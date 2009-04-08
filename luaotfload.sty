@@ -1,0 +1,42 @@
+\expandafter\ifx\csname ProvidesPackage\endcsname\relax
+\expandafter\ifx\csname luaUseModule\endcsname\relax
+\input luatextra.sty
+\fi
+\else
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{luaotfload}%
+  [2009/04/08 v1.001 ConTeXt font loading system]
+\RequirePackage{luatextra}
+\fi
+
+\expandafter\edef\csname otfl@AtEnd\endcsname{%
+  \catcode64 \the\catcode64\relax
+}
+
+\catcode64 11
+
+\newluaattribute\otfl@state
+\newluaattribute\otfl@markbase
+\newluaattribute\otfl@markdone
+\newluaattribute\otfl@markmark
+\newluaattribute\otfl@cursbase
+\newluaattribute\otfl@curscurs
+\newluaattribute\otfl@cursdone
+\newluaattribute\otfl@kernpair
+\newluaattribute\otfl@color
+
+\def\otfl@off{
+\luadirect{luaotfload.unregister_callbacks()}
+}
+
+\def\otfl@on{
+\luadirect{luaotfload.register_callbacks()}
+}
+
+\luaUseModule{luaotfload}
+
+\otfl@on
+
+\otfl@AtEnd
+
+\endinput

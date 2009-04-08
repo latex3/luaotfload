@@ -9,6 +9,16 @@
 \RequirePackage{luatextra}
 \fi
 
+\ifnum\pdfoutput<1
+  \expandafter\ifx\csname PackageWarning\endcsname\relax
+    \write16{}
+    \write16{Warning: luaotfload only works in PDF mode, otf fonts won't work.}
+    \write16{}
+  \else
+    \PackageWarning{luaotfload}{luaotfload only works in PDF mode, otf fonts won't work.}
+  \fi
+\fi
+
 \expandafter\edef\csname otfl@AtEnd\endcsname{%
   \catcode64 \the\catcode64\relax
 }

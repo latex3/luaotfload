@@ -13,8 +13,11 @@ luaotfload.module = {
 luatextra.provides_module(luaotfload.module)
 
 function luaotfload.loadmodule(name)
-    local foundname = kpse.find_file('otfl-'..name,"tex") or ""
-    if not foundname then return end
+    local foundname = kpse.find_file('otfl-'..name,"tex")
+    if not foundname then
+      luatextra.module_error('luaotfload', string.format('file otf-%s not found.', name))
+      return 
+    end
     dofile(foundname)
 end
 

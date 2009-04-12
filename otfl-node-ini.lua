@@ -31,9 +31,9 @@ attributes.numbers    = attributes.numbers or { }
 attributes.list       = attributes.list    or { }
 attributes.unsetvalue = -0x7FFFFFFF
 
-storage.register(false, "attributes/names",   attributes.names,   "attributes.names")
-storage.register(false, "attributes/numbers", attributes.numbers, "attributes.numbers")
-storage.register(false, "attributes/list",    attributes.list,    "attributes.list")
+storage.register("attributes/names",   attributes.names,   "attributes.names")
+storage.register("attributes/numbers", attributes.numbers, "attributes.numbers")
+storage.register("attributes/list",    attributes.list,    "attributes.list")
 
 local names, numbers, list = attributes.names, attributes.numbers, attributes.list
 
@@ -169,6 +169,23 @@ function nodes.after(h,c,n)
         return h, n
     end
     return n, n
+end
+
+function nodes.replace(head,current,new)
+    if current and next then
+        local p, n = current.prev, current.next
+        new.prev, new.next = p, n
+        if p then
+            p.next = new
+        else
+            head = new
+        end
+        if n then
+            n.prev = new
+        end
+        free_node(current)
+    end
+    return head, current
 end
 
 -- will move

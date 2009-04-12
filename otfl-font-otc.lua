@@ -9,6 +9,8 @@ if not modules then modules = { } end modules ['font-otc'] = {
 local format, insert = string.format, table.insert
 local type, next = type, next
 
+local ctxcatcodes = tex.ctxcatcodes
+
 -- we assume that the other otf stuff is loaded already
 
 local trace_loading = false  trackers.register("otf.loading", function(v) trace_loading = v end)
@@ -122,6 +124,6 @@ function otf.char(n) -- todo: afm en tfm
         n = otf.name_to_slot(n)
     end
     if n then
-        tex.sprint(tex.ctxcatcodes,format("\\char%s ",n))
+        tex.sprint(ctxcatcodes,format("\\char%s ",n))
     end
 end

@@ -15,7 +15,7 @@ luatextra.provides_module(luaotfload.module)
 function luaotfload.loadmodule(name)
     local foundname = kpse.find_file('otfl-'..name,"tex")
     if not foundname then
-      luatextra.module_error('luaotfload', string.format('file otf-%s not found.', name))
+      luatextra.module_error('luaotfload', string.format('file otfl-%s not found.', name))
       return 
     end
     dofile(foundname)
@@ -109,7 +109,7 @@ luaotfload.loadmodule('node-dum.lua')
 
 luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('font-tfm.lua') -- will be split (we may need font-log)
---loadmodule('font-ott.lua') -- might be split
+--luaotfload.loadmodule('font-ott.lua') -- might be split
 luaotfload.loadmodule('font-otf.lua')
 luaotfload.loadmodule('font-otb.lua')
 luaotfload.loadmodule('font-cid.lua')
@@ -128,20 +128,18 @@ luaotfload.loadmodule('font-xtx.lua')
 luaotfload.loadmodule('font-dum.lua')
 
 function luaotfload.register_callbacks()
-    callback.add('ligaturing',           nodes.simple_font_dummy, 'nodes.simple_font_dummy')
-    callback.add('kerning',              nodes.simple_font_dummy, 'nodes.simple_font_dummy')
-    callback.add('pre_linebreak_filter', nodes.simple_font_handler, 'nodes.simple_font_handler')
-    callback.add('hpack_filter',         nodes.simple_font_handler, 'nodes.simple_font_handler')
+    callback.add('ligaturing',           nodes.simple_font_dummy, 'luaotfload.ligaturing')
+    callback.add('kerning',              nodes.simple_font_dummy, 'luaotfload.kerning')
+    callback.add('pre_linebreak_filter', nodes.simple_font_handler, 'luaotfload.pre_linebreak_filter')
+    callback.add('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
     callback.reset('define_font')
-    callback.add('define_font' ,         fonts.define.read, 'fonts.define.read', 1)
-    callback.add('find_vf_file',         fonts.vf.find, 'fonts.vf.find')
+    callback.add('define_font' ,         fonts.define.read, 'luaotfload.define_font', 1)
 end
 
 function luaotfload.unregister_callbacks()
-    callback.remove('ligaturing', 'nodes.simple_font_dummy')
-    callback.remove('kerning', 'nodes.simple_font_dummy')
-    callback.remove('pre_linebreak_filter', 'nodes.simple_font_handler')
-    callback.remove('hpack_filter', 'nodes.simple_font_handler')
-    callback.reset('define_font')
-    callback.remove('find_vf_file', 'fonts.vf.find')
+    callback.remove('ligaturing', 'luaotfload.ligaturing')
+    callback.remove('kerning', 'luaotfload.kerning')
+    callback.remove('pre_linebreak_filter', 'luaotfload.pre_linebreak_filter')
+    callback.remove('hpack_filter', 'luaotfload.hpack_filter')
+    callback.remove('define_font', 'luaotfload.define_font')
 end

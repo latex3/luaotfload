@@ -323,7 +323,7 @@ evolved. Each one has its own way of dealing with its format.</p>
 
 local function check_tfm(specification,fullname)
     -- ofm directive blocks local path search unless set
-    fullname = input.findbinfile(fullname, 'ofm') or "" -- just to be sure
+    fullname = input.findbinfile(fullname, 'tfm') or "" -- just to be sure
     if fullname ~= "" then
         specification.filename, specification.format = fullname, "ofm"
         return tfm.read_from_tfm(specification)

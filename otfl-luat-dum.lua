@@ -52,7 +52,7 @@ end
 
 function input.findbinfile(name,kind)
     if not kind or kind == "" then
-        kind = string.match(name,"%.(.-)$")
+        kind = file.extname(name) -- string.match(name,"%.([^%.]-)$")
     end
-    return input.find_file(name,kind and remapper[kind])
+    return input.find_file(name,(kind and remapper[kind]) or kind)
 end

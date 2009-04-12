@@ -290,6 +290,7 @@ function tfm.do_scale(tfmtable, scaledpoints)
     local scaledwidth  = defaultwidth  * delta
     local scaledheight = defaultheight * delta
     local scaleddepth  = defaultdepth  * delta
+    local stackmath = tfmtable.ignore_stack_math ~= true
     for k,v in next, characters do
         local chr, description, index
         if ischanged then
@@ -376,8 +377,10 @@ function tfm.do_scale(tfmtable, scaledpoints)
         if vi then
             chr.italic = vi*delta
         end
-        -- note needed if no math: todo: hasmath
---~ if hasmath then
+        -- to be tested
+if hasmath then
+
+        -- todo, just operate on descriptions.math
         local vn = v.next
         if vn then
             chr.next = vn
@@ -418,7 +421,34 @@ function tfm.do_scale(tfmtable, scaledpoints)
         if vt then
             chr.top_accent = delta*vt
         end
---~ end
+        if stackmath then
+            local mk = v.mathkerns
+            if mk then
+                local kerns = { }
+             -- for k, v in next, mk do
+             --     local kk = { }
+              --     for i=1,#v do
+             --         local vi = v[i]
+             --         kk[i] = { height = delta*vi.height, kern = delta*vi.kern }
+             --     end
+             --     kerns[k] = kk
+             -- end
+                local v = mk.top_right    if v then local k = { } for i=1,#v do local vi = v[i]
+                    k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                end     kerns.top_right    = k end
+                local v = mk.top_left     if v then local k = { } for i=1,#v do local vi = v[i]
+                    k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                end     kerns.top_left     = k end
+                local v = mk.bottom_left  if v then local k = { } for i=1,#v do local vi = v[i]
+                    k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                end     kerns.bottom_left  = k end
+                local v = mk.bottom_right if v then local k = { } for i=1,#v do local vi = v[i]
+                    k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                end     kerns.bottom_right = k end
+                chr.mathkern = kerns -- singular
+            end
+        end
+end
         if not nodemode then
             local vk = v.kerns
             if vk then
@@ -502,8 +532,11 @@ function tfm.do_scale(tfmtable, scaledpoints)
     if not tp[17] then tp[17] = .48*tpx end  -- mathsubcombined
     if not tp[22] then tp[22] =   0     end  -- mathaxisheight
     if t.MathConstants then t.MathConstants.AccentBaseHeight = nil end -- safeguard
---~ print(t.fullname,table.serialize(t.MathConstants),t.parameters.x_height)
-t.tounicode = 1
+    t.tounicode = 1
+    -- we have t.name=metricfile and t.fullname=RealName and t.filename=diskfilename
+    -- when collapsing fonts, luatex looks as both t.name and t.fullname as ttc files
+    -- can have multiple subfonts
+--~ collectgarbage("collect")
     return t, delta
 end
 

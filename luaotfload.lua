@@ -127,6 +127,9 @@ end
 luaotfload.loadmodule('font-xtx.lua')
 luaotfload.loadmodule('font-dum.lua')
 
+-- small patch
+fonts.enc.known = {}
+
 function luaotfload.register_callbacks()
     callback.add('ligaturing',           nodes.simple_font_dummy, 'luaotfload.ligaturing')
     callback.add('kerning',              nodes.simple_font_dummy, 'luaotfload.kerning')

@@ -1,0 +1,466 @@
+% \iffalse meta-comment
+%
+% Copyright (C) 2009 by Elie Roux <elie.roux@telecom-bretagne.eu>
+%
+% This work is under the CC0 license.
+%
+% This work consists of the main source file luamcallbacks.dtx
+% and the derived files
+%    luaotfload.sty, luaotfload.lua
+%
+% Unpacking:
+%    tex luaotfload.dtx
+%
+% Documentation:
+%    pdflatex luaotfload.dtx
+%
+%    The class ltxdoc loads the configuration file ltxdoc.cfg
+%    if available. Here you can specify further options, e.g.
+%    use A4 as paper format:
+%       \PassOptionsToClass{a4paper}{article}
+%
+%
+%
+%<*ignore>
+\begingroup
+  \def\x{LaTeX2e}%
+\expandafter\endgroup
+\ifcase 0\ifx\install y1\fi\expandafter
+         \ifx\csname processbatchFile\endcsname\relax\else1\fi
+         \ifx\fmtname\x\else 1\fi\relax
+\else\csname fi\endcsname
+%</ignore>
+%<*install>
+\input docstrip.tex
+\Msg{************************************************************************}
+\Msg{* Installation}
+\Msg{* Package: luaotfload 2009/04/15 v1.01 ConTeXt font loading system}
+\Msg{************************************************************************}
+
+\keepsilent
+\askforoverwritefalse
+
+\let\MetaPrefix\relax
+
+\preamble
+This is a generated file.
+
+Copyright (C) 2009 by Elie Roux <elie.roux@telecom-bretagne.eu>
+
+This work is under the CC0 license.
+
+This work consists of the main source file luainputenc.dtx
+and the derived files
+    luaotfload.sty, luaotfload.lua
+
+\endpreamble
+
+\let\MetaPrefix\DoubleperCent
+
+
+\generate{%
+  \file{luaotfload.drv}{\from{luaotfload.dtx}{driver}}%
+  \file{luaotfload.sty}{\from{luaotfload.dtx}{package}}%
+}
+
+% The following hacks are to generate a lua file with lua comments starting by -- instead of %%
+
+\def\MetaPrefix{-- }
+
+\def\luapostamble{%
+  \MetaPrefix^^J%
+  \MetaPrefix\space End of File `\outFileName'.%
+}
+
+\def\currentpostamble{\luapostamble}%
+
+\generate{%
+  \usedir{tex/luatex/generic}%
+  \file{luaotfload.lua}{\from{luaotfload.dtx}{lua}}%%
+}
+
+\obeyspaces
+\Msg{************************************************************************}
+\Msg{*}
+\Msg{* To finish the installation you have to move the following}
+\Msg{* files into a directory searched by TeX:}
+\Msg{*}
+\Msg{*     luaotfload.sty, luaotfload.lua}
+\Msg{*}
+\Msg{* Happy TeXing!}
+\Msg{*}
+\Msg{************************************************************************}
+
+\endbatchfile
+%</install>
+%<*ignore>
+\fi
+%</ignore>
+%<*driver>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesFile{luaminimalotf.drv}%
+  [2009/04/15 v1.01 ConTeXt font loading system]%
+\documentclass{ltxdoc}
+\EnableCrossrefs
+\CodelineIndex
+\begin{document}
+  \DocInput{luaotfload.dtx}%
+\end{document}
+%</driver>
+% \fi
+%
+% \CheckSum{0}
+%
+% \CharacterTable
+%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%   Digits        \0\1\2\3\4\5\6\7\8\9
+%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%   Dollar        \$     Percent       \%     Ampersand     \&
+%   Acute accent  \'     Left paren    \(     Right paren   \)
+%   Asterisk      \*     Plus          \+     Comma         \,
+%   Minus         \-     Point         \.     Solidus       \/
+%   Colon         \:     Semicolon     \;     Less than     \<
+%   Equals        \=     Greater than  \>     Question mark \?
+%   Commercial at \@     Left bracket  \[     Backslash     \\
+%   Right bracket \]     Circumflex    \^     Underscore    \_
+%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%   Right brace   \}     Tilde         \~}
+%
+% \GetFileInfo{luaotfload.drv}
+%
+% \title{The \textsf{luaotfload} package}
+% \date{2009/04/15 v1.01}
+% \author{Elie Roux \\ \texttt{elie.roux@telecom-bretagne.eu}}
+%
+% \maketitle
+%
+% \begin{abstract}
+% Con\TeX t font loading system, providing the possibility to load OTF fonts with a lot of features, and the Xe\TeX\ font loading syntax.
+% \end{abstract}
+%
+% \tableofcontents
+%
+% \section{Documentation}
+% 
+% \subsection{Introduction}
+%
+% Font management and installation has always been painful with \TeX\ (and even more with \LaTeX ). A lot of files are needed for one font (tfm, pfb, map, fd, vf), and they are limited to 256 characters. But the font world has evolved since, and new standard types of fonts have appeared, like \textsf{truetype} or \textsf{opentype} fonts. These fonts can contain a lot of characters, and have some functionalities (ligatures, old-style numbers, small capitals, etc.). They are everywhere, as the system fonts and most modern text softwares fonts are of this type. Until now the (almost) only way to use them with \TeX\ was to use them with Xe\TeX .
+%
+% Unlike Xe\TeX , Lua\TeX\ does not provide facilities for these fonts by default, but it provides a way to hook lua code in some points of the \TeX\ algorithm, for instance we can improve the font loading system; this is what we do in this package.
+%
+%This package is quite low-level, and should be loaded directly in the macro package, like it is in Con\TeX t. Sadly, Plain and \LaTeX\ are frozen and it's even impossible to adapt them to the new engines. 
+%
+% \subsection{Con\TeX t files needed}
+%
+% This package is a wrapper for several files taken from the Con\TeX t macro package. The philosophy is to let Con\TeX t do all the implementation and update these files from time to time. To do so we did not modify the files taken from Con\TeX t, we only changed their names to prevent name clashes. You can thus update the font system of this package simply by updating the files taken from Con\TeX t, without (theorically) changing the \texttt{.sty} file nor the main \texttt{.lua} file.
+%
+% The Con\TeX t files are renamed by adding the prefix \texttt{otfl-} to them (\texttt{otfl} as \texttt{OTF L}oad).The files are:
+%
+% \begin{itemize}
+% \item \texttt{luat-dum.lua}
+% \item \texttt{luat-con.lua}
+% \item \texttt{node-ini.lua}
+% \item \texttt{node-inj.lua}
+% \item \texttt{node-fnt.lua}
+% \item \texttt{node-dum.lua}
+% \item \texttt{font-ini.lua}
+% \item \texttt{font-tfm.lua}
+% \item \texttt{font-otf.lua}
+% \item \texttt{font-otb.lua}
+% \item \texttt{font-cid.lua}
+% \item \texttt{font-otn.lua}
+% \item \texttt{font-ota.lua}
+% \item \texttt{font-otc.lua}
+% \item \texttt{font-def.lua}
+% \item \texttt{font-xtx.lua}
+% \item \texttt{font-dum.lua}
+% \end{itemize}
+% 
+% \section{\texttt{luaotfload.lua}}
+%
+% \iffalse
+%<*lua>
+% \fi
+%
+% First some usual initializations.
+%
+%    \begin{macrocode}
+luaotfload          = { }
+
+luaotfload.module = {
+    name          = "luaotfload",
+    version       = 1.01,
+    date          = "2009/04/15",
+    description   = "ConTeXt font loading system.",
+    author        = "Elie Roux & Hans Hagen",
+    copyright     = "Elie Roux",
+    license       = "CC0"
+}
+
+luatextra.provides_module(luaotfload.module)
+
+%    \end{macrocode}
+%
+% We load the Con\TeX t files with this function. It automatically adds the \texttt{otfl-} prefix to it, so that we call it with the actual Con\TeX t name.
+%
+%    \begin{macrocode}
+
+
+function luaotfload.loadmodule(name)
+    local foundname = kpse.find_file('otfl-'..name,"tex")
+    if not foundname then
+      luatextra.module_error('luaotfload', string.format('file otfl-%s not found.', name))
+      return 
+    end
+    dofile(foundname)
+end
+
+%    \end{macrocode}
+%
+% The following functions are made to map Con\TeX t functions to \textsf{luaextra} functions.
+%
+%    \begin{macrocode}
+
+string.strip = string.stripspaces
+
+file = fpath
+file.extname = fpath.suffix
+
+%    \end{macrocode}
+%
+% These are small functions that are not already in \textsf{luatextra}.
+%
+%    \begin{macrocode}
+
+local splitters_s, splitters_m = { }, { }
+
+function lpeg.splitat(separator,single)
+    local splitter = (single and splitters_s[separator]) or splitters_m[separator]
+    if not splitter then
+        separator = lpeg.P(separator)
+        if single then
+            local other, any = lpeg.C((1 - separator)^0), lpeg.P(1)
+            splitter = other * (separator * lpeg.C(any^0) + "")
+            splitters_s[separator] = splitter
+        else
+            local other = lpeg.C((1 - separator)^0)
+            splitter = other * (separator * other)^0
+            splitters_m[separator] = splitter
+        end
+    end
+    return splitter
+end
+
+function table.compact(t)
+    if t then
+        for k,v in next, t do
+            if not next(v) then
+                t[k] = nil
+            end
+        end
+    end
+end
+
+function table.sortedhashkeys(tab) -- fast one
+    local srt = { }
+    for key,_ in next, tab do
+        srt[#srt+1] = key
+    end
+    table.sort(srt)
+    return srt
+end
+
+%    \end{macrocode}
+%
+% We start loading some lua files. These two are some code not used by Con\TeX t at all that allow other modules to be used, it provides some low-level Con\TeX t functions.
+%
+%    \begin{macrocode}
+
+luaotfload.loadmodule('luat-dum.lua') -- not used in context at all
+luaotfload.loadmodule('luat-con.lua') -- maybe some day we don't need this one
+
+%    \end{macrocode}
+%
+% This one is for node support.
+%
+%    \begin{macrocode}
+
+luaotfload.loadmodule('node-ini.lua')
+
+%    \end{macrocode}
+%
+% By default Con\TeX t takes some private attributes for internal use. With Plain and \LaTeX\ we can't do so, we use |\newluaattribute|. This functions overrides a function defined in the previous module that returns the number of a private attribute. We allocate new attributes in the \texttt{.sty} file, and this function returns their number. Like this we don't need any private attribute, and this package is compatible with the others. We use the |otfl@| prefix for attributes.
+%
+%    \begin{macrocode}
+
+function attributes.private(name)
+    local number = tex.attributenumber['otfl@'..name]
+    if not number then 
+        luatextra.module_error('luaotfload', string.format('asking for attribute %s, but not declared. Please report to the maintainer of luaotfload.', name))
+    end
+    return number
+end
+
+%    \end{macrocode}
+%
+% Some more modules. We don't load \texttt{font-ott.lua}, as it only contains the meaning of the options, ans it works perfectly without it. We don't load neither \texttt{font-enc.lua} nor \texttt{font-afm.lua} as it will never be used here.
+%
+%    \begin{macrocode}
+
+luaotfload.loadmodule('node-inj.lua')
+luaotfload.loadmodule('node-fnt.lua')
+luaotfload.loadmodule('node-dum.lua')
+
+luaotfload.loadmodule('font-ini.lua')
+luaotfload.loadmodule('font-tfm.lua')
+luaotfload.loadmodule('font-otf.lua')
+luaotfload.loadmodule('font-otb.lua')
+luaotfload.loadmodule('font-cid.lua')
+luaotfload.loadmodule('font-otn.lua')
+luaotfload.loadmodule('font-ota.lua')
+luaotfload.loadmodule('font-otc.lua')
+
+%    \end{macrocode}
+%
+% \texttt{font-def.lua} calls the function \texttt{callback.register} to register its callbacks. We override it with a dumb function so that it does not register any callback. We will register the callbacks later.
+%
+%    \begin{macrocode}
+
+do
+  local temp = callback.register
+  callback.register = function (...)
+    return
+  end 
+  luaotfload.loadmodule('font-def.lua')
+  callback.register = temp
+end
+
+luaotfload.loadmodule('font-xtx.lua')
+luaotfload.loadmodule('font-dum.lua')
+
+%    \end{macrocode}
+%
+% This is a small patch that prevents errors in some \LaTeX\ files.
+%
+%    \begin{macrocode}
+
+fonts.enc.known = {}
+
+%    \end{macrocode}
+%
+% Finally two functions 
+%
+%    \begin{macrocode}
+
+function luaotfload.register_callbacks()
+    callback.add('ligaturing',           nodes.simple_font_dummy, 'luaotfload.ligaturing')
+    callback.add('kerning',              nodes.simple_font_dummy, 'luaotfload.kerning')
+    callback.add('pre_linebreak_filter', nodes.simple_font_handler, 'luaotfload.pre_linebreak_filter')
+    callback.add('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
+    callback.reset('define_font')
+    callback.add('define_font' ,         fonts.define.read, 'luaotfload.define_font', 1)
+end
+
+function luaotfload.unregister_callbacks()
+    callback.remove('ligaturing', 'luaotfload.ligaturing')
+    callback.remove('kerning', 'luaotfload.kerning')
+    callback.remove('pre_linebreak_filter', 'luaotfload.pre_linebreak_filter')
+    callback.remove('hpack_filter', 'luaotfload.hpack_filter')
+    callback.remove('define_font', 'luaotfload.define_font')
+end
+%    \end{macrocode}
+% \iffalse
+%</lua>
+% \fi
+%
+% \section{\texttt{luaotfload.sty}}
+%
+% \iffalse
+%<*package>
+% \fi
+%
+% Classical Plain+\LaTeX\ package initialization.
+%
+%    \begin{macrocode}
+\csname ifluaotfloadloaded\endcsname
+\let\ifluaotfloadloaded\endinput
+
+\expandafter\ifx\csname ProvidesPackage\endcsname\relax
+  \input luatextra.sty
+\else
+  \NeedsTeXFormat{LaTeX2e}
+  \ProvidesPackage{luaotfload}%
+    [2009/04/15 v1.01 ConTeXt font loading system]
+  \RequirePackage{luatextra}
+\fi
+
+%    \end{macrocode}
+%
+% We print a warning if we are not in PDF mode.
+%
+%    \begin{macrocode}
+
+\ifnum\pdfoutput<1
+  \expandafter\ifx\csname PackageWarning\endcsname\relax
+    \write16{}
+    \write16{Warning: luaotfload only works in PDF mode, otf fonts won't work.}
+    \write16{}
+  \else
+    \PackageWarning{luaotfload}{luaotfload only works in PDF mode, otf fonts won't work.}
+  \fi
+\fi
+
+\expandafter\edef\csname otfl@AtEnd\endcsname{%
+  \catcode64 \the\catcode64\relax
+}
+
+\catcode64 11
+
+%    \end{macrocode}
+%
+% The attributes are allocated here. The |otfl@| prefix is added to prevent name collision.
+%
+%    \begin{macrocode}
+
+\newluaattribute\otfl@state
+\newluaattribute\otfl@markbase
+\newluaattribute\otfl@markdone
+\newluaattribute\otfl@markmark
+\newluaattribute\otfl@cursbase
+\newluaattribute\otfl@curscurs
+\newluaattribute\otfl@cursdone
+\newluaattribute\otfl@kernpair
+\newluaattribute\otfl@color
+
+%    \end{macrocode}
+%
+% Two small macros to register or unregister the callbacks. Without the callbacks this package is totally turned off.
+%
+%    \begin{macrocode}
+
+\def\otfl@off{
+\luadirect{luaotfload.unregister_callbacks()}
+}
+
+\def\otfl@on{
+\luadirect{luaotfload.register_callbacks()}
+}
+
+%    \end{macrocode}
+%
+% We load the |lua| file, and we turn the package on.
+%
+%    \begin{macrocode}
+
+\luaUseModule{luaotfload}
+
+\otfl@on
+
+\otfl@AtEnd
+%    \end{macrocode}
+% \iffalse
+%</package>
+% \fi
+% \Finale
+\endinput

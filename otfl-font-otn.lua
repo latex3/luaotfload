@@ -752,9 +752,6 @@ end
 function handlers.gpos_pair(start,kind,lookupname,kerns,sequence)
     -- todo: kerns in disc nodes: pre, post, replace -> loop over disc too
     -- todo: kerns in components of ligatures
---~ local alreadydone = cursonce and has_attribute(start,curscurs)
-local alreadydone = false
-if not alreadydone then
     local snext = start.next
     if not snext then
         return start, false
@@ -763,7 +760,8 @@ if not alreadydone then
         local factor = tfmdata.factor
         while snext and snext.id == glyph and snext.subtype<256 and snext.font == currentfont do
             local nextchar = snext.char
-            if marks[nextchar] then
+local krn = kerns[nextchar]
+            if not krn and marks[nextchar] then
                 prev = snext
                 snext = snext.next
             else
@@ -813,9 +811,6 @@ if not alreadydone then
         end
         return start, done
     end
-else
-return start, false
-end
 end
 
 --[[ldx--
@@ -1428,11 +1423,12 @@ function chainprocs.gpos_pair(start,stop,kind,chainname,currentcontext,cache,cur
                 local factor = tfmdata.factor
                 while snext and snext.id == glyph and snext.subtype<256 and snext.font == currentfont do
                     local nextchar = snext.char
-                    if marks[nextchar] then
+local krn = kerns[nextchar]
+                    if not krn and marks[nextchar] then
                         prev = snext
                         snext = snext.next
                     else
-                        local krn = kerns[nextchar]
+--~                         local krn = kerns[nextchar]
                         if not krn then
                             -- skip
                         elseif type(krn) == "table" then

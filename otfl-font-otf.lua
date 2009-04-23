@@ -79,9 +79,8 @@ otf.features.default = otf.features.default or { }
 
 otf.enhancers        = otf.enhancers        or { }
 
-otf.version          = 2.617
+otf.version          = 2.619
 otf.pack             = true
-otf.enhance_data     = false
 otf.syncspace        = true
 otf.notdef           = false
 otf.cache            = containers.define("fonts", "otf", otf.version, true)
@@ -173,7 +172,7 @@ otf.tables.valid_fields = {
 
 local function load_featurefile(ff,featurefile)
     if featurefile then
-        featurefile = input.find_file(file.addsuffix(featurefile,'fea')) -- "FONTFEATURES"
+        featurefile = resolvers.find_file(file.addsuffix(featurefile,'fea')) -- "FONTFEATURES"
         if featurefile and featurefile ~= "" then
             if trace_loading then
                 logs.report("load otf", "featurefile: %s", featurefile)
@@ -1203,6 +1202,7 @@ function otf.otf_to_tfm(specification)
     local features = specification.features.normal
     local cache_id = specification.hash
     local tfmdata  = containers.read(tfm.cache(),cache_id)
+--~ print(cache_id)
     if not tfmdata then
         local otfdata = otf.load(filename,format,sub,features and features.featurefile)
         if not table.is_empty(otfdata) then
@@ -1211,7 +1211,7 @@ function otf.otf_to_tfm(specification)
                 anchorhash  = { },
                 initialized = false,
             }
-            tfmdata = otf.copy_to_tfm(otfdata)
+            tfmdata = otf.copy_to_tfm(otfdata,cache_id)
             if not table.is_empty(tfmdata) then
                 tfmdata.unique = tfmdata.unique or { }
                 tfmdata.shared = tfmdata.shared or { } -- combine
@@ -1261,7 +1261,10 @@ end
 -- the first version made a top/mid/not extensible table, now we just pass on the variants data
 -- and deal with it in the tfm scaler (there is no longer an extensible table anyway)
 
-function otf.copy_to_tfm(data) -- we can save a copy when we reorder the tma to unicode (nasty due to one->many)
+-- we cannot share descriptions as virtual fonts might extend them (ok, we could
+-- use a cache with a hash
+
+function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder the tma to unicode (nasty due to one->many)
     if data then
         local glyphs, pfminfo, metadata = data.glyphs or { }, data.pfminfo or { }, data.metadata or { }
         local luatex = data.luatex
@@ -1278,9 +1281,8 @@ function otf.copy_to_tfm(data) -- we can save a copy when we reorder the tma to 
         }
         -- indices maps from unicodes to indices
         for u, i in next, indices do
-            local d = glyphs[i]
             characters[u] = { } -- we need this because for instance we add protruding info
-            descriptions[u] = d
+            descriptions[u] = glyphs[i]
         end
         -- math
         if metadata.math then
@@ -1292,7 +1294,8 @@ function otf.copy_to_tfm(data) -- we can save a copy when we reorder the tma to 
             for u, char in next, characters do
                 local d = descriptions[u]
                 local m = d.math
-                -- we could prepare the variants
+                -- we have them shared because that packs nicer
+                -- we could prepare the variants and keep 'm in descriptions
                 if m then
                     local variants = m.horiz_variants
                     if variants then
@@ -1319,6 +1322,10 @@ function otf.copy_to_tfm(data) -- we can save a copy when we reorder the tma to 
                             c.vert_variants = m.vert_parts
                         end
                     end
+                    local kerns = m.kerns
+                    if kerns then
+                        char.mathkerns = kerns
+                    end
                 end
             end
         end
@@ -1330,7 +1337,7 @@ function otf.copy_to_tfm(data) -- we can save a copy when we reorder the tma to 
         local spaceunits = 500
         tfm.units              = metadata.units_per_em or 1000
         -- we need a runtime lookup because of running from cdrom or zip, brrr
-        tfm.filename           = input.findbinfile(luatex.filename,"") or luatex.filename
+        tfm.filename           = resolvers.findbinfile(luatex.filename,"") or luatex.filename
         tfm.fullname           = metadata.fontname or metadata.fullname
         tfm.encodingbytes      = 2
         tfm.cidinfo            = data.cidinfo
@@ -1456,7 +1463,7 @@ function tfm.read_from_open_type(specification)
         end
         if filename then
             tfmtable.encodingbytes = 2
-            tfmtable.filename = input.findbinfile(filename,"") or filename
+            tfmtable.filename = resolvers.findbinfile(filename,"") or filename
             tfmtable.fullname = otfdata.metadata.fontname or otfdata.metadata.fullname
             local order = otfdata and otfdata.metadata.order2
             if order == 0 then

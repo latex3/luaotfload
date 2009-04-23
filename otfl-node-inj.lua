@@ -166,6 +166,8 @@ function nodes.trace_injection(head)
     report("end run")
 end
 
+-- todo: reuse tables (i.e. no collection), but will be extra fields anyway
+
 function nodes.inject_kerns(head,tail,keep)
     if trace_injections then
         nodes.trace_injection(head)

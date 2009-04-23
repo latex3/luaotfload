@@ -9,7 +9,7 @@ if not modules then modules = { } end modules ['font-tfm'] = {
 local utf = unicode.utf8
 
 local next, format, match, lower = next, string.format, string.match, string.lower
-local concat, sortedkeys, utfbyte = table.concat, table.sortedkeys, utf.byte
+local concat, sortedkeys, utfbyte, serialize = table.concat, table.sortedkeys, utf.byte, table.serialize
 
 local trace_defining = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
 local trace_scaling  = false  trackers.register("fonts.scaling" , function(v) trace_scaling  = v end)
@@ -25,7 +25,7 @@ local trace_scaling  = false  trackers.register("fonts.scaling" , function(v) tr
 
 fonts     = fonts     or { }
 fonts.tfm = fonts.tfm or { }
-fonts.ids = fonts.ids  or { }
+fonts.ids = fonts.ids or { }
 
 local tfm = fonts.tfm
 
@@ -86,7 +86,7 @@ function tfm.read_from_tfm(specification)
             tfmdata.descriptions = tfmdata.descriptions or { }
             if tfm.resolve_vf then
                 fonts.logger.save(tfmdata,file.extname(fname),specification) -- strange, why here
-                fname = input.findbinfile(specification.name, 'ovf')
+                fname = resolvers.findbinfile(specification.name, 'ovf')
                 if fname and fname ~= "" then
                     local vfdata = font.read_vf(fname,specification.size) -- not cached, fast enough
                     if vfdata then
@@ -219,6 +219,13 @@ function tfm.prepare_base_kerns(tfmdata)
     end
 end
 
+-- we can have cache scaled characters when we are in node mode and don't have
+-- protruding and expansion: hash == fullname @ size @ protruding @ expansion
+-- but in practice (except from mk) the otf hash will be enough already so it
+-- makes no sense to mess  up the code now
+
+local charactercache = { }
+
 function tfm.do_scale(tfmtable, scaledpoints)
     tfm.prepare_base_kerns(tfmtable) -- optimalization
     if scaledpoints < 0 then
@@ -263,14 +270,6 @@ function tfm.do_scale(tfmtable, scaledpoints)
     tp.x_height      = (tfmp.x_height      or tfmp[5] or 0)*delta
     tp.quad          = (tfmp.quad          or tfmp[6] or 0)*delta
     tp.extra_space   = (tfmp.extra_space   or tfmp[7] or 0)*delta
---~ texio.write_nl("START")
---~ texio.write_nl(tfmtable.designsize)
---~ texio.write_nl(scaledpoints)
---~ texio.write_nl(tfmtable.units)
---~ texio.write_nl(delta)
---~ texio.write_nl(tfmtable.math_parameters.AxisHeight or "?")
---  t.MathConstants = tfm.scaled_math_parameters(tfmtable.math_parameters,delta)
---~ texio.write_nl(t.MathConstants.AxisHeight or "?")
     local protrusionfactor = (tp.quad ~= 0 and 1000/tp.quad) or 0
     local tc = t.characters
     local characters = tfmtable.characters
@@ -361,7 +360,7 @@ function tfm.do_scale(tfmtable, scaledpoints)
         if hasquality then
             local ve = v.expansion_factor
             if ve then
-                chr.expansion_factor = ve*1000 -- expansionfactor
+                chr.expansion_factor = ve*1000 -- expansionfactor, hm, can happen elsewhere
             end
             local vl = v.left_protruding
             if vl then
@@ -378,77 +377,76 @@ function tfm.do_scale(tfmtable, scaledpoints)
             chr.italic = vi*delta
         end
         -- to be tested
-if hasmath then
-
-        -- todo, just operate on descriptions.math
-        local vn = v.next
-        if vn then
-            chr.next = vn
-        else
-            local vv = v.vert_variants
-            if vv then
-                local t = { }
-                for i=1,#vv do
-                    local vvi = vv[i]
-                    t[i] = {
-                        ["start"]    = (vvi["start"]   or 0)*delta,
-                        ["end"]      = (vvi["end"]     or 0)*delta,
-                        ["advance"]  = (vvi["advance"] or 0)*delta,
-                        ["extender"] =  vvi["extender"],
-                        ["glyph"]    =  vvi["glyph"],
-                    }
-                end
-                chr.vert_variants = t
+        if hasmath then
+            -- todo, just operate on descriptions.math
+            local vn = v.next
+            if vn then
+                chr.next = vn
             else
-                local hv = v.horiz_variants
-                if hv then
+                local vv = v.vert_variants
+                if vv then
                     local t = { }
-                    for i=1,#hv do
-                        local hvi = hv[i]
+                    for i=1,#vv do
+                        local vvi = vv[i]
                         t[i] = {
-                            ["start"]    = (hvi["start"]   or 0)*delta,
-                            ["end"]      = (hvi["end"]     or 0)*delta,
-                            ["advance"]  = (hvi["advance"] or 0)*delta,
-                            ["extender"] =  hvi["extender"],
-                            ["glyph"]    =  hvi["glyph"],
+                            ["start"]    = (vvi["start"]   or 0)*delta,
+                            ["end"]      = (vvi["end"]     or 0)*delta,
+                            ["advance"]  = (vvi["advance"] or 0)*delta,
+                            ["extender"] =  vvi["extender"],
+                            ["glyph"]    =  vvi["glyph"],
                         }
                     end
-                    chr.horiz_variants = t
+                    chr.vert_variants = t
+                else
+                    local hv = v.horiz_variants
+                    if hv then
+                        local t = { }
+                        for i=1,#hv do
+                            local hvi = hv[i]
+                            t[i] = {
+                                ["start"]    = (hvi["start"]   or 0)*delta,
+                                ["end"]      = (hvi["end"]     or 0)*delta,
+                                ["advance"]  = (hvi["advance"] or 0)*delta,
+                                ["extender"] =  hvi["extender"],
+                                ["glyph"]    =  hvi["glyph"],
+                            }
+                        end
+                        chr.horiz_variants = t
+                    end
+                end
+            end
+            local vt = description.top_accent
+            if vt then
+                chr.top_accent = delta*vt
+            end
+            if stackmath then
+                local mk = v.mathkerns
+                if mk then
+                    local kerns = { }
+                 -- for k, v in next, mk do
+                 --     local kk = { }
+                  --     for i=1,#v do
+                 --         local vi = v[i]
+                 --         kk[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                 --     end
+                 --     kerns[k] = kk
+                 -- end
+                    local v = mk.top_right    if v then local k = { } for i=1,#v do local vi = v[i]
+                        k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                    end     kerns.top_right    = k end
+                    local v = mk.top_left     if v then local k = { } for i=1,#v do local vi = v[i]
+                        k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                    end     kerns.top_left     = k end
+                    local v = mk.bottom_left  if v then local k = { } for i=1,#v do local vi = v[i]
+                        k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                    end     kerns.bottom_left  = k end
+                    local v = mk.bottom_right if v then local k = { } for i=1,#v do local vi = v[i]
+                        k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                    end     kerns.bottom_right = k end
+                    chr.mathkern = kerns -- singular
                 end
             end
         end
-        local vt = description.top_accent
-        if vt then
-            chr.top_accent = delta*vt
-        end
-        if stackmath then
-            local mk = v.mathkerns
-            if mk then
-                local kerns = { }
-             -- for k, v in next, mk do
-             --     local kk = { }
-              --     for i=1,#v do
-             --         local vi = v[i]
-             --         kk[i] = { height = delta*vi.height, kern = delta*vi.kern }
-             --     end
-             --     kerns[k] = kk
-             -- end
-                local v = mk.top_right    if v then local k = { } for i=1,#v do local vi = v[i]
-                    k[i] = { height = delta*vi.height, kern = delta*vi.kern }
-                end     kerns.top_right    = k end
-                local v = mk.top_left     if v then local k = { } for i=1,#v do local vi = v[i]
-                    k[i] = { height = delta*vi.height, kern = delta*vi.kern }
-                end     kerns.top_left     = k end
-                local v = mk.bottom_left  if v then local k = { } for i=1,#v do local vi = v[i]
-                    k[i] = { height = delta*vi.height, kern = delta*vi.kern }
-                end     kerns.bottom_left  = k end
-                local v = mk.bottom_right if v then local k = { } for i=1,#v do local vi = v[i]
-                    k[i] = { height = delta*vi.height, kern = delta*vi.kern }
-                end     kerns.bottom_right = k end
-                chr.mathkern = kerns -- singular
-            end
-        end
-end
         if not nodemode then
             local vk = v.kerns
             if vk then
@@ -558,7 +556,7 @@ local lastfont = nil
 -- base mode) but it complicates vf building where the new characters
 -- demand this data
 
---~ for id, f in pairs(fonts.ids) do
+--~ for id, f in pairs(fonts.ids) do -- or font.fonts
 --~     local ffi = font.fonts[id]
 --~     f.characters = ffi.characters
 --~     f.kerns = ffi.kerns
@@ -809,5 +807,7 @@ fonts.initializers.node.tfm.remap = tfm.remap
 -- status info
 
 statistics.register("fonts load time", function()
-    return format("%s seconds",statistics.elapsedtime(fonts))
+    if statistics.elapsedindeed(fonts) then
+        return format("%s seconds",statistics.elapsedtime(fonts))
+    end
 end)

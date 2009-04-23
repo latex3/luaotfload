@@ -32,10 +32,14 @@ local glyph   = node.id('glyph')
 local glue    = node.id('glue')
 local penalty = node.id('penalty')
 
-local set_attribute = node.set_attribute
-local has_attribute = node.has_attribute
-local traverse_id   = node.traverse_id
-local remove_node   = nodes.remove
+local set_attribute      = node.set_attribute
+local has_attribute      = node.has_attribute
+local traverse_id        = node.traverse_id
+local delete_node        = nodes.delete
+local replace_node       = nodes.replace
+local insert_node_after  = node.insert_after
+local insert_node_before = node.insert_before
+local traverse_node_list = node.traverse
 
 local fontdata = fonts.ids
 local state    = attributes.private('state')
@@ -45,12 +49,6 @@ local fcr = (fonts.color and fonts.color.reset) or function() end
 
 local a_to_script   = otf.a_to_script
 local a_to_language = otf.a_to_language
-
-local remove_node        = node.remove
-local delete_node        = nodes.delete
-local insert_node_after  = node.insert_after
-local insert_node_before = node.insert_before
-local traverse_node_list = node.traverse
 
 -- in the future we will use language/script attributes instead of the
 -- font related value, but then we also need dynamic features which is
@@ -239,17 +237,23 @@ end
 
 function fonts.analyzers.methods.arab(head,font,attr) -- maybe make a special version with no trace
     local tfmdata = fontdata[font]
---~     local marks = tfmdata.shared.otfdata.luatex.marks
     local marks = tfmdata.marks
     local first, last, current, done = nil, nil, head, false
-    local removejoiners = otf.remove_joiners
-    local joiners = { }
+    local joiners, nonjoiners
+    local removejoiners = tfmdata.remove_joiners -- or otf.remove_joiners
+    if removejoiners then
+        joiners, nonjoiners = { }, { }
+    end
     while current do
         if current.id == glyph and current.subtype<256 and current.font == font and not has_attribute(current,state) then
             done = true
             local char = current.char
-            if removejoiners and char == zwj or char == zwnj then
-                joiners[#joiners+1] = current
+            if removejoiners then
+                if char == zwj then
+                    joiners[#joiners+1] = current
+                elseif char == zwnj then
+                    nonjoiners[#nonjoiners+1] = current
+                end
             end
             if marks[char] then
                 set_attribute(current,state,5) -- mark
@@ -298,8 +302,19 @@ function fonts.analyzers.methods.arab(head,font,attr) -- maybe make a special ve
     first, last = finish(first,last)
     if removejoiners then
         for i=1,#joiners do
-            head = delete_node(head,joiners[i]) -- was remove so no free
+            head = delete_node(head,joiners[i])
+        end
+        for i=1,#nonjoiners do
+            head = replace_node(head,nonjoiners[i],nodes.glue(0)) -- or maybe a kern
         end
     end
     return head, done
+end
+
+table.insert(fonts.manipulators,"joiners")
+
+function fonts.initializers.node.otf.joiners(tfmdata,value)
+    if value == "strip" then
+        tfmdata.remove_joiners = true
+    end
 end

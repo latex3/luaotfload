@@ -32,12 +32,11 @@ tasks = {
     prependaction = dummyfunction,
 }
 
-
 -- we need to cheat a bit here
 
 texconfig.kpse_init = true
 
-input = { } -- no fancy file helpers used
+resolvers = resolvers or { } -- no fancy file helpers used
 
 local remapper = {
     otf = "opentype fonts",
@@ -45,14 +44,14 @@ local remapper = {
     ttc = "truetype fonts"
 }
 
-function input.find_file(name,kind)
-    name = name:gsub("\\","\/")
+function resolvers.find_file(name,kind)
+    name = string.gsub(name,"\\","\/")
     return kpse.find_file(name,(kind ~= "" and kind) or "tex")
 end
 
-function input.findbinfile(name,kind)
+function resolvers.findbinfile(name,kind)
     if not kind or kind == "" then
         kind = file.extname(name) -- string.match(name,"%.([^%.]-)$")
     end
-    return input.find_file(name,(kind and remapper[kind]) or kind)
+    return resolvers.find_file(name,(kind and remapper[kind]) or kind)
 end

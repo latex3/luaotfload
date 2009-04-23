@@ -4,7 +4,7 @@
 %
 % This work is under the CC0 license.
 %
-% This work consists of the main source file luamcallbacks.dtx
+% This work consists of the main source file luaotfload.dtx
 % and the derived files
 %    luaotfload.sty, luaotfload.lua
 %
@@ -49,7 +49,7 @@ Copyright (C) 2009 by Elie Roux <elie.roux@telecom-bretagne.eu>
 
 This work is under the CC0 license.
 
-This work consists of the main source file luainputenc.dtx
+This work consists of the main source file luaotfload.dtx
 and the derived files
     luaotfload.sty, luaotfload.lua
 
@@ -278,7 +278,7 @@ end
 %    \begin{macrocode}
 
 luaotfload.loadmodule('luat-dum.lua') -- not used in context at all
-luaotfload.loadmodule('luat-con.lua') -- maybe some day we don't need this one
+luaotfload.loadmodule('data-con.lua') -- maybe some day we don't need this one
 
 %    \end{macrocode}
 %
@@ -308,6 +308,7 @@ end
 %
 %    \begin{macrocode}
 
+luaotfload.loadmodule('node-res.lua')
 luaotfload.loadmodule('node-inj.lua')
 luaotfload.loadmodule('node-fnt.lua')
 luaotfload.loadmodule('node-dum.lua')
@@ -393,22 +394,6 @@ end
   \ProvidesPackage{luaotfload}%
     [2009/04/15 v1.01 ConTeXt font loading system]
   \RequirePackage{luatextra}
-\fi
-
-%    \end{macrocode}
-%
-% We print a warning if we are not in PDF mode.
-%
-%    \begin{macrocode}
-
-\ifnum\pdfoutput<1
-  \expandafter\ifx\csname PackageWarning\endcsname\relax
-    \write16{}
-    \write16{Warning: luaotfload only works in PDF mode, otf fonts won't work.}
-    \write16{}
-  \else
-    \PackageWarning{luaotfload}{luaotfload only works in PDF mode, otf fonts won't work.}
-  \fi
 \fi
 
 \expandafter\edef\csname otfl@AtEnd\endcsname{%

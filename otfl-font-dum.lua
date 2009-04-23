@@ -53,7 +53,7 @@ function fonts.names.resolve(name,sub)
         local basename = fonts.names.basename
         if basename and basename ~= "" then
             for _, format in ipairs { "lua", "tex", "other text files" } do
-                local foundname = input.find_file(basename,format) or ""
+                local foundname = resolvers.find_file(basename,format) or ""
                 if foundname ~= "" then
                     data = dofile(foundname)
                     if data then

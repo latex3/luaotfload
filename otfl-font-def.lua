@@ -323,7 +323,7 @@ evolved. Each one has its own way of dealing with its format.</p>
 
 local function check_tfm(specification,fullname)
     -- ofm directive blocks local path search unless set
-    fullname = input.findbinfile(fullname, 'tfm') or "" -- just to be sure
+    fullname = resolvers.findbinfile(fullname, 'tfm') or "" -- just to be sure
     if fullname ~= "" then
         specification.filename, specification.format = fullname, "ofm"
         return tfm.read_from_tfm(specification)
@@ -331,7 +331,7 @@ local function check_tfm(specification,fullname)
 end
 
 local function check_afm(specification,fullname)
-    fullname = input.findbinfile(fullname, 'afm') or "" -- just to be sure
+    fullname = resolvers.findbinfile(fullname, 'afm') or "" -- just to be sure
     if fullname ~= "" then
         specification.filename, specification.format = fullname, "afm"
         return tfm.read_from_afm(specification)
@@ -380,17 +380,17 @@ function readers.afm(specification,method)
 end
 
 local function check_otf(specification,suffix,what)
-    local fullname, tfmtable = input.findbinfile(specification.name,suffix) or "", nil
+    local fullname, tfmtable = resolvers.findbinfile(specification.name,suffix) or "", nil
     if fullname == "" then
         local fb = fonts.names.old_to_new[specification.name]
         if fb then
-            fullname = input.findbinfile(fb,suffix) or ""
+            fullname = resolvers.findbinfile(fb,suffix) or ""
         end
     end
     if fullname == "" then
         local fb = fonts.names.new_to_old[specification.name]
         if fb then
-            fullname = input.findbinfile(fb,suffix) or ""
+            fullname = resolvers.findbinfile(fb,suffix) or ""
         end
     end
     if fullname ~= "" then
@@ -515,6 +515,7 @@ function define.read(specification,size,id) -- id can be optional, name can alre
         end
         if fontdata then
             fontdata.hash = hash
+            fontdata.cache = "no"
             if id then
                 define.register(fontdata,id)
             end
@@ -546,7 +547,7 @@ function vf.find(name)
             if trace_defining then
                 logs.report("define font","locating vf for %s",name)
             end
-            return input.findbinfile(name,"ovf")
+            return resolvers.findbinfile(name,"ovf")
         else
             if trace_defining then
                 logs.report("define font","vf for %s is already taken care of",name)
@@ -557,7 +558,7 @@ function vf.find(name)
         if trace_defining then
             logs.report("define font","locating vf for %s",name)
         end
-        return input.findbinfile(name,"ovf")
+        return resolvers.findbinfile(name,"ovf")
     end
 end
 

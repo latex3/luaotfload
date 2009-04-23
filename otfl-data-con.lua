@@ -1,4 +1,4 @@
-if not modules then modules = { } end modules ['luat-loc'] = {
+if not modules then modules = { } end modules ['data-con'] = {
     version   = 1.001,
     comment   = "companion to luat-lib.tex",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
@@ -8,11 +8,11 @@ if not modules then modules = { } end modules ['luat-loc'] = {
 
 local format, lower, gsub = string.format, string.lower, string.gsub
 
-local trace_cache      = false  trackers.register("input.cache",      function(v) trace_cache      = v end)
-local trace_containers = false  trackers.register("input.containers", function(v) trace_containers = v end)
-local trace_storage    = false  trackers.register("input.storage",    function(v) trace_storage    = v end)
-local trace_verbose    = false  trackers.register("input.verbose",    function(v) trace_verbose    = v end)
-local trace_locating   = false  trackers.register("input.locating",   function(v) trace_locating   = v trace_verbose = v end)
+local trace_cache      = false  trackers.register("resolvers.cache",      function(v) trace_cache      = v end)
+local trace_containers = false  trackers.register("resolvers.containers", function(v) trace_containers = v end)
+local trace_storage    = false  trackers.register("resolvers.storage",    function(v) trace_storage    = v end)
+local trace_verbose    = false  trackers.register("resolvers.verbose",    function(v) trace_verbose    = v end)
+local trace_locating   = false  trackers.register("resolvers.locating",   function(v) trace_locating   = v trackers.enable("resolvers.verbose") end)
 
 --[[ldx--
 <p>Once we found ourselves defining similar cache constructs
@@ -70,7 +70,7 @@ function containers.define(category, subcategory, version, enabled)
 end
 
 function containers.is_usable(container, name)
-    return container.enabled and caches and caches.is_writable(container.path, name)
+    return container.enabled and caches and caches.iswritable(container.path, name)
 end
 
 function containers.is_valid(container, name)

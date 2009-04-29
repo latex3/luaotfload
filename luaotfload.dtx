@@ -59,7 +59,7 @@ and the derived files
 
 
 \generate{%
-  \file{luaotfload.drv}{\from{luaotfload.dtx}{driver}}%
+  \usedir{tex/luatex/luaodfload}%
   \file{luaotfload.sty}{\from{luaotfload.dtx}{package}}%
 }
 
@@ -75,7 +75,7 @@ and the derived files
 \def\currentpostamble{\luapostamble}%
 
 \generate{%
-  \usedir{tex/luatex/generic}%
+  \usedir{tex/luatex/luaotfload}%
   \file{luaotfload.lua}{\from{luaotfload.dtx}{lua}}%%
 }
 

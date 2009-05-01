@@ -1,5 +1,96 @@
+                         The luaotfload generic package
+
+
 luaotfload is the adaptation of the ConTeXt OTF loading system for Plain and
 LaTeX. It allows to open OTF fonts with almost all features available through
 the XeTeX font syntax.
 
 This package is developped on http://github.com/eroux/lualatex/tree/master .
+
+
+Installation
+------------
+
+Here are the recommended installation methods (preferred first).
+
+1. If you are using TeX Live 2008 or later, use 'tlmgr install luaotfload'.
+Alternatively, try your (TeX or Linux) distribution's package management system.
+
+2. a. Grab luaotfload.tds.zip on the CTAN.
+   b. Unzip it at the root of one or your TDS trees.
+   c. You may need to update some filename database after, see your TeX
+distribution's manual for details.
+
+3. a. Grab the sources from CTAN or github.
+   b. Run 'make install TEXMF=/path/to/texmf'.
+   c. See 2c.
+
+4. Try to figure it out by looking at the Makefile and comments in the sources.
+
+
+Manifest
+--------
+
+Source files:
+        luaotfload.dtx          single file source & doc for the package
+        otfl-font-cid.lua       OTF support files from the ConTeXt distribution
+        otfl-font-def.lua                       .
+        otfl-font-dum.lua                       .
+        otfl-font-ini.lua                       .
+        otfl-font-ota.lua                       .
+        otfl-font-otb.lua                       .
+        otfl-font-otc.lua                       .
+        otfl-font-otf.lua                       .
+        otfl-font-otn.lua                       .
+        otfl-font-tfm.lua                       .
+        otfl-font-xtx.lua                       .
+        otfl-luat-dum.lua                       .
+        otfl-node-dum.lua                       .
+        otfl-node-fnt.lua                       .
+        otfl-node-ini.lua                       .
+        otfl-node-inj.lua                       .
+        otfl-node-res.lua       OTF support files from the ConTeXt distribution
+
+Derived files:
+        luaotfload.pdf          documentation
+        luaotfload.sty          TeX & LaTeX package
+        luaotfload.lua          Lua code for the package
+
+License
+-------
+
+This work is distributed under the GNU GPLv2 license. Please see COPYING file
+for more details about the license.
+
+The files otfl-*.lua are under the GNU GPLv2 license. Their legal notice is
+
+"
+Copyright 2008 PRAGMA ADE / ConTeXt Development Team
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+"
+
+The file luaotfload.dtx and the derived files
+  luaotfload.sty
+  luaotfload.lua
+  
+are under the CC0 license. You can find the CC0 license full text at
+
+http://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+and a FAQ at
+
+http://wiki.creativecommons.org/CC0
+

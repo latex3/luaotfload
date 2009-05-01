@@ -70,9 +70,10 @@ $(TDS_ZIP): $(ALL_FILES)
 
 manifest: 
 	@echo "Source files:"
-	@echo $(SOURCE)
+	@for f in $(SOURCE); do echo $$f; done
+	@echo ""
 	@echo "Derived files:"
-	@echo $(COMPILED) $(GENERATED)
+	@for f in $(GENERATED); do echo $$f; done
 
 clean: 
 	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg

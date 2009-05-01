@@ -3,15 +3,16 @@
 NAME = luaotfload
 DOC = $(NAME).pdf
 DTX = $(NAME).dtx
+OTFL = $(wildcard otfl-*.lua)
 
 # Files grouped by generation mode
 COMPILED = $(DOC)
 UNPACKED = luaotfload.sty luaotfload.lua
 GENERATED = $(COMPILED) $(UNPACKED)
-SOURCE = $(DTX) README Makefile
+SOURCE = $(DTX) $(OTFL) README Makefile
 
 # Files grouped by installation location
-RUNFILES = $(UNPACKED) $(wildcard otfl-*.lua)
+RUNFILES = $(UNPACKED) $(OTFL)
 DOCFILES = $(DOC) README
 SRCFILES = $(DTX) Makefile
 

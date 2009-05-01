@@ -22,10 +22,10 @@ ALL_FILES = $(GENERATED) $(SOURCE)
 
 # Installation locations
 FORMAT = luatex
-RUNDIR = tex/$(FORMAT)/$(NAME)
-DOCDIR = doc/$(FORMAT)/$(NAME)
-SRCDIR = source/$(FORMAT)/$(NAME)
-ALL_DIRS = $(RUNDIR) $(DOCDIR) $(SRCDIR)
+RUNDIR = $(TEXMF)/tex/$(FORMAT)/$(NAME)
+DOCDIR = $(TEXMF)/doc/$(FORMAT)/$(NAME)
+SRCDIR = $(TEXMF)/source/$(FORMAT)/$(NAME)
+TEXMF = ./texmf
 
 CTAN_ZIP = $(NAME).zip
 TDS_ZIP = $(NAME).tds.zip
@@ -56,17 +56,25 @@ $(CTAN_ZIP): $(SOURCE) $(COMPILED) $(TDS_ZIP)
 	@$(RM) -- $@
 	@zip -9 $@ $^ >/dev/null
 
+define run-install
+@mkdir -p $(RUNDIR) && cp $(RUNFILES) $(RUNDIR)
+@mkdir -p $(DOCDIR) && cp $(DOCFILES) $(DOCDIR)
+@mkdir -p $(SRCDIR) && cp $(SRCFILES) $(SRCDIR)
+endef
+
+$(TDS_ZIP): TEXMF=./tmp-texmf
 $(TDS_ZIP): $(ALL_FILES)
 	@echo "Making TDS-ready archive $@."
 	@$(RM) -- $@
-	@mkdir -p $(ALL_DIRS)
-	@cp $(RUNFILES) $(RUNDIR)
-	@cp $(DOCFILES) $(DOCDIR)
-	@cp $(SRCFILES) $(SRCDIR)
-	@zip -9 $@ -r $(ALL_DIRS) >/dev/null
-	@$(RM) -r tex doc source
+	$(run-install)
+	@cd $(TEXMF) && zip -9 ../$@ -r . >/dev/null
+	@$(RM) -r -- $(TEXMF)
 
-.PHONY: manifest clean mrproper
+.PHONY: install manifest clean mrproper
+
+install: $(ALL_FILES)
+	@echo "Installing in '$(TEXMF)'."
+	$(run-install)
 
 manifest: 
 	@echo "Source files:"

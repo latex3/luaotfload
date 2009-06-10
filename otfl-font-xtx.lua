@@ -61,17 +61,18 @@ local list = { }
 
 fonts.define.specify.colonized_default_lookup = "file"
 
-local function issome() list.lookup = fonts.define.specify.colonized_default_lookup end
-local function isfile() list.lookup = 'file' end
-local function isname() list.lookup = 'name' end
-local function thename(s) list.name = s end
-local function iscrap(s) list.crap = string.lower(s) end
-local function istrue(s) list[s] = 'yes' end
-local function isfalse(s) list[s] = 'no' end
-local function iskey(k,v) list[k] = v  end
+local function issome ()    list.lookup = fonts.define.specify.colonized_default_lookup end
+local function isfile ()    list.lookup = 'file' end
+local function isname ()    list.lookup = 'name' end
+local function thename(s)   list.name   = s end
+local function issub  (v)   list.sub    = v end
+local function iscrap (s)   list.crap   = string.lower(s) end
+local function istrue (s)   list[s]     = 'yes' end
+local function isfalse(s)   list[s]     = 'no' end
+local function iskey  (k,v) list[k]     = v end
 
 local spaces     = lpeg.P(" ")^0
-local namespec   = (1-lpeg.S("/: "))^0
+local namespec   = (1-lpeg.S("/: ("))^0
 local crapspec   = spaces * lpeg.P("/") * (((1-lpeg.P(":"))^0)/iscrap) * spaces
 local filename   = (lpeg.P("file:")/isfile * (namespec/thename)) + (lpeg.P("[") * lpeg.P(true)/isname * (((1-lpeg.P("]"))^0)/thename) * lpeg.P("]"))
 local fontname   = (lpeg.P("name:")/isname * (namespec/thename)) + lpeg.P(true)/issome * (namespec/thename)
@@ -80,9 +81,10 @@ local truevalue  = lpeg.P("+") * spaces * (sometext/istrue)
 local falsevalue = lpeg.P("-") * spaces * (sometext/isfalse)
 local keyvalue   = (lpeg.C(sometext) * spaces * lpeg.P("=") * spaces * lpeg.C(sometext))/iskey
 local somevalue  = sometext/istrue
+local subvalue   = lpeg.P("(") * (lpeg.C(lpeg.P(1-lpeg.S("()"))^1)/issub) * lpeg.P(")") -- for Kim
 local option     = spaces * (keyvalue + falsevalue + truevalue + somevalue) * spaces
 local options    = lpeg.P(":") * spaces * (lpeg.P(";")^0  * option)^0
-local pattern    = (filename + fontname) * crapspec^0 * options^0
+local pattern    = (filename + fontname) * subvalue^0 * crapspec^0 * options^0
 
 function fonts.define.specify.colonized(specification) -- xetex mode
     list = { }
@@ -101,6 +103,10 @@ function fonts.define.specify.colonized(specification) -- xetex mode
     if list.lookup then
         specification.lookup = list.lookup
         list.lookup = nil
+    end
+    if list.sub then
+        specification.sub = list.sub
+        list.sub = nil
     end
     specification.features.normal = list
     return specification

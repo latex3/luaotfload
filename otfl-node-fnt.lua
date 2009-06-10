@@ -33,6 +33,18 @@ local fontdata = fonts.ids
 -- happen often; we could consider processing sublists but that might need mor
 -- checking later on; the current approach also permits variants
 
+if tex.attribute[0] < 0 then
+
+    texio.write_nl("log","!")
+    texio.write_nl("log","! Attribute 0 is reserved for ConTeXt's font feature management and has to be")
+    texio.write_nl("log","! set to zero. Also, some attributes in the range 1-255 are used for special")
+    texio.write_nl("log","! purposed so setting them at the TeX end might break the font handler.")
+    texio.write_nl("log","!")
+
+    tex.attribute[0] = 0 -- else no features
+
+end
+
 function nodes.process_characters(head)
     -- either next or not, but definitely no already processed list
     starttiming(nodes)
@@ -54,7 +66,7 @@ function nodes.process_characters(head)
                     if shared then
                         local dynamics = shared.dynamics
                         if dynamics then
-                            local d = shared.set_dynamics(font,dynamics,attr)
+                            local d = shared.set_dynamics(font,dynamics,attr) -- still valid?
                             if d then
                                 used[attr] = d
                                 a = a + 1
@@ -95,7 +107,7 @@ function nodes.process_characters(head)
             head, done = h or head, done or d
             if n > 1 then
                 for i=2,n do
-                    local h, d = processors[i](head,font,false)
+                    local h, d = processors[i](head,font,0) -- false)
                     head, done = h or head, done or d
                 end
             end
@@ -107,7 +119,7 @@ function nodes.process_characters(head)
             head, done = h or head, done or d
             if n > 1 then
                 for i=2,n do
-                    local h, d = processors[i](head,font,false)
+                    local h, d = processors[i](head,font,0) -- false)
                     head, done = h or head, done or d
                 end
             end

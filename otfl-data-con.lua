@@ -58,7 +58,7 @@ function containers.define(category, subcategory, version, enabled)
                     enabled = enabled,
                     version = version or 1.000,
                     trace = false,
-                    path = caches and caches.setpath(category,subcategory),
+                    path = caches and caches.setpath and caches.setpath(category,subcategory),
                 }
                 c[subcategory] = s
             end
@@ -115,4 +115,8 @@ end
 
 function containers.content(container,name)
     return container.storage[name]
+end
+
+function containers.cleanname(name)
+    return (gsub(lower(name),"[^%w%d]+","-"))
 end

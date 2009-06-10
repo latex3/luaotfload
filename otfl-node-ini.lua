@@ -49,13 +49,15 @@ are only used when no attribute is set at the \TEX\ end which normally
 happens in <l n='context'/>.</p>
 --ldx]]--
 
-local last = 127
+storage.shared.attributes_last_private = storage.shared.attributes_last_private or 127
 
 function attributes.private(name) -- at the lua end (hidden from user)
     local number = numbers[name]
     if not number then
+        local last = storage.shared.attributes_last_private or 127
         if last < 255 then
             last = last + 1
+            storage.shared.attributes_last_private = last
         end
         number = last
         numbers[name], names[number], list[number] = number, name, { }

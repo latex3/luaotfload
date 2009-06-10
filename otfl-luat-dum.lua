@@ -20,6 +20,7 @@ trackers = {
 }
 storage = {
     register      = dummyfunction,
+    shared        = { },
 }
 logs = {
     report        = dummyfunction,
@@ -41,12 +42,14 @@ resolvers = resolvers or { } -- no fancy file helpers used
 local remapper = {
     otf = "opentype fonts",
     ttf = "truetype fonts",
-    ttc = "truetype fonts"
+    ttc = "truetype fonts",
+    cid = "other text files", -- will become "cid files"
 }
 
 function resolvers.find_file(name,kind)
     name = string.gsub(name,"\\","\/")
-    return kpse.find_file(name,(kind ~= "" and kind) or "tex")
+    kind = string.lower(kind)
+    return kpse.find_file(name,(kind and kind ~= "" and (remapper[kind] or kind)) or "tex")
 end
 
 function resolvers.findbinfile(name,kind)

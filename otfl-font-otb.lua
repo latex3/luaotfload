@@ -22,6 +22,7 @@ local trace_kerns        = false  trackers.register("otf.kerns",        function
 local trace_preparing    = false  trackers.register("otf.preparing",    function(v) trace_preparing    = v end)
 
 local wildcard = "*"
+local default  = "dflt"
 
 local split_at_space = lpeg.Ct(lpeg.splitat(" ")) -- no trailing or multiple spaces anyway
 
@@ -141,8 +142,8 @@ local function collect_lookups(otfdata,kind,script,language)
             local sequence = sequences[s]
             local features = sequence.features
             features = features and features[kind]
-            features = features and (features[script]   or features[wildcard])
-            features = features and (features[language] or features[wildcard])
+            features = features and (features[script]   or features[default] or features[wildcard])
+            features = features and (features[language] or features[default] or features[wildcard])
             if features then
                 local subtables = sequence.subtables
                 if subtables then
@@ -322,20 +323,46 @@ function otf.features.register_base_kern(tag)
     supported_gsub[#supported_gpos+1] = tag
 end
 
+local basehash, basehashes = { }, 1
+
 function fonts.initializers.base.otf.features(tfmdata,value)
     if true then -- value then
         -- not shared
         local t = trace_preparing and os.clock()
         local features = tfmdata.shared.features
         if features then
+            local h = { }
             for f=1,#supported_gsub do
                 local feature = supported_gsub[f]
-                prepare_base_substitutions(tfmdata,feature,features[feature])
+                local value = features[feature]
+                prepare_base_substitutions(tfmdata,feature,value)
+                if value then
+                    h[#h+1] = feature  .. "=" .. tostring(value)
+                end
             end
             for f=1,#supported_gpos do
                 local feature = supported_gpos[f]
+                local value = features[feature]
                 prepare_base_kerns(tfmdata,feature,features[feature])
+                if value then
+                    h[#h+1] = feature  .. "=" .. tostring(value)
+                end
             end
+            local hash = concat(h," ")
+            local base = basehash[hash]
+            if not base then
+                basehashes = basehashes + 1
+                base = basehashes
+                basehash[hash] = base
+            end
+            -- We need to make sure that luatex sees the difference between
+            -- base fonts that have different glyphs in the same slots in fonts
+            -- that have the same fullname (or filename). LuaTeX will merge fonts
+            -- eventually (and subset later on). If needed we can use a more
+            -- verbose name as long as we don't use <()<>[]{}/%> and the length
+            -- is < 128.
+            tfmdata.fullname = tfmdata.fullname .. "-" .. base
+--~ logs.report("otf define","fullname base hash: '%s', featureset '%s'",tfmdata.fullname,hash)
         end
         if trace_preparing then
             logs.report("otf define","preparation time is %0.3f seconds for %s",os.clock()-t,tfmdata.fullname or "?")

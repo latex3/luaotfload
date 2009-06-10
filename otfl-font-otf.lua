@@ -61,6 +61,7 @@ and don't change to frequently.</p>
 
 fonts                = fonts     or { }
 fonts.otf            = fonts.otf or { }
+fonts.tfm            = fonts.tfm or { }
 
 local otf            = fonts.otf
 local tfm            = fonts.tfm
@@ -78,12 +79,14 @@ otf.features.list    = otf.features.list    or { }
 otf.features.default = otf.features.default or { }
 
 otf.enhancers        = otf.enhancers        or { }
+otf.glists           = { "gsub", "gpos" }
 
-otf.version          = 2.619
-otf.pack             = true
+otf.version          = 2.626 -- beware: also sync font-mis.lua
+otf.pack             = true  -- beware: also sync font-mis.lua
 otf.syncspace        = true
 otf.notdef           = false
 otf.cache            = containers.define("fonts", "otf", otf.version, true)
+otf.cleanup_aat      = false -- only context
 
 --[[ldx--
 <p>We start with a lot of tables and related functions.</p>
@@ -197,13 +200,16 @@ local enhancers = {
     -- away from the enhancers namespace
     "patch bugs",
     "merge cid fonts", "prepare unicode", "cleanup ttf tables", "compact glyphs", "reverse coverage",
-    "enrich with features",
+    "cleanup aat", "enrich with features", "add some missing characters",
     "reorganize kerns", -- moved here
     "flatten glyph lookups", "flatten anchor tables", "flatten feature tables",
-    "prepare luatex tables", "analyse features", "analyse anchors", "analyse marks", "analyse unicodes", "analyse subtables",
+    "prepare luatex tables",
+    "analyse features", "rehash features",
+    "analyse anchors", "analyse marks", "analyse unicodes", "analyse subtables",
     "check italic correction","check math",
     "share widths",
     "strip not needed data",
+    "migrate metadata",
 }
 
 function otf.load(filename,format,sub,featurefile)
@@ -213,11 +219,10 @@ function otf.load(filename,format,sub,featurefile)
     end
     if sub == "" then sub = false end
     local hash = name
-    if sub then -- name cleanup will move to cache code
+    if sub then
         hash = hash .. "-" .. sub
-        hash = lower(hash)
-        hash = gsub(hash,"[^%w%d]+","-")
     end
+    hash = containers.cleanname(hash)
     local data = containers.read(otf.cache(), hash)
     local size = lfs.attributes(filename,"size") or 0
     if not data or data.verbose ~= fonts.verbose or data.size ~= size then
@@ -261,7 +266,7 @@ function otf.load(filename,format,sub,featurefile)
         end
     end
     if data then
-        otf.enhance("unpack",data,filename,false) -- no mesage here
+        otf.enhance("unpack",data,filename,false) -- no message here
         otf.add_dimensions(data)
         if trace_sequences then
             otf.show_feature_order(data,filename)
@@ -356,6 +361,11 @@ otf.enhancers["prepare luatex tables"] = function(data,filename)
     luatex.creator = "context mkiv"
 end
 
+otf.enhancers["cleanup aat"] = function(data,filename)
+    if otf.cleanup_aat then
+    end
+end
+
 local function analyze_features(g, features)
     if g then
         local t, done = { }, { }
@@ -380,9 +390,40 @@ local function analyze_features(g, features)
 end
 
 otf.enhancers["analyse features"] = function(data,filename)
-    local luatex = data.luatex
-    luatex.gposfeatures = analyze_features(data.gpos)
-    luatex.gsubfeatures = analyze_features(data.gsub)
+ -- local luatex = data.luatex
+ -- luatex.gposfeatures = analyze_features(data.gpos)
+ -- luatex.gsubfeatures = analyze_features(data.gsub)
+end
+
+otf.enhancers["rehash features"] = function(data,filename)
+    local features = { }
+    data.luatex.features = features
+    for k, what in next, otf.glists do
+        local dw = data[what]
+        if dw then
+            local f = { }
+            features[what] = f
+            for i=1,#dw do
+                local d= dw[i]
+                local dfeatures = d.features
+                if dfeatures then
+                    for i=1,#dfeatures do
+                        local df = dfeatures[i]
+                        local tag = strip(lower(df.tag))
+                        local ft = f[tag] if not ft then ft = {} f[tag] = ft end
+                        local dscripts = df.scripts
+                        for script, languages in next, dscripts do
+                            script = strip(lower(script))
+                            local fts = ft[script] if not fts then fts = {} ft[script] = fts end
+                            for i=1,#languages do
+                                fts[strip(lower(languages[i]))] = true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
 end
 
 otf.enhancers["analyse anchors"] = function(data,filename)
@@ -433,6 +474,7 @@ local ligsplitter = lpeg.Ct(other * (lpeg.P("_") * other)^0)
 
 otf.enhancers["analyse unicodes"] = function(data,filename)
     local unicodes = data.luatex.unicodes
+    -- we need to move this code
     unicodes['space']  = unicodes['space']  or 32   -- handly later on
     unicodes['hyphen'] = unicodes['hyphen'] or 45   -- handly later on
     unicodes['zwj']    = unicodes['zwj']    or zwj  -- handly later on
@@ -616,7 +658,18 @@ otf.enhancers["prepare unicode"] = function(data,filename)
     if not luatex then luatex = { } data.luatex = luatex end
     local indices, unicodes, multiples, internals = { }, { }, { }, { }
     local glyphs = data.glyphs
-    local mapmap = data.map.map
+    local mapmap = data.map
+    if not mapmap then
+        logs.report("load otf","no map in %s",filename)
+        mapmap = { }
+        data.map = { map = mapmap }
+    elseif not mapmap.map then
+        logs.report("load otf","no unicode map in %s",filename)
+        mapmap = { }
+        data.map.map = mapmap
+    else
+        mapmap = mapmap.map
+    end
     local criterium = fonts.private
     local private = fonts.private
     for index, glyph in next, glyphs do
@@ -720,6 +773,7 @@ end
 
 otf.enhancers["check italic correction"] = function(data,filename)
     local glyphs = data.glyphs
+    local ok = false
     for index, glyph in next, glyphs do
         local ic = glyph.italic_correction
         if ic then
@@ -727,8 +781,12 @@ otf.enhancers["check italic correction"] = function(data,filename)
                 glyph.italic = ic
             end
             glyph.italic_correction = nil
+            ok = true
         end
     end
+    -- we can use this to avoid calculations
+    otf.tables.valid_fields[#otf.tables.valid_fields+1] = "has_italic"
+    data.has_italic = true
 end
 
 otf.enhancers["check math"] = function(data,filename)
@@ -993,6 +1051,9 @@ otf.enhancers["strip not needed data"] = function(data,filename)
         data.gsub = nil
         data.anchor_classes = nil
     end
+end
+
+otf.enhancers["migrate metadata"] = function(data,filename)
     local global_fields = otf.tables.global_fields
     local metadata = { }
     for k,v in next, data do
@@ -1082,7 +1143,7 @@ end
 
 otf.enhancers["flatten feature tables"] = function(data,filename)
     -- is this needed? do we still use them at all?
-    for _, tag in next, { "gsub", "gpos" } do
+    for _, tag in next, otf.glists do
         if data[tag] then
             if trace_loading then
                 logs.report("load otf", "flattening %s table", tag)
@@ -1229,6 +1290,7 @@ function otf.otf_to_tfm(specification)
                 tfmdata.marks = otfdata.luatex.marks
                 tfmdata.originals = otfdata.luatex.originals
                 tfmdata.changed = { }
+                tfmdata.has_italic = otfdata.metadata.has_italic
                 if not tfmdata.language then tfmdata.language = 'dflt' end
                 if not tfmdata.script   then tfmdata.script   = 'dflt' end
                 shared.processes, shared.features = otf.set_features(tfmdata,fonts.define.check(features,otf.features.default))
@@ -1374,14 +1436,11 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
         end
         spaceunits = tonumber(spaceunits) or tfm.units/2 -- 500 -- brrr
         parameters.slant         = 0
-        parameters.space         = spaceunits
-        parameters.space_stretch = tfm.units/2   --  500
-     -- parameters.space_shrink  = 2*tfm.units/3 --  333
-        parameters.space_shrink  = 1*tfm.units/3 --  333
-     -- parameters.x_height      = 4*tfm.units/5 --  400
+        parameters.space         = spaceunits              -- 3.333 (cmr10)
+        parameters.space_stretch = tfm.units/2   --  500   -- 1.666 (cmr10)
+        parameters.space_shrink  = 1*tfm.units/3 --  333   -- 1.111 (cmr10)
         parameters.x_height      = 2*tfm.units/5 --  400
         parameters.quad          = tfm.units     -- 1000
-        parameters.extra_space   = 0
         if spaceunits < 2*tfm.units/5 then
             -- todo: warning
         end
@@ -1399,6 +1458,7 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
             parameters.space_stretch = spaceunits/2
             parameters.space_shrink  = spaceunits/3
         end
+        parameters.extra_space = parameters.space_shrink -- 1.111 (cmr10)
         if pfminfo.os2_xheight and pfminfo.os2_xheight > 0 then
             parameters.x_height = pfminfo.os2_xheight
         else
@@ -1479,106 +1539,3 @@ function tfm.read_from_open_type(specification)
     end
     return tfmtable
 end
-
-local a_to_script   = { }  otf.a_to_script   = a_to_script
-local a_to_language = { }  otf.a_to_language = a_to_language
-
-otf.default_language = 'latn'
-otf.default_script   = 'dflt'
-
-local context_setups  = fonts.define.specify.context_setups
-local context_numbers = fonts.define.specify.context_numbers
-
-function otf.set_dynamics(font,dynamics,attribute)
-    features = context_setups[context_numbers[attribute]] -- can be moved to caller
-    if features then
-        local script   = features.script   or 'dflt'
-        local language = features.language or 'dflt'
-        local ds = dynamics[script]
-        if not ds then
-            ds = { }
-            dynamics[script] = ds
-        end
-        local dsl = ds[language]
-        if not dsl then
-            dsl = { }
-            ds[language] = dsl
-        end
-        local dsla = dsl[attribute]
-        if dsla then
-        --  if trace_dynamics then
-        --      logs.report("otf define","using dynamics %s: attribute %s, script %s, language %s",context_numbers[attribute],attribute,script,language)
-        --  end
-            return dsla
-        else
-            local tfmdata = fontdata[font]
-            a_to_script  [attribute] = script
-            a_to_language[attribute] = language
-            -- we need to save some values
-            local saved = {
-                script    = tfmdata.script,
-                language  = tfmdata.language,
-                mode      = tfmdata.mode,
-                features  = tfmdata.shared.features
-            }
-            tfmdata.mode     = "node"
-            tfmdata.language = language
-            tfmdata.script   = script
-            tfmdata.shared.features = { }
-            -- end of save
-            dsla = otf.set_features(tfmdata,fonts.define.check(features,otf.features.default))
-            if trace_dynamics then
-                logs.report("otf define","setting dynamics %s: attribute %s, script %s, language %s",context_numbers[attribute],attribute,script,language)
-            end
-            -- we need to restore some values
-            tfmdata.script          = saved.script
-            tfmdata.language        = saved.language
-            tfmdata.mode            = saved.mode
-            tfmdata.shared.features = saved.features
-            -- end of restore
-            dynamics[script][language][attribute] = dsla -- cache
-            return dsla
-        end
-    end
-    return nil -- { }
-end
-
--- common stuff
-
-function otf.features.language(tfmdata,value)
-    if value then
-        value = lower(value)
-        if otf.tables.languages[value] then
-            tfmdata.language = value
-        end
-    end
-end
-
-function otf.features.script(tfmdata,value)
-    if value then
-        value = lower(value)
-        if otf.tables.scripts[value] then
-            tfmdata.script = value
-        end
-    end
-end
-
-function otf.features.mode(tfmdata,value)
-    if value then
-        tfmdata.mode = lower(value)
-    end
-end
-
-fonts.initializers.base.otf.language = otf.features.language
-fonts.initializers.base.otf.script   = otf.features.script
-fonts.initializers.base.otf.mode     = otf.features.mode
-fonts.initializers.base.otf.method   = otf.features.mode
-
-fonts.initializers.node.otf.language = otf.features.language
-fonts.initializers.node.otf.script   = otf.features.script
-fonts.initializers.node.otf.mode     = otf.features.mode
-fonts.initializers.node.otf.method   = otf.features.mode
-
-otf.features.register("features",true)     -- we always do features
-table.insert(fonts.processors,"features")  -- we need a proper function for doing this
-

@@ -166,9 +166,12 @@ and the derived files
 % \item \texttt{node-dum.lua}
 % \item \texttt{font-ini.lua}
 % \item \texttt{font-tfm.lua}
-% \item \texttt{font-otf.lua}
-% \item \texttt{font-otb.lua}
 % \item \texttt{font-cid.lua}
+% \item \texttt{font-ott.lua}
+% \item \texttt{font-otf.lua}
+% \item \texttt{font-otd.lua}
+% \item \texttt{font-oti.lua}
+% \item \texttt{font-otb.lua}
 % \item \texttt{font-otn.lua}
 % \item \texttt{font-ota.lua}
 % \item \texttt{font-otc.lua}
@@ -271,6 +274,24 @@ function table.sortedhashkeys(tab) -- fast one
     return srt
 end
 
+function table.reverse_hash(h)
+    local r = { }
+    for k,v in next, h do
+        r[v] = string.lower(string.gsub(k," ",""))
+    end 
+    return r
+end 
+
+function table.reverse(t)
+    local tt = { }
+    if #t > 0 then
+        for i=#t,1,-1 do
+            tt[#tt+1] = t[i]
+        end
+    end
+    return tt
+end
+
 %    \end{macrocode}
 %
 % We start loading some lua files. These two are some code not used by Con\TeX t at all that allow other modules to be used, it provides some low-level Con\TeX t functions.
@@ -304,7 +325,7 @@ end
 
 %    \end{macrocode}
 %
-% Some more modules. We don't load \texttt{font-ott.lua}, as it only contains the meaning of the options, ans it works perfectly without it. We don't load neither \texttt{font-enc.lua} nor \texttt{font-afm.lua} as it will never be used here.
+% Some more modules. We don't load neither \texttt{font-enc.lua} nor \texttt{font-afm.lua} as it will never be used here.
 %
 %    \begin{macrocode}
 
@@ -315,9 +336,12 @@ luaotfload.loadmodule('node-dum.lua')
 
 luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('font-tfm.lua')
-luaotfload.loadmodule('font-otf.lua')
-luaotfload.loadmodule('font-otb.lua')
 luaotfload.loadmodule('font-cid.lua')
+luaotfload.loadmodule('font-ott.lua')
+luaotfload.loadmodule('font-otf.lua')
+luaotfload.loadmodule('font-otd.lua')
+luaotfload.loadmodule('font-oti.lua')
+luaotfload.loadmodule('font-otb.lua')
 luaotfload.loadmodule('font-otn.lua')
 luaotfload.loadmodule('font-ota.lua')
 luaotfload.loadmodule('font-otc.lua')

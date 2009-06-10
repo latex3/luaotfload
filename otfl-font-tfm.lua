@@ -101,10 +101,8 @@ function tfm.read_from_tfm(specification)
             end
             tfm.enhance(tfmdata,specification)
         end
-    else
-        if trace_defining then
-            logs.report("define font","loading tfm with name %s fails",specification.name)
-        end
+    elseif trace_defining then
+        logs.report("define font","loading tfm with name %s fails",specification.name)
     end
     return tfmdata
 end
@@ -226,6 +224,10 @@ end
 
 local charactercache = { }
 
+-- The scaler is only used for otf and afm and virtual fonts. If
+-- a virtual font has italic correction make sur eto set the
+-- has_italic flag. Some more flags will be added in the future.
+
 function tfm.do_scale(tfmtable, scaledpoints)
     tfm.prepare_base_kerns(tfmtable) -- optimalization
     if scaledpoints < 0 then
@@ -246,6 +248,7 @@ function tfm.do_scale(tfmtable, scaledpoints)
     local hasmath = tfmtable.math_parameters ~= nil or tfmtable.MathConstants ~= nil
     local nodemode = tfmtable.mode == "node"
     local hasquality = tfmtable.auto_expand or tfmtable.auto_protrude
+    local hasitalic = tfmtable.has_italic
     --
     t.parameters = { }
     t.characters = { }
@@ -372,9 +375,11 @@ function tfm.do_scale(tfmtable, scaledpoints)
             end
         end
         -- todo: hasitalic
-        local vi = description.italic or v.italic
-        if vi then
-            chr.italic = vi*delta
+        if hasitalic then
+            local vi = description.italic or v.italic
+            if vi and vi ~= 0 then
+                chr.italic = vi*delta
+            end
         end
         -- to be tested
         if hasmath then
@@ -531,10 +536,14 @@ function tfm.do_scale(tfmtable, scaledpoints)
     if not tp[22] then tp[22] =   0     end  -- mathaxisheight
     if t.MathConstants then t.MathConstants.AccentBaseHeight = nil end -- safeguard
     t.tounicode = 1
+    t.cidinfo = tfmtable.cidinfo
     -- we have t.name=metricfile and t.fullname=RealName and t.filename=diskfilename
     -- when collapsing fonts, luatex looks as both t.name and t.fullname as ttc files
     -- can have multiple subfonts
 --~ collectgarbage("collect")
+--~ t.fontname = t.fontname or t.fullname
+--~ t.name = t.name or t.fontname
+--~ print(t.fullname,table.serialize(characters[string.byte('W')].kerns))
     return t, delta
 end
 

@@ -83,7 +83,8 @@ function define.add_specifier(symbol)
     local method        = lpeg.S(specifiers)
     local lookup        = lpeg.C(lpeg.P("file")+lpeg.P("name")) * colon -- hard test, else problems with : method
     local sub           = left * lpeg.C(lpeg.P(1-left-right-method)^1) * right
-    local specification = lpeg.C(method) * lpeg.C(lpeg.P(1-method)^1)
+--~   local specification = lpeg.C(method) * lpeg.C(lpeg.P(1-method)^1)
+    local specification = lpeg.C(method) * lpeg.C(lpeg.P(1)^1)
     local name          = lpeg.C((1-sub-specification)^1)
     splitter = lpeg.P((lookup + lpeg.Cc("")) * name * (sub + lpeg.Cc("")) * (specification + lpeg.Cc("")))
 end
@@ -147,7 +148,7 @@ function tfm.hash_features(specification)
             local f = sortedhashkeys(normal)
             for i=1,#f do
                 local v = f[i]
-                if v ~= "number" then
+                if v ~= "number" and v ~= "features" then -- i need to figure this out, features
                     t[#t+1] = v .. '=' .. tostring(normal[v])
                 end
             end
@@ -160,6 +161,9 @@ function tfm.hash_features(specification)
                 t[#t+1] = v .. '=' .. tostring(vtf[v])
             end
         end
+--~ if specification.mathsize then
+--~     t[#t+1] = "mathsize=" .. specification.mathsize
+--~ end
         if #t > 0 then
             return concat(t,"+")
         end
@@ -364,13 +368,13 @@ function readers.afm(specification,method)
         if not tfmtable then
             method = method or define.method or "afm or tfm"
             if method == "tfm" then
-                tfmtable = check_tfm(specification,fullname)
+                tfmtable = check_tfm(specification,specification.name)
             elseif method == "afm" then
-                tfmtable = check_afm(specification,fullname)
+                tfmtable = check_afm(specification,specification.name)
             elseif method == "tfm or afm" then
-                tfmtable = check_tfm(specification,fullname) or check_afm(specification,fullname)
-            else-- method == "afm or tfm" then
-                tfmtable = check_afm(specification,fullname) or check_tfm(specification,fullname)
+                tfmtable = check_tfm(specification,specification.name) or check_afm(specification,specification.name)
+            else -- method == "afm or tfm" or method == "" then
+                tfmtable = check_afm(specification,specification.name) or check_tfm(specification,specification.name)
             end
         end
     else

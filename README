@@ -40,8 +40,11 @@ Source files:
         otfl-font-ota.lua                       .
         otfl-font-otb.lua                       .
         otfl-font-otc.lua                       .
+        otfl-font-otd.lua                       .
         otfl-font-otf.lua                       .
+        otfl-font-oti.lua                       .
         otfl-font-otn.lua                       .
+        otfl-font-ott.lua                       .
         otfl-font-tfm.lua                       .
         otfl-font-xtx.lua                       .
         otfl-luat-dum.lua                       .

@@ -79,7 +79,7 @@ end
 local template = "%s-%s-%s.cidmap"
 
 local function locate(registry,ordering,supplement)
-    local filename = format(template,registry,ordering,supplement)
+    local filename = string.lower(format(template,registry,ordering,supplement))
     local cidmap = fonts.cid.map[filename]
     if not cidmap then
         if trace_loading then

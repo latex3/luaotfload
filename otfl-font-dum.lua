@@ -72,14 +72,42 @@ function fonts.names.resolve(name,sub)
         end
         loaded = true
     end
-    if type(data) == "table" and data.version == 1.07 then
+    if type(data) == "table" and data.version == 1.08 then
         local condensed = string.gsub(name,"[^%a%d]","")
         local found = data.mapping and data.mapping[condensed]
         if found then
             local filename, is_sub = found[3], found[4]
+            if is_sub then is_sub = found[2] end
             return filename, is_sub
         else
             return name, false -- fallback to filename
         end
     end
 end
+
+-- For the moment we put this (adapted) pseudo feature here.
+
+table.insert(fonts.triggers,"itlc")
+
+local function itlc(tfmdata,value)
+    if value then
+        -- the magic 40 and it formula come from Dohyun Kim
+        local metadata = tfmdata.shared.otfdata.metadata
+        if metadata then
+            local italicangle = metadata.italicangle
+            if italicangle and italicangle ~= 0 then
+                local uwidth = (metadata.uwidth or 40)/2
+                for unicode, d in next, tfmdata.descriptions do
+                    local it = d.boundingbox[3] - d.width + uwidth
+                    if it ~= 0 then
+                        d.italic = it
+                    end
+                end
+                tfmdata.has_italic = true
+            end
+        end
+    end
+end
+
+fonts.initializers.base.otf.itlc = itlc
+fonts.initializers.node.otf.itlc = itlc

@@ -168,7 +168,7 @@ end
 
 -- todo: reuse tables (i.e. no collection), but will be extra fields anyway
 
-function nodes.inject_kerns(head,tail,keep)
+function nodes.inject_kerns(head,tail,where,keep)
     if trace_injections then
         nodes.trace_injection(head)
     end
@@ -176,10 +176,10 @@ function nodes.inject_kerns(head,tail,keep)
     if has_marks or has_cursives then
         -- in the future variant we will not copy items but refs to tables
         local done, ky, rl, valid, cx, wx = false, { }, { }, { }, { }, { }
-        for n in traverse_id(glyph,head) do
-            if n.subtype < 256 then
-                valid[#valid+1] = n
-                if has_kerns then -- move outside loop
+        if has_kerns then -- move outside loop
+            for n in traverse_id(glyph,head) do
+                if n.subtype < 256 then
+                    valid[#valid+1] = n
                     local k = has_attribute(n,kernpair)
                     if k then
                         local kk = kerns[k]
@@ -195,6 +195,12 @@ function nodes.inject_kerns(head,tail,keep)
                             rl[n] = kk[1] -- could move in test
                         end
                     end
+                end
+            end
+        else
+            for n in traverse_id(glyph,head) do
+                if n.subtype < 256 then
+                    valid[#valid+1] = n
                 end
             end
         end
@@ -215,6 +221,7 @@ function nodes.inject_kerns(head,tail,keep)
                     n = valid[i]
                     if n.font ~= nf then
                         nf = n.font
+--~ print(n.font,nf,fontdata[nf])
                         tm = fontdata[nf].marks
                         -- maybe flush
                         maxt = 0

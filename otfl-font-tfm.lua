@@ -540,10 +540,6 @@ function tfm.do_scale(tfmtable, scaledpoints)
     -- we have t.name=metricfile and t.fullname=RealName and t.filename=diskfilename
     -- when collapsing fonts, luatex looks as both t.name and t.fullname as ttc files
     -- can have multiple subfonts
---~ collectgarbage("collect")
---~ t.fontname = t.fontname or t.fullname
---~ t.name = t.name or t.fontname
---~ print(t.fullname,table.serialize(characters[string.byte('W')].kerns))
     return t, delta
 end
 
@@ -691,7 +687,7 @@ function tfm.enhance(tfmdata,specification)
     tfmdata.shared = tfmdata.shared or { }
     tfmdata.shared.features = features
     --  tfmdata.shared.tfmdata = tfmdata -- circular
-tfmdata.filename = specification.name
+    tfmdata.filename = specification.name
     if not features.encoding then
         local name, size = specification.name, specification.size
         local encoding, filename = match(name,"^(.-)%-(.*)$") -- context: encoding-name.*

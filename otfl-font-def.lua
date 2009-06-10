@@ -43,6 +43,8 @@ tfm.internalized     = tfm.internalized or { } -- internal tex numbers
 
 tfm.readers.sequence = { 'otf', 'ttf', 'afm', 'tfm' }
 
+tfm.auto_afm = true
+
 local readers  = tfm.readers
 local sequence = readers.sequence
 
@@ -334,10 +336,31 @@ local function check_tfm(specification,fullname)
     end
 end
 
+--~ local function check_afm(specification,fullname)
+--~     fullname = resolvers.findbinfile(fullname, 'afm') or "" -- just to be sure
+--~     if fullname ~= "" then
+--~         specification.filename, specification.format = fullname, "afm"
+--~         return tfm.read_from_afm(specification)
+--~     end
+--~ end
+
 local function check_afm(specification,fullname)
-    fullname = resolvers.findbinfile(fullname, 'afm') or "" -- just to be sure
-    if fullname ~= "" then
-        specification.filename, specification.format = fullname, "afm"
+    local foundname = resolvers.findbinfile(fullname, 'afm') or "" -- just to be sure
+    if foundname == "" and tfm.auto_afm then
+        local encoding, shortname = match(fullname,"^(.-)%-(.*)$") -- context: encoding-name.*
+        if encoding and shortname and fonts.enc.known[encoding] then
+            shortname = resolvers.findbinfile(shortname,'afm') or "" -- just to be sure
+            if shortname ~= "" then
+                foundname = shortname
+             -- tfm.set_normal_feature(specification,'encoding',encoding) -- will go away
+                if trace_loading then
+                    logs.report("load afm","stripping encoding prefix from filename %s",afmname)
+                end
+            end
+        end
+    end
+    if foundname ~= "" then
+        specification.filename, specification.format = foundname, "afm"
         return tfm.read_from_afm(specification)
     end
 end
@@ -529,7 +552,7 @@ function define.read(specification,size,id) -- id can be optional, name can alre
     if not fontdata then
         logs.report("define font", "unknown font %s, loading aborted",specification.name)
     elseif trace_defining and type(fontdata) == "table" then
-        logs.report("define font","using %s font with id %s, n:%s s:%s b:%s e:%s p:%s f:%s",
+        logs.report("define font","using %s font with id %s, name:%s size:%s bytes:%s encoding:%s fullname:%s filename:%s",
             fontdata.type          or "unknown",
             id                     or "?",
             fontdata.name          or "?",
@@ -538,6 +561,7 @@ function define.read(specification,size,id) -- id can be optional, name can alre
             fontdata.encodingname  or "unicode",
             fontdata.fullname      or "?",
             file.basename(fontdata.filename or "?"))
+
     end
     statistics.stoptiming(fonts)
     return fontdata

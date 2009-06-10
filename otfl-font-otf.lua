@@ -1524,7 +1524,7 @@ function tfm.read_from_open_type(specification)
         if filename then
             tfmtable.encodingbytes = 2
             tfmtable.filename = resolvers.findbinfile(filename,"") or filename
-            tfmtable.fullname = otfdata.metadata.fontname or otfdata.metadata.fullname
+            tfmtable.fullname = tfmtable.fullname or otfdata.metadata.fontname or otfdata.metadata.fullname
             local order = otfdata and otfdata.metadata.order2
             if order == 0 then
                 tfmtable.format = 'opentype'
@@ -1537,5 +1537,6 @@ function tfm.read_from_open_type(specification)
         end
         fonts.logger.save(tfmtable,file.extname(specification.filename),specification)
     end
+--~ print(tfmtable.fullname)
     return tfmtable
 end

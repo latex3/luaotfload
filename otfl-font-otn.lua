@@ -1762,7 +1762,7 @@ function otf.setcontextchain(method)
         logwarning("installing contextchain handler '%s'",method)
         local handler = otf.chainhandlers[method]
         handlers.contextchain = function(...)
-            return handler(currentfont,...)
+            return handler(currentfont,...) -- hm, get rid of ...
         end
     end
     handlers.gsub_context             = handlers.contextchain

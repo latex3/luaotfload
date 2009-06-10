@@ -111,3 +111,6 @@ end
 
 fonts.initializers.base.otf.itlc = itlc
 fonts.initializers.node.otf.itlc = itlc
+
+function fonts.register_message()
+end

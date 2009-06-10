@@ -59,6 +59,7 @@ local glue       = nodes.register(new_node("glue"))
 local glue_spec  = nodes.register(new_node("glue_spec"))
 local glyph      = nodes.register(new_node("glyph",0))
 local textdir    = nodes.register(new_node("whatsit",7))
+local rule       = nodes.register(new_node("rule"))
 
 function nodes.glyph(fnt,chr)
     local n = copy_node(glyph)
@@ -99,6 +100,13 @@ function nodes.textdir(dir)
     local t = copy_node(textdir)
     t.dir = dir
     return t
+end
+function nodes.rule(w,h,d)
+    local n = copy_node(rule)
+    if w then n.width  = w end
+    if h then n.height = h end
+    if d then n.depth  = d end
+    return n
 end
 
 statistics.register("cleaned up reserved nodes", function()

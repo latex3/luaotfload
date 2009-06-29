@@ -33,7 +33,8 @@ Manifest
 
 Source files:
         luaotfload.dtx          single file source & doc for the package
-        otfl-font-cid.lua       OTF support files from the ConTeXt distribution
+        otfl-data-con.lua       OTF support files from the ConTeXt distribution
+        otfl-font-cid.lua                       .
         otfl-font-def.lua                       .
         otfl-font-dum.lua                       .
         otfl-font-ini.lua                       .
@@ -86,6 +87,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 "
 
 The file luaotfload.dtx and the derived files
+  luaotfload.pdf
   luaotfload.sty
   luaotfload.lua
   

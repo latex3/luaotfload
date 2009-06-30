@@ -63,7 +63,8 @@ and the derived files
   \file{luaotfload.sty}{\from{luaotfload.dtx}{package}}%
 }
 
-% The following hacks are to generate a lua file with lua comments starting by -- instead of %%
+% The following hacks are to generate a lua file with lua comments starting by
+% -- instead of %%
 
 \def\MetaPrefix{-- }
 
@@ -136,7 +137,8 @@ and the derived files
 % \maketitle
 %
 % \begin{abstract}
-% Con\TeX t font loading system, providing the possibility to load OTF fonts with a lot of features, and the Xe\TeX\ font loading syntax.
+% Con\TeX t font loading system, providing the possibility to load OTF fonts
+% with a lot of features, and the Xe\TeX\ font loading syntax.
 % \end{abstract}
 %
 % \tableofcontents
@@ -145,17 +147,37 @@ and the derived files
 % 
 % \subsection{Introduction}
 %
-% Font management and installation has always been painful with \TeX\ (and even more with \LaTeX ). A lot of files are needed for one font (tfm, pfb, map, fd, vf), and they are limited to 256 characters. But the font world has evolved since, and new standard types of fonts have appeared, like \textsf{truetype} or \textsf{opentype} fonts. These fonts can contain a lot of characters, and have some functionalities (ligatures, old-style numbers, small capitals, etc.). They are everywhere, as the system fonts and most modern text softwares fonts are of this type. Until now the (almost) only way to use them with \TeX\ was to use them with Xe\TeX .
+% Font management and installation has always been painful with \TeX\ (and
+% even more with \LaTeX ). A lot of files are needed for one font (tfm, pfb,
+% map, fd, vf), and they are limited to 256 characters. But the font world has
+% evolved since, and new standard types of fonts have appeared, like
+% \textsf{truetype} or \textsf{opentype} fonts. These fonts can contain a lot
+% of characters, and have some functionalities (ligatures, old-style numbers,
+% small capitals, etc.). They are everywhere, as the system fonts and most
+% modern text softwares fonts are of this type. Until now the (almost) only
+% way to use them with \TeX\ was to use them with Xe\TeX .
 %
-% Unlike Xe\TeX , Lua\TeX\ does not provide facilities for these fonts by default, but it provides a way to hook lua code in some points of the \TeX\ algorithm, for instance we can improve the font loading system; this is what we do in this package.
+% Unlike Xe\TeX , Lua\TeX\ does not provide facilities for these fonts by
+% default, but it provides a way to hook lua code in some points of the \TeX\
+% algorithm, for instance we can improve the font loading system; this is what
+% we do in this package.
 %
-%This package is quite low-level, and should be loaded directly in the macro package, like it is in Con\TeX t. Sadly, Plain and \LaTeX\ are frozen and it's even impossible to adapt them to the new engines. 
+%This package is quite low-level, and should be loaded directly in the macro
+%package, like it is in Con\TeX t. Sadly, Plain and \LaTeX\ are frozen and
+%it's even impossible to adapt them to the new engines. 
 %
 % \subsection{Con\TeX t files needed}
 %
-% This package is a wrapper for several files taken from the Con\TeX t macro package. The philosophy is to let Con\TeX t do all the implementation and update these files from time to time. To do so we did not modify the files taken from Con\TeX t, we only changed their names to prevent name clashes. You can thus update the font system of this package simply by updating the files taken from Con\TeX t, without (theorically) changing the \texttt{.sty} file nor the main \texttt{.lua} file.
+% This package is a wrapper for several files taken from the Con\TeX t macro
+% package. The philosophy is to let Con\TeX t do all the implementation and
+% update these files from time to time. To do so we did not modify the files
+% taken from Con\TeX t, we only changed their names to prevent name clashes.
+% You can thus update the font system of this package simply by updating the
+% files taken from Con\TeX t, without (theorically) changing the \texttt{.sty}
+% file nor the main \texttt{.lua} file.
 %
-% The Con\TeX t files are renamed by adding the prefix \texttt{otfl-} to them (\texttt{otfl} as \texttt{OTF L}oad).The files are:
+% The Con\TeX t files are renamed by adding the prefix \texttt{otfl-} to them
+% (\texttt{otfl} as \texttt{OTF L}oad).The files are:
 %
 % \begin{itemize}
 % \item \texttt{luat-dum.lua}
@@ -186,7 +208,7 @@ and the derived files
 %<*lua>
 % \fi
 %
-% First some usual initializations.
+%    First some usual initializations.
 %
 %    \begin{macrocode}
 luaotfload          = { }
@@ -205,7 +227,9 @@ luatextra.provides_module(luaotfload.module)
 
 %    \end{macrocode}
 %
-% We load the Con\TeX t files with this function. It automatically adds the \texttt{otfl-} prefix to it, so that we call it with the actual Con\TeX t name.
+%    We load the Con\TeX t files with this function. It automatically adds the
+%    \texttt{otfl-} prefix to it, so that we call it with the actual Con\TeX t
+%    name.
 %
 %    \begin{macrocode}
 
@@ -221,7 +245,8 @@ end
 
 %    \end{macrocode}
 %
-% The following functions are made to map Con\TeX t functions to \textsf{luaextra} functions.
+%    The following functions are made to map Con\TeX t functions to
+%    \textsf{luaextra} functions.
 %
 %    \begin{macrocode}
 
@@ -232,7 +257,7 @@ file.extname = fpath.suffix
 
 %    \end{macrocode}
 %
-% These are small functions that are not already in \textsf{luatextra}.
+%    These are small functions that are not already in \textsf{luatextra}.
 %
 %    \begin{macrocode}
 
@@ -294,7 +319,9 @@ end
 
 %    \end{macrocode}
 %
-% We start loading some lua files. These two are some code not used by Con\TeX t at all that allow other modules to be used, it provides some low-level Con\TeX t functions.
+%    We start loading some lua files. These two are some code not used by
+%    Con\TeX t at all that allow other modules to be used, it provides some
+%    low-level Con\TeX t functions.
 %
 %    \begin{macrocode}
 
@@ -303,7 +330,7 @@ luaotfload.loadmodule('data-con.lua') -- maybe some day we don't need this one
 
 %    \end{macrocode}
 %
-% This one is for node support.
+%    This one is for node support.
 %
 %    \begin{macrocode}
 
@@ -311,7 +338,13 @@ luaotfload.loadmodule('node-ini.lua')
 
 %    \end{macrocode}
 %
-% By default Con\TeX t takes some private attributes for internal use. With Plain and \LaTeX\ we can't do so, we use |\newluaattribute|. This functions overrides a function defined in the previous module that returns the number of a private attribute. We allocate new attributes in the \texttt{.sty} file, and this function returns their number. Like this we don't need any private attribute, and this package is compatible with the others. We use the |otfl@| prefix for attributes.
+%    By default Con\TeX t takes some private attributes for internal use. With
+%    Plain and \LaTeX\ we can't do so, we use |\newluaattribute|. This
+%    functions overrides a function defined in the previous module that
+%    returns the number of a private attribute. We allocate new attributes in
+%    the \texttt{.sty} file, and this function returns their number. Like this
+%    we don't need any private attribute, and this package is compatible with
+%    the others. We use the |otfl@| prefix for attributes.
 %
 %    \begin{macrocode}
 
@@ -325,7 +358,8 @@ end
 
 %    \end{macrocode}
 %
-% Some more modules. We don't load neither \texttt{font-enc.lua} nor \texttt{font-afm.lua} as it will never be used here.
+%    Some more modules. We don't load neither \texttt{font-enc.lua} nor
+%    \texttt{font-afm.lua} as it will never be used here.
 %
 %    \begin{macrocode}
 
@@ -348,7 +382,9 @@ luaotfload.loadmodule('font-otc.lua')
 
 %    \end{macrocode}
 %
-% \texttt{font-def.lua} calls the function \texttt{callback.register} to register its callbacks. We override it with a dumb function so that it does not register any callback. We will register the callbacks later.
+%    \texttt{font-def.lua} calls the function \texttt{callback.register} to
+%    register its callbacks. We override it with a dumb function so that it
+%    does not register any callback. We will register the callbacks later.
 %
 %    \begin{macrocode}
 
@@ -366,7 +402,7 @@ luaotfload.loadmodule('font-dum.lua')
 
 %    \end{macrocode}
 %
-% This is a small patch that prevents errors in some \LaTeX\ files.
+%    This is a small patch that prevents errors in some \LaTeX\ files.
 %
 %    \begin{macrocode}
 
@@ -374,7 +410,7 @@ fonts.enc.known = {}
 
 %    \end{macrocode}
 %
-% Finally two functions 
+%    Finally two functions 
 %
 %    \begin{macrocode}
 
@@ -405,7 +441,7 @@ end
 %<*package>
 % \fi
 %
-% Classical Plain+\LaTeX\ package initialization.
+%    Classical Plain+\LaTeX\ package initialization.
 %
 %    \begin{macrocode}
 \csname ifluaotfloadloaded\endcsname
@@ -428,7 +464,8 @@ end
 
 %    \end{macrocode}
 %
-% The attributes are allocated here. The |otfl@| prefix is added to prevent name collision.
+%    The attributes are allocated here. The |otfl@| prefix is added to prevent
+%    name collision.
 %
 %    \begin{macrocode}
 
@@ -444,7 +481,8 @@ end
 
 %    \end{macrocode}
 %
-% Two small macros to register or unregister the callbacks. Without the callbacks this package is totally turned off.
+%    Two small macros to register or unregister the callbacks. Without the
+%    callbacks this package is totally turned off.
 %
 %    \begin{macrocode}
 
@@ -458,7 +496,7 @@ end
 
 %    \end{macrocode}
 %
-% We load the |lua| file, and we turn the package on.
+%    We load the |lua| file, and we turn the package on.
 %
 %    \begin{macrocode}
 

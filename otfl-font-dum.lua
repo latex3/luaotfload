@@ -60,7 +60,7 @@ function fonts.names.resolve(name,sub)
                         local d = {  }
                         for k, v in pairs(data.mapping) do
                             local t = v[1]
-                            if t == "ttf" or t == "otf" or t == "ttc" then
+                            if t == "ttf" or t == "otf" or t == "ttc" or t == "dfont" then
                                 d[k] = v
                             end
                         end
@@ -73,7 +73,7 @@ function fonts.names.resolve(name,sub)
         loaded = true
     end
     if type(data) == "table" and data.version == 1.08 then
-        local condensed = string.gsub(name,"[^%a%d]","")
+        local condensed = string.gsub(string.lower(name),"[^%a%d]","")
         local found = data.mapping and data.mapping[condensed]
         if found then
             local filename, is_sub = found[3], found[4]

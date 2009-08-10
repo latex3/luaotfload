@@ -245,7 +245,7 @@ function tfm.do_scale(tfmtable, scaledpoints)
     end
     -- status
     local isvirtual = tfmtable.type == "virtual" or tfmtable.virtualized
-    local hasmath = tfmtable.math_parameters ~= nil or tfmtable.MathConstants ~= nil
+    local hasmath = (tfmtable.math_parameters ~= nil and next(tfmtable.math_parameters) ~= nil) or (tfmtable.MathConstants ~= nil and next(tfmtable.MathConstants) ~= nil)
     local nodemode = tfmtable.mode == "node"
     local hasquality = tfmtable.auto_expand or tfmtable.auto_protrude
     local hasitalic = tfmtable.has_italic
@@ -293,6 +293,7 @@ function tfm.do_scale(tfmtable, scaledpoints)
     local scaledheight = defaultheight * delta
     local scaleddepth  = defaultdepth  * delta
     local stackmath = tfmtable.ignore_stack_math ~= true
+local private = fonts.private
     for k,v in next, characters do
         local chr, description, index
         if ischanged then
@@ -355,7 +356,7 @@ function tfm.do_scale(tfmtable, scaledpoints)
     --      logs.report("define font","t=%s, u=%s, i=%s, n=%s c=%s",k,chr.tounicode or k,description.index,description.name or '-',description.class or '-')
     --  end
         if tounicode then
-            local tu = tounicode[index]
+            local tu = tounicode[index] -- nb: index!
             if tu then
                 chr.tounicode = tu
             end
@@ -528,6 +529,7 @@ function tfm.do_scale(tfmtable, scaledpoints)
     end
     -- needed for \high cum suis
     local tpx = tp.x_height
+if hasmath then
     if not tp[13] then tp[13] = .86*tpx end  -- mathsupdisplay
     if not tp[14] then tp[14] = .86*tpx end  -- mathsupnormal
     if not tp[15] then tp[15] = .86*tpx end  -- mathsupcramped
@@ -535,11 +537,22 @@ function tfm.do_scale(tfmtable, scaledpoints)
     if not tp[17] then tp[17] = .48*tpx end  -- mathsubcombined
     if not tp[22] then tp[22] =   0     end  -- mathaxisheight
     if t.MathConstants then t.MathConstants.AccentBaseHeight = nil end -- safeguard
+end
     t.tounicode = 1
     t.cidinfo = tfmtable.cidinfo
     -- we have t.name=metricfile and t.fullname=RealName and t.filename=diskfilename
     -- when collapsing fonts, luatex looks as both t.name and t.fullname as ttc files
     -- can have multiple subfonts
+    if hasmath then
+        if trace_defining then
+            logs.report("define font","math enabled for: %s %s %s",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
+        end
+    else
+        if trace_defining then
+            logs.report("define font","math disabled for: %s %s %s",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
+        end
+        t.nomath, t.MathConstants = true, nil
+    end
     return t, delta
 end
 
@@ -714,7 +727,7 @@ function tfm.set_features(tfmdata)
                         local value = features[f]
                         if value and fi.tfm[f] then -- brr
                             if tfm.trace_features then
-                                logs.report("define tfm","initializing feature %s to %s for mode %s for font %s",f,tostring(value),mode or 'unknown',tfmdata.name or 'unknown')
+                                logs.report("define font","initializing feature %s to %s for mode %s for font %s",f,tostring(value),mode or 'unknown',tfmdata.name or 'unknown')
                             end
                             fi.tfm[f](tfmdata,value)
                             mode = tfmdata.mode or fonts.mode

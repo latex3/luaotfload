@@ -114,7 +114,7 @@ end
 
 function nodes.trace_injection(head)
     local function dir(n)
-        return (n<0 and "r-to-l") or (n>0 and "l-to-r") or ("unset")
+        return (n and n<0 and "r-to-l") or (n and n>0 and "l-to-r") or ("unset")
     end
     local function report(...)
         logs.report("nodes finisher",...)
@@ -132,9 +132,9 @@ function nodes.trace_injection(head)
             if kp then
                 local k = kerns[kp]
                 if k[3] then
-                    report("  pairkern: dir=%s, x=%s, y=%s, w=%s, h=%s",dir(k[1]),k[2],k[3],k[4],k[5])
+                    report("  pairkern: dir=%s, x=%s, y=%s, w=%s, h=%s",dir(k[1]),k[2] or "?",k[3] or "?",k[4] or "?",k[5] or "?")
                 else
-                    report("  kern: dir=%s, dx=%s",dir(k[1]),k[2])
+                    report("  kern: dir=%s, dx=%s",dir(k[1]),k[2] or "?")
                 end
             end
             if mb then
@@ -145,13 +145,13 @@ function nodes.trace_injection(head)
                 if mb then
                     local m = m[mb]
                     if m then
-                        report("  markmark: bound=%s, index=%s, dx=%s, dy=%s",mm,j,m[1],m[2])
+                        report("  markmark: bound=%s, index=%s, dx=%s, dy=%s",mm,md or "?",m[1] or "?",m[2] or "?")
                     else
                         report("  markmark: bound=%s, missing index",mm)
                     end
                 else
                     m = m[1]
-                    report("  markmark: bound=%s, dx=%s, dy=%s",mm,m[1],m[2])
+                    report("  markmark: bound=%s, dx=%s, dy=%s",mm,m[1] or "?",m[2] or "?")
                 end
             end
             if cb then
@@ -159,7 +159,7 @@ function nodes.trace_injection(head)
             end
             if cc then
                 local c = cursives[cc]
-                report("  curscurs: bound=%s, dir=%s, dx=%s, dy=%s",cc,dir(c[1]),c[2],c[3])
+                report("  curscurs: bound=%s, dir=%s, dx=%s, dy=%s",cc,dir(c[1]),c[2] or "?",c[3] or "?")
             end
         end
     end
@@ -168,18 +168,24 @@ end
 
 -- todo: reuse tables (i.e. no collection), but will be extra fields anyway
 
-function nodes.inject_kerns(head,tail,where,keep)
-    if trace_injections then
-        nodes.trace_injection(head)
-    end
+function nodes.inject_kerns(head,where,keep)
     local has_marks, has_cursives, has_kerns = next(marks), next(cursives), next(kerns)
     if has_marks or has_cursives then
+        if trace_injections then
+            nodes.trace_injection(head)
+        end
         -- in the future variant we will not copy items but refs to tables
-        local done, ky, rl, valid, cx, wx = false, { }, { }, { }, { }, { }
+        local done, ky, rl, valid, cx, wx, mk = false, { }, { }, { }, { }, { }, { }
         if has_kerns then -- move outside loop
+            local nf, tm = nil, nil
             for n in traverse_id(glyph,head) do
                 if n.subtype < 256 then
                     valid[#valid+1] = n
+                    if n.font ~= nf then
+                        nf = n.font
+                        tm = fontdata[nf].marks
+                    end
+                    mk[n] = tm[n.char]
                     local k = has_attribute(n,kernpair)
                     if k then
                         local kk = kerns[k]
@@ -198,9 +204,15 @@ function nodes.inject_kerns(head,tail,where,keep)
                 end
             end
         else
+            local nf, tm = nil, nil
             for n in traverse_id(glyph,head) do
                 if n.subtype < 256 then
                     valid[#valid+1] = n
+                    if n.font ~= nf then
+                        nf = n.font
+                        tm = fontdata[nf].marks
+                    end
+                    mk[n] = tm[n.char]
                 end
             end
         end
@@ -214,22 +226,15 @@ function nodes.inject_kerns(head,tail,where,keep)
             end
             -- todo: reuse t and use maxt
             if has_cursives then
-                local n_cursbase, n_curscurs, p_cursbase, n, p, nf, tm = nil, nil, nil, nil, nil, nil, nil
+                local p_cursbase, p = nil, nil
                 -- since we need valid[n+1] we can also use a "while true do"
                 local t, d, maxt = { }, { }, 0
                 for i=1,#valid do -- valid == glyphs
-                    n = valid[i]
-                    if n.font ~= nf then
-                        nf = n.font
---~ print(n.font,nf,fontdata[nf])
-                        tm = fontdata[nf].marks
-                        -- maybe flush
-                        maxt = 0
-                    end
-                    if not tm[n.char] then
-                        n_cursbase = has_attribute(n,cursbase)
-                        n_curscurs = has_attribute(n,curscurs)
+                    local n = valid[i]
+                    if not mk[n] then
+                        local n_cursbase = has_attribute(n,cursbase)
                         if p_cursbase then
+                            local n_curscurs = has_attribute(n,curscurs)
                             if p_cursbase == n_curscurs then
                                 local c = cursives[n_curscurs]
                                 if c then
@@ -257,7 +262,8 @@ function nodes.inject_kerns(head,tail,where,keep)
                             local ny = n.yoffset
                             for i=maxt,1,-1 do
                                 ny = ny + d[i]
-                                t[i].yoffset = t[i].yoffset + ny
+                                local ti = t[i]
+                                ti.yoffset = ti.yoffset + ny
                             end
                             maxt = 0
                         end
@@ -265,7 +271,8 @@ function nodes.inject_kerns(head,tail,where,keep)
                             local ny = n.yoffset
                             for i=maxt,1,-1 do
                                 ny = ny + d[i]
-                                t[i].yoffset = ny
+                                local ti = t[i]
+                                ti.yoffset = ny
                             end
                             maxt = 0
                         end
@@ -276,7 +283,8 @@ function nodes.inject_kerns(head,tail,where,keep)
                     local ny = n.yoffset
                     for i=maxt,1,-1 do
                         ny = ny + d[i]
-                        t[i].yoffset = ny
+                        local ti = t[i]
+                        ti.yoffset = ny
                     end
                     maxt = 0
                 end
@@ -285,14 +293,13 @@ function nodes.inject_kerns(head,tail,where,keep)
                 end
             end
             if has_marks then
-                local p_markbase, n_markmark = nil, nil
                 for i=1,#valid do
                     local p = valid[i]
-                    p_markbase = has_attribute(p,markbase)
+                    local p_markbase = has_attribute(p,markbase)
                     if p_markbase then
                         local mrks = marks[p_markbase]
                         for n in traverse_id(glyph,p.next) do
-                            n_markmark = has_attribute(n,markmark)
+                            local n_markmark = has_attribute(n,markmark)
                             if p_markbase == n_markmark then
                                 local index = has_attribute(n,markdone) or 1
                                 local d = mrks[index]
@@ -301,9 +308,17 @@ function nodes.inject_kerns(head,tail,where,keep)
                                 --  if rlmode and rlmode < 0 then
                                 --      n.xoffset = p.xoffset + d[1]
                                 --  else
-                                        n.xoffset = p.xoffset - d[1]
+                                         n.xoffset = p.xoffset - d[1]
+--~ local k = wx[p]
+--~ if k then
+--~     wx[n] = k
+--~ end
                                 --  end
-                                    n.yoffset = p.yoffset + d[2]
+                                    if mk[p] then
+                                        n.yoffset = p.yoffset + d[2]
+                                    else
+                                        n.yoffset = n.yoffset + p.yoffset + d[2]
+                                    end
                                 end
                             else
                                 break
@@ -358,6 +373,9 @@ function nodes.inject_kerns(head,tail,where,keep)
             kerns, cursives, marks = { }, { }, { }
         end
     elseif has_kerns then
+        if trace_injections then
+            nodes.trace_injection(head)
+        end
         -- we assume done is true because there are kerns
         for n in traverse_id(glyph,head) do
             local k = has_attribute(n,kernpair)
@@ -392,224 +410,8 @@ function nodes.inject_kerns(head,tail,where,keep)
             kerns = { }
         end
         return head, true
-    end
-    return head, false
-end
-
--- -- -- KEEP OLD ONE, THE NEXT IS JUST OPTIMIZED -- -- --
-
-function nodes.XXXXXXXxinject_kerns(head,tail,keep)
-    if trace_injections then
-        nodes.trace_injection(head)
-    end
-    local has_marks, has_cursives, has_kerns = next(marks), next(cursives), next(kerns)
-    if has_marks or has_cursives then
-        -- in the future variant we will not copy items but refs to tables
-        local done, ky, valid, cx, wx = false, { }, { }, { }, { }
-        for n in traverse_id(glyph,head) do
-            if n.subtype < 256 then
-                valid[#valid+1] = n
-                if has_kerns then -- move outside loop
-                    local k = has_attribute(n,kernpair)
-                    if k then
-                        local kk = kerns[k]
-                        if kk then
-                            local x, y, w, h = kk[2], kk[3], kk[4], kk[5]
-                            local dy = y - h
-                            if dy ~= 0 then
-                                ky[n] = dy
-                            end
-                            if w ~= 0 or x ~= 0 then
-                                wx[n] = kk
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        if #valid > 0 then
-            -- we can assume done == true because we have cursives and marks
-            local cx = { }
-            if has_kerns and next(ky) then
-                for n, k in next, ky do
-                    n.yoffset = k
-                end
-            end
-            -- todo: reuse t and use maxt
-            if has_cursives then
-                local n_cursbase, n_curscurs, p_cursbase, n, p, nf, tm = nil, nil, nil, nil, nil, nil, nil
-                -- since we need valid[n+1] we can also use a "while true do"
-                local t, d, maxt = { }, { }, 0
-                for i=1,#valid do -- valid == glyphs
-                    n = valid[i]
-                    if n.font ~= nf then
-                        nf = n.font
-                        tm = fontdata[nf].marks
-                        -- maybe flush
-                        maxt = 0
-                    end
-                    if not tm[n.char] then
-                        n_cursbase = has_attribute(n,cursbase)
-                        n_curscurs = has_attribute(n,curscurs)
-                        if p_cursbase then
-                            if p_cursbase == n_curscurs then
-                                local c = cursives[n_curscurs]
-                                if c then
-                                    local rlmode, dx, dy, ws, wn = c[1], c[2], c[3], c[4], c[5]
-                                    if rlmode >= 0 then
-                                        dx = dx - ws
-                                    else
-                                        dx = dx + wn
-                                    end
-                                    if dx ~= 0 then
-if rlmode < 0 then
-                                        cx[n] = -dx
-else
-                                        cx[n] = dx
-end
-                                    end
-                                --  if rlmode and rlmode < 0 then
-                                        dy = -dy
-                                --  end
-                                    maxt = maxt + 1
-                                    t[maxt] = p
-                                    d[maxt] = dy
-                                else
-                                    maxt = 0
-                                end
-                            end
-                        elseif maxt > 0 then
-                            local ny = n.yoffset
-                            for i=maxt,1,-1 do
-                                ny = ny + d[i]
-                                t[i].yoffset = t[i].yoffset + ny
-                            end
-                            maxt = 0
-                        end
-                        if not n_cursbase and maxt > 0 then
-                            local ny = n.yoffset
-                            for i=maxt,1,-1 do
-                                ny = ny + d[i]
-                                t[i].yoffset = ny
-                            end
-                            maxt = 0
-                        end
-                        p_cursbase, p = n_cursbase, n
-                    end
-                end
-                if maxt > 0 then
-                    local ny = n.yoffset
-                    for i=maxt,1,-1 do
-                        ny = ny + d[i]
-                        t[i].yoffset = ny
-                    end
-                    maxt = 0
-                end
-                if not keep then
-                    cursives = { }
-                end
-            end
-            if has_marks then
-                local p_markbase, n_markmark = nil, nil
-                for i=1,#valid do
-                    local p = valid[i]
-                    p_markbase = has_attribute(p,markbase)
-                    if p_markbase then
-                        local mrks = marks[p_markbase]
-                        for n in traverse_id(glyph,p.next) do
-                            n_markmark = has_attribute(n,markmark)
-                            if p_markbase == n_markmark then
-                                local index = has_attribute(n,markdone) or 1
-                                local d = mrks[index]
-                                if d then
-                                    local d1, d2 = d[1], d[2]
-                                    if d1 ~= 0 then
-                                        n.xoffset = p.xoffset - d[1]
-                                    end
-                                    if d2 ~= 0 then
-                                        n.yoffset = p.yoffset + d[2]
-                                    end
-                                end
-                            else
-                                break
-                            end
-                        end
-                    end
-                end
-                if not keep then
-                    marks = { }
-                end
-            end
-            -- todo : combine
-            if next(wx) then
-                for n, k in next, wx do
-                 -- only w can be nil, can be sped up when w == nil
-                    local rl, x, w = k[1], k[2] or 0, k[4] or 0
-                    local wx = w - x
-                    if rl < 0 then
-                        if wx ~= 0 then
-                            insert_node_before(head,n,newkern(wx))
-                        end
-                        if x ~= 0 then
-                            insert_node_after (head,n,newkern(x))
-                        end
-                    else
-                    --  if wx ~= 0 then
-                    --      insert_node_after(head,n,newkern(wx))
-                    --  end
-                        if x ~= 0 then
-                            insert_node_before(head,n,newkern(x))
-                        end
-                    end
-                end
-            end
-            if next(cx) then
-                for n, k in next, cx do
-                    insert_node_before(head,n,newkern(k))
-                end
-            end
-            if not keep then
-                kerns = { }
-            end
-            return head, true
-        elseif not keep then
-            kerns, cursives, marks = { }, { }, { }
-        end
-    elseif has_kerns then
-        -- we assume done is true because there are kerns
-        for n in traverse_id(glyph,head) do
-            local k = has_attribute(n,kernpair)
-            if k then
-                local kk = kerns[k]
-                if kk then
-                 -- only w can be nil, can be sped up when w == nil
-                    local rl, x, y, w = kk[1], kk[2] or 0, kk[3] or 0, kk[4] or 0
-                    if y ~= 0 then
-                        n.yoffset = y -- todo: h ?
-                    end
-                    local wx = w - x
-                    if rl < 0 then
-                        if wx ~= 0 then
-                            insert_node_before(head,n,newkern(wx))
-                        end
-                        if x ~= 0 then
-                            insert_node_after (head,n,newkern(x))
-                        end
-                    else
-                    --  if wx ~= 0 then
-                    --      insert_node_after(head,n,newkern(wx))
-                    --  end
-                        if x ~= 0 then
-                            insert_node_before(head,n,newkern(x))
-                        end
-                    end
-                end
-            end
-        end
-        if not keep then
-            kerns = { }
-        end
-        return head, true
+    else
+        -- no tracing needed
     end
     return head, false
 end

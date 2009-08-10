@@ -162,9 +162,9 @@ and the derived files
 % algorithm, for instance we can improve the font loading system; this is what
 % we do in this package.
 %
-%This package is quite low-level, and should be loaded directly in the macro
-%package, like it is in Con\TeX t. Sadly, Plain and \LaTeX\ are frozen and
-%it's even impossible to adapt them to the new engines. 
+% This package is quite low-level, and should be loaded directly in the macro
+% package, like it is in Con\TeX t. Sadly, Plain and \LaTeX\ are frozen and
+% it's even impossible to adapt them to the new engines. 
 %
 % \subsection{Con\TeX t files needed}
 %
@@ -199,9 +199,18 @@ and the derived files
 % \item \texttt{font-otc.lua}
 % \item \texttt{font-def.lua}
 % \item \texttt{font-xtx.lua}
+% \item \texttt{font-map.lua}
 % \item \texttt{font-dum.lua}
 % \end{itemize}
 % 
+% \subsection{Troubleshooting}
+%
+% If you encounter problems with some fonts, please first update to the latest version of this package before reporting a bug, as this package is under active development.
+%
+% A very common problem is the lack of features for some otf fonts even when specified. It can be related to the fact that some fonts do not provide features for the |dflt| script, which is the default one in this package, so you may have to specify the script in the command line, for example:
+%
+% |\font\myfont = MyFont.otf:script=latn;+liga;|
+%
 % \section{\texttt{luaotfload.lua}}
 %
 % \iffalse
@@ -398,6 +407,7 @@ do
 end
 
 luaotfload.loadmodule('font-xtx.lua')
+luaotfload.loadmodule('font-map.lua')
 luaotfload.loadmodule('font-dum.lua')
 
 %    \end{macrocode}
@@ -415,8 +425,6 @@ fonts.enc.known = {}
 %    \begin{macrocode}
 
 function luaotfload.register_callbacks()
-    callback.add('ligaturing',           nodes.simple_font_dummy, 'luaotfload.ligaturing')
-    callback.add('kerning',              nodes.simple_font_dummy, 'luaotfload.kerning')
     callback.add('pre_linebreak_filter', nodes.simple_font_handler, 'luaotfload.pre_linebreak_filter')
     callback.add('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
     callback.reset('define_font')
@@ -424,8 +432,6 @@ function luaotfload.register_callbacks()
 end
 
 function luaotfload.unregister_callbacks()
-    callback.remove('ligaturing', 'luaotfload.ligaturing')
-    callback.remove('kerning', 'luaotfload.kerning')
     callback.remove('pre_linebreak_filter', 'luaotfload.pre_linebreak_filter')
     callback.remove('hpack_filter', 'luaotfload.hpack_filter')
     callback.remove('define_font', 'luaotfload.define_font')

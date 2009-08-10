@@ -27,6 +27,11 @@ fonts.mode    = 'base'
 fonts.private = 0xF0000 -- 0x10FFFF
 fonts.verbose = false -- more verbose cache tables
 
+fonts.ids[0] = { -- nullfont
+    characters   = { },
+    descriptions = { },
+}
+
 fonts.methods = fonts.methods or {
     base = { tfm = { }, afm = { }, otf = { }, vtf = { }, fix = { } },
     node = { tfm = { }, afm = { }, otf = { }, vtf = { }, fix = { }  },

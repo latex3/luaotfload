@@ -48,6 +48,7 @@ Source files:
         otfl-font-ott.lua                       .
         otfl-font-tfm.lua                       .
         otfl-font-xtx.lua                       .
+        otfl-font-map.lua                       .
         otfl-luat-dum.lua                       .
         otfl-node-dum.lua                       .
         otfl-node-fnt.lua                       .

@@ -150,7 +150,7 @@ trackers.register("*otf.sample","otf.steps,otf.actions,otf.analyzing")
 local insert_node_after = node.insert_after
 local delete_node       = nodes.delete
 local copy_node         = node.copy
-local slide_node_list   = node.slide
+local find_node_tail    = node.tail or node.slide
 local set_attribute     = node.set_attribute
 local has_attribute     = node.has_attribute
 
@@ -1905,7 +1905,7 @@ function fonts.methods.node.otf.features(head,font,attr)
                 local handler = handlers[typ]
                 local thecache = featuredata[typ] or { }
                 -- we need to get rid of this slide !
-                start = slide_node_list(head) -- slow (we can store tail because there's always a skip at the end): todo
+                start = find_node_tail(head) -- slow (we can store tail because there's always a skip at the end): todo
                 while start do
                     local id = start.id
                     if id == glyph then

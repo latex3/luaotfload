@@ -72,7 +72,7 @@ local function isfalse(s)   list[s]     = 'no' end
 local function iskey  (k,v) list[k]     = v end
 
 local spaces     = lpeg.P(" ")^0
-local namespec   = (1-lpeg.S("/: ("))^0
+local namespec   = (1-lpeg.S("/:("))^0 -- was: (1-lpeg.S("/: ("))^0
 local crapspec   = spaces * lpeg.P("/") * (((1-lpeg.P(":"))^0)/iscrap) * spaces
 local filename   = (lpeg.P("file:")/isfile * (namespec/thename)) + (lpeg.P("[") * lpeg.P(true)/isname * (((1-lpeg.P("]"))^0)/thename) * lpeg.P("]"))
 local fontname   = (lpeg.P("name:")/isname * (namespec/thename)) + lpeg.P(true)/issome * (namespec/thename)

@@ -8,17 +8,12 @@ if not modules then modules = { } end modules ['node-dum'] = {
 
 nodes = nodes or { }
 
-function nodes.simple_font_dummy(head,tail)
-    return tail
-end
-
 function nodes.simple_font_handler(head)
-    local tail = node.slide(head)
---  lang.hyphenate(head,tail)
-    head = nodes.process_characters(head,tail)
+--  lang.hyphenate(head)
+    head = nodes.process_characters(head)
     nodes.inject_kerns(head)
     nodes.protect_glyphs(head)
-    tail = node.ligaturing(head,tail)
-    tail = node.kerning(head,tail)
+    head = node.ligaturing(head)
+    head = node.kerning(head)
     return head
 end

@@ -93,6 +93,7 @@ local function locate(registry,ordering,supplement)
                     logs.report("load otf","using cidmap file %s",filename)
                 end
                 fonts.cid.map[filename] = cidmap
+                cidmap.usedname = file.basename(filename)
                 return cidmap
             end
         end

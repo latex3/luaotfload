@@ -7,7 +7,7 @@ if not modules then modules = { } end modules ['node-res'] = {
 }
 
 local gmatch, format = string.gmatch, string.format
-local copy_node, free_node, new_node = node.copy, node.free, node.new
+local copy_node, free_node, free_list, new_node = node.copy, node.free, node.flush_list, node.new
 
 --[[ldx--
 <p>The next function is not that much needed but in <l n='context'/> we use
@@ -51,7 +51,6 @@ function nodes.usage()
     return t
 end
 
-local pdfliteral = nodes.register(new_node("whatsit",8))   pdfliteral.mode = 1
 local disc       = nodes.register(new_node("disc"))
 local kern       = nodes.register(new_node("kern",1))
 local penalty    = nodes.register(new_node("penalty"))
@@ -60,6 +59,7 @@ local glue_spec  = nodes.register(new_node("glue_spec"))
 local glyph      = nodes.register(new_node("glyph",0))
 local textdir    = nodes.register(new_node("whatsit",7))
 local rule       = nodes.register(new_node("rule"))
+local latelua    = nodes.register(new_node("whatsit",35))
 
 function nodes.glyph(fnt,chr)
     local n = copy_node(glyph)
@@ -91,11 +91,6 @@ end
 function nodes.disc()
     return copy_node(disc)
 end
-function nodes.pdfliteral(str)
-    local t = copy_node(pdfliteral)
-    t.data = str
-    return t
-end
 function nodes.textdir(dir)
     local t = copy_node(textdir)
     t.dir = dir
@@ -106,6 +101,11 @@ function nodes.rule(w,h,d)
     if w then n.width  = w end
     if h then n.height = h end
     if d then n.depth  = d end
+    return n
+end
+function nodes.latelua(code)
+    local n = copy_node(latelua)
+    n.data = code
     return n
 end
 

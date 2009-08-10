@@ -328,21 +328,17 @@ evolved. Each one has its own way of dealing with its format.</p>
 --ldx]]--
 
 local function check_tfm(specification,fullname)
-    -- ofm directive blocks local path search unless set
-    fullname = resolvers.findbinfile(fullname, 'tfm') or "" -- just to be sure
-    if fullname ~= "" then
-        specification.filename, specification.format = fullname, "ofm"
+    -- ofm directive blocks local path search unless set; btw, in context we
+    -- don't support ofm files anyway as this format is obsolete
+    local foundname = resolvers.findbinfile(fullname, 'tfm') or "" -- just to be sure
+    if foundname == "" then
+        foundname = resolvers.findbinfile(fullname, 'ofm') or "" -- bonus for usage outside context
+    end
+    if foundname ~= "" then
+        specification.filename, specification.format = foundname, "ofm"
         return tfm.read_from_tfm(specification)
     end
 end
-
---~ local function check_afm(specification,fullname)
---~     fullname = resolvers.findbinfile(fullname, 'afm') or "" -- just to be sure
---~     if fullname ~= "" then
---~         specification.filename, specification.format = fullname, "afm"
---~         return tfm.read_from_afm(specification)
---~     end
---~ end
 
 local function check_afm(specification,fullname)
     local foundname = resolvers.findbinfile(fullname, 'afm') or "" -- just to be sure
@@ -440,9 +436,10 @@ function readers.opentype(specification,suffix,what)
     end
 end
 
-function readers.otf(specification) return readers.opentype(specification,"otf","opentype") end
-function readers.ttf(specification) return readers.opentype(specification,"ttf","truetype") end
-function readers.ttc(specification) return readers.opentype(specification,"ttf","truetype") end -- !!
+function readers.otf  (specification) return readers.opentype(specification,"otf","opentype") end
+function readers.ttf  (specification) return readers.opentype(specification,"ttf","truetype") end
+function readers.ttc  (specification) return readers.opentype(specification,"ttf","truetype") end -- !!
+function readers.dfont(specification) return readers.opentype(specification,"ttf","truetype") end -- !!
 
 --[[ldx--
 <p>We need to check for default features. For this we provide

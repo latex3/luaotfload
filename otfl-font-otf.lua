@@ -12,12 +12,13 @@ local concat, getn, utfbyte = table.concat, table.getn, utf.byte
 local format, gmatch, gsub, find, match, lower, strip = string.format, string.gmatch, string.gsub, string.find, string.match, string.lower, string.strip
 local type, next, tonumber, tostring = type, next, tonumber, tostring
 
-local trace_private   = false  trackers.register("otf.private",      function(v) trace_private      = v end)
-local trace_loading   = false  trackers.register("otf.loading",      function(v) trace_loading      = v end)
-local trace_features  = false  trackers.register("otf.features",     function(v) trace_features     = v end)
-local trace_dynamics  = false  trackers.register("otf.dynamics",     function(v) trace_dynamics     = v end)
-local trace_sequences = false  trackers.register("otf.sequences",    function(v) trace_sequences    = v end)
-local trace_math      = false  trackers.register("otf.math",         function(v) trace_math         = v end)
+local trace_private    = false  trackers.register("otf.private",      function(v) trace_private      = v end)
+local trace_loading    = false  trackers.register("otf.loading",      function(v) trace_loading      = v end)
+local trace_features   = false  trackers.register("otf.features",     function(v) trace_features     = v end)
+local trace_dynamics   = false  trackers.register("otf.dynamics",     function(v) trace_dynamics     = v end)
+local trace_sequences  = false  trackers.register("otf.sequences",    function(v) trace_sequences    = v end)
+local trace_math       = false  trackers.register("otf.math",         function(v) trace_math         = v end)
+local trace_unimapping = false  trackers.register("otf.unimapping",   function(v) trace_unimapping   = v end)
 
 --~ trackers.enable("otf.loading")
 
@@ -81,7 +82,7 @@ otf.features.default = otf.features.default or { }
 otf.enhancers        = otf.enhancers        or { }
 otf.glists           = { "gsub", "gpos" }
 
-otf.version          = 2.626 -- beware: also sync font-mis.lua
+otf.version          = 2.628 -- beware: also sync font-mis.lua
 otf.pack             = true  -- beware: also sync font-mis.lua
 otf.syncspace        = true
 otf.notdef           = false
@@ -464,15 +465,18 @@ otf.enhancers["analyse marks"] = function(data,filename)
     end
 end
 
-local other = lpeg.C((1 - lpeg.S("_."))^0)
-local ligsplitter = lpeg.Ct(other * (lpeg.P("_") * other)^0)
+local separator   = lpeg.S("_.")
+local other       = lpeg.C((1 - separator)^1)
+local ligsplitter = lpeg.Ct(other * (separator * other)^0)
 
---~ print(splitter:match("this"))
---~ print(splitter:match("this.that"))
---~ print(splitter:match("such_so_more"))
---~ print(splitter:match("such_so_more.that"))
+--~ print(table.serialize(ligsplitter:match("this")))
+--~ print(table.serialize(ligsplitter:match("this.that")))
+--~ print(table.serialize(ligsplitter:match("japan1.123")))
+--~ print(table.serialize(ligsplitter:match("such_so_more")))
+--~ print(table.serialize(ligsplitter:match("such_so_more.that")))
 
 otf.enhancers["analyse unicodes"] = function(data,filename)
+    local tounicode16, tounicode16sequence = fonts.map.tounicode16, fonts.map.tounicode16sequence
     local unicodes = data.luatex.unicodes
     -- we need to move this code
     unicodes['space']  = unicodes['space']  or 32   -- handly later on
@@ -482,52 +486,112 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
     -- the tounicode mapping is sparse and only needed for alternatives
     local tounicode, originals, ns, nl, private, unknown = { }, { }, 0, 0, fonts.private, format("%04X",utfbyte("?"))
     data.luatex.tounicode, data.luatex.originals = tounicode, originals
+    local lumunic, uparser, oparser
+    if false then -- will become an option
+        lumunic = fonts.map.load_lum_table(filename)
+        lumunic = lumunic and lumunic.tounicode
+    end
+    local cidinfo, cidnames, cidcodes = data.cidinfo
+    local usedmap = cidinfo and cidinfo.usedname
+    usedmap = usedmap and fonts.cid.map[usedmap]
+    if usedmap then
+        oparser = usedmap and fonts.map.make_name_parser(cidinfo.ordering)
+        cidnames = usedmap.names
+        cidcodes = usedmap.unicodes
+    end
+    uparser = fonts.map.make_name_parser()
     for index, glyph in next, data.glyphs do
         local name, unic = glyph.name, glyph.unicode or -1 -- play safe
         if unic == -1 or unic >= private or (unic >= 0xE000 and unic <= 0xF8FF) or unic == 0xFFFE or unic == 0xFFFF then
-            -- a.whatever or a_b_c.whatever or a_b_c
-            local split = ligsplitter:match(name)
-            if #split == 0 then
-                -- skip
-            elseif #split == 1 then
-                local u = unicodes[split[1]]
-                if u then
-                    if type(u) == "table" then
-                        u = u[1]
-                    end
-                    if u < 0x10000 then
-                        originals[index], tounicode[index] = u, format("%04X",u)
-                    else
-                        originals[index], tounicode[index] = u, format("%04X%04X",u/1024+0xD800,u%1024+0xDC00)
-                    end
-                    ns = ns + 1
-                else
-                    originals[index], tounicode[index] = 0xFFFD, "FFFD"
-                end
-            else
-                local as = { }
-                for l=1,#split do
-                    local u = unicodes[split[l]]
-                    if not u then
-                        as[l], split[l] = 0xFFFD, "FFFD"
-                    else
-                        if type(u) == "table" then
-                            u = u[1]
+            local unicode = lumunic and lumunic[name]
+            if unicode then
+                originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
+            end
+            -- cidmap heuristics, beware, there is no guarantee for a match unless
+            -- the chain resolves
+            if not unicode and usedmap then
+                local foundindex = oparser:match(name)
+                if foundindex then
+                    unicode = cidcodes[foundindex] -- name to number
+                    if not unicode then
+                        local reference = cidnames[foundindex] -- number to name
+                        if reference then
+                            local foundindex = oparser:match(reference)
+                            if foundindex then
+                                unicode = cidcodes[foundindex]
+                                if unicode then
+                                    originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
+                                end
+                            end
+                            if not unicode then
+                                local foundcodes, multiple = uparser:match(reference)
+                                if foundcodes then
+                                    if multiple then
+                                        originals[index], tounicode[index], nl, unicode = foundcodes, tounicode16sequence(foundcodes), nl + 1, true
+                                    else
+                                        originals[index], tounicode[index], ns, unicode = foundcodes, tounicode16(foundcodes), ns + 1, foundcodes
+                                    end
+                                end
+                            end
                         end
-                        if u < 0x10000 then
-                            as[l], split[l] = u, format("%04X",u)
+                    end
+                end
+            end
+            -- a.whatever or a_b_c.whatever or a_b_c (no numbers)
+            if not unicode then
+                local split = ligsplitter:match(name)
+                local nplit = (split and #split) or 0
+                if nplit == 0 then
+                    -- skip
+                elseif nplit == 1 then
+                    unicode = unicodes[split[1]]
+                    if unicode then
+                        if type(unicode) == "table" then
+                            unicode = unicode[1]
+                        end
+                        originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
+                    end
+                else
+                    local done = true
+                    for l=1,nplit do
+                        local u = unicodes[split[l]]
+                        if not u then
+                            done = false
+                            break
+                        elseif type(u) == "table" then
+                            split[l] = u[1]
                         else
-                            as[l], split[l] = u, format("%04X%04X",u/1024+0xD800,u%1024+0xDC00)
+                            split[l] = u
                         end
                     end
+                    if done then
+                        originals[index], tounicode[index], nl, unicode = split, tounicode16sequence(split), nl + 1, true
+                    end
                 end
-                split = concat(split)
-                if split ~= "" then
-                    originals[index], tounicode[index] = as, split
-                    nl = nl + 1
-                else
-                    originals[index], tounicode[index] = 0xFFFD, "FFFD"
+            end
+            -- last resort
+            if not unicode then
+                local foundcodes, multiple = uparser:match(name)
+                if foundcodes then
+                    if multiple then
+                        originals[index], tounicode[index], nl, unicode = foundcodes, tounicode16sequence(foundcodes), nl + 1, true
+                    else
+                        originals[index], tounicode[index], ns, unicode = foundcodes, tounicode16(foundcodes), ns + 1, foundcodes
+                    end
                 end
+            end
+            if not unicode then
+                originals[index], tounicode[index] = 0xFFFD, "FFFD"
+            end
+        end
+    end
+    if trace_unimapping then
+        for index, glyph in table.sortedpairs(data.glyphs) do
+            local toun, name, unic = tounicode[index], glyph.name, glyph.unicode or -1 -- play safe
+            if toun then
+                logs.report("load otf","internal: 0x%05X, name: %s, unicode: 0x%05X, tounicode: %s",index,name,unic,toun)
+            else
+                logs.report("load otf","internal: 0x%05X, name: %s, unicode: 0x%05X",index,name,unic)
             end
         end
     end
@@ -546,16 +610,14 @@ otf.enhancers["analyse subtables"] = function(data,filename)
     for _, g in next, { data.gsub, data.gpos } do
         for k=1,#g do
             local gk = g[k]
-
-local typ = gk.type
-if typ == "gsub_contextchain" or typ == "gpos_contextchain" then
-    gk.chain = 1
-elseif typ == "gsub_reversecontextchain" or typ == "gpos_reversecontextchain" then
-    gk.chain = -1
-else
-    gk.chain = 0
-end
-
+            local typ = gk.type
+            if typ == "gsub_contextchain" or typ == "gpos_contextchain" then
+                gk.chain = 1
+            elseif typ == "gsub_reversecontextchain" or typ == "gpos_reversecontextchain" then
+                gk.chain = -1
+            else
+                gk.chain = 0
+            end
             local features = gk.features
             if features then
                 sequences[#sequences+1] = gk
@@ -610,8 +672,9 @@ otf.enhancers["merge cid fonts"] = function(data,filename)
         local cidinfo = data.cidinfo
         local verbose = fonts.verbose
         if cidinfo.registry then
-            local cidmap = fonts.cid.getmap and fonts.cid.getmap(cidinfo.registry,cidinfo.ordering,cidinfo.supplement)
+            local cidmap, cidname = fonts.cid.getmap(cidinfo.registry,cidinfo.ordering,cidinfo.supplement)
             if cidmap then
+                cidinfo.usedname = cidmap.usedname
                 local glyphs, uni_to_int, int_to_uni, nofnames, nofunicodes = { }, { }, { }, 0, 0
                 local unicodes, names = cidmap.unicodes, cidmap.names
                 for n, subfont in next, data.subfonts do
@@ -1343,7 +1406,7 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
         }
         -- indices maps from unicodes to indices
         for u, i in next, indices do
-            characters[u] = { } -- we need this because for instance we add protruding info
+            characters[u] = { } -- we need this because for instance we add protruding info and loop over characters
             descriptions[u] = glyphs[i]
         end
         -- math

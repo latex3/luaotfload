@@ -110,7 +110,6 @@ local whatsit = node.id('whatsit')
 
 local traverse_id = node.traverse_id
 local traverse    = node.traverse
-local slide_nodes = node.slide
 local free_node   = node.free
 local remove_node = node.remove
 
@@ -132,10 +131,10 @@ function nodes.delete(head,current)
     return nodes.remove(head,current,true)
 end
 
-nodes.before = node.insert_before -- broken
+nodes.before = node.insert_before
 nodes.after  = node.insert_after
 
--- we need to test this, as it might be fixed
+-- we need to test this, as it might be fixed now
 
 function nodes.before(h,c,n)
     if c then

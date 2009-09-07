@@ -428,13 +428,15 @@ function luaotfload.register_callbacks()
     callback.add('pre_linebreak_filter', nodes.simple_font_handler, 'luaotfload.pre_linebreak_filter')
     callback.add('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
     callback.reset('define_font')
-    callback.add('define_font' ,         fonts.define.read, 'luaotfload.define_font', 1)
+    callback.add('define_font', fonts.define.read, 'luaotfload.define_font', 1)
+    callback.add('find_vf_file', fonts.vf.find, 'luaotfload.find_vf_file')
 end
 
 function luaotfload.unregister_callbacks()
     callback.remove('pre_linebreak_filter', 'luaotfload.pre_linebreak_filter')
     callback.remove('hpack_filter', 'luaotfload.hpack_filter')
     callback.remove('define_font', 'luaotfload.define_font')
+    callback.remove('find_vf_file', 'luaotfload.find_vf_file')
 end
 %    \end{macrocode}
 % \iffalse

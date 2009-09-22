@@ -34,7 +34,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload 2009/09/10 v1.04 ConTeXt font loading system}
+\Msg{* Package: luaotfload 2009/09/22 v1.04 ConTeXt font loading system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -100,7 +100,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaminimalotf.drv}%
-  [2009/09/10 v1.04 ConTeXt font loading system]%
+  [2009/09/22 v1.04 ConTeXt font loading system]%
 \documentclass{ltxdoc}
 \EnableCrossrefs
 \CodelineIndex
@@ -131,7 +131,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \textsf{luaotfload} package}
-% \date{2009/09/10 v1.04}
+% \date{2009/09/22 v1.04}
 % \author{Elie Roux \\ \texttt{elie.roux@telecom-bretagne.eu}}
 %
 % \maketitle
@@ -225,7 +225,7 @@ luaotfload          = { }
 luaotfload.module = {
     name          = "luaotfload",
     version       = 1.04,
-    date          = "2009/09/10",
+    date          = "2009/09/22",
     description   = "ConTeXt font loading system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -475,7 +475,7 @@ end
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2009/09/10 v1.04 ConTeXt font loading system]
+    [2009/09/22 v1.04 ConTeXt font loading system]
   \RequirePackage{luatextra}
 \fi
 
@@ -492,15 +492,15 @@ end
 %
 %    \begin{macrocode}
 
-\newluaattribute\otfl@state
-\newluaattribute\otfl@markbase
-\newluaattribute\otfl@markdone
-\newluaattribute\otfl@markmark
-\newluaattribute\otfl@cursbase
-\newluaattribute\otfl@curscurs
-\newluaattribute\otfl@cursdone
-\newluaattribute\otfl@kernpair
-\newluaattribute\otfl@color
+\newluatexattribute\otfl@state
+\newluatexattribute\otfl@markbase
+\newluatexattribute\otfl@markdone
+\newluatexattribute\otfl@markmark
+\newluatexattribute\otfl@cursbase
+\newluatexattribute\otfl@curscurs
+\newluatexattribute\otfl@cursdone
+\newluatexattribute\otfl@kernpair
+\newluatexattribute\otfl@color
 
 %    \end{macrocode}
 %
@@ -523,7 +523,7 @@ end
 %
 %    \begin{macrocode}
 
-\luaUseModule{luaotfload}
+\luatexUseModule{luaotfload}
 
 \otfl@on
 

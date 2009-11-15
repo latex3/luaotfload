@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['font-def'] = {
     version   = 1.001,
-    comment   = "companion to font-ini.tex",
+    comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
@@ -9,7 +9,8 @@ if not modules then modules = { } end modules ['font-def'] = {
 local format, concat, gmatch, match, find, lower = string.format, table.concat, string.gmatch, string.match, string.find, string.lower
 local tostring, next = tostring, next
 
-local trace_defining = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
+local trace_defining     = false  trackers  .register("fonts.defining", function(v) trace_defining     = v end)
+local directive_embedall = false  directives.register("fonts.embedall", function(v) directive_embedall = v end)
 
 trackers.register("fonts.loading", "fonts.defining", "otf.loading", "afm.loading", "tfm.loading")
 trackers.register("fonts.all", "fonts.*", "otf.*", "afm.*", "tfm.*")
@@ -77,19 +78,34 @@ and prepares a table that will move along as we proceed.</p>
 
 local splitter, specifiers = nil, ""
 
+local P, C, S, Cc = lpeg.P, lpeg.C, lpeg.S, lpeg.Cc
+
+local left  = P("(")
+local right = P(")")
+local colon = P(":")
+local space = P(" ")
+
+define.defaultlookup = "file"
+
+local prefixpattern  = P(false)
+
 function define.add_specifier(symbol)
     specifiers = specifiers .. symbol
-    local left          = lpeg.P("(")
-    local right         = lpeg.P(")")
-    local colon         = lpeg.P(":")
-    local method        = lpeg.S(specifiers)
-    local lookup        = lpeg.C(lpeg.P("file")+lpeg.P("name")) * colon -- hard test, else problems with : method
-    local sub           = left * lpeg.C(lpeg.P(1-left-right-method)^1) * right
---~   local specification = lpeg.C(method) * lpeg.C(lpeg.P(1-method)^1)
-    local specification = lpeg.C(method) * lpeg.C(lpeg.P(1)^1)
-    local name          = lpeg.C((1-sub-specification)^1)
-    splitter = lpeg.P((lookup + lpeg.Cc("")) * name * (sub + lpeg.Cc("")) * (specification + lpeg.Cc("")))
+    local method        = S(specifiers)
+    local lookup        = C(prefixpattern) * colon
+    local sub           = left * C(P(1-left-right-method)^1) * right
+    local specification = C(method) * C(P(1)^1)
+    local name          = C((1-sub-specification)^1)
+    splitter = P((lookup + Cc("")) * name * (sub + Cc("")) * (specification + Cc("")))
 end
+
+function define.add_lookup(str,default)
+    prefixpattern = prefixpattern + P(str)
+end
+
+define.add_lookup("file")
+define.add_lookup("name")
+define.add_lookup("spec")
 
 function define.get_specification(str)
     return splitter:match(str)
@@ -111,8 +127,8 @@ function define.makespecification(specification, lookup, name, sub, method, deta
 --~         lookup = specification.lookup -- can come from xetex [] syntax
 --~         specification.lookup = nil
 --~     end
-    if lookup ~= 'name' then -- for the moment only two lookups, maybe some day also system:
-        lookup = 'file'
+    if not lookup or lookup == "" then
+        lookup = define.defaultlookup
     end
     local t = {
         lookup        = lookup,        -- forced type
@@ -132,7 +148,7 @@ end
 function define.analyze(specification, size)
     -- can be optimized with locals
     local lookup, name, sub, method, detail = define.get_specification(specification or "")
-    return define.makespecification(specification,lookup, name, sub, method, detail, size)
+    return define.makespecification(specification, lookup, name, sub, method, detail, size)
 end
 
 --[[ldx--
@@ -214,17 +230,44 @@ end
 <p>We can resolve the filename using the next function:</p>
 --ldx]]--
 
+define.resolvers = resolvers
+
+function define.resolvers.file(specification)
+    specification.forced = file.extname(specification.name)
+    specification.name = file.removesuffix(specification.name)
+end
+
+function define.resolvers.name(specification)
+    local resolve = fonts.names.resolve
+    if resolve then
+        specification.resolved, specification.sub = fonts.names.resolve(specification.name,specification.sub)
+        if specification.resolved then
+            specification.forced = file.extname(specification.resolved)
+            specification.name = file.removesuffix(specification.resolved)
+        end
+    else
+        define.resolvers.file(specification)
+    end
+end
+
+function define.resolvers.spec(specification)
+    local resolvespec = fonts.names.resolvespec
+    if resolvespec then
+        specification.resolved, specification.sub = fonts.names.resolvespec(specification.name,specification.sub)
+        if specification.resolved then
+            specification.forced = file.extname(specification.resolved)
+            specification.name = file.removesuffix(specification.resolved)
+        end
+    else
+        define.resolvers.name(specification)
+    end
+end
+
 function define.resolve(specification)
     if not specification.resolved or specification.resolved == "" then -- resolved itself not per se in mapping hash
-        if specification.lookup == 'name' then
-            specification.resolved, specification.sub = fonts.names.resolve(specification.name,specification.sub)
-            if specification.resolved then
-                specification.forced = file.extname(specification.resolved)
-                specification.name = file.removesuffix(specification.resolved)
-            end
-        elseif specification.lookup == 'file' then
-            specification.forced = file.extname(specification.name)
-            specification.name = file.removesuffix(specification.name)
+        local r = define.resolvers[specification.lookup]
+        if r then
+            r(specification)
         end
     end
     if specification.forced == "" then
@@ -232,7 +275,6 @@ function define.resolve(specification)
     else
         specification.forced = specification.forced
     end
---~     specification.hash = specification.name .. ' @ ' .. tfm.hash_features(specification)
     specification.hash = lower(specification.name .. ' @ ' .. tfm.hash_features(specification))
     if specification.sub and specification.sub ~= "" then
         specification.hash = specification.sub .. ' @ ' .. specification.hash
@@ -271,15 +313,21 @@ function tfm.read(specification)
                 local reader = sequence[s]
                 if readers[reader] then -- not really needed
                     if trace_defining then
-                        logs.report("define font","trying type %s for %s with file %s",reader,specification.name,specification.filename or "unknown")
+                        logs.report("define font","trying (sequence driven) type %s for %s with file %s",reader,specification.name,specification.filename or "unknown")
                     end
                     tfmtable = readers[reader](specification)
-                    if tfmtable then break end
+                    if tfmtable then
+                        break
+                    else
+                        specification.filename = nil
+                    end
                 end
             end
         end
         if tfmtable then
-            if tfmtable.filename and fonts.dontembed[tfmtable.filename] then
+            if directive_embedall then
+                tfmtable.embedding = "full"
+            elseif tfmtable.filename and fonts.dontembed[tfmtable.filename] then
                 tfmtable.embedding = "no"
             else
                 tfmtable.embedding = "subset"
@@ -402,16 +450,22 @@ function readers.afm(specification,method)
     return tfmtable
 end
 
-local function check_otf(specification,suffix,what)
-    local fullname, tfmtable = resolvers.findbinfile(specification.name,suffix) or "", nil
+-- maybe some day a set of names
+
+local function check_otf(forced,specification,suffix,what)
+    local name = specification.name
+    if forced then
+        name = file.addsuffix(name,suffix)
+    end
+    local fullname, tfmtable = resolvers.findbinfile(name,suffix) or "", nil -- one shot
     if fullname == "" then
-        local fb = fonts.names.old_to_new[specification.name]
+        local fb = fonts.names.old_to_new[name]
         if fb then
             fullname = resolvers.findbinfile(fb,suffix) or ""
         end
     end
     if fullname == "" then
-        local fb = fonts.names.new_to_old[specification.name]
+        local fb = fonts.names.new_to_old[name]
         if fb then
             fullname = resolvers.findbinfile(fb,suffix) or ""
         end
@@ -426,13 +480,11 @@ end
 function readers.opentype(specification,suffix,what)
     local forced = specification.forced or ""
     if forced == "otf" then
-        return check_otf(specification,forced,"opentype")
-    elseif forced == "ttf" then
-        return check_otf(specification,forced,"truetype")
-    elseif forced == "ttf" then
-        return check_otf(specification,forced,"truetype")
+        return check_otf(true,specification,forced,"opentype")
+    elseif forced == "ttf" or forced == "ttc" or forced == "dfont" then
+        return check_otf(true,specification,forced,"truetype")
     else
-        return check_otf(specification,suffix,what)
+        return check_otf(false,specification,suffix,what)
     end
 end
 

@@ -219,7 +219,9 @@ function otf.name_to_slot(name) -- todo: afm en tfm
     if tfmdata and tfmdata.shared then
         local otfdata = tfmdata.shared.otfdata
         local unicode = otfdata.luatex.unicodes[name]
-        if type(unicode) == "number" then
+        if not unicode then
+            return string.byte("?") -- nil
+        elseif type(unicode) == "number" then
             return unicode
         else
             return unicode[1]

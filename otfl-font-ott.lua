@@ -87,7 +87,7 @@ otf.tables.scripts = {
     ['ugar'] = 'Ugaritic Cuneiform',
     ['xpeo'] = 'Old Persian Cuneiform',
     ['xsux'] = 'Sumero-Akkadian Cuneiform',
-    ['yi'  ] = 'Yi'
+    ['yi'  ] = 'Yi',
 }
 
 otf.tables.languages = {
@@ -569,6 +569,7 @@ otf.tables.features = {
     ['rphf'] = 'Reph Form',
     ['rtbd'] = 'Right Bounds',
     ['rtla'] = 'Right-To-Left Alternates',
+    ['rtlm'] = 'Right To Left Math', -- math
     ['ruby'] = 'Ruby Notation Forms',
     ['salt'] = 'Stylistic Alternates',
     ['sinf'] = 'Scientific Inferiors',

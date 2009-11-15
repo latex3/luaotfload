@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['font-otn'] = {
     version   = 1.001,
-    comment   = "companion to font-ini.tex",
+    comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
@@ -9,6 +9,8 @@ if not modules then modules = { } end modules ['font-otn'] = {
 -- this is still somewhat preliminary and it will get better in due time;
 -- much functionality could only be implemented thanks to the husayni font
 -- of Idris Samawi Hamid to who we dedicate this module.
+
+-- some day when we can jit this, we can use more functions
 
 -- we can use more lpegs when lpeg is extended with function args and so
 -- resolving to unicode does not gain much
@@ -136,6 +138,7 @@ local trace_bugs         = false  trackers.register("otf.bugs",         function
 local trace_details      = false  trackers.register("otf.details",      function(v) trace_details      = v end)
 local trace_applied      = false  trackers.register("otf.applied",      function(v) trace_applied      = v end)
 local trace_steps        = false  trackers.register("otf.steps",        function(v) trace_steps        = v end)
+local trace_skips        = false  trackers.register("otf.skips",        function(v) trace_skips        = v end)
 
 trackers.register("otf.verbose_chain", function(v) otf.setcontextchain(v and "verbose") end)
 trackers.register("otf.normal_chain",  function(v) otf.setcontextchain(v and "normal")  end)
@@ -301,16 +304,29 @@ end
 
 local function toligature(kind,lookupname,start,stop,char,markflag,discfound) -- brr head
     if start ~= stop then
+--~         if discfound then
+--~             local lignode = copy_node(start)
+--~             lignode.font = start.font
+--~             lignode.char = char
+--~             lignode.subtype = 2
+--~             start = node.do_ligature_n(start, stop, lignode)
+--~             if start.id == disc then
+--~                 local prev = start.prev
+--~                 start = start.next
+--~             end
         if discfound then
+         -- print("start->stop",nodes.tosequence(start,stop))
             local lignode = copy_node(start)
-            lignode.font = start.font
-            lignode.char = char
-            lignode.subtype = 2
-            start = node.do_ligature_n(start, stop, lignode)
-            if start.id == disc then
-                local prev = start.prev
-                start = start.next
+            lignode.font, lignode.char, lignode.subtype = start.font, char, 2
+            local next, prev = stop.next, start.prev
+            stop.next = nil
+            lignode = node.do_ligature_n(start, stop, lignode)
+            prev.next = lignode
+            if next then
+                next.prev = lignode
             end
+            lignode.next, lignode.prev = next, prev
+         -- print("start->end",nodes.tosequence(start))
         else -- start is the ligature
             local deletemarks = markflag ~= "mark"
             local n = copy_node(start)
@@ -385,16 +401,19 @@ local function alternative_glyph(start,alternatives,kind,chainname,chainlookupna
         value, choice = format("first, choice %s",1), alternatives[1]
     elseif value == "last" then
         value, choice = format("last, choice %s",n), alternatives[n]
-    elseif type(value) ~= "number" then
-        value, choice = "default, choice 1", alternatives[1]
-    elseif value > n then
-        value, choice = format("no %s variants, taking %s",value,n), alternatives[n]
-    elseif value == 0 then
-        value, choice = format("choice %s (no change)",value), start.char
-    elseif value < 1 then
-        value, choice = format("no %s variants, taking %s",value,1), alternatives[1]
     else
-        value, choice = format("choice %s",value), alternatives[value]
+        value = tonumber(value)
+        if type(value) ~= "number" then
+            value, choice = "default, choice 1", alternatives[1]
+        elseif value > n then
+            value, choice = format("no %s variants, taking %s",value,n), alternatives[n]
+        elseif value == 0 then
+            value, choice = format("choice %s (no change)",value), start.char
+        elseif value < 1 then
+            value, choice = format("no %s variants, taking %s",value,1), alternatives[1]
+        else
+            value, choice = format("choice %s",value), alternatives[value]
+        end
     end
     if not choice then
         logwarning("%s: no variant %s for %s",cref(kind,chainname,chainlookupname,lookupname),value,gref(start.char))
@@ -752,9 +771,9 @@ end
 
 function handlers.gpos_single(start,kind,lookupname,kerns,sequence)
     local startchar = start.char
-    local dx, dy = set_pair(start,tfmdata.factor,rlmode,kerns,characters[startchar])
+    local dx, dy, w, h = set_pair(start,tfmdata.factor,rlmode,sequence.flags[4],kerns,characters[startchar])
     if trace_kerns then
-        logprocess("%s: shifting single %s by (%s,%s)",pref(kind,lookupname),gref(startchar),dx,dy)
+        logprocess("%s: shifting single %s by (%s,%s) and correction (%s,%s)",pref(kind,lookupname),gref(startchar),dx,dy,w,h)
     end
     return start, false
 end
@@ -783,14 +802,14 @@ local krn = kerns[nextchar]
                         local a, b = krn[3], krn[4]
                         if a and #a > 0 then
                             local startchar = start.char
-                            local x, y, w, h = set_pair(start,factor,rlmode,a,characters[startchar])
+                            local x, y, w, h = set_pair(start,factor,rlmode,sequence.flags[4],a,characters[startchar])
                             if trace_kerns then
                                 logprocess("%s: shifting first of pair %s and %s by (%s,%s) and correction (%s,%s)",pref(kind,lookupname),gref(startchar),gref(nextchar),x,y,w,h)
                             end
                         end
                         if b and #b > 0 then
                             local startchar = start.char
-                            local x, y, w, h = set_pair(snext,factor,rlmode,b,characters[nextchar])
+                            local x, y, w, h = set_pair(snext,factor,rlmode,sequence.flags[4],b,characters[nextchar])
                             if trace_kerns then
                                 logprocess("%s: shifting second of pair %s and %s by (%s,%s) and correction (%s,%s)",pref(kind,lookupname),gref(startchar),gref(nextchar),x,y,w,h)
                             end
@@ -1404,7 +1423,7 @@ function chainprocs.gpos_cursive(start,stop,kind,chainname,currentcontext,cache,
     return start, false
 end
 
-function chainprocs.gpos_single(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname)
+function chainprocs.gpos_single(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,chainindex,sequence)
     -- untested
     local startchar = start.char
     local subtables = currentlookup.subtables
@@ -1413,9 +1432,9 @@ function chainprocs.gpos_single(start,stop,kind,chainname,currentcontext,cache,c
     if kerns then
         kerns = kerns[startchar]
         if kerns then
-            local dx, dy = set_pair(start,tfmdata.factor,rlmode,kerns,characters[startchar])
+            local dx, dy, w, h = set_pair(start,tfmdata.factor,rlmode,sequence.flags[4],kerns,characters[startchar])
             if trace_kerns then
-                logprocess("%s: shifting single %s by (%s,%s)",cref(kind,chainname,chainlookupname),gref(startchar),dx,dy)
+                logprocess("%s: shifting single %s by (%s,%s) and correction (%s,%s)",cref(kind,chainname,chainlookupname),gref(startchar),dx,dy,w,h)
             end
         end
     end
@@ -1424,7 +1443,7 @@ end
 
 -- when machines become faster i will make a shared function
 
-function chainprocs.gpos_pair(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname)
+function chainprocs.gpos_pair(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,chainindex,sequence)
 --    logwarning("%s: gpos_pair not yet supported",cref(kind,chainname,chainlookupname))
     local snext = start.next
     if snext then
@@ -1439,12 +1458,11 @@ function chainprocs.gpos_pair(start,stop,kind,chainname,currentcontext,cache,cur
                 local factor = tfmdata.factor
                 while snext and snext.id == glyph and snext.subtype<256 and snext.font == currentfont do
                     local nextchar = snext.char
-local krn = kerns[nextchar]
+                    local krn = kerns[nextchar]
                     if not krn and marks[nextchar] then
                         prev = snext
                         snext = snext.next
                     else
---~                         local krn = kerns[nextchar]
                         if not krn then
                             -- skip
                         elseif type(krn) == "table" then
@@ -1452,14 +1470,14 @@ local krn = kerns[nextchar]
                                 local a, b = krn[3], krn[4]
                                 if a and #a > 0 then
                                     local startchar = start.char
-                                    local x, y, w, h = set_pair(start,factor,rlmode,a,characters[startchar])
+                                    local x, y, w, h = set_pair(start,factor,rlmode,sequence.flags[4],a,characters[startchar])
                                     if trace_kerns then
                                         logprocess("%s: shifting first of pair %s and %s by (%s,%s) and correction (%s,%s)",cref(kind,chainname,chainlookupname),gref(startchar),gref(nextchar),x,y,w,h)
                                     end
                                 end
                                 if b and #b > 0 then
                                     local startchar = start.char
-                                    local x, y, w, h = set_pair(snext,factor,rlmode,b,characters[nextchar])
+                                    local x, y, w, h = set_pair(snext,factor,rlmode,sequence.flags[4],b,characters[nextchar])
                                     if trace_kerns then
                                         logprocess("%s: shifting second of pair %s and %s by (%s,%s) and correction (%s,%s)",cref(kind,chainname,chainlookupname),gref(startchar),gref(nextchar),x,y,w,h)
                                     end
@@ -1503,19 +1521,29 @@ end
 -- we don't need to pass the currentcontext, saves a bit
 -- make a slow variant then can be activated but with more tracing
 
+local function show_skip(kind,chainname,char,ck,class)
+    if ck[9] then
+        logwarning("%s: skipping char %s (%s) in rule %s, lookuptype %s (%s=>%s)",cref(kind,chainname),gref(char),class,ck[1],ck[2],ck[9],ck[10])
+    else
+        logwarning("%s: skipping char %s (%s) in rule %s, lookuptype %s",cref(kind,chainname),gref(char),class,ck[1],ck[2])
+    end
+end
+
 local function normal_handle_contextchain(start,kind,chainname,contexts,sequence,cache)
     --  local rule, lookuptype, sequence, f, l, lookups = ck[1], ck[2] ,ck[3], ck[4], ck[5], ck[6]
     local flags, done = sequence.flags, false
     local skipmark, skipligature, skipbase = flags[1], flags[2], flags[3]
     local someskip = skipmark or skipligature or skipbase -- could be stored in flags for a fast test (hm, flags could be false !)
+    local markclass = sequence.markclass -- todo, first we need a proper test
     for k=1,#contexts do
         local match, current, last = true, start, start
         local ck = contexts[k]
-        local sequence = ck[3]
-        local s = #sequence
+        local seq = ck[3]
+        local s = #seq
+        -- f..l = mid string
         if s == 1 then
             -- never happens
-            match = current.id == glyph and current.subtype<256 and current.font == currentfont and sequence[1][current.char]
+            match = current.id == glyph and current.subtype<256 and current.font == currentfont and seq[1][current.char]
         else
             -- todo: better space check (maybe check for glue)
             local f, l = ck[4], ck[5]
@@ -1529,7 +1557,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                 -- we cannot optimize for n=2 because there can be disc nodes
                 -- if not someskip and n == l then
                 --    -- n=2 and no skips then faster loop
-                --    match = last and last.id == glyph and last.subtype<256 and last.font == currentfont and sequence[n][last.char]
+                --    match = last and last.id == glyph and last.subtype<256 and last.font == currentfont and seq[n][last.char]
                 -- else
                     while n <= l do
                         if last then
@@ -1540,11 +1568,12 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                     local ccd = descriptions[char]
                                     if ccd then
                                         local class = ccd.class
-                                        if class == skipmark or class == skipligature or class == skipbase then
---~                                         if someskip and class == skipmark or class == skipligature or class == skipbase then
-                                            -- skip 'm
+                                        if class == skipmark or class == skipligature or class == skipbase or (markclass and class == "mark" and not markclass[char]) then
+                                            if trace_skips then
+                                                show_skip(kind,chainname,char,ck,class)
+                                            end
                                             last = last.next
-                                        elseif sequence[n][char] then
+                                        elseif seq[n][char] then
                                             if n < l then
                                                 last = last.next
                                             end
@@ -1570,6 +1599,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                 -- end
             end
             if match and f > 1 then
+                -- before
                 local prev = start.prev
                 if prev then
                     local n = f-1
@@ -1582,10 +1612,11 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                     local ccd = descriptions[char]
                                     if ccd then
                                         local class = ccd.class
-                                        if class == skipmark or class == skipligature or class == skipbase then
---~                                         if someskip and class == skipmark or class == skipligature or class == skipbase then
-                                            -- skip 'm
-                                        elseif sequence[n][char] then
+                                        if class == skipmark or class == skipligature or class == skipbase or (markclass and class == "mark" and not markclass[char]) then
+                                            if trace_skips then
+                                                show_skip(kind,chainname,char,ck,class)
+                                            end
+                                        elseif seq[n][char] then
                                             n = n -1
                                         else
                                             match = false break
@@ -1598,32 +1629,33 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                 end
                             elseif id == disc then
                                 -- skip 'm
-                            elseif sequence[n][32] then
+                            elseif seq[n][32] then
                                 n = n -1
                             else
                                 match = false break
                             end
                             prev = prev.prev
-                        elseif sequence[n][32] then
+                        elseif seq[n][32] then
                             n = n -1
                         else
                             match = false break
                         end
                     end
                 elseif f == 2 then
-                    match = sequence[1][32]
+                    match = seq[1][32]
                 else
                     for n=f-1,1 do
-                        if not sequence[n][32] then
+                        if not seq[n][32] then
                             match = false break
                         end
                     end
                 end
             end
             if match and s > l then
+                -- after
                 local current = last.next
                 if current then
-                    -- removed optimiziation for s-l == 1, we have to deal with marks anyway
+                    -- removed optimization for s-l == 1, we have to deal with marks anyway
                     local n = l + 1
                     while n <= s do
                         if current then
@@ -1634,10 +1666,11 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                     local ccd = descriptions[char]
                                     if ccd then
                                         local class = ccd.class
-                                        if class == skipmark or class == skipligature or class == skipbase then
---~                                         if someskip and class == skipmark or class == skipligature or class == skipbase then
-                                            -- skip 'm
-                                        elseif sequence[n][char] then
+                                        if class == skipmark or class == skipligature or class == skipbase or (markclass and class == "mark" and not markclass[char]) then
+                                            if trace_skips then
+                                                show_skip(kind,chainname,char,ck,class)
+                                            end
+                                        elseif seq[n][char] then
                                             n = n + 1
                                         else
                                             match = false break
@@ -1650,23 +1683,23 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                 end
                             elseif id == disc then
                                 -- skip 'm
-                            elseif sequence[n][32] then -- brrr
+                            elseif seq[n][32] then -- brrr
                                 n = n + 1
                             else
                                 match = false break
                             end
                             current = current.next
-                        elseif sequence[n][32] then
+                        elseif seq[n][32] then
                             n = n + 1
                         else
                             match = false break
                         end
                     end
                 elseif s-l == 1 then
-                    match = sequence[s][32]
+                    match = seq[s][32]
                 else
                     for n=l+1,s do
-                        if not sequence[n][32] then
+                        if not seq[n][32] then
                             match = false break
                         end
                     end
@@ -1676,7 +1709,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
         if match then
             -- ck == currentcontext
             if trace_contexts then
-                local rule, lookuptype, sequence, f, l = ck[1], ck[2] ,ck[3], ck[4], ck[5]
+                local rule, lookuptype, f, l = ck[1], ck[2], ck[4], ck[5]
                 local char = start.char
                 if ck[9] then
                     logwarning("%s: rule %s matches at char %s for (%s,%s,%s) chars, lookuptype %s (%s=>%s)",cref(kind,chainname),rule,gref(char),f-1,l-f+1,s-l,lookuptype,ck[9],ck[10])
@@ -1693,7 +1726,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                     local chainlookup = lookuptable[chainlookupname]
                     local cp = chainprocs[chainlookup.type]
                     if cp then
-                        start, done = cp(start,last,kind,chainname,ck,cache,chainlookup,chainlookupname)
+                        start, done = cp(start,last,kind,chainname,ck,cache,chainlookup,chainlookupname,nil,sequence)
                     else
                         logprocess("%s: %s is not yet supported",cref(kind,chainname,chainlookupname),chainlookup.type)
                     end
@@ -1706,7 +1739,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                         local cp = chainmores[chainlookup.type]
                         if cp then
                             local ok, n
-                            start, ok, n = cp(start,last,kind,chainname,ck,cache,chainlookup,chainlookupname,i)
+                            start, ok, n = cp(start,last,kind,chainname,ck,cache,chainlookup,chainlookupname,i,sequence)
                             -- messy since last can be changed !
                             if ok then
                                 done = true
@@ -1725,7 +1758,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
             else
                 local replacements = ck[7]
                 if replacements then
-                    start, done = chainprocs.reversesub(start,last,kind,chainname,ck,cache,replacements)
+                    start, done = chainprocs.reversesub(start,last,kind,chainname,ck,cache,replacements) -- sequence
                 else
                     done = true -- can be meant to be skipped
                     if trace_contexts then
@@ -1796,6 +1829,8 @@ local function report_missing_cache(typ,lookup)
 end
 
 local resolved = { } -- we only resolve a font,script,language pair once
+
+-- todo: pass all these 'locals' in a table
 
 function fonts.methods.node.otf.features(head,font,attr)
     if trace_steps then
@@ -1956,6 +1991,7 @@ function fonts.methods.node.otf.features(head,font,attr)
                                         -- sequence kan weg
                                         local ok
                                         start, ok = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,1)
+--~ texio.write_nl(tostring(lookupname),tostring(lookupmatch),tostring(ok))
                                         if ok then
                                             success = true
                                         end

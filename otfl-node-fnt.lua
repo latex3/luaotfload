@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['node-fnt'] = {
     version   = 1.001,
-    comment   = "companion to font-ini.tex",
+    comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
@@ -177,7 +177,6 @@ else do
     --                             X001 1010 = 26 = 0x1A = both boundaries lig
     --                             X000 1100 = 12 = 0x1C = leftghost
     --                             X001 0100 = 20 = 0x14 = rightghost
-
 
     function nodes.protect_glyphs(head)
         local done = false

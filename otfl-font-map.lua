@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['font-map'] = {
     version   = 1.001,
-    comment   = "companion to font-ini.tex",
+    comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
@@ -10,7 +10,7 @@ local match, format, find, concat = string.match, string.format, string.find, ta
 
 local trace_loading = false  trackers.register("otf.loading", function(v) trace_loading = v end)
 
-local ctxcatcodes = tex.ctxcatcodes
+local ctxcatcodes = tex and tex.ctxcatcodes
 
 --[[ldx--
 <p>Eventually this code will disappear because map files are kind
@@ -141,13 +141,15 @@ end
 
 local hex     = lpeg.R("AF","09")
 local hexfour = (hex*hex*hex*hex) / function(s) return tonumber(s,16) end
-local dec     = (lpeg.R("09")^1) / tonumber
+local hexsix  = (hex^1)           / function(s) return tonumber(s,16) end
+local dec     = (lpeg.R("09")^1)  / tonumber
 local period  = lpeg.P(".")
 
 local unicode = lpeg.P("uni")   * (hexfour * (period + lpeg.P(-1)) * lpeg.Cc(false) + lpeg.Ct(hexfour^1) * lpeg.Cc(true))
+local ucode   = lpeg.P("u")     * (hexsix  * (period + lpeg.P(-1)) * lpeg.Cc(false) + lpeg.Ct(hexsix ^1) * lpeg.Cc(true))
 local index   = lpeg.P("index") * dec * lpeg.Cc(false)
 
-local parser  = unicode + index
+local parser  = unicode + ucode + index
 
 local parsers = { }
 
@@ -165,10 +167,13 @@ function fonts.map.make_name_parser(str)
 end
 
 --~ local parser = fonts.map.make_name_parser("Japan1")
+--~ local parser = fonts.map.make_name_parser()
 --~ local function test(str)
 --~     local b, a = parser:match(str)
 --~     print((a and table.serialize(b)) or b)
 --~ end
+--~ test("a.sc")
+--~ test("a")
 --~ test("uni1234")
 --~ test("uni1234.xx")
 --~ test("uni12349876")

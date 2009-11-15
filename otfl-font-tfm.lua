@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['font-tfm'] = {
     version   = 1.001,
-    comment   = "companion to font-ini.tex",
+    comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
@@ -8,7 +8,7 @@ if not modules then modules = { } end modules ['font-tfm'] = {
 
 local utf = unicode.utf8
 
-local next, format, match, lower = next, string.format, string.match, string.lower
+local next, format, match, lower, gsub = next, string.format, string.match, string.lower, string.gsub
 local concat, sortedkeys, utfbyte, serialize = table.concat, table.sortedkeys, utf.byte, table.serialize
 
 local trace_defining = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
@@ -225,7 +225,7 @@ end
 local charactercache = { }
 
 -- The scaler is only used for otf and afm and virtual fonts. If
--- a virtual font has italic correction make sur eto set the
+-- a virtual font has italic correction make sure to set the
 -- has_italic flag. Some more flags will be added in the future.
 
 function tfm.do_scale(tfmtable, scaledpoints)
@@ -258,6 +258,9 @@ function tfm.do_scale(tfmtable, scaledpoints)
     t.unicodes = tfmtable.unicodes
     t.indices = tfmtable.indices
     t.marks = tfmtable.marks
+t.goodies = tfmtable.goodies
+t.colorscheme = tfmtable.colorscheme
+--~ t.embedding = tfmtable.embedding
     t.descriptions = descriptions
     if tfmtable.fonts then
         t.fonts = table.fastcopy(tfmtable.fonts) -- hm  also at the end
@@ -362,6 +365,7 @@ local private = fonts.private
             end
         end
         if hasquality then
+            -- we could move these calculations elsewhere (saves calculations)
             local ve = v.expansion_factor
             if ve then
                 chr.expansion_factor = ve*1000 -- expansionfactor, hm, can happen elsewhere
@@ -552,6 +556,13 @@ end
             logs.report("define font","math disabled for: %s %s %s",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
         end
         t.nomath, t.MathConstants = true, nil
+    end
+    -- fullname is used in the subsetting
+    if not t.psname then
+        t.psname = t.fullname -- else bad luck
+    end
+    if trace_defining then
+        logs.report("define font","used for subsetting: %s ",t.fullname or "nofullname")
     end
     return t, delta
 end

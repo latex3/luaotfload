@@ -131,7 +131,8 @@ local isol_fina = {
     [0x06D3] = true, [0x06D5] = true, [0x06EE] = true, [0x06EF] = true,
     [0x0759] = true, [0x075A] = true, [0x075B] = true, [0x076B] = true,
     [0x076C] = true, [0x0771] = true, [0x0773] = true, [0x0774] = true,
-    [0x0778] = true, [0x0779] = true,
+	[0x0778] = true, [0x0779] = true, [0xFEF5] = true, [0xFEF7] = true,
+	[0xFEF9] = true, [0xFEFB] = true,
 }
 
 local isol_fina_medi_init = {

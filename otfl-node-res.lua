@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['node-res'] = {
     version   = 1.001,
-    comment   = "companion to node-ini.tex",
+    comment   = "companion to node-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
@@ -60,6 +60,8 @@ local glyph      = nodes.register(new_node("glyph",0))
 local textdir    = nodes.register(new_node("whatsit",7))
 local rule       = nodes.register(new_node("rule"))
 local latelua    = nodes.register(new_node("whatsit",35))
+--~ local user       = nodes.register(new_node("user_defined"))
+local user       = nodes.register(new_node(44))
 
 function nodes.glyph(fnt,chr)
     local n = copy_node(glyph)
@@ -106,6 +108,31 @@ end
 function nodes.latelua(code)
     local n = copy_node(latelua)
     n.data = code
+    return n
+end
+
+function nodes.usernumber(num)
+    local n = copy_node(user)
+    n.type = 100
+    if num then n.value = num end
+    return n
+end
+function nodes.userstring(str)
+    local n = copy_node(user)
+    n.type = 115
+    if str then n.value = str end
+    return n
+end
+function nodes.userlist(list)
+    local n = copy_node(user)
+    n.type = 110
+    if list then n.value = list end
+    return n
+end
+function nodes.usertokens(tokens)
+    local n = copy_node(user)
+    n.type = 116
+    if tokens then n.value = tokens end
     return n
 end
 

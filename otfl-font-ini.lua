@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['font-ini'] = {
     version   = 1.001,
-    comment   = "companion to font-ini.tex",
+    comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
@@ -11,6 +11,8 @@ if not modules then modules = { } end modules ['font-ini'] = {
 --ldx]]--
 
 local utf = unicode.utf8
+local format, serialize = string.format, table.serialize
+local write_nl = texio.write_nl
 
 if not fontloader then fontloader = fontforge end
 
@@ -30,6 +32,7 @@ fonts.verbose = false -- more verbose cache tables
 fonts.ids[0] = { -- nullfont
     characters   = { },
     descriptions = { },
+    name         = "nullfont",
 }
 
 fonts.methods = fonts.methods or {
@@ -91,7 +94,24 @@ function fonts.show_char_data(n)
         end
         local chr = tfmdata.characters[n]
         if chr then
-            texio.write_nl(table.serialize(chr,string.format("U_%04X",n)))
+            write_nl(format("%s @ %s => U%04X => %s => ",tfmdata.fullname,tfmdata.size,n,utf.char(n)) .. serialize(chr,false))
+        end
+    end
+end
+
+function fonts.show_font_parameters()
+    local tfmdata = fonts.ids[font.current()]
+    if tfmdata then
+        local parameters, mathconstants = tfmdata.parameters, tfmdata.MathConstants
+        local hasparameters, hasmathconstants = parameters and next(parameters), mathconstants and next(mathconstants)
+        if hasparameters then
+            write_nl(format("%s @ %s => parameters => ",tfmdata.fullname,tfmdata.size) .. serialize(parameters,false))
+        end
+        if hasmathconstants then
+            write_nl(format("%s @ %s => math constants => ",tfmdata.fullname,tfmdata.size) .. serialize(mathconstants,false))
+        end
+        if not hasparameters and not hasmathconstants then
+            write_nl(format("%s @ %s => no parameters and/or mathconstants",tfmdata.fullname,tfmdata.size))
         end
     end
 end

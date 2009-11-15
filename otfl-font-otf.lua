@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['font-otf'] = {
     version   = 1.001,
-    comment   = "companion to font-ini.tex",
+    comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
@@ -19,6 +19,7 @@ local trace_dynamics   = false  trackers.register("otf.dynamics",     function(v
 local trace_sequences  = false  trackers.register("otf.sequences",    function(v) trace_sequences    = v end)
 local trace_math       = false  trackers.register("otf.math",         function(v) trace_math         = v end)
 local trace_unimapping = false  trackers.register("otf.unimapping",   function(v) trace_unimapping   = v end)
+local trace_defining   = false  trackers.register("fonts.defining",   function(v) trace_defining     = v end)
 
 --~ trackers.enable("otf.loading")
 
@@ -82,7 +83,7 @@ otf.features.default = otf.features.default or { }
 otf.enhancers        = otf.enhancers        or { }
 otf.glists           = { "gsub", "gpos" }
 
-otf.version          = 2.628 -- beware: also sync font-mis.lua
+otf.version          = 2.635 -- beware: also sync font-mis.lua
 otf.pack             = true  -- beware: also sync font-mis.lua
 otf.syncspace        = true
 otf.notdef           = false
@@ -104,6 +105,7 @@ otf.tables.global_fields = table.tohash {
     "names",
     "unicodes",
     "names",
+--~     "math",
     "anchor_classes",
     "kern_classes",
     "gpos",
@@ -202,6 +204,7 @@ local enhancers = {
     "patch bugs",
     "merge cid fonts", "prepare unicode", "cleanup ttf tables", "compact glyphs", "reverse coverage",
     "cleanup aat", "enrich with features", "add some missing characters",
+    "reorganize mark classes",
     "reorganize kerns", -- moved here
     "flatten glyph lookups", "flatten anchor tables", "flatten feature tables",
     "prepare luatex tables",
@@ -227,7 +230,7 @@ function otf.load(filename,format,sub,featurefile)
     local data = containers.read(otf.cache(), hash)
     local size = lfs.attributes(filename,"size") or 0
     if not data or data.verbose ~= fonts.verbose or data.size ~= size then
-        logs.report("load otf","loading: %s",filename)
+        logs.report("load otf","loading: %s (hash: %s)",filename,hash)
         local ff, messages
         if sub then
             ff, messages = fontloader.open(filename,sub)
@@ -267,6 +270,9 @@ function otf.load(filename,format,sub,featurefile)
         end
     end
     if data then
+        if trace_defining then
+            logs.report("define font","loading from cache: %s",hash)
+        end
         otf.enhance("unpack",data,filename,false) -- no message here
         otf.add_dimensions(data)
         if trace_sequences then
@@ -353,6 +359,29 @@ function otf.show_feature_order(otfdata,filename)
 end
 
 -- todo: normalize, design_size => designsize
+
+otf.enhancers["reorganize mark classes"] = function(data,filename)
+    if data.mark_classes then
+        local unicodes = data.luatex.unicodes
+        local reverse = { }
+        for name, class in next, data.mark_classes do
+            local t = { }
+            for s in gmatch(class,"[^ ]+") do
+                local us = unicodes[s]
+                if type(us) == "table" then
+                    for u=1,#us do
+                        t[us[u]] = true
+                    end
+                else
+                    t[us] = true
+                end
+            end
+            reverse[name] = t
+        end
+        data.luatex.markclasses = reverse
+        data.mark_classes = nil
+    end
+end
 
 otf.enhancers["prepare luatex tables"] = function(data,filename)
     data.luatex = data.luatex or { }
@@ -500,6 +529,7 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
         cidcodes = usedmap.unicodes
     end
     uparser = fonts.map.make_name_parser()
+    local aglmap = fonts.map and fonts.map.agl_to_unicode
     for index, glyph in next, data.glyphs do
         local name, unic = glyph.name, glyph.unicode or -1 -- play safe
         if unic == -1 or unic >= private or (unic >= 0xE000 and unic <= 0xF8FF) or unic == 0xFFFE or unic == 0xFFFF then
@@ -509,7 +539,7 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
             end
             -- cidmap heuristics, beware, there is no guarantee for a match unless
             -- the chain resolves
-            if not unicode and usedmap then
+            if (not unicode) and usedmap then
                 local foundindex = oparser:match(name)
                 if foundindex then
                     unicode = cidcodes[foundindex] -- name to number
@@ -544,7 +574,8 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
                 if nplit == 0 then
                     -- skip
                 elseif nplit == 1 then
-                    unicode = unicodes[split[1]]
+                    local base = split[1]
+                    unicode = unicodes[base] or (agl and agl[base])
                     if unicode then
                         if type(unicode) == "table" then
                             unicode = unicode[1]
@@ -552,20 +583,20 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
                         originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
                     end
                 else
-                    local done = true
+                    local t = { }
                     for l=1,nplit do
-                        local u = unicodes[split[l]]
+                        local base = split[l]
+                        local u = unicodes[base] or (agl and agl[base])
                         if not u then
-                            done = false
                             break
                         elseif type(u) == "table" then
-                            split[l] = u[1]
+                            t[#t+1] = u[1]
                         else
-                            split[l] = u
+                            t[#t+1] = u
                         end
                     end
-                    if done then
-                        originals[index], tounicode[index], nl, unicode = split, tounicode16sequence(split), nl + 1, true
+                    if #t > 0 then -- done then
+                        originals[index], tounicode[index], nl, unicode = t, tounicode16sequence(t), nl + 1, true
                     end
                 end
             end
@@ -658,8 +689,11 @@ otf.enhancers["analyse subtables"] = function(data,filename)
                     (flags.ignorecombiningmarks and "mark")     or false,
                     (flags.ignoreligatures      and "ligature") or false,
                     (flags.ignorebaseglyphs     and "base")     or false,
-                    flags.r2l                                   or false
+                     flags.r2l                                  or false,
                 }
+                if flags.mark_class then
+                    gk.markclass = luatex.markclasses[flags.mark_class]
+                end
             end
         end
     end
@@ -756,7 +790,7 @@ otf.enhancers["prepare unicode"] = function(data,filename)
             end
         end
     end
-    -- beware: the indeces table is used to initialize the tfm table
+    -- beware: the indices table is used to initialize the tfm table
     for unicode, index in next, mapmap do
         if not internals[index] then
             local name = glyphs[index].name
@@ -1464,6 +1498,7 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
         -- we need a runtime lookup because of running from cdrom or zip, brrr
         tfm.filename           = resolvers.findbinfile(luatex.filename,"") or luatex.filename
         tfm.fullname           = metadata.fontname or metadata.fullname
+        tfm.psname             = tfm.fullname
         tfm.encodingbytes      = 2
         tfm.cidinfo            = data.cidinfo
         tfm.cidinfo.registry   = tfm.cidinfo.registry or ""

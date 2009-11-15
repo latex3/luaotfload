@@ -42,6 +42,7 @@ end
 
 fonts.names = fonts.names or { }
 
+fonts.names.version    = 1.014
 fonts.names.basename   = "luatex-fonts-names.lua"
 fonts.names.new_to_old = { }
 fonts.names.old_to_new = { }
@@ -72,7 +73,7 @@ function fonts.names.resolve(name,sub)
         end
         loaded = true
     end
-    if type(data) == "table" and data.version == 1.08 then
+    if type(data) == "table" and data.version == fonts.names.version then
         local condensed = string.gsub(string.lower(name),"[^%a%d]","")
         local found = data.mapping and data.mapping[condensed]
         if found then
@@ -84,6 +85,8 @@ function fonts.names.resolve(name,sub)
         end
     end
 end
+
+fonts.names.resolvespec = fonts.names.resolve -- only supported in mkiv
 
 -- For the moment we put this (adapted) pseudo feature here.
 

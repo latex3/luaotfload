@@ -6,7 +6,7 @@ if not modules then modules = { } end modules ['font-cid'] = {
     license   = "see context related readme files"
 }
 
-local format, match = string.format, string.match
+local format, match, lower = string.format, string.match, string.lower
 local tonumber = tonumber
 
 local trace_loading = false  trackers.register("otf.loading",      function(v) trace_loading      = v end)
@@ -79,8 +79,9 @@ end
 local template = "%s-%s-%s.cidmap"
 
 local function locate(registry,ordering,supplement)
-    local filename = string.lower(format(template,registry,ordering,supplement))
-    local cidmap = fonts.cid.map[filename]
+    local filename = format(template,registry,ordering,supplement)
+    local hashname = lower(filename)
+    local cidmap = fonts.cid.map[hasnname]
     if not cidmap then
         if trace_loading then
             logs.report("load otf","checking cidmap, registry: %s, ordering: %s, supplement: %s, filename: %s",registry,ordering,supplement,filename)
@@ -92,7 +93,7 @@ local function locate(registry,ordering,supplement)
                 if trace_loading then
                     logs.report("load otf","using cidmap file %s",filename)
                 end
-                fonts.cid.map[filename] = cidmap
+                fonts.cid.map[hashname] = cidmap
                 cidmap.usedname = file.basename(filename)
                 return cidmap
             end

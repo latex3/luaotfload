@@ -407,6 +407,11 @@ local private = fonts.private
                         }
                     end
                     chr.vert_variants = t
+--~ local ic = v.vert_italic_correction
+--~ if ic then
+--~     chr.italic = ic * delta
+--~     print(format("0x%05X -> %s",k,chr.italic))
+--~ end
                 else
                     local hv = v.horiz_variants
                     if hv then
@@ -517,6 +522,9 @@ local private = fonts.private
             end
         end
         tc[k] = chr
+--~ if k == 0x222B then
+--~     print(t.fontname,table.serialize(chr))
+--~ end
     end
     -- t.encodingbytes, t.filename, t.fullname, t.name: elsewhere
     t.size = scaledpoints
@@ -533,15 +541,15 @@ local private = fonts.private
     end
     -- needed for \high cum suis
     local tpx = tp.x_height
-if hasmath then
-    if not tp[13] then tp[13] = .86*tpx end  -- mathsupdisplay
-    if not tp[14] then tp[14] = .86*tpx end  -- mathsupnormal
-    if not tp[15] then tp[15] = .86*tpx end  -- mathsupcramped
-    if not tp[16] then tp[16] = .48*tpx end  -- mathsubnormal
-    if not tp[17] then tp[17] = .48*tpx end  -- mathsubcombined
-    if not tp[22] then tp[22] =   0     end  -- mathaxisheight
-    if t.MathConstants then t.MathConstants.AccentBaseHeight = nil end -- safeguard
-end
+    if hasmath then
+        if not tp[13] then tp[13] = .86*tpx end  -- mathsupdisplay
+        if not tp[14] then tp[14] = .86*tpx end  -- mathsupnormal
+        if not tp[15] then tp[15] = .86*tpx end  -- mathsupcramped
+        if not tp[16] then tp[16] = .48*tpx end  -- mathsubnormal
+        if not tp[17] then tp[17] = .48*tpx end  -- mathsubcombined
+        if not tp[22] then tp[22] =   0     end  -- mathaxisheight
+        if t.MathConstants then t.MathConstants.AccentBaseHeight = nil end -- safeguard
+    end
     t.tounicode = 1
     t.cidinfo = tfmtable.cidinfo
     -- we have t.name=metricfile and t.fullname=RealName and t.filename=diskfilename
@@ -549,21 +557,23 @@ end
     -- can have multiple subfonts
     if hasmath then
         if trace_defining then
-            logs.report("define font","math enabled for: %s %s %s",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
+            logs.report("define font","math enabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
         end
     else
         if trace_defining then
-            logs.report("define font","math disabled for: %s %s %s",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
+            logs.report("define font","math disabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
         end
         t.nomath, t.MathConstants = true, nil
     end
-    -- fullname is used in the subsetting
     if not t.psname then
-        t.psname = t.fullname -- else bad luck
+     -- name used in pdf file as well as for selecting subfont in ttc/dfont
+        t.psname = t.fontname or (t.fullname and fonts.names.cleanname(t.fullname))
     end
     if trace_defining then
-        logs.report("define font","used for subsetting: %s ",t.fullname or "nofullname")
+        logs.report("define font","used for accesing subfont: '%s'",t.psname or "nopsname")
+        logs.report("define font","used for subsetting: '%s'",t.fontname or "nofontname")
     end
+--~     print(t.fontname,table.serialize(t.MathConstants))
     return t, delta
 end
 

@@ -60,8 +60,10 @@ local glyph      = nodes.register(new_node("glyph",0))
 local textdir    = nodes.register(new_node("whatsit",7))
 local rule       = nodes.register(new_node("rule"))
 local latelua    = nodes.register(new_node("whatsit",35))
---~ local user       = nodes.register(new_node("user_defined"))
-local user       = nodes.register(new_node(44))
+local user_n     = nodes.register(new_node("whatsit",44)) user_n.type = 100
+local user_l     = nodes.register(new_node("whatsit",44)) user_l.type = 110
+local user_s     = nodes.register(new_node("whatsit",44)) user_s.type = 115
+local user_t     = nodes.register(new_node("whatsit",44)) user_t.type = 116
 
 function nodes.glyph(fnt,chr)
     local n = copy_node(glyph)
@@ -111,27 +113,41 @@ function nodes.latelua(code)
     return n
 end
 
+local cache = { }
+
 function nodes.usernumber(num)
-    local n = copy_node(user)
-    n.type = 100
-    if num then n.value = num end
-    return n
+    local n = cache[num]
+    if n then
+        return copy_node(n)
+    else
+        local n = copy_node(user_n)
+        if num then n.value = num end
+        return n
+    end
 end
-function nodes.userstring(str)
-    local n = copy_node(user)
-    n.type = 115
-    if str then n.value = str end
-    return n
-end
+
 function nodes.userlist(list)
-    local n = copy_node(user)
-    n.type = 110
+    local n = copy_node(user_l)
     if list then n.value = list end
     return n
 end
+
+local cache = { } -- we could use the same cache
+
+function nodes.userstring(str)
+    local n = cache[str]
+    if n then
+        return copy_node(n)
+    else
+        local n = copy_node(user_s)
+        n.type = 115
+        if str then n.value = str end
+        return n
+    end
+end
+
 function nodes.usertokens(tokens)
-    local n = copy_node(user)
-    n.type = 116
+    local n = copy_node(user_t)
     if tokens then n.value = tokens end
     return n
 end

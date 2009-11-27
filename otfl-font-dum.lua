@@ -39,10 +39,15 @@ function fonts.logger.save()
 end
 
 -- names
+--
+-- Watch out, the version number is the same as the one used in
+-- the mtx-fonts.lua function scripts.fonts.names as we use a
+-- simplified font database in the plain solution and by using
+-- a different number we're less dependent on context.
 
 fonts.names = fonts.names or { }
 
-fonts.names.version    = 1.014
+fonts.names.version    = 1.001 -- not the same as in context
 fonts.names.basename   = "luatex-fonts-names.lua"
 fonts.names.new_to_old = { }
 fonts.names.old_to_new = { }
@@ -57,16 +62,6 @@ function fonts.names.resolve(name,sub)
                 local foundname = resolvers.find_file(basename,format) or ""
                 if foundname ~= "" then
                     data = dofile(foundname)
-                    if data then
-                        local d = {  }
-                        for k, v in pairs(data.mapping) do
-                            local t = v[1]
-                            if t == "ttf" or t == "otf" or t == "ttc" or t == "dfont" then
-                                d[k] = v
-                            end
-                        end
-                        data.mapping = d
-                    end
                     break
                 end
             end
@@ -75,11 +70,14 @@ function fonts.names.resolve(name,sub)
     end
     if type(data) == "table" and data.version == fonts.names.version then
         local condensed = string.gsub(string.lower(name),"[^%a%d]","")
-        local found = data.mapping and data.mapping[condensed]
+        local found = data.mappings and data.mappings[condensed]
         if found then
-            local filename, is_sub = found[3], found[4]
-            if is_sub then is_sub = found[2] end
-            return filename, is_sub
+            local fontname, filename, subfont = found[1], found[2], found[3]
+            if subfont then
+                return filename, fontname
+            else
+                return filename, false
+            end
         else
             return name, false -- fallback to filename
         end

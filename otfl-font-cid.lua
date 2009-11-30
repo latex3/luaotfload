@@ -78,10 +78,11 @@ end
 
 local template = "%s-%s-%s.cidmap"
 
+
 local function locate(registry,ordering,supplement)
     local filename = format(template,registry,ordering,supplement)
     local hashname = lower(filename)
-    local cidmap = fonts.cid.map[hasnname]
+    local cidmap = fonts.cid.map[hashname]
     if not cidmap then
         if trace_loading then
             logs.report("load otf","checking cidmap, registry: %s, ordering: %s, supplement: %s, filename: %s",registry,ordering,supplement,filename)

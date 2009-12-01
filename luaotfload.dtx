@@ -34,7 +34,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload 2009/11/15 v1.05 ConTeXt font loading system}
+\Msg{* Package: luaotfload 2009/12/01 v1.06 ConTeXt font loading system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -100,7 +100,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaminimalotf.drv}%
-  [2009/11/15 v1.05 ConTeXt font loading system]%
+  [2009/12/01 v1.06 ConTeXt font loading system]%
 \documentclass{ltxdoc}
 \EnableCrossrefs
 \CodelineIndex
@@ -131,7 +131,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \textsf{luaotfload} package}
-% \date{2009/11/15 v1.05}
+% \date{2009/12/01 v1.06}
 % \author{Elie Roux \\ \texttt{elie.roux@telecom-bretagne.eu}}
 %
 % \maketitle
@@ -224,8 +224,8 @@ luaotfload          = { }
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 1.04,
-    date          = "2009/11/15",
+    version       = 1.06,
+    date          = "2009/12/01",
     description   = "ConTeXt font loading system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -240,16 +240,33 @@ luatextra.provides_module(luaotfload.module)
 %    \texttt{otfl-} prefix to it, so that we call it with the actual Con\TeX t
 %    name.
 %
+%    Some Con\TeX t files introduce incompatibilities with old Lua\TeX s, thus
+%    the old versions of these files are kept under the name |otfl-compat-...|
+%    and are called according to the version. The only file in this case
+%    is a |font-otf.lua| that, in version 2009.11.26 of Con\TeX t generates
+%    invalid PDFs with Lua\TeX{} older than version 0.45.
+%
 %    \begin{macrocode}
 
 
-function luaotfload.loadmodule(name)
-    local foundname = kpse.find_file('otfl-'..name,"tex")
-    if not foundname then
-      luatextra.module_error('luaotfload', string.format('file otfl-%s not found.', name))
-      return 
+function luaotfload.loadmodule(name, compat)
+    local tofind
+    if compat then
+        if tex.luatexversion < 45 then
+            tofind = 'otfl-compat-'..name
+        else
+            tofind = 'otfl-'..name
+        end
+    else
+        tofind = 'otfl-'..name
     end
-    dofile(foundname)
+    local found = kpse.find_file(tofind,"tex")
+    if not found then
+      luatextra.module_error('luaotfload', string.format('file %s not found.', tofind))
+      return
+    end
+    luatextra.module_log('luaotfload', "loading file "..found)
+    dofile(found)
 end
 
 %    \end{macrocode}
@@ -386,7 +403,7 @@ luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('font-tfm.lua')
 luaotfload.loadmodule('font-cid.lua')
 luaotfload.loadmodule('font-ott.lua')
-luaotfload.loadmodule('font-otf.lua')
+luaotfload.loadmodule('font-otf.lua', 1)
 luaotfload.loadmodule('font-otd.lua')
 luaotfload.loadmodule('font-oti.lua')
 luaotfload.loadmodule('font-otb.lua')
@@ -480,7 +497,7 @@ end
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2009/11/15 v1.05 ConTeXt font loading system]
+    [2009/12/01 v1.06 ConTeXt font loading system]
   \RequirePackage{luatextra}
 \fi
 

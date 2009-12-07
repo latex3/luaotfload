@@ -166,6 +166,74 @@ and the derived files
 % package, like it is in Con\TeX t. Sadly, Plain and \LaTeX\ are frozen and
 % it's even impossible to adapt them to the new engines. 
 %
+% \subsection{Loading fonts}
+%
+% \textsf{luaotfload} supports Xe\TeX -like font syntax which looks like:
+%
+% \begin{center}
+% |\font\foo="|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|"| \meta{\TeX\ font features}
+% \end{center}
+%
+% \subsubsection{Prefix}
+%
+% Prefixes are either |file| or |name|; |file| prefix forces searching font
+% based on filename, while a |name| prefix will result in consulting name
+% database. Name database can be generated with\footnote{|mtxrun| tool and
+% scripts are part of Con\TeX t}:
+%
+% \begin{center}
+% |mtxrun --usekpse --script fonts --names|
+% \footnote{|mtxrun --usekpse --script fonts --reload --simple| in recent
+% Con\TeX t releases}
+% \end{center}
+%
+% \noindent Which will generate a file named |luatex-fonts-names.lua| that is
+% to be placed somewhere in your \TeX\ tree where \textsf{kpathsea} can find it.
+%
+% \subsubsection{Font name}
+%
+% Font name can be either a font filename or actual font name. If no prefix is
+% specified; it is assumed to be a filename.
+%
+% \subsubsection{Font features}
+%
+% By default \textsf{luaotfload} doesn't enable any font features, font features
+% must be explicitly enabled, |\font\foo=foo.ttf:+liga| will load |foo.ttf| font
+% and enable |liga| feature. In the same way font features can be deactivated by
+% prefixing it with minus sign; |\font\foo=foo.ttf:+liga;-liga| will load
+% |foo.ttf| without any features enabled.
+%
+% \paragraph{Modes}
+% \textsf{luaotfload} has two OpenType processing modes; |base| mode which
+% enables only a subset of OpenType features and works by mapping those features
+% to traditional TeX ligaturing and kerning mechanisms and is a bit faster, and
+% |node| mode which, hopefully, supports OpenType fully and works by direct
+% processing of node list at lua end and is a bit slower.
+%
+% Modes can be selected using |mode| keyword and it must come before any other
+% font feature, e.g. |\font\foo=foo.ttf:mode=node;+liga|.
+%
+% \paragraph{Additional font features}
+% \textsf{luaotfload} defines some additional font feature not defined in
+% OpenType, currently three features are defined:
+%
+% \begin{itemize}
+% \item[-] |anum| Arabic numbers
+% \item[-] |tlig| \TeX\ ligatures
+% \item[-] |trep| \TeX\ replacements
+% \end{itemize}
+%
+% \subsubsection{Examples}
+% \begin{verbatim}
+% \font\testa=file:lmroman10-regular                  at 12pt \testa \input tufte \par
+% \font\testb=file:lmroman12-regular:+liga;           at 24pt \testb effe flink fietsen \par
+% \font\testc=file:lmroman12-regular:mode=node;+liga; at 24pt \testc effe flink fietsen \par
+% \font\testd=name:lmroman10bold                      at 12pt \testd a bit bold \par
+%
+% \font\teste=[lmroman12-regular]:+liga at 30pt \teste text
+% \font\testf=[lmroman12-regular]       at 40pt \testf more text
+% \end{verbatim}
+%
 % \subsection{Con\TeX t files needed}
 %
 % This package is a wrapper for several files taken from the Con\TeX t macro

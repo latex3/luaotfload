@@ -102,6 +102,8 @@ and the derived files
 \ProvidesFile{luaotfload.drv}%
   [2009/12/01 v1.06 ConTeXt font loading system]%
 \documentclass{ltxdoc}
+\usepackage{metalogo}
+\usepackage[colorlinks=true]{hyperref}
 \EnableCrossrefs
 \CodelineIndex
 \begin{document}
@@ -138,7 +140,7 @@ and the derived files
 %
 % \begin{abstract}
 % Con\TeX t font loading system, providing the possibility to load OTF fonts
-% with a lot of features, and the Xe\TeX\ font loading syntax.
+% with a lot of features, and the \XeTeX\ font loading syntax.
 % \end{abstract}
 %
 % \tableofcontents
@@ -155,9 +157,9 @@ and the derived files
 % of characters, and have some functionalities (ligatures, old-style numbers,
 % small capitals, etc.). They are everywhere, as the system fonts and most
 % modern text softwares fonts are of this type. Until now the (almost) only
-% way to use them with \TeX\ was to use them with Xe\TeX .
+% way to use them with \TeX\ was to use them with \XeTeX .
 %
-% Unlike Xe\TeX , Lua\TeX\ does not provide facilities for these fonts by
+% Unlike \XeTeX , Lua\TeX\ does not provide facilities for these fonts by
 % default, but it provides a way to hook lua code in some points of the \TeX\
 % algorithm, for instance we can improve the font loading system; this is what
 % we do in this package.
@@ -168,7 +170,7 @@ and the derived files
 %
 % \subsection{Loading fonts}
 %
-% \textsf{luaotfload} supports Xe\TeX -like font syntax which looks like:
+% \textsf{luaotfload} supports \XeTeX -like font syntax which looks like:
 %
 % \begin{center}
 % |\font\foo="|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|"| \meta{\TeX\ font features}
@@ -199,28 +201,28 @@ and the derived files
 %
 % By default \textsf{luaotfload} doesn't enable any font features, font features
 % must be explicitly enabled, |\font\foo=foo.ttf:+liga| will load |foo.ttf| font
-% and enable |liga| feature. In the same way font features can be deactivated by
-% prefixing it with minus sign; |\font\foo=foo.ttf:+liga;-liga| will load
-% |foo.ttf| without any features enabled.
+% and enable \texttt{liga} feature. In the same way font features can be
+% deactivated by prefixing it with minus sign; |\font\foo=foo.ttf:+liga;-liga|
+% will load \texttt{foo.ttf} without any features enabled.
 %
 % \paragraph{Modes}
-% \textsf{luaotfload} has two OpenType processing modes; |base| mode which
-% enables only a subset of OpenType features and works by mapping those features
-% to traditional TeX ligaturing and kerning mechanisms and is a bit faster, and
-% |node| mode which, hopefully, supports OpenType fully and works by direct
-% processing of node list at lua end and is a bit slower.
+% \textsf{luaotfload} has two OpenType processing modes; \texttt{base} mode
+% which enables only a subset of OpenType features and works by mapping those
+% features to traditional TeX ligaturing and kerning mechanisms and is a bit
+% faster, and \texttt{node} mode which, hopefully, supports OpenType fully and
+% works by direct processing of node list at lua end and is a bit slower.
 %
-% Modes can be selected using |mode| keyword and it must come before any other
-% font feature, e.g. |\font\foo=foo.ttf:mode=node;+liga|.
+% Modes can be selected using \texttt{mode} keyword and it must come before any
+% other font feature, e.g. |\font\foo=foo.ttf:mode=node;+liga|.
 %
 % \paragraph{Additional font features}
 % \textsf{luaotfload} defines some additional font feature not defined in
 % OpenType, currently three features are defined:
 %
 % \begin{itemize}
-% \item[-] |anum| Arabic numbers
-% \item[-] |tlig| \TeX\ ligatures
-% \item[-] |trep| \TeX\ replacements
+% \item[-] \texttt{anum} Arabic numbers
+% \item[-] \texttt{tlig} \TeX\ ligatures
+% \item[-] \texttt{trep} \TeX\ replacements
 % \end{itemize}
 %
 % \subsubsection{Examples}

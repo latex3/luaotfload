@@ -234,6 +234,7 @@ function tfm.do_scale(tfmtable, scaledpoints)
         scaledpoints = (- scaledpoints/1000) * tfmtable.designsize -- already in sp
     end
     local delta = scaledpoints/(tfmtable.units or 1000) -- brr, some open type fonts have 2048
+    local hdelta, vdelta = delta, delta
     local t = { }
     -- unicoded unique descriptions shared cidinfo characters changed parameters indices
     for k,v in next, tfmtable do
@@ -242,6 +243,19 @@ function tfm.do_scale(tfmtable, scaledpoints)
         else
             t[k] = v
         end
+    end
+    local extend_factor = tfmtable.extend_factor or 0
+    if extend_factor ~= 0 and extend_factor ~= 1 then
+        hdelta = hdelta * extend_factor
+        t.extend = extend_factor * 1000
+    else
+        t.extend = 1000
+    end
+    local slant_factor = tfmtable.slant_factor or 0
+    if slant_factor ~= 0 then
+        t.slant = slant_factor * 1000
+    else
+        t.slant = 0
     end
     -- status
     local isvirtual = tfmtable.type == "virtual" or tfmtable.virtualized
@@ -270,12 +284,12 @@ t.colorscheme = tfmtable.colorscheme
     local tfmp = tfmtable.parameters -- let's check for indexes
     --
     tp.slant         = (tfmp.slant         or tfmp[1] or 0)
-    tp.space         = (tfmp.space         or tfmp[2] or 0)*delta
-    tp.space_stretch = (tfmp.space_stretch or tfmp[3] or 0)*delta
-    tp.space_shrink  = (tfmp.space_shrink  or tfmp[4] or 0)*delta
-    tp.x_height      = (tfmp.x_height      or tfmp[5] or 0)*delta
-    tp.quad          = (tfmp.quad          or tfmp[6] or 0)*delta
-    tp.extra_space   = (tfmp.extra_space   or tfmp[7] or 0)*delta
+    tp.space         = (tfmp.space         or tfmp[2] or 0)*hdelta
+    tp.space_stretch = (tfmp.space_stretch or tfmp[3] or 0)*hdelta
+    tp.space_shrink  = (tfmp.space_shrink  or tfmp[4] or 0)*hdelta
+    tp.x_height      = (tfmp.x_height      or tfmp[5] or 0)*vdelta
+    tp.quad          = (tfmp.quad          or tfmp[6] or 0)*hdelta
+    tp.extra_space   = (tfmp.extra_space   or tfmp[7] or 0)*hdelta
     local protrusionfactor = (tp.quad ~= 0 and 1000/tp.quad) or 0
     local tc = t.characters
     local characters = tfmtable.characters
@@ -292,11 +306,11 @@ t.colorscheme = tfmtable.colorscheme
     local sharedkerns, basekerns = tfm.check_base_kerns(tfmtable)
     -- loop over descriptions (afm and otf have descriptions, tfm not)
     -- there is no need (yet) to assign a value to chr.tonunicode
-    local scaledwidth  = defaultwidth  * delta
-    local scaledheight = defaultheight * delta
-    local scaleddepth  = defaultdepth  * delta
+    local scaledwidth  = defaultwidth  * hdelta
+    local scaledheight = defaultheight * vdelta
+    local scaleddepth  = defaultdepth  * vdelta
     local stackmath = tfmtable.ignore_stack_math ~= true
-local private = fonts.private
+    local private = fonts.private
     for k,v in next, characters do
         local chr, description, index
         if ischanged then
@@ -317,9 +331,9 @@ local private = fonts.private
         local width  = description.width
         local height = description.height
         local depth  = description.depth
-        if width  then width  = delta*width  else width  = scaledwidth  end
-        if height then height = delta*height else height = scaledheight end
-    --  if depth  then depth  = delta*depth  else depth  = scaleddepth  end
+        if width  then width  = hdelta*width  else width  = scaledwidth  end
+        if height then height = vdelta*height else height = scaledheight end
+    --  if depth  then depth  = vdelta*depth  else depth  = scaleddepth  end
         if depth and depth ~= 0 then
             depth = delta*depth
             if nameneeded then
@@ -383,7 +397,7 @@ local private = fonts.private
         if hasitalic then
             local vi = description.italic or v.italic
             if vi and vi ~= 0 then
-                chr.italic = vi*delta
+                chr.italic = vi*hdelta
             end
         end
         -- to be tested
@@ -399,19 +413,19 @@ local private = fonts.private
                     for i=1,#vv do
                         local vvi = vv[i]
                         t[i] = {
-                            ["start"]    = (vvi["start"]   or 0)*delta,
-                            ["end"]      = (vvi["end"]     or 0)*delta,
-                            ["advance"]  = (vvi["advance"] or 0)*delta,
+                            ["start"]    = (vvi["start"]   or 0)*vdelta,
+                            ["end"]      = (vvi["end"]     or 0)*vdelta,
+                            ["advance"]  = (vvi["advance"] or 0)*vdelta,
                             ["extender"] =  vvi["extender"],
                             ["glyph"]    =  vvi["glyph"],
                         }
                     end
                     chr.vert_variants = t
---~ local ic = v.vert_italic_correction
---~ if ic then
---~     chr.italic = ic * delta
---~     print(format("0x%05X -> %s",k,chr.italic))
---~ end
+                --~ local ic = v.vert_italic_correction
+                --~ if ic then
+                --~     chr.italic = ic * hdelta
+                --~     print(format("0x%05X -> %s",k,chr.italic))
+                --~ end
                 else
                     local hv = v.horiz_variants
                     if hv then
@@ -419,9 +433,9 @@ local private = fonts.private
                         for i=1,#hv do
                             local hvi = hv[i]
                             t[i] = {
-                                ["start"]    = (hvi["start"]   or 0)*delta,
-                                ["end"]      = (hvi["end"]     or 0)*delta,
-                                ["advance"]  = (hvi["advance"] or 0)*delta,
+                                ["start"]    = (hvi["start"]   or 0)*hdelta,
+                                ["end"]      = (hvi["end"]     or 0)*hdelta,
+                                ["advance"]  = (hvi["advance"] or 0)*hdelta,
                                 ["extender"] =  hvi["extender"],
                                 ["glyph"]    =  hvi["glyph"],
                             }
@@ -432,31 +446,23 @@ local private = fonts.private
             end
             local vt = description.top_accent
             if vt then
-                chr.top_accent = delta*vt
+                chr.top_accent = vdelta*vt
             end
             if stackmath then
                 local mk = v.mathkerns
                 if mk then
                     local kerns = { }
-                 -- for k, v in next, mk do
-                 --     local kk = { }
-                  --     for i=1,#v do
-                 --         local vi = v[i]
-                 --         kk[i] = { height = delta*vi.height, kern = delta*vi.kern }
-                 --     end
-                 --     kerns[k] = kk
-                 -- end
                     local v = mk.top_right    if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
                     end     kerns.top_right    = k end
                     local v = mk.top_left     if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
                     end     kerns.top_left     = k end
                     local v = mk.bottom_left  if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
                     end     kerns.bottom_left  = k end
                     local v = mk.bottom_right if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = delta*vi.height, kern = delta*vi.kern }
+                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
                     end     kerns.bottom_right = k end
                     chr.mathkern = kerns -- singular
                 end
@@ -469,13 +475,13 @@ local private = fonts.private
                     local base = basekerns[vk] -- hashed by table id, not content
                     if not base then
                         base = {}
-                        for k,v in next, vk do base[k] = v*delta end
+                        for k,v in next, vk do base[k] = v*hdelta end
                         basekerns[vk] = base
                     end
                     chr.kerns = base
                 else
                     local tt = {}
-                    for k,v in next, vk do tt[k] = v*delta end
+                    for k,v in next, vk do tt[k] = v*hdelta end
                     chr.kerns = tt
                 end
             end
@@ -509,8 +515,10 @@ local private = fonts.private
                     for i=1,#vc do
                         local ivc = vc[i]
                         local key = ivc[1]
-                        if key == "right" or key == "down" then
-                            tt[#tt+1] = { key, ivc[2]*delta }
+                        if key == "right" then
+                            tt[#tt+1] = { key, ivc[2]*hdelta }
+                        elseif key == "down" then
+                            tt[#tt+1] = { key, ivc[2]*vdelta }
                         else -- not comment
                             tt[#tt+1] = ivc -- shared since in cache and untouched
                         end
@@ -522,13 +530,12 @@ local private = fonts.private
             end
         end
         tc[k] = chr
---~ if k == 0x222B then
---~     print(t.fontname,table.serialize(chr))
---~ end
     end
     -- t.encodingbytes, t.filename, t.fullname, t.name: elsewhere
     t.size = scaledpoints
     t.factor = delta
+    t.hfactor = hdelta
+    t.vfactor = vdelta
     if t.fonts then
         t.fonts = table.fastcopy(t.fonts) -- maybe we virtualize more afterwards
     end
@@ -536,7 +543,7 @@ local private = fonts.private
      -- mathematics.extras.copy(t) -- can be done elsewhere if needed
         local ma = tfm.mathactions
         for i=1,#ma do
-            ma[i](t,tfmtable,delta)
+            ma[i](t,tfmtable,delta,hdelta,vdelta) -- what delta?
         end
     end
     -- needed for \high cum suis

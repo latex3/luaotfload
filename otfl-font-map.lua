@@ -31,7 +31,7 @@ function fonts.map.line.pdfmapline(tag,str)
     return "\\loadmapline[" .. tag .. "][" .. str .. "]"
 end
 
-function fonts.map.line.pdftex(e) -- so far no combination of slant and stretch
+function fonts.map.line.pdftex(e) -- so far no combination of slant and extend
     if e.name and e.fontfile then
         local fullname = e.fullname or ""
         if e.slant and e.slant ~= 0 then
@@ -40,11 +40,11 @@ function fonts.map.line.pdftex(e) -- so far no combination of slant and stretch
             else
                 return fonts.map.line.pdfmapline("=",format('%s %s "%g SlantFont" <%s',e.name,fullname,e.slant,e.fontfile))
             end
-        elseif e.stretch and e.stretch ~= 1 and e.stretch ~= 0 then
+        elseif e.extend and e.extend ~= 1 and e.extend ~= 0 then
             if e.encoding then
-                return fonts.map.line.pdfmapline("=",format('%s %s "%g ExtendFont" <%s <%s',e.name,fullname,e.stretch,e.encoding,e.fontfile))
+                return fonts.map.line.pdfmapline("=",format('%s %s "%g ExtendFont" <%s <%s',e.name,fullname,e.extend,e.encoding,e.fontfile))
             else
-                return fonts.map.line.pdfmapline("=",format('%s %s "%g ExtendFont" <%s',e.name,fullname,e.stretch,e.fontfile))
+                return fonts.map.line.pdfmapline("=",format('%s %s "%g ExtendFont" <%s',e.name,fullname,e.extend,e.fontfile))
             end
         else
             if e.encoding then
@@ -87,9 +87,9 @@ function fonts.map.load_file(filename, entries, encodings)
                 if find(line,"^[%#%%%s]") then
                     -- print(line)
                 else
-                    local stretch, slant, name, fullname, fontfile, encoding
+                    local extend, slant, name, fullname, fontfile, encoding
                     line = line:gsub('"(.+)"', function(s)
-                        stretch = find(s,'"([^"]+) ExtendFont"')
+                        extend = find(s,'"([^"]+) ExtendFont"')
                         slant = find(s,'"([^"]+) SlantFont"')
                         return ""
                     end)
@@ -113,7 +113,7 @@ function fonts.map.load_file(filename, entries, encodings)
                             encoding = encoding,
                             fontfile = fontfile,
                             slant    = tonumber(slant),
-                            stretch  = tonumber(stretch)
+                            extend   = tonumber(extend)
                         }
                         encodings[name] = encoding
                     elseif line ~= "" then

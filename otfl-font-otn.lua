@@ -327,6 +327,7 @@ local function toligature(kind,lookupname,start,stop,char,markflag,discfound) --
                 next.prev = lignode
             end
             lignode.next, lignode.prev = next, prev
+            start = lignode
          -- print("start->end",nodes.tosequence(start))
         else -- start is the ligature
             local deletemarks = markflag ~= "mark"
@@ -456,7 +457,8 @@ end
 
 function handlers.gsub_ligature(start,kind,lookupname,ligature,sequence) --or maybe pass lookup ref
     local s, stop, discfound = start.next, nil, false
-    if marks[start.char] then
+    local startchar = start.char
+    if marks[startchar] then
         while s do
             local id = s.id
             if id == glyph and s.subtype<256 then
@@ -479,7 +481,7 @@ function handlers.gsub_ligature(start,kind,lookupname,ligature,sequence) --or ma
         end
         if stop and ligature[2] then
             if trace_ligatures then
-                local startchar, stopchar = start.char, stop.char
+                local stopchar = stop.char
                 start = markstoligature(kind,lookupname,start,stop,ligature[2])
                 logprocess("%s: replacing %s upto %s by ligature %s",pref(kind,lookupname),gref(startchar),gref(stopchar),gref(start.char))
             else
@@ -518,7 +520,7 @@ function handlers.gsub_ligature(start,kind,lookupname,ligature,sequence) --or ma
         end
         if stop and ligature[2] then
             if trace_ligatures then
-                local startchar, stopchar = start.char, stop.char
+                local stopchar = stop.char
                 start = toligature(kind,lookupname,start,stop,ligature[2],skipmark,discfound)
                 logprocess("%s: replacing %s upto %s by ligature %s",pref(kind,lookupname),gref(startchar),gref(stopchar),gref(start.char))
             else

@@ -80,7 +80,8 @@ local fontname   = (lpeg.P("name:")/isname * (namespec/thename)) + lpeg.P(true)/
 local sometext   = (lpeg.R("az") + lpeg.R("AZ") + lpeg.R("09"))^1
 local truevalue  = lpeg.P("+") * spaces * (sometext/istrue)
 local falsevalue = lpeg.P("-") * spaces * (sometext/isfalse)
-local keyvalue   = (lpeg.C(sometext) * spaces * lpeg.P("=") * spaces * lpeg.C(sometext))/iskey
+local someval    = (lpeg.S("+-.") + sometext)^1
+local keyvalue   = (lpeg.C(sometext) * spaces * lpeg.P("=") * spaces * lpeg.C(someval))/iskey
 local somevalue  = sometext/istrue
 local subvalue   = lpeg.P("(") * (lpeg.C(lpeg.P(1-lpeg.S("()"))^1)/issub) * lpeg.P(")") -- for Kim
 local option     = spaces * (keyvalue + falsevalue + truevalue + somevalue) * spaces

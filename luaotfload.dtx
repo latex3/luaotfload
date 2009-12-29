@@ -34,7 +34,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload 2009/12/01 v1.06 ConTeXt font loading system}
+\Msg{* Package: luaotfload 2009/12/29 v1.07 ConTeXt font loading system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -100,7 +100,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2009/12/01 v1.06 ConTeXt font loading system]%
+  [2009/12/29 v1.07 ConTeXt font loading system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo}
 \usepackage[colorlinks=true]{hyperref}
@@ -133,7 +133,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \textsf{luaotfload} package}
-% \date{2009/12/01 v1.06}
+% \date{2009/12/29 v1.07}
 % \author{Elie Roux \\ \texttt{elie.roux@telecom-bretagne.eu}}
 %
 % \maketitle
@@ -299,7 +299,7 @@ luaotfload          = { }
 luaotfload.module = {
     name          = "luaotfload",
     version       = 1.06,
-    date          = "2009/12/01",
+    date          = "2009/12/29",
     description   = "ConTeXt font loading system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -535,6 +535,52 @@ luaotfload.loadmodule('font-dum.lua')
 
 %    \end{macrocode}
 %
+%    Support for font slanting and extending.
+%
+%    \begin{macrocode}
+
+fonts.triggers            = fonts.triggers            or { }
+fonts.initializers        = fonts.initializers        or { }
+fonts.initializers.common = fonts.initializers.common or { }
+
+local initializers = fonts.initializers
+
+table.insert(fonts.triggers,"slant")
+
+function fonts.initializers.common.slant(tfmdata,value)
+    value = tonumber(value)
+    if not value then
+        value =  0
+    elseif value >  1 then
+        value =  1
+    elseif value < -1 then
+        value = -1
+    end
+    tfmdata.slant_factor = value
+end
+
+initializers.base.otf.slant = initializers.common.slant
+initializers.node.otf.slant = initializers.common.slant
+
+table.insert(fonts.triggers,"extend")
+
+function initializers.common.extend(tfmdata,value)
+    value = tonumber(value)
+    if not value then
+        value =  0
+    elseif value >  10 then
+        value =  10
+    elseif value < -10 then
+        value = -10
+    end
+    tfmdata.extend_factor = value
+end
+
+initializers.base.otf.extend = initializers.common.extend
+initializers.node.otf.extend = initializers.common.extend
+
+%    \end{macrocode}
+%
 %    This is a small patch that prevents errors in some \LaTeX\ files.
 %
 %    \begin{macrocode}
@@ -598,7 +644,7 @@ end
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2009/12/01 v1.06 ConTeXt font loading system]
+    [2009/12/29 v1.07 ConTeXt font loading system]
   \RequirePackage{luatextra}
 \fi
 

@@ -2275,141 +2275,152 @@ local function prepare_lookups(tfmdata)
     -- we can change the otf table after loading but then we need to adapt base mode
     -- as well (no big deal)
     --
+    local action = {
+        substitution = function(p,lookup,k,glyph,unicode)
+            local old, new = unicode, unicodes[p[2]]
+            if type(new) == "table" then
+                new = new[1]
+            end
+            local s = single[lookup]
+            if not s then s = { } single[lookup] = s end
+            s[old] = new
+        --~ if trace_lookups then
+        --~     logs.report("define otf","lookup %s: substitution %s => %s",lookup,old,new)
+        --~ end
+        end,
+        multiple = function (p,lookup,k,glyph,unicode)
+            local old, new = unicode, { }
+            local m = multiple[lookup]
+            if not m then m = { } multiple[lookup] = m end
+            m[old] = new
+            for pc in gmatch(p[2],"[^ ]+") do
+                local upc = unicodes[pc]
+                if type(upc) == "number" then
+                    new[#new+1] = upc
+                else
+                    new[#new+1] = upc[1]
+                end
+            end
+        --~ if trace_lookups then
+        --~     logs.report("define otf","lookup %s: multiple %s => %s",lookup,old,concat(new," "))
+        --~ end
+        end,
+        alternate = function(p,lookup,k,glyph,unicode)
+            local old, new = unicode, { }
+            local a = alternate[lookup]
+            if not a then a = { } alternate[lookup] = a end
+            a[old] = new
+            for pc in gmatch(p[2],"[^ ]+") do
+                local upc = unicodes[pc]
+                if type(upc) == "number" then
+                    new[#new+1] = upc
+                else
+                    new[#new+1] = upc[1]
+                end
+            end
+        --~ if trace_lookups then
+        --~     logs.report("define otf","lookup %s: alternate %s => %s",lookup,old,concat(new,"|"))
+        --~ end
+        end,
+        ligature = function (p,lookup,k,glyph,unicode)
+        --~ if trace_lookups then
+        --~     logs.report("define otf","lookup %s: ligature %s => %s",lookup,p[2],glyph.name)
+        --~ end
+            local first = true
+            local t = ligature[lookup]
+            if not t then t = { } ligature[lookup] = t end
+            for s in gmatch(p[2],"[^ ]+") do
+                if first then
+                    local u = unicodes[s]
+                    if not u then
+                        logs.report("define otf","lookup %s: ligature %s => %s ignored due to invalid unicode",lookup,p[2],glyph.name)
+                        break
+                    elseif type(u) == "number" then
+                        if not t[u] then
+                            t[u] = { { } }
+                        end
+                        t = t[u]
+                    else
+                        local tt = t
+                        local tu
+                        for i=1,#u do
+                            local u = u[i]
+                            if i==1 then
+                                if not t[u] then
+                                    t[u] = { { } }
+                                end
+                                tu = t[u]
+                                t = tu
+                            else
+                                if not t[u] then
+                                    tt[u] = tu
+                                end
+                            end
+                        end
+                    end
+                    first = false
+                else
+                    s = unicodes[s]
+                    local t1 = t[1]
+                    if not t1[s] then
+                        t1[s] = { { } }
+                    end
+                    t = t1[s]
+                end
+            end
+            t[2] = unicode
+        end,
+        position = function(p,lookup,k,glyph,unicode)
+            -- not used
+            local s = position[lookup]
+            if not s then s = { } position[lookup] = s end
+            s[unicode] = p[2] -- direct pointer to kern spec
+        end,
+        pair = function(p,lookup,k,glyph,unicode)
+            local s = pair[lookup]
+            if not s then s = { } pair[lookup] = s end
+            local others = s[unicode]
+            if not others then others = { } s[unicode] = others end
+            -- todo: fast check for space
+            local two = p[2]
+            local upc = unicodes[two]
+            if not upc then
+                for pc in gmatch(two,"[^ ]+") do
+                    local upc = unicodes[pc]
+                    if type(upc) == "number" then
+                        others[upc] = p -- direct pointer to main table
+                    else
+                        for i=1,#upc do
+                            others[upc[i]] = p -- direct pointer to main table
+                        end
+                    end
+                end
+            elseif type(upc) == "number" then
+                others[upc] = p -- direct pointer to main table
+            else
+                for i=1,#upc do
+                    others[upc[i]] = p -- direct pointer to main table
+                end
+            end
+        --~ if trace_lookups then
+        --~     logs.report("define otf","lookup %s: pair for U+%04X",lookup,unicode)
+        --~ end
+        end,
+    }
+    --
     for unicode, glyph in next, descriptions do
-        local lookups = glyph.lookups
+        local lookups = glyph.slookups
+        if lookups then
+            for lookup, p in next, lookups do
+                action[p[1]](p,lookup,k,glyph,unicode)
+            end
+        end
+        local lookups = glyph.mlookups
         if lookups then
             for lookup, whatever in next, lookups do
                 for i=1,#whatever do -- normaly one
                     local p = whatever[i]
-                    local what = p[1]
-                    if what == 'substitution' then
-                        local old, new = unicode, unicodes[p[2]]
-                        if type(new) == "table" then
-                            new = new[1]
-                        end
-                        local s = single[lookup]
-                        if not s then s = { } single[lookup] = s end
-                        s[old] = new
---~                             if trace_lookups then
---~                                 logs.report("define otf","lookup %s: substitution %s => %s",lookup,old,new)
---~                             end
-                        break
-                    elseif what == 'multiple' then
-                        local old, new = unicode, { }
-                        local m = multiple[lookup]
-                        if not m then m = { } multiple[lookup] = m end
-                        m[old] = new
-                        for pc in gmatch(p[2],"[^ ]+") do
-                            local upc = unicodes[pc]
-                            if type(upc) == "number" then
-                                new[#new+1] = upc
-                            else
-                                new[#new+1] = upc[1]
-                            end
-                        end
---~                             if trace_lookups then
---~                                 logs.report("define otf","lookup %s: multiple %s => %s",lookup,old,concat(new," "))
---~                             end
-                        break
-                    elseif what == 'alternate' then
-                        local old, new = unicode, { }
-                        local a = alternate[lookup]
-                        if not a then a = { } alternate[lookup] = a end
-                        a[old] = new
-                        for pc in gmatch(p[2],"[^ ]+") do
-                            local upc = unicodes[pc]
-                            if type(upc) == "number" then
-                                new[#new+1] = upc
-                            else
-                                new[#new+1] = upc[1]
-                            end
-                        end
---~                             if trace_lookups then
---~                                 logs.report("define otf","lookup %s: alternate %s => %s",lookup,old,concat(new,"|"))
---~                             end
-                        break
-                    elseif what == "ligature" then
---~                             if trace_lookups then
---~                                 logs.report("define otf","lookup %s: ligature %s => %s",lookup,p[2],glyph.name)
---~                             end
-                        local first = true
-                        local t = ligature[lookup]
-                        if not t then t = { } ligature[lookup] = t end
-                        for s in gmatch(p[2],"[^ ]+") do
-                            if first then
-                                local u = unicodes[s]
-                                if not u then
-                                    logs.report("define otf","lookup %s: ligature %s => %s ignored due to invalid unicode",lookup,p[2],glyph.name)
-                                    break
-                                elseif type(u) == "number" then
-                                    if not t[u] then
-                                        t[u] = { { } }
-                                    end
-                                    t = t[u]
-                                else
-                                    local tt = t
-                                    local tu
-                                    for i=1,#u do
-                                        local u = u[i]
-                                        if i==1 then
-                                            if not t[u] then
-                                                t[u] = { { } }
-                                            end
-                                            tu = t[u]
-                                            t = tu
-                                        else
-                                            if not t[u] then
-                                                tt[u] = tu
-                                            end
-                                        end
-                                    end
-                                end
-                                first = false
-                            else
-                                s = unicodes[s]
-                                local t1 = t[1]
-                                if not t1[s] then
-                                    t1[s] = { { } }
-                                end
-                                t = t1[s]
-                            end
-                        end
-                        t[2] = unicode
-                    elseif what == 'position' then
-                        -- not used
-                        local s = position[lookup]
-                        if not s then s = { } position[lookup] = s end
-                        s[unicode] = p[2] -- direct pointer to kern spec
-                    elseif what == 'pair' then
-                        local s = pair[lookup]
-                        if not s then s = { } pair[lookup] = s end
-                        local others = s[unicode]
-                        if not others then others = { } s[unicode] = others end
-                        -- todo: fast check for space
-                        local two = p[2]
-                        local upc = unicodes[two]
-                        if not upc then
-                            for pc in gmatch(two,"[^ ]+") do
-                                local upc = unicodes[pc]
-                                if type(upc) == "number" then
-                                    others[upc] = p -- direct pointer to main table
-                                else
-                                    for i=1,#upc do
-                                        others[upc[i]] = p -- direct pointer to main table
-                                    end
-                                end
-                            end
-                        elseif type(upc) == "number" then
-                            others[upc] = p -- direct pointer to main table
-                        else
-                            for i=1,#upc do
-                                others[upc[i]] = p -- direct pointer to main table
-                            end
-                        end
---~                             if trace_lookups then
---~                                 logs.report("define otf","lookup %s: pair for U+%04X",lookup,unicode)
---~                             end
-                    end
+                    action[p[1]](p,lookup,k,glyph,unicode)
                 end
             end
         end
@@ -2419,9 +2430,9 @@ local function prepare_lookups(tfmdata)
                 local k = kerns[lookup]
                 if not k then k = { } kerns[lookup] = k end
                 k[unicode] = krn -- ref to glyph, saves lookup
---~                     if trace_lookups then
---~                         logs.report("define otf","lookup %s: kern for U+%04X",lookup,unicode)
---~                     end
+            --~ if trace_lookups then
+            --~     logs.report("define otf","lookup %s: kern for U+%04X",lookup,unicode)
+            --~ end
             end
         end
         local oanchor = glyph.anchors
@@ -2435,9 +2446,9 @@ local function prepare_lookups(tfmdata)
                                 local f = mark[lookup]
                                 if not f then f = { } mark[lookup]  = f end
                                 f[unicode] = anchors -- ref to glyph, saves lookup
---~                                     if trace_lookups then
---~                                         logs.report("define otf","lookup %s: mark anchor %s for U+%04X",lookup,name,unicode)
---~                                     end
+                            --~ if trace_lookups then
+                            --~     logs.report("define otf","lookup %s: mark anchor %s for U+%04X",lookup,name,unicode)
+                            --~ end
                             end
                         end
                     end
@@ -2449,9 +2460,9 @@ local function prepare_lookups(tfmdata)
                                 local f = cursive[lookup]
                                 if not f then f = { } cursive[lookup]  = f end
                                 f[unicode] = anchors -- ref to glyph, saves lookup
---~                                     if trace_lookups then
---~                                         logs.report("define otf","lookup %s: exit anchor %s for U+%04X",lookup,name,unicode)
---~                                     end
+                            --~ if trace_lookups then
+                            --~     logs.report("define otf","lookup %s: exit anchor %s for U+%04X",lookup,name,unicode)
+                            --~ end
                             end
                         end
                     end

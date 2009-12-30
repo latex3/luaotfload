@@ -9,6 +9,7 @@ if not modules then modules = { } end modules ['font-xtx'] = {
 local texsprint, count = tex.sprint, tex.count
 local format, concat, gmatch, match, find, lower = string.format, table.concat, string.gmatch, string.match, string.find, string.lower
 local tostring, next = tostring, next
+local lpegmatch = lpeg.match
 
 local trace_defining = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
 
@@ -88,7 +89,7 @@ local pattern    = (filename + fontname) * subvalue^0 * crapspec^0 * options^0
 
 function fonts.define.specify.colonized(specification) -- xetex mode
     list = { }
-    pattern:match(specification.specification)
+    lpegmatch(pattern,specification.specification)
     for k, v in next, list do
         list[k] = v:is_boolean()
         if type(list[a]) == "nil" then

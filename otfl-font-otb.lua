@@ -9,6 +9,7 @@ if not modules then modules = { } end modules ['font-otb'] = {
 local concat = table.concat
 local format, gmatch, gsub, find, match, lower, strip = string.format, string.gmatch, string.gsub, string.find, string.match, string.lower, string.strip
 local type, next, tonumber, tostring = type, next, tonumber, tostring
+local lpegmatch = lpeg.match
 
 local otf = fonts.otf
 local tfm = fonts.tfm
@@ -69,7 +70,7 @@ local function resolve_ligatures(tfmdata,ligatures,kind)
         for k,v in next, ligatures do
             local lig = v[1]
             if not done[lig] then
-                local ligs = split_at_space:match(lig)
+                local ligs = lpegmatch(split_at_space,lig)
                 if #ligs == 2 then
                     local uc = v[2]
                     local c, f, s = characters[uc], ligs[1], ligs[2]
@@ -177,9 +178,84 @@ function prepare_base_substitutions(tfmdata,kind,value) -- we can share some cod
             local characters = tfmdata.characters
             local descriptions = tfmdata.descriptions
             local changed = tfmdata.changed
+            --
+            local actions = {
+                substitution = function(p,lookup,k,glyph,unicode)
+                    local pv = p[2] -- p.variant
+                    if pv then
+                        local upv = unicodes[pv]
+                        if upv then
+                            if type(upv) == "table" then
+                                upv = upv[1]
+                            end
+                            if characters[upv] then
+                                if trace_baseinit and trace_singles then
+                                    logs.report("define otf","%s: base substitution %s => %s",cref(kind,lookup),gref(descriptions,k),gref(descriptions,upv))
+                                end
+                                changed[k] = upv
+                            end
+                        end
+                    end
+                end,
+                alternate = function(p,lookup,k,glyph,unicode)
+                    local pc = p[2] -- p.components
+                    if pc then
+                        -- a bit optimized ugliness
+                        if value == 1 then
+                            pc = lpegmatch(splitter,pc)
+                        elseif value == 2 then
+                            local a, b = lpegmatch(splitter,pc)
+                            pc = b or a
+                        else
+                            pc = { lpegmatch(splitter,pc) }
+                            pc = pc[value] or pc[#pc]
+                        end
+                        if pc then
+                            local upc = unicodes[pc]
+                            if upc then
+                                if type(upc) == "table" then
+                                    upc = upc[1]
+                                end
+                                if characters[upc] then
+                                    if trace_baseinit and trace_alternatives then
+                                        logs.report("define otf","%s: base alternate %s => %s",cref(kind,lookup),gref(descriptions,k),gref(descriptions,upc))
+                                    end
+                                    changed[k] = upc
+                                end
+                            end
+                        end
+                    end
+                end,
+                ligature = function(p,lookup,k,glyph,unicode)
+                    local pc = p[2]
+                    if pc then
+                        if trace_baseinit and trace_ligatures then
+                            local upc = { lpegmatch(splitter,pc) }
+                            for i=1,#upc do upc[i] = unicodes[upc[i]] end
+                            -- we assume that it's no table
+                            logs.report("define otf","%s: base ligature %s => %s",cref(kind,lookup),gref(descriptions,upc),gref(descriptions,k))
+                        end
+                        ligatures[#ligatures+1] = { pc, k }
+                    end
+                end,
+            }
+            --
             for k,c in next, characters do
                 local glyph = descriptions[k]
-                local lookups = glyph.lookups
+                local lookups = glyph.slookups
+                if lookups then
+                    for l=1,#lookuplist do
+                        local lookup = lookuplist[l]
+                        local p = lookups[lookup]
+                        if p then
+                            local a = actions[p[1]]
+                            if a then
+                                a(p,lookup,k,glyph,unicode)
+                            end
+                        end
+                    end
+                end
+                local lookups = glyph.mlookups
                 if lookups then
                     for l=1,#lookuplist do
                         local lookup = lookuplist[l]
@@ -187,62 +263,9 @@ function prepare_base_substitutions(tfmdata,kind,value) -- we can share some cod
                         if ps then
                             for i=1,#ps do
                                 local p = ps[i]
-                                local t = p[1]
-                                if t == 'substitution' then
-                                    local pv = p[2] -- p.variant
-                                    if pv then
-                                        local upv = unicodes[pv]
-                                        if upv then
-                                            if type(upv) == "table" then
-                                                upv = upv[1]
-                                            end
-                                            if characters[upv] then
-                                                if trace_baseinit and trace_singles then
-                                                    logs.report("define otf","%s: base substitution %s => %s",cref(kind,lookup),gref(descriptions,k),gref(descriptions,upv))
-                                                end
-                                                changed[k] = upv
-                                            end
-                                        end
-                                    end
-                                elseif t == 'alternate' then
-                                    local pc = p[2] -- p.components
-                                    if pc then
-                                        -- a bit optimized ugliness
-                                        if value == 1 then
-                                            pc = splitter:match(pc)
-                                        elseif value == 2 then
-                                            local a, b = splitter:match(pc)
-                                            pc = b or a
-                                        else
-                                            pc = { splitter:match(pc) }
-                                            pc = pc[value] or pc[#pc]
-                                        end
-                                        if pc then
-                                            local upc = unicodes[pc]
-                                            if upc then
-                                                if type(upc) == "table" then
-                                                    upc = upc[1]
-                                                end
-                                                if characters[upc] then
-                                                    if trace_baseinit and trace_alternatives then
-                                                        logs.report("define otf","%s: base alternate %s => %s",cref(kind,lookup),gref(descriptions,k),gref(descriptions,upc))
-                                                    end
-                                                    changed[k] = upc
-                                                end
-                                            end
-                                        end
-                                    end
-                                elseif t == 'ligature' and not changed[k] then
-                                    local pc = p[2]
-                                    if pc then
-                                        if trace_baseinit and trace_ligatures then
-                                            local upc = { splitter:match(pc) }
-                                            for i=1,#upc do upc[i] = unicodes[upc[i]] end
-                                            -- we assume that it's no table
-                                            logs.report("define otf","%s: base ligature %s => %s",cref(kind,lookup),gref(descriptions,upc),gref(descriptions,k))
-                                        end
-                                        ligatures[#ligatures+1] = { pc, k }
-                                    end
+                                local a = actions[p[1]]
+                                if a then
+                                    a(p,lookup,k,glyph,unicode)
                                 end
                             end
                         end

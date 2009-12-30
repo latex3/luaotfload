@@ -8,6 +8,7 @@ if not modules then modules = { } end modules ['font-def'] = {
 
 local format, concat, gmatch, match, find, lower = string.format, table.concat, string.gmatch, string.match, string.find, string.lower
 local tostring, next = tostring, next
+local lpegmatch = lpeg.match
 
 local trace_defining     = false  trackers  .register("fonts.defining", function(v) trace_defining     = v end)
 local directive_embedall = false  directives.register("fonts.embedall", function(v) directive_embedall = v end)
@@ -108,7 +109,7 @@ define.add_lookup("name")
 define.add_lookup("spec")
 
 function define.get_specification(str)
-    return splitter:match(str)
+    return lpegmatch(splitter,str)
 end
 
 function define.register_split(symbol,action)

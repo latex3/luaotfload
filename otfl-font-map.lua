@@ -6,7 +6,8 @@ if not modules then modules = { } end modules ['font-map'] = {
     license   = "see context related readme files"
 }
 
-local match, format, find, concat = string.match, string.format, string.find, table.concat
+local match, format, find, concat, gsub = string.match, string.format, string.find, table.concat, string.gsub
+local lpegmatch = lpeg.match
 
 local trace_loading = false  trackers.register("otf.loading", function(v) trace_loading = v end)
 
@@ -88,7 +89,7 @@ function fonts.map.load_file(filename, entries, encodings)
                     -- print(line)
                 else
                     local extend, slant, name, fullname, fontfile, encoding
-                    line = line:gsub('"(.+)"', function(s)
+                    line = gsub(line,'"(.+)"', function(s)
                         extend = find(s,'"([^"]+) ExtendFont"')
                         slant = find(s,'"([^"]+) SlantFont"')
                         return ""
@@ -169,7 +170,7 @@ end
 --~ local parser = fonts.map.make_name_parser("Japan1")
 --~ local parser = fonts.map.make_name_parser()
 --~ local function test(str)
---~     local b, a = parser:match(str)
+--~     local b, a = lpegmatch(parser,str)
 --~     print((a and table.serialize(b)) or b)
 --~ end
 --~ test("a.sc")

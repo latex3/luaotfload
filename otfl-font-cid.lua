@@ -8,6 +8,7 @@ if not modules then modules = { } end modules ['font-cid'] = {
 
 local format, match, lower = string.format, string.match, string.lower
 local tonumber = tonumber
+local lpegmatch = lpeg.match
 
 local trace_loading = false  trackers.register("otf.loading",      function(v) trace_loading      = v end)
 
@@ -61,7 +62,7 @@ function fonts.cid.load(filename)
     local data = io.loaddata(filename)
     if data then
         unicodes, names = { }, { }
-        grammar:match(data)
+        lpegmatch(grammar,data)
         local supplement, registry, ordering = match(filename,"^(.-)%-(.-)%-()%.(.-)$")
         return {
             supplement = supplement,

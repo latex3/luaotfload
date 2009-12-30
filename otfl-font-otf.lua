@@ -11,6 +11,7 @@ local utf = unicode.utf8
 local concat, getn, utfbyte = table.concat, table.getn, utf.byte
 local format, gmatch, gsub, find, match, lower, strip = string.format, string.gmatch, string.gsub, string.find, string.match, string.lower, string.strip
 local type, next, tonumber, tostring = type, next, tonumber, tostring
+local lpegmatch = lpeg.match
 
 local trace_private    = false  trackers.register("otf.private",      function(v) trace_private      = v end)
 local trace_loading    = false  trackers.register("otf.loading",      function(v) trace_loading      = v end)
@@ -83,7 +84,7 @@ otf.features.default = otf.features.default or { }
 otf.enhancers        = otf.enhancers        or { }
 otf.glists           = { "gsub", "gpos" }
 
-otf.version          = 2.641 -- beware: also sync font-mis.lua
+otf.version          = 2.642 -- beware: also sync font-mis.lua
 otf.pack             = true  -- beware: also sync font-mis.lua
 otf.syncspace        = true
 otf.notdef           = false
@@ -207,6 +208,7 @@ local enhancers = {
     "reorganize mark classes",
     "reorganize kerns", -- moved here
     "flatten glyph lookups", "flatten anchor tables", "flatten feature tables",
+    "simplify glyph lookups", -- some saving
     "prepare luatex tables",
     "analyse features", "rehash features",
     "analyse anchors", "analyse marks", "analyse unicodes", "analyse subtables",
@@ -503,11 +505,11 @@ local separator   = lpeg.S("_.")
 local other       = lpeg.C((1 - separator)^1)
 local ligsplitter = lpeg.Ct(other * (separator * other)^0)
 
---~ print(table.serialize(ligsplitter:match("this")))
---~ print(table.serialize(ligsplitter:match("this.that")))
---~ print(table.serialize(ligsplitter:match("japan1.123")))
---~ print(table.serialize(ligsplitter:match("such_so_more")))
---~ print(table.serialize(ligsplitter:match("such_so_more.that")))
+--~ print(table.serialize(lpegmatch(ligsplitter,"this")))
+--~ print(table.serialize(lpegmatch(ligsplitter,"this.that")))
+--~ print(table.serialize(lpegmatch(ligsplitter,"japan1.123")))
+--~ print(table.serialize(lpegmatch(ligsplitter,"such_so_more")))
+--~ print(table.serialize(lpegmatch(ligsplitter,"such_so_more.that")))
 
 otf.enhancers["analyse unicodes"] = function(data,filename)
     local tounicode16, tounicode16sequence = fonts.map.tounicode16, fonts.map.tounicode16sequence
@@ -545,13 +547,13 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
             -- cidmap heuristics, beware, there is no guarantee for a match unless
             -- the chain resolves
             if (not unicode) and usedmap then
-                local foundindex = oparser:match(name)
+                local foundindex = lpegmatch(oparser,name)
                 if foundindex then
                     unicode = cidcodes[foundindex] -- name to number
                     if not unicode then
                         local reference = cidnames[foundindex] -- number to name
                         if reference then
-                            local foundindex = oparser:match(reference)
+                            local foundindex = lpegmatch(oparser,reference)
                             if foundindex then
                                 unicode = cidcodes[foundindex]
                                 if unicode then
@@ -559,7 +561,7 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
                                 end
                             end
                             if not unicode then
-                                local foundcodes, multiple = uparser:match(reference)
+                                local foundcodes, multiple = lpegmatch(uparser,reference)
                                 if foundcodes then
                                     if multiple then
                                         originals[index], tounicode[index], nl, unicode = foundcodes, tounicode16sequence(foundcodes), nl + 1, true
@@ -574,7 +576,7 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
             end
             -- a.whatever or a_b_c.whatever or a_b_c (no numbers)
             if not unicode then
-                local split = ligsplitter:match(name)
+                local split = lpegmatch(ligsplitter,name)
                 local nplit = (split and #split) or 0
                 if nplit == 0 then
                     -- skip
@@ -607,7 +609,7 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
             end
             -- last resort
             if not unicode then
-                local foundcodes, multiple = uparser:match(name)
+                local foundcodes, multiple = lpegmatch(uparser,name)
                 if foundcodes then
                     if multiple then
                         originals[index], tounicode[index], nl, unicode = foundcodes, tounicode16sequence(foundcodes), nl + 1, true
@@ -1193,8 +1195,9 @@ end
 
 otf.enhancers["flatten glyph lookups"] = function(data,filename)
     for k, v in next, data.glyphs do
-        if v.lookups then
-            for kk, vv in next, v.lookups do
+        local lookups = v.lookups
+        if lookups then
+            for kk, vv in next, lookups do
                 for kkk=1,#vv do
                     local vvv = vv[kkk]
                     local s = vvv.specification
@@ -1240,6 +1243,31 @@ otf.enhancers["flatten glyph lookups"] = function(data,filename)
                     end
                 end
             end
+        end
+    end
+end
+
+otf.enhancers["simplify glyph lookups"] = function(data,filename)
+    for k, v in next, data.glyphs do
+        local lookups = v.lookups
+        if lookups then
+            local slookups, mlookups
+            for kk, vv in next, lookups do
+                if #vv == 1 then
+                    if not slookups then
+                        slookups = { }
+                        v.slookups = slookups
+                    end
+                    slookups[kk] = vv[1]
+                else
+                    if not mlookups then
+                        mlookups = { }
+                        v.mlookups = mlookups
+                    end
+                    mlookups[kk] = vv
+                end
+            end
+            v.lookups = nil
         end
     end
 end
@@ -1484,7 +1512,7 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
                     local variants = m.horiz_variants
                     if variants then
                         local c = char
-                        for n in variants:gmatch("[^ ]+") do
+                        for n in gmatch(variants,"[^ ]+") do
                             local un = unicodes[n]
                             if un and u ~= un then
                                 c.next = un
@@ -1496,7 +1524,7 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
                         local variants = m.vert_variants
                         if variants then
                             local c = char
-                            for n in variants:gmatch("[^ ]+") do
+                            for n in gmatch(variants,"[^ ]+") do
                                 local un = unicodes[n]
                                 if un and u ~= un then
                                     c.next = un

@@ -78,6 +78,7 @@ and the derived files
 \generate{%
   \usedir{tex/luatex/luaotfload}%
   \file{luaotfload.lua}{\from{luaotfload.dtx}{lua}}%%
+  \file{otfl-font-msc.lua}{\from{luaotfload.dtx}{font-msc}}%%
 }
 
 \obeyspaces
@@ -532,6 +533,73 @@ end
 luaotfload.loadmodule('font-xtx.lua')
 luaotfload.loadmodule('font-map.lua')
 luaotfload.loadmodule('font-dum.lua')
+luaotfload.loadmodule('font-msc.lua')
+
+%    \end{macrocode}
+%
+%    This is a small patch that prevents errors in some \LaTeX\ files.
+%
+%    \begin{macrocode}
+
+fonts.enc.known = {}
+
+%    \end{macrocode}
+%
+%    We have to register a function in the |find_vf_file| callback in order to make everything work.
+%
+%    \begin{macrocode}
+
+function luaotfload.find_vf_file(name)
+    name = file.removesuffix(file.basename(name))
+    local result = kpse.find_file(name, "vf") or ""
+    if result == "" then
+        result = kpse.find_file(name, "ovf") or ""
+    end
+    return result
+end
+
+%    \end{macrocode}
+%
+%    Finally two functions 
+%
+%    \begin{macrocode}
+
+function luaotfload.register_callbacks()
+    callback.add('pre_linebreak_filter', nodes.simple_font_handler, 'luaotfload.pre_linebreak_filter')
+    callback.add('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
+    callback.reset('define_font')
+    callback.add('define_font', fonts.define.read, 'luaotfload.define_font', 1)
+    callback.add('find_vf_file', luaotfload.find_vf_file, 'luaotfload.find_vf_file')
+end
+
+function luaotfload.unregister_callbacks()
+    callback.remove('pre_linebreak_filter', 'luaotfload.pre_linebreak_filter')
+    callback.remove('hpack_filter', 'luaotfload.hpack_filter')
+    callback.remove('define_font', 'luaotfload.define_font')
+    callback.remove('find_vf_file', 'luaotfload.find_vf_file')
+end
+%    \end{macrocode}
+% \iffalse
+%</lua>
+% \fi
+%
+% \section{\texttt{otfl-font-msc.lua}}
+%
+% \iffalse
+%<*font-msc>
+% \fi
+%
+%    First, some initializations.
+%
+%    \begin{macrocode}
+
+if not modules then modules = { } end modules ['font-msc'] = {
+    version   = 1.001,
+    comment   = "companion to font-otf.lua (miscellaneous)",
+    author    = "Khaled Hosny",
+    copyright = "Khaled Hosny",
+    license   = "GPL"
+}
 
 %    \end{macrocode}
 %
@@ -580,51 +648,8 @@ initializers.base.otf.extend = initializers.common.extend
 initializers.node.otf.extend = initializers.common.extend
 
 %    \end{macrocode}
-%
-%    This is a small patch that prevents errors in some \LaTeX\ files.
-%
-%    \begin{macrocode}
-
-fonts.enc.known = {}
-
-%    \end{macrocode}
-%
-%    We have to register a function in the |find_vf_file| callback in order to make everything work.
-%
-%    \begin{macrocode}
-
-function luaotfload.find_vf_file(name)
-    name = file.removesuffix(file.basename(name))
-    local result = kpse.find_file(name, "vf") or ""
-    if result == "" then
-        result = kpse.find_file(name, "ovf") or ""
-    end
-    return result
-end
-
-%    \end{macrocode}
-%
-%    Finally two functions 
-%
-%    \begin{macrocode}
-
-function luaotfload.register_callbacks()
-    callback.add('pre_linebreak_filter', nodes.simple_font_handler, 'luaotfload.pre_linebreak_filter')
-    callback.add('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
-    callback.reset('define_font')
-    callback.add('define_font', fonts.define.read, 'luaotfload.define_font', 1)
-    callback.add('find_vf_file', luaotfload.find_vf_file, 'luaotfload.find_vf_file')
-end
-
-function luaotfload.unregister_callbacks()
-    callback.remove('pre_linebreak_filter', 'luaotfload.pre_linebreak_filter')
-    callback.remove('hpack_filter', 'luaotfload.hpack_filter')
-    callback.remove('define_font', 'luaotfload.define_font')
-    callback.remove('find_vf_file', 'luaotfload.find_vf_file')
-end
-%    \end{macrocode}
 % \iffalse
-%</lua>
+%</font-msc>
 % \fi
 %
 % \section{\texttt{luaotfload.sty}}

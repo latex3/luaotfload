@@ -611,7 +611,7 @@ fonts.triggers            = fonts.triggers            or { }
 fonts.initializers        = fonts.initializers        or { }
 fonts.initializers.common = fonts.initializers.common or { }
 
-local initializers = fonts.initializers
+local initializers, format = fonts.initializers, string.format
 
 table.insert(fonts.triggers,"slant")
 
@@ -664,25 +664,43 @@ end
 initializers.base.otf.color = initializers.common.color
 initializers.node.otf.color = initializers.common.color
 
+local res1 = tex.pdfpageresources
+local res2 = '/TransGs1<</ca 1/CA 1>>'
+
+local function hex2dec(hex)
+    return tonumber(hex, 16)/255
+end
+
 local function hex_to_rgba(hex)
-    local r, g, b, a, color
+    local r, g, b, a, push, pop, res3
     if hex and #hex == 6 then
         _, _, r, g, b = hex:find('(..)(..)(..)')
     elseif #hex == 8 then
-        _, _, r, g, b, a = hex:find('(..)(..)(..)(..)')
+        _, _, r, g, b, a     = hex:find('(..)(..)(..)(..)')
+        a                    = format('%1.g', hex2dec(a))
+        res3                 = format('/TransGs%g<</ca %g/CA %g>>', a, a, a)
+        res2                 = format('%s%s', res2, res2:find(res3) and "" or res3)
+        tex.pdfpageresources = format('%s/ExtGState<<%s>>', res1, res2)
     else
         return nil
     end
-    r = tonumber(r, 16)/255
-    g = tonumber(g, 16)/255
-    b = tonumber(b, 16)/255
-    color = string.format("%.3g %.3g %.3g rg", r, g, b)
-    return color
+    r = hex2dec(r)
+    g = hex2dec(g)
+    b = hex2dec(b)
+    if a then
+        push = format('/TransGs%g gs %.3g %.3g %.3g rg', a, r, g, b)
+        pop  = '0 g /TransGs1 gs'
+    else
+        push = format('%.3g %.3g %.3g rg', r, g, b)
+        pop  = '0 g'
+    end
+    return push, pop
 end
 
-local glyph = node.id('glyph')
-local hlist = node.id('hlist')
-local vlist = node.id('vlist')
+local glyph   = node.id('glyph')
+local hlist   = node.id('hlist')
+local vlist   = node.id('vlist')
+local whatsit = node.id('whatsit')
 
 local function colorize(head)
    for n in node.traverse(head) do
@@ -694,18 +712,19 @@ local function colorize(head)
            if tfmdata and tfmdata.color then
                local prev = n.prev
                local next = n.next
+               local pushcolor, popcolor = hex_to_rgba(tfmdata.color)
                if prev.id == glyph and fonts.ids[prev.font].color == tfmdata.color then
                else
-                   local push = node.new(node.id("whatsit"), 8)
+                   local push = node.new(whatsit, 8)
                    push.mode  = 2
-                   push.data  = hex_to_rgba(tfmdata.color)
+                   push.data  = pushcolor
                    head       = node.insert_before(head, n, push)
                end
                if next.id == glyph and fonts.ids[next.font].color == tfmdata.color then
                else
-                   local pop  = node.new(node.id("whatsit"), 8)
+                   local pop  = node.new(whatsit, 8)
                    pop.mode   = 2
-                   pop.data   = "0 g"
+                   pop.data   = popcolor
                    head       = node.insert_after(head, n, pop)
                end
            end

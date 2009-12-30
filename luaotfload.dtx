@@ -648,6 +648,76 @@ initializers.base.otf.extend = initializers.common.extend
 initializers.node.otf.extend = initializers.common.extend
 
 %    \end{macrocode}
+%
+%    Support for font color.
+%
+%    \begin{macrocode}
+
+table.insert(fonts.triggers,"color")
+
+function initializers.common.color(tfmdata,value)
+    if value then
+        tfmdata.color = value
+    end
+end
+
+initializers.base.otf.color = initializers.common.color
+initializers.node.otf.color = initializers.common.color
+
+local function hex_to_rgba(hex)
+    local r, g, b, a, color
+    if hex and #hex == 6 then
+        _, _, r, g, b = hex:find('(..)(..)(..)')
+    elseif #hex == 8 then
+        _, _, r, g, b, a = hex:find('(..)(..)(..)(..)')
+    else
+        return nil
+    end
+    r = tonumber(r, 16)/255
+    g = tonumber(g, 16)/255
+    b = tonumber(b, 16)/255
+    color = string.format("%.3g %.3g %.3g rg", r, g, b)
+    return color
+end
+
+local glyph = node.id('glyph')
+local hlist = node.id('hlist')
+local vlist = node.id('vlist')
+
+local function colorize(head)
+   for n in node.traverse(head) do
+       if n.id == hlist or n.id == vlist then
+           colorize(n.list)
+       end
+       if n.id == glyph then
+           local tfmdata = fonts.ids[n.font]
+           if tfmdata and tfmdata.color then
+               local prev = n.prev
+               local next = n.next
+               if prev.id == glyph and fonts.ids[prev.font].color == tfmdata.color then
+               else
+                   local push = node.new(node.id("whatsit"), 8)
+                   push.mode  = 2
+                   push.data  = hex_to_rgba(tfmdata.color)
+                   head       = node.insert_before(head, n, push)
+               end
+               if next.id == glyph and fonts.ids[next.font].color == tfmdata.color then
+               else
+                   local pop  = node.new(node.id("whatsit"), 8)
+                   pop.mode   = 2
+                   pop.data   = "0 g"
+                   head       = node.insert_after(head, n, pop)
+               end
+           end
+       end
+   end
+   return head
+end
+
+callback.add("hpack_filter",         colorize, "Font color")
+callback.add("pre_linebreak_filter", colorize, "Font color")
+
+%    \end{macrocode}
 % \iffalse
 %</font-msc>
 % \fi

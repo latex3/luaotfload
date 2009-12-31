@@ -718,14 +718,14 @@ local function colorize(head)
                if prev.id == glyph and fonts.ids[prev.font].color == tfmdata.color then
                else
                    local push = node.new(whatsit, 8)
-                   push.mode  = 2
+                   push.mode  = 1
                    push.data  = pushcolor
                    head       = node.insert_before(head, n, push)
                end
                if next.id == glyph and fonts.ids[next.font].color == tfmdata.color then
                else
                    local pop  = node.new(whatsit, 8)
-                   pop.mode   = 2
+                   pop.mode   = 1
                    pop.data   = popcolor
                    head       = node.insert_after(head, n, pop)
                end

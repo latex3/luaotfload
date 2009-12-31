@@ -664,24 +664,34 @@ end
 initializers.base.otf.color = initializers.common.color
 initializers.node.otf.color = initializers.common.color
 
-local res1 = tex.pdfpageresources
-local res2 = '/TransGs1<</ca 1/CA 1>>'
+local function hex2dec(hex,one)
+    if one then
+        return format("%.1g", tonumber(hex, 16)/255)
+    else
+        return format("%.3g", tonumber(hex, 16)/255)
+    end
+end
 
-local function hex2dec(hex)
-    return format("%.3g", tonumber(hex, 16)/255)
+local res
+
+local function pageresources(a)
+    local res2
+    if not res then
+       res = "/TransGs1<</ca 1/CA 1>>"
+    end
+    res2 = format("/TransGs%s<</ca %s/CA %s>>", a, a, a)
+    res  = format("%s%s", res, res:find(res2) and "" or res2)
 end
 
 local function hex_to_rgba(hex)
     local r, g, b, a, push, pop, res3
     if hex then
         if #hex == 6 then
-            _, _, r, g, b = hex:find('(..)(..)(..)')
+            _, _, r, g, b    = hex:find('(..)(..)(..)')
         elseif #hex == 8 then
-            _, _, r, g, b, a     = hex:find('(..)(..)(..)(..)')
-            a                    = hex2dec(a)
-            res3                 = format('/TransGs%g<</ca %g/CA %g>>', a, a, a)
-            res2                 = format('%s%s', res2, res2:find(res3) and "" or res3)
-            tex.pdfpageresources = format('%s/ExtGState<<%s>>', res1, res2)
+            _, _, r, g, b, a = hex:find('(..)(..)(..)(..)')
+            a                = hex2dec(a,true)
+            pageresources(a)
         end
     else
         return nil
@@ -735,8 +745,14 @@ local function colorize(head)
    return head
 end
 
+local function finalize(head)
+    tex.pdfpageresources = format("%s\n/ExtGState<<%s>>", tex.pdfpageresources, res)
+    return head
+end
+
 callback.add("hpack_filter",         colorize, "Font color")
 callback.add("pre_linebreak_filter", colorize, "Font color")
+callback.add("pre_output_filter",    finalize, "Finalize hack")
 
 %    \end{macrocode}
 % \iffalse

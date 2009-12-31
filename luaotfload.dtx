@@ -746,7 +746,9 @@ local function colorize(head)
 end
 
 local function finalize(head)
-    tex.pdfpageresources = format("%s\n/ExtGState<<%s>>", tex.pdfpageresources, res)
+    if res then
+        tex.pdfpageresources = format("%s\n/ExtGState<<%s>>", tex.pdfpageresources, res)
+    end
     return head
 end
 

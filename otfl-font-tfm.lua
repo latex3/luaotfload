@@ -186,36 +186,36 @@ fonts.trace_scaling = false
 -- basekerns are scaled and will be hashed by table id
 -- sharedkerns are unscaled and are be hashed by concatenated indexes
 
-function tfm.check_base_kerns(tfmdata)
-    if tfm.share_base_kerns then
-        local sharedkerns = tfmdata.sharedkerns
-        if sharedkerns then
-            local basekerns = { }
-            tfmdata.basekerns = basekerns
-            return sharedkerns, basekerns
-        end
-    end
-    return nil, nil
-end
+--~ function tfm.check_base_kerns(tfmdata)
+--~     if tfm.share_base_kerns then
+--~         local sharedkerns = tfmdata.sharedkerns
+--~         if sharedkerns then
+--~             local basekerns = { }
+--~             tfmdata.basekerns = basekerns
+--~             return sharedkerns, basekerns
+--~         end
+--~     end
+--~     return nil, nil
+--~ end
 
-function tfm.prepare_base_kerns(tfmdata)
-    if tfm.share_base_kerns and not tfmdata.sharedkerns then
-        local sharedkerns = { }
-        tfmdata.sharedkerns = sharedkerns
-        for u, chr in next, tfmdata.characters do
-            local kerns = chr.kerns
-            if kerns then
-                local hash = concat(sortedkeys(kerns), " ")
-                local base = sharedkerns[hash]
-                if not base then
-                    sharedkerns[hash] = kerns
-                else
-                    chr.kerns = base
-                end
-            end
-        end
-    end
-end
+--~ function tfm.prepare_base_kerns(tfmdata)
+--~     if tfm.share_base_kerns and not tfmdata.sharedkerns then
+--~         local sharedkerns = { }
+--~         tfmdata.sharedkerns = sharedkerns
+--~         for u, chr in next, tfmdata.characters do
+--~             local kerns = chr.kerns
+--~             if kerns then
+--~                 local hash = concat(sortedkeys(kerns), " ")
+--~                 local base = sharedkerns[hash]
+--~                 if not base then
+--~                     sharedkerns[hash] = kerns
+--~                 else
+--~                     chr.kerns = base
+--~                 end
+--~             end
+--~         end
+--~     end
+--~ end
 
 -- we can have cache scaled characters when we are in node mode and don't have
 -- protruding and expansion: hash == fullname @ size @ protruding @ expansion
@@ -229,7 +229,7 @@ local charactercache = { }
 -- has_italic flag. Some more flags will be added in the future.
 
 function tfm.do_scale(tfmtable, scaledpoints)
-    tfm.prepare_base_kerns(tfmtable) -- optimalization
+ -- tfm.prepare_base_kerns(tfmtable) -- optimalization
     if scaledpoints < 0 then
         scaledpoints = (- scaledpoints/1000) * tfmtable.designsize -- already in sp
     end
@@ -303,7 +303,7 @@ t.colorscheme = tfmtable.colorscheme
     local defaultheight = luatex and luatex.defaultheight or 0
     local defaultdepth  = luatex and luatex.defaultdepth  or 0
     -- experimental, sharing kerns (unscaled and scaled) saves memory
-    local sharedkerns, basekerns = tfm.check_base_kerns(tfmtable)
+    -- local sharedkerns, basekerns = tfm.check_base_kerns(tfmtable)
     -- loop over descriptions (afm and otf have descriptions, tfm not)
     -- there is no need (yet) to assign a value to chr.tonunicode
     local scaledwidth  = defaultwidth  * hdelta
@@ -311,6 +311,7 @@ t.colorscheme = tfmtable.colorscheme
     local scaleddepth  = defaultdepth  * vdelta
     local stackmath = tfmtable.ignore_stack_math ~= true
     local private = fonts.private
+    local sharedkerns = { }
     for k,v in next, characters do
         local chr, description, index
         if ischanged then
@@ -471,19 +472,26 @@ t.colorscheme = tfmtable.colorscheme
         if not nodemode then
             local vk = v.kerns
             if vk then
-                if sharedkerns then
-                    local base = basekerns[vk] -- hashed by table id, not content
-                    if not base then
-                        base = {}
-                        for k,v in next, vk do base[k] = v*hdelta end
-                        basekerns[vk] = base
-                    end
-                    chr.kerns = base
-                else
-                    local tt = {}
-                    for k,v in next, vk do tt[k] = v*hdelta end
-                    chr.kerns = tt
+            --~ if sharedkerns then
+            --~     local base = basekerns[vk] -- hashed by table id, not content
+            --~     if not base then
+            --~         base = {}
+            --~         for k,v in next, vk do base[k] = v*hdelta end
+            --~         basekerns[vk] = base
+            --~     end
+            --~     chr.kerns = base
+            --~ else
+            --~     local tt = {}
+            --~     for k,v in next, vk do tt[k] = v*hdelta end
+            --~     chr.kerns = tt
+            --~ end
+                local s = sharedkerns[vk]
+                if not s then
+                    local s = {}
+                    for k,v in next, vk do s[k] = v*hdelta end
+                    sharedkerns[vk] = s
                 end
+                chr.kerns = s
             end
             local vl = v.ligatures
             if vl then
@@ -600,21 +608,19 @@ local lastfont = nil
 --
 -- flushing the kern and ligature tables from memory saves a lot (only
 -- base mode) but it complicates vf building where the new characters
--- demand this data
-
---~ for id, f in pairs(fonts.ids) do -- or font.fonts
---~     local ffi = font.fonts[id]
---~     f.characters = ffi.characters
---~     f.kerns = ffi.kerns
---~     f.ligatures = ffi.ligatures
---~ end
+-- demand this data .. solution: functions that access them
 
 function tfm.cleanup_table(tfmdata) -- we need a cleanup callback, now we miss the last one
     if tfm.auto_cleanup then  -- ok, we can hook this into everyshipout or so ... todo
         if tfmdata.type == 'virtual' or tfmdata.virtualized then
             for k, v in next, tfmdata.characters do
-                if v.commands then v.commands  = nil end
+                if v.commands then v.commands = nil end
+            --  if v.kerns    then v.kerns    = nil end
             end
+        else
+        --  for k, v in next, tfmdata.characters do
+        --     if v.kerns    then v.kerns    = nil end
+        --  end
         end
     end
 end

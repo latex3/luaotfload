@@ -314,7 +314,7 @@ function tfm.read(specification)
                 local reader = sequence[s]
                 if readers[reader] then -- not really needed
                     if trace_defining then
-                        logs.report("define font","trying (sequence driven) type %s for %s with file %s",reader,specification.name,specification.filename or "unknown")
+                        logs.report("define font","trying (reader sequence driven) type %s for %s with file %s",reader,specification.name,specification.filename or "unknown")
                     end
                     tfmtable = readers[reader](specification)
                     if tfmtable then

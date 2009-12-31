@@ -279,6 +279,47 @@ function prepare_base_substitutions(tfmdata,kind,value) -- we can share some cod
     end
 end
 
+--~ local function prepare_base_kerns(tfmdata,kind,value) -- todo what kind of kerns, currently all
+--~     if value then
+--~         local otfdata = tfmdata.shared.otfdata
+--~         local validlookups, lookuplist = collect_lookups(otfdata,kind,tfmdata.script,tfmdata.language)
+--~         if validlookups then
+--~             local unicodes = tfmdata.unicodes -- names to unicodes
+--~             local indices = tfmdata.indices
+--~             local characters = tfmdata.characters
+--~             local descriptions = tfmdata.descriptions
+--~             for u, chr in next, characters do
+--~                 local d = descriptions[u]
+--~                 if d then
+--~                     local dk = d.mykerns
+--~                     if dk then
+--~                         local t, done = chr.kerns or { }, false
+--~                         for l=1,#lookuplist do
+--~                             local lookup = lookuplist[l]
+--~                             local kerns = dk[lookup]
+--~                             if kerns then
+--~                                 for k, v in next, kerns do
+--~                                     if v ~= 0 and not t[k] then -- maybe no 0 test here
+--~                                         t[k], done = v, true
+--~                                         if trace_baseinit and trace_kerns then
+--~                                             logs.report("define otf","%s: base kern %s + %s => %s",cref(kind,lookup),gref(descriptions,u),gref(descriptions,k),v)
+--~                                         end
+--~                                     end
+--~                                 end
+--~                             end
+--~                         end
+--~                         if done then
+--~                             chr.kerns = t -- no empty assignments
+--~                         end
+--~                 --  elseif d.kerns then
+--~                 --      logs.report("define otf","%s: invalid mykerns for %s",cref(kind),gref(descriptions,u))
+--~                     end
+--~                 end
+--~             end
+--~         end
+--~     end
+--~ end
+
 local function prepare_base_kerns(tfmdata,kind,value) -- todo what kind of kerns, currently all
     if value then
         local otfdata = tfmdata.shared.otfdata
@@ -288,31 +329,40 @@ local function prepare_base_kerns(tfmdata,kind,value) -- todo what kind of kerns
             local indices = tfmdata.indices
             local characters = tfmdata.characters
             local descriptions = tfmdata.descriptions
+            local sharedkerns = { }
             for u, chr in next, characters do
                 local d = descriptions[u]
                 if d then
-                    local dk = d.mykerns
+                    local dk = d.mykerns -- shared
                     if dk then
-                        local t, done = chr.kerns or { }, false
-                        for l=1,#lookuplist do
-                            local lookup = lookuplist[l]
-                            local kerns = dk[lookup]
-                            if kerns then
-                                for k, v in next, kerns do
-                                    if v ~= 0 and not t[k] then -- maybe no 0 test here
-                                        t[k], done = v, true
-                                        if trace_baseinit and trace_kerns then
-                                            logs.report("define otf","%s: base kern %s + %s => %s",cref(kind,lookup),gref(descriptions,u),gref(descriptions,k),v)
+                        local s = sharedkerns[dk]
+                        if s == false then
+                            -- skip
+                        elseif s then
+                            chr.kerns = s
+                        else
+                            local t, done = chr.kerns or { }, false
+                            for l=1,#lookuplist do
+                                local lookup = lookuplist[l]
+                                local kerns = dk[lookup]
+                                if kerns then
+                                    for k, v in next, kerns do
+                                        if v ~= 0 and not t[k] then -- maybe no 0 test here
+                                            t[k], done = v, true
+                                            if trace_baseinit and trace_kerns then
+                                                logs.report("define otf","%s: base kern %s + %s => %s",cref(kind,lookup),gref(descriptions,u),gref(descriptions,k),v)
+                                            end
                                         end
                                     end
                                 end
                             end
+                            if done then
+                                sharedkerns[dk] = t
+                                chr.kerns = t -- no empty assignments
+                            else
+                                sharedkerns[dk] = false
+                            end
                         end
-                        if done then
-                            chr.kerns = t -- no empty assignments
-                        end
-                --  elseif d.kerns then
-                --      logs.report("define otf","%s: invalid mykerns for %s",cref(kind),gref(descriptions,u))
                     end
                 end
             end

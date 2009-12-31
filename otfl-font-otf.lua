@@ -193,7 +193,7 @@ function otf.enhance(name,data,filename,verbose)
     local enhancer = otf.enhancers[name]
     if enhancer then
         if (verbose ~= nil and verbose) or trace_loading then
-            logs.report("load otf","enhance: %s",name)
+            logs.report("load otf","enhance: %s (%s)",name,filename)
         end
         enhancer(data,filename)
     end
@@ -258,6 +258,7 @@ function otf.load(filename,format,sub,featurefile)
                 logs.report("load otf","enhancing ...")
                 for e=1,#enhancers do
                     otf.enhance(enhancers[e],data,filename)
+                    io.flush() -- we want instant messages
                 end
                 if otf.pack and not fonts.verbose then
                     otf.enhance("pack",data,filename)
@@ -993,6 +994,129 @@ end
 
 -- kern: ttf has a table with kerns
 
+--~ otf.enhancers["reorganize kerns"] = function(data,filename)
+--~     local glyphs, mapmap, unicodes = data.glyphs, data.luatex.indices, data.luatex.unicodes
+--~     local mkdone = false
+--~     for index, glyph in next, data.glyphs do
+--~         if glyph.kerns then
+--~             local mykerns = { }
+--~             for k,v in next, glyph.kerns do
+--~                 local vc, vo, vl = v.char, v.off, v.lookup
+--~                 if vc and vo and vl then -- brrr, wrong! we miss the non unicode ones
+--~                     local uvc = unicodes[vc]
+--~                     if not uvc then
+--~                         if trace_loading then
+--~                             logs.report("load otf","problems with unicode %s of kern %s at glyph %s",vc,k,index)
+--~                         end
+--~                     else
+--~                         if type(vl) ~= "table" then
+--~                             vl = { vl }
+--~                         end
+--~                         for l=1,#vl do
+--~                             local vll = vl[l]
+--~                             local mkl = mykerns[vll]
+--~                             if not mkl then
+--~                                 mkl = { }
+--~                                 mykerns[vll] = mkl
+--~                             end
+--~                             if type(uvc) == "table" then
+--~                                 for u=1,#uvc do
+--~                                     mkl[uvc[u]] = vo
+--~                                 end
+--~                             else
+--~                                 mkl[uvc] = vo
+--~                             end
+--~                         end
+--~                     end
+--~                 end
+--~             end
+--~             glyph.mykerns = mykerns
+--~             glyph.kerns = nil -- saves space and time
+--~             mkdone = true
+--~         end
+--~     end
+--~     if trace_loading and mkdone then
+--~         logs.report("load otf", "replacing 'kerns' tables by 'mykerns' tables")
+--~     end
+--~     if data.kerns then
+--~         if trace_loading then
+--~             logs.report("load otf", "removing global 'kern' table")
+--~         end
+--~         data.kerns = nil
+--~     end
+--~     local dgpos = data.gpos
+--~     if dgpos then
+--~         for gp=1,#dgpos do
+--~             local gpos = dgpos[gp]
+--~             local subtables = gpos.subtables
+--~             if subtables then
+--~                 for s=1,#subtables do
+--~                     local subtable = subtables[s]
+--~                     local kernclass = subtable.kernclass -- name is inconsistent with anchor_classes
+--~                     if kernclass then -- the next one is quite slow
+--~                         for k=1,#kernclass do
+--~                             local kcl = kernclass[k]
+--~                             local firsts, seconds, offsets, lookups = kcl.firsts, kcl.seconds, kcl.offsets, kcl.lookup -- singular
+--~                             if type(lookups) ~= "table" then
+--~                                 lookups = { lookups }
+--~                             end
+--~                             for l=1,#lookups do
+--~                                 local lookup = lookups[l]
+--~                                 -- weird, as maxfirst and maxseconds can have holes
+--~                                 local maxfirsts, maxseconds = getn(firsts), getn(seconds)
+--~                                 if trace_loading then
+--~                                     logs.report("load otf", "adding kernclass %s with %s times %s pairs",lookup, maxfirsts, maxseconds)
+--~                                 end
+--~                                 for fk, fv in next, firsts do
+--~                                     for first in gmatch(fv,"[^ ]+") do
+--~                                         local first_unicode = unicodes[first]
+--~                                         if type(first_unicode) == "number" then
+--~                                             first_unicode = { first_unicode }
+--~                                         end
+--~                                         for f=1,#first_unicode do
+--~                                             local glyph = glyphs[mapmap[first_unicode[f]]]
+--~                                             if glyph then
+--~                                                 local mykerns = glyph.mykerns
+--~                                                 if not mykerns then
+--~                                                     mykerns = { } -- unicode indexed !
+--~                                                     glyph.mykerns = mykerns
+--~                                                 end
+--~                                                 local lookupkerns = mykerns[lookup]
+--~                                                 if not lookupkerns then
+--~                                                     lookupkerns = { }
+--~                                                     mykerns[lookup] = lookupkerns
+--~                                                 end
+--~                                                 for sk, sv in next, seconds do
+--~                                                     local offset = offsets[(fk-1) * maxseconds + sk]
+--~                                                     --~ local offset = offsets[sk] -- (fk-1) * maxseconds + sk]
+--~                                                     for second in gmatch(sv,"[^ ]+") do
+--~                                                         local second_unicode = unicodes[second]
+--~                                                         if type(second_unicode) == "number" then
+--~                                                             lookupkerns[second_unicode] = offset
+--~                                                         else
+--~                                                             for s=1,#second_unicode do
+--~                                                                 lookupkerns[second_unicode[s]] = offset
+--~                                                             end
+--~                                                         end
+--~                                                     end
+--~                                                 end
+--~                                             elseif trace_loading then
+--~                                                 logs.report("load otf", "no glyph data for U+%04X", first_unicode[f])
+--~                                             end
+--~                                         end
+--~                                     end
+--~                                 end
+--~                             end
+--~                         end
+--~                         subtable.comment = "The kernclass table is merged into mykerns in the indexed glyph tables."
+--~                         subtable.kernclass = { }
+--~                     end
+--~                 end
+--~             end
+--~         end
+--~     end
+--~ end
+
 otf.enhancers["reorganize kerns"] = function(data,filename)
     local glyphs, mapmap, unicodes = data.glyphs, data.luatex.indices, data.luatex.unicodes
     local mkdone = false
@@ -1045,6 +1169,9 @@ otf.enhancers["reorganize kerns"] = function(data,filename)
     end
     local dgpos = data.gpos
     if dgpos then
+        local separator = lpeg.P(" ")
+        local other = ((1 - separator)^0) / unicodes
+        local splitter = lpeg.Ct(other * (separator * other)^0)
         for gp=1,#dgpos do
             local gpos = dgpos[gp]
             local subtables = gpos.subtables
@@ -1052,54 +1179,71 @@ otf.enhancers["reorganize kerns"] = function(data,filename)
                 for s=1,#subtables do
                     local subtable = subtables[s]
                     local kernclass = subtable.kernclass -- name is inconsistent with anchor_classes
-                    if kernclass then
+                    if kernclass then -- the next one is quite slow
                         for k=1,#kernclass do
                             local kcl = kernclass[k]
                             local firsts, seconds, offsets, lookups = kcl.firsts, kcl.seconds, kcl.offsets, kcl.lookup -- singular
                             if type(lookups) ~= "table" then
                                 lookups = { lookups }
                             end
+                            local split = { }
                             for l=1,#lookups do
                                 local lookup = lookups[l]
+                                -- weird, as maxfirst and maxseconds can have holes, first seems to be indexed, seconds starts at 2
                                 local maxfirsts, maxseconds = getn(firsts), getn(seconds)
+                                for _, s in next, firsts do
+                                    split[s] = split[s] or lpegmatch(splitter,s)
+                                end
+                                for _, s in next, seconds do
+                                    split[s] = split[s] or lpegmatch(splitter,s)
+                                end
                                 if trace_loading then
                                     logs.report("load otf", "adding kernclass %s with %s times %s pairs",lookup, maxfirsts, maxseconds)
                                 end
-                                for fk, fv in next, firsts do
-                                    for first in gmatch(fv,"[^ ]+") do
-                                        local first_unicode = unicodes[first]
-                                        if type(first_unicode) == "number" then
-                                            first_unicode = { first_unicode }
+                                local function do_it(fk,first_unicode)
+                                    local glyph = glyphs[mapmap[first_unicode]]
+                                    if glyph then
+                                        local mykerns = glyph.mykerns
+                                        if not mykerns then
+                                            mykerns = { } -- unicode indexed !
+                                            glyph.mykerns = mykerns
                                         end
-                                        for f=1,#first_unicode do
-                                            local glyph = glyphs[mapmap[first_unicode[f]]]
-                                            if glyph then
-                                                local mykerns = glyph.mykerns
-                                                if not mykerns then
-                                                    mykerns = { } -- unicode indexed !
-                                                    glyph.mykerns = mykerns
-                                                end
-                                                local lookupkerns = mykerns[lookup]
-                                                if not lookupkerns then
-                                                    lookupkerns = { }
-                                                    mykerns[lookup] = lookupkerns
-                                                end
-                                                for sk, sv in next, seconds do
-                                                    local offset = offsets[(fk-1) * maxseconds + sk]
-                                                    --~ local offset = offsets[sk] -- (fk-1) * maxseconds + sk]
-                                                    for second in gmatch(sv,"[^ ]+") do
-                                                        local second_unicode = unicodes[second]
-                                                        if type(second_unicode) == "number" then
-                                                            lookupkerns[second_unicode] = offset
-                                                        else
-                                                            for s=1,#second_unicode do
-                                                                lookupkerns[second_unicode[s]] = offset
-                                                            end
-                                                        end
+                                        local lookupkerns = mykerns[lookup]
+                                        if not lookupkerns then
+                                            lookupkerns = { }
+                                            mykerns[lookup] = lookupkerns
+                                        end
+                                        local baseoffset = (fk-1) * maxseconds
+                                        for sk=2,maxseconds do
+                                            local sv = seconds[sk]
+                                            local offset = offsets[baseoffset + sk]
+                                            --~ local offset = offsets[sk] -- (fk-1) * maxseconds + sk]
+                                            local splt = split[sv]
+                                            for i=1,#splt do
+                                                local second_unicode = splt[i]
+                                                if tonumber(second_unicode) then
+                                                    lookupkerns[second_unicode] = offset
+                                                else
+                                                    for s=1,#second_unicode do
+                                                        lookupkerns[second_unicode[s]] = offset
                                                     end
                                                 end
-                                            elseif trace_loading then
-                                                logs.report("load otf", "no glyph data for U+%04X", first_unicode[f])
+                                            end
+                                        end
+                                    elseif trace_loading then
+                                        logs.report("load otf", "no glyph data for U+%04X", first_unicode)
+                                    end
+                                end
+                                for fk=1,#firsts do
+                                    local fv = firsts[fk]
+                                    local splt = split[fv]
+                                    for i=1,#splt do
+                                        local first_unicode = splt[i]
+                                        if tonumber(first_unicode) then
+                                            do_it(fk,first_unicode)
+                                        else
+                                            for f=1,#first_unicode do
+                                                do_it(fk,first_unicode[f])
                                             end
                                         end
                                     end

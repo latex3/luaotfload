@@ -668,19 +668,21 @@ local res1 = tex.pdfpageresources
 local res2 = '/TransGs1<</ca 1/CA 1>>'
 
 local function hex2dec(hex)
-    return tonumber(hex, 16)/255
+    return format("%.3g", tonumber(hex, 16)/255)
 end
 
 local function hex_to_rgba(hex)
     local r, g, b, a, push, pop, res3
-    if hex and #hex == 6 then
-        _, _, r, g, b = hex:find('(..)(..)(..)')
-    elseif #hex == 8 then
-        _, _, r, g, b, a     = hex:find('(..)(..)(..)(..)')
-        a                    = format('%1.g', hex2dec(a))
-        res3                 = format('/TransGs%g<</ca %g/CA %g>>', a, a, a)
-        res2                 = format('%s%s', res2, res2:find(res3) and "" or res3)
-        tex.pdfpageresources = format('%s/ExtGState<<%s>>', res1, res2)
+    if hex then
+        if #hex == 6 then
+            _, _, r, g, b = hex:find('(..)(..)(..)')
+        elseif #hex == 8 then
+            _, _, r, g, b, a     = hex:find('(..)(..)(..)(..)')
+            a                    = hex2dec(a)
+            res3                 = format('/TransGs%g<</ca %g/CA %g>>', a, a, a)
+            res2                 = format('%s%s', res2, res2:find(res3) and "" or res3)
+            tex.pdfpageresources = format('%s/ExtGState<<%s>>', res1, res2)
+        end
     else
         return nil
     end
@@ -688,10 +690,10 @@ local function hex_to_rgba(hex)
     g = hex2dec(g)
     b = hex2dec(b)
     if a then
-        push = format('/TransGs%g gs %.3g %.3g %.3g rg', a, r, g, b)
+        push = format('/TransGs%g gs %s %s %s rg', a, r, g, b)
         pop  = '0 g /TransGs1 gs'
     else
-        push = format('%.3g %.3g %.3g rg', r, g, b)
+        push = format('%s %s %s rg', r, g, b)
         pop  = '0 g'
     end
     return push, pop

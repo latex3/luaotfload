@@ -27,18 +27,18 @@ local extra_lists = {
         {
             endash        = "hyphen hyphen",
             emdash        = "hyphen hyphen hyphen",
-         -- quotedblleft  = "quoteleft quoteleft",
-         -- quotedblright = "quoteright quoteright",
-         -- quotedblleft  = "grave grave",
-         -- quotedblright = "quotesingle quotesingle",
-         -- quotedblbase  = "comma comma",
+            quotedblleft  = "quoteleft quoteleft",
+            quotedblright = "quoteright quoteright",
+            quotedblleft  = "grave grave",
+            quotedblright = "quotesingle quotesingle",
+            quotedblbase  = "comma comma",
         },
     },
     trep = {
         {
-         -- [0x0022] = 0x201D,
+            [0x0022] = 0x201D,
             [0x0027] = 0x2019,
-         -- [0x0060] = 0x2018,
+            [0x0060] = 0x2018,
         },
     },
     anum = {

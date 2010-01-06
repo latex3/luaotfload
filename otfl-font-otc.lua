@@ -32,6 +32,10 @@ local extra_lists = {
             quotedblleft  = "grave grave",
             quotedblright = "quotesingle quotesingle",
             quotedblbase  = "comma comma",
+            exclamdown    = "exclam grave",
+            questiondown  = "question grave",
+            guillemotleft = "less less",
+            guillemotright= "greater greater",
         },
     },
     trep = {

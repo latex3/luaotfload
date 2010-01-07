@@ -1778,7 +1778,8 @@ function tfm.read_from_open_type(specification)
     local tfmtable = otf.otf_to_tfm(specification)
     if tfmtable then
         local otfdata = tfmtable.shared.otfdata
-        tfmtable.name = specification.name
+--KH    tfmtable.name = specification.name
+        tfmtable.name = specification.specification -- see mpg/luaotfload#3
         tfmtable.sub = specification.sub
         local s = specification.size
         local m = otfdata.metadata.math
@@ -1829,7 +1830,8 @@ function tfm.read_from_open_type(specification)
             else
                 tfmtable.format = specification.format
             end
-            tfmtable.name = tfmtable.filename or tfmtable.fullname or tfmtable.fontname
+--KH        tfmtable.name = tfmtable.filename or tfmtable.fullname or tfmtable.fontname
+            tfmtable.name = tfmtable.name or tfmtable.filename or tfmtable.fullname or tfmtable.fontname -- see mpg/luaotfload#3
         end
         fonts.logger.save(tfmtable,file.extname(specification.filename),specification)
     end

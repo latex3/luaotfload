@@ -69,7 +69,8 @@ local function thename(s)   list.name   = s end
 local function issub  (v)   list.sub    = v end
 local function iscrap (s)   list.crap   = string.lower(s) end
 local function istrue (s)   list[s]     = 'yes' end
-local function isfalse(s)   list[s]     = 'no' end
+--KH local function isfalse(s)   list[s]     = 'no' end
+local function isfalse(s)   list[s]     = nil end -- see mpg/luaotfload#4
 local function iskey  (k,v) list[k]     = v end
 
 local spaces     = lpeg.P(" ")^0

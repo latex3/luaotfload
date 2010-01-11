@@ -64,3 +64,23 @@ function resolvers.findbinfile(name,kind)
     end
     return resolvers.find_file(name,(kind and remapper[kind]) or kind)
 end
+
+local write_nl, format, name = texio.write_nl, string.format, "luaotfload"
+
+function logs.report(category,fmt,...)
+    if fmt then
+        write_nl(format("%s | %s: %s",name,category,format(fmt,...)))
+    elseif category then
+        write_nl(format("%s | %s",name,category))
+    else
+        write_nl(format("%s |",name))
+    end
+end
+
+function logs.simple(fmt,...)
+    if fmt then
+        write_nl(format("%s | %s",name,format(fmt,...)))
+    else
+        write_nl(format("%s |",name))
+    end
+end

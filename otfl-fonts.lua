@@ -11,10 +11,12 @@ otfl.fonts.module = {
     license       = "CC0"
 }
 
+otfl.fonts.basename = "otfl-names.lua"
+
 kpse.set_program_name("luatex")
 
-require("l-table.lua")
-require("l-io.lua")
+require("luaextra.lua")
+require("otfl-luat-dum.lua")
 
 local fnames    = fnames or { }
 fnames.mappings = fnames.mappings or { }
@@ -46,6 +48,8 @@ function otfl.fonts.load(filename,names,force)
                     mappings[key] = { i.fullname, filename }
                 end
             end
+        else
+            logs.simple("Failed to load %s", filename)
         end
     end
 end
@@ -64,5 +68,12 @@ function otfl.fonts.fontlist()
     return l
 end
 
-otfl.fonts.reload(otfl.fonts.fontlist(),fnames)
-io.savedata("otfl-names.lua", table.serialize(fnames, true))
+local function main()
+    local flist = otfl.fonts.fontlist()
+    otfl.fonts.reload(flist,fnames)
+    logs.simple("%s fonts found, %s saved in the database", #flist, #table.keys(fnames.mappings))
+    io.savedata(otfl.fonts.basename, table.serialize(fnames, true))
+    logs.simple("Saved names database in %s\n", otfl.fonts.basename)
+end
+
+main()

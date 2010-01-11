@@ -423,36 +423,9 @@ end
 %    Con\TeX t at all that allow other modules to be used, it provides some
 %    low-level Con\TeX t functions.
 %
-%    \texttt{luat-dum.lua} defines some dummy functions that are used in other
-%    modules but not really supported outside Con\TeX t, we redefine some of
-%    these functions below.
-%
 %    \begin{macrocode}
 
 luaotfload.loadmodule('luat-dum.lua') -- not used in context at all
-
-%    \end{macrocode}
-%
-%    We redefine the dummy \texttt{logs.report} function to be usable with
-%    \textsf{luaotfload}.
-%
-%    \begin{macrocode}
-
-function logs.report(category,fmt,...)
-    local log, name = luatextra.module_info, luaotfload.module.name
-    if fmt then
-        log(name, string.format("%s: %s", category, string.format(fmt,...)))
-    elseif category then
-        log(name, string.format("%s", category))
-    else
-        log(name, "")
-    end
-end
-
-%    \end{macrocode}
-%
-%    \begin{macrocode}
-
 luaotfload.loadmodule('data-con.lua') -- maybe some day we don't need this one
 
 %    \end{macrocode}

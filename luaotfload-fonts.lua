@@ -112,12 +112,15 @@ local function generate()
         mappings = { },
         version  = luaotfload.fonts.version
     }
-
+    local savepath
     scan_os_fonts(fnames)
     scan_txmf_tree(fnames)
     logs.simple("%s fonts saved in the database", #table.keys(fnames.mappings))
-    io.savedata(luaotfload.fonts.basename, table.serialize(fnames, true))
-    logs.simple("Saved font names database in %s\n", luaotfload.fonts.basename)
+    savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"
+    lfs.mkdir(savepath)
+    savepath = savepath .. luaotfload.fonts.basename
+    io.savedata(savepath, table.serialize(fnames, true))
+    logs.simple("Saved font names database in %s\n", savepath)
 end
 
 luaotfload.fonts.scan     = scan_dir

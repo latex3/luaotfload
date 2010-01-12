@@ -16,7 +16,7 @@ kpse.set_program_name("luatex")
 require("luaextra.lua")
 require("otfl-luat-dum.lua")
 
-local upper, splitpath, expandpath, glob = string.upper, file.split_path, kpse.expand_path, dir.glob
+local upper, splitpath, expandpath, glob, basename = string.upper, file.split_path, kpse.expand_path, dir.glob, file.basename
 
 luaotfload.fonts.basename = "otfl-names.lua"
 luaotfload.fonts.version  = 1.001
@@ -36,11 +36,12 @@ local function clean(str)
     return string.gsub(string.lower(str), "[^%a%d]", "")
 end
 
-local function load_font(filename, names)
+local function load_font(filename, names, texmf)
     local mappings = names.mappings
     local key
     if filename then
         local info = fontloader.info(filename)
+        if texmf == true then filename = basename(filename) end
         if info then
             if type(info) == "table" and #info > 1 then
                 for index,sub in ipairs(info) do
@@ -65,7 +66,7 @@ local function load_font(filename, names)
     end
 end
 
-local function scan_dir(dirname, names, recursive)
+local function scan_dir(dirname, names, recursive, texmf)
     local list, found = { }, { }
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
         if recursive then pat = "/**." else pat = "/*." end
@@ -80,25 +81,29 @@ local function scan_dir(dirname, names, recursive)
         table.append(list, found)
     end
     for _,fnt in ipairs(list) do
-        load_font(fnt, names)
+        load_font(fnt, names, texmf)
     end
 end
 
 local function scan_os_fonts(names)
     local fontdirs
     fontdirs = expandpath("$OSFONTDIR")
-    fontdirs = splitpath(fontdirs, ":")
-    for _,d in ipairs(fontdirs) do
-        scan_dir(d, names, true)
+    if not fontdirs:is_empty() then
+        fontdirs = splitpath(fontdirs, ":")
+        for _,d in ipairs(fontdirs) do
+            scan_dir(d, names, true)
+        end
     end
 end
 
 local function scan_txmf_tree(names)
     local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. expandpath("$TTFONTS")
-    fontdirs = splitpath(fontdirs, ":")
-    for _,d in ipairs(fontdirs) do
-        scan_dir(d, names)
+    if not fontdirs:is_empty() then
+        fontdirs = splitpath(fontdirs, ":")
+        for _,d in ipairs(fontdirs) do
+            scan_dir(d, names, false, true)
+        end
     end
 end
 

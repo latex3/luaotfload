@@ -153,7 +153,7 @@ local function finalize(head)
     return head
 end
 
-callback.add("hpack_filter",         colorize, "Font color")
-callback.add("pre_linebreak_filter", colorize, "Font color")
-callback.add("pre_output_filter",    finalize, "Finalize hack")
+callback.add("hpack_filter",         colorize, "luaotfload.colorize")
+callback.add("pre_linebreak_filter", colorize, "luaotfload.colorize")
+callback.add("pre_output_filter",    finalize, "loaotfload.finalize")
 

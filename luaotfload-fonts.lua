@@ -131,6 +131,7 @@ local function scan_dir(dirname, names, recursive, texmf)
     end
 end
 
+--[[
 local function scan_os_fonts(names)
     local fontdirs
     fontdirs = expandpath("$OSFONTDIR")
@@ -141,6 +142,7 @@ local function scan_os_fonts(names)
         end
     end
 end
+--]]
 
 local function scan_txmf_tree(names)
     local fontdirs = expandpath("$OPENTYPEFONTS")
@@ -159,7 +161,6 @@ local function generate()
         version  = luaotfload.fonts.version
     }
     local savepath
-    scan_os_fonts(fnames)
     scan_txmf_tree(fnames)
     logs.simple("%s fonts saved in the database", #table.keys(fnames.mappings))
     savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"

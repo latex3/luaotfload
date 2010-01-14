@@ -54,7 +54,7 @@ fonts.names.old_to_new = { }
 
 local data, loaded = nil, false
 
-function fonts.names.resolve(name,sub)
+function fonts.names.resolve(name,sub,style)
     if not loaded then
         local basename = fonts.names.basename
         if basename and basename ~= "" then
@@ -70,9 +70,11 @@ function fonts.names.resolve(name,sub)
     end
     if type(data) == "table" and data.version == fonts.names.version then
         local condensed = string.gsub(string.lower(name),"[^%a%d]","")
-        local found = data.mappings and data.mappings[condensed]
+        local found = data.mappings and data.mappings.families and data.mappings.families[condensed]
         if found then
-            local fontname, filename, subfont = found[1], found[2], found[3]
+            local style = style or "regular"
+            found = found[style]
+            local fontname, filename, subfont = found, found[1], found[2]
             if subfont then
                 return filename, fontname
             else

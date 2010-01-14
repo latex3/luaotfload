@@ -32,7 +32,7 @@ local function info(...)
     logs.simple(...)
 end
 
-local function clean(str)
+local function sanitize(str)
     return string.gsub(string.lower(str), "[^%a%d]", "")
 end
 
@@ -92,6 +92,9 @@ function fontloader.fullinfo(filename, subfont)
     if not t.style or t.style:is_empty() then
         t.style = "Regular"
     end
+    for k,v in pairs(t) do
+        t[k] = sanitize(v)
+    end
 --  tprint(m) print(w)
     m, n = nil, nil
     return t
@@ -115,7 +118,7 @@ local function load_font(filename, names, texmf)
                 local fullinfo = fontloader.fullinfo(filename)
                 if texmf == true then
                     filename = basename(filename)
-		end
+                end
                 if not families[fullinfo.family] then
                     families[fullinfo.family] = { }
                 end

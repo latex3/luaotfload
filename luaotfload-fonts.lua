@@ -38,6 +38,7 @@ end
 
 local function tprint(t) print(table.serialize(t)) end
 function fontloader.fullinfo(filename)
+--  info("loaing %s", filename)
     local f, w, m, t, n = nil, nil, nil, { }, { }
     f, w = fontloader.open(filename)
     m = fontloader.to_table(f)
@@ -50,6 +51,7 @@ function fontloader.fullinfo(filename)
                 n.full = v.names.compatfull
                 n.family = v.names.preffamilyname
                 n.subfamily = v.names.subfamily
+                n.modifier = v.names.prefmodifiers
             end
         end
     end
@@ -63,48 +65,50 @@ function fontloader.fullinfo(filename)
     t.psname = m.fontname
     t.fullname = n.full or m.fullname
     t.family = n.family or m.familyname
-    t.style = n.subfamily or m.style --or t.fullname:gsub(t.family, "")
-    if not t.style or t.style == "" then
+    t.style = n.subfamily or m.style
+    if not t.style or t.style:is_empty() then
         local s = t.psname:split("-")
         if s and #s >= 2 then
             t.style = s[#s]
         end
     end
-    if not t.style then
+    if not t.style or t.style:is_empty() then
+        t.style = n.modifier
+    end
+    if not t.style or t.style:is_empty() then
         if n.full and n.family then
             t.style = n.full:gsub(n.family, "")
         elseif m.fontname and m.familyname then
             t.style = m.fontname:gsub(m.familyname, "")
         end
     end
+    if t.style:is_empty() then t.style = "Regular" end
 --  tprint(m) print(w)
     m, n = nil, nil
     return t
 end
 
 local function load_font(filename, names, texmf)
-    local mappings = names.mappings
-    local key
+    local psnames, families = names.mappings.psnames, names.mappings.families
     if filename then
         local info = fontloader.fullinfo(filename)
         if texmf == true then filename = basename(filename) end
         if info then
             if type(info) == "table" and #info > 1 then
                 for index,sub in ipairs(info) do
-                    key = clean(sub.fullname)
-                    if not mappings[key] then
-                        mappings[key] = { sub.fullname, filename, index }
-                    else
-                        log("Font '%s' already exists.", key)
-                    end
+--                  key = clean(sub.fullname)
+--                  if not mappings[key] then
+--                      mappings[key] = { sub.fullname, filename, index }
+--                  else
+--                      log("Font '%s' already exists.", key)
+--                  end
                 end
             else
-                key = clean(info.fullname)
-                if not mappings[key] then
-                    mappings[key] = { info.psname, info.fullname, info.family, info.style, filename }
-                else
-                    log("Font '%s' already exists.", key)
+                if not families[info.family] then
+                    families[info.family] = { }
                 end
+                families[info.family][info.style] = filename
+                psnames[info.psname] = filename
             end
         else
             log("Failed to load %s", filename)
@@ -157,12 +161,15 @@ end
 
 local function generate()
     local fnames = {
-        mappings = { },
+        mappings = {
+            families = { },
+            psnames  = { },
+        },
         version  = luaotfload.fonts.version
     }
     local savepath
     scan_txmf_tree(fnames)
-    logs.simple("%s fonts saved in the database", #table.keys(fnames.mappings))
+    logs.simple("%s fonts saved in the database", #table.keys(fnames.mappings.psnames))
     savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"
     lfs.mkdir(savepath)
     savepath = savepath .. luaotfload.fonts.basename

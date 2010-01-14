@@ -122,8 +122,8 @@ local function load_font(filename, names, texmf)
                 if not families[fullinfo.family] then
                     families[fullinfo.family] = { }
                 end
-                families[fullinfo.family][fullinfo.style] = texmf and basename(filename) or filename
-                psnames[fullinfo.psname] = texmf and basename(filename) or filename
+                families[fullinfo.family][fullinfo.style] = {texmf and basename(filename) or filename}
+                psnames[fullinfo.psname] = {texmf and basename(filename) or filename}
             end
         else
             log("Failed to load %s", filename)

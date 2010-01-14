@@ -19,7 +19,7 @@ require("otfl-luat-dum.lua")
 local upper, splitpath, expandpath, glob, basename = string.upper, file.split_path, kpse.expand_path, dir.glob, file.basename
 
 luaotfload.fonts.basename = "otfl-names.lua"
-luaotfload.fonts.version  = 1.001
+luaotfload.fonts.version  = 2.000
 luaotfload.fonts.log      = false
 
 local function log(...)

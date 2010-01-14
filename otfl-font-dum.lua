@@ -47,7 +47,7 @@ end
 
 fonts.names = fonts.names or { }
 
-fonts.names.version    = 1.001 -- not the same as in context
+fonts.names.version    = 2.000 -- not the same as in context
 fonts.names.basename   = "otfl-names.lua"
 fonts.names.new_to_old = { }
 fonts.names.old_to_new = { }

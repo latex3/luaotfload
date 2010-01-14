@@ -37,10 +37,14 @@ local function clean(str)
 end
 
 local function tprint(t) print(table.serialize(t)) end
-function fontloader.fullinfo(filename)
+function fontloader.fullinfo(filename, subfont)
 --  info("loaing %s", filename)
     local f, w, m, t, n = nil, nil, nil, { }, { }
-    f, w = fontloader.open(filename)
+    if subfont then
+        f, w = fontloader.open(filename, subfont)
+    else
+        f, w = fontloader.open(filename)
+    end
     m = fontloader.to_table(f)
     fontloader.close(f)
     m.glyphs, m.gpos, m.gsub, m.kerns, m.lookups, m.map = nil, nil, nil, nil, nil, nil
@@ -91,24 +95,27 @@ end
 local function load_font(filename, names, texmf)
     local psnames, families = names.mappings.psnames, names.mappings.families
     if filename then
-        local info = fontloader.fullinfo(filename)
-        if texmf == true then filename = basename(filename) end
+        local info = fontloader.info(filename)
         if info then
             if type(info) == "table" and #info > 1 then
-                for index,sub in ipairs(info) do
---                  key = clean(sub.fullname)
---                  if not mappings[key] then
---                      mappings[key] = { sub.fullname, filename, index }
---                  else
---                      log("Font '%s' already exists.", key)
---                  end
+                for index,_ in ipairs(info) do
+                    local fullinfo = fontloader.fullinfo(filename, index-1)
+                    if not families[fullinfo.family] then
+                        families[fullinfo.family] = { }
+                    end
+                    families[fullinfo.family][fullinfo.style] = {texmf and basename(filename) or filename, index-1}
+                    psnames[fullinfo.psname] = {texmf and basename(filename) or filename, index-1}
                 end
             else
-                if not families[info.family] then
-                    families[info.family] = { }
+                local fullinfo = fontloader.fullinfo(filename)
+                if texmf == true then
+                    filename = basename(filename)
+		end
+                if not families[fullinfo.family] then
+                    families[fullinfo.family] = { }
                 end
-                families[info.family][info.style] = filename
-                psnames[info.psname] = filename
+                families[fullinfo.family][fullinfo.style] = texmf and basename(filename) or filename
+                psnames[fullinfo.psname] = texmf and basename(filename) or filename
             end
         else
             log("Failed to load %s", filename)

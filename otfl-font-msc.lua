@@ -174,7 +174,9 @@ end
 function luaotfload.colorize(head)
    local h = luaotfload.node_colorize(head)
    if res then
-      tex.pdfpageresources = format("%s\n/ExtGState<<%s>>", tex.pdfpageresources, res)
+      local r = "/ExtGState<<"..res..">>"
+      local s = tex.pdfpageresources:find(r) and "" or r
+      tex.pdfpageresources = tex.pdfpageresources..s
    end
    return h
 end

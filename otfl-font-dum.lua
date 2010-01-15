@@ -70,18 +70,30 @@ function fonts.names.resolve(name,sub,style)
     end
     if type(data) == "table" and data.version == fonts.names.version then
         local condensed = string.gsub(string.lower(name),"[^%a%d]","")
-        local found = data.mappings and data.mappings.families and data.mappings.families[condensed]
-        if found then
-            local style = style or "regular"
-            found = found[style]
-            local fontname, filename, subfont = found, found[1], found[2]
-            if subfont then
-                return filename, fontname
+        if data.mappings then
+            local psnames  = data.mappings.psnames
+            local families = data.mappings.families
+            local family = families and families[condensed]
+	    local psname = psnames and psnames[condensed]
+            if family then
+                local style = style or "regular"
+                family = family[style]
+                local fontname, filename, subfont = family, family[1], family[2]
+                if subfont then
+                    return filename, fontname
+                else
+                    return filename, false
+                end
+            elseif psname then
+                local fontname, filename, subfont = psname, psname[1], psname[2]
+                if subfont then
+                    return filename, fontname
+                else
+                    return filename, false
+                end
             else
-                return filename, false
+                return name, false -- fallback to filename
             end
-        else
-            return name, false -- fallback to filename
         end
     end
 end

@@ -487,7 +487,7 @@ t.colorscheme = tfmtable.colorscheme
             --~ end
                 local s = sharedkerns[vk]
                 if not s then
-                    local s = {}
+                    s = { }
                     for k,v in next, vk do s[k] = v*hdelta end
                     sharedkerns[vk] = s
                 end

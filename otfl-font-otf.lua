@@ -84,7 +84,7 @@ otf.features.default = otf.features.default or { }
 otf.enhancers        = otf.enhancers        or { }
 otf.glists           = { "gsub", "gpos" }
 
-otf.version          = 2.642 -- beware: also sync font-mis.lua
+otf.version          = 2.643 -- beware: also sync font-mis.lua
 otf.pack             = true  -- beware: also sync font-mis.lua
 otf.syncspace        = true
 otf.notdef           = false
@@ -530,6 +530,7 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
     end
     local cidinfo, cidnames, cidcodes = data.cidinfo
     local usedmap = cidinfo and cidinfo.usedname
+    usedmap = usedmap and lower(usedmap)
     usedmap = usedmap and fonts.cid.map[usedmap]
     if usedmap then
         oparser = usedmap and fonts.map.make_name_parser(cidinfo.ordering)
@@ -551,7 +552,9 @@ otf.enhancers["analyse unicodes"] = function(data,filename)
                 local foundindex = lpegmatch(oparser,name)
                 if foundindex then
                     unicode = cidcodes[foundindex] -- name to number
-                    if not unicode then
+                    if unicode then
+                        originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
+                    else
                         local reference = cidnames[foundindex] -- number to name
                         if reference then
                             local foundindex = lpegmatch(oparser,reference)
@@ -1219,13 +1222,15 @@ otf.enhancers["reorganize kerns"] = function(data,filename)
                                             local offset = offsets[baseoffset + sk]
                                             --~ local offset = offsets[sk] -- (fk-1) * maxseconds + sk]
                                             local splt = split[sv]
-                                            for i=1,#splt do
-                                                local second_unicode = splt[i]
-                                                if tonumber(second_unicode) then
-                                                    lookupkerns[second_unicode] = offset
-                                                else
-                                                    for s=1,#second_unicode do
-                                                        lookupkerns[second_unicode[s]] = offset
+                                            if splt then
+                                                for i=1,#splt do
+                                                    local second_unicode = splt[i]
+                                                    if tonumber(second_unicode) then
+                                                        lookupkerns[second_unicode] = offset
+                                                    else
+                                                        for s=1,#second_unicode do
+                                                            lookupkerns[second_unicode[s]] = offset
+                                                        end
                                                     end
                                                 end
                                             end
@@ -1237,13 +1242,15 @@ otf.enhancers["reorganize kerns"] = function(data,filename)
                                 for fk=1,#firsts do
                                     local fv = firsts[fk]
                                     local splt = split[fv]
-                                    for i=1,#splt do
-                                        local first_unicode = splt[i]
-                                        if tonumber(first_unicode) then
-                                            do_it(fk,first_unicode)
-                                        else
-                                            for f=1,#first_unicode do
-                                                do_it(fk,first_unicode[f])
+                                    if splt then
+                                        for i=1,#splt do
+                                            local first_unicode = splt[i]
+                                            if tonumber(first_unicode) then
+                                                do_it(fk,first_unicode)
+                                            else
+                                                for f=1,#first_unicode do
+                                                    do_it(fk,first_unicode[f])
+                                                end
                                             end
                                         end
                                     end

@@ -241,7 +241,7 @@ end
 function define.resolvers.name(specification)
     local resolve = fonts.names.resolve
     if resolve then
-        specification.resolved, specification.sub = fonts.names.resolve(specification.name,specification.sub)
+        specification.resolved, specification.sub = fonts.names.resolve(specification.name,specification.sub,specification.style)
         if specification.resolved then
             specification.forced = file.extname(specification.resolved)
             specification.name = file.removesuffix(specification.resolved)
@@ -254,7 +254,7 @@ end
 function define.resolvers.spec(specification)
     local resolvespec = fonts.names.resolvespec
     if resolvespec then
-        specification.resolved, specification.sub = fonts.names.resolvespec(specification.name,specification.sub)
+        specification.resolved, specification.sub = fonts.names.resolvespec(specification.name,specification.sub,specification.style)
         if specification.resolved then
             specification.forced = file.extname(specification.resolved)
             specification.name = file.removesuffix(specification.resolved)

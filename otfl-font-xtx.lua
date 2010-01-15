@@ -62,12 +62,23 @@ local list = { }
 
 fonts.define.specify.colonized_default_lookup = "file"
 
+local function isstyle(s)
+    local style  = string.lower(s):split("/")
+    for _,v in ipairs(style) do
+        if v == "b" then
+            list.style = "bold"
+        elseif v == "i" then
+            list.style = "italic"
+        elseif v == "bi" or list.style == "ib" then
+            list.style = "bolditalic"
+        end
+    end
+end
 local function issome ()    list.lookup = fonts.define.specify.colonized_default_lookup end
 local function isfile ()    list.lookup = 'file' end
 local function isname ()    list.lookup = 'name' end
 local function thename(s)   list.name   = s end
 local function issub  (v)   list.sub    = v end
-local function iscrap (s)   list.crap   = string.lower(s) end
 local function istrue (s)   list[s]     = 'yes' end
 --KH local function isfalse(s)   list[s]     = 'no' end
 local function isfalse(s)   list[s]     = nil end -- see mpg/luaotfload#4
@@ -75,7 +86,7 @@ local function iskey  (k,v) list[k]     = v end
 
 local spaces     = lpeg.P(" ")^0
 local namespec   = (1-lpeg.S("/:("))^0 -- was: (1-lpeg.S("/: ("))^0
-local crapspec   = spaces * lpeg.P("/") * (((1-lpeg.P(":"))^0)/iscrap) * spaces
+local crapspec   = spaces * lpeg.P("/") * (((1-lpeg.P(":"))^0)/isstyle) * spaces
 local filename   = (lpeg.P("file:")/isfile * (namespec/thename)) + (lpeg.P("[") * lpeg.P(true)/isname * (((1-lpeg.P("]"))^0)/thename) * lpeg.P("]"))
 local fontname   = (lpeg.P("name:")/isname * (namespec/thename)) + lpeg.P(true)/issome * (namespec/thename)
 local sometext   = (lpeg.R("az") + lpeg.R("AZ") + lpeg.R("09"))^1
@@ -98,7 +109,10 @@ function fonts.define.specify.colonized(specification) -- xetex mode
             list[k] = v
         end
     end
-    list.crap = nil -- style not supported, maybe some day
+    if list.style then
+        specification.style = list.style
+        list.style = nil
+    end
     if list.name then
         specification.name = list.name
         list.name = nil

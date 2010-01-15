@@ -59,6 +59,7 @@ table.insert(fonts.triggers,"color")
 function initializers.common.color(tfmdata,value)
     if value then
         tfmdata.color = value
+        luaotfload.add_color_callback()
     end
 end
 
@@ -114,27 +115,51 @@ local glyph   = node.id('glyph')
 local hlist   = node.id('hlist')
 local vlist   = node.id('vlist')
 local whatsit = node.id('whatsit')
+local pgi     = node.id('page_insert')
+local sbml    = node.id('sub_mlist')
 
-local function colorize(head)
-   for n in node.traverse(head) do
+function luaotfload.node_colorize(head)
+    for n in node.traverse(head) do
        if n.id == hlist or n.id == vlist then
-           colorize(n.list)
+           n.list = luaotfload.node_colorize(n.list)
        end
        if n.id == glyph then
            local tfmdata = fonts.ids[n.font]
            if tfmdata and tfmdata.color then
-               local prev = n.prev
-               local next = n.next
-               local pushcolor, popcolor = hex_to_rgba(tfmdata.color)
-               if prev.id == glyph and fonts.ids[prev.font].color == tfmdata.color then
+               local prevg, nextg = n.prev, n.next
+               local found = nil
+               while prevg and not found do
+                   if prevg.id == glyph then
+                       found = 1
+                   elseif prevg.id == hlist or prevg.id == vlist or prevg.id == whatsit 
+                           or prevg.id == pgi or prevg.id == sbml then
+                       prevg = nil
+                   else
+                       prevg = prevg.prev
+                   end
+               end
+               found = nil
+               while nextg and not found do
+                   if nextg.id == glyph then
+                       found = 1
+                   elseif nextg.id == hlist or nextg.id == vlist or nextg.id == whatsit
+                           or nextg.id == pgi or nextg.id == sbml then
+                       nextg = nil
+                   else
+                       nextg = nextg.next
+                   end
+               end
+               if prevg and fonts.ids[prevg.font].color == tfmdata.color then
                else
+                   local pushcolor = hex_to_rgba(tfmdata.color)
                    local push = node.new(whatsit, 8)
                    push.mode  = 1
                    push.data  = pushcolor
                    head       = node.insert_before(head, n, push)
                end
-               if next.id == glyph and fonts.ids[next.font].color == tfmdata.color then
+               if nextg and fonts.ids[nextg.font].color == tfmdata.color then
                else
+                   local _, popcolor = hex_to_rgba(tfmdata.color)
                    local pop  = node.new(whatsit, 8)
                    pop.mode   = 1
                    pop.data   = popcolor
@@ -146,14 +171,26 @@ local function colorize(head)
    return head
 end
 
-local function finalize(head)
-    if res then
-        tex.pdfpageresources = format("%s\n/ExtGState<<%s>>", tex.pdfpageresources, res)
-    end
-    return head
+function luaotfload.colorize(head)
+   local h = luaotfload.node_colorize(head)
+   if res then
+      tex.pdfpageresources = format("%s\n/ExtGState<<%s>>", tex.pdfpageresources, res)
+   end
+   return h
 end
 
-callback.add("hpack_filter",         colorize, "luaotfload.colorize")
-callback.add("pre_linebreak_filter", colorize, "luaotfload.colorize")
-callback.add("pre_output_filter",    finalize, "loaotfload.finalize")
+luaotfload.color_callback_activated = 0
 
+function luaotfload.add_color_callback()
+    if luaotfload.color_callback_activated == 0 then
+        callback.add("pre_output_filter",    luaotfload.colorize, "loaotfload.colorize")
+        luaotfload.color_callback_activated = 1
+    end
+end
+
+function luaotfload.remove_color_callback()
+    if luaotfload.color_callback_activated == 1 then
+        callback.remove("pre_output_filter",    "loaotfload.colorize")
+        luaotfload.color_callback_activated = 0
+    end
+end

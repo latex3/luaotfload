@@ -55,6 +55,7 @@ Source files:
         otfl-node-ini.lua                       .
         otfl-node-inj.lua                       .
         otfl-node-res.lua       OTF support files from the ConTeXt distribution
+        otfl-node-msc.lua       luaotfload module for additional features
 
 Derived files:
         luaotfload.pdf          documentation
@@ -67,11 +68,22 @@ License
 This work is distributed under the GNU GPLv2 license. Please see COPYING file
 for more details about the license.
 
-The files otfl-*.lua are under the GNU GPLv2 license. Their legal notice is
+The files otfl-*.lua are under the GNU GPLv2 license. Their legal notice
+starts by:
 
 "
 Copyright 2008 PRAGMA ADE / ConTeXt Development Team
+"
 
+for otf-*.lua files except otfl-font-msc.lua, and
+
+"
+Copyright 2010 Khaled Hosny
+"
+
+for otfl-font-msc.lua, and continues by:
+
+"
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
@@ -86,6 +98,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 "
+
 
 The file luaotfload.dtx and the derived files
   luaotfload.pdf

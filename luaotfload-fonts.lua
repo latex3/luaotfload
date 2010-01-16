@@ -14,7 +14,6 @@ luaotfload.fonts.module = {
 kpse.set_program_name("luatex")
 
 require("luaextra.lua")
-require("otfl-luat-dum.lua")
 
 local upper, splitpath, expandpath, glob, basename = string.upper, file.split_path, kpse.expand_path, dir.glob, file.basename
 
@@ -22,14 +21,14 @@ luaotfload.fonts.basename = "otfl-names.lua"
 luaotfload.fonts.version  = 2.000
 luaotfload.fonts.log      = false
 
-local function log(...)
-    if luaotfload.fonts.log then
-        logs.simple(...)
-    end
+local function info(fmt,...)
+    texio.write_nl(string.format("luaotfload | %s", string.format(fmt,...)))
 end
 
-local function info(...)
-    logs.simple(...)
+local function log(...)
+    if luaotfload.fonts.log then
+        info(...)
+    end
 end
 
 local function sanitize(str)
@@ -161,12 +160,12 @@ local function generate()
     }
     local savepath
     scan_txmf_tree(fnames)
-    logs.simple("%s fonts saved in the database", #table.keys(fnames.mappings.psnames))
+    info("%s fonts saved in the database", #table.keys(fnames.mappings.psnames))
     savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"
     lfs.mkdir(savepath)
     savepath = savepath .. luaotfload.fonts.basename
     io.savedata(savepath, table.serialize(fnames, true))
-    logs.simple("Saved font names database in %s\n", savepath)
+    info("Saved font names database in %s\n", savepath)
 end
 
 luaotfload.fonts.scan     = scan_dir

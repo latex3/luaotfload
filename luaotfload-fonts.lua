@@ -52,10 +52,9 @@ function fontloader.fullinfo(filename, subfont)
     if m.names then
         for _,v in pairs(m.names) do
             if v.lang == "English (US)" then
-                n.fullname = v.names.compatfull
-                n.familyname = v.names.preffamilyname
-                n.subfamily = v.names.subfamily
-                n.modifier = v.names.prefmodifiers
+                n.fullname = v.names.compatfull or v.names.fullname
+                n.familyname = v.names.preffamilyname or v.names.family
+                n.subfamily = v.names.subfamily or v.names.prefmodifiers
             end
         end
     end
@@ -70,28 +69,6 @@ function fontloader.fullinfo(filename, subfont)
     t.fullname = n.fullname or m.fullname
     t.family = n.familyname or m.familyname
     t.style = n.subfamily or m.style
-    if not t.style or t.style:is_empty() then
-        local s = t.psname:split("-")
-        if s and #s >= 2 then
-            t.style = s[#s]
-        end
-    end
-    if not t.style or t.style:is_empty() then
-        t.style = n.modifier
-    end
-    if not t.style or t.style:is_empty() then
-        if n.fullname and n.familyname then
-            t.style = (n.fullname:gsub(n.familyname, "") ~= n.fullname and n.fullname:gsub(n.familyname, "")) or nil
-        elseif m.fontname and m.familyname then
-            t.style = (m.fontname:gsub(m.familyname, "") ~= m.fontname and m.fontname:gsub(m.familyname, "")) or nil
-        end
-    end
-    if not t.style or t.style:is_empty() then
-        t.style = (m.fullname:gsub(m.familyname, "") ~= m.fullname and m.fullname:gsub(m.familyname, "")) or nil
-    end
-    if not t.style or t.style:is_empty() then
-        t.style = "Regular"
-    end
     for k,v in pairs(t) do
         t[k] = sanitize(v)
     end

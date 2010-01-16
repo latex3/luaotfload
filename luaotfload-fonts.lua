@@ -45,7 +45,7 @@ function fontloader.fullinfo(...)
             if v.lang == "English (US)" then
                 n.name   = v.names.compatfull     or v.names.fullname
                 n.family = v.names.preffamilyname or v.names.family
-                n.style  = v.names.subfamily      or v.names.prefmodifiers
+                n.style  = v.names.prefmodifiers  or v.names.subfamily
             end
         end
     end

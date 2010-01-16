@@ -172,11 +172,17 @@ function luaotfload.node_colorize(head)
 end
 
 function luaotfload.colorize(head)
-   local h = luaotfload.node_colorize(head)
+   -- check if our page resources existed in the previous run
+   -- and remove it to avoid duplicating it later
    if res then
       local r = "/ExtGState<<"..res..">>"
-      local s = tex.pdfpageresources:find(r) and "" or r
-      tex.pdfpageresources = tex.pdfpageresources..s
+      tex.pdfpageresources = tex.pdfpageresources:gsub(r, "")
+   end
+   local h = luaotfload.node_colorize(head)
+   -- now append our page resources
+   if res and not res:is_empty() then
+      local r = "/ExtGState<<"..res..">>"
+      tex.pdfpageresources = tex.pdfpageresources..r
    end
    return h
 end

@@ -35,25 +35,17 @@ local function sanitize(str)
     return string.gsub(string.lower(str), "[^%a%d]", "")
 end
 
-local function tprint(t) print(table.serialize(t)) end
-function fontloader.fullinfo(filename, subfont)
---  info("loaing %s", filename)
-    local f, w, m, t, n = nil, nil, nil, { }, { }
-    if subfont then
-        f, w = fontloader.open(filename, subfont)
-    else
-        f, w = fontloader.open(filename)
-    end
-    m = fontloader.to_table(f)
+function fontloader.fullinfo(...)
+    local t, n = { }, { }
+    local f = fontloader.open(...)
+    local m = f and fontloader.to_table(f)
     fontloader.close(f)
-    m.glyphs, m.gpos, m.gsub, m.kerns, m.lookups, m.map = nil, nil, nil, nil, nil, nil
-    m.anchor_classes, m.mark_classes, m.horiz_base = nil, nil, nil
     if m.names then
         for _,v in pairs(m.names) do
             if v.lang == "English (US)" then
-                n.fullname = v.names.compatfull or v.names.fullname
-                n.familyname = v.names.preffamilyname or v.names.family
-                n.subfamily = v.names.subfamily or v.names.prefmodifiers
+                n.name   = v.names.compatfull     or v.names.fullname
+                n.family = v.names.preffamilyname or v.names.family
+                n.style  = v.names.subfamily      or v.names.prefmodifiers
             end
         end
     end
@@ -64,14 +56,13 @@ function fontloader.fullinfo(filename, subfont)
             end
         end
     end
-    t.psname = m.fontname
-    t.fullname = n.fullname or m.fullname
-    t.family = n.familyname or m.familyname
-    t.style = n.subfamily or m.style
+    t.psname   = m.fontname
+    t.fullname = n.name   or m.fullname
+    t.family   = n.family or m.familyname
+    t.style    = n.style  or m.style
     for k,v in pairs(t) do
         t[k] = sanitize(v)
     end
---  tprint(m) print(w)
     m, n = nil, nil
     return t
 end
@@ -173,6 +164,4 @@ luaotfload.fonts.generate = generate
 
 if arg[0] == "luaotfload-fonts.lua" then
     generate()
---  t = fontloader.fullinfo(arg[1])
---  tprint(t)
 end

@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['font-msc'] = {
     version   = 1.001,
-    comment   = "companion to font-otf.lua (miscellaneous)",
+    comment   = "companion to font-otf.lua (slanting, extending, colors)",
     author    = "Khaled Hosny",
     copyright = "Khaled Hosny",
     license   = "GPL"
@@ -116,14 +116,13 @@ local hlist   = node.id('hlist')
 local vlist   = node.id('vlist')
 local whatsit = node.id('whatsit')
 local pgi     = node.id('page_insert')
-local sbml    = node.id('sub_mlist')
+local sbox    = node.id('sub_box')
 
 function luaotfload.node_colorize(head)
     for n in node.traverse(head) do
-       if n.id == hlist or n.id == vlist then
+       if n.id == hlist or n.id == vlist or n.id == sbox then
            n.list = luaotfload.node_colorize(n.list)
-       end
-       if n.id == glyph then
+       elseif n.id == glyph then
            local tfmdata = fonts.ids[n.font]
            if tfmdata and tfmdata.color then
                local prevg, nextg = n.prev, n.next
@@ -131,8 +130,9 @@ function luaotfload.node_colorize(head)
                while prevg and not found do
                    if prevg.id == glyph then
                        found = 1
-                   elseif prevg.id == hlist or prevg.id == vlist or prevg.id == whatsit 
-                           or prevg.id == pgi or prevg.id == sbml then
+                   elseif prevg.id == hlist or prevg.id == vlist
+                           or prevg.id == sbox or prevg.id == whatsit 
+                           or prevg.id == pgi then
                        prevg = nil
                    else
                        prevg = prevg.prev
@@ -142,8 +142,9 @@ function luaotfload.node_colorize(head)
                while nextg and not found do
                    if nextg.id == glyph then
                        found = 1
-                   elseif nextg.id == hlist or nextg.id == vlist or nextg.id == whatsit
-                           or nextg.id == pgi or nextg.id == sbml then
+                   elseif nextg.id == hlist or nextg.id == vlist 
+                           or nextg.id == sbox or nextg.id == whatsit
+                           or nextg.id == pgi then
                        nextg = nil
                    else
                        nextg = nextg.next
@@ -180,7 +181,7 @@ function luaotfload.colorize(head)
    end
    local h = luaotfload.node_colorize(head)
    -- now append our page resources
-   if res and not res:is_empty() then
+   if res and res:find("%S") then -- test for non-empty string
       local r = "/ExtGState<<"..res..">>"
       tex.pdfpageresources = tex.pdfpageresources..r
    end

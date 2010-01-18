@@ -118,53 +118,48 @@ local whatsit = node.id('whatsit')
 local pgi     = node.id('page_insert')
 local sbox    = node.id('sub_box')
 
-function luaotfload.node_colorize(head)
+local function lookup_next_color(head)
+    for n in node.traverse(head) do
+        if n.id == glyph then
+            return fonts.ids[n.font].color
+        elseif n.id == vlist or n.id == hlist or n.id == sbox then
+            local r = lookup_next_color(n.list)
+            if r == -1 then
+                return -1
+            elseif r then
+                return r
+            end
+        elseif n.id == whatsit or n.id == pgi then
+            return -1
+        end
+    end
+    return nil
+end
+
+function luaotfload.node_colorize(head, current_color)
     for n in node.traverse(head) do
        if n.id == hlist or n.id == vlist or n.id == sbox then
-           n.list = luaotfload.node_colorize(n.list)
+           n.list = luaotfload.node_colorize(n.list, current_color)
+           current_color = nil -- to optimize, but needs deeper changes
        elseif n.id == glyph then
            local tfmdata = fonts.ids[n.font]
            if tfmdata and tfmdata.color then
-               local prevg, nextg = n.prev, n.next
-               local found = nil
-               while prevg and not found do
-                   if prevg.id == glyph then
-                       found = 1
-                   elseif prevg.id == hlist or prevg.id == vlist
-                           or prevg.id == sbox or prevg.id == whatsit 
-                           or prevg.id == pgi then
-                       prevg = nil
-                   else
-                       prevg = prevg.prev
-                   end
-               end
-               found = nil
-               while nextg and not found do
-                   if nextg.id == glyph then
-                       found = 1
-                   elseif nextg.id == hlist or nextg.id == vlist 
-                           or nextg.id == sbox or nextg.id == whatsit
-                           or nextg.id == pgi then
-                       nextg = nil
-                   else
-                       nextg = nextg.next
-                   end
-               end
-               if prevg and fonts.ids[prevg.font].color == tfmdata.color then
-               else
+               if tfmdata.color ~= current_color then
                    local pushcolor = hex_to_rgba(tfmdata.color)
                    local push = node.new(whatsit, 8)
                    push.mode  = 1
                    push.data  = pushcolor
                    head       = node.insert_before(head, n, push)
+                   current_color = tfmdata.color
                end
-               if nextg and fonts.ids[nextg.font].color == tfmdata.color then
-               else
+               local next_color = lookup_next_color (n.next)
+               if next_color ~= tfmdata.color then
                    local _, popcolor = hex_to_rgba(tfmdata.color)
                    local pop  = node.new(whatsit, 8)
                    pop.mode   = 1
                    pop.data   = popcolor
                    head       = node.insert_after(head, n, pop)
+                   current_color = nil
                end
            end
        end
@@ -179,7 +174,7 @@ function luaotfload.colorize(head)
       local r = "/ExtGState<<"..res..">>"
       tex.pdfpageresources = tex.pdfpageresources:gsub(r, "")
    end
-   local h = luaotfload.node_colorize(head)
+   local h = luaotfload.node_colorize(head, nil)
    -- now append our page resources
    if res and res:find("%S") then -- test for non-empty string
       local r = "/ExtGState<<"..res..">>"
@@ -189,9 +184,15 @@ function luaotfload.colorize(head)
 end
 
 luaotfload.color_callback_activated = 0
+local message_displayed = 0
 
 function luaotfload.add_color_callback()
-    if luaotfload.color_callback_activated == 0 then
+    if tex.luatexversion < 44 then
+        if message_displayed == 0 then
+            luatextra.module_warning("luaotfload","You must have a LuaTeX with version >= 0.44 in order to get colors working, colors won't work.")
+            message_displayed = 1
+        end
+    elseif luaotfload.color_callback_activated == 0 then
         callback.add("pre_output_filter",    luaotfload.colorize, "loaotfload.colorize")
         luaotfload.color_callback_activated = 1
     end

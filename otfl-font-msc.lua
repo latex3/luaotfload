@@ -136,35 +136,35 @@ local function lookup_next_color(head)
     return nil
 end
 
-function luaotfload.node_colorize(head, current_color)
+function luaotfload.node_colorize(head, current_color, next_color)
     for n in node.traverse(head) do
-       if n.id == hlist or n.id == vlist or n.id == sbox then
-           n.list = luaotfload.node_colorize(n.list, current_color)
-           current_color = nil -- to optimize, but needs deeper changes
-       elseif n.id == glyph then
-           local tfmdata = fonts.ids[n.font]
-           if tfmdata and tfmdata.color then
-               if tfmdata.color ~= current_color then
-                   local pushcolor = hex_to_rgba(tfmdata.color)
-                   local push = node.new(whatsit, 8)
-                   push.mode  = 1
-                   push.data  = pushcolor
-                   head       = node.insert_before(head, n, push)
-                   current_color = tfmdata.color
-               end
-               local next_color = lookup_next_color (n.next)
-               if next_color ~= tfmdata.color then
-                   local _, popcolor = hex_to_rgba(tfmdata.color)
-                   local pop  = node.new(whatsit, 8)
-                   pop.mode   = 1
-                   pop.data   = popcolor
-                   head       = node.insert_after(head, n, pop)
-                   current_color = nil
-               end
-           end
-       end
-   end
-   return head
+        if n.id == hlist or n.id == vlist or n.id == sbox then
+            local next_color_in = lookup_next_color(n.next) or next_color
+            n.list, current_color = luaotfload.node_colorize(n.list, current_color, next_color_in)
+        elseif n.id == glyph then
+            local tfmdata = fonts.ids[n.font]
+            if tfmdata and tfmdata.color then
+                if tfmdata.color ~= current_color then
+                    local pushcolor = hex_to_rgba(tfmdata.color)
+                    local push = node.new(whatsit, 8)
+                    push.mode  = 1
+                    push.data  = pushcolor
+                    head       = node.insert_before(head, n, push)
+                    current_color = tfmdata.color
+                end
+                local next_color_in = lookup_next_color (n.next) or next_color
+                if next_color_in ~= tfmdata.color then
+                    local _, popcolor = hex_to_rgba(tfmdata.color)
+                    local pop  = node.new(whatsit, 8)
+                    pop.mode   = 1
+                    pop.data   = popcolor
+                    head       = node.insert_after(head, n, pop)
+                    current_color = nil
+                end
+            end
+        end
+    end
+    return head, current_color
 end
 
 function luaotfload.colorize(head)
@@ -174,7 +174,7 @@ function luaotfload.colorize(head)
       local r = "/ExtGState<<"..res..">>"
       tex.pdfpageresources = tex.pdfpageresources:gsub(r, "")
    end
-   local h = luaotfload.node_colorize(head, nil)
+   local h = luaotfload.node_colorize(head, nil, nil)
    -- now append our page resources
    if res and res:find("%S") then -- test for non-empty string
       local r = "/ExtGState<<"..res..">>"

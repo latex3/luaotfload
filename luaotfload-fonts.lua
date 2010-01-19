@@ -168,7 +168,7 @@ local function load_font(filename, names, texmf)
                 psnames[fullinfo.psname] = {texmf and basename(filename) or filename}
             end
         else
-            log("Failed to load %s", filename)
+            log(1, "Failed to load %s", filename)
         end
     end
 end

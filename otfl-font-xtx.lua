@@ -73,6 +73,7 @@ local function isstyle(s)
             list.style = "bolditalic"
         elseif v:find("^s=") then
             list.optsize = v:split("=")[2]
+        elseif v == "aat" or v == "icu" then
         end
     end
 end

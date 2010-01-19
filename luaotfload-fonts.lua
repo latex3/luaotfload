@@ -205,15 +205,26 @@ local function scan_os_fonts(names)
 end
 --]]
 
-local function scan_txmf_tree(names)
-    local fontdirs = expandpath("$OPENTYPEFONTS")
+local texmfdist = kpse.expand_var("$TEXMFDIST")
+local texmfmain = kpse.expand_var("$TEXMFMAIN")
+local texmflocal = kpse.expand_var("$TEXMFLOCAL")
+
+local function is_texmf(dir)
+    if dir:find(texmfdist) or dir:find(texmfmain) or dir:find(texmflocal) then
+        return true
+    end
+    return false
+end
+
+local function scan_all(names)
+    local fontdirs = string.gsub(expandpath("$OPENTYPEFONTS"), "^\.[;:]", "")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
         local explored_dirs = {}
         fontdirs = splitpath(fontdirs)
         for _,d in ipairs(fontdirs) do
             if not explored_dirs[d] then
-                scan_dir(d, names, false, true)
+                scan_dir(d, names, false, is_texmf(d))
                 explored_dirs[d] = true
             end
         end
@@ -229,7 +240,7 @@ local function generate()
         version  = luaotfload.fonts.version
     }
     local savepath
-    scan_txmf_tree(fnames)
+    scan_all(fnames)
     info("%s fonts saved in the database", #table.keys(fnames.mappings.psnames))
     savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"
     if not file.isreadable(savepath) then

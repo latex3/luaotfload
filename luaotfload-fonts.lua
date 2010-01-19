@@ -13,11 +13,7 @@ luaotfload.fonts.module = {
 
 kpse.set_program_name("luatex")
 
-if status and status.luatex_version and status.luatex_version > 44 then
-    require("luaextra.lua")
-else
-    dofile(kpse.find_file("luaextra.lua"))
-end
+dofile(kpse.find_file("luaextra.lua"))
 
 local upper, splitpath, expandpath, glob, basename = string.upper, file.split_path, kpse.expand_path, dir.glob, file.basename
 

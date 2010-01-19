@@ -73,7 +73,8 @@ local function isstyle(s)
             list.style = "bolditalic"
         elseif v:find("^s=") then
             list.optsize = v:split("=")[2]
-        elseif v == "aat" or v == "icu" then
+        elseif v == "aat" or v == "icu" or v == "gr" then
+            logs.report("define font", "unsupported font option: %s", v)
         else
             list.style = v:gsub("[^%a%d]", "")
         end

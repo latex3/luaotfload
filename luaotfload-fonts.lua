@@ -13,20 +13,24 @@ luaotfload.fonts.module = {
 
 kpse.set_program_name("luatex")
 
-require("luaextra.lua")
+if status and status.luatex_version and status.luatex_version > 44 then
+    require("luaextra.lua")
+else
+    dofile(kpse.find_file("luaextra.lua"))
+end
 
 local upper, splitpath, expandpath, glob, basename = string.upper, file.split_path, kpse.expand_path, dir.glob, file.basename
 
-luaotfload.fonts.basename = "otfl-names.lua"
-luaotfload.fonts.version  = 2.000
-luaotfload.fonts.log      = false
+luaotfload.fonts.basename   = "otfl-names.lua"
+luaotfload.fonts.version    = 2.000
+luaotfload.fonts.log_level  = 1
 
 local function info(fmt,...)
     texio.write_nl(string.format("luaotfload | %s", string.format(fmt,...)))
 end
 
-local function log(...)
-    if luaotfload.fonts.log then
+local function log(lvl, ...)
+    if lvl <= luaotfload.fonts.log_level then
         info(...)
     end
 end
@@ -68,6 +72,7 @@ function fontloader.fullinfo(...)
 end
 
 local function load_font(filename, names, texmf)
+    log(3, "Loading font %s", filename)
     local psnames, families = names.mappings.psnames, names.mappings.families
     if filename then
         local info = fontloader.info(filename)
@@ -89,6 +94,9 @@ local function load_font(filename, names, texmf)
                 if not families[fullinfo.family] then
                     families[fullinfo.family] = { }
                 end
+                if not fullinfo.style then
+                    fullinfo.style = "regular" -- ?
+                end
                 families[fullinfo.family][fullinfo.style] = {texmf and basename(filename) or filename}
                 psnames[fullinfo.psname] = {texmf and basename(filename) or filename}
             end
@@ -99,17 +107,17 @@ local function load_font(filename, names, texmf)
 end
 
 local function scan_dir(dirname, names, recursive, texmf)
+    log(1, "Scanning directory %s", dirname)
     local list, found = { }, { }
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
         if recursive then pat = "/**." else pat = "/*." end
-        log("Scanning '%s' for '%s' fonts", dirname, ext)
+        log(2, "Scanning '%s' for '%s' fonts", dirname, ext)
         found = glob(dirname .. pat .. ext)
-        log("%s fonts found", #found)
+        log(2, "%s fonts found", #found)
         table.append(list, found)
-
-        log("Scanning '%s' for '%s' fonts", dirname, upper(ext))
+        log(2, "Scanning '%s' for '%s' fonts", dirname, upper(ext))
         found = glob(dirname .. pat .. upper(ext))
-        log("%s fonts found", #found)
+        log(2, "%s fonts found", #found)
         table.append(list, found)
     end
     for _,fnt in ipairs(list) do
@@ -132,11 +140,15 @@ end
 
 local function scan_txmf_tree(names)
     local fontdirs = expandpath("$OPENTYPEFONTS")
-    fontdirs = fontdirs .. expandpath("$TTFONTS")
+    fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
-        fontdirs = splitpath(fontdirs, ":")
+        local explored_dirs = {}
+        fontdirs = splitpath(fontdirs)
         for _,d in ipairs(fontdirs) do
-            scan_dir(d, names, false, true)
+            if not explored_dirs[d] then
+                scan_dir(d, names, false, true)
+                explored_dirs[d] = true
+            end
         end
     end
 end
@@ -153,10 +165,17 @@ local function generate()
     scan_txmf_tree(fnames)
     info("%s fonts saved in the database", #table.keys(fnames.mappings.psnames))
     savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"
-    lfs.mkdir(savepath)
-    savepath = savepath .. luaotfload.fonts.basename
-    io.savedata(savepath, table.serialize(fnames, true))
-    info("Saved font names database in %s\n", savepath)
+    if not file.isreadable(savepath) then
+        log(1, "Creating directory %s", savepath)
+        lfs.mkdir(savepath)
+    end
+    if not file.iswritable(savepath) then
+        info("Error: cannot write in directory %s\n", savepath)
+    else
+        savepath = savepath .. luaotfload.fonts.basename
+        io.savedata(savepath, table.serialize(fnames, true))
+        info("Saved font names database in %s\n", savepath)
+    end
 end
 
 luaotfload.fonts.scan     = scan_dir

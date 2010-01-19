@@ -188,19 +188,6 @@ local function scan_dir(dirname, names, recursive, texmf)
     end
 end
 
---[[
-local function scan_os_fonts(names)
-    local fontdirs
-    fontdirs = expandpath("$OSFONTDIR")
-    if not fontdirs:is_empty() then
-        fontdirs = splitpath(fontdirs, ":")
-        for _,d in ipairs(fontdirs) do
-            scan_dir(d, names, true)
-        end
-    end
-end
---]]
-
 local texmfdist = kpse.expand_var("$TEXMFDIST")
 local texmfmain = kpse.expand_var("$TEXMFMAIN")
 local texmflocal = kpse.expand_var("$TEXMFLOCAL")
@@ -212,17 +199,62 @@ local function is_texmf(dir)
     return false
 end
 
+local function read_fcdata(fontdirs, data)
+    local to_add = nil
+    local done = nil
+    for line in data:lines() do
+        if not done then done = true end
+        local match = line:match("^Directory: (.+)")
+        if match then
+            if match:find("ype1") then
+                to_add = nil
+            else
+                to_add = match
+            end
+        elseif to_add then
+            match = line:match('^"[^"]+%.[^"]+"')
+            if match then
+                if to_add then
+                    fontdirs[to_add] = true
+                    to_add = nil
+                end
+            end
+        end
+    end
+    if not done then
+        return nil
+    else
+        return fontdirs
+    end
+end
+
+local function append_fccatdirs(fontdirs)
+    log(1, "executing `fc-cat -v'\n")
+    local data = io.popen("fc-cat -v", 'r')
+    local result = read_fcdata(fontdirs, data)
+    data:close()
+    if not result then
+        log(1, "fail, now trying `fc-cat.exe -v'\n")
+        data = io.popen("fc-cat.exe -v", 'r')
+        result = read_fcdata(fontdirs, data)
+        data:close()
+        if not result then
+            info("Unable to execute fc-cat nor fc-cat.exe, system fonts may not be available")
+            return fontdirs
+        end
+    end
+    return result
+end
+
 local function scan_all(names)
     local fontdirs = string.gsub(expandpath("$OPENTYPEFONTS"), "^\.[;:]", "")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
-        local explored_dirs = {}
         fontdirs = splitpath(fontdirs)
-        for _,d in ipairs(fontdirs) do
-            if not explored_dirs[d] then
-                scan_dir(d, names, false, is_texmf(d))
-                explored_dirs[d] = true
-            end
+        fontdirs = table.tohash(fontdirs)
+        fontdirs = append_fccatdirs(fontdirs)
+        for d,_ in pairs(fontdirs) do
+            scan_dir(d, names, false, is_texmf(d))
         end
     end
 end

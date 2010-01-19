@@ -74,6 +74,8 @@ local function isstyle(s)
         elseif v:find("^s=") then
             list.optsize = v:split("=")[2]
         elseif v == "aat" or v == "icu" then
+        else
+            list.style = v:gsub("[^%a%d]", "")
         end
     end
 end

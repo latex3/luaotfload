@@ -77,12 +77,14 @@ function fonts.names.resolve(name,sub,style)
 	    local psname = psnames and psnames[condensed]
             if family then
                 local style = style or "regular"
-                family = family[style]
-                local fontname, filename, subfont = family, family[1], family[2]
-                if subfont then
-                    return filename, subfont
-                else
-                    return filename, false
+                local found = family[style]
+                if found then
+                    local fontname, filename, subfont = found, found[1], found[2]
+                    if subfont then
+                        return filename, subfont
+                    else
+                        return filename, false
+                    end
                 end
             elseif psname then
                 local fontname, filename, subfont = psname, psname[1], psname[2]

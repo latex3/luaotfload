@@ -71,6 +71,72 @@ function fontloader.fullinfo(...)
     return t
 end
 
+-- table containing hard to guess styles
+local styles = {
+    calibrii = "italic",
+    bookosi = "italic",
+    bookosb = "bold",
+    lsansi = "italic",
+    antquab = "bold",
+    antquai = "italic",
+    }
+
+-- euristics to normalize the style
+local function normalize_style(style, family)
+    local s = {}
+    if style:find("semibold") or style:find("demibold") or style:find("medium")
+            or style:find("lightbold") or style:match("lb$") then
+        s.weight = "demibold"
+    elseif style:find("bold") or style:find("heavy") or style:match("xb$")
+            or style:match("bd$") or style:match("bb$") then
+        s.weight = "bold"
+    elseif style:find("light") or style:find("narrow") then
+        s.weight = "narrow" -- ?
+    end
+    if style:find("italic") or style:find("oblique")  or style:match("it$") then
+        s.italic = true
+    end
+    if style:find("regular") or style:match("rg$") then
+        s.regular = true
+    end
+    local size = tonumber(string.match(style, "%d+"))
+    if size and size > 4 and size < 25 then 
+        s.size = size
+    end
+    if not next(s) then -- more aggressive guessing
+        local truncated = style:sub(1,-2)
+        local endletter = style:sub(-1, -1)
+        if family:find(truncated) and family:sub(-1,-1) ~= endletter then 
+            if endletter =='b' then
+                s.weight = "bold"
+            elseif endletter == 'i' then
+                s.italic = true
+            end
+        end
+    end
+    if not next(s) and styles[style] then
+        return styles[style]
+    end
+    if not next(s) then
+        return style -- or "regular ?"
+    else
+        local result = ""
+        if s.weight then
+            result = s.weight
+        end
+        if s.italic then
+            result = result.."italic"
+        end
+        if not s.italic and not s.weight then
+            result = "regular"
+        end
+        if s.size then
+            result = result.."-"..s.size
+        end
+        return result
+    end
+end
+
 local function load_font(filename, names, texmf)
     log(3, "Loading font %s", filename)
     local psnames, families = names.mappings.psnames, names.mappings.families
@@ -95,8 +161,9 @@ local function load_font(filename, names, texmf)
                     families[fullinfo.family] = { }
                 end
                 if not fullinfo.style then
-                    fullinfo.style = "regular" -- ?
+                    fullinfo.style = sanitize(file.nameonly(filename))
                 end
+                fullinfo.style = normalize_style(fullinfo.style, fullinfo.family)
                 families[fullinfo.family][fullinfo.style] = {texmf and basename(filename) or filename}
                 psnames[fullinfo.psname] = {texmf and basename(filename) or filename}
             end

@@ -71,6 +71,8 @@ local function isstyle(s)
             list.style = "italic"
         elseif v == "bi" or v == "ib" then
             list.style = "bolditalic"
+        elseif v:find("^s=") then
+            list.optsize = v:split("=")[2]
         end
     end
 end
@@ -112,6 +114,10 @@ function fonts.define.specify.colonized(specification) -- xetex mode
     if list.style then
         specification.style = list.style
         list.style = nil
+    end
+    if list.optsize then
+        specification.optsize = list.optsize
+        list.optsize = nil
     end
     if list.name then
         specification.name = list.name

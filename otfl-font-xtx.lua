@@ -69,7 +69,7 @@ local function isstyle(s)
             list.style = "bold"
         elseif v == "i" then
             list.style = "italic"
-        elseif v == "bi" or list.style == "ib" then
+        elseif v == "bi" or v == "ib" then
             list.style = "bolditalic"
         end
     end

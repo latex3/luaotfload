@@ -54,7 +54,8 @@ fonts.names.old_to_new = { }
 
 local data, loaded = nil, false
 
-function fonts.names.resolve(name,sub,style)
+function fonts.names.resolve(specification)
+    local name, sub, style = specification.name, specification.sub, specification.style
     if not loaded then
         local basename = fonts.names.basename
         if basename and basename ~= "" then

@@ -91,8 +91,10 @@ local function isfalse(s)   list[s]     = nil end -- see mpg/luaotfload#4
 local function iskey  (k,v) list[k]     = v end
 
 local spaces     = lpeg.P(" ")^0
-local namespec   = (1-lpeg.S("/:("))^0 -- was: (1-lpeg.S("/: ("))^0
+-- ER: now accepting names like C:/program files/texlive/2009/...
+local namespec   = (lpeg.R("az", "AZ") * lpeg.P(":"))^-1 * (1-lpeg.S("/:("))^1 -- was: (1-lpeg.S("/: ("))^0
 local crapspec   = spaces * lpeg.P("/") * (((1-lpeg.P(":"))^0)/isstyle) * spaces
+-- ER: can't understand why the 'file:' thing doesn't work with fontnames starting by c:...
 local filename   = (lpeg.P("file:")/isfile * (namespec/thename)) + (lpeg.P("[") * lpeg.P(true)/isname * (((1-lpeg.P("]"))^0)/thename) * lpeg.P("]"))
 local fontname   = (lpeg.P("name:")/isname * (namespec/thename)) + lpeg.P(true)/issome * (namespec/thename)
 local sometext   = (lpeg.R("az") + lpeg.R("AZ") + lpeg.R("09"))^1

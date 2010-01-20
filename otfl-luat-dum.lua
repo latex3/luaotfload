@@ -84,3 +84,5 @@ function logs.simple(fmt,...)
         write_nl('log', format("%s |",name))
     end
 end
+
+tex.ctxcatcodes = luatextra.catcodetables.latex

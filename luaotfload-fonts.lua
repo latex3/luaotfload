@@ -274,10 +274,9 @@ local function append_fccatdirs(fontdirs)
         local path = kpse.expand_var("$TEXMFMAIN")..'/../bin/win32/fc-cat.exe'
         if lfs.isfile(path) then
             log(1, "executing `%s' -v\n", path)
-            -- This line doesn't work at all, it replaces a space by a \n, can't understand why...
-            -- the bug should be reported somewhere... TeXLive or LuaTeX?
-            --local data = io.popen(string.format("%s -v", path), 'r')
-            local data = io.popen(path.." -v", 'r')
+            -- dirty hack...
+            path = io.popen(string.format('cygpath.exe -C ANSI -w -s "%s"', path)):read("*all")
+            local data = io.popen('"'..path..' -v"', 'r')
             local result = read_fcdata(fontdirs, data, windows_translate)
             data:close()
             if result then

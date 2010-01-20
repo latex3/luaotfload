@@ -121,7 +121,11 @@ local sbox    = node.id('sub_box')
 local function lookup_next_color(head)
     for n in node.traverse(head) do
         if n.id == glyph then
-            return fonts.ids[n.font].color
+            if fonts.ids[n.font] and fonts.ids[n.font].color then
+                return fonts.ids[n.font].color
+            else
+                return -1
+            end
         elseif n.id == vlist or n.id == hlist or n.id == sbox then
             local r = lookup_next_color(n.list)
             if r == -1 then

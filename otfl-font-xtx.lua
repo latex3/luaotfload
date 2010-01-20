@@ -75,7 +75,7 @@ local function isstyle(s)
             list.optsize = v:split("=")[2]
         elseif v == "aat" or v == "icu" or v == "gr" then
             logs.report("define font", "unsupported font option: %s", v)
-        else
+        elseif not v:is_empty() then
             list.style = v:gsub("[^%a%d]", "")
         end
     end

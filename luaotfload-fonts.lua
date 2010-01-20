@@ -188,9 +188,30 @@ local function scan_dir(dirname, names, recursive, texmf)
     end
 end
 
+local system = LUAROCKS_UNAME_S or io.popen("uname -s"):read("*l")
+if system then
+    if system:match("^CYGWIN") then
+        system = 'cygwin'
+    elseif system:match("^Windows") then
+        system = 'windows'
+    else
+        system = 'unix'
+    end
+else
+    system = 'unix' -- ?
+end
+log(1, "detecting system: %s", system)
+
 local texmfdist = kpse.expand_var("$TEXMFDIST")
 local texmfmain = kpse.expand_var("$TEXMFMAIN")
 local texmflocal = kpse.expand_var("$TEXMFLOCAL")
+-- We lowercase everything under Windows, in order to get a bit of consistency
+if system == 'windows' or system == 'cygwin' then
+    texmfdist = string.lower(texmfdist)
+    texmfmain = string.lower(texmfmain)
+    texmflocal = string.lower(texmflocal)
+end
+
 
 local function is_texmf(dir)
     if dir:find(texmfdist) or dir:find(texmfmain) or dir:find(texmflocal) then
@@ -199,7 +220,7 @@ local function is_texmf(dir)
     return false
 end
 
-local function read_fcdata(fontdirs, data)
+local function read_fcdata(fontdirs, data, translate)
     local to_add = nil
     local done = nil
     for line in data:lines() do
@@ -209,7 +230,7 @@ local function read_fcdata(fontdirs, data)
             if match:find("ype1") then
                 to_add = nil
             else
-                to_add = match
+                to_add = translate(match)
             end
         elseif to_add then
             match = line:match('^"[^"]+%.[^"]+"')
@@ -228,18 +249,63 @@ local function read_fcdata(fontdirs, data)
     end
 end
 
+local function cygwin_translate(name)
+    local res = string.lower(io.popen(string.format("cygpath.exe --mixed %s", name)):read("*all"))
+    -- a very strange thing: spaces are replaced by \n and there is a trailing \n at the end
+    res = res:gsub("\n$", '')
+    res = res:gsub("\n", ' ')
+    return res
+end
+
+local function windows_translate(name)
+    return string.lower(name)
+end
+
+local function no_translate(name)
+    return name
+end
+
 local function append_fccatdirs(fontdirs)
+    -- under cygwin we have the choice between the
+    -- fc-cat of cygwin and the fc-cat of TeXLive.
+    -- we try the fc-cat from TeXLive.
+    local translate = no_translate
+    if system == 'cygwin' then
+        local path = kpse.expand_var("$TEXMFMAIN")..'/../bin/win32/fc-cat.exe'
+        if lfs.isfile(path) then
+            log(1, "executing `%s' -v\n", path)
+            -- This line doesn't work at all, it replaces a space by a \n, can't understand why...
+            -- the bug should be reported somewhere... TeXLive or LuaTeX?
+            --local data = io.popen(string.format("%s -v", path), 'r')
+            local data = io.popen(path.." -v", 'r')
+            local result = read_fcdata(fontdirs, data, windows_translate)
+            data:close()
+            if result then
+                return result
+            else
+                translate = cygwin_translate
+                log(1, "fail")
+            end
+        else
+            log(1, "unable to find TeXLive's fc-cat.exe")
+            translate = cygwin_translate
+        end
+        --translate = cygwin_translate
+    elseif system == 'windows' then
+        translate = windows_translate
+    end
     log(1, "executing `fc-cat -v'\n")
     local data = io.popen("fc-cat -v", 'r')
-    local result = read_fcdata(fontdirs, data)
+    local result = read_fcdata(fontdirs, data, translate)
     data:close()
+    -- this part may be removed (needs further tests though, under non-cygwin Windows systems)
     if not result then
         log(1, "fail, now trying `fc-cat.exe -v'\n")
         data = io.popen("fc-cat.exe -v", 'r')
-        result = read_fcdata(fontdirs, data)
+        result = read_fcdata(fontdirs, data, translate)
         data:close()
         if not result then
-            info("Unable to execute fc-cat nor fc-cat.exe, system fonts may not be available")
+            info("Unable to execute fc-cat nor fc-cat.exe, system fonts will not be available")
             return fontdirs
         end
     end
@@ -249,6 +315,9 @@ end
 local function scan_all(names)
     local fontdirs = string.gsub(expandpath("$OPENTYPEFONTS"), "^\.[;:]", "")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
+    if system == 'windows' or system == 'cygwin' then
+        fontdirs = string.lower(fontdirs)
+    end
     if not fontdirs:is_empty() then
         fontdirs = splitpath(fontdirs)
         fontdirs = table.tohash(fontdirs)
@@ -290,3 +359,4 @@ luaotfload.fonts.generate = generate
 if arg[0] == "luaotfload-fonts.lua" then
     generate()
 end
+

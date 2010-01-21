@@ -69,12 +69,12 @@ end
 
 -- table containing hard to guess styles
 local styles = {
-    calibrii = "italic",
-    bookosi = "italic",
-    bookosb = "bold",
-    lsansi = "italic",
-    antquab = "bold",
-    antquai = "italic",
+    calibrii = "reg-no-no-norm-0-text",
+    bookosi = "reg-it-no-norm-0-text",
+    bookosb = "bd-no-no-norm-0-text",
+    lsansi = "reg-it-no-norm-0-text",
+    antquab = "bd-no-no-norm-0-text",
+    antquai = "reg-it-no-norm-0-text",
     }
 
 -- euristics to normalize the style
@@ -82,27 +82,37 @@ local function normalize_style(style, family)
     local s = {}
     if style:find("semibold") or style:find("demibold")
             or style:find("lightbold") or style:match("lb$") then
-        s.weight = "demibold"
-    elseif style:find("bold") or style:find("heavy") or style:match("xb$")
+        s.weight = "smbd"
+    elseif style:find("bold") or style:match("xb$")
             or style:match("bd$") or style:match("bb$") then
-        s.weight = "bold"
+        s.weight = "bd"
     elseif style:find("medium") or style:find("med") then
-        s.weight = "medium"
-    elseif style:find("light") or style:find("narrow") then
-        s.weight = "narrow" -- ?
+        s.weight = "med"
+    elseif style:find("narrow") then
+        s.weight = "nar" -- ?
     end
     if style:find("italic") or style:find("oblique")  or style:match("it$") then
-        s.italic = true
+        s.italic = "it"
+    elseif style:find("oblique") then
+        s.italic = "obl"
+    end
+    if style:find("heavy") then
+        s.type = "heavy"
+    elseif style:find("light") then
+        s.type = "light"
     end
     if style:find("regular") or style:match("rg$") then
         s.regular = true
     end
+    if style:find("condensed") then
+        s.condensed = true
+    end
     if style:find("caption") or style:find("capt") then
-        s.size_type = 'caption'
+        s.size_type = 'capt'
     elseif style:find("display") or style:find("disp") then
-        s.size_type = 'display'
+        s.size_type = 'disp'
     elseif style:find("subhead") or style:find("subh") then
-        s.size_type = 'subhead'
+        s.size_type = 'subh'
     end
     local size = tonumber(string.match(style, "%d+"))
     if size and size > 4 and size < 25 then 
@@ -113,35 +123,47 @@ local function normalize_style(style, family)
         local endletter = style:sub(-1, -1)
         if family:find(truncated) and family:sub(-1,-1) ~= endletter then 
             if endletter =='b' then
-                s.weight = "bold"
+                s.weight = "bd"
             elseif endletter == 'i' then
-                s.italic = true
+                s.italic = "it"
             end
         end
     end
     if not next(s) and styles[style] then
         return styles[style]
     end
-    if not next(s) then
-        return style -- or "regular ?"
+    local result = nil
+    if s.weight then
+        result = s.weight
     else
-        local result = nil
-        if s.weight then
-            result = s.weight
-        else
-            result = 'regular'
-        end
-        if s.italic then
-            result = result.."-italic"
-        end
-        if s.size then
-            result = result.."-"..s.size
-        end
-        if s.size_type then
-            result = result.."-"..s.size_type
-        end
-        return result
+        result = 'reg'
     end
+    if s.italic then
+        result = result.."-"..s.italic
+    else
+        result = result.."-no"
+    end
+    if s.condensed then
+        result = result.."-cond"
+    else
+        result = result.."-no"
+    end
+    if s.type then
+        result = result.."-"..s.type
+    else
+        result = result.."-norm"
+    end
+    if s.size then
+        result = result.."-"..s.size
+    else
+        result = result.."-0"
+    end
+    if s.size_type then
+        result = result.."-"..s.size_type
+    else
+        result = result.."-text"
+    end
+    return result
 end
 
 local function load_font(filename, names, texmf)

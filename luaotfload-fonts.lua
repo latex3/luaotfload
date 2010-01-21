@@ -86,6 +86,8 @@ local function normalize_style(style, family)
     elseif style:find("bold") or style:find("heavy") or style:match("xb$")
             or style:match("bd$") or style:match("bb$") then
         s.weight = "bold"
+    elseif style:find("medium") or style:find("med") then
+        s.weight = "medium"
     elseif style:find("light") or style:find("narrow") then
         s.weight = "narrow" -- ?
     end
@@ -94,6 +96,13 @@ local function normalize_style(style, family)
     end
     if style:find("regular") or style:match("rg$") then
         s.regular = true
+    end
+    if style:find("caption") then
+        s.size_type = 'caption'
+    elseif style:find("display") or style:find("disp") then
+        s.size_type = 'display'
+    elseif style:find("subhead") or style:find("subh") then
+        s.size_type = 'subhead'
     end
     local size = tonumber(string.match(style, "%d+"))
     if size and size > 4 and size < 25 then 
@@ -116,18 +125,20 @@ local function normalize_style(style, family)
     if not next(s) then
         return style -- or "regular ?"
     else
-        local result = ""
+        local result = nil
         if s.weight then
             result = s.weight
+        else
+            result = 'regular'
         end
         if s.italic then
-            result = result.."italic"
-        end
-        if not s.italic and not s.weight then
-            result = "regular"
+            result = result.."-italic"
         end
         if s.size then
             result = result.."-"..s.size
+        end
+        if s.size_type then
+            result = result.."-"..s.size_type
         end
         return result
     end

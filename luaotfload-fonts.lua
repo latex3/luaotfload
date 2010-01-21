@@ -80,7 +80,7 @@ local styles = {
 -- euristics to normalize the style
 local function normalize_style(style, family)
     local s = {}
-    if style:find("semibold") or style:find("demibold") or style:find("medium")
+    if style:find("semibold") or style:find("demibold")
             or style:find("lightbold") or style:match("lb$") then
         s.weight = "demibold"
     elseif style:find("bold") or style:find("heavy") or style:match("xb$")
@@ -97,7 +97,7 @@ local function normalize_style(style, family)
     if style:find("regular") or style:match("rg$") then
         s.regular = true
     end
-    if style:find("caption") then
+    if style:find("caption") or style:find("capt") then
         s.size_type = 'caption'
     elseif style:find("display") or style:find("disp") then
         s.size_type = 'display'
@@ -170,8 +170,12 @@ local function load_font(filename, names, texmf)
                 if not fullinfo.style then
                     fullinfo.style = sanitize(file.nameonly(filename))
                 end
-                fullinfo.style = normalize_style(fullinfo.style, fullinfo.family)
-                families[fullinfo.family][fullinfo.style] = {texmf and basename(filename) or filename}
+                local guessed = normalize_style(fullinfo.style, fullinfo.family)
+                families[fullinfo.family][texmf and basename(filename) or filename] = 
+                    {
+                      guessed_style = guessed,
+                      raw_style = fullinfo.style,
+                    }
                 psnames[fullinfo.psname] = {texmf and basename(filename) or filename}
             end
         else
@@ -293,14 +297,12 @@ local function append_fccatdirs(fontdirs)
             if result then
                 return result
             else
-                translate = cygwin_translate
                 log(1, "fail")
             end
         else
             log(1, "unable to find TeXLive's fc-cat.exe")
-            translate = cygwin_translate
         end
-        --translate = cygwin_translate
+        translate = cygwin_translate
     elseif system == 'windows' then
         translate = windows_translate
     end

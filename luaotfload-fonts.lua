@@ -81,30 +81,30 @@ local styles = {
 local function normalize_style(style, family)
     local s = {}
     if style:find("semibold") or style:find("demibold")
-            or style:find("lightbold") or style:match("lb$") then
+            or style:find("lightbold") or style:match("lb%d*") then
         s.weight = "smbd"
-    elseif style:find("bold") or style:match("xb$")
-            or style:match("bd$") or style:match("bb$") then
+    elseif style:find("bold") or style:match("xb%d*")
+            or style:match("bd%d*") or style:match("bb%d*") then
         s.weight = "bd"
-    elseif style:find("medium") or style:find("med") then
-        s.weight = "med"
     elseif style:find("narrow") then
         s.weight = "nar" -- ?
     end
-    if style:find("italic") or style:find("oblique")  or style:match("it$") then
+    if style:find("italic") or style:match("it%d*") then
         s.italic = "it"
     elseif style:find("oblique") then
         s.italic = "obl"
     end
     if style:find("heavy") then
         s.type = "heavy"
+    elseif style:find("medium") or style:find("med") then
+        s.type = "med"
     elseif style:find("light") then
         s.type = "light"
     end
-    if style:find("regular") or style:match("rg$") then
+    if style:find("regular") or style:match("rg%d*") then
         s.regular = true
     end
-    if style:find("condensed") then
+    if style:find("condensed") or style:match("cond") then
         s.condensed = true
     end
     if style:find("caption") or style:find("capt") then
@@ -178,7 +178,16 @@ local function load_font(filename, names, texmf)
                     if not families[fullinfo.family] then
                         families[fullinfo.family] = { }
                     end
-                    families[fullinfo.family][fullinfo.style] = {texmf and basename(filename) or filename, index-1}
+                    if not fullinfo.style then
+                        fullinfo.style = sanitize(file.nameonly(filename))
+                    end
+                    local guessed = normalize_style(fullinfo.style, fullinfo.family)
+                    families[fullinfo.family][texmf and basename(filename) or filename] = 
+                        {
+                          guessed_style = guessed,
+                          raw_style = fullinfo.style,
+                          index = index-1,
+                        }
                     psnames[fullinfo.psname] = {texmf and basename(filename) or filename, index-1}
                 end
             else
@@ -193,7 +202,7 @@ local function load_font(filename, names, texmf)
                     fullinfo.style = sanitize(file.nameonly(filename))
                 end
                 local guessed = normalize_style(fullinfo.style, fullinfo.family)
-                families[fullinfo.family][texmf and basename(filename) or filename] = 
+                families[fullinfo.family][filename] = 
                     {
                       guessed_style = guessed,
                       raw_style = fullinfo.style,

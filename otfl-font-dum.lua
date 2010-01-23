@@ -47,15 +47,19 @@ end
 
 fonts.names = fonts.names or { }
 
-fonts.names.version    = 2.000 -- not the same as in context
+fonts.names.version    = 2.001 -- not the same as in context
 fonts.names.basename   = "otfl-names.lua"
 fonts.names.new_to_old = { }
 fonts.names.old_to_new = { }
 
 local data, loaded = nil, false
 
+local function sanitize(str)
+    return string.gsub(string.lower(str), "[^%a%d]", "")
+end
+
 function fonts.names.resolve(specification)
-    local name, sub, style = specification.name, specification.sub, specification.style
+    local name, style = specification.name, specification.style or "regular"
     if not loaded then
         local basename = fonts.names.basename
         if basename and basename ~= "" then
@@ -70,33 +74,38 @@ function fonts.names.resolve(specification)
         loaded = true
     end
     if type(data) == "table" and data.version == fonts.names.version then
-        local condensed = string.gsub(string.lower(name),"[^%a%d]","")
         if data.mappings then
-            local psnames  = data.mappings.psnames
-            local families = data.mappings.families
-            local family = families and families[condensed]
-	    local psname = psnames and psnames[condensed]
-            if family then
-                local style = style or "regular"
-                local found = family[style]
-                if found then
-                    local fontname, filename, subfont = found, found[1], found[2]
-                    if subfont then
-                        return filename, subfont
-                    else
-                        return filename, false
-                    end
+            local family = data.families[name]
+            if family and type(family) == "table" then
+                for _,v in ipairs(family) do
+                   local subfamily      = data.mappings[v].names.subfamily
+                   local prefmodifiers  = data.mappings[v].names.prefmodifiers
+                   local fontstyle_name = data.mappings[v].fontstyle_name
+                   local dsize          = data.mappings[v].design_size and data.mappings[v].design_size / 10
+                   local ssize          = specification.size and specification.size / 65536
+                   local optsize        = tonumber(specification.optsize)
+                   local maxsize        = data.mappings[v].design_range_bottom
+                   local minsize        = data.mappings[v].design_range_top
+                   local filename       = data.mappings[v].filename
+                   if subfamily and sanitize(subfamily) == style then
+                       if not dsize            then return filename, false
+                       elseif dsize == optsize then return filename, false
+                       elseif dsize == ssize   then return filename, false
+                       end
+                   elseif prefmodifiers and sanitize(prefmodifiers) == style then
+                       if not dsize            then return filename, false
+                       elseif dsize == optsize then return filename, false
+                       elseif dsize == ssize   then return filename, false
+                       end
+                   elseif fontstyle_name and sanitize(fontstyle_name) == style then
+                       if not dsize            then return filename, false
+                       elseif dsize == optsize then return filename, false
+                       elseif dsize == ssize   then return filename, false
+                       end
+                   end
                 end
-            elseif psname then
-                local fontname, filename, subfont = psname, psname[1], psname[2]
-                if subfont then
-                    return filename, subfont
-                else
-                    return filename, false
-                end
-            else
-                return name, false -- fallback to filename
             end
+            return name, false -- fallback to filename
         end
     end
 end

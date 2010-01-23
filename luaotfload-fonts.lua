@@ -18,196 +18,91 @@ dofile(kpse.find_file("luaextra.lua"))
 local upper, splitpath, expandpath, glob, basename = string.upper, file.split_path, kpse.expand_path, dir.glob, file.basename
 
 luaotfload.fonts.basename   = "otfl-names.lua"
-luaotfload.fonts.version    = 2.000
+luaotfload.fonts.version    = 2.001
 luaotfload.fonts.log_level  = 1
 
-local function info(fmt,...)
-    texio.write_nl(string.format("luaotfload | %s", string.format(fmt,...)))
-end
-
-local function log(lvl, ...)
+local function log(lvl, fmt, ...)
     if lvl <= luaotfload.fonts.log_level then
-        info(...)
+        texio.write_nl(string.format("luaotfload | %s", string.format(fmt,...)))
     end
 end
 
-local function sanitize(str)
-    return string.gsub(string.lower(str), "[^%a%d]", "")
-end
-
 function fontloader.fullinfo(...)
-    local t, n = { }, { }
+    local t = { }
     local f = fontloader.open(...)
     local m = f and fontloader.to_table(f)
     fontloader.close(f)
     if m.names then
         for _,v in pairs(m.names) do
             if v.lang == "English (US)" then
-                n.name   = v.names.compatfull     or v.names.fullname
-                n.family = v.names.preffamilyname or v.names.family
-                n.style  = v.names.prefmodifiers  or v.names.subfamily
+                t.names = {
+                    fullname       = v.names.fullname,
+                    family         = v.names.family,
+                    subfamily      = v.names.subfamily,
+                    compatfull     = v.names.compatfull,
+                    preffamilyname = v.names.preffamilyname,
+                    prefmodifiers  = v.names.prefmodifiers,
+                }
             end
         end
     end
     if m.fontstyle_name then
         for _,v in pairs(m.fontstyle_name) do
             if v.lang == 1033 then
-                m.style = v.name
+                t.fontstyle_name = v.name
             end
         end
     end
-    t.psname   = m.fontname
-    t.fullname = n.name   or m.fullname
-    t.family   = n.family or m.familyname
-    t.style    = n.style  or m.style
-    for k,v in pairs(t) do
-        t[k] = sanitize(v)
+    if m.pfminfo then
+        t.pfminfo = {
+            weight = m.pfminfo.weight,
+            width  = m.pfminfo.width,
+        }
     end
-    m, n = nil, nil
+    t.fontname    = m.fontname
+    t.fullname    = m.fullname
+    t.familyname  = m.familyname
+    t.filename    = m.origname
+    t.weight      = m.weight
+    t.italicangle = m.italicangle
+    -- don't waste the space with zero values
+    t.design_size         = m.design_size         ~= 0 and m.design_size         or nil
+    t.design_range_bottom = m.design_range_bottom ~= 0 and m.design_range_bottom or nil
+    t.design_range_top    = m.design_range_top    ~= 0 and m.design_range_top    or nil
+    -- used for indexing
+    t.family = t.names.preffamilyname or t.names.family or t.familyname
     return t
-end
-
--- table containing hard to guess styles
-local styles = {
-    calibrii = "reg-no-no-norm-0-text",
-    bookosi = "reg-it-no-norm-0-text",
-    bookosb = "bd-no-no-norm-0-text",
-    lsansi = "reg-it-no-norm-0-text",
-    antquab = "bd-no-no-norm-0-text",
-    antquai = "reg-it-no-norm-0-text",
-    }
-
--- euristics to normalize the style
-local function normalize_style(style, family)
-    local s = {}
-    if style:find("semibold") or style:find("demibold")
-            or style:find("lightbold") or style:match("lb%d*") then
-        s.weight = "smbd"
-    elseif style:find("bold") or style:match("xb%d*")
-            or style:match("bd%d*") or style:match("bb%d*") then
-        s.weight = "bd"
-    elseif style:find("narrow") then
-        s.weight = "nar" -- ?
-    end
-    if style:find("italic") or style:match("it%d*") then
-        s.italic = "it"
-    elseif style:find("oblique") then
-        s.italic = "obl"
-    end
-    if style:find("heavy") then
-        s.type = "heavy"
-    elseif style:find("medium") or style:find("med") then
-        s.type = "med"
-    elseif style:find("light") then
-        s.type = "light"
-    end
-    if style:find("regular") or style:match("rg%d*") then
-        s.regular = true
-    end
-    if style:find("condensed") or style:match("cond") then
-        s.condensed = true
-    end
-    if style:find("caption") or style:find("capt") then
-        s.size_type = 'capt'
-    elseif style:find("display") or style:find("disp") then
-        s.size_type = 'disp'
-    elseif style:find("subhead") or style:find("subh") then
-        s.size_type = 'subh'
-    end
-    local size = tonumber(string.match(style, "%d+"))
-    if size and size > 4 and size < 25 then 
-        s.size = size
-    end
-    if not next(s) then -- more aggressive guessing
-        local truncated = style:sub(1,-2)
-        local endletter = style:sub(-1, -1)
-        if family:find(truncated) and family:sub(-1,-1) ~= endletter then 
-            if endletter =='b' then
-                s.weight = "bd"
-            elseif endletter == 'i' then
-                s.italic = "it"
-            end
-        end
-    end
-    if not next(s) and styles[style] then
-        return styles[style]
-    end
-    local result = nil
-    if s.weight then
-        result = s.weight
-    else
-        result = 'reg'
-    end
-    if s.italic then
-        result = result.."-"..s.italic
-    else
-        result = result.."-no"
-    end
-    if s.condensed then
-        result = result.."-cond"
-    else
-        result = result.."-no"
-    end
-    if s.type then
-        result = result.."-"..s.type
-    else
-        result = result.."-norm"
-    end
-    if s.size then
-        result = result.."-"..s.size
-    else
-        result = result.."-0"
-    end
-    if s.size_type then
-        result = result.."-"..s.size_type
-    else
-        result = result.."-text"
-    end
-    return result
 end
 
 local function load_font(filename, names, texmf)
     log(3, "Loading font %s", filename)
-    local psnames, families = names.mappings.psnames, names.mappings.families
+    local mappings = names.mappings
+    local families = names.families
     if filename then
         local info = fontloader.info(filename)
         if info then
             if type(info) == "table" and #info > 1 then
                 for index,_ in ipairs(info) do
                     local fullinfo = fontloader.fullinfo(filename, index-1)
+                    if texmf then
+                        fullinfo.filename = basename(filename)
+                    end
+                    mappings[#mappings+1] = fullinfo
                     if not families[fullinfo.family] then
                         families[fullinfo.family] = { }
                     end
-                    if not fullinfo.style then
-                        fullinfo.style = sanitize(file.nameonly(filename))
-                    end
-                    local guessed = normalize_style(fullinfo.style, fullinfo.family)
-                    families[fullinfo.family][texmf and basename(filename) or filename] = 
-                        {
-                          guessed_style = guessed,
-                          raw_style = fullinfo.style,
-                          index = index-1,
-                        }
-                    psnames[fullinfo.psname] = {texmf and basename(filename) or filename, index-1}
+                    table.insert(families[fullinfo.family], #mappings)
                 end
             else
                 local fullinfo = fontloader.fullinfo(filename)
-                if texmf == true then
-                    filename = basename(filename)
+                if texmf then
+                    fullinfo.filename = basename(filename)
                 end
+                mappings[#mappings+1] = fullinfo
                 if not families[fullinfo.family] then
                     families[fullinfo.family] = { }
                 end
-                if not fullinfo.style then
-                    fullinfo.style = sanitize(file.nameonly(filename))
-                end
-                local guessed = normalize_style(fullinfo.style, fullinfo.family)
-                families[fullinfo.family][filename] = 
-                    {
-                      guessed_style = guessed,
-                      raw_style = fullinfo.style,
-                    }
-                psnames[fullinfo.psname] = {texmf and basename(filename) or filename}
+                table.insert(families[fullinfo.family], #mappings)
             end
         else
             log(1, "Failed to load %s", filename)
@@ -348,7 +243,7 @@ local function append_fccatdirs(fontdirs)
         result = read_fcdata(fontdirs, data, translate)
         data:close()
         if not result then
-            info("Unable to execute fc-cat nor fc-cat.exe, system fonts will not be available")
+            log(1, "Unable to execute fc-cat nor fc-cat.exe, system fonts will not be available")
             return fontdirs
         end
     end
@@ -373,26 +268,24 @@ end
 
 local function generate()
     local fnames = {
-        mappings = {
-            families = { },
-            psnames  = { },
-        },
-        version  = luaotfload.fonts.version
+        mappings = { },
+        families = { },
+        version  = luaotfload.fonts.version,
     }
     local savepath
     scan_all(fnames)
-    info("%s fonts saved in the database", #table.keys(fnames.mappings.psnames))
+    log(1, "%s fonts in %s families saved in the database", #fnames.mappings, #table.keys(fnames.families))
     savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"
     if not file.isreadable(savepath) then
         log(1, "Creating directory %s", savepath)
         lfs.mkdir(savepath)
     end
     if not file.iswritable(savepath) then
-        info("Error: cannot write in directory %s\n", savepath)
+        log(1, "Error: cannot write in directory %s\n", savepath)
     else
         savepath = savepath .. luaotfload.fonts.basename
         io.savedata(savepath, table.serialize(fnames, true))
-        info("Saved font names database in %s\n", savepath)
+        log(1, "Saved font names database in %s\n", savepath)
     end
 end
 

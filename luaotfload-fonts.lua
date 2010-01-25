@@ -36,12 +36,11 @@ function fontloader.fullinfo(...)
         for _,v in pairs(m.names) do
             if v.lang == "English (US)" then
                 t.names = {
-                    fullname       = v.names.fullname,
-                    family         = v.names.family,
-                    subfamily      = v.names.subfamily,
-                    compatfull     = v.names.compatfull,
-                    preffamilyname = v.names.preffamilyname,
-                    prefmodifiers  = v.names.prefmodifiers,
+                    -- see http://developer.apple.com/textfonts/TTRefMan/RM06/Chap6name.html
+                    fullname       = v.names.compatfull     or v.names.fullname, -- 18, 4
+                    family         = v.names.preffamilyname or v.names.family,   -- 17, 1
+                    subfamily      = v.names.prefmodifiers  or v.names.subfamily,-- 16, 2
+                    psname         = v.names.postscriptname --or t.fontname
                 }
             end
         end
@@ -69,8 +68,6 @@ function fontloader.fullinfo(...)
     t.design_size         = m.design_size         ~= 0 and m.design_size         or nil
     t.design_range_bottom = m.design_range_bottom ~= 0 and m.design_range_bottom or nil
     t.design_range_top    = m.design_range_top    ~= 0 and m.design_range_top    or nil
-    -- used for indexing
-    t.family = t.names.preffamilyname or t.names.family or t.familyname
     return t
 end
 
@@ -88,10 +85,10 @@ local function load_font(filename, names, texmf)
                         fullinfo.filename = basename(filename)
                     end
                     mappings[#mappings+1] = fullinfo
-                    if not families[fullinfo.family] then
-                        families[fullinfo.family] = { }
+                    if not families[fullinfo.names.family] then
+                        families[fullinfo.names.family] = { }
                     end
-                    table.insert(families[fullinfo.family], #mappings)
+                    table.insert(families[fullinfo.names.family], #mappings)
                 end
             else
                 local fullinfo = fontloader.fullinfo(filename)
@@ -99,10 +96,10 @@ local function load_font(filename, names, texmf)
                     fullinfo.filename = basename(filename)
                 end
                 mappings[#mappings+1] = fullinfo
-                if not families[fullinfo.family] then
-                    families[fullinfo.family] = { }
+                if not families[fullinfo.names.family] then
+                    families[fullinfo.names.family] = { }
                 end
-                table.insert(families[fullinfo.family], #mappings)
+                table.insert(families[fullinfo.names.family], #mappings)
             end
         else
             log(1, "Failed to load %s", filename)

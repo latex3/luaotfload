@@ -78,36 +78,32 @@ function fonts.names.resolve(specification)
             local family = data.families[name]
             if family and type(family) == "table" then
                 for _,v in ipairs(family) do
-                   local subfamily      = data.mappings[v].names.subfamily
-                   local prefmodifiers  = data.mappings[v].names.prefmodifiers
-                   local fontstyle_name = data.mappings[v].fontstyle_name
-                   local dsize          = data.mappings[v].design_size and data.mappings[v].design_size / 10
-                   local ssize          = specification.size and specification.size / 65536
-                   local optsize        = tonumber(specification.optsize)
-                   local maxsize        = data.mappings[v].design_range_bottom
-                   local minsize        = data.mappings[v].design_range_top
-                   local filename       = data.mappings[v].filename
-                   if subfamily and sanitize(subfamily) == style then
-                       if not dsize            then return filename, false
-                       elseif dsize == optsize then return filename, false
-                       elseif dsize == ssize   then return filename, false
-                       end
-                   elseif prefmodifiers and sanitize(prefmodifiers) == style then
-                       if not dsize            then return filename, false
-                       elseif dsize == optsize then return filename, false
-                       elseif dsize == ssize   then return filename, false
-                       end
-                   elseif fontstyle_name and sanitize(fontstyle_name) == style then
-                       if not dsize            then return filename, false
-                       elseif dsize == optsize then return filename, false
-                       elseif dsize == ssize   then return filename, false
+                   local face      = data.mappings[v]
+                   local subfamily = face.names.subfamily
+                   local dsize     = face.size[1] and face.size[1] / 10
+                   local ssize     = specification.size and specification.size / 65536
+                   local osize     = tonumber(specification.optsize)
+                   local maxsize   = face.design_range_bottom
+                   local minsize   = face.design_range_top
+                   local filename  = face.filename
+                   if subfamily then
+                       if sanitize(subfamily) == style then
+                           if not dsize or dsize == osize or dsize == ssize then
+                               found = filename
+                               break
+                           end
                        end
                    end
                 end
+                if found then
+                   return found, false
+                else
+                   return name, false -- fallback to filename
+                end
             end
-            return name, false -- fallback to filename
         end
     end
+    logs.report("define font", "Font names database version mismatch")
 end
 
 fonts.names.resolvespec = fonts.names.resolve -- only supported in mkiv

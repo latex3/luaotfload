@@ -18,7 +18,7 @@ dofile(kpse.find_file("luaextra.lua"))
 local upper, splitpath, expandpath, glob, basename = string.upper, file.split_path, kpse.expand_path, dir.glob, file.basename
 
 luaotfload.fonts.basename   = "otfl-names.lua"
-luaotfload.fonts.version    = 2.001
+luaotfload.fonts.version    = 2.002
 luaotfload.fonts.log_level  = 1
 
 local function log(lvl, fmt, ...)
@@ -53,22 +53,19 @@ function fontloader.fullinfo(...)
             end
         end
     end
-    if m.pfminfo then
-        t.pfminfo = {
-            weight = m.pfminfo.weight,
-            width  = m.pfminfo.width,
-        }
-    end
     t.fontname    = m.fontname
     t.fullname    = m.fullname
     t.familyname  = m.familyname
     t.filename    = m.origname
-    t.weight      = m.weight
-    t.italicangle = m.italicangle
+    t.weight      = m.pfminfo.weight
+    t.width       = m.pfminfo.width
+    t.slant       = m.italicangle
     -- don't waste the space with zero values
-    t.design_size         = m.design_size         ~= 0 and m.design_size         or nil
-    t.design_range_bottom = m.design_range_bottom ~= 0 and m.design_range_bottom or nil
-    t.design_range_top    = m.design_range_top    ~= 0 and m.design_range_top    or nil
+    t.size = {
+        m.design_size         ~= 0 and m.design_size         or nil,
+        m.design_range_top    ~= 0 and m.design_range_top    or nil,
+        m.design_range_bottom ~= 0 and m.design_range_bottom or nil,
+    }
     return t
 end
 

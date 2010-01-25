@@ -32,6 +32,14 @@ function fontloader.fullinfo(...)
     local f = fontloader.open(...)
     local m = f and fontloader.to_table(f)
     fontloader.close(f)
+    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
+    if m.fontstyle_name then
+        for _,v in pairs(m.fontstyle_name) do
+            if v.lang == 1033 then
+                t.fontstyle_name = v.name
+            end
+        end
+    end
     if m.names then
         for _,v in pairs(m.names) do
             if v.lang == "English (US)" then
@@ -39,16 +47,9 @@ function fontloader.fullinfo(...)
                     -- see http://developer.apple.com/textfonts/TTRefMan/RM06/Chap6name.html
                     fullname       = v.names.compatfull     or v.names.fullname, -- 18, 4
                     family         = v.names.preffamilyname or v.names.family,   -- 17, 1
-                    subfamily      = v.names.prefmodifiers  or v.names.subfamily,-- 16, 2
+                    subfamily      = t.fontstyle_name       or v.names.prefmodifiers  or v.names.subfamily, -- opt. style, 16, 2
                     psname         = v.names.postscriptname --or t.fontname
                 }
-            end
-        end
-    end
-    if m.fontstyle_name then
-        for _,v in pairs(m.fontstyle_name) do
-            if v.lang == 1033 then
-                t.fontstyle_name = v.name
             end
         end
     end

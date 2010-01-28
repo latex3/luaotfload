@@ -54,6 +54,12 @@ fonts.names.old_to_new = { }
 
 local data, loaded = nil, false
 
+local synonyms = {
+    regular     = {"normal", "roman", "plain", "book", "medium"},
+    italic      = {"regularitalic", "normalitalic", "oblique", "slant"},
+    bolditalic  = {"boldoblique", "boldslant"},
+}
+
 local function sanitize(str)
     return string.gsub(string.lower(str), "[^%a%d]", "")
 end
@@ -91,6 +97,17 @@ function fonts.names.resolve(specification)
                            if not dsize or dsize == osize or dsize == ssize then
                                found = filename
                                break
+                           end
+                       else
+                           if synonyms[style] then
+                               for _,v in ipairs(synonyms[style]) do
+                                   if sanitize(subfamily) == v then
+                                       if not dsize or dsize == osize or dsize == ssize then
+                                            found = filename
+                                            break
+                                       end
+                                   end
+                               end
                            end
                        end
                    end

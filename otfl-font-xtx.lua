@@ -81,7 +81,14 @@ local function isstyle(s)
     end
 end
 
-local default_features = {
+fonts      = fonts      or { }
+fonts.otf  = fonts.otf  or { }
+
+local otf  = fonts.otf
+
+otf.tables = otf.tables or { }
+
+otf.tables.defaults = {
     dflt = {
         "ccmp", "locl", "rlig", "liga", "clig",
         "kern", "mark", "mkmk",
@@ -119,31 +126,31 @@ local default_features = {
     },
 }
 
-default_features.beng = default_features.deva
-default_features.guru = default_features.deva
-default_features.gujr = default_features.deva
-default_features.orya = default_features.deva
-default_features.taml = default_features.deva
-default_features.telu = default_features.deva
-default_features.knda = default_features.deva
-default_features.mlym = default_features.deva
-default_features.sinh = default_features.deva
+otf.tables.defaults.beng = otf.tables.defaults.deva
+otf.tables.defaults.guru = otf.tables.defaults.deva
+otf.tables.defaults.gujr = otf.tables.defaults.deva
+otf.tables.defaults.orya = otf.tables.defaults.deva
+otf.tables.defaults.taml = otf.tables.defaults.deva
+otf.tables.defaults.telu = otf.tables.defaults.deva
+otf.tables.defaults.knda = otf.tables.defaults.deva
+otf.tables.defaults.mlym = otf.tables.defaults.deva
+otf.tables.defaults.sinh = otf.tables.defaults.deva
 
-default_features.syrc = default_features.arab
-default_features.mong = default_features.arab
-default_features.nko  = default_features.arab
+otf.tables.defaults.syrc = otf.tables.defaults.arab
+otf.tables.defaults.mong = otf.tables.defaults.arab
+otf.tables.defaults.nko  = otf.tables.defaults.arab
 
-default_features.tibt = default_features.khmr
+otf.tables.defaults.tibt = otf.tables.defaults.khmr
 
-default_features.lao  = default_features.thai
+otf.tables.defaults.lao  = otf.tables.defaults.thai
 
 local function parse_script(script)
-    if fonts.otf.tables.scripts[script] then
+    if otf.tables.scripts[script] then
         local dflt
-        if default_features[script] then
-            dflt = default_features[script]
+        if otf.tables.defaults[script] then
+            dflt = otf.tables.defaults[script]
         else
-            dflt = default_features["dflt"]
+            dflt = otf.tables.defaults["dflt"]
         end
         for _,v in next, dflt do
             list[v] = "yes"

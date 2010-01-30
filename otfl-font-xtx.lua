@@ -83,17 +83,14 @@ end
 
 local default_features = {
     dflt = {
-        "ccmp", "locl", "liga", "clig", "kern",
-        "mark", "mkmk",
+        "ccmp", "locl", "rlig", "liga", "clig",
+        "kern", "mark", "mkmk",
     },
     arab = {
-        "ccmp", "locl", "isol", "fina", "medi",
-        "init", "rlig", "calt", "liga", "cswh",
-        "mset", "curs", "kern", "mark", "mkmk",
-    },
-    hebr = {
-        "ccmp", "locl", "rlig", "kern", "mark",
-        "mkmk",
+        "ccmp", "locl", "isol", "fina", "fin2",
+        "fin3", "medi", "med2", "init", "rlig",
+        "calt", "liga", "cswh", "mset", "curs",
+        "kern", "mark", "mkmk",
     },
     deva = {
         "ccmp", "locl", "init", "nukt", "akhn",
@@ -117,12 +114,9 @@ local default_features = {
         "ccmp", "locl", "liga", "kern", "mark",
         "mkmk",
     },
-    tibt = {
-        "ccmp", "locl", "pref", "blws", "abvs",
-        "psts", "clig", "calt", "blwm", "abvm",
-        "dist", "kern", "mark", "mkmk",
+    hang = {
+        "ccmp", "ljmo", "vjmo", "tjmo",
     },
-    hang = { },
 }
 
 default_features.beng = default_features.deva
@@ -135,7 +129,12 @@ default_features.knda = default_features.deva
 default_features.mlym = default_features.deva
 default_features.sinh = default_features.deva
 
+default_features.syrc = default_features.arab
+default_features.mong = default_features.arab
 default_features.nko  = default_features.arab
+
+default_features.tibt = default_features.khmr
+
 default_features.lao  = default_features.thai
 
 local function parse_script(script)

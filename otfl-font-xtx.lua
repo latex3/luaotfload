@@ -80,6 +80,100 @@ local function isstyle(s)
         end
     end
 end
+
+local default_features = {
+    arab = {
+        "ccmp", "locl", "isol", "fina", "medi",
+        "init", "rlig", "calt", "liga", "cswh",
+        "mset", "curs", "kern", "mark", "mkmk",
+    },
+    latn = {
+        "ccmp", "locl", "liga", "clig", "kern",
+        "mark", "mkmk",
+    },
+    hebr = {
+        "ccmp", "locl", "rlig", "kern", "mark",
+        "mkmk",
+    },
+    deva = {
+        "ccmp", "locl", "init", "nukt", "akhn",
+        "rphf", "blwf", "half", "pstf", "vatu",
+        "pres", "blws", "abvs", "psts", "haln",
+        "calt", "blwm", "abvm", "dist", "kern",
+        "mark", "mkmk",
+    },
+    khmr = {
+        "ccmp", "locl", "pref", "blwf", "abvf",
+        "pstf", "pres", "blws", "abvs", "psts",
+        "clig", "calt", "blwm", "abvm", "dist",
+        "kern", "mark", "mkmk",
+    },
+    syrc = {
+        "ccmp", "locl", "isol", "fina", "fin1",
+        "fin2", "medi", "med2", "init", "rlig",
+        "calt", "liga", "kern", "mark", "mkmk",
+    },
+    thai = {
+        "ccmp", "locl", "liga", "kern", "mark",
+        "mkmk",
+    },
+    tibt = {
+        "ccmp", "locl", "pref", "blws", "abvs",
+        "psts", "clig", "calt", "blwm", "abvm",
+        "dist", "kern", "mark", "mkmk",
+    },
+    hang = { },
+}
+
+default_features.cyrl = default_features.latn
+default_features.grek = default_features.latn
+default_features.armn = default_features.latn
+default_features.geor = default_features.latn
+default_features.runr = default_features.latn
+default_features.ogam = default_features.latn
+default_features.bopo = default_features.latn
+default_features.cher = default_features.latn
+default_features.copt = default_features.latn
+default_features.dsrt = default_features.latn
+default_features.ethi = default_features.latn
+default_features.goth = default_features.latn
+default_features.hani = default_features.latn
+default_features.kana = default_features.latn
+default_features.ital = default_features.latn
+default_features.cans = default_features.latn
+default_features.yi   = default_features.latn
+default_features.brai = default_features.latn
+default_features.cprt = default_features.latn
+default_features.limb = default_features.latn
+default_features.osma = default_features.latn
+default_features.shaw = default_features.latn
+default_features.linb = default_features.latn
+default_features.ugar = default_features.latn
+default_features.glag = default_features.latn
+default_features.xsux = default_features.latn
+default_features.phnx = default_features.latn
+
+default_features.beng = default_features.deva
+default_features.guru = default_features.deva
+default_features.gujr = default_features.deva
+default_features.orya = default_features.deva
+default_features.taml = default_features.deva
+default_features.telu = default_features.deva
+default_features.knda = default_features.deva
+default_features.mlym = default_features.deva
+default_features.sinh = default_features.deva
+
+default_features.nko  = default_features.arab
+default_features.lao  = default_features.thai
+
+local function parse_script(script)
+    if default_features[script] then
+        for _,v in next, default_features[script] do
+            list[v] = "yes"
+        end
+    end
+end
+
 local function issome ()    list.lookup = fonts.define.specify.colonized_default_lookup end
 local function isfile ()    list.lookup = 'file' end
 local function isname ()    list.lookup = 'name' end
@@ -88,7 +182,12 @@ local function issub  (v)   list.sub    = v end
 local function istrue (s)   list[s]     = 'yes' end
 --KH local function isfalse(s)   list[s]     = 'no' end
 local function isfalse(s)   list[s]     = nil end -- see mpg/luaotfload#4
-local function iskey  (k,v) list[k]     = v end
+local function iskey  (k,v)
+    if k == "script" then
+        parse_script(v)
+    end
+    list[k] = v
+end
 
 local spaces     = lpeg.P(" ")^0
 -- ER: now accepting names like C:/program files/texlive/2009/...

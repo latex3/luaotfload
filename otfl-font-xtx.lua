@@ -82,14 +82,14 @@ local function isstyle(s)
 end
 
 local default_features = {
+    dflt = {
+        "ccmp", "locl", "liga", "clig", "kern",
+        "mark", "mkmk",
+    },
     arab = {
         "ccmp", "locl", "isol", "fina", "medi",
         "init", "rlig", "calt", "liga", "cswh",
         "mset", "curs", "kern", "mark", "mkmk",
-    },
-    latn = {
-        "ccmp", "locl", "liga", "clig", "kern",
-        "mark", "mkmk",
     },
     hebr = {
         "ccmp", "locl", "rlig", "kern", "mark",
@@ -125,34 +125,6 @@ local default_features = {
     hang = { },
 }
 
-default_features.cyrl = default_features.latn
-default_features.grek = default_features.latn
-default_features.armn = default_features.latn
-default_features.geor = default_features.latn
-default_features.runr = default_features.latn
-default_features.ogam = default_features.latn
-default_features.bopo = default_features.latn
-default_features.cher = default_features.latn
-default_features.copt = default_features.latn
-default_features.dsrt = default_features.latn
-default_features.ethi = default_features.latn
-default_features.goth = default_features.latn
-default_features.hani = default_features.latn
-default_features.kana = default_features.latn
-default_features.ital = default_features.latn
-default_features.cans = default_features.latn
-default_features.yi   = default_features.latn
-default_features.brai = default_features.latn
-default_features.cprt = default_features.latn
-default_features.limb = default_features.latn
-default_features.osma = default_features.latn
-default_features.shaw = default_features.latn
-default_features.linb = default_features.latn
-default_features.ugar = default_features.latn
-default_features.glag = default_features.latn
-default_features.xsux = default_features.latn
-default_features.phnx = default_features.latn
-
 default_features.beng = default_features.deva
 default_features.guru = default_features.deva
 default_features.gujr = default_features.deva
@@ -167,8 +139,14 @@ default_features.nko  = default_features.arab
 default_features.lao  = default_features.thai
 
 local function parse_script(script)
-    if default_features[script] then
-        for _,v in next, default_features[script] do
+    if fonts.otf.tables.scripts[script] then
+        local dflt
+        if default_features[script] then
+            dflt = default_features[script]
+        else
+            dflt = default_features["dflt"]
+        end
+        for _,v in next, dflt do
             list[v] = "yes"
         end
     end

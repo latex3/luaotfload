@@ -5,7 +5,7 @@ luaotfload is the adaptation of the ConTeXt OTF loading system for Plain and
 LaTeX. It allows to open OTF fonts with almost all features available through
 the XeTeX font syntax.
 
-This package is developped on <http://github.com/mpg/luaotfload>.
+This package is developed on <http://github.com/mpg/luaotfload>.
 
 
 Installation

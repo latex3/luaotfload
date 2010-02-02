@@ -86,15 +86,14 @@ function fonts.names.resolve(specification)
                 for _,v in ipairs(family) do
                    local face      = data.mappings[v]
                    local subfamily = face.names.subfamily
-                   local dsize     = face.size[1] and face.size[1] / 10
-                   local ssize     = specification.size and specification.size / 65536
-                   local osize     = tonumber(specification.optsize)
-                   local maxsize   = face.design_range_bottom
-                   local minsize   = face.design_range_top
+                   local rqssize   = tonumber(specification.optsize) or specification.size and specification.size / 65536
+                   local dsnsize   = face.size[1] and face.size[1] / 10
+                   local maxsize   = face.size[2] and face.size[2] / 10
+                   local minsize   = face.size[3] and face.size[3] / 10
                    local filename  = face.filename
                    if subfamily then
                        if sanitize(subfamily) == style then
-                           if not dsize or dsize == osize or dsize == ssize then
+                           if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
                                found = filename
                                break
                            end
@@ -102,7 +101,7 @@ function fonts.names.resolve(specification)
                            if synonyms[style] then
                                for _,v in ipairs(synonyms[style]) do
                                    if sanitize(subfamily) == v then
-                                       if not dsize or dsize == osize or dsize == ssize then
+                                       if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
                                             found = filename
                                             break
                                        end

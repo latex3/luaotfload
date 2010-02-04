@@ -112,11 +112,6 @@ otf.tables.defaults = {
         "clig", "calt", "blwm", "abvm", "dist",
         "kern", "mark", "mkmk",
     },
-    syrc = {
-        "ccmp", "locl", "isol", "fina", "fin1",
-        "fin2", "medi", "med2", "init", "rlig",
-        "calt", "liga", "kern", "mark", "mkmk",
-    },
     thai = {
         "ccmp", "locl", "liga", "kern", "mark",
         "mkmk",

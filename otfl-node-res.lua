@@ -16,7 +16,14 @@ for debugging <l n='luatex'/> node management.</p>
 
 nodes = nodes or { }
 
+nodes.whatsits = { } -- table.swapped(node.whatsits())
+
 local reserved = { }
+local whatsits = nodes.whatsits
+
+for k, v in pairs(node.whatsits()) do
+    whatsits[k], whatsits[v] = v, k -- two way
+end
 
 function nodes.register(n)
     reserved[#reserved+1] = n
@@ -57,13 +64,13 @@ local penalty    = nodes.register(new_node("penalty"))
 local glue       = nodes.register(new_node("glue"))
 local glue_spec  = nodes.register(new_node("glue_spec"))
 local glyph      = nodes.register(new_node("glyph",0))
-local textdir    = nodes.register(new_node("whatsit",7))
+local textdir    = nodes.register(new_node("whatsit",whatsits.dir)) -- 7
 local rule       = nodes.register(new_node("rule"))
-local latelua    = nodes.register(new_node("whatsit",35))
-local user_n     = nodes.register(new_node("whatsit",44)) user_n.type = 100
-local user_l     = nodes.register(new_node("whatsit",44)) user_l.type = 110
-local user_s     = nodes.register(new_node("whatsit",44)) user_s.type = 115
-local user_t     = nodes.register(new_node("whatsit",44)) user_t.type = 116
+local latelua    = nodes.register(new_node("whatsit",whatsits.late_lua)) -- 35
+local user_n     = nodes.register(new_node("whatsit",whatsits.user_defined)) user_n.type = 100 -- 44
+local user_l     = nodes.register(new_node("whatsit",whatsits.user_defined)) user_l.type = 110 -- 44
+local user_s     = nodes.register(new_node("whatsit",whatsits.user_defined)) user_s.type = 115 -- 44
+local user_t     = nodes.register(new_node("whatsit",whatsits.user_defined)) user_t.type = 116 -- 44
 
 function nodes.glyph(fnt,chr)
     local n = copy_node(glyph)

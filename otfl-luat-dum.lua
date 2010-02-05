@@ -23,6 +23,11 @@ trackers = {
     enable        = dummyfunction,
     disable       = dummyfunction,
 }
+experiments = {
+    register      = dummyfunction,
+    enable        = dummyfunction,
+    disable       = dummyfunction,
+}
 storage = {
     register      = dummyfunction,
     shared        = { },

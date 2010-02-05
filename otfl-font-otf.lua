@@ -1818,7 +1818,7 @@ function tfm.read_from_open_type(specification)
                 end
             end
         end
-        tfmtable = tfm.scale(tfmtable,s)
+        tfmtable = tfm.scale(tfmtable,s,specification.relativeid)
      -- here we resolve the name; file can be relocated, so this info is not in the cache
         local filename = (otfdata and otfdata.luatex and otfdata.luatex.filename) or specification.filename
         if not filename then

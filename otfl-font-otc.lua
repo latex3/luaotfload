@@ -21,6 +21,8 @@ local tfm = fonts.tfm
 -- instead of "script = "DFLT", langs = { 'dflt' }" we now use wildcards (we used to
 -- have always); some day we can write a "force always when true" trick for other
 -- features as well
+--
+-- we could have a tnum variant as well
 
 local extra_lists = {
     tlig = {

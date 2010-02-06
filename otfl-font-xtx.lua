@@ -74,7 +74,7 @@ local function isstyle(s)
         elseif v:find("^s=") then
             list.optsize = v:split("=")[2]
         elseif v == "aat" or v == "icu" or v == "gr" then
-            logs.report("define font", "unsupported font option: %s", v)
+            logs.report("load font", "unsupported font option: %s", v)
         elseif not v:is_empty() then
             list.style = v:gsub("[^%a%d]", "")
         end
@@ -143,13 +143,17 @@ local function parse_script(script)
     if otf.tables.scripts[script] then
         local dflt
         if otf.tables.defaults[script] then
+            logs.report("load font", "auto-selecting default features for script: %s", script)
             dflt = otf.tables.defaults[script]
         else
+            logs.report("load font", "auto-selecting default features for script: dflt (was %s)", script)
             dflt = otf.tables.defaults["dflt"]
         end
         for _,v in next, dflt do
             list[v] = "yes"
         end
+    else
+        logs.report("load font", "unknown script: %s", script)
     end
 end
 
@@ -159,8 +163,7 @@ local function isname ()    list.lookup = 'name' end
 local function thename(s)   list.name   = s end
 local function issub  (v)   list.sub    = v end
 local function istrue (s)   list[s]     = 'yes' end
---KH local function isfalse(s)   list[s]     = 'no' end
-local function isfalse(s)   list[s]     = nil end -- see mpg/luaotfload#4
+local function isfalse(s)   list[s]     = nil end -- was no, see mpg/luaotfload#4 --KH
 local function iskey  (k,v)
     if k == "script" then
         parse_script(v)

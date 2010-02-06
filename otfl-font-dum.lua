@@ -73,6 +73,7 @@ function fonts.names.resolve(specification)
                 local foundname = resolvers.find_file(basename,format) or ""
                 if foundname ~= "" then
                     data = dofile(foundname)
+                    logs.report("load font", "loaded font names database: %s", foundname)
                     break
                 end
             end
@@ -85,24 +86,26 @@ function fonts.names.resolve(specification)
             if family and type(family) == "table" then
                 for _,v in ipairs(family) do
                    local face      = data.mappings[v]
-                   local subfamily = face.names.subfamily
+                   local subfamily = sanitize(face.names.subfamily)
                    local rqssize   = tonumber(specification.optsize) or specification.size and specification.size / 65536
                    local dsnsize   = face.size[1] and face.size[1] / 10
                    local maxsize   = face.size[2] and face.size[2] / 10
                    local minsize   = face.size[3] and face.size[3] / 10
                    local filename  = face.filename
                    if subfamily then
-                       if sanitize(subfamily) == style then
+                       if subfamily == style then
                            if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
                                found = filename
+                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
                                break
                            end
                        else
                            if synonyms[style] then
                                for _,v in ipairs(synonyms[style]) do
-                                   if sanitize(subfamily) == v then
+                                   if subfamily == v then
                                        if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
                                             found = filename
+                                            logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
                                             break
                                        end
                                    end
@@ -119,7 +122,7 @@ function fonts.names.resolve(specification)
             end
         end
     end
-    logs.report("define font", "Font names database version mismatch")
+    logs.report("load font", "Font names database version mismatch")
 end
 
 fonts.names.resolvespec = fonts.names.resolve -- only supported in mkiv

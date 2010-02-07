@@ -6,7 +6,7 @@ Currrent git, luaotfload v1.07:
     * adding a script to generate a font database with TeX and system fonts
     * more verbose log file
 
-2010/12/01, luaotfload v1.06a:
+2010/02/07, luaotfload v1.06a:
     * more complete tlig and trep
     * defaults options changed to "+ccmp;+locl;+rlig;+liga;+clig;+kern;
          +mark;+mkmk;"

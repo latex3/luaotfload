@@ -1,0 +1,18 @@
+                        History of the luaotfload bundle
+
+Currrent git, luaotfload v1.07:
+    * synchronizing with latest ConTeXt beta 2010.02.03
+    * adding support for color and transparency
+    * adding a script to generate a font database with TeX and system fonts
+    * more verbose log file
+
+2010/12/01, luaotfload v1.06a:
+    * more complete tlig and trep
+    * defaults options changed to "+ccmp;+locl;+rlig;+liga;+clig;+kern;
+         +mark;+mkmk;"
+    * supporting windows absolute path
+
+2009/12/01, luaotfload v1.06:
+    * synchronizing with ConTeXt stable 2009.11.26
+    * adding backward compatibility with LuaTeX 0.40.6
+

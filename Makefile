@@ -9,11 +9,11 @@ OTFL = $(wildcard otfl-*.lua)
 COMPILED = $(DOC)
 UNPACKED = luaotfload.sty luaotfload.lua
 GENERATED = $(COMPILED) $(UNPACKED)
-SOURCE = $(DTX) $(OTFL) README Makefile
+SOURCE = $(DTX) $(OTFL) README Makefile News
 
 # Files grouped by installation location
 RUNFILES = $(UNPACKED) $(OTFL)
-DOCFILES = $(DOC) README
+DOCFILES = $(DOC) README News
 SRCFILES = $(DTX) Makefile
 
 # The following definitions should be equivalent

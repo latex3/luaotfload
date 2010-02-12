@@ -57,7 +57,7 @@ Source files:
         otfl-node-ini.lua                       .
         otfl-node-inj.lua                       .
         otfl-node-res.lua       OTF support files from the ConTeXt distribution
-        otfl-node-msc.lua       luaotfload module for additional features
+        otfl-node-clr.lua       luaotfload module for font color support
 
 Derived files:
         luaotfload.pdf          documentation
@@ -77,13 +77,13 @@ starts by:
 Copyright 2008 PRAGMA ADE / ConTeXt Development Team
 "
 
-for otf-*.lua files except otfl-font-msc.lua, and
+for otf-*.lua files except otfl-font-clr.lua, and
 
 "
 Copyright 2010 Khaled Hosny
 "
 
-for otfl-font-msc.lua, and continues by:
+for otfl-font-clr.lua, and continues by:
 
 "
 This program is free software; you can redistribute it and/or

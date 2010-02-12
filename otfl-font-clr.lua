@@ -1,14 +1,16 @@
-if not modules then modules = { } end modules ['font-msc'] = {
+if not modules then modules = { } end modules ['font-clr'] = {
     version   = 1.001,
-    comment   = "companion to font-otf.lua (slanting, extending, colors)",
+    comment   = "companion to font-otf.lua (font color)",
     author    = "Khaled Hosny",
     copyright = "Khaled Hosny",
     license   = "GPL"
 }
 
---[[
-  Support for font color.
---]]
+fonts.triggers            = fonts.triggers            or { }
+fonts.initializers        = fonts.initializers        or { }
+fonts.initializers.common = fonts.initializers.common or { }
+
+local initializers, format = fonts.initializers, string.format
 
 table.insert(fonts.triggers,"color")
 

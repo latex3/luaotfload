@@ -84,7 +84,7 @@ manifest:
 	@for f in $(GENERATED); do echo $$f; done
 
 clean: 
-	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg
+	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out
 
 mrproper: clean
 	@$(RM) -- $(GENERATED) $(ZIPS)

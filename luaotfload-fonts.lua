@@ -124,139 +124,40 @@ local function scan_dir(dirname, names, recursive, texmf)
     end
 end
 
-local system = LUAROCKS_UNAME_S or io.popen("uname -s"):read("*l")
-if system then
-    if system:match("^CYGWIN") then
-        system = 'cygwin'
-    elseif system:match("^Windows") then
-        system = 'windows'
-    else
-        system = 'unix'
-    end
-else
-    system = 'unix' -- ?
-end
-log(1, "detecting system: %s", system)
-
-local texmfdist = kpse.expand_var("$TEXMFDIST")
-local texmfmain = kpse.expand_var("$TEXMFMAIN")
-local texmflocal = kpse.expand_var("$TEXMFLOCAL")
--- We lowercase everything under Windows, in order to get a bit of consistency
-if system == 'windows' or system == 'cygwin' then
-    texmfdist = string.lower(texmfdist)
-    texmfmain = string.lower(texmfmain)
-    texmflocal = string.lower(texmflocal)
-end
-
-
-local function is_texmf(dir)
-    if dir:find(texmfdist) or dir:find(texmfmain) or dir:find(texmflocal) then
-        return true
-    end
-    return false
-end
-
-local function read_fcdata(fontdirs, data, translate)
-    local to_add = nil
-    local done = nil
-    for line in data:lines() do
-        if not done then done = true end
-        local match = line:match("^Directory: (.+)")
-        if match then
-            if match:find("ype1") then
-                to_add = nil
-            else
-                to_add = translate(match)
-            end
-        elseif to_add then
-            match = line:match('^"[^"]+%.[^"]+"')
-            if match then
-                if to_add then
-                    fontdirs[to_add] = true
-                    to_add = nil
-                end
-            end
-        end
-    end
-    if not done then
-        return nil
-    else
-        return fontdirs
-    end
-end
-
-local function cygwin_translate(name)
-    local res = string.lower(io.popen(string.format("cygpath.exe --mixed %s", name)):read("*all"))
-    -- a very strange thing: spaces are replaced by \n and there is a trailing \n at the end
-    res = res:gsub("\n$", '')
-    res = res:gsub("\n", ' ')
-    return res
-end
-
-local function windows_translate(name)
-    return string.lower(name)
-end
-
-local function no_translate(name)
-    return name
-end
-
-local function append_fccatdirs(fontdirs)
-    -- under cygwin we have the choice between the
-    -- fc-cat of cygwin and the fc-cat of TeXLive.
-    -- we try the fc-cat from TeXLive.
-    local translate = no_translate
-    if system == 'cygwin' then
-        local path = kpse.expand_var("$TEXMFMAIN")..'/../bin/win32/fc-cat.exe'
-        if lfs.isfile(path) then
-            log(1, "executing `%s' -v\n", path)
-            -- dirty hack...
-            path = io.popen(string.format('cygpath.exe -C ANSI -w -s "%s"', path)):read("*all")
-            local data = io.popen('"'..path..' -v"', 'r')
-            local result = read_fcdata(fontdirs, data, windows_translate)
-            data:close()
-            if result then
-                return result
-            else
-                log(1, "fail")
-            end
-        else
-            log(1, "unable to find TeXLive's fc-cat.exe")
-        end
-        translate = cygwin_translate
-    elseif system == 'windows' then
-        translate = windows_translate
-    end
-    log(1, "executing `fc-cat -v'\n")
-    local data = io.popen("fc-cat -v", 'r')
-    local result = read_fcdata(fontdirs, data, translate)
-    data:close()
-    -- this part may be removed (needs further tests though, under non-cygwin Windows systems)
-    if not result then
-        log(1, "fail, now trying `fc-cat.exe -v'\n")
-        data = io.popen("fc-cat.exe -v", 'r')
-        result = read_fcdata(fontdirs, data, translate)
-        data:close()
-        if not result then
-            log(1, "Unable to execute fc-cat nor fc-cat.exe, system fonts will not be available")
-            return fontdirs
-        end
-    end
-    return result
-end
-
-local function scan_all(names)
-    local fontdirs = string.gsub(expandpath("$OPENTYPEFONTS"), "^\.[;:]", "")
+local function scan_texmf_tree(names)
+    local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
-    if system == 'windows' or system == 'cygwin' then
-        fontdirs = string.lower(fontdirs)
-    end
     if not fontdirs:is_empty() then
+        local explored_dirs = {}
         fontdirs = splitpath(fontdirs)
-        fontdirs = table.tohash(fontdirs)
-        fontdirs = append_fccatdirs(fontdirs)
-        for d,_ in pairs(fontdirs) do
-            scan_dir(d, names, false, is_texmf(d))
+	-- hack, don't scan current dir
+	table.remove(fontdirs, 1)
+        for _,d in ipairs(fontdirs) do
+            if not explored_dirs[d] then
+                scan_dir(d, names, false, true)
+                explored_dirs[d] = true
+            end
+        end
+    end
+end
+
+local function read_fcdata(data)
+    local list = { }
+    for line in data:lines() do
+        list[#list+1] = line:gsub(": ", "")
+    end
+    return list
+end
+
+local function scan_os_fonts(names)
+    if expandpath("$OSFONTDIR"):is_empty() then 
+        log(1, "Scanning system fonts...\n")
+        log(2, "Executing 'fc-list : file'\n")
+        local data = io.popen("fc-list : file", 'r')
+        local list = read_fcdata(data)
+        data:close()
+        for _,fnt in ipairs(list) do
+            load_font(fnt, names, texmf)
         end
     end
 end
@@ -268,7 +169,8 @@ local function generate()
         version  = luaotfload.fonts.version,
     }
     local savepath
-    scan_all(fnames)
+    scan_texmf_tree(fnames)
+    scan_os_fonts  (fnames)
     log(1, "%s fonts in %s families saved in the database", #fnames.mappings, #table.keys(fnames.families))
     savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"
     if not file.isreadable(savepath) then

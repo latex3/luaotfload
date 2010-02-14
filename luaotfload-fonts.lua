@@ -15,7 +15,8 @@ kpse.set_program_name("luatex")
 
 dofile(kpse.find_file("luaextra.lua"))
 
-local upper, splitpath, expandpath, glob, basename = string.upper, file.split_path, kpse.expand_path, dir.glob, file.basename
+local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
+local upper, format, rep = string.upper, string.format, string.rep
 
 luaotfload.fonts.basename   = "otfl-names.lua"
 luaotfload.fonts.version    = 2.002
@@ -23,8 +24,23 @@ luaotfload.fonts.log_level  = 1
 
 local function log(lvl, fmt, ...)
     if lvl <= luaotfload.fonts.log_level then
-        texio.write_nl(string.format("luaotfload | %s", string.format(fmt,...)))
+        texio.write_nl(format("luaotfload | %s", format(fmt,...)))
     end
+end
+
+local function progress(current, total)
+--  local width   = os.getenv("COLUMNS") -2 --doesn't work
+    local width   = 78
+    local percent = current/total
+    local gauge   = format("[%s]", rep(" ", width))
+    if percent >= 0.01 then
+        gauge = format("[%s>%s]", rep("=", (width*percent)-1), rep(" ", width-(width*percent)))
+    end
+    if percent == 1 then
+        gauge = gauge .. "\n"
+    end
+    io.stderr:write("\r"..gauge)
+    io.stderr:flush()
 end
 
 function fontloader.fullinfo(...)
@@ -106,7 +122,7 @@ local function load_font(filename, names, texmf)
 end
 
 local function scan_dir(dirname, names, recursive, texmf)
-    log(1, "Scanning directory %s", dirname)
+    log(2, "Scanning directory %s", dirname)
     local list, found = { }, { }
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
         if recursive then pat = "/**." else pat = "/*." end
@@ -125,15 +141,19 @@ local function scan_dir(dirname, names, recursive, texmf)
 end
 
 local function scan_texmf_tree(names)
+    log(1, "Scanning TEXMF fonts:\n")
     local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
         local explored_dirs = {}
         fontdirs = splitpath(fontdirs)
-	-- hack, don't scan current dir
-	table.remove(fontdirs, 1)
+        -- hack, don't scan current dir
+        table.remove(fontdirs, 1)
+        count = 0
         for _,d in ipairs(fontdirs) do
             if not explored_dirs[d] then
+                count = count + 1
+                progress(count, #fontdirs)
                 scan_dir(d, names, false, true)
                 explored_dirs[d] = true
             end
@@ -151,18 +171,22 @@ end
 
 local function scan_os_fonts(names)
     if expandpath("$OSFONTDIR"):is_empty() then 
-        log(1, "Scanning system fonts...\n")
-        log(2, "Executing 'fc-list : file'\n")
+        log(1, "Scanning system fonts:\n")
+        log(2, "Executing 'fc-list : file'")
         local data = io.popen("fc-list : file", 'r')
         local list = read_fcdata(data)
         data:close()
+        count = 0
         for _,fnt in ipairs(list) do
+            count = count + 1
+            progress(count, #list)
             load_font(fnt, names, texmf)
         end
     end
 end
 
 local function generate()
+    texio.write("luaotfload | Generating font names database.")
     local fnames = {
         mappings = { },
         families = { },

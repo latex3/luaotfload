@@ -22,8 +22,11 @@ luaotfload.fonts.basename   = "otfl-names.lua"
 luaotfload.fonts.version    = 2.002
 luaotfload.fonts.log_level  = 1
 
+local lastislog = 0
+
 local function log(lvl, fmt, ...)
     if lvl <= luaotfload.fonts.log_level then
+        lastislog = 1
         texio.write_nl(format("luaotfload | %s", format(fmt,...)))
     end
 end
@@ -38,6 +41,10 @@ local function progress(current, total)
     end
     if percent == 1 then
         gauge = gauge .. "\n"
+    end
+    if lastislog == 1 then
+        texio.write_nl("")
+        lastislog = 0
     end
     io.stderr:write("\r"..gauge)
     io.stderr:flush()

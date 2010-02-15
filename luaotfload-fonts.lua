@@ -171,7 +171,11 @@ end
 local function read_fcdata(data)
     local list = { }
     for line in data:lines() do
-        list[#list+1] = line:gsub(": ", "")
+        line = line:gsub(": ", "")
+        local ext = string.lower(string.match(line,"^.+%.([^/\\]-)$"))
+        if ext == "otf" or ext == "ttf" or ext == "ttc" or ext == "dfont" then
+            list[#list+1] = line:gsub(": ", "")
+        end
     end
     return list
 end

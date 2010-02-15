@@ -38,7 +38,8 @@ local function progress(current, total)
         local percent = current/total
         local gauge   = format("[%s]", rep(" ", width))
         if percent > 0 then
-            gauge = format("[%s>%s]", rep("=", (width*percent)-1), rep(" ", width-(width*percent)))
+            done  = (width * percent) >= 1 and (width * percent) or 1
+            gauge = format("[%s>%s]", rep("=", done - 1), rep(" ", width - done))
         end
         if percent == 1 then
             gauge = gauge .. "\n"
@@ -158,7 +159,7 @@ local function scan_dir(dirname, names, recursive, texmf)
 end
 
 local function scan_texmf_tree(names)
-    log(1, "Scanning TEXMF fonts:\n")
+    log(1, "Scanning TEXMF fonts:")
     local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
@@ -192,7 +193,7 @@ end
 
 local function scan_os_fonts(names)
     if expandpath("$OSFONTDIR"):is_empty() then 
-        log(1, "Scanning system fonts:\n")
+        log(1, "Scanning system fonts:")
         log(2, "Executing 'fc-list : file'")
         local data = io.popen("fc-list : file", 'r')
         local list = read_fcdata(data)

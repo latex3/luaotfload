@@ -106,10 +106,14 @@ local function load_font(filename, names, texmf)
                         fullinfo.filename = basename(filename)
                     end
                     mappings[#mappings+1] = fullinfo
-                    if not families[fullinfo.names.family] then
-                        families[fullinfo.names.family] = { }
+                    if fullinfo.names.family then
+                        if not families[fullinfo.names.family] then
+                            families[fullinfo.names.family] = { }
+                        end
+                        table.insert(families[fullinfo.names.family], #mappings)
+                    else
+                        log(3, "Warning: font with broken names table: %s, ignored", filename)
                     end
-                    table.insert(families[fullinfo.names.family], #mappings)
                 end
             else
                 local fullinfo = fontloader.fullinfo(filename)
@@ -117,10 +121,14 @@ local function load_font(filename, names, texmf)
                     fullinfo.filename = basename(filename)
                 end
                 mappings[#mappings+1] = fullinfo
-                if not families[fullinfo.names.family] then
-                    families[fullinfo.names.family] = { }
+                if fullinfo.names.family then
+                    if not families[fullinfo.names.family] then
+                        families[fullinfo.names.family] = { }
+                    end
+                    table.insert(families[fullinfo.names.family], #mappings)
+                else
+                    log(3, "Warning: font with broken names table: %s, ignored", filename)
                 end
-                table.insert(families[fullinfo.names.family], #mappings)
             end
         else
             log(1, "Failed to load %s", filename)

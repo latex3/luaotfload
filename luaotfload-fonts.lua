@@ -32,22 +32,24 @@ local function log(lvl, fmt, ...)
 end
 
 local function progress(current, total)
---  local width   = os.getenv("COLUMNS") -2 --doesn't work
-    local width   = 78
-    local percent = current/total
-    local gauge   = format("[%s]", rep(" ", width))
-    if percent >= 0.01 then
-        gauge = format("[%s>%s]", rep("=", (width*percent)-1), rep(" ", width-(width*percent)))
+    if luaotfload.fonts.log_level == 1 then
+--      local width   = os.getenv("COLUMNS") -2 --doesn't work
+        local width   = 78
+        local percent = current/total
+        local gauge   = format("[%s]", rep(" ", width))
+        if percent > 0 then
+            gauge = format("[%s>%s]", rep("=", (width*percent)-1), rep(" ", width-(width*percent)))
+        end
+        if percent == 1 then
+            gauge = gauge .. "\n"
+        end
+        if lastislog == 1 then
+            texio.write_nl("")
+            lastislog = 0
+        end
+        io.stderr:write("\r"..gauge)
+        io.stderr:flush()
     end
-    if percent == 1 then
-        gauge = gauge .. "\n"
-    end
-    if lastislog == 1 then
-        texio.write_nl("")
-        lastislog = 0
-    end
-    io.stderr:write("\r"..gauge)
-    io.stderr:flush()
 end
 
 function fontloader.fullinfo(...)

@@ -139,6 +139,31 @@ local function load_font(filename, names, texmf)
     end
 end
 
+local system = LUAROCKS_UNAME_S or io.popen("uname -s"):read("*l")
+if system then
+    if system:match("^CYGWIN") then
+        system = 'cygwin'
+    elseif system:match("^Windows") then
+        system = 'windows'
+    else
+        system = 'unix'
+    end
+else
+    system = 'unix' -- ?
+end
+log(2, "Detecting system: %s", system)
+
+local function path_normalize(path)
+    if system == "cygwin" then
+        local res = string.lower(io.popen(string.format("cygpath.exe --mixed %s", path)):read("*all"))
+        -- a very strange thing: spaces are replaced by \n and there is a trailing \n at the end
+        res = res:gsub("\n$", '')
+        res = res:gsub("\n", ' ')
+        return res
+    end
+    return path
+end
+
 local function scan_dir(dirname, names, recursive, texmf)
     log(2, "Scanning directory %s", dirname)
     local list, found = { }, { }
@@ -185,7 +210,7 @@ local function read_fcdata(data)
         line = line:gsub(": ", "")
         local ext = string.lower(string.match(line,"^.+%.([^/\\]-)$"))
         if ext == "otf" or ext == "ttf" or ext == "ttc" or ext == "dfont" then
-            list[#list+1] = line:gsub(": ", "")
+            list[#list+1] = path_normalize(line:gsub(": ", ""))
         end
     end
     return list

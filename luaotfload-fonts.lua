@@ -6,8 +6,8 @@ luaotfload.fonts.module = {
     version       = 1.001,
     date          = "2010/01/12",
     description   = "luaotfload font database.",
-    author        = "Khaled Hosny",
-    copyright     = "Khaled Hosny",
+    author        = "Khaled Hosny and Elie Roux",
+    copyright     = "Luaotfload Development Team",
     license       = "CC0"
 }
 

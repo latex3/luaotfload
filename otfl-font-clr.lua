@@ -1,8 +1,8 @@
 if not modules then modules = { } end modules ['font-clr'] = {
     version   = 1.001,
     comment   = "companion to font-otf.lua (font color)",
-    author    = "Khaled Hosny",
-    copyright = "Khaled Hosny",
+    author    = "Khaled Hosny and Elie Roux",
+    copyright = "Luaotfload Development Team",
     license   = "GPL"
 }
 

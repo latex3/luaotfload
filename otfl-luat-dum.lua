@@ -42,6 +42,9 @@ tasks = {
     appendaction  = dummyfunction,
     prependaction = dummyfunction,
 }
+callbacks = {
+    register      = dummyfunction,
+}
 
 -- we need to cheat a bit here
 

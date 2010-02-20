@@ -484,24 +484,7 @@ luaotfload.loadmodule('font-otb.lua')
 luaotfload.loadmodule('font-otn.lua')
 luaotfload.loadmodule('font-ota.lua')
 luaotfload.loadmodule('font-otc.lua')
-
-%    \end{macrocode}
-%
-%    \texttt{font-def.lua} calls the function \texttt{callback.register} to
-%    register its callbacks. We override it with a dumb function so that it
-%    does not register any callback. We will register the callbacks later.
-%
-%    \begin{macrocode}
-
-do
-  local temp = callback.register
-  callback.register = function (...)
-    return
-  end 
-  luaotfload.loadmodule('font-def.lua')
-  callback.register = temp
-end
-
+luaotfload.loadmodule('font-def.lua')
 luaotfload.loadmodule('font-xtx.lua')
 luaotfload.loadmodule('font-map.lua')
 luaotfload.loadmodule('font-dum.lua')
@@ -517,21 +500,6 @@ fonts.enc.known = {}
 
 %    \end{macrocode}
 %
-%    We have to register a function in the |find_vf_file| callback in order to make everything work.
-%
-%    \begin{macrocode}
-
-function luaotfload.find_vf_file(name)
-    name = file.removesuffix(file.basename(name))
-    local result = kpse.find_file(name, "vf") or ""
-    if result == "" then
-        result = kpse.find_file(name, "ovf") or ""
-    end
-    return result
-end
-
-%    \end{macrocode}
-%
 %    Finally two functions 
 %
 %    \begin{macrocode}
@@ -541,7 +509,7 @@ function luaotfload.register_callbacks()
     callback.add('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
     callback.reset('define_font')
     callback.add('define_font', fonts.define.read, 'luaotfload.define_font', 1)
-    callback.add('find_vf_file', luaotfload.find_vf_file, 'luaotfload.find_vf_file')
+    callback.add('find_vf_file', fonts.vf.find, 'luaotfload.find_vf_file')
 end
 
 function luaotfload.unregister_callbacks()

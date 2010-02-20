@@ -644,5 +644,5 @@ end
 <p>We overload both the <l n='tfm'/> and <l n='vf'/> readers.</p>
 --ldx]]--
 
-callback.register('define_font' , define.read)
-callback.register('find_vf_file', vf.find    ) -- not that relevant any more
+callbacks.register('define_font' , define.read, "definition of fonts (tfmtable preparation)")
+callbacks.register('find_vf_file', vf.find    , "locating virtual fonts, insofar needed") -- not that relevant any more

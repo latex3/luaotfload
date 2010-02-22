@@ -47,6 +47,7 @@ supplied by <l n='luatex'/>.</p>
 tfm.resolve_vf       = true  -- false
 tfm.share_base_kerns = false -- true (.5 sec slower on mk but brings down mem from 410M to 310M, beware: then script/lang share too)
 tfm.mathactions      = { }
+tfm.fontname_mode    = "fullpath"
 
 function tfm.enhance(tfmdata,specification)
     local name, size = specification.name, specification.size
@@ -874,7 +875,5 @@ fonts.initializers.node.tfm.remap = tfm.remap
 -- status info
 
 statistics.register("fonts load time", function()
-    if statistics.elapsedindeed(fonts) then
-        return format("%s seconds",statistics.elapsedtime(fonts))
-    end
+    return statistics.elapsedseconds(fonts)
 end)

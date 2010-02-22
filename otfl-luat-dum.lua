@@ -57,12 +57,13 @@ local remapper = {
     ttf   = "truetype fonts",
     ttc   = "truetype fonts",
     dfont = "truetype dictionary",
-    cid   = "other text files", -- will become "cid files"
+    cid   = "cid maps",
+    fea   = "font feature files",
 }
 
 function resolvers.find_file(name,kind)
     name = string.gsub(name,"\\","\/")
-    kind = kind and string.lower(kind)
+    kind = string.lower(kind)
     return kpse.find_file(name,(kind and kind ~= "" and (remapper[kind] or kind)) or "tex")
 end
 

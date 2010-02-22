@@ -19,13 +19,9 @@ local trace_features   = false  trackers.register("otf.features",     function(v
 local trace_dynamics   = false  trackers.register("otf.dynamics",     function(v) trace_dynamics     = v end)
 local trace_sequences  = false  trackers.register("otf.sequences",    function(v) trace_sequences    = v end)
 local trace_math       = false  trackers.register("otf.math",         function(v) trace_math         = v end)
-local trace_unimapping = false  trackers.register("otf.unimapping",   function(v) trace_unimapping   = v end)
 local trace_defining   = false  trackers.register("fonts.defining",   function(v) trace_defining     = v end)
 
 --~ trackers.enable("otf.loading")
-
-local zwnj = 0x200C
-local zwj  = 0x200D
 
 --[[ldx--
 <p>The fontforge table has organized lookups in a certain way. A first implementation
@@ -84,7 +80,7 @@ otf.features.default = otf.features.default or { }
 otf.enhancers        = otf.enhancers        or { }
 otf.glists           = { "gsub", "gpos" }
 
-otf.version          = 2.643 -- beware: also sync font-mis.lua
+otf.version          = 2.645 -- beware: also sync font-mis.lua
 otf.pack             = true  -- beware: also sync font-mis.lua
 otf.syncspace        = true
 otf.notdef           = false
@@ -179,7 +175,7 @@ otf.tables.valid_fields = {
 
 local function load_featurefile(ff,featurefile)
     if featurefile then
-        featurefile = resolvers.find_file(file.addsuffix(featurefile,'fea')) -- "FONTFEATURES"
+        featurefile = resolvers.find_file(file.addsuffix(featurefile,'fea'),'fea')
         if featurefile and featurefile ~= "" then
             if trace_loading then
                 logs.report("load otf", "featurefile: %s", featurefile)
@@ -502,145 +498,7 @@ otf.enhancers["analyse marks"] = function(data,filename)
     end
 end
 
-local separator   = lpeg.S("_.")
-local other       = lpeg.C((1 - separator)^1)
-local ligsplitter = lpeg.Ct(other * (separator * other)^0)
-
---~ print(table.serialize(lpegmatch(ligsplitter,"this")))
---~ print(table.serialize(lpegmatch(ligsplitter,"this.that")))
---~ print(table.serialize(lpegmatch(ligsplitter,"japan1.123")))
---~ print(table.serialize(lpegmatch(ligsplitter,"such_so_more")))
---~ print(table.serialize(lpegmatch(ligsplitter,"such_so_more.that")))
-
-otf.enhancers["analyse unicodes"] = function(data,filename)
-    local tounicode16, tounicode16sequence = fonts.map.tounicode16, fonts.map.tounicode16sequence
-    local unicodes = data.luatex.unicodes
-    -- we need to move this code
-    unicodes['space']  = unicodes['space']  or 32   -- handly later on
-    unicodes['hyphen'] = unicodes['hyphen'] or 45   -- handly later on
-    unicodes['zwj']    = unicodes['zwj']    or zwj  -- handly later on
-    unicodes['zwnj']   = unicodes['zwnj']   or zwnj -- handly later on
-    -- the tounicode mapping is sparse and only needed for alternatives
-    local tounicode, originals, ns, nl, private, unknown = { }, { }, 0, 0, fonts.private, format("%04X",utfbyte("?"))
-    data.luatex.tounicode, data.luatex.originals = tounicode, originals
-    local lumunic, uparser, oparser
-    if false then -- will become an option
-        lumunic = fonts.map.load_lum_table(filename)
-        lumunic = lumunic and lumunic.tounicode
-    end
-    local cidinfo, cidnames, cidcodes = data.cidinfo
-    local usedmap = cidinfo and cidinfo.usedname
-    usedmap = usedmap and lower(usedmap)
-    usedmap = usedmap and fonts.cid.map[usedmap]
-    if usedmap then
-        oparser = usedmap and fonts.map.make_name_parser(cidinfo.ordering)
-        cidnames = usedmap.names
-        cidcodes = usedmap.unicodes
-    end
-    uparser = fonts.map.make_name_parser()
-    local aglmap = fonts.map and fonts.map.agl_to_unicode
-    for index, glyph in next, data.glyphs do
-        local name, unic = glyph.name, glyph.unicode or -1 -- play safe
-        if unic == -1 or unic >= private or (unic >= 0xE000 and unic <= 0xF8FF) or unic == 0xFFFE or unic == 0xFFFF then
-            local unicode = lumunic and lumunic[name]
-            if unicode then
-                originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
-            end
-            -- cidmap heuristics, beware, there is no guarantee for a match unless
-            -- the chain resolves
-            if (not unicode) and usedmap then
-                local foundindex = lpegmatch(oparser,name)
-                if foundindex then
-                    unicode = cidcodes[foundindex] -- name to number
-                    if unicode then
-                        originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
-                    else
-                        local reference = cidnames[foundindex] -- number to name
-                        if reference then
-                            local foundindex = lpegmatch(oparser,reference)
-                            if foundindex then
-                                unicode = cidcodes[foundindex]
-                                if unicode then
-                                    originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
-                                end
-                            end
-                            if not unicode then
-                                local foundcodes, multiple = lpegmatch(uparser,reference)
-                                if foundcodes then
-                                    if multiple then
-                                        originals[index], tounicode[index], nl, unicode = foundcodes, tounicode16sequence(foundcodes), nl + 1, true
-                                    else
-                                        originals[index], tounicode[index], ns, unicode = foundcodes, tounicode16(foundcodes), ns + 1, foundcodes
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            -- a.whatever or a_b_c.whatever or a_b_c (no numbers)
-            if not unicode then
-                local split = lpegmatch(ligsplitter,name)
-                local nplit = (split and #split) or 0
-                if nplit == 0 then
-                    -- skip
-                elseif nplit == 1 then
-                    local base = split[1]
-                    unicode = unicodes[base] or (agl and agl[base])
-                    if unicode then
-                        if type(unicode) == "table" then
-                            unicode = unicode[1]
-                        end
-                        originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
-                    end
-                else
-                    local t = { }
-                    for l=1,nplit do
-                        local base = split[l]
-                        local u = unicodes[base] or (agl and agl[base])
-                        if not u then
-                            break
-                        elseif type(u) == "table" then
-                            t[#t+1] = u[1]
-                        else
-                            t[#t+1] = u
-                        end
-                    end
-                    if #t > 0 then -- done then
-                        originals[index], tounicode[index], nl, unicode = t, tounicode16sequence(t), nl + 1, true
-                    end
-                end
-            end
-            -- last resort
-            if not unicode then
-                local foundcodes, multiple = lpegmatch(uparser,name)
-                if foundcodes then
-                    if multiple then
-                        originals[index], tounicode[index], nl, unicode = foundcodes, tounicode16sequence(foundcodes), nl + 1, true
-                    else
-                        originals[index], tounicode[index], ns, unicode = foundcodes, tounicode16(foundcodes), ns + 1, foundcodes
-                    end
-                end
-            end
-            if not unicode then
-                originals[index], tounicode[index] = 0xFFFD, "FFFD"
-            end
-        end
-    end
-    if trace_unimapping then
-        for index, glyph in table.sortedpairs(data.glyphs) do
-            local toun, name, unic = tounicode[index], glyph.name, glyph.unicode or -1 -- play safe
-            if toun then
-                logs.report("load otf","internal: 0x%05X, name: %s, unicode: 0x%05X, tounicode: %s",index,name,unic,toun)
-            else
-                logs.report("load otf","internal: 0x%05X, name: %s, unicode: 0x%05X",index,name,unic)
-            end
-        end
-    end
-    if trace_loading and (ns > 0 or nl > 0) then
-        logs.report("load otf","enhance: %s tounicode entries added (%s ligatures)",nl+ns, ns)
-    end
-end
+otf.enhancers["analyse unicodes"] = fonts.map.add_to_unicode
 
 otf.enhancers["analyse subtables"] = function(data,filename)
     data.luatex = data.luatex or { }
@@ -1785,8 +1643,7 @@ function tfm.read_from_open_type(specification)
     local tfmtable = otf.otf_to_tfm(specification)
     if tfmtable then
         local otfdata = tfmtable.shared.otfdata
---KH    tfmtable.name = specification.name
-        tfmtable.name = specification.specification -- see mpg/luaotfload#3
+        tfmtable.name = specification.name
         tfmtable.sub = specification.sub
         local s = specification.size
         local m = otfdata.metadata.math
@@ -1837,8 +1694,17 @@ function tfm.read_from_open_type(specification)
             else
                 tfmtable.format = specification.format
             end
---KH        tfmtable.name = tfmtable.filename or tfmtable.fullname or tfmtable.fontname
-            tfmtable.name = tfmtable.name or tfmtable.filename or tfmtable.fullname or tfmtable.fontname -- see mpg/luaotfload#3
+            tfmtable.name = tfmtable.filename or tfmtable.fullname or tfmtable.fontname
+            if tfm.fontname_mode == "specification" then
+                -- not to be used in context !
+                local specname = specification.specification
+                if specname then
+                    tfmtable.name = specname
+                    if trace_defining then
+                        logs.report("define font","overloaded fontname: '%s'",specname)
+                    end
+                end
+            end
         end
         fonts.logger.save(tfmtable,file.extname(specification.filename),specification)
     end

@@ -162,14 +162,15 @@ local function isfile ()    list.lookup = 'file' end
 local function isname ()    list.lookup = 'name' end
 local function thename(s)   list.name   = s end
 local function issub  (v)   list.sub    = v end
-local function istrue (s)   list[s]     = 'yes' end
-local function isfalse(s)   list[s]     = nil end -- was no, see mpg/luaotfload#4 --KH
 local function iskey  (k,v)
     if k == "script" then
         parse_script(v)
     end
     list[k] = v
 end
+
+local function istrue (s)   list[s]     = true end
+local function isfalse(s)   list[s]     = false end
 
 local spaces     = lpeg.P(" ")^0
 -- ER: now accepting names like C:/program files/texlive/2009/...
@@ -178,11 +179,10 @@ local crapspec   = spaces * lpeg.P("/") * (((1-lpeg.P(":"))^0)/isstyle) * spaces
 -- ER: can't understand why the 'file:' thing doesn't work with fontnames starting by c:...
 local filename   = (lpeg.P("file:")/isfile * (namespec/thename)) + (lpeg.P("[") * lpeg.P(true)/isname * (((1-lpeg.P("]"))^0)/thename) * lpeg.P("]"))
 local fontname   = (lpeg.P("name:")/isname * (namespec/thename)) + lpeg.P(true)/issome * (namespec/thename)
-local sometext   = (lpeg.R("az") + lpeg.R("AZ") + lpeg.R("09"))^1
+local sometext   = (lpeg.R("az","AZ","09") + lpeg.S("+-."))^1
 local truevalue  = lpeg.P("+") * spaces * (sometext/istrue)
 local falsevalue = lpeg.P("-") * spaces * (sometext/isfalse)
-local someval    = (lpeg.S("+-.") + sometext)^1
-local keyvalue   = (lpeg.C(sometext) * spaces * lpeg.P("=") * spaces * lpeg.C(someval))/iskey
+local keyvalue   = (lpeg.C(sometext) * spaces * lpeg.P("=") * spaces * lpeg.C(sometext))/iskey
 local somevalue  = sometext/istrue
 local subvalue   = lpeg.P("(") * (lpeg.C(lpeg.P(1-lpeg.S("()"))^1)/issub) * lpeg.P(")") -- for Kim
 local option     = spaces * (keyvalue + falsevalue + truevalue + somevalue) * spaces
@@ -192,12 +192,6 @@ local pattern    = (filename + fontname) * subvalue^0 * crapspec^0 * options^0
 function fonts.define.specify.colonized(specification) -- xetex mode
     list = { }
     lpegmatch(pattern,specification.specification)
-    for k, v in next, list do
-        list[k] = v:is_boolean()
-        if type(list[a]) == "nil" then
-            list[k] = v
-        end
-    end
     if list.style then
         specification.style = list.style
         list.style = nil

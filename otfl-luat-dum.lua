@@ -64,7 +64,7 @@ local remapper = {
 function resolvers.find_file(name,kind)
     name = string.gsub(name,"\\","\/")
     kind = string.lower(kind)
-    return kpse.find_file(name,(kind and kind ~= "" and (remapper[kind] or kind)) or "tex")
+    return kpse.find_file(name,(kind and kind ~= "" and (remapper[kind] or kind)) or file.extname(name,"tex"))
 end
 
 function resolvers.findbinfile(name,kind)

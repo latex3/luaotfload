@@ -1988,6 +1988,7 @@ function fonts.methods.node.otf.features(head,font,attr)
                     if not lookupcache then
                         report_missing_cache(typ,lookupname)
                     else
+--~ print(typ,lookupname,lookupcache,table.serialize(lookupcache))
                         while start do
                             local id = start.id
                             if id == glyph then
@@ -1997,6 +1998,7 @@ function fonts.methods.node.otf.features(head,font,attr)
                                     if lookupmatch then
                                         -- sequence kan weg
                                         local ok
+--~ print("!!!")
                                         start, ok = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,1)
 --~ texio.write_nl(tostring(lookupname),tostring(lookupmatch),tostring(ok))
                                         if ok then

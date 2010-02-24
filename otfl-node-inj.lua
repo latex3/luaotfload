@@ -70,7 +70,8 @@ function nodes.set_pair(current,factor,rlmode,r2lflag,spec,tfmchr)
         local bound = has_attribute(current,kernpair)
         if bound then
             local kb = kerns[bound]
-            kb[2], kb[3], kb[4], kb[5] = kb[2] + x, kb[3] + y, kb[4] + w, kb[5] + h
+            -- inefficient but singles have less, but weird anyway, needs checking
+            kb[2], kb[3], kb[4], kb[5] = (kb[2] or 0) + x, (kb[3] or 0) + y, (kb[4] or 0)+ w, (kb[5] or 0) + h
         else
             bound = #kerns + 1
             set_attribute(current,kernpair,bound)

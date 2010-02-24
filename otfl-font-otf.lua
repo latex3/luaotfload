@@ -1711,3 +1711,36 @@ function tfm.read_from_open_type(specification)
 --~ print(tfmtable.fullname)
     return tfmtable
 end
+
+-- helpers
+
+function otf.collect_lookups(otfdata,kind,script,language)
+    -- maybe store this in the font
+    local sequences = otfdata.luatex.sequences
+    if sequences then
+        local featuremap, featurelist = { }, { }
+        for s=1,#sequences do
+            local sequence = sequences[s]
+            local features = sequence.features
+            features = features and features[kind]
+            features = features and (features[script]   or features[default] or features[wildcard])
+            features = features and (features[language] or features[default] or features[wildcard])
+            if features then
+                local subtables = sequence.subtables
+                if subtables then
+                    for s=1,#subtables do
+                        local ss = subtables[s]
+                        if not featuremap[s] then
+                            featuremap[ss] = true
+                            featurelist[#featurelist+1] = ss
+                        end
+                    end
+                end
+            end
+        end
+        if #featurelist > 0 then
+            return featuremap, featurelist
+        end
+    end
+    return nil, nil
+end

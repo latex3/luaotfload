@@ -134,43 +134,12 @@ local function resolve_ligatures(tfmdata,ligatures,kind)
     end
 end
 
-local function collect_lookups(otfdata,kind,script,language)
-    -- maybe store this  in the font
-    local sequences = otfdata.luatex.sequences
-    if sequences then
-        local featuremap, featurelist = { }, { }
-        for s=1,#sequences do
-            local sequence = sequences[s]
-            local features = sequence.features
-            features = features and features[kind]
-            features = features and (features[script]   or features[default] or features[wildcard])
-            features = features and (features[language] or features[default] or features[wildcard])
-            if features then
-                local subtables = sequence.subtables
-                if subtables then
-                    for s=1,#subtables do
-                        local ss = subtables[s]
-                        if not featuremap[s] then
-                            featuremap[ss] = true
-                            featurelist[#featurelist+1] = ss
-                        end
-                    end
-                end
-            end
-        end
-        if #featurelist > 0 then
-            return featuremap, featurelist
-        end
-    end
-    return nil, nil
-end
-
 local splitter = lpeg.splitat(" ")
 
 function prepare_base_substitutions(tfmdata,kind,value) -- we can share some code with the node features
     if value then
         local otfdata = tfmdata.shared.otfdata
-        local validlookups, lookuplist = collect_lookups(otfdata,kind,tfmdata.script,tfmdata.language)
+        local validlookups, lookuplist = otf.collect_lookups(otfdata,kind,tfmdata.script,tfmdata.language)
         if validlookups then
             local ligatures = { }
             local unicodes = tfmdata.unicodes -- names to unicodes
@@ -218,7 +187,7 @@ function prepare_base_substitutions(tfmdata,kind,value) -- we can share some cod
                                 end
                                 if characters[upc] then
                                     if trace_baseinit and trace_alternatives then
-                                        logs.report("define otf","%s: base alternate %s => %s",cref(kind,lookup),gref(descriptions,k),gref(descriptions,upc))
+                                        logs.report("define otf","%s: base alternate %s %s => %s",cref(kind,lookup),tostring(value),gref(descriptions,k),gref(descriptions,upc))
                                     end
                                     changed[k] = upc
                                 end
@@ -279,51 +248,10 @@ function prepare_base_substitutions(tfmdata,kind,value) -- we can share some cod
     end
 end
 
---~ local function prepare_base_kerns(tfmdata,kind,value) -- todo what kind of kerns, currently all
---~     if value then
---~         local otfdata = tfmdata.shared.otfdata
---~         local validlookups, lookuplist = collect_lookups(otfdata,kind,tfmdata.script,tfmdata.language)
---~         if validlookups then
---~             local unicodes = tfmdata.unicodes -- names to unicodes
---~             local indices = tfmdata.indices
---~             local characters = tfmdata.characters
---~             local descriptions = tfmdata.descriptions
---~             for u, chr in next, characters do
---~                 local d = descriptions[u]
---~                 if d then
---~                     local dk = d.mykerns
---~                     if dk then
---~                         local t, done = chr.kerns or { }, false
---~                         for l=1,#lookuplist do
---~                             local lookup = lookuplist[l]
---~                             local kerns = dk[lookup]
---~                             if kerns then
---~                                 for k, v in next, kerns do
---~                                     if v ~= 0 and not t[k] then -- maybe no 0 test here
---~                                         t[k], done = v, true
---~                                         if trace_baseinit and trace_kerns then
---~                                             logs.report("define otf","%s: base kern %s + %s => %s",cref(kind,lookup),gref(descriptions,u),gref(descriptions,k),v)
---~                                         end
---~                                     end
---~                                 end
---~                             end
---~                         end
---~                         if done then
---~                             chr.kerns = t -- no empty assignments
---~                         end
---~                 --  elseif d.kerns then
---~                 --      logs.report("define otf","%s: invalid mykerns for %s",cref(kind),gref(descriptions,u))
---~                     end
---~                 end
---~             end
---~         end
---~     end
---~ end
-
 local function prepare_base_kerns(tfmdata,kind,value) -- todo what kind of kerns, currently all
     if value then
         local otfdata = tfmdata.shared.otfdata
-        local validlookups, lookuplist = collect_lookups(otfdata,kind,tfmdata.script,tfmdata.language)
+        local validlookups, lookuplist = otf.collect_lookups(otfdata,kind,tfmdata.script,tfmdata.language)
         if validlookups then
             local unicodes = tfmdata.unicodes -- names to unicodes
             local indices = tfmdata.indices

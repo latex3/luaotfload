@@ -4,7 +4,6 @@
 -- It is part of the luaotfload bundle, see luaotfload's README for legal
 -- notice.
 
-
 -- some usual initializations
 luaotfload              = luaotfload or { }
 luaotfload.fonts        = { }
@@ -21,13 +20,24 @@ luaotfload.fonts.module = {
 
 kpse.set_program_name("luatex")
 
-dofile(kpse.find_file("luaextra.lua"))
+local luaextra_file = kpse.find_file("luaextra.lua")
+if not luaextra_file then
+    texio.write_nl("Error: cannot find 'luaextra.lua', exiting.")
+    os.exit(1)
+end
+dofile(luaextra_file)
 
 local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
 local upper, format, rep = string.upper, string.format, string.rep
 
--- the final name of the font database
+-- the file name of the font database
 luaotfload.fonts.basename   = "otfl-names.lua"
+
+-- the directory in which the database will be saved, can be overwritten
+luaotfload.fonts.directory = kpse.expand_var("$TEXMFVAR") .. "/tex/"
+
+-- the version of the database, to be checked by the lookup function of
+-- luaotfload
 luaotfload.fonts.version    = 2.002
 
 -- Log facilities:
@@ -297,13 +307,12 @@ local function generate()
         families = { },
         version  = luaotfload.fonts.version,
     }
-    local savepath
     -- we save the scanned fonts in a variable in order for scan_os_fonts not
     -- to rescan them
     local scanned_fonts = scan_texmf_tree(fnames)
     scan_os_fonts  (fnames, scanned_fonts)
     log(1, "%s fonts in %s families saved in the database", #fnames.mappings, #table.keys(fnames.families))
-    savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"
+    local savepath = luaotfload.fonts.directory
     if not file.isreadable(savepath) then
         log(1, "Creating directory %s", savepath)
         lfs.mkdir(savepath)

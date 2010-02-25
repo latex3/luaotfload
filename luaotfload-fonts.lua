@@ -307,23 +307,30 @@ local function generate()
         families = { },
         version  = luaotfload.fonts.version,
     }
-    -- we save the scanned fonts in a variable in order for scan_os_fonts not
-    -- to rescan them
-    local scanned_fonts = scan_texmf_tree(fnames)
-    scan_os_fonts  (fnames, scanned_fonts)
-    log(1, "%s fonts in %s families saved in the database", #fnames.mappings, #table.keys(fnames.families))
     local savepath = luaotfload.fonts.directory
-    if not file.isreadable(savepath) then
+    if not lfs.isdir(savepath) then
         log(1, "Creating directory %s", savepath)
         lfs.mkdir(savepath)
+        if not lfs.isdir(savepath) then
+            texio.write_nl(string.format("Error: cannot create directory '%s', exiting.\n", savepath))
+            os.exit(1)
+        end
     end
-    if not file.iswritable(savepath) then
-        log(1, "Error: cannot write in directory %s\n", savepath)
-    else
-        savepath = savepath .. luaotfload.fonts.basename
-        io.savedata(savepath, table.serialize(fnames, true))
-        log(1, "Saved font names database in %s\n", savepath)
+    savepath = savepath .. luaotfload.fonts.basename
+    local fh = io.open(savepath, 'wb')
+    if not fh then
+        texio.write_nl(string.format("Error: cannot write file '%s', exiting.\n", savepath))
+        os.exit(1)
     end
+    fh:close()
+    -- we save the scanned fonts in a variable in order for scan_os_fonts 
+    -- not to rescan them
+    local scanned_fonts = scan_texmf_tree(fnames)
+    scan_os_fonts  (fnames, scanned_fonts)
+    log(1, "%s fonts in %s families saved in the database", 
+        #fnames.mappings, #table.keys(fnames.families))
+    io.savedata(savepath, table.serialize(fnames, true))
+    log(1, "Saved font names database in %s\n", savepath)
 end
 
 luaotfload.fonts.scan     = scan_dir

@@ -1,3 +1,11 @@
+-- This lua script is made to generate the font database for LuaTeX, in order
+-- for it to be able to load a font according to its name, like XeTeX does.
+--
+-- It is part of the luaotfload bundle, see luaotfload's README for legal
+-- notice.
+
+
+-- some usual initializations
 luaotfload              = luaotfload or { }
 luaotfload.fonts        = { }
 
@@ -18,8 +26,16 @@ dofile(kpse.find_file("luaextra.lua"))
 local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
 local upper, format, rep = string.upper, string.format, string.rep
 
+-- the final name of the font database
 luaotfload.fonts.basename   = "otfl-names.lua"
 luaotfload.fonts.version    = 2.002
+
+-- Log facilities:
+-- - level 0 is quiet
+-- - level 1 is the progress bar
+-- - level 2 prints the searched directories
+-- - level 3 prints all the loaded fonts
+-- - level 4 prints all informations when searching directories (debug only)
 luaotfload.fonts.log_level  = 1
 
 local lastislog = 0
@@ -31,6 +47,7 @@ local function log(lvl, fmt, ...)
     end
 end
 
+-- The progress bar
 local function progress(current, total)
     if luaotfload.fonts.log_level == 1 then
 --      local width   = os.getenv("COLUMNS") -2 --doesn't work
@@ -139,6 +156,7 @@ local function load_font(filename, names, texmf)
     end
 end
 
+-- We need to detect the OS (especially cygwin) to convert paths.
 local system = LUAROCKS_UNAME_S or io.popen("uname -s"):read("*l")
 if system then
     if system:match("^CYGWIN") then
@@ -153,6 +171,7 @@ else
 end
 log(2, "Detecting system: %s", system)
 
+-- path must be normalized under cygwin
 local function path_normalize(path)
     if system == "cygwin" then
         local res = string.lower(io.popen(string.format("cygpath.exe --mixed %s", path)):read("*all"))
@@ -164,27 +183,39 @@ local function path_normalize(path)
     return path
 end
 
+-- this function scans a directory and populates the list of fonts
+-- with all the fonts it finds.
 local function scan_dir(dirname, names, recursive, texmf)
-    log(2, "Scanning directory %s", dirname)
     local list, found = { }, { }
+    local nbfound = 0
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
         if recursive then pat = "/**." else pat = "/*." end
-        log(2, "Scanning '%s' for '%s' fonts", dirname, ext)
+        log(4, "Scanning '%s' for '%s' fonts", dirname, ext)
         found = glob(dirname .. pat .. ext)
-        log(2, "%s fonts found", #found)
+        -- note that glob fails silently on broken symlinks, which happens
+        -- sometimes in TeX Live.
+        log(4, "%s fonts found", #found)
+        nbfound = nbfound + #found
         table.append(list, found)
-        log(2, "Scanning '%s' for '%s' fonts", dirname, upper(ext))
+        log(4, "Scanning '%s' for '%s' fonts", dirname, upper(ext))
         found = glob(dirname .. pat .. upper(ext))
-        log(2, "%s fonts found", #found)
         table.append(list, found)
+        nbfound = nbfound + #found
     end
+    log(2, "%d fonts found in '%s'", nbfound, dirname)
     for _,fnt in ipairs(list) do
         load_font(fnt, names, texmf)
     end
 end
 
+-- The function that scans all fonts in the texmf tree, through kpathsea
+-- variables OPENTYPEFONTS and TTFONTS of texmf.cnf
 local function scan_texmf_tree(names)
-    log(1, "Scanning TEXMF fonts:")
+    if expandpath("$OSFONTDIR"):is_empty() then
+        log(1, "Scanning TEXMF fonts:")
+    else
+        log(1, "Scanning TEXMF and OS fonts:")
+    end
     local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
@@ -204,6 +235,8 @@ local function scan_texmf_tree(names)
     end
 end
 
+-- this function takes raw data returned by fc-list, parses it, normalizes the
+-- paths and makes a list out of it.
 local function read_fcdata(data)
     local list = { }
     for line in data:lines() do
@@ -216,13 +249,20 @@ local function read_fcdata(data)
     return list
 end
 
+-- This function scans the OS fonts through fontcache (fc-list), it executes
+-- only if OSFONTDIR is empty (which is the case under most Unix by default).
+-- If OSFONTDIR is non-empty, this means that the system fonts it contains have
+-- already been scanned, and thus we don't scan them again.
 local function scan_os_fonts(names)
     if expandpath("$OSFONTDIR"):is_empty() then 
         log(1, "Scanning system fonts:")
         log(2, "Executing 'fc-list : file'")
         local data = io.popen("fc-list : file", 'r')
+        log(2, "Parsing the result...")
         local list = read_fcdata(data)
         data:close()
+        log(2, "%d fonts found", #list)
+        log(2, "Scanning...", #list)
         count = 0
         for _,fnt in ipairs(list) do
             count = count + 1
@@ -232,6 +272,7 @@ local function scan_os_fonts(names)
     end
 end
 
+-- The main function, scans everything and writes the file.
 local function generate()
     texio.write("luaotfload | Generating font names database.")
     local fnames = {

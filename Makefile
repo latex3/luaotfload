@@ -9,12 +9,13 @@ OTFL = $(wildcard otfl-*.lua)
 COMPILED = $(DOC)
 UNPACKED = luaotfload.sty luaotfload.lua
 GENERATED = $(COMPILED) $(UNPACKED)
-SOURCE = $(DTX) $(OTFL) README Makefile News
+SOURCE = $(DTX) $(OTFL) README Makefile News luaotfload-fonts.lua update-luatex-font-database.lua
 
 # Files grouped by installation location
-RUNFILES = $(UNPACKED) $(OTFL)
-DOCFILES = $(DOC) README News
-SRCFILES = $(DTX) Makefile
+SCRIPTFILES = luaotfload-fonts.lua update-luatex-font-database.lua
+RUNFILES    = $(UNPACKED) $(OTFL)
+DOCFILES    = $(DOC) README News
+SRCFILES    = $(DTX) Makefile
 
 # The following definitions should be equivalent
 # ALL_FILES = $(RUNFILES) $(DOCFILES) $(SRCFILES)
@@ -22,9 +23,10 @@ ALL_FILES = $(GENERATED) $(SOURCE)
 
 # Installation locations
 FORMAT = luatex
-RUNDIR = $(TEXMFROOT)/tex/$(FORMAT)/$(NAME)
-DOCDIR = $(TEXMFROOT)/doc/$(FORMAT)/$(NAME)
-SRCDIR = $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
+SCRIPTDIR = $(TEXMFROOT)/scripts/updateluatexfontdatabase
+RUNDIR    = $(TEXMFROOT)/tex/$(FORMAT)/$(NAME)
+DOCDIR    = $(TEXMFROOT)/doc/$(FORMAT)/$(NAME)
+SRCDIR    = $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
 TEXMFROOT = ./texmf
 
 CTAN_ZIP = $(NAME).zip
@@ -57,6 +59,7 @@ $(CTAN_ZIP): $(SOURCE) $(COMPILED) $(TDS_ZIP)
 	@zip -9 $@ $^ >/dev/null
 
 define run-install
+@mkdir -p $(SCRIPTDIR) && cp $(SCRIPTFILES) $(SCRIPTDIR)
 @mkdir -p $(RUNDIR) && cp $(RUNFILES) $(RUNDIR)
 @mkdir -p $(DOCDIR) && cp $(DOCFILES) $(DOCDIR)
 @mkdir -p $(SRCDIR) && cp $(SRCFILES) $(SRCDIR)

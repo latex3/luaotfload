@@ -185,7 +185,16 @@ end
 
 -- this function scans a directory and populates the list of fonts
 -- with all the fonts it finds.
-local function scan_dir(dirname, names, recursive, texmf)
+-- - dirname is the name of the directory to scan
+-- - names is the font database to fill
+-- - recursive is whether we scan all directories recursively (always false
+--       in this script)
+-- - texmf is a boolean saying if we are scanning a texmf directory (always
+--       true in this script)
+-- - scanned_fonts contains the list of alread scanned fonts, in order for them
+--       not to be scanned twice. The function populates this list with the
+--       fonts it scans.
+local function scan_dir(dirname, names, recursive, texmf, scanned_fonts)
     local list, found = { }, { }
     local nbfound = 0
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
@@ -204,7 +213,10 @@ local function scan_dir(dirname, names, recursive, texmf)
     end
     log(2, "%d fonts found in '%s'", nbfound, dirname)
     for _,fnt in ipairs(list) do
-        load_font(fnt, names, texmf)
+        if not scanned_fonts[fnt] then
+            load_font(fnt, names, texmf)
+            scanned_fonts[fnt] = true
+        end
     end
 end
 
@@ -216,6 +228,7 @@ local function scan_texmf_tree(names)
     else
         log(1, "Scanning TEXMF and OS fonts:")
     end
+    local scanned_fonts = {}
     local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
@@ -228,11 +241,12 @@ local function scan_texmf_tree(names)
             if not explored_dirs[d] then
                 count = count + 1
                 progress(count, #fontdirs)
-                scan_dir(d, names, false, true)
+                scan_dir(d, names, false, true, scanned_fonts)
                 explored_dirs[d] = true
             end
         end
     end
+    return scanned_fonts
 end
 
 -- this function takes raw data returned by fc-list, parses it, normalizes the
@@ -253,7 +267,7 @@ end
 -- only if OSFONTDIR is empty (which is the case under most Unix by default).
 -- If OSFONTDIR is non-empty, this means that the system fonts it contains have
 -- already been scanned, and thus we don't scan them again.
-local function scan_os_fonts(names)
+local function scan_os_fonts(names, scanned_fonts)
     if expandpath("$OSFONTDIR"):is_empty() then 
         log(1, "Scanning system fonts:")
         log(2, "Executing 'fc-list : file'")
@@ -267,7 +281,10 @@ local function scan_os_fonts(names)
         for _,fnt in ipairs(list) do
             count = count + 1
             progress(count, #list)
-            load_font(fnt, names, texmf)
+            if not scanned_fonts[fnt] then
+                load_font(fnt, names, false)
+                scanned_fonts[fnt] = true
+            end
         end
     end
 end
@@ -281,8 +298,10 @@ local function generate()
         version  = luaotfload.fonts.version,
     }
     local savepath
-    scan_texmf_tree(fnames)
-    scan_os_fonts  (fnames)
+    -- we save the scanned fonts in a variable in order for scan_os_fonts not
+    -- to rescan them
+    local scanned_fonts = scan_texmf_tree(fnames)
+    scan_os_fonts  (fnames, scanned_fonts)
     log(1, "%s fonts in %s families saved in the database", #fnames.mappings, #table.keys(fnames.families))
     savepath = kpse.expand_var("$TEXMFVAR") .. "/tex/"
     if not file.isreadable(savepath) then

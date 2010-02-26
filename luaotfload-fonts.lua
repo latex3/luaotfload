@@ -74,9 +74,6 @@ local function progress(current, total)
             local done = string.rpadd("=", (width * percent) - 1, "=") .. ">"
             gauge = format("[%s]", string.rpadd(done, width, " ") )
         end
-        if percent == 1 then
-            gauge = gauge .. "\n"
-        end
         if lastislog == 1 then
             texio.write_nl("")
             lastislog = 0

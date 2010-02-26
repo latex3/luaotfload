@@ -117,6 +117,9 @@ local function process_cmdline()
             luaotfload.fonts.directory = kpse.expand_var("$TEXMFSYSVAR") .. "/tex/"
         end
     end
+    if string.match(arg[0], '-sys') then
+        luaotfload.fonts.directory = kpse.expand_var("$TEXMFSYSVAR") .. "/tex/"
+    end
     luaotfload.fonts.log_level = log_level
 end
 

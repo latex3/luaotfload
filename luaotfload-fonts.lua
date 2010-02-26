@@ -63,10 +63,10 @@ local function progress(current, total)
 --      local width   = os.getenv("COLUMNS") -2 --doesn't work
         local width   = 78
         local percent = current/total
-        local gauge   = format("[%s]", rep(" ", width))
+        local gauge   = format("[%s]", string.rpadd(" ", width, " "))
         if percent > 0 then
-            done  = (width * percent) >= 1 and (width * percent) or 1
-            gauge = format("[%s>%s]", rep("=", done - 1), rep(" ", width - done))
+            local done = string.rpadd("=", (width * percent) - 1, "=") .. ">"
+            gauge = format("[%s]", string.rpadd(done, width, " ") )
         end
         if percent == 1 then
             gauge = gauge .. "\n"

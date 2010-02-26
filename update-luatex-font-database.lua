@@ -30,6 +30,7 @@ Rebuild the LuaTeX font database.
 
 Valid options:
   -d --dbdir DIRECTORY       writes the database in the specified directory
+  -f --force                 force re-indexing all fonts
   -q --quiet                 don't output anything
   -v --verbose=LEVEL         be more verbose (print the searched directories)
   -vv                        print the loaded fonts
@@ -59,6 +60,7 @@ end
 
 local long_opts = {
     dbdir    = "d",
+    force    = "f",
     quiet    = "q",
     verbose  = 1,
     version  = "V",
@@ -68,7 +70,7 @@ local long_opts = {
     ['no-fc-cache'] = 0,
 }
 
-local short_opts = "d:qvVh"
+local short_opts = "d:fqvVh"
 
 -- Function running fc-cache if needed.
 -- The argument is nil for default, 0 for no fc-cache and 1 for fc-cache.
@@ -88,6 +90,7 @@ end
 
 -- a temporary variable, containing the command line option concerning fc-cache
 local run_fc_cache = nil
+local force_reload = nil
 
 local function process_cmdline()
     local opts, optind, optarg = alt_getopt.get_ordered_opts (arg, short_opts, long_opts)
@@ -109,6 +112,8 @@ local function process_cmdline()
             os.exit(0)
         elseif v == "d" then
             luaotfload.fonts.directory = optarg [i]
+        elseif v == "f" then
+            force_reload = 1
         elseif v == "fc-cache" then
             run_fc_cache = 1
         elseif v == "no-fc-cache" then
@@ -125,4 +130,4 @@ end
 
 process_cmdline()
 do_run_fc_cache(run_fc_cache)
-luaotfload.fonts.generate()
+luaotfload.fonts.reload(force_reload)

@@ -331,12 +331,18 @@ local function fontnames_init()
 end
 
 -- The main function, scans everything and writes the file.
-local function generate()
+local function reload(force)
     texio.write("luaotfload | Generating font names database.")
-    local fnames = kpse.do_file(luaotfload.fonts.basename) or fontnames_init()
-    if fnames.version ~= luaotfload.fonts.version then
-        log(2, "Old font names database version, generating new one")
+    local fnames
+    if force then
         fnames = fontnames_init()
+    else
+        fnames = kpse.do_file(luaotfload.fonts.basename)
+	if fnames and fnames.version and fnames.version == luaotfload.fonts.version then
+        else
+            log(2, "Old font names database version, generating new one")
+            fnames = fontnames_init()
+        end
     end
     local savepath = luaotfload.fonts.directory
     savepath = path_normalize(savepath)
@@ -365,5 +371,5 @@ local function generate()
     log(1, "Saved font names database in %s\n", savepath)
 end
 
-luaotfload.fonts.scan     = scan_dir
-luaotfload.fonts.generate = generate
+luaotfload.fonts.scan   = scan_dir
+luaotfload.fonts.reload = reload

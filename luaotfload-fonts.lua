@@ -181,14 +181,18 @@ else
 end
 log(2, "Detecting system: %s", system)
 
--- path must be normalized under cygwin
+-- path normalization:
+-- - a\b\c  -> a/b/c
+-- - a/../b -> b
+-- - /cygdrive/a/b -> a:/b
 local function path_normalize(path)
+    if system ~= 'unix' then
+        path = path:gsub('\\', '/')
+        path = path:lower()
+    end
+    path = file.collapse_path(path)
     if system == "cygwin" then
-        local res = string.lower(io.popen(string.format("cygpath.exe --mixed %s", path)):read("*all"))
-        -- a very strange thing: spaces are replaced by \n and there is a trailing \n at the end
-        res = res:gsub("\n$", '')
-        res = res:gsub("\n", ' ')
-        return res
+        path = path:gsub('^/cygdrive/(%a)/', '%1:/')
     end
     return path
 end
@@ -223,6 +227,7 @@ local function scan_dir(dirname, names, recursive, texmf, scanned_fonts)
     end
     log(2, "%d fonts found in '%s'", nbfound, dirname)
     for _,fnt in ipairs(list) do
+        fnt = path_normalize(fnt)
         if not scanned_fonts[fnt] then
             load_font(fnt, names, texmf)
             scanned_fonts[fnt] = true
@@ -308,6 +313,7 @@ local function generate()
         version  = luaotfload.fonts.version,
     }
     local savepath = luaotfload.fonts.directory
+    savepath = path_normalize(savepath)
     if not lfs.isdir(savepath) then
         log(1, "Creating directory %s", savepath)
         lfs.mkdir(savepath)
@@ -316,7 +322,7 @@ local function generate()
             os.exit(1)
         end
     end
-    savepath = savepath .. luaotfload.fonts.basename
+    savepath = savepath .. '/' .. luaotfload.fonts.basename
     local fh = io.open(savepath, 'wb')
     if not fh then
         texio.write_nl(string.format("Error: cannot write file '%s', exiting.\n", savepath))
@@ -336,3 +342,6 @@ end
 luaotfload.fonts.scan     = scan_dir
 luaotfload.fonts.generate = generate
 
+if arg[0] == "luaotfload-fonts.lua" then
+    generate()
+end

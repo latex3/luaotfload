@@ -50,12 +50,14 @@ luaotfload.fonts.log_level  = 1
 
 local lastislog = 0
 
-local function log(lvl, fmt, ...)
+function luaotfload.fonts.log(lvl, fmt, ...)
     if lvl <= luaotfload.fonts.log_level then
         lastislog = 1
         texio.write_nl(format("luaotfload | %s", format(fmt,...)))
     end
 end
+
+local log = luaotfload.fonts.log
 
 -- The progress bar
 local function progress(current, total)
@@ -341,7 +343,3 @@ end
 
 luaotfload.fonts.scan     = scan_dir
 luaotfload.fonts.generate = generate
-
-if arg[0] == "luaotfload-fonts.lua" then
-    generate()
-end

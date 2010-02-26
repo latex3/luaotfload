@@ -355,7 +355,7 @@ local function reload(force)
         end
     end
     savepath = savepath .. '/' .. luaotfload.fonts.basename
-    local fh = io.open(savepath, 'wb')
+    local fh = io.open(savepath, 'a+')
     if not fh then
         texio.write_nl(string.format("Error: cannot write file '%s', exiting.\n", savepath))
         os.exit(1)

@@ -33,8 +33,12 @@ local upper, format, rep = string.upper, string.format, string.rep
 -- the file name of the font database
 luaotfload.fonts.basename   = "otfl-names.lua"
 
+-- the path to add to TEXMFVAR or TEXMFSYSVAR to get the final directory in
+-- normal cases
+luaotfload.fonts.subtexmfvardir = "/tex/"
+
 -- the directory in which the database will be saved, can be overwritten
-luaotfload.fonts.directory = kpse.expand_var("$TEXMFVAR") .. "/tex/"
+luaotfload.fonts.directory = kpse.expand_var("$TEXMFVAR") .. luaotfload.fonts.subtexmfvardir
 
 -- the version of the database, to be checked by the lookup function of
 -- luaotfload

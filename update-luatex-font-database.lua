@@ -114,11 +114,11 @@ local function process_cmdline()
         elseif v == "no-fc-cache" then
             run_fc_cache = 0
         elseif v == "sys" then
-            luaotfload.fonts.directory = kpse.expand_var("$TEXMFSYSVAR") .. "/tex/"
+            luaotfload.fonts.directory = kpse.expand_var("$TEXMFSYSVAR") .. luaotfload.fonts.subtexmfvardir
         end
     end
     if string.match(arg[0], '-sys') then
-        luaotfload.fonts.directory = kpse.expand_var("$TEXMFSYSVAR") .. "/tex/"
+        luaotfload.fonts.directory = kpse.expand_var("$TEXMFSYSVAR") .. luaotfload.fonts.subtexmfvardir
     end
     luaotfload.fonts.log_level = log_level
 end

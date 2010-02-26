@@ -336,7 +336,3 @@ end
 luaotfload.fonts.scan     = scan_dir
 luaotfload.fonts.generate = generate
 
-if arg[0] == "luaotfload-fonts.lua" then
-    generate()
-end
-

@@ -35,6 +35,7 @@ Manifest
 Source files:
         luaotfload.dtx          single file source & doc for the package
         luaotfload-fonts.lua    texlua script for font database generation
+        update-luatex-font-database.lua     wrapper for luaotfload-fonts.lua
         otfl-data-con.lua       OTF support files from the ConTeXt distribution
         otfl-font-cid.lua                       .
         otfl-font-def.lua                       .

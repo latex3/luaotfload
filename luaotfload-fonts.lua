@@ -30,6 +30,10 @@ dofile(luaextra_file)
 local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
 local upper, format, rep = string.upper, string.format, string.rep
 
+function kpse.do_file(name)
+    return dofile(kpse.find_file(name))
+end
+
 -- the file name of the font database
 luaotfload.fonts.basename   = "otfl-names.lua"
 
@@ -42,7 +46,7 @@ luaotfload.fonts.directory = kpse.expand_var("$TEXMFVAR") .. luaotfload.fonts.su
 
 -- the version of the database, to be checked by the lookup function of
 -- luaotfload
-luaotfload.fonts.version    = 2.002
+luaotfload.fonts.version    = 2.003
 
 -- Log facilities:
 -- - level 0 is quiet
@@ -126,10 +130,17 @@ function fontloader.fullinfo(...)
 end
 
 local function load_font(filename, names, texmf)
-    log(3, "Loading font %s", filename)
-    local mappings = names.mappings
-    local families = names.families
+    log(3, "Loading font: %s", filename)
+    local mappings  = names.mappings  or { }
+    local families  = names.families  or { }
+    local checksums = names.checksums or { }
     if filename then
+        local checksum = file.checksum(filename)
+        if checksums[checksum] then
+            log(3, "Font already indexed: %s", filename)
+            return
+        end
+        checksums[checksum] = 1
         local info = fontloader.info(filename)
         if info then
             if type(info) == "table" and #info > 1 then
@@ -166,6 +177,9 @@ local function load_font(filename, names, texmf)
         else
             log(1, "Failed to load %s", filename)
         end
+    names.mappings  = names.mappings  or mappings
+    names.families  = names.families  or families
+    names.checksums = names.checksums or checksums
     end
 end
 
@@ -307,14 +321,23 @@ local function scan_os_fonts(names, scanned_fonts)
     end
 end
 
+local function fontnames_init()
+    return {
+        mappings  = { },
+        families  = { },
+        checksums = { },
+        version   = luaotfload.fonts.version,
+    }
+end
+
 -- The main function, scans everything and writes the file.
 local function generate()
     texio.write("luaotfload | Generating font names database.")
-    local fnames = {
-        mappings = { },
-        families = { },
-        version  = luaotfload.fonts.version,
-    }
+    local fnames = kpse.do_file(luaotfload.fonts.basename) or fontnames_init()
+    if fnames.version ~= luaotfload.fonts.version then
+        log(2, "Old font names database version, generating new one")
+        fnames = fontnames_init()
+    end
     local savepath = luaotfload.fonts.directory
     savepath = path_normalize(savepath)
     if not lfs.isdir(savepath) then

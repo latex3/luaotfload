@@ -46,7 +46,7 @@ luaotfload.fonts.directory = kpse.expand_var("$TEXMFVAR") .. luaotfload.fonts.su
 
 -- the version of the database, to be checked by the lookup function of
 -- luaotfload
-luaotfload.fonts.version    = 2.003
+luaotfload.fonts.version    = 2.004
 
 -- Log facilities:
 -- - level 0 is quiet
@@ -136,11 +136,11 @@ local function load_font(filename, names, texmf)
     local checksums = names.checksums or { }
     if filename then
         local checksum = file.checksum(filename)
-        if checksums[checksum] then
+        if checksums[checksum] and checksums[checksum] == filename then
             log(3, "Font already indexed: %s", filename)
             return
         end
-        checksums[checksum] = 1
+        checksums[checksum] = filename
         local info = fontloader.info(filename)
         if info then
             if type(info) == "table" and #info > 1 then

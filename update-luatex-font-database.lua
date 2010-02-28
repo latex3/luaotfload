@@ -29,7 +29,7 @@ local names    = fonts.names
 names.basename = names.basename or "otfl-names.lua"
 names.version  = names.version  or 2.004
 
-local log      = names.log
+local log      = logs.report
 
 local function help_msg()
     texio.write_nl(string.format([[Usage: %s [OPTION]...
@@ -92,7 +92,7 @@ local function do_run_fc_cache(c)
     if system == 'windows' then
         toexec = 'fc-cache.exe' -- TODO: to test on a non-cygwin Windows
     end
-    names.log(1, 'Executing %s...\n', toexec)
+    log('executing %s...\n', toexec)
     os.execute(toexec)
 end
 
@@ -148,10 +148,10 @@ mkluatexfontdb.directory = kpse.expand_var("$TEXMFVAR") .. mkluatexfontdb.subtex
 
 
 local function generate(force)
-    texio.write("luaotfload | Generating font names database.")
+    log("generating font names database.")
     local savepath = mkluatexfontdb.directory
     if not lfs.isdir(savepath) then
-        log(1, "Creating directory %s", savepath)
+        log("creating directory %s", savepath)
         lfs.mkdir(savepath)
         if not lfs.isdir(savepath) then
             texio.write_nl(string.format("Error: cannot create directory '%s', exiting.\n", savepath))
@@ -168,10 +168,10 @@ local function generate(force)
     local fontnames
     fontnames = dofile(kpse.find_file(names.basename))
     fontnames = names.update   (fontnames, force)
-    log(1, "%s fonts in %s families saved in the database", 
+    log("%s fonts in %s families saved in the database",
         #fontnames.mappings, #table.keys(fontnames.families))
     io.savedata(savepath, table.serialize(fontnames, true))
-    log(1, "Saved font names database in %s\n", savepath)
+    log("saved font names database in %s\n", savepath)
 end
 
 generate(force_reload)

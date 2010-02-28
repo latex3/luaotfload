@@ -17,24 +17,21 @@ fonts.names = fonts.names or { }
 local names = fonts.names
 
 local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
-local upper, format, rep = string.upper, string.format, string.rep
+local upper, format = string.upper, string.format
 
--- Log facilities:
--- - level 0 is quiet
--- - level 1 is the progress bar
--- - level 2 prints the searched directories
--- - level 3 prints all the loaded fonts
--- - level 4 prints all informations when searching directories (debug only)
-names.log_level  = 1
+local trace_progress = true  --trackers.register("names.progress", function(v) trace_progress = v end)
+local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
+local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
 local lastislog = 0
 
-function names.log(lvl, fmt, ...)
-    if lvl <= names.log_level then
-        lastislog = 1
-        texio.write_nl(format("luaotfload | %s", format(fmt,...)))
-    end
+function log(fmt, ...)
+    lastislog = 1
+    texio.write_nl(format("luaotfload | %s", format(fmt,...)))
 end
+
+logs        = logs or { }
+logs.report = logs.report or log
 
 local log = names.log
 
@@ -101,15 +98,19 @@ function fontloader.fullinfo(...)
 end
 
 local function load_font(filename, fontnames, texmf)
-    log(3, "Loading font: %s", filename)
     local database  = fontnames
     local mappings  = database.mappings  or { }
     local families  = database.families  or { }
     local checksums = database.checksums or { }
     if filename then
+        if trace_loading then
+            logs.report("loading font: %s", filename)
+        end
         local checksum = file.checksum(filename)
         if checksums[checksum] and checksums[checksum] == filename then
-            log(3, "Font already indexed: %s", filename)
+            if trace_loading then
+                logs.report("font already indexed: %s", filename)
+            end
             return fontnames
         end
         checksums[checksum] = filename
@@ -128,7 +129,9 @@ local function load_font(filename, fontnames, texmf)
                         end
                         table.insert(families[fullinfo.names.family], #mappings)
                     else
-                        log(3, "Warning: font with broken names table: %s, ignored", filename)
+                        if trace_loading then
+                            logs.report("font with broken names table: %s, ignored", filename)
+                        end
                     end
                 end
             else
@@ -143,11 +146,15 @@ local function load_font(filename, fontnames, texmf)
                     end
                     table.insert(families[fullinfo.names.family], #mappings)
                 else
-                    log(3, "Warning: font with broken names table: %s, ignored", filename)
+                    if trace_loading then
+                        logs.report("font with broken names table: %s, ignored", filename)
+                    end
                 end
             end
         else
-            log(1, "Failed to load %s", filename)
+            if trace_loading then
+               logs.report("failed to load %s", filename)
+            end
         end
     end
     return database
@@ -166,7 +173,6 @@ if system then
 else
     system = 'unix' -- ?
 end
-log(2, "Detecting system: %s", system)
 
 -- path normalization:
 -- - a\b\c  -> a/b/c
@@ -197,19 +203,27 @@ local function scan_dir(dirname, fontnames, recursive, texmf)
     local nbfound = 0
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
         if recursive then pat = "/**." else pat = "/*." end
-        log(4, "Scanning '%s' for '%s' fonts", dirname, ext)
+        if trace_search then
+            logs.report("scanning '%s' for '%s' fonts", dirname, ext)
+        end
         found = glob(dirname .. pat .. ext)
         -- note that glob fails silently on broken symlinks, which happens
         -- sometimes in TeX Live.
-        log(4, "%s fonts found", #found)
+        if trace_search then
+            logs.report("%s fonts found", #found)
+        end
         nbfound = nbfound + #found
         table.append(list, found)
-        log(4, "Scanning '%s' for '%s' fonts", dirname, upper(ext))
+        if trace_search then
+            logs.report("scanning '%s' for '%s' fonts", dirname, upper(ext))
+        end
         found = glob(dirname .. pat .. upper(ext))
         table.append(list, found)
         nbfound = nbfound + #found
     end
-    log(2, "%d fonts found in '%s'", nbfound, dirname)
+    if trace_search then
+        logs.report("%d fonts found in '%s'", nbfound, dirname)
+    end
     for _,fnt in ipairs(list) do
         fnt = path_normalize(fnt)
         fontnames = load_font(fnt, fontnames, texmf)
@@ -220,10 +234,12 @@ end
 -- The function that scans all fonts in the texmf tree, through kpathsea
 -- variables OPENTYPEFONTS and TTFONTS of texmf.cnf
 local function scan_texmf_tree(fontnames)
-    if expandpath("$OSFONTDIR"):is_empty() then
-        log(1, "Scanning TEXMF fonts:")
-    else
-        log(1, "Scanning TEXMF and OS fonts:")
+    if trace_progress then
+        if expandpath("$OSFONTDIR"):is_empty() then
+            logs.report("scanning TEXMF fonts:")
+        else
+            logs.report("scanning TEXMF and OS fonts:")
+        end
     end
     local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
@@ -265,14 +281,18 @@ end
 -- already been scanned, and thus we don't scan them again.
 local function scan_os_fonts(fontnames)
     if expandpath("$OSFONTDIR"):is_empty() then 
-        log(1, "Scanning system fonts:")
-        log(2, "Executing 'fc-list : file'")
+        if trace_progress then
+            logs.report("scanning OS fonts:")
+        end
+        if trace_search then
+            logs.report("executing 'fc-list : file' and parsing its result...")
+        end
         local data = io.popen("fc-list : file", 'r')
-        log(2, "Parsing the result...")
         local list = read_fcdata(data)
         data:close()
-        log(2, "%d fonts found", #list)
-        log(2, "Scanning...", #list)
+        if trace_search then
+            logs.report("%d fonts found", #list)
+        end
         count = 0
         for _,fnt in ipairs(list) do
             count = count + 1
@@ -297,10 +317,12 @@ local function update(fontnames,force)
     if force then
         fontnames = fontnames_init()
     else
-	if fontnames and fontnames.version and fontnames.version == names.version then
+        if fontnames and fontnames.version and fontnames.version == names.version then
         else
-            log(2, "Old font names database version, generating new one")
             fontnames = fontnames_init()
+            if trace_search then
+                logs.report("no font names database or old one found, generating new one")
+            end
         end
     end
     fontnames = scan_texmf_tree(fontnames)

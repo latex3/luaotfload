@@ -3,50 +3,21 @@
 --
 -- It is part of the luaotfload bundle, see luaotfload's README for legal
 -- notice.
-
--- some usual initializations
-luaotfload              = luaotfload or { }
-luaotfload.fonts        = { }
-
-luaotfload.fonts.module = {
-    name          = "luaotfload.fonts",
-    version       = 1.001,
-    date          = "2010/01/12",
-    description   = "luaotfload font database.",
-    author        = "Khaled Hosny and Elie Roux",
-    copyright     = "Luaotfload Development Team",
-    license       = "CC0"
+if not modules then modules = { } end modules ['font-nms'] = {
+    version   = 1.002,
+    comment   = "companion to luaotfload.lua",
+    author    = "Khaled Hosny and Elie Roux",
+    copyright = "Luaotfload Development Team",
+    license   = "GPL"
 }
 
-kpse.set_program_name("luatex")
+fonts       = fonts       or { }
+fonts.names = fonts.names or { }
 
-local luaextra_file = kpse.find_file("luaextra.lua")
-if not luaextra_file then
-    texio.write_nl("Error: cannot find 'luaextra.lua', exiting.")
-    os.exit(1)
-end
-dofile(luaextra_file)
+local names = fonts.names
 
 local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
 local upper, format, rep = string.upper, string.format, string.rep
-
-function kpse.do_file(name)
-    return dofile(kpse.find_file(name))
-end
-
--- the file name of the font database
-luaotfload.fonts.basename   = "otfl-names.lua"
-
--- the path to add to TEXMFVAR or TEXMFSYSVAR to get the final directory in
--- normal cases
-luaotfload.fonts.subtexmfvardir = "/tex/"
-
--- the directory in which the database will be saved, can be overwritten
-luaotfload.fonts.directory = kpse.expand_var("$TEXMFVAR") .. luaotfload.fonts.subtexmfvardir
-
--- the version of the database, to be checked by the lookup function of
--- luaotfload
-luaotfload.fonts.version    = 2.004
 
 -- Log facilities:
 -- - level 0 is quiet
@@ -54,22 +25,22 @@ luaotfload.fonts.version    = 2.004
 -- - level 2 prints the searched directories
 -- - level 3 prints all the loaded fonts
 -- - level 4 prints all informations when searching directories (debug only)
-luaotfload.fonts.log_level  = 1
+names.log_level  = 1
 
 local lastislog = 0
 
-function luaotfload.fonts.log(lvl, fmt, ...)
-    if lvl <= luaotfload.fonts.log_level then
+function names.log(lvl, fmt, ...)
+    if lvl <= names.log_level then
         lastislog = 1
         texio.write_nl(format("luaotfload | %s", format(fmt,...)))
     end
 end
 
-local log = luaotfload.fonts.log
+local log = names.log
 
 -- The progress bar
 local function progress(current, total)
-    if luaotfload.fonts.log_level == 1 then
+    if names.log_level == 1 then
 --      local width   = os.getenv("COLUMNS") -2 --doesn't work
         local width   = 78
         local percent = current/total
@@ -129,16 +100,17 @@ function fontloader.fullinfo(...)
     return t
 end
 
-local function load_font(filename, names, texmf)
+local function load_font(filename, fontnames, texmf)
     log(3, "Loading font: %s", filename)
-    local mappings  = names.mappings  or { }
-    local families  = names.families  or { }
-    local checksums = names.checksums or { }
+    local database  = fontnames
+    local mappings  = database.mappings  or { }
+    local families  = database.families  or { }
+    local checksums = database.checksums or { }
     if filename then
         local checksum = file.checksum(filename)
         if checksums[checksum] and checksums[checksum] == filename then
             log(3, "Font already indexed: %s", filename)
-            return
+            return fontnames
         end
         checksums[checksum] = filename
         local info = fontloader.info(filename)
@@ -177,10 +149,8 @@ local function load_font(filename, names, texmf)
         else
             log(1, "Failed to load %s", filename)
         end
-    names.mappings  = names.mappings  or mappings
-    names.families  = names.families  or families
-    names.checksums = names.checksums or checksums
     end
+    return database
 end
 
 -- We need to detect the OS (especially cygwin) to convert paths.
@@ -222,10 +192,7 @@ end
 --       in this script)
 -- - texmf is a boolean saying if we are scanning a texmf directory (always
 --       true in this script)
--- - scanned_fonts contains the list of alread scanned fonts, in order for them
---       not to be scanned twice. The function populates this list with the
---       fonts it scans.
-local function scan_dir(dirname, names, recursive, texmf, scanned_fonts)
+local function scan_dir(dirname, fontnames, recursive, texmf)
     local list, found = { }, { }
     local nbfound = 0
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
@@ -245,22 +212,19 @@ local function scan_dir(dirname, names, recursive, texmf, scanned_fonts)
     log(2, "%d fonts found in '%s'", nbfound, dirname)
     for _,fnt in ipairs(list) do
         fnt = path_normalize(fnt)
-        if not scanned_fonts[fnt] then
-            load_font(fnt, names, texmf)
-            scanned_fonts[fnt] = true
-        end
+        fontnames = load_font(fnt, fontnames, texmf)
     end
+    return fontnames
 end
 
 -- The function that scans all fonts in the texmf tree, through kpathsea
 -- variables OPENTYPEFONTS and TTFONTS of texmf.cnf
-local function scan_texmf_tree(names)
+local function scan_texmf_tree(fontnames)
     if expandpath("$OSFONTDIR"):is_empty() then
         log(1, "Scanning TEXMF fonts:")
     else
         log(1, "Scanning TEXMF and OS fonts:")
     end
-    local scanned_fonts = {}
     local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
@@ -273,12 +237,12 @@ local function scan_texmf_tree(names)
             if not explored_dirs[d] then
                 count = count + 1
                 progress(count, #fontdirs)
-                scan_dir(d, names, false, true, scanned_fonts)
+                fontnames = scan_dir(d, fontnames, false, true)
                 explored_dirs[d] = true
             end
         end
     end
-    return scanned_fonts
+    return fontnames
 end
 
 -- this function takes raw data returned by fc-list, parses it, normalizes the
@@ -299,7 +263,7 @@ end
 -- only if OSFONTDIR is empty (which is the case under most Unix by default).
 -- If OSFONTDIR is non-empty, this means that the system fonts it contains have
 -- already been scanned, and thus we don't scan them again.
-local function scan_os_fonts(names, scanned_fonts)
+local function scan_os_fonts(fontnames)
     if expandpath("$OSFONTDIR"):is_empty() then 
         log(1, "Scanning system fonts:")
         log(2, "Executing 'fc-list : file'")
@@ -313,12 +277,10 @@ local function scan_os_fonts(names, scanned_fonts)
         for _,fnt in ipairs(list) do
             count = count + 1
             progress(count, #list)
-            if not scanned_fonts[fnt] then
-                load_font(fnt, names, false)
-                scanned_fonts[fnt] = true
-            end
+            fontnames = load_font(fnt, fontnames, false)
         end
     end
+    return fontnames
 end
 
 local function fontnames_init()
@@ -326,50 +288,25 @@ local function fontnames_init()
         mappings  = { },
         families  = { },
         checksums = { },
-        version   = luaotfload.fonts.version,
+        version   = names.version,
     }
 end
 
--- The main function, scans everything and writes the file.
-local function reload(force)
-    texio.write("luaotfload | Generating font names database.")
-    local fnames
+-- The main function, scans everything
+local function update(fontnames,force)
     if force then
-        fnames = fontnames_init()
+        fontnames = fontnames_init()
     else
-        fnames = kpse.do_file(luaotfload.fonts.basename)
-	if fnames and fnames.version and fnames.version == luaotfload.fonts.version then
+	if fontnames and fontnames.version and fontnames.version == names.version then
         else
             log(2, "Old font names database version, generating new one")
-            fnames = fontnames_init()
+            fontnames = fontnames_init()
         end
     end
-    local savepath = luaotfload.fonts.directory
-    savepath = path_normalize(savepath)
-    if not lfs.isdir(savepath) then
-        log(1, "Creating directory %s", savepath)
-        lfs.mkdir(savepath)
-        if not lfs.isdir(savepath) then
-            texio.write_nl(string.format("Error: cannot create directory '%s', exiting.\n", savepath))
-            os.exit(1)
-        end
-    end
-    savepath = savepath .. '/' .. luaotfload.fonts.basename
-    local fh = io.open(savepath, 'a+')
-    if not fh then
-        texio.write_nl(string.format("Error: cannot write file '%s', exiting.\n", savepath))
-        os.exit(1)
-    end
-    fh:close()
-    -- we save the scanned fonts in a variable in order for scan_os_fonts 
-    -- not to rescan them
-    local scanned_fonts = scan_texmf_tree(fnames)
-    scan_os_fonts  (fnames, scanned_fonts)
-    log(1, "%s fonts in %s families saved in the database", 
-        #fnames.mappings, #table.keys(fnames.families))
-    io.savedata(savepath, table.serialize(fnames, true))
-    log(1, "Saved font names database in %s\n", savepath)
+    fontnames = scan_texmf_tree(fontnames)
+    fontnames = scan_os_fonts  (fontnames)
+    return fontnames
 end
 
-luaotfload.fonts.scan   = scan_dir
-luaotfload.fonts.reload = reload
+names.scan   = scan_dir
+names.update = update

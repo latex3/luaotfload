@@ -6,11 +6,6 @@
 -- It is part of the luaotfload bundle, please see the luaotfload documentation
 -- for more info.
 
-kpse.set_program_name("luatex")
-
-local name = 'update-luatex-font-database'
-local version = '1.07' -- same version number as luaotfload
-
 --[[
  first we import luaotfload-fonts.lua.
  Basically it 'exports' three usefult things: the two overwritable variables
@@ -20,8 +15,21 @@ local version = '1.07' -- same version number as luaotfload
  - luaotfload.fonts.generate: the function to generate the database
 ]]
 
-require("luaotfload-fonts")
+kpse.set_program_name("luatex")
+
+require("luaextra")
+require("otfl-font-nms")
 require("alt_getopt")
+
+local name = 'update-luatex-font-database'
+local version = '1.07' -- same version number as luaotfload
+
+mkluatexfontdb = { } -- just for now, elie is rewriting it anyway
+local names    = fonts.names
+names.basename = names.basename or "otfl-names.lua"
+names.version  = names.version  or 2.004
+
+local log      = names.log
 
 local function help_msg()
     texio.write_nl(string.format([[Usage: %s [OPTION]...
@@ -49,7 +57,7 @@ end
 
 local function version_msg()
     texio.write_nl(string.format(
-        "%s version %s, database version %s.\n", name, version, luaotfload.fonts.version))
+        "%s version %s, database version %s.\n", name, version, names.version))
 end
 
 --[[
@@ -84,7 +92,7 @@ local function do_run_fc_cache(c)
     if system == 'windows' then
         toexec = 'fc-cache.exe' -- TODO: to test on a non-cygwin Windows
     end
-    luaotfload.fonts.log(1, 'Executing %s...\n', toexec)
+    names.log(1, 'Executing %s...\n', toexec)
     os.execute(toexec)
 end
 
@@ -111,7 +119,7 @@ local function process_cmdline()
             help_msg()
             os.exit(0)
         elseif v == "d" then
-            luaotfload.fonts.directory = optarg [i]
+            mkluatexfontdb.directory = optarg [i]
         elseif v == "f" then
             force_reload = 1
         elseif v == "fc-cache" then
@@ -119,15 +127,51 @@ local function process_cmdline()
         elseif v == "no-fc-cache" then
             run_fc_cache = 0
         elseif v == "sys" then
-            luaotfload.fonts.directory = kpse.expand_var("$TEXMFSYSVAR") .. luaotfload.fonts.subtexmfvardir
+            mkluatexfontdb.directory = kpse.expand_var("$TEXMFSYSVAR") .. mkluatexfontdb.subtexmfvardir
         end
     end
     if string.match(arg[0], '-sys') then
-        luaotfload.fonts.directory = kpse.expand_var("$TEXMFSYSVAR") .. luaotfload.fonts.subtexmfvardir
+        mkluatexfontdb.directory = kpse.expand_var("$TEXMFSYSVAR") .. mkluatexfontdb.subtexmfvardir
     end
-    luaotfload.fonts.log_level = log_level
+    names.log_level = log_level
 end
 
 process_cmdline()
 do_run_fc_cache(run_fc_cache)
-luaotfload.fonts.reload(force_reload)
+
+-- the path to add to TEXMFVAR or TEXMFSYSVAR to get the final directory in
+-- normal cases
+mkluatexfontdb.subtexmfvardir = "/tex/"
+
+-- the directory in which the database will be saved, can be overwritten
+mkluatexfontdb.directory = kpse.expand_var("$TEXMFVAR") .. mkluatexfontdb.subtexmfvardir
+
+
+local function generate(force)
+    texio.write("luaotfload | Generating font names database.")
+    local savepath = mkluatexfontdb.directory
+    if not lfs.isdir(savepath) then
+        log(1, "Creating directory %s", savepath)
+        lfs.mkdir(savepath)
+        if not lfs.isdir(savepath) then
+            texio.write_nl(string.format("Error: cannot create directory '%s', exiting.\n", savepath))
+            os.exit(1)
+        end
+    end
+    savepath = savepath .. '/' .. names.basename
+    local fh = io.open(savepath, 'a+')
+    if not fh then
+        texio.write_nl(string.format("Error: cannot write file '%s', exiting.\n", savepath))
+        os.exit(1)
+    end
+    fh:close()
+    local fontnames
+    fontnames = dofile(kpse.find_file(names.basename))
+    fontnames = names.update   (fontnames, force)
+    log(1, "%s fonts in %s families saved in the database", 
+        #fontnames.mappings, #table.keys(fontnames.families))
+    io.savedata(savepath, table.serialize(fontnames, true))
+    log(1, "Saved font names database in %s\n", savepath)
+end
+
+generate(force_reload)

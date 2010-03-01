@@ -53,8 +53,7 @@ Valid options:
   -V --version               prints the version and exits
   -h --help                  prints this message
   --fc-cache                 run fc-cache before updating database
-                             (default is to run it if available)
-  --no-fc-cache              do not run fc-cache
+  --no-fc-cache              do not run fc-cache (default)
   --sys                      writes the database for the whole system
                              (default is only for the user)
 
@@ -104,7 +103,7 @@ local function do_run_fc_cache(c)
 end
 
 -- a temporary variable, containing the command line option concerning fc-cache
-local run_fc_cache = nil
+local run_fc_cache = 0
 local force_reload = nil
 
 local function process_cmdline()

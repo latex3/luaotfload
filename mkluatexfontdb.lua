@@ -29,6 +29,13 @@ local names    = fonts.names
 names.basename = names.basename or "otfl-names.lua"
 names.version  = names.version  or 2.004
 
+-- the path to add to TEXMFVAR or TEXMFSYSVAR to get the final directory in
+-- normal cases
+mkluatexfontdb.subtexmfvardir = "/tex/"
+
+-- the directory in which the database will be saved, can be overwritten
+mkluatexfontdb.directory = kpse.expand_var("$TEXMFVAR") .. mkluatexfontdb.subtexmfvardir
+
 local log      = logs.report
 
 local function help_msg()
@@ -89,7 +96,7 @@ local function do_run_fc_cache(c)
       -- TODO: detect if fc-cache is available
     end
     local toexec = 'fc-cache'
-    if system == 'windows' then
+    if fonts.system == 'windows' then
         toexec = 'fc-cache.exe' -- TODO: to test on a non-cygwin Windows
     end
     log('executing %s...\n', toexec)
@@ -133,18 +140,12 @@ local function process_cmdline()
     if string.match(arg[0], '-sys') then
         mkluatexfontdb.directory = kpse.expand_var("$TEXMFSYSVAR") .. mkluatexfontdb.subtexmfvardir
     end
+    mkluatexfontdb.directory = fonts.path_normalize(mkluatexfontdb.directory)
     names.log_level = log_level
 end
 
 process_cmdline()
 do_run_fc_cache(run_fc_cache)
-
--- the path to add to TEXMFVAR or TEXMFSYSVAR to get the final directory in
--- normal cases
-mkluatexfontdb.subtexmfvardir = "/tex/"
-
--- the directory in which the database will be saved, can be overwritten
-mkluatexfontdb.directory = kpse.expand_var("$TEXMFVAR") .. mkluatexfontdb.subtexmfvardir
 
 
 local function generate(force)

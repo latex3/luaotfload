@@ -1,8 +1,3 @@
--- This lua script is made to generate the font database for LuaTeX, in order
--- for it to be able to load a font according to its name, like XeTeX does.
---
--- It is part of the luaotfload bundle, see luaotfload's README for legal
--- notice.
 if not modules then modules = { } end modules ['font-nms'] = {
     version   = 1.002,
     comment   = "companion to luaotfload.lua",
@@ -174,6 +169,8 @@ else
     system = 'unix' -- ?
 end
 
+fonts.system = system
+
 -- path normalization:
 -- - a\b\c  -> a/b/c
 -- - a/../b -> b
@@ -189,6 +186,8 @@ local function path_normalize(path)
     end
     return path
 end
+
+fonts.path_normalize = path_normalize
 
 -- this function scans a directory and populates the list of fonts
 -- with all the fonts it finds.

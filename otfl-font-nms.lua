@@ -92,23 +92,24 @@ function fontloader.fullinfo(...)
     return t
 end
 
-local function load_font(filename, fontnames, texmf)
+local function load_font(filename, fontnames, texmf, status)
     local database  = fontnames
     local mappings  = database.mappings  or { }
     local families  = database.families  or { }
     local checksums = database.checksums or { }
     if filename then
-        if trace_loading then
-            logs.report("loading font: %s", filename)
-        end
-        local checksum = file.checksum(filename)
-        if checksums[checksum] and checksums[checksum] == filename then
+        local db_lastmodif = status[filename]
+        local true_lastmodif = lfs.attributes(filename, "modification")
+        if db_lastmodif and db_lastmodif == true_lastmodif then
             if trace_loading then
                 logs.report("font already indexed: %s", filename)
             end
             return fontnames
         end
-        checksums[checksum] = filename
+        if trace_loading then
+            logs.report("loading font: %s", filename)
+        end
+        status[filename] = true_lastmodif
         local info = fontloader.info(filename)
         if info then
             if type(info) == "table" and #info > 1 then
@@ -197,7 +198,7 @@ fonts.path_normalize = path_normalize
 --       in this script)
 -- - texmf is a boolean saying if we are scanning a texmf directory (always
 --       true in this script)
-local function scan_dir(dirname, fontnames, recursive, texmf)
+local function scan_dir(dirname, fontnames, recursive, texmf, status)
     local list, found = { }, { }
     local nbfound = 0
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
@@ -225,14 +226,14 @@ local function scan_dir(dirname, fontnames, recursive, texmf)
     end
     for _,fnt in ipairs(list) do
         fnt = path_normalize(fnt)
-        fontnames = load_font(fnt, fontnames, texmf)
+        fontnames = load_font(fnt, fontnames, texmf, status)
     end
     return fontnames
 end
 
 -- The function that scans all fonts in the texmf tree, through kpathsea
 -- variables OPENTYPEFONTS and TTFONTS of texmf.cnf
-local function scan_texmf_tree(fontnames)
+local function scan_texmf_tree(fontnames, status)
     if trace_progress then
         if expandpath("$OSFONTDIR"):is_empty() then
             logs.report("scanning TEXMF fonts:")
@@ -252,7 +253,7 @@ local function scan_texmf_tree(fontnames)
             if not explored_dirs[d] then
                 count = count + 1
                 progress(count, #fontdirs)
-                fontnames = scan_dir(d, fontnames, false, true)
+                fontnames = scan_dir(d, fontnames, false, true, status)
                 explored_dirs[d] = true
             end
         end
@@ -278,7 +279,7 @@ end
 -- only if OSFONTDIR is empty (which is the case under most Unix by default).
 -- If OSFONTDIR is non-empty, this means that the system fonts it contains have
 -- already been scanned, and thus we don't scan them again.
-local function scan_os_fonts(fontnames)
+local function scan_os_fonts(fontnames, status)
     if expandpath("$OSFONTDIR"):is_empty() then 
         if trace_progress then
             logs.report("scanning OS fonts:")
@@ -296,7 +297,7 @@ local function scan_os_fonts(fontnames)
         for _,fnt in ipairs(list) do
             count = count + 1
             progress(count, #list)
-            fontnames = load_font(fnt, fontnames, false)
+            fontnames = load_font(fnt, fontnames, false, status)
         end
     end
     return fontnames
@@ -312,7 +313,10 @@ local function fontnames_init()
 end
 
 -- The main function, scans everything
-local function update(fontnames,force)
+-- - fontnames is the final table to return
+-- - force is whether we rebuild it from scratch or not
+-- - status is a table containing the current status of the database 
+local function update(fontnames, force, status)
     if force then
         fontnames = fontnames_init()
     else
@@ -324,8 +328,8 @@ local function update(fontnames,force)
             end
         end
     end
-    fontnames = scan_texmf_tree(fontnames)
-    fontnames = scan_os_fonts  (fontnames)
+    fontnames = scan_texmf_tree(fontnames, status)
+    fontnames = scan_os_fonts  (fontnames, status)
     return fontnames
 end
 

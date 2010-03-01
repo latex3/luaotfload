@@ -146,6 +146,13 @@ end
 process_cmdline()
 do_run_fc_cache(run_fc_cache)
 
+-- the status table is containing correspondances between absolute path and last modification
+-- timestamp, it's uses to save time during update, by not reparsing unchanged fonts.
+local status = {}
+local status_file = mkluatexfontdb.directory .. '/' .. "otfl-names-status.lua"
+if lfs.isfile(status_file) then
+    status = dofile(status_file)
+end
 
 local function generate(force)
     log("generating font names database.")
@@ -166,12 +173,17 @@ local function generate(force)
     end
     fh:close()
     local fontnames
-    fontnames = dofile(kpse.find_file(names.basename))
-    fontnames = names.update   (fontnames, force)
-    log("%s fonts in %s families saved in the database",
+    if kpse.find_file(names.basename) then
+        fontnames = dofile(kpse.find_file(names.basename))
+    else
+        fontnames = {}
+    end
+    fontnames = names.update(fontnames, force, status)
+    log("%s fonts in %s families in the database",
         #fontnames.mappings, #table.keys(fontnames.families))
     io.savedata(savepath, table.serialize(fontnames, true))
     log("saved font names database in %s\n", savepath)
+    io.savedata(status_file, table.serialize(status, true))
 end
 
 generate(force_reload)

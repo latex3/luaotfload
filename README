@@ -34,8 +34,7 @@ Manifest
 
 Source files:
         luaotfload.dtx          single file source & doc for the package
-        luaotfload-fonts.lua    texlua script for font database generation
-        update-luatex-font-database.lua     wrapper for luaotfload-fonts.lua
+        mkluatexfontdb.lua      script using otfl-font-nms.lua
         otfl-data-con.lua       OTF support files from the ConTeXt distribution
         otfl-font-cid.lua                       .
         otfl-font-def.lua                       .
@@ -60,6 +59,7 @@ Source files:
         otfl-node-res.lua       OTF support files from the ConTeXt distribution
         otfl-font-clr.lua       luaotfload module for font color support
         otfl-luat-ovr.lua       luaotfload module for overriding some ConTeXt functions
+        otfl-luat-nms.lua       luaotfload module for font name database generation
 
 Derived files:
         luaotfload.pdf          documentation
@@ -85,7 +85,7 @@ for otf-*.lua files except otfl-font-clr.lua and otfl-luat-ovr.lua, and
 Copyright 2010 Luaotfload Development Team
 "
 
-for otfl-font-clr.lua and otfl-luat-ovr.lua, and continues by:
+for otfl-font-clr.lua, otfl-font-nms and otfl-luat-ovr.lua, and continues by:
 
 "
 This program is free software; you can redistribute it and/or
@@ -109,12 +109,11 @@ The file luaotfload.dtx and the derived files
   luaotfload.sty
   luaotfload.lua
   
-as well as the files luaotfload-fonts.lua and update-luatex-font-database.lua
-are under the CC0 license. You can find the CC0 license full text at
+as well as the file mkluatexfontdb.lua are under the CC0 license. You can find
+the CC0 license full text at
 
 http://creativecommons.org/publicdomain/zero/1.0/legalcode
 
 and a FAQ at
 
 http://wiki.creativecommons.org/CC0
-

@@ -21,7 +21,7 @@ require("luaextra")
 require("otfl-font-nms")
 require("alt_getopt")
 
-local name = 'update-luatex-font-database'
+local name = 'mkluatexfontdb'
 local version = '1.07' -- same version number as luaotfload
 
 mkluatexfontdb = { } -- just for now, elie is rewriting it anyway

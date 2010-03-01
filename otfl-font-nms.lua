@@ -312,6 +312,12 @@ local function fontnames_init()
     }
 end
 
+local function status_init()
+    return {
+        version   = names.version,
+    }
+end
+
 -- The main function, scans everything
 -- - fontnames is the final table to return
 -- - force is whether we rebuild it from scratch or not
@@ -319,10 +325,12 @@ end
 local function update(fontnames, force, status)
     if force then
         fontnames = fontnames_init()
+        status = status_init()
     else
-        if fontnames and fontnames.version and fontnames.version == names.version then
-        else
+        if not fontnames or not fontnames.version or fontnames.version ~= names.version
+                or not status or not status.version or status.version ~= names.version then
             fontnames = fontnames_init()
+            status = status_init()
             if trace_search then
                 logs.report("no font names database or old one found, generating new one")
             end
@@ -330,7 +338,7 @@ local function update(fontnames, force, status)
     end
     fontnames = scan_texmf_tree(fontnames, status)
     fontnames = scan_os_fonts  (fontnames, status)
-    return fontnames
+    return fontnames, status
 end
 
 names.scan   = scan_dir

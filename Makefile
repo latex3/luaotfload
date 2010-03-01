@@ -9,10 +9,10 @@ OTFL = $(wildcard otfl-*.lua)
 COMPILED = $(DOC)
 UNPACKED = luaotfload.sty luaotfload.lua
 GENERATED = $(COMPILED) $(UNPACKED)
-SOURCE = $(DTX) $(OTFL) README Makefile News luaotfload-fonts.lua update-luatex-font-database.lua
+SOURCE = $(DTX) $(OTFL) README Makefile News mkluatexfontdb.lua
 
 # Files grouped by installation location
-SCRIPTFILES = luaotfload-fonts.lua update-luatex-font-database.lua
+SCRIPTFILES = mkluatexfontdb.lua
 RUNFILES    = $(UNPACKED) $(OTFL)
 DOCFILES    = $(DOC) README News
 SRCFILES    = $(DTX) Makefile
@@ -23,7 +23,7 @@ ALL_FILES = $(GENERATED) $(SOURCE)
 
 # Installation locations
 FORMAT = luatex
-SCRIPTDIR = $(TEXMFROOT)/scripts/updateluatexfontdatabase
+SCRIPTDIR = $(TEXMFROOT)/scripts/mkluatexfontdb
 RUNDIR    = $(TEXMFROOT)/tex/$(FORMAT)/$(NAME)
 DOCDIR    = $(TEXMFROOT)/doc/$(FORMAT)/$(NAME)
 SRCDIR    = $(TEXMFROOT)/source/$(FORMAT)/$(NAME)

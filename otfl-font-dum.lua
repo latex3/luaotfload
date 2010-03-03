@@ -48,8 +48,9 @@ end
 
 fonts.names = fonts.names or { }
 
-fonts.names.version    = 2.004 -- not the same as in context
-fonts.names.basename   = "otfl-names.lua"
+fonts.names.version       = 2.004 -- not the same as in context
+fonts.names.basename      = "otfl-names.lua"
+fonts.names.subtexmfvardir = "/scripts/luatexfontdb/"
 fonts.names.new_to_old = { }
 fonts.names.old_to_new = { }
 
@@ -69,14 +70,14 @@ function fonts.names.resolve(specification)
     local name, style = specification.name, specification.style or "regular"
     if not loaded then
         local basename = fonts.names.basename
-        if basename and basename ~= "" then
-            for _, format in ipairs { "lua", "tex", "other text files" } do
-                local foundname = resolvers.find_file(basename,format) or ""
-                if foundname ~= "" then
-                    data = dofile(foundname)
-                    logs.report("load font", "loaded font names database: %s", foundname)
-                    break
-                end
+        if basename and basename ~= "" and fonts.names.subtexmfvardir then
+            local foundname = kpse.expand_var("$TEXMFVAR") .. fonts.names.subtexmfvardir .. basename
+            if not file.isreadable(foundname) then
+                foundname = kpse.expand_var("$TEXMFSYSVAR") .. fonts.names.subtexmfvardir .. basename
+            end
+            if file.isreadable(foundname) then
+                data = dofile(foundname)
+                logs.report("load font", "loaded font names database: %s", foundname)
             end
         end
         loaded = true

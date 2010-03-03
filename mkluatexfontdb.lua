@@ -31,7 +31,7 @@ names.version  = names.version  or 2.004
 
 -- the path to add to TEXMFVAR or TEXMFSYSVAR to get the final directory in
 -- normal cases
-mkluatexfontdb.subtexmfvardir = "/tex/"
+mkluatexfontdb.subtexmfvardir = "/scripts/luatexfontdb/"
 
 -- the directory in which the database will be saved, can be overwritten
 mkluatexfontdb.directory = kpse.expand_var("$TEXMFVAR") .. mkluatexfontdb.subtexmfvardir
@@ -57,7 +57,8 @@ Valid options:
   --sys                      writes the database for the whole system
                              (default is only for the user)
 
-The output database file is named otfl-fonts.lua.
+The output database file is named otfl-fonts.lua. By default it is placed
+in TEXMFVAR/scripts/luatexfontdb/.
 ]], name))
 end
 
@@ -149,8 +150,8 @@ do_run_fc_cache(run_fc_cache)
 -- the status table is containing correspondances between absolute path and last modification
 -- timestamp, it's uses to save time during update, by not reparsing unchanged fonts.
 local status = nil
-local status_file = mkluatexfontdb.directory .. '/' .. "otfl-names-status.lua"
-if lfs.isfile(status_file) then
+local status_file = mkluatexfontdb.directory .. "/otfl-names-status.lua"
+if file.isreadable(status_file) then
     status = dofile(status_file)
 end
 
@@ -159,7 +160,7 @@ local function generate(force)
     local savepath = mkluatexfontdb.directory
     if not lfs.isdir(savepath) then
         log("creating directory %s", savepath)
-        lfs.mkdir(savepath)
+        dir.mkdirs(savepath)
         if not lfs.isdir(savepath) then
             texio.write_nl(string.format("Error: cannot create directory '%s', exiting.\n", savepath))
             os.exit(1)

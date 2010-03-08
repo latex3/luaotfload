@@ -146,15 +146,9 @@ local function font_colorize(head)
 end
 
 local color_callback_activated = 0
-local message_displayed = 0
 
 function add_color_callback()
-    if tex.luatexversion < 44 then
-        if message_displayed == 0 then
-            luatextra.module_warning("luaotfload","You must have a LuaTeX with version >= 0.44 in order to get colors working, colors won't work.")
-            message_displayed = 1
-        end
-    elseif color_callback_activated == 0 then
+    if color_callback_activated == 0 then
         callback.add("pre_output_filter", font_colorize, "loaotfload.colorize")
         color_callback_activated = 1
     end

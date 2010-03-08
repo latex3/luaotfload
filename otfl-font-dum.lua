@@ -123,8 +123,9 @@ function fonts.names.resolve(specification)
                 end
             end
         end
+    else
+        logs.report("load font", "Font names database version mismatch, found: %s, requested: %s", data.version, fonts.names.version)
     end
-    logs.report("load font", "Font names database version mismatch")
 end
 
 fonts.names.resolvespec = fonts.names.resolve -- only supported in mkiv

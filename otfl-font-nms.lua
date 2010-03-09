@@ -92,50 +92,65 @@ function fontloader.fullinfo(...)
     return t
 end
 
-local function load_font(filename, fontnames, texmf, status)
-    local database  = fontnames
-    local mappings  = database.mappings  or { }
-    local families  = database.families  or { }
-    local checksums = database.checksums or { }
+local function load_font(filename, fontnames, status, newfontnames, newstatus, texmf)
+    local mappings  = newfontnames.mappings  or { }
+    local families  = newfontnames.families  or { }
+    local oldmappings  = fontnames.mappings  or { }
+    local oldfamilies  = fontnames.families  or { }
     if filename then
-        local db_lastmodif = status[filename]
+        local db_lastmodif = status[filename] and status[filename].timestamp
         local true_lastmodif = lfs.attributes(filename, "modification")
+        newstatus[filename] = {timestamp = true_lastmodif, mappings = {}}
         if db_lastmodif and db_lastmodif == true_lastmodif then
-            if trace_loading then
-                logs.report("font already indexed: %s", filename)
+            for _, i in ipairs(status[filename].mappings) do
+                mappings[#mappings+1] = oldmappings[i]
+                table.insert(newstatus[filename].mappings, #mappings)
+                if oldmappings[i].names.family then
+                    if not families[oldmappings[i].names.family] then
+                        families[oldmappings[i].names.family] = {}
+                    end
+                    table.insert(families[oldmappings[i].names.family], #mappings)
+                elseif trace_loading then
+                    logs.report("font with broken names table: %s, ignored", filename)
+                end
+                if trace_loading then
+                    logs.report("font already indexed: %s", filename)
+                end
             end
-            return fontnames
+            return
         end
         if trace_loading then
             logs.report("loading font: %s", filename)
         end
-        status[filename] = true_lastmodif
+        local checksum = file.checksum(filename)
         local info = fontloader.info(filename)
         if info then
             if type(info) == "table" and #info > 1 then
                 for index,_ in ipairs(info) do
                     local fullinfo = fontloader.fullinfo(filename, index-1)
+                    fullinfo.checksum = checksum
                     if texmf then
                         fullinfo.filename = basename(filename)
                     end
                     mappings[#mappings+1] = fullinfo
+                    table.insert(newstatus[filename].mappings, #mappings)
                     if fullinfo.names.family then
                         if not families[fullinfo.names.family] then
                             families[fullinfo.names.family] = { }
                         end
                         table.insert(families[fullinfo.names.family], #mappings)
-                    else
-                        if trace_loading then
-                            logs.report("font with broken names table: %s, ignored", filename)
-                        end
+                    elseif trace_loading then
+                        logs.report("font with broken names table: %s, ignored", filename)
                     end
                 end
             else
                 local fullinfo = fontloader.fullinfo(filename)
+                fullinfo.checksum = checksum
                 if texmf then
                     fullinfo.filename = basename(filename)
                 end
                 mappings[#mappings+1] = fullinfo
+                table.insert(newstatus[filename].mappings, #mappings)
                 if fullinfo.names.family then
                     if not families[fullinfo.names.family] then
                         families[fullinfo.names.family] = { }
@@ -153,7 +168,6 @@ local function load_font(filename, fontnames, texmf, status)
             end
         end
     end
-    return database
 end
 
 -- We need to detect the OS (especially cygwin) to convert paths.
@@ -198,7 +212,7 @@ fonts.path_normalize = path_normalize
 --       in this script)
 -- - texmf is a boolean saying if we are scanning a texmf directory (always
 --       true in this script)
-local function scan_dir(dirname, fontnames, recursive, texmf, status)
+local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, recursive, texmf)
     local list, found = { }, { }
     local nbfound = 0
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
@@ -226,14 +240,13 @@ local function scan_dir(dirname, fontnames, recursive, texmf, status)
     end
     for _,fnt in ipairs(list) do
         fnt = path_normalize(fnt)
-        fontnames = load_font(fnt, fontnames, texmf, status)
+        load_font(fnt, fontnames, status, newfontnames, newstatus, texmf)
     end
-    return fontnames
 end
 
 -- The function that scans all fonts in the texmf tree, through kpathsea
 -- variables OPENTYPEFONTS and TTFONTS of texmf.cnf
-local function scan_texmf_tree(fontnames, status)
+local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
     if trace_progress then
         if expandpath("$OSFONTDIR"):is_empty() then
             logs.report("scanning TEXMF fonts:")
@@ -253,12 +266,11 @@ local function scan_texmf_tree(fontnames, status)
             if not explored_dirs[d] then
                 count = count + 1
                 progress(count, #fontdirs)
-                fontnames = scan_dir(d, fontnames, false, true, status)
+                scan_dir(d, fontnames, status, newfontnames, newstatus, false, true)
                 explored_dirs[d] = true
             end
         end
     end
-    return fontnames
 end
 
 -- this function takes raw data returned by fc-list, parses it, normalizes the
@@ -279,7 +291,7 @@ end
 -- only if OSFONTDIR is empty (which is the case under most Unix by default).
 -- If OSFONTDIR is non-empty, this means that the system fonts it contains have
 -- already been scanned, and thus we don't scan them again.
-local function scan_os_fonts(fontnames, status)
+local function scan_os_fonts(fontnames, status, newfontnames, newstatus)
     if expandpath("$OSFONTDIR"):is_empty() then 
         if trace_progress then
             logs.report("scanning OS fonts:")
@@ -297,17 +309,15 @@ local function scan_os_fonts(fontnames, status)
         for _,fnt in ipairs(list) do
             count = count + 1
             progress(count, #list)
-            fontnames = load_font(fnt, fontnames, false, status)
+            load_font(fnt, fontnames, status, newfontnames, newstatus, false)
         end
     end
-    return fontnames
 end
 
 local function fontnames_init()
     return {
         mappings  = { },
         families  = { },
-        checksums = { },
         version   = names.version,
     }
 end
@@ -322,7 +332,7 @@ end
 -- - fontnames is the final table to return
 -- - force is whether we rebuild it from scratch or not
 -- - status is a table containing the current status of the database 
-local function update(fontnames, force, status)
+local function update(fontnames, status, force, purge)
     if force then
         fontnames = fontnames_init()
         status = status_init()
@@ -336,9 +346,11 @@ local function update(fontnames, force, status)
             end
         end
     end
-    fontnames = scan_texmf_tree(fontnames, status)
-    fontnames = scan_os_fonts  (fontnames, status)
-    return fontnames, status
+    local newfontnames = fontnames_init()
+    local newstatus    = status_init()
+    scan_texmf_tree(fontnames, status, newfontnames, newstatus)
+    scan_os_fonts  (fontnames, status, newfontnames, newstatus)
+    return newfontnames, newstatus
 end
 
 names.scan   = scan_dir

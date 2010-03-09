@@ -27,7 +27,7 @@ local version = '1.07' -- same version number as luaotfload
 mkluatexfontdb = { } -- just for now, elie is rewriting it anyway
 local names    = fonts.names
 names.basename = names.basename or "otfl-names.lua"
-names.version  = names.version  or 2.004
+names.version  = names.version  or 2.005
 
 -- the path to add to TEXMFVAR or TEXMFSYSVAR to get the final directory in
 -- normal cases
@@ -54,6 +54,7 @@ Valid options:
   -h --help                  prints this message
   --fc-cache                 run fc-cache before updating database
   --no-fc-cache              do not run fc-cache (default)
+  -p --purge                 purge removed fonts
   --sys                      writes the database for the whole system
                              (default is only for the user)
 
@@ -75,6 +76,7 @@ end
 
 local long_opts = {
     dbdir    = "d",
+    purge    = "p",
     force    = "f",
     quiet    = "q",
     verbose  = 1,
@@ -85,7 +87,7 @@ local long_opts = {
     ['no-fc-cache'] = 0,
 }
 
-local short_opts = "d:fqvVh"
+local short_opts = "d:fqpvVh"
 
 -- Function running fc-cache if needed.
 -- The argument is nil for default, 0 for no fc-cache and 1 for fc-cache.
@@ -106,6 +108,7 @@ end
 -- a temporary variable, containing the command line option concerning fc-cache
 local run_fc_cache = 0
 local force_reload = nil
+local purge = nil
 
 local function process_cmdline()
     local opts, optind, optarg = alt_getopt.get_ordered_opts (arg, short_opts, long_opts)
@@ -129,6 +132,8 @@ local function process_cmdline()
             mkluatexfontdb.directory = optarg [i]
         elseif v == "f" then
             force_reload = 1
+        elseif v == "p" then
+            purge = 1
         elseif v == "fc-cache" then
             run_fc_cache = 1
         elseif v == "no-fc-cache" then
@@ -151,11 +156,11 @@ do_run_fc_cache(run_fc_cache)
 -- timestamp, it's uses to save time during update, by not reparsing unchanged fonts.
 local status = nil
 local status_file = mkluatexfontdb.directory .. "/otfl-names-status.lua"
-if file.isreadable(status_file) then
+if not force_reload and file.isreadable(status_file) then
     status = dofile(status_file)
 end
 
-local function generate(force)
+local function generate(force, purge)
     log("generating font names database.")
     local savepath = mkluatexfontdb.directory
     if not lfs.isdir(savepath) then
@@ -174,12 +179,12 @@ local function generate(force)
     end
     fh:close()
     local fontnames
-    if kpse.find_file(names.basename) then
+    if kpse.find_file(names.basename) and not force_reload then
         fontnames = dofile(kpse.find_file(names.basename))
     else
-        fontnames = {}
+        fontnames = nil
     end
-    fontnames, status = names.update(fontnames, force, status)
+    fontnames, status = names.update(fontnames, status, force, purge)
     log("%s fonts in %s families in the database",
         #fontnames.mappings, #table.keys(fontnames.families))
     io.savedata(savepath, table.serialize(fontnames, true))
@@ -187,4 +192,4 @@ local function generate(force)
     io.savedata(status_file, table.serialize(status, true))
 end
 
-generate(force_reload)
+generate(force_reload, purge)

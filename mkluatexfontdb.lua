@@ -39,23 +39,24 @@ mkluatexfontdb.directory = kpse.expand_var("$TEXMFVAR") .. mkluatexfontdb.subtex
 local log      = logs.report
 
 local function help_msg()
-    texio.write_nl(string.format([[Usage: %s [OPTION]...
+    texio.write(string.format([[
+Usage: %s [OPTION]...
     
 Rebuild the LuaTeX font database.
 
 Valid options:
-  -d --dbdir DIRECTORY       writes the database in the specified directory
+  -d --database-dir DIRECTORY       install the database in the specified directory
   -f --force                 force re-indexing all fonts
+  -p --purge                 purge removed fonts
   -q --quiet                 don't output anything
   -v --verbose=LEVEL         be more verbose (print the searched directories)
   -vv                        print the loaded fonts
   -vvv                       print all steps of directory searching
-  -V --version               prints the version and exits
-  -h --help                  prints this message
   --fc-cache                 run fc-cache before updating database
-  -p --purge                 purge removed fonts
-  --sys                      writes the database for the whole system
-                             (default is only for the user)
+  --sys                      install the database system-wide
+                             (default is only for the current user)
+  -V --version               print version and exit
+  -h --help                  print this message
 
 The output database file is named otfl-fonts.lua. By default it is placed
 in TEXMFVAR/scripts/luatexfontdb/.
@@ -63,7 +64,7 @@ in TEXMFVAR/scripts/luatexfontdb/.
 end
 
 local function version_msg()
-    texio.write_nl(string.format(
+    texio.write(string.format(
         "%s version %s, database version %s.\n", name, version, names.version))
 end
 
@@ -74,15 +75,15 @@ end
 ]]
 
 local long_opts = {
-    dbdir    = "d",
-    purge    = "p",
-    force    = "f",
-    quiet    = "q",
-    verbose  = 1,
-    version  = "V",
-    help     = "h",
-    sys      = 0,
-    ['fc-cache']    = 0,
+    ['database-dir'] = "d",
+    force            = "f",
+    purge            = "p",
+    quiet            = "q",
+    help             = "h",
+    ['fc-cache']     = 0  ,
+    sys              = 0  ,
+    verbose          = 1  ,
+    version          = "V",
 }
 
 local short_opts = "d:fqpvVh"

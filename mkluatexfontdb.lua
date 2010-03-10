@@ -146,7 +146,7 @@ local function process_cmdline()
         mkluatexfontdb.directory = kpse.expand_var("$TEXMFSYSVAR") .. mkluatexfontdb.subtexmfvardir
     end
     mkluatexfontdb.directory = fonts.path_normalize(mkluatexfontdb.directory)
-    names.log_level = log_level
+    names.set_log_level(log_level)
 end
 
 process_cmdline()

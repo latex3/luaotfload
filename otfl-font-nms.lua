@@ -147,6 +147,9 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
         end
         local checksum = file.checksum(filename)
         local info = fontloader.info(filename)
+        if not purge then
+            tofillstatus[filename] = {timestamp = true_lastmodif, mappings = {}}
+        end
         if info then
             if type(info) == "table" and #info > 1 then
                 for index,_ in ipairs(info) do

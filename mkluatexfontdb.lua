@@ -53,7 +53,6 @@ Valid options:
   -V --version               prints the version and exits
   -h --help                  prints this message
   --fc-cache                 run fc-cache before updating database
-  --no-fc-cache              do not run fc-cache (default)
   -p --purge                 purge removed fonts
   --sys                      writes the database for the whole system
                              (default is only for the user)
@@ -84,7 +83,6 @@ local long_opts = {
     help     = "h",
     sys      = 0,
     ['fc-cache']    = 0,
-    ['no-fc-cache'] = 0,
 }
 
 local short_opts = "d:fqpvVh"
@@ -136,8 +134,6 @@ local function process_cmdline()
             purge = 1
         elseif v == "fc-cache" then
             run_fc_cache = 1
-        elseif v == "no-fc-cache" then
-            run_fc_cache = 0
         elseif v == "sys" then
             mkluatexfontdb.directory = kpse.expand_var("$TEXMFSYSVAR") .. mkluatexfontdb.subtexmfvardir
         end

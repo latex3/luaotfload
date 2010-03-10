@@ -45,18 +45,18 @@ Usage: %s [OPTION]...
 Rebuild the LuaTeX font database.
 
 Valid options:
-  -d --database-dir DIRECTORY       install the database in the specified directory
-  -f --force                 force re-indexing all fonts
-  -p --purge                 purge removed fonts
-  -q --quiet                 don't output anything
-  -v --verbose=LEVEL         be more verbose (print the searched directories)
-  -vv                        print the loaded fonts
-  -vvv                       print all steps of directory searching
-  --fc-cache                 run fc-cache before updating database
-  --sys                      install the database system-wide
-                             (default is only for the current user)
-  -V --version               print version and exit
-  -h --help                  print this message
+  -d --database-dir=DIRECTORY  install the database in the specified directory
+  -f --force                   force re-indexing all fonts
+  -p --purge                   purge removed fonts
+  -q --quiet                   don't output anything
+  -v --verbose=LEVEL           be more verbose (print the searched directories)
+  -vv                          print the loaded fonts
+  -vvv                         print all steps of directory searching
+  --fc-cache                   run fc-cache before updating database
+  --sys                        install the database system-wide
+                               (default is only for the current user)
+  -V --version                 print version and exit
+  -h --help                    print this message
 
 The output database file is named otfl-fonts.lua. By default it is placed
 in TEXMFVAR/scripts/luatexfontdb/.

@@ -176,8 +176,8 @@ local function generate(force, purge)
     end
     fh:close()
     local fontnames
-    if kpse.find_file(names.basename) and not force_reload then
-        fontnames = dofile(kpse.find_file(names.basename))
+    if not force_reload and file.isreadable(savepath) then
+        fontnames = dofile(savepath)
     else
         fontnames = nil
     end

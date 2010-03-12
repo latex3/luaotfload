@@ -11,8 +11,7 @@ fonts.names          = fonts.names or { }
 
 local names          = fonts.names
 names.version        = 2.005 -- not the same as in context
-names.new_to_old     = { }
-names.old_to_new     = { }
+names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
     localdir  = kpse.expand_var("$TEXMFVAR")    .. "/scripts/luatexfontdb/",
@@ -31,13 +30,6 @@ local function sanitize(str)
     return string.gsub(string.lower(str), "[^%a%d]", "")
 end
 
-local data, loaded = nil, false
-local synonyms = {
-    regular     = {"normal", "roman", "plain", "book", "medium"},
-    italic      = {"regularitalic", "normalitalic", "oblique", "slant"},
-    bolditalic  = {"boldoblique", "boldslant"},
-}
-
 function names.load()
     local localpath  = names.path.localdir  .. names.path.basename
     local systempath = names.path.systemdir .. names.path.basename
@@ -50,12 +42,21 @@ function names.load()
     end
 end
 
+local loaded    = false
+local synonyms  = {
+    regular     = {"normal", "roman", "plain", "book", "medium"},
+    italic      = {"regularitalic", "normalitalic", "oblique", "slant"},
+    bolditalic  = {"boldoblique", "boldslant"},
+}
+
 function names.resolve(specification)
-    local name, style = specification.name, specification.style or "regular"
+    local name  = specification.name
+    local style = specification.style or "regular"
     if not loaded then
-        data   = names.load()
+        names.data   = names.load()
         loaded = true
     end
+    local data  = names.data
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
             local family = data.families[name]
@@ -98,7 +99,7 @@ function names.resolve(specification)
             end
         end
     else
-        logs.report("load font", "Font names database version mismatch, found: %s, requested: %s", data.version, names.version)
+        logs.report("load font", "no font names database loaded")
     end
 end
 

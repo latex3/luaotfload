@@ -11,10 +11,13 @@ fonts.names          = fonts.names or { }
 
 local names          = fonts.names
 names.version        = 2.005 -- not the same as in context
-names.basename       = "otfl-names.lua"
-names.subtexmfvardir = "/scripts/luatexfontdb/"
 names.new_to_old     = { }
 names.old_to_new     = { }
+names.path           = {
+    basename  = "otfl-names.lua",
+    localdir  = kpse.expand_var("$TEXMFVAR")    .. "/scripts/luatexfontdb/",
+    systemdir = kpse.expand_var("$TEXMFSYSVAR") .. "/scripts/luatexfontdb/",
+}
 
 
 local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
@@ -35,20 +38,22 @@ local synonyms = {
     bolditalic  = {"boldoblique", "boldslant"},
 }
 
+function names.load()
+    local localpath  = names.path.localdir  .. names.path.basename
+    local systempath = names.path.systemdir .. names.path.basename
+    local data       = dofile(localpath) or dofile(systempath)
+    if data then
+        if trace_loading then
+            logs.report("load font", "loaded font names database: %s", foundname)
+        end
+        return data
+    end
+end
+
 function names.resolve(specification)
     local name, style = specification.name, specification.style or "regular"
     if not loaded then
-        local basename = names.basename
-        if basename and basename ~= "" and names.subtexmfvardir then
-            local foundname = kpse.expand_var("$TEXMFVAR") .. names.subtexmfvardir .. basename
-            if not file.isreadable(foundname) then
-                foundname = kpse.expand_var("$TEXMFSYSVAR") .. names.subtexmfvardir .. basename
-            end
-            if file.isreadable(foundname) then
-                data = dofile(foundname)
-                logs.report("load font", "loaded font names database: %s", foundname)
-            end
-        end
+        data   = names.load()
         loaded = true
     end
     if type(data) == "table" and data.version == names.version then

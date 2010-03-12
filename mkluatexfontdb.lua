@@ -27,12 +27,8 @@ local version = '1.07' -- same version number as luaotfload
 mkluatexfontdb = { } -- just for now, elie is rewriting it anyway
 local names    = fonts.names
 
--- the path to add to TEXMFVAR or TEXMFSYSVAR to get the final directory in
--- normal cases
-mkluatexfontdb.subtexmfvardir = "/scripts/luatexfontdb/"
-
 -- the directory in which the database will be saved, can be overwritten
-mkluatexfontdb.directory = kpse.expand_var("$TEXMFVAR") .. mkluatexfontdb.subtexmfvardir
+mkluatexfontdb.directory = names.path.localdir
 
 local log      = logs.report
 
@@ -134,11 +130,11 @@ local function process_cmdline()
         elseif v == "fc-cache" then
             run_fc_cache = 1
         elseif v == "sys" then
-            mkluatexfontdb.directory = kpse.expand_var("$TEXMFSYSVAR") .. mkluatexfontdb.subtexmfvardir
+            mkluatexfontdb.directory = names.path.systemdir
         end
     end
     if string.match(arg[0], '-sys') then
-        mkluatexfontdb.directory = kpse.expand_var("$TEXMFSYSVAR") .. mkluatexfontdb.subtexmfvardir
+        mkluatexfontdb.directory = names.path.systemdir
     end
     mkluatexfontdb.directory = fonts.path_normalize(mkluatexfontdb.directory)
     names.set_log_level(log_level)
@@ -166,7 +162,7 @@ local function generate(force, purge)
             os.exit(1)
         end
     end
-    savepath = savepath .. '/' .. names.basename
+    savepath = savepath .. '/' .. names.path.basename
     local fh = io.open(savepath, 'a+')
     if not fh then
         texio.write_nl(string.format("Error: cannot write file '%s', exiting.\n", savepath))

@@ -48,7 +48,7 @@ end
 
 fonts.names = fonts.names or { }
 
-fonts.names.version       = 2.004 -- not the same as in context
+fonts.names.version       = 2.005 -- not the same as in context
 fonts.names.basename      = "otfl-names.lua"
 fonts.names.subtexmfvardir = "/scripts/luatexfontdb/"
 fonts.names.new_to_old = { }

@@ -277,33 +277,17 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
     end
 end
 
--- We need to detect the OS (especially cygwin) to convert paths.
-local system = LUAROCKS_UNAME_S or io.popen("uname -s"):read("*l")
-if system then
-    if system:match("^CYGWIN") then
-        system = 'cygwin'
-    elseif system:match("^Windows") then
-        system = 'windows'
-    else
-        system = 'unix'
-    end
-else
-    system = 'unix' -- ?
-end
-
-fonts.system = system
-
 -- path normalization:
 -- - a\b\c  -> a/b/c
 -- - a/../b -> b
 -- - /cygdrive/a/b -> a:/b
 local function path_normalize(path)
-    if system ~= 'unix' then
+    if os.type ~= 'unix' then
         path = path:gsub('\\', '/')
         path = path:lower()
     end
     path = file.collapse_path(path)
-    if system == "cygwin" then
+    if os.name == "cygwin" then
         path = path:gsub('^/cygdrive/(%a)/', '%1:/')
     end
     return path

@@ -95,7 +95,7 @@ local function do_run_fc_cache(c)
       -- TODO: detect if fc-cache is available
     end
     local toexec = 'fc-cache'
-    if fonts.system == 'windows' then
+    if os.type == 'windows' then
         toexec = 'fc-cache.exe' -- TODO: to test on a non-cygwin Windows
     end
     log('executing %s...\n', toexec)

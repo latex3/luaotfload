@@ -6,19 +6,100 @@ if not modules then modules = { } end modules ['font-nms'] = {
     license   = "GPL"
 }
 
-fonts       = fonts       or { }
-fonts.names = fonts.names or { }
+fonts                = fonts       or { }
+fonts.names          = fonts.names or { }
 
-local names = fonts.names
+local names          = fonts.names
+names.version        = 2.005 -- not the same as in context
+names.basename       = "otfl-names.lua"
+names.subtexmfvardir = "/scripts/luatexfontdb/"
+names.new_to_old     = { }
+names.old_to_new     = { }
+
 
 local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
-local upper, format = string.upper, string.format
+local upper, format  = string.upper, string.format
 
 local trace_progress = true  --trackers.register("names.progress", function(v) trace_progress = v end)
 local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
 local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
-function fonts.names.set_log_level(level)
+local function sanitize(str)
+    return string.gsub(string.lower(str), "[^%a%d]", "")
+end
+
+local data, loaded = nil, false
+local synonyms = {
+    regular     = {"normal", "roman", "plain", "book", "medium"},
+    italic      = {"regularitalic", "normalitalic", "oblique", "slant"},
+    bolditalic  = {"boldoblique", "boldslant"},
+}
+
+function names.resolve(specification)
+    local name, style = specification.name, specification.style or "regular"
+    if not loaded then
+        local basename = names.basename
+        if basename and basename ~= "" and names.subtexmfvardir then
+            local foundname = kpse.expand_var("$TEXMFVAR") .. names.subtexmfvardir .. basename
+            if not file.isreadable(foundname) then
+                foundname = kpse.expand_var("$TEXMFSYSVAR") .. names.subtexmfvardir .. basename
+            end
+            if file.isreadable(foundname) then
+                data = dofile(foundname)
+                logs.report("load font", "loaded font names database: %s", foundname)
+            end
+        end
+        loaded = true
+    end
+    if type(data) == "table" and data.version == names.version then
+        if data.mappings then
+            local family = data.families[name]
+            if family and type(family) == "table" then
+                for _,v in ipairs(family) do
+                   local face      = data.mappings[v]
+                   local subfamily = sanitize(face.names.subfamily)
+                   local rqssize   = tonumber(specification.optsize) or specification.size and specification.size / 65536
+                   local dsnsize   = face.size[1] and face.size[1] / 10
+                   local maxsize   = face.size[2] and face.size[2] / 10
+                   local minsize   = face.size[3] and face.size[3] / 10
+                   local filename  = face.filename
+                   if subfamily then
+                       if subfamily == style then
+                           if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
+                               found = filename
+                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
+                               break
+                           end
+                       else
+                           if synonyms[style] then
+                               for _,v in ipairs(synonyms[style]) do
+                                   if subfamily == v then
+                                       if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
+                                            found = filename
+                                            logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
+                                            break
+                                       end
+                                   end
+                               end
+                           end
+                       end
+                   end
+                end
+                if found then
+                   return found, false
+                else
+                   return name, false -- fallback to filename
+                end
+            end
+        end
+    else
+        logs.report("load font", "Font names database version mismatch, found: %s, requested: %s", data.version, names.version)
+    end
+end
+
+names.resolvespec = names.resolve -- only supported in mkiv
+
+function names.set_log_level(level)
     if level == 2 then
         trace_progress = false
         trace_loading = true

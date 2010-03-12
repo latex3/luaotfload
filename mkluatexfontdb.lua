@@ -26,8 +26,6 @@ local version = '1.07' -- same version number as luaotfload
 
 mkluatexfontdb = { } -- just for now, elie is rewriting it anyway
 local names    = fonts.names
-names.basename = names.basename or "otfl-names.lua"
-names.version  = names.version  or 2.005
 
 -- the path to add to TEXMFVAR or TEXMFSYSVAR to get the final directory in
 -- normal cases

@@ -48,83 +48,40 @@ end
 
 fonts.names = fonts.names or { }
 
-fonts.names.version       = 2.005 -- not the same as in context
-fonts.names.basename      = "otfl-names.lua"
-fonts.names.subtexmfvardir = "/scripts/luatexfontdb/"
+fonts.names.version    = 1.001 -- not the same as in context
+fonts.names.basename   = "luatex-fonts-names.lua"
 fonts.names.new_to_old = { }
 fonts.names.old_to_new = { }
 
 local data, loaded = nil, false
 
-local synonyms = {
-    regular     = {"normal", "roman", "plain", "book", "medium"},
-    italic      = {"regularitalic", "normalitalic", "oblique", "slant"},
-    bolditalic  = {"boldoblique", "boldslant"},
-}
-
-local function sanitize(str)
-    return string.gsub(string.lower(str), "[^%a%d]", "")
-end
-
-function fonts.names.resolve(specification)
-    local name, style = specification.name, specification.style or "regular"
+function fonts.names.resolve(name,sub)
     if not loaded then
         local basename = fonts.names.basename
-        if basename and basename ~= "" and fonts.names.subtexmfvardir then
-            local foundname = kpse.expand_var("$TEXMFVAR") .. fonts.names.subtexmfvardir .. basename
-            if not file.isreadable(foundname) then
-                foundname = kpse.expand_var("$TEXMFSYSVAR") .. fonts.names.subtexmfvardir .. basename
-            end
-            if file.isreadable(foundname) then
-                data = dofile(foundname)
-                logs.report("load font", "loaded font names database: %s", foundname)
+        if basename and basename ~= "" then
+            for _, format in ipairs { "lua", "tex", "other text files" } do
+                local foundname = resolvers.find_file(basename,format) or ""
+                if foundname ~= "" then
+                    data = dofile(foundname)
+                    break
+                end
             end
         end
         loaded = true
     end
     if type(data) == "table" and data.version == fonts.names.version then
-        if data.mappings then
-            local family = data.families[name]
-            if family and type(family) == "table" then
-                for _,v in ipairs(family) do
-                   local face      = data.mappings[v]
-                   local subfamily = sanitize(face.names.subfamily)
-                   local rqssize   = tonumber(specification.optsize) or specification.size and specification.size / 65536
-                   local dsnsize   = face.size[1] and face.size[1] / 10
-                   local maxsize   = face.size[2] and face.size[2] / 10
-                   local minsize   = face.size[3] and face.size[3] / 10
-                   local filename  = face.filename
-                   if subfamily then
-                       if subfamily == style then
-                           if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                               found = filename
-                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
-                               break
-                           end
-                       else
-                           if synonyms[style] then
-                               for _,v in ipairs(synonyms[style]) do
-                                   if subfamily == v then
-                                       if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                                            found = filename
-                                            logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
-                                            break
-                                       end
-                                   end
-                               end
-                           end
-                       end
-                   end
-                end
-                if found then
-                   return found, false
-                else
-                   return name, false -- fallback to filename
-                end
+        local condensed = string.gsub(string.lower(name),"[^%a%d]","")
+        local found = data.mappings and data.mappings[condensed]
+        if found then
+            local fontname, filename, subfont = found[1], found[2], found[3]
+            if subfont then
+                return filename, fontname
+            else
+                return filename, false
             end
+        else
+            return name, false -- fallback to filename
         end
-    else
-        logs.report("load font", "Font names database version mismatch, found: %s, requested: %s", data.version, fonts.names.version)
     end
 end
 

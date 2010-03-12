@@ -282,7 +282,7 @@ end
 -- - a/../b -> b
 -- - /cygdrive/a/b -> a:/b
 local function path_normalize(path)
-    if os.type ~= 'unix' then
+    if os.type == "windows" then
         path = path:gsub('\\', '/')
         path = path:lower()
     end

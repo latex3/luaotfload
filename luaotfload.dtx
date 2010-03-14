@@ -104,6 +104,10 @@ and the derived files
 \documentclass{ltxdoc}
 \usepackage{metalogo}
 \usepackage[colorlinks=true]{hyperref}
+
+\def\LuaTeX{Lua\TeX}
+\def\ConTeXt{Con\TeX t}
+
 \EnableCrossrefs
 \CodelineIndex
 \begin{document}
@@ -139,7 +143,7 @@ and the derived files
 % \maketitle
 %
 % \begin{abstract}
-% Con\TeX t font loading system, providing the possibility to load OTF fonts
+% \ConTeXt font loading system, providing the possibility to load OTF fonts
 % with a lot of features, and the \XeTeX\ font loading syntax.
 % \end{abstract}
 %
@@ -159,13 +163,13 @@ and the derived files
 % modern text softwares fonts are of this type. Until now the (almost) only
 % way to use them with \TeX\ was to use them with \XeTeX .
 %
-% Unlike \XeTeX , Lua\TeX\ does not provide facilities for these fonts by
+% Unlike \XeTeX , \LuaTeX\ does not provide facilities for these fonts by
 % default, but it provides a way to hook lua code in some points of the \TeX\
 % algorithm, for instance we can improve the font loading system; this is what
 % we do in this package.
 %
 % This package is quite low-level, and should be loaded directly in the macro
-% package, like it is in Con\TeX t. Sadly, Plain and \LaTeX\ are frozen and
+% package, like it is in \ConTeXt. Sadly, Plain and \LaTeX\ are frozen and
 % it's even impossible to adapt them to the new engines. 
 %
 % \subsection{Loading fonts}
@@ -181,12 +185,12 @@ and the derived files
 % Prefixes are either |file| or |name|; |file| prefix forces searching font
 % based on filename, while a |name| prefix will result in consulting name
 % database. Name database can be generated with\footnote{|mtxrun| tool and
-% scripts are part of Con\TeX t}:
+% scripts are part of \ConTeXt}:
 %
 % \begin{center}
 % |mtxrun --script fonts --names|
 % \footnote{|mtxrun --script fonts --reload --simple| in recent
-% Con\TeX t releases}
+% \ConTeXt releases}
 % \end{center}
 %
 % \noindent Which will generate a file named |luatex-fonts-names.lua| that is
@@ -240,17 +244,17 @@ and the derived files
 % \font\testf=[lmroman12-regular]       at 40pt \testf more text
 % \end{verbatim}
 %
-% \subsection{Con\TeX t files needed}
+% \subsection{\ConTeXt files needed}
 %
-% This package is a wrapper for several files taken from the Con\TeX t macro
-% package. The philosophy is to let Con\TeX t do all the implementation and
+% This package is a wrapper for several files taken from the \ConTeXt macro
+% package. The philosophy is to let \ConTeXt do all the implementation and
 % update these files from time to time. To do so we did not modify the files
-% taken from Con\TeX t, we only changed their names to prevent name clashes.
+% taken from \ConTeXt, we only changed their names to prevent name clashes.
 % You can thus update the font system of this package simply by updating the
-% files taken from Con\TeX t, without (theorically) changing the \texttt{.sty}
+% files taken from \ConTeXt, without (theorically) changing the \texttt{.sty}
 % file nor the main \texttt{.lua} file.
 %
-% The Con\TeX t files are renamed by adding the prefix \texttt{otfl-} to them
+% The \ConTeXt files are renamed by adding the prefix \texttt{otfl-} to them
 % (\texttt{otfl} as \texttt{OTF L}oad).The files are:
 %
 % \begin{itemize}
@@ -310,7 +314,7 @@ luatextra.provides_module(luaotfload.module)
 
 %    \end{macrocode}
 %
-%    The minimal required Lua\TeX\ version.
+%    The minimal required \LuaTeX\ version.
 %
 %    \begin{macrocode}
 
@@ -322,8 +326,8 @@ end
 
 %    \end{macrocode}
 %
-%    We load the Con\TeX t files with this function. It automatically adds the
-%    \texttt{otfl-} prefix to it, so that we call it with the actual Con\TeX t
+%    We load the \ConTeXt files with this function. It automatically adds the
+%    \texttt{otfl-} prefix to it, so that we call it with the actual \ConTeXt
 %    name.
 %
 %    \begin{macrocode}
@@ -341,7 +345,7 @@ end
 
 %    \end{macrocode}
 %
-%    The following functions are made to map Con\TeX t functions to
+%    The following functions are made to map \ConTeXt functions to
 %    \textsf{luaextra} functions.
 %
 %    \begin{macrocode}
@@ -416,8 +420,8 @@ end
 %    \end{macrocode}
 %
 %    We start loading some lua files. These two are some code not used by
-%    Con\TeX t at all that allow other modules to be used, it provides some
-%    low-level Con\TeX t functions.
+%    \ConTeXt at all that allow other modules to be used, it provides some
+%    low-level \ConTeXt functions.
 %
 %    \begin{macrocode}
 
@@ -435,7 +439,7 @@ luaotfload.loadmodule('node-ini.lua')
 
 %    \end{macrocode}
 %
-%    By default Con\TeX t takes some private attributes for internal use. With
+%    By default \ConTeXt takes some private attributes for internal use. With
 %    Plain and \LaTeX\ we can't do so, we use |\newluaattribute|. This
 %    functions overrides a function defined in the previous module that
 %    returns the number of a private attribute. We allocate new attributes in
@@ -459,7 +463,7 @@ end
 %    \texttt{font-afm.lua} as it will never be used here.
 %    
 %    We also remove a warning from \texttt{node-fnt.lua} as it not relevant
-%    with Lua\TeX{}tra.
+%    with \LuaTeX{}tra.
 %
 %    \begin{macrocode}
 

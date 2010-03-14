@@ -23,6 +23,7 @@ fontloader.totable = fontloader.to_table
 
 fonts     = fonts     or { }
 fonts.ids = fonts.ids or { } -- aka fontdata
+fonts.chr = fonts.chr or { } -- aka chardata
 fonts.tfm = fonts.tfm or { }
 
 fonts.mode    = 'base'
@@ -34,6 +35,8 @@ fonts.ids[0] = { -- nullfont
     descriptions = { },
     name         = "nullfont",
 }
+
+fonts.chr[0] = { }
 
 fonts.methods = fonts.methods or {
     base = { tfm = { }, afm = { }, otf = { }, vtf = { }, fix = { } },

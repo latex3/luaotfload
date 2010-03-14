@@ -535,6 +535,7 @@ function define.register(fontdata,id)
                 logs.report("define font","loading at 2 id %s, hash: %s",id or "?",hash or "?")
             end
             fonts.ids[id] = fontdata
+            fonts.chr[id] = fontdata.characters
             tfm.internalized[hash] = id
         end
     end

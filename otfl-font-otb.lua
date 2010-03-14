@@ -305,12 +305,13 @@ end
 -- to do complete mixed runs and not run featurewise (as we did before).
 
 local supported_gsub = {
-    'liga','dlig','rlig','hlig',
-    'pnum','onum','tnum','lnum',
+    'liga', 'dlig', 'rlig', 'hlig',
+    'pnum', 'onum', 'tnum', 'lnum',
     'zero',
-    'smcp','cpsp','c2sc','ornm','aalt',
-    'hwid','fwid',
+    'smcp', 'cpsp', 'c2sc', 'ornm', 'aalt',
+    'hwid', 'fwid',
     'ssty', 'rtlm', -- math
+--  'tlig', 'trep',
 }
 
 local supported_gpos = {

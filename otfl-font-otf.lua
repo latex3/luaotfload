@@ -87,6 +87,9 @@ otf.notdef           = false
 otf.cache            = containers.define("fonts", "otf", otf.version, true)
 otf.cleanup_aat      = false -- only context
 
+local wildcard = "*"
+local default  = "dflt"
+
 --[[ldx--
 <p>We start with a lot of tables and related functions.</p>
 --ldx]]--

@@ -288,14 +288,13 @@ end
 -- - a/../b -> b
 -- - /cygdrive/a/b -> a:/b
 local function path_normalize(path)
-    if os.type == "windows" then
+    if os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
         path = path:gsub('\\', '/')
         path = path:lower()
-    end
-    path = file.collapse_path(path)
-    if os.name == "cygwin" then
+        -- for cygwin cases...
         path = path:gsub('^/cygdrive/(%a)/', '%1:/')
     end
+    path = file.collapse_path(path)
     return path
 end
 

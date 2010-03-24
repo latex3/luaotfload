@@ -22,13 +22,14 @@ names.path           = {
 local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
 local upper, lower, format, gsub, match  = string.upper, string.lower, string.format, string.gsub, string.match
 local rpadd = string.rpadd
+local utfgsub = unicode.utf8.gsub
 
 local trace_progress = true  --trackers.register("names.progress", function(v) trace_progress = v end)
 local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
 local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
 local function sanitize(str)
-    return gsub(lower(str), "[^%a%d]", "")
+    return utfgsub(lower(str), "[^%a%d]", "")
 end
 
 function names.load()

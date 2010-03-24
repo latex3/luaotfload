@@ -20,14 +20,15 @@ names.path           = {
 
 
 local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
-local upper, format  = string.upper, string.format
+local upper, lower, format, gsub, match  = string.upper, string.lower, string.format, string.gsub, string.match
+local rpadd = string.rpadd
 
 local trace_progress = true  --trackers.register("names.progress", function(v) trace_progress = v end)
 local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
 local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
 local function sanitize(str)
-    return string.gsub(string.lower(str), "[^%a%d]", "")
+    return gsub(lower(str), "[^%a%d]", "")
 end
 
 function names.load()
@@ -134,10 +135,10 @@ local function progress(current, total)
 --      local width   = os.getenv("COLUMNS") -2 --doesn't work
         local width   = 78
         local percent = current/total
-        local gauge   = format("[%s]", string.rpadd(" ", width, " "))
+        local gauge   = format("[%s]", rpadd(" ", width, " "))
         if percent > 0 then
-            local done = string.rpadd("=", (width * percent) - 1, "=") .. ">"
-            gauge = format("[%s]", string.rpadd(done, width, " ") )
+            local done = rpadd("=", (width * percent) - 1, "=") .. ">"
+            gauge = format("[%s]", rpadd(done, width, " ") )
         end
         if lastislog == 1 then
             texio.write_nl("")
@@ -353,7 +354,7 @@ local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
         end
     end
     local fontdirs = expandpath("$OPENTYPEFONTS")
-    fontdirs = fontdirs .. string.gsub(expandpath("$TTFONTS"), "^\.", "")
+    fontdirs = fontdirs .. gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
         local explored_dirs = {}
         fontdirs = splitpath(fontdirs)
@@ -377,7 +378,7 @@ local function read_fcdata(data)
     local list = { }
     for line in data:lines() do
         line = line:gsub(": ", "")
-        local ext = string.lower(string.match(line,"^.+%.([^/\\]-)$"))
+        local ext = lower(match(line,"^.+%.([^/\\]-)$"))
         if ext == "otf" or ext == "ttf" or ext == "ttc" or ext == "dfont" then
             list[#list+1] = path_normalize(line:gsub(": ", ""))
         end

@@ -59,7 +59,7 @@ function names.resolve(specification)
     local data  = names.data
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
-            local family = data.families[name]
+            local family = data.families[sanitize(name)]
             if family and type(family) == "table" then
                 for _,v in ipairs(family) do
                    local face      = data.mappings[v]
@@ -187,6 +187,8 @@ function fontloader.fullinfo(...)
         m.design_range_top    ~= 0 and m.design_range_top    or nil,
         m.design_range_bottom ~= 0 and m.design_range_bottom or nil,
     }
+
+    t.names.family = sanitize(t.names.family)
     return t
 end
 

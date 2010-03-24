@@ -14,8 +14,8 @@ names.version        = 2.005 -- not the same as in context
 names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
-    localdir  = kpse.expand_var("$TEXMFVAR")    .. "/scripts/luatexfontdb/",
-    systemdir = kpse.expand_var("$TEXMFSYSVAR") .. "/scripts/luatexfontdb/",
+    localdir  = kpse.expand_var("$TEXMFVAR")    .. "/luatex-cache/latex/names/",
+    systemdir = kpse.expand_var("$TEXMFSYSVAR") .. "/luatex-cache/latex/names/",
 }
 
 

@@ -53,7 +53,7 @@ Valid options:
   -h --help                    print this message
 
 The output database file is named otfl-fonts.lua. By default it is placed
-in TEXMFVAR/scripts/luatexfontdb/.
+in $TEXMFVAR/luatex-cache/latex/names/.
 ]], name))
 end
 

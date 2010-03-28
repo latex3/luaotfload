@@ -1,19 +1,11 @@
 #!/usr/bin/env texlua
--- This file is copyright 2010 Elie Roux and Khaled Hosny and is under CC0
--- license (see http://creativecommons.org/publicdomain/zero/1.0/legalcode).
---
--- This file is a wrapper for the luaotfload-fonts.lua script.
--- It is part of the luaotfload bundle, please see the luaotfload documentation
--- for more info.
-
 --[[
- first we import luaotfload-fonts.lua.
- Basically it 'exports' three usefult things: the two overwritable variables
- - luaotfload.fonts.basename: the filename of the database
- - luaotfload.fonts.directory: the directory of the database
- and the function
- - luaotfload.fonts.generate: the function to generate the database
-]]
+This file is copyright 2010 Elie Roux and Khaled Hosny and is under CC0
+license (see http://creativecommons.org/publicdomain/zero/1.0/legalcode).
+
+This file is a wrapper for the luaotfload's font names module. It is part of the
+luaotfload bundle, please see the luaotfload documentation for more info.
+--]]
 
 kpse.set_program_name("luatex")
 
@@ -63,10 +55,9 @@ local function version_msg()
 end
 
 --[[
- Command-line processing.
- Here we fill cmdargs with the good values, and then analyze it, setting
- luaotfload.fonts.log_level luaotfload.fonts.directory if necessary.
-]]
+Command-line processing.
+Here we fill cmdargs with the good values, and then analyze it.
+--]]
 
 local long_opts = {
     ['database-dir'] = "d",
@@ -82,10 +73,12 @@ local long_opts = {
 
 local short_opts = "d:fqpvVh"
 
--- Function running fc-cache if needed.
--- The argument is nil for default, 0 for no fc-cache and 1 for fc-cache.
--- Default behaviour is to run fc-cache if available.
 local function do_run_fc_cache(c)
+    --[[
+    Function running fc-cache if needed.
+    The argument is nil for default, 0 for no fc-cache and 1 for fc-cache.
+    Default behaviour is to run fc-cache if available.
+    --]]
     if c == 0 then return end
     if not c then
       -- TODO: detect if fc-cache is available

@@ -287,11 +287,13 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
     end
 end
 
--- path normalization:
--- - a\b\c  -> a/b/c
--- - a/../b -> b
--- - /cygdrive/a/b -> a:/b
 local function path_normalize(path)
+    --[[
+    path normalization:
+    - a\b\c  -> a/b/c
+    - a/../b -> b
+    - /cygdrive/a/b -> a:/b
+    --]]
     if os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
         path = path:gsub('\\', '/')
         path = path:lower()
@@ -304,15 +306,17 @@ end
 
 fonts.path_normalize = path_normalize
 
--- this function scans a directory and populates the list of fonts
--- with all the fonts it finds.
--- - dirname is the name of the directory to scan
--- - names is the font database to fill
--- - recursive is whether we scan all directories recursively (always false
---       in this script)
--- - texmf is a boolean saying if we are scanning a texmf directory (always
---       true in this script)
 local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, recursive, texmf)
+    --[[
+    this function scans a directory and populates the list of fonts
+    with all the fonts it finds.
+    - dirname is the name of the directory to scan
+    - names is the font database to fill
+    - recursive is whether we scan all directories recursively (always false
+          in this script)
+    - texmf is a boolean saying if we are scanning a texmf directory (always
+          true in this script)
+    --]]
     local list, found = { }, { }
     local nbfound = 0
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
@@ -344,9 +348,11 @@ local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, rec
     end
 end
 
--- The function that scans all fonts in the texmf tree, through kpathsea
--- variables OPENTYPEFONTS and TTFONTS of texmf.cnf
 local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
+    --[[
+    The function that scans all fonts in the texmf tree, through kpathsea
+    variables OPENTYPEFONTS and TTFONTS of texmf.cnf
+    --]]
     if trace_progress then
         if expandpath("$OSFONTDIR"):is_empty() then
             logs.report("scanning TEXMF fonts:")
@@ -373,9 +379,11 @@ local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
     end
 end
 
--- this function takes raw data returned by fc-list, parses it, normalizes the
--- paths and makes a list out of it.
 local function read_fcdata(data)
+    --[[
+    this function takes raw data returned by fc-list, parses it, normalizes the
+    paths and makes a list out of it.
+    --]]
     local list = { }
     for line in data:lines() do
         line = line:gsub(": ", "")
@@ -387,11 +395,13 @@ local function read_fcdata(data)
     return list
 end
 
--- This function scans the OS fonts through fontcache (fc-list), it executes
--- only if OSFONTDIR is empty (which is the case under most Unix by default).
--- If OSFONTDIR is non-empty, this means that the system fonts it contains have
--- already been scanned, and thus we don't scan them again.
 local function scan_os_fonts(fontnames, status, newfontnames, newstatus)
+    --[[
+    This function scans the OS fonts through fontcache (fc-list), it executes
+    only if OSFONTDIR is empty (which is the case under most Unix by default).
+    If OSFONTDIR is non-empty, this means that the system fonts it contains have
+    already been scanned, and thus we don't scan them again.
+    --]]
     if expandpath("$OSFONTDIR"):is_empty() then 
         if trace_progress then
             logs.report("scanning OS fonts:")
@@ -428,11 +438,13 @@ local function status_init()
     }
 end
 
--- The main function, scans everything
--- - fontnames is the final table to return
--- - force is whether we rebuild it from scratch or not
--- - status is a table containing the current status of the database 
 local function update(fontnames, status, force, purge)
+    --[[
+    The main function, scans everything
+    - fontnames is the final table to return
+    - force is whether we rebuild it from scratch or not
+    - status is a table containing the current status of the database
+    --]]
     if force then
         fontnames = fontnames_init()
         status = status_init()

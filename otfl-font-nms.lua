@@ -35,7 +35,12 @@ end
 function names.load()
     local localpath  = names.path.localdir  .. names.path.basename
     local systempath = names.path.systemdir .. names.path.basename
-    local data       = dofile(localpath) or dofile(systempath)
+    local data
+    if file.isreadable(localpath) then
+        data = dofile(localpath)
+    elseif file.isreadable(systempath) then
+        data = dofile(systempath)
+    end
     if data then
         if trace_loading then
             logs.report("load font", "loaded font names database: %s", foundname)

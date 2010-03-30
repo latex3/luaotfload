@@ -33,7 +33,6 @@ Rebuild the LuaTeX font database.
 Valid options:
   -d --database-dir=DIRECTORY  install the database in the specified directory
   -f --force                   force re-indexing all fonts
-  -p --purge                   purge removed fonts
   -q --quiet                   don't output anything
   -v --verbose=LEVEL           be more verbose (print the searched directories)
   -vv                          print the loaded fonts
@@ -62,7 +61,6 @@ Here we fill cmdargs with the good values, and then analyze it.
 local long_opts = {
     ['database-dir'] = "d",
     force            = "f",
-    purge            = "p",
     quiet            = "q",
     help             = "h",
     ['fc-cache']     = 0  ,
@@ -94,7 +92,6 @@ end
 -- a temporary variable, containing the command line option concerning fc-cache
 local run_fc_cache = 0
 local force_reload = nil
-local purge = nil
 
 local function process_cmdline()
     local opts, optind, optarg = alt_getopt.get_ordered_opts (arg, short_opts, long_opts)
@@ -118,8 +115,6 @@ local function process_cmdline()
             mkluatexfontdb.directory = optarg [i]
         elseif v == "f" then
             force_reload = 1
-        elseif v == "p" then
-            purge = 1
         elseif v == "fc-cache" then
             run_fc_cache = 1
         elseif v == "sys" then
@@ -144,7 +139,7 @@ if not force_reload and file.isreadable(status_file) then
     status = dofile(status_file)
 end
 
-local function generate(force, purge)
+local function generate(force)
     log("generating font names database.")
     local savepath = mkluatexfontdb.directory
     if not lfs.isdir(savepath) then
@@ -168,7 +163,7 @@ local function generate(force, purge)
     else
         fontnames = nil
     end
-    fontnames, status = names.update(fontnames, status, force, purge)
+    fontnames, status = names.update(fontnames, status, force)
     log("%s fonts in %s families in the database",
         #fontnames.mappings, #table.keys(fontnames.families))
     io.savedata(savepath, table.serialize(fontnames, true))
@@ -176,4 +171,4 @@ local function generate(force, purge)
     io.savedata(status_file, table.serialize(status, true))
 end
 
-generate(force_reload, purge)
+generate(force_reload)

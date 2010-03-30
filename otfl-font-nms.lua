@@ -444,7 +444,7 @@ local function status_init()
     }
 end
 
-local function update(fontnames, status, force, purge)
+local function update(fontnames, status, force)
     --[[
     The main function, scans everything
     - fontnames is the final table to return
@@ -464,19 +464,11 @@ local function update(fontnames, status, force, purge)
             end
         end
     end
-    local newfontnames = nil
-    local newstatus    = nil
-    if purge then
-        newfontnames = fontnames_init()
-        newstatus    = status_init()
-    end
+    local newfontnames = fontnames_init()
+    local newstatus    = status_init()
     scan_texmf_tree(fontnames, status, newfontnames, newstatus)
     scan_os_fonts  (fontnames, status, newfontnames, newstatus)
-    if purge then
-        return newfontnames, newstatus
-    else
-        return fontnames, status
-    end
+    return newfontnames, newstatus
 end
 
 names.scan   = scan_dir

@@ -160,6 +160,7 @@ function fontloader.fullinfo(...)
     local f = fontloader.open(...)
     local m = f and fontloader.to_table(f)
     fontloader.close(f)
+    collectgarbage('collect')
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
     if m.fontstyle_name then
         for _,v in pairs(m.fontstyle_name) do

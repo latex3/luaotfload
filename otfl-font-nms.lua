@@ -71,14 +71,24 @@ function names.resolve(specification)
                 for _,v in ipairs(family) do
                    local face      = data.mappings[v]
                    local subfamily = sanitize(face.names.subfamily)
-                   local rqssize   = tonumber(specification.optsize) or specification.size and specification.size / 65536
-                   local dsnsize   = face.size[1] and face.size[1] / 10
-                   local maxsize   = face.size[2] and face.size[2] / 10
-                   local minsize   = face.size[3] and face.size[3] / 10
                    local filename  = face.filename
+                   local optsize, rqssize, dsnsize, maxsize, minsize
+                   if #face.size > 0 then
+                       optsize = face.size
+                       rqssize = tonumber(specification.optsize) or specification.size and specification.size / 65536
+                       dsnsize = optsize[1] and optsize[1] / 10
+                       maxsize = optsize[2] and optsize[2] / 10 or dsnsize -- can be nil
+                       minsize = optsize[3] and optsize[3] / 10 or dsnsize -- can be nil
+                   end
                    if subfamily then
                        if subfamily == style then
-                           if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
+                           if optsize then
+                               if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
+                                   found = filename
+                                   logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
+                                   break
+                               end
+                           else
                                found = filename
                                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
                                break
@@ -87,10 +97,16 @@ function names.resolve(specification)
                            if synonyms[style] then
                                for _,v in ipairs(synonyms[style]) do
                                    if subfamily == v then
-                                       if not dsnsize or dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                                            found = filename
-                                            logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
-                                            break
+                                       if optsize then
+                                           if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
+                                               found = filename
+                                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
+                                               break
+                                           end
+                                       else
+                                           found = filename
+                                           logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
+                                           break
                                        end
                                    end
                                end

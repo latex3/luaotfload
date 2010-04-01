@@ -84,14 +84,12 @@ function names.resolve(specification)
                        if subfamily == style then
                            if optsize then
                                if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                                   found = filename
-                                   logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
-                                   break
+                                   logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, filename)
+                                   return filename, false
                                end
                            else
-                               found = filename
-                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
-                               break
+                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, filename)
+                               return filename, false
                            end
                        else
                            if synonyms[style] then
@@ -99,14 +97,12 @@ function names.resolve(specification)
                                    if subfamily == v then
                                        if optsize then
                                            if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                                               found = filename
-                                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
-                                               break
+                                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, filename)
+                                               return filename, false
                                            end
                                        else
-                                           found = filename
-                                           logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
-                                           break
+                                           logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, filename)
+                                           return filename, false
                                        end
                                    end
                                end
@@ -114,12 +110,15 @@ function names.resolve(specification)
                        end
                    end
                 end
-                if found then
-                   return found, false
-                else
-                   return name, false -- fallback to filename
+            else
+                for i,v in ipairs(data.mappings) do
+                    if sanitize(v.fullname) == sanitize(name) or sanitize(v.names.fullname) == sanitize(name) then
+                        logs.report("load font", "font fullname='%s' found: %s", name, v.filename)
+                        return v.filename, false
+                    end
                 end
             end
+            return name, false -- fallback to filename
         end
     else
         logs.report("load font", "no font names database loaded")

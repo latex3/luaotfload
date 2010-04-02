@@ -164,8 +164,7 @@ local function generate(force)
         fontnames = nil
     end
     fontnames, status = names.update(fontnames, status, force)
-    log("%s fonts in %s families in the database",
-        #fontnames.mappings, #table.keys(fontnames.families))
+    log("%s fonts in the database", #fontnames.mappings)
     io.savedata(savepath, table.serialize(fontnames, true))
     log("saved font names database in %s\n", savepath)
     io.savedata(status_file, table.serialize(status, true))

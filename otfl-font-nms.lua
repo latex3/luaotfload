@@ -10,7 +10,7 @@ fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 
 local names          = fonts.names
-names.version        = 2.005 -- not the same as in context
+names.version        = 2.006 -- not the same as in context
 names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
@@ -247,43 +247,23 @@ function fontloader.fullinfo(...)
         m.design_range_bottom ~= 0 and m.design_range_bottom or nil,
     }
 
-    t.names.family = sanitize(t.names.family)
     return t
 end
 
 local function load_font(filename, fontnames, status, newfontnames, newstatus, texmf)
-    local mappings  = newfontnames and newfontnames.mappings  or { }
-    local families  = newfontnames and newfontnames.families  or { }
-    local oldmappings  = fontnames.mappings  or { }
-    local oldfamilies  = fontnames.families  or { }
-    local purge = true
-    local tofillstatus = newstatus
-    if not newstatus then
-        purge = false
-        families = fontnames.families  or { }
-        mappings = fontnames.mappings  or { }
-        tofillstatus = status
-    end
+    local mappings    = newfontnames and newfontnames.mappings  or { }
+    local oldmappings = fontnames.mappings  or { }
     if filename then
-        local db_lastmodif = status[filename] and status[filename].timestamp
-        local true_lastmodif = lfs.attributes(filename, "modification")
-        if purge then
-            tofillstatus[filename] = {timestamp = true_lastmodif, mappings = {}}
-        end
-        if db_lastmodif and db_lastmodif == true_lastmodif then
-            if purge then
-                for _, i in ipairs(status[filename].mappings) do
-                    mappings[#mappings+1] = oldmappings[i]
-                    table.insert(tofillstatus[filename].mappings, #mappings)
-                    if oldmappings[i].names.family then
-                        if not families[oldmappings[i].names.family] then
-                            families[oldmappings[i].names.family] = {}
-                        end
-                        table.insert(families[oldmappings[i].names.family], #mappings)
-                    elseif trace_loading then
-                        logs.report("font with broken names table: %s, ignored", filename)
-                    end
-                end
+        local timestamp, db_timestamp
+        db_timestamp        = status[filename] and status[filename].timestamp
+        timestamp           = lfs.attributes(filename, "modification")
+        newstatus[filename] = { }
+        newstatus[filename].timestamp = timestamp
+        newstatus[filename].index     = {}
+        if db_timestamp == timestamp then
+            for i in ipairs(status[filename].index) do
+                mappings[#mappings+1] = oldmappings[i]
+                table.insert(newstatus[filename].index, #mappings)
             end
             if trace_loading then
                 logs.report("font already indexed: %s", filename)
@@ -293,48 +273,24 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
         if trace_loading then
             logs.report("loading font: %s", filename)
         end
-        local checksum = file.checksum(filename)
         local info = fontloader.info(filename)
-        if not purge then
-            tofillstatus[filename] = {timestamp = true_lastmodif, mappings = {}}
-        end
         if info then
             if type(info) == "table" and #info > 1 then
-                for index,_ in ipairs(info) do
-                    local fullinfo = fontloader.fullinfo(filename, index-1)
-                    fullinfo.checksum = checksum
+                for i in ipairs(info) do
+                    local fullinfo = fontloader.fullinfo(filename, i-1)
                     if texmf then
                         fullinfo.filename = basename(filename)
                     end
                     mappings[#mappings+1] = fullinfo
-                    table.insert(tofillstatus[filename].mappings, #mappings)
-                    if fullinfo.names.family then
-                        if not families[fullinfo.names.family] then
-                            families[fullinfo.names.family] = { }
-                        end
-                        table.insert(families[fullinfo.names.family], #mappings)
-                    elseif trace_loading then
-                        logs.report("font with broken names table: %s, ignored", filename)
-                    end
+                    table.insert(newstatus[filename].index, #mappings)
                 end
             else
                 local fullinfo = fontloader.fullinfo(filename)
-                fullinfo.checksum = checksum
                 if texmf then
                     fullinfo.filename = basename(filename)
                 end
                 mappings[#mappings+1] = fullinfo
-                table.insert(tofillstatus[filename].mappings, #mappings)
-                if fullinfo.names.family then
-                    if not families[fullinfo.names.family] then
-                        families[fullinfo.names.family] = { }
-                    end
-                    table.insert(families[fullinfo.names.family], #mappings)
-                else
-                    if trace_loading then
-                        logs.report("font with broken names table: %s, ignored", filename)
-                    end
-                end
+                table.insert(newstatus[filename].index, #mappings)
             end
         else
             if trace_loading then
@@ -484,7 +440,6 @@ end
 local function fontnames_init()
     return {
         mappings  = { },
-        families  = { },
         version   = names.version,
     }
 end

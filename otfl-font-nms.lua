@@ -39,8 +39,11 @@ end
 function names.load()
     local localpath  = names.path.localdir  .. names.path.basename
     local systempath = names.path.systemdir .. names.path.basename
+    local kpsefound  = kpse.find_file(names.path.basename)
     local data
-    if file.isreadable(localpath) then
+    if kpsefound and file.isreadable(kpsefound) then
+        data = dofile(kpsefound)
+    elseif file.isreadable(localpath)  then
         data = dofile(localpath)
     elseif file.isreadable(systempath) then
         data = dofile(systempath)

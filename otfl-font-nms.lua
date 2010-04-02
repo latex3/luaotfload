@@ -81,6 +81,8 @@ function names.resolve(specification)
                 local subfamily = sanitize(face.names.subfamily)
                 local fullname  = sanitize(face.names.fullname)
                 local psname    = sanitize(face.names.psname)
+                local fontname  = sanitize(face.fontname)
+                local pfullname = sanitize(face.fullname)
                 local filename  = face.filename
                 local optsize, dsnsize, maxsize, minsize
                 if #face.size > 0 then
@@ -118,7 +120,7 @@ function names.resolve(specification)
                         found[1] = face
                     end
                 else
-                    if name == fullname or name == psname then
+                    if name == fullname or name == pfullname or name == fontname or name == psname then
                         if optsize then
                             if dsnsize == size or (size > minsize and size <= maxsize) then
                                 found[1] = face

@@ -156,7 +156,7 @@ function names.resolve(specification)
                 logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, closest.filename)
                 return closest.filename, false
             else
-                return name, false -- fallback to filename
+                return specification.name, false -- fallback to filename
             end
         end
     else

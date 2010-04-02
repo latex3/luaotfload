@@ -264,8 +264,8 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
         newstatus[filename].timestamp = timestamp
         newstatus[filename].index     = {}
         if db_timestamp == timestamp then
-            for i in ipairs(status[filename].index) do
-                mappings[#mappings+1] = oldmappings[i]
+            for _,v in ipairs(status[filename].index) do
+                mappings[#mappings+1] = oldmappings[v]
                 table.insert(newstatus[filename].index, #mappings)
             end
             if trace_loading then

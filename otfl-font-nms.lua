@@ -57,10 +57,11 @@ function names.load()
 end
 
 local loaded    = false
+
 local synonyms  = {
-    regular     = {"normal", "roman", "plain", "book", "medium"},
-    italic      = {"regularitalic", "normalitalic", "oblique", "slant"},
-    bolditalic  = {"boldoblique", "boldslant"},
+    regular     = {normal=true,        roman=true,        plain=true,   book=true, medium=true},
+    italic      = {regularitalic=true, normalitalic=true, oblique=true, slant=true},
+    bolditalic  = {boldoblique=true,   boldslant=true},
 }
 
 function names.resolve(specification)
@@ -88,7 +89,7 @@ function names.resolve(specification)
                     maxsize = optsize[2] and optsize[2] / 10 or dsnsize -- can be nil
                     minsize = optsize[3] and optsize[3] / 10 or dsnsize -- can be nil
                 end
-                if name == family and subfamily then
+                if name == family then
                     if subfamily == style then
                         if optsize then
                             if dsnsize == size or (size > minsize and size <= maxsize) then
@@ -101,27 +102,23 @@ function names.resolve(specification)
                             found[1] = face
                             break
                         end
-                    else
-                        if synonyms[style] then
-                            for _,v in ipairs(synonyms[style]) do
-                                if subfamily == v then
-                                    if optsize then
-                                        if dsnsize == size or (size > minsize and size <= maxsize) then
-                                            found[1] = face
-                                            break
-                                        else
-                                            found[#found+1] = face
-                                        end
-                                    else
-                                        found[1] = face
-                                        break
-                                    end
-                                end
+                    elseif synonyms[style] and synonyms[style][subfamily] then
+                        if optsize then
+                            if dsnsize == size or (size > minsize and size <= maxsize) then
+                                found[1] = face
+                                break
+                            else
+                                found[#found+1] = face
                             end
+                        else
+                            found[1] = face
+                            break
                         end
+                    else
+                        found[1] = face
                     end
                 else
-                    if name == family or name == fullname or name == psname then
+                    if name == fullname or name == psname then
                         if optsize then
                             if dsnsize == size or (size > minsize and size <= maxsize) then
                                 found[1] = face

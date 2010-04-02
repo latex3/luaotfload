@@ -29,7 +29,11 @@ local trace_search   = false --trackers.register("names.search",   function(v) t
 local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
 local function sanitize(str)
-    return utfgsub(lower(str), "[^%a%d]", "")
+    if str then
+        return utfgsub(lower(str), "[^%a%d]", "")
+    else
+        return str -- nil
+    end
 end
 
 function names.load()
@@ -57,8 +61,8 @@ local synonyms  = {
 }
 
 function names.resolve(specification)
-    local name  = specification.name
-    local style = specification.style or "regular"
+    local name  = sanitize(specification.name)
+    local style = sanitize(specification.style) or "regular"
     if not loaded then
         names.data   = names.load()
         loaded = true
@@ -66,59 +70,69 @@ function names.resolve(specification)
     local data  = names.data
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
-            local family = data.families[sanitize(name)]
-            if family and type(family) == "table" then
-                for _,v in ipairs(family) do
-                   local face      = data.mappings[v]
-                   local subfamily = sanitize(face.names.subfamily)
-                   local filename  = face.filename
-                   local optsize, rqssize, dsnsize, maxsize, minsize
-                   if #face.size > 0 then
-                       optsize = face.size
-                       rqssize = tonumber(specification.optsize) or specification.size and specification.size / 65536
-                       dsnsize = optsize[1] and optsize[1] / 10
-                       maxsize = optsize[2] and optsize[2] / 10 or dsnsize -- can be nil
-                       minsize = optsize[3] and optsize[3] / 10 or dsnsize -- can be nil
-                   end
-                   if subfamily then
-                       if subfamily == style then
-                           if optsize then
-                               if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                                   logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, filename)
-                                   return filename, false
-                               end
-                           else
-                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, filename)
-                               return filename, false
-                           end
-                       else
-                           if synonyms[style] then
-                               for _,v in ipairs(synonyms[style]) do
-                                   if subfamily == v then
-                                       if optsize then
-                                           if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                                               logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, filename)
-                                               return filename, false
-                                           end
-                                       else
-                                           logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, filename)
-                                           return filename, false
-                                       end
-                                   end
-                               end
-                           end
-                       end
-                   end
+            local found
+            for _,face in ipairs(data.mappings) do
+                local family    = sanitize(face.names.family)
+                local subfamily = sanitize(face.names.subfamily)
+                local fullname  = sanitize(face.names.fullname)
+                local psname    = sanitize(face.names.psname)
+                local filename  = face.filename
+                local optsize, rqssize, dsnsize, maxsize, minsize
+                if #face.size > 0 then
+                    optsize = face.size
+                    rqssize = tonumber(specification.optsize) or specification.size and specification.size / 65536
+                    dsnsize = optsize[1] and optsize[1] / 10
+                    maxsize = optsize[2] and optsize[2] / 10 or dsnsize -- can be nil
+                    minsize = optsize[3] and optsize[3] / 10 or dsnsize -- can be nil
                 end
-            else
-                for i,v in ipairs(data.mappings) do
-                    if sanitize(v.fullname) == sanitize(name) or sanitize(v.names.fullname) == sanitize(name) then
-                        logs.report("load font", "font fullname='%s' found: %s", name, v.filename)
-                        return v.filename, false
+                if name == family and subfamily then
+                    if subfamily == style then
+                        if optsize then
+                            if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
+                                found = filename
+                                break
+                            end
+                        else
+                            found = filename
+                            break
+                        end
+                    else
+                        if synonyms[style] then
+                            for _,v in ipairs(synonyms[style]) do
+                                if subfamily == v then
+                                    if optsize then
+                                        if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
+                                            found = filename
+                                            break
+                                        end
+                                    else
+                                        found = filename
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                    end
+                else
+                    if name == family or name == fullname or name == psname then
+                        if optsize then
+                            if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
+                                found = filename
+                                break
+                            end
+                        else
+                            found = filename
+                            break
+                        end
                     end
                 end
             end
-            return name, false -- fallback to filename
+            if found then
+                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
+                return found, false
+            else
+                return name, false -- fallback to filename
+            end
         end
     else
         logs.report("load font", "no font names database loaded")

@@ -63,6 +63,7 @@ local synonyms  = {
 function names.resolve(specification)
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
+    local size  = tonumber(specification.optsize) or specification.size and specification.size / 65536
     if not loaded then
         names.data   = names.load()
         loaded = true
@@ -70,17 +71,16 @@ function names.resolve(specification)
     local data  = names.data
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
-            local found
+            local found = { }
             for _,face in ipairs(data.mappings) do
                 local family    = sanitize(face.names.family)
                 local subfamily = sanitize(face.names.subfamily)
                 local fullname  = sanitize(face.names.fullname)
                 local psname    = sanitize(face.names.psname)
                 local filename  = face.filename
-                local optsize, rqssize, dsnsize, maxsize, minsize
+                local optsize, dsnsize, maxsize, minsize
                 if #face.size > 0 then
                     optsize = face.size
-                    rqssize = tonumber(specification.optsize) or specification.size and specification.size / 65536
                     dsnsize = optsize[1] and optsize[1] / 10
                     maxsize = optsize[2] and optsize[2] / 10 or dsnsize -- can be nil
                     minsize = optsize[3] and optsize[3] / 10 or dsnsize -- can be nil
@@ -88,12 +88,14 @@ function names.resolve(specification)
                 if name == family and subfamily then
                     if subfamily == style then
                         if optsize then
-                            if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                                found = filename
+                            if dsnsize == size or (size > minsize and size <= maxsize) then
+                                found[1] = face
                                 break
+                            else
+                                found[#found+1] = face
                             end
                         else
-                            found = filename
+                            found[1] = face
                             break
                         end
                     else
@@ -101,12 +103,14 @@ function names.resolve(specification)
                             for _,v in ipairs(synonyms[style]) do
                                 if subfamily == v then
                                     if optsize then
-                                        if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                                            found = filename
+                                        if dsnsize == size or (size > minsize and size <= maxsize) then
+                                            found[1] = face
                                             break
+                                        else
+                                            found[#found+1] = face
                                         end
                                     else
-                                        found = filename
+                                        found[1] = face
                                         break
                                     end
                                 end
@@ -116,20 +120,38 @@ function names.resolve(specification)
                 else
                     if name == family or name == fullname or name == psname then
                         if optsize then
-                            if dsnsize == rqssize or (rqssize > minsize and rqssize <= maxsize) then
-                                found = filename
+                            if dsnsize == size or (size > minsize and size <= maxsize) then
+                                found[1] = face
                                 break
+                            else
+                                found[#found+1] = face
                             end
                         else
-                            found = filename
+                            found[1] = face
                             break
                         end
                     end
                 end
             end
-            if found then
-                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found)
-                return found, false
+            if #found == 1 then
+                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found[1].filename)
+                return found[1].filename, false
+            elseif #found > 1 then
+                -- we found matching font(s) but not in the requested optical
+                -- sizes, so we loop through the matches to find the one with
+                -- least difference from the requested size.
+                local closest
+                local least = math.huge -- initial value is infinity
+                for i,face in ipairs(found) do
+                    local dsnsize    = face.size[1]/10
+                    local difference = math.abs(dsnsize-size)
+                    if difference < least then
+                        closest = face
+                        least   = difference
+                    end
+                end
+                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, closest.filename)
+                return closest.filename, false
             else
                 return name, false -- fallback to filename
             end

@@ -1,0 +1,9 @@
+\input luaotfload.sty
+
+\pdfprotrudechars2 \pdfadjustspacing2
+
+\font\testa=file:texgyrepagella-regular:script=latn                                at 12pt
+\font\testb=file:texgyrepagella-regular:mode=node;script=latn;protrusion=yes;featurefile=opbd.fea;+opbd at 12pt
+\testa \input tufte \par
+\testb \input tufte \par
+\bye

@@ -10,7 +10,7 @@ fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 
 local names          = fonts.names
-names.version        = 2.006 -- not the same as in context
+names.version        = 2.007 -- not the same as in context
 names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
@@ -83,7 +83,6 @@ function names.resolve(specification)
                 local psname    = sanitize(face.names.psname)
                 local fontname  = sanitize(face.fontname)
                 local pfullname = sanitize(face.fullname)
-                local filename  = face.filename
                 local optsize, dsnsize, maxsize, minsize
                 if #face.size > 0 then
                     optsize = face.size
@@ -136,8 +135,8 @@ function names.resolve(specification)
                 end
             end
             if #found == 1 then
-                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found[1].filename)
-                return found[1].filename, false
+                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found[1].filename[1])
+                return found[1].filename[1], found[1].filename[2]
             elseif #found > 1 then
                 -- we found matching font(s) but not in the requested optical
                 -- sizes, so we loop through the matches to find the one with
@@ -152,8 +151,8 @@ function names.resolve(specification)
                         least   = difference
                     end
                 end
-                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, closest.filename)
-                return closest.filename, false
+                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, closest.filename[1])
+                return closest.filename[1], closest.filename[2]
             else
                 return specification.name, false -- fallback to filename
             end
@@ -238,7 +237,7 @@ local function font_fullinfo(filename, subfont, texmf)
     t.fontname    = m.fontname
     t.fullname    = m.fullname
     t.familyname  = m.familyname
-    t.filename    = texmf and basename(m.origname) or m.origname
+    t.filename    = { texmf and basename(filename) or filename, subfont }
     t.weight      = m.pfminfo.weight
     t.width       = m.pfminfo.width
     t.slant       = m.italicangle
@@ -284,7 +283,7 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
                     newstatus[filename].index[#newstatus[filename].index+1] = #mappings
                 end
             else
-                local fullinfo = font_fullinfo(filename, nil, texmf)
+                local fullinfo = font_fullinfo(filename, false, texmf)
                 mappings[#mappings+1] = fullinfo
                 newstatus[filename].index[#newstatus[filename].index+1] = #mappings
             end

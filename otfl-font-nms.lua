@@ -208,9 +208,9 @@ local function progress(current, total)
     end
 end
 
-function fontloader.fullinfo(...)
+local function font_fullinfo(filename, subfont, texmf)
     local t = { }
-    local f = fontloader.open(...)
+    local f = fontloader.open(filename, subfont)
     local m = f and fontloader.to_table(f)
     fontloader.close(f)
     collectgarbage('collect')
@@ -238,7 +238,7 @@ function fontloader.fullinfo(...)
     t.fontname    = m.fontname
     t.fullname    = m.fullname
     t.familyname  = m.familyname
-    t.filename    = m.origname
+    t.filename    = texmf and basename(m.origname) or m.origname
     t.weight      = m.pfminfo.weight
     t.width       = m.pfminfo.width
     t.slant       = m.italicangle
@@ -279,18 +279,12 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
         if info then
             if type(info) == "table" and #info > 1 then
                 for i in ipairs(info) do
-                    local fullinfo = fontloader.fullinfo(filename, i-1)
-                    if texmf then
-                        fullinfo.filename = basename(filename)
-                    end
+                    local fullinfo = font_fullinfo(filename, i-1, texmf)
                     mappings[#mappings+1] = fullinfo
                     table.insert(newstatus[filename].index, #mappings)
                 end
             else
-                local fullinfo = fontloader.fullinfo(filename)
-                if texmf then
-                    fullinfo.filename = basename(filename)
-                end
+                local fullinfo = font_fullinfo(filename, nil, texmf)
                 mappings[#mappings+1] = fullinfo
                 table.insert(newstatus[filename].index, #mappings)
             end

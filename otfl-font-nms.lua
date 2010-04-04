@@ -265,7 +265,7 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
         if db_timestamp == timestamp then
             for _,v in ipairs(status[filename].index) do
                 mappings[#mappings+1] = oldmappings[v]
-                table.insert(newstatus[filename].index, #mappings)
+                newstatus[filename].index[#newstatus[filename].index+1] = #mappings
             end
             if trace_loading then
                 logs.report("font already indexed: %s", filename)
@@ -281,12 +281,12 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
                 for i in ipairs(info) do
                     local fullinfo = font_fullinfo(filename, i-1, texmf)
                     mappings[#mappings+1] = fullinfo
-                    table.insert(newstatus[filename].index, #mappings)
+                    newstatus[filename].index[#newstatus[filename].index+1] = #mappings
                 end
             else
                 local fullinfo = font_fullinfo(filename, nil, texmf)
                 mappings[#mappings+1] = fullinfo
-                table.insert(newstatus[filename].index, #mappings)
+                newstatus[filename].index[#newstatus[filename].index+1] = #mappings
             end
         else
             if trace_loading then

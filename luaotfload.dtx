@@ -460,17 +460,12 @@ end
 
 tex.attribute[0] = 0
 
-luaotfload.loadmodule('char-ini.lua')
-luaotfload.loadmodule('char-utf.lua')
-
 luaotfload.loadmodule('node-res.lua')
-luaotfload.loadmodule('node-pro.lua')
 luaotfload.loadmodule('node-inj.lua')
 luaotfload.loadmodule('node-fnt.lua')
 luaotfload.loadmodule('node-dum.lua')
 
 luaotfload.loadmodule('font-ini.lua')
-luaotfload.loadmodule('font-enc.lua')
 luaotfload.loadmodule('font-tfm.lua')
 luaotfload.loadmodule('font-cid.lua')
 luaotfload.loadmodule('font-map.lua')
@@ -487,14 +482,6 @@ luaotfload.loadmodule('font-xtx.lua')
 luaotfload.loadmodule('font-dum.lua')
 luaotfload.loadmodule('font-nms.lua')
 luaotfload.loadmodule('font-clr.lua')
-
-luaotfload.loadmodule('math-ini.lua')
-luaotfload.loadmodule('math-dim.lua')
-luaotfload.loadmodule('math-ent.lua')
-luaotfload.loadmodule('math-ext.lua')
-luaotfload.loadmodule('math-vfu.lua')
-luaotfload.loadmodule('math-map.lua')
-luaotfload.loadmodule('math-noa.lua')
 
 %    \end{macrocode}
 %
@@ -564,10 +551,6 @@ end
 \newluatexattribute\otfl@cursdone
 \newluatexattribute\otfl@kernpair
 \newluatexattribute\otfl@color
-\newluatexattribute\otfl@mathalphabet
-\newluatexattribute\otfl@mathgreek
-\newluatexattribute\otfl@mathsize
-\newluatexattribute\otfl@mathpunctuation
 
 %    \end{macrocode}
 %

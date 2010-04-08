@@ -102,7 +102,7 @@ and the derived files
 \ProvidesFile{luaotfload.drv}%
   [2010/04/01 v1.07 ConTeXt font loading system]%
 \documentclass{ltxdoc}
-\usepackage{metalogo}
+\usepackage{metalogo,multicol,mdwlist}
 \usepackage[colorlinks=true]{hyperref}
 
 \def\LuaTeX{Lua\TeX}
@@ -138,13 +138,14 @@ and the derived files
 %
 % \title{The \textsf{luaotfload} package}
 % \date{2010/04/01 v1.07}
-% \author{Elie Roux \\ \texttt{elie.roux@telecom-bretagne.eu}}
+% \author{     Elie Roux    \footnote{\texttt{elie.roux@telecom-bretagne.eu}}
+%         \and Khaled hosny \footnote{\texttt{khaledhosny@eglug.org}}}
 %
 % \maketitle
 %
 % \begin{abstract}
-% \ConTeXt font loading system, providing the possibility to load OTF fonts
-% with a lot of features, and the \XeTeX\ font loading syntax.
+% \ConTeXt\ font loading system, providing the possibility to load OTF fonts
+% with a lot of features, and extended font loading syntax.
 % \end{abstract}
 %
 % \tableofcontents
@@ -154,10 +155,10 @@ and the derived files
 % \subsection{Introduction}
 %
 % Font management and installation has always been painful with \TeX\ (and
-% even more with \LaTeX ). A lot of files are needed for one font (tfm, pfb,
+% even more with \LaTeX). A lot of files are needed for one font (tfm, pfb,
 % map, fd, vf), and they are limited to 256 characters. But the font world has
 % evolved since, and new standard types of fonts have appeared, like
-% \textsf{truetype} or \textsf{opentype} fonts. These fonts can contain a lot
+% \textsf{TrueType} and \textsf{OpenType} fonts. These fonts can contain a lot
 % of characters, and have some functionalities (ligatures, old-style numbers,
 % small capitals, etc.). They are everywhere, as the system fonts and most
 % modern text softwares fonts are of this type. Until now the (almost) only
@@ -174,55 +175,81 @@ and the derived files
 %
 % \subsection{Loading fonts}
 %
-% \textsf{luaotfload} supports \XeTeX -like font syntax which looks like:
+% \textsf{luaotfload} supports an extended font loading syntax which looks like:
 %
 % \begin{center}
-% |\font\foo="|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|"| \meta{\TeX\ font features}
+% |\font\foo={|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|}| \meta{\TeX\ font features}
 % \end{center}
 %
-% \subsubsection{Prefix}
+% The curly brackets are optional and are used for escaping spaces in font names
+% (\XeTeX-like double quotes can also used for the same purpose).
 %
-% Prefixes are either |file| or |name|; |file| prefix forces searching font
-% based on filename, while a |name| prefix will result in consulting name
-% database. Name database can be generated with |mkluatexfontdb.lua| script
-% shipped with \textsf{luaotfload}, run |mkluatexfontdb.lua --help| for more
-% details.
+% \paragraph{Prefix}
 %
-% \subsubsection{Font name}
+% Can be either \texttt{file:} or \texttt{name:} and are used to select between filename based
+% or font name based search mechanisms.
+% Loading fonts based on filename is restricted to files found by \textsf{kpathsea}
+% (typically in the \textsc{texmf} tree). Surrounding font name with square
+% brackets is synonym to using \texttt{file:} prefix (for compatibility with \XeTeX).
+% This is usually used for loading old \textsc{tfm} fonts.
+% Accessing fonts by fontname allows loading system installed fonts as well as
+% \textsc{texmf} ones, and requires a font names database that can be generated
+% using the bundled |mkluatexfontdb.lua| script.
+% \footnote{run |mkluatexfontdb.lua --help| for help and usage information}
 %
-% Font name can be either a font filename or actual font name. If no prefix is
-% specified; it is assumed to be a filename. \XeTeX-like syntax of using square
-% brackets to select fonts from \textsc{texmf} tree is olso supported;
-% |\font\foo=[foo.ttf]:+liga|.
+% If no prefix is specified, then \texttt{file:} is assumed.
 %
-% \subsubsection{Font features}
+% \paragraph{Font name}
 %
-% By default \textsf{luaotfload} doesn't enable any font features, font features
-% must be explicitly enabled, |\font\foo=foo.ttf:+liga| will load |foo.ttf| font
-% and enable \texttt{liga} feature. In the same way font features can be
-% deactivated by prefixing it with minus sign; |\font\foo=foo.ttf:+liga;-liga|
-% will load \texttt{foo.ttf} without any features enabled.
+% Font name can be either a font filename or actual font name; based on the
+% prefix specified.
 %
-% \paragraph{Modes}
+% \paragraph{Font features}
+%
+% Font are a semicolon separated list of items, which are either font parameters
+% in the form of |key=value|, or switches to enable/disable certain font
+% features, in the form of |+feat|/|-feat|.
+% The supported parameters are:
+% \begin{description}
+% \item [mode] \hfill \\
 % \textsf{luaotfload} has two OpenType processing modes; \texttt{base} mode
-% which enables only a subset of OpenType features and works by mapping those
-% features to traditional TeX ligaturing and kerning mechanisms and is a bit
+% which supports only a subset of OpenType features and works by mapping those
+% features to traditional \TeX\ ligaturing and kerning mechanisms and is a bit
 % faster, and \texttt{node} mode which, hopefully, supports OpenType fully and
 % works by direct processing of node list at lua end and is a bit slower.
-% Note that, nside math mode only \texttt{base} is supported.
+% Note that \texttt{node} mode doesn't work inside math. By default,
+% \texttt{base} mode is used.
 %
-% Modes can be selected using \texttt{mode} keyword and it must come before any
-% other font feature, e.g. |\font\foo=foo.ttf:mode=node;+liga|.
+% \item [script] \hfill \\ OpenType script string, default value is |dflt|.
 %
-% \paragraph{Additional font features}
+% \item [language] \hfill \\ OpenType language string, default value is |latn|.
+%
+% \item [featurefile] \hfill \\
+% feature files are textual representation of OpenType tables and can be used to
+% extend OpenType features of the font on fly. The file name of the feature file
+% is passed, then features defined in the file can be enabled/disabled like any
+% other feature. The actual syntax is described at
+% \url{http://fontforge.sourceforge.net/featurefile.html} and
+% \url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
+%
+% \item [color] \hfill \\
+% font color, defined as a triplet of two-digit Hex RGB values, with optionally
+% another value for the transparency (where |00| is completely transparent and
+% |FF| is opaque.)
+%
+% \item [protrosion]	\hfill \\ TODO
+% \item [expansion]	\hfill \\ TODO
+% \end{description}
+%
+% \subparagraph{Additional font features}
 % \textsf{luaotfload} defines some additional font feature not defined in
 % OpenType, currently three features are defined:
 %
-% \begin{itemize}
-% \item[-] \texttt{anum}: Arabic numbers
-% \item[-] \texttt{tlig}: \TeX\ ligatures
-% \item[-] \texttt{trep}: \TeX\ replacements
-% \end{itemize}
+% \begin{itemize*}
+% \item \texttt{anum}: replaces European numbers with eastern Arabic numbers.
+% \item \texttt{tlig}: applies legacy \TeX\ ligatures (|``''-- -- !` ?` <<>>|).
+% \item \texttt{trep}: applies legacy \TeX\ replacements (|`'"|).
+% \end{itemize*}
 %
 % \subsubsection{Examples}
 % \begin{verbatim}
@@ -235,20 +262,21 @@ and the derived files
 % \font\testf=[lmroman12-regular]       at 40pt \testf more text
 % \end{verbatim}
 %
-% \subsection{\ConTeXt files needed}
+% \subsection{\ConTeXt\ files needed}
 %
-% This package is a wrapper for several files taken from the \ConTeXt macro
-% package. The philosophy is to let \ConTeXt do all the implementation and
+% This package is a wrapper for several files taken from the \ConTeXt\ macro
+% package. The philosophy is to let \ConTeXt\ do all the implementation and
 % update these files from time to time. To do so we did not modify the files
 % taken from \ConTeXt, we only changed their names to prevent name clashes.
 % You can thus update the font system of this package simply by updating the
-% files taken from \ConTeXt, without (theorically) changing the \texttt{.sty}
+% files taken from \ConTeXt, without (theoretically) changing the \texttt{.sty}
 % file nor the main \texttt{.lua} file.
 %
-% The \ConTeXt files are renamed by adding the prefix \texttt{otfl-} to them
+% The \ConTeXt\ files are renamed by adding the prefix \texttt{otfl-} to them
 % (\texttt{otfl} as \texttt{OTF L}oad).The files are:
 %
-% \begin{itemize}
+% \begin{multicols}{3}
+% \begin{itemize*}
 % \item \texttt{luat-dum.lua}
 % \item \texttt{data-con.lua}
 % \item \texttt{node-ini.lua}
@@ -270,7 +298,8 @@ and the derived files
 % \item \texttt{font-xtx.lua}
 % \item \texttt{font-map.lua}
 % \item \texttt{font-dum.lua}
-% \end{itemize}
+% \end{itemize*}
+% \end{multicols}
 % 
 % \subsection{Troubleshooting}
 %
@@ -317,8 +346,8 @@ end
 
 %    \end{macrocode}
 %
-%    We load the \ConTeXt files with this function. It automatically adds the
-%    \texttt{otfl-} prefix to it, so that we call it with the actual \ConTeXt
+%    We load the \ConTeXt\ files with this function. It automatically adds the
+%    \texttt{otfl-} prefix to it, so that we call it with the actual \ConTeXt\
 %    name.
 %
 %    \begin{macrocode}
@@ -336,7 +365,7 @@ end
 
 %    \end{macrocode}
 %
-%    The following functions are made to map \ConTeXt functions to
+%    The following functions are made to map \ConTeXt\ functions to
 %    \textsf{luaextra} functions.
 %
 %    \begin{macrocode}
@@ -411,8 +440,8 @@ end
 %    \end{macrocode}
 %
 %    We start loading some lua files. These two are some code not used by
-%    \ConTeXt at all that allow other modules to be used, it provides some
-%    low-level \ConTeXt functions.
+%    \ConTeXt\ at all that allow other modules to be used, it provides some
+%    low-level \ConTeXt\ functions.
 %
 %    \begin{macrocode}
 
@@ -430,7 +459,7 @@ luaotfload.loadmodule('node-ini.lua')
 
 %    \end{macrocode}
 %
-%    By default \ConTeXt takes some private attributes for internal use. With
+%    By default \ConTeXt\ takes some private attributes for internal use. With
 %    Plain and \LaTeX\ we can't do so, we use |\newluaattribute|. This
 %    functions overrides a function defined in the previous module that
 %    returns the number of a private attribute. We allocate new attributes in

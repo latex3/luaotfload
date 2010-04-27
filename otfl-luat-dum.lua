@@ -90,7 +90,7 @@ function caches.setpath(category,subcategory)
 --      root = kpse.var_value("VARTEXMF") or ""
 --  end
     local var  = kpse.var_value("TEXMFVAR")
-    local root = var and (var .. "/luatex-cache/latex") or ""
+    local root = var and (var .. "/luatex/generic/luaotfload/") or ""
     if root ~= "" then
         root = file.join(root,category)
         lfs.mkdir(root)

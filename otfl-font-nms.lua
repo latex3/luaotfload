@@ -10,12 +10,13 @@ fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 
 local names          = fonts.names
+local names_dir      = "/luatex/generic/luaotfload/names"
 names.version        = 2.007 -- not the same as in context
 names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
-    localdir  = kpse.expand_var("$TEXMFVAR")    .. "/luatex-cache/latex/names/",
-    systemdir = kpse.expand_var("$TEXMFSYSVAR") .. "/luatex-cache/latex/names/",
+    localdir  = kpse.expand_var("$TEXMFVAR")    .. names_dir,
+    systemdir = kpse.expand_var("$TEXMFSYSVAR") .. names_dir,
 }
 
 

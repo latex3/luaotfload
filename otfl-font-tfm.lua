@@ -205,29 +205,21 @@ local charactercache = { }
 -- a virtual font has italic correction make sure to set the
 -- has_italic flag. Some more flags will be added in the future.
 
-
 function tfm.calculate_scale(tfmtable, scaledpoints, relativeid)
     if scaledpoints < 0 then
         scaledpoints = (- scaledpoints/1000) * tfmtable.designsize -- already in sp
     end
-    local delta = scaledpoints/(tfmtable.units or 1000) -- brr, some open type fonts have 2048
-    return scaledpoints, delta
+    local units = tfmtable.units or 1000
+    local delta = scaledpoints/units -- brr, some open type fonts have 2048
+    return scaledpoints, delta, units
 end
 
 function tfm.do_scale(tfmtable, scaledpoints, relativeid)
  -- tfm.prepare_base_kerns(tfmtable) -- optimalization
-    local scaledpoints, delta = tfm.calculate_scale(tfmtable, scaledpoints, relativeid)
-    if enable_auto_r_scale and relativeid then -- for the moment this is rather context specific
-        local relativedata = fontdata[relativeid]
-        local id_x_height = relativedata and relativedata.parameters and relativedata.parameters.x_height
-        local tf_x_height = id_x_height and tfmtable.parameters and tfmtable.parameters.x_height * delta
-        if tf_x_height then
-            scaledpoints = (id_x_height/tf_x_height) * scaledpoints
-            delta = scaledpoints/(tfmtable.units or 1000)
-        end
-    end
+    local t = { } -- the new table
+    local scaledpoints, delta, units = tfm.calculate_scale(tfmtable, scaledpoints, relativeid)
+    t.units_per_em = units or 1000
     local hdelta, vdelta = delta, delta
-    local t = { }
     -- unicoded unique descriptions shared cidinfo characters changed parameters indices
     for k,v in next, tfmtable do
         if type(v) == "table" then
@@ -502,6 +494,8 @@ t.colorscheme = tfmtable.colorscheme
             local vc = v.commands
             if vc then
                 -- we assume non scaled commands here
+                -- tricky .. we need to scale pseudo math glyphs too
+                -- which is why we deal with rules too
                 local ok = false
                 for i=1,#vc do
                     local key = vc[i][1]
@@ -519,6 +513,8 @@ t.colorscheme = tfmtable.colorscheme
                             tt[#tt+1] = { key, ivc[2]*hdelta }
                         elseif key == "down" then
                             tt[#tt+1] = { key, ivc[2]*vdelta }
+                        elseif key == "rule" then
+                            tt[#tt+1] = { key, ivc[2]*vdelta, ivc[3]*hdelta }
                         else -- not comment
                             tt[#tt+1] = ivc -- shared since in cache and untouched
                         end

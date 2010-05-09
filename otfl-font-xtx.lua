@@ -189,6 +189,8 @@ local option     = spaces * (keyvalue + falsevalue + truevalue + somevalue) * sp
 local options    = lpeg.P(":") * spaces * (lpeg.P(";")^0  * option)^0
 local pattern    = (filename + fontname) * subvalue^0 * crapspec^0 * options^0
 
+local normalize_meanings = fonts.otf.meanings.normalize
+
 function fonts.define.specify.colonized(specification) -- xetex mode
     list = { }
     lpegmatch(pattern,specification.specification)
@@ -212,7 +214,8 @@ function fonts.define.specify.colonized(specification) -- xetex mode
         specification.sub = list.sub
         list.sub = nil
     end
-    specification.features.normal = list
+--  specification.features.normal = list
+    specification.features.normal = normalize_meanings(list)
     return specification
 end
 

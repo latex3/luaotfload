@@ -682,6 +682,14 @@ for k, v in pairs(to_features) do
     to_features[lower(k)] = v
 end
 
+otf.meanings.checkers = {
+    rand = function(v)
+        return v and "random"
+    end
+}
+
+local checkers = otf.meanings.checkers
+
 function otf.meanings.normalize(features)
     local h = { }
     for k,v in next, features do
@@ -710,7 +718,9 @@ function otf.meanings.normalize(features)
                     v = b
                 end
             end
-            h[to_features[k] or k] = v
+            k = to_features[k] or k
+            local c = checkers[k]
+            h[k] = c and c(v) or v
         end
     end
     return h

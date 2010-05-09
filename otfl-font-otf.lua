@@ -247,6 +247,8 @@ function otf.load(filename,format,sub,featurefile)
                     logs.report("load otf","warning: %s",tostring(messages[m]))
                 end
             end
+        else
+            logs.report("load otf","font loaded okay")
         end
         if ff then
             load_featurefile(ff,featurefile)

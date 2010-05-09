@@ -22,8 +22,11 @@ fontloader.totable = fontloader.to_table
 -- fix comes last
 
 fonts     = fonts     or { }
-fonts.ids = fonts.ids or { } -- aka fontdata
-fonts.chr = fonts.chr or { } -- aka chardata
+
+fonts.ids = fonts.ids or { } fonts.identifiers = fonts.ids -- aka fontdata
+fonts.chr = fonts.chr or { } fonts.characters  = fonts.chr -- aka chardata
+fonts.qua = fonts.qua or { } fonts.quads       = fonts.qua -- aka quaddata
+
 fonts.tfm = fonts.tfm or { }
 
 fonts.mode    = 'base'

@@ -108,10 +108,12 @@ local penalty = node.id('penalty')
 local kern    = node.id('kern')
 local whatsit = node.id('whatsit')
 
-local traverse_id = node.traverse_id
-local traverse    = node.traverse
-local free_node   = node.free
-local remove_node = node.remove
+local traverse_id        = node.traverse_id
+local traverse           = node.traverse
+local free_node          = node.free
+local remove_node        = node.remove
+local insert_node_before = node.insert_before
+local insert_node_after  = node.insert_after
 
 function nodes.remove(head, current, free_too)
    local t = current
@@ -131,8 +133,8 @@ function nodes.delete(head,current)
     return nodes.remove(head,current,true)
 end
 
-nodes.before = node.insert_before
-nodes.after  = node.insert_after
+nodes.before = insert_node_before
+nodes.after  = insert_node_after
 
 -- we need to test this, as it might be fixed now
 
@@ -172,21 +174,31 @@ function nodes.after(h,c,n)
     return n, n
 end
 
-function nodes.replace(head,current,new)
-    if current and next then
-        local p, n = current.prev, current.next
-        new.prev, new.next = p, n
-        if p then
-            p.next = new
-        else
+-- local h, c = nodes.replace(head,current,new)
+-- local c = nodes.replace(false,current,new)
+-- local c = nodes.replace(current,new)
+
+function nodes.replace(head,current,new) -- no head returned if false
+    if not new then
+        head, current, new = false, head, current
+    end
+    local prev, next = current.prev, current.next
+    if next then
+        new.next, next.prev = next, new
+    end
+    if prev then
+        new.prev, prev.next = prev, new
+    end
+    if head then
+        if head == current then
             head = new
         end
-        if n then
-            n.prev = new
-        end
         free_node(current)
+        return head, new
+    else
+        free_node(current)
+        return new
     end
-    return head, current
 end
 
 -- will move
@@ -212,7 +224,7 @@ end
 
 nodes.count = count
 
--- new
+-- new, will move
 
 function attributes.ofnode(n)
     local a = n.attr

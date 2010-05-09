@@ -51,7 +51,7 @@ function nodes.process_characters(head)
     local usedfonts, attrfonts, done = { }, { }, false
     local a, u, prevfont, prevattr = 0, 0, nil, 0
     for n in traverse_id(glyph,head) do
-        local font, attr = n.font, has_attribute(n,0) -- zero attribute is reserved for fonts, preset to 0 is faster (first match)
+        local font, attr = n.font, has_attribute(n,0) -- zero attribute is reserved for fonts in context
         if attr and attr > 0 then
             if font ~= prevfont or attr ~= prevattr then
                 local used = attrfonts[font]
@@ -107,7 +107,7 @@ function nodes.process_characters(head)
             head, done = h or head, done or d
             if n > 1 then
                 for i=2,n do
-                    local h, d = processors[i](head,font,0) -- false)
+                    local h, d = processors[i](head,font,false)
                     head, done = h or head, done or d
                 end
             end
@@ -119,7 +119,7 @@ function nodes.process_characters(head)
             head, done = h or head, done or d
             if n > 1 then
                 for i=2,n do
-                    local h, d = processors[i](head,font,0) -- false)
+                    local h, d = processors[i](head,font,false)
                     head, done = h or head, done or d
                 end
             end

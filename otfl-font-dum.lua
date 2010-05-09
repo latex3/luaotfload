@@ -346,3 +346,13 @@ fonts.protrusions.setups['default'] = {
     [0x06D4] = { 0, 1    }, -- arabic full stop       ۔
 
 }
+
+-- normalizer
+
+fonts.otf.meanings = fonts.otf.meanings or { }
+
+fonts.otf.meanings.normalize = fonts.otf.meanings.normalize or function(t)
+    if t.rand then
+        t.rand = "random"
+    end
+end

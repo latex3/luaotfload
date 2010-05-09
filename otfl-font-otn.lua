@@ -10,6 +10,9 @@ if not modules then modules = { } end modules ['font-otn'] = {
 -- much functionality could only be implemented thanks to the husayni font
 -- of Idris Samawi Hamid to who we dedicate this module.
 
+-- I'm in the process of cleaning up the code (which happens in another
+-- file) so don't rely on things staying the same.
+
 -- some day when we can jit this, we can use more functions
 
 -- we can use more lpegs when lpeg is extended with function args and so
@@ -1538,6 +1541,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
     local skipmark, skipligature, skipbase = flags[1], flags[2], flags[3]
     local someskip = skipmark or skipligature or skipbase -- could be stored in flags for a fast test (hm, flags could be false !)
     local markclass = sequence.markclass -- todo, first we need a proper test
+    local skipped = false
     for k=1,#contexts do
         local match, current, last = true, start, start
         local ck = contexts[k]
@@ -1572,6 +1576,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                     if ccd then
                                         local class = ccd.class
                                         if class == skipmark or class == skipligature or class == skipbase or (markclass and class == "mark" and not markclass[char]) then
+                                            skipped = true
                                             if trace_skips then
                                                 show_skip(kind,chainname,char,ck,class)
                                             end
@@ -1616,6 +1621,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                     if ccd then
                                         local class = ccd.class
                                         if class == skipmark or class == skipligature or class == skipbase or (markclass and class == "mark" and not markclass[char]) then
+                                            skipped = true
                                             if trace_skips then
                                                 show_skip(kind,chainname,char,ck,class)
                                             end
@@ -1670,6 +1676,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                     if ccd then
                                         local class = ccd.class
                                         if class == skipmark or class == skipligature or class == skipbase or (markclass and class == "mark" and not markclass[char]) then
+                                            skipped = true
                                             if trace_skips then
                                                 show_skip(kind,chainname,char,ck,class)
                                             end
@@ -1735,8 +1742,47 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                     end
                  else
                     -- actually this needs a more complex treatment for which we will use chainmores
+--~                     local i = 1
+--~                     repeat
+--~                         local chainlookupname = chainlookups[i]
+--~                         local chainlookup = lookuptable[chainlookupname]
+--~                         local cp = chainmores[chainlookup.type]
+--~                         if cp then
+--~                             local ok, n
+--~                             start, ok, n = cp(start,last,kind,chainname,ck,cache,chainlookup,chainlookupname,i,sequence)
+--~                             -- messy since last can be changed !
+--~                             if ok then
+--~                                 done = true
+--~                                 start = start.next
+--~                                 if n then
+--~                                     -- skip next one(s) if ligature
+--~                                     i = i + n - 1
+--~                                 end
+--~                             end
+--~                         else
+--~                             logprocess("%s: multiple subchains for %s are not yet supported",cref(kind,chainname,chainlookupname),chainlookup.type)
+--~                         end
+--~                         i = i + 1
+--~                     until i > nofchainlookups
+
                     local i = 1
                     repeat
+if skipped then
+    while true do
+        local char = start.char
+        local ccd = descriptions[char]
+        if ccd then
+            local class = ccd.class
+            if class == skipmark or class == skipligature or class == skipbase or (markclass and class == "mark" and not markclass[char]) then
+                start = start.next
+            else
+                break
+            end
+        else
+            break
+        end
+    end
+end
                         local chainlookupname = chainlookups[i]
                         local chainlookup = lookuptable[chainlookupname]
                         local cp = chainmores[chainlookup.type]
@@ -1746,17 +1792,18 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                             -- messy since last can be changed !
                             if ok then
                                 done = true
-                                start = start.next
-                                if n then
-                                    -- skip next one(s) if ligature
-                                    i = i + n - 1
-                                end
+                                -- skip next one(s) if ligature
+                                i = i + (n or 1)
+                            else
+                                i = i + 1
                             end
                         else
                             logprocess("%s: multiple subchains for %s are not yet supported",cref(kind,chainname,chainlookupname),chainlookup.type)
+                            i = i + 1
                         end
-                        i = i + 1
+                        start = start.next
                     until i > nofchainlookups
+
                 end
             else
                 local replacements = ck[7]
@@ -1835,9 +1882,6 @@ local resolved = { } -- we only resolve a font,script,language pair once
 
 -- todo: pass all these 'locals' in a table
 
--- maybe some day i'll make an alternative that works on 'sub direction runs' which might be
--- more efficient for arabic but it has quite some consequences
-
 function fonts.methods.node.otf.features(head,font,attr)
     if trace_steps then
         checkstep(head)
@@ -1881,7 +1925,7 @@ function fonts.methods.node.otf.features(head,font,attr)
     local ra  = rl      [attr]     if ra == nil then ra  = { } rl      [attr]     = ra  end -- attr can be false
     -- sequences always > 1 so no need for optimization
     for s=1,#sequences do
-    local pardir, txtdir = 0, { }
+        local pardir, txtdir = 0, { }
         local success = false
         local sequence = sequences[s]
         local r = ra[s] -- cache
@@ -1907,12 +1951,10 @@ function fonts.methods.node.otf.features(head,font,attr)
                             -- only first attribute match check, so we assume simple fina's
                             -- default can become a font feature itself
                             if l[language] then
---~                                 valid, what = true, language
                                 valid, what = s_e or a_e, language
                         --  elseif l[default] then
                         --      valid, what = true, default
                             elseif l[wildcard] then
---~                                 valid, what = true, wildcard
                                 valid, what = s_e or a_e, wildcard
                             end
                             if valid then
@@ -1947,12 +1989,12 @@ function fonts.methods.node.otf.features(head,font,attr)
                 local handler = handlers[typ]
                 local thecache = featuredata[typ] or { }
                 -- we need to get rid of this slide !
-                start = find_node_tail(head) -- slow (we can store tail because there's always a skip at the end): todo
+                local start = find_node_tail(head) -- slow (we can store tail because there's always a skip at the end): todo
                 while start do
                     local id = start.id
                     if id == glyph then
---~                         if start.subtype<256 and start.font == font and (not attr or has_attribute(start,0,attr)) then
-                        if start.subtype<256 and start.font == font and has_attribute(start,0,attr) then
+                        if start.subtype<256 and start.font == font and (not attr or has_attribute(start,0,attr)) then
+--~                         if start.subtype<256 and start.font == font and has_attribute(start,0,attr) then
                             for i=1,#subtables do
                                 local lookupname = subtables[i]
                                 local lookupcache = thecache[lookupname]
@@ -1980,7 +2022,7 @@ function fonts.methods.node.otf.features(head,font,attr)
                 local handler = handlers[typ]
                 local ns = #subtables
                 local thecache = featuredata[typ] or { }
-                start = head -- local ?
+                local start = head -- local ?
                 rlmode = 0 -- to be checked ?
                 if ns == 1 then
                     local lookupname = subtables[1]
@@ -1988,19 +2030,16 @@ function fonts.methods.node.otf.features(head,font,attr)
                     if not lookupcache then
                         report_missing_cache(typ,lookupname)
                     else
---~ print(typ,lookupname,lookupcache,table.serialize(lookupcache))
                         while start do
                             local id = start.id
                             if id == glyph then
---~                                 if start.font == font and start.subtype<256 and (not attr or has_attribute(start,0,attr)) and (not attribute or has_attribute(start,state,attribute)) then
-                                if start.font == font and start.subtype<256 and has_attribute(start,0,attr) and (not attribute or has_attribute(start,state,attribute)) then
+--~                                 if start.font == font and start.subtype<256 and has_attribute(start,0,attr) and (not attribute or has_attribute(start,state,attribute)) then
+                                if start.font == font and start.subtype<256 and (not attr or has_attribute(start,0,attr)) and (not attribute or has_attribute(start,state,attribute)) then
                                     local lookupmatch = lookupcache[start.char]
                                     if lookupmatch then
                                         -- sequence kan weg
                                         local ok
---~ print("!!!")
                                         start, ok = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,1)
---~ texio.write_nl(tostring(lookupname),tostring(lookupmatch),tostring(ok))
                                         if ok then
                                             success = true
                                         end
@@ -2025,25 +2064,6 @@ function fonts.methods.node.otf.features(head,font,attr)
                             --         start = start.next
                             --     end
                             elseif id == whatsit then
---~                             if subtype == 7 then
---~                                 local dir = start.dir
---~                                 if dir == "+TRT" then
---~                                     rlmode = -1
---~                                 elseif dir == "+TLT" then
---~                                     rlmode = 1
---~                                 else
---~                                     rlmode = 0
---~                                 end
---~                             elseif subtype == 6 then
---~                                 local dir = start.dir
---~                                 if dir == "TRT" then
---~                                     rlmode = -1
---~                                 elseif dir == "TLT" then
---~                                     rlmode = 1
---~                                 else
---~                                     rlmode = 0
---~                                 end
---~                             end
                                 local subtype = start.subtype
                                 if subtype == 7 then
                                     local dir = start.dir
@@ -2088,8 +2108,8 @@ function fonts.methods.node.otf.features(head,font,attr)
                     while start do
                         local id = start.id
                         if id == glyph then
---~                             if start.subtype<256 and start.font == font and (not attr or has_attribute(start,0,attr)) and (not attribute or has_attribute(start,state,attribute)) then
-                            if start.subtype<256 and start.font == font and has_attribute(start,0,attr) and (not attribute or has_attribute(start,state,attribute)) then
+                            if start.subtype<256 and start.font == font and (not attr or has_attribute(start,0,attr)) and (not attribute or has_attribute(start,state,attribute)) then
+--~                             if start.subtype<256 and start.font == font and has_attribute(start,0,attr) and (not attribute or has_attribute(start,state,attribute)) then
                                 for i=1,ns do
                                     local lookupname = subtables[i]
                                     local lookupcache = thecache[lookupname]
@@ -2129,59 +2149,40 @@ function fonts.methods.node.otf.features(head,font,attr)
                         --     end
                         elseif id == whatsit then
                             local subtype = start.subtype
---~                             if subtype == 7 then
---~                                 local dir = start.dir
---~                                 if dir == "+TRT" then
---~                                     rlmode = -1
---~                                 elseif dir == "+TLT" then
---~                                     rlmode = 1
---~                                 else
---~                                     rlmode = 0
---~                                 end
---~                             elseif subtype == 6 then
---~                                 local dir = start.dir
---~                                 if dir == "TRT" then
---~                                     rlmode = -1
---~                                 elseif dir == "TLT" then
---~                                     rlmode = 1
---~                                 else
---~                                     rlmode = 0
---~                                 end
---~                             end
-                                local subtype = start.subtype
-                                if subtype == 7 then
-                                    local dir = start.dir
-                                    if     dir == "+TRT" or dir == "+TLT" then
-                                        insert(txtdir,dir)
-                                    elseif dir == "-TRT" or dir == "-TLT" then
-                                        remove(txtdir)
-                                    end
-                                    local d = txtdir[#txtdir]
-                                    if d == "+TRT" then
-                                        rlmode = -1
-                                    elseif d == "+TLT" then
-                                        rlmode = 1
-                                    else
-                                        rlmode = pardir
-                                    end
-                                    if trace_directions then
-                                        logs.report("fonts","directions after textdir %s: pardir=%s, txtdir=%s:%s, rlmode=%s",dir,pardir,#txtdir,txtdir[#txtdir] or "unset",rlmode)
-                                    end
-                                elseif subtype == 6 then
-                                    local dir = start.dir
-                                    if dir == "TRT" then
-                                        pardir = -1
-                                    elseif dir == "TLT" then
-                                        pardir = 1
-                                    else
-                                        pardir = 0
-                                    end
+                            local subtype = start.subtype
+                            if subtype == 7 then
+                                local dir = start.dir
+                                if     dir == "+TRT" or dir == "+TLT" then
+                                    insert(txtdir,dir)
+                                elseif dir == "-TRT" or dir == "-TLT" then
+                                    remove(txtdir)
+                                end
+                                local d = txtdir[#txtdir]
+                                if d == "+TRT" then
+                                    rlmode = -1
+                                elseif d == "+TLT" then
+                                    rlmode = 1
+                                else
                                     rlmode = pardir
-                                --~ txtdir = { }
+                                end
+                                if trace_directions then
+                                    logs.report("fonts","directions after textdir %s: pardir=%s, txtdir=%s:%s, rlmode=%s",dir,pardir,#txtdir,txtdir[#txtdir] or "unset",rlmode)
+                                end
+                            elseif subtype == 6 then
+                                local dir = start.dir
+                                if dir == "TRT" then
+                                    pardir = -1
+                                elseif dir == "TLT" then
+                                    pardir = 1
+                                else
+                                    pardir = 0
+                                end
+                                rlmode = pardir
+                            --~ txtdir = { }
                                 if trace_directions then
                                     logs.report("fonts","directions after pardir %s: pardir=%s, txtdir=%s:%s, rlmode=%s",dir,pardir,#txtdir,txtdir[#txtdir] or "unset",rlmode)
                                 end
-                                end
+                            end
                             start = start.next
                         else
                             start = start.next

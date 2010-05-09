@@ -534,8 +534,10 @@ function define.register(fontdata,id)
             if trace_defining then
                 logs.report("define font","loading at 2 id %s, hash: %s",id or "?",hash or "?")
             end
-            fonts.ids[id] = fontdata
-            fonts.chr[id] = fontdata.characters
+            fonts.identifiers[id] = fontdata
+            fonts.characters [id] = fontdata.characters
+            fonts.quads      [id] = fontdata.parameters.quad
+            -- todo: extra functions, e.g. setdigitwidth etc in list
             tfm.internalized[hash] = id
         end
     end

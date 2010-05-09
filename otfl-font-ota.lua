@@ -41,6 +41,8 @@ local insert_node_after  = node.insert_after
 local insert_node_before = node.insert_before
 local traverse_node_list = node.traverse
 
+local new_glue_node      = nodes.glue
+
 local fontdata = fonts.ids
 local state    = attributes.private('state')
 
@@ -302,11 +304,12 @@ function fonts.analyzers.methods.arab(head,font,attr) -- maybe make a special ve
     end
     first, last = finish(first,last)
     if removejoiners then
+        -- is never head
         for i=1,#joiners do
-            head = delete_node(head,joiners[i])
+            delete_node(head,joiners[i])
         end
         for i=1,#nonjoiners do
-            head = replace_node(head,nonjoiners[i],nodes.glue(0)) -- or maybe a kern
+            replace_node(head,nonjoiners[i],new_glue_node(0)) -- or maybe a kern
         end
     end
     return head, done

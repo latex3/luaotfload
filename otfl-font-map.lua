@@ -22,116 +22,10 @@ of obsolete. Some code may move to runtime or auxiliary modules.</p>
 <p>The name to unciode related code will stay of course.</p>
 --ldx]]--
 
-fonts               = fonts               or { }
-fonts.map           = fonts.map           or { }
-fonts.map.data      = fonts.map.data      or { }
-fonts.map.encodings = fonts.map.encodings or { }
-fonts.map.done      = fonts.map.done      or { }
-fonts.map.loaded    = fonts.map.loaded    or { }
-fonts.map.direct    = fonts.map.direct    or { }
-fonts.map.line      = fonts.map.line      or { }
+fonts     = fonts     or { }
+fonts.map = fonts.map or { }
 
-function fonts.map.line.pdfmapline(tag,str)
-    return "\\loadmapline[" .. tag .. "][" .. str .. "]"
-end
-
-function fonts.map.line.pdftex(e) -- so far no combination of slant and extend
-    if e.name and e.fontfile then
-        local fullname = e.fullname or ""
-        if e.slant and e.slant ~= 0 then
-            if e.encoding then
-                return fonts.map.line.pdfmapline("=",format('%s %s "%g SlantFont" <%s <%s',e.name,fullname,e.slant,e.encoding,e.fontfile))
-            else
-                return fonts.map.line.pdfmapline("=",format('%s %s "%g SlantFont" <%s',e.name,fullname,e.slant,e.fontfile))
-            end
-        elseif e.extend and e.extend ~= 1 and e.extend ~= 0 then
-            if e.encoding then
-                return fonts.map.line.pdfmapline("=",format('%s %s "%g ExtendFont" <%s <%s',e.name,fullname,e.extend,e.encoding,e.fontfile))
-            else
-                return fonts.map.line.pdfmapline("=",format('%s %s "%g ExtendFont" <%s',e.name,fullname,e.extend,e.fontfile))
-            end
-        else
-            if e.encoding then
-                return fonts.map.line.pdfmapline("=",format('%s %s <%s <%s',e.name,fullname,e.encoding,e.fontfile))
-            else
-                return fonts.map.line.pdfmapline("=",format('%s %s <%s',e.name,fullname,e.fontfile))
-            end
-        end
-    else
-        return nil
-    end
-end
-
-function fonts.map.flush(backend) -- will also erase the accumulated data
-    local flushline = fonts.map.line[backend or "pdftex"] or fonts.map.line.pdftex
-    for _, e in pairs(fonts.map.data) do
-        tex.sprint(ctxcatcodes,flushline(e))
-    end
-    fonts.map.data = { }
-end
-
-fonts.map.line.dvips     = fonts.map.line.pdftex
-fonts.map.line.dvipdfmx  = function() end
-
-function fonts.map.convert_entries(filename)
-    if not fonts.map.loaded[filename] then
-        fonts.map.data, fonts.map.encodings = fonts.map.load_file(filename,fonts.map.data, fonts.map.encodings)
-        fonts.map.loaded[filename] = true
-    end
-end
-
-function fonts.map.load_file(filename, entries, encodings)
-    entries   = entries   or { }
-    encodings = encodings or { }
-    local f = io.open(filename)
-    if f then
-        local data = f:read("*a")
-        if data then
-            for line in gmatch(data,"(.-)[\n\t]") do
-                if find(line,"^[%#%%%s]") then
-                    -- print(line)
-                else
-                    local extend, slant, name, fullname, fontfile, encoding
-                    line = gsub(line,'"(.+)"', function(s)
-                        extend = find(s,'"([^"]+) ExtendFont"')
-                        slant = find(s,'"([^"]+) SlantFont"')
-                        return ""
-                    end)
-                    if not name then
-                        -- name fullname encoding fontfile
-                        name, fullname, encoding, fontfile = match(line,"^(%S+)%s+(%S*)[%s<]+(%S*)[%s<]+(%S*)%s*$")
-                    end
-                    if not name then
-                        -- name fullname (flag) fontfile encoding
-                        name, fullname, fontfile, encoding = match(line,"^(%S+)%s+(%S*)[%d%s<]+(%S*)[%s<]+(%S*)%s*$")
-                    end
-                    if not name then
-                        -- name fontfile
-                        name, fontfile = match(line,"^(%S+)%s+[%d%s<]+(%S*)%s*$")
-                    end
-                    if name then
-                        if encoding == "" then encoding = nil end
-                        entries[name] = {
-                            name     = name, -- handy
-                            fullname = fullname,
-                            encoding = encoding,
-                            fontfile = fontfile,
-                            slant    = tonumber(slant),
-                            extend   = tonumber(extend)
-                        }
-                        encodings[name] = encoding
-                    elseif line ~= "" then
-                    --  print(line)
-                    end
-                end
-            end
-        end
-        f:close()
-    end
-    return entries, encodings
-end
-
-local function load_lum_table(filename)
+local function load_lum_table(filename) -- will move to font goodies
     local lumname = file.replacesuffix(file.basename(filename),"lum")
     local lumfile = resolvers.find_file(lumname,"map") or ""
     if lumfile ~= "" and lfs.isfile(lumfile) then
@@ -371,3 +265,106 @@ fonts.map.add_to_unicode = function(data,filename)
         logs.report("load otf","enhance: %s tounicode entries added (%s ligatures)",nl+ns, ns)
     end
 end
+
+-- the following is sort of obsolete
+--
+-- fonts.map.data      = fonts.map.data      or { }
+-- fonts.map.encodings = fonts.map.encodings or { }
+-- fonts.map.loaded    = fonts.map.loaded    or { }
+-- fonts.map.line      = fonts.map.line      or { }
+--
+-- function fonts.map.line.pdftex(e)
+--     if e.name and e.fontfile then
+--         local fullname = e.fullname or ""
+--         if e.slant and e.slant ~= 0 then
+--             if e.encoding then
+--                 pdf.mapline(format('= %s %s "%g SlantFont" <%s <%s',e.name,fullname,e.slant,e.encoding,e.fontfile)))
+--             else
+--                 pdf.mapline(format('= %s %s "%g SlantFont" <%s',e.name,fullname,e.slant,e.fontfile)))
+--             end
+--         elseif e.extend and e.extend ~= 1 and e.extend ~= 0 then
+--             if e.encoding then
+--                 pdf.mapline(format('= %s %s "%g ExtendFont" <%s <%s',e.name,fullname,e.extend,e.encoding,e.fontfile)))
+--             else
+--                 pdf.mapline(format('= %s %s "%g ExtendFont" <%s',e.name,fullname,e.extend,e.fontfile)))
+--             end
+--         else
+--             if e.encoding then
+--                 pdf.mapline(format('= %s %s <%s <%s',e.name,fullname,e.encoding,e.fontfile)))
+--             else
+--                 pdf.mapline(format('= %s %s <%s',e.name,fullname,e.fontfile)))
+--             end
+--         end
+--     else
+--         return nil
+--     end
+-- end
+--
+-- function fonts.map.flush(backend) -- will also erase the accumulated data
+--     local flushline = fonts.map.line[backend or "pdftex"] or fonts.map.line.pdftex
+--     for _, e in pairs(fonts.map.data) do
+--         flushline(e)
+--     end
+--     fonts.map.data = { }
+-- end
+--
+-- fonts.map.line.dvips     = fonts.map.line.pdftex
+-- fonts.map.line.dvipdfmx  = function() end
+--
+-- function fonts.map.convert_entries(filename)
+--     if not fonts.map.loaded[filename] then
+--         fonts.map.data, fonts.map.encodings = fonts.map.load_file(filename,fonts.map.data, fonts.map.encodings)
+--         fonts.map.loaded[filename] = true
+--     end
+-- end
+--
+-- function fonts.map.load_file(filename, entries, encodings)
+--     entries   = entries   or { }
+--     encodings = encodings or { }
+--     local f = io.open(filename)
+--     if f then
+--         local data = f:read("*a")
+--         if data then
+--             for line in gmatch(data,"(.-)[\n\t]") do
+--                 if find(line,"^[%#%%%s]") then
+--                     -- print(line)
+--                 else
+--                     local extend, slant, name, fullname, fontfile, encoding
+--                     line = gsub(line,'"(.+)"', function(s)
+--                         extend = find(s,'"([^"]+) ExtendFont"')
+--                         slant = find(s,'"([^"]+) SlantFont"')
+--                         return ""
+--                     end)
+--                     if not name then
+--                         -- name fullname encoding fontfile
+--                         name, fullname, encoding, fontfile = match(line,"^(%S+)%s+(%S*)[%s<]+(%S*)[%s<]+(%S*)%s*$")
+--                     end
+--                     if not name then
+--                         -- name fullname (flag) fontfile encoding
+--                         name, fullname, fontfile, encoding = match(line,"^(%S+)%s+(%S*)[%d%s<]+(%S*)[%s<]+(%S*)%s*$")
+--                     end
+--                     if not name then
+--                         -- name fontfile
+--                         name, fontfile = match(line,"^(%S+)%s+[%d%s<]+(%S*)%s*$")
+--                     end
+--                     if name then
+--                         if encoding == "" then encoding = nil end
+--                         entries[name] = {
+--                             name     = name, -- handy
+--                             fullname = fullname,
+--                             encoding = encoding,
+--                             fontfile = fontfile,
+--                             slant    = tonumber(slant),
+--                             extend   = tonumber(extend)
+--                         }
+--                         encodings[name] = encoding
+--                     elseif line ~= "" then
+--                     --  print(line)
+--                     end
+--                 end
+--             end
+--         end
+--         f:close()
+--     end
+--     return entries, encodings
+-- end

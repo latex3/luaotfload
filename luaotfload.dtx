@@ -338,10 +338,13 @@ luatextra.provides_module(luaotfload.module)
 %
 %    \begin{macrocode}
 
-luaotfload.luatex_version = 51
+local luatex_version = 60
 
-if tex.luatexversion < luaotfload.luatex_version then
-    luatextra.module_warning('luaotfload', string.format('too old luatex version, "%s" is needed at least', luaotfload.luatex_version/100))
+if tex.luatexversion < luatex_version then
+    luatextra.module_warning('luaotfload',
+        string.format('LuaTeX v%.2f is old, v%.2f is recommended.',
+                       tex.luatexversion/100,
+                       luatex_version   /100))
 end
 
 %    \end{macrocode}

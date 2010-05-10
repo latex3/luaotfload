@@ -1,6 +1,7 @@
                         History of the luaotfload bundle
 
 Currrent git, luaotfload v1.07:
+    * using the new luatexbase package
     * synchronizing with latest ConTeXt stable 2010.05.08
     * adding support for microtypography
     * adding support for color and transparency

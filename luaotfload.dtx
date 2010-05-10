@@ -34,7 +34,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload 2010/04/01 v1.07 ConTeXt font loading system}
+\Msg{* Package: luaotfload 2010/05/10 v1.07 ConTeXt font loading system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -100,7 +100,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2010/04/01 v1.07 ConTeXt font loading system]%
+  [2010/05/10 v1.07 ConTeXt font loading system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist}
 \usepackage[colorlinks=true]{hyperref}
@@ -137,7 +137,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \textsf{luaotfload} package}
-% \date{2010/04/01 v1.07}
+% \date{2010/05/10 v1.07}
 % \author{     Elie Roux    \footnote{\texttt{elie.roux@telecom-bretagne.eu}}
 %         \and Khaled hosny \footnote{\texttt{khaledhosny@eglug.org}}}
 %
@@ -323,7 +323,7 @@ module('luaotfload', package.seeall)
 luaotfload.module = {
     name          = "luaotfload",
     version       = 1.07,
-    date          = "2010/04/01",
+    date          = "2010/05/10",
     description   = "ConTeXt font loading system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -378,7 +378,7 @@ function luaotfload.loadmodule(name)
     local tofind = 'otfl-'..name
     local found = kpse.find_file(tofind,"tex")
     if found then
-        log(format('loading file %s.', found)
+        log(format('loading file %s.', found))
         dofile(found)
     else
         error(format('file %s not found.', tofind))
@@ -467,18 +467,18 @@ luaotfload.loadmodule('font-clr.lua')
 %    \begin{macrocode}
 
 function luaotfload.register_callbacks()
-    callback.add('pre_linebreak_filter', nodes.simple_font_handler, 'luaotfload.pre_linebreak_filter')
-    callback.add('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
-    callback.reset('define_font')
-    callback.add('define_font', fonts.define.read, 'luaotfload.define_font', 1)
-    callback.add('find_vf_file', fonts.vf.find, 'luaotfload.find_vf_file')
+    luatexbase.add_to_callback('pre_linebreak_filter', nodes.simple_font_handler, 'luaotfload.pre_linebreak_filter')
+    luatexbase.add_to_callback('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
+    luatexbase.reset_callback('define_font')
+    luatexbase.add_to_callback('define_font', fonts.define.read, 'luaotfload.define_font', 1)
+    luatexbase.add_to_callback('find_vf_file', fonts.vf.find, 'luaotfload.find_vf_file')
 end
 
 function luaotfload.unregister_callbacks()
-    callback.remove('pre_linebreak_filter', 'luaotfload.pre_linebreak_filter')
-    callback.remove('hpack_filter', 'luaotfload.hpack_filter')
-    callback.remove('define_font', 'luaotfload.define_font')
-    callback.remove('find_vf_file', 'luaotfload.find_vf_file')
+    luatexbase.remove_from_callback('pre_linebreak_filter', 'luaotfload.pre_linebreak_filter')
+    luatexbase.remove_from_callback('hpack_filter', 'luaotfload.hpack_filter')
+    luatexbase.remove_from_callback('define_font', 'luaotfload.define_font')
+    luatexbase.remove_from_callback('find_vf_file', 'luaotfload.find_vf_file')
 end
 %    \end{macrocode}
 % \iffalse
@@ -502,7 +502,7 @@ end
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2010/04/01 v1.07 ConTeXt font loading system]
+    [2010/05/10 v1.07 ConTeXt font loading system]
   \RequirePackage{luatextra}
 \fi
 

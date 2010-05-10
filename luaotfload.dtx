@@ -334,6 +334,26 @@ luatexbase.provides_module(luaotfload.module)
 
 %    \end{macrocode}
 %
+%    Some helper functions.
+%
+%    \begin{macrocode}
+
+local format = string.format
+
+local function log(msg)
+    luatexbase.module_log    ('luaotfload', msg)
+end
+
+local function error(msg)
+    luatexbase.module_error  ('luaotfload', msg)
+end
+
+local function warning(msg)
+    luatexbase.module_warning('luaotfload', msg)
+end
+
+%    \end{macrocode}
+%
 %    The minimal required \LuaTeX\ version.
 %
 %    \begin{macrocode}
@@ -341,10 +361,9 @@ luatexbase.provides_module(luaotfload.module)
 local luatex_version = 60
 
 if tex.luatexversion < luatex_version then
-    luatexbase.module_warning('luaotfload',
-        string.format('LuaTeX v%.2f is old, v%.2f is recommended.',
-                       tex.luatexversion/100,
-                       luatex_version   /100))
+    warning(format('LuaTeX v%.2f is old, v%.2f is recommended.',
+                    tex.luatexversion/100,
+                    luatex_version   /100))
 end
 
 %    \end{macrocode}
@@ -358,12 +377,12 @@ end
 function luaotfload.loadmodule(name)
     local tofind = 'otfl-'..name
     local found = kpse.find_file(tofind,"tex")
-    if not found then
-      luatexbase.module_error('luaotfload', string.format('file %s not found.', tofind))
-      return
+    if found then
+        log(format('loading file %s.', found)
+        dofile(found)
+    else
+        error(format('file %s not found.', tofind))
     end
-    luatexbase.module_log('luaotfload', "loading file "..found)
-    dofile(found)
 end
 
 %    \end{macrocode}
@@ -401,7 +420,7 @@ luaotfload.loadmodule('node-ini.lua')
 function attributes.private(name)
     local number = luatexbase.attributes['otfl@'..name]
     if not number then 
-        luatexbase.module_error('luaotfload', string.format('asking for attribute %s, but not declared. Please report to the maintainer of luaotfload.', name))
+        error(format('asking for attribute %s, but not declared. Please report to the maintainer of luaotfload.', name))
     end
     return number
 end
@@ -411,8 +430,8 @@ end
 %    Some more modules. We don't load neither \texttt{font-enc.lua} nor
 %    \texttt{font-afm.lua} as it will never be used here.
 %    
-%    We also remove a warning from \texttt{node-fnt.lua} as it not relevant
-%    with \LuaTeX{}tra.
+%    We also remove a warning from \texttt{node-fnt.lua} as it is \ConTeXt\
+%    specific.
 %
 %    \begin{macrocode}
 

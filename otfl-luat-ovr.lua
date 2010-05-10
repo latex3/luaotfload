@@ -32,4 +32,4 @@ function logs.simple(fmt,...)
     end
 end
 
-tex.ctxcatcodes = luatextra.catcodetables.latex
+tex.ctxcatcodes = luatexbase.catcodetables.latex

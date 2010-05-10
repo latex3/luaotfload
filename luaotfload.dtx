@@ -318,7 +318,7 @@ and the derived files
 %    First some usual initializations.
 %
 %    \begin{macrocode}
-luaotfload          = { }
+module('luaotfload', package.seeall)
 
 luaotfload.module = {
     name          = "luaotfload",
@@ -330,7 +330,7 @@ luaotfload.module = {
     license       = "CC0"
 }
 
-luatextra.provides_module(luaotfload.module)
+luatexbase.provides_module(luaotfload.module)
 
 %    \end{macrocode}
 %
@@ -341,7 +341,7 @@ luatextra.provides_module(luaotfload.module)
 local luatex_version = 60
 
 if tex.luatexversion < luatex_version then
-    luatextra.module_warning('luaotfload',
+    luatexbase.module_warning('luaotfload',
         string.format('LuaTeX v%.2f is old, v%.2f is recommended.',
                        tex.luatexversion/100,
                        luatex_version   /100))
@@ -359,85 +359,11 @@ function luaotfload.loadmodule(name)
     local tofind = 'otfl-'..name
     local found = kpse.find_file(tofind,"tex")
     if not found then
-      luatextra.module_error('luaotfload', string.format('file %s not found.', tofind))
+      luatexbase.module_error('luaotfload', string.format('file %s not found.', tofind))
       return
     end
-    luatextra.module_log('luaotfload', "loading file "..found)
+    luatexbase.module_log('luaotfload', "loading file "..found)
     dofile(found)
-end
-
-%    \end{macrocode}
-%
-%    The following functions are made to map \ConTeXt\ functions to
-%    \textsf{luaextra} functions.
-%
-%    \begin{macrocode}
-
-string.strip = string.stripspaces
-
-file = fpath
-file.extname = fpath.suffix
-
-%    \end{macrocode}
-%
-%    These are small functions that are not already in \textsf{luatextra}.
-%
-%    \begin{macrocode}
-
-local splitters_s, splitters_m = { }, { }
-
-function lpeg.splitat(separator,single)
-    local splitter = (single and splitters_s[separator]) or splitters_m[separator]
-    if not splitter then
-        separator = lpeg.P(separator)
-        if single then
-            local other, any = lpeg.C((1 - separator)^0), lpeg.P(1)
-            splitter = other * (separator * lpeg.C(any^0) + "")
-            splitters_s[separator] = splitter
-        else
-            local other = lpeg.C((1 - separator)^0)
-            splitter = other * (separator * other)^0
-            splitters_m[separator] = splitter
-        end
-    end
-    return splitter
-end
-
-function table.compact(t)
-    if t then
-        for k,v in next, t do
-            if not next(v) then
-                t[k] = nil
-            end
-        end
-    end
-end
-
-function table.sortedhashkeys(tab) -- fast one
-    local srt = { }
-    for key,_ in next, tab do
-        srt[#srt+1] = key
-    end
-    table.sort(srt)
-    return srt
-end
-
-function table.reverse_hash(h)
-    local r = { }
-    for k,v in next, h do
-        r[v] = string.lower(string.gsub(k," ",""))
-    end 
-    return r
-end 
-
-function table.reverse(t)
-    local tt = { }
-    if #t > 0 then
-        for i=#t,1,-1 do
-            tt[#tt+1] = t[i]
-        end
-    end
-    return tt
 end
 
 %    \end{macrocode}
@@ -473,9 +399,9 @@ luaotfload.loadmodule('node-ini.lua')
 %    \begin{macrocode}
 
 function attributes.private(name)
-    local number = tex.attributenumber['otfl@'..name]
+    local number = luatexbase.attributes['otfl@'..name]
     if not number then 
-        luatextra.module_error('luaotfload', string.format('asking for attribute %s, but not declared. Please report to the maintainer of luaotfload.', name))
+        luatexbase.module_error('luaotfload', string.format('asking for attribute %s, but not declared. Please report to the maintainer of luaotfload.', name))
     end
     return number
 end

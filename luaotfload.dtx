@@ -537,11 +537,11 @@ end
 %    \begin{macrocode}
 
 \def\otfl@off{
-\luadirect{luaotfload.unregister_callbacks()}
+\directlua{luaotfload.unregister_callbacks()}
 }
 
 \def\otfl@on{
-\luadirect{luaotfload.register_callbacks()}
+\directlua{luaotfload.register_callbacks()}
 }
 
 %    \end{macrocode}

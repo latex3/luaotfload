@@ -149,7 +149,7 @@ local color_callback_activated = 0
 
 function add_color_callback()
     if color_callback_activated == 0 then
-        callback.add("pre_output_filter", font_colorize, "loaotfload.colorize")
+        luatexbase.add_to_callback("pre_output_filter", font_colorize, "loaotfload.colorize")
         color_callback_activated = 1
     end
 end

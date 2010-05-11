@@ -273,7 +273,7 @@ and the derived files
 % file nor the main \texttt{.lua} file.
 %
 % The \ConTeXt\ files are renamed by adding the prefix \texttt{otfl-} to them
-% (\texttt{otfl} as \texttt{OTF L}oad).The files are:
+% (\texttt{otfl} as \texttt{OTF L}oad). The files are:
 %
 % \begin{multicols}{3}
 % \begin{itemize*}
@@ -303,9 +303,14 @@ and the derived files
 % 
 % \subsection{Troubleshooting}
 %
-% If you encounter problems with some fonts, please first update to the latest version of this package before reporting a bug, as this package is under active development.
+% If you encounter problems with some fonts, please first update to the latest
+% version of this package before reporting a bug, as this package is under
+% active development.
 %
-% A very common problem is the lack of features for some otf fonts even when specified. It can be related to the fact that some fonts do not provide features for the |dflt| script, which is the default one in this package, so you may have to specify the script in the command line, for example:
+% A very common problem is the lack of features for some otf fonts even when
+% specified. It can be related to the fact that some fonts do not provide
+% features for the |dflt| script, which is the default one in this package,
+% so you may have to specify the script in the command line, for example:
 %
 % |\font\myfont = MyFont.otf:script=latn;+liga;|
 %
@@ -340,16 +345,16 @@ luatexbase.provides_module(luaotfload.module)
 
 local format = string.format
 
-local function log(msg)
-    luatexbase.module_log    ('luaotfload', msg)
+local function log(...)
+    luatexbase.module_log    ('luaotfload', format(...))
 end
 
-local function error(msg)
-    luatexbase.module_error  ('luaotfload', msg)
+local function error(...)
+    luatexbase.module_error  ('luaotfload', format(...))
 end
 
-local function warning(msg)
-    luatexbase.module_warning('luaotfload', msg)
+local function warning(...)
+    luatexbase.module_warning('luaotfload', format(...))
 end
 
 %    \end{macrocode}
@@ -361,9 +366,9 @@ end
 local luatex_version = 60
 
 if tex.luatexversion < luatex_version then
-    warning(format('LuaTeX v%.2f is old, v%.2f is recommended.',
-                    tex.luatexversion/100,
-                    luatex_version   /100))
+    warning('LuaTeX v%.2f is old, v%.2f is recommended.',
+             tex.luatexversion/100,
+             luatex_version   /100)
 end
 
 %    \end{macrocode}
@@ -378,10 +383,10 @@ function luaotfload.loadmodule(name)
     local tofind = 'otfl-'..name
     local found = kpse.find_file(tofind,"tex")
     if found then
-        log(format('loading file %s.', found))
+        log('loading file %s.', found)
         dofile(found)
     else
-        error(format('file %s not found.', tofind))
+        error('file %s not found.', tofind)
     end
 end
 
@@ -420,7 +425,9 @@ luaotfload.loadmodule('node-ini.lua')
 function attributes.private(name)
     local number = luatexbase.attributes['otfl@'..name]
     if not number then 
-        error(format('asking for attribute %s, but not declared. Please report to the maintainer of luaotfload.', name))
+        error('asking for attribute %s, but not declared. '
+            ..'Please report to the maintainer of luaotfload.',
+               name)
     end
     return number
 end
@@ -467,18 +474,30 @@ luaotfload.loadmodule('font-clr.lua')
 %    \begin{macrocode}
 
 function luaotfload.register_callbacks()
-    luatexbase.add_to_callback('pre_linebreak_filter', nodes.simple_font_handler, 'luaotfload.pre_linebreak_filter')
-    luatexbase.add_to_callback('hpack_filter',         nodes.simple_font_handler, 'luaotfload.hpack_filter')
+    luatexbase.add_to_callback('pre_linebreak_filter',
+                                nodes.simple_font_handler,
+                               'luaotfload.pre_linebreak_filter')
+    luatexbase.add_to_callback('hpack_filter',
+                                nodes.simple_font_handler,
+                               'luaotfload.hpack_filter')
     luatexbase.reset_callback('define_font')
-    luatexbase.add_to_callback('define_font', fonts.define.read, 'luaotfload.define_font', 1)
-    luatexbase.add_to_callback('find_vf_file', fonts.vf.find, 'luaotfload.find_vf_file')
+    luatexbase.add_to_callback('define_font',
+                                fonts.define.read,
+                               'luaotfload.define_font', 1)
+    luatexbase.add_to_callback('find_vf_file',
+                                fonts.vf.find,
+                               'luaotfload.find_vf_file')
 end
 
 function luaotfload.unregister_callbacks()
-    luatexbase.remove_from_callback('pre_linebreak_filter', 'luaotfload.pre_linebreak_filter')
-    luatexbase.remove_from_callback('hpack_filter', 'luaotfload.hpack_filter')
-    luatexbase.remove_from_callback('define_font', 'luaotfload.define_font')
-    luatexbase.remove_from_callback('find_vf_file', 'luaotfload.find_vf_file')
+    luatexbase.remove_from_callback('pre_linebreak_filter',
+                                    'luaotfload.pre_linebreak_filter')
+    luatexbase.remove_from_callback('hpack_filter',
+                                    'luaotfload.hpack_filter')
+    luatexbase.remove_from_callback('define_font',
+                                    'luaotfload.define_font')
+    luatexbase.remove_from_callback('find_vf_file',
+                                     'luaotfload.find_vf_file')
 end
 %    \end{macrocode}
 % \iffalse

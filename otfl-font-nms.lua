@@ -66,9 +66,14 @@ local synonyms  = {
 }
 
 function names.resolve(specification)
+    local tfm   = resolvers.find_file(specification.name, "ofm")
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
     local size  = tonumber(specification.optsize) or specification.size and specification.size / 65536
+    if tfm then
+        -- is a tfm font, skip names database
+        return specification.name, false
+    end
     if not loaded then
         names.data   = names.load()
         loaded = true

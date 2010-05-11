@@ -65,6 +65,10 @@ local synonyms  = {
     bolditalic  = {boldoblique=true,   boldslant=true},
 }
 
+-- a small hack to get the log message "no font names database loaded" only
+-- once in the log
+local log_message_shown = false
+
 function names.resolve(specification)
     local tfm   = resolvers.find_file(specification.name, "ofm")
     local name  = sanitize(specification.name)
@@ -171,8 +175,9 @@ function names.resolve(specification)
             -- no font found so far, fallback to filename
             return specification.name, false
         end
-    else
+    elseif not log_message_shown then
         logs.report("load font", "no font names database loaded")
+        log_message_shown = true
     end
 end
 

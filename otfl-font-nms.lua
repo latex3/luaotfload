@@ -141,8 +141,12 @@ function names.resolve(specification)
                 end
             end
             if #found == 1 then
-                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, found[1].filename[1])
-                return found[1].filename[1], found[1].filename[2]
+                if kpse.lookup(found[1].filename[1]) then
+                    logs.report("load font",
+                                "font family='%s', subfamily='%s' found: %s",
+                                name, style, found[1].filename[1])
+                    return found[1].filename[1], found[1].filename[2]
+                end
             elseif #found > 1 then
                 -- we found matching font(s) but not in the requested optical
                 -- sizes, so we loop through the matches to find the one with
@@ -157,11 +161,15 @@ function names.resolve(specification)
                         least   = difference
                     end
                 end
-                logs.report("load font", "font family='%s', subfamily='%s' found: %s", name, style, closest.filename[1])
-                return closest.filename[1], closest.filename[2]
-            else
-                return specification.name, false -- fallback to filename
+                if kpse.lookup(closest.filename[1]) then
+                    logs.report("load font",
+                                "font family='%s', subfamily='%s' found: %s",
+                                name, style, closest.filename[1])
+                    return closest.filename[1], closest.filename[2]
+                end
             end
+            -- no font found so far, fallback to filename
+            return specification.name, false
         end
     else
         logs.report("load font", "no font names database loaded")

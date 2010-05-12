@@ -102,7 +102,7 @@ and the derived files
 \ProvidesFile{luaotfload.drv}%
   [2010/05/10 v1.07 ConTeXt font loading system]%
 \documentclass{ltxdoc}
-\usepackage{metalogo,multicol,mdwlist}
+\usepackage{metalogo,multicol,mdwlist,fancyvrb}
 \usepackage[colorlinks=true]{hyperref}
 
 \def\LuaTeX{Lua\TeX}
@@ -110,6 +110,7 @@ and the derived files
 
 \EnableCrossrefs
 \CodelineIndex
+\VerbatimFootnotes
 \begin{document}
   \DocInput{luaotfload.dtx}%
 \end{document}
@@ -144,14 +145,15 @@ and the derived files
 % \maketitle
 %
 % \begin{abstract}
-% \ConTeXt\ font loading system, providing the possibility to load OTF fonts
-% with a lot of features, and extended font loading syntax.
+% Adaptation of \ConTeXt\ font loading system, providing the ability to load
+% \textsf{OpenType} fonts with a lot of features, and extended font loading
+% syntax.
 % \end{abstract}
 %
 % \tableofcontents
 %
 % \section{Documentation}
-% 
+%
 % \subsection{Introduction}
 %
 % Font management and installation has always been painful with \TeX\ (and
@@ -171,7 +173,7 @@ and the derived files
 %
 % This package is quite low-level, and should be loaded directly in the macro
 % package, like it is in \ConTeXt. Sadly, Plain and \LaTeX\ are frozen and
-% it's even impossible to adapt them to the new engines. 
+% it's even impossible to adapt them to the new engines.
 %
 % \subsection{Loading fonts}
 %
@@ -186,11 +188,12 @@ and the derived files
 %
 % \paragraph{Prefix}
 %
-% Can be either \texttt{file:} or \texttt{name:} and are used to select between filename based
-% or font name based search mechanisms.
-% Loading fonts based on filename is restricted to files found by \textsf{kpathsea}
-% (typically in the \textsc{texmf} tree). Surrounding font name with square
-% brackets is synonym to using \texttt{file:} prefix (for compatibility with \XeTeX).
+% Can be either \texttt{file:} or \texttt{name:} and are used to select between
+% filename based or font name based search mechanisms.
+% Loading fonts based on filename is restricted to files found by
+% \textsf{kpathsea} (typically in the \textsc{texmf} tree). Surrounding font
+% name with square brackets is synonym to using \texttt{file:} prefix (for
+% compatibility with \XeTeX).
 % This is usually used for loading old \textsc{tfm} fonts.
 % Accessing fonts by fontname allows loading system installed fonts as well as
 % \textsc{texmf} ones, and requires a font names database that can be generated
@@ -206,10 +209,10 @@ and the derived files
 %
 % \paragraph{Font features}
 %
-% Font are a semicolon separated list of items, which are either font parameters
-% in the form of |key=value|, or switches to enable/disable certain font
+% Font features are a semicolon separated list of items, which are either
+% |key=value| font parameters, or switches to enable/disable certain font
 % features, in the form of |+feat|/|-feat|.
-% The supported parameters are:
+% The supported keys are:
 % \begin{description}
 % \item [mode] \hfill \\
 % \textsf{luaotfload} has two OpenType processing modes; \texttt{base} mode
@@ -217,10 +220,16 @@ and the derived files
 % features to traditional \TeX\ ligaturing and kerning mechanisms and is a bit
 % faster, and \texttt{node} mode which, hopefully, supports OpenType fully and
 % works by direct processing of node list at lua end and is a bit slower.
-% Note that \texttt{node} mode doesn't work inside math. By default,
-% \texttt{base} mode is used.
+% Note that \texttt{node} mode doesn't work inside math.
 %
-% \item [script] \hfill \\ OpenType script string, default value is |dflt|.
+% By default, \texttt{base} mode is used, however it is advisable to always
+% enable \texttt{node} made, except for math fonts, otherwise many OpenType
+% features will not function properly or even not work at all, especially for
+% advanced scripts like Arabic.
+%
+% \item [script] \hfill \\
+% OpenType script string, default value is |dflt|. Some fonts don't assign
+% features to |dflt| script, in this case script need to be set explicitly.
 %
 % \item [language] \hfill \\ OpenType language string, default value is |latn|.
 %
@@ -232,35 +241,44 @@ and the derived files
 % \url{http://fontforge.sourceforge.net/featurefile.html} and
 % \url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
 %
+% For example, to set a |tkrn| feature from |mykern.fea| file:
+%
+% |\font\lmr=Latin Modern Roman:featurefile=mykern.fea;+tkrn|
+%
 % \item [color] \hfill \\
 % font color, defined as a triplet of two-digit Hex RGB values, with optionally
 % another value for the transparency (where |00| is completely transparent and
 % |FF| is opaque.)
 %
-% \item [protrosion]	\hfill \\ TODO
-% \item [expansion]	\hfill \\ TODO
+% For example, to set text in semitransparent red:
+%
+% |\font\lmr=Latin Modern Roman:color=FF0000BB|
+%
+% \item [protrusion \& expansion] \hfill \\
+% Both keys control microtypographic features of the font, namely glyph
+% protrusion and expansion. The value of the key is the name of predefined
+% lua tables of protrusion and expansion values, see the bottom of
+% \texttt{otfl-font-dum.lua} file for an example of such tables. The only
+% predefined value is |default|.
+%
+% For example, to enable default protrusion\footnote{You also need to set
+% |\pdfprotrudechars2 \pdfadjustspacing2| to activate protrusion and expansion,
+% respectively. See PDF\TeX\ manual for details}:
+%
+% |\font\lmr=Latin Modern Roman:protrusion=default|
+%
 % \end{description}
 %
-% \subparagraph{Additional font features}
+% \subparagraph{Non-standard font features}
 % \textsf{luaotfload} defines some additional font feature not defined in
 % OpenType, currently three features are defined:
 %
 % \begin{itemize*}
-% \item \texttt{anum}: replaces European numbers with eastern Arabic numbers.
+% \item \texttt{anum}: replaces European numbers with eastern Arabic numbers or
+% Persian numbers, depending on the value of |language|.
 % \item \texttt{tlig}: applies legacy \TeX\ ligatures (|``''-- -- !` ?` <<>>|).
 % \item \texttt{trep}: applies legacy \TeX\ replacements (|`'"|).
 % \end{itemize*}
-%
-% \subsubsection{Examples}
-% \begin{verbatim}
-% \font\testa=file:lmroman10-regular                  at 12pt \testa \input tufte \par
-% \font\testb=file:lmroman12-regular:+liga;           at 24pt \testb effe flink fietsen \par
-% \font\testc=file:lmroman12-regular:mode=node;+liga; at 24pt \testc effe flink fietsen \par
-% \font\testd=name:lmroman10bold                      at 12pt \testd a bit bold \par
-%
-% \font\teste=[lmroman12-regular]:+liga at 30pt \teste text
-% \font\testf=[lmroman12-regular]       at 40pt \testf more text
-% \end{verbatim}
 %
 % \subsection{\ConTeXt\ files needed}
 %
@@ -300,19 +318,23 @@ and the derived files
 % \item \texttt{font-dum.lua}
 % \end{itemize*}
 % \end{multicols}
-% 
+%
 % \subsection{Troubleshooting}
 %
 % If you encounter problems with some fonts, please first update to the latest
 % version of this package before reporting a bug, as this package is under
 % active development.
 %
-% A very common problem is the lack of features for some otf fonts even when
-% specified. It can be related to the fact that some fonts do not provide
-% features for the |dflt| script, which is the default one in this package,
-% so you may have to specify the script in the command line, for example:
+% A very common problem is the lack of features for some OpenType fonts
+% even when specified. It can be related to the fact that some fonts do not
+% provide features for the |dflt| script, which is the default one in this
+% package, so you may have to specify the script in the command line, for
+% example:
 %
 % |\font\myfont = MyFont.otf:script=latn;+liga;|
+%
+% Also, some feature like contextual substitution, |calt|, will only work with
+% |node| mode.
 %
 % \section{\texttt{luaotfload.lua}}
 %
@@ -424,7 +446,7 @@ luaotfload.loadmodule('node-ini.lua')
 
 function attributes.private(name)
     local number = luatexbase.attributes['otfl@'..name]
-    if not number then 
+    if not number then
         error('asking for attribute %s, but not declared. '
             ..'Please report to the maintainer of luaotfload.',
                name)
@@ -436,7 +458,7 @@ end
 %
 %    Some more modules. We don't load neither \texttt{font-enc.lua} nor
 %    \texttt{font-afm.lua} as it will never be used here.
-%    
+%
 %    We also remove a warning from \texttt{node-fnt.lua} as it is \ConTeXt\
 %    specific.
 %
@@ -469,7 +491,7 @@ luaotfload.loadmodule('font-clr.lua')
 
 %    \end{macrocode}
 %
-%    Finally two functions 
+%    Finally two functions
 %
 %    \begin{macrocode}
 

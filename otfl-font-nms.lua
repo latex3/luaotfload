@@ -51,7 +51,9 @@ function names.load()
     end
     if data then
         if trace_loading then
-            logs.report("load font", "loaded font names database: %s", foundname)
+            logs.report("load font",
+                "loaded font names database: %s",
+                foundname)
         end
         return data
     end
@@ -60,9 +62,23 @@ end
 local loaded    = false
 
 local synonyms  = {
-    regular     = {normal=true,        roman=true,        plain=true,   book=true, medium=true},
-    italic      = {regularitalic=true, normalitalic=true, oblique=true, slant=true},
-    bolditalic  = {boldoblique=true,   boldslant=true},
+    regular = {
+        normal = true,
+        roman  = true,
+        plain  = true,
+        book   = true,
+        medium = true,
+    },
+    italic = {
+        regularitalic = true,
+        normalitalic  = true,
+        oblique       = true,
+        slant         = true,
+    },
+    bolditalic = {
+        boldoblique   = true,
+        boldslant     = true,
+    },
 }
 
 -- a small hack to get the log message "no font names database loaded" only
@@ -103,7 +119,8 @@ function names.resolve(specification)
                 if name == family then
                     if subfamily == style then
                         if optsize then
-                            if dsnsize == size or (size > minsize and size <= maxsize) then
+                            if dsnsize == size
+                            or (size > minsize and size <= maxsize) then
                                 found[1] = face
                                 break
                             else
@@ -115,7 +132,8 @@ function names.resolve(specification)
                         end
                     elseif synonyms[style] and synonyms[style][subfamily] then
                         if optsize then
-                            if dsnsize == size or (size > minsize and size <= maxsize) then
+                            if dsnsize == size
+                            or (size > minsize and size <= maxsize) then
                                 found[1] = face
                                 break
                             else
@@ -129,9 +147,13 @@ function names.resolve(specification)
                         found[1] = face
                     end
                 else
-                    if name == fullname or name == pfullname or name == fontname or name == psname then
+                    if name == fullname
+                    or name == pfullname
+                    or name == fontname
+                    or name == psname then
                         if optsize then
-                            if dsnsize == size or (size > minsize and size <= maxsize) then
+                            if dsnsize == size
+                            or (size > minsize and size <= maxsize) then
                                 found[1] = face
                                 break
                             else
@@ -244,11 +266,13 @@ local function font_fullinfo(filename, subfont, texmf)
         for _,v in pairs(m.names) do
             if v.lang == "English (US)" then
                 t.names = {
-                    -- see http://developer.apple.com/textfonts/TTRefMan/RM06/Chap6name.html
-                    fullname       = v.names.compatfull     or v.names.fullname, -- 18, 4
-                    family         = v.names.preffamilyname or v.names.family,   -- 17, 1
-                    subfamily      = t.fontstyle_name       or v.names.prefmodifiers  or v.names.subfamily, -- opt. style, 16, 2
-                    psname         = v.names.postscriptname --or t.fontname
+                    -- see
+                    -- http://developer.apple.com/textfonts/
+                    -- TTRefMan/RM06/Chap6name.html
+                    fullname = v.names.compatfull     or v.names.fullname,
+                    family   = v.names.preffamilyname or v.names.family,
+                    subfamily= t.fontstyle_name       or v.names.prefmodifiers  or v.names.subfamily,
+                    psname   = v.names.postscriptname
                 }
             end
         end

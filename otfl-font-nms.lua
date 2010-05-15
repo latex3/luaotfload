@@ -368,8 +368,7 @@ local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, rec
     - names is the font database to fill
     - recursive is whether we scan all directories recursively (always false
           in this script)
-    - texmf is a boolean saying if we are scanning a texmf directory (always
-          true in this script)
+    - texmf is a boolean saying if we are scanning a texmf directory
     --]]
     local list, found = { }, { }
     local nbfound = 0
@@ -449,6 +448,17 @@ local function read_fcdata(data)
     return list
 end
 
+--[[
+  Under Mac OSX, fc-list does not exist and there is no guaranty that OSFONTDIR
+  is correctly filled, so for now we use static paths.
+]]
+
+local static_osx_dirs = {
+ "~/Library/Fonts",
+ "/Library/Fonts",
+ "/System/Library/Fonts",
+ }
+
 local function scan_os_fonts(fontnames, status, newfontnames, newstatus)
     --[[
     This function scans the OS fonts through fontcache (fc-list), it executes
@@ -460,20 +470,34 @@ local function scan_os_fonts(fontnames, status, newfontnames, newstatus)
         if trace_progress then
             logs.report("scanning OS fonts:")
         end
-        if trace_search then
-            logs.report("executing 'fc-list : file' and parsing its result...")
-        end
-        local data = io.popen("fc-list : file", 'r')
-        local list = read_fcdata(data)
-        data:close()
-        if trace_search then
-            logs.report("%d fonts found", #list)
-        end
-        count = 0
-        for _,fnt in ipairs(list) do
-            count = count + 1
-            progress(count, #list)
-            load_font(fnt, fontnames, status, newfontnames, newstatus, false)
+        -- under OSX, we don't rely on fc-list, we rely on some static
+        -- directories instead
+        if os.name == "macosx" then
+            if trace_search then
+                logs.report("searching in static system directories")
+            end
+            count = 0
+            for _,d in ipairs(static_osx_dirs) do
+                count = count + 1
+                progress(count, #static_osx_dirs)
+                scan_dir(d, fontnames, status, newfontnames, newstatus, false, false)
+            end
+        else
+            if trace_search then
+                logs.report("executing 'fc-list : file' and parsing its result...")
+            end
+            local data = io.popen("fc-list : file", 'r')
+            local list = read_fcdata(data)
+            data:close()
+            if trace_search then
+                logs.report("%d fonts found", #list)
+            end
+            count = 0
+            for _,fnt in ipairs(list) do
+                count = count + 1
+                progress(count, #list)
+                load_font(fnt, fontnames, status, newfontnames, newstatus, false)
+            end
         end
     end
 end

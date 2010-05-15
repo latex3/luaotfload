@@ -366,8 +366,7 @@ local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, rec
     with all the fonts it finds.
     - dirname is the name of the directory to scan
     - names is the font database to fill
-    - recursive is whether we scan all directories recursively (always false
-          in this script)
+    - recursive is whether we scan all directories recursively
     - texmf is a boolean saying if we are scanning a texmf directory
     --]]
     local list, found = { }, { }
@@ -413,14 +412,30 @@ local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
             logs.report("scanning TEXMF and OS fonts:")
         end
     end
+    local explored_dirs = {}
+    local osdirs = expandpath("$OSFONTDIR")
+    -- OPENTYPEFONTS and TTFONTS contain OSFONTDIR
     local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
-        local explored_dirs = {}
         fontdirs = splitpath(fontdirs)
         -- hack, don't scan current dir
         table.remove(fontdirs, 1)
         count = 0
+        if osdirs and osdirs ~= '' then
+            osdirs = splitpath(osdirs)
+            -- we first scan the os dirs and have texmf=0 for scan_dir, and then
+            -- we scan the true texmf dirs, with texmf=1. With explored_dirs, we
+            -- won't explore a directory two times.
+            for _,d in ipairs(osdirs) do
+                if not explored_dirs[d] then
+                    count = count + 1
+                    progress(count, #fontdirs)
+                    scan_dir(d, fontnames, status, newfontnames, newstatus, false, false)
+                    explored_dirs[d] = true
+                end
+            end
+        end
         for _,d in ipairs(fontdirs) do
             if not explored_dirs[d] then
                 count = count + 1
@@ -544,3 +559,4 @@ end
 
 names.scan   = scan_dir
 names.update = update
+

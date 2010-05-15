@@ -251,7 +251,11 @@ end
 local function font_fullinfo(filename, subfont, texmf)
     local t = { }
     local f = fontloader.open(filename, subfont)
-    local m = f and fontloader.to_table(f)
+    if not f then
+        logs.report("error: failed to open %s", filename)
+        return nil
+    end
+    local m = fontloader.to_table(f)
     fontloader.close(f)
     collectgarbage('collect')
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
@@ -290,7 +294,6 @@ local function font_fullinfo(filename, subfont, texmf)
         m.design_range_top    ~= 0 and m.design_range_top    or nil,
         m.design_range_bottom ~= 0 and m.design_range_bottom or nil,
     }
-
     return t
 end
 

@@ -16,11 +16,10 @@ require("alt_getopt")
 local name = 'mkluatexfontdb'
 local version = '1.07' -- same version number as luaotfload
 
-mkluatexfontdb = { } -- just for now, elie is rewriting it anyway
 local names    = fonts.names
 
 -- the directory in which the database will be saved, can be overwritten
-mkluatexfontdb.directory = names.path.localdir
+local output_directory = names.path.localdir
 
 local log      = logs.report
 
@@ -112,19 +111,19 @@ local function process_cmdline()
             help_msg()
             os.exit(0)
         elseif v == "d" then
-            mkluatexfontdb.directory = optarg [i]
+            output_directory = optarg [i]
         elseif v == "f" then
             force_reload = 1
         elseif v == "fc-cache" then
             run_fc_cache = 1
         elseif v == "sys" then
-            mkluatexfontdb.directory = names.path.systemdir
+            output_directory = names.path.systemdir
         end
     end
     if string.match(arg[0], '-sys') then
-        mkluatexfontdb.directory = names.path.systemdir
+        output_directory = names.path.systemdir
     end
-    mkluatexfontdb.directory = fonts.path_normalize(mkluatexfontdb.directory)
+    output_directory = fonts.path_normalize(output_directory)
     names.set_log_level(log_level)
 end
 
@@ -134,14 +133,14 @@ do_run_fc_cache(run_fc_cache)
 -- the status table is containing correspondances between absolute path and last modification
 -- timestamp, it's uses to save time during update, by not reparsing unchanged fonts.
 local status = nil
-local status_file = mkluatexfontdb.directory .. "/otfl-names-status.lua"
+local status_file = output_directory .. "/otfl-names-status.lua"
 if not force_reload and file.isreadable(status_file) then
     status = dofile(status_file)
 end
 
 local function generate(force)
     log("generating font names database.")
-    local savepath = mkluatexfontdb.directory
+    local savepath = output_directory
     if not lfs.isdir(savepath) then
         log("creating directory %s", savepath)
         dir.mkdirs(savepath)

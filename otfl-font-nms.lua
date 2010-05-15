@@ -495,7 +495,7 @@ local function scan_os_fonts(fontnames, status, newfontnames, newstatus)
             for _,d in ipairs(static_osx_dirs) do
                 count = count + 1
                 progress(count, #static_osx_dirs)
-                scan_dir(d, fontnames, status, newfontnames, newstatus, false, false)
+                scan_dir(d, fontnames, status, newfontnames, newstatus, true, false)
             end
         else
             if trace_search then

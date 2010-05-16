@@ -37,6 +37,14 @@ local function sanitize(str)
     end
 end
 
+local function fontnames_init()
+    return {
+        mappings  = { },
+        status    = { },
+        version   = names.version,
+    }
+end
+
 function names.load()
     local localpath  = names.path.localdir  .. names.path.basename
     local systempath = names.path.systemdir .. names.path.basename
@@ -55,8 +63,15 @@ function names.load()
                 "loaded font names database: %s",
                 foundname)
         end
-        return data
+    else
+        logs.report("load font",
+            "no font names database found, generating new one")
+        local fontnames = fontnames_init()
+        local savepath  = names.path.localdir  .. names.path.basename
+        data = names.update(fontnames, false)
+        io.savedata(savepath, table.serialize(data, true))
     end
+    return data
 end
 
 local loaded    = false
@@ -80,10 +95,6 @@ local synonyms  = {
         boldslant     = true,
     },
 }
-
--- a small hack to get the log message "no font names database loaded" only
--- once in the log
-local log_message_shown = false
 
 function names.resolve(specification)
     local tfm   = resolvers.find_file(specification.name, "ofm")
@@ -197,9 +208,6 @@ function names.resolve(specification)
             -- no font found so far, fallback to filename
             return specification.name, false
         end
-    elseif not log_message_shown then
-        logs.report("load font", "no font names database loaded")
-        log_message_shown = true
     end
 end
 
@@ -515,14 +523,6 @@ local function scan_os_fonts(fontnames, newfontnames)
             end
         end
     end
-end
-
-local function fontnames_init()
-    return {
-        mappings  = { },
-        status    = { },
-        version   = names.version,
-    }
 end
 
 local function update(fontnames, force)

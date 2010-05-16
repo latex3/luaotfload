@@ -340,7 +340,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
             else
                 local fullinfo = font_fullinfo(filename, false, texmf)
                 newmappings[#newmappings+1] = fullinfo
-                newstatus[filename].index[#newstatus[filename].index+1] = #newmappings
+                newstatus[filename].index[1] = #newmappings
             end
         else
             if trace_loading then

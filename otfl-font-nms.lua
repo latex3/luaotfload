@@ -432,30 +432,14 @@ local function scan_texmf_tree(fontnames, newfontnames)
             logs.report("scanning TEXMF and OS fonts:")
         end
     end
-    local explored_dirs = {}
-    local osdirs = expandpath("$OSFONTDIR")
-    -- OPENTYPEFONTS and TTFONTS contain OSFONTDIR
     local fontdirs = expandpath("$OPENTYPEFONTS")
     fontdirs = fontdirs .. gsub(expandpath("$TTFONTS"), "^\.", "")
     if not fontdirs:is_empty() then
+        local explored_dirs = {}
         fontdirs = splitpath(fontdirs)
         -- hack, don't scan current dir
         table.remove(fontdirs, 1)
         count = 0
-        if osdirs and osdirs ~= '' then
-            osdirs = splitpath(osdirs)
-            -- we first scan the os dirs and have texmf=0 for scan_dir, and then
-            -- we scan the true texmf dirs, with texmf=1. With explored_dirs, we
-            -- won't explore a directory two times.
-            for _,d in ipairs(osdirs) do
-                if not explored_dirs[d] then
-                    count = count + 1
-                    progress(count, #fontdirs)
-                    scan_dir(d, fontnames, newfontnames, false)
-                    explored_dirs[d] = true
-                end
-            end
-        end
         for _,d in ipairs(fontdirs) do
             if not explored_dirs[d] then
                 count = count + 1
@@ -566,4 +550,3 @@ end
 
 names.scan   = scan_dir
 names.update = update
-

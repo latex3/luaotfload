@@ -66,9 +66,8 @@ function names.load()
     else
         logs.report("load font",
             "no font names database found, generating new one")
-        local fontnames = fontnames_init()
         local savepath  = names.path.localdir  .. names.path.basename
-        data = names.update(fontnames, false)
+        data = names.update()
         io.savedata(savepath, table.serialize(data, true))
     end
     return data

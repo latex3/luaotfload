@@ -130,14 +130,6 @@ end
 process_cmdline()
 do_run_fc_cache(run_fc_cache)
 
--- the status table is containing correspondances between absolute path and last modification
--- timestamp, it's uses to save time during update, by not reparsing unchanged fonts.
-local status = nil
-local status_file = output_directory .. "/otfl-names-status.lua"
-if not force_reload and file.isreadable(status_file) then
-    status = dofile(status_file)
-end
-
 local function generate(force)
     log("generating font names database.")
     local savepath = output_directory
@@ -162,11 +154,10 @@ local function generate(force)
     else
         fontnames = nil
     end
-    fontnames, status = names.update(fontnames, status, force)
+    fontnames = names.update(fontnames, force)
     log("%s fonts in the database", #fontnames.mappings)
     io.savedata(savepath, table.serialize(fontnames, true))
     log("saved font names database in %s\n", savepath)
-    io.savedata(status_file, table.serialize(status, true))
 end
 
 generate(force_reload)

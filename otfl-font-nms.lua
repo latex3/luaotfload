@@ -11,7 +11,7 @@ fonts.names          = fonts.names or { }
 
 local names          = fonts.names
 local names_dir      = "/luatex/generic/luaotfload/names/"
-names.version        = 2.007 -- not the same as in context
+names.version        = 2.008 -- not the same as in context
 names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
@@ -297,9 +297,11 @@ local function font_fullinfo(filename, subfont, texmf)
     return t
 end
 
-local function load_font(filename, fontnames, status, newfontnames, newstatus, texmf)
-    local mappings    = newfontnames and newfontnames.mappings  or { }
-    local oldmappings = fontnames.mappings  or { }
+local function load_font(filename, fontnames, newfontnames, texmf)
+    local newmappings = newfontnames.mappings
+    local newstatus   = newfontnames.status
+    local mappings    = fontnames.mappings
+    local status      = fontnames.status
     if filename then
         local timestamp, db_timestamp
         db_timestamp        = status[filename] and status[filename].timestamp
@@ -309,8 +311,8 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
         newstatus[filename].index     = {}
         if db_timestamp == timestamp then
             for _,v in ipairs(status[filename].index) do
-                mappings[#mappings+1] = oldmappings[v]
-                newstatus[filename].index[#newstatus[filename].index+1] = #mappings
+                newmappings[#newmappings+1] = mappings[v]
+                newstatus[filename].index[#newstatus[filename].index+1] = #newmappings
             end
             if trace_loading then
                 logs.report("font already indexed: %s", filename)
@@ -325,13 +327,13 @@ local function load_font(filename, fontnames, status, newfontnames, newstatus, t
             if type(info) == "table" and #info > 1 then
                 for i in ipairs(info) do
                     local fullinfo = font_fullinfo(filename, i-1, texmf)
-                    mappings[#mappings+1] = fullinfo
-                    newstatus[filename].index[#newstatus[filename].index+1] = #mappings
+                    newmappings[#newmappings+1] = fullinfo
+                    newstatus[filename].index[#newstatus[filename].index+1] = #newmappings
                 end
             else
                 local fullinfo = font_fullinfo(filename, false, texmf)
-                mappings[#mappings+1] = fullinfo
-                newstatus[filename].index[#newstatus[filename].index+1] = #mappings
+                newmappings[#newmappings+1] = fullinfo
+                newstatus[filename].index[#newstatus[filename].index+1] = #newmappings
             end
         else
             if trace_loading then
@@ -360,7 +362,7 @@ end
 
 fonts.path_normalize = path_normalize
 
-local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, texmf)
+local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --[[
     this function scans a directory and populates the list of fonts
     with all the fonts it finds.
@@ -394,11 +396,11 @@ local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, tex
     end
     for _,fnt in ipairs(list) do
         fnt = path_normalize(fnt)
-        load_font(fnt, fontnames, status, newfontnames, newstatus, texmf)
+        load_font(fnt, fontnames, newfontnames, texmf)
     end
 end
 
-local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
+local function scan_texmf_tree(fontnames, newfontnames)
     --[[
     The function that scans all fonts in the texmf tree, through kpathsea
     variables OPENTYPEFONTS and TTFONTS of texmf.cnf
@@ -429,7 +431,7 @@ local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
                 if not explored_dirs[d] then
                     count = count + 1
                     progress(count, #fontdirs)
-                    scan_dir(d, fontnames, status, newfontnames, newstatus, false)
+                    scan_dir(d, fontnames, newfontnames, false)
                     explored_dirs[d] = true
                 end
             end
@@ -438,7 +440,7 @@ local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
             if not explored_dirs[d] then
                 count = count + 1
                 progress(count, #fontdirs)
-                scan_dir(d, fontnames, status, newfontnames, newstatus, true)
+                scan_dir(d, fontnames, newfontnames, true)
                 explored_dirs[d] = true
             end
         end
@@ -472,7 +474,7 @@ local static_osx_dirs = {
  "/System/Library/Fonts",
  }
 
-local function scan_os_fonts(fontnames, status, newfontnames, newstatus)
+local function scan_os_fonts(fontnames, newfontnames)
     --[[
     This function scans the OS fonts through fontcache (fc-list), it executes
     only if OSFONTDIR is empty (which is the case under most Unix by default).
@@ -493,7 +495,7 @@ local function scan_os_fonts(fontnames, status, newfontnames, newstatus)
             for _,d in ipairs(static_osx_dirs) do
                 count = count + 1
                 progress(count, #static_osx_dirs)
-                scan_dir(d, fontnames, status, newfontnames, newstatus, false)
+                scan_dir(d, fontnames, newfontnames, false)
             end
         else
             if trace_search then
@@ -509,7 +511,7 @@ local function scan_os_fonts(fontnames, status, newfontnames, newstatus)
             for _,fnt in ipairs(list) do
                 count = count + 1
                 progress(count, #list)
-                load_font(fnt, fontnames, status, newfontnames, newstatus, false)
+                load_font(fnt, fontnames, newfontnames, false)
             end
         end
     end
@@ -518,41 +520,31 @@ end
 local function fontnames_init()
     return {
         mappings  = { },
+        status    = { },
         version   = names.version,
     }
 end
 
-local function status_init()
-    return {
-        version   = names.version,
-    }
-end
-
-local function update(fontnames, status, force)
+local function update(fontnames, force)
     --[[
     The main function, scans everything
     - fontnames is the final table to return
     - force is whether we rebuild it from scratch or not
-    - status is a table containing the current status of the database
     --]]
     if force then
         fontnames = fontnames_init()
-        status = status_init()
     else
-        if not fontnames or not fontnames.version or fontnames.version ~= names.version
-                or not status or not status.version or status.version ~= names.version then
+        if not fontnames or not fontnames.version or fontnames.version ~= names.version then
             fontnames = fontnames_init()
-            status = status_init()
             if trace_search then
                 logs.report("no font names database or old one found, generating new one")
             end
         end
     end
     local newfontnames = fontnames_init()
-    local newstatus    = status_init()
-    scan_texmf_tree(fontnames, status, newfontnames, newstatus)
-    scan_os_fonts  (fontnames, status, newfontnames, newstatus)
-    return newfontnames, newstatus
+    scan_texmf_tree(fontnames, newfontnames)
+    scan_os_fonts  (fontnames, newfontnames)
+    return newfontnames
 end
 
 names.scan   = scan_dir

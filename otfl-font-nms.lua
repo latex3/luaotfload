@@ -510,16 +510,18 @@ local function scan_os_fonts(fontnames, newfontnames)
                 logs.report("executing 'fc-list : file' and parsing its result...")
             end
             local data = io.popen("fc-list : file", 'r')
-            local list = read_fcdata(data)
-            data:close()
-            if trace_search then
-                logs.report("%d fonts found", #list)
-            end
-            count = 0
-            for _,fnt in ipairs(list) do
-                count = count + 1
-                progress(count, #list)
-                load_font(fnt, fontnames, newfontnames, false)
+            if data then
+                local list = read_fcdata(data)
+                data:close()
+                if trace_search then
+                    logs.report("%d fonts found", #list)
+                end
+                count = 0
+                for _,fnt in ipairs(list) do
+                    count = count + 1
+                    progress(count, #list)
+                    load_font(fnt, fontnames, newfontnames, false)
+                end
             end
         end
     end

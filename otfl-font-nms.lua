@@ -360,23 +360,21 @@ end
 
 fonts.path_normalize = path_normalize
 
-local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, recursive, texmf)
+local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, texmf)
     --[[
     this function scans a directory and populates the list of fonts
     with all the fonts it finds.
     - dirname is the name of the directory to scan
     - names is the font database to fill
-    - recursive is whether we scan all directories recursively
     - texmf is a boolean saying if we are scanning a texmf directory
     --]]
     local list, found = { }, { }
     local nbfound = 0
     for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
-        if recursive then pat = "/**." else pat = "/*." end
         if trace_search then
             logs.report("scanning '%s' for '%s' fonts", dirname, ext)
         end
-        found = glob(dirname .. pat .. ext)
+        found = glob(dirname .. "/**." .. ext)
         -- note that glob fails silently on broken symlinks, which happens
         -- sometimes in TeX Live.
         if trace_search then
@@ -387,7 +385,7 @@ local function scan_dir(dirname, fontnames, status, newfontnames, newstatus, rec
         if trace_search then
             logs.report("scanning '%s' for '%s' fonts", dirname, upper(ext))
         end
-        found = glob(dirname .. pat .. upper(ext))
+        found = glob(dirname .. "/**." .. upper(ext))
         table.append(list, found)
         nbfound = nbfound + #found
     end
@@ -431,7 +429,7 @@ local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
                 if not explored_dirs[d] then
                     count = count + 1
                     progress(count, #fontdirs)
-                    scan_dir(d, fontnames, status, newfontnames, newstatus, false, false)
+                    scan_dir(d, fontnames, status, newfontnames, newstatus, false)
                     explored_dirs[d] = true
                 end
             end
@@ -440,7 +438,7 @@ local function scan_texmf_tree(fontnames, status, newfontnames, newstatus)
             if not explored_dirs[d] then
                 count = count + 1
                 progress(count, #fontdirs)
-                scan_dir(d, fontnames, status, newfontnames, newstatus, false, true)
+                scan_dir(d, fontnames, status, newfontnames, newstatus, true)
                 explored_dirs[d] = true
             end
         end
@@ -495,7 +493,7 @@ local function scan_os_fonts(fontnames, status, newfontnames, newstatus)
             for _,d in ipairs(static_osx_dirs) do
                 count = count + 1
                 progress(count, #static_osx_dirs)
-                scan_dir(d, fontnames, status, newfontnames, newstatus, true, false)
+                scan_dir(d, fontnames, status, newfontnames, newstatus, false)
             end
         else
             if trace_search then

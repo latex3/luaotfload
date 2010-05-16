@@ -20,10 +20,11 @@ names.path           = {
 }
 
 
-local splitpath, expandpath, glob, basename = file.split_path, kpse.expand_path, dir.glob, file.basename
-local upper, lower, format, gsub, match  = string.upper, string.lower, string.format, string.gsub, string.match
-local rpadd = string.rpadd
-local utfgsub = unicode.utf8.gsub
+local splitpath, expandpath = file.split_path, kpse.expand_path
+local glob, basename        = dir.glob, file.basename
+local upper, lower, format  = string.upper, string.lower, string.format
+local gsub, match, rpadd    = string.gsub, string.match, string.rpadd
+local utfgsub               = unicode.utf8.gsub
 
 local trace_progress = true  --trackers.register("names.progress", function(v) trace_progress = v end)
 local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
@@ -99,16 +100,25 @@ function names.resolve(specification)
     local tfm   = resolvers.find_file(specification.name, "ofm")
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
-    local size  = tonumber(specification.optsize) or specification.size and specification.size / 65536
+
+    local size
+    if specification.optsize then
+        size = tonumber(specification.optsize)
+    elseif specification.size then
+        size = specification.size / 65536
+    end
+
     if tfm then
         -- is a tfm font, skip names database
         return specification.name, false
     end
+
     if not loaded then
-        names.data   = names.load()
-        loaded = true
+        names.data = names.load()
+        loaded     = true
     end
-    local data  = names.data
+
+    local data = names.data
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
             local found = { }
@@ -123,8 +133,9 @@ function names.resolve(specification)
                 if #face.size > 0 then
                     optsize = face.size
                     dsnsize = optsize[1] and optsize[1] / 10
-                    maxsize = optsize[2] and optsize[2] / 10 or dsnsize -- can be nil
-                    minsize = optsize[3] and optsize[3] / 10 or dsnsize -- can be nil
+                    -- can be nil
+                    maxsize = optsize[2] and optsize[2] / 10 or dsnsize
+                    minsize = optsize[3] and optsize[3] / 10 or dsnsize
                 end
                 if name == family then
                     if subfamily == style then
@@ -210,7 +221,7 @@ function names.resolve(specification)
     end
 end
 
-names.resolvespec = names.resolve -- only supported in mkiv
+names.resolvespec = names.resolve
 
 function names.set_log_level(level)
     if level == 2 then
@@ -222,7 +233,7 @@ function names.set_log_level(level)
         trace_search = true
     end
 end
-    
+
 local lastislog = 0
 
 function log(fmt, ...)
@@ -318,8 +329,9 @@ local function load_font(filename, fontnames, newfontnames, texmf)
         newstatus[filename].index     = {}
         if db_timestamp == timestamp then
             for _,v in ipairs(status[filename].index) do
-                newmappings[#newmappings+1] = mappings[v]
-                newstatus[filename].index[#newstatus[filename].index+1] = #newmappings
+                local index = #newstatus[filename].index
+                newmappings[#newmappings+1]        = mappings[v]
+                newstatus[filename].index[index+1] = #newmappings
             end
             if trace_loading then
                 logs.report("font already indexed: %s", filename)
@@ -334,8 +346,9 @@ local function load_font(filename, fontnames, newfontnames, texmf)
             if type(info) == "table" and #info > 1 then
                 for i in ipairs(info) do
                     local fullinfo = font_fullinfo(filename, i-1, texmf)
-                    newmappings[#newmappings+1] = fullinfo
-                    newstatus[filename].index[#newstatus[filename].index+1] = #newmappings
+                    local index = #newstatus[filename].index
+                    newmappings[#newmappings+1]        = fullinfo
+                    newstatus[filename].index[index+1] = #newmappings
                 end
             else
                 local fullinfo = font_fullinfo(filename, false, texmf)
@@ -535,10 +548,13 @@ local function update(fontnames, force)
     if force then
         fontnames = fontnames_init()
     else
-        if not fontnames or not fontnames.version or fontnames.version ~= names.version then
+        if not fontnames
+        or not fontnames.version
+        or fontnames.version ~= names.version then
             fontnames = fontnames_init()
             if trace_search then
-                logs.report("no font names database or old one found, generating new one")
+                logs.report("no font names database or old one found, "
+                          .."generating new one")
             end
         end
     end

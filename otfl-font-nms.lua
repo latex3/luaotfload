@@ -67,14 +67,11 @@ function names.load()
     else
         logs.report("load font",
             "no font names database found, generating new one")
-        local savepath  = names.path.localdir  .. names.path.basename
         data = names.update()
-        io.savedata(savepath, table.serialize(data, true))
+        names.save(data)
     end
     return data
 end
-
-local loaded    = false
 
 local synonyms  = {
     regular = {
@@ -95,6 +92,9 @@ local synonyms  = {
         boldslant     = true,
     },
 }
+
+local loaded   = false
+local reloaded = false
 
 function names.resolve(specification)
     local tfm   = resolvers.find_file(specification.name, "ofm")
@@ -215,7 +215,25 @@ function names.resolve(specification)
                     return closest.filename[1], closest.filename[2]
                 end
             end
-            -- no font found so far, fallback to filename
+            -- no font found so far
+            if not reloaded then
+                -- try reloading the database
+                names.data = names.update(names.data)
+                names.save(names.data)
+                reloaded   = true
+                return names.resolve(specification)
+            else
+                -- else, fallback to filename
+                return specification.name, false
+            end
+        end
+    else
+        if not reloaded then
+            names.data = names.update()
+            names.save(names.data)
+            reloaded   = true
+            return names.resolve(specification)
+        else
             return specification.name, false
         end
     end
@@ -523,7 +541,7 @@ local function scan_os_fonts(fontnames, newfontnames)
     end
 end
 
-local function update(fontnames, force)
+local function update_names(fontnames, force)
     --[[
     The main function, scans everything
     - fontnames is the final table to return
@@ -548,5 +566,11 @@ local function update(fontnames, force)
     return newfontnames
 end
 
+local function save_names(fontnames)
+    local savepath  = names.path.localdir  .. names.path.basename
+    io.savedata(savepath, table.serialize(fontnames, true))
+end
+
 names.scan   = scan_dir
-names.update = update
+names.update = update_names
+names.save   = save_names

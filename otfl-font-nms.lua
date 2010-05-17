@@ -11,7 +11,7 @@ fonts.names          = fonts.names or { }
 
 local names          = fonts.names
 local names_dir      = "/luatex/generic/luaotfload/names/"
-names.version        = 2.008 -- not the same as in context
+names.version        = 2.009 -- not the same as in context
 names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
@@ -338,44 +338,51 @@ local function load_font(filename, fontnames, newfontnames, texmf)
     local newstatus   = newfontnames.status
     local mappings    = fontnames.mappings
     local status      = fontnames.status
+    local basefile    = texmf and basename(filename) or filename
     if filename then
+        if newstatus[basefile] then
+            -- already indexed in this run
+            return
+        end
+
         local timestamp, db_timestamp
-        db_timestamp        = status[filename] and status[filename].timestamp
+        db_timestamp        = status[basefile] and status[basefile].timestamp
         timestamp           = lfs.attributes(filename, "modification")
-        newstatus[filename] = { }
-        newstatus[filename].timestamp = timestamp
-        newstatus[filename].index     = {}
-        if db_timestamp == timestamp then
-            for _,v in ipairs(status[filename].index) do
-                local index = #newstatus[filename].index
+        newstatus[basefile] = { }
+        newstatus[basefile].timestamp = timestamp
+        newstatus[basefile].index     = {}
+
+        if db_timestamp == timestamp or nd_timestamp == timestamp then
+            for _,v in ipairs(status[basefile].index) do
+                local index = #newstatus[basefile].index
                 newmappings[#newmappings+1]        = mappings[v]
-                newstatus[filename].index[index+1] = #newmappings
+                newstatus[basefile].index[index+1] = #newmappings
             end
             if trace_loading then
-                logs.report("font already indexed: %s", filename)
+                logs.report("font already indexed: %s", basefile)
             end
             return
         end
         if trace_loading then
-            logs.report("loading font: %s", filename)
+            logs.report("loading font: %s", basefile)
         end
         local info = fontloader.info(filename)
         if info then
             if type(info) == "table" and #info > 1 then
                 for i in ipairs(info) do
                     local fullinfo = font_fullinfo(filename, i-1, texmf)
-                    local index = #newstatus[filename].index
+                    local index = #newstatus[basefile].index
                     newmappings[#newmappings+1]        = fullinfo
-                    newstatus[filename].index[index+1] = #newmappings
+                    newstatus[basefile].index[index+1] = #newmappings
                 end
             else
                 local fullinfo = font_fullinfo(filename, false, texmf)
                 newmappings[#newmappings+1] = fullinfo
-                newstatus[filename].index[1] = #newmappings
+                newstatus[basefile].index[1] = #newmappings
             end
         else
             if trace_loading then
-               logs.report("failed to load %s", filename)
+               logs.report("failed to load %s", basefile)
             end
         end
     end
@@ -450,21 +457,15 @@ local function scan_texmf_tree(fontnames, newfontnames)
             logs.report("scanning TEXMF and OS fonts:")
         end
     end
-    local fontdirs = expandpath("$OPENTYPEFONTS")
-    fontdirs = fontdirs .. gsub(expandpath("$TTFONTS"), "^\.", "")
+    local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^\.", "")
+    fontdirs = fontdirs .. expandpath("$TTFONTS"):gsub("^\.", "")
     if not fontdirs:is_empty() then
-        local explored_dirs = {}
         fontdirs = splitpath(fontdirs)
-        -- hack, don't scan current dir
-        table.remove(fontdirs, 1)
         count = 0
         for _,d in ipairs(fontdirs) do
-            if not explored_dirs[d] then
-                count = count + 1
-                progress(count, #fontdirs)
-                scan_dir(d, fontnames, newfontnames, true)
-                explored_dirs[d] = true
-            end
+            count = count + 1
+            progress(count, #fontdirs)
+            scan_dir(d, fontnames, newfontnames, true)
         end
     end
 end

@@ -50,20 +50,21 @@ function names.load()
     local localpath  = names.path.localdir  .. names.path.basename
     local systempath = names.path.systemdir .. names.path.basename
     local kpsefound  = kpse.find_file(names.path.basename)
+    local foundname
     local data
     if kpsefound and file.isreadable(kpsefound) then
         data = dofile(kpsefound)
+	foundname = kpsefound
     elseif file.isreadable(localpath)  then
         data = dofile(localpath)
+	foundname = localpath
     elseif file.isreadable(systempath) then
         data = dofile(systempath)
+	foundname = systempath
     end
     if data then
-        if trace_loading then
-            logs.report("load font",
-                "loaded font names database: %s",
-                foundname)
-        end
+        logs.report("load font",
+            "loaded font names database: %s", foundname)
     else
         logs.report("load font",
             "no font names database found, generating new one")

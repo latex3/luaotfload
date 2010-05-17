@@ -97,7 +97,16 @@ local loaded   = false
 local reloaded = false
 
 function names.resolve(specification)
-    local tfm   = resolvers.find_file(specification.name, "ofm")
+    local tfm   = resolvers.find_file(specification.name, "tfm")
+    local ofm   = resolvers.find_file(specification.name, "ofm")
+
+    if tfm then
+        -- is a tfm font, skip names database
+        return specification.name .. ".tfm", false
+    elseif ofm then
+        return specification.name .. ".ofm", false
+    end
+
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
 
@@ -108,10 +117,6 @@ function names.resolve(specification)
         size = specification.size / 65536
     end
 
-    if tfm then
-        -- is a tfm font, skip names database
-        return specification.name, false
-    end
 
     if not loaded then
         names.data = names.load()

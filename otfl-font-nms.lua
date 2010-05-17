@@ -340,19 +340,22 @@ local function load_font(filename, fontnames, newfontnames, texmf)
     local status      = fontnames.status
     local basefile    = texmf and basename(filename) or filename
     if filename then
-        if newstatus[basefile] then
-            -- already indexed in this run
-            return
-        end
-
         local timestamp, db_timestamp
         db_timestamp        = status[basefile] and status[basefile].timestamp
         timestamp           = lfs.attributes(filename, "modification")
-        newstatus[basefile] = { }
-        newstatus[basefile].timestamp = timestamp
-        newstatus[basefile].index     = {}
 
-        if db_timestamp == timestamp or nd_timestamp == timestamp then
+        if newstatus[basefile] then
+            -- already indexed in this run
+            if newstatus[basefile].timestamp == timestamp then
+                return
+            end
+        end
+
+        newstatus[basefile] = newstatus[basefile] or { }
+        newstatus[basefile].timestamp = timestamp
+        newstatus[basefile].index     = newstatus[basefile].index or { }
+
+        if db_timestamp == timestamp then
             for _,v in ipairs(status[basefile].index) do
                 local index = #newstatus[basefile].index
                 newmappings[#newmappings+1]        = mappings[v]
@@ -371,14 +374,25 @@ local function load_font(filename, fontnames, newfontnames, texmf)
             if type(info) == "table" and #info > 1 then
                 for i in ipairs(info) do
                     local fullinfo = font_fullinfo(filename, i-1, texmf)
-                    local index = #newstatus[basefile].index
-                    newmappings[#newmappings+1]        = fullinfo
-                    newstatus[basefile].index[index+1] = #newmappings
+                    local index = newstatus[basefile].index[i]
+                    if newstatus[basefile].index[i] then
+                        index = newstatus[basefile].index[i]
+                    else
+                        index = #newmappings+1
+                    end
+                    newmappings[index]           = fullinfo
+                    newstatus[basefile].index[i] = index
                 end
             else
                 local fullinfo = font_fullinfo(filename, false, texmf)
-                newmappings[#newmappings+1] = fullinfo
-                newstatus[basefile].index[1] = #newmappings
+                local index
+                if newstatus[basefile].index[1] then
+                    index = newstatus[basefile].index[1]
+                else
+                    index = #newmappings+1
+                end
+                newmappings[index]           = fullinfo
+                newstatus[basefile].index[1] = index
             end
         else
             if trace_loading then

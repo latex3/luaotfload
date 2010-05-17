@@ -355,7 +355,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
         newstatus[basefile].timestamp = timestamp
         newstatus[basefile].index     = newstatus[basefile].index or { }
 
-        if db_timestamp == timestamp then
+        if db_timestamp == timestamp and not newstatus[basefile].index[1] then
             for _,v in ipairs(status[basefile].index) do
                 local index = #newstatus[basefile].index
                 newmappings[#newmappings+1]        = mappings[v]

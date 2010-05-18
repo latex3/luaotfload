@@ -103,9 +103,9 @@ function names.resolve(specification)
 
     if tfm then
         -- is a tfm font, skip names database
-        return specification.name .. ".tfm", false
+        return specification.name, false
     elseif ofm then
-        return specification.name .. ".ofm", false
+        return specification.name, false
     end
 
     local name  = sanitize(specification.name)

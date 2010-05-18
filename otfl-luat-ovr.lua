@@ -24,6 +24,16 @@ function logs.report(category,fmt,...)
     end
 end
 
+function logs.info(category,fmt,...)
+    if fmt then
+        write_nl(format("%s | %s: %s",name,category,format(fmt,...)))
+    elseif category then
+        write_nl(format("%s | %s",name,category))
+    else
+        write_nl(format("%s |",name))
+    end
+end
+
 function logs.simple(fmt,...)
     if fmt then
         write_nl('log', format("%s | %s",name,format(fmt,...)))

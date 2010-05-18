@@ -26,6 +26,7 @@ local upper, lower, format  = string.upper, string.lower, string.format
 local gsub, match, rpadd    = string.gsub, string.match, string.rpadd
 local utfgsub               = unicode.utf8.gsub
 
+local trace_short    = false --tracing adapted to rebuilding of the database inside a document
 local trace_progress = true  --trackers.register("names.progress", function(v) trace_progress = v end)
 local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
 local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
@@ -47,6 +48,8 @@ local function fontnames_init()
 end
 
 function names.load()
+    -- this sets the output of the database building accordingly.
+    names.set_log_level(-1)
     local localpath  = names.path.localdir  .. names.path.basename
     local systempath = names.path.systemdir .. names.path.basename
     local kpsefound  = kpse.find_file(names.path.basename)
@@ -139,7 +142,9 @@ function names.resolve(specification)
                 if not path then
                     path = resolvers.find_file(fname, "truetype fonts")
                 end
-                if not path then
+                if path then
+                    return path -- or fname ?
+                else
                     for _,face in ipairs(data.mappings) do
                         if basename(face.filename[1]) == fname then
                             return face.filename[1], face.filename[2]
@@ -269,7 +274,10 @@ end
 names.resolvespec = names.resolve
 
 function names.set_log_level(level)
-    if level == 2 then
+    if level == -1 then
+        trace_progress = false
+        trace_short = true
+    elseif level == 2 then
         trace_progress = false
         trace_loading = true
     elseif level >= 3 then
@@ -498,6 +506,13 @@ local function scan_texmf_tree(fontnames, newfontnames)
             logs.report("scanning TEXMF and OS fonts:")
         end
     end
+    if trace_short then
+        if expandpath("$OSFONTDIR"):is_empty() then
+            logs.info("scanning TEXMF fonts...")
+        else
+            logs.info("scanning TEXMF and OS fonts...")
+        end
+    end
     local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^\.", "")
     fontdirs = fontdirs .. expandpath("$TTFONTS"):gsub("^\.", "")
     if not fontdirs:is_empty() then
@@ -549,11 +564,14 @@ local function scan_os_fonts(fontnames, newfontnames)
         if trace_progress then
             logs.report("scanning OS fonts:")
         end
+        if trace_short then
+            logs.info("scanning OS fonts...")
+        end
         -- under OSX, we don't rely on fc-list, we rely on some static
         -- directories instead
         if os.name == "macosx" then
             if trace_search then
-                logs.report("searching in static system directories")
+                logs.info("searching in static system directories...")
             end
             count = 0
             for _,d in ipairs(static_osx_dirs) do
@@ -563,7 +581,7 @@ local function scan_os_fonts(fontnames, newfontnames)
             end
         else
             if trace_search then
-                logs.report("executing 'fc-list : file' and parsing its result...")
+                logs.info("executing 'fc-list : file' and parsing its result...")
             end
             local data = io.popen("fc-list : file", 'r')
             if data then
@@ -589,6 +607,9 @@ local function update_names(fontnames, force)
     - fontnames is the final table to return
     - force is whether we rebuild it from scratch or not
     --]]
+    if trace_short then
+        logs.info("Updating the font names database:")
+    end
     if force then
         fontnames = fontnames_init()
     else

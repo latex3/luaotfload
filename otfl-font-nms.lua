@@ -110,6 +110,7 @@ function names.resolve(specification)
 
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
+    local ext = lower(file.extname(specification.name))
 
     local size
     if specification.optsize then
@@ -127,6 +128,21 @@ function names.resolve(specification)
     local data = names.data
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
+            if ext == 'otf' or ext == 'ttf' or ext == 'ttc' or ext == 'dfont' then
+                local fname = specification.name
+                local path = resolvers.find_file(fname, "opentype fonts")
+                if not path then
+                    path = resolvers.find_file(fname, "truetype fonts")
+                end
+                if not path then
+                    for _,face in ipairs(data.mappings) do
+                        if basename(face.filename[1]) == fname then
+                            return face.filename[1], face.filename[2]
+                        end
+                    end
+                end
+                return specification.name
+            end
             local found = { }
             for _,face in ipairs(data.mappings) do
                 local family    = sanitize(face.names.family)

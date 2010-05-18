@@ -128,8 +128,13 @@ function names.resolve(specification)
     local data = names.data
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
+            -- if the specified name ends like a font file, we first look for
+            -- it through kpse, and if we don't find it, we look for it in
+            -- the database.
             if ext == 'otf' or ext == 'ttf' or ext == 'ttc' or ext == 'dfont' then
                 local fname = specification.name
+                -- for absolute and relative path, kpse will find them, so
+                -- there shouldn't be any problem
                 local path = resolvers.find_file(fname, "opentype fonts")
                 if not path then
                     path = resolvers.find_file(fname, "truetype fonts")

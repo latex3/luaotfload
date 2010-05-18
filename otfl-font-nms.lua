@@ -6,6 +6,10 @@ if not modules then modules = { } end modules ['font-nms'] = {
     license   = "GPL"
 }
 
+-- this is a patch for otfl-font-def.lua, that defines a reader for ofm fonts,
+-- this is necessary if we set the forced field of the specification to 'ofm'
+fonts.tfm.readers.ofm = fonts.tfm.readers.tfm
+
 fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 
@@ -103,17 +107,25 @@ local reloaded = false
 function names.resolve(specification)
     local tfm   = resolvers.find_file(specification.name, "tfm")
     local ofm   = resolvers.find_file(specification.name, "ofm")
+    local ext = lower(file.extname(specification.name))
 
     if tfm then
         -- is a tfm font, skip names database
-        return specification.name, false
+        if ext == 'tfm' then
+            return specification.name, false
+        else
+            return specification.name..'.tfm', false
+        end
     elseif ofm then
-        return specification.name, false
+        if ext == 'ofm' then
+            return specification.name, false
+        else
+            return specification.name..'.ofm', false
+        end
     end
 
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
-    local ext = lower(file.extname(specification.name))
 
     local size
     if specification.optsize then

@@ -1,6 +1,7 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 2009 by Elie Roux <elie.roux@telecom-bretagne.eu>
+% Copyright (C) 2009-2010 by Elie Roux    <elie.roux@telecom-bretagne.eu>
+%                        and Khaled Hosny <khaledhosny@eglug.org>
 %
 % This work is under the CC0 license.
 %
@@ -45,7 +46,8 @@
 \preamble
 This is a generated file.
 
-Copyright (C) 2009 by Elie Roux <elie.roux@telecom-bretagne.eu>
+Copyright (C) 2009-2010 by by Elie Roux    <elie.roux@telecom-bretagne.eu>
+                          and Khaled Hosny <khaledhosny@eglug.org>
 
 This work is under the CC0 license.
 
@@ -139,15 +141,15 @@ and the derived files
 %
 % \title{The \textsf{luaotfload} package}
 % \date{2010/05/13 v1.08}
-% \author{     Elie Roux    \footnote{\texttt{elie.roux@telecom-bretagne.eu}}
-%         \and Khaled hosny \footnote{\texttt{khaledhosny@eglug.org}}}
+% \author{     Elie Roux\footnote{\texttt{elie.roux@telecom-bretagne.eu}}
+%         \and Khaled Hosny\footnote{\texttt{khaledhosny@eglug.org}}}
 %
 % \maketitle
 %
 % \begin{abstract}
-% Adaptation of \ConTeXt\ font loading system, providing the ability to load
-% \textsf{OpenType} fonts with a lot of features, and extended font loading
-% syntax.
+% This package is an adaptation of the \ConTeXt\ font loading system,
+% providing the ability to load \textsf{OpenType} fonts with extended font
+% loading syntax supporting a large selection of OpenType font features.
 % \end{abstract}
 %
 % \tableofcontents
@@ -156,82 +158,102 @@ and the derived files
 %
 % \subsection{Introduction}
 %
-% Font management and installation has always been painful with \TeX\ (and
-% even more with \LaTeX). A lot of files are needed for one font (tfm, pfb,
-% map, fd, vf), and they are limited to 256 characters. But the font world has
-% evolved since, and new standard types of fonts have appeared, like
+% Font management and installation has always been painful with \TeX.
+% A lot of files are needed for one font (tfm, pfb,
+% map, fd, vf), and as \TeX\ is 8-bit each font is limited to 256 characters.
+% But the font world has
+% evolved since \TeX, and new standard types of fonts have appeared, most
+% notably
 % \textsf{TrueType} and \textsf{OpenType} fonts. These fonts can contain a lot
 % of characters, and have some functionalities (ligatures, old-style numbers,
 % small capitals, etc.). They are everywhere, as the system fonts and most
-% modern text softwares fonts are of this type. Until now the (almost) only
-% way to use them with \TeX\ was to use them with \XeTeX .
+% modern text softwares fonts are of this type. Until now the only
+% way to use them directly with one of the descendents of \TeX\ was to use
+% them with \XeTeX.
 %
 % Unlike \XeTeX , \LuaTeX\ does not provide facilities for these fonts by
-% default, but it provides a way to hook lua code in some points of the \TeX\
-% algorithm, for instance we can improve the font loading system; this is what
-% we do in this package.
-%
-% This package is quite low-level, and should be loaded directly in the macro
-% package, like it is in \ConTeXt. Sadly, Plain and \LaTeX\ are frozen and
-% it's even impossible to adapt them to the new engines.
+% default, but it provides a way to hook Lua code in some points of the \TeX\
+% processing; for instance, we can improve the font loading system, and this
+% is what we do in this package.
 %
 % \subsection{Loading fonts}
 %
-% \textsf{luaotfload} supports an extended font loading syntax which looks like:
+% \textsf{luaotfload} supports an extended font loading syntax, inspired by \XeTeX, which looks like:
 %
 % \begin{center}
 % |\font\foo={|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|}| \meta{\TeX\ font features}
 % \end{center}
 %
-% The curly brackets are optional and are used for escaping spaces in font names
-% (\XeTeX-like double quotes can also used for the same purpose).
+% \noindent
+% The curly brackets are optional and are used for escaping spaces in font
+% names (double quotes can also used for the same purpose).
 %
 % \paragraph{Prefix}
 %
-% Can be either \texttt{file:} or \texttt{name:} and are used to select between
-% filename based or font name based search mechanisms.
-% Loading fonts based on filename is restricted to files found by
-% \textsf{kpathsea} (typically in the \textsc{texmf} tree). Surrounding font
-% name with square brackets is synonym to using \texttt{file:} prefix (for
-% compatibility with \XeTeX).
-% This is usually used for loading old \textsc{tfm} fonts.
-% Accessing fonts by fontname allows loading system installed fonts as well as
-% \textsc{texmf} ones, and requires a font names database that can be generated
-% using the bundled |mkluatexfontdb.lua| script.
-% \footnote{run |mkluatexfontdb.lua --help| for help and usage information}
+% The \meta{prefix} be either \texttt{file:} or \texttt{name:}, which specify
+% whether to use a select the font from its filename or font name,
+% respectively. If no prefix is specified, then \texttt{file:} is assumed.
 %
-% If no prefix is specified, then \texttt{file:} is assumed.
+% For compatibility with \XeTeX, surrounding the \meta{font name}
+% with square brackets is synonymous to using the \texttt{file:} prefix.
+%
+% Accessing fonts by fontname allows loading system installed fonts as well as
+% \textsc{texmf} ones, and requires a font names database that must be
+% pre-generated using the bundled |mkluatexfontdb.lua| script.^^A
+% \footnote{Run |mkluatexfontdb.lua --help| for help and usage information}
 %
 % \paragraph{Font name}
 %
-% Font name can be either a font filename or actual font name; based on the
-% prefix specified.
+% The \meta{font name} can be either a font filename or actual font name
+% based on the \meta{prefix} as mentioned above.
+%
+% Fonts loaded by filename may either include their absolute path in the
+% filesystem or consist of just the filename with a path.
+% If no path is specified then \textsf{kpathsea} is used to locate the font
+% (which will typically be in the \textsc{texmf} tree or the current
+% directory).
+%
+% For example,
+% \begin{quote}
+% \begin{verbatim}
+% \font\1={file:ec-lmr10} at 10pt
+% \font\2={/Users/Shared/Fonts/aldus.otf} at 11pt
+% \font\3={name:TeX Gyre Pagella} at 9pt
+% \end{verbatim}
+% \end{quote}
+%
 %
 % \paragraph{Font features}
 %
-% Font features are a semicolon separated list of items, which are either
+% \meta{font features} are a list of items separated by semi-colons,
+% which are either
 % |key=value| font parameters, or switches to enable/disable certain font
-% features, in the form of |+feat|/|-feat|.
+% features in the form of |+feat|/|-feat|.
 % The supported keys are:
 % \begin{description}
 % \item [mode] \hfill \\
-% \textsf{luaotfload} has two OpenType processing modes; \texttt{base} mode
-% which supports only a subset of OpenType features and works by mapping those
-% features to traditional \TeX\ ligaturing and kerning mechanisms and is a bit
-% faster, and \texttt{node} mode which, hopefully, supports OpenType fully and
-% works by direct processing of node list at lua end and is a bit slower.
-% Note that \texttt{node} mode doesn't work inside math.
+% \textsf{luaotfload} has two OpenType processing modes;
+% \texttt{base} or \texttt{node}.
+% Using \texttt{mode=base}
+% only supports a subset of OpenType features and works by mapping those
+% features to traditional \TeX\ ligature and kerning mechanisms and is a bit
+% faster
+% Using \texttt{mode=node} hopefully supports OpenType fully and
+% works by direct processing of the node list with Lua; it is slower and
+% is not designed to work in math mode.
 %
-% By default, \texttt{base} mode is used, however it is advisable to always
+% By default \texttt{mode=base} is used, but it is advisable to always
 % enable \texttt{node} made, except for math fonts, otherwise many OpenType
 % features will not function properly or even not work at all, especially for
 % advanced scripts like Arabic.
 %
 % \item [script] \hfill \\
 % OpenType script string, default value is |dflt|. Some fonts don't assign
-% features to |dflt| script, in this case script need to be set explicitly.
+% features to the |dflt| script, in which case the script need to be set
+% explicitly.
 %
-% \item [language] \hfill \\ OpenType language string, default value is |latn|.
+% \item [language] \hfill \\
+% OpenType language string, default value is |latn|.
 %
 % \item [featurefile] \hfill \\
 % feature files are textual representation of OpenType tables and can be used to
@@ -246,9 +268,9 @@ and the derived files
 % |\font\lmr=Latin Modern Roman:featurefile=mykern.fea;+tkrn|
 %
 % \item [color] \hfill \\
-% font color, defined as a triplet of two-digit Hex RGB values, with optionally
-% another value for the transparency (where |00| is completely transparent and
-% |FF| is opaque.)
+% font color, defined as a triplet of two-digit hexadecimal RGB values, with
+% optionally another value for the transparency
+% (where |00| is completely transparent and |FF| is opaque.)
 %
 % For example, to set text in semitransparent red:
 %
@@ -257,7 +279,7 @@ and the derived files
 % \item [protrusion \& expansion] \hfill \\
 % Both keys control microtypographic features of the font, namely glyph
 % protrusion and expansion. The value of the key is the name of predefined
-% lua tables of protrusion and expansion values, see the bottom of
+% Lua tables of protrusion and expansion values; see the end of
 % \texttt{otfl-font-dum.lua} file for an example of such tables. The only
 % predefined value is |default|.
 %
@@ -280,7 +302,10 @@ and the derived files
 % \item \texttt{trep}: applies legacy \TeX\ replacements (|`'"|).
 % \end{itemize*}
 %
-% \subsection{\ConTeXt\ files needed}
+% (For \XeTeX\ users: these last two are the equivalent of writing
+%  \texttt{mapping=text-tex} using \XeTeX's input remapping feature.)
+%
+% \subsection{Required \ConTeXt\ files}
 %
 % This package is a wrapper for several files taken from the \ConTeXt\ macro
 % package. The philosophy is to let \ConTeXt\ do all the implementation and
@@ -319,6 +344,15 @@ and the derived files
 % \end{itemize*}
 % \end{multicols}
 %
+% The following files have been written for this package:
+% \begin{multicols}{3}
+% \begin{itemize*}
+% \item \texttt{font-clr.lua}
+% \item \texttt{font-nms.lua}
+% \item \texttt{luat-ovr.lua}
+% \end{itemize*}
+% \end{multicols}
+%
 % \subsection{Troubleshooting}
 %
 % If you encounter problems with some fonts, please first update to the latest
@@ -333,10 +367,10 @@ and the derived files
 %
 % |\font\myfont = MyFont.otf:script=latn;+liga;|
 %
-% Also, some feature like contextual substitution, |calt|, will only work with
-% |node| mode.
+% Also remember to set |mode=node| as most OpenType features
+% (such as contextual substitution, |calt|), will not work without it.
 %
-% \section{\texttt{luaotfload.lua}}
+% \part{\texttt{luaotfload.lua}}
 %
 % \iffalse
 %<*lua>
@@ -526,7 +560,7 @@ end
 %</lua>
 % \fi
 %
-% \section{\texttt{luaotfload.sty}}
+% \part{\texttt{luaotfload.sty}}
 %
 % \iffalse
 %<*package>

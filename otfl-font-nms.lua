@@ -471,6 +471,10 @@ end
 
 fonts.path_normalize = path_normalize
 
+font_extensions = {
+  "otf", "ttf", "ttc", "dfont", "OTF", "TTF", "TTC", "DFONT"
+}
+
 local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --[[
     this function scans a directory and populates the list of fonts
@@ -481,7 +485,7 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --]]
     local list, found = { }, { }
     local nbfound = 0
-    for _,ext in ipairs { "otf", "ttf", "ttc", "dfont" } do
+    for _,ext in ipairs(font_extensions) do
         if trace_search then
             logs.report("scanning '%s' for '%s' fonts", dirname, ext)
         end
@@ -493,12 +497,6 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
         end
         nbfound = nbfound + #found
         table.append(list, found)
-        if trace_search then
-            logs.report("scanning '%s' for '%s' fonts", dirname, upper(ext))
-        end
-        found = glob(dirname .. "/**." .. upper(ext))
-        table.append(list, found)
-        nbfound = nbfound + #found
     end
     if trace_search then
         logs.report("%d fonts found in '%s'", nbfound, dirname)

@@ -564,10 +564,11 @@ end
 ]]
 
 local static_osx_dirs = {
- "~/Library/Fonts",
- "/Library/Fonts",
- "/System/Library/Fonts",
- }
+    kpse.expand_path('~') .. "/Library/Fonts",
+    "/Library/Fonts",
+    "/System/Library/Fonts",
+    "/Network/Library/Fonts",
+}
 
 local function scan_os_fonts(fontnames, newfontnames)
     --[[

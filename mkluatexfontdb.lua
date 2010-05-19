@@ -43,12 +43,22 @@ Valid options:
   -h --help                    print this message
 
 Fonts are found on Windows or Linux with fontconfig (i.e., using fc-list).
+
 On Mac OS X, only fonts located in the following standard font locations are
 included in the font database:
     ~/Library/Fonts          /Library/Fonts
     /System/Library/Fonts    /Network/Library/Fonts
 In particular, fonts installed in other locations with "Font Book" will not
 be available.
+
+Rather than using fontconfig or, in Mac OS X, searching the default font
+locations, you may specify where fonts are located by setting the OSFONTDIR
+environment variable. Doing so will override the use of fontconfig or
+scanning the system font locations. If you wish to continue to include them
+while also including other font locations, simply include them in the list.
+For example (using a bash shell),
+
+   export OSFONTDIR='/path/to/other/fonts:/Users/will/Library/Fonts:...'
 
 The output database file is named otfl-fonts.lua. By default it is placed
 in $TEXMFVAR/luatex/generic/luaotfload/names.

@@ -6,9 +6,12 @@ if not modules then modules = { } end modules ['font-nms'] = {
     license   = "GPL"
 }
 
--- this is a patch for otfl-font-def.lua, that defines a reader for ofm fonts,
+-- This is a patch for otfl-font-def.lua, that defines a reader for ofm fonts,
 -- this is necessary if we set the forced field of the specification to 'ofm'
-fonts.tfm.readers.ofm = fonts.tfm.readers.tfm
+-- we use it only when using luaotfload, not mkluatexfontdb.
+if fonts and fonts.tfm and fonts.tfm.readers then
+    fonts.tfm.readers.ofm = fonts.tfm.readers.tfm
+end
 
 fonts                = fonts       or { }
 fonts.names          = fonts.names or { }

@@ -38,6 +38,18 @@ local trace_progress = true  --trackers.register("names.progress", function(v) t
 local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
 local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
+
+-- Basic function from <http://stackoverflow.com/questions/2282444/how-to-check-if-a-table-contains-an-element-in-lua>
+function table.contains(table, element)
+  for _, value in pairs(table) do
+    if value == element then
+      return true
+    end
+  end
+  return false
+end
+
+
 local function sanitize(str)
     if str then
         return utfgsub(lower(str), "[^%a%d]", "")
@@ -149,7 +161,7 @@ function names.resolve(specification)
             -- if the specified name ends like a font file, we first look for
             -- it through kpse, and if we don't find it, we look for it in
             -- the database.
-            if ext == 'otf' or ext == 'ttf' or ext == 'ttc' or ext == 'dfont' then
+            if table.contains(font_extensions_lc, ext) then
                 local fname = specification.name
                 -- for absolute and relative path, kpse will find them, so
                 -- there shouldn't be any problem
@@ -471,9 +483,18 @@ end
 
 fonts.path_normalize = path_normalize
 
-font_extensions = {
-  "otf", "ttf", "ttc", "dfont", "OTF", "TTF", "TTC", "DFONT"
-}
+if os.name == "macosx" then
+    -- While Mac OS X 10.6 has a problem with TTC files, ignore them globally:
+    font_extensions = {
+      "otf", "ttf", "dfont", "OTF", "TTF", "DFONT"
+    }
+    font_extensions_lc = { "otf", "ttf", "dfont" }
+else
+    font_extensions = {
+      "otf", "ttf", "ttc", "dfont", "OTF", "TTF", "TTC", "DFONT"
+    }
+    font_extensions_lc = { "otf", "ttf", "ttc", "dfont" }
+end
 
 local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --[[
@@ -549,7 +570,7 @@ local function read_fcdata(data)
         line = line:gsub(": ", "")
         local ext = match(line,"^.+%.([^/\\]-)$") or ""
         ext = lower(ext)
-        if ext == "otf" or ext == "ttf" or ext == "ttc" or ext == "dfont" then
+        if table.contains(font_extensions_lc, ext) then
             list[#list+1] = path_normalize(line:gsub(": ", ""))
         end
     end

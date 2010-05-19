@@ -485,15 +485,15 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --]]
     local list, found = { }, { }
     local nbfound = 0
+    if trace_search then
+        logs.report("scanning '%s'", dirname)
+    end
     for _,ext in ipairs(font_extensions) do
-        if trace_search then
-            logs.report("scanning '%s' for '%s' fonts", dirname, ext)
-        end
         found = glob(dirname .. "/**." .. ext)
         -- note that glob fails silently on broken symlinks, which happens
         -- sometimes in TeX Live.
         if trace_search then
-            logs.report("%s fonts found", #found)
+            logs.report("%s '%s' fonts found", #found, ext)
         end
         nbfound = nbfound + #found
         table.append(list, found)

@@ -159,22 +159,22 @@ and the derived files
 % \subsection{Introduction}
 %
 % Font management and installation has always been painful with \TeX.
-% A lot of files are needed for one font (tfm, pfb,
-% map, fd, vf), and as \TeX\ is 8-bit each font is limited to 256 characters.
-% But the font world has
-% evolved since \TeX, and new standard types of fonts have appeared, most
-% notably
-% \textsf{TrueType} and \textsf{OpenType} fonts. These fonts can contain a lot
-% of characters, and have some functionalities (ligatures, old-style numbers,
-% small capitals, etc.). They are everywhere, as the system fonts and most
-% modern text software fonts are of this type. Until now the only
-% way to use them directly with one of the descendants of \TeX\ was to use
+% A lot of files are needed for one font (tfm, pfb, map, fd, vf), and as
+% \TeX\ is 8-bit each font is limited to 256 characters.
+% But the font world has evolved since \TeX, and new font technologies have
+% appeared, most notably the so called \emph{smart font} technologies like
+% \textsf{OpenType} fonts. These fonts can contain a lot of characters, and
+% additional functionalities like ligatures, old-style numbers, small capitals,
+% etc., and support more complex writing systems like Arabic and Indic scripts.
+% They are widely deployed and available for all modern operating systems and
+% are becoming the de facto standard fonts for advanced text layout.
+% Until now the only way to use them directly in the \TeX\ world was by using
 % them with \XeTeX.
 %
-% Unlike \XeTeX , \LuaTeX\ does not provide facilities for these fonts by
-% default, but it provides a way to hook Lua code in some points of the \TeX\
-% processing; for instance, we can improve the font loading system, and this
-% is what we do in this package.
+% Unlike \XeTeX, \LuaTeX\ does not provide direct support for using these fonts
+% by default, but it provides a way to hook Lua code in some points of the
+% \TeX\ processing; for instance, we can improve the font loading system, and
+% text procession, which what this package is about.
 %
 % \subsection{Loading fonts}
 %

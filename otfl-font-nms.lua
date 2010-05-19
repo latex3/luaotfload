@@ -521,9 +521,9 @@ local function scan_texmf_tree(fontnames, newfontnames)
     end
     if trace_short then
         if expandpath("$OSFONTDIR"):is_empty() then
-            logs.info("scanning TEXMF fonts...")
+            logs.report("scanning TEXMF fonts...")
         else
-            logs.info("scanning TEXMF and OS fonts...")
+            logs.report("scanning TEXMF and OS fonts...")
         end
     end
     local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^\.", "")
@@ -580,13 +580,13 @@ local function scan_os_fonts(fontnames, newfontnames)
             logs.report("scanning OS fonts:")
         end
         if trace_short then
-            logs.info("scanning OS fonts...")
+            logs.report("scanning OS fonts...")
         end
         -- under OSX, we don't rely on fc-list, we rely on some static
         -- directories instead
         if os.name == "macosx" then
             if trace_search then
-                logs.info("searching in static system directories...")
+                logs.report("searching in static system directories...")
             end
             count = 0
             for _,d in ipairs(static_osx_dirs) do
@@ -596,7 +596,7 @@ local function scan_os_fonts(fontnames, newfontnames)
             end
         else
             if trace_search then
-                logs.info("executing 'fc-list : file' and parsing its result...")
+                logs.report("executing 'fc-list : file' and parsing its result...")
             end
             local data = io.popen("fc-list : file", 'r')
             if data then
@@ -623,7 +623,7 @@ local function update_names(fontnames, force)
     - force is whether we rebuild it from scratch or not
     --]]
     if trace_short then
-        logs.info("Updating the font names database:")
+        logs.report("Updating the font names database:")
     end
     if force then
         fontnames = fontnames_init()

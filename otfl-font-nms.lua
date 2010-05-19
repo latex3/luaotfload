@@ -13,6 +13,13 @@ if fonts and fonts.tfm and fonts.tfm.readers then
     fonts.tfm.readers.ofm = fonts.tfm.readers.tfm
 end
 
+-- This is a necessary initalization in order not to rebuild an existing font.
+-- Maybe 600 should be replaced by \pdfpkresolution
+-- or texconfig.pk_dpi (and it should be replaced dynamically), but we don't
+-- have access (yet) to the texconfig table, so we let it be 600. Anyway, it
+-- does still work fine even if \pdfpkresolution is changed.
+kpse.init_prog('', 600, '/')
+
 fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 
@@ -121,7 +128,6 @@ local reloaded = false
 
 function names.resolve(specification)
     local tfm   = resolvers.find_file(specification.name, "tfm")
-    local ofm   = resolvers.find_file(specification.name, "ofm")
     local ext = lower(file.extname(specification.name))
 
     if tfm then
@@ -131,7 +137,7 @@ function names.resolve(specification)
         else
             return specification.name..'.tfm', false
         end
-    elseif ofm then
+    elseif resolvers.find_file(specification.name, "ofm") then
         if ext == 'ofm' then
             return specification.name, false
         else

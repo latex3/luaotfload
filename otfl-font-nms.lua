@@ -522,9 +522,32 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
     if trace_search then
         logs.report("%d fonts found in '%s'", nbfound, dirname)
     end
+    list = remove_ignore_fonts(list) -- fixme: general solution required
     for _,fnt in ipairs(list) do
         fnt = path_normalize(fnt)
         load_font(fnt, fontnames, newfontnames, texmf)
+    end
+end
+
+-- Temporary until a general solution is implemented:
+if os.name == "macosx" then
+    ignore_fonts = {
+      -- this font kills the indexer:
+      "/System/Library/Fonts/LastResort.ttf"
+    }
+    function remove_ignore_fonts(fonts)
+        for N,fnt in ipairs(fonts) do
+          if table.contains(ignore_fonts,fnt) then
+            logs.report("ignoring font '%s'", fnt)
+            table.remove(fonts,N)
+          end
+        end
+        return fonts
+    end
+-- This function is only necessary, for now, on Mac OS X.
+else
+    function remove_ignore_fonts(fonts)
+        return fonts
     end
 end
 

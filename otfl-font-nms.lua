@@ -549,7 +549,8 @@ local function read_fcdata(data)
     local list = { }
     for line in data:lines() do
         line = line:gsub(": ", "")
-        local ext = lower(match(line,"^.+%.([^/\\]-)$"))
+        local ext = match(line,"^.+%.([^/\\]-)$") or ""
+        ext = lower(ext)
         if ext == "otf" or ext == "ttf" or ext == "ttc" or ext == "dfont" then
             list[#list+1] = path_normalize(line:gsub(": ", ""))
         end

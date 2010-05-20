@@ -1,12 +1,57 @@
-                         The luaotfload generic package
+                         The luaotfload package
+
+Luaotfload is an adaptation of the ConTeXt font loading system for Plain and
+LaTeX. It allows OpenType fonts to be loaded with OpenType features accessible
+through the XeTeX font syntax.
+
+It may be loaded in Plain LuaTeX with "\input luaotfload.sty" and in LuaLaTeX
+with "\usepackage{luaotfload}". LuaLaTeX users may be interested in the
+fontspec package which provides a high-level interface to the functionality
+provided by this package.
+
+Please see the documentation luaotfload.pdf for more information.
+
+This package is developed on <http://github.com/khaledhosny/luaotfload>.
+Please report bugs at the Github address above.
+
+Discussion of development for LuaLaTeX is held in the lualatex-dev mailing
+list. See <http://www.tug.org/mailman/listinfo/lualatex-dev> to join or to
+view the archives.
 
 
-luaotfload is the adaptation of the ConTeXt OTF loading system for Plain and
-LaTeX. It allows to open OTF fonts with almost all features available through
-the XeTeX font syntax.
+Responsible Persons
+-------------------
 
-This package is developed on <http://github.com/khaledhosny/luaotfload>, see the
-'NEWS' file for version history.
+The following people have contributed to this package.
+
+Khaled Hosny             <khaledhosny@eglug.org>
+Elie Roux                <elie.roux@telecom-bretagne.eu>
+Manuel Pégourié-Gonnard  <mpg@elzevir.fr>
+Will Robertson           <will.robertson@latex-project.org>
+
+(In approximate order of lines of code contributed.)
+
+
+Change History
+--------------
+
+Currrent git, luaotfload v1.07:
+    * using the new luatexbase package
+    * synchronizing with latest ConTeXt stable 2010.05.08
+    * adding support for microtypography
+    * adding support for color and transparency
+    * adding a script to generate a font database with TeX and system fonts
+    * more verbose log file
+
+2010/02/07, luaotfload v1.06a:
+    * more complete tlig and trep
+    * defaults options changed to "+ccmp;+locl;+rlig;+liga;+clig;+kern;
+         +mark;+mkmk;"
+    * supporting windows absolute path
+
+2009/12/01, luaotfload v1.06:
+    * synchronizing with ConTeXt stable 2009.11.26
+    * adding backward compatibility with LuaTeX 0.40.6
 
 
 Installation
@@ -17,10 +62,10 @@ Here are the recommended installation methods (preferred first).
 1. If you are using TeX Live 2008 or later, use 'tlmgr install luaotfload'.
 Alternatively, try your (TeX or Linux) distribution's package management system.
 
-2. a. Grab luaotfload.tds.zip on the CTAN.
+2. a. Download luaotfload.tds.zip from CTAN.
    b. Unzip it at the root of one or your TDS trees.
    c. You may need to update some filename database after, see your TeX
-distribution's manual for details.
+      distribution's manual for details.
 
 3. a. Grab the sources from CTAN or github.
    b. Run 'make install TEXMFROOT=/path/to/texmf'.
@@ -31,6 +76,8 @@ distribution's manual for details.
 
 Manifest
 --------
+
+The following files are part of the luaotfload package.
 
 Source files:
         luaotfload.dtx          single file source & doc for the package
@@ -66,28 +113,15 @@ Derived files:
         luaotfload.sty          TeX & LaTeX package
         luaotfload.lua          Lua code for the package
 
+
 License
 -------
 
-This work is distributed under the GNU GPLv2 license. Please see COPYING file
-for more details about the license.
+The luaotfload bundle is distributed under the GNU GPLv2 license:
+   <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
+This license requires the license itself to be distributed with the work.
+It may be located within the documentation luaotfload.pdf.
 
-The files otfl-*.lua are under the GNU GPLv2 license. Their legal notice
-starts by:
-
-"
-Copyright 2008 PRAGMA ADE / ConTeXt Development Team
-"
-
-for otf-*.lua files except otfl-font-clr.lua and otfl-luat-ovr.lua, and
-
-"
-Copyright 2010 Luaotfload Development Team
-"
-
-for otfl-font-clr.lua, otfl-font-nms and otfl-luat-ovr.lua, and continues by:
-
-"
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
@@ -98,22 +132,24 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-"
+All non-ConTeXt source files in this bundle, 
+        luaotfload.dtx     
+        mkluatexfontdb.lua 
+        otfl-data-con.lua  
+        otfl-font-clr.lua  
+        otfl-luat-ovr.lua  
+        otfl-luat-nms.lua 
+and derived files 
+        luaotfload.pdf
+        luaotfload.sty
+        luaotfload.lua
+are copyright 2010 by the luaotfload development team (see above).
+These files may be modified and distributed under the terms and conditions
+of the CC0 license: <http://creativecommons.org/publicdomain/zero/1.0>
+
+The ConTeXt files otfl-*.lua (as indicated above) are distributed under the
+terms and conditions of the GNU GPLv2 license. These contents of these files
+is copyright 2008 by PRAGMA ADE and the ConTeXt Development Team.
 
 
-The file luaotfload.dtx and the derived files
-  luaotfload.pdf
-  luaotfload.sty
-  luaotfload.lua
-  
-as well as the file mkluatexfontdb.lua are under the CC0 license. You can find
-the CC0 license full text at
 
-http://creativecommons.org/publicdomain/zero/1.0/legalcode
-
-and a FAQ at
-
-http://wiki.creativecommons.org/CC0

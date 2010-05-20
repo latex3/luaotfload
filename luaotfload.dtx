@@ -154,9 +154,7 @@ and the derived files
 %
 % \tableofcontents
 %
-% \section{Documentation}
-%
-% \subsection{Introduction}
+% \section{Introduction}
 %
 % Font management and installation has always been painful with \TeX.
 % A lot of files are needed for one font (tfm, pfb, map, fd, vf), and as
@@ -176,7 +174,7 @@ and the derived files
 % \TeX\ processing; for instance, we can improve the font loading system, and
 % text procession, which what this package is about.
 %
-% \subsection{Loading fonts}
+% \section{Loading fonts}
 %
 % \textsf{luaotfload} supports an extended font loading syntax which looks
 % like:
@@ -200,8 +198,7 @@ and the derived files
 %
 % Accessing fonts by fontname allows loading system installed fonts as well as
 % \textsc{texmf} ones, and requires a font names database that must be
-% pre-generated using the bundled |mkluatexfontdb.lua| script.^^A
-% \footnote{Run |mkluatexfontdb.lua --help| for help and usage information}
+% pre-generated; see Section~\ref{sec:fontdb} for more information.
 %
 % \paragraph{Font name}
 %
@@ -306,7 +303,39 @@ and the derived files
 % (For \XeTeX\ users: these last two are the equivalent of writing
 %  \texttt{mapping=text-tex} using \XeTeX's input remapping feature.)
 %
-% \subsection{Required \ConTeXt\ files}
+%
+% \section{Maintaining the font database}
+% \label{sec:fontdb}
+%
+% As introduced in the previous section, \textsf{luaotfload} uses a database
+% to keep track of fonts available to \LuaTeX. Using this database, fonts can
+% be loaded by font name as well as filename.
+%
+% This font database must be maintained as you add (and remove) fonts to your
+% system. To update the database, run the script |mkluatexfontdb.lua| that is
+% included with this package. If you have not run it before, it may take quite
+% some time to process every font on your computer. Subsequent runs to update
+% the database will be quite fast, however.
+%
+% In \TeX~Live~2010, there will be a button in the \TeX~Live package manager
+% to run |mkluatexfontdb.lua|.
+%
+% The script will parse standard places for fonts in your system to build the
+% font database. On Windows and Linus, it will use |fc-list| to find the
+% fonts; on Mac~OS~X, it will search in the standard font locations
+% |~/Library/Fonts|, |/Library/Fonts|, |/System/Library/Fonts|, and
+% |/Network/Library/Fonts|,
+%
+% If you do not wish the script to locate fonts automatically but would rather
+% specify the exact locations in which to find your fonts, set the |OSFONTDIR|
+% environment variable instead. When this variable is set, the script will
+% only search in those directories.
+%
+% |mkluatexfontdb.lua --help| provides a brief summary of the functionality of
+% the script and includes some advanced options that we have not mentioned
+% here.
+%
+% \section{Required \ConTeXt\ files}
 %
 % This package is a wrapper for several files taken from the \ConTeXt\ macro
 % package. The philosophy is to let \ConTeXt\ do all the implementation and
@@ -354,7 +383,7 @@ and the derived files
 % \end{itemize*}
 % \end{multicols}
 %
-% \subsection{Troubleshooting}
+% \section{Troubleshooting}
 %
 % If you encounter problems with some fonts, please first update to the latest
 % version of this package before reporting a bug, as this package is under

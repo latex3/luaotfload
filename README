@@ -79,7 +79,7 @@ starts by:
 Copyright 2008 PRAGMA ADE / ConTeXt Development Team
 "
 
-for otf-*.lua files except those below, and
+for otf-*.lua files except otfl-font-clr.lua and otfl-luat-ovr.lua, and
 
 "
 Copyright 2010 Luaotfload Development Team
@@ -103,3 +103,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 "
 
+
+The file luaotfload.dtx and the derived files
+  luaotfload.pdf
+  luaotfload.sty
+  luaotfload.lua
+  
+as well as the file mkluatexfontdb.lua are under the CC0 license. You can find
+the CC0 license full text at
+
+http://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+and a FAQ at
+
+http://wiki.creativecommons.org/CC0

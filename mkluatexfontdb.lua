@@ -1,7 +1,7 @@
 #!/usr/bin/env texlua
 --[[
-This file is copyright 2010 Elie Roux and Khaled Hosny and is distributed
-under the GNU General Public License v3: http://www.gnu.org/licenses/gpl.html
+This file is copyright 2010 Elie Roux and Khaled Hosny and is under CC0
+license (see http://creativecommons.org/publicdomain/zero/1.0/legalcode).
 
 This file is a wrapper for the luaotfload's font names module. It is part of the
 luaotfload bundle, please see the luaotfload documentation for more info.

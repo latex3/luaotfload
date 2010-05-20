@@ -329,6 +329,7 @@ end
 
 logs        = logs or { }
 logs.report = logs.report or log
+logs.info   = logs.info or log
 
 local log = names.log
 

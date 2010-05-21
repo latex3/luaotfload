@@ -696,8 +696,12 @@ local function update_names(fontnames, force)
 end
 
 local function save_names(fontnames)
-    local savepath  = names.path.localdir  .. names.path.basename
-    io.savedata(savepath, table.serialize(fontnames, true))
+    local savepath  = names.path.localdir
+    if not lfs.isdir(savepath) then
+        dir.mkdirs(savepath)
+    end
+    io.savedata(savepath .. names.path.basename,
+                table.serialize(fontnames, true))
 end
 
 names.scan   = scan_dir

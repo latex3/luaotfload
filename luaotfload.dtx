@@ -520,15 +520,19 @@ end
 
 %    \end{macrocode}
 %
-%    Some more modules. We don't load neither \texttt{font-enc.lua} nor
-%    \texttt{font-afm.lua} as it will never be used here.
-%
-%    We also remove a warning from \texttt{node-fnt.lua} as it is \ConTeXt\
+%    A hack to remove a warning from \texttt{node-fnt.lua} as it is \ConTeXt\
 %    specific.
 %
 %    \begin{macrocode}
 
 tex.attribute[0] = 0
+
+%    \end{macrocode}
+%
+%    Some more modules. We don't load neither \texttt{font-enc.lua} nor
+%    \texttt{font-afm.lua} as it will never be used here.
+%
+%    \begin{macrocode}
 
 luaotfload.loadmodule('node-res.lua')
 luaotfload.loadmodule('node-inj.lua')

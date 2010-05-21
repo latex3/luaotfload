@@ -9,8 +9,6 @@ if not modules then modules = { } end modules ['font-otc'] = {
 local format, insert = string.format, table.insert
 local type, next = type, next
 
-local ctxcatcodes = tex.ctxcatcodes
-
 -- we assume that the other otf stuff is loaded already
 
 local trace_loading = false  trackers.register("otf.loading", function(v) trace_loading = v end)
@@ -217,30 +215,3 @@ fonts.initializers.node.otf.lineheight  = fonts.initializers.common.lineheight
 
 fonts.initializers.base.otf.compose     = fonts.initializers.common.compose
 fonts.initializers.node.otf.compose     = fonts.initializers.common.compose
-
--- bonus function
-
-function otf.name_to_slot(name) -- todo: afm en tfm
-    local tfmdata = fonts.ids[font.current()]
-    if tfmdata and tfmdata.shared then
-        local otfdata = tfmdata.shared.otfdata
-        local unicode = otfdata.luatex.unicodes[name]
-        if not unicode then
-            return string.byte("?") -- nil
-        elseif type(unicode) == "number" then
-            return unicode
-        else
-            return unicode[1]
-        end
-    end
-    return nil
-end
-
-function otf.char(n) -- todo: afm en tfm
-    if type(n) == "string" then
-        n = otf.name_to_slot(n)
-    end
-    if n then
-        tex.sprint(ctxcatcodes,format("\\char%s ",n))
-    end
-end

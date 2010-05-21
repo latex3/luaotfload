@@ -80,7 +80,7 @@ otf.features.default = otf.features.default or { }
 otf.enhancers        = otf.enhancers        or { }
 otf.glists           = { "gsub", "gpos" }
 
-otf.version          = 2.645 -- beware: also sync font-mis.lua
+otf.version          = 2.650 -- beware: also sync font-mis.lua
 otf.pack             = true  -- beware: also sync font-mis.lua
 otf.syncspace        = true
 otf.notdef           = false
@@ -576,7 +576,7 @@ end
 otf.enhancers["merge cid fonts"] = function(data,filename)
     -- we can also move the names to data.luatex.names which might
     -- save us some more memory (at the cost of harder tracing)
-    if data.subfonts and table.is_empty(data.glyphs) then
+    if data.subfonts and data.glyphs and next(data.glyphs) then
         local cidinfo = data.cidinfo
         local verbose = fonts.verbose
         if cidinfo.registry then
@@ -1355,7 +1355,7 @@ end
 
 function otf.set_features(tfmdata,features)
     local processes = { }
-    if not table.is_empty(features) then
+    if features and next(features) then
         local lists = {
             fonts.triggers,
             fonts.processors,
@@ -1430,14 +1430,14 @@ function otf.otf_to_tfm(specification)
 --~ print(cache_id)
     if not tfmdata then
         local otfdata = otf.load(filename,format,sub,features and features.featurefile)
-        if not table.is_empty(otfdata) then
+        if otfdata and next(otfdata) then
             otfdata.shared = otfdata.shared or {
                 featuredata = { },
                 anchorhash  = { },
                 initialized = false,
             }
             tfmdata = otf.copy_to_tfm(otfdata,cache_id)
-            if not table.is_empty(tfmdata) then
+            if tfmdata and next(tfmdata) then
                 tfmdata.unique = tfmdata.unique or { }
                 tfmdata.shared = tfmdata.shared or { } -- combine
                 local shared = tfmdata.shared
@@ -1562,12 +1562,12 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
             designsize = 100
         end
         local spaceunits = 500
-        tfm.units              = metadata.units_per_em or 1000
-        -- we need a runtime lookup because of running from cdrom or zip, brrr
-        tfm.filename           = resolvers.findbinfile(luatex.filename,"") or luatex.filename
+        -- we need a runtime lookup because of running from cdrom or zip, brrr (shouldn't we use the basename then?)
+        tfm.filename           = fonts.tfm.checked_filename(luatex)
         tfm.fullname           = metadata.fullname
         tfm.fontname           = metadata.fontname
         tfm.psname             = tfm.fontname or tfm.fullname
+        tfm.units              = metadata.units_per_em or 1000
         tfm.encodingbytes      = 2
         tfm.cidinfo            = data.cidinfo
         tfm.cidinfo.registry   = tfm.cidinfo.registry or ""

@@ -24,7 +24,7 @@ nodes.whatsits = { } -- table.swapped(node.whatsits())
 local reserved = { }
 local whatsits = nodes.whatsits
 
-for k, v in pairs(node.whatsits()) do
+for k, v in next, node.whatsits() do
     whatsits[k], whatsits[v] = v, k -- two way
 end
 

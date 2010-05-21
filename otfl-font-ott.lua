@@ -672,13 +672,13 @@ local to_scripts   = otf.tables.to_scripts
 local to_languages = otf.tables.to_languages
 local to_features  = otf.tables.to_features
 
-for k, v in pairs(to_features) do
+for k, v in next, to_features do
     local stripped = gsub(k,"%-"," ")
     to_features[stripped] = v
     local stripped = gsub(k,"[^a-zA-Z0-9]","")
     to_features[stripped] = v
 end
-for k, v in pairs(to_features) do
+for k, v in next, to_features do
     to_features[lower(k)] = v
 end
 

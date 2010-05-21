@@ -252,7 +252,7 @@ fonts.map.add_to_unicode = function(data,filename)
         end
     end
     if trace_unimapping then
-        for index, glyph in table.sortedpairs(data.glyphs) do
+        for index, glyph in table.sortedhash(data.glyphs) do
             local toun, name, unic = tounicode[index], glyph.name, glyph.unicode or -1 -- play safe
             if toun then
                 logs.report("load otf","internal: 0x%05X, name: %s, unicode: 0x%05X, tounicode: %s",index,name,unic,toun)
@@ -302,7 +302,7 @@ end
 --
 -- function fonts.map.flush(backend) -- will also erase the accumulated data
 --     local flushline = fonts.map.line[backend or "pdftex"] or fonts.map.line.pdftex
---     for _, e in pairs(fonts.map.data) do
+--     for _, e in next, fonts.map.data do
 --         flushline(e)
 --     end
 --     fonts.map.data = { }

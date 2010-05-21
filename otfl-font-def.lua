@@ -501,14 +501,14 @@ a helper function.</p>
 
 function define.check(features,defaults) -- nb adapts features !
     local done = false
-    if table.is_empty(features) then
-        features, done = table.fastcopy(defaults), true
-    else
+    if features and next(features) then
         for k,v in next, defaults do
             if features[k] == nil then
                 features[k], done = v, true
             end
         end
+    else
+        features, done = table.fastcopy(defaults), true
     end
     return features, done -- done signals a change
 end

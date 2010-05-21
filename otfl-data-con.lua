@@ -74,7 +74,7 @@ end
 function containers.is_valid(container, name)
     if name and name ~= "" then
         local storage = container.storage[name]
-        return storage and not table.is_empty(storage) and storage.cache_version == container.version
+        return storage and storage.cache_version == container.version
     else
         return false
     end

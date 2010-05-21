@@ -279,7 +279,7 @@ t.colorscheme = tfmtable.colorscheme
     local characters = tfmtable.characters
     local nameneeded = not tfmtable.shared.otfdata --hack
     local changed = tfmtable.changed or { } -- for base mode
-    local ischanged = not table.is_empty(changed)
+    local ischanged = changed and next(changed)
     local indices = tfmtable.indices
     local luatex = tfmtable.luatex
     local tounicode = luatex and luatex.tounicode
@@ -702,6 +702,31 @@ function tfm.replacements(tfm,value)
  -- tfm.characters[0x0022] = tfm.characters[0x201D]
     tfm.characters[0x0027] = tfm.characters[0x2019]
  -- tfm.characters[0x0060] = tfm.characters[0x2018]
+end
+
+-- checking
+
+function tfm.checked_filename(metadata,whatever)
+    local foundfilename = metadata.foundfilename
+    if not foundfilename then
+        local askedfilename = metadata.filename or ""
+        if askedfilename ~= "" then
+            foundfilename = resolvers.findbinfile(askedfilename,"") or ""
+            if foundfilename == "" then
+                logs.report("fonts","source file '%s' is not found",askedfilename)
+                foundfilename = resolvers.findbinfile(file.basename(askedfilename),"") or ""
+                if foundfilename ~= "" then
+                    logs.report("fonts","using source file '%s' (cache mismatch)",foundfilename)
+                end
+            end
+        elseif whatever then
+            logs.report("fonts","no source file for '%s'",whatever)
+            foundfilename = ""
+        end
+        metadata.foundfilename = foundfilename
+    --  logs.report("fonts","using source file '%s'",foundfilename)
+    end
+    return foundfilename
 end
 
 -- status info

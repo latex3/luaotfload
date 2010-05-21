@@ -55,11 +55,14 @@ fonts.names.old_to_new = { }
 
 local data, loaded = nil, false
 
+local fileformats = { "lua", "tex", "other text files" }
+
 function fonts.names.resolve(name,sub)
     if not loaded then
         local basename = fonts.names.basename
         if basename and basename ~= "" then
-            for _, format in ipairs { "lua", "tex", "other text files" } do
+            for i=1,#fileformats do
+                local format = fileformats[i]
                 local foundname = resolvers.find_file(basename,format) or ""
                 if foundname ~= "" then
                     data = dofile(foundname)
@@ -354,5 +357,25 @@ fonts.otf.meanings = fonts.otf.meanings or { }
 fonts.otf.meanings.normalize = fonts.otf.meanings.normalize or function(t)
     if t.rand then
         t.rand = "random"
+    end
+end
+
+-- bonus
+
+function fonts.otf.name_to_slot(name)
+    local tfmdata = fonts.ids[font.current()]
+    if tfmdata and tfmdata.shared then
+        local otfdata = tfmdata.shared.otfdata
+        local unicode = otfdata.luatex.unicodes[name]
+        return unicode and (type(unicode) == "number" and unicode or unicode[1])
+    end
+end
+
+function fonts.otf.char(n)
+    if type(n) == "string" then
+        n = fonts.otf.name_to_slot(n)
+    end
+    if type(n) == "number" then
+        tex.sprint("\\char" .. n)
     end
 end

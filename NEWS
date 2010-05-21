@@ -1,0 +1,24 @@
+Change History
+--------------
+
+Currrent git, luaotfload v1.08:
+    * XXX
+
+2010/05/10, luaotfload v1.07:
+    * using the new luatexbase package
+    * synchronizing with latest ConTeXt stable 2010.05.08
+    * adding support for microtypography
+    * adding support for color and transparency
+    * adding a script to generate a font database with TeX and system fonts
+    * more verbose log file
+
+2010/02/07, luaotfload v1.06a:
+    * more complete tlig and trep
+    * defaults options changed to "+ccmp;+locl;+rlig;+liga;+clig;+kern;
+         +mark;+mkmk;"
+    * supporting windows absolute path
+
+2009/12/01, luaotfload v1.06:
+    * synchronizing with ConTeXt stable 2009.11.26
+    * adding backward compatibility with LuaTeX 0.40.6
+

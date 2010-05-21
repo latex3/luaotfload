@@ -624,10 +624,13 @@ end
 %    \end{macrocode}
 %
 %    The attributes are allocated here. The |otfl@| prefix is added to prevent
-%    name collision.
+%    name collision. The first attribute, |otfl@dummy|, is a dummy attribute
+%    because \ConTeXt\ code expects attribute |0| not to be used, but
+%    |\newluatexattribute| starts counting from zero.
 %
 %    \begin{macrocode}
 
+\newluatexattribute\otfl@dummy
 \newluatexattribute\otfl@state
 \newluatexattribute\otfl@markbase
 \newluatexattribute\otfl@markdone

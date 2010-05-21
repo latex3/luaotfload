@@ -10,12 +10,12 @@ SCRIPT = mkluatexfontdb.lua
 COMPILED = $(DOC)
 UNPACKED = luaotfload.sty luaotfload.lua
 GENERATED = $(COMPILED) $(UNPACKED)
-SOURCE = $(DTX) $(OTFL) README Makefile $(SCRIPT)
+SOURCE = $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT)
 
 # Files grouped by installation location
 SCRIPTFILES = $(SCRIPT)
 RUNFILES    = $(UNPACKED) $(OTFL)
-DOCFILES    = $(DOC) README
+DOCFILES    = $(DOC) README NEWS
 SRCFILES    = $(DTX) Makefile
 
 # The following definitions should be equivalent

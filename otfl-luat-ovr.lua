@@ -3,7 +3,7 @@ if not modules then modules = { } end modules ['luat-ovr'] = {
     comment   = "companion to luatex-*.tex",
     author    = "Khaled Hosny and Elie Roux",
     copyright = "Luaotfload Development Team",
-    license   = "GPL"
+    license   = "GNU GPL v2"
 }
 
 

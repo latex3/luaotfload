@@ -3,7 +3,7 @@ if not modules then modules = { } end modules ['font-nms'] = {
     comment   = "companion to luaotfload.lua",
     author    = "Khaled Hosny and Elie Roux",
     copyright = "Luaotfload Development Team",
-    license   = "GPL"
+    license   = "GNU GPL v2"
 }
 
 -- This is a patch for otfl-font-def.lua, that defines a reader for ofm fonts,

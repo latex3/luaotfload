@@ -1564,11 +1564,13 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
         local spaceunits = 500
         -- we need a runtime lookup because of running from cdrom or zip, brrr (shouldn't we use the basename then?)
         tfm.filename           = fonts.tfm.checked_filename(luatex)
-        tfm.fullname           = metadata.fullname
         tfm.fontname           = metadata.fontname
+        tfm.fullname           = metadata.fullname or tfm.fontname
         tfm.psname             = tfm.fontname or tfm.fullname
+        tfm.name               = tfm.filename or tfm.fullname or tfm.fontname
         tfm.units              = metadata.units_per_em or 1000
         tfm.encodingbytes      = 2
+        tfm.format             = (metadata.order2 == 1 and 'truetype') or 'opentype'
         tfm.cidinfo            = data.cidinfo
         tfm.cidinfo.registry   = tfm.cidinfo.registry or ""
         tfm.type               = "real"
@@ -1653,6 +1655,7 @@ function tfm.read_from_open_type(specification)
         local s = specification.size
         local m = otfdata.metadata.math
         if m then
+            -- this will move to a function
             local f = specification.features
             if f then
                 local f = f.normal
@@ -1681,33 +1684,13 @@ function tfm.read_from_open_type(specification)
             end
         end
         tfmtable = tfm.scale(tfmtable,s,specification.relativeid)
-     -- here we resolve the name; file can be relocated, so this info is not in the cache
-        local filename = (otfdata and otfdata.luatex and otfdata.luatex.filename) or specification.filename
-        if not filename then
-            -- try to locate anyway and set otfdata.luatex.filename
-        end
-        if filename then
-            tfmtable.encodingbytes = 2
-            tfmtable.filename = resolvers.findbinfile(filename,"") or filename
-            tfmtable.fontname = tfmtable.fontname or otfdata.metadata.fontname
-            tfmtable.fullname = tfmtable.fullname or otfdata.metadata.fullname or tfmtable.fontname
-            local order = otfdata and otfdata.metadata.order2
-            if order == 0 then
-                tfmtable.format = 'opentype'
-            elseif order == 1 then
-                tfmtable.format = 'truetype'
-            else
-                tfmtable.format = specification.format
-            end
-            tfmtable.name = tfmtable.filename or tfmtable.fullname or tfmtable.fontname
-            if tfm.fontname_mode == "specification" then
-                -- not to be used in context !
-                local specname = specification.specification
-                if specname then
-                    tfmtable.name = specname
-                    if trace_defining then
-                        logs.report("define font","overloaded fontname: '%s'",specname)
-                    end
+        if tfm.fontname_mode == "specification" then
+            -- not to be used in context !
+            local specname = specification.specification
+            if specname then
+                tfmtable.name = specname
+                if trace_defining then
+                    logs.report("define font","overloaded fontname: '%s'",specname)
                 end
             end
         end

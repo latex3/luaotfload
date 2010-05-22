@@ -1684,6 +1684,7 @@ function tfm.read_from_open_type(specification)
             end
         end
         tfmtable = tfm.scale(tfmtable,s,specification.relativeid)
+        tfmtable.format = specification.format
         if tfm.fontname_mode == "specification" then
             -- not to be used in context !
             local specname = specification.specification

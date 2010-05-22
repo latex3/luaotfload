@@ -358,7 +358,9 @@ local function font_fullinfo(filename, subfont, texmf)
     local t = { }
     local f = fontloader.open(filename, subfont)
     if not f then
-        logs.report("error: failed to open %s", filename)
+	    if trace_progress then
+        	logs.report("error: failed to open %s", filename)
+	    end
         return nil
     end
     local m = fontloader.to_table(f)
@@ -558,10 +560,12 @@ if os.name == "macosx" then
     }
     function remove_ignore_fonts(fonts)
         for N,fnt in ipairs(fonts) do
-          if table.contains(ignore_fonts,fnt) then
-            logs.report("ignoring font '%s'", fnt)
-            table.remove(fonts,N)
-          end
+            if table.contains(ignore_fonts,fnt) then
+                if trace_progress then
+                	logs.report("ignoring font '%s'", fnt)
+                end
+                table.remove(fonts,N)
+            end
         end
         return fonts
     end

@@ -498,22 +498,19 @@ luaotfload.loadmodule('node-ini.lua')
 
 %    \end{macrocode}
 %
-%    By default \ConTeXt\ takes some private attributes for internal use. With
-%    Plain and \LaTeX\ we can't do so, we use |\newluaattribute|. This
-%    functions overrides a function defined in the previous module that
-%    returns the number of a private attribute. We allocate new attributes in
-%    the \texttt{.sty} file, and this function returns their number. Like this
-%    we don't need any private attribute, and this package is compatible with
-%    the others. We use the |otfl@| prefix for attributes.
+%    By default \ConTeXt\ takes some private attributes for internal use. To
+%    avoide attribute clashes with other packages, we override the function
+%    that allocates new attributes, making it a wraper around
+%    |luatexbase.new_attribute()|. We also prefix attributes with |otfl@| to
+%    avoid possiple name clashes.
 %
 %    \begin{macrocode}
 
 function attributes.private(name)
-    local number = luatexbase.attributes['otfl@'..name]
+    local attr   = 'otfl@' .. name
+    local number = luatexbase.attributes[attr]
     if not number then
-        error('asking for attribute %s, but not declared. '
-            ..'Please report to the maintainer of luaotfload.',
-               name)
+        number = luatexbase.new_attribute(attr)
     end
     return number
 end
@@ -628,26 +625,6 @@ end
 }
 
 \catcode64 11
-
-%    \end{macrocode}
-%
-%    The attributes are allocated here. The |otfl@| prefix is added to prevent
-%    name collision. The first attribute, |otfl@dummy|, is a dummy attribute
-%    because \ConTeXt\ code expects attribute |0| not to be used, but
-%    |\newluatexattribute| starts counting from zero.
-%
-%    \begin{macrocode}
-
-\newluatexattribute\otfl@dummy
-\newluatexattribute\otfl@state
-\newluatexattribute\otfl@markbase
-\newluatexattribute\otfl@markdone
-\newluatexattribute\otfl@markmark
-\newluatexattribute\otfl@cursbase
-\newluatexattribute\otfl@curscurs
-\newluatexattribute\otfl@cursdone
-\newluatexattribute\otfl@kernpair
-\newluatexattribute\otfl@color
 
 %    \end{macrocode}
 %

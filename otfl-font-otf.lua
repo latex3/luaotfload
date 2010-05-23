@@ -576,7 +576,10 @@ end
 otf.enhancers["merge cid fonts"] = function(data,filename)
     -- we can also move the names to data.luatex.names which might
     -- save us some more memory (at the cost of harder tracing)
-    if data.subfonts and data.glyphs and next(data.glyphs) then
+    if data.subfonts then
+        if data.glyphs and next(data.glyphs) then
+            logs.report("load otf","replacing existing glyph table due to subfonts")
+        end
         local cidinfo = data.cidinfo
         local verbose = fonts.verbose
         if cidinfo.registry then
@@ -1490,6 +1493,11 @@ end
 -- we cannot share descriptions as virtual fonts might extend them (ok, we could
 -- use a cache with a hash
 
+fonts.formats.dfont = "truetype"
+fonts.formats.ttc   = "truetype"
+fonts.formats.ttf   = "truetype"
+fonts.formats.otf   = "opentype"
+
 function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder the tma to unicode (nasty due to one->many)
     if data then
         local glyphs, pfminfo, metadata = data.glyphs or { }, data.pfminfo or { }, data.metadata or { }
@@ -1570,7 +1578,7 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
         tfm.name               = tfm.filename or tfm.fullname or tfm.fontname
         tfm.units              = metadata.units_per_em or 1000
         tfm.encodingbytes      = 2
-        tfm.format             = (metadata.order2 == 1 and 'truetype') or 'opentype'
+        tfm.format             = fonts.fontformat(tfm.filename,"opentype")
         tfm.cidinfo            = data.cidinfo
         tfm.cidinfo.registry   = tfm.cidinfo.registry or ""
         tfm.type               = "real"
@@ -1684,7 +1692,6 @@ function tfm.read_from_open_type(specification)
             end
         end
         tfmtable = tfm.scale(tfmtable,s,specification.relativeid)
-        tfmtable.format = specification.format
         if tfm.fontname_mode == "specification" then
             -- not to be used in context !
             local specname = specification.specification

@@ -569,8 +569,7 @@ local function scan_texmf_tree(fontnames, newfontnames)
         else
             logs.report("scanning TEXMF and OS fonts:")
         end
-    end
-    if trace_short then
+    elseif trace_short then
         if expandpath("$OSFONTDIR"):is_empty() then
             logs.info("scanning TEXMF fonts...")
         else
@@ -621,47 +620,43 @@ local static_osx_dirs = {
 
 local function scan_os_fonts(fontnames, newfontnames)
     --[[
-    This function scans the OS fonts through fontcache (fc-list), it executes
-    only if OSFONTDIR is empty (which is the case under most Unix by default).
-    If OSFONTDIR is non-empty, this means that the system fonts it contains have
-    already been scanned, and thus we don't scan them again.
+    This function scans the OS fonts through
+      - fontcache for Unix (reads the fonts.conf file and scans the directories)
+      - a static set of directories for Windows and MacOSX
     --]]
-    if expandpath("$OSFONTDIR"):is_empty() then 
-        if trace_progress then
-            logs.report("scanning OS fonts:")
+    if trace_progress then
+        logs.report("scanning OS fonts:")
+    elseif trace_short then
+        logs.info("scanning OS fonts...")
+    end
+    -- under OSX, we don't rely on fc-list, we rely on some static
+    -- directories instead
+    if os.name == "macosx" then
+        if trace_search then
+            logs.info("searching in static system directories...")
         end
-        if trace_short then
-            logs.info("scanning OS fonts...")
+        count = 0
+        for _,d in ipairs(static_osx_dirs) do
+            count = count + 1
+            progress(count, #static_osx_dirs)
+            scan_dir(d, fontnames, newfontnames, false)
         end
-        -- under OSX, we don't rely on fc-list, we rely on some static
-        -- directories instead
-        if os.name == "macosx" then
+    else
+        if trace_search then
+            logs.info("executing 'fc-list : file' and parsing its result...")
+        end
+        local data = io.popen("fc-list : file", 'r')
+        if data then
+            local list = read_fcdata(data)
+            data:close()
             if trace_search then
-                logs.info("searching in static system directories...")
+                logs.report("%d fonts found", #list)
             end
             count = 0
-            for _,d in ipairs(static_osx_dirs) do
+            for _,fnt in ipairs(list) do
                 count = count + 1
-                progress(count, #static_osx_dirs)
-                scan_dir(d, fontnames, newfontnames, false)
-            end
-        else
-            if trace_search then
-                logs.info("executing 'fc-list : file' and parsing its result...")
-            end
-            local data = io.popen("fc-list : file", 'r')
-            if data then
-                local list = read_fcdata(data)
-                data:close()
-                if trace_search then
-                    logs.report("%d fonts found", #list)
-                end
-                count = 0
-                for _,fnt in ipairs(list) do
-                    count = count + 1
-                    progress(count, #list)
-                    load_font(fnt, fontnames, newfontnames, false)
-                end
+                progress(count, #list)
+                load_font(fnt, fontnames, newfontnames, false)
             end
         end
     end
@@ -691,7 +686,9 @@ local function update_names(fontnames, force)
     end
     local newfontnames = fontnames_init()
     scan_texmf_tree(fontnames, newfontnames)
-    scan_os_fonts  (fontnames, newfontnames)
+    if expandpath("$OSFONTDIR"):is_empty() then
+        scan_os_fonts(fontnames, newfontnames)
+    end
     return newfontnames
 end
 

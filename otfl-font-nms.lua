@@ -558,7 +558,7 @@ else
     end
 end
 
-local function scan_texmf_tree(fontnames, newfontnames)
+local function scan_texmf_fonts(fontnames, newfontnames)
     --[[
     The function that scans all fonts in the texmf tree, through kpathsea
     variables OPENTYPEFONTS and TTFONTS of texmf.cnf
@@ -685,7 +685,7 @@ local function update_names(fontnames, force)
         end
     end
     local newfontnames = fontnames_init()
-    scan_texmf_tree(fontnames, newfontnames)
+    scan_texmf_fonts(fontnames, newfontnames)
     if expandpath("$OSFONTDIR"):is_empty() then
         scan_os_fonts(fontnames, newfontnames)
     end

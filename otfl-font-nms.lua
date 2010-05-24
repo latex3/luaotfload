@@ -489,7 +489,13 @@ local function path_normalize(path)
     if os.type ~= "windows" and os.type ~= "msdos" then
         local dest = lfs.readlink(path)
         if dest then
-            path = file.join(file.dirname(path), dest)
+            if kpse.readable_file(dest) then
+                path = dest
+            elseif kpse.readable_file(file.join(file.dirname(path), dest)) then
+                path = file.join(file.dirname(path), dest)
+            else
+                -- broken symlink?
+            end
         end
     end
     path = file.collapse_path(path)

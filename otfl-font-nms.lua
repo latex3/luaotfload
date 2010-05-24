@@ -672,7 +672,7 @@ local function scan_os_fonts(fontnames, newfontnames)
     end
     -- under OSX, we don't rely on fc-list, we rely on some static
     -- directories instead
-    if os.name == "macosx" then
+    if os.name == "macosx" or os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
         if trace_search then
             logs.info("searching in static system directories...")
         end

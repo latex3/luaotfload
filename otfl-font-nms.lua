@@ -628,7 +628,6 @@ local function read_fonts_conf()
             incomments = false
         elseif sub(line, 1, 4) == '<!--' then
             incomments = true
-            texio.write_nl("comment !")
         else
             for dir in gmatch(line, '<dir>([^<]+)</dir>') do
                 -- now we need to replace ~ by kpse.expand_path('~')

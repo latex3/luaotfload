@@ -590,7 +590,16 @@ local function scan_texmf_fonts(fontnames, newfontnames)
 end
 
 --[[
-  TODO: doc
+  For the OS fonts, there are several options:
+   - if OSFONTDIR is set (which is the case under windows by default but
+     not on the other OSs), it scans it at the same time as the texmf tree,
+     in the scan_texmf_fonts.
+   - if not:
+     - under Windows and Mac OSX, we take a look at some hardcoded directories
+     - under Unix, we read /etc/fonts/fonts.conf and read the directories in it
+
+  This means that if you have fonts in fancy directories, you need to set them
+  in OSFONTDIR.
 ]]
 
 --[[

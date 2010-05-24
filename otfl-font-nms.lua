@@ -414,11 +414,10 @@ local function load_font(filename, fontnames, newfontnames, texmf)
         db_timestamp        = status[basefile] and status[basefile].timestamp
         timestamp           = lfs.attributes(filename, "modification")
 
-        if newstatus[basefile] then
-            -- already indexed in this run
-            if newstatus[basefile].timestamp == timestamp then
-                return
-            end
+        local index_status = newstatus[basefile] or (not texmf and newstatus[basename(filename)])
+        if index_status and index_status.timestamp == timestamp then
+            -- already indexed this run
+            return
         end
 
         newstatus[basefile] = newstatus[basefile] or { }

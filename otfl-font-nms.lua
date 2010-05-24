@@ -473,16 +473,24 @@ end
 
 local function path_normalize(path)
     --[[
-    path normalization:
-    - a\b\c  -> a/b/c
-    - a/../b -> b
-    - /cygdrive/a/b -> a:/b
+        path normalization:
+        - a\b\c  -> a/b/c
+        - a/../b -> b
+        - /cygdrive/a/b -> a:/b
+        - reading symlinks under non-Win32
+        - using kpse.readable_file on Win32
     --]]
     if os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
+        path = kpse.readable_file(path)
         path = path:gsub('\\', '/')
         path = path:lower()
-        -- for cygwin cases...
         path = path:gsub('^/cygdrive/(%a)/', '%1:/')
+    end
+    if os.type ~= "windows" and os.type ~= "msdos" then
+        local dest = lfs.readlink(path)
+        if dest then
+            path = file.join(file.dirname(path), dest)
+        end
     end
     path = file.collapse_path(path)
     return path

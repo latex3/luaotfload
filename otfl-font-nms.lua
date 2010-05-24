@@ -38,6 +38,7 @@ local splitpath, expandpath = file.split_path, kpse.expand_path
 local glob, basename        = dir.glob, file.basename
 local upper, lower, format  = string.upper, string.lower, string.format
 local gsub, match, rpadd    = string.gsub, string.match, string.rpadd
+local gmatch, sub            = string.gmatch, string.sub
 local utfgsub               = unicode.utf8.gsub
 
 local trace_short    = false --tracing adapted to rebuilding of the database inside a document
@@ -607,16 +608,57 @@ local function read_fcdata(data)
 end
 
 --[[
-  Under Mac OSX, fc-list does not exist and there is no guaranty that OSFONTDIR
-  is correctly filled, so for now we use static paths.
+  TODO: doc
 ]]
 
-local static_osx_dirs = {
-    kpse.expand_path('~') .. "/Library/Fonts",
-    "/Library/Fonts",
-    "/System/Library/Fonts",
-    "/Network/Library/Fonts",
-}
+--[[
+  This function parses /etc/fonts/fonts.conf and returns all the dir it finds.
+  The code is minimal, please report any error it may generate.
+]]
+
+local function read_fonts_conf()
+    local f = io.open("/etc/fonts/fonts.conf")
+    if not f then
+        error("Cannot open the file /etc/fonts/fonts.conf")
+    end
+    local results = {}
+    local incomments = false
+    for line in f:lines() do
+        -- spaghetti code... hmmm...
+        if incomments and sub(line, 1, 3) == '-->' then
+            incomments = false
+        elseif sub(line, 1, 4) == '<!--' then
+            incomments = true
+            texio.write_nl("comment !")
+        else
+            for dir in gmatch(line, '<dir>([^<]+)</dir>') do
+                -- now we need to replace ~ by kpse.expand_path('~')
+                if sub(dir, 1, 1) == '~' then
+                    dir = kpse.expand_path('~') .. sub(dir, 2)
+                end
+                results[#results+1] = dir
+            end
+        end
+    end
+    f:close()
+    return results
+end
+
+local function get_os_dirs()
+    if os.name == 'macosx' then
+        return {
+            kpse.expand_path('~') .. "/Library/Fonts",
+            "/Library/Fonts",
+            "/System/Library/Fonts",
+            "/Network/Library/Fonts",
+        }
+    elseif os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
+        local windir = os.getenv("WINDIR")
+        return {windir..'\\Fonts',}
+    else
+        return read_fonts_conf()
+    end
+end
 
 local function scan_os_fonts(fontnames, newfontnames)
     --[[
@@ -636,9 +678,10 @@ local function scan_os_fonts(fontnames, newfontnames)
             logs.info("searching in static system directories...")
         end
         count = 0
-        for _,d in ipairs(static_osx_dirs) do
+        local os_dirs = get_os_dirs()
+        for _,d in ipairs(os_dirs) do
             count = count + 1
-            progress(count, #static_osx_dirs)
+            progress(count, #os_dirs)
             scan_dir(d, fontnames, newfontnames, false)
         end
     else

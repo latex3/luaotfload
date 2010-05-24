@@ -589,23 +589,6 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     end
 end
 
-local function read_fcdata(data)
-    --[[
-    this function takes raw data returned by fc-list, parses it, normalizes the
-    paths and makes a list out of it.
-    --]]
-    local list = { }
-    for line in data:lines() do
-        line = line:gsub(": ", "")
-        local ext = match(line,"^.+%.([^/\\]-)$") or ""
-        ext = lower(ext)
-        if table.contains(font_extensions_lc, ext) then
-            list[#list+1] = path_normalize(line:gsub(": ", ""))
-        end
-    end
-    return list
-end
-
 --[[
   TODO: doc
 ]]
@@ -669,37 +652,15 @@ local function scan_os_fonts(fontnames, newfontnames)
     elseif trace_short then
         logs.info("scanning OS fonts...")
     end
-    -- under OSX, we don't rely on fc-list, we rely on some static
-    -- directories instead
-    if os.name == "macosx" or os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
-        if trace_search then
-            logs.info("searching in static system directories...")
-        end
-        count = 0
-        local os_dirs = get_os_dirs()
-        for _,d in ipairs(os_dirs) do
-            count = count + 1
-            progress(count, #os_dirs)
-            scan_dir(d, fontnames, newfontnames, false)
-        end
-    else
-        if trace_search then
-            logs.info("executing 'fc-list : file' and parsing its result...")
-        end
-        local data = io.popen("fc-list : file", 'r')
-        if data then
-            local list = read_fcdata(data)
-            data:close()
-            if trace_search then
-                logs.report("%d fonts found", #list)
-            end
-            count = 0
-            for _,fnt in ipairs(list) do
-                count = count + 1
-                progress(count, #list)
-                load_font(fnt, fontnames, newfontnames, false)
-            end
-        end
+    if trace_search then
+        logs.info("searching in static system directories...")
+    end
+    count = 0
+    local os_dirs = get_os_dirs()
+    for _,d in ipairs(os_dirs) do
+        count = count + 1
+        progress(count, #os_dirs)
+        scan_dir(d, fontnames, newfontnames, false)
     end
 end
 

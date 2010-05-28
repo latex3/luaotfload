@@ -10,7 +10,7 @@ fonts = fonts or { }
 
 -- general
 
-fonts.otf.pack          = true
+fonts.otf.pack          = false
 fonts.tfm.resolve_vf    = false -- no sure about this
 fonts.tfm.fontname_mode = "specification" -- somehow latex needs this
 

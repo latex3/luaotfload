@@ -1,8 +1,19 @@
 Change History
 --------------
 
-Currrent git, luaotfload v1.08:
-    * XXX
+2010/05/28, luaotfload v1.08:
+    * fix misc. bugs with system fonts scanning
+    * parse fontconfig configuration directly, no longer dependant on 'fc-list'
+    * now if no font names database is found, luaotfload will generate it, also
+      it will force an update of the database if the asked font can not be
+      found
+    * avoid loading non-tfm fonts when the user asks for tfm font
+    * update the documentation
+    * blacklist .ttc and LastResort font on mac.
+    * sync with ConTeXt beta 2010.05.22
+    * fix attribute handling
+    * clarify license
+    * misc. bug fixes
 
 2010/05/10, luaotfload v1.07:
     * using the new luatexbase package

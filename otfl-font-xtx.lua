@@ -90,7 +90,6 @@ otf.tables = otf.tables or { }
 
 otf.tables.defaults = {
     dflt = {
-		"calt",
         "ccmp", "locl", "rlig", "liga", "clig",
         "kern", "mark", "mkmk",
     },

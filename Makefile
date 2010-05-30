@@ -12,6 +12,10 @@ UNPACKED = luaotfload.sty luaotfload.lua
 GENERATED = $(COMPILED) $(UNPACKED)
 SOURCE = $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT)
 
+# test files
+TESTDIR = tests
+TESTFILES = $(wildcard $(TESTDIR)/*.tex)
+
 # Files grouped by installation location
 SCRIPTFILES = $(SCRIPT)
 RUNFILES    = $(UNPACKED) $(OTFL)
@@ -41,7 +45,7 @@ DO_MAKEINDEX = makeindex -s gind.ist $(subst .dtx,,$<) >/dev/null 2>&1
 all: $(GENERATED)
 doc: $(COMPILED)
 unpack: $(UNPACKED)
-ctan: $(CTAN_ZIP)
+ctan: check $(CTAN_ZIP)
 tds: $(TDS_ZIP)
 world: all ctan
 
@@ -79,6 +83,12 @@ $(TDS_ZIP): $(ALL_FILES)
 install: $(ALL_FILES)
 	@echo "Installing in '$(TEXMFROOT)'."
 	$(run-install)
+
+check: $(RUNFILES) $(TESTFILES)
+	@for f in $(TESTFILES); do \
+	    echo "check: luatex $$f"; \
+	    luatex --interaction=batchmode $$f > /dev/null || exit $$?; \
+	    done
 
 manifest: 
 	@echo "Source files:"

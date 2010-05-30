@@ -483,7 +483,7 @@ local function path_normalize(path)
         - using kpse.readable_file on Win32
     --]]
     if os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
-        path = kpse.readable_file(path)
+--      path = kpse.readable_file(path)
         path = path:gsub('\\', '/')
         path = path:lower()
         path = path:gsub('^/cygdrive/(%a)/', '%1:/')

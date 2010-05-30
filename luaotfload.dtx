@@ -311,25 +311,23 @@ and the derived files
 % to keep track of fonts available to \LuaTeX. Using this database, fonts can
 % be loaded by font name as well as filename.
 %
-% This font database must be maintained as you add (and remove) fonts to your
-% system. To update the database, run the script |mkluatexfontdb.lua| that is
-% included with this package. If you have not run it before, it may take quite
-% some time to process every font on your computer. Subsequent runs to update
-% the database will be quite fast, however.
-%
-% In \TeX~Live~2010, there will be a button in the \TeX~Live package manager
-% to run |mkluatexfontdb.lua|.
+% This font database is maintained automatically as you add and remove fonts
+% to/from your system. To update the database manually, run the script
+% |mkluatexfontdb| that is included with this package. If you have not run it
+% before, it may take quite some time to process every font on your computer.
+% This is particularly noticeable if it occurs during a typesetting run.
+% Subsequent runs to update the database will be quite fast, however.
 %
 % The script will parse standard places for fonts in your system to build the
-% font database. On Windows and Linus, it will use |fc-list| to find the
-% fonts; on Mac~OS~X, it will search in the standard font locations
+% font database. On Windows and Linus, it will use |fontconfig| to find the
+% font locations; on Mac~OS~X, it will search in the standard font locations
 % |~/Library/Fonts|, |/Library/Fonts|, |/System/Library/Fonts|, and
 % |/Network/Library/Fonts|,
 %
-% If you do not wish the script to locate fonts automatically but would rather
-% specify the exact locations in which to find your fonts, set the |OSFONTDIR|
-% environment variable instead. When this variable is set, the script will
-% only search in those directories.
+% If you do not wish the script to search the standard font locations by
+% default but would rather specify the exact locations in which to find your
+% fonts, set the |OSFONTDIR| environment variable instead. When this variable
+% is set, the script will only search in those directories.
 %
 % |mkluatexfontdb.lua --help| provides a brief summary of the functionality of
 % the script and includes some advanced options that we have not mentioned

@@ -36,7 +36,6 @@ Valid options:
   -v --verbose=LEVEL           be more verbose (print the searched directories)
   -vv                          print the loaded fonts
   -vvv                         print all steps of directory searching
-  --fc-cache                   run fc-cache before updating database
   --sys                        install the database system-wide
                                (default is only for the current user)
   -V --version                 print version and exit
@@ -81,7 +80,6 @@ local long_opts = {
     force            = "f",
     quiet            = "q",
     help             = "h",
-    ['fc-cache']     = 0  ,
     sys              = 0  ,
     verbose          = 1  ,
     version          = "V",
@@ -89,26 +87,6 @@ local long_opts = {
 
 local short_opts = "d:fqpvVh"
 
-local function do_run_fc_cache(c)
-    --[[
-    Function running fc-cache if needed.
-    The argument is nil for default, 0 for no fc-cache and 1 for fc-cache.
-    Default behaviour is to run fc-cache if available.
-    --]]
-    if c == 0 then return end
-    if not c then
-      -- TODO: detect if fc-cache is available
-    end
-    local toexec = 'fc-cache'
-    if os.type == 'windows' then
-        toexec = 'fc-cache.exe' -- TODO: to test on a non-cygwin Windows
-    end
-    log('executing %s...\n', toexec)
-    os.execute(toexec)
-end
-
--- a temporary variable, containing the command line option concerning fc-cache
-local run_fc_cache = 0
 local force_reload = nil
 
 local function process_cmdline()
@@ -133,8 +111,6 @@ local function process_cmdline()
             output_directory = optarg [i]
         elseif v == "f" then
             force_reload = 1
-        elseif v == "fc-cache" then
-            run_fc_cache = 1
         elseif v == "sys" then
             output_directory = names.path.systemdir
         end
@@ -147,7 +123,6 @@ local function process_cmdline()
 end
 
 process_cmdline()
-do_run_fc_cache(run_fc_cache)
 
 local function generate(force)
     log("generating font names database.")

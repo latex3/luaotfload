@@ -1,6 +1,10 @@
 Change History
 --------------
 
+2010/05/30, luaotfload v1.09:
+    * the last release didn't even load
+    * fix passing --destdir to mkluatexfontdb
+
 2010/05/28, luaotfload v1.08a:
     * revert experimental code that was committed by mistake
 

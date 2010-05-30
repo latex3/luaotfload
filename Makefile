@@ -87,7 +87,8 @@ install: $(ALL_FILES)
 check: $(RUNFILES) $(TESTFILES)
 	@for f in $(TESTFILES); do \
 	    echo "check: luatex $$f"; \
-	    luatex --interaction=batchmode $$f > /dev/null || exit $$?; \
+	    luatex --interaction=batchmode --output-directory $(TESTDIR) $$f \
+	    > /dev/null || exit $$?; \
 	    done
 
 manifest: 
@@ -98,8 +99,8 @@ manifest:
 	@for f in $(GENERATED); do echo $$f; done
 
 clean: 
-	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out
+	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out $(TESTDIR)/*.log
 
 mrproper: clean
-	@$(RM) -- $(GENERATED) $(ZIPS)
+	@$(RM) -- $(GENERATED) $(ZIPS) $(TESTDIR)/*.pdf
 

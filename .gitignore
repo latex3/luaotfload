@@ -6,3 +6,7 @@ luaotfload.pdf
 luaotfload.sty
 luaotfload.tds.zip
 luaotfload.zip
+
+# Temporary files in the tests directory
+tests/*.log
+tests/*.pdf

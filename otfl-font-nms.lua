@@ -508,15 +508,9 @@ fonts.path_normalize = path_normalize
 
 if os.name == "macosx" then
     -- While Mac OS X 10.6 has a problem with TTC files, ignore them globally:
-    font_extensions = {
-      "otf", "ttf", "dfont", "OTF", "TTF", "DFONT"
-    }
-    font_extensions_lc = { "otf", "ttf", "dfont" }
+    font_extensions = { "otf", "ttf", "dfont" }
 else
-    font_extensions = {
-      "otf", "ttf", "ttc", "dfont", "OTF", "TTF", "TTC", "DFONT"
-    }
-    font_extensions_lc = { "otf", "ttf", "ttc", "dfont" }
+    font_extensions = { "otf", "ttf", "ttc", "dfont" }
 end
 
 local function scan_dir(dirname, fontnames, newfontnames, texmf)
@@ -532,15 +526,17 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
     if trace_search then
         logs.report("scanning '%s'", dirname)
     end
-    for _,ext in ipairs(font_extensions) do
-        found = glob(dirname .. "/**." .. ext)
-        -- note that glob fails silently on broken symlinks, which happens
-        -- sometimes in TeX Live.
-        if trace_search then
-            logs.report("%s '%s' fonts found", #found, ext)
+    for _,i in next, font_extensions do
+        for _,ext in next, { i, upper(i) } do
+            found = glob(dirname .. "/**." .. ext)
+            -- note that glob fails silently on broken symlinks, which happens
+            -- sometimes in TeX Live.
+            if trace_search then
+                logs.report("%s '%s' fonts found", #found, ext)
+            end
+            nbfound = nbfound + #found
+            table.append(list, found)
         end
-        nbfound = nbfound + #found
-        table.append(list, found)
     end
     if trace_search then
         logs.report("%d fonts found in '%s'", nbfound, dirname)

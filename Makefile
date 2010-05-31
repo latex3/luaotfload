@@ -15,6 +15,8 @@ SOURCE = $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT)
 # test files
 TESTDIR = tests
 TESTFILES = $(wildcard $(TESTDIR)/*.tex)
+TESTFILE_SYS = $(TESTDIR)/systemfonts.tex
+TESTFILES_TL = $(filter-out $(TESTFILE_SYS), $(TESTFILES))
 
 # Files grouped by installation location
 SCRIPTFILES = $(SCRIPT)
@@ -84,12 +86,17 @@ install: $(ALL_FILES)
 	@echo "Installing in '$(TEXMFROOT)'."
 	$(run-install)
 
-check: $(RUNFILES) $(TESTFILES)
-	@for f in $(TESTFILES); do \
+check: $(RUNFILES) $(TESTFILES_TL)
+	@for f in $(TESTFILES_TL); do \
 	    echo "check: luatex $$f"; \
 	    luatex --interaction=batchmode --output-directory $(TESTDIR) $$f \
 	    > /dev/null || exit $$?; \
 	    done
+
+check-all: $(TESTFILE_SYS) check
+	@echo "check: luatex $<"
+	@luatex --interaction=batchmode --output-directory $(TESTDIR) $< \
+	    >/dev/null
 
 manifest: 
 	@echo "Source files:"

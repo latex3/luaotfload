@@ -165,28 +165,6 @@ function names.resolve(specification)
     local data = names.data
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
-            -- if the specified name ends like a font file, we first look for
-            -- it through kpse, and if we don't find it, we look for it in
-            -- the database.
-            if table.contains(font_extensions_lc, ext) then
-                local fname = specification.name
-                -- for absolute and relative path, kpse will find them, so
-                -- there shouldn't be any problem
-                local path = resolvers.find_file(fname, "opentype fonts")
-                if not path then
-                    path = resolvers.find_file(fname, "truetype fonts")
-                end
-                if path then
-                    return path -- or fname ?
-                else
-                    for _,face in ipairs(data.mappings) do
-                        if basename(face.filename[1]) == fname then
-                            return face.filename[1], face.filename[2]
-                        end
-                    end
-                end
-                return specification.name
-            end
             local found = { }
             for _,face in ipairs(data.mappings) do
                 local family    = sanitize(face.names.family)

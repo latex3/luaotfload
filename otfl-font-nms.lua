@@ -528,7 +528,7 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
     end
     for _,i in next, font_extensions do
         for _,ext in next, { i, upper(i) } do
-            found = glob(dirname .. "/**." .. ext)
+            found = glob(format("%s/**.%s$", dirname, ext))
             -- note that glob fails silently on broken symlinks, which happens
             -- sometimes in TeX Live.
             if trace_search then

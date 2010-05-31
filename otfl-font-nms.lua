@@ -128,24 +128,6 @@ local loaded   = false
 local reloaded = false
 
 function names.resolve(specification)
-    local tfm   = resolvers.find_file(specification.name, "tfm")
-    local ext = lower(file.extname(specification.name))
-
-    if tfm then
-        -- is a tfm font, skip names database
-        if ext == 'tfm' then
-            return specification.name, false
-        else
-            return specification.name..'.tfm', false
-        end
-    elseif resolvers.find_file(specification.name, "ofm") then
-        if ext == 'ofm' then
-            return specification.name, false
-        else
-            return specification.name..'.ofm', false
-        end
-    end
-
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
 

@@ -203,6 +203,10 @@ function fonts.define.specify.colonized(specification) -- xetex mode
         list.optsize = nil
     end
     if list.name then
+        if resolvers.find_file(list.name, "ofm") then
+            list.lookup = "file"
+        end
+
         specification.name = list.name
         list.name = nil
     end

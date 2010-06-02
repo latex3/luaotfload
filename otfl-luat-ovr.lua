@@ -32,6 +32,7 @@ function logs.info(category,fmt,...)
     else
         write_nl(format("%s |",name))
     end
+    io.flush()
 end
 
 function logs.simple(fmt,...)

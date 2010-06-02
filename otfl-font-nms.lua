@@ -93,10 +93,10 @@ function names.load()
 	foundname = systempath
     end
     if data then
-        logs.report("load font",
+        logs.info("load font",
             "loaded font names database: %s", foundname)
     else
-        logs.report("load font",
+        logs.info("load font",
             "no font names database found, generating new one")
         data = names.update()
         names.save(data)

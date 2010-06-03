@@ -16,7 +16,7 @@ table.insert(fonts.triggers,"color")
 
 function initializers.common.color(tfmdata,value)
     if value then
-        tfmdata.color = value
+        tfmdata.color = tostring(value)
         add_color_callback()
     end
 end

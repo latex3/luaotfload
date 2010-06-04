@@ -38,7 +38,7 @@ local splitpath, expandpath = file.split_path, kpse.expand_path
 local glob, basename        = dir.glob, file.basename
 local upper, lower, format  = string.upper, string.lower, string.format
 local gsub, match, rpadd    = string.gsub, string.match, string.rpadd
-local gmatch, sub            = string.gmatch, string.sub
+local gmatch, sub, find     = string.gmatch, string.sub, string.find
 local utfgsub               = unicode.utf8.gsub
 
 local trace_short    = false --tracing adapted to rebuilding of the database inside a document
@@ -579,32 +579,82 @@ end
   The code is minimal, please report any error it may generate.
 ]]
 
-local function read_fonts_conf()
-    local f = io.open("/etc/fonts/fonts.conf")
+local function read_fonts_conf(path, results)
+    local f = io.open(path)
     if not f then
-        error("Cannot open the file /etc/fonts/fonts.conf")
+        error("Cannot open the file "..path)
     end
-    local results = {}
     local incomments = false
     for line in f:lines() do
-        -- spaghetti code... hmmm...
-        if incomments and sub(line, 1, 3) == '-->' then
-            incomments = false
-        elseif sub(line, 1, 4) == '<!--' then
-            incomments = true
-        else
-            for dir in gmatch(line, '<dir>([^<]+)</dir>') do
-                -- now we need to replace ~ by kpse.expand_path('~')
-                if sub(dir, 1, 1) == '~' then
-                    dir = kpse.expand_path('~') .. sub(dir, 2)
+        while line and line ~= "" do
+            -- spaghetti code... hmmm...
+            if incomments then
+                local tmp = find(line, '-->')
+                if tmp then
+                    incomments = false
+                    line = sub(line, tmp+3)
+                else
+                    line = nil
                 end
-                results[#results+1] = dir
+            else
+                local tmp = find(line, '<!--')
+                local newline = line
+                if tmp then
+                    -- for the analysis, we take everything that is before the
+                    -- comment sign
+                    newline = sub(line, 1, tmp-1)
+                    -- and we loop again with the comment
+                    incomments = true
+                    line = sub(line, tmp+4)
+                else
+                    -- if there is no comment start, the block after that will
+                    -- end the analysis, we exit the while loop
+                    line = nil
+                end
+                for dir in gmatch(newline, '<dir>([^<]+)</dir>') do
+                    -- now we need to replace ~ by kpse.expand_path('~')
+                    if sub(dir, 1, 1) == '~' then
+                        dir = kpse.expand_path('~') .. sub(dir, 2)
+                    end
+                    -- we exclude paths with texmf in them, as they should be
+                    -- found anyway
+                    if not find(dir, 'texmf') then
+                        results[#results+1] = dir
+                    end
+                end
+                for include in gmatch(newline, '<include[^<]*>([^<]+)</include>') do
+                    -- include here can be four things: a directory or a file,
+                    -- in absolute or relative path.
+                    if sub(include, 1, 1) == '~' then
+                        include = kpse.expand_path('~') .. sub(include, 2)
+                        -- First if the path is relative, we make it absolute:
+                    elseif not lfs.isfile(include) and not lfs.isdir(include) then
+                        include = file.join(file.dirname(path), include)
+                    end
+                    if lfs.isfile(include) then
+                        -- maybe we should prevent loops here?
+                        -- we exclude path with texmf in them, as they should
+                        -- be found otherwise
+                        read_fonts_conf(include, results)
+                    elseif lfs.isdir(include) then
+                        if sub(include, -1, 0) ~= "/" then
+                            include = include.."/"
+                        end
+                        found = glob(include.."*.conf")
+                        for _, f in ipairs(found) do
+                            read_fonts_conf(f, results)
+                        end
+                    end
+                end
             end
         end
     end
     f:close()
     return results
 end
+
+-- for testing purpose
+names.read_fonts_conf = read_fonts_conf
 
 local function get_os_dirs()
     if os.name == 'macosx' then
@@ -618,7 +668,7 @@ local function get_os_dirs()
         local windir = os.getenv("WINDIR")
         return {windir..'\\Fonts',}
     else
-        return read_fonts_conf()
+        return read_fonts_conf("/etc/fonts/fonts.conf", {})
     end
 end
 

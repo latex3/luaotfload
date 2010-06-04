@@ -190,8 +190,6 @@ function names.resolve(specification)
                             found[1] = face
                             break
                         end
-                    else
-                        found[1] = face
                     end
                 else
                     if name == fullname

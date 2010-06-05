@@ -556,48 +556,6 @@ luaotfload.loadmodule('font-clr.lua')
 
 %    \end{macrocode}
 %
-% \subsection{\ConTeXt\ override}
-%
-%    Here we override some defaults set in \ConTeXt\ code.
-%
-%    \begin{macrocode}
-
-fonts.mode = "node"
-
-%    \end{macrocode}
-%
-%    Finally two functions
-%
-%    \begin{macrocode}
-
-function luaotfload.register_callbacks()
-    luatexbase.add_to_callback('pre_linebreak_filter',
-                                nodes.simple_font_handler,
-                               'luaotfload.pre_linebreak_filter')
-    luatexbase.add_to_callback('hpack_filter',
-                                nodes.simple_font_handler,
-                               'luaotfload.hpack_filter')
-    luatexbase.reset_callback('define_font')
-    luatexbase.add_to_callback('define_font',
-                                fonts.define.read,
-                               'luaotfload.define_font', 1)
-    luatexbase.add_to_callback('find_vf_file',
-                                fonts.vf.find,
-                               'luaotfload.find_vf_file')
-end
-
-function luaotfload.unregister_callbacks()
-    luatexbase.remove_from_callback('pre_linebreak_filter',
-                                    'luaotfload.pre_linebreak_filter')
-    luatexbase.remove_from_callback('hpack_filter',
-                                    'luaotfload.hpack_filter')
-    luatexbase.remove_from_callback('define_font',
-                                    'luaotfload.define_font')
-    luatexbase.remove_from_callback('find_vf_file',
-                                     'luaotfload.find_vf_file')
-end
-%    \end{macrocode}
-%
 % \subsection{Emulating font dimensions}
 %
 % And here add some code to emulate \XeTeX's \cs{fontdimen8},
@@ -628,10 +586,48 @@ local function def_font(...)
     end
     return fontdata
 end
-luatexbase.reset_callback('define_font')
-luatexbase.add_to_callback('define_font',
-                            def_font,
-                           'luaotfload.define_font', 1)
+%    \end{macrocode}
+%
+% \subsection{\ConTeXt\ override}
+%
+%    Here we override some defaults set in \ConTeXt\ code.
+%
+%    \begin{macrocode}
+
+fonts.mode = "node"
+
+%    \end{macrocode}
+%
+%    Finally two functions
+%
+%    \begin{macrocode}
+
+function luaotfload.register_callbacks()
+    luatexbase.add_to_callback('pre_linebreak_filter',
+                                nodes.simple_font_handler,
+                               'luaotfload.pre_linebreak_filter')
+    luatexbase.add_to_callback('hpack_filter',
+                                nodes.simple_font_handler,
+                               'luaotfload.hpack_filter')
+    luatexbase.reset_callback('define_font')
+    luatexbase.add_to_callback('define_font',
+                                def_font,
+                               'luaotfload.define_font', 1)
+    luatexbase.add_to_callback('find_vf_file',
+                                fonts.vf.find,
+                               'luaotfload.find_vf_file')
+end
+
+function luaotfload.unregister_callbacks()
+    luatexbase.remove_from_callback('pre_linebreak_filter',
+                                    'luaotfload.pre_linebreak_filter')
+    luatexbase.remove_from_callback('hpack_filter',
+                                    'luaotfload.hpack_filter')
+    luatexbase.remove_from_callback('define_font',
+                                    'luaotfload.define_font')
+    luatexbase.remove_from_callback('find_vf_file',
+                                     'luaotfload.find_vf_file')
+end
 %    \end{macrocode}
 %
 % \iffalse

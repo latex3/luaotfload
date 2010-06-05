@@ -569,7 +569,7 @@ luaotfload.loadmodule('font-clr.lua')
 %    \begin{macrocode}
 local function def_font(...)
     local fontdata = fonts.define.read(...)
-    if type(fontdata) == "table" then
+    if type(fontdata) == "table" and fontdata.shared then
         local capheight
         local units     = fontdata.units
         local size      = fontdata.size

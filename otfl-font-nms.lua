@@ -93,11 +93,10 @@ function names.load()
 	foundname = systempath
     end
     if data then
-        logs.info("load font",
-            "loaded font names database: %s", foundname)
+        logs.info("Font names database loaded: " .. foundname)
     else
-        logs.info("load font",
-            "no font names database found, generating new one")
+        logs.info([[Font names database not found, generating new one.
+             This can take several minutes; please be patient.]])
         data = names.update()
         names.save(data)
     end
@@ -537,15 +536,15 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     --]]
     if trace_progress then
         if expandpath("$OSFONTDIR"):is_empty() then
-            logs.report("scanning TEXMF fonts:")
+            logs.report("Scanning TEXMF fonts:")
         else
-            logs.report("scanning TEXMF and OS fonts:")
+            logs.report("Scanning TEXMF and OS fonts:")
         end
     elseif trace_short then
         if expandpath("$OSFONTDIR"):is_empty() then
-            logs.info("scanning TEXMF fonts...")
+            logs.info("Scanning TEXMF fonts...")
         else
-            logs.info("scanning TEXMF and OS fonts...")
+            logs.info("Scanning TEXMF and OS fonts...")
         end
     end
     local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^\.", "")
@@ -679,12 +678,12 @@ local function scan_os_fonts(fontnames, newfontnames)
       - a static set of directories for Windows and MacOSX
     --]]
     if trace_progress then
-        logs.report("scanning OS fonts:")
+        logs.report("Scanning OS fonts:")
     elseif trace_short then
-        logs.info("scanning OS fonts...")
+        logs.info("Scanning OS fonts...")
     end
     if trace_search then
-        logs.info("searching in static system directories...")
+        logs.info("Searching in static system directories...")
     end
     count = 0
     local os_dirs = get_os_dirs()
@@ -712,7 +711,7 @@ local function update_names(fontnames, force)
         or fontnames.version ~= names.version then
             fontnames = fontnames_init()
             if trace_search then
-                logs.report("no font names database or old one found, "
+                logs.report("No font names database or old one found; "
                           .."generating new one")
             end
         end

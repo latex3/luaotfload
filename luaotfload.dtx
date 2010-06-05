@@ -597,6 +597,43 @@ function luaotfload.unregister_callbacks()
                                      'luaotfload.find_vf_file')
 end
 %    \end{macrocode}
+%
+% \subsection{Emulating font dimensions}
+%
+% And here add some code to emulate \XeTeX's \cs{fontdimen8},
+% which stores the caps-height of the font. (Cf.\ \cs{fontdimen5} which
+% stores the x-height.)
+%
+% Falls back to measuring the glyph if the font doesn't contain the
+% necessary information.
+% This needs to be extended for fonts that don't contain an `X'.
+%
+%    \begin{macrocode}
+local function def_font(...)
+    local fontdata = fonts.define.read(...)
+    if fontdata then
+        local units     = fontdata.units
+        local size      = fontdata.size
+        local otfdata   = fontdata.shared.otfdata
+
+        local capheight = otfdata.pfminfo.os2_capheight
+
+        local dimen8 = capheight/units*size
+
+        if capheight <= 0 then
+            dimen8 = fontdata.characters[string.byte("X")].height
+        end
+
+        fontdata.parameters[8] = dimen8
+    end
+    return fontdata
+end
+luatexbase.reset_callback('define_font')
+luatexbase.add_to_callback('define_font',
+                            def_font,
+                           'luaotfload.define_font', 1)
+%    \end{macrocode}
+%
 % \iffalse
 %</lua>
 % \fi

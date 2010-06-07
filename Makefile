@@ -15,7 +15,7 @@ SOURCE = $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT)
 # test files
 TESTDIR = tests
 TESTFILES = $(wildcard $(TESTDIR)/*.tex)
-TESTFILE_SYS = $(TESTDIR)/systemfonts.tex
+TESTFILE_SYS = $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
 TESTFILES_TL = $(filter-out $(TESTFILE_SYS), $(TESTFILES))
 
 # Files grouped by installation location

@@ -1,6 +1,22 @@
 Change History
 --------------
 
+2010/06/07, luaotfload v1.10:
+    * provide a fonts.names.scan(dir) function that temporally loads fonts
+      from the specified dir into the names database
+    * Log loaded font file before attempting to open it
+    * fix XeTeX's square brackets syntax so that it doesn't trigger database
+      update
+    * fix loading fonts with absolute path
+    * add \fontdimen8 support, for XeTeX compatibility
+    * be more verbose when updating the font database
+    * improve fonts.conf parsing
+    * make sure when a TFM font is requested we don't end up loading a non-TFM
+      font with a similar name instead
+    * Remove --fc-cache option from mkluatexfontdb.lua, since we no longer use
+      fontconfig tools
+    * misc. bug fixes
+
 2010/05/30, luaotfload v1.09:
     * the last release didn't even load
     * fix passing --destdir to mkluatexfontdb

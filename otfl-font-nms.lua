@@ -733,6 +733,19 @@ local function save_names(fontnames)
                 table.serialize(fontnames, true))
 end
 
-names.scan   = scan_dir
+local function scan_external_dir(dir)
+    local old_names, new_names
+    if loaded then
+        old_names = names.data
+    else
+        old_names = names.load()
+        loaded    = true
+    end
+    new_names = table.copy(old_names)
+    scan_dir("zapfino", old_names, new_names)
+    names.data = new_names
+end
+
+names.scan   = scan_external_dir
 names.update = update_names
 names.save   = save_names

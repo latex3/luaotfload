@@ -173,11 +173,10 @@ local function istrue (s)   list[s]     = true end
 local function isfalse(s)   list[s]     = false end
 
 local spaces     = lpeg.P(" ")^0
--- ER: now accepting names like C:/program files/texlive/2009/...
-local namespec   = (lpeg.R("az", "AZ") * lpeg.P(":"))^-1 * (1-lpeg.S("/:("))^1 -- was: (1-lpeg.S("/: ("))^0
+local namespec   = (1-lpeg.S("/:("))^0 -- was: (1-lpeg.S("/: ("))^0
+local filespec   = (lpeg.R("az", "AZ") * lpeg.P(":"))^-1 * (1-lpeg.S(":("))^1
 local crapspec   = spaces * lpeg.P("/") * (((1-lpeg.P(":"))^0)/isstyle) * spaces
--- ER: can't understand why the 'file:' thing doesn't work with fontnames starting by c:...
-local filename   = (lpeg.P("file:")/isfile * (namespec/thename)) + (lpeg.P("[") * lpeg.P(true)/isname * (((1-lpeg.P("]"))^0)/thename) * lpeg.P("]"))
+local filename   = (lpeg.P("file:")/isfile * (filespec/thename)) + (lpeg.P("[") * lpeg.P(true)/isname * (((1-lpeg.P("]"))^0)/thename) * lpeg.P("]"))
 local fontname   = (lpeg.P("name:")/isname * (namespec/thename)) + lpeg.P(true)/issome * (namespec/thename)
 local sometext   = (lpeg.R("az","AZ","09") + lpeg.S("+-."))^1
 local truevalue  = lpeg.P("+") * spaces * (sometext/istrue)

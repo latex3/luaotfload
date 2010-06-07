@@ -394,9 +394,6 @@ local function load_font(filename, fontnames, newfontnames, texmf)
             end
             return
         end
-        if trace_loading then
-            logs.report("loading font: %s", basefile)
-        end
         local info = fontloader.info(filename)
         if info then
             if type(info) == "table" and #info > 1 then
@@ -499,9 +496,12 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
         logs.report("%d fonts found in '%s'", nbfound, dirname)
     end
     list = remove_ignore_fonts(list) -- fixme: general solution required
-    for _,fnt in ipairs(list) do
-        fnt = path_normalize(fnt)
-        load_font(fnt, fontnames, newfontnames, texmf)
+    for _,file in next, list do
+        file = path_normalize(file)
+        if trace_loading then
+            logs.report("loading font: %s", file)
+        end
+        load_font(file, fontnames, newfontnames, texmf)
     end
 end
 

@@ -189,6 +189,9 @@ function names.resolve(specification)
                             found[1] = face
                             break
                         end
+                    elseif subfamily == "regular"
+                        or synonyms.regular[style] then
+                        found.fallback = face
                     end
                 else
                     if name == fullname
@@ -237,6 +240,8 @@ function names.resolve(specification)
                                 name, style, closest.filename[1])
                     return closest.filename[1], closest.filename[2]
                 end
+            elseif found.fallback then
+                return found.fallback.filename[1], found.fallback.filename[2]
             end
             -- no font found so far
             if not reloaded then

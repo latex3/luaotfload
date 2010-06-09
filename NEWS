@@ -1,6 +1,10 @@
 Change History
 --------------
 
+2010/06/09, luaotfload v1.11:
+    * when asking for a font with style that doesn't exist, we would return
+      nothing, now we fallback to the regular font
+
 2010/06/07, luaotfload v1.10:
     * provide a fonts.names.scan(dir) function that temporally loads fonts
       from the specified dir into the names database

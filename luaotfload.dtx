@@ -488,6 +488,15 @@ luaotfload.loadmodule('data-con.lua') -- maybe some day we don't need this one
 
 %    \end{macrocode}
 %
+%    A hack to remove a warning from \texttt{node-dum.lua} as it is \ConTeXt\
+%    specific.
+%
+%    \begin{macrocode}
+
+tex.attribute[0] = 0
+
+%    \end{macrocode}
+%
 %    Node support modules.
 %
 %    \begin{macrocode}
@@ -513,15 +522,6 @@ function attributes.private(name)
     end
     return number
 end
-
-%    \end{macrocode}
-%
-%    A hack to remove a warning from \texttt{node-dum.lua} as it is \ConTeXt\
-%    specific.
-%
-%    \begin{macrocode}
-
-tex.attribute[0] = 0
 
 %    \end{macrocode}
 %

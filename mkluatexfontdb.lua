@@ -135,7 +135,7 @@ local function generate(force)
             os.exit(1)
         end
     end
-    savepath = savepath .. '/' .. names.path.basename
+    savepath = file.join(savepath, names.path.basename)
     local fh = io.open(savepath, 'a+')
     if not fh then
         texio.write_nl(string.format("Error: cannot write file '%s', exiting.\n", savepath))
@@ -150,7 +150,7 @@ local function generate(force)
     end
     fontnames = names.update(fontnames, force)
     log("%s fonts in the database", #fontnames.mappings)
-    io.savedata(savepath, table.serialize(fontnames, true))
+    table.tofile(savepath, fontnames, true)
     log("saved font names database in %s\n", savepath)
 end
 

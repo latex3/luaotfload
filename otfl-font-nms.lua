@@ -24,13 +24,13 @@ fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 
 local names          = fonts.names
-local names_dir      = "/luatex/generic/luaotfload/names/"
+local names_dir      = "luatex/generic/luaotfload/names"
 names.version        = 2.009 -- not the same as in context
 names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
-    localdir  = kpse.expand_var("$TEXMFVAR")    .. names_dir,
-    systemdir = kpse.expand_var("$TEXMFSYSVAR") .. names_dir,
+    localdir  = file.join(kpse.expand_var("$TEXMFVAR"), names_dir),
+    systemdir = file.join(kpse.expand_var("$TEXMFSYSVAR"), names_dir),
 }
 
 
@@ -77,8 +77,8 @@ end
 function names.load()
     -- this sets the output of the database building accordingly.
     names.set_log_level(-1)
-    local localpath  = names.path.localdir  .. names.path.basename
-    local systempath = names.path.systemdir .. names.path.basename
+    local localpath  = file.join(names.path.localdir, names.path.basename)
+    local systempath = file.join(names.path.systemdir, names.path.basename)
     local kpsefound  = kpse.find_file(names.path.basename)
     local foundname
     local data
@@ -618,7 +618,7 @@ local function read_fonts_conf(path, results)
                 for dir in gmatch(newline, '<dir>([^<]+)</dir>') do
                     -- now we need to replace ~ by kpse.expand_path('~')
                     if sub(dir, 1, 1) == '~' then
-                        dir = kpse.expand_path('~') .. sub(dir, 2)
+                        dir = file.join(kpse.expand_path('~'), sub(dir, 2))
                     end
                     -- we exclude paths with texmf in them, as they should be
                     -- found anyway
@@ -630,7 +630,7 @@ local function read_fonts_conf(path, results)
                     -- include here can be four things: a directory or a file,
                     -- in absolute or relative path.
                     if sub(include, 1, 1) == '~' then
-                        include = kpse.expand_path('~') .. sub(include, 2)
+                        include = file.join(kpse.expand_path('~'),sub(include, 2))
                         -- First if the path is relative, we make it absolute:
                     elseif not lfs.isfile(include) and not lfs.isdir(include) then
                         include = file.join(file.dirname(path), include)
@@ -641,10 +641,7 @@ local function read_fonts_conf(path, results)
                         -- be found otherwise
                         read_fonts_conf(include, results)
                     elseif lfs.isdir(include) then
-                        if sub(include, -1, 0) ~= "/" then
-                            include = include.."/"
-                        end
-                        found = glob(include.."*.conf")
+                        found = glob(file.join(include, "*.conf"))
                         for _, f in ipairs(found) do
                             read_fonts_conf(f, results)
                         end
@@ -663,14 +660,14 @@ names.read_fonts_conf = read_fonts_conf
 local function get_os_dirs()
     if os.name == 'macosx' then
         return {
-            kpse.expand_path('~') .. "/Library/Fonts",
+            file.join(kpse.expand_path('~'), "Library/Fonts"),
             "/Library/Fonts",
             "/System/Library/Fonts",
             "/Network/Library/Fonts",
         }
     elseif os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
         local windir = os.getenv("WINDIR")
-        return {windir..'\\Fonts',}
+        return { file.join(windir, 'Fonts') }
     else
         return read_fonts_conf("/etc/fonts/fonts.conf", {})
     end
@@ -734,8 +731,7 @@ local function save_names(fontnames)
     if not lfs.isdir(savepath) then
         dir.mkdirs(savepath)
     end
-    io.savedata(savepath .. names.path.basename,
-                table.serialize(fontnames, true))
+    table.tofile(file.join(savepath, names.path.basename), fontnames, true)
 end
 
 local function scan_external_dir(dir)

@@ -501,6 +501,7 @@ tex.attribute[0] = 0
 %
 %    \begin{macrocode}
 
+luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('node-dum.lua')
 luaotfload.loadmodule('node-inj.lua')
 
@@ -529,7 +530,6 @@ end
 %
 %    \begin{macrocode}
 
-luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('font-tfm.lua')
 luaotfload.loadmodule('font-cid.lua')
 luaotfload.loadmodule('font-ott.lua')

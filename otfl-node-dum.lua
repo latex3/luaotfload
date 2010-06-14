@@ -13,6 +13,7 @@ attributes = attributes or { }
 local traverse_id = node.traverse_id
 local free_node   = node.free
 local remove_node = node.remove
+local new_node    = node.new
 
 local glyph = node.id('glyph')
 
@@ -48,6 +49,7 @@ nodes.unprotect_glyphs = node.unprotect_glyphs
 function nodes.process_characters(head)
     local usedfonts, done, prevfont = { }, false, nil
     for n in traverse_id(glyph,head) do
+        local font = n.font
         if font ~= prevfont then
             prevfont = font
             local used = usedfonts[font]

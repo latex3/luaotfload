@@ -76,10 +76,7 @@ Source files:
         otfl-font-map.lua                       .
         otfl-luat-dum.lua                       .
         otfl-node-dum.lua                       .
-        otfl-node-fnt.lua                       .
-        otfl-node-ini.lua                       .
-        otfl-node-inj.lua                       .
-        otfl-node-res.lua       OTF support files from the ConTeXt distribution
+        otfl-node-inj.lua       OTF support files from the ConTeXt distribution
         otfl-font-clr.lua       luaotfload module for font color support
         otfl-luat-ovr.lua       luaotfload module for overriding some ConTeXt functions
         otfl-luat-nms.lua       luaotfload module for font name database generation

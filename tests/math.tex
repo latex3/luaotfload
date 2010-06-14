@@ -1,0 +1,20 @@
+% start out with plain.tex,
+% having TFM-based CM fonts preloaded in \fam 0...3
+
+% load OT math font in \fam 4
+\input luaotfload.sty
+\font\4={name:XITS Math:mode=base;script=math} at 10pt
+\font\5={name:XITS Math:mode=base;script=math;+ssty=0} at 7pt
+\font\6={name:XITS Math:mode=node;script=math;+ssty=1} at 5pt
+\textfont4=\4 \scriptfont4=\5 \scriptscriptfont4=\6
+
+% set up macros to use math font in \fam 4, just enough for this test
+\def\x{\Umathchar"7 "4 "1D465 }
+\def\y{\Umathchar"7 "4 "1D465 }
+\def\3{\Umathchar"7 "4 "0033 }
+
+%\tracingall
+$$\Uradical "4 "221A {\x}$$
+$$\Uroot    "4 "221A {\3}{\x^\3+\y^\3}$$
+\bye
+

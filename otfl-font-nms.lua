@@ -24,7 +24,7 @@ fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 
 local names          = fonts.names
-local names_dir      = "luatex/generic/luaotfload/names"
+local names_dir      = "luatex-cache/generic/names"
 names.version        = 2.009 -- not the same as in context
 names.data           = nil
 names.path           = {

@@ -204,10 +204,10 @@ function fonts.define.specify.colonized(specification) -- xetex mode
     if list.name then
         if resolvers.find_file(list.name, "tfm") then
             list.lookup = "file"
-            list.name   = list.name .. ".tfm"
+            list.name   = file.addsuffix(list.name, "tfm")
         elseif resolvers.find_file(list.name, "ofm") then
             list.lookup = "file"
-            list.name   = list.name .. ".ofm"
+            list.name   = file.addsuffix(list.name, "ofm")
         end
 
         specification.name = list.name

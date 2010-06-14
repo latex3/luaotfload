@@ -6,7 +6,7 @@ if not modules then modules = { } end modules ['font-otd'] = {
     license   = "see context related readme files"
 }
 
-local trace_dynamics  = false  trackers.register("otf.dynamics",     function(v) trace_dynamics     = v end)
+local trace_dynamics = false  trackers.register("otf.dynamics", function(v) trace_dynamics     = v end)
 
 fonts     = fonts     or { }
 fonts.otf = fonts.otf or { }
@@ -60,9 +60,10 @@ function otf.set_dynamics(font,dynamics,attribute)
             tfmdata.script   = script
             tfmdata.shared.features = { }
             -- end of save
-            dsla = otf.set_features(tfmdata,fonts.define.check(features,otf.features.default))
+            local set = fonts.define.check(features,otf.features.default)
+            dsla = otf.set_features(tfmdata,set)
             if trace_dynamics then
-                logs.report("otf define","setting dynamics %s: attribute %s, script %s, language %s",context_numbers[attribute],attribute,script,language)
+                logs.report("otf define","setting dynamics %s: attribute %s, script %s, language %s, set: %s",context_numbers[attribute],attribute,script,language,table.sequenced(set))
             end
             -- we need to restore some values
             tfmdata.script          = saved.script

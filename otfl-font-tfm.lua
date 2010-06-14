@@ -52,6 +52,8 @@ tfm.fontname_mode    = "fullpath"
 
 tfm.enhance = tfm.enhance or function() end
 
+fonts.formats.tfm = "type1" -- we need to have at least a value here
+
 function tfm.read_from_tfm(specification)
     local fname, tfmdata = specification.filename or "", nil
     if fname ~= "" then
@@ -391,6 +393,9 @@ t.colorscheme = tfmtable.colorscheme
             local vn = v.next
             if vn then
                 chr.next = vn
+            --~ if v.vert_variants or v.horiz_variants then
+            --~     logs.report("glyph 0x%05X has combination of next, vert_variants and horiz_variants",index)
+            --~ end
             else
                 local vv = v.vert_variants
                 if vv then

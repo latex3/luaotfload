@@ -1882,6 +1882,9 @@ end
 local resolved = { } -- we only resolve a font,script,language pair once
 
 -- todo: pass all these 'locals' in a table
+--
+-- dynamics will be isolated some day ... for the moment we catch attribute zero
+-- not being set
 
 function fonts.methods.node.otf.features(head,font,attr)
     if trace_steps then
@@ -1926,8 +1929,7 @@ function fonts.methods.node.otf.features(head,font,attr)
     local ra  = rl      [attr]     if ra == nil then ra  = { } rl      [attr]     = ra  end -- attr can be false
     -- sequences always > 1 so no need for optimization
     for s=1,#sequences do
-        local pardir, txtdir = 0, { }
-        local success = false
+        local pardir, txtdir, success = 0, { }, false
         local sequence = sequences[s]
         local r = ra[s] -- cache
         if r == nil then
@@ -1994,24 +1996,33 @@ function fonts.methods.node.otf.features(head,font,attr)
                 while start do
                     local id = start.id
                     if id == glyph then
-                        if start.subtype<256 and start.font == font and (not attr or has_attribute(start,0,attr)) then
---~                         if start.subtype<256 and start.font == font and has_attribute(start,0,attr) then
-                            for i=1,#subtables do
-                                local lookupname = subtables[i]
-                                local lookupcache = thecache[lookupname]
-                                if lookupcache then
-                                    local lookupmatch = lookupcache[start.char]
-                                    if lookupmatch then
-                                        start, success = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,i)
-                                        if success then
-                                            break
-                                        end
-                                    end
-                                else
-                                    report_missing_cache(typ,lookupname)
-                                end
+                        if start.subtype<256 and start.font == font then
+                            local a = has_attribute(start,0)
+                            if a then
+                                a = a == attr
+                            else
+                                a = true
                             end
-                            if start then start = start.prev end
+                            if a then
+                                for i=1,#subtables do
+                                    local lookupname = subtables[i]
+                                    local lookupcache = thecache[lookupname]
+                                    if lookupcache then
+                                        local lookupmatch = lookupcache[start.char]
+                                        if lookupmatch then
+                                            start, success = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,i)
+                                            if success then
+                                                break
+                                            end
+                                        end
+                                    else
+                                        report_missing_cache(typ,lookupname)
+                                    end
+                                end
+                                if start then start = start.prev end
+                            else
+                                start = start.prev
+                            end
                         else
                             start = start.prev
                         end
@@ -2034,18 +2045,27 @@ function fonts.methods.node.otf.features(head,font,attr)
                         while start do
                             local id = start.id
                             if id == glyph then
---~                                 if start.font == font and start.subtype<256 and has_attribute(start,0,attr) and (not attribute or has_attribute(start,state,attribute)) then
-                                if start.font == font and start.subtype<256 and (not attr or has_attribute(start,0,attr)) and (not attribute or has_attribute(start,state,attribute)) then
-                                    local lookupmatch = lookupcache[start.char]
-                                    if lookupmatch then
-                                        -- sequence kan weg
-                                        local ok
-                                        start, ok = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,1)
-                                        if ok then
-                                            success = true
-                                        end
+                                if start.subtype<256 and start.font == font then
+                                    local a = has_attribute(start,0)
+                                    if a then
+                                        a = (a == attr) and (not attribute or has_attribute(start,state,attribute))
+                                    else
+                                        a = not attribute or has_attribute(start,state,attribute)
                                     end
-                                    if start then start = start.next end
+                                    if a then
+                                        local lookupmatch = lookupcache[start.char]
+                                        if lookupmatch then
+                                            -- sequence kan weg
+                                            local ok
+                                            start, ok = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,1)
+                                            if ok then
+                                                success = true
+                                            end
+                                        end
+                                        if start then start = start.next end
+                                    else
+                                        start = start.next
+                                    end
                                 else
                                     start = start.next
                                 end
@@ -2109,27 +2129,36 @@ function fonts.methods.node.otf.features(head,font,attr)
                     while start do
                         local id = start.id
                         if id == glyph then
-                            if start.subtype<256 and start.font == font and (not attr or has_attribute(start,0,attr)) and (not attribute or has_attribute(start,state,attribute)) then
---~                             if start.subtype<256 and start.font == font and has_attribute(start,0,attr) and (not attribute or has_attribute(start,state,attribute)) then
-                                for i=1,ns do
-                                    local lookupname = subtables[i]
-                                    local lookupcache = thecache[lookupname]
-                                    if lookupcache then
-                                        local lookupmatch = lookupcache[start.char]
-                                        if lookupmatch then
-                                            -- we could move all code inline but that makes things even more unreadable
-                                            local ok
-                                            start, ok = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,i)
-                                            if ok then
-                                                success = true
-                                                break
-                                            end
-                                        end
-                                    else
-                                        report_missing_cache(typ,lookupname)
-                                    end
+                            if start.subtype<256 and start.font == font then
+                                local a = has_attribute(start,0)
+                                if a then
+                                    a = (a == attr) and (not attribute or has_attribute(start,state,attribute))
+                                else
+                                    a = not attribute or has_attribute(start,state,attribute)
                                 end
-                                if start then start = start.next end
+                                if a then
+                                    for i=1,ns do
+                                        local lookupname = subtables[i]
+                                        local lookupcache = thecache[lookupname]
+                                        if lookupcache then
+                                            local lookupmatch = lookupcache[start.char]
+                                            if lookupmatch then
+                                                -- we could move all code inline but that makes things even more unreadable
+                                                local ok
+                                                start, ok = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,i)
+                                                if ok then
+                                                    success = true
+                                                    break
+                                                end
+                                            end
+                                        else
+                                            report_missing_cache(typ,lookupname)
+                                        end
+                                    end
+                                    if start then start = start.next end
+                                else
+                                    start = start.next
+                                end
                             else
                                 start = start.next
                             end
@@ -2149,7 +2178,6 @@ function fonts.methods.node.otf.features(head,font,attr)
                         --         start = start.next
                         --     end
                         elseif id == whatsit then
-                            local subtype = start.subtype
                             local subtype = start.subtype
                             if subtype == 7 then
                                 local dir = start.dir

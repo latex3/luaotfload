@@ -342,39 +342,21 @@ function nodes.inject_kerns(head,where,keep)
                  -- only w can be nil, can be sped up when w == nil
                     local rl, x, w, r2l = k[1], k[2] or 0, k[4] or 0, k[6]
                     local wx = w - x
---~                     if rl < 0 then
---~                         if r2l then
---~                             if wx ~= 0 then
---~                                 insert_node_before(head,n,newkern(wx))
---~                             end
---~                             if x ~= 0 then
---~                                 insert_node_after (head,n,newkern(x))
---~                             end
---~                         else
---~                             if x ~= 0 then
---~                                 insert_node_before(head,n,newkern(x))
---~                             end
---~                             if wx ~= 0 then
---~                                 insert_node_after(head,n,newkern(wx))
---~                             end
---~                         end
---~                     else
-                        if r2l then
-                            if wx ~= 0 then
-                                insert_node_before(head,n,newkern(wx))
-                            end
-                            if x ~= 0 then
-                                insert_node_after (head,n,newkern(x))
-                            end
-                        else
-                            if x ~= 0 then
-                                insert_node_before(head,n,newkern(x))
-                            end
-                            if wx ~= 0 then
-                                insert_node_after(head,n,newkern(wx))
-                            end
+                    if r2l then
+                        if wx ~= 0 then
+                            insert_node_before(head,n,newkern(wx))
                         end
---~                     end
+                        if x ~= 0 then
+                            insert_node_after (head,n,newkern(x))
+                        end
+                    else
+                        if x ~= 0 then
+                            insert_node_before(head,n,newkern(x))
+                        end
+                        if wx ~= 0 then
+                            insert_node_after(head,n,newkern(wx))
+                        end
+                    end
                 end
             end
             if next(cx) then
@@ -413,39 +395,21 @@ function nodes.inject_kerns(head,where,keep)
                         -- copied from above
                         local r2l = kk[6]
                         local wx = w - x
---~                         if rl < 0 then
---~                             if r2l then
---~                                 if x ~= 0 then
---~                                     insert_node_before(head,n,newkern(x))
---~                                 end
---~                                 if wx ~= 0 then
---~                                     insert_node_after(head,n,newkern(wx))
---~                                 end
---~                             else
---~                                 if wx ~= 0 then
---~                                     insert_node_before(head,n,newkern(wx))
---~                                 end
---~                                 if x ~= 0 then
---~                                     insert_node_after (head,n,newkern(x))
---~                                 end
---~                             end
---~                         else
-                            if r2l then
-                                if wx ~= 0 then
-                                    insert_node_before(head,n,newkern(wx))
-                                end
-                                if x ~= 0 then
-                                    insert_node_after (head,n,newkern(x))
-                                end
-                            else
-                                if x ~= 0 then
-                                    insert_node_before(head,n,newkern(x))
-                                end
-                                if wx ~= 0 then
-                                    insert_node_after(head,n,newkern(wx))
-                                end
+                        if r2l then
+                            if wx ~= 0 then
+                                insert_node_before(head,n,newkern(wx))
                             end
---~                         end
+                            if x ~= 0 then
+                                insert_node_after (head,n,newkern(x))
+                            end
+                        else
+                            if x ~= 0 then
+                                insert_node_before(head,n,newkern(x))
+                            end
+                            if wx ~= 0 then
+                                insert_node_after(head,n,newkern(wx))
+                            end
+                        end
                     else
                         -- simple (e.g. kernclass kerns)
                         if x ~= 0 then

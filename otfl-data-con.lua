@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['data-con'] = {
-    version   = 1.001,
+    version   = 1.100,
     comment   = "companion to luat-lib.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
@@ -37,38 +37,48 @@ end
 
 local allocated = { }
 
--- tracing
+local mt = {
+    __index = function(t,k)
+        if k == "writable" then
+            local writable = caches.getwritablepath(t.category,t.subcategory) or { "." }
+            t.writable = writable
+            return writable
+        elseif k == "readables" then
+            local readables = caches.getreadablepaths(t.category,t.subcategory) or { "." }
+            t.readables = readables
+            return readables
+        end
+    end
+}
 
 function containers.define(category, subcategory, version, enabled)
-    return function()
-        if category and subcategory then
-            local c = allocated[category]
-            if not c then
-                c  = { }
-                allocated[category] = c
-            end
-            local s = c[subcategory]
-            if not s then
-                s = {
-                    category = category,
-                    subcategory = subcategory,
-                    storage = { },
-                    enabled = enabled,
-                    version = version or 1.000,
-                    trace = false,
-                    path = caches and caches.setpath and caches.setpath(category,subcategory),
-                }
-                c[subcategory] = s
-            end
-            return s
-        else
-            return nil
+    if category and subcategory then
+        local c = allocated[category]
+        if not c then
+            c  = { }
+            allocated[category] = c
         end
+        local s = c[subcategory]
+        if not s then
+            s = {
+                category    = category,
+                subcategory = subcategory,
+                storage     = { },
+                enabled     = enabled,
+                version     = version or math.pi, -- after all, this is TeX
+                trace       = false,
+             -- writable    = caches.getwritablepath  and caches.getwritablepath (category,subcategory) or { "." },
+             -- readables   = caches.getreadablepaths and caches.getreadablepaths(category,subcategory) or { "." },
+            }
+            setmetatable(s,mt)
+            c[subcategory] = s
+        end
+        return s
     end
 end
 
 function containers.is_usable(container, name)
-    return container.enabled and caches and caches.iswritable(container.path, name)
+    return container.enabled and caches and caches.iswritable(container.writable, name)
 end
 
 function containers.is_valid(container, name)
@@ -81,18 +91,20 @@ function containers.is_valid(container, name)
 end
 
 function containers.read(container,name)
-    if container.enabled and caches and not container.storage[name] and containers.usecache then
-        container.storage[name] = caches.loaddata(container.path,name)
-        if containers.is_valid(container,name) then
+    local storage = container.storage
+    local stored = storage[name]
+    if not stored and container.enabled and caches and containers.usecache then
+        stored = caches.loaddata(container.readables,name)
+        if stored and stored.cache_version == container.version then
             report(container,"loaded",name)
         else
-            container.storage[name] = nil
+            stored = nil
         end
-    end
-    if container.storage[name] then
+        storage[name] = stored
+    elseif stored then
         report(container,"reusing",name)
     end
-    return container.storage[name]
+    return stored
 end
 
 function containers.write(container, name, data)
@@ -101,7 +113,7 @@ function containers.write(container, name, data)
         if container.enabled and caches then
             local unique, shared = data.unique, data.shared
             data.unique, data.shared = nil, nil
-            caches.savedata(container.path, name, data)
+            caches.savedata(container.writable, name, data)
             report(container,"saved",name)
             data.unique, data.shared = unique, shared
         end

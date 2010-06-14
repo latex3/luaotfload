@@ -13,6 +13,7 @@ if not modules then modules = { } end modules ['font-ini'] = {
 local utf = unicode.utf8
 local format, serialize = string.format, table.serialize
 local write_nl = texio.write_nl
+local lower = string.lower
 
 if not fontloader then fontloader = fontforge end
 
@@ -84,12 +85,12 @@ end
 fonts.formats = { }
 
 function fonts.fontformat(filename,default)
-    local extname = file.extname(filename)
+    local extname = lower(file.extname(filename))
     local format = fonts.formats[extname]
     if format then
         return format
     else
-        logs.report("fonts define","unable to detemine font format for '%s'",filename)
+        logs.report("fonts define","unable to determine font format for '%s'",filename)
         return default
     end
 end

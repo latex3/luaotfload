@@ -35,13 +35,7 @@ local penalty = node.id('penalty')
 local set_attribute      = node.set_attribute
 local has_attribute      = node.has_attribute
 local traverse_id        = node.traverse_id
-local delete_node        = nodes.delete
-local replace_node       = nodes.replace
-local insert_node_after  = node.insert_after
-local insert_node_before = node.insert_before
 local traverse_node_list = node.traverse
-
-local new_glue_node      = nodes.glue
 
 local fontdata = fonts.ids
 local state    = attributes.private('state')
@@ -55,7 +49,6 @@ local a_to_language = otf.a_to_language
 -- in the future we will use language/script attributes instead of the
 -- font related value, but then we also need dynamic features which is
 -- somewhat slower; and .. we need a chain of them
-
 
 function fonts.initializers.node.otf.analyze(tfmdata,value,attr)
     if attr and attr > 0 then
@@ -195,8 +188,6 @@ function fonts.analyzers.methods.nocolor(head,font,attr)
     return head, true
 end
 
-otf.remove_joiners = false -- true -- for idris who want it as option
-
 local function finish(first,last)
     if last then
         if first == last then
@@ -242,22 +233,10 @@ function fonts.analyzers.methods.arab(head,font,attr) -- maybe make a special ve
     local tfmdata = fontdata[font]
     local marks = tfmdata.marks
     local first, last, current, done = nil, nil, head, false
-    local joiners, nonjoiners
-    local removejoiners = tfmdata.remove_joiners -- or otf.remove_joiners
-    if removejoiners then
-        joiners, nonjoiners = { }, { }
-    end
     while current do
         if current.id == glyph and current.subtype<256 and current.font == font and not has_attribute(current,state) then
             done = true
             local char = current.char
-            if removejoiners then
-                if char == zwj then
-                    joiners[#joiners+1] = current
-                elseif char == zwnj then
-                    nonjoiners[#nonjoiners+1] = current
-                end
-            end
             if marks[char] then
                 set_attribute(current,state,5) -- mark
                 if trace_analyzing then fcs(current,"font:mark") end
@@ -303,22 +282,5 @@ function fonts.analyzers.methods.arab(head,font,attr) -- maybe make a special ve
         current = current.next
     end
     first, last = finish(first,last)
-    if removejoiners then
-        -- is never head
-        for i=1,#joiners do
-            delete_node(head,joiners[i])
-        end
-        for i=1,#nonjoiners do
-            replace_node(head,nonjoiners[i],new_glue_node(0)) -- or maybe a kern
-        end
-    end
     return head, done
-end
-
-table.insert(fonts.manipulators,"joiners")
-
-function fonts.initializers.node.otf.joiners(tfmdata,value)
-    if value == "strip" then
-        tfmdata.remove_joiners = true
-    end
 end

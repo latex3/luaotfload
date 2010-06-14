@@ -233,18 +233,29 @@ end
 
 define.resolvers = resolvers
 
+-- todo: reporter
+
 function define.resolvers.file(specification)
-    specification.forced = file.extname(specification.name)
-    specification.name = file.removesuffix(specification.name)
+    local suffix = file.suffix(specification.name)
+    if fonts.formats[suffix] then
+        specification.forced = suffix
+        specification.name = file.removesuffix(specification.name)
+    end
 end
 
 function define.resolvers.name(specification)
     local resolve = fonts.names.resolve
     if resolve then
-        specification.resolved, specification.sub = fonts.names.resolve(specification)
-        if specification.resolved then
-            specification.forced = file.extname(specification.resolved)
-            specification.name = file.removesuffix(specification.resolved)
+        local resolved, sub = fonts.names.resolve(specification)
+        specification.resolved, specification.sub = resolved, sub
+        if resolved then
+            local suffix = file.suffix(resolved)
+            if fonts.formats[suffix] then
+                specification.forced = suffix
+                specification.name = file.removesuffix(resolved)
+            else
+                specification.name = resolved
+            end
         end
     else
         define.resolvers.file(specification)
@@ -456,7 +467,7 @@ end
 local function check_otf(forced,specification,suffix,what)
     local name = specification.name
     if forced then
-        name = file.addsuffix(name,suffix)
+        name = file.addsuffix(name,suffix,true)
     end
     local fullname, tfmtable = resolvers.findbinfile(name,suffix) or "", nil -- one shot
     if fullname == "" then
@@ -578,7 +589,7 @@ function define.read(specification,size,id) -- id can be optional, name can alre
     specification = define.resolve(specification)
     local hash = tfm.hash_instance(specification)
     if cache_them then
-        local fontdata = containers.read(fonts.cache(),hash) -- for tracing purposes
+        local fontdata = containers.read(fonts.cache,hash) -- for tracing purposes
     end
     local fontdata = define.registered(hash) -- id
     if not fontdata then
@@ -591,7 +602,7 @@ function define.read(specification,size,id) -- id can be optional, name can alre
             end
         end
         if cache_them then
-            fontdata = containers.write(fonts.cache(),hash,fontdata) -- for tracing purposes
+            fontdata = containers.write(fonts.cache,hash,fontdata) -- for tracing purposes
         end
         if fontdata then
             fontdata.hash = hash

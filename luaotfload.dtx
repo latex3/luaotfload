@@ -350,9 +350,7 @@ and the derived files
 % \begin{itemize*}
 % \item \texttt{luat-dum.lua}
 % \item \texttt{data-con.lua}
-% \item \texttt{node-ini.lua}
 % \item \texttt{node-inj.lua}
-% \item \texttt{node-fnt.lua}
 % \item \texttt{node-dum.lua}
 % \item \texttt{font-ini.lua}
 % \item \texttt{font-tfm.lua}
@@ -490,11 +488,12 @@ luaotfload.loadmodule('data-con.lua') -- maybe some day we don't need this one
 
 %    \end{macrocode}
 %
-%    This one is for node support.
+%    Node support modules.
 %
 %    \begin{macrocode}
 
-luaotfload.loadmodule('node-ini.lua')
+luaotfload.loadmodule('node-dum.lua')
+luaotfload.loadmodule('node-inj.lua')
 
 %    \end{macrocode}
 %
@@ -517,7 +516,7 @@ end
 
 %    \end{macrocode}
 %
-%    A hack to remove a warning from \texttt{node-fnt.lua} as it is \ConTeXt\
+%    A hack to remove a warning from \texttt{node-dum.lua} as it is \ConTeXt\
 %    specific.
 %
 %    \begin{macrocode}
@@ -526,21 +525,15 @@ tex.attribute[0] = 0
 
 %    \end{macrocode}
 %
-%    Some more modules. We don't load neither \texttt{font-enc.lua} nor
-%    \texttt{font-afm.lua} as it will never be used here.
+%    Font handling modules.
 %
 %    \begin{macrocode}
-
-luaotfload.loadmodule('node-res.lua')
-luaotfload.loadmodule('node-inj.lua')
-luaotfload.loadmodule('node-fnt.lua')
-luaotfload.loadmodule('node-dum.lua')
 
 luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('font-tfm.lua')
 luaotfload.loadmodule('font-cid.lua')
-luaotfload.loadmodule('font-map.lua')
 luaotfload.loadmodule('font-ott.lua')
+luaotfload.loadmodule('font-map.lua')
 luaotfload.loadmodule('font-otf.lua')
 luaotfload.loadmodule('font-otd.lua')
 luaotfload.loadmodule('font-oti.lua')
@@ -551,6 +544,13 @@ luaotfload.loadmodule('font-otc.lua')
 luaotfload.loadmodule('font-def.lua')
 luaotfload.loadmodule('font-xtx.lua')
 luaotfload.loadmodule('font-dum.lua')
+
+%    \end{macrocode}
+%
+%    \textsf{luaotfload} specific modules.
+%
+%    \begin{macrocode}
+
 luaotfload.loadmodule('font-nms.lua')
 luaotfload.loadmodule('font-clr.lua')
 

@@ -696,7 +696,6 @@ function otf.meanings.normalize(features)
         k = lower(k)
         if k == "language" or k == "lang" then
             v = gsub(lower(v),"[^a-z0-9%-]","")
-            k = language
             if not languages[v] then
                 h.language = to_languages[v] or "dflt"
             else

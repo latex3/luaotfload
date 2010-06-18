@@ -1058,7 +1058,7 @@ end
 <p>Here we replace start by new glyph. First we delete the rest of the match.</p>
 --ldx]]--
 
-function chainprocs.gsub_alternate(start,stop,kind,lookupname,currentcontext,cache,currentlookup)
+function chainprocs.gsub_alternate(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname)
     -- todo: marks ?
     delete_till_stop(start,stop)
     local current = start
@@ -1155,7 +1155,7 @@ function chainprocs.gsub_ligature(start,stop,kind,chainname,currentcontext,cache
                         logprocess("%s: replacing character %s upto %s by ligature %s",cref(kind,chainname,chainlookupname,lookupname,chainindex),gref(startchar),gref(stop.char),gref(l2))
                     end
                 end
-                start = toligature(kind,lookup,start,stop,l2,currentlookup.flags[1],discfound)
+                start = toligature(kind,lookupname,start,stop,l2,currentlookup.flags[1],discfound)
                 return start, true, nofreplacements
             elseif trace_bugs then
                 if start == stop then
@@ -2308,7 +2308,7 @@ local function prepare_lookups(tfmdata)
     -- as well (no big deal)
     --
     local action = {
-        substitution = function(p,lookup,k,glyph,unicode)
+        substitution = function(p,lookup,glyph,unicode)
             local old, new = unicode, unicodes[p[2]]
             if type(new) == "table" then
                 new = new[1]
@@ -2320,7 +2320,7 @@ local function prepare_lookups(tfmdata)
         --~     logs.report("define otf","lookup %s: substitution %s => %s",lookup,old,new)
         --~ end
         end,
-        multiple = function (p,lookup,k,glyph,unicode)
+        multiple = function (p,lookup,glyph,unicode)
             local old, new = unicode, { }
             local m = multiple[lookup]
             if not m then m = { } multiple[lookup] = m end
@@ -2337,7 +2337,7 @@ local function prepare_lookups(tfmdata)
         --~     logs.report("define otf","lookup %s: multiple %s => %s",lookup,old,concat(new," "))
         --~ end
         end,
-        alternate = function(p,lookup,k,glyph,unicode)
+        alternate = function(p,lookup,glyph,unicode)
             local old, new = unicode, { }
             local a = alternate[lookup]
             if not a then a = { } alternate[lookup] = a end
@@ -2354,7 +2354,7 @@ local function prepare_lookups(tfmdata)
         --~     logs.report("define otf","lookup %s: alternate %s => %s",lookup,old,concat(new,"|"))
         --~ end
         end,
-        ligature = function (p,lookup,k,glyph,unicode)
+        ligature = function (p,lookup,glyph,unicode)
         --~ if trace_lookups then
         --~     logs.report("define otf","lookup %s: ligature %s => %s",lookup,p[2],glyph.name)
         --~ end
@@ -2402,13 +2402,13 @@ local function prepare_lookups(tfmdata)
             end
             t[2] = unicode
         end,
-        position = function(p,lookup,k,glyph,unicode)
+        position = function(p,lookup,glyph,unicode)
             -- not used
             local s = position[lookup]
             if not s then s = { } position[lookup] = s end
             s[unicode] = p[2] -- direct pointer to kern spec
         end,
-        pair = function(p,lookup,k,glyph,unicode)
+        pair = function(p,lookup,glyph,unicode)
             local s = pair[lookup]
             if not s then s = { } pair[lookup] = s end
             local others = s[unicode]
@@ -2444,7 +2444,7 @@ local function prepare_lookups(tfmdata)
         local lookups = glyph.slookups
         if lookups then
             for lookup, p in next, lookups do
-                action[p[1]](p,lookup,k,glyph,unicode)
+                action[p[1]](p,lookup,glyph,unicode)
             end
         end
         local lookups = glyph.mlookups
@@ -2452,7 +2452,7 @@ local function prepare_lookups(tfmdata)
             for lookup, whatever in next, lookups do
                 for i=1,#whatever do -- normaly one
                     local p = whatever[i]
-                    action[p[1]](p,lookup,k,glyph,unicode)
+                    action[p[1]](p,lookup,glyph,unicode)
                 end
             end
         end
@@ -2507,7 +2507,7 @@ end
 -- local cache = { }
 luatex = luatex or {} -- this has to change ... we need a better one
 
-function prepare_contextchains(tfmdata)
+local function prepare_contextchains(tfmdata)
     local otfdata = tfmdata.shared.otfdata
     local lookups = otfdata.lookups
     if lookups then

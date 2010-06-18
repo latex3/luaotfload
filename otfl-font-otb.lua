@@ -136,7 +136,7 @@ end
 
 local splitter = lpeg.splitat(" ")
 
-function prepare_base_substitutions(tfmdata,kind,value) -- we can share some code with the node features
+local function prepare_base_substitutions(tfmdata,kind,value) -- we can share some code with the node features
     if value then
         local otfdata = tfmdata.shared.otfdata
         local validlookups, lookuplist = otf.collect_lookups(otfdata,kind,tfmdata.script,tfmdata.language)

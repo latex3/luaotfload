@@ -24,7 +24,7 @@ local a_to_script   = { }  otf.a_to_script   = a_to_script
 local a_to_language = { }  otf.a_to_language = a_to_language
 
 function otf.set_dynamics(font,dynamics,attribute)
-    features = context_setups[context_numbers[attribute]] -- can be moved to caller
+    local features = context_setups[context_numbers[attribute]] -- can be moved to caller
     if features then
         local script   = features.script   or 'dflt'
         local language = features.language or 'dflt'

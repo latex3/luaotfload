@@ -27,6 +27,7 @@ local glyph = node.id('glyph')
 local kern  = node.id('kern')
 
 local traverse_id        = node.traverse_id
+local unset_attribute    = node.unset_attribute
 local has_attribute      = node.has_attribute
 local set_attribute      = node.set_attribute
 local insert_node_before = node.insert_before
@@ -88,8 +89,10 @@ function nodes.set_kern(current,factor,rlmode,x,tfmchr)
         local bound = #kerns + 1
         set_attribute(current,kernpair,bound)
         kerns[bound] = { rlmode, dx }
+        return dx, bound
+    else
+        return 0, 0
     end
-    return dx, bound
 end
 
 function nodes.set_mark(start,base,factor,rlmode,ba,ma,index) --ba=baseanchor, ma=markanchor
@@ -171,6 +174,7 @@ function nodes.trace_injection(head)
 end
 
 -- todo: reuse tables (i.e. no collection), but will be extra fields anyway
+-- todo: check for attribute
 
 function nodes.inject_kerns(head,where,keep)
     local has_marks, has_cursives, has_kerns = next(marks), next(cursives), next(kerns)
@@ -193,6 +197,7 @@ function nodes.inject_kerns(head,where,keep)
                     mk[n] = tm[n.char]
                     local k = has_attribute(n,kernpair)
                     if k then
+--~ unset_attribute(k,kernpair)
                         local kk = kerns[k]
                         if kk then
                             local x, y, w, h = kk[2] or 0, kk[3] or 0, kk[4] or 0, kk[5] or 0
@@ -383,37 +388,39 @@ function nodes.inject_kerns(head,where,keep)
             nodes.trace_injection(head)
         end
         for n in traverse_id(glyph,head) do
-            local k = has_attribute(n,kernpair)
-            if k then
-                local kk = kerns[k]
-                if kk then
-                    local rl, x, y, w = kk[1], kk[2] or 0, kk[3], kk[4]
-                    if y and y ~= 0 then
-                        n.yoffset = y -- todo: h ?
-                    end
-                    if w then
-                        -- copied from above
-                        local r2l = kk[6]
-                        local wx = w - x
-                        if r2l then
-                            if wx ~= 0 then
-                                insert_node_before(head,n,newkern(wx))
-                            end
-                            if x ~= 0 then
-                                insert_node_after (head,n,newkern(x))
+            if n.subtype < 256 then
+                local k = has_attribute(n,kernpair)
+                if k then
+                    local kk = kerns[k]
+                    if kk then
+                        local rl, x, y, w = kk[1], kk[2] or 0, kk[3], kk[4]
+                        if y and y ~= 0 then
+                            n.yoffset = y -- todo: h ?
+                        end
+                        if w then
+                            -- copied from above
+                            local r2l = kk[6]
+                            local wx = w - x
+                            if r2l then
+                                if wx ~= 0 then
+                                    insert_node_before(head,n,newkern(wx))
+                                end
+                                if x ~= 0 then
+                                    insert_node_after (head,n,newkern(x))
+                                end
+                            else
+                                if x ~= 0 then
+                                    insert_node_before(head,n,newkern(x))
+                                end
+                                if wx ~= 0 then
+                                    insert_node_after(head,n,newkern(wx))
+                                end
                             end
                         else
+                            -- simple (e.g. kernclass kerns)
                             if x ~= 0 then
                                 insert_node_before(head,n,newkern(x))
                             end
-                            if wx ~= 0 then
-                                insert_node_after(head,n,newkern(wx))
-                            end
-                        end
-                    else
-                        -- simple (e.g. kernclass kerns)
-                        if x ~= 0 then
-                            insert_node_before(head,n,newkern(x))
                         end
                     end
                 end

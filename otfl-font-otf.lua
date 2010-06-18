@@ -222,7 +222,8 @@ local enhancers = {
 
 function otf.load(filename,format,sub,featurefile)
     local name = file.basename(file.removesuffix(filename))
-    local size = lfs.attributes(filename,"size") or 0
+    local attr = lfs.attributes(filename)
+    local size, time = attr.size or 0, attr.modification or 0
     if featurefile then
         name = name .. "@" .. file.removesuffix(file.basename(featurefile))
     end
@@ -233,7 +234,7 @@ function otf.load(filename,format,sub,featurefile)
     end
     hash = containers.cleanname(hash)
     local data = containers.read(otf.cache,hash)
-    if not data or data.verbose ~= fonts.verbose or data.size ~= size then
+    if not data or data.verbose ~= fonts.verbose or data.size ~= size or data.time ~= time then
         logs.report("load otf","loading: %s (hash: %s)",filename,hash)
         local ff, messages
         if sub then
@@ -267,6 +268,7 @@ function otf.load(filename,format,sub,featurefile)
                     otf.enhance("pack",data,filename)
                 end
                 data.size = size
+                data.time = time
                 data.verbose = fonts.verbose
                 logs.report("load otf","saving in cache: %s",filename)
                 data = containers.write(otf.cache, hash, data)
@@ -1537,7 +1539,7 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
         if designsize == 0 then
             designsize = 100
         end
-        local spaceunits = 500
+        local spaceunits, spacer = 500, "space"
         -- indices maps from unicodes to indices
         for u, i in next, indices do
             characters[u] = { } -- we need this because for instance we add protruding info and loop over characters

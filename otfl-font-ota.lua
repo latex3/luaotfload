@@ -51,6 +51,7 @@ local a_to_language = otf.a_to_language
 -- somewhat slower; and .. we need a chain of them
 
 function fonts.initializers.node.otf.analyze(tfmdata,value,attr)
+    local script, language
     if attr and attr > 0 then
         script, language = a_to_script[attr], a_to_language[attr]
     else

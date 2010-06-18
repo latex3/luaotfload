@@ -1,6 +1,12 @@
 Change History
 --------------
 
+2010/06/18, luaotfload v1.12:
+    * populate MathConstants table for OpenType math fonts, now such fonts
+      can be really used in math mode.
+    * sync with ConTeXt beta 2010.06.18
+    * change cache dir to $TEXMFCACHE/luatex-cache/generic
+
 2010/06/09, luaotfload v1.11:
     * when asking for a font with style that doesn't exist, we would return
       nothing, now we fallback to the regular font

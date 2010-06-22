@@ -273,16 +273,9 @@ end
 
 local lastislog = 0
 
-function log(fmt, ...)
-    lastislog = 1
-    texio.write_nl(format("luaotfload | %s", format(fmt,...)))
-end
-
 logs        = logs or { }
 logs.report = logs.report or log
 logs.info   = logs.info or log
-
-local log = names.log
 
 -- The progress bar
 local function progress(current, total)

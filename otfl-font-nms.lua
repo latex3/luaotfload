@@ -46,18 +46,6 @@ local trace_progress = true  --trackers.register("names.progress", function(v) t
 local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
 local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
-
--- Basic function from <http://stackoverflow.com/questions/2282444/how-to-check-if-a-table-contains-an-element-in-lua>
-function table.contains(table, element)
-  for _, value in pairs(table) do
-    if value == element then
-      return true
-    end
-  end
-  return false
-end
-
-
 local function sanitize(str)
     if str then
         return utfgsub(lower(str), "[^%a%d]", "")

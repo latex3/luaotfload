@@ -95,7 +95,7 @@ do
     local cachepaths = kpse.expand_path('$TEXMFCACHE') or ""
 
     if cachepaths == "" then
-        cachepaths = kpse.expand_path('$VARTEXMF')
+        cachepaths = kpse.expand_path('$TEXMFVAR')
     end
 
     if cachepaths == "" then

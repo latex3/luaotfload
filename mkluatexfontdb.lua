@@ -61,7 +61,7 @@ the list. For example (using a bash shell),
    export OSFONTDIR='/path/to/other/fonts:/Users/will/Library/Fonts:...'
 
 The output database file is named otfl-fonts.lua. By default it is placed
-in $TEXMFVAR/luatex/generic/luaotfload/names.
+in $TEXMFVAR/luatex-cache/generic/names."
 ]], name))
 end
 

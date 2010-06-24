@@ -197,8 +197,8 @@ and the derived files
 % with square brackets is synonymous to using the \texttt{file:} prefix.
 %
 % Accessing fonts by fontname allows loading system installed fonts as well as
-% \textsc{texmf} ones, and requires a font names database that must be
-% pre-generated; see Section~\ref{sec:fontdb} for more information.
+% \textsc{texmf} ones, and requires a font names database; see
+% Section~\ref{sec:fontdb} for more information.
 %
 % \paragraph{Font name}
 %
@@ -304,30 +304,43 @@ and the derived files
 %  \texttt{mapping=text-tex} using \XeTeX's input remapping feature.)
 %
 %
-% \section{Maintaining the font database}
+% \section{Font names database}
 % \label{sec:fontdb}
 %
 % As introduced in the previous section, \textsf{luaotfload} uses a database
 % to keep track of fonts available to \LuaTeX. Using this database, fonts can
 % be loaded by font name as well as filename.
 %
-% This font database is maintained automatically as you add and remove fonts
-% to/from your system. To update the database manually, run the script
-% |mkluatexfontdb| that is included with this package. If you have not run it
-% before, it may take quite some time to process every font on your computer.
+% When \textsf{luaotfload} is asked to load a font by font name, it will check
+% if font names database exists and load it, or generate a new database if non
+% exists. This is all done automatically without user intervention. When the
+% asked font is missing from the database, it will attempt to update the
+% database and try to find the font again, so that the user can install new
+% fonts without worrying about manually updating the database.
+%
+% However, it is sometimes desirable to update the database manually, so
+% \textsf{luaotfload} provides a |mkluatexfontdb| utility to manually update
+% the database. |mkluatexfontdb| is a lua script that can be either run
+% directly or as an argument to |texlua|, depending on your system\footnote{
+% On MS Windows it can be run either by calling the wrapper application
+% |mkluatexfontdb.exe| or with |texlua.exe mkluatexfontdb.lua|}.
+%
+% The first time the database is generated may take quite some time to process
+% every font on your computer.
 % This is particularly noticeable if it occurs during a typesetting run.
 % Subsequent runs to update the database will be quite fast, however.
 %
-% The script will parse standard places for fonts in your system to build the
-% font database. Linux, it will use |fontconfig| to find the font locations;
+% \textsf{luaotfload} will parse standard places for fonts in your system to
+% build the font database. On Linux, it will read |fontconfig| configuration
+% files to find the font locations;
 % on Windows and Mac~OS~X, it will search in the standard font locations,
 % |%WINDIR%\Fonts| in Windows and |~/Library/Fonts|, |/Library/Fonts|,
 % |/System/Library/Fonts|, and |/Network/Library/Fonts| in Mac~OS~X.
 %
-% If you do not wish the script to search the standard font locations by
-% default but would rather specify the exact locations in which to find your
-% fonts, set the |OSFONTDIR| environment variable instead. When this variable
-% is set, the script will only search in those directories.
+% If you do not wish the standard font locations be searched by default but
+% would rather specify the exact locations in which to find your fonts, set
+% the |OSFONTDIR| environment variable instead. When this variable is set,
+% only the specified directories will be searched.
 %
 % |mkluatexfontdb.lua --help| provides a brief summary of the functionality of
 % the script and includes some advanced options that we have not mentioned

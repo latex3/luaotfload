@@ -1,6 +1,9 @@
 Change History
 --------------
 
+2010/06/24, luaotfload v1.13:
+    * fix typo in font cache path
+
 2010/06/18, luaotfload v1.12:
     * populate MathConstants table for OpenType math fonts, now such fonts
       can be really used in math mode.

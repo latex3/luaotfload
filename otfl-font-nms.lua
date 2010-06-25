@@ -263,6 +263,7 @@ local lastislog = 0
 function log(fmt, ...)
     lastislog = 1
     texio.write_nl(format("luaotfload | %s", format(fmt,...)))
+    io.flush()
 end
 
 logs        = logs or { }

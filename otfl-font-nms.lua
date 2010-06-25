@@ -465,9 +465,12 @@ local function read_blacklist()
     if files and type(files) == "table" then
         for _,v in next, files do
             for line in io.lines(v) do
+                line = line:strip() -- to get rid of lines like " % foo"
                 if line:find("^%%") or line:is_empty() then
                     -- comment or empty line
                 else
+                    line = line:split("%")[1]
+                    line = line:strip()
                     if trace_search then
                         logs.report("blacklisted file: %s", line)
                     end

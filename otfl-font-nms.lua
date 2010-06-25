@@ -92,23 +92,9 @@ function names.load()
 end
 
 local synonyms  = {
-    regular = {
-        normal = true,
-        roman  = true,
-        plain  = true,
-        book   = true,
-        medium = true,
-    },
-    italic = {
-        regularitalic = true,
-        normalitalic  = true,
-        oblique       = true,
-        slant         = true,
-    },
-    bolditalic = {
-        boldoblique   = true,
-        boldslant     = true,
-    },
+    regular    = { "normal", "roman", "plain", "book", "medium" },
+    italic     = { "regularitalic", "normalitalic", "oblique", "slant" },
+    bolditalic = { "boldoblique", "boldslat" },
 }
 
 local loaded   = false
@@ -164,7 +150,8 @@ function names.resolve(specification)
                             found[1] = face
                             break
                         end
-                    elseif synonyms[style] and synonyms[style][subfamily] then
+                    elseif synonyms[style] and
+                           table.contains(synonyms[style], subfamily) then
                         if optsize then
                             if dsnsize == size
                             or (size > minsize and size <= maxsize) then
@@ -177,8 +164,8 @@ function names.resolve(specification)
                             found[1] = face
                             break
                         end
-                    elseif subfamily == "regular"
-                        or synonyms.regular[style] then
+                    elseif subfamily == "regular" or
+                           table.contains(synonyms.regular, subfamily) then
                         found.fallback = face
                     end
                 else

@@ -362,6 +362,13 @@ local function load_font(filename, fontnames, newfontnames, texmf)
     local status      = fontnames.status
     local basefile    = texmf and basename(filename) or filename
     if filename then
+        if table.contains(names.blacklist, filename) or
+           table.contains(names.blacklist, basename(filename)) then
+            if trace_search then
+                logs.report("ignoring font '%s'", filename)
+            end
+            return
+        end
         local timestamp, db_timestamp
         db_timestamp        = status[basefile] and status[basefile].timestamp
         timestamp           = lfs.attributes(filename, "modification")
@@ -460,6 +467,30 @@ else
     font_extensions = { "otf", "ttf", "ttc", "dfont" }
 end
 
+names.blacklist = { }
+
+local function read_blacklist()
+    local files = {
+        kpse.lookup("otfl-blacklist.cnf", {all=true, format="tex"})
+    }
+    local blacklist = names.blacklist
+
+    if files and type(files) == "table" then
+        for _,v in next, files do
+            for line in io.lines(v) do
+                if line:find("^%%") or line:is_empty() then
+                    -- comment or empty line
+                else
+                    if trace_search then
+                        logs.report("blacklisted file: %s", line)
+                    end
+                    blacklist[#blacklist+1] = line
+                end
+            end
+        end
+    end
+end
+
 local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --[[
     this function scans a directory and populates the list of fonts
@@ -488,37 +519,13 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
     if trace_search then
         logs.report("%d fonts found in '%s'", nbfound, dirname)
     end
-    list = remove_ignore_fonts(list) -- fixme: general solution required
+
     for _,file in next, list do
         file = path_normalize(file)
         if trace_loading then
             logs.report("loading font: %s", file)
         end
         load_font(file, fontnames, newfontnames, texmf)
-    end
-end
-
--- Temporary until a general solution is implemented:
-if os.name == "macosx" then
-    ignore_fonts = {
-      -- this font kills the indexer:
-      "/System/Library/Fonts/LastResort.ttf"
-    }
-    function remove_ignore_fonts(fonts)
-        for N,fnt in ipairs(fonts) do
-            if table.contains(ignore_fonts,fnt) then
-                if trace_search then
-                	logs.report("ignoring font '%s'", fnt)
-                end
-                table.remove(fonts,N)
-            end
-        end
-        return fonts
-    end
--- This function is only necessary, for now, on Mac OS X.
-else
-    function remove_ignore_fonts(fonts)
-        return fonts
     end
 end
 
@@ -707,6 +714,7 @@ local function update_names(fontnames, force)
         end
     end
     local newfontnames = fontnames_init()
+    read_blacklist()
     scan_texmf_fonts(fontnames, newfontnames)
     if expandpath("$OSFONTDIR"):is_empty() then
         scan_os_fonts(fontnames, newfontnames)

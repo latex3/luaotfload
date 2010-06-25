@@ -448,13 +448,6 @@ end
 
 fonts.path_normalize = path_normalize
 
-if os.name == "macosx" then
-    -- While Mac OS X 10.6 has a problem with TTC files, ignore them globally:
-    font_extensions = { "otf", "ttf", "dfont" }
-else
-    font_extensions = { "otf", "ttf", "ttc", "dfont" }
-end
-
 names.blacklist = { }
 
 local function read_blacklist()
@@ -481,6 +474,8 @@ local function read_blacklist()
         end
     end
 end
+
+local font_extensions = { "otf", "ttf", "ttc", "dfont" }
 
 local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --[[

@@ -1,6 +1,13 @@
 Change History
 --------------
 
+2010/06/25, luaotfload v1.14:
+    * fix mkluatexfontdb which was broken in the last version
+    * support general font blacklisting feature
+    * temporally re-enable ttc fonts on Mac OS X
+    * make sure mkluatexfontdb in verbose mode prints font filename before
+      attempting to load it
+
 2010/06/24, luaotfload v1.13:
     * fix typo in font cache path
 

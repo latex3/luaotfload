@@ -346,6 +346,19 @@ and the derived files
 % the script and includes some advanced options that we have not mentioned
 % here.
 %
+% \subsection{Blacklisting fonts}
+%
+% Some fonts are problematic in \LuaTeX, if you found that your document takes
+% too long to compile, or eats all the free memory, you can find the culprit
+% file by running |mkluatexfontdb| utility with |-v| option to see which font
+% file it is stuck with. You can then instruct \textsf{luaotfload} to ignore
+% this font by adding it to the blacklist configuration file.
+%
+% Simply, create a file named |otfl-blacklist.cnf| and added the to be
+% blacklisted files, one per line. Then put the file some where \textsf{kpse}
+% can find. You can either use the base name or the full path. Any thing after
+% a |%| sign is ignored.
+%
 % \section{Required \ConTeXt\ files}
 %
 % This package is a wrapper for several files taken from the \ConTeXt\ macro

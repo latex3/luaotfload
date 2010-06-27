@@ -94,14 +94,14 @@ local extra_features = { -- maybe just 1..n so that we prescribe order
     },
     anum = {
         {
-            features  = { { scripts = { { script = "arab", langs = { "dflt", "FAR" }, } }, tag = "anum", comment = "added bij mkiv" }, },
+            features  = { { scripts = { { script = "arab", langs = { "dflt", "ARA" }, } }, tag = "anum", comment = "added bij mkiv" }, },
             name      = "ctx_anum_1",
             subtables = { { name = "ctx_anum_1_s" } },
             type      = "gsub_single",
             flags     = { },
         },
         {
-            features  = { { scripts = { { script = "arab", langs = { "URD" }, } }, tag = "anum", comment = "added bij mkiv" }, },
+            features  = { { scripts = { { script = "arab", langs = { "FAR" }, } }, tag = "anum", comment = "added bij mkiv" }, },
             name      = "ctx_anum_2",
             subtables = { { name = "ctx_anum_2_s" } },
             type      = "gsub_single",

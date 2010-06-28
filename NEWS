@@ -1,6 +1,11 @@
 Change History
 --------------
 
+2010/06/28, luaotfload v1.15:
+    * anum feature did not work as advertised
+    * add system shipped TTC fonts on Mac OS X to the blacklist, until the
+      culprit ones are isolated
+
 2010/06/25, luaotfload v1.14:
     * fix mkluatexfontdb which was broken in the last version
     * support general font blacklisting feature

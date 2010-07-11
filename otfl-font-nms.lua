@@ -42,7 +42,6 @@ local gmatch, sub, find     = string.gmatch, string.sub, string.find
 local utfgsub               = unicode.utf8.gsub
 
 local trace_short    = false --tracing adapted to rebuilding of the database inside a document
-local trace_progress = true  --trackers.register("names.progress", function(v) trace_progress = v end)
 local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
 local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
@@ -63,8 +62,6 @@ local function fontnames_init()
 end
 
 function names.load()
-    -- this sets the output of the database building accordingly.
-    names.set_log_level(-1)
     local localpath  = file.join(names.path.localdir, names.path.basename)
     local systempath = file.join(names.path.systemdir, names.path.basename)
     local kpsefound  = kpse.find_file(names.path.basename)
@@ -245,14 +242,9 @@ end
 names.resolvespec = names.resolve
 
 function names.set_log_level(level)
-    if level == -1 then
-        trace_progress = false
-        trace_short = true
-    elseif level == 2 then
-        trace_progress = false
+    if level == 2 then
         trace_loading = true
     elseif level >= 3 then
-        trace_progress = false
         trace_loading = true
         trace_search = true
     end
@@ -271,26 +263,6 @@ logs.report = logs.report or log
 logs.info   = logs.info or log
 
 local log = names.log
-
--- The progress bar
-local function progress(current, total)
-    if trace_progress then
---      local width   = os.getenv("COLUMNS") -2 --doesn't work
-        local width   = 78
-        local percent = current/total
-        local gauge   = format("[%s]", rpadd(" ", width, " "))
-        if percent > 0 then
-            local done = rpadd("=", (width * percent) - 1, "=") .. ">"
-            gauge = format("[%s]", rpadd(done, width, " ") )
-        end
-        if lastislog == 1 then
-            texio.write_nl("")
-            lastislog = 0
-        end
-        io.stderr:write("\r"..gauge)
-        io.stderr:flush()
-    end
-end
 
 local function font_fullinfo(filename, subfont, texmf)
     local t = { }
@@ -520,27 +492,16 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     The function that scans all fonts in the texmf tree, through kpathsea
     variables OPENTYPEFONTS and TTFONTS of texmf.cnf
     --]]
-    if trace_progress then
-        if expandpath("$OSFONTDIR"):is_empty() then
-            logs.report("Scanning TEXMF fonts:")
-        else
-            logs.report("Scanning TEXMF and OS fonts:")
-        end
-    elseif trace_short then
-        if expandpath("$OSFONTDIR"):is_empty() then
-            logs.info("Scanning TEXMF fonts...")
-        else
-            logs.info("Scanning TEXMF and OS fonts...")
-        end
+    if expandpath("$OSFONTDIR"):is_empty() then
+        logs.info("Scanning TEXMF fonts...")
+    else
+        logs.info("Scanning TEXMF and OS fonts...")
     end
     local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^\.", "")
     fontdirs = fontdirs .. expandpath("$TTFONTS"):gsub("^\.", "")
     if not fontdirs:is_empty() then
         fontdirs = splitpath(fontdirs)
-        count = 0
         for _,d in ipairs(fontdirs) do
-            count = count + 1
-            progress(count, #fontdirs)
             scan_dir(d, fontnames, newfontnames, true)
         end
     end
@@ -660,19 +621,12 @@ local function scan_os_fonts(fontnames, newfontnames)
       - fontcache for Unix (reads the fonts.conf file and scans the directories)
       - a static set of directories for Windows and MacOSX
     --]]
-    if trace_progress then
-        logs.report("Scanning OS fonts:")
-    elseif trace_short then
-        logs.info("Scanning OS fonts...")
-    end
+    logs.info("Scanning OS fonts...")
     if trace_search then
         logs.info("Searching in static system directories...")
     end
-    count = 0
     local os_dirs = get_os_dirs()
     for _,d in ipairs(os_dirs) do
-        count = count + 1
-        progress(count, #os_dirs)
         scan_dir(d, fontnames, newfontnames, false)
     end
 end
@@ -683,9 +637,8 @@ local function update_names(fontnames, force)
     - fontnames is the final table to return
     - force is whether we rebuild it from scratch or not
     --]]
-    if trace_short then
-        logs.info("Updating the font names database:")
-    end
+    logs.info("Updating the font names database:")
+
     if force then
         fontnames = fontnames_init()
     else

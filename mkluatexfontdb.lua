@@ -125,7 +125,6 @@ end
 process_cmdline()
 
 local function generate(force)
-    log("generating font names database.")
     local savepath = output_directory
     if not lfs.isdir(savepath) then
         log("creating directory %s", savepath)

@@ -118,7 +118,7 @@ function names.resolve(specification)
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
             local found = { }
-            for _,face in ipairs(data.mappings) do
+            for _,face in next, data.mappings do
                 local family    = sanitize(face.names.family)
                 local subfamily = sanitize(face.names.subfamily)
                 local fullname  = sanitize(face.names.fullname)
@@ -198,7 +198,7 @@ function names.resolve(specification)
                 -- least difference from the requested size.
                 local closest
                 local least = math.huge -- initial value is infinity
-                for i,face in ipairs(found) do
+                for i,face in next, found do
                     local dsnsize    = face.size[1]/10
                     local difference = math.abs(dsnsize-size)
                     if difference < least then
@@ -278,14 +278,14 @@ local function font_fullinfo(filename, subfont, texmf)
     collectgarbage('collect')
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
     if m.fontstyle_name then
-        for _,v in pairs(m.fontstyle_name) do
+        for _,v in next, m.fontstyle_name do
             if v.lang == 1033 then
                 t.fontstyle_name = v.name
             end
         end
     end
     if m.names then
-        for _,v in pairs(m.names) do
+        for _,v in next, m.names do
             if v.lang == "English (US)" then
                 t.names = {
                     -- see
@@ -344,7 +344,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
         newstatus[basefile].index     = newstatus[basefile].index or { }
 
         if db_timestamp == timestamp and not newstatus[basefile].index[1] then
-            for _,v in ipairs(status[basefile].index) do
+            for _,v in next, status[basefile].index do
                 local index = #newstatus[basefile].index
                 newmappings[#newmappings+1]        = mappings[v]
                 newstatus[basefile].index[index+1] = #newmappings
@@ -357,7 +357,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
         local info = fontloader.info(filename)
         if info then
             if type(info) == "table" and #info > 1 then
-                for i in ipairs(info) do
+                for i in next, info do
                     local fullinfo = font_fullinfo(filename, i-1, texmf)
                     local index = newstatus[basefile].index[i]
                     if newstatus[basefile].index[i] then
@@ -395,9 +395,8 @@ local function path_normalize(path)
         - /cygdrive/a/b -> a:/b
         - reading symlinks under non-Win32
         - using kpse.readable_file on Win32
-    --]]
+    ]]
     if os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
---      path = kpse.readable_file(path)
         path = path:gsub('\\', '/')
         path = path:lower()
         path = path:gsub('^/cygdrive/(%a)/', '%1:/')
@@ -451,12 +450,12 @@ local font_extensions = { "otf", "ttf", "ttc", "dfont" }
 
 local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --[[
-    this function scans a directory and populates the list of fonts
+    This function scans a directory and populates the list of fonts
     with all the fonts it finds.
     - dirname is the name of the directory to scan
     - names is the font database to fill
     - texmf is a boolean saying if we are scanning a texmf directory
-    --]]
+    ]]
     local list, found = { }, { }
     local nbfound = 0
     if trace_search then
@@ -489,9 +488,9 @@ end
 
 local function scan_texmf_fonts(fontnames, newfontnames)
     --[[
-    The function that scans all fonts in the texmf tree, through kpathsea
+    This function scans all fonts in the texmf tree, through kpathsea
     variables OPENTYPEFONTS and TTFONTS of texmf.cnf
-    --]]
+    ]]
     if expandpath("$OSFONTDIR"):is_empty() then
         logs.info("Scanning TEXMF fonts...")
     else
@@ -500,8 +499,7 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^\.", "")
     fontdirs = fontdirs .. expandpath("$TTFONTS"):gsub("^\.", "")
     if not fontdirs:is_empty() then
-        fontdirs = splitpath(fontdirs)
-        for _,d in ipairs(fontdirs) do
+        for _,d in next, splitpath(fontdirs) do
             scan_dir(d, fontnames, newfontnames, true)
         end
     end
@@ -520,12 +518,11 @@ end
   in OSFONTDIR.
 ]]
 
---[[
-  This function parses /etc/fonts/fonts.conf and returns all the dir it finds.
-  The code is minimal, please report any error it may generate.
-]]
-
 local function read_fonts_conf(path, results)
+    --[[
+    This function parses /etc/fonts/fonts.conf and returns all the dir it finds.
+    The code is minimal, please report any error it may generate.
+    ]]
     local f = io.open(path)
     if not f then
         error("Cannot open the file "..path)
@@ -583,8 +580,7 @@ local function read_fonts_conf(path, results)
                         -- be found otherwise
                         read_fonts_conf(include, results)
                     elseif lfs.isdir(include) then
-                        found = glob(file.join(include, "*.conf"))
-                        for _, f in ipairs(found) do
+                        for _,f in next, glob(file.join(include, "*.conf")) do
                             read_fonts_conf(f, results)
                         end
                     end
@@ -620,13 +616,12 @@ local function scan_os_fonts(fontnames, newfontnames)
     This function scans the OS fonts through
       - fontcache for Unix (reads the fonts.conf file and scans the directories)
       - a static set of directories for Windows and MacOSX
-    --]]
+    ]]
     logs.info("Scanning OS fonts...")
     if trace_search then
         logs.info("Searching in static system directories...")
     end
-    local os_dirs = get_os_dirs()
-    for _,d in ipairs(os_dirs) do
+    for _,d in next, get_os_dirs() do
         scan_dir(d, fontnames, newfontnames, false)
     end
 end
@@ -636,7 +631,7 @@ local function update_names(fontnames, force)
     The main function, scans everything
     - fontnames is the final table to return
     - force is whether we rebuild it from scratch or not
-    --]]
+    ]]
     logs.info("Updating the font names database:")
 
     if force then

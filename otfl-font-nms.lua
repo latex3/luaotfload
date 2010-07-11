@@ -6,20 +6,6 @@ if not modules then modules = { } end modules ['font-nms'] = {
     license   = "GNU GPL v2"
 }
 
--- This is a patch for otfl-font-def.lua, that defines a reader for ofm fonts,
--- this is necessary if we set the forced field of the specification to 'ofm'
--- we use it only when using luaotfload, not mkluatexfontdb.
-if fonts and fonts.tfm and fonts.tfm.readers then
-    fonts.tfm.readers.ofm = fonts.tfm.readers.tfm
-end
-
--- This is a necessary initalization in order not to rebuild an existing font.
--- Maybe 600 should be replaced by \pdfpkresolution
--- or texconfig.pk_dpi (and it should be replaced dynamically), but we don't
--- have access (yet) to the texconfig table, so we let it be 600. Anyway, it
--- does still work fine even if \pdfpkresolution is changed.
-kpse.init_prog('', 600, '/')
-
 fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 

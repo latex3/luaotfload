@@ -1,6 +1,11 @@
 Change History
 --------------
 
+2010/07/12, luaotfload v1.16:
+    * support keys prefixed by "+", for compatibility with XeTeX
+    * remove the progress bar from mkluatexfontdb, it is of little use now
+    * minor code a documentation cleanups
+
 2010/06/28, luaotfload v1.15:
     * anum feature did not work as advertised
     * add system shipped TTC fonts on Mac OS X to the blacklist, until the

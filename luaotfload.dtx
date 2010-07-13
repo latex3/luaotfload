@@ -652,8 +652,8 @@ local function def_font(...)
 %    \begin{macrocode}
         if otfdata.metadata.math then
             for k,v in next, otfdata.metadata.math do
-                if k == "RadicalDegreeBottomRaisePercent" then
-                    -- this is a percent
+                if k:find("Percent") then
+                    -- keep percent values as is
                     fontdata.MathConstants[k] = v
                 else
                     fontdata.MathConstants[k] = v / units * size

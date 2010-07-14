@@ -1,6 +1,10 @@
 Change History
 --------------
 
+2010/07/14, luaotfload v1.17:
+    * allow stylistic sets features in base mode
+    * don't scale percent math constants
+
 2010/07/12, luaotfload v1.16:
     * support keys prefixed by "+", for compatibility with XeTeX
     * remove the progress bar from mkluatexfontdb, it is of little use now

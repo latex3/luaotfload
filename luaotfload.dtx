@@ -104,8 +104,21 @@ and the derived files
 \ProvidesFile{luaotfload.drv}%
   [2010/07/12 v1.16 ConTeXt font loading system]%
 \documentclass{ltxdoc}
-\usepackage{metalogo,multicol,mdwlist,fancyvrb}
-\usepackage[colorlinks=true]{hyperref}
+\usepackage{metalogo,multicol,mdwlist,fancyvrb,xcolor}
+\usepackage{charter}
+\usepackage[
+  bookmarks=true,
+  colorlinks=true,
+  linkcolor=niceblue,
+% urlcolor=niceblue,
+  citecolor=niceblue,
+  pdftitle={The luaotfload package},
+  pdfsubject={OpenType layout system for Plain TeX and LaTeX},
+  pdfauthor={Elie Roux & Khaled Hosny},
+  pdfkeywords={luatex, lualatex, unicode, opentype}
+  ]{hyperref}
+
+\definecolor{niceblue}{rgb}{0.4,0.6,1.000}
 
 \def\LuaTeX{Lua\TeX}
 \def\ConTeXt{Con\TeX t}

@@ -664,17 +664,20 @@ local function def_font(...)
 %
 %    \begin{macrocode}
         if otfdata.metadata.math then
+            local mc = { }
             for k,v in next, otfdata.metadata.math do
                 if k:find("Percent") then
                     -- keep percent values as is
-                    fontdata.MathConstants[k] = v
+                    mc[k] = v
                 else
-                    fontdata.MathConstants[k] = v / units * size
+                    mc[k] = v / units * size
                 end
             end
             -- for \overwithdelims
-            fontdata.MathConstants["FractionDelimiterSize"]        = 1.01 * size
-            fontdata.MathConstants["FractionDelimiterDisplayStyleSize"] = 2.39 * size
+            mc["FractionDelimiterSize"]             = 1.01 * size
+            mc["FractionDelimiterDisplayStyleSize"] = 2.39 * size
+
+            fontdata.MathConstants = mc
         end
 
     end

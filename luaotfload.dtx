@@ -672,6 +672,9 @@ local function def_font(...)
                     fontdata.MathConstants[k] = v / units * size
                 end
             end
+            -- for \overwithdelims
+            fontdata.MathConstants["FractionDelimiterSize"]        = 1.01 * size
+            fontdata.MathConstants["FractionDelimiterDisplayStyleSize"] = 2.39 * size
         end
 
     end

@@ -1,6 +1,9 @@
 Change History
 --------------
 
+2010/07/15, luaotfload v1.18:
+    * fix for \overwithdelims and brothers
+
 2010/07/14, luaotfload v1.17:
     * allow stylistic sets features in base mode
     * don't scale percent math constants

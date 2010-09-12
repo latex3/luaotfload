@@ -1,6 +1,7 @@
 Change History
 --------------
-current svn:
+
+2010/09/12, luaotfload v1.19:
     * fix LaTeX's detection (made Tikz fail under a non-LaTeX format)
 
 2010/07/15, luaotfload v1.18:

@@ -15,8 +15,22 @@ local initializers, format = fonts.initializers, string.format
 table.insert(fonts.triggers,"color")
 
 function initializers.common.color(tfmdata,value)
+    local sanitized
+
     if value then
-        tfmdata.color = tostring(value)
+        if #value == 6 or #value == 8 then
+            sanitized = value
+        elseif #value == 7 then
+            _, _, sanitized = value:find("(......)")
+        elseif #value > 8 then
+            _, _, sanitized = value:find("(........)")
+        else
+            -- broken color code ignored, issue a warning?
+        end
+    end
+
+    if sanitized then
+        tfmdata.color = sanitized
         add_color_callback()
     end
 end

@@ -257,7 +257,7 @@ local function font_fullinfo(filename, subfont, texmf)
 	    if trace_loading then
         	logs.report("error: failed to open %s", filename)
 	    end
-        return nil
+        return
     end
     local m = fontloader.to_table(f)
     fontloader.close(f)
@@ -284,6 +284,12 @@ local function font_fullinfo(filename, subfont, texmf)
                 }
             end
         end
+    else
+        -- no names table, propably a broken font
+        if trace_loading then
+            logs.report("broken font rejected: %s", basefile)
+        end
+        return
     end
     t.fontname    = m.fontname
     t.fullname    = m.fullname
@@ -345,6 +351,9 @@ local function load_font(filename, fontnames, newfontnames, texmf)
             if type(info) == "table" and #info > 1 then
                 for i in next, info do
                     local fullinfo = font_fullinfo(filename, i-1, texmf)
+                    if not fullinfo then
+                        return
+                    end
                     local index = newstatus[basefile].index[i]
                     if newstatus[basefile].index[i] then
                         index = newstatus[basefile].index[i]
@@ -356,6 +365,9 @@ local function load_font(filename, fontnames, newfontnames, texmf)
                 end
             else
                 local fullinfo = font_fullinfo(filename, false, texmf)
+                if not fullinfo then
+                    return
+                end
                 local index
                 if newstatus[basefile].index[1] then
                     index = newstatus[basefile].index[1]

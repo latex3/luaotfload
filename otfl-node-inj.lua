@@ -115,7 +115,7 @@ function nodes.set_mark(start,base,factor,rlmode,ba,ma,index) --ba=baseanchor, m
     set_attribute(base,markbase,bound)
     set_attribute(start,markmark,bound)
     set_attribute(start,markdone,index)
-    marks[bound] = { [index] = { dx, dy } }
+    marks[bound] = { [index] = { dx, dy, rlmode } }
     return dx, dy, bound
 end
 
@@ -314,17 +314,23 @@ function nodes.inject_kerns(head,where,keep)
                                 local index = has_attribute(n,markdone) or 1
                                 local d = mrks[index]
                                 if d then
-                                --  local rlmode = d[3] -- not used
-                                --  if rlmode and rlmode > 0 then
-                                        -- todo
-                                --  else
+                                    local rlmode = d[3]
+                                    if rlmode and rlmode > 0 then
+                                        -- new per 2010-10-06
+                                        local k = wx[p]
+                                        if k then -- maybe (d[1] - p.width) and/or + k[2]
+                                            n.xoffset = p.xoffset - (p.width - d[1]) - k[2]
+                                        else
+                                            n.xoffset = p.xoffset - (p.width - d[1])
+                                        end
+                                    else
                                         local k = wx[p]
                                         if k then
                                             n.xoffset = p.xoffset - d[1] - k[2]
                                         else
                                             n.xoffset = p.xoffset - d[1]
                                         end
-                                --  end
+                                    end
                                     if mk[p] then
                                         n.yoffset = p.yoffset + d[2]
                                     else

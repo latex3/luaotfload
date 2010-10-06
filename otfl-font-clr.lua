@@ -18,6 +18,7 @@ function initializers.common.color(tfmdata,value)
     local sanitized
 
     if value then
+        value = tostring(value)
         if #value == 6 or #value == 8 then
             sanitized = value
         elseif #value == 7 then

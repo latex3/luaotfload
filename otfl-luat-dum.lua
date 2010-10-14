@@ -92,24 +92,26 @@ end
 
 do
 
-    local cachepaths = kpse.expand_path('$TEXMFCACHE') or ""
+    local cachepaths
 
-    if cachepaths == "" then
-        cachepaths = kpse.expand_path('$TEXMFVAR')
+    if kpse.expand_var('$TEXMFCACHE') ~= '$TEXMFCACHE' then
+        cachepaths = kpse.expand_var('$TEXMFCACHE')
+    elseif kpse.expand_var('$TEXMFVAR') ~= '$TEXMFVAR' then
+        cachepaths = kpse.expand_var('$TEXMFVAR')
     end
 
-    if cachepaths == "" then
+    if not cachepaths then
         cachepaths = "."
     end
 
     cachepaths = string.split(cachepaths,os.type == "windows" and ";" or ":")
 
     for i=1,#cachepaths do
-        if file.iswritable(cachepaths[i]) then
-            writable = file.join(cachepaths[i],"luatex-cache")
-            lfs.mkdir(writable)
-            writable = file.join(writable,caches.namespace)
-            lfs.mkdir(writable)
+        local done
+        writable = file.join(cachepaths[i], "luatex-cache")
+        writable = file.join(writable,caches.namespace)
+        writable, done = dir.mkdirs(writable)
+        if done then
             break
         end
     end
@@ -121,10 +123,10 @@ do
     end
 
     if not writable then
-        texio.write_nl("quiting: fix your writable cache path")
+        texio.write_nl("quiting: fix your writable cache path\n")
         os.exit()
     elseif #readables == 0 then
-        texio.write_nl("quiting: fix your readable cache path")
+        texio.write_nl("quiting: fix your readable cache path\n")
         os.exit()
     elseif #readables == 1 and readables[1] == writable then
         texio.write(string.format("(using cache: %s)",writable))

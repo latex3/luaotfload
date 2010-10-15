@@ -1,6 +1,12 @@
 Change History
 --------------
 
+2010/10/16, luaotfload v1.20:
+    * Make cache directory creation more robust
+    * Fix GPOS mark placement in left-to-right direction
+    * Reject fonts missing 'names' table
+    * Sanitize color value before attempting to use it
+
 2010/09/12, luaotfload v1.19:
     * fix LaTeX's detection (made Tikz fail under a non-LaTeX format)
 

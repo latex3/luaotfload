@@ -459,7 +459,6 @@ luaotfload.module = {
 }
 
 luatexbase.provides_module(luaotfload.module)
-
 %    \end{macrocode}
 %
 %    This is a necessary initalization in order not to rebuild an existing font.
@@ -469,15 +468,12 @@ luatexbase.provides_module(luaotfload.module)
 %    fine even if |\pdfpkresolution| is changed.
 %
 %    \begin{macrocode}
-
 kpse.init_prog('', 600, '/')
-
 %    \end{macrocode}
 %
 %    Some helper functions.
 %
 %    \begin{macrocode}
-
 local format = string.format
 
 local function log(...)
@@ -491,13 +487,11 @@ end
 local function warning(...)
     luatexbase.module_warning('luaotfload', format(...))
 end
-
 %    \end{macrocode}
 %
 %    The minimal required \LuaTeX\ version.
 %
 %    \begin{macrocode}
-
 local luatex_version = 60
 
 if tex.luatexversion < luatex_version then
@@ -505,7 +499,6 @@ if tex.luatexversion < luatex_version then
              tex.luatexversion/100,
              luatex_version   /100)
 end
-
 %    \end{macrocode}
 %
 % \subsection{Module loading}
@@ -515,7 +508,6 @@ end
 %    name.
 %
 %    \begin{macrocode}
-
 function luaotfload.loadmodule(name)
     local tofind = 'otfl-'..name
     local found = kpse.find_file(tofind,"tex")
@@ -526,7 +518,6 @@ function luaotfload.loadmodule(name)
         error('file %s not found.', tofind)
     end
 end
-
 %    \end{macrocode}
 %
 %    We start loading some lua files. These two are some code not used by
@@ -534,30 +525,24 @@ end
 %    low-level \ConTeXt\ functions.
 %
 %    \begin{macrocode}
-
 luaotfload.loadmodule('luat-dum.lua') -- not used in context at all
 luaotfload.loadmodule('luat-ovr.lua') -- override some luat-dum functions
 luaotfload.loadmodule('data-con.lua') -- maybe some day we don't need this one
-
 %    \end{macrocode}
 %
 %    A hack to remove a warning from \texttt{node-dum.lua} as it is \ConTeXt\
 %    specific.
 %
 %    \begin{macrocode}
-
 tex.attribute[0] = 0
-
 %    \end{macrocode}
 %
 %    Node support modules.
 %
 %    \begin{macrocode}
-
 luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('node-dum.lua')
 luaotfload.loadmodule('node-inj.lua')
-
 %    \end{macrocode}
 %
 %    By default \ConTeXt\ takes some private attributes for internal use. To
@@ -567,7 +552,6 @@ luaotfload.loadmodule('node-inj.lua')
 %    avoid possiple name clashes.
 %
 %    \begin{macrocode}
-
 function attributes.private(name)
     local attr   = 'otfl@' .. name
     local number = luatexbase.attributes[attr]
@@ -576,13 +560,11 @@ function attributes.private(name)
     end
     return number
 end
-
 %    \end{macrocode}
 %
 %    Font handling modules.
 %
 %    \begin{macrocode}
-
 luaotfload.loadmodule('font-tfm.lua')
 luaotfload.loadmodule('font-cid.lua')
 luaotfload.loadmodule('font-ott.lua')
@@ -597,7 +579,6 @@ luaotfload.loadmodule('font-otc.lua')
 luaotfload.loadmodule('font-def.lua')
 luaotfload.loadmodule('font-xtx.lua')
 luaotfload.loadmodule('font-dum.lua')
-
 %    \end{macrocode}
 %
 %    This is a patch for |otfl-font-def.lua|, that defines a reader for ofm
@@ -606,20 +587,16 @@ luaotfload.loadmodule('font-dum.lua')
 %    |mkluatexfontdb|.
 %
 %    \begin{macrocode}
-
 if fonts and fonts.tfm and fonts.tfm.readers then
     fonts.tfm.readers.ofm = fonts.tfm.readers.tfm
 end
-
 %    \end{macrocode}
 %
 %    \textsf{luaotfload} specific modules.
 %
 %    \begin{macrocode}
-
 luaotfload.loadmodule('font-nms.lua')
 luaotfload.loadmodule('font-clr.lua')
-
 %    \end{macrocode}
 %
 % \subsection{Post-processing TFM table}
@@ -707,16 +684,13 @@ end
 %    Here we override some defaults set in \ConTeXt\ code.
 %
 %    \begin{macrocode}
-
 fonts.mode = "node"
-
 %    \end{macrocode}
 %
 %    The following features are useful in math (e.g. in XITS Math font),
 %    but \textsf{luaotfload} does not recognize them in |base| mode.
 %
 %    \begin{macrocode}
-
 local register_base_sub = fonts.otf.features.register_base_substitution
 local gsubs = {
     "ss01", "ss02", "ss03", "ss04", "ss05",
@@ -728,13 +702,11 @@ local gsubs = {
 for _,v in next, gsubs do
     register_base_sub(v)
 end
-
 %    \end{macrocode}
 %
 %    Finally two functions
 %
 %    \begin{macrocode}
-
 function luaotfload.register_callbacks()
     luatexbase.add_to_callback('pre_linebreak_filter',
                                 nodes.simple_font_handler,
@@ -794,14 +766,12 @@ end
 }
 
 \catcode64 11
-
 %    \end{macrocode}
 %
 %    Two small macros to register or unregister the callbacks. Without the
 %    callbacks this package is totally turned off.
 %
 %    \begin{macrocode}
-
 \def\otfl@off{
 \directlua{luaotfload.unregister_callbacks()}
 }
@@ -809,13 +779,11 @@ end
 \def\otfl@on{
 \directlua{luaotfload.register_callbacks()}
 }
-
 %    \end{macrocode}
 %
 %    We load the |lua| file, and we turn the package on.
 %
 %    \begin{macrocode}
-
 \luatexUseModule{luaotfload}
 
 \otfl@on

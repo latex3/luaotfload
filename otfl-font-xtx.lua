@@ -38,7 +38,7 @@ local normalize_meanings = fonts.otf.meanings.normalize
 
 local list = { }
 
-fonts.define.specify.colonized_default_lookup = "file"
+specifiers.colonizedpreference = "file"
 
 local function isstyle(s)
     local style  = string.lower(s):split("/")
@@ -181,10 +181,10 @@ local function colonized(specification) -- xetex mode
         list.optsize = nil
     end
     if list.name then
-        if resolvers.find_file(list.name, "tfm") then
+        if resolvers.findfile(list.name, "tfm") then
             list.lookup = "file"
             list.name   = file.addsuffix(list.name, "tfm")
-        elseif resolvers.find_file(list.name, "ofm") then
+        elseif resolvers.findfile(list.name, "ofm") then
             list.lookup = "file"
             list.name   = file.addsuffix(list.name, "ofm")
         end

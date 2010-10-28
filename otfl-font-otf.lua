@@ -43,7 +43,7 @@ local otf            = fonts.otf
 local tfm            = fonts.tfm
 
 local fontdata       = fonts.ids
-local chardata       = characters.data
+--local chardata       = characters.data
 
 otf.features         = otf.features         or { }
 otf.features.list    = otf.features.list    or { }

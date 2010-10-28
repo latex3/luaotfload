@@ -501,6 +501,17 @@ if tex.luatexversion < luatex_version then
 end
 %    \end{macrocode}
 %
+%
+%    \begin{macrocode}
+function table.swaphash(h) -- needs another name
+    local r = { }
+    for k,v in next, h do
+        r[v] = string.lower(string.gsub(k," ",""))
+    end
+    return r
+end
+%    \end{macrocode}
+%
 % \subsection{Module loading}
 %
 %    We load the \ConTeXt\ files with this function. It automatically adds the
@@ -540,7 +551,6 @@ tex.attribute[0] = 0
 %    Node support modules.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('node-dum.lua')
 luaotfload.loadmodule('node-inj.lua')
 %    \end{macrocode}
@@ -565,6 +575,7 @@ end
 %    Font handling modules.
 %
 %    \begin{macrocode}
+luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('font-tfm.lua')
 luaotfload.loadmodule('font-cid.lua')
 luaotfload.loadmodule('font-ott.lua')
@@ -576,6 +587,7 @@ luaotfload.loadmodule('font-otb.lua')
 luaotfload.loadmodule('font-otn.lua')
 luaotfload.loadmodule('font-ota.lua')
 luaotfload.loadmodule('font-otc.lua')
+luaotfload.loadmodule('font-agl.lua')
 luaotfload.loadmodule('font-def.lua')
 luaotfload.loadmodule('font-xtx.lua')
 luaotfload.loadmodule('font-dum.lua')
@@ -606,7 +618,7 @@ luaotfload.loadmodule('font-clr.lua')
 %
 %    \begin{macrocode}
 local function def_font(...)
-    local fontdata = fonts.define.read(...)
+    local fontdata = fonts.definers.read(...)
     if type(fontdata) == "table" and fontdata.shared then
 %    \end{macrocode}
 %
@@ -691,7 +703,7 @@ fonts.mode = "node"
 %    but \textsf{luaotfload} does not recognize them in |base| mode.
 %
 %    \begin{macrocode}
-local register_base_sub = fonts.otf.features.register_base_substitution
+local register_base_sub = fonts.otf.features.registerbasesubstitution
 local gsubs = {
     "ss01", "ss02", "ss03", "ss04", "ss05",
     "ss06", "ss07", "ss08", "ss09", "ss10",

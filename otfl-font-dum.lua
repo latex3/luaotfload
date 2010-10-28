@@ -188,7 +188,23 @@ local setups  = fonts.protrusions.setups
 --
 -- \definefontfeature[whocares][default][mode=node,protrusion=2,opbd=yes,script=latn,featurefile=texgyrepagella-regularxx.fea]
 
-classes['double'] = { -- for testing opbd
+local function get_class_and_vector(tfmdata,value,where) -- "expansions"
+    local g_where = tfmdata.goodies and tfmdata.goodies[where]
+    local f_where = fonts[where]
+    local g_classes = g_where and g_where.classes
+    local f_classes = f_where and f_where.classes
+    local class = (g_classes and g_classes[value]) or (f_classes and f_classes[value])
+--~ print(value,class,f_where,f_classes)
+    if class then
+        local class_vector = class.vector
+        local g_vectors = g_where and g_where.vectors
+        local f_vectors = f_where and f_where.vectors
+        local vector = (g_vectors and g_vectors[class_vector]) or (f_vectors and f_vectors[class_vector])
+        return class, vector
+    end
+end
+
+setups['double'] = { -- for testing opbd
     factor = 2, left = 1, right = 1,
 }
 
@@ -198,7 +214,7 @@ local function map_opbd_onto_protrusion(tfmdata,value,opbd)
     local singles = otfdata.shared.featuredata.gpos_single
     local script, language = tfmdata.script, tfmdata.language
     local done, factor, left, right = false, 1, 1, 1
-    local class = classes[value]
+    local class = setups[value]
     if class then
         factor = class.factor or 1
         left   = class.left   or 1
@@ -207,7 +223,7 @@ local function map_opbd_onto_protrusion(tfmdata,value,opbd)
         factor = tonumber(value) or 1
     end
     if opbd ~= "right" then
-        local validlookups, lookuplist = otf.collectlookups(otfdata,"lfbd",script,language)
+        local validlookups, lookuplist = fonts.otf.collectlookups(otfdata,"lfbd",script,language)
         if validlookups then
             for i=1,#lookuplist do
                 local lookup = lookuplist[i]
@@ -230,7 +246,7 @@ local function map_opbd_onto_protrusion(tfmdata,value,opbd)
         end
     end
     if opbd ~= "left" then
-        local validlookups, lookuplist = otf.collectlookups(otfdata,"rtbd",script,language)
+        local validlookups, lookuplist = fonts.otf.collectlookups(otfdata,"rtbd",script,language)
         if validlookups then
             for i=1,#lookuplist do
                 local lookup = lookuplist[i]
@@ -260,7 +276,7 @@ end
 -- only has some kerns for digits. So, consider this feature not
 -- supported till we have a proper test font.
 
-function initializers.common.protrusion(tfmdata,value)
+function fonts.initializers.common.protrusion(tfmdata,value)
     if value then
         local opbd = tfmdata.shared.features.opbd
         if opbd then

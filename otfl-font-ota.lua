@@ -17,46 +17,46 @@ local trace_cjk       = false  trackers.register("cjk.injections", function(v) t
 
 trackers.register("cjk.analyzing","otf.analyzing")
 
-fonts                        = fonts                        or { }
-fonts.analyzers              = fonts.analyzers              or { }
-fonts.analyzers.initializers = fonts.analyzers.initializers or { node = { otf = { } } }
-fonts.analyzers.methods      = fonts.analyzers.methods      or { node = { otf = { } } }
+local fonts, nodes = fonts, nodes
+local node = node
 
 local otf = fonts.otf
 local tfm = fonts.tfm
 
-local initializers = fonts.analyzers.initializers
-local methods      = fonts.analyzers.methods
+fonts.analyzers          = fonts.analyzers or { }
+local analyzers          = fonts.analyzers
 
-local glyph   = node.id('glyph')
-local glue    = node.id('glue')
-local penalty = node.id('penalty')
+analyzers.initializers   = analyzers.initializers or { node = { otf = { } } }
+analyzers.methods        = analyzers.methods      or { node = { otf = { } } }
+
+local initializers       = analyzers.initializers
+local methods            = analyzers.methods
+
+local nodecodes          = nodes.nodecodes
+local glyph_code         = nodecodes.glyph
 
 local set_attribute      = node.set_attribute
 local has_attribute      = node.has_attribute
 local traverse_id        = node.traverse_id
 local traverse_node_list = node.traverse
 
-local fontdata = fonts.ids
-local state    = attributes.private('state')
+local fontdata           = fonts.ids
+local state              = attributes.private('state')
+local categories         = characters and characters.categories or { } -- sorry, only in context
 
-local fcs = (fonts.color and fonts.color.set)   or function() end
-local fcr = (fonts.color and fonts.color.reset) or function() end
+local fontscolors        = fonts.colors
+local fcs                = (fontscolors and fontscolors.set)   or function() end
+local fcr                = (fontscolors and fontscolors.reset) or function() end
 
-local a_to_script   = otf.a_to_script
-local a_to_language = otf.a_to_language
 
 -- in the future we will use language/script attributes instead of the
 -- font related value, but then we also need dynamic features which is
 -- somewhat slower; and .. we need a chain of them
 
+local scriptandlanguage = otf.scriptandlanguage
+
 function fonts.initializers.node.otf.analyze(tfmdata,value,attr)
-    local script, language
-    if attr and attr > 0 then
-        script, language = a_to_script[attr], a_to_language[attr]
-    else
-        script, language = tfmdata.script, tfmdata.language
-    end
+    local script, language = otf.scriptandlanguage(tfmdata,attr)
     local action = initializers[script]
     if action then
         if type(action) == "function" then
@@ -73,12 +73,7 @@ end
 
 function fonts.methods.node.otf.analyze(head,font,attr)
     local tfmdata = fontdata[font]
-    local script, language
-    if attr and attr > 0 then
-        script, language = a_to_script[attr], a_to_language[attr]
-    else
-        script, language = tfmdata.script, tfmdata.language
-    end
+    local script, language = otf.scriptandlanguage(tfmdata,attr)
     local action = methods[script]
     if action then
         if type(action) == "function" then
@@ -98,7 +93,7 @@ table.insert(fonts.triggers,"analyze")  -- we need a proper function for doing t
 
 -- latin
 
-fonts.analyzers.methods.latn = fonts.analyzers.aux.setstate
+analyzers.methods.latn = analyzers.aux.setstate
 
 -- this info eventually will go into char-def
 
@@ -180,8 +175,8 @@ local function warning(current,what)
     end
 end
 
-function fonts.analyzers.methods.nocolor(head,font,attr)
-    for n in traverse_node_list(head,glyph) do
+function analyzers.methods.nocolor(head,font,attr)
+    for n in traverse_id(glyph_code,head) do
         if not font or n.font == font then
             fcr(n)
         end
@@ -230,15 +225,16 @@ local function finish(first,last)
     return first, last
 end
 
-function fonts.analyzers.methods.arab(head,font,attr) -- maybe make a special version with no trace
+function analyzers.methods.arab(head,font,attr) -- maybe make a special version with no trace
+    local useunicodemarks = analyzers.useunicodemarks
     local tfmdata = fontdata[font]
     local marks = tfmdata.marks
     local first, last, current, done = nil, nil, head, false
     while current do
-        if current.id == glyph and current.subtype<256 and current.font == font and not has_attribute(current,state) then
+        if current.id == glyph_code and current.subtype<256 and current.font == font and not has_attribute(current,state) then
             done = true
             local char = current.char
-            if marks[char] then
+            if marks[char] or (useunicodemarks and categories[char] == "mn") then
                 set_attribute(current,state,5) -- mark
                 if trace_analyzing then fcs(current,"font:mark") end
             elseif isol[char] then -- can be zwj or zwnj too

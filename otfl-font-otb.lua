@@ -11,8 +11,9 @@ local format, gmatch, gsub, find, match, lower, strip = string.format, string.gm
 local type, next, tonumber, tostring = type, next, tonumber, tostring
 local lpegmatch = lpeg.match
 
-local otf = fonts.otf
-local tfm = fonts.tfm
+local fonts = fonts
+local otf   = fonts.otf
+local tfm   = fonts.tfm
 
 local trace_baseinit     = false  trackers.register("otf.baseinit",     function(v) trace_baseinit     = v end)
 local trace_singles      = false  trackers.register("otf.singles",      function(v) trace_singles      = v end)
@@ -21,6 +22,8 @@ local trace_alternatives = false  trackers.register("otf.alternatives", function
 local trace_ligatures    = false  trackers.register("otf.ligatures",    function(v) trace_ligatures    = v end)
 local trace_kerns        = false  trackers.register("otf.kerns",        function(v) trace_kerns        = v end)
 local trace_preparing    = false  trackers.register("otf.preparing",    function(v) trace_preparing    = v end)
+
+local report_prepare = logs.new("otf prepare")
 
 local wildcard = "*"
 local default  = "dflt"
@@ -41,8 +44,20 @@ local function gref(descriptions,n)
         local num, nam = { }, { }
         for i=1,#n do
             local ni = n[i]
-            num[i] = format("U+%04X",ni)
-            nam[i] = descriptions[ni].name or "?"
+            -- ! ! ! could be a helper ! ! !
+            if type(ni) == "table" then
+                local nnum, nnam = { }, { }
+                for j=1,#ni do
+                    local nj = ni[j]
+                    nnum[j] = format("U+%04X",nj)
+                    nnam[j] = descriptions[nj].name or "?"
+                end
+                num[i] = concat(nnum,"|")
+                nam[i] = concat(nnam,"|")
+            else
+                num[i] = format("U+%04X",ni)
+                nam[i] = descriptions[ni].name or "?"
+            end
         end
         return format("%s (%s)",concat(num," "), concat(nam," "))
     else
@@ -76,7 +91,7 @@ local function resolve_ligatures(tfmdata,ligatures,kind)
                     local c, f, s = characters[uc], ligs[1], ligs[2]
                     local uft, ust = unicodes[f] or 0, unicodes[s] or 0
                     if not uft or not ust then
-                        logs.report("define otf","%s: unicode problem with base ligature %s = %s + %s",cref(kind),gref(descriptions,uc),gref(descriptions,uft),gref(descriptions,ust))
+                        report_prepare("%s: unicode problem with base ligature %s = %s + %s",cref(kind),gref(descriptions,uc),gref(descriptions,uft),gref(descriptions,ust))
                         -- some kind of error
                     else
                         if type(uft) == "number" then uft = { uft } end
@@ -87,7 +102,7 @@ local function resolve_ligatures(tfmdata,ligatures,kind)
                                 local us = ust[usi]
                                 if changed[uf] or changed[us] then
                                     if trace_baseinit and trace_ligatures then
-                                        logs.report("define otf","%s: base ligature %s + %s ignored",cref(kind),gref(descriptions,uf),gref(descriptions,us))
+                                        report_prepare("%s: base ligature %s + %s ignored",cref(kind),gref(descriptions,uf),gref(descriptions,us))
                                     end
                                 else
                                     local first, second = characters[uf], us
@@ -103,7 +118,7 @@ local function resolve_ligatures(tfmdata,ligatures,kind)
                                             t[second] = { type = 0, char = uc[1] } -- can this still happen?
                                         end
                                         if trace_baseinit and trace_ligatures then
-                                            logs.report("define otf","%s: base ligature %s + %s => %s",cref(kind),gref(descriptions,uf),gref(descriptions,us),gref(descriptions,uc))
+                                            report_prepare("%s: base ligature %s + %s => %s",cref(kind),gref(descriptions,uf),gref(descriptions,us),gref(descriptions,uc))
                                         end
                                     end
                                 end
@@ -139,7 +154,7 @@ local splitter = lpeg.splitat(" ")
 local function prepare_base_substitutions(tfmdata,kind,value) -- we can share some code with the node features
     if value then
         local otfdata = tfmdata.shared.otfdata
-        local validlookups, lookuplist = otf.collect_lookups(otfdata,kind,tfmdata.script,tfmdata.language)
+        local validlookups, lookuplist = otf.collectlookups(otfdata,kind,tfmdata.script,tfmdata.language)
         if validlookups then
             local ligatures = { }
             local unicodes = tfmdata.unicodes -- names to unicodes
@@ -154,12 +169,12 @@ local function prepare_base_substitutions(tfmdata,kind,value) -- we can share so
                     if pv then
                         local upv = unicodes[pv]
                         if upv then
-                            if type(upv) == "table" then
+                            if type(upv) == "table" then -- zero change that table
                                 upv = upv[1]
                             end
                             if characters[upv] then
                                 if trace_baseinit and trace_singles then
-                                    logs.report("define otf","%s: base substitution %s => %s",cref(kind,lookup),gref(descriptions,k),gref(descriptions,upv))
+                                    report_prepare("%s: base substitution %s => %s",cref(kind,lookup),gref(descriptions,k),gref(descriptions,upv))
                                 end
                                 changed[k] = upv
                             end
@@ -182,12 +197,12 @@ local function prepare_base_substitutions(tfmdata,kind,value) -- we can share so
                         if pc then
                             local upc = unicodes[pc]
                             if upc then
-                                if type(upc) == "table" then
+                                if type(upc) == "table" then -- zero change that table
                                     upc = upc[1]
                                 end
                                 if characters[upc] then
                                     if trace_baseinit and trace_alternatives then
-                                        logs.report("define otf","%s: base alternate %s %s => %s",cref(kind,lookup),tostring(value),gref(descriptions,k),gref(descriptions,upc))
+                                        report_prepare("%s: base alternate %s %s => %s",cref(kind,lookup),tostring(value),gref(descriptions,k),gref(descriptions,upc))
                                     end
                                     changed[k] = upc
                                 end
@@ -202,7 +217,7 @@ local function prepare_base_substitutions(tfmdata,kind,value) -- we can share so
                             local upc = { lpegmatch(splitter,pc) }
                             for i=1,#upc do upc[i] = unicodes[upc[i]] end
                             -- we assume that it's no table
-                            logs.report("define otf","%s: base ligature %s => %s",cref(kind,lookup),gref(descriptions,upc),gref(descriptions,k))
+                            report_prepare("%s: base ligature %s => %s",cref(kind,lookup),gref(descriptions,upc),gref(descriptions,k))
                         end
                         ligatures[#ligatures+1] = { pc, k }
                     end
@@ -248,10 +263,10 @@ local function prepare_base_substitutions(tfmdata,kind,value) -- we can share so
     end
 end
 
-local function prepare_base_kerns(tfmdata,kind,value) -- todo what kind of kerns, currently all
+local function preparebasekerns(tfmdata,kind,value) -- todo what kind of kerns, currently all
     if value then
         local otfdata = tfmdata.shared.otfdata
-        local validlookups, lookuplist = otf.collect_lookups(otfdata,kind,tfmdata.script,tfmdata.language)
+        local validlookups, lookuplist = otf.collectlookups(otfdata,kind,tfmdata.script,tfmdata.language)
         if validlookups then
             local unicodes = tfmdata.unicodes -- names to unicodes
             local indices = tfmdata.indices
@@ -261,7 +276,7 @@ local function prepare_base_kerns(tfmdata,kind,value) -- todo what kind of kerns
             for u, chr in next, characters do
                 local d = descriptions[u]
                 if d then
-                    local dk = d.mykerns -- shared
+                    local dk = d.kerns -- shared
                     if dk then
                         local s = sharedkerns[dk]
                         if s == false then
@@ -278,7 +293,7 @@ local function prepare_base_kerns(tfmdata,kind,value) -- todo what kind of kerns
                                         if v ~= 0 and not t[k] then -- maybe no 0 test here
                                             t[k], done = v, true
                                             if trace_baseinit and trace_kerns then
-                                                logs.report("define otf","%s: base kern %s + %s => %s",cref(kind,lookup),gref(descriptions,u),gref(descriptions,k),v)
+                                                report_prepare("%s: base kern %s + %s => %s",cref(kind,lookup),gref(descriptions,u),gref(descriptions,k),v)
                                             end
                                         end
                                     end
@@ -318,10 +333,10 @@ local supported_gpos = {
     'kern'
 }
 
-function otf.features.register_base_substitution(tag)
+function otf.features.registerbasesubstitution(tag)
     supported_gsub[#supported_gsub+1] = tag
 end
-function otf.features.register_base_kern(tag)
+function otf.features.registerbasekern(tag)
     supported_gsub[#supported_gpos+1] = tag
 end
 
@@ -345,7 +360,7 @@ function fonts.initializers.base.otf.features(tfmdata,value)
             for f=1,#supported_gpos do
                 local feature = supported_gpos[f]
                 local value = features[feature]
-                prepare_base_kerns(tfmdata,feature,features[feature])
+                preparebasekerns(tfmdata,feature,features[feature])
                 if value then
                     h[#h+1] = feature  .. "=" .. tostring(value)
                 end
@@ -364,10 +379,10 @@ function fonts.initializers.base.otf.features(tfmdata,value)
             -- verbose name as long as we don't use <()<>[]{}/%> and the length
             -- is < 128.
             tfmdata.fullname = tfmdata.fullname .. "-" .. base -- tfmdata.psname is the original
-        --~ logs.report("otf define","fullname base hash: '%s', featureset '%s'",tfmdata.fullname,hash)
+        --~ report_prepare("fullname base hash: '%s', featureset '%s'",tfmdata.fullname,hash)
         end
         if trace_preparing then
-            logs.report("otf define","preparation time is %0.3f seconds for %s",os.clock()-t,tfmdata.fullname or "?")
+            report_prepare("preparation time is %0.3f seconds for %s",os.clock()-t,tfmdata.fullname or "?")
         end
     end
 end

@@ -10,12 +10,24 @@ nodes      = nodes      or { }
 fonts      = fonts      or { }
 attributes = attributes or { }
 
+nodes.pool     = nodes.pool     or { }
+nodes.handlers = nodes.handlers or { }
+
+local nodecodes  = { } for k,v in next, node.types   () do nodecodes[string.gsub(v,"_","")] = k end
+local whatcodes  = { } for k,v in next, node.whatsits() do whatcodes[string.gsub(v,"_","")] = k end
+local glyphcodes = { [0] = "character", "glyph", "ligature", "ghost", "left", "right" }
+
+nodes.nodecodes    = nodecodes
+nodes.whatcodes    = whatcodes
+nodes.whatsitcodes = whatcodes
+nodes.glyphcodes   = glyphcodes
+
 local traverse_id = node.traverse_id
 local free_node   = node.free
 local remove_node = node.remove
 local new_node    = node.new
 
-local glyph = node.id('glyph')
+local glyph_code = nodecodes.glyph
 
 -- fonts
 
@@ -23,9 +35,9 @@ local fontdata = fonts.ids or { }
 
 function nodes.simple_font_handler(head)
 --  lang.hyphenate(head)
-    head = nodes.process_characters(head)
-    nodes.inject_kerns(head)
-    nodes.protect_glyphs(head)
+    head = nodes.handlers.characters(head)
+    nodes.injections.handler(head)
+    nodes.handlers.protectglyphs(head)
     head = node.ligaturing(head)
     head = node.kerning(head)
     return head
@@ -43,12 +55,12 @@ if tex.attribute[0] ~= 0 then
 
 end
 
-nodes.protect_glyphs   = node.protect_glyphs
-nodes.unprotect_glyphs = node.unprotect_glyphs
+nodes.handlers.protectglyphs   = node.protect_glyphs
+nodes.handlers.unprotectglyphs = node.unprotect_glyphs
 
-function nodes.process_characters(head)
+function nodes.handlers.characters(head)
     local usedfonts, done, prevfont = { }, false, nil
-    for n in traverse_id(glyph,head) do
+    for n in traverse_id(glyph_code,head) do
         local font = n.font
         if font ~= prevfont then
             prevfont = font
@@ -81,7 +93,7 @@ end
 
 -- helper
 
-function nodes.kern(k)
+function nodes.pool.kern(k)
     local n = new_node("kern",1)
     n.kern = k
     return n

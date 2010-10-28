@@ -6,19 +6,17 @@ if not modules then modules = { } end modules ['font-oti'] = {
     license   = "see context related readme files"
 }
 
--- i need to check features=yes|no also in relation to hashing
-
 local lower = string.lower
 
-local otf = fonts.otf
+local fonts = fonts
 
-otf.default_language = 'latn'
-otf.default_script   = 'dflt'
+local otf          = fonts.otf
+local initializers = fonts.initializers
 
-local languages = otf.tables.languages
-local scripts   = otf.tables.scripts
+local languages    = otf.tables.languages
+local scripts      = otf.tables.scripts
 
-function otf.features.language(tfmdata,value)
+local function set_language(tfmdata,value)
     if value then
         value = lower(value)
         if languages[value] then
@@ -27,7 +25,7 @@ function otf.features.language(tfmdata,value)
     end
 end
 
-function otf.features.script(tfmdata,value)
+local function set_script(tfmdata,value)
     if value then
         value = lower(value)
         if scripts[value] then
@@ -36,21 +34,24 @@ function otf.features.script(tfmdata,value)
     end
 end
 
-function otf.features.mode(tfmdata,value)
+local function set_mode(tfmdata,value)
     if value then
         tfmdata.mode = lower(value)
     end
 end
 
-fonts.initializers.base.otf.language = otf.features.language
-fonts.initializers.base.otf.script   = otf.features.script
-fonts.initializers.base.otf.mode     = otf.features.mode
-fonts.initializers.base.otf.method   = otf.features.mode
+local base_initializers = initializers.base.otf
+local node_initializers = initializers.node.otf
 
-fonts.initializers.node.otf.language = otf.features.language
-fonts.initializers.node.otf.script   = otf.features.script
-fonts.initializers.node.otf.mode     = otf.features.mode
-fonts.initializers.node.otf.method   = otf.features.mode
+base_initializers.language = set_language
+base_initializers.script   = set_script
+base_initializers.mode     = set_mode
+base_initializers.method   = set_mode
+
+node_initializers.language = set_language
+node_initializers.script   = set_script
+node_initializers.mode     = set_mode
+node_initializers.method   = set_mode
 
 otf.features.register("features",true)     -- we always do features
 table.insert(fonts.processors,"features")  -- we need a proper function for doing this

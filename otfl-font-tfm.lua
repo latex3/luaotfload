@@ -11,8 +11,12 @@ local utf = unicode.utf8
 local next, format, match, lower, gsub = next, string.format, string.match, string.lower, string.gsub
 local concat, sortedkeys, utfbyte, serialize = table.concat, table.sortedkeys, utf.byte, table.serialize
 
+local allocate = utilities.storage.allocate
+
 local trace_defining = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
 local trace_scaling  = false  trackers.register("fonts.scaling" , function(v) trace_scaling  = v end)
+
+local report_define = logs.new("define fonts")
 
 -- tfmdata has also fast access to indices and unicodes
 -- to be checked: otf -> tfm -> tfmscaled
@@ -23,32 +27,32 @@ local trace_scaling  = false  trackers.register("fonts.scaling" , function(v) tr
 <p>Here we only implement a few helper functions.</p>
 --ldx]]--
 
-fonts     = fonts     or { }
-fonts.tfm = fonts.tfm or { }
-fonts.ids = fonts.ids or { }
+local fonts = fonts
+local tfm   = fonts.tfm
 
-local tfm = fonts.tfm
-
-fonts.loaded              = fonts.loaded    or { }
-fonts.dontembed           = fonts.dontembed or { }
-fonts.triggers            = fonts.triggers  or { } -- brrr
-fonts.initializers        = fonts.initializers        or { }
+fonts.loaded              = allocate()
+fonts.dontembed           = allocate()
+fonts.triggers            = fonts.triggers or { } -- brrr
+fonts.initializers        = fonts.initializers or { }
 fonts.initializers.common = fonts.initializers.common or { }
 
-local fontdata      = fonts.ids
-local disc          = node.id('disc')
-local glyph         = node.id('glyph')
 local set_attribute = node.set_attribute
+
+local fontdata   = fonts.ids
+local nodecodes  = nodes.nodecodes
+
+local disc_code  = nodecodes.disc
+local glyph_code = nodecodes.glyph
 
 --[[ldx--
 <p>The next function encapsulates the standard <l n='tfm'/> loader as
 supplied by <l n='luatex'/>.</p>
 --ldx]]--
 
-tfm.resolve_vf       = true  -- false
-tfm.share_base_kerns = false -- true (.5 sec slower on mk but brings down mem from 410M to 310M, beware: then script/lang share too)
-tfm.mathactions      = { }
-tfm.fontname_mode    = "fullpath"
+tfm.resolvevirtualtoo = true  -- false
+tfm.sharebasekerns    = false -- true (.5 sec slower on mk but brings down mem from 410M to 310M, beware: then script/lang share too)
+tfm.mathactions       = { }
+tfm.fontnamemode      = "fullpath"
 
 tfm.enhance = tfm.enhance or function() end
 
@@ -58,12 +62,12 @@ function tfm.read_from_tfm(specification)
     local fname, tfmdata = specification.filename or "", nil
     if fname ~= "" then
         if trace_defining then
-            logs.report("define font","loading tfm file %s at size %s",fname,specification.size)
+            report_define("loading tfm file %s at size %s",fname,specification.size)
         end
         tfmdata = font.read_tfm(fname,specification.size) -- not cached, fast enough
         if tfmdata then
             tfmdata.descriptions = tfmdata.descriptions or { }
-            if tfm.resolve_vf then
+            if tfm.resolvevirtualtoo then
                 fonts.logger.save(tfmdata,file.extname(fname),specification) -- strange, why here
                 fname = resolvers.findbinfile(specification.name, 'ovf')
                 if fname and fname ~= "" then
@@ -81,7 +85,7 @@ function tfm.read_from_tfm(specification)
             tfm.enhance(tfmdata,specification)
         end
     elseif trace_defining then
-        logs.report("define font","loading tfm with name %s fails",specification.name)
+        report_define("loading tfm with name %s fails",specification.name)
     end
     return tfmdata
 end
@@ -124,7 +128,7 @@ end
 to scale virtual characters.</p>
 --ldx]]--
 
-function tfm.get_virtual_id(tfmdata)
+function tfm.getvirtualid(tfmdata)
     --  since we don't know the id yet, we use 0 as signal
     if not tfmdata.fonts then
         tfmdata.type = "virtual"
@@ -136,7 +140,7 @@ function tfm.get_virtual_id(tfmdata)
     end
 end
 
-function tfm.check_virtual_id(tfmdata, id)
+function tfm.checkvirtualid(tfmdata, id)
     if tfmdata and tfmdata.type == "virtual" then
         if not tfmdata.fonts or #tfmdata.fonts == 0 then
             tfmdata.type, tfmdata.fonts = "real", nil
@@ -166,7 +170,7 @@ fonts.trace_scaling = false
 -- sharedkerns are unscaled and are be hashed by concatenated indexes
 
 --~ function tfm.check_base_kerns(tfmdata)
---~     if tfm.share_base_kerns then
+--~     if tfm.sharebasekerns then
 --~         local sharedkerns = tfmdata.sharedkerns
 --~         if sharedkerns then
 --~             local basekerns = { }
@@ -178,7 +182,7 @@ fonts.trace_scaling = false
 --~ end
 
 --~ function tfm.prepare_base_kerns(tfmdata)
---~     if tfm.share_base_kerns and not tfmdata.sharedkerns then
+--~     if tfm.sharebasekerns and not tfmdata.sharedkerns then
 --~         local sharedkerns = { }
 --~         tfmdata.sharedkerns = sharedkerns
 --~         for u, chr in next, tfmdata.characters do
@@ -207,7 +211,47 @@ local charactercache = { }
 -- a virtual font has italic correction make sure to set the
 -- has_italic flag. Some more flags will be added in the future.
 
-function tfm.calculate_scale(tfmtable, scaledpoints, relativeid)
+--[[ldx--
+<p>The reason why the scaler was originally split, is that for a while we experimented
+with a helper function. However, in practice the <l n='api'/> calls are too slow to
+make this profitable and the <l n='lua'/> based variant was just faster. A days
+wasted day but an experience richer.</p>
+--ldx]]--
+
+tfm.autocleanup = true
+
+local lastfont = nil
+
+-- we can get rid of the tfm instance when we have fast access to the
+-- scaled character dimensions at the tex end, e.g. a fontobject.width
+--
+-- flushing the kern and ligature tables from memory saves a lot (only
+-- base mode) but it complicates vf building where the new characters
+-- demand this data .. solution: functions that access them
+
+-- we don't need the glyph data as we can use the description .. but we will
+-- have to wait till we can access the internal tfm table efficiently in which
+-- case characters will become a metatable afterwards
+
+function tfm.cleanuptable(tfmdata) -- we need a cleanup callback, now we miss the last one
+    if tfm.autocleanup then  -- ok, we can hook this into everyshipout or so ... todo
+        if tfmdata.type == 'virtual' or tfmdata.virtualized then
+            for k, v in next, tfmdata.characters do
+                if v.commands then v.commands = nil end
+            --  if v.kerns    then v.kerns    = nil end
+            end
+        else
+        --  for k, v in next, tfmdata.characters do
+        --     if v.kerns    then v.kerns    = nil end
+        --  end
+        end
+    end
+end
+
+function tfm.cleanup(tfmdata) -- we need a cleanup callback, now we miss the last one
+end
+
+function tfm.calculatescale(tfmtable, scaledpoints)
     if scaledpoints < 0 then
         scaledpoints = (- scaledpoints/1000) * tfmtable.designsize -- already in sp
     end
@@ -216,10 +260,10 @@ function tfm.calculate_scale(tfmtable, scaledpoints, relativeid)
     return scaledpoints, delta, units
 end
 
-function tfm.do_scale(tfmtable, scaledpoints, relativeid)
+function tfm.scale(tfmtable, scaledpoints, relativeid)
  -- tfm.prepare_base_kerns(tfmtable) -- optimalization
     local t = { } -- the new table
-    local scaledpoints, delta, units = tfm.calculate_scale(tfmtable, scaledpoints, relativeid)
+    local scaledpoints, delta, units = tfm.calculatescale(tfmtable, scaledpoints, relativeid)
     t.units_per_em = units or 1000
     local hdelta, vdelta = delta, delta
     -- unicoded unique descriptions shared cidinfo characters changed parameters indices
@@ -249,18 +293,23 @@ function tfm.do_scale(tfmtable, scaledpoints, relativeid)
     local nodemode = tfmtable.mode == "node"
     local hasquality = tfmtable.auto_expand or tfmtable.auto_protrude
     local hasitalic = tfmtable.has_italic
+    local descriptions = tfmtable.descriptions or { }
+    --
+    if hasmath then
+        t.has_math = true -- this will move to elsewhere
+    end
     --
     t.parameters = { }
     t.characters = { }
     t.MathConstants = { }
     -- fast access
-    local descriptions = tfmtable.descriptions or { }
+    t.unscaled = tfmtable -- the original unscaled one (temp)
     t.unicodes = tfmtable.unicodes
     t.indices = tfmtable.indices
     t.marks = tfmtable.marks
-t.goodies = tfmtable.goodies
-t.colorscheme = tfmtable.colorscheme
---~ t.embedding = tfmtable.embedding
+    t.goodies = tfmtable.goodies
+    t.colorscheme = tfmtable.colorscheme
+ -- t.embedding = tfmtable.embedding
     t.descriptions = descriptions
     if tfmtable.fonts then
         t.fonts = table.fastcopy(tfmtable.fonts) -- hm  also at the end
@@ -296,7 +345,7 @@ t.colorscheme = tfmtable.colorscheme
     local scaledheight = defaultheight * vdelta
     local scaleddepth  = defaultdepth  * vdelta
     local stackmath = tfmtable.ignore_stack_math ~= true
-    local private = fonts.private
+    local private = fonts.privateoffset
     local sharedkerns = { }
     for k,v in next, characters do
         local chr, description, index
@@ -357,7 +406,7 @@ t.colorscheme = tfmtable.colorscheme
             end
         end
     --  if trace_scaling then
-    --      logs.report("define font","t=%s, u=%s, i=%s, n=%s c=%s",k,chr.tounicode or k,description.index,description.name or '-',description.class or '-')
+    --      report_define("t=%s, u=%s, i=%s, n=%s c=%s",k,chr.tounicode or k,description.index,description.name or '-',description.class or '-')
     --  end
         if tounicode then
             local tu = tounicode[index] -- nb: index!
@@ -394,7 +443,7 @@ t.colorscheme = tfmtable.colorscheme
             if vn then
                 chr.next = vn
             --~ if v.vert_variants or v.horiz_variants then
-            --~     logs.report("glyph 0x%05X has combination of next, vert_variants and horiz_variants",index)
+            --~     report_define("glyph 0x%05X has combination of next, vert_variants and horiz_variants",index)
             --~ end
             else
                 local vv = v.vert_variants
@@ -565,11 +614,11 @@ t.colorscheme = tfmtable.colorscheme
     -- can have multiple subfonts
     if hasmath then
         if trace_defining then
-            logs.report("define font","math enabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
+            report_define("math enabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
         end
     else
         if trace_defining then
-            logs.report("define font","math disabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
+            report_define("math disabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
         end
         t.nomath, t.MathConstants = true, nil
     end
@@ -578,58 +627,17 @@ t.colorscheme = tfmtable.colorscheme
         t.psname = t.fontname or (t.fullname and fonts.names.cleanname(t.fullname))
     end
     if trace_defining then
-        logs.report("define font","used for accesing subfont: '%s'",t.psname or "nopsname")
-        logs.report("define font","used for subsetting: '%s'",t.fontname or "nofontname")
+        report_define("used for accessing (sub)font: '%s'",t.psname or "nopsname")
+        report_define("used for subsetting: '%s'",t.fontname or "nofontname")
     end
---~     print(t.fontname,table.serialize(t.MathConstants))
-    return t, delta
-end
-
---[[ldx--
-<p>The reason why the scaler is split, is that for a while we experimented
-with a helper function. However, in practice the <l n='api'/> calls are too slow to
-make this profitable and the <l n='lua'/> based variant was just faster. A days
-wasted day but an experience richer.</p>
---ldx]]--
-
-tfm.auto_cleanup = true
-
-local lastfont = nil
-
--- we can get rid of the tfm instance when we have fast access to the
--- scaled character dimensions at the tex end, e.g. a fontobject.width
---
--- flushing the kern and ligature tables from memory saves a lot (only
--- base mode) but it complicates vf building where the new characters
--- demand this data .. solution: functions that access them
-
-function tfm.cleanup_table(tfmdata) -- we need a cleanup callback, now we miss the last one
-    if tfm.auto_cleanup then  -- ok, we can hook this into everyshipout or so ... todo
-        if tfmdata.type == 'virtual' or tfmdata.virtualized then
-            for k, v in next, tfmdata.characters do
-                if v.commands then v.commands = nil end
-            --  if v.kerns    then v.kerns    = nil end
-            end
-        else
-        --  for k, v in next, tfmdata.characters do
-        --     if v.kerns    then v.kerns    = nil end
-        --  end
-        end
-    end
-end
-
-function tfm.cleanup(tfmdata) -- we need a cleanup callback, now we miss the last one
-end
-
-function tfm.scale(tfmtable, scaledpoints, relativeid)
-    local t, factor = tfm.do_scale(tfmtable, scaledpoints, relativeid)
-    t.factor    = factor
-    t.ascender  = factor*(tfmtable.ascender  or 0)
-    t.descender = factor*(tfmtable.descender or 0)
+    -- this will move up (side effect of merging split call)
+    t.factor    = delta
+    t.ascender  = delta*(tfmtable.ascender  or 0)
+    t.descender = delta*(tfmtable.descender or 0)
     t.shared    = tfmtable.shared or { }
     t.unique    = table.fastcopy(tfmtable.unique or {})
---~ print("scaling", t.name, t.factor) -- , tfm.hash_features(tfmtable.specification))
     tfm.cleanup(t)
+ -- print(t.fontname,table.serialize(t.MathConstants))
     return t
 end
 
@@ -638,10 +646,12 @@ end
 process features right.</p>
 --ldx]]--
 
-fonts.analyzers              = fonts.analyzers              or { }
-fonts.analyzers.aux          = fonts.analyzers.aux          or { }
-fonts.analyzers.methods      = fonts.analyzers.methods      or { }
-fonts.analyzers.initializers = fonts.analyzers.initializers or { }
+fonts.analyzers        = fonts.analyzers or { }
+local analyzers        = fonts.analyzers
+
+analyzers.aux          = analyzers.aux or { }
+analyzers.methods      = analyzers.methods or { }
+analyzers.initializers = analyzers.initializers or { }
 
 -- todo: analyzers per script/lang, cross font, so we need an font id hash -> script
 -- e.g. latin -> hyphenate, arab -> 1/2/3 analyze
@@ -650,17 +660,19 @@ fonts.analyzers.initializers = fonts.analyzers.initializers or { }
 
 local state = attributes.private('state')
 
-function fonts.analyzers.aux.setstate(head,font)
+function analyzers.aux.setstate(head,font)
+    local useunicodemarks  = analyzers.useunicodemarks
     local tfmdata = fontdata[font]
     local characters = tfmdata.characters
     local descriptions = tfmdata.descriptions
     local first, last, current, n, done = nil, nil, head, 0, false -- maybe make n boolean
     while current do
         local id = current.id
-        if id == glyph and current.font == font then
-            local d = descriptions[current.char]
+        if id == glyph_code and current.font == font then
+            local char = current.char
+            local d = descriptions[char]
             if d then
-                if d.class == "mark" then
+                if d.class == "mark" or (useunicodemarks and categories[char] == "mn") then
                     done = true
                     set_attribute(current,state,5) -- mark
                 elseif n == 0 then
@@ -678,7 +690,7 @@ function fonts.analyzers.aux.setstate(head,font)
                 end
                 first, last, n = nil, nil, 0
             end
-        elseif id == disc then
+        elseif id == disc_code then
             -- always in the middle
             set_attribute(current,state,2) -- midi
             last = current
@@ -711,25 +723,25 @@ end
 
 -- checking
 
-function tfm.checked_filename(metadata,whatever)
+function tfm.checkedfilename(metadata,whatever)
     local foundfilename = metadata.foundfilename
     if not foundfilename then
         local askedfilename = metadata.filename or ""
         if askedfilename ~= "" then
             foundfilename = resolvers.findbinfile(askedfilename,"") or ""
             if foundfilename == "" then
-                logs.report("fonts","source file '%s' is not found",askedfilename)
+                report_define("source file '%s' is not found",askedfilename)
                 foundfilename = resolvers.findbinfile(file.basename(askedfilename),"") or ""
                 if foundfilename ~= "" then
-                    logs.report("fonts","using source file '%s' (cache mismatch)",foundfilename)
+                    report_define("using source file '%s' (cache mismatch)",foundfilename)
                 end
             end
         elseif whatever then
-            logs.report("fonts","no source file for '%s'",whatever)
+            report_define("no source file for '%s'",whatever)
             foundfilename = ""
         end
         metadata.foundfilename = foundfilename
-    --  logs.report("fonts","using source file '%s'",foundfilename)
+    --  report_define("using source file '%s'",foundfilename)
     end
     return foundfilename
 end

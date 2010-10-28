@@ -7,17 +7,23 @@ if not modules then modules = { } end modules ['font-otf'] = {
 }
 
 local type, next, tonumber, tostring = type, next, tonumber, tostring
-local gsub, lower = string.gsub, string.lower
+local gsub, lower, format = string.gsub, string.lower, string.format
+local is_boolean = string.is_boolean
 
-fonts     = fonts     or { }
-fonts.otf = fonts.otf or { }
+local allocate = utilities.storage.allocate
 
-local otf = fonts.otf
+fonts          = fonts or { } -- needed for font server
+local fonts    = fonts
+fonts.otf      = fonts.otf or { }
+local otf      = fonts.otf
 
-otf.tables   = otf.tables   or { }
-otf.meanings = otf.meanings or { }
+otf.tables     = otf.tables or { }
+local tables   = otf.tables
 
-otf.tables.scripts = {
+otf.meanings   = otf.meanings or { }
+local meanings = otf.meanings
+
+local scripts = allocate {
     ['dflt'] = 'Default',
 
     ['arab'] = 'Arabic',
@@ -90,7 +96,7 @@ otf.tables.scripts = {
     ['yi'  ] = 'Yi',
 }
 
-otf.tables.languages = {
+local languages = allocate {
     ['dflt'] = 'Default',
 
     ['aba'] = 'Abaza',
@@ -484,7 +490,7 @@ otf.tables.languages = {
     ['zul'] = 'Zulu'
 }
 
-otf.tables.features = {
+local features = allocate {
     ['aalt'] = 'Access All Alternates',
     ['abvf'] = 'Above-Base Forms',
     ['abvm'] = 'Above-Base Mark Positioning',
@@ -622,7 +628,7 @@ otf.tables.features = {
     ['tlig'] = 'Traditional TeX Ligatures',
 }
 
-otf.tables.baselines = {
+local baselines = allocate {
     ['hang'] = 'Hanging baseline',
     ['icfb'] = 'Ideographic character face bottom edge baseline',
     ['icft'] = 'Ideographic character face tope edige baseline',
@@ -632,10 +638,33 @@ otf.tables.baselines = {
     ['romn'] = 'Roman baseline'
 }
 
+local verbosescripts    = allocate(table.swaphash(scripts  ))
+local verboselanguages  = allocate(table.swaphash(languages))
+local verbosefeatures   = allocate(table.swaphash(features ))
+
+tables.scripts          = scripts
+tables.languages        = languages
+tables.features         = features
+tables.baselines        = baselines
+
+tables.verbosescripts   = verbosescripts
+tables.verboselanguages = verboselanguages
+tables.verbosefeatures  = verbosefeatures
+
+for k, v in next, verbosefeatures do
+    local stripped = gsub(k,"%-"," ")
+    verbosefeatures[stripped] = v
+    local stripped = gsub(k,"[^a-zA-Z0-9]","")
+    verbosefeatures[stripped] = v
+end
+for k, v in next, verbosefeatures do
+    verbosefeatures[lower(k)] = v
+end
+
 -- can be sped up by local tables
 
-function otf.tables.to_tag(id)
-    return stringformat("%4s",lower(id))
+function tables.totag(id) -- not used
+    return format("%4s",lower(id))
 end
 
 local function resolve(tab,id)
@@ -647,87 +676,59 @@ local function resolve(tab,id)
     end
 end
 
-function otf.meanings.script(id)
-    return resolve(otf.tables.scripts,id)
-end
-function otf.meanings.language(id)
-    return resolve(otf.tables.languages,id)
-end
-function otf.meanings.feature(id)
-    return resolve(otf.tables.features,id)
-end
-function otf.meanings.baseline(id)
-    return resolve(otf.tables.baselines,id)
-end
+function meanings.script  (id) return resolve(scripts,  id) end
+function meanings.language(id) return resolve(languages,id) end
+function meanings.feature (id) return resolve(features, id) end
+function meanings.baseline(id) return resolve(baselines,id) end
 
-otf.tables.to_scripts   = table.reverse_hash(otf.tables.scripts  )
-otf.tables.to_languages = table.reverse_hash(otf.tables.languages)
-otf.tables.to_features  = table.reverse_hash(otf.tables.features )
-
-local scripts      = otf.tables.scripts
-local languages    = otf.tables.languages
-local features     = otf.tables.features
-
-local to_scripts   = otf.tables.to_scripts
-local to_languages = otf.tables.to_languages
-local to_features  = otf.tables.to_features
-
-for k, v in next, to_features do
-    local stripped = gsub(k,"%-"," ")
-    to_features[stripped] = v
-    local stripped = gsub(k,"[^a-zA-Z0-9]","")
-    to_features[stripped] = v
-end
-for k, v in next, to_features do
-    to_features[lower(k)] = v
-end
-
-otf.meanings.checkers = {
+local checkers = {
     rand = function(v)
         return v and "random"
     end
 }
 
-local checkers = otf.meanings.checkers
+meanings.checkers = checkers
 
-function otf.meanings.normalize(features)
-    local h = { }
-    for k,v in next, features do
-        k = lower(k)
-        if k == "language" or k == "lang" then
-            v = gsub(lower(v),"[^a-z0-9%-]","")
-            if not languages[v] then
-                h.language = to_languages[v] or "dflt"
-            else
-                h.language = v
-            end
-        elseif k == "script" then
-            v = gsub(lower(v),"[^a-z0-9%-]","")
-            if not scripts[v] then
-                h.script = to_scripts[v] or "dflt"
-            else
-                h.script = v
-            end
-        else
-            if type(v) == "string" then
-                local b = v:is_boolean()
-                if type(b) == "nil" then
-                    v = tonumber(v) or lower(v)
+function meanings.normalize(features)
+    if features then
+        local h = { }
+        for k,v in next, features do
+            k = lower(k)
+            if k == "language" or k == "lang" then
+                v = gsub(lower(v),"[^a-z0-9%-]","")
+                if not languages[v] then
+                    h.language = verboselanguages[v] or "dflt"
                 else
-                    v = b
+                    h.language = v
                 end
+            elseif k == "script" then
+                v = gsub(lower(v),"[^a-z0-9%-]","")
+                if not scripts[v] then
+                    h.script = verbosescripts[v] or "dflt"
+                else
+                    h.script = v
+                end
+            else
+                if type(v) == "string" then
+                    local b = is_boolean(v)
+                    if type(b) == "nil" then
+                        v = tonumber(v) or lower(v)
+                    else
+                        v = b
+                    end
+                end
+                k = verbosefeatures[k] or k
+                local c = checkers[k]
+                h[k] = c and c(v) or v
             end
-            k = to_features[k] or k
-            local c = checkers[k]
-            h[k] = c and c(v) or v
         end
+        return h
     end
-    return h
 end
 
 -- When I feel the need ...
 
---~ otf.tables.aat = {
+--~ tables.aat = {
 --~     [ 0] = {
 --~         name = "allTypographicFeaturesType",
 --~         [ 0] = "allTypeFeaturesOnSelector",

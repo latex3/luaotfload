@@ -14,7 +14,7 @@ local utfbyte = utf.byte
 local trace_loading    = false  trackers.register("otf.loading",    function(v) trace_loading    = v end)
 local trace_unimapping = false  trackers.register("otf.unimapping", function(v) trace_unimapping = v end)
 
-local ctxcatcodes = tex and tex.ctxcatcodes
+local report_otf = logs.new("load otf")
 
 --[[ldx--
 <p>Eventually this code will disappear because map files are kind
@@ -22,50 +22,51 @@ of obsolete. Some code may move to runtime or auxiliary modules.</p>
 <p>The name to unciode related code will stay of course.</p>
 --ldx]]--
 
-fonts     = fonts     or { }
-fonts.map = fonts.map or { }
+local fonts = fonts
+fonts.map   = fonts.map or { }
 
-local function load_lum_table(filename) -- will move to font goodies
+local function loadlumtable(filename) -- will move to font goodies
     local lumname = file.replacesuffix(file.basename(filename),"lum")
-    local lumfile = resolvers.find_file(lumname,"map") or ""
+    local lumfile = resolvers.findfile(lumname,"map") or ""
     if lumfile ~= "" and lfs.isfile(lumfile) then
         if trace_loading or trace_unimapping then
-            logs.report("load otf","enhance: loading %s ",lumfile)
+            report_otf("enhance: loading %s ",lumfile)
         end
         lumunic = dofile(lumfile)
         return lumunic, lumfile
     end
 end
 
-local hex     = lpeg.R("AF","09")
+local P, R, S, C, Ct, Cc = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.Ct, lpeg.Cc
+
+local hex     = R("AF","09")
 local hexfour = (hex*hex*hex*hex) / function(s) return tonumber(s,16) end
 local hexsix  = (hex^1)           / function(s) return tonumber(s,16) end
-local dec     = (lpeg.R("09")^1)  / tonumber
-local period  = lpeg.P(".")
-
-local unicode = lpeg.P("uni")   * (hexfour * (period + lpeg.P(-1)) * lpeg.Cc(false) + lpeg.Ct(hexfour^1) * lpeg.Cc(true))
-local ucode   = lpeg.P("u")     * (hexsix  * (period + lpeg.P(-1)) * lpeg.Cc(false) + lpeg.Ct(hexsix ^1) * lpeg.Cc(true))
-local index   = lpeg.P("index") * dec * lpeg.Cc(false)
+local dec     = (R("09")^1)  / tonumber
+local period  = P(".")
+local unicode = P("uni")   * (hexfour * (period + P(-1)) * Cc(false) + Ct(hexfour^1) * Cc(true))
+local ucode   = P("u")     * (hexsix  * (period + P(-1)) * Cc(false) + Ct(hexsix ^1) * Cc(true))
+local index   = P("index") * dec * Cc(false)
 
 local parser  = unicode + ucode + index
 
 local parsers = { }
 
-local function make_name_parser(str)
+local function makenameparser(str)
     if not str or str == "" then
         return parser
     else
         local p = parsers[str]
         if not p then
-            p = lpeg.P(str) * period * dec * lpeg.Cc(false)
+            p = P(str) * period * dec * Cc(false)
             parsers[str] = p
         end
         return p
     end
 end
 
---~ local parser = fonts.map.make_name_parser("Japan1")
---~ local parser = fonts.map.make_name_parser()
+--~ local parser = fonts.map.makenameparser("Japan1")
+--~ local parser = fonts.map.makenameparser()
 --~ local function test(str)
 --~     local b, a = lpegmatch(parser,str)
 --~     print((a and table.serialize(b)) or b)
@@ -119,14 +120,14 @@ end
 --~     return s
 --~ end
 
-fonts.map.load_lum_table      = load_lum_table
-fonts.map.make_name_parser    = make_name_parser
+fonts.map.loadlumtable        = loadlumtable
+fonts.map.makenameparser      = makenameparser
 fonts.map.tounicode16         = tounicode16
 fonts.map.tounicode16sequence = tounicode16sequence
 
-local separator   = lpeg.S("_.")
-local other       = lpeg.C((1 - separator)^1)
-local ligsplitter = lpeg.Ct(other * (separator * other)^0)
+local separator   = S("_.")
+local other       = C((1 - separator)^1)
+local ligsplitter = Ct(other * (separator * other)^0)
 
 --~ print(table.serialize(lpegmatch(ligsplitter,"this")))
 --~ print(table.serialize(lpegmatch(ligsplitter,"this.that")))
@@ -134,7 +135,7 @@ local ligsplitter = lpeg.Ct(other * (separator * other)^0)
 --~ print(table.serialize(lpegmatch(ligsplitter,"such_so_more")))
 --~ print(table.serialize(lpegmatch(ligsplitter,"such_so_more.that")))
 
-fonts.map.add_to_unicode = function(data,filename)
+fonts.map.addtounicode = function(data,filename)
     local unicodes = data.luatex and data.luatex.unicodes
     if not unicodes then
         return
@@ -145,11 +146,11 @@ fonts.map.add_to_unicode = function(data,filename)
     unicodes['zwj']    = unicodes['zwj']    or 0x200D
     unicodes['zwnj']   = unicodes['zwnj']   or 0x200C
     -- the tounicode mapping is sparse and only needed for alternatives
-    local tounicode, originals, ns, nl, private, unknown = { }, { }, 0, 0, fonts.private, format("%04X",utfbyte("?"))
+    local tounicode, originals, ns, nl, private, unknown = { }, { }, 0, 0, fonts.privateoffset, format("%04X",utfbyte("?"))
     data.luatex.tounicode, data.luatex.originals = tounicode, originals
     local lumunic, uparser, oparser
     if false then -- will become an option
-        lumunic = load_lum_table(filename)
+        lumunic = loadlumtable(filename)
         lumunic = lumunic and lumunic.tounicode
     end
     local cidinfo, cidnames, cidcodes = data.cidinfo
@@ -157,12 +158,12 @@ fonts.map.add_to_unicode = function(data,filename)
     usedmap = usedmap and lower(usedmap)
     usedmap = usedmap and fonts.cid.map[usedmap]
     if usedmap then
-        oparser = usedmap and make_name_parser(cidinfo.ordering)
+        oparser = usedmap and makenameparser(cidinfo.ordering)
         cidnames = usedmap.names
         cidcodes = usedmap.unicodes
     end
-    uparser = make_name_parser()
-    local aglmap = fonts.map and fonts.map.agl_to_unicode
+    uparser = makenameparser()
+    local aglmap = fonts.enc and fonts.enc.agl -- to name
     for index, glyph in next, data.glyphs do
         local name, unic = glyph.name, glyph.unicode or -1 -- play safe
         if unic == -1 or unic >= private or (unic >= 0xE000 and unic <= 0xF8FF) or unic == 0xFFFE or unic == 0xFFFF then
@@ -230,7 +231,11 @@ fonts.map.add_to_unicode = function(data,filename)
                             t[#t+1] = u
                         end
                     end
-                    if #t > 0 then -- done then
+                    if #t == 0 then -- done then
+                        -- nothing
+                    elseif #t == 1 then
+                        originals[index], tounicode[index], nl, unicode = t[1], tounicode16(t[1]), nl + 1, true
+                    else
                         originals[index], tounicode[index], nl, unicode = t, tounicode16sequence(t), nl + 1, true
                     end
                 end
@@ -255,14 +260,14 @@ fonts.map.add_to_unicode = function(data,filename)
         for index, glyph in table.sortedhash(data.glyphs) do
             local toun, name, unic = tounicode[index], glyph.name, glyph.unicode or -1 -- play safe
             if toun then
-                logs.report("load otf","internal: 0x%05X, name: %s, unicode: 0x%05X, tounicode: %s",index,name,unic,toun)
+                report_otf("internal: 0x%05X, name: %s, unicode: 0x%05X, tounicode: %s",index,name,unic,toun)
             else
-                logs.report("load otf","internal: 0x%05X, name: %s, unicode: 0x%05X",index,name,unic)
+                report_otf("internal: 0x%05X, name: %s, unicode: 0x%05X",index,name,unic)
             end
         end
     end
     if trace_loading and (ns > 0 or nl > 0) then
-        logs.report("load otf","enhance: %s tounicode entries added (%s ligatures)",nl+ns, ns)
+        report_otf("enhance: %s tounicode entries added (%s ligatures)",nl+ns, ns)
     end
 end
 

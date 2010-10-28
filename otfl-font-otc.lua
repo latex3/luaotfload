@@ -13,14 +13,22 @@ local type, next = type, next
 
 local trace_loading = false  trackers.register("otf.loading", function(v) trace_loading = v end)
 
-local otf = fonts.otf
-local tfm = fonts.tfm
+local fonts = fonts
+local otf   = fonts.otf
+
+local report_otf = logs.new("load otf")
 
 -- instead of "script = "DFLT", langs = { 'dflt' }" we now use wildcards (we used to
 -- have always); some day we can write a "force always when true" trick for other
 -- features as well
 --
 -- we could have a tnum variant as well
+
+-- In the userdata interface we can not longer tweak the loaded font as
+-- conveniently as before. For instance, instead of pushing extra data in
+-- in the table using the original structure, we now have to operate on
+-- the mkiv representation. And as the fontloader interface is modelled
+-- after fontforge we cannot change that one too much either.
 
 local extra_lists = {
     tlig = {
@@ -76,142 +84,157 @@ local extra_lists = {
 local extra_features = { -- maybe just 1..n so that we prescribe order
     tlig = {
         {
-            features  = { { scripts = { { script = "*", langs = { "*" }, } }, tag = "tlig", comment = "added bij mkiv" }, },
+            features  = { ["*"] = { ["*"] = true } },
             name      = "ctx_tlig_1",
-            subtables = { { name = "ctx_tlig_1_s" } },
+            subtables = { "ctx_tlig_1_s" },
             type      = "gsub_ligature",
             flags     = { },
         },
     },
     trep = {
         {
-            features  = { { scripts = { { script = "*", langs = { "*" }, } }, tag = "trep", comment = "added bij mkiv" }, },
+            features  = { ["*"] = { ["*"] = true } },
             name      = "ctx_trep_1",
-            subtables = { { name = "ctx_trep_1_s" } },
+            subtables = { "ctx_trep_1_s" },
             type      = "gsub_single",
             flags     = { },
         },
     },
     anum = {
         {
-            features  = { { scripts = { { script = "arab", langs = { "dflt", "ARA" }, } }, tag = "anum", comment = "added bij mkiv" }, },
+            features  = { arab = { FAR = true, dflt = true } },
             name      = "ctx_anum_1",
-            subtables = { { name = "ctx_anum_1_s" } },
+            subtables = { "ctx_anum_1_s" },
             type      = "gsub_single",
             flags     = { },
         },
         {
-            features  = { { scripts = { { script = "arab", langs = { "FAR" }, } }, tag = "anum", comment = "added bij mkiv" }, },
+            features  = { arab = { FAR = true } },
             name      = "ctx_anum_2",
-            subtables = { { name = "ctx_anum_2_s" } },
+            subtables = { "ctx_anum_2_s" },
             type      = "gsub_single",
             flags     = { },
         },
     },
 }
 
-fonts.otf.enhancers["add some missing characters"] = function(data,filename)
-    -- todo
-end
-
-fonts.otf.enhancers["enrich with features"] = function(data,filename)
-    -- could be done elsewhere (true can be #)
-    local used = { }
-    for i=1,#otf.glists do
-        local g = data[otf.glists[i]]
-        if g then
-            for i=1,#g do
-                local f = g[i].features
-                if f then
-                    for i=1,#f do
-                        local t = f[i].tag
-                        if t then used[t] = true end
-                    end
-                end
-            end
-        end
-    end
-    --
+local function enhancedata(data,filename,raw)
+    local luatex = data.luatex
+    local lookups = luatex.lookups
+    local sequences = luatex.sequences
     local glyphs = data.glyphs
-    local indices = data.map.map
-    data.gsub = data.gsub or { }
+    local indices = luatex.indices
+    local gsubfeatures = luatex.features.gsub
     for kind, specifications in next, extra_features do
-        if not used[kind] then
+        if gsub and gsub[kind] then
+            -- already present
+        else
             local done = 0
             for s=1,#specifications do
                 local added = false
                 local specification = specifications[s]
+                local features, subtables = specification.features, specification.subtables
+                local name, type, flags = specification.name, specification.type, specification.flags
+                local full = subtables[1]
                 local list = extra_lists[kind][s]
-                local name = specification.name .. "_s"
-                if specification.type == "gsub_ligature" then
+                if type == "gsub_ligature" then
+                    -- inefficient loop
                     for unicode, index in next, indices do
                         local glyph = glyphs[index]
                         local ligature = list[glyph.name]
                         if ligature then
-                            local o = glyph.lookups or { }
-                        --  o[name] = { "ligature", ligature, glyph.name }
-                            o[name] = {
-                                {
-                                    ["type"] = "ligature",
-                                    ["specification"] = {
-                                        char = glyph.name,
-                                        components = ligature,
-                                    }
-                                }
-                            }
-                            glyph.lookups, done, added = o, done+1, true
+                            if glyph.slookups then
+                                glyph.slookups     [full] = { "ligature", ligature, glyph.name }
+                            else
+                                glyph.slookups = { [full] = { "ligature", ligature, glyph.name } }
+                            end
+                            done, added = done+1, true
                         end
                     end
-                elseif specification.type == "gsub_single" then
+                elseif type == "gsub_single" then
+                    -- inefficient loop
                     for unicode, index in next, indices do
                         local glyph = glyphs[index]
                         local r = list[unicode]
                         if r then
                             local replacement = indices[r]
                             if replacement and glyphs[replacement] then
-                                local o = glyph.lookups or { }
-                            --  o[name] = { { "substitution", glyphs[replacement].name } }
-                                o[name] = {
-                                    {
-                                        ["type"] = "substitution",
-                                        ["specification"] = {
-                                            variant = glyphs[replacement].name,
-                                        }
-                                    }
-                                }
-                                glyph.lookups, done, added = o, done+1, true
+                                if glyph.slookups then
+                                    glyph.slookups     [full] = { "substitution", glyphs[replacement].name }
+                                else
+                                    glyph.slookups = { [full] = { "substitution", glyphs[replacement].name } }
+                                end
+                                done, added = done+1, true
                             end
                         end
                     end
                 end
                 if added then
-                    insert(data.gsub,s,table.fastcopy(specification)) -- right order
+                    sequences[#sequences+1] = {
+                        chain     = 0,
+                        features  = { [kind] = features },
+                        flags     = flags,
+                        name      = name,
+                        subtables = subtables,
+                        type      = type,
+                    }
+                    -- register in metadata (merge as there can be a few)
+                    if not gsubfeatures then
+                        gsubfeatures = { }
+                        luatex.features.gsub = gsubfeatures
+                    end
+                    local k = gsubfeatures[kind]
+                    if not k then
+                        k = { }
+                        gsubfeatures[kind] = k
+                    end
+                    for script, languages in next, features do
+                        local kk = k[script]
+                        if not kk then
+                            kk = { }
+                            k[script] = kk
+                        end
+                        for language, value in next, languages do
+                            kk[language] = value
+                        end
+                    end
                 end
             end
             if done > 0 then
                 if trace_loading then
-                    logs.report("load otf","enhance: registering %s feature (%s glyphs affected)",kind,done)
+                    report_otf("enhance: registering %s feature (%s glyphs affected)",kind,done)
                 end
             end
         end
     end
 end
 
-otf.tables.features['tlig'] = 'TeX Ligatures'
-otf.tables.features['trep'] = 'TeX Replacements'
-otf.tables.features['anum'] = 'Arabic Digits'
+otf.enhancers.register("check extra features",enhancedata)
 
-otf.features.register_base_substitution('tlig')
-otf.features.register_base_substitution('trep')
-otf.features.register_base_substitution('anum')
+local features = otf.tables.features
+
+features['tlig'] = 'TeX Ligatures'
+features['trep'] = 'TeX Replacements'
+features['anum'] = 'Arabic Digits'
+
+local registerbasesubstitution = otf.features.registerbasesubstitution
+
+registerbasesubstitution('tlig')
+registerbasesubstitution('trep')
+registerbasesubstitution('anum')
 
 -- the functionality is defined elsewhere
 
-fonts.initializers.base.otf.equaldigits = fonts.initializers.common.equaldigits
-fonts.initializers.node.otf.equaldigits = fonts.initializers.common.equaldigits
+local initializers        = fonts.initializers
+local common_initializers = initializers.common
+local base_initializers   = initializers.base.otf
+local node_initializers   = initializers.node.otf
 
-fonts.initializers.base.otf.lineheight  = fonts.initializers.common.lineheight
-fonts.initializers.node.otf.lineheight  = fonts.initializers.common.lineheight
+base_initializers.equaldigits = common_initializers.equaldigits
+node_initializers.equaldigits = common_initializers.equaldigits
 
-fonts.initializers.base.otf.compose     = fonts.initializers.common.compose
-fonts.initializers.node.otf.compose     = fonts.initializers.common.compose
+base_initializers.lineheight  = common_initializers.lineheight
+node_initializers.lineheight  = common_initializers.lineheight
+
+base_initializers.compose     = common_initializers.compose
+node_initializers.compose     = common_initializers.compose

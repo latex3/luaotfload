@@ -25,13 +25,15 @@ table structures without bothering about the disk cache.</p>
 <p>Examples of usage can be found in the font related code.</p>
 --ldx]]--
 
-containers = containers or { }
-
+containers          = containers or { }
+local containers    = containers
 containers.usecache = true
+
+local report_cache = logs.new("cache")
 
 local function report(container,tag,name)
     if trace_cache or trace_containers then
-        logs.report(format("%s cache",container.subcategory),"%s: %s",tag,name or 'invalid')
+        report_cache("container: %s, tag: %s, name: %s",container.subcategory,tag,name or 'invalid')
     end
 end
 
@@ -48,7 +50,8 @@ local mt = {
             t.readables = readables
             return readables
         end
-    end
+    end,
+    __storage__ = true
 }
 
 function containers.define(category, subcategory, version, enabled)
@@ -78,7 +81,7 @@ function containers.define(category, subcategory, version, enabled)
 end
 
 function containers.is_usable(container, name)
-    return container.enabled and caches and caches.iswritable(container.writable, name)
+    return container.enabled and caches and caches.is_writable(container.writable, name)
 end
 
 function containers.is_valid(container, name)

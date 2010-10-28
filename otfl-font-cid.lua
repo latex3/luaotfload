@@ -12,11 +12,14 @@ local lpegmatch = lpeg.match
 
 local trace_loading = false  trackers.register("otf.loading",      function(v) trace_loading      = v end)
 
-fonts         = fonts         or { }
-fonts.cid     = fonts.cid     or { }
-fonts.cid.map = fonts.cid.map or { }
-fonts.cid.max = fonts.cid.max or 10
+local report_otf = logs.new("load otf")
 
+local fonts   = fonts
+
+fonts.cid     = fonts.cid or { }
+local cid     = fonts.cid
+cid.map       = cid.map or { }
+cid.max       = cid.max or 10
 
 -- original string parser: 0.109, lpeg parser: 0.036 seconds for Adobe-CNS1-4.cidmap
 --
@@ -25,12 +28,14 @@ fonts.cid.max = fonts.cid.max or 10
 -- 1..95 0020
 -- 99 3000
 
-local number  = lpeg.C(lpeg.R("09","af","AF")^1)
-local space   = lpeg.S(" \n\r\t")
+local P, S, R, C = lpeg.P, lpeg.S, lpeg.R, lpeg.C
+
+local number  = C(R("09","af","AF")^1)
+local space   = S(" \n\r\t")
 local spaces  = space^0
-local period  = lpeg.P(".")
+local period  = P(".")
 local periods = period * period
-local name    = lpeg.P("/") * lpeg.C((1-space)^1)
+local name    = P("/") * C((1-space)^1)
 
 local unicodes, names = { }, { }
 
@@ -58,7 +63,7 @@ local grammar = lpeg.P { "start",
     named  = (number * spaces  * name) / do_name
 }
 
-function fonts.cid.load(filename)
+function cid.load(filename)
     local data = io.loaddata(filename)
     if data then
         unicodes, names = { }, { }
@@ -79,23 +84,22 @@ end
 
 local template = "%s-%s-%s.cidmap"
 
-
 local function locate(registry,ordering,supplement)
     local filename = format(template,registry,ordering,supplement)
     local hashname = lower(filename)
-    local cidmap = fonts.cid.map[hashname]
+    local cidmap = cid.map[hashname]
     if not cidmap then
         if trace_loading then
-            logs.report("load otf","checking cidmap, registry: %s, ordering: %s, supplement: %s, filename: %s",registry,ordering,supplement,filename)
+            report_otf("checking cidmap, registry: %s, ordering: %s, supplement: %s, filename: %s",registry,ordering,supplement,filename)
         end
-        local fullname = resolvers.find_file(filename,'cid') or ""
+        local fullname = resolvers.findfile(filename,'cid') or ""
         if fullname ~= "" then
-            cidmap = fonts.cid.load(fullname)
+            cidmap = cid.load(fullname)
             if cidmap then
                 if trace_loading then
-                    logs.report("load otf","using cidmap file %s",filename)
+                    report_otf("using cidmap file %s",filename)
                 end
-                fonts.cid.map[hashname] = cidmap
+                cid.map[hashname] = cidmap
                 cidmap.usedname = file.basename(filename)
                 return cidmap
             end
@@ -104,18 +108,18 @@ local function locate(registry,ordering,supplement)
     return cidmap
 end
 
-function fonts.cid.getmap(registry,ordering,supplement)
+function cid.getmap(registry,ordering,supplement)
     -- cf Arthur R. we can safely scan upwards since cids are downward compatible
     local supplement = tonumber(supplement)
     if trace_loading then
-        logs.report("load otf","needed cidmap, registry: %s, ordering: %s, supplement: %s",registry,ordering,supplement)
+        report_otf("needed cidmap, registry: %s, ordering: %s, supplement: %s",registry,ordering,supplement)
     end
     local cidmap = locate(registry,ordering,supplement)
     if not cidmap then
         local cidnum = nil
         -- next highest (alternatively we could start high)
-        if supplement < fonts.cid.max then
-            for supplement=supplement+1,fonts.cid.max do
+        if supplement < cid.max then
+            for supplement=supplement+1,cid.max do
                 local c = locate(registry,ordering,supplement)
                 if c then
                     cidmap, cidnum = c, supplement
@@ -137,8 +141,8 @@ function fonts.cid.getmap(registry,ordering,supplement)
         if cidmap and cidnum > 0 then
             for s=0,cidnum-1 do
                 filename = format(template,registry,ordering,s)
-                if not fonts.cid.map[filename] then
-                    fonts.cid.map[filename] = cidmap -- copy of ref
+                if not cid.map[filename] then
+                    cid.map[filename] = cidmap -- copy of ref
                 end
             end
         end

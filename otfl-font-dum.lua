@@ -10,9 +10,9 @@ fonts = fonts or { }
 
 -- general
 
-fonts.otf.pack          = false
-fonts.tfm.resolve_vf    = false -- no sure about this
-fonts.tfm.fontname_mode = "specification" -- somehow latex needs this
+fonts.otf.pack              = false -- only makes sense in context
+fonts.tfm.resolvevirtualtoo = false -- context specific (du eto resolver)
+fonts.tfm.fontnamemode      = "specification" -- somehow latex needs this (changed name!)
 
 -- readers
 
@@ -22,15 +22,16 @@ fonts.tfm.readers.afm      = nil
 
 -- define
 
-fonts.define = fonts.define or { }
+fonts.definers            = fonts.definers or { }
+fonts.definers.specifiers = fonts.definers.specifiers or { }
 
---~ fonts.define.method = "tfm"
+fonts.definers.specifiers.colonizedpreference = "name" -- is "file" in context
 
-fonts.define.specify.colonized_default_lookup = "name"
-
-function fonts.define.get_specification(str)
+function fonts.definers.getspecification(str)
     return "", str, "", ":", str
 end
+
+fonts.definers.registersplit("",fonts.definers.specifiers.variants[":"]) -- we add another one for catching lone [names]
 
 -- logger
 
@@ -63,7 +64,7 @@ function fonts.names.resolve(name,sub)
         if basename and basename ~= "" then
             for i=1,#fileformats do
                 local format = fileformats[i]
-                local foundname = resolvers.find_file(basename,format) or ""
+                local foundname = resolvers.findfile(basename,format) or ""
                 if foundname ~= "" then
                     data = dofile(foundname)
                     break
@@ -89,6 +90,10 @@ function fonts.names.resolve(name,sub)
 end
 
 fonts.names.resolvespec = fonts.names.resolve -- only supported in mkiv
+
+function fonts.names.getfilename(askedname,suffix)  -- only supported in mkiv
+    return ""
+end
 
 -- For the moment we put this (adapted) pseudo feature here.
 
@@ -183,36 +188,40 @@ local setups  = fonts.protrusions.setups
 --
 -- \definefontfeature[whocares][default][mode=node,protrusion=2,opbd=yes,script=latn,featurefile=texgyrepagella-regularxx.fea]
 
+classes['double'] = { -- for testing opbd
+    factor = 2, left = 1, right = 1,
+}
+
 local function map_opbd_onto_protrusion(tfmdata,value,opbd)
     local characters, descriptions = tfmdata.characters, tfmdata.descriptions
     local otfdata = tfmdata.shared.otfdata
     local singles = otfdata.shared.featuredata.gpos_single
     local script, language = tfmdata.script, tfmdata.language
     local done, factor, left, right = false, 1, 1, 1
-    local setup = setups[value]
-    if setup then
-        factor = setup.factor or 1
-        left   = setup.left   or 1
-        right  = setup.right  or 1
+    local class = classes[value]
+    if class then
+        factor = class.factor or 1
+        left   = class.left   or 1
+        right  = class.right  or 1
     else
         factor = tonumber(value) or 1
     end
     if opbd ~= "right" then
-        local validlookups, lookuplist = fonts.otf.collect_lookups(otfdata,"lfbd",script,language)
+        local validlookups, lookuplist = otf.collectlookups(otfdata,"lfbd",script,language)
         if validlookups then
             for i=1,#lookuplist do
                 local lookup = lookuplist[i]
                 local data = singles[lookup]
                 if data then
                     if trace_protrusion then
-                        logs.report("fonts","set left protrusion using lfbd lookup '%s'",lookup)
+                        report_fonts("set left protrusion using lfbd lookup '%s'",lookup)
                     end
                     for k, v in next, data do
                     --  local p = - v[3] / descriptions[k].width-- or 1 ~= 0 too but the same
                         local p = - (v[1] / 1000) * factor * left
                         characters[k].left_protruding = p
                         if trace_protrusion then
-                            logs.report("opbd","lfbd -> %s -> 0x%05X (%s) -> %0.03f (%s)",lookup,k,utfchar(k),p,concat(v," "))
+                            report_protrusions("lfbd -> %s -> 0x%05X (%s) -> %0.03f (%s)",lookup,k,utfchar(k),p,concat(v," "))
                         end
                     end
                     done = true
@@ -221,21 +230,21 @@ local function map_opbd_onto_protrusion(tfmdata,value,opbd)
         end
     end
     if opbd ~= "left" then
-        local validlookups, lookuplist = fonts.otf.collect_lookups(otfdata,"rtbd",script,language)
+        local validlookups, lookuplist = otf.collectlookups(otfdata,"rtbd",script,language)
         if validlookups then
             for i=1,#lookuplist do
                 local lookup = lookuplist[i]
                 local data = singles[lookup]
                 if data then
                     if trace_protrusion then
-                        logs.report("fonts","set right protrusion using rtbd lookup '%s'",lookup)
+                        report_fonts("set right protrusion using rtbd lookup '%s'",lookup)
                     end
                     for k, v in next, data do
                     --  local p = v[3] / descriptions[k].width -- or 3
                         local p = (v[1] / 1000) * factor * right
                         characters[k].right_protruding = p
                         if trace_protrusion then
-                            logs.report("opbd","rtbd -> %s -> 0x%05X (%s) -> %0.03f (%s)",lookup,k,utfchar(k),p,concat(v," "))
+                            report_protrusions("rtbd -> %s -> 0x%05X (%s) -> %0.03f (%s)",lookup,k,utfchar(k),p,concat(v," "))
                         end
                     end
                 end
@@ -251,26 +260,60 @@ end
 -- only has some kerns for digits. So, consider this feature not
 -- supported till we have a proper test font.
 
-function fonts.initializers.common.protrusion(tfmdata,value)
+function initializers.common.protrusion(tfmdata,value)
     if value then
         local opbd = tfmdata.shared.features.opbd
         if opbd then
             -- possible values: left right both yes no (experimental)
             map_opbd_onto_protrusion(tfmdata,value,opbd)
-        elseif value then
-            local setup = setups[value]
-            if setup then
-                local factor, left, right = setup.factor or 1, setup.left or 1, setup.right or 1
-                local emwidth = tfmdata.parameters.quad
-                tfmdata.auto_protrude = true
-                for i, chr in next, tfmdata.characters do
-                    local v, pl, pr = setup[i], nil, nil
-                    if v then
-                        pl, pr = v[1], v[2]
+        else
+            local class, vector = get_class_and_vector(tfmdata,value,"protrusions")
+            if class then
+                if vector then
+                    local factor = class.factor or 1
+                    local left   = class.left   or 1
+                    local right  = class.right  or 1
+                    if trace_protrusion then
+                        report_fonts("set protrusion class %s, vector: %s, factor: %s, left: %s, right: %s",
+                            value,class.vector,factor,left,right)
                     end
-                    if pl and pl ~= 0 then chr.left_protruding  = left *pl*factor end
-                    if pr and pr ~= 0 then chr.right_protruding = right*pr*factor end
+                    local data = characters.data
+                    local emwidth = tfmdata.parameters.quad
+                    tfmdata.auto_protrude = true
+                    for i, chr in next, tfmdata.characters do
+                        local v, pl, pr = vector[i], nil, nil
+                        if v then
+                            pl, pr = v[1], v[2]
+                        else
+                            local d = data[i]
+                            if d then
+                                local s = d.shcode
+                                if not s then
+                                    -- sorry
+                                elseif type(s) == "table" then
+                                    local vl, vr = vector[s[1]], vector[s[#s]]
+                                    if vl then pl = vl[1] end
+                                    if vr then pr = vr[2] end
+                                else
+                                    v = vector[s]
+                                    if v then
+                                        pl, pr = v[1], v[2]
+                                    end
+                                end
+                            end
+                        end
+                        if pl and pl ~= 0 then
+                            chr.left_protruding  = left *pl*factor
+                        end
+                        if pr and pr ~= 0 then
+                            chr.right_protruding = right*pr*factor
+                        end
+                    end
+                elseif trace_protrusion then
+                    report_fonts("unknown protrusion vector '%s' in class '%s",class.vector,value)
                 end
+            elseif trace_protrusion then
+                report_fonts("unknown protrusion class '%s'",value)
             end
         end
     end
@@ -309,7 +352,7 @@ fonts.initializers.node.otf.expansion  = fonts.initializers.common.expansion
 
 -- left over
 
-function fonts.register_message()
+function fonts.registermessage()
 end
 
 -- example vectors
@@ -360,9 +403,15 @@ fonts.otf.meanings.normalize = fonts.otf.meanings.normalize or function(t)
     end
 end
 
+-- needed (different in context)
+
+function fonts.otf.scriptandlanguage(tfmdata)
+    return tfmdata.script, tfmdata.language
+end
+
 -- bonus
 
-function fonts.otf.name_to_slot(name)
+function fonts.otf.nametoslot(name)
     local tfmdata = fonts.ids[font.current()]
     if tfmdata and tfmdata.shared then
         local otfdata = tfmdata.shared.otfdata
@@ -373,7 +422,7 @@ end
 
 function fonts.otf.char(n)
     if type(n) == "string" then
-        n = fonts.otf.name_to_slot(n)
+        n = fonts.otf.nametoslot(n)
     end
     if type(n) == "number" then
         tex.sprint("\\char" .. n)

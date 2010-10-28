@@ -12,6 +12,7 @@ statistics = {
     register      = dummyfunction,
     starttiming   = dummyfunction,
     stoptiming    = dummyfunction,
+    elapsedtime   = nil,
 }
 directives = {
     register      = dummyfunction,
@@ -28,22 +29,23 @@ experiments = {
     enable        = dummyfunction,
     disable       = dummyfunction,
 }
-storage = {
+storage = { -- probably no longer needed
     register      = dummyfunction,
     shared        = { },
 }
 logs = {
+    new           = function() return dummyfunction end,
     report        = dummyfunction,
     simple        = dummyfunction,
 }
-tasks = {
-    new           = dummyfunction,
-    actions       = dummyfunction,
-    appendaction  = dummyfunction,
-    prependaction = dummyfunction,
-}
 callbacks = {
     register = function(n,f) return callback.register(n,f) end,
+}
+utilities = {
+    storage = {
+        allocate = function(t) return t or { } end,
+        mark     = function(t) return t or { } end,
+    },
 }
 
 -- we need to cheat a bit here
@@ -61,7 +63,7 @@ local remapper = {
     fea   = "font feature files",
 }
 
-function resolvers.find_file(name,kind)
+function resolvers.findfile(name,kind)
     name = string.gsub(name,"\\","\/")
     kind = string.lower(kind)
     return kpse.find_file(name,(kind and kind ~= "" and (remapper[kind] or kind)) or file.extname(name,"tex"))
@@ -71,7 +73,7 @@ function resolvers.findbinfile(name,kind)
     if not kind or kind == "" then
         kind = file.extname(name) -- string.match(name,"%.([^%.]-)$")
     end
-    return resolvers.find_file(name,(kind and remapper[kind]) or kind)
+    return resolvers.findfile(name,(kind and remapper[kind]) or kind)
 end
 
 -- Caches ... I will make a real stupid version some day when I'm in the
@@ -160,9 +162,9 @@ local function makefullname(path,name)
     end
 end
 
-function caches.iswritable(path,name)
+function caches.is_writable(path,name)
     local fullname = makefullname(path,name)
-    return fullname and file.iswritable(fullname)
+    return fullname and file.is_writable(fullname)
 end
 
 function caches.loaddata(paths,name)

@@ -503,12 +503,18 @@ end
 %
 %
 %    \begin{macrocode}
-function table.swaphash(h) -- needs another name
-    local r = { }
-    for k,v in next, h do
-        r[v] = string.lower(string.gsub(k," ",""))
+function table.reversed(t)
+    if t then
+        local tt, tn = { }, #t
+        if tn > 0 then
+            local ttn = 0
+            for i=tn,1,-1 do
+                ttn = ttn + 1
+                tt[ttn] = t[i]
+            end
+        end
+        return tt
     end
-    return r
 end
 %    \end{macrocode}
 %

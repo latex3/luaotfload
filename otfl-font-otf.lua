@@ -13,13 +13,13 @@ if not modules then modules = { } end modules ['font-otf'] = {
 
 local utf = unicode.utf8
 
-local concat, utfbyte = table.concat, utf.byte
+local utfbyte = utf.byte
 local format, gmatch, gsub, find, match, lower, strip = string.format, string.gmatch, string.gsub, string.find, string.match, string.lower, string.strip
 local type, next, tonumber, tostring = type, next, tonumber, tostring
 local abs = math.abs
 local getn = table.getn
 local lpegmatch = lpeg.match
-local reverse = table.reverse
+local reversed, concat = table.reversed, table.concat
 local ioflush = io.flush
 
 local allocate = utilities.storage.allocate
@@ -43,7 +43,6 @@ local otf            = fonts.otf
 local tfm            = fonts.tfm
 
 local fontdata       = fonts.ids
---local chardata       = characters.data
 
 otf.features         = otf.features         or { }
 otf.features.list    = otf.features.list    or { }
@@ -57,7 +56,7 @@ local definers       = fonts.definers
 
 otf.glists           = { "gsub", "gpos" }
 
-otf.version          = 2.705 -- beware: also sync font-mis.lua
+otf.version          = 2.706 -- beware: also sync font-mis.lua
 otf.cache            = containers.define("fonts", "otf", otf.version, true)
 
 local loadmethod     = "table" -- table, mixed, sparse
@@ -968,6 +967,7 @@ actions["prepare unicodes"] = function(data,filename,raw)
     local luatex = data.luatex
     local indices, unicodes, multiples, internals = { }, { }, { }, { }
     local mapmap = data.map or raw.map
+    local mapenc = nil -- will go away
     if not mapmap then
         report_otf("no map in %s",filename)
         mapmap = { }
@@ -977,11 +977,13 @@ actions["prepare unicodes"] = function(data,filename,raw)
         mapmap = { }
         data.map.map = mapmap
     else
+        mapenc = mapmap.enc -- will go away
         mapmap = mapmap.map
     end
     local criterium = fonts.privateoffset
     local private = criterium
     local glyphs = data.glyphs
+    -- todo: nofmultiples
     for index, glyph in next, glyphs do
         if index > 0 then
             local name = glyph.name -- really needed ?
@@ -1000,41 +1002,68 @@ actions["prepare unicodes"] = function(data,filename,raw)
                     indices[unicode] = index
                     unicodes[name] = unicode
                 end
+                -- maybe deal with altuni here in the future but first we need
+                -- to encounter a proper font that sets them; we have to wait till
+                -- a next luatex binary as currently the unicode numbers can be out
+                -- of bounds
+                if false then
+                    local altuni = glyph.altuni
+                    if altuni then
+                        local un = { unicodes[name] }
+                        for i=1,#altuni do
+                            local unicode = altuni[i].unicode
+                            multiples[#multiples+1] = name
+                            un[i+1] = unicode
+                            indices[unicode] = index -- maybe check for duplicates
+                        end
+                        unicodes[name] = un
+                    end
+                end
             else
                 -- message that something is wrong
             end
         end
     end
     -- beware: the indices table is used to initialize the tfm table
-    for unicode, index in next, mapmap do
-        if not internals[index] then
-            local name = glyphs[index].name
-            if name then
-                local un = unicodes[name]
-                if not un then
-                    unicodes[name] = unicode -- or 0
-                elseif type(un) == "number" then -- tonumber(un)
-                    if un ~= unicode then
-                        multiples[#multiples+1] = name
-                        unicodes[name] = { un, unicode }
-                        indices[unicode] = index
-                    end
-                else
-                    local ok = false
-                    for u=1,#un do
-                        if un[u] == unicode then
-                            ok = true
-                            break
+    local encname = lower(data.enc_name or (mapenc and mapenc[1] and mapenc[1].enc_name) or "") -- mapenc will go away
+ -- will become: local encname = lower(data.enc_name or "")
+    if encname == "" or encname == "unicodebmp" or encname == "unicodefull" then -- maybe find(encname,"unicode")
+        if trace_loading then
+            report_otf("using extra unicode map")
+        end
+        -- ok -- we can also consider using the altuni
+        for unicode, index in next, mapmap do
+            if not internals[index] then
+                local name = glyphs[index].name
+                if name then
+                    local un = unicodes[name]
+                    if not un then
+                        unicodes[name] = unicode -- or 0
+                    elseif type(un) == "number" then -- tonumber(un)
+                        if un ~= unicode then
+                            multiples[#multiples+1] = name
+                            unicodes[name] = { un, unicode }
+                            indices[unicode] = index
                         end
-                    end
-                    if not ok then
-                        multiples[#multiples+1] = name
-                        un[#un+1] = unicode
-                        indices[unicode] = index
+                    else
+                        local ok = false
+                        for u=1,#un do
+                            if un[u] == unicode then
+                                ok = true
+                                break
+                            end
+                        end
+                        if not ok then
+                            multiples[#multiples+1] = name
+                            un[#un+1] = unicode
+                            indices[unicode] = index
+                        end
                     end
                 end
             end
         end
+    else
+        report_otf("warning: non unicode map '%s', only using glyph unicode data",encname or "whatever")
     end
     if trace_loading then
         if #multiples > 0 then
@@ -1063,7 +1092,7 @@ actions["reorganize lookups"] = function(data,filename,raw)
                 for _, vv in next, v.rules do
                     local c = vv.coverage
                     if c and c.before then
-                        c.before = reverse(c.before)
+                        c.before = reversed(c.before)
                     end
                 end
             end
@@ -1582,8 +1611,8 @@ local function copytotfm(data,cache_id) -- we can save a copy when we reorder th
         local glyphs, pfminfo, metadata = data.glyphs or { }, data.pfminfo or { }, data.metadata or { }
         local luatex = data.luatex
         local unicodes = luatex.unicodes -- names to unicodes
-        local indices = luatex.indices        local mode = data.mode or "base"
-
+        local indices = luatex.indices
+        local mode = data.mode or "base"
         local characters, parameters, math_parameters, descriptions = { }, { }, { }, { }
         local designsize = metadata.designsize or metadata.design_size or 100
         if designsize == 0 then

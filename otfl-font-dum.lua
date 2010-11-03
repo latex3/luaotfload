@@ -163,173 +163,20 @@ fonts.protrusions.setups = fonts.protrusions.setups or { }
 
 local setups  = fonts.protrusions.setups
 
--- As this is experimental code, users should not depend on it. The
--- implications are still discussed on the ConTeXt Dev List and we're
--- not sure yet what exactly the spec is (the next code is tested with
--- a gyre font patched by / fea file made by Khaled Hosny). The double
--- trick should not be needed it proper hanging punctuation is used in
--- which case values < 1 can be used.
---
--- preferred (in context, usine vectors):
---
--- \definefontfeature[whatever][default][mode=node,protrusion=quality]
---
--- using lfbd and rtbd, with possibibility to enable only one side :
---
--- \definefontfeature[whocares][default][mode=node,protrusion=yes,  opbd=yes,script=latn]
--- \definefontfeature[whocares][default][mode=node,protrusion=right,opbd=yes,script=latn]
---
--- idem, using multiplier
---
--- \definefontfeature[whocares][default][mode=node,protrusion=2,opbd=yes,script=latn]
--- \definefontfeature[whocares][default][mode=node,protrusion=double,opbd=yes,script=latn]
---
--- idem, using named feature file (less frozen):
---
--- \definefontfeature[whocares][default][mode=node,protrusion=2,opbd=yes,script=latn,featurefile=texgyrepagella-regularxx.fea]
-
-local function get_class_and_vector(tfmdata,value,where) -- "expansions"
-    local g_where = tfmdata.goodies and tfmdata.goodies[where]
-    local f_where = fonts[where]
-    local g_classes = g_where and g_where.classes
-    local f_classes = f_where and f_where.classes
-    local class = (g_classes and g_classes[value]) or (f_classes and f_classes[value])
---~ print(value,class,f_where,f_classes)
-    if class then
-        local class_vector = class.vector
-        local g_vectors = g_where and g_where.vectors
-        local f_vectors = f_where and f_where.vectors
-        local vector = (g_vectors and g_vectors[class_vector]) or (f_vectors and f_vectors[class_vector])
-        return class, vector
-    end
-end
-
-setups['double'] = { -- for testing opbd
-    factor = 2, left = 1, right = 1,
-}
-
-local function map_opbd_onto_protrusion(tfmdata,value,opbd)
-    local characters, descriptions = tfmdata.characters, tfmdata.descriptions
-    local otfdata = tfmdata.shared.otfdata
-    local singles = otfdata.shared.featuredata.gpos_single
-    local script, language = tfmdata.script, tfmdata.language
-    local done, factor, left, right = false, 1, 1, 1
-    local class = setups[value]
-    if class then
-        factor = class.factor or 1
-        left   = class.left   or 1
-        right  = class.right  or 1
-    else
-        factor = tonumber(value) or 1
-    end
-    if opbd ~= "right" then
-        local validlookups, lookuplist = fonts.otf.collectlookups(otfdata,"lfbd",script,language)
-        if validlookups then
-            for i=1,#lookuplist do
-                local lookup = lookuplist[i]
-                local data = singles[lookup]
-                if data then
-                    if trace_protrusion then
-                        report_fonts("set left protrusion using lfbd lookup '%s'",lookup)
-                    end
-                    for k, v in next, data do
-                    --  local p = - v[3] / descriptions[k].width-- or 1 ~= 0 too but the same
-                        local p = - (v[1] / 1000) * factor * left
-                        characters[k].left_protruding = p
-                        if trace_protrusion then
-                            report_protrusions("lfbd -> %s -> 0x%05X (%s) -> %0.03f (%s)",lookup,k,utfchar(k),p,concat(v," "))
-                        end
-                    end
-                    done = true
-                end
-            end
-        end
-    end
-    if opbd ~= "left" then
-        local validlookups, lookuplist = fonts.otf.collectlookups(otfdata,"rtbd",script,language)
-        if validlookups then
-            for i=1,#lookuplist do
-                local lookup = lookuplist[i]
-                local data = singles[lookup]
-                if data then
-                    if trace_protrusion then
-                        report_fonts("set right protrusion using rtbd lookup '%s'",lookup)
-                    end
-                    for k, v in next, data do
-                    --  local p = v[3] / descriptions[k].width -- or 3
-                        local p = (v[1] / 1000) * factor * right
-                        characters[k].right_protruding = p
-                        if trace_protrusion then
-                            report_protrusions("rtbd -> %s -> 0x%05X (%s) -> %0.03f (%s)",lookup,k,utfchar(k),p,concat(v," "))
-                        end
-                    end
-                end
-                done = true
-            end
-        end
-    end
-    tfmdata.auto_protrude = done
-end
-
--- The opbd test is just there because it was discussed on the
--- context development list. However, the mentioned fxlbi.otf font
--- only has some kerns for digits. So, consider this feature not
--- supported till we have a proper test font.
-
 function fonts.initializers.common.protrusion(tfmdata,value)
     if value then
-        local opbd = tfmdata.shared.features.opbd
-        if opbd then
-            -- possible values: left right both yes no (experimental)
-            map_opbd_onto_protrusion(tfmdata,value,opbd)
-        else
-            local class, vector = get_class_and_vector(tfmdata,value,"protrusions")
-            if class then
-                if vector then
-                    local factor = class.factor or 1
-                    local left   = class.left   or 1
-                    local right  = class.right  or 1
-                    if trace_protrusion then
-                        report_fonts("set protrusion class %s, vector: %s, factor: %s, left: %s, right: %s",
-                            value,class.vector,factor,left,right)
-                    end
-                    local data = characters.data
-                    local emwidth = tfmdata.parameters.quad
-                    tfmdata.auto_protrude = true
-                    for i, chr in next, tfmdata.characters do
-                        local v, pl, pr = vector[i], nil, nil
-                        if v then
-                            pl, pr = v[1], v[2]
-                        else
-                            local d = data[i]
-                            if d then
-                                local s = d.shcode
-                                if not s then
-                                    -- sorry
-                                elseif type(s) == "table" then
-                                    local vl, vr = vector[s[1]], vector[s[#s]]
-                                    if vl then pl = vl[1] end
-                                    if vr then pr = vr[2] end
-                                else
-                                    v = vector[s]
-                                    if v then
-                                        pl, pr = v[1], v[2]
-                                    end
-                                end
-                            end
-                        end
-                        if pl and pl ~= 0 then
-                            chr.left_protruding  = left *pl*factor
-                        end
-                        if pr and pr ~= 0 then
-                            chr.right_protruding = right*pr*factor
-                        end
-                    end
-                elseif trace_protrusion then
-                    report_fonts("unknown protrusion vector '%s' in class '%s",class.vector,value)
+        local setup = setups[value]
+        if setup then
+            local factor, left, right = setup.factor or 1, setup.left or 1, setup.right or 1
+            local emwidth = tfmdata.parameters.quad
+            tfmdata.auto_protrude = true
+            for i, chr in next, tfmdata.characters do
+                local v, pl, pr = setup[i], nil, nil
+                if v then
+                    pl, pr = v[1], v[2]
                 end
-            elseif trace_protrusion then
-                report_fonts("unknown protrusion class '%s'",value)
+                if pl and pl ~= 0 then chr.left_protruding  = left *pl*factor end
+                if pr and pr ~= 0 then chr.right_protruding = right*pr*factor end
             end
         end
     end

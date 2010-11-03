@@ -564,13 +564,13 @@ function tfm.scale(tfmtable, scaledpoints, relativeid)
                         local ivc = vc[i]
                         local key = ivc[1]
                         if key == "right" then
-                            tt[#tt+1] = { key, ivc[2]*hdelta }
+                            tt[i] = { key, ivc[2]*hdelta }
                         elseif key == "down" then
-                            tt[#tt+1] = { key, ivc[2]*vdelta }
+                            tt[i] = { key, ivc[2]*vdelta }
                         elseif key == "rule" then
-                            tt[#tt+1] = { key, ivc[2]*vdelta, ivc[3]*hdelta }
+                            tt[i] = { key, ivc[2]*vdelta, ivc[3]*hdelta }
                         else -- not comment
-                            tt[#tt+1] = ivc -- shared since in cache and untouched
+                            tt[i] = ivc -- shared since in cache and untouched
                         end
                     end
                     chr.commands = tt

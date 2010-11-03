@@ -170,14 +170,15 @@ local sortedhashkeys = table.sortedhashkeys
 function tfm.hashfeatures(specification)
     local features = specification.features
     if features then
-        local t = { }
+        local t, tn = { }, 0
         local normal = features.normal
         if normal and next(normal) then
             local f = sortedhashkeys(normal)
             for i=1,#f do
                 local v = f[i]
                 if v ~= "number" and v ~= "features" then -- i need to figure this out, features
-                    t[#t+1] = v .. '=' .. tostring(normal[v])
+                    tn = tn + 1
+                    t[tn] = v .. '=' .. tostring(normal[v])
                 end
             end
         end
@@ -186,13 +187,15 @@ function tfm.hashfeatures(specification)
             local f = sortedhashkeys(vtf)
             for i=1,#f do
                 local v = f[i]
-                t[#t+1] = v .. '=' .. tostring(vtf[v])
+                tn = tn + 1
+                t[tn] = v .. '=' .. tostring(vtf[v])
             end
         end
---~ if specification.mathsize then
---~     t[#t+1] = "mathsize=" .. specification.mathsize
---~ end
-        if #t > 0 then
+    --~ if specification.mathsize then
+    --~     tn = tn + 1
+    --~     t[tn] = "mathsize=" .. specification.mathsize
+    --~ end
+        if tn > 0 then
             return concat(t,"+")
         end
     end

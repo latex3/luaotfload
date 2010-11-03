@@ -176,7 +176,7 @@ local zwj      = 0x200D
 local wildcard = "*"
 local default  = "dflt"
 
-local split_at_space = lpeg.splitters[" "] or lpeg.Ct(lpeg.splitat(" ")) -- no trailing or multiple spaces anyway
+local split_at_space = lpeg.Ct(lpeg.splitat(" ")) -- no trailing or multiple spaces anyway
 
 local nodecodes     = nodes.nodecodes
 local whatcodes     = nodes.whatcodes
@@ -282,9 +282,9 @@ local function gref(n)
         local num, nam = { }, { }
         for i=1,#n do
             local ni = n[i]
-            num[#num+1] = format("U+%04X",ni)
-            local dni = descriptions[ni]
-            nam[#num] = (dni and dni.name) or "?"
+            local di = descriptions[ni]
+            num[i] = format("U+%04X",ni)
+            nam[i] = di and di.name or "?"
         end
         return format("%s (%s)",concat(num," "), concat(nam," "))
     end
@@ -2254,13 +2254,14 @@ otf.features.prepare = { }
 
 local function split(replacement,original,cache,unicodes)
     -- we can cache this too, but not the same (although unicode is a unique enough hash)
-    local o, t, n = { }, { }, 0
+    local o, t, n, no = { }, { }, 0, 0
     for s in gmatch(original,"[^ ]+") do
         local us = unicodes[s]
+        no = no + 1
         if type(us) == "number" then -- tonumber(us)
-            o[#o+1] = us
+            o[no] = us
         else
-            o[#o+1] = us[1]
+            o[no] = us[1]
         end
     end
     for s in gmatch(replacement,"[^ ]+") do
@@ -2277,9 +2278,11 @@ end
 
 local function uncover(covers,result,cache,unicodes)
     -- lpeg hardly faster (.005 sec on mk)
+    local nofresults = #result
     for n=1,#covers do
         local c = covers[n]
         local cc = cache[c]
+        nofresults = nofresults + 1
         if not cc then
             local t = { }
             for s in gmatch(c,"[^ ]+") do
@@ -2293,9 +2296,9 @@ local function uncover(covers,result,cache,unicodes)
                 end
             end
             cache[c] = t
-            result[#result+1] = t
+            result[nofresults] = t
         else
-            result[#result+1] = cc
+            result[nofresults] = cc
         end
     end
 end
@@ -2337,16 +2340,17 @@ local function prepare_lookups(tfmdata)
         --~ end
         end,
         multiple = function (p,lookup,glyph,unicode)
-            local old, new = unicode, { }
+            local old, new, nnew = unicode, { }, 0
             local m = multiple[lookup]
             if not m then m = { } multiple[lookup] = m end
             m[old] = new
             for pc in gmatch(p[2],"[^ ]+") do
                 local upc = unicodes[pc]
+                nnew = nnew + 1
                 if type(upc) == "number" then
-                    new[#new+1] = upc
+                    new[nnew] = upc
                 else
-                    new[#new+1] = upc[1]
+                    new[nnew] = upc[1]
                 end
             end
         --~ if trace_lookups then
@@ -2354,16 +2358,17 @@ local function prepare_lookups(tfmdata)
         --~ end
         end,
         alternate = function(p,lookup,glyph,unicode)
-            local old, new = unicode, { }
+            local old, new, nnew = unicode, { }, 0
             local a = alternate[lookup]
             if not a then a = { } alternate[lookup] = a end
             a[old] = new
             for pc in gmatch(p[2],"[^ ]+") do
                 local upc = unicodes[pc]
+                nnew = nnew + 1
                 if type(upc) == "number" then
-                    new[#new+1] = upc
+                    new[nnew] = upc
                 else
-                    new[#new+1] = upc[1]
+                    new[nnew] = upc[1]
                 end
             end
         --~ if trace_lookups then
@@ -2557,7 +2562,7 @@ local function prepare_contextchains(tfmdata)
                                 contexts = { }
                                 contextchain[lookupname] = contexts
                             end
-                            local t = { }
+                            local t, nt = { }, 0
                             for nofrules=1,#rules do -- does #rules>1 happen often?
                                 local rule = rules[nofrules]
                                 local coverage = rule.coverage
@@ -2573,7 +2578,8 @@ local function prepare_contextchains(tfmdata)
                                         uncover(after,sequence,cache,unicodes)
                                     end
                                     if sequence[1] then
-                                        t[#t+1] = { nofrules, lookuptype, sequence, start, stop, rule.lookups }
+                                        nt = nt + 1
+                                        t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups }
                                         for unic, _ in next, sequence[start] do
                                             local cu = contexts[unic]
                                             if not cu then
@@ -2593,7 +2599,7 @@ local function prepare_contextchains(tfmdata)
                                 contexts = { }
                                 reversecontextchain[lookupname] = contexts
                             end
-                            local t = { }
+                            local t, nt = { }, 0
                             for nofrules=1,#rules do
                                 local rule = rules[nofrules]
                                 local reversecoverage = rule.reversecoverage
@@ -2613,7 +2619,8 @@ local function prepare_contextchains(tfmdata)
                                     end
                                     if sequence[1] then
                                         -- this is different from normal coverage, we assume only replacements
-                                        t[#t+1] = { nofrules, lookuptype, sequence, start, stop, rule.lookups, replacements }
+                                        nt = nt + 1
+                                        t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups, replacements }
                                         for unic, _ in next, sequence[start] do
                                             local cu = contexts[unic]
                                             if not cu then
@@ -2633,7 +2640,7 @@ local function prepare_contextchains(tfmdata)
                                 contexts = { }
                                 contextchain[lookupname] = contexts
                             end
-                            local t = { }
+                            local t, nt = { }, 0
                             for nofrules=1,#rules do
                                 -- nearly the same as coverage so we could as well rename it
                                 local rule = rules[nofrules]
@@ -2653,7 +2660,8 @@ local function prepare_contextchains(tfmdata)
                                         uncover(back,sequence,cache,unicodes)
                                     end
                                     if sequence[1] then
-                                        t[#t+1] = { nofrules, lookuptype, sequence, start, stop, rule.lookups }
+                                        nt = nt + 1
+                                        t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups }
                                         for unic, _ in next, sequence[start] do
                                             local cu = contexts[unic]
                                             if not cu then

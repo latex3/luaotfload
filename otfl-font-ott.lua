@@ -638,9 +638,18 @@ local baselines = allocate {
     ['romn'] = 'Roman baseline'
 }
 
-local verbosescripts    = allocate(table.swaphash(scripts  ))
-local verboselanguages  = allocate(table.swaphash(languages))
-local verbosefeatures   = allocate(table.swaphash(features ))
+
+local function swap(h) -- can be a tables.swap when we get a better name
+    local r = { }
+    for k, v in next, h do
+        r[v] = lower(gsub(k," ",""))
+    end
+    return r
+end
+
+local verbosescripts    = allocate(swap(scripts  ))
+local verboselanguages  = allocate(swap(languages))
+local verbosefeatures   = allocate(swap(features ))
 
 tables.scripts          = scripts
 tables.languages        = languages
@@ -659,12 +668,6 @@ for k, v in next, verbosefeatures do
 end
 for k, v in next, verbosefeatures do
     verbosefeatures[lower(k)] = v
-end
-
--- can be sped up by local tables
-
-function tables.totag(id) -- not used
-    return format("%4s",lower(id))
 end
 
 local function resolve(tab,id)

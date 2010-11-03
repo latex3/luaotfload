@@ -219,21 +219,23 @@ fonts.map.addtounicode = function(data,filename)
                         originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
                     end
                 else
-                    local t = { }
+                    local t, n = { }, 0
                     for l=1,nplit do
                         local base = split[l]
                         local u = unicodes[base] or (aglmap and aglmap[base])
                         if not u then
                             break
                         elseif type(u) == "table" then
-                            t[#t+1] = u[1]
+                            n = n + 1
+                            t[n] = u[1]
                         else
-                            t[#t+1] = u
+                            n = n + 1
+                            t[n] = u
                         end
                     end
-                    if #t == 0 then -- done then
+                    if n == 0 then -- done then
                         -- nothing
-                    elseif #t == 1 then
+                    elseif n == 1 then
                         originals[index], tounicode[index], nl, unicode = t[1], tounicode16(t[1]), nl + 1, true
                     else
                         originals[index], tounicode[index], nl, unicode = t, tounicode16sequence(t), nl + 1, true

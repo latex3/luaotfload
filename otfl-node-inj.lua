@@ -188,12 +188,13 @@ function injections.handler(head,where,keep)
             trace(head)
         end
         -- in the future variant we will not copy items but refs to tables
-        local done, ky, rl, valid, cx, wx, mk = false, { }, { }, { }, { }, { }, { }
+        local done, ky, rl, valid, cx, wx, mk, nofvalid = false, { }, { }, { }, { }, { }, { }, 0
         if has_kerns then -- move outside loop
             local nf, tm = nil, nil
             for n in traverse_id(glyph_code,head) do
                 if n.subtype < 256 then
-                    valid[#valid+1] = n
+                    nofvalid = nofvalid + 1
+                    valid[nofvalid] = n
                     if n.font ~= nf then
                         nf = n.font
                         tm = fontdata[nf].marks
@@ -221,7 +222,8 @@ function injections.handler(head,where,keep)
             local nf, tm = nil, nil
             for n in traverse_id(glyph_code,head) do
                 if n.subtype < 256 then
-                    valid[#valid+1] = n
+                    nofvalid = nofvalid + 1
+                    valid[nofvalid] = n
                     if n.font ~= nf then
                         nf = n.font
                         tm = fontdata[nf].marks
@@ -230,7 +232,7 @@ function injections.handler(head,where,keep)
                 end
             end
         end
-        if #valid > 0 then
+        if nofvalid > 0 then
             -- we can assume done == true because we have cursives and marks
             local cx = { }
             if has_kerns and next(ky) then
@@ -243,7 +245,7 @@ function injections.handler(head,where,keep)
                 local p_cursbase, p = nil, nil
                 -- since we need valid[n+1] we can also use a "while true do"
                 local t, d, maxt = { }, { }, 0
-                for i=1,#valid do -- valid == glyphs
+                for i=1,nofvalid do -- valid == glyphs
                     local n = valid[i]
                     if not mk[n] then
                         local n_cursbase = has_attribute(n,cursbase)
@@ -307,7 +309,7 @@ function injections.handler(head,where,keep)
                 end
             end
             if has_marks then
-                for i=1,#valid do
+                for i=1,nofvalid do
                     local p = valid[i]
                     local p_markbase = has_attribute(p,markbase)
                     if p_markbase then

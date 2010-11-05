@@ -128,16 +128,31 @@ end
 to scale virtual characters.</p>
 --ldx]]--
 
+--~ function tfm.getvirtualid(tfmdata)
+--~     --  since we don't know the id yet, we use 0 as signal
+--~     local tf = tfmdata.fonts
+--~     if not tf then
+--~         tfmdata.type = "virtual"
+--~         tfmdata.fonts = { { id = 0 } }
+--~         return 1
+--~     else
+--~         local ntf = #tf + 1
+--~         tf[ntf] = { id = 0 }
+--~         return ntf
+--~     end
+--~ end
+
 function tfm.getvirtualid(tfmdata)
     --  since we don't know the id yet, we use 0 as signal
-    if not tfmdata.fonts then
+    local tf = tfmdata.fonts
+    if not tf then
+        tf = { }
         tfmdata.type = "virtual"
-        tfmdata.fonts = { { id = 0 } }
-        return 1
-    else
-        tfmdata.fonts[#tfmdata.fonts+1] = { id = 0 }
-        return #tfmdata.fonts
+        tfmdata.fonts = tf
     end
+    local ntf = #tf + 1
+    tf[ntf] = { id = 0 }
+    return ntf
 end
 
 function tfm.checkvirtualid(tfmdata, id)

@@ -48,6 +48,10 @@ utilities = {
     },
 }
 
+characters = characters or {
+    data = { }
+}
+
 -- we need to cheat a bit here
 
 texconfig.kpse_init = true

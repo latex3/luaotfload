@@ -753,13 +753,18 @@ end
 
 \bgroup\expandafter\expandafter\expandafter\egroup
 \expandafter\ifx\csname ProvidesPackage\endcsname\relax
-  \input luatextra.sty
+  \input luatexbase.sty
+  \input luatexbase-modutils.sty
+  \input luatexbase-mcb.sty
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
     [2010/10/16 v1.20 OpenType layout system]
-  \RequirePackage{luatextra}
+  \RequirePackage{luatexbase}
+  \RequirePackage{luatexbase-modutils}
+  \RequirePackage{luatexbase-mcb}
 \fi
+\luatexUseModule{lualibs}
 
 \expandafter\edef\csname otfl@AtEnd\endcsname{%
   \catcode64 \the\catcode64\relax

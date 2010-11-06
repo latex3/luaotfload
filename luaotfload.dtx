@@ -458,7 +458,7 @@ luaotfload.module = {
     license       = "CC0"
 }
 
-luatexbase.provides_module(luaotfload.module)
+local error, warning, info, log = luatexbase.provides_module(luaotfload.module)
 %    \end{macrocode}
 %
 %    This is a necessary initalization in order not to rebuild an existing font.
@@ -469,24 +469,6 @@ luatexbase.provides_module(luaotfload.module)
 %
 %    \begin{macrocode}
 kpse.init_prog('', 600, '/')
-%    \end{macrocode}
-%
-%    Some helper functions.
-%
-%    \begin{macrocode}
-local format = string.format
-
-local function log(...)
-    luatexbase.module_log    ('luaotfload', format(...))
-end
-
-local function error(...)
-    luatexbase.module_error  ('luaotfload', format(...))
-end
-
-local function warning(...)
-    luatexbase.module_warning('luaotfload', format(...))
-end
 %    \end{macrocode}
 %
 %    The minimal required \LuaTeX\ version.
@@ -754,17 +736,13 @@ end
 \bgroup\expandafter\expandafter\expandafter\egroup
 \expandafter\ifx\csname ProvidesPackage\endcsname\relax
   \input luatexbase.sty
-  \input luatexbase-modutils.sty
-  \input luatexbase-mcb.sty
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
     [2010/10/16 v1.20 OpenType layout system]
   \RequirePackage{luatexbase}
-  \RequirePackage{luatexbase-modutils}
-  \RequirePackage{luatexbase-mcb}
 \fi
-\luatexUseModule{lualibs}
+\RequireLuaModule{lualibs}
 
 \expandafter\edef\csname otfl@AtEnd\endcsname{%
   \catcode64 \the\catcode64\relax
@@ -789,7 +767,7 @@ end
 %    We load the |lua| file, and we turn the package on.
 %
 %    \begin{macrocode}
-\luatexUseModule{luaotfload}
+\RequireLuaModule{luaotfload}
 
 \otfl@on
 

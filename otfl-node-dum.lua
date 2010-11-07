@@ -29,10 +29,6 @@ local new_node    = node.new
 
 local glyph_code = nodecodes.glyph
 
--- fonts
-
-local fontdata = fonts.ids or { }
-
 function nodes.simple_font_handler(head)
 --  lang.hyphenate(head)
     head = nodes.handlers.characters(head)
@@ -48,7 +44,7 @@ if tex.attribute[0] ~= 0 then
     texio.write_nl("log","!")
     texio.write_nl("log","! Attribute 0 is reserved for ConTeXt's font feature management and has to be")
     texio.write_nl("log","! set to zero. Also, some attributes in the range 1-255 are used for special")
-    texio.write_nl("log","! purposed so setting them at the TeX end might break the font handler.")
+    texio.write_nl("log","! purposes so setting them at the TeX end might break the font handler.")
     texio.write_nl("log","!")
 
     tex.attribute[0] = 0 -- else no features
@@ -59,36 +55,41 @@ nodes.handlers.protectglyphs   = node.protect_glyphs
 nodes.handlers.unprotectglyphs = node.unprotect_glyphs
 
 function nodes.handlers.characters(head)
-    local usedfonts, done, prevfont = { }, false, nil
-    for n in traverse_id(glyph_code,head) do
-        local font = n.font
-        if font ~= prevfont then
-            prevfont = font
-            local used = usedfonts[font]
-            if not used then
-                local tfmdata = fontdata[font]
-                if tfmdata then
-                    local shared = tfmdata.shared -- we need to check shared, only when same features
-                    if shared then
-                        local processors = shared.processes
-                        if processors and #processors > 0 then
-                            usedfonts[font] = processors
-                            done = true
+    local fontdata = fonts.identifiers
+    if fontdata then
+        local usedfonts, done, prevfont = { }, false, nil
+        for n in traverse_id(glyph_code,head) do
+            local font = n.font
+            if font ~= prevfont then
+                prevfont = font
+                local used = usedfonts[font]
+                if not used then
+                    local tfmdata = fontdata[font] --
+                    if tfmdata then
+                        local shared = tfmdata.shared -- we need to check shared, only when same features
+                        if shared then
+                            local processors = shared.processes
+                            if processors and #processors > 0 then
+                                usedfonts[font] = processors
+                                done = true
+                            end
                         end
                     end
                 end
             end
         end
-    end
-    if done then
-        for font, processors in next, usedfonts do
-            for i=1,#processors do
-                local h, d = processors[i](head,font,0)
-                head, done = h or head, done or d
+        if done then
+            for font, processors in next, usedfonts do
+                for i=1,#processors do
+                    local h, d = processors[i](head,font,0)
+                    head, done = h or head, done or d
+                end
             end
         end
+        return head, true
+    else
+        return head, false
     end
-    return head, true
 end
 
 -- helper

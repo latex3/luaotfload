@@ -1,6 +1,9 @@
 Change History
 --------------
 
+2010/11/11, luaotfload v1.21:
+    * Adapt to luatexbase v3.0
+
 2010/10/16, luaotfload v1.20:
     * Make cache directory creation more robust
     * Fix GPOS mark placement in left-to-right direction

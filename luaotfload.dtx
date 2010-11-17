@@ -2,6 +2,7 @@
 %
 % Copyright (C) 2009-2010 by Elie Roux    <elie.roux@telecom-bretagne.eu>
 %                        and Khaled Hosny <khaledhosny@eglug.org>
+%                             (Support: <lualatex-dev@tug.org>.)
 %
 % This work is under the CC0 license.
 %
@@ -35,7 +36,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload 2010/11/11 v1.21 OpenType layout system}
+\Msg{* Package: luaotfload v1.21 OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -48,6 +49,7 @@ This is a generated file.
 
 Copyright (C) 2009-2010 by by Elie Roux    <elie.roux@telecom-bretagne.eu>
                           and Khaled Hosny <khaledhosny@eglug.org>
+                               (Support: <lualatex-dev@tug.org>.)
 
 This work is under the CC0 license.
 
@@ -104,7 +106,7 @@ and the derived files
 \ProvidesFile{luaotfload.drv}%
   [2010/11/11 v1.21 OpenType layout system]%
 \documentclass{ltxdoc}
-\usepackage{metalogo,multicol,mdwlist,fancyvrb,xcolor}
+\usepackage{metalogo,multicol,mdwlist,fancyvrb,xcolor,xspace}
 \usepackage{charter}
 \usepackage[
   bookmarks=true,
@@ -120,8 +122,13 @@ and the derived files
 
 \definecolor{niceblue}{rgb}{0.4,0.6,1.000}
 
-\def\LuaTeX{Lua\TeX}
-\def\ConTeXt{Con\TeX t}
+\newcommand\tex    {\TeX\xspace}
+\newcommand\pdftex {PDF\TeX\xspace}
+\newcommand\luatex {Lua\TeX\xspace}
+\newcommand\xetex  {\XeTeX\xspace}
+\newcommand\context{Con\TeX t\xspace}
+
+\newcommand*\email[1]{\href{mailto:#1}{#1}}
 
 \EnableCrossrefs
 \CodelineIndex
@@ -154,13 +161,13 @@ and the derived files
 %
 % \title{The \textsf{luaotfload} package}
 % \date{2010/11/11 v1.21}
-% \author{     Elie Roux\footnote{\texttt{elie.roux@telecom-bretagne.eu}}
-%         \and Khaled Hosny\footnote{\texttt{khaledhosny@eglug.org}}}
+% \author{Elie Roux and Khaled Hosny\\
+%         Support: \email{lualatex-dev@tug.org}}
 %
 % \maketitle
 %
 % \begin{abstract}
-% This package is an adaptation of the \ConTeXt\ font loading system,
+% This package is an adaptation of the \context font loading system,
 % providing the ability to load \textsf{OpenType} fonts with extended font
 % loading syntax supporting a large selection of OpenType font features.
 % \end{abstract}
@@ -169,10 +176,10 @@ and the derived files
 %
 % \section{Introduction}
 %
-% Font management and installation has always been painful with \TeX.
+% Font management and installation has always been painful with \tex.
 % A lot of files are needed for one font (tfm, pfb, map, fd, vf), and as
-% \TeX\ is 8-bit each font is limited to 256 characters.
-% But the font world has evolved since \TeX, and new font technologies have
+% \tex is 8-bit each font is limited to 256 characters.
+% But the font world has evolved since \tex, and new font technologies have
 % appeared, most notably the so called \emph{smart font} technologies like
 % \textsf{OpenType} fonts. These fonts can contain a lot of characters, and
 % additional functionalities like ligatures, old-style numbers, small capitals,
@@ -181,12 +188,12 @@ and the derived files
 % scripts right now} scripts.
 % They are widely deployed and available for all modern operating systems and
 % are becoming the de facto standard fonts for advanced text layout.
-% Until now the only way to use them directly in the \TeX\ world was by using
-% them with \XeTeX.
+% Until now the only way to use them directly in the \tex world was by using
+% them with \xetex.
 %
-% Unlike \XeTeX, \LuaTeX\ does not provide direct support for using these fonts
+% Unlike \xetex, \luatex does not provide direct support for using these fonts
 % by default, but it provides a way to hook Lua code in some points of the
-% \TeX\ processing; for instance, we can improve the font loading system, and
+% \tex processing; for instance, we can improve the font loading system, and
 % text procession, which what this package is about.
 %
 % \section{Loading fonts}
@@ -195,7 +202,7 @@ and the derived files
 % like:
 %
 % \begin{center}
-% |\font\foo={|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|}| \meta{\TeX\ font features}
+% |\font\foo={|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|}| \meta{\tex font features}
 % \end{center}
 %
 % \noindent
@@ -208,7 +215,7 @@ and the derived files
 % whether to use a select the font from its filename or font name,
 % respectively. If no prefix is specified, then \texttt{file:} is assumed.
 %
-% For compatibility with \XeTeX, surrounding the \meta{font name}
+% For compatibility with \xetex, surrounding the \meta{font name}
 % with square brackets is synonymous to using the \texttt{file:} prefix.
 %
 % Accessing fonts by fontname allows loading system installed fonts as well as
@@ -249,7 +256,7 @@ and the derived files
 % \texttt{base} or \texttt{node}.
 % Using \texttt{mode=base}
 % only supports a subset of OpenType features and works by mapping those
-% features to traditional \TeX\ ligature and kerning mechanisms and is a bit
+% features to traditional \tex ligature and kerning mechanisms and is a bit
 % faster
 % Using \texttt{mode=node} hopefully supports OpenType fully and
 % works by direct processing of the node list with Lua; it is slower and
@@ -272,9 +279,8 @@ and the derived files
 % feature files are textual representation of OpenType tables and can be used to
 % extend OpenType features of the font on fly. The file name of the feature file
 % is passed, then features defined in the file can be enabled/disabled like any
-% other feature. The actual syntax is described at
-% \url{http://fontforge.sourceforge.net/featurefile.html} and
-% \url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
+% other feature. The syntax is documented in Adobe's
+% \href{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}{OpenType Feature File Specification}.
 %
 % For example, to set a |tkrn| feature from |mykern.fea| file:
 %
@@ -298,7 +304,7 @@ and the derived files
 %
 % For example, to enable default protrusion\footnote{You also need to set
 % |\pdfprotrudechars2 \pdfadjustspacing2| to activate protrusion and expansion,
-% respectively. See PDF\TeX\ manual for details}:
+% respectively. See \pdftex manual for details}:
 %
 % |\font\lmr=Latin Modern Roman:protrusion=default|
 %
@@ -311,19 +317,19 @@ and the derived files
 % \begin{itemize*}
 % \item \texttt{anum}: replaces European numbers with eastern Arabic numbers or
 % Persian numbers, depending on the value of |language|.
-% \item \texttt{tlig}: applies legacy \TeX\ ligatures (|``''-- -- !` ?` <<>>|).
-% \item \texttt{trep}: applies legacy \TeX\ replacements (|`'"|).
+% \item \texttt{tlig}: applies legacy \tex ligatures (|``''-- -- !` ?` <<>>|).
+% \item \texttt{trep}: applies legacy \tex replacements (|`'"|).
 % \end{itemize*}
 %
-% (For \XeTeX\ users: these last two are the equivalent of writing
-%  \texttt{mapping=text-tex} using \XeTeX's input remapping feature.)
+% (For \xetex users: these last two are the equivalent of writing
+%  \texttt{mapping=text-tex} using \xetex's input remapping feature.)
 %
 %
 % \section{Font names database}
 % \label{sec:fontdb}
 %
 % As introduced in the previous section, \textsf{luaotfload} uses a database
-% to keep track of fonts available to \LuaTeX. Using this database, fonts can
+% to keep track of fonts available to \luatex. Using this database, fonts can
 % be loaded by font name as well as filename.
 %
 % When \textsf{luaotfload} is asked to load a font by font name, it will check
@@ -363,7 +369,7 @@ and the derived files
 %
 % \subsection{Blacklisting fonts}
 %
-% Some fonts are problematic in \LuaTeX, if you found that your document takes
+% Some fonts are problematic in \luatex, if you found that your document takes
 % too long to compile, or eats all the free memory, you can find the culprit
 % file by running |mkluatexfontdb| utility with |-v| option to see which font
 % file it is stuck with. You can then instruct \textsf{luaotfload} to ignore
@@ -374,17 +380,17 @@ and the derived files
 % can find. You can either use the base name or the full path. Any thing after
 % a |%| sign is ignored.
 %
-% \section{Required \ConTeXt\ files}
+% \section{Required \context files}
 %
-% This package is a wrapper for several files taken from the \ConTeXt\ macro
-% package. The philosophy is to let \ConTeXt\ do all the implementation and
+% This package is a wrapper for several files taken from the \context macro
+% package. The philosophy is to let \context do all the implementation and
 % update these files from time to time. To do so we did not modify the files
-% taken from \ConTeXt, we only changed their names to prevent name clashes.
+% taken from \context, we only changed their names to prevent name clashes.
 % You can thus update the font system of this package simply by updating the
-% files taken from \ConTeXt, without (theoretically) changing the \texttt{.sty}
+% files taken from \context, without (theoretically) changing the \texttt{.sty}
 % file nor the main \texttt{.lua} file.
 %
-% The \ConTeXt\ files are renamed by adding the prefix \texttt{otfl-} to them
+% The \context files are renamed by adding the prefix \texttt{otfl-} to them
 % (\texttt{otfl} as \texttt{OTF L}oad). The files are:
 %
 % \begin{multicols}{3}
@@ -471,7 +477,7 @@ local error, warning, info, log = luatexbase.provides_module(luaotfload.module)
 kpse.init_prog('', 600, '/')
 %    \end{macrocode}
 %
-%    The minimal required \LuaTeX\ version.
+%    The minimal required \luatex version.
 %
 %    \begin{macrocode}
 local luatex_version = 60
@@ -485,8 +491,8 @@ end
 %
 % \subsection{Module loading}
 %
-%    We load the \ConTeXt\ files with this function. It automatically adds the
-%    \texttt{otfl-} prefix to it, so that we call it with the actual \ConTeXt\
+%    We load the \context files with this function. It automatically adds the
+%    \texttt{otfl-} prefix to it, so that we call it with the actual \context
 %    name.
 %
 %    \begin{macrocode}
@@ -503,8 +509,8 @@ end
 %    \end{macrocode}
 %
 %    We start loading some lua files. These two are some code not used by
-%    \ConTeXt\ at all that allow other modules to be used, it provides some
-%    low-level \ConTeXt\ functions.
+%    \context at all that allow other modules to be used, it provides some
+%    low-level \context functions.
 %
 %    \begin{macrocode}
 luaotfload.loadmodule('luat-dum.lua') -- not used in context at all
@@ -512,7 +518,7 @@ luaotfload.loadmodule('luat-ovr.lua') -- override some luat-dum functions
 luaotfload.loadmodule('data-con.lua') -- maybe some day we don't need this one
 %    \end{macrocode}
 %
-%    A hack to remove a warning from \texttt{node-dum.lua} as it is \ConTeXt\
+%    A hack to remove a warning from \texttt{node-dum.lua} as it is \context
 %    specific.
 %
 %    \begin{macrocode}
@@ -527,7 +533,7 @@ luaotfload.loadmodule('node-dum.lua')
 luaotfload.loadmodule('node-inj.lua')
 %    \end{macrocode}
 %
-%    By default \ConTeXt\ takes some private attributes for internal use. To
+%    By default \context takes some private attributes for internal use. To
 %    avoide attribute clashes with other packages, we override the function
 %    that allocates new attributes, making it a wraper around
 %    |luatexbase.new_attribute()|. We also prefix attributes with |otfl@| to
@@ -583,7 +589,7 @@ luaotfload.loadmodule('font-clr.lua')
 % \subsection{Post-processing TFM table}
 %
 % Here we do some final touches to the loaded TFM table before passing it
-% to the \TeX\ end.
+% to the \tex end.
 %
 %    \begin{macrocode}
 local function def_font(...)
@@ -591,7 +597,7 @@ local function def_font(...)
     if type(fontdata) == "table" and fontdata.shared then
 %    \end{macrocode}
 %
-% First, we add some code to emulate \XeTeX's \cs{fontdimen8},
+% First, we add some code to emulate \xetex's \cs{fontdimen8},
 % which stores the caps-height of the font. (Cf.\ \cs{fontdimen5} which
 % stores the x-height.)
 %
@@ -638,9 +644,9 @@ local function def_font(...)
             fontdata.MathConstants = mc
 %    \end{macrocode}
 %
-%    \LuaTeX\ does not provide interface to accessing
+%    \luatex does not provide interface to accessing
 %    \texttt{(Script)ScriptPercentScaleDown} math constants, so we emulate
-%    \XeTeX\ behaviour by setting \cs{fontdimen10} and \cs{fontdimen11}.
+%    \xetex behaviour by setting \cs{fontdimen10} and \cs{fontdimen11}.
 %
 %    \begin{macrocode}
             if mc["ScriptPercentScaleDown"] then
@@ -660,9 +666,9 @@ local function def_font(...)
 end
 %    \end{macrocode}
 %
-% \subsection{\ConTeXt\ override}
+% \subsection{\context override}
 %
-%    Here we override some defaults set in \ConTeXt\ code.
+%    Here we override some defaults set in \context code.
 %
 %    \begin{macrocode}
 fonts.mode = "node"

@@ -733,25 +733,14 @@ luatexbase.add_to_callback('find_vf_file',
     [2010/11/11 v1.21 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
+
 \RequireLuaModule{lualibs}
-
-\expandafter\edef\csname otfl@AtEnd\endcsname{%
-  \catcode64 \the\catcode64\relax
-}
-
-\catcode64 11
 %    \end{macrocode}
 %
-%    Finally we load the |lua| module
+%    Finally we load the |lua| module.
 %
 %    \begin{macrocode}
 \RequireLuaModule{luaotfload}
-%    \end{macrocode}
-%
-%    and finalize the package.
-%
-%    \begin{macrocode}
-\otfl@AtEnd
 %    \end{macrocode}
 % \iffalse
 %</package>

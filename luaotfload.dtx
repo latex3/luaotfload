@@ -690,35 +690,22 @@ for _,v in next, gsubs do
 end
 %    \end{macrocode}
 %
-%    Finally two functions
+%    Finally we register the callbacks
 %
 %    \begin{macrocode}
-function luaotfload.register_callbacks()
-    luatexbase.add_to_callback('pre_linebreak_filter',
-                                nodes.simple_font_handler,
-                               'luaotfload.pre_linebreak_filter')
-    luatexbase.add_to_callback('hpack_filter',
-                                nodes.simple_font_handler,
-                               'luaotfload.hpack_filter')
-    luatexbase.reset_callback('define_font')
-    luatexbase.add_to_callback('define_font',
-                                def_font,
-                               'luaotfload.define_font', 1)
-    luatexbase.add_to_callback('find_vf_file',
-                                fonts.vf.find,
-                               'luaotfload.find_vf_file')
-end
-
-function luaotfload.unregister_callbacks()
-    luatexbase.remove_from_callback('pre_linebreak_filter',
-                                    'luaotfload.pre_linebreak_filter')
-    luatexbase.remove_from_callback('hpack_filter',
-                                    'luaotfload.hpack_filter')
-    luatexbase.remove_from_callback('define_font',
-                                    'luaotfload.define_font')
-    luatexbase.remove_from_callback('find_vf_file',
-                                     'luaotfload.find_vf_file')
-end
+luatexbase.add_to_callback('pre_linebreak_filter',
+                            nodes.simple_font_handler,
+                           'luaotfload.pre_linebreak_filter')
+luatexbase.add_to_callback('hpack_filter',
+                            nodes.simple_font_handler,
+                           'luaotfload.hpack_filter')
+luatexbase.reset_callback('define_font')
+luatexbase.add_to_callback('define_font',
+                            def_font,
+                           'luaotfload.define_font', 1)
+luatexbase.add_to_callback('find_vf_file',
+                            fonts.vf.find,
+                           'luaotfload.find_vf_file')
 %    \end{macrocode}
 %
 % \iffalse
@@ -755,26 +742,15 @@ end
 \catcode64 11
 %    \end{macrocode}
 %
-%    Two small macros to register or unregister the callbacks. Without the
-%    callbacks this package is totally turned off.
-%
-%    \begin{macrocode}
-\def\otfl@off{
-\directlua{luaotfload.unregister_callbacks()}
-}
-
-\def\otfl@on{
-\directlua{luaotfload.register_callbacks()}
-}
-%    \end{macrocode}
-%
-%    We load the |lua| file, and we turn the package on.
+%    Finally we load the |lua| module
 %
 %    \begin{macrocode}
 \RequireLuaModule{luaotfload}
-
-\otfl@on
-
+%    \end{macrocode}
+%
+%    and finalize the package.
+%
+%    \begin{macrocode}
 \otfl@AtEnd
 %    \end{macrocode}
 % \iffalse

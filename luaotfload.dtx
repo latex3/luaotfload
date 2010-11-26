@@ -647,8 +647,8 @@ local function def_font(...)
                 end
             end
             -- for \overwithdelims
-            mc["FractionDelimiterSize"]             = 1.01 * size
-            mc["FractionDelimiterDisplayStyleSize"] = 2.39 * size
+            mc.FractionDelimiterSize             = 1.01 * size
+            mc.FractionDelimiterDisplayStyleSize = 2.39 * size
 
             fontdata.MathConstants = mc
 %    \end{macrocode}
@@ -661,12 +661,12 @@ local function def_font(...)
 %
 %    \begin{macrocode}
             if mc["ScriptPercentScaleDown"] then
-                fontdata.parameters[10] = mc["ScriptPercentScaleDown"]
+                fontdata.parameters[10] = mc.ScriptPercentScaleDown
             else -- resort to plain TeX default
                 fontdata.parameters[10] = 70
             end
             if mc["ScriptScriptPercentScaleDown"] then
-                fontdata.parameters[11] = mc["ScriptScriptPercentScaleDown"]
+                fontdata.parameters[11] = mc.ScriptScriptPercentScaleDown
             else -- resort to plain TeX default
                 fontdata.parameters[11] = 50
             end

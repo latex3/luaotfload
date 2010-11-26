@@ -707,14 +707,6 @@ for _,v in next, gsubs do
 end
 %    \end{macrocode}
 %
-% Function to register font patching callbacks.
-%
-%    \begin{macrocode}
-function luaotfload.add_patch_callback(...)
-    luatexbase.add_to_callback("luaotfload.patch_font", ...)
-end
-%    \end{macrocode}
-%
 %    Finally we register the callbacks
 %
 %    \begin{macrocode}

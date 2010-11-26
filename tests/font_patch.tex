@@ -1,6 +1,6 @@
 \input{luaotfload.sty}
 \directlua {
-  local function patch_font(fontdata)
+  local function patch(fontdata)
     local mc = fontdata.MathConstants
     local em = fontdata.units
     local sz = fontdata.size
@@ -8,7 +8,7 @@
       mc.DisplayOperatorMinHeight = 2800 / em * sz
     end
   end
- luaotfload.add_patch_callback(patch_font, "modernmath.patch_font")
+  luatexbase.add_to_callback("luaotfload.patch_font", patch, "cambria.domh")
 }
 
 \font\4={name:Cambria Math:mode=base;script=math} at 10pt

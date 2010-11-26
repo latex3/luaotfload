@@ -591,6 +591,10 @@ luaotfload.loadmodule('font-clr.lua')
 % to the \tex end.
 %
 %    \begin{macrocode}
+local function default_callback(fontdata)
+    -- do nothing
+end
+luatexbase.create_callback("luaotfload.patch_font", "simple", default_callback)
 local function def_font(...)
     local fontdata = fonts.define.read(...)
     if type(fontdata) == "table" and fontdata.shared then
@@ -659,7 +663,7 @@ local function def_font(...)
                 fontdata.parameters[11] = 50
             end
         end
-
+        luatexbase.call_callback("luaotfload.patch_font", fontdata)
     end
     return fontdata
 end
@@ -687,6 +691,10 @@ local gsubs = {
 
 for _,v in next, gsubs do
     register_base_sub(v)
+end
+
+function luaotfload.add_patch_callback(...)
+    luatexbase.add_to_callback("luaotfload.patch_font", ...)
 end
 %    \end{macrocode}
 %

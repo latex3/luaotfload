@@ -590,23 +590,29 @@ luaotfload.loadmodule('font-clr.lua')
 % Here we do some final touches to the loaded TFM table before passing it
 % to the \tex end.
 %
+% First we create a callback for patching fonts on the fly, to be used by
+% other packages.
 %    \begin{macrocode}
-local function default_callback(fontdata)
-    -- do nothing
-end
-luatexbase.create_callback("luaotfload.patch_font", "simple", default_callback)
+luatexbase.create_callback("luaotfload.patch_font", "simple", function() end)
+%    \end{macrocode}
+%
+% then define a function where font manipulation will take place.
+%
+%    \begin{macrocode}
 local function def_font(...)
     local fontdata = fonts.define.read(...)
     if type(fontdata) == "table" and fontdata.shared then
 %    \end{macrocode}
 %
-% First, we add some code to emulate \xetex's \cs{fontdimen8},
+% Here we add some code to emulate \xetex's \cs{fontdimen8},
 % which stores the caps-height of the font. (Cf.\ \cs{fontdimen5} which
 % stores the x-height.)
 %
 % Falls back to measuring the glyph if the font doesn't contain the
 % necessary information.
 % This needs to be extended for fonts that don't contain an `X'.
+%
+% XXX: move to \texttt{fontspec}.
 %
 %    \begin{macrocode}
         local capheight
@@ -647,9 +653,11 @@ local function def_font(...)
             fontdata.MathConstants = mc
 %    \end{macrocode}
 %
-%    \luatex does not provide interface to accessing
-%    \texttt{(Script)ScriptPercentScaleDown} math constants, so we emulate
-%    \xetex behaviour by setting \cs{fontdimen10} and \cs{fontdimen11}.
+% \luatex does not provide interface to accessing
+% \texttt{(Script)ScriptPercentScaleDown} math constants, so we emulate
+% \xetex behaviour by setting \cs{fontdimen10} and \cs{fontdimen11}.
+%
+% XXX: move to \texttt{unicode-math}.
 %
 %    \begin{macrocode}
             if mc["ScriptPercentScaleDown"] then
@@ -663,6 +671,11 @@ local function def_font(...)
                 fontdata.parameters[11] = 50
             end
         end
+%    \end{macrocode}
+%
+% Execute any registered font patching callbacks.
+%
+%    \begin{macrocode}
         luatexbase.call_callback("luaotfload.patch_font", fontdata)
     end
     return fontdata
@@ -692,7 +705,11 @@ local gsubs = {
 for _,v in next, gsubs do
     register_base_sub(v)
 end
-
+%    \end{macrocode}
+%
+% Function to register font patching callbacks.
+%
+%    \begin{macrocode}
 function luaotfload.add_patch_callback(...)
     luatexbase.add_to_callback("luaotfload.patch_font", ...)
 end

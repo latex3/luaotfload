@@ -1,6 +1,11 @@
 Change History
 --------------
 
+2011/01/25, luaotfload v1.22:
+    * Remove --database-dir and --sys options from mkluatexfontdb
+    * Provide a "luaotfload.patch_font" callback for on the fly patching of fonts
+    * Some documentation improvements
+
 2010/11/11, luaotfload v1.21:
     * Adapt to luatexbase v3.0
 

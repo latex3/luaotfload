@@ -1,6 +1,9 @@
 Change History
 --------------
 
+2011/02/04, luaotfload v1.23:
+    * Fix a typo breaking fonts.names.scan()
+
 2011/01/25, luaotfload v1.22:
     * Remove --database-dir and --sys options from mkluatexfontdb
     * Provide a "luaotfload.patch_font" callback for on the fly patching of fonts

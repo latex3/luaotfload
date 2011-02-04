@@ -36,7 +36,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload v1.22 OpenType layout system}
+\Msg{* Package: luaotfload v1.23 OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -104,7 +104,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2011/01/25 v1.22 OpenType layout system]%
+  [2011/02/04 v1.23 OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xcolor,xspace}
 \usepackage{charter}
@@ -161,7 +161,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \textsf{luaotfload} package}
-% \date{2011/01/25 v1.22}
+% \date{2011/02/04 v1.23}
 % \author{Elie Roux and Khaled Hosny\\
 %         Support: \email{lualatex-dev@tug.org}}
 %
@@ -455,8 +455,8 @@ module('luaotfload', package.seeall)
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 1.22,
-    date          = "2011/01/25",
+    version       = 1.23,
+    date          = "2011/02/04",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -747,7 +747,7 @@ luatexbase.add_to_callback('find_vf_file',
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2011/01/25 v1.22 OpenType layout system]
+    [2011/02/04 v1.23 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
 

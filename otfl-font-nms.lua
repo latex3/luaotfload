@@ -678,7 +678,7 @@ local function scan_external_dir(dir)
         loaded    = true
     end
     new_names = table.copy(old_names)
-    scan_dir("zapfino", old_names, new_names)
+    scan_dir(dir, old_names, new_names)
     names.data = new_names
 end
 

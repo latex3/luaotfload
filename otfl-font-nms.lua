@@ -68,7 +68,7 @@ local function load_names()
     else
         logs.info([[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
-        data = names.update()
+        data = names.update(fontnames_init())
         names.save(data)
     end
     return data

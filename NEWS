@@ -1,6 +1,9 @@
 Change History
 --------------
 
+2011/02/16, luaotfload v1.24:
+    * Fix infinite loop first time creating a name list
+
 2011/02/04, luaotfload v1.23:
     * Fix a typo breaking fonts.names.scan()
 

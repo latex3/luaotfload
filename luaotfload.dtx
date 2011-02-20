@@ -623,25 +623,6 @@ local function def_font(...)
             mc.FractionDelimiterDisplayStyleSize = 2.39 * size
 
             fontdata.MathConstants = mc
-%    \end{macrocode}
-%
-% \luatex does not provide interface to accessing
-% \texttt{(Script)ScriptPercentScaleDown} math constants, so we emulate
-% \xetex behaviour by setting \cs{fontdimen10} and \cs{fontdimen11}.
-%
-% XXX: move to \texttt{unicode-math}.
-%
-%    \begin{macrocode}
-            if mc["ScriptPercentScaleDown"] then
-                fontdata.parameters[10] = mc.ScriptPercentScaleDown
-            else -- resort to plain TeX default
-                fontdata.parameters[10] = 70
-            end
-            if mc["ScriptScriptPercentScaleDown"] then
-                fontdata.parameters[11] = mc.ScriptScriptPercentScaleDown
-            else -- resort to plain TeX default
-                fontdata.parameters[11] = 50
-            end
         end
 %    \end{macrocode}
 %

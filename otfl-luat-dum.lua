@@ -56,7 +56,7 @@ local remapper = {
     otf   = "opentype fonts",
     ttf   = "truetype fonts",
     ttc   = "truetype fonts",
-    dfont = "truetype dictionary",
+    dfont = "truetype fonts",
     cid   = "cid maps",
     fea   = "font feature files",
 }

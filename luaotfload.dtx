@@ -605,6 +605,7 @@ local function def_font(...)
 % OpenType math.
 %
 %    \begin{macrocode}
+        local otfdata = fontdata.shared.otfdata
         if otfdata.metadata.math then
             local mc = { }
             for k,v in next, otfdata.metadata.math do
@@ -612,12 +613,12 @@ local function def_font(...)
                     -- keep percent values as is
                     mc[k] = v
                 else
-                    mc[k] = v / units * size
+                    mc[k] = v / fontdata.units * fontdata.size
                 end
             end
             -- for \overwithdelims
-            mc.FractionDelimiterSize             = 1.01 * size
-            mc.FractionDelimiterDisplayStyleSize = 2.39 * size
+            mc.FractionDelimiterSize             = 1.01 * fontdata.size
+            mc.FractionDelimiterDisplayStyleSize = 2.39 * fontdata.size
 
             fontdata.MathConstants = mc
         end

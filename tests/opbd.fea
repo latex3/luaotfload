@@ -1,5 +1,15 @@
+languagesystem DFLT dlft;
+languagesystem grek dflt;
+languagesystem latn dflt;
+languagesystem latn AZE;
+languagesystem latn CRT;
+languagesystem latn MOL;
+languagesystem latn NLD;
+languagesystem latn PLK;
+languagesystem latn ROM;
+languagesystem latn TRK;
 
-lookup RightBounds {
+feature rtbd {
   lookupflag 0;
     pos \exclam <100 0 0 0>;
     pos \percent <100 0 0 0>;
@@ -98,9 +108,9 @@ lookup RightBounds {
     pos \L_uni0303 <50 0 0 0>;
     pos \T_uni0303 <50 0 0 0>;
     pos \T_uni0308 <50 0 0 0>;
-} RightBounds;
+} rtbd;
 
-lookup LeftBounds {
+feature lfbd {
   lookupflag 0;
     pos \percent <-100 0 -100 0>;
     pos \ampersand <-50 0 -50 0>;
@@ -174,71 +184,4 @@ lookup LeftBounds {
     pos \J_uni030C.cap <-50 0 -50 0>;
     pos \T_uni0303 <-50 0 -50 0>;
     pos \T_uni0308 <-50 0 -50 0>;
-} LeftBounds;
-
-feature rtbd {
-
-  script DFLT;
-     language dflt ;
-      lookup RightBounds;
-
-  script grek;
-     language dflt ;
-      lookup RightBounds;
-
-  script latn;
-     language dflt ;
-      lookup RightBounds;
-     language AZE  exclude_dflt;
-      lookup RightBounds;
-     language CRT  exclude_dflt;
-      lookup RightBounds;
-     language MOL  exclude_dflt;
-      lookup RightBounds;
-     language NLD  exclude_dflt;
-      lookup RightBounds;
-     language PLK  exclude_dflt;
-      lookup RightBounds;
-     language ROM  exclude_dflt;
-      lookup RightBounds;
-     language TRK  exclude_dflt;
-      lookup RightBounds;
-
-  script thai;
-     language dflt ;
-      lookup RightBounds;
-} rtbd;
-
-feature lfbd {
-
-  script DFLT;
-     language dflt ;
-      lookup LeftBounds;
-
-  script grek;
-     language dflt ;
-      lookup LeftBounds;
-
-  script latn;
-     language dflt ;
-      lookup LeftBounds;
-     language AZE  exclude_dflt;
-      lookup LeftBounds;
-     language CRT  exclude_dflt;
-      lookup LeftBounds;
-     language MOL  exclude_dflt;
-      lookup LeftBounds;
-     language NLD  exclude_dflt;
-      lookup LeftBounds;
-     language PLK  exclude_dflt;
-      lookup LeftBounds;
-     language ROM  exclude_dflt;
-      lookup LeftBounds;
-     language TRK  exclude_dflt;
-      lookup LeftBounds;
-
-  script thai;
-     language dflt ;
-      lookup LeftBounds;
 } lfbd;
-

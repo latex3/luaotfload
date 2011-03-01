@@ -254,16 +254,15 @@ and the derived files
 % The supported keys are:
 % \begin{description}
 % \item [mode] \hfill \\
-% \textsf{luaotfload} has two OpenType processing modes; |base| and
-% |node|. |base| mode works mapping those features to traditional
-% \tex ligature and kerning mechanisms and thus supports only a subset of
-% OpenType features but is a bit faster and is the only processing mode
-% supports in math mode. |node| works by direct processing of the node
-% list at Lua end and have more wide support of OpenType features but is a bit
-% slower.
+% \textsf{luaotfload} has two OpenType processing modes; |base| and |node|.
+% |base| mode works by mapping OpenType features to traditional \tex ligature
+% and kerning mechanisms, thus supporting only non-contextual substitutions and
+% kerning pairs, but is slightly faster. |node| works by direct processing of
+% the node list at Lua end and have more wide support of OpenType features but
+% can be slow especially with complex fonts and can't be used in math mode.
 %
-% By default |node| mode is used, and you have to manually force
-% |base| mode when needed e.g. for math fonts.
+% By default |node| mode is used, and you have to manually force |base| mode
+% when needed e.g. for math fonts.
 %
 % \item [script] \hfill \\
 % OpenType script string, default value is |dflt|. Some fonts don't assign

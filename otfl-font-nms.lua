@@ -74,8 +74,9 @@ local function load_names()
     return data
 end
 
-local synonyms  = {
+local synonyms = {
     regular    = { "normal", "roman", "plain", "book", "medium" },
+    bold       = { "boldregular" },
     italic     = { "regularitalic", "normalitalic", "oblique", "slant" },
     bolditalic = { "boldoblique", "boldslat" },
 }

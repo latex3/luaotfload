@@ -107,8 +107,6 @@ and the derived files
   [2011/02/16 v1.24 OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xcolor,xspace}
-\usepackage{lmodern}
-\usepackage{charter}
 \usepackage[
   bookmarks=true,
   colorlinks=true,
@@ -120,6 +118,10 @@ and the derived files
   pdfauthor={Elie Roux & Khaled Hosny},
   pdfkeywords={luatex, lualatex, unicode, opentype}
   ]{hyperref}
+
+\usepackage{fontspec}
+\setmainfont[Ligatures=TeX]{Linux Libertine O}
+\setsansfont[Ligatures=TeX]{Linux Biolinum O}
 
 \definecolor{niceblue}{rgb}{0.4,0.6,1.000}
 

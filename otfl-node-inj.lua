@@ -6,7 +6,7 @@ if not modules then modules = { } end modules ['node-inj'] = {
     license   = "see context related readme files"
 }
 
--- tricky ... fonts.ids is not yet defined .. to be solved (maybe general tex ini)
+-- tricky ... fonts.identifiers is not yet defined .. to be solved (maybe general tex ini)
 
 -- This is very experimental (this will change when we have luatex > .50 and
 -- a few pending thingies are available. Also, Idris needs to make a few more
@@ -17,22 +17,22 @@ local next = next
 
 local trace_injections = false  trackers.register("nodes.injections", function(v) trace_injections = v end)
 
-local report_injections = logs.new("injections")
+local report_injections = logs.reporter("nodes","injections")
 
 local attributes, nodes, node = attributes, nodes, node
 
-fonts     = fonts      or { }
-fonts.tfm = fonts.tfm  or { }
-fonts.ids = fonts.ids  or { }
+fonts                    = fonts or { }
+fonts.tfm                = fonts.tfm or { }
+fonts.identifiers        = fonts.identifiers or { }
 
-nodes.injections = nodes.injections or { }
-local injections = nodes.injections
+nodes.injections         = nodes.injections or { }
+local injections         = nodes.injections
 
-local fontdata   = fonts.ids
-local nodecodes  = nodes.nodecodes
-local glyph_code = nodecodes.glyph
-local nodepool   = nodes.pool
-local newkern    = nodepool.kern
+local fontdata           = fonts.identifiers
+local nodecodes          = nodes.nodecodes
+local glyph_code         = nodecodes.glyph
+local nodepool           = nodes.pool
+local newkern            = nodepool.kern
 
 local traverse_id        = node.traverse_id
 local unset_attribute    = node.unset_attribute

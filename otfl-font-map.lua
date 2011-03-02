@@ -14,7 +14,7 @@ local utfbyte = utf.byte
 local trace_loading    = false  trackers.register("otf.loading",    function(v) trace_loading    = v end)
 local trace_unimapping = false  trackers.register("otf.unimapping", function(v) trace_unimapping = v end)
 
-local report_otf = logs.new("load otf")
+local report_otf = logs.reporter("fonts","otf loading")
 
 --[[ldx--
 <p>Eventually this code will disappear because map files are kind
@@ -163,11 +163,11 @@ fonts.map.addtounicode = function(data,filename)
         cidcodes = usedmap.unicodes
     end
     uparser = makenameparser()
-    local aglmap = fonts.enc and fonts.enc.agl -- to name
+    local unicodevector = fonts.enc.agl.unicodes -- loaded runtime in context
     for index, glyph in next, data.glyphs do
         local name, unic = glyph.name, glyph.unicode or -1 -- play safe
         if unic == -1 or unic >= private or (unic >= 0xE000 and unic <= 0xF8FF) or unic == 0xFFFE or unic == 0xFFFF then
-            local unicode = (lumunic and lumunic[name]) or (aglmap and aglmap[name])
+            local unicode = (lumunic and lumunic[name]) or unicodevector[name]
             if unicode then
                 originals[index], tounicode[index], ns = unicode, tounicode16(unicode), ns + 1
             end
@@ -211,7 +211,7 @@ fonts.map.addtounicode = function(data,filename)
                     -- skip
                 elseif nplit == 1 then
                     local base = split[1]
-                    unicode = unicodes[base] or (aglmap and aglmap[base])
+                    unicode = unicodes[base] or unicodevector[base]
                     if unicode then
                         if type(unicode) == "table" then
                             unicode = unicode[1]
@@ -222,7 +222,7 @@ fonts.map.addtounicode = function(data,filename)
                     local t, n = { }, 0
                     for l=1,nplit do
                         local base = split[l]
-                        local u = unicodes[base] or (aglmap and aglmap[base])
+                        local u = unicodes[base] or unicodevector[base]
                         if not u then
                             break
                         elseif type(u) == "table" then

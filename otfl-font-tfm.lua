@@ -16,7 +16,7 @@ local allocate = utilities.storage.allocate
 local trace_defining = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
 local trace_scaling  = false  trackers.register("fonts.scaling" , function(v) trace_scaling  = v end)
 
-local report_define = logs.new("define fonts")
+local report_defining = logs.reporter("fonts","defining")
 
 -- tfmdata has also fast access to indices and unicodes
 -- to be checked: otf -> tfm -> tfmscaled
@@ -37,8 +37,10 @@ fonts.initializers        = fonts.initializers or { }
 fonts.initializers.common = fonts.initializers.common or { }
 
 local set_attribute = node.set_attribute
+local findbinfile   = resolvers.findbinfile
 
-local fontdata   = fonts.ids
+local readers    = fonts.tfm.readers
+local fontdata   = fonts.identifiers
 local nodecodes  = nodes.nodecodes
 
 local disc_code  = nodecodes.disc
@@ -56,20 +58,18 @@ tfm.fontnamemode      = "fullpath"
 
 tfm.enhance = tfm.enhance or function() end
 
-fonts.formats.tfm = "type1" -- we need to have at least a value here
-
-function tfm.read_from_tfm(specification)
+local function read_from_tfm(specification)
     local fname, tfmdata = specification.filename or "", nil
     if fname ~= "" then
         if trace_defining then
-            report_define("loading tfm file %s at size %s",fname,specification.size)
+            report_defining("loading tfm file %s at size %s",fname,specification.size)
         end
         tfmdata = font.read_tfm(fname,specification.size) -- not cached, fast enough
         if tfmdata then
             tfmdata.descriptions = tfmdata.descriptions or { }
             if tfm.resolvevirtualtoo then
                 fonts.logger.save(tfmdata,file.extname(fname),specification) -- strange, why here
-                fname = resolvers.findbinfile(specification.name, 'ovf')
+                fname = findbinfile(specification.name, 'ovf')
                 if fname and fname ~= "" then
                     local vfdata = font.read_vf(fname,specification.size) -- not cached, fast enough
                     if vfdata then
@@ -85,7 +85,7 @@ function tfm.read_from_tfm(specification)
             tfm.enhance(tfmdata,specification)
         end
     elseif trace_defining then
-        report_define("loading tfm with name %s fails",specification.name)
+        report_defining("loading tfm with name %s fails",specification.name)
     end
     return tfmdata
 end
@@ -279,7 +279,9 @@ function tfm.scale(tfmtable, scaledpoints, relativeid)
  -- tfm.prepare_base_kerns(tfmtable) -- optimalization
     local t = { } -- the new table
     local scaledpoints, delta, units = tfm.calculatescale(tfmtable, scaledpoints, relativeid)
+    -- is just a trigger for the backend
     t.units_per_em = units or 1000
+    --
     local hdelta, vdelta = delta, delta
     -- unicoded unique descriptions shared cidinfo characters changed parameters indices
     for k,v in next, tfmtable do
@@ -304,7 +306,7 @@ function tfm.scale(tfmtable, scaledpoints, relativeid)
     end
     -- status
     local isvirtual = tfmtable.type == "virtual" or tfmtable.virtualized
-    local hasmath = (tfmtable.math_parameters ~= nil and next(tfmtable.math_parameters) ~= nil) or (tfmtable.MathConstants ~= nil and next(tfmtable.MathConstants) ~= nil)
+    local hasmath = (tfmtable.mathparameters ~= nil and next(tfmtable.mathparameters) ~= nil) or (tfmtable.MathConstants ~= nil and next(tfmtable.MathConstants) ~= nil)
     local nodemode = tfmtable.mode == "node"
     local hasquality = tfmtable.auto_expand or tfmtable.auto_protrude
     local hasitalic = tfmtable.has_italic
@@ -322,15 +324,18 @@ function tfm.scale(tfmtable, scaledpoints, relativeid)
     t.unicodes = tfmtable.unicodes
     t.indices = tfmtable.indices
     t.marks = tfmtable.marks
+    -- this will move to some subtable so that it is copied at once
     t.goodies = tfmtable.goodies
     t.colorscheme = tfmtable.colorscheme
+    t.postprocessors = tfmtable.postprocessors
+    --
  -- t.embedding = tfmtable.embedding
     t.descriptions = descriptions
     if tfmtable.fonts then
         t.fonts = table.fastcopy(tfmtable.fonts) -- hm  also at the end
     end
     local tp = t.parameters
-    local mp = t.math_parameters
+    local mp = t.mathparameters
     local tfmp = tfmtable.parameters -- let's check for indexes
     --
     tp.slant         = (tfmp.slant         or tfmp[1] or 0)
@@ -421,7 +426,7 @@ function tfm.scale(tfmtable, scaledpoints, relativeid)
             end
         end
     --  if trace_scaling then
-    --      report_define("t=%s, u=%s, i=%s, n=%s c=%s",k,chr.tounicode or k,description.index,description.name or '-',description.class or '-')
+    --    report_defining("t=%s, u=%s, i=%s, n=%s c=%s",k,chr.tounicode or "",index or 0,description.name or '-',description.class or '-')
     --  end
         if tounicode then
             local tu = tounicode[index] -- nb: index!
@@ -458,7 +463,7 @@ function tfm.scale(tfmtable, scaledpoints, relativeid)
             if vn then
                 chr.next = vn
             --~ if v.vert_variants or v.horiz_variants then
-            --~     report_define("glyph 0x%05X has combination of next, vert_variants and horiz_variants",index)
+            --~     report_defining("glyph 0x%05X has combination of next, vert_variants and horiz_variants",index)
             --~ end
             else
                 local vv = v.vert_variants
@@ -592,6 +597,7 @@ function tfm.scale(tfmtable, scaledpoints, relativeid)
                 else
                     chr.commands = vc
                 end
+                chr.index = nil
             end
         end
         tc[k] = chr
@@ -629,11 +635,11 @@ function tfm.scale(tfmtable, scaledpoints, relativeid)
     -- can have multiple subfonts
     if hasmath then
         if trace_defining then
-            report_define("math enabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
+            report_defining("math enabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
         end
     else
         if trace_defining then
-            report_define("math disabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
+            report_defining("math disabled for: name '%s', fullname: '%s', filename: '%s'",t.name or "noname",t.fullname or "nofullname",t.filename or "nofilename")
         end
         t.nomath, t.MathConstants = true, nil
     end
@@ -642,8 +648,8 @@ function tfm.scale(tfmtable, scaledpoints, relativeid)
         t.psname = t.fontname or (t.fullname and fonts.names.cleanname(t.fullname))
     end
     if trace_defining then
-        report_define("used for accessing (sub)font: '%s'",t.psname or "nopsname")
-        report_define("used for subsetting: '%s'",t.fontname or "nofontname")
+        report_defining("used for accessing (sub)font: '%s'",t.psname or "nopsname")
+        report_defining("used for subsetting: '%s'",t.fontname or "nofontname")
     end
     -- this will move up (side effect of merging split call)
     t.factor    = delta
@@ -743,20 +749,21 @@ function tfm.checkedfilename(metadata,whatever)
     if not foundfilename then
         local askedfilename = metadata.filename or ""
         if askedfilename ~= "" then
-            foundfilename = resolvers.findbinfile(askedfilename,"") or ""
+            askedfilename = resolvers.resolve(askedfilename) -- no shortcut
+            foundfilename = findbinfile(askedfilename,"") or ""
             if foundfilename == "" then
-                report_define("source file '%s' is not found",askedfilename)
-                foundfilename = resolvers.findbinfile(file.basename(askedfilename),"") or ""
+                report_defining("source file '%s' is not found",askedfilename)
+                foundfilename = findbinfile(file.basename(askedfilename),"") or ""
                 if foundfilename ~= "" then
-                    report_define("using source file '%s' (cache mismatch)",foundfilename)
+                    report_defining("using source file '%s' (cache mismatch)",foundfilename)
                 end
             end
         elseif whatever then
-            report_define("no source file for '%s'",whatever)
+            report_defining("no source file for '%s'",whatever)
             foundfilename = ""
         end
         metadata.foundfilename = foundfilename
-    --  report_define("using source file '%s'",foundfilename)
+    --  report_defining("using source file '%s'",foundfilename)
     end
     return foundfilename
 end
@@ -766,3 +773,41 @@ end
 statistics.register("fonts load time", function()
     return statistics.elapsedseconds(fonts)
 end)
+
+-- readers
+
+fonts.formats.tfm = "type1" -- we need to have at least a value here
+
+local function check_tfm(specification,fullname)
+    -- ofm directive blocks local path search unless set; btw, in context we
+    -- don't support ofm files anyway as this format is obsolete
+    local foundname = findbinfile(fullname, 'tfm') or "" -- just to be sure
+    if foundname == "" then
+        foundname = findbinfile(fullname, 'ofm') or "" -- bonus for usage outside context
+    end
+    if foundname == "" then
+        foundname = fonts.names.getfilename(fullname,"tfm")
+    end
+    if foundname ~= "" then
+        specification.filename, specification.format = foundname, "ofm"
+        return read_from_tfm(specification)
+    end
+end
+
+readers.check_tfm = check_tfm
+
+function readers.tfm(specification)
+    local fullname, tfmtable = specification.filename or "", nil
+    if fullname == "" then
+        local forced = specification.forced or ""
+        if forced ~= "" then
+            tfmtable = check_tfm(specification,specification.name .. "." .. forced)
+        end
+        if not tfmtable then
+            tfmtable = check_tfm(specification,specification.name)
+        end
+    else
+        tfmtable = check_tfm(specification,fullname)
+    end
+    return tfmtable
+end

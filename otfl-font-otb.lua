@@ -23,7 +23,7 @@ local trace_ligatures    = false  trackers.register("otf.ligatures",    function
 local trace_kerns        = false  trackers.register("otf.kerns",        function(v) trace_kerns        = v end)
 local trace_preparing    = false  trackers.register("otf.preparing",    function(v) trace_preparing    = v end)
 
-local report_prepare = logs.new("otf prepare")
+local report_prepare = logs.reporter("fonts","otf prepare")
 
 local wildcard = "*"
 local default  = "dflt"

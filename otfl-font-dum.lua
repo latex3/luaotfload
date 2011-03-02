@@ -11,13 +11,13 @@ fonts = fonts or { }
 -- general
 
 fonts.otf.pack              = false -- only makes sense in context
-fonts.tfm.resolvevirtualtoo = false -- context specific (du eto resolver)
+fonts.tfm.resolvevirtualtoo = false -- context specific (due to resolver)
 fonts.tfm.fontnamemode      = "specification" -- somehow latex needs this (changed name!)
 
 -- readers
 
 fonts.tfm.readers          = fonts.tfm.readers or { }
-fonts.tfm.readers.sequence = { 'otf', 'ttf', 'tfm' }
+fonts.tfm.readers.sequence = { 'otf', 'ttf', 'tfm', 'lua' }
 fonts.tfm.readers.afm      = nil
 
 -- define
@@ -275,7 +275,7 @@ end
 -- bonus
 
 function fonts.otf.nametoslot(name)
-    local tfmdata = fonts.ids[font.current()]
+    local tfmdata = fonts.identifiers[font.current()]
     if tfmdata and tfmdata.shared then
         local otfdata = tfmdata.shared.otfdata
         local unicode = otfdata.luatex.unicodes[name]
@@ -310,3 +310,45 @@ fonts.strippables = table.tohash {
     0xE0077, 0xE0078, 0xE0079, 0xE007A, 0xE007B, 0xE007C, 0xE007D, 0xE007E, 0xE007F,
 }
 
+-- \font\test=file:somefont:reencode=mymessup
+--
+--  fonts.enc.reencodings.mymessup = {
+--      [109] = 110, -- m
+--      [110] = 109, -- n
+--  }
+
+fonts.enc             = fonts.enc or {}
+local reencodings     = { }
+fonts.enc.reencodings = reencodings
+
+local function specialreencode(tfmdata,value)
+    -- we forget about kerns as we assume symbols and we
+    -- could issue a message if ther are kerns but it's
+    -- a hack anyway so we odn't care too much here
+    local encoding = value and reencodings[value]
+    if encoding then
+        local temp = { }
+        local char = tfmdata.characters
+        for k, v in next, encoding do
+            temp[k] = char[v]
+        end
+        for k, v in next, temp do
+            char[k] = temp[k]
+        end
+        -- if we use the font otherwise luatex gets confused so
+        -- we return an additional hash component for fullname
+        return string.format("reencoded:%s",value)
+    end
+end
+
+local function reencode(tfmdata,value)
+    tfmdata.postprocessors = tfmdata.postprocessors or { }
+    table.insert(tfmdata.postprocessors,
+        function(tfmdata)
+            return specialreencode(tfmdata,value)
+        end
+    )
+end
+
+table.insert(fonts.manipulators,"reencode")
+fonts.initializers.base.otf.reencode = reencode

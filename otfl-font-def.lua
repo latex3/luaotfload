@@ -6,7 +6,8 @@ if not modules then modules = { } end modules ['font-def'] = {
     license   = "see context related readme files"
 }
 
-local format, concat, gmatch, match, find, lower = string.format, table.concat, string.gmatch, string.match, string.find, string.lower
+local concat = table.concat
+local format, gmatch, match, find, lower, gsub = string.format, string.gmatch, string.match, string.find, string.lower, string.gsub
 local tostring, next = tostring, next
 local lpegmatch = lpeg.match
 
@@ -18,8 +19,7 @@ local directive_embedall = false  directives.register("fonts.embedall", function
 trackers.register("fonts.loading", "fonts.defining", "otf.loading", "afm.loading", "tfm.loading")
 trackers.register("fonts.all", "fonts.*", "otf.*", "afm.*", "tfm.*")
 
-local report_define = logs.new("define fonts")
-local report_afm    = logs.new("load afm")
+local report_defining = logs.reporter("fonts","defining")
 
 --[[ldx--
 <p>Here we deal with defining fonts. We do so by intercepting the
@@ -29,16 +29,14 @@ default loader that only handles <l n='tfm'/>.</p>
 local fonts         = fonts
 local tfm           = fonts.tfm
 local vf            = fonts.vf
-local fontcsnames   = fonts.csnames
 
 fonts.used          = allocate()
 
 tfm.readers         = tfm.readers or { }
 tfm.fonts           = allocate()
-tfm.internalized    = allocate() -- internal tex numbers
 
 local readers       = tfm.readers
-local sequence      = allocate { 'otf', 'ttf', 'afm', 'tfm' }
+local sequence      = allocate { 'otf', 'ttf', 'afm', 'tfm', 'lua' }
 readers.sequence    = sequence
 
 tfm.version         = 1.01
@@ -125,15 +123,18 @@ end
 
 definers.getspecification = getspecification
 
-function definers.registersplit(symbol,action)
+function definers.registersplit(symbol,action,verbosename)
     addspecifier(symbol)
     variants[symbol] = action
+    if verbosename then
+        variants[verbosename] = action
+    end
 end
 
 function definers.makespecification(specification, lookup, name, sub, method, detail, size)
     size = size or 655360
     if trace_defining then
-        report_define("%s -> lookup: %s, name: %s, sub: %s, method: %s, detail: %s",
+        report_defining("%s -> lookup: %s, name: %s, sub: %s, method: %s, detail: %s",
             specification, (lookup ~= "" and lookup) or "[file]", (name ~= "" and name) or "-",
             (sub ~= "" and sub) or "-", (method ~= "" and method) or "-", (detail ~= "" and detail) or "-")
     end
@@ -191,10 +192,10 @@ function tfm.hashfeatures(specification)
                 t[tn] = v .. '=' .. tostring(vtf[v])
             end
         end
-    --~ if specification.mathsize then
-    --~     tn = tn + 1
-    --~     t[tn] = "mathsize=" .. specification.mathsize
-    --~ end
+     -- if specification.mathsize then
+     --     tn = tn + 1
+     --     t[tn] = "mathsize=" .. specification.mathsize
+     -- end
         if tn > 0 then
             return concat(t,"+")
         end
@@ -222,21 +223,21 @@ function tfm.hashinstance(specification,force)
         size = math.round(tfm.scaled(size,fonts.designsizes[hash]))
         specification.size = size
     end
---~     local mathsize = specification.mathsize or 0
---~     if mathsize > 0 then
---~         local textsize = specification.textsize
---~         if fallbacks then
---~             return hash .. ' @ ' .. tostring(size) .. ' [ ' .. tostring(mathsize) .. ' : ' .. tostring(textsize) .. ' ] @ ' .. fallbacks
---~         else
---~             return hash .. ' @ ' .. tostring(size) .. ' [ ' .. tostring(mathsize) .. ' : ' .. tostring(textsize) .. ' ]'
---~         end
---~     else
+ -- local mathsize = specification.mathsize or 0
+ -- if mathsize > 0 then
+ --     local textsize = specification.textsize
+ --     if fallbacks then
+ --         return hash .. ' @ ' .. tostring(size) .. ' [ ' .. tostring(mathsize) .. ' : ' .. tostring(textsize) .. ' ] @ ' .. fallbacks
+ --     else
+ --         return hash .. ' @ ' .. tostring(size) .. ' [ ' .. tostring(mathsize) .. ' : ' .. tostring(textsize) .. ' ]'
+ --     end
+ -- else
         if fallbacks then
             return hash .. ' @ ' .. tostring(size) .. ' @ ' .. fallbacks
         else
             return hash .. ' @ ' .. tostring(size)
         end
---~     end
+ -- end
 end
 
 --[[ldx--
@@ -259,7 +260,7 @@ end
 function resolvers.name(specification)
     local resolve = fonts.names.resolve
     if resolve then
-        local resolved, sub = fonts.names.resolve(specification)
+        local resolved, sub = fonts.names.resolve(specification.name,specification.sub)
         specification.resolved, specification.sub = resolved, sub
         if resolved then
             local suffix = file.suffix(resolved)
@@ -278,7 +279,7 @@ end
 function resolvers.spec(specification)
     local resolvespec = fonts.names.resolvespec
     if resolvespec then
-        specification.resolved, specification.sub = fonts.names.resolvespec(specification)
+        specification.resolved, specification.sub = fonts.names.resolvespec(specification.name,specification.sub)
         if specification.resolved then
             specification.forced = file.extname(specification.resolved)
             specification.name = file.removesuffix(specification.resolved)
@@ -338,16 +339,17 @@ function tfm.read(specification)
     if not tfmtable then
         local forced = specification.forced or ""
         if forced ~= "" then
-            tfmtable = readers[lower(forced)](specification)
+            local reader = readers[lower(forced)]
+            tfmtable = reader and reader(specification)
             if not tfmtable then
-                report_define("forced type %s of %s not found",forced,specification.name)
+                report_defining("forced type %s of %s not found",forced,specification.name)
             end
         else
             for s=1,#sequence do -- reader sequence
                 local reader = sequence[s]
                 if readers[reader] then -- not really needed
                     if trace_defining then
-                        report_define("trying (reader sequence driven) type %s for %s with file %s",reader,specification.name,specification.filename or "unknown")
+                        report_defining("trying (reader sequence driven) type %s for %s with file %s",reader,specification.name,specification.filename or "unknown")
                     end
                     tfmtable = readers[reader](specification)
                     if tfmtable then
@@ -366,13 +368,26 @@ function tfm.read(specification)
             else
                 tfmtable.embedding = "subset"
             end
+            -- fonts.goodies.postprocessors.apply(tfmdata) -- only here
+            local postprocessors = tfmtable.postprocessors
+            if postprocessors then
+                for i=1,#postprocessors do
+                    local extrahash = postprocessors[i](tfmtable) -- after scaling etc
+                    if type(extrahash) == "string" and extrahash ~= "" then
+                        -- e.g. a reencoding needs this
+                        extrahash = gsub(lower(extrahash),"[^a-z]","-")
+                        tfmtable.fullname = format("%s-%s",tfmtable.fullname,extrahash)
+                    end
+                end
+            end
+            --
             tfm.fonts[hash] = tfmtable
             fonts.designsizes[specification.hash] = tfmtable.designsize -- we only know this for sure after loading once
         --~ tfmtable.mode = specification.features.normal.mode or "base"
         end
     end
     if not tfmtable then
-        report_define("font with name %s is not found",specification.name)
+        report_defining("font with asked name '%s' is not found using lookup '%s'",specification.name,specification.lookup)
     end
     return tfmtable
 end
@@ -391,151 +406,18 @@ function tfm.readanddefine(name,size) -- no id
     local hash = tfm.hashinstance(specification)
     local id = definers.registered(hash)
     if not id then
-        local fontdata = tfm.read(specification)
-        if fontdata then
-            fontdata.hash = hash
-            id = font.define(fontdata)
-            definers.register(fontdata,id)
-            tfm.cleanuptable(fontdata)
+        local tfmdata = tfm.read(specification)
+        if tfmdata then
+            tfmdata.hash = hash
+            id = font.define(tfmdata)
+            definers.register(tfmdata,id)
+            tfm.cleanuptable(tfmdata)
         else
             id = 0  -- signal
         end
     end
-    return fonts.ids[id], id
+    return fonts.identifiers[id], id
 end
-
---[[ldx--
-<p>Next follow the readers. This code was written while <l n='luatex'/>
-evolved. Each one has its own way of dealing with its format.</p>
---ldx]]--
-
-local function check_tfm(specification,fullname)
-    -- ofm directive blocks local path search unless set; btw, in context we
-    -- don't support ofm files anyway as this format is obsolete
-    local foundname = findbinfile(fullname, 'tfm') or "" -- just to be sure
-    if foundname == "" then
-        foundname = findbinfile(fullname, 'ofm') or "" -- bonus for usage outside context
-    end
-    if foundname == "" then
-        foundname = fonts.names.getfilename(fullname,"tfm")
-    end
-    if foundname ~= "" then
-        specification.filename, specification.format = foundname, "ofm"
-        return tfm.read_from_tfm(specification)
-    end
-end
-
-local function check_afm(specification,fullname)
-    local foundname = findbinfile(fullname, 'afm') or "" -- just to be sure
-    if foundname == "" then
-        foundname = fonts.names.getfilename(fullname,"afm")
-    end
-    if foundname == "" and tfm.autoprefixedafm then
-        local encoding, shortname = match(fullname,"^(.-)%-(.*)$") -- context: encoding-name.*
-        if encoding and shortname and fonts.enc.known[encoding] then
-            shortname = findbinfile(shortname,'afm') or "" -- just to be sure
-            if shortname ~= "" then
-                foundname = shortname
-                if trace_loading then
-                    report_afm("stripping encoding prefix from filename %s",afmname)
-                end
-            end
-        end
-    end
-    if foundname ~= "" then
-        specification.filename, specification.format = foundname, "afm"
-        return tfm.read_from_afm(specification)
-    end
-end
-
-function readers.tfm(specification)
-    local fullname, tfmtable = specification.filename or "", nil
-    if fullname == "" then
-        local forced = specification.forced or ""
-        if forced ~= "" then
-            tfmtable = check_tfm(specification,specification.name .. "." .. forced)
-        end
-        if not tfmtable then
-            tfmtable = check_tfm(specification,specification.name)
-        end
-    else
-        tfmtable = check_tfm(specification,fullname)
-    end
-    return tfmtable
-end
-
-function readers.afm(specification,method)
-    local fullname, tfmtable = specification.filename or "", nil
-    if fullname == "" then
-        local forced = specification.forced or ""
-        if forced ~= "" then
-            tfmtable = check_afm(specification,specification.name .. "." .. forced)
-        end
-        if not tfmtable then
-            method = method or definers.method or "afm or tfm"
-            if method == "tfm" then
-                tfmtable = check_tfm(specification,specification.name)
-            elseif method == "afm" then
-                tfmtable = check_afm(specification,specification.name)
-            elseif method == "tfm or afm" then
-                tfmtable = check_tfm(specification,specification.name) or check_afm(specification,specification.name)
-            else -- method == "afm or tfm" or method == "" then
-                tfmtable = check_afm(specification,specification.name) or check_tfm(specification,specification.name)
-            end
-        end
-    else
-        tfmtable = check_afm(specification,fullname)
-    end
-    return tfmtable
-end
-
--- maybe some day a set of names
-
-local function check_otf(forced,specification,suffix,what)
-    local name = specification.name
-    if forced then
-        name = file.addsuffix(name,suffix,true)
-    end
-    local fullname, tfmtable = findbinfile(name,suffix) or "", nil -- one shot
- -- if false then  -- can be enabled again when needed
-     -- if fullname == "" then
-     --     local fb = fonts.names.old_to_new[name]
-     --     if fb then
-     --         fullname = findbinfile(fb,suffix) or ""
-     --     end
-     -- end
-     -- if fullname == "" then
-     --     local fb = fonts.names.new_to_old[name]
-     --     if fb then
-     --         fullname = findbinfile(fb,suffix) or ""
-     --     end
-     -- end
- -- end
-    if fullname == "" then
-        fullname = fonts.names.getfilename(name,suffix)
-    end
-    if fullname ~= "" then
-        specification.filename, specification.format = fullname, what -- hm, so we do set the filename, then
-        tfmtable = tfm.read_from_otf(specification)             -- we need to do it for all matches / todo
-    end
-    return tfmtable
-end
-
-function readers.opentype(specification,suffix,what)
-    local forced = specification.forced or ""
-    if forced == "otf" then
-        return check_otf(true,specification,forced,"opentype")
-    elseif forced == "ttf" or forced == "ttc" or forced == "dfont" then
-        return check_otf(true,specification,forced,"truetype")
-    else
-        return check_otf(false,specification,suffix,what)
-    end
-end
-
-function readers.otf  (specification) return readers.opentype(specification,"otf","opentype") end
-function readers.ttf  (specification) return readers.opentype(specification,"ttf","truetype") end
-function readers.ttc  (specification) return readers.opentype(specification,"ttf","truetype") end -- !!
-function readers.dfont(specification) return readers.opentype(specification,"ttf","truetype") end -- !!
 
 --[[ldx--
 <p>We need to check for default features. For this we provide
@@ -568,31 +450,29 @@ not gain much. By the way, passing id's back to in the callback was
 introduced later in the development.</p>
 --ldx]]--
 
-local lastdefined = nil -- we don't want this one to end up in s-tra-02
+local lastdefined  = nil -- we don't want this one to end up in s-tra-02
+local internalized = { }
 
 function definers.current() -- or maybe current
     return lastdefined
 end
 
-function definers.register(fontdata,id)
-    if fontdata and id then
-        local hash = fontdata.hash
-        if not tfm.internalized[hash] then
+function definers.register(tfmdata,id) -- will be overloaded
+    if tfmdata and id then
+        local hash = tfmdata.hash
+        if not internalized[hash] then
             if trace_defining then
-                report_define("loading at 2 id %s, hash: %s",id or "?",hash or "?")
+                report_defining("registering font, id: %s, hash: %s",id or "?",hash or "?")
             end
-            fonts.identifiers[id] = fontdata
-            fonts.characters [id] = fontdata.characters
-            fonts.quads      [id] = fontdata.parameters and fontdata.parameters.quad
-            -- todo: extra functions, e.g. setdigitwidth etc in list
-            tfm.internalized[hash] = id
+            fonts.identifiers[id] = tfmdata
+            internalized[hash] = id
         end
     end
 end
 
-function definers.registered(hash)
-    local id = tfm.internalized[hash]
-    return id, id and fonts.ids[id]
+function definers.registered(hash) -- will be overloaded
+    local id = internalized[hash]
+    return id, id and fonts.identifiers[id]
 end
 
 local cache_them = false
@@ -625,49 +505,45 @@ function definers.read(specification,size,id) -- id can be optional, name can al
     specification = definers.resolve(specification)
     local hash = tfm.hashinstance(specification)
     if cache_them then
-        local fontdata = containers.read(fonts.cache,hash) -- for tracing purposes
+        local tfmdata = containers.read(fonts.cache,hash) -- for tracing purposes
     end
-    local fontdata = definers.registered(hash) -- id
-    if not fontdata then
+    local tfmdata = definers.registered(hash) -- id
+    if not tfmdata then
         if specification.features.vtf and specification.features.vtf.preset then
-            fontdata = tfm.make(specification)
+            tfmdata = tfm.make(specification)
         else
-            fontdata = tfm.read(specification)
-            if fontdata then
-                tfm.checkvirtualid(fontdata)
+            tfmdata = tfm.read(specification)
+            if tfmdata then
+                tfm.checkvirtualid(tfmdata)
             end
         end
         if cache_them then
-            fontdata = containers.write(fonts.cache,hash,fontdata) -- for tracing purposes
+            tfmdata = containers.write(fonts.cache,hash,tfmdata) -- for tracing purposes
         end
-        if fontdata then
-            fontdata.hash = hash
-            fontdata.cache = "no"
+        if tfmdata then
+            tfmdata.hash = hash
+            tfmdata.cache = "no"
             if id then
-                definers.register(fontdata,id)
+                definers.register(tfmdata,id)
             end
         end
     end
-    lastdefined = fontdata or id -- todo ! ! ! ! !
-    if not fontdata then -- or id?
-        report_define( "unknown font %s, loading aborted",specification.name)
-    elseif trace_defining and type(fontdata) == "table" then
-        report_define("using %s font with id %s, name:%s size:%s bytes:%s encoding:%s fullname:%s filename:%s",
-            fontdata.type          or "unknown",
-            id                     or "?",
-            fontdata.name          or "?",
-            fontdata.size          or "default",
-            fontdata.encodingbytes or "?",
-            fontdata.encodingname  or "unicode",
-            fontdata.fullname      or "?",
-            file.basename(fontdata.filename or "?"))
-    end
-    local cs = specification.cs
-    if cs then
-        fontcsnames[cs] = fontdata -- new (beware: locals can be forgotten)
+    lastdefined = tfmdata or id -- todo ! ! ! ! !
+    if not tfmdata then -- or id?
+        report_defining( "unknown font %s, loading aborted",specification.name)
+    elseif trace_defining and type(tfmdata) == "table" then
+        report_defining("using %s font with id %s, name:%s size:%s bytes:%s encoding:%s fullname:%s filename:%s",
+            tfmdata.type          or "unknown",
+            id                    or "?",
+            tfmdata.name          or "?",
+            tfmdata.size          or "default",
+            tfmdata.encodingbytes or "?",
+            tfmdata.encodingname  or "unicode",
+            tfmdata.fullname      or "?",
+            file.basename(tfmdata.filename or "?"))
     end
     statistics.stoptiming(fonts)
-    return fontdata
+    return tfmdata
 end
 
 function vf.find(name)
@@ -676,18 +552,18 @@ function vf.find(name)
         local format = fonts.logger.format(name)
         if format == 'tfm' or format == 'ofm' then
             if trace_defining then
-                report_define("locating vf for %s",name)
+                report_defining("locating vf for %s",name)
             end
             return findbinfile(name,"ovf")
         else
             if trace_defining then
-                report_define("vf for %s is already taken care of",name)
+                report_defining("vf for %s is already taken care of",name)
             end
             return nil -- ""
         end
     else
         if trace_defining then
-            report_define("locating vf for %s",name)
+            report_defining("locating vf for %s",name)
         end
         return findbinfile(name,"ovf")
     end
@@ -698,4 +574,4 @@ end
 --ldx]]--
 
 callbacks.register('define_font' , definers.read, "definition of fonts (tfmtable preparation)")
-callbacks.register('find_vf_file', vf.find    , "locating virtual fonts, insofar needed") -- not that relevant any more
+callbacks.register('find_vf_file', vf.find,       "locating virtual fonts, insofar needed") -- not that relevant any more

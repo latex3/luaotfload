@@ -32,44 +32,53 @@ local trace_sequences  = false  trackers.register("otf.sequences",  function(v) 
 local trace_math       = false  trackers.register("otf.math",       function(v) trace_math         = v end)
 local trace_defining   = false  trackers.register("fonts.defining", function(v) trace_defining     = v end)
 
-local report_otf = logs.new("load otf")
+local report_otf = logs.reporter("fonts","otf loading")
 
 local starttiming, stoptiming, elapsedtime = statistics.starttiming, statistics.stoptiming, statistics.elapsedtime
 
-local fonts          = fonts
+local findbinfile = resolvers.findbinfile
 
-fonts.otf            = fonts.otf or { }
-local otf            = fonts.otf
-local tfm            = fonts.tfm
+local fonts            = fonts
 
-local fontdata       = fonts.ids
-local chardata       = characters and characters.data -- not used
+fonts.otf              = fonts.otf or { }
+local otf              = fonts.otf
+local tfm              = fonts.tfm
 
-otf.features         = otf.features         or { }
-otf.features.list    = otf.features.list    or { }
-otf.features.default = otf.features.default or { }
+local fontdata         = fonts.identifiers
+local chardata         = characters and characters.data -- not used
 
-otf.enhancers        = allocate()
-local enhancers      = otf.enhancers
-enhancers.patches    = { }
+-- todo: probably first time so local first
 
-local definers       = fonts.definers
+otf.features           = otf.features     or { }
+local features         = otf.features
+features.list          = features.list    or { }
+local featurelist      = features.list
+features.default       = features.default or { }
+local defaultfeatures  = features.default
 
-otf.glists           = { "gsub", "gpos" }
+otf.enhancers          = allocate()
+local enhancers        = otf.enhancers
+enhancers.patches      = { }
+local patches          = enhancers.patches
 
-otf.version          = 2.706 -- beware: also sync font-mis.lua
-otf.cache            = containers.define("fonts", "otf", otf.version, true)
+local definers         = fonts.definers
+local readers          = fonts.tfm.readers
 
-local loadmethod     = "table" -- table, mixed, sparse
-local forceload      = false
-local cleanup        = 0
-local usemetatables  = false -- .4 slower on mk but 30 M less mem so we might change the default -- will be directive
-local packdata       = true
-local syncspace      = true
-local forcenotdef    = false
+otf.glists             = { "gsub", "gpos" }
 
-local wildcard       = "*"
-local default        = "dflt"
+otf.version            = 2.710 -- beware: also sync font-mis.lua
+otf.cache              = containers.define("fonts", "otf", otf.version, true)
+
+local loadmethod       = "table" -- table, mixed, sparse
+local forceload        = false
+local cleanup          = 0
+local usemetatables    = false -- .4 slower on mk but 30 M less mem so we might change the default -- will be directive
+local packdata         = true
+local syncspace        = true
+local forcenotdef      = false
+
+local wildcard         = "*"
+local default          = "dflt"
 
 local fontloaderfields = fontloader.fields
 local mainfields       = nil
@@ -264,11 +273,11 @@ local ordered_enhancers = {
 
 local actions = { }
 
-enhancers.patches.before = allocate()
-enhancers.patches.after  = allocate()
+patches.before = allocate()
+patches.after  = allocate()
 
-local before = enhancers.patches.before
-local after  = enhancers.patches.after
+local before = patches.before
+local after  = patches.after
 
 local function enhance(name,data,filename,raw,verbose)
     local enhancer = actions[name]
@@ -312,14 +321,20 @@ function enhancers.apply(data,filename,raw,verbose)
     ioflush() -- we want instant messages
 end
 
--- enhancers.patches.register("before","migrate metadata","cambria",function() end)
+-- patches.register("before","migrate metadata","cambria",function() end)
 
-function enhancers.patches.register(what,where,pattern,action)
+function patches.register(what,where,pattern,action)
     local ww = what[where]
     if ww then
         ww[pattern] = action
     else
         ww = { [pattern] = action}
+    end
+end
+
+function patches.report(fmt,...)
+    if trace_loading then
+        report_otf("patching: " ..fmt,...)
     end
 end
 
@@ -332,9 +347,7 @@ function otf.load(filename,format,sub,featurefile)
     local attr = lfs.attributes(filename)
     local size, time = attr and attr.size or 0, attr and attr.modification or 0
     if featurefile then
-        local fattr = lfs.attributes(featurefile)
-        local fsize, ftime = fattr and fattr.size or 0, fattr and fattr.modification or 0
-        name = name .. "@" .. file.removesuffix(file.basename(featurefile)) .. ftime .. fsize
+        name = name .. "@" .. file.removesuffix(file.basename(featurefile))
     end
     if sub == "" then sub = false end
     local hash = name
@@ -435,6 +448,7 @@ function otf.load(filename,format,sub,featurefile)
                 end
                 data.size = size
                 data.time = time
+                data.format = format
                 if featurefiles then
                     data.featuredata = featurefiles
                 end
@@ -545,7 +559,7 @@ end
 
 actions["prepare tables"] = function(data,filename,raw)
     local luatex = {
-        filename = filename,
+        filename = resolvers.unresolve(filename), -- no shortcut
         version  = otf.version,
         creator  = "context mkiv",
     }
@@ -966,23 +980,27 @@ actions["reorganize subtables"] = function(data,filename,raw)
     end
 end
 
+-- the next one is still messy but will get better when we have
+-- flattened map/enc tables in the font loader
+
 actions["prepare unicodes"] = function(data,filename,raw)
     local luatex = data.luatex
-    local indices, unicodes, multiples, internals = { }, { }, { }, { }
-    local mapmap = data.map or raw.map
-    local mapenc = nil -- will go away
-    if not mapmap then
-        report_otf("no map in %s",filename)
+    local indices, unicodes, multiples, internals= { }, { }, { }, { }
+    local mapdata = data.map or raw.map -- map already moved
+    local mapmap
+    if not mapdata then
+        report_otf("no mapdata in '%s'",filename)
         mapmap = { }
-        data.map = { map = mapmap }
-    elseif not mapmap.map then
-        report_otf("no unicode map in %s",filename)
+        mapdata = { map = mapmap }
+        data.map = mapdata
+    elseif not mapdata.map then
+        report_otf("no map in mapdata of '%s'",filename)
         mapmap = { }
-        data.map.map = mapmap
+        mapdata.map = mapmap
     else
-        mapenc = mapmap.enc -- will go away
-        mapmap = mapmap.map
+        mapmap = mapdata.map
     end
+    local encname = lower(data.enc_name or raw.enc_name or mapdata.enc_name or "")
     local criterium = fonts.privateoffset
     local private = criterium
     local glyphs = data.glyphs
@@ -1028,11 +1046,9 @@ actions["prepare unicodes"] = function(data,filename,raw)
         end
     end
     -- beware: the indices table is used to initialize the tfm table
-    local encname = lower(data.enc_name or (mapenc and mapenc[1] and mapenc[1].enc_name) or "") -- mapenc will go away
- -- will become: local encname = lower(data.enc_name or "")
-    if encname == "" or encname == "unicodebmp" or encname == "unicodefull" then -- maybe find(encname,"unicode")
+    if find(encname,"unicode") then -- unicodebmp, unicodefull, ...
         if trace_loading then
-            report_otf("using extra unicode map")
+            report_otf("using embedded unicode map '%s'",encname)
         end
         -- ok -- we can also consider using the altuni
         for unicode, index in next, mapmap do
@@ -1394,7 +1410,7 @@ actions["check metadata"] = function(data,filename,raw)
     data.map = nil
 end
 
-local private_math_parameters = {
+local private_mathparameters = {
     "FractionDelimiterSize",
     "FractionDelimiterDisplayStyleSize",
 }
@@ -1402,8 +1418,8 @@ local private_math_parameters = {
 actions["check math parameters"] = function(data,filename,raw)
     local mathdata = data.metadata.math
     if mathdata then
-        for m=1,#private_math_parameters do
-            local pmp = private_math_parameters[m]
+        for m=1,#private_mathparameters do
+            local pmp = private_mathparameters[m]
             if not mathdata[pmp] then
                 if trace_loading then
                     report_otf("setting math parameter '%s' to 0", pmp)
@@ -1523,9 +1539,12 @@ end
 -- -- -- -- -- --
 -- -- -- -- -- --
 
-function otf.features.register(name,default)
-    otf.features.list[#otf.features.list+1] = name
-    otf.features.default[name] = default
+function features.register(name,default,description)
+    featurelist[#featurelist+1] = name
+    defaultfeatures[name] = default
+    if description and description ~= "" then
+        fonts.otf.tables.features[name] = description
+    end
 end
 
 -- for context this will become a task handler
@@ -1604,11 +1623,6 @@ end
 -- we cannot share descriptions as virtual fonts might extend them (ok, we could
 -- use a cache with a hash
 
-fonts.formats.dfont = "truetype"
-fonts.formats.ttc   = "truetype"
-fonts.formats.ttf   = "truetype"
-fonts.formats.otf   = "opentype"
-
 local function copytotfm(data,cache_id) -- we can save a copy when we reorder the tma to unicode (nasty due to one->many)
     if data then
         local glyphs, pfminfo, metadata = data.glyphs or { }, data.pfminfo or { }, data.metadata or { }
@@ -1616,13 +1630,15 @@ local function copytotfm(data,cache_id) -- we can save a copy when we reorder th
         local unicodes = luatex.unicodes -- names to unicodes
         local indices = luatex.indices
         local mode = data.mode or "base"
-        local characters, parameters, math_parameters, descriptions = { }, { }, { }, { }
+        local characters, parameters, mathparameters, descriptions = { }, { }, { }, { }
         local designsize = metadata.designsize or metadata.design_size or 100
         if designsize == 0 then
             designsize = 100
         end
         local spaceunits, spacer = 500, "space"
         -- indices maps from unicodes to indices
+        -- this wil stay as we can manipulate indices
+        -- beforehand
         for u, i in next, indices do
             characters[u] = { } -- we need this because for instance we add protruding info and loop over characters
             descriptions[u] = glyphs[i]
@@ -1631,7 +1647,7 @@ local function copytotfm(data,cache_id) -- we can save a copy when we reorder th
         if metadata.math then
             -- parameters
             for name, value in next, metadata.math do
-                math_parameters[name] = value
+                mathparameters[name] = value
             end
             -- we could use a subset
             for u, char in next, characters do
@@ -1678,10 +1694,10 @@ local function copytotfm(data,cache_id) -- we can save a copy when we reorder th
             end
         end
         -- end math
-        local endash, emdash, space = 0x20, 0x2014, "space" -- unicodes['space'], unicodes['emdash']
+        local space, emdash = 0x20, 0x2014 -- unicodes['space'], unicodes['emdash']
         if metadata.isfixedpitch then
-            if descriptions[endash] then
-                spaceunits, spacer = descriptions[endash].width, "space"
+            if descriptions[space] then
+                spaceunits, spacer = descriptions[space].width, "space"
             end
             if not spaceunits and descriptions[emdash] then
                 spaceunits, spacer = descriptions[emdash].width, "emdash"
@@ -1690,8 +1706,8 @@ local function copytotfm(data,cache_id) -- we can save a copy when we reorder th
                 spaceunits, spacer = metadata.charwidth, "charwidth"
             end
         else
-            if descriptions[endash] then
-                spaceunits, spacer = descriptions[endash].width, "space"
+            if descriptions[space] then
+                spaceunits, spacer = descriptions[space].width, "space"
             end
             if not spaceunits and descriptions[emdash] then
                 spaceunits, spacer = descriptions[emdash].width/2, "emdash/2"
@@ -1700,7 +1716,7 @@ local function copytotfm(data,cache_id) -- we can save a copy when we reorder th
                 spaceunits, spacer = metadata.charwidth, "charwidth"
             end
         end
-        spaceunits = tonumber(spaceunits) or tfm.units/2 -- 500 -- brrr
+        spaceunits = tonumber(spaceunits) or 500 -- brrr
         -- we need a runtime lookup because of running from cdrom or zip, brrr (shouldn't we use the basename then?)
         local filename = fonts.tfm.checkedfilename(luatex)
         local fontname = metadata.fontname
@@ -1743,10 +1759,14 @@ local function copytotfm(data,cache_id) -- we can save a copy when we reorder th
             end
         end
         --
+        local fileformat = data.format or fonts.fontformat(filename,"opentype")
+        if units > 1000  then
+            fileformat = "truetype"
+        end
         return {
             characters         = characters,
             parameters         = parameters,
-            math_parameters    = math_parameters,
+            mathparameters     = mathparameters,
             descriptions       = descriptions,
             indices            = indices,
             unicodes           = unicodes,
@@ -1755,7 +1775,6 @@ local function copytotfm(data,cache_id) -- we can save a copy when we reorder th
             boundarychar_label = 0,
             boundarychar       = 65536,
             designsize         = (designsize/10)*65536,
-            spacer             = "500 units",
             encodingbytes      = 2,
             mode               = mode,
             filename           = filename,
@@ -1764,7 +1783,7 @@ local function copytotfm(data,cache_id) -- we can save a copy when we reorder th
             psname             = fontname or fullname,
             name               = filename or fullname,
             units              = units,
-            format             = fonts.fontformat(filename,"opentype"),
+            format             = fileformat,
             cidinfo            = cidinfo,
             ascender           = abs(metadata.ascent  or 0),
             descender          = abs(metadata.descent or 0),
@@ -1814,7 +1833,8 @@ local function otftotfm(specification)
                 tfmdata.has_italic = otfdata.metadata.has_italic
                 if not tfmdata.language then tfmdata.language = 'dflt' end
                 if not tfmdata.script   then tfmdata.script   = 'dflt' end
-                shared.processes, shared.features = otf.setfeatures(tfmdata,definers.check(features,otf.features.default))
+                -- at this moment no characters are assinged yet, only empty slots
+                shared.processes, shared.features = otf.setfeatures(tfmdata,definers.check(features,defaultfeatures))
             end
         end
         containers.write(tfm.cache,cache_id,tfmdata)
@@ -1822,9 +1842,9 @@ local function otftotfm(specification)
     return tfmdata
 end
 
-otf.features.register('mathsize')
+features.register('mathsize')
 
-function tfm.read_from_otf(specification) -- wrong namespace
+local function read_from_otf(specification) -- wrong namespace
     local tfmtable = otftotfm(specification)
     if tfmtable then
         local otfdata = tfmtable.shared.otfdata
@@ -1910,3 +1930,56 @@ function otf.collectlookups(otfdata,kind,script,language)
     end
     return nil, nil
 end
+
+-- readers
+
+fonts.formats.dfont = "truetype"
+fonts.formats.ttc   = "truetype"
+fonts.formats.ttf   = "truetype"
+fonts.formats.otf   = "opentype"
+
+local function check_otf(forced,specification,suffix,what)
+    local name = specification.name
+    if forced then
+        name = file.addsuffix(name,suffix,true)
+    end
+    local fullname, tfmtable = findbinfile(name,suffix) or "", nil -- one shot
+ -- if false then  -- can be enabled again when needed
+     -- if fullname == "" then
+     --     local fb = fonts.names.old_to_new[name]
+     --     if fb then
+     --         fullname = findbinfile(fb,suffix) or ""
+     --     end
+     -- end
+     -- if fullname == "" then
+     --     local fb = fonts.names.new_to_old[name]
+     --     if fb then
+     --         fullname = findbinfile(fb,suffix) or ""
+     --     end
+     -- end
+ -- end
+    if fullname == "" then
+        fullname = fonts.names.getfilename(name,suffix)
+    end
+    if fullname ~= "" then
+        specification.filename, specification.format = fullname, what -- hm, so we do set the filename, then
+        tfmtable = read_from_otf(specification)                       -- we need to do it for all matches / todo
+    end
+    return tfmtable
+end
+
+function readers.opentype(specification,suffix,what)
+    local forced = specification.forced or ""
+    if forced == "otf" then
+        return check_otf(true,specification,forced,"opentype")
+    elseif forced == "ttf" or forced == "ttc" or forced == "dfont" then
+        return check_otf(true,specification,forced,"truetype")
+    else
+        return check_otf(false,specification,suffix,what)
+    end
+end
+
+function readers.otf  (specification) return readers.opentype(specification,"otf","opentype") end
+function readers.ttf  (specification) return readers.opentype(specification,"ttf","truetype") end
+function readers.ttc  (specification) return readers.opentype(specification,"ttf","truetype") end -- !!
+function readers.dfont(specification) return readers.opentype(specification,"ttf","truetype") end -- !!

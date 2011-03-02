@@ -7,6 +7,7 @@ if not modules then modules = { } end modules ['luat-dum'] = {
 }
 
 local dummyfunction = function() end
+local dummyreporter = function(c) return function(...) texio.write(c .. " : " .. string.format(...)) end end
 
 statistics = {
     register      = dummyfunction,
@@ -34,9 +35,10 @@ storage = { -- probably no longer needed
     shared        = { },
 }
 logs = {
-    new           = function() return dummyfunction end,
+    new           = dummyreporter,
+    reporter      = dummyreporter,
+    messenger     = dummyreporter,
     report        = dummyfunction,
-    simple        = dummyfunction,
 }
 callbacks = {
     register = function(n,f) return callback.register(n,f) end,
@@ -62,15 +64,19 @@ local remapper = {
     otf   = "opentype fonts",
     ttf   = "truetype fonts",
     ttc   = "truetype fonts",
-    dfont = "truetype fonts",
+    dfont = "truetype fonts", -- "truetype dictionary",
     cid   = "cid maps",
     fea   = "font feature files",
 }
 
 function resolvers.findfile(name,kind)
     name = string.gsub(name,"\\","\/")
-    kind = string.lower(kind)
-    return kpse.find_file(name,(kind and kind ~= "" and (remapper[kind] or kind)) or file.extname(name,"tex"))
+    kind = kind and string.lower(kind)
+    local found = kpse.find_file(name,(kind and kind ~= "" and (remapper[kind] or kind)) or file.extname(name,"tex"))
+    if not found or found == "" then
+        found = kpse.find_file(name,"other text file")
+    end
+    return found
 end
 
 function resolvers.findbinfile(name,kind)
@@ -78,6 +84,14 @@ function resolvers.findbinfile(name,kind)
         kind = file.extname(name) -- string.match(name,"%.([^%.]-)$")
     end
     return resolvers.findfile(name,(kind and remapper[kind]) or kind)
+end
+
+function resolvers.resolve(s)
+    return s
+end
+
+function resolvers.unresolve(s)
+    return s
 end
 
 -- Caches ... I will make a real stupid version some day when I'm in the
@@ -98,41 +112,43 @@ end
 
 do
 
-    local cachepaths
+    local cachepaths = kpse.expand_path('$TEXMFCACHE') or ""
 
-    if kpse.expand_var('$TEXMFCACHE') ~= '$TEXMFCACHE' then
-        cachepaths = kpse.expand_var('$TEXMFCACHE')
-    elseif kpse.expand_var('$TEXMFVAR') ~= '$TEXMFVAR' then
-        cachepaths = kpse.expand_var('$TEXMFVAR')
+    if cachepaths == "" then
+        cachepaths = kpse.expand_path('$TEXMFVAR')
     end
 
-    if not cachepaths then
+    if cachepaths == "" then
+        cachepaths = kpse.expand_path('$VARTEXMF')
+    end
+
+    if cachepaths == "" then
         cachepaths = "."
     end
 
     cachepaths = string.split(cachepaths,os.type == "windows" and ";" or ":")
 
     for i=1,#cachepaths do
-        local done
-        writable = file.join(cachepaths[i], "luatex-cache")
-        writable = file.join(writable,caches.namespace)
-        writable, done = dir.mkdirs(writable)
-        if done then
+        if file.is_writable(cachepaths[i]) then
+            writable = file.join(cachepaths[i],"luatex-cache")
+            lfs.mkdir(writable)
+            writable = file.join(writable,caches.namespace)
+            lfs.mkdir(writable)
             break
         end
     end
 
     for i=1,#cachepaths do
-        if file.isreadable(cachepaths[i]) then
+        if file.is_readable(cachepaths[i]) then
             readables[#readables+1] = file.join(cachepaths[i],"luatex-cache",caches.namespace)
         end
     end
 
     if not writable then
-        texio.write_nl("quiting: fix your writable cache path\n")
+        texio.write_nl("quiting: fix your writable cache path")
         os.exit()
     elseif #readables == 0 then
-        texio.write_nl("quiting: fix your readable cache path\n")
+        texio.write_nl("quiting: fix your readable cache path")
         os.exit()
     elseif #readables == 1 and readables[1] == writable then
         texio.write(string.format("(using cache: %s)",writable))

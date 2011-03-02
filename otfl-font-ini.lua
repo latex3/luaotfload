@@ -6,6 +6,9 @@ if not modules then modules = { } end modules ['font-ini'] = {
     license   = "see context related readme files"
 }
 
+-- The font code will be upgraded and reorganized so that we have a
+-- leaner generic code base and can do more tuning for context.
+
 --[[ldx--
 <p>Not much is happening here.</p>
 --ldx]]--
@@ -16,7 +19,7 @@ local write_nl = texio.write_nl
 local lower = string.lower
 local allocate, mark = utilities.storage.allocate, utilities.storage.mark
 
-local report_define = logs.new("define fonts")
+local report_defining = logs.reporter("fonts","defining")
 
 fontloader.totable = fontloader.to_table
 
@@ -25,14 +28,18 @@ fontloader.totable = fontloader.to_table
 
 fonts = fonts or { }
 
--- we will also have des and fam hashes
+-- beware, some already defined
 
--- beware, soem alreadyu defined
+fonts.identifiers = mark(fonts.identifiers or { }) -- fontdata
+-----.characters  = mark(fonts.characters  or { }) -- chardata
+-----.csnames     = mark(fonts.csnames     or { }) -- namedata
+-----.quads       = mark(fonts.quads       or { }) -- quaddata
 
-fonts.ids = mark(fonts.ids or { })  fonts.identifiers = fonts.ids -- aka fontdata
-fonts.chr = mark(fonts.chr or { })  fonts.characters  = fonts.chr -- aka chardata
-fonts.qua = mark(fonts.qua or { })  fonts.quads       = fonts.qua -- aka quaddata
-fonts.css = mark(fonts.css or { })  fonts.csnames     = fonts.css -- aka namedata
+--~ fonts.identifiers[0] = { -- nullfont
+--~     characters   = { },
+--~     descriptions = { },
+--~     name         = "nullfont",
+--~ }
 
 fonts.tfm = fonts.tfm or { }
 fonts.vf  = fonts.vf  or { }
@@ -41,15 +48,7 @@ fonts.pfb = fonts.pfb or { }
 fonts.otf = fonts.otf or { }
 
 fonts.privateoffset = 0xF0000 -- 0x10FFFF
-fonts.verbose = false -- more verbose cache tables
-
-fonts.ids[0] = { -- nullfont
-    characters   = { },
-    descriptions = { },
-    name         = "nullfont",
-}
-
-fonts.chr[0] = { }
+fonts.verbose       = false   -- more verbose cache tables (will move to context namespace)
 
 fonts.methods = fonts.methods or {
     base = { tfm = { }, afm = { }, otf = { }, vtf = { }, fix = { } },
@@ -109,7 +108,11 @@ function fonts.fontformat(filename,default)
     if format then
         return format
     else
-        report_define("unable to determine font format for '%s'",filename)
+        report_defining("unable to determine font format for '%s'",filename)
         return default
     end
 end
+
+-- readers
+
+fonts.tfm.readers = fonts.tfm.readers or { }

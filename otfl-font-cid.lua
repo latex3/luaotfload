@@ -12,7 +12,7 @@ local lpegmatch = lpeg.match
 
 local trace_loading = false  trackers.register("otf.loading",      function(v) trace_loading      = v end)
 
-local report_otf = logs.new("load otf")
+local report_otf = logs.reporter("fonts","otf loading")
 
 local fonts   = fonts
 

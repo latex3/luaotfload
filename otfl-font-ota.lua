@@ -40,7 +40,7 @@ local has_attribute      = node.has_attribute
 local traverse_id        = node.traverse_id
 local traverse_node_list = node.traverse
 
-local fontdata           = fonts.ids
+local fontdata           = fonts.identifiers
 local state              = attributes.private('state')
 local categories         = characters and characters.categories or { } -- sorry, only in context
 

@@ -16,7 +16,7 @@ local trace_loading = false  trackers.register("otf.loading", function(v) trace_
 local fonts = fonts
 local otf   = fonts.otf
 
-local report_otf = logs.new("load otf")
+local report_otf = logs.reporter("fonts","otf loading")
 
 -- instead of "script = "DFLT", langs = { 'dflt' }" we now use wildcards (we used to
 -- have always); some day we can write a "force always when true" trick for other
@@ -35,22 +35,18 @@ local extra_lists = {
         {
             endash        = "hyphen hyphen",
             emdash        = "hyphen hyphen hyphen",
-            quotedblleft  = "quoteleft quoteleft",
-            quotedblright = "quoteright quoteright",
-            quotedblleft  = "grave grave",
-            quotedblright = "quotesingle quotesingle",
-            quotedblbase  = "comma comma",
-            exclamdown    = "exclam grave",
-            questiondown  = "question grave",
-            guillemotleft = "less less",
-            guillemotright= "greater greater",
+         -- quotedblleft  = "quoteleft quoteleft",
+         -- quotedblright = "quoteright quoteright",
+         -- quotedblleft  = "grave grave",
+         -- quotedblright = "quotesingle quotesingle",
+         -- quotedblbase  = "comma comma",
         },
     },
     trep = {
         {
-            [0x0022] = 0x201D,
+         -- [0x0022] = 0x201D,
             [0x0027] = 0x2019,
-            [0x0060] = 0x2018,
+         -- [0x0060] = 0x2018,
         },
     },
     anum = {
@@ -102,14 +98,14 @@ local extra_features = { -- maybe just 1..n so that we prescribe order
     },
     anum = {
         {
-            features  = { arab = { FAR = true, dflt = true } },
+            features  = { arab = { URD = true, dflt = true } },
             name      = "ctx_anum_1",
             subtables = { "ctx_anum_1_s" },
             type      = "gsub_single",
             flags     = { },
         },
         {
-            features  = { arab = { FAR = true } },
+            features  = { arab = { URD = true } },
             name      = "ctx_anum_2",
             subtables = { "ctx_anum_2_s" },
             type      = "gsub_single",

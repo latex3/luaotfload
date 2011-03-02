@@ -332,7 +332,9 @@ function otf.load(filename,format,sub,featurefile)
     local attr = lfs.attributes(filename)
     local size, time = attr and attr.size or 0, attr and attr.modification or 0
     if featurefile then
-        name = name .. "@" .. file.removesuffix(file.basename(featurefile))
+        local fattr = lfs.attributes(featurefile)
+        local fsize, ftime = fattr and fattr.size or 0, fattr and fattr.modification or 0
+        name = name .. "@" .. file.removesuffix(file.basename(featurefile)) .. ftime .. fsize
     end
     if sub == "" then sub = false end
     local hash = name

@@ -1,16 +1,8 @@
+languagesystem DFLT dflt;
+languagesystem latn dflt;
 
-lookup TeXkern {
+feature tkrn {
   lookupflag 0;
     pos E X -125;
     pos T <0 0 -166 0> E  <0 -235 0 0>;
-} TeXkern;
-
-feature tkrn {
-  script DFLT;
-     language dflt ;
-      lookup TeXkern;
-  script latn;
-     language dflt ;
-      lookup TeXkern;
-
 } tkrn;

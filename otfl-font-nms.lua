@@ -47,7 +47,7 @@ local function fontnames_init()
     }
 end
 
-function names.load()
+local function load_names()
     local localpath  = file.join(names.path.localdir, names.path.basename)
     local systempath = file.join(names.path.systemdir, names.path.basename)
     local kpsefound  = kpse.find_file(names.path.basename)
@@ -68,14 +68,15 @@ function names.load()
     else
         logs.info([[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
-        data = names.update()
+        data = names.update(fontnames_init())
         names.save(data)
     end
     return data
 end
 
-local synonyms  = {
+local synonyms = {
     regular    = { "normal", "roman", "plain", "book", "medium" },
+    bold       = { "boldregular" },
     italic     = { "regularitalic", "normalitalic", "oblique", "slant" },
     bolditalic = { "boldoblique", "boldslat" },
 }
@@ -238,7 +239,7 @@ end
 
 local lastislog = 0
 
-function log(fmt, ...)
+local function log(fmt, ...)
     lastislog = 1
     texio.write_nl(format("luaotfload | %s", format(fmt,...)))
     io.flush()
@@ -247,8 +248,6 @@ end
 logs        = logs or { }
 logs.report = logs.report or log
 logs.info   = logs.info or log
-
-local log = names.log
 
 local function font_fullinfo(filename, subfont, texmf)
     local t = { }
@@ -635,9 +634,10 @@ local function update_names(fontnames, force)
     if force then
         fontnames = fontnames_init()
     else
-        if not fontnames
-        or not fontnames.version
-        or fontnames.version ~= names.version then
+        if not fontnames then
+            fontnames = names.load()
+        end
+        if fontnames.version ~= names.version then
             fontnames = fontnames_init()
             if trace_search then
                 logs.report("No font names database or old one found; "
@@ -659,7 +659,15 @@ local function save_names(fontnames)
     if not lfs.isdir(savepath) then
         dir.mkdirs(savepath)
     end
-    table.tofile(file.join(savepath, names.path.basename), fontnames, true)
+    savepath = file.join(savepath, names.path.basename)
+    if file.iswritable(savepath) then
+        table.tofile(savepath, fontnames, true)
+        logs.info("Font names database saved: %s \n", savepath)
+        return savepath
+    else
+        logs.info("Failed to save names database\n")
+        return nil
+    end
 end
 
 local function scan_external_dir(dir)
@@ -671,10 +679,11 @@ local function scan_external_dir(dir)
         loaded    = true
     end
     new_names = table.copy(old_names)
-    scan_dir("zapfino", old_names, new_names)
+    scan_dir(dir, old_names, new_names)
     names.data = new_names
 end
 
 names.scan   = scan_external_dir
+names.load   = load_names
 names.update = update_names
 names.save   = save_names

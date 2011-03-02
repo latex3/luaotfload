@@ -2,6 +2,7 @@
 %
 % Copyright (C) 2009-2010 by Elie Roux    <elie.roux@telecom-bretagne.eu>
 %                        and Khaled Hosny <khaledhosny@eglug.org>
+%                             (Support: <lualatex-dev@tug.org>.)
 %
 % This work is under the CC0 license.
 %
@@ -35,7 +36,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload 2010/10/16 v1.20 OpenType layout system}
+\Msg{* Package: luaotfload v1.24 OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -48,6 +49,7 @@ This is a generated file.
 
 Copyright (C) 2009-2010 by by Elie Roux    <elie.roux@telecom-bretagne.eu>
                           and Khaled Hosny <khaledhosny@eglug.org>
+                               (Support: <lualatex-dev@tug.org>.)
 
 This work is under the CC0 license.
 
@@ -102,10 +104,9 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2010/10/16 v1.20 OpenType layout system]%
+  [2011/02/16 v1.24 OpenType layout system]%
 \documentclass{ltxdoc}
-\usepackage{metalogo,multicol,mdwlist,fancyvrb,xcolor}
-\usepackage{charter}
+\usepackage{metalogo,multicol,mdwlist,fancyvrb,xcolor,xspace}
 \usepackage[
   bookmarks=true,
   colorlinks=true,
@@ -118,10 +119,22 @@ and the derived files
   pdfkeywords={luatex, lualatex, unicode, opentype}
   ]{hyperref}
 
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\setmainfont[Ligatures=TeX]{Linux Libertine O}
+\setsansfont[Ligatures=TeX]{Linux Biolinum O}
+\setmathfont{XITS Math}
+
 \definecolor{niceblue}{rgb}{0.4,0.6,1.000}
 
-\def\LuaTeX{Lua\TeX}
-\def\ConTeXt{Con\TeX t}
+\newcommand\tex    {\TeX\xspace}
+\newcommand\pdftex {PDF\TeX\xspace}
+\newcommand\luatex {Lua\TeX\xspace}
+\newcommand\xetex  {\XeTeX\xspace}
+\newcommand\latex  {\LaTeX\xspace}
+\newcommand\context{Con\TeX t\xspace}
+
+\newcommand*\email[1]{\href{mailto:#1}{#1}}
 
 \EnableCrossrefs
 \CodelineIndex
@@ -153,14 +166,14 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \textsf{luaotfload} package}
-% \date{2010/10/16 v1.20}
-% \author{     Elie Roux\footnote{\texttt{elie.roux@telecom-bretagne.eu}}
-%         \and Khaled Hosny\footnote{\texttt{khaledhosny@eglug.org}}}
+% \date{2011/02/16 v1.24}
+% \author{Elie Roux and Khaled Hosny\\
+%         Support: \email{lualatex-dev@tug.org}}
 %
 % \maketitle
 %
 % \begin{abstract}
-% This package is an adaptation of the \ConTeXt\ font loading system,
+% This package is an adaptation of the \context font loading system,
 % providing the ability to load \textsf{OpenType} fonts with extended font
 % loading syntax supporting a large selection of OpenType font features.
 % \end{abstract}
@@ -169,10 +182,10 @@ and the derived files
 %
 % \section{Introduction}
 %
-% Font management and installation has always been painful with \TeX.
+% Font management and installation has always been painful with \tex.
 % A lot of files are needed for one font (tfm, pfb, map, fd, vf), and as
-% \TeX\ is 8-bit each font is limited to 256 characters.
-% But the font world has evolved since \TeX, and new font technologies have
+% \tex is 8-bit each font is limited to 256 characters.
+% But the font world has evolved since \tex, and new font technologies have
 % appeared, most notably the so called \emph{smart font} technologies like
 % \textsf{OpenType} fonts. These fonts can contain a lot of characters, and
 % additional functionalities like ligatures, old-style numbers, small capitals,
@@ -181,12 +194,12 @@ and the derived files
 % scripts right now} scripts.
 % They are widely deployed and available for all modern operating systems and
 % are becoming the de facto standard fonts for advanced text layout.
-% Until now the only way to use them directly in the \TeX\ world was by using
-% them with \XeTeX.
+% Until now the only way to use them directly in the \tex world was by using
+% them with \xetex.
 %
-% Unlike \XeTeX, \LuaTeX\ does not provide direct support for using these fonts
+% Unlike \xetex, \luatex does not provide direct support for using these fonts
 % by default, but it provides a way to hook Lua code in some points of the
-% \TeX\ processing; for instance, we can improve the font loading system, and
+% \tex processing; for instance, we can improve the font loading system, and
 % text procession, which what this package is about.
 %
 % \section{Loading fonts}
@@ -195,7 +208,7 @@ and the derived files
 % like:
 %
 % \begin{center}
-% |\font\foo={|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|}| \meta{\TeX\ font features}
+% |\font\foo={|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|}| \meta{\tex font features}
 % \end{center}
 %
 % \noindent
@@ -204,12 +217,12 @@ and the derived files
 %
 % \paragraph{Prefix}
 %
-% The \meta{prefix} be either \texttt{file:} or \texttt{name:}, which specify
+% The \meta{prefix} be either |file:| or |name:|, which specify
 % whether to use a select the font from its filename or font name,
-% respectively. If no prefix is specified, then \texttt{file:} is assumed.
+% respectively. If no prefix is specified, then |file:| is assumed.
 %
-% For compatibility with \XeTeX, surrounding the \meta{font name}
-% with square brackets is synonymous to using the \texttt{file:} prefix.
+% For compatibility with \xetex, surrounding the \meta{font name}
+% with square brackets is synonymous to using the |file:| prefix.
 %
 % Accessing fonts by fontname allows loading system installed fonts as well as
 % \textsc{texmf} ones, and requires a font names database; see
@@ -245,20 +258,15 @@ and the derived files
 % The supported keys are:
 % \begin{description}
 % \item [mode] \hfill \\
-% \textsf{luaotfload} has two OpenType processing modes;
-% \texttt{base} or \texttt{node}.
-% Using \texttt{mode=base}
-% only supports a subset of OpenType features and works by mapping those
-% features to traditional \TeX\ ligature and kerning mechanisms and is a bit
-% faster
-% Using \texttt{mode=node} hopefully supports OpenType fully and
-% works by direct processing of the node list with Lua; it is slower and
-% is not designed to work in math mode.
+% \textsf{luaotfload} has two OpenType processing modes; |base| and |node|.
+% |base| mode works by mapping OpenType features to traditional \tex ligature
+% and kerning mechanisms, thus supporting only non-contextual substitutions and
+% kerning pairs, but is slightly faster. |node| works by direct processing of
+% the node list at Lua end and have more wide support of OpenType features but
+% can be slow especially with complex fonts and can't be used in math mode.
 %
-% By default \texttt{mode=base} is used, but it is advisable to always
-% enable \texttt{node} made, except for math fonts, otherwise many OpenType
-% features will not function properly or even not work at all, especially for
-% advanced scripts like Arabic.
+% By default |node| mode is used, and you have to manually force |base| mode
+% when needed e.g. for math fonts.
 %
 % \item [script] \hfill \\
 % OpenType script string, default value is |dflt|. Some fonts don't assign
@@ -272,9 +280,8 @@ and the derived files
 % feature files are textual representation of OpenType tables and can be used to
 % extend OpenType features of the font on fly. The file name of the feature file
 % is passed, then features defined in the file can be enabled/disabled like any
-% other feature. The actual syntax is described at
-% \url{http://fontforge.sourceforge.net/featurefile.html} and
-% \url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
+% other feature. The syntax is documented in Adobe's
+% \href{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}{OpenType Feature File Specification}.
 %
 % For example, to set a |tkrn| feature from |mykern.fea| file:
 %
@@ -293,12 +300,12 @@ and the derived files
 % Both keys control microtypographic features of the font, namely glyph
 % protrusion and expansion. The value of the key is the name of predefined
 % Lua tables of protrusion and expansion values; see the end of
-% \texttt{otfl-font-dum.lua} file for an example of such tables. The only
+% |otfl-font-dum.lua| file for an example of such tables. The only
 % predefined value is |default|.
 %
 % For example, to enable default protrusion\footnote{You also need to set
 % |\pdfprotrudechars2 \pdfadjustspacing2| to activate protrusion and expansion,
-% respectively. See PDF\TeX\ manual for details}:
+% respectively. See \pdftex manual for details}:
 %
 % |\font\lmr=Latin Modern Roman:protrusion=default|
 %
@@ -309,21 +316,21 @@ and the derived files
 % OpenType, currently three features are defined:
 %
 % \begin{itemize*}
-% \item \texttt{anum}: replaces European numbers with eastern Arabic numbers or
+% \item |anum|: replaces European numbers with eastern Arabic numbers or
 % Persian numbers, depending on the value of |language|.
-% \item \texttt{tlig}: applies legacy \TeX\ ligatures (|``''-- -- !` ?` <<>>|).
-% \item \texttt{trep}: applies legacy \TeX\ replacements (|`'"|).
+% \item |tlig|: applies legacy \tex ligatures (|``''-- -- !` ?` <<>>|).
+% \item |trep|: applies legacy \tex replacements (|`'"|).
 % \end{itemize*}
 %
-% (For \XeTeX\ users: these last two are the equivalent of writing
-%  \texttt{mapping=text-tex} using \XeTeX's input remapping feature.)
+% (For \xetex users: these last two are the equivalent of writing
+%  |mapping=text-tex| using \xetex's input remapping feature.)
 %
 %
 % \section{Font names database}
 % \label{sec:fontdb}
 %
 % As introduced in the previous section, \textsf{luaotfload} uses a database
-% to keep track of fonts available to \LuaTeX. Using this database, fonts can
+% to keep track of fonts available to \luatex. Using this database, fonts can
 % be loaded by font name as well as filename.
 %
 % When \textsf{luaotfload} is asked to load a font by font name, it will check
@@ -363,7 +370,7 @@ and the derived files
 %
 % \subsection{Blacklisting fonts}
 %
-% Some fonts are problematic in \LuaTeX, if you found that your document takes
+% Some fonts are problematic in \luatex, if you found that your document takes
 % too long to compile, or eats all the free memory, you can find the culprit
 % file by running |mkluatexfontdb| utility with |-v| option to see which font
 % file it is stuck with. You can then instruct \textsf{luaotfload} to ignore
@@ -374,49 +381,47 @@ and the derived files
 % can find. You can either use the base name or the full path. Any thing after
 % a |%| sign is ignored.
 %
-% \section{Required \ConTeXt\ files}
+% \section{Required \context files}
 %
-% This package is a wrapper for several files taken from the \ConTeXt\ macro
-% package. The philosophy is to let \ConTeXt\ do all the implementation and
-% update these files from time to time. To do so we did not modify the files
-% taken from \ConTeXt, we only changed their names to prevent name clashes.
-% You can thus update the font system of this package simply by updating the
-% files taken from \ConTeXt, without (theoretically) changing the \texttt{.sty}
-% file nor the main \texttt{.lua} file.
+% This package is a wrapper for several files taken from the \context macro
+% package. The philosophy is to let \context do all the implementation and
+% update these files from time to time. So we try not to modify the files
+% taken from \context as far as possible, but we changed their names to
+% prevent name clashes.
 %
-% The \ConTeXt\ files are renamed by adding the prefix \texttt{otfl-} to them
-% (\texttt{otfl} as \texttt{OTF L}oad). The files are:
+% The \context files are renamed by adding the prefix |otfl-| to them
+% (|otfl| as |OTF L|oad). The files are:
 %
 % \begin{multicols}{3}
 % \begin{itemize*}
-% \item \texttt{luat-dum.lua}
-% \item \texttt{data-con.lua}
-% \item \texttt{node-inj.lua}
-% \item \texttt{node-dum.lua}
-% \item \texttt{font-ini.lua}
-% \item \texttt{font-tfm.lua}
-% \item \texttt{font-cid.lua}
-% \item \texttt{font-ott.lua}
-% \item \texttt{font-otf.lua}
-% \item \texttt{font-otd.lua}
-% \item \texttt{font-oti.lua}
-% \item \texttt{font-otb.lua}
-% \item \texttt{font-otn.lua}
-% \item \texttt{font-ota.lua}
-% \item \texttt{font-otc.lua}
-% \item \texttt{font-def.lua}
-% \item \texttt{font-xtx.lua}
-% \item \texttt{font-map.lua}
-% \item \texttt{font-dum.lua}
+% \item |luat-dum.lua|
+% \item |data-con.lua|
+% \item |node-inj.lua|
+% \item |node-dum.lua|
+% \item |font-ini.lua|
+% \item |font-tfm.lua|
+% \item |font-cid.lua|
+% \item |font-ott.lua|
+% \item |font-otf.lua|
+% \item |font-otd.lua|
+% \item |font-oti.lua|
+% \item |font-otb.lua|
+% \item |font-otn.lua|
+% \item |font-ota.lua|
+% \item |font-otc.lua|
+% \item |font-def.lua|
+% \item |font-xtx.lua|
+% \item |font-map.lua|
+% \item |font-dum.lua|
 % \end{itemize*}
 % \end{multicols}
 %
 % The following files have been written for this package:
 % \begin{multicols}{3}
 % \begin{itemize*}
-% \item \texttt{font-clr.lua}
-% \item \texttt{font-nms.lua}
-% \item \texttt{luat-ovr.lua}
+% \item |font-clr.lua|
+% \item |font-nms.lua|
+% \item |luat-ovr.lua|
 % \end{itemize*}
 % \end{multicols}
 %
@@ -434,9 +439,6 @@ and the derived files
 %
 % |\font\myfont = MyFont.otf:script=latn;+liga;|
 %
-% Also remember to set |mode=node| as most OpenType features
-% (such as contextual substitution, |calt|), will not work without it.
-%
 % \part{\texttt{luaotfload.lua}}
 %
 % \iffalse
@@ -446,12 +448,12 @@ and the derived files
 %    First some usual initializations.
 %
 %    \begin{macrocode}
-module('luaotfload', package.seeall)
+module("luaotfload", package.seeall)
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 1.20,
-    date          = "2010/10/16",
+    version       = 1.24,
+    date          = "2011/02/16",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -468,16 +470,16 @@ local error, warning, info, log = luatexbase.provides_module(luaotfload.module)
 %    fine even if |\pdfpkresolution| is changed.
 %
 %    \begin{macrocode}
-kpse.init_prog('', 600, '/')
+kpse.init_prog("", 600, "/")
 %    \end{macrocode}
 %
-%    The minimal required \LuaTeX\ version.
+%    The minimal required \luatex version.
 %
 %    \begin{macrocode}
 local luatex_version = 60
 
 if tex.luatexversion < luatex_version then
-    warning('LuaTeX v%.2f is old, v%.2f is recommended.',
+    warning("LuaTeX v%.2f is old, v%.2f is recommended.",
              tex.luatexversion/100,
              luatex_version   /100)
 end
@@ -502,34 +504,34 @@ end
 %
 % \subsection{Module loading}
 %
-%    We load the \ConTeXt\ files with this function. It automatically adds the
-%    \texttt{otfl-} prefix to it, so that we call it with the actual \ConTeXt\
+%    We load the \context files with this function. It automatically adds the
+%    |otfl-| prefix to it, so that we call it with the actual \context
 %    name.
 %
 %    \begin{macrocode}
 function luaotfload.loadmodule(name)
-    local tofind = 'otfl-'..name
+    local tofind = "otfl-"..name
     local found = kpse.find_file(tofind,"tex")
     if found then
-        log('loading file %s.', found)
+        log("loading file %s.", found)
         dofile(found)
     else
-        error('file %s not found.', tofind)
+        error("file %s not found.", tofind)
     end
 end
 %    \end{macrocode}
 %
 %    We start loading some lua files. These two are some code not used by
-%    \ConTeXt\ at all that allow other modules to be used, it provides some
-%    low-level \ConTeXt\ functions.
+%    \context at all that allow other modules to be used, it provides some
+%    low-level \context functions.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule('luat-dum.lua') -- not used in context at all
-luaotfload.loadmodule('luat-ovr.lua') -- override some luat-dum functions
-luaotfload.loadmodule('data-con.lua') -- maybe some day we don't need this one
+luaotfload.loadmodule("luat-dum.lua") -- not used in context at all
+luaotfload.loadmodule("luat-ovr.lua") -- override some luat-dum functions
+luaotfload.loadmodule("data-con.lua") -- maybe some day we don't need this one
 %    \end{macrocode}
 %
-%    A hack to remove a warning from \texttt{node-dum.lua} as it is \ConTeXt\
+%    A hack to remove a warning from |node-dum.lua| as it is \context
 %    specific.
 %
 %    \begin{macrocode}
@@ -543,7 +545,7 @@ luaotfload.loadmodule('node-dum.lua')
 luaotfload.loadmodule('node-inj.lua')
 %    \end{macrocode}
 %
-%    By default \ConTeXt\ takes some private attributes for internal use. To
+%    By default \context takes some private attributes for internal use. To
 %    avoide attribute clashes with other packages, we override the function
 %    that allocates new attributes, making it a wraper around
 %    |luatexbase.new_attribute()|. We also prefix attributes with |otfl@| to
@@ -551,7 +553,7 @@ luaotfload.loadmodule('node-inj.lua')
 %
 %    \begin{macrocode}
 function attributes.private(name)
-    local attr   = 'otfl@' .. name
+    local attr   = "otfl@" .. name
     local number = luatexbase.attributes[attr]
     if not number then
         number = luatexbase.new_attribute(attr)
@@ -583,8 +585,7 @@ luaotfload.loadmodule('font-dum.lua')
 %
 %    This is a patch for |otfl-font-def.lua|, that defines a reader for ofm
 %    fonts, this is necessary if we set the forced field of the specification
-%    to |ofm|, we use it only when using \textsf{luaotfload}, not
-%    |mkluatexfontdb|.
+%    to |ofm|.
 %
 %    \begin{macrocode}
 if fonts and fonts.tfm and fonts.tfm.readers then
@@ -595,51 +596,34 @@ end
 %    \textsf{luaotfload} specific modules.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule('font-nms.lua')
-luaotfload.loadmodule('font-clr.lua')
+luaotfload.loadmodule("font-nms.lua")
+luaotfload.loadmodule("font-clr.lua")
 %    \end{macrocode}
 %
 % \subsection{Post-processing TFM table}
 %
 % Here we do some final touches to the loaded TFM table before passing it
-% to the \TeX\ end.
+% to the \tex end.
+%
+% First we create a callback for patching fonts on the fly, to be used by
+% other packages.
+%    \begin{macrocode}
+luatexbase.create_callback("luaotfload.patch_font", "simple", function() end)
+%    \end{macrocode}
+%
+% then define a function where font manipulation will take place.
 %
 %    \begin{macrocode}
 local function def_font(...)
-    local fontdata = fonts.definers.read(...)
+    local fontdata = fonts.define.read(...)
     if type(fontdata) == "table" and fontdata.shared then
 %    \end{macrocode}
 %
-% First, we add some code to emulate \XeTeX's \cs{fontdimen8},
-% which stores the caps-height of the font. (Cf.\ \cs{fontdimen5} which
-% stores the x-height.)
-%
-% Falls back to measuring the glyph if the font doesn't contain the
-% necessary information.
-% This needs to be extended for fonts that don't contain an `X'.
-%
-%    \begin{macrocode}
-        local capheight
-        local units     = fontdata.units
-        local size      = fontdata.size
-        local otfdata   = fontdata.shared.otfdata
-
-        if otfdata.pfminfo.os2_capheight > 0 then
-            capheight = otfdata.pfminfo.os2_capheight / units * size
-        else
-            if fontdata.characters[string.byte("X")] then
-                capheight = fontdata.characters[string.byte("X")].height
-            else
-                capheight = otfdata.metadata.ascent / units * size
-            end
-        end
-        fontdata.parameters[8] = capheight
-%    \end{macrocode}
-%
-% Then we populate \texttt{MathConstants} table, which is required for
+% Then we populate |MathConstants| table, which is required for
 % OpenType math.
 %
 %    \begin{macrocode}
+        local otfdata = fontdata.shared.otfdata
         if otfdata.metadata.math then
             local mc = { }
             for k,v in next, otfdata.metadata.math do
@@ -647,41 +631,29 @@ local function def_font(...)
                     -- keep percent values as is
                     mc[k] = v
                 else
-                    mc[k] = v / units * size
+                    mc[k] = v / fontdata.units * fontdata.size
                 end
             end
             -- for \overwithdelims
-            mc["FractionDelimiterSize"]             = 1.01 * size
-            mc["FractionDelimiterDisplayStyleSize"] = 2.39 * size
+            mc.FractionDelimiterSize             = 1.01 * fontdata.size
+            mc.FractionDelimiterDisplayStyleSize = 2.39 * fontdata.size
 
             fontdata.MathConstants = mc
+        end
 %    \end{macrocode}
 %
-%    \LuaTeX\ does not provide interface to accessing
-%    \texttt{(Script)ScriptPercentScaleDown} math constants, so we emulate
-%    \XeTeX\ behaviour by setting \cs{fontdimen10} and \cs{fontdimen11}.
+% Execute any registered font patching callbacks.
 %
 %    \begin{macrocode}
-            if mc["ScriptPercentScaleDown"] then
-                fontdata.parameters[10] = mc["ScriptPercentScaleDown"]
-            else -- resort to plain TeX default
-                fontdata.parameters[10] = 70
-            end
-            if mc["ScriptScriptPercentScaleDown"] then
-                fontdata.parameters[11] = mc["ScriptScriptPercentScaleDown"]
-            else -- resort to plain TeX default
-                fontdata.parameters[11] = 50
-            end
-        end
-
+        luatexbase.call_callback("luaotfload.patch_font", fontdata)
     end
     return fontdata
 end
 %    \end{macrocode}
 %
-% \subsection{\ConTeXt\ override}
+% \subsection{\context override}
 %
-%    Here we override some defaults set in \ConTeXt\ code.
+%    Here we override some defaults set in \context code.
 %
 %    \begin{macrocode}
 fonts.mode = "node"
@@ -704,35 +676,22 @@ for _,v in next, gsubs do
 end
 %    \end{macrocode}
 %
-%    Finally two functions
+%    Finally we register the callbacks
 %
 %    \begin{macrocode}
-function luaotfload.register_callbacks()
-    luatexbase.add_to_callback('pre_linebreak_filter',
-                                nodes.simple_font_handler,
-                               'luaotfload.pre_linebreak_filter')
-    luatexbase.add_to_callback('hpack_filter',
-                                nodes.simple_font_handler,
-                               'luaotfload.hpack_filter')
-    luatexbase.reset_callback('define_font')
-    luatexbase.add_to_callback('define_font',
-                                def_font,
-                               'luaotfload.define_font', 1)
-    luatexbase.add_to_callback('find_vf_file',
-                                fonts.vf.find,
-                               'luaotfload.find_vf_file')
-end
-
-function luaotfload.unregister_callbacks()
-    luatexbase.remove_from_callback('pre_linebreak_filter',
-                                    'luaotfload.pre_linebreak_filter')
-    luatexbase.remove_from_callback('hpack_filter',
-                                    'luaotfload.hpack_filter')
-    luatexbase.remove_from_callback('define_font',
-                                    'luaotfload.define_font')
-    luatexbase.remove_from_callback('find_vf_file',
-                                     'luaotfload.find_vf_file')
-end
+luatexbase.add_to_callback("pre_linebreak_filter",
+                            nodes.simple_font_handler,
+                           "luaotfload.pre_linebreak_filter")
+luatexbase.add_to_callback("hpack_filter",
+                            nodes.simple_font_handler,
+                           "luaotfload.hpack_filter")
+luatexbase.reset_callback("define_font")
+luatexbase.add_to_callback("define_font",
+                            def_font,
+                           "luaotfload.define_font", 1)
+luatexbase.add_to_callback("find_vf_file",
+                            fonts.vf.find,
+                           "luaotfload.find_vf_file")
 %    \end{macrocode}
 %
 % \iffalse
@@ -745,7 +704,7 @@ end
 %<*package>
 % \fi
 %
-%    Classical Plain+\LaTeX\ package initialization.
+%    Classical Plain+\latex package initialization.
 %
 %    \begin{macrocode}
 \csname ifluaotfloadloaded\endcsname
@@ -757,39 +716,17 @@ end
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2010/10/16 v1.20 OpenType layout system]
+    [2011/02/16 v1.24 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
+
 \RequireLuaModule{lualibs}
-
-\expandafter\edef\csname otfl@AtEnd\endcsname{%
-  \catcode64 \the\catcode64\relax
-}
-
-\catcode64 11
 %    \end{macrocode}
 %
-%    Two small macros to register or unregister the callbacks. Without the
-%    callbacks this package is totally turned off.
-%
-%    \begin{macrocode}
-\def\otfl@off{
-\directlua{luaotfload.unregister_callbacks()}
-}
-
-\def\otfl@on{
-\directlua{luaotfload.register_callbacks()}
-}
-%    \end{macrocode}
-%
-%    We load the |lua| file, and we turn the package on.
+%    Finally we load the |lua| module.
 %
 %    \begin{macrocode}
 \RequireLuaModule{luaotfload}
-
-\otfl@on
-
-\otfl@AtEnd
 %    \end{macrocode}
 % \iffalse
 %</package>

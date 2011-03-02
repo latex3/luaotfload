@@ -616,7 +616,7 @@ luatexbase.create_callback("luaotfload.patch_font", "simple", function() end)
 %
 %    \begin{macrocode}
 local function def_font(...)
-    local fontdata = fonts.define.read(...)
+    local fontdata = fonts.definers.read(...)
     if type(fontdata) == "table" and fontdata.shared then
 %    \end{macrocode}
 %

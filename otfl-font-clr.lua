@@ -94,8 +94,8 @@ local sbox    = node.id('sub_box')
 local function lookup_next_color(head)
     for n in node.traverse(head) do
         if n.id == glyph then
-            if fonts.ids[n.font] and fonts.ids[n.font].color then
-                return fonts.ids[n.font].color
+            if fonts.identifiers[n.font] and fonts.identifiers[n.font].color then
+                return fonts.identifiers[n.font].color
             else
                 return -1
             end
@@ -119,7 +119,7 @@ local function node_colorize(head, current_color, next_color)
             local next_color_in = lookup_next_color(n.next) or next_color
             n.list, current_color = node_colorize(n.list, current_color, next_color_in)
         elseif n.id == glyph then
-            local tfmdata = fonts.ids[n.font]
+            local tfmdata = fonts.identifiers[n.font]
             if tfmdata and tfmdata.color then
                 if tfmdata.color ~= current_color then
                     local pushcolor = hex_to_rgba(tfmdata.color)

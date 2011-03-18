@@ -660,23 +660,6 @@ end
 fonts.mode = "node"
 %    \end{macrocode}
 %
-%    The following features are useful in math (e.g. in XITS Math font),
-%    but \textsf{luaotfload} does not recognize them in |base| mode.
-%
-%    \begin{macrocode}
-local register_base_sub = fonts.otf.features.registerbasesubstitution
-local gsubs = {
-    "ss01", "ss02", "ss03", "ss04", "ss05",
-    "ss06", "ss07", "ss08", "ss09", "ss10",
-    "ss11", "ss12", "ss13", "ss14", "ss15",
-    "ss16", "ss17", "ss18", "ss19", "ss20",
-}
-
-for _,v in next, gsubs do
-    register_base_sub(v)
-end
-%    \end{macrocode}
-%
 %    Finally we register the callbacks
 %
 %    \begin{macrocode}

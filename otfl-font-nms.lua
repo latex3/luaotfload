@@ -19,9 +19,21 @@ names.path           = {
     systemdir = file.join(kpse.expand_var("$TEXMFSYSVAR"), names_dir),
 }
 
+local success = pcall(require, "luatexbase.modutils")
+if success then
+   success = pcall(luatexbase.require_module, "lualatex-platform", "2011/03/30")
+end
+local get_installed_fonts
+if success then
+   get_installed_fonts = lualatex.platform.get_installed_fonts
+else
+   function get_installed_fonts()
+   end
+end
 
 local splitpath, expandpath = file.split_path, kpse.expand_path
 local glob, basename        = dir.glob, file.basename
+local extname               = file.extname
 local upper, lower, format  = string.upper, string.lower, string.format
 local gsub, match, rpadd    = string.gsub, string.match, string.rpadd
 local gmatch, sub, find     = string.gmatch, string.sub, string.find
@@ -444,6 +456,42 @@ local function read_blacklist()
 end
 
 local font_extensions = { "otf", "ttf", "ttc", "dfont" }
+local font_extensions_set = {}
+for key, value in ipairs(font_extensions) do
+   font_extensions_set[value] = true
+end
+
+local installed_fonts_scanned = false
+
+local function scan_installed_fonts(fontnames, newfontnames)
+   -- Try to query and add font list from operating system.
+   -- This uses the lualatex-platform module.
+   logs.info("Scanning fonts known to operating system...")
+   local fonts = get_installed_fonts()
+   if fonts and #fonts > 0 then
+      installed_fonts_scanned = true
+      if trace_search then
+         logs.report("%d operating system fonts found", #fonts)
+      end
+      for key, value in ipairs(fonts) do
+         local file = value.path
+         if file then
+            local ext = extname(file)
+            if ext and font_extensions_set[ext] then
+               file = path_normalize(file)
+               if trace_loading then
+                  logs.report("loading font: %s", file)
+               end
+               load_font(file, fontnames, newfontnames, false)
+            end
+         end
+      end
+   else
+      if trace_search then
+         logs.report("Could not retrieve list of installed fonts")
+      end
+   end
+end
 
 local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --[[
@@ -647,8 +695,10 @@ local function update_names(fontnames, force)
     end
     local newfontnames = fontnames_init()
     read_blacklist()
+    installed_font_scanned = false
+    scan_installed_fonts(fontnames, newfontnames)
     scan_texmf_fonts(fontnames, newfontnames)
-    if expandpath("$OSFONTDIR"):is_empty() then
+    if not installed_fonts_scanned and expandpath("$OSFONTDIR"):is_empty() then
         scan_os_fonts(fontnames, newfontnames)
     end
     return newfontnames

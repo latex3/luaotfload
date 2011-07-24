@@ -76,13 +76,14 @@ local function load_names()
 	foundname = systempath
     end
     if data then
-        logs.info("Font names database loaded: " .. foundname)
+        logs.info("Font names database loaded", "%s", foundname)
     else
         logs.info([[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
         data = names.update(fontnames_init())
         names.save(data)
     end
+    texio.write_nl("")
     return data
 end
 
@@ -251,9 +252,15 @@ end
 
 local lastislog = 0
 
-local function log(fmt, ...)
+local function log(category, fmt, ...)
     lastislog = 1
-    texio.write_nl(format("luaotfload | %s", format(fmt,...)))
+    if fmt then
+        texio.write_nl(format("luaotfload | %s: %s", category, format(fmt, ...)))
+    elseif category then
+        texio.write_nl(format("luaotfload | %s", category))
+    else
+        texio.write_nl(format("luaotfload |"))
+    end
     io.flush()
 end
 
@@ -266,7 +273,7 @@ local function font_fullinfo(filename, subfont, texmf)
     local f = fontloader.open(filename, subfont)
     if not f then
 	    if trace_loading then
-        	logs.report("error: failed to open %s", filename)
+               logs.report("error", "failed to open %s", filename)
 	    end
         return
     end
@@ -298,7 +305,7 @@ local function font_fullinfo(filename, subfont, texmf)
     else
         -- no names table, propably a broken font
         if trace_loading then
-            logs.report("broken font rejected: %s", basefile)
+            logs.report("broken font rejected", "%s", basefile)
         end
         return
     end
@@ -328,7 +335,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
         if table.contains(names.blacklist, filename) or
            table.contains(names.blacklist, basename(filename)) then
             if trace_search then
-                logs.report("ignoring font '%s'", filename)
+                logs.report("ignoring font", "%s", filename)
             end
             return
         end
@@ -353,7 +360,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
                 newstatus[basefile].index[index+1] = #newmappings
             end
             if trace_loading then
-                logs.report("font already indexed: %s", basefile)
+                logs.report("font already indexed", "%s", basefile)
             end
             return
         end
@@ -390,7 +397,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
             end
         else
             if trace_loading then
-               logs.report("failed to load %s", basefile)
+               logs.report("failed to load", "%s", basefile)
             end
         end
     end
@@ -446,7 +453,7 @@ local function read_blacklist()
                     line = line:split("%")[1]
                     line = line:strip()
                     if trace_search then
-                        logs.report("blacklisted file: %s", line)
+                        logs.report("blacklisted file", "%s", line)
                     end
                     blacklist[#blacklist+1] = line
                 end
@@ -471,7 +478,7 @@ local function scan_installed_fonts(fontnames, newfontnames)
    if fonts and #fonts > 0 then
       installed_fonts_scanned = true
       if trace_search then
-         logs.report("%d operating system fonts found", #fonts)
+         logs.report("operating system fonts found", "%d", #fonts)
       end
       for key, value in ipairs(fonts) do
          local file = value.path
@@ -480,7 +487,7 @@ local function scan_installed_fonts(fontnames, newfontnames)
             if ext and font_extensions_set[ext] then
                file = path_normalize(file)
                if trace_loading then
-                  logs.report("loading font: %s", file)
+                  logs.report("loading font", "%s", file)
                end
                load_font(file, fontnames, newfontnames, false)
             end
@@ -504,7 +511,7 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
     local list, found = { }, { }
     local nbfound = 0
     if trace_search then
-        logs.report("scanning '%s'", dirname)
+        logs.report("scanning", "%s", dirname)
     end
     for _,i in next, font_extensions do
         for _,ext in next, { i, upper(i) } do
@@ -512,20 +519,20 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
             -- note that glob fails silently on broken symlinks, which happens
             -- sometimes in TeX Live.
             if trace_search then
-                logs.report("%s '%s' fonts found", #found, ext)
+                logs.report("fonts found", "%s '%s' fonts found", #found, ext)
             end
             nbfound = nbfound + #found
             table.append(list, found)
         end
     end
     if trace_search then
-        logs.report("%d fonts found in '%s'", nbfound, dirname)
+        logs.report("fonts found", "%d fonts found in '%s'", nbfound, dirname)
     end
 
     for _,file in next, list do
         file = path_normalize(file)
         if trace_loading then
-            logs.report("loading font: %s", file)
+            logs.report("loading font", "%s", file)
         end
         load_font(file, fontnames, newfontnames, texmf)
     end
@@ -677,7 +684,7 @@ local function update_names(fontnames, force)
     - fontnames is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
-    logs.info("Updating the font names database:")
+    logs.info("Updating the font names database")
 
     if force then
         fontnames = fontnames_init()
@@ -712,10 +719,10 @@ local function save_names(fontnames)
     savepath = file.join(savepath, names.path.basename)
     if file.iswritable(savepath) then
         table.tofile(savepath, fontnames, true)
-        logs.info("Font names database saved: %s \n", savepath)
+        logs.info("Font names database saved", "%s", savepath)
         return savepath
     else
-        logs.info("Failed to save names database\n")
+        logs.info("Failed to save names database")
         return nil
     end
 end

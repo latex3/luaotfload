@@ -332,8 +332,8 @@ local function load_font(filename, fontnames, newfontnames, texmf)
     local status      = fontnames.status
     local basefile    = texmf and basename(filename) or filename
     if filename then
-        if table.contains(names.blacklist, filename) or
-           table.contains(names.blacklist, basename(filename)) then
+        if names.blacklist[filename] or
+           names.blacklist[basename(filename)] then
             if trace_search then
                 logs.report("ignoring font", "%s", filename)
             end
@@ -442,6 +442,7 @@ local function read_blacklist()
         kpse.lookup("otfl-blacklist.cnf", {all=true, format="tex"})
     }
     local blacklist = names.blacklist
+    local whitelist = { }
 
     if files and type(files) == "table" then
         for _,v in next, files do
@@ -452,13 +453,20 @@ local function read_blacklist()
                 else
                     line = line:split("%")[1]
                     line = line:strip()
-                    if trace_search then
-                        logs.report("blacklisted file", "%s", line)
+                    if string.sub(line,1,1) == "-" then
+                        whitelist[string.sub(line,2,-1)] = true
+                    else
+                      if trace_search then
+                          logs.report("blacklisted file", "%s", line)
+                      end
+                      blacklist[line] = true
                     end
-                    blacklist[#blacklist+1] = line
                 end
             end
         end
+    end
+    for fontname,_ in pairs(whitelist) do
+      blacklist[fontname] = nil
     end
 end
 

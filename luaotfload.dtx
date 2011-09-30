@@ -379,7 +379,18 @@ and the derived files
 % Simply, create a file named |otfl-blacklist.cnf| and added the to be
 % blacklisted files, one per line. Then put the file some where \textsf{kpse}
 % can find. You can either use the base name or the full path. Any thing after
-% a |%| sign is ignored.
+% a |%| sign is ignored. \textsf{luaotfload} reads all files named named
+% |otfl-blacklist.cnf|, so you can add your own fonts to the global blacklist
+% by creating a local file |otfl-blacklist.cnf| with the entries you need.
+% You can also remove a font from this blacklist by prepending the name with
+% a dash (|-|).
+%
+% \begin{verbatim}
+% % example otf-blacklist.cnf
+% /Library/Fonts/GillSans.ttc  % luaotfload ignores this font
+% -/Library/Fonts/Optima.ttc   % it is usable again, even if it
+%                              % is blacklisted somewhere else
+% \end{verbatim}
 %
 % \section{Required \context files}
 %

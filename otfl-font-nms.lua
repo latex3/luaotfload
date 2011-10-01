@@ -587,7 +587,10 @@ local function read_fonts_conf(path, results)
     ]]
     local f = io.open(path)
     if not f then
-        error("Cannot open the file "..path)
+        if trace_search then
+            logs.report("cannot open file", "%s", path)
+        end
+        return results
     end
     local incomments = false
     for line in f:lines() do
@@ -675,6 +678,7 @@ local function get_os_dirs()
             end
         end
     end
+    return {}
 end
 
 local function scan_os_fonts(fontnames, newfontnames)

@@ -669,7 +669,11 @@ local function get_os_dirs()
         local windir = os.getenv("WINDIR")
         return { file.join(windir, 'Fonts') }
     else
-        return read_fonts_conf("/etc/fonts/fonts.conf", {})
+        for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
+            if lfs.isfile(p) then
+                return read_fonts_conf("/etc/fonts/fonts.conf", {})
+            end
+        end
     end
 end
 

@@ -224,6 +224,8 @@ function names.resolve(specification)
                 return names.resolve(specification)
             else
                 -- else, fallback to filename
+                -- XXX: specification.name is empty with absolute paths, looks
+                -- like a bug in the specification parser
                 return specification.name, false
             end
         end

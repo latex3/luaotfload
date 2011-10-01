@@ -1,6 +1,12 @@
 Change History
 --------------
 
+2011/04/21, luaotfload v1.25:
+    * Fix bug loading *.dfont fonts
+    * Misc. documentation fixes
+    * Fix the need to manually delete font cache when feature file is changed
+    * Hack to support Demi fonts
+
 2011/02/16, luaotfload v1.24:
     * Fix infinite loop first time creating a name list
 

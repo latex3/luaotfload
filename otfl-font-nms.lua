@@ -97,7 +97,7 @@ local synonyms = {
 local loaded   = false
 local reloaded = false
 
-function names.resolve(specification)
+function names.resolve(_,_,specification)
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
 
@@ -221,7 +221,7 @@ function names.resolve(specification)
                 names.data = names.update(names.data)
                 names.save(names.data)
                 reloaded   = true
-                return names.resolve(specification)
+                return names.resolve(_,_,specification)
             else
                 -- else, fallback to filename
                 -- XXX: specification.name is empty with absolute paths, looks
@@ -234,7 +234,7 @@ function names.resolve(specification)
             names.data = names.update()
             names.save(names.data)
             reloaded   = true
-            return names.resolve(specification)
+            return names.resolve(_,_,specification)
         else
             return specification.name, false
         end

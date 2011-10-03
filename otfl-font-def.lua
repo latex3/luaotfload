@@ -170,7 +170,7 @@ end
 function resolvers.name(specification)
     local resolve = fonts.names.resolve
     if resolve then
-        local resolved, sub = fonts.names.resolve(specification.name,specification.sub)
+        local resolved, sub = fonts.names.resolve(specification.name,specification.sub,specification)
         specification.resolved, specification.sub = resolved, sub
         if resolved then
             local suffix = file.suffix(resolved)
@@ -189,7 +189,7 @@ end
 function resolvers.spec(specification)
     local resolvespec = fonts.names.resolvespec
     if resolvespec then
-        specification.resolved, specification.sub = fonts.names.resolvespec(specification.name,specification.sub)
+        specification.resolved, specification.sub = fonts.names.resolvespec(specification.name,specification.sub,specification)
         if specification.resolved then
             specification.forced = file.extname(specification.resolved)
             specification.name = file.removesuffix(specification.resolved)

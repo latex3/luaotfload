@@ -224,6 +224,8 @@ function names.resolve(specification)
                 return names.resolve(specification)
             else
                 -- else, fallback to filename
+                -- XXX: specification.name is empty with absolute paths, looks
+                -- like a bug in the specification parser
                 return specification.name, false
             end
         end
@@ -585,7 +587,10 @@ local function read_fonts_conf(path, results)
     ]]
     local f = io.open(path)
     if not f then
-        error("Cannot open the file "..path)
+        if trace_search then
+            logs.report("cannot open file", "%s", path)
+        end
+        return results
     end
     local incomments = false
     for line in f:lines() do
@@ -667,8 +672,13 @@ local function get_os_dirs()
         local windir = os.getenv("WINDIR")
         return { file.join(windir, 'Fonts') }
     else
-        return read_fonts_conf("/etc/fonts/fonts.conf", {})
+        for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
+            if lfs.isfile(p) then
+                return read_fonts_conf("/etc/fonts/fonts.conf", {})
+            end
+        end
     end
+    return {}
 end
 
 local function scan_os_fonts(fontnames, newfontnames)

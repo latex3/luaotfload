@@ -10,14 +10,6 @@ if not modules then modules = { } end modules ['font-otn'] = {
 -- much functionality could only be implemented thanks to the husayni font
 -- of Idris Samawi Hamid to who we dedicate this module.
 
--- I'm in the process of cleaning up the code (which happens in another
--- file) so don't rely on things staying the same.
-
--- some day when we can jit this, we can use more functions
-
--- we can use more lpegs when lpeg is extended with function args and so
--- resolving to unicode does not gain much
-
 -- in retrospect it always looks easy but believe it or not, it took a lot
 -- of work to get proper open type support done: buggy fonts, fuzzy specs,
 -- special made testfonts, many skype sessions between taco, idris and me,
@@ -32,10 +24,7 @@ if not modules then modules = { } end modules ['font-otn'] = {
 -- alternative loop quitters
 -- check cursive and r2l
 -- find out where ignore-mark-classes went
--- remove unused tables
--- slide tail (always glue at the end so only needed once
 -- default features (per language, script)
--- cleanup kern(class) code, remove double info
 -- handle positions (we need example fonts)
 -- handle gpos_single (we might want an extra width field in glyph nodes because adding kerns might interfere)
 
@@ -111,6 +100,8 @@ results in different tables.</p>
 -- gpos_context              ok          --
 -- gpos_contextchain         ok          --
 --
+-- todo: contextpos and contextsub and class stuff
+--
 -- actions:
 --
 -- handler   : actions triggered by lookup
@@ -120,16 +111,20 @@ results in different tables.</p>
 -- remark: the 'not implemented yet' variants will be done when we have fonts that use them
 -- remark: we need to check what to do with discretionaries
 
+-- We used to have independent hashes for lookups but as the tags are unique
+-- we now use only one hash. If needed we can have multiple again but in that
+-- case I will probably prefix (i.e. rename) the lookups in the cached font file.
+
 local concat, insert, remove = table.concat, table.insert, table.remove
 local format, gmatch, gsub, find, match, lower, strip = string.format, string.gmatch, string.gsub, string.find, string.match, string.lower, string.strip
 local type, next, tonumber, tostring = type, next, tonumber, tostring
 local lpegmatch = lpeg.match
 local random = math.random
 
-local logs, trackers, fonts, nodes, attributes = logs, trackers, fonts, nodes, attributes
+local logs, trackers, nodes, attributes = logs, trackers, nodes, attributes
 
-local otf = fonts.otf
-local tfm = fonts.tfm
+local fonts = fonts
+local otf   = fonts.handlers.otf
 
 local trace_lookups      = false  trackers.register("otf.lookups",      function(v) trace_lookups      = v end)
 local trace_singles      = false  trackers.register("otf.singles",      function(v) trace_singles      = v end)
@@ -164,92 +159,84 @@ trackers.register("otf.injections","nodes.injections")
 
 trackers.register("*otf.sample","otf.steps,otf.actions,otf.analyzing")
 
-local insert_node_after = node.insert_after
-local delete_node       = nodes.delete
-local copy_node         = node.copy
-local find_node_tail    = node.tail or node.slide
-local set_attribute     = node.set_attribute
-local has_attribute     = node.has_attribute
+local insert_node_after  = node.insert_after
+local delete_node        = nodes.delete
+local copy_node          = node.copy
+local find_node_tail     = node.tail or node.slide
+local set_attribute      = node.set_attribute
+local has_attribute      = node.has_attribute
+local flush_node_list    = node.flush_list
 
-local zwnj     = 0x200C
-local zwj      = 0x200D
-local wildcard = "*"
-local default  = "dflt"
+local setmetatableindex  = table.setmetatableindex
 
-local split_at_space = lpeg.Ct(lpeg.splitat(" ")) -- no trailing or multiple spaces anyway
+local zwnj               = 0x200C
+local zwj                = 0x200D
+local wildcard           = "*"
+local default            = "dflt"
 
-local nodecodes     = nodes.nodecodes
-local whatcodes     = nodes.whatcodes
-local glyphcodes    = nodes.glyphcodes
+local nodecodes          = nodes.nodecodes
+local whatcodes          = nodes.whatcodes
+local glyphcodes         = nodes.glyphcodes
 
-local glyph_code    = nodecodes.glyph
-local glue_code     = nodecodes.glue
-local disc_code     = nodecodes.disc
-local whatsit_code  = nodecodes.whatsit
+local glyph_code         = nodecodes.glyph
+local glue_code          = nodecodes.glue
+local disc_code          = nodecodes.disc
+local whatsit_code       = nodecodes.whatsit
 
-local dir_code      = whatcodes.dir
-local localpar_code = whatcodes.localpar
+local dir_code           = whatcodes.dir
+local localpar_code      = whatcodes.localpar
 
-local ligature_code = glyphcodes.ligature
+local ligature_code      = glyphcodes.ligature
 
-local state    = attributes.private('state')
-local markbase = attributes.private('markbase')
-local markmark = attributes.private('markmark')
-local markdone = attributes.private('markdone')
-local cursbase = attributes.private('cursbase')
-local curscurs = attributes.private('curscurs')
-local cursdone = attributes.private('cursdone')
-local kernpair = attributes.private('kernpair')
+local privateattribute   = attributes.private
 
-local injections  = nodes.injections
-local setmark     = injections.setmark
-local setcursive  = injections.setcursive
-local setkern     = injections.setkern
-local setpair     = injections.setpair
+local state              = privateattribute('state')
+local markbase           = privateattribute('markbase')
+local markmark           = privateattribute('markmark')
+local markdone           = privateattribute('markdone')
+local cursbase           = privateattribute('cursbase')
+local curscurs           = privateattribute('curscurs')
+local cursdone           = privateattribute('cursdone')
+local kernpair           = privateattribute('kernpair')
 
-local markonce = true
-local cursonce = true
-local kernonce = true
+local injections         = nodes.injections
+local setmark            = injections.setmark
+local setcursive         = injections.setcursive
+local setkern            = injections.setkern
+local setpair            = injections.setpair
 
-local fontdata = fonts.identifiers
+local markonce           = true
+local cursonce           = true
+local kernonce           = true
 
-otf.features.process = { }
+local fonthashes         = fonts.hashes
+local fontdata           = fonthashes.identifiers
+
+local otffeatures        = fonts.constructors.newfeatures("otf")
+local registerotffeature = otffeatures.register
+
+local onetimemessage     = fonts.loggers.onetimemessage
 
 -- we share some vars here, after all, we have no nested lookups and
 -- less code
 
-local tfmdata       = false
-local otfdata       = false
-local characters    = false
-local descriptions  = false
-local marks         = false
-local indices       = false
-local unicodes      = false
-local currentfont   = false
-local lookuptable   = false
-local anchorlookups = false
-local handlers      = { }
-local rlmode        = 0
-local featurevalue  = false
-
--- we cheat a bit and assume that a font,attr combination are kind of ranged
-
-local specifiers     = fonts.definers.specifiers
-local contextsetups  = specifiers.contextsetups
-local contextnumbers = specifiers.contextnumbers
-local contextmerged  = specifiers.contextmerged
+local tfmdata             = false
+local characters          = false
+local descriptions        = false
+local resources           = false
+local marks               = false
+local currentfont         = false
+local lookuptable         = false
+local anchorlookups       = false
+local lookuptypes         = false
+local handlers            = { }
+local rlmode              = 0
+local featurevalue        = false
 
 -- we cannot optimize with "start = first_glyph(head)" because then we don't
 -- know which rlmode we're in which messes up cursive handling later on
 --
 -- head is always a whatsit so we can safely assume that head is not changed
-
-local special_attributes = {
-    init = 1,
-    medi = 2,
-    fina = 3,
-    isol = 4
-}
 
 -- we use this for special testing and documentation
 
@@ -263,6 +250,7 @@ local function logprocess(...)
     end
     report_direct(...)
 end
+
 local function logwarning(...)
     report_direct(...)
 end
@@ -272,9 +260,9 @@ local function gref(n)
         local description = descriptions[n]
         local name = description and description.name
         if name then
-            return format("U+%04X (%s)",n,name)
+            return format("U+%05X (%s)",n,name)
         else
-            return format("U+%04X",n)
+            return format("U+%05X",n)
         end
     elseif not n then
         return "<error in tracing>"
@@ -282,9 +270,11 @@ local function gref(n)
         local num, nam = { }, { }
         for i=1,#n do
             local ni = n[i]
-            local di = descriptions[ni]
-            num[i] = format("U+%04X",ni)
-            nam[i] = di and di.name or "?"
+            if tonumber(ni) then -- later we will start at 2
+                local di = descriptions[ni]
+                num[i] = format("U+%05X",ni)
+                nam[i] = di and di.name or "?"
+            end
         end
         return format("%s (%s)",concat(num," "), concat(nam," "))
     end
@@ -327,86 +317,90 @@ local function markstoligature(kind,lookupname,start,stop,char)
 end
 
 local function toligature(kind,lookupname,start,stop,char,markflag,discfound) -- brr head
-    if start ~= stop then
---~         if discfound then
---~             local lignode = copy_node(start)
---~             lignode.font = start.font
---~             lignode.char = char
---~             lignode.subtype = ligature_code
---~             start = node.do_ligature_n(start, stop, lignode)
---~             if start.id == disc_code then
---~                 local prev = start.prev
---~                 start = start.next
---~             end
-        if discfound then
-         -- print("start->stop",nodes.tosequence(start,stop))
-            local lignode = copy_node(start)
-            lignode.font, lignode.char, lignode.subtype = start.font, char, ligature_code
-            local next, prev = stop.next, start.prev
-            stop.next = nil
-            lignode = node.do_ligature_n(start, stop, lignode)
-            prev.next = lignode
-            if next then
-                next.prev = lignode
-            end
-            lignode.next, lignode.prev = next, prev
-            start = lignode
-         -- print("start->end",nodes.tosequence(start))
-        else -- start is the ligature
-            local deletemarks = markflag ~= "mark"
-            local n = copy_node(start)
-            local current
-            current, start = insert_node_after(start,start,n)
-            local snext = stop.next
-            current.next = snext
-            if snext then
-                snext.prev = current
-            end
-            start.prev, stop.next = nil, nil
-            current.char, current.subtype, current.components = char, ligature_code, start
-            local head = current
-            if deletemarks then
-                if trace_marks then
-                    while start do
-                        if marks[start.char] then
-                            logwarning("%s: remove mark %s",pref(kind,lookupname),gref(start.char))
-                        end
-                        start = start.next
-                    end
-                end
-            else
-                local i = 0
+    if start == stop then
+        start.char = char
+        return start
+    elseif discfound then
+     -- print("start->stop",nodes.tosequence(start,stop))
+        local components = start.components
+        if components then
+            flush_node_list(components)
+            start.components = nil
+        end
+        local lignode = copy_node(start)
+        lignode.font = start.font
+        lignode.char = char
+        lignode.subtype = ligature_code
+        local next = stop.next
+        local prev = start.prev
+        stop.next = nil
+        start.prev = nil
+        lignode.components = start
+     -- print("lignode",nodes.tosequence(lignode))
+     -- print("components",nodes.tosequence(lignode.components))
+        prev.next = lignode
+        if next then
+            next.prev = lignode
+        end
+        lignode.next = next
+        lignode.prev = prev
+     -- print("start->end",nodes.tosequence(start))
+        return lignode
+    else
+        -- start is the ligature
+        local deletemarks = markflag ~= "mark"
+        local n = copy_node(start)
+        local current
+        current, start = insert_node_after(start,start,n)
+        local snext = stop.next
+        current.next = snext
+        if snext then
+            snext.prev = current
+        end
+        start.prev = nil
+        stop.next = nil
+        current.char = char
+        current.subtype = ligature_code
+        current.components = start
+        local head = current
+        if deletemarks then
+            if trace_marks then
                 while start do
                     if marks[start.char] then
-                        set_attribute(start,markdone,i)
-                        if trace_marks then
-                            logwarning("%s: keep mark %s, gets index %s",pref(kind,lookupname),gref(start.char),i)
-                        end
-                        head, current = insert_node_after(head,current,copy_node(start))
-                    else
-                        i = i + 1
-                    end
-                    start = start.next
-                end
-                start = current.next
-                while start and start.id == glyph_code do
-                    if marks[start.char] then
-                        set_attribute(start,markdone,i)
-                        if trace_marks then
-                            logwarning("%s: keep mark %s, gets index %s",pref(kind,lookupname),gref(start.char),i)
-                        end
-                    else
-                        break
+                        logwarning("%s: remove mark %s",pref(kind,lookupname),gref(start.char))
                     end
                     start = start.next
                 end
             end
-            return head
+        else
+            local i = 0
+            while start do
+                if marks[start.char] then
+                    set_attribute(start,markdone,i)
+                    if trace_marks then
+                        logwarning("%s: keep mark %s, gets index %s",pref(kind,lookupname),gref(start.char),i)
+                    end
+                    head, current = insert_node_after(head,current,copy_node(start))
+                else
+                    i = i + 1
+                end
+                start = start.next
+            end
+            start = current.next
+            while start and start.id == glyph_code do
+                if marks[start.char] then
+                    set_attribute(start,markdone,i)
+                    if trace_marks then
+                        logwarning("%s: keep mark %s, gets index %s",pref(kind,lookupname),gref(start.char),i)
+                    end
+                else
+                    break
+                end
+                start = start.next
+            end
         end
-    else
-        start.char = char
+        return head
     end
-    return start
 end
 
 function handlers.gsub_single(start,kind,lookupname,replacement)
@@ -418,7 +412,11 @@ function handlers.gsub_single(start,kind,lookupname,replacement)
 end
 
 local function alternative_glyph(start,alternatives,kind,chainname,chainlookupname,lookupname) -- chainname and chainlookupname optional
-    local value, choice, n = featurevalue or tfmdata.shared.features[kind], nil, #alternatives -- global value, brrr
+    -- needs checking: (global value, brrr)
+    local value  = featurevalue == true and tfmdata.shared.features[kind] or featurevalue
+    local choice = nil
+    local n      = #alternatives
+    --
     if value == "random" then
         local r = random(1,n)
         value, choice = format("random, choice %s",r), alternatives[r]
@@ -447,6 +445,33 @@ local function alternative_glyph(start,alternatives,kind,chainname,chainlookupna
     return choice, value
 end
 
+local function multiple_glyphs(start,multiple)
+    local nofmultiples = #multiple
+    if nofmultiples > 0 then
+        start.char = multiple[1]
+        if nofmultiples > 1 then
+            local sn = start.next
+            for k=2,nofmultiples do -- todo: use insert_node
+                local n = copy_node(start)
+                n.char = multiple[k]
+                n.next = sn
+                n.prev = start
+                if sn then
+                    sn.prev = n
+                end
+                start.next = n
+                start = n
+            end
+        end
+        return start, true
+    else
+        if trace_multiples then
+            logprocess("no multiple for %s",gref(start.char))
+        end
+        return start, false
+    end
+end
+
 function handlers.gsub_alternate(start,kind,lookupname,alternative,sequence)
     local choice, index = alternative_glyph(start,alternative,kind,lookupname)
     if trace_alternatives then
@@ -460,41 +485,21 @@ function handlers.gsub_multiple(start,kind,lookupname,multiple)
     if trace_multiples then
         logprocess("%s: replacing %s by multiple %s",pref(kind,lookupname),gref(start.char),gref(multiple))
     end
-    start.char = multiple[1]
-    if #multiple > 1 then
-        for k=2,#multiple do
-            local n = copy_node(start)
-            n.char = multiple[k]
-            local sn = start.next
-            n.next = sn
-            n.prev = start
-            if sn then
-                sn.prev = n
-            end
-            start.next = n
-            start = n
-        end
-    end
-    return start, true
+    return multiple_glyphs(start,multiple)
 end
 
-function handlers.gsub_ligature(start,kind,lookupname,ligature,sequence) --or maybe pass lookup ref
+function handlers.gsub_ligature(start,kind,lookupname,ligature,sequence)
     local s, stop, discfound = start.next, nil, false
     local startchar = start.char
     if marks[startchar] then
         while s do
             local id = s.id
-            if id == glyph_code and s.subtype<256 then
-                if s.font == currentfont then
-                    local char = s.char
-                    local lg = ligature[1][char]
-                    if not lg then
-                        break
-                    else
-                        stop = s
-                        ligature = lg
-                        s = s.next
-                    end
+            if id == glyph_code and s.subtype<256 and s.font == currentfont then
+                local lg = ligature[s.char]
+                if lg then
+                    stop = s
+                    ligature = lg
+                    s = s.next
                 else
                     break
                 end
@@ -502,15 +507,20 @@ function handlers.gsub_ligature(start,kind,lookupname,ligature,sequence) --or ma
                 break
             end
         end
-        if stop and ligature[2] then
-            if trace_ligatures then
-                local stopchar = stop.char
-                start = markstoligature(kind,lookupname,start,stop,ligature[2])
-                logprocess("%s: replacing %s upto %s by ligature %s",pref(kind,lookupname),gref(startchar),gref(stopchar),gref(start.char))
+        if stop then
+            local lig = ligature.ligature
+            if lig then
+                if trace_ligatures then
+                    local stopchar = stop.char
+                    start = markstoligature(kind,lookupname,start,stop,lig)
+                    logprocess("%s: replacing %s upto %s by ligature %s",pref(kind,lookupname),gref(startchar),gref(stopchar),gref(start.char))
+                else
+                    start = markstoligature(kind,lookupname,start,stop,lig)
+                end
+                return start, true
             else
-                start = markstoligature(kind,lookupname,start,stop,ligature[2])
+                -- ok, goto next lookup
             end
-            return start, true
         end
     else
         local skipmark = sequence.flags[1]
@@ -522,13 +532,13 @@ function handlers.gsub_ligature(start,kind,lookupname,ligature,sequence) --or ma
                     if skipmark and marks[char] then
                         s = s.next
                     else
-                        local lg = ligature[1][char]
-                        if not lg then
-                            break
-                        else
+                        local lg = ligature[char]
+                        if lg then
                             stop = s
                             ligature = lg
                             s = s.next
+                        else
+                            break
                         end
                     end
                 else
@@ -541,15 +551,20 @@ function handlers.gsub_ligature(start,kind,lookupname,ligature,sequence) --or ma
                 break
             end
         end
-        if stop and ligature[2] then
-            if trace_ligatures then
-                local stopchar = stop.char
-                start = toligature(kind,lookupname,start,stop,ligature[2],skipmark,discfound)
-                logprocess("%s: replacing %s upto %s by ligature %s",pref(kind,lookupname),gref(startchar),gref(stopchar),gref(start.char))
+        if stop then
+            local lig = ligature.ligature
+            if lig then
+                if trace_ligatures then
+                    local stopchar = stop.char
+                    start = toligature(kind,lookupname,start,stop,lig,skipmark,discfound)
+                    logprocess("%s: replacing %s upto %s by ligature %s",pref(kind,lookupname),gref(startchar),gref(stopchar),gref(start.char))
+                else
+                    start = toligature(kind,lookupname,start,stop,lig,skipmark,discfound)
+                end
+                return start, true
             else
-                start = toligature(kind,lookupname,start,stop,ligature[2],skipmark,discfound)
+                -- ok, goto next lookup
             end
-            return start, true
         end
     end
     return start, false
@@ -594,7 +609,7 @@ function handlers.gpos_mark2base(start,kind,lookupname,markanchors,sequence)
                         if al[anchor] then
                             local ma = markanchors[anchor]
                             if ma then
-                                local dx, dy, bound = setmark(start,base,tfmdata.factor,rlmode,ba,ma)
+                                local dx, dy, bound = setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma)
                                 if trace_marks then
                                     logprocess("%s, anchor %s, bound %s: anchoring mark %s to basechar %s => (%s,%s)",
                                         pref(kind,lookupname),anchor,bound,gref(markchar),gref(basechar),dx,dy)
@@ -609,7 +624,7 @@ function handlers.gpos_mark2base(start,kind,lookupname,markanchors,sequence)
                 end
             else -- if trace_bugs then
             --  logwarning("%s: char %s is missing in font",pref(kind,lookupname),gref(basechar))
-                fonts.registermessage(currentfont,basechar,"no base anchors")
+                onetimemessage(currentfont,basechar,"no base anchors",report_fonts)
             end
         elseif trace_bugs then
             logwarning("%s: prev node is no char",pref(kind,lookupname))
@@ -662,7 +677,7 @@ function handlers.gpos_mark2ligature(start,kind,lookupname,markanchors,sequence)
                                 if ma then
                                     ba = ba[index]
                                     if ba then
-                                        local dx, dy, bound = setmark(start,base,tfmdata.factor,rlmode,ba,ma,index)
+                                        local dx, dy, bound = setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma,index)
                                         if trace_marks then
                                             logprocess("%s, anchor %s, index %s, bound %s: anchoring mark %s to baselig %s at index %s => (%s,%s)",
                                                 pref(kind,lookupname),anchor,index,bound,gref(markchar),gref(basechar),index,dx,dy)
@@ -679,7 +694,7 @@ function handlers.gpos_mark2ligature(start,kind,lookupname,markanchors,sequence)
                 end
             else -- if trace_bugs then
             --  logwarning("%s: char %s is missing in font",pref(kind,lookupname),gref(basechar))
-                fonts.registermessage(currentfont,basechar,"no base anchors")
+                onetimemessage(currentfont,basechar,"no base anchors",report_fonts)
             end
         elseif trace_bugs then
             logwarning("%s: prev node is no char",pref(kind,lookupname))
@@ -709,7 +724,7 @@ function handlers.gpos_mark2mark(start,kind,lookupname,markanchors,sequence)
                                 if al[anchor] then
                                     local ma = markanchors[anchor]
                                     if ma then
-                                        local dx, dy, bound = setmark(start,base,tfmdata.factor,rlmode,ba,ma)
+                                        local dx, dy, bound = setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma)
                                         if trace_marks then
                                             logprocess("%s, anchor %s, bound %s: anchoring mark %s to basemark %s => (%s,%s)",
                                                 pref(kind,lookupname),anchor,bound,gref(markchar),gref(basechar),dx,dy)
@@ -725,7 +740,7 @@ function handlers.gpos_mark2mark(start,kind,lookupname,markanchors,sequence)
                     end
                 else -- if trace_bugs then
                 --  logwarning("%s: char %s is missing in font",pref(kind,lookupname),gref(basechar))
-                    fonts.registermessage(currentfont,basechar,"no base anchors")
+                    onetimemessage(currentfont,basechar,"no base anchors",report_fonts)
                 end
             elseif trace_bugs then
                 logwarning("%s: prev node is no mark",pref(kind,lookupname))
@@ -767,7 +782,7 @@ function handlers.gpos_cursive(start,kind,lookupname,exitanchors,sequence) -- to
                                     if al[anchor] then
                                         local exit = exitanchors[anchor]
                                         if exit then
-                                            local dx, dy, bound = setcursive(start,nxt,tfmdata.factor,rlmode,exit,entry,characters[startchar],characters[nextchar])
+                                            local dx, dy, bound = setcursive(start,nxt,tfmdata.parameters.factor,rlmode,exit,entry,characters[startchar],characters[nextchar])
                                             if trace_cursive then
                                                 logprocess("%s: moving %s to %s cursive (%s,%s) using anchor %s and bound %s in rlmode %s",pref(kind,lookupname),gref(startchar),gref(nextchar),dx,dy,anchor,bound,rlmode)
                                             end
@@ -780,7 +795,7 @@ function handlers.gpos_cursive(start,kind,lookupname,exitanchors,sequence) -- to
                         end
                     else -- if trace_bugs then
                     --  logwarning("%s: char %s is missing in font",pref(kind,lookupname),gref(startchar))
-                        fonts.registermessage(currentfont,startchar,"no entry anchors")
+                        onetimemessage(currentfont,startchar,"no entry anchors",report_fonts)
                     end
                     break
                 end
@@ -797,7 +812,7 @@ end
 
 function handlers.gpos_single(start,kind,lookupname,kerns,sequence)
     local startchar = start.char
-    local dx, dy, w, h = setpair(start,tfmdata.factor,rlmode,sequence.flags[4],kerns,characters[startchar])
+    local dx, dy, w, h = setpair(start,tfmdata.parameters.factor,rlmode,sequence.flags[4],kerns,characters[startchar])
     if trace_kerns then
         logprocess("%s: shifting single %s by (%s,%s) and correction (%s,%s)",pref(kind,lookupname),gref(startchar),dx,dy,w,h)
     end
@@ -812,7 +827,8 @@ function handlers.gpos_pair(start,kind,lookupname,kerns,sequence)
         return start, false
     else
         local prev, done = start, false
-        local factor = tfmdata.factor
+        local factor = tfmdata.parameters.factor
+        local lookuptype = lookuptypes[lookupname]
         while snext and snext.id == glyph_code and snext.subtype<256 and snext.font == currentfont do
             local nextchar = snext.char
             local krn = kerns[nextchar]
@@ -824,8 +840,8 @@ function handlers.gpos_pair(start,kind,lookupname,kerns,sequence)
                 if not krn then
                     -- skip
                 elseif type(krn) == "table" then
-                    if krn[1] == "pair" then
-                        local a, b = krn[3], krn[4]
+                    if lookuptype == "pair" then -- probably not needed
+                        local a, b = krn[2], krn[3]
                         if a and #a > 0 then
                             local startchar = start.char
                             local x, y, w, h = setpair(start,factor,rlmode,sequence.flags[4],a,characters[startchar])
@@ -840,18 +856,18 @@ function handlers.gpos_pair(start,kind,lookupname,kerns,sequence)
                                 logprocess("%s: shifting second of pair %s and %s by (%s,%s) and correction (%s,%s)",pref(kind,lookupname),gref(startchar),gref(nextchar),x,y,w,h)
                             end
                         end
-                    else
+                    else -- wrong ... position has different entries
                         report_process("%s: check this out (old kern stuff)",pref(kind,lookupname))
-                        local a, b = krn[3], krn[7]
-                        if a and a ~= 0 then
-                            local k = setkern(snext,factor,rlmode,a)
-                            if trace_kerns then
-                                logprocess("%s: inserting first kern %s between %s and %s",pref(kind,lookupname),k,gref(prev.char),gref(nextchar))
-                            end
-                        end
-                        if b and b ~= 0 then
-                            logwarning("%s: ignoring second kern xoff %s",pref(kind,lookupname),b*factor)
-                        end
+                     -- local a, b = krn[2], krn[6]
+                     -- if a and a ~= 0 then
+                     --     local k = setkern(snext,factor,rlmode,a)
+                     --     if trace_kerns then
+                     --         logprocess("%s: inserting first kern %s between %s and %s",pref(kind,lookupname),k,gref(prev.char),gref(nextchar))
+                     --     end
+                     -- end
+                     -- if b and b ~= 0 then
+                     --     logwarning("%s: ignoring second kern xoff %s",pref(kind,lookupname),b*factor)
+                     -- end
                     end
                     done = true
                 elseif krn ~= 0 then
@@ -885,39 +901,6 @@ end
 
 local logwarning = report_subchain
 
--- ['coverage']={
---     ['after']={ "r" },
---     ['before']={ "q" },
---     ['current']={ "a", "b", "c" },
--- },
--- ['lookups']={ "ls_l_1", "ls_l_1", "ls_l_1" },
-
-function chainmores.chainsub(start,stop,kind,chainname,currentcontext,cache,lookuplist,chainlookupname,n)
-    logprocess("%s: a direct call to chainsub cannot happen",cref(kind,chainname,chainlookupname))
-    return start, false
-end
-
--- handled later:
---
--- function chainmores.gsub_single(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,n)
---     return chainprocs.gsub_single(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,n)
--- end
-
-function chainmores.gsub_multiple(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,n)
-    logprocess("%s: gsub_multiple not yet supported",cref(kind,chainname,chainlookupname))
-    return start, false
-end
-function chainmores.gsub_alternate(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,n)
-    logprocess("%s: gsub_alternate not yet supported",cref(kind,chainname,chainlookupname))
-    return start, false
-end
-
--- handled later:
---
--- function chainmores.gsub_ligature(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,n)
---     return chainprocs.gsub_ligature(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,n)
--- end
-
 local function logprocess(...)
     if trace_steps then
         registermessage(...)
@@ -930,8 +913,13 @@ local logwarning = report_chain
 -- We could share functions but that would lead to extra function calls with many
 -- arguments, redundant tests and confusing messages.
 
-function chainprocs.chainsub(start,stop,kind,chainname,currentcontext,cache,lookuplist,chainlookupname)
+function chainprocs.chainsub(start,stop,kind,chainname,currentcontext,lookuphash,lookuplist,chainlookupname)
     logwarning("%s: a direct call to chainsub cannot happen",cref(kind,chainname,chainlookupname))
+    return start, false
+end
+
+function chainmores.chainsub(start,stop,kind,chainname,currentcontext,lookuphash,lookuplist,chainlookupname,n)
+    logprocess("%s: a direct call to chainsub cannot happen",cref(kind,chainname,chainlookupname))
     return start, false
 end
 
@@ -939,7 +927,7 @@ end
 -- in a bit weird way. There is no lookup and the replacement comes from the lookup
 -- itself. It is meant mostly for dealing with Urdu.
 
-function chainprocs.reversesub(start,stop,kind,chainname,currentcontext,cache,replacements)
+function chainprocs.reversesub(start,stop,kind,chainname,currentcontext,lookuphash,replacements)
     local char = start.char
     local replacement = replacements[char]
     if replacement then
@@ -966,18 +954,29 @@ example, the following is valid:</p>
 
 <p>Therefore we we don't really do the replacement here already unless we have the
 single lookup case. The efficiency of the replacements can be improved by deleting
-as less as needed but that would also mke the code even more messy.</p>
+as less as needed but that would also make the code even more messy.</p>
 --ldx]]--
 
 local function delete_till_stop(start,stop,ignoremarks)
-    if start ~= stop then
-        -- todo keep marks
-        local done = false
-        while not done do
-            done = start == stop
-            delete_node(start,start.next)
-        end
+    local n = 1
+    if start == stop then
+        -- done
+    elseif ignoremarks then
+        repeat -- start x x m x x stop => start m
+            local next = start.next
+            if not marks[next.char] then
+                delete_node(start,next)
+            end
+            n = n + 1
+        until next == stop
+    else -- start x x x stop => start
+        repeat
+            local next = start.next
+            delete_node(start,next)
+            n = n + 1
+        until next == stop
     end
+    return n
 end
 
 --[[ldx--
@@ -985,18 +984,22 @@ end
 match.</p>
 --ldx]]--
 
-function chainprocs.gsub_single(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,chainindex)
+function chainprocs.gsub_single(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname,chainindex)
     -- todo: marks ?
-    if not chainindex then
-        delete_till_stop(start,stop) -- ,currentlookup.flags[1])
-    end
+--~     if not chainindex then
+--~         delete_till_stop(start,stop) -- ,currentlookup.flags[1]
+--~         stop = start
+--~     end
     local current = start
     local subtables = currentlookup.subtables
+    if #subtables > 1 then
+        logwarning("todo: check if we need to loop over the replacements: %s",concat(subtables," "))
+    end
     while current do
         if current.id == glyph_code then
             local currentchar = current.char
-            local lookupname = subtables[1]
-            local replacement = cache.gsub_single[lookupname]
+            local lookupname = subtables[1] -- only 1
+            local replacement = lookuphash[lookupname]
             if not replacement then
                 if trace_bugs then
                     logwarning("%s: no single hits",cref(kind,chainname,chainlookupname,lookupname,chainindex))
@@ -1031,12 +1034,12 @@ chainmores.gsub_single = chainprocs.gsub_single
 the match.</p>
 --ldx]]--
 
-function chainprocs.gsub_multiple(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname)
-    delete_till_stop(start,stop)
+function chainprocs.gsub_multiple(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname)
+    delete_till_stop(start,stop) -- we can assume that marks are to be deleted
     local startchar = start.char
     local subtables = currentlookup.subtables
     local lookupname = subtables[1]
-    local replacements = cache.gsub_multiple[lookupname]
+    local replacements = lookuphash[lookupname]
     if not replacements then
         if trace_bugs then
             logwarning("%s: no multiple hits",cref(kind,chainname,chainlookupname,lookupname))
@@ -1051,43 +1054,42 @@ function chainprocs.gsub_multiple(start,stop,kind,chainname,currentcontext,cache
             if trace_multiples then
                 logprocess("%s: replacing %s by multiple characters %s",cref(kind,chainname,chainlookupname,lookupname),gref(startchar),gref(replacements))
             end
-            local sn = start.next
-            for k=1,#replacements do
-                if k == 1 then
-                    start.char = replacements[k]
-                else
-                    local n = copy_node(start) -- maybe delete the components and such
-                    n.char = replacements[k]
-                    n.next, n.prev = sn, start
-                    if sn then
-                        sn.prev = n
-                    end
-                    start.next, start = n, n
-                end
-            end
-            return start, true
+            return multiple_glyphs(start,replacements)
         end
     end
     return start, false
 end
 
+-- function chainmores.gsub_multiple(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname,n)
+--     logprocess("%s: gsub_multiple not yet supported",cref(kind,chainname,chainlookupname))
+--     return start, false
+-- end
+
+chainmores.gsub_multiple = chainprocs.gsub_multiple
+
 --[[ldx--
 <p>Here we replace start by new glyph. First we delete the rest of the match.</p>
 --ldx]]--
 
-function chainprocs.gsub_alternate(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname)
-    -- todo: marks ?
-    delete_till_stop(start,stop)
+-- char_1 mark_1 -> char_x mark_1 (ignore marks)
+-- char_1 mark_1 -> char_x
+
+-- to be checked: do we always have just one glyph?
+-- we can also have alternates for marks
+-- marks come last anyway
+-- are there cases where we need to delete the mark
+
+function chainprocs.gsub_alternate(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname)
     local current = start
     local subtables = currentlookup.subtables
     while current do
-        if current.id == glyph_code then
+        if current.id == glyph_code then -- is this check needed?
             local currentchar = current.char
             local lookupname = subtables[1]
-            local alternatives = cache.gsub_alternate[lookupname]
+            local alternatives = lookuphash[lookupname]
             if not alternatives then
                 if trace_bugs then
-                    logwarning("%s: no alternative hits",cref(kind,chainname,chainlookupname,lookupname))
+                    logwarning("%s: no alternative hit",cref(kind,chainname,chainlookupname,lookupname))
                 end
             else
                 alternatives = alternatives[currentchar]
@@ -1099,7 +1101,8 @@ function chainprocs.gsub_alternate(start,stop,kind,chainname,currentcontext,cach
                     local choice, index = alternative_glyph(current,alternatives,kind,chainname,chainlookupname,lookupname)
                     current.char = choice
                     if trace_alternatives then
-                        logprocess("%s: replacing single %s by alternative %s (%s)",cref(kind,chainname,chainlookupname,lookupname),index,gref(currentchar),gref(choice),index)
+                        logprocess("%s: replacing single %s by alternative %s (%s)",
+                            cref(kind,chainname,chainlookupname,lookupname),index,gref(currentchar),gref(choice))
                     end
                 end
             end
@@ -1113,17 +1116,24 @@ function chainprocs.gsub_alternate(start,stop,kind,chainname,currentcontext,cach
     return start, false
 end
 
+-- function chainmores.gsub_alternate(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname,n)
+--     logprocess("%s: gsub_alternate not yet supported",cref(kind,chainname,chainlookupname))
+--     return start, false
+-- end
+
+chainmores.gsub_alternate = chainprocs.gsub_alternate
+
 --[[ldx--
 <p>When we replace ligatures we use a helper that handles the marks. I might change
 this function (move code inline and handle the marks by a separate function). We
 assume rather stupid ligatures (no complex disc nodes).</p>
 --ldx]]--
 
-function chainprocs.gsub_ligature(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,chainindex)
+function chainprocs.gsub_ligature(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname,chainindex)
     local startchar = start.char
     local subtables = currentlookup.subtables
     local lookupname = subtables[1]
-    local ligatures = cache.gsub_ligature[lookupname]
+    local ligatures = lookuphash[lookupname]
     if not ligatures then
         if trace_bugs then
             logwarning("%s: no ligature hits",cref(kind,chainname,chainlookupname,lookupname,chainindex))
@@ -1146,21 +1156,21 @@ function chainprocs.gsub_ligature(start,stop,kind,chainname,currentcontext,cache
                     if marks[schar] then -- marks
                         s = s.next
                     else
-                        local lg = ligatures[1][schar]
-                        if not lg then
-                            break
-                        else
+                        local lg = ligatures[schar]
+                        if lg then
                             ligatures, last, nofreplacements = lg, s, nofreplacements + 1
                             if s == stop then
                                 break
                             else
                                 s = s.next
                             end
+                        else
+                            break
                         end
                     end
                 end
             end
-            local l2 = ligatures[2]
+            local l2 = ligatures.ligature
             if l2 then
                 if chainindex then
                     stop = last
@@ -1188,12 +1198,12 @@ end
 
 chainmores.gsub_ligature = chainprocs.gsub_ligature
 
-function chainprocs.gpos_mark2base(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname)
+function chainprocs.gpos_mark2base(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname)
     local markchar = start.char
     if marks[markchar] then
         local subtables = currentlookup.subtables
         local lookupname = subtables[1]
-        local markanchors = cache.gpos_mark2base[lookupname]
+        local markanchors = lookuphash[lookupname]
         if markanchors then
             markanchors = markanchors[markchar]
         end
@@ -1226,7 +1236,7 @@ function chainprocs.gpos_mark2base(start,stop,kind,chainname,currentcontext,cach
                             if al[anchor] then
                                 local ma = markanchors[anchor]
                                 if ma then
-                                    local dx, dy, bound = setmark(start,base,tfmdata.factor,rlmode,ba,ma)
+                                    local dx, dy, bound = setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma)
                                     if trace_marks then
                                         logprocess("%s, anchor %s, bound %s: anchoring mark %s to basechar %s => (%s,%s)",
                                             cref(kind,chainname,chainlookupname,lookupname),anchor,bound,gref(markchar),gref(basechar),dx,dy)
@@ -1252,12 +1262,12 @@ function chainprocs.gpos_mark2base(start,stop,kind,chainname,currentcontext,cach
     return start, false
 end
 
-function chainprocs.gpos_mark2ligature(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname)
+function chainprocs.gpos_mark2ligature(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname)
     local markchar = start.char
     if marks[markchar] then
         local subtables = currentlookup.subtables
         local lookupname = subtables[1]
-        local markanchors = cache.gpos_mark2ligature[lookupname]
+        local markanchors = lookuphash[lookupname]
         if markanchors then
             markanchors = markanchors[markchar]
         end
@@ -1299,7 +1309,7 @@ function chainprocs.gpos_mark2ligature(start,stop,kind,chainname,currentcontext,
                                 if ma then
                                     ba = ba[index]
                                     if ba then
-                                        local dx, dy, bound = setmark(start,base,tfmdata.factor,rlmode,ba,ma,index)
+                                        local dx, dy, bound = setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma,index)
                                         if trace_marks then
                                             logprocess("%s, anchor %s, bound %s: anchoring mark %s to baselig %s at index %s => (%s,%s)",
                                                 cref(kind,chainname,chainlookupname,lookupname),anchor,a or bound,gref(markchar),gref(basechar),index,dx,dy)
@@ -1326,7 +1336,7 @@ function chainprocs.gpos_mark2ligature(start,stop,kind,chainname,currentcontext,
     return start, false
 end
 
-function chainprocs.gpos_mark2mark(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname)
+function chainprocs.gpos_mark2mark(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname)
     local markchar = start.char
     if marks[markchar] then
 --~         local alreadydone = markonce and has_attribute(start,markmark)
@@ -1334,7 +1344,7 @@ function chainprocs.gpos_mark2mark(start,stop,kind,chainname,currentcontext,cach
         --  local markanchors = descriptions[markchar].anchors markanchors = markanchors and markanchors.mark
             local subtables = currentlookup.subtables
             local lookupname = subtables[1]
-            local markanchors = cache.gpos_mark2mark[lookupname]
+            local markanchors = lookuphash[lookupname]
             if markanchors then
                 markanchors = markanchors[markchar]
             end
@@ -1351,7 +1361,7 @@ function chainprocs.gpos_mark2mark(start,stop,kind,chainname,currentcontext,cach
                                 if al[anchor] then
                                     local ma = markanchors[anchor]
                                     if ma then
-                                        local dx, dy, bound = setmark(start,base,tfmdata.factor,rlmode,ba,ma)
+                                        local dx, dy, bound = setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma)
                                         if trace_marks then
                                             logprocess("%s, anchor %s, bound %s: anchoring mark %s to basemark %s => (%s,%s)",
                                                 cref(kind,chainname,chainlookupname,lookupname),anchor,bound,gref(markchar),gref(basechar),dx,dy)
@@ -1382,13 +1392,13 @@ end
 
 -- ! ! ! untested ! ! !
 
-function chainprocs.gpos_cursive(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname)
+function chainprocs.gpos_cursive(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname)
     local alreadydone = cursonce and has_attribute(start,cursbase)
     if not alreadydone then
         local startchar = start.char
         local subtables = currentlookup.subtables
         local lookupname = subtables[1]
-        local exitanchors = cache.gpos_cursive[lookupname]
+        local exitanchors = lookuphash[lookupname]
         if exitanchors then
             exitanchors = exitanchors[startchar]
         end
@@ -1417,7 +1427,7 @@ function chainprocs.gpos_cursive(start,stop,kind,chainname,currentcontext,cache,
                                         if al[anchor] then
                                             local exit = exitanchors[anchor]
                                             if exit then
-                                                local dx, dy, bound = setcursive(start,nxt,tfmdata.factor,rlmode,exit,entry,characters[startchar],characters[nextchar])
+                                                local dx, dy, bound = setcursive(start,nxt,tfmdata.parameters.factor,rlmode,exit,entry,characters[startchar],characters[nextchar])
                                                 if trace_cursive then
                                                     logprocess("%s: moving %s to %s cursive (%s,%s) using anchor %s and bound %s in rlmode %s",pref(kind,lookupname),gref(startchar),gref(nextchar),dx,dy,anchor,bound,rlmode)
                                                 end
@@ -1430,7 +1440,7 @@ function chainprocs.gpos_cursive(start,stop,kind,chainname,currentcontext,cache,
                             end
                         else -- if trace_bugs then
                         --  logwarning("%s: char %s is missing in font",pref(kind,lookupname),gref(startchar))
-                            fonts.registermessage(currentfont,startchar,"no entry anchors")
+                            onetimemessage(currentfont,startchar,"no entry anchors",report_fonts)
                         end
                         break
                     end
@@ -1447,16 +1457,16 @@ function chainprocs.gpos_cursive(start,stop,kind,chainname,currentcontext,cache,
     return start, false
 end
 
-function chainprocs.gpos_single(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,chainindex,sequence)
-    -- untested
+function chainprocs.gpos_single(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname,chainindex,sequence)
+    -- untested .. needs checking for the new model
     local startchar = start.char
     local subtables = currentlookup.subtables
     local lookupname = subtables[1]
-    local kerns = cache.gpos_single[lookupname]
+    local kerns = lookuphash[lookupname]
     if kerns then
-        kerns = kerns[startchar]
+        kerns = kerns[startchar] -- needed ?
         if kerns then
-            local dx, dy, w, h = setpair(start,tfmdata.factor,rlmode,sequence.flags[4],kerns,characters[startchar])
+            local dx, dy, w, h = setpair(start,tfmdata.parameters.factor,rlmode,sequence.flags[4],kerns,characters[startchar])
             if trace_kerns then
                 logprocess("%s: shifting single %s by (%s,%s) and correction (%s,%s)",cref(kind,chainname,chainlookupname),gref(startchar),dx,dy,w,h)
             end
@@ -1467,19 +1477,20 @@ end
 
 -- when machines become faster i will make a shared function
 
-function chainprocs.gpos_pair(start,stop,kind,chainname,currentcontext,cache,currentlookup,chainlookupname,chainindex,sequence)
+function chainprocs.gpos_pair(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname,chainindex,sequence)
 --    logwarning("%s: gpos_pair not yet supported",cref(kind,chainname,chainlookupname))
     local snext = start.next
     if snext then
         local startchar = start.char
         local subtables = currentlookup.subtables
         local lookupname = subtables[1]
-        local kerns = cache.gpos_pair[lookupname]
+        local kerns = lookuphash[lookupname]
         if kerns then
             kerns = kerns[startchar]
             if kerns then
+                local lookuptype = lookuptypes[lookupname]
                 local prev, done = start, false
-                local factor = tfmdata.factor
+                local factor = tfmdata.parameters.factor
                 while snext and snext.id == glyph_code and snext.subtype<256 and snext.font == currentfont do
                     local nextchar = snext.char
                     local krn = kerns[nextchar]
@@ -1490,8 +1501,8 @@ function chainprocs.gpos_pair(start,stop,kind,chainname,currentcontext,cache,cur
                         if not krn then
                             -- skip
                         elseif type(krn) == "table" then
-                            if krn[1] == "pair" then
-                                local a, b = krn[3], krn[4]
+                            if lookuptype == "pair" then
+                                local a, b = krn[2], krn[3]
                                 if a and #a > 0 then
                                     local startchar = start.char
                                     local x, y, w, h = setpair(start,factor,rlmode,sequence.flags[4],a,characters[startchar])
@@ -1508,7 +1519,7 @@ function chainprocs.gpos_pair(start,stop,kind,chainname,currentcontext,cache,cur
                                 end
                             else
                                 report_process("%s: check this out (old kern stuff)",cref(kind,chainname,chainlookupname))
-                                local a, b = krn[3], krn[7]
+                                local a, b = krn[2], krn[6]
                                 if a and a ~= 0 then
                                     local k = setkern(snext,factor,rlmode,a)
                                     if trace_kerns then
@@ -1553,7 +1564,7 @@ local function show_skip(kind,chainname,char,ck,class)
     end
 end
 
-local function normal_handle_contextchain(start,kind,chainname,contexts,sequence,cache)
+local function normal_handle_contextchain(start,kind,chainname,contexts,sequence,lookuphash)
     --  local rule, lookuptype, sequence, f, l, lookups = ck[1], ck[2] ,ck[3], ck[4], ck[5], ck[6]
     local flags, done = sequence.flags, false
     local skipmark, skipligature, skipbase = flags[1], flags[2], flags[3]
@@ -1572,7 +1583,8 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
         else
             -- todo: better space check (maybe check for glue)
             local f, l = ck[4], ck[5]
-            if f == l then
+            -- current match
+            if f == 1 and f == l then
                 -- already a hit
                 match = true
             else
@@ -1624,8 +1636,8 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                     end
                 -- end
             end
+            -- before
             if match and f > 1 then
-                -- before
                 local prev = start.prev
                 if prev then
                     local n = f-1
@@ -1662,7 +1674,7 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                 match = false break
                             end
                             prev = prev.prev
-                        elseif seq[n][32] then
+                        elseif seq[n][32] then -- somehat special, as zapfino can have many preceding spaces
                             n = n -1
                         else
                             match = false break
@@ -1678,9 +1690,9 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                     end
                 end
             end
+            -- after
             if match and s > l then
-                -- after
-                local current = last.next
+                local current = last and last.next
                 if current then
                     -- removed optimization for s-l == 1, we have to deal with marks anyway
                     local n = l + 1
@@ -1740,9 +1752,11 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                 local rule, lookuptype, f, l = ck[1], ck[2], ck[4], ck[5]
                 local char = start.char
                 if ck[9] then
-                    logwarning("%s: rule %s matches at char %s for (%s,%s,%s) chars, lookuptype %s (%s=>%s)",cref(kind,chainname),rule,gref(char),f-1,l-f+1,s-l,lookuptype,ck[9],ck[10])
+                    logwarning("%s: rule %s matches at char %s for (%s,%s,%s) chars, lookuptype %s (%s=>%s)",
+                        cref(kind,chainname),rule,gref(char),f-1,l-f+1,s-l,lookuptype,ck[9],ck[10])
                 else
-                    logwarning("%s: rule %s matches at char %s for (%s,%s,%s) chars, lookuptype %s",cref(kind,chainname),rule,gref(char),f-1,l-f+1,s-l,lookuptype)
+                    logwarning("%s: rule %s matches at char %s for (%s,%s,%s) chars, lookuptype %s",
+                        cref(kind,chainname),rule,gref(char),f-1,l-f+1,s-l,lookuptype)
                 end
             end
             local chainlookups = ck[6]
@@ -1754,35 +1768,11 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                     local chainlookup = lookuptable[chainlookupname]
                     local cp = chainprocs[chainlookup.type]
                     if cp then
-                        start, done = cp(start,last,kind,chainname,ck,cache,chainlookup,chainlookupname,nil,sequence)
+                        start, done = cp(start,last,kind,chainname,ck,lookuphash,chainlookup,chainlookupname,nil,sequence)
                     else
                         logprocess("%s: %s is not yet supported",cref(kind,chainname,chainlookupname),chainlookup.type)
                     end
                  else
-                    -- actually this needs a more complex treatment for which we will use chainmores
---~                     local i = 1
---~                     repeat
---~                         local chainlookupname = chainlookups[i]
---~                         local chainlookup = lookuptable[chainlookupname]
---~                         local cp = chainmores[chainlookup.type]
---~                         if cp then
---~                             local ok, n
---~                             start, ok, n = cp(start,last,kind,chainname,ck,cache,chainlookup,chainlookupname,i,sequence)
---~                             -- messy since last can be changed !
---~                             if ok then
---~                                 done = true
---~                                 start = start.next
---~                                 if n then
---~                                     -- skip next one(s) if ligature
---~                                     i = i + n - 1
---~                                 end
---~                             end
---~                         else
---~                             logprocess("%s: multiple subchains for %s are not yet supported",cref(kind,chainname,chainlookupname),chainlookup.type)
---~                         end
---~                         i = i + 1
---~                     until i > nofchainlookups
-
                     local i = 1
                     repeat
                         if skipped then
@@ -1802,11 +1792,11 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                             end
                         end
                         local chainlookupname = chainlookups[i]
-                        local chainlookup = lookuptable[chainlookupname]
-                        local cp = chainmores[chainlookup.type]
+                        local chainlookup = lookuptable[chainlookupname] -- can be false (n matches, <n replacement)
+                        local cp = chainlookup and chainmores[chainlookup.type]
                         if cp then
                             local ok, n
-                            start, ok, n = cp(start,last,kind,chainname,ck,cache,chainlookup,chainlookupname,i,sequence)
+                            start, ok, n = cp(start,last,kind,chainname,ck,lookuphash,chainlookup,chainlookupname,i,sequence)
                             -- messy since last can be changed !
                             if ok then
                                 done = true
@@ -1816,17 +1806,17 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                 i = i + 1
                             end
                         else
-                            logprocess("%s: multiple subchains for %s are not yet supported",cref(kind,chainname,chainlookupname),chainlookup.type)
+                         -- is valid
+                         -- logprocess("%s: multiple subchains for %s are not yet supported",cref(kind,chainname,chainlookupname),chainlookup and chainlookup.type or "?")
                             i = i + 1
                         end
                         start = start.next
                     until i > nofchainlookups
-
                 end
             else
                 local replacements = ck[7]
                 if replacements then
-                    start, done = chainprocs.reversesub(start,last,kind,chainname,ck,cache,replacements) -- sequence
+                    start, done = chainprocs.reversesub(start,last,kind,chainname,ck,lookuphash,replacements) -- sequence
                 else
                     done = true -- can be meant to be skipped
                     if trace_contexts then
@@ -1891,123 +1881,119 @@ local function report_missing_cache(typ,lookup)
     local t = f[typ]               if not t then t = { } f[typ]               = t end
     if not t[lookup] then
         t[lookup] = true
-        logwarning("missing cache for lookup %s of type %s in font %s (%s)",lookup,typ,currentfont,tfmdata.fullname)
+        logwarning("missing cache for lookup %s of type %s in font %s (%s)",lookup,typ,currentfont,tfmdata.properties.fullname)
     end
 end
 
 local resolved = { } -- we only resolve a font,script,language pair once
 
 -- todo: pass all these 'locals' in a table
---
--- dynamics will be isolated some day ... for the moment we catch attribute zero
--- not being set
 
-function fonts.methods.node.otf.features(head,font,attr)
+local lookuphashes = { }
+
+setmetatableindex(lookuphashes, function(t,font)
+    local lookuphash = fontdata[font].resources.lookuphash
+    if not lookuphash or not next(lookuphash) then
+        lookuphash = false
+    end
+    t[font] = lookuphash
+    return lookuphash
+end)
+
+-- fonts.hashes.lookups = lookuphashes
+
+local special_attributes = {
+    init = 1,
+    medi = 2,
+    fina = 3,
+    isol = 4
+}
+
+local function initialize(sequence,script,language,enabled)
+    local features = sequence.features
+    if features then
+        for kind, scripts in next, features do
+            local valid = enabled[kind]
+            if valid then
+                local languages = scripts[script] or scripts[wildcard]
+                if languages and (languages[language] or languages[wildcard]) then
+                    return { valid, special_attributes[kind] or false, sequence.chain or 0, kind }
+                end
+            end
+        end
+    end
+    return false
+end
+
+function otf.dataset(ftfmdata,sequences,font) -- generic variant, overloaded in context
+    local shared     = tfmdata.shared
+    local properties = tfmdata.properties
+    local language   = properties.language or "dflt"
+    local script     = properties.script   or "dflt"
+    local enabled    = shared.features
+    local res = resolved[font]
+    if not res then
+        res = { }
+        resolved[font] = res
+    end
+    local rs = res[script]
+    if not rs then
+        rs = { }
+        res[script] = rs
+    end
+    local rl = rs[language]
+    if not rl then
+        rl = { }
+        rs[language] = rl
+        setmetatableindex(rl, function(t,k)
+            local v = enabled and initialize(sequences[k],script,language,enabled)
+            t[k] = v
+            return v
+        end)
+    end
+    return rl
+end
+
+local function featuresprocessor(head,font,attr)
+
+    local lookuphash = lookuphashes[font] -- we can also check sequences here
+
+    if not lookuphash then
+        return head, false
+    end
+
     if trace_steps then
         checkstep(head)
     end
-    tfmdata = fontdata[font]
-    local shared = tfmdata.shared
-    otfdata = shared.otfdata
-    local luatex = otfdata.luatex
-    descriptions = tfmdata.descriptions
-    characters = tfmdata.characters
-    indices = tfmdata.indices
-    unicodes = tfmdata.unicodes
-    marks = tfmdata.marks
-    anchorlookups = luatex.lookup_to_anchor
-    currentfont = font
-    rlmode = 0
-    local featuredata = otfdata.shared.featuredata -- can be made local to closure
-    local sequences = luatex.sequences
-    lookuptable = luatex.lookups
-    local done = false
-    local script, language, s_enabled, a_enabled, dyn
-    local attribute_driven = attr and attr ~= 0
-    if attribute_driven then
-        local features = contextsetups[contextnumbers[attr]] -- could be a direct list
-        dyn = contextmerged[attr] or 0
-        language, script = features.language or "dflt", features.script or "dflt"
-        a_enabled = features -- shared.features -- can be made local to the resolver
-        if dyn == 2 or dyn == -2 then
-            -- font based
-            s_enabled = shared.features
-        end
-    else
-        language, script = tfmdata.language or "dflt", tfmdata.script or "dflt"
-        s_enabled = shared.features -- can be made local to the resolver
-        dyn = 0
-    end
-    -- we can save some runtime by caching feature tests
-    local res = resolved[font]     if not res   then res = { } resolved[font]     = res end
-    local rs  = res     [script]   if not rs    then rs  = { } res     [script]   = rs  end
-    local rl  = rs      [language] if not rl    then rl  = { } rs      [language] = rl  end
-    local ra  = rl      [attr]     if ra == nil then ra  = { } rl      [attr]     = ra  end -- attr can be false
-    -- sequences always > 1 so no need for optimization
+
+    tfmdata                = fontdata[font]
+    descriptions           = tfmdata.descriptions
+    characters             = tfmdata.characters
+    resources              = tfmdata.resources
+
+    marks                  = resources.marks
+    anchorlookups          = resources.lookup_to_anchor
+    lookuptable            = resources.lookups
+    lookuptypes            = resources.lookuptypes
+
+    currentfont            = font
+    rlmode                 = 0
+
+    local sequences        = resources.sequences
+    local done             = false
+    local datasets         = otf.dataset(tfmdata,sequences,font,attr)
+
     for s=1,#sequences do
-        local pardir, txtdir, success = 0, { }, false
+        local pardir, txtdir, success = 0, { }, false -- we could reuse txtdir and use a top pointer
         local sequence = sequences[s]
-        local r = ra[s] -- cache
-        if r == nil then
-            --
-            -- this bit will move to font-ctx and become a function
-            ---
-            local chain = sequence.chain or 0
-            local features = sequence.features
-            if not features then
-                -- indirect lookup, part of chain (todo: make this a separate table)
-                r = false -- { false, false, chain }
-            else
-                local valid, attribute, kind, what = false, false
-                for k,v in next, features do
-                    -- we can quit earlier but for the moment we want the tracing
-                    local s_e = s_enabled and s_enabled[k]
-                    local a_e = a_enabled and a_enabled[k]
-                    if s_e or a_e then
-                        local l = v[script] or v[wildcard]
-                        if l then
-                            -- not l[language] or l[default] or l[wildcard] because we want tracing
-                            -- only first attribute match check, so we assume simple fina's
-                            -- default can become a font feature itself
-                            if l[language] then
-                                valid, what = s_e or a_e, language
-                        --  elseif l[default] then
-                        --      valid, what = true, default
-                            elseif l[wildcard] then
-                                valid, what = s_e or a_e, wildcard
-                            end
-                            if valid then
-                                kind, attribute = k, special_attributes[k] or false
-                                if a_e and dyn < 0 then
-                                    valid = false
-                                end
-                                if trace_applied then
-                                    local typ, action = match(sequence.type,"(.*)_(.*)")
-                                    report_process(
-                                        "%s font: %03i, dynamic: %03i, kind: %s, lookup: %3i, script: %-4s, language: %-4s (%-4s), type: %s, action: %s, name: %s",
-                                        (valid and "+") or "-",font,attr or 0,kind,s,script,language,what,typ,action,sequence.name)
-                                end
-                                break
-                            end
-                        end
-                    end
-                end
-                if valid then
-                    r = { valid, attribute, chain, kind }
-                else
-                    r = false -- { valid, attribute, chain, "generic" } -- false anyway, could be flag instead of table
-                end
-            end
-            ra[s] = r
-        end
-        featurevalue = r and r[1] -- todo: pass to function instead of using a global
+        local dataset = datasets[s] -- cache
+        featurevalue = dataset and dataset[1] -- todo: pass to function instead of using a global
         if featurevalue then
-            local attribute, chain, typ, subtables = r[2], r[3], sequence.type, sequence.subtables
+            local attribute, chain, typ, subtables = dataset[2], dataset[3], sequence.type, sequence.subtables
             if chain < 0 then
                 -- this is a limited case, no special treatments like 'init' etc
                 local handler = handlers[typ]
-                local thecache = featuredata[typ] or { }
-                -- we need to get rid of this slide !
+                -- we need to get rid of this slide! probably no longer needed in latest luatex
                 local start = find_node_tail(head) -- slow (we can store tail because there's always a skip at the end): todo
                 while start do
                     local id = start.id
@@ -2022,11 +2008,11 @@ function fonts.methods.node.otf.features(head,font,attr)
                             if a then
                                 for i=1,#subtables do
                                     local lookupname = subtables[i]
-                                    local lookupcache = thecache[lookupname]
+                                    local lookupcache = lookuphash[lookupname]
                                     if lookupcache then
                                         local lookupmatch = lookupcache[start.char]
                                         if lookupmatch then
-                                            start, success = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,i)
+                                            start, success = handler(start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,i)
                                             if success then
                                                 break
                                             end
@@ -2049,13 +2035,13 @@ function fonts.methods.node.otf.features(head,font,attr)
             else
                 local handler = handlers[typ]
                 local ns = #subtables
-                local thecache = featuredata[typ] or { }
                 local start = head -- local ?
                 rlmode = 0 -- to be checked ?
                 if ns == 1 then
                     local lookupname = subtables[1]
-                    local lookupcache = thecache[lookupname]
-                    if not lookupcache then
+                    local lookupcache = lookuphash[lookupname]
+--~ inspect(lookupcache)
+                    if not lookupcache then -- also check for empty cache
                         report_missing_cache(typ,lookupname)
                     else
                         while start do
@@ -2068,12 +2054,13 @@ function fonts.methods.node.otf.features(head,font,attr)
                                     else
                                         a = not attribute or has_attribute(start,state,attribute)
                                     end
+--~ print(a,start.char)
                                     if a then
                                         local lookupmatch = lookupcache[start.char]
                                         if lookupmatch then
                                             -- sequence kan weg
                                             local ok
-                                            start, ok = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,1)
+                                            start, ok = handler(start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,1)
                                             if ok then
                                                 success = true
                                             end
@@ -2155,13 +2142,13 @@ function fonts.methods.node.otf.features(head,font,attr)
                                 if a then
                                     for i=1,ns do
                                         local lookupname = subtables[i]
-                                        local lookupcache = thecache[lookupname]
+                                        local lookupcache = lookuphash[lookupname]
                                         if lookupcache then
                                             local lookupmatch = lookupcache[start.char]
                                             if lookupmatch then
                                                 -- we could move all code inline but that makes things even more unreadable
                                                 local ok
-                                                start, ok = handler(start,r[4],lookupname,lookupmatch,sequence,featuredata,i)
+                                                start, ok = handler(start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,i)
                                                 if ok then
                                                     success = true
                                                     break
@@ -2246,467 +2233,422 @@ function fonts.methods.node.otf.features(head,font,attr)
     return head, done
 end
 
-otf.features.prepare = { }
-
--- we used to share code in the following functions but that costs a lot of
--- memory due to extensive calls to functions (easily hundreds of thousands per
--- document)
-
-local function split(replacement,original,cache,unicodes)
-    -- we can cache this too, but not the same (although unicode is a unique enough hash)
-    local o, t, n, no = { }, { }, 0, 0
-    for s in gmatch(original,"[^ ]+") do
-        local us = unicodes[s]
-        no = no + 1
-        if type(us) == "number" then -- tonumber(us)
-            o[no] = us
-        else
-            o[no] = us[1]
-        end
+local function generic(lookupdata,lookupname,unicode,lookuphash)
+    local target = lookuphash[lookupname]
+    if target then
+        target[unicode] = lookupdata
+    else
+        lookuphash[lookupname] = { [unicode] = lookupdata }
     end
-    for s in gmatch(replacement,"[^ ]+") do
-        n = n + 1
-        local us = unicodes[s]
-        if type(us) == "number" then -- tonumber(us)
-            t[o[n]] = us
-        else
-            t[o[n]] = us[1]
-        end
-    end
-    return t
 end
 
-local function uncover(covers,result,cache,unicodes)
-    -- lpeg hardly faster (.005 sec on mk)
-    local nofresults = #result
-    for n=1,#covers do
-        local c = covers[n]
-        local cc = cache[c]
-        nofresults = nofresults + 1
-        if not cc then
-            local t = { }
-            for s in gmatch(c,"[^ ]+") do
-                local us = unicodes[s]
-                if type(us) == "number" then
-                    t[us] = true
-                else
-                    for i=1,#us do
-                        t[us[i]] = true
-                    end
-                end
+local action = {
+
+    substitution = generic,
+    multiple     = generic,
+    alternate    = generic,
+    position     = generic,
+
+    ligature = function(lookupdata,lookupname,unicode,lookuphash)
+        local target = lookuphash[lookupname]
+        if not target then
+            target = { }
+            lookuphash[lookupname] = target
+        end
+        for i=1,#lookupdata do
+            local li = lookupdata[i]
+            local tu = target[li]
+            if not tu then
+                tu = { }
+                target[li] = tu
             end
-            cache[c] = t
-            result[nofresults] = t
-        else
-            result[nofresults] = cc
+            target = tu
         end
-    end
-end
+        target.ligature = unicode
+    end,
+
+    pair = function(lookupdata,lookupname,unicode,lookuphash)
+        local target = lookuphash[lookupname]
+        if not target then
+            target = { }
+            lookuphash[lookupname] = target
+        end
+        local others = target[unicode]
+        local paired = lookupdata[1]
+        if others then
+            others[paired] = lookupdata
+        else
+            others = { [paired] = lookupdata }
+            target[unicode] = others
+        end
+    end,
+
+}
 
 local function prepare_lookups(tfmdata)
-    local otfdata = tfmdata.shared.otfdata
-    local featuredata = otfdata.shared.featuredata
-    local anchor_to_lookup = otfdata.luatex.anchor_to_lookup
-    local lookup_to_anchor = otfdata.luatex.lookup_to_anchor
-    --
-    local multiple = featuredata.gsub_multiple
-    local alternate = featuredata.gsub_alternate
-    local single = featuredata.gsub_single
-    local ligature = featuredata.gsub_ligature
-    local pair = featuredata.gpos_pair
-    local position = featuredata.gpos_single
-    local kerns = featuredata.gpos_pair
-    local mark = featuredata.gpos_mark2mark
-    local cursive = featuredata.gpos_cursive
-    --
-    local unicodes = tfmdata.unicodes -- names to unicodes
-    local indices = tfmdata.indices
-    local descriptions = tfmdata.descriptions
-    --
-    -- we can change the otf table after loading but then we need to adapt base mode
-    -- as well (no big deal)
-    --
-    local action = {
-        substitution = function(p,lookup,glyph,unicode)
-            local old, new = unicode, unicodes[p[2]]
-            if type(new) == "table" then
-                new = new[1]
-            end
-            local s = single[lookup]
-            if not s then s = { } single[lookup] = s end
-            s[old] = new
-        --~ if trace_lookups then
-        --~     report_prepare("lookup %s: substitution %s => %s",lookup,old,new)
-        --~ end
-        end,
-        multiple = function (p,lookup,glyph,unicode)
-            local old, new, nnew = unicode, { }, 0
-            local m = multiple[lookup]
-            if not m then m = { } multiple[lookup] = m end
-            m[old] = new
-            for pc in gmatch(p[2],"[^ ]+") do
-                local upc = unicodes[pc]
-                nnew = nnew + 1
-                if type(upc) == "number" then
-                    new[nnew] = upc
-                else
-                    new[nnew] = upc[1]
-                end
-            end
-        --~ if trace_lookups then
-        --~     report_prepare("lookup %s: multiple %s => %s",lookup,old,concat(new," "))
-        --~ end
-        end,
-        alternate = function(p,lookup,glyph,unicode)
-            local old, new, nnew = unicode, { }, 0
-            local a = alternate[lookup]
-            if not a then a = { } alternate[lookup] = a end
-            a[old] = new
-            for pc in gmatch(p[2],"[^ ]+") do
-                local upc = unicodes[pc]
-                nnew = nnew + 1
-                if type(upc) == "number" then
-                    new[nnew] = upc
-                else
-                    new[nnew] = upc[1]
-                end
-            end
-        --~ if trace_lookups then
-        --~     report_prepare("lookup %s: alternate %s => %s",lookup,old,concat(new,"|"))
-        --~ end
-        end,
-        ligature = function (p,lookup,glyph,unicode)
-        --~ if trace_lookups then
-        --~     report_prepare("lookup %s: ligature %s => %s",lookup,p[2],glyph.name)
-        --~ end
-            local first = true
-            local t = ligature[lookup]
-            if not t then t = { } ligature[lookup] = t end
-            for s in gmatch(p[2],"[^ ]+") do
-                if first then
-                    local u = unicodes[s]
-                    if not u then
-                        report_prepare("lookup %s: ligature %s => %s ignored due to invalid unicode",lookup,p[2],glyph.name)
-                        break
-                    elseif type(u) == "number" then
-                        if not t[u] then
-                            t[u] = { { } }
-                        end
-                        t = t[u]
-                    else
-                        local tt = t
-                        local tu
-                        for i=1,#u do
-                            local u = u[i]
-                            if i==1 then
-                                if not t[u] then
-                                    t[u] = { { } }
-                                end
-                                tu = t[u]
-                                t = tu
-                            else
-                                if not t[u] then
-                                    tt[u] = tu
-                                end
-                            end
-                        end
-                    end
-                    first = false
-                else
-                    s = unicodes[s]
-                    local t1 = t[1]
-                    if not t1[s] then
-                        t1[s] = { { } }
-                    end
-                    t = t1[s]
-                end
-            end
-            t[2] = unicode
-        end,
-        position = function(p,lookup,glyph,unicode)
-            -- not used
-            local s = position[lookup]
-            if not s then s = { } position[lookup] = s end
-            s[unicode] = p[2] -- direct pointer to kern spec
-        end,
-        pair = function(p,lookup,glyph,unicode)
-            local s = pair[lookup]
-            if not s then s = { } pair[lookup] = s end
-            local others = s[unicode]
-            if not others then others = { } s[unicode] = others end
-            -- todo: fast check for space
-            local two = p[2]
-            local upc = unicodes[two]
-            if not upc then
-                for pc in gmatch(two,"[^ ]+") do
-                    local upc = unicodes[pc]
-                    if type(upc) == "number" then
-                        others[upc] = p -- direct pointer to main table
-                    else
-                        for i=1,#upc do
-                            others[upc[i]] = p -- direct pointer to main table
-                        end
-                    end
-                end
-            elseif type(upc) == "number" then
-                others[upc] = p -- direct pointer to main table
-            else
-                for i=1,#upc do
-                    others[upc[i]] = p -- direct pointer to main table
-                end
-            end
-        --~ if trace_lookups then
-        --~     report_prepare("lookup %s: pair for U+%04X",lookup,unicode)
-        --~ end
-        end,
-    }
-    --
-    for unicode, glyph in next, descriptions do
-        local lookups = glyph.slookups
+
+    local rawdata          = tfmdata.shared.rawdata
+    local resources        = rawdata.resources
+    local lookuphash       = resources.lookuphash
+    local anchor_to_lookup = resources.anchor_to_lookup
+    local lookup_to_anchor = resources.lookup_to_anchor
+    local lookuptypes      = resources.lookuptypes
+    local characters       = tfmdata.characters
+    local descriptions     = tfmdata.descriptions
+
+    -- we cannot free the entries in the descriptions as sometimes we access
+    -- then directly (for instance anchors) ... selectively freeing does save
+    -- much memory as it's only a reference to a table and the slot in the
+    -- description hash is not freed anyway
+
+    for unicode, character in next, characters do -- we cannot loop over descriptions !
+
+        local description = descriptions[unicode]
+
+        local lookups = description.slookups
         if lookups then
-            for lookup, p in next, lookups do
-                action[p[1]](p,lookup,glyph,unicode)
+            for lookupname, lookupdata in next, lookups do
+                action[lookuptypes[lookupname]](lookupdata,lookupname,unicode,lookuphash)
             end
         end
-        local lookups = glyph.mlookups
+
+        local lookups = description.mlookups
         if lookups then
-            for lookup, whatever in next, lookups do
-                for i=1,#whatever do -- normaly one
-                    local p = whatever[i]
-                    action[p[1]](p,lookup,glyph,unicode)
+            for lookupname, lookuplist in next, lookups do
+                local lookuptype = lookuptypes[lookupname]
+                for l=1,#lookuplist do
+                    local lookupdata = lookuplist[l]
+                    action[lookuptype](lookupdata,lookupname,unicode,lookuphash)
                 end
             end
         end
-        local list = glyph.kerns
+
+        local list = description.kerns
         if list then
-            for lookup, krn in next, list do
-                local k = kerns[lookup]
-                if not k then k = { } kerns[lookup] = k end
-                k[unicode] = krn -- ref to glyph, saves lookup
-            --~ if trace_lookups then
-            --~     report_prepare("lookup %s: kern for U+%04X",lookup,unicode)
-            --~ end
+            for lookup, krn in next, list do  -- ref to glyph, saves lookup
+                local target = lookuphash[lookup]
+                if target then
+                    target[unicode] = krn
+                else
+                    lookuphash[lookup] = { [unicode] = krn }
+                end
             end
         end
-        local oanchor = glyph.anchors
-        if oanchor then
-            for typ, anchors in next, oanchor do -- types
-                if typ == "mark" then
+
+        local list = description.anchors
+        if list then
+            for typ, anchors in next, list do -- types
+                if typ == "mark" or typ == "cexit" then -- or entry?
                     for name, anchor in next, anchors do
                         local lookups = anchor_to_lookup[name]
                         if lookups then
                             for lookup, _ in next, lookups do
-                                local f = mark[lookup]
-                                if not f then f = { } mark[lookup]  = f end
-                                f[unicode] = anchors -- ref to glyph, saves lookup
-                            --~ if trace_lookups then
-                            --~     report_prepare("lookup %s: mark anchor %s for U+%04X",lookup,name,unicode)
-                            --~ end
-                            end
-                        end
-                    end
-                elseif typ == "cexit" then -- or entry?
-                    for name, anchor in next, anchors do
-                        local lookups = anchor_to_lookup[name]
-                        if lookups then
-                            for lookup, _ in next, lookups do
-                                local f = cursive[lookup]
-                                if not f then f = { } cursive[lookup]  = f end
-                                f[unicode] = anchors -- ref to glyph, saves lookup
-                            --~ if trace_lookups then
-                            --~     report_prepare("lookup %s: exit anchor %s for U+%04X",lookup,name,unicode)
-                            --~ end
+                                local target = lookuphash[lookup]
+                                if target then
+                                    target[unicode] = anchors
+                                else
+                                    lookuphash[lookup] = { [unicode] = anchors }
+                                end
                             end
                         end
                     end
                 end
             end
         end
+
     end
+
 end
 
--- local cache = { }
-luatex = luatex or {} -- this has to change ... we need a better one
+local function split(replacement,original)
+    local result = { }
+    for i=1,#replacement do
+        result[original[i]] = replacement[i]
+    end
+    return result
+end
+
+-- not shared as we hook into lookups now
+
+--~ local function uncover_1(covers,result) -- multiple covers
+--~     local nofresults = #result
+--~     for n=1,#covers do
+--~         nofresults = nofresults + 1
+--~         local u = { }
+--~         local c = covers[n]
+--~         for i=1,#c do
+--~             u[c[i]] = true
+--~         end
+--~         result[nofresults] = u
+--~     end
+--~ end
+
+--~ local function uncover_2(covers,result) -- single covers (turned into multiple with n=1)
+--~     local nofresults = #result
+--~     for n=1,#covers do
+--~         nofresults = nofresults + 1
+--~         result[nofresults] = { [covers[n]] = true }
+--~     end
+--~ end
+
+--~ local function uncover_1(covers,result) -- multiple covers
+--~     local nofresults = #result
+--~     for n=1,#covers do
+--~         nofresults = nofresults + 1
+--~         result[nofresults] = covers[n]
+--~     end
+--~ end
+
+--~ local function prepare_contextchains(tfmdata)
+--~     local rawdata    = tfmdata.shared.rawdata
+--~     local resources  = rawdata.resources
+--~     local lookuphash = resources.lookuphash
+--~     local lookups    = rawdata.lookups
+--~     if lookups then
+--~         for lookupname, lookupdata in next, rawdata.lookups do
+--~             local lookuptype = lookupdata.type
+--~             if not lookuptype then
+--~                 report_prepare("missing lookuptype for %s",lookupname)
+--~             else -- => lookuphash[lookupname][unicode]
+--~                 local rules = lookupdata.rules
+--~                 if rules then
+--~                     local fmt = lookupdata.format
+--~                  -- if fmt == "coverage" then
+--~                     if fmt == "coverage" or fmt == "glyphs" then
+--~                         if lookuptype ~= "chainsub" and lookuptype ~= "chainpos" then
+--~                             -- todo: dejavu-serif has one (but i need to see what use it has)
+--~                             report_prepare("unsupported coverage %s for %s",lookuptype,lookupname)
+--~                         else
+--~                             local contexts = lookuphash[lookupname]
+--~                             if not contexts then
+--~                                 contexts = { }
+--~                                 lookuphash[lookupname] = contexts
+--~                             end
+--~                             local t, nt = { }, 0
+--~                             for nofrules=1,#rules do -- does #rules>1 happen often?
+--~                                 local rule     = rules[nofrules]
+--~                                 local current  = rule.current
+--~                                 local before   = rule.before
+--~                                 local after    = rule.after
+--~                                 local sequence = { }
+--~                                 if before then
+--~                                     uncover_1(before,sequence)
+--~                                 end
+--~                                 local start = #sequence + 1
+--~                                 uncover_1(current,sequence)
+--~                                 local stop = #sequence
+--~                                 if after then
+--~                                     uncover_1(after,sequence)
+--~                                 end
+--~                                 if sequence[1] then
+--~                                     nt = nt + 1
+--~                                     t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups }
+--~                                     for unic, _ in next, sequence[start] do
+--~                                         local cu = contexts[unic]
+--~                                         if not cu then
+--~                                             contexts[unic] = t
+--~                                         end
+--~                                     end
+--~                                 end
+--~                             end
+--~                         end
+--~                     elseif fmt == "reversecoverage" then -- we could combine both branches (only dufference is replacements)
+--~                         if lookuptype ~= "reversesub" then
+--~                             report_prepare("unsupported reverse coverage %s for %s",lookuptype,lookupname)
+--~                         else
+--~                             local contexts = lookuphash[lookupname]
+--~                             if not contexts then
+--~                                 contexts = { }
+--~                                 lookuphash[lookupname] = contexts
+--~                             end
+--~                             local t, nt = { }, 0
+--~                             for nofrules=1,#rules do
+--~                                 local rule         = rules[nofrules]
+--~                                 local current      = rule.current
+--~                                 local before       = rule.before
+--~                                 local after        = rule.after
+--~                                 local replacements = rule.replacements
+--~                                 local sequence     = { }
+--~                                 if before then
+--~                                     uncover_1(before,sequence)
+--~                                 end
+--~                                 local start = #sequence + 1
+--~                                 uncover_1(current,sequence)
+--~                                 local stop = #sequence
+--~                                 if after then
+--~                                     uncover_1(after,sequence)
+--~                                 end
+--~                                 if sequence[1] then
+--~                                     nt = nt + 1
+--~                                     t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups, replacements }
+--~                                     for unic, _  in next, sequence[start] do
+--~                                         local cu = contexts[unic]
+--~                                         if not cu then
+--~                                             contexts[unic] = t
+--~                                         end
+--~                                     end
+--~                                 end
+--~                             end
+--~                         end
+--~                  -- elseif fmt == "glyphs" then --maybe just make then before = { fore } and share with coverage
+--~                  --     if lookuptype ~= "chainsub" and lookuptype ~= "chainpos" then
+--~                  --         report_prepare("unsupported coverage %s for %s",lookuptype,lookupname)
+--~                  --     else
+--~                  --         local contexts = lookuphash[lookupname]
+--~                  --         if not contexts then
+--~                  --             contexts = { }
+--~                  --             lookuphash[lookupname] = contexts
+--~                  --         end
+--~                  --         local t, nt = { }, 0
+--~                  --         for nofrules=1,#rules do -- we can make glyphs a special case (less tables)
+--~                  --             local rule     = rules[nofrules]
+--~                  --             local current  = rule.names
+--~                  --             local before   = rule.fore
+--~                  --             local after    = rule.back
+--~                  --             local sequence = { }
+--~                  --             if before then
+--~                  --                 uncover_1(before,sequence)
+--~                  --             end
+--~                  --             local start = #sequence + 1
+--~                  --             uncover_1(current,sequence)
+--~                  --             local stop = #sequence
+--~                  --             if after then
+--~                  --                 uncover_1(after,sequence)
+--~                  --             end
+--~                  --             if sequence then
+--~                  --                 nt = nt + 1
+--~                  --                 t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups }
+--~                  --                 for unic, _ in next, sequence[start] do
+--~                  --                     local cu = contexts[unic]
+--~                  --                     if not cu then
+--~                  --                         contexts[unic] = t
+--~                  --                     end
+--~                  --                 end
+--~                  --             end
+--~                  --         end
+--~                  --     end
+--~                     end
+--~                 end
+--~             end
+--~         end
+--~     end
+--~ end
+
+local valid = {
+    coverage        = { chainsub = true, chainpos = true, contextsub = true },
+    reversecoverage = { reversesub = true },
+    glyphs          = { chainsub = true, chainpos = true },
+}
 
 local function prepare_contextchains(tfmdata)
-    local otfdata = tfmdata.shared.otfdata
-    local lookups = otfdata.lookups
+    local rawdata    = tfmdata.shared.rawdata
+    local resources  = rawdata.resources
+    local lookuphash = resources.lookuphash
+    local lookups    = rawdata.lookups
     if lookups then
-        local featuredata = otfdata.shared.featuredata
-        local contextchain = featuredata.gsub_contextchain -- shared with gpos
-        local reversecontextchain = featuredata.gsub_reversecontextchain -- shared with gpos
-        local characters = tfmdata.characters
-        local unicodes = tfmdata.unicodes
-        local indices = tfmdata.indices
-        local cache = luatex.covers
-        if not cache then
-            cache = { }
-            luatex.covers = cache
-        end
-        --
-        for lookupname, lookupdata in next, otfdata.lookups do
+        for lookupname, lookupdata in next, rawdata.lookups do
             local lookuptype = lookupdata.type
-            if not lookuptype then
-                report_prepare("missing lookuptype for %s",lookupname)
-            else
+            if lookuptype then
                 local rules = lookupdata.rules
                 if rules then
-                    local fmt = lookupdata.format
-                    -- contextchain[lookupname][unicode]
-                    if fmt == "coverage" then
-                        if lookuptype ~= "chainsub" and lookuptype ~= "chainpos" then
-                            report_prepare("unsupported coverage %s for %s",lookuptype,lookupname)
-                        else
-                            local contexts = contextchain[lookupname]
-                            if not contexts then
-                                contexts = { }
-                                contextchain[lookupname] = contexts
-                            end
-                            local t, nt = { }, 0
-                            for nofrules=1,#rules do -- does #rules>1 happen often?
-                                local rule = rules[nofrules]
-                                local coverage = rule.coverage
-                                if coverage and coverage.current then
-                                    local current, before, after, sequence = coverage.current, coverage.before, coverage.after, { }
-                                    if before then
-                                        uncover(before,sequence,cache,unicodes)
-                                    end
-                                    local start = #sequence + 1
-                                    uncover(current,sequence,cache,unicodes)
-                                    local stop = #sequence
-                                    if after then
-                                        uncover(after,sequence,cache,unicodes)
-                                    end
-                                    if sequence[1] then
-                                        nt = nt + 1
-                                        t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups }
-                                        for unic, _ in next, sequence[start] do
-                                            local cu = contexts[unic]
-                                            if not cu then
-                                                contexts[unic] = t
-                                            end
-                                        end
-                                    end
+                    local format = lookupdata.format
+                    local validformat = valid[format]
+                    if not validformat then
+                        report_prepare("unsupported format %s",format)
+                    elseif not validformat[lookuptype] then
+                        -- todo: dejavu-serif has one (but i need to see what use it has)
+                        report_prepare("unsupported %s %s for %s",format,lookuptype,lookupname)
+                    else
+                        local contexts = lookuphash[lookupname]
+                        if not contexts then
+                            contexts = { }
+                            lookuphash[lookupname] = contexts
+                        end
+                        local t, nt = { }, 0
+                        for nofrules=1,#rules do
+                            local rule         = rules[nofrules]
+                            local current      = rule.current
+                            local before       = rule.before
+                            local after        = rule.after
+                            local replacements = rule.replacements
+                            local sequence     = { }
+                            local nofsequences = 0
+                            -- Wventually we can store start, stop and sequence in the cached file
+                            -- but then less sharing takes place so best not do that without a lot
+                            -- of profiling so let's forget about it.
+                            if before then
+                                for n=1,#before do
+                                    nofsequences = nofsequences + 1
+                                    sequence[nofsequences] = before[n]
                                 end
                             end
-                        end
-                    elseif fmt == "reversecoverage" then
-                        if lookuptype ~= "reversesub" then
-                            report_prepare("unsupported reverse coverage %s for %s",lookuptype,lookupname)
-                        else
-                            local contexts = reversecontextchain[lookupname]
-                            if not contexts then
-                                contexts = { }
-                                reversecontextchain[lookupname] = contexts
+                            local start = nofsequences + 1
+                            for n=1,#current do
+                                nofsequences = nofsequences + 1
+                                sequence[nofsequences] = current[n]
                             end
-                            local t, nt = { }, 0
-                            for nofrules=1,#rules do
-                                local rule = rules[nofrules]
-                                local reversecoverage = rule.reversecoverage
-                                if reversecoverage and reversecoverage.current then
-                                    local current, before, after, replacements, sequence = reversecoverage.current, reversecoverage.before, reversecoverage.after, reversecoverage.replacements, { }
-                                    if before then
-                                        uncover(before,sequence,cache,unicodes)
-                                    end
-                                    local start = #sequence + 1
-                                    uncover(current,sequence,cache,unicodes)
-                                    local stop = #sequence
-                                    if after then
-                                        uncover(after,sequence,cache,unicodes)
-                                    end
-                                    if replacements then
-                                        replacements = split(replacements,current[1],cache,unicodes)
-                                    end
-                                    if sequence[1] then
-                                        -- this is different from normal coverage, we assume only replacements
-                                        nt = nt + 1
-                                        t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups, replacements }
-                                        for unic, _ in next, sequence[start] do
-                                            local cu = contexts[unic]
-                                            if not cu then
-                                                contexts[unic] = t
-                                            end
-                                        end
-                                    end
+                            local stop = nofsequences
+                            if after then
+                                for n=1,#after do
+                                    nofsequences = nofsequences + 1
+                                    sequence[nofsequences] = after[n]
                                 end
                             end
-                        end
-                    elseif fmt == "glyphs" then
-                        if lookuptype ~= "chainsub" and lookuptype ~= "chainpos" then
-                            report_prepare("unsupported coverage %s for %s",lookuptype,lookupname)
-                        else
-                            local contexts = contextchain[lookupname]
-                            if not contexts then
-                                contexts = { }
-                                contextchain[lookupname] = contexts
-                            end
-                            local t, nt = { }, 0
-                            for nofrules=1,#rules do
-                                -- nearly the same as coverage so we could as well rename it
-                                local rule = rules[nofrules]
-                                local glyphs = rule.glyphs
-                                if glyphs and glyphs.names then
-                                    local fore, back, names, sequence = glyphs.fore, glyphs.back, glyphs.names, { }
-                                    if fore and fore ~= "" then
-                                        fore = lpegmatch(split_at_space,fore)
-                                        uncover(fore,sequence,cache,unicodes)
-                                    end
-                                    local start = #sequence + 1
-                                    names = lpegmatch(split_at_space,names)
-                                    uncover(names,sequence,cache,unicodes)
-                                    local stop = #sequence
-                                    if back and back ~= "" then
-                                        back = lpegmatch(split_at_space,back)
-                                        uncover(back,sequence,cache,unicodes)
-                                    end
-                                    if sequence[1] then
-                                        nt = nt + 1
-                                        t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups }
-                                        for unic, _ in next, sequence[start] do
-                                            local cu = contexts[unic]
-                                            if not cu then
-                                                contexts[unic] = t
-                                            end
-                                        end
+                            if sequence[1] then
+                                -- Replacements only happen with reverse lookups as they are single only. We
+                                -- could pack them into current (replacement value instead of true) and then
+                                -- use sequence[start] instead but it's somewhat ugly.
+                                nt = nt + 1
+                                t[nt] = { nofrules, lookuptype, sequence, start, stop, rule.lookups, replacements }
+                                for unic, _  in next, sequence[start] do
+                                    local cu = contexts[unic]
+                                    if not cu then
+                                        contexts[unic] = t
                                     end
                                 end
                             end
                         end
                     end
+                else
+                    -- no rules
                 end
+            else
+                report_prepare("missing lookuptype for %s",lookupname)
             end
         end
     end
 end
 
-function fonts.initializers.node.otf.features(tfmdata,value)
+-- we can consider lookuphash == false (initialized but empty) vs lookuphash == table
+
+local function featuresinitializer(tfmdata,value)
     if true then -- value then
-        if not tfmdata.shared.otfdata.shared.initialized then
-            local t = trace_preparing and os.clock()
-            local otfdata = tfmdata.shared.otfdata
-            local featuredata = otfdata.shared.featuredata
-            -- caches
-            featuredata.gsub_multiple            = { }
-            featuredata.gsub_alternate           = { }
-            featuredata.gsub_single              = { }
-            featuredata.gsub_ligature            = { }
-            featuredata.gsub_contextchain        = { }
-            featuredata.gsub_reversecontextchain = { }
-            featuredata.gpos_pair                = { }
-            featuredata.gpos_single              = { }
-            featuredata.gpos_mark2base           = { }
-            featuredata.gpos_mark2ligature       = featuredata.gpos_mark2base
-            featuredata.gpos_mark2mark           = featuredata.gpos_mark2base
-            featuredata.gpos_cursive             = { }
-            featuredata.gpos_contextchain        = featuredata.gsub_contextchain
-            featuredata.gpos_reversecontextchain = featuredata.gsub_reversecontextchain
-            --
+        -- beware we need to use the topmost properties table
+        local rawdata    = tfmdata.shared.rawdata
+        local properties = rawdata.properties
+        if not properties.initialized then
+            local starttime = trace_preparing and os.clock()
+            local resources = rawdata.resources
+            resources.lookuphash = resources.lookuphash or { }
             prepare_contextchains(tfmdata)
             prepare_lookups(tfmdata)
-            otfdata.shared.initialized = true
+            properties.initialized = true
             if trace_preparing then
-                report_prepare("preparation time is %0.3f seconds for %s",os.clock()-t,tfmdata.fullname or "?")
+                report_prepare("preparation time is %0.3f seconds for %s",os.clock()-starttime,tfmdata.properties.fullname or "?")
             end
         end
     end
 end
+
+registerotffeature {
+    name         = "features",
+    description  = "features",
+    default      = true,
+    initializers = {
+        position = 1,
+        node     = featuresinitializer,
+    },
+    processors   = {
+        node     = featuresprocessor,
+    }
+}

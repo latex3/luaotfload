@@ -537,23 +537,24 @@ end
 %    low-level \context functions.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule("luat-dum.lua") -- not used in context at all
+luaotfload.loadmodule("basics-gen.lua")
 luaotfload.loadmodule("luat-ovr.lua") -- override some luat-dum functions
 luaotfload.loadmodule("data-con.lua") -- maybe some day we don't need this one
+luaotfload.loadmodule('basics-nod.lua')
 %    \end{macrocode}
 %
 %    A hack to remove a warning from |node-dum.lua| as it is \context
 %    specific.
 %
 %    \begin{macrocode}
-tex.attribute[0] = 0
+%tex.attribute[0] = 0
 %    \end{macrocode}
 %
 %    Node support modules.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule('node-dum.lua')
-luaotfload.loadmodule('node-inj.lua')
+%luaotfload.loadmodule('node-dum.lua')
+%luaotfload.loadmodule('node-inj.lua')
 %    \end{macrocode}
 %
 %    By default \context takes some private attributes for internal use. To
@@ -577,22 +578,23 @@ end
 %
 %    \begin{macrocode}
 luaotfload.loadmodule('font-ini.lua')
-luaotfload.loadmodule('font-tfm.lua')
+luaotfload.loadmodule('font-con.lua')
+luaotfload.loadmodule('fonts-enc.lua') -- will load font-age on demand
 luaotfload.loadmodule('font-cid.lua')
-luaotfload.loadmodule('font-ott.lua')
-luaotfload.loadmodule('font-map.lua')
-luaotfload.loadmodule('font-lua.lua')
-luaotfload.loadmodule('font-otf.lua')
-luaotfload.loadmodule('font-otd.lua')
+luaotfload.loadmodule('font-map.lua')         -- for loading lum file (will be stripped)
+luaotfload.loadmodule('font-nms.lua')
+luaotfload.loadmodule('font-tfm.lua')
 luaotfload.loadmodule('font-oti.lua')
+luaotfload.loadmodule('font-otf.lua')
 luaotfload.loadmodule('font-otb.lua')
+luaotfload.loadmodule('node-inj.lua')         -- will be replaced (luatex >= .70)
 luaotfload.loadmodule('font-otn.lua')
 luaotfload.loadmodule('font-ota.lua')
-luaotfload.loadmodule('font-otc.lua')
-luaotfload.loadmodule('font-age.lua')
+luaotfload.loadmodule('font-lua.lua')
 luaotfload.loadmodule('font-def.lua')
-luaotfload.loadmodule('font-ltx.lua')
-luaotfload.loadmodule('font-dum.lua')
+luaotfload.loadmodule('fonts-def.lua')
+luaotfload.loadmodule('fonts-ext.lua') -- some extensions
+luaotfload.loadmodule('fonts-cbk.lua')
 %    \end{macrocode}
 %
 %    This is a patch for |otfl-font-def.lua|, that defines a reader for ofm
@@ -608,8 +610,8 @@ end
 %    \textsf{luaotfload} specific modules.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule("font-nms.lua")
-luaotfload.loadmodule("font-clr.lua")
+%luaotfload.loadmodule("font-nms.lua")
+%luaotfload.loadmodule("font-clr.lua")
 %    \end{macrocode}
 %
 % \subsection{Post-processing TFM table}
@@ -684,9 +686,9 @@ luatexbase.reset_callback("define_font")
 luatexbase.add_to_callback("define_font",
                             def_font,
                            "luaotfload.define_font", 1)
-luatexbase.add_to_callback("find_vf_file",
-                            fonts.vf.find,
-                           "luaotfload.find_vf_file")
+%luatexbase.add_to_callback("find_vf_file",
+%                            fonts.vf.find,
+%                           "luaotfload.find_vf_file")
 %    \end{macrocode}
 %
 % \iffalse

@@ -1,10 +1,15 @@
-if not modules then modules = { } end modules ['luat-dum'] = {
+if not modules then modules = { } end modules ['luat-basics-gen'] = {
     version   = 1.100,
     comment   = "companion to luatex-*.tex",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
 }
+
+if context then
+    texio.write_nl("fatal error: this module is not for context")
+    os.exit()
+end
 
 local dummyfunction = function() end
 local dummyreporter = function(c) return function(...) texio.write(c .. " : " .. string.format(...)) end end
@@ -15,34 +20,42 @@ statistics = {
     stoptiming    = dummyfunction,
     elapsedtime   = nil,
 }
+
 directives = {
     register      = dummyfunction,
     enable        = dummyfunction,
     disable       = dummyfunction,
 }
+
 trackers = {
     register      = dummyfunction,
     enable        = dummyfunction,
     disable       = dummyfunction,
 }
+
 experiments = {
     register      = dummyfunction,
     enable        = dummyfunction,
     disable       = dummyfunction,
 }
+
 storage = { -- probably no longer needed
     register      = dummyfunction,
     shared        = { },
 }
+
 logs = {
     new           = dummyreporter,
     reporter      = dummyreporter,
     messenger     = dummyreporter,
     report        = dummyfunction,
 }
+
 callbacks = {
     register = function(n,f) return callback.register(n,f) end,
+
 }
+
 utilities = {
     storage = {
         allocate = function(t) return t or { } end,
@@ -69,21 +82,21 @@ local remapper = {
     fea   = "font feature files",
 }
 
-function resolvers.findfile(name,kind)
+function resolvers.findfile(name,fileformat)
     name = string.gsub(name,"\\","\/")
-    kind = kind and string.lower(kind)
-    local found = kpse.find_file(name,(kind and kind ~= "" and (remapper[kind] or kind)) or file.extname(name,"tex"))
+    fileformat = fileformat and string.lower(fileformat)
+    local found = kpse.find_file(name,(fileformat and fileformat ~= "" and (remapper[fileformat] or fileformat)) or file.extname(name,"tex"))
     if not found or found == "" then
-        found = kpse.find_file(name,"other text file")
+        found = kpse.find_file(name,"other text files")
     end
     return found
 end
 
-function resolvers.findbinfile(name,kind)
-    if not kind or kind == "" then
-        kind = file.extname(name) -- string.match(name,"%.([^%.]-)$")
+function resolvers.findbinfile(name,fileformat)
+    if not fileformat or fileformat == "" then
+        fileformat = file.extname(name) -- string.match(name,"%.([^%.]-)$")
     end
-    return resolvers.findfile(name,(kind and remapper[kind]) or kind)
+    return resolvers.findfile(name,(fileformat and remapper[fileformat]) or fileformat)
 end
 
 function resolvers.resolve(s)
@@ -202,6 +215,12 @@ function caches.savedata(path,name,data)
     local fullname = makefullname(path,name)
     if fullname then
         texio.write(string.format("(save: %s)",fullname))
-        table.tofile(fullname,data,'return',false,true,false)
+        table.tofile(fullname,data,true,{ reduce = true })
     end
+end
+
+--
+
+function table.setmetatableindex(t,f)
+    setmetatable(t,{ __index = f })
 end

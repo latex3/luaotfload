@@ -8,51 +8,85 @@ if not modules then modules = { } end modules ['font-oti'] = {
 
 local lower = string.lower
 
-local fonts = fonts
+local allocate = utilities.storage.allocate
 
-local otf          = fonts.otf
-local initializers = fonts.initializers
+local fonts              = fonts
+local otf                = { }
+fonts.handlers.otf       = otf
 
-local languages    = otf.tables.languages
-local scripts      = otf.tables.scripts
+local otffeatures        = fonts.constructors.newfeatures("otf")
+local registerotffeature = otffeatures.register
 
-local function set_language(tfmdata,value)
+registerotffeature {
+    name        = "features",
+    description = "initialization of feature handler",
+    default     = true,
+}
+
+-- these are later hooked into node and base initializaters
+
+local otftables = otf.tables -- not always defined
+
+local function setmode(tfmdata,value)
     if value then
-        value = lower(value)
-        if languages[value] then
-            tfmdata.language = value
+        tfmdata.properties.mode = lower(value)
+    end
+end
+
+local function setlanguage(tfmdata,value)
+    if value then
+        local cleanvalue = lower(value)
+        local languages  = otftables and otftables.languages
+        local properties = tfmdata.properties
+        if not languages then
+            properties.language = cleanvalue
+        elseif languages[value] then
+            properties.language = cleanvalue
+        else
+            properties.language = "dflt"
         end
     end
 end
 
-local function set_script(tfmdata,value)
+local function setscript(tfmdata,value)
     if value then
-        value = lower(value)
-        if scripts[value] then
-            tfmdata.script = value
+        local cleanvalue = lower(value)
+        local scripts    = otftables and otftables.scripts
+        local properties = tfmdata.properties
+        if not scripts then
+            properties.script = cleanvalue
+        elseif scripts[value] then
+            properties.script = cleanvalue
+        else
+            properties.script = "dflt"
         end
     end
 end
 
-local function set_mode(tfmdata,value)
-    if value then
-        tfmdata.mode = lower(value)
-    end
-end
+registerotffeature {
+    name        = "mode",
+    description = "mode",
+    initializers = {
+        base = setmode,
+        node = setmode,
+    }
+}
 
-local base_initializers = initializers.base.otf
-local node_initializers = initializers.node.otf
+registerotffeature {
+    name         = "language",
+    description  = "language",
+    initializers = {
+        base = setlanguage,
+        node = setlanguage,
+    }
+}
 
-base_initializers.language = set_language
-base_initializers.script   = set_script
-base_initializers.mode     = set_mode
-base_initializers.method   = set_mode
-
-node_initializers.language = set_language
-node_initializers.script   = set_script
-node_initializers.mode     = set_mode
-node_initializers.method   = set_mode
-
-otf.features.register("features",true)     -- we always do features
-table.insert(fonts.processors,"features")  -- we need a proper function for doing this
+registerotffeature {
+    name        = "script",
+    description = "script",
+    initializers = {
+        base = setscript,
+        node = setscript,
+    }
+}
 

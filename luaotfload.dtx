@@ -646,7 +646,7 @@ local function def_font(...)
 % OpenType math.
 %
 %    \begin{macrocode}
-        local otfdata = fontdata.shared.otfdata
+        local otfdata = fontdata.shared.rawdata
         if otfdata.metadata.math then
             local mc = { }
             for k,v in next, otfdata.metadata.math do

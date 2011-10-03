@@ -511,6 +511,14 @@ function table.reversed(t)
         return tt
     end
 end
+
+function table.derive(parent)
+    local child = { }
+    if parent then
+        setmetatable(child,{ __index = parent })
+    end
+    return child
+end
 %    \end{macrocode}
 %
 % \subsection{Module loading}

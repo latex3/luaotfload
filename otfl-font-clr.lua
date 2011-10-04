@@ -6,15 +6,13 @@ if not modules then modules = { } end modules ['font-clr'] = {
     license   = "GPL"
 }
 
-fonts.triggers            = fonts.triggers            or { }
-fonts.initializers        = fonts.initializers        or { }
-fonts.initializers.common = fonts.initializers.common or { }
+local format = string.format
 
-local initializers, format = fonts.initializers, string.format
+local otffeatures        = fonts.constructors.newfeatures("otf")
+local ids                = fonts.hashes.identifiers
+local registerotffeature = otffeatures.register
 
-table.insert(fonts.triggers,"color")
-
-function initializers.common.color(tfmdata,value)
+local function setcolor(tfmdata,value)
     local sanitized
 
     if value then
@@ -36,8 +34,14 @@ function initializers.common.color(tfmdata,value)
     end
 end
 
-initializers.base.otf.color = initializers.common.color
-initializers.node.otf.color = initializers.common.color
+registerotffeature {
+    name        = "color",
+    description = "color",
+    initializers = {
+        base = setcolor,
+        node = setcolor,
+    }
+}
 
 local function hex2dec(hex,one)
     if one then
@@ -94,8 +98,8 @@ local sbox    = node.id('sub_box')
 local function lookup_next_color(head)
     for n in node.traverse(head) do
         if n.id == glyph then
-            if fonts.identifiers[n.font] and fonts.identifiers[n.font].color then
-                return fonts.identifiers[n.font].color
+            if ids[n.font] and ids[n.font].color then
+                return ids[n.font].color
             else
                 return -1
             end
@@ -119,7 +123,7 @@ local function node_colorize(head, current_color, next_color)
             local next_color_in = lookup_next_color(n.next) or next_color
             n.list, current_color = node_colorize(n.list, current_color, next_color_in)
         elseif n.id == glyph then
-            local tfmdata = fonts.identifiers[n.font]
+            local tfmdata = ids[n.font]
             if tfmdata and tfmdata.color then
                 if tfmdata.color ~= current_color then
                     local pushcolor = hex_to_rgba(tfmdata.color)

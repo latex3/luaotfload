@@ -2,8 +2,8 @@
 \directlua {
   local function patch(fontdata)
     local mc = fontdata.MathConstants
-    local em = fontdata.units
-    local sz = fontdata.size
+    local em = fontdata.parameters.units
+    local sz = fontdata.parameters.size
     if fontdata.psname == "CambriaMath" and mc then
       mc.DisplayOperatorMinHeight = 2800 / em * sz
     end

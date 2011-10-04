@@ -762,3 +762,8 @@ names.scan   = scan_external_dir
 names.load   = load_names
 names.update = update_names
 names.save   = save_names
+
+-- dummy
+function fonts.names.getfilename(askedname,suffix)  -- only supported in mkiv
+    return ""
+end

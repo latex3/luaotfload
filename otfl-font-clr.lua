@@ -14,6 +14,7 @@ local registerotffeature = otffeatures.register
 
 local function setcolor(tfmdata,value)
     local sanitized
+    local properties = tfmdata.properties
 
     if value then
         value = tostring(value)
@@ -29,7 +30,7 @@ local function setcolor(tfmdata,value)
     end
 
     if sanitized then
-        tfmdata.color = sanitized
+        tfmdata.properties.color = sanitized
         add_color_callback()
     end
 end
@@ -98,8 +99,8 @@ local sbox    = node.id('sub_box')
 local function lookup_next_color(head)
     for n in node.traverse(head) do
         if n.id == glyph then
-            if ids[n.font] and ids[n.font].color then
-                return ids[n.font].color
+            if ids[n.font] and ids[n.font].properties and ids[n.font].properties.color then
+                return ids[n.font].properties.color
             else
                 return -1
             end
@@ -124,18 +125,18 @@ local function node_colorize(head, current_color, next_color)
             n.list, current_color = node_colorize(n.list, current_color, next_color_in)
         elseif n.id == glyph then
             local tfmdata = ids[n.font]
-            if tfmdata and tfmdata.color then
-                if tfmdata.color ~= current_color then
-                    local pushcolor = hex_to_rgba(tfmdata.color)
+            if tfmdata and tfmdata.properties  and tfmdata.properties.color then
+                if tfmdata.properties.color ~= current_color then
+                    local pushcolor = hex_to_rgba(tfmdata.properties.color)
                     local push = node.new(whatsit, 8)
                     push.mode  = 1
                     push.data  = pushcolor
                     head       = node.insert_before(head, n, push)
-                    current_color = tfmdata.color
+                    current_color = tfmdata.properties.color
                 end
                 local next_color_in = lookup_next_color (n.next) or next_color
-                if next_color_in ~= tfmdata.color then
-                    local _, popcolor = hex_to_rgba(tfmdata.color)
+                if next_color_in ~= tfmdata.properties.color then
+                    local _, popcolor = hex_to_rgba(tfmdata.properties.color)
                     local pop  = node.new(whatsit, 8)
                     pop.mode   = 1
                     pop.data   = popcolor

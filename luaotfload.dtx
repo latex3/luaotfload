@@ -406,25 +406,24 @@ and the derived files
 % \begin{multicols}{3}
 % \begin{itemize*}
 % \item |data-con.lua|
-% \item |font-age.lua|
 % \item |font-cid.lua|
+% \item |font-con.lua|
 % \item |font-def.lua|
-% \item |font-dum.lua|
 % \item |font-ini.lua|
-% \item |font-lua.lua|
 % \item |font-map.lua|
 % \item |font-ota.lua|
 % \item |font-otb.lua|
-% \item |font-otc.lua|
-% \item |font-otd.lua|
 % \item |font-otf.lua|
 % \item |font-oti.lua|
 % \item |font-otn.lua|
-% \item |font-ott.lua|
-% \item |font-tfm.lua|
-% \item |luat-dum.lua|
-% \item |node-dum.lua|
 % \item |node-inj.lua|
+% \item |luatex-fonts-cbk.lua|
+% \item |luatex-fonts-enc.lua|
+% \item |luatex-fonts-ext.lua|
+% \item |luatex-fonts-lua.lua|
+% \item |luatex-fonts-tfm.lua|
+% \item |luatex-basics-gen.lua|
+% \item |luatex-basics-nod.lua|
 % \end{itemize*}
 % \end{multicols}
 %
@@ -433,7 +432,7 @@ and the derived files
 % \item |font-clr.lua|
 % \item |font-nms.lua|
 % \item |luat-ovr.lua|
-% \item |font-ltx.lua|, heavily modified version of |font-xtx.lua|.
+% \item |font-ltx.lua|, heavily modified version of |luatex-fonts-def.lua|.
 % \end{itemize*}
 %
 % \section{Troubleshooting}
@@ -487,7 +486,7 @@ kpse.init_prog("", 600, "/")
 %    The minimal required \luatex version.
 %
 %    \begin{macrocode}
-local luatex_version = 60
+local luatex_version = 70
 
 if tex.luatexversion < luatex_version then
     warning("LuaTeX v%.2f is old, v%.2f is recommended.",
@@ -496,6 +495,7 @@ if tex.luatexversion < luatex_version then
 end
 %    \end{macrocode}
 %
+%    Some required functions missing from \textsf{lualibs} package.
 %
 %    \begin{macrocode}
 function table.reversed(t)
@@ -545,24 +545,10 @@ end
 %    low-level \context functions.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule("basics-gen.lua")
-luaotfload.loadmodule("luat-ovr.lua") -- override some luat-dum functions
-luaotfload.loadmodule("data-con.lua") -- maybe some day we don't need this one
+luaotfload.loadmodule('basics-gen.lua')
+luaotfload.loadmodule('luat-ovr.lua') -- override some basics-gen.lua functions
+luaotfload.loadmodule('data-con.lua')
 luaotfload.loadmodule('basics-nod.lua')
-%    \end{macrocode}
-%
-%    A hack to remove a warning from |node-dum.lua| as it is \context
-%    specific.
-%
-%    \begin{macrocode}
-%tex.attribute[0] = 0
-%    \end{macrocode}
-%
-%    Node support modules.
-%
-%    \begin{macrocode}
-%luaotfload.loadmodule('node-dum.lua')
-%luaotfload.loadmodule('node-inj.lua')
 %    \end{macrocode}
 %
 %    By default \context takes some private attributes for internal use. To
@@ -587,38 +573,27 @@ end
 %    \begin{macrocode}
 luaotfload.loadmodule('font-ini.lua')
 luaotfload.loadmodule('font-con.lua')
-luaotfload.loadmodule('fonts-enc.lua') -- will load font-age on demand
+luaotfload.loadmodule('fonts-enc.lua')
 luaotfload.loadmodule('font-cid.lua')
-luaotfload.loadmodule('font-map.lua')         -- for loading lum file (will be stripped)
+luaotfload.loadmodule('font-map.lua')
 luaotfload.loadmodule('font-nms.lua')
 luaotfload.loadmodule('fonts-tfm.lua')
 luaotfload.loadmodule('font-oti.lua')
 luaotfload.loadmodule('font-otf.lua')
 luaotfload.loadmodule('font-otb.lua')
-luaotfload.loadmodule('node-inj.lua')         -- will be replaced (luatex >= .70)
+luaotfload.loadmodule('node-inj.lua')
 luaotfload.loadmodule('font-otn.lua')
 luaotfload.loadmodule('font-ota.lua')
 luaotfload.loadmodule('fonts-lua.lua')
 luaotfload.loadmodule('font-def.lua')
 luaotfload.loadmodule('font-ltx.lua')
-luaotfload.loadmodule('fonts-ext.lua') -- some extensions
+luaotfload.loadmodule('fonts-ext.lua')
 luaotfload.loadmodule('fonts-cbk.lua')
-%    \end{macrocode}
-%
-%    This is a patch for |otfl-font-def.lua|, that defines a reader for ofm
-%    fonts, this is necessary if we set the forced field of the specification
-%    to |ofm|.
-%
-%    \begin{macrocode}
-if fonts and fonts.tfm and fonts.tfm.readers then
-    fonts.tfm.readers.ofm = fonts.tfm.readers.tfm
-end
 %    \end{macrocode}
 %
 %    \textsf{luaotfload} specific modules.
 %
 %    \begin{macrocode}
-%luaotfload.loadmodule("font-nms.lua")
 %luaotfload.loadmodule("font-clr.lua")
 %    \end{macrocode}
 %

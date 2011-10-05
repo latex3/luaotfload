@@ -173,34 +173,32 @@ and the derived files
 % \maketitle
 %
 % \begin{abstract}
-% This package is an adaptation of the \context font loading system,
-% providing the ability to load \textsf{OpenType} fonts with extended font
-% loading syntax supporting a large selection of OpenType font features.
+% This package is an adaptation of the \context font loading system, providing
+% the ability to load \textsf{OpenType} fonts with extended font loading syntax
+% supporting a large selection of OpenType font features.
 % \end{abstract}
 %
 % \tableofcontents
 %
 % \section{Introduction}
 %
-% Font management and installation has always been painful with \tex.
-% A lot of files are needed for one font (tfm, pfb, map, fd, vf), and as
-% \tex is 8-bit each font is limited to 256 characters.
-% But the font world has evolved since \tex, and new font technologies have
-% appeared, most notably the so called \emph{smart font} technologies like
-% \textsf{OpenType} fonts. These fonts can contain a lot of characters, and
-% additional functionalities like ligatures, old-style numbers, small capitals,
-% etc., and support more complex writing systems like Arabic and
-% Indic\footnote{Unfortunately, \textsf{luaotfload} doesn't support Indic
-% scripts right now} scripts.
-% They are widely deployed and available for all modern operating systems and
-% are becoming the de facto standard fonts for advanced text layout.
-% Until now the only way to use them directly in the \tex world was by using
-% them with \xetex.
+% Font management and installation has always been painful with \tex.  A lot of
+% files are needed for one font (tfm, pfb, map, fd, vf), and as \tex is 8-bit
+% each font is limited to 256 characters.  But the font world has evolved since
+% \tex, and new font technologies have appeared, most notably the so called
+% \emph{smart font} technologies like \textsf{OpenType} fonts. These fonts can
+% contain a lot of characters, and additional functionalities like ligatures,
+% old-style numbers, small capitals, etc., and support more complex writing
+% systems like Arabic and Indic\footnote{Unfortunately, \textsf{luaotfload}
+% doesn't support Indic scripts right now} scripts.  They are widely deployed
+% and available for all modern operating systems and are becoming the de facto
+% standard fonts for advanced text layout.  Until now the only way to use them
+% directly in the \tex world was by using them with \xetex.
 %
 % Unlike \xetex, \luatex does not provide direct support for using these fonts
-% by default, but it provides a way to hook Lua code in some points of the
-% \tex processing; for instance, we can improve the font loading system, and
-% text procession, which what this package is about.
+% by default, but it provides a way to hook Lua code in some points of the \tex
+% processing; for instance, we can improve the font loading system, and text
+% procession, which what this package is about.
 %
 % \section{Loading fonts}
 %
@@ -217,12 +215,12 @@ and the derived files
 %
 % \paragraph{Prefix}
 %
-% The \meta{prefix} can be either |file:| or |name:|, which specify
-% whether to use a select the font from its filename or font name,
-% respectively. If no prefix is specified |name:| is assumed.
+% The \meta{prefix} can be either |file:| or |name:|, which specify whether to
+% use a select the font from its filename or font name, respectively. If no
+% prefix is specified |name:| is assumed.
 %
-% For compatibility with \xetex, surrounding the \meta{font name}
-% with square brackets is synonymous to using the |file:| prefix.
+% For compatibility with \xetex, surrounding the \meta{font name} with square
+% brackets is synonymous to using the |file:| prefix.
 %
 % Accessing fonts by fontname allows loading system installed fonts as well as
 % \textsc{texmf} ones, and requires a font names database; see
@@ -230,14 +228,13 @@ and the derived files
 %
 % \paragraph{Font name}
 %
-% The \meta{font name} can be either a font filename or actual font name
-% based on the \meta{prefix} as mentioned above.
+% The \meta{font name} can be either a font filename or actual font name based
+% on the \meta{prefix} as mentioned above.
 %
 % Fonts loaded by filename may either include their absolute path in the
-% filesystem or consist of just the filename with a path.
-% If no path is specified then \textsf{kpathsea} is used to locate the font
-% (which will typically be in the \textsc{texmf} tree or the current
-% directory).
+% filesystem or consist of just the filename with a path.  If no path is
+% specified then \textsf{kpathsea} is used to locate the font (which will
+% typically be in the \textsc{texmf} tree or the current directory).
 %
 % For example,
 % \begin{quote}
@@ -251,11 +248,9 @@ and the derived files
 %
 % \paragraph{Font features}
 %
-% \meta{font features} are a list of items separated by semi-colons,
-% which are either
-% |key=value| font parameters, or switches to enable/disable certain font
-% features in the form of |+feat|/|-feat|.
-% The supported keys are:
+% \meta{font features} are a list of items separated by semi-colons, which are
+% either |key=value| font parameters, or switches to enable/disable certain
+% font features in the form of |+feat|/|-feat|.  The supported keys are:
 % \begin{description}
 % \item [mode] \hfill \\
 % \textsf{luaotfload} has two OpenType processing modes; |base| and |node|.
@@ -277,11 +272,12 @@ and the derived files
 % OpenType language string, default value is |latn|.
 %
 % \item [featurefile] \hfill \\
-% feature files are textual representation of OpenType tables and can be used to
-% extend OpenType features of the font on fly. The file name of the feature file
-% is passed, then features defined in the file can be enabled/disabled like any
-% other feature. The syntax is documented in Adobe's
-% \href{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}{OpenType Feature File Specification}.
+% feature files are textual representation of OpenType tables and can be used
+% to extend OpenType features of the font on fly. The file name of the feature
+% file is passed, then features defined in the file can be enabled/disabled
+% like any other feature. The syntax is documented in Adobe's
+% \href{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}
+% {OpenType Feature File Specification}.
 %
 % For example, to set a |tkrn| feature from |mykern.fea| file:
 %
@@ -289,8 +285,8 @@ and the derived files
 %
 % \item [color] \hfill \\
 % font color, defined as a triplet of two-digit hexadecimal RGB values, with
-% optionally another value for the transparency
-% (where |00| is completely transparent and |FF| is opaque.)
+% optionally another value for the transparency (where |00| is completely
+% transparent and |FF| is opaque.)
 %
 % For example, to set text in semitransparent red:
 %
@@ -298,10 +294,9 @@ and the derived files
 %
 % \item [protrusion \& expansion] \hfill \\
 % Both keys control microtypographic features of the font, namely glyph
-% protrusion and expansion. The value of the key is the name of predefined
-% Lua tables of protrusion and expansion values; see the end of
-% |otfl-font-dum.lua| file for an example of such tables. The only
-% predefined value is |default|.
+% protrusion and expansion. The value of the key is the name of predefined Lua
+% tables of protrusion and expansion values; see the end of |otfl-font-dum.lua|
+% file for an example of such tables. The only predefined value is |default|.
 %
 % For example, to enable default protrusion\footnote{You also need to set
 % |\pdfprotrudechars2 \pdfadjustspacing2| to activate protrusion and expansion,
@@ -323,15 +318,15 @@ and the derived files
 % \end{itemize*}
 %
 % (For \xetex users: these last two are the equivalent of writing
-%  |mapping=text-tex| using \xetex's input remapping feature.)
+% |mapping=text-tex| using \xetex's input remapping feature.)
 %
 %
 % \section{Font names database}
 % \label{sec:fontdb}
 %
-% As introduced in the previous section, \textsf{luaotfload} uses a database
-% to keep track of fonts available to \luatex. Using this database, fonts can
-% be loaded by font name as well as filename.
+% As introduced in the previous section, \textsf{luaotfload} uses a database to
+% keep track of fonts available to \luatex. Using this database, fonts can be
+% loaded by font name as well as filename.
 %
 % When \textsf{luaotfload} is asked to load a font by font name, it will check
 % if font names database exists and load it, or generate a new database if non
@@ -343,26 +338,26 @@ and the derived files
 % However, it is sometimes desirable to update the database manually, so
 % \textsf{luaotfload} provides a |mkluatexfontdb| utility to manually update
 % the database. |mkluatexfontdb| is a lua script that can be either run
-% directly or as an argument to |texlua|, depending on your system\footnote{
-% On MS Windows it can be run either by calling the wrapper application
+% directly or as an argument to |texlua|, depending on your system\footnote{On
+% MS Windows it can be run either by calling the wrapper application
 % |mkluatexfontdb.exe| or with |texlua.exe mkluatexfontdb.lua|}.
 %
 % The first time the database is generated may take quite some time to process
-% every font on your computer.
-% This is particularly noticeable if it occurs during a typesetting run.
-% Subsequent runs to update the database will be quite fast, however.
+% every font on your computer.  This is particularly noticeable if it occurs
+% during a typesetting run.  Subsequent runs to update the database will be
+% quite fast, however.
 %
 % \textsf{luaotfload} will parse standard places for fonts in your system to
 % build the font database. On Linux, it will read |fontconfig| configuration
-% files to find the font locations;
-% on Windows and Mac~OS~X, it will search in the standard font locations,
-% |%WINDIR%\Fonts| in Windows and |~/Library/Fonts|, |/Library/Fonts|,
-% |/System/Library/Fonts|, and |/Network/Library/Fonts| in Mac~OS~X.
+% files to find the font locations; on Windows and Mac~OS~X, it will search in
+% the standard font locations, |%WINDIR%\Fonts| in Windows and
+% |~/Library/Fonts|, |/Library/Fonts|, |/System/Library/Fonts|, and
+% |/Network/Library/Fonts| in Mac~OS~X.
 %
 % If you do not wish the standard font locations be searched by default but
-% would rather specify the exact locations in which to find your fonts, set
-% the |OSFONTDIR| environment variable instead. When this variable is set,
-% only the specified directories will be searched.
+% would rather specify the exact locations in which to find your fonts, set the
+% |OSFONTDIR| environment variable instead. When this variable is set, only the
+% specified directories will be searched.
 %
 % |mkluatexfontdb.lua --help| provides a brief summary of the functionality of
 % the script and includes some advanced options that we have not mentioned
@@ -381,9 +376,9 @@ and the derived files
 % can find. You can either use the base name or the full path. Any thing after
 % a |%| sign is ignored. \textsf{luaotfload} reads all files named named
 % |otfl-blacklist.cnf|, so you can add your own fonts to the global blacklist
-% by creating a local file |otfl-blacklist.cnf| with the entries you need.
-% You can also remove a font from this blacklist by prepending the name with
-% a dash (|-|).
+% by creating a local file |otfl-blacklist.cnf| with the entries you need.  You
+% can also remove a font from this blacklist by prepending the name with a dash
+% (|-|).
 %
 % \begin{verbatim}
 % % example otf-blacklist.cnf
@@ -396,12 +391,12 @@ and the derived files
 %
 % This package is a wrapper for several files taken from the \context macro
 % package. The philosophy is to let \context do all the implementation and
-% update these files from time to time. So we try not to modify the files
-% taken from \context as far as possible, but we changed their names to
-% prevent name clashes.
+% update these files from time to time. So we try not to modify the files taken
+% from \context as far as possible, but we changed their names to prevent name
+% clashes.
 %
-% The \context files are renamed by adding the prefix |otfl-| to them
-% (|otfl| as |OTF L|oad). The files are:
+% The \context files are renamed by adding the prefix |otfl-| to them (|otfl|
+% as |OTF L|oad). The files are:
 %
 % \begin{multicols}{3}
 % \begin{itemize*}
@@ -441,11 +436,10 @@ and the derived files
 % version of this package before reporting a bug, as this package is under
 % active development.
 %
-% A very common problem is the lack of features for some OpenType fonts
-% even when specified. It can be related to the fact that some fonts do not
-% provide features for the |dflt| script, which is the default one in this
-% package, so you may have to specify the script in the command line, for
-% example:
+% A very common problem is the lack of features for some OpenType fonts even
+% when specified. It can be related to the fact that some fonts do not provide
+% features for the |dflt| script, which is the default one in this package, so
+% you may have to specify the script in the command line, for example:
 %
 % |\font\myfont = MyFont.otf:script=latn;+liga;|
 %
@@ -473,11 +467,11 @@ luaotfload.module = {
 local error, warning, info, log = luatexbase.provides_module(luaotfload.module)
 %    \end{macrocode}
 %
-%    This is a necessary initalization in order not to rebuild an existing font.
-%    Maybe 600 should be replaced by |\pdfpkresolution| or |texconfig.pk_dpi|
-%    (and it should be replaced dynamically), but we don't have access (yet) to
-%    the |texconfig| table, so we let it be 600. Anyway, it does still work
-%    fine even if |\pdfpkresolution| is changed.
+%    This is a necessary initalization in order not to rebuild an existing
+%    font.  Maybe 600 should be replaced by |\pdfpkresolution| or
+%    |texconfig.pk_dpi| (and it should be replaced dynamically), but we don't
+%    have access (yet) to the |texconfig| table, so we let it be 600. Anyway,
+%    it does still work fine even if |\pdfpkresolution| is changed.
 %
 %    \begin{macrocode}
 kpse.init_prog("", 600, "/")
@@ -524,8 +518,7 @@ end
 % \subsection{Module loading}
 %
 %    We load the \context files with this function. It automatically adds the
-%    |otfl-| prefix to it, so that we call it with the actual \context
-%    name.
+%    |otfl-| prefix to it, so that we call it with the actual \context name.
 %
 %    \begin{macrocode}
 function luaotfload.loadmodule(name)
@@ -599,11 +592,11 @@ luaotfload.loadmodule("font-clr.lua")
 %
 % \subsection{Post-processing TFM table}
 %
-% Here we do some final touches to the loaded TFM table before passing it
-% to the \tex end.
+%    Here we do some final touches to the loaded TFM table before passing it to
+%    the \tex end.
 %
-% First we create a callback for patching fonts on the fly, to be used by
-% other packages.
+%    First we create a callback for patching fonts on the fly, to be used by
+%    other packages.
 %    \begin{macrocode}
 luatexbase.create_callback("luaotfload.patch_font", "simple", function() end)
 %    \end{macrocode}
@@ -616,8 +609,8 @@ local function def_font(...)
     if type(fontdata) == "table" and fontdata.shared then
 %    \end{macrocode}
 %
-% Then we populate |MathConstants| table, which is required for
-% OpenType math.
+%    Then we populate |MathConstants| table, which is required for OpenType
+%    math.
 %
 %    \begin{macrocode}
         local otfdata = fontdata.shared.rawdata
@@ -640,7 +633,7 @@ local function def_font(...)
         end
 %    \end{macrocode}
 %
-% Execute any registered font patching callbacks.
+%    Execute any registered font patching callbacks.
 %
 %    \begin{macrocode}
         luatexbase.call_callback("luaotfload.patch_font", fontdata)

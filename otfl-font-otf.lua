@@ -114,15 +114,21 @@ local function showfeatureorder(rawdata,filename)
             if features then
                 for feature, scripts in next, features do
                     local tt = { }
-                    for script, languages in next, scripts do
-                        local ttt = { }
-                        for language, _ in next, languages do
-                            ttt[#ttt+1] = language
+                    if type(scripts) == "table" then
+                        for script, languages in next, scripts do
+                            local ttt = { }
+                            for language, _ in next, languages do
+                                ttt[#ttt+1] = language
+                            end
+                            tt[#tt+1] = format("[%s: %s]",script,concat(ttt," "))
                         end
-                        tt[#tt+1] = format("[%s: %s]",script,concat(ttt," "))
-                    end
-                    if trace_loading then
-                        report_otf("       %s: %s",feature,concat(tt," "))
+                        if trace_loading then
+                            report_otf("       %s: %s",feature,concat(tt," "))
+                        end
+                    else
+                        if trace_loading then
+                            report_otf("       %s: %s",feature,tostring(scripts))
+                        end
                     end
                 end
             end

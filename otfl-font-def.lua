@@ -299,7 +299,7 @@ function definers.loadfont(specification)
             local embedding
             if directive_embedall then
                 embedding = "full"
-            elseif properties.filename and constructors.dontembed[properties.filename] then
+            elseif properties and properties.filename and constructors.dontembed[properties.filename] then
                 embedding = "no"
             else
                 embedding = "subset"

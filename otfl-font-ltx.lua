@@ -94,20 +94,15 @@ defaults.tibt = defaults.khmr
 defaults.lao  = defaults.thai
 
 local function parse_script(script)
+    local features
+    logs.report("load font", "auto-selecting default features for script: %s", script)
     if defaults[script] then
-        local dflt
-        if defaults[script] then
-            logs.report("load font", "auto-selecting default features for script: %s", script)
-            dflt = defaults[script]
-        else
-            logs.report("load font", "auto-selecting default features for script: dflt (was %s)", script)
-            dflt = defaults["dflt"]
-        end
-        for _,v in next, dflt do
-            list[v] = "yes"
-        end
+        features = defaults[script]
     else
-        logs.report("load font", "unknown script: %s", script)
+        features = defaults["dflt"]
+    end
+    for _,v in next, features do
+        list[v] = "yes"
     end
 end
 

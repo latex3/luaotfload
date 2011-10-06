@@ -41,7 +41,7 @@ TDS_ZIP = $(NAME).tds.zip
 ZIPS = $(CTAN_ZIP) $(TDS_ZIP)
 
 DO_TEX = tex --interaction=batchmode $< >/dev/null
-DO_LATEX = lualatex --interaction=batchmode $< >/dev/null
+DO_LATEX = latexmk -pdf -pdflatex=lualatex -silent $< >/dev/null
 
 all: $(GENERATED)
 doc: $(COMPILED)
@@ -51,7 +51,6 @@ tds: $(TDS_ZIP)
 world: all ctan
 
 $(COMPILED): $(DTX)
-	$(DO_LATEX)
 	$(DO_LATEX)
 
 $(UNPACKED): $(DTX)

@@ -3,7 +3,7 @@
 NAME = luaotfload
 DOC = $(NAME).pdf
 DTX = $(NAME).dtx
-OTFL = $(wildcard otfl-*.lua) otfl-blacklist.cnf
+OTFL = $(wildcard otfl-*.lua) otfl-blacklist.cnf font-age.lua
 SCRIPT = mkluatexfontdb.lua
 
 # Files grouped by generation mode

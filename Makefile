@@ -42,7 +42,6 @@ ZIPS = $(CTAN_ZIP) $(TDS_ZIP)
 
 DO_TEX = tex --interaction=batchmode $< >/dev/null
 DO_LATEX = lualatex --interaction=batchmode $< >/dev/null
-DO_MAKEINDEX = makeindex -s gind.ist $(subst .dtx,,$<) >/dev/null 2>&1
 
 all: $(GENERATED)
 doc: $(COMPILED)
@@ -52,8 +51,6 @@ tds: $(TDS_ZIP)
 world: all ctan
 
 $(COMPILED): $(DTX)
-	$(DO_LATEX)
-	$(DO_MAKEINDEX)
 	$(DO_LATEX)
 	$(DO_LATEX)
 

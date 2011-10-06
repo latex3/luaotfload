@@ -34,7 +34,7 @@ SCRIPTDIR = $(TEXMFROOT)/scripts/$(NAME)
 RUNDIR    = $(TEXMFROOT)/tex/$(FORMAT)/$(NAME)
 DOCDIR    = $(TEXMFROOT)/doc/$(FORMAT)/$(NAME)
 SRCDIR    = $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
-TEXMFROOT = ./texmf
+TEXMFROOT = $(shell kpsewhich --var-value TEXMFHOME)
 
 CTAN_ZIP = $(NAME).zip
 TDS_ZIP = $(NAME).tds.zip

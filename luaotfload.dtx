@@ -501,31 +501,15 @@ end
 %
 % \subsection{Module loading}
 %
-%    We load the \context files with this function. It automatically adds the
-%    |otfl-| prefix to it, so that we call it with the actual \context name.
-%
-%    \begin{macrocode}
-function luaotfload.loadmodule(name)
-    local tofind = "otfl-"..name
-    local found = kpse.find_file(tofind,"tex")
-    if found then
-        log("loading file %s.", found)
-        dofile(found)
-    else
-        error("file %s not found.", tofind)
-    end
-end
-%    \end{macrocode}
-%
 %    We start loading some lua files. These two are some code not used by
 %    \context at all that allow other modules to be used, it provides some
 %    low-level \context functions.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule('basics-gen.lua')
-luaotfload.loadmodule('luat-ovr.lua') -- override some basics-gen.lua functions
-luaotfload.loadmodule('data-con.lua')
-luaotfload.loadmodule('basics-nod.lua')
+require('otfl-basics-gen.lua')
+require('otfl-luat-ovr.lua') -- overrides some otfl-basics-gen.lua functions
+require('otfl-data-con.lua')
+require('otfl-basics-nod.lua')
 %    \end{macrocode}
 %
 %    By default \context takes some private attributes for internal use. To
@@ -548,30 +532,30 @@ end
 %    Font handling modules.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule('font-ini.lua')
-luaotfload.loadmodule('font-con.lua')
-luaotfload.loadmodule('fonts-enc.lua')
-luaotfload.loadmodule('font-cid.lua')
-luaotfload.loadmodule('font-map.lua')
-luaotfload.loadmodule('font-nms.lua')
-luaotfload.loadmodule('fonts-tfm.lua')
-luaotfload.loadmodule('font-oti.lua')
-luaotfload.loadmodule('font-otf.lua')
-luaotfload.loadmodule('font-otb.lua')
-luaotfload.loadmodule('node-inj.lua')
-luaotfload.loadmodule('font-otn.lua')
-luaotfload.loadmodule('font-ota.lua')
-luaotfload.loadmodule('fonts-lua.lua')
-luaotfload.loadmodule('font-def.lua')
-luaotfload.loadmodule('font-ltx.lua')
-luaotfload.loadmodule('fonts-ext.lua')
-luaotfload.loadmodule('fonts-cbk.lua')
+require('otfl-font-ini.lua')
+require('otfl-font-con.lua')
+require('otfl-fonts-enc.lua')
+require('otfl-font-cid.lua')
+require('otfl-font-map.lua')
+require('otfl-font-nms.lua')
+require('otfl-fonts-tfm.lua')
+require('otfl-font-oti.lua')
+require('otfl-font-otf.lua')
+require('otfl-font-otb.lua')
+require('otfl-node-inj.lua')
+require('otfl-font-otn.lua')
+require('otfl-font-ota.lua')
+require('otfl-fonts-lua.lua')
+require('otfl-font-def.lua')
+require('otfl-font-ltx.lua')
+require('otfl-fonts-ext.lua')
+require('otfl-fonts-cbk.lua')
 %    \end{macrocode}
 %
 %    \textsf{luaotfload} specific modules.
 %
 %    \begin{macrocode}
-luaotfload.loadmodule("font-clr.lua")
+require('otfl-font-clr.lua')
 %    \end{macrocode}
 %
 % \subsection{Post-processing TFM table}

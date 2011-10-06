@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 2009-2010 by Elie Roux    <elie.roux@telecom-bretagne.eu>
+% Copyright (C) 2009-2011 by Elie Roux    <elie.roux@telecom-bretagne.eu>
 %                        and Khaled Hosny <khaledhosny@eglug.org>
 %                             (Support: <lualatex-dev@tug.org>.)
 %
@@ -36,7 +36,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload v1.25 OpenType layout system}
+\Msg{* Package: luaotfload v2.0 OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -47,7 +47,7 @@
 \preamble
 This is a generated file.
 
-Copyright (C) 2009-2010 by by Elie Roux    <elie.roux@telecom-bretagne.eu>
+Copyright (C) 2009-2011 by by Elie Roux    <elie.roux@telecom-bretagne.eu>
                           and Khaled Hosny <khaledhosny@eglug.org>
                                (Support: <lualatex-dev@tug.org>.)
 
@@ -104,7 +104,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2011/04/21 v1.25 OpenType layout system]%
+  [2011/10/06 v2.0 OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xcolor,xspace}
 \usepackage[
@@ -164,7 +164,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \textsf{luaotfload} package}
-% \date{2011/04/21 v1.25}
+% \date{2011/10/06 v2.0}
 % \author{Elie Roux and Khaled Hosny\\
 %         Support: \email{lualatex-dev@tug.org}}
 %
@@ -438,8 +438,8 @@ module("luaotfload", package.seeall)
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 1.25,
-    date          = "2011/04/21",
+    version       = 2.0,
+    date          = "2011/10/06",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -656,7 +656,7 @@ luatexbase.add_to_callback("define_font",
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2011/04/21 v1.25 OpenType layout system]
+    [2011/10/06 v2.0 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
 

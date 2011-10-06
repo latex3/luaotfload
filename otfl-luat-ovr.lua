@@ -34,13 +34,3 @@ function logs.info(category,fmt,...)
     end
     io.flush()
 end
-
-function logs.simple(fmt,...)
-    if fmt then
-        write_nl('log', format("%s | %s",name,format(fmt,...)))
-    else
-        write_nl('log', format("%s |",name))
-    end
-end
-
-tex.ctxcatcodes = luatexbase.catcodetables.latex

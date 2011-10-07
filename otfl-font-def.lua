@@ -170,13 +170,14 @@ end
 function resolvers.name(specification)
     local resolve = fonts.names.resolve
     if resolve then
-        local resolved, sub = fonts.names.resolve(specification.name,specification.sub,specification)
-        specification.resolved, specification.sub = resolved, sub
+        local resolved, sub = resolve(specification.name,specification.sub,specification) -- we pass specification for overloaded versions
         if resolved then
+            specification.resolved = resolved
+            specification.sub      = sub
             local suffix = file.suffix(resolved)
             if fonts.formats[suffix] then
                 specification.forced = suffix
-                specification.name = file.removesuffix(resolved)
+                specification.name   = file.removesuffix(resolved)
             else
                 specification.name = resolved
             end
@@ -189,10 +190,12 @@ end
 function resolvers.spec(specification)
     local resolvespec = fonts.names.resolvespec
     if resolvespec then
-        specification.resolved, specification.sub = fonts.names.resolvespec(specification.name,specification.sub,specification)
-        if specification.resolved then
-            specification.forced = file.extname(specification.resolved)
-            specification.name = file.removesuffix(specification.resolved)
+        local resolved, sub = resolvespec(specification.name,specification.sub,specification) -- we pass specification for overloaded versions
+        if resolved then
+            specification.resolved = resolved
+            specification.sub      = sub
+            specification.forced   = file.extname(resolved)
+            specification.name     = file.removesuffix(resolved)
         end
     else
         resolvers.name(specification)

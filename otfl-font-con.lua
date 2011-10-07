@@ -146,7 +146,13 @@ function constructors.calculatescale(tfmdata,scaledpoints)
     return scaledpoints, scaledpoints / (parameters.units or 1000) -- delta
 end
 
-function constructors.assignmathparameters(target,original) -- dumb version, not used in context
+local unscaled = {
+    ScriptPercentScaleDown          = true,
+    ScriptScriptPercentScaleDown    = true,
+    RadicalDegreeBottomRaisePercent = true
+}
+
+function constructors.assignmathparameters(target,original) -- simple variant, not used in context
     -- when a tfm file is loaded, it has already been scaled
     -- and it never enters the scaled so this is otf only and
     -- even then we do some extra in the context math plugins
@@ -157,18 +163,18 @@ function constructors.assignmathparameters(target,original) -- dumb version, not
         local targetmathparameters = { }
         local factor               = targetproperties.math_is_scaled and 1 or targetparameters.factor
         for name, value in next, mathparameters do
-            if name == "RadicalDegreeBottomRaisePercent" then
+            if unscaled[name] then
                 targetmathparameters[name] = value
             else
                 targetmathparameters[name] = value * factor
             end
         end
-     -- if not targetmathparameters.FractionDelimiterSize then
-     --     targetmathparameters.FractionDelimiterSize = 0
-     -- end
-     -- if not mathparameters.FractionDelimiterDisplayStyleSize then
-     --     targetmathparameters.FractionDelimiterDisplayStyleSize = 0
-     -- end
+        if not targetmathparameters.FractionDelimiterSize then
+            targetmathparameters.FractionDelimiterSize = 1.01 * targetparameters.size
+        end
+        if not mathparameters.FractionDelimiterDisplayStyleSize then
+            targetmathparameters.FractionDelimiterDisplayStyleSize = 2.40 * targetparameters.size
+        end
         target.mathparameters = targetmathparameters
     end
 end
@@ -1122,6 +1128,9 @@ function constructors.collectprocessors(what,tfmdata,features,trace,report)
                     end
                 end
             end
+        else
+            report("no feature processors for mode %s for font %s",
+                mode or 'unknown', tfmdata.properties.fullname or 'unknown')
         end
     end
     return processes

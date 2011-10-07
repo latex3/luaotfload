@@ -1984,11 +1984,11 @@ local function featuresprocessor(head,font,attr)
     local datasets         = otf.dataset(tfmdata,sequences,font,attr)
 
     for s=1,#sequences do
-        local pardir, txtdir, success = 0, { }, false -- we could reuse txtdir and use a top pointer
-        local sequence = sequences[s]
-        local dataset = datasets[s] -- cache
+        local dataset = datasets[s] -- cache -- s?
         featurevalue = dataset and dataset[1] -- todo: pass to function instead of using a global
         if featurevalue then
+            local sequence = sequences[s]
+            local pardir, txtdir, success = 0, { }, false -- we could reuse txtdir and use a top pointer
             local attribute, chain, typ, subtables = dataset[2], dataset[3], sequence.type, sequence.subtables
             if chain < 0 then
                 -- this is a limited case, no special treatments like 'init' etc

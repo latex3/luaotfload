@@ -345,8 +345,8 @@ function otf.load(filename,format,sub,featurefile)
                 local attr = lfs.attributes(name)
                 featurefiles[#featurefiles+1] = {
                     name = name,
-                    size = size,
-                    time = time,
+                    size = attr and attr.size or 0,
+                    time = attr and attr.modification or 0,
                 }
             end
         end

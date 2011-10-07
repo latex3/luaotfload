@@ -293,7 +293,7 @@ and the derived files
 % \item [protrusion \& expansion] \hfill \\
 % Both keys control microtypographic features of the font, namely glyph
 % protrusion and expansion. The value of the key is the name of predefined Lua
-% tables of protrusion and expansion values; see the end of |otfl-font-dum.lua|
+% tables of protrusion and expansion values; see the end of |otfl-fonts-ext.lua|
 % file for an example of such tables. The only predefined value is |default|.
 %
 % For example, to enable default protrusion\footnote{You also need to set
@@ -401,6 +401,8 @@ and the derived files
 % \item |luatex-fonts-tfm.lua|
 % \item |luatex-basics-gen.lua|
 % \item |luatex-basics-nod.lua|
+% \item |font-age.lua| (not renamed as it is loaded directly from
+% |fonts-enc.lua|.)
 % \end{itemize*}
 % \end{multicols}
 %
@@ -409,7 +411,8 @@ and the derived files
 % \item |otfl-font-clr.lua|
 % \item |otfl-font-nms.lua|
 % \item |otfl-luat-ovr.lua|
-% \item |otfl-font-ltx.lua|, heavily modified version of |luatex-fonts-def.lua|.
+% \item |otfl-font-ltx.lua| (a heavily modified version of
+% |luatex-fonts-def.lua|.)
 % \end{itemize*}
 %
 % \section{Troubleshooting}

@@ -556,28 +556,16 @@ require('otfl-fonts-cbk.lua')
 require('otfl-font-clr.lua')
 %    \end{macrocode}
 %
-% \subsection{Post-processing TFM table}
+% \subsection{Font patching callback}
 %
-%    Here we do some final touches to the loaded TFM table before passing it to
-%    the \tex end.
-%
-%    First we create a callback for patching fonts on the fly, to be used by
-%    other packages.
+%    we provide a callback for patching fonts on the fly, to be used by other
+%    packages.
 %    \begin{macrocode}
 luatexbase.create_callback("luaotfload.patch_font", "simple", function() end)
-%    \end{macrocode}
-%
-% then define a function where font manipulation will take place.
-%
-%    \begin{macrocode}
-local function def_font(...)
+
+local function definefont(...)
     local fontdata = fonts.definers.read(...)
     if type(fontdata) == "table" then
-%    \end{macrocode}
-%
-%    Execute any registered font patching callbacks.
-%
-%    \begin{macrocode}
         luatexbase.call_callback("luaotfload.patch_font", fontdata)
     end
     return fontdata
@@ -603,7 +591,7 @@ luatexbase.add_to_callback("hpack_filter",
                            "luaotfload.hpack_filter")
 luatexbase.reset_callback("define_font")
 luatexbase.add_to_callback("define_font",
-                            def_font,
+                            definefont,
                            "luaotfload.define_font", 1)
 %luatexbase.add_to_callback("find_vf_file",
 %                            fonts.vf.find,

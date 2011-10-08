@@ -498,6 +498,10 @@ function table.derive(parent)
     end
     return child
 end
+
+function string.quoted(str)
+    return string.format("%q",str) -- always "
+end
 %    \end{macrocode}
 %
 % \subsection{Module loading}
@@ -581,6 +585,7 @@ end
 %
 %    \begin{macrocode}
 fonts.mode = "node"
+caches.compilemethod = "both"
 %    \end{macrocode}
 %
 %    Finally we register the callbacks

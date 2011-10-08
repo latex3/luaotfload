@@ -191,7 +191,7 @@ end
 local function makefullname(path,name)
     if path and path ~= "" then
         name = "temp-" .. name -- clash prevention
-        return file.addsuffix(file.join(path,name),"lua")
+        return file.addsuffix(file.join(path,name),"lua"), file.addsuffix(file.join(path,name),"luc")
     end
 end
 
@@ -202,20 +202,61 @@ end
 
 function caches.loaddata(paths,name)
     for i=1,#paths do
-        local fullname = makefullname(paths[i],name)
-        if fullname then
-            texio.write(string.format("(load: %s)",fullname))
-            local data = loadfile(fullname)
-            return data and data()
+        local data = false
+        local luaname, lucname = makefullname(paths[i],name)
+        if lucname and lfs.isfile(lucname) then
+            texio.write(string.format("(load: %s)",lucname))
+            data = loadfile(lucname)
         end
+        if not data and luaname and lfs.isfile(luaname) then
+            texio.write(string.format("(load: %s)",luaname))
+            data = loadfile(luaname)
+        end
+        return data and data()
     end
 end
 
 function caches.savedata(path,name,data)
-    local fullname = makefullname(path,name)
-    if fullname then
-        texio.write(string.format("(save: %s)",fullname))
-        table.tofile(fullname,data,true,{ reduce = true })
+    local luaname, lucname = makefullname(path,name)
+    if luaname then
+        texio.write(string.format("(save: %s)",luaname))
+        table.tofile(luaname,data,true,{ reduce = true })
+        if lucname and type(caches.compile) == "function" then
+            os.remove(lucname) -- better be safe
+            texio.write(string.format("(save: %s)",lucname))
+            caches.compile(data,luaname,lucname)
+        end
+    end
+end
+
+-- According to KH os.execute is not permitted in plain/latex so there is
+-- no reason to use the normal context way. So the method here is slightly
+-- different from the one we have in context. We also use different suffixes
+-- as we don't want any clashes (sharing cache files is not that handy as
+-- context moves on faster.)
+--
+-- Beware: serialization might fail on large files (so maybe we should pcall
+-- this) in which case one should limit the method to luac and enable support
+-- for execution.
+
+caches.compilemethod = "luac" -- luac dump both
+
+function caches.compile(data,luaname,lucname)
+    local done = false
+    if caches.compilemethod == "luac" or caches.compilemethod == "both" then
+        local command = "-o " .. string.quoted(lucname) .. " -s " .. string.quoted(luaname)
+        done = os.spawn("texluac " .. command) == 0
+    end
+    if not done and (caches.compilemethod == "dump" or caches.compilemethod == "both") then
+        local d = table.serialize(data,true)
+        if d and d ~= "" then
+            local f = io.open(lucname,'w')
+            if f then
+                local s = loadstring(d)
+                f:write(string.dump(s))
+                f:close()
+            end
+        end
     end
 end
 

@@ -93,8 +93,9 @@ defaults.tibt = defaults.khmr
 
 defaults.lao  = defaults.thai
 
-local function parse_script(script)
+local function set_default_features(script)
     local features
+    local script = script or "dflt"
     logs.report("load font", "auto-selecting default features for script: %s", script)
     if defaults[script] then
         features = defaults[script]
@@ -102,7 +103,9 @@ local function parse_script(script)
         features = defaults["dflt"]
     end
     for _,v in next, features do
-        list[v] = "yes"
+        if list[v] ~= false then
+            list[v] = true
+        end
     end
 end
 
@@ -113,12 +116,7 @@ local function thename(s)   list.name   = s end
 local function issub  (v)   list.sub    = v end
 local function istrue (s)   list[s]     = true end
 local function isfalse(s)   list[s]     = false end
-local function iskey  (k,v)
-    if k == "script" then
-        parse_script(v)
-    end
-    list[k] = v
-end
+local function iskey  (k,v) list[k]     = v end
 
 local P, S, R, C = lpeg.P, lpeg.S, lpeg.R, lpeg.C
 
@@ -141,6 +139,7 @@ local pattern    = (filename + fontname) * subvalue^0 * stylespec^0 * options^0
 local function colonized(specification) -- xetex mode
     list = { }
     lpeg.match(pattern,specification.specification)
+    set_default_features(list.script)
     if list.style then
         specification.style = list.style
         list.style = nil

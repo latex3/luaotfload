@@ -569,32 +569,31 @@ fonts.mode = "node"
 caches.compilemethod = "both"
 %    \end{macrocode}
 %
-%    Finally we register the callbacks
-%
-%    \begin{macrocode}
-local handler = nodes.simple_font_handler
-luatexbase.add_to_callback("pre_linebreak_filter", handler, "luaotfload")
-luatexbase.add_to_callback("hpack_filter",         handler, "luaotfload")
-luatexbase.reset_callback("define_font")
-luatexbase.add_to_callback("define_font",       definefont, "luaotfload")
-%    \end{macrocode}
-%
-% \section{Font patching callback}
-%
 %    we provide a callback for patching fonts on the fly, to be used by other
 %    packages.
+%
 %    \begin{macrocode}
 luatexbase.create_callback("luaotfload.patch_font", "simple", function() end)
 %    \end{macrocode}
 %
 %    \begin{macrocode}
-local function definefont(...)
+local function deffont(...)
     local fontdata = fonts.definers.read(...)
     if type(fontdata) == "table" then
         luatexbase.call_callback("luaotfload.patch_font", fontdata)
     end
     return fontdata
 end
+%    \end{macrocode}
+%
+%    Finally we register the callbacks
+%
+%    \begin{macrocode}
+local handler = nodes.simple_font_handler
+luatexbase.reset_callback("define_font")
+luatexbase.add_to_callback("pre_linebreak_filter", handler, "luaotfload")
+luatexbase.add_to_callback("hpack_filter",         handler, "luaotfload")
+luatexbase.add_to_callback("define_font",          deffont, "luaotfload")
 %    \end{macrocode}
 %
 % \iffalse

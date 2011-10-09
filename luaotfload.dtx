@@ -434,11 +434,13 @@ and the derived files
 %<*lua>
 % \fi
 %
-%    First some usual initializations.
+% \section{Initializations}
 %
 %    \begin{macrocode}
 module("luaotfload", package.seeall)
-
+%    \end{macrocode}
+%
+%    \begin{macrocode}
 luaotfload.module = {
     name          = "luaotfload",
     version       = 2.0,
@@ -448,7 +450,9 @@ luaotfload.module = {
     copyright     = "Elie Roux",
     license       = "CC0"
 }
-
+%    \end{macrocode}
+%
+%    \begin{macrocode}
 local error, warning, info, log = luatexbase.provides_module(luaotfload.module)
 %    \end{macrocode}
 %
@@ -466,7 +470,9 @@ kpse.init_prog("", 600, "/")
 %
 %    \begin{macrocode}
 local luatex_version = 70
-
+%    \end{macrocode}
+%
+%    \begin{macrocode}
 if tex.luatexversion < luatex_version then
     warning("LuaTeX v%.2f is old, v%.2f is recommended.",
              tex.luatexversion/100,
@@ -490,7 +496,9 @@ function table.reversed(t)
         return tt
     end
 end
-
+%    \end{macrocode}
+%
+%    \begin{macrocode}
 function table.derive(parent)
     local child = { }
     if parent then
@@ -498,17 +506,15 @@ function table.derive(parent)
     end
     return child
 end
-
+%    \end{macrocode}
+%
+%    \begin{macrocode}
 function string.quoted(str)
     return string.format("%q",str) -- always "
 end
 %    \end{macrocode}
 %
-% \subsection{Module loading}
-%
-%    We start loading some lua files. These two are some code not used by
-%    \context at all that allow other modules to be used, it provides some
-%    low-level \context functions.
+% \section{Module loading}
 %
 %    \begin{macrocode}
 require('otfl-basics-gen.lua')
@@ -534,8 +540,6 @@ function attributes.private(name)
 end
 %    \end{macrocode}
 %
-%    Font handling modules.
-%
 %    \begin{macrocode}
 require('otfl-font-ini.lua')
 require('otfl-font-con.lua')
@@ -555,31 +559,8 @@ require('otfl-font-def.lua')
 require('otfl-font-ltx.lua')
 require('otfl-fonts-ext.lua')
 require('otfl-fonts-cbk.lua')
-%    \end{macrocode}
-%
-%    \textsf{luaotfload} specific modules.
-%
-%    \begin{macrocode}
 require('otfl-font-clr.lua')
 %    \end{macrocode}
-%
-% \subsection{Font patching callback}
-%
-%    we provide a callback for patching fonts on the fly, to be used by other
-%    packages.
-%    \begin{macrocode}
-luatexbase.create_callback("luaotfload.patch_font", "simple", function() end)
-
-local function definefont(...)
-    local fontdata = fonts.definers.read(...)
-    if type(fontdata) == "table" then
-        luatexbase.call_callback("luaotfload.patch_font", fontdata)
-    end
-    return fontdata
-end
-%    \end{macrocode}
-%
-% \subsection{\context override}
 %
 %    Here we override some defaults set in \context code.
 %
@@ -591,20 +572,29 @@ caches.compilemethod = "both"
 %    Finally we register the callbacks
 %
 %    \begin{macrocode}
-luatexbase.add_to_callback("pre_linebreak_filter",
-                            nodes.simple_font_handler,
-                           "luaotfload.pre_linebreak_filter")
-luatexbase.add_to_callback("hpack_filter",
-                            nodes.simple_font_handler,
-                           "luaotfload.hpack_filter")
+local handler = nodes.simple_font_handler
+luatexbase.add_to_callback("pre_linebreak_filter", handler, "luaotfload")
+luatexbase.add_to_callback("hpack_filter",         handler, "luaotfload")
 luatexbase.reset_callback("define_font")
-luatexbase.add_to_callback("define_font",
-                            definefont,
-                           "luaotfload.define_font", 1)
-% XXX: still needed?
-%luatexbase.add_to_callback("find_vf_file",
-%                            fonts.vf.find,
-%                           "luaotfload.find_vf_file")
+luatexbase.add_to_callback("define_font",       definefont, "luaotfload", 1)
+%    \end{macrocode}
+%
+% \section{Font patching callback}
+%
+%    we provide a callback for patching fonts on the fly, to be used by other
+%    packages.
+%    \begin{macrocode}
+luatexbase.create_callback("luaotfload.patch_font", "simple", function() end)
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+local function definefont(...)
+    local fontdata = fonts.definers.read(...)
+    if type(fontdata) == "table" then
+        luatexbase.call_callback("luaotfload.patch_font", fontdata)
+    end
+    return fontdata
+end
 %    \end{macrocode}
 %
 % \iffalse
@@ -622,7 +612,9 @@ luatexbase.add_to_callback("define_font",
 %    \begin{macrocode}
 \csname ifluaotfloadloaded\endcsname
 \let\ifluaotfloadloaded\endinput
-
+%    \end{macrocode}
+%
+%    \begin{macrocode}
 \bgroup\expandafter\expandafter\expandafter\egroup
 \expandafter\ifx\csname ProvidesPackage\endcsname\relax
   \input luatexbase.sty
@@ -632,11 +624,11 @@ luatexbase.add_to_callback("define_font",
     [2011/10/06 v2.0 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
-
-\RequireLuaModule{lualibs}
 %    \end{macrocode}
 %
-%    Finally we load the |lua| module.
+%    \begin{macrocode}
+\RequireLuaModule{lualibs}
+%    \end{macrocode}
 %
 %    \begin{macrocode}
 \RequireLuaModule{luaotfload}

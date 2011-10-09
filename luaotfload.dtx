@@ -576,7 +576,7 @@ local handler = nodes.simple_font_handler
 luatexbase.add_to_callback("pre_linebreak_filter", handler, "luaotfload")
 luatexbase.add_to_callback("hpack_filter",         handler, "luaotfload")
 luatexbase.reset_callback("define_font")
-luatexbase.add_to_callback("define_font",       definefont, "luaotfload", 1)
+luatexbase.add_to_callback("define_font",       definefont, "luaotfload")
 %    \end{macrocode}
 %
 % \section{Font patching callback}

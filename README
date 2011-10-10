@@ -49,44 +49,6 @@ Alternatively, try your (TeX or Linux) distribution's package management system.
 
 4. Try to figure it out by looking at the Makefile and comments in the sources.
 
-
-Manifest
---------
-
-The following files are part of the luaotfload package.
-
-Source files:
-        luaotfload.dtx          single file source & doc for the package
-        mkluatexfontdb.lua      script using otfl-font-nms.lua
-        otfl-data-con.lua       OTF support files from the ConTeXt distribution
-        otfl-font-cid.lua                       .
-        otfl-font-def.lua                       .
-        otfl-font-dum.lua                       .
-        otfl-font-ini.lua                       .
-        otfl-font-ota.lua                       .
-        otfl-font-otb.lua                       .
-        otfl-font-otc.lua                       .
-        otfl-font-otd.lua                       .
-        otfl-font-otf.lua                       .
-        otfl-font-oti.lua                       .
-        otfl-font-otn.lua                       .
-        otfl-font-ott.lua                       .
-        otfl-font-tfm.lua                       .
-        otfl-font-xtx.lua                       .
-        otfl-font-map.lua                       .
-        otfl-luat-dum.lua                       .
-        otfl-node-dum.lua                       .
-        otfl-node-inj.lua       OTF support files from the ConTeXt distribution
-        otfl-font-clr.lua       luaotfload module for font color support
-        otfl-luat-ovr.lua       luaotfload module for overriding some ConTeXt functions
-        otfl-luat-nms.lua       luaotfload module for font name database generation
-
-Derived files:
-        luaotfload.pdf          documentation
-        luaotfload.sty          TeX & LaTeX package
-        luaotfload.lua          Lua code for the package
-
-
 License
 -------
 

@@ -67,27 +67,5 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-All non-ConTeXt source files in this bundle, 
-        luaotfload.dtx     
-        mkluatexfontdb.lua 
-        otfl-data-con.lua  
-        otfl-font-clr.lua  
-and derived files 
-        luaotfload.pdf
-        luaotfload.sty
-        luaotfload.lua
-are copyright 2010 by the luaotfload development team (see above).
-These files may be modified and distributed under the terms and conditions
-of the CC0 license: <http://creativecommons.org/publicdomain/zero/1.0>
-
-The source files otfl-luat-ovr.lua and otfl-luat-nms.lua are copyright 2010 by
-the luaotfload development team and are derived from ConTeXt sources. They are
-distributed under the terms and conditions of the GNU General Public License
-v2.
-
-The ConTeXt files otfl-*.lua (as indicated above) are distributed under the
-terms and conditions of the GNU General Public License v2. The contents of
-these files is copyright 2008 by PRAGMA ADE and the ConTeXt Development Team.
-
-
+See headers of each source file for copyright details.
 

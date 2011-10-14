@@ -26,30 +26,30 @@ local report_defining = logs.reporter("fonts","defining")
 <p>Here we only implement a few helper functions.</p>
 --ldx]]--
 
-local fonts                 = fonts
-local constructors          = { }
-fonts.constructors          = constructors
-local handlers              = { }
-fonts.handlers              = handlers
+local fonts                  = fonts
+local constructors           = { }
+fonts.constructors           = constructors
+local handlers               = { }
+fonts.handlers               = handlers
 
-local specifiers            = fonts.specifiers
-local contextsetups         = specifiers.contextsetups
-local contextnumbers        = specifiers.contextnumbers
+local specifiers             = fonts.specifiers
+local contextsetups          = specifiers.contextsetups
+local contextnumbers         = specifiers.contextnumbers
 
-local allocate              = utilities.storage.allocate
-local setmetatableindex     = table.setmetatableindex
+local allocate               = utilities.storage.allocate
+local setmetatableindex      = table.setmetatableindex
 
 -- will be directives
 
-constructors.dontembed      = allocate()
-constructors.mathactions    = { }
-constructors.autocleanup    = true
-constructors.namemode       = "fullpath" -- will be a function
+constructors.dontembed       = allocate()
+constructors.mathactions     = { }
+constructors.autocleanup     = true
+constructors.namemode        = "fullpath" -- will be a function
 
-constructors.version        = 1.01
-constructors.cache          = containers.define("fonts", "constructors", constructors.version, false)
+constructors.version         = 1.01
+constructors.cache           = containers.define("fonts", "constructors", constructors.version, false)
 
-constructors.privateoffset  = 0xF0000 -- 0x10FFFF
+constructors.privateoffset   = 0xF0000 -- 0x10FFFF
 
 -- This might become an interface;
 
@@ -406,6 +406,26 @@ function constructors.scale(tfmdata,specification)
         target.mathparameters = nil -- nop
     end
     --
+    local italickey = "italic"
+    if hasmath then
+        if properties.no_mathitalics then
+            italickey = "italic_correction" -- context specific trickery
+            if trace_defining then
+                report_defining("math italics disabled for: name '%s', fullname: '%s', filename: '%s'",
+                    name or "noname",fullname or "nofullname",filename or "nofilename")
+            end
+        end
+        autoitalic = false -- new
+    else
+        if properties.no_textitalics then
+            italickey = "italic_correction" -- context specific trickery
+            if trace_defining then
+                report_defining("text italics disabled for: name '%s', fullname: '%s', filename: '%s'",
+                    name or "noname",fullname or "nofullname",filename or "nofilename")
+            end
+        end
+    end
+    --
     local sharedkerns   = { }
     --
     for unicode, character in next, characters do
@@ -501,16 +521,16 @@ function constructors.scale(tfmdata,specification)
                 chr.right_protruding  = protrusionfactor*width*vr
             end
         end
-        -- todo: hasitalic
+        --
         if autoitalic then
             local vi = description.italic or (description.boundingbox[3] - description.width + autoitalic)
             if vi and vi ~= 0 then
-                chr.italic = vi*hdelta
+                chr[italickey] = vi*hdelta
             end
         elseif hasitalic then
             local vi = description.italic or character.italic -- why character
             if vi and vi ~= 0 then
-                chr.italic = vi*hdelta
+                chr[italickey] = vi*hdelta
             end
         end
         -- to be tested
@@ -1128,7 +1148,7 @@ function constructors.collectprocessors(what,tfmdata,features,trace,report)
                     end
                 end
             end
-        else
+        elseif trace then
             report("no feature processors for mode %s for font %s",
                 mode or 'unknown', tfmdata.properties.fullname or 'unknown')
         end

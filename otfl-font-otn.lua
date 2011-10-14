@@ -445,7 +445,7 @@ local function alternative_glyph(start,alternatives,kind,chainname,chainlookupna
     return choice, value
 end
 
-local function multiple_glyphs(start,multiple)
+local function multiple_glyphs(start,multiple) -- marks ?
     local nofmultiples = #multiple
     if nofmultiples > 0 then
         start.char = multiple[1]
@@ -957,7 +957,7 @@ single lookup case. The efficiency of the replacements can be improved by deleti
 as less as needed but that would also make the code even more messy.</p>
 --ldx]]--
 
-local function delete_till_stop(start,stop,ignoremarks)
+local function delete_till_stop(start,stop,ignoremarks) -- keeps start
     local n = 1
     if start == stop then
         -- done
@@ -986,10 +986,6 @@ match.</p>
 
 function chainprocs.gsub_single(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname,chainindex)
     -- todo: marks ?
---~     if not chainindex then
---~         delete_till_stop(start,stop) -- ,currentlookup.flags[1]
---~         stop = start
---~     end
     local current = start
     local subtables = currentlookup.subtables
     if #subtables > 1 then
@@ -1035,7 +1031,7 @@ the match.</p>
 --ldx]]--
 
 function chainprocs.gsub_multiple(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname)
-    delete_till_stop(start,stop) -- we can assume that marks are to be deleted
+    delete_till_stop(start,stop) -- we could pass ignoremarks as #3 ..
     local startchar = start.char
     local subtables = currentlookup.subtables
     local lookupname = subtables[1]
@@ -1565,37 +1561,41 @@ local function show_skip(kind,chainname,char,ck,class)
 end
 
 local function normal_handle_contextchain(start,kind,chainname,contexts,sequence,lookuphash)
-    --  local rule, lookuptype, sequence, f, l, lookups = ck[1], ck[2] ,ck[3], ck[4], ck[5], ck[6]
-    local flags, done = sequence.flags, false
-    local skipmark, skipligature, skipbase = flags[1], flags[2], flags[3]
-    local someskip = skipmark or skipligature or skipbase -- could be stored in flags for a fast test (hm, flags could be false !)
-    local markclass = sequence.markclass -- todo, first we need a proper test
-    local skipped = false
+   --  local rule, lookuptype, sequence, f, l, lookups = ck[1], ck[2] ,ck[3], ck[4], ck[5], ck[6]
+    local flags        = sequence.flags
+    local done         = false
+    local skipmark     = flags[1]
+    local skipligature = flags[2]
+    local skipbase     = flags[3]
+    local someskip     = skipmark or skipligature or skipbase -- could be stored in flags for a fast test (hm, flags could be false !)
+    local markclass    = sequence.markclass                   -- todo, first we need a proper test
+    local skipped      = false
     for k=1,#contexts do
-        local match, current, last = true, start, start
-        local ck = contexts[k]
-        local seq = ck[3]
-        local s = #seq
+        local match   = true
+        local current = start
+        local last    = start
+        local ck      = contexts[k]
+        local seq     = ck[3]
+        local s       = #seq
         -- f..l = mid string
         if s == 1 then
             -- never happens
             match = current.id == glyph_code and current.subtype<256 and current.font == currentfont and seq[1][current.char]
         else
-            -- todo: better space check (maybe check for glue)
+            -- maybe we need a better space check (maybe check for glue or category or combination)
+            -- we cannot optimize for n=2 because there can be disc nodes
             local f, l = ck[4], ck[5]
             -- current match
-            if f == 1 and f == l then
+            if f == 1 and f == l then -- current only
                 -- already a hit
-                match = true
-            else
+             -- match = true
+            else -- before/current/after | before/current | current/after
                 -- no need to test first hit (to be optimized)
-                local n = f + 1
-                last = last.next
-                -- we cannot optimize for n=2 because there can be disc nodes
-                -- if not someskip and n == l then
-                --    -- n=2 and no skips then faster loop
-                --    match = last and last.id == glyph_code and last.subtype<256 and last.font == currentfont and seq[n][last.char]
-                -- else
+                if f == l then -- new, else last out of sync (f is > 1)
+                 -- match = true
+                else
+                    local n = f + 1
+                    last = last.next
                     while n <= l do
                         if last then
                             local id = last.id
@@ -1617,24 +1617,29 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                             end
                                             n = n + 1
                                         else
-                                            match = false break
+                                            match = false
+                                            break
                                         end
                                     else
-                                        match = false break
+                                        match = false
+                                        break
                                     end
                                 else
-                                    match = false break
+                                    match = false
+                                    break
                                 end
-                            elseif id == disc_code then -- what to do with kerns?
+                            elseif id == disc_code then
                                 last = last.next
                             else
-                                match = false break
+                                match = false
+                                break
                             end
                         else
-                            match = false break
+                            match = false
+                            break
                         end
                     end
-                -- end
+                end
             end
             -- before
             if match and f > 1 then
@@ -1658,26 +1663,31 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                         elseif seq[n][char] then
                                             n = n -1
                                         else
-                                            match = false break
+                                            match = false
+                                            break
                                         end
                                     else
-                                        match = false break
+                                        match = false
+                                        break
                                     end
                                 else
-                                    match = false break
+                                    match = false
+                                    break
                                 end
                             elseif id == disc_code then
                                 -- skip 'm
                             elseif seq[n][32] then
                                 n = n -1
                             else
-                                match = false break
+                                match = false
+                                break
                             end
                             prev = prev.prev
                         elseif seq[n][32] then -- somehat special, as zapfino can have many preceding spaces
                             n = n -1
                         else
-                            match = false break
+                            match = false
+                            break
                         end
                     end
                 elseif f == 2 then
@@ -1685,7 +1695,8 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                 else
                     for n=f-1,1 do
                         if not seq[n][32] then
-                            match = false break
+                            match = false
+                            break
                         end
                     end
                 end
@@ -1713,26 +1724,31 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                                         elseif seq[n][char] then
                                             n = n + 1
                                         else
-                                            match = false break
+                                            match = false
+                                            break
                                         end
                                     else
-                                        match = false break
+                                        match = false
+                                        break
                                     end
                                 else
-                                    match = false break
+                                    match = false
+                                    break
                                 end
                             elseif id == disc_code then
                                 -- skip 'm
                             elseif seq[n][32] then -- brrr
                                 n = n + 1
                             else
-                                match = false break
+                                match = false
+                                break
                             end
                             current = current.next
                         elseif seq[n][32] then
                             n = n + 1
                         else
-                            match = false break
+                            match = false
+                            break
                         end
                     end
                 elseif s-l == 1 then
@@ -1740,7 +1756,8 @@ local function normal_handle_contextchain(start,kind,chainname,contexts,sequence
                 else
                     for n=l+1,s do
                         if not seq[n][32] then
-                            match = false break
+                            match = false
+                            break
                         end
                     end
                 end

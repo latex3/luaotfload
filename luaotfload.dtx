@@ -246,9 +246,26 @@ and the derived files
 %
 % \paragraph{Font features}
 %
-% \meta{font features} are a list of items separated by semi-colons, which are
-% either |key=value| font parameters, or switches to enable/disable certain
-% font features in the form of |+feat|/|-feat|.  The supported keys are:
+% \meta{font features} is semicolon-separated list of feature
+% tags\footnote{\url{http://www.microsoft.com/typography/otspec/featurelist.htm}}
+% and font options. Font features are prepended with a |+| to turn them on and
+% a |-| to turn them off, alternatively you can pass |true| or |false| value to
+% the feature:
+%
+% |\font\test=Latin Modern Roman:+clig;-kern|
+%
+% \noindent or:
+%
+% |\font\test=Latin Modern Roman:clig=true;kern=false|
+%
+% \noindent For alternate substation features you can pass the index of the
+% variant you want (starting from 1) or |random| to randomly select a variant
+% each time an affected glyph is shown, e.g.:
+%
+% |\font\test=Latin Modern Roman:salt=1|
+%
+% \noindent Known font options include:
+%
 % \begin{description}
 % \item [mode] \hfill \\
 % \textsf{luaotfload} has two OpenType processing modes; |base| and |node|.
@@ -262,24 +279,27 @@ and the derived files
 % when needed e.g. for math fonts.
 %
 % \item [script] \hfill \\
-% OpenType script string, default value is |dflt|. Some fonts don't assign
-% features to the |dflt| script, in which case the script need to be set
-% explicitly.
+% OpenType script
+% string,\footnote{\url{http://www.microsoft.com/typography/otspec/scripttags.htm}}
+% default value is |dflt|. Some fonts don't assign features to the |dflt|
+% script, in which case the script need to be set explicitly.
 %
 % \item [language] \hfill \\
-% OpenType language string, default value is |latn|.
+% OpenType language
+% string,\footnote{\url{http://www.microsoft.com/typography/otspec/languagetags.htm}}
+% default value is |latn|.
 %
 % \item [featurefile] \hfill \\
 % feature files are textual representation of OpenType tables and can be used
 % to extend OpenType features of the font on fly. The file name of the feature
 % file is passed, then features defined in the file can be enabled/disabled
-% like any other feature. The syntax is documented in Adobe's
-% \href{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}
-% {OpenType Feature File Specification}.
+% like any other feature. The syntax is documented in Adobe's OpenType Feature
+% File
+% Specification\footnote{\url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}}.
 %
 % For example, to set a |tkrn| feature from |mykern.fea| file:
 %
-% |\font\lmr=Latin Modern Roman:featurefile=mykern.fea;+tkrn|
+% |\font\test=Latin Modern Roman:featurefile=mykern.fea;+tkrn|
 %
 % \item [color] \hfill \\
 % font color, defined as a triplet of two-digit hexadecimal RGB values, with
@@ -288,7 +308,7 @@ and the derived files
 %
 % For example, to set text in semitransparent red:
 %
-% |\font\lmr=Latin Modern Roman:color=FF0000BB|
+% |\font\test=Latin Modern Roman:color=FF0000BB|
 %
 % \item [protrusion \& expansion] \hfill \\
 % Both keys control microtypographic features of the font, namely glyph
@@ -300,7 +320,7 @@ and the derived files
 % |\pdfprotrudechars2 \pdfadjustspacing2| to activate protrusion and expansion,
 % respectively. See \pdftex manual for details}:
 %
-% |\font\lmr=Latin Modern Roman:protrusion=default|
+% |\font\test=Latin Modern Roman:protrusion=default|
 % \end{description}
 %
 % \section{Font names database}
@@ -426,7 +446,7 @@ and the derived files
 % features for the |dflt| script, which is the default one in this package, so
 % you may have to specify the script in the command line, for example:
 %
-% |\font\myfont = MyFont.otf:script=latn;+liga;|
+% |\font\test=file:MyFont.otf:script=latn;+liga;|
 %
 % \part{\texttt{luaotfload.lua}}
 %

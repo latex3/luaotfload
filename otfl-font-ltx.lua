@@ -25,7 +25,7 @@ local list = { }
 
 local function isstyle(s)
     local style  = string.lower(s):split("/")
-    for _,v in ipairs(style) do
+    for _,v in next, style do
         if v == "b" then
             list.style = "bold"
         elseif v == "i" then

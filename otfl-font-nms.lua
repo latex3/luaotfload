@@ -467,14 +467,14 @@ local function read_blacklist()
             end
         end
     end
-    for fontname,_ in pairs(whitelist) do
+    for _,fontname in next, whitelist do
       blacklist[fontname] = nil
     end
 end
 
 local font_extensions = { "otf", "ttf", "ttc", "dfont" }
 local font_extensions_set = {}
-for key, value in ipairs(font_extensions) do
+for key, value in next, font_extensions do
    font_extensions_set[value] = true
 end
 
@@ -490,7 +490,7 @@ local function scan_installed_fonts(fontnames, newfontnames)
       if trace_search then
          logs.report("operating system fonts found", "%d", #fonts)
       end
-      for key, value in ipairs(fonts) do
+      for key, value in next, fonts do
          local file = value.path
          if file then
             local ext = extname(file)

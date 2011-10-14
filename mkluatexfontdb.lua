@@ -64,7 +64,7 @@ local force_reload = nil
 local function process_cmdline()
     local opts, optind, optarg = alt_getopt.get_ordered_opts (arg, short_opts, long_opts)
     local log_level = 1
-    for i,v in ipairs(opts) do
+    for i,v in next, opts do
         if     v == "q" then
             log_level = 0
         elseif v == "v" then

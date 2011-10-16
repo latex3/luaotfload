@@ -9,7 +9,10 @@ luaotfload bundle, please see the luaotfload documentation for more info.
 
 kpse.set_program_name("luatex")
 
+function string.quoted(s) return string.format("%q",s) end -- XXX
+
 require("lualibs")
+require("otfl-basics-gen.lua")
 require("otfl-font-nms")
 require("alt_getopt")
 

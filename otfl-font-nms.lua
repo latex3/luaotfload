@@ -11,7 +11,7 @@ fonts.names          = fonts.names or { }
 
 local names          = fonts.names
 local names_dir      = "luatex-cache/generic/names"
-names.version        = 2.009 -- not the same as in context
+names.version        = 2.010 -- not the same as in context
 names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
@@ -58,13 +58,21 @@ local function fontnames_init()
     }
 end
 
+local function make_name(path)
+    return file.replacesuffix(path, "lua"), file.replacesuffix(path, "luc")
+end
+
 local function load_names()
-    local localpath  = file.join(names.path.localdir, names.path.basename)
+    local path = file.join(names.path.localdir, names.path.basename)
+    local luaname, lucname = make_name(path)
     local foundname
     local data
-    if file.isreadable(localpath)  then
-        data = dofile(localpath)
-	foundname = localpath
+    if file.isreadable(lucname) then
+        data = dofile(lucname)
+	foundname = lucname
+    elseif file.isreadable(luaname) then
+        data = dofile(luaname)
+	foundname = luaname
     end
     if data then
         logs.info("Font names database loaded", "%s", foundname)
@@ -727,8 +735,10 @@ local function save_names(fontnames)
     end
     savepath = file.join(savepath, names.path.basename)
     if file.iswritable(savepath) then
-        table.tofile(savepath, fontnames, true)
-        logs.info("Font names database saved", "%s", savepath)
+        local luaname, lucname = make_name(savepath)
+        table.tofile(luaname, fontnames, true)
+        caches.compile(fontnames,luaname,lucname)
+        logs.info("Font names database saved")
         return savepath
     else
         logs.info("Failed to save names database")

@@ -39,7 +39,7 @@ Valid options:
 The output database file is named otfl-fonts.lua and is placed under:
 
    %s"
-]], name, names.path.localdir))
+]], name, names.path.dir))
 end
 
 local function version_msg()

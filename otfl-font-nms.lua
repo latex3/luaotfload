@@ -14,8 +14,8 @@ local names_dir      = "luatex-cache/generic/names"
 names.version        = 2.010 -- not the same as in context
 names.data           = nil
 names.path           = {
-    basename  = "otfl-names.lua",
-    localdir  = file.join(kpse.expand_var("$TEXMFVAR"), names_dir),
+    basename = "otfl-names.lua",
+    dir      = file.join(kpse.expand_var("$TEXMFVAR"), names_dir),
 }
 
 local success = pcall(require, "luatexbase.modutils")
@@ -63,7 +63,7 @@ local function make_name(path)
 end
 
 local function load_names()
-    local path = file.join(names.path.localdir, names.path.basename)
+    local path = file.join(names.path.dir, names.path.basename)
     local luaname, lucname = make_name(path)
     local foundname
     local data
@@ -729,17 +729,17 @@ local function update_names(fontnames, force)
 end
 
 local function save_names(fontnames)
-    local savepath  = names.path.localdir
-    if not lfs.isdir(savepath) then
-        dir.mkdirs(savepath)
+    local path  = names.path.dir
+    if not lfs.isdir(path) then
+        dir.mkdirs(path)
     end
-    savepath = file.join(savepath, names.path.basename)
-    if file.iswritable(savepath) then
-        local luaname, lucname = make_name(savepath)
+    path = file.join(path, names.path.basename)
+    if file.iswritable(path) then
+        local luaname, lucname = make_name(path)
         table.tofile(luaname, fontnames, true)
         caches.compile(fontnames,luaname,lucname)
         logs.info("Font names database saved")
-        return savepath
+        return path
     else
         logs.info("Failed to save names database")
         return nil

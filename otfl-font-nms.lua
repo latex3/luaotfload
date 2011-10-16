@@ -16,7 +16,6 @@ names.data           = nil
 names.path           = {
     basename  = "otfl-names.lua",
     localdir  = file.join(kpse.expand_var("$TEXMFVAR"), names_dir),
-    systemdir = file.join(kpse.expand_var("$TEXMFSYSVAR"), names_dir),
 }
 
 local success = pcall(require, "luatexbase.modutils")
@@ -61,19 +60,11 @@ end
 
 local function load_names()
     local localpath  = file.join(names.path.localdir, names.path.basename)
-    local systempath = file.join(names.path.systemdir, names.path.basename)
-    local kpsefound  = kpse.find_file(names.path.basename)
     local foundname
     local data
-    if kpsefound and file.isreadable(kpsefound) then
-        data = dofile(kpsefound)
-	foundname = kpsefound
-    elseif file.isreadable(localpath)  then
+    if file.isreadable(localpath)  then
         data = dofile(localpath)
 	foundname = localpath
-    elseif file.isreadable(systempath) then
-        data = dofile(systempath)
-	foundname = systempath
     end
     if data then
         logs.info("Font names database loaded", "%s", foundname)

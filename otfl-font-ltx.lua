@@ -126,7 +126,7 @@ local filespec   = (R("az", "AZ") * P(":"))^-1 * (1-S(":("))^1
 local stylespec  = spaces * P("/") * (((1-P(":"))^0)/isstyle) * spaces
 local filename   = (P("file:")/isfile * (filespec/thename)) + (P("[") * P(true)/isname * (((1-P("]"))^0)/thename) * P("]"))
 local fontname   = (P("name:")/isname * (namespec/thename)) + P(true)/issome * (namespec/thename)
-local sometext   = (R("az","AZ","09") + S("+-."))^1
+local sometext   = (R("az","AZ","09") + S("+-.,"))^1
 local truevalue  = P("+") * spaces * (sometext/istrue)
 local falsevalue = P("-") * spaces * (sometext/isfalse)
 local keyvalue   = P("+") + (C(sometext) * spaces * P("=") * spaces * C(sometext))/iskey

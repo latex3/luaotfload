@@ -290,11 +290,11 @@ and the derived files
 % default value is |latn|.
 %
 % \item [featurefile] \hfill \\
-% feature files are textual representation of OpenType tables and can be used
-% to extend OpenType features of the font on fly. The file name of the feature
-% file is passed, then features defined in the file can be enabled/disabled
-% like any other feature. The syntax is documented in Adobe's OpenType Feature
-% File
+% a comma-separated list of feature files to be applied to the font.  Feature
+% files are textual representation of OpenType tables and can be used to extend
+% OpenType features of the font on fly. Features defined in a feature file,
+% after being applied to the font, can be enabled/disabled like any other
+% feature. The syntax is documented in Adobe's OpenType Feature File
 % Specification\footnote{\url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}}.
 %
 % For example, to set a |tkrn| feature from |mykern.fea| file:

@@ -248,26 +248,26 @@ features (esp in virtual fonts) so let's not do that now.</p>
 specification yet.</p>
 --ldx]]--
 
--- not in context, at least not now:
---
--- function definers.applypostprocessors(tfmdata)
---     local postprocessors = tfmdata.postprocessors
---     if postprocessors then
---         for i=1,#postprocessors do
---             local extrahash = postprocessors[i](tfmdata) -- after scaling etc
---             if type(extrahash) == "string" and extrahash ~= "" then
---                 -- e.g. a reencoding needs this
---                 extrahash = gsub(lower(extrahash),"[^a-z]","-")
---                 tfmdata.properties.fullname = format("%s-%s",tfmdata.properties.fullname,extrahash)
---             end
---         end
---     end
---     return tfmdata
--- end
+-- very experimental:
 
 function definers.applypostprocessors(tfmdata)
+    local postprocessors = tfmdata.postprocessors
+    if postprocessors then
+        for i=1,#postprocessors do
+            local extrahash = postprocessors[i](tfmdata) -- after scaling etc
+            if type(extrahash) == "string" and extrahash ~= "" then
+                -- e.g. a reencoding needs this
+                extrahash = gsub(lower(extrahash),"[^a-z]","-")
+                tfmdata.properties.fullname = format("%s-%s",tfmdata.properties.fullname,extrahash)
+            end
+        end
+    end
     return tfmdata
 end
+
+-- function definers.applypostprocessors(tfmdata)
+--     return tfmdata
+-- end
 
 function definers.loadfont(specification)
     local hash = constructors.hashinstance(specification)

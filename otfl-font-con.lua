@@ -426,7 +426,9 @@ function constructors.scale(tfmdata,specification)
         end
     end
     --
-    local sharedkerns   = { }
+    local sharedkerns = { }
+    --
+    -- we can have a dumb mode (basemode without math etc) that skips most
     --
     for unicode, character in next, characters do
         local chr, description, index, touni
@@ -528,7 +530,7 @@ function constructors.scale(tfmdata,specification)
                 chr[italickey] = vi*hdelta
             end
         elseif hasitalic then
-            local vi = description.italic or character.italic -- why character
+            local vi = description.italic -- or character.italic hm, already scaled !
             if vi and vi ~= 0 then
                 chr[italickey] = vi*hdelta
             end

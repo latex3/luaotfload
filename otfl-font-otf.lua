@@ -1838,6 +1838,11 @@ local function copytotfm(data,cache_id)
         local fullname = metadata.fullname or fontname
         local units    = metadata.units_per_em or 1000
         --
+        if units == 0 then -- catch bugs in fonts
+            units = 1000
+            metadata.units_per_em = 1000
+        end
+        --
         parameters.slant         = 0
         parameters.space         = spaceunits          -- 3.333 (cmr10)
         parameters.space_stretch = units/2   --  500   -- 1.666 (cmr10)

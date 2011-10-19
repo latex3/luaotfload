@@ -80,6 +80,8 @@ local remapper = {
     dfont = "truetype fonts", -- "truetype dictionary",
     cid   = "cid maps",
     fea   = "font feature files",
+    pfa   = "type1 fonts", -- this is for Khaled, in ConTeXt we don't use this!
+    pfb   = "type1 fonts", -- this is for Khaled, in ConTeXt we don't use this!
 }
 
 function resolvers.findfile(name,fileformat)

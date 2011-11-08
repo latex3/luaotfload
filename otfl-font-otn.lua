@@ -399,6 +399,11 @@ local function toligature(kind,lookupname,start,stop,char,markflag,discfound) --
                 start = start.next
             end
         end
+     -- we do need components in funny kerning mode but maybe I can better reconstruct then
+     -- as we do have the font components info available; removing components makes the
+     -- previous code much simpler
+     --
+     -- flush_node_list(head.components)
         return head
     end
 end

@@ -29,7 +29,7 @@ local function initializeitlc(tfmdata,value)
                     d.italic = it
                 end
             end
-            tfmdata.properties.italic_correction = true
+            tfmdata.properties.hasitalics = true
         end
     end
 end
@@ -54,7 +54,7 @@ local function initializeslant(tfmdata,value)
     elseif value < -1 then
         value = -1
     end
-    tfmdata.parameters.slant_factor = value
+    tfmdata.parameters.slantfactor = value
 end
 
 otffeatures.register {
@@ -75,7 +75,7 @@ local function initializeextend(tfmdata,value)
     elseif value < -10 then
         value = -10
     end
-    tfmdata.parameters.extend_factor = value
+    tfmdata.parameters.extendfactor = value
 end
 
 otffeatures.register {

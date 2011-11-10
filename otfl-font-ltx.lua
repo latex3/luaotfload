@@ -168,6 +168,10 @@ local function colonized(specification) -- xetex mode
         specification.sub = list.sub
         list.sub = nil
     end
+    if not list.mode then
+        -- if no mode is set, use our default
+        list.mode = fonts.mode
+    end
     specification.features.normal = fonts.handlers.otf.features.normalize(list)
     return specification
 end

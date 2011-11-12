@@ -123,25 +123,27 @@ local random = math.random
 
 local logs, trackers, nodes, attributes = logs, trackers, nodes, attributes
 
+local registertracker = trackers.register
+
 local fonts = fonts
 local otf   = fonts.handlers.otf
 
-local trace_lookups      = false  trackers.register("otf.lookups",      function(v) trace_lookups      = v end)
-local trace_singles      = false  trackers.register("otf.singles",      function(v) trace_singles      = v end)
-local trace_multiples    = false  trackers.register("otf.multiples",    function(v) trace_multiples    = v end)
-local trace_alternatives = false  trackers.register("otf.alternatives", function(v) trace_alternatives = v end)
-local trace_ligatures    = false  trackers.register("otf.ligatures",    function(v) trace_ligatures    = v end)
-local trace_contexts     = false  trackers.register("otf.contexts",     function(v) trace_contexts     = v end)
-local trace_marks        = false  trackers.register("otf.marks",        function(v) trace_marks        = v end)
-local trace_kerns        = false  trackers.register("otf.kerns",        function(v) trace_kerns        = v end)
-local trace_cursive      = false  trackers.register("otf.cursive",      function(v) trace_cursive      = v end)
-local trace_preparing    = false  trackers.register("otf.preparing",    function(v) trace_preparing    = v end)
-local trace_bugs         = false  trackers.register("otf.bugs",         function(v) trace_bugs         = v end)
-local trace_details      = false  trackers.register("otf.details",      function(v) trace_details      = v end)
-local trace_applied      = false  trackers.register("otf.applied",      function(v) trace_applied      = v end)
-local trace_steps        = false  trackers.register("otf.steps",        function(v) trace_steps        = v end)
-local trace_skips        = false  trackers.register("otf.skips",        function(v) trace_skips        = v end)
-local trace_directions   = false  trackers.register("otf.directions",   function(v) trace_directions   = v end)
+local trace_lookups      = false  registertracker("otf.lookups",      function(v) trace_lookups      = v end)
+local trace_singles      = false  registertracker("otf.singles",      function(v) trace_singles      = v end)
+local trace_multiples    = false  registertracker("otf.multiples",    function(v) trace_multiples    = v end)
+local trace_alternatives = false  registertracker("otf.alternatives", function(v) trace_alternatives = v end)
+local trace_ligatures    = false  registertracker("otf.ligatures",    function(v) trace_ligatures    = v end)
+local trace_contexts     = false  registertracker("otf.contexts",     function(v) trace_contexts     = v end)
+local trace_marks        = false  registertracker("otf.marks",        function(v) trace_marks        = v end)
+local trace_kerns        = false  registertracker("otf.kerns",        function(v) trace_kerns        = v end)
+local trace_cursive      = false  registertracker("otf.cursive",      function(v) trace_cursive      = v end)
+local trace_preparing    = false  registertracker("otf.preparing",    function(v) trace_preparing    = v end)
+local trace_bugs         = false  registertracker("otf.bugs",         function(v) trace_bugs         = v end)
+local trace_details      = false  registertracker("otf.details",      function(v) trace_details      = v end)
+local trace_applied      = false  registertracker("otf.applied",      function(v) trace_applied      = v end)
+local trace_steps        = false  registertracker("otf.steps",        function(v) trace_steps        = v end)
+local trace_skips        = false  registertracker("otf.skips",        function(v) trace_skips        = v end)
+local trace_directions   = false  registertracker("otf.directions",   function(v) trace_directions   = v end)
 
 local report_direct   = logs.reporter("fonts","otf direct")
 local report_subchain = logs.reporter("fonts","otf subchain")
@@ -149,15 +151,15 @@ local report_chain    = logs.reporter("fonts","otf chain")
 local report_process  = logs.reporter("fonts","otf process")
 local report_prepare  = logs.reporter("fonts","otf prepare")
 
-trackers.register("otf.verbose_chain", function(v) otf.setcontextchain(v and "verbose") end)
-trackers.register("otf.normal_chain",  function(v) otf.setcontextchain(v and "normal")  end)
+registertracker("otf.verbose_chain", function(v) otf.setcontextchain(v and "verbose") end)
+registertracker("otf.normal_chain",  function(v) otf.setcontextchain(v and "normal")  end)
 
-trackers.register("otf.replacements", "otf.singles,otf.multiples,otf.alternatives,otf.ligatures")
-trackers.register("otf.positions","otf.marks,otf.kerns,otf.cursive")
-trackers.register("otf.actions","otf.replacements,otf.positions")
-trackers.register("otf.injections","nodes.injections")
+registertracker("otf.replacements", "otf.singles,otf.multiples,otf.alternatives,otf.ligatures")
+registertracker("otf.positions","otf.marks,otf.kerns,otf.cursive")
+registertracker("otf.actions","otf.replacements,otf.positions")
+registertracker("otf.injections","nodes.injections")
 
-trackers.register("*otf.sample","otf.steps,otf.actions,otf.analyzing")
+registertracker("*otf.sample","otf.steps,otf.actions,otf.analyzing")
 
 local insert_node_after  = node.insert_after
 local delete_node        = nodes.delete
@@ -216,6 +218,8 @@ local otffeatures        = fonts.constructors.newfeatures("otf")
 local registerotffeature = otffeatures.register
 
 local onetimemessage     = fonts.loggers.onetimemessage
+
+otf.defaultnodealternate = "none" -- first last
 
 -- we share some vars here, after all, we have no nested lookups and
 -- less code
@@ -416,7 +420,7 @@ function handlers.gsub_single(start,kind,lookupname,replacement)
     return start, true
 end
 
-local function alternative_glyph(start,alternatives,kind,chainname,chainlookupname,lookupname) -- chainname and chainlookupname optional
+local function set_alternative_glyph(start,alternatives,kind,chainname,chainlookupname,lookupname) -- chainname and chainlookupname optional
     -- needs checking: (global value, brrr)
     local value  = featurevalue == true and tfmdata.shared.features[kind] or featurevalue
     local choice = nil
@@ -434,7 +438,14 @@ local function alternative_glyph(start,alternatives,kind,chainname,chainlookupna
         if type(value) ~= "number" then
             value, choice = "default, choice 1", alternatives[1]
         elseif value > n then
-            value, choice = format("no %s variants, taking %s",value,n), alternatives[n]
+            local defaultalt = otf.defaultnodealternate
+            if defaultalt == "first" then
+                value, choice = format("no %s variants, taking %s",value,n), alternatives[n]
+            elseif defaultalt == "last" then
+                value, choice = format("no %s variants, taking %s",value,1), alternatives[1]
+            else
+                value, choice = format("no %s variants, ignoring",value), false
+            end
         elseif value == 0 then
             value, choice = format("choice %s (no change)",value), start.char
         elseif value < 1 then
@@ -443,11 +454,23 @@ local function alternative_glyph(start,alternatives,kind,chainname,chainlookupna
             value, choice = format("choice %s",value), alternatives[value]
         end
     end
-    if not choice then
-        logwarning("%s: no variant %s for %s",cref(kind,chainname,chainlookupname,lookupname),value,gref(start.char))
-        choice, value = start.char, format("no replacement instead of %s",value)
+    if trace_alternatives then
+        if choice then
+            logprocess("%s: replacing %s by alternative %s (%s)",pref(kind,lookupname),gref(start.char),gref(choice),index)
+        else
+            logwarning("%s: no variant %s for %s",cref(kind,chainname,chainlookupname,lookupname),value,gref(start.char))
+        end
     end
-    return choice, value
+    if choice then
+        start.char = choice
+        if trace_alternatives then
+            logprocess("%s: replacing %s by alternative %s (%s)",pref(kind,lookupname),gref(start.char),gref(choice),index)
+        end
+    else
+        if trace_alternatives then
+            logwarning("%s: no variant %s for %s",cref(kind,chainname,chainlookupname,lookupname),value,gref(start.char))
+        end
+    end
 end
 
 local function multiple_glyphs(start,multiple) -- marks ?
@@ -478,11 +501,7 @@ local function multiple_glyphs(start,multiple) -- marks ?
 end
 
 function handlers.gsub_alternate(start,kind,lookupname,alternative,sequence)
-    local choice, index = alternative_glyph(start,alternative,kind,lookupname)
-    if trace_alternatives then
-        logprocess("%s: replacing %s by alternative %s (%s)",pref(kind,lookupname),gref(start.char),gref(choice),index)
-    end
-    start.char = choice
+    set_alternative_glyph(start,alternative,kind,lookupname)
     return start, true
 end
 
@@ -1094,17 +1113,10 @@ function chainprocs.gsub_alternate(start,stop,kind,chainname,currentcontext,look
                 end
             else
                 alternatives = alternatives[currentchar]
-                if not alternatives then
-                    if trace_bugs then
-                        logwarning("%s: no alternative for %s",cref(kind,chainname,chainlookupname,lookupname),gref(currentchar))
-                    end
-                else
-                    local choice, index = alternative_glyph(current,alternatives,kind,chainname,chainlookupname,lookupname)
-                    current.char = choice
-                    if trace_alternatives then
-                        logprocess("%s: replacing single %s by alternative %s (%s)",
-                            cref(kind,chainname,chainlookupname,lookupname),index,gref(currentchar),gref(choice))
-                    end
+                if alternatives then
+                    set_alternative_glyph(current,alternatives,kind,chainname,chainlookupname,lookupname)
+                elseif trace_bugs then
+                    logwarning("%s: no alternative for %s",cref(kind,chainname,chainlookupname,lookupname),gref(currentchar))
                 end
             end
             return start, true

@@ -27,6 +27,8 @@ local otf                 = fonts.handlers.otf
 local otffeatures         = fonts.constructors.newfeatures("otf")
 local registerotffeature  = otffeatures.register
 
+otf.defaultbasealternate  = "none" -- first last
+
 local wildcard = "*"
 local default  = "dflt"
 
@@ -57,6 +59,22 @@ local function cref(feature,lookupname)
     else
         return format("feature %s",feature)
     end
+end
+
+local function report_alternate(feature,lookupname,descriptions,unicode,replacement,value,comment)
+    report_prepare("%s: base alternate %s => %s (%s => %s)",cref(feature,lookupname),
+        gref(descriptions,unicode),replacement and gref(descriptions,replacement) or "-",
+        tostring(value),comment)
+end
+
+local function report_substitution(feature,lookupname,descriptions,unicode,substitution)
+    report_prepare("%s: base substitution %s => %s",cref(feature,lookupname),
+        gref(descriptions,unicode),gref(descriptions,substitution))
+end
+
+local function report_ligature(feature,lookupname,descriptions,unicode,ligature)
+    report_prepare("%s: base ligature %s => %s",cref(feature,lookupname),
+        gref(descriptions,ligature),gref(descriptions,unicode))
 end
 
 local basemethods = { }
@@ -223,27 +241,47 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
     local lookuptypes  = resources.lookuptypes
 
     local ligatures    = { }
+    local alternate    = tonumber(value)
+    local defaultalt   = otf.defaultbasealternate
+
+    local trace_singles      = trace_baseinit and trace_singles
+    local trace_alternatives = trace_baseinit and trace_alternatives
+    local trace_ligatures    = trace_baseinit and trace_ligatures
 
     local actions      = {
         substitution = function(lookupdata,lookupname,description,unicode)
-            if trace_baseinit and trace_singles then
-                report_prepare("%s: base substitution %s => %s",cref(feature,lookupname),
-                    gref(descriptions,unicode),gref(descriptions,lookupdatat))
+            if trace_singles then
+                report_substitution(feature,lookupname,descriptions,unicode,lookupdata)
             end
             changed[unicode] = lookupdata
         end,
         alternate = function(lookupdata,lookupname,description,unicode)
-            local replacement = lookupdata[value] or lookupdata[#lookupdata]
-            if trace_baseinit and trace_alternatives then
-                report_prepare("%s: base alternate %s %s => %s",cref(feature,lookupname),
-                    tostring(value),gref(descriptions,unicode),gref(descriptions,replacement))
+            local replacement = lookupdata[alternate]
+            if replacement then
+                changed[unicode] = replacement
+                if trace_alternatives then
+                    report_alternate(feature,lookupname,descriptions,unicode,replacement,value,"normal")
+                end
+            elseif defaultalt == "first" then
+                replacement = lookupdata[1]
+                changed[unicode] = replacement
+                if trace_alternatives then
+                    report_alternate(feature,lookupname,descriptions,unicode,replacement,value,defaultalt)
+                end
+            elseif defaultalt == "last" then
+                replacement = lookupdata[#data]
+                if trace_alternatives then
+                    report_alternate(feature,lookupname,descriptions,unicode,replacement,value,defaultalt)
+                end
+            else
+                if trace_alternatives then
+                    report_alternate(feature,lookupname,descriptions,unicode,replacement,value,"unknown")
+                end
             end
-            changed[unicode] = replacement
         end,
         ligature = function(lookupdata,lookupname,description,unicode)
-            if trace_baseinit and trace_alternatives then
-                report_prepare("%s: base ligature %s %s => %s",cref(feature,lookupname),
-                    tostring(value),gref(descriptions,lookupdata),gref(descriptions,unicode))
+            if trace_ligatures then
+                report_ligature(feature,lookupname,descriptions,unicode,lookupdata)
             end
             ligatures[#ligatures+1] = { unicode, lookupdata }
         end,
@@ -409,6 +447,12 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
     local lookuptypes  = resources.lookuptypes
 
     local ligatures    = { }
+    local alternate    = tonumber(value)
+    local defaultalt   = otf.defaultbasealternate
+
+    local trace_singles      = trace_baseinit and trace_singles
+    local trace_alternatives = trace_baseinit and trace_alternatives
+    local trace_ligatures    = trace_baseinit and trace_ligatures
 
     for l=1,#lookuplist do
         local lookupname = lookuplist[l]
@@ -416,20 +460,38 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
         local lookuptype = lookuptypes[lookupname]
         for unicode, data in next, lookupdata do
             if lookuptype == "substitution" then
-                if trace_baseinit and trace_singles then
-                    report_prepare("%s: base substitution %s => %s",cref(feature,lookupname),
-                        gref(descriptions,unicode),gref(descriptions,data))
+                if trace_singles then
+                    report_substitution(feature,lookupname,descriptions,unicode,data)
                 end
                 changed[unicode] = data
             elseif lookuptype == "alternate" then
-                local replacement = data[value] or data[#data]
-                if trace_baseinit and trace_alternatives then
-                    report_prepare("%s: base alternate %s %s => %s",cref(feature,lookupname),
-                        tostring(value),gref(descriptions,unicode),gref(descriptions,replacement))
+                local replacement = data[alternate]
+                if replacement then
+                    changed[unicode] = replacement
+                    if trace_alternatives then
+                        report_alternate(feature,lookupname,descriptions,unicode,replacement,value,"normal")
+                    end
+                elseif defaultalt == "first" then
+                    replacement = data[1]
+                    changed[unicode] = replacement
+                    if trace_alternatives then
+                        report_alternate(feature,lookupname,descriptions,unicode,replacement,value,defaultalt)
+                    end
+                elseif defaultalt == "last" then
+                    replacement = data[#data]
+                    if trace_alternatives then
+                        report_alternate(feature,lookupname,descriptions,unicode,replacement,value,defaultalt)
+                    end
+                else
+                    if trace_alternatives then
+                        report_alternate(feature,lookupname,descriptions,unicode,replacement,value,"unknown")
+                    end
                 end
-                changed[unicode] = replacement
             elseif lookuptype == "ligature" then
                 ligatures[#ligatures+1] = { unicode, data, lookupname }
+                if trace_ligatures then
+                    report_ligature(feature,lookupname,descriptions,unicode,data)
+                end
             end
         end
     end
@@ -452,13 +514,6 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
             local ligature = ligatures[i]
             local unicode, tree, lookupname = ligature[1], ligature[2], ligature[3]
             make_2(present,tfmdata,characters,tree,"ctx_"..unicode,unicode,unicode,done,lookupname)
-        end
-
-        if done then
-            for lookupname, list in next, done do
-                report_prepare("%s: base ligatures %s => %s",cref(feature,lookupname),
-                    tostring(value),gref(descriptions,done))
-            end
         end
 
     end
@@ -566,13 +621,13 @@ registerotffeature {
     description  = "features",
     default      = true,
     initializers = {
---~         position = 1, -- after setscript (temp hack ... we need to force script / language to 1
+ --     position = 1, -- after setscript (temp hack ... we need to force script / language to 1
         base     = featuresinitializer,
     }
 }
 
 -- independent : collect lookups independently (takes more runtime ... neglectable)
--- shared      : shares lookups with node mode (takes more memory  ... noticeable)
+-- shared      : shares lookups with node mode (takes more memory unless also a node mode variant is used ... noticeable)
 
 directives.register("fonts.otf.loader.basemethod", function(v)
     if basemethods[v] then

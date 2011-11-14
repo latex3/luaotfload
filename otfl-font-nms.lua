@@ -88,7 +88,7 @@ end
 
 local synonyms = {
     regular    = { "normal", "roman", "plain", "book", "medium" },
-    bold       = { "boldregular", "demi" },
+    bold       = { "boldregular", "demi", "demibold" },
     italic     = { "regularitalic", "normalitalic", "oblique", "slanted" },
     bolditalic = { "boldoblique", "boldslanted", "demiitalic", "demioblique", "demislanted" },
 }

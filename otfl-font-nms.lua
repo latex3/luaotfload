@@ -96,7 +96,7 @@ local synonyms = {
 local loaded   = false
 local reloaded = false
 
-function names.resolve(_,_,specification)
+function names.resolve(_,_,specification) -- the 1st two parameters are used by ConTeXt
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
 

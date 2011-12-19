@@ -1002,6 +1002,20 @@ local g_directions = {
     gpos_reversecontextchain = -1,
 }
 
+-- Research by Khaled Hosny has demonstrated that the font loader merges
+-- regular and AAT features and that these can interfere (especially because
+-- we dropped checking for valid features elsewhere. So, we just check for
+-- the special flag and drop the feature if such a tag is found.
+
+local function supported(features)
+    for i=1,#features do
+        if features[i].ismac then
+            return false
+        end
+    end
+    return true
+end
+
 actions["reorganize subtables"] = function(data,filename,raw)
     local resources       = data.resources
     local sequences       = { }
@@ -1014,69 +1028,72 @@ actions["reorganize subtables"] = function(data,filename,raw)
         if dw then
             for k=1,#dw do
                 local gk = dw[k]
-                local typ = gk.type
-                local chain = g_directions[typ] or 0
-                local subtables = gk.subtables
-                if subtables then
-                    local t = { }
-                    for s=1,#subtables do
-                        t[s] = subtables[s].name
-                    end
-                    subtables = t
-                end
-                local flags, markclass = gk.flags, nil
-                if flags then
-                    local t = { -- forcing false packs nicer
-                        (flags.ignorecombiningmarks and "mark")     or false,
-                        (flags.ignoreligatures      and "ligature") or false,
-                        (flags.ignorebaseglyphs     and "base")     or false,
-                         flags.r2l                                  or false,
-                    }
-                    markclass = flags.mark_class
-                    if markclass then
-                        markclass = resources.markclasses[markclass]
-                    end
-                    flags = t
-                end
-                --
-                local name = gk.name
-                --
                 local features = gk.features
-                if features then
-                    -- scripts, tag, ismac
-                    local f = { }
-                    for i=1,#features do
-                        local df = features[i]
-                        local tag = strip(lower(df.tag))
-                        local ft = f[tag] if not ft then ft = {} f[tag] = ft end
-                        local dscripts = df.scripts
-                        for i=1,#dscripts do
-                            local d = dscripts[i]
-                            local languages = d.langs
-                            local script = strip(lower(d.script))
-                            local fts = ft[script] if not fts then fts = {} ft[script] = fts end
-                            for i=1,#languages do
-                                fts[strip(lower(languages[i]))] = true
+                if features and supported(features) then
+                    local typ = gk.type
+                    local chain = g_directions[typ] or 0
+                    local subtables = gk.subtables
+                    if subtables then
+                        local t = { }
+                        for s=1,#subtables do
+                            t[s] = subtables[s].name
+                        end
+                        subtables = t
+                    end
+                    local flags, markclass = gk.flags, nil
+                    if flags then
+                        local t = { -- forcing false packs nicer
+                            (flags.ignorecombiningmarks and "mark")     or false,
+                            (flags.ignoreligatures      and "ligature") or false,
+                            (flags.ignorebaseglyphs     and "base")     or false,
+                             flags.r2l                                  or false,
+                        }
+                        markclass = flags.mark_class
+                        if markclass then
+                            markclass = resources.markclasses[markclass]
+                        end
+                        flags = t
+                    end
+                    --
+                    local name = gk.name
+                    --
+                    local features = gk.features
+                    if features then
+                        -- scripts, tag, ismac
+                        local f = { }
+                        for i=1,#features do
+                            local df = features[i]
+                            local tag = strip(lower(df.tag))
+                            local ft = f[tag] if not ft then ft = {} f[tag] = ft end
+                            local dscripts = df.scripts
+                            for i=1,#dscripts do
+                                local d = dscripts[i]
+                                local languages = d.langs
+                                local script = strip(lower(d.script))
+                                local fts = ft[script] if not fts then fts = {} ft[script] = fts end
+                                for i=1,#languages do
+                                    fts[strip(lower(languages[i]))] = true
+                                end
                             end
                         end
+                        sequences[#sequences+1] = {
+                            type      = typ,
+                            chain     = chain,
+                            flags     = flags,
+                            name      = name,
+                            subtables = subtables,
+                            markclass = markclass,
+                            features  = f,
+                        }
+                    else
+                        lookups[name] = {
+                            type      = typ,
+                            chain     = chain,
+                            flags     = flags,
+                            subtables = subtables,
+                            markclass = markclass,
+                        }
                     end
-                    sequences[#sequences+1] = {
-                        type      = typ,
-                        chain     = chain,
-                        flags     = flags,
-                        name      = name,
-                        subtables = subtables,
-                        markclass = markclass,
-                        features  = f,
-                    }
-                else
-                    lookups[name] = {
-                        type      = typ,
-                        chain     = chain,
-                        flags     = flags,
-                        subtables = subtables,
-                        markclass = markclass,
-                    }
                 end
             end
         end

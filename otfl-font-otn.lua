@@ -420,11 +420,11 @@ function handlers.gsub_single(start,kind,lookupname,replacement)
     return start, true
 end
 
-local function set_alternative_glyph(start,alternatives,kind,chainname,chainlookupname,lookupname) -- chainname and chainlookupname optional
+local function get_alternative_glyph(start,alternatives,value)
     -- needs checking: (global value, brrr)
-    local value  = featurevalue == true and tfmdata.shared.features[kind] or featurevalue
     local choice = nil
     local n      = #alternatives
+    local char   = start.char
     --
     if value == "random" then
         local r = random(1,n)
@@ -447,30 +447,14 @@ local function set_alternative_glyph(start,alternatives,kind,chainname,chainlook
                 value, choice = format("no %s variants, ignoring",value), false
             end
         elseif value == 0 then
-            value, choice = format("choice %s (no change)",value), start.char
+            value, choice = format("choice %s (no change)",value), char
         elseif value < 1 then
             value, choice = format("no %s variants, taking %s",value,1), alternatives[1]
         else
             value, choice = format("choice %s",value), alternatives[value]
         end
     end
-    if trace_alternatives then
-        if choice then
-            logprocess("%s: replacing %s by alternative %s (%s)",pref(kind,lookupname),gref(start.char),gref(choice),index)
-        else
-            logwarning("%s: no variant %s for %s",cref(kind,chainname,chainlookupname,lookupname),value,gref(start.char))
-        end
-    end
-    if choice then
-        start.char = choice
-        if trace_alternatives then
-            logprocess("%s: replacing %s by alternative %s (%s)",pref(kind,lookupname),gref(start.char),gref(choice),index)
-        end
-    else
-        if trace_alternatives then
-            logwarning("%s: no variant %s for %s",cref(kind,chainname,chainlookupname,lookupname),value,gref(start.char))
-        end
-    end
+    return choice
 end
 
 local function multiple_glyphs(start,multiple) -- marks ?
@@ -501,7 +485,18 @@ local function multiple_glyphs(start,multiple) -- marks ?
 end
 
 function handlers.gsub_alternate(start,kind,lookupname,alternative,sequence)
-    set_alternative_glyph(start,alternative,kind,lookupname)
+    local value  = featurevalue == true and tfmdata.shared.features[kind] or featurevalue
+    local choice = get_alternative_glyph(start,alternative,value)
+    if choice then
+        if trace_alternatives then
+            logprocess("%s: replacing %s by alternative %s (%s)",pref(kind,lookupname),gref(char),gref(choice),choice)
+        end
+        start.char = choice
+    else
+        if trace_alternatives then
+            logwarning("%s: no variant %s for %s",pref(kind,lookupname),tostring(value),gref(char))
+        end
+    end
     return start, true
 end
 
@@ -1102,6 +1097,7 @@ chainmores.gsub_multiple = chainprocs.gsub_multiple
 function chainprocs.gsub_alternate(start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname)
     local current = start
     local subtables = currentlookup.subtables
+    local value  = featurevalue == true and tfmdata.shared.features[kind] or featurevalue
     while current do
         if current.id == glyph_code then -- is this check needed?
             local currentchar = current.char
@@ -1114,7 +1110,17 @@ function chainprocs.gsub_alternate(start,stop,kind,chainname,currentcontext,look
             else
                 alternatives = alternatives[currentchar]
                 if alternatives then
-                    set_alternative_glyph(current,alternatives,kind,chainname,chainlookupname,lookupname)
+                    local choice = get_alternative_glyph(current,alternatives,value)
+                    if choice then
+                        if trace_alternatives then
+                            logprocess("%s: replacing %s by alternative %s (%s)",cref(kind,chainname,chainlookupname,lookupname),gref(char),gref(choice),choice)
+                        end
+                        start.char = choice
+                    else
+                        if trace_alternatives then
+                            logwarning("%s: no variant %s for %s",cref(kind,chainname,chainlookupname,lookupname),tostring(value),gref(char))
+                        end
+                    end
                 elseif trace_bugs then
                     logwarning("%s: no alternative for %s",cref(kind,chainname,chainlookupname,lookupname),gref(currentchar))
                 end

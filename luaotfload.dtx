@@ -323,6 +323,21 @@ and the derived files
 % |\font\test=Latin Modern Roman:protrusion=default|
 % \end{description}
 %
+% \subparagraph{Non-standard font features}
+% \textsf{luaotfload} defines some additional font feature not defined in
+% OpenType, currently three features are defined:
+%
+% \begin{itemize*}
+% \item |anum|: replaces European numbers with eastern Arabic numbers or
+% Persian numbers, depending on the value of |language|.
+% \item |tlig|: applies legacy \tex ligatures (|``''-- -- !` ?` <<>>|).
+% \item |trep|: applies legacy \tex replacements (|`'"|).
+% \end{itemize*}
+%
+% (For \xetex users: these last two are the equivalent of writing
+% |mapping=text-tex| using \xetex's input remapping feature.)
+%
+%
 % \section{Font names database}
 % \label{sec:fontdb}
 %

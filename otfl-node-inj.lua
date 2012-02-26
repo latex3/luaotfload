@@ -45,6 +45,7 @@ local cursbase = attributes.private('cursbase')
 local curscurs = attributes.private('curscurs')
 local cursdone = attributes.private('cursdone')
 local kernpair = attributes.private('kernpair')
+local ligacomp = attributes.private('ligacomp')
 local fontkern = attributes.private('fontkern')
 
 if context then
@@ -61,16 +62,21 @@ if context then
 
 end
 
+-- This injector has been tested by Idris Samawi Hamid (several arabic fonts as well as
+-- the rather demanding Husayni font), Khaled Hosny (latin and arabic) and Kaj Eigner
+-- (arabic, hebrew and thai) and myself (whatever font I come across). I'm pretty sure
+-- that this code is not 100% okay but examples are needed to figure things out.
+
 local cursives = { }
 local marks    = { }
 local kerns    = { }
 
--- currently we do gpos/kern in a bit inofficial way but when we
--- have the extra fields in glyphnodes to manipulate ht/dp/wd
--- explicitly i will provide an alternative; also, we can share
--- tables
+-- Currently we do gpos/kern in a bit inofficial way but when we have the extra fields in
+-- glyphnodes to manipulate ht/dp/wd explicitly I will provide an alternative; also, we
+-- can share tables.
 
--- for the moment we pass the r2l key ... volt/arabtype tests
+-- For the moment we pass the r2l key ... volt/arabtype tests .. idris: this needs
+-- checking with husayni (volt and fontforge).
 
 function injections.setcursive(start,nxt,factor,rlmode,exit,entry,tfmstart,tfmnext)
     local dx, dy = factor*(exit[1]-entry[1]), factor*(exit[2]-entry[2])
@@ -113,14 +119,16 @@ function injections.setkern(current,factor,rlmode,x,tfmchr)
     end
 end
 
-function injections.setmark(start,base,factor,rlmode,ba,ma,index) --ba=baseanchor, ma=markanchor
-    local dx, dy = factor*(ba[1]-ma[1]), factor*(ba[2]-ma[2])
-    local bound = has_attribute(base,markbase)
+function injections.setmark(start,base,factor,rlmode,ba,ma,index) -- ba=baseanchor, ma=markanchor
+    local dx, dy = factor*(ba[1]-ma[1]), factor*(ba[2]-ma[2])     -- the index argument is no longer used but when this
+    local bound = has_attribute(base,markbase)                    -- fails again we should pass it
+local index = 1
     if bound then
         local mb = marks[bound]
         if mb then
-            if not index then index = #mb + 1 end
-            mb[index] = { dx, dy }
+         -- if not index then index = #mb + 1 end
+index = #mb + 1
+            mb[index] = { dx, dy, rlmode }
             set_attribute(start,markmark,bound)
             set_attribute(start,markdone,index)
             return dx, dy, bound
@@ -128,6 +136,7 @@ function injections.setmark(start,base,factor,rlmode,ba,ma,index) --ba=baseancho
             report_injections("possible problem, U+%05X is base mark without data (id: %s)",base.char,bound)
         end
     end
+--     index = index or 1
     index = index or 1
     bound = #marks + 1
     set_attribute(base,markbase,bound)
@@ -174,7 +183,7 @@ local function trace(head)
                     end
                 else
                     m = m[1]
-                    report_injections("  markmark: bound=%s, dx=%s, dy=%s",mm,m[1] or "?",m[2] or "?")
+                    report_injections("  markmark: bound=%s, dx=%s, dy=%s",mm,m and m[1] or "?",m and m[2] or "?")
                 end
             end
             if cb then
@@ -192,7 +201,8 @@ end
 -- todo: reuse tables (i.e. no collection), but will be extra fields anyway
 -- todo: check for attribute
 
--- we can have a fast test on a font being processed, so we can check faster for marks etc
+-- We can have a fast test on a font being processed, so we can check faster for marks etc
+-- but I'll make a context variant anyway.
 
 function injections.handler(head,where,keep)
     local has_marks, has_cursives, has_kerns = next(marks), next(cursives), next(kerns)
@@ -330,6 +340,7 @@ function injections.handler(head,where,keep)
                     local p_markbase = has_attribute(p,markbase)
                     if p_markbase then
                         local mrks = marks[p_markbase]
+                        local nofmarks = #mrks
                         for n in traverse_id(glyph_code,p.next) do
                             local n_markmark = has_attribute(n,markmark)
                             if p_markbase == n_markmark then
@@ -343,7 +354,7 @@ function injections.handler(head,where,keep)
                                         -- that makes sense but we no longer do that so as a
                                         -- consequence the sign of p.width was changed (we need
                                         -- to keep an eye on it as we don't have that many fonts
-                                        -- that enter this branch .. i'm still not sure if this
+                                        -- that enter this branch .. I'm still not sure if this
                                         -- one is right
                                         local k = wx[p]
                                         if k then
@@ -366,9 +377,14 @@ function injections.handler(head,where,keep)
                                     else
                                         n.yoffset = n.yoffset + p.yoffset + d[2]
                                     end
+                                    if nofmarks == 1 then
+                                        break
+                                    else
+                                        nofmarks = nofmarks - 1
+                                    end
                                 end
                             else
-                                break
+                                -- KE: there can be <mark> <mkmk> <mark> sequences in ligatures
                             end
                         end
                     end
@@ -380,23 +396,32 @@ function injections.handler(head,where,keep)
             -- todo : combine
             if next(wx) then
                 for n, k in next, wx do
-                 -- only w can be nil, can be sped up when w == nil
-                    local rl, x, w, r2l = k[1], k[2] or 0, k[4] or 0, k[6]
-                    local wx = w - x
-                    if r2l then
-                        if wx ~= 0 then
-                            insert_node_before(head,n,newkern(wx))
+                 -- only w can be nil (kernclasses), can be sped up when w == nil
+                    local x, w = k[2] or 0, k[4]
+                    if w then
+                        local rl = k[1] -- r2l = k[6]
+                        local wx = w - x
+                        if rl < 0 then	-- KE: don't use r2l here
+                            if wx ~= 0 then
+                                insert_node_before(head,n,newkern(wx))
+                            end
+                            if x ~= 0 then
+                                insert_node_after (head,n,newkern(x))
+                            end
+                        else
+                            if x ~= 0 then
+                                insert_node_before(head,n,newkern(x))
+                            end
+                            if wx ~= 0 then
+                                insert_node_after(head,n,newkern(wx))
+                            end
                         end
-                        if x ~= 0 then
-                            insert_node_after (head,n,newkern(x))
-                        end
-                    else
-                        if x ~= 0 then
-                            insert_node_before(head,n,newkern(x))
-                        end
-                        if wx ~= 0 then
-                            insert_node_after(head,n,newkern(wx))
-                        end
+                    elseif x ~= 0 then
+                        -- this needs checking for rl < 0 but it is unlikely that a r2l script
+                        -- uses kernclasses between glyphs so we're probably safe (KE has a
+                        -- problematic font where marks interfere with rl < 0 in the previous
+                        -- case)
+                        insert_node_before(head,n,newkern(x))
                     end
                 end
             end
@@ -435,9 +460,9 @@ function injections.handler(head,where,keep)
                         end
                         if w then
                             -- copied from above
-                            local r2l = kk[6]
+                         -- local r2l = kk[6]
                             local wx = w - x
-                            if r2l then
+                            if rl < 0 then  -- KE: don't use r2l here
                                 if wx ~= 0 then
                                     insert_node_before(head,n,newkern(wx))
                                 end

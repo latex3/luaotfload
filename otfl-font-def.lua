@@ -214,17 +214,6 @@ function definers.resolve(specification)
     else
         specification.forced = specification.forced
     end
-    -- for the moment here (goodies set outside features)
-    local goodies = specification.goodies
-    if goodies and goodies ~= "" then
-        local normal = specification.features.normal
-        if not normal then
-            specification.features.normal = { goodies = goodies }
-        elseif not normal.goodies then
-            normal.goodies = goodies
-        end
-    end
-    --
     specification.hash = lower(specification.name .. ' @ ' .. constructors.hashfeatures(specification))
     if specification.sub and specification.sub ~= "" then
         specification.hash = specification.sub .. ' @ ' .. specification.hash

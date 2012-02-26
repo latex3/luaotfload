@@ -44,7 +44,6 @@ local setmetatableindex      = table.setmetatableindex
 -- will be directives
 
 constructors.dontembed       = allocate()
-constructors.mathactions     = { }
 constructors.autocleanup     = true
 constructors.namemode        = "fullpath" -- will be a function
 
@@ -89,7 +88,7 @@ constructors.keys = {
         finalized              = "boolean",
     },
     parameters = {
-        mathsize               = "scaledpoints",
+        mathsize               = "number",
         scriptpercentage       = "float",
         scriptscriptpercentage = "float",
         units                  = "cardinal",
@@ -276,6 +275,14 @@ function constructors.assignmathparameters(target,original) -- simple variant, n
         end
         target.mathparameters = targetmathparameters
     end
+end
+
+function constructors.beforecopyingcharacters(target,original)
+    -- can be used for additional tweaking
+end
+
+function constructors.aftercopyingcharacters(target,original)
+    -- can be used for additional tweaking
 end
 
 function constructors.enhanceparameters(parameters)
@@ -527,7 +534,7 @@ function constructors.scale(tfmdata,specification)
     --
     local italickey = "italic"
     --
-    -- some context specific trickery (we might move this to a plug in into here
+    -- some context specific trickery (this will move to a plugin)
     --
     if hasmath then
         if properties.mathitalics then
@@ -552,6 +559,8 @@ function constructors.scale(tfmdata,specification)
     end
     --
     -- end of context specific trickery
+    --
+    constructors.beforecopyingcharacters(target,tfmdata)
     --
     local sharedkerns = { }
     --
@@ -795,6 +804,9 @@ function constructors.scale(tfmdata,specification)
         end
         targetcharacters[unicode] = chr
     end
+    --
+    constructors.aftercopyingcharacters(target,tfmdata)
+    --
     return target
 end
 

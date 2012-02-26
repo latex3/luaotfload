@@ -49,7 +49,7 @@ local otf                = fonts.handlers.otf
 
 otf.glists               = { "gsub", "gpos" }
 
-otf.version              = 2.735 -- beware: also sync font-mis.lua
+otf.version              = 2.736 -- beware: also sync font-mis.lua
 otf.cache                = containers.define("fonts", "otf", otf.version, true)
 
 local fontdata           = fonts.hashes.identifiers
@@ -848,7 +848,7 @@ actions["analyze glyphs"] = function(data,filename,raw) -- maybe integrate this 
     local properties        = data.properties
     local hasitalics        = false
     local widths            = { }
-    local marks             = { }
+    local marks             = { } -- always present (saves checking)
     for unicode, description in next, descriptions do
         local glyph = description.glyph
         local italic = glyph.italic_correction
@@ -1029,7 +1029,8 @@ actions["reorganize subtables"] = function(data,filename,raw)
             for k=1,#dw do
                 local gk = dw[k]
                 local features = gk.features
-                if features and supported(features) then
+--              if features and supported(features) then
+                if not features or supported(features) then -- not always features !
                     local typ = gk.type
                     local chain = g_directions[typ] or 0
                     local subtables = gk.subtables
@@ -1057,7 +1058,6 @@ actions["reorganize subtables"] = function(data,filename,raw)
                     --
                     local name = gk.name
                     --
-                    local features = gk.features
                     if features then
                         -- scripts, tag, ismac
                         local f = { }

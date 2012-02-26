@@ -330,8 +330,8 @@ and the derived files
 % \begin{itemize*}
 % \item |anum|: replaces European numbers with eastern Arabic numbers or
 % Persian numbers, depending on the value of |language|.
-% \item |tlig|: applies legacy \tex ligatures (|``''-- --|).
-% \item |trep|: applies legacy \tex replacements (|`'|).
+% \item |tlig|: applies legacy \tex ligatures (|`` '' -- -- !` ?`|).
+% \item |trep|: applies legacy \tex replacements (|` ' "|).
 % \end{itemize*}
 %
 % (For \xetex users: these last two are the equivalent of writing
@@ -608,9 +608,12 @@ local tlig = {
     [0x201C] = {0x0060, 0x0060},         -- quotedblleft
     [0x201D] = {0x0027, 0x0027},         -- quotedblright
     [0x201E] = {0x002C, 0x002C},         -- quotedblbase
+    [0x00A1] = {0x0021, 0x0060},         -- exclamdown
+    [0x00BF] = {0x003F, 0x0060},         -- questiondown
 }
 
 local trep = {
+    [0x0022] = 0x201D, -- quotedblright
     [0x0027] = 0x2019, -- quoteleft
     [0x0060] = 0x2018, -- quoteright
 }

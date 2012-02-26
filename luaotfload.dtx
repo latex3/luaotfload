@@ -330,12 +330,11 @@ and the derived files
 % \begin{itemize*}
 % \item |anum|: replaces European numbers with eastern Arabic numbers or
 % Persian numbers, depending on the value of |language|.
-% \item |tlig|: applies legacy \tex ligatures (|`` '' -- -- !` ?`|).
-% \item |trep|: applies legacy \tex replacements (|` ' "|).
+% \item |tlig|: applies legacy \tex ligatures: |``|, |''|, |`|, |'|, |"|, |--|,
+% |---|, |!`| and |?`|.\footnote{For \xetex users: this is the equivalent of
+% writing |mapping=text-tex| using \xetex's input remapping feature.}
 % \end{itemize*}
 %
-% (For \xetex users: these last two are the equivalent of writing
-% |mapping=text-tex| using \xetex's input remapping feature.)
 %
 %
 % \section{Font names database}
@@ -600,14 +599,22 @@ caches.compilemethod = "both"
 %    Now overriding the \context's definition of |tlig| and |trep| features.
 %
 %    \begin{macrocode}
+local everywhere = { ["*"] = { ["*"] = true } }
+local noflags = { }
+
 local tlig = {
     [0x2013] = {0x002D, 0x002D},         -- endash
     [0x2014] = {0x002D, 0x002D, 0x002D}, -- emdash
     [0x201C] = {0x2018, 0x2018},         -- quotedblleft
     [0x201D] = {0x2019, 0x2019},         -- quotedblright
+    [0x201E] = {0x002C, 0x002C},         -- quotedblbase
+    [0x00A1] = {0x0021, 0x2018},         -- exclamdown
+    [0x00BF] = {0x003F, 0x2018},         -- questiondown
+}
+
+local tlig2 = {
     [0x201C] = {0x0060, 0x0060},         -- quotedblleft
     [0x201D] = {0x0027, 0x0027},         -- quotedblright
-    [0x201E] = {0x002C, 0x002C},         -- quotedblbase
     [0x00A1] = {0x0021, 0x0060},         -- exclamdown
     [0x00BF] = {0x003F, 0x0060},         -- questiondown
 }
@@ -632,8 +639,17 @@ local tlig_specification = {
     flags    = noflags,
 }
 
-fonts.handlers.otf.addfeature("tlig", tlig_specification)
-fonts.handlers.otf.addfeature("trep", trep_specification)
+local tlig2_specification = {
+    type     = "ligature",
+    features = everywhere,
+    data     = tlig2,
+    flags    = noflags,
+}
+
+fonts.handlers.otf.addfeature("tlig",
+     { tlig_specification, tlig2_specification, trep_specification }
+)
+fonts.handlers.otf.addfeature("trep", {})
 %    \end{macrocode}
 %
 %    we provide a callback for patching fonts on the fly, to be used by other

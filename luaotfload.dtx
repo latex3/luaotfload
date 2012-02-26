@@ -188,7 +188,7 @@ and the derived files
 % contain a lot of characters, and additional functionalities like ligatures,
 % old-style numbers, small capitals, etc., and support more complex writing
 % systems like Arabic and Indic\footnote{Unfortunately, \textsf{luaotfload}
-% doesn't support Indic scripts right now} scripts.  They are widely deployed
+% doesn't support Indic scripts right now.} scripts.  They are widely deployed
 % and available for all modern operating systems and are becoming the de facto
 % standard fonts for advanced text layout.  Until now the only way to use them
 % directly in the \tex world was by using them with \xetex.
@@ -295,7 +295,7 @@ and the derived files
 % OpenType features of the font on fly. Features defined in a feature file,
 % after being applied to the font, can be enabled/disabled like any other
 % feature. The syntax is documented in Adobe's OpenType Feature File
-% Specification\footnote{\url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}}.
+% Specification.\footnote{\url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}}
 %
 % For example, to set a |tkrn| feature from |mykern.fea| file:
 %
@@ -316,9 +316,9 @@ and the derived files
 % tables of protrusion and expansion values; see the end of |otfl-fonts-ext.lua|
 % file for an example of such tables. The only predefined value is |default|.
 %
-% For example, to enable default protrusion\footnote{You also need to set
+% For example, to enable default protrusion:\footnote{You also need to set
 % |\pdfprotrudechars2 \pdfadjustspacing2| to activate protrusion and expansion,
-% respectively. See \pdftex manual for details}:
+% respectively. See \pdftex manual for details.}
 %
 % |\font\test=Latin Modern Roman:protrusion=default|
 % \end{description}
@@ -354,9 +354,9 @@ and the derived files
 % However, it is sometimes desirable to update the database manually, so
 % \textsf{luaotfload} provides a |mkluatexfontdb| utility to manually update
 % the database. |mkluatexfontdb| is a lua script that can be either run
-% directly or as an argument to |texlua|, depending on your system\footnote{On
+% directly or as an argument to |texlua|, depending on your system.\footnote{On
 % MS Windows it can be run either by calling the wrapper application
-% |mkluatexfontdb.exe| or with |texlua.exe mkluatexfontdb.lua|}.
+% |mkluatexfontdb.exe| or with |texlua.exe mkluatexfontdb.lua|.}
 %
 % The first time the database is generated may take quite some time to process
 % every font on your computer.  This is particularly noticeable if it occurs

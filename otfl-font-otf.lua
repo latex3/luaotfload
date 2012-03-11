@@ -1137,6 +1137,7 @@ local function t_hashed(t,cache)
         local ht = { }
         for i=1,#t do
             local ti = t[i]
+print(ti)
             local tih = cache[ti]
             if not tih then
                 tih = { }

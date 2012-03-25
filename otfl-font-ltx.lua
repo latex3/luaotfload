@@ -45,7 +45,7 @@ end
 local defaults = {
     dflt = {
         "ccmp", "locl", "rlig", "liga", "clig",
-        "kern", "mark", "mkmk",
+        "kern", "mark", "mkmk", 'itlc',
     },
     arab = {
         "ccmp", "locl", "isol", "fina", "fin2",

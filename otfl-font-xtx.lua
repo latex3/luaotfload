@@ -91,7 +91,7 @@ otf.tables = otf.tables or { }
 otf.tables.defaults = {
     dflt = {
         "ccmp", "locl", "rlig", "liga", "clig",
-        "kern", "mark", "mkmk",
+        "kern", "mark", "mkmk", "itlc",
     },
     arab = {
         "ccmp", "locl", "isol", "fina", "fin2",

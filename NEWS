@@ -1,6 +1,10 @@
 Change History
 --------------
 
+2012/03/27, luaotfload v1.26:
+    * Enable setting italic correction values by default
+    * Fix finding demibold italic fonts
+
 2011/04/21, luaotfload v1.25:
     * Fix bug loading *.dfont fonts
     * Misc. documentation fixes

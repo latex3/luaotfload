@@ -258,6 +258,24 @@ end
 --     return tfmdata
 -- end
 
+local function checkembedding(tfmdata)
+    local properties = tfmdata.properties
+    local embedding
+    if directive_embedall then
+        embedding = "full"
+    elseif properties and properties.filename and constructors.dontembed[properties.filename] then
+        embedding = "no"
+    else
+        embedding = "subset"
+    end
+    if properties then
+        properties.embedding = embedding
+    else
+        tfmdata.properties = { embedding = embedding }
+    end
+    tfmdata.embedding = embedding
+end
+
 function definers.loadfont(specification)
     local hash = constructors.hashinstance(specification)
     local tfmdata = loadedfonts[hash] -- hashes by size !
@@ -287,21 +305,8 @@ function definers.loadfont(specification)
             end
         end
         if tfmdata then
-            local properties = tfmdata.properties
-            local embedding
-            if directive_embedall then
-                embedding = "full"
-            elseif properties and properties.filename and constructors.dontembed[properties.filename] then
-                embedding = "no"
-            else
-                embedding = "subset"
-            end
-            if properties then
-                properties.embedding = embedding
-            else
-                tfmdata.properties = { embedding = embedding }
-            end
             tfmdata = definers.applypostprocessors(tfmdata)
+            checkembedding(tfmdata) -- todo: general postprocessor
             loadedfonts[hash] = tfmdata
             designsizes[specification.hash] = tfmdata.parameters.designsize
         end

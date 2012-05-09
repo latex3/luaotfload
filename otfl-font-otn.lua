@@ -2359,55 +2359,59 @@ local function prepare_lookups(tfmdata)
 
         local description = descriptions[unicode]
 
-        local lookups = description.slookups
-        if lookups then
-            for lookupname, lookupdata in next, lookups do
-                action[lookuptypes[lookupname]](lookupdata,lookupname,unicode,lookuphash)
-            end
-        end
+        if description then
 
-        local lookups = description.mlookups
-        if lookups then
-            for lookupname, lookuplist in next, lookups do
-                local lookuptype = lookuptypes[lookupname]
-                for l=1,#lookuplist do
-                    local lookupdata = lookuplist[l]
-                    action[lookuptype](lookupdata,lookupname,unicode,lookuphash)
+            local lookups = description.slookups
+            if lookups then
+                for lookupname, lookupdata in next, lookups do
+                    action[lookuptypes[lookupname]](lookupdata,lookupname,unicode,lookuphash)
                 end
             end
-        end
 
-        local list = description.kerns
-        if list then
-            for lookup, krn in next, list do  -- ref to glyph, saves lookup
-                local target = lookuphash[lookup]
-                if target then
-                    target[unicode] = krn
-                else
-                    lookuphash[lookup] = { [unicode] = krn }
+            local lookups = description.mlookups
+            if lookups then
+                for lookupname, lookuplist in next, lookups do
+                    local lookuptype = lookuptypes[lookupname]
+                    for l=1,#lookuplist do
+                        local lookupdata = lookuplist[l]
+                        action[lookuptype](lookupdata,lookupname,unicode,lookuphash)
+                    end
                 end
             end
-        end
 
-        local list = description.anchors
-        if list then
-            for typ, anchors in next, list do -- types
-                if typ == "mark" or typ == "cexit" then -- or entry?
-                    for name, anchor in next, anchors do
-                        local lookups = anchor_to_lookup[name]
-                        if lookups then
-                            for lookup, _ in next, lookups do
-                                local target = lookuphash[lookup]
-                                if target then
-                                    target[unicode] = anchors
-                                else
-                                    lookuphash[lookup] = { [unicode] = anchors }
+            local list = description.kerns
+            if list then
+                for lookup, krn in next, list do  -- ref to glyph, saves lookup
+                    local target = lookuphash[lookup]
+                    if target then
+                        target[unicode] = krn
+                    else
+                        lookuphash[lookup] = { [unicode] = krn }
+                    end
+                end
+            end
+
+            local list = description.anchors
+            if list then
+                for typ, anchors in next, list do -- types
+                    if typ == "mark" or typ == "cexit" then -- or entry?
+                        for name, anchor in next, anchors do
+                            local lookups = anchor_to_lookup[name]
+                            if lookups then
+                                for lookup, _ in next, lookups do
+                                    local target = lookuphash[lookup]
+                                    if target then
+                                        target[unicode] = anchors
+                                    else
+                                        lookuphash[lookup] = { [unicode] = anchors }
+                                    end
                                 end
                             end
                         end
                     end
                 end
             end
+
         end
 
     end

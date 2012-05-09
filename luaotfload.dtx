@@ -625,31 +625,29 @@ local trep = {
     [0x0060] = 0x2018, -- quoteright
 }
 
-local trep_specification = {
-    type      = "substitution",
-    features  = everywhere,
-    data      = trep,
-    flags     = noflags,
-}
-
 local tlig_specification = {
-    type     = "ligature",
-    features = everywhere,
-    data     = tlig,
-    flags    = noflags,
+    {
+        type      = "substitution",
+        features  = everywhere,
+        data      = trep,
+        flags     = { },
+    },
+    {
+        type     = "ligature",
+        features = everywhere,
+        data     = tlig,
+        flags    = { },
+    },
+    {
+        type     = "ligature",
+        features = everywhere,
+        data     = tlig2,
+        flags    = { },
+    },
 }
 
-local tlig2_specification = {
-    type     = "ligature",
-    features = everywhere,
-    data     = tlig2,
-    flags    = noflags,
-}
-
-fonts.handlers.otf.addfeature("tlig",
-     { tlig_specification, tlig2_specification, trep_specification }
-)
-fonts.handlers.otf.addfeature("trep", {})
+fonts.handlers.otf.addfeature("tlig", tlig_specification)
+fonts.handlers.otf.addfeature("trep", { })
 %    \end{macrocode}
 %
 %    we provide a callback for patching fonts on the fly, to be used by other

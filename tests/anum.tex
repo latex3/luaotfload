@@ -1,12 +1,17 @@
 \input luaotfload.sty
 
-\font\testa={name:dejavusans:script=arab;language=ara;+anum}
-\font\testp={name:dejavusans:script=arab;language=far;+anum}
-\font\tests={name:dejavusans:script=arab;language=snd;+anum}
-\font\testu={name:dejavusans:script=arab;language=urd;+anum}
+\font\testd={name:amiri:script=arab;language=dflt;+anum}
+\font\testa={name:amiri:script=arab;language=ara;+anum}
+\font\testp={name:amiri:script=arab;language=far;+anum}
+\font\tests={name:amiri:script=arab;language=snd;+anum}
+\font\testu={name:amiri:script=arab;language=urd;+anum}
+\font\testx={name:amiri:script=arab;language=xxx;+anum}
 
-\testa 0123456789\par
-\testp 0123456789\par
-\tests 0123456789\par
-\testu 0123456789\par
+\def\test{\luatextextdir TRT ضرب 0123456789}
+\testd \test\par
+\testa \test\par
+\testp \test\par
+\tests \test\par
+\testu \test\par
+\testx \test\par
 \bye

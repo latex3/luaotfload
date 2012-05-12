@@ -15,8 +15,8 @@ SOURCE = $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT)
 # test files
 TESTDIR = tests
 TESTFILES = $(wildcard $(TESTDIR)/*.tex)
-TESTFILE_SYS = $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
-TESTFILES_TL = $(filter-out $(TESTFILE_SYS), $(TESTFILES))
+TESTFILES_SYS = $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
+TESTFILES_TL = $(filter-out $(TESTFILES_SYS), $(TESTFILES))
 TESTINPUTS = '.;..;$$TEXMF/tex/{luatex,plain,generic,}//'
 
 # Files grouped by installation location
@@ -90,10 +90,12 @@ check: $(RUNFILES) $(TESTFILES_TL)
 	    > /dev/null || exit $$?; \
 	    done
 
-check-all: $(TESTFILE_SYS) check
-	@echo "check: luatex $<"
-	@cd $(TESTDIR); env TEXINPUTS=$(TESTINPUTS) luatex --interaction=batchmode ../$< \
-	    >/dev/null
+check-all: $(TESTFILES_SYS) check
+	@cd $(TESTDIR); for f in $(TESTFILES_SYS); do \
+	    echo "check: luatex $$f"; \
+	    env TEXINPUTS=$(TESTINPUTS) luatex --interaction=batchmode ../$$f \
+	    > /dev/null || exit $$?; \
+	    done
 
 manifest: 
 	@echo "Source files:"

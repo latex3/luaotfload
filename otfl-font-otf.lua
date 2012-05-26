@@ -49,7 +49,7 @@ local otf                = fonts.handlers.otf
 
 otf.glists               = { "gsub", "gpos" }
 
-otf.version              = 2.736 -- beware: also sync font-mis.lua
+otf.version              = 2.737 -- beware: also sync font-mis.lua
 otf.cache                = containers.define("fonts", "otf", otf.version, true)
 
 local fontdata           = fonts.hashes.identifiers
@@ -1338,12 +1338,15 @@ local function check_variants(unicode,the_variants,splitter,unicodes)
             local g = glyphs[i]
             if done[g] then
                 report_otf("skipping cyclic reference U+%05X in math variant U+%05X",g,unicode)
-            elseif n == 0 then
-                n = 1
-                variants = { g }
             else
-                n = n + 1
-                variants[n] = g
+                if n == 0 then
+                    n = 1
+                    variants = { g }
+                else
+                    n = n + 1
+                    variants[n] = g
+                end
+                done[g] = true
             end
         end
         if n == 0 then

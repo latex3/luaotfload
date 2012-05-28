@@ -1,6 +1,9 @@
 Change History
 --------------
 
+2012/05/28, luaotfload v1.27:
+    * Fix "endless loop in charlist" with some OpenType math fonts
+
 2012/03/27, luaotfload v1.26:
     * Enable setting italic correction values by default
     * Fix finding demibold italic fonts

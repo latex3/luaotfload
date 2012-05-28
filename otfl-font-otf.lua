@@ -1560,26 +1560,28 @@ function otf.copy_to_tfm(data,cache_id) -- we can save a copy when we reorder th
                 -- we have them shared because that packs nicer
                 -- we could prepare the variants and keep 'm in descriptions
                 if m then
-                    local variants, parts, c = m.horiz_variants, m.horiz_parts, char
+                    local variants, parts, c, uc = m.horiz_variants, m.horiz_parts, char, u
                     if variants then
                         for n in gmatch(variants,"[^ ]+") do
                             local un = unicodes[n]
-                            if un and u ~= un then
+                            if un and uc ~= un then
                                 c.next = un
                                 c = characters[un]
+				uc = un
                             end
                         end
                         c.horiz_variants = parts
                     elseif parts then
                         c.horiz_variants = parts
                     end
-                    local variants, parts, c = m.vert_variants, m.vert_parts, char
+                    local variants, parts, c, uc = m.vert_variants, m.vert_parts, char, u
                     if variants then
                         for n in gmatch(variants,"[^ ]+") do
                             local un = unicodes[n]
-                            if un and u ~= un then
+                            if un and uc ~= un then
                                 c.next = un
                                 c = characters[un]
+				uc = un
                             end
                         end -- c is now last in chain
                         c.vert_variants = parts

@@ -596,58 +596,52 @@ fonts.mode = "node"
 caches.compilemethod = "both"
 %    \end{macrocode}
 %
-%    Now overriding the \context's definition of |tlig| and |trep| features.
+%    Now overriding the \context's definition of |tlig| and |trep| features,
+%    using code points instead of glyph names to make it font independent.
 %
 %    \begin{macrocode}
 local everywhere = { ["*"] = { ["*"] = true } }
-local noflags = { }
 
 local tlig = {
-    [0x2013] = {0x002D, 0x002D},         -- endash
-    [0x2014] = {0x002D, 0x002D, 0x002D}, -- emdash
-    [0x201C] = {0x2018, 0x2018},         -- quotedblleft
-    [0x201D] = {0x2019, 0x2019},         -- quotedblright
-    [0x201E] = {0x002C, 0x002C},         -- quotedblbase
-    [0x00A1] = {0x0021, 0x2018},         -- exclamdown
-    [0x00BF] = {0x003F, 0x2018},         -- questiondown
-}
-
-local tlig2 = {
-    [0x201C] = {0x0060, 0x0060},         -- quotedblleft
-    [0x201D] = {0x0027, 0x0027},         -- quotedblright
-    [0x00A1] = {0x0021, 0x0060},         -- exclamdown
-    [0x00BF] = {0x003F, 0x0060},         -- questiondown
-}
-
-local trep = {
-    [0x0022] = 0x201D, -- quotedblright
-    [0x0027] = 0x2019, -- quoteleft
-    [0x0060] = 0x2018, -- quoteright
-}
-
-local tlig_specification = {
     {
         type      = "substitution",
         features  = everywhere,
-        data      = trep,
+        data      = {
+            [0x0022] = 0x201D,                   -- quotedblright
+            [0x0027] = 0x2019,                   -- quoteleft
+            [0x0060] = 0x2018,                   -- quoteright
+        },
         flags     = { },
     },
     {
         type     = "ligature",
         features = everywhere,
-        data     = tlig,
+        data     = {
+            [0x2013] = {0x002D, 0x002D},         -- endash
+            [0x2014] = {0x002D, 0x002D, 0x002D}, -- emdash
+            [0x201C] = {0x2018, 0x2018},         -- quotedblleft
+            [0x201D] = {0x2019, 0x2019},         -- quotedblright
+            [0x201E] = {0x002C, 0x002C},         -- quotedblbase
+            [0x00A1] = {0x0021, 0x2018},         -- exclamdown
+            [0x00BF] = {0x003F, 0x2018},         -- questiondown
+        },
         flags    = { },
     },
     {
         type     = "ligature",
         features = everywhere,
-        data     = tlig2,
+        data     = {
+            [0x201C] = {0x0060, 0x0060},         -- quotedblleft
+            [0x201D] = {0x0027, 0x0027},         -- quotedblright
+            [0x00A1] = {0x0021, 0x0060},         -- exclamdown
+            [0x00BF] = {0x003F, 0x0060},         -- questiondown
+        },
         flags    = { },
     },
 }
 
-fonts.handlers.otf.addfeature("tlig", tlig_specification)
-fonts.handlers.otf.addfeature("trep", { })
+fonts.handlers.otf.addfeature("tlig", tlig)
+fonts.handlers.otf.addfeature("trep", { }) -- empty, all in tlig now
 %    \end{macrocode}
 %
 %    And overriding the \context's definition of |anum|.

@@ -118,10 +118,10 @@ function names.resolve(_,_,specification) -- the 1st two parameters are used by 
         if data.mappings then
             local found = { }
             for _,face in next, data.mappings do
-                local family    = sanitize(face.names.family)
-                local subfamily = sanitize(face.names.subfamily)
-                local fullname  = sanitize(face.names.fullname)
-                local psname    = sanitize(face.names.psname)
+                local family    = sanitize(face.names and face.names.family)
+                local subfamily = sanitize(face.names and face.names.subfamily)
+                local fullname  = sanitize(face.names and face.names.fullname)
+                local psname    = sanitize(face.names and face.names.psname)
                 local fontname  = sanitize(face.fontname)
                 local pfullname = sanitize(face.fullname)
                 local optsize, dsnsize, maxsize, minsize

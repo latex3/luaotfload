@@ -85,7 +85,7 @@ local remapper = {
 }
 
 function resolvers.findfile(name,fileformat)
-    name = string.gsub(name,"\\","\/")
+    name = string.gsub(name,"\\","/")
     fileformat = fileformat and string.lower(fileformat)
     local found = kpse.find_file(name,(fileformat and fileformat ~= "" and (remapper[fileformat] or fileformat)) or file.extname(name,"tex"))
     if not found or found == "" then

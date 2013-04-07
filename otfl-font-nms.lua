@@ -557,8 +557,8 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     else
         logs.info("Scanning TEXMF and OS fonts...")
     end
-    local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^\.", "")
-    fontdirs = fontdirs .. expandpath("$TTFONTS"):gsub("^\.", "")
+    local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^%.", "")
+    fontdirs = fontdirs .. expandpath("$TTFONTS"):gsub("^%.", "")
     if not fontdirs:is_empty() then
         for _,d in next, splitpath(fontdirs) do
             scan_dir(d, fontnames, newfontnames, true)

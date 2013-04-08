@@ -11,6 +11,14 @@ kpse.set_program_name("luatex")
 
 function string.quoted(s) return string.format("%q",s) end -- XXX
 
+-- First we need to be able to load module (code copied from
+-- luatexbase-loader.sty):
+local file = "luatexbase.loader.lua"
+local path = assert(kpse.find_file(file, 'tex'),
+  "File '"..file.."' not found")
+texio.write_nl("("..path..")")
+dofile(path)
+
 require("lualibs")
 require("otfl-basics-gen.lua")
 require("otfl-font-nms")

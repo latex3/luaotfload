@@ -92,11 +92,16 @@ end
 
 --[[--
   it all boils down to this: we load otfl-fonts.lua
-  which takes care loading the merged file.
+  which takes care of loading the merged file.
   that’s it, go thank Hans!
 --]]--
 
---luaotfload.loadmodule("fonts.lua", "luatex")
+_G.non_generic_context = { luatex_fonts = {
+    load_before     = "otfl-fonts-merged.lua",
+     -- load_after      = nil, --- TODO, this is meant for callbacks
+    skip_loading    = true,
+}}
+
 luaotfload.loadmodule("fonts.lua")
 
 --- now load luatexbase (from the TEX end)

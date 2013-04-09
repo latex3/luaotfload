@@ -19,10 +19,22 @@ if not modules then modules = { } end modules ['luatex-fonts'] = {
 
 utf = utf or unicode.utf8
 
+-- We have some (global) hooks (for latex):
+
+if not non_generic_context then
+    non_generic_context = { }
+end
+
+if not non_generic_context.luatex_fonts then
+    non_generic_context.luatex_fonts = {
+     -- load_before  = nil,
+     -- load_after   = nil,
+     -- skip_loading = nil,
+    }
+end
+
 if not generic_context then
-
     generic_context  = { }
-
 end
 
 if not generic_context.push_namespaces then
@@ -104,101 +116,112 @@ local function loadmodule(name,continue)
     end
 end
 
---loadmodule('luatex-fonts-merged.lua',true) -- you might comment this line
-loadmodule('otfl-fonts-merged.lua',true)
+if non_generic_context.luatex_fonts.load_before then
+    loadmodule(non_generic_context.luatex_fonts.load_before,true)
+end
 
-if fonts then
+if non_generic_context.luatex_fonts.skip_loading ~= true then
 
-    if not fonts._merge_loaded_message_done_ then
-        texio.write_nl("log", "!")
-        texio.write_nl("log", "! I am using the merged version of 'luatex-fonts.lua' here. If")
-        texio.write_nl("log", "! you run into problems or experience unexpected behaviour, and")
-        texio.write_nl("log", "! if you have ConTeXt installed you can try to delete the file")
-        texio.write_nl("log", "! 'luatex-font-merged.lua' as I might then use the possibly")
-        texio.write_nl("log", "! updated libraries. The merged version is not supported as it")
-        texio.write_nl("log", "! is a frozen instance. Problems can be reported to the ConTeXt")
-        texio.write_nl("log", "! mailing list.")
-        texio.write_nl("log", "!")
+    loadmodule('luatex-fonts-merged.lua',true)
+
+    if fonts then
+
+        if not fonts._merge_loaded_message_done_ then
+            texio.write_nl("log", "!")
+            texio.write_nl("log", "! I am using the merged version of 'luatex-fonts.lua' here. If")
+            texio.write_nl("log", "! you run into problems or experience unexpected behaviour, and")
+            texio.write_nl("log", "! if you have ConTeXt installed you can try to delete the file")
+            texio.write_nl("log", "! 'luatex-font-merged.lua' as I might then use the possibly")
+            texio.write_nl("log", "! updated libraries. The merged version is not supported as it")
+            texio.write_nl("log", "! is a frozen instance. Problems can be reported to the ConTeXt")
+            texio.write_nl("log", "! mailing list.")
+            texio.write_nl("log", "!")
+        end
+
+        fonts._merge_loaded_message_done_ = true
+
+    else
+
+        -- The following helpers are a bit overkill but I don't want to mess up context code for the
+        -- sake of general generality. Around version 1.0 there will be an official api defined.
+        --
+        -- So, I will strip these libraries and see what is really needed so that we don't have this
+        -- overhead in the generic modules. The next section is only there for the packager, so stick
+        -- to using luatex-fonts with luatex-fonts-merged.lua and forget about the rest. The following
+        -- list might change without prior notice (for instance because we shuffled code around).
+
+        loadmodule("l-lua.lua")
+        loadmodule("l-lpeg.lua")
+        loadmodule("l-function.lua")
+        loadmodule("l-string.lua")
+        loadmodule("l-table.lua")
+        loadmodule("l-io.lua")
+        ----------("l-number.lua")
+        ----------("l-set.lua")
+        ----------("l-os.lua")
+        loadmodule("l-file.lua")
+        ----------("l-md5.lua")
+        ----------("l-url.lua")
+        ----------("l-dir.lua")
+        loadmodule("l-boolean.lua")
+        ----------("l-unicode.lua")
+        loadmodule("l-math.lua")
+        loadmodule("util-str.lua")
+
+
+        -- The following modules contain code that is either not used at all outside context or will fail
+        -- when enabled due to lack of other modules.
+
+        -- First we load a few helper modules. This is about the miminum needed to let the font modules do
+        -- their work. Don't depend on their functions as we might strip them in future versions of his
+        -- generic variant.
+
+        loadmodule('luatex-basics-gen.lua')
+        loadmodule('data-con.lua')
+
+        -- We do need some basic node support. The code in there is not for general use as it might change.
+
+        loadmodule('luatex-basics-nod.lua')
+
+        -- Now come the font modules that deal with traditional tex fonts as well as open type fonts. We only
+        -- support OpenType fonts here.
+        --
+        -- The font database file (if used at all) must be put someplace visible for kpse and is not shared
+        -- with context. The mtx-fonts script can be used to genate this file (using the --names option).
+
+        -- in 2013/14 we will merge/move some generic files into luatex-fonts-* files (copies) so that
+        -- intermediate updates of context not interfere
+
+        loadmodule('font-ini.lua')
+        loadmodule('font-con.lua')
+        loadmodule('luatex-fonts-enc.lua') -- will load font-age on demand
+        loadmodule('font-cid.lua')
+        loadmodule('font-map.lua')         -- for loading lum file (will be stripped)
+        loadmodule('luatex-fonts-syn.lua') -- deals with font names (synonyms)
+        loadmodule('luatex-fonts-tfm.lua')
+        loadmodule('font-oti.lua')
+        loadmodule('font-otf.lua')
+        loadmodule('font-otb.lua')
+        loadmodule('node-inj.lua')         -- will be replaced (luatex >= .70)
+        loadmodule('font-ota.lua')
+        loadmodule('font-otn.lua')
+        ----------('luatex-fonts-chr.lua')
+        loadmodule('luatex-fonts-lua.lua')
+        loadmodule('font-def.lua')
+        loadmodule('luatex-fonts-def.lua')
+        loadmodule('luatex-fonts-ext.lua') -- some extensions
+
+        -- We need to plug into a callback and the following module implements the handlers. Actual plugging
+        -- in happens later.
+
+        loadmodule('luatex-fonts-cbk.lua')
+
     end
 
-    fonts._merge_loaded_message_done_ = true
+end
 
-else
-
-    -- The following helpers are a bit overkill but I don't want to mess up context code for the
-    -- sake of general generality. Around version 1.0 there will be an official api defined.
-    --
-    -- So, I will strip these libraries and see what is really needed so that we don't have this
-    -- overhead in the generic modules. The next section is only there for the packager, so stick
-    -- to using luatex-fonts with luatex-fonts-merged.lua and forget about the rest. The following
-    -- list might change without prior notice (for instance because we shuffled code around).
-
-    loadmodule("l-lua.lua")
-    loadmodule("l-lpeg.lua")
-    loadmodule("l-function.lua")
-    loadmodule("l-string.lua")
-    loadmodule("l-table.lua")
-    loadmodule("l-io.lua")
-    ----------("l-number.lua")
-    ----------("l-set.lua")
-    ----------("l-os.lua")
-    loadmodule("l-file.lua")
-    ----------("l-md5.lua")
-    ----------("l-url.lua")
-    ----------("l-dir.lua")
-    loadmodule("l-boolean.lua")
-    ----------("l-unicode.lua")
-    loadmodule("l-math.lua")
-    loadmodule("util-str.lua")
-
-
-    -- The following modules contain code that is either not used at all outside context or will fail
-    -- when enabled due to lack of other modules.
-
-    -- First we load a few helper modules. This is about the miminum needed to let the font modules do
-    -- their work. Don't depend on their functions as we might strip them in future versions of his
-    -- generic variant.
-
-    loadmodule('luatex-basics-gen.lua')
-    loadmodule('data-con.lua')
-
-    -- We do need some basic node support. The code in there is not for general use as it might change.
-
-    loadmodule('luatex-basics-nod.lua')
-
-    -- Now come the font modules that deal with traditional tex fonts as well as open type fonts. We only
-    -- support OpenType fonts here.
-    --
-    -- The font database file (if used at all) must be put someplace visible for kpse and is not shared
-    -- with context. The mtx-fonts script can be used to genate this file (using the --names option).
-
-    -- in 2013/14 we will merge/move some generic files into luatex-fonts-* files (copies) so that
-    -- intermediate updates of context not interfere
-
-    loadmodule('font-ini.lua')
-    loadmodule('font-con.lua')
-    loadmodule('luatex-fonts-enc.lua') -- will load font-age on demand
-    loadmodule('font-cid.lua')
-    loadmodule('font-map.lua')         -- for loading lum file (will be stripped)
-    loadmodule('luatex-fonts-syn.lua') -- deals with font names (synonyms)
-    loadmodule('luatex-fonts-tfm.lua')
-    loadmodule('font-oti.lua')
-    loadmodule('font-otf.lua')
-    loadmodule('font-otb.lua')
-    loadmodule('node-inj.lua')         -- will be replaced (luatex >= .70)
-    loadmodule('font-ota.lua')
-    loadmodule('font-otn.lua')
-    ----------('luatex-fonts-chr.lua')
-    loadmodule('luatex-fonts-lua.lua')
-    loadmodule('font-def.lua')
-    loadmodule('luatex-fonts-def.lua')
-    loadmodule('luatex-fonts-ext.lua') -- some extensions
-
-    -- We need to plug into a callback and the following module implements the handlers. Actual plugging
-    -- in happens later.
-
-    loadmodule('luatex-fonts-cbk.lua')
-
+if non_generic_context.luatex_fonts.load_after then
+    loadmodule(non_generic_context.luatex_fonts.load_after,true)
 end
 
 resolvers.loadmodule = loadmodule

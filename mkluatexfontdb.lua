@@ -46,7 +46,7 @@ Valid options:
 
 The output database file is named otfl-names(.lua and .luc) and is placed under:
 
-   %s"
+   %s
 ]], name, names.path.dir))
 end
 

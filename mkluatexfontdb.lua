@@ -44,7 +44,7 @@ Valid options:
   -V --version                 print version and exit
   -h --help                    print this message
 
-The output database file is named otfl-fonts.lua and is placed under:
+The output database file is named otfl-names(.lua and .luc) and is placed under:
 
    %s"
 ]], name, names.path.dir))

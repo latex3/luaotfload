@@ -30,13 +30,14 @@ else
    end
 end
 
-local splitpath, expandpath = file.split_path, kpse.expand_path
-local glob, basename        = dir.glob, file.basename
-local extname               = file.extname
-local upper, lower, format  = string.upper, string.lower, string.format
-local gsub, match, rpadd    = string.gsub, string.match, string.rpadd
-local gmatch, sub, find     = string.gmatch, string.sub, string.find
-local utfgsub               = unicode.utf8.gsub
+local splitpath, collapsepath = file.splitpath, file.collapsepath
+local expandpath              = kpse.expand_path
+local glob, basename          = dir.glob, file.basename
+local extname                 = file.extname
+local upper, lower, format    = string.upper, string.lower, string.format
+local gsub, match, rpadd      = string.gsub, string.match, string.rpadd
+local gmatch, sub, find       = string.gmatch, string.sub, string.find
+local utfgsub                 = unicode.utf8.gsub
 
 local trace_short    = false --tracing adapted to rebuilding of the database inside a document
 local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
@@ -430,7 +431,7 @@ local function path_normalize(path)
             end
         end
     end
-    path = file.collapse_path(path)
+    path = collapsepath(path)
     return path
 end
 

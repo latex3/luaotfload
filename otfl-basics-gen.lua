@@ -254,7 +254,8 @@ function caches.compile(data,luaname,lucname)
         if d and d ~= "" then
             local f = io.open(lucname,'w')
             if f then
-                local s = loadstring(d)
+                local s
+                if _G["loadstring"] then s=loadstring(d) else s=load(d) end
                 f:write(string.dump(s))
                 f:close()
             end

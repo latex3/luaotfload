@@ -104,7 +104,8 @@ local function loadmodule(name,continue)
     end
 end
 
-loadmodule('luatex-fonts-merged.lua',true) -- you might comment this line
+--loadmodule('luatex-fonts-merged.lua',true) -- you might comment this line
+loadmodule('otfl-fonts-merged.lua',true)
 
 if fonts then
 

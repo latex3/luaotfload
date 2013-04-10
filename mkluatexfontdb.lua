@@ -13,13 +13,15 @@ function string.quoted(s) return string.format("%q",s) end -- XXX
 
 -- First we need to be able to load module (code copied from
 -- luatexbase-loader.sty):
-local file = "luatexbase.loader.lua"
-local path = assert(kpse.find_file(file, 'tex'),
-  "File '"..file.."' not found")
+local loader_file = "luatexbase.loader.lua"
+local path = assert(kpse.find_file(loader_file, 'tex'),
+  "File '"..loader_file.."' not found")
 texio.write_nl("("..path..")")
 dofile(path)
 
 require("lualibs")
+--- TODO we seriously need recent lualibs
+file.splitpath, file.collapsepath = file.split_path, file.collapse_path
 require("otfl-basics-gen.lua")
 require("otfl-font-nms")
 require("alt_getopt")

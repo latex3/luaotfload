@@ -34,6 +34,13 @@ local luatexbase = luatexbase
 local type, next, dofile = type, next, dofile
 local stringfind = string.find
 
+local add_to_callback, create_callback =
+      luatexbase.add_to_callback, luatexbase.create_callback
+local reset_callback, call_callback =
+      luatexbase.reset_callback, luatexbase.call_callback
+
+local dummy_function   = function () end
+
 --[[doc--
 No final decision has been made on how to handle font definition.
 At the moment, there are three candidates: The \textsf{generic}
@@ -164,7 +171,6 @@ The imported font loader will call \verb|callback.register| once
 This is unavoidable but harmless, so we make it call a dummy instead.
 --doc]]--
 local trapped_register = callback.register
-local dummy_function   = function () end
 callback.register      = dummy_function
 
 --[[doc--
@@ -178,11 +184,6 @@ After the fontloader is ready we can restore the callback trap from
 --doc]]--
 
 callback.register = trapped_register
-
-local add_to_callback, create_callback =
-      luatexbase.add_to_callback, luatexbase.create_callback
-local reset_callback, call_callback =
-      luatexbase.reset_callback, luatexbase.call_callback
 
 --[[doc--
 We do our own callback handling with the means provided by luatexbase.
@@ -208,7 +209,6 @@ loadmodule"font-clr.lua"
 --loadmodule"font-ovr.lua"
 loadmodule"font-ltx.lua"
 
-local dummy_function = function ( ) end --- upvalue more efficient than lambda
 create_callback("luaotfload.patch_font", "simple", dummy_function)
 
 --[[doc--

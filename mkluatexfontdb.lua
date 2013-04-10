@@ -7,32 +7,33 @@ This file is a wrapper for the luaotfload's font names module. It is part of the
 luaotfload bundle, please see the luaotfload documentation for more info.
 --]]
 
-kpse.set_program_name("luatex")
+kpse.set_program_name"luatex"
 
-function string.quoted(s) return string.format("%q",s) end -- XXX
+local stringformat  = string.format
+local texiowrite_nl = texio.write_nl
 
 -- First we need to be able to load module (code copied from
 -- luatexbase-loader.sty):
 local loader_file = "luatexbase.loader.lua"
-local path = assert(kpse.find_file(loader_file, 'tex'),
-  "File '"..loader_file.."' not found")
-texio.write_nl("("..path..")")
-dofile(path)
+local loader_path = assert(kpse.find_file(loader_file, 'tex'),
+                           "File '"..loader_file.."' not found")
+--texiowrite_nl("("..path..")")
+dofile(loader_path) -- FIXME this pollutes stdout with filenames
 
-require("lualibs")
---- TODO we seriously need recent lualibs
-file.splitpath, file.collapsepath = file.split_path, file.collapse_path
-require("otfl-basics-gen.lua")
-require("otfl-font-nms")
-require("alt_getopt")
+require"lualibs"
+require"otfl-basics-gen.lua"
+require"otfl-font-nms"
+require"alt_getopt"
 
-local name = 'mkluatexfontdb'
-local version = '1.07' -- same version number as luaotfload
-
+local name    = 'mkluatexfontdb'
+local version = '2.1' -- same version number as luaotfload
 local names    = fonts.names
 
+local db_src_out = names.path.dir.."/"..names.path.basename
+local db_bin_out = file.replacesuffix(db_src_out, "luc")
 local function help_msg()
-    texio.write(string.format([[
+    texiowrite_nl(stringformat([[
+
 Usage: %s [OPTION]...
     
 Rebuild the LuaTeX font database.
@@ -46,14 +47,15 @@ Valid options:
   -V --version                 print version and exit
   -h --help                    print this message
 
-The output database file is named otfl-fonts.lua and is placed under:
+The font database will be saved to
+   %s
+   %s
 
-   %s"
-]], name, names.path.dir))
+]], name, db_src_out, db_bin_out))
 end
 
 local function version_msg()
-    texio.write(string.format(
+    texiowrite_nl(stringformat(
         "%s version %s, database version %s.\n", name, version, names.version))
 end
 
@@ -62,7 +64,7 @@ Command-line processing.
 Here we fill cmdargs with the good values, and then analyze it.
 --]]
 
-local long_opts = {
+local long_options = {
     force            = "f",
     quiet            = "q",
     help             = "h",
@@ -70,14 +72,14 @@ local long_opts = {
     version          = "V",
 }
 
-local short_opts = "fqpvVh"
+local short_options = "fqpvVh"
 
 local force_reload = nil
 
 local function process_cmdline()
-    local opts, optind, optarg = alt_getopt.get_ordered_opts (arg, short_opts, long_opts)
+    local options, _, _ = alt_getopt.get_ordered_opts (arg, short_options, long_options)
     local log_level = 1
-    for i,v in next, opts do
+    for i,v in next, options do
         if     v == "q" then
             log_level = 0
         elseif v == "v" then
@@ -104,7 +106,7 @@ local function generate(force)
     fontnames = names.update(fontnames, force)
     logs.report("fonts in the database", "%i", #fontnames.mappings)
     saved = names.save(fontnames)
-    texio.write_nl("")
+    texiowrite_nl("")
 end
 
 process_cmdline()

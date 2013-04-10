@@ -17,8 +17,7 @@ local report_otf          = logs.reporter("fonts","otf loading")
 
 local fonts               = fonts
 local otf                 = fonts.handlers.otf
-local otffeatures         = fonts.constructors.newfeatures("otf")
-local registerotffeature  = otffeatures.register
+local registerotffeature  = otf.features.register
 local setmetatableindex   = table.setmetatableindex
 
 -- In the userdata interface we can not longer tweak the loaded font as
@@ -166,7 +165,7 @@ local function addfeature(data,feature,specifications)
             end
         end
         if trace_loading then
-            report_otf("enhance: registering feature '%s', %s glyphs affected, %s glyphs skipped",feature,done,skip)
+            report_otf("registering feature %a, affected glyphs %a, skipped glyphs %a",feature,done,skip)
         end
     end
 end
@@ -312,14 +311,14 @@ end
 local anum_specification = {
     {
         type     = "substitution",
-        features = { arab = { URD = true, dflt = true } },
+        features = { arab = { urd = true, dflt = true } },
         data     = anum_arabic,
         flags    = noflags, -- { },
         valid    = valid,
     },
     {
         type     = "substitution",
-        features = { arab = { URD = true } },
+        features = { arab = { urd = true } },
         data     = anum_persian,
         flags    = noflags, -- { },
         valid    = valid,

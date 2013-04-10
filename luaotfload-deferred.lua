@@ -29,6 +29,8 @@ add_to_callback("hpack_filter",
                 "luaotfload.node_processor",
                 1)
 
+luaotfload.loadmodule("font-otc.lua")
+
 loadmodule("lib-dir.lua")    -- required by font-nms; will change with lualibs update
 loadmodule("font-nms.lua")
 loadmodule("font-clr.lua")
@@ -95,6 +97,7 @@ local patch_defined_font = function (...)
     if type(tfmdata) == "table" and tfmdata.shared then
         call_callback("luaotfload.patch_font", tfmdata)
     end
+    --inspect(tfmdata.shared.features)
     return tfmdata
 end
 
@@ -127,8 +130,6 @@ elseif luaotfload.font_definer == "patch"  then
                   "luaotfload.define_font",
                   1)
 end
-
---luaotfload.loadmodule("font-otc.lua") -- broken
 
 --local register_base_sub = fonts.otf.features.register_base_substitution
 --local gsubs = {

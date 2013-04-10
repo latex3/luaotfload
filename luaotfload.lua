@@ -29,7 +29,14 @@ luaotfload.module = {
     license       = "CC0"
 }
 
-luaotfload.old_font_definer = false --- toggle wrapper for font loader
+--[[doc--
+No final decision has been made on how to handle font definition.
+At the moment, there are three candidates: The \textsf{generic}
+callback as hard-coded in the font loader, the \textsf{old} wrapper,
+and a simplified version of the latter (\textsf{patch}) that does
+nothing besides applying font patches.
+--doc]]--
+luaotfload.font_definer = "patch" --- | “generic” | “old”
 
 local fl_prefix = "otfl" -- “luatex” for luatex-plain
 

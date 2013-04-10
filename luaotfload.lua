@@ -29,9 +29,11 @@ luaotfload.module = {
     license       = "CC0"
 }
 
+luaotfload.old_font_definer = false --- toggle wrapper for font loader
+
 local fl_prefix = "otfl" -- “luatex” for luatex-plain
 
---- these will be overloaded later by luatexbase
+--- these will be provided by luatexbase some time
 local error = function(...) print("err", string.format(...)) end
 local log   = function(...) print("log", string.format(...)) end
 
@@ -98,7 +100,7 @@ luaotfload.loadmodule = loadmodule --- required in deferred code
   that’s it, go thank Hans!
 --]]--
 
---[[doc
+--[[doc--
 We treat the fontloader as a black box so behavior is consistent
 between formats.
 The wrapper file is |otfl-fonts.lua| which we imported from
@@ -145,7 +147,6 @@ _G.non_generic_context = { luatex_fonts = {
 
 loadmodule("fonts.lua")
 
---- now load luatexbase (from the TEX end)
 --- then continue in luaotfload-deferred.lua
 
 -- vim:tw=71:sw=2:ts=2:expandtab

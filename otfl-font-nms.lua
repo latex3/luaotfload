@@ -39,9 +39,10 @@ local gsub, match, rpadd      = string.gsub, string.match, string.rpadd
 local gmatch, sub, find       = string.gmatch, string.sub, string.find
 local utfgsub                 = unicode.utf8.gsub
 
-local trace_short    = false --tracing adapted to rebuilding of the database inside a document
-local trace_search   = false --trackers.register("names.search",   function(v) trace_search   = v end)
-local trace_loading  = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
+local suppress_output = false
+local trace_short     = false --tracing adapted to rebuilding of the database inside a document
+local trace_search    = false --trackers.register("names.search",   function(v) trace_search   = v end)
+local trace_loading   = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
 local function sanitize(str)
     if str then
@@ -244,7 +245,9 @@ end
 names.resolvespec = names.resolve
 
 function names.set_log_level(level)
-    if level == 2 then
+    if level == 0 then
+        suppress_output = true
+    elseif level == 2 then
         trace_loading = true
     elseif level >= 3 then
         trace_loading = true
@@ -252,30 +255,29 @@ function names.set_log_level(level)
     end
 end
 
-local lastislog = 0
-
-local function log(category, fmt, ...)
-    lastislog = 1
-    if fmt then
-        texio.write_nl(format("luaotfload | %s: %s", category, format(fmt, ...)))
-    elseif category then
-        texio.write_nl(format("luaotfload | %s", category))
-    else
-        texio.write_nl(format("luaotfload |"))
+local function log (category, fmt, ...)
+    if not suppress_output then
+        if fmt then
+            texio.write_nl(format("luaotfload | %s: %s", category, format(fmt, ...)))
+        elseif category then
+            texio.write_nl(format("luaotfload | %s", category))
+        else
+            texio.write_nl(format("luaotfload |"))
+        end
+        io.flush()
     end
-    io.flush()
 end
 
 logs        = logs or { }
 logs.report = logs.report or log
-logs.info   = logs.info or log
+logs.info   = logs.info   or log
 
 local function font_fullinfo(filename, subfont, texmf)
     local t = { }
     local f = fontloader.open(filename, subfont)
     if not f then
 	    if trace_loading then
-               logs.report("error", "failed to open %s", filename)
+        logs.report("error", "failed to open %s", filename)
 	    end
         return
     end
@@ -769,3 +771,4 @@ names.save   = save_names
 function fonts.names.getfilename(askedname,suffix)  -- only supported in mkiv
     return ""
 end
+-- vim:tw=71:sw=4:ts=4:expandtab

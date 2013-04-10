@@ -79,7 +79,7 @@ local force_reload = nil
 local function process_cmdline()
     local options, _, _ = alt_getopt.get_ordered_opts (arg, short_options, long_options)
     local log_level = 1
-    for i,v in next, options do
+    for _,v in next, options do
         if     v == "q" then
             log_level = 0
         elseif v == "v" then
@@ -111,3 +111,4 @@ end
 
 process_cmdline()
 generate(force_reload)
+-- vim:tw=71:sw=4:ts=4:expandtab

@@ -22,6 +22,7 @@ dofile(loader_path) -- FIXME this pollutes stdout with filenames
 
 require"lualibs"
 require"otfl-basics-gen.lua"
+require"otfl-luat-ovr.lua"
 require"otfl-font-nms"
 require"alt_getopt"
 

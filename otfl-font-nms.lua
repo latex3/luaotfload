@@ -268,10 +268,6 @@ local function log (category, fmt, ...)
     end
 end
 
-logs        = logs or { }
-logs.report = logs.report or log
-logs.info   = logs.info   or log
-
 local function font_fullinfo(filename, subfont, texmf)
     local t = { }
     local f = fontloader.open(filename, subfont)

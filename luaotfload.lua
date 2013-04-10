@@ -204,9 +204,9 @@ add_to_callback("hpack_filter",
 loadmodule"font-otc.lua"   -- TODO check what we can drop from otfl-features
 
 loadmodule"lib-dir.lua"    -- required by font-nms; will change with lualibs update
+loadmodule"luat-ovr.lua"
 loadmodule"font-nms.lua"
 loadmodule"font-clr.lua"
---loadmodule"font-ovr.lua"
 loadmodule"font-ltx.lua"
 
 create_callback("luaotfload.patch_font", "simple", dummy_function)

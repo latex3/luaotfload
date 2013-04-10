@@ -7,30 +7,31 @@ if not modules then modules = { } end modules ['luat-ovr'] = {
 }
 
 
-local write_nl, format, name = texio.write_nl, string.format, "luaotfload"
-local dummyfunction = function() end
+local module_name = "luaotfload"
 
-callbacks = {
-    register      = dummyfunction,
-}
+local texiowrite_nl = texio.write_nl
+local stringformat  = string.format
+local ioflush       = io.flush
+local dummyfunction = function() end
 
 function logs.report(category,fmt,...)
     if fmt then
-        write_nl('log', format("%s | %s: %s",name,category,format(fmt,...)))
+        texiowrite_nl('log', stringformat("%s | %s: %s",module_name,category,stringformat(fmt,...)))
     elseif category then
-        write_nl('log', format("%s | %s",name,category))
+        texiowrite_nl('log', stringformat("%s | %s",module_name,category))
     else
-        write_nl('log', format("%s |",name))
+        texiowrite_nl('log', stringformat("%s |",module_name))
     end
 end
 
 function logs.info(category,fmt,...)
     if fmt then
-        write_nl(format("%s | %s: %s",name,category,format(fmt,...)))
+        texiowrite_nl(stringformat("%s | %s: %s",module_name,category,stringformat(fmt,...)))
     elseif category then
-        write_nl(format("%s | %s",name,category))
+        texiowrite_nl(stringformat("%s | %s",module_name,category))
     else
-        write_nl(format("%s |",name))
+        texiowrite_nl(stringformat("%s |",module_name))
     end
-    io.flush()
+    ioflush()
 end
+

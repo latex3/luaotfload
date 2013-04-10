@@ -31,7 +31,7 @@ luaotfload.module = {
 
 local luatexbase = luatexbase
 
-local type, next = type, next
+local type, next, dofile = type, next, dofile
 local stringfind = string.find
 
 --[[doc--
@@ -45,12 +45,9 @@ luaotfload.font_definer = "patch" --- | “generic” | “old”
 
 local fl_prefix = "otfl" -- “luatex” for luatex-plain
 
---- these will be provided by luatexbase some time
-local error = function(...) print("err", string.format(...)) end
-local log   = function(...) print("log", string.format(...)) end
+local error, warning, info, log = luatexbase.provides_module(luaotfload.module)
 
-kpse.init_prog("", 600, "/")
-local luatex_version = 60
+local luatex_version = 75
 
 if tex.luatexversion < luatex_version then
     warning("LuaTeX v%.2f is old, v%.2f is recommended.",
@@ -203,7 +200,7 @@ add_to_callback("hpack_filter",
                 "luaotfload.node_processor",
                 1)
 
-loadmodule"font-otc.lua"
+loadmodule"font-otc.lua"   -- TODO check what we can drop from otfl-features
 
 loadmodule"lib-dir.lua"    -- required by font-nms; will change with lualibs update
 loadmodule"font-nms.lua"
@@ -268,7 +265,7 @@ callback.
 --doc]]--
 local patch_defined_font = function (...)
     local tfmdata = fonts.definers.read(...)
-    if type(tfmdata) == "table" and tfmdata.shared then
+    if type(tfmdata) == "table" then
         call_callback("luaotfload.patch_font", tfmdata)
     end
     --inspect(tfmdata.shared.features)
@@ -276,6 +273,7 @@ local patch_defined_font = function (...)
 end
 
 fonts.mode = "node"
+caches.compilemethod = "both"
 
 function attributes.private(name)
     local attr   = "otfl@" .. name
@@ -305,58 +303,10 @@ elseif luaotfload.font_definer == "patch"  then
                   1)
 end
 
---[[doc--
-These vanished in 2011.
-\url{http://repo.or.cz/w/context.git/commitdiff/1455dd60b68c9140db1b9977c9e5ce372b772ec8}
+loadmodule"features.lua"
 
-The “ss” stuff is in tables.features in context (see font-ott.lua), but
-commented.
-I’ll get back at restoring it as soon as someone can tell me what those do.
-/phg
-
-local register_base_sub = fonts.otf.features.register_base_substitution
-local gsubs = {
-    "ss01", "ss02", "ss03", "ss04", "ss05",
-    "ss06", "ss07", "ss08", "ss09", "ss10",
-    "ss11", "ss12", "ss13", "ss14", "ss15",
-    "ss16", "ss17", "ss18", "ss19", "ss20",
-}
-
-for _,v in next, gsubs do
-    register_base_sub(v)
-end
---doc]]--
-
----TODO check for conflicts with lualibs
--- imported from "util-sto.lua"
---table.setmetatablenewindex = function (t,f)
---    if type(t) ~= "table" then
---        f, t = t, { }
---    end
---    local m = getmetatable(t)
---    if m then
---        if f == "ignore" then
---            m.__newindex = f_ignore
---        else
---            m.__newindex = f
---        end
---    else
---        if f == "ignore" then
---            setmetatable(t, t_ignore)
---        else
---            setmetatable(t,{ __newindex = f })
---        end
---    end
---    return t
---end
----- this overloads fonts.handlers.features.normalize()
----- breakage ahead.
---loadmodule"font-ott.lua"
-
---add_to_callback("find_vf_file",
---                 fonts.vf.find,
---                "luaotfload.find_vf_file")
-
+--[==[
+---- is this still necessary?
 local set_sscale_diments = function (tfmdata)
     local mathconstants = tfmdata.MathConstants
     if mathconstants then
@@ -377,6 +327,7 @@ end
 add_to_callback("luaotfload.patch_font",
                 set_sscale_diments,
                 "unicodemath.set_sscale_diments")
+]==]
 
 -- vim:tw=71:sw=2:ts=2:expandtab
 

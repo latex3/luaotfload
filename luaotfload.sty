@@ -22,7 +22,6 @@
 \bgroup\expandafter\expandafter\expandafter\egroup
 %\RequireLuaModule{lualibs}
 %\RequireLuaModule{luaotfload}
-\directlua{require"luaotfload"}
 \expandafter\ifx\csname ProvidesPackage\endcsname\relax
   \input luatexbase.sty
 \else
@@ -31,7 +30,7 @@
     [2011/10/06 v2.0 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
-\directlua{require"luaotfload-deferred"}
+\directlua{require"luaotfload"}
 \endinput
 %%
 %% End of file `luaotfload.sty'.

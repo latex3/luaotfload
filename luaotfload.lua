@@ -65,24 +65,35 @@ local loadmodule = function (name)
 end
 luaotfload.loadmodule = loadmodule --- required in deferred code
 
+--[[doc--
+The imported font loader will call \verb|callback.register| once
+(during \verb|font-def.lua|).
+This is unavoidable but harmless, so we make it call a dummy instead.
+--doc]]--
+local trapped_register = callback.register
+local dummy_function   = function () end
+callback.register      = dummy_function
+
 --[[-- keep --]]
 --- from Hans (all merged):
 
----   file name              modified include name
---- × basics-gen.lua         t        luat-basics-gen
---- × font-def -> fonts-def  t        luatex-font-def (there’s also the normal font-def!)
---- × fonts-enc              f        luatex-font-enc
---- × fonts-ext              t        luatex-fonts-ext
---- × fonts-lua              f        luatex-fonts-lua
----   fonts-tfm              f        luatex-fonts-tfm
---- × fonts-cbk              f        luatex-fonts-lua
+---   file name              modified  include name
+--- × basics-gen.lua         t         luat-basics-gen
+--- × font-def -> fonts-def  t         luatex-font-def (there’s also the normal font-def!)
+--- × fonts-enc              f         luatex-font-enc
+--- × fonts-ext              t         luatex-fonts-ext
+--- × fonts-lua              f         luatex-fonts-lua
+---   fonts-tfm              f         luatex-fonts-tfm
+--- × fonts-cbk              f         luatex-fonts-lua
+
+--- from Hans (unmerged):
+---   font-otc.lua -> otfl-font-otc.lua
 
 --- from luaotfload:
 ---   otfl-luat-ovr.lua    -- override some luat-dum functions
 ---   otfl-font-clr.lua
 ---   otfl-font-ltx.lua
 ---   otfl-font-nms.lua
----   otfl-font-otc.lua
 ---   otfl-font-pfb.lua    -- ?
 
 --[[-- new --]]
@@ -153,6 +164,13 @@ _G.non_generic_context = { luatex_fonts = {
 }}
 
 loadmodule("fonts.lua")
+
+--[[doc--
+After the fontloader is ready we can restore the callback trap from
+\textsf{luatexbase}.
+--doc]]--
+
+callback.register = trapped_register
 
 --- then continue in luaotfload-deferred.lua
 

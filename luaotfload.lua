@@ -29,6 +29,8 @@ luaotfload.module = {
     license       = "CC0"
 }
 
+local fl_prefix = "otfl" -- “luatex” for luatex-plain
+
 --- these will be overloaded later by luatexbase
 local error = function(...) print("err", string.format(...)) end
 local log   = function(...) print("log", string.format(...)) end
@@ -41,9 +43,8 @@ if tex.luatexversion < luatex_version then
              tex.luatexversion/100,
              luatex_version   /100)
 end
-function luaotfload.loadmodule(name, prefix)
-    local prefix = prefix or "otfl"
-    local tofind = prefix .."-"..name
+local loadmodule = function (name)
+    local tofind = fl_prefix .."-"..name
     local found = kpse.find_file(tofind,"tex")
     if found then
         log("loading file %s.", found)
@@ -53,6 +54,7 @@ function luaotfload.loadmodule(name, prefix)
         error("file %s not found.", tofind)
     end
 end
+luaotfload.loadmodule = loadmodule --- required in deferred code
 
 --[[-- keep --]]
 --- from Hans (all merged):
@@ -96,15 +98,56 @@ end
   that’s it, go thank Hans!
 --]]--
 
+--[[doc
+We treat the fontloader as a black box so behavior is consistent
+between formats.
+The wrapper file is |otfl-fonts.lua| which we imported from
+\LUATEX-Plain.
+It has roughly two purposes:
+(\textit{1}) insert the functionality required for fontloader, and
+(\textit{2}) put it in place via the respective callbacks.
+How the first step is executed depends on the presence on the
+\emph{merged font loader code}.
+In \textsf{luaotfload} this is contained in the file
+|otfl-fonts-merged.lua|.
+If this file cannot be found,  the original libraries from \CONTEXT of
+which the merged code was composed are loaded instead.
+
+Hans provides two global tables to control the font loader:
+\begin{tabular}{ll}
+  \texttt{generic\textunderscore context}                    & 
+  encapsulation mechanism, callback functions
+  \\
+  \texttt{non\textunderscore generic\textunderscore context} & 
+  customized code insertion
+  \\
+\end{tabular}
+With \verb|non_generic_context| we can tailor the font loader insertion
+to our file naming habits (key \verb|load_before|).
+Additionally, \verb|skip_loading| can be unset to force loading of
+the original libraries as though the merged code was absent.
+Another key, \verb|load_after| is called at the time when the font
+loader is actually inserted.
+In combination with the option \verb|no_callbacks_yet| in
+\verb|generic_context|, we can insert our own,
+\textsf{luatexbase}-style callback handling here.
+--doc]]--
+if not _G.    generic_context then _G.    generic_context = { } end
+if not _G.non_generic_context then _G.non_generic_context = { } end
+
+generic_context.no_callbacks_yet = true
+
 _G.non_generic_context = { luatex_fonts = {
     load_before     = "otfl-fonts-merged.lua",
      -- load_after      = nil, --- TODO, this is meant for callbacks
     skip_loading    = true,
 }}
 
-luaotfload.loadmodule("fonts.lua")
+loadmodule("fonts.lua")
 
 --- now load luatexbase (from the TEX end)
 --- then continue in luaotfload-deferred.lua
+
+-- vim:tw=71:sw=2:ts=2:expandtab
 
 --  End of File `luaotfload.lua'.

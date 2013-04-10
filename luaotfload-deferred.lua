@@ -1,8 +1,12 @@
 --- TODO integrate into luaotfload.dtx
 --- this part is loaded after luatexbase
-luaotfload.loadmodule("lib-dir.lua")    -- required by font-nms; will change with lualibs update
-luaotfload.loadmodule("font-nms.lua")
-luaotfload.loadmodule("font-clr.lua")
+local loadmodule = luaotfload.loadmodule
+
+loadmodule("lib-dir.lua")    -- required by font-nms; will change with lualibs update
+loadmodule("font-nms.lua")
+loadmodule("font-clr.lua")
+--loadmodule("font-ovr.lua")
+loadmodule("font-ltx.lua")
 
 luatexbase.create_callback("luaotfload.patch_font", "simple", function() end)
 
@@ -112,5 +116,7 @@ end
 --end
 
 --luatexbase.add_to_callback("luaotfload.patch_font", set_sscale_diments, "unicodemath.set_sscale_diments")
--- 
+
+-- vim:tw=71:sw=2:ts=2:expandtab
+
 --  End of File `luaotfload.lua'.

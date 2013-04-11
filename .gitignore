@@ -22,3 +22,5 @@ tests/*.log
 tests/*.pdf
 tests/*.lua
 tests/*.otf
+tests/*.aux
+tests/phg-*.tex

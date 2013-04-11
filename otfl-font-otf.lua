@@ -1100,7 +1100,7 @@ otf.enhancers["reorganize kerns"] = function(data,filename)
                             if type(lookups) ~= "table" then
                                 lookups = { lookups }
                             end
-                            local maxfirsts, maxseconds = getn(firsts), getn(seconds)
+                            local maxfirsts, maxseconds = #firsts, #seconds
                             -- here we could convert split into a list of unicodes which is a bit
                             -- faster but as this is only done when caching it does not save us much
                             for _, s in next, firsts do

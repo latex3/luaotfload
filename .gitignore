@@ -20,3 +20,5 @@ luaotfload.zip
 # Temporary files in the tests directory
 tests/*.log
 tests/*.pdf
+tests/*.lua
+tests/*.otf

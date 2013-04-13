@@ -17,8 +17,13 @@ local texiowrite_nl = texio.write_nl
 local loader_file = "luatexbase.loader.lua"
 local loader_path = assert(kpse.find_file(loader_file, 'tex'),
                            "File '"..loader_file.."' not found")
---texiowrite_nl("("..path..")")
+--texiowrite_nl("("..loader_path..")")
 dofile(loader_path) -- FIXME this pollutes stdout with filenames
+
+local config   = config or { }
+config.lualibs = config.lualibs or { }
+config.lualibs.prefer_merged = false
+config.lualibs.load_extended = true
 
 require"lualibs"
 require"otfl-basics-gen.lua"

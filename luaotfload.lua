@@ -203,8 +203,21 @@ add_to_callback("hpack_filter",
 
 loadmodule"font-otc.lua"   -- TODO check what we can drop from otfl-features
 
-loadmodule"lib-dir.lua"    -- required by font-nms; will change with lualibs update
+loadmodule"lib-dir.lua"    -- required by font-nms
 loadmodule"luat-ovr.lua"
+
+if fonts and fonts.readers.tfm then
+  --------------------------------------------------------------------
+  --- OFM; read this first
+  --------------------------------------------------------------------
+  --- I can’t quite make out whether this is still relevant
+  --- as those ofm fonts always fail, even in the 2011 version
+  --- (mktexpk:  don't know how to create bitmap font for omarabb.ofm)
+  --- the font loader appears to read ofm like tfm so if this
+  --- hack was supposed achieve that, we should excise it anyways
+  fonts.readers.ofm = fonts.readers.tfm
+  --------------------------------------------------------------------
+end
 loadmodule"font-nms.lua"
 loadmodule"font-clr.lua"
 loadmodule"font-ltx.lua"

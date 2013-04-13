@@ -20,7 +20,8 @@ local loader_path = assert(kpse.find_file(loader_file, 'tex'),
 --texiowrite_nl("("..loader_path..")")
 dofile(loader_path) -- FIXME this pollutes stdout with filenames
 
-local config   = config or { }
+_G.config      = _G.config or { }
+local config   = _G.config
 config.lualibs = config.lualibs or { }
 config.lualibs.prefer_merged = false
 config.lualibs.load_extended = true

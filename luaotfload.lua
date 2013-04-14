@@ -33,6 +33,7 @@ local luatexbase = luatexbase
 
 local type, next, dofile = type, next, dofile
 local stringfind = string.find
+local find_file  = kpse.find_file
 
 local add_to_callback, create_callback =
       luatexbase.add_to_callback, luatexbase.create_callback
@@ -63,7 +64,7 @@ if tex.luatexversion < luatex_version then
 end
 local loadmodule = function (name)
     local tofind = fl_prefix .."-"..name
-    local found = kpse.find_file(tofind,"tex")
+    local found = find_file(tofind,"tex")
     if found then
         log("loading file %s.", found)
         dofile(found)
@@ -71,6 +72,23 @@ local loadmodule = function (name)
         --error("file %s not found.", tofind)
         error("file %s not found.", tofind)
     end
+end
+
+--[[doc--
+Virtual fonts are resolved via a callback.
+\verb|find_vf_file| derives the name of the virtual font file from the
+filename.
+(NB: \CONTEXT\ handles this likewise in \textsf{font-vf.lua}.)
+--doc]]--
+local find_vf_file = function (name)
+    local fullname = find_file(name, "ovf")
+    if not fullname then
+      fullname = find_file(file.removesuffix(file.basename(name)), "ovf")
+    end
+    if fullname then
+      log("loading virtual font file %s.", fullname)
+    end
+    return fullname
 end
 
 --[[-- keep --]]
@@ -200,6 +218,8 @@ add_to_callback("hpack_filter",
                 generic_context.callback_hpack_filter,
                 "luaotfload.node_processor",
                 1)
+add_to_callback("find_vf_file",
+                find_vf_file, "luaotfload.find_vf_file")
 
 loadmodule"font-otc.lua"   -- TODO check what we can drop from otfl-features
 

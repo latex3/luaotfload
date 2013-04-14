@@ -12,7 +12,6 @@ local module_name = "luaotfload"
 local texiowrite_nl = texio.write_nl
 local stringformat  = string.format
 local tableconcat   = table.concat
-local dummyfunction = function() end
 local type          = type
 
 --[[doc--
@@ -31,9 +30,9 @@ We recreate the verbosity levels previously implemented in font-nms:
 local loglevel = 1 --- default
 
 local set_loglevel = function (n)
-  if type(n) == "number" then
-    loglevel = n
-  end
+    if type(n) == "number" then
+        loglevel = n
+    end
 end
 logs.set_loglevel = set_loglevel
 

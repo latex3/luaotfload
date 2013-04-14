@@ -42,7 +42,6 @@ local utfgsub                 = unicode.utf8.gsub
 local suppress_output = false
 local trace_short     = false --tracing adapted to rebuilding of the database inside a document
 local trace_search    = false --trackers.register("names.search",   function(v) trace_search   = v end)
-local trace_loading   = false --trackers.register("names.loading",  function(v) trace_loading  = v end)
 
 local function sanitize(str)
     if str then
@@ -244,37 +243,11 @@ end
 
 names.resolvespec = names.resolve
 
-function names.set_log_level(level)
-    if level == 0 then
-        suppress_output = true
-    elseif level == 2 then
-        trace_loading = true
-    elseif level >= 3 then
-        trace_loading = true
-        trace_search = true
-    end
-end
-
-local function log (category, fmt, ...)
-    if not suppress_output then
-        if fmt then
-            texio.write_nl(format("luaotfload | %s: %s", category, format(fmt, ...)))
-        elseif category then
-            texio.write_nl(format("luaotfload | %s", category))
-        else
-            texio.write_nl(format("luaotfload |"))
-        end
-        io.flush()
-    end
-end
-
 local function font_fullinfo(filename, subfont, texmf)
     local t = { }
     local f = fontloader.open(filename, subfont)
     if not f then
-	    if trace_loading then
-        logs.report("error", "failed to open %s", filename)
-	    end
+        logs.names_loading("error", "failed to open %s", filename)
         return
     end
     local m = fontloader.to_table(f)
@@ -304,9 +277,7 @@ local function font_fullinfo(filename, subfont, texmf)
         end
     else
         -- no names table, propably a broken font
-        if trace_loading then
-            logs.report("broken font rejected", "%s", basefile)
-        end
+        logs.names_loading("broken font rejected", "%s", basefile)
         return
     end
     t.fontname    = m.fontname
@@ -359,9 +330,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
                 newmappings[#newmappings+1]        = mappings[v]
                 newstatus[basefile].index[index+1] = #newmappings
             end
-            if trace_loading then
-                logs.report("font already indexed", "%s", basefile)
-            end
+            logs.names_loading("font already indexed", "%s", basefile)
             return
         end
         local info = fontloader.info(filename)
@@ -396,9 +365,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
                 newstatus[basefile].index[1] = index
             end
         else
-            if trace_loading then
-               logs.report("failed to load", "%s", basefile)
-            end
+            logs.names_loading("failed to load", "%s", basefile)
         end
     end
 end
@@ -479,33 +446,31 @@ end
 local installed_fonts_scanned = false
 
 local function scan_installed_fonts(fontnames, newfontnames)
-   -- Try to query and add font list from operating system.
-   -- This uses the lualatex-platform module.
-   logs.info("Scanning fonts known to operating system...")
-   local fonts = get_installed_fonts()
-   if fonts and #fonts > 0 then
-      installed_fonts_scanned = true
-      if trace_search then
-         logs.report("operating system fonts found", "%d", #fonts)
-      end
-      for key, value in next, fonts do
-         local file = value.path
-         if file then
-            local ext = extname(file)
-            if ext and font_extensions_set[ext] then
-               file = path_normalize(file)
-               if trace_loading then
-                  logs.report("loading font", "%s", file)
-               end
-               load_font(file, fontnames, newfontnames, false)
+    -- Try to query and add font list from operating system.
+    -- This uses the lualatex-platform module.
+    logs.info("Scanning fonts known to operating system...")
+    local fonts = get_installed_fonts()
+    if fonts and #fonts > 0 then
+        installed_fonts_scanned = true
+        if trace_search then
+            logs.report("operating system fonts found", "%d", #fonts)
+        end
+        for key, value in next, fonts do
+            local file = value.path
+            if file then
+                local ext = extname(file)
+                if ext and font_extensions_set[ext] then
+                file = path_normalize(file)
+                    logs.names_loading("loading font", "%s", file)
+                load_font(file, fontnames, newfontnames, false)
+                end
             end
-         end
-      end
-   else
-      if trace_search then
-         logs.report("Could not retrieve list of installed fonts")
-      end
-   end
+        end
+    else
+        if trace_search then
+            logs.report("Could not retrieve list of installed fonts")
+        end
+    end
 end
 
 local function scan_dir(dirname, fontnames, newfontnames, texmf)
@@ -539,9 +504,7 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
 
     for _,file in next, list do
         file = path_normalize(file)
-        if trace_loading then
-            logs.report("loading font", "%s", file)
-        end
+        logs.names_loading("loading font", "%s", file)
         load_font(file, fontnames, newfontnames, texmf)
     end
 end

@@ -11,8 +11,31 @@ local module_name = "luaotfload"
 
 local texiowrite_nl = texio.write_nl
 local stringformat  = string.format
+local tableconcat   = table.concat
 local ioflush       = io.flush
 local dummyfunction = function() end
+
+--[[doc--
+We recreate the verbosity levels previously implemented in font-nms:
+
+    ==========================================================
+    lvl      arg  trace_loading  trace_search  suppress_output
+    ----------------------------------------------------------
+    (0)  ->  -q         ⊥              ⊥            ⊤
+    (1)  ->  ∅          ⊥              ⊥            ⊥
+    (2)  ->  -v         ⊤              ⊥            ⊥
+    (>2) ->  -vv        ⊤              ⊤            ⊥
+    ==========================================================
+
+--doc]]--
+local loglevel = 1 --- default
+
+local set_loglevel = function (n)
+  if type(n) == "number" then
+    loglevel = n
+  end
+end
+logs.set_loglevel = set_loglevel
 
 function logs.report(category,fmt,...)
     if fmt then
@@ -35,3 +58,14 @@ function logs.info(category,fmt,...)
     ioflush()
 end
 
+logs.names_loading = function (category, fmt, ...)
+    if loglevel > 1 then
+        local res = { module_name, " |" }
+        if category then res[#res+1] = " " .. category end
+        if fmt      then res[#res+1] = ": " .. stringformat(fmt, ...) end
+        texiowrite_nl(tableconcat(res))
+        ioflush()
+    end
+end
+
+-- vim:tw=71:sw=4:ts=4:expandtab

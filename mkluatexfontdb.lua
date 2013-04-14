@@ -24,11 +24,11 @@ _G.config      = _G.config or { }
 local config   = _G.config
 config.lualibs = config.lualibs or { }
 config.lualibs.prefer_merged = false
-config.lualibs.load_extended = true
+config.lualibs.load_extended = false
 
 require"lualibs"
 require"otfl-basics-gen.lua"
-require"otfl-luat-ovr.lua"
+require"otfl-luat-ovr.lua"  --- this populates the logs.* namespace
 require"otfl-font-nms"
 require"alt_getopt"
 
@@ -84,7 +84,9 @@ local short_options = "fqpvVh"
 local force_reload = nil
 
 local function process_cmdline()
-    local options, _, _ = alt_getopt.get_ordered_opts (arg, short_options, long_options)
+    local options, _, _ = alt_getopt.get_ordered_opts (arg,
+                                                       short_options,
+                                                       long_options)
     local log_level = 1
     for _,v in next, options do
         if     v == "q" then
@@ -105,7 +107,7 @@ local function process_cmdline()
             force_reload = 1
         end
     end
-    names.set_log_level(log_level)
+    logs.set_loglevel(log_level)
 end
 
 local function generate(force)

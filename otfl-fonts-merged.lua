@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/07/13 14:05:24
+-- merge date  : 04/14/13 16:51:15
 
 do -- begin closure to overcome local limits and interference
 
@@ -193,7 +193,7 @@ local function loadedbypath(name,rawname,paths,islib,what)
 end
 local function notloaded(name)
   if helpers.trace then
-    helpers.report("? unable to locate library '%s'",name)
+    helpers.report("unable to locate library '%s'",name)
   end
 end
 helpers.loadedaslib=loadedaslib
@@ -223,6 +223,16 @@ function helpers.loaded(name)
     return result
   end
   return notloaded(name)
+end
+function helpers.unload(name)
+  if helpers.trace then
+    if package.loaded[name] then
+      helpers.report("unloading library '%s', %s",name,"done")
+    else
+      helpers.report("unloading library '%s', %s",name,"not loaded")
+    end
+  end
+  package.loaded[name]=nil
 end
 
 end -- closure

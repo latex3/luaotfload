@@ -28,6 +28,7 @@ We recreate the verbosity levels previously implemented in font-nms:
 
 --doc]]--
 local loglevel = 1 --- default
+local logout   = "log"
 
 local set_loglevel = function (n)
     if type(n) == "number" then
@@ -36,11 +37,20 @@ local set_loglevel = function (n)
 end
 logs.set_loglevel = set_loglevel
 
+local set_logout = function (s)
+    if s == "stdout" then
+        logout = "term"
+    --else --- remains “log”
+    end
+end
+
+logs.set_logout = set_logout
+
 local log = function (category, fmt, ...)
     local res = { module_name, " |" }
     if category then res[#res+1] = " " .. category end
     if fmt      then res[#res+1] = ": " .. stringformat(fmt, ...) end
-    texiowrite_nl("log", tableconcat(res))
+    texiowrite_nl(logout, tableconcat(res))
 end
 
 local stdout = function (category, fmt, ...)

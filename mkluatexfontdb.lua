@@ -53,6 +53,7 @@ Valid options:
   -vvv                         print all steps of directory searching
   -V --version                 print version and exit
   -h --help                    print this message
+  --log=stdout                 redirect log output to stdout
 
 The font database will be saved to
    %s
@@ -73,22 +74,24 @@ Here we fill cmdargs with the good values, and then analyze it.
 
 local long_options = {
     force            = "f",
-    quiet            = "q",
     help             = "h",
+    log              = 1,
+    quiet            = "q",
     verbose          = 1  ,
     version          = "V",
 }
 
-local short_options = "fqpvVh"
+local short_options = "fqvVh"
 
 local force_reload = nil
 
 local function process_cmdline()
-    local options, _, _ = alt_getopt.get_ordered_opts (arg,
-                                                       short_options,
-                                                       long_options)
+    local options, _, optarg =
+        alt_getopt.get_ordered_opts (arg, short_options, long_options)
     local log_level = 1
-    for _,v in next, options do
+    local nopts = #options
+    for n=1, nopts do
+        local v = options[n]
         if     v == "q" then
             log_level = 0
         elseif v == "v" then
@@ -105,6 +108,16 @@ local function process_cmdline()
             os.exit(0)
         elseif v == "f" then
             force_reload = 1
+        elseif v == "verbose" then
+            local lvl = optarg[n]
+            if lvl then
+                log_level = tonumber(lvl)
+            end
+        elseif v == "log" then
+            local str = optarg[n]
+            if str then
+                logs.set_logout(str)
+            end
         end
     end
     logs.set_loglevel(log_level)

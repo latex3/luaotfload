@@ -39,9 +39,7 @@ local gsub, match, rpadd      = string.gsub, string.match, string.rpadd
 local gmatch, sub, find       = string.gmatch, string.sub, string.find
 local utfgsub                 = unicode.utf8.gsub
 
-local suppress_output = false
-local trace_short     = false --tracing adapted to rebuilding of the database inside a document
-local trace_search    = false --trackers.register("names.search",   function(v) trace_search   = v end)
+local report = logs.names_report
 
 local function sanitize(str)
     if str then
@@ -76,9 +74,10 @@ local function load_names()
 	foundname = luaname
     end
     if data then
-        logs.info("Font names database loaded", "%s", foundname)
+        report("info", 0, "Font names database loaded", "%s", foundname)
     else
-        logs.info([[Font names database not found, generating new one.
+        report("info", 0,
+            [[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
         data = names.update(fontnames_init())
         names.save(data)
@@ -187,9 +186,10 @@ function names.resolve(_,_,specification) -- the 1st two parameters are used by 
             end
             if #found == 1 then
                 if kpse.lookup(found[1].filename[1]) then
-                    logs.report("load font",
-                                "font family='%s', subfamily='%s' found: %s",
-                                name, style, found[1].filename[1])
+                    report("log", 0, "load font",
+                        "font family='%s', subfamily='%s' found: %s",
+                        name, style, found[1].filename[1]
+                    )
                     return found[1].filename[1], found[1].filename[2]
                 end
             elseif #found > 1 then
@@ -207,9 +207,10 @@ function names.resolve(_,_,specification) -- the 1st two parameters are used by 
                     end
                 end
                 if kpse.lookup(closest.filename[1]) then
-                    logs.report("load font",
-                                "font family='%s', subfamily='%s' found: %s",
-                                name, style, closest.filename[1])
+                    report("log", 0, "load font",
+                        "font family='%s', subfamily='%s' found: %s",
+                        name, style, closest.filename[1]
+                    )
                     return closest.filename[1], closest.filename[2]
                 end
             elseif found.fallback then
@@ -247,7 +248,7 @@ local function font_fullinfo(filename, subfont, texmf)
     local t = { }
     local f = fontloader.open(filename, subfont)
     if not f then
-        logs.names_loading("error", "failed to open %s", filename)
+        report("log", 1, "error", "failed to open %s", filename)
         return
     end
     local m = fontloader.to_table(f)
@@ -277,7 +278,7 @@ local function font_fullinfo(filename, subfont, texmf)
         end
     else
         -- no names table, propably a broken font
-        logs.names_loading("broken font rejected", "%s", basefile)
+        report("log", 1, "broken font rejected", "%s", basefile)
         return
     end
     t.fontname    = m.fontname
@@ -305,9 +306,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
     if filename then
         if names.blacklist[filename] or
            names.blacklist[basename(filename)] then
-            if trace_search then
-                logs.report("ignoring font", "%s", filename)
-            end
+            report("log", 2, "ignoring font", "%s", filename)
             return
         end
         local timestamp, db_timestamp
@@ -330,7 +329,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
                 newmappings[#newmappings+1]        = mappings[v]
                 newstatus[basefile].index[index+1] = #newmappings
             end
-            logs.names_loading("font already indexed", "%s", basefile)
+            report("log", 1, "font already indexed", "%s", basefile)
             return
         end
         local info = fontloader.info(filename)
@@ -365,7 +364,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
                 newstatus[basefile].index[1] = index
             end
         else
-            logs.names_loading("failed to load", "%s", basefile)
+            report("log", 1, "failed to load", "%s", basefile)
         end
     end
 end
@@ -423,10 +422,8 @@ local function read_blacklist()
                     if string.sub(line,1,1) == "-" then
                         whitelist[string.sub(line,2,-1)] = true
                     else
-                      if trace_search then
-                          logs.report("blacklisted file", "%s", line)
-                      end
-                      blacklist[line] = true
+                        report("log", 2, "blacklisted file", "%s", line)
+                        blacklist[line] = true
                     end
                 end
             end
@@ -448,28 +445,24 @@ local installed_fonts_scanned = false
 local function scan_installed_fonts(fontnames, newfontnames)
     -- Try to query and add font list from operating system.
     -- This uses the lualatex-platform module.
-    logs.info("Scanning fonts known to operating system...")
+    report("info", 0, "Scanning fonts known to operating system...")
     local fonts = get_installed_fonts()
     if fonts and #fonts > 0 then
         installed_fonts_scanned = true
-        if trace_search then
-            logs.report("operating system fonts found", "%d", #fonts)
-        end
+        report("log", 2, "operating system fonts found", "%d", #fonts)
         for key, value in next, fonts do
             local file = value.path
             if file then
                 local ext = extname(file)
                 if ext and font_extensions_set[ext] then
                 file = path_normalize(file)
-                    logs.names_loading("loading font", "%s", file)
+                    report("log", 1, "loading font", "%s", file)
                 load_font(file, fontnames, newfontnames, false)
                 end
             end
         end
     else
-        if trace_search then
-            logs.report("Could not retrieve list of installed fonts")
-        end
+        report("log", 2, "Could not retrieve list of installed fonts")
     end
 end
 
@@ -483,28 +476,22 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
     ]]
     local list, found = { }, { }
     local nbfound = 0
-    if trace_search then
-        logs.report("scanning", "%s", dirname)
-    end
+    report("log", 2, "scanning", "%s", dirname)
     for _,i in next, font_extensions do
         for _,ext in next, { i, upper(i) } do
             found = glob(format("%s/**.%s$", dirname, ext))
             -- note that glob fails silently on broken symlinks, which happens
             -- sometimes in TeX Live.
-            if trace_search then
-                logs.report("fonts found", "%s '%s' fonts found", #found, ext)
-            end
+            report("log", 2, "fonts found", "%s '%s' fonts found", #found, ext)
             nbfound = nbfound + #found
             table.append(list, found)
         end
     end
-    if trace_search then
-        logs.report("fonts found", "%d fonts found in '%s'", nbfound, dirname)
-    end
+    report("log", 2, "fonts found", "%d fonts found in '%s'", nbfound, dirname)
 
     for _,file in next, list do
         file = path_normalize(file)
-        logs.names_loading("loading font", "%s", file)
+        report("log", 1, "loading font", "%s", file)
         load_font(file, fontnames, newfontnames, texmf)
     end
 end
@@ -515,9 +502,9 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     variables OPENTYPEFONTS and TTFONTS of texmf.cnf
     ]]
     if expandpath("$OSFONTDIR"):is_empty() then
-        logs.info("Scanning TEXMF fonts...")
+        report("info", 0, "Scanning TEXMF fonts...")
     else
-        logs.info("Scanning TEXMF and OS fonts...")
+        report("info", 0, "Scanning TEXMF and OS fonts...")
     end
     local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^%.", "")
     fontdirs = fontdirs .. expandpath("$TTFONTS"):gsub("^%.", "")
@@ -548,9 +535,7 @@ local function read_fonts_conf(path, results)
     ]]
     local f = io.open(path)
     if not f then
-        if trace_search then
-            logs.report("cannot open file", "%s", path)
-        end
+        report("log", 2, "cannot open file", "%s", path)
         return results
     end
     local incomments = false
@@ -648,10 +633,8 @@ local function scan_os_fonts(fontnames, newfontnames)
       - fontcache for Unix (reads the fonts.conf file and scans the directories)
       - a static set of directories for Windows and MacOSX
     ]]
-    logs.info("Scanning OS fonts...")
-    if trace_search then
-        logs.info("Searching in static system directories...")
-    end
+    report("info", 0, "Scanning OS fonts...")
+    report("info", 2, "Searching in static system directories...")
     for _,d in next, get_os_dirs() do
         scan_dir(d, fontnames, newfontnames, false)
     end
@@ -663,7 +646,7 @@ local function update_names(fontnames, force)
     - fontnames is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
-    logs.info("Updating the font names database")
+    report("info", 0, "Updating the font names database")
 
     if force then
         fontnames = fontnames_init()
@@ -673,10 +656,8 @@ local function update_names(fontnames, force)
         end
         if fontnames.version ~= names.version then
             fontnames = fontnames_init()
-            if trace_search then
-                logs.report("No font names database or old one found; "
-                          .."generating new one")
-            end
+            report("log", 0, "No font names database or old one found; "
+                           .."generating new one")
         end
     end
     local newfontnames = fontnames_init()
@@ -700,10 +681,10 @@ local function save_names(fontnames)
         local luaname, lucname = make_name(path)
         table.tofile(luaname, fontnames, true)
         caches.compile(fontnames,luaname,lucname)
-        logs.info("Font names database saved")
+        report("info", 0, "Font names database saved")
         return path
     else
-        logs.info("Failed to save names database")
+        report("info", 0, "Failed to save names database")
         return nil
     end
 end

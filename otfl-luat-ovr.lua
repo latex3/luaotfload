@@ -12,8 +12,8 @@ local module_name = "luaotfload"
 local texiowrite_nl = texio.write_nl
 local stringformat  = string.format
 local tableconcat   = table.concat
-local ioflush       = io.flush
 local dummyfunction = function() end
+local type          = type
 
 --[[doc--
 We recreate the verbosity levels previously implemented in font-nms:
@@ -47,24 +47,44 @@ function logs.report(category,fmt,...)
     end
 end
 
-function logs.info(category,fmt,...)
-    if fmt then
-        texiowrite_nl(stringformat("%s | %s: %s",module_name,category,stringformat(fmt,...)))
-    elseif category then
-        texiowrite_nl(stringformat("%s | %s",module_name,category))
-    else
-        texiowrite_nl(stringformat("%s |",module_name))
-    end
-    ioflush()
-end
-
-logs.names_loading = function (category, fmt, ...)
-    if loglevel > 1 then
+logs.names_search = function (category, fmt, ...)
+    if loglevel > 2 then
         local res = { module_name, " |" }
         if category then res[#res+1] = " " .. category end
         if fmt      then res[#res+1] = ": " .. stringformat(fmt, ...) end
-        texiowrite_nl(tableconcat(res))
-        ioflush()
+        texiowrite_nl("log", tableconcat(res))
+    end
+end
+
+
+local log = function (category, fmt, ...)
+    local res = { module_name, " |" }
+    if category then res[#res+1] = " " .. category end
+    if fmt      then res[#res+1] = ": " .. stringformat(fmt, ...) end
+    texiowrite_nl("log", tableconcat(res))
+end
+
+local stdout = function (category, fmt, ...)
+    local res = { module_name, " |" }
+    if category then res[#res+1] = " " .. category end
+    if fmt      then res[#res+1] = ": " .. stringformat(fmt, ...) end
+    texiowrite_nl(tableconcat(res))
+end
+
+local level_ids = { common  = 0, loading = 1, search  = 2 }
+
+logs.names_report = function (mode, lvl, ...)
+    if type(lvl) == "string" then
+        lvl = level_ids[lvl]
+    end
+    if not lvl then lvl = 0 end
+
+    if loglevel > lvl then
+        if mode == "log" then
+            log (...)
+        else
+            stdout (...)
+        end
     end
 end
 

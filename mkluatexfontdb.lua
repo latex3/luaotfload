@@ -113,7 +113,8 @@ end
 local function generate(force)
     local fontnames, saved
     fontnames = names.update(fontnames, force)
-    logs.report("fonts in the database", "%i", #fontnames.mappings)
+    logs.names_report("log", 0, "fonts in the database",
+                      "%i", #fontnames.mappings)
     saved = names.save(fontnames)
     texiowrite_nl("")
 end

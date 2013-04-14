@@ -37,26 +37,6 @@ local set_loglevel = function (n)
 end
 logs.set_loglevel = set_loglevel
 
-function logs.report(category,fmt,...)
-    if fmt then
-        texiowrite_nl('log', stringformat("%s | %s: %s",module_name,category,stringformat(fmt,...)))
-    elseif category then
-        texiowrite_nl('log', stringformat("%s | %s",module_name,category))
-    else
-        texiowrite_nl('log', stringformat("%s |",module_name))
-    end
-end
-
-logs.names_search = function (category, fmt, ...)
-    if loglevel > 2 then
-        local res = { module_name, " |" }
-        if category then res[#res+1] = " " .. category end
-        if fmt      then res[#res+1] = ": " .. stringformat(fmt, ...) end
-        texiowrite_nl("log", tableconcat(res))
-    end
-end
-
-
 local log = function (category, fmt, ...)
     local res = { module_name, " |" }
     if category then res[#res+1] = " " .. category end

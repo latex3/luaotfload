@@ -24,6 +24,8 @@ end
 
 local feature_list = { }
 
+local report = logs.names_report
+
 --- ugh TODO use lpeg instead
 local function isstyle(s)
     local style  = string.lower(s):split("/")
@@ -37,7 +39,8 @@ local function isstyle(s)
         elseif v:find("^s=") then
             feature_list.optsize = v:split("=")[2]
         elseif v == "aat" or v == "icu" or v == "gr" then
-            logs.report("load font", "unsupported font option: %s", v)
+            report("log", 0,
+                "load font", "unsupported font option: %s", v)
         elseif not v:is_empty() then
             feature_list.style = v:gsub("[^%a%d]", "")
         end
@@ -98,7 +101,9 @@ defaults.lao  = defaults.thai
 local function set_default_features(script)
     local features
     local script = script or "dflt"
-    logs.report("load font", "auto-selecting default features for script: %s", script)
+    report("log", 0, "load font",
+        "auto-selecting default features for script: %s",
+        script)
     if defaults[script] then
         features = defaults[script]
     else
@@ -195,3 +200,4 @@ function fonts.definers.applypostprocessors(tfmdata)
     end
     return tfmdata
 end
+-- vim:tw=71:sw=4:ts=4:expandtab

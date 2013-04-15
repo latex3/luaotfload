@@ -1,28 +1,9 @@
--- 
---  This is file `luaotfload.lua',
---  generated with the docstrip utility.
--- 
---  The original source files were:
--- 
---  luaotfload.dtx  (with options: `lua')
---  This is a generated file.
---  
---  Copyright (C) 2009-2010 by by Elie Roux    <elie.roux@telecom-bretagne.eu>
---                            and Khaled Hosny <khaledhosny@eglug.org>
---                                 (Support: <lualatex-dev@tug.org>.)
---  
---  This work is under the CC0 license.
---  
---  This work consists of the main source file luaotfload.dtx
---  and the derived files
---      luaotfload.sty, luaotfload.lua
---  
 module("luaotfload", package.seeall)
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 1.27,
-    date          = "2012/05/28",
+    version       = 2.2,
+    date          = "2013/04/15",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -135,12 +116,6 @@ end
 --- otfl-font-otf.lua
 --- otfl-font-oti.lua
 --- otfl-font-otn.lua
-
---[[--
-  it all boils down to this: we load otfl-fonts.lua
-  which takes care of loading the merged file.
-  that’s it, go thank Hans!
---]]--
 
 --[[doc--
 We treat the fontloader as a black box so behavior is consistent
@@ -374,5 +349,3 @@ add_to_callback("luaotfload.patch_font",
 ]==]
 
 -- vim:tw=71:sw=4:ts=4:expandtab
-
---  End of File `luaotfload.lua'.

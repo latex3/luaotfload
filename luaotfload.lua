@@ -243,10 +243,12 @@ if fonts and fonts.readers.tfm then
   --- the font loader appears to read ofm like tfm so if this
   --- hack was supposed achieve that, we should excise it anyways
   fonts.readers.ofm  = fonts.readers.tfm
-  fonts.handlers.ofm = fonts.handlers.tfm
-  fonts.formats.ofm  = fonts.formats.tfm
+  fonts.handlers.ofm = fonts.handlers.tfm --- empty anyways
+  fonts.formats.ofm  = fonts.formats.tfm  --- “type1”
   --------------------------------------------------------------------
 end
+loadmodule"font-pfb.lua"
+
 loadmodule"font-nms.lua"
 loadmodule"font-clr.lua"
 loadmodule"font-ltx.lua"

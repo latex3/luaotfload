@@ -83,10 +83,10 @@ filename.
 local find_vf_file = function (name)
     local fullname = find_file(name, "ovf")
     if not fullname then
-      fullname = find_file(file.removesuffix(file.basename(name)), "ovf")
+        fullname = find_file(file.removesuffix(file.basename(name)), "ovf")
     end
     if fullname then
-      log("loading virtual font file %s.", fullname)
+        log("loading virtual font file %s.", fullname)
     end
     return fullname
 end
@@ -178,9 +178,9 @@ local non_generic_context =non_generic_context
 generic_context.no_callbacks_yet = true
 
 _G.non_generic_context = { luatex_fonts = {
-    load_before     = "otfl-fonts-merged.lua",
-     -- load_after      = nil, --- TODO, this is meant for callbacks
-    skip_loading    = true,
+        load_before     = "otfl-fonts-merged.lua",
+        -- load_after      = nil, --- TODO, this is meant for callbacks
+        skip_loading    = true,
 }}
 
 --[[doc--
@@ -235,7 +235,9 @@ if fonts and fonts.readers.tfm then
   --- (mktexpk:  don't know how to create bitmap font for omarabb.ofm)
   --- the font loader appears to read ofm like tfm so if this
   --- hack was supposed achieve that, we should excise it anyways
-  fonts.readers.ofm = fonts.readers.tfm
+  fonts.readers.ofm  = fonts.readers.tfm
+  fonts.handlers.ofm = fonts.handlers.tfm
+  fonts.formats.ofm  = fonts.formats.tfm
   --------------------------------------------------------------------
 end
 loadmodule"font-nms.lua"
@@ -362,6 +364,6 @@ add_to_callback("luaotfload.patch_font",
                 "unicodemath.set_sscale_diments")
 ]==]
 
--- vim:tw=71:sw=2:ts=2:expandtab
+-- vim:tw=71:sw=4:ts=4:expandtab
 
 --  End of File `luaotfload.lua'.

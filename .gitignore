@@ -24,3 +24,10 @@ tests/*.lua
 tests/*.otf
 tests/*.aux
 tests/phg-*.tex
+tests/*.pfb
+tests/*.afm
+tests/*.tfm
+tests/*.dvi
+tests/*.ofm
+tests/*.ovp
+tests/*.ovf

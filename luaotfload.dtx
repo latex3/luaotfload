@@ -636,7 +636,13 @@ end
 %
 % \subsection{\context override}
 %
-%    Here we override some defaults set in \context code.
+%    We have a unified function for both file and name resolver.
+%
+%    \begin{macrocode}
+fonts.define.resolvers.file = fonts.define.resolvers.name
+%    \end{macrocode}
+%
+%    Overriding some defaults set in \context code.
 %
 %    \begin{macrocode}
 fonts.mode = "node"

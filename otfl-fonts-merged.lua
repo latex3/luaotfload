@@ -6148,7 +6148,19 @@ local function t_hashed(t,cache)
     return nil
   end
 end
-local s_hashed=t_hashed
+--local s_hashed=t_hashed
+local function s_hashed(t,cache)
+    if t then
+        local ht = { }
+        local tf = t[1]
+        for i=1,#tf do
+            ht[i] = { [tf[i]] = true }
+        end
+        return ht
+    else
+        return nil
+    end
+end
 local function r_uncover(splitter,cache,cover,replacements)
   if cover=="" then
     return nil

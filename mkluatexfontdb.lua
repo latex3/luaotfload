@@ -55,6 +55,8 @@ Valid options:
   -vvv                         print all steps of directory searching
   -V --version                 print version and exit
   -h --help                    print this message
+
+  --find="font name"           query the database for a font name
   --log=stdout                 redirect log output to stdout
 
 The font database will be saved to
@@ -115,6 +117,22 @@ actions.generate = function (job)
 end
 
 actions.query = function (job)
+    local tmpspec = {
+        name          = job.query,
+        lookup        = "name",
+        specification = "name:"..job.query,
+    }
+    local foundname, _whatever, success = fonts.names.resolve(nil, nil, tmpspec)
+    if success then
+        logs.names_report(false, 0,
+            "resolve", "Font “%s” found!", job.query)
+        logs.names_report(false, 0,
+            "resolve", "Resolved file name “%s”:", foundname)
+    else
+        logs.names_report(false, 0,
+            "resolve", "Cannot find “%s”.", job.query)
+    end
+    texiowrite_nl""
     return true, true
 end
 
@@ -189,7 +207,7 @@ local main = function ( ) -- unit -> int
     local retval    = 0
     local job       = process_cmdline()
 
---    inspect(action_pending)
+    --inspect(action_pending)
 
     for i=1, #action_sequence do
         local actionname = action_sequence[i]

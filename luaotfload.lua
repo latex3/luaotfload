@@ -21,28 +21,55 @@ local add_to_callback, create_callback =
 local reset_callback, call_callback =
       luatexbase.reset_callback, luatexbase.call_callback
 
-local dummy_function   = function () end
+local dummy_function = function () end
 
 --[[doc--
-No final decision has been made on how to handle font definition.
-At the moment, there are three candidates: The \textsf{generic}
-callback as hard-coded in the font loader, the \textsf{old} wrapper,
-and a simplified version of the latter (\textsf{patch}) that does
-nothing besides applying font patches.
+No final decision has been made on how to handle font definition.  At
+the moment, there are three candidates: The \identifier{generic}
+callback as hard-coded in the font loader, the \identifier{old}
+wrapper, and a simplified version of the latter (\identifier{patch})
+that does nothing besides applying font patches.
 --doc]]--
 luaotfload.font_definer = "patch" --- | “generic” | “old”
 
-local fl_prefix = "otfl" -- “luatex” for luatex-plain
+local error, warning, info, log =
+    luatexbase.provides_module(luaotfload.module)
 
-local error, warning, info, log = luatexbase.provides_module(luaotfload.module)
+--[[doc--
+This is a necessary initalization in order not to rebuild an existing
+font.
+Maybe 600 should be replaced by \texmacro{pdfpkresolution} %% (why?)
+or \luafunction{texconfig.pk_dpi} (and it should be replaced
+dynamically), but we don't have access (yet) to the
+\identifier{texconfig} table, so we let it be 600.
+Anyway, it does still work fine even if \texmacro{pdfpkresolution} is
+changed.
+--doc]]--
 
-local luatex_version = 75
+kpse.init_prog("", 600, "/")
+
+--[[doc--
+We set the minimum version requirement for \LUATEX to v0.74, as it was
+the first version to include version 5.2 of the \LUA interpreter.
+--doc]]--
+
+local luatex_version = 74
 
 if tex.luatexversion < luatex_version then
     warning("LuaTeX v%.2f is old, v%.2f is recommended.",
              tex.luatexversion/100,
              luatex_version   /100)
 end
+
+--[[doc--
+\subsection{Module loading}
+
+We load the files imported from \CONTEXT with this function.
+It automatically prepends the prefix \fileent{otfl-} to its argument,
+so we can refer to the files with their actual \CONTEXT name.
+--doc]]--
+
+local fl_prefix = "otfl" -- “luatex” for luatex-plain
 local loadmodule = function (name)
     local tofind = fl_prefix .."-"..name
     local found = find_file(tofind,"tex")
@@ -50,16 +77,15 @@ local loadmodule = function (name)
         log("loading file %s.", found)
         dofile(found)
     else
-        --error("file %s not found.", tofind)
         error("file %s not found.", tofind)
     end
 end
 
 --[[doc--
 Virtual fonts are resolved via a callback.
-\verb|find_vf_file| derives the name of the virtual font file from the
-filename.
-(NB: \CONTEXT\ handles this likewise in \textsf{font-vf.lua}.)
+\luafunction{find_vf_file} derives the name of the virtual font file
+from the filename.
+(NB: \CONTEXT handles this likewise in \fileent{font-vf.lua}.)
 --doc]]--
 local Cs, P, lpegmatch = lpeg.Cs, lpeg.P, lpeg.match
 
@@ -118,38 +144,48 @@ end
 --- otfl-font-otn.lua
 
 --[[doc--
+
+\subsection{Preparing the Font Loader}
 We treat the fontloader as a black box so behavior is consistent
 between formats.
-The wrapper file is |otfl-fonts.lua| which we imported from
-\LUATEX-Plain.
+The wrapper file is \fileent{otfl-fonts.lua} which we imported from
+\href{http://standalone.contextgarden.net/current/context/experimental/tex/generic/context/luatex/}{\LUATEX-Plain}.
 It has roughly two purposes:
-(\textit{1}) insert the functionality required for fontloader, and
-(\textit{2}) put it in place via the respective callbacks.
+
+\begin{enumerate}
+
+   \item insert the functionality required for fontloader; and
+
+   \item put it in place via the respective callbacks.
+
+\end{enumerate}
+
 How the first step is executed depends on the presence on the
 \emph{merged font loader code}.
-In \textsf{luaotfload} this is contained in the file
-|otfl-fonts-merged.lua|.
+In \identifier{luaotfload} this is contained in the file
+\fileent{otfl-fonts-merged.lua}.
 If this file cannot be found,  the original libraries from \CONTEXT of
 which the merged code was composed are loaded instead.
 
 Hans provides two global tables to control the font loader:
-\begin{tabular}{ll}
-  \texttt{generic\textunderscore context}                    & 
-  encapsulation mechanism, callback functions
-  \\
-  \texttt{non\textunderscore generic\textunderscore context} & 
-  customized code insertion
-  \\
-\end{tabular}
-With \verb|non_generic_context| we can tailor the font loader insertion
-to our file naming habits (key \verb|load_before|).
-Additionally, \verb|skip_loading| can be unset to force loading of
-the original libraries as though the merged code was absent.
-Another key, \verb|load_after| is called at the time when the font
-loader is actually inserted.
-In combination with the option \verb|no_callbacks_yet| in
-\verb|generic_context|, we can insert our own,
-\textsf{luatexbase}-style callback handling here.
+
+  \begin{itemize}
+    \item  \luafunction{generic_context}:
+           encapsulation mechanism, callback functions
+    \item  \luafunction{non generic_context}:
+           customized code insertion
+  \end{itemize}
+
+
+With \luafunction{non_generic_context} we can tailor the font loader
+insertion to our file naming habits (key \luafunction{load_before}).
+Additionally, \luafunction{skip_loading} can be unset to force loading
+of the original libraries as though the merged code was absent.
+Another key, \luafunction{load_after} is called at the time when the
+font loader is actually inserted.
+In combination with the option \luafunction{no_callbacks_yet} in
+\luafunction{generic_context}, we can insert our own,
+\identifier{luatexbase}-style callback handling here.
 --doc]]--
 if not _G.    generic_context then _G.    generic_context = { } end
 if not _G.non_generic_context then _G.non_generic_context = { } end
@@ -166,21 +202,91 @@ _G.non_generic_context = { luatex_fonts = {
 }}
 
 --[[doc--
-The imported font loader will call \verb|callback.register| once
-(during \verb|font-def.lua|).
-This is unavoidable but harmless, so we make it call a dummy instead.
+The imported font loader will call \luafunction{callback.register} once
+while reading \fileent{font-def.lua}.
+This is unavoidable unless we modify the imported files, but harmless
+if we make it call a dummy instead.
 --doc]]--
+
 local trapped_register = callback.register
 callback.register      = dummy_function
 
 --[[doc--
-Now that things are sorted out we can load the fontloader.
+Now that things are sorted out we can finally load the fontloader.
 --doc]]--
+
 loadmodule"fonts.lua"
 
 --[[doc--
+By default, the fontloader requires a number of \emph{private
+attributes} for internal use.
+These must be kept consistent with the attribute handling methods as
+provided by \identifier{luatexbase}.
+Previously, when \identifier{luaotfload} imported individual files from
+\CONTEXT, the strategy was to override the function that allocates new
+attributes at the appropriate time during initialization, making it a
+wrapper around \luafunction{luatexbase.new_attribute}.
+
+\begin{verbatim}
+attributes.private = function (name)
+    local attr   = "otfl@" .. name
+    local number = luatexbase.attributes[attr]
+    if not number then
+        number = luatexbase.new_attribute(attr)
+    end
+    return number
+end
+\end{verbatim}
+
+Now that the fontloader comes as a package, this hack is no longer
+applicable.
+The attribute handler installed by \identifier{luatex-fonts} (see the
+file \fileent{otfl-basics-nod.lua}) cannot be intercepted before the
+first call to it takes place.
+While it is not feasible to prevent insertion of attributes at the
+wrong places, we can still retrieve them from the closure surrounding
+the allocation function \luafunction{attributes.private}
+using \LUA’s introspection features.
+
+The recovered attribute identifiers are prefixed “\fileent{otfl@}” to
+avoid name clashes.
+--doc]]--
+
+do
+    local debug_getupvalue = debug.getupvalue
+
+    local nups = debug.getinfo(attributes.private, "u").nups
+    local nup, numbers = 0
+    while nup <= nups do
+        nup = nup + 1
+        local upname, upvalue = debug_getupvalue(attributes.private, nup)
+        if upname == "numbers" then
+            numbers = upvalue
+            break
+        end
+    end
+    if numbers then
+        local luatexbase_attributes = luatexbase.attributes
+        local prefix = "otfl@"
+        --- re-register attributes from “numbers”
+        --- ... pull request for luatexbase pending
+        for name, num in next, numbers do
+            name = prefix .. name
+            luatexbase_attributes[name] = num
+        end
+    end
+    --- The definitions used by the fontloader are never
+    --- called again so it is safe to nil them, I suppose.
+    debug.setupvalue(attributes.private, nup, { })
+    _G.attributes = nil --- needed for initialization only
+end
+
+--[[doc--
+
+\subsection{Callbacks}
+
 After the fontloader is ready we can restore the callback trap from
-\textsf{luatexbase}.
+\identifier{luatexbase}.
 --doc]]--
 
 callback.register = trapped_register
@@ -188,8 +294,8 @@ callback.register = trapped_register
 --[[doc--
 We do our own callback handling with the means provided by luatexbase.
 
-Note: \verb|pre_linebreak_filter| and \verb|hpack_filter| are coupled
-in \CONTEXT\ in the concept of \emph{node processor}.
+Note: \luafunction{pre_linebreak_filter} and \luafunction{hpack_filter}
+are coupled in \CONTEXT in the concept of \emph{node processor}.
 --doc]]--
 
 add_to_callback("pre_linebreak_filter",
@@ -220,29 +326,46 @@ if fonts and fonts.readers.tfm then
   fonts.readers.ofm  = fonts.readers.tfm
   fonts.handlers.ofm = fonts.handlers.tfm --- empty anyways
   fonts.formats.ofm  = fonts.formats.tfm  --- “type1”
+  --- fonts.readers.sequence[#fonts.readers.sequence+1] = "ofm"
   --------------------------------------------------------------------
 end
-loadmodule"font-pfb.lua"
 
+--[[doc--
+
+Now we load the modules written for \identifier{luaotfload}.
+
+--doc]]--
+loadmodule"font-pfb.lua"    --- new in 2.0, added 2011
 loadmodule"font-nms.lua"
 loadmodule"font-clr.lua"
-loadmodule"font-ltx.lua"
+loadmodule"font-ltx.lua"    --- new in 2.0, added 2011
+
+--[[doc--
+
+We create a callback for patching fonts on the fly, to be used by other
+packages.
+It initially contains the empty function that we are going to override
+below.
+
+--doc]]--
 
 create_callback("luaotfload.patch_font", "simple", dummy_function)
 
 --[[doc--
-This is a wrapper for the imported font loader.
-As of 2013, everything it does appears to be redundand, so we won’t use
-it.
-Nevertheless, it has been adapted to work with the current structure of
-font data objects and will stay here for reference / until somebody
-reports breakage.
 
-TODO
+This is a wrapper for the imported font loader.
+As of 2013, everything it does appear to be redundand, so we won’t use
+it unless somebody points out a cogent reason.
+Nevertheless, it has been adapted to work with the current structure of
+font data objects and will stay here for reference / until breakage is
+reported.
+
+\emphasis{TODO}
 This one also enables patching fonts.
 The current fontloader apparently comes with a dedicated mechanism for
 that already: enhancers.
 How those work remains to be figured out.
+
 --doc]]--
 local define_font_wrapper = function (...)
     --- we use “tfmdata” (not “fontdata”) for consistency with the
@@ -279,35 +402,34 @@ local define_font_wrapper = function (...)
 end
 
 --[[doc--
+
+\subsection{\CONTEXT override}
+
 We provide a simplified version of the original font definition
 callback.
+
 --doc]]--
+
+local read_font_file = fonts.definers.read
 local patch_defined_font = function (...)
-    local tfmdata = fonts.definers.read(...)
+    local tfmdata = read_font_file(...)-- spec -> size -> id -> tmfdata
     if type(tfmdata) == "table" then
         call_callback("luaotfload.patch_font", tfmdata)
     end
-    --inspect(tfmdata.shared.features)
     return tfmdata
 end
 
-fonts.mode = "node"
 caches.compilemethod = "both"
-
-function attributes.private(name)
-    local attr   = "otfl@" .. name
-    local number = luatexbase.attributes[attr]
-    if not number then
-        number = luatexbase.new_attribute(attr)
-    end
-    return number
-end
 
 reset_callback("define_font")
 
+--[[doc--
+Finally we register the callbacks
+--doc]]--
+
 if luaotfload.font_definer == "old"  then
   add_to_callback("define_font",
-                  old_define_font_wrapper,
+                  define_font_wrapper,
                   "luaotfload.define_font",
                   1)
 elseif luaotfload.font_definer == "generic"  then
@@ -323,29 +445,5 @@ elseif luaotfload.font_definer == "patch"  then
 end
 
 loadmodule"features.lua"
-
---[==[
----- is this still necessary?
-local set_sscale_diments = function (tfmdata)
-    local mathconstants = tfmdata.MathConstants
-    if mathconstants then
-        local tfmparameters = tfmdata.parameters
-        if mathconstants.ScriptPercentScaleDown then
-            tfmparameters[10] = mathconstants.ScriptPercentScaleDown
-        else -- resort to plain TeX default
-            tfmparameters[10] = 70
-        end
-        if mathconstants.ScriptScriptPercentScaleDown then
-            tfmparameters[11] = mathconstants.ScriptScriptPercentScaleDown
-        else -- resort to plain TeX default
-            tfmparameters[11] = 50
-        end
-    end
-end
-
-add_to_callback("luaotfload.patch_font",
-                set_sscale_diments,
-                "unicodemath.set_sscale_diments")
-]==]
 
 -- vim:tw=71:sw=4:ts=4:expandtab

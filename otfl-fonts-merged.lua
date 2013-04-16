@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/14/13 16:51:15
+-- merge date  : 04/16/13 18:49:45
 
 do -- begin closure to overcome local limits and interference
 
@@ -2141,7 +2141,7 @@ elseif not lfs.isfile then
   end
 end
 local insert,concat=table.insert,table.concat
-local match=string.match
+local match,find=string.match,string.find
 local lpegmatch=lpeg.match
 local getcurrentdir,attributes=lfs.currentdir,lfs.attributes
 local checkedsplit=string.checkedsplit
@@ -2355,11 +2355,11 @@ local anchors=fwslash+drivespec
 local untouched=periods+(1-period)^1*P(-1)
 local splitstarter=(Cs(drivespec*(bwslash/"/"+fwslash)^0)+Cc(false))*Ct(lpeg.splitat(S("/\\")^1))
 local absolute=fwslash
-function file.collapsepath(str,anchor)
+function file.collapsepath(str,anchor) 
   if not str then
     return
   end
-  if anchor and not lpegmatch(anchors,str) then
+  if anchor==true and not lpegmatch(anchors,str) then
     str=getcurrentdir().."/"..str
   end
   if str=="" or str=="." then
@@ -2399,7 +2399,12 @@ function file.collapsepath(str,anchor)
   elseif lpegmatch(absolute,str) then
     return "/"..concat(newelements,'/')
   else
-    return concat(newelements,'/')
+    newelements=concat(newelements,'/')
+    if anchor=="." and find(str,"^%./") then
+      return "./"..newelements
+    else
+      return newelements
+    end
   end
 end
 local validchars=R("az","09","AZ","--","..")
@@ -3399,10 +3404,10 @@ if tex.attribute[0]~=0 then
   texio.write_nl("log","!")
   tex.attribute[0]=0 
 end
-attributes={}
+attributes=attributes or {}
 attributes.unsetvalue=-0x7FFFFFFF
 local numbers,last={},127
-function attributes.private(name)
+attributes.private=attributes.private or function(name)
   local number=numbers[name]
   if not number then
     if last<255 then
@@ -6148,19 +6153,7 @@ local function t_hashed(t,cache)
     return nil
   end
 end
---local s_hashed=t_hashed
-local function s_hashed(t,cache)
-    if t then
-        local ht = { }
-        local tf = t[1]
-        for i=1,#tf do
-            ht[i] = { [tf[i]] = true }
-        end
-        return ht
-    else
-        return nil
-    end
-end
+local s_hashed=t_hashed
 local function r_uncover(splitter,cache,cover,replacements)
   if cover=="" then
     return nil

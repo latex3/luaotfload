@@ -522,6 +522,7 @@ local function read_fonts_conf(path, results)
     ]]
     local f = io.open(path)
     if not f then
+        logs.info("Warning: unable to read "..path.. ", skipping...")
         return results
     end
     local incomments = false

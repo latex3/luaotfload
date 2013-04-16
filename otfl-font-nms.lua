@@ -522,7 +522,7 @@ local function read_fonts_conf(path, results)
     ]]
     local f = io.open(path)
     if not f then
-        error("Cannot open the file "..path)
+        return results
     end
     local incomments = false
     for line in f:lines() do
@@ -571,7 +571,7 @@ local function read_fonts_conf(path, results)
                     elseif not lfs.isfile(include) and not lfs.isdir(include) then
                         include = file.join(file.dirname(path), include)
                     end
-                    if lfs.isfile(include) then
+                    if lfs.isfile(include) and kpse.readable_file(include) then
                         -- maybe we should prevent loops here?
                         -- we exclude path with texmf in them, as they should
                         -- be found otherwise

@@ -76,9 +76,12 @@ end
 
 local synonyms = {
     regular    = { "normal", "roman", "plain", "book", "medium" },
-    bold       = { "boldregular", "demi", "demibold" },
+    -- boldregular was for old versions of Linux Libertine, is it still useful?
+    -- semibold is in new versions of Linux Libertine, but there is also a bold,
+    -- not sure it's useful here...
+    bold       = { "demi", "demibold", "semibold", "boldregular" },
     italic     = { "regularitalic", "normalitalic", "oblique", "slanted" },
-    bolditalic = { "boldoblique", "boldslanted", "demiitalic", "demioblique", "demislanted", "demibolditalic" },
+    bolditalic = { "boldoblique", "boldslanted", "demiitalic", "demioblique", "demislanted", "demibolditalic", "semibolditalic" },
 }
 
 local loaded   = false

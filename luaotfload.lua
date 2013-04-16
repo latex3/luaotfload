@@ -218,67 +218,34 @@ Now that things are sorted out we can finally load the fontloader.
 loadmodule"fonts.lua"
 
 --[[doc--
-By default, the fontloader requires a number of \emph{private
+By default, the fontloader requires a number of \emphasis{private
 attributes} for internal use.
 These must be kept consistent with the attribute handling methods as
 provided by \identifier{luatexbase}.
-Previously, when \identifier{luaotfload} imported individual files from
-\CONTEXT, the strategy was to override the function that allocates new
-attributes at the appropriate time during initialization, making it a
-wrapper around \luafunction{luatexbase.new_attribute}.
-
-\begin{verbatim}
-attributes.private = function (name)
-    local attr   = "otfl@" .. name
-    local number = luatexbase.attributes[attr]
-    if not number then
-        number = luatexbase.new_attribute(attr)
-    end
-    return number
-end
-\end{verbatim}
-
-Now that the fontloader comes as a package, this hack is no longer
-applicable.
-The attribute handler installed by \identifier{luatex-fonts} (see the
-file \fileent{otfl-basics-nod.lua}) cannot be intercepted before the
-first call to it takes place.
-While it is not feasible to prevent insertion of attributes at the
-wrong places, we can still retrieve them from the closure surrounding
-the allocation function \luafunction{attributes.private}
-using \LUA’s introspection features.
-
-The recovered attribute identifiers are prefixed “\fileent{otfl@}” to
+Our strategy is to override the function that allocates new attributes
+before we initialize the font loader, making it a wrapper around
+\luafunction{luatexbase.new_attribute}.\footnote{%
+    Many thanks, again, to Hans Hagen for making this part
+    configurable!
+}
+The attribute identifiers are prefixed “\fileent{otfl@}” to
 avoid name clashes.
 --doc]]--
 
 do
-    local debug_getupvalue = debug.getupvalue
+    local new_attribute = luatexbase.new_attribute
+    local the_attributes = luatexbase.attributes
 
-    local nups = debug.getinfo(attributes.private, "u").nups
-    local nup, numbers = 0
-    while nup <= nups do
-        nup = nup + 1
-        local upname, upvalue = debug_getupvalue(attributes.private, nup)
-        if upname == "numbers" then
-            numbers = upvalue
-            break
+    _G.attributes = _G.attributes or { }
+
+    _G.attributes.private = function (name)
+        local attr   = "otfl@" .. name
+        local number = the_attributes[attr]
+        if not number then
+            number = new_attribute(attr)
         end
+        return number
     end
-    if numbers then
-        local luatexbase_attributes = luatexbase.attributes
-        local prefix = "otfl@"
-        --- re-register attributes from “numbers”
-        --- ... pull request for luatexbase pending
-        for name, num in next, numbers do
-            name = prefix .. name
-            luatexbase_attributes[name] = num
-        end
-    end
-    --- The definitions used by the fontloader are never
-    --- called again so it is safe to nil them, I suppose.
-    debug.setupvalue(attributes.private, nup, { })
-    _G.attributes = nil --- needed for initialization only
 end
 
 --[[doc--

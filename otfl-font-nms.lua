@@ -189,6 +189,28 @@ font database created by the mkluatexfontdb script.
 
 --doc]]--
 
+
+---
+--- the request specification has the fields:
+---
+---   · features: table
+---     · normal: set of { ccmp clig itlc kern liga locl mark mkmk rlig }
+---     · ???
+---   · forced:   string
+---   · lookup:   "name" | "file"
+---   · method:   string
+---   · name:     string
+---   · resolved: string
+---   · size:     int
+---   · specification: string (== <lookup> ":" <name>)
+---   · sub:      string
+---
+--- the return value of “resolve” is the file name of the requested
+--- font
+
+--- 'a -> 'a -> table -> (string * string | bool * bool)
+--- note by phg: I added a third return value that indicates a
+--- successful lookup as this cannot be inferred from the other values.
 resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
     local name  = sanitize_string(specification.name)
     local style = sanitize_string(specification.style) or "regular"
@@ -282,7 +304,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                         "font family='%s', subfamily='%s' found: %s",
                         name, style, found[1].filename[1]
                     )
-                    return found[1].filename[1], found[1].filename[2]
+                    return found[1].filename[1], found[1].filename[2], true
                 end
             elseif #found > 1 then
                 -- we found matching font(s) but not in the requested optical
@@ -303,10 +325,10 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                         "font family='%s', subfamily='%s' found: %s",
                         name, style, closest.filename[1]
                     )
-                    return closest.filename[1], closest.filename[2]
+                    return closest.filename[1], closest.filename[2], true
                 end
             elseif found.fallback then
-                return found.fallback.filename[1], found.fallback.filename[2]
+                return found.fallback.filename[1], found.fallback.filename[2], true
             end
             -- no font found so far
             if not reloaded then
@@ -316,10 +338,10 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 reloaded   = true
                 return resolve(_,_,specification)
             else
-                -- else, fallback to filename
+                -- else, fallback to requested name
                 -- XXX: specification.name is empty with absolute paths, looks
                 -- like a bug in the specification parser
-                return specification.name, false
+                return specification.name, false, false
             end
         end
     else
@@ -329,7 +351,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             reloaded   = true
             return resolve(_,_,specification)
         else
-            return specification.name, false
+            return specification.name, false, false
         end
     end
 end

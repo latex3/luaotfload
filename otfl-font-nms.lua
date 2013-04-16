@@ -7,7 +7,6 @@ if not modules then modules = { } end modules ['font-nms'] = {
 }
 
 --- Luatex builtins
-local dofile                  = dofile
 local load                    = load
 local next                    = next
 local pcall                   = pcall
@@ -151,10 +150,10 @@ load_names = function ( )
         report("info", 0,
             [[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
-        data = names.update(fontnames_init())
-        names.save(data)
+        data = update_names(fontnames_init())
+        save_names(data)
     end
-    texiowrite_nl("")
+    texiowrite_nl""
     return data
 end
 
@@ -200,7 +199,6 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     elseif specification.size then
         size = specification.size / 65536
     end
-
 
     if not loaded then
         names.data = load_names()
@@ -313,8 +311,8 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             -- no font found so far
             if not reloaded then
                 -- try reloading the database
-                names.data = names.update(names.data)
-                names.save(names.data)
+                names.data = update_names(names.data)
+                save_names(names.data)
                 reloaded   = true
                 return resolve(_,_,specification)
             else
@@ -326,8 +324,8 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
         end
     else
         if not reloaded then
-            names.data = names.update()
-            names.save(names.data)
+            names.data = update_names()
+            save_names(names.data)
             reloaded   = true
             return resolve(_,_,specification)
         else
@@ -336,35 +334,43 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     end
 end
 
-local function font_fullinfo(filename, subfont, texmf)
-    local t = { }
-    local f = fontloader.open(filename, subfont)
-    if not f then
+--[[doc--
+The data inside an Opentype font file can be quite heterogeneous.
+Thus in order to get the relevant information, parts of the original
+table as returned by the font file reader need to be relocated.
+--doc]]--
+local font_fullinfo = function (filename, subfont, texmf)
+    local tfmdata = { }
+    local rawfont = fontloader.open(filename, subfont)
+    if not rawfont then
         report("log", 1, "error", "failed to open %s", filename)
         return
     end
-    local m = fontloader.to_table(f)
-    fontloader.close(f)
-    collectgarbage('collect')
+    local metadata = fontloader.to_table(rawfont)
+    fontloader.close(rawfont)
+    collectgarbage("collect")
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
-    if m.fontstyle_name then
-        for _,v in next, m.fontstyle_name do
-            if v.lang == 1033 then
-                t.fontstyle_name = v.name
+    if metadata.fontstyle_name then
+        for _, name in next, metadata.fontstyle_name do
+            if name.lang == 1033 then --- I hate magic numbers
+                tfmdata.fontstyle_name = name.name
             end
         end
     end
-    if m.names then
-        for _,v in next, m.names do
-            if v.lang == "English (US)" then
-                t.names = {
-                    -- see
-                    -- http://developer.apple.com/textfonts/
-                    -- TTRefMan/RM06/Chap6name.html
-                    fullname = v.names.compatfull     or v.names.fullname,
-                    family   = v.names.preffamilyname or v.names.family,
-                    subfamily= t.fontstyle_name       or v.names.prefmodifiers  or v.names.subfamily,
-                    psname   = v.names.postscriptname
+    if metadata.names then
+        for _, namedata in next, metadata.names do
+            if namedata.lang == "English (US)" then
+                tfmdata.names = {
+                    --- see
+                    --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
+                    fullname = namedata.names.compatfull
+                            or namedata.names.fullname,
+                    family   = namedata.names.preffamilyname
+                            or namedata.names.family,
+                    subfamily= tfmdata.fontstyle_name
+                            or namedata.names.prefmodifiers
+                            or namedata.names.subfamily,
+                    psname   = namedata.names.postscriptname
                 }
             end
         end
@@ -373,23 +379,26 @@ local function font_fullinfo(filename, subfont, texmf)
         report("log", 1, "broken font rejected", "%s", basefile)
         return
     end
-    t.fontname    = m.fontname
-    t.fullname    = m.fullname
-    t.familyname  = m.familyname
-    t.filename    = { texmf and filebasename(filename) or filename, subfont }
-    t.weight      = m.pfminfo.weight
-    t.width       = m.pfminfo.width
-    t.slant       = m.italicangle
-    -- don't waste the space with zero values
-    t.size = {
-        m.design_size         ~= 0 and m.design_size         or nil,
-        m.design_range_top    ~= 0 and m.design_range_top    or nil,
-        m.design_range_bottom ~= 0 and m.design_range_bottom or nil,
+    tfmdata.fontname    = metadata.fontname
+    tfmdata.fullname    = metadata.fullname
+    tfmdata.familyname  = metadata.familyname
+    tfmdata.filename    = {
+        texmf and filebasename(filename) or filename,
+        subfont
     }
-    return t
+    tfmdata.weight      = metadata.pfminfo.weight
+    tfmdata.width       = metadata.pfminfo.width
+    tfmdata.slant       = metadata.italicangle
+    -- don't waste the space with zero values
+    tfmdata.size = {
+        metadata.design_size         ~= 0 and metadata.design_size         or nil,
+        metadata.design_range_top    ~= 0 and metadata.design_range_top    or nil,
+        metadata.design_range_bottom ~= 0 and metadata.design_range_bottom or nil,
+    }
+    return tfmdata
 end
 
-local function load_font(filename, fontnames, newfontnames, texmf)
+local load_font = function (filename, fontnames, newfontnames, texmf)
     local newmappings = newfontnames.mappings
     local newstatus   = newfontnames.status
     local mappings    = fontnames.mappings

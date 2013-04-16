@@ -11,7 +11,7 @@ fonts.names          = fonts.names or { }
 
 local names          = fonts.names
 local names_dir      = "luatex-cache/generic/names"
-names.version        = 2.010 -- not the same as in context
+names.version        = 2.2 -- not the same as in context
 names.data           = nil
 names.path           = {
     basename = "otfl-names.lua",
@@ -103,7 +103,18 @@ local synonyms = {
 local loaded   = false
 local reloaded = false
 
-function names.resolve(_,_,specification) -- the 1st two parameters are used by ConTeXt
+--[[doc--
+
+Luatex-fonts, the font-loader package luaotfload imports, comes with
+basic file location facilities (see luatex-fonts-syn.lua).
+However, the builtin functionality is too limited to be of more than
+basic use, which is why we supply our own resolver that accesses the
+font database created by the mkluatexfontdb script.
+
+--doc]]--
+
+local resolve resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
+    inspect(specification)
     local name  = sanitize(specification.name)
     local style = sanitize(specification.style) or "regular"
 
@@ -229,7 +240,7 @@ function names.resolve(_,_,specification) -- the 1st two parameters are used by 
                 names.data = names.update(names.data)
                 names.save(names.data)
                 reloaded   = true
-                return names.resolve(_,_,specification)
+                return resolve(_,_,specification)
             else
                 -- else, fallback to filename
                 -- XXX: specification.name is empty with absolute paths, looks
@@ -242,14 +253,15 @@ function names.resolve(_,_,specification) -- the 1st two parameters are used by 
             names.data = names.update()
             names.save(names.data)
             reloaded   = true
-            return names.resolve(_,_,specification)
+            return resolve(_,_,specification)
         else
             return specification.name, false
         end
     end
 end
 
-names.resolvespec = names.resolve
+names.resolve     = resolve --- replace the resolver from luatex-fonts
+names.resolvespec = resolve
 
 local function font_fullinfo(filename, subfont, texmf)
     local t = { }

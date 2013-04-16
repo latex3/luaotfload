@@ -88,9 +88,16 @@ end
 
 local synonyms = {
     regular    = { "normal", "roman", "plain", "book", "medium" },
-    bold       = { "boldregular", "demi", "demibold" },
+    --- TODO note from Élie Roux
+    --- boldregular was for old versions of Linux Libertine, is it still useful?
+    --- semibold is in new versions of Linux Libertine, but there is also a bold,
+    --- not sure it's useful here...
+    bold       = { "demi", "demibold", "semibold", "boldregular" },
     italic     = { "regularitalic", "normalitalic", "oblique", "slanted" },
-    bolditalic = { "boldoblique", "boldslanted", "demiitalic", "demioblique", "demislanted", "demibolditalic" },
+    bolditalic = {
+        "boldoblique", "boldslanted", "demiitalic", "demioblique",
+        "demislanted", "demibolditalic", "semibolditalic"
+    },
 }
 
 local loaded   = false
@@ -585,7 +592,7 @@ local function read_fonts_conf(path, results)
                     elseif not lfs.isfile(include) and not lfs.isdir(include) then
                         include = file.join(file.dirname(path), include)
                     end
-                    if lfs.isfile(include) then
+                    if lfs.isfile(include) and kpse.readable_file(include) then
                         -- maybe we should prevent loops here?
                         -- we exclude path with texmf in them, as they should
                         -- be found otherwise

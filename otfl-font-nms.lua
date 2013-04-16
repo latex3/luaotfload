@@ -38,6 +38,7 @@ local upper, lower, format    = string.upper, string.lower, string.format
 local gsub, match, rpadd      = string.gsub, string.match, string.rpadd
 local gmatch, sub, find       = string.gmatch, string.sub, string.find
 local utfgsub                 = unicode.utf8.gsub
+local tableinsert             = table.insert
 
 local report = logs.names_report
 
@@ -547,12 +548,13 @@ end
   in OSFONTDIR.
 ]]
 
-local function read_fonts_conf(path, results)
+local read_fonts_conf read_fonts_conf = function (path, results, passed_paths)
     --[[
     This function parses /etc/fonts/fonts.conf and returns all the dir it finds.
     The code is minimal, please report any error it may generate.
     ]]
     local f = io.open(path)
+    tableinsert(passed_paths, path)
     if not f then
         report("log", 2, "cannot open file", "%s", path)
         return results
@@ -604,14 +606,14 @@ local function read_fonts_conf(path, results)
                     elseif not lfs.isfile(include) and not lfs.isdir(include) then
                         include = file.join(file.dirname(path), include)
                     end
-                    if lfs.isfile(include) and kpse.readable_file(include) then
+                    if lfs.isfile(include) and kpse.readable_file(include) and not table.contains(passed_paths, include) then
                         -- maybe we should prevent loops here?
                         -- we exclude path with texmf in them, as they should
                         -- be found otherwise
-                        read_fonts_conf(include, results)
+                        read_fonts_conf(include, results, passed_paths)
                     elseif lfs.isdir(include) then
                         for _,f in next, glob(file.join(include, "*.conf")) do
-                            read_fonts_conf(f, results)
+                            read_fonts_conf(f, results, passed_paths)
                         end
                     end
                 end
@@ -639,7 +641,7 @@ local function get_os_dirs()
     else
         for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
             if lfs.isfile(p) then
-                return read_fonts_conf("/etc/fonts/fonts.conf", {})
+                return read_fonts_conf("/etc/fonts/fonts.conf", {}, {})
             end
         end
     end

@@ -577,7 +577,6 @@ local function read_fonts_conf(path, results, passed_paths)
                         include = file.join(file.dirname(path), include)
                     end
                     if lfs.isfile(include) and kpse.readable_file(include) and not table.contains(passed_paths, include) then
-                        -- maybe we should prevent loops here?
                         -- we exclude path with texmf in them, as they should
                         -- be found otherwise
                         read_fonts_conf(include, results, passed_paths)

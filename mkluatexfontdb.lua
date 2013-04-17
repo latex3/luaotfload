@@ -57,6 +57,8 @@ Valid options:
   -h --help                    print this message
 
   --find="font name"           query the database for a font name
+  -F --fuzzy                   look for approximate matches if --find fails
+
   --log=stdout                 redirect log output to stdout
 
 The font database will be saved to
@@ -109,7 +111,6 @@ actions.generate = function (job)
     logs.names_report("log", 0, "fonts in the database",
                       "%i", #fontnames.mappings)
     savedname = names.save(fontnames)
-    texiowrite_nl""
     if savedname then --- FIXME have names.save return bool
         return true, true
     end
@@ -117,22 +118,32 @@ actions.generate = function (job)
 end
 
 actions.query = function (job)
+
+    local query = job.query
     local tmpspec = {
-        name          = job.query,
+        name          = query,
         lookup        = "name",
-        specification = "name:"..job.query,
+        specification = "name:" .. query,
+        optsize       = 0,
     }
-    local foundname, _whatever, success = fonts.names.resolve(nil, nil, tmpspec)
+
+    local foundname, _whatever, success =
+        fonts.names.resolve(nil, nil, tmpspec)
+
     if success then
         logs.names_report(false, 0,
-            "resolve", "Font “%s” found!", job.query)
+            "resolve", "Font “%s” found!", query)
         logs.names_report(false, 0,
             "resolve", "Resolved file name “%s”:", foundname)
     else
         logs.names_report(false, 0,
-            "resolve", "Cannot find “%s”.", job.query)
+            "resolve", "Cannot find “%s”.", query)
+        if job.fuzzy == true then
+            logs.names_report(false, 2,
+                "resolve", "Looking for close matches, this may take a while ...")
+            local success = fonts.names.find_closest(query, job.fuzzy_limit)
+        end
     end
-    texiowrite_nl""
     return true, true
 end
 
@@ -161,9 +172,11 @@ local process_cmdline = function ( ) -- unit -> jobspec
         verbose          = 1  ,
         version          = "V",
         find             = 1,
+        fuzzy            = "F",
+        limit            = 1,
     }
 
-    local short_options = "fqvVh"
+    local short_options = "fFqvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -198,6 +211,13 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "find" then
             action_pending["query"] = true
             result.query = optarg[n]
+        elseif v == "F" then
+            result.fuzzy = true
+        elseif v == "limit" then
+            local lim = optarg[n]
+            if lim then
+                result.fuzzy_limit = tonumber(lim)
+            end
         end
     end
     return result
@@ -207,7 +227,8 @@ local main = function ( ) -- unit -> int
     local retval    = 0
     local job       = process_cmdline()
 
-    --inspect(action_pending)
+--    inspect(action_pending)
+--    inspect(job)
 
     for i=1, #action_sequence do
         local actionname = action_sequence[i]
@@ -236,6 +257,7 @@ local main = function ( ) -- unit -> int
         if exit then break end
     end
 
+    texiowrite_nl""
     return retval
 end
 

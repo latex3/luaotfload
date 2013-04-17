@@ -17,6 +17,7 @@ local iolines                 = io.lines
 local ioopen                  = io.open
 local kpseexpand_path         = kpse.expand_path
 local mathabs                 = math.abs
+local mathmin                 = math.min
 local stringfind              = string.find
 local stringformat            = string.format
 local stringgmatch            = string.gmatch
@@ -24,13 +25,15 @@ local stringgsub              = string.gsub
 local stringlower             = string.lower
 local stringsub               = string.sub
 local stringupper             = string.upper
+local tableappend             = table.append   -- TODO get rid of
+local tableconcat             = table.concat
+local tablecontains           = table.contains -- TODO get rid of
+local tablecopy               = table.copy
+local tablesort               = table.sort
+local tabletofile             = table.tofile
 local texiowrite_nl           = texio.write_nl
 local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
-local tablecontains           = table.contains -- TODO get rid of
-local tableappend             = table.append   -- TODO get rid of
-local tabletofile             = table.tofile
-local tablecopy               = table.copy
 
 --- these come from Lualibs/Context
 local dirglob                 = dir.glob
@@ -99,8 +102,6 @@ end
 --- When loading a lua file we try its binary complement first, which
 --- is assumed to be located at an identical path, carrying the suffix
 --- .luc.
---- Furthermore, we memoize loaded files along the way to avoid
---- duplication.
 
 local code_cache = { }
 
@@ -135,13 +136,15 @@ local load_lua_file = function (path)
 end
 
 --- define locals in scope
+local find_closest
+local font_fullinfo
 local load_names
+local read_fonts_conf
+local reload_db
+local resolve
 local save_names
 local scan_external_dir
 local update_names
-local read_fonts_conf
-local resolve
-
 
 load_names = function ( )
     local path            = filejoin(names.path.dir, names.path.basename)
@@ -159,6 +162,8 @@ load_names = function ( )
     texiowrite_nl""
     return data
 end
+
+local fuzzy_limit = 1 --- display closest only
 
 local synonyms = {
     regular    = { "normal",        "roman",
@@ -179,8 +184,9 @@ local synonyms = {
                    "semibolditalic",                   },
 }
 
-local loaded   = false
-local reloaded = false
+--- state of the database
+local fonts_loaded   = false
+local fonts_reloaded = false
 
 --[[doc--
 
@@ -212,8 +218,11 @@ font database created by the mkluatexfontdb script.
 --- font
 
 --- 'a -> 'a -> table -> (string * string | bool * bool)
---- note by phg: I added a third return value that indicates a
---- successful lookup as this cannot be inferred from the other values.
+---
+---     note by phg: I added a third return value that indicates a
+---     successful lookup as this cannot be inferred from the other
+---     values.
+---
 resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
     local name  = sanitize_string(specification.name)
     local style = sanitize_string(specification.style) or "regular"
@@ -225,9 +234,9 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
         size = specification.size / 65536
     end
 
-    if not loaded then
-        names.data = load_names()
-        loaded     = true
+    if not fonts_loaded then
+        names.data   = load_names()
+        fonts_loaded = true
     end
 
     local data = names.data
@@ -235,6 +244,8 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
         if data.mappings then
             local found = { }
             for _,face in next, data.mappings do
+                --- TODO we really should store those in dedicated
+                --- .sanitized field
                 local family    = sanitize_string(face.names and face.names.family)
                 local subfamily = sanitize_string(face.names and face.names.subfamily)
                 local fullname  = sanitize_string(face.names and face.names.fullname)
@@ -333,38 +344,150 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             elseif found.fallback then
                 return found.fallback.filename[1], found.fallback.filename[2], true
             end
-            -- no font found so far
-            if not reloaded then
-                -- try reloading the database
-                names.data = update_names(names.data)
-                save_names(names.data)
-                reloaded   = true
-                return resolve(_,_,specification)
+            --- no font found so far
+            if not fonts_reloaded then
+                --- last straw: try reloading the database
+                return reload_db(resolve, nil, nil, specification)
             else
-                -- else, fallback to requested name
-                -- XXX: specification.name is empty with absolute paths, looks
-                -- like a bug in the specification parser
+                --- else, fallback to requested name
+                --- XXX: specification.name is empty with absolute paths, looks
+                --- like a bug in the specification parser
                 return specification.name, false, false
             end
         end
-    else
-        if not reloaded then
-            names.data = update_names()
-            save_names(names.data)
-            reloaded   = true
-            return resolve(_,_,specification)
-        else
+
+    else --- no db or outdated; reload names and retry
+        if not fonts_reloaded then
+            return reload_db(resolve, nil, nil, specification)
+        else --- unsucessfully reloaded; bail
             return specification.name, false, false
         end
     end
+end --- resolve()
+
+--- when reload is triggered we update the database
+--- and then re-run the caller with the arg list
+
+--- ('a -> 'a) -> 'a list -> 'a
+reload_db = function (caller, ...)
+    report("log", 1, "db", "reload initiated")
+    names.data = update_names()
+    save_names(names.data)
+    fonts_reloaded = true
+    return caller(...)
 end
+
+--- string -> string -> int
+local iterative_levenshtein = function (s1, s2)
+
+  local costs = { }
+  local len1, len2 = #s1, #s2
+
+  for i = 0, len1 do
+    local last = i
+    for j = 0, len2 do
+      if i == 0 then
+        costs[j] = j
+      else
+        if j > 0 then
+          local current = costs[j-1]
+          if stringsub(s1, i, i) ~= stringsub(s2, j, j) then
+            current = mathmin(current, last, costs[j]) + 1
+          end
+          costs[j-1] = last
+          last = current
+        end
+      end
+    end
+    if i > 0 then costs[len2] = last end
+  end
+
+  return costs[len2]--- lower right has the distance
+end
+
+--- string -> int -> bool
+find_closest = function (name, limit)
+    local name     = sanitize_string(name)
+    limit          = limit or fuzzy_limit
+
+    if not fonts_loaded then
+        names.data = load_names()
+        fonts_loaded     = true
+    end
+
+    local data = names.data
+
+    if type(data) == "table" then
+        local by_distance   = { } --- (int, string list) dict
+        local distances     = { } --- int list
+        local cached        = { } --- (string, int) dict
+        local mappings      = data.mappings
+        local n_fonts       = #mappings
+
+        for n = 1, n_fonts do
+            local current    = mappings[n]
+            local cnames     = current.names
+            --[[
+                This is simplistic but surpisingly fast.
+                Matching is performed against the “family” name
+                of a db record. We then store its “fullname” at
+                it edit distance.
+                We should probably do some weighting over all the
+                font name categories as well as whatever agrep
+                does.
+            --]]
+            if cnames then
+                local fullname, family = cnames.fullname, cnames.family
+                family = sanitize_string(family)
+
+                local dist = cached[family]--- maybe already calculated
+                if not dist then
+                    dist = iterative_levenshtein(name, family)
+                    cached[family] = dist
+                end
+                local namelst = by_distance[dist]
+                if not namelst then --- first entry
+                    namelst = { fullname }
+                    distances[#distances+1] = dist
+                else --- append
+                    namelst[#namelst+1] = fullname
+                end
+                by_distance[dist] = namelst
+            end
+        end
+
+        --- print the matches according to their distance
+        local n_distances = #distances
+        if n_distances > 0 then --- got some data
+            tablesort(distances)
+            limit = mathmin(n_distances, limit)
+            report(false, 1, "query",
+                    "displaying %d distance levels", limit)
+
+            for i = 1, limit do
+                local dist     = distances[i]
+                local namelst  = by_distance[dist]
+                report(false, 0, "query",
+                    "distance from “" .. name .. "”: " .. dist
+                 .. "\n    " .. tableconcat(namelst, "\n    ")
+                )
+            end
+
+            return true
+        end
+        return false
+    else --- need reload
+        return reload_db(find_closest, name)
+    end
+    return false
+end --- find_closest()
 
 --[[doc--
 The data inside an Opentype font file can be quite heterogeneous.
 Thus in order to get the relevant information, parts of the original
 table as returned by the font file reader need to be relocated.
 --doc]]--
-local font_fullinfo = function (filename, subfont, texmf)
+font_fullinfo = function (filename, subfont, texmf)
     local tfmdata = { }
     local rawfont = fontloader.open(filename, subfont)
     if not rawfont then
@@ -825,11 +948,11 @@ end
 
 scan_external_dir = function (dir)
     local old_names, new_names
-    if loaded then
+    if fonts_loaded then
         old_names = names.data
     else
         old_names = load_names()
-        loaded    = true
+        fonts_loaded    = true
     end
     new_names = tablecopy(old_names)
     scan_dir(dir, old_names, new_names)
@@ -842,8 +965,9 @@ names.load   = load_names
 names.update = update_names
 names.save   = save_names
 
-names.resolve     = resolve --- replace the resolver from luatex-fonts
-names.resolvespec = resolve
+names.resolve      = resolve --- replace the resolver from luatex-fonts
+names.resolvespec  = resolve
+names.find_closest = find_closest
 
 --- dummy required by luatex-fonts (cf. luatex-fonts-syn.lua)
 

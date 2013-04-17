@@ -25,9 +25,7 @@ local stringgsub              = string.gsub
 local stringlower             = string.lower
 local stringsub               = string.sub
 local stringupper             = string.upper
-local tableappend             = table.append   -- TODO get rid of
 local tableconcat             = table.concat
-local tablecontains           = table.contains -- TODO get rid of
 local tablecopy               = table.copy
 local tablesort               = table.sort
 local tabletofile             = table.tofile
@@ -37,6 +35,7 @@ local utf8lower               = unicode.utf8.lower
 
 --- these come from Lualibs/Context
 local dirglob                 = dir.glob
+local dirmkdirs               = dir.mkdirds
 local filebasename            = file.basename
 local filecollapsepath        = file.collapsepath
 local fileextname             = file.extname
@@ -46,6 +45,8 @@ local filesplitpath           = file.splitpath
 local stringis_empty          = string.is_empty
 local stringsplit             = string.split
 local stringstrip             = string.strip
+local tableappend             = table.append
+local tabletohash             = table.tohash
 
 --- the font loader namespace is “fonts”, same as in Context
 fonts                = fonts       or { }
@@ -178,24 +179,30 @@ end
 
 local fuzzy_limit = 1 --- display closest only
 
-local synonyms = {
-    regular    = { "normal",        "roman",
-                   "plain",         "book",
-                   "medium"                             },
-    --- TODO note from Élie Roux
-    --- boldregular was for old versions of Linux Libertine, is it still useful?
-    --- semibold is in new versions of Linux Libertine, but there is also a bold,
-    --- not sure it's useful here...
-    bold       = { "demi",           "demibold",
-                   "semibold",       "boldregular",     },
-    italic     = { "regularitalic",  "normalitalic",
-                   "oblique",        "slanted",         },
-    bolditalic = {
-                   "boldoblique",    "boldslanted",
-                   "demiitalic",     "demioblique",
-                   "demislanted",    "demibolditalic",
-                   "semibolditalic",                   },
-}
+local style_synonyms = { set = { } }
+do
+    style_synonyms.list = {
+        regular    = { "normal",        "roman",
+                       "plain",         "book",
+                       "medium", },
+        --- TODO note from Élie Roux
+        --- boldregular was for old versions of Linux Libertine, is it still useful?
+        --- semibold is in new versions of Linux Libertine, but there is also a bold,
+        --- not sure it's useful here...
+        bold       = { "demi",           "demibold",
+                       "semibold",       "boldregular",},
+        italic     = { "regularitalic",  "normalitalic",
+                       "oblique",        "slanted", },
+        bolditalic = { "boldoblique",    "boldslanted",
+                       "demiitalic",     "demioblique",
+                       "demislanted",    "demibolditalic",
+                       "semibolditalic", },
+    }
+
+    for category, synonyms in next, style_synonyms.list do
+        style_synonyms.set[category] = tabletohash(synonyms, true)
+    end
+end
 
 --- state of the database
 local fonts_loaded   = false
@@ -256,6 +263,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     if type(data) == "table" and data.version == names.version then
         if data.mappings then
             local found = { }
+            local synonym_set = style_synonyms.set
             for _,face in next, data.mappings do
                 --- TODO we really should store those in dedicated
                 --- .sanitized field
@@ -287,8 +295,8 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                             found[1] = face
                             break
                         end
-                    elseif synonyms[style] and
-                           tablecontains(synonyms[style], subfamily) then
+                    elseif synonym_set[style] and
+                           synonym_set[style][subfamily] then
                         if optsize then
                             if dsnsize == size
                             or (size > minsize and size <= maxsize) then
@@ -302,7 +310,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                             break
                         end
                     elseif subfamily == "regular" or
-                           tablecontains(synonyms.regular, subfamily) then
+                           synonym_set.regular[subfamily] then
                         found.fallback = face
                     end
                 else
@@ -804,6 +812,7 @@ read_fonts_conf = function (path, results, passed_paths)
     ]]
     local fh = ioopen(path)
     passed_paths[#passed_paths+1] = path
+    passed_paths_set = tabletohash(passed_paths, true)
     if not fh then
         report("log", 2, "cannot open file", "%s", path)
         return results
@@ -857,7 +866,7 @@ read_fonts_conf = function (path, results, passed_paths)
                     end
                     if      lfs.isfile(include)
                     and     kpse.readable_file(include)
-                    and not tablecontains(passed_paths, include)
+                    and not passed_paths_set[include]
                     then
                         -- maybe we should prevent loops here?
                         -- we exclude path with texmf in them, as they should
@@ -950,7 +959,7 @@ end
 save_names = function (fontnames)
     local path  = names.path.dir
     if not lfs.isdir(path) then
-        dir.mkdirs(path)
+        dirmkdirs(path)
     end
     path = filejoin(path, names.path.basename)
     if file.iswritable(path) then

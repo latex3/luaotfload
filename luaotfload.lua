@@ -161,7 +161,7 @@ It has roughly two purposes:
 \end{enumerate}
 
 How the first step is executed depends on the presence on the
-\emph{merged font loader code}.
+\emphasis{merged font loader code}.
 In \identifier{luaotfload} this is contained in the file
 \fileent{otfl-fonts-merged.lua}.
 If this file cannot be found,  the original libraries from \CONTEXT of
@@ -262,7 +262,7 @@ callback.register = trapped_register
 We do our own callback handling with the means provided by luatexbase.
 
 Note: \luafunction{pre_linebreak_filter} and \luafunction{hpack_filter}
-are coupled in \CONTEXT in the concept of \emph{node processor}.
+are coupled in \CONTEXT in the concept of \emphasis{node processor}.
 --doc]]--
 
 add_to_callback("pre_linebreak_filter",

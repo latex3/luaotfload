@@ -60,18 +60,31 @@ names.path           = {
     dir      = filejoin(kpse.expand_var("$TEXMFVAR"), names_dir),
 }
 
-local success = pcall(require, "luatexbase.modutils")
-if success then
-   success = pcall(luatexbase.require_module,
-                   "lualatex-platform", "2011/03/30")
-end
-local get_installed_fonts
-if success then
-   get_installed_fonts = lualatex.platform.get_installed_fonts
-else
-   function get_installed_fonts()
-   end
-end
+
+---- <FIXME>
+---
+--- these lines load some binary module called “lualatex-platform”
+--- that doesn’t appear to build with Lua 5.2. I’m going ahead and
+--- disable it for the time being until someone clarifies what it
+--- is supposed to do and whether we should care to fix it.
+---
+--local success = pcall(require, "luatexbase.modutils")
+--if success then
+--   success = pcall(luatexbase.require_module,
+--                   "lualatex-platform", "2011/03/30")
+--    print(success)
+--end
+
+--local get_installed_fonts
+--if success then
+--   get_installed_fonts = lualatex.platform.get_installed_fonts
+--else
+--   function get_installed_fonts()
+--   end
+--end
+---- </FIXME>
+
+local get_installed_fonts = nil
 
 --[[doc--
 Auxiliary functions
@@ -691,31 +704,34 @@ for key, value in next, font_extensions do
    font_extensions_set[value] = true
 end
 
-local installed_fonts_scanned = false
+--local installed_fonts_scanned = false --- ugh
 
-local function scan_installed_fonts(fontnames, newfontnames)
-    -- Try to query and add font list from operating system.
-    -- This uses the lualatex-platform module.
-    report("info", 0, "Scanning fonts known to operating system...")
-    local fonts = get_installed_fonts()
-    if fonts and #fonts > 0 then
-        installed_fonts_scanned = true
-        report("log", 2, "operating system fonts found", "%d", #fonts)
-        for key, value in next, fonts do
-            local file = value.path
-            if file then
-                local ext = fileextname(file)
-                if ext and font_extensions_set[ext] then
-                file = path_normalize(file)
-                    report("log", 1, "loading font", "%s", file)
-                load_font(file, fontnames, newfontnames, false)
-                end
-            end
-        end
-    else
-        report("log", 2, "Could not retrieve list of installed fonts")
-    end
-end
+--- we already have scan_os_fonts don’t we?
+
+--local function scan_installed_fonts(fontnames, newfontnames)
+--    --- Try to query and add font list from operating system.
+--    --- This uses the lualatex-platform module.
+--    --- <phg>what for? why can’t we do this in Lua?</phg>
+--    report("info", 0, "Scanning fonts known to operating system...")
+--    local fonts = get_installed_fonts()
+--    if fonts and #fonts > 0 then
+--        installed_fonts_scanned = true
+--        report("log", 2, "operating system fonts found", "%d", #fonts)
+--        for key, value in next, fonts do
+--            local file = value.path
+--            if file then
+--                local ext = fileextname(file)
+--                if ext and font_extensions_set[ext] then
+--                file = path_normalize(file)
+--                    report("log", 1, "loading font", "%s", file)
+--                load_font(file, fontnames, newfontnames, false)
+--                end
+--            end
+--        end
+--    else
+--        report("log", 2, "Could not retrieve list of installed fonts")
+--    end
+--end
 
 local function scan_dir(dirname, fontnames, newfontnames, texmf)
     --[[
@@ -919,10 +935,13 @@ update_names = function (fontnames, force)
     end
     local newfontnames = fontnames_init()
     read_blacklist()
-    installed_font_scanned = false
-    scan_installed_fonts(fontnames, newfontnames)
+    --installed_fonts_scanned = false
+    --scan_installed_fonts(fontnames, newfontnames) --- see fixme above
     scan_texmf_fonts(fontnames, newfontnames)
-    if not installed_fonts_scanned and stringis_empty(kpseexpand_path("$OSFONTDIR")) then
+    --if  not installed_fonts_scanned
+    --and stringis_empty(kpseexpand_path("$OSFONTDIR"))
+    if stringis_empty(kpseexpand_path("$OSFONTDIR"))
+    then
         scan_os_fonts(fontnames, newfontnames)
     end
     return newfontnames

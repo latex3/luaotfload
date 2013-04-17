@@ -24,10 +24,13 @@ local stringgsub              = string.gsub
 local stringlower             = string.lower
 local stringsub               = string.sub
 local stringupper             = string.upper
-local tableinsert             = table.insert
 local texiowrite_nl           = texio.write_nl
 local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
+local tablecontains           = table.contains -- TODO get rid of
+local tableappend             = table.append   -- TODO get rid of
+local tabletofile             = table.tofile
+local tablecopy               = table.copy
 
 --- these come from Lualibs/Context
 local dirglob                 = dir.glob
@@ -261,7 +264,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                             break
                         end
                     elseif synonyms[style] and
-                           table.contains(synonyms[style], subfamily) then
+                           tablecontains(synonyms[style], subfamily) then
                         if optsize then
                             if dsnsize == size
                             or (size > minsize and size <= maxsize) then
@@ -275,7 +278,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                             break
                         end
                     elseif subfamily == "regular" or
-                           table.contains(synonyms.regular, subfamily) then
+                           tablecontains(synonyms.regular, subfamily) then
                         found.fallback = face
                     end
                 else
@@ -609,7 +612,7 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
             -- sometimes in TeX Live.
             report("log", 2, "fonts found", "%s '%s' fonts found", #found, ext)
             nbfound = nbfound + #found
-            table.append(list, found)
+            tableappend(list, found)
         end
     end
     report("log", 2, "fonts found", "%d fonts found in '%s'", nbfound, dirname)
@@ -661,7 +664,7 @@ read_fonts_conf = function (path, results, passed_paths)
     generate.
     ]]
     local fh = ioopen(path)
-    tableinsert(passed_paths, path)
+    passed_paths[#passed_paths+1] = path
     if not fh then
         report("log", 2, "cannot open file", "%s", path)
         return results
@@ -715,7 +718,7 @@ read_fonts_conf = function (path, results, passed_paths)
                     end
                     if      lfs.isfile(include)
                     and     kpse.readable_file(include)
-                    and not table.contains(passed_paths, include)
+                    and not tablecontains(passed_paths, include)
                     then
                         -- maybe we should prevent loops here?
                         -- we exclude path with texmf in them, as they should
@@ -810,7 +813,7 @@ save_names = function (fontnames)
     path = filejoin(path, names.path.basename)
     if file.iswritable(path) then
         local luaname, lucname = make_name(path)
-        table.tofile(luaname, fontnames, true)
+        tabletofile(luaname, fontnames, true)
         caches.compile(fontnames,luaname,lucname)
         report("info", 0, "Font names database saved")
         return path
@@ -828,7 +831,7 @@ scan_external_dir = function (dir)
         old_names = load_names()
         loaded    = true
     end
-    new_names = table.copy(old_names)
+    new_names = tablecopy(old_names)
     scan_dir(dir, old_names, new_names)
     names.data = new_names
 end

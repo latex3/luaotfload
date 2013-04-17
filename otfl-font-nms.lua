@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['font-nms'] = {
-    version   = 1.002,
+    version   = 2.2,
     comment   = "companion to luaotfload.lua",
     author    = "Khaled Hosny and Elie Roux",
     copyright = "Luaotfload Development Team",
@@ -54,7 +54,7 @@ fonts.names          = fonts.names or { }
 
 local names          = fonts.names
 local names_dir      = "luatex-cache/generic/names"
-names.version        = 2.2 -- not the same as in context
+names.version        = 2.2
 names.data           = nil
 names.path           = {
     basename = "otfl-names.lua",
@@ -260,7 +260,15 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     end
 
     local data = names.data
-    if type(data) == "table" and data.version == names.version then
+    if type(data) == "table" then
+        local db_version, nms_version = data.version, names.version
+        if data.version ~= names.version then
+            report("log", 0, "db",
+                [[version mismatch; expected %4.3f, got %4.3f]],
+                nms_version, db_version
+            )
+            return reload_db(resolve, nil, nil, specification)
+        end
         if data.mappings then
             local found = { }
             local synonym_set = style_synonyms.set

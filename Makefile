@@ -1,15 +1,20 @@
 # Makefile for luaotfload
 
-NAME = luaotfload
-DOC = $(NAME).pdf
-DTX = $(NAME).dtx
-OTFL = $(wildcard otfl-*.lua) otfl-blacklist.cnf font-age.lua
+NAME   = luaotfload
+DOC    = $(NAME).pdf
+DTX    = $(NAME).dtx
+OTFL   = $(wildcard otfl-*.lua) otfl-blacklist.cnf font-age.lua
 SCRIPT = mkluatexfontdb.lua
 
+GRAPH  = filegraph
+DOTPDF = $(GRAPH).pdf
+DOT    = $(GRAPH).dot
+
 # Files grouped by generation mode
+GRAPHED  = $(DOTPDF)
 COMPILED = $(DOC)
 UNPACKED = luaotfload.sty luaotfload.lua
-GENERATED = $(COMPILED) $(UNPACKED)
+GENERATED = $(GRAPHED) $(COMPILED) $(UNPACKED)
 SOURCE = $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT)
 
 # test files
@@ -43,13 +48,18 @@ ZIPS = $(CTAN_ZIP) $(TDS_ZIP)
 
 DO_TEX = tex --interaction=batchmode $< >/dev/null
 DO_LATEX = latexmk -pdf -pdflatex=lualatex -silent $< >/dev/null
+DO_GRAPHVIZ = dot -Tpdf -o $@ $< > /dev/null
 
 all: $(GENERATED)
-doc: $(COMPILED)
+graph: $(GRAPHED)
+doc: $(GRAPHED) $(COMPILED)
 unpack: $(UNPACKED)
 ctan: check $(CTAN_ZIP)
 tds: $(TDS_ZIP)
 world: all ctan
+
+$(GRAPHED): $(DOT)
+	$(DO_GRAPHVIZ)
 
 $(COMPILED): $(DTX)
 	$(DO_LATEX)

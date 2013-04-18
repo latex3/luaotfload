@@ -20,3 +20,14 @@ luaotfload.zip
 # Temporary files in the tests directory
 tests/*.log
 tests/*.pdf
+tests/*.lua
+tests/*.otf
+tests/*.aux
+tests/phg-*.tex
+tests/*.pfb
+tests/*.afm
+tests/*.tfm
+tests/*.dvi
+tests/*.ofm
+tests/*.ovp
+tests/*.ovf

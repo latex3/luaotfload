@@ -128,7 +128,9 @@ local function iskey  (k,v) feature_list[k]     = v end
 local P, S, R, C = lpeg.P, lpeg.S, lpeg.R, lpeg.C
 
 local spaces     = P(" ")^0
-local namespec   = (1-S("/:("))^0 -- was: (1-S("/: ("))^0
+--local namespec   = (1-S("/:("))^0 -- was: (1-S("/: ("))^0
+--[[phg-- this prevents matching of absolute paths as file names --]]--
+local namespec   = (1-S("/:("))^1
 local filespec   = (R("az", "AZ") * P(":"))^-1 * (1-S(":("))^1
 local stylespec  = spaces * P("/") * (((1-P(":"))^0)/isstyle) * spaces
 local filename   = (P("file:")/isfile * (filespec/thename)) + (P("[") * P(true)/isname * (((1-P("]"))^0)/thename) * P("]"))

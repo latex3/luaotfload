@@ -107,44 +107,6 @@ local find_vf_file = function (name)
     return fullname
 end
 
---[[-- keep --]]
---- from Hans (all merged):
-
----   file name              modified  include name
---- × basics-gen.lua         t         luat-basics-gen
---- × font-def -> fonts-def  t         luatex-font-def (there’s also the normal font-def!)
---- × fonts-enc              f         luatex-font-enc
---- × fonts-ext              t         luatex-fonts-ext
---- × fonts-lua              f         luatex-fonts-lua
----   fonts-tfm              f         luatex-fonts-tfm
---- × fonts-cbk              f         luatex-fonts-lua
-
---- from Hans (unmerged):
----   font-otc.lua -> otfl-font-otc.lua
-
---- from luaotfload:
----   otfl-luat-ovr.lua    -- override some luat-dum functions
----   otfl-font-clr.lua
----   otfl-font-ltx.lua
----   otfl-font-nms.lua
----   otfl-font-pfb.lua    -- ?
-
---[[-- new --]]
---- basics-nod          (merged as fonts-nod !)
---- fonts-demo-vf-1.lua
---- fonts-syn           (merged)
-
---[[-- merged, to be dropped --]]
---- otfl-data-con.lua
---- otfl-font-cid.lua
---- otfl-font-con.lua
---- otfl-font-ini.lua
---- otfl-font-ota.lua
---- otfl-font-otb.lua
---- otfl-font-otf.lua
---- otfl-font-oti.lua
---- otfl-font-otn.lua
-
 --[[doc--
 
 \subsection{Preparing the Font Loader}

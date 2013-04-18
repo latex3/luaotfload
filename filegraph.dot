@@ -196,4 +196,4 @@ strict digraph luaotfload_files { //looks weird with circo ...
     ]
 }
 
-/* vim:ft=dot:sw=4:ts=4:expandtab */
+// vim:ft=dot:sw=4:ts=4:expandtab

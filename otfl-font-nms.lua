@@ -582,7 +582,9 @@ local function read_fonts_conf(path, results, passed_paths)
                         read_fonts_conf(include, results, passed_paths)
                     elseif lfs.isdir(include) then
                         for _,f in next, glob(file.join(include, "*.conf")) do
-                            read_fonts_conf(f, results, passed_paths)
+                            if not table.contains(passed_paths, f) then
+                                read_fonts_conf(f, results, passed_paths)
+                            end
                         end
                     end
                 end

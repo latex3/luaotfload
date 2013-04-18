@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/16/13 18:49:45
+-- merge date  : 04/17/13 18:36:10
 
 do -- begin closure to overcome local limits and interference
 
@@ -81,158 +81,6 @@ function optionalrequire(...)
   if ok then
     return result
   end
-end
-local type=type
-local gsub,format=string.gsub,string.format
-local package=package
-local searchers=package.searchers or package.loaders
-local libpaths=nil
-local clibpaths=nil
-local libhash={}
-local clibhash={}
-local libextras={}
-local clibextras={}
-local filejoin=file and file.join    or function(path,name)  return path.."/"..name end
-local isreadable=file and file.is_readable or function(name)    local f=io.open(name) if f then f:close() return true end end
-local addsuffix=file and file.addsuffix  or function(name,suffix) return name.."."..suffix end
-local function cleanpath(path) 
-  return path
-end
-local helpers=package.helpers or {
-  libpaths=function() return {} end,
-  clibpaths=function() return {} end,
-  cleanpath=cleanpath,
-  trace=false,
-  report=function(...) print(format(...)) end,
-}
-package.helpers=helpers
-local function getlibpaths()
-  return libpaths or helpers.libpaths(libhash)
-end
-local function getclibpaths()
-  return clibpaths or helpers.clibpaths(clibhash)
-end
-package.libpaths=getlibpaths
-package.clibpaths=getclibpaths
-local function addpath(what,paths,extras,hash,...)
-  local pathlist={... }
-  local cleanpath=helpers.cleanpath
-  local trace=helpers.trace
-  local report=helpers.report
-  local function add(path)
-    local path=cleanpath(path)
-    if not hash[path] then
-      if trace then
-        report("extra %s path: %s",what,path)
-      end
-      paths [#paths+1]=path
-      extras[#extras+1]=path
-    end
-  end
-  for p=1,#pathlist do
-    local path=pathlist[p]
-    if type(path)=="table" then
-      for i=1,#path do
-        add(path[i])
-      end
-    else
-      add(path)
-    end
-  end
-  return paths,extras
-end
-function package.extralibpath(...)
-   libpaths,libextras=addpath("lua",getlibpaths(),libextras,libhash,...)
-end
-function package.extraclibpath(...)
-  clibpaths,clibextras=addpath("lib",getclibpaths(),clibextras,clibhash,...)
-end
-if not searchers[-2] then
-  searchers[-2]=searchers[2]
-end
-searchers[2]=function(name)
-  return helpers.loaded(name)
-end
-searchers[3]=nil 
-local function loadedaslib(resolved,rawname)
-  local init="luaopen_"..gsub(rawname,"%.","_")
-  if helpers.trace then
-    helpers.report("calling loadlib with '%s' with init '%s'",resolved,init)
-  end
-  return package.loadlib(resolved,init)
-end
-local function loadedbylua(name)
-  if helpers.trace then
-    helpers.report("locating '%s' using normal loader",name)
-  end
-  return true,searchers[-2](name) 
-end
-local function loadedbypath(name,rawname,paths,islib,what)
-  local trace=helpers.trace
-  local report=helpers.report
-  if trace then
-    report("locating '%s' as '%s' on '%s' paths",rawname,name,what)
-  end
-  for p=1,#paths do
-    local path=paths[p]
-    local resolved=filejoin(path,name)
-    if trace then 
-      report("checking for '%s' using '%s' path '%s'",name,what,path)
-    end
-    if isreadable(resolved) then
-      if trace then
-        report("lib '%s' located on '%s'",name,resolved)
-      end
-      if islib then
-        return true,loadedaslib(resolved,rawname)
-      else
-        return true,loadfile(resolved)
-      end
-    end
-  end
-end
-local function notloaded(name)
-  if helpers.trace then
-    helpers.report("unable to locate library '%s'",name)
-  end
-end
-helpers.loadedaslib=loadedaslib
-helpers.loadedbylua=loadedbylua
-helpers.loadedbypath=loadedbypath
-helpers.notloaded=notloaded
-function helpers.loaded(name)
-  local thename=gsub(name,"%.","/")
-  local luaname=addsuffix(thename,"lua")
-  local libname=addsuffix(thename,os.libsuffix or "so") 
-  local libpaths=getlibpaths()
-  local clibpaths=getclibpaths()
-  local done,result=loadedbypath(luaname,name,libpaths,false,"lua")
-  if done then
-    return result
-  end
-  local done,result=loadedbypath(luaname,name,clibpaths,false,"lua")
-  if done then
-    return result
-  end
-  local done,result=loadedbypath(libname,name,clibpaths,true,"lib")
-  if done then
-    return result
-  end
-  local done,result=loadedbylua(name)
-  if done then
-    return result
-  end
-  return notloaded(name)
-end
-function helpers.unload(name)
-  if helpers.trace then
-    if package.loaded[name] then
-      helpers.report("unloading library '%s', %s",name,"done")
-    else
-      helpers.report("unloading library '%s', %s",name,"not loaded")
-    end
-  end
-  package.loaded[name]=nil
 end
 
 end -- closure
@@ -5172,6 +5020,7 @@ local lpegmatch=lpeg.match
 local reversed,concat,remove=table.reversed,table.concat,table.remove
 local ioflush=io.flush
 local fastcopy,tohash,derivetable=table.fastcopy,table.tohash,table.derive
+local formatters=string.formatters
 local allocate=utilities.storage.allocate
 local registertracker=trackers.register
 local registerdirective=directives.register
@@ -5190,7 +5039,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.741 
+otf.version=2.742 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -6153,7 +6002,18 @@ local function t_hashed(t,cache)
     return nil
   end
 end
-local s_hashed=t_hashed
+local function s_hashed(t,cache)
+  if t then
+    local ht={}
+    local tf=t[1]
+    for i=1,#tf do
+      ht[i]={ [tf[i]]=true }
+    end
+    return ht
+  else
+    return nil
+  end
+end
 local function r_uncover(splitter,cache,cover,replacements)
   if cover=="" then
     return nil

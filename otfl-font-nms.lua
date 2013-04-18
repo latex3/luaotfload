@@ -697,6 +697,7 @@ local function read_blacklist()
                 if first_chr == "%" or stringis_empty(line) then
                     -- comment or empty line
                 else
+                    --- this is highly inefficient
                     line = stringsplit(line, "%")[1]
                     line = stringstrip(line)
                     if stringsub(line, 1, 1) == "-" then
@@ -817,6 +818,11 @@ read_fonts_conf = function (path, results, passed_paths)
     This function parses /etc/fonts/fonts.conf and returns all the dir
     it finds.  The code is minimal, please report any error it may
     generate.
+
+    TODO    fonts.conf are some kind of XML so in theory the following
+            is totally inappropriate. Maybe a future version of the
+            lualibs will include the lxml-* files from Context so we
+            can write something presentable instead.
     ]]
     local fh = ioopen(path)
     passed_paths[#passed_paths+1] = path
@@ -896,6 +902,7 @@ end
 -- for testing purpose
 names.read_fonts_conf = read_fonts_conf
 
+--- TODO stuff those paths into some writable table
 local function get_os_dirs()
     if os.name == 'macosx' then
         return {
@@ -907,7 +914,7 @@ local function get_os_dirs()
     elseif os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
         local windir = os.getenv("WINDIR")
         return { filejoin(windir, 'Fonts') }
-    else
+    else --- TODO what about ~/config/fontconfig/fonts.conf etc?
         for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
             if lfs.isfile(p) then
                 return read_fonts_conf("/etc/fonts/fonts.conf", {}, {})

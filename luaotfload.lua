@@ -12,9 +12,11 @@ luaotfload.module = {
 
 local luatexbase = luatexbase
 
-local type, next, dofile = type, next, dofile
-local stringfind = string.find
-local find_file  = kpse.find_file
+local type, next       = type, next
+local stringfind       = string.find
+local stringsub        = string.sub
+local stringmatch      = string.match
+local find_file        = kpse.find_file
 
 local add_to_callback, create_callback =
       luatexbase.add_to_callback, luatexbase.create_callback
@@ -277,7 +279,6 @@ add_to_callback("find_vf_file",
                 find_vf_file, "luaotfload.find_vf_file")
 
 loadmodule"font-otc.lua"   -- TODO check what we can drop from otfl-features
-
 loadmodule"lib-dir.lua"    -- required by font-nms
 loadmodule"luat-ovr.lua"
 
@@ -410,6 +411,38 @@ elseif luaotfload.font_definer == "patch"  then
                   "luaotfload.define_font",
                   1)
 end
+
+--[[todo--
+--- The manual promises coercion of the file: lookup if
+--- the asked name is enclosed in brackets.
+--- A couple things make me doubt that this is the case:
+---
+---     1) there doesn’t appear to be code for these cases
+---     2) the brackets remain part of the file name
+---     3) we still get calls to names.resolve which
+---        ignores the “lookup” field of the spec it gets
+---
+--- For this reason here is some code that a) coerces
+--- file: lookups in these cases and b) strips the brackets
+--- from the file name. As we *still* get name: lookups even
+--- though this code is active I’ll just leave it here
+--- for reference, ineffective as it is.
+do
+    local getspecification, makespecification =
+        fonts.definers.getspecification, fonts.definers.makespecification
+
+    local analyze = function (specification, size)
+        local lookup, name, sub, method, detail = getspecification(specification or "")
+        local filename = stringmatch(name, "^%[(.*)%]$")
+        if filename then
+            lookup   = "file"    --> coerce file:
+            name     = filename  --> remove brackets
+        end
+        return makespecification(specification, lookup, name, sub, method, detail, size)
+    end
+    fonts.definers.analyze = analyze
+end
+--]]--
 
 loadmodule"features.lua"
 

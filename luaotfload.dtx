@@ -14,7 +14,7 @@
 %    tex luaotfload.dtx
 %
 % Documentation:
-%    pdflatex luaotfload.dtx
+%    lualatex luaotfload.dtx
 %
 %    The class ltxdoc loads the configuration file ltxdoc.cfg
 %    if available. Here you can specify further options, e.g.
@@ -36,7 +36,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload v2.0 OpenType layout system}
+\Msg{* Package: luaotfload v2.2 OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -60,7 +60,6 @@ and the derived files
 \endpreamble
 
 \let\MetaPrefix\DoubleperCent
-
 
 \generate{%
   \usedir{tex/luatex/luaotfload}%
@@ -109,8 +108,8 @@ and the derived files
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
 \usepackage[x11names]{xcolor}
 %
-\def\primarycolor{DodgerBlue4}
-\def\secondarycolor{Goldenrod4}
+\def\primarycolor{DodgerBlue4}  %%-> rgb  16  78 139 | #104e8b
+\def\secondarycolor{Goldenrod4} %%-> rgb 139 105 200 | #8b6914
 %
 \usepackage[
     bookmarks=true,
@@ -131,12 +130,10 @@ and the derived files
 \setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
 %setmathfont{XITS Math}
 
-%%\definecolor{niceblue}{rgb}{0.4,0.6,1.000}
-
 \newcommand\TEX    {\TeX\xspace}
 \newcommand\LUA    {Lua\xspace}
 \newcommand\PDFTEX {pdf\TeX\xspace}
-\newcommand\LUATEX {\LUA\TeX\xspace}
+\newcommand\LUATEX {Lua\TeX\xspace}
 \newcommand\XETEX  {\XeTeX\xspace}
 \newcommand\LATEX  {\LaTeX\xspace}
 \newcommand\CONTEXT{Con\TeX t\xspace}
@@ -197,7 +194,7 @@ and the derived files
 % \begin{abstract}
 % This package is an adaptation of the \CONTEXT font loading system, providing
 % the ability to load \identifier{OpenType} fonts with extended font loading syntax
-% supporting a large selection of OpenType font features.
+% supporting a large selection of \identifier{OpenType} font features.
 % \end{abstract}
 %
 % \tableofcontents
@@ -208,60 +205,81 @@ and the derived files
 % files are needed for one font (\abbrev{tfm}, \abbrev{pfb}, \abbrev{map},
 % \abbrev{fd}, \abbrev{vf}), and as \TEX is 8-bit each font is limited to 256
 % characters.
-% But the font world has evolved since
-% \TEX, and new font technologies have appeared, most notably the so called
-% \emphasis{smart font} technologies like \identifier{OpenType} fonts. These fonts can
-% contain a lot of characters, and additional functionalities like ligatures,
-% old-style numbers, small capitals, etc., and support more complex writing
-% systems like Arabic and Indic\footnote{%
-%   Unfortunately, \identifier{luaotfload} doesn't support Indic scripts right
-%   now.
-% } scripts.
-% They are widely deployed
-% and available for all modern operating systems and are becoming the de facto
-% standard fonts for advanced text layout.  Until now the only way to use them
-% directly in the \TEX world was by using them with \XETEX.
+% But the font world has evolved since the original
+% \TEX, and new typographic systems have appeared, most notably the so
+% called \emphasis{smart font} technologies like \identifier{OpenType}
+% (\abbrev{otf}) fonts.
+% These fonts can contain a lot of characters and additional
+% functionality like ligatures, old-style numbers, small capitals,
+% etc., and support more complex writing systems like Arabic and
+% Indic\footnote{%
+%   Unfortunately, \identifier{luaotfload} doesn't support Indic
+%   scripts right now.
+%   Assistance in implementing the prerequisites is greatly
+%   appreciated.
+% }
+% scripts.
+% \identifier{OpenType} fonts are widely deployed and available for all
+% modern operating systems.
+% As of 2013 they have become the de facto standard for advanced text
+% layout.
+% However, until recently the only way to use them directly in the \TEX
+% world was with the \XETEX engine.
 %
-% Unlike \XETEX, \LUATEX does not provide direct support for using these fonts
-% by default, but it provides a way to hook \LUA code in some points of the \TEX
-% processing; for instance, we can improve the font loading system, and text
-% procession, which what this package is about.
+% Unlike \XETEX, \LUATEX has no built-in support for
+% \identifier{OpenType} or other technologies.
+% Instead, it provides hooks for executing Lua during the \TEX run
+% that allow implementing extensions for loading fonts and manipulating
+% how input text is processed without modifying the underlying engine.
 %
 % \section{Loading fonts}
 %
-% \identifier{luaotfload} supports an extended font loading syntax which looks
-% like:
+% \identifier{luaotfload} supports an extended font loading syntax:
 %
 % \begin{center}
-% |\font\foo={|\meta{prefix}|:|\meta{font name}|:|\meta{font features}|}| \meta{\TEX font features}
+%       |\font\foo={|%
+%       \meta{prefix}|:|%
+%       \meta{font name}|:|%
+%       \meta{font features}|}|%
+%       \meta{\TEX font features}
 % \end{center}
 %
 % \noindent
-% The curly brackets are optional and are used for escaping spaces in font
-% names (double quotes can also used for the same purpose).
+% The curly brackets are optional and escape the spaces in the enclosed
+% font name (alternatively, double quotes serve the same purpose).
+% The individual parts of the syntax are:
 %
 % \paragraph{Prefix}
 %
-% The \meta{prefix} can be either |file:| or |name:|, which specify whether to
-% use a select the font from its filename or font name, respectively. If no
-% prefix is specified |name:| is assumed.
+% The \meta{prefix} is either |file:| or |name:|.
+% It determines whether font loader should interpret the request as a
+% file name or font name, respectively, which again influences how it
+% will attempt to locate the font.
+% The prefix can be omitted, in which case |name:| is assumed.
 %
-% For compatibility with \XETEX, surrounding the \meta{font name} with square
-% brackets is synonymous to using the |file:| prefix.
+%% \iffalse%% how am i supposed to friggin comment stuff in a dtx???
+%%      TODO
+%%      it would appear that the next paragraph is incorrect; I get
+%%      name: lookups regardless unless the font file is actually
+%%      in CWD
+%% \fi
+%% For compatibility with \XETEX, surrounding the \meta{font name} with
+%% square brackets is synonymous to using the |file:| prefix.
 %
-% Accessing fonts by fontname allows loading system installed fonts as well as
-% \fileent{texmf} ones, and requires a font names database; see
+% Accessing fonts by fontname allows loading system installed fonts as
+% well as \fileent{texmf} ones, and requires a font names database; see
 % Section~\ref{sec:fontdb} for more information.
 %
 % \paragraph{Font name}
 %
-% The \meta{font name} can be either a font filename or actual font name based
-% on the \meta{prefix} as mentioned above.
+% The \meta{font name} can be either a font filename or actual font
+% name based on the \meta{prefix} as mentioned above.
 %
-% Fonts loaded by filename may either include their absolute path in the
-% filesystem or consist of just the filename with a path.  If no path is
-% specified then \identifier{kpathsea} is used to locate the font (which will
-% typically be in the \fileent{texmf} tree or the current directory).
+% Fonts loaded by filename may either include their absolute path in
+% the filesystem or consist of just the filename without a path.  If no
+% path is specified, then \identifier{kpathsea} is used to locate the
+% font (which will typically be in the \fileent{texmf} tree or the
+% current directory).
 %
 % For example,
 % \begin{quote}
@@ -277,249 +295,526 @@ and the derived files
 %
 % \meta{font features} is semicolon-separated list of feature
 % tags\footnote{%
-%   Cf. \url{http://www.microsoft.com/typography/otspec/featurelist.htm}
+%   Cf. \url{http://www.microsoft.com/typography/otspec/featurelist.htm}.
 % }
-% and font options. Font features are prepended with a |+| to turn them on and
-% a |-| to turn them off, alternatively you can pass |true| or |false| value to
-% the feature:
+% and font options.
+% Prepending a font feature with a |+|-sign enables it, while
+% a |-| disables it. For instance, the request
 %
 % |\font\test=Latin Modern Roman:+clig;-kern|
 %
-% \noindent or:
+% \noindent activates contextual ligatures (|clig|) and disables
+% kerning (|kern|).
+% Alternatively the options |true| or |false| can be passed to
+% the feature in a key/value expression.
+% The following request has the same meaning as the last one:
 %
 % |\font\test=Latin Modern Roman:clig=true;kern=false|
 %
-% \noindent For alternate substation features you can pass the index of the
-% variant you want (starting from 1) or |random| to randomly select a variant
-% each time an affected glyph is shown, e.g.:
+% \noindent
+% Furthermore, this second syntax is required if a font feature
+% accepts options besides its activation state.
+% For example, \emphasis{stylistic alternates} (|salt|) provide a set
+% of variants to given glyphs.
+% These can be selected either explicitly by supplying the variant
+% index (starting from 1), or randomly by setting the value to,
+% obviously, |random|:
 %
 % |\font\test=Latin Modern Roman:salt=1|
 %
-% \noindent Known font options include:
+% \noindent Other font options include:
 %
 % \begin{description}
-% \item [mode]
-% \identifier{luaotfload} has two OpenType processing modes; \identifier{base}
-% and \identifier{node}.
-% \identifier{base} mode works by mapping OpenType features to traditional \TEX
-% ligature and kerning mechanisms, thus supporting only non-contextual
-% substitutions and kerning pairs, but is slightly faster. \identifier{node}
-% works by direct processing of the node list at \LUA end and have more wide
-% support of OpenType features but can be slow especially with complex fonts
-% and can't be used in math mode.
 %
-% By default \identifier{node} mode is used, and you have to manually force
-% \identifier{base} mode when needed, e.~g. for math fonts.
+% \item [mode] \hfill \\
+%        \identifier{luaotfload} has two \identifier{OpenType} processing
+%        \emphasis{modes}:
+%        \identifier{base} and \identifier{node}.
 %
-% \item [script]
-% OpenType script string,\footnote{%
-%   Cf. \url{http://www.microsoft.com/typography/otspec/scripttags.htm}.
-% }
-% default value is \identifier{dlft}.
-% Some fonts don't assign features to the |dflt|
-% script, in which case the script need to be set explicitly.
+%        \identifier{base} mode works by mapping \identifier{OpenType}
+%        features to traditional \TEX ligature and kerning mechanisms,
+%        thus supporting only non-contextual substitutions and kerning
+%        pairs, but is the slightly faster variant.
+%        \identifier{node} mode works by processing \TEX’s internal
+%        node list directly at the \LUA end and supports
+%        a wider range of \identifier{OpenType} features.
+%        The downside is that the intricate operations required for
+%        \identifier{node} mode may slow down typesetting especially
+%        with complex fonts and it does not work in math mode.
+%
+%        By default \identifier{luaotfload} is in \identifier{node}
+%        mode, and \identifier{base} mode has to be requested where needed,
+%        e.~g. for math fonts.
+%
+% \item [script] \ref{script-tag} \hfill \\
+%        An \identifier{OpenType} script tag;\footnote{%
+%          See \url{http://www.microsoft.com/typography/otspec/scripttags.htm}
+%          for a list of valid values.
+%          For scripts derived from the Latin alphabet the value
+%          |latn| is good choice.
+%        }
+%        the default value is |dlft|.
+%        Some fonts do not assign features to the |dflt| script, in
+%        which case the script needs to be set explicitly.
 %
 % \item [language] \hfill \\
-% OpenType language string,\footnote{%
-%   Cf. \url{http://www.microsoft.com/typography/otspec/languagetags.htm}.
-% }
-% default value is \identifier{latn}.
+%        An \identifier{OpenType} language system identifier,\footnote{%
+%          Cf. \url{http://www.microsoft.com/typography/otspec/languagetags.htm}.
+%        }
+%        defaulting to |dflt|.
 %
 % \item [featurefile] \hfill \\
-% a comma-separated list of feature files to be applied to the font.  Feature
-% files are textual representation of OpenType tables and can be used to extend
-% OpenType features of the font on fly. Features defined in a feature file,
-% after being applied to the font, can be enabled/disabled like any other
-% feature. The syntax is documented in Adobe's OpenType Feature File
-% Specification.\footnote{%
-%   Cf. \url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}
-% }
+%        A comma-separated list of feature files to be applied to the
+%        font.
+%        Feature files contain a textual representation of
+%        \identifier{OpenType} tables and extend the features of a font
+%        on fly.
+%        After they are applied to a font, features defined in a
+%        feature file can be enabled or disabled just like any
+%        other font feature.
+%        The syntax is documented in \identifier{Adobe}’s
+%        \identifier{OpenType} Feature File Specification.\footnote{%
+%          Cf. \url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
+%        }
 %
-% For example, to set a |tkrn| feature from |mykern.fea| file:
+%        For a demonstration of how to set a |tkrn| feature consult
+%        the file |tkrn.fea| that is part of \identifier{luaotfload}.
+%        It can be read and applied as follows:
 %
-% |\font\test=Latin Modern Roman:featurefile=mykern.fea;+tkrn|
+%        |\font\test=Latin Modern Roman:featurefile=tkrn.fea;+tkrn|
 %
 % \item [color] \hfill \\
-% font color, defined as a triplet of two-digit hexadecimal RGB values, with
-% optionally another value for the transparency (where |00| is completely
-% transparent and |FF| is opaque.)
+%        A font color, defined as a triplet of two-digit hexadecimal
+%        \abbrev{rgb} values, with an optional fourth value for
+%        transparency
+%        (where |00| is completely transparent and |FF| is opaque).
 %
-% For example, to set text in semitransparent red:
+%        For example, in order to set text in semitransparent red:
 %
-% |\font\test=Latin Modern Roman:color=FF0000BB|
+%        |\font\test=Latin Modern Roman:color=FF0000BB|
 %
 % \item [protrusion \& expansion] \hfill \\
-% Both keys control microtypographic features of the font, namely glyph
-% protrusion and expansion. The value of the key is the name of predefined \LUA
-% tables of protrusion and expansion values; see the end of
-% \fileent{otfl-fonts-ext.lua}
-% file for an example of such tables. The only predefined value is
-% \identifier{default}.
+%        These keys both control microtypographic features of the font,
+%        namely \emphasis{character protrusion} and \emphasis{font
+%        expansion}.
+%        They accept names of predefined \LUA tables that contain
+%        values for the respective features.\footnote{%
+%           For examples of the table layout please refer to the
+%           section of the file \fileent{otfl-fonts-ext.lua} where the
+%           default values are defined.
+%           Alternatively and with loss of information, you can dump
+%           those tables into your terminal by issuing
+%           \begin{verbatim}
+%             \directlua{inspect(fonts.protrusions.setups.default)
+%                        inspect(fonts.expansions.setups.default)}
+%           \end{verbatim}
+%           at some point after loading \fileent{luaotfload.sty}.
+%        }
+%        For both, only the set \identifier{default} is predefined.
 %
-% For example, to enable default protrusion\footnote{%
-%   You also need to set
-%       \texmacro{pdfprotrudechars}|=2|
-%       \texmacro{pdfadjustspacing}|=2|
-%   to activate protrusion and expansion, respectively.
-%   See
-%   \href{http://mirrors.ctan.org/systems/pdftex/manual/pdftex-a.pdf}%
-%        {\PDFTEX manual}
-%   for details.
-% }:
+%        For example, to enable default protrusion\footnote{%
+%          You also need to set
+%              \verb|pdfprotrudechars=2| and
+%              \verb|pdfadjustspacing=2|
+%          to activate protrusion and expansion, respectively.
+%          See the
+%          \href{http://mirrors.ctan.org/systems/pdftex/manual/pdftex-a.pdf}%
+%               {\PDFTEX manual}
+%          for details.
+%        }:
 %
-% |\font\test=Latin Modern Roman:protrusion=default|
+%        |\font\test=Latin Modern Roman:protrusion=default|
 % \end{description}
 %
-% \subparagraph{Non-standard font features}
-% \identifier{luaotfload} defines some additional font feature not defined in
-% OpenType, currently three features are defined:
+% \paragraph{Non-standard font features}
+% \identifier{luaotfload} add a number of features that are not defined
+% in the original \identifier{OpenType} specification, most of them
+% aiming at emulating the behavior familiar from other \TEX engines.
+% Currently (2013) there are three of them:
 %
-% \begin{itemize*}
+% \begin{description}
 %
-%   \item   \identifier{anum}:
-%           replaces European numbers with eastern Arabic numbers or Persian
-%           numbers, depending on the value of \identifier{language}.
-%   \item   \identifier{tlig}:
-%           applies legacy \TEX ligatures:
+%   \item [anum]
+%           Substitutes the glyphs in the \abbrev{ascii} number range
+%           with their counterparts from eastern Arabic or Persian,
+%           depending on the value of \identifier{language}.
+%
+%   \item [tlig]
+%           Applies legacy \TEX ligatures:
 %           |``|, |''|, |`|, |'|, |"|, |--|, |---|, |!`| and |?`|.%
 %           \footnote{%
-%             For \XETEX users: this is the equivalent of the assignment
-%             \verb|mapping=text-tex| using \XETEX's input remapping feature.
+%             These contain the feature set \verb|trep| of earlier
+%             versions of \identifier{luaotfload}.
+%
+%             Note to \XETEX users: this is the equivalent of the
+%             assignment \verb|mapping=text-tex| using \XETEX's input
+%             remapping feature.
 %           }
 %
-% \end{itemize*}
+%   \item [itlc]
+%           Computes italic correction values (active by default).
+%
+% \end{description}
 %
 %
 %
 % \section{Font names database}
 % \label{sec:fontdb}
 %
-% As introduced in the previous section, \identifier{luaotfload} uses a database to
-% keep track of fonts available to \LUATEX. Using this database, fonts can be
-% loaded by font name as well as filename.
-%
-% When \identifier{luaotfload} is asked to load a font by font name, it will check
-% if font names database exists and load it, or generate a new database if non
-% exists. This is all done automatically without user intervention. When the
-% asked font is missing from the database, it will attempt to update the
-% database and try to find the font again, so that the user can install new
-% fonts without worrying about manually updating the database.
-%
-% However, it is sometimes desirable to update the database manually, so
-% \identifier{luaotfload} provides a |mkluatexfontdb| utility to manually update
-% the database. |mkluatexfontdb| is a lua script that can be either run
-% directly or as an argument to |texlua|, depending on your system.\footnote{%
-%   On \abbrev{MS} \identifier{Windows} it can be run either by calling the
-%   wrapper application |mkluatexfontdb.exe| or with
-%   |texlua.exe mkluatexfontdb.lua|.
+% As mentioned above, \identifier{luaotfload} keeps track of which
+% fonts are available to \LUATEX by means of a \emphasis{database}.
+% This allows loading not only by explicit filenames but also by the
+% proper names contained in the metadata which is often more accessible
+% to humans.\footnote{%
+%   The tool \href{http://www.lcdf.org/type/}{\fileent{otfinfo}} (comes
+%   with \TEX Live), when invoked on a font file with the \verb|-o|
+%   option, lists the variety of name fields defined for it.
 % }
 %
-% The first time the database is generated may take quite some time to process
-% every font on your computer.  This is particularly noticeable if it occurs
-% during a typesetting run.  Subsequent runs to update the database will be
-% quite fast, however.
+% When \identifier{luaotfload} is asked to load a font by font name, it
+% will check if the database exists and load it or else generate a
+% fresh one.
+% Should it then fail to locate the font, an update to the database is
+% performed in case the font has been added to the system only
+% recently.  As soon as the database is updated, the resolver will try
+% and look up the font again, all without user intervention.
+% The goal is for \identifier{luaotfload} to act in the background and
+% behave as unobtrusively as possible, while providing a convenient
+% interface to the fonts installed on the system.
 %
-% \identifier{luaotfload} will parse standard places for fonts in your system to
-% build the font database. On Linux, it will read |fontconfig| configuration
-% files to find the font locations; on Windows and Mac~OS~X, it will search in
-% the standard font locations, |%WINDIR%\Fonts| in Windows and
-% |~/Library/Fonts|, |/Library/Fonts|, |/System/Library/Fonts|, and
-% |/Network/Library/Fonts| in Mac~OS~X.
+% \subsection[mkluatexfontdb.lua]%
+%            {\fileent{mkluatexfontdb.lua}\footnote{%
+%   The script may be named just \fileent{mkluatexfontdb} in your
+%   distribution.
+% }}
 %
-% If you do not wish the standard font locations be searched by default but
-% would rather specify the exact locations in which to find your fonts, set the
-% |OSFONTDIR| environment variable instead. When this variable is set, only the
-% specified directories will be searched.
+% However, it can be desirable at times to do some of these steps
+% manually.
+% To this end, \identifier{luaotfload} comes with the utility
+% \fileent{mkluatexfontdb} that offers an interface to the database
+% functionality.
+% Being a \LUA script, there are two ways to run it:
+% either make it executable (\verb|chmod +x| on unixoid systems) or
+% pass it as an argument to \fileent{texlua}.\footnote{%
+%   Tests by the maintainer show only marginal performance gain by
+%   running with Luigi Scarso’s
+%   \href{https://foundry.supelec.fr/projects/luajittex/}%
+%        {\LUA jit\TEX},
+%   which is probably due to the fact that most of the time is spent
+%   on file system operations.
 %
-% |mkluatexfontdb.lua --help| provides a brief summary of the functionality of
-% the script and includes some advanced options that we have not mentioned
-% here.
+%   \emphasis{Note}:
+%   On \abbrev{MS} \identifier{Windows} systems, the script can be run
+%   either by calling the wrapper application
+%   \fileent{mkluatexfontdb.exe} or as
+%   \verb|texlua.exe mkluatexfontdb.lua|.
+% }
+% Invoke it from the command line with the \verb|--force| switch to
+% initiate a complete rebuild of the database.
+%
+% \begin{verbatim}
+%   mkluatexfontdb --force
+% \end{verbatim}
+%
+% Generating the database for the first time may take a while since it
+% inspects every font file on your computer.
+% This is particularly noticeable if it occurs during a typesetting run.
+% In any case, subsequent updates to the database will be quite fast.
+%
+% \subsection{Search Paths}
+%
+% \identifier{luaotfload} scans those directories where fonts are
+% expected to be located on a given system.
+% On a Linux machine it follows the paths listed in the
+% \identifier{Fontconfig} configuration files;
+% consult \verb|man 5 fonts.conf| for further information.
+% On \identifier{Windows} systems, the standard location is
+% \verb|Windows\Fonts|,
+% while \identifier{Mac OS~X} requires a multitude of paths to
+% be examined.
+% The complete list is is given in table \ref{table-searchpaths}.
+% Other paths can be specified by setting the environment variable
+% \verb+OSFONTDIR+.
+% If it is non-empty, then search will be limited to the included
+% directories.
+%
+% \begin{table}[t]
+%   \hrule
+%   \caption{List of paths searched for each supported operating
+%            system.}
+%   \renewcommand{\arraystretch}{1.2}
+%   \begin{center}
+%     \begin{tabular}{lp{.5\textwidth}}
+%       Windows     & \verb|%WINDIR%\Fonts|
+%       \\
+%       Linux       & \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break
+%                     \fileent{/etc/fonts/fonts.conf"}
+%       \\
+%       Mac         & \fileent{~/Library/Fonts},\break
+%                     \fileent{/Library/Fonts},\break
+%                     \fileent{/System/Library/Fonts}, and\hfill\break
+%                     \fileent{/Network/Library/Fonts}
+%       \\
+%     \end{tabular}
+%   \end{center}
+%   \label{table-searchpaths}
+%   \hrule
+% \end{table}
+%
+% \subsection{Querying from outside}
+%
+% \fileent{mkluatexfontdb.lua} also provides rudimentary means of
+% accessing the font database.
+% If the option \verb|--find=name| is given, the script will try and search
+% the fonts indexed by \identifier{luaotfload} for a matching name.
+% For instance, the invocation
+%
+% \begin{verbatim}
+%   mkluatexfontdb.lua  --find="Iwona Regular"
+% \end{verbatim}
+%
+% will verify if “Iwona Regular” is found in the database and can be
+% readily requested in a document.
+%
+% If you are unsure about the actual font name, then you can add the
+% \verb|-F| switch to the command line to enable approximate matching.
+% Suppose you cannot precisely remember if the variant of
+% \identifier{Iwona} you are looking for was “Bright” or “Light”.
+% The query 
+%
+% \begin{verbatim}
+%   mkluatexfontdb.lua  -F --find="Iwona Bright"
+% \end{verbatim}
+%
+% will tell you that indeed the latter name is correct.
+%
+% \verb|mkluatexfontdb.lua --help| will list the available command line
+% switches, including some that will not be discussed in detail here.
 %
 % \subsection{Blacklisting fonts}
+% \label{font-blacklist}
 %
-% Some fonts are problematic in \LUATEX, if you found that your document takes
-% too long to compile, or eats all the free memory, you can find the culprit
-% file by running |mkluatexfontdb| utility with |-v| option to see which font
-% file it is stuck with. You can then instruct \identifier{luaotfload} to ignore
-% this font by adding it to the blacklist configuration file.
+% Some fonts are problematic in general, or just in \LUATEX.
+% If you find that compiling your document takes far too long or eats
+% away all your system’s memory, you can track down the culprit by
+% running \verb|mkluatexfontdb -v| to increase verbosity.
+% Take a note of the \emphasis{filename} of the font that database
+% creation fails with and append it to the file
+% \fileent{otfl-blacklist.cnf}.
 %
-% Simply, create a file named |otfl-blacklist.cnf| and added the to be
-% blacklisted files, one per line. Then put the file some where \identifier{kpse}
-% can find. You can either use the base name or the full path. Any thing after
-% a |%| sign is ignored. \identifier{luaotfload} reads all files named named
-% |otfl-blacklist.cnf|, so you can add your own fonts to the global blacklist
-% by creating a local file |otfl-blacklist.cnf| with the entries you need.  You
-% can also remove a font from this blacklist by prepending the name with a dash
-% (|-|).
+% A blacklist file is a list of font filenames, one per line.
+% Specifying the full path where the file is located is optional, the
+% plain filename should suffice.
+% File extensions (\fileent{.otf}, \fileent{.ttf}, etc.) may be omitted.
+% Anything after a percent (|%|) character until the end of the line
+% is ignored, so use this to add comments.
+% Place this file to some location where the \identifier{kpse}
+% library can find it, e.~g.
+% \fileent{texmf-local/tex/luatex/luaotfload} if you are running
+% \identifier{\TEX Live},\footnote{%
+%   You may have to run \verb|mktexlsr| if you created a new file in
+%   your \fileent{texmf} tree.
+% }
+% or just leave it in the working directory of your document.
+% \identifier{luaotfload} reads all files named
+% \fileent{otfl-blacklist.cnf} it finds, so the fonts in
+% \fileent{./otfl-blacklist.cnf} extend the global blacklist.
+%
+% Furthermore, a filename prepended with a dash character (|-|) is
+% removed from the blacklist, causing it to be temporarily whitelisted
+% without modifying the global file.
+% An example with explicit paths:
 %
 % \begin{verbatim}
 % % example otf-blacklist.cnf
-% /Library/Fonts/GillSans.ttc  % luaotfload ignores this font
-% -/Library/Fonts/Optima.ttc   % it is usable again, even if it
-%                              % is blacklisted somewhere else
+% /Library/Fonts/GillSans.ttc  % Luaotfload ignores this font.
+% -/Library/Fonts/Optima.ttc   % This one is usable again, even if
+%                              % blacklisted somewhere else.
 % \end{verbatim}
 %
-% \section{Used \CONTEXT files}
+% \section{Files from \CONTEXT and \LUATEX-Fonts}
 %
-% This package is a wrapper for several files taken from the \CONTEXT macro
-% package. The philosophy is to let \CONTEXT do all the implementation and
-% update these files from time to time. So we try not to modify the files taken
-% from \CONTEXT as far as possible, but we changed their names to prevent name
+% This package relies on code originally written by Hans
+% Hagen\footnote{%
+%   The creator of the \href{http://wiki.contextgarden.net}{\CONTEXT}
+%   format.
+% }
+% for and tested with \CONTEXT.
+% \identifier{luaotfload} integrates the font loader as distributed in
+% the \identifier{\LUATEX-Fonts} package.
+% The original \LUA source files have been combined using the
+% \fileent{mtx-package} script into a single, self-contained blob.
+% In this form the font loader has no further dependencies\footnote{%
+%   It covers, however, to some extent the functionality of the
+%   \identifier{lualibs} package.
+% }
+% and requires only minor adaptions to integrate into
+% \identifier{luaotfload}.
+% The guiding principle is to let \CONTEXT/\LUATEX-Fonts take care of
+% the implementation, and update the imported code from time to time.
+% As maintainers, we aim at importing files from upstream essentially
+% \emphasis{unmodified}, except for renaming the files to prevent name
 % clashes.
+% This job has been greatly alleviated since the advent of
+% \LUATEX-Fonts, prior to which the individual dependencies had to be
+% manually spotted and extracted from the \CONTEXT source code in a
+% complicated and error-prone fashion.
 %
-% The \CONTEXT files are renamed by adding the prefix |otfl-| to them (|otfl|
-% as |OTF L|oad). The files are:
+% Below is a commented list of the files distributed with
+% \identifier{luaotfload} in one way or the other.
+% See figure \ref{file-graph} on page \pageref{file-graph} for a
+% graphical representation of the dependencies.
+% From \LUATEX-Fonts the following files have been imported:
 %
-% \begin{multicols}{3}
-% \begin{itemize*}
-% \item |data-con.lua|
-% \item |font-cid.lua|
-% \item |font-con.lua|
-% \item |font-def.lua|
-% \item |font-ini.lua|
-% \item |font-map.lua|
-% \item |font-ota.lua|
-% \item |font-otb.lua|
-% \item |font-otc.lua|
-% \item |font-otf.lua|
-% \item |font-oti.lua|
-% \item |font-otn.lua|
-% \item |node-inj.lua|
-% \item |luatex-fonts-cbk.lua|
-% \item |luatex-fonts-enc.lua|
-% \item |luatex-fonts-ext.lua|
-% \item |luatex-fonts-lua.lua|
-% \item |luatex-fonts-tfm.lua|
-% \item |luatex-basics-gen.lua|
-% \item |luatex-basics-nod.lua|
-% \item |font-age.lua|\footnote{%
-%   Not renamed as it is loaded directly from % |fonts-enc.lua|.
-% }
-% \end{itemize*}
-% \end{multicols}
+%   \begin{itemize}
+%     \let\normalitem=\item
+%     \def\fileitem#1#2{%
+%       \normalitem{\fileent{#1}}%
+%       \hfill
+%       (as \fileent{\itshape#2})%
+%       \break
+%     }
+%     \def\incitem#1{%
+%       \normalitem{\fileent{#1}}
+%     }
+%     \fileitem{luatex-fonts.lua}{otfl-fonts.lua}
+%           The wrapper that loads the font loader code.
 %
-% The following files have been written for this package:
-% \begin{itemize*}
-% \item |otfl-font-clr.lua|
-% \item |otfl-font-nms.lua|
-% \item |otfl-luat-ovr.lua|
-% \item |otfl-font-ltx.lua|\footnote{%
-%   A heavily modified version of |luatex-fonts-def.lua|.
-% }
-% \end{itemize*}
+%     \fileitem{luatex-fonts-merged.lua}{otfl-fonts-merged.lua}
+%           The font loader package.
+%           It is generated by \fileent{mtx-package}, a \LUA
+%           source code merging tool developed by Hans
+%           Hagen.\footnote{%
+%             \fileent{mtx-package} is
+%             \href
+%               {http://repo.or.cz/w/context.git/blob_plain/refs/heads/origin:/scripts/context/lua/mtx-package.lua}
+%               {part of \CONTEXT}
+%             and requires \fileent{mtxrun}.
+%             Run
+%             \verb|mtxrun --script package --help|
+%             to display further information.
+%             For the actual merging code see the file
+%             \fileent{util-mrg.lua} that is part of \CONTEXT.
+%           }
+%
+%           Included are several Lua files that can be classed in three
+%           categories.
+%           \begin{itemize}
+%             \normalitem \emphasis{\LUA utility libraries}, a subset
+%                         of what is provided by the \identifier{lualibs}
+%                         package.
+%
+%                         \begin{multicols}{2}
+%                           \begin{itemize}
+%                             \incitem{l-lua.lua}       \incitem{l-lpeg.lua}
+%                             \incitem{l-function.lua}  \incitem{l-string.lua}
+%                             \incitem{l-table.lua}     \incitem{l-io.lua}
+%                             \incitem{l-file.lua}      \incitem{l-boolean.lua}
+%                             \incitem{l-math.lua}      \incitem{util-str.lua}
+%                           \end{itemize}
+%                         \end{multicols}
+%
+%             \normalitem The \emphasis{Font Loader} itself.
+%                         These files have been written for
+%                         \LUATEX-Fonts and are distributed along with
+%                         \identifier{luaotfload}.
+%                         \begin{multicols}{2}
+%                           \begin{itemize}
+%                             \incitem{luatex-basics-gen.lua}
+%                             \incitem{luatex-basics-nod.lua}
+%                             \incitem{luatex-fonts-enc.lua}
+%                             \incitem{luatex-fonts-syn.lua}
+%                             \incitem{luatex-fonts-tfm.lua}
+%                             \incitem{luatex-fonts-chr.lua}
+%                             \incitem{luatex-fonts-lua.lua}
+%                             \incitem{luatex-fonts-def.lua}
+%                             \incitem{luatex-fonts-ext.lua}
+%                             \incitem{luatex-fonts-cbk.lua}
+%                           \end{itemize}
+%                         \end{multicols}
+%
+%             \normalitem Code related to \emphasis{font handling and
+%                         node processing}, taken directly from
+%                         \CONTEXT.
+%                         \begin{multicols}{2}
+%                           \begin{itemize}
+%                             \incitem{data-con.lua} \incitem{font-ini.lua}
+%                             \incitem{font-con.lua} \incitem{font-cid.lua}
+%                             \incitem{font-map.lua} \incitem{font-oti.lua}
+%                             \incitem{font-otf.lua} \incitem{font-otb.lua}
+%                             \incitem{node-inj.lua} \incitem{font-ota.lua}
+%                             \incitem{font-otn.lua} \incitem{font-def.lua}
+%                           \end{itemize}
+%                         \end{multicols}
+%           \end{itemize}
+%
+%   \end{itemize}
+%
+% In addition to these, \identifier{luaotfload} requires a number of
+% files not contained in the merge. Some of these have no equivalent in
+% \LUATEX-Fonts or \CONTEXT, some were taken unmodified from the
+% latter.
+%
+% \begin{itemize}
+%     \let\normalitem=\item
+%     \def\ouritem#1{%
+%       \normalitem{\fileent{#1}}%
+%       \space--\hskip1em
+%     }
+%     \ouritem {otfl-font-otc.lua} \fileent{font-otc} from \CONTEXT;
+%                                  font feature handling.
+%     \ouritem {otfl-lib-dir.lua}  \fileent{l-dir} from \CONTEXT;
+%                                  contains functionality required
+%                                  by \fileent{otfl-font-nms.lua}.
+%     \ouritem {otfl-luat-ovr.lua} overrides for the \CONTEXT logging
+%                                  functionality.
+%     \ouritem {otfl-font-pfb.lua} registers the \identifier{OpenType}
+%                                  font reader as handler for
+%                                  Postscript fonts.
+%     \ouritem {otfl-font-nms.lua} font database.
+%     \ouritem {otfl-font-clr.lua} color handling.
+%     \ouritem {otfl-font-ltx.lua} font feature handling.
+%     \ouritem {otfl-features.lua} definitions of the \verb|anum| and
+%                                  \verb|tlig| features.
+% \end{itemize}
+%
+% \begin{figure}[b]
+%   \caption{Schematic of the Files in \identifier{Luaotfload}}
+%   \includegraphics[width=\textheight,angle=90]{filegraph.pdf}
+%   \label{file-graph}
+% \end{figure}
 %
 % \section{Troubleshooting}
 %
 % If you encounter problems with some fonts, please first update to the latest
-% version of this package before reporting a bug, as this package is under
-% active development.
+% version of this package before reporting a bug, as
+% \identifier{luaotfload} is under active development and still a
+% moving target.
+% Errors during database generation can be traced by increasing
+% verbosity levels and redirecting log output to \fileent{stdout}:
 %
-% A very common problem is the lack of features for some OpenType fonts even
-% when specified. It can be related to the fact that some fonts do not provide
-% features for the |dflt| script, which is the default one in this package, so
-% you may have to specify the script in the command line, for example:
+% \begin{verbatim}
+%   mkluatexfontdb.lua -F -vvv --log=stdout
+% \end{verbatim}
 %
-% |\font\test=file:MyFont.otf:script=latn;+liga;|
+% If this fails, the font last printed to the terminal is likely to be
+% the culprit.
+% Please specify it when reporting a bug, and blacklist it for the time
+% being (see above, page \pageref{font-blacklist}).
+%
+% A common problem is the lack of features for some
+% \identifier{OpenType} fonts even when specified.
+% This can be related to the fact that some fonts do not provide
+% features for the |dflt| script (see above on page
+% \pageref{script-tag}),
+% which is the default one in this package.
+% If this happens, assigning a script when the font is defined should
+% fix it.
+% For example with the |latn| script:
+%
+% \begin{verbatim}
+%   \font\test=file:MyFont.otf:script=latn;+liga;
+% \end{verbatim}
 %
 % \part{\fileent{luaotfload.lua}}
 %
@@ -541,9 +836,11 @@ luaotfload.module = {
 
 local luatexbase = luatexbase
 
-local type, next, dofile = type, next, dofile
-local stringfind = string.find
-local find_file  = kpse.find_file
+local type, next       = type, next
+local stringfind       = string.find
+local stringsub        = string.sub
+local stringmatch      = string.match
+local find_file        = kpse.find_file
 
 local add_to_callback, create_callback =
       luatexbase.add_to_callback, luatexbase.create_callback
@@ -701,7 +998,7 @@ end
 %    \end{enumerate}
 %
 %    How the first step is executed depends on the presence on the
-%    \emph{merged font loader code}.
+%    \emphasis{merged font loader code}.
 %    In \identifier{luaotfload} this is contained in the file
 %    \fileent{otfl-fonts-merged.lua}.
 %    If this file cannot be found,  the original libraries from \CONTEXT of
@@ -811,7 +1108,7 @@ callback.register = trapped_register
 %    We do our own callback handling with the means provided by luatexbase.
 %
 %    Note: \luafunction{pre_linebreak_filter} and \luafunction{hpack_filter}
-%    are coupled in \CONTEXT in the concept of \emph{node processor}.
+%    are coupled in \CONTEXT in the concept of \emphasis{node processor}.
 %
 %    \begin{macrocode}
 
@@ -827,7 +1124,6 @@ add_to_callback("find_vf_file",
                 find_vf_file, "luaotfload.find_vf_file")
 
 loadmodule"font-otc.lua"   -- TODO check what we can drop from otfl-features
-
 loadmodule"lib-dir.lua"    -- required by font-nms
 loadmodule"luat-ovr.lua"
 
@@ -967,6 +1263,38 @@ elseif luaotfload.font_definer == "patch"  then
                   1)
 end
 
+--[[todo--
+--- The manual promises coercion of the file: lookup if
+--- the asked name is enclosed in brackets.
+--- A couple things make me doubt that this is the case:
+---
+---     1) there doesn’t appear to be code for these cases
+---     2) the brackets remain part of the file name
+---     3) we still get calls to names.resolve which
+---        ignores the “lookup” field of the spec it gets
+---
+--- For this reason here is some code that a) coerces
+--- file: lookups in these cases and b) strips the brackets
+--- from the file name. As we *still* get name: lookups even
+--- though this code is active I’ll just leave it here
+--- for reference, ineffective as it is.
+do
+    local getspecification, makespecification =
+        fonts.definers.getspecification, fonts.definers.makespecification
+
+    local analyze = function (specification, size)
+        local lookup, name, sub, method, detail = getspecification(specification or "")
+        local filename = stringmatch(name, "^%[(.*)%]$")
+        if filename then
+            lookup   = "file"    --> coerce file:
+            name     = filename  --> remove brackets
+        end
+        return makespecification(specification, lookup, name, sub, method, detail, size)
+    end
+    fonts.definers.analyze = analyze
+end
+--]]--
+
 loadmodule"features.lua"
 
 -- vim:tw=71:sw=4:ts=4:expandtab
@@ -997,32 +1325,6 @@ loadmodule"features.lua"
     [2013/04/16 v2.2 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
-\RequireLuaModule{lualibs}
-\RequireLuaModule{luaotfload}
-
-\csname ifluaotfloadloaded\endcsname
-\let\ifluaotfloadloaded\endinput
-\bgroup\expandafter\expandafter\expandafter\egroup
-\expandafter\ifx\csname ProvidesPackage\endcsname\relax
-  \input luatexbase.sty
-\else
-  \NeedsTeXFormat{LaTeX2e}
-  \ProvidesPackage{luaotfload}%
-    [2013/04/16 v2.2 OpenType layout system]
-  \RequirePackage{luatexbase}
-\fi
-%    \end{macrocode}
-%
-% %% As soon as we feel the need this file will file will contain an extension
-% %% to the standard plain register allocation. For the moment we stick to a
-% %% rather dumb attribute allocator. We start at 256 because we don't want
-% %% any interference with the attributes used in the font handler.
-% %%\newcount \lastallocatedattribute \lastallocatedattribute=255
-% %%\def\newattribute#1%
-% %% {\global\advance\lastallocatedattribute 1
-% %%  \attributedef#1\lastallocatedattribute}
-%
-%     \begin{macrocode}
 \RequireLuaModule{luaotfload}
 \endinput
 %    \end{macrocode}

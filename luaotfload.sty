@@ -28,18 +28,6 @@
     [2011/10/06 v2.0 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
-%% --------------------------------------------------------------------
-%% from luatex-basics.tex
-% As soon as we feel the need this file will file will contain an extension
-% to the standard plain register allocation. For the moment we stick to a
-% rather dumb attribute allocator. We start at 256 because we don't want
-% any interference with the attributes used in the font handler.
-%\newcount \lastallocatedattribute \lastallocatedattribute=255
-
-%\def\newattribute#1%
-  %{\global\advance\lastallocatedattribute 1
-   %\attributedef#1\lastallocatedattribute}
-%% --------------------------------------------------------------------
 \RequireLuaModule{luaotfload}
 \endinput
 %%

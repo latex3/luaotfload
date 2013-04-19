@@ -35,7 +35,7 @@ local utf8lower               = unicode.utf8.lower
 
 --- these come from Lualibs/Context
 local dirglob                 = dir.glob
-local dirmkdirs               = dir.mkdirds
+local dirmkdirs               = dir.mkdirs
 local filebasename            = file.basename
 local filecollapsepath        = file.collapsepath
 local fileextname             = file.extname

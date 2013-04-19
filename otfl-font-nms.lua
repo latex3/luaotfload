@@ -888,7 +888,9 @@ read_fonts_conf = function (path, results, passed_paths)
                         read_fonts_conf(include, results, passed_paths)
                     elseif lfs.isdir(include) then
                         for _,f in next, dirglob(filejoin(include, "*.conf")) do
-                            read_fonts_conf(f, results, passed_paths)
+                            if not passed_paths_set[f] then
+                                read_fonts_conf(f, results, passed_paths)
+                            end
                         end
                     end
                 end

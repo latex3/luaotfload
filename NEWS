@@ -1,6 +1,23 @@
 Change History
 --------------
 
+2013/04/xx, luaotfload v2.2:
+    * Synchronisation with ConTeXt from TeXLive 2013, inducing
+      backward-incompatible changes in the font structure (fontspec and 
+      unicode-math must be updated)
+    * Synchronisation with ConTeXt is now easier and can be done by just
+      updating otfl-fonts-merged.lua (available in ConTeXt)
+    * Improve documentation
+    * renaming mkluatexfontdb into fontdbutil, with more search functionalities
+
+2013/04/11, luaotfload v1.28:
+    * Adapting to LuaTeX 0.75, keeping backward-compatibility
+    * Fix small documentation issues in mkluatexfontdb
+    * Fix possibility of infite loop with fontconfig config files references
+    * Adding semibold synonym for bold
+    * file:xxx syntax now uses the same search function as name: which
+      make more fonts recognized
+
 2011/04/21, luaotfload v1.25:
     * Fix bug loading *.dfont fonts
     * Misc. documentation fixes

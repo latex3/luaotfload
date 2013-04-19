@@ -822,7 +822,7 @@ and the derived files
 %<*lua>
 % \fi
 %    \begin{macrocode}
-module("luaotfload", package.seeall)
+luaotfload = luaotfload or {}
 
 luaotfload.module = {
     name          = "luaotfload",
@@ -1019,15 +1019,9 @@ end
 %    \identifier{luatexbase}-style callback handling here.
 %
 %    \begin{macrocode}
-if not _G.    generic_context then _G.    generic_context = { } end
-if not _G.non_generic_context then _G.non_generic_context = { } end
+generic_context = {no_callbacks_yet = true}
 
-local     generic_context =    generic_context
-local non_generic_context =non_generic_context
-
-generic_context.no_callbacks_yet = true
-
-_G.non_generic_context = { luatex_fonts = {
+non_generic_context = { luatex_fonts = {
         load_before     = "otfl-fonts-merged.lua",
         -- load_after      = nil, --- TODO, this is meant for callbacks
         skip_loading    = true,
@@ -1055,7 +1049,7 @@ callback.register      = dummy_function
 local dummylogfunction=function() end
 local dummylogreporter=function(c) return function(...) log(string.formatters(...)) end end
 
-_G.logs={
+logs={
   new=dummylogreporter,
   reporter=dummylogreporter,
   messenger=dummylogreporter,
@@ -1091,9 +1085,9 @@ do
     local new_attribute = luatexbase.new_attribute
     local the_attributes = luatexbase.attributes
 
-    _G.attributes = _G.attributes or { }
+    attributes = attributes or { }
 
-    _G.attributes.private = function (name)
+    attributes.private = function (name)
         local attr   = "otfl@" .. name
         local number = the_attributes[attr]
         if not number then

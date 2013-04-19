@@ -1080,14 +1080,7 @@ end
 
 local fl_prefix = "luaotfload" -- “luatex” for luatex-plain
 local loadmodule = function (name)
-    local tofind = fl_prefix .."-"..name
-    local found = find_file(tofind,"tex")
-    if found then
-        log("loading file %s.", found)
-        dofile(found)
-    else
-        error("file %s not found.", tofind)
-    end
+    require(fl_prefix .."-"..name)
 end
 
 %    \end{macrocode}

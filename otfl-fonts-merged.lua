@@ -2926,7 +2926,7 @@ storage={
   register=dummyfunction,
   shared={},
 }
-logs={
+logs=logs or {
   new=dummyreporter,
   reporter=dummyreporter,
   messenger=dummyreporter,

@@ -1047,6 +1047,23 @@ callback.register      = dummy_function
 
 %    \end{macrocode}
 %
+%    In order to have an output with normal verbosity, we need to pre-override
+%    some \CONTEXT log function:
+%
+%    \begin{macrocode}
+
+local dummylogfunction=function() end
+local dummylogreporter=function(c) return function(...) log(string.formatters(...)) end end
+
+_G.logs={
+  new=dummylogreporter,
+  reporter=dummylogreporter,
+  messenger=dummylogreporter,
+  report=dummylogfunction,
+}
+
+%    \end{macrocode}
+%
 %    Now that things are sorted out we can finally load the fontloader.
 %
 %    \begin{macrocode}

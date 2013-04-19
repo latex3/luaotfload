@@ -130,13 +130,14 @@ and the derived files
 \setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
 %setmathfont{XITS Math}
 
-\newcommand\TEX    {\TeX\xspace}
-\newcommand\LUA    {Lua\xspace}
-\newcommand\PDFTEX {pdf\TeX\xspace}
-\newcommand\LUATEX {Lua\TeX\xspace}
-\newcommand\XETEX  {\XeTeX\xspace}
-\newcommand\LATEX  {\LaTeX\xspace}
-\newcommand\CONTEXT{Con\TeX t\xspace}
+\newcommand\TEX     {\TeX\xspace}
+\newcommand\LUA     {Lua\xspace}
+\newcommand\PDFTEX  {pdf\TeX\xspace}
+\newcommand\LUATEX  {Lua\TeX\xspace}
+\newcommand\XETEX   {\XeTeX\xspace}
+\newcommand\LATEX   {\LaTeX\xspace}
+\newcommand\CONTEXT {Con\TeX t\xspace}
+\newcommand\OpenType{\identifier{Open\kern-.25ex Type}\xspace}
 
 \def\definehighlight[#1][#2]%
  {\ifcsname #1\endcsname\else
@@ -192,9 +193,9 @@ and the derived files
 % \maketitle
 %
 % \begin{abstract}
-% This package is an adaptation of the \CONTEXT font loading system, providing
-% the ability to load \identifier{OpenType} fonts with extended font loading syntax
-% supporting a large selection of \identifier{OpenType} font features.
+% This package is an adaptation of the \CONTEXT font loading system.
+% It allows for loading \OpenType fonts with an extended syntax and adds
+% support for a variety of font features.
 % \end{abstract}
 %
 % \tableofcontents
@@ -203,13 +204,13 @@ and the derived files
 %
 % Font management and installation has always been painful with \TEX.  A lot of
 % files are needed for one font (\abbrev{tfm}, \abbrev{pfb}, \abbrev{map},
-% \abbrev{fd}, \abbrev{vf}), and as \TEX is 8-bit each font is limited to 256
-% characters.
+% \abbrev{fd}, \abbrev{vf}), and due to the 8-Bit encoding each font is limited
+% to 256 characters.
 % But the font world has evolved since the original
 % \TEX, and new typographic systems have appeared, most notably the so
-% called \emphasis{smart font} technologies like \identifier{OpenType}
-% (\abbrev{otf}) fonts.
-% These fonts can contain a lot of characters and additional
+% called \emphasis{smart font} technologies like \OpenType
+% fonts (\abbrev{otf}).
+% These fonts can contain many more characters than \TEX fonts, as well as additional
 % functionality like ligatures, old-style numbers, small capitals,
 % etc., and support more complex writing systems like Arabic and
 % Indic\footnote{%
@@ -219,7 +220,7 @@ and the derived files
 %   appreciated.
 % }
 % scripts.
-% \identifier{OpenType} fonts are widely deployed and available for all
+% \OpenType fonts are widely deployed and available for all
 % modern operating systems.
 % As of 2013 they have become the de facto standard for advanced text
 % layout.
@@ -227,10 +228,15 @@ and the derived files
 % world was with the \XETEX engine.
 %
 % Unlike \XETEX, \LUATEX has no built-in support for
-% \identifier{OpenType} or other technologies.
-% Instead, it provides hooks for executing Lua during the \TEX run
+% \OpenType or technologies other than the original \TEX fonts.
+% Instead, it provides hooks for executing \Lua code during the \TEX run
 % that allow implementing extensions for loading fonts and manipulating
 % how input text is processed without modifying the underlying engine.
+% This is where \identifier{luaotfload} comes into play:
+% Based on code from \CONTEXT, it extends \LUATEX with functionality necessary
+% for handling \OpenType fonts.
+% Additionally, it provides means for accessing fonts known to the operating
+% system conveniently by indexing the metadata.
 %
 % \section{Loading fonts}
 %
@@ -252,7 +258,7 @@ and the derived files
 % \paragraph{Prefix}
 %
 % The \meta{prefix} is either |file:| or |name:|.
-% It determines whether font loader should interpret the request as a
+% It determines whether the font loader should interpret the request as a
 % file name or font name, respectively, which again influences how it
 % will attempt to locate the font.
 % The prefix can be omitted, in which case |name:| is assumed.
@@ -266,30 +272,89 @@ and the derived files
 %% For compatibility with \XETEX, surrounding the \meta{font name} with
 %% square brackets is synonymous to using the |file:| prefix.
 %
-% Accessing fonts by fontname allows loading system installed fonts as
-% well as \fileent{texmf} ones, and requires a font names database; see
-% Section~\ref{sec:fontdb} for more information.
+% In order for fonts installed both in system locations and in your
+% \fileent{texmf} to be accessible by font name, \identifier{luaotfload} must
+% first collect the metadata included in the files.
+% Please refer to section ~\ref{sec:fontdb} below for instructions on how to
+% create the database.
 %
 % \paragraph{Font name}
 %
 % The \meta{font name} can be either a font filename or actual font
 % name based on the \meta{prefix} as mentioned above.
 %
-% Fonts loaded by filename may either include their absolute path in
-% the filesystem or consist of just the filename without a path.  If no
-% path is specified, then \identifier{kpathsea} is used to locate the
+% A filename request may optionally include the absolute path to the font file,
+% allowing for fonts outside the standard locations to be loaded as well.
+% If no path is specified, then \identifier{kpathsea} is used to locate the
 % font (which will typically be in the \fileent{texmf} tree or the
 % current directory).
 %
-% For example,
+% \subparagraph{Examples for loading by file name}
+%
+% For example, conventional \abbrev{type1} font can be loaded with a \verb|file:|
+% request like so:
+%
 % \begin{quote}
-% \begin{verbatim}
-% \font\1={file:ec-lmr10} at 10pt
-% \font\2={/Users/Shared/Fonts/aldus.otf} at 11pt
-% \font\3={name:TeX Gyre Pagella} at 9pt
-% \end{verbatim}
+%   \begin{verbatim}
+%   \font\lmromanten={file:ec-lmr10} at 10pt
+%   \end{verbatim}
 % \end{quote}
 %
+% The \OpenType version of Janusz Nowacki’s font \emphasis{Antykwa
+% Półtawskiego} (in \TEX Live) in its condensed variant can be loaded as
+% follows:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\apcregular=file:antpoltltcond-regular.otf at 42pt
+%   \end{verbatim}
+% \end{quote}
+%
+% The next example shows how to load the \emphasis{Porson} font digitized by
+% the Greek Font Society using \XETEX-style syntax and an absolute path from a
+% non-standard directory:
+% 
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\gfsporson="[/tmp/GFSPorson.otf]" at 12pt
+%   \end{verbatim}
+% \end{quote}
+%
+% \subparagraph{Examples for loading by font name}
+%
+% The \verb|name:| lookup does not depend on cryptic filenames:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\pagellaregular={name:TeX Gyre Pagella} at 9pt
+%   \end{verbatim}
+% \end{quote}
+%
+% A bit more specific but essentially the same lookup would be:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\pagellaregular={name:TeX Gyre Pagella Regular} at 9pt
+%   \end{verbatim}
+% \end{quote}
+%
+% Which fits nicely with the whole set:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\pagellaregular   ={name:TeX Gyre Pagella Regular}    at 9pt
+%   \font\pagellaitalic    ={name:TeX Gyre Pagella Italic}     at 9pt
+%   \font\pagellabold      ={name:TeX Gyre Pagella Bold}       at 9pt
+%   \font\pagellabolditalic={name:TeX Gyre Pagella Bolditalic} at 9pt
+%
+%   {\pagellaregular     foo bar baz\endgraf}
+%   {\pagellaitalic      foo bar baz\endgraf}
+%   {\pagellabold        foo bar baz\endgraf}
+%   {\pagellabolditalic  foo bar baz\endgraf}
+%
+%   ...
+%   \end{verbatim}
+% \end{quote}
 %
 % \paragraph{Font features}
 %
@@ -298,10 +363,14 @@ and the derived files
 %   Cf. \url{http://www.microsoft.com/typography/otspec/featurelist.htm}.
 % }
 % and font options.
-% Prepending a font feature with a |+|-sign enables it, while
-% a |-| disables it. For instance, the request
+% Prepending a font feature with a |+| (plus sign) enables it, whereas
+% a |-| (minus) disables it. For instance, the request
 %
-% |\font\test=Latin Modern Roman:+clig;-kern|
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\test=LatinModernRoman:+clig;-kern
+%   \end{verbatim}
+% \end{quote}
 %
 % \noindent activates contextual ligatures (|clig|) and disables
 % kerning (|kern|).
@@ -309,35 +378,45 @@ and the derived files
 % the feature in a key/value expression.
 % The following request has the same meaning as the last one:
 %
-% |\font\test=Latin Modern Roman:clig=true;kern=false|
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\test=LatinModernRoman:clig=true;kern=false
+%   \end{verbatim}
+% \end{quote}
 %
 % \noindent
-% Furthermore, this second syntax is required if a font feature
-% accepts options besides its activation state.
-% For example, \emphasis{stylistic alternates} (|salt|) provide a set
-% of variants to given glyphs.
-% These can be selected either explicitly by supplying the variant
-% index (starting from 1), or randomly by setting the value to,
-% obviously, |random|:
+% Furthermore, this second syntax is required should a font feature
+% accept other options besides a true/false switch.
+% For example, \emphasis{stylistic alternates} (|salt|) are variants of given
+% glyphs.
+% They can be selected either explicitly by supplying the variant
+% index (starting from one), or randomly by setting the value to,
+% obviously, |random|.
 %
-% |\font\test=Latin Modern Roman:salt=1|
+% \iffalse TODO verify that this actually works with a font that supports
+%               the salt feature!\false
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\librmsaltfirst=LatinModernRoman:salt=1
+%   \end{verbatim}
+% \end{quote}
 %
 % \noindent Other font options include:
 %
 % \begin{description}
 %
 % \item [mode] \hfill \\
-%        \identifier{luaotfload} has two \identifier{OpenType} processing
+%        \identifier{luaotfload} has two \OpenType processing
 %        \emphasis{modes}:
 %        \identifier{base} and \identifier{node}.
 %
-%        \identifier{base} mode works by mapping \identifier{OpenType}
-%        features to traditional \TEX ligature and kerning mechanisms,
-%        thus supporting only non-contextual substitutions and kerning
-%        pairs, but is the slightly faster variant.
-%        \identifier{node} mode works by processing \TEX’s internal
+%        \identifier{base} mode works by mapping \OpenType
+%        features to traditional \TEX ligature and kerning mechanisms.
+%        Supporting only non-contextual substitutions and kerning
+%        pairs, it is the slightly faster, albeit somewhat limited, variant.
+%        \identifier{node} mode works by processing \TeX’s internal
 %        node list directly at the \LUA end and supports
-%        a wider range of \identifier{OpenType} features.
+%        a wider range of \OpenType features.
 %        The downside is that the intricate operations required for
 %        \identifier{node} mode may slow down typesetting especially
 %        with complex fonts and it does not work in math mode.
@@ -346,19 +425,20 @@ and the derived files
 %        mode, and \identifier{base} mode has to be requested where needed,
 %        e.~g. for math fonts.
 %
-% \item [script] \ref{script-tag} \hfill \\
-%        An \identifier{OpenType} script tag;\footnote{%
+% \item [script] \label{script-tag} \hfill \\
+%        An \OpenType script tag;\footnote{%
 %          See \url{http://www.microsoft.com/typography/otspec/scripttags.htm}
 %          for a list of valid values.
 %          For scripts derived from the Latin alphabet the value
 %          |latn| is good choice.
 %        }
 %        the default value is |dlft|.
-%        Some fonts do not assign features to the |dflt| script, in
+%        Some fonts, including very popular ones by foundries like Adobe,
+%        do not assign features to the |dflt| script, in
 %        which case the script needs to be set explicitly.
 %
 % \item [language] \hfill \\
-%        An \identifier{OpenType} language system identifier,\footnote{%
+%        An \OpenType language system identifier,\footnote{%
 %          Cf. \url{http://www.microsoft.com/typography/otspec/languagetags.htm}.
 %        }
 %        defaulting to |dflt|.
@@ -367,13 +447,13 @@ and the derived files
 %        A comma-separated list of feature files to be applied to the
 %        font.
 %        Feature files contain a textual representation of
-%        \identifier{OpenType} tables and extend the features of a font
+%        \OpenType tables and extend the features of a font
 %        on fly.
 %        After they are applied to a font, features defined in a
 %        feature file can be enabled or disabled just like any
 %        other font feature.
 %        The syntax is documented in \identifier{Adobe}’s
-%        \identifier{OpenType} Feature File Specification.\footnote{%
+%        \OpenType Feature File Specification.\footnote{%
 %          Cf. \url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
 %        }
 %
@@ -391,13 +471,17 @@ and the derived files
 %
 %        For example, in order to set text in semitransparent red:
 %
-%        |\font\test=Latin Modern Roman:color=FF0000BB|
+%        \begin{quote}
+%           \begin{verbatim}
+%           \font\test={Latin Modern Roman}:color=FF0000BB
+%           \end{verbatim}
+%        \end{verbatim}
 %
 % \item [protrusion \& expansion] \hfill \\
-%        These keys both control microtypographic features of the font,
+%        These keys control microtypographic features of the font,
 %        namely \emphasis{character protrusion} and \emphasis{font
 %        expansion}.
-%        They accept names of predefined \LUA tables that contain
+%        Their arguments are names of \LUA tables that contain
 %        values for the respective features.\footnote{%
 %           For examples of the table layout please refer to the
 %           section of the file \fileent{otfl-fonts-ext.lua} where the
@@ -423,12 +507,16 @@ and the derived files
 %          for details.
 %        }:
 %
-%        |\font\test=Latin Modern Roman:protrusion=default|
+%        \begin{quote}
+%           \begin{verbatim}
+%           \font\test=LatinModernRoman:protrusion=default
+%           \end{verbatim}
+%        \end{verbatim}
 % \end{description}
 %
 % \paragraph{Non-standard font features}
-% \identifier{luaotfload} add a number of features that are not defined
-% in the original \identifier{OpenType} specification, most of them
+% \identifier{luaotfload} adds a number of features that are not defined
+% in the original \OpenType specification, most of them
 % aiming at emulating the behavior familiar from other \TEX engines.
 % Currently (2013) there are three of them:
 %
@@ -441,7 +529,15 @@ and the derived files
 %
 %   \item [tlig]
 %           Applies legacy \TEX ligatures:
-%           |``|, |''|, |`|, |'|, |"|, |--|, |---|, |!`| and |?`|.%
+%
+%           \begin{tabular}{rl|rl}
+%           ``  &  \verb|``|  &  ''  &  \verb|''|  \\
+%           `   &  \verb|`|   &  '   &  \verb|'|   \\
+%           "   &  \verb|"|   &  --  &  \verb|--|  \\
+%           --- &  \verb|---| &  !`  &  \verb|!`|  \\
+%           ?`  &  \verb|?`|  &      &             \\
+%           \end{tabular}
+
 %           \footnote{%
 %             These contain the feature set \verb|trep| of earlier
 %             versions of \identifier{luaotfload}.
@@ -768,7 +864,7 @@ and the derived files
 %                                  by \fileent{otfl-font-nms.lua}.
 %     \ouritem {otfl-luat-ovr.lua} overrides for the \CONTEXT logging
 %                                  functionality.
-%     \ouritem {otfl-font-pfb.lua} registers the \identifier{OpenType}
+%     \ouritem {otfl-font-pfb.lua} registers the \OpenType
 %                                  font reader as handler for
 %                                  Postscript fonts.
 %     \ouritem {otfl-font-nms.lua} font database.
@@ -803,7 +899,7 @@ and the derived files
 % being (see above, page \pageref{font-blacklist}).
 %
 % A common problem is the lack of features for some
-% \identifier{OpenType} fonts even when specified.
+% \OpenType fonts even when specified.
 % This can be related to the fact that some fonts do not provide
 % features for the |dflt| script (see above on page
 % \pageref{script-tag}),

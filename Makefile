@@ -19,7 +19,7 @@ SOURCE = $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT)
 
 # test files
 TESTDIR = tests
-TESTFILES = $(wildcard $(TESTDIR)/*.tex)
+TESTFILES = $(wildcard $(TESTDIR)/*.tex $(TESTDIR)/*.ltx)
 TESTFILES_SYS = $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
 TESTFILES_TL = $(filter-out $(TESTFILES_SYS), $(TESTFILES))
 

@@ -243,8 +243,6 @@ font database created by the mkluatexfontdb script.
 ---     successful lookup as this cannot be inferred from the other
 ---     values.
 ---
---- TODO: this function is used also with the file lookup, it could be optimized
----       a lot for this case.
 --- 
 resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
     local name  = sanitize_string(specification.name)

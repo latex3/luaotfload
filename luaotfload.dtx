@@ -200,6 +200,8 @@ and the derived files
 %
 % \tableofcontents
 %
+% \part{Package Description}
+%
 % \section{Introduction}
 %
 % Font management and installation has always been painful with \TEX.  A lot of
@@ -238,7 +240,7 @@ and the derived files
 % Additionally, it provides means for accessing fonts known to the operating
 % system conveniently by indexing the metadata.
 %
-% \section{Loading fonts}
+% \section{Loading Fonts}
 %
 % \identifier{luaotfload} supports an extended font loading syntax:
 %
@@ -537,7 +539,7 @@ and the derived files
 %           --- &  \verb|---| &  !`  &  \verb|!`|  \\
 %           ?`  &  \verb|?`|  &      &             \\
 %           \end{tabular}
-
+%
 %           \footnote{%
 %             These contain the feature set \verb|trep| of earlier
 %             versions of \identifier{luaotfload}.
@@ -559,16 +561,16 @@ and the derived files
 %
 % As mentioned above, \identifier{luaotfload} keeps track of which
 % fonts are available to \LUATEX by means of a \emphasis{database}.
-% This allows loading not only by explicit filenames but also by the
-% proper names contained in the metadata which is often more accessible
-% to humans.\footnote{%
+% This allows referring to fonts not only by explicit filenames but
+% also by the proper names contained in the metadata which is often
+% more accessible to humans.\footnote{%
 %   The tool \href{http://www.lcdf.org/type/}{\fileent{otfinfo}} (comes
-%   with \TEX Live), when invoked on a font file with the \verb|-o|
+%   with \TEX Live), when invoked on a font file with the \verb|-i|
 %   option, lists the variety of name fields defined for it.
 % }
 %
-% When \identifier{luaotfload} is asked to load a font by font name, it
-% will check if the database exists and load it or else generate a
+% When \identifier{luaotfload} is asked to load a font by a font name,
+% it will check if the database exists and load it, or else generate a
 % fresh one.
 % Should it then fail to locate the font, an update to the database is
 % performed in case the font has been added to the system only
@@ -578,14 +580,19 @@ and the derived files
 % behave as unobtrusively as possible, while providing a convenient
 % interface to the fonts installed on the system.
 %
+% Generating the database for the first time may take a while since it
+% inspects every font file on your computer.
+% This is particularly noticeable if it occurs during a typesetting run.
+% In any case, subsequent updates to the database will be quite fast.
+%
 % \subsection[mkluatexfontdb.lua]%
 %            {\fileent{mkluatexfontdb.lua}\footnote{%
 %   The script may be named just \fileent{mkluatexfontdb} in your
 %   distribution.
 % }}
 %
-% However, it can be desirable at times to do some of these steps
-% manually.
+% It can still be desirable at times to do some of these steps
+% manually, and without having to compile a document.
 % To this end, \identifier{luaotfload} comes with the utility
 % \fileent{mkluatexfontdb} that offers an interface to the database
 % functionality.
@@ -595,7 +602,7 @@ and the derived files
 %   Tests by the maintainer show only marginal performance gain by
 %   running with Luigi Scarso’s
 %   \href{https://foundry.supelec.fr/projects/luajittex/}%
-%        {\LUA jit\TEX},
+%        {\itentifier{Luajit\kern-.25ex\TEX}},
 %   which is probably due to the fact that most of the time is spent
 %   on file system operations.
 %
@@ -608,14 +615,11 @@ and the derived files
 % Invoke it from the command line with the \verb|--force| switch to
 % initiate a complete rebuild of the database.
 %
-% \begin{verbatim}
-%   mkluatexfontdb --force
-% \end{verbatim}
-%
-% Generating the database for the first time may take a while since it
-% inspects every font file on your computer.
-% This is particularly noticeable if it occurs during a typesetting run.
-% In any case, subsequent updates to the database will be quite fast.
+% \begin{quote}
+%   \begin{verbatim}
+%     mkluatexfontdb --force
+%   \end{verbatim}
+% \end{quote}
 %
 % \subsection{Search Paths}
 %
@@ -644,9 +648,9 @@ and the derived files
 %       Windows     & \verb|%WINDIR%\Fonts|
 %       \\
 %       Linux       & \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break
-%                     \fileent{/etc/fonts/fonts.conf"}
+%                     \fileent{/etc/fonts/fonts.conf}
 %       \\
-%       Mac         & \fileent{~/Library/Fonts},\break
+%       Mac         & \fileent{\texttilde/Library/Fonts},\break
 %                     \fileent{/Library/Fonts},\break
 %                     \fileent{/System/Library/Fonts}, and\hfill\break
 %                     \fileent{/Network/Library/Fonts}
@@ -657,18 +661,22 @@ and the derived files
 %   \hrule
 % \end{table}
 %
-% \subsection{Querying from outside}
+% \subsection{Querying from Outside}
 %
 % \fileent{mkluatexfontdb.lua} also provides rudimentary means of
-% accessing the font database.
-% If the option \verb|--find=name| is given, the script will try and search
-% the fonts indexed by \identifier{luaotfload} for a matching name.
+% accessing the information collected in the font database.
+% If the option \verb|--find=|\emphasis{name} is given, the script will
+% try and search the fonts indexed by \identifier{luaotfload} for a
+% matching name.
 % For instance, the invocation
 %
-% \begin{verbatim}
-%   mkluatexfontdb.lua  --find="Iwona Regular"
-% \end{verbatim}
+% \begin{quote}
+%   \begin{verbatim}
+%     mkluatexfontdb.lua  --find="Iwona Regular"
+%   \end{verbatim}
+% \end{quote}
 %
+% \noindent
 % will verify if “Iwona Regular” is found in the database and can be
 % readily requested in a document.
 %
@@ -678,16 +686,19 @@ and the derived files
 % \identifier{Iwona} you are looking for was “Bright” or “Light”.
 % The query 
 %
-% \begin{verbatim}
-%   mkluatexfontdb.lua  -F --find="Iwona Bright"
-% \end{verbatim}
+% \begin{quote}
+%   \begin{verbatim}
+%     mkluatexfontdb.lua  -F --find="Iwona Bright"
+%   \end{verbatim}
+% \end{quote}
 %
+% \noindent
 % will tell you that indeed the latter name is correct.
 %
 % \verb|mkluatexfontdb.lua --help| will list the available command line
-% switches, including some that will not be discussed in detail here.
+% switches, including some not discussed in detail here.
 %
-% \subsection{Blacklisting fonts}
+% \subsection{Blacklisting Fonts}
 % \label{font-blacklist}
 %
 % Some fonts are problematic in general, or just in \LUATEX.
@@ -699,7 +710,7 @@ and the derived files
 % \fileent{otfl-blacklist.cnf}.
 %
 % A blacklist file is a list of font filenames, one per line.
-% Specifying the full path where the file is located is optional, the
+% Specifying the full path to where the file is located is optional, the
 % plain filename should suffice.
 % File extensions (\fileent{.otf}, \fileent{.ttf}, etc.) may be omitted.
 % Anything after a percent (|%|) character until the end of the line
@@ -912,7 +923,27 @@ and the derived files
 %   \font\test=file:MyFont.otf:script=latn;+liga;
 % \end{verbatim}
 %
-% \part{\fileent{luaotfload.lua}}
+% \part{Implementation}
+%
+% \section{\fileent{luaotfload.lua}}
+%
+% This file initializes the system and loads the font loader.
+% To minimize potential conflicts between other packages and the
+% code imported from \CONTEXT, several precautions are in order.
+% Some of the functionality that the font loader expects to be present,
+% like raw access to callbacks, are assumed to have been disabled by
+% \identifier{luatexbase} when this file is processed.
+% In some cases it is possible to trick it by putting dummies into
+% place and restoring the behavior from \identifier{luatexbase} after
+% initilization.
+% Other cases such as attribute allocation require that we hook the
+% functionality from \identifier{luatexbase} into locations where they
+% normally wouldn’t be.
+%
+% Anyways we can import the code base without modifications, which is
+% due mostly to the extra effort by
+% Hans Hagen to make \LUATEX-Fonts self-contained and encapsulate it,
+% and especially due to his willingness to incorporate our suggestions.
 %
 % \iffalse
 %<*lua>
@@ -1401,7 +1432,7 @@ loadmodule"features.lua"
 %</lua>
 % \fi
 %
-% \part{\fileent{luaotfload.sty}}
+% \section{\fileent{luaotfload.sty}}
 %
 % \iffalse
 %<*package>

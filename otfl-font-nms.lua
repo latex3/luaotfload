@@ -557,7 +557,7 @@ font_fullinfo = function (filename, subfont, texmf)
         end
     else
         -- no names table, propably a broken font
-        report("log", 1, "broken font rejected", "%s", basefile)
+        report("log", 1, "db", "broken font rejected", "%s", basefile)
         return
     end
     tfmdata.fontname    = metadata.fontname
@@ -589,7 +589,7 @@ local load_font = function (filename, fontnames, newfontnames, texmf)
     if filename then
         if names.blacklist[filename] or
            names.blacklist[basename] then
-            report("log", 2, "ignoring font", "%s", filename)
+            report("log", 2, "db", "ignoring font", "%s", filename)
             return
         end
         local timestamp, db_timestamp
@@ -612,7 +612,7 @@ local load_font = function (filename, fontnames, newfontnames, texmf)
                 newmappings[#newmappings+1]        = mappings[v]
                 newstatus[basefile].index[index+1] = #newmappings
             end
-            report("log", 1, "font already indexed", "%s", basefile)
+            report("log", 1, "db", "font already indexed", "%s", basefile)
             return
         end
         local info = fontloader.info(filename)
@@ -647,7 +647,7 @@ local load_font = function (filename, fontnames, newfontnames, texmf)
                 newstatus[basefile].index[1] = index
             end
         else
-            report("log", 1, "failed to load", "%s", basefile)
+            report("log", 1, "db", "failed to load", "%s", basefile)
         end
     end
 end
@@ -988,10 +988,10 @@ save_names = function (fontnames)
         local luaname, lucname = make_name(path)
         tabletofile(luaname, fontnames, true)
         caches.compile(fontnames,luaname,lucname)
-        report("info", 1, "db", "Font names database saved")
+        report("info", 0, "db", "Font names database saved")
         return path
     else
-        report("info", 1, "db", "Failed to save names database")
+        report("info", 0, "db", "Failed to save names database")
         return nil
     end
 end

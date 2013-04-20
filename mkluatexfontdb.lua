@@ -11,6 +11,8 @@ kpse.set_program_name"luatex"
 
 local stringformat  = string.format
 local texiowrite_nl = texio.write_nl
+local stringfind    = string.find
+local stringlower   = string.lower
 
 -- First we need to be able to load module (code copied from
 -- luatexbase-loader.sty):
@@ -21,11 +23,49 @@ local loader_path = assert(kpse.find_file(loader_file, "lua"),
 --texiowrite_nl("("..loader_path..")")
 dofile(loader_path) -- FIXME this pollutes stdout with filenames
 
-_G.config      = _G.config or { }
-local config   = _G.config
+--[[doc--
+Depending on how the script is called we change its behavior.
+For backwards compatibility, moving or symlinking the script to a
+file name starting with \fileent{mkluatexfontdb} will cause it to
+trigger a database update on every run.
+Running as \fileent{fontdbutil} -- the new name -- will do this upon
+request only.
+
+There are two naming conventions followed here: firstly that of
+utilities such as \fileent{mktexpk}, \fileent{mktexlsr} and the likes,
+and secondly that of \fileent{fmtutil}.
+After support for querying the database was added, the latter appeared
+to be the more appropriate.
+--doc]]--
+
+config              = config or { }
+local config        = config
+config.luaotfload   = config.luaotfload or { }
+
+do -- we don’t have file.basename and the likes yet, so inline parser ftw
+    local C, P         = lpeg.C, lpeg.P
+    local lpegmatch    = lpeg.match
+    local slash        = P"/"
+    local dot          = P"."
+    local noslash      = 1 - slash
+    local slashes      = slash^1
+    local path         =  slashes^-1 * (noslash^1 * slashes)^1
+    local thename      = (1 - slash - dot)^1
+    local extension    = dot * (1 - slash - dot)^1
+    local p_basename   = path^-1 * C(thename) * extension^-1 * P(-1)
+
+    -- if stringfind(stringlower(arg[0]), "^fontdbutil") then  
+    local self = lpegmatch(p_basename, stringlower(arg[0]))
+    if self == "fontdbutil" then
+        config.luaotfload.self = "fontdbutil"
+    else
+        config.luaotfload.self = "mkluatexfontdb"
+    end
+end
 
 config.lualibs                  = config.lualibs or { }
-config.lualibs.prefer_merged    = false
+config.lualibs.verbose          = false
+config.lualibs.prefer_merged    = true
 config.lualibs.load_extended    = false
 
 require"lualibs"
@@ -34,14 +74,48 @@ require"otfl-luat-ovr.lua"  --- this populates the logs.* namespace
 require"otfl-font-nms"
 require"alt_getopt"
 
-local name    = "mkluatexfontdb"
 local version = "2.2" -- same version number as luaotfload
 local names    = fonts.names
 
 local db_src_out = names.path.dir.."/"..names.path.basename
 local db_bin_out = file.replacesuffix(db_src_out, "luc")
-local function help_msg()
-    texiowrite_nl(stringformat([[
+
+local help_messages = {
+    fontdbutil = [[
+
+Usage: %s [OPTION]...
+    
+Operations on the LuaTeX font database.
+
+This tool is part of the luaotfload package. Valid options are:
+
+-------------------------------------------------------------------------------
+                             VERBOSITY AND LOGGING
+
+  -q --quiet                   don't output anything
+  -v --verbose=LEVEL           be more verbose (print the searched directories)
+  -vv                          print the loaded fonts
+  -vvv                         print all steps of directory searching
+  -V --version                 print version and exit
+  -h --help                    print this message
+
+-------------------------------------------------------------------------------
+                                   DATABASE
+
+  -u --update                  update the database
+  -f --force                   force re-indexing all fonts
+
+  --find="font name"           query the database for a font name
+  -F --fuzzy                   look for approximate matches if --find fails
+
+  --log=stdout                 redirect log output to stdout
+
+The font database will be saved to
+   %s
+   %s
+
+]],
+    mkluatexfontdb = [[
 
 Usage: %s [OPTION]...
     
@@ -56,22 +130,23 @@ Valid options:
   -V --version                 print version and exit
   -h --help                    print this message
 
-  --find="font name"           query the database for a font name
-  -F --fuzzy                   look for approximate matches if --find fails
-
-  --log=stdout                 redirect log output to stdout
-
 The font database will be saved to
    %s
    %s
 
-]], name, db_src_out, db_bin_out))
+]],
+}
+
+local help_msg = function ( )
+    local template = help_messages[config.luaotfload.self]
+                  or help.messages.fontdbutil
+    texiowrite_nl(stringformat(template, config.luaotfload.self, db_src_out, db_bin_out))
 end
 
-local function version_msg()
+local version_msg = function ( )
     texiowrite_nl(stringformat(
         "%s version %s, database version %s.\n",
-        name, version, names.version))
+        config.luaotfload.self, version, names.version))
 end
 
 --[[--
@@ -80,17 +155,19 @@ executed in the correct order. To avoid duplication we track them in a
 set.
 --]]--
 
-local action_sequence = { "loglevel", "help", "version", "generate", "query" }
+local action_sequence = {
+    "loglevel", "help", "version", "generate", "query"
+}
 local action_pending  = table.tohash(action_sequence, false)
 
-action_pending.loglevel = true --- always set the loglevel
-action_pending.generate = true --- this is the default action
+action_pending.loglevel = true  --- always set the loglevel
+action_pending.generate = false --- this is the default action
 
 local actions = { } --- (jobspec -> (bool * bool)) list
 
 actions.loglevel = function (job)
     logs.set_loglevel(job.log_level)
-    logs.names_report("log", 2,
+    logs.names_report("log", 2, "util",
                       "setting log level", "%d", job.log_level)
     return true, true
 end
@@ -108,8 +185,8 @@ end
 actions.generate = function (job)
     local fontnames, savedname
     fontnames = names.update(fontnames, job.force_reload)
-    logs.names_report("log", 0, "fonts in the database",
-                      "%i", #fontnames.mappings)
+    logs.names_report("log", 0, "db",
+        "fonts in the database", "%i", #fontnames.mappings)
     savedname = names.save(fontnames)
     if savedname then --- FIXME have names.save return bool
         return true, true
@@ -164,6 +241,10 @@ local process_cmdline = function ( ) -- unit -> jobspec
         log_level    = 1,
     }
 
+    if config.luaotfload.self == "mkluatexfontdb" then
+        action_pending["generate"] = true
+    end
+
     local long_options = {
         force            = "f",
         help             = "h",
@@ -174,9 +255,10 @@ local process_cmdline = function ( ) -- unit -> jobspec
         find             = 1,
         fuzzy            = "F",
         limit            = 1,
+        update           = "u",
     }
 
-    local short_options = "fFqvVh"
+    local short_options = "fFquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -186,6 +268,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
         local v = options[n]
         if     v == "q" then
             result.log_level = 0
+        elseif v == "u" then
+            action_pending["generate"] = true
         elseif v == "v" then
             if result.log_level > 0 then
                 result.log_level = result.log_level + 1
@@ -197,6 +281,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "h" then
             action_pending["help"] = true
         elseif v == "f" then
+            result.update       = true
             result.force_reload = 1
         elseif v == "verbose" then
             local lvl = optarg[n]
@@ -234,24 +319,24 @@ local main = function ( ) -- unit -> int
         local actionname = action_sequence[i]
         local exit       = false
         if action_pending[actionname] then
-            logs.names_report("log", 3, "preparing for task",
+            logs.names_report("log", 3, "util", "preparing for task",
                               "%s", actionname)
 
             local action             = actions[actionname]
             local success, continue  = action(job)
 
             if not success then
-                logs.names_report(false, 0, "could not finish task",
-                                  "%s", actionname)
+                logs.names_report(false, 0, "util",
+                    "could not finish task", "%s", actionname)
                 retval = -1
                 exit   = true
             elseif not continue then
-                logs.names_report(false, 3, "task completed, exiting",
-                                  "%s", actionname)
+                logs.names_report(false, 3, "util",
+                    "task completed, exiting", "%s", actionname)
                 exit   = true
             else
-                logs.names_report(false, 3, "task completed successfully",
-                                  "%s", actionname)
+                logs.names_report(false, 3, "util",
+                    "task completed successfully", "%s", actionname)
             end
         end
         if exit then break end

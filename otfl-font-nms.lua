@@ -16,6 +16,9 @@ local tonumber                = tonumber
 local iolines                 = io.lines
 local ioopen                  = io.open
 local kpseexpand_path         = kpse.expand_path
+local kpseexpand_var          = kpse.expand_var
+local kpselookup              = kpse.lookup
+local kpsereadable_file       = kpse.readable_file
 local mathabs                 = math.abs
 local mathmin                 = math.min
 local stringfind              = string.find
@@ -39,6 +42,7 @@ local dirmkdirs               = dir.mkdirs
 local filebasename            = file.basename
 local filecollapsepath        = file.collapsepath
 local fileextname             = file.extname
+local fileiswritable          = file.iswritable
 local filejoin                = file.join
 local filereplacesuffix       = file.replacesuffix
 local filesplitpath           = file.splitpath
@@ -58,7 +62,7 @@ names.version        = 2.2
 names.data           = nil
 names.path           = {
     basename = "otfl-names.lua",
-    dir      = filejoin(kpse.expand_var("$TEXMFVAR"), names_dir),
+    dir      = filejoin(kpseexpand_var("$TEXMFVAR"), names_dir),
 }
 
 
@@ -165,15 +169,15 @@ load_names = function ( )
     local foundname, data = load_lua_file(path)
 
     if data then
-        report("info", 0, "Font names database loaded", "%s", foundname)
+        report("info", 1, "db",
+            "Font names database loaded", "%s", foundname)
     else
-        report("info", 0,
+        report("info", 0, "db",
             [[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
         data = update_names(fontnames_init())
         save_names(data)
     end
-    texiowrite_nl""
     return data
 end
 
@@ -342,8 +346,8 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 end
             end
             if #found == 1 then
-                if kpse.lookup(found[1].filename[1]) then
-                    report("log", 0, "load font",
+                if kpselookup(found[1].filename[1]) then
+                    report("log", 0, "resolve",
                         "font family='%s', subfamily='%s' found: %s",
                         name, style, found[1].filename[1]
                     )
@@ -363,8 +367,8 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                         least   = difference
                     end
                 end
-                if kpse.lookup(closest.filename[1]) then
-                    report("log", 0, "load font",
+                if kpselookup(closest.filename[1]) then
+                    report("log", 0, "resolve",
                         "font family='%s', subfamily='%s' found: %s",
                         name, style, closest.filename[1]
                     )
@@ -665,9 +669,9 @@ local function path_normalize(path)
     if os.type ~= "windows" and os.type ~= "msdos" then
         local dest = lfs.readlink(path)
         if dest then
-            if kpse.readable_file(dest) then
+            if kpsereadable_file(dest) then
                 path = dest
-            elseif kpse.readable_file(filejoin(file.dirname(path), dest)) then
+            elseif kpsereadable_file(filejoin(file.dirname(path), dest)) then
                 path = filejoin(file.dirname(path), dest)
             else
                 -- broken symlink?
@@ -684,7 +688,7 @@ names.blacklist = { }
 
 local function read_blacklist()
     local files = {
-        kpse.lookup("otfl-blacklist.cnf", {all=true, format="tex"})
+        kpselookup("otfl-blacklist.cnf", {all=true, format="tex"})
     }
     local blacklist = names.blacklist
     local whitelist = { }
@@ -703,7 +707,7 @@ local function read_blacklist()
                     if stringsub(line, 1, 1) == "-" then
                         whitelist[stringsub(line, 2, -1)] = true
                     else
-                        report("log", 2, "blacklisted file", "%s", line)
+                        report("log", 2, "db", "blacklisted file", "%s", line)
                         blacklist[line] = true
                     end
                 end
@@ -760,22 +764,25 @@ local function scan_dir(dirname, fontnames, newfontnames, texmf)
     ]]
     local list, found = { }, { }
     local nbfound = 0
-    report("log", 2, "scanning", "%s", dirname)
+    report("log", 2, "db", "scanning", "%s", dirname)
     for _,i in next, font_extensions do
         for _,ext in next, { i, stringupper(i) } do
             found = dirglob(stringformat("%s/**.%s$", dirname, ext))
             -- note that glob fails silently on broken symlinks, which happens
             -- sometimes in TeX Live.
-            report("log", 2, "fonts found", "%s '%s' fonts found", #found, ext)
+            report("log", 2, "db",
+                "fonts found", "%s '%s' fonts found", #found, ext)
             nbfound = nbfound + #found
             tableappend(list, found)
         end
     end
-    report("log", 2, "fonts found", "%d fonts found in '%s'", nbfound, dirname)
+    report("log", 2, "db",
+        "fonts found", "%d fonts found in '%s'", nbfound, dirname)
 
     for _,file in next, list do
         file = path_normalize(file)
-        report("log", 1, "loading font", "%s", file)
+        report("log", 1, "db",
+            "loading font", "%s", file)
         load_font(file, fontnames, newfontnames, texmf)
     end
 end
@@ -786,9 +793,9 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     variables OPENTYPEFONTS and TTFONTS of texmf.cnf
     ]]
     if stringis_empty(kpseexpand_path("$OSFONTDIR")) then
-        report("info", 0, "Scanning TEXMF fonts...")
+        report("info", 1, "db", "Scanning TEXMF fonts...")
     else
-        report("info", 0, "Scanning TEXMF and OS fonts...")
+        report("info", 1, "db", "Scanning TEXMF and OS fonts...")
     end
     local fontdirs = stringgsub(kpseexpand_path("$OPENTYPEFONTS"), "^%.", "")
     fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
@@ -828,7 +835,7 @@ read_fonts_conf = function (path, results, passed_paths)
     passed_paths[#passed_paths+1] = path
     passed_paths_set = tabletohash(passed_paths, true)
     if not fh then
-        report("log", 2, "cannot open file", "%s", path)
+        report("log", 2, "db", "cannot open file", "%s", path)
         return results
     end
     local incomments = false
@@ -879,7 +886,7 @@ read_fonts_conf = function (path, results, passed_paths)
                         include = filejoin(file.dirname(path), include)
                     end
                     if      lfs.isfile(include)
-                    and     kpse.readable_file(include)
+                    and     kpsereadable_file(include)
                     and not passed_paths_set[include]
                     then
                         -- maybe we should prevent loops here?
@@ -930,8 +937,8 @@ local function scan_os_fonts(fontnames, newfontnames)
       - fontcache for Unix (reads the fonts.conf file and scans the directories)
       - a static set of directories for Windows and MacOSX
     ]]
-    report("info", 0, "Scanning OS fonts...")
-    report("info", 2, "Searching in static system directories...")
+    report("info", 1, "db", "Scanning OS fonts...")
+    report("info", 2, "db", "Searching in static system directories...")
     for _,d in next, get_os_dirs() do
         scan_dir(d, fontnames, newfontnames, false)
     end
@@ -943,7 +950,7 @@ update_names = function (fontnames, force)
     - fontnames is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
-    report("info", 0, "Updating the font names database")
+    report("info", 1, "db", "Updating the font names database")
 
     if force then
         fontnames = fontnames_init()
@@ -953,8 +960,8 @@ update_names = function (fontnames, force)
         end
         if fontnames.version ~= names.version then
             fontnames = fontnames_init()
-            report("log", 0, "No font names database or old one found; "
-                           .."generating new one")
+            report("log", 1, "db", "No font names database or old "
+                                .. "one found; generating new one")
         end
     end
     local newfontnames = fontnames_init()
@@ -977,14 +984,14 @@ save_names = function (fontnames)
         dirmkdirs(path)
     end
     path = filejoin(path, names.path.basename)
-    if file.iswritable(path) then
+    if fileiswritable(path) then
         local luaname, lucname = make_name(path)
         tabletofile(luaname, fontnames, true)
         caches.compile(fontnames,luaname,lucname)
-        report("info", 0, "Font names database saved")
+        report("info", 1, "db", "Font names database saved")
         return path
     else
-        report("info", 0, "Failed to save names database")
+        report("info", 1, "db", "Failed to save names database")
         return nil
     end
 end

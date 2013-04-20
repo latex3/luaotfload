@@ -22,7 +22,6 @@ TESTDIR = tests
 TESTFILES = $(wildcard $(TESTDIR)/*.tex)
 TESTFILES_SYS = $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
 TESTFILES_TL = $(filter-out $(TESTFILES_SYS), $(TESTFILES))
-TESTENV = env TEXINPUTS='.;..;$$TEXMF/tex/{luatex,plain,generic,}//' TEXMFVAR='../var'
 
 # Files grouped by installation location
 SCRIPTFILES = $(SCRIPT)
@@ -95,9 +94,9 @@ install: $(ALL_FILES)
 
 check: $(RUNFILES) $(TESTFILES_TL)
 	@rm -rf var
-	@cd $(TESTDIR); for f in $(TESTFILES_TL); do \
+	@for f in $(TESTFILES_TL); do \
 	    echo "check: luatex $$f"; \
-	    $(TESTENV) luatex --interaction=batchmode ../$$f \
+	    luatex --interaction=batchmode $$f \
 	    > /dev/null || exit $$?; \
 	    done
 

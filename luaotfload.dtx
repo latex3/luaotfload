@@ -1160,6 +1160,20 @@ loadmodule"font-ltx.lua"    --- new in 2.0, added 2011
 %    \end{macrocode}
 %
 %
+%    This hack makes fonts called with file method found by fonts.names.resove
+%    instead of just trying to find them with kpse. It is necessary in case
+%    of fonts that are not accessible by kpse but present in the database, a 
+%    quite common case under Linux.
+%
+%    \begin{macrocode}
+
+fonts.definers.resolvers.file = function (specification) 
+  specification.name = fonts.names.resolve('', '', specification) 
+end
+
+%    \end{macrocode}
+%
+%
 %    We create a callback for patching fonts on the fly, to be used by other
 %    packages.
 %    It initially contains the empty function that we are going to override

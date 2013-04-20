@@ -1,0 +1,13 @@
+\input luaotfload.sty
+
+% https://bugs.freedesktop.org/attachment.cgi?id=72363
+\font\testa=file:TestLig.ttf:script=tibt;+ccmp+abvs+blws+kern at 10pt
+
+\testa གཚོའི་ཁིའུ་ཨཱཿཀ
+
+% good result for the first part: 
+% https://bugs.freedesktop.org/attachment.cgi?id=72365
+% for the second part, the two circles shoud appear clearlybefore the last 
+% letter, not mixed with it
+
+\bye

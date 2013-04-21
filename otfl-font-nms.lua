@@ -6,6 +6,11 @@ if not modules then modules = { } end modules ['font-nms'] = {
     license   = "GNU GPL v2"
 }
 
+--- TODO: if the specification is an absolute filename with a font not in the 
+--- database, add the font to the database and load it. There is a small
+--- difficulty with the filenames of the TEXMF tree that are referenced as
+--- relative paths...
+
 --- Luatex builtins
 local load                    = load
 local next                    = next
@@ -246,7 +251,7 @@ font database created by the mkluatexfontdb script.
 ---
 --- the return value of “resolve” is the file name of the requested
 --- font
-
+--- 
 --- 'a -> 'a -> table -> (string * string | bool * bool)
 ---
 ---     note by phg: I added a third return value that indicates a
@@ -390,12 +395,12 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 return reload_db(resolve, nil, nil, specification)
             else
                 --- else, fallback to requested name
-                --- XXX: specification.name is empty with absolute paths, looks
-                --- like a bug in the specification parser
+                --- specification.name is empty with absolute paths, looks
+                --- like a bug in the specification parser << is it still
+                --- relevant? looks not...
                 return specification.name, false, false
             end
         end
-
     else --- no db or outdated; reload names and retry
         if not fonts_reloaded then
             return reload_db(resolve, nil, nil, specification)

@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/17/13 18:36:10
+-- merge date  : 04/20/13 13:33:53
 
 do -- begin closure to overcome local limits and interference
 
@@ -1401,7 +1401,7 @@ function table.tofile(filename,root,name,specification)
     io.flush()
   end
 end
-local function flattened(t,f,depth)
+local function flattened(t,f,depth) 
   if f==nil then
     f={}
     depth=0xFFFF
@@ -1416,19 +1416,16 @@ local function flattened(t,f,depth)
       if depth>0 and type(v)=="table" then
         flattened(v,f,depth-1)
       else
-        f[k]=v
+        f[#f+1]=v
       end
     end
   end
-  local n=#f
   for k=1,#t do
     local v=t[k]
     if depth>0 and type(v)=="table" then
       flattened(v,f,depth-1)
-      n=#f
     else
-      n=n+1
-      f[n]=v
+      f[#f+1]=v
     end
   end
   return f
@@ -2926,7 +2923,7 @@ storage={
   register=dummyfunction,
   shared={},
 }
-logs=logs or {
+logs={
   new=dummyreporter,
   reporter=dummyreporter,
   messenger=dummyreporter,
@@ -2988,7 +2985,7 @@ end
 do
   local cachepaths=kpse.expand_path('$TEXMFCACHE') or ""
   if cachepaths=="" then
-    cachepaths=kpse.expand_path('$TEXMFVAR') or ""
+    cachepaths=kpse.expand_path('$TEXMFVAR')
   end
   if cachepaths=="" then
     cachepaths=kpse.expand_path('$VARTEXMF')
@@ -10379,6 +10376,7 @@ local variants=allocate()
 specifiers.variants=variants
 definers.methods=definers.methods or {}
 local internalized=allocate() 
+local lastdefined=nil 
 local loadedfonts=constructors.loadedfonts
 local designsizes=constructors.designsizes
 local resolvefile=fontgoodies and fontgoodies.filenames and fontgoodies.filenames.resolve or function(s) return s end
@@ -10579,18 +10577,7 @@ function definers.loadfont(specification)
   end
   return tfmdata
 end
-local function checkvirtual(tfmdata)
-  local fonts=tfmdata.fonts
-  local selfid=font.nextid()
-  if fonts and #fonts>0 then
-    for i=1,#fonts do
-      if fonts[i][2]==0 then
-        fonts[i][2]=selfid
-      end
-    end
-  else
-    tfmdata.fonts={ "id",selfid }
-  end
+function constructors.checkvirtualids()
 end
 function constructors.readanddefine(name,size) 
   local specification=definers.analyze(name,size)
@@ -10604,7 +10591,8 @@ function constructors.readanddefine(name,size)
   if not id then
     local tfmdata=definers.loadfont(specification)
     if tfmdata then
-      checkvirtual(tfmdata) 
+      tfmdata.properties.hash=hash
+      constructors.checkvirtualids(tfmdata) 
       id=font.define(tfmdata)
       definers.register(tfmdata,id)
     else
@@ -10613,8 +10601,6 @@ function constructors.readanddefine(name,size)
   end
   return fontdata[id],id
 end
-local lastdefined=nil 
-local internalized={}
 function definers.current() 
   return lastdefined
 end
@@ -10625,7 +10611,9 @@ end
 function definers.register(tfmdata,id)
   if tfmdata and id then
     local hash=tfmdata.properties.hash
-    if not internalized[hash] then
+    if not hash then
+      report_defining("registering font, id %a, name %a, invalid hash",id,tfmdata.properties.filename or "?")
+    elseif not internalized[hash] then
       internalized[hash]=id
       if trace_defining then
         report_defining("registering font, id %s, hash %a",id,hash)

@@ -16,6 +16,10 @@ if not modules then modules = { } end modules ['luatex-fonts'] = {
 -- places where in context other code is plugged in, but this does not affect the core code. Users
 -- can (given that their macro package provides this option) access the font data (characters,
 -- descriptions, properties, parameters, etc) of this main table.
+--
+-- Future versions will probably have some more specific context code removed, like tracing and
+-- obscure hooks, so that we have a more efficient version (and less files too). So, don't depend
+-- too much on low level code that is meant for context as it can change without notice.
 
 utf = utf or unicode.utf8
 
@@ -37,12 +41,10 @@ if not generic_context then
     generic_context  = { }
 end
 
-local printinfo = function(s) texio.write_nl("log", s) end
-
 if not generic_context.push_namespaces then
 
     function generic_context.push_namespaces()
-        printinfo(" <push namespace>")
+        texio.write(" <push namespace>")
         local normalglobal = { }
         for k, v in next, _G do
             normalglobal[k] = v
@@ -52,7 +54,7 @@ if not generic_context.push_namespaces then
 
     function generic_context.pop_namespaces(normalglobal,isolate)
         if normalglobal then
-            printinfo(" <pop namespace>")
+            texio.write(" <pop namespace>")
             for k, v in next, _G do
                 if not normalglobal[k] then
                     generic_context[k] = v
@@ -112,7 +114,7 @@ local function loadmodule(name,continue)
         end
     else
         if verbose then
-            printinfo(string.format(" <%s>",foundname)) -- no file.basename yet
+            texio.write(string.format(" <%s>",foundname)) -- no file.basename yet
         end
         dofile(foundname)
     end
@@ -158,18 +160,10 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule("l-string.lua")
         loadmodule("l-table.lua")
         loadmodule("l-io.lua")
-        ----------("l-number.lua")
-        ----------("l-set.lua")
-        ----------("l-os.lua")
         loadmodule("l-file.lua")
-        ----------("l-md5.lua")
-        ----------("l-url.lua")
-        ----------("l-dir.lua")
         loadmodule("l-boolean.lua")
-        ----------("l-unicode.lua")
         loadmodule("l-math.lua")
         loadmodule("util-str.lua")
-
 
         -- The following modules contain code that is either not used at all outside context or will fail
         -- when enabled due to lack of other modules.
@@ -192,7 +186,7 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         -- with context. The mtx-fonts script can be used to genate this file (using the --names option).
 
         -- in 2013/14 we will merge/move some generic files into luatex-fonts-* files (copies) so that
-        -- intermediate updates of context not interfere
+        -- intermediate updates of context not interfere; we can then also use the general merger
 
         loadmodule('font-ini.lua')
         loadmodule('font-con.lua')
@@ -254,6 +248,6 @@ end
 
 -- We're done.
 
---texio.write(string.format(" <luatex-fonts.lua loaded in %0.3f seconds>", os.gettimeofday()-starttime))
+texio.write(string.format(" <luatex-fonts.lua loaded in %0.3f seconds>", os.gettimeofday()-starttime))
 
 generic_context.pop_namespaces(whatever)

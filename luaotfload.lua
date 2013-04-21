@@ -16,6 +16,7 @@ local type, next       = type, next
 local stringfind       = string.find
 local stringsub        = string.sub
 local stringmatch      = string.match
+local stringformat     = string.format
 local find_file        = kpse.find_file
 
 local add_to_callback, create_callback =
@@ -170,6 +171,41 @@ _G.non_generic_context = { luatex_fonts = {
 }}
 
 --[[doc--
+In its raw form, the font loader will write to the terminal quite
+liberally, not using the proper channels (loggers) even of \CONTEXT.
+To make it behave we temporarily replace two functions from the
+\luafunction{texio} library with wrappers that redirect output to the
+log.
+Just in case Hans decides to call \luafunction{texio.write*} with the
+optional target parameter (which he doesn’t at the moment), we catch the
+first argument and skip it where appropriate.
+The originals are backed up and restored after loading
+\fileent{otfl-fonts.lua}.
+
+Should we decide to do our own packaging (we’re capable of that
+anyways), this will most likely become unnecessary.
+--doc]]--
+
+local normal_write, normal_write_nl = texio.write, texio.write_nl
+
+local log_template = "luaotfload: %s"
+local fake_write = function (first, rest)
+    if first == "log" or first == "term" then -- ignore
+        normal_write("log", stringformat(log_template, rest))
+    else
+        normal_write("log", stringformat(log_template, first))
+    end
+end
+local fake_write_nl = function (first, rest)
+    if first == "log" or first == "term" then -- ignore
+        normal_write_nl("log", stringformat(log_template, rest))
+    else
+        normal_write_nl("log", stringformat(log_template, first, rest))
+    end
+end
+texio.write, texio.write_nl = fake_write, fake_write_nl
+
+--[[doc--
 The imported font loader will call \luafunction{callback.register} once
 while reading \fileent{font-def.lua}.
 This is unavoidable unless we modify the imported files, but harmless
@@ -184,6 +220,11 @@ Now that things are sorted out we can finally load the fontloader.
 --doc]]--
 
 loadmodule"fonts.lua"
+
+--[[doc--
+Here we restore the original \luafunction{texio} functions.
+--doc]]--
+texio.write, texio.write_nl = normal_write, normal_write_nl
 
 --[[doc--
 By default, the fontloader requires a number of \emphasis{private

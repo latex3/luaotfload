@@ -927,12 +927,17 @@ local function get_os_dirs()
     elseif os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
         local windir = os.getenv("WINDIR")
         return { filejoin(windir, 'Fonts') }
-    else --- TODO what about ~/config/fontconfig/fonts.conf etc?
+    else 
+        local passed_paths = {}
+        local os_dirs = {}
+        -- what about ~/config/fontconfig/fonts.conf etc? 
+        -- Answer: they should be included by the others, please report if it's not
         for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
             if lfs.isfile(p) then
-                return read_fonts_conf("/etc/fonts/fonts.conf", {}, {})
+                read_fonts_conf(p, os_dirs, passed_paths)
             end
         end
+        return os_dirs
     end
     return {}
 end

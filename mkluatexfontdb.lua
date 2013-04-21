@@ -107,6 +107,9 @@ This tool is part of the luaotfload package. Valid options are:
 
   --find="font name"           query the database for a font name
   -F --fuzzy                   look for approximate matches if --find fails
+  --limit=n                    limit display of fuzzy matches to <n>
+                               (default: n = 1)
+  -i --info                    display font metadata
 
   --log=stdout                 redirect log output to stdout
 
@@ -147,6 +150,37 @@ local version_msg = function ( )
     texiowrite_nl(stringformat(
         "%s version %s, database version %s.\n",
         config.luaotfload.self, version, names.version))
+end
+
+local show_info_items = function (fontinfo)
+    local items    = table.sortedkeys(fontinfo)
+    for n = 1, #items do
+        local item = items[n]
+        texiowrite_nl(stringformat(
+            [[  %11s:  %s]], item, fontinfo[item]))
+    end
+end
+
+local show_font_info = function (filename)
+    local fullname = resolvers.findfile(filename)
+    if fullname then
+        local fontinfo = fontloader.info(fullname)
+        local nfonts   = #fontinfo
+        if nfonts > 0 then -- true type collection
+            logs.names_report(true, 0, "resolve",
+                [[%s is a font collection]], filename)
+            for n = 1, nfonts do
+                logs.names_report(true, 0, "resolve",
+                    [[showing info for font no. %d]], n)
+                show_info_items(fontinfo[n])
+            end
+        else
+            show_info_items(fontinfo)
+        end
+    else
+        logs.names_report(true, 0, "resolve",
+            "font %s not found", filename)
+    end
 end
 
 --[[--
@@ -212,6 +246,9 @@ actions.query = function (job)
             "resolve", "Font “%s” found!", query)
         logs.names_report(false, 0,
             "resolve", "Resolved file name “%s”:", foundname)
+        if job.show_info then
+            show_font_info(foundname)
+        end
     else
         logs.names_report(false, 0,
             "resolve", "Cannot find “%s”.", query)
@@ -246,19 +283,20 @@ local process_cmdline = function ( ) -- unit -> jobspec
     end
 
     local long_options = {
+        find             = 1,
         force            = "f",
+        fuzzy            = "F",
         help             = "h",
+        info             = "i",
+        limit            = 1,
         log              = 1,
         quiet            = "q",
+        update           = "u",
         verbose          = 1  ,
         version          = "V",
-        find             = 1,
-        fuzzy            = "F",
-        limit            = 1,
-        update           = "u",
     }
 
-    local short_options = "fFquvVh"
+    local short_options = "fFiquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -303,6 +341,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             if lim then
                 result.fuzzy_limit = tonumber(lim)
             end
+        elseif v == "i" then
+            result.show_info = true
         end
     end
     return result

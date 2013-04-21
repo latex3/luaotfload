@@ -6,6 +6,11 @@ if not modules then modules = { } end modules ['font-nms'] = {
     license   = "GNU GPL v2"
 }
 
+--- TODO: if the specification is an absolute filename with a font not in the 
+--- database, add the font to the database and load it. There is a small
+--- difficulty with the filenames of the TEXMF tree that are referenced as
+--- relative paths...
+
 --- Luatex builtins
 local load                    = load
 local next                    = next
@@ -57,13 +62,24 @@ fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 
 local names          = fonts.names
-local names_dir      = "luatex-cache/generic/names"
+
 names.version        = 2.2
 names.data           = nil
 names.path           = {
     basename = "otfl-names.lua",
-    dir      = filejoin(kpseexpand_var("$TEXMFVAR"), names_dir),
+    dir      = "",
+    path     = "",
 }
+
+-- We use the cache.* of ConTeXt (see luat-basics-gen), we can
+-- use it safely (all checks and directory creations are already done). It
+-- uses TEXMFCACHE or TEXMFVAR as starting points.
+local writable_path = caches.getwritablepath("names","")
+if not writable_path then
+  error("Impossible to find a suitable writeable cache...")
+end
+names.path.dir = writable_path
+names.path.path = filejoin(writable_path, names.path.basename)
 
 
 ---- <FIXME>
@@ -165,8 +181,7 @@ local scan_external_dir
 local update_names
 
 load_names = function ( )
-    local path            = filejoin(names.path.dir, names.path.basename)
-    local foundname, data = load_lua_file(path)
+    local foundname, data = load_lua_file(names.path.path)
 
     if data then
         report("info", 1, "db",
@@ -240,13 +255,14 @@ font database created by the mkluatexfontdb script.
 ---
 --- the return value of “resolve” is the file name of the requested
 --- font
-
+---
 --- 'a -> 'a -> table -> (string * string | bool * bool)
 ---
 ---     note by phg: I added a third return value that indicates a
 ---     successful lookup as this cannot be inferred from the other
 ---     values.
 ---
+--- 
 resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
     local name  = sanitize_string(specification.name)
     local style = sanitize_string(specification.style) or "regular"
@@ -383,12 +399,12 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 return reload_db(resolve, nil, nil, specification)
             else
                 --- else, fallback to requested name
-                --- XXX: specification.name is empty with absolute paths, looks
-                --- like a bug in the specification parser
+                --- specification.name is empty with absolute paths, looks
+                --- like a bug in the specification parser <TODO< is it still
+                --- relevant? looks not...
                 return specification.name, false, false
             end
         end
-
     else --- no db or outdated; reload names and retry
         if not fonts_reloaded then
             return reload_db(resolve, nil, nil, specification)
@@ -895,7 +911,9 @@ read_fonts_conf = function (path, results, passed_paths)
                         read_fonts_conf(include, results, passed_paths)
                     elseif lfs.isdir(include) then
                         for _,f in next, dirglob(filejoin(include, "*.conf")) do
-                            read_fonts_conf(f, results, passed_paths)
+                            if not passed_paths_set[f] then
+                                read_fonts_conf(f, results, passed_paths)
+                            end
                         end
                     end
                 end
@@ -921,12 +939,17 @@ local function get_os_dirs()
     elseif os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
         local windir = os.getenv("WINDIR")
         return { filejoin(windir, 'Fonts') }
-    else --- TODO what about ~/config/fontconfig/fonts.conf etc?
+    else 
+        local passed_paths = {}
+        local os_dirs = {}
+        -- what about ~/config/fontconfig/fonts.conf etc? 
+        -- Answer: they should be included by the others, please report if it's not
         for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
             if lfs.isfile(p) then
-                return read_fonts_conf("/etc/fonts/fonts.conf", {}, {})
+                read_fonts_conf(p, os_dirs, passed_paths)
             end
         end
+        return os_dirs
     end
     return {}
 end

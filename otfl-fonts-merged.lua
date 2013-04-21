@@ -2926,7 +2926,7 @@ storage={
   register=dummyfunction,
   shared={},
 }
-logs={
+logs=logs or {
   new=dummyreporter,
   reporter=dummyreporter,
   messenger=dummyreporter,
@@ -2988,7 +2988,7 @@ end
 do
   local cachepaths=kpse.expand_path('$TEXMFCACHE') or ""
   if cachepaths=="" then
-    cachepaths=kpse.expand_path('$TEXMFVAR')
+    cachepaths=kpse.expand_path('$TEXMFVAR') or ""
   end
   if cachepaths=="" then
     cachepaths=kpse.expand_path('$VARTEXMF')

@@ -37,10 +37,12 @@ if not generic_context then
     generic_context  = { }
 end
 
+local printinfo = function(s) texio.write_nl("log", s) end
+
 if not generic_context.push_namespaces then
 
     function generic_context.push_namespaces()
-        texio.write(" <push namespace>")
+        printinfo(" <push namespace>")
         local normalglobal = { }
         for k, v in next, _G do
             normalglobal[k] = v
@@ -50,7 +52,7 @@ if not generic_context.push_namespaces then
 
     function generic_context.pop_namespaces(normalglobal,isolate)
         if normalglobal then
-            texio.write(" <pop namespace>")
+            printinfo(" <pop namespace>")
             for k, v in next, _G do
                 if not normalglobal[k] then
                     generic_context[k] = v
@@ -110,7 +112,7 @@ local function loadmodule(name,continue)
         end
     else
         if verbose then
-            texio.write(string.format(" <%s>",foundname)) -- no file.basename yet
+            printinfo(string.format(" <%s>",foundname)) -- no file.basename yet
         end
         dofile(foundname)
     end
@@ -252,6 +254,6 @@ end
 
 -- We're done.
 
-texio.write(string.format(" <luatex-fonts.lua loaded in %0.3f seconds>", os.gettimeofday()-starttime))
+--texio.write(string.format(" <luatex-fonts.lua loaded in %0.3f seconds>", os.gettimeofday()-starttime))
 
 generic_context.pop_namespaces(whatever)

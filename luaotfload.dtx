@@ -990,7 +990,7 @@ and the derived files
 %<*lua>
 % \fi
 %    \begin{macrocode}
-module("luaotfload", package.seeall)
+luaotfload = luaotfload or {}
 
 luaotfload.module = {
     name          = "luaotfload",
@@ -1073,22 +1073,17 @@ end
 
 local fl_prefix = "otfl" -- “luatex” for luatex-plain
 local loadmodule = function (name)
-    local tofind = fl_prefix .."-"..name
-    local found = find_file(tofind,"tex")
-    if found then
-        log("loading file %s.", found)
-        dofile(found)
-    else
-        error("file %s not found.", tofind)
-    end
+    require(fl_prefix .."-"..name)
 end
 
 %    \end{macrocode}
 %
-%    Virtual fonts are resolved via a callback.
-%    \luafunction{find_vf_file} derives the name of the virtual font file
-%    from the filename.
-%    (NB: \CONTEXT handles this likewise in \fileent{font-vf.lua}.)
+%    Before \TeX Live 2013 version, \LUATEX had a bug that made ofm fonts fail
+%    when called with their extension. There was a side-effect making ofm
+%    totally unloadable when luaotfload was present. The following lines are
+%    a patch for this bug. The utility of these lines is questionable as they
+%    are not necessary since \TeX Live 2013. They should be removed in the next
+%    version.
 %
 %    \begin{macrocode}
 local Cs, P, lpegmatch = lpeg.Cs, lpeg.P, lpeg.match
@@ -1192,15 +1187,9 @@ end
 %    \identifier{luatexbase}-style callback handling here.
 %
 %    \begin{macrocode}
-if not _G.    generic_context then _G.    generic_context = { } end
-if not _G.non_generic_context then _G.non_generic_context = { } end
+generic_context = {no_callbacks_yet = true}
 
-local     generic_context =    generic_context
-local non_generic_context =non_generic_context
-
-generic_context.no_callbacks_yet = true
-
-_G.non_generic_context = { luatex_fonts = {
+non_generic_context = { luatex_fonts = {
         load_before     = "otfl-fonts-merged.lua",
         -- load_after      = nil, --- TODO, this is meant for callbacks
         skip_loading    = true,
@@ -1217,6 +1206,23 @@ _G.non_generic_context = { luatex_fonts = {
 
 local trapped_register = callback.register
 callback.register      = dummy_function
+
+%    \end{macrocode}
+%
+%    In order to have an output with normal verbosity, we need to pre-override
+%    some \CONTEXT log function:
+%
+%    \begin{macrocode}
+
+local dummylogfunction=function() end
+local dummylogreporter=function(c) return function(...) log(string.formatters(...)) end end
+
+logs={
+  new=dummylogreporter,
+  reporter=dummylogreporter,
+  messenger=dummylogreporter,
+  report=dummylogfunction,
+}
 
 %    \end{macrocode}
 %
@@ -1247,9 +1253,9 @@ do
     local new_attribute = luatexbase.new_attribute
     local the_attributes = luatexbase.attributes
 
-    _G.attributes = _G.attributes or { }
+    attributes = attributes or { }
 
-    _G.attributes.private = function (name)
+    attributes.private = function (name)
         local attr   = "otfl@" .. name
         local number = the_attributes[attr]
         if not number then
@@ -1295,22 +1301,19 @@ loadmodule"font-otc.lua"   -- TODO check what we can drop from otfl-features
 loadmodule"lib-dir.lua"    -- required by font-nms
 loadmodule"luat-ovr.lua"
 
-if fonts and fonts.readers.tfm then
-  --------------------------------------------------------------------
-  --- OFM; read this first
-  --------------------------------------------------------------------
-  --- I can’t quite make out whether this is still relevant
-  --- as those ofm fonts always fail, even in the 2011 version
-  --- (mktexpk:  don't know how to create bitmap font for omarabb.ofm)
-  --- the font loader appears to read ofm like tfm so if this
-  --- hack was supposed achieve that, we should excise it anyways
-  fonts.readers.ofm  = fonts.readers.tfm
-  fonts.handlers.ofm = fonts.handlers.tfm --- empty anyways
-  fonts.formats.ofm  = fonts.formats.tfm  --- “type1”
-  --- fonts.readers.sequence[#fonts.readers.sequence+1] = "ofm"
-  --------------------------------------------------------------------
-end
-
+%    \end{macrocode}
+%
+%
+%    \CONTEXT does not support ofm, these lines were added in order to make it
+%    work. However they do not seem necessary so they are commented for now.
+%
+%    \begin{macrocode}
+-- if fonts and fonts.readers.tfm then
+--  fonts.readers.ofm  = fonts.readers.tfm
+--  fonts.handlers.ofm = fonts.handlers.tfm --- empty anyways
+--  fonts.formats.ofm  = fonts.formats.tfm  --- “type1”
+--  --- fonts.readers.sequence[#fonts.readers.sequence+1] = "ofm"
+--end
 %    \end{macrocode}
 %
 %
@@ -1321,6 +1324,20 @@ loadmodule"font-pfb.lua"    --- new in 2.0, added 2011
 loadmodule"font-nms.lua"
 loadmodule"font-clr.lua"
 loadmodule"font-ltx.lua"    --- new in 2.0, added 2011
+
+%    \end{macrocode}
+%
+%
+%    This hack makes fonts called with file method found by fonts.names.resove
+%    instead of just trying to find them with kpse. It is necessary in case
+%    of fonts that are not accessible by kpse but present in the database, a 
+%    quite common case under Linux.
+%
+%    \begin{macrocode}
+
+fonts.definers.resolvers.file = function (specification) 
+  specification.name = fonts.names.resolve('', '', specification) 
+end
 
 %    \end{macrocode}
 %

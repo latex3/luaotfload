@@ -231,7 +231,7 @@ and the derived files
 %
 % Unlike \XETEX, \LUATEX has no built-in support for
 % \OpenType or technologies other than the original \TEX fonts.
-% Instead, it provides hooks for executing \Lua code during the \TEX run
+% Instead, it provides hooks for executing \LUA code during the \TEX run
 % that allow implementing extensions for loading fonts and manipulating
 % how input text is processed without modifying the underlying engine.
 % This is where \identifier{luaotfload} comes into play:
@@ -396,7 +396,7 @@ and the derived files
 % obviously, |random|.
 %
 % \iffalse TODO verify that this actually works with a font that supports
-%               the salt feature!\false
+%               the salt/random feature!\fi
 % \begin{quote}
 %   \begin{verbatim}
 %   \font\librmsaltfirst=LatinModernRoman:salt=1
@@ -477,7 +477,7 @@ and the derived files
 %           \begin{verbatim}
 %           \font\test={Latin Modern Roman}:color=FF0000BB
 %           \end{verbatim}
-%        \end{verbatim}
+%        \end{quote}
 %
 % \item [protrusion \& expansion] \hfill \\
 %        These keys control microtypographic features of the font,
@@ -513,7 +513,7 @@ and the derived files
 %           \begin{verbatim}
 %           \font\test=LatinModernRoman:protrusion=default
 %           \end{verbatim}
-%        \end{verbatim}
+%        \end{quote}
 % \end{description}
 %
 % \paragraph{Non-standard font features}
@@ -532,12 +532,12 @@ and the derived files
 %   \item [tlig]
 %           Applies legacy \TEX ligatures:
 %
-%           \begin{tabular}{rl|rl}
-%           ``  &  \verb|``|  &  ''  &  \verb|''|  \\
-%           `   &  \verb|`|   &  '   &  \verb|'|   \\
-%           "   &  \verb|"|   &  --  &  \verb|--|  \\
-%           --- &  \verb|---| &  !`  &  \verb|!`|  \\
-%           ?`  &  \verb|?`|  &      &             \\
+%           \begin{tabular}{rlrl}
+%              ``  &  \verb|``|  &  ''  &  \verb|''|  \\
+%              `   &  \verb|`|   &  '   &  \verb|'|   \\
+%              "   &  \verb|"|   &  --  &  \verb|--|  \\
+%              --- &  \verb|---| &  !`  &  \verb|!`|  \\
+%              ?`  &  \verb|?`|  &      &             \\
 %           \end{tabular}
 %
 %           \footnote{%
@@ -603,7 +603,7 @@ and the derived files
 %   Tests by the maintainer show only marginal performance gain by
 %   running with Luigi Scarso’s
 %   \href{https://foundry.supelec.fr/projects/luajittex/}%
-%        {\itentifier{Luajit\kern-.25ex\TEX}},
+%        {\identifier{Luajit\kern-.25ex\TEX}},
 %   which is probably due to the fact that most of the time is spent
 %   on file system operations.
 %
@@ -666,7 +666,7 @@ and the derived files
 %       Linux       & \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break
 %                     \fileent{/etc/fonts/fonts.conf}
 %       \\
-%       Mac         & \fileent{\texttilde/Library/Fonts},\break
+%       Mac         & \fileent{\textasciitilde/Library/Fonts},\break
 %                     \fileent{/Library/Fonts},\break
 %                     \fileent{/System/Library/Fonts}, and\hfill\break
 %                     \fileent{/Network/Library/Fonts}

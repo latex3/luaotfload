@@ -53,13 +53,24 @@ fonts                = fonts       or { }
 fonts.names          = fonts.names or { }
 
 local names          = fonts.names
-local names_dir      = "luatex-cache/generic/names"
+
 names.version        = 2.2
 names.data           = nil
 names.path           = {
     basename = "otfl-names.lua",
-    dir      = filejoin(kpse.expand_var("$TEXMFVAR"), names_dir),
+    dir      = "",
+    path     = "",
 }
+
+-- We use the cache.* of ConTeXt (see luat-basics-gen), we can
+-- use it safely (all checks and directory creations are already done). It
+-- uses TEXMFCACHE or TEXMFVAR as starting points.
+local writable_path = caches.getwritablepath("names","")
+if not writable_path then
+  error("Impossible to find a suitable writeable cache...")
+end
+names.path.dir = writable_path
+names.path.path = filejoin(writable_path, names.path.basename)
 
 
 ---- <FIXME>
@@ -161,8 +172,7 @@ local scan_external_dir
 local update_names
 
 load_names = function ( )
-    local path            = filejoin(names.path.dir, names.path.basename)
-    local foundname, data = load_lua_file(path)
+    local foundname, data = load_lua_file(names.path.path)
 
     if data then
         report("info", 0, "Font names database loaded", "%s", foundname)

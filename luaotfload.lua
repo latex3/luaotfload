@@ -25,6 +25,9 @@ local reset_callback, call_callback =
 
 local dummy_function = function () end
 
+_G.luaotfload     = _G.luaotfload or { }
+local luaotfload  = _G.luaotfload
+
 --[[doc--
 No final decision has been made on how to handle font definition.  At
 the moment, there are three candidates: The \identifier{generic}
@@ -32,6 +35,7 @@ callback as hard-coded in the font loader, the \identifier{old}
 wrapper, and a simplified version of the latter (\identifier{patch})
 that does nothing besides applying font patches.
 --doc]]--
+
 luaotfload.font_definer = "patch" --- | “generic” | “old”
 
 local error, warning, info, log =
@@ -346,6 +350,7 @@ local patch_defined_font = function (...)
     if type(tfmdata) == "table" then
         call_callback("luaotfload.patch_font", tfmdata)
     end
+    -- inspect(table.keys(tfmdata)) 
     return tfmdata
 end
 

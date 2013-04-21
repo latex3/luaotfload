@@ -696,8 +696,9 @@ and the derived files
 % will verify if “Iwona Regular” is found in the database and can be
 % readily requested in a document.
 %
-% If you are unsure about the actual font name, then you can add the
-% \verb|-F| switch to the command line to enable approximate matching.
+% If you are unsure about the actual font name, then add the
+% \verb|-F| (or \verb|--fuzzy|) switch to the command line to enable
+% approximate matching.
 % Suppose you cannot precisely remember if the variant of
 % \identifier{Iwona} you are looking for was “Bright” or “Light”.
 % The query 
@@ -711,6 +712,19 @@ and the derived files
 % \noindent
 % will tell you that indeed the latter name is correct.
 %
+% Basic information about fonts in the database can be displayed
+% using the \verb|-i| option (\verb|--info|).
+% \begin{quote}
+%   \begin{verbatim}
+%     fontdbutil  -F --find="Iwona Light Italic"
+%   \end{verbatim}
+% \end{quote}
+% \noindent
+% The meaning of the printed values is described in section 4.4 of the
+% \LUATEX reference manual.\footnote{%
+%   In \TEX Live: \fileent{texmf-dist/doc/luatex/base/luatexref-t.pdf}.
+% }
+%  
 % \verb|fontdbutil --help| will list the available command line
 % switches, including some not discussed in detail here.
 %

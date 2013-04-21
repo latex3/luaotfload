@@ -3,7 +3,13 @@
 \font\testa={LM Roman Slanted 10 Regular} at 10pt
 \font\testb={LM Roman 9 Italic}           at 10pt
 \font\testc={TeX Gyre Termes Bold}        at 25pt
+% Also testing with absolute filename, please change the path according to your 
+% system
+\font\testd=file:/usr/share/texmf/fonts/opentype/public/lm/lmmono10-italic.otf
+
 \testa abcd ABCD\par
 \testb abcd ABCD\par
 \testc abcd ABCD\par
+\testd abcd ABCD\par
+
 \bye

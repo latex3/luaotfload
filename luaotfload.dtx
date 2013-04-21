@@ -757,13 +757,13 @@ and the derived files
 %
 % \section{Files from \CONTEXT and \LUATEX-Fonts}
 %
-% This package relies on code originally written by Hans
+% \identifier{luaotfload} relies on code originally written by Hans
 % Hagen\footnote{%
 %   The creator of the \href{http://wiki.contextgarden.net}{\CONTEXT}
 %   format.
 % }
 % for and tested with \CONTEXT.
-% \identifier{luaotfload} integrates the font loader as distributed in
+% It integrates the font loader as distributed in
 % the \identifier{\LUATEX-Fonts} package.
 % The original \LUA source files have been combined using the
 % \fileent{mtx-package} script into a single, self-contained blob.
@@ -776,7 +776,7 @@ and the derived files
 % The guiding principle is to let \CONTEXT/\LUATEX-Fonts take care of
 % the implementation, and update the imported code from time to time.
 % As maintainers, we aim at importing files from upstream essentially
-% \emphasis{unmodified}, except for renaming the files to prevent name
+% \emphasis{unmodified}, except for renaming them to prevent name
 % clashes.
 % This job has been greatly alleviated since the advent of
 % \LUATEX-Fonts, prior to which the individual dependencies had to be
@@ -837,10 +837,10 @@ and the derived files
 %                           \end{itemize}
 %                         \end{multicols}
 %
-%             \normalitem The \emphasis{Font Loader} itself.
+%             \normalitem The \emphasis{font loader} itself.
 %                         These files have been written for
-%                         \LUATEX-Fonts and are distributed along with
-%                         \identifier{luaotfload}.
+%                         \LUATEX-Fonts and they are distributed along
+%                         with \identifier{luaotfload}.
 %                         \begin{multicols}{2}
 %                           \begin{itemize}
 %                             \incitem{luatex-basics-gen.lua}
@@ -871,6 +871,16 @@ and the derived files
 %                         \end{multicols}
 %           \end{itemize}
 %
+%           Note that if \identifier{luaotfload} cannot locate the
+%           merged file, it will load the individual \LUA libraries
+%           instead.
+%           Their names remain the same as in \CONTEXT (without the
+%           \verb|otfl|-prefix) since they are hard-coded in
+%           \fileent{otfl-fonts.lua}.
+%           Thus if you prefer running bleeding edge code from the
+%           \CONTEXT beta, all you have to do is remove
+%           \fileent{otfl-fonts-merged.lua} from the search path.
+%
 %   \end{itemize}
 %
 % In addition to these, \identifier{luaotfload} requires a number of
@@ -889,7 +899,7 @@ and the derived files
 %     \ouritem {otfl-lib-dir.lua}  \fileent{l-dir} from \CONTEXT;
 %                                  contains functionality required
 %                                  by \fileent{otfl-font-nms.lua}.
-%     \ouritem {otfl-luat-ovr.lua} overrides for the \CONTEXT logging
+%     \ouritem {otfl-luat-ovr.lua} overrides the \CONTEXT logging
 %                                  functionality.
 %     \ouritem {otfl-font-pfb.lua} registers the \OpenType
 %                                  font reader as handler for
@@ -913,11 +923,12 @@ and the derived files
 % version of this package before reporting a bug, as
 % \identifier{luaotfload} is under active development and still a
 % moving target.
+%
 % Errors during database generation can be traced by increasing
 % verbosity levels and redirecting log output to \fileent{stdout}:
 %
 % \begin{verbatim}
-%   fontdbutil -F -vvv --log=stdout
+%   fontdbutil -fuvvv --log=stdout
 % \end{verbatim}
 %
 % If this fails, the font last printed to the terminal is likely to be
@@ -928,12 +939,12 @@ and the derived files
 % A common problem is the lack of features for some
 % \OpenType fonts even when specified.
 % This can be related to the fact that some fonts do not provide
-% features for the |dflt| script (see above on page
+% features for the \verb|dflt| script (see above on page
 % \pageref{script-tag}),
 % which is the default one in this package.
-% If this happens, assigning a script when the font is defined should
+% If this happens, assigning a noth script when the font is defined should
 % fix it.
-% For example with the |latn| script:
+% For example with \verb|latn|:
 %
 % \begin{verbatim}
 %   \font\test=file:MyFont.otf:script=latn;+liga;

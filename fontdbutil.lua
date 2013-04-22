@@ -20,6 +20,10 @@ local loader_file = "luatexbase.loader.lua"
 local loader_path = assert(kpse.find_file(loader_file, "lua"),
                            "File '"..loader_file.."' not found")
 
+string.quoted = string.quoted or function (str)
+  return string.format("%q",str) 
+end
+
 --texiowrite_nl("("..loader_path..")")
 dofile(loader_path) -- FIXME this pollutes stdout with filenames
 

@@ -1,4 +1,4 @@
-if not modules then modules = { } end modules ['font-nms'] = {
+if not modules then modules = { } end modules ['luaotfload-database'] = {
     version   = 2.2,
     comment   = "companion to luaotfload.lua",
     author    = "Khaled Hosny and Elie Roux",

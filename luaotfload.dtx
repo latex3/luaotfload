@@ -1314,9 +1314,9 @@ add_to_callback("hpack_filter",
 add_to_callback("find_vf_file",
                 find_vf_file, "luaotfload.find_vf_file")
 
-loadmodule"font-otc.lua"   -- TODO check what we can drop from luaotfload-features
-loadmodule"lib-dir.lua"    -- required by font-nms
-loadmodule"luat-ovr.lua"
+loadmodule"font-otc.lua"  --- TODO check what we can drop from luaotfload-features
+loadmodule"lib-dir.lua"   --- required by luaofload-database.lua
+loadmodule"override.lua"  --- “luat-ovr”
 
 %    \end{macrocode}
 % \CONTEXT does not support ofm, these lines were added in order to make it
@@ -1333,10 +1333,10 @@ loadmodule"luat-ovr.lua"
 % Now we load the modules written for \identifier{luaotfload}.
 %
 %    \begin{macrocode}
-loadmodule"font-pfb.lua"    --- new in 2.0, added 2011
-loadmodule"font-nms.lua"
-loadmodule"font-clr.lua"
-loadmodule"font-ltx.lua"    --- new in 2.0, added 2011
+loadmodule"loaders.lua"    --- “font-pfb” new in 2.0, added 2011
+loadmodule"database.lua"   --- “font-nms”
+loadmodule"colors.lua"     --- “font-clr”
+loadmodule"font-ltx.lua"   --- new in 2.0, added 2011
 
 %    \end{macrocode}
 % This hack makes fonts called with file method found by fonts.names.resolve

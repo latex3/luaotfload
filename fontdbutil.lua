@@ -74,8 +74,8 @@ config.lualibs.load_extended    = false
 
 require"lualibs"
 require"luaotfload-basics-gen.lua"
-require"luaotfload-luat-ovr.lua"  --- this populates the logs.* namespace
-require"luaotfload-font-nms"
+require"luaotfload-override.lua"  --- this populates the logs.* namespace
+require"luaotfload-database"
 require"alt_getopt"
 
 local version = "2.2" -- same version number as luaotfload

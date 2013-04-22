@@ -66,7 +66,7 @@ local names          = fonts.names
 names.version        = 2.2
 names.data           = nil
 names.path           = {
-    basename = "otfl-names.lua",
+    basename = "luaotfload-names.lua",
     dir      = "",
     path     = "",
 }
@@ -704,7 +704,7 @@ names.blacklist = { }
 
 local function read_blacklist()
     local files = {
-        kpselookup("otfl-blacklist.cnf", {all=true, format="tex"})
+        kpselookup("luaotfload-blacklist.cnf", {all=true, format="tex"})
     }
     local blacklist = names.blacklist
     local whitelist = { }

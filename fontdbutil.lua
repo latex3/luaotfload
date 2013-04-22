@@ -9,10 +9,10 @@ luaotfload bundle, please see the luaotfload documentation for more info.
 
 kpse.set_program_name"luatex"
 
-local stringformat  = string.format
-local texiowrite_nl = texio.write_nl
-local stringfind    = string.find
-local stringlower   = string.lower
+local stringformat    = string.format
+local texiowrite_nl   = texio.write_nl
+local stringfind      = string.find
+local stringlower     = string.lower
 
 -- First we need to be able to load module (code copied from
 -- luatexbase-loader.sty):
@@ -69,9 +69,9 @@ config.lualibs.prefer_merged    = true
 config.lualibs.load_extended    = false
 
 require"lualibs"
-require"otfl-basics-gen.lua"
-require"otfl-luat-ovr.lua"  --- this populates the logs.* namespace
-require"otfl-font-nms"
+require"luaotfload-basics-gen.lua"
+require"luaotfload-luat-ovr.lua"  --- this populates the logs.* namespace
+require"luaotfload-font-nms"
 require"alt_getopt"
 
 local version = "2.2" -- same version number as luaotfload

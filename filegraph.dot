@@ -27,8 +27,11 @@ strict digraph luaotfload_files { //looks weird with circo ...
 /* ····································································
  * file structure
  * ································································· */
-    luaotfload -> otfl_fonts
-    otfl_fonts -> otfl_fonts_merged [label="merged"]
+    luaotfload -> otfl_fonts_merged [label="merged"]
+    luaotfload -> merged_lua_libs     [label="unmerged", style=solid]
+    luaotfload -> merged_luatex_fonts [label="unmerged", style=solid]
+    luaotfload -> merged_context_libs [label="unmerged", style=solid]
+
     luaotfload -> luaotfload_libs
     luaotfload -> otfl_blacklist_cnf
 
@@ -43,9 +46,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
                                               style=dotted,
                                               lhead=cluster_merged]
 
-    otfl_fonts -> merged_lua_libs     [label="unmerged", style=solid]
-    otfl_fonts -> merged_luatex_fonts [label="unmerged", style=solid]
-    otfl_fonts -> merged_context_libs [label="unmerged", style=solid]
 
 
 /* ····································································
@@ -59,14 +59,16 @@ strict digraph luaotfload_files { //looks weird with circo ...
                        color  = "#01012222",
                        style  = "filled,rounded",
                        penwidth=2]
-    otfl_fonts        [label = "otfl-fonts.lua",
-                       shape = rect,
-                       width  = "3.2cm",
-                       height = "1.2cm",
-                       color  = "#01012222",
-                       style  = "filled,rounded",
-                       penwidth=2]
-    otfl_fonts_merged [label = "otfl-fonts-merged.lua",
+    /*
+     *otfl_fonts        [label = "luaotfload-fonts.lua",
+     *                   shape = rect,
+     *                   width  = "3.2cm",
+     *                   height = "1.2cm",
+     *                   color  = "#01012222",
+     *                   style  = "filled,rounded",
+     *                   penwidth=2]
+     */
+    otfl_fonts_merged [label = "luaotfload-merged.lua",
                        shape = rect,
                        width  = "3.2cm",
                        height = "1.2cm",
@@ -78,28 +80,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
  * luaotfload files
  * ································································· */
 
-/*
- *    subgraph cluster_luaotfload_libs {
- *        style     = "filled,rounded";
- *        color     = "grey90:goldenrod4";
- *        gradientangle=0;
- *        //nodesep   = "3.0";
- *        rank      = same;
- *        label     = "Luaotfload";
- *        otfl_font_otc;  otfl_lib_dir;   otfl_luat_ovr;
- *        otfl_font_pfb;  otfl_font_nms;  otfl_font_clr;
- *        otfl_font_ltx;  otfl_features;  otfl_blacklist_cnf;
- *    }
- *
- *    otfl_font_otc      [style=filled, color=white, shape=box, label="otfl-font-otc.lua"]
- *    otfl_lib_dir       [style=filled, color=white, shape=box, label="otfl-lib-dir.lua"]
- *    otfl_luat_ovr      [style=filled, color=white, shape=box, label="otfl-luat-ovr.lua"]
- *    otfl_font_pfb      [style=filled, color=white, shape=box, label="otfl-font-pfb.lua"]
- *    otfl_font_nms      [style=filled, color=white, shape=box, label="otfl-font-nms.lua"]
- *    otfl_font_clr      [style=filled, color=white, shape=box, label="otfl-font-clr.lua"]
- *    otfl_font_ltx      [style=filled, color=white, shape=box, label="otfl-font-ltx.lua"]
- *    otfl_features      [style=filled, color=white, shape=box, label="otfl-features.lua"]
- */
 
     otfl_blacklist_cnf [style      = "filled,dashed",
                         shape      = rect,
@@ -107,7 +87,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
                         fillcolor  = "#01012222",
                         color      = grey40,
                         style      = "filled,dotted,rounded",
-                        label      = "otfl-blacklist.cnf"]
+                        label      = "luaotfload-blacklist.cnf"]
 
     luaotfload_libs [
         shape      = box,
@@ -117,10 +97,10 @@ strict digraph luaotfload_files { //looks weird with circo ...
         label      = <
             <table cellborder="0" bgcolor="#FFFFFFAA">
                 <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Luaotfload Libraries</font> </td> </th>
-                <tr> <td>otfl-font-otc.lua</td> <td>otfl-lib-dir.lua</td>  </tr>
-                <tr> <td>otfl-luat-ovr.lua</td> <td>otfl-font-pfb.lua</td> </tr>
-                <tr> <td>otfl-font-nms.lua</td> <td>otfl-font-clr.lua</td> </tr>
-                <tr> <td>otfl-font-ltx.lua</td> <td>otfl-features.lua</td> </tr>
+                <tr> <td>luaotfload-font-otc.lua</td> <td>luaotfload-lib-dir.lua</td>  </tr>
+                <tr> <td>luaotfload-luat-ovr.lua</td> <td>luaotfload-font-pfb.lua</td> </tr>
+                <tr> <td>luaotfload-font-nms.lua</td> <td>luaotfload-font-clr.lua</td> </tr>
+                <tr> <td>luaotfload-font-ltx.lua</td> <td>luaotfload-features.lua</td> </tr>
             </table>
         >,
     ]

@@ -5,7 +5,9 @@ DOC          = $(NAME).pdf
 DTX          = $(NAME).dtx
 OTFL         = $(wildcard otfl-*.lua) otfl-blacklist.cnf font-age.lua
 SCRIPT       = fontdbutil
+
 GLYPHSCRIPT  = mkglyphlist
+GLYPHSOURCE  = glyphlist.txt
 
 GRAPH  = filegraph
 DOTPDF = $(GRAPH).pdf
@@ -125,5 +127,5 @@ clean:
 	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out $(TESTDIR)/*.log
 
 mrproper: clean
-	@$(RM) -- $(GENERATED) $(ZIPS) $(TESTDIR)/*.pdf
+	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE) $(TESTDIR)/*.pdf
 

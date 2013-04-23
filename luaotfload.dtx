@@ -907,21 +907,20 @@ and the derived files
 %       \normalitem{\fileent{#1}}%
 %       \space--\hskip1em
 %     }
-%     \ouritem {luaotfload-font-otc.lua} \fileent{font-otc} from \CONTEXT;
-%                                  font feature handling.
-%     \ouritem {luaotfload-lib-dir.lua}  \fileent{l-dir} from \CONTEXT;
-%                                  contains functionality required
-%                                  by \fileent{luaotfload-font-nms.lua}.
-%     \ouritem {luaotfload-luat-ovr.lua} overrides the \CONTEXT logging
-%                                  functionality.
-%     \ouritem {luaotfload-font-pfb.lua} registers the \OpenType
-%                                  font reader as handler for
-%                                  Postscript fonts.
-%     \ouritem {luaotfload-font-nms.lua} font database.
-%     \ouritem {luaotfload-font-clr.lua} color handling.
-%     \ouritem {luaotfload-font-ltx.lua} font feature handling.
-%     \ouritem {luaotfload-features.lua} definitions of the \verb|anum| and
-%                                  \verb|tlig| features.
+%     \ouritem {luaotfload-features.lua}   font feature handling;
+%                                          incorporates some of the code from
+%                                          \fileent{font-otc} from \CONTEXT;
+%     \ouritem {luaotfload-lib-dir.lua}    \fileent{l-dir} from \CONTEXT;
+%                                          contains functionality required
+%                                          by \fileent{luaotfload-font-nms.lua}.
+%     \ouritem {luaotfload-override.lua}   overrides the \CONTEXT logging
+%                                          functionality.
+%     \ouritem {luaotfload-loaders.lua}    registers the \OpenType
+%                                          font reader as handler for
+%                                          Postscript fonts
+%                                          (\abbrev{pfa}, \abbrev{pfb}).
+%     \ouritem {luaotfload-database.lua}   font names database.
+%     \ouritem {luaotfload-colors.lua}     color handling.
 % \end{itemize}
 %
 % \begin{figure}[b]

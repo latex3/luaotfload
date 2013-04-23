@@ -35,6 +35,10 @@ strict digraph luaotfload_files { //looks weird with circo ...
     luaotfload -> luaotfload_libs
     luaotfload -> otfl_blacklist_cnf
 
+    mkglyphlist -> font_age     [label="from glyphlist.txt",
+                                 style=dashed]
+    fontdbutil  -> font_names   [label="--update",
+                                 style=dashed]
 
     otfl_fonts_merged -> merged_lua_libs     [label="merged",
                                               style=dotted,
@@ -51,6 +55,22 @@ strict digraph luaotfload_files { //looks weird with circo ...
 /* ····································································
  * main files
  * ································································· */
+
+    fontdbutil        [label  = "fontdbutil\nmkluatexfontdb.lua",
+                       shape  = rect,
+                       width  = "3.2cm",
+                       height = "1.2cm",
+                       color  = "#01012222",
+                       style  = "filled,rounded",
+                       penwidth=2]
+
+    mkglyphlist       [label  = "mkglyphlist",
+                       shape  = rect,
+                       width  = "3.2cm",
+                       height = "1.2cm",
+                       color  = "#01012222",
+                       style  = "filled,rounded",
+                       penwidth=2]
 
     luaotfload        [label  = "luaotfload.lua",
                        shape  = rect,
@@ -80,6 +100,22 @@ strict digraph luaotfload_files { //looks weird with circo ...
  * luaotfload files
  * ································································· */
 
+
+    font_age [style      = "filled,dashed",
+              shape      = rect,
+              width      = "3.2cm",
+              fillcolor  = "#01012222",
+              color      = grey40,
+              style      = "filled,dotted,rounded",
+              label      = "font-age.lua"]
+
+    font_names [style      = "filled,dashed",
+                shape      = rect,
+                width      = "3.2cm",
+                fillcolor  = "#01012222",
+                color      = grey40,
+                style      = "filled,dotted,rounded",
+                label      = "luaotfload-names.lua\nluaotfload-names.luc"]
 
     otfl_blacklist_cnf [style      = "filled,dashed",
                         shape      = rect,

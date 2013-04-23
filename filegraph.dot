@@ -1,0 +1,178 @@
+strict digraph luaotfload_files { //looks weird with circo ...
+    compound       = true;
+
+//  label          = "Schematic of the files included in Luaotfload.";
+//  labelloc       = "b";
+
+    fontsize       = "14.4";
+    labelfontname  = "Iwona Medium Regular";
+    fontname       = "Iwona Light Regular";
+    size           = "21cm";
+
+    rankdir        = LR;
+    ranksep  = 0.618;
+    nodesep  = 1.618;
+
+    edge [
+        arrowhead = onormal,
+        fontname  = "Iwona Cond Regular",
+        penwidth  = 1.0,
+    ];
+    node [
+        //penwidth = 0.7,
+        fontname = "Liberation Mono",
+        fontsize = 12,
+    ];
+
+/* ····································································
+ * file structure
+ * ································································· */
+    luaotfload -> otfl_fonts_merged [label="merged"]
+    luaotfload -> merged_lua_libs     [label="unmerged", style=solid]
+    luaotfload -> merged_luatex_fonts [label="unmerged", style=solid]
+    luaotfload -> merged_context_libs [label="unmerged", style=solid]
+
+    luaotfload -> luaotfload_libs
+    luaotfload -> otfl_blacklist_cnf
+
+
+    otfl_fonts_merged -> merged_lua_libs     [label="merged",
+                                              style=dotted,
+                                              lhead=cluster_merged]
+    otfl_fonts_merged -> merged_luatex_fonts [label="merged",
+                                              style=dotted,
+                                              lhead=cluster_merged]
+    otfl_fonts_merged -> merged_context_libs [label="merged",
+                                              style=dotted,
+                                              lhead=cluster_merged]
+
+
+
+/* ····································································
+ * main files
+ * ································································· */
+
+    luaotfload        [label  = "luaotfload.lua",
+                       shape  = rect,
+                       width  = "3.2cm",
+                       height = "1.2cm",
+                       color  = "#01012222",
+                       style  = "filled,rounded",
+                       penwidth=2]
+    /*
+     *otfl_fonts        [label = "luaotfload-fonts.lua",
+     *                   shape = rect,
+     *                   width  = "3.2cm",
+     *                   height = "1.2cm",
+     *                   color  = "#01012222",
+     *                   style  = "filled,rounded",
+     *                   penwidth=2]
+     */
+    otfl_fonts_merged [label = "luaotfload-merged.lua",
+                       shape = rect,
+                       width  = "3.2cm",
+                       height = "1.2cm",
+                       color  = "#01012222",
+                       style  = "filled,rounded",
+                       penwidth=2]
+
+/* ····································································
+ * luaotfload files
+ * ································································· */
+
+
+    otfl_blacklist_cnf [style      = "filled,dashed",
+                        shape      = rect,
+                        width      = "3.2cm",
+                        fillcolor  = "#01012222",
+                        color      = grey40,
+                        style      = "filled,dotted,rounded",
+                        label      = "luaotfload-blacklist.cnf"]
+
+    luaotfload_libs [
+        shape      = box,
+        style      = "filled,rounded",
+        color      = "grey90:goldenrod4",
+        fontsize   = 10,
+        label      = <
+            <table cellborder="0" bgcolor="#FFFFFFAA">
+                <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Luaotfload Libraries</font> </td> </th>
+                <tr> <td>luaotfload-lib-dir.lua</td>  <td>luaotfload-features.lua</td> </tr>
+                <tr> <td>luaotfload-override.lua</td> <td>luaotfload-loaders.lua</td>  </tr>
+                <tr> <td>luaotfload-database.lua</td> <td>luaotfload-color.lua</td>    </tr>
+            </table>
+        >,
+    ]
+
+/* ····································································
+ * merged files
+ * ································································· */
+
+   subgraph cluster_merged {
+       node [style=filled, color=white];
+       style     = "filled,rounded";
+       color     = "grey90:dodgerblue4";
+       //nodesep   = "3.0";
+       rank      = same;
+       label     = "Merged Libraries";
+       gradientangle=0;
+       merged_lua_libs;
+       merged_luatex_fonts;
+       merged_context_libs;
+   }
+
+    otfl_fonts_merged -> merged_lua_libs
+    otfl_fonts_merged -> merged_luatex_fonts
+    otfl_fonts_merged -> merged_context_libs
+
+    merged_lua_libs [
+        shape      = box,
+        style      = "filled,rounded",
+        color      = "#FFFFFFAA",
+        fontsize   = 10,
+        label      = <
+            <table border="0">
+                <th> <td colspan="3"> <font point-size="12" face="Iwona Italic">Lua Libraries from Context</font> </td> </th>
+                <tr> <td>l-lua.lua</td>     <td>l-lpeg.lua</td>    <td>l-function.lua</td>  </tr>
+                <tr> <td>l-string.lua</td>  <td>l-table.lua</td>   <td>l-io.lua</td>        </tr>
+                <tr> <td>l-file.lua</td>    <td>l-boolean.lua</td> <td>l-math.lua</td>      </tr>
+                <tr> <td>util-str.lua</td>                                                  </tr>
+            </table>
+        >,
+    ]
+
+    merged_luatex_fonts [
+        shape      = box,
+        style      = "filled,rounded",
+        color      = "#FFFFFFAA",
+        fontsize   = 10,
+        label      = <
+            <table border="0">
+                <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Font Loader (LuaTeX-Fonts)</font> </td> </th>
+                <tr> <td>luatex-basics-gen.lua</td> <td>luatex-basics-nod.lua</td> </tr>
+                <tr> <td>luatex-fonts-enc.lua</td>  <td>luatex-fonts-syn.lua</td> </tr>
+                <tr> <td>luatex-fonts-tfm.lua</td>  <td>luatex-fonts-chr.lua</td> </tr>
+                <tr> <td>luatex-fonts-lua.lua</td>  <td>luatex-fonts-def.lua</td> </tr>
+                <tr> <td>luatex-fonts-ext.lua</td>  <td>luatex-fonts-cbk.lua</td> </tr>
+            </table>
+        >,
+    ]
+
+    merged_context_libs [
+        shape      = box,
+        style      = "filled,rounded",
+        color      = "#FFFFFFAA",
+        fontsize   = 10,
+        label      = <
+            <table border="0">
+                <th> <td colspan="3"> <font point-size="12" face="Iwona Italic"> Font and Node Libraries from Context </font> </td> </th>
+                <tr> <td>data-con.lua</td> <td>font-ini.lua</td> <td>font-con.lua</td> </tr>
+                <tr> <td>font-cid.lua</td> <td>font-map.lua</td> <td>font-oti.lua</td> </tr>
+                <tr> <td>font-otf.lua</td> <td>font-otb.lua</td> <td>node-inj.lua</td> </tr>
+                <tr> <td>font-ota.lua</td> <td>font-otn.lua</td> <td>font-def.lua</td> </tr>
+            </table>
+        >,
+    ]
+}
+
+// vim:ft=dot:sw=4:ts=4:expandtab

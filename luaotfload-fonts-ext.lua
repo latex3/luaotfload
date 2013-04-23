@@ -18,18 +18,14 @@ local otffeatures = fonts.constructors.newfeatures("otf")
 
 local function initializeitlc(tfmdata,value)
     if value then
-        -- the magic 40 and it formula come from Dohyun Kim
-        local parameters  = tfmdata.parameters
+        -- the magic 40 and it formula come from Dohyun Kim but we might need another guess
+        local parameters = tfmdata.parameters
         local italicangle = parameters.italicangle
         if italicangle and italicangle ~= 0 then
-            local uwidth = (parameters.uwidth or 40)/2
-            for unicode, d in next, tfmdata.descriptions do
-                local it = d.boundingbox[3] - d.width + uwidth
-                if it ~= 0 then
-                    d.italic = it
-                end
-            end
-            tfmdata.properties.hasitalics = true
+            local properties = tfmdata.properties
+            local factor = tonumber(value) or 1
+            properties.hasitalics = true
+            properties.autoitalicamount = factor * (parameters.uwidth or 40)/2
         end
     end
 end

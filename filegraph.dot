@@ -97,10 +97,10 @@ strict digraph luaotfload_files { //looks weird with circo ...
         label      = <
             <table cellborder="0" bgcolor="#FFFFFFAA">
                 <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Luaotfload Libraries</font> </td> </th>
-                <tr> <td>luaotfload-font-otc.lua</td> <td>luaotfload-lib-dir.lua</td>  </tr>
-                <tr> <td>luaotfload-luat-ovr.lua</td> <td>luaotfload-font-pfb.lua</td> </tr>
-                <tr> <td>luaotfload-font-nms.lua</td> <td>luaotfload-font-clr.lua</td> </tr>
-                <tr> <td>luaotfload-font-ltx.lua</td> <td>luaotfload-features.lua</td> </tr>
+                <tr> <td>luaotfload-font-otc.lua</td> <td>luaotfload-lib-dir.lua</td> </tr>
+                <tr> <td>luaotfload-override.lua</td> <td>luaotfload-loaders.lua</td> </tr>
+                <tr> <td>luaotfload-database.lua</td> <td>luaotfload-color.lua</td>   </tr>
+                <tr> <td>luaotfload-features.lua</td> </tr>
             </table>
         >,
     ]

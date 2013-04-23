@@ -1024,22 +1024,9 @@ local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
 
 %    \end{macrocode}
-% This is a necessary initalization in order not to rebuild an existing
-% font.
-% Maybe 600 should be replaced by \texmacro{pdfpkresolution} %% (why?)
-% or \luafunction{texconfig.pk_dpi} (and it should be replaced
-% dynamically), but we don't have access (yet) to the
-% \identifier{texconfig} table, so we let it be 600.
-% Anyway, it does still work fine even if \texmacro{pdfpkresolution} is
-% changed.
 %
-%    \begin{macrocode}
-
-kpse.init_prog("", 600, "/")
-
-%    \end{macrocode}
-% We set the minimum version requirement for \LUATEX to v0.74, as it was
-% the first version to include version 5.2 of the \LUA interpreter.
+%    We set the minimum version requirement for \LUATEX to v0.74, as it was
+%    the first version to include version 5.2 of the \LUA interpreter.
 %
 %    \begin{macrocode}
 

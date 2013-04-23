@@ -1,30 +1,32 @@
 # Makefile for luaotfload
 
-NAME   = luaotfload
-DOC    = $(NAME).pdf
-DTX    = $(NAME).dtx
-OTFL   = $(wildcard otfl-*.lua) otfl-blacklist.cnf font-age.lua
-SCRIPT = mkluatexfontdb.lua
+NAME         = luaotfload
+DOC          = $(NAME).pdf
+DTX          = $(NAME).dtx
+OTFL         = $(wildcard otfl-*.lua) otfl-blacklist.cnf font-age.lua
+SCRIPT       = fontdbutil
+GLYPHSCRIPT  = mkglyphlist
 
 GRAPH  = filegraph
 DOTPDF = $(GRAPH).pdf
 DOT    = $(GRAPH).dot
 
 # Files grouped by generation mode
-GRAPHED  = $(DOTPDF)
-COMPILED = $(DOC)
-UNPACKED = luaotfload.sty luaotfload.lua
-GENERATED = $(GRAPHED) $(COMPILED) $(UNPACKED)
-SOURCE = $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT)
+GLYPHS      = font-age.lua
+GRAPHED     = $(DOTPDF)
+COMPILED    = $(DOC)
+UNPACKED    = luaotfload.sty luaotfload.lua
+GENERATED   = $(GRAPHED) $(COMPILED) $(UNPACKED) $(GLYPHS)
+SOURCE 		= $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT) $(GLYPHSCRIPT)
 
 # test files
-TESTDIR = tests
-TESTFILES = $(wildcard $(TESTDIR)/*.tex $(TESTDIR)/*.ltx)
-TESTFILES_SYS = $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
-TESTFILES_TL = $(filter-out $(TESTFILES_SYS), $(TESTFILES))
+TESTDIR 		= tests
+TESTFILES 		= $(wildcard $(TESTDIR)/*.tex $(TESTDIR)/*.ltx)
+TESTFILES_SYS 	= $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
+TESTFILES_TL 	= $(filter-out $(TESTFILES_SYS), $(TESTFILES))
 
 # Files grouped by installation location
-SCRIPTFILES = $(SCRIPT)
+SCRIPTFILES = $(SCRIPT) $(GLYPHSCRIPT)
 RUNFILES    = $(UNPACKED) $(OTFL)
 DOCFILES    = $(DOC) README NEWS
 SRCFILES    = $(DTX) Makefile
@@ -42,20 +44,25 @@ SRCDIR    = $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
 TEXMFROOT = $(shell kpsewhich --var-value TEXMFHOME)
 
 CTAN_ZIP = $(NAME).zip
-TDS_ZIP = $(NAME).tds.zip
-ZIPS = $(CTAN_ZIP) $(TDS_ZIP)
+TDS_ZIP  = $(NAME).tds.zip
+ZIPS 	 = $(CTAN_ZIP) $(TDS_ZIP)
 
-DO_TEX = tex --interaction=batchmode $< >/dev/null
-DO_LATEX = latexmk -pdf -pdflatex=lualatex -silent $< >/dev/null
-DO_GRAPHVIZ = dot -Tpdf -o $@ $< > /dev/null
+DO_TEX 			= tex --interaction=batchmode $< >/dev/null
+DO_LATEX 		= latexmk -pdf -pdflatex=lualatex -silent $< >/dev/null
+DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null
+DO_GLYPHLIST 	= texlua ./mkglyphlist > /dev/null
 
 all: $(GENERATED)
 graph: $(GRAPHED)
 doc: $(GRAPHED) $(COMPILED)
 unpack: $(UNPACKED)
+glyphs: $(GLYPHS)
 ctan: check $(CTAN_ZIP)
 tds: $(TDS_ZIP)
 world: all ctan
+
+$(GLYPHS): /dev/null
+	$(DO_GLYPHLIST)
 
 $(GRAPHED): $(DOT)
 	$(DO_GRAPHVIZ)

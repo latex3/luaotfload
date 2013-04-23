@@ -1,6 +1,14 @@
 Change History
 --------------
 
+2013/04/11, luaotfload v1.28:
+    * Adapting to LuaTeX 0.75
+    * Fix small documentation issues in mkluatexfontdb
+    * Fix possibility of infite loop fontconfig config files references
+    * Adding semibold synonym for bold
+    * file:xxx syntax now uses the same search function as name: which
+      make more fonts recognized
+
 2012/05/28, luaotfload v1.27:
     * Fix "endless loop in charlist" with some OpenType math fonts
 

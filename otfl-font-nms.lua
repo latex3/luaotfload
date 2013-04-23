@@ -76,9 +76,12 @@ end
 
 local synonyms = {
     regular    = { "normal", "roman", "plain", "book", "medium" },
-    bold       = { "boldregular", "demi", "demibold" },
+    -- boldregular was for old versions of Linux Libertine, is it still useful?
+    -- semibold is in new versions of Linux Libertine, but there is also a bold,
+    -- not sure it's useful here...
+    bold       = { "demi", "demibold", "semibold", "boldregular" },
     italic     = { "regularitalic", "normalitalic", "oblique", "slanted" },
-    bolditalic = { "boldoblique", "boldslanted", "demiitalic", "demioblique", "demislanted", "demibolditalic" },
+    bolditalic = { "boldoblique", "boldslanted", "demiitalic", "demioblique", "demislanted", "demibolditalic", "semibolditalic" },
 }
 
 local loaded   = false
@@ -493,8 +496,8 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     else
         logs.info("Scanning TEXMF and OS fonts...")
     end
-    local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^\.", "")
-    fontdirs = fontdirs .. expandpath("$TTFONTS"):gsub("^\.", "")
+    local fontdirs = expandpath("$OPENTYPEFONTS"):gsub("^%.", "")
+    fontdirs = fontdirs .. expandpath("$TTFONTS"):gsub("^%.", "")
     if not fontdirs:is_empty() then
         for _,d in next, splitpath(fontdirs) do
             scan_dir(d, fontnames, newfontnames, true)
@@ -515,14 +518,16 @@ end
   in OSFONTDIR.
 ]]
 
-local function read_fonts_conf(path, results)
+local function read_fonts_conf(path, results, passed_paths)
     --[[
     This function parses /etc/fonts/fonts.conf and returns all the dir it finds.
     The code is minimal, please report any error it may generate.
     ]]
     local f = io.open(path)
+    table.insert(passed_paths, path)
     if not f then
-        error("Cannot open the file "..path)
+        logs.info("Warning: unable to read "..path.. ", skipping...")
+        return results
     end
     local incomments = false
     for line in f:lines() do
@@ -571,14 +576,15 @@ local function read_fonts_conf(path, results)
                     elseif not lfs.isfile(include) and not lfs.isdir(include) then
                         include = file.join(file.dirname(path), include)
                     end
-                    if lfs.isfile(include) then
-                        -- maybe we should prevent loops here?
+                    if lfs.isfile(include) and kpse.readable_file(include) and not table.contains(passed_paths, include) then
                         -- we exclude path with texmf in them, as they should
                         -- be found otherwise
-                        read_fonts_conf(include, results)
+                        read_fonts_conf(include, results, passed_paths)
                     elseif lfs.isdir(include) then
                         for _,f in next, glob(file.join(include, "*.conf")) do
-                            read_fonts_conf(f, results)
+                            if not table.contains(passed_paths, f) then
+                                read_fonts_conf(f, results, passed_paths)
+                            end
                         end
                     end
                 end
@@ -604,7 +610,7 @@ local function get_os_dirs()
         local windir = os.getenv("WINDIR")
         return { file.join(windir, 'Fonts') }
     else
-        return read_fonts_conf("/etc/fonts/fonts.conf", {})
+        return read_fonts_conf("/etc/fonts/fonts.conf", {}, {})
     end
 end
 

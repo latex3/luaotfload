@@ -158,6 +158,8 @@ and the derived files
 
 \newcommand*\email[1]{\href{mailto:#1}{#1}}
 
+\renewcommand\partname{Part}%% gets rid of the stupid “file” heading
+
 \VerbatimFootnotes
 \begin{document}
   \DocInput{luaotfload.dtx}%
@@ -881,6 +883,15 @@ and the derived files
 % Thus if you prefer running bleeding edge code from the
 % \CONTEXT beta, all you have to do is remove
 % \fileent{luaotfload-merged.lua} from the search path.
+%
+% Also, the merged file at some point
+% loads the Adobe Glyph List from a \LUA table that is contained in
+% \fileent{font-age.lua}, which has also been imported unmodified from
+% \CONTEXT.\footnote{%
+%   See \fileent{luaotfload-font-enc.lua}.
+%   The hard-coded file name is why the file lacks the \fileent{luaotfload-}
+%   prefix.
+% }
 %
 % In addition to these, \identifier{luaotfload} requires a number of
 % files not contained in the merge. Some of these have no equivalent in

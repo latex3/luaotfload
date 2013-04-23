@@ -1041,13 +1041,19 @@ local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
 
 %    \end{macrocode}
-%
-%    We set the minimum version requirement for \LUATEX to v0.74, as it was
-%    the first version to include version 5.2 of the \LUA interpreter.
+%    We set the minimum version requirement for \LUATEX to v0.76,
+%    because the font loader requires recent features like direct
+%    attribute indexing and \luafunction{node.end_of_math()} that aren’t
+%    available in earlier versions.\footnote{%
+%     See Taco’s announcement of v0.76:
+%     \url{http://comments.gmane.org/gmane.comp.tex.luatex.user/4042}
+%     and this commit by Hans that introduced those features.
+%     \url{http://repo.or.cz/w/context.git/commitdiff/a51f6cf6ee087046a2ae5927ed4edff0a1acec1b}.
+%   }
 %
 %    \begin{macrocode}
 
-local luatex_version = 74
+local luatex_version = 76
 
 if tex.luatexversion < luatex_version then
     warning("LuaTeX v%.2f is old, v%.2f is recommended.",
@@ -1110,7 +1116,6 @@ end
 % \fileent{luaotfload-merged.lua}.
 % If this file cannot be found, the original libraries from \CONTEXT of
 % which the merged code was composed are loaded instead.
-%
 % The imported font loader will call \luafunction{callback.register} once
 % while reading \fileent{font-def.lua}.
 % This is unavoidable unless we modify the imported files, but harmless
@@ -1418,8 +1423,10 @@ end
 %    \begin{macrocode}
 
 local read_font_file = fonts.definers.read
-local patch_defined_font = function (...)
-    local tfmdata = read_font_file(...)-- spec -> size -> id -> tmfdata
+
+--- spec -> size -> id -> tmfdata
+local patch_defined_font = function (specification, size, id)
+    local tfmdata = read_font_file(specification, size, id)
     if type(tfmdata) == "table" then
         call_callback("luaotfload.patch_font", tfmdata)
     end
@@ -1488,7 +1495,6 @@ end
 loadmodule"features.lua" --- contains what was “font-ltx” and “font-otc”
 
 -- vim:tw=71:sw=4:ts=4:expandtab
-
 
 %    \end{macrocode}
 %

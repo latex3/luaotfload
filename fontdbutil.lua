@@ -1,11 +1,15 @@
 #!/usr/bin/env texlua
---[[
+
+--[[doc--
 This file was originally written by Elie Roux and Khaled Hosny and is under CC0
 license (see http://creativecommons.org/publicdomain/zero/1.0/legalcode).
 
-This file is a wrapper for the luaotfload's font names module. It is part of the
-luaotfload bundle, please see the luaotfload documentation for more info.
---]]
+This file is a wrapper for the luaotfload font names module
+(luaotfload-database.lua). It is part of the luaotfload bundle, please
+see the luaotfload documentation for more info. Report bugs to
+\url{https://github.com/lualatex/luaotfload/issues}.
+
+--doc]]--
 
 kpse.set_program_name"luatex"
 
@@ -14,18 +18,17 @@ local texiowrite_nl   = texio.write_nl
 local stringfind      = string.find
 local stringlower     = string.lower
 
--- First we need to be able to load module (code copied from
--- luatexbase-loader.sty):
+
 local loader_file = "luatexbase.loader.lua"
 local loader_path = assert(kpse.find_file(loader_file, "lua"),
                            "File '"..loader_file.."' not found")
+
 
 string.quoted = string.quoted or function (str)
   return string.format("%q",str) 
 end
 
---texiowrite_nl("("..loader_path..")")
-dofile(loader_path) -- FIXME this pollutes stdout with filenames
+dofile(loader_path)
 
 --[[doc--
 Depending on how the script is called we change its behavior.
@@ -73,7 +76,19 @@ config.lualibs.prefer_merged    = true
 config.lualibs.load_extended    = false
 
 require"lualibs"
+
+--[[doc--
+\fileent{luatex-basics-gen.lua} calls functions from the
+\luafunction{texio.*} library; too much for our taste.
+We intercept them with dummies.
+--doc]]--
+
+local dummy_function = function ( ) end
+local backup_write, backup_write_nl  = texio.write, texio.write_nl
+texio.write, texio.write_nl          = dummy_function, dummy_function
 require"luaotfload-basics-gen.lua"
+texio.write, texio.write_nl          = backup_write, backup_write_nl
+
 require"luaotfload-override.lua"  --- this populates the logs.* namespace
 require"luaotfload-database"
 require"alt_getopt"

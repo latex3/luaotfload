@@ -35,7 +35,8 @@ local set_loglevel = function (n)
         loglevel = n
     end
 end
-logs.set_loglevel = set_loglevel
+logs.set_loglevel   = set_loglevel
+logs.set_log_level  = set_loglevel --- accomodating lazy typists
 
 local set_logout = function (s)
     if s == "stdout" then

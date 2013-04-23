@@ -1,6 +1,6 @@
-if not modules then modules = { } end modules ['font-clr'] = {
+if not modules then modules = { } end modules ['luaotfload-colors'] = {
     version   = 1.001,
-    comment   = "companion to font-otf.lua (font color)",
+    comment   = "companion to luaotfload.lua (font color)",
     author    = "Khaled Hosny and Elie Roux",
     copyright = "Luaotfload Development Team",
     license   = "GPL"

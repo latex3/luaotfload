@@ -45,6 +45,7 @@ local utf8lower               = unicode.utf8.lower
 local dirglob                 = dir.glob
 local dirmkdirs               = dir.mkdirs
 local filebasename            = file.basename
+local filedirname             = file.dirname
 local filecollapsepath        = file.collapsepath or file.collapse_path
 local fileextname             = file.extname
 local fileiswritable          = file.iswritable
@@ -212,11 +213,14 @@ local scan_external_dir
 local update_names
 
 load_names = function ( )
+    local starttime = os.gettimeofday()
     local foundname, data = load_lua_file(names.path.path)
 
     if data then
         report("info", 1, "db",
             "Font names database loaded", "%s", foundname)
+        report("info", 1, "db", "Loading took %0.f ms",
+                                1000*(os.gettimeofday()-starttime))
     else
         report("info", 0, "db",
             [[Font names database not found, generating new one.
@@ -622,6 +626,7 @@ font_fullinfo = function (filename, subfont, texmf)
     return tfmdata
 end
 
+-----           load_font(file, fontnames, newfontnames, texmf)
 local load_font = function (filename, fontnames, newfontnames, texmf)
     local newmappings = newfontnames.mappings
     local newstatus   = newfontnames.status
@@ -632,7 +637,7 @@ local load_font = function (filename, fontnames, newfontnames, texmf)
     if filename then
         if names.blacklist[filename] or
            names.blacklist[basename] then
-            report("log", 2, "db", "ignoring font", "%s", filename)
+            report("log", 2, "db", "ignoring blacklisted font “%s”", filename)
             return
         end
         local timestamp, db_timestamp
@@ -655,7 +660,7 @@ local load_font = function (filename, fontnames, newfontnames, texmf)
                 newmappings[#newmappings+1]        = mappings[v]
                 newstatus[basefile].index[index+1] = #newmappings
             end
-            report("log", 1, "db", "font already indexed", "%s", basefile)
+            report("log", 2, "db", "font “%s” already indexed", basefile)
             return
         end
         local info = fontloader.info(filename)
@@ -690,39 +695,66 @@ local load_font = function (filename, fontnames, newfontnames, texmf)
                 newstatus[basefile].index[1] = index
             end
         else
-            report("log", 1, "db", "failed to load", "%s", basefile)
+            report("log", 1, "db", "failed to load “%s”", basefile)
         end
     end
 end
 
-local function path_normalize(path)
-    --[[
-        path normalization:
-        - a\b\c  -> a/b/c
-        - a/../b -> b
-        - /cygdrive/a/b -> a:/b
-        - reading symlinks under non-Win32
-        - using kpse.readable_file on Win32
-    ]]
-    if os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
-        path = stringgsub(path, '\\', '/')
-        path = stringlower(path)
-        path = stringgsub(path, '^/cygdrive/(%a)/', '%1:/')
-    end
-    if os.type ~= "windows" and os.type ~= "msdos" then
-        local dest = lfs.readlink(path)
-        if dest then
-            if kpsereadable_file(dest) then
-                path = dest
-            elseif kpsereadable_file(filejoin(file.dirname(path), dest)) then
-                path = filejoin(file.dirname(path), dest)
-            else
-                -- broken symlink?
+local path_normalize
+do
+    --- os.type and os.name are constants so we
+    --- choose a normalization function in advance
+    --- instead of testing with every call
+    local os_type, os_name = os.type, os.name
+    local filecollapsepath = filecollapsepath
+    local lfsreadlink      = lfs.readlink
+
+    --- windows and dos
+    if os_type == "windows" or os_type == "msdos" then
+        --- ms platfom specific stuff
+        path_normalize = function (path)
+            path = stringgsub(path, '\\', '/')
+            path = stringlower(path)
+            path = stringgsub(path, '^/cygdrive/(%a)/', '%1:/')
+            path = filecollapsepath(path)
+            return path
+        end
+
+    elseif os_name == "cygwin" then -- union of ms + unix
+        path_normalize = function (path)
+            path = stringgsub(path, '\\', '/')
+            path = stringlower(path)
+            path = stringgsub(path, '^/cygdrive/(%a)/', '%1:/')
+            local dest = lfsreadlink(path)
+            if dest then
+                if kpsereadable_file(dest) then
+                    path = dest
+                elseif kpsereadable_file(filejoin(filedirname(path), dest)) then
+                    path = filejoin(file.dirname(path), dest)
+                else
+                    -- broken symlink?
+                end
             end
+            path = filecollapsepath(path)
+            return path
+        end
+
+    else -- posix
+        path_normalize = function (path)
+            local dest = lfsreadlink(path)
+            if dest then
+                if kpsereadable_file(dest) then
+                    path = dest
+                elseif kpsereadable_file(filejoin(filedirname(path), dest)) then
+                    path = filejoin(file.dirname(path), dest)
+                else
+                    -- broken symlink?
+                end
+            end
+            path = filecollapsepath(path)
+            return path
         end
     end
-    path = filecollapsepath(path)
-    return path
 end
 
 fonts.path_normalize = path_normalize
@@ -750,7 +782,7 @@ local function read_blacklist()
                     if stringsub(line, 1, 1) == "-" then
                         whitelist[stringsub(line, 2, -1)] = true
                     else
-                        report("log", 2, "db", "blacklisted file", "%s", line)
+                        report("log", 2, "db", "blacklisted file “%s”", line)
                         blacklist[line] = true
                     end
                 end
@@ -774,34 +806,28 @@ local scan_dir = function (dirname, fontnames, newfontnames, texmf)
     This function scans a directory and populates the list of fonts
     with all the fonts it finds.
     - dirname is the name of the directory to scan
-    - names is the font database to fill
+    - names is the font database to fill -> no such term!!!
     - texmf is a boolean saying if we are scanning a texmf directory
-
-    srsly guys, calling a variable “list” is just lazy!
     ]]
-    --- list:  string list
     local n_found = 0   --- total of fonts collected
     report("log", 2, "db", "scanning", "%s", dirname)
     for _,i in next, font_extensions do
         for _,ext in next, { i, stringupper(i) } do
             local found = dirglob(stringformat("%s/**.%s$", dirname, ext))
             local n_new = #found
-            --- note that glob fails silently on broken symlinks, which happens
-            --- sometimes in TeX Live.
-            report("log", 2, "db",
-                "fonts found", "%s '%s' fonts found", #found, ext)
+            --- note that glob fails silently on broken symlinks, which
+            --- happens sometimes in TeX Live.
+            report("log", 2, "db", "%s '%s' fonts found", n_new, ext)
             n_found = n_found + n_new
             for j=1, n_new do
-                local file = found[j]
-                file = path_normalize(file)
-                report("log", 1, "db", "loading font", "%s", file)
-                load_font(file, fontnames, newfontnames, texmf)
+                local filename = found[j]
+                filename = path_normalize(filename)
+                report("log", 2, "db", "loading font “%s”", filename)
+                load_font(filename, fontnames, newfontnames, texmf)
             end
-            --tableappend(list, found)
         end
     end
-    report("log", 2, "db",
-        "fonts found", "%d fonts found in '%s'", n_found, dirname)
+    report("log", 2, "db", "%d fonts found in '%s'", n_found, dirname)
     return n_found
 end
 
@@ -853,7 +879,7 @@ read_fonts_conf = function (path, results, passed_paths)
     passed_paths[#passed_paths+1] = path
     passed_paths_set = tabletohash(passed_paths, true)
     if not fh then
-        report("log", 2, "db", "cannot open file", "%s", path)
+        report("log", 2, "db", "cannot open file %s", path)
         return results
     end
     local incomments = false
@@ -1001,9 +1027,10 @@ update_names = function (fontnames, force)
     then
         scan_os_fonts(fontnames, newfontnames)
     end
-    --- stats before rewrite:
-    ---         partial:  1144 ms
-    ---         forced:  45384 ms
+    --- stats:
+    ---            before rewrite   | after rewrite
+    ---   partial:         804 ms   |   701 ms
+    ---   forced:        45384 ms   | 44714 ms
     report("info", 1, "db", "Rebuilt in %0.f ms",
            1000*(os.gettimeofday()-starttime))
     return newfontnames

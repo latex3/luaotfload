@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/23/13 12:46:30
+-- merge date  : 04/24/13 13:39:43
 
 do -- begin closure to overcome local limits and interference
 
@@ -6098,6 +6098,14 @@ actions["reorganize lookups"]=function(data,filename,raw)
               local current=coverage.current
               if current then
                 current=t_uncover(splitter,t_u_cache,current)
+                local lookups=rule.lookups
+                if lookups then
+                  for i=1,#current do
+                    if not lookups[i] then
+                      lookups[i]="" 
+                    end
+                  end
+                end
                 rule.current=t_hashed(current,t_h_cache)
               end
               local after=coverage.after
@@ -10642,8 +10650,8 @@ local function packdata(data)
               local r=rule.before    if r then for i=1,#r do r[i]=pack_boolean(r[i]) end end
               local r=rule.after    if r then for i=1,#r do r[i]=pack_boolean(r[i]) end end
               local r=rule.current   if r then for i=1,#r do r[i]=pack_boolean(r[i]) end end
-              local r=rule.replacements if r then rule.replacements=pack_flat  (r)  end
-              local r=rule.lookups   if r then rule.lookups=pack_indexed(r)  end 
+              local r=rule.replacements if r then rule.replacements=pack_flat  (r)  end 
+              local r=rule.lookups   if r then rule.lookups=pack_indexed(r)  end
             end
           end
         end

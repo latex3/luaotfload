@@ -37,6 +37,12 @@ local stringfind       = string.find
 local stringexplode    = string.explode
 local stringis_empty   = string.is_empty
 
+--[[doc--
+Apparently, these “modifiers” are another measure of emulating \XETEX,
+cf. “About \XETEX”, by Jonathan Kew, 2005; and
+    “The \XETEX Reference Guide”, by Will Robertson, 2011.
+--doc]]--
+
 local supported = {
     b    = "bold",
     i    = "italic",
@@ -123,7 +129,7 @@ defaults.tibt = defaults.khmr
 
 defaults.lao  = defaults.thai
 
-local function set_default_features(script)
+local set_default_features = function (script)
     local features
     local script = script or "dflt"
     report("log", 0, "load font",
@@ -171,9 +177,13 @@ local options    = P(":") * spaces * (P(";")^0  * option)^0
 local pattern    = (filename + fontname) * subvalue^0 * stylespec^0 * options^0
 
 local function colonized(specification) -- xetex mode
+    --print"~~~~~~~~~~~~~~~~~~~~~~~~"
+    --print(specification.specification)
     feature_list = { }
     lpeg.match(pattern,specification.specification)
     set_default_features(feature_list.script)
+    --inspect(feature_list)
+    --os.exit()
     if feature_list.style then
         specification.style = feature_list.style
         feature_list.style = nil
@@ -206,27 +216,31 @@ local function colonized(specification) -- xetex mode
         -- if no mode is set, use our default
         feature_list.mode = fonts.mode
     end
+    --inspect(feature_list)
     specification.features.normal = fonts.handlers.otf.features.normalize(feature_list)
+    --inspect(specification.features.normal)
     return specification
 end
 
 fonts.definers.registersplit(":",colonized,"cryptic")
 fonts.definers.registersplit("", colonized,"more cryptic") -- catches \font\text=[names]
 
-function fonts.definers.applypostprocessors(tfmdata)
-    local postprocessors = tfmdata.postprocessors
-    if postprocessors then
-        for i=1,#postprocessors do
-            local extrahash = postprocessors[i](tfmdata) -- after scaling etc
-            if type(extrahash) == "string" and extrahash ~= "" then
-                -- e.g. a reencoding needs this
-                extrahash = string.gsub(lower(extrahash),"[^a-z]","-")
-                tfmdata.properties.fullname = format("%s-%s",tfmdata.properties.fullname,extrahash)
-            end
-        end
-    end
-    return tfmdata
-end
+--- TODO below section is literally the same in luatex-fonts-def
+---      why is it here?
+--function fonts.definers.applypostprocessors(tfmdata)
+--    local postprocessors = tfmdata.postprocessors
+--    if postprocessors then
+--        for i=1,#postprocessors do
+--            local extrahash = postprocessors[i](tfmdata) -- after scaling etc
+--            if type(extrahash) == "string" and extrahash ~= "" then
+--                -- e.g. a reencoding needs this
+--                extrahash = string.gsub(lower(extrahash),"[^a-z]","-")
+--                tfmdata.properties.fullname = format("%s-%s",tfmdata.properties.fullname,extrahash)
+--            end
+--        end
+--    end
+--    return tfmdata
+--end
 ---[[ end included font-ltx.lua ]]
 
 --[[doc--

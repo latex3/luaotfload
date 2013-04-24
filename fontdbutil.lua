@@ -85,6 +85,7 @@ We intercept them with dummies.
 
 local dummy_function = function ( ) end
 local backup_write, backup_write_nl  = texio.write, texio.write_nl
+
 texio.write, texio.write_nl          = dummy_function, dummy_function
 require"luaotfload-basics-gen.lua"
 texio.write, texio.write_nl          = backup_write, backup_write_nl
@@ -239,7 +240,7 @@ actions.generate = function (job)
     local fontnames, savedname
     fontnames = names.update(fontnames, job.force_reload)
     logs.names_report("log", 0, "db",
-        "fonts in the database", "%i", #fontnames.mappings)
+        "Fonts in the database: %i", #fontnames.mappings)
     savedname = names.save(fontnames)
     if savedname then --- FIXME have names.save return bool
         return true, true

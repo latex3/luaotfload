@@ -1328,6 +1328,8 @@ add_to_callback("find_vf_file",
 loadmodule"lib-dir.lua"   --- required by luaofload-database.lua
 loadmodule"override.lua"  --- “luat-ovr”
 
+logs.set_loglevel(2)
+
 %    \end{macrocode}
 % \CONTEXT does not support ofm, these lines were added in order to make it
 % work. However they do not seem necessary so they are commented for now.
@@ -1399,7 +1401,7 @@ local define_font_wrapper = function (...)
                 --- definers.read
                 if stringfind(k, "Percent") then
                     -- keep percent values as is
-                    print(k,v)
+                    --print(k,v)
                     mathconstants[k] = v
                 else
                     mathconstants[k] = v / units_per_em * size

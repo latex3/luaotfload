@@ -46,6 +46,7 @@ local utf8lower               = unicode.utf8.lower
 local dirglob                 = dir.glob
 local dirmkdirs               = dir.mkdirs
 local filebasename            = file.basename
+local filenameonly            = file.nameonly
 local filedirname             = file.dirname
 local filecollapsepath        = file.collapsepath or file.collapse_path
 local fileextname             = file.extname
@@ -82,32 +83,6 @@ if not writable_path then
 end
 names.path.dir = writable_path
 names.path.path = filejoin(writable_path, names.path.basename)
-
-
----- <FIXME>
----
---- these lines load some binary module called “lualatex-platform”
---- that doesn’t appear to build with Lua 5.2. I’m going ahead and
---- disable it for the time being until someone clarifies what it
---- is supposed to do and whether we should care to fix it.
----
---local success = pcall(require, "luatexbase.modutils")
---if success then
---   success = pcall(luatexbase.require_module,
---                   "lualatex-platform", "2011/03/30")
---    print(success)
---end
-
---local get_installed_fonts
---if success then
---   get_installed_fonts = lualatex.platform.get_installed_fonts
---else
---   function get_installed_fonts()
---   end
---end
----- </FIXME>
-
-local get_installed_fonts = nil
 
 --[[doc--
 Auxiliary functions
@@ -157,7 +132,12 @@ local fontnames_init = function ( )
     return {
         mappings  = { },
         status    = { },
-        filenames = { }, --- (basename, fullname) hash; maybe overkill
+        --- adding filename mapping increases the
+        --- size of the serialized db on my system
+        --- (5840 font files) by a factor of ...
+        barenames = { },--- incr. by 1.11
+        basenames = { },--- incr. by 1.22
+--      fullnames = { },--- incr. by 1.48
         version   = names.version,
     }
 end
@@ -259,6 +239,55 @@ end
 local fonts_loaded   = false
 local fonts_reloaded = false
 
+local crude_file_lookup_verbose = function (data, filename)
+    local found = data.barenames[filename]
+    if found then
+        report("info", 0, "db",
+            "crude file lookup: req=%s; hit=bare; ret=%s",
+            filename, found[1])
+        return found
+    end
+--  found = data.fullnames[filename]
+--  if found then
+--      report("info", 0, "db",
+--          "crude file lookup: req=%s; hit=bare; ret=%s",
+--          filename, found[1])
+--      return found
+--  end
+    found = data.basenames[filename]
+    if found then
+        report("info", 0, "db",
+            "crude file lookup: req=%s; hit=bare; ret=%s",
+            filename, found[1])
+        return found
+    end
+    found = resolvers.findfile(filename, "tfm")
+    if found then
+        report("info", 0, "db",
+            "crude file lookup: req=tfm; hit=bare; ret=%s", found)
+        return { found, false }
+    end
+    found = resolvers.findfile(filename, "ofm")
+    if found then
+        report("info", 0, "db",
+            "crude file lookup: req=ofm; hit=bare; ret=%s", found)
+        return { found, false }
+    end
+    return false
+end
+
+local crude_file_lookup = function (data, filename)
+    local found = data.barenames[filename]
+--             or data.fullnames[filename]
+               or data.basenames[filename]
+    if found then return found end
+    found = resolvers.findfile(filename, "tfm")
+    if found then return { found, false } end
+    found = resolvers.findfile(filename, "ofm")
+    if found then return { found, false } end
+    return false
+end
+
 --[[doc--
 
 Luatex-fonts, the font-loader package luaotfload imports, comes with
@@ -285,8 +314,10 @@ font database created by the mkluatexfontdb script.
 ---   · specification: string (== <lookup> ":" <name>)
 ---   · sub:      string
 ---
---- the return value of “resolve” is the file name of the requested
---- font
+--- the first return value of “resolve” is the file name of the
+--- requested font (string)
+--- the second is of type bool or string and indicates the subfont of a
+--- ttc
 ---
 --- 'a -> 'a -> table -> (string * string | bool * bool)
 ---
@@ -296,6 +327,18 @@ font database created by the mkluatexfontdb script.
 ---
 --- 
 resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
+    if not fonts_loaded then
+        names.data   = load_names()
+        fonts_loaded = true
+    end
+    local data = names.data
+
+    if specification.lookup == "file" then
+        local found = crude_file_lookup(data, specification.name)
+        --local found = crude_file_lookup_verbose(data, specification.name)
+        if found then return found[1], found[2], true end
+    end
+
     local name  = sanitize_string(specification.name)
     local style = sanitize_string(specification.style) or "regular"
 
@@ -306,12 +349,6 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
         size = specification.size / 65536
     end
 
-    if not fonts_loaded then
-        names.data   = load_names()
-        fonts_loaded = true
-    end
-
-    local data = names.data
     if type(data) == "table" then
         local db_version, nms_version = data.version, names.version
         if data.version ~= names.version then
@@ -632,10 +669,20 @@ end
 local load_font = function (fullname, fontnames, newfontnames, texmf)
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status
+
+--  local newfullnames  = newfontnames.fullnames
+    local newbasenames  = newfontnames.basenames
+    local newbarenames  = newfontnames.barenames
+
     local mappings      = fontnames.mappings
     local status        = fontnames.status
-    local filenames     = fontnames.filenames
+--  local fullnames     = fontnames.fullnames
+    local basenames     = fontnames.basenames
+    local barenames     = fontnames.barenames
+
     local basename      = filebasename(fullname)
+    local barename      = filenameonly(fullname)
+
     --- entryname is apparently the identifier a font is
     --- loaded by; it is different for files in the texmf
     --- (due to kpse? idk.)
@@ -669,19 +716,24 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     newstatus[entryname].timestamp = timestamp
     newstatus[entryname].index     = newstatus[entryname].index or { }
 
-    if db_timestamp == timestamp and not newstatus[entryname].index[1] then
+    if  db_timestamp == timestamp
+    and not newstatus[entryname].index[1] then
         for _,v in next, status[entryname].index do
-            local index = #newstatus[entryname].index
-            newmappings[#newmappings+1]        = mappings[v]
+            local index    = #newstatus[entryname].index
+            local fullinfo = mappings[v]
+            newmappings[#newmappings+1]         = fullinfo --- keep
             newstatus[entryname].index[index+1] = #newmappings
+--          newfullnames[fullname] = fullinfo.filename
+            newbasenames[basename] = fullinfo.filename
+            newbarenames[barename] = fullinfo.filename
         end
         report("log", 2, "db", "font “%s” already indexed", entryname)
         return false
     end
-    local info = fontloaderinfo(fullname)
 
+    local info = fontloaderinfo(fullname)
     if info then
-        if type(info) == "table" and #info > 1 then
+        if type(info) == "table" and #info > 1 then --- ttc
             for i in next, info do
                 local fullinfo = font_fullinfo(fullname, i-1, texmf)
                 if not fullinfo then
@@ -693,7 +745,10 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
                 else
                     index = #newmappings+1
                 end
-                newmappings[index]           = fullinfo
+                newmappings[index]            = fullinfo
+--              newfullnames[fullname]        = fullinfo.filename
+                newbasenames[basename]        = fullinfo.filename
+                newbarenames[barename]        = fullinfo.filename
                 newstatus[entryname].index[i] = index
             end
         else
@@ -707,7 +762,10 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
             else
                 index = #newmappings+1
             end
-            newmappings[index]           = fullinfo
+            newmappings[index]            = fullinfo
+--          newfullnames[fullname]        = { fullinfo.filename[1], fullinfo.filename[2] }
+            newbasenames[basename]        = { fullinfo.filename[1], fullinfo.filename[2] }
+            newbarenames[barename]        = { fullinfo.filename[1], fullinfo.filename[2] }
             newstatus[entryname].index[1] = index
         end
 

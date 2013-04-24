@@ -111,6 +111,8 @@ local defaults = {
     },
 }
 
+local global_defaults = { mode = "node" }
+
 defaults.beng = defaults.deva
 defaults.guru = defaults.deva
 defaults.gujr = defaults.deva
@@ -129,22 +131,36 @@ defaults.tibt = defaults.khmr
 
 defaults.lao  = defaults.thai
 
-local set_default_features = function (script)
-    local features
-    local script = script or "dflt"
+--- (string, string) dict -> (string, string) dict
+local set_default_features = function (speclist)
+    local script = speclist.script or "dflt"
+
     report("log", 0, "load font",
         "auto-selecting default features for script: %s",
         script)
-    if defaults[script] then
-        features = defaults[script]
-    else
-        features = defaults["dflt"]
+
+    local requested = defaults[script]
+    if not requested then
+        report("log", 0, "load font",
+            "no defaults for script “%s”, falling back to “dflt”",
+            script)
+        requested = defaults.dflt
     end
-    for _,v in next, features do
-        if feature_list[v] ~= false then
-            feature_list[v] = true
+
+    for i=1, #requested do
+        local feat = requested[i]
+        if speclist[feat] ~= false then
+            speclist[feat] = true
         end
     end
+
+    for feat, state in next, global_defaults do
+        --- This is primarily intended for setting node
+        --- mode unless “base” is requested, as stated
+        --- in the manual.
+        if not speclist[feat] then speclist[feat] = state end
+    end
+    return speclist
 end
 
 local function issome ()    feature_list.lookup = 'name' end
@@ -177,13 +193,9 @@ local options    = P(":") * spaces * (P(";")^0  * option)^0
 local pattern    = (filename + fontname) * subvalue^0 * stylespec^0 * options^0
 
 local function colonized(specification) -- xetex mode
-    --print"~~~~~~~~~~~~~~~~~~~~~~~~"
-    --print(specification.specification)
     feature_list = { }
     lpeg.match(pattern,specification.specification)
-    set_default_features(feature_list.script)
-    --inspect(feature_list)
-    --os.exit()
+    feature_list = set_default_features(feature_list)
     if feature_list.style then
         specification.style = feature_list.style
         feature_list.style = nil
@@ -216,9 +228,7 @@ local function colonized(specification) -- xetex mode
         -- if no mode is set, use our default
         feature_list.mode = fonts.mode
     end
-    --inspect(feature_list)
     specification.features.normal = fonts.handlers.otf.features.normalize(feature_list)
-    --inspect(specification.features.normal)
     return specification
 end
 

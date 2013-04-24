@@ -193,6 +193,7 @@ local save_names
 local scan_external_dir
 local update_names
 
+--- unit -> dbobj
 load_names = function ( )
     local starttime = os.gettimeofday()
     local foundname, data = load_lua_file(names.path.path)
@@ -349,146 +350,162 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
         size = specification.size / 65536
     end
 
-    if type(data) == "table" then
-        local db_version, nms_version = data.version, names.version
-        if data.version ~= names.version then
-            report("log", 0, "db",
-                [[version mismatch; expected %4.3f, got %4.3f]],
-                nms_version, db_version
-            )
-            return reload_db(resolve, nil, nil, specification)
+    if type(data) ~= "table" then
+         --- this catches a case where load_names() doesn’t
+         --- return a database object, which can happen only
+         --- in case there is valid Lua code in the database,
+         --- but it’s not a table, e.g. it contains an integer.
+        if not fonts_reloaded then
+            return reload_db("invalid database; not a table",
+                             resolve, nil, nil, specification
+                   )
         end
-        if data.mappings then
-            local found = { }
-            local synonym_set = style_synonyms.set
-            for _,face in next, data.mappings do
-                --- TODO we really should store those in dedicated
-                --- .sanitized field
-                local family    = sanitize_string(face.names and face.names.family)
-                local subfamily = sanitize_string(face.names and face.names.subfamily)
-                local fullname  = sanitize_string(face.names and face.names.fullname)
-                local psname    = sanitize_string(face.names and face.names.psname)
-                local fontname  = sanitize_string(face.fontname)
-                local pfullname = sanitize_string(face.fullname)
-                local optsize, dsnsize, maxsize, minsize
-                if #face.size > 0 then
-                    optsize = face.size
-                    dsnsize = optsize[1] and optsize[1] / 10
-                    -- can be nil
-                    maxsize = optsize[2] and optsize[2] / 10 or dsnsize
-                    minsize = optsize[3] and optsize[3] / 10 or dsnsize
-                end
-                if name == family then
-                    if subfamily == style then
-                        if optsize then
-                            if dsnsize == size
-                            or (size > minsize and size <= maxsize) then
-                                found[1] = face
-                                break
-                            else
-                                found[#found+1] = face
-                            end
-                        else
-                            found[1] = face
-                            break
-                        end
-                    elseif synonym_set[style] and
-                           synonym_set[style][subfamily] then
-                        if optsize then
-                            if dsnsize == size
-                            or (size > minsize and size <= maxsize) then
-                                found[1] = face
-                                break
-                            else
-                                found[#found+1] = face
-                            end
-                        else
-                            found[1] = face
-                            break
-                        end
-                    elseif subfamily == "regular" or
-                           synonym_set.regular[subfamily] then
-                        found.fallback = face
+        --- unsucessfully reloaded; bail
+        return specification.name, false, false
+    end
+
+    local db_version, nms_version = data.version, names.version
+    if db_version ~= nms_version then
+        report("log", 0, "db",
+            [[version mismatch; expected %4.3f, got %4.3f]],
+            nms_version, db_version
+        )
+        return reload_db("version mismatch", resolve, nil, nil, specification)
+    end
+
+    if not data.mappings then
+        return reload_db("invalid database; missing font mapping",
+                         resolve, nil, nil, specification
+               )
+    end
+
+    local found = { }
+    local synonym_set = style_synonyms.set
+    for _,face in next, data.mappings do
+        --- TODO we really should store those in dedicated
+        --- .sanitized field
+        local family    = sanitize_string(face.names and face.names.family)
+        local subfamily = sanitize_string(face.names and face.names.subfamily)
+        local fullname  = sanitize_string(face.names and face.names.fullname)
+        local psname    = sanitize_string(face.names and face.names.psname)
+        local fontname  = sanitize_string(face.fontname)
+        local pfullname = sanitize_string(face.fullname)
+        local optsize, dsnsize, maxsize, minsize
+        if #face.size > 0 then
+            optsize = face.size
+            dsnsize = optsize[1] and optsize[1] / 10
+            -- can be nil
+            maxsize = optsize[2] and optsize[2] / 10 or dsnsize
+            minsize = optsize[3] and optsize[3] / 10 or dsnsize
+        end
+        if name == family then
+            if subfamily == style then
+                if optsize then
+                    if dsnsize == size
+                    or (size > minsize and size <= maxsize) then
+                        found[1] = face
+                        break
+                    else
+                        found[#found+1] = face
                     end
                 else
-                    if name == fullname
-                    or name == pfullname
-                    or name == fontname
-                    or name == psname then
-                        if optsize then
-                            if dsnsize == size
-                            or (size > minsize and size <= maxsize) then
-                                found[1] = face
-                                break
-                            else
-                                found[#found+1] = face
-                            end
-                        else
-                            found[1] = face
-                            break
-                        end
+                    found[1] = face
+                    break
+                end
+            elseif synonym_set[style] and
+                    synonym_set[style][subfamily] then
+                if optsize then
+                    if dsnsize == size
+                    or (size > minsize and size <= maxsize) then
+                        found[1] = face
+                        break
+                    else
+                        found[#found+1] = face
                     end
+                else
+                    found[1] = face
+                    break
                 end
+            elseif subfamily == "regular" or
+                    synonym_set.regular[subfamily] then
+                found.fallback = face
             end
-            if #found == 1 then
-                if kpselookup(found[1].filename[1]) then
-                    report("log", 0, "resolve",
-                        "font family='%s', subfamily='%s' found: %s",
-                        name, style, found[1].filename[1]
-                    )
-                    return found[1].filename[1], found[1].filename[2], true
-                end
-            elseif #found > 1 then
-                -- we found matching font(s) but not in the requested optical
-                -- sizes, so we loop through the matches to find the one with
-                -- least difference from the requested size.
-                local closest
-                local least = math.huge -- initial value is infinity
-                for i,face in next, found do
-                    local dsnsize    = face.size[1]/10
-                    local difference = mathabs(dsnsize-size)
-                    if difference < least then
-                        closest = face
-                        least   = difference
+        else
+            if name == fullname
+            or name == pfullname
+            or name == fontname
+            or name == psname then
+                if optsize then
+                    if dsnsize == size
+                    or (size > minsize and size <= maxsize) then
+                        found[1] = face
+                        break
+                    else
+                        found[#found+1] = face
                     end
+                else
+                    found[1] = face
+                    break
                 end
-                if kpselookup(closest.filename[1]) then
-                    report("log", 0, "resolve",
-                        "font family='%s', subfamily='%s' found: %s",
-                        name, style, closest.filename[1]
-                    )
-                    return closest.filename[1], closest.filename[2], true
-                end
-            elseif found.fallback then
-                return found.fallback.filename[1], found.fallback.filename[2], true
             end
-            --- no font found so far
-            if not fonts_reloaded then
-                --- last straw: try reloading the database
-                return reload_db(resolve, nil, nil, specification)
-            else
-                --- else, fallback to requested name
-                --- specification.name is empty with absolute paths, looks
-                --- like a bug in the specification parser <TODO< is it still
-                --- relevant? looks not...
-                return specification.name, false, false
-            end
-        end
-    else --- no db or outdated; reload names and retry
-        if not fonts_reloaded then
-            return reload_db(resolve, nil, nil, specification)
-        else --- unsucessfully reloaded; bail
-            return specification.name, false, false
         end
     end
+
+    if #found == 1 then
+        if kpselookup(found[1].filename[1]) then
+            report("log", 0, "resolve",
+                "font family='%s', subfamily='%s' found: %s",
+                name, style, found[1].filename[1]
+            )
+            return found[1].filename[1], found[1].filename[2], true
+        end
+    elseif #found > 1 then
+        -- we found matching font(s) but not in the requested optical
+        -- sizes, so we loop through the matches to find the one with
+        -- least difference from the requested size.
+        local closest
+        local least = math.huge -- initial value is infinity
+        for i,face in next, found do
+            local dsnsize    = face.size[1]/10
+            local difference = mathabs(dsnsize-size)
+            if difference < least then
+                closest = face
+                least   = difference
+            end
+        end
+        if kpselookup(closest.filename[1]) then
+            report("log", 0, "resolve",
+                "font family='%s', subfamily='%s' found: %s",
+                name, style, closest.filename[1]
+            )
+            return closest.filename[1], closest.filename[2], true
+        end
+    elseif found.fallback then
+        return found.fallback.filename[1], found.fallback.filename[2], true
+    end
+
+    --- no font found so far
+    if not fonts_reloaded then
+        --- last straw: try reloading the database
+        return reload_db(
+            "unresoled font name: “" .. name .. "”",
+            resolve, nil, nil, specification
+        )
+    end
+
+    --- else, fallback to requested name
+    --- specification.name is empty with absolute paths, looks
+    --- like a bug in the specification parser <TODO< is it still
+    --- relevant? looks not...
+    return specification.name, false, false
 end --- resolve()
 
 --- when reload is triggered we update the database
 --- and then re-run the caller with the arg list
 
---- ('a -> 'a) -> 'a list -> 'a
-reload_db = function (caller, ...)
-    report("log", 1, "db", "reload initiated")
+--- string -> ('a -> 'a) -> 'a list -> 'a
+reload_db = function (why, caller, ...)
+    report("log", 1, "db", "reload initiated; reason: “%s”", why)
     names.data = update_names()
     save_names(names.data)
     fonts_reloaded = true
@@ -535,67 +552,65 @@ find_closest = function (name, limit)
 
     local data = names.data
 
-    if type(data) == "table" then
-        local by_distance   = { } --- (int, string list) dict
-        local distances     = { } --- int list
-        local cached        = { } --- (string, int) dict
-        local mappings      = data.mappings
-        local n_fonts       = #mappings
+    if type(data) ~= "table" then
+        return reload_db("no database", find_closest, name)
+    end
+    local by_distance   = { } --- (int, string list) dict
+    local distances     = { } --- int list
+    local cached        = { } --- (string, int) dict
+    local mappings      = data.mappings
+    local n_fonts       = #mappings
 
-        for n = 1, n_fonts do
-            local current    = mappings[n]
-            local cnames     = current.names
-            --[[
-                This is simplistic but surpisingly fast.
-                Matching is performed against the “family” name
-                of a db record. We then store its “fullname” at
-                it edit distance.
-                We should probably do some weighting over all the
-                font name categories as well as whatever agrep
-                does.
-            --]]
-            if cnames then
-                local fullname, family = cnames.fullname, cnames.family
-                family = sanitize_string(family)
+    for n = 1, n_fonts do
+        local current    = mappings[n]
+        local cnames     = current.names
+        --[[
+            This is simplistic but surpisingly fast.
+            Matching is performed against the “family” name
+            of a db record. We then store its “fullname” at
+            it edit distance.
+            We should probably do some weighting over all the
+            font name categories as well as whatever agrep
+            does.
+        --]]
+        if cnames then
+            local fullname, family = cnames.fullname, cnames.family
+            family = sanitize_string(family)
 
-                local dist = cached[family]--- maybe already calculated
-                if not dist then
-                    dist = iterative_levenshtein(name, family)
-                    cached[family] = dist
-                end
-                local namelst = by_distance[dist]
-                if not namelst then --- first entry
-                    namelst = { fullname }
-                    distances[#distances+1] = dist
-                else --- append
-                    namelst[#namelst+1] = fullname
-                end
-                by_distance[dist] = namelst
+            local dist = cached[family]--- maybe already calculated
+            if not dist then
+                dist = iterative_levenshtein(name, family)
+                cached[family] = dist
             end
+            local namelst = by_distance[dist]
+            if not namelst then --- first entry
+                namelst = { fullname }
+                distances[#distances+1] = dist
+            else --- append
+                namelst[#namelst+1] = fullname
+            end
+            by_distance[dist] = namelst
+        end
+    end
+
+    --- print the matches according to their distance
+    local n_distances = #distances
+    if n_distances > 0 then --- got some data
+        tablesort(distances)
+        limit = mathmin(n_distances, limit)
+        report(false, 1, "query",
+                "displaying %d distance levels", limit)
+
+        for i = 1, limit do
+            local dist     = distances[i]
+            local namelst  = by_distance[dist]
+            report(false, 0, "query",
+                "distance from “" .. name .. "”: " .. dist
+                .. "\n    " .. tableconcat(namelst, "\n    ")
+            )
         end
 
-        --- print the matches according to their distance
-        local n_distances = #distances
-        if n_distances > 0 then --- got some data
-            tablesort(distances)
-            limit = mathmin(n_distances, limit)
-            report(false, 1, "query",
-                    "displaying %d distance levels", limit)
-
-            for i = 1, limit do
-                local dist     = distances[i]
-                local namelst  = by_distance[dist]
-                report(false, 0, "query",
-                    "distance from “" .. name .. "”: " .. dist
-                 .. "\n    " .. tableconcat(namelst, "\n    ")
-                )
-            end
-
-            return true
-        end
-        return false
-    else --- need reload
-        return reload_db(find_closest, name)
+        return true
     end
     return false
 end --- find_closest()

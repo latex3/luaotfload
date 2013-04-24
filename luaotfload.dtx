@@ -1328,7 +1328,7 @@ add_to_callback("find_vf_file",
 loadmodule"lib-dir.lua"   --- required by luaofload-database.lua
 loadmodule"override.lua"  --- “luat-ovr”
 
-logs.set_loglevel(2)
+logs.set_loglevel(0)
 
 %    \end{macrocode}
 % \CONTEXT does not support ofm, these lines were added in order to make it
@@ -1351,9 +1351,17 @@ loadmodule"colors.lua"     --- “font-clr”
 
 %    \end{macrocode}
 % This hack makes fonts called with file method found by fonts.names.resolve
-% instead of just trying to find them with kpse. It is necessary in case
-% of fonts that are not accessible by kpse but present in the database, a
-% quite common case under Linux.
+% instead of just trying to find them with \identifier{kpse}.
+% It is necessary in cases when font files are not reachable by
+% \identifier{kpse} but present in the database, a quite common case
+% under Linux.
+%
+% As of 2013-04-24 we have a workaround in the resolver that handles
+% \verb|file:| lookups diverted this way.
+% It requires some overhead due to additional extra data saved in the
+% names database, and might vanish entirely once the font request syntax
+% is understood.
+% Until then it is considered a kludge, like the hack below.
 %
 %    \begin{macrocode}
 

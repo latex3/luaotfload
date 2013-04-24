@@ -121,10 +121,41 @@ local sanitize_string = function (str)
     return nil
 end
 
+--[[doc--
+This is a sketch of the db:
+
+    type dbobj = {
+        mappings : fontentry list;
+        status   : filestatus;
+        version  : float;
+    }
+    and fontentry = {
+        familyname  : string;
+        filename    : (string * bool);
+        fontname    : string;
+        fullname    : string;
+        names       : {
+            family     : string;
+            fullname   : string;
+            psname     : string;
+            subfamily  : string;
+        }
+        size        : int list;
+        slant       : int;
+        weight      : int;
+        width       : int;
+    }
+    and filestatus = (fullname, { index : int list; timestamp : int }) dict
+
+beware that this is a reconstruction and may be incomplete.
+
+--doc]]--
+
 local fontnames_init = function ( )
     return {
         mappings  = { },
         status    = { },
+        filenames = { }, --- maybe overkill
         version   = names.version,
     }
 end
@@ -204,10 +235,6 @@ do
         regular    = { "normal",        "roman",
                        "plain",         "book",
                        "medium", },
-        --- TODO note from Élie Roux
-        --- boldregular was for old versions of Linux Libertine, is it still useful?
-        --- semibold is in new versions of Linux Libertine, but there is also a bold,
-        --- not sure it's useful here...
         bold       = { "demi",           "demibold",
                        "semibold",       "boldregular",},
         italic     = { "regularitalic",  "normalitalic",
@@ -741,66 +768,41 @@ for key, value in next, font_extensions do
    font_extensions_set[value] = true
 end
 
---local installed_fonts_scanned = false --- ugh
-
---- we already have scan_os_fonts don’t we?
-
---local function scan_installed_fonts(fontnames, newfontnames)
---    --- Try to query and add font list from operating system.
---    --- This uses the lualatex-platform module.
---    --- <phg>what for? why can’t we do this in Lua?</phg>
---    report("info", 0, "Scanning fonts known to operating system...")
---    local fonts = get_installed_fonts()
---    if fonts and #fonts > 0 then
---        installed_fonts_scanned = true
---        report("log", 2, "operating system fonts found", "%d", #fonts)
---        for key, value in next, fonts do
---            local file = value.path
---            if file then
---                local ext = fileextname(file)
---                if ext and font_extensions_set[ext] then
---                file = path_normalize(file)
---                    report("log", 1, "loading font", "%s", file)
---                load_font(file, fontnames, newfontnames, false)
---                end
---            end
---        end
---    else
---        report("log", 2, "Could not retrieve list of installed fonts")
---    end
---end
-
-local function scan_dir(dirname, fontnames, newfontnames, texmf)
+--- string -> dbobj -> dbobj -> bool -> int
+local scan_dir = function (dirname, fontnames, newfontnames, texmf)
     --[[
     This function scans a directory and populates the list of fonts
     with all the fonts it finds.
     - dirname is the name of the directory to scan
     - names is the font database to fill
     - texmf is a boolean saying if we are scanning a texmf directory
+
+    srsly guys, calling a variable “list” is just lazy!
     ]]
-    local list, found = { }, { }
-    local nbfound = 0
+    --- list:  string list
+    local n_found = 0   --- total of fonts collected
     report("log", 2, "db", "scanning", "%s", dirname)
     for _,i in next, font_extensions do
         for _,ext in next, { i, stringupper(i) } do
-            found = dirglob(stringformat("%s/**.%s$", dirname, ext))
-            -- note that glob fails silently on broken symlinks, which happens
-            -- sometimes in TeX Live.
+            local found = dirglob(stringformat("%s/**.%s$", dirname, ext))
+            local n_new = #found
+            --- note that glob fails silently on broken symlinks, which happens
+            --- sometimes in TeX Live.
             report("log", 2, "db",
                 "fonts found", "%s '%s' fonts found", #found, ext)
-            nbfound = nbfound + #found
-            tableappend(list, found)
+            n_found = n_found + n_new
+            for j=1, n_new do
+                local file = found[j]
+                file = path_normalize(file)
+                report("log", 1, "db", "loading font", "%s", file)
+                load_font(file, fontnames, newfontnames, texmf)
+            end
+            --tableappend(list, found)
         end
     end
     report("log", 2, "db",
-        "fonts found", "%d fonts found in '%s'", nbfound, dirname)
-
-    for _,file in next, list do
-        file = path_normalize(file)
-        report("log", 1, "db",
-            "loading font", "%s", file)
-        load_font(file, fontnames, newfontnames, texmf)
-    end
+        "fonts found", "%d fonts found in '%s'", n_found, dirname)
+    return n_found
 end
 
 local function scan_texmf_fonts(fontnames, newfontnames)
@@ -942,8 +944,6 @@ local function get_os_dirs()
     else 
         local passed_paths = {}
         local os_dirs = {}
-        -- what about ~/config/fontconfig/fonts.conf etc? 
-        -- Answer: they should be included by the others, please report if it's not
         for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
             if lfs.isfile(p) then
                 read_fonts_conf(p, os_dirs, passed_paths)
@@ -967,13 +967,16 @@ local function scan_os_fonts(fontnames, newfontnames)
     end
 end
 
+--- dbobj -> bool -> dbobj
 update_names = function (fontnames, force)
+    local starttime = os.gettimeofday()
     --[[
     The main function, scans everything
-    - fontnames is the final table to return
+    - “newfontnames” is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
-    report("info", 1, "db", "Updating the font names database")
+    report("info", 1, "db", "Updating the font names database"
+                         .. (force and " forcefully" or ""))
 
     if force then
         fontnames = fontnames_init()
@@ -998,9 +1001,15 @@ update_names = function (fontnames, force)
     then
         scan_os_fonts(fontnames, newfontnames)
     end
+    --- stats before rewrite:
+    ---         partial:  1144 ms
+    ---         forced:  45384 ms
+    report("info", 1, "db", "Rebuilt in %0.f ms",
+           1000*(os.gettimeofday()-starttime))
     return newfontnames
 end
 
+--- dbobj -> unit
 save_names = function (fontnames)
     local path  = names.path.dir
     if not lfs.isdir(path) then

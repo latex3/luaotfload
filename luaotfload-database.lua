@@ -18,6 +18,7 @@ local pcall                   = pcall
 local require                 = require
 local tonumber                = tonumber
 
+local fontloaderinfo          = fontloader.info
 local iolines                 = io.lines
 local ioopen                  = io.open
 local kpseexpand_path         = kpse.expand_path
@@ -156,7 +157,7 @@ local fontnames_init = function ( )
     return {
         mappings  = { },
         status    = { },
-        filenames = { }, --- maybe overkill
+        filenames = { }, --- (basename, fullname) hash; maybe overkill
         version   = names.version,
     }
 end
@@ -626,78 +627,95 @@ font_fullinfo = function (filename, subfont, texmf)
     return tfmdata
 end
 
------           load_font(file, fontnames, newfontnames, texmf)
-local load_font = function (filename, fontnames, newfontnames, texmf)
-    local newmappings = newfontnames.mappings
-    local newstatus   = newfontnames.status
-    local mappings    = fontnames.mappings
-    local status      = fontnames.status
-    local basename    = filebasename(filename)
-    local basefile    = texmf and basename or filename
-    if filename then
-        if names.blacklist[filename] or
-           names.blacklist[basename] then
-            report("log", 2, "db", "ignoring blacklisted font “%s”", filename)
-            return
-        end
-        local timestamp, db_timestamp
-        db_timestamp        = status[basefile] and status[basefile].timestamp
-        timestamp           = lfs.attributes(filename, "modification")
+--- we return true if the fond is new or re-indexed
+--- string -> dbobj -> dbobj -> bool -> bool
+local load_font = function (fullname, fontnames, newfontnames, texmf)
+    local newmappings   = newfontnames.mappings
+    local newstatus     = newfontnames.status
+    local mappings      = fontnames.mappings
+    local status        = fontnames.status
+    local filenames     = fontnames.filenames
+    local basename      = filebasename(fullname)
+    --- entryname is apparently the identifier a font is
+    --- loaded by; it is different for files in the texmf
+    --- (due to kpse? idk.)
+    --- entryname = texmf : true -> basename | false -> fullname
+    local entryname     = texmf and basename or fullname
 
-        local index_status = newstatus[basefile] or (not texmf and newstatus[basename])
-        if index_status and index_status.timestamp == timestamp then
-            -- already indexed this run
-            return
-        end
+    if not fullname then return false end
 
-        newstatus[basefile] = newstatus[basefile] or { }
-        newstatus[basefile].timestamp = timestamp
-        newstatus[basefile].index     = newstatus[basefile].index or { }
+    if names.blacklist[fullname]
+    or names.blacklist[basename]
+    then
+        report("log", 2, "db",
+            "ignoring blacklisted font “%s”", fullname)
+        return false
+    end
+    local timestamp, db_timestamp
+    db_timestamp        = status[entryname]
+                        and status[entryname].timestamp
+    timestamp           = lfs.attributes(fullname, "modification")
 
-        if db_timestamp == timestamp and not newstatus[basefile].index[1] then
-            for _,v in next, status[basefile].index do
-                local index = #newstatus[basefile].index
-                newmappings[#newmappings+1]        = mappings[v]
-                newstatus[basefile].index[index+1] = #newmappings
-            end
-            report("log", 2, "db", "font “%s” already indexed", basefile)
-            return
+    local index_status = newstatus[entryname]
+                        or (not texmf and newstatus[basename])
+    local teststat = newstatus[entryname]
+    --- index_status: nil | false | table
+    if index_status and index_status.timestamp == timestamp then
+        -- already indexed this run
+        return false
+    end
+
+    newstatus[entryname]           = newstatus[entryname] or { }
+    newstatus[entryname].timestamp = timestamp
+    newstatus[entryname].index     = newstatus[entryname].index or { }
+
+    if db_timestamp == timestamp and not newstatus[entryname].index[1] then
+        for _,v in next, status[entryname].index do
+            local index = #newstatus[entryname].index
+            newmappings[#newmappings+1]        = mappings[v]
+            newstatus[entryname].index[index+1] = #newmappings
         end
-        local info = fontloader.info(filename)
-        if info then
-            if type(info) == "table" and #info > 1 then
-                for i in next, info do
-                    local fullinfo = font_fullinfo(filename, i-1, texmf)
-                    if not fullinfo then
-                        return
-                    end
-                    local index = newstatus[basefile].index[i]
-                    if newstatus[basefile].index[i] then
-                        index = newstatus[basefile].index[i]
-                    else
-                        index = #newmappings+1
-                    end
-                    newmappings[index]           = fullinfo
-                    newstatus[basefile].index[i] = index
-                end
-            else
-                local fullinfo = font_fullinfo(filename, false, texmf)
+        report("log", 2, "db", "font “%s” already indexed", entryname)
+        return false
+    end
+    local info = fontloaderinfo(fullname)
+
+    if info then
+        if type(info) == "table" and #info > 1 then
+            for i in next, info do
+                local fullinfo = font_fullinfo(fullname, i-1, texmf)
                 if not fullinfo then
-                    return
+                    return false
                 end
-                local index
-                if newstatus[basefile].index[1] then
-                    index = newstatus[basefile].index[1]
+                local index = newstatus[entryname].index[i]
+                if newstatus[entryname].index[i] then
+                    index = newstatus[entryname].index[i]
                 else
                     index = #newmappings+1
                 end
                 newmappings[index]           = fullinfo
-                newstatus[basefile].index[1] = index
+                newstatus[entryname].index[i] = index
             end
         else
-            report("log", 1, "db", "failed to load “%s”", basefile)
+            local fullinfo = font_fullinfo(fullname, false, texmf)
+            if not fullinfo then
+                return false
+            end
+            local index
+            if newstatus[entryname].index[1] then
+                index = newstatus[entryname].index[1]
+            else
+                index = #newmappings+1
+            end
+            newmappings[index]           = fullinfo
+            newstatus[entryname].index[1] = index
         end
+
+    else --- missing info
+        report("log", 1, "db", "failed to load “%s”", entryname)
+        return false
     end
+    return true
 end
 
 local path_normalize
@@ -800,7 +818,7 @@ for key, value in next, font_extensions do
    font_extensions_set[value] = true
 end
 
---- string -> dbobj -> dbobj -> bool -> int
+--- string -> dbobj -> dbobj -> bool -> (int * int)
 local scan_dir = function (dirname, fontnames, newfontnames, texmf)
     --[[
     This function scans a directory and populates the list of fonts
@@ -809,29 +827,31 @@ local scan_dir = function (dirname, fontnames, newfontnames, texmf)
     - names is the font database to fill -> no such term!!!
     - texmf is a boolean saying if we are scanning a texmf directory
     ]]
-    local n_found = 0   --- total of fonts collected
+    local n_scanned, n_new = 0, 0   --- total of fonts collected
     report("log", 2, "db", "scanning", "%s", dirname)
     for _,i in next, font_extensions do
         for _,ext in next, { i, stringupper(i) } do
             local found = dirglob(stringformat("%s/**.%s$", dirname, ext))
-            local n_new = #found
+            local n_found = #found
             --- note that glob fails silently on broken symlinks, which
             --- happens sometimes in TeX Live.
-            report("log", 2, "db", "%s '%s' fonts found", n_new, ext)
-            n_found = n_found + n_new
-            for j=1, n_new do
-                local filename = found[j]
-                filename = path_normalize(filename)
-                report("log", 2, "db", "loading font “%s”", filename)
-                load_font(filename, fontnames, newfontnames, texmf)
+            report("log", 2, "db", "%s '%s' fonts found", n_found, ext)
+            n_scanned = n_scanned + n_found
+            for j=1, n_found do
+                local fullname = found[j]
+                fullname = path_normalize(fullname)
+                report("log", 2, "db", "loading font “%s”", fullname)
+                local new = load_font(fullname, fontnames, newfontnames, texmf)
+                if new then n_new = n_new + 1 end
             end
         end
     end
-    report("log", 2, "db", "%d fonts found in '%s'", n_found, dirname)
-    return n_found
+    report("log", 2, "db", "%d fonts found in '%s'", n_scanned, dirname)
+    return n_scanned, n_new
 end
 
 local function scan_texmf_fonts(fontnames, newfontnames)
+    local n_scanned, n_new = 0, 0
     --[[
     This function scans all fonts in the texmf tree, through kpathsea
     variables OPENTYPEFONTS and TTFONTS of texmf.cnf
@@ -845,9 +865,12 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
     if not stringis_empty(fontdirs) then
         for _,d in next, filesplitpath(fontdirs) do
-            scan_dir(d, fontnames, newfontnames, true)
+            local found, new = scan_dir(d, fontnames, newfontnames, true)
+            n_scanned = n_scanned + found
+            n_new     = n_new     + new
         end
     end
+    return n_scanned, n_new
 end
 
 --[[
@@ -981,6 +1004,7 @@ local function get_os_dirs()
 end
 
 local function scan_os_fonts(fontnames, newfontnames)
+    local n_scanned, n_new = 0, 0
     --[[
     This function scans the OS fonts through
       - fontcache for Unix (reads the fonts.conf file and scans the directories)
@@ -989,13 +1013,17 @@ local function scan_os_fonts(fontnames, newfontnames)
     report("info", 1, "db", "Scanning OS fonts...")
     report("info", 2, "db", "Searching in static system directories...")
     for _,d in next, get_os_dirs() do
-        scan_dir(d, fontnames, newfontnames, false)
+        local found, new = scan_dir(d, fontnames, newfontnames, false)
+        n_scanned = n_scanned + found
+        n_new     = n_new     + new
     end
+    return n_scanned, n_new
 end
 
 --- dbobj -> bool -> dbobj
 update_names = function (fontnames, force)
     local starttime = os.gettimeofday()
+    local n_scanned, n_new = 0, 0
     --[[
     The main function, scans everything
     - “newfontnames” is the final table to return
@@ -1020,19 +1048,25 @@ update_names = function (fontnames, force)
     read_blacklist()
     --installed_fonts_scanned = false
     --scan_installed_fonts(fontnames, newfontnames) --- see fixme above
-    scan_texmf_fonts(fontnames, newfontnames)
+    local scanned, new = scan_texmf_fonts(fontnames, newfontnames)
+    n_scanned = n_scanned + scanned
+    n_new     = n_new     + new
     --if  not installed_fonts_scanned
     --and stringis_empty(kpseexpand_path("$OSFONTDIR"))
     if stringis_empty(kpseexpand_path("$OSFONTDIR"))
     then
-        scan_os_fonts(fontnames, newfontnames)
+        local scanned, new = scan_os_fonts(fontnames, newfontnames)
+        n_scanned = n_scanned + scanned
+        n_new     = n_new     + new
     end
     --- stats:
     ---            before rewrite   | after rewrite
     ---   partial:         804 ms   |   701 ms
     ---   forced:        45384 ms   | 44714 ms
-    report("info", 1, "db", "Rebuilt in %0.f ms",
-           1000*(os.gettimeofday()-starttime))
+    report("info", 1, "db",
+           "Scanned %d font files; %d new entries.", n_scanned, n_new)
+    report("info", 1, "db",
+           "Rebuilt in %0.f ms", 1000*(os.gettimeofday()-starttime))
     return newfontnames
 end
 
@@ -1064,8 +1098,9 @@ scan_external_dir = function (dir)
         fonts_loaded    = true
     end
     new_names = tablecopy(old_names)
-    scan_dir(dir, old_names, new_names)
+    local n_scanned, n_new = scan_dir(dir, old_names, new_names)
     names.data = new_names
+    return n_scanned, n_new
 end
 
 --- export functionality to the namespace “fonts.names”

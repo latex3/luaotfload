@@ -5,10 +5,16 @@
 \font\second=file:antpoltltsemiexpd-bolditalic.otf at 42pt
 %% lookup font by name, with style in slash notation
 \font\third={name:Antykwa torunska/I} at 42pt
+%% unspecified lookup; in definers.read:
+%%  - first it falls back to “file”
+%%  - empty “method” field triggers fallback to “name”
+%%  - names.resolve -> kpse.lookup -> hit!
+\font\fourth=iwona at 42pt
 
 {\first   foo \endgraf}
 {\second  bar \endgraf}
 {\third   baz \endgraf}
+{\fourth  xyzzy \endgraf}
 
 \bye
 

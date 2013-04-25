@@ -154,6 +154,11 @@ function names.resolve(specification)
                     elseif subfamily == "regular" or
                            table.contains(synonyms.regular, subfamily) then
                         found.fallback = face
+                    elseif name == fullname then
+                      --- guard for Libertine Mono which has
+                      --- subtype == “mono”
+                      found[1] = face
+                      break
                     end
                 end
                 if name == fullname
@@ -505,12 +510,12 @@ end
    - if OSFONTDIR is set (which is the case under windows by default but
      not on the other OSs), it scans it at the same time as the texmf tree,
      in the scan_texmf_fonts.
-   - if not:
+   - in addition:
      - under Windows and Mac OSX, we take a look at some hardcoded directories
      - under Unix, we read /etc/fonts/fonts.conf and read the directories in it
 
   This means that if you have fonts in fancy directories, you need to set them
-  in OSFONTDIR.
+  in OSFONTDIR if they cannot be found by fontconfig.
 ]]
 
 local function read_fonts_conf(path, results, passed_paths)
@@ -649,9 +654,7 @@ local function update_names(fontnames, force)
     local newfontnames = fontnames_init()
     read_blacklist()
     scan_texmf_fonts(fontnames, newfontnames)
-    if expandpath("$OSFONTDIR"):is_empty() then
-        scan_os_fonts(fontnames, newfontnames)
-    end
+    scan_os_fonts(fontnames, newfontnames)
     return newfontnames
 end
 

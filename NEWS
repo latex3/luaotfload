@@ -1,6 +1,13 @@
 Change History
 --------------
 
+2013/04/11, luaotfload v1.29:
+    * Reverting the unified resolver, as the database was rebuilt too often
+      which made the compilation longer. This will come back improved
+      in the next version, hopefully for TeXLive 2013.
+    * Fix resolving of Libertine Mono
+    * Fix a bug that made fontconfig files not parsed when OSFONTDIR is set
+
 2013/04/11, luaotfload v1.28:
     * Adapting to LuaTeX 0.75
     * Fix small documentation issues in mkluatexfontdb

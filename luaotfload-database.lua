@@ -429,9 +429,13 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                     break
                 end
             elseif subfamily == "regular" or
-                   subfamily == "mono"    or  --> Libertine Mono O
                     synonym_set.regular[subfamily] then
                 found.fallback = face
+            elseif name == fullname then
+                --- happens with Libertine Mono which has
+                --- “mono” as subfamily
+                found[1] = face
+                break
             end
 
         else

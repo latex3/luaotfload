@@ -636,10 +636,13 @@ end
 %
 % \subsection{\context override}
 %
-%    We have a unified function for both file and name resolver.
+%    We have a unified function for both file and name resolver. This line is
+%    commented as it makes database reload too often. This means that in some
+%    cases, a font in the database will not be found if it's not in the texmf
+%    tree. A similar thing will reappear in next version.
 %
 %    \begin{macrocode}
-fonts.define.resolvers.file = fonts.define.resolvers.name
+--fonts.define.resolvers.file = fonts.define.resolvers.name
 %    \end{macrocode}
 %
 %    Overriding some defaults set in \context code.

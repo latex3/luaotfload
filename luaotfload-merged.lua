@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/24/13 13:39:43
+-- merge date  : 04/25/13 18:50:39
 
 do -- begin closure to overcome local limits and interference
 
@@ -7412,6 +7412,7 @@ nodes.injections=nodes.injections or {}
 local injections=nodes.injections
 local nodecodes=nodes.nodecodes
 local glyph_code=nodecodes.glyph
+local kern_code=nodecodes.kern
 local nodepool=nodes.pool
 local newkern=nodepool.kern
 local traverse_id=node.traverse_id
@@ -7505,7 +7506,7 @@ local function trace(head)
       local cb=n[a_cursbase]
       local cc=n[a_curscurs]
       local char=n.char
-      report_injections("font %s, char %U, glyph %c",char,n.font,char)
+      report_injections("font %s, char %U, glyph %c",n.font,char,char)
       if kp then
         local k=kerns[kp]
         if k[3] then
@@ -7541,6 +7542,24 @@ local function trace(head)
     end
   end
   report_injections("end run")
+end
+local function show_result(head)
+  local current=head
+  local skipping=false
+  while current do
+    local id=current.id
+    if id==glyph_code then
+      report_injections("char: %C, width %p, xoffset %p, yoffset %p",current.char,current.width,current.xoffset,current.yoffset)
+      skipping=false
+    elseif id==kern_code then
+      report_injections("kern: %p",current.kern)
+      skipping=false
+    elseif not skipping then
+      report_injections()
+      skipping=true
+    end
+    current=current.next
+  end
 end
 function injections.handler(head,where,keep)
   local has_marks,has_cursives,has_kerns=next(marks),next(cursives),next(kerns)
@@ -7680,17 +7699,26 @@ function injections.handler(head,where,keep)
                 local d=mrks[index]
                 if d then
                   local rlmode=d[3]
-                  if rlmode and rlmode>=0 then
-                    local k=wx[p]
-                    if k then
-                      n.xoffset=p.xoffset-p.width+d[1]-k[2] 
+                  local k=wx[p]
+                  if k then
+                    local x=k[2]
+                    local w=k[4]
+                    if w then
+                      if rlmode and rlmode>=0 then
+                        n.xoffset=p.xoffset-p.width+d[1]-x
+                      else
+                        n.xoffset=p.xoffset-d[1]-x
+                      end
                     else
-                      n.xoffset=p.xoffset-p.width+d[1] 
+                      if rlmode and rlmode>=0 then
+                        n.xoffset=p.xoffset-p.width+d[1]
+                      else
+                        n.xoffset=p.xoffset-d[1]-x 
+                      end
                     end
                   else
-                    local k=wx[p]
-                    if k then
-                      n.xoffset=p.xoffset-d[1]-k[2]
+                    if rlmode and rlmode>=0 then
+                      n.xoffset=p.xoffset-p.width+d[1]
                     else
                       n.xoffset=p.xoffset-d[1]
                     end
@@ -7723,21 +7751,21 @@ function injections.handler(head,where,keep)
             local wx=w-x
             if rl<0 then	
               if wx~=0 then
-                insert_node_before(head,n,newkern(wx))
+                insert_node_before(head,n,newkern(wx)) 
               end
               if x~=0 then
-                insert_node_after (head,n,newkern(x))
+                insert_node_after (head,n,newkern(x)) 
               end
             else
               if x~=0 then
-                insert_node_before(head,n,newkern(x))
+                insert_node_before(head,n,newkern(x)) 
               end
               if wx~=0 then
-                insert_node_after(head,n,newkern(wx))
+                insert_node_after (head,n,newkern(wx)) 
               end
             end
           elseif x~=0 then
-            insert_node_before(head,n,newkern(x))
+            insert_node_before(head,n,newkern(x)) 
           end
         end
       end
@@ -7746,9 +7774,9 @@ function injections.handler(head,where,keep)
           if k~=0 then
             local rln=rl[n]
             if rln and rln<0 then
-              insert_node_before(head,n,newkern(-k))
+              insert_node_before(head,n,newkern(-k)) 
             else
-              insert_node_before(head,n,newkern(k))
+              insert_node_before(head,n,newkern(k)) 
             end
           end
         end

@@ -154,27 +154,23 @@ function names.resolve(specification)
                     elseif subfamily == "regular" or
                            table.contains(synonyms.regular, subfamily) then
                         found.fallback = face
-                    elseif name = fullname then
-                        found[1] = face
-                        break
                     end
-                else
-                    if name == fullname
-                    or name == pfullname
-                    or name == fontname
-                    or name == psname then
-                        if optsize then
-                            if dsnsize == size
-                            or (size > minsize and size <= maxsize) then
-                                found[1] = face
-                                break
-                            else
-                                found[#found+1] = face
-                            end
-                        else
+                end
+                if name == fullname
+                or name == pfullname
+                or name == fontname
+                or name == psname then
+                    if optsize then
+                        if dsnsize == size
+                        or (size > minsize and size <= maxsize) then
                             found[1] = face
                             break
+                        else
+                            found[#found+1] = face
                         end
+                    else
+                        found[1] = face
+                        break
                     end
                 end
             end

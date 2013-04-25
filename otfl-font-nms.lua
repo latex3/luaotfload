@@ -154,6 +154,9 @@ function names.resolve(specification)
                     elseif subfamily == "regular" or
                            table.contains(synonyms.regular, subfamily) then
                         found.fallback = face
+                    elseif name = fullname then
+                        found[1] = face
+                        break
                     end
                 else
                     if name == fullname
@@ -357,9 +360,7 @@ local function load_font(filename, fontnames, newfontnames, texmf)
                         return
                     end
                     local index = newstatus[basefile].index[i]
-                    if newstatus[basefile].index[i] then
-                        index = newstatus[basefile].index[i]
-                    else
+                    if not index then
                         index = #newmappings+1
                     end
                     newmappings[index]           = fullinfo

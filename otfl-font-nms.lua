@@ -154,11 +154,6 @@ function names.resolve(specification)
                     elseif subfamily == "regular" or
                            table.contains(synonyms.regular, subfamily) then
                         found.fallback = face
-                    elseif name == fullname then
-                      --- guard for Libertine Mono which has
-                      --- subtype == “mono”
-                      found[1] = face
-                      break
                     end
                 end
                 if name == fullname

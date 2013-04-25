@@ -398,6 +398,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             maxsize = optsize[2] and optsize[2] / 10 or dsnsize
             minsize = optsize[3] and optsize[3] / 10 or dsnsize
         end
+
         if name == family then
             if subfamily == style then
                 if optsize then
@@ -413,7 +414,8 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                     break
                 end
             elseif synonym_set[style] and
-                    synonym_set[style][subfamily] then
+                   synonym_set[style][subfamily]
+            then
                 if optsize then
                     if dsnsize == size
                     or (size > minsize and size <= maxsize) then
@@ -427,9 +429,11 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                     break
                 end
             elseif subfamily == "regular" or
+                   subfamily == "mono"    or  --> Libertine Mono O
                     synonym_set.regular[subfamily] then
                 found.fallback = face
             end
+
         else
             if name == fullname
             or name == pfullname

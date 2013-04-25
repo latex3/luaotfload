@@ -66,7 +66,7 @@ fonts.names          = fonts.names or { }
 
 local names          = fonts.names
 
-names.version        = 2.2
+names.version        = 2.201
 names.data           = nil
 names.path           = {
     basename = "luaotfload-names.lua",
@@ -99,12 +99,15 @@ local sanitize_string = function (str)
 end
 
 --[[doc--
-This is a sketch of the db:
+This is a sketch of the luaotfload db:
 
     type dbobj = {
-        mappings : fontentry list;
-        status   : filestatus;
-        version  : float;
+        mappings  : fontentry list;
+        status    : filestatus;
+        version   : float;
+        // preliminary additions of v2.2:
+        basenames : (string, int) hash;    // where int is the index in mappings
+        barenames : (string, int) hash;    // where int is the index in mappings
     }
     and fontentry = {
         familyname  : string;
@@ -126,6 +129,40 @@ This is a sketch of the db:
 
 beware that this is a reconstruction and may be incomplete.
 
+mtx-fonts has in names.tma:
+
+    type names = {
+        cache_uuid    : uuid;
+        cache_version : float;
+        datastate     : uuid list;
+        fallbacks     : (filetype, (basename, int) hash) hash;
+        families      : (basename, int list) hash;
+        files         : (filename, fullname) hash;
+        indices       : (fullname, int) hash;
+        mappings      : (filetype, (basename, int) hash) hash;
+        names         : ? (empty hash) ?;
+        rejected      : (basename, int) hash;
+        specifications: fontentry list;
+    }
+    and fontentry = {
+        designsize    : int;
+        familyname    : string;
+        filename      : string;
+        fontname      : string;
+        format        : string;
+        fullname      : string;
+        maxsize       : int;
+        minsize       : int;
+        modification  : int;
+        rawname       : string;
+        style         : string;
+        subfamily     : string;
+        variant       : string;
+        weight        : string;
+        width         : string;
+    }
+
+
 --doc]]--
 
 local fontnames_init = function ( )
@@ -134,10 +171,12 @@ local fontnames_init = function ( )
         status    = { },
         --- adding filename mapping increases the
         --- size of the serialized db on my system
-        --- (5840 font files) by a factor of ...
-        barenames = { },--- incr. by 1.11
-        basenames = { },--- incr. by 1.22
---      fullnames = { },--- incr. by 1.48
+        --- (5840 font files) by a factor of 1.09
+        --- if we store only the indices in the
+        --- mappings table
+        barenames = { },
+        basenames = { },
+--      fullnames = { },
         version   = names.version,
     }
 end
@@ -240,28 +279,38 @@ end
 local fonts_loaded   = false
 local fonts_reloaded = false
 
+--- chain: barenames -> [fullnames ->] basenames -> findfile
 local crude_file_lookup_verbose = function (data, filename)
-    local found = data.barenames[filename]
-    if found then
+    local mappings = data.mappings
+    local found
+
+    --- look up in db first ...
+    found = data.barenames[filename]
+    if found and mappings[found] then
+        found = mappings[found].filename
         report("info", 0, "db",
             "crude file lookup: req=%s; hit=bare; ret=%s",
             filename, found[1])
         return found
     end
 --  found = data.fullnames[filename]
---  if found then
---      report("info", 0, "db",
+--  if found and mappings[found] then
+--      found = mappings[found].filename[1]
 --          "crude file lookup: req=%s; hit=bare; ret=%s",
 --          filename, found[1])
 --      return found
 --  end
     found = data.basenames[filename]
-    if found then
+    if found and mappings[found] then
+        found = mappings[found].filename
         report("info", 0, "db",
             "crude file lookup: req=%s; hit=bare; ret=%s",
             filename, found[1])
         return found
     end
+
+    --- now look for tfm et al.; will be superseded by proper
+    --- format lookup
     found = resolvers.findfile(filename, "tfm")
     if found then
         report("info", 0, "db",
@@ -281,7 +330,10 @@ local crude_file_lookup = function (data, filename)
     local found = data.barenames[filename]
 --             or data.fullnames[filename]
                or data.basenames[filename]
-    if found then return found end
+    if found then
+        found = data.mappings[found]
+        if found then return found.filename end
+    end
     found = resolvers.findfile(filename, "tfm")
     if found then return { found, false } end
     found = resolvers.findfile(filename, "ofm")
@@ -742,13 +794,14 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     if  db_timestamp == timestamp
     and not newstatus[entryname].index[1] then
         for _,v in next, status[entryname].index do
-            local index    = #newstatus[entryname].index
-            local fullinfo = mappings[v]
-            newmappings[#newmappings+1]         = fullinfo --- keep
-            newstatus[entryname].index[index+1] = #newmappings
---          newfullnames[fullname] = fullinfo.filename
-            newbasenames[basename] = fullinfo.filename
-            newbarenames[barename] = fullinfo.filename
+            local index      = #newstatus[entryname].index
+            local fullinfo   = mappings[v]
+            local location   = #newmappings + 1
+            newmappings[location]               = fullinfo --- keep
+            newstatus[entryname].index[index+1] = location --- is this actually used anywhere?
+--          newfullnames[fullname]              = location
+            newbasenames[basename]              = location
+            newbarenames[barename]              = location
         end
         report("log", 2, "db", "font “%s” already indexed", entryname)
         return false
@@ -757,38 +810,34 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     local info = fontloaderinfo(fullname)
     if info then
         if type(info) == "table" and #info > 1 then --- ttc
-            for i in next, info do
-                local fullinfo = font_fullinfo(fullname, i-1, texmf)
+            for n_font = 1, #info do
+                local fullinfo = font_fullinfo(fullname, n_font-1, texmf)
                 if not fullinfo then
                     return false
                 end
-                local index = newstatus[entryname].index[i]
-                if newstatus[entryname].index[i] then
-                    index = newstatus[entryname].index[i]
-                else
-                    index = #newmappings+1
-                end
-                newmappings[index]            = fullinfo
---              newfullnames[fullname]        = fullinfo.filename
-                newbasenames[basename]        = fullinfo.filename
-                newbarenames[barename]        = fullinfo.filename
-                newstatus[entryname].index[i] = index
+                local location = #newmappings+1
+                local index    = newstatus[entryname].index[n_font]
+                if not index then index = location end
+
+                newmappings[index]                  = fullinfo
+--              newfullnames[fullname]              = location
+                newbasenames[basename]              = location
+                newbarenames[barename]              = location
+                newstatus[entryname].index[n_font]  = index
             end
         else
             local fullinfo = font_fullinfo(fullname, false, texmf)
             if not fullinfo then
                 return false
             end
-            local index
-            if newstatus[entryname].index[1] then
-                index = newstatus[entryname].index[1]
-            else
-                index = #newmappings+1
-            end
+            local location  = #newmappings+1
+            local index     = newstatus[entryname].index[1]
+            if not index then index = location end
+
             newmappings[index]            = fullinfo
---          newfullnames[fullname]        = { fullinfo.filename[1], fullinfo.filename[2] }
-            newbasenames[basename]        = { fullinfo.filename[1], fullinfo.filename[2] }
-            newbarenames[barename]        = { fullinfo.filename[1], fullinfo.filename[2] }
+--          newfullnames[fullname]        = location
+            newbasenames[basename]        = location
+            newbarenames[barename]        = location
             newstatus[entryname].index[1] = index
         end
 

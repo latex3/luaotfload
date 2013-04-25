@@ -201,10 +201,10 @@ load_names = function ( )
     if data then
         report("info", 1, "db",
             "Font names database loaded", "%s", foundname)
-        report("info", 1, "db", "Loading took %0.f ms",
+        report("info", 3, "db", "Loading took %0.f ms",
                                 1000*(os.gettimeofday()-starttime))
     else
-        report("info", 0, "db",
+        report("info", 1, "db",
             [[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
         data = update_names(fontnames_init())
@@ -938,9 +938,9 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     variables OPENTYPEFONTS and TTFONTS of texmf.cnf
     ]]
     if stringis_empty(kpseexpand_path("$OSFONTDIR")) then
-        report("info", 1, "db", "Scanning TEXMF fonts...")
+        report("info", 2, "db", "Scanning TEXMF fonts...")
     else
-        report("info", 1, "db", "Scanning TEXMF and OS fonts...")
+        report("info", 2, "db", "Scanning TEXMF and OS fonts...")
     end
     local fontdirs = stringgsub(kpseexpand_path("$OPENTYPEFONTS"), "^%.", "")
     fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
@@ -1091,8 +1091,8 @@ local function scan_os_fonts(fontnames, newfontnames)
       - fontcache for Unix (reads the fonts.conf file and scans the directories)
       - a static set of directories for Windows and MacOSX
     ]]
-    report("info", 1, "db", "Scanning OS fonts...")
-    report("info", 2, "db", "Searching in static system directories...")
+    report("info", 2, "db", "Scanning OS fonts...")
+    report("info", 3, "db", "Searching in static system directories...")
     for _,d in next, get_os_dirs() do
         local found, new = scan_dir(d, fontnames, newfontnames, false)
         n_scanned = n_scanned + found
@@ -1110,7 +1110,7 @@ update_names = function (fontnames, force)
     - “newfontnames” is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
-    report("info", 1, "db", "Updating the font names database"
+    report("info", 2, "db", "Updating the font names database"
                          .. (force and " forcefully" or ""))
 
     if force then
@@ -1144,9 +1144,9 @@ update_names = function (fontnames, force)
     ---            before rewrite   | after rewrite
     ---   partial:         804 ms   |   701 ms
     ---   forced:        45384 ms   | 44714 ms
-    report("info", 1, "db",
+    report("info", 3, "db",
            "Scanned %d font files; %d new entries.", n_scanned, n_new)
-    report("info", 1, "db",
+    report("info", 3, "db",
            "Rebuilt in %0.f ms", 1000*(os.gettimeofday()-starttime))
     return newfontnames
 end

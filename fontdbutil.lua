@@ -119,6 +119,8 @@ This tool is part of the luaotfload package. Valid options are:
   -V --version                 print version and exit
   -h --help                    print this message
 
+  --alias=<name>               force behavior of “fontdbutil” or legacy
+                               “mkluatexfontdb”
 -------------------------------------------------------------------------------
                                    DATABASE
 
@@ -152,6 +154,8 @@ Valid options:
   -vvv                         print all steps of directory searching
   -V --version                 print version and exit
   -h --help                    print this message
+  --alias=<name>               force behavior of “fontdbutil” or legacy
+                               “mkluatexfontdb”
 
 The font database will be saved to
    %s
@@ -187,10 +191,10 @@ local show_font_info = function (filename)
         local fontinfo = fontloader.info(fullname)
         local nfonts   = #fontinfo
         if nfonts > 0 then -- true type collection
-            logs.names_report(true, 0, "resolve",
+            logs.names_report(true, 1, "resolve",
                 [[%s is a font collection]], filename)
             for n = 1, nfonts do
-                logs.names_report(true, 0, "resolve",
+                logs.names_report(true, 1, "resolve",
                     [[showing info for font no. %d]], n)
                 show_info_items(fontinfo[n])
             end
@@ -198,7 +202,7 @@ local show_font_info = function (filename)
             show_info_items(fontinfo)
         end
     else
-        logs.names_report(true, 0, "resolve",
+        logs.names_report(true, 1, "resolve",
             "font %s not found", filename)
     end
 end
@@ -221,7 +225,7 @@ local actions = { } --- (jobspec -> (bool * bool)) list
 
 actions.loglevel = function (job)
     logs.set_loglevel(job.log_level)
-    logs.names_report("log", 2, "util",
+    logs.names_report("info", 3, "util",
                       "setting log level", "%d", job.log_level)
     return true, true
 end
@@ -239,7 +243,7 @@ end
 actions.generate = function (job)
     local fontnames, savedname
     fontnames = names.update(fontnames, job.force_reload)
-    logs.names_report("log", 0, "db",
+    logs.names_report("info", 2, "db",
         "Fonts in the database: %i", #fontnames.mappings)
     savedname = names.save(fontnames)
     if savedname then --- FIXME have names.save return bool
@@ -262,18 +266,18 @@ actions.query = function (job)
         fonts.names.resolve(nil, nil, tmpspec)
 
     if success then
-        logs.names_report(false, 0,
+        logs.names_report(false, 1,
             "resolve", "Font “%s” found!", query)
-        logs.names_report(false, 0,
+        logs.names_report(false, 1,
             "resolve", "Resolved file name “%s”:", foundname)
         if job.show_info then
             show_font_info(foundname)
         end
     else
-        logs.names_report(false, 0,
+        logs.names_report(false, 1,
             "resolve", "Cannot find “%s”.", query)
         if job.fuzzy == true then
-            logs.names_report(false, 2,
+            logs.names_report(false, 1,
                 "resolve", "Looking for close matches, this may take a while ...")
             local success = fonts.names.find_closest(query, job.fuzzy_limit)
         end
@@ -295,14 +299,11 @@ local process_cmdline = function ( ) -- unit -> jobspec
     local result = { -- jobspec
         force_reload = nil,
         query        = "",
-        log_level    = 1,
+        log_level    = 1, --- 2 is approx. the old behavior
     }
 
-    if config.luaotfload.self == "mkluatexfontdb" then
-        action_pending["generate"] = true
-    end
-
     local long_options = {
+        alias            = 1,
         find             = 1,
         force            = "f",
         fuzzy            = "F",
@@ -363,7 +364,16 @@ local process_cmdline = function ( ) -- unit -> jobspec
             end
         elseif v == "i" then
             result.show_info = true
+        elseif v == "alias" then
+            config.luaotfload.self = optarg[n]
         end
+    end
+
+    if config.luaotfload.self == "mkluatexfontdb" then
+        action_pending["generate"] = true
+        print(result.log_level)
+        result.log_level = math.max(2, result.log_level)
+        print(result.log_level)
     end
     return result
 end

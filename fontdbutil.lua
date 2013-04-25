@@ -269,7 +269,7 @@ actions.query = function (job)
         logs.names_report(false, 1,
             "resolve", "Font “%s” found!", query)
         logs.names_report(false, 1,
-            "resolve", "Resolved file name “%s”:", foundname)
+            "resolve", "Resolved file name “%s”", foundname)
         if job.show_info then
             show_font_info(foundname)
         end

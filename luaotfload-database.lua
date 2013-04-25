@@ -1188,19 +1188,16 @@ update_names = function (fontnames, force)
     end
     local newfontnames = fontnames_init()
     read_blacklist()
-    --installed_fonts_scanned = false
-    --scan_installed_fonts(fontnames, newfontnames) --- see fixme above
-    local scanned, new = scan_texmf_fonts(fontnames, newfontnames)
+
+    local scanned, new
+    scanned, new = scan_texmf_fonts(fontnames, newfontnames)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
-    --if  not installed_fonts_scanned
-    --and stringis_empty(kpseexpand_path("$OSFONTDIR"))
-    if stringis_empty(kpseexpand_path("$OSFONTDIR"))
-    then
-        local scanned, new = scan_os_fonts(fontnames, newfontnames)
-        n_scanned = n_scanned + scanned
-        n_new     = n_new     + new
-    end
+
+    scanned, new = scan_os_fonts(fontnames, newfontnames)
+    n_scanned = n_scanned + scanned
+    n_new     = n_new     + new
+
     --- stats:
     ---            before rewrite   | after rewrite
     ---   partial:         804 ms   |   701 ms

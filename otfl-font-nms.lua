@@ -371,10 +371,8 @@ local function load_font(filename, fontnames, newfontnames, texmf)
                 if not fullinfo then
                     return
                 end
-                local index
-                if newstatus[basefile].index[1] then
-                    index = newstatus[basefile].index[1]
-                else
+                local index = newstatus[basefile].index[1]
+                if not index then
                     index = #newmappings+1
                 end
                 newmappings[index]           = fullinfo

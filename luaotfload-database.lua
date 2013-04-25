@@ -436,12 +436,18 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     for _,face in next, data.mappings do
         --- TODO we really should store those in dedicated
         --- .sanitized field
-        local family    = sanitize_string(face.names and face.names.family)
-        local subfamily = sanitize_string(face.names and face.names.subfamily)
-        local fullname  = sanitize_string(face.names and face.names.fullname)
-        local psname    = sanitize_string(face.names and face.names.psname)
-        local fontname  = sanitize_string(face.fontname)
-        local pfullname = sanitize_string(face.fullname)
+        local family, subfamily, fullname, psname, fontname, pfullname
+
+        local facenames = face.sanitized
+        if facenames then
+            family      = facenames.family
+            subfamily   = facenames.subfamily
+            fullname    = facenames.fullname
+            psname      = facenames.psname
+        end
+        fontname  = facenames.fontname  or sanitize_string(face.fontname)
+        pfullname = facenames.pfullname or sanitize_string(face.fullname)
+
         local optsize, dsnsize, maxsize, minsize
         if #face.size > 0 then
             optsize = face.size
@@ -483,30 +489,24 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             elseif subfamily == "regular" or
                     synonym_set.regular[subfamily] then
                 found.fallback = face
-            elseif name == fullname then
-                --- happens with Libertine Mono which has
-                --- “mono” as subfamily
-                found[1] = face
-                break
             end
+        end
 
-        else
-            if name == fullname
-            or name == pfullname
-            or name == fontname
-            or name == psname then
-                if optsize then
-                    if dsnsize == size
-                    or (size > minsize and size <= maxsize) then
-                        found[1] = face
-                        break
-                    else
-                        found[#found+1] = face
-                    end
-                else
+        if name == fullname
+        or name == pfullname
+        or name == fontname
+        or name == psname then
+            if optsize then
+                if dsnsize == size
+                or (size > minsize and size <= maxsize) then
                     found[1] = face
                     break
+                else
+                    found[#found+1] = face
                 end
+            else
+                found[1] = face
+                break
             end
         end
     end
@@ -623,7 +623,7 @@ find_closest = function (name, limit)
 
     for n = 1, n_fonts do
         local current    = mappings[n]
-        local cnames     = current.names
+        local cnames     = current.sanitized
         --[[
             This is simplistic but surpisingly fast.
             Matching is performed against the “family” name
@@ -675,6 +675,14 @@ find_closest = function (name, limit)
     return false
 end --- find_closest()
 
+local sanitize_names = function (names)
+    local res = { }
+    for idx, name in next, names do
+        res[idx] = sanitize_string(name)
+    end
+    return res
+end
+
 --[[doc--
 The data inside an Opentype font file can be quite heterogeneous.
 Thus in order to get the relevant information, parts of the original
@@ -701,18 +709,22 @@ font_fullinfo = function (filename, subfont, texmf)
     if metadata.names then
         for _, namedata in next, metadata.names do
             if namedata.lang == "English (US)" then
-                tfmdata.names = {
+                local names = {
                     --- see
                     --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
-                    fullname = namedata.names.compatfull
-                            or namedata.names.fullname,
-                    family   = namedata.names.preffamilyname
-                            or namedata.names.family,
-                    subfamily= tfmdata.fontstyle_name
-                            or namedata.names.prefmodifiers
-                            or namedata.names.subfamily,
-                    psname   = namedata.names.postscriptname
+                    fullname  = namedata.names.compatfull
+                             or namedata.names.fullname,
+                    family    = namedata.names.preffamilyname
+                             or namedata.names.family,
+                    subfamily = tfmdata.fontstyle_name
+                             or namedata.names.prefmodifiers
+                             or namedata.names.subfamily,
+                    psname    = namedata.names.postscriptname,
+                    pfullname = metadata.fullname,
+                    fontname  = metadata.fontname,
                 }
+                tfmdata.names     = names
+                tfmdata.sanitized = sanitize_names(names)
             end
         end
     else

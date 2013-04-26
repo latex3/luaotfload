@@ -1288,11 +1288,11 @@ local function scan_os_fonts(fontnames, newfontnames)
     return n_scanned, n_new
 end
 
-flush_cache = function (fontnames)
-    if not fontnames then fontnames = load_names() end
-    fontnames.request_cache = { }
+flush_cache = function ()
+    if not names.data then names.data = load_names() end
+    names.data.request_cache = { }
     collectgarbage"collect"
-    return true, fontnames
+    return true, names.data
 end
 
 --- dbobj -> bool -> dbobj
@@ -1352,8 +1352,8 @@ save_names = function (fontnames)
     if fileiswritable(path) then
         local luaname, lucname = make_name(names.path.path)
         if luaname then
-            --tabletofile(luaname, data, true, { reduce=true })
-            table.tofile(luaname, fontnames, true)
+            --tabletofile(luaname, fontnames, true, { reduce=true })
+            tabletofile(luaname, fontnames, true)
             if lucname and type(caches.compile) == "function" then
                 os.remove(lucname)
                 caches.compile(fontnames, luaname, lucname)

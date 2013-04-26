@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/25/13 18:50:39
+-- merge date  : 04/26/13 15:13:48
 
 do -- begin closure to overcome local limits and interference
 
@@ -7705,7 +7705,7 @@ function injections.handler(head,where,keep)
                     local w=k[4]
                     if w then
                       if rlmode and rlmode>=0 then
-                        n.xoffset=p.xoffset-p.width+d[1]-x
+                        n.xoffset=p.xoffset-p.width+d[1]-(w-x)
                       else
                         n.xoffset=p.xoffset-d[1]-x
                       end
@@ -7745,7 +7745,8 @@ function injections.handler(head,where,keep)
       end
       if next(wx) then
         for n,k in next,wx do
-          local x,w=k[2] or 0,k[4]
+          local x=k[2]
+          local w=k[4]
           if w then
             local rl=k[1] 
             local wx=w-x

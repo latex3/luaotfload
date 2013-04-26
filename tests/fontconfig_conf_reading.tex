@@ -1,6 +1,9 @@
 \directlua{
 require("lualibs")
 require("otfl-font-nms.lua")
-texio.write_nl(table.serialize(fonts.names.read_fonts_conf("fonts.conf.test", {})))
+local res = fonts.names.read_fonts_conf("fonts.conf.test", {}, {})
+if res then
+  texio.write_nl(table.serialize(res))
+end
 }
 \bye

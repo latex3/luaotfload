@@ -163,7 +163,7 @@ local set_default_features = function (speclist)
     return speclist
 end
 
-local function issome ()    feature_list.lookup = 'name' end
+local function issome ()    feature_list.lookup = 'file' end
 local function isfile ()    feature_list.lookup = 'file' end
 local function isname ()    feature_list.lookup = 'name' end
 local function thename(s)   feature_list.name   = s end
@@ -180,7 +180,8 @@ local spaces     = P(" ")^0
 local namespec   = (1-S("/:("))^1
 local filespec   = (R("az", "AZ") * P(":"))^-1 * (1-S(":("))^1
 local stylespec  = spaces * P("/") * (((1-P(":"))^0)/isstyle) * spaces
-local filename   = (P("file:")/isfile * (filespec/thename)) + (P("[") * P(true)/isname * (((1-P("]"))^0)/thename) * P("]"))
+local filename   = (P("file:")/isfile * (filespec/thename))
+                 + (P("[") * P(true)/isname * (((1-P("]"))^0)/thename) * P("]"))
 local fontname   = (P("name:")/isname * (namespec/thename)) + P(true)/issome * (namespec/thename)
 local sometext   = (R("az","AZ","09") + S("+-.,"))^1
 local truevalue  = P("+") * spaces * (sometext/istrue)
@@ -216,10 +217,12 @@ local function colonized(specification) -- xetex mode
         specification.name = feature_list.name
         feature_list.name = nil
     end
-    if feature_list.lookup then
-        specification.lookup = feature_list.lookup
-        feature_list.lookup = nil
-    end
+    --- this test overwrites valid file: requests for xetex bracket
+    --- syntax
+--    if feature_list.lookup then
+--        specification.lookup = feature_list.lookup
+--        feature_list.lookup = nil
+--    end
     if feature_list.sub then
         specification.sub = feature_list.sub
         feature_list.sub = nil
@@ -229,6 +232,8 @@ local function colonized(specification) -- xetex mode
         feature_list.mode = fonts.mode
     end
     specification.features.normal = fonts.handlers.otf.features.normalize(feature_list)
+    --inspect(specification)
+    --os.exit()
     return specification
 end
 

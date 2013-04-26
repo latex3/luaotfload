@@ -230,6 +230,8 @@ local load_lua_file = function (path)
 end
 
 --- define locals in scope
+local crude_file_lookup
+local crude_file_lookup_verbose
 local find_closest
 local flush_cache
 local font_fullinfo
@@ -290,8 +292,12 @@ do
 end
 
 --- chain: barenames -> [fullnames ->] basenames -> findfile
-local crude_file_lookup_verbose = function (data, filename)
-    local mappings = data.mappings
+
+--- string -> (string * bool | int)
+crude_file_lookup_verbose = function (filename)
+    if not names.data then names.data = names_reload() end
+    local data      = names.data
+    local mappings  = data.mappings
     local found
 
     --- look up in db first ...
@@ -336,7 +342,11 @@ local crude_file_lookup_verbose = function (data, filename)
     return false
 end
 
-local crude_file_lookup = function (data, filename)
+--- string -> (string * bool | int)
+crude_file_lookup = function (filename)
+    if not names.data then names.data = names_reload() end
+    local data      = names.data
+    local mappings  = data.mappings
     local found = data.barenames[filename]
 --             or data.fullnames[filename]
                or data.basenames[filename]
@@ -470,6 +480,7 @@ local resolvers = {
 
 fonts.definers.resolve = resolvers[config.luaotfload.resolver]
 --fonts.definers.resolve = resolvers.cached
+fonts.definers.resolve = resolvers.dummy
 
 --[[doc--
 
@@ -512,12 +523,6 @@ font database created by the mkluatexfontdb script.
 resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
     if not fonts_loaded then names.data = load_names() end
     local data = names.data
-
-    if specification.lookup == "file" then
-        local found = crude_file_lookup(data, specification.name)
-        --local found = crude_file_lookup_verbose(data, specification.name)
-        if found then return found[1], found[2], true end
-    end
 
     local name  = sanitize_string(specification.name)
     local style = sanitize_string(specification.style) or "regular"
@@ -1380,11 +1385,13 @@ scan_external_dir = function (dir)
 end
 
 --- export functionality to the namespace “fonts.names”
-names.flush_cache   = flush_cache
-names.load          = load_names
-names.save          = save_names
-names.scan          = scan_external_dir
-names.update        = update_names
+names.flush_cache                 = flush_cache
+names.load                        = load_names
+names.save                        = save_names
+names.scan                        = scan_external_dir
+names.update                      = update_names
+names.crude_file_lookup           = crude_file_lookup
+names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 
 names.resolve      = resolve --- replace the resolver from luatex-fonts
 names.resolvespec  = resolve

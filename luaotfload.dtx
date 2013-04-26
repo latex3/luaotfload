@@ -1328,7 +1328,7 @@ add_to_callback("find_vf_file",
 loadmodule"lib-dir.lua"   --- required by luaofload-database.lua
 loadmodule"override.lua"  --- “luat-ovr”
 
-logs.set_loglevel(0)
+logs.set_loglevel(config.luaotfload.loglevel or 2)
 
 %    \end{macrocode}
 % \CONTEXT does not support ofm, these lines were added in order to make it
@@ -1365,8 +1365,19 @@ loadmodule"colors.lua"     --- “font-clr”
 %
 %    \begin{macrocode}
 
+--- below lines already (2013-04-25) lead to warnings by
+--- the font loader
+--fonts.definers.resolvers.file = function (specification)
+--  specification.name = fonts.names.resolve('', '', specification)
+--end
+
 fonts.definers.resolvers.file = function (specification)
-  specification.name = fonts.names.resolve('', '', specification)
+    --inspect(specification)
+    if specification.lookup == "file" then
+        local found = fonts.names.crude_file_lookup(specification.name)
+        --local found = fonts.names.crude_file_lookup_verbose(specification.name)
+        specification.name = found[1]
+    end
 end
 
 %    \end{macrocode}

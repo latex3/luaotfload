@@ -61,8 +61,11 @@ local tableappend             = table.append
 local tabletohash             = table.tohash
 
 --- the font loader namespace is “fonts”, same as in Context
-fonts                = fonts       or { }
-fonts.names          = fonts.names or { }
+--- we need to put some fallbacks into place for when running
+--- as a script
+fonts                = fonts          or { }
+fonts.names          = fonts.names    or { }
+fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
@@ -73,6 +76,7 @@ names.path           = {
     dir      = "",
     path     = "",
 }
+local lookup_cache = nil --> names.data.cache; populated by load_names
 
 -- We use the cache.* of ConTeXt (see luat-basics-gen), we can
 -- use it safely (all checks and directory creations are already done). It
@@ -108,6 +112,7 @@ This is a sketch of the luaotfload db:
         // preliminary additions of v2.2:
         basenames : (string, int) hash;    // where int is the index in mappings
         barenames : (string, int) hash;    // where int is the index in mappings
+        caches    : lookup_cache;          // see below
     }
     and fontentry = {
         familyname  : string;
@@ -165,7 +170,7 @@ mtx-fonts has in names.tma:
 
 --doc]]--
 
-local fontnames_init = function ( )
+local fontnames_init = function ( ) --- returns clean dbobj
     return {
         mappings  = { },
         status    = { },
@@ -178,6 +183,10 @@ local fontnames_init = function ( )
         basenames = { },
 --      fullnames = { },
         version   = names.version,
+        caches    = { --- new
+            file = { }, name = { },
+            path = { }, anon = { },
+        }
     }
 end
 
@@ -242,6 +251,7 @@ load_names = function ( )
             "Font names database loaded", "%s", foundname)
         report("info", 3, "db", "Loading took %0.f ms",
                                 1000*(os.gettimeofday()-starttime))
+        lookup_cache = data.caches
     else
         report("info", 1, "db",
             [[Font names database not found, generating new one.
@@ -249,6 +259,7 @@ load_names = function ( )
         data = update_names(fontnames_init())
         save_names(data)
     end
+    fonts_loaded = true
     return data
 end
 
@@ -342,6 +353,101 @@ local crude_file_lookup = function (data, filename)
 end
 
 --[[doc--
+Lookups can be quite costly, more so the less specific they are.
+Even if we find a matching font eventually, the next time the
+user compiles Eir document E will have to stand through the delay
+again.
+Thus, some caching of results -- even between runs -- is in order.
+We’ll just store successful lookups in the database in a record of
+the respective lookup type.
+
+type lookup_cache = {
+    file : lookups;
+    name : lookups;
+    path : lookups;
+    anon : lookups;
+}
+and lookups = (string, (string * num)) dict
+
+TODO:
+ ×  1) add cache to dbobj
+ ×  2) wrap lookups in cached versions
+    3) make caching optional (via the config table) for debugging
+    4) make names_update() cache aware (nil if “force”)
+ ×  5) add logging
+    6) add cache control to fontdbutil
+    7) incr db version
+    8) ???
+    n) PROFIT!!!
+
+--doc]]--
+
+--- the resolver is called after the font request is parsed
+--- this is where we insert the cache
+local normal_resolve = fonts.definers.resolve
+local dummyresolver = function (specification)
+    --- this ensures that the db is always loaded
+    --- before a lookup occurs
+    if not fonts_loaded then names.data = load_names() end
+    inspect(normal_resolve(specification))
+    return normal_resolve(specification)
+end
+
+--[[doc--
+The name lookup requires both the “name” and the “style”
+key, so we’ll concatenate them.
+--doc]]--
+--- string -> spec -> string
+local to_hash_field = function (lookup, specification)
+    if lookup == "name" and specification.style then
+        return specification.name.."*"..specification.style
+    end
+    return specification.name
+end
+
+--[[doc--
+From my reading of font-def.lua, what a resolver does is
+basically rewrite the “name” field of the specification record
+with the resolution.
+Also, the fields “resolved”, “sub”, “force” etc. influence the outcome.
+
+We’ll just cache a deep copy of the entire spec as it leaves the
+resolver, lest we want to worry if we caught all the details.
+--doc]]--
+
+local cached_resolver = function (specification)
+    if not lookup_cache then names.data = load_names() end
+    local lookup  = specification.lookup
+    local field   = to_hash_field(lookup, specification)
+    local cached  = lookup_cache[lookup]
+    report("info", 4, "cache",
+           "looking up field “%s” in category “%s” ...",
+           field, lookup)
+    local hit = cached[field]
+    if hit then
+        report("info", 4, "cache", "found!")
+        return hit
+    end
+    report("info", 4, "cache", "not cached; resolving")
+
+    --- here we add to the cache
+    local resolved_spec = normal_resolve(specification)
+    cached[field] = tablecopy(resolved_spec) --- slow for the first time
+    --- obviously, the updated cache needs to be stored.
+    --- for the moment, we write the entire db to disk
+    --- whenever the cache is updated.
+    --- TODO this should trigger a save only once the
+    ---      document is compiled (finish_pdffile callback?)
+    report("info", 5, "cache", "saving updated cache")
+    save_names(names.data)
+    return resolved_spec
+end
+
+--fonts.definers.resolve = dummyresolver
+--fonts.definers.resolve = normalresolver
+fonts.definers.resolve = cached_resolver
+
+--[[doc--
 
 Luatex-fonts, the font-loader package luaotfload imports, comes with
 basic file location facilities (see luatex-fonts-syn.lua).
@@ -382,10 +488,11 @@ font database created by the mkluatexfontdb script.
 resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
     if not fonts_loaded then
         names.data   = load_names()
-        fonts_loaded = true
     end
     local data = names.data
 
+    --inspect(specification)
+    --os.exit()
     if specification.lookup == "file" then
         local found = crude_file_lookup(data, specification.name)
         --local found = crude_file_lookup_verbose(data, specification.name)
@@ -607,7 +714,6 @@ find_closest = function (name, limit)
 
     if not fonts_loaded then
         names.data = load_names()
-        fonts_loaded     = true
     end
 
     local data = names.data
@@ -1234,7 +1340,6 @@ scan_external_dir = function (dir)
         old_names = names.data
     else
         old_names = load_names()
-        fonts_loaded    = true
     end
     new_names = tablecopy(old_names)
     local n_scanned, n_new = scan_dir(dir, old_names, new_names)

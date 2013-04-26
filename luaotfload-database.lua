@@ -69,7 +69,7 @@ fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
-names.version        = 2.201
+names.version        = 2.202
 names.data           = nil
 names.path           = {
     basename = "luaotfload-names.lua",
@@ -231,6 +231,7 @@ end
 
 --- define locals in scope
 local find_closest
+local flush_cache
 local font_fullinfo
 local load_names
 local read_fonts_conf
@@ -367,9 +368,10 @@ TODO:
  ×  3) make caching optional (via the config table) for debugging
  ×  4) make names_update() cache aware (nil if “force”)
  ×  5) add logging
-    6) add cache control to fontdbutil
-    7) incr db version
-    8) ???
+ ×  6) add cache control to fontdbutil
+ ×  7) incr db version
+    8) wishlist: save cache only at the end of a run
+    9) ???
     n) PROFIT!!!
 
 --doc]]--
@@ -508,12 +510,7 @@ font database created by the mkluatexfontdb script.
 ---
 
 resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
-    if not fonts_loaded then
-        print("=============")
-        print(names.data)
-        names.data   = load_names()
-        --os.exit()
-    end
+    if not fonts_loaded then names.data = load_names() end
     local data = names.data
 
     if specification.lookup == "file" then
@@ -1291,6 +1288,13 @@ local function scan_os_fonts(fontnames, newfontnames)
     return n_scanned, n_new
 end
 
+flush_cache = function (fontnames)
+    if not fontnames then fontnames = load_names() end
+    fontnames.request_cache = { }
+    collectgarbage"collect"
+    return true, fontnames
+end
+
 --- dbobj -> bool -> dbobj
 update_names = function (fontnames, force)
     local starttime = os.gettimeofday()
@@ -1376,10 +1380,11 @@ scan_external_dir = function (dir)
 end
 
 --- export functionality to the namespace “fonts.names”
-names.scan   = scan_external_dir
-names.load   = load_names
-names.update = update_names
-names.save   = save_names
+names.flush_cache   = flush_cache
+names.load          = load_names
+names.save          = save_names
+names.scan          = scan_external_dir
+names.update        = update_names
 
 names.resolve      = resolve --- replace the resolver from luatex-fonts
 names.resolvespec  = resolve

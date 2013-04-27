@@ -9,6 +9,7 @@ Change History
       updating otfl-fonts-merged.lua (available in ConTeXt)
     * Improve documentation
     * renaming mkluatexfontdb into fontdbutil, with more search functionalities
+    * blacklisting font lingoes.ttf
 
 2013/04/11, luaotfload v1.28:
     * Adapting to LuaTeX 0.75, keeping backward-compatibility

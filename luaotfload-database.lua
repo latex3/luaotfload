@@ -21,7 +21,6 @@ local tonumber                = tonumber
 local fontloaderinfo          = fontloader.info
 local iolines                 = io.lines
 local ioopen                  = io.open
-local iopopen                 = io.popen
 local kpseexpand_path         = kpse.expand_path
 local kpseexpand_var          = kpse.expand_var
 local kpselookup              = kpse.lookup
@@ -235,6 +234,7 @@ local find_closest
 local flush_cache
 local font_fullinfo
 local load_names
+local read_fonts_conf
 local reload_db
 local resolve
 local save_names
@@ -1141,29 +1141,6 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     return n_scanned, n_new
 end
 
---- fc-cat outputs every directory it finds fonts in,
---- so we have to remove all subdirectories from the
---- list.
-
---- dir list -> dir list
-local collapse_paths = function (dir_lst)
-    tablesort(dir_lst)
-    local last  = dir_lst[1]
-    local res   = { last }
-    local ndirs = #dir_lst
-    if ndirs > 1 then
-        for i=2, ndirs do
-            local dir = dir_lst[i]
-            if stringsub(dir, 1, #last) ~= last then
-                --- new prefix
-                res[#res+1] = dir
-                last = dir
-            end
-        end
-    end
-    return res
-end
-
 --[[
   For the OS fonts, there are several options:
    - if OSFONTDIR is set (which is the case under windows by default but
@@ -1171,32 +1148,99 @@ end
      in the scan_texmf_fonts.
    - if not:
      - under Windows and Mac OSX, we take a look at some hardcoded directories
-     - under Unix, we parse the output of “fc-cat -v”
+     - under Unix, we read /etc/fonts/fonts.conf and read the directories in it
 
   This means that if you have fonts in fancy directories, you need to set them
   in OSFONTDIR.
 ]]
 
---[[doc--
-Instead of processing the fontconfig configuration files with a
-haphazarad XML parser, we scan the output of fc-cache for search paths
-and use these. This way we don’t need to resolve possible included
-files.
---doc]]--
-local get_fontconfig_paths = function ( )
-    local fc_cat_cmd = "fc-cat -v 2> /dev/null"
-    local res = { }
-    local chan = assert(iopopen(fc_cat_cmd, "r"),
-                        "cannot read from pipe")
-    local nlines = 0
-    for line in chan:lines() do
-        nlines = nlines + 1
-        if stringsub(line, 1, 11) == "Directory: " then
-            res[#res+1] = string.explode(line, " ")[2] .. "/"
+--- (string -> tab -> tab -> tab)
+read_fonts_conf = function (path, results, passed_paths)
+    --[[
+    This function parses /etc/fonts/fonts.conf and returns all the dir
+    it finds.  The code is minimal, please report any error it may
+    generate.
+
+    TODO    fonts.conf are some kind of XML so in theory the following
+            is totally inappropriate. Maybe a future version of the
+            lualibs will include the lxml-* files from Context so we
+            can write something presentable instead.
+    ]]
+    local fh = ioopen(path)
+    passed_paths[#passed_paths+1] = path
+    passed_paths_set = tabletohash(passed_paths, true)
+    if not fh then
+        report("log", 2, "db", "cannot open file %s", path)
+        return results
+    end
+    local incomments = false
+    for line in fh:lines() do
+        while line and line ~= "" do
+            -- spaghetti code... hmmm...
+            if incomments then
+                local tmp = stringfind(line, '-->') --- wtf?
+                if tmp then
+                    incomments = false
+                    line = stringsub(line, tmp+3)
+                else
+                    line = nil
+                end
+            else
+                local tmp = stringfind(line, '<!--')
+                local newline = line
+                if tmp then
+                    -- for the analysis, we take everything that is before the
+                    -- comment sign
+                    newline = stringsub(line, 1, tmp-1)
+                    -- and we loop again with the comment
+                    incomments = true
+                    line = stringsub(line, tmp+4)
+                else
+                    -- if there is no comment start, the block after that will
+                    -- end the analysis, we exit the while loop
+                    line = nil
+                end
+                for dir in stringgmatch(newline, '<dir>([^<]+)</dir>') do
+                    -- now we need to replace ~ by kpse.expand_path('~')
+                    if stringsub(dir, 1, 1) == '~' then
+                        dir = filejoin(kpseexpand_path('~'), stringsub(dir, 2))
+                    end
+                    -- we exclude paths with texmf in them, as they should be
+                    -- found anyway
+                    if not stringfind(dir, 'texmf') then
+                        results[#results+1] = dir
+                    end
+                end
+                for include in stringgmatch(newline, '<include[^<]*>([^<]+)</include>') do
+                    -- include here can be four things: a directory or a file,
+                    -- in absolute or relative path.
+                    if stringsub(include, 1, 1) == '~' then
+                        include = filejoin(kpseexpand_path('~'),stringsub(include, 2))
+                        -- First if the path is relative, we make it absolute:
+                    elseif not lfs.isfile(include) and not lfs.isdir(include) then
+                        include = filejoin(file.dirname(path), include)
+                    end
+                    if      lfs.isfile(include)
+                    and     kpsereadable_file(include)
+                    and not passed_paths_set[include]
+                    then
+                        -- maybe we should prevent loops here?
+                        -- we exclude path with texmf in them, as they should
+                        -- be found otherwise
+                        read_fonts_conf(include, results, passed_paths)
+                    elseif lfs.isdir(include) then
+                        for _,f in next, dirglob(filejoin(include, "*.conf")) do
+                            if not passed_paths_set[f] then
+                                read_fonts_conf(f, results, passed_paths)
+                            end
+                        end
+                    end
+                end
+            end
         end
     end
-    chan:close()
-    return collapse_paths(res)
+    fh:close()
+    return results
 end
 
 -- for testing purpose
@@ -1215,7 +1259,13 @@ local function get_os_dirs()
         local windir = os.getenv("WINDIR")
         return { filejoin(windir, 'Fonts') }
     else 
-        local os_dirs = get_fontconfig_paths()
+        local passed_paths = {}
+        local os_dirs = {}
+        for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
+            if lfs.isfile(p) then
+                read_fonts_conf(p, os_dirs, passed_paths)
+            end
+        end
         return os_dirs
     end
     return {}
@@ -1225,7 +1275,7 @@ local function scan_os_fonts(fontnames, newfontnames)
     local n_scanned, n_new = 0, 0
     --[[
     This function scans the OS fonts through
-      - fontcache for Unix (runs fc-cat -v and scans the directories)
+      - fontcache for Unix (reads the fonts.conf file and scans the directories)
       - a static set of directories for Windows and MacOSX
     ]]
     report("info", 2, "db", "Scanning OS fonts...")

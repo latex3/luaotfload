@@ -1,5 +1,7 @@
 % Tackes ages to load
-LastResort.ttf % a MacOSX font, but also available for free from unicode.org 
+LastResort.ttf % a MacOSX font, but also available for free from unicode.org
+% Segfaults with LuaTeX 0.76
+lingoes.ttf
 
 % Mac OS X TTC fonts, this list need to be filtered out
 /Library/Fonts/AmericanTypewriter.ttc

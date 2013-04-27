@@ -37,6 +37,12 @@ local stringfind       = string.find
 local stringexplode    = string.explode
 local stringis_empty   = string.is_empty
 
+--[[doc--
+Apparently, these “modifiers” are another measure of emulating \XETEX,
+cf. “About \XETEX”, by Jonathan Kew, 2005; and
+    “The \XETEX Reference Guide”, by Will Robertson, 2011.
+--doc]]--
+
 local supported = {
     b    = "bold",
     i    = "italic",
@@ -105,6 +111,8 @@ local defaults = {
     },
 }
 
+local global_defaults = { mode = "node" }
+
 defaults.beng = defaults.deva
 defaults.guru = defaults.deva
 defaults.gujr = defaults.deva
@@ -123,22 +131,36 @@ defaults.tibt = defaults.khmr
 
 defaults.lao  = defaults.thai
 
-local function set_default_features(script)
-    local features
-    local script = script or "dflt"
+--- (string, string) dict -> (string, string) dict
+local set_default_features = function (speclist)
+    local script = speclist.script or "dflt"
+
     report("log", 0, "load font",
         "auto-selecting default features for script: %s",
         script)
-    if defaults[script] then
-        features = defaults[script]
-    else
-        features = defaults["dflt"]
+
+    local requested = defaults[script]
+    if not requested then
+        report("log", 0, "load font",
+            "no defaults for script “%s”, falling back to “dflt”",
+            script)
+        requested = defaults.dflt
     end
-    for _,v in next, features do
-        if feature_list[v] ~= false then
-            feature_list[v] = true
+
+    for i=1, #requested do
+        local feat = requested[i]
+        if speclist[feat] ~= false then
+            speclist[feat] = true
         end
     end
+
+    for feat, state in next, global_defaults do
+        --- This is primarily intended for setting node
+        --- mode unless “base” is requested, as stated
+        --- in the manual.
+        if not speclist[feat] then speclist[feat] = state end
+    end
+    return speclist
 end
 
 local function issome ()    feature_list.lookup = 'name' end
@@ -173,7 +195,7 @@ local pattern    = (filename + fontname) * subvalue^0 * stylespec^0 * options^0
 local function colonized(specification) -- xetex mode
     feature_list = { }
     lpeg.match(pattern,specification.specification)
-    set_default_features(feature_list.script)
+    feature_list = set_default_features(feature_list)
     if feature_list.style then
         specification.style = feature_list.style
         feature_list.style = nil
@@ -213,20 +235,22 @@ end
 fonts.definers.registersplit(":",colonized,"cryptic")
 fonts.definers.registersplit("", colonized,"more cryptic") -- catches \font\text=[names]
 
-function fonts.definers.applypostprocessors(tfmdata)
-    local postprocessors = tfmdata.postprocessors
-    if postprocessors then
-        for i=1,#postprocessors do
-            local extrahash = postprocessors[i](tfmdata) -- after scaling etc
-            if type(extrahash) == "string" and extrahash ~= "" then
-                -- e.g. a reencoding needs this
-                extrahash = string.gsub(lower(extrahash),"[^a-z]","-")
-                tfmdata.properties.fullname = format("%s-%s",tfmdata.properties.fullname,extrahash)
-            end
-        end
-    end
-    return tfmdata
-end
+--- TODO below section is literally the same in luatex-fonts-def
+---      why is it here?
+--function fonts.definers.applypostprocessors(tfmdata)
+--    local postprocessors = tfmdata.postprocessors
+--    if postprocessors then
+--        for i=1,#postprocessors do
+--            local extrahash = postprocessors[i](tfmdata) -- after scaling etc
+--            if type(extrahash) == "string" and extrahash ~= "" then
+--                -- e.g. a reencoding needs this
+--                extrahash = string.gsub(lower(extrahash),"[^a-z]","-")
+--                tfmdata.properties.fullname = format("%s-%s",tfmdata.properties.fullname,extrahash)
+--            end
+--        end
+--    end
+--    return tfmdata
+--end
 ---[[ end included font-ltx.lua ]]
 
 --[[doc--

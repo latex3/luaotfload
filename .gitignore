@@ -31,3 +31,5 @@ tests/*.dvi
 tests/*.ofm
 tests/*.ovp
 tests/*.ovf
+tests/*.sty
+tests/luaotfload*

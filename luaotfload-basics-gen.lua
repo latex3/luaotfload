@@ -130,7 +130,9 @@ end
 
 caches = { }
 
-local writable, readables = nil, { }
+local writable  = nil
+local readables = { }
+local usingjit  = jit
 
 if not caches.namespace or caches.namespace == "" or caches.namespace == "context" then
     caches.namespace = 'generic'
@@ -204,7 +206,7 @@ end
 local function makefullname(path,name)
     if path and path ~= "" then
         name = "temp-" .. name -- clash prevention
-        return file.addsuffix(file.join(path,name),"lua"), file.addsuffix(file.join(path,name),"luc")
+        return file.addsuffix(file.join(path,name),"lua"), file.addsuffix(file.join(path,name),usingjit and "lub" or "luc")
     end
 end
 
@@ -265,26 +267,36 @@ end
 -- this) in which case one should limit the method to luac and enable support
 -- for execution.
 
-caches.compilemethod = "both"
+-- function caches.compile(data,luaname,lucname)
+--     local d = io.loaddata(luaname)
+--     if not d or d == "" then
+--         d = table.serialize(data,true) -- slow
+--     end
+--     if d and d ~= "" then
+--         local f = io.open(lucname,'w')
+--         if f then
+--             local s = loadstring(d)
+--             if s then
+--                 f:write(string.dump(s,true))
+--             end
+--             f:close()
+--         end
+--     end
+-- end
 
 function caches.compile(data,luaname,lucname)
-    local done = false
-    if caches.compilemethod == "luac" or caches.compilemethod == "both" then
-        done = os.spawn("texluac -o " .. string.quoted(lucname) .. " -s " .. string.quoted(luaname)) == 0
+    local d = io.loaddata(luaname)
+    if not d or d == "" then
+        d = table.serialize(data,true) -- slow
     end
-    if not done and (caches.compilemethod == "dump" or caches.compilemethod == "both") then
-        local d = io.loaddata(luaname)
-        if not d or d == "" then
-            d = table.serialize(data,true) -- slow
-        end
-        if d and d ~= "" then
-            local f = io.open(lucname,'w')
-            if f then
-                local s
-                if _G["loadstring"] then s=loadstring(d) else s=load(d) end
-                f:write(string.dump(s))
-                f:close()
+    if d and d ~= "" then
+        local f = io.open(lucname,'w')
+        if f then
+            local s = loadstring(d)
+            if s then
+                f:write(string.dump(s,true))
             end
+            f:close()
         end
     end
 end

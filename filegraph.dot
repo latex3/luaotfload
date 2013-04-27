@@ -27,6 +27,9 @@ strict digraph luaotfload_files { //looks weird with circo ...
 /* ····································································
  * file structure
  * ································································· */
+    fontdbutil  -> font_names   [label="--update",
+                                 style=dashed]
+
     luaotfload -> otfl_fonts_merged [label="merged"]
     luaotfload -> merged_lua_libs     [label="unmerged", style=solid]
     luaotfload -> merged_luatex_fonts [label="unmerged", style=solid]
@@ -34,7 +37,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
 
     luaotfload -> luaotfload_libs
     luaotfload -> otfl_blacklist_cnf
-
 
     otfl_fonts_merged -> merged_lua_libs     [label="merged",
                                               style=dotted,
@@ -46,11 +48,35 @@ strict digraph luaotfload_files { //looks weird with circo ...
                                               style=dotted,
                                               lhead=cluster_merged]
 
+    merged_luatex_fonts -> font_age [label="luatex-fonts-enc.lua",
+                                     ltail=cluster_merged]
 
+    luaotfload_libs -> font_names [label="luaotfload-database.lua"]
+
+    mkglyphlist -> font_age     [label="generates from glyphlist.txt",
+                                 style=dashed]
+
+    subgraph { rank = same; mkglyphlist; fontdbutil; luaotfload }
 
 /* ····································································
  * main files
  * ································································· */
+
+    fontdbutil        [label  = "fontdbutil\nmkluatexfontdb.lua",
+                       shape  = rect,
+                       width  = "3.2cm",
+                       height = "1.2cm",
+                       color  = "#01012222",
+                       style  = "filled,rounded",
+                       penwidth=2]
+
+    mkglyphlist       [label  = "mkglyphlist",
+                       shape  = rect,
+                       width  = "3.2cm",
+                       height = "1.2cm",
+                       color  = "#01012222",
+                       style  = "filled,rounded",
+                       penwidth=2]
 
     luaotfload        [label  = "luaotfload.lua",
                        shape  = rect,
@@ -81,6 +107,22 @@ strict digraph luaotfload_files { //looks weird with circo ...
  * ································································· */
 
 
+    font_age [style      = "filled,dashed",
+              shape      = rect,
+              width      = "3.2cm",
+              fillcolor  = "#01012222",
+              color      = grey40,
+              style      = "filled,dotted,rounded",
+              label      = "font-age.lua"]
+
+    font_names [style      = "filled,dashed",
+                shape      = rect,
+                width      = "3.2cm",
+                fillcolor  = "#01012222",
+                color      = grey40,
+                style      = "filled,dotted,rounded",
+                label      = "luaotfload-names.lua\nluaotfload-names.luc"]
+
     otfl_blacklist_cnf [style      = "filled,dashed",
                         shape      = rect,
                         width      = "3.2cm",
@@ -97,10 +139,9 @@ strict digraph luaotfload_files { //looks weird with circo ...
         label      = <
             <table cellborder="0" bgcolor="#FFFFFFAA">
                 <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Luaotfload Libraries</font> </td> </th>
-                <tr> <td>luaotfload-font-otc.lua</td> <td>luaotfload-lib-dir.lua</td> </tr>
-                <tr> <td>luaotfload-override.lua</td> <td>luaotfload-loaders.lua</td> </tr>
-                <tr> <td>luaotfload-database.lua</td> <td>luaotfload-color.lua</td>   </tr>
-                <tr> <td>luaotfload-features.lua</td> </tr>
+                <tr> <td>luaotfload-lib-dir.lua</td>  <td>luaotfload-features.lua</td> </tr>
+                <tr> <td>luaotfload-override.lua</td> <td>luaotfload-loaders.lua</td>  </tr>
+                <tr> <td>luaotfload-database.lua</td> <td>luaotfload-color.lua</td>    </tr>
             </table>
         >,
     ]

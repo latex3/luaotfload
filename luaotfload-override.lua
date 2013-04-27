@@ -69,9 +69,12 @@ logs.names_report = function (mode, lvl, ...)
     end
     if not lvl then lvl = 0 end
 
-    if loglevel > lvl then
+    if loglevel >= lvl then
         if mode == "log" then
             log (...)
+        elseif mode == "both" then
+            log (...)
+            stdout (...)
         else
             stdout (...)
         end

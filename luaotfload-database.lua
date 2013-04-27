@@ -6,7 +6,7 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
     license   = "GNU GPL v2"
 }
 
---- TODO: if the specification is an absolute filename with a font not in the 
+--- TODO: if the specification is an absolute filename with a font not in the
 --- database, add the font to the database and load it. There is a small
 --- difficulty with the filenames of the TEXMF tree that are referenced as
 --- relative paths...
@@ -25,6 +25,8 @@ local kpseexpand_path         = kpse.expand_path
 local kpseexpand_var          = kpse.expand_var
 local kpselookup              = kpse.lookup
 local kpsereadable_file       = kpse.readable_file
+local lfsisdir                = lfs.isdir
+local lfsisfile               = lfs.isfile
 local mathabs                 = math.abs
 local mathmin                 = math.min
 local stringfind              = string.find
@@ -1154,97 +1156,217 @@ end
   in OSFONTDIR.
 ]]
 
---- (string -> tab -> tab -> tab)
-read_fonts_conf = function (path, results, passed_paths)
-    --[[
-    This function parses /etc/fonts/fonts.conf and returns all the dir
-    it finds.  The code is minimal, please report any error it may
-    generate.
+local read_fonts_conf
+do --- closure for read_fonts_conf()
 
-    TODO    fonts.conf are some kind of XML so in theory the following
-            is totally inappropriate. Maybe a future version of the
-            lualibs will include the lxml-* files from Context so we
-            can write something presentable instead.
-    ]]
-    local fh = ioopen(path)
-    passed_paths[#passed_paths+1] = path
-    passed_paths_set = tabletohash(passed_paths, true)
-    if not fh then
-        report("log", 2, "db", "cannot open file %s", path)
-        return results
+    local lpeg = require "lpeg"
+
+    local C, Cc, Cf, Cg, Ct
+        = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Ct
+
+    local P, R, S, lpegmatch
+        = lpeg.P, lpeg.R, lpeg.S, lpeg.match
+
+    local alpha             = R("az", "AZ")
+    local digit             = R"09"
+    local tag_name          = C(alpha^1)
+    local whitespace        = S" \n\r\t\v"
+    local ws                = whitespace^1
+    local comment           = P"<!--" * (1 - P"--")^0 * P"-->"
+
+    ---> header specifica
+    local xml_declaration   = P"<?xml" * (1 - P"?>")^0 * P"?>"
+    local xml_doctype       = P"<!DOCTYPE" * ws
+                            * "fontconfig" * (1 - P">")^0 * P">"
+    local header            = xml_declaration^-1
+                            * (xml_doctype + comment + ws)^0
+
+    ---> enforce root node
+    local root_start        = P"<"  * ws^-1 * P"fontconfig" * ws^-1 * P">"
+    local root_stop         = P"</" * ws^-1 * P"fontconfig" * ws^-1 * P">"
+
+    local dquote, squote    = P[["]], P"'"
+    local xml_namestartchar = S":_" + alpha --- ascii only, funk the rest
+    local xml_namechar      = S":._" + alpha + digit
+    local xml_name          = ws^-1
+                            * C(xml_namestartchar * xml_namechar^0)
+    local xml_attvalue      = dquote * C((1 - S[[%&"]])^1) * dquote * ws^-1
+                            + squote * C((1 - S[[%&']])^1) * squote * ws^-1
+    local xml_attr          = Cg(xml_name * P"=" * xml_attvalue)
+    local xml_attr_list     = Cf(Ct"" * xml_attr^1, rawset)
+
+    --[[doc--
+         scan_node creates a parser for a given xml tag.
+    --doc]]--
+    --- string -> bool -> lpeg_t
+    local scan_node = function (tag)
+        --- Node attributes go into a table with the index “attributes”
+        --- (relevant for “prefix="xdg"” and the likes).
+        local p_tag = P(tag)
+        local with_attributes   = P"<" * p_tag
+                                * Cg(xml_attr_list, "attributes")^-1
+                                * ws^-1
+                                * P">"
+        local plain             = P"<" * p_tag * ws^-1 * P">"
+        local node_start        = plain + with_attributes
+        local node_stop         = P"</" * p_tag * ws^-1 * P">"
+        --- there is no nesting, the earth is flat ...
+        local node              = node_start
+                                * Cc(tag) * C(comment + (1 - node_stop)^1)
+                                * node_stop
+        return Ct(node) -- returns {string, string [, attributes = { key = val }] }
     end
-    local incomments = false
-    for line in fh:lines() do
-        while line and line ~= "" do
-            -- spaghetti code... hmmm...
-            if incomments then
-                local tmp = stringfind(line, '-->') --- wtf?
-                if tmp then
-                    incomments = false
-                    line = stringsub(line, tmp+3)
-                else
-                    line = nil
+
+    --[[doc--
+         At the moment, the interesting tags are “dir” for
+         directory declarations, and “include” for including
+         further configuration files.
+
+         spec: http://freedesktop.org/software/fontconfig/fontconfig-user.html
+    --doc]]--
+    local include_node        = scan_node"include"
+    local dir_node            = scan_node"dir"
+
+    local element             = dir_node
+                              + include_node
+                              + comment         --> ignore
+                              + P(1-root_stop)  --> skip byte
+
+    local root                = root_start * Ct(element^0) * root_stop
+    local p_cheapxml          = header * root
+
+    --lpeg.print(p_cheapxml) ---> 757 rules with v0.10
+
+    --[[doc--
+         fonts_conf_scanner() handles configuration files.
+         It is called on an abolute path to a config file (e.g.
+         /home/luser/.config/fontconfig/fonts.conf) and returns a list
+         of the nodes it managed to extract from the file.
+    --doc]]--
+    --- string -> path list
+    local fonts_conf_scanner = function (path)
+        local fh = ioopen(path, "r")
+        if not fh then
+            report("both", 3, "db", "cannot open fontconfig file %s", path)
+            return
+        end
+        local raw = fh:read"*all"
+        fh:close()
+
+        local confdata = lpegmatch(p_cheapxml, raw)
+        if not confdata then
+            report("both", 3, "db", "cannot scan fontconfig file %s", path)
+            return
+        end
+        return confdata
+    end
+
+    --[[doc--
+         read_fonts_conf_indeed() is called with six arguments; the
+         latter three are tables that represent the state and are
+         always returned.
+         The first three are
+             · the path to the file
+             · the expanded $HOME
+             · the expanded $XDG_CONFIG_DIR
+    --doc]]--
+    --- string -> string -> string -> tab -> tab -> (tab * tab * tab)
+    local read_fonts_conf_indeed
+    read_fonts_conf_indeed = function (start, home, xdg_home,
+                                       acc, done, dirs_done)
+
+        local paths = fonts_conf_scanner(start)
+        if not paths then --- nothing to do
+            return acc, done, dirs_done
+        end
+
+        for i=1, #paths do
+            local pathobj = paths[i]
+            local kind, path = pathobj[1], pathobj[2]
+            local attributes = pathobj.attributes
+            if attributes and attributes.prefix == "xdg" then
+                --- this prepends the xdg root (usually ~/.config)
+                path = filejoin(xdg_home, path)
+            end
+
+            if kind == "dir" then
+                if stringsub(path, 1, 1) == "~" then
+                    path = filejoin(home, stringsub(path, 2))
                 end
-            else
-                local tmp = stringfind(line, '<!--')
-                local newline = line
-                if tmp then
-                    -- for the analysis, we take everything that is before the
-                    -- comment sign
-                    newline = stringsub(line, 1, tmp-1)
-                    -- and we loop again with the comment
-                    incomments = true
-                    line = stringsub(line, tmp+4)
-                else
-                    -- if there is no comment start, the block after that will
-                    -- end the analysis, we exit the while loop
-                    line = nil
+                --- We exclude paths with texmf in them, as they should be
+                --- found anyway; also duplicates are ignored by checking
+                --- if they are elements of dirs_done.
+                if not (stringfind(path, "texmf") or dirs_done[path]) then
+                    acc[#acc+1] = path
+                    dirs_done[path] = true
                 end
-                for dir in stringgmatch(newline, '<dir>([^<]+)</dir>') do
-                    -- now we need to replace ~ by kpse.expand_path('~')
-                    if stringsub(dir, 1, 1) == '~' then
-                        dir = filejoin(kpseexpand_path('~'), stringsub(dir, 2))
-                    end
-                    -- we exclude paths with texmf in them, as they should be
-                    -- found anyway
-                    if not stringfind(dir, 'texmf') then
-                        results[#results+1] = dir
-                    end
+
+            elseif kind == "include" then
+                --- here the path can be four things: a directory or a file,
+                --- in absolute or relative path.
+                if stringsub(path, 1, 1) == "~" then
+                    path = filejoin(home, stringsub(path, 2))
+                elseif --- if the path is relative, we make it absolute
+                    not ( lfsisfile(path) or lfsisdir(path) )
+                then
+                    path = filejoin(filedirname(start), path)
                 end
-                for include in stringgmatch(newline, '<include[^<]*>([^<]+)</include>') do
-                    -- include here can be four things: a directory or a file,
-                    -- in absolute or relative path.
-                    if stringsub(include, 1, 1) == '~' then
-                        include = filejoin(kpseexpand_path('~'),stringsub(include, 2))
-                        -- First if the path is relative, we make it absolute:
-                    elseif not lfs.isfile(include) and not lfs.isdir(include) then
-                        include = filejoin(file.dirname(path), include)
-                    end
-                    if      lfs.isfile(include)
-                    and     kpsereadable_file(include)
-                    and not passed_paths_set[include]
-                    then
-                        -- maybe we should prevent loops here?
-                        -- we exclude path with texmf in them, as they should
-                        -- be found otherwise
-                        read_fonts_conf(include, results, passed_paths)
-                    elseif lfs.isdir(include) then
-                        for _,f in next, dirglob(filejoin(include, "*.conf")) do
-                            if not passed_paths_set[f] then
-                                read_fonts_conf(f, results, passed_paths)
-                            end
+                if  lfsisfile(path)
+                    and kpsereadable_file(path)
+                    and not done[path]
+                then
+                    --- we exclude path with texmf in them, as they should
+                    --- be found otherwise
+                    acc = read_fonts_conf_indeed(
+                                path, home, xdg_home,
+                                acc,  done, dirs_done)
+                elseif lfsisdir(path) then --- arrow code ahead
+                    local config_files = dirglob(filejoin(path, "*.conf"))
+                    for _, filename in next, config_files do
+                        if not done[filename] then
+                            acc = read_fonts_conf_indeed(
+                            filename, home, xdg_home,
+                            acc,      done, dirs_done)
                         end
                     end
-                end
-            end
+                end --- match “kind”
+            end --- iterate paths
         end
-    end
-    fh:close()
-    return results
-end
 
--- for testing purpose
-names.read_fonts_conf = read_fonts_conf
+        --inspect(acc)
+        --inspect(done)
+        return acc, done, dirs_done
+    end --- read_fonts_conf_indeed()
+
+    --[[doc--
+         read_fonts_conf() sets up an accumulator and two sets
+         for tracking what’s been done.
+
+         Also, the environment variables HOME and XDG_CONFIG_HOME --
+         which are constants anyways -- are expanded so don’t have to
+         repeat that over and over again as with the old parser.
+         Now they’re just passed on to every call of
+         read_fonts_conf_indeed().
+
+         read_fonts_conf() is also the only reference visible outside
+         the closure.
+    --doc]]--
+    --- list -> list
+    read_fonts_conf = function (path_list)
+        local home      = kpseexpand_path"~" --- could be os.getenv"HOME"
+        local xdg_home  = kpseexpand_path"$XDG_CONFIG_HOME"
+        if xdg_home == "" then xdg_home = filejoin(home, ".config") end
+        local acc       = { } ---> list: paths collected
+        local done      = { } ---> set:  files inspected
+        local dirs_done = { } ---> set:  dirs in list
+        for i=1, #path_list do --- we keep the state between files
+            acc, done, dirs_done = read_fonts_conf_indeed(
+                                     path_list[i], home, xdg_home,
+                                     acc, done, dirs_done)
+        end
+        return acc
+    end
+end --- read_fonts_conf closure
 
 --- TODO stuff those paths into some writable table
 local function get_os_dirs()
@@ -1258,14 +1380,12 @@ local function get_os_dirs()
     elseif os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
         local windir = os.getenv("WINDIR")
         return { filejoin(windir, 'Fonts') }
-    else 
-        local passed_paths = {}
-        local os_dirs = {}
-        for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
-            if lfs.isfile(p) then
-                read_fonts_conf(p, os_dirs, passed_paths)
-            end
-        end
+    else
+        local fonts_conves = { --- plural, much?
+            "/usr/local/etc/fonts/fonts.conf",
+            "/etc/fonts/fonts.conf",
+        }
+        local os_dirs = read_fonts_conf(fonts_conves)
         return os_dirs
     end
     return {}
@@ -1275,7 +1395,8 @@ local function scan_os_fonts(fontnames, newfontnames)
     local n_scanned, n_new = 0, 0
     --[[
     This function scans the OS fonts through
-      - fontcache for Unix (reads the fonts.conf file and scans the directories)
+      - fontcache for Unix (reads the fonts.conf file and scans the
+        directories)
       - a static set of directories for Windows and MacOSX
     ]]
     report("info", 2, "db", "Scanning OS fonts...")
@@ -1389,6 +1510,9 @@ names.update        = update_names
 names.resolve      = resolve --- replace the resolver from luatex-fonts
 names.resolvespec  = resolve
 names.find_closest = find_closest
+
+-- for testing purpose
+names.read_fonts_conf = read_fonts_conf
 
 --- dummy required by luatex-fonts (cf. luatex-fonts-syn.lua)
 

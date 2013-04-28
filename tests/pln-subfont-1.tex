@@ -1,0 +1,12 @@
+\ifdefined\directlua\input luaotfload.sty\fi
+
+\directlua{
+  inspect(fontloader.info"cambria.ttc")
+}
+
+\font\subfontone="file:cambria.ttc(0)" at 42pt
+\font\subfonttwo="file:cambria.ttc(1)" at 42pt
+
+\subfontone foo bar baz \endgraf
+\subfonttwo foo bar baz \endgraf
+\bye

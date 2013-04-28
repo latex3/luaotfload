@@ -3,6 +3,7 @@ Change History
 
 2013/04/27, luaotfload v1.3:
     *  blacklisting lingoes.ttf (segfaults)
+    *  unblacklisting ttc fonts (warning: may break LuaTeX < 0.65)
 
 2013/04/25, luaotfload v1.29:
     * Reverting the unified resolver, as the database was rebuilt too often

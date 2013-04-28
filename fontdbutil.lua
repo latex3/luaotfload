@@ -276,14 +276,20 @@ actions.query = function (job)
         optsize       = 0,
     }
 
-    local foundname, _whatever, success =
+    local foundname, subfont, success =
         fonts.names.resolve(nil, nil, tmpspec)
 
     if success then
         logs.names_report(false, 1,
             "resolve", "Font “%s” found!", query)
-        logs.names_report(false, 1,
-            "resolve", "Resolved file name “%s”", foundname)
+        if subfont then
+            logs.names_report(false, 1, "resolve",
+                "Resolved file name “%s”, subfont nr. “%s”",
+                foundname, subfont)
+        else
+            logs.names_report(false, 1,
+                "resolve", "Resolved file name “%s”", foundname)
+        end
         if job.show_info then
             show_font_info(foundname)
         end

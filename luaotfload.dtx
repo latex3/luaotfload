@@ -1378,8 +1378,9 @@ loadmodule"colors.lua"     --- “font-clr”
 %
 %    \begin{macrocode}
 
-local resolvers = fonts.definers.resolvers
-local formats   = fonts.formats
+local request_resolvers   = fonts.definers.resolvers
+local formats             = fonts.formats
+formats.ofm               = "type1"
 
 %    \end{macrocode}
 % \identifier{luaotfload} promises easy access to system fonts.
@@ -1398,15 +1399,13 @@ local formats   = fonts.formats
 % most cases when looking up font files, only when generating the database.
 %
 %    \begin{macrocode}
-resolvers.file = function (specification)
-    --- how would we go about allowing subfonts (ttc)?
-    if specification.lookup == "file" then
-        local found = fonts.names.crude_file_lookup(specification.name)
-        specification.name = found[1]
-    end
+request_resolvers.file = function (specification)
+    --local found = fonts.names.crude_file_lookup(specification.name)
+    local found = fonts.names.crude_file_lookup_verbose(specification.name)
+    specification.name = found[1]
+    --if format then specification.forced = format end
 end
 
---- TODO rewrite this according to the syntax spec
 %    \end{macrocode}
 % We classify as \verb|anon:| those requests that have neither a
 % prefix nor brackets. According to Khaled\footnote{%
@@ -1417,7 +1416,35 @@ end
 %
 %    \begin{macrocode}
 
-resolvers.anon = resolvers.name
+--request_resolvers.anon = request_resolvers.name
+
+%    \end{macrocode}
+% There is one drawback, though.
+% This syntax is also used for requesting fonts in \identifier{Type1}
+% (\abbrev{tfm}, \abbrev{ofm}) format.
+% These are essentially \verb|file:| lookups and must be caught before
+% the \verb|name:| resolver kicks in, lest they cause the database to
+% update.
+% Even if we were to require the \verb|file:| prefix for all
+% \identifier{Type1} requests, tests have shown that certain fonts still
+% include further fonts (e.~g. \fileent{omlgcb.ofm} will ask for
+% \fileent{omsecob.tfm}) \emphasis{using the old syntax}.
+% For this reason, we introduce an extra check with an early return.
+%
+%    \begin{macrocode}
+local type1_formats = { "tfm", "ofm", }
+
+request_resolvers.anon = function (specification)
+    local name = specification.name
+    for i=1, #type1_formats do
+        local format = type1_formats[i]
+        if resolvers.findfile(name, format) then
+            specification.name = file.addsuffix(name, format)
+            return
+        end
+    end
+    request_resolvers.name(specification)
+end
 
 %    \end{macrocode}
 % Prior to version 2.2, \identifier{luaotfload} did not distinguish
@@ -1427,10 +1454,10 @@ resolvers.anon = resolvers.name
 % system, otherwise we fall back to the \verb|file:| lookup.
 %
 %    \begin{macrocode}
-resolvers.path = function (specification)
+request_resolvers.path = function (specification)
     local exists, _ = lfsisfile(specification.name)
     if not exists then -- resort to file: lookup
-        resolvers.file(specification)
+        request_resolvers.file(specification)
     end
 end
 

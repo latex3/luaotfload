@@ -291,7 +291,7 @@ do
     end
 end
 
---- chain: barenames -> [fullnames ->] basenames -> findfile
+local type1_formats = { "tfm", "ofm", }
 
 --- string -> (string * bool | int)
 crude_file_lookup_verbose = function (filename)
@@ -320,26 +320,19 @@ crude_file_lookup_verbose = function (filename)
     if found and mappings[found] then
         found = mappings[found].filename
         report("info", 0, "db",
-            "crude file lookup: req=%s; hit=bare; ret=%s",
+            "crude file lookup: req=%s; hit=base; ret=%s",
             filename, found[1])
         return found
     end
 
-    --- now look for tfm et al.; will be superseded by proper
-    --- format lookup
-    found = resolvers.findfile(filename, "tfm")
-    if found then
-        report("info", 0, "db",
-            "crude file lookup: req=tfm; hit=bare; ret=%s", found)
-        return { found, false }
+    --- ofm and tfm
+    for i=1, #type1_formats do
+        local format = type1_formats[i]
+        if resolvers.findfile(filename, format) then
+            return { file.addsuffix(filename, format), false }, format
+        end
     end
-    found = resolvers.findfile(filename, "ofm")
-    if found then
-        report("info", 0, "db",
-            "crude file lookup: req=ofm; hit=bare; ret=%s", found)
-        return { found, false }
-    end
-    return false
+    return { filename, false }, nil
 end
 
 --- string -> (string * bool | int)
@@ -354,11 +347,13 @@ crude_file_lookup = function (filename)
         found = data.mappings[found]
         if found then return found.filename end
     end
-    found = resolvers.findfile(filename, "tfm")
-    if found then return { found, false } end
-    found = resolvers.findfile(filename, "ofm")
-    if found then return { found, false } end
-    return false
+    for i=1, #type1_formats do
+        local format = type1_formats[i]
+        if resolvers.findfile(filename, format) then
+            return { file.addsuffix(filename, format), false }, format
+        end
+    end
+    return { filename, false }, nil
 end
 
 --[[doc--
@@ -644,13 +639,14 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     end
 
     if #found == 1 then
-        if kpselookup(found[1].filename[1]) then
-            report("log", 0, "resolve",
-                "font family='%s', subfamily='%s' found: %s",
-                name, style, found[1].filename[1]
-            )
-            return found[1].filename[1], found[1].filename[2], true
-        end
+        --- Since we do the file resolving ourselves, we don’t need the
+        --- kpathsea lookup here any longer.
+        --- “found” is really synonymous with “registered in the db”.
+        report("log", 0, "resolve",
+            "font family='%s', subfamily='%s' found: %s",
+            name, style, found[1].filename[1]
+        )
+        return found[1].filename[1], found[1].filename[2], true
     elseif #found > 1 then
         -- we found matching font(s) but not in the requested optical
         -- sizes, so we loop through the matches to find the one with
@@ -665,13 +661,11 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 least   = difference
             end
         end
-        if kpselookup(closest.filename[1]) then
-            report("log", 0, "resolve",
-                "font family='%s', subfamily='%s' found: %s",
-                name, style, closest.filename[1]
-            )
-            return closest.filename[1], closest.filename[2], true
-        end
+        report("log", 0, "resolve",
+            "font family='%s', subfamily='%s' found: %s",
+            name, style, closest.filename[1]
+        )
+        return closest.filename[1], closest.filename[2], true
     elseif found.fallback then
         return found.fallback.filename[1], found.fallback.filename[2], true
     end
@@ -680,7 +674,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     if not fonts_reloaded then
         --- last straw: try reloading the database
         return reload_db(
-            "unresoled font name: “" .. name .. "”",
+            "unresolved font name: “" .. name .. "”",
             resolve, nil, nil, specification
         )
     end
@@ -737,9 +731,7 @@ find_closest = function (name, limit)
     local name     = sanitize_string(name)
     limit          = limit or fuzzy_limit
 
-    if not fonts_loaded then
-        names.data = load_names()
-    end
+    if not fonts_loaded then names.data = load_names() end
 
     local data = names.data
 
@@ -866,10 +858,10 @@ font_fullinfo = function (filename, subfont, texmf)
     tfmdata.fontname    = metadata.fontname
     tfmdata.fullname    = metadata.fullname
     tfmdata.familyname  = metadata.familyname
-    tfmdata.filename    = {
-        texmf and filebasename(filename) or filename,
-        subfont
-    }
+    if texmf then
+        filename = filebasename(filename)
+    end
+    tfmdata.filename    = { filename, subfont }
     tfmdata.weight      = metadata.pfminfo.weight
     tfmdata.width       = metadata.pfminfo.width
     tfmdata.slant       = metadata.italicangle
@@ -1328,9 +1320,9 @@ update_names = function (fontnames, force)
     read_blacklist()
 
     local scanned, new
-    scanned, new = scan_texmf_fonts(fontnames, newfontnames)
-    n_scanned = n_scanned + scanned
-    n_new     = n_new     + new
+--    scanned, new = scan_texmf_fonts(fontnames, newfontnames)
+--    n_scanned = n_scanned + scanned
+--    n_new     = n_new     + new
 
     scanned, new = scan_os_fonts(fontnames, newfontnames)
     n_scanned = n_scanned + scanned

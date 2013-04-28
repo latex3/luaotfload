@@ -419,23 +419,6 @@ local import_values = {
     "style", "optsize", "lookup", "sub" --[[‽]], "mode",
 }
 
-local handle_tfmofm = function (specname, raw)
-    --- FIXME only file: and name: atm
-    local name = raw.file or raw.name or specname
-    local lookup
-    --- why is this here?
-    --- TODO should we keep this, check if it applies only to tfm and
-    ---      ofm, and test formats by a defined list!
-    if resolvers.findfile(name, "tfm") then
-        lookup = "file"
-        name   = file.addsuffix(name, "tfm")
-    elseif resolvers.findfile(name, "ofm") then
-        lookup = "file"
-        name   = file.addsuffix(name, "ofm")
-    end
-    return name, lookup
-end
-
 local lookup_types = { "anon", "file", "name", "path" }
 
 local select_lookup = function (request)
@@ -455,9 +438,6 @@ local handle_request = function (specification)
     local lookup, name = select_lookup(request)
     request.features  = set_default_features(request.features)
 
-    --- FIXME what to do about tfm/ofm??
-    --local name, lookup = handle_tfmofm(specification.name, request)
-
     if name then
         specification.name    = name
         specification.lookup  = lookup or specification.lookup
@@ -467,7 +447,6 @@ local handle_request = function (specification)
         local feat       = import_values[n]
         local newvalue   = request.features[feat]
         if newvalue then
-            print(feat, newvalue)
             specification[feat]    = request.features[feat]
             request.features[feat] = nil
         end
@@ -495,22 +474,6 @@ fonts.definers.registersplit("",  handle_request, "more cryptic") -- catches \fo
 --fonts.definers.registersplit(":",old_behavior,"cryptic")
 --fonts.definers.registersplit("", old_behavior,"more cryptic") -- catches \font\text=[names]
 
---- TODO below section is literally the same in luatex-fonts-def
----      why is it here?
---function fonts.definers.applypostprocessors(tfmdata)
---    local postprocessors = tfmdata.postprocessors
---    if postprocessors then
---        for i=1,#postprocessors do
---            local extrahash = postprocessors[i](tfmdata) -- after scaling etc
---            if type(extrahash) == "string" and extrahash ~= "" then
---                -- e.g. a reencoding needs this
---                extrahash = string.gsub(lower(extrahash),"[^a-z]","-")
---                tfmdata.properties.fullname = format("%s-%s",tfmdata.properties.fullname,extrahash)
---            end
---        end
---    end
---    return tfmdata
---end
 ---[[ end included font-ltx.lua ]]
 
 --[[doc--

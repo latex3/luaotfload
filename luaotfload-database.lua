@@ -25,6 +25,7 @@ local kpseexpand_path         = kpse.expand_path
 local kpseexpand_var          = kpse.expand_var
 local kpselookup              = kpse.lookup
 local kpsereadable_file       = kpse.readable_file
+local lfsisfile               = lfs.isfile
 local mathabs                 = math.abs
 local mathmin                 = math.min
 local stringfind              = string.find
@@ -639,14 +640,15 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     end
 
     if #found == 1 then
-        --- Since we do the file resolving ourselves, we don’t need the
-        --- kpathsea lookup here any longer.
         --- “found” is really synonymous with “registered in the db”.
-        report("log", 0, "resolve",
-            "font family='%s', subfamily='%s' found: %s",
-            name, style, found[1].filename[1]
-        )
-        return found[1].filename[1], found[1].filename[2], true
+        local filename = found[1].filename[1]
+        if lfsisfile(filename) or kpselookup(filename) then
+            report("log", 0, "resolve",
+                "font family='%s', subfamily='%s' found: %s",
+                name, style, filename
+            )
+            return filename, found[1].filename[2], true
+        end
     elseif #found > 1 then
         -- we found matching font(s) but not in the requested optical
         -- sizes, so we loop through the matches to find the one with
@@ -661,13 +663,18 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 least   = difference
             end
         end
-        report("log", 0, "resolve",
-            "font family='%s', subfamily='%s' found: %s",
-            name, style, closest.filename[1]
-        )
-        return closest.filename[1], closest.filename[2], true
+        local filename = closest.filename[1]
+        if lfsisfile(filename) or kpselookup(filename) then
+            report("log", 0, "resolve",
+                "font family='%s', subfamily='%s' found: %s",
+                name, style, filename
+            )
+            return filename, closest.filename[2], true
+        end
     elseif found.fallback then
-        return found.fallback.filename[1], found.fallback.filename[2], true
+        return found.fallback.filename[1],
+               found.fallback.filename[2],
+               true
     end
 
     --- no font found so far

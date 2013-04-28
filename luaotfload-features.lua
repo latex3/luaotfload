@@ -384,10 +384,28 @@ local feature_list      = Cf(Ct""
                            , rawset)
                         * featuresep^-1
 
+--- other -------------------------------------------------------------
+--- This rule is present in the original parser. It sets the “sub”
+--- field of the specification which allows addressing a specific
+--- font inside a TTC container. Neither in Luatex-Fonts nor in
+--- Luaotfload is this documented, so we might as well silently drop
+--- it. However, as backward compatibility is one of our prime goals we
+--- just insert it here and leave it undocumented until someone cares
+--- to ask. (Note: afair subfonts are numbered, but this rule matches a
+--- string; I won’t mess with it though until someone reports a
+--- problem.)
+--- local subvalue   = P("(") * (C(P(1-S("()"))^1)/issub) * P(")") -- for Kim
+---                                                                 Who’s Kim?
+--- Note to self: subfonts apparently start at index 0. Tested with
+--- Cambria.ttc that includes “Cambria Math” at 0 and “Cambria” at 1.
+--- Other values cause luatex to segfault.
+local subfont           = P"(" * Cg((1 - S"()")^1, "sub") * P")"
 --- top-level rules ---------------------------------------------------
 --- \font\foo=<specification>:<features>
 local features          = Cg(feature_list, "features")
-local specification     = (prefixed + unprefixed) * modifier_list^-1
+local specification     = (prefixed + unprefixed)
+                        * subfont^-1
+                        * modifier_list^-1
 local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
                            + specification * (colon    * features)^-1)
 
@@ -449,6 +467,7 @@ local handle_request = function (specification)
         local feat       = import_values[n]
         local newvalue   = request.features[feat]
         if newvalue then
+            print(feat, newvalue)
             specification[feat]    = request.features[feat]
             request.features[feat] = nil
         end
@@ -467,11 +486,11 @@ local compare_requests = function (spec)
     return new
 end
 
-fonts.definers.registersplit(":", compare_requests, "cryptic")
-fonts.definers.registersplit("",  compare_requests, "more cryptic") -- catches \font\text=[names]
+--fonts.definers.registersplit(":", compare_requests, "cryptic")
+--fonts.definers.registersplit("",  compare_requests, "more cryptic") -- catches \font\text=[names]
 
---fonts.definers.registersplit(":", handle_request, "cryptic")
---fonts.definers.registersplit("",  handle_request, "more cryptic") -- catches \font\text=[names]
+fonts.definers.registersplit(":", handle_request, "cryptic")
+fonts.definers.registersplit("",  handle_request, "more cryptic") -- catches \font\text=[names]
 
 --fonts.definers.registersplit(":",old_behavior,"cryptic")
 --fonts.definers.registersplit("", old_behavior,"more cryptic") -- catches \font\text=[names]

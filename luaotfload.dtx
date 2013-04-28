@@ -645,6 +645,15 @@ end
 --fonts.define.resolvers.file = fonts.define.resolvers.name
 %    \end{macrocode}
 %
+%    We override the cleanname function as it outputs garbage for exotic font
+%    names
+%
+%    \begin{macrocode}
+containers.cleanname = function (name)
+    return (string.gsub(string.lower(name),"[^%w%d\128\255]+","-"))
+end 
+%    \end{macrocode}
+%
 %    Overriding some defaults set in \context code.
 %
 %    \begin{macrocode}

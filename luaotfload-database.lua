@@ -437,7 +437,7 @@ local cached_resolver = function (specification)
     if not names.data then names.data = load_names() end
     local request_cache = names.data.request_cache
     local request = specification.specification
-    report("info", 4, "cache",
+    report("log", 4, "cache",
            "looking for “%s” in cache ...",
            request)
     local found = names.data.request_cache[request]
@@ -449,7 +449,7 @@ local cached_resolver = function (specification)
         end
         return specification
     end
-    report("info", 4, "cache", "not cached; resolving")
+    report("log", 4, "cache", "not cached; resolving")
 
     --- first we resolve normally ...
     local resolved_spec = normal_resolver(specification)
@@ -459,7 +459,7 @@ local cached_resolver = function (specification)
         local f = cache_fields[i]
         entry[f] = resolved_spec[f]
     end
-    report("info", 4, "cache", "new entry: %s", request)
+    report("log", 4, "cache", "new entry: %s", request)
     names.data.request_cache[request] = entry
 
     --- obviously, the updated cache needs to be stored.
@@ -467,7 +467,7 @@ local cached_resolver = function (specification)
     --- whenever the cache is updated.
     --- TODO this should trigger a save only once the
     ---      document is compiled (finish_pdffile callback?)
-    report("info", 5, "cache", "saving updated cache")
+    report("log", 5, "cache", "saving updated cache")
     save_names()
     return resolved_spec
 end
@@ -480,7 +480,7 @@ local resolvers = {
 
 fonts.definers.resolve = resolvers[config.luaotfload.resolver]
 --fonts.definers.resolve = resolvers.cached
-fonts.definers.resolve = resolvers.dummy
+--fonts.definers.resolve = resolvers.dummy
 
 --[[doc--
 
@@ -1268,7 +1268,7 @@ local function get_os_dirs()
         local os_dirs = {}
         for _,p in next, {"/usr/local/etc/fonts/fonts.conf", "/etc/fonts/fonts.conf"} do
             if lfs.isfile(p) then
-                read_fonts_conf(p, os_dirs, passed_paths)
+                paths = read_fonts_conf(p, os_dirs, passed_paths)
             end
         end
         return os_dirs

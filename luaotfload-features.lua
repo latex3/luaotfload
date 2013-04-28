@@ -401,9 +401,9 @@ local import_values = {
     "style", "optsize", "lookup", "sub" --[[‽]], "mode",
 }
 
-local handle_name = function (specification, raw)
+local handle_name = function (specname, raw)
     --- FIXME only file: and name: atm
-    local name = raw.file or raw.name
+    local name = raw.file or raw.name or specname
     local lookup
     --- why is this here?
     --- TODO should we keep this, check if it applies only to tfm and
@@ -424,7 +424,7 @@ local handle_request = function (specification)
                                   specification.specification)
     request.features  = set_default_features(request.features)
 
-    local name, lookup = handle_name(specification, request)
+    local name, lookup = handle_name(specification.name, request)
     if name then
         specification.name    = name
         specification.lookup  = lookup or specification.lookup

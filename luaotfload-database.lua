@@ -295,7 +295,7 @@ end
 
 --- string -> (string * bool | int)
 crude_file_lookup_verbose = function (filename)
-    if not names.data then names.data = names_reload() end
+    if not names.data then names.data = load_names() end
     local data      = names.data
     local mappings  = data.mappings
     local found
@@ -344,7 +344,7 @@ end
 
 --- string -> (string * bool | int)
 crude_file_lookup = function (filename)
-    if not names.data then names.data = names_reload() end
+    if not names.data then names.data = load_names() end
     local data      = names.data
     local mappings  = data.mappings
     local found = data.barenames[filename]

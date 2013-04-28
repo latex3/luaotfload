@@ -28,7 +28,7 @@ string.quoted = string.quoted or function (str)
   return string.format("%q",str) 
 end
 
-dofile(loader_path)
+require(loader_path)
 
 --[[doc--
 Depending on how the script is called we change its behavior.

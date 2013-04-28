@@ -1014,11 +1014,12 @@ local luatexbase = luatexbase
 
 local type, next       = type, next
 local setmetatable     = setmetatable
-local stringfind       = string.find
-local stringsub        = string.sub
-local stringmatch      = string.match
-local stringformat     = string.format
 local find_file        = kpse.find_file
+local lfsisfile        = lfs.isfile
+local stringfind       = string.find
+local stringformat     = string.format
+local stringmatch      = string.match
+local stringsub        = string.sub
 
 local add_to_callback, create_callback =
       luatexbase.add_to_callback, luatexbase.create_callback
@@ -1363,47 +1364,74 @@ loadmodule"colors.lua"     --- “font-clr”
 % is understood.
 % Until then it is considered a kludge, like the hack below.
 %
+% Relying on the \verb|name:| resolver for everything has been the source
+% of permanent trouble with the database.
+% With the introduction of the new syntax parser we now have enough
+% granularity to distinguish between the \XETEX emulation layer and the
+% genuine \verb|name:| and \verb|file:| lookups of \LUATEX-Fonts.
+% Another benefit is that we can now easily plug in or replace new lookup
+% behaviors if necessary.
+%
+% The name resolver remains untouched, but it calls
+% \luafunction{fonts.names.resolve()} internally anyways (see
+% \fileent{luaotfload-database.lua}).
+%
 %    \begin{macrocode}
-
---- below lines already (2013-04-25) lead to warnings by
---- the font loader
---fonts.definers.resolvers.file = function (specification)
---  specification.name = fonts.names.resolve('', '', specification)
---end
 
 local resolvers = fonts.definers.resolvers
 local formats   = fonts.formats
 
+%    \end{macrocode}
+% \identifier{luaotfload} promises easy access to system fonts.
+% Without additional precautions, this cannot be achieved by
+% \identifier{kpathsea} alone, because it searches only the
+% \fileent{texmf} directories by default.
+% Although it is possible for \identifier{kpathsea} to include extra
+% paths by adding them to the \verb|OSFONTDIR| environment variable,
+% this is still short of the goal »\emphasis{it just works!}«.
+% When building the font database \identifier{luaotfload} scans
+% system font directories anyways, so we already have all the
+% information for looking sytem fonts.
+% With the release version 2.2 the file names are indexed in the database
+% as well and we are ready to resolve \verb|file:| lookups this way.
+% Thus we no longer need to call the \identifier{kpathsea} library in
+% most cases when looking up font files, only when generating the database.
+%
+%    \begin{macrocode}
 resolvers.file = function (specification)
+    --- how would we go about allowing subfonts (ttc)?
     if specification.lookup == "file" then
         local found = fonts.names.crude_file_lookup(specification.name)
-        --local found = fonts.names.crude_file_lookup_verbose(specification.name)
         specification.name = found[1]
     end
 end
 
 --- TODO rewrite this according to the syntax spec
-resolvers.anon = function (specification)
-    local resolved, subfontno = fonts.names.resolve(nil, nil, specification)
-    if resolved then --- we follow fonts-def to some extent
-        specification.resolved = resolved
-        specification.sub      = subfontno
-        local suffix = file.suffix(resolved)
-        if formats[suffix] then
-            specification.forced = suffix
-            specification.name   = file.removesuffix(resolved)
-        else
-            specification.name   = resolved
-        end
-    else
+%    \end{macrocode}
+% We classify as \verb|anon:| those requests that have neither a
+% prefix nor brackets. According to Khaled\footnote{%
+%     \url{https://github.com/phi-gamma/luaotfload/issues/4#issuecomment-17090553}.
+% }
+% they are the \XETEX equivalent of a \verb|name:| request, so we will be
+% treating them as such.
+%
+%    \begin{macrocode}
+
+resolvers.anon = resolvers.name
+
+%    \end{macrocode}
+% Prior to version 2.2, \identifier{luaotfload} did not distinguish
+% \verb|file:| and \verb|path:| lookups, causing complications with the
+% resolver.
+% Now we test if the requested name is an absolute path in the file
+% system, otherwise we fall back to the \verb|file:| lookup.
+%
+%    \begin{macrocode}
+resolvers.path = function (specification)
+    local exists, _ = lfsisfile(specification.name)
+    if not exists then -- resort to file: lookup
         resolvers.file(specification)
     end
-end
-
---- TODO rewrite this according to the syntax spec
-resolvers.path = function (specification)
-    local found = fonts.names.crude_file_lookup(specification.name)
-    specification.name = found[1]
 end
 
 %    \end{macrocode}

@@ -1371,13 +1371,39 @@ loadmodule"colors.lua"     --- “font-clr”
 --  specification.name = fonts.names.resolve('', '', specification)
 --end
 
-fonts.definers.resolvers.file = function (specification)
-    --inspect(specification)
+local resolvers = fonts.definers.resolvers
+local formats   = fonts.formats
+
+resolvers.file = function (specification)
     if specification.lookup == "file" then
         local found = fonts.names.crude_file_lookup(specification.name)
         --local found = fonts.names.crude_file_lookup_verbose(specification.name)
         specification.name = found[1]
     end
+end
+
+--- TODO rewrite this according to the syntax spec
+resolvers.anon = function (specification)
+    local resolved, subfontno = fonts.names.resolve(nil, nil, specification)
+    if resolved then --- we follow fonts-def to some extent
+        specification.resolved = resolved
+        specification.sub      = subfontno
+        local suffix = file.suffix(resolved)
+        if formats[suffix] then
+            specification.forced = suffix
+            specification.name   = file.removesuffix(resolved)
+        else
+            specification.name   = resolved
+        end
+    else
+        resolvers.file(specification)
+    end
+end
+
+--- TODO rewrite this according to the syntax spec
+resolvers.path = function (specification)
+    local found = fonts.names.crude_file_lookup(specification.name)
+    specification.name = found[1]
 end
 
 %    \end{macrocode}

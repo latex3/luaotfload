@@ -401,7 +401,7 @@ local import_values = {
     "style", "optsize", "lookup", "sub" --[[‽]], "mode",
 }
 
-local handle_name = function (specname, raw)
+local handle_tfmofm = function (specname, raw)
     --- FIXME only file: and name: atm
     local name = raw.file or raw.name or specname
     local lookup
@@ -418,13 +418,28 @@ local handle_name = function (specname, raw)
     return name, lookup
 end
 
+local lookup_types = { "anon", "file", "name", "path" }
+
+local select_lookup = function (request)
+    for i=1, #lookup_types do
+        local lookup = lookup_types[i]
+        local value  = request[lookup]
+        if value then
+            return lookup, value
+        end
+    end
+end
+
 --- spec -> spec
 local handle_request = function (specification)
-    local request     = lpegmatch(font_request,
-                                  specification.specification)
+    local request = lpegmatch(font_request,
+                              specification.specification)
+    local lookup, name = select_lookup(request)
     request.features  = set_default_features(request.features)
 
-    local name, lookup = handle_name(specification.name, request)
+    --- FIXME what to do about tfm/ofm??
+    --local name, lookup = handle_tfmofm(specification.name, request)
+
     if name then
         specification.name    = name
         specification.lookup  = lookup or specification.lookup

@@ -126,6 +126,7 @@ This tool is part of the luaotfload package. Valid options are:
 
   -u --update                  update the database
   -f --force                   force re-indexing all fonts
+  -c --flush-cache             empty cache of font requests
 
   --find="font name"           query the database for a font name
   -F --fuzzy                   look for approximate matches if --find fails
@@ -214,7 +215,7 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel", "help", "version", "generate", "query"
+    "loglevel", "help", "version", "flush", "generate", "query"
 }
 local action_pending  = table.tohash(action_sequence, false)
 
@@ -252,6 +253,19 @@ actions.generate = function (job)
     return false, false
 end
 
+actions.flush = function (job)
+    local success, fontnames = names.flush_cache()
+    if success then
+        local savedname = names.save(fontnames)
+        logs.names_report("info", 2, "cache",
+            "Cache emptied", #fontnames.mappings)
+        if savedname then
+            return true, true
+        end
+    end
+    return false, false
+end
+
 actions.query = function (job)
 
     local query = job.query
@@ -269,7 +283,7 @@ actions.query = function (job)
         logs.names_report(false, 1,
             "resolve", "Font “%s” found!", query)
         logs.names_report(false, 1,
-            "resolve", "Resolved file name “%s”:", foundname)
+            "resolve", "Resolved file name “%s”", foundname)
         if job.show_info then
             show_font_info(foundname)
         end
@@ -304,6 +318,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
 
     local long_options = {
         alias            = 1,
+        ["flush-cache"]  = "c",
         find             = 1,
         force            = "f",
         fuzzy            = "F",
@@ -317,7 +332,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         version          = "V",
     }
 
-    local short_options = "fFiquvVh"
+    local short_options = "cfFiquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -366,6 +381,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.show_info = true
         elseif v == "alias" then
             config.luaotfload.self = optarg[n]
+        elseif v == "c" then
+            action_pending["flush"] = true
         end
     end
 

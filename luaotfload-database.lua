@@ -542,7 +542,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
 
     local found = { }
     local synonym_set = style_synonyms.set
-    for _,face in next, data.mappings do
+    for _, face in next, data.mappings do
         local family, subfamily, fullname, psname, fontname, pfullname
 
         local facenames = face.sanitized
@@ -797,7 +797,7 @@ The data inside an Opentype font file can be quite heterogeneous.
 Thus in order to get the relevant information, parts of the original
 table as returned by the font file reader need to be relocated.
 --doc]]--
-font_fullinfo = function (filename, subfont, texmf)
+font_fullinfo = function (filename, subfont)
     local tfmdata = { }
     local rawfont = fontloader.open(filename, subfont)
     if not rawfont then
@@ -844,10 +844,7 @@ font_fullinfo = function (filename, subfont, texmf)
     tfmdata.fontname    = metadata.fontname
     tfmdata.fullname    = metadata.fullname
     tfmdata.familyname  = metadata.familyname
-    if texmf then
-        filename = filebasename(filename)
-    end
-    tfmdata.filename    = { filename, subfont }
+    tfmdata.filename    = { filename, subfont } -- always store full path
     tfmdata.weight      = metadata.pfminfo.weight
     tfmdata.width       = metadata.pfminfo.width
     tfmdata.slant       = metadata.italicangle
@@ -862,7 +859,7 @@ end
 
 --- we return true if the fond is new or re-indexed
 --- string -> dbobj -> dbobj -> bool -> bool
-local load_font = function (fullname, fontnames, newfontnames, texmf)
+local load_font = function (fullname, fontnames, newfontnames)
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status
 
@@ -879,11 +876,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     local basename      = filebasename(fullname)
     local barename      = filenameonly(fullname)
 
-    --- entryname is apparently the identifier a font is
-    --- loaded by; it is different for files in the texmf
-    --- (due to kpse? idk.)
-    --- entryname = texmf : true -> basename | false -> fullname
-    local entryname     = texmf and basename or fullname
+    local entryname     = basename
 
     if not fullname then return false end
 
@@ -899,8 +892,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
                         and status[entryname].timestamp
     timestamp           = lfs.attributes(fullname, "modification")
 
-    local index_status = newstatus[entryname]
-                        or (not texmf and newstatus[basename])
+    local index_status = newstatus[entryname] or newstatus[basename]
     local teststat = newstatus[entryname]
     --- index_status: nil | false | table
     if index_status and index_status.timestamp == timestamp then
@@ -932,7 +924,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     if info then
         if type(info) == "table" and #info > 1 then --- ttc
             for n_font = 1, #info do
-                local fullinfo = font_fullinfo(fullname, n_font-1, texmf)
+                local fullinfo = font_fullinfo(fullname, n_font-1)
                 if not fullinfo then
                     return false
                 end
@@ -947,7 +939,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
                 newstatus[entryname].index[n_font]  = index
             end
         else
-            local fullinfo = font_fullinfo(fullname, false, texmf)
+            local fullinfo = font_fullinfo(fullname, false)
             if not fullinfo then
                 return false
             end
@@ -1070,13 +1062,13 @@ for key, value in next, font_extensions do
 end
 
 --- string -> dbobj -> dbobj -> bool -> (int * int)
-local scan_dir = function (dirname, fontnames, newfontnames, texmf)
+local scan_dir = function (dirname, fontnames, newfontnames)
     --[[
     This function scans a directory and populates the list of fonts
     with all the fonts it finds.
     - dirname is the name of the directory to scan
     - names is the font database to fill -> no such term!!!
-    - texmf is a boolean saying if we are scanning a texmf directory
+    - texmf used to be a boolean saying if we are scanning a texmf directory
     ]]
     local n_scanned, n_new = 0, 0   --- total of fonts collected
     report("log", 2, "db", "scanning", "%s", dirname)
@@ -1092,7 +1084,7 @@ local scan_dir = function (dirname, fontnames, newfontnames, texmf)
                 local fullname = found[j]
                 fullname = path_normalize(fullname)
                 report("log", 2, "db", "loading font “%s”", fullname)
-                local new = load_font(fullname, fontnames, newfontnames, texmf)
+                local new = load_font(fullname, fontnames, newfontnames)
                 if new then n_new = n_new + 1 end
             end
         end
@@ -1382,8 +1374,9 @@ local function scan_os_fonts(fontnames, newfontnames)
     ]]
     report("info", 2, "db", "Scanning OS fonts...")
     report("info", 3, "db", "Searching in static system directories...")
+    print"~~~~"
     for _,d in next, get_os_dirs() do
-        local found, new = scan_dir(d, fontnames, newfontnames, false)
+        local found, new = scan_dir(d, fontnames, newfontnames)
         n_scanned = n_scanned + found
         n_new     = n_new     + new
     end

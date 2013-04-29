@@ -240,6 +240,7 @@ local load_names
 local read_fonts_conf
 local reload_db
 local resolve
+local resolve_cached
 local save_names
 local scan_external_dir
 local update_names
@@ -380,22 +381,6 @@ TODO:
     9) ???
     n) PROFIT!!!
 
---doc]]--
-
---- the resolver is called after the font request is parsed
---- this is where we insert the cache
-local normal_resolver = fonts.definers.resolve
-local dummy_resolver = function (specification)
-    --- this ensures that the db is always loaded
-    --- before a lookup occurs
-    if not names.data then names.data = load_names() end
-    --inspect(specification)
-    local resolved = normal_resolver(specification)
-    --inspect(resolved)
-    return resolved
-end
-
---[[doc--
 The name lookup requires both the “name” and some other
 keys, so we’ll concatenate them.
 The spec is modified in place (ugh), so we’ll have to catalogue what
@@ -428,33 +413,29 @@ We’ll just cache a deep copy of the entire spec as it leaves the
 resolver, lest we want to worry if we caught all the details.
 --doc]]--
 
---- spec -> spec
-local cached_resolver = function (specification)
+--- 'a -> 'a -> table -> (string * int|boolean * boolean)
+resolve_cached = function (_, _, specification)
     if not names.data then names.data = load_names() end
     local request_cache = names.data.request_cache
     local request = specification.specification
-    report("log", 4, "cache",
-           "looking for “%s” in cache ...",
+    report("log", 4, "cache", "looking for “%s” in cache ...",
            request)
+
     local found = names.data.request_cache[request]
+
+    --- case 1) cache positive ----------------------------------------
     if found then --- replay fields from cache hit
         report("info", 4, "cache", "found!")
-        for i=1, #cache_fields do
-            local f = cache_fields[i]
-            if found[f] then specification[f] = found[f] end
-        end
-        return specification
+        return found[1], found[2], true
     end
     report("log", 4, "cache", "not cached; resolving")
 
+    --- case 2) cache negative ----------------------------------------
     --- first we resolve normally ...
-    local resolved_spec = normal_resolver(specification)
-    --- ... then we add the fields to the cache
-    local entry = { }
-    for i=1, #cache_fields do
-        local f = cache_fields[i]
-        entry[f] = resolved_spec[f]
-    end
+    local filename, subfont, success = resolve(nil, nil, specification)
+    if not success then return filename, subfont, false end
+    --- ... then we add the fields to the cache ... ...
+    local entry = { filename, subfont }
     report("log", 4, "cache", "new entry: %s", request)
     names.data.request_cache[request] = entry
 
@@ -463,20 +444,12 @@ local cached_resolver = function (specification)
     --- whenever the cache is updated.
     --- TODO this should trigger a save only once the
     ---      document is compiled (finish_pdffile callback?)
+    --- TODO we should speed up writing by separating
+    ---      the cache from the db
     report("log", 5, "cache", "saving updated cache")
     save_names()
-    return resolved_spec
+    return filename, subfont, true
 end
-
-local resolvers = {
-    dummy    = dummy_resolver,
-    normal   = normal_resolver,
-    cached   = cached_resolver,
-}
-
-fonts.definers.resolve = resolvers[config.luaotfload.resolver]
---fonts.definers.resolve = resolvers.cached
---fonts.definers.resolve = resolvers.dummy
 
 --[[doc--
 
@@ -1390,9 +1363,16 @@ names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
 names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 
-names.resolve      = resolve --- replace the resolver from luatex-fonts
-names.resolvespec  = resolve
-names.find_closest = find_closest
+--- replace the resolver from luatex-fonts
+if config.luaotfload.resolver == "cached" then
+    report("info", 0, "cache", "caching of name: lookups active")
+    names.resolve     = resolve_cached
+    names.resolvespec = resolve_cached
+else
+    names.resolve     = resolve
+    names.resolvespec = resolve
+end
+names.find_closest      = find_closest
 
 --- dummy required by luatex-fonts (cf. luatex-fonts-syn.lua)
 

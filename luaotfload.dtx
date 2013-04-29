@@ -540,8 +540,8 @@ and the derived files
 % \end{quote}
 %
 % \noindent
-% If style modifiers are present (\XETEX style), they must precede \meta{font
-% features}.
+% If style modifiers are present (\XETEX style), they must precede
+% \meta{font features}.
 %
 % The element \meta{font features} is a semicolon-separated list of feature
 % tags\footnote{%
@@ -1532,19 +1532,6 @@ loadmodule"database.lua"   --- “font-nms”
 loadmodule"colors.lua"     --- “font-clr”
 
 %    \end{macrocode}
-% This hack makes fonts called with file method found by fonts.names.resolve
-% instead of just trying to find them with \identifier{kpse}.
-% It is necessary in cases when font files are not reachable by
-% \identifier{kpse} but present in the database, a quite common case
-% under Linux.
-%
-% As of 2013-04-24 we have a workaround in the resolver that handles
-% \verb|file:| lookups diverted this way.
-% It requires some overhead due to additional extra data saved in the
-% names database, and might vanish entirely once the font request syntax
-% is understood.
-% Until then it is considered a kludge, like the hack below.
-%
 % Relying on the \verb|name:| resolver for everything has been the source
 % of permanent trouble with the database.
 % With the introduction of the new syntax parser we now have enough
@@ -1715,7 +1702,6 @@ local patch_defined_font = function (specification, size, id)
     if type(tfmdata) == "table" then
         call_callback("luaotfload.patch_font", tfmdata)
     end
-    -- inspect(table.keys(tfmdata))
     return tfmdata
 end
 

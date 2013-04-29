@@ -416,7 +416,8 @@ local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
 local import_values = {
     --- That’s what the 1.x parser did, not quite as graciously,
     --- with an array of branch expressions.
-    "style", "optsize", "lookup", "sub" --[[‽]], "mode",
+    -- "style", "optsize",--> from slashed notation; handled otherwise
+    "lookup", "sub" --[[‽]], "mode",
 }
 
 local lookup_types = { "anon", "file", "name", "path" }

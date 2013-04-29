@@ -1,6 +1,7 @@
 \ifdefined\directlua
   \directlua{config = config or { luaotfload = { } }
-             config.luaotfload.resolver = "cached" }
+             config.luaotfload.resolver = "cached"
+             config.luaotfload.loglevel = 5 }
   \input luaotfload.sty
 \fi
 

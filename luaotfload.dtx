@@ -1179,7 +1179,8 @@ local luaotfload            = luaotfload
 
 config                      = config or { }
 config.luaotfload           = config.luaotfload or { }
-luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
+config.luaotfload.resolver  = config.luaotfload.resolver or "normal"
+--luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 
 luaotfload.module = {
     name          = "luaotfload",

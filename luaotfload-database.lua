@@ -562,8 +562,6 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     local found = { }
     local synonym_set = style_synonyms.set
     for _,face in next, data.mappings do
-        --- TODO we really should store those in dedicated
-        --- .sanitized field
         local family, subfamily, fullname, psname, fontname, pfullname
 
         local facenames = face.sanitized

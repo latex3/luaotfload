@@ -431,6 +431,35 @@ local select_lookup = function (request)
     end
 end
 
+local supported = {
+    b    = "bold",
+    i    = "italic",
+    bi   = "bolditalic",
+    aat  = false,
+    icu  = false,
+    gr   = false,
+}
+
+local handle_slashed = function (modifiers)
+    local style, optsize
+    for i=1, #modifiers do
+        local mod  = modifiers[i]
+        if supported[mod] then
+            style = supported[mod]
+        --elseif stringfind(v, "^s=") then
+        elseif stringsub(v, 1, 2) == "s=" then
+            local val = stringsub(v, 3)
+            optsize = val
+        elseif stylename == false then
+            report("log", 0,
+                "load", "unsupported font option: %s", v)
+        elseif not stringis_empty(v) then
+            style = stringgsub(v, "[^%a%d]", "")
+        end
+    end
+    return style, optsize
+end
+
 --- spec -> spec
 local handle_request = function (specification)
     local request = lpegmatch(font_request,
@@ -443,6 +472,11 @@ local handle_request = function (specification)
         specification.lookup  = lookup or specification.lookup
     end
 
+    if request.modifiers then
+        local style, optsize = handle_slashed(request.modifiers)
+        specification.style, specification.optsize = style, optsize
+    end
+
     for n=1, #import_values do
         local feat       = import_values[n]
         local newvalue   = request.features[feat]
@@ -451,6 +485,7 @@ local handle_request = function (specification)
             request.features[feat] = nil
         end
     end
+
     --- The next line sets the “rand” feature to “random”; I haven’t
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.

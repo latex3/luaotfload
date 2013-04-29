@@ -79,9 +79,14 @@ names.path           = {
     path     = "",
 }
 
-config                      = config or { }
-config.luaotfload           = config.luaotfload or { }
-config.luaotfload.resolver  = config.luaotfload.resolver or "normal"
+config                         = config or { }
+config.luaotfload              = config.luaotfload or { }
+config.luaotfload.resolver     = config.luaotfload.resolver or "normal"
+if config.luaotfload.update_live ~= false then
+    --- this option allows for disabling updates
+    --- during a TeX run
+    config.luaotfload.update_live = true
+end
 
 -- We use the cache.* of ConTeXt (see luat-basics-gen), we can
 -- use it safely (all checks and directory creations are already done). It
@@ -677,7 +682,7 @@ end --- resolve()
 
 --- string -> ('a -> 'a) -> 'a list -> 'a
 reload_db = function (why, caller, ...)
-    report("log", 1, "db", "reload initiated; reason: “%s”", why)
+    report("both", 1, "db", "reload initiated; reason: “%s”", why)
     names.data = update_names()
     save_names(names.data)
     fonts_reloaded = true
@@ -1392,6 +1397,12 @@ end
 
 --- dbobj -> bool -> dbobj
 update_names = function (fontnames, force)
+    if config.luaotfload.update_live == false then
+        report("info", 2, "db",
+               "skipping database update")
+        --- skip all db updates
+        return fontnames
+    end
     local starttime = os.gettimeofday()
     local n_scanned, n_new = 0, 0
     --[[
@@ -1399,7 +1410,7 @@ update_names = function (fontnames, force)
     - “newfontnames” is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
-    report("info", 2, "db", "Updating the font names database"
+    report("both", 2, "db", "Updating the font names database"
                          .. (force and " forcefully" or ""))
 
     if force then
@@ -1409,8 +1420,8 @@ update_names = function (fontnames, force)
             fontnames = load_names()
         end
         if fontnames.version ~= names.version then
-            report("log", 1, "db", "No font names database or old "
-                                .. "one found; generating new one")
+            report("both", 1, "db", "No font names database or old "
+                                 .. "one found; generating new one")
             fontnames = fontnames_init(true)
         end
     end

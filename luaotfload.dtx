@@ -160,6 +160,8 @@ and the derived files
 
 \renewcommand\partname{Part}%% gets rid of the stupid “file” heading
 
+\usepackage{syntax}%% bnf for font request syntax
+
 \VerbatimFootnotes
 \begin{document}
   \DocInput{luaotfload.dtx}%
@@ -256,8 +258,81 @@ and the derived files
 %
 % \noindent
 % The curly brackets are optional and escape the spaces in the enclosed
-% font name (alternatively, double quotes serve the same purpose).
-% The individual parts of the syntax are:
+% font name.
+% Alternatively, double quotes serve the same purpose.
+% A selection of individual parts of the syntax are discussed below;
+% for a more formal description see figure \ref{font-syntax}.
+%
+% \begin{figure}[b]
+%   \setlength\grammarparsep{12pt plus 2pt minus 2pt}
+%   \setlength\grammarindent{5cm}
+%   \begingroup
+%     \small
+%     \begin{grammar}
+%       <definition>      ::= `\\font', {\sc csname}, `=', <font request>, [ <size> ] ;
+%
+%       <size>            ::= `at', {\sc dimension} ;
+%
+%       <font request>    ::= `"', <unquoted font request> `"'
+%       \alt                  `{', <unquoted font request> `}'
+%       \alt                  <unquoted font request> ;
+%
+%       <unquoted font request> ::= <specification>, [`:', <feature list> ]
+%       \alt                        `[', <path lookup> `]', [ [`:'], <feature list> ] ;
+%
+%       <specification>    ::= <prefixed spec>, [ <subfont no> ], \{ <modifier> \}
+%       \alt                   <anon lookup>, \{ <modifier> \} ;
+%
+%       <prefixed spec>    ::= `file:', <file lookup>
+%       \alt                   `name:', <name lookup> ;
+%
+%       <file lookup>      ::= \{ <name character> \} ;
+%
+%       <name lookup>      ::= \{ <name character> \} ;
+%
+%       <anon lookup>      ::= {\sc tfmname} | <name lookup> ;
+%
+%       <path lookup>      ::= \{ {\sc all_characters} - `]' \} ;
+%
+%       <modifier>         ::= `/', (`i' | `b' | `bi' | `ib') ;
+%
+%       <subfont no>       ::= `(', \{ {\sc digit} \}, `)' ;
+%
+%       <feature list>     ::= <feature expr>, \{ `;', <feature expr> \} ;
+%
+%       <feature expr>     ::= {\sc feature_id}, `=', {\sc feature_value}
+%       \alt                   <feature switch>, {\sc feature_id} ;
+%
+%       <feature switch>   ::= `+' | `-' ;
+%
+%       <name character>   ::= {\sc all_characters} - ( `(' | `/' | `:' ) ;
+%     \end{grammar}
+%   \endgroup
+%   \caption{Font request syntax.
+%            Braces or double quotes around the
+%            \emphasis{specification} rule will
+%            preserve whitespace in file names.
+%            In addition to the font style modifiers
+%            (\emphasis{slash-notation}) given above, there
+%            are others that are recognized but will be silently
+%            ignored: {\ttfamily aat},
+%                     {\ttfamily icu}, and
+%                     {\ttfamily gr}.
+%            The special terminals are:
+%            {\sc feature\textunderscore id} for a valid font
+%               feature name and
+%            {\sc feature\textunderscore value} for the corresponding
+%               value.
+%            {\sc tfmname} is the name of a \abbrev{tfm} file.
+%            {\sc digit}  again refers to bytes 48--57, and
+%            {\sc all\textunderscore characters} to all byte values.
+%            {\sc csname} and {\sc dimension} are the \TEX concepts.}
+%   \label{font-syntax}
+% \end{figure}
+%
+% %(* braces around the specification will preserve whitespace *)
+% %(* file lookups do not allow paths *)
+% %(* others like `aat', `icu', and `gr' are silently ignored *)
 %
 % \paragraph{Prefix}
 %

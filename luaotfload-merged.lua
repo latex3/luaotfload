@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/26/13 15:13:48
+-- merge date  : 04/29/13 20:30:03
 
 do -- begin closure to overcome local limits and interference
 
@@ -3039,7 +3039,6 @@ function caches.getreadablepaths(category,subcategory)
 end
 local function makefullname(path,name)
   if path and path~="" then
-    name="temp-"..name 
     return file.addsuffix(file.join(path,name),"lua"),file.addsuffix(file.join(path,name),usingjit and "lub" or "luc")
   end
 end
@@ -3093,7 +3092,7 @@ function caches.compile(data,luaname,lucname)
     d=table.serialize(data,true) 
   end
   if d and d~="" then
-    local f=io.open(lucname,'w')
+    local f=io.open(lucname,'wb')
     if f then
       local s=loadstring(d)
       if s then
@@ -3218,7 +3217,7 @@ function containers.content(container,name)
   return container.storage[name]
 end
 function containers.cleanname(name)
-  return (gsub(lower(name),"[^%w%d]+","-"))
+  return (gsub(lower(name),"[^%w\128-\255]+","-")) 
 end
 
 end -- closure
@@ -4829,22 +4828,35 @@ end
 local fonts=fonts
 fonts.names=fonts.names or {}
 fonts.names.version=1.001 
-fonts.names.basename="luatex-fonts-names.lua"
+fonts.names.basename="luatex-fonts-names"
 fonts.names.new_to_old={}
 fonts.names.old_to_new={}
+fonts.names.cache=containers.define("fonts","data",fonts.names.version,true)
 local data,loaded=nil,false
 local fileformats={ "lua","tex","other text files" }
+function fonts.names.reportmissingbase()
+  texio.write("<missing font database, run: mtxrun --script fonts --reload --simple>")
+  fonts.names.reportmissingbase=nil
+end
+function fonts.names.reportmissingname()
+  texio.write("<unknown font in database, run: mtxrun --script fonts --reload --simple>")
+  fonts.names.reportmissingname=nil
+end
 function fonts.names.resolve(name,sub)
   if not loaded then
     local basename=fonts.names.basename
     if basename and basename~="" then
-      for i=1,#fileformats do
-        local format=fileformats[i]
-        local foundname=resolvers.findfile(basename,format) or ""
-        if foundname~="" then
-          data=dofile(foundname)
-          texio.write("<font database loaded: ",foundname,">")
-          break
+      data=containers.read(fonts.names.cache,basename)
+      if not data then
+        basename=file.addsuffix(basename,"lua")
+        for i=1,#fileformats do
+          local format=fileformats[i]
+          local foundname=resolvers.findfile(basename,format) or ""
+          if foundname~="" then
+            data=dofile(foundname)
+            texio.write("<font database loaded: ",foundname,">")
+            break
+          end
         end
       end
     end
@@ -4860,9 +4872,12 @@ function fonts.names.resolve(name,sub)
       else
         return filename,false
       end
-    else
+    elseif fonts.names.reportmissingname then
+      fonts.names.reportmissingname()
       return name,false 
     end
+  elseif fonts.names.reportmissingbase then
+    fonts.names.reportmissingbase()
   end
 end
 fonts.names.resolvespec=fonts.names.resolve 
@@ -7713,7 +7728,7 @@ function injections.handler(head,where,keep)
                       if rlmode and rlmode>=0 then
                         n.xoffset=p.xoffset-p.width+d[1]
                       else
-                        n.xoffset=p.xoffset-d[1]-x 
+                        n.xoffset=p.xoffset-d[1]-x
                       end
                     end
                   else
@@ -10053,6 +10068,8 @@ for s=1,#datasets do
                           head,start,ok=handler(head,start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,i)
                           if ok then
                             success=true
+                            break
+                          elseif not start then
                             break
                           end
                         end

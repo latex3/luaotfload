@@ -6,10 +6,27 @@ Change History
       backward-incompatible changes in the font structure (fontspec and 
       unicode-math must be updated)
     * Synchronisation with ConTeXt is now easier and can be done by just
-      updating otfl-fonts-merged.lua (available in ConTeXt)
-    * Improve documentation
-    * renaming mkluatexfontdb into fontdbutil, with more search functionalities
-    * blacklisting font lingoes.ttf
+      updating luaotfload-merged.lua (<= luatex-fonts-merged.lua from
+      the LuaTeX-Plain format)
+    * Improved and extended documentation
+    * Blacklisting font lingoes.ttf while removing several TrueType collections
+      from the blacklist
+    * Font filenames are stored in the database (file: lookups more efficient)
+    * Optional caching of name: lookups
+    * Increased fidelity of XeTeX emulation
+    * Renaming mkluatexfontdb into luaotfload-tool, with more search
+      functionalities (the old behavior is kept if the script is symlinked/
+      renamed mkluatexfontdb)
+    * Added options to luaotfload-tool for simple database queries
+    * Logging facilities have been rewritten and allow for more granularity
+    * All files have been renamed, abandoning cryptic acronyms; also
+      the new prefix is »luaotfload« (<= »otfl«)
+    * The Adobe Glyph List (font-age.lua) is now built via script (mkglyphlist)
+    * Hans adapted the font loader to several of our requests (attribute
+      allocation, custom merged package name, non-ascii names in font cache
+      etc.)
+    * There is now a central, non-personal dev repo on github:
+      https://github.com/lualatex/luaotfload
 
 2013/04/11, luaotfload v1.28:
     * Adapting to LuaTeX 0.75, keeping backward-compatibility

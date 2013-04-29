@@ -28,14 +28,14 @@ string.quoted = string.quoted or function (str)
   return string.format("%q",str) 
 end
 
-dofile(loader_path)
+require(loader_path)
 
 --[[doc--
 Depending on how the script is called we change its behavior.
 For backwards compatibility, moving or symlinking the script to a
 file name starting with \fileent{mkluatexfontdb} will cause it to
 trigger a database update on every run.
-Running as \fileent{fontdbutil} -- the new name -- will do this upon
+Running as \fileent{luaotfload-tool} -- the new name -- will do this upon
 request only.
 
 There are two naming conventions followed here: firstly that of
@@ -61,10 +61,9 @@ do -- we don’t have file.basename and the likes yet, so inline parser ftw
     local extension    = dot * (1 - slash - dot)^1
     local p_basename   = path^-1 * C(thename) * extension^-1 * P(-1)
 
-    -- if stringfind(stringlower(arg[0]), "^fontdbutil") then  
     local self = lpegmatch(p_basename, stringlower(arg[0]))
-    if self == "fontdbutil" then
-        config.luaotfload.self = "fontdbutil"
+    if self == "luaotfload-tool" then
+        config.luaotfload.self = "luaotfload-tool"
     else
         config.luaotfload.self = "mkluatexfontdb"
     end
@@ -101,7 +100,7 @@ local db_src_out = names.path.dir.."/"..names.path.basename
 local db_bin_out = file.replacesuffix(db_src_out, "luc")
 
 local help_messages = {
-    fontdbutil = [[
+    ["luaotfload-tool"] = [[
 
 Usage: %s [OPTION]...
     
@@ -119,7 +118,7 @@ This tool is part of the luaotfload package. Valid options are:
   -V --version                 print version and exit
   -h --help                    print this message
 
-  --alias=<name>               force behavior of “fontdbutil” or legacy
+  --alias=<name>               force behavior of “luaotfload-tool” or legacy
                                “mkluatexfontdb”
 -------------------------------------------------------------------------------
                                    DATABASE
@@ -155,7 +154,7 @@ Valid options:
   -vvv                         print all steps of directory searching
   -V --version                 print version and exit
   -h --help                    print this message
-  --alias=<name>               force behavior of “fontdbutil” or legacy
+  --alias=<name>               force behavior of “luaotfload-tool” or legacy
                                “mkluatexfontdb”
 
 The font database will be saved to
@@ -167,7 +166,7 @@ The font database will be saved to
 
 local help_msg = function ( )
     local template = help_messages[config.luaotfload.self]
-                  or help.messages.fontdbutil
+                  or help_messages["luaotfload-tool"]
     texiowrite_nl(stringformat(template, config.luaotfload.self, db_src_out, db_bin_out))
 end
 
@@ -276,14 +275,20 @@ actions.query = function (job)
         optsize       = 0,
     }
 
-    local foundname, _whatever, success =
+    local foundname, subfont, success =
         fonts.names.resolve(nil, nil, tmpspec)
 
     if success then
         logs.names_report(false, 1,
             "resolve", "Font “%s” found!", query)
-        logs.names_report(false, 1,
-            "resolve", "Resolved file name “%s”", foundname)
+        if subfont then
+            logs.names_report(false, 1, "resolve",
+                "Resolved file name “%s”, subfont nr. “%s”",
+                foundname, subfont)
+        else
+            logs.names_report(false, 1,
+                "resolve", "Resolved file name “%s”", foundname)
+        end
         if job.show_info then
             show_font_info(foundname)
         end
@@ -388,9 +393,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
 
     if config.luaotfload.self == "mkluatexfontdb" then
         action_pending["generate"] = true
-        print(result.log_level)
         result.log_level = math.max(2, result.log_level)
-        print(result.log_level)
     end
     return result
 end

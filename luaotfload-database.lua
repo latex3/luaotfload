@@ -383,7 +383,7 @@ TODO:
  ×  3) make caching optional (via the config table) for debugging
  ×  4) make names_update() cache aware (nil if “force”)
  ×  5) add logging
- ×  6) add cache control to fontdbutil
+ ×  6) add cache control to luaotfload-tool
  ×  7) incr db version
     8) wishlist: save cache only at the end of a run
     9) ???
@@ -858,8 +858,10 @@ font_fullinfo = function (filename, subfont)
 end
 
 --- we return true if the fond is new or re-indexed
---- string -> dbobj -> dbobj -> bool -> bool
+--- string -> dbobj -> dbobj -> bool
 local load_font = function (fullname, fontnames, newfontnames)
+    if not fullname then return false end
+
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status
 
@@ -878,40 +880,39 @@ local load_font = function (fullname, fontnames, newfontnames)
 
     local entryname     = basename
 
-    if not fullname then return false end
-
-    if names.blacklist[fullname]
-    or names.blacklist[basename]
+    if names.blacklist[fullname] or names.blacklist[basename]
     then
         report("log", 2, "db",
             "ignoring blacklisted font “%s”", fullname)
         return false
     end
+
     local timestamp, db_timestamp
-    db_timestamp        = status[entryname]
-                        and status[entryname].timestamp
+    db_timestamp        = status[fullname]
+                        and status[fullname].timestamp
     timestamp           = lfs.attributes(fullname, "modification")
 
-    local index_status = newstatus[entryname] or newstatus[basename]
-    local teststat = newstatus[entryname]
+    local index_status = newstatus[fullname]
     --- index_status: nil | false | table
     if index_status and index_status.timestamp == timestamp then
         -- already indexed this run
         return false
     end
 
-    newstatus[entryname]           = newstatus[entryname] or { }
-    newstatus[entryname].timestamp = timestamp
-    newstatus[entryname].index     = newstatus[entryname].index or { }
+    newstatus[fullname]           = newstatus[fullname] or { }
+    newstatus[fullname].timestamp = timestamp
+    newstatus[fullname].index     = newstatus[fullname].index or { }
 
+    --- this test compares the modification data registered
+    --- in the database with the current one
     if  db_timestamp == timestamp
-    and not newstatus[entryname].index[1] then
-        for _,v in next, status[entryname].index do
-            local index      = #newstatus[entryname].index
+    and not newstatus[fullname].index[1] then
+        for _,v in next, status[fullname].index do
+            local index      = #newstatus[fullname].index
             local fullinfo   = mappings[v]
             local location   = #newmappings + 1
             newmappings[location]               = fullinfo --- keep
-            newstatus[entryname].index[index+1] = location --- is this actually used anywhere?
+            newstatus[fullname].index[index+1]  = location --- is this actually used anywhere?
 --          newfullnames[fullname]              = location
             newbasenames[basename]              = location
             newbarenames[barename]              = location
@@ -929,14 +930,14 @@ local load_font = function (fullname, fontnames, newfontnames)
                     return false
                 end
                 local location = #newmappings+1
-                local index    = newstatus[entryname].index[n_font]
+                local index    = newstatus[fullname].index[n_font]
                 if not index then index = location end
 
                 newmappings[index]                  = fullinfo
 --              newfullnames[fullname]              = location
                 newbasenames[basename]              = location
                 newbarenames[barename]              = location
-                newstatus[entryname].index[n_font]  = index
+                newstatus[fullname].index[n_font]   = index
             end
         else
             local fullinfo = font_fullinfo(fullname, false)
@@ -944,14 +945,14 @@ local load_font = function (fullname, fontnames, newfontnames)
                 return false
             end
             local location  = #newmappings+1
-            local index     = newstatus[entryname].index[1]
+            local index     = newstatus[fullname].index[1]
             if not index then index = location end
 
             newmappings[index]            = fullinfo
 --          newfullnames[fullname]        = location
             newbasenames[basename]        = location
             newbarenames[barename]        = location
-            newstatus[entryname].index[1] = index
+            newstatus[fullname].index[1]  = index
         end
 
     else --- missing info
@@ -1108,7 +1109,7 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
     if not stringis_empty(fontdirs) then
         for _,d in next, filesplitpath(fontdirs) do
-            local found, new = scan_dir(d, fontnames, newfontnames, true)
+            local found, new = scan_dir(d, fontnames, newfontnames)
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end
@@ -1374,7 +1375,6 @@ local function scan_os_fonts(fontnames, newfontnames)
     ]]
     report("info", 2, "db", "Scanning OS fonts...")
     report("info", 3, "db", "Searching in static system directories...")
-    print"~~~~"
     for _,d in next, get_os_dirs() do
         local found, new = scan_dir(d, fontnames, newfontnames)
         n_scanned = n_scanned + found
@@ -1409,9 +1409,9 @@ update_names = function (fontnames, force)
             fontnames = load_names()
         end
         if fontnames.version ~= names.version then
-            fontnames = fontnames_init(true)
             report("log", 1, "db", "No font names database or old "
                                 .. "one found; generating new one")
+            fontnames = fontnames_init(true)
         end
     end
     local newfontnames = fontnames_init(true)

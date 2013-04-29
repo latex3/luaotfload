@@ -301,7 +301,7 @@ end
 ---
 ---     caching of successful lookups is essential. we need
 ---     an additional subtable "cached" in the database. it
----     should be nil’able by issuing fontdbutil --flush or
+---     should be nil’able by issuing luaotfload-tool --flush or
 ---     something. if a cache miss is followed by a successful
 ---     lookup, then it will be counted as new addition to the
 ---     cache. we also need a config option to ignore caching.

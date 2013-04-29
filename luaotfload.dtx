@@ -768,8 +768,8 @@ and the derived files
 % This is particularly noticeable if it occurs during a typesetting run.
 % In any case, subsequent updates to the database will be quite fast.
 %
-% \subsection[fontdbutil / mkluatexfontdb.lua]%
-%            {\fileent{fontdbutil} /
+% \subsection[luaotfload-tool / mkluatexfontdb.lua]%
+%            {\fileent{luaotfload-tool} /
 %             \fileent{mkluatexfontdb.lua}\footnote{%
 %   The script may be named just \fileent{mkluatexfontdb} in your
 %   distribution.
@@ -778,7 +778,7 @@ and the derived files
 % It can still be desirable at times to do some of these steps
 % manually, and without having to compile a document.
 % To this end, \identifier{luaotfload} comes with the utility
-% \fileent{fontdbutil} that offers an interface to the database
+% \fileent{luaotfload-tool} that offers an interface to the database
 % functionality.
 % Being a \LUA script, there are two ways to run it:
 % either make it executable (\verb|chmod +x| on unixoid systems) or
@@ -793,15 +793,15 @@ and the derived files
 %   \emphasis{Note}:
 %   On \abbrev{MS} \identifier{Windows} systems, the script can be run
 %   either by calling the wrapper application
-%   \fileent{fontdbutil.exe} or as
-%   \verb|texlua.exe fontdbutil|.
+%   \fileent{luaotfload-tool.exe} or as
+%   \verb|texlua.exe luaotfload-tool.lua|.
 % }
 % Invoked with the argument \verb|--update| it will perform a database
 % update, scanning for fonts not indexed.
 %
 % \begin{quote}
 %   \begin{verbatim}
-%     fontdbutil --update
+%     luaotfload-tool --update
 %   \end{verbatim}
 % \end{quote}
 %
@@ -810,11 +810,11 @@ and the derived files
 %
 % \begin{quote}
 %   \begin{verbatim}
-%     fontdbutil --update --force
+%     luaotfload-tool --update --force
 %   \end{verbatim}
 % \end{quote}
 %
-% For sake of backwards compatibility, \fileent{fontdbutil} may be
+% For sake of backwards compatibility, \fileent{luaotfload-tool} may be
 % renamed or symlinked to \fileent{mkluatexfontdb}.
 % Whenever it is run under this name, it will update the database
 % first, mimicking the behavior of earlier versions of
@@ -862,7 +862,7 @@ and the derived files
 %
 % \subsection{Querying from Outside}
 %
-% \fileent{fontdbutil} also provides rudimentary means of
+% \fileent{luaotfload-tool} also provides rudimentary means of
 % accessing the information collected in the font database.
 % If the option \verb|--find=|\emphasis{name} is given, the script will
 % try and search the fonts indexed by \identifier{luaotfload} for a
@@ -871,7 +871,7 @@ and the derived files
 %
 % \begin{quote}
 %   \begin{verbatim}
-%     fontdbutil  --find="Iwona Regular"
+%     luaotfload-tool  --find="Iwona Regular"
 %   \end{verbatim}
 % \end{quote}
 %
@@ -888,7 +888,7 @@ and the derived files
 %
 % \begin{quote}
 %   \begin{verbatim}
-%     fontdbutil  -F --find="Iwona Bright"
+%     luaotfload-tool  -F --find="Iwona Bright"
 %   \end{verbatim}
 % \end{quote}
 %
@@ -899,7 +899,7 @@ and the derived files
 % using the \verb|-i| option (\verb|--info|).
 % \begin{quote}
 %   \begin{verbatim}
-%     fontdbutil  -F --find="Iwona Light Italic"
+%     luaotfload-tool  -F --find="Iwona Light Italic"
 %   \end{verbatim}
 % \end{quote}
 % \noindent
@@ -908,7 +908,7 @@ and the derived files
 %   In \TEX Live: \fileent{texmf-dist/doc/luatex/base/luatexref-t.pdf}.
 % }
 %
-% \verb|fontdbutil --help| will list the available command line
+% \verb|luaotfload-tool --help| will list the available command line
 % switches, including some not discussed in detail here.
 %
 % \subsection{Blacklisting Fonts}
@@ -917,7 +917,7 @@ and the derived files
 % Some fonts are problematic in general, or just in \LUATEX.
 % If you find that compiling your document takes far too long or eats
 % away all your system’s memory, you can track down the culprit by
-% running \verb|fontdbutil -v| to increase verbosity.
+% running \verb|luaotfload-tool -v| to increase verbosity.
 % Take a note of the \emphasis{filename} of the font that database
 % creation fails with and append it to the file
 % \fileent{luaotfload-blacklist.cnf}.
@@ -1126,7 +1126,7 @@ and the derived files
 % verbosity levels and redirecting log output to \fileent{stdout}:
 %
 % \begin{verbatim}
-%   fontdbutil -fuvvv --log=stdout
+%   luaotfload-tool -fuvvv --log=stdout
 % \end{verbatim}
 %
 % If this fails, the font last printed to the terminal is likely to be

@@ -239,6 +239,8 @@ local load_lua_file = function (path)
 end
 
 --- define locals in scope
+local crude_file_lookup
+local crude_file_lookup_verbose
 local find_closest
 local flush_cache
 local font_fullinfo
@@ -246,6 +248,7 @@ local load_names
 local read_fonts_conf
 local reload_db
 local resolve
+local resolve_cached
 local save_names
 local scan_external_dir
 local update_names
@@ -298,9 +301,13 @@ do
     end
 end
 
---- chain: barenames -> [fullnames ->] basenames -> findfile
-local crude_file_lookup_verbose = function (data, filename)
-    local mappings = data.mappings
+local type1_formats = { "tfm", "ofm", }
+
+--- string -> (string * bool | int)
+crude_file_lookup_verbose = function (filename)
+    if not names.data then names.data = load_names() end
+    local data      = names.data
+    local mappings  = data.mappings
     local found
 
     --- look up in db first ...
@@ -323,29 +330,26 @@ local crude_file_lookup_verbose = function (data, filename)
     if found and mappings[found] then
         found = mappings[found].filename
         report("info", 0, "db",
-            "crude file lookup: req=%s; hit=bare; ret=%s",
+            "crude file lookup: req=%s; hit=base; ret=%s",
             filename, found[1])
         return found
     end
 
-    --- now look for tfm et al.; will be superseded by proper
-    --- format lookup
-    found = resolvers.findfile(filename, "tfm")
-    if found then
-        report("info", 0, "db",
-            "crude file lookup: req=tfm; hit=bare; ret=%s", found)
-        return { found, false }
+    --- ofm and tfm
+    for i=1, #type1_formats do
+        local format = type1_formats[i]
+        if resolvers.findfile(filename, format) then
+            return { file.addsuffix(filename, format), false }, format
+        end
     end
-    found = resolvers.findfile(filename, "ofm")
-    if found then
-        report("info", 0, "db",
-            "crude file lookup: req=ofm; hit=bare; ret=%s", found)
-        return { found, false }
-    end
-    return false
+    return { filename, false }, nil
 end
 
-local crude_file_lookup = function (data, filename)
+--- string -> (string * bool | int)
+crude_file_lookup = function (filename)
+    if not names.data then names.data = load_names() end
+    local data      = names.data
+    local mappings  = data.mappings
     local found = data.barenames[filename]
 --             or data.fullnames[filename]
                or data.basenames[filename]
@@ -353,11 +357,13 @@ local crude_file_lookup = function (data, filename)
         found = data.mappings[found]
         if found then return found.filename end
     end
-    found = resolvers.findfile(filename, "tfm")
-    if found then return { found, false } end
-    found = resolvers.findfile(filename, "ofm")
-    if found then return { found, false } end
-    return false
+    for i=1, #type1_formats do
+        local format = type1_formats[i]
+        if resolvers.findfile(filename, format) then
+            return { file.addsuffix(filename, format), false }, format
+        end
+    end
+    return { filename, false }, nil
 end
 
 --[[doc--
@@ -383,22 +389,6 @@ TODO:
     9) ???
     n) PROFIT!!!
 
---doc]]--
-
---- the resolver is called after the font request is parsed
---- this is where we insert the cache
-local normal_resolver = fonts.definers.resolve
-local dummy_resolver = function (specification)
-    --- this ensures that the db is always loaded
-    --- before a lookup occurs
-    if not names.data then names.data = load_names() end
-    --inspect(specification)
-    local resolved = normal_resolver(specification)
-    --inspect(resolved)
-    return resolved
-end
-
---[[doc--
 The name lookup requires both the “name” and some other
 keys, so we’ll concatenate them.
 The spec is modified in place (ugh), so we’ll have to catalogue what
@@ -431,34 +421,30 @@ We’ll just cache a deep copy of the entire spec as it leaves the
 resolver, lest we want to worry if we caught all the details.
 --doc]]--
 
---- spec -> spec
-local cached_resolver = function (specification)
+--- 'a -> 'a -> table -> (string * int|boolean * boolean)
+resolve_cached = function (_, _, specification)
     if not names.data then names.data = load_names() end
     local request_cache = names.data.request_cache
     local request = specification.specification
-    report("info", 4, "cache",
-           "looking for “%s” in cache ...",
+    report("log", 4, "cache", "looking for “%s” in cache ...",
            request)
+
     local found = names.data.request_cache[request]
+
+    --- case 1) cache positive ----------------------------------------
     if found then --- replay fields from cache hit
         report("info", 4, "cache", "found!")
-        for i=1, #cache_fields do
-            local f = cache_fields[i]
-            if found[f] then specification[f] = found[f] end
-        end
-        return specification
+        return found[1], found[2], true
     end
-    report("info", 4, "cache", "not cached; resolving")
+    report("log", 4, "cache", "not cached; resolving")
 
+    --- case 2) cache negative ----------------------------------------
     --- first we resolve normally ...
-    local resolved_spec = normal_resolver(specification)
-    --- ... then we add the fields to the cache
-    local entry = { }
-    for i=1, #cache_fields do
-        local f = cache_fields[i]
-        entry[f] = resolved_spec[f]
-    end
-    report("info", 4, "cache", "new entry: %s", request)
+    local filename, subfont, success = resolve(nil, nil, specification)
+    if not success then return filename, subfont, false end
+    --- ... then we add the fields to the cache ... ...
+    local entry = { filename, subfont }
+    report("log", 4, "cache", "new entry: %s", request)
     names.data.request_cache[request] = entry
 
     --- obviously, the updated cache needs to be stored.
@@ -466,19 +452,12 @@ local cached_resolver = function (specification)
     --- whenever the cache is updated.
     --- TODO this should trigger a save only once the
     ---      document is compiled (finish_pdffile callback?)
-    report("info", 5, "cache", "saving updated cache")
+    --- TODO we should speed up writing by separating
+    ---      the cache from the db
+    report("log", 5, "cache", "saving updated cache")
     save_names()
-    return resolved_spec
+    return filename, subfont, true
 end
-
-local resolvers = {
-    dummy    = dummy_resolver,
-    normal   = normal_resolver,
-    cached   = cached_resolver,
-}
-
-fonts.definers.resolve = resolvers[config.luaotfload.resolver]
---fonts.definers.resolve = resolvers.cached
 
 --[[doc--
 
@@ -522,12 +501,6 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     if not fonts_loaded then names.data = load_names() end
     local data = names.data
 
-    if specification.lookup == "file" then
-        local found = crude_file_lookup(data, specification.name)
-        --local found = crude_file_lookup_verbose(data, specification.name)
-        if found then return found[1], found[2], true end
-    end
-
     local name  = sanitize_string(specification.name)
     local style = sanitize_string(specification.style) or "regular"
 
@@ -570,8 +543,6 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     local found = { }
     local synonym_set = style_synonyms.set
     for _,face in next, data.mappings do
-        --- TODO we really should store those in dedicated
-        --- .sanitized field
         local family, subfamily, fullname, psname, fontname, pfullname
 
         local facenames = face.sanitized
@@ -648,12 +619,14 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     end
 
     if #found == 1 then
-        if kpselookup(found[1].filename[1]) then
+        --- “found” is really synonymous with “registered in the db”.
+        local filename = found[1].filename[1]
+        if lfsisfile(filename) or kpselookup(filename) then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
-                name, style, found[1].filename[1]
+                name, style, filename
             )
-            return found[1].filename[1], found[1].filename[2], true
+            return filename, found[1].filename[2], true
         end
     elseif #found > 1 then
         -- we found matching font(s) but not in the requested optical
@@ -669,22 +642,25 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 least   = difference
             end
         end
-        if kpselookup(closest.filename[1]) then
+        local filename = closest.filename[1]
+        if lfsisfile(filename) or kpselookup(filename) then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
-                name, style, closest.filename[1]
+                name, style, filename
             )
-            return closest.filename[1], closest.filename[2], true
+            return filename, closest.filename[2], true
         end
     elseif found.fallback then
-        return found.fallback.filename[1], found.fallback.filename[2], true
+        return found.fallback.filename[1],
+               found.fallback.filename[2],
+               true
     end
 
     --- no font found so far
     if not fonts_reloaded then
         --- last straw: try reloading the database
         return reload_db(
-            "unresoled font name: “" .. name .. "”",
+            "unresolved font name: “" .. name .. "”",
             resolve, nil, nil, specification
         )
     end
@@ -741,9 +717,7 @@ find_closest = function (name, limit)
     local name     = sanitize_string(name)
     limit          = limit or fuzzy_limit
 
-    if not fonts_loaded then
-        names.data = load_names()
-    end
+    if not fonts_loaded then names.data = load_names() end
 
     local data = names.data
 
@@ -870,10 +844,10 @@ font_fullinfo = function (filename, subfont, texmf)
     tfmdata.fontname    = metadata.fontname
     tfmdata.fullname    = metadata.fullname
     tfmdata.familyname  = metadata.familyname
-    tfmdata.filename    = {
-        texmf and filebasename(filename) or filename,
-        subfont
-    }
+    if texmf then
+        filename = filebasename(filename)
+    end
+    tfmdata.filename    = { filename, subfont }
     tfmdata.weight      = metadata.pfminfo.weight
     tfmdata.width       = metadata.pfminfo.width
     tfmdata.slant       = metadata.italicangle
@@ -1508,15 +1482,24 @@ scan_external_dir = function (dir)
 end
 
 --- export functionality to the namespace “fonts.names”
-names.flush_cache   = flush_cache
-names.load          = load_names
-names.save          = save_names
-names.scan          = scan_external_dir
-names.update        = update_names
+names.flush_cache                 = flush_cache
+names.load                        = load_names
+names.save                        = save_names
+names.scan                        = scan_external_dir
+names.update                      = update_names
+names.crude_file_lookup           = crude_file_lookup
+names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 
-names.resolve      = resolve --- replace the resolver from luatex-fonts
-names.resolvespec  = resolve
-names.find_closest = find_closest
+--- replace the resolver from luatex-fonts
+if config.luaotfload.resolver == "cached" then
+    report("info", 0, "cache", "caching of name: lookups active")
+    names.resolve     = resolve_cached
+    names.resolvespec = resolve_cached
+else
+    names.resolve     = resolve
+    names.resolvespec = resolve
+end
+names.find_closest      = find_closest
 
 -- for testing purpose
 names.read_fonts_conf = read_fonts_conf

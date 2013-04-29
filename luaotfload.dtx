@@ -130,6 +130,8 @@ and the derived files
 \setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
 %setmathfont{XITS Math}
 
+\usepackage{hologo}
+
 \newcommand\TEX     {\TeX\xspace}
 \newcommand\LUA     {Lua\xspace}
 \newcommand\PDFTEX  {pdf\TeX\xspace}
@@ -159,6 +161,8 @@ and the derived files
 \newcommand*\email[1]{\href{mailto:#1}{#1}}
 
 \renewcommand\partname{Part}%% gets rid of the stupid “file” heading
+
+\usepackage{syntax}%% bnf for font request syntax
 
 \VerbatimFootnotes
 \begin{document}
@@ -244,56 +248,177 @@ and the derived files
 %
 % \section{Loading Fonts}
 %
-% \identifier{luaotfload} supports an extended font loading syntax:
+% \identifier{luaotfload} supports an extended font request syntax:
 %
-% \begin{center}
+% \begin{quote}
 %       |\font\foo={|%
 %       \meta{prefix}|:|%
 %       \meta{font name}|:|%
 %       \meta{font features}|}|%
 %       \meta{\TEX font features}
-% \end{center}
+% \end{quote}
 %
 % \noindent
 % The curly brackets are optional and escape the spaces in the enclosed
-% font name (alternatively, double quotes serve the same purpose).
-% The individual parts of the syntax are:
+% font name.
+% Alternatively, double quotes serve the same purpose.
+% A selection of individual parts of the syntax are discussed below;
+% for a more formal description see figure \ref{font-syntax}.
 %
-% \paragraph{Prefix}
+% \begin{figure}[b]
+%   \setlength\grammarparsep{12pt plus 2pt minus 2pt}
+%   \setlength\grammarindent{5cm}
+%   \begingroup
+%     \small
+%     \begin{grammar}
+%       <definition>      ::= `\\font', {\sc csname}, `=', <font request>, [ <size> ] ;
 %
-% The \meta{prefix} is either |file:| or |name:|.
-% It determines whether the font loader should interpret the request as a
-% file name or font name, respectively, which again influences how it
-% will attempt to locate the font.
-% The prefix can be omitted, in which case |name:| is assumed.
+%       <size>            ::= `at', {\sc dimension} ;
 %
-%% \iffalse%% how am i supposed to friggin comment stuff in a dtx???
-%%      TODO
-%%      it would appear that the next paragraph is incorrect; I get
-%%      name: lookups regardless unless the font file is actually
-%%      in CWD
-%% \fi
-%% For compatibility with \XETEX, surrounding the \meta{font name} with
-%% square brackets is synonymous to using the |file:| prefix.
+%       <font request>    ::= `"', <unquoted font request> `"'
+%       \alt                  `{', <unquoted font request> `}'
+%       \alt                  <unquoted font request> ;
 %
+%       <unquoted font request> ::= <specification>, [`:', <feature list> ]
+%       \alt                        `[', <path lookup> `]', [ [`:'], <feature list> ] ;
+%
+%       <specification>    ::= <prefixed spec>, [ <subfont no> ], \{ <modifier> \}
+%       \alt                   <anon lookup>, \{ <modifier> \} ;
+%
+%       <prefixed spec>    ::= `file:', <file lookup>
+%       \alt                   `name:', <name lookup> ;
+%
+%       <file lookup>      ::= \{ <name character> \} ;
+%
+%       <name lookup>      ::= \{ <name character> \} ;
+%
+%       <anon lookup>      ::= {\sc tfmname} | <name lookup> ;
+%
+%       <path lookup>      ::= \{ {\sc all_characters} - `]' \} ;
+%
+%       <modifier>         ::= `/', (`i' | `b' | `bi' | `ib') ;
+%
+%       <subfont no>       ::= `(', \{ {\sc digit} \}, `)' ;
+%
+%       <feature list>     ::= <feature expr>, \{ `;', <feature expr> \} ;
+%
+%       <feature expr>     ::= {\sc feature_id}, `=', {\sc feature_value}
+%       \alt                   <feature switch>, {\sc feature_id} ;
+%
+%       <feature switch>   ::= `+' | `-' ;
+%
+%       <name character>   ::= {\sc all_characters} - ( `(' | `/' | `:' ) ;
+%     \end{grammar}
+%   \endgroup
+%   \caption{Font request syntax.
+%            Braces or double quotes around the
+%            \emphasis{specification} rule will
+%            preserve whitespace in file names.
+%            In addition to the font style modifiers
+%            (\emphasis{slash-notation}) given above, there
+%            are others that are recognized but will be silently
+%            ignored: {\ttfamily aat},
+%                     {\ttfamily icu}, and
+%                     {\ttfamily gr}.
+%            The special terminals are:
+%            {\sc feature\textunderscore id} for a valid font
+%               feature name and
+%            {\sc feature\textunderscore value} for the corresponding
+%               value.
+%            {\sc tfmname} is the name of a \abbrev{tfm} file.
+%            {\sc digit}  again refers to bytes 48--57, and
+%            {\sc all\textunderscore characters} to all byte values.
+%            {\sc csname} and {\sc dimension} are the \TEX concepts.}
+%   \label{font-syntax}
+% \end{figure}
+%
+% \subsection{Prefix -- the \identifier{luaotfload}\space Way}
+%
+% In \identifier{luaotfload}, the canonical syntax for font requests
+% requires a \emphasis{prefix}:
+% \begin{quote}
+%   |\font\fontname=|\meta{prefix}|:|\meta{fontname}\dots
+% \end{quote}
+% where \meta{prefix} is either \verb|file:| or \verb|name:|.
+% It determines whether the font loader should interpret the request as
+% a \emphasis{file name} or
+%   \emphasis{font name}, respectively,
+% which again influences how it will attempt to locate the font.
+% Examples for font names are
+%             “Latin Modern Italic”,
+%             “GFS Bodoni Rg”, and
+%             “PT Serif Caption”
+% -- they are the human readable identifiers
+% usually listed in drop-down menus and the like.
 % In order for fonts installed both in system locations and in your
 % \fileent{texmf} to be accessible by font name, \identifier{luaotfload} must
 % first collect the metadata included in the files.
-% Please refer to section ~\ref{sec:fontdb} below for instructions on how to
+% Please refer to section~\ref{sec:fontdb} below for instructions on how to
 % create the database.
 %
-% \paragraph{Font name}
+% File names are whatever your file system allows them to be, except
+% that that they may not contain the characters
+%                             \verb|(|,
+%                             \verb|:|, and
+%                             \verb|/|.
+% As obvious from the last exception, the \verb|file:| lookup will 
+% not process paths to the font location -- only those
+% files found when generating the database are addressable this way.
+% Continue below in the \XETEX section if you need to load your fonts
+% by path.
+% The file names corresponding to the example font names above are
+%           \fileent{lmroman12-italic.otf},
+%           \fileent{GFSBodoni.otf}, and
+%           \fileent{PTZ56F.ttf}.
 %
-% The \meta{font name} can be either a font filename or actual font
-% name based on the \meta{prefix} as mentioned above.
+% \subsection{\hologo{XeTeX} Compatibility Layer}
 %
-% A filename request may optionally include the absolute path to the font file,
-% allowing for fonts outside the standard locations to be loaded as well.
-% If no path is specified, then \identifier{kpathsea} is used to locate the
-% font (which will typically be in the \fileent{texmf} tree or the
-% current directory).
+% In addition to the regular prefixed requests, \identifier{luaotfload}
+% accepts loading fonts the \XETEX way.
+% There are again two modes: bracketed and unbracketed.
+% A bracketed request looks as follows.
 %
-% \subparagraph{Examples for loading by file name}
+% \begin{quote}
+%   |\font\fontname=[|\meta{path to file}|]|
+% \end{quote}
+%
+% \noindent
+% Inside the square brackets, every character except for a closing
+% bracket is permitted, allowing for specifying paths to a font file.
+% Naturally, path-less file names are equally valid and processed the
+% same way as an ordinary \verb|file:| lookup.
+%
+% \begin{quote}
+%   |\font\fontname=|\meta{font name} \dots
+% \end{quote}
+%
+% Unbracketed (or, for lack of a better word: \emphasis{anonymous})
+% font requests resemble the conventional \TEX syntax.
+% However, they have a broader spectrum of possible interpretations:
+% before anything else, \identifier{luaotfload} attempts to load a
+% traditional \TEX Font Metric (\abbrev{tfm} or \abbrev{ofm}).
+% If this fails, it performs a \verb|name:| lookup, which itself will
+% fall back to a \verb|file:| lookup if no database entry matches
+% \meta{font name}.
+%
+% Furthermore, \identifier{luaotfload} supports the slashed (shorthand)
+% font style notation from \XETEX.
+%
+% \begin{quote}
+%   |\font\fontname=|\meta{font name}|/|\meta{modifier}\dots
+% \end{quote}
+%
+% \noindent
+% Currently, four style modifiers are supported:
+%   \verb|i| for italic shape,
+%   \verb|b| for bold   weight,
+%   \verb|bi| or \verb|ib| for the combination of both.
+% Other “slashed” modifiers are too specific to the \XETEX engine and
+% have no meaning in \LUATEX.
+%
+% \subsection{Examples}
+%
+% \subsubsection{Loading by File Name}
 %
 % For example, conventional \abbrev{type1} font can be loaded with a \verb|file:|
 % request like so:
@@ -305,8 +430,11 @@ and the derived files
 % \end{quote}
 %
 % The \OpenType version of Janusz Nowacki’s font \emphasis{Antykwa
-% Półtawskiego} (in \TEX Live) in its condensed variant can be loaded as
-% follows:
+% Półtawskiego}\footnote{%
+%   \url{http://jmn.pl/antykwa-poltawskiego/}, also available in
+%   in \TEX Live.
+% }
+% in its condensed variant can be loaded as follows:
 %
 % \begin{quote}
 %   \begin{verbatim}
@@ -324,7 +452,7 @@ and the derived files
 %   \end{verbatim}
 % \end{quote}
 %
-% \subparagraph{Examples for loading by font name}
+% \subsubsection{Loading by Font Name}
 %
 % The \verb|name:| lookup does not depend on cryptic filenames:
 %
@@ -360,9 +488,62 @@ and the derived files
 %   \end{verbatim}
 % \end{quote}
 %
-% \paragraph{Font features}
+% \subsubsection{Modifiers}
 %
-% \meta{font features} is semicolon-separated list of feature
+% If the entire \emphasis{Iwona} family\footnote{%
+%   \url{http://jmn.pl/kurier-i-iwona/},
+%   also in \TEX Live.
+% }
+% is installed in some location accessible by \identifier{luaotfload},
+% the regular shape can be loaded as follows:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\iwona=Iwona at 20pt
+%   \end{verbatim}
+% \end{quote}
+%
+% \noindent
+% To load the most common of the other styles, the slash notation can
+% be employed as shorthand:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\iwonaitalic    =Iwona/i    at 20pt
+%   \font\iwonabold      =Iwona/b    at 20pt
+%   \font\iwonabolditalic=Iwona/bi   at 20pt
+%   \end{verbatim}
+% \end{quote}
+%
+% \noindent
+% which is equivalent to these full names:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%   \font\iwonaitalic    ="Iwona Italic"       at 20pt
+%   \font\iwonabold      ="Iwona Bold"         at 20pt
+%   \font\iwonabolditalic="Iwona BoldItalic"   at 20pt
+%   \end{verbatim}
+% \end{quote}
+%
+% \section{Font features}
+%
+% \emphasis{Font features} are the second to last component in the
+% general scheme for font requests:
+%
+% \begin{quote}
+%       |\font\foo={|%
+%       \meta{prefix}|:|%
+%       \meta{font name}|:|%
+%       \meta{font features}|}|%
+%       \meta{\TEX font features}
+% \end{quote}
+%
+% \noindent
+% If style modifiers are present (\XETEX style), they must precede
+% \meta{font features}.
+%
+% The element \meta{font features} is a semicolon-separated list of feature
 % tags\footnote{%
 %   Cf. \url{http://www.microsoft.com/typography/otspec/featurelist.htm}.
 % }
@@ -1003,7 +1184,7 @@ luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 luaotfload.module = {
     name          = "luaotfload",
     version       = 2.2,
-    date          = "2013/04/15",
+    date          = "2013/04/29",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -1014,11 +1195,12 @@ local luatexbase = luatexbase
 
 local type, next       = type, next
 local setmetatable     = setmetatable
-local stringfind       = string.find
-local stringsub        = string.sub
-local stringmatch      = string.match
-local stringformat     = string.format
 local find_file        = kpse.find_file
+local lfsisfile        = lfs.isfile
+local stringfind       = string.find
+local stringformat     = string.format
+local stringmatch      = string.match
+local stringsub        = string.sub
 
 local add_to_callback, create_callback =
       luatexbase.add_to_callback, luatexbase.create_callback
@@ -1328,7 +1510,7 @@ add_to_callback("find_vf_file",
 loadmodule"lib-dir.lua"   --- required by luaofload-database.lua
 loadmodule"override.lua"  --- “luat-ovr”
 
-logs.set_loglevel(0)
+logs.set_loglevel(config.luaotfload.loglevel or 2)
 
 %    \end{macrocode}
 % \CONTEXT does not support ofm, these lines were added in order to make it
@@ -1350,23 +1532,101 @@ loadmodule"database.lua"   --- “font-nms”
 loadmodule"colors.lua"     --- “font-clr”
 
 %    \end{macrocode}
-% This hack makes fonts called with file method found by fonts.names.resolve
-% instead of just trying to find them with \identifier{kpse}.
-% It is necessary in cases when font files are not reachable by
-% \identifier{kpse} but present in the database, a quite common case
-% under Linux.
+% Relying on the \verb|name:| resolver for everything has been the source
+% of permanent trouble with the database.
+% With the introduction of the new syntax parser we now have enough
+% granularity to distinguish between the \XETEX emulation layer and the
+% genuine \verb|name:| and \verb|file:| lookups of \LUATEX-Fonts.
+% Another benefit is that we can now easily plug in or replace new lookup
+% behaviors if necessary.
 %
-% As of 2013-04-24 we have a workaround in the resolver that handles
-% \verb|file:| lookups diverted this way.
-% It requires some overhead due to additional extra data saved in the
-% names database, and might vanish entirely once the font request syntax
-% is understood.
-% Until then it is considered a kludge, like the hack below.
+% The name resolver remains untouched, but it calls
+% \luafunction{fonts.names.resolve()} internally anyways (see
+% \fileent{luaotfload-database.lua}).
 %
 %    \begin{macrocode}
 
-fonts.definers.resolvers.file = function (specification)
-  specification.name = fonts.names.resolve('', '', specification)
+local request_resolvers   = fonts.definers.resolvers
+local formats             = fonts.formats
+formats.ofm               = "type1"
+
+%    \end{macrocode}
+% \identifier{luaotfload} promises easy access to system fonts.
+% Without additional precautions, this cannot be achieved by
+% \identifier{kpathsea} alone, because it searches only the
+% \fileent{texmf} directories by default.
+% Although it is possible for \identifier{kpathsea} to include extra
+% paths by adding them to the \verb|OSFONTDIR| environment variable,
+% this is still short of the goal »\emphasis{it just works!}«.
+% When building the font database \identifier{luaotfload} scans
+% system font directories anyways, so we already have all the
+% information for looking sytem fonts.
+% With the release version 2.2 the file names are indexed in the database
+% as well and we are ready to resolve \verb|file:| lookups this way.
+% Thus we no longer need to call the \identifier{kpathsea} library in
+% most cases when looking up font files, only when generating the database.
+%
+%    \begin{macrocode}
+request_resolvers.file = function (specification)
+    --local found = fonts.names.crude_file_lookup(specification.name)
+    local found = fonts.names.crude_file_lookup_verbose(specification.name)
+    specification.name = found[1]
+    --if format then specification.forced = format end
+end
+
+%    \end{macrocode}
+% We classify as \verb|anon:| those requests that have neither a
+% prefix nor brackets. According to Khaled\footnote{%
+%     \url{https://github.com/phi-gamma/luaotfload/issues/4#issuecomment-17090553}.
+% }
+% they are the \XETEX equivalent of a \verb|name:| request, so we will be
+% treating them as such.
+%
+%    \begin{macrocode}
+
+--request_resolvers.anon = request_resolvers.name
+
+%    \end{macrocode}
+% There is one drawback, though.
+% This syntax is also used for requesting fonts in \identifier{Type1}
+% (\abbrev{tfm}, \abbrev{ofm}) format.
+% These are essentially \verb|file:| lookups and must be caught before
+% the \verb|name:| resolver kicks in, lest they cause the database to
+% update.
+% Even if we were to require the \verb|file:| prefix for all
+% \identifier{Type1} requests, tests have shown that certain fonts still
+% include further fonts (e.~g. \fileent{omlgcb.ofm} will ask for
+% \fileent{omsecob.tfm}) \emphasis{using the old syntax}.
+% For this reason, we introduce an extra check with an early return.
+%
+%    \begin{macrocode}
+local type1_formats = { "tfm", "ofm", }
+
+request_resolvers.anon = function (specification)
+    local name = specification.name
+    for i=1, #type1_formats do
+        local format = type1_formats[i]
+        if resolvers.findfile(name, format) then
+            specification.name = file.addsuffix(name, format)
+            return
+        end
+    end
+    request_resolvers.name(specification)
+end
+
+%    \end{macrocode}
+% Prior to version 2.2, \identifier{luaotfload} did not distinguish
+% \verb|file:| and \verb|path:| lookups, causing complications with the
+% resolver.
+% Now we test if the requested name is an absolute path in the file
+% system, otherwise we fall back to the \verb|file:| lookup.
+%
+%    \begin{macrocode}
+request_resolvers.path = function (specification)
+    local exists, _ = lfsisfile(specification.name)
+    if not exists then -- resort to file: lookup
+        request_resolvers.file(specification)
+    end
 end
 
 %    \end{macrocode}
@@ -1442,7 +1702,6 @@ local patch_defined_font = function (specification, size, id)
     if type(tfmdata) == "table" then
         call_callback("luaotfload.patch_font", tfmdata)
     end
-    -- inspect(table.keys(tfmdata))
     return tfmdata
 end
 

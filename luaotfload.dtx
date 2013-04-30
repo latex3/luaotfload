@@ -1181,6 +1181,7 @@ local luaotfload            = luaotfload
 config                      = config or { }
 config.luaotfload           = config.luaotfload or { }
 config.luaotfload.resolver  = config.luaotfload.resolver or "normal"
+config.luaotfload.definer   = config.luaotfload.definer  or "patch"
 --luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 
 luaotfload.module = {
@@ -1655,6 +1656,13 @@ create_callback("luaotfload.patch_font", "simple", dummy_function)
 % How those work remains to be figured out.
 %
 %    \begin{macrocode}
+--- font-con.lua:
+---     · constructors.assignmathparameters(target, original)
+---     · | .*Percent.* -> value
+---       | _           -> value * factor
+---       ... where factor = target.parameters.factor
+---     · writes new params to target
+
 local define_font_wrapper = function (...)
     --- we use “tfmdata” (not “fontdata”) for consistency with the
     --- font loader
@@ -1664,17 +1672,13 @@ local define_font_wrapper = function (...)
         local mathdata = metadata.math --- do all fonts have this field?
         if mathdata then
             local mathconstants = { } --- why new hash, not modify in place?
-            local units_per_em  = metadata.units_per_em
-            local size          = tfmdata.size
+            local factor        = tfmdata.parameters.factor
             for k,v in next, mathdata do
-                --- afaics this is alread taken care of by
-                --- definers.read
                 if stringfind(k, "Percent") then
                     -- keep percent values as is
-                    --print(k,v)
                     mathconstants[k] = v
                 else
-                    mathconstants[k] = v / units_per_em * size
+                    mathconstants[k] = v * factor
                 end
             end
             --- for \overwithdelims
@@ -1716,17 +1720,19 @@ reset_callback("define_font")
 %
 %    \begin{macrocode}
 
-if luaotfload.font_definer == "old"  then
+local font_definer = config.luaotfload.definer
+
+if definer == "old"  then
   add_to_callback("define_font",
                   define_font_wrapper,
                   "luaotfload.define_font",
                   1)
-elseif luaotfload.font_definer == "generic"  then
+elseif font_definer == "generic"  then
   add_to_callback("define_font",
                   fonts.definers.read,
                   "luaotfload.define_font",
                   1)
-elseif luaotfload.font_definer == "patch"  then
+elseif font_definer == "patch"  then
   add_to_callback("define_font",
                   patch_defined_font,
                   "luaotfload.define_font",

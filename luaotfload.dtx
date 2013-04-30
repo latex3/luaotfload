@@ -1643,57 +1643,6 @@ end
 create_callback("luaotfload.patch_font", "simple", dummy_function)
 
 %    \end{macrocode}
-% This is a wrapper for the imported font loader.
-% As of 2013, everything it does appear to be redundand, so we won’t use
-% it unless somebody points out a cogent reason.
-% Nevertheless, it has been adapted to work with the current structure of
-% font data objects and will stay here for reference / until breakage is
-% reported.
-% \emphasis{TODO}
-% This one also enables patching fonts.
-% The current fontloader apparently comes with a dedicated mechanism for
-% that already: enhancers.
-% How those work remains to be figured out.
-%
-%    \begin{macrocode}
---- font-con.lua:
----     · constructors.assignmathparameters(target, original)
----     · | .*Percent.* -> value
----       | _           -> value * factor
----       ... where factor = target.parameters.factor
----     · writes new params to target
-
-local define_font_wrapper = function (...)
-    --- we use “tfmdata” (not “fontdata”) for consistency with the
-    --- font loader
-    local tfmdata = fonts.definers.read(...)
-    if type(tfmdata) == "table" and tfmdata.shared then
-        local metadata = tfmdata.shared.rawdata.metadata
-        local mathdata = metadata.math --- do all fonts have this field?
-        if mathdata then
-            local mathconstants = { } --- why new hash, not modify in place?
-            local factor        = tfmdata.parameters.factor
-            for k,v in next, mathdata do
-                if stringfind(k, "Percent") then
-                    -- keep percent values as is
-                    mathconstants[k] = v
-                else
-                    mathconstants[k] = v * factor
-                end
-            end
-            --- for \overwithdelims
-            --- done by definers.read as well
-            mathconstants.FractionDelimiterSize             = 1.01 * size
-            --- fontloader has 2.4 × size
-            mathconstants.FractionDelimiterDisplayStyleSize = 2.39 * size
-            tfmdata.MathConstants = mathconstants
-        end
-        call_callback("luaotfload.patch_font", tfmdata)
-    end
-    return tfmdata
-end
-
-%    \end{macrocode}
 % \subsection{\CONTEXT override}
 % We provide a simplified version of the original font definition
 % callback.
@@ -1722,12 +1671,7 @@ reset_callback("define_font")
 
 local font_definer = config.luaotfload.definer
 
-if definer == "old"  then
-  add_to_callback("define_font",
-                  define_font_wrapper,
-                  "luaotfload.define_font",
-                  1)
-elseif font_definer == "generic"  then
+if font_definer == "generic"  then
   add_to_callback("define_font",
                   fonts.definers.read,
                   "luaotfload.define_font",

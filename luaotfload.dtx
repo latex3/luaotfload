@@ -1733,38 +1733,6 @@ elseif luaotfload.font_definer == "patch"  then
                   1)
 end
 
---[[todo--
---- The manual promises coercion of the file: lookup if
---- the asked name is enclosed in brackets.
---- A couple things make me doubt that this is the case:
----
----     1) there doesn’t appear to be code for these cases
----     2) the brackets remain part of the file name
----     3) we still get calls to names.resolve which
----        ignores the “lookup” field of the spec it gets
----
---- For this reason here is some code that a) coerces
---- file: lookups in these cases and b) strips the brackets
---- from the file name. As we *still* get name: lookups even
---- though this code is active I’ll just leave it here
---- for reference, ineffective as it is.
-do
-    local getspecification, makespecification =
-        fonts.definers.getspecification, fonts.definers.makespecification
-
-    local analyze = function (specification, size)
-        local lookup, name, sub, method, detail = getspecification(specification or "")
-        local filename = stringmatch(name, "^%[(.*)%]$")
-        if filename then
-            lookup   = "file"    --> coerce file:
-            name     = filename  --> remove brackets
-        end
-        return makespecification(specification, lookup, name, sub, method, detail, size)
-    end
-    fonts.definers.analyze = analyze
-end
---]]--
-
 loadmodule"features.lua" --- contains what was “font-ltx” and “font-otc”
 
 -- vim:tw=71:sw=4:ts=4:expandtab

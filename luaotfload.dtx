@@ -835,7 +835,7 @@ and the derived files
 % The complete list is is given in table \ref{table-searchpaths}.
 % Other paths can be specified by setting the environment variable
 % \verb+OSFONTDIR+.
-% If it is non-empty, then search will be limited to the included
+% If it is non-empty, then search will be extended to the included
 % directories.
 %
 % \begin{table}[t]
@@ -900,7 +900,7 @@ and the derived files
 % using the \verb|-i| option (\verb|--info|).
 % \begin{quote}
 %   \begin{verbatim}
-%     luaotfload-tool  -F --find="Iwona Light Italic"
+%     luaotfload-tool  -i --find="Iwona Light Italic"
 %   \end{verbatim}
 % \end{quote}
 % \noindent
@@ -1181,6 +1181,7 @@ local luaotfload            = luaotfload
 config                      = config or { }
 config.luaotfload           = config.luaotfload or { }
 config.luaotfload.resolver  = config.luaotfload.resolver or "normal"
+config.luaotfload.definer   = config.luaotfload.definer  or "patch"
 --luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 
 luaotfload.module = {
@@ -1642,54 +1643,6 @@ end
 create_callback("luaotfload.patch_font", "simple", dummy_function)
 
 %    \end{macrocode}
-% This is a wrapper for the imported font loader.
-% As of 2013, everything it does appear to be redundand, so we won’t use
-% it unless somebody points out a cogent reason.
-% Nevertheless, it has been adapted to work with the current structure of
-% font data objects and will stay here for reference / until breakage is
-% reported.
-% \emphasis{TODO}
-% This one also enables patching fonts.
-% The current fontloader apparently comes with a dedicated mechanism for
-% that already: enhancers.
-% How those work remains to be figured out.
-%
-%    \begin{macrocode}
-local define_font_wrapper = function (...)
-    --- we use “tfmdata” (not “fontdata”) for consistency with the
-    --- font loader
-    local tfmdata = fonts.definers.read(...)
-    if type(tfmdata) == "table" and tfmdata.shared then
-        local metadata = tfmdata.shared.rawdata.metadata
-        local mathdata = metadata.math --- do all fonts have this field?
-        if mathdata then
-            local mathconstants = { } --- why new hash, not modify in place?
-            local units_per_em  = metadata.units_per_em
-            local size          = tfmdata.size
-            for k,v in next, mathdata do
-                --- afaics this is alread taken care of by
-                --- definers.read
-                if stringfind(k, "Percent") then
-                    -- keep percent values as is
-                    --print(k,v)
-                    mathconstants[k] = v
-                else
-                    mathconstants[k] = v / units_per_em * size
-                end
-            end
-            --- for \overwithdelims
-            --- done by definers.read as well
-            mathconstants.FractionDelimiterSize             = 1.01 * size
-            --- fontloader has 2.4 × size
-            mathconstants.FractionDelimiterDisplayStyleSize = 2.39 * size
-            tfmdata.MathConstants = mathconstants
-        end
-        call_callback("luaotfload.patch_font", tfmdata)
-    end
-    return tfmdata
-end
-
-%    \end{macrocode}
 % \subsection{\CONTEXT override}
 % We provide a simplified version of the original font definition
 % callback.
@@ -1716,54 +1669,19 @@ reset_callback("define_font")
 %
 %    \begin{macrocode}
 
-if luaotfload.font_definer == "old"  then
-  add_to_callback("define_font",
-                  define_font_wrapper,
-                  "luaotfload.define_font",
-                  1)
-elseif luaotfload.font_definer == "generic"  then
+local font_definer = config.luaotfload.definer
+
+if font_definer == "generic"  then
   add_to_callback("define_font",
                   fonts.definers.read,
                   "luaotfload.define_font",
                   1)
-elseif luaotfload.font_definer == "patch"  then
+elseif font_definer == "patch"  then
   add_to_callback("define_font",
                   patch_defined_font,
                   "luaotfload.define_font",
                   1)
 end
-
---[[todo--
---- The manual promises coercion of the file: lookup if
---- the asked name is enclosed in brackets.
---- A couple things make me doubt that this is the case:
----
----     1) there doesn’t appear to be code for these cases
----     2) the brackets remain part of the file name
----     3) we still get calls to names.resolve which
----        ignores the “lookup” field of the spec it gets
----
---- For this reason here is some code that a) coerces
---- file: lookups in these cases and b) strips the brackets
---- from the file name. As we *still* get name: lookups even
---- though this code is active I’ll just leave it here
---- for reference, ineffective as it is.
-do
-    local getspecification, makespecification =
-        fonts.definers.getspecification, fonts.definers.makespecification
-
-    local analyze = function (specification, size)
-        local lookup, name, sub, method, detail = getspecification(specification or "")
-        local filename = stringmatch(name, "^%[(.*)%]$")
-        if filename then
-            lookup   = "file"    --> coerce file:
-            name     = filename  --> remove brackets
-        end
-        return makespecification(specification, lookup, name, sub, method, detail, size)
-    end
-    fonts.definers.analyze = analyze
-end
---]]--
 
 loadmodule"features.lua" --- contains what was “font-ltx” and “font-otc”
 

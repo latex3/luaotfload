@@ -71,12 +71,15 @@ fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
-names.version        = 2.202
-names.data           = nil
+names.version        = 2.203
+names.data           = nil      --- contains the loaded database
+names.lookups        = nil      --- contains the lookup cache
 names.path           = {
-    basename = "luaotfload-names.lua",
-    dir      = "",
-    path     = "",
+    dir              = "",                      --- db and cache directory
+    basename         = "luaotfload-names.lua",  --- db file name
+    path             = "",                      --- full path to db file
+    lookup_basename  = "luaotfload-lookup-cache.lua", --- cache file name
+    lookup_path      = "",                            --- cache full path
 }
 
 config                         = config or { }
@@ -97,8 +100,9 @@ if caches then
     if not writable_path then
         error("Impossible to find a suitable writeable cache...")
     end
-    names.path.dir   = writable_path
-    names.path.path  = filejoin(writable_path, names.path.basename)
+    names.path.dir          = writable_path
+    names.path.path         = filejoin(writable_path, names.path.basename)
+    names.path.lookup_path  = filejoin(writable_path, names.path.lookup_basename)
 else --- running as script, inject some dummies
     caches = { }
     logs   = { report = function () end }
@@ -188,12 +192,6 @@ mtx-fonts has in names.tma:
 --doc]]--
 
 local fontnames_init = function (keep_cache) --- returns dbobj
-    local request_cache
-    if keep_cache and names.data and names.data.request_cache then
-        request_cache = names.data.request_cache
-    else
-        request_cache = { }
-    end
     return {
         mappings        = { },
         status          = { },
@@ -206,7 +204,6 @@ local fontnames_init = function (keep_cache) --- returns dbobj
         basenames       = { },
 --      fullnames       = { },
         version         = names.version,
-        request_cache   = request_cache,
     }
 end
 
@@ -250,11 +247,13 @@ local find_closest
 local flush_cache
 local font_fullinfo
 local load_names
+local load_lookups
 local read_fonts_conf
 local reload_db
 local resolve
 local resolve_cached
 local save_names
+local save_lookups
 local scan_external_dir
 local update_names
 
@@ -280,6 +279,20 @@ load_names = function ( )
         save_names(data)
     end
     fonts_loaded = true
+    return data
+end
+
+--- unit -> dbobj
+load_lookups = function ( )
+    local foundname, data = load_lua_file(names.path.lookup_path)
+    if data then
+        report("both", 1, "cache",
+               "Lookup cache loaded (%s)", foundname)
+    else
+        report("both", 1, "cache",
+               "No lookup cache, creating empty.")
+        data = { }
+    end
     return data
 end
 
@@ -428,20 +441,20 @@ resolver, lest we want to worry if we caught all the details.
 
 --- 'a -> 'a -> table -> (string * int|boolean * boolean)
 resolve_cached = function (_, _, specification)
-    if not names.data then names.data = load_names() end
-    local request_cache = names.data.request_cache
+    --if not names.data then names.data = load_names() end
+    if not names.lookups then names.lookups = load_lookups() end
     local request = specification.specification
-    report("log", 4, "cache", "looking for “%s” in cache ...",
+    report("both", 4, "cache", "looking for “%s” in cache ...",
            request)
 
-    local found = names.data.request_cache[request]
+    local found = names.lookups[request]
 
     --- case 1) cache positive ----------------------------------------
     if found then --- replay fields from cache hit
         report("info", 4, "cache", "found!")
         return found[1], found[2], true
     end
-    report("log", 4, "cache", "not cached; resolving")
+    report("both", 4, "cache", "not cached; resolving")
 
     --- case 2) cache negative ----------------------------------------
     --- first we resolve normally ...
@@ -449,8 +462,8 @@ resolve_cached = function (_, _, specification)
     if not success then return filename, subfont, false end
     --- ... then we add the fields to the cache ... ...
     local entry = { filename, subfont }
-    report("log", 4, "cache", "new entry: %s", request)
-    names.data.request_cache[request] = entry
+    report("both", 4, "cache", "new entry: %s", request)
+    names.lookups[request] = entry
 
     --- obviously, the updated cache needs to be stored.
     --- for the moment, we write the entire db to disk
@@ -459,8 +472,8 @@ resolve_cached = function (_, _, specification)
     ---      document is compiled (finish_pdffile callback?)
     --- TODO we should speed up writing by separating
     ---      the cache from the db
-    report("log", 5, "cache", "saving updated cache")
-    save_names()
+    report("both", 5, "cache", "saving updated cache")
+    save_lookups()
     return filename, subfont, true
 end
 
@@ -468,9 +481,10 @@ end
 
 Luatex-fonts, the font-loader package luaotfload imports, comes with
 basic file location facilities (see luatex-fonts-syn.lua).
-However, the builtin functionality is too limited to be of more than
-basic use, which is why we supply our own resolver that accesses the
-font database created by the mkluatexfontdb script.
+However, not only does the builtin functionality rely on Context’s font
+name database, it is also too limited to be of more than basic use.
+For this reason, luaotfload supplies its own resolvers that accesses
+the font database created by the luaotfload-tool script.
 
 --doc]]--
 
@@ -684,7 +698,7 @@ end --- resolve()
 reload_db = function (why, caller, ...)
     report("both", 1, "db", "reload initiated; reason: “%s”", why)
     names.data = update_names()
-    save_names(names.data)
+    save_names()
     fonts_reloaded = true
     return caller(...)
 end
@@ -1389,10 +1403,10 @@ local function scan_os_fonts(fontnames, newfontnames)
 end
 
 flush_cache = function ()
-    if not names.data then names.data = load_names() end
-    names.data.request_cache = { }
+    if not names.lookups then names.lookups = load_lookups() end
+    names.lookups = { }
     collectgarbage"collect"
-    return true, names.data
+    return true, names.lookups
 end
 
 --- dbobj -> bool -> dbobj
@@ -1448,13 +1462,47 @@ update_names = function (fontnames, force)
     return newfontnames
 end
 
+--- unit -> string
+local ensure_names_path = function ( )
+    local path = names.path.dir
+    if not lfsisdir(path) then
+        dirmkdirs(path)
+    end
+    return path
+end
+
+--- The lookup cache is an experimental feature of version 2.2;
+--- instead of incorporating it into the database it gets its own
+--- file. As we update it after every single addition this saves us
+--- quite some time.
+
+--- unit -> string
+save_lookups = function ( )
+    ---- this is boilerplate and should be refactored into something
+    ---- usable by both the db and the cache writers
+    local lookups  = names.lookups
+    local path     = ensure_names_path()
+    if fileiswritable(path) then
+        local luaname, lucname = make_name(names.path.lookup_path)
+        if luaname then
+            tabletofile(luaname, lookups, true)
+            if lucname and type(caches.compile) == "function" then
+                os.remove(lucname)
+                caches.compile(lookups, luaname, lucname)
+                report("info", 1, "cache", "Lookup cache saved")
+                return names.path.lookup_path
+            end
+        end
+    end
+    report("info", 0, "cache", "Could not write lookup cache")
+    return nil
+end
+
+--- save_names() is usually called without the argument
 --- dbobj -> unit
 save_names = function (fontnames)
     if not fontnames then fontnames = names.data end
-    local path  = names.path.dir
-    if not lfs.isdir(path) then
-        dirmkdirs(path)
-    end
+    local path  = ensure_names_path()
     if fileiswritable(path) then
         local luaname, lucname = make_name(names.path.path)
         if luaname then

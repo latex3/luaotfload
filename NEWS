@@ -9,8 +9,6 @@ Change History
       updating luaotfload-merged.lua (<= luatex-fonts-merged.lua from
       the LuaTeX-Plain format)
     * Improved and extended documentation
-    * Blacklisting font lingoes.ttf while removing several TrueType collections
-      from the blacklist
     * Font filenames are stored in the database (file: lookups more efficient)
     * Optional caching of name: lookups
     * Increased fidelity of XeTeX emulation
@@ -22,10 +20,14 @@ Change History
       the new prefix is »luaotfload« (<= »otfl«)
     * The Adobe Glyph List (font-age.lua) is now built via script (mkglyphlist)
     * Hans adapted the font loader to several of our requests (attribute
-      allocation, custom merged package name, non-ascii names in font cache
-      etc.)
+      allocation, custom merged package name etc.)
     * There is now a central, non-personal dev repo on github:
       https://github.com/lualatex/luaotfload
+
+2013/04/27, luaotfload v1.3:
+    *  blacklisting lingoes.ttf (segfaults)
+    *  unblacklisting ttc fonts (warning: may break LuaTeX < 0.65)
+    *  fixing font cache file name with non-ascii characters
 
 2013/04/25, luaotfload v1.29:
     * Reverting the unified resolver, as the database was rebuilt too often
@@ -35,12 +37,19 @@ Change History
     * Fix a bug that made fontconfig files not parsed when OSFONTDIR is set
 
 2013/04/11, luaotfload v1.28:
-    * Adapting to LuaTeX 0.75, keeping backward-compatibility
+    * Adapting to LuaTeX 0.75
     * Fix small documentation issues in mkluatexfontdb
-    * Fix possibility of infite loop with fontconfig config files references
+    * Fix possible infite loop with fontconfig config files references
     * Adding semibold synonym for bold
     * file:xxx syntax now uses the same search function as name: which
       make more fonts recognized
+
+2012/05/28, luaotfload v1.27:
+    * Fix "endless loop in charlist" with some OpenType math fonts
+
+2012/03/27, luaotfload v1.26:
+    * Enable setting italic correction values by default
+    * Fix finding demibold italic fonts
 
 2011/04/21, luaotfload v1.25:
     * Fix bug loading *.dfont fonts

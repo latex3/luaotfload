@@ -337,13 +337,6 @@ crude_file_lookup_verbose = function (filename)
             filename, found[1])
         return found
     end
---  found = data.fullnames[filename]
---  if found and mappings[found] then
---      found = mappings[found].filename[1]
---          "crude file lookup: req=%s; hit=bare; ret=%s",
---          filename, found[1])
---      return found
---  end
     found = data.basenames[filename]
     if found and mappings[found] then
         found = mappings[found].filename
@@ -369,7 +362,6 @@ crude_file_lookup = function (filename)
     local data      = names.data
     local mappings  = data.mappings
     local found = data.barenames[filename]
---             or data.fullnames[filename]
                or data.basenames[filename]
     if found then
         found = data.mappings[found]
@@ -475,6 +467,27 @@ resolve_cached = function (_, _, specification)
     report("both", 5, "cache", "saving updated cache")
     save_lookups()
     return filename, subfont, true
+end
+
+--- this used to be inlined; with the lookup cache we don’t
+--- have to be parsimonious wrt function calls anymore
+--- “found” is the match accumulator
+local add_to_match = function (
+    found,   optsize, dsnsize, size,
+    minsize, maxsize, face)
+    local continue = true
+    if optsize then
+        if dsnsize == size or (size > minsize and size <= maxsize) then
+            found[1] = face
+            continue = false ---> break
+        else
+            found[#found+1] = face
+        end
+    else
+        found[1] = face
+        continue = false ---> break
+    end
+    return found, continue
 end
 
 --[[doc--
@@ -585,54 +598,43 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
 
         if name == family then
             if subfamily == style then
-                if optsize then
-                    if dsnsize == size
-                    or (size > minsize and size <= maxsize) then
-                        found[1] = face
-                        break
-                    else
-                        found[#found+1] = face
-                    end
-                else
-                    found[1] = face
-                    break
-                end
+                local continue
+                found, continue = add_to_match(
+                    found,   optsize, dsnsize, size,
+                    minsize, maxsize, face)
+                if continue == false then break end
             elseif synonym_set[style] and
                    synonym_set[style][subfamily]
             then
-                if optsize then
-                    if dsnsize == size
-                    or (size > minsize and size <= maxsize) then
-                        found[1] = face
-                        break
-                    else
-                        found[#found+1] = face
-                    end
-                else
-                    found[1] = face
-                    break
-                end
+                local continue
+                found, continue = add_to_match(
+                    found,   optsize, dsnsize, size,
+                    minsize, maxsize, face)
+                if continue == false then break end
             elseif subfamily == "regular" or
-                    synonym_set.regular[subfamily] then
+                   synonym_set.regular[subfamily] then
                 found.fallback = face
+            elseif name == fullname
+                or name == pfullname
+                or name == fontname
+                or name == psname
+            then
+                local continue
+                found, continue = add_to_match(
+                    found,   optsize, dsnsize, size,
+                    minsize, maxsize, face)
+                if continue == false then break end
             end
-        end
-
-        if name == fullname
-        or name == pfullname
-        or name == fontname
-        or name == psname then
-            if optsize then
-                if dsnsize == size
-                or (size > minsize and size <= maxsize) then
-                    found[1] = face
-                    break
-                else
-                    found[#found+1] = face
-                end
-            else
-                found[1] = face
-                break
+        else
+            if name == fullname
+            or name == pfullname
+            or name == fontname
+            or name == psname then
+                local continue
+                found, continue = add_to_match(
+                    found,   optsize, dsnsize, size,
+                    minsize, maxsize, face)
+                if continue == false then break end
             end
         end
     end

@@ -3,7 +3,7 @@
 --         FILE:  luaotfload-auxiliary.lua
 --  DESCRIPTION:  part of luaotfload
 -- REQUIREMENTS:  luaotfload 2.2
---       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 --      VERSION:  1.0
 --      CREATED:  2013-05-01 14:40:50+0200
 -----------------------------------------------------------------------
@@ -27,6 +27,7 @@ local utf8          = unicode.utf8
 local stringlower   = string.lower
 local stringformat  = string.format
 local stringgsub    = string.gsub
+local stringbyte    = string.byte
 
 -----------------------------------------------------------------------
 ---                          font patches
@@ -85,6 +86,57 @@ luatexbase.add_to_callback(
   "luaotfload.patch_font",
   patch_cambria_domh,
   "luaotfload.aux.patch_cambria_domh")
+
+--[[doc--
+
+Comment from fontspec:
+
+ “Here we patch fonts tfm table to emulate \XeTeX's \cs{fontdimen8},
+  which stores the caps-height of the font. (Cf.\ \cs{fontdimen5} which
+  stores the x-height.)
+
+  Falls back to measuring the glyph if the font doesn't contain the
+  necessary information.
+  This needs to be extended for fonts that don't contain an `X'.”
+
+--doc]]--
+
+local set_capheight = function (fontdata)
+    local shared     = fontdata.shared
+    local parameters = fontdata.parameters
+    local capheight
+    if shared then
+      local units_per_em   = parameters.units
+      local size           = parameters.size
+      local os2_capheight  = shared.rawdata.metadata.pfminfo.os2_capheight
+
+      if os2_capheight > 0 then
+        capheight = os2_capheight / units_per_em * size
+      else
+        local X8 = stringbyte"X"
+        if fontdata.characters[X8] then
+          capheight = fontdata.characters[X8].height
+        else
+          capheight = parameters.ascender / units_per_em * size
+        end
+      end
+    else
+      local X8 = stringbyte"X"
+      if fontdata.characters[X8] then
+        capheight = fontdata.characters[X8].height
+      end
+    end
+    if capheight then
+      --- is this legit? afaics there’s nothing else on the
+      --- array part of that table
+      fontdata.parameters[8] = capheight
+    end
+end
+
+luatexbase.add_to_callback(
+  "luaotfload.patch_font",
+  set_capheight,
+  "luaotfload.aux.set_capheight")
 
 -----------------------------------------------------------------------
 ---                             glyphs
@@ -236,8 +288,8 @@ accounted for in the script with tag “asked_script” in feature
 --doc]]--
 
 --- int -> string -> string -> string -> bool
-local provides_feature = function(font_id,        asked_script,
-                                  asked_language, asked_feature)
+local provides_feature = function (font_id,        asked_script,
+                                   asked_language, asked_feature)
   asked_script    = stringlower(asked_script)
   asked_language  = stringlower(asked_language)
   asked_feature   = lpegmatch(strip_garbage, asked_feature)

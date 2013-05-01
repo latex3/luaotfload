@@ -1226,6 +1226,11 @@ luaotfload.font_definer = "patch" --- | “generic” | “old”
 local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
 
+luaotfload.error        = error
+luaotfload.warning      = warning
+luaotfload.info         = info
+luaotfload.log          = log
+
 %    \end{macrocode}
 %    We set the minimum version requirement for \LUATEX to v0.76,
 %    because the font loader requires recent features like direct
@@ -1542,7 +1547,6 @@ loadmodule"colors.lua"     --- “font-clr”
 % genuine \verb|name:| and \verb|file:| lookups of \LUATEX-Fonts.
 % Another benefit is that we can now easily plug in or replace new lookup
 % behaviors if necessary.
-%
 % The name resolver remains untouched, but it calls
 % \luafunction{fonts.names.resolve()} internally anyways (see
 % \fileent{luaotfload-database.lua}).
@@ -1683,9 +1687,11 @@ elseif font_definer == "patch"  then
                   1)
 end
 
-loadmodule"features.lua" --- contains what was “font-ltx” and “font-otc”
+loadmodule"features.lua"    --- contains what was “font-ltx” and “font-otc”
+loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 
 -- vim:tw=71:sw=4:ts=4:expandtab
+
 
 %    \end{macrocode}
 %

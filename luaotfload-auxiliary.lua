@@ -22,6 +22,8 @@ local aux           = luaotfload.aux
 local log           = luaotfload.log
 local identifiers   = fonts.hashes.identifiers
 
+local fontid        = font.id
+local texsprint     = tex.sprint
 
 local utf8          = unicode.utf8
 local stringlower   = string.lower
@@ -323,5 +325,28 @@ local provides_feature = function (font_id,        asked_script,
 end
 
 aux.provides_feature = provides_feature
+
+-----------------------------------------------------------------------
+---                         font dimensions
+-----------------------------------------------------------------------
+
+--- string -> string -> int
+local get_math_dimension = function (csname, dimenname)
+  local fontdata  = identifiers[fontid(csname)]
+  local mathdata  = fontdata.mathparameters
+  if mathdata then return mathdata[dimenname] or 0 end
+  return 0
+end
+
+aux.get_math_dimension = get_math_dimension
+
+--- string -> string -> unit
+local sprint_math_dimension = function (csname, dimenname)
+  local dim = get_math_dimension(csname, dimenname)
+  texsprint(luatexbase.catcodetables["latex-package"], dim)
+  texsprint(luatexbase.catcodetables["latex-package"], "sp")
+end
+
+aux.sprint_math_dimension = sprint_math_dimension
 
 -- vim:tw=71:sw=2:ts=2:expandtab

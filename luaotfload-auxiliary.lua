@@ -18,9 +18,15 @@ luaotfload.aux              = luaotfload.aux or { }
 config                      = config or { }
 config.luaotfload           = config.luaotfload or { }
 
-local utf8 = unicode.utf8
+local aux           = luaotfload.aux
+local log           = luaotfload.log
+local identifiers   = fonts.hashes.identifiers
 
-local aux = luaotfload.aux
+
+local utf8          = unicode.utf8
+local stringlower   = string.lower
+local stringformat  = string.format
+local stringgsub    = string.gsub
 
 -----------------------------------------------------------------------
 ---                          font patches
@@ -81,7 +87,7 @@ luatexbase.add_to_callback(
   "luaotfload.aux.patch_cambria_domh")
 
 -----------------------------------------------------------------------
----                              fonts
+---                             glyphs
 -----------------------------------------------------------------------
 
 --- int -> int -> bool
@@ -113,5 +119,157 @@ local do_if_glyph_else = function (chr, positive, negative)
 end
 
 aux.do_if_glyph_else = do_if_glyph_else
+
+-----------------------------------------------------------------------
+---                 features / scripts / languages
+-----------------------------------------------------------------------
+--- lots of arrowcode ahead
+
+--[[doc--
+This function, modeled after “check_script()” from fontspec, returns
+true if in the given font, the script “asked_script” is accounted for in at
+least one feature.
+--doc]]--
+
+--- int -> string -> bool
+local provides_script = function (font_id, asked_script)
+  asked_script = stringlower(asked_script)
+  if font_id and font_id > 0 then
+    local fontdata = identifiers[font_id].shared.rawdata
+    if fontdata then
+      local fontname = fontdata.metadata.fontname
+      local features = fontdata.resources.features
+      for method, featuredata in next, features do
+        --- where method: "gpos" | "gsub"
+        for feature, data in next, featuredata do
+          if data[asked_script] then
+            log(stringformat(
+              "font no %d (%s) defines feature %s for script %s",
+              font_id, fontname, feature, asked_script))
+            return true
+          end
+        end
+      end
+      log(stringformat(
+        "font no %d (%s) defines no feature for script %s",
+        font_id, fontname, asked_script))
+    end
+  end
+  log(stringformat("no font with id %d", font_id))
+  return false
+end
+
+aux.provides_script = provides_script
+
+--[[doc--
+This function, modeled after “check_language()” from fontspec, returns
+true if in the given font, the language with tage “asked_language” is
+accounted for in the script with tag “asked_script” in at least one
+feature.
+--doc]]--
+
+--- int -> string -> string -> bool
+local provides_language = function (font_id, asked_script, asked_language)
+  asked_script     = stringlower(asked_script)
+  asked_language   = stringlower(asked_language)
+  if font_id and font_id > 0 then
+    local fontdata = identifiers[font_id].shared.rawdata
+    if fontdata then
+      local fontname = fontdata.metadata.fontname
+      local features = fontdata.resources.features
+      for method, featuredata in next, features do
+        --- where method: "gpos" | "gsub"
+        for feature, data in next, featuredata do
+          local scriptdata = data[asked_script]
+          if scriptdata and scriptdata[asked_language] then
+            log(stringformat("font no %d (%s) defines feature %s "
+                          .. "for script %s with language %s",
+                             font_id, fontname, feature,
+                             asked_script, asked_language))
+            return true
+          end
+        end
+      end
+      log(stringformat(
+        "font no %d (%s) defines no feature for script %s with language %s",
+        font_id, fontname, asked_script, asked_language))
+    end
+  end
+  log(stringformat("no font with id %d", font_id))
+  return false
+end
+
+aux.provides_language = provides_language
+
+--[[doc--
+We strip the syntax elements from feature definitions (shouldn’t
+actually be there in the first place, but who cares ...)
+--doc]]--
+
+local lpeg        = require"lpeg"
+local C, P, S     = lpeg.C, lpeg.P, lpeg.S
+local lpegmatch   = lpeg.match
+
+local sign            = S"+-"
+local rhs             = P"=" * P(1)^0 * P(-1)
+local strip_garbage   = sign^-1 * C((1 - rhs)^1)
+
+--s   = "+foo"        --> foo
+--ss  = "-bar"        --> bar
+--sss = "baz"         --> baz
+--t   = "foo=bar"     --> foo
+--tt  = "+bar=baz"    --> bar
+--ttt = "-baz=true"   --> baz
+--
+--print(lpeg.match(strip_garbage, s))
+--print(lpeg.match(strip_garbage, ss))
+--print(lpeg.match(strip_garbage, sss))
+--print(lpeg.match(strip_garbage, t))
+--print(lpeg.match(strip_garbage, tt))
+--print(lpeg.match(strip_garbage, ttt))
+
+--[[doc--
+This function, modeled after “check_feature()” from fontspec, returns
+true if in the given font, the language with tag “asked_language” is
+accounted for in the script with tag “asked_script” in feature
+“asked_feature”.
+--doc]]--
+
+--- int -> string -> string -> string -> bool
+local provides_feature = function(font_id,        asked_script,
+                                  asked_language, asked_feature)
+  asked_script    = stringlower(asked_script)
+  asked_language  = stringlower(asked_language)
+  asked_feature   = lpegmatch(strip_garbage, asked_feature)
+
+  if font_id and font_id > 0 then
+    local fontdata = identifiers[font_id].shared.rawdata
+    if fontdata then
+      local features = fontdata.resources.features
+      local fontname = fontdata.metadata.fontname
+      for method, featuredata in next, features do
+        --- where method: "gpos" | "gsub"
+        local feature = featuredata[asked_feature]
+        if feature then
+          local scriptdata = feature[asked_script]
+          if scriptdata and scriptdata[asked_language] then
+            log(stringformat("font no %d (%s) defines feature %s "
+                          .. "for script %s with language %s",
+                             font_id, fontname, asked_feature,
+                             asked_script, asked_language))
+            return true
+          end
+        end
+      end
+      log(stringformat(
+        "font no %d (%s) does not define feature %s for script %s with language %s",
+        font_id, fontname, asked_feature, asked_script, asked_language))
+    end
+  end
+  log(stringformat("no font with id %d", font_id))
+  return false
+end
+
+aux.provides_feature = provides_feature
 
 -- vim:tw=71:sw=2:ts=2:expandtab

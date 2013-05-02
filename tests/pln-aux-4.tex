@@ -6,9 +6,10 @@
 
 \font\ptserifregular = file:PTF55F.ttf \ptserifregular
 
-%% here we map the function luaotfload.aux.name_of_codepoint
-%% on a short text, printing a list of letters, their codepoints
-%% and names (as specified in the Adobe Glyph List).
+%% here we map the function luaotfload.aux.name_of_slot
+%% on a short text, printing a list of letters, their
+%% code points and names (as specified in the Adobe
+%% Glyph List).
 
 \directlua{
   local aux = luaotfload.aux
@@ -21,7 +22,7 @@
     for chr in string.utfcharacters(str) do
       local val = unicode.utf8.byte(chr)
       local line = chr .. " <> " .. tostring(val)
-      line = line .. " <> " .. (aux.name_of_codepoint(val) or "")
+      line = line .. " <> " .. (aux.name_of_slot(val) or "")
       res[\string#res+1] = line
     end
     return table.concat(res, [[\endgraf]])

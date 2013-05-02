@@ -174,31 +174,47 @@ end
 
 aux.do_if_glyph_else = do_if_glyph_else
 
---- this one is approximately “name_to_slot” from the microtype
---- package
+--[[doc--
+
+  This one is approximately “name_to_slot” from the microtype package;
+  note that it is all about Adobe Glyph names and glyph slots in the
+  font. The names and values may diverge from actual Unicode.
+
+  http://www.adobe.com/devnet/opentype/archives/glyph.html
+
+--doc]]--
 
 --- string -> (int | false)
-local codepoint_of_name = function (glyphname)
+local slot_of_name = function (glyphname)
   local fontdata = identifiers[font.current()]
   if fontdata then
     local unicode = fontdata.resources.unicodes[glyphname]
     if unicode and type(unicode) == "number" then
       return unicode
     else
-      return unicode[1] --- again, does that even happen?
+      return unicode[1] --- for multiple components
     end
   end
   return false
 end
 
-aux.codepoint_of_name = codepoint_of_name
+aux.slot_of_name = slot_of_name
 
---- inverse of above
+--[[doc--
+
+  Inverse of above; not authoritative as to my knowledge the official
+  inverse of the AGL is the AGLFN. Maybe this whole issue should be
+  dealt with in a separate package that loads char-def.lua and thereby
+  solves the problem for the next couple decades.
+
+  http://partners.adobe.com/public/developer/en/opentype/aglfn13.txt
+
+--doc]]--
 
 local indices
 
 --- int -> (string | false)
-local name_of_codepoint = function (codepoint)
+local name_of_slot = function (codepoint)
   if not indices then --- this will load the glyph list
     local unicodes = fonts.encodings.agl.unicodes
     indices = table.swapped(unicodes)
@@ -210,7 +226,7 @@ local name_of_codepoint = function (codepoint)
   return false
 end
 
-aux.name_of_codepoint = name_of_codepoint
+aux.name_of_slot      = name_of_slot
 
 -----------------------------------------------------------------------
 ---                 features / scripts / languages

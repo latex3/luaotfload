@@ -465,6 +465,18 @@ end
 local handle_request = function (specification)
     local request = lpegmatch(font_request,
                               specification.specification)
+    if not request then
+        --- happens when called with an absolute path
+        --- in an anonymous lookup;
+        --- we try to behave as friendly as possible
+        --- just go with it ...
+        report("log", 0, "load", "invalid request “%s” of type anon",
+            specification.specification)
+        report("log", 0, "load", "use square bracket syntax or consult the documentation.")
+        specification.name      = specification.specification
+        specification.lookup    = "file"
+        return specification
+    end
     local lookup, name = select_lookup(request)
     request.features  = set_default_features(request.features)
 

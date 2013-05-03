@@ -4,7 +4,7 @@ NAME         = luaotfload
 DOC          = $(NAME).pdf
 DTX          = $(NAME).dtx
 OTFL         = $(wildcard otfl-*.lua) otfl-blacklist.cnf font-age.lua
-SCRIPT       = fontdbutil
+SCRIPT       = luaotfload-tool.lua
 
 GLYPHSCRIPT  = mkglyphlist
 GLYPHSOURCE  = glyphlist.txt

@@ -1,0 +1,18 @@
+\ifdefined\directlua
+  \directlua{config = config or { luaotfload = { } }
+             config.luaotfload.resolver = "cached"
+             config.luaotfload.loglevel = 5 }
+  \input luaotfload.sty
+\fi
+
+\font\iwona           =name:iwona      at 20pt
+\font\iwonabold       =name:iwona/b    at 20pt
+\font\iwonaitalic     =name:iwona/i    at 20pt
+\font\iwonabolditalic =name:iwona/bi   at 20pt
+
+\def\test{foo bar baz \endgraf}
+{\iwona           \test}
+{\iwonabold       \test}
+{\iwonaitalic     \test}
+{\iwonabolditalic \test}
+\bye

@@ -71,17 +71,25 @@ fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
-names.version        = 2.202
-names.data           = nil
+names.version        = 2.203
+names.data           = nil      --- contains the loaded database
+names.lookups        = nil      --- contains the lookup cache
 names.path           = {
-    basename = "luaotfload-names.lua",
-    dir      = "",
-    path     = "",
+    dir              = "",                      --- db and cache directory
+    basename         = "luaotfload-names.lua",  --- db file name
+    path             = "",                      --- full path to db file
+    lookup_basename  = "luaotfload-lookup-cache.lua", --- cache file name
+    lookup_path      = "",                            --- cache full path
 }
 
-config                      = config or { }
-config.luaotfload           = config.luaotfload or { }
-config.luaotfload.resolver  = config.luaotfload.resolver or "normal"
+config                         = config or { }
+config.luaotfload              = config.luaotfload or { }
+config.luaotfload.resolver     = config.luaotfload.resolver or "normal"
+if config.luaotfload.update_live ~= false then
+    --- this option allows for disabling updates
+    --- during a TeX run
+    config.luaotfload.update_live = true
+end
 
 -- We use the cache.* of ConTeXt (see luat-basics-gen), we can
 -- use it safely (all checks and directory creations are already done). It
@@ -92,8 +100,9 @@ if caches then
     if not writable_path then
         error("Impossible to find a suitable writeable cache...")
     end
-    names.path.dir   = writable_path
-    names.path.path  = filejoin(writable_path, names.path.basename)
+    names.path.dir          = writable_path
+    names.path.path         = filejoin(writable_path, names.path.basename)
+    names.path.lookup_path  = filejoin(writable_path, names.path.lookup_basename)
 else --- running as script, inject some dummies
     caches = { }
     logs   = { report = function () end }
@@ -183,12 +192,6 @@ mtx-fonts has in names.tma:
 --doc]]--
 
 local fontnames_init = function (keep_cache) --- returns dbobj
-    local request_cache
-    if keep_cache and names.data and names.data.request_cache then
-        request_cache = names.data.request_cache
-    else
-        request_cache = { }
-    end
     return {
         mappings        = { },
         status          = { },
@@ -201,7 +204,6 @@ local fontnames_init = function (keep_cache) --- returns dbobj
         basenames       = { },
 --      fullnames       = { },
         version         = names.version,
-        request_cache   = request_cache,
     }
 end
 
@@ -239,14 +241,19 @@ local load_lua_file = function (path)
 end
 
 --- define locals in scope
+local crude_file_lookup
+local crude_file_lookup_verbose
 local find_closest
 local flush_cache
 local font_fullinfo
 local load_names
+local load_lookups
 local read_fonts_conf
 local reload_db
 local resolve
+local resolve_cached
 local save_names
+local save_lookups
 local scan_external_dir
 local update_names
 
@@ -275,6 +282,20 @@ load_names = function ( )
     return data
 end
 
+--- unit -> dbobj
+load_lookups = function ( )
+    local foundname, data = load_lua_file(names.path.lookup_path)
+    if data then
+        report("both", 1, "cache",
+               "Lookup cache loaded (%s)", foundname)
+    else
+        report("both", 1, "cache",
+               "No lookup cache, creating empty.")
+        data = { }
+    end
+    return data
+end
+
 local fuzzy_limit = 1 --- display closest only
 
 local style_synonyms = { set = { } }
@@ -298,9 +319,13 @@ do
     end
 end
 
---- chain: barenames -> [fullnames ->] basenames -> findfile
-local crude_file_lookup_verbose = function (data, filename)
-    local mappings = data.mappings
+local type1_formats = { "tfm", "ofm", }
+
+--- string -> (string * bool | int)
+crude_file_lookup_verbose = function (filename)
+    if not names.data then names.data = load_names() end
+    local data      = names.data
+    local mappings  = data.mappings
     local found
 
     --- look up in db first ...
@@ -312,52 +337,43 @@ local crude_file_lookup_verbose = function (data, filename)
             filename, found[1])
         return found
     end
---  found = data.fullnames[filename]
---  if found and mappings[found] then
---      found = mappings[found].filename[1]
---          "crude file lookup: req=%s; hit=bare; ret=%s",
---          filename, found[1])
---      return found
---  end
     found = data.basenames[filename]
     if found and mappings[found] then
         found = mappings[found].filename
         report("info", 0, "db",
-            "crude file lookup: req=%s; hit=bare; ret=%s",
+            "crude file lookup: req=%s; hit=base; ret=%s",
             filename, found[1])
         return found
     end
 
-    --- now look for tfm et al.; will be superseded by proper
-    --- format lookup
-    found = resolvers.findfile(filename, "tfm")
-    if found then
-        report("info", 0, "db",
-            "crude file lookup: req=tfm; hit=bare; ret=%s", found)
-        return { found, false }
+    --- ofm and tfm
+    for i=1, #type1_formats do
+        local format = type1_formats[i]
+        if resolvers.findfile(filename, format) then
+            return { file.addsuffix(filename, format), false }, format
+        end
     end
-    found = resolvers.findfile(filename, "ofm")
-    if found then
-        report("info", 0, "db",
-            "crude file lookup: req=ofm; hit=bare; ret=%s", found)
-        return { found, false }
-    end
-    return false
+    return { filename, false }, nil
 end
 
-local crude_file_lookup = function (data, filename)
+--- string -> (string * bool | int)
+crude_file_lookup = function (filename)
+    if not names.data then names.data = load_names() end
+    local data      = names.data
+    local mappings  = data.mappings
     local found = data.barenames[filename]
---             or data.fullnames[filename]
                or data.basenames[filename]
     if found then
         found = data.mappings[found]
         if found then return found.filename end
     end
-    found = resolvers.findfile(filename, "tfm")
-    if found then return { found, false } end
-    found = resolvers.findfile(filename, "ofm")
-    if found then return { found, false } end
-    return false
+    for i=1, #type1_formats do
+        local format = type1_formats[i]
+        if resolvers.findfile(filename, format) then
+            return { file.addsuffix(filename, format), false }, format
+        end
+    end
+    return { filename, false }, nil
 end
 
 --[[doc--
@@ -377,28 +393,12 @@ TODO:
  ×  3) make caching optional (via the config table) for debugging
  ×  4) make names_update() cache aware (nil if “force”)
  ×  5) add logging
- ×  6) add cache control to fontdbutil
+ ×  6) add cache control to luaotfload-tool
  ×  7) incr db version
     8) wishlist: save cache only at the end of a run
     9) ???
     n) PROFIT!!!
 
---doc]]--
-
---- the resolver is called after the font request is parsed
---- this is where we insert the cache
-local normal_resolver = fonts.definers.resolve
-local dummy_resolver = function (specification)
-    --- this ensures that the db is always loaded
-    --- before a lookup occurs
-    if not names.data then names.data = load_names() end
-    --inspect(specification)
-    local resolved = normal_resolver(specification)
-    --inspect(resolved)
-    return resolved
-end
-
---[[doc--
 The name lookup requires both the “name” and some other
 keys, so we’ll concatenate them.
 The spec is modified in place (ugh), so we’ll have to catalogue what
@@ -431,62 +431,73 @@ We’ll just cache a deep copy of the entire spec as it leaves the
 resolver, lest we want to worry if we caught all the details.
 --doc]]--
 
---- spec -> spec
-local cached_resolver = function (specification)
-    if not names.data then names.data = load_names() end
-    local request_cache = names.data.request_cache
+--- 'a -> 'a -> table -> (string * int|boolean * boolean)
+resolve_cached = function (_, _, specification)
+    --if not names.data then names.data = load_names() end
+    if not names.lookups then names.lookups = load_lookups() end
     local request = specification.specification
-    report("info", 4, "cache",
-           "looking for “%s” in cache ...",
+    report("both", 4, "cache", "looking for “%s” in cache ...",
            request)
-    local found = names.data.request_cache[request]
+
+    local found = names.lookups[request]
+
+    --- case 1) cache positive ----------------------------------------
     if found then --- replay fields from cache hit
         report("info", 4, "cache", "found!")
-        for i=1, #cache_fields do
-            local f = cache_fields[i]
-            if found[f] then specification[f] = found[f] end
-        end
-        return specification
+        return found[1], found[2], true
     end
-    report("info", 4, "cache", "not cached; resolving")
+    report("both", 4, "cache", "not cached; resolving")
 
+    --- case 2) cache negative ----------------------------------------
     --- first we resolve normally ...
-    local resolved_spec = normal_resolver(specification)
-    --- ... then we add the fields to the cache
-    local entry = { }
-    for i=1, #cache_fields do
-        local f = cache_fields[i]
-        entry[f] = resolved_spec[f]
-    end
-    report("info", 4, "cache", "new entry: %s", request)
-    names.data.request_cache[request] = entry
+    local filename, subfont, success = resolve(nil, nil, specification)
+    if not success then return filename, subfont, false end
+    --- ... then we add the fields to the cache ... ...
+    local entry = { filename, subfont }
+    report("both", 4, "cache", "new entry: %s", request)
+    names.lookups[request] = entry
 
     --- obviously, the updated cache needs to be stored.
     --- for the moment, we write the entire db to disk
     --- whenever the cache is updated.
     --- TODO this should trigger a save only once the
     ---      document is compiled (finish_pdffile callback?)
-    report("info", 5, "cache", "saving updated cache")
-    save_names()
-    return resolved_spec
+    --- TODO we should speed up writing by separating
+    ---      the cache from the db
+    report("both", 5, "cache", "saving updated cache")
+    save_lookups()
+    return filename, subfont, true
 end
 
-local resolvers = {
-    dummy    = dummy_resolver,
-    normal   = normal_resolver,
-    cached   = cached_resolver,
-}
-
-fonts.definers.resolve = resolvers[config.luaotfload.resolver]
---fonts.definers.resolve = resolvers.cached
+--- this used to be inlined; with the lookup cache we don’t
+--- have to be parsimonious wrt function calls anymore
+--- “found” is the match accumulator
+local add_to_match = function (
+    found,   optsize, dsnsize, size,
+    minsize, maxsize, face)
+    local continue = true
+    if optsize then
+        if dsnsize == size or (size > minsize and size <= maxsize) then
+            found[1] = face
+            continue = false ---> break
+        else
+            found[#found+1] = face
+        end
+    else
+        found[1] = face
+        continue = false ---> break
+    end
+    return found, continue
+end
 
 --[[doc--
 
 Luatex-fonts, the font-loader package luaotfload imports, comes with
 basic file location facilities (see luatex-fonts-syn.lua).
-However, the builtin functionality is too limited to be of more than
-basic use, which is why we supply our own resolver that accesses the
-font database created by the mkluatexfontdb script.
+However, not only does the builtin functionality rely on Context’s font
+name database, it is also too limited to be of more than basic use.
+For this reason, luaotfload supplies its own resolvers that accesses
+the font database created by the luaotfload-tool script.
 
 --doc]]--
 
@@ -521,12 +532,6 @@ font database created by the mkluatexfontdb script.
 resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
     if not fonts_loaded then names.data = load_names() end
     local data = names.data
-
-    if specification.lookup == "file" then
-        local found = crude_file_lookup(data, specification.name)
-        --local found = crude_file_lookup_verbose(data, specification.name)
-        if found then return found[1], found[2], true end
-    end
 
     local name  = sanitize_string(specification.name)
     local style = sanitize_string(specification.style) or "regular"
@@ -569,9 +574,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
 
     local found = { }
     local synonym_set = style_synonyms.set
-    for _,face in next, data.mappings do
-        --- TODO we really should store those in dedicated
-        --- .sanitized field
+    for _, face in next, data.mappings do
         local family, subfamily, fullname, psname, fontname, pfullname
 
         local facenames = face.sanitized
@@ -595,65 +598,56 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
 
         if name == family then
             if subfamily == style then
-                if optsize then
-                    if dsnsize == size
-                    or (size > minsize and size <= maxsize) then
-                        found[1] = face
-                        break
-                    else
-                        found[#found+1] = face
-                    end
-                else
-                    found[1] = face
-                    break
-                end
+                local continue
+                found, continue = add_to_match(
+                    found,   optsize, dsnsize, size,
+                    minsize, maxsize, face)
+                if continue == false then break end
             elseif synonym_set[style] and
                    synonym_set[style][subfamily]
             then
-                if optsize then
-                    if dsnsize == size
-                    or (size > minsize and size <= maxsize) then
-                        found[1] = face
-                        break
-                    else
-                        found[#found+1] = face
-                    end
-                else
-                    found[1] = face
-                    break
-                end
+                local continue
+                found, continue = add_to_match(
+                    found,   optsize, dsnsize, size,
+                    minsize, maxsize, face)
+                if continue == false then break end
             elseif subfamily == "regular" or
-                    synonym_set.regular[subfamily] then
+                   synonym_set.regular[subfamily] then
                 found.fallback = face
+            elseif name == fullname
+                or name == pfullname
+                or name == fontname
+                or name == psname
+            then
+                local continue
+                found, continue = add_to_match(
+                    found,   optsize, dsnsize, size,
+                    minsize, maxsize, face)
+                if continue == false then break end
             end
-        end
-
-        if name == fullname
-        or name == pfullname
-        or name == fontname
-        or name == psname then
-            if optsize then
-                if dsnsize == size
-                or (size > minsize and size <= maxsize) then
-                    found[1] = face
-                    break
-                else
-                    found[#found+1] = face
-                end
-            else
-                found[1] = face
-                break
+        else
+            if name == fullname
+            or name == pfullname
+            or name == fontname
+            or name == psname then
+                local continue
+                found, continue = add_to_match(
+                    found,   optsize, dsnsize, size,
+                    minsize, maxsize, face)
+                if continue == false then break end
             end
         end
     end
 
     if #found == 1 then
-        if kpselookup(found[1].filename[1]) then
+        --- “found” is really synonymous with “registered in the db”.
+        local filename = found[1].filename[1]
+        if lfsisfile(filename) or kpselookup(filename) then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
-                name, style, found[1].filename[1]
+                name, style, filename
             )
-            return found[1].filename[1], found[1].filename[2], true
+            return filename, found[1].filename[2], true
         end
     elseif #found > 1 then
         -- we found matching font(s) but not in the requested optical
@@ -669,22 +663,25 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 least   = difference
             end
         end
-        if kpselookup(closest.filename[1]) then
+        local filename = closest.filename[1]
+        if lfsisfile(filename) or kpselookup(filename) then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
-                name, style, closest.filename[1]
+                name, style, filename
             )
-            return closest.filename[1], closest.filename[2], true
+            return filename, closest.filename[2], true
         end
     elseif found.fallback then
-        return found.fallback.filename[1], found.fallback.filename[2], true
+        return found.fallback.filename[1],
+               found.fallback.filename[2],
+               true
     end
 
     --- no font found so far
     if not fonts_reloaded then
         --- last straw: try reloading the database
         return reload_db(
-            "unresoled font name: “" .. name .. "”",
+            "unresolved font name: “" .. name .. "”",
             resolve, nil, nil, specification
         )
     end
@@ -701,9 +698,9 @@ end --- resolve()
 
 --- string -> ('a -> 'a) -> 'a list -> 'a
 reload_db = function (why, caller, ...)
-    report("log", 1, "db", "reload initiated; reason: “%s”", why)
+    report("both", 1, "db", "reload initiated; reason: “%s”", why)
     names.data = update_names()
-    save_names(names.data)
+    save_names()
     fonts_reloaded = true
     return caller(...)
 end
@@ -741,9 +738,7 @@ find_closest = function (name, limit)
     local name     = sanitize_string(name)
     limit          = limit or fuzzy_limit
 
-    if not fonts_loaded then
-        names.data = load_names()
-    end
+    if not fonts_loaded then names.data = load_names() end
 
     local data = names.data
 
@@ -823,7 +818,7 @@ The data inside an Opentype font file can be quite heterogeneous.
 Thus in order to get the relevant information, parts of the original
 table as returned by the font file reader need to be relocated.
 --doc]]--
-font_fullinfo = function (filename, subfont, texmf)
+font_fullinfo = function (filename, subfont)
     local tfmdata = { }
     local rawfont = fontloader.open(filename, subfont)
     if not rawfont then
@@ -870,10 +865,7 @@ font_fullinfo = function (filename, subfont, texmf)
     tfmdata.fontname    = metadata.fontname
     tfmdata.fullname    = metadata.fullname
     tfmdata.familyname  = metadata.familyname
-    tfmdata.filename    = {
-        texmf and filebasename(filename) or filename,
-        subfont
-    }
+    tfmdata.filename    = { filename, subfont } -- always store full path
     tfmdata.weight      = metadata.pfminfo.weight
     tfmdata.width       = metadata.pfminfo.width
     tfmdata.slant       = metadata.italicangle
@@ -887,8 +879,10 @@ font_fullinfo = function (filename, subfont, texmf)
 end
 
 --- we return true if the fond is new or re-indexed
---- string -> dbobj -> dbobj -> bool -> bool
-local load_font = function (fullname, fontnames, newfontnames, texmf)
+--- string -> dbobj -> dbobj -> bool
+local load_font = function (fullname, fontnames, newfontnames)
+    if not fullname then return false end
+
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status
 
@@ -905,47 +899,41 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     local basename      = filebasename(fullname)
     local barename      = filenameonly(fullname)
 
-    --- entryname is apparently the identifier a font is
-    --- loaded by; it is different for files in the texmf
-    --- (due to kpse? idk.)
-    --- entryname = texmf : true -> basename | false -> fullname
-    local entryname     = texmf and basename or fullname
+    local entryname     = basename
 
-    if not fullname then return false end
-
-    if names.blacklist[fullname]
-    or names.blacklist[basename]
+    if names.blacklist[fullname] or names.blacklist[basename]
     then
         report("log", 2, "db",
             "ignoring blacklisted font “%s”", fullname)
         return false
     end
+
     local timestamp, db_timestamp
-    db_timestamp        = status[entryname]
-                        and status[entryname].timestamp
+    db_timestamp        = status[fullname]
+                        and status[fullname].timestamp
     timestamp           = lfs.attributes(fullname, "modification")
 
-    local index_status = newstatus[entryname]
-                        or (not texmf and newstatus[basename])
-    local teststat = newstatus[entryname]
+    local index_status = newstatus[fullname]
     --- index_status: nil | false | table
     if index_status and index_status.timestamp == timestamp then
         -- already indexed this run
         return false
     end
 
-    newstatus[entryname]           = newstatus[entryname] or { }
-    newstatus[entryname].timestamp = timestamp
-    newstatus[entryname].index     = newstatus[entryname].index or { }
+    newstatus[fullname]           = newstatus[fullname] or { }
+    newstatus[fullname].timestamp = timestamp
+    newstatus[fullname].index     = newstatus[fullname].index or { }
 
+    --- this test compares the modification data registered
+    --- in the database with the current one
     if  db_timestamp == timestamp
-    and not newstatus[entryname].index[1] then
-        for _,v in next, status[entryname].index do
-            local index      = #newstatus[entryname].index
+    and not newstatus[fullname].index[1] then
+        for _,v in next, status[fullname].index do
+            local index      = #newstatus[fullname].index
             local fullinfo   = mappings[v]
             local location   = #newmappings + 1
             newmappings[location]               = fullinfo --- keep
-            newstatus[entryname].index[index+1] = location --- is this actually used anywhere?
+            newstatus[fullname].index[index+1]  = location --- is this actually used anywhere?
 --          newfullnames[fullname]              = location
             newbasenames[basename]              = location
             newbarenames[barename]              = location
@@ -958,34 +946,34 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     if info then
         if type(info) == "table" and #info > 1 then --- ttc
             for n_font = 1, #info do
-                local fullinfo = font_fullinfo(fullname, n_font-1, texmf)
+                local fullinfo = font_fullinfo(fullname, n_font-1)
                 if not fullinfo then
                     return false
                 end
                 local location = #newmappings+1
-                local index    = newstatus[entryname].index[n_font]
+                local index    = newstatus[fullname].index[n_font]
                 if not index then index = location end
 
                 newmappings[index]                  = fullinfo
 --              newfullnames[fullname]              = location
                 newbasenames[basename]              = location
                 newbarenames[barename]              = location
-                newstatus[entryname].index[n_font]  = index
+                newstatus[fullname].index[n_font]   = index
             end
         else
-            local fullinfo = font_fullinfo(fullname, false, texmf)
+            local fullinfo = font_fullinfo(fullname, false)
             if not fullinfo then
                 return false
             end
             local location  = #newmappings+1
-            local index     = newstatus[entryname].index[1]
+            local index     = newstatus[fullname].index[1]
             if not index then index = location end
 
             newmappings[index]            = fullinfo
 --          newfullnames[fullname]        = location
             newbasenames[basename]        = location
             newbarenames[barename]        = location
-            newstatus[entryname].index[1] = index
+            newstatus[fullname].index[1]  = index
         end
 
     else --- missing info
@@ -1096,13 +1084,13 @@ for key, value in next, font_extensions do
 end
 
 --- string -> dbobj -> dbobj -> bool -> (int * int)
-local scan_dir = function (dirname, fontnames, newfontnames, texmf)
+local scan_dir = function (dirname, fontnames, newfontnames)
     --[[
     This function scans a directory and populates the list of fonts
     with all the fonts it finds.
     - dirname is the name of the directory to scan
     - names is the font database to fill -> no such term!!!
-    - texmf is a boolean saying if we are scanning a texmf directory
+    - texmf used to be a boolean saying if we are scanning a texmf directory
     ]]
     local n_scanned, n_new = 0, 0   --- total of fonts collected
     report("log", 2, "db", "scanning", "%s", dirname)
@@ -1118,7 +1106,7 @@ local scan_dir = function (dirname, fontnames, newfontnames, texmf)
                 local fullname = found[j]
                 fullname = path_normalize(fullname)
                 report("log", 2, "db", "loading font “%s”", fullname)
-                local new = load_font(fullname, fontnames, newfontnames, texmf)
+                local new = load_font(fullname, fontnames, newfontnames)
                 if new then n_new = n_new + 1 end
             end
         end
@@ -1142,7 +1130,7 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
     if not stringis_empty(fontdirs) then
         for _,d in next, filesplitpath(fontdirs) do
-            local found, new = scan_dir(d, fontnames, newfontnames, true)
+            local found, new = scan_dir(d, fontnames, newfontnames)
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end
@@ -1409,7 +1397,7 @@ local function scan_os_fonts(fontnames, newfontnames)
     report("info", 2, "db", "Scanning OS fonts...")
     report("info", 3, "db", "Searching in static system directories...")
     for _,d in next, get_os_dirs() do
-        local found, new = scan_dir(d, fontnames, newfontnames, false)
+        local found, new = scan_dir(d, fontnames, newfontnames)
         n_scanned = n_scanned + found
         n_new     = n_new     + new
     end
@@ -1417,14 +1405,20 @@ local function scan_os_fonts(fontnames, newfontnames)
 end
 
 flush_cache = function ()
-    if not names.data then names.data = load_names() end
-    names.data.request_cache = { }
+    if not names.lookups then names.lookups = load_lookups() end
+    names.lookups = { }
     collectgarbage"collect"
-    return true, names.data
+    return true, names.lookups
 end
 
 --- dbobj -> bool -> dbobj
 update_names = function (fontnames, force)
+    if config.luaotfload.update_live == false then
+        report("info", 2, "db",
+               "skipping database update")
+        --- skip all db updates
+        return fontnames
+    end
     local starttime = os.gettimeofday()
     local n_scanned, n_new = 0, 0
     --[[
@@ -1432,7 +1426,7 @@ update_names = function (fontnames, force)
     - “newfontnames” is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
-    report("info", 2, "db", "Updating the font names database"
+    report("both", 2, "db", "Updating the font names database"
                          .. (force and " forcefully" or ""))
 
     if force then
@@ -1442,9 +1436,9 @@ update_names = function (fontnames, force)
             fontnames = load_names()
         end
         if fontnames.version ~= names.version then
+            report("both", 1, "db", "No font names database or old "
+                                 .. "one found; generating new one")
             fontnames = fontnames_init(true)
-            report("log", 1, "db", "No font names database or old "
-                                .. "one found; generating new one")
         end
     end
     local newfontnames = fontnames_init(true)
@@ -1470,13 +1464,47 @@ update_names = function (fontnames, force)
     return newfontnames
 end
 
+--- unit -> string
+local ensure_names_path = function ( )
+    local path = names.path.dir
+    if not lfsisdir(path) then
+        dirmkdirs(path)
+    end
+    return path
+end
+
+--- The lookup cache is an experimental feature of version 2.2;
+--- instead of incorporating it into the database it gets its own
+--- file. As we update it after every single addition this saves us
+--- quite some time.
+
+--- unit -> string
+save_lookups = function ( )
+    ---- this is boilerplate and should be refactored into something
+    ---- usable by both the db and the cache writers
+    local lookups  = names.lookups
+    local path     = ensure_names_path()
+    if fileiswritable(path) then
+        local luaname, lucname = make_name(names.path.lookup_path)
+        if luaname then
+            tabletofile(luaname, lookups, true)
+            if lucname and type(caches.compile) == "function" then
+                os.remove(lucname)
+                caches.compile(lookups, luaname, lucname)
+                report("info", 1, "cache", "Lookup cache saved")
+                return names.path.lookup_path
+            end
+        end
+    end
+    report("info", 0, "cache", "Could not write lookup cache")
+    return nil
+end
+
+--- save_names() is usually called without the argument
 --- dbobj -> unit
 save_names = function (fontnames)
     if not fontnames then fontnames = names.data end
-    local path  = names.path.dir
-    if not lfs.isdir(path) then
-        dirmkdirs(path)
-    end
+    local path  = ensure_names_path()
     if fileiswritable(path) then
         local luaname, lucname = make_name(names.path.path)
         if luaname then
@@ -1508,15 +1536,24 @@ scan_external_dir = function (dir)
 end
 
 --- export functionality to the namespace “fonts.names”
-names.flush_cache   = flush_cache
-names.load          = load_names
-names.save          = save_names
-names.scan          = scan_external_dir
-names.update        = update_names
+names.flush_cache                 = flush_cache
+names.load                        = load_names
+names.save                        = save_names
+names.scan                        = scan_external_dir
+names.update                      = update_names
+names.crude_file_lookup           = crude_file_lookup
+names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 
-names.resolve      = resolve --- replace the resolver from luatex-fonts
-names.resolvespec  = resolve
-names.find_closest = find_closest
+--- replace the resolver from luatex-fonts
+if config.luaotfload.resolver == "cached" then
+    report("info", 0, "cache", "caching of name: lookups active")
+    names.resolve     = resolve_cached
+    names.resolvespec = resolve_cached
+else
+    names.resolve     = resolve
+    names.resolvespec = resolve
+end
+names.find_closest      = find_closest
 
 -- for testing purpose
 names.read_fonts_conf = read_fonts_conf

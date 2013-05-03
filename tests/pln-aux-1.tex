@@ -1,0 +1,49 @@
+\input luaotfload.sty
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% usage for glyph tests
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\baselineskip=17.28pt
+
+\font\iwonaregular=name:iwona at 14.4pt
+\font\lmromanten=file:lmroman10-regular.otf at 14.4pt
+\font\cmuregular=file:cmunrm.otf at 14.4pt
+
+%% wrap tests in macros (could move to style file)
+\def\doifglyphelse#1#2#3{%
+  \directlua{
+    luaotfload.aux.do_if_glyph_else([[#1]], [[#2]], [[#3]])
+  }%
+}
+
+\def\doifglyph#1#2{\doifglyphelse{#1}{#2}{}}
+
+%% no otf font loaded yet, so both fail:
+first:
+\doifglyphelse{a}{true}{false}
+\doifglyph    {a}{yep}
+
+%% load lm and try repeat:
+\lmromanten
+second:
+\doifglyphelse{a}{true}{false}
+\doifglyph    {a}{yep}
+
+%% let’s test some more free fonts
+\def\checkglyphset{%
+  \doifglyphelse  ö{ö}{nope}
+  \doifglyphelse  п{п}{nope}
+  \doifglyphelse  α{α}{nope}
+  \doifglyphelse  Æ{Æ}{nope}
+  \doifglyphelse  ą{ą}{nope}
+  \doifglyphelse  ř{ř}{nope}
+  \doifglyphelse  ˝{˝}{nope}
+  \doifglyphelse  ѩ{ѩ}{nope}
+  \endgraf
+}
+
+\iwonaregular \checkglyphset
+\lmromanten   \checkglyphset
+\cmuregular   \checkglyphset
+
+\bye

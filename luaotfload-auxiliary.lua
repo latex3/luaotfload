@@ -155,25 +155,6 @@ end
 
 aux.font_has_glyph = font_has_glyph
 
---- int -> bool
-local current_font_has_glyph = function (codepoint)
-  return font_has_glyph (font.current(), codepoint)
-end
-
-aux.current_font_has_glyph = current_font_has_glyph
-
-local do_if_glyph_else = function (chr, positive, negative)
-  local codepoint = tonumber(chr)
-  if not codepoint then codepoint = utf8.byte(chr) end
-  if current_font_has_glyph(codepoint) then
-    tex.sprint(positive)
-  else
-    tex.sprint(negative)
-  end
-end
-
-aux.do_if_glyph_else = do_if_glyph_else
-
 --[[doc--
 
   This one is approximately “name_to_slot” from the microtype package;
@@ -184,9 +165,9 @@ aux.do_if_glyph_else = do_if_glyph_else
 
 --doc]]--
 
---- string -> (int | false)
-local slot_of_name = function (glyphname)
-  local fontdata = identifiers[font.current()]
+--- int -> string -> (int | false)
+local slot_of_name = function (font_id, glyphname)
+  local fontdata = identifiers[font_id]
   if fontdata then
     local unicode = fontdata.resources.unicodes[glyphname]
     if unicode and type(unicode) == "number" then

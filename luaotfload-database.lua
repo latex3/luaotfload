@@ -116,6 +116,7 @@ Auxiliary functions
 
 local report = logs.names_report
 
+--- string -> string
 local sanitize_string = function (str)
     if str ~= nil then
         return utf8gsub(utf8lower(str), "[^%a%d]", "")
@@ -1537,6 +1538,7 @@ end
 
 --- export functionality to the namespace “fonts.names”
 names.flush_cache                 = flush_cache
+names.save_lookups                = save_lookups
 names.load                        = load_names
 names.save                        = save_names
 names.scan                        = scan_external_dir

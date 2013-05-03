@@ -1,0 +1,39 @@
+\input luaotfload.sty
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% math dimension getter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\font\xitsmath=file:xits-math.otf
+\font\cambriamath=file:cambria.ttc(1)
+
+\font\main=file:Iwona-Regular.otf at 12pt\main
+
+\directlua{
+  local aux = luaotfload.aux
+  local test_a = function (fontname, dimension)
+    tex.sprint(
+      "(", fontname, " (", dimension, " ",
+      aux.get_math_dimension(fontname, dimension),
+      [[))\endgraf ]])
+  end
+    
+  local test_b = function (fontname, dimension)
+    aux.sprint_math_dimension(fontname, dimension)
+    tex.print[[\endgraf ]]
+  end
+
+  test_a("xitsmath",     "AxisHeight")
+  test_a("xitsmath",     "RadicalVerticalGap")
+  test_a("cambriamath",  "StackTopShiftUp")
+  test_a("cambriamath",  "FractionNumeratorGapMin")
+
+  test_b("xitsmath",     "AxisHeight")
+  test_b("xitsmath",     "RadicalVerticalGap")
+  test_b("cambriamath",  "StackTopShiftUp")
+  test_b("cambriamath",  "FractionNumeratorGapMin")
+}
+
+foo bar baz
+
+\bye

@@ -8,7 +8,11 @@
       mc.DisplayOperatorMinHeight = 2800 / em * sz
     end
   end
-  luatexbase.add_to_callback("luaotfload.patch_font", patch, "cambria.domh")
+  %% part of luaotfload-auxiliary
+  %luatexbase.add_to_callback(
+    %"luaotfload.patch_font",
+    %patch,
+    %"luaotfload.aux.patch_cambria_domh")
 }
 
 \font\4={name:Cambria Math:mode=base;script=math} at 10pt

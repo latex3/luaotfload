@@ -1,0 +1,41 @@
+\input luaotfload.sty
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% unicode character mappings
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\font\ptserifregular = file:PTF55F.ttf \ptserifregular
+
+%% here we map the function luaotfload.aux.name_of_slot
+%% on a short text, printing a list of letters, their
+%% code points and names (as specified in the Adobe
+%% Glyph List).
+
+\directlua{
+  local aux = luaotfload.aux
+  local cbk = function (str)
+    if string.match(str, "^EOF") then
+      luatexbase.remove_from_callback("process_input_buffer", "weird")
+      return [[the end!]]
+    end
+    local res = { }
+    for chr in string.utfcharacters(str) do
+      local val = unicode.utf8.byte(chr)
+      local line = chr .. " <> " .. tostring(val)
+      line = line .. " <> " .. (aux.name_of_slot(val) or "")
+      res[\string#res+1] = line
+    end
+    return table.concat(res, [[\endgraf]])
+  end
+
+  luatexbase.add_to_callback("process_input_buffer", cbk, "weird")
+}
+
+Я узнал что у меня
+Есть огромная семья
+И тропинка и лесок
+В поле каждый колосок
+
+EOF
+
+\bye

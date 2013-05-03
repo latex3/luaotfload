@@ -1180,8 +1180,9 @@ local luaotfload            = luaotfload
 
 config                      = config or { }
 config.luaotfload           = config.luaotfload or { }
-config.luaotfload.resolver  = config.luaotfload.resolver or "normal"
-config.luaotfload.definer   = config.luaotfload.definer  or "patch"
+config.luaotfload.resolver  = config.luaotfload.resolver  or "normal"
+config.luaotfload.definer   = config.luaotfload.definer   or "patch"
+config.luaotfload.loglevel  = config.luaotfload.loglevel  or 1
 --luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 
 luaotfload.module = {
@@ -1419,6 +1420,7 @@ tex.attribute[0] = 0
 %    \begin{macrocode}
 
 loadmodule"merged.lua"
+---loadmodule"font-odv.lua" --- <= Devanagari support from Context
 
 if fonts then
 
@@ -1518,19 +1520,8 @@ add_to_callback("find_vf_file",
 loadmodule"lib-dir.lua"   --- required by luaofload-database.lua
 loadmodule"override.lua"  --- “luat-ovr”
 
-logs.set_loglevel(config.luaotfload.loglevel or 2)
+logs.set_loglevel(config.luaotfload.loglevel)
 
-%    \end{macrocode}
-% \CONTEXT does not support ofm, these lines were added in order to make it
-% work. However they do not seem necessary so they are commented for now.
-%
-%    \begin{macrocode}
--- if fonts and fonts.readers.tfm then
---  fonts.readers.ofm  = fonts.readers.tfm
---  fonts.handlers.ofm = fonts.handlers.tfm --- empty anyways
---  fonts.formats.ofm  = fonts.formats.tfm  --- “type1”
---  --- fonts.readers.sequence[#fonts.readers.sequence+1] = "ofm"
---end
 %    \end{macrocode}
 % Now we load the modules written for \identifier{luaotfload}.
 %
@@ -1658,7 +1649,10 @@ local read_font_file = fonts.definers.read
 --- spec -> size -> id -> tmfdata
 local patch_defined_font = function (specification, size, id)
     local tfmdata = read_font_file(specification, size, id)
-    if type(tfmdata) == "table" then
+    if type(tfmdata) == "table" and tfmdata.shared then
+        --- We need to test for the “shared” field here
+        --- or else the fontspec capheight callback will
+        --- operate on tfm fonts.
         call_callback("luaotfload.patch_font", tfmdata)
     end
     return tfmdata

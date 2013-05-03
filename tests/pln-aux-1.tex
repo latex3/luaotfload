@@ -12,7 +12,13 @@
 %% wrap tests in macros (could move to style file)
 \def\doifglyphelse#1#2#3{%
   \directlua{
-    luaotfload.aux.do_if_glyph_else([[#1]], [[#2]], [[#3]])
+    local codepoint = tonumber('\string#1')
+    if not codepoint then codepoint = unicode.utf8.byte('\string#1') end
+    if luaotfload.aux.font_has_glyph(font.current(), codepoint) then
+      tex.sprint('\string#2')
+    else
+      tex.sprint('\string#3')
+    end
   }%
 }
 

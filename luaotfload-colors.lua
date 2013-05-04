@@ -226,13 +226,13 @@ node_colorize = function (head, current_color, next_color)
             if tfmdata and tfmdata.properties  and tfmdata.properties.color then
                 local font_color = tfmdata.properties.color
 --                luaotfload.info(cnt, utf.char(n.char), n.font, "<TRUE>", font_color)
-                if fontcolor ~= current_color then
-                    local pushcolor = hex_to_rgba(fontcolor)
+                if font_color ~= current_color then
+                    local pushcolor = hex_to_rgba(font_color)
                     local push      = newnode(whatsit_t, 8)
                     push.mode       = 1
                     push.data       = pushcolor
                     head            = insert_node_before(head, n, push)
-                    current_color   = fontcolor
+                    current_color   = font_color
                 end
                 local next_color_in = lookup_next_color (nextnode) or next_color
                 if next_color_in ~= font_color then

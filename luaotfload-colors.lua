@@ -6,6 +6,24 @@ if not modules then modules = { } end modules ['luaotfload-colors'] = {
     license   = "GNU GPL v2"
 }
 
+--[[doc--
+buggy coloring with the pre_output_filter when expansion is enabled
+    · tfmdata for different expansion values is split over different objects
+    · in ``initializeexpansion()``, chr.expansion_factor is set, and only
+      those characters that have it are affected
+    · in constructors.scale: chr.expansion_factor = ve*1000 if commented out
+      makes the bug vanish
+--doc]]--
+
+
+local color_callback = config.luaotfload.color_callback
+if not color_callback then
+    --- maybe this would be better as a method: "early" | "late"
+    color_callback = "pre_linebreak_filter"
+--  color_callback = "pre_output_filter" --- old behavior, breaks expansion
+end
+
+
 local newnode               = node.new
 local nodetype              = node.id
 local traverse_nodes        = node.traverse
@@ -225,7 +243,9 @@ node_colorize = function (head, current_color, next_color)
             --- loading (see ``setcolor()`` above)
             if tfmdata and tfmdata.properties  and tfmdata.properties.color then
                 local font_color = tfmdata.properties.color
---                luaotfload.info(cnt, utf.char(n.char), n.font, "<TRUE>", font_color)
+--                luaotfload.info(
+--                    "n: %d; %s; %d %s, %s",
+--                    cnt, utf.char(n.char), n.font, "<TRUE>", font_color)
                 if font_color ~= current_color then
                     local pushcolor = hex_to_rgba(font_color)
                     local push      = newnode(whatsit_t, 8)
@@ -243,8 +263,11 @@ node_colorize = function (head, current_color, next_color)
                     head              = insert_node_after(head, n, pop)
                     current_color     = nil
                 end
+
 --            else
---                luaotfload.info(cnt, utf.char(n.char), n.font, "<FALSE>")
+--                luaotfload.info(
+--                    "n: %d; %s; %d %s",
+--                    cnt, utf.char(n.char), n.font, "<FALSE>")
             end
         end
     end
@@ -273,7 +296,7 @@ local color_callback_activated = 0
 --- unit -> unit
 add_color_callback = function ( )
     if color_callback_activated == 0 then
-        luatexbase.add_to_callback("pre_output_filter",
+        luatexbase.add_to_callback(color_callback,
                                    color_handler,
                                    "luaotfload.color_handler")
         color_callback_activated = 1

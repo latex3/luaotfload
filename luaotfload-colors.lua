@@ -15,12 +15,50 @@ local insert_node_after     = node.insert_after
 local stringformat          = string.format
 local stringgsub            = string.gsub
 local stringfind            = string.find
+local stringsub             = string.sub
 
 local otffeatures           = fonts.constructors.newfeatures("otf")
 local identifiers           = fonts.hashes.identifiers
 local registerotffeature    = otffeatures.register
 
 local add_color_callback --[[ this used to be a global‽ ]]
+
+local lpeg = require"lpeg"
+local lpegmatch = lpeg.match
+local C, Cg, Ct, P, R, S = lpeg.C, lpeg.Cg, lpeg.Ct, lpeg.P, lpeg.R, lpeg.S
+
+local digit16   = R("09", "af", "AF")
+local octet     = C(digit16 * digit16)
+local p_rgb     = Cg(octet, "red")
+                * Cg(octet, "green")
+                * Cg(octet, "blue")
+local p_rgba    = p_rgb * Cg(octet, "alpha")
+local p_color   = Ct(p_rgba + p_rgb)
+
+local old_sanitize_color_expression = function (value)
+    local sanitized
+    if value then
+        value = tostring(value)
+        local n_value = #value
+        if n_value == 6 or n_value == 8 then
+            sanitized = value
+        elseif n_value == 7 then --> take first six bytes
+            _, _, sanitized = stringsub(value, 1, 6)
+        elseif n_value > 8 then  --> take first eight bytes
+            _, _, sanitized = stringsub(value, 1, 8)
+        else
+            -- broken color code ignored, issue a warning?
+            luaotfload.warning(
+                "“%s” is not a valid rgb[a] color expression", value)
+        end
+    end
+    return sanitized
+end
+
+local sanitize_color_expression = function (digits)
+    local old = old_sanitize_color_expression(digits)
+    return old
+end
 
 --[[doc--
 ``setcolor`` modifies tfmdata.properties.color in place
@@ -32,22 +70,11 @@ local add_color_callback --[[ this used to be a global‽ ]]
 ---         hexadecimal, with an optional fourth transparency
 ---         value)
 ---
-local function setcolor(tfmdata,value)
-    local sanitized
+local function setcolor (tfmdata, value)
+    print("~~~~~~~~~~~~~")
+    print(value)
+    local sanitized  = sanitize_color_expression(value)
     local properties = tfmdata.properties
-
-    if value then
-        value = tostring(value)
-        if #value == 6 or #value == 8 then
-            sanitized = value
-        elseif #value == 7 then
-            _, _, sanitized = stringfind(value, "(......)")
-        elseif #value > 8 then
-            _, _, sanitized = stringfind(value, "(........)")
-        else
-            -- broken color code ignored, issue a warning?
-        end
-    end
 
     if sanitized then
         tfmdata.properties.color = sanitized

@@ -19,8 +19,10 @@ local fonts = fonts
 
 fonts.constructors.namemode = "specification" -- somehow latex needs this (changed name!) => will change into an overload
 
--- tricky: we sort of bypass the parser and directly feed all into
--- the sub parser
+--[[HH--
+    tricky: we sort of bypass the parser and directly feed all into
+    the sub parser
+--HH]]--
 
 function fonts.definers.getspecification(str)
     return "", str, "", ":", str
@@ -31,26 +33,8 @@ local old_feature_list = { }
 local report = logs.names_report
 
 local stringlower      = string.lower
-local stringsub        = string.sub
 local stringgsub       = string.gsub
-local stringfind       = string.find
-local stringexplode    = string.explode
 local stringis_empty   = string.is_empty
-
---[[doc--
-Apparently, these “modifiers” are another measure of emulating \XETEX,
-cf. “About \XETEX”, by Jonathan Kew, 2005; and
-    “The \XETEX Reference Guide”, by Will Robertson, 2011.
---doc]]--
-
-local supported = {
-    b    = "bold",
-    i    = "italic",
-    bi   = "bolditalic",
-    aat  = false,
-    icu  = false,
-    gr   = false,
-}
 
 --- this parses the optional flags after the slash
 --- the original behavior is that multiple slashes
@@ -212,8 +196,6 @@ end
 -----------------------------------------------------------------------
 
 
-local stringlower = string.lower
-
 local toboolean = function (s)
   if s == "true"  then return true  end
   if s == "false" then return false end
@@ -348,7 +330,7 @@ local handle_slashed = function (modifiers)
     local style, optsize
     for i=1, #modifiers do
         local mod  = modifiers[i]
-        if type(mod) == "table" then --> optical size
+        if type(mod) == "table" and mod[1] == "optsize" then --> optical size
             optsize = tonumber(mod[2])
         elseif supported[mod] then
             style = supported[mod]
@@ -414,14 +396,8 @@ local compare_requests = function (spec)
     return new
 end
 
---fonts.definers.registersplit(":", compare_requests, "cryptic")
---fonts.definers.registersplit("",  compare_requests, "more cryptic") -- catches \font\text=[names]
-
 fonts.definers.registersplit(":", handle_request, "cryptic")
 fonts.definers.registersplit("",  handle_request, "more cryptic") -- catches \font\text=[names]
-
---fonts.definers.registersplit(":",old_behavior,"cryptic")
---fonts.definers.registersplit("", old_behavior,"more cryptic") -- catches \font\text=[names]
 
 ---[[ end included font-ltx.lua ]]
 

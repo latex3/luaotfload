@@ -253,11 +253,10 @@ actions.generate = function (job)
 end
 
 actions.flush = function (job)
-    local success, fontnames = names.flush_cache()
+    local success, lookups = names.flush_cache()
     if success then
-        local savedname = names.save(fontnames)
-        logs.names_report("info", 2, "cache",
-            "Cache emptied", #fontnames.mappings)
+        local savedname = names.save_lookups()
+        logs.names_report("info", 2, "cache", "Cache emptied")
         if savedname then
             return true, true
         end

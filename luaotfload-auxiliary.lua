@@ -62,9 +62,9 @@ local add_fontdata_fallbacks = function (fontdata)
       fontdata.units = fontdata.units_per_em
     else --- otf
       metadata = fontdata.shared.rawdata.metadata
-      fontdata.units = fontparameters.units
-      local resources      = fontdata.resources
-      fontdata.size  = fontparameters.size
+      fontdata.units   = fontparameters.units
+      local resources  = fontdata.resources
+      fontdata.size    = fontparameters.size
       --- for legacy fontspec.lua and unicode-math.lua
       fontdata.shared.otfdata          = metadata
       fontdata.shared.otfdata.metadata = metadata --- brr, that’s meta indeed
@@ -85,17 +85,18 @@ luatexbase.add_to_callback(
 
 --[[doc--
 
-Additionally, the font registry is expected at fonts.identifiers, but
-in the meantime it has been migrated to fonts.hashes.identifiers.
-We’ll make luaotfload satisfy those assumptions. (Maybe it’d be more
-appropriate to use font.getfont() since Hans made it a harmless wrapper
-[1].)
+Additionally, the font registry is expected at fonts.identifiers
+(fontspec) or fonts.ids (microtype), but in the meantime it has been
+migrated to fonts.hashes.identifiers.  We’ll make luaotfload satisfy
+those assumptions. (Maybe it’d be more appropriate to use
+font.getfont() since Hans made it a harmless wrapper [1].)
 
 [1] http://www.ntg.nl/pipermail/ntg-context/2013/072166.html
 
 --doc]]--
 
 fonts.identifiers = fonts.hashes.identifiers
+fonts.ids         = fonts.hashes.identifiers
 
 --[[doc--
 This sets two dimensions apparently relied upon by the unicode-math
@@ -133,6 +134,7 @@ end
 --[[doc--
 This callback corrects some values of the Cambria font.
 --doc]]--
+--- fontobj -> unit
 local patch_cambria_domh = function (fontdata)
   local mathconstants = fontdata.MathConstants
   if mathconstants and fontdata.psname == "CambriaMath" then
@@ -351,6 +353,16 @@ local provides_language = function (font_id, asked_script, asked_language)
 end
 
 aux.provides_language = provides_language
+
+--- fontspec apparently has the arguments shuffled
+---     theirs:  id -> lang   -> script -> bool
+---     ours:    id -> script -> lang   -> bool
+--- whereas in the other check_* functions, script is
+--- always the second argument ...
+aux.provides_language_fontspec = function
+                          (font_id, asked_language, asked_script)
+  return provides_language(font_id, asked_script, asked_language)
+end
 
 --[[doc--
 We strip the syntax elements from feature definitions (shouldn’t

@@ -57,27 +57,6 @@ local supported = {
 --- are valid but they might cancel prior settings
 --- example: {name:Antykwa Torunska/I/B} -> bold
 
-local isstyle = function (request)
-    request = stringlower(request)
-    request = stringexplode(request, "/")
-
-    for _,v in next, request do
-        local stylename = supported[v]
-        if stylename then
-            old_feature_list.style = stylename
-        elseif stringfind(v, "^s=") then
-            --- after all, we want everything after the second byte ...
-            local val = stringsub(v, 3)
-            old_feature_list.optsize = val
-        elseif stylename == false then
-            report("log", 0,
-                "load", "unsupported font option: %s", v)
-        elseif not stringis_empty(v) then
-            old_feature_list.style = stringgsub(v, "[^%a%d]", "")
-        end
-    end
-end
-
 --- TODO an option to dump the default features for a script would make
 ---      a nice addition to luaotfload-tool
 
@@ -168,84 +147,6 @@ local set_default_features = function (speclist)
     end
     return speclist
 end
-
--- --[==[obsolete--
-local function issome ()    old_feature_list.lookup = 'name' end
-local function isfile ()    old_feature_list.lookup = 'file' end
-local function isname ()    old_feature_list.lookup = 'name' end
-local function thename(s)   old_feature_list.name   = s end
-local function issub  (v)   old_feature_list.sub    = v end
-local function istrue (s)   old_feature_list[s]     = true end
-local function isfalse(s)   old_feature_list[s]     = false end
-local function iskey  (k,v) old_feature_list[k]     = v end
-
-local P, S, R, C = lpeg.P, lpeg.S, lpeg.R, lpeg.C
-
-local spaces     = P(" ")^0
---local namespec   = (1-S("/:("))^0 -- was: (1-S("/: ("))^0
---[[phg-- this prevents matching of absolute paths as file names --]]--
-local namespec   = (1-S("/:("))^1
-local filespec   = (R("az", "AZ") * P(":"))^-1 * (1-S(":("))^1
-local stylespec  = spaces * P("/") * (((1-P(":"))^0)/isstyle) * spaces
-local filename   = (P("file:")/isfile * (filespec/thename))
-                 + (P("[") * P(true)/isname * (((1-P("]"))^0)/thename) * P("]"))
-local fontname   = (P("name:")/isname * (namespec/thename)) + P(true)/issome * (namespec/thename)
-local sometext   = (R("az","AZ","09") + S("+-.,"))^1
-local truevalue  = P("+") * spaces * (sometext/istrue)
-local falsevalue = P("-") * spaces * (sometext/isfalse)
-local keyvalue   = P("+") + (C(sometext) * spaces * P("=") * spaces * C(sometext))/iskey
-local somevalue  = sometext/istrue
-local subvalue   = P("(") * (C(P(1-S("()"))^1)/issub) * P(")") -- for Kim
-local option     = spaces * (keyvalue + falsevalue + truevalue + somevalue) * spaces
-local options    = P(":") * spaces * (P(";")^0  * option)^0
-local oldsyntax  = (filename + fontname) * subvalue^0 * stylespec^0 * options^0
-
---- to be annihilated
-local function old_behavior (specification) -- xetex mode
-    old_feature_list = { }
-    lpeg.match(oldsyntax,specification.specification)
-    old_feature_list = set_default_features(old_feature_list)
-    if old_feature_list.style then
-        specification.style = old_feature_list.style
-        old_feature_list.style = nil
-    end
-    if old_feature_list.optsize then
-        specification.optsize = old_feature_list.optsize
-        old_feature_list.optsize = nil
-    end
-    if old_feature_list.name then
-        if resolvers.findfile(old_feature_list.name, "tfm") then
-            old_feature_list.lookup = "file"
-            old_feature_list.name   = file.addsuffix(old_feature_list.name, "tfm")
-        elseif resolvers.findfile(old_feature_list.name, "ofm") then
-            old_feature_list.lookup = "file"
-            old_feature_list.name   = file.addsuffix(old_feature_list.name, "ofm")
-        end
-
-        specification.name = old_feature_list.name
-        old_feature_list.name = nil
-    end
-    --- this test overwrites valid file: requests for xetex bracket
-    --- syntax
-    if old_feature_list.lookup then
-        specification.lookup = old_feature_list.lookup
-        old_feature_list.lookup = nil
-    end
-    if old_feature_list.sub then
-        specification.sub = old_feature_list.sub
-        old_feature_list.sub = nil
-    end
-    if not old_feature_list.mode then
-        -- if no mode is set, use our default
-        old_feature_list.mode = fonts.mode
-    end
-    specification.features.normal = fonts.handlers.otf.features.normalize(old_feature_list)
-    return specification
-end
-
---fonts.definers.registersplit(":",old_behavior,"cryptic")
---fonts.definers.registersplit("", old_behavior,"more cryptic") -- catches \font\text=[names]
---obsolete]==]--
 
 -----------------------------------------------------------------------
 ---                    request syntax parser 2.2
@@ -352,13 +253,15 @@ local decimal     = digit^1 * (dot * digit^0)^-1
 --doc]]--
 local style_modifier    = (P"BI" + P"IB" + P"bi" + P"ib" + S"biBI")
                         / stringlower
-local other_modifier    = P"S=" * decimal --- optical size; unsupported
-                        + P"AAT" + P"aat" --- apple stuff;  unsupported
+local size_modifier     = S"Ss" * P"="    --- optical size
+                        * Cc"optsize" * C(decimal)
+local other_modifier    = P"AAT" + P"aat" --- apple stuff;  unsupported
                         + P"ICU" + P"icu" --- not applicable
                         + P"GR"  + P"gr"  --- sil stuff;    unsupported
 local garbage_modifier  = ((1 - colon - slash)^0 * Cc(false))
 local modifier          = slash * (other_modifier      --> ignore
                                  + Cs(style_modifier)  --> collect
+                                 + Ct(size_modifier)   --> collect
                                  + garbage_modifier)   --> warn
 local modifier_list     = Cg(Ct(modifier^0), "modifiers")
 
@@ -445,12 +348,10 @@ local handle_slashed = function (modifiers)
     local style, optsize
     for i=1, #modifiers do
         local mod  = modifiers[i]
-        if supported[mod] then
+        if type(mod) == "table" then --> optical size
+            optsize = tonumber(mod[2])
+        elseif supported[mod] then
             style = supported[mod]
-        --elseif stringfind(v, "^s=") then
-        elseif stringsub(v, 1, 2) == "s=" then
-            local val = stringsub(v, 3)
-            optsize = val
         elseif stylename == false then
             report("log", 0,
                 "load", "unsupported font option: %s", v)

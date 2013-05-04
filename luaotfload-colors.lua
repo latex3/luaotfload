@@ -6,19 +6,19 @@ if not modules then modules = { } end modules ['luaotfload-colors'] = {
     license   = "GNU GPL v2"
 }
 
-local newnode            = node.new
-local nodetype           = node.id
-local traverse_nodes     = node.traverse
-local insert_node_before = node.insert_before
-local insert_node_after  = node.insert_after
+local newnode               = node.new
+local nodetype              = node.id
+local traverse_nodes        = node.traverse
+local insert_node_before    = node.insert_before
+local insert_node_after     = node.insert_after
 
-local stringformat = string.format
-local stringgsub   = string.gsub
-local stringfind   = string.find
+local stringformat          = string.format
+local stringgsub            = string.gsub
+local stringfind            = string.find
 
-local otffeatures        = fonts.constructors.newfeatures("otf")
-local ids                = fonts.hashes.identifiers
-local registerotffeature = otffeatures.register
+local otffeatures           = fonts.constructors.newfeatures("otf")
+local identifiers           = fonts.hashes.identifiers
+local registerotffeature    = otffeatures.register
 
 local function setcolor(tfmdata,value)
     local sanitized
@@ -97,29 +97,38 @@ local function hex_to_rgba(hex)
     return push, pop
 end
 
-local glyph   = nodetype('glyph')
-local hlist   = nodetype('hlist')
-local vlist   = nodetype('vlist')
-local whatsit = nodetype('whatsit')
-local pgi     = nodetype('page_insert')
-local sbox    = nodetype('sub_box')
+--- Luatex internal types
+
+local glyph_t           = nodetype("glyph")
+local hlist_t           = nodetype("hlist")
+local vlist_t           = nodetype("vlist")
+local whatsit_t         = nodetype("whatsit")
+local page_insert_t     = nodetype("page_insert")
+local sub_box_t         = nodetype("sub_box")
 
 local function lookup_next_color(head)
     for n in traverse_nodes(head) do
-        if n.id == glyph then
-            if ids[n.font] and ids[n.font].properties and ids[n.font].properties.color then
-                return ids[n.font].properties.color
+        local n_id = n.id
+        if n_id == glyph_t then
+            local n_font
+            if  identifiers[n_font]
+            and identifiers[n_font].properties
+            and identifiers[n_font].properties.color
+            then
+                return identifiers[n.font].properties.color
             else
                 return -1
             end
-        elseif n.id == vlist or n.id == hlist or n.id == sbox then
+
+        elseif n_id == vlist_t or n_id == hlist_t or n_id == sub_box_t then
             local r = lookup_next_color(n.list)
             if r == -1 then
                 return -1
             elseif r then
                 return r
             end
-        elseif n.id == whatsit or n.id == pgi then
+
+        elseif n_id == whatsit_t or n_id == page_insert_t then
             return -1
         end
     end
@@ -128,15 +137,18 @@ end
 
 local function node_colorize(head, current_color, next_color)
     for n in traverse_nodes(head) do
-        if n.id == hlist or n.id == vlist or n.id == sbox then
+        local n_id = n.id
+
+        if n_id == hlist_t or n_id == vlist_t or n_id == sub_box_t then
             local next_color_in = lookup_next_color(n.next) or next_color
             n.list, current_color = node_colorize(n.list, current_color, next_color_in)
-        elseif n.id == glyph then
-            local tfmdata = ids[n.font]
+
+        elseif n_id == glyph_t then
+            local tfmdata = identifiers[n.font]
             if tfmdata and tfmdata.properties  and tfmdata.properties.color then
                 if tfmdata.properties.color ~= current_color then
                     local pushcolor = hex_to_rgba(tfmdata.properties.color)
-                    local push = newnode(whatsit, 8)
+                    local push = newnode(whatsit_t, 8)
                     push.mode  = 1
                     push.data  = pushcolor
                     head       = insert_node_before(head, n, push)
@@ -145,7 +157,7 @@ local function node_colorize(head, current_color, next_color)
                 local next_color_in = lookup_next_color (n.next) or next_color
                 if next_color_in ~= tfmdata.properties.color then
                     local _, popcolor = hex_to_rgba(tfmdata.properties.color)
-                    local pop  = newnode(whatsit, 8)
+                    local pop  = newnode(whatsit_t, 8)
                     pop.mode   = 1
                     pop.data   = popcolor
                     head       = insert_node_after(head, n, pop)
@@ -164,13 +176,13 @@ local function font_colorize(head)
       local r = "/ExtGState<<"..res..">>"
       tex.pdfpageresources = stringgsub(tex.pdfpageresources, r, "")
    end
-   local h = node_colorize(head, nil, nil)
+   local new_head = node_colorize(head, nil, nil)
    -- now append our page resources
    if res and stringfind(res, "%S") then -- test for non-empty string
       local r = "/ExtGState<<"..res..">>"
       tex.pdfpageresources = tex.pdfpageresources..r
    end
-   return h
+   return new_head
 end
 
 local color_callback_activated = 0

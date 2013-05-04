@@ -1,9 +1,9 @@
 if not modules then modules = { } end modules ['luaotfload-colors'] = {
-    version   = 1.001,
+    version   = 2.200,
     comment   = "companion to luaotfload.lua (font color)",
-    author    = "Khaled Hosny and Elie Roux",
+    author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
-    license   = "GPL"
+    license   = "GNU GPL v2"
 }
 
 local newnode            = node.new

@@ -1,11 +1,10 @@
 if not modules then modules = { } end modules ['luat-ovr'] = {
-    version   = 1.001,
+    version   = 2.2,
     comment   = "companion to luatex-*.tex",
-    author    = "Khaled Hosny and Elie Roux",
+    author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
     license   = "GNU GPL v2"
 }
-
 
 local module_name = "luaotfload"
 
@@ -27,6 +26,7 @@ We recreate the verbosity levels previously implemented in font-nms:
     ==========================================================
 
 --doc]]--
+
 local loglevel = 1 --- default
 local logout   = "log"
 

@@ -169,9 +169,11 @@ local page_insert_t     = nodetype("page_insert")
 local sub_box_t         = nodetype("sub_box")
 
 --- node -> nil | -1 | color‽
-local function lookup_next_color(head)
+local lookup_next_color
+lookup_next_color = function (head) --- paragraph material
     for n in traverse_nodes(head) do
         local n_id = n.id
+
         if n_id == glyph_t then
             local n_font
             if  identifiers[n_font]
@@ -202,35 +204,47 @@ always nil when the function is called, they temporarily take string
 values during the node list traversal.
 --doc]]--
 
+local cnt = 0
 --- node -> string -> int -> (node * string)
-local function node_colorize(head, current_color, next_color)
+local node_colorize
+node_colorize = function (head, current_color, next_color)
     for n in traverse_nodes(head) do
-        local n_id = n.id
+        local n_id      = n.id
+        local nextnode  = n.next
 
         if n_id == hlist_t or n_id == vlist_t or n_id == sub_box_t then
-            local next_color_in = lookup_next_color(n.next) or next_color
+            local next_color_in = lookup_next_color(nextnode) or next_color
             n.list, current_color = node_colorize(n.list, current_color, next_color_in)
 
         elseif n_id == glyph_t then
+            cnt = cnt + 1
             local tfmdata = identifiers[n.font]
+
+            --- colorization is restricted to those fonts
+            --- that received the “color” property upon
+            --- loading (see ``setcolor()`` above)
             if tfmdata and tfmdata.properties  and tfmdata.properties.color then
-                if tfmdata.properties.color ~= current_color then
-                    local pushcolor = hex_to_rgba(tfmdata.properties.color)
-                    local push = newnode(whatsit_t, 8)
-                    push.mode  = 1
-                    push.data  = pushcolor
-                    head       = insert_node_before(head, n, push)
-                    current_color = tfmdata.properties.color
+                local font_color = tfmdata.properties.color
+--                luaotfload.info(cnt, utf.char(n.char), n.font, "<TRUE>", font_color)
+                if fontcolor ~= current_color then
+                    local pushcolor = hex_to_rgba(fontcolor)
+                    local push      = newnode(whatsit_t, 8)
+                    push.mode       = 1
+                    push.data       = pushcolor
+                    head            = insert_node_before(head, n, push)
+                    current_color   = fontcolor
                 end
-                local next_color_in = lookup_next_color (n.next) or next_color
-                if next_color_in ~= tfmdata.properties.color then
-                    local _, popcolor = hex_to_rgba(tfmdata.properties.color)
-                    local pop  = newnode(whatsit_t, 8)
-                    pop.mode   = 1
-                    pop.data   = popcolor
-                    head       = insert_node_after(head, n, pop)
-                    current_color = nil
+                local next_color_in = lookup_next_color (nextnode) or next_color
+                if next_color_in ~= font_color then
+                    local _, popcolor = hex_to_rgba(font_color)
+                    local pop         = newnode(whatsit_t, 8)
+                    pop.mode          = 1
+                    pop.data          = popcolor
+                    head              = insert_node_after(head, n, pop)
+                    current_color     = nil
                 end
+--            else
+--                luaotfload.info(cnt, utf.char(n.char), n.font, "<FALSE>")
             end
         end
     end
@@ -238,17 +252,17 @@ local function node_colorize(head, current_color, next_color)
 end
 
 --- node -> node
-local function color_handler (head)
+local color_handler = function (head)
     -- check if our page resources existed in the previous run
     -- and remove it to avoid duplicating it later
     if res then
-        local r = "/ExtGState<<"..res..">>"
+        local r = "/ExtGState<<" .. res .. ">>"
         tex.pdfpageresources = stringgsub(tex.pdfpageresources, r, "")
     end
     local new_head = node_colorize(head, nil, nil)
     -- now append our page resources
     if res and stringfind(res, "%S") then -- test for non-empty string
-        local r = "/ExtGState<<"..res..">>"
+        local r = "/ExtGState<<" .. res .. ">>"
         tex.pdfpageresources = tex.pdfpageresources..r
     end
     return new_head
@@ -257,7 +271,7 @@ end
 local color_callback_activated = 0
 
 --- unit -> unit
-function add_color_callback ()
+add_color_callback = function ( )
     if color_callback_activated == 0 then
         luatexbase.add_to_callback("pre_output_filter",
                                    color_handler,

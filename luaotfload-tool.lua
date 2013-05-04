@@ -1,8 +1,17 @@
 #!/usr/bin/env texlua
+-----------------------------------------------------------------------
+--         FILE:  luaotfload-tool.lua
+--  DESCRIPTION:  database functionality
+-- REQUIREMENTS:  luaotfload 2.2
+--       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
+--      VERSION:  2.2
+--      CREATED:  2013-05-01 14:40:50+0200
+-----------------------------------------------------------------------
 
 --[[doc--
-This file was originally written by Elie Roux and Khaled Hosny and is under CC0
-license (see http://creativecommons.org/publicdomain/zero/1.0/legalcode).
+This file was originally written (as \fileent{mkluatexfontdb.lua}) by
+Elie Roux and Khaled Hosny and is under CC0 license (see
+http://creativecommons.org/publicdomain/zero/1.0/legalcode).
 
 This file is a wrapper for the luaotfload font names module
 (luaotfload-database.lua). It is part of the luaotfload bundle, please

@@ -4,7 +4,7 @@
 --  DESCRIPTION:  part of luaotfload
 -- REQUIREMENTS:  luaotfload 2.2
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  1.0
+--      VERSION:  2.2
 --      CREATED:  2013-05-01 14:40:50+0200
 -----------------------------------------------------------------------
 --
@@ -353,16 +353,6 @@ local provides_language = function (font_id, asked_script, asked_language)
 end
 
 aux.provides_language = provides_language
-
---- fontspec apparently has the arguments shuffled
----     theirs:  id -> lang   -> script -> bool
----     ours:    id -> script -> lang   -> bool
---- whereas in the other check_* functions, script is
---- always the second argument ...
-aux.provides_language_fontspec = function
-                          (font_id, asked_language, asked_script)
-  return provides_language(font_id, asked_script, asked_language)
-end
 
 --[[doc--
 We strip the syntax elements from feature definitions (shouldn’t

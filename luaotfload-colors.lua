@@ -20,6 +20,18 @@ local otffeatures           = fonts.constructors.newfeatures("otf")
 local identifiers           = fonts.hashes.identifiers
 local registerotffeature    = otffeatures.register
 
+local add_color_callback --[[ this used to be a global‽ ]]
+
+--[[doc--
+``setcolor`` modifies tfmdata.properties.color in place
+--doc]]--
+
+--- fontobj -> string -> unit
+---
+---         (where “string” is a rgb value as three octet
+---         hexadecimal, with an optional fourth transparency
+---         value)
+---
 local function setcolor(tfmdata,value)
     local sanitized
     local properties = tfmdata.properties
@@ -52,7 +64,15 @@ registerotffeature {
     }
 }
 
-local function hex2dec(hex,one)
+
+--[[doc--
+This converts a single octet into a decimal with three digits of
+precision. The optional second argument limits precision to a single
+digit.
+--doc]]--
+
+--- string -> bool? -> float
+local function hex_to_dec(hex,one)
     if one then
         return stringformat("%.1g", tonumber(hex, 16)/255)
     else
@@ -60,33 +80,41 @@ local function hex2dec(hex,one)
     end
 end
 
-local res
+--- something is carried around in ``res``
+--- for later use by color_handler() --- but what?
 
+local res --- <- state of what?
+
+--- float -> unit
 local function pageresources(a)
     local res2
     if not res then
        res = "/TransGs1<</ca 1/CA 1>>"
     end
     res2 = stringformat("/TransGs%s<</ca %s/CA %s>>", a, a, a)
-    res  = stringformat("%s%s", res, stringfind(res, res2) and "" or res2)
+    res  = stringformat("%s%s",
+                        res,
+                        stringfind(res, res2) and "" or res2)
 end
 
+--- string -> (string * string)
 local function hex_to_rgba(hex)
     local r, g, b, a, push, pop, res3
     if hex then
+        --- TODO lpeg this mess
         if #hex == 6 then
             _, _, r, g, b    = stringfind(hex, '(..)(..)(..)')
         elseif #hex == 8 then
             _, _, r, g, b, a = stringfind(hex, '(..)(..)(..)(..)')
-            a                = hex2dec(a,true)
+            a                = hex_to_dec(a,true)
             pageresources(a)
         end
     else
         return nil
     end
-    r = hex2dec(r)
-    g = hex2dec(g)
-    b = hex2dec(b)
+    r = hex_to_dec(r)
+    g = hex_to_dec(g)
+    b = hex_to_dec(b)
     if a then
         push = stringformat('/TransGs%g gs %s %s %s rg', a, r, g, b)
         pop  = '0 g /TransGs1 gs'
@@ -106,6 +134,7 @@ local whatsit_t         = nodetype("whatsit")
 local page_insert_t     = nodetype("page_insert")
 local sub_box_t         = nodetype("sub_box")
 
+--- node -> nil | -1 | color‽
 local function lookup_next_color(head)
     for n in traverse_nodes(head) do
         local n_id = n.id
@@ -122,9 +151,7 @@ local function lookup_next_color(head)
 
         elseif n_id == vlist_t or n_id == hlist_t or n_id == sub_box_t then
             local r = lookup_next_color(n.list)
-            if r == -1 then
-                return -1
-            elseif r then
+            if r then
                 return r
             end
 
@@ -135,6 +162,13 @@ local function lookup_next_color(head)
     return nil
 end
 
+--[[doc--
+While the second argument and second returned value are apparently
+always nil when the function is called, they temporarily take string
+values during the node list traversal.
+--doc]]--
+
+--- node -> string -> int -> (node * string)
 local function node_colorize(head, current_color, next_color)
     for n in traverse_nodes(head) do
         local n_id = n.id
@@ -169,28 +203,31 @@ local function node_colorize(head, current_color, next_color)
     return head, current_color
 end
 
-local function font_colorize(head)
-   -- check if our page resources existed in the previous run
-   -- and remove it to avoid duplicating it later
-   if res then
-      local r = "/ExtGState<<"..res..">>"
-      tex.pdfpageresources = stringgsub(tex.pdfpageresources, r, "")
-   end
-   local new_head = node_colorize(head, nil, nil)
-   -- now append our page resources
-   if res and stringfind(res, "%S") then -- test for non-empty string
-      local r = "/ExtGState<<"..res..">>"
-      tex.pdfpageresources = tex.pdfpageresources..r
-   end
-   return new_head
+--- node -> node
+local function color_handler (head)
+    -- check if our page resources existed in the previous run
+    -- and remove it to avoid duplicating it later
+    if res then
+        local r = "/ExtGState<<"..res..">>"
+        tex.pdfpageresources = stringgsub(tex.pdfpageresources, r, "")
+    end
+    local new_head = node_colorize(head, nil, nil)
+    -- now append our page resources
+    if res and stringfind(res, "%S") then -- test for non-empty string
+        local r = "/ExtGState<<"..res..">>"
+        tex.pdfpageresources = tex.pdfpageresources..r
+    end
+    return new_head
 end
 
 local color_callback_activated = 0
 
-function add_color_callback()
+--- unit -> unit
+function add_color_callback ()
     if color_callback_activated == 0 then
-        luatexbase.add_to_callback(
-          "pre_output_filter", font_colorize, "luaotfload.colorize")
+        luatexbase.add_to_callback("pre_output_filter",
+                                   color_handler,
+                                   "luaotfload.color_handler")
         color_callback_activated = 1
     end
 end

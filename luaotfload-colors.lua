@@ -24,6 +24,21 @@ local registerotffeature    = otffeatures.register
 local add_color_callback --[[ this used to be a global‽ ]]
 
 --[[doc--
+This converts a single octet into a decimal with three digits of
+precision. The optional second argument limits precision to a single
+digit.
+--doc]]--
+
+--- string -> bool? -> string
+local hex_to_dec = function (hex,one) --- one isn’t actually used anywhere ...
+    if one then
+        return stringformat("%.1g", tonumber(hex, 16)/255)
+    else
+        return stringformat("%.3g", tonumber(hex, 16)/255)
+    end
+end
+
+--[[doc--
 Color string validator / parser.
 --doc]]--
 
@@ -38,10 +53,10 @@ local p_rgb          = octet * octet * octet
 local p_rgba         = p_rgb * octet
 local valid_digits   = C(p_rgba + p_rgb) -- matches eight or six hex digits
 
-local p_Crgb         = Cg(octet, "red") --- for captures
-                     * Cg(octet, "green")
-                     * Cg(octet, "blue")
-local p_Crgba        = p_Crgb * Cg(octet, "alpha")
+local p_Crgb         = Cg(octet/hex_to_dec, "red") --- for captures
+                     * Cg(octet/hex_to_dec, "green")
+                     * Cg(octet/hex_to_dec, "blue")
+local p_Crgba        = p_Crgb * Cg(octet/hex_to_dec, "alpha")
 local extract_color  = Ct(p_Crgba + p_Crgb)
 
 --- string -> (string | nil)
@@ -66,12 +81,12 @@ end
 ---         hexadecimal, with an optional fourth transparency
 ---         value)
 ---
-local function setcolor (tfmdata, value)
+local setcolor = function (tfmdata, value)
     local sanitized  = sanitize_color_expression(value)
     local properties = tfmdata.properties
 
     if sanitized then
-        tfmdata.properties.color = sanitized
+        properties.color = sanitized
         add_color_callback()
     end
 end
@@ -86,64 +101,62 @@ registerotffeature {
 }
 
 
---[[doc--
-This converts a single octet into a decimal with three digits of
-precision. The optional second argument limits precision to a single
-digit.
---doc]]--
-
---- string -> bool? -> float
-local function hex_to_dec(hex,one)
-    if one then
-        return stringformat("%.1g", tonumber(hex, 16)/255)
-    else
-        return stringformat("%.3g", tonumber(hex, 16)/255)
-    end
-end
-
 --- something is carried around in ``res``
 --- for later use by color_handler() --- but what?
 
 local res --- <- state of what?
 
 --- float -> unit
-local function pageresources(a)
+local function pageresources(alpha)
     local res2
     if not res then
        res = "/TransGs1<</ca 1/CA 1>>"
     end
-    res2 = stringformat("/TransGs%s<</ca %s/CA %s>>", a, a, a)
+    res2 = stringformat("/TransGs%s<</ca %s/CA %s>>",
+                        alpha, alpha, alpha)
     res  = stringformat("%s%s",
                         res,
                         stringfind(res, res2) and "" or res2)
 end
 
+--- we store results of below color handler as tuples of
+--- push/pop strings
+local color_cache = { } --- (string, (string * string)) hash_t
+
 --- string -> (string * string)
-local function hex_to_rgba(hex)
-    local r, g, b, a, push, pop, res3
-    if hex then
-        --- TODO lpeg this mess
-        if #hex == 6 then
-            _, _, r, g, b    = stringfind(hex, '(..)(..)(..)')
-        elseif #hex == 8 then
-            _, _, r, g, b, a = stringfind(hex, '(..)(..)(..)(..)')
-            a                = hex_to_dec(a,true)
-            pageresources(a)
+local hex_to_rgba = function (digits)
+    if not digits then
+        return
+    end
+
+    --- this is called like a thousand times, so some
+    --- memoizing is in order.
+    local cached = color_cache[digits]
+    if not cached then
+        local push, pop
+        local rgb = lpegmatch(extract_color, digits)
+        if rgb.alpha then
+            pageresources(rgb.alpha)
+            push = stringformat(
+                        "/TransGs%g gs %s %s %s rg",
+                        rgb.alpha,
+                        rgb.red,
+                        rgb.green,
+                        rgb.blue)
+            pop  = "0 g /TransGs1 gs"
+        else
+            push = stringformat(
+                        "%s %s %s rg",
+                        rgb.red,
+                        rgb.green,
+                        rgb.blue)
+            pop  = "0 g"
         end
-    else
-        return nil
+        color_cache[digits] = { push, pop }
+        return push, pop
     end
-    r = hex_to_dec(r)
-    g = hex_to_dec(g)
-    b = hex_to_dec(b)
-    if a then
-        push = stringformat('/TransGs%g gs %s %s %s rg', a, r, g, b)
-        pop  = '0 g /TransGs1 gs'
-    else
-        push = stringformat('%s %s %s rg', r, g, b)
-        pop  = '0 g'
-    end
-    return push, pop
+
+    return cached[1], cached[2]
 end
 
 --- Luatex internal types

@@ -6,9 +6,9 @@ if not modules then modules = { } end modules ["features"] = {
     license   = "see context related readme files"
 }
 
-local format, insert = string.format, table.insert
-local type, next = type, next
-local lpegmatch = lpeg.match
+local format, insert    = string.format, table.insert
+local type, next        = type, next
+local lpegmatch         = lpeg.match
 
 ---[[ begin included font-ltx.lua ]]
 --- this appears to be based in part on luatex-fonts-def.lua
@@ -98,6 +98,21 @@ defaults.tibt = defaults.khmr
 defaults.lao  = defaults.thai
 
 --[[doc--
+
+    As discussed, we will issue a warning because of incomplete support
+    when one of the scripts below is requested.
+
+    Reference: https://github.com/lualatex/luaotfload/issues/31
+
+--doc]]--
+
+local support_incomplete = table.tohash({
+    "deva", "beng", "guru", "gujr",
+    "orya", "taml", "telu", "knda",
+    "mlym", "sinh",
+}, true)
+
+--[[doc--
 Which features are active by default depends on the script requested.
 --doc]]--
 
@@ -105,6 +120,11 @@ Which features are active by default depends on the script requested.
 local set_default_features = function (speclist)
     speclist = speclist or { }
     local script = speclist.script or "dflt"
+    if support_incomplete[script] then
+        report("log", 0, "load",
+            "support for the requested script: “%s” may be incomplete",
+            script)
+    end
 
     report("log", 0, "load",
         "auto-selecting default features for script: %s",

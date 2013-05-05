@@ -383,25 +383,20 @@ Even if we find a matching font eventually, the next time the
 user compiles Eir document E will have to stand through the delay
 again.
 Thus, some caching of results -- even between runs -- is in order.
-We’ll just store successful lookups in the database in a record of
-the respective lookup type.
+We’ll just store successful name: lookups in a separate cache file.
 
 type lookup_cache = (string, (string * num)) dict
 
-TODO:
+Complete, needs testing:
  ×  1) add cache to dbobj
  ×  2) wrap lookups in cached versions
  ×  3) make caching optional (via the config table) for debugging
  ×  4) make names_update() cache aware (nil if “force”)
  ×  5) add logging
  ×  6) add cache control to luaotfload-tool
- ×  7) incr db version
-    8) wishlist: save cache only at the end of a run
-    9) ???
-    n) PROFIT!!!
+ ×  7) incr db version (now 2.203)
+ ×  8) save cache only at the end of a run
 
-The name lookup requires both the “name” and some other
-keys, so we’ll concatenate them.
 The spec is modified in place (ugh), so we’ll have to catalogue what
 fields actually influence its behavior.
 
@@ -416,20 +411,11 @@ Idk what the “spec” resolver is for.
 * name: contains both the name resolver from luatex-fonts and resolve()
   below
 
-The following fields of a resolved spec need to be cached:
---doc]]--
-local cache_fields = {
-    "forced", "hash", "lookup", "name", "resolved", "sub",
-}
-
---[[doc--
 From my reading of font-def.lua, what a resolver does is
 basically rewrite the “name” field of the specification record
 with the resolution.
 Also, the fields “resolved”, “sub”, “force” etc. influence the outcome.
 
-We’ll just cache a deep copy of the entire spec as it leaves the
-resolver, lest we want to worry if we caught all the details.
 --doc]]--
 
 --- 'a -> 'a -> table -> (string * int|boolean * boolean)
@@ -459,12 +445,8 @@ resolve_cached = function (_, _, specification)
     names.lookups[request] = entry
 
     --- obviously, the updated cache needs to be stored.
-    --- for the moment, we write the entire db to disk
-    --- whenever the cache is updated.
     --- TODO this should trigger a save only once the
     ---      document is compiled (finish_pdffile callback?)
-    --- TODO we should speed up writing by separating
-    ---      the cache from the db
     report("both", 5, "cache", "saving updated cache")
     save_lookups()
     return filename, subfont, true

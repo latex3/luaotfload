@@ -4,7 +4,7 @@
 --  DESCRIPTION:  part of luaotfload
 -- REQUIREMENTS:  luaotfload 2.2
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  1.0
+--      VERSION:  2.2
 --      CREATED:  2013-05-01 14:40:50+0200
 -----------------------------------------------------------------------
 --
@@ -34,6 +34,69 @@ local stringbyte    = string.byte
 -----------------------------------------------------------------------
 ---                          font patches
 -----------------------------------------------------------------------
+
+--[[doc--
+
+The font object (tfmdata) structure has changed since version 1.x, so
+in case other packages haven’t been updated we put fallbacks in place
+where they’d expect them. Specifically we have in mind:
+
+  · fontspec
+  · unicode-math
+  · microtype (most likely fixed till TL2013)
+
+--doc]]--
+
+--- fontobj -> fontobj
+local add_fontdata_fallbacks = function (fontdata)
+  if type(fontdata) == "table" then
+    local fontparameters = fontdata.parameters
+    local metadata
+    if not fontdata.shared then --- that would be a tfm
+      --- we can’t really catch everything that
+      --- goes wrong; for some reason, fontspec.lua
+      --- just assumes it always gets an otf object,
+      --- so its capheight callback, which does not
+      --- bother to do any checks, will access
+      --- fontdata.shared no matter what ...
+      fontdata.units = fontdata.units_per_em
+    else --- otf
+      metadata = fontdata.shared.rawdata.metadata
+      fontdata.units   = fontparameters.units
+      local resources  = fontdata.resources
+      fontdata.size    = fontparameters.size
+      --- for legacy fontspec.lua and unicode-math.lua
+      fontdata.shared.otfdata          = metadata
+      fontdata.shared.otfdata.metadata = metadata --- brr, that’s meta indeed
+      --- for microtype.lua
+      fontdata.shared.otfdata.luatex = {
+        unicodes = resources.unicodes,
+        features = resources.features,
+      }
+    end
+  end
+  return fontdata
+end
+
+luatexbase.add_to_callback(
+  "luaotfload.patch_font",
+  add_fontdata_fallbacks,
+  "luaotfload.fontdata_fallbacks")
+
+--[[doc--
+
+Additionally, the font registry is expected at fonts.identifiers
+(fontspec) or fonts.ids (microtype), but in the meantime it has been
+migrated to fonts.hashes.identifiers.  We’ll make luaotfload satisfy
+those assumptions. (Maybe it’d be more appropriate to use
+font.getfont() since Hans made it a harmless wrapper [1].)
+
+[1] http://www.ntg.nl/pipermail/ntg-context/2013/072166.html
+
+--doc]]--
+
+fonts.identifiers = fonts.hashes.identifiers
+fonts.ids         = fonts.hashes.identifiers
 
 --[[doc--
 This sets two dimensions apparently relied upon by the unicode-math
@@ -71,6 +134,7 @@ end
 --[[doc--
 This callback corrects some values of the Cambria font.
 --doc]]--
+--- fontobj -> unit
 local patch_cambria_domh = function (fontdata)
   local mathconstants = fontdata.MathConstants
   if mathconstants and fontdata.psname == "CambriaMath" then

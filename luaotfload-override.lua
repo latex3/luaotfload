@@ -1,11 +1,10 @@
 if not modules then modules = { } end modules ['luat-ovr'] = {
-    version   = 1.001,
+    version   = 2.2,
     comment   = "companion to luatex-*.tex",
-    author    = "Khaled Hosny and Elie Roux",
+    author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
     license   = "GNU GPL v2"
 }
-
 
 local module_name = "luaotfload"
 
@@ -27,6 +26,7 @@ We recreate the verbosity levels previously implemented in font-nms:
     ==========================================================
 
 --doc]]--
+
 local loglevel = 1 --- default
 local logout   = "log"
 
@@ -81,12 +81,4 @@ logs.names_report = function (mode, lvl, ...)
     end
 end
 
-if containers then
-    --- This will vanish as soon as Hans fixes it in data-con
-    --- https://github.com/lualatex/luaotfload/issues/17
-
-    containers.cleanname = function (name)
-        return (string.gsub(string.lower(name),"[^%w%d\128\255]+","-"))
-    end
-end
 -- vim:tw=71:sw=4:ts=4:expandtab

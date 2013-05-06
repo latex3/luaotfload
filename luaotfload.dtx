@@ -1,10 +1,14 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 2009-2013 by Elie Roux    <elie.roux@telecom-bretagne.eu>
-%                        and Khaled Hosny <khaledhosny@eglug.org>
-%                             (Support: <lualatex-dev@tug.org>.)
+% Copyright (C) 2009-2013
+%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
+%      and Khaled Hosny   <khaledhosny@eglug.org>
+%      and Philipp Gesang <philipp.gesang@alumni.uni-heidelberg.de>
 %
-% This work is under the CC0 license.
+%      Home:      https://github.com/lualatex/luaotfload
+%      Support:   <lualatex-dev@tug.org>.
+%
+% This work is under the GPL v2.0 license.
 %
 % This work consists of the main source file luaotfload.dtx
 % and the derived files
@@ -47,11 +51,15 @@
 \preamble
 This is a generated file.
 
-Copyright (C) 2009-2013 by by Elie Roux    <elie.roux@telecom-bretagne.eu>
-                          and Khaled Hosny <khaledhosny@eglug.org>
-                               (Support: <lualatex-dev@tug.org>.)
+Copyright (C) 2009-2013
+     by  Elie Roux      <elie.roux@telecom-bretagne.eu>
+     and Khaled Hosny   <khaledhosny@eglug.org>
+     and Philipp Gesang <philipp.gesang@alumni.uni-heidelberg.de>
 
-This work is under the CC0 license.
+     Home:      https://github.com/lualatex/luaotfload
+     Support:   <lualatex-dev@tug.org>.
+
+This work is under the GPL v2.0 license.
 
 This work consists of the main source file luaotfload.dtx
 and the derived files
@@ -119,12 +127,18 @@ and the derived files
     citecolor=\primarycolor,
      pdftitle={The luaotfload package},
    pdfsubject={OpenType layout system for Plain TeX and LaTeX},
-    pdfauthor={Elie Roux & Khaled Hosny},
+    pdfauthor={Elie Roux & Khaled Hosny & Philipp Gesang},
   pdfkeywords={luatex, lualatex, unicode, opentype}
 ]{hyperref}
 \usepackage{fontspec}
-%usepackage{unicode-math}%% broken
-\setmainfont[Numbers=OldStyle,Ligatures=TeX]{Linux Libertine O}
+\usepackage{unicode-math}
+\setmainfont[
+  Numbers     = OldStyle,
+  Ligatures   = TeX,
+  BoldFont    = {Linux Libertine Bold},
+  ItalicFont  = {Linux Libertine Italic},
+  SlantedFont = {Linux Libertine Italic},
+]{Linux Libertine O}
 \setmonofont[Ligatures=TeX,Scale=MatchLowercase]{Liberation Mono}
 %setsansfont[Ligatures=TeX]{Linux Biolinum O}
 \setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
@@ -164,6 +178,27 @@ and the derived files
 
 \usepackage{syntax}%% bnf for font request syntax
 
+\usepackage{titlesec}
+
+\def\movecountertomargin#1{\llap{\rmfamily\upshape#1\hskip2em}}
+\def\zeropoint{0pt}
+\titleformat \part
+             {\normalsize\rmfamily\bfseries}
+             {\movecountertomargin\thepart} \zeropoint {}
+\titleformat \section
+             {\normalsize\rmfamily\scshape}%% no \word; life is full of disappointments
+             {\movecountertomargin\thesection} \zeropoint {}
+\titleformat \subsection
+             {\small\rmfamily\itshape}
+             {\movecountertomargin\thesubsection} \zeropoint {}
+
+\usepackage{tocloft}
+\renewcommand \cftpartfont   {\rmfamily\upshape}
+\renewcommand \cftsecfont    {\rmfamily\upshape}
+\renewcommand \cftsubsecfont {\rmfamily\upshape}
+\setlength \cftbeforepartskip {1ex}
+\setlength \cftbeforesecskip  {1ex}
+
 \VerbatimFootnotes
 \begin{document}
   \DocInput{luaotfload.dtx}%
@@ -192,9 +227,10 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \identifier{luaotfload} package}
-% \date{2013/04/16 v2.2}
-% \author{Elie Roux and Khaled Hosny\\
-%         Support: \email{lualatex-dev@tug.org}}
+% \date{2013/05/05 v2.2}
+% \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
+%         Home:      \url{https://github.com/lualatex/luaotfload}\\
+%         Support:   \email{lualatex-dev@tug.org}}
 %
 % \maketitle
 %
@@ -296,7 +332,7 @@ and the derived files
 %
 %       <path lookup>      ::= \{ {\sc all_characters} - `]' \} ;
 %
-%       <modifier>         ::= `/', (`I' | `B' | `BI' | `IB') ;
+%       <modifier>         ::= `/', (`I' | `B' | `BI' | `IB' | `S=', \{ {\sc digit} \} ) ;
 %
 %       <subfont no>       ::= `(', \{ {\sc digit} \}, `)' ;
 %
@@ -1104,6 +1140,9 @@ and the derived files
 %                                          (\abbrev{pfa}, \abbrev{pfb}).
 %     \ouritem {luaotfload-database.lua}   font names database.
 %     \ouritem {luaotfload-colors.lua}     color handling.
+%     \ouritem {luaotfload-auxiliary.lua}  access to internal functionality
+%                                          for package authors
+%                                          (proposals for additions welcome).
 % \end{itemize}
 %
 % \begin{figure}[b]
@@ -1178,10 +1217,13 @@ and the derived files
 luaotfload                  = luaotfload or {}
 local luaotfload            = luaotfload
 
-config                      = config or { }
-config.luaotfload           = config.luaotfload or { }
-config.luaotfload.resolver  = config.luaotfload.resolver or "normal"
-config.luaotfload.definer   = config.luaotfload.definer  or "patch"
+config                            = config or { }
+config.luaotfload                 = config.luaotfload or { }
+------.luaotfload.resolver        = config.luaotfload.resolver  or "normal"
+config.luaotfload.resolver        = config.luaotfload.resolver  or "cached"
+config.luaotfload.definer         = config.luaotfload.definer   or "patch"
+config.luaotfload.loglevel        = config.luaotfload.loglevel  or 1
+config.luaotfload.color_callback  = config.luaotfload.color_callback  or "pre_linebreak_filter"
 --luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 
 luaotfload.module = {
@@ -1191,7 +1233,7 @@ luaotfload.module = {
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
-    license       = "CC0"
+    license       = "GPL v2.0"
 }
 
 local luatexbase = luatexbase
@@ -1378,7 +1420,7 @@ local pop_namespaces = function (normalglobal, isolate)
         local _G = _G
         local mode = "non-destructive"
         if isolate then mode = "destructive" end
-        log("pop namespace from font loader -- "..mode)
+        log("pop namespace from font loader -- " .. mode)
         for k, v in next, _G do
             if not normalglobal[k] then
                 context_environment[k] = v
@@ -1419,6 +1461,7 @@ tex.attribute[0] = 0
 %    \begin{macrocode}
 
 loadmodule"merged.lua"
+---loadmodule"font-odv.lua" --- <= Devanagari support from Context
 
 if fonts then
 
@@ -1518,19 +1561,8 @@ add_to_callback("find_vf_file",
 loadmodule"lib-dir.lua"   --- required by luaofload-database.lua
 loadmodule"override.lua"  --- “luat-ovr”
 
-logs.set_loglevel(config.luaotfload.loglevel or 2)
+logs.set_loglevel(config.luaotfload.loglevel)
 
-%    \end{macrocode}
-% \CONTEXT does not support ofm, these lines were added in order to make it
-% work. However they do not seem necessary so they are commented for now.
-%
-%    \begin{macrocode}
--- if fonts and fonts.readers.tfm then
---  fonts.readers.ofm  = fonts.readers.tfm
---  fonts.handlers.ofm = fonts.handlers.tfm --- empty anyways
---  fonts.formats.ofm  = fonts.formats.tfm  --- “type1”
---  --- fonts.readers.sequence[#fonts.readers.sequence+1] = "ofm"
---end
 %    \end{macrocode}
 % Now we load the modules written for \identifier{luaotfload}.
 %
@@ -1575,8 +1607,8 @@ formats.ofm               = "type1"
 %
 %    \begin{macrocode}
 request_resolvers.file = function (specification)
-    --local found = fonts.names.crude_file_lookup(specification.name)
-    local found = fonts.names.crude_file_lookup_verbose(specification.name)
+    local found = fonts.names.crude_file_lookup(specification.name)
+    --local found = fonts.names.crude_file_lookup_verbose(specification.name)
     specification.name = found[1]
     --if format then specification.forced = format end
 end
@@ -1658,7 +1690,10 @@ local read_font_file = fonts.definers.read
 --- spec -> size -> id -> tmfdata
 local patch_defined_font = function (specification, size, id)
     local tfmdata = read_font_file(specification, size, id)
-    if type(tfmdata) == "table" then
+    if type(tfmdata) == "table" and tfmdata.shared then
+        --- We need to test for the “shared” field here
+        --- or else the fontspec capheight callback will
+        --- operate on tfm fonts.
         call_callback("luaotfload.patch_font", tfmdata)
     end
     return tfmdata

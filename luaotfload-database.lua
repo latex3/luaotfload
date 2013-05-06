@@ -1,7 +1,7 @@
 if not modules then modules = { } end modules ['luaotfload-database'] = {
     version   = 2.2,
     comment   = "companion to luaotfload.lua",
-    author    = "Khaled Hosny and Elie Roux",
+    author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
     license   = "GNU GPL v2"
 }
@@ -98,7 +98,7 @@ local writable_path
 if caches then
     writable_path = caches.getwritablepath("names","")
     if not writable_path then
-        error("Impossible to find a suitable writeable cache...")
+        luaotfload.error("Impossible to find a suitable writeable cache...")
     end
     names.path.dir          = writable_path
     names.path.path         = filejoin(writable_path, names.path.basename)
@@ -116,6 +116,7 @@ Auxiliary functions
 
 local report = logs.names_report
 
+--- string -> string
 local sanitize_string = function (str)
     if str ~= nil then
         return utf8gsub(utf8lower(str), "[^%a%d]", "")
@@ -133,11 +134,10 @@ This is a sketch of the luaotfload db:
         // preliminary additions of v2.2:
         basenames       : (string, int) hash;    // where int is the index in mappings
         barenames       : (string, int) hash;    // where int is the index in mappings
-        request_cache   : lookup_cache;          // see below
     }
     and fontentry = {
         familyname  : string;
-        filename    : (string * bool);
+        filename    : (string * int);            // int: subfont
         fontname    : string;
         fullname    : string;
         names       : {
@@ -188,21 +188,15 @@ mtx-fonts has in names.tma:
         width         : string;
     }
 
-
 --doc]]--
 
 local fontnames_init = function (keep_cache) --- returns dbobj
     return {
         mappings        = { },
         status          = { },
-        --- adding filename mapping increases the
-        --- size of the serialized db on my system
-        --- (5840 font files) by a factor of 1.09
-        --- if we store only the indices in the
-        --- mappings table
         barenames       = { },
         basenames       = { },
---      fullnames       = { },
+--      fullnames       = { }, // -> status
         version         = names.version,
     }
 end
@@ -261,18 +255,21 @@ local update_names
 local fonts_loaded   = false
 local fonts_reloaded = false
 
+--- limit output when approximate font matching (luaotfload-tool -F)
+local fuzzy_limit = 1 --- display closest only
+
 --- unit -> dbobj
 load_names = function ( )
     local starttime = os.gettimeofday()
     local foundname, data = load_lua_file(names.path.path)
 
     if data then
-        report("info", 1, "db",
+        report("both", 2, "db",
             "Font names database loaded", "%s", foundname)
         report("info", 3, "db", "Loading took %0.f ms",
                                 1000*(os.gettimeofday()-starttime))
     else
-        report("info", 1, "db",
+        report("both", 0, "db",
             [[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
         data = update_names(fontnames_init(false))
@@ -286,7 +283,7 @@ end
 load_lookups = function ( )
     local foundname, data = load_lua_file(names.path.lookup_path)
     if data then
-        report("both", 1, "cache",
+        report("both", 3, "cache",
                "Lookup cache loaded (%s)", foundname)
     else
         report("both", 1, "cache",
@@ -295,8 +292,6 @@ load_lookups = function ( )
     end
     return data
 end
-
-local fuzzy_limit = 1 --- display closest only
 
 local style_synonyms = { set = { } }
 do
@@ -382,25 +377,20 @@ Even if we find a matching font eventually, the next time the
 user compiles Eir document E will have to stand through the delay
 again.
 Thus, some caching of results -- even between runs -- is in order.
-We’ll just store successful lookups in the database in a record of
-the respective lookup type.
+We’ll just store successful name: lookups in a separate cache file.
 
 type lookup_cache = (string, (string * num)) dict
 
-TODO:
+Complete, needs testing:
  ×  1) add cache to dbobj
  ×  2) wrap lookups in cached versions
  ×  3) make caching optional (via the config table) for debugging
  ×  4) make names_update() cache aware (nil if “force”)
  ×  5) add logging
  ×  6) add cache control to luaotfload-tool
- ×  7) incr db version
-    8) wishlist: save cache only at the end of a run
-    9) ???
-    n) PROFIT!!!
+ ×  7) incr db version (now 2.203)
+ ×  8) save cache only at the end of a run
 
-The name lookup requires both the “name” and some other
-keys, so we’ll concatenate them.
 The spec is modified in place (ugh), so we’ll have to catalogue what
 fields actually influence its behavior.
 
@@ -415,20 +405,11 @@ Idk what the “spec” resolver is for.
 * name: contains both the name resolver from luatex-fonts and resolve()
   below
 
-The following fields of a resolved spec need to be cached:
---doc]]--
-local cache_fields = {
-    "forced", "hash", "lookup", "name", "resolved", "sub",
-}
-
---[[doc--
 From my reading of font-def.lua, what a resolver does is
 basically rewrite the “name” field of the specification record
 with the resolution.
 Also, the fields “resolved”, “sub”, “force” etc. influence the outcome.
 
-We’ll just cache a deep copy of the entire spec as it leaves the
-resolver, lest we want to worry if we caught all the details.
 --doc]]--
 
 --- 'a -> 'a -> table -> (string * int|boolean * boolean)
@@ -458,12 +439,8 @@ resolve_cached = function (_, _, specification)
     names.lookups[request] = entry
 
     --- obviously, the updated cache needs to be stored.
-    --- for the moment, we write the entire db to disk
-    --- whenever the cache is updated.
     --- TODO this should trigger a save only once the
     ---      document is compiled (finish_pdffile callback?)
-    --- TODO we should speed up writing by separating
-    ---      the cache from the db
     report("both", 5, "cache", "saving updated cache")
     save_lookups()
     return filename, subfont, true
@@ -681,15 +658,12 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     if not fonts_reloaded then
         --- last straw: try reloading the database
         return reload_db(
-            "unresolved font name: “" .. name .. "”",
+            "unresolved font name: ‘" .. name .. "’",
             resolve, nil, nil, specification
         )
     end
 
     --- else, fallback to requested name
-    --- specification.name is empty with absolute paths, looks
-    --- like a bug in the specification parser <TODO< is it still
-    --- relevant? looks not...
     return specification.name, false, false
 end --- resolve()
 
@@ -1491,7 +1465,7 @@ save_lookups = function ( )
             if lucname and type(caches.compile) == "function" then
                 os.remove(lucname)
                 caches.compile(lookups, luaname, lucname)
-                report("info", 1, "cache", "Lookup cache saved")
+                report("both", 3, "cache", "Lookup cache saved")
                 return names.path.lookup_path
             end
         end
@@ -1518,7 +1492,7 @@ save_names = function (fontnames)
             end
         end
     end
-    report("info", 0, "db", "Failed to save names database")
+    report("both", 0, "db", "Failed to save names database")
     return nil
 end
 
@@ -1537,6 +1511,7 @@ end
 
 --- export functionality to the namespace “fonts.names”
 names.flush_cache                 = flush_cache
+names.save_lookups                = save_lookups
 names.load                        = load_names
 names.save                        = save_names
 names.scan                        = scan_external_dir
@@ -1546,7 +1521,7 @@ names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 
 --- replace the resolver from luatex-fonts
 if config.luaotfload.resolver == "cached" then
-    report("info", 0, "cache", "caching of name: lookups active")
+    report("both", 2, "cache", "caching of name: lookups active")
     names.resolve     = resolve_cached
     names.resolvespec = resolve_cached
 else

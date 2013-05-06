@@ -1,3 +1,11 @@
+if not modules then modules = { } end modules ["loaders"] = {
+    version   = 2.200,
+    comment   = "companion to luaotfload.lua",
+    author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
+    copyright = "PRAGMA ADE / ConTeXt Development Team",
+    license   = "see context related readme files"
+}
+
 local fonts = fonts
 
 ---

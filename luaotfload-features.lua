@@ -1,26 +1,28 @@
 if not modules then modules = { } end modules ["features"] = {
-    version   = 1.000,
+    version   = 2.200,
     comment   = "companion to luaotfload.lua",
-    author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
+    author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
 }
 
-local format, insert = string.format, table.insert
-local type, next = type, next
-local lpegmatch = lpeg.match
+local format, insert    = string.format, table.insert
+local type, next        = type, next
+local lpegmatch         = lpeg.match
 
 ---[[ begin included font-ltx.lua ]]
 --- this appears to be based in part on luatex-fonts-def.lua
 
 local fonts = fonts
 
--- A bit of tuning for definitions.
+--HH A bit of tuning for definitions.
 
 fonts.constructors.namemode = "specification" -- somehow latex needs this (changed name!) => will change into an overload
 
--- tricky: we sort of bypass the parser and directly feed all into
--- the sub parser
+--[[HH--
+    tricky: we sort of bypass the parser and directly feed all into
+    the sub parser
+--HH]]--
 
 function fonts.definers.getspecification(str)
     return "", str, "", ":", str
@@ -31,52 +33,8 @@ local old_feature_list = { }
 local report = logs.names_report
 
 local stringlower      = string.lower
-local stringsub        = string.sub
 local stringgsub       = string.gsub
-local stringfind       = string.find
-local stringexplode    = string.explode
 local stringis_empty   = string.is_empty
-
---[[doc--
-Apparently, these “modifiers” are another measure of emulating \XETEX,
-cf. “About \XETEX”, by Jonathan Kew, 2005; and
-    “The \XETEX Reference Guide”, by Will Robertson, 2011.
---doc]]--
-
-local supported = {
-    b    = "bold",
-    i    = "italic",
-    bi   = "bolditalic",
-    aat  = false,
-    icu  = false,
-    gr   = false,
-}
-
---- this parses the optional flags after the slash
---- the original behavior is that multiple slashes
---- are valid but they might cancel prior settings
---- example: {name:Antykwa Torunska/I/B} -> bold
-
-local isstyle = function (request)
-    request = stringlower(request)
-    request = stringexplode(request, "/")
-
-    for _,v in next, request do
-        local stylename = supported[v]
-        if stylename then
-            old_feature_list.style = stylename
-        elseif stringfind(v, "^s=") then
-            --- after all, we want everything after the second byte ...
-            local val = stringsub(v, 3)
-            old_feature_list.optsize = val
-        elseif stylename == false then
-            report("log", 0,
-                "load", "unsupported font option: %s", v)
-        elseif not stringis_empty(v) then
-            old_feature_list.style = stringgsub(v, "[^%a%d]", "")
-        end
-    end
-end
 
 --- TODO an option to dump the default features for a script would make
 ---      a nice addition to luaotfload-tool
@@ -135,13 +93,36 @@ defaults.tibt = defaults.khmr
 defaults.lao  = defaults.thai
 
 --[[doc--
-Which features are active by default depends on the script requested.
+
+    As discussed, we will issue a warning because of incomplete support
+    when one of the scripts below is requested.
+
+    Reference: https://github.com/lualatex/luaotfload/issues/31
+
+--doc]]--
+
+local support_incomplete = table.tohash({
+    "deva", "beng", "guru", "gujr",
+    "orya", "taml", "telu", "knda",
+    "mlym", "sinh",
+}, true)
+
+--[[doc--
+
+    Which features are active by default depends on the script
+    requested.
+
 --doc]]--
 
 --- (string, string) dict -> (string, string) dict
 local set_default_features = function (speclist)
     speclist = speclist or { }
     local script = speclist.script or "dflt"
+    if support_incomplete[script] then
+        report("log", 0, "load",
+            "support for the requested script: “%s” may be incomplete",
+            script)
+    end
 
     report("log", 0, "load",
         "auto-selecting default features for script: %s",
@@ -168,84 +149,6 @@ local set_default_features = function (speclist)
     end
     return speclist
 end
-
--- --[==[obsolete--
-local function issome ()    old_feature_list.lookup = 'name' end
-local function isfile ()    old_feature_list.lookup = 'file' end
-local function isname ()    old_feature_list.lookup = 'name' end
-local function thename(s)   old_feature_list.name   = s end
-local function issub  (v)   old_feature_list.sub    = v end
-local function istrue (s)   old_feature_list[s]     = true end
-local function isfalse(s)   old_feature_list[s]     = false end
-local function iskey  (k,v) old_feature_list[k]     = v end
-
-local P, S, R, C = lpeg.P, lpeg.S, lpeg.R, lpeg.C
-
-local spaces     = P(" ")^0
---local namespec   = (1-S("/:("))^0 -- was: (1-S("/: ("))^0
---[[phg-- this prevents matching of absolute paths as file names --]]--
-local namespec   = (1-S("/:("))^1
-local filespec   = (R("az", "AZ") * P(":"))^-1 * (1-S(":("))^1
-local stylespec  = spaces * P("/") * (((1-P(":"))^0)/isstyle) * spaces
-local filename   = (P("file:")/isfile * (filespec/thename))
-                 + (P("[") * P(true)/isname * (((1-P("]"))^0)/thename) * P("]"))
-local fontname   = (P("name:")/isname * (namespec/thename)) + P(true)/issome * (namespec/thename)
-local sometext   = (R("az","AZ","09") + S("+-.,"))^1
-local truevalue  = P("+") * spaces * (sometext/istrue)
-local falsevalue = P("-") * spaces * (sometext/isfalse)
-local keyvalue   = P("+") + (C(sometext) * spaces * P("=") * spaces * C(sometext))/iskey
-local somevalue  = sometext/istrue
-local subvalue   = P("(") * (C(P(1-S("()"))^1)/issub) * P(")") -- for Kim
-local option     = spaces * (keyvalue + falsevalue + truevalue + somevalue) * spaces
-local options    = P(":") * spaces * (P(";")^0  * option)^0
-local oldsyntax  = (filename + fontname) * subvalue^0 * stylespec^0 * options^0
-
---- to be annihilated
-local function old_behavior (specification) -- xetex mode
-    old_feature_list = { }
-    lpeg.match(oldsyntax,specification.specification)
-    old_feature_list = set_default_features(old_feature_list)
-    if old_feature_list.style then
-        specification.style = old_feature_list.style
-        old_feature_list.style = nil
-    end
-    if old_feature_list.optsize then
-        specification.optsize = old_feature_list.optsize
-        old_feature_list.optsize = nil
-    end
-    if old_feature_list.name then
-        if resolvers.findfile(old_feature_list.name, "tfm") then
-            old_feature_list.lookup = "file"
-            old_feature_list.name   = file.addsuffix(old_feature_list.name, "tfm")
-        elseif resolvers.findfile(old_feature_list.name, "ofm") then
-            old_feature_list.lookup = "file"
-            old_feature_list.name   = file.addsuffix(old_feature_list.name, "ofm")
-        end
-
-        specification.name = old_feature_list.name
-        old_feature_list.name = nil
-    end
-    --- this test overwrites valid file: requests for xetex bracket
-    --- syntax
-    if old_feature_list.lookup then
-        specification.lookup = old_feature_list.lookup
-        old_feature_list.lookup = nil
-    end
-    if old_feature_list.sub then
-        specification.sub = old_feature_list.sub
-        old_feature_list.sub = nil
-    end
-    if not old_feature_list.mode then
-        -- if no mode is set, use our default
-        old_feature_list.mode = fonts.mode
-    end
-    specification.features.normal = fonts.handlers.otf.features.normalize(old_feature_list)
-    return specification
-end
-
---fonts.definers.registersplit(":",old_behavior,"cryptic")
---fonts.definers.registersplit("", old_behavior,"more cryptic") -- catches \font\text=[names]
---obsolete]==]--
 
 -----------------------------------------------------------------------
 ---                    request syntax parser 2.2
@@ -282,36 +185,27 @@ end
 ---     according to my reconstruction, the correct chaining
 ---     of the lookups for each category is as follows:
 ---
----     | File -> ( db/filename lookup;
----                 db/basename lookup;
----                 kpse.find_file() )
----     | Name -> ( names.resolve() )
----     | Path -> ( db/filename lookup;
----                 db/basename lookup;
----                 kpse.find_file();
----                 fullpath lookup )
----     | Anon -> ( names.resolve();      (* most general *)
----                 db/filename lookup;
----                 db/basename lookup;
----                 kpse.find_file();
+---     | File -> ( db/filename lookup )
+---
+---     | Name -> ( db/name lookup,
+---                 db/filename lookup )
+---
+---     | Path -> ( db/filename lookup,
 ---                 fullpath lookup )
 ---
----     the database should be generated only if the chain has
----     been completed, and then only once.
+---     | Anon -> ( kpse.find_file(),     // <- for tfm, ofm
+---                 db/name lookup,
+---                 db/filename lookup,
+---                 fullpath lookup )
 ---
----     caching of successful lookups is essential. we need
----     an additional subtable "cached" in the database. it
----     should be nil’able by issuing luaotfload-tool --flush or
----     something. if a cache miss is followed by a successful
----     lookup, then it will be counted as new addition to the
----     cache. we also need a config option to ignore caching.
----
----     also everything has to be finished by tomorrow at noon.
+---     caching of successful lookups is essential. we now
+---     as of v2.2 have an experimental lookup cache that is
+---     stored in a separate file. it pertains only to name:
+---     lookups, and is described in more detail in
+---     luaotfload-database.lua.
 ---
 -----------------------------------------------------------------------
 
-
-local stringlower = string.lower
 
 local toboolean = function (s)
   if s == "true"  then return true  end
@@ -348,17 +242,19 @@ local decimal     = digit^1 * (dot * digit^0)^-1
     The slash notation: called “modifiers” (Kew) or “font options”
     (Robertson, Goosens)
     we only support the shorthands for italic / bold / bold italic
-    shapes, the rest is ignored.
+    shapes, as well as setting optical size, the rest is ignored.
 --doc]]--
 local style_modifier    = (P"BI" + P"IB" + P"bi" + P"ib" + S"biBI")
                         / stringlower
-local other_modifier    = P"S=" * decimal --- optical size; unsupported
-                        + P"AAT" + P"aat" --- apple stuff;  unsupported
+local size_modifier     = S"Ss" * P"="    --- optical size
+                        * Cc"optsize" * C(decimal)
+local other_modifier    = P"AAT" + P"aat" --- apple stuff;  unsupported
                         + P"ICU" + P"icu" --- not applicable
                         + P"GR"  + P"gr"  --- sil stuff;    unsupported
 local garbage_modifier  = ((1 - colon - slash)^0 * Cc(false))
 local modifier          = slash * (other_modifier      --> ignore
                                  + Cs(style_modifier)  --> collect
+                                 + Ct(size_modifier)   --> collect
                                  + garbage_modifier)   --> warn
 local modifier_list     = Cg(Ct(modifier^0), "modifiers")
 
@@ -409,15 +305,15 @@ local specification     = (prefixed + unprefixed)
 local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
                            + specification * (colon    * features)^-1)
 
--- lpeg.print(font_request)
---- new parser: 632 rules
+--  lpeg.print(font_request)
+--- new parser: 657 rules
 --- old parser: 230 rules
 
 local import_values = {
     --- That’s what the 1.x parser did, not quite as graciously,
     --- with an array of branch expressions.
     -- "style", "optsize",--> from slashed notation; handled otherwise
-    "lookup", "sub" --[[‽]], "mode",
+    "lookup", "sub", "mode",
 }
 
 local lookup_types = { "anon", "file", "name", "path" }
@@ -441,21 +337,21 @@ local supported = {
     gr   = false,
 }
 
+--- (string | (string * string) | bool) list -> (string * number)
 local handle_slashed = function (modifiers)
     local style, optsize
     for i=1, #modifiers do
         local mod  = modifiers[i]
-        if supported[mod] then
-            style = supported[mod]
-        --elseif stringfind(v, "^s=") then
-        elseif stringsub(v, 1, 2) == "s=" then
-            local val = stringsub(v, 3)
-            optsize = val
-        elseif stylename == false then
+        if type(mod) == "table" and mod[1] == "optsize" then --> optical size
+            optsize = tonumber(mod[2])
+        elseif mod == false then
+            --- ignore
             report("log", 0,
                 "load", "unsupported font option: %s", v)
-        elseif not stringis_empty(v) then
-            style = stringgsub(v, "[^%a%d]", "")
+        elseif supported[mod] then
+            style = supported[mod]
+        elseif not stringis_empty(mod) then
+            style = stringgsub(mod, "[^%a%d]", "")
         end
     end
     return style, optsize
@@ -465,6 +361,18 @@ end
 local handle_request = function (specification)
     local request = lpegmatch(font_request,
                               specification.specification)
+    if not request then
+        --- happens when called with an absolute path
+        --- in an anonymous lookup;
+        --- we try to behave as friendly as possible
+        --- just go with it ...
+        report("log", 0, "load", "invalid request “%s” of type anon",
+            specification.specification)
+        report("log", 0, "load", "use square bracket syntax or consult the documentation.")
+        specification.name      = specification.specification
+        specification.lookup    = "file"
+        return specification
+    end
     local lookup, name = select_lookup(request)
     request.features  = set_default_features(request.features)
 
@@ -501,14 +409,8 @@ local compare_requests = function (spec)
     return new
 end
 
---fonts.definers.registersplit(":", compare_requests, "cryptic")
---fonts.definers.registersplit("",  compare_requests, "more cryptic") -- catches \font\text=[names]
-
 fonts.definers.registersplit(":", handle_request, "cryptic")
 fonts.definers.registersplit("",  handle_request, "more cryptic") -- catches \font\text=[names]
-
---fonts.definers.registersplit(":",old_behavior,"cryptic")
---fonts.definers.registersplit("", old_behavior,"more cryptic") -- catches \font\text=[names]
 
 ---[[ end included font-ltx.lua ]]
 
@@ -531,11 +433,15 @@ local otf                 = fonts.handlers.otf
 local registerotffeature  = otf.features.register
 local setmetatableindex   = table.setmetatableindex
 
--- In the userdata interface we can not longer tweak the loaded font as
--- conveniently as before. For instance, instead of pushing extra data in
--- in the table using the original structure, we now have to operate on
--- the mkiv representation. And as the fontloader interface is modelled
--- after fontforge we cannot change that one too much either.
+--[[HH--
+
+   In the userdata interface we can not longer tweak the loaded font as
+   conveniently as before. For instance, instead of pushing extra data in
+   in the table using the original structure, we now have to operate on
+   the mkiv representation. And as the fontloader interface is modelled
+   after fontforge we cannot change that one too much either.
+
+--HH]]--
 
 local types = {
     substitution = "gsub_single",
@@ -799,24 +705,7 @@ local anum_specification = {
 --- below the specifications as given in the removed font-otc.lua
 --- the rest was identical to what this file had from the beginning
 --- both make the “anum.tex” test pass anyways
---
---local anum_specification = {
---    {
---        type     = "substitution",
---        features = { arab = { urd = true, dflt = true } },
---        data     = anum_arabic,
---        flags    = noflags, -- { },
---        valid    = valid,
---    },
---    {
---        type     = "substitution",
---        features = { arab = { urd = true } },
---        data     = anum_persian,
---        flags    = noflags, -- { },
---        valid    = valid,
---    },
---}
---
+
 otf.addfeature("anum",anum_specification)
 
 registerotffeature {

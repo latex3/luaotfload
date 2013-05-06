@@ -2,6 +2,8 @@ Change History
 --------------
 
 2013/04/xx, luaotfload v2.2:
+    * There is now a central, non-personal dev repo on github:
+      https://github.com/lualatex/luaotfload
     * Synchronisation with ConTeXt from TeXLive 2013, inducing
       backward-incompatible changes in the font structure (fontspec and 
       unicode-math must be updated)
@@ -10,7 +12,7 @@ Change History
       the LuaTeX-Plain format)
     * Improved and extended documentation
     * Font filenames are stored in the database (file: lookups more efficient)
-    * Optional caching of name: lookups
+    * Optional caching of name: lookups (uses separate cache file)
     * Increased fidelity of XeTeX emulation
     * Renaming mkluatexfontdb into luaotfload-tool (the old behavior is kept if
       the script is symlinked/ renamed mkluatexfontdb)
@@ -21,8 +23,8 @@ Change History
     * The Adobe Glyph List (font-age.lua) is now built via script (mkglyphlist)
     * Hans adapted the font loader to several of our requests (attribute
       allocation, custom merged package name etc.)
-    * There is now a central, non-personal dev repo on github:
-      https://github.com/lualatex/luaotfload
+    * Auxiliary functions for package authors
+    * Fallbacks for older versions of dependent packages
 
 2013/04/27, luaotfload v1.3:
     *  blacklisting lingoes.ttf (segfaults)

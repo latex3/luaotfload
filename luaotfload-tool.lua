@@ -1,13 +1,28 @@
 #!/usr/bin/env texlua
+-----------------------------------------------------------------------
+--         FILE:  luaotfload-tool.lua
+--  DESCRIPTION:  database functionality
+-- REQUIREMENTS:  luaotfload 2.2
+--       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
+--      VERSION:  2.2
+--      LICENSE:  GPL v2
+--      CREATED:  2013-05-06 13:37:12+0200
+-----------------------------------------------------------------------
 
 --[[doc--
-This file was originally written by Elie Roux and Khaled Hosny and is under CC0
-license (see http://creativecommons.org/publicdomain/zero/1.0/legalcode).
+
+This file was originally written (as \fileent{mkluatexfontdb.lua}) by
+Elie Roux and Khaled Hosny and, as a derived work of ConTeXt, is
+provided under the terms of the GPL v2.0 license as printed in full
+text in the manual (luaotfload.pdf).
+
+    \url{http://www.gnu.org/licenses/old-licenses/gpl-2.0.html}.
 
 This file is a wrapper for the luaotfload font names module
 (luaotfload-database.lua). It is part of the luaotfload bundle, please
 see the luaotfload documentation for more info. Report bugs to
-\url{https://github.com/lualatex/luaotfload/issues}.
+
+    \url{https://github.com/lualatex/luaotfload/issues}.
 
 --doc]]--
 
@@ -15,7 +30,6 @@ kpse.set_program_name"luatex"
 
 local stringformat    = string.format
 local texiowrite_nl   = texio.write_nl
-local stringfind      = string.find
 local stringlower     = string.lower
 
 
@@ -93,7 +107,7 @@ require"luaotfload-override.lua"  --- this populates the logs.* namespace
 require"luaotfload-database"
 require"alt_getopt"
 
-local version = "2.2" -- same version number as luaotfload
+local version  = "2.2" -- same version number as luaotfload
 local names    = fonts.names
 
 local db_src_out = names.path.dir.."/"..names.path.basename
@@ -253,11 +267,10 @@ actions.generate = function (job)
 end
 
 actions.flush = function (job)
-    local success, fontnames = names.flush_cache()
+    local success, lookups = names.flush_cache()
     if success then
-        local savedname = names.save(fontnames)
-        logs.names_report("info", 2, "cache",
-            "Cache emptied", #fontnames.mappings)
+        local savedname = names.save_lookups()
+        logs.names_report("info", 2, "cache", "Cache emptied")
         if savedname then
             return true, true
         end

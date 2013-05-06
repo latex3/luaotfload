@@ -134,11 +134,10 @@ This is a sketch of the luaotfload db:
         // preliminary additions of v2.2:
         basenames       : (string, int) hash;    // where int is the index in mappings
         barenames       : (string, int) hash;    // where int is the index in mappings
-        request_cache   : lookup_cache;          // see below
     }
     and fontentry = {
         familyname  : string;
-        filename    : (string * bool);
+        filename    : (string * int);            // int: subfont
         fontname    : string;
         fullname    : string;
         names       : {
@@ -189,21 +188,15 @@ mtx-fonts has in names.tma:
         width         : string;
     }
 
-
 --doc]]--
 
 local fontnames_init = function (keep_cache) --- returns dbobj
     return {
         mappings        = { },
         status          = { },
-        --- adding filename mapping increases the
-        --- size of the serialized db on my system
-        --- (5840 font files) by a factor of 1.09
-        --- if we store only the indices in the
-        --- mappings table
         barenames       = { },
         basenames       = { },
---      fullnames       = { },
+--      fullnames       = { }, // -> status
         version         = names.version,
     }
 end
@@ -262,18 +255,21 @@ local update_names
 local fonts_loaded   = false
 local fonts_reloaded = false
 
+--- limit output when approximate font matching (luaotfload-tool -F)
+local fuzzy_limit = 1 --- display closest only
+
 --- unit -> dbobj
 load_names = function ( )
     local starttime = os.gettimeofday()
     local foundname, data = load_lua_file(names.path.path)
 
     if data then
-        report("info", 1, "db",
+        report("both", 2, "db",
             "Font names database loaded", "%s", foundname)
         report("info", 3, "db", "Loading took %0.f ms",
                                 1000*(os.gettimeofday()-starttime))
     else
-        report("info", 1, "db",
+        report("both", 0, "db",
             [[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
         data = update_names(fontnames_init(false))
@@ -287,7 +283,7 @@ end
 load_lookups = function ( )
     local foundname, data = load_lua_file(names.path.lookup_path)
     if data then
-        report("both", 1, "cache",
+        report("both", 3, "cache",
                "Lookup cache loaded (%s)", foundname)
     else
         report("both", 1, "cache",
@@ -296,8 +292,6 @@ load_lookups = function ( )
     end
     return data
 end
-
-local fuzzy_limit = 1 --- display closest only
 
 local style_synonyms = { set = { } }
 do
@@ -664,15 +658,12 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     if not fonts_reloaded then
         --- last straw: try reloading the database
         return reload_db(
-            "unresolved font name: “" .. name .. "”",
+            "unresolved font name: ‘" .. name .. "’",
             resolve, nil, nil, specification
         )
     end
 
     --- else, fallback to requested name
-    --- specification.name is empty with absolute paths, looks
-    --- like a bug in the specification parser <TODO< is it still
-    --- relevant? looks not...
     return specification.name, false, false
 end --- resolve()
 
@@ -1474,7 +1465,7 @@ save_lookups = function ( )
             if lucname and type(caches.compile) == "function" then
                 os.remove(lucname)
                 caches.compile(lookups, luaname, lucname)
-                report("info", 1, "cache", "Lookup cache saved")
+                report("both", 3, "cache", "Lookup cache saved")
                 return names.path.lookup_path
             end
         end
@@ -1501,7 +1492,7 @@ save_names = function (fontnames)
             end
         end
     end
-    report("info", 0, "db", "Failed to save names database")
+    report("both", 0, "db", "Failed to save names database")
     return nil
 end
 
@@ -1530,7 +1521,7 @@ names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 
 --- replace the resolver from luatex-fonts
 if config.luaotfload.resolver == "cached" then
-    report("info", 0, "cache", "caching of name: lookups active")
+    report("both", 2, "cache", "caching of name: lookups active")
     names.resolve     = resolve_cached
     names.resolvespec = resolve_cached
 else

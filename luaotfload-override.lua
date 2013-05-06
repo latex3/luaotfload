@@ -81,12 +81,4 @@ logs.names_report = function (mode, lvl, ...)
     end
 end
 
-if containers then
-    --- This will vanish as soon as Hans fixes it in data-con
-    --- https://github.com/lualatex/luaotfload/issues/17
-
-    containers.cleanname = function (name)
-        return (string.gsub(string.lower(name),"[^%w%d\128\255]+","-"))
-    end
-end
 -- vim:tw=71:sw=4:ts=4:expandtab

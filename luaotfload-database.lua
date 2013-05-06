@@ -98,7 +98,7 @@ local writable_path
 if caches then
     writable_path = caches.getwritablepath("names","")
     if not writable_path then
-        error("Impossible to find a suitable writeable cache...")
+        luaotfload.error("Impossible to find a suitable writeable cache...")
     end
     names.path.dir          = writable_path
     names.path.path         = filejoin(writable_path, names.path.basename)

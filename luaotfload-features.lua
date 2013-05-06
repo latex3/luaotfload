@@ -352,13 +352,14 @@ local handle_slashed = function (modifiers)
         local mod  = modifiers[i]
         if type(mod) == "table" and mod[1] == "optsize" then --> optical size
             optsize = tonumber(mod[2])
-        elseif supported[mod] then
-            style = supported[mod]
-        elseif stylename == false then
+        elseif mod == false then
+            --- ignore
             report("log", 0,
                 "load", "unsupported font option: %s", v)
-        elseif not stringis_empty(v) then
-            style = stringgsub(v, "[^%a%d]", "")
+        elseif supported[mod] then
+            style = supported[mod]
+        elseif not stringis_empty(mod) then
+            style = stringgsub(mod, "[^%a%d]", "")
         end
     end
     return style, optsize

@@ -4,22 +4,27 @@ NAME         = luaotfload
 DOC          = $(NAME).pdf
 DTX          = $(NAME).dtx
 OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf $(GLYPHS)
-SCRIPT       = luaotfload-tool.lua
 
 GLYPHSCRIPT  = mkglyphlist
 GLYPHSOURCE  = glyphlist.txt
 
-GRAPH  = filegraph
-DOTPDF = $(GRAPH).pdf
-DOT    = $(GRAPH).dot
+SCRIPTNAME   = luaotfload-tool
+SCRIPT       = $(SCRIPTNAME).lua
+MANSOURCE	 = $(SCRIPTNAME).rst
+MANPAGE   	 = $(SCRIPTNAME).1
+
+GRAPH  		 = filegraph
+DOTPDF 		 = $(GRAPH).pdf
+DOT    		 = $(GRAPH).dot
 
 # Files grouped by generation mode
 GLYPHS      = font-age.lua
 GRAPHED     = $(DOTPDF)
+MAN			= $(MANPAGE)
 COMPILED    = $(DOC)
 UNPACKED    = luaotfload.sty luaotfload.lua
-GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(GLYPHS)
-SOURCE 		= $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT) $(GLYPHSCRIPT)
+GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(GLYPHS) $(MAN)
+SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(SCRIPT) $(GLYPHSCRIPT)
 
 # test files
 TESTDIR 		= tests
@@ -31,6 +36,7 @@ TESTFILES_TL 	= $(filter-out $(TESTFILES_SYS), $(TESTFILES))
 SCRIPTFILES = $(SCRIPT) $(GLYPHSCRIPT)
 RUNFILES    = $(UNPACKED) $(OTFL)
 DOCFILES    = $(DOC) $(DOTPDF) README NEWS
+MANFILES	= $(MANPAGE)
 SRCFILES    = $(DTX) Makefile
 
 # The following definitions should be equivalent
@@ -42,6 +48,7 @@ FORMAT = luatex
 SCRIPTDIR = $(TEXMFROOT)/scripts/$(NAME)
 RUNDIR    = $(TEXMFROOT)/tex/$(FORMAT)/$(NAME)
 DOCDIR    = $(TEXMFROOT)/doc/$(FORMAT)/$(NAME)
+MANDIR    = $(TEXMFROOT)/doc/man/man1/
 SRCDIR    = $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
 TEXMFROOT = $(shell kpsewhich --var-value TEXMFHOME)
 
@@ -54,13 +61,15 @@ DO_TEX 		  	= tex --interaction=batchmode $< >/dev/null
 DO_LATEX 	  	= latexmk -pdf -e '$$pdflatex = q(lualatex %O %S)' -silent $< >/dev/null
 DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null
 DO_GLYPHLIST 	= texlua ./mkglyphlist > /dev/null
+DO_DOCUTILS 	= rst2man2 $< >$@ 2>/dev/null
 
 all: $(GENERATED)
 graph: $(GRAPHED)
-doc: $(GRAPHED) $(COMPILED)
+doc: $(GRAPHED) $(COMPILED) $(MAN)
+manual: $(MAN)
 unpack: $(UNPACKED)
 glyphs: $(GLYPHS)
-ctan: check $(CTAN_ZIP)
+ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)
 world: all ctan
 
@@ -76,6 +85,9 @@ $(COMPILED): $(DTX)
 $(UNPACKED): $(DTX)
 	$(DO_TEX)
 
+$(MAN): $(MANSOURCE)
+	$(DO_DOCUTILS)
+
 $(CTAN_ZIP): $(SOURCE) $(COMPILED) $(TDS_ZIP)
 	@echo "Making $@ for CTAN upload."
 	@$(RM) -- $@
@@ -86,6 +98,7 @@ define run-install
 @mkdir -p $(RUNDIR) && cp $(RUNFILES) $(RUNDIR)
 @mkdir -p $(DOCDIR) && cp $(DOCFILES) $(DOCDIR)
 @mkdir -p $(SRCDIR) && cp $(SRCFILES) $(SRCDIR)
+@mkdir -p $(MANDIR) && cp $(MANFILES) $(MANDIR)
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf

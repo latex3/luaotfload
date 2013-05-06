@@ -1219,7 +1219,8 @@ local luaotfload            = luaotfload
 
 config                            = config or { }
 config.luaotfload                 = config.luaotfload or { }
-config.luaotfload.resolver        = config.luaotfload.resolver  or "normal"
+------.luaotfload.resolver        = config.luaotfload.resolver  or "normal"
+config.luaotfload.resolver        = config.luaotfload.resolver  or "cached"
 config.luaotfload.definer         = config.luaotfload.definer   or "patch"
 config.luaotfload.loglevel        = config.luaotfload.loglevel  or 1
 config.luaotfload.color_callback  = config.luaotfload.color_callback  or "pre_linebreak_filter"
@@ -1232,7 +1233,7 @@ luaotfload.module = {
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
-    license       = "CC0"
+    license       = "GPL v2.0"
 }
 
 local luatexbase = luatexbase
@@ -1419,7 +1420,7 @@ local pop_namespaces = function (normalglobal, isolate)
         local _G = _G
         local mode = "non-destructive"
         if isolate then mode = "destructive" end
-        log("pop namespace from font loader -- "..mode)
+        log("pop namespace from font loader -- " .. mode)
         for k, v in next, _G do
             if not normalglobal[k] then
                 context_environment[k] = v
@@ -1606,8 +1607,8 @@ formats.ofm               = "type1"
 %
 %    \begin{macrocode}
 request_resolvers.file = function (specification)
-    --local found = fonts.names.crude_file_lookup(specification.name)
-    local found = fonts.names.crude_file_lookup_verbose(specification.name)
+    local found = fonts.names.crude_file_lookup(specification.name)
+    --local found = fonts.names.crude_file_lookup_verbose(specification.name)
     specification.name = found[1]
     --if format then specification.forced = format end
 end

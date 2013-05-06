@@ -1,42 +1,46 @@
-                         The luaotfload package
+*******************************************************************************
+                            The Luaotfload Package
+*******************************************************************************
 
-Luaotfload is an adaptation of the ConTeXt font loading system for Plain and
-LaTeX. It allows OpenType fonts to be loaded with OpenType features accessible
-through the XeTeX font syntax.
+Luaotfload is an adaptation of the ConTeXt font loading system for the Plain
+and LaTeX formats. It allows OpenType fonts to be loaded with font features
+accessible using an extended font request syntax while providing compatibility
+with XeTeX. By indexing metadata in a database it facilitates loading fonts by
+their proper names instead of file names.
 
-It may be loaded in Plain LuaTeX with "\input luaotfload.sty" and in LuaLaTeX
-with "\usepackage{luaotfload}". LuaLaTeX users may be interested in the
-fontspec package which provides a high-level interface to the functionality
+Luaotfload may be loaded in Plain LuaTeX with "\input luaotfload.sty" and in
+LuaLaTeX with "\usepackage{luaotfload}". LuaLaTeX users may be interested in
+the fontspec package which provides a high-level interface to the functionality
 provided by this package.
 
 Please see the documentation luaotfload.pdf for more information.
 
-This package is developed on <http://github.com/khaledhosny/luaotfload>.
-Please report bugs at the Github address above.
+This package is developed by the LuaLaTeX dev team on
+<http://github.com/lualatex/luaotfload>. Please report bugs to the issue
+tracker there.
 
-Discussion of development for LuaLaTeX is held in the lualatex-dev mailing
-list. See <http://www.tug.org/mailman/listinfo/lualatex-dev> to join or to
-view the archives.
+The development for LuaLaTeX is discussed on the lualatex-dev mailing list. See
+<http://www.tug.org/mailman/listinfo/lualatex-dev> for details.
 
 
 Responsible Persons
--------------------
-
+-------------------------------------------------------------------------------
 The following people have contributed to this package.
 
 Khaled Hosny             <khaledhosny@eglug.org>
 Elie Roux                <elie.roux@telecom-bretagne.eu>
 Will Robertson           <will.robertson@latex-project.org>
-
+Philipp Gesang           <philipp.gesang@alumni.uni-heidelberg.de>
 
 
 Installation
-------------
+-------------------------------------------------------------------------------
 
 Here are the recommended installation methods (preferred first).
 
 1. If you are using TeX Live 2008 or later, use 'tlmgr install luaotfload'.
-Alternatively, try your (TeX or Linux) distribution's package management system.
+   Alternatively, try your (TeX or Linux) distribution's package management
+   system.
 
 2. a. Download luaotfload.tds.zip from CTAN.
    b. Unzip it at the root of one or your TDS trees.
@@ -50,22 +54,27 @@ Alternatively, try your (TeX or Linux) distribution's package management system.
 4. Try to figure it out by looking at the Makefile and comments in the sources.
 
 License
--------
+-------------------------------------------------------------------------------
 
-The luaotfload bundle is distributed under the GNU GPLv2 license:
+The luaotfload bundle, as a derived work of ConTeXt, is distributed under the
+GNU GPLv2 license:
+
    <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
-This license requires the license itself to be distributed with the work.
-It may be located within the documentation luaotfload.pdf.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+This license requires the license itself to be distributed with the work. For
+its full text see the documentation in luaotfload.pdf.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
 
-See headers of each source file for copyright details.
+                                  DISCLAIMER
+
+        This program is free software; you can redistribute it and/or
+        modify it under the terms of the GNU General Public License
+        as published by the Free Software Foundation; version 2.
+
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        See headers of each source file for copyright details.
 

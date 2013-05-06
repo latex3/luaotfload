@@ -305,7 +305,7 @@ local specification     = (prefixed + unprefixed)
 local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
                            + specification * (colon    * features)^-1)
 
- lpeg.print(font_request)
+--  lpeg.print(font_request)
 --- new parser: 657 rules
 --- old parser: 230 rules
 

@@ -131,11 +131,13 @@ and the derived files
   pdfkeywords={luatex, lualatex, unicode, opentype}
 ]{hyperref}
 \usepackage{fontspec}
-%usepackage{unicode-math}%% broken
+\usepackage{unicode-math}
 \setmainfont[
-  Numbers=OldStyle,
-  Ligatures=TeX,
-  %SlantedFont={Linux Libertine Italic},
+  Numbers     = OldStyle,
+  Ligatures   = TeX,
+  BoldFont    = {Linux Libertine Bold},
+  ItalicFont  = {Linux Libertine Italic},
+  SlantedFont = {Linux Libertine Italic},
 ]{Linux Libertine O}
 \setmonofont[Ligatures=TeX,Scale=MatchLowercase]{Liberation Mono}
 %setsansfont[Ligatures=TeX]{Linux Biolinum O}
@@ -176,6 +178,27 @@ and the derived files
 
 \usepackage{syntax}%% bnf for font request syntax
 
+\usepackage{titlesec}
+
+\def\movecountertomargin#1{\llap{\rmfamily\upshape#1\hskip2em}}
+\def\zeropoint{0pt}
+\titleformat \part
+             {\normalsize\rmfamily\bfseries}
+             {\movecountertomargin\thepart} \zeropoint {}
+\titleformat \section
+             {\normalsize\rmfamily\scshape}%% no \word; life is full of disappointments
+             {\movecountertomargin\thesection} \zeropoint {}
+\titleformat \subsection
+             {\small\rmfamily\itshape}
+             {\movecountertomargin\thesubsection} \zeropoint {}
+
+\usepackage{tocloft}
+\renewcommand \cftpartfont   {\rmfamily\upshape}
+\renewcommand \cftsecfont    {\rmfamily\upshape}
+\renewcommand \cftsubsecfont {\rmfamily\upshape}
+\setlength \cftbeforepartskip {1ex}
+\setlength \cftbeforesecskip  {1ex}
+
 \VerbatimFootnotes
 \begin{document}
   \DocInput{luaotfload.dtx}%
@@ -206,7 +229,7 @@ and the derived files
 % \title{The \identifier{luaotfload} package}
 % \date{2013/05/05 v2.2}
 % \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
-%         Home:      https://github.com/lualatex/luaotfload\\
+%         Home:      \url{https://github.com/lualatex/luaotfload}\\
 %         Support:   \email{lualatex-dev@tug.org}}
 %
 % \maketitle
@@ -309,7 +332,7 @@ and the derived files
 %
 %       <path lookup>      ::= \{ {\sc all_characters} - `]' \} ;
 %
-%       <modifier>         ::= `/', (`I' | `B' | `BI' | `IB') ;
+%       <modifier>         ::= `/', (`I' | `B' | `BI' | `IB' | `S=', \{ {\sc digit} \} ) ;
 %
 %       <subfont no>       ::= `(', \{ {\sc digit} \}, `)' ;
 %
@@ -1117,6 +1140,9 @@ and the derived files
 %                                          (\abbrev{pfa}, \abbrev{pfb}).
 %     \ouritem {luaotfload-database.lua}   font names database.
 %     \ouritem {luaotfload-colors.lua}     color handling.
+%     \ouritem {luaotfload-auxiliary.lua}  access to internal functionality
+%                                          for package authors
+%                                          (proposals for additions welcome).
 % \end{itemize}
 %
 % \begin{figure}[b]
@@ -1193,7 +1219,8 @@ local luaotfload            = luaotfload
 
 config                            = config or { }
 config.luaotfload                 = config.luaotfload or { }
-config.luaotfload.resolver        = config.luaotfload.resolver  or "normal"
+------.luaotfload.resolver        = config.luaotfload.resolver  or "normal"
+config.luaotfload.resolver        = config.luaotfload.resolver  or "cached"
 config.luaotfload.definer         = config.luaotfload.definer   or "patch"
 config.luaotfload.loglevel        = config.luaotfload.loglevel  or 1
 config.luaotfload.color_callback  = config.luaotfload.color_callback  or "pre_linebreak_filter"
@@ -1206,7 +1233,7 @@ luaotfload.module = {
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
-    license       = "CC0"
+    license       = "GPL v2.0"
 }
 
 local luatexbase = luatexbase
@@ -1393,7 +1420,7 @@ local pop_namespaces = function (normalglobal, isolate)
         local _G = _G
         local mode = "non-destructive"
         if isolate then mode = "destructive" end
-        log("pop namespace from font loader -- "..mode)
+        log("pop namespace from font loader -- " .. mode)
         for k, v in next, _G do
             if not normalglobal[k] then
                 context_environment[k] = v
@@ -1580,8 +1607,8 @@ formats.ofm               = "type1"
 %
 %    \begin{macrocode}
 request_resolvers.file = function (specification)
-    --local found = fonts.names.crude_file_lookup(specification.name)
-    local found = fonts.names.crude_file_lookup_verbose(specification.name)
+    local found = fonts.names.crude_file_lookup(specification.name)
+    --local found = fonts.names.crude_file_lookup_verbose(specification.name)
     specification.name = found[1]
     --if format then specification.forced = format end
 end

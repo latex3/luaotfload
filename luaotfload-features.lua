@@ -6,16 +6,16 @@ if not modules then modules = { } end modules ["features"] = {
     license   = "see context related readme files"
 }
 
-local format, insert = string.format, table.insert
-local type, next = type, next
-local lpegmatch = lpeg.match
+local format, insert    = string.format, table.insert
+local type, next        = type, next
+local lpegmatch         = lpeg.match
 
 ---[[ begin included font-ltx.lua ]]
 --- this appears to be based in part on luatex-fonts-def.lua
 
 local fonts = fonts
 
--- A bit of tuning for definitions.
+--HH A bit of tuning for definitions.
 
 fonts.constructors.namemode = "specification" -- somehow latex needs this (changed name!) => will change into an overload
 
@@ -35,11 +35,6 @@ local report = logs.names_report
 local stringlower      = string.lower
 local stringgsub       = string.gsub
 local stringis_empty   = string.is_empty
-
---- this parses the optional flags after the slash
---- the original behavior is that multiple slashes
---- are valid but they might cancel prior settings
---- example: {name:Antykwa Torunska/I/B} -> bold
 
 --- TODO an option to dump the default features for a script would make
 ---      a nice addition to luaotfload-tool
@@ -98,13 +93,36 @@ defaults.tibt = defaults.khmr
 defaults.lao  = defaults.thai
 
 --[[doc--
-Which features are active by default depends on the script requested.
+
+    As discussed, we will issue a warning because of incomplete support
+    when one of the scripts below is requested.
+
+    Reference: https://github.com/lualatex/luaotfload/issues/31
+
+--doc]]--
+
+local support_incomplete = table.tohash({
+    "deva", "beng", "guru", "gujr",
+    "orya", "taml", "telu", "knda",
+    "mlym", "sinh",
+}, true)
+
+--[[doc--
+
+    Which features are active by default depends on the script
+    requested.
+
 --doc]]--
 
 --- (string, string) dict -> (string, string) dict
 local set_default_features = function (speclist)
     speclist = speclist or { }
     local script = speclist.script or "dflt"
+    if support_incomplete[script] then
+        report("log", 0, "load",
+            "support for the requested script: “%s” may be incomplete",
+            script)
+    end
 
     report("log", 0, "load",
         "auto-selecting default features for script: %s",
@@ -167,31 +185,24 @@ end
 ---     according to my reconstruction, the correct chaining
 ---     of the lookups for each category is as follows:
 ---
----     | File -> ( db/filename lookup;
----                 db/basename lookup;
----                 kpse.find_file() )
----     | Name -> ( names.resolve() )
----     | Path -> ( db/filename lookup;
----                 db/basename lookup;
----                 kpse.find_file();
----                 fullpath lookup )
----     | Anon -> ( names.resolve();      (* most general *)
----                 db/filename lookup;
----                 db/basename lookup;
----                 kpse.find_file();
+---     | File -> ( db/filename lookup )
+---
+---     | Name -> ( db/name lookup,
+---                 db/filename lookup )
+---
+---     | Path -> ( db/filename lookup,
 ---                 fullpath lookup )
 ---
----     the database should be generated only if the chain has
----     been completed, and then only once.
+---     | Anon -> ( kpse.find_file(),     // <- for tfm, ofm
+---                 db/name lookup,
+---                 db/filename lookup,
+---                 fullpath lookup )
 ---
----     caching of successful lookups is essential. we need
----     an additional subtable "cached" in the database. it
----     should be nil’able by issuing luaotfload-tool --flush or
----     something. if a cache miss is followed by a successful
----     lookup, then it will be counted as new addition to the
----     cache. we also need a config option to ignore caching.
----
----     also everything has to be finished by tomorrow at noon.
+---     caching of successful lookups is essential. we now
+---     as of v2.2 have an experimental lookup cache that is
+---     stored in a separate file. it pertains only to name:
+---     lookups, and is described in more detail in
+---     luaotfload-database.lua.
 ---
 -----------------------------------------------------------------------
 
@@ -231,7 +242,7 @@ local decimal     = digit^1 * (dot * digit^0)^-1
     The slash notation: called “modifiers” (Kew) or “font options”
     (Robertson, Goosens)
     we only support the shorthands for italic / bold / bold italic
-    shapes, the rest is ignored.
+    shapes, as well as setting optical size, the rest is ignored.
 --doc]]--
 local style_modifier    = (P"BI" + P"IB" + P"bi" + P"ib" + S"biBI")
                         / stringlower
@@ -294,15 +305,15 @@ local specification     = (prefixed + unprefixed)
 local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
                            + specification * (colon    * features)^-1)
 
--- lpeg.print(font_request)
---- new parser: 632 rules
+--  lpeg.print(font_request)
+--- new parser: 657 rules
 --- old parser: 230 rules
 
 local import_values = {
     --- That’s what the 1.x parser did, not quite as graciously,
     --- with an array of branch expressions.
     -- "style", "optsize",--> from slashed notation; handled otherwise
-    "lookup", "sub" --[[‽]], "mode",
+    "lookup", "sub", "mode",
 }
 
 local lookup_types = { "anon", "file", "name", "path" }
@@ -326,19 +337,21 @@ local supported = {
     gr   = false,
 }
 
+--- (string | (string * string) | bool) list -> (string * number)
 local handle_slashed = function (modifiers)
     local style, optsize
     for i=1, #modifiers do
         local mod  = modifiers[i]
         if type(mod) == "table" and mod[1] == "optsize" then --> optical size
             optsize = tonumber(mod[2])
-        elseif supported[mod] then
-            style = supported[mod]
-        elseif stylename == false then
+        elseif mod == false then
+            --- ignore
             report("log", 0,
                 "load", "unsupported font option: %s", v)
-        elseif not stringis_empty(v) then
-            style = stringgsub(v, "[^%a%d]", "")
+        elseif supported[mod] then
+            style = supported[mod]
+        elseif not stringis_empty(mod) then
+            style = stringgsub(mod, "[^%a%d]", "")
         end
     end
     return style, optsize
@@ -420,11 +433,15 @@ local otf                 = fonts.handlers.otf
 local registerotffeature  = otf.features.register
 local setmetatableindex   = table.setmetatableindex
 
--- In the userdata interface we can not longer tweak the loaded font as
--- conveniently as before. For instance, instead of pushing extra data in
--- in the table using the original structure, we now have to operate on
--- the mkiv representation. And as the fontloader interface is modelled
--- after fontforge we cannot change that one too much either.
+--[[HH--
+
+   In the userdata interface we can not longer tweak the loaded font as
+   conveniently as before. For instance, instead of pushing extra data in
+   in the table using the original structure, we now have to operate on
+   the mkiv representation. And as the fontloader interface is modelled
+   after fontforge we cannot change that one too much either.
+
+--HH]]--
 
 local types = {
     substitution = "gsub_single",
@@ -688,24 +705,7 @@ local anum_specification = {
 --- below the specifications as given in the removed font-otc.lua
 --- the rest was identical to what this file had from the beginning
 --- both make the “anum.tex” test pass anyways
---
---local anum_specification = {
---    {
---        type     = "substitution",
---        features = { arab = { urd = true, dflt = true } },
---        data     = anum_arabic,
---        flags    = noflags, -- { },
---        valid    = valid,
---    },
---    {
---        type     = "substitution",
---        features = { arab = { urd = true } },
---        data     = anum_persian,
---        flags    = noflags, -- { },
---        valid    = valid,
---    },
---}
---
+
 otf.addfeature("anum",anum_specification)
 
 registerotffeature {

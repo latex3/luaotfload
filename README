@@ -53,6 +53,12 @@ Here are the recommended installation methods (preferred first).
 
 4. Try to figure it out by looking at the Makefile and comments in the sources.
 
+Prerequisites
+-------------------------------------------------------------------------------
+
+Typesetting the documentation requires LuaTeX and GraphViz. The Docutils are
+needed to generate the manpage.
+
 License
 -------------------------------------------------------------------------------
 

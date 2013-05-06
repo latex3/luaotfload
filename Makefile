@@ -30,7 +30,7 @@ TESTFILES_TL 	= $(filter-out $(TESTFILES_SYS), $(TESTFILES))
 # Files grouped by installation location
 SCRIPTFILES = $(SCRIPT) $(GLYPHSCRIPT)
 RUNFILES    = $(UNPACKED) $(OTFL)
-DOCFILES    = $(DOC) README NEWS
+DOCFILES    = $(DOC) $(DOTPDF) README NEWS
 SRCFILES    = $(DTX) Makefile
 
 # The following definitions should be equivalent

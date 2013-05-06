@@ -3,7 +3,7 @@
 NAME         = luaotfload
 DOC          = $(NAME).pdf
 DTX          = $(NAME).dtx
-OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf
+OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf $(GLYPHS)
 SCRIPT       = luaotfload-tool.lua
 
 GLYPHSCRIPT  = mkglyphlist
@@ -18,7 +18,7 @@ GLYPHS      = font-age.lua
 GRAPHED     = $(DOTPDF)
 COMPILED    = $(DOC)
 UNPACKED    = luaotfload.sty luaotfload.lua
-GENERATED   = $(GRAPHED) $(COMPILED) $(UNPACKED) $(GLYPHS)
+GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(GLYPHS)
 SOURCE 		= $(DTX) $(OTFL) README Makefile NEWS $(SCRIPT) $(GLYPHSCRIPT)
 
 # test files
@@ -49,8 +49,9 @@ CTAN_ZIP = $(NAME).zip
 TDS_ZIP  = $(NAME).tds.zip
 ZIPS 	 = $(CTAN_ZIP) $(TDS_ZIP)
 
-DO_TEX 			= tex --interaction=batchmode $< >/dev/null
-DO_LATEX 		= latexmk -pdf -pdflatex=lualatex -silent $< >/dev/null
+DO_TEX 		  	= tex --interaction=batchmode $< >/dev/null
+# (with the next version of latexmk: -pdf -pdflatex=lualatex)
+DO_LATEX 	  	= latexmk -pdf -e '$$pdflatex = q(lualatex %O %S)' -silent $< >/dev/null
 DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null
 DO_GLYPHLIST 	= texlua ./mkglyphlist > /dev/null
 

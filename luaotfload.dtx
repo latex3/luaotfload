@@ -131,11 +131,13 @@ and the derived files
   pdfkeywords={luatex, lualatex, unicode, opentype}
 ]{hyperref}
 \usepackage{fontspec}
-%usepackage{unicode-math}%% broken
+\usepackage{unicode-math}
 \setmainfont[
-  Numbers=OldStyle,
-  Ligatures=TeX,
-  %SlantedFont={Linux Libertine Italic},
+  Numbers     = OldStyle,
+  Ligatures   = TeX,
+  BoldFont    = {Linux Libertine Bold},
+  ItalicFont  = {Linux Libertine Italic},
+  SlantedFont = {Linux Libertine Italic},
 ]{Linux Libertine O}
 \setmonofont[Ligatures=TeX,Scale=MatchLowercase]{Liberation Mono}
 %setsansfont[Ligatures=TeX]{Linux Biolinum O}
@@ -176,6 +178,27 @@ and the derived files
 
 \usepackage{syntax}%% bnf for font request syntax
 
+\usepackage{titlesec}
+
+\def\movecountertomargin#1{\llap{\rmfamily\upshape#1\hskip2em}}
+\def\zeropoint{0pt}
+\titleformat \part
+             {\normalsize\rmfamily\bfseries}
+             {\movecountertomargin\thepart} \zeropoint {}
+\titleformat \section
+             {\normalsize\rmfamily\scshape}%% no \word; life is full of disappointments
+             {\movecountertomargin\thesection} \zeropoint {}
+\titleformat \subsection
+             {\small\rmfamily\itshape}
+             {\movecountertomargin\thesubsection} \zeropoint {}
+
+\usepackage{tocloft}
+\renewcommand \cftpartfont   {\rmfamily\upshape}
+\renewcommand \cftsecfont    {\rmfamily\upshape}
+\renewcommand \cftsubsecfont {\rmfamily\upshape}
+\setlength \cftbeforepartskip {1ex}
+\setlength \cftbeforesecskip  {1ex}
+
 \VerbatimFootnotes
 \begin{document}
   \DocInput{luaotfload.dtx}%
@@ -206,7 +229,7 @@ and the derived files
 % \title{The \identifier{luaotfload} package}
 % \date{2013/05/05 v2.2}
 % \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
-%         Home:      https://github.com/lualatex/luaotfload\\
+%         Home:      \url{https://github.com/lualatex/luaotfload}\\
 %         Support:   \email{lualatex-dev@tug.org}}
 %
 % \maketitle
@@ -309,7 +332,7 @@ and the derived files
 %
 %       <path lookup>      ::= \{ {\sc all_characters} - `]' \} ;
 %
-%       <modifier>         ::= `/', (`I' | `B' | `BI' | `IB') ;
+%       <modifier>         ::= `/', (`I' | `B' | `BI' | `IB' | `S=', \{ {\sc digit} \} ) ;
 %
 %       <subfont no>       ::= `(', \{ {\sc digit} \}, `)' ;
 %

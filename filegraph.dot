@@ -113,7 +113,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
               fillcolor  = "#01012222",
               color      = grey40,
               style      = "filled,dotted,rounded",
-              label      = "font-age.lua"]
+              label      = "luaotfload-glyphlist.lua"]
 
     font_names [style      = "filled,dashed",
                 shape      = rect,

@@ -18,7 +18,7 @@ DOTPDF 		 = $(GRAPH).pdf
 DOT    		 = $(GRAPH).dot
 
 # Files grouped by generation mode
-GLYPHS      = font-age.lua
+GLYPHS      = luaotfload-glyphlist.lua
 GRAPHED     = $(DOTPDF)
 MAN			= $(MANPAGE)
 COMPILED    = $(DOC)

@@ -17,7 +17,7 @@ SYNOPSIS
 
 **luaotfload** [ -cfFiquvVh ]
 
-**luaotfload** --update [ --force ] [ --find ] [ --quiet ] [ --verbose ]
+**luaotfload** --update [ --force ] [ --quiet ] [ --verbose ]
 
 **luaotfload** --find=filename [ --fuzzy ] [ --info ]
 

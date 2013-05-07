@@ -3,7 +3,7 @@
 NAME         = luaotfload
 DOC          = $(NAME).pdf
 DTX          = $(NAME).dtx
-OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf $(GLYPHS)
+OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf
 
 GLYPHSCRIPT  = mkglyphlist
 GLYPHSOURCE  = glyphlist.txt

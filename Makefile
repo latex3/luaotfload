@@ -3,7 +3,7 @@
 NAME         = luaotfload
 DOC          = $(NAME).pdf
 DTX          = $(NAME).dtx
-OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf $(GLYPHS)
+OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf
 
 GLYPHSCRIPT  = mkglyphlist
 GLYPHSOURCE  = glyphlist.txt
@@ -18,7 +18,7 @@ DOTPDF 		 = $(GRAPH).pdf
 DOT    		 = $(GRAPH).dot
 
 # Files grouped by generation mode
-GLYPHS      = font-age.lua
+GLYPHS      = luaotfload-glyphlist.lua
 GRAPHED     = $(DOTPDF)
 MAN			= $(MANPAGE)
 COMPILED    = $(DOC)

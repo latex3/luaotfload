@@ -64,7 +64,7 @@ local add_fontdata_fallbacks = function (fontdata)
       metadata = fontdata.shared.rawdata.metadata
       fontdata.units   = fontparameters.units
       local resources  = fontdata.resources
-      fontdata.size    = fontparameters.size
+      fontdata.size    = fontparameters.size * fontdata.units / 1000
       --- for legacy fontspec.lua and unicode-math.lua
       fontdata.shared.otfdata          = metadata
       fontdata.shared.otfdata.metadata = metadata --- brr, that’s meta indeed

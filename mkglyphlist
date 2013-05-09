@@ -21,6 +21,21 @@ local font_age      = "./luaotfload-glyphlist.lua"
 local glyph_source  = "http://partners.adobe.com/public/developer/en/opentype/glyphlist.txt"
 
 -----------------------------------------------------------------------
+--                             fallbacks
+-----------------------------------------------------------------------
+--- Hans adds a small list of mappings that are not in the original
+--- glyph list but seem to be normalizations of some sort. I trust his
+--- experience, so I’ll just include them here. Background:
+--- http://www.ntg.nl/pipermail/ntg-context/2013/073089.html
+
+local fallbacks = {
+  ["SF10000"]=9484, ["SF20000"]=9492, ["SF30000"]=9488,
+  ["SF40000"]=9496, ["SF50000"]=9532, ["SF60000"]=9516,
+  ["SF70000"]=9524, ["SF80000"]=9500, ["SF90000"]=9508,
+  ["afii208"]=8213,
+}
+
+-----------------------------------------------------------------------
 --                             includes
 -----------------------------------------------------------------------
 require"lpeg"
@@ -72,6 +87,9 @@ local get_glyphs = function (data)
   if not res then
     print("error: could not parse glyph list")
     os.exit(-1)
+  end
+  for name, glyph in next, fallbacks do
+    res[name] = res[name] or glyph
   end
   return res
 end

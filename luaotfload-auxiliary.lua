@@ -68,7 +68,7 @@ local add_fontdata_fallbacks = function (fontdata)
       --- non-standard em-sizes (most ms fonts have 2048, others
       --- come with 256)
       --- this is considered a bug in the font loader
-      fontdata.size    = fontparameters.size * fontdata.units / 1000
+      --fontdata.size    = fontparameters.size * fontdata.units / 1000
       --- for legacy fontspec.lua and unicode-math.lua
       fontdata.shared.otfdata          = metadata
       fontdata.shared.otfdata.metadata = metadata --- brr, that’s meta indeed

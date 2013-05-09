@@ -129,11 +129,14 @@ This tool is part of the luaotfload package. Valid options are:
   -v --verbose=LEVEL           be more verbose (print the searched directories)
   -vv                          print the loaded fonts
   -vvv                         print all steps of directory searching
+  --log=stdout                 redirect log output to stdout
+
   -V --version                 print version and exit
   -h --help                    print this message
 
   --alias=<name>               force behavior of “luaotfload-tool” or legacy
                                “mkluatexfontdb”
+
 -------------------------------------------------------------------------------
                                    DATABASE
 
@@ -147,7 +150,9 @@ This tool is part of the luaotfload package. Valid options are:
                                (default: n = 1)
   -i --info                    display font metadata
 
-  --log=stdout                 redirect log output to stdout
+  --list=<criterion>           output list of entries by field <criterion>
+  --list=<criterion>:<value>   restrict to entries with <criterion>=<value>
+  --fields=<f1>,<f2>,…,<fn>    which fields <f> to print with --list
 
 The font database will be saved to
    %s
@@ -158,7 +163,7 @@ The font database will be saved to
 
 Usage: %s [OPTION]...
     
-Rebuild the LuaTeX font database.
+Rebuild or update the LuaTeX font database.
 
 Valid options:
   -f --force                   force re-indexing all fonts

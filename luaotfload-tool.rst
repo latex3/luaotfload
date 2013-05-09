@@ -19,7 +19,7 @@ SYNOPSIS
 
 **luaotfload** --update [ --force ] [ --quiet ] [ --verbose ]
 
-**luaotfload** --find=filename [ --fuzzy ] [ --info ]
+**luaotfload** --find=FONTNAME [ --fuzzy ] [ --info ]
 
 **luaotfload** --flush-cache
 

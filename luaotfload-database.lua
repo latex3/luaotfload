@@ -71,7 +71,7 @@ fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
-names.version        = 2.203
+names.version        = 2.204
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 names.path           = {

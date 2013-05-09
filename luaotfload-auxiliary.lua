@@ -64,6 +64,10 @@ local add_fontdata_fallbacks = function (fontdata)
       metadata = fontdata.shared.rawdata.metadata
       fontdata.units   = fontparameters.units
       local resources  = fontdata.resources
+      --- the next line is a hack that fixes scaling of fonts with
+      --- non-standard em-sizes (most ms fonts have 2048, others
+      --- come with 256)
+      --- this is considered a bug in the font loader
       fontdata.size    = fontparameters.size * fontdata.units / 1000
       --- for legacy fontspec.lua and unicode-math.lua
       fontdata.shared.otfdata          = metadata

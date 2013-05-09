@@ -146,10 +146,11 @@ This is a sketch of the luaotfload db:
             psname     : string;
             subfamily  : string;
         }
-        size        : int list;
-        slant       : int;
-        weight      : int;
-        width       : int;
+        size         : int list;
+        slant        : int;
+        weight       : int;
+        width        : int;
+        units_per_em : int;                      // mainly 1000, but also 2048 or 256
     }
     and filestatus = (fullname, { index : int list; timestamp : int }) dict
 
@@ -836,13 +837,16 @@ font_fullinfo = function (filename, subfont)
         report("log", 1, "db", "broken font rejected", "%s", basefile)
         return
     end
-    tfmdata.fontname    = metadata.fontname
-    tfmdata.fullname    = metadata.fullname
-    tfmdata.familyname  = metadata.familyname
-    tfmdata.filename    = { filename, subfont } -- always store full path
-    tfmdata.weight      = metadata.pfminfo.weight
-    tfmdata.width       = metadata.pfminfo.width
-    tfmdata.slant       = metadata.italicangle
+    tfmdata.fontname      = metadata.fontname
+    tfmdata.fullname      = metadata.fullname
+    tfmdata.familyname    = metadata.familyname
+    tfmdata.filename      = { filename, subfont } -- always store full path
+    tfmdata.weight        = metadata.pfminfo.weight
+    tfmdata.width         = metadata.pfminfo.width
+    tfmdata.slant         = metadata.italicangle
+    --- this is for querying
+    tfmdata.units_per_em  = metadata.units_per_em
+    tfmdata.version       = metadata.version
     -- don't waste the space with zero values
     tfmdata.size = {
         metadata.design_size         ~= 0 and metadata.design_size         or nil,

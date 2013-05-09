@@ -1259,17 +1259,6 @@ local reset_callback, call_callback =
 
 local dummy_function = function () end
 
-%    \end{macrocode}
-% No final decision has been made on how to handle font definition.  At
-% the moment, there are three candidates: The \identifier{generic}
-% callback as hard-coded in the font loader, the \identifier{old}
-% wrapper, and a simplified version of the latter (\identifier{patch})
-% that does nothing besides applying font patches.
-%
-%    \begin{macrocode}
-
-luaotfload.font_definer = "patch" --- | “generic” | “old”
-
 local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
 
@@ -1611,12 +1600,21 @@ formats.ofm               = "type1"
 % most cases when looking up font files, only when generating the database.
 %
 %    \begin{macrocode}
-request_resolvers.file = function (specification)
-    local found = fonts.names.crude_file_lookup(specification.name)
-    --local found = fonts.names.crude_file_lookup_verbose(specification.name)
-    specification.name = found[1]
-    --if format then specification.forced = format end
+
+local resolvefile = fonts.names.crude_file_lookup
+--local resolvefile = fonts.names.crude_file_lookup_verbose
+
+function request_resolvers.file(specification)
+  local name=resolvefile(specification.name)
+  local suffix=file.suffix(name)
+  if formats[suffix] then
+    specification.forced=suffix
+    specification.name=file.removesuffix(name)
+  else
+    specification.name=name
+  end
 end
+
 
 %    \end{macrocode}
 % We classify as \verb|anon:| those requests that have neither a

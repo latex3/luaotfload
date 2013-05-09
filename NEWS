@@ -26,6 +26,7 @@ Change History
     * Hans adapted the font loader to several of our requests (attribute
       allocation, custom merged package name etc.)
     * Auxiliary functions for package authors
+    * Man page for luaotfload-tool
 
 2013/04/27, luaotfload v1.3:
     *  blacklisting lingoes.ttf (segfaults)

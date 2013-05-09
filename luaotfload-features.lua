@@ -32,6 +32,7 @@ local old_feature_list = { }
 
 local report = logs.names_report
 
+local stringfind       = string.find
 local stringlower      = string.lower
 local stringgsub       = string.gsub
 local stringis_empty   = string.is_empty
@@ -215,10 +216,25 @@ local toboolean = function (s)
   return s
 end
 
+--- dirty test if a file: request is actually a path: lookup; don’t
+--- ask!
+local check_garbage = function (_,i, garbage)
+    if stringfind(garbage, "/") then
+        report("log", 0, "load",  --- ffs use path!
+            "warning: path in file: lookups is deprecated; ")
+        report("log", 0, "load", "use bracket syntax instead!")
+        report("log", 0, "load",
+            "position: %d; full match: “%s”",
+            i, garbage)
+        return true
+    end
+    return false
+end
+
 local lpegmatch = lpeg.match
 local P, S, R   = lpeg.P, lpeg.S, lpeg.R
-local C, Cc, Cf, Cg, Cs, Ct
-    = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Cs, lpeg.Ct
+local C, Cc, Cf, Cg, Cmt, Cs, Ct
+    = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Cmt, lpeg.Cs, lpeg.Ct
 
 --- terminals and low-level classes -----------------------------------
 --- note we could use the predefined ones from lpeg.patterns
@@ -259,9 +275,17 @@ local modifier          = slash * (other_modifier      --> ignore
 local modifier_list     = Cg(Ct(modifier^0), "modifiers")
 
 --- lookups -----------------------------------------------------------
-local fontname          = C((1-S"/:(")^1) --- like luatex-fonts
+local fontname          = C((1-S":(/")^1)  --- like luatex-fonts
+local unsupported       = Cmt((1-S":(")^1, check_garbage)
 local prefixed          = P"name:" * ws * Cg(fontname, "name")
-                        + P"file:" * ws * Cg(fontname, "file")
+--- initially we intended file: to emulate the behavior of
+--- luatex-fonts, i.e. no paths allowed. after all, we do have XeTeX
+--- emulation with the path lookup and it interferes with db lookups.
+--- turns out fontspec and other widely used packages rely on file:
+--- with paths already, so we’ll add a less strict rule here.  anyways,
+--- we’ll emit a warning.
+                        + P"file:" * ws * Cg(unsupported, "path")
+                        + P"file:" * ws * Cg(fontname,    "file")
 local unprefixed        = Cg(fontname, "anon")
 local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
 

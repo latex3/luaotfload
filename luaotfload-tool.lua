@@ -416,11 +416,9 @@ actions.list = function (job)
         logs.names_report(false, 1, "list", "by %s", criterion)
 
         --- firstly, build a list of fonts to operate on
-        local targets, ntargets
-
-        if asked_value then
+        local targets = { }
+        if asked_value then --- only those whose value matches
             logs.names_report(false, 2, "list", "restricting to value %s", asked_value)
-            targets = { }
             for i=1, nmappings do
                 local entry = mappings[i]
                 if  entry[criterion]
@@ -429,11 +427,34 @@ actions.list = function (job)
                     targets[#targets+1] = entry
                 end
             end
-            ntargets = #targets
-        else --- all
-            targets  = mappings
-            ntargets = nmappings
+
+        else --- whichever have the field, sorted
+            local categories, by_category = { }, { }
+            for i=1, nmappings do
+                local entry = mappings[i]
+                local value = entry[criterion]
+                if value then
+                    --value = tostring(value)
+                    local entries = by_category[value]
+                    if not entries then
+                        entries = { entry }
+                        categories[#categories+1] = value
+                    else
+                        entries[#entries+1] = entry
+                    end
+                    by_category[value] = entries
+                end
+            end
+            table.sort(categories)
+
+            for i=1, #categories do
+                local entries = by_category[categories[i]]
+                for j=1, #entries do
+                    targets[#targets+1] = entries[j]
+                end
+            end
         end
+        local ntargets = #targets
         logs.names_report(false, 2, "list", "%d entries", ntargets)
 
         --- now, output the collection

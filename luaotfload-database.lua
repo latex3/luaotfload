@@ -317,7 +317,7 @@ end
 
 local type1_formats = { "tfm", "ofm", }
 
---- string -> (string * bool | int)
+--- string -> string
 crude_file_lookup_verbose = function (filename)
     if not names.data then names.data = load_names() end
     local data      = names.data
@@ -327,18 +327,18 @@ crude_file_lookup_verbose = function (filename)
     --- look up in db first ...
     found = data.barenames[filename]
     if found and mappings[found] then
-        found = mappings[found].filename
+        found = mappings[found].filename[1]
         report("info", 0, "db",
             "crude file lookup: req=%s; hit=bare; ret=%s",
-            filename, found[1])
+            filename, found)
         return found
     end
     found = data.basenames[filename]
     if found and mappings[found] then
-        found = mappings[found].filename
+        found = mappings[found].filename[1]
         report("info", 0, "db",
             "crude file lookup: req=%s; hit=base; ret=%s",
-            filename, found[1])
+            filename, found)
         return found
     end
 
@@ -346,13 +346,13 @@ crude_file_lookup_verbose = function (filename)
     for i=1, #type1_formats do
         local format = type1_formats[i]
         if resolvers.findfile(filename, format) then
-            return { file.addsuffix(filename, format), false }, format
+            return file.addsuffix(filename, format), format
         end
     end
-    return { filename, false }, nil
+    return filename, nil
 end
 
---- string -> (string * bool | int)
+--- string -> string
 crude_file_lookup = function (filename)
     if not names.data then names.data = load_names() end
     local data      = names.data
@@ -361,15 +361,15 @@ crude_file_lookup = function (filename)
                or data.basenames[filename]
     if found then
         found = data.mappings[found]
-        if found then return found.filename end
+        if found then return found.filename[1] end
     end
     for i=1, #type1_formats do
         local format = type1_formats[i]
         if resolvers.findfile(filename, format) then
-            return { file.addsuffix(filename, format), false }, format
+            return file.addsuffix(filename, format), format
         end
     end
-    return { filename, false }, nil
+    return filename, nil
 end
 
 --[[doc--

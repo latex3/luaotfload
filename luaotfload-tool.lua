@@ -572,6 +572,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
     if config.luaotfload.self == "mkluatexfontdb" then
         action_pending["generate"] = true
         result.log_level = math.max(2, result.log_level)
+        logs.set_logout"stdout"
     end
     return result
 end

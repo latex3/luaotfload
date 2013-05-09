@@ -1071,25 +1071,25 @@ local scan_dir = function (dirname, fontnames, newfontnames)
     - texmf used to be a boolean saying if we are scanning a texmf directory
     ]]
     local n_scanned, n_new = 0, 0   --- total of fonts collected
-    report("log", 2, "db", "scanning", "%s", dirname)
+    report("both", 2, "db", "scanning directory %s", dirname)
     for _,i in next, font_extensions do
         for _,ext in next, { i, stringupper(i) } do
             local found = dirglob(stringformat("%s/**.%s$", dirname, ext))
             local n_found = #found
             --- note that glob fails silently on broken symlinks, which
             --- happens sometimes in TeX Live.
-            report("log", 2, "db", "%s '%s' fonts found", n_found, ext)
+            report("both", 4, "db", "%s '%s' fonts found", n_found, ext)
             n_scanned = n_scanned + n_found
             for j=1, n_found do
                 local fullname = found[j]
                 fullname = path_normalize(fullname)
-                report("log", 2, "db", "loading font “%s”", fullname)
+                report("both", 4, "db", "loading font “%s”", fullname)
                 local new = load_font(fullname, fontnames, newfontnames)
                 if new then n_new = n_new + 1 end
             end
         end
     end
-    report("log", 2, "db", "%d fonts found in '%s'", n_scanned, dirname)
+    report("both", 4, "db", "%d fonts found in '%s'", n_scanned, dirname)
     return n_scanned, n_new
 end
 
@@ -1108,6 +1108,7 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
     if not stringis_empty(fontdirs) then
         for _,d in next, filesplitpath(fontdirs) do
+            report("info", 4, "db", "Entering directory %s", d)
             local found, new = scan_dir(d, fontnames, newfontnames)
             n_scanned = n_scanned + found
             n_new     = n_new     + new

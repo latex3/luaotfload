@@ -947,6 +947,11 @@ and the derived files
 %
 % \verb|luaotfload-tool --help| will list the available command line
 % switches, including some not discussed in detail here.
+% For a full documentation of \identifier{luaotfload-tool} and its
+% capabilities refer to the manpage
+% (\verb|man 1 luaotfload-tool|).\footnote{%
+%   Or see \verb|luaotfload-tool.rst| in the source directory.
+% }
 %
 % \subsection{Blacklisting Fonts}
 % \label{font-blacklist}
@@ -1219,11 +1224,12 @@ local luaotfload            = luaotfload
 
 config                            = config or { }
 config.luaotfload                 = config.luaotfload or { }
-------.luaotfload.resolver        = config.luaotfload.resolver  or "normal"
-config.luaotfload.resolver        = config.luaotfload.resolver  or "cached"
-config.luaotfload.definer         = config.luaotfload.definer   or "patch"
+------.luaotfload.resolver        = config.luaotfload.resolver         or "normal"
+config.luaotfload.resolver        = config.luaotfload.resolver         or "cached"
+config.luaotfload.definer         = config.luaotfload.definer          or "patch"
+config.luaotfload.compatibility   = config.luaotfload.compatibility    or false
 config.luaotfload.loglevel        = config.luaotfload.loglevel  or 1
-config.luaotfload.color_callback  = config.luaotfload.color_callback  or "pre_linebreak_filter"
+config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_linebreak_filter"
 --luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 
 luaotfload.module = {
@@ -1253,17 +1259,6 @@ local reset_callback, call_callback =
       luatexbase.reset_callback, luatexbase.call_callback
 
 local dummy_function = function () end
-
-%    \end{macrocode}
-% No final decision has been made on how to handle font definition.  At
-% the moment, there are three candidates: The \identifier{generic}
-% callback as hard-coded in the font loader, the \identifier{old}
-% wrapper, and a simplified version of the latter (\identifier{patch})
-% that does nothing besides applying font patches.
-%
-%    \begin{macrocode}
-
-luaotfload.font_definer = "patch" --- | “generic” | “old”
 
 local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
@@ -1606,12 +1601,21 @@ formats.ofm               = "type1"
 % most cases when looking up font files, only when generating the database.
 %
 %    \begin{macrocode}
-request_resolvers.file = function (specification)
-    local found = fonts.names.crude_file_lookup(specification.name)
-    --local found = fonts.names.crude_file_lookup_verbose(specification.name)
-    specification.name = found[1]
-    --if format then specification.forced = format end
+
+local resolvefile = fonts.names.crude_file_lookup
+--local resolvefile = fonts.names.crude_file_lookup_verbose
+
+function request_resolvers.file(specification)
+  local name=resolvefile(specification.name)
+  local suffix=file.suffix(name)
+  if formats[suffix] then
+    specification.forced=suffix
+    specification.name=file.removesuffix(name)
+  else
+    specification.name=name
+  end
 end
+
 
 %    \end{macrocode}
 % We classify as \verb|anon:| those requests that have neither a

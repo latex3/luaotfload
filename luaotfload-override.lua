@@ -101,32 +101,34 @@ logs.names_report = names_report
 
 --doc]]--
 
-if next(fonts.encodings.agl) then
-    print(next, fonts.encodings.agl)
-    --- unnecessary because the file shouldn’t be loaded at this time
-    --- but we’re just making sure
-    fonts.encodings.agl = nil
-    collectgarbage"collect"
-end
-
-
-fonts.encodings.agl = { }
-
-setmetatable(fonts.encodings.agl, { __index = function (t, k)
-    if k == "unicodes" then
-        local glyphlist = resolvers.findfile"luaotfload-glyphlist.lua"
-        if glyphlist then
-            names_report("both", 0, "load", "loading the Adobe glyph list")
-        else
-            glyphlist = resolvers.findfile"font-age.lua"
-            names_report("both", 0, "load", "loading the extended glyph list from ConTeXt")
-        end
-        local unicodes      = dofile(glyphlist)
-        fonts.encodings.agl = { unicodes = unicodes }
-        return unicodes
-    else
-        return nil
+if fonts then --- need to be running TeX
+    if next(fonts.encodings.agl) then
+        print(next, fonts.encodings.agl)
+        --- unnecessary because the file shouldn’t be loaded at this time
+        --- but we’re just making sure
+        fonts.encodings.agl = nil
+        collectgarbage"collect"
     end
-end })
+
+
+    fonts.encodings.agl = { }
+
+    setmetatable(fonts.encodings.agl, { __index = function (t, k)
+        if k == "unicodes" then
+            local glyphlist = resolvers.findfile"luaotfload-glyphlist.lua"
+            if glyphlist then
+                names_report("both", 0, "load", "loading the Adobe glyph list")
+            else
+                glyphlist = resolvers.findfile"font-age.lua"
+                names_report("both", 0, "load", "loading the extended glyph list from ConTeXt")
+            end
+            local unicodes      = dofile(glyphlist)
+            fonts.encodings.agl = { unicodes = unicodes }
+            return unicodes
+        else
+            return nil
+        end
+    end })
+end
 
 -- vim:tw=71:sw=4:ts=4:expandtab

@@ -20,6 +20,7 @@ config.luaotfload           = config.luaotfload or { }
 
 local aux           = luaotfload.aux
 local log           = luaotfload.log
+local warning       = luaotfload.log
 local identifiers   = fonts.hashes.identifiers
 
 local fontid        = font.id
@@ -60,28 +61,50 @@ local add_fontdata_fallbacks = function (fontdata)
       --- bother to do any checks, will access
       --- fontdata.shared no matter what ...
       fontdata.units = fontdata.units_per_em
+
     else --- otf
       metadata = fontdata.shared.rawdata.metadata
-      fontdata.units   = fontparameters.units
+      fontdata.units   = fontdata.units_per_em
       local resources  = fontdata.resources
-      fontdata.size    = fontparameters.size * fontdata.units / 1000
+      --- the next line is a hack that fixes scaling of fonts with
+      --- non-standard em-sizes (most ms fonts have 2048, others
+      --- come with 256)
+      --fontdata.size    = fontparameters.size * fontdata.units / 1000
       --- for legacy fontspec.lua and unicode-math.lua
-      fontdata.shared.otfdata          = metadata
-      fontdata.shared.otfdata.metadata = metadata --- brr, that’s meta indeed
-      --- for microtype.lua
+      fontdata.shared.otfdata          = {
+        pfminfo   = { os2_capheight = metadata.pfminfo.os2_capheight },
+        metadata  = { ascent = metadata.ascent },
+      }
+      --fontdata.shared.otfdata.metadata = metadata --- brr, that’s meta indeed
+      --- for microtype and fontspec
+      local fake_features = { } -- wrong: table.copy(resources.features)
+      setmetatable(fake_features, { __index = function (tab, idx)
+        warning("some package (probably fontspec) is outdated")
+        warning(
+          "attempt to index " ..
+          "tfmdata.shared.otfdata.luatex.features (%s)",
+          idx)
+        --os.exit(1)
+        return nil --- empty anyways
+      end})
       fontdata.shared.otfdata.luatex = {
         unicodes = resources.unicodes,
-        features = resources.features,
+        features = fake_features,
       }
     end
   end
   return fontdata
 end
 
-luatexbase.add_to_callback(
-  "luaotfload.patch_font",
-  add_fontdata_fallbacks,
-  "luaotfload.fontdata_fallbacks")
+--if config.luaotfload.compatibility == true then
+if true then
+  --- this will cause the output pdf to be garbled
+  --- in pdf.js
+  luatexbase.add_to_callback(
+    "luaotfload.patch_font",
+    add_fontdata_fallbacks,
+    "luaotfload.fontdata_fallbacks")
+end
 
 --[[doc--
 

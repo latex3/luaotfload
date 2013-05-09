@@ -71,7 +71,7 @@ fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
-names.version        = 2.203
+names.version        = 2.204
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 names.path           = {
@@ -146,10 +146,11 @@ This is a sketch of the luaotfload db:
             psname     : string;
             subfamily  : string;
         }
-        size        : int list;
-        slant       : int;
-        weight      : int;
-        width       : int;
+        size         : int list;
+        slant        : int;
+        weight       : int;
+        width        : int;
+        units_per_em : int;                      // mainly 1000, but also 2048 or 256
     }
     and filestatus = (fullname, { index : int list; timestamp : int }) dict
 
@@ -316,7 +317,7 @@ end
 
 local type1_formats = { "tfm", "ofm", }
 
---- string -> (string * bool | int)
+--- string -> string
 crude_file_lookup_verbose = function (filename)
     if not names.data then names.data = load_names() end
     local data      = names.data
@@ -326,18 +327,18 @@ crude_file_lookup_verbose = function (filename)
     --- look up in db first ...
     found = data.barenames[filename]
     if found and mappings[found] then
-        found = mappings[found].filename
+        found = mappings[found].filename[1]
         report("info", 0, "db",
             "crude file lookup: req=%s; hit=bare; ret=%s",
-            filename, found[1])
+            filename, found)
         return found
     end
     found = data.basenames[filename]
     if found and mappings[found] then
-        found = mappings[found].filename
+        found = mappings[found].filename[1]
         report("info", 0, "db",
             "crude file lookup: req=%s; hit=base; ret=%s",
-            filename, found[1])
+            filename, found)
         return found
     end
 
@@ -345,13 +346,13 @@ crude_file_lookup_verbose = function (filename)
     for i=1, #type1_formats do
         local format = type1_formats[i]
         if resolvers.findfile(filename, format) then
-            return { file.addsuffix(filename, format), false }, format
+            return file.addsuffix(filename, format), format
         end
     end
-    return { filename, false }, nil
+    return filename, nil
 end
 
---- string -> (string * bool | int)
+--- string -> string
 crude_file_lookup = function (filename)
     if not names.data then names.data = load_names() end
     local data      = names.data
@@ -360,15 +361,15 @@ crude_file_lookup = function (filename)
                or data.basenames[filename]
     if found then
         found = data.mappings[found]
-        if found then return found.filename end
+        if found then return found.filename[1] end
     end
     for i=1, #type1_formats do
         local format = type1_formats[i]
         if resolvers.findfile(filename, format) then
-            return { file.addsuffix(filename, format), false }, format
+            return file.addsuffix(filename, format), format
         end
     end
-    return { filename, false }, nil
+    return filename, nil
 end
 
 --[[doc--
@@ -836,13 +837,16 @@ font_fullinfo = function (filename, subfont)
         report("log", 1, "db", "broken font rejected", "%s", basefile)
         return
     end
-    tfmdata.fontname    = metadata.fontname
-    tfmdata.fullname    = metadata.fullname
-    tfmdata.familyname  = metadata.familyname
-    tfmdata.filename    = { filename, subfont } -- always store full path
-    tfmdata.weight      = metadata.pfminfo.weight
-    tfmdata.width       = metadata.pfminfo.width
-    tfmdata.slant       = metadata.italicangle
+    tfmdata.fontname      = metadata.fontname
+    tfmdata.fullname      = metadata.fullname
+    tfmdata.familyname    = metadata.familyname
+    tfmdata.filename      = { filename, subfont } -- always store full path
+    tfmdata.weight        = metadata.pfminfo.weight
+    tfmdata.width         = metadata.pfminfo.width
+    tfmdata.slant         = metadata.italicangle
+    --- this is for querying
+    tfmdata.units_per_em  = metadata.units_per_em
+    tfmdata.version       = metadata.version
     -- don't waste the space with zero values
     tfmdata.size = {
         metadata.design_size         ~= 0 and metadata.design_size         or nil,
@@ -1067,25 +1071,25 @@ local scan_dir = function (dirname, fontnames, newfontnames)
     - texmf used to be a boolean saying if we are scanning a texmf directory
     ]]
     local n_scanned, n_new = 0, 0   --- total of fonts collected
-    report("log", 2, "db", "scanning", "%s", dirname)
+    report("both", 2, "db", "scanning directory %s", dirname)
     for _,i in next, font_extensions do
         for _,ext in next, { i, stringupper(i) } do
             local found = dirglob(stringformat("%s/**.%s$", dirname, ext))
             local n_found = #found
             --- note that glob fails silently on broken symlinks, which
             --- happens sometimes in TeX Live.
-            report("log", 2, "db", "%s '%s' fonts found", n_found, ext)
+            report("both", 4, "db", "%s '%s' fonts found", n_found, ext)
             n_scanned = n_scanned + n_found
             for j=1, n_found do
                 local fullname = found[j]
                 fullname = path_normalize(fullname)
-                report("log", 2, "db", "loading font “%s”", fullname)
+                report("both", 4, "db", "loading font “%s”", fullname)
                 local new = load_font(fullname, fontnames, newfontnames)
                 if new then n_new = n_new + 1 end
             end
         end
     end
-    report("log", 2, "db", "%d fonts found in '%s'", n_scanned, dirname)
+    report("both", 4, "db", "%d fonts found in '%s'", n_scanned, dirname)
     return n_scanned, n_new
 end
 
@@ -1104,6 +1108,7 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
     if not stringis_empty(fontdirs) then
         for _,d in next, filesplitpath(fontdirs) do
+            report("info", 4, "db", "Entering directory %s", d)
             local found, new = scan_dir(d, fontnames, newfontnames)
             n_scanned = n_scanned + found
             n_new     = n_new     + new

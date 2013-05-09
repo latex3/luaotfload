@@ -32,6 +32,8 @@ local stringformat    = string.format
 local texiowrite_nl   = texio.write_nl
 local stringlower     = string.lower
 
+local C, Ct, P     = lpeg.C, lpeg.Ct, lpeg.P
+local lpegmatch    = lpeg.match
 
 local loader_file = "luatexbase.loader.lua"
 local loader_path = assert(kpse.find_file(loader_file, "lua"),
@@ -64,8 +66,6 @@ local config        = config
 config.luaotfload   = config.luaotfload or { }
 
 do -- we don’t have file.basename and the likes yet, so inline parser ftw
-    local C, P         = lpeg.C, lpeg.P
-    local lpegmatch    = lpeg.match
     local slash        = P"/"
     local dot          = P"."
     local noslash      = 1 - slash
@@ -129,11 +129,14 @@ This tool is part of the luaotfload package. Valid options are:
   -v --verbose=LEVEL           be more verbose (print the searched directories)
   -vv                          print the loaded fonts
   -vvv                         print all steps of directory searching
+  --log=stdout                 redirect log output to stdout
+
   -V --version                 print version and exit
   -h --help                    print this message
 
   --alias=<name>               force behavior of “luaotfload-tool” or legacy
                                “mkluatexfontdb”
+
 -------------------------------------------------------------------------------
                                    DATABASE
 
@@ -147,7 +150,9 @@ This tool is part of the luaotfload package. Valid options are:
                                (default: n = 1)
   -i --info                    display font metadata
 
-  --log=stdout                 redirect log output to stdout
+  --list=<criterion>           output list of entries by field <criterion>
+  --list=<criterion>:<value>   restrict to entries with <criterion>=<value>
+  --fields=<f1>,<f2>,…,<fn>    which fields <f> to print with --list
 
 The font database will be saved to
    %s
@@ -158,7 +163,7 @@ The font database will be saved to
 
 Usage: %s [OPTION]...
     
-Rebuild the LuaTeX font database.
+Rebuild or update the LuaTeX font database.
 
 Valid options:
   -f --force                   force re-indexing all fonts
@@ -228,7 +233,7 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel", "help", "version", "flush", "generate", "query"
+    "loglevel", "help", "version", "flush", "generate", "list", "query"
 }
 local action_pending  = table.tohash(action_sequence, false)
 
@@ -286,7 +291,7 @@ actions.query = function (job)
         lookup        = "name",
         specification = "name:" .. query,
         optsize       = 0,
-    }
+   }
 
     local foundname, subfont, success =
         fonts.names.resolve(nil, nil, tmpspec)
@@ -317,6 +322,158 @@ actions.query = function (job)
     return true, true
 end
 
+---         --list=<criterion>
+---         --list=<criterion>:<value>
+---
+---         --list=<criterion>          --fields=<f1>,<f2>,<f3>,...<fn>
+
+local get_fields get_fields = function (entry, fields, acc, n)
+    if not acc then
+        return get_fields(entry, fields, { }, 1)
+    end
+
+    local field = fields[n]
+    if field then
+        local value = entry[field]
+        acc[#acc+1] = value or false
+        return get_fields(entry, fields, acc, n+1)
+    end
+    return acc
+end
+
+local comma       = P","
+local noncomma    = 1-comma
+local split_comma = Ct((C(noncomma^1) + comma)^1)
+
+local texiowrite_nl     = texio.write_nl
+local tableconcat       = table.concat
+local stringexplode     = string.explode
+
+local separator = "\t" --- could be “,” for csv
+
+local format_fields format_fields = function (fields, acc, n)
+    if not acc then
+        return format_fields(fields, { }, 1)
+    end
+
+    local field = fields[n]
+    if field ~= nil then
+        if field == false then
+            acc[#acc+1] = "<none>"
+        else
+            acc[#acc+1] = tostring(field)
+        end
+        return format_fields(fields, acc, n+1)
+    end
+    return tableconcat(acc, separator)
+end
+
+local set_primary_field
+set_primary_field = function (fields, addme, acc, n)
+    if not acc then
+        return set_primary_field(fields, addme, { addme }, 1)
+    end
+
+    local field = fields[n]
+    if field then
+        if field ~= addme then
+            acc[#acc+1] = field
+        end
+        return set_primary_field(fields, addme, acc, n+1)
+    end
+    return acc
+end
+
+actions.list = function (job)
+    local criterion     = job.criterion
+
+    local asked_fields  = job.asked_fields
+    if asked_fields then
+        asked_fields = lpegmatch(split_comma, asked_fields)
+    else
+        --- some defaults
+        asked_fields = { "fullname", "version", }
+    end
+
+    if not names.data then
+        names.data = names.load()
+    end
+
+    local mappings  = names.data.mappings
+    local nmappings = #mappings
+
+    if criterion == "*" then
+        logs.names_report(false, 1, "list", "all %d entries", nmappings)
+        for i=1, nmappings do
+            local entry     = mappings[i]
+            local fields    = get_fields(entry, asked_fields)
+            --- we could collect these instead ...
+            local formatted = format_fields(fields)
+            texiowrite_nl(formatted)
+        end
+
+    else
+        criterion = stringexplode(criterion, ":") --> { field, value }
+        local asked_value  = criterion[2]
+        criterion          = criterion[1]
+        asked_fields       = set_primary_field(asked_fields, criterion)
+
+        logs.names_report(false, 1, "list", "by %s", criterion)
+
+        --- firstly, build a list of fonts to operate on
+        local targets = { }
+        if asked_value then --- only those whose value matches
+            logs.names_report(false, 2, "list", "restricting to value %s", asked_value)
+            for i=1, nmappings do
+                local entry = mappings[i]
+                if  entry[criterion]
+                and tostring(entry[criterion]) == asked_value
+                then
+                    targets[#targets+1] = entry
+                end
+            end
+
+        else --- whichever have the field, sorted
+            local categories, by_category = { }, { }
+            for i=1, nmappings do
+                local entry = mappings[i]
+                local value = entry[criterion]
+                if value then
+                    --value = tostring(value)
+                    local entries = by_category[value]
+                    if not entries then
+                        entries = { entry }
+                        categories[#categories+1] = value
+                    else
+                        entries[#entries+1] = entry
+                    end
+                    by_category[value] = entries
+                end
+            end
+            table.sort(categories)
+
+            for i=1, #categories do
+                local entries = by_category[categories[i]]
+                for j=1, #entries do
+                    targets[#targets+1] = entries[j]
+                end
+            end
+        end
+        local ntargets = #targets
+        logs.names_report(false, 2, "list", "%d entries", ntargets)
+
+        --- now, output the collection
+        for i=1, ntargets do
+            local entry         = targets[i]
+            local fields        = get_fields(entry, asked_fields)
+            local formatted     = format_fields(fields)
+            texiowrite_nl(formatted)
+        end
+    end
+
+    return true, true
+end
+
 --[[--
 Command-line processing.
 mkluatexfontdb.lua relies on the script alt_getopt to process argv and
@@ -330,6 +487,7 @@ alt_getopt.
 local process_cmdline = function ( ) -- unit -> jobspec
     local result = { -- jobspec
         force_reload = nil,
+        criterion    = "",
         query        = "",
         log_level    = 1, --- 2 is approx. the old behavior
     }
@@ -337,12 +495,14 @@ local process_cmdline = function ( ) -- unit -> jobspec
     local long_options = {
         alias            = 1,
         ["flush-cache"]  = "c",
+        fields           = 1,
         find             = 1,
         force            = "f",
         fuzzy            = "F",
         help             = "h",
         info             = "i",
         limit            = 1,
+        list             = 1,
         log              = 1,
         quiet            = "q",
         update           = "u",
@@ -401,12 +561,18 @@ local process_cmdline = function ( ) -- unit -> jobspec
             config.luaotfload.self = optarg[n]
         elseif v == "c" then
             action_pending["flush"] = true
+        elseif v == "list" then
+            action_pending["list"] = true
+            result.criterion = optarg[n]
+        elseif v == "fields" then
+            result.asked_fields = optarg[n]
         end
     end
 
     if config.luaotfload.self == "mkluatexfontdb" then
         action_pending["generate"] = true
         result.log_level = math.max(2, result.log_level)
+        logs.set_logout"stdout"
     end
     return result
 end

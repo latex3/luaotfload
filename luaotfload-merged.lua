@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/29/13 20:30:03
+-- merge date  : 05/09/13 15:23:31
 
 do -- begin closure to overcome local limits and interference
 
@@ -4586,7 +4586,7 @@ local floor=math.floor
 local trace_loading=false trackers.register("fonts.loading",function(v) trace_loading=v end)
 local trace_mapping=false trackers.register("fonts.mapping",function(v) trace_unimapping=v end)
 local report_fonts=logs.reporter("fonts","loading") 
-local fonts=fonts
+local fonts=fonts or {}
 local mappings=fonts.mappings or {}
 fonts.mappings=mappings
 local function loadlumtable(filename) 
@@ -4602,7 +4602,7 @@ local function loadlumtable(filename)
 end
 local hex=R("AF","09")
 local hexfour=(hex*hex*hex*hex)/function(s) return tonumber(s,16) end
-local hexsix=(hex^1)/function(s) return tonumber(s,16) end
+local hexsix=(hex*hex*hex*hex*hex*hex)/function(s) return tonumber(s,16) end
 local dec=(R("09")^1)/tonumber
 local period=P(".")
 local unicode=P("uni")*(hexfour*(period+P(-1))*Cc(false)+Ct(hexfour^1)*Cc(true))
@@ -4622,16 +4622,16 @@ local function makenameparser(str)
     return p
   end
 end
-local function tounicode16(unicode)
+local function tounicode16(unicode,name)
   if unicode<0x10000 then
     return format("%04X",unicode)
   elseif unicode<0x1FFFFFFFFF then
     return format("%04X%04X",floor(unicode/1024),unicode%1024+0xDC00)
   else
-    report_fonts("can't convert %a into tounicode",unicode)
+    report_fonts("can't convert %a in %a into tounicode",unicode,name)
   end
 end
-local function tounicode16sequence(unicodes)
+local function tounicode16sequence(unicodes,name)
   local t={}
   for l=1,#unicodes do
     local unicode=unicodes[l]
@@ -4640,7 +4640,7 @@ local function tounicode16sequence(unicodes)
     elseif unicode<0x1FFFFFFFFF then
       t[l]=format("%04X%04X",floor(unicode/1024),unicode%1024+0xDC00)
     else
-      report_fonts ("can't convert %a into tounicode",unicode)
+      report_fonts ("can't convert %a in %a into tounicode",unicode,name)
     end
   end
   return concat(t)
@@ -4702,7 +4702,7 @@ function mappings.addtounicode(data,filename)
       local unicode=lumunic and lumunic[name] or unicodevector[name]
       if unicode then
         originals[index]=unicode
-        tounicode[index]=tounicode16(unicode)
+        tounicode[index]=tounicode16(unicode,name)
         ns=ns+1
       end
       if (not unicode) and usedmap then
@@ -4711,7 +4711,7 @@ function mappings.addtounicode(data,filename)
           unicode=cidcodes[foundindex] 
           if unicode then
             originals[index]=unicode
-            tounicode[index]=tounicode16(unicode)
+            tounicode[index]=tounicode16(unicode,name)
             ns=ns+1
           else
             local reference=cidnames[foundindex] 
@@ -4721,11 +4721,11 @@ function mappings.addtounicode(data,filename)
                 unicode=cidcodes[foundindex]
                 if unicode then
                   originals[index]=unicode
-                  tounicode[index]=tounicode16(unicode)
+                  tounicode[index]=tounicode16(unicode,name)
                   ns=ns+1
                 end
               end
-              if not unicode then
+              if not unicode or unicode=="" then
                 local foundcodes,multiple=lpegmatch(uparser,reference)
                 if foundcodes then
                   originals[index]=foundcodes
@@ -4734,7 +4734,7 @@ function mappings.addtounicode(data,filename)
                     nl=nl+1
                     unicode=true
                   else
-                    tounicode[index]=tounicode16(foundcodes)
+                    tounicode[index]=tounicode16(foundcodes,name)
                     ns=ns+1
                     unicode=foundcodes
                   end
@@ -4744,7 +4744,7 @@ function mappings.addtounicode(data,filename)
           end
         end
       end
-      if not unicode then
+      if not unicode or unicode=="" then
         local split=lpegmatch(ligsplitter,name)
         local nplit=split and #split or 0
         if nplit>=2 then
@@ -4765,7 +4765,7 @@ function mappings.addtounicode(data,filename)
           if n==0 then
           elseif n==1 then
             originals[index]=t[1]
-            tounicode[index]=tounicode16(t[1])
+            tounicode[index]=tounicode16(t[1],name)
           else
             originals[index]=t
             tounicode[index]=tounicode16sequence(t)
@@ -4775,17 +4775,17 @@ function mappings.addtounicode(data,filename)
         else
         end
       end
-      if not unicode then
+      if not unicode or unicode=="" then
         local foundcodes,multiple=lpegmatch(uparser,name)
         if foundcodes then
           if multiple then
             originals[index]=foundcodes
-            tounicode[index]=tounicode16sequence(foundcodes)
+            tounicode[index]=tounicode16sequence(foundcodes,name)
             nl=nl+1
             unicode=true
           else
             originals[index]=foundcodes
-            tounicode[index]=tounicode16(foundcodes)
+            tounicode[index]=tounicode16(foundcodes,name)
             ns=ns+1
             unicode=foundcodes
           end
@@ -8484,6 +8484,19 @@ local function toligature(kind,lookupname,head,start,stop,char,markflag,discfoun
       end
       start=start.next
     end
+    local start=base.next
+    while start and start.id==glyph_code do 
+      local char=start.char
+      if marks[char] then
+        start[a_ligacomp]=baseindex+(start[a_ligacomp] or componentindex)
+        if trace_marks then
+          logwarning("%s: find mark %s, gets index %s",pref(kind,lookupname),gref(char),start[a_ligacomp])
+        end
+      else
+        break
+      end
+      start=start.next
+    end
   end
   return head,base
 end
@@ -8751,6 +8764,10 @@ function handlers.gpos_mark2ligature(head,start,kind,lookupname,markanchors,sequ
                         pref(kind,lookupname),anchor,index,bound,gref(markchar),gref(basechar),index,dx,dy)
                     end
                     return head,start,true
+                  else
+                    if trace_bugs then
+                      logwarning("%s: no matching anchors for mark %s and baselig %s with index %a",pref(kind,lookupname),gref(markchar),gref(basechar),index)
+                    end
                   end
                 end
               end

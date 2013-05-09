@@ -19,9 +19,11 @@ SYNOPSIS
 
 **luaotfload** --update [ --force ] [ --quiet ] [ --verbose ]
 
-**luaotfload** --find=filename [ --fuzzy ] [ --info ]
+**luaotfload** --find=FONTNAME [ --fuzzy ] [ --info ]
 
 **luaotfload** --flush-cache
+
+**luaotfload** --list=CRITERION[:VALUE] [ --fields=F1,F2,...,Fn ]
 
 **luaotfload** --help
 
@@ -54,13 +56,28 @@ update mode
 
 query mode
 -----------------------------------------------------------------------
---find=<name>           Resolve a font name; this looks up <name> in
+--find=NAME             Resolve a font name; this looks up <name> in
                         the database and prints the file name it is
                         mapped to.
 --fuzzy, -F             Show approximate matches to the file name if
-                        the lookup was unsuccessful (requires ``--find``).
+                        the lookup was unsuccessful (requires
+                        ``--find``).
 --info, -i              Display basic information to a resolved font
                         file (requires ``--find``).
+--list=CRITERION        Show entries, where *CRITERION* is one of the
+                        following:
+
+                        1) the character ``*``, selecting all entries;
+                        2) a field of a database entry, for instance
+                           *fullname* or *units_per_em*, according to
+                           which the output will be sorted; or
+                        3) an expression of the form ``field:value`` to
+                           limit the output to entries whose ``field``
+                           matches ``value``.
+
+--fields=FIELDS         Comma-separated list of fields that should be
+                        printed.  The default is *fullname,version*.
+                        (Only meaningful with ``--list``.)
 
 lookup cache
 -----------------------------------------------------------------------
@@ -68,7 +85,7 @@ lookup cache
 
 miscellaneous
 -----------------------------------------------------------------------
---verbose=<n>, -v       Set verbosity level to *n* or the number of
+--verbose=N, -v         Set verbosity level to *n* or the number of
                         repetitions of ``-v``.
 --quiet                 No verbose output (log level set to zero).
 --log=stdout            Redirect log output to terminal (for database

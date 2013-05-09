@@ -1224,11 +1224,12 @@ local luaotfload            = luaotfload
 
 config                            = config or { }
 config.luaotfload                 = config.luaotfload or { }
-------.luaotfload.resolver        = config.luaotfload.resolver  or "normal"
-config.luaotfload.resolver        = config.luaotfload.resolver  or "cached"
-config.luaotfload.definer         = config.luaotfload.definer   or "patch"
+------.luaotfload.resolver        = config.luaotfload.resolver         or "normal"
+config.luaotfload.resolver        = config.luaotfload.resolver         or "cached"
+config.luaotfload.definer         = config.luaotfload.definer          or "patch"
+config.luaotfload.compatibility   = config.luaotfload.compatibility    or false
 config.luaotfload.loglevel        = config.luaotfload.loglevel  or 1
-config.luaotfload.color_callback  = config.luaotfload.color_callback  or "pre_linebreak_filter"
+config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_linebreak_filter"
 --luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 
 luaotfload.module = {

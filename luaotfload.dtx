@@ -1290,6 +1290,23 @@ if tex.luatexversion < luatex_version then
 end
 
 %    \end{macrocode}
+%   Prepare directories: the cache function in Luatex-Fonts checks for a
+%   writable directory only once during startup. If there is no
+%   \fileent{texmf-var} at this time it will create a subdirectory
+%   \fileent{./luatex-cache} instead.
+%   Thus everything has to be laid out before we load the fontloader.
+%
+%    \begin{macrocode}
+
+local cachepath = kpse.expand_var"$TEXMFVAR"
+if not lfs.isdir(cachepath) then
+    dir.mkdirs(cachepath)
+    if not lfs.isdir(cachepath) then
+        error( "ERROR could not create directory %s", cachepath)
+    end
+end
+
+%    \end{macrocode}
 % \subsection{Module loading}
 % We load the files imported from \CONTEXT with this function.
 % It automatically prepends the prefix \fileent{luaotfload-} to its

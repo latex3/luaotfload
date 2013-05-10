@@ -1770,10 +1770,16 @@ loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2013/04/16 v2.2 OpenType layout system]
+    [2013/05/10 v2.2 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
-\RequireLuaModule{luaotfload}
+\ifnum\luatexversion<76
+  %% here some deprecation warning would be in order
+  \RequireLuaModule{lualibs}
+  \RequireLuaModule{luaotfload-legacy}
+\else
+  \RequireLuaModule{luaotfload}
+\fi
 \endinput
 %    \end{macrocode}
 % \iffalse

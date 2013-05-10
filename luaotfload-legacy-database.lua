@@ -109,13 +109,17 @@ function names.resolve(specification)
         if data.mappings then
             local found = { }
             for _,face in next, data.mappings do
-                local family    = sanitize(face.names.family)
-                local subfamily = sanitize(face.names.subfamily)
-                local fullname  = sanitize(face.names.fullname)
-                local psname    = sanitize(face.names.psname)
+                local family, subfamily, fullname, psname
+                local optsize, dsnsize, maxsize, minsize
+
+                if face.names then
+                    family    = sanitize(face.names.family)
+                    subfamily = sanitize(face.names.subfamily)
+                    fullname  = sanitize(face.names.fullname)
+                    psname    = sanitize(face.names.psname)
+                end
                 local fontname  = sanitize(face.fontname)
                 local pfullname = sanitize(face.fullname)
-                local optsize, dsnsize, maxsize, minsize
                 if #face.size > 0 then
                     optsize = face.size
                     dsnsize = optsize[1] and optsize[1] / 10
@@ -192,11 +196,17 @@ function names.resolve(specification)
                 end
             end
             if #found == 1 then
+                print(table.serialize(found))
                 if kpse.lookup(found[1].filename[1]) then
                     logs.report("load font",
                                 "font family='%s', subfamily='%s' found: %s",
                                 name, style, found[1].filename[1])
                     return found[1].filename[1], found[1].filename[2]
+                elseif lfs.isfile(found[1].found_at) then
+                    logs.report("load font",
+                                "font family='%s', subfamily='%s' found: %s",
+                                name, style, found[1].found_at)
+                    return found[1].found_at, found[1].filename[2]
                 end
             elseif #found > 1 then
                 -- we found matching font(s) but not in the requested optical
@@ -217,6 +227,11 @@ function names.resolve(specification)
                                 "font family='%s', subfamily='%s' found: %s",
                                 name, style, closest.filename[1])
                     return closest.filename[1], closest.filename[2]
+                elseif lfs.isfile(closest.found_at) then
+                    logs.report("load font",
+                                "font family='%s', subfamily='%s' found: %s",
+                                name, style, closest.found_at)
+                    return closest.found_at, closest.filename[2]
                 end
             elseif found.fallback then
                 return found.fallback.filename[1], found.fallback.filename[2]
@@ -269,6 +284,7 @@ logs.report = logs.report or log
 logs.info   = logs.info or log
 
 local function font_fullinfo(filename, subfont, texmf)
+    local found_at = filename
     local t = { }
     local f = fontloader.open(filename, subfont)
     if not f then
@@ -322,6 +338,8 @@ local function font_fullinfo(filename, subfont, texmf)
         m.design_range_top    ~= 0 and m.design_range_top    or nil,
         m.design_range_bottom ~= 0 and m.design_range_bottom or nil,
     }
+    -- rather, waste space on paths
+    t.found_at = found_at
     return t
 end
 
@@ -703,3 +721,5 @@ names.scan   = scan_external_dir
 names.load   = load_names
 names.update = update_names
 names.save   = save_names
+
+-- vim:ft=lua:sw=4:ts=4:expandtab

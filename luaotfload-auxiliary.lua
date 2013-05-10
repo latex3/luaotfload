@@ -31,6 +31,7 @@ local stringlower   = string.lower
 local stringformat  = string.format
 local stringgsub    = string.gsub
 local stringbyte    = string.byte
+local stringmatch   = string.match
 
 -----------------------------------------------------------------------
 ---                          font patches
@@ -64,6 +65,9 @@ local add_fontdata_fallbacks = function (fontdata)
 
     else --- otf
       metadata = fontdata.shared.rawdata.metadata
+      fontdata.name    = fontdata.name
+                      or fontdata.fullname
+                      or fontdata.psname
       fontdata.units   = fontdata.units_per_em
       local resources  = fontdata.resources
       --- the next line is a hack that fixes scaling of fonts with
@@ -98,8 +102,6 @@ end
 
 --if config.luaotfload.compatibility == true then
 if true then
-  --- this will cause the output pdf to be garbled
-  --- in pdf.js
   luatexbase.add_to_callback(
     "luaotfload.patch_font",
     add_fontdata_fallbacks,

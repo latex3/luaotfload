@@ -133,7 +133,7 @@ and the derived files
 \usepackage{fontspec}
 \usepackage{unicode-math}
 \setmainfont[
-  Numbers     = OldStyle,
+% Numbers     = OldStyle, %% buggy with font cache
   Ligatures   = TeX,
   BoldFont    = {Linux Libertine O Bold},
   ItalicFont  = {Linux Libertine O Italic},
@@ -407,7 +407,7 @@ and the derived files
 %           \fileent{GFSBodoni.otf}, and
 %           \fileent{PTZ56F.ttf}.
 %
-% \subsection{\hologo{XeTeX} Compatibility Layer}
+% \subsection{Compatibility Layer}
 %
 % In addition to the regular prefixed requests, \identifier{luaotfload}
 % accepts loading fonts the \XETEX way.
@@ -1719,8 +1719,6 @@ local patch_defined_font = function (specification, size, id)
     end
     return tfmdata
 end
-
-caches.compilemethod = "both"
 
 reset_callback("define_font")
 

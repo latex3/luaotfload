@@ -31,6 +31,7 @@ local stringlower   = string.lower
 local stringformat  = string.format
 local stringgsub    = string.gsub
 local stringbyte    = string.byte
+local stringfind    = string.find
 
 -----------------------------------------------------------------------
 ---                          font patches
@@ -64,18 +65,17 @@ local add_fontdata_fallbacks = function (fontdata)
 
     else --- otf
       metadata = fontdata.shared.rawdata.metadata
+      fontdata.name    = fontdata.name
+                      or fontdata.fullname
+                      or fontdata.psname
       fontdata.units   = fontdata.units_per_em
+      fontdata.size = fontdata.size or fontparameters.size
       local resources  = fontdata.resources
-      --- the next line is a hack that fixes scaling of fonts with
-      --- non-standard em-sizes (most ms fonts have 2048, others
-      --- come with 256)
-      --fontdata.size    = fontparameters.size * fontdata.units / 1000
       --- for legacy fontspec.lua and unicode-math.lua
       fontdata.shared.otfdata          = {
         pfminfo   = { os2_capheight = metadata.pfminfo.os2_capheight },
         metadata  = { ascent = metadata.ascent },
       }
-      --fontdata.shared.otfdata.metadata = metadata --- brr, that’s meta indeed
       --- for microtype and fontspec
       local fake_features = { } -- wrong: table.copy(resources.features)
       setmetatable(fake_features, { __index = function (tab, idx)
@@ -98,8 +98,6 @@ end
 
 --if config.luaotfload.compatibility == true then
 if true then
-  --- this will cause the output pdf to be garbled
-  --- in pdf.js
   luatexbase.add_to_callback(
     "luaotfload.patch_font",
     add_fontdata_fallbacks,

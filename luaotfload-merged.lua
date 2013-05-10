@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/09/13 15:23:31
+-- merge date  : 05/10/13 15:05:28
 
 do -- begin closure to overcome local limits and interference
 
@@ -5046,7 +5046,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.742 
+otf.version=2.743 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -5065,6 +5065,7 @@ local usemetatables=false
 local packdata=true
 local syncspace=true
 local forcenotdef=false
+local includesubfonts=false
 local wildcard="*"
 local default="dflt"
 local fontloaderfields=fontloader.fields
@@ -5191,8 +5192,8 @@ local ordered_enhancers={
   "check glyphs",
   "check metadata",
   "check extra features",
-  "add duplicates",
   "check encoding",
+  "add duplicates",
   "cleanup tables",
 }
 local actions=allocate()
@@ -5536,7 +5537,7 @@ actions["prepare glyphs"]=function(data,filename,raw)
   local duplicates=resources.duplicates
   local variants=resources.variants
   if rawsubfonts then
-    metadata.subfonts={}
+    metadata.subfonts=includesubfonts and {}
     properties.cidinfo=rawcidinfo
     if rawcidinfo.registry then
       local cidmap=fonts.cid.getmap(rawcidinfo)
@@ -5547,7 +5548,9 @@ actions["prepare glyphs"]=function(data,filename,raw)
         for cidindex=1,#rawsubfonts do
           local subfont=rawsubfonts[cidindex]
           local cidglyphs=subfont.glyphs
-          metadata.subfonts[cidindex]=somecopy(subfont)
+          if includesubfonts then
+            metadata.subfonts[cidindex]=somecopy(subfont)
+          end
           for index=0,subfont.glyphcnt-1 do 
             local glyph=cidglyphs[index]
             if glyph then
@@ -5555,6 +5558,10 @@ actions["prepare glyphs"]=function(data,filename,raw)
               local name=glyph.name or cidnames[index]
               if not unicode or unicode==-1 or unicode>=criterium then
                 unicode=cidunicodes[index]
+              end
+              if unicode and descriptions[unicode] then
+                report_otf("preventing glyph %a at index %H to overload unicode %U",name or "noname",index,unicode)
+                unicode=-1
               end
               if not unicode or unicode==-1 or unicode>=criterium then
                 if not name then
@@ -5659,7 +5666,8 @@ actions["check encoding"]=function(data,filename,raw)
   local resources=data.resources
   local properties=data.properties
   local unicodes=resources.unicodes 
-  local indices=resources.indices
+  local indices=resources.indices 
+  local duplicates=resources.duplicates
   local mapdata=raw.map or {}
   local unicodetoindex=mapdata and mapdata.map or {}
   local encname=lower(data.enc_name or mapdata.enc_name or "")
@@ -5671,10 +5679,35 @@ actions["check encoding"]=function(data,filename,raw)
     for unicode,index in next,unicodetoindex do 
       if unicode<=criterium and not descriptions[unicode] then
         local parent=indices[index] 
-        if parent then
-          report_otf("weird, unicode %U points to %U with index %H",unicode,parent,index)
-        else
+        if not parent then
           report_otf("weird, unicode %U points to nowhere with index %H",unicode,index)
+        else
+          local parentdescription=descriptions[parent]
+          if parentdescription then
+            local altuni=parentdescription.altuni
+            if not altuni then
+              altuni={ { unicode=parent } }
+              parentdescription.altuni=altuni
+              duplicates[parent]={ unicode }
+            else
+              local done=false
+              for i=1,#altuni do
+                if altuni[i].unicode==parent then
+                  done=true
+                  break
+                end
+              end
+              if not done then
+                altuni[#altuni+1]={ unicode=parent }
+                table.insert(duplicates[parent],unicode)
+              end
+            end
+            if trace_loading then
+              report_otf("weird, unicode %U points to nowhere with index %H",unicode,index)
+            end
+          else
+            report_otf("weird, unicode %U points to %U with index %H",unicode,index)
+          end
         end
       end
     end
@@ -8468,29 +8501,18 @@ local function toligature(kind,lookupname,head,start,stop,char,markflag,discfoun
           logwarning("%s: keep mark %s, gets index %s",pref(kind,lookupname),gref(char),start[a_ligacomp])
         end
         head,current=insert_node_after(head,current,copy_node(start)) 
+      elseif trace_marks then
+        logwarning("%s: delete mark %s",pref(kind,lookupname),gref(char))
       end
       start=start.next
     end
-    local start=components
-    while start and start.id==glyph_code do 
+    local start=current.next
+    while start and start.id==glyph_code do
       local char=start.char
       if marks[char] then
         start[a_ligacomp]=baseindex+(start[a_ligacomp] or componentindex)
         if trace_marks then
-          logwarning("%s: keep mark %s, gets index %s",pref(kind,lookupname),gref(char),start[a_ligacomp])
-        end
-      else
-        break
-      end
-      start=start.next
-    end
-    local start=base.next
-    while start and start.id==glyph_code do 
-      local char=start.char
-      if marks[char] then
-        start[a_ligacomp]=baseindex+(start[a_ligacomp] or componentindex)
-        if trace_marks then
-          logwarning("%s: find mark %s, gets index %s",pref(kind,lookupname),gref(char),start[a_ligacomp])
+          logwarning("%s: set mark %s, gets index %s",pref(kind,lookupname),gref(char),start[a_ligacomp])
         end
       else
         break
@@ -10702,6 +10724,12 @@ local function packdata(data)
             end
           end
         end
+        local altuni=description.altuni
+        if altuni then
+          for i=1,#altuni do
+            altuni[i]=pack_flat(altuni[i])
+          end
+        end
       end
       local lookups=data.lookups
       if lookups then
@@ -10805,6 +10833,10 @@ local function packdata(data)
             for tag,mlookup in next,mlookups do
               mlookups[tag]=pack_normal(mlookup)
             end
+          end
+          local altuni=description.altuni
+          if altuni then
+            description.altuni=pack_normal(altuni)
           end
         end
         local lookups=data.lookups
@@ -10993,6 +11025,19 @@ local function unpackdata(data)
                     anchor[a]=tv
                   end
                 end
+              end
+            end
+          end
+        end
+        local altuni=description.altuni
+        if altuni then
+          local altuni=tables[altuni]
+          if altuni then
+            description.altuni=altuni
+            for i=1,#altuni do
+              local tv=tables[altuni[i]]
+              if tv then
+                altuni[i]=tv
               end
             end
           end

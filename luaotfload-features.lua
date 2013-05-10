@@ -337,7 +337,9 @@ local import_values = {
     --- That’s what the 1.x parser did, not quite as graciously,
     --- with an array of branch expressions.
     -- "style", "optsize",--> from slashed notation; handled otherwise
-    "lookup", "sub", "mode",
+    { "lookup", false },
+    { "sub",    false },
+    { "mode",   true },
 }
 
 local lookup_types = { "anon", "file", "name", "path" }
@@ -411,11 +413,14 @@ local handle_request = function (specification)
     end
 
     for n=1, #import_values do
-        local feat       = import_values[n]
+        local feat       = import_values[n][1]
+        local keep       = import_values[n][2]
         local newvalue   = request.features[feat]
         if newvalue then
             specification[feat]    = request.features[feat]
-            --request.features[feat] = nil
+            if not keep then
+                request.features[feat] = nil
+            end
         end
     end
 

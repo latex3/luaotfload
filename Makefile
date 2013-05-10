@@ -12,6 +12,7 @@ SCRIPTNAME   = luaotfload-tool
 SCRIPT       = $(SCRIPTNAME).lua
 MANSOURCE	 = $(SCRIPTNAME).rst
 MANPAGE   	 = $(SCRIPTNAME).1
+OLDSCRIPT    = luaotfload-legacy-tool.lua
 
 GRAPH  		 = filegraph
 DOTPDF 		 = $(GRAPH).pdf
@@ -24,7 +25,7 @@ MAN			= $(MANPAGE)
 COMPILED    = $(DOC)
 UNPACKED    = luaotfload.sty luaotfload.lua
 GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(GLYPHS) $(MAN)
-SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(SCRIPT) $(GLYPHSCRIPT)
+SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(SCRIPT) $(OLDSCRIPT) $(GLYPHSCRIPT)
 
 # test files
 TESTDIR 		= tests
@@ -33,7 +34,7 @@ TESTFILES_SYS 	= $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.t
 TESTFILES_TL 	= $(filter-out $(TESTFILES_SYS), $(TESTFILES))
 
 # Files grouped by installation location
-SCRIPTFILES = $(SCRIPT) $(GLYPHSCRIPT)
+SCRIPTFILES = $(SCRIPT) $(OLDSCRIPT) $(GLYPHSCRIPT)
 RUNFILES    = $(UNPACKED) $(OTFL)
 DOCFILES    = $(DOC) $(DOTPDF) README NEWS
 MANFILES	= $(MANPAGE)

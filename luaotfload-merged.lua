@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/09/13 15:23:31
+-- merge date  : 05/10/13 10:26:54
 
 do -- begin closure to overcome local limits and interference
 
@@ -8468,29 +8468,18 @@ local function toligature(kind,lookupname,head,start,stop,char,markflag,discfoun
           logwarning("%s: keep mark %s, gets index %s",pref(kind,lookupname),gref(char),start[a_ligacomp])
         end
         head,current=insert_node_after(head,current,copy_node(start)) 
+      elseif trace_marks then
+        logwarning("%s: delete mark %s",pref(kind,lookupname),gref(char))
       end
       start=start.next
     end
-    local start=components
-    while start and start.id==glyph_code do 
+    local start=current.next
+    while start and start.id==glyph_code do
       local char=start.char
       if marks[char] then
         start[a_ligacomp]=baseindex+(start[a_ligacomp] or componentindex)
         if trace_marks then
-          logwarning("%s: keep mark %s, gets index %s",pref(kind,lookupname),gref(char),start[a_ligacomp])
-        end
-      else
-        break
-      end
-      start=start.next
-    end
-    local start=base.next
-    while start and start.id==glyph_code do 
-      local char=start.char
-      if marks[char] then
-        start[a_ligacomp]=baseindex+(start[a_ligacomp] or componentindex)
-        if trace_marks then
-          logwarning("%s: find mark %s, gets index %s",pref(kind,lookupname),gref(char),start[a_ligacomp])
+          logwarning("%s: set mark %s, gets index %s",pref(kind,lookupname),gref(char),start[a_ligacomp])
         end
       else
         break

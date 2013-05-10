@@ -213,7 +213,7 @@ local toboolean = function (s)
   if s == "false" then return false end
 --if s == "yes"   then return true  end --- Context style
 --if s == "no"    then return false end
-  return s
+  return stringlower(s)
 end
 
 --- dirty test if a file: request is actually a path: lookup; don’t

@@ -196,7 +196,6 @@ function names.resolve(specification)
                 end
             end
             if #found == 1 then
-                print(table.serialize(found))
                 if kpse.lookup(found[1].filename[1]) then
                     logs.report("load font",
                                 "font family='%s', subfamily='%s' found: %s",

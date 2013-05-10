@@ -189,13 +189,6 @@ end
 
 --[[doc--
 
-    We override the cleanname function as it outputs garbage for exotic font
-    names
-
---doc]]--
-
---[[doc--
-
     Overriding some defaults set in \context code.
 
 --doc]]--

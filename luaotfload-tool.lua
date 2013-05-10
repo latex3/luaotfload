@@ -90,6 +90,19 @@ config.lualibs.load_extended    = false
 
 require"lualibs"
 
+--- prepare directories: the cache function in Luatex-Fonts
+--- checks for writable directory only on startup, so everything
+--- has to be laid out before we load basics-gen
+
+local cachepath = kpse.expand_var"$TEXMFVAR"
+if not lfs.isdir(cachepath) then
+    dir.mkdirs(cachepath)
+    if not lfs.isdir(cachepath) then
+        texiowrite(stringformat(
+            "ERROR could not create directory %s", cachepath))
+    end
+end
+
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
 \luafunction{texio.*} library; too much for our taste.

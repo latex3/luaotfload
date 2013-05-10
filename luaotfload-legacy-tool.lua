@@ -9,12 +9,12 @@ luaotfload bundle, please see the luaotfload documentation for more info.
 
 kpse.set_program_name("luatex")
 
-require("lualibs")
-require("otfl-font-nms")
-require("alt_getopt")
+require("lualibs")                    ---> current
+require("luaotfload-legacy-database") ---> old
+require("alt_getopt")                 ---> ?
 
-local name      = 'mkluatexfontdb'
-local version   = '1.07' -- same version number as luaotfload
+local name      = "mkluatexfontdb"
+local version   = "1.31 (legacy)"
 
 local names    = fonts.names
 
@@ -23,8 +23,8 @@ local function help_msg()
 Usage: %s [OPTION]...
 
 ================================================================================
-                   please update your luatex binary
-        this version is unsupported and likely to break things
+                        please update your luatex binary
+             this version is unsupported and likely to break things
 ================================================================================
     
 Rebuild the LuaTeX font database.

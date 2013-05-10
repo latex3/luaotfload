@@ -415,7 +415,7 @@ local handle_request = function (specification)
         local newvalue   = request.features[feat]
         if newvalue then
             specification[feat]    = request.features[feat]
-            request.features[feat] = nil
+            --request.features[feat] = nil
         end
     end
 

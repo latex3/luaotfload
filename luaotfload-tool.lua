@@ -156,6 +156,7 @@ This tool is part of the luaotfload package. Valid options are:
   -u --update                  update the database
   -f --force                   force re-indexing all fonts
   -l --flush-lookups           empty lookup cache of font requests
+  -D --dry-run                 skip loading of fonts, just scan
 
   --find="font name"           query the database for a font name
   -F --fuzzy                   look for approximate matches if --find fails

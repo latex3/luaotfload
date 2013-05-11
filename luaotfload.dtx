@@ -146,14 +146,15 @@ and the derived files
 
 \usepackage{hologo}
 
-\newcommand\TEX     {\TeX\xspace}
-\newcommand\LUA     {Lua\xspace}
-\newcommand\PDFTEX  {pdf\TeX\xspace}
-\newcommand\LUATEX  {Lua\TeX\xspace}
-\newcommand\XETEX   {\XeTeX\xspace}
-\newcommand\LATEX   {\LaTeX\xspace}
-\newcommand\CONTEXT {Con\TeX t\xspace}
-\newcommand\OpenType{\identifier{Open\kern-.25ex Type}\xspace}
+\newcommand\TEX      {\TeX\xspace}
+\newcommand\LUA      {Lua\xspace}
+\newcommand\PDFTEX   {pdf\TeX\xspace}
+\newcommand\LUATEX   {Lua\TeX\xspace}
+\newcommand\XETEX    {\XeTeX\xspace}
+\newcommand\LATEX    {\LaTeX\xspace}
+\newcommand\LUALATEX {Lua\LaTeX\xspace}
+\newcommand\CONTEXT  {Con\TeX t\xspace}
+\newcommand\OpenType {\identifier{Open\kern-.25ex Type}\xspace}
 
 \def\definehighlight[#1][#2]%
  {\ifcsname #1\endcsname\else
@@ -258,7 +259,7 @@ and the derived files
 % functionality like ligatures, old-style numbers, small capitals,
 % etc., and support more complex writing systems like Arabic and
 % Indic\footnote{%
-%   Unfortunately, \identifier{luaotfload} doesn't support Indic
+%   Unfortunately, \identifier{luaotfload} doesn‘t support many Indic
 %   scripts right now.
 %   Assistance in implementing the prerequisites is greatly
 %   appreciated.
@@ -281,6 +282,27 @@ and the derived files
 % for handling \OpenType fonts.
 % Additionally, it provides means for accessing fonts known to the operating
 % system conveniently by indexing the metadata.
+%
+%
+% \section{Thanks}
+%
+% \identifier{Luaotfload} is part of \LUALATEX, the community-driven
+% project to provide a foundation for using the \LATEX format with the
+% full capabilites of the \LUATEX engine.
+% As such, the distinction between end users, contributors, and project
+% maintainers is intentionally kept less strict, lest we unduly
+% personalize the common effort.
+%
+% Nevertheless, the current maintainers would like to express their
+% gratitude to Khaled Hosny, Akira Kakuto, Hironori Kitagawa and Dohyun
+% Kim.
+% Their contributions -- be it patches, advice, or systematic
+% testing -- made the switch from version 1.x to 2.2 possible.
+% Also, Hans Hagen, the author of the font loader, made porting the
+% code to \LATEX a breeze due to the extra effort he invested into
+% isolating it from the rest of \CONTEXT, not to mention his assistance
+% in the task and willingness to respond to our suggestions.
+%
 %
 % \section{Loading Fonts}
 %

@@ -155,7 +155,8 @@ This tool is part of the luaotfload package. Valid options are:
 
   -u --update                  update the database
   -f --force                   force re-indexing all fonts
-  -c --flush-cache             empty cache of font requests
+  -l --flush-lookups           empty lookup cache of font requests
+  -D --dry-run                 skip loading of fonts, just scan
 
   --find="font name"           query the database for a font name
   -F --fuzzy                   look for approximate matches if --find fails
@@ -170,6 +171,12 @@ This tool is part of the luaotfload package. Valid options are:
 The font database will be saved to
    %s
    %s
+
+-------------------------------------------------------------------------------
+                                   FONT CACHE
+
+  --cache=<directive>          operate on font cache, where <directive> is
+                               “show”, “purge”, or “erase”
 
 ]],
     mkluatexfontdb = [[
@@ -246,7 +253,8 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel", "help", "version", "flush", "generate", "list", "query"
+    "loglevel", "help",     "version", "cache",
+    "flush",    "generate", "list",    "query",
 }
 local action_pending  = table.tohash(action_sequence, false)
 
@@ -275,7 +283,7 @@ end
 
 actions.generate = function (job)
     local fontnames, savedname
-    fontnames = names.update(fontnames, job.force_reload)
+    fontnames = names.update(fontnames, job.force_reload, job.dry_run)
     logs.names_report("info", 2, "db",
         "Fonts in the database: %i", #fontnames.mappings)
     local success = names.save(fontnames)
@@ -286,13 +294,32 @@ actions.generate = function (job)
 end
 
 actions.flush = function (job)
-    local success, lookups = names.flush_cache()
+    local success, lookups = names.flush_lookup_cache()
     if success then
         local success = names.save_lookups()
         if success then
-            logs.names_report("info", 2, "cache", "Cache emptied")
+            logs.names_report("info", 2, "cache", "Lookup cache emptied")
             return true, true
         end
+    end
+    return false, false
+end
+
+local cache_directives = {
+    ["purge"] = names.purge_cache,
+    ["erase"] = names.erase_cache,
+    ["show"]  = names.show_cache,
+}
+
+actions.cache = function (job)
+    local directive = cache_directives[job.cache]
+    if not directive or type(directive) ~= "function" then
+        logs.names_report("info", 2, "cache",
+                          "Invalid font cache directive %s.", job.cache)
+        return false, false
+    end
+    if directive() then
+        return true, true
     end
     return false, false
 end
@@ -507,24 +534,26 @@ local process_cmdline = function ( ) -- unit -> jobspec
     }
 
     local long_options = {
-        alias            = 1,
-        ["flush-cache"]  = "c",
-        fields           = 1,
-        find             = 1,
-        force            = "f",
-        fuzzy            = "F",
-        help             = "h",
-        info             = "i",
-        limit            = 1,
-        list             = 1,
-        log              = 1,
-        quiet            = "q",
-        update           = "u",
-        verbose          = 1  ,
-        version          = "V",
+        alias              = 1,
+        cache              = 1,
+        ["dry-run"]        = "D",
+        ["flush-lookups"]  = "l",
+        fields             = 1,
+        find               = 1,
+        force              = "f",
+        fuzzy              = "F",
+        help               = "h",
+        info               = "i",
+        limit              = 1,
+        list               = 1,
+        log                = 1,
+        quiet              = "q",
+        update             = "u",
+        verbose            = 1  ,
+        version            = "V",
     }
 
-    local short_options = "cfFiquvVh"
+    local short_options = "DfFilquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -573,13 +602,18 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.show_info = true
         elseif v == "alias" then
             config.luaotfload.self = optarg[n]
-        elseif v == "c" then
+        elseif v == "l" then
             action_pending["flush"] = true
         elseif v == "list" then
             action_pending["list"] = true
             result.criterion = optarg[n]
         elseif v == "fields" then
             result.asked_fields = optarg[n]
+        elseif v == "cache" then
+            action_pending["cache"] = true
+            result.cache = optarg[n]
+        elseif v == "D" then
+            result.dry_run = true
         end
     end
 

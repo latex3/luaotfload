@@ -30,13 +30,24 @@ We recreate the verbosity levels previously implemented in font-nms:
 local loglevel = 1 --- default
 local logout   = "log"
 
+--- int -> bool
 local set_loglevel = function (n)
     if type(n) == "number" then
         loglevel = n
     end
+    return true
 end
+logs.setloglevel    = set_loglevel
 logs.set_loglevel   = set_loglevel
 logs.set_log_level  = set_loglevel --- accomodating lazy typists
+
+--- unit -> int
+local get_loglevel = function ( )
+    return loglevel
+end
+logs.getloglevel    = get_loglevel
+logs.get_loglevel   = get_loglevel
+logs.get_log_level  = get_loglevel
 
 local set_logout = function (s)
     if s == "stdout" then

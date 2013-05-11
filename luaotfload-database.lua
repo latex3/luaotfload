@@ -239,7 +239,7 @@ end
 local crude_file_lookup
 local crude_file_lookup_verbose
 local find_closest
-local flush_cache
+local flush_lookup_cache
 local font_fullinfo
 local load_names
 local load_lookups
@@ -259,8 +259,8 @@ local fonts_reloaded = false
 --- limit output when approximate font matching (luaotfload-tool -F)
 local fuzzy_limit = 1 --- display closest only
 
---- unit -> dbobj
-load_names = function ( )
+--- bool? -> dbobj
+load_names = function (dry_run)
     local starttime = os.gettimeofday()
     local foundname, data = load_lua_file(names.path.path)
 
@@ -273,7 +273,7 @@ load_names = function ( )
         report("both", 0, "db",
             [[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
-        data = update_names(fontnames_init(false))
+        data = update_names(fontnames_init(false), nil, dry_run)
         local success = save_names(data)
         if not success then
             report("both", 0, "db", "Database creation unsuccessful.")
@@ -868,7 +868,9 @@ end
 --- we return true if the fond is new or re-indexed
 --- string -> dbobj -> dbobj -> bool
 local load_font = function (fullname, fontnames, newfontnames)
-    if not fullname then return false end
+    if not fullname then
+        return false
+    end
 
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status
@@ -1070,15 +1072,20 @@ for key, value in next, font_extensions do
    font_extensions_set[value] = true
 end
 
---- string -> dbobj -> dbobj -> bool -> (int * int)
-local scan_dir = function (dirname, fontnames, newfontnames)
-    --[[
-    This function scans a directory and populates the list of fonts
+--[[doc--
+
+    scan_dir() scans a directory and populates the list of fonts
     with all the fonts it finds.
-    - dirname is the name of the directory to scan
-    - names is the font database to fill -> no such term!!!
-    - texmf used to be a boolean saying if we are scanning a texmf directory
-    ]]
+
+        · dirname   : name of the directory to scan
+        · fontnames : current font db object
+        · newnames  : font db object to fill
+        · dry_run   : don’t touch anything
+
+--doc]]--
+
+--- string -> dbobj -> dbobj -> bool -> (int * int)
+local scan_dir = function (dirname, fontnames, newfontnames, dry_run)
     local n_scanned, n_new = 0, 0   --- total of fonts collected
     report("both", 2, "db", "scanning directory %s", dirname)
     for _,i in next, font_extensions do
@@ -1092,9 +1099,16 @@ local scan_dir = function (dirname, fontnames, newfontnames)
             for j=1, n_found do
                 local fullname = found[j]
                 fullname = path_normalize(fullname)
-                report("both", 4, "db", "loading font “%s”", fullname)
-                local new = load_font(fullname, fontnames, newfontnames)
-                if new then n_new = n_new + 1 end
+                local new
+                if dry_run == true then
+                    report("both", 1, "db", "would have been loading “%s”", fullname)
+                else
+                    report("both", 4, "db", "loading font “%s”", fullname)
+                    local new = load_font(fullname, fontnames, newfontnames)
+                    if new == true then
+                        n_new = n_new + 1
+                    end
+                end
             end
         end
     end
@@ -1102,7 +1116,8 @@ local scan_dir = function (dirname, fontnames, newfontnames)
     return n_scanned, n_new
 end
 
-local function scan_texmf_fonts(fontnames, newfontnames)
+--- dbobj -> dbobj -> bool? -> (int * int)
+local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
     local n_scanned, n_new = 0, 0
     --[[
     This function scans all fonts in the texmf tree, through kpathsea
@@ -1118,7 +1133,7 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     if not stringis_empty(fontdirs) then
         for _,d in next, filesplitpath(fontdirs) do
             report("info", 4, "db", "Entering directory %s", d)
-            local found, new = scan_dir(d, fontnames, newfontnames)
+            local found, new = scan_dir(d, fontnames, newfontnames, dry_run)
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end
@@ -1352,6 +1367,7 @@ do --- closure for read_fonts_conf()
 end --- read_fonts_conf closure
 
 --- TODO stuff those paths into some writable table
+--- unit -> string list
 local function get_os_dirs()
     if os.name == 'macosx' then
         return {
@@ -1374,7 +1390,8 @@ local function get_os_dirs()
     return {}
 end
 
-local function scan_os_fonts(fontnames, newfontnames)
+--- dbobj -> dbobj -> bool? -> (int * int)
+local scan_os_fonts = function (fontnames, newfontnames, dry_run)
     local n_scanned, n_new = 0, 0
     --[[
     This function scans the OS fonts through
@@ -1384,23 +1401,27 @@ local function scan_os_fonts(fontnames, newfontnames)
     ]]
     report("info", 2, "db", "Scanning OS fonts...")
     report("info", 3, "db", "Searching in static system directories...")
-    for _,d in next, get_os_dirs() do
-        local found, new = scan_dir(d, fontnames, newfontnames)
+    for _, d in next, get_os_dirs() do
+        local found, new = scan_dir(d, fontnames, newfontnames, dry_run)
         n_scanned = n_scanned + found
         n_new     = n_new     + new
     end
     return n_scanned, n_new
 end
 
-flush_cache = function ()
+--- unit -> (bool, lookup_cache)
+flush_lookup_cache = function ()
     if not names.lookups then names.lookups = load_lookups() end
     names.lookups = { }
     collectgarbage"collect"
     return true, names.lookups
 end
 
---- dbobj -> bool -> dbobj
-update_names = function (fontnames, force)
+--- force:      dictate rebuild from scratch
+--- dry_dun:    don’t write to the db, just scan dirs
+
+--- dbobj? -> bool? -> bool? -> dbobj
+update_names = function (fontnames, force, dry_run)
     if config.luaotfload.update_live == false then
         report("info", 2, "db",
                "skipping database update")
@@ -1421,7 +1442,7 @@ update_names = function (fontnames, force)
         fontnames = fontnames_init(false)
     else
         if not fontnames then
-            fontnames = load_names()
+            fontnames = load_names(dry_run)
         end
         if fontnames.version ~= names.version then
             report("both", 1, "db", "No font names database or old "
@@ -1433,11 +1454,11 @@ update_names = function (fontnames, force)
     read_blacklist()
 
     local scanned, new
-    scanned, new = scan_texmf_fonts(fontnames, newfontnames)
+    scanned, new = scan_texmf_fonts(fontnames, newfontnames, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 
-    scanned, new = scan_os_fonts(fontnames, newfontnames)
+    scanned, new = scan_os_fonts(fontnames, newfontnames, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 
@@ -1510,7 +1531,130 @@ save_names = function (fontnames)
     return false
 end
 
---- is this used anywhere?
+--[[doc--
+
+    Below set of functions is modeled after mtx-cache.
+
+--doc]]--
+
+--- string -> string -> string list -> string list -> string list -> unit
+local print_cache = function (category, path, luanames, lucnames, rest)
+    local report_indeed = function (...)
+        report("info", 0, "cache", ...)
+    end
+    report_indeed("Luaotfload cache: %s", category)
+    report_indeed("location: %s", path)
+    report_indeed("[raw]       %4i", #luanames)
+    report_indeed("[compiled]  %4i", #lucnames)
+    report_indeed("[other]     %4i", #rest)
+    report_indeed("[total]     %4i", #luanames + #lucnames + #rest)
+end
+
+--- string -> string -> string list -> bool -> bool
+local purge_from_cache = function (category, path, list, all)
+    report("info", 2, "cache", "Luaotfload cache: %s %s",
+        (all and "erase" or "purge"), category)
+    report("info", 2, "cache", "location: %s",path)
+    local n = 0
+    for i=1,#list do
+        local filename = list[i]
+        if string.find(filename,"luatex%-cache") then -- safeguard
+            if all then
+                report("info", 5, "cache", "removing %s", filename)
+                os.remove(filename)
+                n = n + 1
+            else
+                local suffix = file.suffix(filename)
+                if suffix == "lua" then
+                    local checkname = file.replacesuffix(
+                        filename, "lua", "luc")
+                    if lfs.isfile(checkname) then
+                        report("info", 5, "cache", "removing %s", filename)
+                        os.remove(filename)
+                        n = n + 1
+                    end
+                end
+            end
+        end
+    end
+    report("info", 2, "cache", "removed lua files : %i", n)
+    return true
+end
+--- string -> string list -> int -> string list -> string list -> string list ->
+---     (string list * string list * string list * string list)
+local collect_cache collect_cache = function (path, all, n, luanames,
+                                              lucnames, rest)
+    if not all then
+        local all = dirglob(path .. "/**/*")
+        local luanames, lucnames, rest = { }, { }, { }
+        return collect_cache(nil, all, 1, luanames, lucnames, rest)
+    end
+
+    local filename = all[n]
+    if filename then
+        local suffix = file.suffix(filename)
+        if suffix == "lua" then
+            luanames[#luanames+1] = filename
+        elseif suffix == "luc" then
+            lucnames[#lucnames+1] = filename
+        else
+            rest[#rest+1] = filename
+        end
+        return collect_cache(nil, all, n+1, luanames, lucnames, rest)
+    end
+    return luanames, lucnames, rest, all
+end
+
+--- unit -> unit
+local purge_cache = function ( )
+    local writable_path = caches.getwritablepath()
+    local luanames, lucnames, rest = collect_cache(writable_path)
+    if logs.get_loglevel() > 1 then
+        print_cache("writable path", writable_path, luanames, lucnames, rest)
+    end
+    local success = purge_from_cache("writable path", writable_path, luanames, false)
+    return success
+end
+
+--- unit -> unit
+local erase_cache = function ( )
+    local writable_path = caches.getwritablepath()
+    local luanames, lucnames, rest, all = collect_cache(writable_path)
+    if logs.get_loglevel() > 1 then
+        print_cache("writable path", writable_path, luanames, lucnames, rest)
+    end
+    local success = purge_from_cache("writable path", writable_path, all, true)
+    return success
+end
+
+local separator = function ( )
+    report("info", 0, string.rep("-", 67))
+end
+
+--- unit -> unit
+local show_cache = function ( )
+    local readable_paths = caches.getreadablepaths()
+    local writable_path  = caches.getwritablepath()
+    local luanames, lucnames, rest = collect_cache(writable_path)
+
+    separator()
+    print_cache("writable path", writable_path, luanames, lucnames, rest)
+    texiowrite_nl""
+    for i=1,#readable_paths do
+        local readable_path = readable_paths[i]
+        if readable_path ~= writable_path then
+            local luanames, lucnames = collect_cache(readable_path)
+            print_cache("readable path",
+                readable_path,luanames,lucnames,rest)
+        end
+    end
+    separator()
+    return true
+end
+
+--- is this used anywhere? we decided to comment it for the
+--- time being.
+--- https://github.com/lualatex/luaotfload/pull/61
 --scan_external_dir = function (dir)
 --    local old_names, new_names
 --    if fonts_loaded then
@@ -1524,8 +1668,11 @@ end
 --    return n_scanned, n_new
 --end
 
+-----------------------------------------------------------------------
 --- export functionality to the namespace “fonts.names”
-names.flush_cache                 = flush_cache
+-----------------------------------------------------------------------
+
+names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
 names.load                        = load_names
 names.save                        = save_names
@@ -1533,6 +1680,11 @@ names.save                        = save_names
 names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
 names.crude_file_lookup_verbose   = crude_file_lookup_verbose
+
+--- font cache
+names.purge_cache    = purge_cache
+names.erase_cache    = erase_cache
+names.show_cache     = show_cache
 
 --- replace the resolver from luatex-fonts
 if config.luaotfload.resolver == "cached" then

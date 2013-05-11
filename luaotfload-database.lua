@@ -239,7 +239,7 @@ end
 local crude_file_lookup
 local crude_file_lookup_verbose
 local find_closest
-local flush_cache
+local flush_lookup_cache
 local font_fullinfo
 local load_names
 local load_lookups
@@ -1392,7 +1392,7 @@ local function scan_os_fonts(fontnames, newfontnames)
     return n_scanned, n_new
 end
 
-flush_cache = function ()
+flush_lookup_cache = function ()
     if not names.lookups then names.lookups = load_lookups() end
     names.lookups = { }
     collectgarbage"collect"
@@ -1651,7 +1651,7 @@ end
 --- export functionality to the namespace “fonts.names”
 -----------------------------------------------------------------------
 
-names.flush_cache                 = flush_cache --- concerns lookups
+names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
 names.load                        = load_names
 names.save                        = save_names

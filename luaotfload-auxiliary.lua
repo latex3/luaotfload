@@ -64,10 +64,8 @@ local add_fontdata_fallbacks = function (fontdata)
       fontdata.units = fontdata.units_per_em
 
     else --- otf
-      metadata = fontdata.shared.rawdata.metadata
-      fontdata.name    = fontdata.name
-                      or fontdata.fullname
-                      or fontdata.psname
+      metadata         = fontdata.shared.rawdata.metadata
+      fontdata.name    = metadata.origname or fontdata.name
       fontdata.units   = fontdata.units_per_em
       fontdata.size = fontdata.size or fontparameters.size
       local resources  = fontdata.resources

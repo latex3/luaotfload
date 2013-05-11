@@ -36,11 +36,13 @@ see the luaotfload documentation for more info. Report bugs to
 
 --doc]]--
 
-if _G.getfenv then
-    return require"luaotfload-legacy-tool"
-end
-
 kpse.set_program_name"luatex"
+
+if _G.getfenv then
+    local oldscript = kpse.find_file"luaotfload-legacy-tool.lua"
+    print(oldscript)
+    return require(oldscript)
+end
 
 local stringformat    = string.format
 local texiowrite_nl   = texio.write_nl

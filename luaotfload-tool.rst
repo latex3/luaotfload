@@ -21,7 +21,9 @@ SYNOPSIS
 
 **luaotfload** --find=FONTNAME [ --fuzzy ] [ --info ]
 
-**luaotfload** --flush-cache
+**luaotfload** --flush-lookups
+
+**luaotfload** --cache=DIRECTIVE
 
 **luaotfload** --list=CRITERION[:VALUE] [ --fields=F1,F2,...,Fn ]
 
@@ -79,9 +81,17 @@ query mode
                         printed.  The default is *fullname,version*.
                         (Only meaningful with ``--list``.)
 
-lookup cache
+font and lookup caches
 -----------------------------------------------------------------------
---flush-cache           Clear font name lookup cache (experimental).
+--flush-lookups         Clear font name lookup cache (experimental).
+
+--cache=DIRECTIVE       Cache control, where *DIRECTIVE* is one of the
+                        following:
+
+                        1) ``purge`` -> delete Lua files from cache;
+                        2) ``erase`` -> delete Lua and Luc files from
+                           cache;
+                        3) ``show``  -> print stats.
 
 miscellaneous
 -----------------------------------------------------------------------

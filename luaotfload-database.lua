@@ -274,7 +274,10 @@ load_names = function ( )
             [[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
         data = update_names(fontnames_init(false))
-        save_names(data)
+        local success = save_names(data)
+        if not success then
+            report("both", 0, "db", "Database creation unsuccessful.")
+        end
     end
     fonts_loaded = true
     return data
@@ -443,7 +446,10 @@ resolve_cached = function (_, _, specification)
     --- TODO this should trigger a save only once the
     ---      document is compiled (finish_pdffile callback?)
     report("both", 5, "cache", "saving updated cache")
-    save_lookups()
+    local success = save_lookups()
+    if not success then --- sad, but not critical
+        report("both", 0, "cache", "could not write to cache")
+    end
     return filename, subfont, true
 end
 
@@ -675,9 +681,12 @@ end --- resolve()
 reload_db = function (why, caller, ...)
     report("both", 1, "db", "reload initiated; reason: “%s”", why)
     names.data = update_names()
-    save_names()
-    fonts_reloaded = true
-    return caller(...)
+    local success = save_names()
+    if success then
+        fonts_reloaded = true
+        return caller(...)
+    end
+    report("both", 0, "db", "Database update unsuccessful.")
 end
 
 --- string -> string -> int
@@ -1457,7 +1466,7 @@ end
 --- file. As we update it after every single addition this saves us
 --- quite some time.
 
---- unit -> string
+--- unit -> bool
 save_lookups = function ( )
     ---- this is boilerplate and should be refactored into something
     ---- usable by both the db and the cache writers
@@ -1471,19 +1480,19 @@ save_lookups = function ( )
                 os.remove(lucname)
                 caches.compile(lookups, luaname, lucname)
                 report("both", 3, "cache", "Lookup cache saved")
-                return names.path.lookup_path
+                return true
             end
         end
     end
     report("info", 0, "cache", "Could not write lookup cache")
-    return nil
+    return false
 end
 
 --- save_names() is usually called without the argument
---- dbobj -> unit
+--- dbobj? -> bool
 save_names = function (fontnames)
     if not fontnames then fontnames = names.data end
-    local path  = ensure_names_path()
+    local path = ensure_names_path()
     if fileiswritable(path) then
         local luaname, lucname = make_name(names.path.path)
         if luaname then
@@ -1492,13 +1501,13 @@ save_names = function (fontnames)
             if lucname and type(caches.compile) == "function" then
                 os.remove(lucname)
                 caches.compile(fontnames, luaname, lucname)
-                report("info", 0, "db", "Font names database saved")
-                return names.path.path
+                report("info", 1, "db", "Font names database saved")
+                return true
             end
         end
     end
     report("both", 0, "db", "Failed to save names database")
-    return nil
+    return false
 end
 
 scan_external_dir = function (dir)

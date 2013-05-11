@@ -259,6 +259,7 @@ actions.loglevel = function (job)
     logs.set_loglevel(job.log_level)
     logs.names_report("info", 3, "util",
                       "setting log level", "%d", job.log_level)
+    logs.names_report("log", 0, "util", "lua=%s", _VERSION)
     return true, true
 end
 
@@ -277,8 +278,8 @@ actions.generate = function (job)
     fontnames = names.update(fontnames, job.force_reload)
     logs.names_report("info", 2, "db",
         "Fonts in the database: %i", #fontnames.mappings)
-    savedname = names.save(fontnames)
-    if savedname then --- FIXME have names.save return bool
+    local success = names.save(fontnames)
+    if success then
         return true, true
     end
     return false, false
@@ -287,9 +288,9 @@ end
 actions.flush = function (job)
     local success, lookups = names.flush_cache()
     if success then
-        local savedname = names.save_lookups()
-        logs.names_report("info", 2, "cache", "Cache emptied")
-        if savedname then
+        local success = names.save_lookups()
+        if success then
+            logs.names_report("info", 2, "cache", "Cache emptied")
             return true, true
         end
     end

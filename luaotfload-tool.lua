@@ -155,7 +155,7 @@ This tool is part of the luaotfload package. Valid options are:
 
   -u --update                  update the database
   -f --force                   force re-indexing all fonts
-  -c --flush-cache             empty cache of font requests
+  -l --flush-lookups           empty lookup cache of font requests
 
   --find="font name"           query the database for a font name
   -F --fuzzy                   look for approximate matches if --find fails
@@ -533,25 +533,25 @@ local process_cmdline = function ( ) -- unit -> jobspec
     }
 
     local long_options = {
-        alias            = 1,
-        cache            = 1,
-        ["flush-cache"]  = "c",
-        fields           = 1,
-        find             = 1,
-        force            = "f",
-        fuzzy            = "F",
-        help             = "h",
-        info             = "i",
-        limit            = 1,
-        list             = 1,
-        log              = 1,
-        quiet            = "q",
-        update           = "u",
-        verbose          = 1  ,
-        version          = "V",
+        alias              = 1,
+        cache              = 1,
+        ["flush-lookups"]  = "l",
+        fields             = 1,
+        find               = 1,
+        force              = "f",
+        fuzzy              = "F",
+        help               = "h",
+        info               = "i",
+        limit              = 1,
+        list               = 1,
+        log                = 1,
+        quiet              = "q",
+        update             = "u",
+        verbose            = 1  ,
+        version            = "V",
     }
 
-    local short_options = "cfFiquvVh"
+    local short_options = "lfFiquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -600,7 +600,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.show_info = true
         elseif v == "alias" then
             config.luaotfload.self = optarg[n]
-        elseif v == "c" then
+        elseif v == "l" then
             action_pending["flush"] = true
         elseif v == "list" then
             action_pending["list"] = true

@@ -40,7 +40,6 @@ kpse.set_program_name"luatex"
 
 if _G.getfenv then
     local oldscript = kpse.find_file"luaotfload-legacy-tool.lua"
-    print(oldscript)
     return require(oldscript)
 end
 

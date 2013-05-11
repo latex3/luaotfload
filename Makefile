@@ -57,7 +57,7 @@ CTAN_ZIP = $(NAME).zip
 TDS_ZIP  = $(NAME).tds.zip
 ZIPS 	 = $(CTAN_ZIP) $(TDS_ZIP)
 
-DO_TEX 		  	= tex --interaction=batchmode $< >/dev/null
+DO_TEX 		  	= luatex --interaction=batchmode $< >/dev/null
 # (with the next version of latexmk: -pdf -pdflatex=lualatex)
 DO_LATEX 	  	= latexmk -pdf -e '$$pdflatex = q(lualatex %O %S)' -silent $< >/dev/null
 DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null

@@ -259,8 +259,8 @@ local fonts_reloaded = false
 --- limit output when approximate font matching (luaotfload-tool -F)
 local fuzzy_limit = 1 --- display closest only
 
---- unit -> dbobj
-load_names = function ( )
+--- bool? -> dbobj
+load_names = function (dry_run)
     local starttime = os.gettimeofday()
     local foundname, data = load_lua_file(names.path.path)
 
@@ -273,7 +273,7 @@ load_names = function ( )
         report("both", 0, "db",
             [[Font names database not found, generating new one.
              This can take several minutes; please be patient.]])
-        data = update_names(fontnames_init(false))
+        data = update_names(fontnames_init(false), nil, dry_run)
         local success = save_names(data)
         if not success then
             report("both", 0, "db", "Database creation unsuccessful.")
@@ -868,7 +868,9 @@ end
 --- we return true if the fond is new or re-indexed
 --- string -> dbobj -> dbobj -> bool
 local load_font = function (fullname, fontnames, newfontnames)
-    if not fullname then return false end
+    if not fullname then
+        return false
+    end
 
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status
@@ -1070,15 +1072,20 @@ for key, value in next, font_extensions do
    font_extensions_set[value] = true
 end
 
---- string -> dbobj -> dbobj -> bool -> (int * int)
-local scan_dir = function (dirname, fontnames, newfontnames)
-    --[[
-    This function scans a directory and populates the list of fonts
+--[[doc--
+
+    scan_dir() scans a directory and populates the list of fonts
     with all the fonts it finds.
-    - dirname is the name of the directory to scan
-    - names is the font database to fill -> no such term!!!
-    - texmf used to be a boolean saying if we are scanning a texmf directory
-    ]]
+
+        · dirname   : name of the directory to scan
+        · fontnames : current font db object
+        · newnames  : font db object to fill
+        · dry_run   : don’t touch anything
+
+--doc]]--
+
+--- string -> dbobj -> dbobj -> bool -> (int * int)
+local scan_dir = function (dirname, fontnames, newfontnames, dry_run)
     local n_scanned, n_new = 0, 0   --- total of fonts collected
     report("both", 2, "db", "scanning directory %s", dirname)
     for _,i in next, font_extensions do
@@ -1092,9 +1099,16 @@ local scan_dir = function (dirname, fontnames, newfontnames)
             for j=1, n_found do
                 local fullname = found[j]
                 fullname = path_normalize(fullname)
-                report("both", 4, "db", "loading font “%s”", fullname)
-                local new = load_font(fullname, fontnames, newfontnames)
-                if new then n_new = n_new + 1 end
+                local new
+                if dry_run == true then
+                    report("both", 1, "db", "would have been loading “%s”", fullname)
+                else
+                    report("both", 4, "db", "loading font “%s”", fullname)
+                    local new = load_font(fullname, fontnames, newfontnames)
+                    if new == true then
+                        n_new = n_new + 1
+                    end
+                end
             end
         end
     end
@@ -1102,7 +1116,8 @@ local scan_dir = function (dirname, fontnames, newfontnames)
     return n_scanned, n_new
 end
 
-local function scan_texmf_fonts(fontnames, newfontnames)
+--- dbobj -> dbobj -> bool? -> (int * int)
+local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
     local n_scanned, n_new = 0, 0
     --[[
     This function scans all fonts in the texmf tree, through kpathsea
@@ -1118,7 +1133,7 @@ local function scan_texmf_fonts(fontnames, newfontnames)
     if not stringis_empty(fontdirs) then
         for _,d in next, filesplitpath(fontdirs) do
             report("info", 4, "db", "Entering directory %s", d)
-            local found, new = scan_dir(d, fontnames, newfontnames)
+            local found, new = scan_dir(d, fontnames, newfontnames, dry_run)
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end
@@ -1352,6 +1367,7 @@ do --- closure for read_fonts_conf()
 end --- read_fonts_conf closure
 
 --- TODO stuff those paths into some writable table
+--- unit -> string list
 local function get_os_dirs()
     if os.name == 'macosx' then
         return {
@@ -1374,7 +1390,8 @@ local function get_os_dirs()
     return {}
 end
 
-local function scan_os_fonts(fontnames, newfontnames)
+--- dbobj -> dbobj -> bool? -> (int * int)
+local scan_os_fonts = function (fontnames, newfontnames, dry_run)
     local n_scanned, n_new = 0, 0
     --[[
     This function scans the OS fonts through
@@ -1384,14 +1401,15 @@ local function scan_os_fonts(fontnames, newfontnames)
     ]]
     report("info", 2, "db", "Scanning OS fonts...")
     report("info", 3, "db", "Searching in static system directories...")
-    for _,d in next, get_os_dirs() do
-        local found, new = scan_dir(d, fontnames, newfontnames)
+    for _, d in next, get_os_dirs() do
+        local found, new = scan_dir(d, fontnames, newfontnames, dry_run)
         n_scanned = n_scanned + found
         n_new     = n_new     + new
     end
     return n_scanned, n_new
 end
 
+--- unit -> (bool, lookup_cache)
 flush_lookup_cache = function ()
     if not names.lookups then names.lookups = load_lookups() end
     names.lookups = { }
@@ -1399,8 +1417,11 @@ flush_lookup_cache = function ()
     return true, names.lookups
 end
 
---- dbobj -> bool -> dbobj
-update_names = function (fontnames, force)
+--- force:      dictate rebuild from scratch
+--- dry_dun:    don’t write to the db, just scan dirs
+
+--- dbobj? -> bool? -> bool? -> dbobj
+update_names = function (fontnames, force, dry_run)
     if config.luaotfload.update_live == false then
         report("info", 2, "db",
                "skipping database update")
@@ -1421,7 +1442,7 @@ update_names = function (fontnames, force)
         fontnames = fontnames_init(false)
     else
         if not fontnames then
-            fontnames = load_names()
+            fontnames = load_names(dry_run)
         end
         if fontnames.version ~= names.version then
             report("both", 1, "db", "No font names database or old "
@@ -1433,11 +1454,11 @@ update_names = function (fontnames, force)
     read_blacklist()
 
     local scanned, new
-    scanned, new = scan_texmf_fonts(fontnames, newfontnames)
+    scanned, new = scan_texmf_fonts(fontnames, newfontnames, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 
-    scanned, new = scan_os_fonts(fontnames, newfontnames)
+    scanned, new = scan_os_fonts(fontnames, newfontnames, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 

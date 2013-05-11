@@ -282,7 +282,7 @@ end
 
 actions.generate = function (job)
     local fontnames, savedname
-    fontnames = names.update(fontnames, job.force_reload)
+    fontnames = names.update(fontnames, job.force_reload, job.dry_run)
     logs.names_report("info", 2, "db",
         "Fonts in the database: %i", #fontnames.mappings)
     local success = names.save(fontnames)
@@ -535,6 +535,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
     local long_options = {
         alias              = 1,
         cache              = 1,
+        ["dry-run"]        = "D",
         ["flush-lookups"]  = "l",
         fields             = 1,
         find               = 1,
@@ -551,7 +552,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         version            = "V",
     }
 
-    local short_options = "lfFiquvVh"
+    local short_options = "DfFilquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -610,6 +611,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "cache" then
             action_pending["cache"] = true
             result.cache = optarg[n]
+        elseif v == "D" then
+            result.dry_run = true
         end
     end
 

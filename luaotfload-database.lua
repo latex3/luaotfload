@@ -1510,7 +1510,130 @@ save_names = function (fontnames)
     return false
 end
 
---- is this used anywhere?
+--[[doc--
+
+    Below set of functions is modeled after mtx-cache.
+
+--doc]]--
+
+--- string -> string -> string list -> string list -> string list -> unit
+local print_cache = function (category, path, luanames, lucnames, rest)
+    local report_indeed = function (...)
+        report("info", 0, "cache", ...)
+    end
+    report_indeed("Luaotfload cache: %s", category)
+    report_indeed("location: %s", path)
+    report_indeed("[raw]       %4i", #luanames)
+    report_indeed("[compiled]  %4i", #lucnames)
+    report_indeed("[other]     %4i", #rest)
+    report_indeed("[total]     %4i", #luanames + #lucnames + #rest)
+end
+
+--- string -> string -> string list -> bool -> bool
+local purge_from_cache = function (category, path, list, all)
+    report("info", 2, "cache", "Luaotfload cache: %s %s",
+        (all and "erase" or "purge"), category)
+    report("info", 2, "cache", "location: %s",path)
+    local n = 0
+    for i=1,#list do
+        local filename = list[i]
+        if string.find(filename,"luatex%-cache") then -- safeguard
+            if all then
+                report("info", 5, "cache", "removing %s", filename)
+                os.remove(filename)
+                n = n + 1
+            else
+                local suffix = file.suffix(filename)
+                if suffix == "lua" then
+                    local checkname = file.replacesuffix(
+                        filename, "lua", "luc")
+                    if lfs.isfile(checkname) then
+                        report("info", 5, "cache", "removing %s", filename)
+                        os.remove(filename)
+                        n = n + 1
+                    end
+                end
+            end
+        end
+    end
+    report("info", 2, "cache", "removed lua files : %i", n)
+    return true
+end
+--- string -> string list -> int -> string list -> string list -> string list ->
+---     (string list * string list * string list * string list)
+local collect_cache collect_cache = function (path, all, n, luanames,
+                                              lucnames, rest)
+    if not all then
+        local all = dirglob(path .. "/**/*")
+        local luanames, lucnames, rest = { }, { }, { }
+        return collect_cache(nil, all, 1, luanames, lucnames, rest)
+    end
+
+    local filename = all[n]
+    if filename then
+        local suffix = file.suffix(filename)
+        if suffix == "lua" then
+            luanames[#luanames+1] = filename
+        elseif suffix == "luc" then
+            lucnames[#lucnames+1] = filename
+        else
+            rest[#rest+1] = filename
+        end
+        return collect_cache(nil, all, n+1, luanames, lucnames, rest)
+    end
+    return luanames, lucnames, rest, all
+end
+
+--- unit -> unit
+local purge_cache = function ( )
+    local writable_path = caches.getwritablepath()
+    local luanames, lucnames, rest = collect_cache(writable_path)
+    if logs.get_loglevel() > 1 then
+        print_cache("writable path", writable_path, luanames, lucnames, rest)
+    end
+    local success = purge_from_cache("writable path", writable_path, luanames, false)
+    return success
+end
+
+--- unit -> unit
+local erase_cache = function ( )
+    local writable_path = caches.getwritablepath()
+    local luanames, lucnames, rest, all = collect_cache(writable_path)
+    if logs.get_loglevel() > 1 then
+        print_cache("writable path", writable_path, luanames, lucnames, rest)
+    end
+    local success = purge_from_cache("writable path", writable_path, all, true)
+    return success
+end
+
+local separator = function ( )
+    report("info", 0, string.rep("-", 67))
+end
+
+--- unit -> unit
+local show_cache = function ( )
+    local readable_paths = caches.getreadablepaths()
+    local writable_path  = caches.getwritablepath()
+    local luanames, lucnames, rest = collect_cache(writable_path)
+
+    separator()
+    print_cache("writable path", writable_path, luanames, lucnames, rest)
+    texiowrite_nl""
+    for i=1,#readable_paths do
+        local readable_path = readable_paths[i]
+        if readable_path ~= writable_path then
+            local luanames, lucnames = collect_cache(readable_path)
+            print_cache("readable path",
+                readable_path,luanames,lucnames,rest)
+        end
+    end
+    separator()
+    return true
+end
+
+--- is this used anywhere? we decided to comment it for the
+--- time being.
+--- https://github.com/lualatex/luaotfload/pull/61
 --scan_external_dir = function (dir)
 --    local old_names, new_names
 --    if fonts_loaded then
@@ -1524,8 +1647,11 @@ end
 --    return n_scanned, n_new
 --end
 
+-----------------------------------------------------------------------
 --- export functionality to the namespace “fonts.names”
-names.flush_cache                 = flush_cache
+-----------------------------------------------------------------------
+
+names.flush_cache                 = flush_cache --- concerns lookups
 names.save_lookups                = save_lookups
 names.load                        = load_names
 names.save                        = save_names
@@ -1533,6 +1659,11 @@ names.save                        = save_names
 names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
 names.crude_file_lookup_verbose   = crude_file_lookup_verbose
+
+--- font cache
+names.purge_cache    = purge_cache
+names.erase_cache    = erase_cache
+names.show_cache     = show_cache
 
 --- replace the resolver from luatex-fonts
 if config.luaotfload.resolver == "cached" then

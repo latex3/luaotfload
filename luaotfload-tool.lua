@@ -171,6 +171,12 @@ The font database will be saved to
    %s
    %s
 
+-------------------------------------------------------------------------------
+                                   FONT CACHE
+
+  --cache=<directive>          operate on font cache, where <directive> is
+                               “show”, “purge”, or “erase”
+
 ]],
     mkluatexfontdb = [[
 
@@ -246,7 +252,8 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel", "help", "version", "flush", "generate", "list", "query"
+    "loglevel", "help",     "version", "cache",
+    "flush",    "generate", "list",    "query",
 }
 local action_pending  = table.tohash(action_sequence, false)
 
@@ -290,9 +297,28 @@ actions.flush = function (job)
     if success then
         local success = names.save_lookups()
         if success then
-            logs.names_report("info", 2, "cache", "Cache emptied")
+            logs.names_report("info", 2, "cache", "Lookup cache emptied")
             return true, true
         end
+    end
+    return false, false
+end
+
+local cache_directives = {
+    ["purge"] = names.purge_cache,
+    ["erase"] = names.erase_cache,
+    ["show"]  = names.show_cache,
+}
+
+actions.cache = function (job)
+    local directive = cache_directives[job.cache]
+    if not directive or type(directive) ~= "function" then
+        logs.names_report("info", 2, "cache",
+                          "Invalid font cache directive %s.", job.cache)
+        return false, false
+    end
+    if directive() then
+        return true, true
     end
     return false, false
 end
@@ -508,6 +534,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
 
     local long_options = {
         alias            = 1,
+        cache            = 1,
         ["flush-cache"]  = "c",
         fields           = 1,
         find             = 1,
@@ -580,6 +607,9 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.criterion = optarg[n]
         elseif v == "fields" then
             result.asked_fields = optarg[n]
+        elseif v == "cache" then
+            action_pending["cache"] = true
+            result.cache = optarg[n]
         end
     end
 

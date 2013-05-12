@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/10/13 15:05:28
+-- merge date  : 05/12/13 14:50:50
 
 do -- begin closure to overcome local limits and interference
 
@@ -4650,7 +4650,7 @@ local function fromunicode16(str)
     return tonumber(str,16)
   else
     local l,r=match(str,"(....)(....)")
-    return (tonumber(l,16)- 0xD800)*0x400+tonumber(r,16)-0xDC00
+    return (tonumber(l,16))*0x400+tonumber(r,16)-0xDC00
   end
 end
 mappings.loadlumtable=loadlumtable

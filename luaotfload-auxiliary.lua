@@ -32,6 +32,7 @@ local stringformat  = string.format
 local stringgsub    = string.gsub
 local stringbyte    = string.byte
 local stringfind    = string.find
+local tablecopy     = table.copy
 
 -----------------------------------------------------------------------
 ---                          font patches
@@ -466,5 +467,32 @@ local sprint_math_dimension = function (csname, dimenname)
 end
 
 aux.sprint_math_dimension = sprint_math_dimension
+
+-----------------------------------------------------------------------
+---                    extra database functions
+-----------------------------------------------------------------------
+
+--- migrated from luaotfload-database.lua
+--- https://github.com/lualatex/luaotfload/pull/61#issuecomment-17776975
+
+--- string -> (int, int)
+local scan_external_dir = function (dir)
+    local old_names, new_names = names.data
+    if not old_names then
+        old_names = load_names()
+    end
+    new_names = tablecopy(old_names)
+    local n_scanned, n_new = fonts.names.scan_dir(dir, old_names,
+                                                  new_names)
+    --- FIXME
+    --- This doesn’t seem right. If a db update is triggered after this
+    --- point, then the added fonts will be saved along with it --
+    --- which is not as “temporarily” as it should be. (This should be
+    --- addressed during a refactoring of names_resolve().)
+    names.data = new_names
+    return n_scanned, n_new
+end
+
+aux.scan_external_dir = scan_external_dir
 
 -- vim:tw=71:sw=2:ts=2:expandtab

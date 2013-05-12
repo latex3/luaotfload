@@ -249,7 +249,6 @@ local resolve
 local resolve_cached
 local save_names
 local save_lookups
-local scan_external_dir
 local update_names
 
 --- state of the database
@@ -1652,31 +1651,15 @@ local show_cache = function ( )
     return true
 end
 
---- is this used anywhere? we decided to comment it for the
---- time being.
---- https://github.com/lualatex/luaotfload/pull/61
---scan_external_dir = function (dir)
---    local old_names, new_names
---    if fonts_loaded then
---        old_names = names.data
---    else
---        old_names = load_names()
---    end
---    new_names = tablecopy(old_names)
---    local n_scanned, n_new = scan_dir(dir, old_names, new_names)
---    names.data = new_names
---    return n_scanned, n_new
---end
-
 -----------------------------------------------------------------------
 --- export functionality to the namespace “fonts.names”
 -----------------------------------------------------------------------
 
+names.scan_dir                    = scan_dir
 names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
 names.load                        = load_names
 names.save                        = save_names
------.scan                        = scan_external_dir
 names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
 names.crude_file_lookup_verbose   = crude_file_lookup_verbose

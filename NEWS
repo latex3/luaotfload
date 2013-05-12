@@ -1,7 +1,7 @@
 Change History
 --------------
 
-2013/05/06, luaotfload v2.2:
+2013/05/11, luaotfload v2.2:
     * There is now a central, non-personal dev repo on github:
       https://github.com/lualatex/luaotfload
     * Synchronisation with ConTeXt from TeXLive 2013, inducing
@@ -27,6 +27,9 @@ Change History
       allocation, custom merged package name etc.)
     * Auxiliary functions for package authors
     * Man page for luaotfload-tool
+    * Unsupported v1.3 codebase is included in the luaotfload-*lua files. Crude,
+      but effective way to support older Luatex binaries
+    * implemented basic cache control/stats option for luaotfload-tool
 
 2013/04/27, luaotfload v1.3:
     *  blacklisting lingoes.ttf (segfaults)

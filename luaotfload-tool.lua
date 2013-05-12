@@ -26,7 +26,22 @@ see the luaotfload documentation for more info. Report bugs to
 
 --doc]]--
 
+--[[doc--
+
+    We test for Lua 5.1 by means of capability detection to see if
+    we’re running an outdated Luatex.  If so, we hand over control to
+    the legacy db runner.
+
+    \url{http://lua-users.org/wiki/LuaVersionCompatibility}
+
+--doc]]--
+
 kpse.set_program_name"luatex"
+
+if _G.getfenv then
+    local oldscript = kpse.find_file"luaotfload-legacy-tool.lua"
+    return require(oldscript)
+end
 
 local stringformat    = string.format
 local texiowrite_nl   = texio.write_nl

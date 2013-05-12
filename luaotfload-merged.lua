@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/12/13 14:50:50
+-- merge date  : 05/12/13 22:16:22
 
 do -- begin closure to overcome local limits and interference
 
@@ -2896,8 +2896,13 @@ if context then
   texio.write_nl("fatal error: this module is not for context")
   os.exit()
 end
-local dummyfunction=function() end
-local dummyreporter=function(c) return function(...) texio.write_nl(c.." : "..string.formatters(...)) end end
+local dummyfunction=function()
+end
+local dummyreporter=function(c)
+  return function(...)
+    (texio.reporter or texio.write_nl)(c.." : "..string.formatters(...))
+  end
+end
 statistics={
   register=dummyfunction,
   starttiming=dummyfunction,
@@ -8336,7 +8341,7 @@ local fonthashes=fonts.hashes
 local fontdata=fonthashes.identifiers
 local otffeatures=fonts.constructors.newfeatures("otf")
 local registerotffeature=otffeatures.register
-local onetimemessage=fonts.loggers.onetimemessage
+local onetimemessage=fonts.loggers.onetimemessage or function() end
 otf.defaultnodealternate="none"
 local tfmdata=false
 local characters=false
@@ -8733,7 +8738,7 @@ function handlers.gpos_mark2base(head,start,kind,lookupname,markanchors,sequence
             logwarning("%s, no matching anchors for mark %s and base %s",pref(kind,lookupname),gref(markchar),gref(basechar))
           end
         end
-      else
+      elseif trace_bugs then
         onetimemessage(currentfont,basechar,"no base anchors",report_fonts)
       end
     elseif trace_bugs then
@@ -8799,7 +8804,7 @@ function handlers.gpos_mark2ligature(head,start,kind,lookupname,markanchors,sequ
             end
           end
         end
-      else
+      elseif trace_bugs then
         onetimemessage(currentfont,basechar,"no base anchors",report_fonts)
       end
     elseif trace_bugs then
@@ -8852,7 +8857,7 @@ function handlers.gpos_mark2mark(head,start,kind,lookupname,markanchors,sequence
             end
           end
         end
-      else
+      elseif trace_bugs then
         onetimemessage(currentfont,basechar,"no base anchors",report_fonts)
       end
     elseif trace_bugs then
@@ -8901,7 +8906,7 @@ function handlers.gpos_cursive(head,start,kind,lookupname,exitanchors,sequence)
                 end
               end
             end
-          else
+          elseif trace_bugs then
             onetimemessage(currentfont,startchar,"no entry anchors",report_fonts)
           end
           break
@@ -9449,7 +9454,7 @@ function chainprocs.gpos_cursive(head,start,stop,kind,chainname,currentcontext,l
                   end
                 end
               end
-            else
+            elseif trace_bugs then
               onetimemessage(currentfont,startchar,"no entry anchors",report_fonts)
             end
             break

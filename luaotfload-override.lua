@@ -72,7 +72,8 @@ local stdout = function (category, fmt, ...)
     texiowrite_nl(tableconcat(res))
 end
 
-local level_ids = { common  = 0, loading = 1, search  = 2 }
+--- at default (zero), we aim to be quiet
+local level_ids = { common  = 1, loading = 2, search  = 3 }
 
 local names_report = function (mode, lvl, ...)
     if type(lvl) == "string" then
@@ -93,6 +94,24 @@ local names_report = function (mode, lvl, ...)
 end
 
 logs.names_report = names_report
+
+--[[doc--
+
+    The fontloader comes with the Context logging mechanisms
+    inaccessible. Instead, it provides dumb fallbacks based
+    on the functions in texio.write*() that can be overridden
+    by providing a function texio.reporter().
+
+    The fontloader output can be quite verbose, so we disable
+    it entirely by default.
+
+--doc]]--
+
+local texioreporter = function (message)
+    names_report("log", 2, message)
+end
+
+texio.reporter = texioreporter
 
 --[[doc--
 

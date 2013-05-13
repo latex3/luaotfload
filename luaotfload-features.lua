@@ -1053,7 +1053,7 @@ local handle_request = function (specification)
             specification.specification)
         report("log", 0, "load", "use square bracket syntax or consult the documentation.")
         specification.name      = specification.specification
-        specification.lookup    = "file"
+        specification.lookup    = "path"
         return specification
     end
     local lookup, name = select_lookup(request)

@@ -62,7 +62,7 @@ DO_TEX 		  	= luatex --interaction=batchmode $< >/dev/null
 DO_LATEX 	  	= latexmk -pdf -e '$$pdflatex = q(lualatex %O %S)' -silent $< >/dev/null
 DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null
 DO_GLYPHLIST 	= texlua ./mkglyphlist > /dev/null
-DO_DOCUTILS 	= rst2man2 $< >$@ 2>/dev/null
+DO_DOCUTILS 	= rst2man $< >$@ 2>/dev/null
 
 all: $(GENERATED)
 graph: $(GRAPHED)

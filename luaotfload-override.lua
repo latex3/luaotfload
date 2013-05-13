@@ -147,10 +147,11 @@ if fonts then --- need to be running TeX
         if k == "unicodes" then
             local glyphlist = resolvers.findfile"luaotfload-glyphlist.lua"
             if glyphlist then
-                names_report("both", 0, "load", "loading the Adobe glyph list")
+                names_report("log", 1, "load", "loading the Adobe glyph list")
             else
                 glyphlist = resolvers.findfile"font-age.lua"
-                names_report("both", 0, "load", "loading the extended glyph list from ConTeXt")
+                names_report("both", 0, "load",
+                    "loading the extended glyph list from ConTeXt")
             end
             local unicodes      = dofile(glyphlist)
             fonts.encodings.agl = { unicodes = unicodes }

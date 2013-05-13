@@ -68,7 +68,7 @@ local add_fontdata_fallbacks = function (fontdata)
       metadata         = fontdata.shared.rawdata.metadata
       fontdata.name    = metadata.origname or fontdata.name
       fontdata.units   = fontdata.units_per_em
-      fontdata.size = fontdata.size or fontparameters.size
+      fontdata.size    = fontdata.size or fontparameters.size
       local resources  = fontdata.resources
       --- for legacy fontspec.lua and unicode-math.lua
       fontdata.shared.otfdata          = {
@@ -449,21 +449,28 @@ aux.provides_feature = provides_feature
 ---                         font dimensions
 -----------------------------------------------------------------------
 
---- string -> string -> int
-local get_math_dimension = function (csname, dimenname)
-  local fontdata  = identifiers[fontid(csname)]
+--- int -> string -> int
+local get_math_dimension = function (font_id, dimenname)
+  if type(font_id) == "string" then
+    font_id = fontid(font_id) --- safeguard
+  end
+  local fontdata  = identifiers[font_id]
   local mathdata  = fontdata.mathparameters
-  if mathdata then return mathdata[dimenname] or 0 end
+  if mathdata then
+    return mathdata[dimenname] or 0
+  end
   return 0
 end
 
 aux.get_math_dimension = get_math_dimension
 
---- string -> string -> unit
-local sprint_math_dimension = function (csname, dimenname)
-  local dim = get_math_dimension(csname, dimenname)
-  texsprint(luatexbase.catcodetables["latex-package"], dim)
-  texsprint(luatexbase.catcodetables["latex-package"], "sp")
+--- int -> string -> unit
+local sprint_math_dimension = function (font_id, dimenname)
+  if type(font_id) == "string" then
+    font_id = fontid(font_id)
+  end
+  local dim = get_math_dimension(font_id, dimenname)
+  texsprint(luatexbase.catcodetables["latex-package"], dim, "sp")
 end
 
 aux.sprint_math_dimension = sprint_math_dimension

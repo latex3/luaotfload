@@ -187,11 +187,14 @@ and the derived files
              {\normalsize\rmfamily\bfseries}
              {\movecountertomargin\thepart} \zeropoint {}
 \titleformat \section
-             {\normalsize\rmfamily\scshape}%% no \word; life is full of disappointments
+             {\normalsize\rmfamily\scshape}
              {\movecountertomargin\thesection} \zeropoint {}
 \titleformat \subsection
              {\small\rmfamily\itshape}
              {\movecountertomargin\thesubsection} \zeropoint {}
+\titleformat \subsubsection
+             {\normalsize\rmfamily\upshape}
+             {\movecountertomargin\thesubsubsection} \zeropoint {}
 
 \usepackage{tocloft}
 \renewcommand \cftpartfont   {\rmfamily\upshape}
@@ -1178,6 +1181,174 @@ and the derived files
 %   \label{file-graph}
 % \end{figure}
 %
+% \section{Auxiliary Functions}
+%
+% With release version 2.2, \identifier{luaotfload} received
+% additional functions for package authors to call from outside
+% (see the file \fileent{luaotfload-auxiliary.lua} for details).
+% The purpose of this addition twofold.
+% Firstly, \identifier{luaotfload} failed to provide a stable interface
+% to internals in the past which resulted in an unmanageable situation
+% of different packages abusing the raw access to font objects by means
+% of the \luafunction{patch_font} callback.
+% When the structure of the font object changed due to an update, all
+% of these imploded and several packages had to be fixed while
+% simultaneously providing fallbacks for earlier versions.
+% Now the patching is done on the \identifier{luaotfload} side and can
+% be adapted with future modifications to font objects without touching
+% the packages that depend on it.
+% Second, some the capabilities of the font loader and the names
+% database are not immediately relevant in \identifier{luaotfload}
+% itself but might nevertheless be of great value to package authors or
+% end users.
+%
+% Note that the current interface is not yet set in stone and the
+% development team is open to suggestions for improvements or
+% additions.
+%
+% \subsection{Callback Functions}
+%
+% The \luafunction{patch_font} callback is inserted in the wrapper
+% \identifier{luaotfload} provides for the font definition callback
+% (see below, page \pageref{define-font}).
+% At this place it allows manipulating the font object immediately after
+% the font loader is done creating it.
+% For a short demonstration of its usefulness, here is a snippet that
+% writes an entire font object to the file \fileent{fontdump.lua}:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%   \input luaotfload.sty
+%   \directlua{
+%     local dumpfile    = "fontdump.lua"
+%     local dump_font   = function (tfmdata)
+%       local data = table.serialize(tfmdata)
+%       io.savedata(dumpfile, data)
+%     end
+%
+%     luatexbase.add_to_callback(
+%       "luaotfload.patch_font",
+%       dump_font,
+%       "my_private_callbacks.dump_font"
+%     )
+%   }
+%   \font\dumpme=name:Iwona
+%   \bye
+%   \end{verbatim}
+% \end{quote}
+%
+% \emphasis{Beware}: this creates a Lua file of around 150,000 lines of
+% code, taking up 3~\abbrev{mb} of disk space.
+% By inspecting the output you can get a first impression of how a font
+% is structured in \LUATEX’s memory, what elements it is composed of,
+% and in what ways it can be rearranged.
+%
+% \subsubsection{Compatibility with Earlier Versions}
+%
+% As has been touched on in the preface to this section, the structure
+% of the object as returned by the fontloader underwent rather drastic
+% changes during different stages of its development, and not all
+% packages that made use of font patching have kept up with every one
+% of it.
+% To ensure compatibility with these as well as older versions of
+% some packages, \identifier{luaotfload} sets up copies of or references
+% to data in the font table where it used to be located.
+% For instance, important parameters like the requested point size, the
+% units factor, and the font name have again been made accessible from
+% the toplevel of the table even though they were migrated to different
+% subtables in the meantime.
+%
+% \subsubsection{Patches}
+%
+% These are mostly concerned with establishing compatibility with
+% \XETEX.
+%
+% \begin{itemize}
+%   \let\normalitem=\item
+%   \def\ouritem#1{%
+%     \normalitem{\luafunction{#1}}%
+%     \hfill\break
+%   }
+%
+%   \ouritem  {set_sscale_dimens}
+%             Calculate \texmacro{fontdimen}s 10 and 11 to emulate \XETEX.
+%
+%   \ouritem  {set_capheight}
+%             Calculates \texmacro{fontdimen} 8 like \XETEX.
+%
+%   \ouritem  {patch_cambria_domh}
+%             Correct some values of the font \emphasis{Cambria Math}.
+%
+% \end{itemize}
+%
+% \subsection{Package Author’s Interface}
+%
+% As \LUATEX release 1.0 is nearing, the demand for a reliable interface
+% for package authors increases.
+%
+% \subsubsection{Font Properties}
+%
+% Below functions mostly concern querying the different components of a
+% font like for instance the glyphs it contains, or what font features
+% are defined for which scripts.
+%
+% \begin{itemize}
+%   \let\normalitem=\item
+%   \def\ouritem#1{%
+%     \normalitem{\luafunction{#1}}%
+%     \hfill\break
+%   }
+%
+%   \ouritem  {aux.font_has_glyph (id : int, index : int)}
+%             Predicate that returns true if the font \luafunction{id}
+%             has glyph \luafunction{index}.
+%
+%   \ouritem  {aux.slot_of_name(name : string)}
+%             Translates an Adobe Glyph name to the corresponding glyph
+%             slot.
+%
+%   \ouritem  {aux.name_of_slot(slot : int)}
+%             The inverse of \luafunction{slot_of_name}; note that this
+%             might be incomplete as multiple glyph names may map to the
+%             same codepoint, only one of which is returned by
+%             \luafunction{name_of_slot}.
+%
+%   \ouritem  {aux.provides_script(id : int, script : string)}
+%             Test if a font supports \luafunction{script}.
+%
+%   \ouritem  {aux.provides_language(id : int, script : string, language : string)}
+%             Test if a font defines \luafunction{language} for a given
+%             \luafunction{script}.
+%
+%   \ouritem  {aux.provides_feature(id : int, script : string,
+%              language : string, feature : string)}
+%             Test if a font defines \luafunction{feature} for
+%             \luafunction{language} for a given \luafunction{script}.
+%
+%   \ouritem  {aux.get_math_dimension(id : int, dimension : string)}
+%             Get the dimension \luafunction{dimension} of font \luafunction{id}.
+%
+%   \ouritem  {aux.sprint_math_dimension(id : int, dimension : string)}
+%             Same as \luafunction{get_math_dimension()}, but output the value
+%             in scaled points at the \TEX end.
+%
+% \end{itemize}
+%
+% \subsubsection{Database}
+%
+% \begin{itemize}
+%   \let\normalitem=\item
+%   \def\ouritem#1{%
+%     \normalitem{\luafunction{#1}}%
+%     \hfill\break
+%   }
+%
+%   \ouritem  {aux.scan_external_dir(dir : string)}
+%             Include fonts in directory \luafunction{dir} in font lookups without
+%             adding them to the database.
+%
+% \end{itemize}
+%
 % \section{Troubleshooting}
 %
 % If you encounter problems with some fonts, please first update to the latest
@@ -1214,6 +1385,22 @@ and the derived files
 % \begin{verbatim}
 %   \font\test=file:MyFont.otf:script=latn;+liga;
 % \end{verbatim}
+%
+% Another strategy that helps avoiding problems is to not access raw \LUATEX
+% internals directly.
+% Some of them, even though they are dangerous to access, have not been
+% overridden or disabled.
+% Thus, whenever possible prefer the functions in the
+% \luafunction{aux} namespace over direct manipulation of font objects.
+% For example, raw access to the \luafunction{font.fonts} table like:
+%
+% \begin{verbatim}
+%   local somefont = font.fonts[2]
+% \end{verbatim}
+%
+% can render already defined fonts unusable.
+% Instead, the function \luafunction{font.getfont()} should be used because
+% it has been replaced by a safe variant.
 %
 % \part{Implementation}
 %
@@ -1592,8 +1779,8 @@ add_to_callback("hpack_filter",
 add_to_callback("find_vf_file",
                 find_vf_file, "luaotfload.find_vf_file")
 
-loadmodule"lib-dir.lua"   --- required by luaofload-database.lua
-loadmodule"override.lua"  --- “luat-ovr”
+loadmodule"lib-dir.lua"    --- required by luaofload-database.lua
+loadmodule"override.lua"   --- “luat-ovr”
 
 logs.set_loglevel(config.luaotfload.loglevel)
 
@@ -1723,6 +1910,7 @@ create_callback("luaotfload.patch_font", "simple", dummy_function)
 
 %    \end{macrocode}
 % \subsection{\CONTEXT override}
+% \label{define-font}
 % We provide a simplified version of the original font definition
 % callback.
 %

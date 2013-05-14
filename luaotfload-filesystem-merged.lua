@@ -1,6 +1,6 @@
 -- merged file : luaotfload-filesystem-merged.lua
 -- parent file : luaotfload-filesystem.lua
--- merge date  : Tue May 14 12:12:07 2013
+-- merge date  : Tue May 14 12:58:57 2013
 
 do -- begin closure to overcome local limits and interference
 
@@ -656,6 +656,964 @@ local case_2=period*(digit-trailingzeros)^1*(trailingzeros/"")
 local number=digit^1*(case_1+case_2)
 local stripper=Cs((number+1)^0)
 lpeg.patterns.stripzeros=stripper
+
+end -- closure
+
+do -- begin closure to overcome local limits and interference
+
+if not modules then modules={} end modules ['l-string']={
+  version=1.001,
+  comment="companion to luat-lib.mkiv",
+  author="Hans Hagen, PRAGMA-ADE, Hasselt NL",
+  copyright="PRAGMA ADE / ConTeXt Development Team",
+  license="see context related readme files"
+}
+local string=string
+local sub,gmatch,format,char,byte,rep,lower=string.sub,string.gmatch,string.format,string.char,string.byte,string.rep,string.lower
+local lpegmatch,patterns=lpeg.match,lpeg.patterns
+local P,S,C,Ct,Cc,Cs=lpeg.P,lpeg.S,lpeg.C,lpeg.Ct,lpeg.Cc,lpeg.Cs
+local unquoted=patterns.squote*C(patterns.nosquote)*patterns.squote+patterns.dquote*C(patterns.nodquote)*patterns.dquote
+function string.unquoted(str)
+  return lpegmatch(unquoted,str) or str
+end
+function string.quoted(str)
+  return format("%q",str) 
+end
+function string.count(str,pattern) 
+  local n=0
+  for _ in gmatch(str,pattern) do 
+    n=n+1
+  end
+  return n
+end
+function string.limit(str,n,sentinel) 
+  if #str>n then
+    sentinel=sentinel or "..."
+    return sub(str,1,(n-#sentinel))..sentinel
+  else
+    return str
+  end
+end
+local stripper=patterns.stripper
+local collapser=patterns.collapser
+local longtostring=patterns.longtostring
+function string.strip(str)
+  return lpegmatch(stripper,str) or ""
+end
+function string.collapsespaces(str)
+  return lpegmatch(collapser,str) or ""
+end
+function string.longtostring(str)
+  return lpegmatch(longtostring,str) or ""
+end
+local pattern=P(" ")^0*P(-1)
+function string.is_empty(str)
+  if str=="" then
+    return true
+  else
+    return lpegmatch(pattern,str) and true or false
+  end
+end
+local anything=patterns.anything
+local allescapes=Cc("%")*S(".-+%?()[]*") 
+local someescapes=Cc("%")*S(".-+%()[]")  
+local matchescapes=Cc(".")*S("*?")     
+local pattern_a=Cs ((allescapes+anything )^0 )
+local pattern_b=Cs ((someescapes+matchescapes+anything )^0 )
+local pattern_c=Cs (Cc("^")*(someescapes+matchescapes+anything )^0*Cc("$") )
+function string.escapedpattern(str,simple)
+  return lpegmatch(simple and pattern_b or pattern_a,str)
+end
+function string.topattern(str,lowercase,strict)
+  if str=="" or type(str)~="string" then
+    return ".*"
+  elseif strict then
+    str=lpegmatch(pattern_c,str)
+  else
+    str=lpegmatch(pattern_b,str)
+  end
+  if lowercase then
+    return lower(str)
+  else
+    return str
+  end
+end
+function string.valid(str,default)
+  return (type(str)=="string" and str~="" and str) or default or nil
+end
+string.itself=function(s) return s end
+local pattern=Ct(C(1)^0) 
+function string.totable(str)
+  return lpegmatch(pattern,str)
+end
+local replacer=lpeg.replacer("@","%%") 
+function string.tformat(fmt,...)
+  return format(lpegmatch(replacer,fmt),...)
+end
+string.quote=string.quoted
+string.unquote=string.unquoted
+
+end -- closure
+
+do -- begin closure to overcome local limits and interference
+
+if not modules then modules={} end modules ['l-table']={
+  version=1.001,
+  comment="companion to luat-lib.mkiv",
+  author="Hans Hagen, PRAGMA-ADE, Hasselt NL",
+  copyright="PRAGMA ADE / ConTeXt Development Team",
+  license="see context related readme files"
+}
+local type,next,tostring,tonumber,ipairs,select=type,next,tostring,tonumber,ipairs,select
+local table,string=table,string
+local concat,sort,insert,remove=table.concat,table.sort,table.insert,table.remove
+local format,lower,dump=string.format,string.lower,string.dump
+local getmetatable,setmetatable=getmetatable,setmetatable
+local getinfo=debug.getinfo
+local lpegmatch,patterns=lpeg.match,lpeg.patterns
+local floor=math.floor
+local stripper=patterns.stripper
+function table.strip(tab)
+  local lst,l={},0
+  for i=1,#tab do
+    local s=lpegmatch(stripper,tab[i]) or ""
+    if s=="" then
+    else
+      l=l+1
+      lst[l]=s
+    end
+  end
+  return lst
+end
+function table.keys(t)
+  if t then
+    local keys,k={},0
+    for key,_ in next,t do
+      k=k+1
+      keys[k]=key
+    end
+    return keys
+  else
+    return {}
+  end
+end
+local function compare(a,b)
+  local ta,tb=type(a),type(b) 
+  if ta==tb then
+    return a<b
+  else
+    return tostring(a)<tostring(b)
+  end
+end
+local function sortedkeys(tab)
+  if tab then
+    local srt,category,s={},0,0 
+    for key,_ in next,tab do
+      s=s+1
+      srt[s]=key
+      if category==3 then
+      else
+        local tkey=type(key)
+        if tkey=="string" then
+          category=(category==2 and 3) or 1
+        elseif tkey=="number" then
+          category=(category==1 and 3) or 2
+        else
+          category=3
+        end
+      end
+    end
+    if category==0 or category==3 then
+      sort(srt,compare)
+    else
+      sort(srt)
+    end
+    return srt
+  else
+    return {}
+  end
+end
+local function sortedhashkeys(tab,cmp) 
+  if tab then
+    local srt,s={},0
+    for key,_ in next,tab do
+      if key then
+        s=s+1
+        srt[s]=key
+      end
+    end
+    sort(srt,cmp)
+    return srt
+  else
+    return {}
+  end
+end
+function table.allkeys(t)
+  local keys={}
+  for k,v in next,t do
+    for k,v in next,v do
+      keys[k]=true
+    end
+  end
+  return sortedkeys(keys)
+end
+table.sortedkeys=sortedkeys
+table.sortedhashkeys=sortedhashkeys
+local function nothing() end
+local function sortedhash(t,cmp)
+  if t then
+    local s
+    if cmp then
+      s=sortedhashkeys(t,function(a,b) return cmp(t,a,b) end)
+    else
+      s=sortedkeys(t) 
+    end
+    local n=0
+    local function kv(s)
+      n=n+1
+      local k=s[n]
+      return k,t[k]
+    end
+    return kv,s
+  else
+    return nothing
+  end
+end
+table.sortedhash=sortedhash
+table.sortedpairs=sortedhash 
+function table.append(t,list)
+  local n=#t
+  for i=1,#list do
+    n=n+1
+    t[n]=list[i]
+  end
+  return t
+end
+function table.prepend(t,list)
+  local nl=#list
+  local nt=nl+#t
+  for i=#t,1,-1 do
+    t[nt]=t[i]
+    nt=nt-1
+  end
+  for i=1,#list do
+    t[i]=list[i]
+  end
+  return t
+end
+function table.merge(t,...) 
+  t=t or {}
+  for i=1,select("#",...) do
+    for k,v in next,(select(i,...)) do
+      t[k]=v
+    end
+  end
+  return t
+end
+function table.merged(...)
+  local t={}
+  for i=1,select("#",...) do
+    for k,v in next,(select(i,...)) do
+      t[k]=v
+    end
+  end
+  return t
+end
+function table.imerge(t,...)
+  local nt=#t
+  for i=1,select("#",...) do
+    local nst=select(i,...)
+    for j=1,#nst do
+      nt=nt+1
+      t[nt]=nst[j]
+    end
+  end
+  return t
+end
+function table.imerged(...)
+  local tmp,ntmp={},0
+  for i=1,select("#",...) do
+    local nst=select(i,...)
+    for j=1,#nst do
+      ntmp=ntmp+1
+      tmp[ntmp]=nst[j]
+    end
+  end
+  return tmp
+end
+local function fastcopy(old,metatabletoo) 
+  if old then
+    local new={}
+    for k,v in next,old do
+      if type(v)=="table" then
+        new[k]=fastcopy(v,metatabletoo) 
+      else
+        new[k]=v
+      end
+    end
+    if metatabletoo then
+      local mt=getmetatable(old)
+      if mt then
+        setmetatable(new,mt)
+      end
+    end
+    return new
+  else
+    return {}
+  end
+end
+local function copy(t,tables) 
+  tables=tables or {}
+  local tcopy={}
+  if not tables[t] then
+    tables[t]=tcopy
+  end
+  for i,v in next,t do 
+    if type(i)=="table" then
+      if tables[i] then
+        i=tables[i]
+      else
+        i=copy(i,tables)
+      end
+    end
+    if type(v)~="table" then
+      tcopy[i]=v
+    elseif tables[v] then
+      tcopy[i]=tables[v]
+    else
+      tcopy[i]=copy(v,tables)
+    end
+  end
+  local mt=getmetatable(t)
+  if mt then
+    setmetatable(tcopy,mt)
+  end
+  return tcopy
+end
+table.fastcopy=fastcopy
+table.copy=copy
+function table.derive(parent) 
+  local child={}
+  if parent then
+    setmetatable(child,{ __index=parent })
+  end
+  return child
+end
+function table.tohash(t,value)
+  local h={}
+  if t then
+    if value==nil then value=true end
+    for _,v in next,t do 
+      h[v]=value
+    end
+  end
+  return h
+end
+function table.fromhash(t)
+  local hsh,h={},0
+  for k,v in next,t do 
+    if v then
+      h=h+1
+      hsh[h]=k
+    end
+  end
+  return hsh
+end
+local noquotes,hexify,handle,reduce,compact,inline,functions
+local reserved=table.tohash { 
+  'and','break','do','else','elseif','end','false','for','function','if',
+  'in','local','nil','not','or','repeat','return','then','true','until','while',
+}
+local function simple_table(t)
+  if #t>0 then
+    local n=0
+    for _,v in next,t do
+      n=n+1
+    end
+    if n==#t then
+      local tt,nt={},0
+      for i=1,#t do
+        local v=t[i]
+        local tv=type(v)
+        if tv=="number" then
+          nt=nt+1
+          if hexify then
+            tt[nt]=format("0x%04X",v)
+          else
+            tt[nt]=tostring(v) 
+          end
+        elseif tv=="boolean" then
+          nt=nt+1
+          tt[nt]=tostring(v)
+        elseif tv=="string" then
+          nt=nt+1
+          tt[nt]=format("%q",v)
+        else
+          tt=nil
+          break
+        end
+      end
+      return tt
+    end
+  end
+  return nil
+end
+local propername=patterns.propername 
+local function dummy() end
+local function do_serialize(root,name,depth,level,indexed)
+  if level>0 then
+    depth=depth.." "
+    if indexed then
+      handle(format("%s{",depth))
+    else
+      local tn=type(name)
+      if tn=="number" then
+        if hexify then
+          handle(format("%s[0x%04X]={",depth,name))
+        else
+          handle(format("%s[%s]={",depth,name))
+        end
+      elseif tn=="string" then
+        if noquotes and not reserved[name] and lpegmatch(propername,name) then
+          handle(format("%s%s={",depth,name))
+        else
+          handle(format("%s[%q]={",depth,name))
+        end
+      elseif tn=="boolean" then
+        handle(format("%s[%s]={",depth,tostring(name)))
+      else
+        handle(format("%s{",depth))
+      end
+    end
+  end
+  if root and next(root) then
+    local first,last=nil,0
+    if compact then
+      last=#root
+      for k=1,last do
+        if root[k]==nil then
+          last=k-1
+          break
+        end
+      end
+      if last>0 then
+        first=1
+      end
+    end
+    local sk=sortedkeys(root)
+    for i=1,#sk do
+      local k=sk[i]
+      local v=root[k]
+      local t,tk=type(v),type(k)
+      if compact and first and tk=="number" and k>=first and k<=last then
+        if t=="number" then
+          if hexify then
+            handle(format("%s 0x%04X,",depth,v))
+          else
+            handle(format("%s %s,",depth,v)) 
+          end
+        elseif t=="string" then
+          if reduce and tonumber(v) then
+            handle(format("%s %s,",depth,v))
+          else
+            handle(format("%s %q,",depth,v))
+          end
+        elseif t=="table" then
+          if not next(v) then
+            handle(format("%s {},",depth))
+          elseif inline then 
+            local st=simple_table(v)
+            if st then
+              handle(format("%s { %s },",depth,concat(st,", ")))
+            else
+              do_serialize(v,k,depth,level+1,true)
+            end
+          else
+            do_serialize(v,k,depth,level+1,true)
+          end
+        elseif t=="boolean" then
+          handle(format("%s %s,",depth,tostring(v)))
+        elseif t=="function" then
+          if functions then
+            handle(format('%s load(%q),',depth,dump(v)))
+          else
+            handle(format('%s "function",',depth))
+          end
+        else
+          handle(format("%s %q,",depth,tostring(v)))
+        end
+      elseif k=="__p__" then 
+        if false then
+          handle(format("%s __p__=nil,",depth))
+        end
+      elseif t=="number" then
+        if tk=="number" then
+          if hexify then
+            handle(format("%s [0x%04X]=0x%04X,",depth,k,v))
+          else
+            handle(format("%s [%s]=%s,",depth,k,v)) 
+          end
+        elseif tk=="boolean" then
+          if hexify then
+            handle(format("%s [%s]=0x%04X,",depth,tostring(k),v))
+          else
+            handle(format("%s [%s]=%s,",depth,tostring(k),v)) 
+          end
+        elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+          if hexify then
+            handle(format("%s %s=0x%04X,",depth,k,v))
+          else
+            handle(format("%s %s=%s,",depth,k,v)) 
+          end
+        else
+          if hexify then
+            handle(format("%s [%q]=0x%04X,",depth,k,v))
+          else
+            handle(format("%s [%q]=%s,",depth,k,v)) 
+          end
+        end
+      elseif t=="string" then
+        if reduce and tonumber(v) then
+          if tk=="number" then
+            if hexify then
+              handle(format("%s [0x%04X]=%s,",depth,k,v))
+            else
+              handle(format("%s [%s]=%s,",depth,k,v))
+            end
+          elseif tk=="boolean" then
+            handle(format("%s [%s]=%s,",depth,tostring(k),v))
+          elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+            handle(format("%s %s=%s,",depth,k,v))
+          else
+            handle(format("%s [%q]=%s,",depth,k,v))
+          end
+        else
+          if tk=="number" then
+            if hexify then
+              handle(format("%s [0x%04X]=%q,",depth,k,v))
+            else
+              handle(format("%s [%s]=%q,",depth,k,v))
+            end
+          elseif tk=="boolean" then
+            handle(format("%s [%s]=%q,",depth,tostring(k),v))
+          elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+            handle(format("%s %s=%q,",depth,k,v))
+          else
+            handle(format("%s [%q]=%q,",depth,k,v))
+          end
+        end
+      elseif t=="table" then
+        if not next(v) then
+          if tk=="number" then
+            if hexify then
+              handle(format("%s [0x%04X]={},",depth,k))
+            else
+              handle(format("%s [%s]={},",depth,k))
+            end
+          elseif tk=="boolean" then
+            handle(format("%s [%s]={},",depth,tostring(k)))
+          elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+            handle(format("%s %s={},",depth,k))
+          else
+            handle(format("%s [%q]={},",depth,k))
+          end
+        elseif inline then
+          local st=simple_table(v)
+          if st then
+            if tk=="number" then
+              if hexify then
+                handle(format("%s [0x%04X]={ %s },",depth,k,concat(st,", ")))
+              else
+                handle(format("%s [%s]={ %s },",depth,k,concat(st,", ")))
+              end
+            elseif tk=="boolean" then
+              handle(format("%s [%s]={ %s },",depth,tostring(k),concat(st,", ")))
+            elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+              handle(format("%s %s={ %s },",depth,k,concat(st,", ")))
+            else
+              handle(format("%s [%q]={ %s },",depth,k,concat(st,", ")))
+            end
+          else
+            do_serialize(v,k,depth,level+1)
+          end
+        else
+          do_serialize(v,k,depth,level+1)
+        end
+      elseif t=="boolean" then
+        if tk=="number" then
+          if hexify then
+            handle(format("%s [0x%04X]=%s,",depth,k,tostring(v)))
+          else
+            handle(format("%s [%s]=%s,",depth,k,tostring(v)))
+          end
+        elseif tk=="boolean" then
+          handle(format("%s [%s]=%s,",depth,tostring(k),tostring(v)))
+        elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+          handle(format("%s %s=%s,",depth,k,tostring(v)))
+        else
+          handle(format("%s [%q]=%s,",depth,k,tostring(v)))
+        end
+      elseif t=="function" then
+        if functions then
+          local f=getinfo(v).what=="C" and dump(dummy) or dump(v)
+          if tk=="number" then
+            if hexify then
+              handle(format("%s [0x%04X]=load(%q),",depth,k,f))
+            else
+              handle(format("%s [%s]=load(%q),",depth,k,f))
+            end
+          elseif tk=="boolean" then
+            handle(format("%s [%s]=load(%q),",depth,tostring(k),f))
+          elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+            handle(format("%s %s=load(%q),",depth,k,f))
+          else
+            handle(format("%s [%q]=load(%q),",depth,k,f))
+          end
+        end
+      else
+        if tk=="number" then
+          if hexify then
+            handle(format("%s [0x%04X]=%q,",depth,k,tostring(v)))
+          else
+            handle(format("%s [%s]=%q,",depth,k,tostring(v)))
+          end
+        elseif tk=="boolean" then
+          handle(format("%s [%s]=%q,",depth,tostring(k),tostring(v)))
+        elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+          handle(format("%s %s=%q,",depth,k,tostring(v)))
+        else
+          handle(format("%s [%q]=%q,",depth,k,tostring(v)))
+        end
+      end
+    end
+  end
+  if level>0 then
+    handle(format("%s},",depth))
+  end
+end
+local function serialize(_handle,root,name,specification) 
+  local tname=type(name)
+  if type(specification)=="table" then
+    noquotes=specification.noquotes
+    hexify=specification.hexify
+    handle=_handle or specification.handle or print
+    reduce=specification.reduce or false
+    functions=specification.functions
+    compact=specification.compact
+    inline=specification.inline and compact
+    if functions==nil then
+      functions=true
+    end
+    if compact==nil then
+      compact=true
+    end
+    if inline==nil then
+      inline=compact
+    end
+  else
+    noquotes=false
+    hexify=false
+    handle=_handle or print
+    reduce=false
+    compact=true
+    inline=true
+    functions=true
+  end
+  if tname=="string" then
+    if name=="return" then
+      handle("return {")
+    else
+      handle(name.."={")
+    end
+  elseif tname=="number" then
+    if hexify then
+      handle(format("[0x%04X]={",name))
+    else
+      handle("["..name.."]={")
+    end
+  elseif tname=="boolean" then
+    if name then
+      handle("return {")
+    else
+      handle("{")
+    end
+  else
+    handle("t={")
+  end
+  if root then
+    if getmetatable(root) then 
+      local dummy=root._w_h_a_t_e_v_e_r_
+      root._w_h_a_t_e_v_e_r_=nil
+    end
+    if next(root) then
+      do_serialize(root,name,"",0)
+    end
+  end
+  handle("}")
+end
+function table.serialize(root,name,specification)
+  local t,n={},0
+  local function flush(s)
+    n=n+1
+    t[n]=s
+  end
+  serialize(flush,root,name,specification)
+  return concat(t,"\n")
+end
+table.tohandle=serialize
+local maxtab=2*1024
+function table.tofile(filename,root,name,specification)
+  local f=io.open(filename,'w')
+  if f then
+    if maxtab>1 then
+      local t,n={},0
+      local function flush(s)
+        n=n+1
+        t[n]=s
+        if n>maxtab then
+          f:write(concat(t,"\n"),"\n") 
+          t,n={},0 
+        end
+      end
+      serialize(flush,root,name,specification)
+      f:write(concat(t,"\n"),"\n")
+    else
+      local function flush(s)
+        f:write(s,"\n")
+      end
+      serialize(flush,root,name,specification)
+    end
+    f:close()
+    io.flush()
+  end
+end
+local function flattened(t,f,depth) 
+  if f==nil then
+    f={}
+    depth=0xFFFF
+  elseif tonumber(f) then
+    depth=f
+    f={}
+  elseif not depth then
+    depth=0xFFFF
+  end
+  for k,v in next,t do
+    if type(k)~="number" then
+      if depth>0 and type(v)=="table" then
+        flattened(v,f,depth-1)
+      else
+        f[#f+1]=v
+      end
+    end
+  end
+  for k=1,#t do
+    local v=t[k]
+    if depth>0 and type(v)=="table" then
+      flattened(v,f,depth-1)
+    else
+      f[#f+1]=v
+    end
+  end
+  return f
+end
+table.flattened=flattened
+local function unnest(t,f) 
+  if not f then     
+    f={}      
+  end
+  for i=1,#t do
+    local v=t[i]
+    if type(v)=="table" then
+      if type(v[1])=="table" then
+        unnest(v,f)
+      else
+        f[#f+1]=v
+      end
+    else
+      f[#f+1]=v
+    end
+  end
+  return f
+end
+function table.unnest(t) 
+  return unnest(t)
+end
+local function are_equal(a,b,n,m) 
+  if a and b and #a==#b then
+    n=n or 1
+    m=m or #a
+    for i=n,m do
+      local ai,bi=a[i],b[i]
+      if ai==bi then
+      elseif type(ai)=="table" and type(bi)=="table" then
+        if not are_equal(ai,bi) then
+          return false
+        end
+      else
+        return false
+      end
+    end
+    return true
+  else
+    return false
+  end
+end
+local function identical(a,b) 
+  for ka,va in next,a do
+    local vb=b[ka]
+    if va==vb then
+    elseif type(va)=="table" and type(vb)=="table" then
+      if not identical(va,vb) then
+        return false
+      end
+    else
+      return false
+    end
+  end
+  return true
+end
+table.identical=identical
+table.are_equal=are_equal
+function table.compact(t) 
+  if t then
+    for k,v in next,t do
+      if not next(v) then 
+        t[k]=nil
+      end
+    end
+  end
+end
+function table.contains(t,v)
+  if t then
+    for i=1,#t do
+      if t[i]==v then
+        return i
+      end
+    end
+  end
+  return false
+end
+function table.count(t)
+  local n=0
+  for k,v in next,t do
+    n=n+1
+  end
+  return n
+end
+function table.swapped(t,s) 
+  local n={}
+  if s then
+    for k,v in next,s do
+      n[k]=v
+    end
+  end
+  for k,v in next,t do
+    n[v]=k
+  end
+  return n
+end
+function table.mirrored(t) 
+  local n={}
+  for k,v in next,t do
+    n[v]=k
+    n[k]=v
+  end
+  return n
+end
+function table.reversed(t)
+  if t then
+    local tt,tn={},#t
+    if tn>0 then
+      local ttn=0
+      for i=tn,1,-1 do
+        ttn=ttn+1
+        tt[ttn]=t[i]
+      end
+    end
+    return tt
+  end
+end
+function table.reverse(t)
+  if t then
+    local n=#t
+    for i=1,floor(n/2) do
+      local j=n-i+1
+      t[i],t[j]=t[j],t[i]
+    end
+    return t
+  end
+end
+function table.sequenced(t,sep,simple) 
+  if not t then
+    return ""
+  end
+  local n=#t
+  local s={}
+  if n>0 then
+    for i=1,n do
+      s[i]=tostring(t[i])
+    end
+  else
+    n=0
+    for k,v in sortedhash(t) do
+      if simple then
+        if v==true then
+          n=n+1
+          s[n]=k
+        elseif v and v~="" then
+          n=n+1
+          s[n]=k.."="..tostring(v)
+        end
+      else
+        n=n+1
+        s[n]=k.."="..tostring(v)
+      end
+    end
+  end
+  return concat(s,sep or " | ")
+end
+function table.print(t,...)
+  if type(t)~="table" then
+    print(tostring(t))
+  else
+    serialize(print,t,...)
+  end
+end
+setinspector(function(v) if type(v)=="table" then serialize(print,v,"table") return true end end)
+function table.sub(t,i,j)
+  return { unpack(t,i,j) }
+end
+function table.is_empty(t)
+  return not t or not next(t)
+end
+function table.has_one_entry(t)
+  return t and not next(t,next(t))
+end
+function table.loweredkeys(t) 
+  local l={}
+  for k,v in next,t do
+    l[lower(k)]=v
+  end
+  return l
+end
+function table.unique(old)
+  local hash={}
+  local new={}
+  local n=0
+  for i=1,#old do
+    local oi=old[i]
+    if not hash[oi] then
+      n=n+1
+      new[n]=oi
+      hash[oi]=true
+    end
+  end
+  return new
+end
+function table.sorted(t,...)
+  sort(t,...)
+  return t 
+end
 
 end -- closure
 

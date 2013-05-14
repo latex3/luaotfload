@@ -873,8 +873,14 @@ local toboolean = function (s)
   return stringlower(s)
 end
 
---- dirty test if a file: request is actually a path: lookup; don’t
---- ask!
+--[[doc--
+
+    Dirty test if a file: request is actually a path: lookup; don’t
+    ask! Note this fails on Windows-style absolute paths. These will
+    *really* have to use the correct request.
+
+--doc]]--
+
 local check_garbage = function (_,i, garbage)
     if stringfind(garbage, "/") then
         report("log", 0, "load",  --- ffs use path!
@@ -1053,7 +1059,7 @@ local handle_request = function (specification)
             specification.specification)
         report("log", 0, "load", "use square bracket syntax or consult the documentation.")
         specification.name      = specification.specification
-        specification.lookup    = "file"
+        specification.lookup    = "path"
         return specification
     end
     local lookup, name = select_lookup(request)
@@ -1388,9 +1394,13 @@ local anum_specification = {
     },
 }
 
---- below the specifications as given in the removed font-otc.lua
---- the rest was identical to what this file had from the beginning
---- both make the “anum.tex” test pass anyways
+--[[doc--
+
+    Below the specifications as given in the removed font-otc.lua.
+    The rest was identical to what this file had from the beginning.
+    Both make the “anum.tex” test pass anyways.
+
+--doc]]--
 
 otf.addfeature("anum",anum_specification)
 
@@ -1398,36 +1408,5 @@ registerotffeature {
     name        = 'anum',
     description = 'arabic digits',
 }
-
-if characters.combined then
-
-    local tcom = { }
-
-    local function initialize()
-        characters.initialize()
-        for first, seconds in next, characters.combined do
-            for second, combination in next, seconds do
-                tcom[combination] = { first, second }
-            end
-        end
-        -- return false
-    end
-
-    local tcom_specification = {
-        type       = "ligature",
-        features   = everywhere,
-        data       = tcom,
-        flags      = noflags,
-        initialize = initialize,
-    }
-
-    otf.addfeature("tcom",tcom_specification)
-
-    registerotffeature {
-        name        = 'tcom',
-        description = 'tex combinations',
-    }
-
-end
 
 -- vim:tw=71:sw=4:ts=4:expandtab

@@ -6,7 +6,7 @@ if not modules then modules = { } end modules ['luat-ovr'] = {
     license   = "GNU GPL v2"
 }
 
-local module_name = "luaotfload"
+local module_name   = "luaotfload"
 
 local texiowrite_nl = texio.write_nl
 local stringformat  = string.format
@@ -74,6 +74,32 @@ end
 
 --- at default (zero), we aim to be quiet
 local level_ids = { common  = 1, loading = 2, search  = 3 }
+
+--[[doc--
+
+    The names_report logger is used more or less all over luaotfload.
+    Its requirements are twofold:
+
+    1) Provide two logging channels, the terminal and the log file;
+    2) Allow for control over verbosity levels.
+
+    The first part is addressed by specifying the log *mode* as the
+    first argument that can be either “log”, meaning the log file, or
+    “both”: log file and stdout. Anything else is taken as referring to
+    stdout only.
+
+    Verbosity levels, though not as fine-grained as e.g. Context’s
+    system of tracers, allow keeping the logging spam caused by
+    different subsystems manageable. By default, luaotfload will not
+    emit anything if things are running smoothly on level zero. Only
+    warning messages are relayed, while the other messages are skipped
+    over. (This is a little sub-optimal performance-wise since the
+    function calls to the logger are executed regardless.) The log
+    level during a Luatex run can be adjusted by setting the “loglevel”
+    field in config.luaotfload, or by calling logs.set_loglevel() as
+    defined above.
+
+--doc]]--
 
 local names_report = function (mode, lvl, ...)
     if type(lvl) == "string" then
@@ -147,10 +173,11 @@ if fonts then --- need to be running TeX
         if k == "unicodes" then
             local glyphlist = resolvers.findfile"luaotfload-glyphlist.lua"
             if glyphlist then
-                names_report("both", 0, "load", "loading the Adobe glyph list")
+                names_report("log", 1, "load", "loading the Adobe glyph list")
             else
                 glyphlist = resolvers.findfile"font-age.lua"
-                names_report("both", 0, "load", "loading the extended glyph list from ConTeXt")
+                names_report("both", 0, "load",
+                    "loading the extended glyph list from ConTeXt")
             end
             local unicodes      = dofile(glyphlist)
             fonts.encodings.agl = { unicodes = unicodes }

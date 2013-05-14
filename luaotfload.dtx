@@ -1832,13 +1832,13 @@ local resolvefile = fonts.names.crude_file_lookup
 --local resolvefile = fonts.names.crude_file_lookup_verbose
 
 function request_resolvers.file(specification)
-  local name=resolvefile(specification.name)
-  local suffix=file.suffix(name)
+  local name    = resolvefile(specification.name)
+  local suffix  = file.suffix(name)
   if formats[suffix] then
-    specification.forced=suffix
-    specification.name=file.removesuffix(name)
+    specification.forced  = suffix
+    specification.name    = file.removesuffix(name)
   else
-    specification.name=name
+    specification.name = name
   end
 end
 
@@ -1869,6 +1869,7 @@ end
 % For this reason, we introduce an extra check with an early return.
 %
 %    \begin{macrocode}
+
 local type1_formats = { "tfm", "ofm", }
 
 request_resolvers.anon = function (specification)
@@ -1879,6 +1880,20 @@ request_resolvers.anon = function (specification)
             specification.name = file.addsuffix(name, format)
             return
         end
+    end
+    --- under some weird circumstances absolute paths get
+    --- passed to the definer; we have to catch them
+    --- before the name: resolver misinterprets them.
+    name = specification.specification
+    local exists, _ = lfsisfile(name)
+    if exists then --- garbage; we do this because we are nice,
+                   --- not because it is correct
+        logs.names_report("log", 1, "load", "file “%s” exists", name)
+        logs.names_report("log", 1, "load",
+          "... overriding borked anon: lookup with path: lookup")
+        specification.name = name
+        request_resolvers.path(specification)
+        return
     end
     request_resolvers.name(specification)
 end
@@ -1892,9 +1907,21 @@ end
 %
 %    \begin{macrocode}
 request_resolvers.path = function (specification)
-    local exists, _ = lfsisfile(specification.name)
+    local name       = specification.name
+    local exists, _  = lfsisfile(name)
     if not exists then -- resort to file: lookup
+        logs.names_report("log", 1, "load",
+          "path lookup of “%s” unsuccessful, falling back to file:",
+          name)
         request_resolvers.file(specification)
+    else
+      local suffix = file.suffix(name)
+      if formats[suffix] then
+        specification.forced  = suffix
+        specification.name    = file.removesuffix(name)
+      else
+        specification.name = name
+      end
     end
 end
 
@@ -1955,7 +1982,6 @@ loadmodule"features.lua"    --- contains what was “font-ltx” and “font-otc
 loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 
 -- vim:tw=71:sw=4:ts=4:expandtab
-
 
 %    \end{macrocode}
 %

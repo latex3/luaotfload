@@ -479,27 +479,65 @@ aux.sprint_math_dimension = sprint_math_dimension
 ---                    extra database functions
 -----------------------------------------------------------------------
 
+local namesresolve      = fonts.names.resolve
+local namesscan_dir     = fonts.names.scan_dir
+
 --- migrated from luaotfload-database.lua
 --- https://github.com/lualatex/luaotfload/pull/61#issuecomment-17776975
 
---- string -> (int, int)
+--- string -> (int * int)
 local scan_external_dir = function (dir)
-    local old_names, new_names = names.data
-    if not old_names then
-        old_names = load_names()
-    end
-    new_names = tablecopy(old_names)
-    local n_scanned, n_new = fonts.names.scan_dir(dir, old_names,
-                                                  new_names)
-    --- FIXME
-    --- This doesn’t seem right. If a db update is triggered after this
-    --- point, then the added fonts will be saved along with it --
-    --- which is not as “temporarily” as it should be. (This should be
-    --- addressed during a refactoring of names_resolve().)
-    names.data = new_names
-    return n_scanned, n_new
+  local old_names, new_names = names.data
+  if not old_names then
+    old_names = load_names()
+  end
+  new_names = tablecopy(old_names)
+  local n_scanned, n_new = scan_dir(dir, old_names, new_names)
+  --- FIXME
+  --- This doesn’t seem right. If a db update is triggered after this
+  --- point, then the added fonts will be saved along with it --
+  --- which is not as “temporarily” as it should be. (This should be
+  --- addressed during a refactoring of names_resolve().)
+  names.data = new_names
+  return n_scanned, n_new
 end
 
 aux.scan_external_dir = scan_external_dir
+
+--- https://github.com/lualatex/luaotfload/issues/74
+--- string -> (string * int)
+local resolve_fontname = function (name)
+  local foundname, subfont, success = namesresolve(nil, nil, {
+          name          = name,
+          lookup        = "name",
+          optsize       = 0,
+          specification = "name:" .. name,
+  })
+  if success then
+    return foundname, subfont
+  end
+  return false, false
+end
+
+aux.resolve_fontname = resolve_fontname
+
+--- string list -> (string * int)
+local resolve_fontlist
+resolve_fontlist = function (names, n)
+  if not n then
+    return resolve_fontlist(names, 1)
+  end
+  local this = names[n]
+  if this then
+    local foundname, subfont = resolve_fontname(this)
+    if foundname then
+      return foundname, subfont
+    end
+    return resolve_fontlist(names, n+1)
+  end
+  return false, false
+end
+
+aux.resolve_fontlist = resolve_fontlist
 
 -- vim:tw=71:sw=2:ts=2:expandtab

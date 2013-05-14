@@ -76,16 +76,18 @@ local add_fontdata_fallbacks = function (fontdata)
         metadata  = { ascent = metadata.ascent },
       }
       --- for microtype and fontspec
-      local fake_features = { } -- wrong: table.copy(resources.features)
+      --local fake_features = { }
+      local fake_features = table.copy(resources.features)
       setmetatable(fake_features, { __index = function (tab, idx)
-        warning("some package (probably fontspec) is outdated")
-        warning(
-          "attempt to index " ..
-          "tfmdata.shared.otfdata.luatex.features (%s)",
-          idx)
-        --os.exit(1)
-        return nil --- empty anyways
-      end})
+          warning("some package (probably fontspec) is outdated")
+          warning(
+            "attempt to index " ..
+            "tfmdata.shared.otfdata.luatex.features (%s)",
+            idx)
+          --os.exit(1)
+          return tab[idx]
+        end,
+      })
       fontdata.shared.otfdata.luatex = {
         unicodes = resources.unicodes,
         features = fake_features,

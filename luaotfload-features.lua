@@ -1046,6 +1046,17 @@ local handle_slashed = function (modifiers)
     return style, optsize
 end
 
+local extract_subfont
+do
+    local eof         = P(-1)
+    local digit       = R"09"
+    --- Theoretically a valid subfont address can be up to seven
+    --- digits long.
+    local sub_expr    = P"(" * C(digit^1) * P")" * eof
+    local full_path   = C(P(1 - sub_expr)^1)
+    extract_subfont   = full_path * sub_expr
+end
+
 --- spec -> spec
 local handle_request = function (specification)
     local request = lpegmatch(font_request,
@@ -1055,11 +1066,27 @@ local handle_request = function (specification)
         --- in an anonymous lookup;
         --- we try to behave as friendly as possible
         --- just go with it ...
-        report("log", 0, "load", "invalid request “%s” of type anon",
+        report("log", 1, "load", "invalid request “%s” of type anon",
             specification.specification)
-        report("log", 0, "load", "use square bracket syntax or consult the documentation.")
-        specification.name      = specification.specification
-        specification.lookup    = "path"
+        report("log", 1, "load",
+               "use square bracket syntax or consult the documentation.")
+        --- The result of \fontname must be re-feedable into \font
+        --- which is expected by the Latex font mechanism. Now this
+        --- is complicated with TTC fonts that need to pass the
+        --- number of the requested subfont along with the file name.
+        --- Thus we test whether the request is a bare path only or
+        --- ends in a subfont expression (decimal digits inside
+        --- parentheses).
+        --- https://github.com/lualatex/luaotfload/issues/57
+        local fullpath, sub = lpegmatch(extract_subfont,
+                                        specification.specification)
+        if fullpath and sub then
+            specification.sub  = tonumber(sub)
+            specification.name = fullpath
+        else
+            specification.name = specification.specification
+        end
+        specification.lookup = "path"
         return specification
     end
     local lookup, name = select_lookup(request)

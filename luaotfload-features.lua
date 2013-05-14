@@ -1050,7 +1050,7 @@ local extract_subfont
 do
     local eof         = P(-1)
     local digit       = R"09"
-    --- Theoretically a valid subfont address can be up to seven
+    --- Theoretically a valid subfont address can be up to ten
     --- digits long.
     local sub_expr    = P"(" * C(digit^1) * P")" * eof
     local full_path   = C(P(1 - sub_expr)^1)

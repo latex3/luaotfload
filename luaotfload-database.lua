@@ -202,8 +202,10 @@ local fontnames_init = function (keep_cache) --- returns dbobj
     }
 end
 
-local make_name = function (path)
-    return filereplacesuffix(path, "lua"), filereplacesuffix(path, "luc")
+--- string -> (string * string)
+local make_savenames = function (path)
+    return filereplacesuffix(path, "lua"),
+           filereplacesuffix(path, "luc")
 end
 
 --- When loading a lua file we try its binary complement first, which
@@ -1493,7 +1495,7 @@ save_lookups = function ( )
     local lookups  = names.lookups
     local path     = ensure_names_path()
     if fileiswritable(path) then
-        local luaname, lucname = make_name(names.path.lookup_path)
+        local luaname, lucname = make_savenames(names.path.lookup_path)
         if luaname then
             tabletofile(luaname, lookups, true)
             if lucname and type(caches.compile) == "function" then
@@ -1514,7 +1516,7 @@ save_names = function (fontnames)
     if not fontnames then fontnames = names.data end
     local path = ensure_names_path()
     if fileiswritable(path) then
-        local luaname, lucname = make_name(names.path.path)
+        local luaname, lucname = make_savenames(names.path.path)
         if luaname then
             --tabletofile(luaname, fontnames, true, { reduce=true })
             tabletofile(luaname, fontnames, true)

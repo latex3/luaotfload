@@ -25,7 +25,7 @@ MAN			= $(MANPAGE)
 COMPILED    = $(DOC)
 UNPACKED    = luaotfload.sty luaotfload.lua
 GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(GLYPHS) $(MAN)
-SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(SCRIPT) $(OLDSCRIPT) $(GLYPHSCRIPT)
+SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(GLYPHSCRIPT)
 
 # test files
 TESTDIR 		= tests
@@ -35,7 +35,7 @@ TESTFILES_TL 	= $(filter-out $(TESTFILES_SYS), $(TESTFILES))
 
 # Files grouped by installation location
 SCRIPTFILES = $(SCRIPT) $(OLDSCRIPT) $(GLYPHSCRIPT)
-RUNFILES    = $(UNPACKED) $(OTFL)
+RUNFILES    = $(UNPACKED) $(filter-out $(SCRIPTFILES),$(OTFL))
 DOCFILES    = $(DOC) $(DOTPDF) README NEWS
 MANFILES	= $(MANPAGE)
 SRCFILES    = $(DTX) Makefile

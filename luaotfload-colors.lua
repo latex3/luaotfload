@@ -7,12 +7,16 @@ if not modules then modules = { } end modules ['luaotfload-colors'] = {
 }
 
 --[[doc--
+
 buggy coloring with the pre_output_filter when expansion is enabled
     · tfmdata for different expansion values is split over different objects
     · in ``initializeexpansion()``, chr.expansion_factor is set, and only
       those characters that have it are affected
     · in constructors.scale: chr.expansion_factor = ve*1000 if commented out
       makes the bug vanish
+
+explanation: http://tug.org/pipermail/luatex/2013-May/004305.html
+
 --doc]]--
 
 

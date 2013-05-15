@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/12/13 22:16:22
+-- merge date  : 05/14/13 23:14:52
 
 do -- begin closure to overcome local limits and interference
 
@@ -2046,7 +2046,11 @@ function file.splitname(str,splitdrive)
   end
 end
 function file.splitbase(str)
-  return str and lpegmatch(pattern_d,str) 
+  if str then
+    return lpegmatch(pattern_d,str) 
+  else
+    return "",str 
+  end
 end
 function file.nametotable(str,splitdrive)
   if str then

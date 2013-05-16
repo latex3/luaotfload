@@ -276,10 +276,14 @@ local slot_of_name = function (font_id, glyphname, unsafe)
   local fontdata = identifiers[font_id]
   if fontdata then
     local unicode = fontdata.resources.unicodes[glyphname]
-    if unicode and type(unicode) == "number" then
-      return unicode
-    else
-      return unicode[1] --- for multiple components
+    if unicode then
+      if type(unicode) == "number" then
+        return unicode
+      else
+        return unicode[1] --- for multiple components
+      end
+--  else
+--    --- missing
     end
   elseif unsafe == true then -- for Robert
     return raw_slot_of_name(font_id, glyphname)

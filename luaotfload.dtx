@@ -1512,40 +1512,6 @@ local loadmodule = function (name)
 end
 
 %    \end{macrocode}
-%     The font loader expects the \TEX Live cache directories to be in
-%     place and due to some quirk in \fileent{data-con.lua} they are
-%     fixed during the run. It follows that we have to ensure their
-%     presence before we can initialize the fontloader.
-%     The most reliable way to do so is by using the
-%     \luafunction{mkdirs()} function from \CONTEXT’s
-%     \fileent{l-dir.lua}.
-%     Unfortunately, for this to work we need to to preload substantial
-%     parts of the \LUA libraries.
-%
-%    \begin{macrocode}
-
-loadmodule"filesystem-merged.lua"
-
-%    \end{macrocode}
-%   Prepare directories: the cache function in Luatex-Fonts checks for a
-%   writable directory only once during startup. If there is no
-%   \fileent{texmf-var} at this time it will create a subdirectory
-%   \fileent{./luatex-cache} instead.
-%   Thus everything has to be laid out before we load the fontloader.
-%
-%    \begin{macrocode}
-
-
-local cachepath = kpse.expand_var"$TEXMFVAR"
-
-if not lfs.isdir(cachepath) then
-    dir.mkdirs(cachepath)
-    if not lfs.isdir(cachepath) then
-        error( "ERROR could not create directory %s", cachepath)
-    end
-end
-
-%    \end{macrocode}
 % Before \TeX Live 2013 version, \LUATEX had a bug that made ofm fonts fail
 % when called with their extension. There was a side-effect making ofm
 % totally unloadable when luaotfload was present. The following lines are
@@ -1796,6 +1762,7 @@ add_to_callback("hpack_filter",
 add_to_callback("find_vf_file",
                 find_vf_file, "luaotfload.find_vf_file")
 
+loadmodule"lib-dir.lua"    --- required by luaofload-database.lua
 loadmodule"override.lua"   --- “luat-ovr”
 
 logs.set_loglevel(config.luaotfload.loglevel)
@@ -1922,6 +1889,7 @@ end
 % system, otherwise we fall back to the \verb|file:| lookup.
 %
 %    \begin{macrocode}
+
 request_resolvers.path = function (specification)
     local name       = specification.name
     local exists, _  = lfsisfile(name)

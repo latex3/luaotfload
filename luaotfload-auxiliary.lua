@@ -484,6 +484,8 @@ aux.sprint_math_dimension = sprint_math_dimension
 local namesresolve      = fonts.names.resolve
 local namesscan_dir     = fonts.names.scan_dir
 
+--- local directories -------------------------------------------------
+
 --- migrated from luaotfload-database.lua
 --- https://github.com/lualatex/luaotfload/pull/61#issuecomment-17776975
 
@@ -505,6 +507,8 @@ local scan_external_dir = function (dir)
 end
 
 aux.scan_external_dir = scan_external_dir
+
+--- db queries --------------------------------------------------------
 
 --- https://github.com/lualatex/luaotfload/issues/74
 --- string -> (string * int)
@@ -541,5 +545,73 @@ resolve_fontlist = function (names, n)
 end
 
 aux.resolve_fontlist = resolve_fontlist
+
+--- loaded fonts ------------------------------------------------------
+
+--- just a proof of concept
+
+--- fontobj -> string list -> (string list) list
+local get_font_data get_font_data = function (tfmdata, keys, acc, n)
+  if not acc then
+    return get_font_data(tfmdata, keys, {}, 1)
+  end
+  local key = keys[n]
+  if key then
+    local val = tfmdata[key]
+    if val then
+      acc[#acc+1] = val
+    else
+      acc[#acc+1] = false
+    end
+    return get_font_data(tfmdata, keys, acc, n+1)
+  end
+  return acc
+end
+
+--[[doc--
+
+    The next one operates on the fonts.hashes.identifiers table.
+    It returns a list containing tuples of font ids and the
+    contents of the fields specified in the first argument.
+    Font table entries that were created indirectly -- e.g. by
+    \letterspacefont or during font expansion -- will not be
+    listed.
+
+--doc]]--
+
+local default_keys = { "fullname" }
+
+--- string list -> (int * string list) list
+local get_loaded_fonts get_loaded_fonts = function (keys, acc, lastid)
+  if not acc then
+    if not keys then
+      keys = default_keys
+    end
+    return get_loaded_fonts(keys, {}, lastid)
+  end
+  local id, tfmdata = next(identifiers, lastid)
+  if id then
+    local data = get_font_data(tfmdata, keys)
+    acc[#acc+1] = { id, data }
+    return get_loaded_fonts (keys, acc, id)
+  end
+  return acc
+end
+
+aux.get_loaded_fonts = get_loaded_fonts
+
+--- Raw access to the font.* namespace is unsafe so no documentation on
+--- this one.
+local get_raw_fonts = function ( )
+  local res = { }
+  for i, v in font.each() do
+    if v.filename then
+      res[#res+1] = { i, v }
+    end
+  end
+  return res
+end
+
+aux.get_raw_fonts = get_raw_fonts
 
 -- vim:tw=71:sw=2:ts=2:expandtab

@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/14/13 23:14:52
+-- merge date  : 05/16/13 00:29:34
 
 do -- begin closure to overcome local limits and interference
 
@@ -1986,7 +1986,7 @@ elseif not lfs.isfile then
   end
 end
 local insert,concat=table.insert,table.concat
-local match,find=string.match,string.find
+local match,find,gmatch=string.match,string.find,string.gmatch
 local lpegmatch=lpeg.match
 local getcurrentdir,attributes=lfs.currentdir,lfs.attributes
 local checkedsplit=string.checkedsplit
@@ -2297,6 +2297,19 @@ function file.strip(name,dir)
   if name then
     local b,a=match(name,"^(.-)"..dir.."(.*)$")
     return a~="" and a or name
+  end
+end
+function lfs.mkdirs(path)
+  local full
+  for sub in gmatch(path,"([^\\/]+)") do
+    if full then
+      full=full.."/"..sub
+    else
+      full=sub
+    end
+    if not lfs.isdir(full) then
+      lfs.mkdir(full)
+    end
   end
 end
 
@@ -3006,8 +3019,15 @@ do
   end
   cachepaths=string.split(cachepaths,os.type=="windows" and ";" or ":")
   for i=1,#cachepaths do
-    if file.is_writable(cachepaths[i]) then
-      writable=file.join(cachepaths[i],"luatex-cache")
+    local cachepath=cachepaths[i]
+    if not lfs.isdir(cachepath) then
+      lfs.mkdirs(cachepath) 
+      if lfs.isdir(cachepath) then
+        texio.write(string.format("(created cache path: %s)",cachepath))
+      end
+    end
+    if file.is_writable(cachepath) then
+      writable=file.join(cachepath,"luatex-cache")
       lfs.mkdir(writable)
       writable=file.join(writable,caches.namespace)
       lfs.mkdir(writable)
@@ -6809,7 +6829,7 @@ local function checkmathsize(tfmdata,mathsize)
 end
 registerotffeature {
   name="mathsize",
-  description="apply mathsize as specified in the font",
+  description="apply mathsize specified in the font",
   initializers={
     base=checkmathsize,
     node=checkmathsize,

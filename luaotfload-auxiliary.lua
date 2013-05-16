@@ -230,6 +230,8 @@ luatexbase.add_to_callback(
 ---                             glyphs
 -----------------------------------------------------------------------
 
+local agl = fonts.encodings.agl
+
 --- int -> int -> bool
 local font_has_glyph = function (font_id, codepoint)
   local fontdata = fonts.hashes.identifiers[font_id]
@@ -241,6 +243,20 @@ end
 
 aux.font_has_glyph = font_has_glyph
 
+--- undocumented
+
+local raw_slot_of_name = function (font_id, glyphname)
+  local fontdata = font.fonts[font_id]
+  if fontdata.type == "virtual" then --- get base font for glyph idx
+    local codepoint  = agl.unicodes[glyphname]
+    local glyph      = fontdata.characters[codepoint]
+    if fontdata.characters[codepoint] then
+      return codepoint
+    end
+  end
+  return false
+end
+
 --[[doc--
 
   This one is approximately “name_to_slot” from the microtype package;
@@ -249,10 +265,14 @@ aux.font_has_glyph = font_has_glyph
 
   http://www.adobe.com/devnet/opentype/archives/glyph.html
 
+  The “unsafe” switch triggers a fallback lookup in the raw fonts
+  table. As some of the information is stored as references, this may
+  have unpredictable side-effects.
+
 --doc]]--
 
---- int -> string -> (int | false)
-local slot_of_name = function (font_id, glyphname)
+--- int -> string -> bool -> (int | false)
+local slot_of_name = function (font_id, glyphname, unsafe)
   local fontdata = identifiers[font_id]
   if fontdata then
     local unicode = fontdata.resources.unicodes[glyphname]
@@ -261,6 +281,8 @@ local slot_of_name = function (font_id, glyphname)
     else
       return unicode[1] --- for multiple components
     end
+  elseif unsafe == true then -- for Robert
+    return raw_slot_of_name(font_id, glyphname)
   end
   return false
 end
@@ -283,7 +305,7 @@ local indices
 --- int -> (string | false)
 local name_of_slot = function (codepoint)
   if not indices then --- this will load the glyph list
-    local unicodes = fonts.encodings.agl.unicodes
+    local unicodes = agl.unicodes
     indices = table.swapped(unicodes)
   end
   local glyphname = indices[codepoint]

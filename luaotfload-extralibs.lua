@@ -278,7 +278,7 @@ commands = commands or { }
 
 --- we should be ready at this moment to insert the library
 
-require "typo-krn"
+require "luaotfload-typo-krn"
 
 --===================================================================--
 ---                              CLEAN

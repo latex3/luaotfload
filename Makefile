@@ -7,6 +7,9 @@ OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf
 
 GLYPHSCRIPT  = mkglyphlist
 GLYPHSOURCE  = glyphlist.txt
+CHARSCRIPT   = mkcharacters
+
+RESOURCESCRIPTS = $(GLYPHSCRIPT) $(CHARSCRIPT)
 
 SCRIPTNAME   = luaotfload-tool
 SCRIPT       = $(SCRIPTNAME).lua
@@ -20,12 +23,13 @@ DOT    		 = $(GRAPH).dot
 
 # Files grouped by generation mode
 GLYPHS      = luaotfload-glyphlist.lua
+CHARS       = luaotfload-characters.lua
 GRAPHED     = $(DOTPDF)
 MAN			= $(MANPAGE)
 COMPILED    = $(DOC)
 UNPACKED    = luaotfload.sty luaotfload.lua
-GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(GLYPHS) $(MAN)
-SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(GLYPHSCRIPT)
+GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(GLYPHS) $(CHARS) $(MAN)
+SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(RESOURCESCRIPTS)
 
 # test files
 TESTDIR 		= tests
@@ -34,7 +38,7 @@ TESTFILES_SYS 	= $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.t
 TESTFILES_TL 	= $(filter-out $(TESTFILES_SYS), $(TESTFILES))
 
 # Files grouped by installation location
-SCRIPTFILES = $(SCRIPT) $(OLDSCRIPT) $(GLYPHSCRIPT)
+SCRIPTFILES = $(SCRIPT) $(OLDSCRIPT) $(RESOURCESCRIPTS)
 RUNFILES    = $(UNPACKED) $(filter-out $(SCRIPTFILES),$(OTFL))
 DOCFILES    = $(DOC) $(DOTPDF) README NEWS
 MANFILES	= $(MANPAGE)
@@ -57,11 +61,14 @@ CTAN_ZIP = $(NAME).zip
 TDS_ZIP  = $(NAME).tds.zip
 ZIPS 	 = $(CTAN_ZIP) $(TDS_ZIP)
 
+LUA	= texlua
+
 DO_TEX 		  	= luatex --interaction=batchmode $< >/dev/null
 # (with the next version of latexmk: -pdf -pdflatex=lualatex)
 DO_LATEX 	  	= latexmk -pdf -e '$$pdflatex = q(lualatex %O %S)' -silent $< >/dev/null
 DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null
-DO_GLYPHLIST 	= texlua ./mkglyphlist > /dev/null
+DO_GLYPHS 		= $(LUA) $(GLYPHSCRIPT) > /dev/null
+DO_CHARS 		= $(LUA) $(CHARSCRIPT)  > /dev/null
 DO_DOCUTILS 	= rst2man $< >$@ 2>/dev/null
 
 all: $(GENERATED)
@@ -69,13 +76,17 @@ graph: $(GRAPHED)
 doc: $(GRAPHED) $(COMPILED) $(MAN)
 manual: $(MAN)
 unpack: $(UNPACKED)
-glyphs: $(GLYPHS)
+resources: $(GLYPHS) $(CHARS)
+chars: $(CHARS)
 ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)
 world: all ctan
 
 $(GLYPHS): /dev/null
-	$(DO_GLYPHLIST)
+	$(DO_GLYPHS)
+
+$(CHARS): /dev/null
+	$(DO_CHARS)
 
 $(GRAPHED): $(DOT)
 	$(DO_GRAPHVIZ)

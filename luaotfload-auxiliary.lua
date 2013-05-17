@@ -21,7 +21,8 @@ config.luaotfload           = config.luaotfload or { }
 local aux           = luaotfload.aux
 local log           = luaotfload.log
 local warning       = luaotfload.log
-local identifiers   = fonts.hashes.identifiers
+local fonthashes    = fonts.hashes
+local identifiers   = fonthashes.identifiers
 
 local fontid        = font.id
 local texsprint     = tex.sprint
@@ -679,5 +680,54 @@ local get_raw_fonts = function ( )
 end
 
 aux.get_raw_fonts = get_raw_fonts
+
+-----------------------------------------------------------------------
+---                         font parameters
+-----------------------------------------------------------------------
+--- analogy of font-hsh
+
+fonthashes.parameters    = fonthashes.parameters or { }
+fonthashes.quads         = fonthashes.quads or { }
+
+local parameters         = fonthashes.parameters or { }
+local quads              = fonthashes.quads or { }
+
+setmetatable(parameters, { __index = function (t, font_id)
+  local tfmdata = identifiers[font_id]
+  if not tfmdata then --- unsafe; avoid
+    tfmdata = font.fonts[font_id]
+  end
+  if tfmdata and type(tfmdata) == "table" then
+    local fontparameters = tfmdata.parameters
+    t[font_id] = fontparameters
+    return fontparameters
+  end
+  return nil
+end})
+
+--[[doc--
+
+  Note that the reason as to why we prefer functions over table indices
+  is that functions are much safer against unintended manipulation.
+  This justifies the overhead they cost.
+
+--doc]]--
+
+--- int -> (number | false)
+local get_quad = function (font_id)
+  local quad = quads[font_id]
+  if quad then
+    return quad
+  end
+  local fontparameters = parameters[font_id]
+  if fontparameters then
+    local quad     = fontparameters.quad or 0
+    quads[font_id] = quad
+    return quad
+  end
+  return false
+end
+
+aux.get_quad = get_quad
 
 -- vim:tw=71:sw=2:ts=2:expandtab

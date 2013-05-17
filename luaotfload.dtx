@@ -1815,14 +1815,14 @@ local resolvefile = fonts.names.crude_file_lookup
 --local resolvefile = fonts.names.crude_file_lookup_verbose
 
 function request_resolvers.file(specification)
-  local name    = resolvefile(specification.name)
-  local suffix  = file.suffix(name)
-  if formats[suffix] then
-    specification.forced  = suffix
-    specification.name    = file.removesuffix(name)
-  else
-    specification.name = name
-  end
+    local name    = resolvefile(specification.name)
+    local suffix  = file.suffix(name)
+    if formats[suffix] then
+        specification.forced  = suffix
+        specification.name    = file.removesuffix(name)
+    else
+        specification.name = name
+    end
 end
 
 
@@ -1963,6 +1963,7 @@ elseif font_definer == "patch"  then
 end
 
 loadmodule"features.lua"    --- contains what was “font-ltx” and “font-otc”
+loadmodule"extralibs.lua"   --- load additional Context libraries
 loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 
 -- vim:tw=71:sw=4:ts=4:expandtab

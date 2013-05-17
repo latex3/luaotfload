@@ -104,7 +104,11 @@ end
 do
   local chardata    = get_characters()
   local stripped    = extract_fields(chardata)
-  local serialized  = table.serialize(stripped)
+  local serialized  = table.serialize(stripped, true, {
+    compact   = true,
+    noquotes  = true,
+    hexify    = true, --- for consistency with char-def
+  })
   if writedata(serialized) then
     goto done
   end

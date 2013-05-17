@@ -367,7 +367,6 @@ collectgarbage"collect"
 --[[example--
 
 \input luaotfload.sty
-\RequireLuaModule{letterspace-support.lua}
 \def\setcharacterkerning#1{% #1 factor : float
   \directlua{typesetters.kerns.set(0.618)}%
 }

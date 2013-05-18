@@ -24,11 +24,12 @@ DOT    		 = $(GRAPH).dot
 # Files grouped by generation mode
 GLYPHS      = luaotfload-glyphlist.lua
 CHARS       = luaotfload-characters.lua
+RESOURCES	= $(GLYPHS) $(CHARS)
 GRAPHED     = $(DOTPDF)
 MAN			= $(MANPAGE)
 COMPILED    = $(DOC)
 UNPACKED    = luaotfload.sty luaotfload.lua
-GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(GLYPHS) $(CHARS) $(MAN)
+GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(RESOURCES) $(MAN)
 SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(RESOURCESCRIPTS)
 
 # test files
@@ -76,7 +77,7 @@ graph: $(GRAPHED)
 doc: $(GRAPHED) $(COMPILED) $(MAN)
 manual: $(MAN)
 unpack: $(UNPACKED)
-resources: $(GLYPHS) $(CHARS)
+resources: $(RESOURCES)
 chars: $(CHARS)
 ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)

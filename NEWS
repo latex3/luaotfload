@@ -1,7 +1,7 @@
 Change History
 --------------
 
-2013/05/17, luaotfload v2.2:
+2013/05/18, luaotfload v2.2:
     * There is now a central, non-personal dev repo on github:
       https://github.com/lualatex/luaotfload
     * Synchronisation with ConTeXt from TeXLive 2013, inducing

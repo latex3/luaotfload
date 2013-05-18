@@ -230,7 +230,12 @@ attributes.private = attributes.private or function (attr_name)
   return res
 end
 
-attributes.unsetvalue = luatexbase.get_unset_value()
+if luatexbase.get_unset_value then
+  attributes.unsetvalue = luatexbase.get_unset_value()
+else -- old luatexbase
+  attributes.unsetvalue = (luatexbase.luatexversion < 37) and -1
+                       or -2147483647
+end
 
 -----------------------------------------------------------------------
 --- luat-sto

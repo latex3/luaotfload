@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/16/13 00:29:34
+-- merge date  : 05/18/13 02:06:59
 
 do -- begin closure to overcome local limits and interference
 
@@ -7434,8 +7434,8 @@ local function featuresinitializer(tfmdata,value)
           end
         end
       end
-      if basepositions then
-        for feature,data in next,basepositions do
+      if basepositionings then
+        for feature,data in next,basepositionings do
           local value=features[feature]
           if value then
             local validlookups,lookuplist=collectlookups(rawdata,feature,script,language)

@@ -111,7 +111,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2013/04/16 v2.2 OpenType layout system]%
+  [2013/05/18 v2.2 OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
 \usepackage[x11names]{xcolor}
@@ -231,7 +231,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \identifier{luaotfload} package}
-% \date{2013/05/05 v2.2}
+% \date{2013/05/18 v2.2}
 % \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
 %         Home:      \url{https://github.com/lualatex/luaotfload}\\
 %         Support:   \email{lualatex-dev@tug.org}}
@@ -1444,7 +1444,7 @@ config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_l
 luaotfload.module = {
     name          = "luaotfload",
     version       = 2.2,
-    date          = "2013/04/29",
+    date          = "2013/05/18",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -1815,14 +1815,14 @@ local resolvefile = fonts.names.crude_file_lookup
 --local resolvefile = fonts.names.crude_file_lookup_verbose
 
 function request_resolvers.file(specification)
-  local name    = resolvefile(specification.name)
-  local suffix  = file.suffix(name)
-  if formats[suffix] then
-    specification.forced  = suffix
-    specification.name    = file.removesuffix(name)
-  else
-    specification.name = name
-  end
+    local name    = resolvefile(specification.name)
+    local suffix  = file.suffix(name)
+    if formats[suffix] then
+        specification.forced  = suffix
+        specification.name    = file.removesuffix(name)
+    else
+        specification.name = name
+    end
 end
 
 
@@ -1963,6 +1963,7 @@ elseif font_definer == "patch"  then
 end
 
 loadmodule"features.lua"    --- contains what was “font-ltx” and “font-otc”
+loadmodule"extralibs.lua"   --- load additional Context libraries
 loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 
 -- vim:tw=71:sw=4:ts=4:expandtab
@@ -1990,7 +1991,7 @@ loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2013/05/10 v2.2 OpenType layout system]
+    [2013/05/18 v2.2 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
 \ifnum\luatexversion<76

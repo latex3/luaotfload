@@ -6,10 +6,10 @@ if not modules then modules = { } end modules ["features"] = {
     license   = "see context related readme files"
 }
 
-local format, insert    = string.format, table.insert
 local type, next        = type, next
+local tonumber          = tonumber
+local tostring          = tostring
 local lpegmatch         = lpeg.match
-local mathceil          = math.ceil
 
 ---[[ begin included font-ltx.lua ]]
 --- this appears to be based in part on luatex-fonts-def.lua
@@ -29,15 +29,15 @@ function fonts.definers.getspecification(str)
     return "", str, "", ":", str
 end
 
-local old_feature_list = { }
-
 local report = logs.names_report
 
 local stringfind       = string.find
 local stringlower      = string.lower
 local stringgsub       = string.gsub
 local stringsub        = string.sub
+local stringformat     = string.format
 local stringis_empty   = string.is_empty
+local mathceil         = math.ceil
 
 --- TODO an option to dump the default features for a script would make
 ---      a nice addition to luaotfload-tool
@@ -1298,11 +1298,11 @@ local function addfeature(data,feature,specifications)
                 local featuretype   = types[specification.type or "substitution"]
                 local featureflags  = specification.flags or noflags
                 local added         = false
-                local featurename   = format("ctx_%s_%s",feature,s)
+                local featurename   = stringformat("ctx_%s_%s",feature,s)
                 local st = { }
                 for t=1,#subtables do
                     local list = subtables[t]
-                    local full = format("%s_%s",featurename,t)
+                    local full = stringformat("%s_%s",featurename,t)
                     st[t] = full
                     if featuretype == "gsub_ligature" then
                         lookuptypes[full] = "ligature"

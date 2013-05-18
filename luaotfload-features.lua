@@ -35,6 +35,7 @@ local report = logs.names_report
 local stringfind       = string.find
 local stringlower      = string.lower
 local stringgsub       = string.gsub
+local stringsub        = string.sub
 local stringis_empty   = string.is_empty
 
 --- TODO an option to dump the default features for a script would make
@@ -864,13 +865,34 @@ end
 ---
 -----------------------------------------------------------------------
 
+--[[doc--
+
+    One further incompatibility between Xetex and Luatex-Fonts consists
+    in their option list syntax: apparently, Xetex requires key-value
+    options to be prefixed by a "+" (ascii “plus”) character. We
+    silently accept this as well, dropping the first byte if it is a
+    plus or minus character.
+
+    Reference: https://github.com/lualatex/luaotfload/issues/79#issuecomment-18104483
+
+--doc]]--
+
+local strip_leading_sign = function (s)
+    --- handle option list keys
+    local first = stringsub(s, 1, 1)
+    if first == "+" or first == "-" then --- Xetex style
+        return stringsub(s, 2)
+    end
+    return s
+end
 
 local toboolean = function (s)
-  if s == "true"  then return true  end
-  if s == "false" then return false end
---if s == "yes"   then return true  end --- Context style
---if s == "no"    then return false end
-  return stringlower(s)
+    --- handle option list values
+    if s == "true"  then return true  end
+    if s == "false" then return false end
+    --if s == "yes"   then return true  end --- Context style
+    --if s == "no"    then return false end
+    return stringlower(s)
 end
 
 --[[doc--
@@ -956,7 +978,9 @@ local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
 local field             = (anum + S"+-.")^1 --- sic!
 --- assignments are “lhs=rhs”
 --- switches    are “+key” | “-key”
-local assignment        = C(field) * ws * equals * ws * (field / toboolean)
+local assignment        = (field / strip_leading_sign) * ws
+                        * equals * ws
+                        * (field / toboolean)
 local switch            = P"+" * ws * C(field) * Cc(true)
                         + P"-" * ws * C(field) * Cc(false)
                         +             C(field) * Cc(true) -- catch crap

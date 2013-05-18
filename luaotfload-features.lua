@@ -9,6 +9,7 @@ if not modules then modules = { } end modules ["features"] = {
 local format, insert    = string.format, table.insert
 local type, next        = type, next
 local lpegmatch         = lpeg.match
+local mathceil          = math.ceil
 
 ---[[ begin included font-ltx.lua ]]
 --- this appears to be based in part on luatex-fonts-def.lua
@@ -877,22 +878,83 @@ end
 
 --doc]]--
 
-local strip_leading_sign = function (s)
-    --- handle option list keys
-    local first = stringsub(s, 1, 1)
-    if first == "+" or first == "-" then --- Xetex style
-        return stringsub(s, 2)
+--local strip_leading_sign = function (s)
+--    --- handle option list keys
+--    local first = stringsub(s, 1, 1)
+--    if first == "+" or first == "-" then --- Xetex style
+--        return stringsub(s, 2)
+--    end
+--    return s
+--end
+--
+--local toboolean = function (s)
+--    --- handle option list values
+--    if s == "true"  then return true  end
+--    if s == "false" then return false end
+--    --if s == "yes"   then return true  end --- Context style
+--    --if s == "no"    then return false end
+--    return stringlower(s)
+--end
+
+local handle_normal_option = function (key, val)
+    val = stringlower(val)
+    --- the former “toboolean()” handler
+    if val == "true"  then
+        val = true
+    elseif val == "false" then
+        val = false
     end
-    return s
+    return key, val
 end
 
-local toboolean = function (s)
-    --- handle option list values
-    if s == "true"  then return true  end
-    if s == "false" then return false end
-    --if s == "yes"   then return true  end --- Context style
-    --if s == "no"    then return false end
-    return stringlower(s)
+--[[doc--
+
+    Xetex style indexing begins at zero which we just increment before
+    passing it along to the font loader.  Ymmv.
+
+    However, some non-indexed options expect scalars, so we cannot just
+    blindly add to *any* feature value. Instead we restrict it to those
+    features that are known to accept an index value, for instance GSUB
+    lookup type 3 ones like “ssty”.
+
+    http://partners.adobe.com/public/developer/opentype/index_table_formats1.html#ASF1
+
+--doc]]--
+
+local indexed_features = table.tohash ({
+    --- Note that this list is not definitive and was gathered by
+    --- grepping Adobe’s feature tag spec.
+    "aalt",
+    "cswh",
+    "curs",
+    "falt",
+    "hngl",
+    "jalt",
+    "jp78",
+    "nalt",
+    "ornm",
+    "rand",
+    "rlig",
+    "salt",
+    "ssty",
+    "swsh",
+    "trad",
+}, true)
+
+local handle_xetex_option = function (key, val)
+    local numeric = tonumber(val) --- decimal only; keeps colors intact
+    if numeric then --- ugh
+        if  mathceil(numeric) == numeric -- integer, possible index
+        and indexed_features[key]
+        then
+            val = tostring(numeric + 1)
+        end
+    elseif val == "true"  then
+        val = true
+    elseif val == "false" then
+        val = false
+    end
+    return key, val
 end
 
 --[[doc--
@@ -977,10 +1039,15 @@ local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
 --- features ----------------------------------------------------------
 local field             = (anum + S"+-.")^1 --- sic!
 --- assignments are “lhs=rhs”
+---              or “+lhs=rhs” (Xetex-style)
 --- switches    are “+key” | “-key”
-local assignment        = (field / strip_leading_sign) * ws
-                        * equals * ws
-                        * (field / toboolean)
+local normal_option     = C(field) * ws * equals * ws * C(field) * ws
+local xetex_option      = P"+" * ws * normal_option
+local assignment        = xetex_option  / handle_xetex_option
+                        + normal_option / handle_normal_option
+----- assignment        = (field / strip_leading_sign) * ws
+-----                   * equals * ws
+-----                   * (field / toboolean)
 local switch            = P"+" * ws * C(field) * Cc(true)
                         + P"-" * ws * C(field) * Cc(false)
                         +             C(field) * Cc(true) -- catch crap

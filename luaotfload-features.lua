@@ -878,24 +878,6 @@ end
 
 --doc]]--
 
---local strip_leading_sign = function (s)
---    --- handle option list keys
---    local first = stringsub(s, 1, 1)
---    if first == "+" or first == "-" then --- Xetex style
---        return stringsub(s, 2)
---    end
---    return s
---end
---
---local toboolean = function (s)
---    --- handle option list values
---    if s == "true"  then return true  end
---    if s == "false" then return false end
---    --if s == "yes"   then return true  end --- Context style
---    --if s == "no"    then return false end
---    return stringlower(s)
---end
-
 local handle_normal_option = function (key, val)
     val = stringlower(val)
     --- the former “toboolean()” handler
@@ -912,41 +894,13 @@ end
     Xetex style indexing begins at zero which we just increment before
     passing it along to the font loader.  Ymmv.
 
-    However, some non-indexed options expect scalars, so we cannot just
-    blindly add to *any* feature value. Instead we restrict it to those
-    features that are known to accept an index value, for instance GSUB
-    lookup type 3 ones like “ssty”.
-
-    http://partners.adobe.com/public/developer/opentype/index_table_formats1.html#ASF1
-
 --doc]]--
 
-local indexed_features = table.tohash ({
-    --- Note that this list is not definitive and was gathered by
-    --- grepping Adobe’s feature tag spec.
-    "aalt",
-    "cswh",
-    "curs",
-    "falt",
-    "hngl",
-    "jalt",
-    "jp78",
-    "nalt",
-    "ornm",
-    "rand",
-    "rlig",
-    "salt",
-    "ssty",
-    "swsh",
-    "trad",
-}, true)
-
 local handle_xetex_option = function (key, val)
+    val = stringlower(val)
     local numeric = tonumber(val) --- decimal only; keeps colors intact
     if numeric then --- ugh
-        if  mathceil(numeric) == numeric -- integer, possible index
-        and indexed_features[key]
-        then
+        if  mathceil(numeric) == numeric then -- integer, possible index
             val = tostring(numeric + 1)
         end
     elseif val == "true"  then
@@ -1037,7 +991,8 @@ local unprefixed        = Cg(fontname, "anon")
 local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
 
 --- features ----------------------------------------------------------
-local field             = (anum + S"+-.")^1 --- sic!
+local field_char        = anum + S"+-." --- sic!
+local field             = field_char^1
 --- assignments are “lhs=rhs”
 ---              or “+lhs=rhs” (Xetex-style)
 --- switches    are “+key” | “-key”
@@ -1050,11 +1005,13 @@ local assignment        = xetex_option  / handle_xetex_option
 -----                   * (field / toboolean)
 local switch            = P"+" * ws * C(field) * Cc(true)
                         + P"-" * ws * C(field) * Cc(false)
-                        +             C(field) * Cc(true) -- catch crap
+--                      +             C(field) * Cc(true) -- catch crap
+local ignore            = (1 - featuresep)^1 --- ignores one option
 local feature_expr      = ws * Cg(assignment + switch) * ws
+local option            = feature_expr + ignore
 local feature_list      = Cf(Ct""
-                           * feature_expr
-                           * (featuresep * feature_expr)^0
+                           * option
+                           * (featuresep * option)^0
                            , rawset)
                         * featuresep^-1
 
@@ -1069,7 +1026,6 @@ local feature_list      = Cf(Ct""
 --- string; I won’t mess with it though until someone reports a
 --- problem.)
 --- local subvalue   = P("(") * (C(P(1-S("()"))^1)/issub) * P(")") -- for Kim
----                                                                 Who’s Kim?
 --- Note to self: subfonts apparently start at index 0. Tested with
 --- Cambria.ttc that includes “Cambria Math” at 0 and “Cambria” at 1.
 --- Other values cause luatex to segfault.

@@ -23,6 +23,7 @@ local texattribute    = tex.attribute
 
 local new_node        = node.new
 local copy_node       = node.copy
+local otffeatures     = fonts.constructors.newfeatures "otf"
 
 -----------------------------------------------------------------------
 --- namespace
@@ -38,8 +39,10 @@ local kerns              = typesetters.kerns
 kerns.mapping            = kerns.mapping or { }
 kerns.factors            = kerns.factors or { }
 
-local namespace          = "kern" --- <= attribute <= plugin.name
-local callback_name      = "typesetters.kerncharacters"
+local kern_callback      = "typesetters.kerncharacters"
+
+typesetters.kernfont     = typesetters.kernfont or { }
+local kernfont           = typesetters.kernfont
 
 -----------------------------------------------------------------------
 --- node-ini
@@ -282,10 +285,10 @@ commands = commands or { }
 ---                              LOAD
 --===================================================================--
 
---- we should be ready at this moment to insert the library
+--- we should be ready at this moment to insert the libraries
 
---require "luaotfload-typo-krn"
-require "luaotfload-letterspace" --- simplified
+require "luaotfload-typo-krn"    --- typesetters.kerns
+require "luaotfload-letterspace" --- typesetters.kernfont
 
 --===================================================================--
 ---                              CLEAN
@@ -298,45 +301,83 @@ local mapping           = kerns.mapping
 local unsetvalue        = attributes.unset_value
 local process_kerns     = plugin_store.kern
 
-local kernfont          = typesetters.kernfont
+--- kern_callback     : normal
+--- · callback:     process_kerns
+--- · enabler:      enablecharacterkerning
+--- · disabler:     disablecharacterkerning
+--- · interface:    kerns.set
 
-local kerncharacters = function (head)
-  return process_kerns("kerns", hidden.a_kerns, head)
-end
+--- kernfont_callback : fontwise
+--- · callback:     kernfont.handler
+--- · enabler:      enablefontkerning
+--- · disabler:     disablefontkerning
 
 --- callback wrappers
-local add_kern_processor = function (...)
-  for i=1, select("#", ...) do
-    luatexbase.add_to_callback(
-      select(i, ...), kernfont.handler, callback_name
-    )
+
+--- (node_t -> node_t) -> string -> string list -> bool
+local registered_as = { } --- procname -> callbacks
+local add_processor = function (processor, name, ...)
+  local callbacks = { ... }
+  for i=1, #callbacks do
+    luatexbase.add_to_callback(callbacks[i], processor, name)
   end
+  registered_as[name] = callbacks --- for removal
+  return true
 end
-local remove_kern_processor = function (...)
-  for i=1, select("#", ...) do
-    luatexbase.remove_from_callback(
-      select(i, ...), callback_name
-    )
+
+--- string -> bool
+local remove_processor = function (name)
+  local callbacks = registered_as[name]
+  if callbacks then
+    for i=1, #callbacks do
+      luatexbase.remove_from_callback(callbacks[i], name)
+    end
+    return true
   end
+  return false --> unregistered
 end
 
 --- we use the same callbacks as a node processor in Context
+--- unit -> bool
 local enablecharacterkerning = function ( )
-  add_kern_processor("pre_linebreak_filter", "hpack_filter")
+  return add_processor(function (head)
+      return process_kerns("kerns", hidden.a_kerns, head)
+    end,
+    "typesetters.kerncharacters",
+    "pre_linebreak_filter", "hpack_filter"
+  )
 end
 
+--- unit -> bool
 local disablecharacterkerning = function ( )
-  remove_kern_processor("pre_linebreak_filter", "hpack_filter")
+  return remove_processor "typesetters.kerncharacters"
 end
 
---kerns.enablecharacterkerning    = enablecharacterkerning
---kerns.disablecharacterkerning   = disablecharacterkerning
-kernfont.enablecharacterkerning    = enablecharacterkerning
-kernfont.disablecharacterkerning   = disablecharacterkerning
+kerns.enablecharacterkerning     = enablecharacterkerning
+kerns.disablecharacterkerning    = disablecharacterkerning
 
-local enabled = false --- callback state
+--- now for the simplistic variant
+--- unit -> bool
+local enablefontkerning = function ( )
+  return add_processor(
+    kernfont.handler,
+    "typesetters.kernfont",
+    "pre_linebreak_filter", "hpack_filter"
+  )
+end
 
-local initializekerning = function (tfmdata, factor)
+--- unit -> bool
+local disablefontkerning = function ( )
+  return remove_processor "typesetters.kernfont"
+end
+
+--- fontwise kerning uses a font property for passing along the
+--- letterspacing factor
+
+local fontkerning_enabled = false --- callback state
+
+--- fontobj -> float -> unit
+local initializefontkerning = function (tfmdata, factor)
   if factor ~= "max" then
     factor = tonumber(factor) or 0
   end
@@ -346,29 +387,60 @@ local initializekerning = function (tfmdata, factor)
       --- hopefully this field stays unused otherwise
       fontproperties.kerncharacters = factor
     end
-    if not enabled then
-      enablecharacterkerning()
-      enabled = true
+    if not fontkerning_enabled then
+      fontkerning_enabled = enablefontkerning()
     end
   end
 end
 
-local otffeatures = fonts.constructors.newfeatures "otf"
+--- like the font colorization, fontwise kerning is hooked into the
+--- feature mechanism
+
 otffeatures.register {
-    name        = "kerncharacters",
-    description = "kerncharacters",
-    initializers = {
-        base = initializekerning,
-        node = initializekerning,
-    }
+  name        = "letterspace", --"kerncharacters",
+  description = "letterspace", --"kerncharacters",
+  initializers = {
+    base = initializefontkerning,
+    node = initializefontkerning,
+  }
 }
+
+kerns.set = nil
+
+local characterkerning_enabled = false
+
+kerns.set = function (factor)
+    if factor ~= "max" then
+        factor = tonumber(factor) or 0
+    end
+    if factor == "max" or factor ~= 0 then
+        if not characterkerning_enabled then
+            enablecharacterkerning()
+            characterkerning_enabled = true
+        end
+        local a = factors[factor]
+        if not a then
+            a = #mapping + 1
+            factors[factors], mapping[a] = a, factor
+        end
+        factor = a
+    else
+        factor = unsetvalue
+    end
+    texattribute[hidden.a_kerns] = factor
+    return factor
+end
+
+
 
 -----------------------------------------------------------------------
 --- options
 -----------------------------------------------------------------------
 
-kerns.keepligature = false --- supposed to be of type function
-kerns.keeptogether = false --- supposed to be of type function
+kerns   .keepligature     = false --- supposed to be of type function
+kerns   .keeptogether     = false --- supposed to be of type function
+kernfont.keepligature     = false --- supposed to be of type function
+kernfont.keeptogether     = false --- supposed to be of type function
 
 -----------------------------------------------------------------------
 --- erase fake Context layer

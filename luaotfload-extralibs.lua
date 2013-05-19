@@ -207,6 +207,7 @@ if not markdata then
   fonthashes.marks = markdata
 end
 
+--- next stems from the multilingual interface
 interfaces                = interfaces or { }
 interfaces.variables      = interfaces.variables or { }
 interfaces.variables.max  = "max"
@@ -283,7 +284,8 @@ commands = commands or { }
 
 --- we should be ready at this moment to insert the library
 
-require "luaotfload-typo-krn"
+--require "luaotfload-typo-krn"
+require "luaotfload-letterspace" --- simplified
 
 --===================================================================--
 ---                              CLEAN
@@ -296,6 +298,8 @@ local mapping           = kerns.mapping
 local unsetvalue        = attributes.unset_value
 local process_kerns     = plugin_store.kern
 
+local kernfont          = typesetters.kernfont
+
 local kerncharacters = function (head)
   return process_kerns("kerns", hidden.a_kerns, head)
 end
@@ -304,52 +308,60 @@ end
 local add_kern_processor = function (...)
   for i=1, select("#", ...) do
     luatexbase.add_to_callback(
-      select(i, ...), kerncharacters, callback_name
+      select(i, ...), kernfont.handler, callback_name
     )
   end
 end
 local remove_kern_processor = function (...)
   for i=1, select("#", ...) do
     luatexbase.remove_from_callback(
-      select(i, ...), kerncharacters, callback_name
+      select(i, ...), callback_name
     )
   end
 end
 
 --- we use the same callbacks as a node processor in Context
-kerns.enablecharacterkerning = function ( )
+local enablecharacterkerning = function ( )
   add_kern_processor("pre_linebreak_filter", "hpack_filter")
 end
 
-kerns.disablecharacterkerning = function ( )
+local disablecharacterkerning = function ( )
   remove_kern_processor("pre_linebreak_filter", "hpack_filter")
 end
 
+--kerns.enablecharacterkerning    = enablecharacterkerning
+--kerns.disablecharacterkerning   = disablecharacterkerning
+kernfont.enablecharacterkerning    = enablecharacterkerning
+kernfont.disablecharacterkerning   = disablecharacterkerning
+
 local enabled = false --- callback state
 
---- we just replace the kern enabler with our modified version
-kerns.set = function (factor)
-  if factor ~= v_max then
+local initializekerning = function (tfmdata, factor)
+  if factor ~= "max" then
     factor = tonumber(factor) or 0
   end
-  if factor == v_max or factor ~= 0 then
+  if factor == "max" or factor ~= 0 then
+    local fontproperties = tfmdata.properties
+    if fontproperties then
+      --- hopefully this field stays unused otherwise
+      fontproperties.kerncharacters = factor
+    end
     if not enabled then
-      kerns.enablecharacterkerning()
+      enablecharacterkerning()
       enabled = true
     end
-    local a = factors[factor]
-    if not a then
-      a = #mapping + 1
-      factors[factors], mapping[a] = a, factor
-    end
-    factor = a
-  else
-    factor = unsetvalue
   end
-  texattribute[hidden.a_kerns] = factor
-  return factor
 end
 
+local otffeatures = fonts.constructors.newfeatures "otf"
+otffeatures.register {
+    name        = "kerncharacters",
+    description = "kerncharacters",
+    initializers = {
+        base = initializekerning,
+        node = initializekerning,
+    }
+}
 
 -----------------------------------------------------------------------
 --- options

@@ -754,6 +754,7 @@ local support_incomplete = table.tohash({
 --- (string, string) dict -> (string, string) dict
 local set_default_features = function (speclist)
     speclist = speclist or { }
+    speclist[""] = nil --- invalid options stub
 
     --- handle language tag
     local language = speclist.language
@@ -913,6 +914,22 @@ end
 
 --[[doc--
 
+    Instead of silently ignoring invalid options we emit a warning to
+    the log.
+
+    Note that we have to return a pair to please rawset(). This creates
+    an entry on the resulting features hash which will later be removed
+    during set_default_features().
+
+--doc]]--
+
+local handle_invalid_option = function (opt)
+    report("log", 0, "load", "font option “%s” unknown.", opt)
+    return "", false
+end
+
+--[[doc--
+
     Dirty test if a file: request is actually a path: lookup; don’t
     ask! Note this fails on Windows-style absolute paths. These will
     *really* have to use the correct request.
@@ -1006,7 +1023,8 @@ local assignment        = xetex_option  / handle_xetex_option
 local switch            = P"+" * ws * C(field) * Cc(true)
                         + P"-" * ws * C(field) * Cc(false)
 --                      +             C(field) * Cc(true) -- catch crap
-local ignore            = (1 - featuresep)^1 --- ignores one option
+local ignore            = (1 - featuresep)^1     --- ignores one option
+                        / handle_invalid_option
 local feature_expr      = ws * Cg(assignment + switch) * ws
 local option            = feature_expr + ignore
 local feature_list      = Cf(Ct""
@@ -1136,8 +1154,8 @@ local handle_request = function (specification)
         specification.lookup = "path"
         return specification
     end
-    local lookup, name = select_lookup(request)
-    request.features  = set_default_features(request.features)
+    local lookup, name  = select_lookup(request)
+    request.features    = set_default_features(request.features)
 
     if name then
         specification.name    = name

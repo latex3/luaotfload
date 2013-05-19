@@ -1,7 +1,7 @@
-if not modules then modules = { } end modules ['typo-krn'] = {
-    version   = 1.001,
-    comment   = "companion to typo-krn.mkiv",
-    author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
+if not modules then modules = { } end modules ['letterspace'] = {
+    version   = 2.200,
+    comment   = "companion to luaotfload.lua",
+    author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
 }
@@ -63,6 +63,19 @@ local kern_injector = function (fillup,kern)
   end
 end
 
+--[[doc--
+
+    Caveat lector.
+    This is a preliminary, makeshift adaptation of the Context
+    character kerning mechanism that emulates XeTeX-style fontwise
+    letterspacing. Note that in its present state it is far inferior to
+    the original, which is attribute-based and ignores font-boundaries.
+    Nevertheless, due to popular demand the following callback has been
+    added. It should not be relied upon to be present in future
+    versions.
+
+--doc]]--
+
 local kernfactors = { } --- fontid -> factor
 
 local kerncharacters
@@ -112,8 +125,9 @@ kerncharacters = function (head)
       end
 
       lastfont = fontid
-      local c = start.components
 
+      --- 2) resolve ligatures
+      local c = start.components
       if c then
         if keepligature and keepligature(start) then
           -- keep 'm
@@ -140,23 +154,25 @@ kerncharacters = function (head)
         end
       end -- kern ligature
 
+      --- 3) apply the extra kerning
       local prev = start.prev
       if prev then
         local pid = prev.id
 
         if not pid then
           -- nothing
+
         elseif pid == kern_code then
           if prev.subtype == kerning_code or prev[a_fontkern] then
-            if keeptogether and prev.prev.id == glyph_code and keeptogether(prev.prev,start) then -- we could also pass start
-              -- keep 'm
+            if keeptogether and prev.prev.id == glyph_code and keeptogether(prev.prev,start) then
+              -- keep
             else
-              -- not yet ok, as injected kerns can be overlays (from node-inj.lua)
               prev.subtype = userkern_code
               prev.kern = prev.kern + quaddata[lastfont]*krn -- here
               done = true
             end
           end
+
         elseif pid == glyph_code then
           if prev.font == lastfont then
             local prevchar, lastchar = prev.char, start.char
@@ -250,5 +266,5 @@ end
 
 kernfont.handler = kerncharacters
 
---- vim:sw=2:ts=2:expandtab
+--- vim:sw=2:ts=2:expandtab:tw=71
 

@@ -51,11 +51,15 @@ local kernfont           = typesetters.kernfont
 nodes              = nodes or { } --- should be present with luaotfload
 local bothways     = function (t) return table.swapped (t, t) end
 
-nodes.kerncodes = bothways({
+local kerncodes = bothways({
   [0] = "fontkern",
   [1] = "userkern",
   [2] = "accentkern",
 })
+
+kerncodes.kerning = kerncodes.fontkern --- idiosyncrasy
+
+nodes.kerncodes = kerncodes
 
 nodes.skipcodes = bothways({
   [  0] = "userskip",

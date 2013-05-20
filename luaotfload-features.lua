@@ -6,8 +6,9 @@ if not modules then modules = { } end modules ["features"] = {
     license   = "see context related readme files"
 }
 
-local format, insert    = string.format, table.insert
 local type, next        = type, next
+local tonumber          = tonumber
+local tostring          = tostring
 local lpegmatch         = lpeg.match
 
 ---[[ begin included font-ltx.lua ]]
@@ -28,15 +29,15 @@ function fonts.definers.getspecification(str)
     return "", str, "", ":", str
 end
 
-local old_feature_list = { }
-
 local report = logs.names_report
 
 local stringfind       = string.find
 local stringlower      = string.lower
 local stringgsub       = string.gsub
 local stringsub        = string.sub
+local stringformat     = string.format
 local stringis_empty   = string.is_empty
+local mathceil         = math.ceil
 
 --- TODO an option to dump the default features for a script would make
 ---      a nice addition to luaotfload-tool
@@ -753,6 +754,7 @@ local support_incomplete = table.tohash({
 --- (string, string) dict -> (string, string) dict
 local set_default_features = function (speclist)
     speclist = speclist or { }
+    speclist[""] = nil --- invalid options stub
 
     --- handle language tag
     local language = speclist.language
@@ -877,22 +879,53 @@ end
 
 --doc]]--
 
-local strip_leading_sign = function (s)
-    --- handle option list keys
-    local first = stringsub(s, 1, 1)
-    if first == "+" or first == "-" then --- Xetex style
-        return stringsub(s, 2)
+local handle_normal_option = function (key, val)
+    val = stringlower(val)
+    --- the former “toboolean()” handler
+    if val == "true"  then
+        val = true
+    elseif val == "false" then
+        val = false
     end
-    return s
+    return key, val
 end
 
-local toboolean = function (s)
-    --- handle option list values
-    if s == "true"  then return true  end
-    if s == "false" then return false end
-    --if s == "yes"   then return true  end --- Context style
-    --if s == "no"    then return false end
-    return stringlower(s)
+--[[doc--
+
+    Xetex style indexing begins at zero which we just increment before
+    passing it along to the font loader.  Ymmv.
+
+--doc]]--
+
+local handle_xetex_option = function (key, val)
+    val = stringlower(val)
+    local numeric = tonumber(val) --- decimal only; keeps colors intact
+    if numeric then --- ugh
+        if  mathceil(numeric) == numeric then -- integer, possible index
+            val = tostring(numeric + 1)
+        end
+    elseif val == "true"  then
+        val = true
+    elseif val == "false" then
+        val = false
+    end
+    return key, val
+end
+
+--[[doc--
+
+    Instead of silently ignoring invalid options we emit a warning to
+    the log.
+
+    Note that we have to return a pair to please rawset(). This creates
+    an entry on the resulting features hash which will later be removed
+    during set_default_features().
+
+--doc]]--
+
+local handle_invalid_option = function (opt)
+    report("log", 0, "load", "font option “%s” unknown.", opt)
+    return "", false
 end
 
 --[[doc--
@@ -975,19 +1008,28 @@ local unprefixed        = Cg(fontname, "anon")
 local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
 
 --- features ----------------------------------------------------------
-local field             = (anum + S"+-.")^1 --- sic!
+local field_char        = anum + S"+-." --- sic!
+local field             = field_char^1
 --- assignments are “lhs=rhs”
+---              or “+lhs=rhs” (Xetex-style)
 --- switches    are “+key” | “-key”
-local assignment        = (field / strip_leading_sign) * ws
-                        * equals * ws
-                        * (field / toboolean)
+local normal_option     = C(field) * ws * equals * ws * C(field) * ws
+local xetex_option      = P"+" * ws * normal_option
+local assignment        = xetex_option  / handle_xetex_option
+                        + normal_option / handle_normal_option
+----- assignment        = (field / strip_leading_sign) * ws
+-----                   * equals * ws
+-----                   * (field / toboolean)
 local switch            = P"+" * ws * C(field) * Cc(true)
                         + P"-" * ws * C(field) * Cc(false)
-                        +             C(field) * Cc(true) -- catch crap
+--                      +             C(field) * Cc(true) -- catch crap
+local ignore            = (1 - featuresep)^1     --- ignores one option
+                        / handle_invalid_option
 local feature_expr      = ws * Cg(assignment + switch) * ws
+local option            = feature_expr + ignore
 local feature_list      = Cf(Ct""
-                           * feature_expr
-                           * (featuresep * feature_expr)^0
+                           * option
+                           * (featuresep * option)^0
                            , rawset)
                         * featuresep^-1
 
@@ -1002,7 +1044,6 @@ local feature_list      = Cf(Ct""
 --- string; I won’t mess with it though until someone reports a
 --- problem.)
 --- local subvalue   = P("(") * (C(P(1-S("()"))^1)/issub) * P(")") -- for Kim
----                                                                 Who’s Kim?
 --- Note to self: subfonts apparently start at index 0. Tested with
 --- Cambria.ttc that includes “Cambria Math” at 0 and “Cambria” at 1.
 --- Other values cause luatex to segfault.
@@ -1113,8 +1154,8 @@ local handle_request = function (specification)
         specification.lookup = "path"
         return specification
     end
-    local lookup, name = select_lookup(request)
-    request.features  = set_default_features(request.features)
+    local lookup, name  = select_lookup(request)
+    request.features    = set_default_features(request.features)
 
     if name then
         specification.name    = name
@@ -1231,11 +1272,11 @@ local function addfeature(data,feature,specifications)
                 local featuretype   = types[specification.type or "substitution"]
                 local featureflags  = specification.flags or noflags
                 local added         = false
-                local featurename   = format("ctx_%s_%s",feature,s)
+                local featurename   = stringformat("ctx_%s_%s",feature,s)
                 local st = { }
                 for t=1,#subtables do
                     local list = subtables[t]
-                    local full = format("%s_%s",featurename,t)
+                    local full = stringformat("%s_%s",featurename,t)
                     st[t] = full
                     if featuretype == "gsub_ligature" then
                         lookuptypes[full] = "ligature"

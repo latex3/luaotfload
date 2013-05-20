@@ -1455,12 +1455,14 @@ local luatexbase = luatexbase
 
 local type, next       = type, next
 local setmetatable     = setmetatable
-local find_file        = kpse.find_file
+local kpsefind_file    = kpse.find_file
+local kpseexpand_path  = kpse.expand_path
+local kpseexpand_var   = kpse.expand_var
 local lfsisfile        = lfs.isfile
-local stringfind       = string.find
-local stringformat     = string.format
-local stringmatch      = string.match
-local stringsub        = string.sub
+local lfsisdir         = lfs.isdir
+local lfsmkdir         = lfs.mkdir
+local stringexplode    = string.explode
+local stringgmatch     = string.gmatch
 
 local add_to_callback, create_callback =
       luatexbase.add_to_callback, luatexbase.create_callback
@@ -1509,6 +1511,80 @@ if tex.luatexversion < luatex_version then
 end
 
 %    \end{macrocode}
+%     Create $TEXMFCACHE if not present. This is necessary due to
+%     two bugs in Luatex-Fonts that surface simultaneously if none
+%     of the possible cache directories exists. We add a fixed version
+%     of lfs.mkdirs() first.
+%
+%    \begin{macrocode}
+
+local ostype = os.type
+
+local mkdirs = function (path)
+    local full
+    for sub in stringgmatch(path, "([^\\/]+)") do
+        if full then
+            full = full .. "/" .. sub
+        else
+            if ostype == "windows" then
+                full = sub
+            else
+                full = "/" .. sub
+            end
+        end
+        if not lfsisdir(full) then
+            lfsmkdir(full)
+        end
+    end
+end
+
+--- <hack>
+
+local phantom_kpse, normal_expand_path
+do --- take care of writable path
+    local cachepath = kpseexpand_path"$TEXMFCACHE"
+    if cachepath == "" then
+        cachepath = kpseexpand_path"$TEXMFVAR"
+    end
+    if cachepath == "" then --- dir missing, create
+        texio.write_nl("term and log",
+            "(luaotfload: cache directory inaccessible)")
+        local cachedest = kpseexpand_var"$TEXMFCACHE"
+        local pathsep = ostype == "windows" and ";" or ":"
+        if cachedest then
+            cachedest = stringexplode(cachedest, pathsep)
+        end
+        for _, path in next, cachedest do
+            if not lfsisdir(path) then
+                texio.write_nl("term and log",
+                    "(luaotfload: creating path " .. path)
+                mkdirs(path)
+                if  lfsisdir(path) then
+                    local writable = kpseexpand_path("$TEXMFCACHE", true)
+                    texio.write("term and log", " -- success)")
+                    phantom_kpse = kpse.new "luatex"
+                    goto writable_cache
+                end
+                texio.write("term and log", " FAILED!)")
+            end
+        end
+    end
+end
+
+::writable_cache::
+if phantom_kpse ~= nil then
+    normal_expand_path = kpseexpand_path
+    kpse.expand_path = function (spec)
+        --- the second kpse instance is needed because kpathsea
+        --- doesn’t update variables
+        --- http://www.ntg.nl/pipermail/dev-luatex/2007-December/001172.html
+        return phantom_kpse:expand_path(spec)
+    end
+end
+
+--- </hack>
+
+%    \end{macrocode}
 % \subsection{Module loading}
 % We load the files imported from \CONTEXT with this function.
 % It automatically prepends the prefix \fileent{luaotfload-} to its
@@ -1537,10 +1613,10 @@ local p_suffix       = (p_dot * (1 - p_dot - p_slash)^1 * P(-1)) / ""
 local p_removesuffix = Cs((p_suffix + 1)^1)
 
 local find_vf_file = function (name)
-    local fullname = find_file(name, "ovf")
+    local fullname = kpsefind_file(name, "ovf")
     if not fullname then
-        --fullname = find_file(file.removesuffix(name), "ovf")
-        fullname = find_file(lpegmatch(p_removesuffix, name), "ovf")
+        --fullname = kpsefind_file(file.removesuffix(name), "ovf")
+        fullname = kpsefind_file(lpegmatch(p_removesuffix, name), "ovf")
     end
     if fullname then
         log("loading virtual font file %s.", fullname)
@@ -1744,6 +1820,16 @@ end --- non-merge fallback scope
 pop_namespaces(our_environment, false)-- true)
 
 log("fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
+
+%    \end{macrocode}
+%     Restore original \luafunction{kpse.expand_path} function.
+%
+%    \begin{macrocode}
+
+if normal_expand_path ~= nil then
+    kpse.expand_path = normal_expand_path
+    phantom_kpse     = nil
+end
 
 %    \end{macrocode}
 % \subsection{Callbacks}

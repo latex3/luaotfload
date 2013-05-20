@@ -90,7 +90,6 @@ kerncharacters = function (head)
   local kernfactors   = kernfactors
 
   while start do
-    local attr = start[attribute]
     local id = start.id
     if id == glyph_code then
 
@@ -163,7 +162,9 @@ kerncharacters = function (head)
           -- nothing
 
         elseif pid == kern_code then
-          if prev.subtype == kerning_code or prev[a_fontkern] then
+          if prev.subtype == kerning_code   --- context does this by means of an
+          or prev.subtype == userkern_code  --- attribute; we may need a test
+          then
             if keeptogether and prev.prev.id == glyph_code and keeptogether(prev.prev,start) then
               -- keep
             else

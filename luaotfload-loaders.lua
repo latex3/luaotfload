@@ -6,7 +6,8 @@ if not modules then modules = { } end modules ["loaders"] = {
     license   = "see context related readme files"
 }
 
-local fonts = fonts
+local fonts   = fonts
+local readers = fonts.readers
 
 ---
 --- opentype reader (from font-otf.lua):

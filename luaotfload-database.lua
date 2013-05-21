@@ -568,9 +568,11 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             subfamily   = facenames.subfamily
             fullname    = facenames.fullname
             psname      = facenames.psname
+            fontname    = facenames.fontname
+            pfullname   = facenames.pfullname
         end
-        fontname  = facenames.fontname  or sanitize_string(face.fontname)
-        pfullname = facenames.pfullname or sanitize_string(face.fullname)
+        fontname    = fontname  or sanitize_string(face.fontname)
+        pfullname   = pfullname or sanitize_string(face.fullname)
 
         local optsize, dsnsize, maxsize, minsize
         if #face.size > 0 then

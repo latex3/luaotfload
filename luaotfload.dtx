@@ -1516,10 +1516,10 @@ if tex.luatexversion < luatex_version then
 end
 
 %    \end{macrocode}
-%     Create $TEXMFCACHE if not present. This is necessary due to a bug
+%     Create \verb+$TEXMFCACHE+ if not present. This is necessary due to a bug
 %     in Luatex-Fonts that surfaces if none of the possible cache
-%     directories exists. We add a fixed version of lfs.mkdirs() first
-%     that will be installed as soon as l-file.lua tries to insert its
+%     directories exists. We add a fixed version of \luafunction{lfs.mkdirs} first
+%     that will be installed as soon as \fileent{l-file.lua} tries to insert its
 %     buggy version.
 %
 %    \begin{macrocode}

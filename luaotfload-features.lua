@@ -1015,18 +1015,15 @@ local field             = field_char^1
 --- switches    are “+key” | “-key”
 local normal_option     = C(field) * ws * equals * ws * C(field) * ws
 local xetex_option      = P"+" * ws * normal_option
+local ignore_option     = (1 - equals)^1 * equals * (1 - featuresep)^1
 local assignment        = xetex_option  / handle_xetex_option
                         + normal_option / handle_normal_option
------ assignment        = (field / strip_leading_sign) * ws
------                   * equals * ws
------                   * (field / toboolean)
+                        + ignore_option / handle_invalid_option
 local switch            = P"+" * ws * C(field) * Cc(true)
                         + P"-" * ws * C(field) * Cc(false)
---                      +             C(field) * Cc(true) -- catch crap
-local ignore            = (1 - featuresep)^1     --- ignores one option
-                        / handle_invalid_option
+                        +             C(field) * Cc(true)   --- default
 local feature_expr      = ws * Cg(assignment + switch) * ws
-local option            = feature_expr + ignore
+local option            = feature_expr
 local feature_list      = Cf(Ct""
                            * option
                            * (featuresep * option)^0

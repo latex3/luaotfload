@@ -1451,18 +1451,23 @@ luaotfload.module = {
     license       = "GPL v2.0"
 }
 
-local luatexbase = luatexbase
+local luatexbase       = luatexbase
 
-local type, next       = type, next
+local getmetatable     = getmetatable
+local rawset           = rawset
 local setmetatable     = setmetatable
-local kpsefind_file    = kpse.find_file
+local type, next       = type, next
+
+
 local kpseexpand_path  = kpse.expand_path
 local kpseexpand_var   = kpse.expand_var
-local lfsisfile        = lfs.isfile
+local kpsefind_file    = kpse.find_file
 local lfsisdir         = lfs.isdir
+local lfsisfile        = lfs.isfile
 local lfsmkdir         = lfs.mkdir
 local stringexplode    = string.explode
 local stringgmatch     = string.gmatch
+local stringsub        = string.sub
 
 local add_to_callback, create_callback =
       luatexbase.add_to_callback, luatexbase.create_callback
@@ -1511,76 +1516,49 @@ if tex.luatexversion < luatex_version then
 end
 
 %    \end{macrocode}
-%     Create \verb|$TEXMFCACHE| if not present. This is necessary due to
-%     two bugs in Luatex-Fonts that surface simultaneously if none
-%     of the possible cache directories exists. We add a fixed version
-%     of \verb|lfs.mkdirs()| first.
+%     Create $TEXMFCACHE if not present. This is necessary due to a bug
+%     in Luatex-Fonts that surfaces if none of the possible cache
+%     directories exists. We add a fixed version of lfs.mkdirs() first
+%     that will be installed as soon as l-file.lua tries to insert its
+%     buggy version.
 %
 %    \begin{macrocode}
 
-local ostype = os.type
-
+local ostype      = os.type
 local mkdirs = function (path)
-    local full
-    for sub in stringgmatch(path, "([^\\/]+)") do
-        if full then
-            full = full .. "/" .. sub
-        else
-            if ostype == "windows" then
-                full = sub
-            else
-                full = "/" .. sub
-            end
-        end
-        if not lfsisdir(full) then
-            lfsmkdir(full)
-        end
+  local full
+  if ostype ~= "windows" and stringsub(path, 1, 1) == "/" then
+    --- absolute path, force initial backslash
+    full = ""
+  end
+  for sub in stringgmatch(path,"([^\\/]+)") do
+    if full then
+      full = full .. "/" .. sub
+    else
+      full = sub
     end
+    if not lfsisdir(full) then
+      lfsmkdir(full)
+    end
+  end
 end
 
---- <hack>
+--- <hack version="2">
 
-local phantom_kpse, normal_expand_path
-do --- take care of writable path
-    local cachepath = kpseexpand_path"$TEXMFCACHE"
-    if cachepath == "" then
-        cachepath = kpseexpand_path"$TEXMFVAR"
-    end
-    if cachepath == "" then --- dir missing, create
-        texio.write_nl("term and log",
-            "(luaotfload: cache directory inaccessible)")
-        local cachedest = kpseexpand_var"$TEXMFCACHE"
-        local pathsep = ostype == "windows" and ";" or ":"
-        if cachedest then
-            cachedest = stringexplode(cachedest, pathsep)
-        end
-        for _, path in next, cachedest do
-            if not lfsisdir(path) then
-                texio.write_nl("term and log",
-                    "(luaotfload: creating path " .. path)
-                mkdirs(path)
-                if  lfsisdir(path) then
-                    local writable = kpseexpand_path("$TEXMFCACHE", true)
-                    texio.write("term and log", " -- success)")
-                    phantom_kpse = kpse.new "luatex"
-                    goto writable_cache
-                end
-                texio.write("term and log", " FAILED!)")
-            end
-        end
-    end
+local backup_mkdirs -- just in case
+
+local lfs_mt = getmetatable(lfs) or { } --- should be empty
+
+lfs_mt.__newindex = function (t, k, v)
+  if k == "mkdirs" then
+    backup_mkdirs = v               --> backup
+    rawset(t, "mkdirs", mkdirs)     --> ours
+  else -- insert normally
+    t[k] = v
+  end
 end
 
-::writable_cache::
-if phantom_kpse ~= nil then
-    normal_expand_path = kpseexpand_path
-    kpse.expand_path = function (spec)
-        --- the second kpse instance is needed because kpathsea
-        --- doesn’t update variables
-        --- http://www.ntg.nl/pipermail/dev-luatex/2007-December/001172.html
-        return phantom_kpse:expand_path(spec)
-    end
-end
+setmetatable(lfs, lfs_mt)
 
 --- </hack>
 

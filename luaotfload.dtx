@@ -1451,15 +1451,22 @@ luaotfload.module = {
     license       = "GPL v2.0"
 }
 
-local luatexbase = luatexbase
+local luatexbase       = luatexbase
 
-local type, next       = type, next
+local getmetatable     = getmetatable
+local rawset           = rawset
 local setmetatable     = setmetatable
-local find_file        = kpse.find_file
+local type, next       = type, next
+
+
+local kpseexpand_path  = kpse.expand_path
+local kpseexpand_var   = kpse.expand_var
+local kpsefind_file    = kpse.find_file
+local lfsisdir         = lfs.isdir
 local lfsisfile        = lfs.isfile
-local stringfind       = string.find
-local stringformat     = string.format
-local stringmatch      = string.match
+local lfsmkdir         = lfs.mkdir
+local stringexplode    = string.explode
+local stringgmatch     = string.gmatch
 local stringsub        = string.sub
 
 local add_to_callback, create_callback =
@@ -1509,6 +1516,53 @@ if tex.luatexversion < luatex_version then
 end
 
 %    \end{macrocode}
+%     Create \verb+$TEXMFCACHE+ if not present. This is necessary due to a bug
+%     in Luatex-Fonts that surfaces if none of the possible cache
+%     directories exists. We add a fixed version of \luafunction{lfs.mkdirs} first
+%     that will be installed as soon as \fileent{l-file.lua} tries to insert its
+%     buggy version.
+%
+%    \begin{macrocode}
+
+local ostype      = os.type
+local mkdirs = function (path)
+  local full
+  if ostype ~= "windows" and stringsub(path, 1, 1) == "/" then
+    --- absolute path, force initial backslash
+    full = ""
+  end
+  for sub in stringgmatch(path,"([^\\/]+)") do
+    if full then
+      full = full .. "/" .. sub
+    else
+      full = sub
+    end
+    if not lfsisdir(full) then
+      lfsmkdir(full)
+    end
+  end
+end
+
+--- <hack version="2">
+
+local backup_mkdirs -- just in case
+
+local lfs_mt = getmetatable(lfs) or { } --- should be empty
+
+lfs_mt.__newindex = function (t, k, v)
+  if k == "mkdirs" then
+    backup_mkdirs = v               --> backup
+    rawset(t, "mkdirs", mkdirs)     --> ours
+  else -- insert normally
+    t[k] = v
+  end
+end
+
+setmetatable(lfs, lfs_mt)
+
+--- </hack>
+
+%    \end{macrocode}
 % \subsection{Module loading}
 % We load the files imported from \CONTEXT with this function.
 % It automatically prepends the prefix \fileent{luaotfload-} to its
@@ -1537,10 +1591,10 @@ local p_suffix       = (p_dot * (1 - p_dot - p_slash)^1 * P(-1)) / ""
 local p_removesuffix = Cs((p_suffix + 1)^1)
 
 local find_vf_file = function (name)
-    local fullname = find_file(name, "ovf")
+    local fullname = kpsefind_file(name, "ovf")
     if not fullname then
-        --fullname = find_file(file.removesuffix(name), "ovf")
-        fullname = find_file(lpegmatch(p_removesuffix, name), "ovf")
+        --fullname = kpsefind_file(file.removesuffix(name), "ovf")
+        fullname = kpsefind_file(lpegmatch(p_removesuffix, name), "ovf")
     end
     if fullname then
         log("loading virtual font file %s.", fullname)
@@ -1744,6 +1798,16 @@ end --- non-merge fallback scope
 pop_namespaces(our_environment, false)-- true)
 
 log("fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
+
+%    \end{macrocode}
+%     Restore original \luafunction{kpse.expand_path} function.
+%
+%    \begin{macrocode}
+
+if normal_expand_path ~= nil then
+    kpse.expand_path = normal_expand_path
+    phantom_kpse     = nil
+end
 
 %    \end{macrocode}
 % \subsection{Callbacks}

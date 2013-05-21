@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/18/13 02:06:59
+-- merge date  : 05/21/13 16:14:48
 
 do -- begin closure to overcome local limits and interference
 
@@ -2017,11 +2017,21 @@ local pattern=(noslashes^0*slashes)^0*(noperiod^1*period)^1*C(noperiod^1)*-1
 local function suffixonly(name)
   return name and lpegmatch(pattern,name) or ""
 end
+local pattern=(noslashes^0*slashes)^0*noperiod^1*((period*C(noperiod^1))^1)*-1+Cc("")
+local function suffixesonly(name)
+  if name then
+    return lpegmatch(pattern,name)
+  else
+    return ""
+  end
+end
 file.pathpart=pathpart
 file.basename=basename
 file.nameonly=nameonly
 file.suffixonly=suffixonly
 file.suffix=suffixonly
+file.suffixesonly=suffixesonly
+file.suffixes=suffixesonly
 file.dirname=pathpart  
 file.extname=suffixonly
 local drive=C(R("az","AZ"))*colon
@@ -3007,12 +3017,12 @@ if not caches.namespace or caches.namespace=="" or caches.namespace=="context" t
   caches.namespace='generic'
 end
 do
-  local cachepaths=kpse.expand_path('$TEXMFCACHE') or ""
+  local cachepaths=kpse.expand_var('$TEXMFCACHE') or ""
   if cachepaths=="" then
-    cachepaths=kpse.expand_path('$TEXMFVAR')
+    cachepaths=kpse.expand_var('$TEXMFVAR') or ""
   end
   if cachepaths=="" then
-    cachepaths=kpse.expand_path('$VARTEXMF')
+    cachepaths=kpse.expand_var('$VARTEXMF') or ""
   end
   if cachepaths=="" then
     cachepaths="."

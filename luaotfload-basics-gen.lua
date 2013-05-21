@@ -147,18 +147,18 @@ do
 
     -- standard context tree setup
 
-    local cachepaths = kpse.expand_path('$TEXMFCACHE') or ""
+    local cachepaths = kpse.expand_var('$TEXMFCACHE') or ""
 
     -- quite like tex live or so
 
     if cachepaths == "" then
-        cachepaths = kpse.expand_path('$TEXMFVAR')
+        cachepaths = kpse.expand_var('$TEXMFVAR') or ""
     end
 
     -- this also happened to be used
 
     if cachepaths == "" then
-        cachepaths = kpse.expand_path('$VARTEXMF')
+        cachepaths = kpse.expand_var('$VARTEXMF') or ""
     end
 
     -- and this is a last resort

@@ -425,7 +425,7 @@ local function path_normalize(path)
         - reading symlinks under non-Win32
         - using kpse.readable_file on Win32
     ]]
-    if os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
+    if os.type == "windows" or os.type == "msdos" then
         path = path:gsub('\\', '/')
         path = path:lower()
         path = path:gsub('^/cygdrive/(%a)/', '%1:/')
@@ -635,7 +635,7 @@ local function get_os_dirs()
             "/System/Library/Fonts",
             "/Network/Library/Fonts",
         }
-    elseif os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
+    elseif os.type == "windows" or os.type == "msdos" then
         local windir = os.getenv("WINDIR")
         return { file.join(windir, 'Fonts') }
     else

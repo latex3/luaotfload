@@ -990,29 +990,14 @@ do
         path_normalize = function (path)
             path = stringgsub(path, '\\', '/')
             path = stringlower(path)
-            path = stringgsub(path, '^/cygdrive/(%a)/', '%1:/')
             path = filecollapsepath(path)
             return path
         end
-
-    elseif os_name == "cygwin" then -- union of ms + unix
-        path_normalize = function (path)
-            path = stringgsub(path, '\\', '/')
-            path = stringlower(path)
-            path = stringgsub(path, '^/cygdrive/(%a)/', '%1:/')
-            local dest = lfsreadlink(path)
-            if dest then
-                if kpsereadable_file(dest) then
-                    path = dest
-                elseif kpsereadable_file(filejoin(filedirname(path), dest)) then
-                    path = filejoin(file.dirname(path), dest)
-                else
-                    -- broken symlink?
-                end
-            end
-            path = filecollapsepath(path)
-            return path
-        end
+--[[doc--
+    Cygwin used to be treated different from windows and dos.  This
+    special treatment was removed with a patch submitted by Ken Brown.
+    Reference: http://cygwin.com/ml/cygwin/2013-05/msg00006.html
+--doc]]--
 
     else -- posix
         path_normalize = function (path)
@@ -1379,7 +1364,7 @@ local function get_os_dirs()
             "/System/Library/Fonts",
             "/Network/Library/Fonts",
         }
-    elseif os.type == "windows" or os.type == "msdos" or os.name == "cygwin" then
+    elseif os.type == "windows" or os.type == "msdos" then
         local windir = os.getenv("WINDIR")
         return { filejoin(windir, 'Fonts') }
     else

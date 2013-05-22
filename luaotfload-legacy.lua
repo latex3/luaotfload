@@ -357,9 +357,9 @@ local get_math_dimension = function(fnt, str)
   end
 end
 
-aux.check_script          = check_script
-aux.check_language        = check_language
-aux.check_feature         = check_feature
+aux.provides_script       = check_script
+aux.provides_language     = check_language
+aux.provides_feature      = check_feature
 aux.get_math_dimension    = get_math_dimension
 
 local set_capheight = function (tfmdata)

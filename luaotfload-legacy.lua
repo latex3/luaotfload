@@ -263,4 +263,140 @@ end
 
 luatexbase.add_to_callback("luaotfload.patch_font", set_sscale_diments, "unicodemath.set_sscale_diments")
 
+--[[doc--
+  Version 2.3c of fontspec dropped a couple features that are now
+  provided in the luaotfload auxiliary libraries. To avoid breaking
+  Mik\TEX (again), which is sorta the entire point of distributing the
+  legacy codebase, we temporarily restore those functions here.
+
+  Note that apart from cosmetic changes these are still the same as in
+  pre-TL2013 fontspec, relying on pairs() and other inefficient methods.
+--doc]]--
+
+luaotfload.aux      = luaotfload.aux or { }
+local aux           = luaotfload.aux
+
+local stringlower   = string.lower
+local fontid        = font.id
+
+local identifiers   = fonts.identifiers
+
+local check_script = function (id, script)
+  local s = stringlower(script)
+  if id and id > 0 then
+    local tfmdata = identifiers[id]
+    local otfdata = tfmdata.shared and tfmdata.shared.otfdata
+    if otfdata then
+      local features = otfdata.luatex.features
+      for i, _ in pairs(features) do
+        for j, _ in pairs(features[i]) do
+          if features[i][j][s] then
+            fontspec.log("script '%s' exists in font '%s'",
+                         script, tfmdata.fullname)
+            return true
+          end
+        end
+      end
+    end
+  end
+end
+
+local check_language = function (id, script, language)
+  local s = stringlower(script)
+  local l = stringlower(language)
+  if id and id > 0 then
+    local tfmdata = identifiers[id]
+    local otfdata = tfmdata.shared and tfmdata.shared.otfdata
+    if otfdata then
+      local features = otfdata.luatex.features
+      for i, _ in pairs(features) do
+        for j, _ in pairs(features[i]) do
+          if features[i][j][s] and features[i][j][s][l] then
+            fontspec.log("language '%s' for script '%s' exists in font '%s'",
+                         language, script, tfmdata.fullname)
+            return true
+          end
+        end
+      end
+    end
+  end
+end
+
+local check_feature = function (id, script, language, feature)
+  local s = stringlower(script)
+  local l = stringlower(language)
+  local f = stringlower(feature:gsub("^[+-]", ""):gsub("=.*$", ""))
+  if id and id > 0 then
+    local tfmdata = identifiers[id]
+    local otfdata = tfmdata.shared and tfmdata.shared.otfdata
+    if otfdata then
+      local features = otfdata.luatex.features
+      for i, _ in pairs(features) do
+        if features[i][f] and features[i][f][s] then
+          if features[i][f][s][l] == true then
+            fontspec.log("feature '%s' for language '%s' and script '%s' exists in font '%s'",
+                         feature, language, script, tfmdata.fullname)
+            return true
+          end
+        end
+      end
+    end
+  end
+end
+
+local get_math_dimension = function(fnt, str)
+  if type(fnt) == "string" then
+    fnt = fontid(fnt)
+  end
+  local tfmdata = identifiers[fnt]
+  if tfmdata then
+    local mathdata = tfmdata.MathConstants
+    if mathdata then
+      return mathdata[str]
+    end
+  end
+end
+
+aux.check_script          = check_script
+aux.check_language        = check_language
+aux.check_feature         = check_feature
+aux.get_math_dimension    = get_math_dimension
+
+local set_capheight = function (tfmdata)
+    local capheight
+    local shared = tfmdata.shared
+    if shared then
+      local metadata       = shared.otfdata.metadata
+      local units_per_em   = metadata.units_per_em or tfmdata.units
+      local os2_capheight  = shared.otfdata.pfminfo.os2_capheight
+      local size           = tfmdata.size
+
+      if os2_capheight > 0 then
+          capheight = os2_capheight / units_per_em * size
+      else
+          local X8 = string.byte"X"
+          if tfmdata.characters[X8] then
+              capheight = tfmdata.characters[X8].height
+          else
+              capheight = metadata.ascent / units_per_em * size
+          end
+      end
+    else
+        local X8 = string.byte"X"
+        if tfmdata.characters[X8] then
+            capheight = tfmdata.characters[X8].height
+        end
+    end
+    if capheight then
+        tfmdata.parameters[8] = capheight
+    end
+end
+luatexbase.add_to_callback("luaotfload.patch_font",
+                           set_capheight,
+                           "luaotfload.set_capheight")
+
+--[[doc--
+End of auxiliary functionality that was moved from fontspec.lua.
+--doc]]--
+
 -- vim:ts=2:sw=2:expandtab:ft=lua

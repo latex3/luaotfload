@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/21/13 16:14:48
+-- merge date  : 05/22/13 19:28:51
 
 do -- begin closure to overcome local limits and interference
 
@@ -2310,16 +2310,10 @@ function file.strip(name,dir)
   end
 end
 function lfs.mkdirs(path)
-  local full
-  for sub in gmatch(path,"([^\\/]+)") do
-    if full then
-      full=full.."/"..sub
-    else
-      full=sub
-    end
-    if not lfs.isdir(full) then
-      lfs.mkdir(full)
-    end
+  local full=""
+  for sub in gmatch(path,"(/*[^\\/]+)") do 
+    full=full..sub
+    lfs.mkdir(full)
   end
 end
 

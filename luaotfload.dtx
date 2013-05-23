@@ -1743,16 +1743,6 @@ pop_namespaces(our_environment, false)-- true)
 log("fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
 
 %    \end{macrocode}
-%     Restore original \luafunction{kpse.expand_path} function.
-%
-%    \begin{macrocode}
-
-if normal_expand_path ~= nil then
-    kpse.expand_path = normal_expand_path
-    phantom_kpse     = nil
-end
-
-%    \end{macrocode}
 % \subsection{Callbacks}
 % After the fontloader is ready we can restore the callback trap from
 % \identifier{luatexbase}.

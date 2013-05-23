@@ -1015,7 +1015,9 @@ local field             = field_char^1
 --- switches    are “+key” | “-key”
 local normal_option     = C(field) * ws * equals * ws * C(field) * ws
 local xetex_option      = P"+" * ws * normal_option
-local ignore_option     = (1 - equals)^1 * equals * (1 - featuresep)^1
+local ignore_option     = (1 - equals - featuresep)^1
+                        * equals
+                        * (1 - featuresep)^1
 local assignment        = xetex_option  / handle_xetex_option
                         + normal_option / handle_normal_option
                         + ignore_option / handle_invalid_option

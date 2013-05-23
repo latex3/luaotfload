@@ -111,7 +111,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2013/05/20 v2.2c OpenType layout system]%
+  [2013/05/23 v2.2d OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
 \usepackage[x11names]{xcolor}
@@ -231,7 +231,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \identifier{luaotfload} package}
-% \date{2013/05/20 v2.2c}
+% \date{2013/05/23 v2.2d}
 % \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
 %         Home:      \url{https://github.com/lualatex/luaotfload}\\
 %         Support:   \email{lualatex-dev@tug.org}}
@@ -1444,7 +1444,7 @@ config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_l
 luaotfload.module = {
     name          = "luaotfload",
     version       = 2.2,
-    date          = "2013/05/20",
+    date          = "2013/05/23",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -1453,21 +1453,11 @@ luaotfload.module = {
 
 local luatexbase       = luatexbase
 
-local getmetatable     = getmetatable
-local rawset           = rawset
 local setmetatable     = setmetatable
 local type, next       = type, next
 
-
-local kpseexpand_path  = kpse.expand_path
-local kpseexpand_var   = kpse.expand_var
 local kpsefind_file    = kpse.find_file
-local lfsisdir         = lfs.isdir
 local lfsisfile        = lfs.isfile
-local lfsmkdir         = lfs.mkdir
-local stringexplode    = string.explode
-local stringgmatch     = string.gmatch
-local stringsub        = string.sub
 
 local add_to_callback, create_callback =
       luatexbase.add_to_callback, luatexbase.create_callback
@@ -1514,53 +1504,6 @@ if tex.luatexversion < luatex_version then
         end
     end
 end
-
-%    \end{macrocode}
-%     Create \verb+$TEXMFCACHE+ if not present. This is necessary due to a bug
-%     in Luatex-Fonts that surfaces if none of the possible cache
-%     directories exists. We add a fixed version of \luafunction{lfs.mkdirs} first
-%     that will be installed as soon as \fileent{l-file.lua} tries to insert its
-%     buggy version.
-%
-%    \begin{macrocode}
-
-local ostype      = os.type
-local mkdirs = function (path)
-  local full
-  if ostype ~= "windows" and stringsub(path, 1, 1) == "/" then
-    --- absolute path, force initial backslash
-    full = ""
-  end
-  for sub in stringgmatch(path,"([^\\/]+)") do
-    if full then
-      full = full .. "/" .. sub
-    else
-      full = sub
-    end
-    if not lfsisdir(full) then
-      lfsmkdir(full)
-    end
-  end
-end
-
---- <hack version="2">
-
-local backup_mkdirs -- just in case
-
-local lfs_mt = getmetatable(lfs) or { } --- should be empty
-
-lfs_mt.__newindex = function (t, k, v)
-  if k == "mkdirs" then
-    backup_mkdirs = v               --> backup
-    rawset(t, "mkdirs", mkdirs)     --> ours
-  else -- insert normally
-    t[k] = v
-  end
-end
-
-setmetatable(lfs, lfs_mt)
-
---- </hack>
 
 %    \end{macrocode}
 % \subsection{Module loading}
@@ -2065,7 +2008,7 @@ loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2013/05/20 v2.2c OpenType layout system]
+    [2013/05/23 v2.2d OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
 \ifnum\luatexversion<76

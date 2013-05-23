@@ -75,7 +75,7 @@ local add_fontdata_fallbacks = function (fontdata)
       fontdata.size    = fontdata.size or fontparameters.size
       local resources  = fontdata.resources
       --- for legacy fontspec.lua and unicode-math.lua
-      fontdata.shared.otfdata          = {
+      fontdata.shared.otfdata = {
         pfminfo   = { os2_capheight = metadata.pfminfo.os2_capheight },
         metadata  = { ascent = metadata.ascent },
       }

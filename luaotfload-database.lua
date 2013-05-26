@@ -19,6 +19,7 @@ local require                 = require
 local tonumber                = tonumber
 
 local fontloaderinfo          = fontloader.info
+local fontloaderopen          = fontloader.open
 local iolines                 = io.lines
 local ioopen                  = io.open
 local kpseexpand_path         = kpse.expand_path
@@ -71,7 +72,7 @@ fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
-names.version        = 2.204
+names.version        = 2.205
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 names.path           = {
@@ -356,13 +357,19 @@ crude_file_lookup_verbose = function (filename)
     return filename, nil
 end
 
+local dummy_findfile = resolvers.findfile -- from basics-gen
+
 --- string -> string
 crude_file_lookup = function (filename)
+    local found = dummy_findfile(filename)
+    if found then
+        return found
+    end
     if not names.data then names.data = load_names() end
     local data      = names.data
     local mappings  = data.mappings
-    local found = data.barenames[filename]
-               or data.basenames[filename]
+    found = data.barenames[filename]
+         or data.basenames[filename]
     if found then
         found = data.mappings[found]
         if found then return found.filename[1] end
@@ -807,7 +814,7 @@ table as returned by the font file reader need to be relocated.
 --doc]]--
 font_fullinfo = function (filename, subfont)
     local tfmdata = { }
-    local rawfont = fontloader.open(filename, subfont)
+    local rawfont = fontloaderopen(filename, subfont)
     if not rawfont then
         report("log", 1, "error", "failed to open %s", filename)
         return
@@ -870,7 +877,7 @@ end
 
 --- we return true if the fond is new or re-indexed
 --- string -> dbobj -> dbobj -> bool
-local load_font = function (fullname, fontnames, newfontnames)
+local load_font = function (fullname, fontnames, newfontnames, texmf)
     if not fullname then
         return false
     end
@@ -891,7 +898,10 @@ local load_font = function (fullname, fontnames, newfontnames)
     local basename      = filebasename(fullname)
     local barename      = filenameonly(fullname)
 
-    local entryname     = basename
+    local entryname     = fullname
+    if texmf == true then
+        entryname = basename
+    end
 
     if names.blacklist[fullname] or names.blacklist[basename]
     then
@@ -901,36 +911,37 @@ local load_font = function (fullname, fontnames, newfontnames)
     end
 
     local timestamp, db_timestamp
-    db_timestamp        = status[fullname]
-                        and status[fullname].timestamp
+    db_timestamp        = status[entryname]
+                        and status[entryname].timestamp
     timestamp           = lfs.attributes(fullname, "modification")
 
-    local index_status = newstatus[fullname]
+    local index_status = newstatus[entryname]
     --- index_status: nil | false | table
     if index_status and index_status.timestamp == timestamp then
         -- already indexed this run
         return false
     end
 
-    newstatus[fullname]           = newstatus[fullname] or { }
-    newstatus[fullname].timestamp = timestamp
-    newstatus[fullname].index     = newstatus[fullname].index or { }
+    newstatus[entryname]           = newstatus[entryname] or { }
+    newstatus[entryname].timestamp = timestamp
+    newstatus[entryname].index     = newstatus[entryname].index or { }
 
     --- this test compares the modification data registered
     --- in the database with the current one
     if  db_timestamp == timestamp
-    and not newstatus[fullname].index[1] then
-        for _,v in next, status[fullname].index do
-            local index      = #newstatus[fullname].index
+    and not newstatus[entryname].index[1]
+    then
+        for _, v in next, status[entryname].index do
+            local index      = #newstatus[entryname].index
             local fullinfo   = mappings[v]
             local location   = #newmappings + 1
-            newmappings[location]               = fullinfo --- keep
-            newstatus[fullname].index[index+1]  = location --- is this actually used anywhere?
---          newfullnames[fullname]              = location
-            newbasenames[basename]              = location
-            newbarenames[barename]              = location
+            newmappings[location]                = fullinfo --- keep
+            newstatus[entryname].index[index+1]  = location --- is this actually used anywhere?
+--          newfullnames[fullname]               = location
+            newbasenames[basename]               = location
+            newbarenames[barename]               = location
         end
-        report("log", 2, "db", "font “%s” already indexed", entryname)
+        report("log", 2, "db", "font “%s” already indexed", basename)
         return false
     end
 
@@ -943,14 +954,14 @@ local load_font = function (fullname, fontnames, newfontnames)
                     return false
                 end
                 local location = #newmappings+1
-                local index    = newstatus[fullname].index[n_font]
+                local index    = newstatus[entryname].index[n_font]
                 if not index then index = location end
 
                 newmappings[index]                  = fullinfo
 --              newfullnames[fullname]              = location
                 newbasenames[basename]              = location
                 newbarenames[barename]              = location
-                newstatus[fullname].index[n_font]   = index
+                newstatus[entryname].index[n_font]  = index
             end
         else
             local fullinfo = font_fullinfo(fullname, false)
@@ -958,18 +969,18 @@ local load_font = function (fullname, fontnames, newfontnames)
                 return false
             end
             local location  = #newmappings+1
-            local index     = newstatus[fullname].index[1]
+            local index     = newstatus[entryname].index[1]
             if not index then index = location end
 
-            newmappings[index]            = fullinfo
---          newfullnames[fullname]        = location
-            newbasenames[basename]        = location
-            newbarenames[barename]        = location
-            newstatus[fullname].index[1]  = index
+            newmappings[index]             = fullinfo
+--          newfullnames[fullname]         = location
+            newbasenames[basename]         = location
+            newbarenames[barename]         = location
+            newstatus[entryname].index[1]  = index
         end
 
     else --- missing info
-        report("log", 1, "db", "failed to load “%s”", entryname)
+        report("log", 1, "db", "failed to load “%s”", basename)
         return false
     end
     return true
@@ -1073,7 +1084,7 @@ end
 --doc]]--
 
 --- string -> dbobj -> dbobj -> bool -> (int * int)
-local scan_dir = function (dirname, fontnames, newfontnames, dry_run)
+local scan_dir = function (dirname, fontnames, newfontnames, dry_run, texmf)
     local n_scanned, n_new = 0, 0   --- total of fonts collected
     report("both", 2, "db", "scanning directory %s", dirname)
     for _,i in next, font_extensions do
@@ -1092,7 +1103,7 @@ local scan_dir = function (dirname, fontnames, newfontnames, dry_run)
                     report("both", 1, "db", "would have been loading “%s”", fullname)
                 else
                     report("both", 4, "db", "loading font “%s”", fullname)
-                    local new = load_font(fullname, fontnames, newfontnames)
+                    local new = load_font(fullname, fontnames, newfontnames, texmf)
                     if new == true then
                         n_new = n_new + 1
                     end
@@ -1121,7 +1132,7 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
     if not stringis_empty(fontdirs) then
         for _,d in next, filesplitpath(fontdirs) do
             report("info", 4, "db", "Entering directory %s", d)
-            local found, new = scan_dir(d, fontnames, newfontnames, dry_run)
+            local found, new = scan_dir(d, fontnames, newfontnames, dry_run, true)
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end
@@ -1356,7 +1367,7 @@ end --- read_fonts_conf closure
 
 --- TODO stuff those paths into some writable table
 --- unit -> string list
-local function get_os_dirs()
+local function get_os_dirs ()
     if os.name == 'macosx' then
         return {
             filejoin(kpseexpand_path('~'), "Library/Fonts"),

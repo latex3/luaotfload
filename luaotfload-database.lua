@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['luaotfload-database'] = {
-    version   = 2.2,
+    version   = 2.3,
     comment   = "companion to luaotfload.lua",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
@@ -17,6 +17,7 @@ local next                    = next
 local pcall                   = pcall
 local require                 = require
 local tonumber                = tonumber
+local unpack                  = table.unpack
 
 local fontloaderinfo          = fontloader.info
 local fontloaderopen          = fontloader.open
@@ -133,9 +134,13 @@ This is a sketch of the luaotfload db:
         mappings        : fontentry list;
         status          : filestatus;
         version         : float;
-        // preliminary additions of v2.2:
-        basenames       : (string, int) hash;    // where int is the index in mappings
-        barenames       : (string, int) hash;    // where int is the index in mappings
+        // additions of v2.3; these supersede the basenames / barenames
+        // hashes from v2.2
+        filenames       : {
+            base : (string, int) hash; // basename -> idx
+            bare : (string, int) hash; // barename -> idx
+            full : (int, string) hash; // idx -> full path
+        }
     }
     and fontentry = {
         familyname  : string;
@@ -204,9 +209,7 @@ local fontnames_init = function (keep_cache) --- returns dbobj
     return {
         mappings        = { },
         status          = { },
-        barenames       = { },
-        basenames       = { },
---      fullnames       = { }, // -> status
+--      filenames       = { }, -- created later
         version         = names.version,
     }
 end
@@ -890,7 +893,7 @@ font_fullinfo = function (filename, subfont, texmf, basename)
     tfmdata.fullname      = metadata.fullname
     tfmdata.familyname    = metadata.familyname
     if texmf == true then --- ugh, ugliness levels peaking here
-        tfmdata.filename      = { barename, subfont }
+        tfmdata.filename      = { basename, subfont }
         tfmdata.texmf         = true
     else
         tfmdata.filename      = { filename, subfont }
@@ -976,7 +979,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     if info then
         if type(info) == "table" and #info > 1 then --- ttc
             for n_font = 1, #info do
-                local fullinfo = font_fullinfo(fullname, n_font-1, texmf, barename)
+                local fullinfo = font_fullinfo(fullname, n_font-1, texmf, basename)
                 if not fullinfo then
                     return false
                 end
@@ -989,7 +992,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
                 newentrystatus.index[n_font]  = index
             end
         else
-            local fullinfo = font_fullinfo(fullname, false, texmf, barename)
+            local fullinfo = font_fullinfo(fullname, false, texmf, basename)
             if not fullinfo then
                 return false
             end
@@ -1438,6 +1441,60 @@ flush_lookup_cache = function ()
     return true, names.lookups
 end
 
+--- dbobj -> dbobj
+local gen_fast_lookups = function (fontnames)
+    report("both", 2, "db", "creating filename map")
+    local texmf_wins = config.luaotfload.texmf_wins
+    local mappings   = fontnames.mappings
+    local nmappings  = #mappings
+    --- this is needlessly complicated due to texmf priorization
+    local filenames  = {
+        bare = { },
+        base = { },
+        full = { }, --- non-texmf
+    }
+
+    local texmf, sys = { }, { } -- quintuple list
+
+    for idx = 1, nmappings do
+        local entry    = mappings[idx]
+        local filename = entry.filename[1]
+        if entry.texmf == true then
+            bare = filenameonly(filename)
+            texmf[#texmf+1] = { idx, filename, bare, true, nil }
+        else
+            --- filename contains full path
+            base = filebasename(filename)
+            bare = filenameonly(filename)
+            sys[#sys+1] = { idx, base, bare, false, filename }
+        end
+    end
+
+    local addmap = function (lst)
+        --- this will overwrite existing entries
+        for i=1, #lst do
+            local idx, base, bare, texmf, full = unpack(lst[i])
+            filenames.bare[bare] = idx
+            filenames.base[base] = idx
+            if texmf ~= true then
+                filenames.full[idx] = full
+            end
+        end
+    end
+
+    if config.luaotfload.prioritize == "texmf" then
+        report("both", 2, "db", "preferring texmf fonts")
+        addmap(sys)
+        addmap(texmf)
+    else --- sys
+        addmap(texmf)
+        addmap(sys)
+    end
+
+    fontnames.filenames = filenames
+    return fontnames
+end
+
 --- force:      dictate rebuild from scratch
 --- dry_dun:    don’t write to the db, just scan dirs
 
@@ -1482,6 +1539,10 @@ update_names = function (fontnames, force, dry_run)
     scanned, new = scan_os_fonts(fontnames, newfontnames, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
+
+    if n_new > 0 then
+        newfontnames = gen_fast_lookups(newfontnames)
+    end
 
     --- stats:
     ---            before rewrite   | after rewrite

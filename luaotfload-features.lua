@@ -1004,6 +1004,8 @@ local prefixed          = P"name:" * ws * Cg(fontname, "name")
 --- we’ll emit a warning.
                         + P"file:" * ws * Cg(unsupported, "path")
                         + P"file:" * ws * Cg(fontname,    "file")
+--- EXPERIMENTAL: kpse lookup
+                        + P"kpse:" * ws * Cg(fontname,    "kpse")
 local unprefixed        = Cg(fontname, "anon")
 local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
 
@@ -1069,7 +1071,7 @@ local import_values = {
     { "mode",   true },
 }
 
-local lookup_types = { "anon", "file", "name", "path" }
+local lookup_types = { "anon", "file", "kpse", "name", "path" }
 
 local select_lookup = function (request)
     for i=1, #lookup_types do

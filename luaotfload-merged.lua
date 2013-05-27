@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/22/13 19:28:51
+-- merge date  : 05/27/13 11:01:26
 
 do -- begin closure to overcome local limits and interference
 
@@ -4691,9 +4691,9 @@ mappings.makenameparser=makenameparser
 mappings.tounicode16=tounicode16
 mappings.tounicode16sequence=tounicode16sequence
 mappings.fromunicode16=fromunicode16
-local separator=S("_.")
-local other=C((1-separator)^1)
-local ligsplitter=Ct(other*(separator*other)^0)
+local ligseparator=P("_")
+local varseparator=P(".")
+local namesplitter=Ct(C((1-ligseparator-varseparator)^1)*(ligseparator*C((1-ligseparator-varseparator)^1))^0)
 function mappings.addtounicode(data,filename)
   local resources=data.resources
   local properties=data.properties
@@ -4778,11 +4778,11 @@ function mappings.addtounicode(data,filename)
         end
       end
       if not unicode or unicode=="" then
-        local split=lpegmatch(ligsplitter,name)
-        local nplit=split and #split or 0
-        if nplit>=2 then
+        local split=lpegmatch(namesplitter,name)
+        local nsplit=split and #split or 0
+        if nsplit>=2 then
           local t,n={},0
-          for l=1,nplit do
+          for l=1,nsplit do
             local base=split[l]
             local u=unicodes[base] or unicodevector[base]
             if not u then

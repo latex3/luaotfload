@@ -941,7 +941,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     end
 
     local newmappings   = newfontnames.mappings
-    local newstatus     = newfontnames.status
+    local newstatus     = newfontnames.status --- by full path
 
     local mappings      = fontnames.mappings
     local status        = fontnames.status
@@ -962,28 +962,26 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     end
 
     local new_timestamp, current_timestamp
-    current_timestamp   = status[entryname]
-                      and status[entryname].timestamp
+    current_timestamp   = status[fullname]
+                      and status[fullname].timestamp
     new_timestamp       = lfsattributes(fullname, "modification")
 
-    local newentrystatus = newstatus[entryname]
+    local newentrystatus = newstatus[fullname]
     --- newentrystatus: nil | false | table
     if newentrystatus and newentrystatus.timestamp == new_timestamp then
         -- already indexed this run
         return false
     end
 
-    newstatus[entryname]     = newentrystatus or { }
-    local newentrystatus     = newstatus[entryname]
+    newstatus[fullname]      = newentrystatus or { }
+    local newentrystatus     = newstatus[fullname]
     newentrystatus.timestamp = new_timestamp
     newentrystatus.index     = newentrystatus.index or { }
 
-    --- this test compares the modification date registered
-    --- in the database with the current one
     if  current_timestamp == new_timestamp
     and not newentrystatus.index[1]
     then
-        for _, v in next, status[entryname].index do
+        for _, v in next, status[fullname].index do
             local index      = #newentrystatus.index
             local fullinfo   = mappings[v]
             local location   = #newmappings + 1
@@ -1002,7 +1000,6 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
                 if not fullinfo then
                     return false
                 end
-                fullinfo.texmf = texmf --- flag for resolver
                 local location = #newmappings+1
                 local index    = newentrystatus.index[n_font]
                 if not index then index = location end
@@ -1127,7 +1124,7 @@ end
 
 --doc]]--
 
---- string -> dbobj -> dbobj -> bool -> (int * int)
+--- string -> dbobj -> dbobj -> bool -> bool -> (int * int)
 local scan_dir = function (dirname, fontnames, newfontnames, dry_run, texmf)
     local n_scanned, n_new = 0, 0   --- total of fonts collected
     report("both", 2, "db", "scanning directory %s", dirname)
@@ -1463,7 +1460,6 @@ end
 --- dbobj -> dbobj
 local gen_fast_lookups = function (fontnames)
     report("both", 2, "db", "creating filename map")
-    local texmf_wins = config.luaotfload.texmf_wins
     local mappings   = fontnames.mappings
     local nmappings  = #mappings
     --- this is needlessly complicated due to texmf priorization

@@ -172,6 +172,7 @@ This tool is part of the luaotfload package. Valid options are:
   -f --force                   force re-indexing all fonts
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
+  -p --prefer-texmf            prefer fonts in the TEXMF over system fonts
 
   --find="font name"           query the database for a font name
   -F --fuzzy                   look for approximate matches if --find fails
@@ -562,13 +563,14 @@ local process_cmdline = function ( ) -- unit -> jobspec
         limit              = 1,
         list               = 1,
         log                = 1,
+        ["prefer-texmf"]   = "p",
         quiet              = "q",
         update             = "u",
         verbose            = 1  ,
         version            = "V",
     }
 
-    local short_options = "DfFilquvVh"
+    local short_options = "DfFilpquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -629,6 +631,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.cache = optarg[n]
         elseif v == "D" then
             result.dry_run = true
+        elseif v == "p" then
+            config.luaotfload.prioritize = "texmf"
         end
     end
 

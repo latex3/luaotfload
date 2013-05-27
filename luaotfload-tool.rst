@@ -15,9 +15,9 @@
 SYNOPSIS
 =======================================================================
 
-**luaotfload** [ -cfFiquvVh ]
+**luaotfload** [ -cfFipquvVh ]
 
-**luaotfload** --update [ --force ] [ --quiet ] [ --verbose ] [ --dry-run ]
+**luaotfload** --update [ --force ] [ --quiet ] [ --verbose ] [ --prefer-texmf ] [ --dry-run ]
 
 **luaotfload** --find=FONTNAME [ --fuzzy ] [ --info ]
 
@@ -55,6 +55,9 @@ update mode
 --update, -u            Update the database; indexes new fonts.
 --force, -f             Force rebuilding of the database; re-indexes
                         all fonts.
+--prefer-texmf, -p      Organize the file name database in a way so
+                        that it prefer fonts in the *TEXMF* tree over
+                        system fonts if they are installed in both.
 --dry-run, -D           Don’t load fonts, scan directories only.
                         (For debugging file system related issues.)
 

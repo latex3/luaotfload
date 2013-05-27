@@ -134,13 +134,14 @@ This is a sketch of the luaotfload db:
         mappings        : fontentry list;
         status          : filestatus;
         version         : float;
-        // additions of v2.3; these supersede the basenames / barenames
+        // new in v2.3; these supersede the basenames / barenames
         // hashes from v2.2
-        filenames       : {
-            base : (string, int) hash; // basename -> idx
-            bare : (string, int) hash; // barename -> idx
-            full : (int, string) hash; // idx -> full path
-        }
+        filenames       : filemap;
+    }
+    and filemap = {
+        base : (string, int) hash; // basename -> idx
+        bare : (string, int) hash; // barename -> idx
+        full : (int, string) hash; // idx -> full path
     }
     and fontentry = {
         familyname  : string;
@@ -333,32 +334,47 @@ end
 
 local type1_formats = { "tfm", "ofm", }
 
---- string -> string
+local dummy_findfile = resolvers.findfile -- from basics-gen
+
+--- filemap -> string -> string -> (string | bool)
+local verbose_lookup = function (data, kind, filename)
+    local found = data[kind][filename]
+    if found ~= nil then
+        found = data.full[found]
+        if found == nil then --> texmf
+            report("info", 0, "db",
+                "crude file lookup: req=%s; hit=%s => kpse",
+                filename, kind)
+            found = dummy_findfile(filename)
+        else
+            report("info", 0, "db",
+                "crude file lookup: req=%s; hit=%s; ret=%s",
+                filename, kind, found)
+        end
+        return found
+    end
+    return false
+end
+
+--- string -> (string | string * string)
 crude_file_lookup_verbose = function (filename)
     if not names.data then names.data = load_names() end
     local data      = names.data
     local mappings  = data.mappings
+    local filenames = data.filenames
     local found
 
     --- look up in db first ...
-    found = data.barenames[filename]
-    if found and mappings[found] then
-        found = mappings[found].filename[1]
-        report("info", 0, "db",
-            "crude file lookup: req=%s; hit=bare; ret=%s",
-            filename, found)
+    found = verbose_lookup(filenames, "bare", filename)
+    if found then
         return found
     end
-    found = data.basenames[filename]
-    if found and mappings[found] then
-        found = mappings[found].filename[1]
-        report("info", 0, "db",
-            "crude file lookup: req=%s; hit=base; ret=%s",
-            filename, found)
+    found = verbose_lookup(filenames, "base", filename)
+    if found then
         return found
     end
 
-    --- ofm and tfm
+    --- ofm and tfm, returns pair
     for i=1, #type1_formats do
         local format = type1_formats[i]
         if resolvers.findfile(filename, format) then
@@ -368,22 +384,25 @@ crude_file_lookup_verbose = function (filename)
     return filename, nil
 end
 
-local dummy_findfile = resolvers.findfile -- from basics-gen
-
---- string -> string
+--- string -> (string | string * string)
 crude_file_lookup = function (filename)
-    local found = dummy_findfile(filename)
-    if found then
-        return found
-    end
     if not names.data then names.data = load_names() end
     local data      = names.data
     local mappings  = data.mappings
-    found = data.barenames[filename]
-         or data.basenames[filename]
+    local filenames = data.filenames
+
+    local found
+
+    found = filenames.base[filename]
+         or filenames.bare[filename]
+
     if found then
-        found = data.mappings[found]
-        if found then return found.filename[1] end
+        found = filenames.full[found]
+        if found == nil then
+            return dummy_findfile(filename)
+        else
+            return found
+        end
     end
     for i=1, #type1_formats do
         local format = type1_formats[i]
@@ -1437,7 +1456,7 @@ end
 flush_lookup_cache = function ()
     if not names.lookups then names.lookups = load_lookups() end
     names.lookups = { }
-    collectgarbage"collect"
+    collectgarbage "collect"
     return true, names.lookups
 end
 
@@ -1473,10 +1492,12 @@ local gen_fast_lookups = function (fontnames)
     local addmap = function (lst)
         --- this will overwrite existing entries
         for i=1, #lst do
-            local idx, base, bare, texmf, full = unpack(lst[i])
+            local idx, base, bare, intexmf, full = unpack(lst[i])
             filenames.bare[bare] = idx
             filenames.base[base] = idx
-            if texmf ~= true then
+            if intexmf == true then
+                filenames.full[idx] = nil
+            else
                 filenames.full[idx] = full
             end
         end
@@ -1492,6 +1513,8 @@ local gen_fast_lookups = function (fontnames)
     end
 
     fontnames.filenames = filenames
+    texmf, sys = nil, nil
+    collectgarbage "collect"
     return fontnames
 end
 

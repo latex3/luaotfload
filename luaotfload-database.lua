@@ -1489,6 +1489,18 @@ local gen_fast_lookups = function (fontnames)
         --- this will overwrite existing entries
         for i=1, #lst do
             local idx, base, bare, intexmf, full = unpack(lst[i])
+
+            local known = filenames.base[base] or filenames.bare[bare]
+            if known then --- known
+                report("both", 1, "db",
+                       "font file “%s” already indexed (%d)",
+                       base, idx)
+                report("both", 2, "db", "> old location: %s",
+                       (filenames.full[known] or "texmf"))
+                report("both", 2, "db", "> new location: %s",
+                       (intexmf and "texmf" or full))
+            end
+
             filenames.bare[bare] = idx
             filenames.base[base] = idx
             if intexmf == true then

@@ -1797,7 +1797,7 @@ loadmodule"colors.lua"     --- “font-clr”
 %    \begin{macrocode}
 
 local request_resolvers   = fonts.definers.resolvers
-local formats             = fonts.formats
+local formats             = fonts.formats -- nice table; does lowercasing ...
 formats.ofm               = "type1"
 
 %    \end{macrocode}
@@ -1913,6 +1913,33 @@ request_resolvers.path = function (specification)
       else
         specification.name = name
       end
+    end
+end
+
+%    \end{macrocode}
+% {\bfseries EXPERIMENTAL}
+% \identifier{kpse}-only resolver, for those who can do without system
+% fonts.
+%
+%    \begin{macrocode}
+
+request_resolvers.kpse = function (specification)
+    local name       = specification.name
+    local suffix     = file.suffix(name)
+    if suffix and formats[suffix] then
+        name = file.removesuffix(name)
+        if resolvers.findfile(name, suffix) then
+            specification.forced = suffix
+            specification.name   = name
+            return
+        end
+    end
+    for t, format in next, formats do --- brute force
+        if kpse.find_file (name, format) then
+            specification.forced = t
+            specification.name   = name
+            return
+        end
     end
 end
 

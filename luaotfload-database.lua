@@ -28,6 +28,7 @@ local kpselookup              = kpse.lookup
 local kpsereadable_file       = kpse.readable_file
 local lfsisdir                = lfs.isdir
 local lfsisfile               = lfs.isfile
+local lfsattributes           = lfs.attributes
 local mathabs                 = math.abs
 local mathmin                 = math.min
 local stringfind              = string.find
@@ -146,9 +147,16 @@ This is a sketch of the luaotfload db:
             fullname   : string;
             psname     : string;
             subfamily  : string;
-        }
+        };
+        sanitized   : {
+            family     : string;
+            fullname   : string;
+            psname     : string;
+            subfamily  : string;
+        };
         size         : int list;
         slant        : int;
+        texmf        : bool;
         weight       : int;
         width        : int;
         units_per_em : int;                      // mainly 1000, but also 2048 or 256
@@ -483,6 +491,18 @@ local add_to_match = function (
 end
 
 --[[doc--
+Existence of the resolved file name is verified differently depending
+on whether the index entry has a texmf flag set.
+--doc]]--
+
+local is_file = function (filename, texmf)
+    if texmf == true then
+        return kpselookup(filename)
+    end
+    return lfsisfile(filename)
+end
+
+--[[doc--
 
 Luatex-fonts, the font-loader package luaotfload imports, comes with
 basic file location facilities (see luatex-fonts-syn.lua).
@@ -553,15 +573,20 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     if db_version ~= nms_version then
         report("log", 0, "db",
             [[version mismatch; expected %4.3f, got %4.3f]],
-            nms_version, db_version
-        )
-        return reload_db("version mismatch", resolve, nil, nil, specification)
+            nms_version, db_version)
+        if not fonts_reloaded then
+            return reload_db("version mismatch",
+                             resolve, nil, nil, specification)
+        end
+        return specification.name, false, false
     end
 
     if not data.mappings then
-        return reload_db("invalid database; missing font mapping",
-                         resolve, nil, nil, specification
-               )
+        if not fonts_reloaded then
+            return reload_db("invalid database; missing font mapping",
+                             resolve, nil, nil, specification)
+        end
+        return specification.name, false, false
     end
 
     local found = { }
@@ -635,13 +660,14 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
 
     if #found == 1 then
         --- “found” is really synonymous with “registered in the db”.
-        local filename = found[1].filename[1]
-        if lfsisfile(filename) or kpselookup(filename) then
+        local entry    = found[1]
+        local filename = entry.filename[1]
+        if is_file(filename, entry.texmf) then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
                 name, style, filename
             )
-            return filename, found[1].filename[2], true
+            return filename, entry.filename[2], true
         end
     elseif #found > 1 then
         -- we found matching font(s) but not in the requested optical
@@ -658,7 +684,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             end
         end
         local filename = closest.filename[1]
-        if lfsisfile(filename) or kpselookup(filename) then
+        if is_file(filename, closest.texmf) then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
                 name, style, filename
@@ -690,7 +716,7 @@ end --- resolve()
 --- string -> ('a -> 'a) -> 'a list -> 'a
 reload_db = function (why, caller, ...)
     report("both", 1, "db", "reload initiated; reason: “%s”", why)
-    names.data = update_names()
+    names.data = update_names(names.data, false, false)
     local success = save_names()
     if success then
         fonts_reloaded = true
@@ -737,7 +763,10 @@ find_closest = function (name, limit)
     local data = names.data
 
     if type(data) ~= "table" then
-        return reload_db("no database", find_closest, name)
+        if not fonts_reloaded then
+            return reload_db("no database", find_closest, name)
+        end
+        return false
     end
     local by_distance   = { } --- (int, string list) dict
     local distances     = { } --- int list
@@ -812,7 +841,8 @@ The data inside an Opentype font file can be quite heterogeneous.
 Thus in order to get the relevant information, parts of the original
 table as returned by the font file reader need to be relocated.
 --doc]]--
-font_fullinfo = function (filename, subfont)
+--- string -> int -> bool -> string -> fontentry
+font_fullinfo = function (filename, subfont, texmf, basename)
     local tfmdata = { }
     local rawfont = fontloaderopen(filename, subfont)
     if not rawfont then
@@ -859,7 +889,13 @@ font_fullinfo = function (filename, subfont)
     tfmdata.fontname      = metadata.fontname
     tfmdata.fullname      = metadata.fullname
     tfmdata.familyname    = metadata.familyname
-    tfmdata.filename      = { filename, subfont } -- always store full path
+    if texmf == true then --- ugh, ugliness levels peaking here
+        tfmdata.filename      = { barename, subfont }
+        tfmdata.texmf         = true
+    else
+        tfmdata.filename      = { filename, subfont }
+        tfmdata.texmf         = false
+    end
     tfmdata.weight        = metadata.pfminfo.weight
     tfmdata.width         = metadata.pfminfo.width
     tfmdata.slant         = metadata.italicangle
@@ -885,15 +921,8 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status
 
---  local newfullnames  = newfontnames.fullnames
-    local newbasenames  = newfontnames.basenames
-    local newbarenames  = newfontnames.barenames
-
     local mappings      = fontnames.mappings
     local status        = fontnames.status
---  local fullnames     = fontnames.fullnames
-    local basenames     = fontnames.basenames
-    local barenames     = fontnames.barenames
 
     local basename      = filebasename(fullname)
     local barename      = filenameonly(fullname)
@@ -910,36 +939,34 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
         return false
     end
 
-    local timestamp, db_timestamp
-    db_timestamp        = status[entryname]
-                        and status[entryname].timestamp
-    timestamp           = lfs.attributes(fullname, "modification")
+    local new_timestamp, current_timestamp
+    current_timestamp   = status[entryname]
+                      and status[entryname].timestamp
+    new_timestamp       = lfsattributes(fullname, "modification")
 
-    local index_status = newstatus[entryname]
-    --- index_status: nil | false | table
-    if index_status and index_status.timestamp == timestamp then
+    local newentrystatus = newstatus[entryname]
+    --- newentrystatus: nil | false | table
+    if newentrystatus and newentrystatus.timestamp == new_timestamp then
         -- already indexed this run
         return false
     end
 
-    newstatus[entryname]           = newstatus[entryname] or { }
-    newstatus[entryname].timestamp = timestamp
-    newstatus[entryname].index     = newstatus[entryname].index or { }
+    newstatus[entryname]     = newentrystatus or { }
+    local newentrystatus     = newstatus[entryname]
+    newentrystatus.timestamp = new_timestamp
+    newentrystatus.index     = newentrystatus.index or { }
 
-    --- this test compares the modification data registered
+    --- this test compares the modification date registered
     --- in the database with the current one
-    if  db_timestamp == timestamp
-    and not newstatus[entryname].index[1]
+    if  current_timestamp == new_timestamp
+    and not newentrystatus.index[1]
     then
         for _, v in next, status[entryname].index do
-            local index      = #newstatus[entryname].index
+            local index      = #newentrystatus.index
             local fullinfo   = mappings[v]
             local location   = #newmappings + 1
-            newmappings[location]                = fullinfo --- keep
-            newstatus[entryname].index[index+1]  = location --- is this actually used anywhere?
---          newfullnames[fullname]               = location
-            newbasenames[basename]               = location
-            newbarenames[barename]               = location
+            newmappings[location]          = fullinfo --- keep
+            newentrystatus.index[index+1]  = location --- is this actually used anywhere?
         end
         report("log", 2, "db", "font “%s” already indexed", basename)
         return false
@@ -949,34 +976,29 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     if info then
         if type(info) == "table" and #info > 1 then --- ttc
             for n_font = 1, #info do
-                local fullinfo = font_fullinfo(fullname, n_font-1)
+                local fullinfo = font_fullinfo(fullname, n_font-1, texmf, barename)
                 if not fullinfo then
                     return false
                 end
+                fullinfo.texmf = texmf --- flag for resolver
                 local location = #newmappings+1
-                local index    = newstatus[entryname].index[n_font]
+                local index    = newentrystatus.index[n_font]
                 if not index then index = location end
 
-                newmappings[index]                  = fullinfo
---              newfullnames[fullname]              = location
-                newbasenames[basename]              = location
-                newbarenames[barename]              = location
-                newstatus[entryname].index[n_font]  = index
+                newmappings[index]            = fullinfo
+                newentrystatus.index[n_font]  = index
             end
         else
-            local fullinfo = font_fullinfo(fullname, false)
+            local fullinfo = font_fullinfo(fullname, false, texmf, barename)
             if not fullinfo then
                 return false
             end
             local location  = #newmappings+1
-            local index     = newstatus[entryname].index[1]
+            local index     = newentrystatus.index[1]
             if not index then index = location end
 
-            newmappings[index]             = fullinfo
---          newfullnames[fullname]         = location
-            newbasenames[basename]         = location
-            newbarenames[barename]         = location
-            newstatus[entryname].index[1]  = index
+            newmappings[index]       = fullinfo
+            newentrystatus.index[1]  = index
         end
 
     else --- missing info

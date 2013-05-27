@@ -1917,7 +1917,7 @@ request_resolvers.path = function (specification)
 end
 
 %    \end{macrocode}
-% {\bfseries EXPERIMENTAL}
+% {\bfseries EXPERIMENTAL}:
 % \identifier{kpse}-only resolver, for those who can do without system
 % fonts.
 %
@@ -1941,6 +1941,17 @@ request_resolvers.kpse = function (specification)
             return
         end
     end
+end
+
+%    \end{macrocode}
+% Also {\bfseries EXPERIMENTAL}:
+% custom file resolvers via callback.
+%
+%    \begin{macrocode}
+create_callback("luaotfload.resolve_font", "simple", dummy_function)
+
+request_resolvers.my = function (specification)
+    call_callback("luaotfload.resolve_font", specification)
 end
 
 %    \end{macrocode}

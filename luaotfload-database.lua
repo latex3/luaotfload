@@ -1425,7 +1425,7 @@ update_names = function (fontnames, force, dry_run)
         report("info", 2, "db",
                "skipping database update")
         --- skip all db updates
-        return fontnames
+        return fontnames or names.data
     end
     local starttime = os.gettimeofday()
     local n_scanned, n_new = 0, 0

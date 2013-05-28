@@ -546,7 +546,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         force_reload = nil,
         criterion    = "",
         query        = "",
-        log_level    = 1, --- 2 is approx. the old behavior
+        log_level    = 0, --- 2 is approx. the old behavior
     }
 
     local long_options = {

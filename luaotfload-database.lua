@@ -399,10 +399,9 @@ crude_file_lookup = function (filename)
     if found then
         found = filenames.full[found]
         if found == nil then
-            return dummy_findfile(filename)
-        else
-            return found
+            found = dummy_findfile(filename)
         end
+        return found or filename
     end
     for i=1, #type1_formats do
         local format = type1_formats[i]

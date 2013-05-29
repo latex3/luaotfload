@@ -285,8 +285,9 @@ load_names = function (dry_run)
                                 1000*(os.gettimeofday()-starttime))
     else
         report("both", 0, "db",
-            [[Font names database not found, generating new one.
-             This can take several minutes; please be patient.]])
+            [[Font names database not found, generating new one.]])
+        report("both", 0, "db",
+             [[This can take several minutes; please be patient.]])
         data = update_names(fontnames_init(false), nil, dry_run)
         local success = save_names(data)
         if not success then

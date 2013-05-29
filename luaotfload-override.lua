@@ -1,17 +1,30 @@
 if not modules then modules = { } end modules ['luat-ovr'] = {
-    version   = 2.2,
+    version   = 2.3,
     comment   = "companion to luatex-*.tex",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
     license   = "GNU GPL v2"
 }
 
-local module_name   = "luaotfload"
+--[[doc--
+The logging system is slow in general, as we always have the function
+call overhead even if we aren’t going to output anything. On the other
+hand, the more efficient approach followed by Context isn’t an option
+because we lack a user interface to toggle per-subsystem tracing.
+--doc]]--
 
-local texiowrite_nl = texio.write_nl
-local stringformat  = string.format
-local tableconcat   = table.concat
-local type          = type
+local module_name       = "luaotfload"
+
+local select            = select
+local stringformat      = string.format
+local tableconcat       = table.concat
+local texiowrite_nl     = texio.write_nl
+local texiowrite        = texio.write
+local type              = type
+
+local texio_write_nl    = texio.write_nl
+local texio_write       = texio.write
+local iowrite           = io.write
 
 --[[doc--
 We recreate the verbosity levels previously implemented in font-nms:
@@ -65,11 +78,40 @@ local log = function (category, fmt, ...)
     texiowrite_nl(logout, tableconcat(res))
 end
 
-local stdout = function (category, fmt, ...)
-    local res = { module_name, " |" }
-    if category then res[#res+1] = " " .. category end
-    if fmt      then res[#res+1] = ": " .. stringformat(fmt, ...) end
-    texiowrite_nl(tableconcat(res))
+--- with faux db update with maximum verbosity:
+---
+---     ---------   --------
+---     buffering   time (s)
+---     ---------   --------
+---     full        4.12
+---     line        4.20
+---     none        4.39
+---     ---------   --------
+---
+
+io.stdout:setvbuf "no"
+io.stderr:setvbuf "no"
+
+local writeln
+if tex and (tex.jobname or tex.formatname) then
+    --- TeX
+    writeln = texiowrite_nl
+else
+    --- Lua interpreter
+    writeln = function (str)
+        iowrite(str)
+        iowrite "\n"
+    end
+end
+
+stdout = function (category, ...)
+    local res = { module_name, "|", category, ":" }
+    if select("#", ...) == 1 then
+        res[#res+1] = select(1, ...) -- around 30% faster than unpack()
+    else
+        res[#res+1] = stringformat(...)
+    end
+    writeln(tableconcat(res, " "))
 end
 
 --- at default (zero), we aim to be quiet

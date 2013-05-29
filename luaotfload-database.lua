@@ -1571,7 +1571,7 @@ update_names = function (fontnames, force, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 
-    if n_new > 0 then
+    if force or n_new > 0 then
         newfontnames = gen_fast_lookups(newfontnames)
     end
 

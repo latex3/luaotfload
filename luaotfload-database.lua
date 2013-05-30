@@ -1573,6 +1573,8 @@ update_names = function (fontnames, force, dry_run)
 
     if force or n_new > 0 then
         newfontnames = gen_fast_lookups(newfontnames)
+    else
+        newfontnames.filenames = fontnames.filenames
     end
 
     --- stats:

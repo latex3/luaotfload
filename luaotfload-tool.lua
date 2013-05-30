@@ -354,24 +354,24 @@ actions.query = function (job)
         fonts.names.resolve(nil, nil, tmpspec)
 
     if success then
-        logs.names_report(false, 1,
+        logs.names_report(false, 0,
             "resolve", "Font “%s” found!", query)
         if subfont then
-            logs.names_report(false, 1, "resolve",
+            logs.names_report(false, 0, "resolve",
                 "Resolved file name “%s”, subfont nr. “%s”",
                 foundname, subfont)
         else
-            logs.names_report(false, 1,
+            logs.names_report(false, 0,
                 "resolve", "Resolved file name “%s”", foundname)
         end
         if job.show_info then
             show_font_info(foundname)
         end
     else
-        logs.names_report(false, 1,
+        logs.names_report(false, 0,
             "resolve", "Cannot find “%s”.", query)
         if job.fuzzy == true then
-            logs.names_report(false, 1,
+            logs.names_report(false, 0,
                 "resolve", "Looking for close matches, this may take a while ...")
             local success = fonts.names.find_closest(query, job.fuzzy_limit)
         end

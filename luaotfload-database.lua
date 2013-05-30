@@ -611,9 +611,11 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
         return specification.name, false, false
     end
 
-    local found = { }
+    local found      = { } --> collect results
+    local candidates = { } --> secondary results, incomplete matches
+
     local synonym_set = style_synonyms.set
-    for _, face in next, data.mappings do
+    for n, face in next, data.mappings do
         local family, subfamily, fullname, psname, fontname, pfullname
 
         local facenames = face.sanitized
@@ -653,6 +655,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                     minsize, maxsize, face)
                 if continue == false then break end
             elseif subfamily == "regular" or
+                --- TODO this match should be performed when building the db
                    synonym_set.regular[subfamily] then
                 found.fallback = face
             elseif name == fullname
@@ -665,6 +668,8 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                     found,   optsize, dsnsize, size,
                     minsize, maxsize, face)
                 if continue == false then break end
+            else --- mark as last straw but continue
+                candidates[#candidates+1] = face
             end
         else
             if name == fullname
@@ -717,6 +722,17 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
         return found.fallback.filename[1],
                found.fallback.filename[2],
                true
+    elseif next(candidates) then
+        --- pick the first candidate encountered
+        local entry     = candidates[1]
+        local filename  = entry.filename[1]
+        if is_file(filename, entry.texmf) then
+            report("log", 0, "resolve",
+                "font family='%s', subfamily='%s' found: %s",
+                name, style, filename
+            )
+            return filename, entry.filename[2], true
+        end
     end
 
     --- no font found so far

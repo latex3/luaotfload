@@ -11,6 +11,14 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
 --- difficulty with the filenames of the TEXMF tree that are referenced as
 --- relative paths...
 
+local lpeg = require "lpeg"
+
+local P, R, S, lpegmatch
+    = lpeg.P, lpeg.R, lpeg.S, lpeg.match
+
+local C, Cc, Cf, Cg, Ct
+    = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Ct
+
 --- Luatex builtins
 local load                    = load
 local next                    = next
@@ -1119,13 +1127,80 @@ fonts.path_normalize = path_normalize
 
 names.blacklist = { }
 
-local function read_blacklist()
+local blacklist   = names.blacklist
+local p_blacklist --- prefixes of dirs
+
+--- string list -> string list
+local collapse_prefixes = function (lst)
+    --- avoid redundancies in blacklist
+    if #lst < 2 then
+        return lst
+    end
+
+    tablesort(lst)
+    local cur = lst[1]
+    local result = { cur }
+    for i=2, #lst do
+        local elm = lst[i]
+        if stringsub(elm, 1, #cur) ~= cur then
+            --- different prefix
+            cur = elm
+            result[#result+1] = cur
+        end
+    end
+    return result
+end
+
+--- string list -> string list -> (string, bool) hash_t
+local create_blacklist = function (blacklist, whitelist)
+    local result = { }
+    local dirs   = { }
+
+    report("info", 2, "db", "blacklisting “%d” files and directories",
+           #blacklist)
+    for i=1, #blacklist do
+        local entry = blacklist[i]
+        if lfsisdir(entry) then
+            dirs[#dirs+1] = entry
+        else
+            result[blacklist[i]] = true
+        end
+    end
+
+    report("info", 2, "db", "whitelisting “%d” files", #whitelist)
+    for i=1, #whitelist do
+        result[whitelist[i]] = nil
+    end
+
+    dirs = collapse_prefixes(dirs)
+
+    --- build the disjunction of the blacklisted directories
+    for i=1, #dirs do
+        local p_dir = P(dirs[i])
+        if p_blacklist then
+            p_blacklist = p_blacklist + p_dir
+        else
+            p_blacklist = p_dir
+        end
+    end
+
+    if p_blacklist == nil then
+        --- always return false
+        p_blacklist = Cc(false)
+    end
+
+    return result
+end
+
+--- unit -> unit
+local read_blacklist = function ()
     local files = {
         kpselookup("luaotfload-blacklist.cnf", {all=true, format="tex"})
     }
-    local blacklist = names.blacklist
+    local blacklist = { }
     local whitelist = { }
 
+    --- TODO lpegify
     if files and type(files) == "table" then
         for _,v in next, files do
             for line in iolines(v) do
@@ -1133,23 +1208,21 @@ local function read_blacklist()
                 local first_chr = stringsub(line, 1, 1) --- faster than find
                 if first_chr == "%" or stringis_empty(line) then
                     -- comment or empty line
+                elseif first_chr == "-" then
+                    whitelist[#whitelist+1] = stringsub(line, 2, -1)
                 else
-                    --- this is highly inefficient
-                    line = stringsplit(line, "%")[1]
-                    line = stringstrip(line)
-                    if stringsub(line, 1, 1) == "-" then
-                        whitelist[stringsub(line, 2, -1)] = true
-                    else
-                        report("log", 2, "db", "blacklisted file “%s”", line)
-                        blacklist[line] = true
+                    local cmt = stringfind(line, "%%")
+                    if cmt then
+                        line = stringsub(line, cmt - 1)
                     end
+                    line = stringstrip(line)
+                    report("log", 2, "db", "blacklisted file “%s”", line)
+                    blacklist[#blacklist+1] = line
                 end
             end
         end
     end
-    for _,fontname in next, whitelist do
-      blacklist[fontname] = nil
-    end
+    names.blacklist = create_blacklist(blacklist, whitelist)
 end
 
 local font_extensions = { "otf", "ttf", "ttc", "dfont" }
@@ -1172,8 +1245,13 @@ end
 
 --- string -> dbobj -> dbobj -> bool -> bool -> (int * int)
 local scan_dir = function (dirname, fontnames, newfontnames, dry_run, texmf)
+    if lpegmatch(p_blacklist, dirname) then
+        --- ignore
+        return 0, 0
+    end
+
     local n_scanned, n_new = 0, 0   --- total of fonts collected
-    report("both", 2, "db", "scanning directory %s", dirname)
+    report("both", 3, "db", "scanning directory %s", dirname)
     for _,i in next, font_extensions do
         for _,ext in next, { i, stringupper(i) } do
             local found = dirglob(stringformat("%s/**.%s$", dirname, ext))
@@ -1242,14 +1320,6 @@ end
 
 local read_fonts_conf
 do --- closure for read_fonts_conf()
-
-    local lpeg = require "lpeg"
-
-    local C, Cc, Cf, Cg, Ct
-        = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Ct
-
-    local P, R, S, lpegmatch
-        = lpeg.P, lpeg.R, lpeg.S, lpeg.match
 
     local alpha             = R("az", "AZ")
     local digit             = R"09"
@@ -1544,12 +1614,12 @@ local gen_fast_lookups = function (fontnames)
 
             local known = filenames.base[base] or filenames.bare[bare]
             if known then --- known
-                report("both", 1, "db",
+                report("both", 3, "db",
                        "font file “%s” already indexed (%d)",
                        base, idx)
-                report("both", 2, "db", "> old location: %s",
+                report("both", 3, "db", "> old location: %s",
                        (filenames.full[known] or "texmf"))
-                report("both", 2, "db", "> new location: %s",
+                report("both", 3, "db", "> new location: %s",
                        (intexmf and "texmf" or full))
             end
 

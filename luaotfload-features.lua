@@ -1175,7 +1175,7 @@ local handle_request = function (specification)
         local keep       = import_values[n][2]
         local newvalue   = request.features[feat]
         if newvalue then
-            specification[feat]    = request.features[feat]
+            specification[feat] = request.features[feat]
             if not keep then
                 request.features[feat] = nil
             end

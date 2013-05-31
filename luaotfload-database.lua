@@ -144,8 +144,9 @@ This is a sketch of the luaotfload db:
         full : (int, string) hash; // idx -> full path
     }
     and fontentry = {
+        barename    : string;
         familyname  : string;
-        filename    : (string * int);            // int: subfont
+        filename    : string;
         fontname    : string;
         fullname    : string;
         names       : {
@@ -162,6 +163,7 @@ This is a sketch of the luaotfload db:
         };
         size         : int list;
         slant        : int;
+        subfont     : int;
         texmf        : bool;
         weight       : int;
         width        : int;
@@ -553,7 +555,7 @@ the font database created by the luaotfload-tool script.
 ---     · normal: set of { ccmp clig itlc kern liga locl mark mkmk rlig }
 ---     · ???
 ---   · forced:   string
----   · lookup:   "name" | "file"
+---   · lookup:   "name"
 ---   · method:   string
 ---   · name:     string
 ---   · resolved: string
@@ -622,6 +624,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     end
 
     local found      = { } --> collect results
+    local fallback         --> e.g. non-matching style (fontspec is anal about this)
     local candidates = { } --> secondary results, incomplete matches
 
     local synonym_set = style_synonyms.set
@@ -667,7 +670,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             elseif subfamily == "regular" or
                 --- TODO this match should be performed when building the db
                    synonym_set.regular[subfamily] then
-                found.fallback = face
+                fallback = face
             elseif name == fullname
                 or name == pfullname
                 or name == fontname
@@ -697,8 +700,9 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
 
     if #found == 1 then
         --- “found” is really synonymous with “registered in the db”.
-        local entry    = found[1]
-        local success, filename, subfont = get_font_file(data.filenames.full, entry)
+        local entry = found[1]
+        local success, filename, subfont
+            = get_font_file(data.filenames.full, entry)
         if success == true then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
@@ -720,7 +724,8 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 least   = difference
             end
         end
-        local success, filename, subfont = get_font_file(data.filenames.full, closest)
+        local success, filename, subfont
+            = get_font_file(data.filenames.full, closest)
         if success == true then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
@@ -728,14 +733,25 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             )
             return filename, subfont, true
         end
-    elseif found.fallback then
-        return found.fallback.filename[1],
-               found.fallback.filename[2],
-               true
+    elseif fallback then
+        local success, filename, subfont
+            = get_font_file(data.filenames.full, fallback)
+        if success == true then
+            report("log", 0, "resolve",
+                "no exact match for request %s; using fallback",
+                specification.specification
+            )
+            report("log", 0, "resolve",
+                "font family='%s', subfamily='%s' found: %s",
+                name, style, filename
+            )
+            return filename, subfont, true
+        end
     elseif next(candidates) then
         --- pick the first candidate encountered
-        local entry     = candidates[1]
-        local success, filename, subfont = get_font_file(data.filenames.full, entry)
+        local entry = candidates[1]
+        local success, filename, subfont
+            = get_font_file(data.filenames.full, entry)
         if success == true then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
@@ -754,7 +770,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
         )
     end
 
-    --- else, fallback to requested name
+    --- else, default to requested name
     return specification.name, false, false
 end --- resolve()
 

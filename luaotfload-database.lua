@@ -74,7 +74,7 @@ fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
-names.version        = 2.205
+names.version        = 2.206
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 names.path           = {
@@ -165,9 +165,10 @@ This is a sketch of the luaotfload db:
         texmf        : bool;
         weight       : int;
         width        : int;
-        units_per_em : int;                      // mainly 1000, but also 2048 or 256
+        units_per_em : int;        // mainly 1000, but also 2048 or 256
     }
-    and filestatus = (fullname, { index : int list; timestamp : int }) dict
+    and filestatus = (fullname,
+                      { index : int list; timestamp : int }) dict
 
 beware that this is a reconstruction and may be incomplete.
 
@@ -517,12 +518,21 @@ Existence of the resolved file name is verified differently depending
 on whether the index entry has a texmf flag set.
 --doc]]--
 
-local is_file = function (filename, texmf)
-    if texmf == true then
-        return kpselookup(filename)
+local get_font_file = function (fullnames, entry)
+    if entry.texmf == true then
+        local basename = entry.basename
+        if kpselookup(basename) then
+            return true, basename, entry.subfont
+        end
+    else
+        local fullname = fullnames[entry.index]
+        if lfsisfile(fullname) then
+            return true, fullname, entry.subfont
+        end
     end
-    return lfsisfile(filename)
+    return false
 end
+
 
 --[[doc--
 
@@ -688,13 +698,13 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     if #found == 1 then
         --- “found” is really synonymous with “registered in the db”.
         local entry    = found[1]
-        local filename = entry.filename[1]
-        if is_file(filename, entry.texmf) then
+        local success, filename, subfont = get_font_file(data.filenames.full, entry)
+        if success == true then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
                 name, style, filename
             )
-            return filename, entry.filename[2], true
+            return filename, subfont, true
         end
     elseif #found > 1 then
         -- we found matching font(s) but not in the requested optical
@@ -710,13 +720,13 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                 least   = difference
             end
         end
-        local filename = closest.filename[1]
-        if is_file(filename, closest.texmf) then
+        local success, filename, subfont = get_font_file(data.filenames.full, closest)
+        if success == true then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
                 name, style, filename
             )
-            return filename, closest.filename[2], true
+            return filename, subfont, true
         end
     elseif found.fallback then
         return found.fallback.filename[1],
@@ -725,13 +735,13 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     elseif next(candidates) then
         --- pick the first candidate encountered
         local entry     = candidates[1]
-        local filename  = entry.filename[1]
-        if is_file(filename, entry.texmf) then
+        local success, filename, subfont = get_font_file(data.filenames.full, entry)
+        if success == true then
             report("log", 0, "resolve",
                 "font family='%s', subfamily='%s' found: %s",
                 name, style, filename
             )
-            return filename, entry.filename[2], true
+            return filename, subfont, true
         end
     end
 
@@ -927,13 +937,6 @@ font_fullinfo = function (filename, subfont, texmf, basename)
     tfmdata.fontname      = metadata.fontname
     tfmdata.fullname      = metadata.fullname
     tfmdata.familyname    = metadata.familyname
-    if texmf == true then --- ugh, ugliness levels peaking here
-        tfmdata.filename      = { basename, subfont }
-        tfmdata.texmf         = true
-    else
-        tfmdata.filename      = { filename, subfont }
-        tfmdata.texmf         = false
-    end
     tfmdata.weight        = metadata.pfminfo.weight
     tfmdata.width         = metadata.pfminfo.width
     tfmdata.slant         = metadata.italicangle
@@ -946,6 +949,13 @@ font_fullinfo = function (filename, subfont, texmf, basename)
         metadata.design_range_top    ~= 0 and metadata.design_range_top    or nil,
         metadata.design_range_bottom ~= 0 and metadata.design_range_bottom or nil,
     }
+
+    --- file location data (used to be filename field)
+    tfmdata.filename      = filename --> sys
+    tfmdata.basename      = basename --> texmf
+    tfmdata.texmf         = texmf or false
+    tfmdata.subfont       = subfont
+
     return tfmdata
 end
 
@@ -1489,15 +1499,21 @@ local gen_fast_lookups = function (fontnames)
 
     for idx = 1, nmappings do
         local entry    = mappings[idx]
-        local filename = entry.filename[1]
+        local filename = entry.filename
+        local basename = entry.basename
+        local bare     = filenameonly(filename)
+        local subfont  = entry.subfont
+
+        entry.index    = idx
+---     unfortunately, the sys/texmf schism prevents us from
+---     doing away the full name, so we cannot avoid the
+---     substantial duplication
+--      entry.filename = nil
+
         if entry.texmf == true then
-            bare = filenameonly(filename)
-            texmf[#texmf+1] = { idx, filename, bare, true, nil }
+            texmf[#texmf+1] = { idx, basename, bare, true, nil }
         else
-            --- filename contains full path
-            base = filebasename(filename)
-            bare = filenameonly(filename)
-            sys[#sys+1] = { idx, base, bare, false, filename }
+            sys[#sys+1] = { idx, basename, bare, false, filename }
         end
     end
 
@@ -1587,11 +1603,10 @@ update_names = function (fontnames, force, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 
-    if force or n_new > 0 then
-        newfontnames = gen_fast_lookups(newfontnames)
-    else
-        newfontnames.filenames = fontnames.filenames
-    end
+    --- we always generate the file lookup tables because
+    --- non-texmf entries are redirected there and the mapping
+    --- needs to be 100% consistent
+    newfontnames = gen_fast_lookups(newfontnames)
 
     --- stats:
     ---            before rewrite   | after rewrite

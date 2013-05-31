@@ -183,6 +183,7 @@ This tool is part of the luaotfload package. Valid options are:
   --list=<criterion>           output list of entries by field <criterion>
   --list=<criterion>:<value>   restrict to entries with <criterion>=<value>
   --fields=<f1>,<f2>,…,<fn>    which fields <f> to print with --list
+  -b --show-blacklist          show blacklisted files
 
 The font database will be saved to
    %s
@@ -269,7 +270,7 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel", "help",     "version", "cache",
+    "loglevel", "help",     "version", "blacklist", "cache",
     "flush",    "generate", "list",    "query",
 }
 local action_pending  = table.tohash(action_sequence, false)
@@ -294,6 +295,15 @@ end
 
 actions.help = function (job)
     help_msg()
+    return true, false
+end
+
+actions.blacklist = function (job)
+    names.read_blacklist()
+    local n = 0
+    for n, entry in next, table.sortedkeys(fonts.names.blacklist) do
+        texiowrite_nl(stringformat("(%d %s)", n, entry))
+    end
     return true, false
 end
 
@@ -565,12 +575,13 @@ local process_cmdline = function ( ) -- unit -> jobspec
         log                = 1,
         ["prefer-texmf"]   = "p",
         quiet              = "q",
+        ["show-blacklist"] = "b",
         update             = "u",
         verbose            = 1  ,
         version            = "V",
     }
 
-    local short_options = "DfFilpquvVh"
+    local short_options = "bDfFilpquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -633,6 +644,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.dry_run = true
         elseif v == "p" then
             config.luaotfload.prioritize = "texmf"
+        elseif v == "b" then
+            action_pending["blacklist"] = true
         end
     end
 

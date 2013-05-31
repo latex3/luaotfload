@@ -15,7 +15,7 @@
 SYNOPSIS
 =======================================================================
 
-**luaotfload** [ -cfFipquvVh ]
+**luaotfload** [ -bDcfFipquvVh ]
 
 **luaotfload** --update [ --force ] [ --quiet ] [ --verbose ] [ --prefer-texmf ] [ --dry-run ]
 
@@ -30,6 +30,8 @@ SYNOPSIS
 **luaotfload** --help
 
 **luaotfload** --version
+
+**luaotfload** --show-blacklist
 
 DESCRIPTION
 =======================================================================
@@ -71,6 +73,7 @@ query mode
                         ``--find``).
 --info, -i              Display basic information to a resolved font
                         file (requires ``--find``).
+--show-blacklist, -b    Show blacklisted files (not directories).
 --list=CRITERION        Show entries, where *CRITERION* is one of the
                         following:
 

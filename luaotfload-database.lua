@@ -267,6 +267,7 @@ local flush_lookup_cache
 local font_fullinfo
 local load_names
 local load_lookups
+local read_blacklist
 local read_fonts_conf
 local reload_db
 local resolve
@@ -1193,7 +1194,7 @@ local create_blacklist = function (blacklist, whitelist)
 end
 
 --- unit -> unit
-local read_blacklist = function ()
+read_blacklist = function ()
     local files = {
         kpselookup("luaotfload-blacklist.cnf", {all=true, format="tex"})
     }
@@ -1213,7 +1214,7 @@ local read_blacklist = function ()
                 else
                     local cmt = stringfind(line, "%%")
                     if cmt then
-                        line = stringsub(line, cmt - 1)
+                        line = stringsub(line, 1, cmt - 1)
                     end
                     line = stringstrip(line)
                     report("log", 2, "db", "blacklisted file “%s”", line)
@@ -1900,6 +1901,7 @@ names.save                        = save_names
 names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
 names.crude_file_lookup_verbose   = crude_file_lookup_verbose
+names.read_blacklist              = read_blacklist
 
 --- font cache
 names.purge_cache    = purge_cache

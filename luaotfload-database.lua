@@ -74,7 +74,7 @@ fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
-names.version        = 2.206
+names.version        = 2.207
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 names.path           = {
@@ -147,23 +147,21 @@ This is a sketch of the luaotfload db:
         barename    : string;
         familyname  : string;
         filename    : string;
-        fontname    : string;
-        fullname    : string;
-        names       : {
-            family     : string;
-            fullname   : string;
-            psname     : string;
-            subfamily  : string;
-        };
+        fontname    : string; // <- metadata
+        fullname    : string; // <- metadata
         sanitized   : {
-            family     : string;
-            fullname   : string;
-            psname     : string;
-            subfamily  : string;
+            family         : string;
+            fontname       : string; // <- metadata
+            fullname       : string; // <- namedata.names
+            metafamily     : string;
+            pfullname      : string;
+            prefmodifiers  : string;
+            psname         : string;
+            subfamily      : string;
         };
         size         : int list;
         slant        : int;
-        subfont     : int;
+        subfont      : int;
         texmf        : bool;
         weight       : int;
         width        : int;
@@ -629,16 +627,19 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
 
     local synonym_set = style_synonyms.set
     for n, face in next, data.mappings do
-        local family, subfamily, fullname, psname, fontname, pfullname
+        local family, subfamily, fullname, prefmodifiers
+        local psname, fontname, pfullname, metafamily
 
         local facenames = face.sanitized
         if facenames then
-            family      = facenames.family
-            subfamily   = facenames.subfamily
-            fullname    = facenames.fullname
-            psname      = facenames.psname
-            fontname    = facenames.fontname
-            pfullname   = facenames.pfullname
+            family          = facenames.family
+            subfamily       = facenames.subfamily
+            prefmodifiers   = facenames.prefmodifiers
+            fullname        = facenames.fullname
+            psname          = facenames.psname
+            fontname        = facenames.fontname
+            pfullname       = facenames.pfullname
+            metafamily      = facenames.metafamily
         end
         fontname    = fontname  or sanitize_string(face.fontname)
         pfullname   = pfullname or sanitize_string(face.fullname)
@@ -652,24 +653,27 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
             minsize = optsize[3] and optsize[3] / 10 or dsnsize
         end
 
-        if name == family then
-            if subfamily == style then
-                local continue
-                found, continue = add_to_match(
-                    found,   optsize, dsnsize, size,
-                    minsize, maxsize, face)
-                if continue == false then break end
-            elseif synonym_set[style] and
-                   synonym_set[style][subfamily]
+        if     name == family
+            or name == metafamily
+        then
+            if     style == prefmodifiers
+                or style == subfamily
+                or synonym_set[style] and
+                    (synonym_set[style][prefmodifiers] or
+                     synonym_set[style][subfamily])
             then
                 local continue
                 found, continue = add_to_match(
                     found,   optsize, dsnsize, size,
                     minsize, maxsize, face)
                 if continue == false then break end
-            elseif subfamily == "regular" or
+
+            elseif prefmodifiers == "regular"
+                or subfamily     == "regular"
                 --- TODO this match should be performed when building the db
-                   synonym_set.regular[subfamily] then
+                or synonym_set.regular[prefmodifiers]
+                or synonym_set.regular[subfamily]
+            then
                 fallback = face
             elseif name == fullname
                 or name == pfullname
@@ -852,7 +856,6 @@ find_closest = function (name, limit)
         --]]
         if cnames then
             local fullname, family = cnames.fullname, cnames.family
-            family = sanitize_string(family)
 
             local dist = cached[family]--- maybe already calculated
             if not dist then
@@ -930,18 +933,19 @@ font_fullinfo = function (filename, subfont, texmf, basename)
                 local names = {
                     --- see
                     --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
-                    fullname  = namedata.names.compatfull
-                             or namedata.names.fullname,
-                    family    = namedata.names.preffamilyname
-                             or namedata.names.family,
-                    subfamily = tfmdata.fontstyle_name
-                             or namedata.names.prefmodifiers
-                             or namedata.names.subfamily,
-                    psname    = namedata.names.postscriptname,
-                    pfullname = metadata.fullname,
-                    fontname  = metadata.fontname,
+                    fullname      = namedata.names.compatfull
+                                 or namedata.names.fullname,
+                    family        = namedata.names.preffamilyname
+                                 or namedata.names.family,
+                    prefmodifiers = namedata.names.prefmodifiers,
+                    subfamily     = tfmdata.fontstyle_name
+                                 or namedata.names.subfamily,
+                    psname        = namedata.names.postscriptname,
+                    pfullname     = metadata.fullname,
+                    fontname      = metadata.fontname,
+                    metafamily    = metadata.familyname,
                 }
-                tfmdata.names     = names
+--              tfmdata.names     = names
                 tfmdata.sanitized = sanitize_names(names)
             end
         end

@@ -272,6 +272,7 @@ local read_fonts_conf
 local reload_db
 local resolve
 local resolve_cached
+local resolve_fullpath
 local save_names
 local save_lookups
 local update_names
@@ -528,20 +529,19 @@ on whether the index entry has a texmf flag set.
 --doc]]--
 
 local get_font_file = function (fullnames, entry)
+    local basename = entry.basename
     if entry.texmf == true then
-        local basename = entry.basename
         if kpselookup(basename) then
             return true, basename, entry.subfont
         end
     else
         local fullname = fullnames[entry.index]
         if lfsisfile(fullname) then
-            return true, fullname, entry.subfont
+            return true, basename, entry.subfont
         end
     end
     return false
 end
-
 
 --[[doc--
 
@@ -711,6 +711,7 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
         end
     end
 
+    --- this is a monster
     if #found == 1 then
         --- “found” is really synonymous with “registered in the db”.
         local entry = found[1]
@@ -786,6 +787,20 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     --- else, default to requested name
     return specification.name, false, false
 end --- resolve()
+
+--- dummy required by luatex-fonts (cf. luatex-fonts-syn.lua)
+
+resolve_fullpath = function (fontname, ext) --- getfilename()
+    if not fonts_loaded then
+        names.data = load_names()
+    end
+    local filenames = names.data.filenames
+    local idx = filenames.base[fontname]
+    if idx then
+        return filenames.full[idx]
+    end
+    return ""
+end
 
 --- when reload is triggered we update the database
 --- and then re-run the caller with the arg list
@@ -1902,6 +1917,7 @@ names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
 names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 names.read_blacklist              = read_blacklist
+names.getfilename                 = resolve_fullpath
 
 --- font cache
 names.purge_cache    = purge_cache
@@ -1921,9 +1937,5 @@ names.find_closest      = find_closest
 
 -- for testing purpose
 names.read_fonts_conf = read_fonts_conf
-
---- dummy required by luatex-fonts (cf. luatex-fonts-syn.lua)
-
-fonts.names.getfilename = function (askedname,suffix) return "" end
 
 -- vim:tw=71:sw=4:ts=4:expandtab

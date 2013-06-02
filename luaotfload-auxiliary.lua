@@ -42,6 +42,10 @@ local tablecopy     = table.copy
 ---                          font patches
 -----------------------------------------------------------------------
 
+--- as of 2.3 the compatibility hacks for TL 2013 are made optional
+
+if config.luaotfload.compatibility == true then
+
 --[[doc--
 
 The font object (tfmdata) structure has changed since version 1.x, so
@@ -101,13 +105,10 @@ local add_fontdata_fallbacks = function (fontdata)
   return fontdata
 end
 
---if config.luaotfload.compatibility == true then
-if true then
-  luatexbase.add_to_callback(
-    "luaotfload.patch_font",
-    add_fontdata_fallbacks,
-    "luaotfload.fontdata_fallbacks")
-end
+luatexbase.add_to_callback(
+  "luaotfload.patch_font",
+  add_fontdata_fallbacks,
+  "luaotfload.fontdata_fallbacks")
 
 --[[doc--
 
@@ -123,6 +124,8 @@ font.getfont() since Hans made it a harmless wrapper [1].)
 
 fonts.identifiers = fonts.hashes.identifiers
 fonts.ids         = fonts.hashes.identifiers
+
+end
 
 --[[doc--
 This sets two dimensions apparently relied upon by the unicode-math

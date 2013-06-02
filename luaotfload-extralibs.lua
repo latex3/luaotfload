@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ["extralibs"] = {
-    version   = 2.201,
+    version   = 2.3,
     comment   = "companion to luaotfload.lua",
     author    = "Hans Hagen, Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",

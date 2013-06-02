@@ -96,7 +96,7 @@ end
 
 local file_header = [==[
 if not modules then modules = { } end modules ["font-age"] = {
-  version     = 2.200,
+  version     = 2.300,
   comment     = "part of the luaotfload package",
   author      = "luaotfload team / mkglyphlist",
   copyright   = "derived from %s",

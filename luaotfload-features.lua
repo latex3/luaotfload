@@ -1003,7 +1003,11 @@ local prefixed          = P"name:" * ws * Cg(fontname, "name")
 --- with paths already, so we’ll add a less strict rule here.  anyways,
 --- we’ll emit a warning.
                         + P"file:" * ws * Cg(unsupported, "path")
-                        + P"file:" * ws * Cg(fontname,    "file")
+                        + P"file:" * ws * Cg(fontname, "file")
+--- EXPERIMENTAL: kpse lookup
+                        + P"kpse:" * ws * Cg(fontname, "kpse")
+--- EXPERIMENTAL: custom lookup
+                        + P"my:" * ws * Cg(fontname, "my")
 local unprefixed        = Cg(fontname, "anon")
 local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
 
@@ -1069,7 +1073,7 @@ local import_values = {
     { "mode",   true },
 }
 
-local lookup_types = { "anon", "file", "name", "path" }
+local lookup_types = { "anon", "file", "kpse", "my", "name", "path" }
 
 local select_lookup = function (request)
     for i=1, #lookup_types do
@@ -1171,7 +1175,7 @@ local handle_request = function (specification)
         local keep       = import_values[n][2]
         local newvalue   = request.features[feat]
         if newvalue then
-            specification[feat]    = request.features[feat]
+            specification[feat] = request.features[feat]
             if not keep then
                 request.features[feat] = nil
             end

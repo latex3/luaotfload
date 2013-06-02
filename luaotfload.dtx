@@ -1437,8 +1437,9 @@ config.luaotfload                 = config.luaotfload or { }
 config.luaotfload.resolver        = config.luaotfload.resolver         or "cached"
 config.luaotfload.definer         = config.luaotfload.definer          or "patch"
 config.luaotfload.compatibility   = config.luaotfload.compatibility    or false
-config.luaotfload.loglevel        = config.luaotfload.loglevel  or 1
+config.luaotfload.loglevel        = config.luaotfload.loglevel         or 1
 config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_linebreak_filter"
+config.luaotfload.prioritize      = config.luaotfload.prioritize       or "sys"
 --luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 
 luaotfload.module = {
@@ -1797,7 +1798,7 @@ loadmodule"colors.lua"     --- “font-clr”
 %    \begin{macrocode}
 
 local request_resolvers   = fonts.definers.resolvers
-local formats             = fonts.formats
+local formats             = fonts.formats -- nice table; does lowercasing ...
 formats.ofm               = "type1"
 
 %    \end{macrocode}
@@ -1821,7 +1822,7 @@ formats.ofm               = "type1"
 local resolvefile = fonts.names.crude_file_lookup
 --local resolvefile = fonts.names.crude_file_lookup_verbose
 
-function request_resolvers.file(specification)
+request_resolvers.file = function (specification)
     local name    = resolvefile(specification.name)
     local suffix  = file.suffix(name)
     if formats[suffix] then
@@ -1831,7 +1832,6 @@ function request_resolvers.file(specification)
         specification.name = name
     end
 end
-
 
 %    \end{macrocode}
 % We classify as \verb|anon:| those requests that have neither a
@@ -1917,6 +1917,44 @@ request_resolvers.path = function (specification)
 end
 
 %    \end{macrocode}
+% {\bfseries EXPERIMENTAL}:
+% \identifier{kpse}-only resolver, for those who can do without system
+% fonts.
+%
+%    \begin{macrocode}
+
+request_resolvers.kpse = function (specification)
+    local name       = specification.name
+    local suffix     = file.suffix(name)
+    if suffix and formats[suffix] then
+        name = file.removesuffix(name)
+        if resolvers.findfile(name, suffix) then
+            specification.forced = suffix
+            specification.name   = name
+            return
+        end
+    end
+    for t, format in next, formats do --- brute force
+        if kpse.find_file (name, format) then
+            specification.forced = t
+            specification.name   = name
+            return
+        end
+    end
+end
+
+%    \end{macrocode}
+% Also {\bfseries EXPERIMENTAL}:
+% custom file resolvers via callback.
+%
+%    \begin{macrocode}
+create_callback("luaotfload.resolve_font", "simple", dummy_function)
+
+request_resolvers.my = function (specification)
+    call_callback("luaotfload.resolve_font", specification)
+end
+
+%    \end{macrocode}
 % We create a callback for patching fonts on the fly, to be used by other
 % packages.
 % It initially contains the empty function that we are going to override
@@ -1943,12 +1981,12 @@ local patch_defined_font = function (specification, size, id)
         --- We need to test for the “shared” field here
         --- or else the fontspec capheight callback will
         --- operate on tfm fonts.
-        call_callback("luaotfload.patch_font", tfmdata)
+        call_callback("luaotfload.patch_font", tfmdata, specification)
     end
     return tfmdata
 end
 
-reset_callback("define_font")
+reset_callback "define_font"
 
 %    \end{macrocode}
 % Finally we register the callbacks.

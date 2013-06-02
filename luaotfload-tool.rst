@@ -15,9 +15,9 @@
 SYNOPSIS
 =======================================================================
 
-**luaotfload** [ -cfFiquvVh ]
+**luaotfload** [ -bDcfFipquvVh ]
 
-**luaotfload** --update [ --force ] [ --quiet ] [ --verbose ] [ --dry-run ]
+**luaotfload** --update [ --force ] [ --quiet ] [ --verbose ] [ --prefer-texmf ] [ --dry-run ]
 
 **luaotfload** --find=FONTNAME [ --fuzzy ] [ --info ]
 
@@ -30,6 +30,8 @@ SYNOPSIS
 **luaotfload** --help
 
 **luaotfload** --version
+
+**luaotfload** --show-blacklist
 
 DESCRIPTION
 =======================================================================
@@ -55,6 +57,9 @@ update mode
 --update, -u            Update the database; indexes new fonts.
 --force, -f             Force rebuilding of the database; re-indexes
                         all fonts.
+--prefer-texmf, -p      Organize the file name database in a way so
+                        that it prefer fonts in the *TEXMF* tree over
+                        system fonts if they are installed in both.
 --dry-run, -D           Don’t load fonts, scan directories only.
                         (For debugging file system related issues.)
 
@@ -68,6 +73,7 @@ query mode
                         ``--find``).
 --info, -i              Display basic information to a resolved font
                         file (requires ``--find``).
+--show-blacklist, -b    Show blacklisted files (not directories).
 --list=CRITERION        Show entries, where *CRITERION* is one of the
                         following:
 

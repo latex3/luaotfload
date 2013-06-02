@@ -172,6 +172,7 @@ This tool is part of the luaotfload package. Valid options are:
   -f --force                   force re-indexing all fonts
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
+  -p --prefer-texmf            prefer fonts in the TEXMF over system fonts
 
   --find="font name"           query the database for a font name
   -F --fuzzy                   look for approximate matches if --find fails
@@ -182,6 +183,7 @@ This tool is part of the luaotfload package. Valid options are:
   --list=<criterion>           output list of entries by field <criterion>
   --list=<criterion>:<value>   restrict to entries with <criterion>=<value>
   --fields=<f1>,<f2>,…,<fn>    which fields <f> to print with --list
+  -b --show-blacklist          show blacklisted files
 
 The font database will be saved to
    %s
@@ -268,7 +270,7 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel", "help",     "version", "cache",
+    "loglevel", "help",     "version", "blacklist", "cache",
     "flush",    "generate", "list",    "query",
 }
 local action_pending  = table.tohash(action_sequence, false)
@@ -293,6 +295,15 @@ end
 
 actions.help = function (job)
     help_msg()
+    return true, false
+end
+
+actions.blacklist = function (job)
+    names.read_blacklist()
+    local n = 0
+    for n, entry in next, table.sortedkeys(fonts.names.blacklist) do
+        texiowrite_nl(stringformat("(%d %s)", n, entry))
+    end
     return true, false
 end
 
@@ -353,24 +364,24 @@ actions.query = function (job)
         fonts.names.resolve(nil, nil, tmpspec)
 
     if success then
-        logs.names_report(false, 1,
+        logs.names_report(false, 0,
             "resolve", "Font “%s” found!", query)
         if subfont then
-            logs.names_report(false, 1, "resolve",
+            logs.names_report(false, 0, "resolve",
                 "Resolved file name “%s”, subfont nr. “%s”",
                 foundname, subfont)
         else
-            logs.names_report(false, 1,
+            logs.names_report(false, 0,
                 "resolve", "Resolved file name “%s”", foundname)
         end
         if job.show_info then
             show_font_info(foundname)
         end
     else
-        logs.names_report(false, 1,
+        logs.names_report(false, 0,
             "resolve", "Cannot find “%s”.", query)
         if job.fuzzy == true then
-            logs.names_report(false, 1,
+            logs.names_report(false, 0,
                 "resolve", "Looking for close matches, this may take a while ...")
             local success = fonts.names.find_closest(query, job.fuzzy_limit)
         end
@@ -545,7 +556,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         force_reload = nil,
         criterion    = "",
         query        = "",
-        log_level    = 1, --- 2 is approx. the old behavior
+        log_level    = 0, --- 2 is approx. the old behavior
     }
 
     local long_options = {
@@ -562,13 +573,15 @@ local process_cmdline = function ( ) -- unit -> jobspec
         limit              = 1,
         list               = 1,
         log                = 1,
+        ["prefer-texmf"]   = "p",
         quiet              = "q",
+        ["show-blacklist"] = "b",
         update             = "u",
         verbose            = 1  ,
         version            = "V",
     }
 
-    local short_options = "DfFilquvVh"
+    local short_options = "bDfFilpquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -629,6 +642,10 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.cache = optarg[n]
         elseif v == "D" then
             result.dry_run = true
+        elseif v == "p" then
+            config.luaotfload.prioritize = "texmf"
+        elseif v == "b" then
+            action_pending["blacklist"] = true
         end
     end
 

@@ -1437,8 +1437,9 @@ config.luaotfload                 = config.luaotfload or { }
 config.luaotfload.resolver        = config.luaotfload.resolver         or "cached"
 config.luaotfload.definer         = config.luaotfload.definer          or "patch"
 config.luaotfload.compatibility   = config.luaotfload.compatibility    or false
-config.luaotfload.loglevel        = config.luaotfload.loglevel  or 1
+config.luaotfload.loglevel        = config.luaotfload.loglevel         or 1
 config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_linebreak_filter"
+config.luaotfload.prioritize      = config.luaotfload.prioritize       or "sys"
 --luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
 
 luaotfload.module = {
@@ -1821,7 +1822,7 @@ formats.ofm               = "type1"
 local resolvefile = fonts.names.crude_file_lookup
 --local resolvefile = fonts.names.crude_file_lookup_verbose
 
-function request_resolvers.file(specification)
+request_resolvers.file = function (specification)
     local name    = resolvefile(specification.name)
     local suffix  = file.suffix(name)
     if formats[suffix] then
@@ -1831,7 +1832,6 @@ function request_resolvers.file(specification)
         specification.name = name
     end
 end
-
 
 %    \end{macrocode}
 % We classify as \verb|anon:| those requests that have neither a
@@ -1981,7 +1981,7 @@ local patch_defined_font = function (specification, size, id)
         --- We need to test for the “shared” field here
         --- or else the fontspec capheight callback will
         --- operate on tfm fonts.
-        call_callback("luaotfload.patch_font", tfmdata)
+        call_callback("luaotfload.patch_font", tfmdata, specification)
     end
     return tfmdata
 end

@@ -788,14 +788,13 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
     return specification.name, false, false
 end --- resolve()
 
---- dummy required by luatex-fonts (cf. luatex-fonts-syn.lua)
-
 resolve_fullpath = function (fontname, ext) --- getfilename()
     if not fonts_loaded then
         names.data = load_names()
     end
     local filenames = names.data.filenames
     local idx = filenames.base[fontname]
+             or filenames.bare[fontname]
     if idx then
         return filenames.full[idx]
     end

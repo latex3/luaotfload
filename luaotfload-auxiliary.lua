@@ -42,6 +42,17 @@ local tablecopy     = table.copy
 ---                          font patches
 -----------------------------------------------------------------------
 
+--- https://github.com/khaledhosny/luaotfload/issues/54
+
+local rewrite_fontname = function (tfmdata, specification)
+  tfmdata.name = [["]] .. specification .. [["]]
+end
+
+luatexbase.add_to_callback(
+  "luaotfload.patch_font",
+  rewrite_fontname,
+  "luaotfload.rewrite_fontname")
+
 --- as of 2.3 the compatibility hacks for TL 2013 are made optional
 
 if config.luaotfload.compatibility == true then

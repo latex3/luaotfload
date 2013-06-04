@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/27/13 11:01:26
+-- merge date  : 06/04/13 21:26:55
 
 do -- begin closure to overcome local limits and interference
 
@@ -197,7 +197,7 @@ patterns.unspacer=((patterns.spacer^1)/"")^0
 patterns.singlequoted=squote*patterns.nosquote*squote
 patterns.doublequoted=dquote*patterns.nodquote*dquote
 patterns.quoted=patterns.doublequoted+patterns.singlequoted
-patterns.propername=R("AZ","az","__")*R("09","AZ","az","__")^0*P(-1)
+patterns.propername=R("AZ","az","__")*R("09","AZ","az","__")^0*endofstring
 patterns.somecontent=(anything-newline-space)^1 
 patterns.beginline=#(1-newline)
 patterns.longtostring=Cs(whitespace^0/""*nonwhitespace^0*((whitespace^0/" "*(patterns.quoted+nonwhitespace)^1)^0))
@@ -372,7 +372,7 @@ function lpeg.replacer(one,two,makefunction,isutf)
     return pattern
   end
 end
-function lpeg.finder(lst,makefunction)
+function lpeg.finder(lst,makefunction) 
   local pattern
   if type(lst)=="table" then
     pattern=P(false)
@@ -401,8 +401,8 @@ local splitters_f,splitters_s={},{}
 function lpeg.firstofsplit(separator) 
   local splitter=splitters_f[separator]
   if not splitter then
-    separator=P(separator)
-    splitter=C((1-separator)^0)
+    local pattern=P(separator)
+    splitter=C((1-pattern)^0)
     splitters_f[separator]=splitter
   end
   return splitter
@@ -410,9 +410,28 @@ end
 function lpeg.secondofsplit(separator) 
   local splitter=splitters_s[separator]
   if not splitter then
-    separator=P(separator)
-    splitter=(1-separator)^0*separator*C(anything^0)
+    local pattern=P(separator)
+    splitter=(1-pattern)^0*pattern*C(anything^0)
     splitters_s[separator]=splitter
+  end
+  return splitter
+end
+local splitters_s,splitters_p={},{}
+function lpeg.beforesuffix(separator) 
+  local splitter=splitters_s[separator]
+  if not splitter then
+    local pattern=P(separator)
+    splitter=C((1-pattern)^0)*pattern*endofstring
+    splitters_s[separator]=splitter
+  end
+  return splitter
+end
+function lpeg.afterprefix(separator) 
+  local splitter=splitters_p[separator]
+  if not splitter then
+    local pattern=P(separator)
+    splitter=pattern*C(anything^0)
+    splitters_p[separator]=splitter
   end
   return splitter
 end
@@ -2851,7 +2870,7 @@ local builder=Cs { "start",
   ["W"]=(prefix_any*P("W"))/format_W,
   ["a"]=(prefix_any*P("a"))/format_a,
   ["A"]=(prefix_any*P("A"))/format_A,
-  ["*"]=Cs(((1-P("%"))^1+P("%%")/"%%%%")^1)/format_rest,
+  ["*"]=Cs(((1-P("%"))^1+P("%%")/"%%")^1)/format_rest,
   ["!"]=Carg(2)*prefix_any*P("!")*C((1-P("!"))^1)*P("!")/format_extension,
 }
 local direct=Cs (
@@ -6718,8 +6737,9 @@ local function copytotfm(data,cache_id)
     local fullname=metadata.fullname or fontname
     local units=metadata.units_per_em or 1000
     if units==0 then 
-      units=1000
+      units=1000 
       metadata.units_per_em=1000
+      report_otf("changing %a units to %a",0,units)
     end
     parameters.slant=0
     parameters.space=spaceunits     

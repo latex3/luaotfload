@@ -1,6 +1,15 @@
 Change History
 --------------
 
+2013/xx/xx, luaotfload v2.3:
+    * New experimental lookups: ``kpse`` (kpathsea), ``my`` (callback)
+    * Precedence of texmf over system fonts can be requested
+      using the ``--prefer-texmf`` option of luaotfload-tool
+    * Resolve file names to full paths at later stage
+    * Rewrite the output of ``\fontname`` via ``patch_font`` callback
+    * Allow blacklisting directories
+    * Drop compatibility layer
+
 2013/05/20, luaotfload v2.2:
     * There is now a central, non-personal dev repo on github:
       https://github.com/lualatex/luaotfload

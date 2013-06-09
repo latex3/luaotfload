@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/27/13 11:01:26
+-- merge date  : 06/07/13 12:25:27
 
 do -- begin closure to overcome local limits and interference
 
@@ -110,13 +110,22 @@ patterns.anything=anything
 patterns.endofstring=endofstring
 patterns.beginofstring=alwaysmatched
 patterns.alwaysmatched=alwaysmatched
-local digit,sign=R('09'),S('+-')
+local sign=S('+-')
+local zero=P('0')
+local digit=R('09')
+local octdigit=R("07")
+local lowercase=R("az")
+local uppercase=R("AZ")
+local underscore=P("_")
+local hexdigit=digit+lowercase+uppercase
 local cr,lf,crlf=P("\r"),P("\n"),P("\r\n")
 local newline=crlf+S("\r\n") 
 local escaped=P("\\")*anything
 local squote=P("'")
 local dquote=P('"')
 local space=P(" ")
+local period=P(".")
+local comma=P(",")
 local utfbom_32_be=P('\000\000\254\255')
 local utfbom_32_le=P('\255\254\000\000')
 local utfbom_16_be=P('\255\254')
@@ -155,23 +164,8 @@ local stripper=spacer^0*C((spacer^0*nonspacer^1)^0)
 local collapser=Cs(spacer^0/""*nonspacer^0*((spacer^0/" "*nonspacer^1)^0))
 patterns.stripper=stripper
 patterns.collapser=collapser
-patterns.digit=digit
-patterns.sign=sign
-patterns.cardinal=sign^0*digit^1
-patterns.integer=sign^0*digit^1
-patterns.unsigned=digit^0*P('.')*digit^1
-patterns.float=sign^0*patterns.unsigned
-patterns.cunsigned=digit^0*P(',')*digit^1
-patterns.cfloat=sign^0*patterns.cunsigned
-patterns.number=patterns.float+patterns.integer
-patterns.cnumber=patterns.cfloat+patterns.integer
-patterns.oct=P("0")*R("07")^1
-patterns.octal=patterns.oct
-patterns.HEX=P("0x")*R("09","AF")^1
-patterns.hex=P("0x")*R("09","af")^1
-patterns.hexadecimal=P("0x")*R("09","AF","af")^1
-patterns.lowercase=R("az")
-patterns.uppercase=R("AZ")
+patterns.lowercase=lowercase
+patterns.uppercase=uppercase
 patterns.letter=patterns.lowercase+patterns.uppercase
 patterns.space=space
 patterns.tab=P("\t")
@@ -179,12 +173,12 @@ patterns.spaceortab=patterns.space+patterns.tab
 patterns.newline=newline
 patterns.emptyline=newline^1
 patterns.equal=P("=")
-patterns.comma=P(",")
-patterns.commaspacer=P(",")*spacer^0
-patterns.period=P(".")
+patterns.comma=comma
+patterns.commaspacer=comma*spacer^0
+patterns.period=period
 patterns.colon=P(":")
 patterns.semicolon=P(";")
-patterns.underscore=P("_")
+patterns.underscore=underscore
 patterns.escaped=escaped
 patterns.squote=squote
 patterns.dquote=dquote
@@ -197,7 +191,26 @@ patterns.unspacer=((patterns.spacer^1)/"")^0
 patterns.singlequoted=squote*patterns.nosquote*squote
 patterns.doublequoted=dquote*patterns.nodquote*dquote
 patterns.quoted=patterns.doublequoted+patterns.singlequoted
-patterns.propername=R("AZ","az","__")*R("09","AZ","az","__")^0*P(-1)
+patterns.digit=digit
+patterns.octdigit=octdigit
+patterns.hexdigit=hexdigit
+patterns.sign=sign
+patterns.cardinal=digit^1
+patterns.integer=sign^-1*digit^1
+patterns.unsigned=digit^0*period*digit^1
+patterns.float=sign^-1*patterns.unsigned
+patterns.cunsigned=digit^0*comma*digit^1
+patterns.cfloat=sign^-1*patterns.cunsigned
+patterns.number=patterns.float+patterns.integer
+patterns.cnumber=patterns.cfloat+patterns.integer
+patterns.oct=zero*octdigit^1
+patterns.octal=patterns.oct
+patterns.HEX=zero*P("X")*(digit+uppercase)^1
+patterns.hex=zero*P("x")*(digit+lowercase)^1
+patterns.hexadecimal=zero*S("xX")*hexdigit^1
+patterns.hexafloat=sign^-1*zero*S("xX")*(hexdigit^0*period*hexdigit^1+hexdigit^1*period*hexdigit^0+hexdigit^1)*(S("pP")*sign^-1*hexdigit^1)^-1
+patterns.decafloat=sign^-1*(digit^0*period*digit^1+digit^1*period*digit^0+digit^1)*S("eE")*sign^-1*digit^1
+patterns.propername=(uppercase+lowercase+underscore)*(uppercase+lowercase+underscore+digit)^0*endofstring
 patterns.somecontent=(anything-newline-space)^1 
 patterns.beginline=#(1-newline)
 patterns.longtostring=Cs(whitespace^0/""*nonwhitespace^0*((whitespace^0/" "*(patterns.quoted+nonwhitespace)^1)^0))
@@ -372,7 +385,7 @@ function lpeg.replacer(one,two,makefunction,isutf)
     return pattern
   end
 end
-function lpeg.finder(lst,makefunction)
+function lpeg.finder(lst,makefunction) 
   local pattern
   if type(lst)=="table" then
     pattern=P(false)
@@ -401,8 +414,8 @@ local splitters_f,splitters_s={},{}
 function lpeg.firstofsplit(separator) 
   local splitter=splitters_f[separator]
   if not splitter then
-    separator=P(separator)
-    splitter=C((1-separator)^0)
+    local pattern=P(separator)
+    splitter=C((1-pattern)^0)
     splitters_f[separator]=splitter
   end
   return splitter
@@ -410,9 +423,28 @@ end
 function lpeg.secondofsplit(separator) 
   local splitter=splitters_s[separator]
   if not splitter then
-    separator=P(separator)
-    splitter=(1-separator)^0*separator*C(anything^0)
+    local pattern=P(separator)
+    splitter=(1-pattern)^0*pattern*C(anything^0)
     splitters_s[separator]=splitter
+  end
+  return splitter
+end
+local splitters_s,splitters_p={},{}
+function lpeg.beforesuffix(separator) 
+  local splitter=splitters_s[separator]
+  if not splitter then
+    local pattern=P(separator)
+    splitter=C((1-pattern)^0)*pattern*endofstring
+    splitters_s[separator]=splitter
+  end
+  return splitter
+end
+function lpeg.afterprefix(separator) 
+  local splitter=splitters_p[separator]
+  if not splitter then
+    local pattern=P(separator)
+    splitter=pattern*C(anything^0)
+    splitters_p[separator]=splitter
   end
   return splitter
 end
@@ -647,9 +679,6 @@ end
 function lpeg.times(pattern,n)
   return P(nextstep(n,2^16,{ "start",["1"]=pattern }))
 end
-local digit=R("09")
-local period=P(".")
-local zero=P("0")
 local trailingzeros=zero^0*-digit 
 local case_1=period*trailingzeros/""
 local case_2=period*(digit-trailingzeros)^1*(trailingzeros/"")
@@ -1149,7 +1178,7 @@ local function do_serialize(root,name,depth,level,indexed)
           handle(format("%s %s,",depth,tostring(v)))
         elseif t=="function" then
           if functions then
-            handle(format('%s load(%q),',depth,dump(v)))
+            handle(format('%s load(%q),',depth,dump(v))) 
           else
             handle(format('%s "function",',depth))
           end
@@ -2594,7 +2623,7 @@ setmetatable(arguments,{ __index=function(t,k)
   end
 })
 local prefix_any=C((S("+- .")+R("09"))^0)
-local prefix_tab=C((1-R("az","AZ","09","%%"))^0)
+local prefix_tab=P("{")*C((1-P("}"))^0)*P("}")+C((1-R("az","AZ","09","%%"))^0)
 local format_s=function(f)
   n=n+1
   if f and f~="" then
@@ -2844,14 +2873,14 @@ local builder=Cs { "start",
   ["b"]=(prefix_any*P("b"))/format_b,
   ["t"]=(prefix_tab*P("t"))/format_t,
   ["T"]=(prefix_tab*P("T"))/format_T,
-  ["l"]=(prefix_tab*P("l"))/format_l,
-  ["L"]=(prefix_tab*P("L"))/format_L,
+  ["l"]=(prefix_any*P("l"))/format_l,
+  ["L"]=(prefix_any*P("L"))/format_L,
   ["I"]=(prefix_any*P("I"))/format_I,
   ["w"]=(prefix_any*P("w"))/format_w,
   ["W"]=(prefix_any*P("W"))/format_W,
   ["a"]=(prefix_any*P("a"))/format_a,
   ["A"]=(prefix_any*P("A"))/format_A,
-  ["*"]=Cs(((1-P("%"))^1+P("%%")/"%%%%")^1)/format_rest,
+  ["*"]=Cs(((1-P("%"))^1+P("%%")/"%%")^1)/format_rest,
   ["!"]=Carg(2)*prefix_any*P("!")*C((1-P("!"))^1)*P("!")/format_extension,
 }
 local direct=Cs (
@@ -6718,8 +6747,9 @@ local function copytotfm(data,cache_id)
     local fullname=metadata.fullname or fontname
     local units=metadata.units_per_em or 1000
     if units==0 then 
-      units=1000
+      units=1000 
       metadata.units_per_em=1000
+      report_otf("changing %a units to %a",0,units)
     end
     parameters.slant=0
     parameters.space=spaceunits     
@@ -9985,227 +10015,227 @@ local function featuresprocessor(head,font,attr)
   local done=false
   local datasets=otf.dataset(tfmdata,font,attr)
   local dirstack={}
-for s=1,#datasets do
-  local dataset=datasets[s]
-  featurevalue=dataset[1] 
-        local sequence=dataset[5] 
-        local rlparmode=0
-        local topstack=0
-        local success=false
-        local attribute=dataset[2]
-        local chain=dataset[3] 
-        local typ=sequence.type
-        local subtables=sequence.subtables
-        if chain<0 then
-          local handler=handlers[typ]
-          local start=find_node_tail(head) 
+  for s=1,#datasets do
+    local dataset=datasets[s]
+    featurevalue=dataset[1] 
+    local sequence=dataset[5] 
+    local rlparmode=0
+    local topstack=0
+    local success=false
+    local attribute=dataset[2]
+    local chain=dataset[3] 
+    local typ=sequence.type
+    local subtables=sequence.subtables
+    if chain<0 then
+      local handler=handlers[typ]
+      local start=find_node_tail(head) 
+      while start do
+        local id=start.id
+        if id==glyph_code then
+          if start.font==font and start.subtype<256 then
+            local a=start[0]
+            if a then
+              a=a==attr
+            else
+              a=true
+            end
+            if a then
+              for i=1,#subtables do
+                local lookupname=subtables[i]
+                local lookupcache=lookuphash[lookupname]
+                if lookupcache then
+                  local lookupmatch=lookupcache[start.char]
+                  if lookupmatch then
+                    head,start,success=handler(head,start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,i)
+                    if success then
+                      break
+                    end
+                  end
+                else
+                  report_missing_cache(typ,lookupname)
+                end
+              end
+              if start then start=start.prev end
+            else
+              start=start.prev
+            end
+          else
+            start=start.prev
+          end
+        else
+          start=start.prev
+        end
+      end
+    else
+      local handler=handlers[typ]
+      local ns=#subtables
+      local start=head 
+      rlmode=0 
+      if ns==1 then 
+        local lookupname=subtables[1]
+        local lookupcache=lookuphash[lookupname]
+        if not lookupcache then 
+          report_missing_cache(typ,lookupname)
+        else
           while start do
             local id=start.id
             if id==glyph_code then
               if start.font==font and start.subtype<256 then
                 local a=start[0]
                 if a then
-                  a=a==attr
+                  a=(a==attr) and (not attribute or start[a_state]==attribute)
                 else
-                  a=true
+                  a=not attribute or start[a_state]==attribute
                 end
                 if a then
-                  for i=1,#subtables do
-                    local lookupname=subtables[i]
-                    local lookupcache=lookuphash[lookupname]
-                    if lookupcache then
-                      local lookupmatch=lookupcache[start.char]
-                      if lookupmatch then
-                        head,start,success=handler(head,start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,i)
-                        if success then
-                          break
-                        end
-                      end
-                    else
-                      report_missing_cache(typ,lookupname)
+                  local lookupmatch=lookupcache[start.char]
+                  if lookupmatch then
+                    local ok
+                    head,start,ok=handler(head,start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,1)
+                    if ok then
+                      success=true
                     end
                   end
-                  if start then start=start.prev end
-                else
-                  start=start.prev
-                end
-              else
-                start=start.prev
-              end
-            else
-              start=start.prev
-            end
-          end
-        else
-          local handler=handlers[typ]
-          local ns=#subtables
-          local start=head 
-          rlmode=0 
-          if ns==1 then 
-            local lookupname=subtables[1]
-            local lookupcache=lookuphash[lookupname]
-            if not lookupcache then 
-              report_missing_cache(typ,lookupname)
-            else
-              while start do
-                local id=start.id
-                if id==glyph_code then
-                  if start.font==font and start.subtype<256 then
-                    local a=start[0]
-                    if a then
-                      a=(a==attr) and (not attribute or start[a_state]==attribute)
-                    else
-                      a=not attribute or start[a_state]==attribute
-                    end
-                    if a then
-                      local lookupmatch=lookupcache[start.char]
-                      if lookupmatch then
-                        local ok
-                        head,start,ok=handler(head,start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,1)
-                        if ok then
-                          success=true
-                        end
-                      end
-                      if start then start=start.next end
-                    else
-                      start=start.next
-                    end
-                  elseif id==math_code then
-                    start=end_of_math(start).next
-                  else
-                    start=start.next
-                  end
-                elseif id==whatsit_code then 
-                  local subtype=start.subtype
-                  if subtype==dir_code then
-                    local dir=start.dir
-                    if   dir=="+TRT" or dir=="+TLT" then
-                      topstack=topstack+1
-                      dirstack[topstack]=dir
-                    elseif dir=="-TRT" or dir=="-TLT" then
-                      topstack=topstack-1
-                    end
-                    local newdir=dirstack[topstack]
-                    if newdir=="+TRT" then
-                      rlmode=-1
-                    elseif newdir=="+TLT" then
-                      rlmode=1
-                    else
-                      rlmode=rlparmode
-                    end
-                    if trace_directions then
-                      report_process("directions after txtdir %a: parmode %a, txtmode %a, # stack %a, new dir %a",dir,rlparmode,rlmode,topstack,newdir)
-                    end
-                  elseif subtype==localpar_code then
-                    local dir=start.dir
-                    if dir=="TRT" then
-                      rlparmode=-1
-                    elseif dir=="TLT" then
-                      rlparmode=1
-                    else
-                      rlparmode=0
-                    end
-                    rlmode=rlparmode
-                    if trace_directions then
-                      report_process("directions after pardir %a: parmode %a, txtmode %a",dir,rlparmode,rlmode)
-                    end
-                  end
-                  start=start.next
-                elseif id==math_code then
-                  start=end_of_math(start).next
+                  if start then start=start.next end
                 else
                   start=start.next
                 end
-              end
-            end
-          else
-            while start do
-              local id=start.id
-              if id==glyph_code then
-                if start.font==font and start.subtype<256 then
-                  local a=start[0]
-                  if a then
-                    a=(a==attr) and (not attribute or start[a_state]==attribute)
-                  else
-                    a=not attribute or start[a_state]==attribute
-                  end
-                  if a then
-                    for i=1,ns do
-                      local lookupname=subtables[i]
-                      local lookupcache=lookuphash[lookupname]
-                      if lookupcache then
-                        local lookupmatch=lookupcache[start.char]
-                        if lookupmatch then
-                          local ok
-                          head,start,ok=handler(head,start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,i)
-                          if ok then
-                            success=true
-                            break
-                          elseif not start then
-                            break
-                          end
-                        end
-                      else
-                        report_missing_cache(typ,lookupname)
-                      end
-                    end
-                    if start then start=start.next end
-                  else
-                    start=start.next
-                  end
-                else
-                  start=start.next
-                end
-              elseif id==whatsit_code then
-                local subtype=start.subtype
-                if subtype==dir_code then
-                  local dir=start.dir
-                  if   dir=="+TRT" or dir=="+TLT" then
-                    topstack=topstack+1
-                    dirstack[topstack]=dir
-                  elseif dir=="-TRT" or dir=="-TLT" then
-                    topstack=topstack-1
-                  end
-                  local newdir=dirstack[topstack]
-                  if newdir=="+TRT" then
-                    rlmode=-1
-                  elseif newdir=="+TLT" then
-                    rlmode=1
-                  else
-                    rlmode=rlparmode
-                  end
-                  if trace_directions then
-                    report_process("directions after txtdir %a: parmode %a, txtmode %a, # stack %a, new dir %a",dir,rlparmode,rlmode,topstack,newdir)
-                  end
-                elseif subtype==localpar_code then
-                  local dir=start.dir
-                  if dir=="TRT" then
-                    rlparmode=-1
-                  elseif dir=="TLT" then
-                    rlparmode=1
-                  else
-                    rlparmode=0
-                  end
-                  rlmode=rlparmode
-                  if trace_directions then
-                    report_process("directions after pardir %a: parmode %a, txtmode %a",dir,rlparmode,rlmode)
-                  end
-                end
-                start=start.next
               elseif id==math_code then
                 start=end_of_math(start).next
               else
                 start=start.next
               end
+            elseif id==whatsit_code then 
+              local subtype=start.subtype
+              if subtype==dir_code then
+                local dir=start.dir
+                if   dir=="+TRT" or dir=="+TLT" then
+                  topstack=topstack+1
+                  dirstack[topstack]=dir
+                elseif dir=="-TRT" or dir=="-TLT" then
+                  topstack=topstack-1
+                end
+                local newdir=dirstack[topstack]
+                if newdir=="+TRT" then
+                  rlmode=-1
+                elseif newdir=="+TLT" then
+                  rlmode=1
+                else
+                  rlmode=rlparmode
+                end
+                if trace_directions then
+                  report_process("directions after txtdir %a: parmode %a, txtmode %a, # stack %a, new dir %a",dir,rlparmode,rlmode,topstack,newdir)
+                end
+              elseif subtype==localpar_code then
+                local dir=start.dir
+                if dir=="TRT" then
+                  rlparmode=-1
+                elseif dir=="TLT" then
+                  rlparmode=1
+                else
+                  rlparmode=0
+                end
+                rlmode=rlparmode
+                if trace_directions then
+                  report_process("directions after pardir %a: parmode %a, txtmode %a",dir,rlparmode,rlmode)
+                end
+              end
+              start=start.next
+            elseif id==math_code then
+              start=end_of_math(start).next
+            else
+              start=start.next
             end
           end
         end
-        if success then
-          done=true
+      else
+        while start do
+          local id=start.id
+          if id==glyph_code then
+            if start.font==font and start.subtype<256 then
+              local a=start[0]
+              if a then
+                a=(a==attr) and (not attribute or start[a_state]==attribute)
+              else
+                a=not attribute or start[a_state]==attribute
+              end
+              if a then
+                for i=1,ns do
+                  local lookupname=subtables[i]
+                  local lookupcache=lookuphash[lookupname]
+                  if lookupcache then
+                    local lookupmatch=lookupcache[start.char]
+                    if lookupmatch then
+                      local ok
+                      head,start,ok=handler(head,start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,i)
+                      if ok then
+                        success=true
+                        break
+                      elseif not start then
+                        break
+                      end
+                    end
+                  else
+                    report_missing_cache(typ,lookupname)
+                  end
+                end
+                if start then start=start.next end
+              else
+                start=start.next
+              end
+            else
+              start=start.next
+            end
+          elseif id==whatsit_code then
+            local subtype=start.subtype
+            if subtype==dir_code then
+              local dir=start.dir
+              if   dir=="+TRT" or dir=="+TLT" then
+                topstack=topstack+1
+                dirstack[topstack]=dir
+              elseif dir=="-TRT" or dir=="-TLT" then
+                topstack=topstack-1
+              end
+              local newdir=dirstack[topstack]
+              if newdir=="+TRT" then
+                rlmode=-1
+              elseif newdir=="+TLT" then
+                rlmode=1
+              else
+                rlmode=rlparmode
+              end
+              if trace_directions then
+                report_process("directions after txtdir %a: parmode %a, txtmode %a, # stack %a, new dir %a",dir,rlparmode,rlmode,topstack,newdir)
+              end
+            elseif subtype==localpar_code then
+              local dir=start.dir
+              if dir=="TRT" then
+                rlparmode=-1
+              elseif dir=="TLT" then
+                rlparmode=1
+              else
+                rlparmode=0
+              end
+              rlmode=rlparmode
+              if trace_directions then
+                report_process("directions after pardir %a: parmode %a, txtmode %a",dir,rlparmode,rlmode)
+              end
+            end
+            start=start.next
+          elseif id==math_code then
+            start=end_of_math(start).next
+          else
+            start=start.next
+          end
         end
-        if trace_steps then 
-          registerstep(head)
-        end
+      end
+    end
+    if success then
+      done=true
+    end
+    if trace_steps then 
+      registerstep(head)
+    end
   end
   return head,done
 end

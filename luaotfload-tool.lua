@@ -4,9 +4,9 @@
 --  DESCRIPTION:  database functionality
 -- REQUIREMENTS:  luaotfload 2.2
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  2.2
+--      VERSION:  2.3
 --      LICENSE:  GPL v2
---      CREATED:  2013-05-06 13:37:12+0200
+--     MODIFIED:  2013-06-02 19:23:54+0200
 -----------------------------------------------------------------------
 
 --[[doc--
@@ -135,7 +135,7 @@ require"luaotfload-override.lua"  --- this populates the logs.* namespace
 require"luaotfload-database"
 require"alt_getopt"
 
-local version  = "2.2" -- same version number as luaotfload
+local version  = "2.3" -- same version number as luaotfload
 local names    = fonts.names
 
 local db_src_out = names.path.dir.."/"..names.path.basename

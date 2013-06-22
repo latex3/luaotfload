@@ -295,6 +295,17 @@ load_names = function (dry_run)
             "Font names database loaded", "%s", foundname)
         report("info", 3, "db", "Loading took %0.f ms",
                                 1000*(os.gettimeofday()-starttime))
+
+        local db_version, nms_version = data.version, names.version
+        if db_version ~= nms_version then
+            report("log", 0, "db",
+                [[version mismatch; expected %4.3f, got %4.3f]],
+                nms_version, db_version)
+            if not fonts_reloaded then
+                report("log", 0, "db", [[force rebuild]])
+                return update_names({ }, true, false)
+            end
+        end
     else
         report("both", 0, "db",
             [[Font names database not found, generating new one.]])
@@ -663,7 +674,7 @@ the font database created by the luaotfload-tool script.
 ---     values.
 ---
 
-resolve = function (_,_,specification) -- the 1st two parameters are used by ConTeXt
+resolve = function (_, _, specification) -- the 1st two parameters are used by ConTeXt
     if not fonts_loaded then names.data = load_names() end
     local data = names.data
 
@@ -688,18 +699,6 @@ resolve = function (_,_,specification) -- the 1st two parameters are used by Con
                    )
         end
         --- unsucessfully reloaded; bail
-        return specification.name, false, false
-    end
-
-    local db_version, nms_version = data.version, names.version
-    if db_version ~= nms_version then
-        report("log", 0, "db",
-            [[version mismatch; expected %4.3f, got %4.3f]],
-            nms_version, db_version)
-        if not fonts_reloaded then
-            return reload_db("version mismatch",
-                             resolve, nil, nil, specification)
-        end
         return specification.name, false, false
     end
 

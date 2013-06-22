@@ -326,12 +326,14 @@ end
 
 local style_synonyms = { set = { } }
 do
+    --- read this: http://blogs.adobe.com/typblography/2008/05/indesign_font_conflicts.html
+    --- tl;dr: font style synonyms are unreliable.
     style_synonyms.list = {
-        regular    = { "normal",        "roman",
-                       "plain",         "book",
-                       "medium", },
+        regular    = { "normal",         "roman",
+                       "plain",          "book", },
         bold       = { "demi",           "demibold",
-                       "semibold",       "boldregular",},
+                       "semibold",       "boldregular",
+                       "medium" },
         italic     = { "regularitalic",  "normalitalic",
                        "oblique",        "slanted", },
         bolditalic = { "boldoblique",    "boldslanted",

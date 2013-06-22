@@ -326,21 +326,48 @@ end
 
 local style_synonyms = { set = { } }
 do
+    local combine = function (ta, tb)
+        local result = { }
+        for i=1, #ta do
+            for j=1, #tb do
+                result[#result+1] = ta[i] .. tb[j]
+            end
+        end
+        return result
+    end
+
     --- read this: http://blogs.adobe.com/typblography/2008/05/indesign_font_conflicts.html
     --- tl;dr: font style synonyms are unreliable.
-    style_synonyms.list = {
+    ---
+    --- Context matches font names against lists of known identifiers
+    --- for weight, style, width, and variant, so that including
+    --- the family name there are five dimensions for choosing a
+    --- match. The sad thing is, while this is a decent heuristic it
+    --- makes no sense to imitate it in luaotfload because the user
+    --- interface must fit into the much more limited Xetex scheme that
+    --- distinguishes between merely four style categories: “regular”,
+    --- “italic”, “bold”, and “bolditalic”. As a result, some of the
+    --- styles are lumped together although they can differ
+    --- significantly (like “medium” and “bold”).
+
+    local list = {
         regular    = { "normal",         "roman",
-                       "plain",          "book", },
+                       "plain",          "book",
+                       "light",          "extralight",
+                       "ultralight", },
         bold       = { "demi",           "demibold",
                        "semibold",       "boldregular",
-                       "medium" },
+                       "medium",         "mediumbold",
+                       "ultrabold",      "extrabold",
+                       "heavy",          "black",
+                       "bold", },
         italic     = { "regularitalic",  "normalitalic",
-                       "oblique",        "slanted", },
-        bolditalic = { "boldoblique",    "boldslanted",
-                       "demiitalic",     "demioblique",
-                       "demislanted",    "demibolditalic",
-                       "semibolditalic", },
+                       "oblique",        "slanted",
+                       "italic", },
     }
+
+    list.bolditalic     = combine(list.bold, list.italic)
+    style_synonyms.list = list
 
     for category, synonyms in next, style_synonyms.list do
         style_synonyms.set[category] = tabletohash(synonyms, true)

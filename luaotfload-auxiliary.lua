@@ -358,7 +358,7 @@ do
   local index = function (t, k)
     if chardata == nil then
       log("Loading character metadata from %s.", chardef)
-      chardata = dofile(kpse.find_file("luaotfload-characters.lua", "lua"))
+      chardata = dofile(kpse.find_file(chardef, "lua"))
       if chardata == nil then
         warning("Could not load %s; continuing with empty character table.",
                 chardef)

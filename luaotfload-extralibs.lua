@@ -176,9 +176,15 @@ if not chardata then
     if k == true then
       return chardata[currentfont()]
     else
-      local characters = identifiers[k].characters
-      t[k] = characters
-      return characters
+      local tfmdata = identifiers[k]
+      if not tfmdata then --- unsafe
+        tfmdata = font.fonts[k]
+      end
+      if tfmdata then
+        local characters = tfmdata.characters
+        t[k] = characters
+        return characters
+      end
     end
   end)
   fonthashes.characters = chardata

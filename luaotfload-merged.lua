@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 06/07/13 12:25:27
+-- merge date  : 06/10/13 12:24:08
 
 do -- begin closure to overcome local limits and interference
 
@@ -1085,12 +1085,12 @@ local function simple_table(t)
           else
             tt[nt]=tostring(v) 
           end
-        elseif tv=="boolean" then
-          nt=nt+1
-          tt[nt]=tostring(v)
         elseif tv=="string" then
           nt=nt+1
           tt[nt]=format("%q",v)
+        elseif tv=="boolean" then
+          nt=nt+1
+          tt[nt]=v and "true" or "false"
         else
           tt=nil
           break
@@ -1123,7 +1123,7 @@ local function do_serialize(root,name,depth,level,indexed)
           handle(format("%s[%q]={",depth,name))
         end
       elseif tn=="boolean" then
-        handle(format("%s[%s]={",depth,tostring(name)))
+        handle(format("%s[%s]={",depth,name and "true" or "false"))
       else
         handle(format("%s{",depth))
       end
@@ -1147,21 +1147,21 @@ local function do_serialize(root,name,depth,level,indexed)
     for i=1,#sk do
       local k=sk[i]
       local v=root[k]
-      local t,tk=type(v),type(k)
+      local tv,tk=type(v),type(k)
       if compact and first and tk=="number" and k>=first and k<=last then
-        if t=="number" then
+        if tv=="number" then
           if hexify then
             handle(format("%s 0x%04X,",depth,v))
           else
             handle(format("%s %s,",depth,v)) 
           end
-        elseif t=="string" then
+        elseif tv=="string" then
           if reduce and tonumber(v) then
             handle(format("%s %s,",depth,v))
           else
             handle(format("%s %q,",depth,v))
           end
-        elseif t=="table" then
+        elseif tv=="table" then
           if not next(v) then
             handle(format("%s {},",depth))
           elseif inline then 
@@ -1174,9 +1174,9 @@ local function do_serialize(root,name,depth,level,indexed)
           else
             do_serialize(v,k,depth,level+1,true)
           end
-        elseif t=="boolean" then
-          handle(format("%s %s,",depth,tostring(v)))
-        elseif t=="function" then
+        elseif tv=="boolean" then
+          handle(format("%s %s,",depth,v and "true" or "false"))
+        elseif tv=="function" then
           if functions then
             handle(format('%s load(%q),',depth,dump(v))) 
           else
@@ -1189,7 +1189,7 @@ local function do_serialize(root,name,depth,level,indexed)
         if false then
           handle(format("%s __p__=nil,",depth))
         end
-      elseif t=="number" then
+      elseif tv=="number" then
         if tk=="number" then
           if hexify then
             handle(format("%s [0x%04X]=0x%04X,",depth,k,v))
@@ -1198,9 +1198,9 @@ local function do_serialize(root,name,depth,level,indexed)
           end
         elseif tk=="boolean" then
           if hexify then
-            handle(format("%s [%s]=0x%04X,",depth,tostring(k),v))
+            handle(format("%s [%s]=0x%04X,",depth,k and "true" or "false",v))
           else
-            handle(format("%s [%s]=%s,",depth,tostring(k),v)) 
+            handle(format("%s [%s]=%s,",depth,k and "true" or "false",v)) 
           end
         elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
           if hexify then
@@ -1215,7 +1215,7 @@ local function do_serialize(root,name,depth,level,indexed)
             handle(format("%s [%q]=%s,",depth,k,v)) 
           end
         end
-      elseif t=="string" then
+      elseif tv=="string" then
         if reduce and tonumber(v) then
           if tk=="number" then
             if hexify then
@@ -1224,7 +1224,7 @@ local function do_serialize(root,name,depth,level,indexed)
               handle(format("%s [%s]=%s,",depth,k,v))
             end
           elseif tk=="boolean" then
-            handle(format("%s [%s]=%s,",depth,tostring(k),v))
+            handle(format("%s [%s]=%s,",depth,k and "true" or "false",v))
           elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
             handle(format("%s %s=%s,",depth,k,v))
           else
@@ -1238,14 +1238,14 @@ local function do_serialize(root,name,depth,level,indexed)
               handle(format("%s [%s]=%q,",depth,k,v))
             end
           elseif tk=="boolean" then
-            handle(format("%s [%s]=%q,",depth,tostring(k),v))
+            handle(format("%s [%s]=%q,",depth,k and "true" or "false",v))
           elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
             handle(format("%s %s=%q,",depth,k,v))
           else
             handle(format("%s [%q]=%q,",depth,k,v))
           end
         end
-      elseif t=="table" then
+      elseif tv=="table" then
         if not next(v) then
           if tk=="number" then
             if hexify then
@@ -1254,7 +1254,7 @@ local function do_serialize(root,name,depth,level,indexed)
               handle(format("%s [%s]={},",depth,k))
             end
           elseif tk=="boolean" then
-            handle(format("%s [%s]={},",depth,tostring(k)))
+            handle(format("%s [%s]={},",depth,k and "true" or "false"))
           elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
             handle(format("%s %s={},",depth,k))
           else
@@ -1270,7 +1270,7 @@ local function do_serialize(root,name,depth,level,indexed)
                 handle(format("%s [%s]={ %s },",depth,k,concat(st,", ")))
               end
             elseif tk=="boolean" then
-              handle(format("%s [%s]={ %s },",depth,tostring(k),concat(st,", ")))
+              handle(format("%s [%s]={ %s },",depth,k and "true" or "false",concat(st,", ")))
             elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
               handle(format("%s %s={ %s },",depth,k,concat(st,", ")))
             else
@@ -1282,21 +1282,21 @@ local function do_serialize(root,name,depth,level,indexed)
         else
           do_serialize(v,k,depth,level+1)
         end
-      elseif t=="boolean" then
+      elseif tv=="boolean" then
         if tk=="number" then
           if hexify then
-            handle(format("%s [0x%04X]=%s,",depth,k,tostring(v)))
+            handle(format("%s [0x%04X]=%s,",depth,k,v and "true" or "false"))
           else
-            handle(format("%s [%s]=%s,",depth,k,tostring(v)))
+            handle(format("%s [%s]=%s,",depth,k,v and "true" or "false"))
           end
         elseif tk=="boolean" then
-          handle(format("%s [%s]=%s,",depth,tostring(k),tostring(v)))
+          handle(format("%s [%s]=%s,",depth,tostring(k),v and "true" or "false"))
         elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
-          handle(format("%s %s=%s,",depth,k,tostring(v)))
+          handle(format("%s %s=%s,",depth,k,v and "true" or "false"))
         else
-          handle(format("%s [%q]=%s,",depth,k,tostring(v)))
+          handle(format("%s [%q]=%s,",depth,k,v and "true" or "false"))
         end
-      elseif t=="function" then
+      elseif tv=="function" then
         if functions then
           local f=getinfo(v).what=="C" and dump(dummy) or dump(v)
           if tk=="number" then
@@ -1306,7 +1306,7 @@ local function do_serialize(root,name,depth,level,indexed)
               handle(format("%s [%s]=load(%q),",depth,k,f))
             end
           elseif tk=="boolean" then
-            handle(format("%s [%s]=load(%q),",depth,tostring(k),f))
+            handle(format("%s [%s]=load(%q),",depth,k and "true" or "false",f))
           elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
             handle(format("%s %s=load(%q),",depth,k,f))
           else
@@ -1321,7 +1321,7 @@ local function do_serialize(root,name,depth,level,indexed)
             handle(format("%s [%s]=%q,",depth,k,tostring(v)))
           end
         elseif tk=="boolean" then
-          handle(format("%s [%s]=%q,",depth,tostring(k),tostring(v)))
+          handle(format("%s [%s]=%q,",depth,k and "true" or "false",tostring(v)))
         elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
           handle(format("%s %s=%q,",depth,k,tostring(v)))
         else
@@ -2926,10 +2926,13 @@ local function add(t,name,template,preamble)
   end
 end
 strings.formatters.add=add
-lpeg.patterns.xmlescape=Cs((P("<")/"&lt;"+P(">")/"&gt;"+P("&")/"&amp;"+P('"')/"&quot;"+P(1))^0)
-lpeg.patterns.texescape=Cs((C(S("#$%\\{}"))/"\\%1"+P(1))^0)
+patterns.xmlescape=Cs((P("<")/"&lt;"+P(">")/"&gt;"+P("&")/"&amp;"+P('"')/"&quot;"+P(1))^0)
+patterns.texescape=Cs((C(S("#$%\\{}"))/"\\%1"+P(1))^0)
+patterns.luaescape=Cs(((1-S('"\n'))^1+P('"')/'\\"'+P('\n')/'\\n"')^0) 
+patterns.luaquoted=Cs(Cc('"')*((1-S('"\n'))^1+P('"')/'\\"'+P('\n')/'\\n"')^0*Cc('"'))
 add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],[[local xmlescape = lpeg.patterns.xmlescape]])
 add(formatters,"tex",[[lpegmatch(texescape,%s)]],[[local texescape = lpeg.patterns.texescape]])
+add(formatters,"lua",[[lpegmatch(luaescape,%s)]],[[local luaescape = lpeg.patterns.luaescape]])
 
 end -- closure
 
@@ -10100,8 +10103,6 @@ local function featuresprocessor(head,font,attr)
                 else
                   start=start.next
                 end
-              elseif id==math_code then
-                start=end_of_math(start).next
               else
                 start=start.next
               end

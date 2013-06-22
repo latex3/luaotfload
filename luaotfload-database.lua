@@ -465,11 +465,29 @@ Also, the fields “resolved”, “sub”, “force” etc. influence the outco
 
 --doc]]--
 
+local concat_char = "#"
+local hash_fields = {
+    --- order is important
+    "specification", "style", "sub", "optsize", "size",
+}
+local n_hash_fields = #hash_fields
+
+--- spec -> string
+local hash_request = function (specification)
+    local key = { } --- segments of the hash
+    for i=1, n_hash_fields do
+        local field = specification[hash_fields[i]]
+        if field then
+            key[#key+1] = field
+        end
+    end
+    return tableconcat(key, concat_char)
+end
+
 --- 'a -> 'a -> table -> (string * int|boolean * boolean)
 resolve_cached = function (_, _, specification)
-    --if not names.data then names.data = load_names() end
     if not names.lookups then names.lookups = load_lookups() end
-    local request = specification.specification
+    local request = hash_request(specification)
     report("both", 4, "cache", "looking for “%s” in cache ...",
            request)
 

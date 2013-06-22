@@ -356,11 +356,13 @@ do
     --- match. The sad thing is, while this is a decent heuristic it
     --- makes no sense to imitate it in luaotfload because the user
     --- interface must fit into the much more limited Xetex scheme that
-    --- distinguishes between merely four style categories: “regular”,
-    --- “italic”, “bold”, and “bolditalic”. As a result, some of the
-    --- styles are lumped together although they can differ
+    --- distinguishes between merely four style categories (variants):
+    --- “regular”, “italic”, “bold”, and “bolditalic”. As a result,
+    --- some of the styles are lumped together although they can differ
     --- significantly (like “medium” and “bold”).
 
+    --- Xetex (XeTeXFontMgr.cpp) appears to recognize only “plain”,
+    --- “normal”, and “roman” as synonyms for “regular”.
     local list = {
         regular    = { "normal",         "roman",
                        "plain",          "book",
@@ -710,7 +712,8 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         return specification.name, false, false
     end
 
-    local found      = { } --> collect results
+    local exact      = { } --> collect exact style matches
+    local synonymous = { } --> collect matching style synonyms
     local fallback         --> e.g. non-matching style (fontspec is anal about this)
     local candidates = { } --> secondary results, incomplete matches
 
@@ -747,21 +750,16 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         then
             if     style == prefmodifiers
                 or style == subfamily
-                or synonym_set[style] and
-                    (synonym_set[style][prefmodifiers] or
-                     synonym_set[style][subfamily])
             then
                 local continue
-                found, continue = add_to_match(
-                    found,   optsize, dsnsize, size,
+                exact, continue = add_to_match(
+                    exact,   optsize, dsnsize, size,
                     minsize, maxsize, face)
                 if continue == false then break end
 
             elseif prefmodifiers == "regular"
                 or subfamily     == "regular"
                 --- TODO this match should be performed when building the db
-                or synonym_set.regular[prefmodifiers]
-                or synonym_set.regular[subfamily]
             then
                 fallback = face
             elseif name == fullname
@@ -770,10 +768,19 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
                 or name == psname
             then
                 local continue
-                found, continue = add_to_match(
-                    found,   optsize, dsnsize, size,
+                exact, continue = add_to_match(
+                    exact,   optsize, dsnsize, size,
                     minsize, maxsize, face)
                 if continue == false then break end
+            elseif synonym_set[style] and
+                    (synonym_set[style][prefmodifiers] or
+                     synonym_set[style][subfamily])
+                or synonym_set.regular[prefmodifiers]
+                or synonym_set.regular[subfamily]
+            then
+                synonymous = add_to_match(synonymous,
+                    optsize, dsnsize, size,
+                    minsize, maxsize, face)
             else --- mark as last straw but continue
                 candidates[#candidates+1] = face
             end
@@ -783,13 +790,21 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
             or name == fontname
             or name == psname then
                 local continue
-                found, continue = add_to_match(
-                    found,   optsize, dsnsize, size,
+                exact, continue = add_to_match(
+                    exact,   optsize, dsnsize, size,
                     minsize, maxsize, face)
                 if continue == false then break end
             end
         end
     end
+
+    local found
+    if next(exact) then
+        found = exact
+    else
+        found = synonymous
+    end
+
 
     --- this is a monster
     if #found == 1 then

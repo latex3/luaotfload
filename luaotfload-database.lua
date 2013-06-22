@@ -34,6 +34,7 @@ local ioopen                  = io.open
 local kpseexpand_path         = kpse.expand_path
 local kpseexpand_var          = kpse.expand_var
 local kpselookup              = kpse.lookup
+local kpsefind_file           = kpse.find_file
 local kpsereadable_file       = kpse.readable_file
 local lfsisdir                = lfs.isdir
 local lfsisfile               = lfs.isfile
@@ -325,12 +326,14 @@ end
 
 local style_synonyms = { set = { } }
 do
+    --- read this: http://blogs.adobe.com/typblography/2008/05/indesign_font_conflicts.html
+    --- tl;dr: font style synonyms are unreliable.
     style_synonyms.list = {
-        regular    = { "normal",        "roman",
-                       "plain",         "book",
-                       "medium", },
+        regular    = { "normal",         "roman",
+                       "plain",          "book", },
         bold       = { "demi",           "demibold",
-                       "semibold",       "boldregular",},
+                       "semibold",       "boldregular",
+                       "medium" },
         italic     = { "regularitalic",  "normalitalic",
                        "oblique",        "slanted", },
         bolditalic = { "boldoblique",    "boldslanted",
@@ -425,6 +428,52 @@ crude_file_lookup = function (filename)
 end
 
 --[[doc--
+Existence of the resolved file name is verified differently depending
+on whether the index entry has a texmf flag set.
+--doc]]--
+
+local get_font_file = function (fullnames, entry)
+    local basename = entry.basename
+    if entry.texmf == true then
+        if kpselookup(basename) then
+            return true, basename, entry.subfont
+        end
+    else
+        local fullname = fullnames[entry.index]
+        if lfsisfile(fullname) then
+            return true, basename, entry.subfont
+        end
+    end
+    return false
+end
+
+--[[doc--
+We need to verify if the result of a cached lookup actually exists in
+the texmf or filesystem.
+--doc]]--
+
+local verify_font_file = function (basename)
+    local filenames = names.data.filenames
+    local idx = filenames.base[basename]
+    if not idx then
+        return false
+    end
+
+    --- firstly, check filesystem
+    local fullname = filenames.full[idx]
+    if fullname and lfsisfile(fullname) then
+        return true
+    end
+
+    --- secondly, locate via kpathsea
+    if kpsefind_file(basename) then
+        return true
+    end
+
+    return false
+end
+
+--[[doc--
 Lookups can be quite costly, more so the less specific they are.
 Even if we find a matching font eventually, the next time the
 user compiles Eir document E will have to stand through the delay
@@ -496,9 +545,16 @@ resolve_cached = function (_, _, specification)
     --- case 1) cache positive ----------------------------------------
     if found then --- replay fields from cache hit
         report("info", 4, "cache", "found!")
-        return found[1], found[2], true
+        local basename = found[1]
+        --- check the presence of the file in case it’s been removed
+        local success = verify_font_file(basename)
+        if success == true then
+            return basename, found[2], true
+        end
+        report("both", 4, "cache", "cached file not found; resolving again")
+    else
+        report("both", 4, "cache", "not cached; resolving")
     end
-    report("both", 4, "cache", "not cached; resolving")
 
     --- case 2) cache negative ----------------------------------------
     --- first we resolve normally ...
@@ -539,26 +595,6 @@ local add_to_match = function (
         continue = false ---> break
     end
     return found, continue
-end
-
---[[doc--
-Existence of the resolved file name is verified differently depending
-on whether the index entry has a texmf flag set.
---doc]]--
-
-local get_font_file = function (fullnames, entry)
-    local basename = entry.basename
-    if entry.texmf == true then
-        if kpselookup(basename) then
-            return true, basename, entry.subfont
-        end
-    else
-        local fullname = fullnames[entry.index]
-        if lfsisfile(fullname) then
-            return true, basename, entry.subfont
-        end
-    end
-    return false
 end
 
 --[[doc--

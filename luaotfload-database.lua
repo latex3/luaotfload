@@ -743,17 +743,15 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         fontname    = fontname  or sanitize_string(face.fontname)
         pfullname   = pfullname or sanitize_string(face.fullname)
 
-
         if     name == family
             or name == metafamily
         then
-            if style == prefmodifiers then -- exact
+            if style == prefmodifiers then
                 local continue
                 exact, continue = add_to_match(exact, askedsize, face)
                 if continue == false then break end
-            elseif prefmodifiers == "regular" then
-                --- TODO this match should be performed when building the db
-                fallback = face
+            elseif style == subfamily then
+                exact = add_to_match(exact, askedsize, face)
             elseif name == fullname
                 or name == pfullname
                 or name == fontname
@@ -762,15 +760,16 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
                 local continue
                 exact, continue = add_to_match(exact, askedsize, face)
                 if continue == false then break end
-            elseif style     == subfamily --- unreliable (see Ad. Garm. Pro)
-                or subfamily == "regular"
-                or synonym_set[style] and
+            elseif synonym_set[style] and
                     (synonym_set[style][prefmodifiers] or
                      synonym_set[style][subfamily])
                 or synonym_set.regular[prefmodifiers]
                 or synonym_set.regular[subfamily]
             then
                 synonymous = add_to_match(synonymous, askedsize, face)
+            elseif prefmodifiers == "regular"
+                or subfamily     == "regular" then
+                fallback = face
             else --- mark as last straw but continue
                 candidates[#candidates+1] = face
             end
@@ -792,7 +791,6 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
     else
         found = synonymous
     end
-
 
     --- this is a monster
     if #found == 1 then

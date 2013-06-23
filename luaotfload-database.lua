@@ -619,9 +619,16 @@ end
 --- this used to be inlined; with the lookup cache we don’t
 --- have to be parsimonious wrt function calls anymore
 --- “found” is the match accumulator
-local add_to_match = function (
-    found,   optsize, dsnsize, size,
-    minsize, maxsize, face)
+local add_to_match = function (found, size, face)
+
+    local optsize, dsnsize, maxsize, minsize
+    if #face.size > 0 then
+        optsize = face.size
+        dsnsize = optsize[1] and optsize[1] / 10
+        -- can be nil
+        maxsize = optsize[2] and optsize[2] / 10 or dsnsize
+        minsize = optsize[3] and optsize[3] / 10 or dsnsize
+    end
     local continue = true
     if optsize then
         if dsnsize == size or (size > minsize and size <= maxsize) then
@@ -683,11 +690,11 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
     local name  = sanitize_string(specification.name)
     local style = sanitize_string(specification.style) or "regular"
 
-    local size
+    local askedsize
     if specification.optsize then
-        size = tonumber(specification.optsize)
+        askedsize = tonumber(specification.optsize)
     elseif specification.size then
-        size = specification.size / 65536
+        askedsize = specification.size / 65536
     end
 
     if type(data) ~= "table" then
@@ -736,23 +743,13 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         fontname    = fontname  or sanitize_string(face.fontname)
         pfullname   = pfullname or sanitize_string(face.fullname)
 
-        local optsize, dsnsize, maxsize, minsize
-        if #face.size > 0 then
-            optsize = face.size
-            dsnsize = optsize[1] and optsize[1] / 10
-            -- can be nil
-            maxsize = optsize[2] and optsize[2] / 10 or dsnsize
-            minsize = optsize[3] and optsize[3] / 10 or dsnsize
-        end
 
         if     name == family
             or name == metafamily
         then
             if style == prefmodifiers then -- exact
                 local continue
-                exact, continue = add_to_match(
-                    exact,   optsize, dsnsize, size,
-                    minsize, maxsize, face)
+                exact, continue = add_to_match(exact, askedsize, face)
                 if continue == false then break end
             elseif prefmodifiers == "regular" then
                 --- TODO this match should be performed when building the db
@@ -763,9 +760,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
                 or name == psname
             then
                 local continue
-                exact, continue = add_to_match(
-                    exact,   optsize, dsnsize, size,
-                    minsize, maxsize, face)
+                exact, continue = add_to_match(exact, askedsize, face)
                 if continue == false then break end
             elseif style     == subfamily --- unreliable (see Ad. Garm. Pro)
                 or subfamily == "regular"
@@ -775,9 +770,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
                 or synonym_set.regular[prefmodifiers]
                 or synonym_set.regular[subfamily]
             then
-                synonymous = add_to_match(synonymous,
-                    optsize, dsnsize, size,
-                    minsize, maxsize, face)
+                synonymous = add_to_match(synonymous, askedsize, face)
             else --- mark as last straw but continue
                 candidates[#candidates+1] = face
             end
@@ -787,9 +780,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
             or name == fontname
             or name == psname then
                 local continue
-                exact, continue = add_to_match(
-                    exact,   optsize, dsnsize, size,
-                    minsize, maxsize, face)
+                exact, continue = add_to_match(exact, askedsize, face)
                 if continue == false then break end
             end
         end
@@ -824,7 +815,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         local least = math.huge -- initial value is infinity
         for i,face in next, found do
             local dsnsize    = face.size[1]/10
-            local difference = mathabs(dsnsize-size)
+            local difference = mathabs(dsnsize - askedsize)
             if difference < least then
                 closest = face
                 least   = difference

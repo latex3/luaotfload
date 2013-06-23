@@ -748,19 +748,14 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         if     name == family
             or name == metafamily
         then
-            if     style == prefmodifiers
-                or style == subfamily
-            then
+            if style == prefmodifiers then -- exact
                 local continue
                 exact, continue = add_to_match(
                     exact,   optsize, dsnsize, size,
                     minsize, maxsize, face)
                 if continue == false then break end
-
-            elseif prefmodifiers == "regular"
-                or subfamily     == "regular"
+            elseif prefmodifiers == "regular" then
                 --- TODO this match should be performed when building the db
-            then
                 fallback = face
             elseif name == fullname
                 or name == pfullname
@@ -772,7 +767,9 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
                     exact,   optsize, dsnsize, size,
                     minsize, maxsize, face)
                 if continue == false then break end
-            elseif synonym_set[style] and
+            elseif style     == subfamily --- unreliable (see Ad. Garm. Pro)
+                or subfamily == "regular"
+                or synonym_set[style] and
                     (synonym_set[style][prefmodifiers] or
                      synonym_set[style][subfamily])
                 or synonym_set.regular[prefmodifiers]

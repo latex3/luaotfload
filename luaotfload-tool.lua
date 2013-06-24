@@ -43,9 +43,12 @@ if _G.getfenv then
     return require(oldscript)
 end
 
+local stringexplode   = string.explode
 local stringformat    = string.format
-local texiowrite_nl   = texio.write_nl
 local stringlower     = string.lower
+local tableconcat     = table.concat
+local texiowrite_nl   = texio.write_nl
+
 
 local C, Ct, P     = lpeg.C, lpeg.Ct, lpeg.P
 local lpegmatch    = lpeg.match
@@ -103,17 +106,17 @@ config.lualibs.verbose          = false
 config.lualibs.prefer_merged    = true
 config.lualibs.load_extended    = false
 
-require"lualibs"
+require "lualibs"
 
 --- prepare directories: the cache function in Luatex-Fonts
 --- checks for writable directory only on startup, so everything
 --- has to be laid out before we load basics-gen
 
-local cachepath = kpse.expand_var"$TEXMFVAR"
+local cachepath = kpse.expand_var "$TEXMFVAR"
 if not lfs.isdir(cachepath) then
     dir.mkdirs(cachepath)
     if not lfs.isdir(cachepath) then
-        texiowrite(stringformat(
+        texiowrite_nl(stringformat(
             "ERROR could not create directory %s", cachepath))
     end
 end
@@ -411,10 +414,6 @@ end
 local comma       = P","
 local noncomma    = 1-comma
 local split_comma = Ct((C(noncomma^1) + comma)^1)
-
-local texiowrite_nl     = texio.write_nl
-local tableconcat       = table.concat
-local stringexplode     = string.explode
 
 local separator = "\t" --- could be “,” for csv
 

@@ -312,7 +312,12 @@ local p_words      = Ct(p_word * (p_whitespace * p_word)^0)
 
 --- string -> int -> string list
 local reflow = function (text, width)
-    local words     = lpegmatch(p_words, text)
+    local words
+    if type(text) == "string" then
+        words = lpegmatch(p_words, text)
+    else
+        words = text
+    end
     if #words < 2 then
         return { text }
     end
@@ -392,7 +397,7 @@ local general_fields = {
     { "units_per_em",        "l", "units per em"        },
     { "ascent",              "l", "ascender height"     },
     { "descent",             "l", "descender height"    },
-    { "comments",            "l", "comments"            },
+    { "comment",            "l", "comments"            },
     { "os2_version",         "l", "os2 version"         },
     { "sfd_version",         "l", "sfd version"         },
 }
@@ -421,6 +426,75 @@ local display_general = function (fullinfo)
     end
 end
 
+local print_features = function (features)
+    for tag, data in next, features do
+        print_heading(tag, 4)
+        for script, languages in next, data do
+            local field     = stringformat(key_fmt, script).. fieldseparator .. " "
+            local wd_field  = #field
+            local lines     = reflow(languages.list, textwidth - wd_field)
+            local indent    = stringrep(" ", wd_field)
+            texiowrite_nl(field)
+            texiowrite(lines[1])
+            if #lines > 1 then
+                for i=1, #lines do
+                    texiowrite_nl(indent .. lines[i])
+                end
+            end
+        end
+    end
+end
+
+local extract_feature_info = function (set)
+    local collected = { }
+    for i=1, #set do
+        local features = set[i].features
+        if features then
+            for j=1, #features do
+                local feature   = features[j]
+                local scripts   = feature.scripts
+                local tagname   = stringlower(feature.tag)
+                local entry     = collected[tagname] or { }
+
+                for k=1, #scripts do
+                    local script     = scripts[k]
+                    local scriptname = stringlower(script.script)
+                    local c_script   = entry[scriptname] or {
+                                            list = { },
+                                            set  = { },
+                                        }
+                    local list, set  = c_script.list, c_script.set
+
+                    for l=1, #script.langs do
+                        local langname = stringlower(script.langs[l])
+                        if not set[langname] then
+                            list[#list+1] = langname
+                            set[langname] = true
+                        end
+                    end
+                    entry[scriptname] = c_script
+                end
+                collected[tagname]  = entry
+            end
+        end
+    end
+    return collected
+end
+
+local display_feature_set = function (set)
+    local collected = extract_feature_info(set)
+    print_features(collected)
+end
+
+local display_features = function (gsub, gpos)
+    texiowrite_nl ""
+    print_heading("Features", 2)
+    print_heading("GSUB Features", 3)
+    display_feature_set(gsub)
+    print_heading("GPOS Features", 3)
+    display_feature_set(gpos)
+end
+
 local show_full_info = function (path, subfont, warnings)
     local rawinfo, warn = fontloader.open(path, subfont)
     if warnings then
@@ -432,11 +506,11 @@ local show_full_info = function (path, subfont, warnings)
     end
     local fontdata = { }
     local fullinfo = fontloader.to_table(rawinfo)
-    local fields = fontloader.fields(rawinfo.glyphs[0])
+    local fields = fontloader.fields(rawinfo)
     fontloader.close(rawinfo)
-    --inspect(fields)
     display_names(fullinfo.names)
     display_general(fullinfo)
+    display_features(fullinfo.gsub, fullinfo.gpos)
 end
 
 --- Subfonts returned by fontloader.info() do not correspond

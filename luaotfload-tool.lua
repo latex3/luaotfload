@@ -46,10 +46,10 @@ end
 local stringexplode   = string.explode
 local stringformat    = string.format
 local stringlower     = string.lower
+local stringrep       = string.rep
 local tableconcat     = table.concat
-local texiowrite      = texio.write
 local texiowrite_nl   = texio.write_nl
-
+local texiowrite      = texio.write
 
 local C, Ct, P, S  = lpeg.C, lpeg.Ct, lpeg.P, lpeg.S
 local lpegmatch    = lpeg.match
@@ -247,7 +247,14 @@ end
 local head_adornchars = {
     [1] = "*", [2] = "=", [3] = "~", [4] = "-", [5] = "·",
 }
-local tw = 80
+
+local textwidth         = 80
+local wd_leftcolumn     = math.floor(textwidth * .25)
+local key_fmt           = stringformat([[%%%ds]], wd_leftcolumn)
+local val_fmt           = [[%s]]
+local fieldseparator    = ":"
+local info_fmt          = key_fmt .. fieldseparator .. " " .. val_fmt
+
 
 local print_heading = function (title, level)
     if not level or level > #head_adornchars then
@@ -256,12 +263,9 @@ local print_heading = function (title, level)
     local adornchar = head_adornchars[level]
 
     local s = adornchar .. adornchar .. " " .. title .. " "
-    texiowrite_nl (s .. string.rep(adornchar, tw-utf.len(s)))
+    texiowrite_nl (s .. stringrep(adornchar, textwidth-utf.len(s)))
     texiowrite_nl ""
 end
-
-local info_fmt = [[%13s:  %s]]
-local warn_fmt = [[(%d %s)]]
 
 local show_info_items = function (fontinfo)
     local items    = table.sortedkeys(fontinfo)
@@ -284,7 +288,6 @@ local show_fontloader_warnings = function (ws)
     print_heading(stringformat(
         [[the fontloader emitted %d warnings]],
         nws), 2)
-    texiowrite_nl ""
     for i=1, nws do
         local w = ws[i]
         texiowrite_nl (stringformat("%d:", i))
@@ -297,10 +300,70 @@ local show_fontloader_warnings = function (ws)
     end
 end
 
+local p_spacechar  = S" \n\r\t\v"
+local p_wordchar   = (1 - p_spacechar)
+local p_whitespace = p_spacechar^1
+local p_word       = C(p_wordchar^1)
+local p_words      = Ct(p_word * (p_whitespace * p_word)^0)
+
+--- string -> int -> string list
+local reflow = function (text, width)
+    local words     = lpegmatch(p_words, text)
+    if #words < 2 then
+        return { text }
+    end
+
+    local space     = " "
+    local utflen    = utf.len
+    local reflowed  = { }
+
+    local first     = words[1]
+    local linelen   = #first
+    local line      = { first }
+
+    for i=2, #words do
+        local word  = words[i]
+        local lword = utflen(word)
+        linelen = linelen + lword + 1
+        if linelen > width then
+            reflowed[#reflowed+1] = tableconcat(line)
+            linelen = #word
+            line = { word }
+        else
+            line[#line+1] = space
+            line[#line+1] = word
+        end
+    end
+    reflowed[#reflowed+1] = tableconcat(line)
+    return reflowed
+end
+
+local print_field = function (key, val)
+    local lhs    = stringformat(key_fmt, key) .. fieldseparator .. " "
+    local wd_lhs = #lhs
+    local lines  = reflow(val, textwidth - wd_lhs)
+
+    texiowrite_nl(lhs)
+    texiowrite(lines[1])
+    if #lines > 1 then
+        local indent = stringrep(" ", wd_lhs)
+        for i=2, #lines do
+            texiowrite_nl(indent)
+            texiowrite   (lines[i])
+        end
+    end
+end
+
 local display_names = function (names)
     print_heading("Font Metadata", 2)
     for i=1, #names do
-        local namedata = names[i]
+        local lang, namedata = names[i].lang, names[i].names
+        print_heading(stringformat("%d) Language: %s ", i, lang), 3)
+        if namedata then
+            for field, value in next, namedata do
+                print_field(field, value)
+            end
+        end
     end
 end
 

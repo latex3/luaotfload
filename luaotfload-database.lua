@@ -1998,6 +1998,7 @@ names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
 names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 names.read_blacklist              = read_blacklist
+names.sanitize_string             = sanitize_string
 names.getfilename                 = resolve_fullpath
 
 --- font cache

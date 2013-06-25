@@ -47,10 +47,11 @@ local stringexplode   = string.explode
 local stringformat    = string.format
 local stringlower     = string.lower
 local tableconcat     = table.concat
+local texiowrite      = texio.write
 local texiowrite_nl   = texio.write_nl
 
 
-local C, Ct, P     = lpeg.C, lpeg.Ct, lpeg.P
+local C, Ct, P, S  = lpeg.C, lpeg.Ct, lpeg.P, lpeg.S
 local lpegmatch    = lpeg.match
 
 local loader_file = "luatexbase.loader.lua"
@@ -141,6 +142,8 @@ require"alt_getopt"
 local version  = "2.3" -- same version number as luaotfload
 local names    = fonts.names
 
+local sanitize_string = names.sanitize_string
+
 local db_src_out = names.path.dir.."/"..names.path.basename
 local db_bin_out = file.replacesuffix(db_src_out, "luc")
 
@@ -226,7 +229,10 @@ The font database will be saved to
 local help_msg = function ( )
     local template = help_messages[config.luaotfload.self]
                   or help_messages["luaotfload-tool"]
-    texiowrite_nl(stringformat(template, config.luaotfload.self, db_src_out, db_bin_out))
+    texiowrite_nl(stringformat(template,
+                               config.luaotfload.self,
+                               db_src_out,
+                               db_bin_out))
 end
 
 local version_msg = function ( )
@@ -243,16 +249,59 @@ local print_font_name = function (name)
     texiowrite_nl ""
 end
 
+local info_fmt = [[%13s:  %s]]
+local warn_fmt = [[(%d %s)]]
+
 local show_info_items = function (fontinfo)
     local items    = table.sortedkeys(fontinfo)
     print_font_name(fontinfo.fullname)
     for n = 1, #items do
         local item = items[n]
         texiowrite_nl(stringformat(
-            [[  %11s:  %s]], item, fontinfo[item]))
+            info_fmt, item, fontinfo[item]))
     end
     texiowrite_nl ""
 end
+
+local p_eol     = S"\n\r"^1
+local p_space   = S" \t\v"^0
+local p_line    = p_space * C((1 - p_eol)^1)^-1
+local p_lines   = Ct(p_line * (p_eol^1 * p_line^-1)^0)
+
+local show_fontloader_warnings = function (ws)
+    local nws = #ws
+    texiowrite_nl(stringformat(
+        [[* the fontloader emitted %d warnings *]],
+        nws, name))
+    for i=1, nws do
+        local w = ws[i]
+        texiowrite_nl (stringformat("%d:", i))
+        local lines = lpegmatch(p_lines, w)
+        for i=1, #lines do
+            local line = lines[i]
+            texiowrite_nl("  · " .. line)
+        end
+        texiowrite_nl ""
+    end
+end
+
+local show_full_info = function (path, subfont, warnings)
+    local rawinfo, warn = fontloader.open(path, subfont)
+    if warnings then
+        show_fontloader_warnings(warn)
+    end
+    if not rawinfo then
+        texiowrite_nl(stringformat([[cannot open font %s]], path))
+        return
+    end
+    local fullinfo = fontloader.to_table(rawinfo)
+    fontloader.close(rawinfo)
+end
+
+--- Subfonts returned by fontloader.info() do not correspond
+--- to the actual indices required by fontloader.open(), so
+--- we try and locate the correct one by matching the request
+--- against the full name.
 
 local subfont_by_name
 subfont_by_name = function (lst, askedname, n)
@@ -262,7 +311,7 @@ subfont_by_name = function (lst, askedname, n)
 
     local font = lst[n]
     if font then
-        if font.fullname == askedname then
+        if sanitize_string(font.fullname) == askedname then
             return font
         end
         return subfont_by_name (lst, askedname, n+1)
@@ -274,20 +323,19 @@ end
 The font info knows two levels of detail:
 
     a)  basic information returned by fontloader.info(); and
-    b)  detailed information that is a subset of the font table returned
-        by fontloader.open().
+    b)  detailed information that is a subset of the font table
+        returned by fontloader.open().
 --doc]]--
 
-local show_font_info = function (basename, askedname, full)
+local show_font_info = function (basename, askedname, detail, warnings)
     local filenames = names.data.filenames
     local index     = filenames.base[basename]
     local fullname  = filenames.full[index]
+    askedname = sanitize_string(askedname)
     if not fullname then -- texmf
         fullname = resolvers.findfile(basename)
     end
-    local info     = { }
     if fullname then
-        info.location = fullname
         local shortinfo = fontloader.info(fullname)
         local nfonts   = #shortinfo
         if nfonts > 0 then -- true type collection
@@ -300,18 +348,26 @@ local show_font_info = function (basename, askedname, full)
             end
             if subfont then
                 show_info_items(subfont)
+                if detail == true then
+                    show_full_info(fullname, subfont, warnings)
+                end
             else -- list all subfonts
                 logs.names_report(true, 1, "resolve",
                     [[%s is a font collection]], basename)
-                inspect(shortinfo)
-                for n = 1, nfonts do
+                for subfont = 1, nfonts do
                     logs.names_report(true, 1, "resolve",
                         [[showing info for font no. %d]], n)
-                    show_info_items(shortinfo[n])
+                    show_info_items(shortinfo[subfont])
+                    if detail == true then
+                        show_full_info(fullname, subfont, warnings)
+                    end
                 end
             end
         else
             show_info_items(shortinfo)
+            if detail == true then
+                show_full_info(fullname, subfont, warnings)
+            end
         end
     else
         logs.names_report(true, 1, "resolve",
@@ -431,7 +487,7 @@ actions.query = function (job)
                 "resolve", "Resolved file name “%s”", foundname)
         end
         if job.show_info then
-            show_font_info(foundname, query, job.full_info)
+            show_font_info(foundname, query, job.full_info, job.warnings)
         end
     else
         logs.names_report(false, 0,
@@ -607,6 +663,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
     local result = { -- jobspec
         force_reload = nil,
         full_info    = false,
+        warnings     = false,
         criterion    = "",
         query        = "",
         log_level    = 0, --- 2 is approx. the old behavior
@@ -633,9 +690,10 @@ local process_cmdline = function ( ) -- unit -> jobspec
         update             = "u",
         verbose            = 1  ,
         version            = "V",
+        warnings           = "w",
     }
 
-    local short_options = "bDfFiIlpquvVh"
+    local short_options = "bDfFiIlpquvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -663,8 +721,14 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "verbose" then
             local lvl = optarg[n]
             if lvl then
-                result.log_level = tonumber(lvl)
+                lvl = tonumber(lvl)
+                result.log_level = lvl
+                if lvl > 2 then
+                    result.warnings = true
+                end
             end
+        elseif v == "w" then
+            result.warnings = true
         elseif v == "log" then
             local str = optarg[n]
             if str then

@@ -235,30 +235,83 @@ local version_msg = function ( )
         config.luaotfload.self, version, names.version))
 end
 
+local tw = 80
+local print_font_name = function (name)
+    local s = "-- " .. name .. " "
+    s = s .. string.rep("-", tw-string.len(s))
+    texiowrite_nl (s)
+    texiowrite_nl ""
+end
+
 local show_info_items = function (fontinfo)
     local items    = table.sortedkeys(fontinfo)
+    print_font_name(fontinfo.fullname)
     for n = 1, #items do
         local item = items[n]
         texiowrite_nl(stringformat(
             [[  %11s:  %s]], item, fontinfo[item]))
     end
+    texiowrite_nl ""
 end
 
-local show_font_info = function (filename)
-    local fullname = resolvers.findfile(filename)
+local subfont_by_name
+subfont_by_name = function (lst, askedname, n)
+    if not n then
+        return subfont_by_name (lst, askedname, 1)
+    end
+
+    local font = lst[n]
+    if font then
+        if font.fullname == askedname then
+            return font
+        end
+        return subfont_by_name (lst, askedname, n+1)
+    end
+    return false
+end
+
+--[[doc--
+The font info knows two levels of detail:
+
+    a)  basic information returned by fontloader.info(); and
+    b)  detailed information that is a subset of the font table returned
+        by fontloader.open().
+--doc]]--
+
+local show_font_info = function (basename, askedname, full)
+    local filenames = names.data.filenames
+    local index     = filenames.base[basename]
+    local fullname  = filenames.full[index]
+    if not fullname then -- texmf
+        fullname = resolvers.findfile(basename)
+    end
+    local info     = { }
     if fullname then
-        local fontinfo = fontloader.info(fullname)
-        local nfonts   = #fontinfo
+        info.location = fullname
+        local shortinfo = fontloader.info(fullname)
+        local nfonts   = #shortinfo
         if nfonts > 0 then -- true type collection
-            logs.names_report(true, 1, "resolve",
-                [[%s is a font collection]], filename)
-            for n = 1, nfonts do
+            local subfont
+            if askedname then
                 logs.names_report(true, 1, "resolve",
-                    [[showing info for font no. %d]], n)
-                show_info_items(fontinfo[n])
+                    [[%s is part of the font collection %s]],
+                    askedname, basename)
+                subfont = subfont_by_name(shortinfo, askedname)
+            end
+            if subfont then
+                show_info_items(subfont)
+            else -- list all subfonts
+                logs.names_report(true, 1, "resolve",
+                    [[%s is a font collection]], basename)
+                inspect(shortinfo)
+                for n = 1, nfonts do
+                    logs.names_report(true, 1, "resolve",
+                        [[showing info for font no. %d]], n)
+                    show_info_items(shortinfo[n])
+                end
             end
         else
-            show_info_items(fontinfo)
+            show_info_items(shortinfo)
         end
     else
         logs.names_report(true, 1, "resolve",
@@ -378,7 +431,7 @@ actions.query = function (job)
                 "resolve", "Resolved file name “%s”", foundname)
         end
         if job.show_info then
-            show_font_info(foundname)
+            show_font_info(foundname, query, job.full_info)
         end
     else
         logs.names_report(false, 0,
@@ -553,6 +606,7 @@ alt_getopt.
 local process_cmdline = function ( ) -- unit -> jobspec
     local result = { -- jobspec
         force_reload = nil,
+        full_info    = false,
         criterion    = "",
         query        = "",
         log_level    = 0, --- 2 is approx. the old behavior
@@ -569,6 +623,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         fuzzy              = "F",
         help               = "h",
         info               = "i",
+        inspect            = "I",
         limit              = 1,
         list               = 1,
         log                = 1,
@@ -580,7 +635,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         version            = "V",
     }
 
-    local short_options = "bDfFilpquvVh"
+    local short_options = "bDfFiIlpquvVh"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -627,6 +682,9 @@ local process_cmdline = function ( ) -- unit -> jobspec
             end
         elseif v == "i" then
             result.show_info = true
+        elseif v == "I" then
+            result.show_info = true
+            result.full_info = true
         elseif v == "alias" then
             config.luaotfload.self = optarg[n]
         elseif v == "l" then

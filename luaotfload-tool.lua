@@ -241,11 +241,22 @@ local version_msg = function ( )
         config.luaotfload.self, version, names.version))
 end
 
+
+--- makeshift formatting
+
+local head_adornchars = {
+    [1] = "*", [2] = "=", [3] = "~", [4] = "-", [5] = "·",
+}
 local tw = 80
-local print_font_name = function (name)
-    local s = "-- " .. name .. " "
-    s = s .. string.rep("-", tw-string.len(s))
-    texiowrite_nl (s)
+
+local print_heading = function (title, level)
+    if not level or level > #head_adornchars then
+        level = #head_adornchars
+    end
+    local adornchar = head_adornchars[level]
+
+    local s = adornchar .. adornchar .. " " .. title .. " "
+    texiowrite_nl (s .. string.rep(adornchar, tw-utf.len(s)))
     texiowrite_nl ""
 end
 
@@ -254,7 +265,7 @@ local warn_fmt = [[(%d %s)]]
 
 local show_info_items = function (fontinfo)
     local items    = table.sortedkeys(fontinfo)
-    print_font_name(fontinfo.fullname)
+    print_heading(fontinfo.fullname, 1)
     for n = 1, #items do
         local item = items[n]
         texiowrite_nl(stringformat(
@@ -270,9 +281,10 @@ local p_lines   = Ct(p_line * (p_eol^1 * p_line^-1)^0)
 
 local show_fontloader_warnings = function (ws)
     local nws = #ws
-    texiowrite_nl(stringformat(
-        [[* the fontloader emitted %d warnings *]],
-        nws, name))
+    print_heading(stringformat(
+        [[the fontloader emitted %d warnings]],
+        nws), 2)
+    texiowrite_nl ""
     for i=1, nws do
         local w = ws[i]
         texiowrite_nl (stringformat("%d:", i))
@@ -285,6 +297,13 @@ local show_fontloader_warnings = function (ws)
     end
 end
 
+local display_names = function (names)
+    print_heading("Font Metadata", 2)
+    for i=1, #names do
+        local namedata = names[i]
+    end
+end
+
 local show_full_info = function (path, subfont, warnings)
     local rawinfo, warn = fontloader.open(path, subfont)
     if warnings then
@@ -294,8 +313,12 @@ local show_full_info = function (path, subfont, warnings)
         texiowrite_nl(stringformat([[cannot open font %s]], path))
         return
     end
+    local fontdata = { }
     local fullinfo = fontloader.to_table(rawinfo)
+    local fields = fontloader.fields(rawinfo.glyphs[0])
     fontloader.close(rawinfo)
+    --inspect(fields)
+    display_names(fullinfo.names)
 end
 
 --- Subfonts returned by fontloader.info() do not correspond

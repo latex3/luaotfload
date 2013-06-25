@@ -338,7 +338,9 @@ local reflow = function (text, width)
     return reflowed
 end
 
+--- string -> 'a -> string list
 local print_field = function (key, val)
+    val = tostring(val)
     local lhs    = stringformat(key_fmt, key) .. fieldseparator .. " "
     local wd_lhs = #lhs
     local lines  = reflow(val, textwidth - wd_lhs)
@@ -367,6 +369,54 @@ local display_names = function (names)
     end
 end
 
+--- see luafflib.c
+local general_fields = {
+    --- second: l -> literal | n -> length | d -> date
+    { "fullname",            "l", "font name"           },
+    { "version",             "l", "font version"        },
+    { "creationtime",        "d", "creation time"       },
+    { "modificationtime",    "d", "modification time"   },
+    { "subfonts",            "n", "number of subfonts"  },
+    { "glyphcnt",            "l", "number of glyphs"    },
+    { "weight",              "l", "weight indicator"    },
+    { "design_size",         "l", "design size"         },
+    { "design_range_bottom", "l", "design size min"     },
+    { "design_range_top",    "l", "design size max"     },
+    { "fontstyle_id",        "l", "font style id"       },
+    { "fontstyle_name",      "l", "font style name"     },
+    { "strokewidth",         "l", "stroke width"        },
+    { "units_per_em",        "l", "units per em"        },
+    { "ascent",              "l", "ascender height"     },
+    { "descent",             "l", "descender height"    },
+    { "comments",            "l", "comments"            },
+    { "os2_version",         "l", "os2 version"         },
+    { "sfd_version",         "l", "sfd version"         },
+}
+
+local display_general = function (fullinfo)
+    texiowrite_nl ""
+    print_heading("General Information", 2)
+    for i=1, #general_fields do
+        local field = general_fields[i]
+        local key, mode, desc  = unpack(field)
+        local val
+        if mode == "l" then
+            val = fullinfo[key]
+        elseif mode == "n" then
+            local v = fullinfo[key]
+            if v then
+                val = #fullinfo[key]
+            end
+        elseif mode == "d" then
+            val = os.date("%F %T", fullinfo[key])
+        end
+        if not val then
+            val = "<none>"
+        end
+        print_field(desc, val)
+    end
+end
+
 local show_full_info = function (path, subfont, warnings)
     local rawinfo, warn = fontloader.open(path, subfont)
     if warnings then
@@ -382,6 +432,7 @@ local show_full_info = function (path, subfont, warnings)
     fontloader.close(rawinfo)
     --inspect(fields)
     display_names(fullinfo.names)
+    display_general(fullinfo)
 end
 
 --- Subfonts returned by fontloader.info() do not correspond

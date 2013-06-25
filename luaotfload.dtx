@@ -400,7 +400,23 @@ and the derived files
 % \begin{quote}
 %   |\font\fontname=|\meta{prefix}|:|\meta{fontname}\dots
 % \end{quote}
-% where \meta{prefix} is either \verb|file:| or \verb|name:|.
+% where \meta{prefix} is either \verb|file:| or \verb|name:|.\footnote{%
+%   The development version also knows two further prefixes,
+%   \verb|kpse:| and \verb|my:|.
+%   A \verb|kpse| lookup is restricted to files that can be found by
+%   \identifier{kpathsea} and
+%   will not attempt to locate system fonts.
+%   This behavior can be of value when an extra degree of encapsulation is
+%   needed, for instance when supplying a customized tex distribution.
+%
+%   The \verb|my| lookup takes this a step further: it lets you define
+%   a custom resolver function and hook it into the \luafunction{resolve_font}
+%   callback.
+%   This ensures full control over how a file is located.
+%   For a working example see the
+%   \href{https://bitbucket.org/phg/lua-la-tex-tests/src/5f6a535d/pln-lookup-callback-1.tex}
+%        {test repo}.
+% }
 % It determines whether the font loader should interpret the request as
 % a \emphasis{file name} or
 %   \emphasis{font name}, respectively,

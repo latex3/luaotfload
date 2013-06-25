@@ -426,7 +426,26 @@ and the derived files
 %             “GFS Bodoni Rg”, and
 %             “PT Serif Caption”
 % -- they are the human readable identifiers
-% usually listed in drop-down menus and the like.
+% usually listed in drop-down menus and the like.\footnote{%
+%   Font names may appear like a great choice at first because they
+%   offer seemingly more intuitive identifiers in comparison to arguably
+%   cryptic file names:
+%   “PT Sans Bold” is a lot more descriptive than \fileent{PTS75F.ttf}.
+%   On the other hand, font names are quite arbitrary and there is no
+%   universal method to determine their meaning.
+%   While \identifier{luaotfload} provides fairly sophisticated heuristic
+%   to figure out a matching font style, weight, and optical size, it
+%   cannot be relied upon to work satisfactorily for all font files.
+%   For an in-depth analysis of the situation and how broken font names
+%   are, please refer to
+%   \href{http://www.ntg.nl/pipermail/ntg-context/2013/073889.html}
+%        {this post}
+%   by Hans Hagen, the author of the font loader.
+%   If in doubt, use filenames.
+%   \fileent{luaotfload-tool} can perform the matching for you with the
+%   option \verb|--find=<name>|, and you can use the file name it returns
+%   in your font definition.
+% }
 % In order for fonts installed both in system locations and in your
 % \fileent{texmf} to be accessible by font name, \identifier{luaotfload} must
 % first collect the metadata included in the files.

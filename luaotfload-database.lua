@@ -493,6 +493,7 @@ the texmf or filesystem.
 --doc]]--
 
 local verify_font_file = function (basename)
+    if not names.data then names.data = load_names() end
     local filenames = names.data.filenames
     local idx = filenames.base[basename]
     if not idx then

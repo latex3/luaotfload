@@ -433,7 +433,7 @@ local general_fields = {
     { "units_per_em",        "l", "units per em"        },
     { "ascent",              "l", "ascender height"     },
     { "descent",             "l", "descender height"    },
-    { "comment",            "l", "comments"            },
+    { "comments",            "l", "comments"            },
     { "os2_version",         "l", "os2 version"         },
     { "sfd_version",         "l", "sfd version"         },
 }
@@ -609,7 +609,7 @@ local show_font_info = function (basename, askedname, detail, warnings)
                     [[%s is a font collection]], basename)
                 for subfont = 1, nfonts do
                     logs.names_report(true, 1, "resolve",
-                        [[showing info for font no. %d]], n)
+                        [[Showing info for font no. %d]], n)
                     show_info_items(shortinfo[subfont])
                     if detail == true then
                         show_full_info(fullname, subfont, warnings)
@@ -624,7 +624,7 @@ local show_font_info = function (basename, askedname, detail, warnings)
         end
     else
         logs.names_report(true, 1, "resolve",
-            "font %s not found", filename)
+            "Font %s not found", filename)
     end
 end
 
@@ -648,8 +648,8 @@ local actions = { } --- (jobspec -> (bool * bool)) list
 actions.loglevel = function (job)
     logs.set_loglevel(job.log_level)
     logs.names_report("info", 3, "util",
-                      "setting log level", "%d", job.log_level)
-    logs.names_report("log", 0, "util", "lua=%s", _VERSION)
+                      "Setting log level", "%d", job.log_level)
+    logs.names_report("log", 0, "util", "Lua=%s", _VERSION)
     return true, true
 end
 
@@ -736,8 +736,8 @@ actions.query = function (job)
                 "Resolved file name “%s”, subfont nr. “%s”",
                 foundname, subfont)
         else
-            logs.names_report(false, 0,
-                "resolve", "Resolved file name “%s”", foundname)
+            logs.names_report(false, 0, "resolve",
+                              "Resolved file name “%s”", foundname)
         end
         if job.show_info then
             show_font_info(foundname, query, job.full_info, job.warnings)
@@ -831,7 +831,7 @@ actions.list = function (job)
     local nmappings = #mappings
 
     if criterion == "*" then
-        logs.names_report(false, 1, "list", "all %d entries", nmappings)
+        logs.names_report(false, 1, "list", "All %d entries", nmappings)
         for i=1, nmappings do
             local entry     = mappings[i]
             local fields    = get_fields(entry, asked_fields)
@@ -846,12 +846,12 @@ actions.list = function (job)
         criterion          = criterion[1]
         asked_fields       = set_primary_field(asked_fields, criterion)
 
-        logs.names_report(false, 1, "list", "by %s", criterion)
+        logs.names_report(false, 1, "list", "By %s", criterion)
 
         --- firstly, build a list of fonts to operate on
         local targets = { }
         if asked_value then --- only those whose value matches
-            logs.names_report(false, 2, "list", "restricting to value %s", asked_value)
+            logs.names_report(false, 2, "list", "Restricting to value %s", asked_value)
             for i=1, nmappings do
                 local entry = mappings[i]
                 if  entry[criterion]
@@ -1042,7 +1042,7 @@ local main = function ( ) -- unit -> int
         local actionname = action_sequence[i]
         local exit       = false
         if action_pending[actionname] then
-            logs.names_report("log", 3, "util", "preparing for task",
+            logs.names_report("log", 3, "util", "Preparing for task",
                               "%s", actionname)
 
             local action             = actions[actionname]
@@ -1050,16 +1050,16 @@ local main = function ( ) -- unit -> int
 
             if not success then
                 logs.names_report(false, 0, "util",
-                    "could not finish task", "%s", actionname)
+                    "Could not finish task", "%s", actionname)
                 retval = -1
                 exit   = true
             elseif not continue then
                 logs.names_report(false, 3, "util",
-                    "task completed, exiting", "%s", actionname)
+                    "Task completed, exiting", "%s", actionname)
                 exit   = true
             else
                 logs.names_report(false, 3, "util",
-                    "task completed successfully", "%s", actionname)
+                    "Task completed successfully", "%s", actionname)
             end
         end
         if exit then break end

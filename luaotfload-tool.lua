@@ -259,21 +259,52 @@ local val_fmt           = [[%s]]
 local fieldseparator    = ":"
 local info_fmt          = key_fmt .. fieldseparator .. " " .. val_fmt
 
+local currentdepth      = 0
+local counterstack      = { } -- counters per level
+local counterformat     = "%d"
+
+local format_counter = function (stack)
+    local acc = { }
+    for lvl=1, #stack do
+        acc[#acc+1] = stringformat(counterformat, stack[lvl])
+    end
+    return tableconcat(acc, ".")
+end
 
 local print_heading = function (title, level)
+    local structuredata
+    if currentdepth == level then -- top is current
+        counterstack[#counterstack] = counterstack[#counterstack] + 1
+    elseif currentdepth < level then -- push new
+        counterstack[#counterstack+1] = 1
+    else -- pop
+        local diff = currentdepth - level
+        while diff > 0 do
+            counterstack[#counterstack] = nil
+            diff = diff - 1
+        end
+        counterstack[#counterstack] = counterstack[#counterstack] + 1
+    end
+    currentdepth = level
+
+    texiowrite_nl ""
     if not level or level > #head_adornchars then
         level = #head_adornchars
     end
     local adornchar = head_adornchars[level]
 
-    local s = adornchar .. adornchar .. " " .. title .. " "
+    local counter = format_counter(counterstack)
+
+    local s = adornchar .. adornchar .. " "
+           .. counter .. " "
+           .. title .. " "
     texiowrite_nl (s .. stringrep(adornchar, textwidth-utf.len(s)))
-    texiowrite_nl ""
 end
 
 local show_info_items = function (fontinfo)
-    local items    = table.sortedkeys(fontinfo)
+    local items = table.sortedkeys(fontinfo)
     print_heading(fontinfo.fullname, 1)
+    texiowrite_nl ""
     for n = 1, #items do
         local item = items[n]
         texiowrite_nl(stringformat(
@@ -292,6 +323,7 @@ local show_fontloader_warnings = function (ws)
     print_heading(stringformat(
         [[the fontloader emitted %d warnings]],
         nws), 2)
+    texiowrite_nl ""
     for i=1, nws do
         local w = ws[i]
         texiowrite_nl (stringformat("%d:", i))
@@ -315,11 +347,14 @@ local reflow = function (text, width)
     local words
     if type(text) == "string" then
         words = lpegmatch(p_words, text)
+        if #words < 2 then
+            return { text }
+        end
     else
         words = text
-    end
-    if #words < 2 then
-        return { text }
+        if #words < 2 then
+            return words
+        end
     end
 
     local space     = " "
@@ -369,7 +404,8 @@ local display_names = function (names)
     print_heading("Font Metadata", 2)
     for i=1, #names do
         local lang, namedata = names[i].lang, names[i].names
-        print_heading(stringformat("%d) Language: %s ", i, lang), 3)
+        print_heading(stringformat("Language: %s ", i, lang), 3)
+        texiowrite_nl ""
         if namedata then
             for field, value in next, namedata do
                 print_field(field, value)
@@ -405,6 +441,7 @@ local general_fields = {
 local display_general = function (fullinfo)
     texiowrite_nl ""
     print_heading("General Information", 2)
+    texiowrite_nl ""
     for i=1, #general_fields do
         local field = general_fields[i]
         local key, mode, desc  = unpack(field)
@@ -432,6 +469,7 @@ local print_features = function (features)
         for script, languages in next, data do
             local field     = stringformat(key_fmt, script).. fieldseparator .. " "
             local wd_field  = #field
+            --inspect(languages.list)
             local lines     = reflow(languages.list, textwidth - wd_field)
             local indent    = stringrep(" ", wd_field)
             texiowrite_nl(field)

@@ -16,8 +16,8 @@ local lpeg = require "lpeg"
 local P, R, S, lpegmatch
     = lpeg.P, lpeg.R, lpeg.S, lpeg.match
 
-local C, Cc, Cf, Cg, Ct
-    = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Ct
+local C, Cc, Cf, Cg, Cs, Ct
+    = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Cs, lpeg.Ct
 
 --- Luatex builtins
 local load                    = load
@@ -134,6 +134,17 @@ local sanitize_string = function (str)
         return utf8gsub(utf8lower(str), "[^%a%d]", "")
     end
     return nil
+end
+
+local preescape_path --- working around funky characters
+do
+    local escape    = function (chr) return "%" .. chr end
+    local funkychar = S"()[]"
+    local pattern   = Cs((funkychar/escape + 1)^0)
+
+    preescape_path = function (str)
+        return lpegmatch (pattern, str)
+    end
 end
 
 --[[doc--
@@ -1351,8 +1362,10 @@ local scan_dir = function (dirname, fontnames, newfontnames, dry_run, texmf)
     report("both", 3, "db", "Scanning directory %s", dirname)
     for _,i in next, font_extensions do
         for _,ext in next, { i, stringupper(i) } do
-            local found = dirglob(stringformat("%s/**.%s$", dirname, ext))
-            local n_found = #found
+            local escapeddir = preescape_path (dirname)
+            local found      = dirglob (stringformat("%s/**.%s$",
+                                                     escapeddir, ext))
+            local n_found    = #found
             --- note that glob fails silently on broken symlinks, which
             --- happens sometimes in TeX Live.
             report("both", 4, "db", "%s '%s' fonts found", n_found, ext)
@@ -1572,7 +1585,9 @@ do --- closure for read_fonts_conf()
                                 path, home, xdg_home,
                                 acc,  done, dirs_done)
                 elseif lfsisdir(path) then --- arrow code ahead
-                    local config_files = dirglob(filejoin(path, "*.conf"))
+                    local escapedpath  = preescape_path (path)
+                    local config_files = dirglob
+                        (filejoin(escapedpath, "*.conf"))
                     for _, filename in next, config_files do
                         if not done[filename] then
                             acc = read_fonts_conf_indeed(
@@ -1920,7 +1935,8 @@ end
 local collect_cache collect_cache = function (path, all, n, luanames,
                                               lucnames, rest)
     if not all then
-        local all = dirglob(path .. "/**/*")
+        local escapedpath = preescape_path (path)
+        local all = dirglob (escapedpath .. "/**/*")
         local luanames, lucnames, rest = { }, { }, { }
         return collect_cache(nil, all, 1, luanames, lucnames, rest)
     end

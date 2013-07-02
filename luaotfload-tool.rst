@@ -116,8 +116,14 @@ miscellaneous
 --verbose=N, -v         Set verbosity level to *n* or the number of
                         repetitions of ``-v``.
 --quiet                 No verbose output (log level set to zero).
---log=stdout            Redirect log output to terminal (for database
-                        troubleshooting).
+--log=CHANNEL           Redirect log output (for database
+                        troubleshooting), where *CHANNEL* can be
+
+                        1) ``stdout`` -> all output will be
+                           dumped to the terminal; or
+                        2) ``file`` -> write to a file to the temporary
+                           directory (the name will be chosen
+                           automatically (**experimental!**).
 
 --version, -V           Show version number and exit.
 --help, -h              Show help message and exit.

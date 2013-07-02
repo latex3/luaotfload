@@ -902,6 +902,22 @@ actions.list = function (job)
     return true, true
 end
 
+--- stuff to be carried out prior to exit
+
+local finalizers = { }
+
+--- returns false if at least one of the actions failed, mainly
+--- for closing io channels
+local finalize = function ()
+    local success = true
+    for _, fun in next, finalizers do
+        if type (fun) == "function" then
+            if fun () == false then success = false end
+        end
+    end
+    return success
+end
+
 --[[--
 Command-line processing.
 mkluatexfontdb.lua relies on the script alt_getopt to process argv and
@@ -985,7 +1001,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "log" then
             local str = optarg[n]
             if str then
-                logs.set_logout(str)
+                finalizers = logs.set_logout(str, finalizers)
             end
         elseif v == "find" then
             action_pending["query"] = true
@@ -1065,7 +1081,11 @@ local main = function ( ) -- unit -> int
         if exit then break end
     end
 
-    texiowrite_nl""
+    if finalize () == false then
+        retval = -1
+    end
+
+    --texiowrite_nl""
     return retval
 end
 

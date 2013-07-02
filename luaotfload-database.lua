@@ -54,7 +54,6 @@ local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
 
 --- these come from Lualibs/Context
-local dirglob                 = dir.glob
 local dirmkdirs               = dir.mkdirs
 local filebasename            = file.basename
 local filecollapsepath        = file.collapsepath or file.collapse_path
@@ -137,16 +136,46 @@ local sanitize_string = function (str)
     return nil
 end
 
-local preescape_path --- working around funky characters
-do
-    local escape    = function (chr) return "%" .. chr end
-    local funkychar = S"()[]"
-    local pattern   = Cs((funkychar/escape + 1)^0)
+local find_files_indeed
+find_files_indeed = function (acc, dirs, filter)
+    if not next (dirs) then --- done
+        return acc
+    end
 
-    preescape_path = function (str)
-        return lpegmatch (pattern, str)
+    local dir   = dirs[#dirs]
+    dirs[#dirs] = nil
+
+    local newdirs, newfiles = { }, { }
+    for ent in lfsdir (dir) do
+        if ent ~= "." and ent ~= ".." then
+            local fullpath = dir .. "/" .. ent
+            if filter (fullpath) == true then
+                if lfsisdir (fullpath) then
+                    newdirs[#newdirs+1] = fullpath
+                elseif lfsisfile (fullpath) then
+                    newfiles[#newfiles+1] = fullpath
+                end
+            end
+        end
+    end
+    return find_files_indeed (tableappend (acc, newfiles),
+                              tableappend (dirs, newdirs),
+                              filter)
+end
+
+local dummyfilter = function () return true end
+
+--- the optional filter function receives the full path of a file
+--- system entity. a filter applies if the first argument it returns is
+--- true.
+
+--- string -> function? -> string list
+local find_files = function (root, filter)
+    if lfsisdir (root) then
+        return find_files_indeed ({}, { root }, filter or dummyfilter)
     end
 end
+
 
 --[[doc--
 This is a sketch of the luaotfload db:
@@ -1575,6 +1604,16 @@ do --- closure for read_fonts_conf()
         return confdata
     end
 
+    local p_conf   = P".conf" * P(-1)
+    local p_filter = (1 - p_conf)^1 * p_conf
+
+    local conf_filter = function (path)
+        if lpegmatch (p_filter, path) then
+            return true
+        end
+        return false
+    end
+
     --[[doc--
          read_fonts_conf_indeed() is called with six arguments; the
          latter three are tables that represent the state and are
@@ -1635,9 +1674,7 @@ do --- closure for read_fonts_conf()
                                 path, home, xdg_home,
                                 acc,  done, dirs_done)
                 elseif lfsisdir(path) then --- arrow code ahead
-                    local escapedpath  = preescape_path (path)
-                    local config_files = dirglob
-                        (filejoin(escapedpath, "*.conf"))
+                    local config_files = find_files (path, conf_filter)
                     for _, filename in next, config_files do
                         if not done[filename] then
                             acc = read_fonts_conf_indeed(
@@ -1980,13 +2017,14 @@ local purge_from_cache = function (category, path, list, all)
     report("info", 2, "cache", "Removed lua files : %i", n)
     return true
 end
+
 --- string -> string list -> int -> string list -> string list -> string list ->
 ---     (string list * string list * string list * string list)
 local collect_cache collect_cache = function (path, all, n, luanames,
                                               lucnames, rest)
     if not all then
-        local escapedpath = preescape_path (path)
-        local all = dirglob (escapedpath .. "/**/*")
+        local all = find_files (path)
+
         local luanames, lucnames, rest = { }, { }, { }
         return collect_cache(nil, all, 1, luanames, lucnames, rest)
     end

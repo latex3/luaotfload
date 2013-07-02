@@ -106,7 +106,10 @@ end
 
 stdout = function (category, ...)
     local res = { module_name, "|", category, ":" }
-    if select("#", ...) == 1 then
+    local nargs = select("#", ...)
+    if nargs == 0 then
+        writeln (tableconcat ({...}))
+    elseif nargs == 1 then
         res[#res+1] = select(1, ...) -- around 30% faster than unpack()
     else
         res[#res+1] = stringformat(...)

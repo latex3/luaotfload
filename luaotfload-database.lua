@@ -2006,9 +2006,21 @@ local collect_cache collect_cache = function (path, all, n, luanames,
     return luanames, lucnames, rest, all
 end
 
+local getfontcachepath = function ( )
+    --- fonts.handlers.otf doesn’t exist outside a Luatex run,
+    --- so we have to improvise
+    local writable = caches.getwritablepath ()
+    if writable then
+        writable = writable .. "/fonts"
+        if lfsisdir (writable) then
+            return writable
+        end
+    end
+end
+
 --- unit -> unit
 local purge_cache = function ( )
-    local writable_path = caches.getwritablepath()
+    local writable_path = getfontcachepath ()
     local luanames, lucnames, rest = collect_cache(writable_path)
     if logs.get_loglevel() > 1 then
         print_cache("writable path", writable_path, luanames, lucnames, rest)
@@ -2019,7 +2031,7 @@ end
 
 --- unit -> unit
 local erase_cache = function ( )
-    local writable_path = caches.getwritablepath()
+    local writable_path = getfontcachepath ()
     local luanames, lucnames, rest, all = collect_cache(writable_path)
     if logs.get_loglevel() > 1 then
         print_cache("writable path", writable_path, luanames, lucnames, rest)
@@ -2035,7 +2047,7 @@ end
 --- unit -> unit
 local show_cache = function ( )
     local readable_paths = caches.getreadablepaths()
-    local writable_path  = caches.getwritablepath()
+    local writable_path  = getfontcachepath ()
     local luanames, lucnames, rest = collect_cache(writable_path)
 
     separator()

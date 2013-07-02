@@ -2006,7 +2006,7 @@ local collect_cache collect_cache = function (path, all, n, luanames,
     return luanames, lucnames, rest, all
 end
 
-local getfontcachepath = function ( )
+local getwritablecachepath = function ( )
     --- fonts.handlers.otf doesn’t exist outside a Luatex run,
     --- so we have to improvise
     local writable = caches.getwritablepath ()
@@ -2018,9 +2018,23 @@ local getfontcachepath = function ( )
     end
 end
 
+local getreadablecachepaths = function ( )
+    local readables = caches.getreadablepaths ()
+    local result    = { }
+    if readables then
+        for i=1, #readables do
+            local readable = readables[i] .. "/fonts"
+            if lfsisdir (readable) then
+                result[#result+1] = readable
+            end
+        end
+    end
+    return result
+end
+
 --- unit -> unit
 local purge_cache = function ( )
-    local writable_path = getfontcachepath ()
+    local writable_path = getwritablecachepath ()
     local luanames, lucnames, rest = collect_cache(writable_path)
     if logs.get_loglevel() > 1 then
         print_cache("writable path", writable_path, luanames, lucnames, rest)
@@ -2031,7 +2045,7 @@ end
 
 --- unit -> unit
 local erase_cache = function ( )
-    local writable_path = getfontcachepath ()
+    local writable_path = getwritablecachepath ()
     local luanames, lucnames, rest, all = collect_cache(writable_path)
     if logs.get_loglevel() > 1 then
         print_cache("writable path", writable_path, luanames, lucnames, rest)
@@ -2046,19 +2060,20 @@ end
 
 --- unit -> unit
 local show_cache = function ( )
-    local readable_paths = caches.getreadablepaths()
-    local writable_path  = getfontcachepath ()
+    local readable_paths = getreadablecachepaths ()
+    local writable_path  = getwritablecachepath ()
     local luanames, lucnames, rest = collect_cache(writable_path)
 
-    separator()
-    print_cache("writable path", writable_path, luanames, lucnames, rest)
+    separator ()
+    print_cache ("writable path", writable_path,
+                 luanames, lucnames, rest)
     texiowrite_nl""
     for i=1,#readable_paths do
         local readable_path = readable_paths[i]
         if readable_path ~= writable_path then
-            local luanames, lucnames = collect_cache(readable_path)
-            print_cache("readable path",
-                readable_path,luanames,lucnames,rest)
+            local luanames, lucnames = collect_cache (readable_path)
+            print_cache ("readable path",
+                         readable_path, luanames, lucnames, rest)
         end
     end
     separator()

@@ -54,7 +54,6 @@ local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
 
 --- these come from Lualibs/Context
-local dirmkdirs               = dir.mkdirs
 local filebasename            = file.basename
 local filecollapsepath        = file.collapsepath or file.collapse_path
 local filedirname             = file.dirname
@@ -66,6 +65,7 @@ local filereplacesuffix       = file.replacesuffix
 local filesplitpath           = file.splitpath or file.split_path
 local lfsisdir                = lfs.isdir
 local lfsisfile               = lfs.isfile
+local lfsmkdirs               = lfs.mkdirs
 local stringis_empty          = string.is_empty
 local stringsplit             = string.split
 local stringstrip             = string.strip
@@ -83,6 +83,15 @@ fonts.definers       = fonts.definers or { }
 
 local names          = fonts.names
 
+config                         = config or { }
+config.luaotfload              = config.luaotfload or { }
+config.luaotfload.resolver     = config.luaotfload.resolver or "normal"
+if config.luaotfload.update_live ~= false then
+    --- this option allows for disabling updates
+    --- during a TeX run
+    config.luaotfload.update_live = true
+end
+
 names.version        = 2.207
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
@@ -93,15 +102,6 @@ names.path           = {
     lookup_basename  = "luaotfload-lookup-cache.lua", --- cache file name
     lookup_path      = "",                            --- cache full path
 }
-
-config                         = config or { }
-config.luaotfload              = config.luaotfload or { }
-config.luaotfload.resolver     = config.luaotfload.resolver or "normal"
-if config.luaotfload.update_live ~= false then
-    --- this option allows for disabling updates
-    --- during a TeX run
-    config.luaotfload.update_live = true
-end
 
 -- We use the cache.* of ConTeXt (see luat-basics-gen), we can
 -- use it safely (all checks and directory creations are already done). It
@@ -1912,7 +1912,7 @@ end
 local ensure_names_path = function ( )
     local path = names.path.dir
     if not lfsisdir(path) then
-        dirmkdirs(path)
+        lfsmkdirs(path)
     end
     return path
 end

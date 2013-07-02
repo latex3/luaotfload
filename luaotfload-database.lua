@@ -769,9 +769,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
                 or name == fontname
                 or name == psname
             then
-                local continue
-                exact, continue = add_to_match(exact, askedsize, face)
-                if continue == false then break end
+                synonymous, continue = add_to_match(synonymous, askedsize, face)
             elseif synonym_set[style] and
                     (synonym_set[style][prefmodifiers] or
                      synonym_set[style][subfamily])

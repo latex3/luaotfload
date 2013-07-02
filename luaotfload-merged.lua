@@ -3143,7 +3143,7 @@ function caches.savedata(path,name,data)
   local luaname,lucname=makefullname(path,name)
   if luaname then
     texio.write(string.format("(save: %s)",luaname))
-    table.tofile(luaname,data,true,{ reduce=true })
+    table.tofile(luaname,data,true,{ reduce=false })
     if lucname and type(caches.compile)=="function" then
       os.remove(lucname) 
       texio.write(string.format("(save: %s)",lucname))

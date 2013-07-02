@@ -33,12 +33,11 @@ local iolines                 = io.lines
 local ioopen                  = io.open
 local kpseexpand_path         = kpse.expand_path
 local kpseexpand_var          = kpse.expand_var
-local kpselookup              = kpse.lookup
 local kpsefind_file           = kpse.find_file
+local kpselookup              = kpse.lookup
 local kpsereadable_file       = kpse.readable_file
-local lfsisdir                = lfs.isdir
-local lfsisfile               = lfs.isfile
 local lfsattributes           = lfs.attributes
+local lfsdir                  = lfs.dir
 local mathabs                 = math.abs
 local mathmin                 = math.min
 local stringfind              = string.find
@@ -49,9 +48,7 @@ local stringlower             = string.lower
 local stringsub               = string.sub
 local stringupper             = string.upper
 local tableconcat             = table.concat
-local tablecopy               = table.copy
 local tablesort               = table.sort
-local tabletofile             = table.tofile
 local texiowrite_nl           = texio.write_nl
 local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
@@ -60,18 +57,22 @@ local utf8lower               = unicode.utf8.lower
 local dirglob                 = dir.glob
 local dirmkdirs               = dir.mkdirs
 local filebasename            = file.basename
-local filenameonly            = file.nameonly
-local filedirname             = file.dirname
 local filecollapsepath        = file.collapsepath or file.collapse_path
+local filedirname             = file.dirname
 local fileextname             = file.extname
 local fileiswritable          = file.iswritable
 local filejoin                = file.join
+local filenameonly            = file.nameonly
 local filereplacesuffix       = file.replacesuffix
 local filesplitpath           = file.splitpath or file.split_path
+local lfsisdir                = lfs.isdir
+local lfsisfile               = lfs.isfile
 local stringis_empty          = string.is_empty
 local stringsplit             = string.split
 local stringstrip             = string.strip
 local tableappend             = table.append
+local tablecopy               = table.copy
+local tabletofile             = table.tofile
 local tabletohash             = table.tohash
 
 --- the font loader namespace is “fonts”, same as in Context
@@ -1206,8 +1207,8 @@ do
             return path
         end
 --[[doc--
-    Cygwin used to be treated different from windows and dos.  This
-    special treatment was removed with a patch submitted by Ken Brown.
+    The special treatment for cygwin was removed with a patch submitted
+    by Ken Brown.
     Reference: http://cygwin.com/ml/cygwin/2013-05/msg00006.html
 --doc]]--
 
@@ -1301,12 +1302,12 @@ end
 --- unit -> unit
 read_blacklist = function ()
     local files = {
-        kpselookup("luaotfload-blacklist.cnf", {all=true, format="tex"})
+        kpselookup ("luaotfload-blacklist.cnf",
+                    {all=true, format="tex"})
     }
     local blacklist = { }
     local whitelist = { }
 
-    --- TODO lpegify
     if files and type(files) == "table" then
         for _,v in next, files do
             for line in iolines(v) do
@@ -1331,10 +1332,59 @@ read_blacklist = function ()
     names.blacklist = create_blacklist(blacklist, whitelist)
 end
 
-local font_extensions = { "otf", "ttf", "ttc", "dfont" }
-local font_extensions_set = {}
-for key, value in next, font_extensions do
-   font_extensions_set[value] = true
+local font_extensions     = { "otf", "ttf", "ttc", "dfont" }
+local font_extensions_set = tabletohash (font_extensions)
+local p_font_extensions
+do
+    local extns
+    --tablesort (font_extensions) --- safeguard
+    for i=#font_extensions, 1, -1 do
+        local e = font_extensions[i]
+        if not extns then
+            extns = P(e)
+        else
+            extns = extns + P(e)
+        end
+    end
+    extns = extns * P(-1)
+    p_font_extensions = (1 - extns)^1 * extns
+end
+
+local process_dir_tree
+process_dir_tree = function (acc, dirs)
+    if not next (dirs) then --- done
+        return acc
+    end
+
+    local dir   = dirs[#dirs]
+    dirs[#dirs] = nil
+
+    local newdirs, newfiles = { }, { }
+    local blacklist = names.blacklist
+    for ent in lfsdir (dir) do
+        --- filter right away
+        if ent ~= "." and ent ~= ".." and not blacklist[ent] then
+            local fullpath = dir .. "/" .. ent
+            if lfsisdir (fullpath)
+            and not lpegmatch (p_blacklist, fullpath)
+            then
+                newdirs[#newdirs+1] = fullpath
+            elseif lfsisfile (fullpath) then
+                if lpegmatch (p_font_extensions, stringlower(ent)) then
+                    newfiles[#newfiles+1] = fullpath
+                end
+            end
+        end
+    end
+    return process_dir_tree (tableappend (acc, newfiles),
+                             tableappend (dirs, newdirs))
+end
+
+--- string -> string list
+local find_font_files = function (root)
+    if lfsisdir (root) then
+        return process_dir_tree ({}, { root })
+    end
 end
 
 --[[doc--
@@ -1350,42 +1400,45 @@ end
 --doc]]--
 
 --- string -> dbobj -> dbobj -> bool -> bool -> (int * int)
-local scan_dir = function (dirname, fontnames, newfontnames, dry_run, texmf)
-    if lpegmatch(p_blacklist, dirname) then
+local scan_dir = function (dirname, fontnames, newfontnames,
+                           dry_run, texmf)
+    if lpegmatch (p_blacklist, dirname) then
+        report ("both", 3, "db",
+                "Skipping blacklisted directory %s", dirname)
         --- ignore
         return 0, 0
     end
+    local found = find_font_files (dirname)
+    if not found then
+        report ("both", 3, "db",
+                "No such directory: “%s”; skipping.", dirname)
+        return 0, 0
+    end
+    report ("both", 3, "db", "Scanning directory %s", dirname)
 
-    local n_scanned, n_new = 0, 0   --- total of fonts collected
-    report("both", 3, "db", "Scanning directory %s", dirname)
-    for _,i in next, font_extensions do
-        for _,ext in next, { i, stringupper(i) } do
-            local escapeddir = preescape_path (dirname)
-            local found      = dirglob (stringformat("%s/**.%s$",
-                                                     escapeddir, ext))
-            local n_found    = #found
-            --- note that glob fails silently on broken symlinks, which
-            --- happens sometimes in TeX Live.
-            report("both", 4, "db", "%s '%s' fonts found", n_found, ext)
-            n_scanned = n_scanned + n_found
-            for j=1, n_found do
-                local fullname = found[j]
-                fullname = path_normalize(fullname)
-                local new
-                if dry_run == true then
-                    report("both", 1, "db", "Would have been loading “%s”", fullname)
-                else
-                    report("both", 4, "db", "Loading font “%s”", fullname)
-                    local new = load_font(fullname, fontnames, newfontnames, texmf)
-                    if new == true then
-                        n_new = n_new + 1
-                    end
-                end
+    local n_new = 0   --- total of fonts collected
+    local n_found = #found
+    report ("both", 4, "db", "%d font files detected", n_found)
+    for j=1, n_found do
+        local fullname = found[j]
+        fullname = path_normalize(fullname)
+        local new
+        if dry_run == true then
+            report ("both", 1, "db",
+                    "Would have been loading “%s”", fullname)
+        else
+            report ("both", 4, "db",
+                    "Loading font “%s”", fullname)
+            local new = load_font (fullname, fontnames,
+                                   newfontnames, texmf)
+            if new == true then
+                n_new = n_new + 1
             end
         end
     end
-    report("both", 4, "db", "%d fonts found in '%s'", n_scanned, dirname)
-    return n_scanned, n_new
+
+    report("both", 4, "db", "%d fonts found in '%s'", n_found, dirname)
+    return n_found, n_new
 end
 
 --- dbobj -> dbobj -> bool? -> (int * int)
@@ -1404,7 +1457,6 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
     fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
     if not stringis_empty(fontdirs) then
         for _,d in next, filesplitpath(fontdirs) do
-            report("info", 4, "db", "Entering directory %s", d)
             local found, new = scan_dir(d, fontnames, newfontnames, dry_run, true)
             n_scanned = n_scanned + found
             n_new     = n_new     + new

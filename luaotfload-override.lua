@@ -15,16 +15,22 @@ because we lack a user interface to toggle per-subsystem tracing.
 
 local module_name       = "luaotfload"
 
+local ioopen            = io.open
+local iowrite           = io.write
+local lfsisdir          = lfs.isdir
+local lfsisfile         = lfs.isfile
+local md5sumhexa        = md5.sumhexa
+local osdate            = os.date
+local ostime            = os.time
 local select            = select
 local stringformat      = string.format
+local stringsub         = string.sub
 local tableconcat       = table.concat
+local texio_write_nl    = texio.write_nl
 local texiowrite_nl     = texio.write_nl
+local texio_write       = texio.write
 local texiowrite        = texio.write
 local type              = type
-
-local texio_write_nl    = texio.write_nl
-local texio_write       = texio.write
-local iowrite           = io.write
 
 --[[doc--
 We recreate the verbosity levels previously implemented in font-nms:
@@ -62,9 +68,67 @@ logs.getloglevel    = get_loglevel
 logs.get_loglevel   = get_loglevel
 logs.get_log_level  = get_loglevel
 
-local set_logout = function (s)
+local writeln --- scope so we can change it
+
+local log_msg = [[
+logging output redirected to %s
+to monitor the progress run "tail -f %s" in another terminal
+]]
+
+local tmppath = os.getenv "TMPDIR" or "/tmp"
+
+local choose_logfile = function ( )
+    if lfsisdir (tmppath) then
+        local fname
+        repeat --- ensure that file of that name doesn’t exist
+            fname = tmppath .. "/luaotfload-log-"
+                            .. stringsub (md5sumhexa (ostime ()), 1, 8)
+        until not lfsisfile (fname)
+        iowrite (stringformat (log_msg, fname, fname))
+        return ioopen (fname, "w")
+    end
+    --- missing /tmp
+    return false
+end
+
+local set_logout = function (s, finalizers)
     if s == "stdout" then
         logout = "term"
+    elseif s == "file" then --- inject custom logger
+        local chan = choose_logfile ()
+        chan:write (stringformat ("logging initiated at %s",
+                                  osdate ("%F %T", ostime ())))
+        local writefile = function (...)
+            if select ("#", ...) == 2 then
+                chan:write (select (2, ...))
+            else
+                chan:write (select (1, ...))
+            end
+        end
+        local writefile_nl= function (...)
+            chan:write "\n"
+            if select ("#", ...) == 2 then
+                chan:write (select (2, ...))
+            else
+                chan:write (select (1, ...))
+            end
+        end
+
+        local writeln_orig = writeln
+
+        texiowrite    = writefile
+        texiowrite_nl = writefile_nl
+        writeln       = writefile_nl
+
+        finalizers[#finalizers+1] = function ()
+            chan:write (stringformat ("\nlogging finished at %s\n",
+                                      osdate ("%F %T", ostime ())))
+            chan:close ()
+            texiowrite    = texio.write
+            texiowrite_nl = texio.write_nl
+            writeln       = writeln_orig
+        end
+        return finalizers
     --else --- remains “log”
     end
 end
@@ -92,7 +156,6 @@ end
 io.stdout:setvbuf "no"
 io.stderr:setvbuf "no"
 
-local writeln
 if tex and (tex.jobname or tex.formatname) then
     --- TeX
     writeln = texiowrite_nl
@@ -106,7 +169,10 @@ end
 
 stdout = function (category, ...)
     local res = { module_name, "|", category, ":" }
-    if select("#", ...) == 1 then
+    local nargs = select("#", ...)
+    if nargs == 0 then
+        writeln (tableconcat ({...}))
+    elseif nargs == 1 then
         res[#res+1] = select(1, ...) -- around 30% faster than unpack()
     else
         res[#res+1] = stringformat(...)
@@ -152,7 +218,7 @@ local names_report = function (mode, lvl, ...)
     if loglevel >= lvl then
         if mode == "log" then
             log (...)
-        elseif mode == "both" then
+        elseif mode == "both" and log ~= "stdout" then
             log (...)
             stdout (...)
         else

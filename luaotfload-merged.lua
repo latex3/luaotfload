@@ -3044,10 +3044,10 @@ if not caches.namespace or caches.namespace=="" or caches.namespace=="context" t
 end
 do
   local cachepaths=kpse.expand_var('$TEXMFCACHE') or ""
-  if cachepaths=="" then
+  if cachepaths=="" or cachepaths == "$TEXMFCACHE" then
     cachepaths=kpse.expand_var('$TEXMFVAR') or ""
   end
-  if cachepaths=="" then
+  if cachepaths=="" or cachepaths == "$TEXMFVAR" then
     cachepaths=kpse.expand_var('$VARTEXMF') or ""
   end
   if cachepaths=="" then
@@ -3143,7 +3143,7 @@ function caches.savedata(path,name,data)
   local luaname,lucname=makefullname(path,name)
   if luaname then
     texio.write(string.format("(save: %s)",luaname))
-    table.tofile(luaname,data,true,{ reduce=true })
+    table.tofile(luaname,data,true,{ reduce=false })
     if lucname and type(caches.compile)=="function" then
       os.remove(lucname) 
       texio.write(string.format("(save: %s)",lucname))

@@ -1032,7 +1032,7 @@ local feature_expr      = ws * Cg(assignment + switch) * ws
 local option            = feature_expr
 local feature_list      = Cf(Ct""
                            * option
-                           * (featuresep * option)^0
+                           * (featuresep * option^-1)^0
                            , rawset)
                         * featuresep^-1
 

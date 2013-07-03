@@ -1,7 +1,7 @@
 Change History
 --------------
 
-2013/xx/xx, luaotfload v2.3:
+2013/07/03, luaotfload v2.3:
     * New experimental lookups: ``kpse`` (kpathsea), ``my`` (callback)
     * Precedence of texmf over system fonts can be requested
       using the ``--prefer-texmf`` option of luaotfload-tool

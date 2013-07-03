@@ -1460,8 +1460,8 @@ and the derived files
 %<*lua>
 % \fi
 %    \begin{macrocode}
-luaotfload                  = luaotfload or {}
-local luaotfload            = luaotfload
+luaotfload                        = luaotfload or {}
+local luaotfload                  = luaotfload
 
 config                            = config or { }
 config.luaotfload                 = config.luaotfload or { }
@@ -1472,7 +1472,9 @@ config.luaotfload.compatibility   = config.luaotfload.compatibility    or false
 config.luaotfload.loglevel        = config.luaotfload.loglevel         or 1
 config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_linebreak_filter"
 config.luaotfload.prioritize      = config.luaotfload.prioritize       or "sys"
---luaotfload.prefer_merge     = config.luaotfload.prefer_merge or true
+config.luaotfload.names_dir       = config.luaotfload.names_dir        or "names"
+config.luaotfload.cache_dir       = config.luaotfload.cache_dir        or "fonts"
+config.luaotfload.names_file      = config.luaotfload.names_file       or "luaotfload-names.lua"
 
 luaotfload.module = {
     name          = "luaotfload",

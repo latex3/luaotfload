@@ -80,9 +80,13 @@ After support for querying the database was added, the latter appeared
 to be the more appropriate.
 --doc]]--
 
-config              = config or { }
-local config        = config
-config.luaotfload   = config.luaotfload or { }
+config                        = config or { }
+local config                  = config
+config.luaotfload             = config.luaotfload or { }
+config.luaotfload.names_dir   = config.luaotfload.names_dir or "names"
+config.luaotfload.cache_dir   = config.luaotfload.cache_dir or "fonts"
+config.luaotfload.names_file  = config.luaotfload.names_file
+                             or "luaotfload-names.lua"
 
 do -- we don’t have file.basename and the likes yet, so inline parser ftw
     local slash        = P"/"
@@ -109,19 +113,6 @@ config.lualibs.load_extended    = false
 
 require "lualibs"
 
---- prepare directories: the cache function in Luatex-Fonts
---- checks for writable directory only on startup, so everything
---- has to be laid out before we load basics-gen
-
-local cachepath = kpse.expand_var "$TEXMFVAR"
-if not lfs.isdir(cachepath) then
-    dir.mkdirs(cachepath)
-    if not lfs.isdir(cachepath) then
-        texiowrite_nl(stringformat(
-            "ERROR could not create directory %s", cachepath))
-    end
-end
-
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
 \luafunction{texio.*} library; too much for our taste.
@@ -144,8 +135,11 @@ local names    = fonts.names
 
 local sanitize_string = names.sanitize_string
 
-local db_src_out = names.path.dir.."/"..names.path.basename
-local db_bin_out = file.replacesuffix(db_src_out, "luc")
+--local db_src_out = names.path.dir.."/"..names.path.basename
+local names_plain = file.join
+    (caches.getwritablepath (config.luaotfload.names_dir),
+     config.luaotfload.names_file)
+local names_bin   = file.replacesuffix (names_plain, "luc")
 
 local help_messages = {
     ["luaotfload-tool"] = [[
@@ -205,6 +199,9 @@ The font database will be saved to
   --cache=<directive>          operate on font cache, where <directive> is
                                “show”, “purge”, or “erase”
 
+The font cache will be written to
+   %s
+
 ]],
     mkluatexfontdb = [[
 
@@ -235,8 +232,10 @@ local help_msg = function ( )
                   or help_messages["luaotfload-tool"]
     texiowrite_nl(stringformat(template,
                                config.luaotfload.self,
-                               db_src_out,
-                               db_bin_out))
+                               names_plain,
+                               names_bin,
+                               caches.getwritablepath
+                                (config.luaotfload.cache_dir)))
 end
 
 local version_msg = function ( )

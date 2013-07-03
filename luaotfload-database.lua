@@ -97,7 +97,8 @@ names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 names.path           = {
     dir              = "",                      --- db and cache directory
-    basename         = "luaotfload-names.lua",  --- db file name
+    basename         = config.luaotfload.names_file
+                    or "luaotfload-names.lua",
     path             = "",                      --- full path to db file
     lookup_basename  = "luaotfload-lookup-cache.lua", --- cache file name
     lookup_path      = "",                            --- cache full path
@@ -108,7 +109,7 @@ names.path           = {
 -- uses TEXMFCACHE or TEXMFVAR as starting points.
 local writable_path
 if caches then
-    writable_path = caches.getwritablepath("names","")
+    writable_path = caches.getwritablepath "names"
     if not writable_path then
         luaotfload.error("Impossible to find a suitable writeable cache...")
     end
@@ -2047,21 +2048,20 @@ end
 local getwritablecachepath = function ( )
     --- fonts.handlers.otf doesn’t exist outside a Luatex run,
     --- so we have to improvise
-    local writable = caches.getwritablepath ()
+    local writable = caches.getwritablepath
+                        (config.luaotfload.cache_dir)
     if writable then
-        writable = writable .. "/fonts"
-        if lfsisdir (writable) then
-            return writable
-        end
+        return writable
     end
 end
 
 local getreadablecachepaths = function ( )
-    local readables = caches.getreadablepaths ()
+    local readables = caches.getreadablepaths
+                        (config.luaotfload.cache_dir)
     local result    = { }
     if readables then
         for i=1, #readables do
-            local readable = readables[i] .. "/fonts"
+            local readable = readables[i]
             if lfsisdir (readable) then
                 result[#result+1] = readable
             end

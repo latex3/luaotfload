@@ -151,13 +151,13 @@ do
 
     -- quite like tex live or so
 
-    if cachepaths == "" then
+    if cachepaths == "$TEXMFCACHE" then
         cachepaths = kpse.expand_var('$TEXMFVAR') or ""
     end
 
     -- this also happened to be used
 
-    if cachepaths == "" then
+    if cachepaths == "$TEXMFVAR" then
         cachepaths = kpse.expand_var('$VARTEXMF') or ""
     end
 

@@ -3044,10 +3044,10 @@ if not caches.namespace or caches.namespace=="" or caches.namespace=="context" t
 end
 do
   local cachepaths=kpse.expand_var('$TEXMFCACHE') or ""
-  if cachepaths=="" then
+  if cachepaths=="" or cachepaths == "$TEXMFCACHE" then
     cachepaths=kpse.expand_var('$TEXMFVAR') or ""
   end
-  if cachepaths=="" then
+  if cachepaths=="" or cachepaths == "$TEXMFVAR" then
     cachepaths=kpse.expand_var('$VARTEXMF') or ""
   end
   if cachepaths=="" then

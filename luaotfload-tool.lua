@@ -36,11 +36,19 @@ see the luaotfload documentation for more info. Report bugs to
 
 --doc]]--
 
-kpse.set_program_name"luatex"
+kpse.set_program_name "luatex"
 
-if _G.getfenv then
-    local oldscript = kpse.find_file "luaotfload-legacy-tool.lua"
-    return require(oldscript)
+local runtime
+if _G.getfenv ~= nil then -- 5.1 or LJ
+    if _G.jit ~= nil then
+        runtime = { "jit", jit.version }
+    else
+        runtime = { "stock", _VERSION }
+        local oldscript = kpse.find_file "luaotfload-legacy-tool.lua"
+        return require (oldscript)
+    end
+else -- 5.2
+    runtime = { "stock", _VERSION }
 end
 
 local stringexplode   = string.explode

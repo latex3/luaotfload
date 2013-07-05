@@ -39,7 +39,7 @@ see the luaotfload documentation for more info. Report bugs to
 kpse.set_program_name"luatex"
 
 if _G.getfenv then
-    local oldscript = kpse.find_file"luaotfload-legacy-tool.lua"
+    local oldscript = kpse.find_file "luaotfload-legacy-tool.lua"
     return require(oldscript)
 end
 
@@ -136,8 +136,8 @@ local names    = fonts.names
 local sanitize_string = names.sanitize_string
 
 --local db_src_out = names.path.dir.."/"..names.path.basename
-local names_plain = file.join
-    (caches.getwritablepath (config.luaotfload.names_dir),
+local names_plain = file.join (
+     caches.getwritablepath (config.luaotfload.names_dir),
      config.luaotfload.names_file)
 local names_bin   = file.replacesuffix (names_plain, "luc")
 
@@ -234,8 +234,8 @@ local help_msg = function ( )
                                config.luaotfload.self,
                                names_plain,
                                names_bin,
-                               caches.getwritablepath
-                                (config.luaotfload.cache_dir)))
+                               caches.getwritablepath (
+                                 config.luaotfload.cache_dir)))
 end
 
 local version_msg = function ( )

@@ -54,6 +54,7 @@ local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
 
 --- these come from Lualibs/Context
+local getwritablepath         = caches.getwritablepath
 local filebasename            = file.basename
 local filecollapsepath        = file.collapsepath or file.collapse_path
 local filedirname             = file.dirname
@@ -99,9 +100,9 @@ names.path           = {
     dir              = "",                      --- db and cache directory
     basename         = config.luaotfload.names_file
                     or "luaotfload-names.lua",
-    path             = "",                      --- full path to db file
+    index            = "",                      --- full path to db file
     lookup_basename  = "luaotfload-lookup-cache.lua", --- cache file name
-    lookup_path      = "",                            --- cache full path
+    lookups          = "",                            --- cache full path
 }
 
 -- We use the cache.* of ConTeXt (see luat-basics-gen), we can
@@ -109,13 +110,15 @@ names.path           = {
 -- uses TEXMFCACHE or TEXMFVAR as starting points.
 local writable_path
 if caches then
-    writable_path = caches.getwritablepath "names"
+    writable_path = getwritablepath ("names", "")
     if not writable_path then
-        luaotfload.error("Impossible to find a suitable writeable cache...")
+        luaotfload.error
+            ("Impossible to find a suitable writeable cache...")
     end
-    names.path.dir          = writable_path
-    names.path.path         = filejoin(writable_path, names.path.basename)
-    names.path.lookup_path  = filejoin(writable_path, names.path.lookup_basename)
+    names.path.dir     = writable_path
+    names.path.index   = getwritablepath ("names", names.path.basename)
+    names.path.lookups = getwritablepath ("names",
+                                          names.path.lookup_basename)
 else --- running as script, inject some dummies
     caches = { }
     logs   = { report = function () end }
@@ -330,7 +333,7 @@ local fuzzy_limit = 1 --- display closest only
 --- bool? -> dbobj
 load_names = function (dry_run)
     local starttime = os.gettimeofday()
-    local foundname, data = load_lua_file(names.path.path)
+    local foundname, data = load_lua_file(names.path.index)
 
     if data then
         report("both", 2, "db",
@@ -352,7 +355,7 @@ load_names = function (dry_run)
         report("both", 0, "db",
             [[Font names database not found, generating new one.]])
         report("both", 0, "db",
-             [[This can take several minutes; please be patient.]])
+            [[This can take several minutes; please be patient.]])
         data = update_names(fontnames_init(false), nil, dry_run)
         local success = save_names(data)
         if not success then
@@ -365,7 +368,7 @@ end
 
 --- unit -> dbobj
 load_lookups = function ( )
-    local foundname, data = load_lua_file(names.path.lookup_path)
+    local foundname, data = load_lua_file(names.path.lookups)
     if data then
         report("both", 3, "cache",
                "Lookup cache loaded (%s)", foundname)
@@ -1930,12 +1933,12 @@ save_lookups = function ( )
     local lookups  = names.lookups
     local path     = ensure_names_path()
     if fileiswritable(path) then
-        local luaname, lucname = make_savenames(names.path.lookup_path)
+        local luaname, lucname = make_savenames(names.path.lookups)
         if luaname then
             tabletofile(luaname, lookups, true)
             if lucname and type(caches.compile) == "function" then
                 os.remove(lucname)
-                caches.compile(lookups, luaname, lucname)
+                print("\ncompile>", caches.compile(lookups, luaname, lucname))
                 report("both", 3, "cache", "Lookup cache saved")
                 return true
             end
@@ -1950,8 +1953,8 @@ end
 save_names = function (fontnames)
     if not fontnames then fontnames = names.data end
     local path = ensure_names_path()
-    if fileiswritable(path) then
-        local luaname, lucname = make_savenames(names.path.path)
+    if fileiswritable (path) then
+        local luaname, lucname = make_savenames(names.path.index)
         if luaname then
             --tabletofile(luaname, fontnames, true, { reduce=true })
             tabletofile(luaname, fontnames, true)
@@ -1964,6 +1967,8 @@ save_names = function (fontnames)
                 return true
             end
         end
+    --else
+        --report("both", 0, "db", "Failed to save names database")
     end
     report("both", 0, "db", "Failed to save names database")
     return false
@@ -2048,8 +2053,7 @@ end
 local getwritablecachepath = function ( )
     --- fonts.handlers.otf doesn’t exist outside a Luatex run,
     --- so we have to improvise
-    local writable = caches.getwritablepath
-                        (config.luaotfload.cache_dir)
+    local writable = getwritablepath (config.luaotfload.cache_dir)
     if writable then
         return writable
     end

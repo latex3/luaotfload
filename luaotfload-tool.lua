@@ -248,8 +248,14 @@ end
 
 local version_msg = function ( )
     texiowrite_nl(stringformat(
-        "%s version %s, database version %s.\n",
-        config.luaotfload.self, version, names.version))
+        "%s version “%s”\n" .. -- no \z due to 5.1 compatibility
+        "database version “%s”\n" ..
+        "Lua interpreter: %s; version “%s”\n",
+        config.luaotfload.self,
+        version,
+        names.version,
+        runtime[1],
+        runtime[2]))
 end
 
 

@@ -93,7 +93,7 @@ local config                  = config
 config.luaotfload             = config.luaotfload or { }
 config.luaotfload.names_dir   = config.luaotfload.names_dir or "names"
 config.luaotfload.cache_dir   = config.luaotfload.cache_dir or "fonts"
-config.luaotfload.names_file  = config.luaotfload.names_file
+config.luaotfload.index_file  = config.luaotfload.index_file
                              or "luaotfload-names.lua"
 
 do -- we don’t have file.basename and the likes yet, so inline parser ftw
@@ -143,11 +143,9 @@ local names    = fonts.names
 
 local sanitize_string = names.sanitize_string
 
---local db_src_out = names.path.dir.."/"..names.path.basename
-local names_plain = file.join (
-     caches.getwritablepath (config.luaotfload.names_dir),
-     config.luaotfload.names_file)
-local names_bin   = file.replacesuffix (names_plain, "luc")
+local pathdata    = names.path
+local names_plain = pathdata.lookups.lua
+local names_bin   = pathdata.lookups.luc
 
 local help_messages = {
     ["luaotfload-tool"] = [[

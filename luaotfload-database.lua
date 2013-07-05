@@ -27,6 +27,7 @@ local require                 = require
 local tonumber                = tonumber
 local unpack                  = table.unpack
 
+
 local fontloaderinfo          = fontloader.info
 local fontloaderopen          = fontloader.open
 local iolines                 = io.lines
@@ -40,6 +41,7 @@ local lfsattributes           = lfs.attributes
 local lfsdir                  = lfs.dir
 local mathabs                 = math.abs
 local mathmin                 = math.min
+local osremove                = os.remove
 local stringfind              = string.find
 local stringformat            = string.format
 local stringgmatch            = string.gmatch
@@ -52,7 +54,6 @@ local tablesort               = table.sort
 local texiowrite_nl           = texio.write_nl
 local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
-
 --- these come from Lualibs/Context
 local getwritablepath         = caches.getwritablepath
 local filebasename            = file.basename
@@ -96,29 +97,57 @@ end
 names.version        = 2.207
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
-names.path           = {
-    dir              = "",                      --- db and cache directory
-    basename         = config.luaotfload.names_file
+
+names.path           = { index = { }, lookups = { } }
+names.path.globals   = {
+    prefix           = "", --- writable_path/names_dir
+    names_dir        = config.luaotfload.names_dir or "names",
+    index_file       = config.luaotfload.index_file
                     or "luaotfload-names.lua",
-    index            = "",                      --- full path to db file
-    lookup_basename  = "luaotfload-lookup-cache.lua", --- cache file name
-    lookups          = "",                            --- cache full path
+    lookups_file     = "luaotfload-lookup-cache.lua",
 }
 
--- We use the cache.* of ConTeXt (see luat-basics-gen), we can
--- use it safely (all checks and directory creations are already done). It
--- uses TEXMFCACHE or TEXMFVAR as starting points.
-local writable_path
+--- string -> (string * string)
+local make_luanames = function (path)
+    return filereplacesuffix(path, "lua"),
+           filereplacesuffix(path, "luc")
+end
+
+local report = logs.names_report
+
+--[[doc--
+    We use the functions in the cache.* namespace that come with the
+    fontloader (see luat-basics-gen). it’s safe to use for the most part
+    since most checks and directory creations are already done. It
+    uses TEXMFCACHE or TEXMFVAR as starting points.
+
+    There is one quirk, though: ``getwritablepath()`` will always
+    assume that files in subdirectories of the cache tree are writable.
+    It gives no feedback at all if it fails to open a file in write
+    mode. This may cause trouble when the index or lookup cache were
+    created by different user.
+--doc]]--
+
 if caches then
-    writable_path = getwritablepath ("names", "")
-    if not writable_path then
+    local globals   = names.path.globals
+    local names_dir = globals.names_dir
+
+    prefix = getwritablepath (names_dir, "")
+    if not prefix then
         luaotfload.error
             ("Impossible to find a suitable writeable cache...")
+    else
+        report ("log", 0, "db",
+                "root cache directory is " .. prefix)
     end
-    names.path.dir     = writable_path
-    names.path.index   = getwritablepath ("names", names.path.basename)
-    names.path.lookups = getwritablepath ("names",
-                                          names.path.lookup_basename)
+
+    globals.prefix     = prefix
+    local lookups      = names.path.lookups
+    local index        = names.path.index
+    local lookups_file = filejoin (prefix, globals.lookups_file)
+    local index_file   = filejoin (prefix, globals.index_file)
+    lookups.lua, lookups.luc = make_luanames (lookups_file)
+    index.lua, index.luc     = make_luanames (index_file)
 else --- running as script, inject some dummies
     caches = { }
     logs   = { report = function () end }
@@ -128,9 +157,6 @@ end
 --[[doc--
 Auxiliary functions
 --doc]]--
-
-
-local report = logs.names_report
 
 --- string -> string
 local sanitize_string = function (str)
@@ -270,12 +296,6 @@ local fontnames_init = function (keep_cache) --- returns dbobj
     }
 end
 
---- string -> (string * string)
-local make_savenames = function (path)
-    return filereplacesuffix(path, "lua"),
-           filereplacesuffix(path, "luc")
-end
-
 --- When loading a lua file we try its binary complement first, which
 --- is assumed to be located at an identical path, carrying the suffix
 --- .luc.
@@ -333,7 +353,7 @@ local fuzzy_limit = 1 --- display closest only
 --- bool? -> dbobj
 load_names = function (dry_run)
     local starttime = os.gettimeofday()
-    local foundname, data = load_lua_file(names.path.index)
+    local foundname, data = load_lua_file(names.path.index.lua)
 
     if data then
         report("both", 2, "db",
@@ -368,7 +388,7 @@ end
 
 --- unit -> dbobj
 load_lookups = function ( )
-    local foundname, data = load_lua_file(names.path.lookups)
+    local foundname, data = load_lua_file(names.path.lookups.lua)
     if data then
         report("both", 3, "cache",
                "Lookup cache loaded (%s)", foundname)
@@ -1912,15 +1932,6 @@ update_names = function (fontnames, force, dry_run)
     return newfontnames
 end
 
---- unit -> string
-local ensure_names_path = function ( )
-    local path = names.path.dir
-    if not lfsisdir(path) then
-        lfsmkdirs(path)
-    end
-    return path
-end
-
 --- The lookup cache is an experimental feature of version 2.2;
 --- instead of incorporating it into the database it gets its own
 --- file. As we update it after every single addition this saves us
@@ -1928,23 +1939,28 @@ end
 
 --- unit -> bool
 save_lookups = function ( )
-    ---- this is boilerplate and should be refactored into something
-    ---- usable by both the db and the cache writers
-    local lookups  = names.lookups
-    local path     = ensure_names_path()
-    if fileiswritable(path) then
-        local luaname, lucname = make_savenames(names.path.lookups)
-        if luaname then
-            tabletofile(luaname, lookups, true)
-            if lucname and type(caches.compile) == "function" then
-                os.remove(lucname)
-                print("\ncompile>", caches.compile(lookups, luaname, lucname))
-                report("both", 3, "cache", "Lookup cache saved")
-                return true
-            end
+    local lookups = names.lookups
+    local path    = names.path.lookups
+    local luaname, lucname = path.lua, path.luc
+    if fileiswritable (luaname) and fileiswritable (lucname) then
+        tabletofile (luaname, lookups, true)
+        osremove (lucname)
+        caches.compile (lookups, luaname, lucname)
+        --- double check ...
+        if lfsisfile (luaname) and lfsisfile (luaname) then
+            report ("both", 3, "cache", "Lookup cache saved")
+            return true
         end
+        report ("info", 0, "cache", "Could not compile lookup cache")
+        return false
     end
-    report("info", 0, "cache", "Could not write lookup cache")
+    report ("info", 0, "cache", "Lookup cache file not writable")
+    if not fileiswritable (luaname) then
+        report ("info", 0, "cache", "failed to write %s", luaname)
+    end
+    if not fileiswritable (lucname) then
+        report ("info", 0, "cache", "failed to write %s", lucname)
+    end
     return false
 end
 
@@ -1952,25 +1968,28 @@ end
 --- dbobj? -> bool
 save_names = function (fontnames)
     if not fontnames then fontnames = names.data end
-    local path = ensure_names_path()
-    if fileiswritable (path) then
-        local luaname, lucname = make_savenames(names.path.index)
-        if luaname then
-            --tabletofile(luaname, fontnames, true, { reduce=true })
-            tabletofile(luaname, fontnames, true)
-            if lucname and type(caches.compile) == "function" then
-                os.remove(lucname)
-                caches.compile(fontnames, luaname, lucname)
-                report("info", 1, "db", "Font names database saved")
-                report("info", 3, "db", "Text: " .. luaname)
-                report("info", 3, "db", "Byte: " .. lucname)
-                return true
-            end
+    local path = names.path.index
+    local luaname, lucname = path.lua, path.luc
+    if fileiswritable (luaname) and fileiswritable (lucname) then
+        tabletofile (luaname, fontnames, true)
+        osremove (lucname)
+        caches.compile (fontnames, luaname, lucname)
+        if lfsisfile (luaname) and lfsisfile (luaname) then
+            report ("info", 1, "db", "Font index saved")
+            report ("info", 3, "db", "Text: " .. luaname)
+            report ("info", 3, "db", "Byte: " .. lucname)
+            return true
         end
-    --else
-        --report("both", 0, "db", "Failed to save names database")
+        report ("info", 0, "db", "Could not compile font index")
+        return false
     end
-    report("both", 0, "db", "Failed to save names database")
+    report ("info", 0, "db", "Index file not writable")
+    if not fileiswritable (luaname) then
+        report ("info", 0, "db", "failed to write %s", luaname)
+    end
+    if not fileiswritable (lucname) then
+        report ("info", 0, "db", "failed to write %s", lucname)
+    end
     return false
 end
 
@@ -2004,7 +2023,7 @@ local purge_from_cache = function (category, path, list, all)
         if string.find(filename,"luatex%-cache") then -- safeguard
             if all then
                 report("info", 5, "cache", "removing %s", filename)
-                os.remove(filename)
+                osremove(filename)
                 n = n + 1
             else
                 local suffix = file.suffix(filename)
@@ -2013,7 +2032,7 @@ local purge_from_cache = function (category, path, list, all)
                         filename, "lua", "luc")
                     if lfs.isfile(checkname) then
                         report("info", 5, "cache", "Removing %s", filename)
-                        os.remove(filename)
+                        osremove(filename)
                         n = n + 1
                     end
                 end

@@ -36,11 +36,19 @@ see the luaotfload documentation for more info. Report bugs to
 
 --doc]]--
 
-kpse.set_program_name"luatex"
+kpse.set_program_name "luatex"
 
-if _G.getfenv then
-    local oldscript = kpse.find_file"luaotfload-legacy-tool.lua"
-    return require(oldscript)
+local runtime
+if _G.getfenv ~= nil then -- 5.1 or LJ
+    if _G.jit ~= nil then
+        runtime = { "jit", jit.version }
+    else
+        runtime = { "stock", _VERSION }
+        local oldscript = kpse.find_file "luaotfload-legacy-tool.lua"
+        return require (oldscript)
+    end
+else -- 5.2
+    runtime = { "stock", _VERSION }
 end
 
 local stringexplode   = string.explode
@@ -136,8 +144,8 @@ local names    = fonts.names
 local sanitize_string = names.sanitize_string
 
 --local db_src_out = names.path.dir.."/"..names.path.basename
-local names_plain = file.join
-    (caches.getwritablepath (config.luaotfload.names_dir),
+local names_plain = file.join (
+     caches.getwritablepath (config.luaotfload.names_dir),
      config.luaotfload.names_file)
 local names_bin   = file.replacesuffix (names_plain, "luc")
 
@@ -234,14 +242,20 @@ local help_msg = function ( )
                                config.luaotfload.self,
                                names_plain,
                                names_bin,
-                               caches.getwritablepath
-                                (config.luaotfload.cache_dir)))
+                               caches.getwritablepath (
+                                 config.luaotfload.cache_dir)))
 end
 
 local version_msg = function ( )
     texiowrite_nl(stringformat(
-        "%s version %s, database version %s.\n",
-        config.luaotfload.self, version, names.version))
+        "%s version “%s”\n" .. -- no \z due to 5.1 compatibility
+        "database version “%s”\n" ..
+        "Lua interpreter: %s; version “%s”\n",
+        config.luaotfload.self,
+        version,
+        names.version,
+        runtime[1],
+        runtime[2]))
 end
 
 

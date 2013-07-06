@@ -1947,7 +1947,7 @@ save_lookups = function ( )
         osremove (lucname)
         caches.compile (lookups, luaname, lucname)
         --- double check ...
-        if lfsisfile (luaname) and lfsisfile (luaname) then
+        if lfsisfile (luaname) and lfsisfile (lucname) then
             report ("both", 3, "cache", "Lookup cache saved")
             return true
         end
@@ -1956,10 +1956,10 @@ save_lookups = function ( )
     end
     report ("info", 0, "cache", "Lookup cache file not writable")
     if not fileiswritable (luaname) then
-        report ("info", 0, "cache", "failed to write %s", luaname)
+        report ("info", 0, "cache", "Failed to write %s", luaname)
     end
     if not fileiswritable (lucname) then
-        report ("info", 0, "cache", "failed to write %s", lucname)
+        report ("info", 0, "cache", "Failed to write %s", lucname)
     end
     return false
 end
@@ -1974,7 +1974,7 @@ save_names = function (fontnames)
         tabletofile (luaname, fontnames, true)
         osremove (lucname)
         caches.compile (fontnames, luaname, lucname)
-        if lfsisfile (luaname) and lfsisfile (luaname) then
+        if lfsisfile (luaname) and lfsisfile (lucname) then
             report ("info", 1, "db", "Font index saved")
             report ("info", 3, "db", "Text: " .. luaname)
             report ("info", 3, "db", "Byte: " .. lucname)
@@ -1985,10 +1985,10 @@ save_names = function (fontnames)
     end
     report ("info", 0, "db", "Index file not writable")
     if not fileiswritable (luaname) then
-        report ("info", 0, "db", "failed to write %s", luaname)
+        report ("info", 0, "db", "Failed to write %s", luaname)
     end
     if not fileiswritable (lucname) then
-        report ("info", 0, "db", "failed to write %s", lucname)
+        report ("info", 0, "db", "Failed to write %s", lucname)
     end
     return false
 end

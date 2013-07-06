@@ -143,9 +143,9 @@ local names    = fonts.names
 
 local sanitize_string = names.sanitize_string
 
-local pathdata    = names.path
-local names_plain = pathdata.lookups.lua
-local names_bin   = pathdata.lookups.luc
+local pathdata      = names.path
+local names_plain   = pathdata.index.lua
+local names_bin     = pathdata.index.luc
 
 local help_messages = {
     ["luaotfload-tool"] = [[

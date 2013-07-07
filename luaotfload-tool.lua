@@ -26,6 +26,8 @@ see the luaotfload documentation for more info. Report bugs to
 
 --doc]]--
 
+kpse.set_program_name "luatex"
+
 --[[doc--
 
     We test for Lua 5.1 by means of capability detection to see if
@@ -36,21 +38,7 @@ see the luaotfload documentation for more info. Report bugs to
 
 --doc]]--
 
-kpse.set_program_name "luatex"
-
-local runtime
-if _G.getfenv ~= nil then -- 5.1 or LJ
-    if _G.jit ~= nil then
-        runtime = { "jit", jit.version }
-    else
-        runtime = { "stock", _VERSION }
-        local oldscript = kpse.find_file "luaotfload-legacy-tool.lua"
-        return require (oldscript)
-    end
-else -- 5.2
-    runtime = { "stock", _VERSION }
-end
-
+local md5sumhexa      = md5.sumhexa
 local stringexplode   = string.explode
 local stringformat    = string.format
 local stringlower     = string.lower
@@ -58,12 +46,27 @@ local stringrep       = string.rep
 local tableconcat     = table.concat
 local texiowrite_nl   = texio.write_nl
 local texiowrite      = texio.write
+local kpsefind_file   = kpse.find_file
+
+local runtime
+if _G.getfenv ~= nil then -- 5.1 or LJ
+    if _G.jit ~= nil then
+        runtime = { "jit", jit.version }
+    else
+        runtime = { "stock", _VERSION }
+        local oldscript = kpsefind_file "luaotfload-legacy-tool.lua"
+        return require (oldscript)
+    end
+else -- 5.2
+    runtime = { "stock", _VERSION }
+end
+
 
 local C, Ct, P, S  = lpeg.C, lpeg.Ct, lpeg.P, lpeg.S
 local lpegmatch    = lpeg.match
 
 local loader_file = "luatexbase.loader.lua"
-local loader_path = assert(kpse.find_file(loader_file, "lua"),
+local loader_path = assert(kpsefind_file(loader_file, "lua"),
                            "File '"..loader_file.."' not found")
 
 
@@ -120,6 +123,8 @@ config.lualibs.prefer_merged    = true
 config.lualibs.load_extended    = false
 
 require "lualibs"
+
+local ioloaddata = io.loaddata
 
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
@@ -646,8 +651,9 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel", "help",     "version", "blacklist", "cache",
-    "flush",    "generate", "list",    "query",
+    "loglevel",  "help",  "version", "diagnose",
+    "blacklist", "cache", "flush",   "generate",
+    "list",      "query",
 }
 local action_pending  = table.tohash(action_sequence, false)
 
@@ -913,6 +919,87 @@ actions.list = function (job)
     return true, true
 end
 
+do
+    local hash_list = "luaotfload-files"
+
+    local out = function (...)
+        logs.names_report (false, 0, "diagnose", ...)
+    end
+
+    local verify_files = function (errcnt)
+        out ("Loading file hashes.")
+        local hashes  = require (hash_list)
+        if not hashes then
+            out ("Testing %d files for integrity.", nhashes)
+            return 1/0
+        end
+        local nhashes = #hashes
+        out ("Testing %d files for integrity.", nhashes)
+        for i = 1, nhashes do
+            local fname, canonicalsum = unpack (hashes[i])
+            local location = kpsefind_file (fname)
+            if not location then
+                errcnt = errcnt + 1
+                out ("FAILED: file %d missing.", fname)
+            else
+                out ("File: %s.", location)
+                local raw = ioloaddata (location)
+                if not raw then
+                    errcnt = errcnt + 1
+                    out ("FAILED: file %d not readable.", fname)
+                else
+                    local sum = md5sumhexa (raw)
+                    if sum ~= canonicalsum then
+                        errcnt = errcnt + 1
+                        out ("FAILED: checksum mismatch for file %s.",
+                             fname)
+                        out ("Expected %s, got %s.", canonicalsum, sum)
+                    else
+                        out ("Ok, %s passed.", fname)
+                    end
+                end
+            end
+        end
+        return errcnt
+    end
+
+    actions.diagnose = function (job)
+        local errcnt = 0
+        errcnt = verify_files (errcnt)
+
+        if errcnt == 0 then --> success
+            out ("Everything appears to be in order, \z
+                  you may sleep well.")
+            return true, false
+        else
+            out (     [[===============================================
+                                            WARNING
+                        ===============================================
+
+                        The diagnostic detected %d errors.
+
+                        This version of luaotfload may have been
+                        tampered with. Modified versions of the
+                        luaotfload source are unsupported. Read the log
+                        carefully and get a clean version from CTAN or
+                        github:
+
+                            × http://ctan.org/tex-archive/macros/luatex/generic/luaotfload
+                            × https://github.com/lualatex/luaotfload/releases
+
+                        If you are uncertain as to how to proceed, then
+                        ask on the lualatex mailing list:
+
+                            http://www.tug.org/mailman/listinfo/lualatex-dev
+
+                        ===============================================
+]],
+                errcnt)
+        end
+        return false, false
+    end
+end
+
 --- stuff to be carried out prior to exit
 
 local finalizers = { }
@@ -952,6 +1039,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
     local long_options = {
         alias              = 1,
         cache              = 1,
+        diagnose           = "d",
         ["dry-run"]        = "D",
         ["flush-lookups"]  = "l",
         fields             = 1,
@@ -973,7 +1061,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         warnings           = "w",
     }
 
-    local short_options = "bDfFiIlpquvVhw"
+    local short_options = "bdDfFiIlpquvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -1047,6 +1135,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             config.luaotfload.prioritize = "texmf"
         elseif v == "b" then
             action_pending["blacklist"] = true
+        elseif v == "d" then
+            action_pending["diagnose"] = true
         end
     end
 

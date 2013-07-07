@@ -928,11 +928,22 @@ do
 
     local verify_files = function (errcnt)
         out ("Loading file hashes.")
-        local hashes  = require (hash_list)
-        if not hashes then
-            out ("Testing %d files for integrity.", nhashes)
+        local info   = require (hash_list)
+        local hashes = info.hashes
+        local notes  = info.notes
+        if not hashes or #hashes == 0 then
+            out ("FAILED: cannot read checksums from %s.", hash_list)
+            return 1/0
+        elseif not notes then
+            out ("FAILED: cannot read commit metadata from %s.",
+                 hash_list)
             return 1/0
         end
+
+        out ("Luaotfload revision %s.", notes.revision)
+        out ("Committed by %s.",        notes.committer)
+        out ("Timestamp %s.",           notes.timestamp)
+
         local nhashes = #hashes
         out ("Testing %d files for integrity.", nhashes)
         for i = 1, nhashes do
@@ -953,14 +964,15 @@ do
                         errcnt = errcnt + 1
                         out ("FAILED: checksum mismatch for file %s.",
                              fname)
-                        out ("Expected %s, got %s.", canonicalsum, sum)
+                        out ("Expected %s.", canonicalsum)
+                        out ("Got      %s.", sum)
                     else
                         out ("Ok, %s passed.", fname)
                     end
                 end
             end
         end
-        return errcnt
+        return errcnt, notes
     end
 
     actions.diagnose = function (job)

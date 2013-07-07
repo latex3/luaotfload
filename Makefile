@@ -8,8 +8,9 @@ OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf
 GLYPHSCRIPT  = mkglyphlist
 GLYPHSOURCE  = glyphlist.txt
 CHARSCRIPT   = mkcharacters
+FILESCRIPT   = mkfilelist
 
-RESOURCESCRIPTS = $(GLYPHSCRIPT) $(CHARSCRIPT)
+RESOURCESCRIPTS = $(GLYPHSCRIPT) $(CHARSCRIPT) $(FILESCRIPT)
 
 SCRIPTNAME   = luaotfload-tool
 SCRIPT       = $(SCRIPTNAME).lua
@@ -24,7 +25,8 @@ DOT    		 = $(GRAPH).dot
 # Files grouped by generation mode
 GLYPHS      = luaotfload-glyphlist.lua
 CHARS       = luaotfload-characters.lua
-RESOURCES	= $(GLYPHS) $(CHARS)
+FILES       = luaotfload-files.lua
+RESOURCES	= $(GLYPHS) $(CHARS) $(FILES)
 GRAPHED     = $(DOTPDF)
 MAN			= $(MANPAGE)
 COMPILED    = $(DOC)
@@ -70,6 +72,7 @@ DO_LATEX 	  	= latexmk -pdf -e '$$pdflatex = q(lualatex %O %S)' -silent $< >/dev
 DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null
 DO_GLYPHS 		= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS 		= $(LUA) $(CHARSCRIPT)  > /dev/null
+DO_FILES 		= $(LUA) $(FILESCRIPT)  > /dev/null
 DO_DOCUTILS 	= rst2man $< >$@ 2>/dev/null
 
 all: $(GENERATED)
@@ -79,6 +82,7 @@ manual: $(MAN)
 unpack: $(UNPACKED)
 resources: $(RESOURCES)
 chars: $(CHARS)
+filelist: $(FILES)
 ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)
 world: all ctan
@@ -88,6 +92,9 @@ $(GLYPHS): /dev/null
 
 $(CHARS): /dev/null
 	$(DO_CHARS)
+
+$(FILES): /dev/null
+	$(DO_FILES)
 
 $(GRAPHED): $(DOT)
 	$(DO_GRAPHVIZ)

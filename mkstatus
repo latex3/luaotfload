@@ -1,8 +1,8 @@
 #!/usr/bin/env texlua
 -----------------------------------------------------------------------
---         FILE:  mkfilelist.lua
---        USAGE:  ./mkfilelist.lua 
---  DESCRIPTION:  part of the luaotfload package
+--         FILE:  mkstatus.lua
+--        USAGE:  ./mkstatus.lua
+--  DESCRIPTION:  writes the repository state
 -- REQUIREMENTS:  luatex, the lualibs package
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
 --      VERSION:  1.0
@@ -29,7 +29,7 @@ local iopopen      = io.popen
 -- settings
 -----------------------------------------------------------------------
 
-local filelist = "luaotfload-files.lua" --- result
+local filelist = "luaotfload-status.lua" --- result
 
 local names = {
   --- only the runtime files and scripts
@@ -56,8 +56,8 @@ local names = {
   "luaotfload-tool.lua",
   "luaotfload-typo-krn.lua",
   "mkcharacters",
-  "mkfilelist",
   "mkglyphlist",
+  "mkstatus",
 }
 
 -----------------------------------------------------------------------

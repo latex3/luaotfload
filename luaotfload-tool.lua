@@ -920,7 +920,7 @@ actions.list = function (job)
 end
 
 do
-    local hash_list = "luaotfload-files"
+    local status_file = "luaotfload-status"
 
     local out = function (...)
         logs.names_report (false, 0, "diagnose", ...)
@@ -928,15 +928,15 @@ do
 
     local verify_files = function (errcnt)
         out ("Loading file hashes.")
-        local info   = require (hash_list)
+        local info   = require (status_file)
         local hashes = info.hashes
         local notes  = info.notes
         if not hashes or #hashes == 0 then
-            out ("FAILED: cannot read checksums from %s.", hash_list)
+            out ("FAILED: cannot read checksums from %s.", status_file)
             return 1/0
         elseif not notes then
             out ("FAILED: cannot read commit metadata from %s.",
-                 hash_list)
+                 status_file)
             return 1/0
         end
 

@@ -38,16 +38,21 @@ kpse.set_program_name "luatex"
 
 --doc]]--
 
+
+local kpsefind_file   = kpse.find_file
 local md5sumhexa      = md5.sumhexa
+local next            = next
+local osdate          = os.date
 local stringexplode   = string.explode
 local stringformat    = string.format
 local stringlower     = string.lower
 local stringrep       = string.rep
+local stringsub       = string.sub
 local tableconcat     = table.concat
 local texiowrite_nl   = texio.write_nl
 local texiowrite      = texio.write
-local kpsefind_file   = kpse.find_file
-
+local tonumber        = tonumber
+local type            = type
 local runtime
 if _G.getfenv ~= nil then -- 5.1 or LJ
     if _G.jit ~= nil then
@@ -120,11 +125,13 @@ end
 config.lualibs                  = config.lualibs or { }
 config.lualibs.verbose          = false
 config.lualibs.prefer_merged    = true
-config.lualibs.load_extended    = false
+config.lualibs.load_extended    = true
 
 require "lualibs"
+--- dofile "util-jsn.lua" --- awaiting fix
 
-local ioloaddata = io.loaddata
+local lua_of_json               = utilities.json.tolua
+local ioloaddata                = io.loaddata
 
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
@@ -156,7 +163,7 @@ local help_messages = {
     ["luaotfload-tool"] = [[
 
 Usage: %s [OPTION]...
-    
+
 Operations on the LuaTeX font database.
 
 This tool is part of the luaotfload package. Valid options are:
@@ -217,7 +224,7 @@ The font cache will be written to
     mkluatexfontdb = [[
 
 Usage: %s [OPTION]...
-    
+
 Rebuild or update the LuaTeX font database.
 
 Valid options:
@@ -470,7 +477,7 @@ local display_general = function (fullinfo)
                 val = #fullinfo[key]
             end
         elseif mode == "d" then
-            val = os.date("%F %T", fullinfo[key])
+            val = osdate("%F %T", fullinfo[key])
         end
         if not val then
             val = "<none>"
@@ -927,7 +934,7 @@ do
     end
 
     local verify_files = function (errcnt)
-        out ("Loading file hashes.")
+        out "Loading file hashes."
         local info   = require (status_file)
         local hashes = info.hashes
         local notes  = info.notes
@@ -975,16 +982,213 @@ do
         return errcnt, notes
     end
 
+    local check_upstream
+
+    if kpsefind_file ("https.lua", "lua") == nil then
+        check_upstream = function ()
+            out       [[Github API access requires the luasec library.
+                        WARNING: Cannot retrieve repository data.
+                        Grab it from <https://github.com/brunoos/luasec>
+                        and retry.]]
+        end
+    else
+    --- github api stuff begin
+        local https = require "ssl.https"
+
+        local gh_api_root     = [[https://api.github.com]]
+        local release_url     = [[https://github.com/lualatex/luaotfload/releases]]
+        local luaotfload_repo = [[lualatex/luaotfload]]
+        local user_agent      = [[lualatex/luaotfload integrity check]]
+        local shortbytes = 8
+
+        local gh_shortrevision = function (rev)
+            return stringsub (rev, 1, shortbytes)
+        end
+
+        local gh_encode_parameters = function (parameters)
+            local acc = {}
+            for field, value in next, parameters do
+                --- unsafe, non-urlencoded coz it’s all ascii chars
+                acc[#acc+1] = field .. "=" .. value
+            end
+            return "?" .. tableconcat (acc, "&")
+        end
+
+        local gh_make_url = function (components, parameters)
+            local url = tableconcat ({ gh_api_root,
+                                       unpack (components) },
+                                     "/")
+            if parameters then
+                url = url .. gh_encode_parameters (parameters)
+            end
+            return url
+        end
+
+        local alright = [[HTTP/1.1 200 OK]]
+
+        local gh_api_request = function (...)
+            local args    = {...}
+            local nargs   = #args
+            local final   = args[nargs]
+            local request = {
+                url     = "",
+                headers = { ["user-agent"] = user_agent },
+            }
+            if type (final) == "table" then
+                args[nargs] = nil
+                request = gh_make_url (args, final)
+            else
+                request = gh_make_url (args)
+            end
+
+            out ("Requesting <%s>.", request)
+            local response, code, headers, status
+                = https.request (request)
+            if status ~= alright then
+                out "Request failed!"
+                return false
+            end
+            return response
+        end
+
+        local gh_api_checklimit = function (headers)
+            local rawlimit  = gh_api_request "rate_limit"
+            local limitdata = lua_of_json (rawlimit)
+            if not limitdata and limitdata.rate then
+                out "Cannot parse API rate limit."
+                return false
+            end
+            limitdata = limitdata.rate
+
+            local limit = tonumber (limitdata.limit)
+            local left  = tonumber (limitdata.remaining)
+            local reset = tonumber (limitdata.reset)
+
+            out ("%d of %d Github API requests left.", left, limit)
+            if left == 0 then
+                out ("Cannot make any more API requests.")
+                out ("Try again later at %s.", osdate ("%F %T", reset))
+            end
+            return true
+        end
+
+        local gh_tags = function ()
+            out "Fetching tags from repository, please stand by."
+            local rawtags = gh_api_request ("repos",
+                                            luaotfload_repo,
+                                            "tags")
+            local taglist = lua_of_json (rawtags)
+            if not taglist or #taglist == 0 then
+                out "Cannot parse response."
+                return false
+            end
+
+            local ntags = #taglist
+            out ("Repository contains %d tags.", ntags)
+            local _idx, latest = next (taglist)
+            out ("The most recent release is %s (revision %s).",
+                 latest.name,
+            gh_shortrevision (latest.commit.sha))
+            return latest
+        end
+
+        local gh_compare = function (head, base)
+            if base == nil then
+                base = "HEAD"
+            end
+            out ("Fetching comparison between %s and %s, \z
+                  please stand by.",
+                 gh_shortrevision (head),
+                 gh_shortrevision (base))
+            local comparison = base .. "..." .. head
+            local rawstatus = gh_api_request ("repos",
+                                              luaotfload_repo,
+                                              "compare",
+                                              comparison)
+            local status = lua_of_json (rawstatus)
+            if not status then
+                out "Cannot parse response for status request."
+                return false
+            end
+            return status
+        end
+
+        local gh_news = function (since)
+            local compared  = gh_compare (since)
+            if not compared then
+                return false
+            end
+            local behind_by = compared.behind_by
+            local ahead_by  = compared.ahead_by
+            local status    = compared.status
+            out ("Comparison state: %s.", status)
+            if behind_by > 0 then
+                out ("Your Luaotfload is %d \z
+                      revisions behind upstream.",
+                     behind_by)
+                return behind_by
+            elseif status == "ahead" then
+                out "Since you are obviously from the future \z
+                     I assume you already know the repository state."
+            else
+                out "Everything up to date. \z
+                     Luaotfload is in sync with upstream."
+            end
+            return false
+        end
+
+        local gh_catchup = function (current, latest)
+            local compared = gh_compare (latest, current)
+            local ahead_by = tonumber (compared.ahead_by)
+            if ahead_by > 0 then
+                local permalink_url = compared.permalink_url
+                out ("Your Luaotfload is %d revisions \z
+                      behind the most recent release.",
+                     ahead_by)
+                out ("To view the commit log, visit <%s>.",
+                     permalink_url)
+                out ("You can grab an up to date tarball at <%s>.",
+                     release_url)
+                return true
+            else
+                out "There weren’t any new releases in the meantime."
+                out "Luaotfload is up to date."
+            end
+            return false
+        end
+
+        check_upstream = function (current)
+            local _succ  = gh_api_checklimit ()
+            local behind = gh_news (current)
+            if behind then
+                local latest  = gh_tags ()
+                local _behind = gh_catchup (current,
+                                            latest.commit.sha,
+                                            latest.name)
+            end
+        end
+
+        --- trivium: diff since the first revision as pushed by Élie
+        --- in 2009
+        --- local firstrevision = "c3ccb3ee07e0a67171c24960966ae974e0dd8e98"
+        --- check_upstream (firstrevision)
+    end
+    --- github api stuff end
+
+
     actions.diagnose = function (job)
         local errcnt = 0
-        errcnt = verify_files (errcnt)
+        errcnt, notes = verify_files (errcnt)
+        --errcnt = check_upstream (notes.revision)
+
+        check_upstream (notes.revision)
 
         if errcnt == 0 then --> success
             out ("Everything appears to be in order, \z
                   you may sleep well.")
             return true, false
-        else
-            out (     [[===============================================
+        end
+        out (         [[===============================================
                                             WARNING
                         ===============================================
 
@@ -1005,10 +1209,8 @@ do
                             http://www.tug.org/mailman/listinfo/lualatex-dev
 
                         ===============================================
-]],
-                errcnt)
-        end
-        return false, false
+]],          errcnt)
+        return true, false
     end
 end
 

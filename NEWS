@@ -1,6 +1,9 @@
 Change History
 --------------
 
+2013/??/??, git tip
+    * Detect LuaJIT interpreter (LuaJITTeX)
+
 2013/07/03, luaotfload v2.3:
     * New experimental lookups: ``kpse`` (kpathsea), ``my`` (callback)
     * Precedence of texmf over system fonts can be requested

@@ -189,6 +189,8 @@ This tool is part of the luaotfload package. Valid options are:
 
   -V --version                 print version and exit
   -h --help                    print this message
+  --diagnose=CHECK             run a self test procedure; one of “files”,
+                               “permissions”, or “repository”
 
   --alias=<name>               force behavior of “luaotfload-tool” or legacy
                                “mkluatexfontdb”

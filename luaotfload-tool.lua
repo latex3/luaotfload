@@ -132,6 +132,7 @@ require "lualibs"
 
 local lua_of_json               = utilities.json.tolua
 local ioloaddata                = io.loaddata
+local tabletohash               = table.tohash
 
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
@@ -662,7 +663,7 @@ local action_sequence = {
     "blacklist", "cache", "flush",   "generate",
     "list",      "query",
 }
-local action_pending  = table.tohash(action_sequence, false)
+local action_pending  = tabletohash(action_sequence, false)
 
 action_pending.loglevel = true  --- always set the loglevel
 action_pending.generate = false --- this is the default action
@@ -927,15 +928,11 @@ actions.list = function (job)
 end
 
 do
-    local status_file = "luaotfload-status"
-
     local out = function (...)
         logs.names_report (false, 0, "diagnose", ...)
     end
 
-    local verify_files = function (errcnt)
-        out "Loading file hashes."
-        local info   = require (status_file)
+    local verify_files = function (errcnt, info)
         local hashes = info.hashes
         local notes  = info.notes
         if not hashes or #hashes == 0 then
@@ -979,7 +976,7 @@ do
                 end
             end
         end
-        return errcnt, notes
+        return errcnt
     end
 
     local check_upstream
@@ -1175,13 +1172,33 @@ do
     end
     --- github api stuff end
 
+    local anamneses   = { "verify", "repository", }
+    local status_file = "luaotfload-status"
 
     actions.diagnose = function (job)
         local errcnt = 0
-        errcnt, notes = verify_files (errcnt)
-        --errcnt = check_upstream (notes.revision)
+        local asked  = job.asked_diagnostics
+        if asked == "all" or asked == "thorough" then
+            asked = tabletohash (anamneses, true)
+        else
+            asked = lpegmatch(split_comma, asked)
+            asked = tabletohash (asked, true)
+        end
 
-        check_upstream (notes.revision)
+        out "Loading file hashes."
+        local info = require (status_file)
+
+        if asked.verify == true then
+            errcnt = verify_files (errcnt, info)
+        end
+--        if asked.xxx == true then
+--            errcnt = xxx (errcnt)
+--        end
+        if asked.repository == true then
+            --errcnt = check_upstream (info.notes.revision)
+            check_upstream (info.notes.revision)
+        end
+
 
         if errcnt == 0 then --> success
             out ("Everything appears to be in order, \z
@@ -1253,7 +1270,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
     local long_options = {
         alias              = 1,
         cache              = 1,
-        diagnose           = "d",
+        diagnose           = 1,
         ["dry-run"]        = "D",
         ["flush-lookups"]  = "l",
         fields             = 1,
@@ -1275,7 +1292,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         warnings           = "w",
     }
 
-    local short_options = "bdDfFiIlpquvVhw"
+    local short_options = "bDfFiIlpquvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -1349,8 +1366,9 @@ local process_cmdline = function ( ) -- unit -> jobspec
             config.luaotfload.prioritize = "texmf"
         elseif v == "b" then
             action_pending["blacklist"] = true
-        elseif v == "d" then
+        elseif v == "diagnose" then
             action_pending["diagnose"] = true
+            result.asked_diagnostics = optarg[n]
         end
     end
 

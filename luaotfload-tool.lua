@@ -39,10 +39,16 @@ kpse.set_program_name "luatex"
 --doc]]--
 
 
+local ioopen          = io.open
 local kpsefind_file   = kpse.find_file
+local lfsattributes   = lfs.attributes
+local lfsisfile       = lfs.isfile
+local lfsreadlink     = lfs.readlink
 local md5sumhexa      = md5.sumhexa
 local next            = next
 local osdate          = os.date
+local osremove        = os.remove
+local ostype          = os.type
 local stringexplode   = string.explode
 local stringformat    = string.format
 local stringlower     = string.lower
@@ -53,6 +59,7 @@ local texiowrite_nl   = texio.write_nl
 local texiowrite      = texio.write
 local tonumber        = tonumber
 local type            = type
+
 local runtime
 if _G.getfenv ~= nil then -- 5.1 or LJ
     if _G.jit ~= nil then
@@ -67,7 +74,7 @@ else -- 5.2
 end
 
 
-local C, Ct, P, S  = lpeg.C, lpeg.Ct, lpeg.P, lpeg.S
+local C, Cg, Ct, P, S  = lpeg.C, lpeg.Cg, lpeg.Ct, lpeg.P, lpeg.S
 local lpegmatch    = lpeg.match
 
 local loader_file = "luatexbase.loader.lua"
@@ -133,6 +140,8 @@ require "lualibs"
 local lua_of_json               = utilities.json.tolua
 local ioloaddata                = io.loaddata
 local tabletohash               = table.tohash
+local fileiswritable            = file.iswritable
+local fileisreadable            = file.isreadable
 
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
@@ -933,6 +942,7 @@ do
     end
 
     local verify_files = function (errcnt, info)
+        out "================ verify files ================="
         local hashes = info.hashes
         local notes  = info.notes
         if not hashes or #hashes == 0 then
@@ -979,14 +989,138 @@ do
         return errcnt
     end
 
+    local get_tentative_attributes = function (file)
+        if not lfsisfile (file) then
+            local chan = ioopen (file, "w")
+            if chan then
+                chan:close ()
+                local attributes = lfsattributes (file)
+                os.remove (file)
+                return attributes
+            end
+        end
+    end
+
+    local p_permissions = Ct(Cg(Ct(C(1) * C(1) * C(1)), "u")
+                           * Cg(Ct(C(1) * C(1) * C(1)), "g")
+                           * Cg(Ct(C(1) * C(1) * C(1)), "o"))
+
+    local analyze_permissions = function (raw)
+        return lpegmatch (p_permissions, raw)
+    end
+
+    local get_permissions = function (t, location)
+        local attributes = lfsattributes (location)
+        if not attributes and t == "f" then
+            attributes = get_tentative_attributes (location)
+            if not attributes then
+                return false
+            end
+        end
+
+        local permissions
+
+        if fileisreadable (location) then
+            --- link handling appears to be unnecessary because
+            --- lfs.attributes() will return the information on
+            --- the link target.
+            if mode == "link" then --follow and repeat
+                location = lfsreadlink (location)
+                attributes = lfsattributes (location)
+            end
+        end
+
+        permissions = analyze_permissions (attributes.permissions)
+
+        return {
+            location    = location,
+            mode        = attributes.mode,
+            owner       = attributes.uid, --- useless on windows
+            permissions = permissions,
+            attributes  = attributes,
+        }
+    end
+
+    local check_conformance = function (spec, permissions, errcnt)
+        local uid = permissions.attributes.uid
+        local gid = permissions.attributes.gid
+        local raw = permissions.attributes.permissions
+
+        out ("Owner: %d, group %d, permissions %s.", uid, gid, raw)
+        if ostype == "unix" then
+            if uid == 0 or gid == 0 then
+                out "Owned by the superuser, permission conflict likely."
+                errcnt = errcnt + 1
+            end
+        end
+
+        local user = permissions.permissions.u
+        if spec.r == true then
+            if user[1] == "r" then
+                out "Readable: ok."
+            else
+                out "Not readable: permissions need fixing."
+                errcnt = errcnt + 1
+            end
+        end
+
+        if spec.w == true then
+            if user[2] == "w"
+            or  fileiswritable (permissions.location) then
+                out "Writable: ok."
+            else
+                out "Not writable: permissions need fixing."
+                errcnt = errcnt + 1
+            end
+        end
+
+        return errcnt
+    end
+
+    local path = names.path
+
+    local desired_permissions = {
+        { "d", {"r","w"}, function () return caches.getwritablepath () end },
+        { "d", {"r","w"}, path.globals.prefix },
+        { "f", {"r","w"}, path.index.lua },
+        { "f", {"r","w"}, path.index.luc },
+        { "f", {"r","w"}, path.lookups.lua },
+        { "f", {"r","w"}, path.lookups.luc },
+    }
+
+    local check_permissions = function (errcnt)
+        out [[=============== file permissions ==============]]
+        for i = 1, #desired_permissions do
+            local t, spec, path = unpack (desired_permissions[i])
+            if type (path) == "function" then
+                path = path ()
+            end
+
+            spec = tabletohash (spec)
+
+            out ("Checking permissions of %s.", path)
+
+            local permissions = get_permissions (t, path)
+            if permissions then
+                --inspect (permissions)
+                errcnt = check_conformance (spec, permissions, errcnt)
+            else
+                errcnt = errcnt + 1
+            end
+        end
+        return errcnt
+    end
+
     local check_upstream
 
     if kpsefind_file ("https.lua", "lua") == nil then
-        check_upstream = function ()
-            out       [[Github API access requires the luasec library.
+        check_upstream = function (errcnt)
+            out       [[============= upstream repository =============
+                        Github API access requires the luasec library.
                         WARNING: Cannot retrieve repository data.
                         Grab it from <https://github.com/brunoos/luasec>
                         and retry.]]
+            return errcnt
         end
     else
     --- github api stuff begin
@@ -1155,6 +1289,7 @@ do
         end
 
         check_upstream = function (current)
+            out "============= upstream repository ============="
             local _succ  = gh_api_checklimit ()
             local behind = gh_news (current)
             if behind then
@@ -1172,7 +1307,7 @@ do
     end
     --- github api stuff end
 
-    local anamneses   = { "verify", "repository", }
+    local anamneses   = { "files", "repository", "permissions" }
     local status_file = "luaotfload-status"
 
     actions.diagnose = function (job)
@@ -1188,12 +1323,12 @@ do
         out "Loading file hashes."
         local info = require (status_file)
 
-        if asked.verify == true then
+        if asked.files == true then
             errcnt = verify_files (errcnt, info)
         end
---        if asked.xxx == true then
---            errcnt = xxx (errcnt)
---        end
+        if asked.permissions == true then
+            errcnt = check_permissions (errcnt)
+        end
         if asked.repository == true then
             --errcnt = check_upstream (info.notes.revision)
             check_upstream (info.notes.revision)

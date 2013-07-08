@@ -33,6 +33,8 @@ SYNOPSIS
 
 **luaotfload** --show-blacklist
 
+**luaotfload** --diagnose=CHECK
+
 DESCRIPTION
 =======================================================================
 
@@ -42,8 +44,6 @@ the *Luaotfload* package. There are two general modes: **update** and
 
 + **update**:  update the database or rebuild it entirely;
 + **query**:   resolve a font name or display close matches.
-
-A third mode for clearing the lookup cache is currently experimental.
 
 Note that if the script is named ``mkluatexfontdb`` it will behave like
 earlier versions (<=1.3) and always update the database first. Also,
@@ -128,6 +128,17 @@ miscellaneous
 --version, -V           Show version number and exit.
 --help, -h              Show help message and exit.
 
+--diagnose=CHECK        Run the diagnostic procedure *CHECK*. Available
+                        procedures are:
+
+                        1) ``files`` -> check *Luaotfload* files for
+                           modifications;
+                        2) ``permissions`` -> check permissions of
+                           cache directories and files;
+                        3) ``repository`` -> check the git repository
+                           for new releases.
+
+                        Specify ``thorough`` to run all checks.
 
 FILES
 =======================================================================

@@ -15,25 +15,25 @@
 SYNOPSIS
 =======================================================================
 
-**luaotfload** [ -bDcfFiIpquvVwh ]
+**luaotfload-tool** [ -bDcfFiIpquvVwh ]
 
-**luaotfload** --update [ --force ] [ --quiet ] [ --verbose ] [ --prefer-texmf ] [ --dry-run ]
+**luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ] [ --prefer-texmf ] [ --dry-run ]
 
-**luaotfload** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
+**luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
 
-**luaotfload** --flush-lookups
+**luaotfload-tool** --flush-lookups
 
-**luaotfload** --cache=DIRECTIVE
+**luaotfload-tool** --cache=DIRECTIVE
 
-**luaotfload** --list=CRITERION[:VALUE] [ --fields=F1,F2,...,Fn ]
+**luaotfload-tool** --list=CRITERION[:VALUE] [ --fields=F1,F2,...,Fn ]
 
-**luaotfload** --help
+**luaotfload-tool** --help
 
-**luaotfload** --version
+**luaotfload-tool** --version
 
-**luaotfload** --show-blacklist
+**luaotfload-tool** --show-blacklist
 
-**luaotfload** --diagnose=CHECK
+**luaotfload-tool** --diagnose=CHECK
 
 DESCRIPTION
 =======================================================================

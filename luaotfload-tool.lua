@@ -40,6 +40,7 @@ kpse.set_program_name "luatex"
 
 
 local ioopen          = io.open
+local iowrite         = io.write
 local kpsefind_file   = kpse.find_file
 local lfsattributes   = lfs.attributes
 local lfsisfile       = lfs.isfile
@@ -172,7 +173,7 @@ local names_bin     = pathdata.index.luc
 local help_messages = {
     ["luaotfload-tool"] = [[
 
-Usage: %s [OPTION]...
+Usage: %s [OPTIONS...]
 
 Operations on the LuaTeX font database.
 
@@ -255,17 +256,26 @@ The font database will be saved to
    %s
 
 ]],
+    short = [[
+Usage: luaotfload-tool [--help] [--version] [--verbose=<lvl>]
+                       [--update] [--force] [--prefer-texmf]
+                       [--find=<font name>] [--fuzzy] [--info] [--inspect]
+                       [--list=<criterion>] [--fields=<field list>]
+                       [--cache=<directive>] [--flush-lookups]
+                       [--show-blacklist] [--diagnose=<procedure>]
+
+Enter 'luaotfload-tool --help' for a larger list of options.
+]]
 }
 
-local help_msg = function ( )
-    local template = help_messages[config.luaotfload.self]
-                  or help_messages["luaotfload-tool"]
-    texiowrite_nl(stringformat(template,
-                               config.luaotfload.self,
-                               names_plain,
-                               names_bin,
-                               caches.getwritablepath (
-                                 config.luaotfload.cache_dir)))
+local help_msg = function (version)
+    local template = help_messages[version]
+    iowrite(stringformat(template,
+                         config.luaotfload.self,
+                         names_plain,
+                         names_bin,
+                         caches.getwritablepath (
+                         config.luaotfload.cache_dir)))
 end
 
 local version_msg = function ( )
@@ -685,7 +695,7 @@ actions.loglevel = function (job)
     logs.set_loglevel(job.log_level)
     logs.names_report("info", 3, "util",
                       "Setting log level", "%d", job.log_level)
-    logs.names_report("log", 0, "util", "Lua=%s", _VERSION)
+    logs.names_report("log", 2, "util", "Lua=%s", _VERSION)
     return true, true
 end
 
@@ -695,7 +705,7 @@ actions.version = function (job)
 end
 
 actions.help = function (job)
-    help_msg()
+    help_msg (job.help_version or "luaotfload-tool")
     return true, false
 end
 
@@ -1510,9 +1520,13 @@ local process_cmdline = function ( ) -- unit -> jobspec
     end
 
     if config.luaotfload.self == "mkluatexfontdb" then
+        result.help_version = "mkluatexfontdb"
         action_pending["generate"] = true
-        result.log_level = math.max(2, result.log_level)
+        result.log_level = math.max(1, result.log_level)
         logs.set_logout"stdout"
+    elseif nopts == 0 then
+        action_pending["help"] = true
+        result.help_version = "short"
     end
     return result
 end

@@ -977,7 +977,7 @@ do
             local location = kpsefind_file (fname)
             if not location then
                 errcnt = errcnt + 1
-                out ("FAILED: file %d missing.", fname)
+                out ("FAILED: file %s missing.", fname)
             else
                 out ("File: %s.", location)
                 local raw = ioloaddata (location)

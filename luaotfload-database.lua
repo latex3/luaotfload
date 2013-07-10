@@ -799,7 +799,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         if facenames then
             family          = facenames.family
             subfamily       = facenames.subfamily
-            prefmodifiers   = facenames.prefmodifiers
+            prefmodifiers   = facenames.prefmodifiers or facenames.subfamily
             fullname        = facenames.fullname
             psname          = facenames.psname
             fontname        = facenames.fontname
@@ -818,16 +818,19 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
                 if continue == false then break end
             elseif style == subfamily then
                 exact = add_to_match(exact, askedsize, face)
+            elseif synonym_set[style] and synonym_set[style][prefmodifiers]
+                or synonym_set.regular[prefmodifiers]
+            then
+                --- treat synonyms for prefmodifiers as first-class
+                --- (needed to prioritize DejaVu Book over Condensed)
+                exact = add_to_match(exact, askedsize, face)
             elseif name == fullname
                 or name == pfullname
                 or name == fontname
                 or name == psname
             then
-                synonymous, continue = add_to_match(synonymous, askedsize, face)
-            elseif synonym_set[style] and
-                    (synonym_set[style][prefmodifiers] or
-                     synonym_set[style][subfamily])
-                or synonym_set.regular[prefmodifiers]
+                synonymous = add_to_match(synonymous, askedsize, face)
+            elseif synonym_set[style] and synonym_set[style][subfamily]
                 or synonym_set.regular[subfamily]
             then
                 synonymous = add_to_match(synonymous, askedsize, face)

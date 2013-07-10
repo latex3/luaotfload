@@ -4,7 +4,7 @@
 --  DESCRIPTION:  database functionality
 -- REQUIREMENTS:  luaotfload 2.2
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  2.3
+--      VERSION:  2.3a
 --      LICENSE:  GPL v2
 --     MODIFIED:  2013-06-02 19:23:54+0200
 -----------------------------------------------------------------------

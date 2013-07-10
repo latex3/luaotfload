@@ -975,6 +975,7 @@ do
         for i = 1, nhashes do
             local fname, canonicalsum = unpack (hashes[i])
             local location = kpsefind_file (fname)
+                          or kpsefind_file (fname, "texmfscripts")
             if not location then
                 errcnt = errcnt + 1
                 out ("FAILED: file %s missing.", fname)

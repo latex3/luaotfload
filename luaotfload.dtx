@@ -40,7 +40,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload v2.3 OpenType layout system}
+\Msg{* Package: luaotfload v2.3a OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -111,7 +111,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2013/05/23 v2.3d OpenType layout system]%
+  [2013/07/10 v2.3a OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
 \usepackage[x11names]{xcolor}
@@ -231,7 +231,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \identifier{luaotfload} package}
-% \date{2013/05/23 v2.3d}
+% \date{2013/07/10 v2.3a}
 % \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
 %         Home:      \url{https://github.com/lualatex/luaotfload}\\
 %         Support:   \email{lualatex-dev@tug.org}}
@@ -1474,12 +1474,12 @@ config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_l
 config.luaotfload.prioritize      = config.luaotfload.prioritize       or "sys"
 config.luaotfload.names_dir       = config.luaotfload.names_dir        or "names"
 config.luaotfload.cache_dir       = config.luaotfload.cache_dir        or "fonts"
-config.luaotfload.names_file      = config.luaotfload.names_file       or "luaotfload-names.lua"
+config.luaotfload.index_file      = config.luaotfload.index_file       or "luaotfload-names.lua"
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 2.3,
-    date          = "2013/06/02",
+    version       = 2.3001,
+    date          = "2013/07/10",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -2069,7 +2069,7 @@ loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2013/05/23 v2.3d OpenType layout system]
+    [2013/07/10 v2.3a OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
 \ifnum\luatexversion<76

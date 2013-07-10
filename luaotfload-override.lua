@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['luat-ovr'] = {
-    version   = 2.3,
+    version   = "2.3a",
     comment   = "companion to luatex-*.tex",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
@@ -31,6 +31,12 @@ local texiowrite_nl     = texio.write_nl
 local texio_write       = texio.write
 local texiowrite        = texio.write
 local type              = type
+
+local texjob = false
+if tex and (tex.jobname or tex.formatname) then
+    --- TeX
+    texjob = true
+end
 
 --[[doc--
 We recreate the verbosity levels previously implemented in font-nms:
@@ -136,10 +142,9 @@ end
 logs.set_logout = set_logout
 
 local log = function (category, fmt, ...)
-    local res = { module_name, " |" }
-    if category then res[#res+1] = " " .. category end
-    if fmt      then res[#res+1] = ": " .. stringformat(fmt, ...) end
-    texiowrite_nl(logout, tableconcat(res))
+    local res = { module_name, "|", category, ":" }
+    if fmt      then res[#res+1] = stringformat(fmt, ...) end
+    texiowrite_nl(logout, tableconcat(res, " "))
 end
 
 --- with faux db update with maximum verbosity:
@@ -156,11 +161,11 @@ end
 io.stdout:setvbuf "no"
 io.stderr:setvbuf "no"
 
-if tex and (tex.jobname or tex.formatname) then
-    --- TeX
-    writeln = texiowrite_nl
+if texjob == true then
+    writeln = function (str)
+        texiowrite_nl ("term", str)
+    end
 else
-    --- Lua interpreter
     writeln = function (str)
         iowrite(str)
         iowrite "\n"
@@ -171,7 +176,8 @@ stdout = function (category, ...)
     local res = { module_name, "|", category, ":" }
     local nargs = select("#", ...)
     if nargs == 0 then
-        writeln (tableconcat ({...}))
+        --writeln tableconcat(res, " ")
+        --return
     elseif nargs == 1 then
         res[#res+1] = select(1, ...) -- around 30% faster than unpack()
     else

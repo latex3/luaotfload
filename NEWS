@@ -1,6 +1,10 @@
 Change History
 --------------
 
+2013/07/10, luaotfload v2.3a
+    * Detect LuaJIT interpreter (LuaJITTeX)
+    * Self-test functionality for luaotfload-tool.lua (option  ``--diagnose``)
+
 2013/07/03, luaotfload v2.3:
     * New experimental lookups: ``kpse`` (kpathsea), ``my`` (callback)
     * Precedence of texmf over system fonts can be requested

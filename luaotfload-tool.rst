@@ -6,32 +6,34 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:      2013-06-02
+:Date:      2013-07-10
 :Copyright: GPL v2.0
-:Version:   2.3
+:Version:   2.3a
 :Manual section: 1
 :Manual group: text processing
 
 SYNOPSIS
 =======================================================================
 
-**luaotfload** [ -bDcfFiIpquvVwh ]
+**luaotfload-tool** [ -bDcfFiIpquvVwh ]
 
-**luaotfload** --update [ --force ] [ --quiet ] [ --verbose ] [ --prefer-texmf ] [ --dry-run ]
+**luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ] [ --prefer-texmf ] [ --dry-run ]
 
-**luaotfload** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
+**luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
 
-**luaotfload** --flush-lookups
+**luaotfload-tool** --flush-lookups
 
-**luaotfload** --cache=DIRECTIVE
+**luaotfload-tool** --cache=DIRECTIVE
 
-**luaotfload** --list=CRITERION[:VALUE] [ --fields=F1,F2,...,Fn ]
+**luaotfload-tool** --list=CRITERION[:VALUE] [ --fields=F1,F2,...,Fn ]
 
-**luaotfload** --help
+**luaotfload-tool** --help
 
-**luaotfload** --version
+**luaotfload-tool** --version
 
-**luaotfload** --show-blacklist
+**luaotfload-tool** --show-blacklist
+
+**luaotfload-tool** --diagnose=CHECK
 
 DESCRIPTION
 =======================================================================
@@ -42,8 +44,6 @@ the *Luaotfload* package. There are two general modes: **update** and
 
 + **update**:  update the database or rebuild it entirely;
 + **query**:   resolve a font name or display close matches.
-
-A third mode for clearing the lookup cache is currently experimental.
 
 Note that if the script is named ``mkluatexfontdb`` it will behave like
 earlier versions (<=1.3) and always update the database first. Also,
@@ -128,6 +128,17 @@ miscellaneous
 --version, -V           Show version number and exit.
 --help, -h              Show help message and exit.
 
+--diagnose=CHECK        Run the diagnostic procedure *CHECK*. Available
+                        procedures are:
+
+                        1) ``files`` -> check *Luaotfload* files for
+                           modifications;
+                        2) ``permissions`` -> check permissions of
+                           cache directories and files;
+                        3) ``repository`` -> check the git repository
+                           for new releases.
+
+                        Specify ``thorough`` to run all checks.
 
 FILES
 =======================================================================

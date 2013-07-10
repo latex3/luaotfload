@@ -8,8 +8,9 @@ OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf
 GLYPHSCRIPT  = mkglyphlist
 GLYPHSOURCE  = glyphlist.txt
 CHARSCRIPT   = mkcharacters
+STATUSSCRIPT = mkstatus
 
-RESOURCESCRIPTS = $(GLYPHSCRIPT) $(CHARSCRIPT)
+RESOURCESCRIPTS = $(GLYPHSCRIPT) $(CHARSCRIPT) $(STATUSSCRIPT)
 
 SCRIPTNAME   = luaotfload-tool
 SCRIPT       = $(SCRIPTNAME).lua
@@ -24,7 +25,8 @@ DOT    		 = $(GRAPH).dot
 # Files grouped by generation mode
 GLYPHS      = luaotfload-glyphlist.lua
 CHARS       = luaotfload-characters.lua
-RESOURCES	= $(GLYPHS) $(CHARS)
+STATUS      = luaotfload-status.lua
+RESOURCES	= $(GLYPHS) $(CHARS) $(STATUS)
 GRAPHED     = $(DOTPDF)
 MAN			= $(MANPAGE)
 COMPILED    = $(DOC)
@@ -34,20 +36,20 @@ SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(RESOURCESCRIPTS)
 
 # test files
 TESTDIR 		= tests
-TESTFILES 		= $(wildcard $(TESTDIR)/*.tex $(TESTDIR)/*.ltx)
-TESTFILES_SYS 	= $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
-TESTFILES_TL 	= $(filter-out $(TESTFILES_SYS), $(TESTFILES))
+TESTSTATUS 		= $(wildcard $(TESTDIR)/*.tex $(TESTDIR)/*.ltx)
+TESTSTATUS_SYS 	= $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
+TESTSTATUS_TL 	= $(filter-out $(TESTSTATUS_SYS), $(TESTSTATUS))
 
 # Files grouped by installation location
-SCRIPTFILES = $(SCRIPT) $(OLDSCRIPT) $(RESOURCESCRIPTS)
-RUNFILES    = $(UNPACKED) $(filter-out $(SCRIPTFILES),$(OTFL))
-DOCFILES    = $(DOC) $(DOTPDF) README NEWS
-MANFILES	= $(MANPAGE)
-SRCFILES    = $(DTX) Makefile
+SCRIPTSTATUS = $(SCRIPT) $(OLDSCRIPT) $(RESOURCESCRIPTS)
+RUNSTATUS    = $(UNPACKED) $(filter-out $(SCRIPTSTATUS),$(OTFL))
+DOCSTATUS    = $(DOC) $(DOTPDF) README NEWS
+MANSTATUS	= $(MANPAGE)
+SRCSTATUS    = $(DTX) Makefile
 
 # The following definitions should be equivalent
-# ALL_FILES = $(RUNFILES) $(DOCFILES) $(SRCFILES)
-ALL_FILES = $(GENERATED) $(SOURCE)
+# ALL_STATUS = $(RUNSTATUS) $(DOCSTATUS) $(SRCSTATUS)
+ALL_STATUS = $(GENERATED) $(SOURCE)
 
 # Installation locations
 FORMAT = luatex
@@ -70,6 +72,7 @@ DO_LATEX 	  	= latexmk -pdf -e '$$pdflatex = q(lualatex %O %S)' -silent $< >/dev
 DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null
 DO_GLYPHS 		= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS 		= $(LUA) $(CHARSCRIPT)  > /dev/null
+DO_STATUS 		= $(LUA) $(STATUSSCRIPT)  > /dev/null
 DO_DOCUTILS 	= rst2man $< >$@ 2>/dev/null
 
 all: $(GENERATED)
@@ -79,6 +82,7 @@ manual: $(MAN)
 unpack: $(UNPACKED)
 resources: $(RESOURCES)
 chars: $(CHARS)
+status: $(STATUS)
 ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)
 world: all ctan
@@ -88,6 +92,9 @@ $(GLYPHS): /dev/null
 
 $(CHARS): /dev/null
 	$(DO_CHARS)
+
+$(STATUS): /dev/null
+	$(DO_STATUS)
 
 $(GRAPHED): $(DOT)
 	$(DO_GRAPHVIZ)
@@ -107,15 +114,15 @@ $(CTAN_ZIP): $(SOURCE) $(COMPILED) $(TDS_ZIP)
 	@zip -9 $@ $^ >/dev/null
 
 define run-install
-@mkdir -p $(SCRIPTDIR) && cp $(SCRIPTFILES) $(SCRIPTDIR)
-@mkdir -p $(RUNDIR) && cp $(RUNFILES) $(RUNDIR)
-@mkdir -p $(DOCDIR) && cp $(DOCFILES) $(DOCDIR)
-@mkdir -p $(SRCDIR) && cp $(SRCFILES) $(SRCDIR)
-@mkdir -p $(MANDIR) && cp $(MANFILES) $(MANDIR)
+@mkdir -p $(SCRIPTDIR) && cp $(SCRIPTSTATUS) $(SCRIPTDIR)
+@mkdir -p $(RUNDIR) && cp $(RUNSTATUS) $(RUNDIR)
+@mkdir -p $(DOCDIR) && cp $(DOCSTATUS) $(DOCDIR)
+@mkdir -p $(SRCDIR) && cp $(SRCSTATUS) $(SRCDIR)
+@mkdir -p $(MANDIR) && cp $(MANSTATUS) $(MANDIR)
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf
-$(TDS_ZIP): $(ALL_FILES)
+$(TDS_ZIP): $(ALL_STATUS)
 	@echo "Making TDS-ready archive $@."
 	@$(RM) -- $@
 	$(run-install)
@@ -124,20 +131,20 @@ $(TDS_ZIP): $(ALL_FILES)
 
 .PHONY: install manifest clean mrproper
 
-install: $(ALL_FILES)
+install: $(ALL_STATUS)
 	@echo "Installing in '$(TEXMFROOT)'."
 	$(run-install)
 
-check: $(RUNFILES) $(TESTFILES_TL)
+check: $(RUNSTATUS) $(TESTSTATUS_TL)
 	@rm -rf var
-	@for f in $(TESTFILES_TL); do \
+	@for f in $(TESTSTATUS_TL); do \
 	    echo "check: luatex $$f"; \
 	    luatex --interaction=batchmode $$f \
 	    > /dev/null || exit $$?; \
 	    done
 
-check-all: $(TESTFILES_SYS) check
-	@cd $(TESTDIR); for f in $(TESTFILES_SYS); do \
+check-all: $(TESTSTATUS_SYS) check
+	@cd $(TESTDIR); for f in $(TESTSTATUS_SYS); do \
 	    echo "check: luatex $$f"; \
 	    $(TESTENV) luatex --interaction=batchmode ../$$f \
 	    > /dev/null || exit $$?; \

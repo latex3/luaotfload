@@ -1,0 +1,147 @@
+#!/usr/bin/env texlua
+-----------------------------------------------------------------------
+--         FILE:  mkstatus.lua
+--        USAGE:  ./mkstatus.lua
+--  DESCRIPTION:  writes the repository state
+-- REQUIREMENTS:  luatex, the lualibs package
+--       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--      VERSION:  1.0
+--      CREATED:  2013-07-07 14:01:12+0200
+-----------------------------------------------------------------------
+--
+-- This script generates a list of hashes that serves as the input
+-- for the file integrity check (option --diagnose). md5 is all we can
+-- assume in Luatex, so it’s really only a superficial test.
+
+kpse.set_program_name "luatex"
+
+local md5 = require "md5"
+
+require "lualibs"
+
+local stringformat = string.format
+local md5sumhexa   = md5.sumhexa
+local ioloaddata   = io.loaddata
+local iosavedata   = io.savedata
+local iopopen      = io.popen
+
+-----------------------------------------------------------------------
+-- settings
+-----------------------------------------------------------------------
+
+local filelist = "luaotfload-status.lua" --- result
+
+local names = {
+  --- only the runtime files and scripts
+  "luaotfload-auxiliary.lua",
+  "luaotfload-basics-gen.lua",
+  "luaotfload-basics-nod.lua",
+  "luaotfload-characters.lua",
+  "luaotfload-colors.lua",
+  "luaotfload-database.lua",
+  "luaotfload-extralibs.lua",
+  "luaotfload-features.lua",
+  "luaotfload-fonts-cbk.lua",
+  "luaotfload-fonts-def.lua",
+  "luaotfload-fonts-enc.lua",
+  "luaotfload-fonts-ext.lua",
+  "luaotfload-fonts-lua.lua",
+  "luaotfload-fonts-tfm.lua",
+  "luaotfload-glyphlist.lua",
+  "luaotfload-letterspace.lua",
+  "luaotfload-loaders.lua",
+  "luaotfload.lua",
+  "luaotfload-merged.lua",
+  "luaotfload-override.lua",
+  "luaotfload-tool.lua",
+  "luaotfload-typo-krn.lua",
+  "mkcharacters",
+  "mkglyphlist",
+  "mkstatus",
+}
+
+-----------------------------------------------------------------------
+-- helpers
+-----------------------------------------------------------------------
+
+local die = function (...)
+  io.stderr:write "[fatal error]: "
+  io.stderr:write (stringformat (...))
+  io.stderr:write "\naborting.\n"
+  os.exit (1)
+end
+
+local gitcmd = "git log -1 \z
+                    --format=\"return {\z
+                                %n  revision  = [[%H]],\z
+                                %n  timestamp = [[%cd]],\z
+                                %n  committer = [[%cn <%ce>]],\z
+                                %n}\" \z
+                    --date=iso"
+
+local git_info = function ()
+  --io.write (gitcmd)
+  --io.write "\n"
+  local chan = iopopen (gitcmd)
+  if not chan then
+    die ("this script needs to be run inside \z
+          the luaotfload git repository")
+  end
+
+  local data = chan:read "*all"
+  chan:close ()
+  if data and type (data) == "string" and data ~= "" then
+    data = load (data)
+    if not data then
+      die "cannot parse git information"
+    end
+    return data ()
+  end
+  die "cannot read from pipe"
+end
+
+-----------------------------------------------------------------------
+-- functionality
+-----------------------------------------------------------------------
+
+local hash_file = function (fname)
+  if not lfs.isfile (fname) then
+    die ("cannot find %s.", fname)
+  end
+  local raw = ioloaddata (fname)
+  if not raw then
+    die ("cannot read from %s.", fname)
+  end
+  return md5sumhexa (raw)
+end
+
+local hash_all
+hash_all = function (list, acc)
+  if list == nil then
+    return hash_all (table.fastcopy (names), { })
+  end
+
+  local fname = list[#list]
+  list[#list] = nil
+  if fname then
+    local sum = hash_file (fname)
+    acc[#acc+1] = { fname, sum }
+    return hash_all (list, acc)
+  end
+  return acc
+end
+
+local main = function ()
+  local hashes      = hash_all ()
+  local notes       = git_info ()
+  local serialized  = table.serialize ({ notes = notes,
+                                         hashes = hashes }, true)
+  local success     = io.savedata (filelist, serialized)
+  if success == false then
+    die ("could not write to %s.", filelist)
+  end
+  return 0
+end
+
+return main ()
+

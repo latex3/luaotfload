@@ -1,0 +1,134 @@
+#!/usr/bin/env texlua
+-----------------------------------------------------------------------
+--         FILE:  mktests
+--        USAGE:  ./mktests 
+--  DESCRIPTION:  test the behavior of Luaotfload
+-- REQUIREMENTS:  Luatex > 0.76, Luaotfload
+--       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--      VERSION:  2.3
+--      CREATED:  2013-07-11 11:32:24+0200
+-----------------------------------------------------------------------
+--
+--===================================================================--
+--                               NOTE
+--             this is a stub, to be completed long-term
+--                        suggestions welcome
+--===================================================================--
+
+
+local tests = { }
+
+config = { luaotfload = {
+    names_dir     = "names",
+    cache_dir     = "fonts",
+    index_file    = "luaotfload-names.lua",
+    resolver      = "normal",
+    update_live   = true, --- suppress db updates
+}}
+
+kpse.set_program_name "luatex"
+
+require "lualibs"
+require "luaotfload-basics-gen.lua"
+require "luaotfload-override.lua"
+require "luaotfload-database"
+
+local names = fonts.names
+
+-----------------------------------------------------------------------
+--- helper functions
+-----------------------------------------------------------------------
+
+local pprint_resolve = function (input, output, result)
+  texio.write_nl (string.format ("[%s] “%s” -> “%s”",
+                                 result == true and "passed" or "failed",
+                                 input,
+                                 output))
+end
+
+local pprint_result = function (name, failed, total)
+  if failed == 0 then
+    texio.write_nl (string.format ("[%s] all %d passed", name, total))
+  else
+    texio.write_nl (string.format ("[%s] %d of %d failed",
+                                   name,
+                                   failed,
+                                   total))
+  end
+end
+
+-----------------------------------------------------------------------
+--- font tests
+-----------------------------------------------------------------------
+
+--- test sets
+
+local infer_regular_style = {
+  --- inferring which one is the correct style for “regular”; can be
+  --- obscured by synonyms like “book” etc.
+  { "Iwona",                "Iwona-Regular.otf" }, -- trivial case
+  { "DejaVu Serif",         "DejaVuSerif.ttf" },
+  { "Adobe Garamond Pro",   "agaramondpro_regular.otf" },
+  { "Garamond Premier Pro", "GaramondPremrPro-Capt.otf" },
+}
+
+local font_name_tests = {
+    infer_regular_style,
+}
+
+local resolve_font_name = function ()
+  local failed, total = 0, 0
+  local resolve_name = names.resolve
+  for nset = 1, #font_name_tests do
+    local set = font_name_tests[nset]
+    for ntest = 1, #set do
+      local test = set[ntest]
+      local input, output = test[1], test[2]
+      local input_spec = {
+          name          = input,
+          lookup        = "name",
+          specification = "name:" .. input,
+          optsize       = 0,
+      }
+      local result = resolve_name (nil, nil, input_spec) == output
+      total = total + 1
+      if not result then
+        failed = failed + 1
+      end
+      pprint_resolve (input, output, result)
+    end
+  end
+  return failed, total
+end
+
+tests ["resolve_font_name"] = resolve_font_name
+
+-----------------------------------------------------------------------
+--- runner
+-----------------------------------------------------------------------
+
+local main = function ()
+  local failed, total = 0, 0
+  for name, test in next, tests do
+    texio.write_nl ("[" .. name .. "]")
+    local newfailed, newtotal = test ()
+    total  = total + 1
+    pprint_result (name, newfailed, newtotal)
+    failed = failed + newfailed
+    total  = total  + newtotal
+  end
+
+  if failed == 0 then
+    texio.write_nl (string.format ("[report] all %d tests passed.", total))
+  else
+    texio.write_nl (string.format ("[report] %d of %d tests failed (%d %%).",
+                                   failed,
+                                   total,
+                                   failed / total * 100))
+  end
+  texio.write_nl ""
+  os.exit (0)
+end
+
+return main ()
+

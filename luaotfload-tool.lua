@@ -1338,16 +1338,22 @@ do
 
         if asked.files == true then
             errcnt = verify_files (errcnt, info)
+            asked.files = nil
         end
         if asked.permissions == true then
             errcnt = check_permissions (errcnt)
+            asked.permissions = nil
         end
         if asked.repository == true then
             --errcnt = check_upstream (info.notes.revision)
             check_upstream (info.notes.revision)
+            asked.repository = nil
         end
 
-
+        local rest = next (asked)
+        if rest ~= nil then --> something unknown
+            out ("Unknown diagnostic “%s”.", rest)
+        end
         if errcnt == 0 then --> success
             out ("Everything appears to be in order, \z
                   you may sleep well.")

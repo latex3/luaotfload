@@ -88,17 +88,32 @@ function nodes.delete(head,current)
     return nodes.remove(head,current,true)
 end
 
-nodes.before = node.insert_before
-nodes.after  = node.insert_after
-
 function nodes.pool.kern(k)
     local n = new_node("kern",1)
     n.kern = k
     return n
 end
 
-function nodes.endofmath(n)
-    for n in traverse_id(math_code,n.next) do
-        return n
-    end
-end
+-- experimental
+
+local getfield = node.getfield or function(n,tag)       return n[tag]  end end
+local setfield = node.setfield or function(n,tag,value) n[tag] = value end end
+
+nodes.getfield = getfield
+nodes.setfield = setfield
+
+nodes.getattr  = getfield
+nodes.setattr  = setfield
+
+if node.getid      then nodes.getid      = node.getid      else function nodes.getid     (n) return getfield(n,"id")      end end
+if node.getsubtype then nodes.getsubtype = node.getsubtype else function nodes.getsubtype(n) return getfield(n,"subtype") end end
+if node.getnext    then nodes.getnext    = node.getnext    else function nodes.getnext   (n) return getfield(n,"next")    end end
+if node.getprev    then nodes.getprev    = node.getprev    else function nodes.getprev   (n) return getfield(n,"prev")    end end
+if node.getchar    then nodes.getchar    = node.getchar    else function nodes.getchar   (n) return getfield(n,"char")    end end
+if node.getfont    then nodes.getfont    = node.getfont    else function nodes.getfont   (n) return getfield(n,"font")    end end
+if node.getlist    then nodes.getlist    = node.getlist    else function nodes.getlist   (n) return getfield(n,"list")    end end
+
+function nodes.tonut (n) return n end
+function nodes.tonode(n) return n end
+
+nodes.nuts = nodes -- we stay nodes

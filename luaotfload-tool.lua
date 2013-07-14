@@ -1022,8 +1022,16 @@ do
         return lpegmatch (p_permissions, raw)
     end
 
+    local trailingslashes   = P"/"^1 * P(-1)
+    local stripslashes      = C((1 - trailingslashes)^0)
+
     local get_permissions = function (t, location)
+        if stringsub (location, #location) == "/" then
+            --- strip trailing slashes (lfs idiosyncrasy on Win)
+            location = lpegmatch (stripslashes, location)
+        end
         local attributes = lfsattributes (location)
+
         if not attributes and t == "f" then
             attributes = get_tentative_attributes (location)
             if not attributes then

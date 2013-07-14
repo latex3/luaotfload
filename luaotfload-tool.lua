@@ -1129,8 +1129,8 @@ do
     if kpsefind_file ("https.lua", "lua") == nil then
         check_upstream = function (errcnt)
             out       [[============= upstream repository =============
-                        Github API access requires the luasec library.
                         WARNING: Cannot retrieve repository data.
+                        Github API access requires the luasec library.
                         Grab it from <https://github.com/brunoos/luasec>
                         and retry.]]
             return errcnt

@@ -3381,8 +3381,8 @@ function nodes.pool.kern(k)
   n.kern=k
   return n
 end
-local getfield=node.getfield or function(n,tag)    return n[tag] end end
-local setfield=node.setfield or function(n,tag,value) n[tag]=value end end
+local getfield=node.getfield or function(n,tag)    return n[tag] end
+local setfield=node.setfield or function(n,tag,value) n[tag]=value end
 nodes.getfield=getfield
 nodes.setfield=setfield
 nodes.getattr=getfield

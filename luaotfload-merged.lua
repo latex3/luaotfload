@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 07/12/13 19:10:11
+-- merge date  : 07/14/13 14:53:44
 
 do -- begin closure to overcome local limits and interference
 
@@ -3396,7 +3396,43 @@ if node.getfont  then nodes.getfont=node.getfont  else function nodes.getfont  (
 if node.getlist  then nodes.getlist=node.getlist  else function nodes.getlist  (n) return getfield(n,"list")  end end
 function nodes.tonut (n) return n end
 function nodes.tonode(n) return n end
-nodes.nuts=nodes 
+nodes.tostring=node.tostring or tostring
+nodes.copy=node.copy
+nodes.copy_list=node.copy_list
+nodes.delete=node.delete
+nodes.dimensions=node.dimensions
+nodes.end_of_math=node.end_of_math
+nodes.flush_list=node.flush_list
+nodes.flush_node=node.flush_node
+nodes.free=node.free
+nodes.insert_after=node.insert_after
+nodes.insert_before=node.insert_before
+nodes.hpack=node.hpack
+nodes.new=node.new
+nodes.tail=node.tail
+nodes.traverse=node.traverse
+nodes.traverse_id=node.traverse_id
+nodes.slide=node.slide
+nodes.vpack=node.vpack
+nodes.first_glyph=node.first_glyph
+nodes.first_character=node.first_character
+nodes.has_glyph=node.has_glyph or node.first_glyph
+nodes.current_attr=node.current_attr
+nodes.do_ligature_n=node.do_ligature_n
+nodes.has_field=node.has_field
+nodes.last_node=node.last_node
+nodes.usedlist=node.usedlist
+nodes.protrusion_skippable=node.protrusion_skippable
+nodes.write=node.write
+nodes.has_attribute=node.has_attribute
+nodes.set_attribute=node.set_attribute
+nodes.unset_attribute=node.unset_attribute
+nodes.protect_glyphs=node.protect_glyphs
+nodes.unprotect_glyphs=node.unprotect_glyphs
+nodes.kerning=node.kerning
+nodes.ligaturing=node.ligaturing
+nodes.mlist_to_hlist=node.mlist_to_hlist
+nodes.nuts=nodes
 
 end -- closure
 

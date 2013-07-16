@@ -87,7 +87,7 @@ local sanitize_color_expression = function (digits)
     local sanitized = lpegmatch(valid_digits, digits)
     if not sanitized then
         luaotfload.warning(
-            "“%s” is not a valid rgb[a] color expression", digits)
+            "%q is not a valid rgb[a] color expression", digits)
         return nil
     end
     return sanitized

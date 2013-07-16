@@ -778,7 +778,7 @@ local set_default_features = function (speclist)
         if support_incomplete[script] then
             report("log", 0, "load",
                 "support for the requested script: "
-                .. "“%s” may be incomplete", script)
+                .. "%q may be incomplete", script)
         end
     else
         script = "dflt"
@@ -792,7 +792,7 @@ local set_default_features = function (speclist)
     local requested = defaults[script]
     if not requested then
         report("log", 0, "load",
-            "no defaults for script “%s”, falling back to “dflt”",
+            "no defaults for script %q, falling back to \"dflt\"",
             script)
         requested = defaults.dflt
     end
@@ -924,7 +924,7 @@ end
 --doc]]--
 
 local handle_invalid_option = function (opt)
-    report("log", 0, "load", "font option “%s” unknown.", opt)
+    report("log", 0, "load", "font option %q unknown.", opt)
     return "", false
 end
 
@@ -942,7 +942,7 @@ local check_garbage = function (_,i, garbage)
             "warning: path in file: lookups is deprecated; ")
         report("log", 0, "load", "use bracket syntax instead!")
         report("log", 0, "load",
-            "position: %d; full match: “%s”",
+            "position: %d; full match: %q",
             i, garbage)
         return true
     end
@@ -1134,7 +1134,7 @@ local handle_request = function (specification)
         --- in an anonymous lookup;
         --- we try to behave as friendly as possible
         --- just go with it ...
-        report("log", 1, "load", "invalid request “%s” of type anon",
+        report("log", 1, "load", "invalid request %q of type anon",
             specification.specification)
         report("log", 1, "load",
                "use square bracket syntax or consult the documentation.")

@@ -1712,14 +1712,13 @@ loadmodule"merged.lua"
 if fonts then
 
     if not fonts._merge_loaded_message_done_ then
-        --- a program talking first person -- HH sure believes in strong AI ...
-        log[[“I am using the merged version of 'luaotfload.lua' here. If]]
-        log[[ you run into problems or experience unexpected behaviour,]]
-        log[[ and if you have ConTeXt installed you can try to delete the]]
-        log[[ file 'luaotfload-font-merged.lua' as I might then use the]]
-        log[[ possibly updated libraries. The merged version is not]]
-        log[[ supported as it is a frozen instance. Problems can be]]
-        log[[ reported to the ConTeXt mailing list.”]]
+        log [["I am using the merged version of 'luaotfload.lua' here.]]
+        log [[ If you run into problems or experience unexpected]]
+        log [[ behaviour, and if you have ConTeXt installed you can try]]
+        log [[ to delete the file 'luaotfload-merged.lua' as I might]]
+        log [[ then use the possibly updated libraries. The merged]]
+        log [[ version is not supported as it is a frozen instance.]]
+        log [[ Problems can be reported to the ConTeXt mailing list."]]
     end
     fonts._merge_loaded_message_done_ = true
 
@@ -1911,7 +1910,7 @@ request_resolvers.anon = function (specification)
     local exists, _ = lfsisfile(name)
     if exists then --- garbage; we do this because we are nice,
                    --- not because it is correct
-        logs.names_report("log", 1, "load", "file “%s” exists", name)
+        logs.names_report("log", 1, "load", "file %q exists", name)
         logs.names_report("log", 1, "load",
           "... overriding borked anon: lookup with path: lookup")
         specification.name = name
@@ -1935,7 +1934,7 @@ request_resolvers.path = function (specification)
     local exists, _  = lfsisfile(name)
     if not exists then -- resort to file: lookup
         logs.names_report("log", 1, "load",
-          "path lookup of “%s” unsuccessful, falling back to file:",
+          "path lookup of %q unsuccessful, falling back to file:",
           name)
         request_resolvers.file(specification)
     else

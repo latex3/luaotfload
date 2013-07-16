@@ -190,11 +190,11 @@ This tool is part of the luaotfload package. Valid options are:
 
   -V --version                 print version and exit
   -h --help                    print this message
-  --diagnose=CHECK             run a self test procedure; one of “files”,
-                               “permissions”, or “repository”
+  --diagnose=CHECK             run a self test procedure; one of "files",
+                               "permissions", or "repository"
 
-  --alias=<name>               force behavior of “luaotfload-tool” or legacy
-                               “mkluatexfontdb”
+  --alias=<name>               force behavior of "luaotfload-tool" or legacy
+                               "mkluatexfontdb"
 
 -------------------------------------------------------------------------------
                                    DATABASE
@@ -228,7 +228,7 @@ The font database will be saved to
                                    FONT CACHE
 
   --cache=<directive>          operate on font cache, where <directive> is
-                               “show”, “purge”, or “erase”
+                               "show", "purge", or "erase"
 
 The font cache will be written to
    %s
@@ -248,8 +248,8 @@ Valid options:
   -vvv                         print all steps of directory searching
   -V --version                 print version and exit
   -h --help                    print this message
-  --alias=<name>               force behavior of “luaotfload-tool” or legacy
-                               “mkluatexfontdb”
+  --alias=<name>               force behavior of "luaotfload-tool" or legacy
+                               "mkluatexfontdb"
 
 The font database will be saved to
    %s
@@ -280,9 +280,9 @@ end
 
 local version_msg = function ( )
     texiowrite_nl(stringformat(
-        "%s version “%s”\n" .. -- no \z due to 5.1 compatibility
-        "database version “%s”\n" ..
-        "Lua interpreter: %s; version “%s”\n",
+        "%s version %q\n" .. -- no \z due to 5.1 compatibility
+        "database version %q\n" ..
+        "Lua interpreter: %s; version %q\n",
         config.luaotfload.self,
         version,
         names.version,
@@ -776,21 +776,21 @@ actions.query = function (job)
 
     if success then
         logs.names_report(false, 0,
-            "resolve", "Font “%s” found!", query)
+            "resolve", "Font %q found!", query)
         if subfont then
             logs.names_report(false, 0, "resolve",
-                "Resolved file name “%s”, subfont nr. “%s”",
+                "Resolved file name %q, subfont nr. %q",
                 foundname, subfont)
         else
             logs.names_report(false, 0, "resolve",
-                              "Resolved file name “%s”", foundname)
+                              "Resolved file name %q", foundname)
         end
         if job.show_info then
             show_font_info(foundname, query, job.full_info, job.warnings)
         end
     else
         logs.names_report(false, 0,
-            "resolve", "Cannot find “%s”.", query)
+            "resolve", "Cannot find %q.", query)
         if job.fuzzy == true then
             logs.names_report(false, 0,
                 "resolve", "Looking for close matches, this may take a while ...")
@@ -1303,7 +1303,7 @@ do
                      release_url)
                 return true
             else
-                out "There weren’t any new releases in the meantime."
+                out "There weren't any new releases in the meantime."
                 out "Luaotfload is up to date."
             end
             return false
@@ -1360,7 +1360,7 @@ do
 
         local rest = next (asked)
         if rest ~= nil then --> something unknown
-            out ("Unknown diagnostic “%s”.", rest)
+            out ("Unknown diagnostic %q.", rest)
         end
         if errcnt == 0 then --> success
             out ("Everything appears to be in order, \z

@@ -161,8 +161,12 @@ require"luaotfload-override.lua"  --- this populates the logs.* namespace
 require"luaotfload-database"
 require"alt_getopt"
 
-local version  = "2.3" -- same version number as luaotfload
-local names    = fonts.names
+local names = fonts.names
+
+local status_file = "luaotfload-status"
+local status      = require (status_file)
+
+local version  = "2.3"
 
 local sanitize_string = names.sanitize_string
 
@@ -281,10 +285,12 @@ end
 local version_msg = function ( )
     texiowrite_nl(stringformat(
         "%s version %q\n" .. -- no \z due to 5.1 compatibility
+        "revision %q\n" ..
         "database version %q\n" ..
         "Lua interpreter: %s; version %q\n",
         config.luaotfload.self,
         version,
+        status.notes.revision,
         names.version,
         runtime[1],
         runtime[2]))
@@ -953,10 +959,10 @@ do
         logs.names_report (false, 0, "diagnose", ...)
     end
 
-    local verify_files = function (errcnt, info)
+    local verify_files = function (errcnt, status)
         out "================ verify files ================="
-        local hashes = info.hashes
-        local notes  = info.notes
+        local hashes = status.hashes
+        local notes  = status.notes
         if not hashes or #hashes == 0 then
             out ("FAILED: cannot read checksums from %s.", status_file)
             return 1/0
@@ -1329,7 +1335,6 @@ do
     --- github api stuff end
 
     local anamneses   = { "files", "repository", "permissions" }
-    local status_file = "luaotfload-status"
 
     actions.diagnose = function (job)
         local errcnt = 0
@@ -1341,11 +1346,8 @@ do
             asked = tabletohash (asked, true)
         end
 
-        out "Loading file hashes."
-        local info = require (status_file)
-
         if asked.files == true then
-            errcnt = verify_files (errcnt, info)
+            errcnt = verify_files (errcnt, status)
             asked.files = nil
         end
         if asked.permissions == true then
@@ -1353,8 +1355,7 @@ do
             asked.permissions = nil
         end
         if asked.repository == true then
-            --errcnt = check_upstream (info.notes.revision)
-            check_upstream (info.notes.revision)
+            check_upstream (status.notes.revision)
             asked.repository = nil
         end
 

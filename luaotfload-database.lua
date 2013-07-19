@@ -363,11 +363,11 @@ load_names = function (dry_run)
 
         local db_version, nms_version = data.version, names.version
         if db_version ~= nms_version then
-            report("log", 0, "db",
+            report("both", 0, "db",
                 [[Version mismatch; expected %4.3f, got %4.3f]],
                 nms_version, db_version)
             if not fonts_reloaded then
-                report("log", 0, "db", [[force rebuild]])
+                report("both", 0, "db", [[Force rebuild]])
                 return update_names({ }, true, false)
             end
         end

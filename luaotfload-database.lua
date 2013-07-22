@@ -175,13 +175,13 @@ find_files_indeed = function (acc, dirs, filter)
     local dir   = dirs[#dirs]
     dirs[#dirs] = nil
 
-    local newdirs, newfiles = { }, { }
+    local newfiles = { }
     for ent in lfsdir (dir) do
         if ent ~= "." and ent ~= ".." then
             local fullpath = dir .. "/" .. ent
             if filter (fullpath) == true then
                 if lfsisdir (fullpath) then
-                    newdirs[#newdirs+1] = fullpath
+                    dirs[#dirs+1] = fullpath
                 elseif lfsisfile (fullpath) then
                     newfiles[#newfiles+1] = fullpath
                 end
@@ -189,8 +189,7 @@ find_files_indeed = function (acc, dirs, filter)
         end
     end
     return find_files_indeed (tableappend (acc, newfiles),
-                              tableappend (dirs, newdirs),
-                              filter)
+                              dirs, filter)
 end
 
 local dummyfilter = function () return true end
@@ -1415,7 +1414,7 @@ process_dir_tree = function (acc, dirs)
     local dir   = dirs[#dirs]
     dirs[#dirs] = nil
 
-    local newdirs, newfiles = { }, { }
+    local newfiles = { }
     local blacklist = names.blacklist
     for ent in lfsdir (dir) do
         --- filter right away
@@ -1424,7 +1423,7 @@ process_dir_tree = function (acc, dirs)
             if lfsisdir (fullpath)
             and not lpegmatch (p_blacklist, fullpath)
             then
-                newdirs[#newdirs+1] = fullpath
+                dirs[#dirs+1] = fullpath
             elseif lfsisfile (fullpath) then
                 if lpegmatch (p_font_extensions, stringlower(ent)) then
                     newfiles[#newfiles+1] = fullpath
@@ -1432,8 +1431,7 @@ process_dir_tree = function (acc, dirs)
             end
         end
     end
-    return process_dir_tree (tableappend (acc, newfiles),
-                             tableappend (dirs, newdirs))
+    return process_dir_tree (tableappend (acc, newfiles),dirs)
 end
 
 --- string -> string list

@@ -27,7 +27,6 @@ local require                 = require
 local tonumber                = tonumber
 local unpack                  = table.unpack
 
-
 local fontloaderinfo          = fontloader.info
 local fontloaderopen          = fontloader.open
 local iolines                 = io.lines
@@ -38,6 +37,8 @@ local kpsefind_file           = kpse.find_file
 local kpselookup              = kpse.lookup
 local kpsereadable_file       = kpse.readable_file
 local lfsattributes           = lfs.attributes
+local lfschdir                = lfs.chdir
+local lfscurrentdir           = lfs.currentdir
 local lfsdir                  = lfs.dir
 local mathabs                 = math.abs
 local mathmin                 = math.min
@@ -54,6 +55,7 @@ local tablesort               = table.sort
 local texiowrite_nl           = texio.write_nl
 local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
+
 --- these come from Lualibs/Context
 local getwritablepath         = caches.getwritablepath
 local filebasename            = file.basename
@@ -172,24 +174,31 @@ find_files_indeed = function (acc, dirs, filter)
         return acc
     end
 
+    local pwd   = lfscurrentdir ()
     local dir   = dirs[#dirs]
     dirs[#dirs] = nil
 
-    local newfiles = { }
-    for ent in lfsdir (dir) do
-        if ent ~= "." and ent ~= ".." then
-            local fullpath = dir .. "/" .. ent
-            if filter (fullpath) == true then
-                if lfsisdir (fullpath) then
-                    dirs[#dirs+1] = fullpath
-                elseif lfsisfile (fullpath) then
-                    newfiles[#newfiles+1] = fullpath
+    if lfschdir (dir) then
+        lfschdir (pwd)
+
+        local newfiles = { }
+        for ent in lfsdir (dir) do
+            if ent ~= "." and ent ~= ".." then
+                local fullpath = dir .. "/" .. ent
+                if filter (fullpath) == true then
+                    if lfsisdir (fullpath) then
+                        dirs[#dirs+1] = fullpath
+                    elseif lfsisfile (fullpath) then
+                        newfiles[#newfiles+1] = fullpath
+                    end
                 end
             end
         end
+        return find_files_indeed (tableappend (acc, newfiles),
+                                  dirs, filter)
     end
-    return find_files_indeed (tableappend (acc, newfiles),
-                              dirs, filter)
+    --- could not cd into, so we skip it
+    return find_files_indeed (acc, dirs, filter)
 end
 
 local dummyfilter = function () return true end
@@ -1411,27 +1420,34 @@ process_dir_tree = function (acc, dirs)
         return acc
     end
 
+    local pwd   = lfscurrentdir ()
     local dir   = dirs[#dirs]
     dirs[#dirs] = nil
 
-    local newfiles = { }
-    local blacklist = names.blacklist
-    for ent in lfsdir (dir) do
-        --- filter right away
-        if ent ~= "." and ent ~= ".." and not blacklist[ent] then
-            local fullpath = dir .. "/" .. ent
-            if lfsisdir (fullpath)
-            and not lpegmatch (p_blacklist, fullpath)
-            then
-                dirs[#dirs+1] = fullpath
-            elseif lfsisfile (fullpath) then
-                if lpegmatch (p_font_extensions, stringlower(ent)) then
-                    newfiles[#newfiles+1] = fullpath
+    if lfschdir (dir) then
+        lfschdir (pwd)
+
+        local newfiles = { }
+        local blacklist = names.blacklist
+        for ent in lfsdir (dir) do
+            --- filter right away
+            if ent ~= "." and ent ~= ".." and not blacklist[ent] then
+                local fullpath = dir .. "/" .. ent
+                if lfsisdir (fullpath)
+                and not lpegmatch (p_blacklist, fullpath)
+                then
+                    dirs[#dirs+1] = fullpath
+                elseif lfsisfile (fullpath) then
+                    if lpegmatch (p_font_extensions, stringlower(ent)) then
+                        newfiles[#newfiles+1] = fullpath
+                    end
                 end
             end
         end
+        return process_dir_tree (tableappend (acc, newfiles), dirs)
     end
-    return process_dir_tree (tableappend (acc, newfiles),dirs)
+    --- cannot cd; skip
+    return process_dir_tree (acc, dirs)
 end
 
 --- string -> string list

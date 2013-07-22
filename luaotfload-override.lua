@@ -134,9 +134,9 @@ local set_logout = function (s, finalizers)
             texiowrite_nl = texio.write_nl
             writeln       = writeln_orig
         end
-        return finalizers
     --else --- remains “log”
     end
+    return finalizers
 end
 
 logs.set_logout = set_logout

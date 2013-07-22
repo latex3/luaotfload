@@ -1539,7 +1539,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         result.help_version = "mkluatexfontdb"
         action_pending["generate"] = true
         result.log_level = math.max(1, result.log_level)
-        logs.set_logout"stdout"
+        logs.set_logout("stdout", finalizers)
     elseif nopts == 0 then
         action_pending["help"] = true
         result.help_version = "short"

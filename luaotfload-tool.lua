@@ -4,7 +4,7 @@
 --  DESCRIPTION:  database functionality
 -- REQUIREMENTS:  luaotfload 2.2
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  2.3a
+--      VERSION:  2.3b
 --      LICENSE:  GPL v2
 --     MODIFIED:  2013-06-02 19:23:54+0200
 -----------------------------------------------------------------------
@@ -166,7 +166,7 @@ local names = fonts.names
 local status_file = "luaotfload-status"
 local status      = require (status_file)
 
-local version  = "2.3"
+local version  = "2.3b"
 
 local sanitize_string = names.sanitize_string
 

@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['luaotfload-database'] = {
-    version   = "2.3a",
+    version   = "2.3b",
     comment   = "companion to luaotfload.lua",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
@@ -2037,7 +2037,7 @@ local purge_from_cache = function (category, path, list, all)
     local n = 0
     for i=1,#list do
         local filename = list[i]
-        if string.find(filename,"luatex%-cache") then -- safeguard
+        if stringfind(filename,"luatex%-cache") then -- safeguard
             if all then
                 report("info", 5, "cache", "removing %s", filename)
                 osremove(filename)

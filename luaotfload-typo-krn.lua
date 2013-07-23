@@ -20,7 +20,7 @@ local insert_node_before = node.insert_before
 local insert_node_after  = node.insert_after
 local end_of_math        = node.end_of_math
 
-local texattribute       = tex.attribute
+local texsetattribute    = tex.setattribute
 local unsetvalue         = attributes.unsetvalue
 
 local nodepool           = nodes.pool
@@ -316,7 +316,7 @@ function kerns.set(factor)
     else
         factor = unsetvalue
     end
-    texattribute[a_kerns] = factor
+    texsetattribute(a_kerns,factor)
     return factor
 end
 

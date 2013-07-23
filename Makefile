@@ -67,8 +67,9 @@ ZIPS 	 = $(CTAN_ZIP) $(TDS_ZIP)
 LUA	= texlua
 
 DO_TEX 		  	= luatex --interaction=batchmode $< >/dev/null
-# (with the next version of latexmk: -pdf -pdflatex=lualatex)
-DO_LATEX 	  	= latexmk -pdf -e '$$pdflatex = q(lualatex %O %S)' -silent $< >/dev/null
+DO_LATEXMK	 	= latexmk -e '$$max_repeat = 5' -pdf -lualatex -silent $< >/dev/null
+# latexmk does only one run on my machine, so we’re not going to rely on it
+DO_LATEX  	 	= lualatex -interaction=batchmode $< >/dev/null
 DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null
 DO_GLYPHS 		= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS 		= $(LUA) $(CHARSCRIPT)  > /dev/null
@@ -100,6 +101,7 @@ $(GRAPHED): $(DOT)
 	$(DO_GRAPHVIZ)
 
 $(COMPILED): $(DTX)
+	$(DO_LATEX)
 	$(DO_LATEX)
 
 $(UNPACKED): $(DTX)

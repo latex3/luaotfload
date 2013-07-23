@@ -40,7 +40,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload v2.3a OpenType layout system}
+\Msg{* Package: luaotfload v2.3b OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -111,7 +111,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2013/07/10 v2.3a OpenType layout system]%
+  [2013/07/23 v2.3b OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
 \usepackage[x11names]{xcolor}
@@ -231,7 +231,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \identifier{luaotfload} package}
-% \date{2013/07/10 v2.3a}
+% \date{2013/07/23 v2.3b}
 % \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
 %         Home:      \url{https://github.com/lualatex/luaotfload}\\
 %         Support:   \email{lualatex-dev@tug.org}}
@@ -1478,8 +1478,8 @@ config.luaotfload.index_file      = config.luaotfload.index_file       or "luaot
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 2.3001,
-    date          = "2013/07/10",
+    version       = 2.3002,
+    date          = "2013/07/23",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -1712,14 +1712,13 @@ loadmodule"merged.lua"
 if fonts then
 
     if not fonts._merge_loaded_message_done_ then
-        --- a program talking first person -- HH sure believes in strong AI ...
-        log[[“I am using the merged version of 'luaotfload.lua' here. If]]
-        log[[ you run into problems or experience unexpected behaviour,]]
-        log[[ and if you have ConTeXt installed you can try to delete the]]
-        log[[ file 'luaotfload-font-merged.lua' as I might then use the]]
-        log[[ possibly updated libraries. The merged version is not]]
-        log[[ supported as it is a frozen instance. Problems can be]]
-        log[[ reported to the ConTeXt mailing list.”]]
+        log [["I am using the merged version of 'luaotfload.lua' here.]]
+        log [[ If you run into problems or experience unexpected]]
+        log [[ behaviour, and if you have ConTeXt installed you can try]]
+        log [[ to delete the file 'luaotfload-merged.lua' as I might]]
+        log [[ then use the possibly updated libraries. The merged]]
+        log [[ version is not supported as it is a frozen instance.]]
+        log [[ Problems can be reported to the ConTeXt mailing list."]]
     end
     fonts._merge_loaded_message_done_ = true
 
@@ -1911,7 +1910,7 @@ request_resolvers.anon = function (specification)
     local exists, _ = lfsisfile(name)
     if exists then --- garbage; we do this because we are nice,
                    --- not because it is correct
-        logs.names_report("log", 1, "load", "file “%s” exists", name)
+        logs.names_report("log", 1, "load", "file %q exists", name)
         logs.names_report("log", 1, "load",
           "... overriding borked anon: lookup with path: lookup")
         specification.name = name
@@ -1935,7 +1934,7 @@ request_resolvers.path = function (specification)
     local exists, _  = lfsisfile(name)
     if not exists then -- resort to file: lookup
         logs.names_report("log", 1, "load",
-          "path lookup of “%s” unsuccessful, falling back to file:",
+          "path lookup of %q unsuccessful, falling back to file:",
           name)
         request_resolvers.file(specification)
     else
@@ -2044,6 +2043,8 @@ loadmodule"features.lua"    --- contains what was “font-ltx” and “font-otc
 loadmodule"extralibs.lua"   --- load additional Context libraries
 loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 
+luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
+
 -- vim:tw=71:sw=4:ts=4:expandtab
 
 %    \end{macrocode}
@@ -2069,7 +2070,7 @@ loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2013/07/10 v2.3a OpenType layout system]
+    [2013/07/23 v2.3b OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
 \ifnum\luatexversion<76

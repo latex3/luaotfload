@@ -48,10 +48,33 @@ local rewrite_fontname = function (tfmdata, specification)
   tfmdata.name = [["]] .. specification .. [["]]
 end
 
-luatexbase.add_to_callback(
-  "luaotfload.patch_font",
-  rewrite_fontname,
-  "luaotfload.rewrite_fontname")
+local rewriting = false
+
+local start_rewrite_fontname = function ()
+  if rewriting == false then
+    luatexbase.add_to_callback (
+      "luaotfload.patch_font",
+      rewrite_fontname,
+      "luaotfload.rewrite_fontname")
+    rewriting = true
+    logs.names_report ("log", 0, "aux",
+                       "start rewriting tfmdata.name field")
+  end
+end
+
+aux.start_rewrite_fontname = start_rewrite_fontname
+
+local stop_rewrite_fontname = function ()
+  if rewriting == true then
+    luatexbase.remove_fromt_callback
+      ("luaotfload.patch_font", "luaotfload.rewrite_fontname")
+    rewriting = false
+    logs.names_report ("log", 0, "aux",
+                       "stop rewriting tfmdata.name field")
+  end
+end
+
+aux.stop_rewrite_fontname = stop_rewrite_fontname
 
 --- as of 2.3 the compatibility hacks for TL 2013 are made optional
 

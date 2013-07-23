@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['luaotfload-database'] = {
-    version   = "2.3a",
+    version   = "2.3b",
     comment   = "companion to luaotfload.lua",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
@@ -27,7 +27,6 @@ local require                 = require
 local tonumber                = tonumber
 local unpack                  = table.unpack
 
-
 local fontloaderinfo          = fontloader.info
 local fontloaderopen          = fontloader.open
 local iolines                 = io.lines
@@ -38,6 +37,8 @@ local kpsefind_file           = kpse.find_file
 local kpselookup              = kpse.lookup
 local kpsereadable_file       = kpse.readable_file
 local lfsattributes           = lfs.attributes
+local lfschdir                = lfs.chdir
+local lfscurrentdir           = lfs.currentdir
 local lfsdir                  = lfs.dir
 local mathabs                 = math.abs
 local mathmin                 = math.min
@@ -54,6 +55,7 @@ local tablesort               = table.sort
 local texiowrite_nl           = texio.write_nl
 local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
+
 --- these come from Lualibs/Context
 local getwritablepath         = caches.getwritablepath
 local filebasename            = file.basename
@@ -172,25 +174,31 @@ find_files_indeed = function (acc, dirs, filter)
         return acc
     end
 
+    local pwd   = lfscurrentdir ()
     local dir   = dirs[#dirs]
     dirs[#dirs] = nil
 
-    local newdirs, newfiles = { }, { }
-    for ent in lfsdir (dir) do
-        if ent ~= "." and ent ~= ".." then
-            local fullpath = dir .. "/" .. ent
-            if filter (fullpath) == true then
-                if lfsisdir (fullpath) then
-                    newdirs[#newdirs+1] = fullpath
-                elseif lfsisfile (fullpath) then
-                    newfiles[#newfiles+1] = fullpath
+    if lfschdir (dir) then
+        lfschdir (pwd)
+
+        local newfiles = { }
+        for ent in lfsdir (dir) do
+            if ent ~= "." and ent ~= ".." then
+                local fullpath = dir .. "/" .. ent
+                if filter (fullpath) == true then
+                    if lfsisdir (fullpath) then
+                        dirs[#dirs+1] = fullpath
+                    elseif lfsisfile (fullpath) then
+                        newfiles[#newfiles+1] = fullpath
+                    end
                 end
             end
         end
+        return find_files_indeed (tableappend (acc, newfiles),
+                                  dirs, filter)
     end
-    return find_files_indeed (tableappend (acc, newfiles),
-                              tableappend (dirs, newdirs),
-                              filter)
+    --- could not cd into, so we skip it
+    return find_files_indeed (acc, dirs, filter)
 end
 
 local dummyfilter = function () return true end
@@ -363,11 +371,11 @@ load_names = function (dry_run)
 
         local db_version, nms_version = data.version, names.version
         if db_version ~= nms_version then
-            report("log", 0, "db",
+            report("both", 0, "db",
                 [[Version mismatch; expected %4.3f, got %4.3f]],
                 nms_version, db_version)
             if not fonts_reloaded then
-                report("log", 0, "db", [[force rebuild]])
+                report("both", 0, "db", [[Force rebuild]])
                 return update_names({ }, true, false)
             end
         end
@@ -643,7 +651,7 @@ end
 resolve_cached = function (_, _, specification)
     if not names.lookups then names.lookups = load_lookups() end
     local request = hash_request(specification)
-    report("both", 4, "cache", "Looking for “%s” in cache ...",
+    report("both", 4, "cache", "Looking for %q in cache ...",
            request)
 
     local found = names.lookups[request]
@@ -927,7 +935,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
     if not fonts_reloaded then
         --- last straw: try reloading the database
         return reload_db(
-            "unresolved font name: ‘" .. name .. "’",
+            "unresolved font name: '" .. name .. "'",
             resolve, nil, nil, specification
         )
     end
@@ -954,7 +962,7 @@ end
 
 --- string -> ('a -> 'a) -> 'a list -> 'a
 reload_db = function (why, caller, ...)
-    report("both", 1, "db", "Reload initiated; reason: “%s”", why)
+    report("both", 1, "db", "Reload initiated; reason: %q", why)
     names.data = update_names(names.data, false, false)
     local success = save_names()
     if success then
@@ -1056,7 +1064,7 @@ find_closest = function (name, limit)
             local dist     = distances[i]
             local namelst  = by_distance[dist]
             report(false, 0, "query",
-                   "Distance from “" .. name .. "”: " .. dist
+                   "Distance from \"" .. name .. "\": " .. dist
                 .. "\n    " .. tableconcat(namelst, "\n    ")
             )
         end
@@ -1174,7 +1182,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     if names.blacklist[fullname] or names.blacklist[basename]
     then
         report("log", 2, "db",
-               "Ignoring blacklisted font “%s”", fullname)
+               "Ignoring blacklisted font %q", fullname)
         return false
     end
 
@@ -1205,7 +1213,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
             newmappings[location]          = fullinfo --- keep
             newentrystatus.index[index+1]  = location --- is this actually used anywhere?
         end
-        report("log", 2, "db", "Font “%s” already indexed", basename)
+        report("log", 2, "db", "Font %q already indexed", basename)
         return false
     end
 
@@ -1238,7 +1246,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
         end
 
     else --- missing info
-        report("log", 1, "db", "Failed to load “%s”", basename)
+        report("log", 1, "db", "Failed to load %q", basename)
         return false
     end
     return true
@@ -1319,7 +1327,7 @@ local create_blacklist = function (blacklist, whitelist)
     local result = { }
     local dirs   = { }
 
-    report("info", 2, "db", "Blacklisting “%d” files and directories",
+    report("info", 2, "db", "Blacklisting %q files and directories",
            #blacklist)
     for i=1, #blacklist do
         local entry = blacklist[i]
@@ -1330,7 +1338,7 @@ local create_blacklist = function (blacklist, whitelist)
         end
     end
 
-    report("info", 2, "db", "Whitelisting “%d” files", #whitelist)
+    report("info", 2, "db", "Whitelisting %q files", #whitelist)
     for i=1, #whitelist do
         result[whitelist[i]] = nil
     end
@@ -1379,7 +1387,7 @@ read_blacklist = function ()
                         line = stringsub(line, 1, cmt - 1)
                     end
                     line = stringstrip(line)
-                    report("log", 2, "db", "Blacklisted file “%s”", line)
+                    report("log", 2, "db", "Blacklisted file %q", line)
                     blacklist[#blacklist+1] = line
                 end
             end
@@ -1412,28 +1420,34 @@ process_dir_tree = function (acc, dirs)
         return acc
     end
 
+    local pwd   = lfscurrentdir ()
     local dir   = dirs[#dirs]
     dirs[#dirs] = nil
 
-    local newdirs, newfiles = { }, { }
-    local blacklist = names.blacklist
-    for ent in lfsdir (dir) do
-        --- filter right away
-        if ent ~= "." and ent ~= ".." and not blacklist[ent] then
-            local fullpath = dir .. "/" .. ent
-            if lfsisdir (fullpath)
-            and not lpegmatch (p_blacklist, fullpath)
-            then
-                newdirs[#newdirs+1] = fullpath
-            elseif lfsisfile (fullpath) then
-                if lpegmatch (p_font_extensions, stringlower(ent)) then
-                    newfiles[#newfiles+1] = fullpath
+    if lfschdir (dir) then
+        lfschdir (pwd)
+
+        local newfiles = { }
+        local blacklist = names.blacklist
+        for ent in lfsdir (dir) do
+            --- filter right away
+            if ent ~= "." and ent ~= ".." and not blacklist[ent] then
+                local fullpath = dir .. "/" .. ent
+                if lfsisdir (fullpath)
+                and not lpegmatch (p_blacklist, fullpath)
+                then
+                    dirs[#dirs+1] = fullpath
+                elseif lfsisfile (fullpath) then
+                    if lpegmatch (p_font_extensions, stringlower(ent)) then
+                        newfiles[#newfiles+1] = fullpath
+                    end
                 end
             end
         end
+        return process_dir_tree (tableappend (acc, newfiles), dirs)
     end
-    return process_dir_tree (tableappend (acc, newfiles),
-                             tableappend (dirs, newdirs))
+    --- cannot cd; skip
+    return process_dir_tree (acc, dirs)
 end
 
 --- string -> string list
@@ -1467,7 +1481,7 @@ local scan_dir = function (dirname, fontnames, newfontnames,
     local found = find_font_files (dirname)
     if not found then
         report ("both", 3, "db",
-                "No such directory: “%s”; skipping.", dirname)
+                "No such directory: %q; skipping.", dirname)
         return 0, 0
     end
     report ("both", 3, "db", "Scanning directory %s", dirname)
@@ -1481,10 +1495,10 @@ local scan_dir = function (dirname, fontnames, newfontnames,
         local new
         if dry_run == true then
             report ("both", 1, "db",
-                    "Would have been loading “%s”", fullname)
+                    "Would have been loading %q", fullname)
         else
             report ("both", 4, "db",
-                    "Loading font “%s”", fullname)
+                    "Loading font %q", fullname)
             local new = load_font (fullname, fontnames,
                                    newfontnames, texmf)
             if new == true then
@@ -1841,7 +1855,7 @@ local gen_fast_lookups = function (fontnames)
             local known = filenames.base[base] or filenames.bare[bare]
             if known then --- known
                 report("both", 3, "db",
-                       "Font file “%s” already indexed (%d)",
+                       "Font file %q already indexed (%d)",
                        base, idx)
                 report("both", 3, "db", "> old location: %s",
                        (filenames.full[known] or "texmf"))
@@ -2023,7 +2037,7 @@ local purge_from_cache = function (category, path, list, all)
     local n = 0
     for i=1,#list do
         local filename = list[i]
-        if string.find(filename,"luatex%-cache") then -- safeguard
+        if stringfind(filename,"luatex%-cache") then -- safeguard
             if all then
                 report("info", 5, "cache", "removing %s", filename)
                 osremove(filename)

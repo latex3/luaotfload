@@ -60,6 +60,9 @@ MANDIR    = $(TEXMFROOT)/doc/man/man1/
 SRCDIR    = $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
 TEXMFROOT = $(shell kpsewhich --var-value TEXMFHOME)
 
+# CTAN-friendly subdirectory for packaging
+DISTDIR	  = ./luaotfload
+
 CTAN_ZIP = $(NAME).zip
 TDS_ZIP  = $(NAME).tds.zip
 ZIPS 	 = $(CTAN_ZIP) $(TDS_ZIP)
@@ -110,10 +113,16 @@ $(UNPACKED): $(DTX)
 $(MAN): $(MANSOURCE)
 	$(DO_DOCUTILS)
 
+define make-ctandir
+@$(RM) -rf $(DISTDIR)
+@mkdir -p $(DISTDIR) && cp $(SOURCE) $(COMPILED) $(DISTDIR)
+endef
+
 $(CTAN_ZIP): $(SOURCE) $(COMPILED) $(TDS_ZIP)
 	@echo "Making $@ for CTAN upload."
 	@$(RM) -- $@
-	@zip -9 $@ $^ >/dev/null
+	$(make-ctandir)
+	@zip -r -9 $@ $(TDS_ZIP) $(DISTDIR) >/dev/null
 
 define run-install
 @mkdir -p $(SCRIPTDIR) && cp $(SCRIPTSTATUS) $(SCRIPTDIR)
@@ -164,4 +173,5 @@ clean:
 
 mrproper: clean
 	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE) $(TESTDIR)/*.pdf
+	@$(RM) -r -- $(DISTDIR)
 

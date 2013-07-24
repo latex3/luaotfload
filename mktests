@@ -57,6 +57,12 @@ local pprint_result = function (name, failed, total)
   end
 end
 
+local pprint_spec = function (spec)
+  return string.format ("%s*%.2fpt",
+                        spec.specification,
+                        spec.optsize)
+end
+
 -----------------------------------------------------------------------
 --- font tests
 -----------------------------------------------------------------------
@@ -72,8 +78,31 @@ local infer_regular_style = {
   { "Garamond Premier Pro", "GaramondPremrPro-Capt.otf" },
 }
 
+local choose_optical_size = {
+  { { name = "Latin Modern Roman", optsize =  0 }, "lmroman5-regular.otf" },
+  { { name = "Latin Modern Roman", optsize = 10 }, "lmroman10-regular.otf" },
+  { { name = "Latin Modern Roman", optsize = 12 }, "lmroman12-regular.otf" },
+  { { name = "Latin Modern Roman", optsize = 42 }, "lmroman17-regular.otf" },
+  { { name = "EB Garamond", optsize =  0 }, "EBGaramond08-Regular.otf" },
+  { { name = "EB Garamond", optsize =  8 }, "EBGaramond08-Regular.otf" },
+  { { name = "EB Garamond", optsize = 12 }, "EBGaramond12-Regular.otf" },
+  { { name = "EB Garamond", optsize = 42 }, "EBGaramond12-Regular.otf" },
+  { { name = "Garamond Premier Pro", optsize =  0 }, "GaramondPremrPro-Capt.otf" },
+  { { name = "Garamond Premier Pro", optsize = 10 }, "GaramondPremrPro.otf" },
+  { { name = "Garamond Premier Pro", optsize = 15 }, "GaramondPremrPro-Subh.otf" },
+  { { name = "Garamond Premier Pro", optsize = 42 }, "GaramondPremrPro-Disp.otf" },
+}
+
 local font_name_tests = {
-    infer_regular_style,
+  infer_regular_style,
+  choose_optical_size,
+}
+
+local default_spec = {
+  name          = false,
+  lookup        = "name",
+  specification = false,
+  optsize       = 0,
 }
 
 local resolve_font_name = function ()
@@ -81,21 +110,37 @@ local resolve_font_name = function ()
   local resolve_name = names.resolve
   for nset = 1, #font_name_tests do
     local set = font_name_tests[nset]
+
     for ntest = 1, #set do
       local test = set[ntest]
       local input, output = test[1], test[2]
-      local input_spec = {
-          name          = input,
-          lookup        = "name",
-          specification = "name:" .. input,
-          optsize       = 0,
-      }
-      local result = resolve_name (nil, nil, input_spec) == output
-      total = total + 1
-      if not result then
-        failed = failed + 1
+
+      if type (input) == "string" then
+        local input_spec = table.copy (default_spec)
+        input_spec.name = input
+        input_spec.specification = input_spec.lookup .. ":" .. input
+        local result = resolve_name (nil, nil, input_spec) == output
+        total = total + 1
+        if not result then
+          failed = failed + 1
+        end
+        pprint_resolve (input, output, result)
+
+      else
+        local input_spec, output = test[1], test[2]
+        input_spec.specification = (input_spec.lookup
+                                    or default_spec.lookup)
+                                .. ":" .. input_spec.name
+        input_spec.optsize = input_spec.optsize or default_spec.optsize
+        --print( resolve_name (nil, nil, input_spec) )
+        local result = resolve_name (nil, nil, input_spec) == output
+        total = total + 1
+        if not result then
+          failed = failed + 1
+        end
+        pprint_resolve (pprint_spec (input_spec), output, result)
       end
-      pprint_resolve (input, output, result)
+
     end
   end
   return failed, total

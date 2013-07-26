@@ -1438,7 +1438,9 @@ process_dir_tree = function (acc, dirs)
                 then
                     dirs[#dirs+1] = fullpath
                 elseif lfsisfile (fullpath) then
-                    if lpegmatch (p_font_extensions, stringlower(ent)) then
+                    if lpegmatch (p_font_extensions,
+                                  stringlower (ent))
+                    then
                         newfiles[#newfiles+1] = fullpath
                     end
                 end
@@ -1450,10 +1452,38 @@ process_dir_tree = function (acc, dirs)
     return process_dir_tree (acc, dirs)
 end
 
---- string -> string list
-local find_font_files = function (root)
+local process_dir = function (dir)
+    local pwd = lfscurrentdir ()
+    if lfschdir (dir) then
+        lfschdir (pwd)
+
+        local files = { }
+        local blacklist = names.blacklist
+        for ent in lfsdir (dir) do
+            if ent ~= "." and ent ~= ".." and not blacklist[ent] then
+                local fullpath = dir .. "/" .. ent
+                if lfsisfile (fullpath) then
+                    if lpegmatch (p_font_extensions,
+                                  stringlower (ent))
+                    then
+                        files[#files+1] = fullpath
+                    end
+                end
+            end
+        end
+        return files
+    end
+    return { }
+end
+
+--- string -> bool -> string list
+local find_font_files = function (root, recurse)
     if lfsisdir (root) then
-        return process_dir_tree ({}, { root })
+        if recurse == true then
+            return process_dir_tree ({}, { root })
+        else --- kpathsea already delivered the necessary subdirs
+            return process_dir (root)
+        end
     end
 end
 
@@ -1478,7 +1508,7 @@ local scan_dir = function (dirname, fontnames, newfontnames,
         --- ignore
         return 0, 0
     end
-    local found = find_font_files (dirname)
+    local found = find_font_files (dirname, texmf ~= true)
     if not found then
         report ("both", 3, "db",
                 "No such directory: %q; skipping.", dirname)

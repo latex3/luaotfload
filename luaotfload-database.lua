@@ -1546,23 +1546,55 @@ local scan_dir = function (dirname, fontnames, newfontnames,
     return n_found, n_new
 end
 
+--- string list -> string list
+local filter_out_pwd = function (dirs)
+    local result = { }
+    local pwd = path_normalize (lpegmatch (stripslashes,
+                                           lfscurrentdir ()))
+    for i = 1, #dirs do
+        --- better safe than sorry
+        local dir = path_normalize (lpegmatch (stripslashes, dirs[i]))
+        if not (dir == "." or dir == pwd) then
+            result[#result+1] = dir
+        end
+    end
+    return result
+end
+
+--[[doc--
+    scan_texmf_fonts() scans all fonts in the texmf tree through the
+    kpathsea variables OPENTYPEFONTS and TTFONTS of texmf.cnf.
+    The current working directory comes as “.” (texlive) or absolute
+    path (miktex) and will always be filtered out.
+--doc]]--
+
 --- dbobj -> dbobj -> bool? -> (int * int)
 local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
-    local n_scanned, n_new = 0, 0
-    --[[
-    This function scans all fonts in the texmf tree, through kpathsea
-    variables OPENTYPEFONTS and TTFONTS of texmf.cnf
-    ]]
-    if stringis_empty(kpseexpand_path("$OSFONTDIR")) then
-        report("info", 2, "db", "Scanning TEXMF fonts...")
+    local n_scanned, n_new, fontdirs = 0, 0
+    local osfontdir = kpseexpand_path "$OSFONTDIR"
+    if stringis_empty (osfontdir) then
+        report ("info", 2, "db", "Scanning TEXMF fonts...")
     else
-        report("info", 2, "db", "Scanning TEXMF and OS fonts...")
+        report ("info", 2, "db", "Scanning TEXMF and OS fonts...")
+        if logs.get_loglevel () > 3 then
+            local osdirs = filesplitpath (osfontdir)
+            report ("info", 0, "db",
+                    "$OSFONTDIR has %d entries:", #osdirs)
+            for i = 1, #osdirs do
+                report ("info", 0, "db", "[%d] %s", i, osdirs[i])
+            end
+        end
     end
-    local fontdirs = stringgsub(kpseexpand_path("$OPENTYPEFONTS"), "^%.", "")
-    fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
-    if not stringis_empty(fontdirs) then
-        for _,d in next, filesplitpath(fontdirs) do
-            local found, new = scan_dir(d, fontnames, newfontnames, dry_run, true)
+    fontdirs = kpseexpand_path "$OPENTYPEFONTS"
+    fontdirs = fontdirs .. (ostype == "windows" and ";" or ":")
+            .. kpseexpand_path "$TTFONTS"
+    if not stringis_empty (fontdirs) then
+        local tasks = filter_out_pwd (filesplitpath (fontdirs))
+        report ("info", 3, "db",
+                "Initiating scan of %d directories.", #tasks)
+        for _, d in next, tasks do
+            local found, new = scan_dir (d, fontnames, newfontnames,
+                                         dry_run, true)
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end

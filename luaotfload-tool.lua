@@ -1028,8 +1028,7 @@ do
         return lpegmatch (p_permissions, raw)
     end
 
-    local trailingslashes   = P"/"^1 * P(-1)
-    local stripslashes      = C((1 - trailingslashes)^0)
+    local stripslashes = names.patterns.stripslashes
 
     local get_permissions = function (t, location)
         if stringsub (location, #location) == "/" then

@@ -117,6 +117,10 @@ end
 
 local report = logs.names_report
 
+local trailingslashes   = P"/"^1 * P(-1)
+local stripslashes      = C((1 - trailingslashes)^0)
+names.patterns          = { stripslashes = stripslashes }
+
 --[[doc--
     We use the functions in the cache.* namespace that come with the
     fontloader (see luat-basics-gen). it’s safe to use for the most part
@@ -139,6 +143,7 @@ if caches then
         luaotfload.error
             ("Impossible to find a suitable writeable cache...")
     else
+        prefix = lpegmatch (stripslashes, prefix)
         report ("log", 0, "db",
                 "root cache directory is " .. prefix)
     end

@@ -117,6 +117,10 @@ end
 
 local report = logs.names_report
 
+local trailingslashes   = P"/"^1 * P(-1)
+local stripslashes      = C((1 - trailingslashes)^0)
+names.patterns          = { stripslashes = stripslashes }
+
 --[[doc--
     We use the functions in the cache.* namespace that come with the
     fontloader (see luat-basics-gen). it’s safe to use for the most part
@@ -139,6 +143,7 @@ if caches then
         luaotfload.error
             ("Impossible to find a suitable writeable cache...")
     else
+        prefix = lpegmatch (stripslashes, prefix)
         report ("log", 0, "db",
                 "root cache directory is " .. prefix)
     end
@@ -1438,7 +1443,9 @@ process_dir_tree = function (acc, dirs)
                 then
                     dirs[#dirs+1] = fullpath
                 elseif lfsisfile (fullpath) then
-                    if lpegmatch (p_font_extensions, stringlower(ent)) then
+                    if lpegmatch (p_font_extensions,
+                                  stringlower (ent))
+                    then
                         newfiles[#newfiles+1] = fullpath
                     end
                 end
@@ -1450,10 +1457,38 @@ process_dir_tree = function (acc, dirs)
     return process_dir_tree (acc, dirs)
 end
 
---- string -> string list
-local find_font_files = function (root)
+local process_dir = function (dir)
+    local pwd = lfscurrentdir ()
+    if lfschdir (dir) then
+        lfschdir (pwd)
+
+        local files = { }
+        local blacklist = names.blacklist
+        for ent in lfsdir (dir) do
+            if ent ~= "." and ent ~= ".." and not blacklist[ent] then
+                local fullpath = dir .. "/" .. ent
+                if lfsisfile (fullpath) then
+                    if lpegmatch (p_font_extensions,
+                                  stringlower (ent))
+                    then
+                        files[#files+1] = fullpath
+                    end
+                end
+            end
+        end
+        return files
+    end
+    return { }
+end
+
+--- string -> bool -> string list
+local find_font_files = function (root, recurse)
     if lfsisdir (root) then
-        return process_dir_tree ({}, { root })
+        if recurse == true then
+            return process_dir_tree ({}, { root })
+        else --- kpathsea already delivered the necessary subdirs
+            return process_dir (root)
+        end
     end
 end
 
@@ -1478,7 +1513,7 @@ local scan_dir = function (dirname, fontnames, newfontnames,
         --- ignore
         return 0, 0
     end
-    local found = find_font_files (dirname)
+    local found = find_font_files (dirname, texmf ~= true)
     if not found then
         report ("both", 3, "db",
                 "No such directory: %q; skipping.", dirname)
@@ -1511,23 +1546,55 @@ local scan_dir = function (dirname, fontnames, newfontnames,
     return n_found, n_new
 end
 
+--- string list -> string list
+local filter_out_pwd = function (dirs)
+    local result = { }
+    local pwd = path_normalize (lpegmatch (stripslashes,
+                                           lfscurrentdir ()))
+    for i = 1, #dirs do
+        --- better safe than sorry
+        local dir = path_normalize (lpegmatch (stripslashes, dirs[i]))
+        if not (dir == "." or dir == pwd) then
+            result[#result+1] = dir
+        end
+    end
+    return result
+end
+
+--[[doc--
+    scan_texmf_fonts() scans all fonts in the texmf tree through the
+    kpathsea variables OPENTYPEFONTS and TTFONTS of texmf.cnf.
+    The current working directory comes as “.” (texlive) or absolute
+    path (miktex) and will always be filtered out.
+--doc]]--
+
 --- dbobj -> dbobj -> bool? -> (int * int)
 local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
-    local n_scanned, n_new = 0, 0
-    --[[
-    This function scans all fonts in the texmf tree, through kpathsea
-    variables OPENTYPEFONTS and TTFONTS of texmf.cnf
-    ]]
-    if stringis_empty(kpseexpand_path("$OSFONTDIR")) then
-        report("info", 2, "db", "Scanning TEXMF fonts...")
+    local n_scanned, n_new, fontdirs = 0, 0
+    local osfontdir = kpseexpand_path "$OSFONTDIR"
+    if stringis_empty (osfontdir) then
+        report ("info", 2, "db", "Scanning TEXMF fonts...")
     else
-        report("info", 2, "db", "Scanning TEXMF and OS fonts...")
+        report ("info", 2, "db", "Scanning TEXMF and OS fonts...")
+        if logs.get_loglevel () > 3 then
+            local osdirs = filesplitpath (osfontdir)
+            report ("info", 0, "db",
+                    "$OSFONTDIR has %d entries:", #osdirs)
+            for i = 1, #osdirs do
+                report ("info", 0, "db", "[%d] %s", i, osdirs[i])
+            end
+        end
     end
-    local fontdirs = stringgsub(kpseexpand_path("$OPENTYPEFONTS"), "^%.", "")
-    fontdirs       = fontdirs .. stringgsub(kpseexpand_path("$TTFONTS"), "^%.", "")
-    if not stringis_empty(fontdirs) then
-        for _,d in next, filesplitpath(fontdirs) do
-            local found, new = scan_dir(d, fontnames, newfontnames, dry_run, true)
+    fontdirs = kpseexpand_path "$OPENTYPEFONTS"
+    fontdirs = fontdirs .. (ostype == "windows" and ";" or ":")
+            .. kpseexpand_path "$TTFONTS"
+    if not stringis_empty (fontdirs) then
+        local tasks = filter_out_pwd (filesplitpath (fontdirs))
+        report ("info", 3, "db",
+                "Initiating scan of %d directories.", #tasks)
+        for _, d in next, tasks do
+            local found, new = scan_dir (d, fontnames, newfontnames,
+                                         dry_run, true)
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end

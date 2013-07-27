@@ -42,13 +42,17 @@ kpse.set_program_name "luatex"
 local ioopen          = io.open
 local iowrite         = io.write
 local kpsefind_file   = kpse.find_file
+local kpseexpand_var  = kpse.expand_var
+local kpseexpand_path = kpse.expand_path
 local lfsattributes   = lfs.attributes
 local lfsisfile       = lfs.isfile
 local lfsreadlink     = lfs.readlink
 local md5sumhexa      = md5.sumhexa
 local next            = next
 local osdate          = os.date
+local osgetenv        = os.getenv
 local osremove        = os.remove
+local osname          = os.name
 local ostype          = os.type
 local stringexplode   = string.explode
 local stringformat    = string.format
@@ -136,13 +140,13 @@ config.lualibs.prefer_merged    = true
 config.lualibs.load_extended    = true
 
 require "lualibs"
---- dofile "util-jsn.lua" --- awaiting fix
 
-local lua_of_json               = utilities.json.tolua
-local ioloaddata                = io.loaddata
-local tabletohash               = table.tohash
-local fileiswritable            = file.iswritable
 local fileisreadable            = file.isreadable
+local fileiswritable            = file.iswritable
+local filesplitpath             = file.splitpath
+local ioloaddata                = io.loaddata
+local lua_of_json               = utilities.json.tolua
+local tabletohash               = table.tohash
 
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
@@ -690,6 +694,7 @@ local action_sequence = {
     "blacklist", "cache", "flush",   "generate",
     "list",      "query",
 }
+
 local action_pending  = tabletohash(action_sequence, false)
 
 action_pending.loglevel = true  --- always set the loglevel
@@ -1028,8 +1033,7 @@ do
         return lpegmatch (p_permissions, raw)
     end
 
-    local trailingslashes   = P"/"^1 * P(-1)
-    local stripslashes      = C((1 - trailingslashes)^0)
+    local stripslashes = names.patterns.stripslashes
 
     local get_permissions = function (t, location)
         if stringsub (location, #location) == "/" then
@@ -1334,7 +1338,136 @@ do
     end
     --- github api stuff end
 
-    local anamneses   = { "files", "repository", "permissions" }
+    local print_envvar = function (var)
+        local val = osgetenv (var)
+        if val then
+            out ("%20s: %q", stringformat ("$%s", var), val)
+            return val
+        else
+            out ("%20s: <unset>", stringformat ("$%s", var))
+        end
+    end
+
+    local print_path = function (var)
+        local val = osgetenv (var)
+        if val then
+            local paths = filesplitpath (val)
+            if paths then
+                local npaths = #paths
+                if npaths == 1 then
+                    out ("%20s: %q", stringformat ("$%s", var), val)
+                elseif npaths > 1 then
+                    out ("%20s: <%d items>", stringformat ("$%s", var), npaths)
+                    for i = 1, npaths do
+                        out ("                   +: %q", paths[i])
+                    end
+                else
+                    out ("%20s: <empty>")
+                end
+            end
+        else
+            out ("%20s: <unset>", stringformat ("$%s", var))
+        end
+    end
+
+    local print_kpsevar = function (var)
+        var = "$" .. var
+        local val = kpseexpand_var (var)
+        if val and val ~= var then
+            out ("%20s: %q", var, val)
+            return val
+        else
+            out ("%20s: <empty or unset>", var)
+        end
+    end
+
+    local print_kpsepath = function (var)
+        var = "$" .. var
+        local val = kpseexpand_path (var)
+        if val and val ~= "" then
+            local paths = filesplitpath (val)
+            if paths then
+                local npaths = #paths
+                if npaths == 1 then
+                    out ("%20s: %q", var, paths[1])
+                elseif npaths > 1 then
+                    out ("%20s: <%d items>", var, npaths)
+                    for i = 1, npaths do
+                        out ("                   +: %q", paths[i])
+                    end
+                else
+                    out ("%20s: <empty>")
+                end
+            end
+        else
+            out ("%20s: <empty or unset>", var)
+        end
+    end
+
+    --- this test first if a variable is set and then expands the
+    --- paths; this is necessitated by the fact that expand-path will
+    --- return the empty string both if the variable is unset and if
+    --- the directory does not exist
+
+    local print_kpsepathvar = function (var)
+        local vvar = "$" .. var
+        local val = kpseexpand_var (vvar)
+        if val and val ~= vvar then
+            out ("%20s: %q", vvar, val)
+            print_kpsepath (var)
+        else
+            out ("%20s: <empty or unset>", var)
+        end
+    end
+
+    local check_environment = function (errcnt)
+        out "============ environment settings ============="
+        out ("system: %s/%s", ostype, osname)
+        if ostype == "unix" and io.popen then
+            local chan = io.popen ("uname -a", "r")
+            if chan then
+                out ("info: %s", chan:read "*all")
+                chan:close ()
+            end
+        end
+
+        out "1) *shell environment*"
+        print_envvar "SHELL"
+        print_path "PATH"
+        print_path "OSFONTDIR"
+        print_envvar "USER"
+        if ostype == "windows" then
+            print_envvar "WINDIR"
+            print_envvar "CD"
+            print_path "TEMP"
+        elseif ostype == "unix" then
+            print_envvar "HOME"
+            print_envvar "PWD"
+            print_path "TMPDIR"
+        end
+
+        out "2) *kpathsea*"
+        print_kpsepathvar "OPENTYPEFONTS"
+        print_kpsepathvar "TTFONTS"
+
+        print_kpsepathvar "TEXMFCACHE"
+        print_kpsepathvar "TEXMFVAR"
+
+        --- the expansion of these can be quite large; as they aren’t
+        --- usually essential to luaotfload, we won’t dump every single
+        --- path
+        print_kpsevar "LUAINPUTS"
+        print_kpsevar "CLUAINPUTS"
+
+        return errcnt
+    end
+
+    local anamneses   = {
+        "environment",
+        "files",
+        "repository",
+        "permissions"
+    }
 
     actions.diagnose = function (job)
         local errcnt = 0
@@ -1346,14 +1479,21 @@ do
             asked = tabletohash (asked, true)
         end
 
+        if asked.environment == true then
+            errcnt = check_environment (errcnt)
+            asked.environment = nil
+        end
+
         if asked.files == true then
             errcnt = verify_files (errcnt, status)
             asked.files = nil
         end
+
         if asked.permissions == true then
             errcnt = check_permissions (errcnt)
             asked.permissions = nil
         end
+
         if asked.repository == true then
             check_upstream (status.notes.revision)
             asked.repository = nil

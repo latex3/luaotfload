@@ -135,9 +135,13 @@ miscellaneous
                            modifications;
                         2) ``permissions`` -> check permissions of
                            cache directories and files;
-                        3) ``repository`` -> check the git repository
+                        3) ``environment`` -> print relevant
+                            environment and kpse variables;
+                        4) ``repository`` -> check the git repository
                            for new releases.
 
+                        Procedures can be chained by concatenating with
+                        commas, e.g. ``--diagnose=files,permissions``.
                         Specify ``thorough`` to run all checks.
 
 FILES

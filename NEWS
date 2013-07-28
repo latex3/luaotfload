@@ -1,6 +1,11 @@
 Change History
 --------------
 
+2013/XX/XX, luaotfload v2.4
+    * additional self-tests, now in separate file (luaotfload-diagnostics.lua)
+    * better path and directory handling, especially on Windows
+    * test runner (script mktests)
+
 2013/07/10, luaotfload v2.3a
     * Detect LuaJIT interpreter (LuaJITTeX)
     * Self-test functionality for luaotfload-tool.lua (option  ``--diagnose``)

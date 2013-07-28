@@ -117,9 +117,17 @@ end
 
 local report = logs.names_report
 
+names.patterns          = { }
+local patterns          = names.patterns
+
 local trailingslashes   = P"/"^1 * P(-1)
 local stripslashes      = C((1 - trailingslashes)^0)
-names.patterns          = { stripslashes = stripslashes }
+patterns.stripslashes   = stripslashes
+
+local comma             = P","
+local noncomma          = 1-comma
+local splitcomma        = Ct((C(noncomma^1) + comma)^1)
+patterns.splitcomma     = splitcomma
 
 --[[doc--
     We use the functions in the cache.* namespace that come with the

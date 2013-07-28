@@ -40,7 +40,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload v2.3b OpenType layout system}
+\Msg{* Package: luaotfload v2.4 OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -111,7 +111,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2013/07/23 v2.3b OpenType layout system]%
+  [2013/07/28 v2.4 OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
 \usepackage[x11names]{xcolor}
@@ -231,7 +231,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \identifier{luaotfload} package}
-% \date{2013/07/23 v2.3b}
+% \date{2013/07/28 v2.4}
 % \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
 %         Home:      \url{https://github.com/lualatex/luaotfload}\\
 %         Support:   \email{lualatex-dev@tug.org}}
@@ -1005,6 +1005,14 @@ and the derived files
 %   In \TEX Live: \fileent{texmf-dist/doc/luatex/base/luatexref-t.pdf}.
 % }
 %
+% For a much more detailed report about a given font try the \verb|-I| option
+% instead (\verb|--inspect|).
+% \begin{quote}
+%   \begin{verbatim}
+%     luaotfload-tool  -I --find="Iwona Light Italic"
+%   \end{verbatim}
+% \end{quote}
+%
 % \verb|luaotfload-tool --help| will list the available command line
 % switches, including some not discussed in detail here.
 % For a full documentation of \identifier{luaotfload-tool} and its
@@ -1383,6 +1391,7 @@ and the derived files
 %
 % \section{Troubleshooting}
 %
+% \subsection {Database Generation}
 % If you encounter problems with some fonts, please first update to the latest
 % version of this package before reporting a bug, as
 % \identifier{luaotfload} is under active development and still a
@@ -1392,18 +1401,42 @@ and the derived files
 % tracker for submitting bug reports, feature requests and the likes
 % requests and the likes.
 %
-% Errors during database generation can be traced by increasing
-% verbosity levels and redirecting log output to \fileent{stdout}:
+% Bug reports are more likely to be addressed if they contain the output of
 %
-% \begin{verbatim}
-%   luaotfload-tool -fuvvv --log=stdout
-% \end{verbatim}
+% \begin{quote}
+%   \begin{verbatim}
+%     luaotfload-tool --diagnose=environment,files,permissions
+%   \end{verbatim}
+% \end{quote}
 %
-% If this fails, the font last printed to the terminal is likely to be
-% the culprit.
+% \noindent Consult the man page for a description of these options.
+%
+% Errors during database generation can be traced by increasing the
+% verbosity level and redirecting log output to \fileent{stdout}:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%     luaotfload-tool -fuvvv --log=stdout
+%   \end{verbatim}
+% \end{quote}
+%
+% \noindent or to a file in \fileent{/tmp}:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%     luaotfload-tool -fuvvv --log=file
+%   \end{verbatim}
+% \end{quote}
+%
+% \noindent In the latter case, invoke the \verb|tail(1)| utility on the file
+% for live monitoring of the progress.
+%
+% If database generation fails, the font last printed to the terminal or log
+% file is likely to be the culprit.
 % Please specify it when reporting a bug, and blacklist it for the time
 % being (see above, page \pageref{font-blacklist}).
 %
+% \subsection {Font Features}
 % A common problem is the lack of features for some
 % \OpenType fonts even when specified.
 % This can be related to the fact that some fonts do not provide
@@ -1414,10 +1447,22 @@ and the derived files
 % fix it.
 % For example with \verb|latn|:
 %
-% \begin{verbatim}
-%   \font\test=file:MyFont.otf:script=latn;+liga;
-% \end{verbatim}
+% \begin{quote}
+%   \begin{verbatim}
+%     \font\test=file:MyFont.otf:script=latn;+liga;
+%   \end{verbatim}
+% \end{quote}
 %
+% You can get a list of features that a font defines for scripts and languages
+% by querying it in \fileent{luaotfload-tool}:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%     luaotfload-tool --find="Iwona" --inspect
+%   \end{verbatim}
+% \end{quote}
+%
+% \subsection {\LUATEX Programming}
 % Another strategy that helps avoiding problems is to not access raw \LUATEX
 % internals directly.
 % Some of them, even though they are dangerous to access, have not been
@@ -1426,13 +1471,38 @@ and the derived files
 % \luafunction{aux} namespace over direct manipulation of font objects.
 % For example, raw access to the \luafunction{font.fonts} table like:
 %
-% \begin{verbatim}
-%   local somefont = font.fonts[2]
-% \end{verbatim}
+% \begin{quote}
+%   \begin{verbatim}
+%     local somefont = font.fonts[2]
+%   \end{verbatim}
+% \end{quote}
 %
-% can render already defined fonts unusable.
+% \noindent can render already defined fonts unusable.
 % Instead, the function \luafunction{font.getfont()} should be used because
 % it has been replaced by a safe variant.
+%
+% However, \luafunction{font.getfont()} only covers fonts handled by the font
+% loader, e.~g. \identifier{OpenType} and \identifier{TrueType} fonts, but
+% not \abbrev{tfm} or \abbrev{ofm}.
+% Should you absolutely require access to all fonts known to \LUATEX, including
+% the virtual and autogenerated ones, then you need to query both
+% \luafunction{font.getfont()} and \luafunction{font.fonts}.
+% In this case, best define you own accessor:
+%
+% \begin{quote}
+%   \begin{verbatim}
+%     local unsafe_getfont = function (id)
+%         local tfmdata = font.getfont (id)
+%         if not tfmdata then
+%             tfmdata = font.fonts[id]
+%         end
+%         return tfmdata
+%     end
+%
+%     --- use like getfont()
+%     local somefont = unsafe_getfont (2)
+%   \end{verbatim}
+% \end{quote}
 %
 % \part{Implementation}
 %
@@ -1478,8 +1548,8 @@ config.luaotfload.index_file      = config.luaotfload.index_file       or "luaot
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 2.3002,
-    date          = "2013/07/23",
+    version       = 2.40001,
+    date          = "2013/07/28",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -2070,7 +2140,7 @@ luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2013/07/23 v2.3b OpenType layout system]
+    [2013/07/28 v2.4 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
 \ifnum\luatexversion<76

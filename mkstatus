@@ -39,6 +39,7 @@ local names = {
   "luaotfload-characters.lua",
   "luaotfload-colors.lua",
   "luaotfload-database.lua",
+  "luaotfload-diagnostics.lua",
   "luaotfload-extralibs.lua",
   "luaotfload-features.lua",
   "luaotfload-fonts-cbk.lua",

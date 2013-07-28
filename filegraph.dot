@@ -51,18 +51,55 @@ strict digraph luaotfload_files { //looks weird with circo ...
     merged_luatex_fonts -> font_age [label="luatex-fonts-enc.lua",
                                      ltail=cluster_merged]
 
+    fontdbutil -> fontdbutil_diagnostics [label="--diagnose"]
+
+    fontdbutil -> status [label="version information"]
+
+    fontdbutil_diagnostics -> status [constraint=no, label="hash files"]
+
+    merged_luatex_fonts -> characters [label="luaotfload-auxiliary.lua",
+                                       ltail=cluster_merged]
+
     luaotfload_libs -> font_names [label="luaotfload-database.lua"]
+    luaotfload_libs -> typo_krn   [label="luaotfload-extralibs.lua"]
+
+    mkstatus    -> status     [label="generates from distribution files",
+                               style=dashed]
 
     mkglyphlist -> font_age     [label="generates from glyphlist.txt",
                                  style=dashed]
 
-    subgraph { rank = same; mkglyphlist; fontdbutil; luaotfload }
+    mkcharacters -> characters     [label="generates from Context’s char-def.lua",
+                                    style=dashed]
+
+    subgraph { rank = same;
+               mkcharacters;
+               mkglyphlist;
+               mkstatus;
+               fontdbutil;
+               luaotfload }
 
 /* ····································································
  * main files
  * ································································· */
 
-    fontdbutil        [label  = "luaotfload-util\nmkluatexfontdb.lua",
+    fontdbutil        [label  = "luaotfload-tool.lua\nmkluatexfontdb.lua",
+                       shape  = rect,
+                       width  = "3.2cm",
+                       height = "1.2cm",
+                       color  = "#01012222",
+                       style  = "filled,rounded",
+                       penwidth=2]
+
+    fontdbutil_diagnostics [label  = "luaotfload-diagnostics.lua",
+                            shape  = rect,
+                            width  = "3.2cm",
+                            height = "1.2cm",
+                            color  = "#01012222",
+                            style  = "filled,rounded",
+                            penwidth=2]
+
+    mkstatus          [label  = "mkstatus",
                        shape  = rect,
                        width  = "3.2cm",
                        height = "1.2cm",
@@ -71,6 +108,14 @@ strict digraph luaotfload_files { //looks weird with circo ...
                        penwidth=2]
 
     mkglyphlist       [label  = "mkglyphlist",
+                       shape  = rect,
+                       width  = "3.2cm",
+                       height = "1.2cm",
+                       color  = "#01012222",
+                       style  = "filled,rounded",
+                       penwidth=2]
+
+    mkcharacters      [label  = "mkcharacters",
                        shape  = rect,
                        width  = "3.2cm",
                        height = "1.2cm",
@@ -102,10 +147,26 @@ strict digraph luaotfload_files { //looks weird with circo ...
                        style  = "filled,rounded",
                        penwidth=2]
 
+    typo_krn [label  = "luaotfload-typo-krn.lua",
+              shape  = rect,
+              width  = "3.2cm",
+              height = "1.2cm",
+              color  = "#01012222",
+              style  = "filled,rounded",
+              penwidth=2]
+
 /* ····································································
  * luaotfload files
  * ································································· */
 
+
+    characters [style      = "filled,dashed",
+                shape      = rect,
+                width      = "3.2cm",
+                fillcolor  = "#01012222",
+                color      = grey40,
+                style      = "filled,dotted,rounded",
+                label      = "luaotfload-characters.lua"]
 
     font_age [style      = "filled,dashed",
               shape      = rect,
@@ -123,6 +184,14 @@ strict digraph luaotfload_files { //looks weird with circo ...
                 style      = "filled,dotted,rounded",
                 label      = "luaotfload-names.lua\nluaotfload-names.luc"]
 
+    status [style      = "filled,dashed",
+            shape      = rect,
+            width      = "3.2cm",
+            fillcolor  = "#01012222",
+            color      = grey40,
+            style      = "filled,dotted,rounded",
+            label      = "luaotfload-status.lua"]
+
     otfl_blacklist_cnf [style      = "filled,dashed",
                         shape      = rect,
                         width      = "3.2cm",
@@ -139,9 +208,10 @@ strict digraph luaotfload_files { //looks weird with circo ...
         label      = <
             <table cellborder="0" bgcolor="#FFFFFFAA">
                 <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Luaotfload Libraries</font> </td> </th>
-                <tr> <td>luaotfload-auxiliary.lua</td> <td>luaotfload-features.lua</td> </tr>
-                <tr> <td>luaotfload-override.lua</td>  <td>luaotfload-loaders.lua</td>  </tr>
-                <tr> <td>luaotfload-database.lua</td>  <td>luaotfload-color.lua</td>    </tr>
+                <tr> <td>luaotfload-auxiliary.lua</td>  <td>luaotfload-features.lua</td>    </tr>
+                <tr> <td>luaotfload-override.lua</td>   <td>luaotfload-loaders.lua</td>     </tr>
+                <tr> <td>luaotfload-database.lua</td>   <td>luaotfload-color.lua</td>       </tr>
+                <tr> <td>luaotfload-extralibs.lua</td>  <td>luaotfload-letterspace.lua</td> </tr>
             </table>
         >,
     ]

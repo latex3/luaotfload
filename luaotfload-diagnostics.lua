@@ -312,7 +312,12 @@ else
         out ("%d of %d Github API requests left.", left, limit)
         if left == 0 then
             out ("Cannot make any more API requests.")
-            out ("Try again later at %s.", osdate ("%F %T", reset))
+            if ostype == "unix" then
+                out ("Try again later at %s.", osdate ("%F %T", reset))
+            else --- windows doesn’t C99
+                out ("Try again later at %s.",
+                     osdate ("%Y-%m-d %H:%M:%S", reset))
+            end
         end
         return true
     end
@@ -620,3 +625,4 @@ end
 
 return diagnose
 
+-- vim:tw=71:sw=4:ts=4:expandtab

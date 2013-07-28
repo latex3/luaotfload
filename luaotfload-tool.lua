@@ -46,6 +46,7 @@ local iowrite         = io.write
 local kpsefind_file   = kpse.find_file
 local next            = next
 local osdate          = os.date
+local ostype          = os.type
 local stringexplode   = string.explode
 local stringformat    = string.format
 local stringlower     = string.lower
@@ -507,7 +508,14 @@ local display_general = function (fullinfo)
                 val = #fullinfo[key]
             end
         elseif mode == "d" then
-            val = osdate("%F %T", fullinfo[key])
+            if ostype == "unix" then
+                val = osdate("%F %T", fullinfo[key])
+            else
+                --- the MS compiler doesn’t support C99, so
+                --- strftime is missing some functionality;
+                --- see loslib.c for details.
+                val = osdate("%Y-%m-d %H:%M:%S", fullinfo[key])
+            end
         end
         if not val then
             val = "<none>"
@@ -795,7 +803,8 @@ actions.query = function (job)
                               "Resolved file name %q", foundname)
         end
         if job.show_info then
-            show_font_info(foundname, query, job.full_info, job.warnings)
+            show_font_info (foundname, query, job.full_info, job.warnings)
+            texiowrite_nl ""
         end
     else
         logs.names_report(false, 0,

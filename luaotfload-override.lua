@@ -99,8 +99,9 @@ end
 
 local set_logout = function (s, finalizers)
     if s == "stdout" then
-        logout = "term"
+        logout = "redirect"
     elseif s == "file" then --- inject custom logger
+        logout = "redirect"
         local chan = choose_logfile ()
         chan:write (stringformat ("logging initiated at %s",
                                   osdate ("%F %T", ostime ())))
@@ -224,7 +225,7 @@ local names_report = function (mode, lvl, ...)
     if loglevel >= lvl then
         if mode == "log" then
             log (...)
-        elseif mode == "both" and log ~= "stdout" then
+        elseif mode == "both" and logout ~= "redirect" then
             log (...)
             stdout (...)
         else

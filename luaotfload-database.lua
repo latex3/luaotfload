@@ -28,7 +28,9 @@ local tonumber                = tonumber
 local unpack                  = table.unpack
 
 local fontloaderinfo          = fontloader.info
+local fontloaderclose         = fontloader.close
 local fontloaderopen          = fontloader.open
+local fontloaderto_table      = fontloader.to_table
 local iolines                 = io.lines
 local ioopen                  = io.open
 local kpseexpand_path         = kpse.expand_path
@@ -67,6 +69,7 @@ local filejoin                = file.join
 local filenameonly            = file.nameonly
 local filereplacesuffix       = file.replacesuffix
 local filesplitpath           = file.splitpath or file.split_path
+local filesuffix              = file.suffix
 local lfsisdir                = lfs.isdir
 local lfsisfile               = lfs.isfile
 local lfsmkdirs               = lfs.mkdirs
@@ -351,7 +354,8 @@ local crude_file_lookup
 local crude_file_lookup_verbose
 local find_closest
 local flush_lookup_cache
-local font_fullinfo
+local ot_fullinfo
+local t1_fullinfo
 local load_names
 local load_lookups
 local read_blacklist
@@ -1095,22 +1099,33 @@ local sanitize_names = function (names)
     return res
 end
 
+local load_font_file = function (filename, subfont)
+    local rawfont, _msg = fontloaderopen (filename, subfont)
+    if not rawfont then
+        report ("log", 1, "db", "ERROR: failed to open %s", filename)
+        return
+    end
+    local metadata = fontloaderto_table (rawfont)
+    fontloaderclose (rawfont)
+    collectgarbage "collect"
+    return metadata
+end
+
 --[[doc--
 The data inside an Opentype font file can be quite heterogeneous.
 Thus in order to get the relevant information, parts of the original
 table as returned by the font file reader need to be relocated.
 --doc]]--
+
 --- string -> int -> bool -> string -> fontentry
-font_fullinfo = function (filename, subfont, texmf, basename)
+ot_fullinfo = function (filename, subfont, texmf, basename)
     local tfmdata = { }
-    local rawfont = fontloaderopen(filename, subfont)
-    if not rawfont then
-        report("log", 1, "error", "Failed to open %s", filename)
-        return
+
+    local metadata = load_font_file (filename, subfont)
+    if not metadata then
+        return nil
     end
-    local metadata = fontloader.to_table(rawfont)
-    fontloader.close(rawfont)
-    collectgarbage("collect")
+
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
     if metadata.fontstyle_name then
         for _, name in next, metadata.fontstyle_name do
@@ -1119,6 +1134,7 @@ font_fullinfo = function (filename, subfont, texmf, basename)
             end
         end
     end
+
     if metadata.names then
         for _, namedata in next, metadata.names do
             if namedata.lang == "English (US)" then
@@ -1171,13 +1187,98 @@ font_fullinfo = function (filename, subfont, texmf, basename)
     return tfmdata
 end
 
+--[[doc--
+
+    Type1 font inspector. PFB’s contain a good deal less name fields
+    which makes it tricky in some parts to find a meaningful representation
+    for the database.
+
+--doc]]--
+
+--- string -> int -> bool -> string -> fontentry
+t1_fullinfo = function (filename, _subfont, texmf, basename)
+    local namedata = { }
+    local metadata = load_font_file (filename)
+
+    local fontname      = metadata.fontname
+    local fullname      = metadata.fullname
+    local familyname    = metadata.familyname
+    local italicangle   = metadata.italicangle
+    local weight        = metadata.weight
+
+    --- we have to improvise and detect whether we deal with
+    --- italics since pfb fonts don’t come with a “subfamily”
+    --- field
+    local style
+    if italicangle == 0 then
+        style = false
+    else
+        style = "italic"
+    end
+
+    if weight then
+        weight = sanitize_string (weight)
+        if style then
+            if style_synonyms.set.bold[weight] then
+                style = "bold" .. style
+            end
+        else
+            if style_synonyms.set.regular[weight] then
+                style = "regular"
+            end
+        end
+    end
+
+    if not style then
+        style = "regular"
+    end
+
+    namedata.sanitized = sanitize_names ({
+        fontname        = fontname,
+        psname          = fullname,
+        pfullname       = fullname,
+        metafamily      = family,
+        family          = familyname,
+        subfamily       = weight,
+        prefmodifiers   = style,
+    })
+
+    namedata.fontname      = fontname
+    namedata.fullname      = fullname
+    namedata.familyname    = familyname
+
+    namedata.weight        = 0 -- dummy
+    namedata.version       = metadata.version
+
+    namedata.size          = { }
+
+    namedata.filename      = filename --> sys
+    namedata.basename      = basename --> texmf
+    namedata.texmf         = texmf or false
+    namedata.subfont       = subfont
+    return namedata
+end
+
+local loaders = {
+    otf = ot_fullinfo,
+    ttf = ot_fullinfo,
+
+    afm = function (filename, _, texmf, basename)
+        --- TODO
+        local pfbname = filereplacesuffix (filename, "pfb")
+        if lfsisfile (pfbname) then
+            return t1_fullinfo (pfbname, nil, texmf, basename)
+        end
+        report ("both", 1, "db",
+                "Cannot find matching pfb for %s; skipping.", basename)
+        return false
+    end,
+    pfb = t1_fullinfo,
+}
+
 --- we return true if the fond is new or re-indexed
 --- string -> dbobj -> dbobj -> bool
 local load_font = function (fullname, fontnames, newfontnames, texmf)
-    if not fullname then
-        return false
-    end
-
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status --- by full path
 
@@ -1186,6 +1287,8 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
 
     local basename      = filebasename(fullname)
     local barename      = filenameonly(fullname)
+
+    local format        = stringlower (filesuffix (basename))
 
     local entryname     = fullname
     if texmf == true then
@@ -1230,11 +1333,18 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
         return false
     end
 
+    local loader = loaders[format] --- ot_fullinfo, t1_fullinfo
+    if not loader then
+        report ("both", 0, "db",
+                "Unknown format: %q, skipping.", format)
+        return false
+    end
+
     local info = fontloaderinfo(fullname)
     if info then
         if type(info) == "table" and #info > 1 then --- ttc
             for n_font = 1, #info do
-                local fullinfo = font_fullinfo(fullname, n_font-1, texmf, basename)
+                local fullinfo = loader (fullname, n_font-1, texmf, basename)
                 if not fullinfo then
                     return false
                 end
@@ -1246,7 +1356,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
                 newentrystatus.index[n_font]  = index
             end
         else
-            local fullinfo = font_fullinfo(fullname, false, texmf, basename)
+            local fullinfo = loader (fullname, false, texmf, basename)
             if not fullinfo then
                 return false
             end
@@ -1409,7 +1519,7 @@ read_blacklist = function ()
     names.blacklist = create_blacklist(blacklist, whitelist)
 end
 
-local font_extensions     = { "otf", "ttf", "ttc", "dfont" }
+local font_extensions     = { "otf", "ttf", "ttc", "dfont", "pfb" }
 local font_extensions_set = tabletohash (font_extensions)
 local p_font_extensions
 do
@@ -1596,6 +1706,8 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
     fontdirs = kpseexpand_path "$OPENTYPEFONTS"
     fontdirs = fontdirs .. (ostype == "windows" and ";" or ":")
             .. kpseexpand_path "$TTFONTS"
+    fontdirs = fontdirs .. (ostype == "windows" and ";" or ":")
+            .. kpseexpand_path "$T1FONTS"
     if not stringis_empty (fontdirs) then
         local tasks = filter_out_pwd (filesplitpath (fontdirs))
         report ("info", 3, "db",
@@ -2118,11 +2230,11 @@ local purge_from_cache = function (category, path, list, all)
                 osremove(filename)
                 n = n + 1
             else
-                local suffix = file.suffix(filename)
+                local suffix = filesuffix(filename)
                 if suffix == "lua" then
                     local checkname = file.replacesuffix(
                         filename, "lua", "luc")
-                    if lfs.isfile(checkname) then
+                    if lfsisfile(checkname) then
                         report("info", 5, "cache", "Removing %s", filename)
                         osremove(filename)
                         n = n + 1
@@ -2148,7 +2260,7 @@ local collect_cache collect_cache = function (path, all, n, luanames,
 
     local filename = all[n]
     if filename then
-        local suffix = file.suffix(filename)
+        local suffix = filesuffix(filename)
         if suffix == "lua" then
             luanames[#luanames+1] = filename
         elseif suffix == "luc" then

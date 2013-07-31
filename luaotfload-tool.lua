@@ -108,7 +108,7 @@ config.luaotfload.names_dir   = config.luaotfload.names_dir or "names"
 config.luaotfload.cache_dir   = config.luaotfload.cache_dir or "fonts"
 config.luaotfload.index_file  = config.luaotfload.index_file
                              or "luaotfload-names.lua"
-config.luaotfload.include_t1  = config.luaotfload.include_t1 == true
+config.luaotfload.formats     = config.luaotfload.formats or "otf,ttf,ttc,dfont"
 
 do -- we don’t have file.basename and the likes yet, so inline parser ftw
     local slash        = P"/"
@@ -1026,7 +1026,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         ["prefer-texmf"]   = "p",
         quiet              = "q",
         ["show-blacklist"] = "b",
-        type1              = 0,
+        formats            = 1,
         update             = "u",
         verbose            = 1,
         version            = "V",
@@ -1110,8 +1110,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "diagnose" then
             action_pending["diagnose"] = true
             result.asked_diagnostics = optarg[n]
-        elseif v == "type1" then
-            config.luaotfload.include_t1 = true
+        elseif v == "formats" then
+            names.set_font_filter (optarg[n])
         end
     end
 

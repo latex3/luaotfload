@@ -93,7 +93,7 @@ local names          = fonts.names
 config                         = config or { }
 config.luaotfload              = config.luaotfload or { }
 config.luaotfload.resolver     = config.luaotfload.resolver or "normal"
-config.luaotfload.include_t1   = config.luaotfload.include_t1 == true
+config.luaotfload.formats      = config.luaotfload.formats or "otf,ttf,ttc,dfont"
 
 if config.luaotfload.update_live ~= false then
     --- this option allows for disabling updates
@@ -369,6 +369,7 @@ local resolve_fullpath
 local save_names
 local save_lookups
 local update_names
+local set_font_filter
 
 --- state of the database
 local fonts_loaded   = false
@@ -1263,6 +1264,7 @@ end
 
 local loaders = {
     otf = ot_fullinfo,
+    ttc = ot_fullinfo,
     ttf = ot_fullinfo,
 
     afm = function (filename, _, texmf, basename)
@@ -1521,13 +1523,13 @@ read_blacklist = function ()
     names.blacklist = create_blacklist(blacklist, whitelist)
 end
 
-local ordinary_extensions   = { "otf", "ttf", "ttc", "dfont" }
-local type1_extensions      = { "pfb", --[[afm]] }
+----- ordinary_extensions   = { "otf", "ttf", "ttc", "dfont" }
+----- type1_extensions      = { "pfb", --[[afm]] }
 ----- font_extensions_set = tabletohash (font_extensions)
-local get_font_filter
+local p_font_filter
 
 do
-    local luaotfloadconfig = config.luaotfload
+    local current_formats = { }
 
     local extension_pattern = function (list)
         local pat
@@ -1539,25 +1541,58 @@ do
                 pat = pat + P(e)
             end
         end
-        return pat * P(-1)
+        pat = pat * P(-1)
+        return (1 - pat)^1 * pat
     end
 
-    local extns    = extension_pattern (ordinary_extensions)
-    local t1extns  = extns + extension_pattern (type1_extensions)
-    local ordinary = (1 - extns)^1   * extns
-    local with_t1  = (1 - t1extns)^1 * t1extns
+    --- small helper to adjust the font filter pattern (--formats
+    --- option)
 
-    get_font_filter = function ()
-        if luaotfloadconfig.include_t1 == true then
-            return with_t1
-        else
-            return ordinary
+    set_font_filter = function (formats)
+
+        if not formats and type (formats) == "string" then
+            return
         end
+
+        if stringsub (formats, 1, 1) == "+" then -- add
+            formats = lpegmatch (splitcomma, stringsub (formats, 2))
+            if formats then
+                current_formats = tableappend (current_formats, formats)
+            end
+        elseif stringsub (formats, 1, 1) == "-" then -- add
+            formats = lpegmatch (splitcomma, stringsub (formats, 2))
+            if formats then
+                local newformats = { }
+                for i = 1, #current_formats do
+                    local fmt     = current_formats[i]
+                    local include = true
+                    for j = 1, #formats do
+                        if current_formats[i] == formats[j] then
+                            include = false
+                            goto skip
+                        end
+                    end
+                    newformats[#newformats+1] = fmt
+                    ::skip::
+                end
+                current_formats = newformats
+            end
+        else -- set
+            formats = lpegmatch (splitcomma, formats)
+            if formats then
+                current_formats = formats
+            end
+        end
+
+        p_font_filter = extension_pattern (current_formats)
     end
+
+    --- initialize
+    set_font_filter (config.luaotfload.formats)
 end
 
 local process_dir_tree
-process_dir_tree = function (acc, dirs, criterium)
+process_dir_tree = function (acc, dirs)
     if not next (dirs) then --- done
         return acc
     end
@@ -1580,20 +1615,20 @@ process_dir_tree = function (acc, dirs, criterium)
                 then
                     dirs[#dirs+1] = fullpath
                 elseif lfsisfile (fullpath) then
-                    if lpegmatch (criterium, stringlower (ent))
+                    if lpegmatch (p_font_filter, stringlower (ent))
                     then
                         newfiles[#newfiles+1] = fullpath
                     end
                 end
             end
         end
-        return process_dir_tree (tableappend (acc, newfiles), dirs, criterium)
+        return process_dir_tree (tableappend (acc, newfiles), dirs)
     end
     --- cannot cd; skip
-    return process_dir_tree (acc, dirs, criterium)
+    return process_dir_tree (acc, dirs)
 end
 
-local process_dir = function (dir, criterium)
+local process_dir = function (dir)
     local pwd = lfscurrentdir ()
     if lfschdir (dir) then
         lfschdir (pwd)
@@ -1604,7 +1639,7 @@ local process_dir = function (dir, criterium)
             if ent ~= "." and ent ~= ".." and not blacklist[ent] then
                 local fullpath = dir .. "/" .. ent
                 if lfsisfile (fullpath) then
-                    if lpegmatch (criterium, stringlower (ent))
+                    if lpegmatch (p_font_filter, stringlower (ent))
                     then
                         files[#files+1] = fullpath
                     end
@@ -1618,12 +1653,11 @@ end
 
 --- string -> bool -> string list
 local find_font_files = function (root, recurse)
-    local criterium = get_font_filter ()
     if lfsisdir (root) then
         if recurse == true then
-            return process_dir_tree ({}, { root }, criterium)
+            return process_dir_tree ({}, { root })
         else --- kpathsea already delivered the necessary subdirs
-            return process_dir (root, criterium)
+            return process_dir (root)
         end
     end
 end
@@ -2390,6 +2424,7 @@ end
 -----------------------------------------------------------------------
 
 names.scan_dir                    = scan_dir
+names.set_font_filter             = set_font_filter
 names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
 names.load                        = load_names

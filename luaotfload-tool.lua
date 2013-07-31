@@ -211,6 +211,7 @@ This tool is part of the luaotfload package. Valid options are:
   -f --force                   force re-indexing all fonts
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
+  --formats=[+|-]EXTENSIONS    set, add, or subtract formats to index
   -p --prefer-texmf            prefer fonts in the TEXMF over system fonts
 
   --find="font name"           query the database for a font name
@@ -267,6 +268,7 @@ The font database will be saved to
     short = [[
 Usage: luaotfload-tool [--help] [--version] [--verbose=<lvl>]
                        [--update] [--force] [--prefer-texmf]
+                       [--dry-run] [--formats=<extension list>]
                        [--find=<font name>] [--fuzzy] [--info] [--inspect]
                        [--list=<criterion>] [--fields=<field list>]
                        [--cache=<directive>] [--flush-lookups]

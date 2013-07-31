@@ -93,6 +93,8 @@ local names          = fonts.names
 config                         = config or { }
 config.luaotfload              = config.luaotfload or { }
 config.luaotfload.resolver     = config.luaotfload.resolver or "normal"
+config.luaotfload.include_t1   = config.luaotfload.include_t1 == true
+
 if config.luaotfload.update_live ~= false then
     --- this option allows for disabling updates
     --- during a TeX run
@@ -1519,26 +1521,43 @@ read_blacklist = function ()
     names.blacklist = create_blacklist(blacklist, whitelist)
 end
 
-local font_extensions     = { "otf", "ttf", "ttc", "dfont", "pfb" }
-local font_extensions_set = tabletohash (font_extensions)
-local p_font_extensions
+local ordinary_extensions   = { "otf", "ttf", "ttc", "dfont" }
+local type1_extensions      = { "pfb", --[[afm]] }
+----- font_extensions_set = tabletohash (font_extensions)
+local get_font_filter
+
 do
-    local extns
-    --tablesort (font_extensions) --- safeguard
-    for i=#font_extensions, 1, -1 do
-        local e = font_extensions[i]
-        if not extns then
-            extns = P(e)
+    local luaotfloadconfig = config.luaotfload
+
+    local extension_pattern = function (list)
+        local pat
+        for i=#list, 1, -1 do
+            local e = list[i]
+            if not pat then
+                pat = P(e)
+            else
+                pat = pat + P(e)
+            end
+        end
+        return pat * P(-1)
+    end
+
+    local extns    = extension_pattern (ordinary_extensions)
+    local t1extns  = extns + extension_pattern (type1_extensions)
+    local ordinary = (1 - extns)^1   * extns
+    local with_t1  = (1 - t1extns)^1 * t1extns
+
+    get_font_filter = function ()
+        if luaotfloadconfig.include_t1 == true then
+            return with_t1
         else
-            extns = extns + P(e)
+            return ordinary
         end
     end
-    extns = extns * P(-1)
-    p_font_extensions = (1 - extns)^1 * extns
 end
 
 local process_dir_tree
-process_dir_tree = function (acc, dirs)
+process_dir_tree = function (acc, dirs, criterium)
     if not next (dirs) then --- done
         return acc
     end
@@ -1561,21 +1580,20 @@ process_dir_tree = function (acc, dirs)
                 then
                     dirs[#dirs+1] = fullpath
                 elseif lfsisfile (fullpath) then
-                    if lpegmatch (p_font_extensions,
-                                  stringlower (ent))
+                    if lpegmatch (criterium, stringlower (ent))
                     then
                         newfiles[#newfiles+1] = fullpath
                     end
                 end
             end
         end
-        return process_dir_tree (tableappend (acc, newfiles), dirs)
+        return process_dir_tree (tableappend (acc, newfiles), dirs, criterium)
     end
     --- cannot cd; skip
-    return process_dir_tree (acc, dirs)
+    return process_dir_tree (acc, dirs, criterium)
 end
 
-local process_dir = function (dir)
+local process_dir = function (dir, criterium)
     local pwd = lfscurrentdir ()
     if lfschdir (dir) then
         lfschdir (pwd)
@@ -1586,8 +1604,7 @@ local process_dir = function (dir)
             if ent ~= "." and ent ~= ".." and not blacklist[ent] then
                 local fullpath = dir .. "/" .. ent
                 if lfsisfile (fullpath) then
-                    if lpegmatch (p_font_extensions,
-                                  stringlower (ent))
+                    if lpegmatch (criterium, stringlower (ent))
                     then
                         files[#files+1] = fullpath
                     end
@@ -1601,11 +1618,12 @@ end
 
 --- string -> bool -> string list
 local find_font_files = function (root, recurse)
+    local criterium = get_font_filter ()
     if lfsisdir (root) then
         if recurse == true then
-            return process_dir_tree ({}, { root })
+            return process_dir_tree ({}, { root }, criterium)
         else --- kpathsea already delivered the necessary subdirs
-            return process_dir (root)
+            return process_dir (root, criterium)
         end
     end
 end
@@ -1679,6 +1697,8 @@ local filter_out_pwd = function (dirs)
     return result
 end
 
+local path_separator = ostype == "windows" and ";" or ":"
+
 --[[doc--
     scan_texmf_fonts() scans all fonts in the texmf tree through the
     kpathsea variables OPENTYPEFONTS and TTFONTS of texmf.cnf.
@@ -1688,8 +1708,10 @@ end
 
 --- dbobj -> dbobj -> bool? -> (int * int)
 local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
+
     local n_scanned, n_new, fontdirs = 0, 0
     local osfontdir = kpseexpand_path "$OSFONTDIR"
+
     if stringis_empty (osfontdir) then
         report ("info", 2, "db", "Scanning TEXMF fonts...")
     else
@@ -1703,11 +1725,11 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
             end
         end
     end
+
     fontdirs = kpseexpand_path "$OPENTYPEFONTS"
-    fontdirs = fontdirs .. (ostype == "windows" and ";" or ":")
-            .. kpseexpand_path "$TTFONTS"
-    fontdirs = fontdirs .. (ostype == "windows" and ";" or ":")
-            .. kpseexpand_path "$T1FONTS"
+    fontdirs = fontdirs .. path_separator .. kpseexpand_path "$TTFONTS"
+    fontdirs = fontdirs .. path_separator .. kpseexpand_path "$T1FONTS"
+
     if not stringis_empty (fontdirs) then
         local tasks = filter_out_pwd (filesplitpath (fontdirs))
         report ("info", 3, "db",
@@ -1719,6 +1741,7 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
             n_new     = n_new     + new
         end
     end
+
     return n_scanned, n_new
 end
 
@@ -1973,22 +1996,36 @@ local function get_os_dirs ()
     return {}
 end
 
---- dbobj -> dbobj -> bool? -> (int * int)
-local scan_os_fonts = function (fontnames, newfontnames, dry_run)
-    local n_scanned, n_new = 0, 0
-    --[[
-    This function scans the OS fonts through
-      - fontcache for Unix (reads the fonts.conf file and scans the
+--[[doc--
+
+    scan_os_fonts() scans the OS fonts through
+      - fontconfig for Unix (reads the fonts.conf file[s] and scans the
         directories)
       - a static set of directories for Windows and MacOSX
-    ]]
-    report("info", 2, "db", "Scanning OS fonts...")
-    report("info", 3, "db", "Searching in static system directories...")
-    for _, d in next, get_os_dirs() do
-        local found, new = scan_dir(d, fontnames, newfontnames, dry_run)
+
+    **NB**: If $OSFONTDIR is nonempty, as it appears to be by default
+            on Windows setups, the system fonts will have already been
+            processed while scanning the TEXMF. Thus, this function is
+            never called.
+
+--doc]]--
+
+--- dbobj -> dbobj -> bool? -> (int * int)
+local scan_os_fonts = function (fontnames, newfontnames,
+                                dry_run)
+
+    local n_scanned, n_new = 0, 0
+    report ("info", 2, "db", "Scanning OS fonts...")
+    report ("info", 3, "db",
+            "Searching in static system directories...")
+
+    for _, d in next, get_os_dirs () do
+        local found, new = scan_dir (d, fontnames,
+                                     newfontnames, dry_run)
         n_scanned = n_scanned + found
         n_new     = n_new     + new
     end
+
     return n_scanned, n_new
 end
 
@@ -2080,14 +2117,17 @@ end
 
 --- dbobj? -> bool? -> bool? -> dbobj
 update_names = function (fontnames, force, dry_run)
+
     if config.luaotfload.update_live == false then
         report("info", 2, "db",
                "skipping database update")
         --- skip all db updates
         return fontnames or names.data
     end
+
     local starttime = os.gettimeofday()
     local n_scanned, n_new = 0, 0
+
     --[[
     The main function, scans everything
     - “newfontnames” is the final table to return
@@ -2112,11 +2152,11 @@ update_names = function (fontnames, force, dry_run)
     read_blacklist()
 
     local scanned, new
-    scanned, new = scan_texmf_fonts(fontnames, newfontnames, dry_run)
+    scanned, new = scan_texmf_fonts (fontnames, newfontnames, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 
-    scanned, new = scan_os_fonts(fontnames, newfontnames, dry_run)
+    scanned, new = scan_os_fonts (fontnames, newfontnames, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 
@@ -2375,7 +2415,8 @@ else
     names.resolve     = resolve
     names.resolvespec = resolve
 end
-names.find_closest      = find_closest
+
+names.find_closest = find_closest
 
 -- for testing purpose
 names.read_fonts_conf = read_fonts_conf

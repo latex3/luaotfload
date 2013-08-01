@@ -1278,6 +1278,7 @@ local loaders = {
         return false
     end,
     pfb = t1_fullinfo,
+    pfa = t1_fullinfo,
 }
 
 --- we return true if the fond is new or re-indexed
@@ -1550,7 +1551,7 @@ do
 
     set_font_filter = function (formats)
 
-        if not formats and type (formats) == "string" then
+        if not formats or type (formats) ~= "string" then
             return
         end
 

@@ -65,9 +65,9 @@ update mode
 --formats=EXTENSIONS    Extensions of the font files to index.
                         Where *EXTENSIONS* is a comma-separated list of
                         supported file extensions (otf, ttf, ttc,
-                        dfont, and pfb).  If the list is prefixed with
-                        a ``+`` sign, the given list is added to the
-                        currently active one; ``-`` subtracts.
+                        dfont, pfa, and pfb).  If the list is prefixed
+                        with a ``+`` sign, the given list is added to
+                        the currently active one; ``-`` subtracts.
                         Default: *otf,ttf,ttc,dfont*.
                         Examples:
 

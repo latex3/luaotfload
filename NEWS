@@ -4,6 +4,8 @@ Change History
 2013/XX/XX, luaotfload v2.4
     * additional self-tests, now in separate file (luaotfload-diagnostics.lua)
     * better path and directory handling, especially on Windows
+    * database now indexes Type1 fonts (PFA, PFB) and makes them accessible
+      with style modifiers (requires --format=+pfa,pfb option to luaotfload-tool)
     * test runner (script mktests)
 
 2013/07/10, luaotfload v2.3a

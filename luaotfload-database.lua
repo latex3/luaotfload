@@ -28,7 +28,9 @@ local tonumber                = tonumber
 local unpack                  = table.unpack
 
 local fontloaderinfo          = fontloader.info
+local fontloaderclose         = fontloader.close
 local fontloaderopen          = fontloader.open
+local fontloaderto_table      = fontloader.to_table
 local iolines                 = io.lines
 local ioopen                  = io.open
 local kpseexpand_path         = kpse.expand_path
@@ -67,6 +69,7 @@ local filejoin                = file.join
 local filenameonly            = file.nameonly
 local filereplacesuffix       = file.replacesuffix
 local filesplitpath           = file.splitpath or file.split_path
+local filesuffix              = file.suffix
 local lfsisdir                = lfs.isdir
 local lfsisfile               = lfs.isfile
 local lfsmkdirs               = lfs.mkdirs
@@ -75,6 +78,7 @@ local stringsplit             = string.split
 local stringstrip             = string.strip
 local tableappend             = table.append
 local tablecopy               = table.copy
+local tablefastcopy           = table.fastcopy
 local tabletofile             = table.tofile
 local tabletohash             = table.tohash
 
@@ -90,13 +94,15 @@ local names          = fonts.names
 config                         = config or { }
 config.luaotfload              = config.luaotfload or { }
 config.luaotfload.resolver     = config.luaotfload.resolver or "normal"
+config.luaotfload.formats      = config.luaotfload.formats or "otf,ttf,ttc,dfont"
+
 if config.luaotfload.update_live ~= false then
     --- this option allows for disabling updates
     --- during a TeX run
     config.luaotfload.update_live = true
 end
 
-names.version        = 2.207
+names.version        = 2.208
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 
@@ -232,6 +238,7 @@ end
 This is a sketch of the luaotfload db:
 
     type dbobj = {
+        formats         : string list; // { "otf", "ttf", "ttc", "dfont" }
         mappings        : fontentry list;
         status          : filestatus;
         version         : float;
@@ -308,12 +315,13 @@ mtx-fonts has in names.tma:
 
 --doc]]--
 
-local fontnames_init = function (keep_cache) --- returns dbobj
+local fontnames_init = function (formats) --- returns dbobj
     return {
         mappings        = { },
         status          = { },
 --      filenames       = { }, -- created later
         version         = names.version,
+        formats         = formats,
     }
 end
 
@@ -351,7 +359,8 @@ local crude_file_lookup
 local crude_file_lookup_verbose
 local find_closest
 local flush_lookup_cache
-local font_fullinfo
+local ot_fullinfo
+local t1_fullinfo
 local load_names
 local load_lookups
 local read_blacklist
@@ -363,6 +372,8 @@ local resolve_fullpath
 local save_names
 local save_lookups
 local update_names
+local get_font_filter
+local set_font_filter
 
 --- state of the database
 local fonts_loaded   = false
@@ -397,7 +408,8 @@ load_names = function (dry_run)
             [[Font names database not found, generating new one.]])
         report("both", 0, "db",
             [[This can take several minutes; please be patient.]])
-        data = update_names(fontnames_init(false), nil, dry_run)
+        data = update_names (fontnames_init (get_font_filter ()),
+                             nil, dry_run)
         local success = save_names(data)
         if not success then
             report("both", 0, "db", "Database creation unsuccessful.")
@@ -1095,22 +1107,33 @@ local sanitize_names = function (names)
     return res
 end
 
+local load_font_file = function (filename, subfont)
+    local rawfont, _msg = fontloaderopen (filename, subfont)
+    if not rawfont then
+        report ("log", 1, "db", "ERROR: failed to open %s", filename)
+        return
+    end
+    local metadata = fontloaderto_table (rawfont)
+    fontloaderclose (rawfont)
+    collectgarbage "collect"
+    return metadata
+end
+
 --[[doc--
 The data inside an Opentype font file can be quite heterogeneous.
 Thus in order to get the relevant information, parts of the original
 table as returned by the font file reader need to be relocated.
 --doc]]--
+
 --- string -> int -> bool -> string -> fontentry
-font_fullinfo = function (filename, subfont, texmf, basename)
+ot_fullinfo = function (filename, subfont, texmf, basename)
     local tfmdata = { }
-    local rawfont = fontloaderopen(filename, subfont)
-    if not rawfont then
-        report("log", 1, "error", "Failed to open %s", filename)
-        return
+
+    local metadata = load_font_file (filename, subfont)
+    if not metadata then
+        return nil
     end
-    local metadata = fontloader.to_table(rawfont)
-    fontloader.close(rawfont)
-    collectgarbage("collect")
+
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
     if metadata.fontstyle_name then
         for _, name in next, metadata.fontstyle_name do
@@ -1119,6 +1142,7 @@ font_fullinfo = function (filename, subfont, texmf, basename)
             end
         end
     end
+
     if metadata.names then
         for _, namedata in next, metadata.names do
             if namedata.lang == "English (US)" then
@@ -1171,13 +1195,106 @@ font_fullinfo = function (filename, subfont, texmf, basename)
     return tfmdata
 end
 
+--[[doc--
+
+    Type1 font inspector. PFB’s contain a good deal less name fields
+    which makes it tricky in some parts to find a meaningful representation
+    for the database.
+
+--doc]]--
+
+--- string -> int -> bool -> string -> fontentry
+t1_fullinfo = function (filename, _subfont, texmf, basename)
+    local namedata = { }
+    local metadata = load_font_file (filename)
+
+    local fontname      = metadata.fontname
+    local fullname      = metadata.fullname
+    local familyname    = metadata.familyname
+    local italicangle   = metadata.italicangle
+    local weight        = metadata.weight
+
+    --- we have to improvise and detect whether we deal with
+    --- italics since pfb fonts don’t come with a “subfamily”
+    --- field
+    local style
+    if italicangle == 0 then
+        style = false
+    else
+        style = "italic"
+    end
+
+    local style_synonyms_set = style_synonyms.set
+    if weight then
+        weight = sanitize_string (weight)
+        local tmp = ""
+        if style_synonyms_set.bold[weight] then
+            tmp = "bold"
+        end
+        if style then
+            style = tmp .. style
+        else
+            if style_synonyms_set.regular[weight] then
+                style = "regular"
+            else
+                style = tmp
+            end
+        end
+    end
+
+    if not style then
+        style = "regular"
+        --- else italic
+    end
+
+    namedata.sanitized = sanitize_names ({
+        fontname        = fontname,
+        psname          = fullname,
+        pfullname       = fullname,
+        metafamily      = family,
+        family          = familyname,
+        subfamily       = weight,
+        prefmodifiers   = style,
+    })
+
+    namedata.fontname      = fontname
+    namedata.fullname      = fullname
+    namedata.familyname    = familyname
+
+    namedata.weight        = 0 -- dummy
+    namedata.version       = metadata.version
+
+    namedata.size          = { }
+
+    namedata.filename      = filename --> sys
+    namedata.basename      = basename --> texmf
+    namedata.texmf         = texmf or false
+    namedata.subfont       = subfont
+    return namedata
+end
+
+local loaders = {
+    otf = ot_fullinfo,
+    ttc = ot_fullinfo,
+    ttf = ot_fullinfo,
+
+    afm = function (filename, _, texmf, basename)
+        --- TODO
+        local pfbname = filereplacesuffix (filename, "pfb")
+        if lfsisfile (pfbname) then
+            return t1_fullinfo (pfbname, nil, texmf, basename)
+        end
+        report ("both", 1, "db",
+                "Cannot find matching pfb for %s; skipping.", basename)
+        return false
+    end,
+    pfb = t1_fullinfo,
+    pfa = t1_fullinfo,
+}
+
 --- we return true if the fond is new or re-indexed
 --- string -> dbobj -> dbobj -> bool
 local load_font = function (fullname, fontnames, newfontnames, texmf)
-    if not fullname then
-        return false
-    end
-
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status --- by full path
 
@@ -1186,6 +1303,8 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
 
     local basename      = filebasename(fullname)
     local barename      = filenameonly(fullname)
+
+    local format        = stringlower (filesuffix (basename))
 
     local entryname     = fullname
     if texmf == true then
@@ -1230,11 +1349,18 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
         return false
     end
 
+    local loader = loaders[format] --- ot_fullinfo, t1_fullinfo
+    if not loader then
+        report ("both", 0, "db",
+                "Unknown format: %q, skipping.", format)
+        return false
+    end
+
     local info = fontloaderinfo(fullname)
     if info then
         if type(info) == "table" and #info > 1 then --- ttc
             for n_font = 1, #info do
-                local fullinfo = font_fullinfo(fullname, n_font-1, texmf, basename)
+                local fullinfo = loader (fullname, n_font-1, texmf, basename)
                 if not fullinfo then
                     return false
                 end
@@ -1246,7 +1372,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
                 newentrystatus.index[n_font]  = index
             end
         else
-            local fullinfo = font_fullinfo(fullname, false, texmf, basename)
+            local fullinfo = loader (fullname, false, texmf, basename)
             if not fullinfo then
                 return false
             end
@@ -1409,22 +1535,73 @@ read_blacklist = function ()
     names.blacklist = create_blacklist(blacklist, whitelist)
 end
 
-local font_extensions     = { "otf", "ttf", "ttc", "dfont" }
-local font_extensions_set = tabletohash (font_extensions)
-local p_font_extensions
+local p_font_filter
+
 do
-    local extns
-    --tablesort (font_extensions) --- safeguard
-    for i=#font_extensions, 1, -1 do
-        local e = font_extensions[i]
-        if not extns then
-            extns = P(e)
-        else
-            extns = extns + P(e)
+    local current_formats = { }
+
+    local extension_pattern = function (list)
+        local pat
+        for i=#list, 1, -1 do
+            local e = list[i]
+            if not pat then
+                pat = P(e)
+            else
+                pat = pat + P(e)
+            end
         end
+        pat = pat * P(-1)
+        return (1 - pat)^1 * pat
     end
-    extns = extns * P(-1)
-    p_font_extensions = (1 - extns)^1 * extns
+
+    --- small helper to adjust the font filter pattern (--formats
+    --- option)
+
+    set_font_filter = function (formats)
+
+        if not formats or type (formats) ~= "string" then
+            return
+        end
+
+        if stringsub (formats, 1, 1) == "+" then -- add
+            formats = lpegmatch (splitcomma, stringsub (formats, 2))
+            if formats then
+                current_formats = tableappend (current_formats, formats)
+            end
+        elseif stringsub (formats, 1, 1) == "-" then -- add
+            formats = lpegmatch (splitcomma, stringsub (formats, 2))
+            if formats then
+                local newformats = { }
+                for i = 1, #current_formats do
+                    local fmt     = current_formats[i]
+                    local include = true
+                    for j = 1, #formats do
+                        if current_formats[i] == formats[j] then
+                            include = false
+                            goto skip
+                        end
+                    end
+                    newformats[#newformats+1] = fmt
+                    ::skip::
+                end
+                current_formats = newformats
+            end
+        else -- set
+            formats = lpegmatch (splitcomma, formats)
+            if formats then
+                current_formats = formats
+            end
+        end
+
+        p_font_filter = extension_pattern (current_formats)
+    end
+
+    get_font_filter = function (formats)
+        return tablefastcopy (current_formats)
+    end
+
+    --- initialize
+    set_font_filter (config.luaotfload.formats)
 end
 
 local process_dir_tree
@@ -1451,8 +1628,7 @@ process_dir_tree = function (acc, dirs)
                 then
                     dirs[#dirs+1] = fullpath
                 elseif lfsisfile (fullpath) then
-                    if lpegmatch (p_font_extensions,
-                                  stringlower (ent))
+                    if lpegmatch (p_font_filter, stringlower (ent))
                     then
                         newfiles[#newfiles+1] = fullpath
                     end
@@ -1476,8 +1652,7 @@ local process_dir = function (dir)
             if ent ~= "." and ent ~= ".." and not blacklist[ent] then
                 local fullpath = dir .. "/" .. ent
                 if lfsisfile (fullpath) then
-                    if lpegmatch (p_font_extensions,
-                                  stringlower (ent))
+                    if lpegmatch (p_font_filter, stringlower (ent))
                     then
                         files[#files+1] = fullpath
                     end
@@ -1569,6 +1744,8 @@ local filter_out_pwd = function (dirs)
     return result
 end
 
+local path_separator = ostype == "windows" and ";" or ":"
+
 --[[doc--
     scan_texmf_fonts() scans all fonts in the texmf tree through the
     kpathsea variables OPENTYPEFONTS and TTFONTS of texmf.cnf.
@@ -1578,8 +1755,10 @@ end
 
 --- dbobj -> dbobj -> bool? -> (int * int)
 local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
+
     local n_scanned, n_new, fontdirs = 0, 0
     local osfontdir = kpseexpand_path "$OSFONTDIR"
+
     if stringis_empty (osfontdir) then
         report ("info", 2, "db", "Scanning TEXMF fonts...")
     else
@@ -1593,9 +1772,11 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
             end
         end
     end
+
     fontdirs = kpseexpand_path "$OPENTYPEFONTS"
-    fontdirs = fontdirs .. (ostype == "windows" and ";" or ":")
-            .. kpseexpand_path "$TTFONTS"
+    fontdirs = fontdirs .. path_separator .. kpseexpand_path "$TTFONTS"
+    fontdirs = fontdirs .. path_separator .. kpseexpand_path "$T1FONTS"
+
     if not stringis_empty (fontdirs) then
         local tasks = filter_out_pwd (filesplitpath (fontdirs))
         report ("info", 3, "db",
@@ -1607,6 +1788,7 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
             n_new     = n_new     + new
         end
     end
+
     return n_scanned, n_new
 end
 
@@ -1861,22 +2043,36 @@ local function get_os_dirs ()
     return {}
 end
 
---- dbobj -> dbobj -> bool? -> (int * int)
-local scan_os_fonts = function (fontnames, newfontnames, dry_run)
-    local n_scanned, n_new = 0, 0
-    --[[
-    This function scans the OS fonts through
-      - fontcache for Unix (reads the fonts.conf file and scans the
+--[[doc--
+
+    scan_os_fonts() scans the OS fonts through
+      - fontconfig for Unix (reads the fonts.conf file[s] and scans the
         directories)
       - a static set of directories for Windows and MacOSX
-    ]]
-    report("info", 2, "db", "Scanning OS fonts...")
-    report("info", 3, "db", "Searching in static system directories...")
-    for _, d in next, get_os_dirs() do
-        local found, new = scan_dir(d, fontnames, newfontnames, dry_run)
+
+    **NB**: If $OSFONTDIR is nonempty, as it appears to be by default
+            on Windows setups, the system fonts will have already been
+            processed while scanning the TEXMF. Thus, this function is
+            never called.
+
+--doc]]--
+
+--- dbobj -> dbobj -> bool? -> (int * int)
+local scan_os_fonts = function (fontnames, newfontnames,
+                                dry_run)
+
+    local n_scanned, n_new = 0, 0
+    report ("info", 2, "db", "Scanning OS fonts...")
+    report ("info", 3, "db",
+            "Searching in static system directories...")
+
+    for _, d in next, get_os_dirs () do
+        local found, new = scan_dir (d, fontnames,
+                                     newfontnames, dry_run)
         n_scanned = n_scanned + found
         n_new     = n_new     + new
     end
+
     return n_scanned, n_new
 end
 
@@ -1968,14 +2164,17 @@ end
 
 --- dbobj? -> bool? -> bool? -> dbobj
 update_names = function (fontnames, force, dry_run)
+
     if config.luaotfload.update_live == false then
         report("info", 2, "db",
                "skipping database update")
         --- skip all db updates
         return fontnames or names.data
     end
+
     local starttime = os.gettimeofday()
     local n_scanned, n_new = 0, 0
+
     --[[
     The main function, scans everything
     - “newfontnames” is the final table to return
@@ -1985,26 +2184,26 @@ update_names = function (fontnames, force, dry_run)
                          .. (force and " forcefully" or ""))
 
     if force then
-        fontnames = fontnames_init(false)
+        fontnames = fontnames_init (get_font_filter ())
     else
         if not fontnames then
-            fontnames = load_names(dry_run)
+            fontnames = load_names (dry_run)
         end
         if fontnames.version ~= names.version then
-            report("both", 1, "db", "No font names database or old "
-                                 .. "one found; generating new one")
-            fontnames = fontnames_init(true)
+            report ("both", 1, "db", "No font names database or old "
+                                  .. "one found; generating new one")
+            fontnames = fontnames_init (get_font_filter ())
         end
     end
-    local newfontnames = fontnames_init(true)
-    read_blacklist()
+    local newfontnames = fontnames_init (get_font_filter ())
+    read_blacklist ()
 
     local scanned, new
-    scanned, new = scan_texmf_fonts(fontnames, newfontnames, dry_run)
+    scanned, new = scan_texmf_fonts (fontnames, newfontnames, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 
-    scanned, new = scan_os_fonts(fontnames, newfontnames, dry_run)
+    scanned, new = scan_os_fonts (fontnames, newfontnames, dry_run)
     n_scanned = n_scanned + scanned
     n_new     = n_new     + new
 
@@ -2118,11 +2317,11 @@ local purge_from_cache = function (category, path, list, all)
                 osremove(filename)
                 n = n + 1
             else
-                local suffix = file.suffix(filename)
+                local suffix = filesuffix(filename)
                 if suffix == "lua" then
                     local checkname = file.replacesuffix(
                         filename, "lua", "luc")
-                    if lfs.isfile(checkname) then
+                    if lfsisfile(checkname) then
                         report("info", 5, "cache", "Removing %s", filename)
                         osremove(filename)
                         n = n + 1
@@ -2148,7 +2347,7 @@ local collect_cache collect_cache = function (path, all, n, luanames,
 
     local filename = all[n]
     if filename then
-        local suffix = file.suffix(filename)
+        local suffix = filesuffix(filename)
         if suffix == "lua" then
             luanames[#luanames+1] = filename
         elseif suffix == "luc" then
@@ -2238,6 +2437,7 @@ end
 -----------------------------------------------------------------------
 
 names.scan_dir                    = scan_dir
+names.set_font_filter             = set_font_filter
 names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
 names.load                        = load_names
@@ -2263,7 +2463,8 @@ else
     names.resolve     = resolve
     names.resolvespec = resolve
 end
-names.find_closest      = find_closest
+
+names.find_closest = find_closest
 
 -- for testing purpose
 names.read_fonts_conf = read_fonts_conf

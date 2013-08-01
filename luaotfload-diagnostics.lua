@@ -29,14 +29,17 @@ local osname                   = os.name
 local osremove                 = os.remove
 local ostype                   = os.type
 local stringformat             = string.format
+local stringlower              = string.lower
 local stringsub                = string.sub
 
 local fileisreadable           = file.isreadable
 local fileiswritable           = file.iswritable
 local filesplitpath            = file.splitpath
+local filesuffix               = file.suffix
 local ioloaddata               = io.loaddata
 local lua_of_json              = utilities.json.tolua
 local tableconcat              = table.concat
+local tablesortedkeys          = table.sortedkeys
 local tabletohash              = table.tohash
 
 local lpeg                     = require "lpeg"
@@ -45,6 +48,47 @@ local lpegmatch                = lpeg.match
 
 local out = function (...)
     logs.names_report (false, 0, "diagnose", ...)
+end
+
+local check_index = function (errcnt)
+
+    out "================= font names =================="
+
+    if not names.data then
+        names.data = names.load ()
+    end
+
+    local namedata = names.data
+    local mappings = namedata.mappings
+
+    if not namedata and namedata.formats and namedata.version then
+        out "Database corrupt."
+        return errcnt + 1
+    end
+
+    out ("Database version: %.3f.", names.version)
+    out ("Font formats indexed: %s.",
+         tableconcat (namedata.formats, ", "))
+    out ("%d font files indexed.", #mappings)
+
+    local by_format = { }
+    for i = 1, #mappings do
+        local record = mappings[i]
+        local format = stringlower (filesuffix (record.filename))
+        local count  = by_format[format]
+        if count then
+            by_format[format] = count + 1
+        else
+            by_format[format] = 1
+        end
+    end
+
+    local formats = tablesortedkeys (by_format)
+    for i = 1, #formats do
+        local format = formats[i]
+        out ("%20s: %5d", format, by_format[format])
+    end
+    return errcnt
 end
 
 local verify_files = function (errcnt, status)
@@ -312,7 +356,12 @@ else
         out ("%d of %d Github API requests left.", left, limit)
         if left == 0 then
             out ("Cannot make any more API requests.")
-            out ("Try again later at %s.", osdate ("%F %T", reset))
+            if ostype == "unix" then
+                out ("Try again later at %s.", osdate ("%F %T", reset))
+            else --- windows doesn’t C99
+                out ("Try again later at %s.",
+                     osdate ("%Y-%m-d %H:%M:%S", reset))
+            end
         end
         return true
     end
@@ -548,6 +597,7 @@ end
 local anamneses   = {
     "environment",
     "files",
+    "index",
     "repository",
     "permissions"
 }
@@ -562,6 +612,11 @@ local diagnose = function (job)
     else
         asked = lpegmatch (splitcomma, asked)
         asked = tabletohash (asked, true)
+    end
+
+    if asked.index == true then
+        errcnt = check_index (errcnt)
+        asked.index = nil
     end
 
     if asked.environment == true then
@@ -620,3 +675,4 @@ end
 
 return diagnose
 
+-- vim:tw=71:sw=4:ts=4:expandtab

@@ -46,6 +46,7 @@ local iowrite         = io.write
 local kpsefind_file   = kpse.find_file
 local next            = next
 local osdate          = os.date
+local ostype          = os.type
 local stringexplode   = string.explode
 local stringformat    = string.format
 local stringlower     = string.lower
@@ -107,6 +108,7 @@ config.luaotfload.names_dir   = config.luaotfload.names_dir or "names"
 config.luaotfload.cache_dir   = config.luaotfload.cache_dir or "fonts"
 config.luaotfload.index_file  = config.luaotfload.index_file
                              or "luaotfload-names.lua"
+config.luaotfload.formats     = config.luaotfload.formats or "otf,ttf,ttc,dfont"
 
 do -- we don’t have file.basename and the likes yet, so inline parser ftw
     local slash        = P"/"
@@ -197,7 +199,8 @@ This tool is part of the luaotfload package. Valid options are:
   -V --version                 print version and exit
   -h --help                    print this message
   --diagnose=CHECK             run a self test procedure; one of "files",
-                               "permissions", or "repository"
+                               "environment", "index", "permissions", or
+                               "repository"
 
   --alias=<name>               force behavior of "luaotfload-tool" or legacy
                                "mkluatexfontdb"
@@ -209,6 +212,7 @@ This tool is part of the luaotfload package. Valid options are:
   -f --force                   force re-indexing all fonts
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
+  --formats=[+|-]EXTENSIONS    set, add, or subtract formats to index
   -p --prefer-texmf            prefer fonts in the TEXMF over system fonts
 
   --find="font name"           query the database for a font name
@@ -265,6 +269,7 @@ The font database will be saved to
     short = [[
 Usage: luaotfload-tool [--help] [--version] [--verbose=<lvl>]
                        [--update] [--force] [--prefer-texmf]
+                       [--dry-run] [--formats=<extension list>]
                        [--find=<font name>] [--fuzzy] [--info] [--inspect]
                        [--list=<criterion>] [--fields=<field list>]
                        [--cache=<directive>] [--flush-lookups]
@@ -507,7 +512,14 @@ local display_general = function (fullinfo)
                 val = #fullinfo[key]
             end
         elseif mode == "d" then
-            val = osdate("%F %T", fullinfo[key])
+            if ostype == "unix" then
+                val = osdate("%F %T", fullinfo[key])
+            else
+                --- the MS compiler doesn’t support C99, so
+                --- strftime is missing some functionality;
+                --- see loslib.c for details.
+                val = osdate("%Y-%m-d %H:%M:%S", fullinfo[key])
+            end
         end
         if not val then
             val = "<none>"
@@ -795,7 +807,8 @@ actions.query = function (job)
                               "Resolved file name %q", foundname)
         end
         if job.show_info then
-            show_font_info(foundname, query, job.full_info, job.warnings)
+            show_font_info (foundname, query, job.full_info, job.warnings)
+            texiowrite_nl ""
         end
     else
         logs.names_report(false, 0,
@@ -1016,8 +1029,9 @@ local process_cmdline = function ( ) -- unit -> jobspec
         ["prefer-texmf"]   = "p",
         quiet              = "q",
         ["show-blacklist"] = "b",
+        formats            = 1,
         update             = "u",
-        verbose            = 1  ,
+        verbose            = 1,
         version            = "V",
         warnings           = "w",
     }
@@ -1099,6 +1113,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "diagnose" then
             action_pending["diagnose"] = true
             result.asked_diagnostics = optarg[n]
+        elseif v == "formats" then
+            names.set_font_filter (optarg[n])
         end
     end
 

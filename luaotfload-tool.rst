@@ -6,18 +6,20 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:      2013-07-10
+:Date:      2013-07-31
 :Copyright: GPL v2.0
-:Version:   2.3a
+:Version:   2.4
 :Manual section: 1
 :Manual group: text processing
 
 SYNOPSIS
 =======================================================================
 
-**luaotfload-tool** [ -bDcfFiIpquvVwh ]
+**luaotfload-tool** [ -bDfFiIlpquvVhw ]
 
-**luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ] [ --prefer-texmf ] [ --dry-run ]
+**luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ]
+                             [ --prefer-texmf ] [ --dry-run ]
+                             [ --formats=[+|-]EXTENSIONS ]
 
 **luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
 
@@ -60,6 +62,25 @@ update mode
 --prefer-texmf, -p      Organize the file name database in a way so
                         that it prefer fonts in the *TEXMF* tree over
                         system fonts if they are installed in both.
+--formats=EXTENSIONS    Extensions of the font files to index.
+                        Where *EXTENSIONS* is a comma-separated list of
+                        supported file extensions (otf, ttf, ttc,
+                        dfont, pfa, and pfb).  If the list is prefixed
+                        with a ``+`` sign, the given list is added to
+                        the currently active one; ``-`` subtracts.
+                        Default: *otf,ttf,ttc,dfont*.
+                        Examples:
+
+                        1) ``--formats=-ttc,ttf`` would skip
+                           TrueType fonts and font collections;
+                        2) ``--formats=otf`` would scan only OpenType
+                           files;
+                        3) ``--formats=+pfb`` includes binary
+                           Postscript files. **Warning**: with a
+                           standard TeX Live installation this will
+                           grow the database considerably and slow down
+                           font indexing.
+
 --dry-run, -D           Don’t load fonts, scan directories only.
                         (For debugging file system related issues.)
 
@@ -138,7 +159,9 @@ miscellaneous
                         3) ``environment`` -> print relevant
                             environment and kpse variables;
                         4) ``repository`` -> check the git repository
-                           for new releases.
+                           for new releases,
+                        5) ``index`` -> check database, display
+                           information about it.
 
                         Procedures can be chained by concatenating with
                         commas, e.g. ``--diagnose=files,permissions``.

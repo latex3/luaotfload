@@ -313,7 +313,7 @@ mtx-fonts has in names.tma:
 
 --doc]]--
 
-local fontnames_init = function (keep_cache) --- returns dbobj
+local fontnames_init = function () --- returns dbobj
     return {
         mappings        = { },
         status          = { },
@@ -404,7 +404,7 @@ load_names = function (dry_run)
             [[Font names database not found, generating new one.]])
         report("both", 0, "db",
             [[This can take several minutes; please be patient.]])
-        data = update_names(fontnames_init(false), nil, dry_run)
+        data = update_names(fontnames_init(), nil, dry_run)
         local success = save_names(data)
         if not success then
             report("both", 0, "db", "Database creation unsuccessful.")
@@ -2178,7 +2178,7 @@ update_names = function (fontnames, force, dry_run)
                          .. (force and " forcefully" or ""))
 
     if force then
-        fontnames = fontnames_init(false)
+        fontnames = fontnames_init()
     else
         if not fontnames then
             fontnames = load_names(dry_run)
@@ -2186,10 +2186,10 @@ update_names = function (fontnames, force, dry_run)
         if fontnames.version ~= names.version then
             report("both", 1, "db", "No font names database or old "
                                  .. "one found; generating new one")
-            fontnames = fontnames_init(true)
+            fontnames = fontnames_init()
         end
     end
-    local newfontnames = fontnames_init(true)
+    local newfontnames = fontnames_init()
     read_blacklist()
 
     local scanned, new

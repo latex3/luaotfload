@@ -486,7 +486,7 @@ local general_fields = {
     { "design_range_bottom", "l", "design size min"     },
     { "design_range_top",    "l", "design size max"     },
     { "fontstyle_id",        "l", "font style id"       },
-    { "fontstyle_name",      "l", "font style name"     },
+    { "fontstyle_name",      "S", "font style name"     },
     { "strokewidth",         "l", "stroke width"        },
     { "units_per_em",        "l", "units per em"        },
     { "ascent",              "l", "ascender height"     },
@@ -506,6 +506,25 @@ local display_general = function (fullinfo)
         local val
         if mode == "l" then
             val = fullinfo[key]
+        elseif mode == "S" then --- style names table
+            local data = fullinfo[key]
+            if type (data) == "table" then
+                if #data > 0 then
+                    for n = 1, #data do
+                        local nth = data[n]
+                        if nth.lang == 1033 then
+                            val = nth.name
+                            goto found
+                        end
+                    end
+                    val = next (data).name
+                else
+                    val = ""
+                end
+                ::found::
+            else
+                val = data
+            end
         elseif mode == "n" then
             local v = fullinfo[key]
             if v then

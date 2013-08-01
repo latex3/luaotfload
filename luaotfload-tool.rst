@@ -159,7 +159,9 @@ miscellaneous
                         3) ``environment`` -> print relevant
                             environment and kpse variables;
                         4) ``repository`` -> check the git repository
-                           for new releases.
+                           for new releases,
+                        5) ``index`` -> check database, display
+                           information about it.
 
                         Procedures can be chained by concatenating with
                         commas, e.g. ``--diagnose=files,permissions``.

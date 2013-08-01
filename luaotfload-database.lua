@@ -1219,21 +1219,27 @@ t1_fullinfo = function (filename, _subfont, texmf, basename)
         style = "italic"
     end
 
+    local style_synonyms_set = style_synonyms.set
     if weight then
         weight = sanitize_string (weight)
+        local tmp = ""
+        if style_synonyms_set.bold[weight] then
+            tmp = "bold"
+        end
         if style then
-            if style_synonyms.set.bold[weight] then
-                style = "bold" .. style
-            end
+            style = tmp .. style
         else
-            if style_synonyms.set.regular[weight] then
+            if style_synonyms_set.regular[weight] then
                 style = "regular"
+            else
+                style = tmp
             end
         end
     end
 
     if not style then
         style = "regular"
+        --- else italic
     end
 
     namedata.sanitized = sanitize_names ({

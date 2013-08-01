@@ -102,7 +102,7 @@ if config.luaotfload.update_live ~= false then
     config.luaotfload.update_live = true
 end
 
-names.version        = 2.207
+names.version        = 2.208
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 

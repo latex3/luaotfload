@@ -78,6 +78,7 @@ local stringsplit             = string.split
 local stringstrip             = string.strip
 local tableappend             = table.append
 local tablecopy               = table.copy
+local tablefastcopy           = table.fastcopy
 local tabletofile             = table.tofile
 local tabletohash             = table.tohash
 
@@ -237,6 +238,7 @@ end
 This is a sketch of the luaotfload db:
 
     type dbobj = {
+        formats         : string list; // { "otf", "ttf", "ttc", "dfont" }
         mappings        : fontentry list;
         status          : filestatus;
         version         : float;
@@ -313,12 +315,13 @@ mtx-fonts has in names.tma:
 
 --doc]]--
 
-local fontnames_init = function () --- returns dbobj
+local fontnames_init = function (formats) --- returns dbobj
     return {
         mappings        = { },
         status          = { },
 --      filenames       = { }, -- created later
         version         = names.version,
+        formats         = formats,
     }
 end
 
@@ -369,6 +372,7 @@ local resolve_fullpath
 local save_names
 local save_lookups
 local update_names
+local get_font_filter
 local set_font_filter
 
 --- state of the database
@@ -404,7 +408,8 @@ load_names = function (dry_run)
             [[Font names database not found, generating new one.]])
         report("both", 0, "db",
             [[This can take several minutes; please be patient.]])
-        data = update_names(fontnames_init(), nil, dry_run)
+        data = update_names (fontnames_init (get_font_filter ()),
+                             nil, dry_run)
         local success = save_names(data)
         if not success then
             report("both", 0, "db", "Database creation unsuccessful.")
@@ -1530,9 +1535,6 @@ read_blacklist = function ()
     names.blacklist = create_blacklist(blacklist, whitelist)
 end
 
------ ordinary_extensions   = { "otf", "ttf", "ttc", "dfont" }
------ type1_extensions      = { "pfb", --[[afm]] }
------ font_extensions_set = tabletohash (font_extensions)
 local p_font_filter
 
 do
@@ -1592,6 +1594,10 @@ do
         end
 
         p_font_filter = extension_pattern (current_formats)
+    end
+
+    get_font_filter = function (formats)
+        return tablefastcopy (current_formats)
     end
 
     --- initialize
@@ -2178,19 +2184,19 @@ update_names = function (fontnames, force, dry_run)
                          .. (force and " forcefully" or ""))
 
     if force then
-        fontnames = fontnames_init()
+        fontnames = fontnames_init (get_font_filter ())
     else
         if not fontnames then
-            fontnames = load_names(dry_run)
+            fontnames = load_names (dry_run)
         end
         if fontnames.version ~= names.version then
-            report("both", 1, "db", "No font names database or old "
-                                 .. "one found; generating new one")
-            fontnames = fontnames_init()
+            report ("both", 1, "db", "No font names database or old "
+                                  .. "one found; generating new one")
+            fontnames = fontnames_init (get_font_filter ())
         end
     end
-    local newfontnames = fontnames_init()
-    read_blacklist()
+    local newfontnames = fontnames_init (get_font_filter ())
+    read_blacklist ()
 
     local scanned, new
     scanned, new = scan_texmf_fonts (fontnames, newfontnames, dry_run)

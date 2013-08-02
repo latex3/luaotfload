@@ -384,41 +384,38 @@ local fuzzy_limit = 1 --- display closest only
 
 --- bool? -> dbobj
 load_names = function (dry_run)
-    local starttime = os.gettimeofday()
-    local foundname, data = load_lua_file(names.path.index.lua)
+    local starttime = os.gettimeofday ()
+    local foundname, data = load_lua_file (names.path.index.lua)
 
     if data then
-        report("both", 2, "db",
-            "Font names database loaded", "%s", foundname)
-        report("info", 3, "db", "Loading took %0.f ms",
-                                1000*(os.gettimeofday()-starttime))
+        report ("both", 2, "db",
+                "Font names database loaded", "%s", foundname)
+        report ("info", 3, "db", "Loading took %0.f ms",
+                1000*(os.gettimeofday()-starttime))
 
         local db_version, nms_version = data.version, names.version
         if db_version ~= nms_version then
-            report("both", 0, "db",
-                [[Version mismatch; expected %4.3f, got %4.3f]],
-                nms_version, db_version)
+            report ("both", 0, "db",
+                    [[Version mismatch; expected %4.3f, got %4.3f]],
+                    nms_version, db_version)
             if not fonts_reloaded then
-                report("both", 0, "db", [[Force rebuild]])
-                data = update_names({ }, true, false)
-                local success = save_names (data)
-                if not success then
+                report ("both", 0, "db", [[Force rebuild]])
+                data = update_names ({ }, true, false)
+                if not data then
                     report ("both", 0, "db",
                             "Database creation unsuccessful.")
                 end
-                return data
             end
         end
     else
-        report("both", 0, "db",
-            [[Font names database not found, generating new one.]])
-        report("both", 0, "db",
-            [[This can take several minutes; please be patient.]])
+        report ("both", 0, "db",
+                [[Font names database not found, generating new one.]])
+        report ("both", 0, "db",
+                [[This can take several minutes; please be patient.]])
         data = update_names (fontnames_init (get_font_filter ()),
                              nil, dry_run)
-        local success = save_names(data)
         if not success then
-            report("both", 0, "db", "Database creation unsuccessful.")
+            report ("both", 0, "db", "Database creation unsuccessful.")
         end
     end
     fonts_loaded = true
@@ -993,14 +990,13 @@ end
 
 --- string -> ('a -> 'a) -> 'a list -> 'a
 reload_db = function (why, caller, ...)
-    report("both", 1, "db", "Reload initiated; reason: %q", why)
-    names.data = update_names(names.data, false, false)
-    local success = save_names()
-    if success then
+    report ("both", 1, "db", "Reload initiated; reason: %q", why)
+    names.data = update_names (names.data, false, false)
+    if names.data then
         fonts_reloaded = true
-        return caller(...)
+        return caller (...)
     end
-    report("both", 0, "db", "Database update unsuccessful.")
+    report ("both", 0, "db", "Database update unsuccessful.")
 end
 
 --- string -> string -> int
@@ -2226,6 +2222,11 @@ update_names = function (fontnames, force, dry_run)
            "Scanned %d font files; %d new entries.", n_scanned, n_new)
     report("info", 3, "db",
            "Rebuilt in %0.f ms", 1000*(os.gettimeofday()-starttime))
+    names.data = newfontnames
+
+    if dry_run ~= true then
+        save_names ()
+    end
     return newfontnames
 end
 

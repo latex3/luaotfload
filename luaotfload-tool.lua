@@ -763,8 +763,7 @@ actions.generate = function (job)
     fontnames = names.update(fontnames, job.force_reload, job.dry_run)
     logs.names_report("info", 2, "db",
         "Fonts in the database: %i", #fontnames.mappings)
-    local success = names.save(fontnames)
-    if success then
+    if names.data then
         return true, true
     end
     return false, false

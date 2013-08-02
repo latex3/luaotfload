@@ -39,9 +39,6 @@ local stringformat     = string.format
 local stringis_empty   = string.is_empty
 local mathceil         = math.ceil
 
---- TODO an option to dump the default features for a script would make
----      a nice addition to luaotfload-tool
-
 local defaults = {
     dflt = {
         "ccmp", "locl", "rlig", "liga", "clig",

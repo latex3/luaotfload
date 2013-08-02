@@ -400,7 +400,13 @@ load_names = function (dry_run)
                 nms_version, db_version)
             if not fonts_reloaded then
                 report("both", 0, "db", [[Force rebuild]])
-                return update_names({ }, true, false)
+                data = update_names({ }, true, false)
+                local success = save_names (data)
+                if not success then
+                    report ("both", 0, "db",
+                            "Database creation unsuccessful.")
+                end
+                return data
             end
         end
     else

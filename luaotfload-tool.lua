@@ -823,13 +823,10 @@ actions.query = function (job)
     then
         foundname, subfont = names.resolve (nil, nil, tmpspec)
         if foundname then
-            foundname = names.crude_file_lookup (foundname)
-            if foundname then
-                success = true
-            end
+            foundname, _, success = names.crude_file_lookup (foundname)
         end
     elseif tmpspec.lookup == "file" then
-        foundname, subfont, success =
+        foundname, _, success =
             names.crude_file_lookup (tmpspec.name)
     end
 

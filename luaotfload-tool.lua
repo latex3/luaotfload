@@ -209,6 +209,7 @@ This tool is part of the luaotfload package. Valid options are:
                                    DATABASE
 
   -u --update                  update the database
+  -n --no-reload               suppress db update
   -f --force                   force re-indexing all fonts
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
@@ -1044,6 +1045,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         limit              = 1,
         list               = 1,
         log                = 1,
+        ["no-reload"]      = "n",
         ["prefer-texmf"]   = "p",
         quiet              = "q",
         ["show-blacklist"] = "b",
@@ -1054,7 +1056,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         warnings           = "w",
     }
 
-    local short_options = "bDfFiIlpquvVhw"
+    local short_options = "bDfFiIlnpquvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -1133,6 +1135,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.asked_diagnostics = optarg[n]
         elseif v == "formats" then
             names.set_font_filter (optarg[n])
+        elseif v == "n" then
+            config.luaotfload.update_live = false
         end
     end
 

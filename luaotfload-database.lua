@@ -2169,7 +2169,7 @@ update_names = function (fontnames, force, dry_run)
 
     if config.luaotfload.update_live == false then
         report("info", 2, "db",
-               "skipping database update")
+               "Skipping database update")
         --- skip all db updates
         return fontnames or names.data
     end

@@ -14,11 +14,25 @@ local lpegmatch         = lpeg.match
 ---[[ begin included font-ltx.lua ]]
 --- this appears to be based in part on luatex-fonts-def.lua
 
-local fonts = fonts
+local fonts             = fonts
+local definers          = fonts.definers
+local handlers          = fonts.handlers
+
+local as_script, normalize
+
+if handlers then
+    normalize = handlers.otf.features.normalize
+else
+    normalize = function () end
+    as_script = true
+end
+
 
 --HH A bit of tuning for definitions.
 
-fonts.constructors.namemode = "specification" -- somehow latex needs this (changed name!) => will change into an overload
+if fonts.constructors then
+    fonts.constructors.namemode = "specification" -- somehow latex needs this (changed name!) => will change into an overload
+end
 
 --[[HH--
     tricky: we sort of bypass the parser and directly feed all into
@@ -1182,19 +1196,20 @@ local handle_request = function (specification)
     --- The next line sets the “rand” feature to “random”; I haven’t
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.
-    specification.features.normal
-        = fonts.handlers.otf.features.normalize(request.features)
+    specification.features.normal = normalize (request.features)
     return specification
 end
 
-local compare_requests = function (spec)
-    local old = old_behavior(spec)
-    local new = handle_request(spec)
-    return new
+if as_script == true then --- skip the remainder of the file
+    fonts.names.handle_request = handle_request
+    report ("log", 5, "load",
+            "Exiting early from luaotfload-features.lua.")
+    return
+else
+    local registersplit = definers.registersplit
+    registersplit (":", handle_request, "cryptic")
+    registersplit ("",  handle_request, "more cryptic") -- catches \font\text=[names]
 end
-
-fonts.definers.registersplit(":", handle_request, "cryptic")
-fonts.definers.registersplit("",  handle_request, "more cryptic") -- catches \font\text=[names]
 
 ---[[ end included font-ltx.lua ]]
 

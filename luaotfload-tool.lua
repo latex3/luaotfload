@@ -753,7 +753,7 @@ end
 actions.blacklist = function (job)
     names.read_blacklist()
     local n = 0
-    for n, entry in next, table.sortedkeys(fonts.names.blacklist) do
+    for n, entry in next, table.sortedkeys(names.blacklist) do
         texiowrite_nl(stringformat("(%d %s)", n, entry))
     end
     return true, false
@@ -803,16 +803,22 @@ end
 
 actions.query = function (job)
 
+    require "luaotfload-features"
+
     local query = job.query
+
     local tmpspec = {
         name          = query,
         lookup        = "name",
-        specification = "name:" .. query,
+        specification = query,
         optsize       = 0,
+        features      = { },
     }
 
+    tmpspec = names.handle_request (tmpspec)
+
     local foundname, subfont, success =
-        fonts.names.resolve(nil, nil, tmpspec)
+        names.resolve(nil, nil, tmpspec)
 
     if success then
         logs.names_report(false, 0,
@@ -835,7 +841,7 @@ actions.query = function (job)
         if job.fuzzy == true then
             logs.names_report(false, 0,
                 "resolve", "Looking for close matches, this may take a while ...")
-            local success = fonts.names.find_closest(query, job.fuzzy_limit)
+            local success = names.find_closest(query, job.fuzzy_limit)
         end
     end
     return true, true

@@ -554,7 +554,6 @@ local print_features = function (features)
         for script, languages in next, data do
             local field     = stringformat(key_fmt, script).. fieldseparator .. " "
             local wd_field  = #field
-            --inspect(languages.list)
             local lines     = reflow(languages.list, textwidth - wd_field)
             local indent    = stringrep(" ", wd_field)
             texiowrite_nl(field)
@@ -817,8 +816,22 @@ actions.query = function (job)
 
     tmpspec = names.handle_request (tmpspec)
 
-    local foundname, subfont, success =
-        names.resolve(nil, nil, tmpspec)
+    local foundname, subfont, success
+
+    if tmpspec.lookup == "name"
+    or tmpspec.lookup == "anon" --- not *exactly* as resolvers.anon
+    then
+        foundname, subfont = names.resolve (nil, nil, tmpspec)
+        if foundname then
+            foundname = names.crude_file_lookup (foundname)
+            if foundname then
+                success = true
+            end
+        end
+    elseif tmpspec.lookup == "file" then
+        foundname, subfont, success =
+            names.crude_file_lookup (tmpspec.name)
+    end
 
     if success then
         logs.names_report(false, 0,
@@ -841,7 +854,7 @@ actions.query = function (job)
         if job.fuzzy == true then
             logs.names_report(false, 0,
                 "resolve", "Looking for close matches, this may take a while ...")
-            local success = names.find_closest(query, job.fuzzy_limit)
+            local _success = names.find_closest(query, job.fuzzy_limit)
         end
     end
     return true, true

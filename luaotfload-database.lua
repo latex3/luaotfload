@@ -523,21 +523,21 @@ crude_file_lookup_verbose = function (filename)
     --- look up in db first ...
     found = verbose_lookup(filenames, "bare", filename)
     if found then
-        return found
+        return found, nil, true
     end
     found = verbose_lookup(filenames, "base", filename)
     if found then
-        return found
+        return found, nil, true
     end
 
     --- ofm and tfm, returns pair
     for i=1, #type1_formats do
         local format = type1_formats[i]
         if resolvers.findfile(filename, format) then
-            return file.addsuffix(filename, format), format
+            return file.addsuffix(filename, format), format, true
         end
     end
-    return filename, nil
+    return filename, nil, false
 end
 
 --- string -> (string | string * string)
@@ -557,15 +557,17 @@ crude_file_lookup = function (filename)
         if found == nil then
             found = dummy_findfile(filename)
         end
-        return found or filename
+        return found or filename, nil, true
     end
+
     for i=1, #type1_formats do
         local format = type1_formats[i]
         if resolvers.findfile(filename, format) then
-            return file.addsuffix(filename, format), format
+            return file.addsuffix(filename, format), format, true
         end
     end
-    return filename, nil
+
+    return filename, nil, false
 end
 
 --[[doc--

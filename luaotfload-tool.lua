@@ -816,6 +816,10 @@ actions.query = function (job)
 
     tmpspec = names.handle_request (tmpspec)
 
+    if not tmpspec.size then
+        tmpspec.size = 655360 --- assume 10pt
+    end
+
     local foundname, subfont, success
 
     if tmpspec.lookup == "name"

@@ -93,6 +93,9 @@ query mode
 --find=NAME             Resolve a font name; this looks up <name> in
                         the database and prints the file name it is
                         mapped to.
+                        ``--find`` also understands request syntax,
+                        i.e. ``--find=file:foo.otf`` checks whether
+                        ``foo.otf`` is indexed.
 --fuzzy, -F             Show approximate matches to the file name if
                         the lookup was unsuccessful (requires
                         ``--find``).

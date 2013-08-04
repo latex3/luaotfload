@@ -1134,7 +1134,7 @@ table as returned by the font file reader need to be relocated.
 
 --- string -> int -> bool -> string -> fontentry
 ot_fullinfo = function (filename, subfont, texmf, basename)
-    local tfmdata = { }
+    local namedata = { }
 
     local metadata = load_font_file (filename, subfont)
     if not metadata then
@@ -1145,68 +1145,74 @@ ot_fullinfo = function (filename, subfont, texmf, basename)
     if metadata.fontstyle_name then
         for _, name in next, metadata.fontstyle_name do
             if name.lang == 1033 then --- I hate magic numbers
-                tfmdata.fontstyle_name = name.name
+                namedata.fontstyle_name = name.name
             end
         end
     end
 
     if metadata.names then
-        for _, namedata in next, metadata.names do
-            if namedata.lang == "English (US)" then
+        for _, raw_namedata in next, metadata.names do
+            if raw_namedata.lang == "English (US)" then
                 local names = {
                     --- see
                     --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
-                    fullname      = namedata.names.compatfull
-                                 or namedata.names.fullname,
-                    family        = namedata.names.preffamilyname
-                                 or namedata.names.family,
-                    prefmodifiers = namedata.names.prefmodifiers,
-                    subfamily     = tfmdata.fontstyle_name
-                                 or namedata.names.subfamily,
-                    psname        = namedata.names.postscriptname,
+                    fullname      = raw_namedata.names.compatfull
+                                 or raw_namedata.names.fullname,
+                    family        = raw_namedata.names.preffamilyname
+                                 or raw_namedata.names.family,
+                    prefmodifiers = raw_namedata.names.prefmodifiers,
+                    subfamily     = namedata.fontstyle_name
+                                 or raw_namedata.names.subfamily,
+                    psname        = raw_namedata.names.postscriptname,
                     pfullname     = metadata.fullname,
                     fontname      = metadata.fontname,
                     metafamily    = metadata.familyname,
                 }
---              tfmdata.names     = names
-                tfmdata.sanitized = sanitize_names(names)
+--              namedata.names     = names
+                namedata.sanitized = sanitize_names(names)
             end
         end
     else
         -- no names table, propably a broken font
-        report("log", 1, "db", "Broken font rejected", "%s", basefile)
+        report("log", 1, "db",
+               "Broken font %s rejected due to missing names table.",
+               basename)
         return
     end
-    tfmdata.fontname      = metadata.fontname
-    tfmdata.fullname      = metadata.fullname
-    tfmdata.familyname    = metadata.familyname
-    tfmdata.weight        = metadata.pfminfo.weight
-    tfmdata.width         = metadata.pfminfo.width
-    tfmdata.slant         = metadata.italicangle
-    --- this is for querying
-    tfmdata.units_per_em  = metadata.units_per_em
-    tfmdata.version       = metadata.version
+
+
+    namedata.fontname      = metadata.fontname
+    namedata.fullname      = metadata.fullname
+    namedata.familyname    = metadata.familyname
+    namedata.weight        = metadata.pfminfo.weight
+    namedata.width         = metadata.pfminfo.width
+    namedata.slant         = metadata.italicangle
+    --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
+    namedata.units_per_em  = metadata.units_per_em
+    namedata.version       = metadata.version
     -- don't waste the space with zero values
-    tfmdata.size = {
+    namedata.size = {
         metadata.design_size         ~= 0 and metadata.design_size         or nil,
         metadata.design_range_top    ~= 0 and metadata.design_range_top    or nil,
         metadata.design_range_bottom ~= 0 and metadata.design_range_bottom or nil,
     }
 
     --- file location data (used to be filename field)
-    tfmdata.filename      = filename --> sys
-    tfmdata.basename      = basename --> texmf
-    tfmdata.texmf         = texmf or false
-    tfmdata.subfont       = subfont
+    namedata.filename      = filename --> sys
+    namedata.basename      = basename --> texmf
+    namedata.texmf         = texmf or false
+    namedata.subfont       = subfont
 
-    return tfmdata
+    return namedata
 end
 
 --[[doc--
 
-    Type1 font inspector. PFB’s contain a good deal less name fields
-    which makes it tricky in some parts to find a meaningful representation
-    for the database.
+    Type1 font inspector. In comparison with OTF, PFB’s contain a good
+    deal less name fields which makes it tricky in some parts to find a
+    meaningful representation for the database.
+
+    Good read: http://www.adobe.com/devnet/font/pdfs/5004.AFM_Spec.pdf
 
 --doc]]--
 
@@ -1219,7 +1225,7 @@ t1_fullinfo = function (filename, _subfont, texmf, basename)
     local fullname      = metadata.fullname
     local familyname    = metadata.familyname
     local italicangle   = metadata.italicangle
-    local weight        = metadata.weight
+    local weight        = metadata.weight --- string identifier
 
     --- we have to improvise and detect whether we deal with
     --- italics since pfb fonts don’t come with a “subfamily”
@@ -1268,15 +1274,18 @@ t1_fullinfo = function (filename, _subfont, texmf, basename)
     namedata.fullname      = fullname
     namedata.familyname    = familyname
 
-    namedata.weight        = 0 -- dummy
+    namedata.slant         = italicangle
+    namedata.units_per_em  = 1000 --- ps fonts standard
     namedata.version       = metadata.version
+    namedata.weight        = metadata.pfminfo.weight --- integer
+    namedata.width         = metadata.pfminfo.width
 
     namedata.size          = { }
 
     namedata.filename      = filename --> sys
     namedata.basename      = basename --> texmf
     namedata.texmf         = texmf or false
-    namedata.subfont       = subfont
+    namedata.subfont       = false
     return namedata
 end
 

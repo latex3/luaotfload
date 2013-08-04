@@ -102,7 +102,7 @@ if config.luaotfload.update_live ~= false then
     config.luaotfload.update_live = true
 end
 
-names.version        = 2.208
+names.version        = 2.209
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 
@@ -259,6 +259,7 @@ This is a sketch of the luaotfload db:
         fullname    : string; // <- metadata
         sanitized   : {
             family         : string;
+            fontstyle_name : string; // <- new in 2.4
             fontname       : string; // <- metadata
             fullname       : string; // <- namedata.names
             metafamily     : string;
@@ -726,7 +727,7 @@ end
 local add_to_match = function (found, size, face)
 
     local optsize, dsnsize, maxsize, minsize
-    if #face.size > 0 then
+    if face.size ~= false then
         optsize = face.size
         dsnsize = optsize[1] and optsize[1] / 10
         -- can be nil
@@ -1197,11 +1198,21 @@ ot_fullinfo = function (filename, subfont, texmf, basename)
     namedata.units_per_em  = metadata.units_per_em
     namedata.version       = metadata.version
     -- don't waste the space with zero values
-    namedata.size = {
-        metadata.design_size         ~= 0 and metadata.design_size         or nil,
-        metadata.design_range_top    ~= 0 and metadata.design_range_top    or nil,
-        metadata.design_range_bottom ~= 0 and metadata.design_range_bottom or nil,
-    }
+
+    local design_size         = metadata.design_size
+    local design_range_top    = metadata.design_range_top
+    local design_range_bottom = metadata.design_range_bottom
+
+    if     design_size         ~= 0
+        or design_range_top    ~= 0
+        or design_range_bottom ~= 0
+    then
+        namedata.size = {
+            design_size, design_range_top, design_range_bottom,
+        }
+    else
+        namedata.size = false
+    end
 
     --- file location data (used to be filename field)
     namedata.filename      = filename --> sys

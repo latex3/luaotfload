@@ -512,7 +512,7 @@ local verbose_lookup = function (data, kind, filename)
     return false
 end
 
---- string -> (string | string * string)
+--- string -> (string * string * bool)
 crude_file_lookup_verbose = function (filename)
     if not names.data then names.data = load_names() end
     local data      = names.data
@@ -540,7 +540,7 @@ crude_file_lookup_verbose = function (filename)
     return filename, nil, false
 end
 
---- string -> (string | string * string)
+--- string -> (string * string * bool)
 crude_file_lookup = function (filename)
     if not names.data then names.data = load_names() end
     local data      = names.data
@@ -833,14 +833,16 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
     local candidates = { } --> secondary results, incomplete matches
 
     for n, face in next, data.mappings do
-        local family, subfamily, fullname, prefmodifiers
-        local psname, fontname, pfullname, metafamily
+        local family, metafamily
+        local prefmodifiers, fontstyle_name, subfamily
+        local psname, fullname, fontname, pfullname
 
         local facenames = face.sanitized
         if facenames then
             family          = facenames.family
             subfamily       = facenames.subfamily
-            prefmodifiers   = facenames.prefmodifiers or facenames.subfamily
+            fontstyle_name  = facenames.fontstyle_name
+            prefmodifiers   = facenames.prefmodifiers or fontstyle_name or subfamily
             fullname        = facenames.fullname
             psname          = facenames.psname
             fontname        = facenames.fontname
@@ -853,7 +855,9 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         if     name == family
             or name == metafamily
         then
-            if style == prefmodifiers then
+            if     style == prefmodifiers
+                or style == fontstyle_name
+            then
                 local continue
                 exact, continue = add_to_match(exact, askedsize, face)
                 if continue == false then break end
@@ -1141,35 +1145,12 @@ ot_fullinfo = function (filename, subfont, texmf, basename)
         return nil
     end
 
-    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
-    if metadata.fontstyle_name then
-        for _, name in next, metadata.fontstyle_name do
-            if name.lang == 1033 then --- I hate magic numbers
-                namedata.fontstyle_name = name.name
-            end
-        end
-    end
+    local english_names
 
     if metadata.names then
         for _, raw_namedata in next, metadata.names do
             if raw_namedata.lang == "English (US)" then
-                local names = {
-                    --- see
-                    --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
-                    fullname      = raw_namedata.names.compatfull
-                                 or raw_namedata.names.fullname,
-                    family        = raw_namedata.names.preffamilyname
-                                 or raw_namedata.names.family,
-                    prefmodifiers = raw_namedata.names.prefmodifiers,
-                    subfamily     = namedata.fontstyle_name
-                                 or raw_namedata.names.subfamily,
-                    psname        = raw_namedata.names.postscriptname,
-                    pfullname     = metadata.fullname,
-                    fontname      = metadata.fontname,
-                    metafamily    = metadata.familyname,
-                }
---              namedata.names     = names
-                namedata.sanitized = sanitize_names(names)
+                english_names = raw_namedata.names
             end
         end
     else
@@ -1180,6 +1161,31 @@ ot_fullinfo = function (filename, subfont, texmf, basename)
         return
     end
 
+    local fontnames = {
+        --- see
+        --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
+        fullname      = english_names.compatfull
+                     or english_names.fullname,
+        family        = english_names.preffamilyname
+                     or english_names.family,
+        prefmodifiers = english_names.prefmodifiers,
+        subfamily     = english_names.subfamily,
+        psname        = english_names.postscriptname,
+        pfullname     = metadata.fullname,
+        fontname      = metadata.fontname,
+        metafamily    = metadata.familyname,
+    }
+
+    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
+    if metadata.fontstyle_name then
+        for _, name in next, metadata.fontstyle_name do
+            if name.lang == 1033 then --- I hate magic numbers
+                fontnames.fontstyle_name = name.name
+            end
+        end
+    end
+
+    namedata.sanitized = sanitize_names (fontnames)
 
     namedata.fontname      = metadata.fontname
     namedata.fullname      = metadata.fullname

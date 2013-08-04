@@ -823,12 +823,15 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         return specification.name, false, false
     end
 
+    local synonym_set       = style_synonyms.set
+    local stylesynonyms     = synonym_set[style]
+    local regularsynonyms   = synonym_set.regular
+
     local exact      = { } --> collect exact style matches
     local synonymous = { } --> collect matching style synonyms
     local fallback         --> e.g. non-matching style (fontspec is anal about this)
     local candidates = { } --> secondary results, incomplete matches
 
-    local synonym_set = style_synonyms.set
     for n, face in next, data.mappings do
         local family, subfamily, fullname, prefmodifiers
         local psname, fontname, pfullname, metafamily
@@ -856,8 +859,8 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
                 if continue == false then break end
             elseif style == subfamily then
                 exact = add_to_match(exact, askedsize, face)
-            elseif synonym_set[style] and synonym_set[style][prefmodifiers]
-                or synonym_set.regular[prefmodifiers]
+            elseif stylesynonyms and stylesynonyms[prefmodifiers]
+                or regularsynonyms[prefmodifiers]
             then
                 --- treat synonyms for prefmodifiers as first-class
                 --- (needed to prioritize DejaVu Book over Condensed)
@@ -868,8 +871,8 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
                 or name == psname
             then
                 synonymous = add_to_match(synonymous, askedsize, face)
-            elseif synonym_set[style] and synonym_set[style][subfamily]
-                or synonym_set.regular[subfamily]
+            elseif stylesynonyms and stylesynonyms[subfamily]
+                or regularsynonyms[subfamily]
             then
                 synonymous = add_to_match(synonymous, askedsize, face)
             elseif prefmodifiers == "regular"

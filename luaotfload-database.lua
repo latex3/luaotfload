@@ -102,7 +102,7 @@ if config.luaotfload.update_live ~= false then
     config.luaotfload.update_live = true
 end
 
-names.version        = 2.209
+names.version        = 2.210
 names.data           = nil      --- contains the loaded database
 names.lookups        = nil      --- contains the lookup cache
 
@@ -2264,7 +2264,18 @@ update_names = function (fontnames, force, dry_run)
     names.data = newfontnames
 
     if dry_run ~= true then
+
         save_names ()
+
+        local success, _lookups = flush_lookup_cache ()
+        if success then
+            local success = names.save_lookups ()
+            if success then
+                logs.names_report ("info", 2, "cache",
+                                   "Lookup cache emptied")
+                return true, true
+            end
+        end
     end
     return newfontnames
 end

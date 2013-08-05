@@ -726,16 +726,17 @@ end
 --- “found” is the match accumulator
 local add_to_match = function (found, size, face)
 
-    local optsize, dsnsize, maxsize, minsize
-    if face.size ~= false then
-        optsize = face.size
+    local continue = true
+
+    local optsize = face.size
+
+    if next (optsize) then
+        local dsnsize, maxsize, minsize
         dsnsize = optsize[1] and optsize[1] / 10
         -- can be nil
         maxsize = optsize[2] and optsize[2] / 10 or dsnsize
         minsize = optsize[3] and optsize[3] / 10 or dsnsize
-    end
-    local continue = true
-    if optsize then
+
         if dsnsize == size or (size > minsize and size <= maxsize) then
             found[1] = face
             continue = false ---> break
@@ -746,6 +747,7 @@ local add_to_match = function (found, size, face)
         found[1] = face
         continue = false ---> break
     end
+
     return found, continue
 end
 
@@ -925,7 +927,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         local closest
         local least = math.huge -- initial value is infinity
         for i,face in next, found do
-            local dsnsize    = face.size[1]/10
+            local dsnsize    = (face.size[1] or 0) / 10
             local difference = mathabs(dsnsize - askedsize)
             if difference < least then
                 closest = face

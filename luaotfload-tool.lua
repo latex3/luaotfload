@@ -610,11 +610,20 @@ end
 
 local display_features = function (gsub, gpos)
     texiowrite_nl ""
-    print_heading("Features", 2)
-    print_heading("GSUB Features", 3)
-    display_feature_set(gsub)
-    print_heading("GPOS Features", 3)
-    display_feature_set(gpos)
+
+    if gsub or gpos then
+        print_heading("Features", 2)
+
+        if gsub then
+            print_heading("GSUB Features", 3)
+            display_feature_set(gsub)
+        end
+
+        if gpos then
+            print_heading("GPOS Features", 3)
+            display_feature_set(gpos)
+        end
+    end
 end
 
 local show_full_info = function (path, subfont, warnings)

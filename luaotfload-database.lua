@@ -730,12 +730,11 @@ local add_to_match = function (found, size, face)
 
     local optsize = face.size
 
-    if next (optsize) then
+    if optsize and next (optsize) then
         local dsnsize, maxsize, minsize
-        dsnsize = optsize[1] and optsize[1] / 10
-        -- can be nil
-        maxsize = optsize[2] and optsize[2] / 10 or dsnsize
-        minsize = optsize[3] and optsize[3] / 10 or dsnsize
+        dsnsize = optsize[1]
+        maxsize = optsize[2]
+        minsize = optsize[3]
 
         if dsnsize == size or (size > minsize and size <= maxsize) then
             found[1] = face
@@ -926,14 +925,17 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         -- least difference from the requested size.
         local closest
         local least = math.huge -- initial value is infinity
+
         for i,face in next, found do
-            local dsnsize    = (face.size[1] or 0) / 10
+
+            local dsnsize = face.size and face.size[1] or 0
             local difference = mathabs(dsnsize - askedsize)
             if difference < least then
                 closest = face
                 least   = difference
             end
         end
+
         local success, filename, subfont
             = get_font_file(data.filenames.full, closest)
         if success == true then
@@ -1205,10 +1207,14 @@ ot_fullinfo = function (filename, subfont, texmf, basename)
     local design_range_top    = metadata.design_range_top
     local design_range_bottom = metadata.design_range_bottom
 
-    if     design_size         ~= 0
-        or design_range_top    ~= 0
-        or design_range_bottom ~= 0
-    then
+    local fallback_size = design_size         ~= 0 and design_size
+                       or design_range_bottom ~= 0 and design_range_bottom
+                       or design_range_top    ~= 0 and design_range_top
+
+    if fallback_size then
+        design_size         = (design_size         or fallback_size) / 10
+        design_range_top    = (design_range_top    or fallback_size) / 10
+        design_range_bottom = (design_range_bottom or fallback_size) / 10
         namedata.size = {
             design_size, design_range_top, design_range_bottom,
         }
@@ -1299,7 +1305,7 @@ t1_fullinfo = function (filename, _subfont, texmf, basename)
     namedata.weight        = metadata.pfminfo.weight --- integer
     namedata.width         = metadata.pfminfo.width
 
-    namedata.size          = { }
+    namedata.size          = false
 
     namedata.filename      = filename --> sys
     namedata.basename      = basename --> texmf

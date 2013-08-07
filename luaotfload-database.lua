@@ -1280,7 +1280,7 @@ t1_fullinfo = function (filename, _subfont, texmf, basename)
         end
     end
 
-    if not style then
+    if not style or style == "" then
         style = "regular"
         --- else italic
     end
@@ -2273,17 +2273,12 @@ update_names = function (fontnames, force, dry_run)
             if success then
                 logs.names_report ("info", 2, "cache",
                                    "Lookup cache emptied")
-                return true, true
+                return newfontnames
             end
         end
     end
     return newfontnames
 end
-
---- The lookup cache is an experimental feature of version 2.2;
---- instead of incorporating it into the database it gets its own
---- file. As we update it after every single addition this saves us
---- quite some time.
 
 --- unit -> bool
 save_lookups = function ( )

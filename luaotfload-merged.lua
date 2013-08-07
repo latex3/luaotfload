@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 07/14/13 14:53:44
+-- merge date  : 08/01/13 01:31:02
 
 do -- begin closure to overcome local limits and interference
 
@@ -2416,9 +2416,9 @@ function string.booleanstring(str)
 end
 function string.is_boolean(str,default)
   if type(str)=="string" then
-    if str=="true" or str=="yes" or str=="on" or str=="t" then
+    if str=="true" or str=="yes" or str=="on" or str=="t" or str=="1" then
       return true
-    elseif str=="false" or str=="no" or str=="off" or str=="f" then
+    elseif str=="false" or str=="no" or str=="off" or str=="f" or str=="0" then
       return false
     end
   end
@@ -4880,33 +4880,38 @@ function mappings.addtounicode(data,filename)
       if not unicode or unicode=="" then
         local split=lpegmatch(namesplitter,name)
         local nsplit=split and #split or 0
-        if nsplit>=2 then
-          local t,n={},0
-          for l=1,nsplit do
-            local base=split[l]
-            local u=unicodes[base] or unicodevector[base]
-            if not u then
+        local t,n={},0
+        unicode=true
+        for l=1,nsplit do
+          local base=split[l]
+          local u=unicodes[base] or unicodevector[base]
+          if not u then
+            break
+          elseif type(u)=="table" then
+            if u[1]>=private then
+              unicode=false
               break
-            elseif type(u)=="table" then
-              n=n+1
-              t[n]=u[1]
-            else
-              n=n+1
-              t[n]=u
             end
-          end
-          if n==0 then
-          elseif n==1 then
-            originals[index]=t[1]
-            tounicode[index]=tounicode16(t[1],name)
+            n=n+1
+            t[n]=u[1]
           else
-            originals[index]=t
-            tounicode[index]=tounicode16sequence(t)
+            if u>=private then
+              unicode=false
+              break
+            end
+            n=n+1
+            t[n]=u
           end
-          nl=nl+1
-          unicode=true
-        else
         end
+        if n==0 then
+        elseif n==1 then
+          originals[index]=t[1]
+          tounicode[index]=tounicode16(t[1],name)
+        else
+          originals[index]=t
+          tounicode[index]=tounicode16sequence(t)
+        end
+        nl=nl+1
       end
       if not unicode or unicode=="" then
         local foundcodes,multiple=lpegmatch(uparser,name)

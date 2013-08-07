@@ -15,13 +15,14 @@
 SYNOPSIS
 =======================================================================
 
-**luaotfload-tool** [ -bDfFiIlpquvVhw ]
+**luaotfload-tool** [ -bDfFiIlnpquvVhw ]
 
 **luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ]
                              [ --prefer-texmf ] [ --dry-run ]
                              [ --formats=[+|-]EXTENSIONS ]
 
 **luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
+                                    [ --no-reload ]
 
 **luaotfload-tool** --flush-lookups
 
@@ -59,6 +60,9 @@ update mode
 --update, -u            Update the database; indexes new fonts.
 --force, -f             Force rebuilding of the database; re-indexes
                         all fonts.
+--no-reload, -n         Suppress auto-updates to the database (e.g.
+                        when ``--find`` is passed an unknown name).
+
 --prefer-texmf, -p      Organize the file name database in a way so
                         that it prefer fonts in the *TEXMF* tree over
                         system fonts if they are installed in both.
@@ -89,6 +93,9 @@ query mode
 --find=NAME             Resolve a font name; this looks up <name> in
                         the database and prints the file name it is
                         mapped to.
+                        ``--find`` also understands request syntax,
+                        i.e. ``--find=file:foo.otf`` checks whether
+                        ``foo.otf`` is indexed.
 --fuzzy, -F             Show approximate matches to the file name if
                         the lookup was unsuccessful (requires
                         ``--find``).

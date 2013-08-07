@@ -209,6 +209,7 @@ This tool is part of the luaotfload package. Valid options are:
                                    DATABASE
 
   -u --update                  update the database
+  -n --no-reload               suppress db update
   -f --force                   force re-indexing all fonts
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
@@ -486,7 +487,7 @@ local general_fields = {
     { "design_range_bottom", "l", "design size min"     },
     { "design_range_top",    "l", "design size max"     },
     { "fontstyle_id",        "l", "font style id"       },
-    { "fontstyle_name",      "l", "font style name"     },
+    { "fontstyle_name",      "S", "font style name"     },
     { "strokewidth",         "l", "stroke width"        },
     { "units_per_em",        "l", "units per em"        },
     { "ascent",              "l", "ascender height"     },
@@ -506,6 +507,25 @@ local display_general = function (fullinfo)
         local val
         if mode == "l" then
             val = fullinfo[key]
+        elseif mode == "S" then --- style names table
+            local data = fullinfo[key]
+            if type (data) == "table" then
+                if #data > 0 then
+                    for n = 1, #data do
+                        local nth = data[n]
+                        if nth.lang == 1033 then
+                            val = nth.name
+                            goto found
+                        end
+                    end
+                    val = next (data).name
+                else
+                    val = ""
+                end
+                ::found::
+            else
+                val = data
+            end
         elseif mode == "n" then
             local v = fullinfo[key]
             if v then
@@ -534,7 +554,6 @@ local print_features = function (features)
         for script, languages in next, data do
             local field     = stringformat(key_fmt, script).. fieldseparator .. " "
             local wd_field  = #field
-            --inspect(languages.list)
             local lines     = reflow(languages.list, textwidth - wd_field)
             local indent    = stringrep(" ", wd_field)
             texiowrite_nl(field)
@@ -591,11 +610,20 @@ end
 
 local display_features = function (gsub, gpos)
     texiowrite_nl ""
-    print_heading("Features", 2)
-    print_heading("GSUB Features", 3)
-    display_feature_set(gsub)
-    print_heading("GPOS Features", 3)
-    display_feature_set(gpos)
+
+    if gsub or gpos then
+        print_heading("Features", 2)
+
+        if gsub then
+            print_heading("GSUB Features", 3)
+            display_feature_set(gsub)
+        end
+
+        if gpos then
+            print_heading("GPOS Features", 3)
+            display_feature_set(gpos)
+        end
+    end
 end
 
 local show_full_info = function (path, subfont, warnings)
@@ -733,7 +761,7 @@ end
 actions.blacklist = function (job)
     names.read_blacklist()
     local n = 0
-    for n, entry in next, table.sortedkeys(fonts.names.blacklist) do
+    for n, entry in next, table.sortedkeys(names.blacklist) do
         texiowrite_nl(stringformat("(%d %s)", n, entry))
     end
     return true, false
@@ -744,8 +772,7 @@ actions.generate = function (job)
     fontnames = names.update(fontnames, job.force_reload, job.dry_run)
     logs.names_report("info", 2, "db",
         "Fonts in the database: %i", #fontnames.mappings)
-    local success = names.save(fontnames)
-    if success then
+    if names.data then
         return true, true
     end
     return false, false
@@ -784,16 +811,37 @@ end
 
 actions.query = function (job)
 
+    require "luaotfload-features"
+
     local query = job.query
+
     local tmpspec = {
         name          = query,
         lookup        = "name",
-        specification = "name:" .. query,
+        specification = query,
         optsize       = 0,
+        features      = { },
     }
 
-    local foundname, subfont, success =
-        fonts.names.resolve(nil, nil, tmpspec)
+    tmpspec = names.handle_request (tmpspec)
+
+    if not tmpspec.size then
+        tmpspec.size = 655360 --- assume 10pt
+    end
+
+    local foundname, subfont, success
+
+    if tmpspec.lookup == "name"
+    or tmpspec.lookup == "anon" --- not *exactly* as resolvers.anon
+    then
+        foundname, subfont = names.resolve (nil, nil, tmpspec)
+        if foundname then
+            foundname, _, success = names.crude_file_lookup (foundname)
+        end
+    elseif tmpspec.lookup == "file" then
+        foundname, _, success =
+            names.crude_file_lookup (tmpspec.name)
+    end
 
     if success then
         logs.names_report(false, 0,
@@ -816,7 +864,7 @@ actions.query = function (job)
         if job.fuzzy == true then
             logs.names_report(false, 0,
                 "resolve", "Looking for close matches, this may take a while ...")
-            local success = fonts.names.find_closest(query, job.fuzzy_limit)
+            local _success = names.find_closest(query, job.fuzzy_limit)
         end
     end
     return true, true
@@ -1026,6 +1074,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         limit              = 1,
         list               = 1,
         log                = 1,
+        ["no-reload"]      = "n",
         ["prefer-texmf"]   = "p",
         quiet              = "q",
         ["show-blacklist"] = "b",
@@ -1036,7 +1085,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         warnings           = "w",
     }
 
-    local short_options = "bDfFiIlpquvVhw"
+    local short_options = "bDfFiIlnpquvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -1115,6 +1164,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.asked_diagnostics = optarg[n]
         elseif v == "formats" then
             names.set_font_filter (optarg[n])
+        elseif v == "n" then
+            config.luaotfload.update_live = false
         end
     end
 

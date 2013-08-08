@@ -1315,9 +1315,10 @@ t1_fullinfo = function (filename, _subfont, texmf, basename)
 end
 
 local loaders = {
-    otf = ot_fullinfo,
-    ttc = ot_fullinfo,
-    ttf = ot_fullinfo,
+    dfont   = ot_fullinfo,
+    otf     = ot_fullinfo,
+    ttc     = ot_fullinfo,
+    ttf     = ot_fullinfo,
 
     afm = function (filename, _, texmf, basename)
         --- TODO

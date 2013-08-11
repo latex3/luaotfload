@@ -42,6 +42,8 @@ local names = {
   "luaotfload-diagnostics.lua",
   "luaotfload-extralibs.lua",
   "luaotfload-features.lua",
+  "luaotfload-font-afk.lua",
+  "luaotfload-font-afm.lua",
   "luaotfload-fonts-cbk.lua",
   "luaotfload-fonts-def.lua",
   "luaotfload-fonts-enc.lua",

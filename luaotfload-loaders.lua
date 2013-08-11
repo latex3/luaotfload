@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ["loaders"] = {
-    version   = "2.3a",
+    version   = "2.4",
     comment   = "companion to luaotfload.lua",
     author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
@@ -15,6 +15,8 @@ local lfsisfile       = lfs.isfile
 local fileaddsuffix   = file.addsuffix
 local filebasename    = file.basename
 local stringsub       = string.sub
+local stringlower     = string.lower
+local stringupper     = string.upper
 
 local lpeg            = require "lpeg"
 local lpegmatch       = lpeg.match
@@ -76,56 +78,65 @@ require "luaotfload-font-afk.lua"
 
 --[[ </EXPERIMENTAL> ]]
 
-local pfa_reader = function (specification)
-  return readers.opentype(specification,"pfa","type1")
-end
-
 --[[doc--
 
-    The PFB reader checks whether there is a corresponding AFM file and
-    hands the spec over to the AFM loader if appropriate.  Context uses
-    string.gsub() to accomplish this but that can cause collateral
+    The PFB/PFA reader checks whether there is a corresponding AFM file
+    and hands the spec over to the AFM loader if appropriate.  Context
+    uses string.gsub() to accomplish this but that can cause collateral
     damage.
 
 --doc]]--
 
-local p_pfb      = P"." * S"pP" * S"fF" * S"bB"
----              we have to be careful here so we don’t affect harmless
----              substrings
-                 * (P"("    --- subfont
-                  + P":"    --- feature list
-                  + P(-1))  --- end of string
-local no_pfb     = 1 - p_pfb
-local p_pfb_file = no_pfb^1 * Cp() * p_pfb * Cp() --- first occurrence
+local mk_type1_reader = function (format)
 
-local pfb_reader = function (specification, method)
+  format          = stringlower (format)
+  local first     = stringsub (format, 1, 1)
+  local second    = stringsub (format, 2, 2)
+  local third     = stringsub (format, 3, 3)
 
-  local afmfile = fileaddsuffix (specification.name, "afm")
+  local p_format      = P"."
+                      * (P(first)   + P(stringupper (first)))
+                      * (P(second)  + P(stringupper (second)))
+                      * (P(third)   + P(stringupper (third)))
+  ---                  we have to be careful here so we don’t affect
+  ---                  harmless substrings
+                      * (P"("    --- subfont
+                       + P":"    --- feature list
+                       + P(-1))  --- end of string
+  local no_format     = 1 - p_format
+  local p_format_file = no_format^1 * Cp() * p_format * Cp()
 
-  if lfsisfile (afmfile) then
-    --- switch to afm reader
-    logs.names_report ("log", 0, "type1",
-                       "Found corresponding AFM file %s, using that.",
-                       filebasename (afmfile))
-    local oldspec = specification.specification
-    local before, after = lpegmatch (p_pfb_file, oldspec)
-    specification.specification = stringsub (oldspec, 1, before)
-                               .. "afm"
-                               .. stringsub (oldspec, after - 1)
-    specification.forced = "afm"
-    return readers.afm (specification, method)
+  local reader = function (specification, method)
+
+    local afmfile = fileaddsuffix (specification.name, "afm")
+
+    if lfsisfile (afmfile) then
+      --- switch to afm reader
+      logs.names_report ("log", 0, "type1",
+                         "Found corresponding AFM file %s, using that.",
+                         filebasename (afmfile))
+      local oldspec = specification.specification
+      local before, after = lpegmatch (p_format_file, oldspec)
+      specification.specification = stringsub (oldspec, 1, before)
+                                 .. "afm"
+                                 .. stringsub (oldspec, after - 1)
+      specification.forced = "afm"
+      return readers.afm (specification, method)
+    end
+
+    --- else read pfb via opentype mechanism
+    return readers.opentype (specification, format, "type1")
   end
 
-  --- else read pfb via opentype mechanism
-  return readers.opentype (specification, "pfb", "type1")
+  return reader
 end
 
 formats.pfa  = "type1"
-readers.pfa  = pfa_reader
+readers.pfa  = mk_type1_reader "pfa"
 handlers.pfa = { }
 
 formats.pfb  = "type1"
-readers.pfb  = pfb_reader
+readers.pfb  = mk_type1_reader "pfb"
 handlers.pfb = { }  --- empty, as with tfm
 
 -- vim:tw=71:sw=2:ts=2:expandtab

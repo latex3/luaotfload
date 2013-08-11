@@ -6,8 +6,19 @@ if not modules then modules = { } end modules ["loaders"] = {
     license   = "see context related readme files"
 }
 
-local fonts   = fonts
-local readers = fonts.readers
+local fonts           = fonts
+local readers         = fonts.readers
+local handlers        = fonts.handlers
+local formats         = fonts.formats
+
+local lfsisfile       = lfs.isfile
+local fileaddsuffix   = file.addsuffix
+local filebasename    = file.basename
+local stringsub       = string.sub
+
+local lpeg            = require "lpeg"
+local lpegmatch       = lpeg.match
+local P, S, Cp        = lpeg.P, lpeg.S, lpeg.Cp
 
 resolvers.openbinfile = function (filename)
     if filename and filename ~= "" then
@@ -65,21 +76,56 @@ require "luaotfload-font-afk.lua"
 
 --[[ </EXPERIMENTAL> ]]
 
-local pfb_reader = function (specification)
-  return readers.opentype(specification,"pfb","type1")
-end
-
 local pfa_reader = function (specification)
   return readers.opentype(specification,"pfa","type1")
 end
 
-fonts.formats.pfa  = "type1"
-fonts.readers.pfa  = pfa_reader
-fonts.handlers.pfa = { }
+--[[doc--
 
+    The PFB reader checks whether there is a corresponding AFM file and
+    hands the spec over to the AFM loader if appropriate.  Context uses
+    string.gsub() to accomplish this but that can cause collateral
+    damage.
 
-fonts.formats.pfb  = "type1"
-fonts.readers.pfb  = pfb_reader
-fonts.handlers.pfb = { }  --- empty, as with tfm
+--doc]]--
+
+local p_pfb      = P"." * S"pP" * S"fF" * S"bB"
+---              we have to be careful here so we don’t affect harmless
+---              substrings
+                 * (P"("    --- subfont
+                  + P":"    --- feature list
+                  + P(-1))  --- end of string
+local no_pfb     = 1 - p_pfb
+local p_pfb_file = no_pfb^1 * Cp() * p_pfb * Cp() --- first occurrence
+
+local pfb_reader = function (specification, method)
+
+  local afmfile = fileaddsuffix (specification.name, "afm")
+
+  if lfsisfile (afmfile) then
+    --- switch to afm reader
+    logs.names_report ("log", 0, "type1",
+                       "Found corresponding AFM file %s, using that.",
+                       filebasename (afmfile))
+    local oldspec = specification.specification
+    local before, after = lpegmatch (p_pfb_file, oldspec)
+    specification.specification = stringsub (oldspec, 1, before)
+                               .. "afm"
+                               .. stringsub (oldspec, after - 1)
+    specification.forced = "afm"
+    return readers.afm (specification, method)
+  end
+
+  --- else read pfb via opentype mechanism
+  return readers.opentype (specification, "pfb", "type1")
+end
+
+formats.pfa  = "type1"
+readers.pfa  = pfa_reader
+handlers.pfa = { }
+
+formats.pfb  = "type1"
+readers.pfb  = pfb_reader
+handlers.pfb = { }  --- empty, as with tfm
 
 -- vim:tw=71:sw=2:ts=2:expandtab

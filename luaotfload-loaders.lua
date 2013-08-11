@@ -1,35 +1,27 @@
 if not modules then modules = { } end modules ["loaders"] = {
-    version   = "2.3a",
+    version   = "2.4",
     comment   = "companion to luaotfload.lua",
     author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
 }
 
-local fonts   = fonts
-local readers = fonts.readers
+local fonts           = fonts
+local readers         = fonts.readers
+local handlers        = fonts.handlers
+local formats         = fonts.formats
 
----
---- opentype reader (from font-otf.lua):
---- (spec : table) -> (suffix : string) -> (format : string) -> (font : table)
----
+local lfsisfile       = lfs.isfile
+local fileaddsuffix   = file.addsuffix
+local filebasename    = file.basename
+local stringsub       = string.sub
+local stringlower     = string.lower
+local stringupper     = string.upper
+local findbinfile     = resolvers.findbinfile
 
-local pfb_reader = function (specification)
-  return readers.opentype(specification,"pfb","type1")
-end
-
-local pfa_reader = function (specification)
-  return readers.opentype(specification,"pfa","type1")
-end
-
-fonts.formats.pfb  = "type1"
-fonts.readers.pfb  = pfb_reader
-fonts.handlers.pfb = { }  --- empty, as with tfm
-
-fonts.formats.pfa  = "type1"
-fonts.readers.pfa  = pfa_reader
-fonts.handlers.pfa = { }
-
+local lpeg            = require "lpeg"
+local lpegmatch       = lpeg.match
+local P, S, Cp        = lpeg.P, lpeg.S, lpeg.Cp
 
 resolvers.openbinfile = function (filename)
     if filename and filename ~= "" then
@@ -61,6 +53,31 @@ resolvers.loadbinfile = function (filename, filetype)
 
 end
 
+--- this function is required because AFM precedes TFM in the reader
+--- chain (see definers.loadfont() in font-def.lua
+
+local check_tfm = function (specification, fullname)
+
+    local foundname = findbinfile (fullname, "tfm") or ""
+
+    if foundname == "" then
+        foundname = findbinfile (fullname, "ofm") or ""
+    end
+
+    if foundname == "" then
+        foundname = fonts.names.getfilename (fullname,"tfm") or ""
+    end
+
+    if foundname ~= "" then
+        specification.filename = foundname
+        specification.format   = "ofm"
+        return font.read_tfm (specification.filename,
+                              specification.size)
+    end
+end
+
+readers.check_tfm = check_tfm
+
 --[[ <EXPERIMENTAL> ]]
 
 --[[doc--
@@ -86,5 +103,66 @@ require "luaotfload-font-afm.lua"
 require "luaotfload-font-afk.lua"
 
 --[[ </EXPERIMENTAL> ]]
+
+--[[doc--
+
+    The PFB/PFA reader checks whether there is a corresponding AFM file
+    and hands the spec over to the AFM loader if appropriate.  Context
+    uses string.gsub() to accomplish this but that can cause collateral
+    damage.
+
+--doc]]--
+
+local mk_type1_reader = function (format)
+
+  format          = stringlower (format)
+  local first     = stringsub (format, 1, 1)
+  local second    = stringsub (format, 2, 2)
+  local third     = stringsub (format, 3, 3)
+
+  local p_format      = P"."
+                      * (P(first)   + P(stringupper (first)))
+                      * (P(second)  + P(stringupper (second)))
+                      * (P(third)   + P(stringupper (third)))
+  ---                  we have to be careful here so we don’t affect
+  ---                  harmless substrings
+                      * (P"("    --- subfont
+                       + P":"    --- feature list
+                       + P(-1))  --- end of string
+  local no_format     = 1 - p_format
+  local p_format_file = no_format^1 * Cp() * p_format * Cp()
+
+  local reader = function (specification, method)
+
+    local afmfile = fileaddsuffix (specification.name, "afm")
+
+    if lfsisfile (afmfile) then
+      --- switch to afm reader
+      logs.names_report ("log", 0, "type1",
+                         "Found corresponding AFM file %s, using that.",
+                         filebasename (afmfile))
+      local oldspec = specification.specification
+      local before, after = lpegmatch (p_format_file, oldspec)
+      specification.specification = stringsub (oldspec, 1, before)
+                                 .. "afm"
+                                 .. stringsub (oldspec, after - 1)
+      specification.forced = "afm"
+      return readers.afm (specification, method)
+    end
+
+    --- else read pfb via opentype mechanism
+    return readers.opentype (specification, format, "type1")
+  end
+
+  return reader
+end
+
+formats.pfa  = "type1"
+readers.pfa  = mk_type1_reader "pfa"
+handlers.pfa = { }
+
+formats.pfb  = "type1"
+readers.pfb  = mk_type1_reader "pfb"
+handlers.pfb = { }  --- empty, as with tfm
 
 -- vim:tw=71:sw=2:ts=2:expandtab

@@ -9,28 +9,6 @@ if not modules then modules = { } end modules ["loaders"] = {
 local fonts   = fonts
 local readers = fonts.readers
 
----
---- opentype reader (from font-otf.lua):
---- (spec : table) -> (suffix : string) -> (format : string) -> (font : table)
----
-
-local pfb_reader = function (specification)
-  return readers.opentype(specification,"pfb","type1")
-end
-
-local pfa_reader = function (specification)
-  return readers.opentype(specification,"pfa","type1")
-end
-
-fonts.formats.pfb  = "type1"
-fonts.readers.pfb  = pfb_reader
-fonts.handlers.pfb = { }  --- empty, as with tfm
-
-fonts.formats.pfa  = "type1"
-fonts.readers.pfa  = pfa_reader
-fonts.handlers.pfa = { }
-
-
 resolvers.openbinfile = function (filename)
     if filename and filename ~= "" then
         local f = io.open(filename,"rb")
@@ -86,5 +64,22 @@ require "luaotfload-font-afm.lua"
 require "luaotfload-font-afk.lua"
 
 --[[ </EXPERIMENTAL> ]]
+
+local pfb_reader = function (specification)
+  return readers.opentype(specification,"pfb","type1")
+end
+
+local pfa_reader = function (specification)
+  return readers.opentype(specification,"pfa","type1")
+end
+
+fonts.formats.pfa  = "type1"
+fonts.readers.pfa  = pfa_reader
+fonts.handlers.pfa = { }
+
+
+fonts.formats.pfb  = "type1"
+fonts.readers.pfb  = pfb_reader
+fonts.handlers.pfb = { }  --- empty, as with tfm
 
 -- vim:tw=71:sw=2:ts=2:expandtab

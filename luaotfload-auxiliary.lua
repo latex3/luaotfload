@@ -234,7 +234,7 @@ local set_capheight = function (fontdata)
     local shared     = fontdata.shared
     local parameters = fontdata.parameters
     local capheight
-    if shared then
+    if shared and shared.rawdata.metadata.pfminfo then
       local units_per_em   = parameters.units
       local size           = parameters.size
       local os2_capheight  = shared.rawdata.metadata.pfminfo.os2_capheight

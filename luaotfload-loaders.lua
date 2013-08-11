@@ -17,6 +17,7 @@ local filebasename    = file.basename
 local stringsub       = string.sub
 local stringlower     = string.lower
 local stringupper     = string.upper
+local findbinfile     = resolvers.findbinfile
 
 local lpeg            = require "lpeg"
 local lpegmatch       = lpeg.match
@@ -51,6 +52,31 @@ resolvers.loadbinfile = function (filename, filetype)
     end
 
 end
+
+--- this function is required because AFM precedes TFM in the reader
+--- chain (see definers.loadfont() in font-def.lua
+
+local check_tfm = function (specification, fullname)
+
+    local foundname = findbinfile (fullname, "tfm") or ""
+
+    if foundname == "" then
+        foundname = findbinfile (fullname, "ofm") or ""
+    end
+
+    if foundname == "" then
+        foundname = fonts.names.getfilename (fullname,"tfm") or ""
+    end
+
+    if foundname ~= "" then
+        specification.filename = foundname
+        specification.format   = "ofm"
+        return font.read_tfm (specification.filename,
+                              specification.size)
+    end
+end
+
+readers.check_tfm = check_tfm
 
 --[[ <EXPERIMENTAL> ]]
 

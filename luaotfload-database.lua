@@ -1320,18 +1320,8 @@ local loaders = {
     ttc     = ot_fullinfo,
     ttf     = ot_fullinfo,
 
-    afm = function (filename, _, texmf, basename)
-        --- TODO
-        local pfbname = filereplacesuffix (filename, "pfb")
-        if lfsisfile (pfbname) then
-            return t1_fullinfo (pfbname, nil, texmf, basename)
-        end
-        report ("both", 1, "db",
-                "Cannot find matching pfb for %s; skipping.", basename)
-        return false
-    end,
-    pfb = t1_fullinfo,
-    pfa = t1_fullinfo,
+    pfb     = t1_fullinfo,
+    pfa     = t1_fullinfo,
 }
 
 --- we return true if the fond is new or re-indexed
@@ -1670,10 +1660,22 @@ process_dir_tree = function (acc, dirs)
                 then
                     dirs[#dirs+1] = fullpath
                 elseif lfsisfile (fullpath) then
-                    if lpegmatch (p_font_filter, stringlower (ent))
-                    then
-                        newfiles[#newfiles+1] = fullpath
+                    ent = stringlower (ent)
+
+                    if lpegmatch (p_font_filter, ent) then
+                        if filesuffix (ent) == "afm" then
+                            --- fontloader.open() will load the afm
+                            --- iff both files are in the same directory
+                            local pfbpath = filereplacesuffix
+                                                    (fullpath, "pfb")
+                            if lfsisfile (pfbpath) then
+                                newfiles[#newfiles+1] = pfbpath
+                            end
+                        else
+                            newfiles[#newfiles+1] = fullpath
+                        end
                     end
+
                 end
             end
         end
@@ -1694,9 +1696,21 @@ local process_dir = function (dir)
             if ent ~= "." and ent ~= ".." and not blacklist[ent] then
                 local fullpath = dir .. "/" .. ent
                 if lfsisfile (fullpath) then
-                    if lpegmatch (p_font_filter, stringlower (ent))
+                    ent = stringlower (ent)
+                    if lpegmatch (p_font_filter, ent)
                     then
-                        files[#files+1] = fullpath
+                        if filesuffix (ent) == "afm" then
+                            --- fontloader.open() will load the afm
+                            --- iff both files are in the same
+                            --- directory
+                            local pfbpath = filereplacesuffix
+                                                    (fullpath, "pfb")
+                            if lfsisfile (pfbpath) then
+                                files[#files+1] = pfbpath
+                            end
+                        else
+                            files[#files+1] = fullpath
+                        end
                     end
                 end
             end

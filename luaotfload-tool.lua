@@ -169,8 +169,8 @@ require"alt_getopt"
 local names = fonts.names
 
 local status_file                    = "luaotfload-status"
-local status                         = require (status_file)
-config.luaotfload.status             = status
+local luaotfloadstatus               = require (status_file)
+config.luaotfload.status             = luaotfloadstatus
 
 local sanitize_string                = names.sanitize_string
 
@@ -291,17 +291,16 @@ local help_msg = function (version)
 end
 
 local version_msg = function ( )
-    texiowrite_nl(stringformat(
-        "%s version %q\n" .. -- no \z due to 5.1 compatibility
-        "revision %q\n" ..
-        "database version %q\n" ..
-        "Lua interpreter: %s; version %q\n",
-        config.luaotfload.self,
-        version,
-        status.notes.revision,
-        names.version,
-        runtime[1],
-        runtime[2]))
+    local out = function (...) texiowrite_nl (stringformat (...)) end
+    out ("%s version %q", config.luaotfload.self, version)
+    out ("revision %q", luaotfloadstatus.notes.revision)
+    out ("database version %q", names.version)
+    out ("Lua interpreter: %s; version %q", runtime[1], runtime[2])
+    out ("Luatex SVN revision %d", status.luatex_svn)
+    out ("Luatex version %.2f.%d",
+         status.luatex_version / 100,
+         status.luatex_revision)
+    out ""
 end
 
 

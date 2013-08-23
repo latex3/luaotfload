@@ -9,6 +9,7 @@
 -----------------------------------------------------------------------
 --
 local names                    = fonts.names
+local luatexstatus             = status
 local status                   = config.luaotfload.status
 
 local kpse                     = require "kpse"

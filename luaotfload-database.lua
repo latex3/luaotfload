@@ -810,8 +810,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
          --- but it’s not a table, e.g. it contains an integer.
         if not fonts_reloaded then
             return reload_db("invalid database; not a table",
-                             resolve, nil, nil, specification
-                   )
+                             resolve, nil, nil, specification)
         end
         --- unsucessfully reloaded; bail
         return specification.name, false, false
@@ -1004,12 +1003,21 @@ end
 
 --- string -> ('a -> 'a) -> 'a list -> 'a
 reload_db = function (why, caller, ...)
-    report ("both", 1, "db", "Reload initiated; reason: %q", why)
+    local namedata  = names.data
+    local formats   = tableconcat (namedata.formats, ",")
+
+    report ("both", 1, "db",
+            "Reload initiated (formats: %s); reason: %q",
+            formats, why)
+
+    set_font_filter (formats)
     names.data = update_names (names.data, false, false)
+
     if names.data then
         fonts_reloaded = true
         return caller (...)
     end
+
     report ("both", 0, "db", "Database update unsuccessful.")
 end
 

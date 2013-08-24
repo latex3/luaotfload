@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 08/22/13 15:28:35
+-- merge date  : 08/24/13 12:19:21
 
 do -- begin closure to overcome local limits and interference
 
@@ -2621,6 +2621,7 @@ local tracedchar = string.tracedchar
 local autosingle = string.autosingle
 local autodouble = string.autodouble
 local sequenced = table.sequenced
+local formattednumber = number.formatted
 ]]
 local template=[[
 %s
@@ -2817,6 +2818,39 @@ end
 local format_W=function(f) 
   return format("nspaces[%s]",tonumber(f) or 0)
 end
+local digit=patterns.digit
+local period=patterns.period
+local three=digit*digit*digit
+local splitter=Cs (
+  (((1-(three^1*period))^1+C(three))*(Carg(1)*three)^1+C((1-period)^1))*(P(1)/""*Carg(2))*C(2)
+)
+patterns.formattednumber=splitter
+function number.formatted(n,sep1,sep2)
+  local s=type(s)=="string" and n or format("%0.2f",n)
+  if sep1==true then
+    return lpegmatch(splitter,s,1,".",",")
+  elseif sep1=="." then
+    return lpegmatch(splitter,s,1,sep1,sep2 or ",")
+  elseif sep1=="," then
+    return lpegmatch(splitter,s,1,sep1,sep2 or ".")
+  else
+    return lpegmatch(splitter,s,1,sep1 or ",",sep2 or ".")
+  end
+end
+local format_m=function(f)
+  n=n+1
+  if not f or f=="" then
+    f=","
+  end
+  return format([[formattednumber(a%s,%q,".")]],n,f)
+end
+local format_M=function(f)
+  n=n+1
+  if not f or f=="" then
+    f="."
+  end
+  return format([[formattednumber(a%s,%q,",")]],n,f)
+end
 local format_rest=function(s)
   return format("%q",s) 
 end
@@ -2854,7 +2888,8 @@ local builder=Cs { "start",
 +V("w") 
 +V("W") 
 +V("a") 
-+V("A")
++V("A") 
++V("m")+V("M")
 +V("*") 
       )+V("*")
     )*(P(-1)+Carg(1))
@@ -2890,6 +2925,8 @@ local builder=Cs { "start",
   ["I"]=(prefix_any*P("I"))/format_I,
   ["w"]=(prefix_any*P("w"))/format_w,
   ["W"]=(prefix_any*P("W"))/format_W,
+  ["m"]=(prefix_tab*P("m"))/format_m,
+  ["M"]=(prefix_tab*P("M"))/format_M,
   ["a"]=(prefix_any*P("a"))/format_a,
   ["A"]=(prefix_any*P("A"))/format_A,
   ["*"]=Cs(((1-P("%"))^1+P("%%")/"%%")^1)/format_rest,

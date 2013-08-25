@@ -63,16 +63,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
     luaotfload_libs -> font_names [label="luaotfload-database.lua"]
     luaotfload_libs -> typo_krn   [label="luaotfload-extralibs.lua"]
 
-    luaotfload_libs -> font_afm   [label="luaotfload-loaders.lua"]
     luaotfload_libs -> font_afk   [label="luaotfload-loaders.lua"]
-
-    subgraph cluster_afm { rank = same;
-                           label = "AFM support";
-                           node [style=filled, color=white];
-                           style     = "filled,rounded";
-                           color     = "grey90:white";
-                           font_afm;
-                           font_afk; }
 
     mkstatus    -> status     [label="generates from distribution files",
                                style=dashed]
@@ -159,14 +150,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
                        penwidth=2]
 
     font_afk [label  = "luaotfload-font-afk.lua",
-              shape  = rect,
-              width  = "3.2cm",
-              height = "1.2cm",
-              color  = "#01012222",
-              style  = "filled,rounded",
-              penwidth=2]
-
-    font_afm [label  = "luaotfload-font-afm.lua",
               shape  = rect,
               width  = "3.2cm",
               height = "1.2cm",

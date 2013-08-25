@@ -89,6 +89,7 @@ local remapper = {
     fea    = "font feature files",
     pfa    = "type1 fonts", -- this is for Khaled, in ConTeXt we don't use this!
     pfb    = "type1 fonts", -- this is for Khaled, in ConTeXt we don't use this!
+    afm    = "afm",
 }
 
 function resolvers.findfile(name,fileformat)
@@ -116,6 +117,11 @@ end
 -- end
 
 resolvers.findbinfile = resolvers.findfile
+
+function resolvers.loadbinfile(filename,filetype)
+    local data = io.loaddata(filename)
+    return true, data, #data
+end
 
 function resolvers.resolve(s)
     return s

@@ -736,7 +736,9 @@ local add_to_match = function (found, size, face)
         maxsize = optsize[2]
         minsize = optsize[3]
 
-        if dsnsize == size or (size > minsize and size <= maxsize) then
+        if size ~= nil
+        and (dsnsize == size or (size > minsize and size <= maxsize))
+        then
             found[1] = face
             continue = false ---> break
         else
@@ -777,16 +779,31 @@ the font database created by the luaotfload-tool script.
 ---   · specification: string (== <lookup> ":" <name>)
 ---   · sub:      string
 ---
+--- The “size” field deserves special attention: if its value is
+--- negative, then it actually specifies a scalefactor of the
+--- design size of the requested font. This happens e.g. if a font is
+--- requested without an explicit “at size”. If the font is part of a
+--- larger collection with different design sizes, this complicates
+--- matters a bit: Normally, the resolver prefers fonts that have a
+--- design size as close as possible to the requested size. If no
+--- size specified, then the design size is implied. But which design
+--- size should that be? Xetex appears to pick the “normal” (unmarked)
+--- size: with Adobe fonts this would be the one that is neither
+--- “caption” nor “subhead” nor “display” &c ... For fonts by Adobe this
+--- seems to be the one that does not receive a “prefmodifiers” field.
+--- (IOW Adobe uses the “prefmodifiers” field to encode the design size
+--- in more or less human readable format.) However, this is not true
+--- of LM and EB Garamond. As this matters only where there are
+--- multiple design sizes to a given font/style combination, we put a
+--- workaround in place that chooses that unmarked version.
+
+---
 --- the first return value of “resolve” is the file name of the
 --- requested font (string)
 --- the second is of type bool or string and indicates the subfont of a
 --- ttc
 ---
 --- 'a -> 'a -> table -> (string * string | bool * bool)
----
----     note by phg: I added a third return value that indicates a
----     successful lookup as this cannot be inferred from the other
----     values.
 ---
 
 resolve = function (_, _, specification) -- the 1st two parameters are used by ConTeXt
@@ -797,10 +814,14 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
     local style = sanitize_string(specification.style) or "regular"
 
     local askedsize
+
     if specification.optsize then
         askedsize = tonumber(specification.optsize)
-    elseif specification.size then
-        askedsize = specification.size / 65536
+    else
+        local specsize = specification.size
+        if specsize and specsize >= 0 then
+            askedsize = specsize / 65536
+        end
     end
 
     if type(data) ~= "table" then
@@ -918,25 +939,40 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
             )
             return filename, subfont, true
         end
+
     elseif #found > 1 then
         -- we found matching font(s) but not in the requested optical
         -- sizes, so we loop through the matches to find the one with
         -- least difference from the requested size.
-        local closest
-        local least = math.huge -- initial value is infinity
+        local match
 
-        for i,face in next, found do
+        if askedsize then  --- choose by design size
+            local closest
+            local least = math.huge -- initial value is infinity
 
-            local dsnsize = face.size and face.size[1] or 0
-            local difference = mathabs(dsnsize - askedsize)
-            if difference < least then
-                closest = face
-                least   = difference
+            for i, face in next, found do
+                local dsnsize = face.size and face.size [1] or 0
+                local difference = mathabs (dsnsize - askedsize)
+                if difference < least then
+                    closest = face
+                    least   = difference
+                end
+            end
+
+            match = closest
+        else --- choose “unmarked” match, for Adobe fonts this
+             --- is the one without a “prefmodifiers” field.
+            match = found [1] --- fallback
+            for i, face in next, found do
+                if not face.sanitized.prefmodifiers then
+                    match = face
+                    break
+                end
             end
         end
 
         local success, filename, subfont
-            = get_font_file(data.filenames.full, closest)
+            = get_font_file(data.filenames.full, match)
         if success == true then
             report("log", 0, "resolve",
                 "Font family='%s', subfamily='%s' found: %s",
@@ -944,6 +980,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
             )
             return filename, subfont, true
         end
+
     elseif fallback then
         local success, filename, subfont
             = get_font_file(data.filenames.full, fallback)
@@ -1198,8 +1235,7 @@ ot_fullinfo = function (filename, subfont, texmf, basename)
         end
     end
 
-    namedata.sanitized = sanitize_names (fontnames)
-
+    namedata.sanitized     = sanitize_names (fontnames)
     namedata.fontname      = metadata.fontname
     namedata.fullname      = metadata.fullname
     namedata.familyname    = metadata.familyname

@@ -73,9 +73,10 @@ end
 local infer_regular_style = {
   --- inferring which one is the correct style for “regular”; can be
   --- obscured by synonyms like “book” etc.
-  { "Iwona",                "Iwona-Regular.otf" }, -- trivial case
-  { "DejaVu Serif",         "DejaVuSerif.ttf" },
-  { "Adobe Garamond Pro",   "agaramondpro_regular.otf" },
+  { "Iwona",                "Iwona-Regular.otf"         }, -- trivial case
+  { "DejaVu Serif",         "DejaVuSerif.ttf"           },
+  { "DejaVu Sans",          "DejaVuSans.ttf"            },
+  { "Adobe Garamond Pro",   "agaramondpro_regular.otf"  },
   { "Garamond Premier Pro", "GaramondPremrPro-Capt.otf" },
 }
 

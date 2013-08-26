@@ -1112,20 +1112,20 @@ find_closest = function (name, limit)
         local cnames     = current.sanitized
         --[[
             This is simplistic but surpisingly fast.
-            Matching is performed against the “family” name
-            of a db record. We then store its “fullname” at
-            it edit distance.
+            Matching is performed against the “fullname” field
+            of a db record in preprocessed form. We then store the
+            raw “fullname” at its edit distance.
             We should probably do some weighting over all the
             font name categories as well as whatever agrep
             does.
         --]]
         if cnames then
-            local fullname, family = cnames.fullname, cnames.family
+            local fullname, sfullname = current.fullname, cnames.fullname
 
-            local dist = cached[family]--- maybe already calculated
+            local dist = cached[sfullname]--- maybe already calculated
             if not dist then
-                dist = iterative_levenshtein(name, family)
-                cached[family] = dist
+                dist = iterative_levenshtein(name, sfullname)
+                cached[sfullname] = dist
             end
             local namelst = by_distance[dist]
             if not namelst then --- first entry

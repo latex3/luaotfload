@@ -859,7 +859,9 @@ actions.query = function (job)
         end
     else
         logs.names_report(false, 0,
-            "resolve", "Cannot find %q.", query)
+            "resolve", "Cannot find %q in index.", query)
+        logs.names_report(false, 0,
+            "resolve", "Hint: use the --fuzzy option to display suggestions.", query)
         if job.fuzzy == true then
             logs.names_report(false, 0,
                 "resolve", "Looking for close matches, this may take a while ...")

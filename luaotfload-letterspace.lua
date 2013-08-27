@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['letterspace'] = {
-    version   = "2.3a",
+    version   = "2.4",
     comment   = "companion to luaotfload.lua",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
@@ -89,6 +89,8 @@ kerncharacters = function (head)
   local identifiers   = fonthashes.identifiers
   local kernfactors   = kernfactors
 
+  local firstkern     = true
+
   while start do
     local id = start.id
     if id == glyph_code then
@@ -112,6 +114,9 @@ kerncharacters = function (head)
           kernfactors[fontid] = krn
         end
         if not krn or krn == 0 then
+          goto nextnode
+        elseif firstkern then
+          firstkern = false
           goto nextnode
         end
       end

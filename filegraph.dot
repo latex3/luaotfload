@@ -63,8 +63,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
     luaotfload_libs -> font_names [label="luaotfload-database.lua"]
     luaotfload_libs -> typo_krn   [label="luaotfload-extralibs.lua"]
 
-    luaotfload_libs -> font_afk   [label="luaotfload-loaders.lua"]
-
     mkstatus    -> status     [label="generates from distribution files",
                                style=dashed]
 
@@ -148,14 +146,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
                        color  = "#01012222",
                        style  = "filled,rounded",
                        penwidth=2]
-
-    font_afk [label  = "luaotfload-font-afk.lua",
-              shape  = rect,
-              width  = "3.2cm",
-              height = "1.2cm",
-              color  = "#01012222",
-              style  = "filled,rounded",
-              penwidth=2]
 
     typo_krn [label  = "luaotfload-typo-krn.lua",
               shape  = rect,
@@ -274,9 +264,13 @@ strict digraph luaotfload_files { //looks weird with circo ...
                 <tr> <td>luatex-basics-gen.lua</td> <td>luatex-basics-nod.lua</td> </tr>
                 <tr> <td>luatex-fonts-enc.lua</td>  <td>luatex-fonts-syn.lua</td>  </tr>
                 <tr> <td>luatex-font-tfm.lua</td>   <td>luatex-font-afm.lua</td>   </tr>
-                <tr> <td>luatex-fonts-tfm.lua</td>  <td>luatex-fonts-chr.lua</td>  </tr>
-                <tr> <td>luatex-fonts-lua.lua</td>  <td>luatex-fonts-def.lua</td>  </tr>
-                <tr> <td>luatex-fonts-ext.lua</td>  <td>luatex-fonts-cbk.lua</td>  </tr>
+                <tr> <td>luatex-font-afk.lua</td>   <td>luatex-fonts-tfm.lua</td>  </tr>
+                <tr> <td>luatex-fonts-chr.lua</td>  <td>luatex-fonts-lua.lua</td>  </tr>
+                <tr> <td>luatex-fonts-def.lua</td>  <td>luatex-fonts-ext.lua</td>  </tr>
+                <tr> <td>luatex-fonts-cbk.lua</td>                                 </tr>
+ 
+ 
+ 
             </table>
         >,
     ]

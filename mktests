@@ -5,8 +5,8 @@
 --  DESCRIPTION:  test the behavior of Luaotfload
 -- REQUIREMENTS:  Luatex > 0.76, Luaotfload
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  2.3
---      CREATED:  2013-07-11 11:32:24+0200
+--      VERSION:  2.4
+--     MODIFIED:  2013-08-26 09:31:22+0200
 -----------------------------------------------------------------------
 --
 --===================================================================--
@@ -58,9 +58,10 @@ local pprint_result = function (name, failed, total)
 end
 
 local pprint_spec = function (spec)
-  return string.format ("%s*%.2fpt",
+  return string.format ("%s/%s*%.2fpt",
                         spec.specification,
-                        spec.optsize)
+                        spec.style or "regular",
+                        spec.optsize or 0)
 end
 
 -----------------------------------------------------------------------
@@ -72,9 +73,10 @@ end
 local infer_regular_style = {
   --- inferring which one is the correct style for “regular”; can be
   --- obscured by synonyms like “book” etc.
-  { "Iwona",                "Iwona-Regular.otf" }, -- trivial case
-  { "DejaVu Serif",         "DejaVuSerif.ttf" },
-  { "Adobe Garamond Pro",   "agaramondpro_regular.otf" },
+  { "Iwona",                "Iwona-Regular.otf"         }, -- trivial case
+  { "DejaVu Serif",         "DejaVuSerif.ttf"           },
+  { "DejaVu Sans",          "DejaVuSans.ttf"            },
+  { "Adobe Garamond Pro",   "agaramondpro_regular.otf"  },
   { "Garamond Premier Pro", "GaramondPremrPro-Capt.otf" },
 }
 
@@ -93,9 +95,27 @@ local choose_optical_size = {
   { { name = "Garamond Premier Pro", optsize = 42 }, "GaramondPremrPro-Disp.otf" },
 }
 
+--- this needs a database built with --formats=+pfa,pfb,afm
+
+local resolve_t1_font = {
+  { { name = "URW Gothic L",          style = "regular"    }, "uagk8a.pfb" },
+  { { name = "URW Gothic L",          style = "italic"     }, "uagko8a.pfb" },
+  { { name = "URW Gothic L",          style = "bold"       }, "uagd8a.pfb" },
+  { { name = "URW Gothic L",          style = "bolditalic" }, "uagdo8a.pfb" },
+  { { name = "Century Schoolbook L",  style = "regular"    }, "uncr8a.pfb"   },
+  { { name = "Century Schoolbook L",  style = "italic"     }, "uncri8a.pfb"  },
+  { { name = "Century Schoolbook L",  style = "bold"       }, "uncb8a.pfb"   },
+  { { name = "Century Schoolbook L",  style = "bolditalic" }, "uncbi8a.pfb"  },
+  { { name = "Nimbus Roman No9 L",    style = "regular"    }, "utmr8a.pfb"   },
+  { { name = "Nimbus Roman No9 L",    style = "italic"     }, "utmri8a.pfb"  },
+  { { name = "Nimbus Roman No9 L",    style = "bold"       }, "utmb8a.pfb"   }, --- medium, actually
+  { { name = "Nimbus Roman No9 L",    style = "bolditalic" }, "utmbi8a.pfb"  },
+}
+
 local font_name_tests = {
   infer_regular_style,
   choose_optical_size,
+  resolve_t1_font,
 }
 
 local default_spec = {
@@ -132,7 +152,6 @@ local resolve_font_name = function ()
                                     or default_spec.lookup)
                                 .. ":" .. input_spec.name
         input_spec.optsize = input_spec.optsize or default_spec.optsize
-        --print( resolve_name (nil, nil, input_spec) )
         local result = resolve_name (nil, nil, input_spec) == output
         total = total + 1
         if not result then

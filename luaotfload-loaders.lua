@@ -11,18 +11,6 @@ local readers         = fonts.readers
 local handlers        = fonts.handlers
 local formats         = fonts.formats
 
---[[doc--
-
-  As of 2013-08-25 AFM support has been included in the fontloader
-  package.
-
-  We still have to load the font feature definitions (font-afk.lua) to
-  achieve kerning and ligatures.
-
---doc]]--
-
-require "luaotfload-font-afk.lua"
-
 local pfb_reader = function (specification)
   return readers.opentype (specification, "pfb", "type1")
 end 

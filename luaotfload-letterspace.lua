@@ -114,6 +114,7 @@ kerncharacters = function (head)
           kernfactors[fontid] = krn
         end
         if not krn or krn == 0 then
+          firstkern = true
           goto nextnode
         elseif firstkern then
           firstkern = false

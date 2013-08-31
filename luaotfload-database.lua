@@ -318,11 +318,19 @@ mtx-fonts has in names.tma:
 
 local fontnames_init = function (formats) --- returns dbobj
     return {
-        mappings        = { },
-        status          = { },
+        families        = {
+            texmf  = { },
+            system = { },
+        },
+        index           = { }, -- was: status; map abspath -> mapping
+        mappings        = { }, -- TODO: check if still necessary after rewrite
+        names           = { },
 --      filenames       = { }, -- created later
-        version         = names.version,
-        formats         = formats,
+        meta            = {
+            formats    = formats,
+            statistics = { },
+            version    = names.version,
+        },
     }
 end
 
@@ -2191,8 +2199,14 @@ local gen_fast_lookups = function (fontnames)
     local nmappings  = #mappings
     --- this is needlessly complicated due to texmf priorization
     local filenames  = {
-        bare = { },
-        base = { },
+        bare = {
+            system = { }, --- mapped to mapping format -> index in full
+            texmf  = { }, --- mapped to mapping format -> “true”
+        },
+        base = {
+            system = { }, --- mapped to index in “full”
+            texmf  = { }, --- set; all values are “true”
+        },
         full = { }, --- non-texmf
     }
 

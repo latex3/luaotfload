@@ -238,14 +238,15 @@ end
 This is a sketch of the luaotfload db:
 
     type dbobj = {
-        mappings        : fontentry list;
-        index           : filestatus;
-        families        : familytable;
-        names           : namedata; // TODO: check for relevance after db is finalized
-        meta            : metadata;
-        filenames       : filemap;
+        families    : familytable;
+        filenames   : filemap;
+        index       : filestatus;
+        mappings    : fontentry list;
+        meta        : metadata;
+        names       : namedata; // TODO: check for relevance after db is finalized
     }
     and familytable = {
+        local  : (format, familyentry) hash; // specified with include dir
         texmf  : (format, familyentry) hash;
         system : (format, familyentry) hash;
     }
@@ -256,8 +257,8 @@ This is a sketch of the luaotfload db:
         bolditalic  : sizes;
     }
     and sizes = {
-        default = int;              // points into mappings or names
-        other   = (int, int) list;  // design size -> index entry
+        default : int;              // points into mappings or names
+        optical : (int, int) list;  // design size -> index entry
     }
     and metadata = {
         formats     : string list; // { "otf", "ttf", "ttc", "dfont" }
@@ -266,12 +267,14 @@ This is a sketch of the luaotfload db:
     }
     and filemap = {
         base : {
-            texmf  : (string, int) hash; // basename -> idx
+            local  : (string, int) hash; // basename -> idx
             system : (string, int) hash;
+            texmf  : (string, int) hash;
         };
         bare : {
-            texmf  : (string, (string, int) hash) hash; // format -> (barename -> idx)
+            local  : (string, (string, int) hash) hash; // format -> (barename -> idx)
             system : (string, (string, int) hash) hash;
+            texmf  : (string, (string, int) hash) hash;
         };
         full : (int, string) hash; // idx -> full path
     }
@@ -295,7 +298,7 @@ This is a sketch of the luaotfload db:
         size         : int list;
         slant        : int;
         subfont      : int;
-        texmf        : bool;
+        location     : local | system | texmf;
         weight       : int;
         width        : int;
         units_per_em : int;        // mainly 1000, but also 2048 or 256
@@ -343,8 +346,9 @@ mtx-fonts has in names.tma:
 local fontnames_init = function (formats) --- returns dbobj
     return {
         families        = {
-            texmf  = { },
-            system = { },
+            ["local"]  = { },
+            system     = { },
+            texmf      = { },
         },
         index           = { }, -- was: status; map abspath -> mapping
         mappings        = { }, -- TODO: check if still necessary after rewrite

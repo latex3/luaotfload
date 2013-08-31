@@ -211,7 +211,12 @@ if not markdata then
     if k == true then
       return marks[currentfont()]
     else
-      local resources = identifiers[k].resources or { }
+      local resources = { }
+
+      if identifiers[k] then
+        resources = identifiers[k].resources or { }
+      end
+
       local marks = resources.marks or { }
       t[k] = marks
       return marks
@@ -369,11 +374,10 @@ kerns.disablecharacterkerning    = disablecharacterkerning
 --- now for the simplistic variant
 --- unit -> bool
 local enablefontkerning = function ( )
-  return add_processor(
-    kernfont.handler,
-    "typesetters.kernfont",
-    "pre_linebreak_filter", "hpack_filter"
-  )
+  return add_processor( kernfont.handler
+                      , "typesetters.kernfont"
+                      , "pre_linebreak_filter"
+                      , "hpack_filter")
 end
 
 --- unit -> bool

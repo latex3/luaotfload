@@ -118,7 +118,10 @@ kerncharacters = function (head)
           goto nextnode
         elseif firstkern then
           firstkern = false
-          goto nextnode
+          if (id ~= disc_code) and (not start.components) then
+            --- not a ligature, skip node
+            goto nextnode
+          end
         end
       end
 
@@ -133,11 +136,12 @@ kerncharacters = function (head)
 
       --- 2) resolve ligatures
       local c = start.components
+
       if c then
         if keepligature and keepligature(start) then
           -- keep 'm
         else
-          c = kerncharacters (c)
+          --- c = kerncharacters (c) --> taken care of after replacing
           local s = start
           local p, n = s.prev, s.next
           local tail = find_node_tail(c)

@@ -78,30 +78,51 @@ local infer_regular_style = {
   { "DejaVu Sans",          "DejaVuSans.ttf"            },
   { "Adobe Garamond Pro",   "agaramondpro_regular.otf"  },
   { "Garamond Premier Pro", "GaramondPremrPro-Capt.otf" },
+  { "CMU Serif",            "cmunrm.otf"                },
+  { "CMU Sans Serif",       "cmunss.otf"                },
 }
 
 local choose_optical_size = {
-  { { name = "Latin Modern Roman", optsize =  0 }, "lmroman5-regular.otf" },
-  { { name = "Latin Modern Roman", optsize = 10 }, "lmroman10-regular.otf" },
-  { { name = "Latin Modern Roman", optsize = 12 }, "lmroman12-regular.otf" },
-  { { name = "Latin Modern Roman", optsize = 42 }, "lmroman17-regular.otf" },
-  { { name = "EB Garamond", optsize =  0 }, "EBGaramond08-Regular.otf" },
-  { { name = "EB Garamond", optsize =  8 }, "EBGaramond08-Regular.otf" },
-  { { name = "EB Garamond", optsize = 12 }, "EBGaramond12-Regular.otf" },
-  { { name = "EB Garamond", optsize = 42 }, "EBGaramond12-Regular.otf" },
+  { { name = "Latin Modern Roman", optsize =  0 }, "lmroman5-regular.otf"        },
+  { { name = "Latin Modern Roman", optsize = 10 }, "lmroman10-regular.otf"       },
+  { { name = "Latin Modern Roman", optsize = 12 }, "lmroman12-regular.otf"       },
+  { { name = "Latin Modern Roman", optsize = 42 }, "lmroman17-regular.otf"       },
+  { { name = "EB Garamond", optsize =  0 }, "EBGaramond08-Regular.otf"           },
+  { { name = "EB Garamond", optsize =  8 }, "EBGaramond08-Regular.otf"           },
+  { { name = "EB Garamond", optsize = 12 }, "EBGaramond12-Regular.otf"           },
+  { { name = "EB Garamond", optsize = 42 }, "EBGaramond12-Regular.otf"           },
   { { name = "Garamond Premier Pro", optsize =  0 }, "GaramondPremrPro-Capt.otf" },
-  { { name = "Garamond Premier Pro", optsize = 10 }, "GaramondPremrPro.otf" },
+  { { name = "Garamond Premier Pro", optsize = 10 }, "GaramondPremrPro.otf"      },
   { { name = "Garamond Premier Pro", optsize = 15 }, "GaramondPremrPro-Subh.otf" },
   { { name = "Garamond Premier Pro", optsize = 42 }, "GaramondPremrPro-Disp.otf" },
+}
+
+local choose_style = {
+  { { name = "DejaVu Sans", style = "regular"    }, "DejaVuSans.ttf"                       },
+  { { name = "DejaVu Sans", style = "italic"     }, "DejaVuSans-Oblique.ttf"               },
+  { { name = "DejaVu Sans", style = "bold"       }, "DejaVuSans-Bold.ttf"                  },
+  { { name = "DejaVu Sans", style = "bolditalic" }, "DejaVuSans-BoldOblique.ttf"           },
+  { { name = "Linux Libertine O", style = "regular"    }, "LinLibertine_R.otf"             },
+  { { name = "Linux Libertine O", style = "italic"     }, "LinLibertine_RI.otf"            },
+  { { name = "Linux Libertine O", style = "bold"       }, "LinLibertine_RB.otf"            },
+  { { name = "Linux Libertine O", style = "bolditalic" }, "LinLibertine_RBI.otf"           },
+  { { name = "Liberation Serif", style = "regular"    }, "LiberationSerif-Regular.ttf"     },
+  { { name = "Liberation Serif", style = "italic"     }, "LiberationSerif-Italic.ttf"      },
+  { { name = "Liberation Serif", style = "bold"       }, "LiberationSerif-Bold.ttf"        },
+  { { name = "Liberation Serif", style = "bolditalic" }, "LiberationSerif-BoldItalic.ttf"  },
+  { { name = "CMU Sans Serif", style = "regular"    }, "cmunss.otf"   }, -- no “regular” but “medium”
+  { { name = "CMU Sans Serif", style = "italic"     }, "cmunsi.otf"   }, -- no “italic” but “oblique”
+  { { name = "CMU Sans Serif", style = "bold"       }, "cmunsx.otf"   },
+  { { name = "CMU Sans Serif", style = "bolditalic" }, "cmunso.otf"   },
 }
 
 --- this needs a database built with --formats=+pfa,pfb,afm
 
 local resolve_t1_font = {
-  { { name = "URW Gothic L",          style = "regular"    }, "uagk8a.pfb" },
-  { { name = "URW Gothic L",          style = "italic"     }, "uagko8a.pfb" },
-  { { name = "URW Gothic L",          style = "bold"       }, "uagd8a.pfb" },
-  { { name = "URW Gothic L",          style = "bolditalic" }, "uagdo8a.pfb" },
+  { { name = "URW Gothic L",          style = "regular"    }, "uagk8a.pfb"   },
+  { { name = "URW Gothic L",          style = "italic"     }, "uagko8a.pfb"  },
+  { { name = "URW Gothic L",          style = "bold"       }, "uagd8a.pfb"   },
+  { { name = "URW Gothic L",          style = "bolditalic" }, "uagdo8a.pfb"  },
   { { name = "Century Schoolbook L",  style = "regular"    }, "uncr8a.pfb"   },
   { { name = "Century Schoolbook L",  style = "italic"     }, "uncri8a.pfb"  },
   { { name = "Century Schoolbook L",  style = "bold"       }, "uncb8a.pfb"   },
@@ -115,6 +136,7 @@ local resolve_t1_font = {
 local font_name_tests = {
   infer_regular_style,
   choose_optical_size,
+  choose_style,
   resolve_t1_font,
 }
 

@@ -240,7 +240,7 @@ This is a sketch of the luaotfload db:
     type dbobj = {
         families    : familytable;
         filenames   : filemap;
-        index       : filestatus;
+        status      : filestatus;
         mappings    : fontentry list;
         meta        : metadata;
         names       : namedata; // TODO: check for relevance after db is finalized
@@ -301,10 +301,11 @@ This is a sketch of the luaotfload db:
         location     : local | system | texmf;
         weight       : int;
         width        : int;
-        units_per_em : int;        // mainly 1000, but also 2048 or 256
+        units_per_em : int;         // mainly 1000, but also 2048 or 256
     }
-    and filestatus = (fullname,
-                      { index : int list; timestamp : int }) dict
+    and filestatus = (string,       // fullname
+                      { index       : int list; // pointer into mappings
+                        timestamp   : int;      }) dict
 
 beware that this is a reconstruction and may be incomplete.
 
@@ -350,7 +351,7 @@ local fontnames_init = function (formats) --- returns dbobj
             system     = { },
             texmf      = { },
         },
-        index           = { }, -- was: status; map abspath -> mapping
+        status          = { }, -- was: status; map abspath -> mapping
         mappings        = { }, -- TODO: check if still necessary after rewrite
         names           = { },
 --      filenames       = { }, -- created later
@@ -1404,17 +1405,22 @@ local loaders = {
     pfa     = t1_fullinfo,
 }
 
---- we return true if the fond is new or re-indexed
+--- we return true if the font is new or re-indexed
 --- string -> dbobj -> dbobj -> bool
-local load_font = function (fullname, fontnames, newfontnames, texmf)
+
+local read_font_names = function (fullname,
+                                  fontnames,
+                                  newfontnames,
+                                  texmf)
+
     local newmappings   = newfontnames.mappings
     local newstatus     = newfontnames.status --- by full path
 
     local mappings      = fontnames.mappings
     local status        = fontnames.status
 
-    local basename      = filebasename(fullname)
-    local barename      = filenameonly(fullname)
+    local basename      = filebasename (fullname)
+    local barename      = filenameonly (fullname)
 
     local format        = stringlower (filesuffix (basename))
 
@@ -1438,7 +1444,7 @@ local load_font = function (fullname, fontnames, newfontnames, texmf)
     local newentrystatus = newstatus[fullname]
     --- newentrystatus: nil | false | table
     if newentrystatus and newentrystatus.timestamp == new_timestamp then
-        -- already indexed this run
+        -- already statused this run
         return false
     end
 
@@ -1824,6 +1830,7 @@ end
 --doc]]--
 
 --- string -> dbobj -> dbobj -> bool -> bool -> (int * int)
+
 local scan_dir = function (dirname, fontnames, newfontnames,
                            dry_run, texmf)
     if lpegmatch (p_blacklist, dirname) then
@@ -1849,12 +1856,13 @@ local scan_dir = function (dirname, fontnames, newfontnames,
         local new
         if dry_run == true then
             report ("both", 1, "db",
-                    "Would have been loading %q", fullname)
+                    "Would have been extracting metadata from %q",
+                    fullname)
         else
             report ("both", 4, "db",
-                    "Loading font %q", fullname)
-            local new = load_font (fullname, fontnames,
-                                   newfontnames, texmf)
+                    "Extracting metadata from font %q", fullname)
+            local new = read_font_names (fullname, fontnames,
+                                         newfontnames, texmf)
             if new == true then
                 n_new = n_new + 1
             end
@@ -1890,6 +1898,7 @@ local path_separator = ostype == "windows" and ";" or ":"
 --doc]]--
 
 --- dbobj -> dbobj -> bool? -> (int * int)
+
 local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
 
     local n_scanned, n_new, fontdirs = 0, 0
@@ -2301,6 +2310,24 @@ local gen_fast_lookups = function (fontnames)
     return fontnames
 end
 
+local retrieve_namedata = function (fontnames, newfontnames, dry_run)
+    local n_rawnames, n_new = 0, 0
+
+    local rawnames, new = scan_texmf_fonts (fontnames,
+                                            newfontnames,
+                                            dry_run)
+
+    n_rawnames    = n_rawnames + rawnames
+    n_new         = n_new + new
+
+    rawnames, new = scan_os_fonts (fontnames, newfontnames, dry_run)
+
+    n_rawnames    = n_rawnames + rawnames
+    n_new         = n_new + new
+
+    return n_rawnames, n_new
+end
+
 --- force:      dictate rebuild from scratch
 --- dry_dun:    don’t write to the db, just scan dirs
 
@@ -2314,8 +2341,8 @@ update_names = function (fontnames, force, dry_run)
         return fontnames or names.data
     end
 
-    local starttime = os.gettimeofday()
-    local n_scanned, n_new = 0, 0
+    local starttime            = os.gettimeofday()
+    local n_rawnames, n_new    = 0, 0
 
     --[[
     The main function, scans everything
@@ -2340,14 +2367,11 @@ update_names = function (fontnames, force, dry_run)
     local newfontnames = fontnames_init (get_font_filter ())
     read_blacklist ()
 
-    local scanned, new
-    scanned, new = scan_texmf_fonts (fontnames, newfontnames, dry_run)
-    n_scanned = n_scanned + scanned
-    n_new     = n_new     + new
-
-    scanned, new = scan_os_fonts (fontnames, newfontnames, dry_run)
-    n_scanned = n_scanned + scanned
-    n_new     = n_new     + new
+    local rawnames, new = retrieve_namedata (fontnames,
+                                             newfontnames,
+                                             dry_run)
+    n_rawnames = n_rawnames + rawnames
+    n_new      = n_new + new
 
     --- we always generate the file lookup tables because
     --- non-texmf entries are redirected there and the mapping
@@ -2359,7 +2383,7 @@ update_names = function (fontnames, force, dry_run)
     ---   partial:         804 ms   |   701 ms
     ---   forced:        45384 ms   | 44714 ms
     report("info", 3, "db",
-           "Scanned %d font files; %d new entries.", n_scanned, n_new)
+           "Scanned %d font files; %d new entries.", n_rawnames, n_new)
     report("info", 3, "db",
            "Rebuilt in %0.f ms", 1000*(os.gettimeofday()-starttime))
     names.data = newfontnames

@@ -1409,22 +1409,22 @@ local loaders = {
 --- string -> dbobj -> dbobj -> bool
 
 local read_font_names = function (fullname,
-                                  fontnames,
-                                  newfontnames,
+                                  currentnames,
+                                  targetnames,
                                   texmf)
 
-    local newmappings   = newfontnames.mappings
-    local newstatus     = newfontnames.status --- by full path
+    local targetmappings    = targetnames.mappings
+    local targetstatus      = targetnames.status --- by full path
 
-    local mappings      = fontnames.mappings
-    local status        = fontnames.status
+    local currentmappings   = currentnames.mappings
+    local currentstatus     = currentnames.status
 
-    local basename      = filebasename (fullname)
-    local barename      = filenameonly (fullname)
+    local basename          = filebasename (fullname)
+    local barename          = filenameonly (fullname)
 
-    local format        = stringlower (filesuffix (basename))
+    local format            = stringlower (filesuffix (basename))
 
-    local entryname     = fullname
+    local entryname         = fullname
     if texmf == true then
         entryname = basename
     end
@@ -1437,30 +1437,30 @@ local read_font_names = function (fullname,
     end
 
     local new_timestamp, current_timestamp
-    current_timestamp   = status[fullname]
-                      and status[fullname].timestamp
+    current_timestamp   = currentstatus[fullname]
+                      and currentstatus[fullname].timestamp
     new_timestamp       = lfsattributes(fullname, "modification")
 
-    local newentrystatus = newstatus[fullname]
+    local newentrystatus = targetstatus[fullname]
     --- newentrystatus: nil | false | table
     if newentrystatus and newentrystatus.timestamp == new_timestamp then
         -- already statused this run
         return false
     end
 
-    newstatus[fullname]      = newentrystatus or { }
-    local newentrystatus     = newstatus[fullname]
+    targetstatus[fullname]   = newentrystatus or { }
+    local newentrystatus     = targetstatus[fullname]
     newentrystatus.timestamp = new_timestamp
     newentrystatus.index     = newentrystatus.index or { }
 
     if  current_timestamp == new_timestamp
     and not newentrystatus.index[1]
     then
-        for _, v in next, status[fullname].index do
+        for _, v in next, currentstatus[fullname].index do
             local index      = #newentrystatus.index
-            local fullinfo   = mappings[v]
-            local location   = #newmappings + 1
-            newmappings[location]          = fullinfo --- keep
+            local fullinfo   = currentmappings[v]
+            local location   = #targetmappings + 1
+            targetmappings[location]       = fullinfo --- keep
             newentrystatus.index[index+1]  = location --- is this actually used anywhere?
         end
         report("log", 2, "db", "Font %q already indexed", basename)
@@ -1482,11 +1482,11 @@ local read_font_names = function (fullname,
                 if not fullinfo then
                     return false
                 end
-                local location = #newmappings+1
+                local location = #targetmappings + 1
                 local index    = newentrystatus.index[n_font]
                 if not index then index = location end
 
-                newmappings[index]            = fullinfo
+                targetmappings[index]         = fullinfo
                 newentrystatus.index[n_font]  = index
             end
         else
@@ -1494,11 +1494,11 @@ local read_font_names = function (fullname,
             if not fullinfo then
                 return false
             end
-            local location  = #newmappings+1
+            local location  = #targetmappings + 1
             local index     = newentrystatus.index[1]
             if not index then index = location end
 
-            newmappings[index]       = fullinfo
+            targetmappings[index]    = fullinfo
             newentrystatus.index[1]  = index
         end
 
@@ -2364,7 +2364,9 @@ update_names = function (fontnames, force, dry_run)
             fontnames = fontnames_init (get_font_filter ())
         end
     end
+
     local newfontnames = fontnames_init (get_font_filter ())
+
     read_blacklist ()
 
     local rawnames, new = retrieve_namedata (fontnames,

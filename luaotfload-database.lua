@@ -1453,6 +1453,36 @@ local compare_timestamps = function (fullname,
     return true
 end
 
+local insert_fullinfo = function (fullname,
+                                  basename,
+                                  n_font,
+                                  loader,
+                                  location,
+                                  targetmappings,
+                                  targetentrystatus)
+
+    local subfont = n_font and n_font - 1 or false
+
+    local fullinfo = loader (fullname, subfont,
+                             location, basename)
+
+    if not fullinfo then
+        return false
+    end
+
+    local index = targetentrystatus.index [n_font]
+
+    if not index then
+        index = #targetmappings + 1
+    end
+
+    targetmappings [index]            = fullinfo
+    targetentrystatus.index [n_font]  = index
+
+    return true
+end
+
+
 
 --- we return true if the font is new or re-indexed
 --- string -> dbobj -> dbobj -> bool
@@ -1479,18 +1509,19 @@ local read_font_names = function (fullname,
     local barename              = filenameonly (fullname)
     local entryname             = fullname
 
-    local format                = stringlower (filesuffix (basename))
-
     if location == "texmf" then
         entryname = basename
     end
 
-    if names.blacklist[fullname] or names.blacklist[basename]
-    then
+    --- 1) skip if blacklisted
+
+    if names.blacklist[fullname] or names.blacklist[basename] then
         report("log", 2, "db",
                "Ignoring blacklisted font %q", fullname)
         return false
     end
+
+    --- 2) skip if known with same timestamp
 
     if not compare_timestamps (fullname,
                                currentstatus,
@@ -1503,47 +1534,49 @@ local read_font_names = function (fullname,
         return false
     end
 
-    local loader = loaders[format] --- ot_fullinfo, t1_fullinfo
+    --- 3) new font; choose a loader, abort if unknown
+
+    local format    = stringlower (filesuffix (basename))
+    local loader    = loaders [format] --- ot_fullinfo, t1_fullinfo
+
     if not loader then
         report ("both", 0, "db",
                 "Unknown format: %q, skipping.", format)
         return false
     end
 
-    local info = fontloaderinfo(fullname)
+    --- 4) get basic info, abort if fontloader can’t read it
 
-    if info then
-        if type(info) == "table" and #info > 1 then --- ttc
-            for n_font = 1, #info do
-                local fullinfo = loader (fullname, n_font-1, location, basename)
-                if not fullinfo then
-                    return false
-                end
-                local location = #targetmappings + 1
-                local index    = targetentrystatus.index[n_font]
-                if not index then index = location end
+    local info = fontloaderinfo (fullname)
 
-                targetmappings[index]            = fullinfo
-                targetentrystatus.index[n_font]  = index
-            end
-        else
-            local fullinfo = loader (fullname, false, location, basename)
-            if not fullinfo then
-                return false
-            end
-            local location  = #targetmappings + 1
-            local index     = targetentrystatus.index[1]
-            if not index then index = location end
-
-            targetmappings[index]       = fullinfo
-            targetentrystatus.index[1]  = index
-        end
-
-    else --- missing info
-        report("log", 1, "db", "Failed to load %q", basename)
+    if not info then
+        report ("log", 1, "db",
+                "Failed to read basic information from %q", basename)
         return false
     end
-    return true
+
+
+    --- 5) check for subfonts and process each of them
+
+    if type (info) == "table" and #info > 1 then --- ttc
+
+        local success = false --- true if at least one subfont got read
+
+        for n_font = 1, #info do
+            if insert_fullinfo (fullname, basename, n_font,
+                                loader, location,
+                                targetmappings, targetentrystatus)
+            then
+                success = true
+            end
+        end
+
+        return success
+    end
+
+    return insert_fullinfo (fullname, basename, false,
+                            loader, location,
+                            targetmappings, targetentrystatus)
 end
 
 local path_normalize

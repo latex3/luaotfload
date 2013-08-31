@@ -118,7 +118,9 @@ kerncharacters = function (head)
           goto nextnode
         elseif firstkern then
           firstkern = false
-          goto nextnode
+          if not start.components then
+            goto nextnode
+          end
         end
       end
 

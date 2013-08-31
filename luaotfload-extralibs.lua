@@ -369,11 +369,10 @@ kerns.disablecharacterkerning    = disablecharacterkerning
 --- now for the simplistic variant
 --- unit -> bool
 local enablefontkerning = function ( )
-  return add_processor(
-    kernfont.handler,
-    "typesetters.kernfont",
-    "pre_linebreak_filter", "hpack_filter"
-  )
+  return add_processor( kernfont.handler
+                      , "typesetters.kernfont"
+                      , "pre_linebreak_filter"
+                      , "hpack_filter")
 end
 
 --- unit -> bool

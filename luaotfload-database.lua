@@ -615,7 +615,7 @@ on whether the index entry has a texmf flag set.
 
 local get_font_file = function (fullnames, entry)
     local basename = entry.basename
-    if entry.texmf == true then
+    if entry.location == "texmf" then
         if kpselookup(basename) then
             return true, basename, entry.subfont
         end
@@ -1224,7 +1224,7 @@ table as returned by the font file reader need to be relocated.
 --doc]]--
 
 --- string -> int -> bool -> string -> fontentry
-ot_fullinfo = function (filename, subfont, texmf, basename)
+ot_fullinfo = function (filename, subfont, location, basename)
     local namedata = { }
 
     local metadata = load_font_file (filename, subfont)
@@ -1306,7 +1306,7 @@ ot_fullinfo = function (filename, subfont, texmf, basename)
     --- file location data (used to be filename field)
     namedata.filename      = filename --> sys
     namedata.basename      = basename --> texmf
-    namedata.texmf         = texmf or false
+    namedata.location      = location or "system" --- TODO or “local”??
     namedata.subfont       = subfont
 
     return namedata
@@ -1323,7 +1323,7 @@ end
 --doc]]--
 
 --- string -> int -> bool -> string -> fontentry
-t1_fullinfo = function (filename, _subfont, texmf, basename)
+t1_fullinfo = function (filename, _subfont, location, basename)
     local namedata = { }
     local metadata = load_font_file (filename)
 
@@ -1390,8 +1390,9 @@ t1_fullinfo = function (filename, _subfont, texmf, basename)
 
     namedata.filename      = filename --> sys
     namedata.basename      = basename --> texmf
-    namedata.texmf         = texmf or false
+    namedata.location      = location or "system"
     namedata.subfont       = false
+
     return namedata
 end
 
@@ -1411,7 +1412,7 @@ local loaders = {
 local read_font_names = function (fullname,
                                   currentnames,
                                   targetnames,
-                                  texmf)
+                                  location)
 
     local targetmappings    = targetnames.mappings
     local targetstatus      = targetnames.status --- by full path
@@ -1425,7 +1426,7 @@ local read_font_names = function (fullname,
     local format            = stringlower (filesuffix (basename))
 
     local entryname         = fullname
-    if texmf == true then
+    if location == "texmf" then
         entryname = basename
     end
 
@@ -1475,10 +1476,11 @@ local read_font_names = function (fullname,
     end
 
     local info = fontloaderinfo(fullname)
+
     if info then
         if type(info) == "table" and #info > 1 then --- ttc
             for n_font = 1, #info do
-                local fullinfo = loader (fullname, n_font-1, texmf, basename)
+                local fullinfo = loader (fullname, n_font-1, location, basename)
                 if not fullinfo then
                     return false
                 end
@@ -1490,7 +1492,7 @@ local read_font_names = function (fullname,
                 newentrystatus.index[n_font]  = index
             end
         else
-            local fullinfo = loader (fullname, false, texmf, basename)
+            local fullinfo = loader (fullname, false, location, basename)
             if not fullinfo then
                 return false
             end
@@ -1832,14 +1834,14 @@ end
 --- string -> dbobj -> dbobj -> bool -> bool -> (int * int)
 
 local scan_dir = function (dirname, fontnames, newfontnames,
-                           dry_run, texmf)
+                           dry_run, location)
     if lpegmatch (p_blacklist, dirname) then
         report ("both", 3, "db",
                 "Skipping blacklisted directory %s", dirname)
         --- ignore
         return 0, 0
     end
-    local found = find_font_files (dirname, texmf ~= true)
+    local found = find_font_files (dirname, location ~= "texmf")
     if not found then
         report ("both", 3, "db",
                 "No such directory: %q; skipping.", dirname)
@@ -1862,7 +1864,7 @@ local scan_dir = function (dirname, fontnames, newfontnames,
             report ("both", 4, "db",
                     "Extracting metadata from font %q", fullname)
             local new = read_font_names (fullname, fontnames,
-                                         newfontnames, texmf)
+                                         newfontnames, location)
             if new == true then
                 n_new = n_new + 1
             end
@@ -1928,7 +1930,7 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
                 "Initiating scan of %d directories.", #tasks)
         for _, d in next, tasks do
             local found, new = scan_dir (d, fontnames, newfontnames,
-                                         dry_run, true)
+                                         dry_run, "texmf")
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end
@@ -2092,6 +2094,10 @@ do --- closure for read_fonts_conf()
                 --- We exclude paths with texmf in them, as they should be
                 --- found anyway; also duplicates are ignored by checking
                 --- if they are elements of dirs_done.
+                ---
+                --- FIXME does this mean we cannot access paths from
+                --- distributions (e.g. Context minimals) installed
+                --- separately?
                 if not (stringfind(path, "texmf") or dirs_done[path]) then
                     acc[#acc+1] = path
                     dirs_done[path] = true
@@ -2230,7 +2236,7 @@ flush_lookup_cache = function ()
 end
 
 --- dbobj -> dbobj
-local gen_fast_lookups = function (fontnames)
+local gen_fast_lookups = function (fontnames) --- this will become obsolete
     report("both", 2, "db", "Creating filename map")
     local mappings   = fontnames.mappings
     local nmappings  = #mappings
@@ -2262,7 +2268,7 @@ local gen_fast_lookups = function (fontnames)
 ---     substantial duplication
 --      entry.filename = nil
 
-        if entry.texmf == true then
+        if entry.location == "texmf" then
             texmf[#texmf+1] = { idx, basename, bare, true, nil }
         else
             sys[#sys+1] = { idx, basename, bare, false, filename }
@@ -2378,6 +2384,7 @@ update_names = function (fontnames, force, dry_run)
     --- we always generate the file lookup tables because
     --- non-texmf entries are redirected there and the mapping
     --- needs to be 100% consistent
+
     newfontnames = gen_fast_lookups(newfontnames)
 
     --- stats:

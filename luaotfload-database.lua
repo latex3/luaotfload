@@ -431,7 +431,7 @@ load_names = function (dry_run)
         report ("info", 3, "db", "Loading took %0.f ms",
                 1000*(os.gettimeofday()-starttime))
 
-        local db_version, nms_version = data.version, names.version
+        local db_version, nms_version = data.meta.version, names.version
         if db_version ~= nms_version then
             report ("both", 0, "db",
                     [[Version mismatch; expected %4.3f, got %4.3f]],
@@ -1449,6 +1449,8 @@ local compare_timestamps = function (fullname,
 
         return false
     end
+
+    return true
 end
 
 
@@ -1490,13 +1492,16 @@ local read_font_names = function (fullname,
         return false
     end
 
-    local changed = compare_timestamps (fullname,
-                                        currentstatus,
-                                        currententrystatus,
-                                        currentmappings,
-                                        targetstatus,
-                                        targetentrystatus,
-                                        targetmappings)
+    if not compare_timestamps (fullname,
+                               currentstatus,
+                               currententrystatus,
+                               currentmappings,
+                               targetstatus,
+                               targetentrystatus,
+                               targetmappings)
+    then
+        return false
+    end
 
     local loader = loaders[format] --- ot_fullinfo, t1_fullinfo
     if not loader then

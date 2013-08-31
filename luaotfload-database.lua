@@ -1406,6 +1406,52 @@ local loaders = {
     pfa     = t1_fullinfo,
 }
 
+--- not side-effect free!
+
+local compare_timestamps = function (fullname,
+                                     currentstatus,
+                                     currententrystatus,
+                                     currentmappings,
+                                     targetstatus,
+                                     targetentrystatus,
+                                     targetmappings)
+
+    local currenttimestamp = currententrystatus
+                         and currententrystatus.timestamp
+    local targettimestamp  = lfsattributes (fullname, "modification")
+
+    if targetentrystatus ~= nil
+    and targetentrystatus.timestamp == targettimestamp then
+        report ("log", 3, "db", "Font %q already read.", basename)
+        return false
+    end
+
+    targetentrystatus.timestamp = targettimestamp
+    targetentrystatus.index     = targetentrystatus.index or { }
+
+    if  currenttimestamp == targettimestamp
+    and not targetentrystatus.index [1]
+    then
+
+        --- copy old namedata into new
+
+        for _, currentindex in next, currententrystatus.index do
+
+            local targetindex   = #targetentrystatus.index
+            local fullinfo      = currentmappings [currentindex]
+            local location      = #targetmappings + 1
+
+            targetmappings [location]                 = fullinfo
+            targetentrystatus.index [targetindex + 1] = location
+        end
+
+        report ("log", 3, "db", "Font %q already indexed.", basename)
+
+        return false
+    end
+end
+
+
 --- we return true if the font is new or re-indexed
 --- string -> dbobj -> dbobj -> bool
 
@@ -1414,18 +1460,25 @@ local read_font_names = function (fullname,
                                   targetnames,
                                   location)
 
-    local targetmappings    = targetnames.mappings
-    local targetstatus      = targetnames.status --- by full path
+    local targetmappings        = targetnames.mappings
+    local targetstatus          = targetnames.status --- by full path
+    local targetentrystatus     = targetstatus [fullname]
 
-    local currentmappings   = currentnames.mappings
-    local currentstatus     = currentnames.status
+    if targetentrystatus == nil then
+        targetentrystatus        = { }
+        targetstatus [fullname]  = targetentrystatus
+    end
 
-    local basename          = filebasename (fullname)
-    local barename          = filenameonly (fullname)
+    local currentmappings       = currentnames.mappings
+    local currentstatus         = currentnames.status
+    local currententrystatus    = currentstatus [fullname]
 
-    local format            = stringlower (filesuffix (basename))
+    local basename              = filebasename (fullname)
+    local barename              = filenameonly (fullname)
+    local entryname             = fullname
 
-    local entryname         = fullname
+    local format                = stringlower (filesuffix (basename))
+
     if location == "texmf" then
         entryname = basename
     end
@@ -1437,36 +1490,13 @@ local read_font_names = function (fullname,
         return false
     end
 
-    local new_timestamp, current_timestamp
-    current_timestamp   = currentstatus[fullname]
-                      and currentstatus[fullname].timestamp
-    new_timestamp       = lfsattributes(fullname, "modification")
-
-    local newentrystatus = targetstatus[fullname]
-    --- newentrystatus: nil | false | table
-    if newentrystatus and newentrystatus.timestamp == new_timestamp then
-        -- already statused this run
-        return false
-    end
-
-    targetstatus[fullname]   = newentrystatus or { }
-    local newentrystatus     = targetstatus[fullname]
-    newentrystatus.timestamp = new_timestamp
-    newentrystatus.index     = newentrystatus.index or { }
-
-    if  current_timestamp == new_timestamp
-    and not newentrystatus.index[1]
-    then
-        for _, v in next, currentstatus[fullname].index do
-            local index      = #newentrystatus.index
-            local fullinfo   = currentmappings[v]
-            local location   = #targetmappings + 1
-            targetmappings[location]       = fullinfo --- keep
-            newentrystatus.index[index+1]  = location --- is this actually used anywhere?
-        end
-        report("log", 2, "db", "Font %q already indexed", basename)
-        return false
-    end
+    local changed = compare_timestamps (fullname,
+                                        currentstatus,
+                                        currententrystatus,
+                                        currentmappings,
+                                        targetstatus,
+                                        targetentrystatus,
+                                        targetmappings)
 
     local loader = loaders[format] --- ot_fullinfo, t1_fullinfo
     if not loader then
@@ -1485,11 +1515,11 @@ local read_font_names = function (fullname,
                     return false
                 end
                 local location = #targetmappings + 1
-                local index    = newentrystatus.index[n_font]
+                local index    = targetentrystatus.index[n_font]
                 if not index then index = location end
 
-                targetmappings[index]         = fullinfo
-                newentrystatus.index[n_font]  = index
+                targetmappings[index]            = fullinfo
+                targetentrystatus.index[n_font]  = index
             end
         else
             local fullinfo = loader (fullname, false, location, basename)
@@ -1497,11 +1527,11 @@ local read_font_names = function (fullname,
                 return false
             end
             local location  = #targetmappings + 1
-            local index     = newentrystatus.index[1]
+            local index     = targetentrystatus.index[1]
             if not index then index = location end
 
-            targetmappings[index]    = fullinfo
-            newentrystatus.index[1]  = index
+            targetmappings[index]       = fullinfo
+            targetentrystatus.index[1]  = index
         end
 
     else --- missing info

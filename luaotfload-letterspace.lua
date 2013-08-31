@@ -118,7 +118,8 @@ kerncharacters = function (head)
           goto nextnode
         elseif firstkern then
           firstkern = false
-          if not start.components then
+          if (id ~= disc_code) and (not start.components) then
+            --- not a ligature, skip node
             goto nextnode
           end
         end

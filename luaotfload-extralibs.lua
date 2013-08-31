@@ -211,7 +211,12 @@ if not markdata then
     if k == true then
       return marks[currentfont()]
     else
-      local resources = identifiers[k].resources or { }
+      local resources = { }
+
+      if identifiers[k] then
+        resources = identifiers[k].resources or { }
+      end
+
       local marks = resources.marks or { }
       t[k] = marks
       return marks

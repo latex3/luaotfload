@@ -238,17 +238,41 @@ end
 This is a sketch of the luaotfload db:
 
     type dbobj = {
-        formats         : string list; // { "otf", "ttf", "ttc", "dfont" }
         mappings        : fontentry list;
-        status          : filestatus;
-        version         : float;
-        // new in v2.3; these supersede the basenames / barenames
-        // hashes from v2.2
+        index           : filestatus;
+        families        : familytable;
+        names           : namedata; // TODO: check for relevance after db is finalized
+        meta            : metadata;
         filenames       : filemap;
     }
+    and familytable = {
+        texmf  : (format, familyentry) hash;
+        system : (format, familyentry) hash;
+    }
+    and familyentry = {
+        regular     : sizes;
+        italic      : sizes;
+        bold        : sizes;
+        bolditalic  : sizes;
+    }
+    and sizes = {
+        default = int;              // points into mappings or names
+        other   = (int, int) list;  // design size -> index entry
+    }
+    and metadata = {
+        formats     : string list; // { "otf", "ttf", "ttc", "dfont" }
+        statistics  : TODO;
+        version     : float;
+    }
     and filemap = {
-        base : (string, int) hash; // basename -> idx
-        bare : (string, int) hash; // barename -> idx
+        base : {
+            texmf  : (string, int) hash; // basename -> idx
+            system : (string, int) hash;
+        };
+        bare : {
+            texmf  : (string, (string, int) hash) hash; // format -> (barename -> idx)
+            system : (string, (string, int) hash) hash;
+        };
         full : (int, string) hash; // idx -> full path
     }
     and fontentry = {

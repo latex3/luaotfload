@@ -1107,17 +1107,18 @@ end
 --- string -> ('a -> 'a) -> 'a list -> 'a
 reload_db = function (why, caller, ...)
     local namedata  = names.data
-    local formats   = tableconcat (namedata.formats, ",")
+    local formats   = tableconcat (namedata.meta.formats, ",")
 
     report ("both", 1, "db",
             "Reload initiated (formats: %s); reason: %q",
             formats, why)
 
     set_font_filter (formats)
-    names.data = update_names (names.data, false, false)
+    namedata = update_names (namedata, false, false)
 
-    if names.data then
+    if namedata then
         fonts_reloaded = true
+        names.data = namedata
         return caller (...)
     end
 

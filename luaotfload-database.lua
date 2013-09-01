@@ -2369,9 +2369,9 @@ local generate_filedata = function (mappings)
         local format   = entry.format   --- otf, afm, ...
         local location = filedata.location --- texmf, system, ...
 
-        local filename = filedata.full
+        local fullname = filedata.full
         local basename = filedata.base
-        local barename = filenameonly (filename)
+        local barename = filenameonly (fullname)
         local subfont  = filedata.subfont
 
         entry.index    = index
@@ -2381,12 +2381,23 @@ local generate_filedata = function (mappings)
         local inbase = base [location] --- no format since the suffix is known
 
         if inbase then
-            if inbase [basename] then
+            local present = inbase [basename]
+            if present then
                 report ("both", 3, "db",
                         "Conflicting basename: %q already indexed \z
                          in category %s, ignoring.",
                         barename, location)
                 conflicts.basenames = conflicts.basenames + 1
+
+                --- track conflicts per font
+                local conflictdata = entry.conflicts
+
+                if not conflictdata then
+                    entry.conflicts = { basename = present }
+                else -- some conflicts already detected
+                    conflictdata.basename = present
+                end
+
             else
                 inbase [basename] = index
             end
@@ -2400,12 +2411,23 @@ local generate_filedata = function (mappings)
         local inbare = bare [location] [format]
 
         if inbare then
-            if inbare [barename] then
+            local present = inbare [barename]
+            if present then
                 report ("both", 3, "db",
                         "Conflicting barename: %q already indexed \z
                          in category %s/%s, ignoring.",
                         barename, location, format)
                 conflicts.barenames = conflicts.barenames + 1
+
+                --- track conflicts per font
+                local conflictdata = entry.conflicts
+
+                if not conflictdata then
+                    entry.conflicts = { barename = present }
+                else -- some conflicts already detected
+                    conflictdata.barename = present
+                end
+
             else
                 inbare [barename] = index
             end

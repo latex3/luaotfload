@@ -189,7 +189,8 @@ local invalidchars = "[^%a%d]"
 
 local sanitize_fontname = function (str)
     if str ~= nil then
-        return utf8gsub (utf8lower (str), invalidchars, "")
+        str = utf8gsub (utf8lower (str), invalidchars, "")
+        return str
     end
     return nil
 end
@@ -1269,12 +1270,12 @@ local get_size_info = function (metadata)
     return false
 end
 
-local organize_namedata = function (metadata, basename, info)
+local get_english_names = function (names, basename)
 
     local english_names
 
-    if metadata.names then
-        for _, raw_namedata in next, metadata.names do
+    if names then
+        for _, raw_namedata in next, names do
             if raw_namedata.lang == "English (US)" then
                 english_names = raw_namedata.names
             end
@@ -1287,23 +1288,48 @@ local organize_namedata = function (metadata, basename, info)
         return nil
     end
 
+    return english_names
+end
+
+local organize_namedata = function (metadata,
+                                    english_names,
+                                    basename,
+                                    info)
+
+    --print (english_names.family, "<>", english_names.preffamilyname)
     local fontnames = {
         --- see
         --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
+        --- http://www.microsoft.com/typography/OTSPEC/name.htm#NameIDs
         english = {
+            --- where a “compatfull” field is given, the value of “fullname” is
+            --- either identical or differs by separating the style
+            --- with a hyphen and omitting spaces.
+            --- Of the three “fullname” fields, this one appears to be the one
+            --- with the entire name given in a legible,
+            --- non-abbreviated fashion, for most fonts at any rate.
+            --- However, in some fonts (e.g. CMU) all three fields are
+            --- identical.
             fullname      = english_names.compatfull
                          or english_names.fullname,
-            family        = english_names.preffamilyname
-                         or english_names.family,
-            --prefmodifiers = english_names.prefmodifiers, --> style
-            --subfamily     = english_names.subfamily, --> style
+            --- we keep both the “preferred family” and the “family”
+            --- values around since both are valid but can turn out
+            --- quite differently, e.g. with Latin Modern:
+            ---     preffamily: “Latin Modern Sans”,
+            ---     family:     “LM Sans 10”
+            preffamily    = english_names.preffamilyname,
+            family        = english_names.family,
+            prefmodifiers = english_names.prefmodifiers,
+            subfamily     = english_names.subfamily,
             psname        = english_names.postscriptname,
         },
+
         metadata = {
-            pfullname     = metadata.fullname,
+            fullname      = metadata.fullname,
             fontname      = metadata.fontname,
             metafamily    = metadata.familyname,
         },
+
         info = {
             fullname      = info.fullname,
             familyname    = info.familyname,
@@ -1311,13 +1337,24 @@ local organize_namedata = function (metadata, basename, info)
         },
     }
 
-    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
+--    print (fontnames.english.fullname,
+--           fontnames.metadata.fullname,
+--           fontnames.info.fullname)
+
     if metadata.fontstyle_name then
+        --- not present in all fonts, often differs from the preferred
+        --- subfamily as well as subfamily fields, e.g. with LMSans10-BoldOblique:
+        ---     subfamily:      “Bold Italic”
+        ---     prefmodifiers:  “10 Bold Oblique”
+        ---     fontstyle_name: “Bold Oblique”
         for _, name in next, metadata.fontstyle_name do
             if name.lang == 1033 then --- I hate magic numbers
                 fontnames.fontstyle_name = name.name
             end
         end
+
+        --print (fontnames.metadata.fontname, "|>", english_names.subfamily, "<>", english_names.prefmodifiers)
+        --print (fontnames.metadata.fontname, "|>", english_names.subfamily, "<>", fontnames.fontstyle_name)
     end
 
     return {
@@ -1329,6 +1366,32 @@ local organize_namedata = function (metadata, basename, info)
 
 end
 
+local organize_styledata = function (metadata, english_names, info)
+    local pfminfo   = metadata.pfminfo
+    local names     = metadata.names
+
+--    print (">", pfminfo.avgwidth,
+--            (metadata.italicangle == info.italicangle) and "T" or
+--            string.format ("%f / %f", metadata.italicangle, info.italicangle),
+--            pfminfo.width, pfminfo.weight, info.weight)
+    return {
+    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
+        size            = get_size_info (metadata),
+        weight          = {
+            pfminfo.weight,                     -- integer (multiple of 100?)
+            sanitize_fontname (info.weight),    -- style name
+        },
+        width           = pfminfo.width,
+        italicangle     = metadata.italicangle,
+--        italicangle     = {
+--            metadata.italicangle,   -- float
+--            info.italicangle,       -- truncated to integer point size?
+--        },
+    --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
+        units_per_em    = metadata.units_per_em,
+        version         = metadata.version,
+    }
+end
 
 --[[doc--
 The data inside an Opentype font file can be quite heterogeneous.
@@ -1344,25 +1407,20 @@ ot_fullinfo = function (filename,
                         basename,
                         format,
                         info)
-    local styles    = { }
 
     local metadata = load_font_file (filename, subfont)
     if not metadata then
         return nil
     end
 
-    local namedata = organize_namedata (metadata, basename, info)
-
-
-    local style = {
-        size            = get_size_info (metadata),
-        weight          = metadata.pfminfo.weight,
-        width           = metadata.pfminfo.width,
-        slant           = metadata.italicangle,
-    --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
-        units_per_em    = metadata.units_per_em,
-        version         = metadata.version,
-    }
+    local english_names = get_english_names (metadata.names, basename)
+    local namedata      = organize_namedata (metadata,
+                                             english_names,
+                                             basename,
+                                             info)
+    local style         = organize_styledata (metadata,
+                                              english_names,
+                                              info)
 
     return {
         file            = { base        = basename,

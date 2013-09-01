@@ -172,7 +172,7 @@ local status_file                    = "luaotfload-status"
 local luaotfloadstatus               = require (status_file)
 config.luaotfload.status             = luaotfloadstatus
 
-local sanitize_string                = names.sanitize_string
+local sanitize_fontname              = names.sanitize_fontname
 
 local pathdata      = names.path
 local names_plain   = pathdata.index.lua
@@ -656,7 +656,7 @@ subfont_by_name = function (lst, askedname, n)
 
     local font = lst[n]
     if font then
-        if sanitize_string(font.fullname) == askedname then
+        if sanitize_fontname (font.fullname) == askedname then
             return font
         end
         return subfont_by_name (lst, askedname, n+1)
@@ -676,7 +676,7 @@ local show_font_info = function (basename, askedname, detail, warnings)
     local filenames = names.data.filenames
     local index     = filenames.base[basename]
     local fullname  = filenames.full[index]
-    askedname = sanitize_string(askedname)
+    askedname = sanitize_fontname (askedname)
     if not fullname then -- texmf
         fullname = resolvers.findfile(basename)
     end

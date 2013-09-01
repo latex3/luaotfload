@@ -197,13 +197,20 @@ end
 local sanitize_fontnames = function (rawnames)
     local result = { }
     for category, namedata in next, rawnames do
-        local target = { }
-        for field, name in next, namedata do
-            target [field] = utf8gsub (utf8lower (name),
-                                       invalidchars,
-                                       "")
+
+        if type (namedata) == "string" then
+            result [category] = utf8gsub (utf8lower (namedata),
+                                          invalidchars,
+                                          "")
+        else
+            local target = { }
+            for field, name in next, namedata do
+                target [field] = utf8gsub (utf8lower (name),
+                                        invalidchars,
+                                        "")
+            end
+            result [category] = target
         end
-        result [category] = target
     end
     return result
 end
@@ -1224,9 +1231,18 @@ local load_font_file = function (filename, subfont)
         report ("log", 1, "db", "ERROR: failed to open %s", filename)
         return
     end
+
     local metadata = fontloaderto_table (rawfont)
     fontloaderclose (rawfont)
+
+    metadata.glyphs     = nil
+    metadata.subfonts   = nil
+    metadata.gpos       = nil
+    metadata.gsub       = nil
+    metadata.lookups    = nil
+
     collectgarbage "collect"
+
     return metadata
 end
 
@@ -1279,8 +1295,8 @@ local organize_namedata = function (metadata, basename, info)
                          or english_names.fullname,
             family        = english_names.preffamilyname
                          or english_names.family,
-            prefmodifiers = english_names.prefmodifiers,
-            subfamily     = english_names.subfamily,
+            --prefmodifiers = english_names.prefmodifiers, --> style
+            --subfamily     = english_names.subfamily, --> style
             psname        = english_names.postscriptname,
         },
         metadata = {
@@ -1289,6 +1305,9 @@ local organize_namedata = function (metadata, basename, info)
             metafamily    = metadata.familyname,
         },
         info = {
+            fullname      = info.fullname,
+            familyname    = info.familyname,
+            fontname      = info.fontname,
         },
     }
 
@@ -1628,7 +1647,8 @@ local read_font_names = function (fullname,
 
     return insert_fullinfo (fullname, basename, false,
                             loader, format, location,
-                            targetmappings, targetentrystatus)
+                            targetmappings, targetentrystatus,
+                            info)
 end
 
 local path_normalize

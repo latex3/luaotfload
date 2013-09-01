@@ -2588,7 +2588,7 @@ end
 local collect_statistics = function (mappings)
     local sum_dsnsize, n_dsnsize = 0, 0
 
-    local fullname, family = { }, { }
+    local fullname, family, families = { }, { }, { }
     local subfamily, prefmodifiers, fontstyle_name = { }, { }, { }
 
     local addtohash = function (hash, item)
@@ -2598,6 +2598,28 @@ local collect_statistics = function (mappings)
                 hash [item] = times + 1
             else
                 hash [item] = 1
+            end
+        end
+    end
+
+    local appendtohash = function (hash, key, value)
+        if key and value then
+            local entry = hash [key]
+            if entry then
+                entry [#entry + 1] = value
+            else
+                hash [key] = { value }
+            end
+        end
+    end
+
+    local addtoset = function (hash, key, value)
+        if key and value then
+            local set = hash [key]
+            if set then
+                set [value] = true
+            else
+                hash [key] = { [value] = true }
             end
         end
     end
@@ -2629,6 +2651,8 @@ local collect_statistics = function (mappings)
         addtohash (prefmodifiers,   englishnames.prefmodifiers)
         addtohash (fontstyle_name,  names.fontstyle_name)
 
+        addtoset (families, englishnames.family, englishnames.fullname)
+
         local sizeinfo = entry.style.size
         if sizeinfo then
             sum_dsnsize = sum_dsnsize + sizeinfo [1]
@@ -2636,19 +2660,23 @@ local collect_statistics = function (mappings)
         end
     end
 
+    --inspect (families)
+
     local n_fullname = setsize (fullname)
     local n_family   = setsize (family)
 
     if logs.get_loglevel () > 1 then
-        report ("both", 0, "", "~~~~ font index statistics ~~~~")
-        report ("both", 0, "db",
-                "   · Collected %d fonts (%d names) in %d families.",
-                #mappings, n_fullname, n_family)
+        local pprint_top = function (hash, n, set)
 
-        local pprint_top = function (hash, n)
             local freqs = { }
             local items = { }
-            for item, freq in next, hash do
+
+            for item, value in next, hash do
+                if set then
+                    freq = setsize (value)
+                else
+                    freq = value
+                end
                 local ifreq = items [freq]
                 if ifreq then
                     ifreq [#ifreq + 1] = item
@@ -2669,11 +2697,22 @@ local collect_statistics = function (mappings)
             for i = from, to, -1 do
                 local freq     = freqs [i]
                 local itemlist = items [freq]
+
+                if type (itemlist) == "table" then
+                    itemlist = tableconcat (itemlist, ", ")
+                end
+
                 report ("both", 0, "db",
                         "       · %4d × %s.",
-                        freq, tableconcat (itemlist, ", "))
+                        freq, itemlist)
             end
         end
+
+        report ("both", 0, "", "~~~~ font index statistics ~~~~")
+        report ("both", 0, "db",
+                "   · Collected %d fonts (%d names) in %d families.",
+                #mappings, n_fullname, n_family)
+        pprint_top (families, 4, true)
 
         report ("both", 0, "db",
                 "   · %d different “subfamily” kinds",

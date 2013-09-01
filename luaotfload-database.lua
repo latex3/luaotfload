@@ -2544,7 +2544,7 @@ local generate_filedata = function (mappings)
                 inbare [barename] = index
             end
         else
-            inbare = { barename = index }
+            inbare = { [barename] = index }
             bare [location] [format] = inbare
         end
 

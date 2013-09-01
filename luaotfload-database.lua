@@ -180,12 +180,32 @@ end
 Auxiliary functions
 --doc]]--
 
+--- fontnames contain all kinds of garbage; as a precaution we
+--- lowercase and strip them of non alphanumerical characters
+
 --- string -> string
-local sanitize_string = function (str)
+
+local invalidchars = "[^%a%d]"
+
+local sanitize_fontname = function (str)
     if str ~= nil then
-        return utf8gsub(utf8lower(str), "[^%a%d]", "")
+        return utf8gsub (utf8lower (str), invalidchars, "")
     end
     return nil
+end
+
+local sanitize_fontnames = function (rawnames)
+    local result = { }
+    for category, namedata in next, rawnames do
+        local target = { }
+        for field, name in next, namedata do
+            target [field] = utf8gsub (utf8lower (name),
+                                       invalidchars,
+                                       "")
+        end
+        result [category] = target
+    end
+    return result
 end
 
 local find_files_indeed
@@ -848,8 +868,8 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
     if not fonts_loaded then names.data = load_names() end
     local data = names.data
 
-    local name  = sanitize_string(specification.name)
-    local style = sanitize_string(specification.style) or "regular"
+    local name  = sanitize_fontname (specification.name)
+    local style = sanitize_fontname (specification.style) or "regular"
 
     local askedsize
 
@@ -909,8 +929,8 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
             pfullname       = facenames.pfullname
             metafamily      = facenames.metafamily
         end
-        fontname    = fontname  or sanitize_string(face.fontname)
-        pfullname   = pfullname or sanitize_string(face.fullname)
+        fontname    = fontname  or sanitize_fontname (face.fontname)
+        pfullname   = pfullname or sanitize_fontname (face.fullname)
 
         if     name == family
             or name == metafamily
@@ -1126,7 +1146,7 @@ end
 
 --- string -> int -> bool
 find_closest = function (name, limit)
-    local name     = sanitize_string(name)
+    local name     = sanitize_fontname (name)
     limit          = limit or fuzzy_limit
 
     if not fonts_loaded then names.data = load_names() end
@@ -1198,14 +1218,6 @@ find_closest = function (name, limit)
     return false
 end --- find_closest()
 
-local sanitize_names = function (names)
-    local res = { }
-    for idx, name in next, names do
-        res[idx] = sanitize_string(name)
-    end
-    return res
-end
-
 local load_font_file = function (filename, subfont)
     local rawfont, _msg = fontloaderopen (filename, subfont)
     if not rawfont then
@@ -1241,7 +1253,7 @@ local get_size_info = function (metadata)
     return false
 end
 
-local extract_namedata = function (metadata, basename)
+local organize_namedata = function (metadata, basename, info)
 
     local english_names
 
@@ -1262,16 +1274,22 @@ local extract_namedata = function (metadata, basename)
     local fontnames = {
         --- see
         --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
-        fullname      = english_names.compatfull
-                     or english_names.fullname,
-        family        = english_names.preffamilyname
-                     or english_names.family,
-        prefmodifiers = english_names.prefmodifiers,
-        subfamily     = english_names.subfamily,
-        psname        = english_names.postscriptname,
-        pfullname     = metadata.fullname,
-        fontname      = metadata.fontname,
-        metafamily    = metadata.familyname,
+        english = {
+            fullname      = english_names.compatfull
+                         or english_names.fullname,
+            family        = english_names.preffamilyname
+                         or english_names.family,
+            prefmodifiers = english_names.prefmodifiers,
+            subfamily     = english_names.subfamily,
+            psname        = english_names.postscriptname,
+        },
+        metadata = {
+            pfullname     = metadata.fullname,
+            fontname      = metadata.fontname,
+            metafamily    = metadata.familyname,
+        },
+        info = {
+        },
     }
 
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
@@ -1284,7 +1302,7 @@ local extract_namedata = function (metadata, basename)
     end
 
     return {
-        sanitized     = sanitize_names (fontnames),
+        sanitized     = sanitize_fontnames (fontnames),
         fontname      = metadata.fontname,
         fullname      = metadata.fullname,
         familyname    = metadata.familyname,
@@ -1301,7 +1319,12 @@ table as returned by the font file reader need to be relocated.
 
 --- string -> int -> bool -> string -> fontentry
 
-ot_fullinfo = function (filename, subfont, location, basename, format)
+ot_fullinfo = function (filename,
+                        subfont,
+                        location,
+                        basename,
+                        format,
+                        info)
     local styles    = { }
 
     local metadata = load_font_file (filename, subfont)
@@ -1309,7 +1332,7 @@ ot_fullinfo = function (filename, subfont, location, basename, format)
         return nil
     end
 
-    local namedata = extract_namedata (metadata, basename)
+    local namedata = organize_namedata (metadata, basename, info)
 
 
     local style = {
@@ -1369,7 +1392,7 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
 
     local style_synonyms_set = style_synonyms.set
     if weight then
-        weight = sanitize_string (weight)
+        weight = sanitize_fontname (weight)
         local tmp = ""
         if style_synonyms_set.bold[weight] then
             tmp = "bold"
@@ -1390,7 +1413,7 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         --- else italic
     end
 
-    namedata.sanitized = sanitize_names ({
+    namedata.sanitized = sanitize_fontnames ({
         fontname        = fontname,
         psname          = fullname,
         pfullname       = fullname,
@@ -1485,13 +1508,14 @@ local insert_fullinfo = function (fullname,
                                   format,
                                   location,
                                   targetmappings,
-                                  targetentrystatus)
+                                  targetentrystatus,
+                                  info)
 
     local subfont = n_font and n_font - 1 or false
 
     local fullinfo = loader (fullname, subfont,
                              location, basename,
-                             format)
+                             format, info)
 
     if not fullinfo then
         return false
@@ -1592,7 +1616,8 @@ local read_font_names = function (fullname,
         for n_font = 1, #info do
             if insert_fullinfo (fullname, basename, n_font,
                                 loader, format, location,
-                                targetmappings, targetentrystatus)
+                                targetmappings, targetentrystatus,
+                                info)
             then
                 success = true
             end
@@ -2778,7 +2803,7 @@ names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
 names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 names.read_blacklist              = read_blacklist
-names.sanitize_string             = sanitize_string
+names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath
 
 --- font cache

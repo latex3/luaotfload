@@ -272,7 +272,7 @@ This is a sketch of the luaotfload db:
             texmf  : (string, int) hash;
         };
         bare : {
-            local  : (string, (string, int) hash) hash; // format -> (barename -> idx)
+            local  : (string, (string, int) hash) hash; // location -> (barename -> idx)
             system : (string, (string, int) hash) hash;
             texmf  : (string, (string, int) hash) hash;
         };
@@ -1217,20 +1217,30 @@ local load_font_file = function (filename, subfont)
     return metadata
 end
 
---[[doc--
-The data inside an Opentype font file can be quite heterogeneous.
-Thus in order to get the relevant information, parts of the original
-table as returned by the font file reader need to be relocated.
---doc]]--
+--- rawdata -> (int * int * int | bool)
 
---- string -> int -> bool -> string -> fontentry
-ot_fullinfo = function (filename, subfont, location, basename)
-    local namedata = { }
+local get_size_info = function (metadata)
+    local design_size         = metadata.design_size
+    local design_range_top    = metadata.design_range_top
+    local design_range_bottom = metadata.design_range_bottom
 
-    local metadata = load_font_file (filename, subfont)
-    if not metadata then
-        return nil
+    local fallback_size = design_size         ~= 0 and design_size
+                       or design_range_bottom ~= 0 and design_range_bottom
+                       or design_range_top    ~= 0 and design_range_top
+
+    if fallback_size then
+        design_size         = (design_size         or fallback_size) / 10
+        design_range_top    = (design_range_top    or fallback_size) / 10
+        design_range_bottom = (design_range_bottom or fallback_size) / 10
+        return {
+            design_size, design_range_top, design_range_bottom,
+        }
     end
+
+    return false
+end
+
+local extract_namedata = function (metadata, basename)
 
     local english_names
 
@@ -1241,11 +1251,11 @@ ot_fullinfo = function (filename, subfont, location, basename)
             end
         end
     else
-        -- no names table, propably a broken font
+        -- no names table, probably a broken font
         report("log", 1, "db",
                "Broken font %s rejected due to missing names table.",
                basename)
-        return
+        return nil
     end
 
     local fontnames = {
@@ -1272,44 +1282,56 @@ ot_fullinfo = function (filename, subfont, location, basename)
         end
     end
 
-    namedata.sanitized     = sanitize_names (fontnames)
-    namedata.fontname      = metadata.fontname
-    namedata.fullname      = metadata.fullname
-    namedata.familyname    = metadata.familyname
-    namedata.weight        = metadata.pfminfo.weight
-    namedata.width         = metadata.pfminfo.width
-    namedata.slant         = metadata.italicangle
-    --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
-    namedata.units_per_em  = metadata.units_per_em
-    namedata.version       = metadata.version
-    -- don't waste the space with zero values
+    return {
+        sanitized     = sanitize_names (fontnames),
+        fontname      = metadata.fontname,
+        fullname      = metadata.fullname,
+        familyname    = metadata.familyname,
+    }
 
-    local design_size         = metadata.design_size
-    local design_range_top    = metadata.design_range_top
-    local design_range_bottom = metadata.design_range_bottom
+end
 
-    local fallback_size = design_size         ~= 0 and design_size
-                       or design_range_bottom ~= 0 and design_range_bottom
-                       or design_range_top    ~= 0 and design_range_top
 
-    if fallback_size then
-        design_size         = (design_size         or fallback_size) / 10
-        design_range_top    = (design_range_top    or fallback_size) / 10
-        design_range_bottom = (design_range_bottom or fallback_size) / 10
-        namedata.size = {
-            design_size, design_range_top, design_range_bottom,
-        }
-    else
-        namedata.size = false
+--[[doc--
+The data inside an Opentype font file can be quite heterogeneous.
+Thus in order to get the relevant information, parts of the original
+table as returned by the font file reader need to be relocated.
+--doc]]--
+
+--- string -> int -> bool -> string -> fontentry
+
+ot_fullinfo = function (filename, subfont, location, basename, format)
+    local styles    = { }
+
+    local metadata = load_font_file (filename, subfont)
+    if not metadata then
+        return nil
     end
 
-    --- file location data (used to be filename field)
-    namedata.filename      = filename --> sys
-    namedata.basename      = basename --> texmf
-    namedata.location      = location or "system" --- TODO or “local”??
-    namedata.subfont       = subfont
+    local namedata = extract_namedata (metadata, basename)
 
-    return namedata
+
+    local style = {
+        size            = get_size_info (metadata),
+        weight          = metadata.pfminfo.weight,
+        width           = metadata.pfminfo.width,
+        slant           = metadata.italicangle,
+    --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
+        units_per_em    = metadata.units_per_em,
+        version         = metadata.version,
+    }
+
+    return {
+        file            = { base        = basename,
+                            full        = filename,
+                            subfont     = subfont,
+                            location    = location or "system" },
+        format          = format,
+        names           = namedata,
+        style           = style,
+        units_per_em    = metadata.units_per_em,
+        version         = metadata.version,
+    }
 end
 
 --[[doc--
@@ -1323,7 +1345,8 @@ end
 --doc]]--
 
 --- string -> int -> bool -> string -> fontentry
-t1_fullinfo = function (filename, _subfont, location, basename)
+
+t1_fullinfo = function (filename, _subfont, location, basename, format)
     local namedata = { }
     local metadata = load_font_file (filename)
 
@@ -1390,6 +1413,7 @@ t1_fullinfo = function (filename, _subfont, location, basename)
 
     namedata.filename      = filename --> sys
     namedata.basename      = basename --> texmf
+    namedata.format        = format
     namedata.location      = location or "system"
     namedata.subfont       = false
 
@@ -1457,6 +1481,7 @@ local insert_fullinfo = function (fullname,
                                   basename,
                                   n_font,
                                   loader,
+                                  format,
                                   location,
                                   targetmappings,
                                   targetentrystatus)
@@ -1464,7 +1489,8 @@ local insert_fullinfo = function (fullname,
     local subfont = n_font and n_font - 1 or false
 
     local fullinfo = loader (fullname, subfont,
-                             location, basename)
+                             location, basename,
+                             format)
 
     if not fullinfo then
         return false
@@ -1564,7 +1590,7 @@ local read_font_names = function (fullname,
 
         for n_font = 1, #info do
             if insert_fullinfo (fullname, basename, n_font,
-                                loader, location,
+                                loader, format, location,
                                 targetmappings, targetentrystatus)
             then
                 success = true
@@ -1575,7 +1601,7 @@ local read_font_names = function (fullname,
     end
 
     return insert_fullinfo (fullname, basename, false,
-                            loader, location,
+                            loader, format, location,
                             targetmappings, targetentrystatus)
 end
 
@@ -2303,85 +2329,107 @@ flush_lookup_cache = function ()
     return true, names.lookups
 end
 
---- dbobj -> dbobj
-local gen_fast_lookups = function (fontnames) --- this will become obsolete
-    report("both", 2, "db", "Creating filename map")
-    local mappings   = fontnames.mappings
+
+--- fontentry list -> filemap
+
+local generate_filedata = function (mappings)
+
+    report ("both", 2, "db", "Creating filename map")
+
     local nmappings  = #mappings
-    --- this is needlessly complicated due to texmf priorization
+
     local filenames  = {
         bare = {
-            system = { }, --- mapped to mapping format -> index in full
-            texmf  = { }, --- mapped to mapping format -> “true”
+            ["local"]   = { },
+            system      = { }, --- mapped to mapping format -> index in full
+            texmf       = { }, --- mapped to mapping format -> “true”
         },
         base = {
-            system = { }, --- mapped to index in “full”
-            texmf  = { }, --- set; all values are “true”
+            ["local"]   = { },
+            system      = { }, --- mapped to index in “full”
+            texmf       = { }, --- set; all values are “true”
         },
         full = { }, --- non-texmf
     }
 
-    local texmf, sys = { }, { } -- quintuple list
+    local base = filenames.base
+    local bare = filenames.bare
+    local full = filenames.full
 
-    for idx = 1, nmappings do
-        local entry    = mappings[idx]
-        local filename = entry.filename
-        local basename = entry.basename
-        local bare     = filenameonly(filename)
-        local subfont  = entry.subfont
+    local conflicts = {
+        basenames = 0,
+        barenames = 0,
+    }
 
-        entry.index    = idx
----     unfortunately, the sys/texmf schism prevents us from
----     doing away the full name, so we cannot avoid the
----     substantial duplication
---      entry.filename = nil
+    for index = 1, nmappings do
+        local entry    = mappings [index]
 
-        if entry.location == "texmf" then
-            texmf[#texmf+1] = { idx, basename, bare, true, nil }
-        else
-            sys[#sys+1] = { idx, basename, bare, false, filename }
-        end
-    end
+        local filedata = entry.file
 
-    local addmap = function (lst)
-        --- this will overwrite existing entries
-        for i=1, #lst do
-            local idx, base, bare, intexmf, full = unpack(lst[i])
+        local format   = entry.format   --- otf, afm, ...
+        local location = filedata.location --- texmf, system, ...
 
-            local known = filenames.base[base] or filenames.bare[bare]
-            if known then --- known
-                report("both", 3, "db",
-                       "Font file %q already indexed (%d)",
-                       base, idx)
-                report("both", 3, "db", "> old location: %s",
-                       (filenames.full[known] or "texmf"))
-                report("both", 3, "db", "> new location: %s",
-                       (intexmf and "texmf" or full))
-            end
+        local filename = filedata.full
+        local basename = filedata.base
+        local barename = filenameonly (filename)
+        local subfont  = filedata.subfont
 
-            filenames.bare[bare] = idx
-            filenames.base[base] = idx
-            if intexmf == true then
-                filenames.full[idx] = nil
+        entry.index    = index
+
+        --- 1) add to basename table
+
+        local inbase = base [location] --- no format since the suffix is known
+
+        if inbase then
+            if inbase [basename] then
+                report ("both", 3, "db",
+                        "Conflicting basename: %q already indexed \z
+                         in category %s, ignoring.",
+                        barename, location)
+                conflicts.basenames = conflicts.basenames + 1
             else
-                filenames.full[idx] = full
+                inbase [basename] = index
             end
+        else
+            inbase = { basename = index }
+            base [location] = inbase
         end
+
+        --- 2) add to barename table
+
+        local inbare = bare [location] [format]
+
+        if inbare then
+            if inbare [barename] then
+                report ("both", 3, "db",
+                        "Conflicting barename: %q already indexed \z
+                         in category %s/%s, ignoring.",
+                        barename, location, format)
+                conflicts.barenames = conflicts.barenames + 1
+            else
+                inbare [barename] = index
+            end
+        else
+            inbare = { barename = index }
+            bare [location] [format] = inbare
+        end
+
+        --- 3) add to fullname map
+
+        full [index] = fullname
     end
 
-    if config.luaotfload.prioritize == "texmf" then
-        report("both", 2, "db", "Preferring texmf fonts")
-        addmap(sys)
-        addmap(texmf)
-    else --- sys
-        addmap(texmf)
-        addmap(sys)
-    end
+    --- TODO adapt to new mechanism!
+--    if config.luaotfload.prioritize == "texmf" then
+--        report("both", 2, "db", "Preferring texmf fonts")
+--        addmap(sys)
+--        addmap(texmf)
+--    else --- sys
+--        addmap(texmf)
+--        addmap(sys)
+--    end
 
-    fontnames.filenames = filenames
-    texmf, sys = nil, nil
-    collectgarbage "collect"
-    return fontnames
+    return filenames
 end
 
 local retrieve_namedata = function (fontnames, newfontnames, dry_run)
@@ -2453,7 +2501,7 @@ update_names = function (fontnames, force, dry_run)
     --- non-texmf entries are redirected there and the mapping
     --- needs to be 100% consistent
 
-    newfontnames = gen_fast_lookups(newfontnames)
+    newfontnames.files = generate_filedata (newfontnames.mappings)
 
     --- stats:
     ---            before rewrite   | after rewrite

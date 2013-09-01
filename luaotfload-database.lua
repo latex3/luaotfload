@@ -1304,7 +1304,8 @@ local organize_namedata = function (metadata,
         english = {
             --- where a “compatfull” field is given, the value of “fullname” is
             --- either identical or differs by separating the style
-            --- with a hyphen and omitting spaces.
+            --- with a hyphen and omitting spaces. (According to the
+            --- spec, “compatfull” is “Macintosh only”.)
             --- Of the three “fullname” fields, this one appears to be the one
             --- with the entire name given in a legible,
             --- non-abbreviated fashion, for most fonts at any rate.
@@ -1547,7 +1548,7 @@ local compare_timestamps = function (fullname,
 
     if targetentrystatus ~= nil
     and targetentrystatus.timestamp == targettimestamp then
-        report ("log", 3, "db", "Font %q already read.", basename)
+        report ("log", 3, "db", "Font %q already read.", fullname)
         return false
     end
 
@@ -1570,7 +1571,7 @@ local compare_timestamps = function (fullname,
             targetentrystatus.index [targetindex + 1] = location
         end
 
-        report ("log", 3, "db", "Font %q already indexed.", basename)
+        report ("log", 3, "db", "Font %q already indexed.", fullname)
 
         return false
     end
@@ -2034,22 +2035,22 @@ end
 local scan_dir = function (dirname, currentnames, targetnames,
                            dry_run, location)
     if lpegmatch (p_blacklist, dirname) then
-        report ("both", 3, "db",
+        report ("both", 4, "db",
                 "Skipping blacklisted directory %s", dirname)
         --- ignore
         return 0, 0
     end
     local found = find_font_files (dirname, location ~= "texmf")
     if not found then
-        report ("both", 3, "db",
+        report ("both", 4, "db",
                 "No such directory: %q; skipping.", dirname)
         return 0, 0
     end
-    report ("both", 3, "db", "Scanning directory %s", dirname)
+    report ("both", 4, "db", "Scanning directory %s", dirname)
 
     local n_new = 0   --- total of fonts collected
     local n_found = #found
-    report ("both", 4, "db", "%d font files detected", n_found)
+    report ("both", 5, "db", "%d font files detected", n_found)
     for j=1, n_found do
         local fullname = found[j]
         fullname = path_normalize(fullname)
@@ -2059,7 +2060,7 @@ local scan_dir = function (dirname, currentnames, targetnames,
                     "Would have been extracting metadata from %q",
                     fullname)
         else
-            report ("both", 4, "db",
+            report ("both", 5, "db",
                     "Extracting metadata from font %q", fullname)
             local new = read_font_names (fullname, currentnames,
                                          targetnames, location)
@@ -2069,7 +2070,7 @@ local scan_dir = function (dirname, currentnames, targetnames,
         end
     end
 
-    report("both", 4, "db", "%d fonts found in '%s'", n_found, dirname)
+    report("both", 5, "db", "%d fonts found in '%s'", n_found, dirname)
     return n_found, n_new
 end
 
@@ -2488,7 +2489,7 @@ local generate_filedata = function (mappings)
         if inbase then
             local present = inbase [basename]
             if present then
-                report ("both", 3, "db",
+                report ("both", 4, "db",
                         "Conflicting basename: %q already indexed \z
                          in category %s, ignoring.",
                         barename, location)
@@ -2518,7 +2519,7 @@ local generate_filedata = function (mappings)
         if inbare then
             local present = inbare [barename]
             if present then
-                report ("both", 3, "db",
+                report ("both", 4, "db",
                         "Conflicting barename: %q already indexed \z
                          in category %s/%s, ignoring.",
                         barename, location, format)
@@ -2559,6 +2560,7 @@ local generate_filedata = function (mappings)
     return filenames
 end
 
+
 local retrieve_namedata = function (currentnames,
                                     targetnames,
                                     dry_run,
@@ -2577,6 +2579,129 @@ local retrieve_namedata = function (currentnames,
     n_newnames    = n_newnames + new
 
     return n_rawnames, n_newnames
+end
+
+
+--- dbobj -> stats
+
+local collect_statistics = function (mappings)
+    local sum_dsnsize, n_dsnsize = 0, 0
+
+    local fullname, family = { }, { }
+    local subfamily, prefmodifiers, fontstyle_name = { }, { }, { }
+
+    local addtohash = function (hash, item)
+        if item then
+            local times = hash [item]
+            if times then
+                hash [item] = times + 1
+            else
+                hash [item] = 1
+            end
+        end
+    end
+
+    local setsize = function (set)
+        local n = 0
+        for _, _ in next, set do
+            n = n + 1
+        end
+        return n
+    end
+
+    local hashsum = function (hash)
+        local n = 0
+        for _, m in next, hash do
+            n = n + m
+        end
+        return n
+    end
+
+    for _, entry in next, mappings do
+        local style        = entry.style
+        local names        = entry.names.sanitized
+        local englishnames = names.english
+
+        addtohash (fullname,        englishnames.fullname)
+        addtohash (family,          englishnames.family)
+        addtohash (subfamily,       englishnames.subfamily)
+        addtohash (prefmodifiers,   englishnames.prefmodifiers)
+        addtohash (fontstyle_name,  names.fontstyle_name)
+
+        local sizeinfo = entry.style.size
+        if sizeinfo then
+            sum_dsnsize = sum_dsnsize + sizeinfo [1]
+            n_dsnsize = n_dsnsize + 1
+        end
+    end
+
+    local n_fullname = setsize (fullname)
+    local n_family   = setsize (family)
+
+    if logs.get_loglevel () > 1 then
+        report ("both", 0, "", "~~~~ font index statistics ~~~~")
+        report ("both", 0, "db",
+                "   · Collected %d fonts (%d names) in %d families.",
+                #mappings, n_fullname, n_family)
+
+        local pprint_top = function (hash, n)
+            local freqs = { }
+            local items = { }
+            for item, freq in next, hash do
+                local ifreq = items [freq]
+                if ifreq then
+                    ifreq [#ifreq + 1] = item
+                else
+                    items [freq] = { item }
+                    freqs [#freqs + 1] = freq
+                end
+            end
+
+            tablesort (freqs)
+
+            local from = #freqs
+            local to   = from - (n - 1)
+            if to < 1 then
+                to = 1
+            end
+
+            for i = from, to, -1 do
+                local freq     = freqs [i]
+                local itemlist = items [freq]
+                report ("both", 0, "db",
+                        "       · %4d × %s.",
+                        freq, tableconcat (itemlist, ", "))
+            end
+        end
+
+        report ("both", 0, "db",
+                "   · %d different “subfamily” kinds",
+                setsize (subfamily))
+        pprint_top (subfamily, 4)
+
+        report ("both", 0, "db",
+                "   · %d different “prefmodifiers” kinds",
+                setsize (prefmodifiers))
+        pprint_top (prefmodifiers, 4)
+
+        report ("both", 0, "db",
+                "   · %d different “fontstyle_name” kinds",
+                setsize (fontstyle_name))
+        pprint_top (fontstyle_name, 4)
+    end
+
+    return {
+        mean_dsnsize = sum_dsnsize / n_dsnsize,
+        names = {
+            fullname = n_fullname,
+            families = n_family,
+        },
+--        style = {
+--            subfamily = subfamily,
+--            prefmodifiers = prefmodifiers,
+--            fontstyle_name = fontstyle_name,
+--        },
+    }
 end
 
 --- force:      dictate rebuild from scratch
@@ -2625,6 +2750,7 @@ update_names = function (currentnames, force, dry_run)
                                                       dry_run,
                                                       n_rawnames,
                                                       n_newnames)
+    targetnames.meta.statistics = collect_statistics (targetnames.mappings)
 
     --- we always generate the file lookup tables because
     --- non-texmf entries are redirected there and the mapping

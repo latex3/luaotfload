@@ -44,6 +44,7 @@ local lfscurrentdir           = lfs.currentdir
 local lfsdir                  = lfs.dir
 local mathabs                 = math.abs
 local mathmin                 = math.min
+local osgettimeofday          = os.gettimeofday
 local osremove                = os.remove
 local stringfind              = string.find
 local stringformat            = string.format
@@ -344,7 +345,7 @@ mtx-fonts has in names.tma:
 
 --doc]]--
 
-local fontnames_init = function (formats) --- returns dbobj
+local initialize_namedata = function (formats) --- returns dbobj
     return {
         families        = {
             ["local"]  = { },
@@ -422,14 +423,14 @@ local fuzzy_limit = 1 --- display closest only
 
 --- bool? -> dbobj
 load_names = function (dry_run)
-    local starttime = os.gettimeofday ()
+    local starttime = osgettimeofday ()
     local foundname, data = load_lua_file (names.path.index.lua)
 
     if data then
         report ("both", 2, "db",
                 "Font names database loaded", "%s", foundname)
         report ("info", 3, "db", "Loading took %0.f ms",
-                1000*(os.gettimeofday()-starttime))
+                1000 * (osgettimeofday () - starttime))
 
         local db_version, nms_version = data.meta.version, names.version
         if db_version ~= nms_version then
@@ -450,7 +451,7 @@ load_names = function (dry_run)
                 [[Font names database not found, generating new one.]])
         report ("both", 0, "db",
                 [[This can take several minutes; please be patient.]])
-        data = update_names (fontnames_init (get_font_filter ()),
+        data = update_names (initialize_namedata (get_font_filter ()),
                              nil, dry_run)
         if not success then
             report ("both", 0, "db", "Database creation unsuccessful.")
@@ -1918,16 +1919,16 @@ end
     scan_dir() scans a directory and populates the list of fonts
     with all the fonts it finds.
 
-        · dirname   : name of the directory to scan
-        · fontnames : current font db object
-        · newnames  : font db object to fill
-        · dry_run   : don’t touch anything
+        · dirname       : name of the directory to scan
+        · currentnames  : current font db object
+        · targetnames   : font db object to fill
+        · dry_run       : don’t touch anything
 
 --doc]]--
 
 --- string -> dbobj -> dbobj -> bool -> bool -> (int * int)
 
-local scan_dir = function (dirname, fontnames, newfontnames,
+local scan_dir = function (dirname, currentnames, targetnames,
                            dry_run, location)
     if lpegmatch (p_blacklist, dirname) then
         report ("both", 3, "db",
@@ -1957,8 +1958,8 @@ local scan_dir = function (dirname, fontnames, newfontnames,
         else
             report ("both", 4, "db",
                     "Extracting metadata from font %q", fullname)
-            local new = read_font_names (fullname, fontnames,
-                                         newfontnames, location)
+            local new = read_font_names (fullname, currentnames,
+                                         targetnames, location)
             if new == true then
                 n_new = n_new + 1
             end
@@ -1995,7 +1996,7 @@ local path_separator = ostype == "windows" and ";" or ":"
 
 --- dbobj -> dbobj -> bool? -> (int * int)
 
-local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
+local scan_texmf_fonts = function (currentnames, targetnames, dry_run)
 
     local n_scanned, n_new, fontdirs = 0, 0
     local osfontdir = kpseexpand_path "$OSFONTDIR"
@@ -2023,7 +2024,7 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
         report ("info", 3, "db",
                 "Initiating scan of %d directories.", #tasks)
         for _, d in next, tasks do
-            local found, new = scan_dir (d, fontnames, newfontnames,
+            local found, new = scan_dir (d, currentnames, targetnames,
                                          dry_run, "texmf")
             n_scanned = n_scanned + found
             n_new     = n_new     + new
@@ -2303,7 +2304,8 @@ end
 --doc]]--
 
 --- dbobj -> dbobj -> bool? -> (int * int)
-local scan_os_fonts = function (fontnames, newfontnames,
+local scan_os_fonts = function (currentnames,
+                                targetnames,
                                 dry_run)
 
     local n_scanned, n_new = 0, 0
@@ -2312,8 +2314,8 @@ local scan_os_fonts = function (fontnames, newfontnames,
             "Searching in static system directories...")
 
     for _, d in next, get_os_dirs () do
-        local found, new = scan_dir (d, fontnames,
-                                     newfontnames, dry_run)
+        local found, new = scan_dir (d, currentnames,
+                                     targetnames, dry_run)
         n_scanned = n_scanned + found
         n_new     = n_new     + new
     end
@@ -2454,86 +2456,90 @@ local generate_filedata = function (mappings)
     return filenames
 end
 
-local retrieve_namedata = function (fontnames, newfontnames, dry_run)
-    local n_rawnames, n_new = 0, 0
-
-    local rawnames, new = scan_texmf_fonts (fontnames,
-                                            newfontnames,
+local retrieve_namedata = function (currentnames,
+                                    targetnames,
+                                    dry_run,
+                                    n_rawnames,
+                                    n_newnames)
+    local rawnames, new = scan_texmf_fonts (currentnames,
+                                            targetnames,
                                             dry_run)
 
     n_rawnames    = n_rawnames + rawnames
-    n_new         = n_new + new
+    n_newnames    = n_newnames + new
 
-    rawnames, new = scan_os_fonts (fontnames, newfontnames, dry_run)
+    rawnames, new = scan_os_fonts (currentnames, targetnames, dry_run)
 
     n_rawnames    = n_rawnames + rawnames
-    n_new         = n_new + new
+    n_newnames    = n_newnames + new
 
-    return n_rawnames, n_new
+    return n_rawnames, n_newnames
 end
 
 --- force:      dictate rebuild from scratch
 --- dry_dun:    don’t write to the db, just scan dirs
 
 --- dbobj? -> bool? -> bool? -> dbobj
-update_names = function (fontnames, force, dry_run)
+update_names = function (currentnames, force, dry_run)
 
     if config.luaotfload.update_live == false then
-        report("info", 2, "db",
-               "Skipping database update")
+        report ("info", 2, "db",
+                "Skipping database update")
         --- skip all db updates
-        return fontnames or names.data
+        return currentnames or names.data
     end
 
-    local starttime            = os.gettimeofday()
-    local n_rawnames, n_new    = 0, 0
+    local starttime                 = osgettimeofday ()
+    local n_rawnames, n_newnames    = 0, 0
 
     --[[
     The main function, scans everything
-    - “newfontnames” is the final table to return
+    - “targetnames” is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
-    report("both", 2, "db", "Updating the font names database"
-                         .. (force and " forcefully" or ""))
+    report ("both", 2, "db", "Updating the font names database"
+                          .. (force and " forcefully" or ""))
 
     if force then
-        fontnames = fontnames_init (get_font_filter ())
+        currentnames = initialize_namedata (get_font_filter ())
     else
-        if not fontnames then
-            fontnames = load_names (dry_run)
+        if not currentnames then
+            currentnames = load_names (dry_run)
         end
-        if fontnames.version ~= names.version then
+        if currentnames.meta.version ~= names.version then
             report ("both", 1, "db", "No font names database or old "
                                   .. "one found; generating new one")
-            fontnames = fontnames_init (get_font_filter ())
+            currentnames = initialize_namedata (get_font_filter ())
         end
     end
 
-    local newfontnames = fontnames_init (get_font_filter ())
+    local targetnames = initialize_namedata (get_font_filter ())
 
     read_blacklist ()
 
-    local rawnames, new = retrieve_namedata (fontnames,
-                                             newfontnames,
-                                             dry_run)
-    n_rawnames = n_rawnames + rawnames
-    n_new      = n_new + new
+    local n_rawnames, n_newnames = retrieve_namedata (currentnames,
+                                                      targetnames,
+                                                      dry_run,
+                                                      n_rawnames,
+                                                      n_newnames)
 
     --- we always generate the file lookup tables because
     --- non-texmf entries are redirected there and the mapping
     --- needs to be 100% consistent
 
-    newfontnames.files = generate_filedata (newfontnames.mappings)
+    targetnames.files = generate_filedata (targetnames.mappings)
 
     --- stats:
     ---            before rewrite   | after rewrite
     ---   partial:         804 ms   |   701 ms
     ---   forced:        45384 ms   | 44714 ms
-    report("info", 3, "db",
-           "Scanned %d font files; %d new entries.", n_rawnames, n_new)
-    report("info", 3, "db",
-           "Rebuilt in %0.f ms", 1000*(os.gettimeofday()-starttime))
-    names.data = newfontnames
+    report ("info", 3, "db",
+            "Scanned %d font files; %d new entries.",
+            n_rawnames, n_newnames)
+    report ("info", 3, "db",
+            "Rebuilt in %0.f ms.",
+            1000 * (osgettimeofday () - starttime))
+    names.data = targetnames
 
     if dry_run ~= true then
 
@@ -2545,11 +2551,11 @@ update_names = function (fontnames, force, dry_run)
             if success then
                 logs.names_report ("info", 2, "cache",
                                    "Lookup cache emptied")
-                return newfontnames
+                return targetnames
             end
         end
     end
-    return newfontnames
+    return targetnames
 end
 
 --- unit -> bool
@@ -2581,14 +2587,16 @@ end
 
 --- save_names() is usually called without the argument
 --- dbobj? -> bool
-save_names = function (fontnames)
-    if not fontnames then fontnames = names.data end
+save_names = function (currentnames)
+    if not currentnames then
+        currentnames = names.data
+    end
     local path = names.path.index
     local luaname, lucname = path.lua, path.luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
-        tabletofile (luaname, fontnames, true)
+        tabletofile (luaname, currentnames, true)
         osremove (lucname)
-        caches.compile (fontnames, luaname, lucname)
+        caches.compile (currentnames, luaname, lucname)
         if lfsisfile (luaname) and lfsisfile (lucname) then
             report ("info", 1, "db", "Font index saved")
             report ("info", 3, "db", "Text: " .. luaname)

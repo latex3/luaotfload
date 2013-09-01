@@ -1559,7 +1559,6 @@ local compare_timestamps = function (fullname,
     if  currenttimestamp == targettimestamp
     and not targetentrystatus.index [1]
     then
-
         --- copy old namedata into new
 
         for _, currentindex in next, currententrystatus.index do
@@ -1590,7 +1589,13 @@ local insert_fullinfo = function (fullname,
                                   targetentrystatus,
                                   info)
 
-    local subfont = n_font and n_font - 1 or false
+    local subfont
+    if n_font ~= false then
+        subfont = n_font - 1
+    else
+        subfont = false
+        n_font  = 1
+    end
 
     local fullinfo = loader (fullname, subfont,
                              location, basename,
@@ -2567,6 +2572,7 @@ local retrieve_namedata = function (currentnames,
                                     dry_run,
                                     n_rawnames,
                                     n_newnames)
+
     local rawnames, new = scan_texmf_fonts (currentnames,
                                             targetnames,
                                             dry_run)

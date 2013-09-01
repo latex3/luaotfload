@@ -2691,8 +2691,13 @@ local collect_statistics = function (mappings)
         pprint_top (fontstyle_name, 4)
     end
 
+    local mean_dsnsize = 0
+    if n_dsnsize > 0 then
+        mean_dsnsize = sum_dsnsize / n_dsnsize
+    end
+
     return {
-        mean_dsnsize = sum_dsnsize / n_dsnsize,
+        mean_dsnsize = mean_dsnsize,
         names = {
             fullname = n_fullname,
             families = n_family,

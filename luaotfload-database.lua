@@ -1786,7 +1786,7 @@ local create_blacklist = function (blacklist, whitelist)
     local result = { }
     local dirs   = { }
 
-    report("info", 2, "db", "Blacklisting %q files and directories",
+    report("info", 2, "db", "Blacklisting %d files and directories",
            #blacklist)
     for i=1, #blacklist do
         local entry = blacklist[i]
@@ -1797,7 +1797,7 @@ local create_blacklist = function (blacklist, whitelist)
         end
     end
 
-    report("info", 2, "db", "Whitelisting %q files", #whitelist)
+    report("info", 2, "db", "Whitelisting %d files", #whitelist)
     for i=1, #whitelist do
         result[whitelist[i]] = nil
     end

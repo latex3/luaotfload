@@ -1068,6 +1068,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         fields             = 1,
         find               = 1,
         force              = "f",
+        formats            = 1,
         fuzzy              = "F",
         help               = "h",
         info               = "i",
@@ -1079,14 +1080,14 @@ local process_cmdline = function ( ) -- unit -> jobspec
         ["prefer-texmf"]   = "p",
         quiet              = "q",
         ["show-blacklist"] = "b",
-        formats            = 1,
+        stats              = "S",
         update             = "u",
         verbose            = 1,
         version            = "V",
         warnings           = "w",
     }
 
-    local short_options = "bDfFiIlnpquvVhw"
+    local short_options = "bDfFiIlnpqSuvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -1156,7 +1157,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.cache = optarg[n]
         elseif v == "D" then
             result.dry_run = true
-        elseif v == "p" then
+        elseif v == "p" then  --- TODO adapt to new db structure
             config.luaotfload.prioritize = "texmf"
         elseif v == "b" then
             action_pending["blacklist"] = true
@@ -1167,6 +1168,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             names.set_font_filter (optarg[n])
         elseif v == "n" then
             config.luaotfload.update_live = false
+        elseif v == "S" then
+            config.luaotfload.statistics = true
         end
     end
 

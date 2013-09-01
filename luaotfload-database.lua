@@ -2795,7 +2795,11 @@ update_names = function (currentnames, force, dry_run)
                                                       dry_run,
                                                       n_rawnames,
                                                       n_newnames)
-    targetnames.meta.statistics = collect_statistics (targetnames.mappings)
+
+    if config.luaotfload.statistics == true then
+        targetnames.meta.statistics = collect_statistics
+                                            (targetnames.mappings)
+    end
 
     --- we always generate the file lookup tables because
     --- non-texmf entries are redirected there and the mapping

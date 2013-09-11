@@ -60,7 +60,6 @@ local utf8gsub                = unicode.utf8.gsub
 local utf8lower               = unicode.utf8.lower
 
 --- these come from Lualibs/Context
-local getwritablepath         = caches.getwritablepath
 local filebasename            = file.basename
 local filecollapsepath        = file.collapsepath or file.collapse_path
 local filedirname             = file.dirname
@@ -71,9 +70,11 @@ local filenameonly            = file.nameonly
 local filereplacesuffix       = file.replacesuffix
 local filesplitpath           = file.splitpath or file.split_path
 local filesuffix              = file.suffix
+local getwritablepath         = caches.getwritablepath
 local lfsisdir                = lfs.isdir
 local lfsisfile               = lfs.isfile
 local lfsmkdirs               = lfs.mkdirs
+local lpegsplitat             = lpeg.splitat
 local stringis_empty          = string.is_empty
 local stringsplit             = string.split
 local stringstrip             = string.strip
@@ -375,11 +376,7 @@ mtx-fonts has in names.tma:
 
 local initialize_namedata = function (formats) --- returns dbobj
     return {
-        families        = {
-            ["local"]  = { },
-            system     = { },
-            texmf      = { },
-        },
+        --families        = { },
         status          = { }, -- was: status; map abspath -> mapping
         mappings        = { }, -- TODO: check if still necessary after rewrite
         names           = { },
@@ -1368,7 +1365,20 @@ local organize_namedata = function (metadata,
 
 end
 
-local organize_styledata = function (metadata, english_names, info)
+
+local dashsplitter = lpegsplitat "-"
+
+local split_fontname = function (fontname)
+    --- sometimes the style hides in the latter part of the
+    --- fontname, separated by a dash, e.g. “Iwona-Regular”,
+    --- “GFSSolomos-Regular”
+    local splitted = { lpegmatch (dashsplitter, fontname) }
+    if splitted then
+        return sanitize_fontname (splitted [#splitted])
+    end
+end
+
+local organize_styledata = function (fontname, metadata, english_names, info)
     local pfminfo   = metadata.pfminfo
     local names     = metadata.names
 
@@ -1383,6 +1393,7 @@ local organize_styledata = function (metadata, english_names, info)
             pfminfo.weight,                     -- integer (multiple of 100?)
             sanitize_fontname (info.weight),    -- style name
         },
+        split           = split_fontname (fontname),
         width           = pfminfo.width,
         italicangle     = metadata.italicangle,
 --        italicangle     = {
@@ -1420,7 +1431,8 @@ ot_fullinfo = function (filename,
                                              english_names,
                                              basename,
                                              info)
-    local style         = organize_styledata (metadata,
+    local style         = organize_styledata (namedata.fontname,
+                                              metadata,
                                               english_names,
                                               info)
 
@@ -1432,7 +1444,6 @@ ot_fullinfo = function (filename,
         format          = format,
         names           = namedata,
         style           = style,
-        units_per_em    = metadata.units_per_em,
         version         = metadata.version,
     }
 end
@@ -2566,6 +2577,196 @@ local generate_filedata = function (mappings)
     return filenames
 end
 
+local match_synonyms = function (pattern)
+    local nopattern = 1 - pattern
+    return nopattern^0 * pattern * Cc (true) + Cc (false)
+end
+
+local determine_italic
+local determine_bold
+local pick_style
+local check_regular
+
+do
+    local italic = match_synonyms (P"oblique" + P"slanted" + P"italic")
+    local bold   = match_synonyms (P"bold" + P"demi", P"heavy", P"black", P"ultra")
+
+    determine_italic = function (fontstyle_name,
+                                 italicangle,
+                                 prefmodifiers,
+                                 subfamily)
+        if italicangle ~= 0 then
+            return true
+        elseif fontstyle_name and lpegmatch (italic, fontstyle_name) then
+            return true
+        elseif prefmodifiers and lpegmatch (italic, prefmodifiers) then
+            return lpegmatch (italic, prefmodifiers)
+        else
+            return lpegmatch (italic, subfamily)
+        end
+    end
+
+    determine_bold = function (fontstyle_name,
+                               weight,
+                               prefmodifiers,
+                               subfamily)
+        if weight [2] == "bold" then
+            return true
+        elseif fontstyle_name and lpegmatch (bold, fontstyle_name) then
+            return true
+        elseif prefmodifiers and lpegmatch (bold, prefmodifiers) then
+            return true
+        else
+            return lpegmatch (bold, subfamily)
+        end
+    end
+
+    local splitfontname = lpeg.splitat "-"
+
+    local choose_exact = function (field)
+        if field == "italic" or field == "oblique" then
+            return "i"
+        elseif field == "bold" then
+            return "b"
+        elseif field == "bolditalic" or field == "boldoblique" then
+            return "bi"
+        end
+
+        return false
+    end
+
+    pick_style = function (fontstyle_name,
+                           prefmodifiers,
+                           subfamily,
+                           splitstyle)
+        local style
+        if fontstyle_name ~= nil then
+            style = choose_exact (prefmodifiers)
+        end
+        if not style and prefmodifiers ~= nil then
+            style = choose_exact (prefmodifiers)
+        end
+        if not style then
+            style = choose_exact (subfamily)
+        end
+        if not style and splitstyle ~= nil then
+            choose_exact (splitstyle)
+        end
+        return style
+    end
+
+    --- we use only exact matches here since there are constructs
+    --- like “regularitalic” (Cabin, Bodoni Old Fashion)
+
+    check_regular = function (fontstyle_name,
+                              prefmodifiers,
+                              subfamily,
+                              splitstyle)
+
+        if fontstyle_name == "regular" or fontstyle_name == "book" then
+            return "r"
+        end
+
+        if prefmodifiers == "regular" or prefmodifiers == "book" then
+            return "r"
+        end
+
+        if subfamily == "regular" or subfamily == "book" then
+            return "r"
+        end
+
+        if splitstyle == "regular" or splitstyle == "book" then
+            return "r"
+        end
+
+        return nil
+    end
+end
+
+local collect_families = function (mappings)
+
+    local families = {
+        ["local"]  = { },
+        system     = { },
+        texmf      = { },
+    }
+
+    for i = 1, #mappings do
+
+        local entry     = mappings [i]
+        local file      = entry.file
+        local names     = entry.names
+        local style     = entry.style
+
+        local location  = file.location
+        local format    = entry.format
+        local english   = names.sanitized.english
+        local info      = names.sanitized.info
+
+        local subtable  = families [location] [format]
+        if not subtable then
+            subtable  = { }
+            families [location] [format] = subtable
+        end
+
+        local familyname        = english.preffamily
+                               or english.family
+                               or info.familyname
+        local fullname          = english.fullname or info.fullname
+        local fontname          = info.fontname
+
+        local fontstyle_name    = names.sanitized.fontstyle_name
+        local prefmodifiers     = english.prefmodifiers or "regular"
+        local subfamily         = english.subfamily
+
+        local weight            = style.weight
+        local italicangle       = style.italicangle
+        local splitstyle        = style.split
+
+        local modifier          = pick_style (fontstyle_name,
+                                              prefmodifiers,
+                                              subfamily,
+                                              splitstyle)
+
+        if not modifier then --- guess
+            local italic = determine_italic (fontstyle_name,
+                                             italicangle,
+                                             prefmodifiers,
+                                             subfamily)
+            local bold = determine_bold (fontstyle_name,
+                                         weight,
+                                         prefmodifiers,
+                                         subfamily)
+            if bold and italic then
+                modifier = "bi"
+            elseif bold then
+                modifier = "b"
+            elseif italic then
+                modifier = "i"
+            end
+        end
+
+        if not modifier then --- regular, exact only
+            modifier = check_regular (fontstyle_name,
+                                      subfamily,
+                                      splitstyle)
+        end
+
+        if modifier then
+            --- stub; here we will continue building a list of optical sizes
+            --- no size -> hash “normal”
+            --- other sizes -> indexed tuples { dsnsize, idx }
+            local familytable = subtable [familyname]
+            if not familytable then
+                familytable = { }
+                subtable [familyname] = familytable
+            end
+            familytable [modifier] = entry.index
+        end
+    end
+
+    return families
+end
 
 local retrieve_namedata = function (currentnames,
                                     targetnames,
@@ -2811,7 +3012,8 @@ update_names = function (currentnames, force, dry_run)
     --- non-texmf entries are redirected there and the mapping
     --- needs to be 100% consistent
 
-    targetnames.files = generate_filedata (targetnames.mappings)
+    targetnames.files       = generate_filedata (targetnames.mappings)
+    targetnames.families    = collect_families (targetnames.mappings)
 
     --- stats:
     ---            before rewrite   | after rewrite

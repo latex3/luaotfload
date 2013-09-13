@@ -1974,7 +1974,7 @@ request_resolvers.anon = function (specification)
     for i=1, #type1_formats do
         local format = type1_formats[i]
         if resolvers.findfile(name, format) then
-            specification.name = file.addsuffix(name, format)
+            specification.forced = format
             return
         end
     end

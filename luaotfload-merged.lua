@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 08/26/13 16:41:50
+-- merge date  : 09/13/13 10:59:07
 
 do -- begin closure to overcome local limits and interference
 
@@ -127,15 +127,22 @@ local dquote=P('"')
 local space=P(" ")
 local period=P(".")
 local comma=P(",")
-local utfbom_32_be=P('\000\000\254\255')
-local utfbom_32_le=P('\255\254\000\000')
-local utfbom_16_be=P('\255\254')
-local utfbom_16_le=P('\254\255')
-local utfbom_8=P('\239\187\191')
+local utfbom_32_be=P('\000\000\254\255') 
+local utfbom_32_le=P('\255\254\000\000') 
+local utfbom_16_be=P('\254\255')     
+local utfbom_16_le=P('\255\254')     
+local utfbom_8=P('\239\187\191')   
 local utfbom=utfbom_32_be+utfbom_32_le+utfbom_16_be+utfbom_16_le+utfbom_8
 local utftype=utfbom_32_be*Cc("utf-32-be")+utfbom_32_le*Cc("utf-32-le")+utfbom_16_be*Cc("utf-16-be")+utfbom_16_le*Cc("utf-16-le")+utfbom_8*Cc("utf-8")+alwaysmatched*Cc("utf-8") 
 local utfoffset=utfbom_32_be*Cc(4)+utfbom_32_le*Cc(4)+utfbom_16_be*Cc(2)+utfbom_16_le*Cc(2)+utfbom_8*Cc(3)+Cc(0)
 local utf8next=R("\128\191")
+patterns.utfbom_32_be=utfbom_32_be
+patterns.utfbom_32_le=utfbom_32_le
+patterns.utfbom_16_be=utfbom_16_be
+patterns.utfbom_16_le=utfbom_16_le
+patterns.utfbom_8=utfbom_8
+patterns.utf_16_be_nl=P("\000\r\000\n")+P("\000\r")+P("\000\n")
+patterns.utf_16_le_nl=P("\r\000\n\000")+P("\r\000")+P("\n\000")
 patterns.utf8one=R("\000\127")
 patterns.utf8two=R("\194\223")*utf8next
 patterns.utf8three=R("\224\239")*utf8next*utf8next
@@ -3770,7 +3777,7 @@ function constructors.scale(tfmdata,specification)
   targetproperties.script=properties.script  or "dflt" 
   targetproperties.mode=properties.mode   or "base"
   local askedscaledpoints=scaledpoints
-  local scaledpoints,delta=constructors.calculatescale(tfmdata,scaledpoints)
+  local scaledpoints,delta=constructors.calculatescale(tfmdata,scaledpoints,nil,specification)
   local hdelta=delta
   local vdelta=delta
   target.designsize=parameters.designsize 
@@ -4286,11 +4293,11 @@ function constructors.hashinstance(specification,force)
     size=math.round(constructors.scaled(size,designsizes[hash]))
     specification.size=size
   end
-    if fallbacks then
-      return hash..' @ '..tostring(size)..' @ '..fallbacks
-    else
-      return hash..' @ '..tostring(size)
-    end
+  if fallbacks then
+    return hash..' @ '..tostring(size)..' @ '..fallbacks
+  else
+    return hash..' @ '..tostring(size)
+  end
 end
 function constructors.setname(tfmdata,specification) 
   if constructors.namemode=="specification" then
@@ -5705,7 +5712,7 @@ local function copytotfm(data)
     parameters.space_shrink=333
     parameters.x_height=400
     parameters.quad=1000
-    if italicangle then
+    if italicangle and italicangle~=0 then
       parameters.italicangle=italicangle
       parameters.italicfactor=math.cos(math.rad(90+italicangle))
       parameters.slant=- math.tan(italicangle*math.pi/180)
@@ -7996,7 +8003,7 @@ local function copytotfm(data,cache_id)
     parameters.quad=units   
     if spaceunits<2*units/5 then
     end
-    if italicangle then
+    if italicangle and italicangle~=0 then
       parameters.italicangle=italicangle
       parameters.italicfactor=math.cos(math.rad(90+italicangle))
       parameters.slant=- math.tan(italicangle*math.pi/180)
@@ -8829,7 +8836,7 @@ function injections.setkern(current,factor,rlmode,x,tfmchr)
     return 0,0
   end
 end
-function injections.setmark(start,base,factor,rlmode,ba,ma,index) 
+function injections.setmark(start,base,factor,rlmode,ba,ma,index,baseismark) 
   local dx,dy=factor*(ba[1]-ma[1]),factor*(ba[2]-ma[2])   
   local bound=getattr(base,a_markbase)          
   local index=1
@@ -8850,7 +8857,7 @@ function injections.setmark(start,base,factor,rlmode,ba,ma,index)
   setattr(base,a_markbase,bound)
   setattr(start,a_markmark,bound)
   setattr(start,a_markdone,index)
-  marks[bound]={ [index]={ dx,dy,rlmode } }
+  marks[bound]={ [index]={ dx,dy,rlmode,baseismark } }
   return dx,dy,bound
 end
 local function dir(n)
@@ -8971,7 +8978,7 @@ function injections.handler(head,where,keep)
           local f=getfont(n)
           if f~=nf then
             nf=f
-            tm=fontdata[nf].resources.marks
+            tm=fontdata[nf].resources.marks 
           end
           if tm then
             mk[n]=tm[getchar(n)]
@@ -9084,10 +9091,16 @@ function injections.handler(head,where,keep)
                       end
                     end
                   else
+                    local wp=getfield(p,"width")
+                    local wn=getfield(n,"width") 
                     if rlmode and rlmode>=0 then
-                      ox=px-getfield(p,"width")+d[1]
+                      ox=px-wp+d[1]
                     else
                       ox=px-d[1]
+                    end
+                    if wn~=0 then
+                      insert_node_before(head,n,newkern(-wn/2))
+                      insert_node_after(head,n,newkern(-wn/2))
                     end
                   end
                   setfield(n,"xoffset",ox)
@@ -9105,6 +9118,8 @@ function injections.handler(head,where,keep)
                     nofmarks=nofmarks-1
                   end
                 end
+              elseif not n_markmark then
+                break 
               else
               end
             end
@@ -10176,7 +10191,7 @@ function handlers.gpos_mark2mark(head,start,kind,lookupname,markanchors,sequence
               if al[anchor] then
                 local ma=markanchors[anchor]
                 if ma then
-                  local dx,dy,bound=setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma)
+                  local dx,dy,bound=setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma,true)
                   if trace_marks then
                     logprocess("%s, anchor %s, bound %s: anchoring mark %s to basemark %s => (%p,%p)",
                       pref(kind,lookupname),anchor,bound,gref(markchar),gref(basechar),dx,dy)
@@ -10717,7 +10732,7 @@ function chainprocs.gpos_mark2mark(head,start,stop,kind,chainname,currentcontext
                 if al[anchor] then
                   local ma=markanchors[anchor]
                   if ma then
-                    local dx,dy,bound=setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma)
+                    local dx,dy,bound=setmark(start,base,tfmdata.parameters.factor,rlmode,ba,ma,true)
                     if trace_marks then
                       logprocess("%s, anchor %s, bound %s: anchoring mark %s to basemark %s => (%p,%p)",
                         cref(kind,chainname,chainlookupname,lookupname),anchor,bound,gref(markchar),gref(basechar),dx,dy)
@@ -12667,7 +12682,7 @@ addlookup("file")
 addlookup("name")
 addlookup("spec")
 local function getspecification(str)
-  return lpegmatch(splitter,str)
+  return lpegmatch(splitter,str or "") 
 end
 definers.getspecification=getspecification
 function definers.registersplit(symbol,action,verbosename)

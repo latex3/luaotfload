@@ -1373,7 +1373,7 @@ local split_fontname = function (fontname)
     --- fontname, separated by a dash, e.g. “Iwona-Regular”,
     --- “GFSSolomos-Regular”
     local splitted = { lpegmatch (dashsplitter, fontname) }
-    if splitted then
+    if next (splitted) then
         return sanitize_fontname (splitted [#splitted])
     end
 end

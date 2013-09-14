@@ -15,10 +15,39 @@
 --                              config
 -----------------------------------------------------------------------
 local charfile      = "./luaotfload-characters.lua"
-local chardef       = "~phg/base/char-def.lua"
-local import        = {
+local chardef       = "/home/phg/base/char-def.lua"
+
+---  for every code point char-def.lua provides a set of fields. they
+---  are:
+---
+---     * adobename
+---     * category
+---     * cjkwd
+---     * comment
+---     * contextname
+---     * description
+---     * direction
+---     * lccode
+---     * linebreak
+---     * mathclass
+---     * mathextensible
+---     * mathfiller
+---     * mathname
+---     * mathspec
+---     * mathstretch
+---     * mathsymbol
+---     * mirror
+---     * shcode
+---     * specials
+---     * textclass
+---     * uccode
+---     * unicodeslot
+---     * variants
+
+local import = {
   "direction", "mirror", --> πολυγλωσσία/uax9
   "category",            --> https://gist.github.com/phi-gamma/5812290
+  "textclass",           --> https://gist.github.com/phi-gamma/6488187 
 }
 
 -----------------------------------------------------------------------

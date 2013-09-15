@@ -20,101 +20,100 @@ local C, Cc, Cf, Cg, Cs, Ct
     = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Cs, lpeg.Ct
 
 --- Luatex builtins
-local load                    = load
-local next                    = next
-local pcall                   = pcall
-local require                 = require
-local tonumber                = tonumber
-local unpack                  = table.unpack
+local load                     = load
+local next                     = next
+local pcall                    = pcall
+local require                  = require
+local tonumber                 = tonumber
+local unpack                   = table.unpack
 
-local fontloaderinfo          = fontloader.info
-local fontloaderclose         = fontloader.close
-local fontloaderopen          = fontloader.open
-local fontloaderto_table      = fontloader.to_table
-local iolines                 = io.lines
-local ioopen                  = io.open
-local kpseexpand_path         = kpse.expand_path
-local kpseexpand_var          = kpse.expand_var
-local kpsefind_file           = kpse.find_file
-local kpselookup              = kpse.lookup
-local kpsereadable_file       = kpse.readable_file
-local lfsattributes           = lfs.attributes
-local lfschdir                = lfs.chdir
-local lfscurrentdir           = lfs.currentdir
-local lfsdir                  = lfs.dir
-local mathabs                 = math.abs
-local mathmin                 = math.min
-local osgettimeofday          = os.gettimeofday
-local osremove                = os.remove
-local stringfind              = string.find
-local stringformat            = string.format
-local stringgmatch            = string.gmatch
-local stringgsub              = string.gsub
-local stringlower             = string.lower
-local stringsub               = string.sub
-local stringupper             = string.upper
-local tableconcat             = table.concat
-local tablesort               = table.sort
-local texiowrite_nl           = texio.write_nl
-local utf8gsub                = unicode.utf8.gsub
-local utf8lower               = unicode.utf8.lower
+local fontloaderinfo           = fontloader.info
+local fontloaderclose          = fontloader.close
+local fontloaderopen           = fontloader.open
+local fontloaderto_table       = fontloader.to_table
+local iolines                  = io.lines
+local ioopen                   = io.open
+local kpseexpand_path          = kpse.expand_path
+local kpseexpand_var           = kpse.expand_var
+local kpsefind_file            = kpse.find_file
+local kpselookup               = kpse.lookup
+local kpsereadable_file        = kpse.readable_file
+local lfsattributes            = lfs.attributes
+local lfschdir                 = lfs.chdir
+local lfscurrentdir            = lfs.currentdir
+local lfsdir                   = lfs.dir
+local mathabs                  = math.abs
+local mathmin                  = math.min
+local osgettimeofday           = os.gettimeofday
+local osremove                 = os.remove
+local stringfind               = string.find
+local stringformat             = string.format
+local stringgmatch             = string.gmatch
+local stringgsub               = string.gsub
+local stringlower              = string.lower
+local stringsub                = string.sub
+local stringupper              = string.upper
+local tableconcat              = table.concat
+local tablesort                = table.sort
+local texiowrite_nl            = texio.write_nl
+local utf8gsub                 = unicode.utf8.gsub
+local utf8lower                = unicode.utf8.lower
 
 --- these come from Lualibs/Context
-local filebasename            = file.basename
-local filecollapsepath        = file.collapsepath or file.collapse_path
-local filedirname             = file.dirname
-local fileextname             = file.extname
-local fileiswritable          = file.iswritable
-local filejoin                = file.join
-local filenameonly            = file.nameonly
-local filereplacesuffix       = file.replacesuffix
-local filesplitpath           = file.splitpath or file.split_path
-local filesuffix              = file.suffix
-local getwritablepath         = caches.getwritablepath
-local lfsisdir                = lfs.isdir
-local lfsisfile               = lfs.isfile
-local lfsmkdirs               = lfs.mkdirs
-local lpegsplitat             = lpeg.splitat
-local stringis_empty          = string.is_empty
-local stringsplit             = string.split
-local stringstrip             = string.strip
-local tableappend             = table.append
-local tablecopy               = table.copy
-local tablefastcopy           = table.fastcopy
-local tabletofile             = table.tofile
-local tabletohash             = table.tohash
+local filebasename             = file.basename
+local filecollapsepath         = file.collapsepath or file.collapse_path
+local filedirname              = file.dirname
+local fileextname              = file.extname
+local fileiswritable           = file.iswritable
+local filejoin                 = file.join
+local filenameonly             = file.nameonly
+local filereplacesuffix        = file.replacesuffix
+local filesplitpath            = file.splitpath or file.split_path
+local filesuffix               = file.suffix
+local getwritablepath          = caches.getwritablepath
+local lfsisdir                 = lfs.isdir
+local lfsisfile                = lfs.isfile
+local lfsmkdirs                = lfs.mkdirs
+local lpegsplitat              = lpeg.splitat
+local stringis_empty           = string.is_empty
+local stringsplit              = string.split
+local stringstrip              = string.strip
+local tableappend              = table.append
+local tablecopy                = table.copy
+local tablefastcopy            = table.fastcopy
+local tabletofile              = table.tofile
+local tabletohash              = table.tohash
 
 --- the font loader namespace is “fonts”, same as in Context
 --- we need to put some fallbacks into place for when running
 --- as a script
-fonts                = fonts          or { }
-fonts.names          = fonts.names    or { }
-fonts.definers       = fonts.definers or { }
+fonts                          = fonts          or { }
+fonts.names                    = fonts.names    or { }
+fonts.definers                 = fonts.definers or { }
 
-local names          = fonts.names
+local names                    = fonts.names
 
-config                         = config or { }
-config.luaotfload              = config.luaotfload or { }
-config.luaotfload.resolver     = config.luaotfload.resolver or "normal"
-config.luaotfload.formats      = config.luaotfload.formats or "otf,ttf,ttc,dfont"
+local luaotfloadconfig         = config.luaotfload --- always present
+luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
+luaotfloadconfig.formats       = luaotfloadconfig.formats or "otf,ttf,ttc,dfont"
 
-if config.luaotfload.update_live ~= false then
+if luaotfloadconfig.update_live ~= false then
     --- this option allows for disabling updates
     --- during a TeX run
-    config.luaotfload.update_live = true
+    luaotfloadconfig.update_live = true
 end
 
-names.version        = 2.4
-names.data           = nil      --- contains the loaded database
-names.lookups        = nil      --- contains the lookup cache
+names.version                  = 2.4
+names.data                     = nil      --- contains the loaded database
+names.lookups                  = nil      --- contains the lookup cache
 
-names.path           = { index = { }, lookups = { } }
-names.path.globals   = {
-    prefix           = "", --- writable_path/names_dir
-    names_dir        = config.luaotfload.names_dir or "names",
-    index_file       = config.luaotfload.index_file
-                    or "luaotfload-names.lua",
-    lookups_file     = "luaotfload-lookup-cache.lua",
+names.path                     = { index = { }, lookups = { } }
+names.path.globals             = {
+    prefix                     = "", --- writable_path/names_dir
+    names_dir                  = luaotfloadconfig.names_dir or "names",
+    index_file                 = luaotfloadconfig.index_file
+                              or "luaotfload-names.lua",
+    lookups_file               = "luaotfload-lookup-cache.lua",
 }
 
 --- string -> (string * string)
@@ -1937,7 +1936,7 @@ do
     end
 
     --- initialize
-    set_font_filter (config.luaotfload.formats)
+    set_font_filter (luaotfloadconfig.formats)
 end
 
 local process_dir_tree
@@ -2565,7 +2564,7 @@ local generate_filedata = function (mappings)
     end
 
     --- TODO adapt to new mechanism!
---    if config.luaotfload.prioritize == "texmf" then
+--    if luaotfloadconfig.prioritize == "texmf" then
 --        report("both", 2, "db", "Preferring texmf fonts")
 --        addmap(sys)
 --        addmap(texmf)
@@ -2986,7 +2985,9 @@ end
 --- dbobj? -> bool? -> bool? -> dbobj
 update_names = function (currentnames, force, dry_run)
 
-    if config.luaotfload.update_live == false then
+    local targetnames
+
+    if luaotfloadconfig.update_live == false then
         report ("info", 2, "db",
                 "Skipping database update")
         --- skip all db updates
@@ -3004,30 +3005,43 @@ update_names = function (currentnames, force, dry_run)
     report ("both", 2, "db", "Updating the font names database"
                           .. (force and " forcefully" or ""))
 
-    if force then
-        currentnames = initialize_namedata (get_font_filter ())
+    if luaotfloadconfig.skip_read == true then
+        --- the difference to a “dry run” is that we don’t search
+        --- for font files entirely. we also ignore the “force”
+        --- parameter since it concerns only the font files.
+        report ("info", 2, "db",
+                "Ignoring font files, reusing old data.")
+        currentnames = load_names (false)
+        targetnames  = currentnames
     else
-        if not currentnames then
-            currentnames = load_names (dry_run)
-        end
-        if currentnames.meta.version ~= names.version then
-            report ("both", 1, "db", "No font names database or old "
-                                  .. "one found; generating new one")
+        if force then
             currentnames = initialize_namedata (get_font_filter ())
+        else
+            if not currentnames then
+                currentnames = load_names (dry_run)
+            end
+            if currentnames.meta.version ~= names.version then
+                report ("both", 1, "db", "No font names database or old "
+                                    .. "one found; generating new one")
+                currentnames = initialize_namedata (get_font_filter ())
+            end
         end
+
+        targetnames = initialize_namedata (get_font_filter ())
+
+        read_blacklist ()
+
+        local n_raw, n_new= retrieve_namedata (currentnames,
+                                               targetnames,
+                                               dry_run,
+                                               n_rawnames,
+                                               n_newnames)
+        report ("info", 3, "db",
+                "Scanned %d font files; %d new entries.",
+                n_rawnames, n_newnames)
     end
 
-    local targetnames = initialize_namedata (get_font_filter ())
-
-    read_blacklist ()
-
-    local n_rawnames, n_newnames = retrieve_namedata (currentnames,
-                                                      targetnames,
-                                                      dry_run,
-                                                      n_rawnames,
-                                                      n_newnames)
-
-    if config.luaotfload.statistics == true then
+    if luaotfloadconfig.statistics == true then
         targetnames.meta.statistics = collect_statistics
                                             (targetnames.mappings)
     end
@@ -3039,13 +3053,6 @@ update_names = function (currentnames, force, dry_run)
     targetnames.files       = generate_filedata (targetnames.mappings)
     targetnames.families    = collect_families (targetnames.mappings)
 
-    --- stats:
-    ---            before rewrite   | after rewrite
-    ---   partial:         804 ms   |   701 ms
-    ---   forced:        45384 ms   | 44714 ms
-    report ("info", 3, "db",
-            "Scanned %d font files; %d new entries.",
-            n_rawnames, n_newnames)
     report ("info", 3, "db",
             "Rebuilt in %0.f ms.",
             1000 * (osgettimeofday () - starttime))
@@ -3205,7 +3212,7 @@ end
 local getwritablecachepath = function ( )
     --- fonts.handlers.otf doesn’t exist outside a Luatex run,
     --- so we have to improvise
-    local writable = getwritablepath (config.luaotfload.cache_dir)
+    local writable = getwritablepath (luaotfloadconfig.cache_dir)
     if writable then
         return writable
     end
@@ -3213,7 +3220,7 @@ end
 
 local getreadablecachepaths = function ( )
     local readables = caches.getreadablepaths
-                        (config.luaotfload.cache_dir)
+                        (luaotfloadconfig.cache_dir)
     local result    = { }
     if readables then
         for i=1, #readables do
@@ -3297,7 +3304,7 @@ names.erase_cache    = erase_cache
 names.show_cache     = show_cache
 
 --- replace the resolver from luatex-fonts
-if config.luaotfload.resolver == "cached" then
+if luaotfloadconfig.resolver == "cached" then
     report("both", 2, "cache", "caching of name: lookups active")
     names.resolve     = resolve_cached
     names.resolvespec = resolve_cached

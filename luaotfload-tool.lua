@@ -102,13 +102,16 @@ to be the more appropriate.
 
 config                        = config or { }
 local config                  = config
-config.luaotfload             = config.luaotfload or { }
-config.luaotfload.version     = config.luaotfload.version   or version
-config.luaotfload.names_dir   = config.luaotfload.names_dir or "names"
-config.luaotfload.cache_dir   = config.luaotfload.cache_dir or "fonts"
-config.luaotfload.index_file  = config.luaotfload.index_file
+local luaotfloadconfig        = config.luaotfload or { }
+config.luaotfload             = luaotfloadconfig
+luaotfloadconfig.version      = luaotfloadconfig.version   or version
+luaotfloadconfig.names_dir    = luaotfloadconfig.names_dir or "names"
+luaotfloadconfig.cache_dir    = luaotfloadconfig.cache_dir or "fonts"
+luaotfloadconfig.index_file   = luaotfloadconfig.index_file
                              or "luaotfload-names.lua"
-config.luaotfload.formats     = config.luaotfload.formats or "otf,ttf,ttc,dfont"
+luaotfloadconfig.formats      = luaotfloadconfig.formats
+                             or "otf,ttf,ttc,dfont"
+luaotfloadconfig.reload       = false
 
 do -- we don’t have file.basename and the likes yet, so inline parser ftw
     local slash        = P"/"
@@ -122,9 +125,9 @@ do -- we don’t have file.basename and the likes yet, so inline parser ftw
 
     local self = lpegmatch(p_basename, stringlower(arg[0]))
     if self == "luaotfload-tool" then
-        config.luaotfload.self = "luaotfload-tool"
+        luaotfloadconfig.self = "luaotfload-tool"
     else
-        config.luaotfload.self = "mkluatexfontdb"
+        luaotfloadconfig.self = "mkluatexfontdb"
     end
 end
 
@@ -170,7 +173,7 @@ local names = fonts.names
 
 local status_file                    = "luaotfload-status"
 local luaotfloadstatus               = require (status_file)
-config.luaotfload.status             = luaotfloadstatus
+luaotfloadconfig.status              = luaotfloadstatus
 
 local sanitize_fontname              = names.sanitize_fontname
 
@@ -283,16 +286,16 @@ Enter 'luaotfload-tool --help' for a larger list of options.
 local help_msg = function (version)
     local template = help_messages[version]
     iowrite(stringformat(template,
-                         config.luaotfload.self,
+                         luaotfloadconfig.self,
                          names_plain,
                          names_bin,
                          caches.getwritablepath (
-                         config.luaotfload.cache_dir)))
+                         luaotfloadconfig.cache_dir)))
 end
 
 local version_msg = function ( )
     local out = function (...) texiowrite_nl (stringformat (...)) end
-    out ("%s version %q", config.luaotfload.self, version)
+    out ("%s version %q", luaotfloadconfig.self, version)
     out ("revision %q", luaotfloadstatus.notes.revision)
     out ("database version %q", names.version)
     out ("Lua interpreter: %s; version %q", runtime[1], runtime[2])
@@ -1077,6 +1080,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         list               = 1,
         log                = 1,
         ["no-reload"]      = "n",
+        ["skip-read"]      = "R",
         ["prefer-texmf"]   = "p",
         quiet              = "q",
         ["show-blacklist"] = "b",
@@ -1087,7 +1091,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         warnings           = "w",
     }
 
-    local short_options = "bDfFiIlnpqSuvVhw"
+    local short_options = "bDfFiIlnpqRSuvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -1144,7 +1148,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.show_info = true
             result.full_info = true
         elseif v == "alias" then
-            config.luaotfload.self = optarg[n]
+            luaotfloadconfig.self = optarg[n]
         elseif v == "l" then
             action_pending["flush"] = true
         elseif v == "list" then
@@ -1158,7 +1162,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "D" then
             result.dry_run = true
         elseif v == "p" then  --- TODO adapt to new db structure
-            config.luaotfload.prioritize = "texmf"
+            luaotfloadconfig.prioritize = "texmf"
         elseif v == "b" then
             action_pending["blacklist"] = true
         elseif v == "diagnose" then
@@ -1167,13 +1171,16 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "formats" then
             names.set_font_filter (optarg[n])
         elseif v == "n" then
-            config.luaotfload.update_live = false
+            luaotfloadconfig.update_live = false
         elseif v == "S" then
-            config.luaotfload.statistics = true
+            luaotfloadconfig.statistics = true
+        elseif v == "R" then
+            ---  dev only, undocumented
+            luaotfloadconfig.skip_read = true
         end
     end
 
-    if config.luaotfload.self == "mkluatexfontdb" then
+    if luaotfloadconfig.self == "mkluatexfontdb" then --- TODO drop legacy ballast after 2.4
         result.help_version = "mkluatexfontdb"
         action_pending["generate"] = true
         result.log_level = math.max(1, result.log_level)

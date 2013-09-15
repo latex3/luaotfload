@@ -2457,7 +2457,7 @@ end
 
 local generate_filedata = function (mappings)
 
-    report ("both", 2, "db", "Creating filename map")
+    report ("both", 2, "db", "Creating filename map.")
 
     local nmappings  = #mappings
 
@@ -2685,6 +2685,8 @@ end
 
 local collect_families = function (mappings)
 
+    report ("info", 2, "db", "Analyzing families, sizes, and styles.")
+
     local families = {
         ["local"]  = { },
         system     = { },
@@ -2716,7 +2718,7 @@ local collect_families = function (mappings)
         local fontname          = info.fontname
 
         local fontstyle_name    = names.sanitized.fontstyle_name
-        local prefmodifiers     = english.prefmodifiers or "regular"
+        local prefmodifiers     = english.prefmodifiers
         local subfamily         = english.subfamily
 
         local weight            = style.weight
@@ -2755,13 +2757,35 @@ local collect_families = function (mappings)
         if modifier then
             --- stub; here we will continue building a list of optical sizes
             --- no size -> hash “normal”
-            --- other sizes -> indexed tuples { dsnsize, idx }
+            --- other sizes -> indexed tuples { dsnsize, high, low, idx }
             local familytable = subtable [familyname]
             if not familytable then
                 familytable = { }
                 subtable [familyname] = familytable
             end
-            familytable [modifier] = entry.index
+
+            --- the style table is treated as an unordered list
+            local styletable = familytable [modifier]
+            if not styletable then
+                styletable = { }
+                familytable [modifier] = styletable
+            end
+
+            if not prefmodifiers then --- default size for this style/family combo
+                styletable.default = entry.index
+            end
+
+            local size = style.size --- dsnsize * high * low
+            if size then
+                styletable [#styletable + 1] = {
+                    size [1],
+                    size [2],
+                    size [3],
+                    entry.index,
+                }
+            else
+                styletable.default = entry.index
+            end
         end
     end
 

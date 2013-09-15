@@ -2791,6 +2791,27 @@ local collect_families = function (mappings)
     return families
 end
 
+local cmp_sizes = function (a, b)
+    return a [1] < b [1]
+end
+
+local order_design_sizes = function (families)
+
+    report ("info", 2, "db", "Ordering design sizes.")
+
+    for location, data in next, families do
+        for format, data in next, data do
+            for familyname, data in next, data do
+                for style, data in next, data do
+                    tablesort (data, cmp_sizes)
+                end
+            end
+        end
+    end
+
+    return families
+end
+
 local retrieve_namedata = function (currentnames,
                                     targetnames,
                                     dry_run,
@@ -3005,6 +3026,9 @@ update_names = function (currentnames, force, dry_run)
     report ("both", 2, "db", "Updating the font names database"
                           .. (force and " forcefully" or ""))
 
+    --- pass 1 get raw data: read font files (normal case) or reuse
+    --- information present in index
+
     if luaotfloadconfig.skip_read == true then
         --- the difference to a “dry run” is that we don’t search
         --- for font files entirely. we also ignore the “force”
@@ -3041,6 +3065,7 @@ update_names = function (currentnames, force, dry_run)
                 n_rawnames, n_newnames)
     end
 
+    --- pass 2 (optional): collect some stats about the raw font info
     if luaotfloadconfig.statistics == true then
         targetnames.meta.statistics = collect_statistics
                                             (targetnames.mappings)
@@ -3050,8 +3075,15 @@ update_names = function (currentnames, force, dry_run)
     --- non-texmf entries are redirected there and the mapping
     --- needs to be 100% consistent
 
+    --- pass 3: build filename table
     targetnames.files       = generate_filedata (targetnames.mappings)
+
+    --- pass 4: build family lookup table
     targetnames.families    = collect_families (targetnames.mappings)
+
+    --- pass 5: order design size tables
+    targetnames.families    = order_design_sizes (targetnames.families)
+
 
     report ("info", 3, "db",
             "Rebuilt in %0.f ms.",

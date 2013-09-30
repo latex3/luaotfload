@@ -1423,9 +1423,13 @@ local tlig = {
             [0x2014] = {0x002D, 0x002D, 0x002D}, -- emdash
             [0x201C] = {0x2018, 0x2018},         -- quotedblleft
             [0x201D] = {0x2019, 0x2019},         -- quotedblright
-            [0x201E] = {0x002C, 0x002C},         -- quotedblbase
             [0x00A1] = {0x0021, 0x2018},         -- exclamdown
             [0x00BF] = {0x003F, 0x2018},         -- questiondown
+            --- next three originate in T1 encoding; Xetex applies
+            --- them too
+            [0x201E] = {0x002C, 0x002C},         -- quotedblbase
+            [0x00AB] = {0x003C, 0x003C},         -- LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
+            [0x00BB] = {0x003E, 0x003E},         -- RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
         },
         flags    = { },
     },
@@ -1442,8 +1446,8 @@ local tlig = {
     },
 }
 
-otf.addfeature("tlig", tlig)
-otf.addfeature("trep", { }) -- empty, all in tlig now
+otf.addfeature ("tlig", tlig)
+otf.addfeature ("trep", { })
 
 local anum_arabic = { --- these are the same as in font-otc
     [0x0030] = 0x0660,

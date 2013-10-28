@@ -8,3 +8,5 @@ spltfgbd.ttf
 spltfgbi.ttf
 spltfgit.ttf
 spltfgrg.ttf
+% Buggy Max OS font, see https://github.com/lualatex/luaotfload/issues/139
+Skia.ttf

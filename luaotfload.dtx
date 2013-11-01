@@ -1933,8 +1933,8 @@ request_resolvers.file = function (specification)
     local name    = resolvefile(specification.name)
     local suffix  = file.suffix(name)
     if formats[suffix] then
-        specification.forced  = suffix
-        specification.name    = file.removesuffix(name)
+        specification.forced      = suffix
+        specification.forcedname  = file.removesuffix(name)
     else
         specification.name = name
     end

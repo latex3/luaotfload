@@ -82,14 +82,15 @@ local tablefastcopy           = table.fastcopy
 local tabletofile             = table.tofile
 local tabletohash             = table.tohash
 
+local runasscript             = caches == nil
+
 --- the font loader namespace is “fonts”, same as in Context
 --- we need to put some fallbacks into place for when running
 --- as a script
-fonts                = fonts          or { }
-fonts.names          = fonts.names    or { }
-fonts.definers       = fonts.definers or { }
-
-local names          = fonts.names
+fonts                          = fonts          or { }
+fonts.names                    = fonts.names    or { }
+fonts.definers                 = fonts.definers or { }
+local names                    = fonts.names --- font index namespace
 
 config                         = config or { }
 config.luaotfload              = config.luaotfload or { }
@@ -148,7 +149,7 @@ patterns.splitcomma     = splitcomma
     created by different user.
 --doc]]--
 
-if caches then
+if not runasscript then
     local globals   = names.path.globals
     local names_dir = globals.names_dir
 

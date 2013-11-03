@@ -310,8 +310,10 @@ local status_start = function (low, high)
     status_low   = low
     status_high  = high
 
-    if os.type == "windows" then --- Assume broken terminal.
-        status_writer = function (...)
+    if os.type == "windows" --- Assume broken terminal.
+    or os.getenv "TERM" == "dumb"
+    then
+        status_writer = function (mode, ...)
             names_report (mode, high, ...)
         end
         return

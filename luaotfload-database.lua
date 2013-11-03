@@ -713,10 +713,6 @@ resolve_cached = function (_, _, specification)
     local entry = { filename, subfont }
     report("both", 4, "cache", "New entry: %s", request)
     names.lookups[request] = entry
-
-    --- obviously, the updated cache needs to be stored.
-    --- TODO this should trigger a save only once the
-    ---      document is compiled (finish_pdffile callback?)
     report("both", 5, "cache", "Saving updated cache")
     local success = save_lookups()
     if not success then --- sad, but not critical

@@ -170,6 +170,7 @@ io.stderr:setvbuf "no"
 local kill_line = "\r\x1b[K"
 
 if texjob == true then
+    --- We imitate the texio.* functions so the output is consistent.
     writeln = function (str)
         iowrite "\n"
         iowrite(str)

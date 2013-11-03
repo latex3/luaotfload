@@ -1811,14 +1811,13 @@ local scan_dir = function (dirname, fontnames, newfontnames,
     local n_new = 0   --- total of fonts collected
     local n_found = #found
     report ("both", 4, "db", "%d font files detected", n_found)
-    report_status_start (2, 4)
     for j=1, n_found do
         local fullname = found[j]
         fullname = path_normalize(fullname)
         local new
         if dry_run == true then
-            report ("both", 1, "db",
-                    "Would have been loading %q", fullname)
+            report_status ("both", "db",
+                           "Would have been loading %q", fullname)
         else
             report_status ("both", "db", "Loading font %q", fullname)
             local new = load_font (fullname, fontnames,
@@ -1828,8 +1827,8 @@ local scan_dir = function (dirname, fontnames, newfontnames,
             end
         end
     end
-    report_status_stop ("both", "db", "Done. %d fonts indexed in %q",
-                        n_found, dirname)
+    report ("both", 4, "db", "Done. %d fonts indexed in %q",
+            n_found, dirname)
     return n_found, n_new
 end
 
@@ -1885,12 +1884,14 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
         local tasks = filter_out_pwd (filesplitpath (fontdirs))
         report ("info", 3, "db",
                 "Initiating scan of %d directories.", #tasks)
+        report_status_start (2, 4)
         for _, d in next, tasks do
             local found, new = scan_dir (d, fontnames, newfontnames,
                                          dry_run, true)
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end
+        report_status_stop ("term", "db", "Scanned %d files, %d new.", n_scanned, n_new)
     end
 
     return n_scanned, n_new
@@ -2170,12 +2171,14 @@ local scan_os_fonts = function (fontnames, newfontnames,
     report ("info", 3, "db",
             "Searching in static system directories...")
 
+    report_status_start (2, 4)
     for _, d in next, get_os_dirs () do
         local found, new = scan_dir (d, fontnames,
                                      newfontnames, dry_run)
         n_scanned = n_scanned + found
         n_new     = n_new     + new
     end
+    report_status_stop ("term", "db", "Scanned %d files, %d new.", n_scanned, n_new)
 
     return n_scanned, n_new
 end

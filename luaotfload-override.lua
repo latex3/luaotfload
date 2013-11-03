@@ -312,7 +312,7 @@ local status_start = function (low, high)
 
     if os.type == "windows" then --- Assume broken terminal.
         status_writer = function (...)
-            names_report (high, ...)
+            names_report (mode, high, ...)
         end
         return
     end

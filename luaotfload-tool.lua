@@ -1102,7 +1102,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
             if result.log_level > 0 then
                 result.log_level = result.log_level + 1
             else
-                result.log_level = 2
+                result.log_level = 1
             end
         elseif v == "V" then
             action_pending["version"] = true

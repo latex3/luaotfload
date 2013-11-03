@@ -122,7 +122,10 @@ local make_luanames = function (path)
            filereplacesuffix(path, "luc")
 end
 
-local report = logs.names_report
+local report                = logs.names_report
+local report_status         = logs.names_status
+local report_status_start   = logs.names_status_start
+local report_status_stop    = logs.names_status_stop
 
 names.patterns          = { }
 local patterns          = names.patterns
@@ -390,7 +393,7 @@ load_names = function (dry_run)
     local foundname, data = load_lua_file (names.path.index.lua)
 
     if data then
-        report ("both", 2, "db",
+        report ("both", 1, "db",
                 "Font names database loaded", "%s", foundname)
         report ("info", 3, "db", "Loading took %0.f ms",
                 1000*(os.gettimeofday()-starttime))
@@ -1543,7 +1546,7 @@ local create_blacklist = function (blacklist, whitelist)
     local result = { }
     local dirs   = { }
 
-    report("info", 2, "db", "Blacklisting %q files and directories",
+    report("info", 1, "db", "Blacklisting %q files and directories",
            #blacklist)
     for i=1, #blacklist do
         local entry = blacklist[i]
@@ -1554,7 +1557,7 @@ local create_blacklist = function (blacklist, whitelist)
         end
     end
 
-    report("info", 2, "db", "Whitelisting %q files", #whitelist)
+    report("info", 1, "db", "Whitelisting %q files", #whitelist)
     for i=1, #whitelist do
         result[whitelist[i]] = nil
     end
@@ -1808,6 +1811,7 @@ local scan_dir = function (dirname, fontnames, newfontnames,
     local n_new = 0   --- total of fonts collected
     local n_found = #found
     report ("both", 4, "db", "%d font files detected", n_found)
+    report_status_start (2, 4)
     for j=1, n_found do
         local fullname = found[j]
         fullname = path_normalize(fullname)
@@ -1816,8 +1820,7 @@ local scan_dir = function (dirname, fontnames, newfontnames,
             report ("both", 1, "db",
                     "Would have been loading %q", fullname)
         else
-            report ("both", 4, "db",
-                    "Loading font %q", fullname)
+            report_status ("both", "db", "Loading font %q", fullname)
             local new = load_font (fullname, fontnames,
                                    newfontnames, texmf)
             if new == true then
@@ -1825,8 +1828,8 @@ local scan_dir = function (dirname, fontnames, newfontnames,
             end
         end
     end
-
-    report("both", 4, "db", "%d fonts found in '%s'", n_found, dirname)
+    report_status_stop ("both", "db", "Done. %d fonts indexed in %q",
+                        n_found, dirname)
     return n_found, n_new
 end
 
@@ -1861,9 +1864,9 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
     local osfontdir = kpseexpand_path "$OSFONTDIR"
 
     if stringis_empty (osfontdir) then
-        report ("info", 2, "db", "Scanning TEXMF fonts...")
+        report ("info", 1, "db", "Scanning TEXMF fonts...")
     else
-        report ("info", 2, "db", "Scanning TEXMF and OS fonts...")
+        report ("info", 1, "db", "Scanning TEXMF and OS fonts...")
         if logs.get_loglevel () > 3 then
             local osdirs = filesplitpath (osfontdir)
             report ("info", 0, "db",
@@ -2163,7 +2166,7 @@ local scan_os_fonts = function (fontnames, newfontnames,
                                 dry_run)
 
     local n_scanned, n_new = 0, 0
-    report ("info", 2, "db", "Scanning OS fonts...")
+    report ("info", 1, "db", "Scanning OS fonts...")
     report ("info", 3, "db",
             "Searching in static system directories...")
 
@@ -2187,7 +2190,7 @@ end
 
 --- dbobj -> dbobj
 local gen_fast_lookups = function (fontnames)
-    report("both", 2, "db", "Creating filename map")
+    report("both", 1, "db", "Creating filename map")
     local mappings   = fontnames.mappings
     local nmappings  = #mappings
     --- this is needlessly complicated due to texmf priorization
@@ -2246,7 +2249,7 @@ local gen_fast_lookups = function (fontnames)
     end
 
     if config.luaotfload.prioritize == "texmf" then
-        report("both", 2, "db", "Preferring texmf fonts")
+        report("both", 1, "db", "Preferring texmf fonts")
         addmap(sys)
         addmap(texmf)
     else --- sys
@@ -2267,7 +2270,7 @@ end
 update_names = function (fontnames, force, dry_run)
 
     if config.luaotfload.update_live == false then
-        report("info", 2, "db",
+        report("info", 1, "db",
                "Skipping database update")
         --- skip all db updates
         return fontnames or names.data
@@ -2281,7 +2284,7 @@ update_names = function (fontnames, force, dry_run)
     - “newfontnames” is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
-    report("both", 2, "db", "Updating the font names database"
+    report("both", 1, "db", "Updating the font names database"
                          .. (force and " forcefully" or ""))
 
     if force then
@@ -2417,9 +2420,9 @@ end
 
 --- string -> string -> string list -> bool -> bool
 local purge_from_cache = function (category, path, list, all)
-    report("info", 2, "cache", "Luaotfload cache: %s %s",
+    report("info", 1, "cache", "Luaotfload cache: %s %s",
         (all and "erase" or "purge"), category)
-    report("info", 2, "cache", "location: %s",path)
+    report("info", 1, "cache", "location: %s",path)
     local n = 0
     for i=1,#list do
         local filename = list[i]
@@ -2442,7 +2445,7 @@ local purge_from_cache = function (category, path, list, all)
             end
         end
     end
-    report("info", 2, "cache", "Removed lua files : %i", n)
+    report("info", 1, "cache", "Removed lua files : %i", n)
     return true
 end
 

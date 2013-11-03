@@ -32,6 +32,8 @@ local texio_write       = texio.write
 local texiowrite        = texio.write
 local type              = type
 
+local dummyfunction     = function () end
+
 local texjob = false
 if tex and (tex.jobname or tex.formatname) then
     --- TeX
@@ -52,7 +54,7 @@ We recreate the verbosity levels previously implemented in font-nms:
 
 --doc]]--
 
-local loglevel = 1 --- default
+local loglevel = 0 --- default
 local logout   = "log"
 
 --- int -> bool
@@ -74,7 +76,9 @@ logs.getloglevel    = get_loglevel
 logs.get_loglevel   = get_loglevel
 logs.get_log_level  = get_loglevel
 
-local writeln --- scope so we can change it
+local writeln  --- pointer to terminal/log writer
+local statusln --- terminal writer that reuses the current line
+local first_status = true --- indicate the begin of a status region
 
 local log_msg = [[
 logging output redirected to %s
@@ -126,6 +130,7 @@ local set_logout = function (s, finalizers)
         texiowrite    = writefile
         texiowrite_nl = writefile_nl
         writeln       = writefile_nl
+        statusln      = dummyfunction
 
         finalizers[#finalizers+1] = function ()
             chan:write (stringformat ("\nlogging finished at %s\n",
@@ -162,18 +167,34 @@ end
 io.stdout:setvbuf "no"
 io.stderr:setvbuf "no"
 
+local kill_line = "\r\x1b[K"
+
 if texjob == true then
     writeln = function (str)
         texiowrite_nl ("term", str)
+    end
+    statusln = function (str)
+        if first_status == false then
+            texiowrite ("term", kill_line)
+            texiowrite ("term", str)
+        else
+            texiowrite_nl ("term", str)
+        end
     end
 else
     writeln = function (str)
         iowrite(str)
         iowrite "\n"
     end
+    statusln = function (str)
+        if first_status == false then
+            iowrite (kill_line)
+        end
+        iowrite (str)
+    end
 end
 
-stdout = function (category, ...)
+stdout = function (writer, category, ...)
     local res = { module_name, "|", category, ":" }
     local nargs = select("#", ...)
     if nargs == 0 then
@@ -184,7 +205,7 @@ stdout = function (category, ...)
     else
         res[#res+1] = stringformat(...)
     end
-    writeln(tableconcat(res, " "))
+    writer (tableconcat(res, " "))
 end
 
 --- at default (zero), we aim to be quiet
@@ -227,14 +248,101 @@ local names_report = function (mode, lvl, ...)
             log (...)
         elseif mode == "both" and logout ~= "redirect" then
             log (...)
-            stdout (...)
+            stdout (writeln, ...)
         else
-            stdout (...)
+            stdout (writeln, ...)
         end
     end
 end
 
 logs.names_report = names_report
+
+--[[doc--
+
+    status_logger -- Overwrites the most recently printed line of the
+    terminal. Its purpose is to provide feedback without spamming
+    stdout with irrelevant messages, i.e. when building the database.
+
+    Status logging must be initialized by calling status_start() and
+    properly reset via status_stop().
+
+    The arguments low and high indicate the loglevel threshold at which
+    linewise and full logging is triggered, respectively. E.g.
+
+            names_status (1, 4, "term", "Hello, world!")
+
+    will print nothing if the loglevel is less than one, reuse the
+    current line if the loglevel ranges from one to three inclusively,
+    and output the message on a separate line otherwise.
+
+--doc]]--
+
+local status_logger = function (mode, ...)
+    if mode == "log" then
+        log (...)
+    else
+        if mode == "both" and logout ~= "redirect" then
+            log (...)
+            stdout (statusln, ...)
+        else
+            stdout (statusln, ...)
+        end
+        first_status = false
+    end
+end
+
+--[[doc--
+
+    status_start -- Initialize status logging. This installs the status
+        logger if the loglevel is in the specified range, and the normal
+        logger otherwise.  It also resets the first line state which
+        causing the next line printed using the status logger to not kill
+        the current line.
+
+--doc]]--
+
+local status_writer
+local status_low  = 99
+local status_high = 99
+
+local status_start = function (low, high)
+    first_status = true
+    status_low   = low
+    status_high  = high
+
+    if os.type == "windows" then --- Assume broken terminal.
+        status_writer = function (...)
+            names_report (high, ...)
+        end
+        return
+    end
+
+    if low <= loglevel and loglevel < high then
+        status_writer = status_logger
+    else
+        status_writer = function (mode, ...)
+            names_report (mode, high, ...)
+        end
+    end
+end
+
+--[[doc--
+
+    status_stop -- Finalize a status region by outputting a newline and
+    printing a message.
+
+--doc]]--
+
+local status_stop = function (...)
+    if first_status == false then
+        status_writer(...)
+        writeln ""
+    end
+end
+
+logs.names_status = function (...) status_writer (...) end
+logs.names_status_start = status_start
+logs.names_status_stop  = status_stop
 
 --[[doc--
 
@@ -274,7 +382,6 @@ texio.reporter = texioreporter
 
 if fonts then --- need to be running TeX
     if next(fonts.encodings.agl) then
-        print(next, fonts.encodings.agl)
         --- unnecessary because the file shouldn’t be loaded at this time
         --- but we’re just making sure
         fonts.encodings.agl = nil

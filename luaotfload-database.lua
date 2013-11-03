@@ -477,7 +477,7 @@ load_names = function (dry_run)
                 [[This can take several minutes; please be patient.]])
         data = update_names (initialize_namedata (get_font_filter ()),
                              nil, dry_run)
-        if not success then
+        if not data then
             report ("both", 0, "db", "Database creation unsuccessful.")
         end
     end

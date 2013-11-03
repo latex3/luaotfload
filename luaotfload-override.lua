@@ -171,15 +171,14 @@ local kill_line = "\r\x1b[K"
 
 if texjob == true then
     writeln = function (str)
-        texiowrite_nl ("term", str)
+        iowrite "\n"
+        iowrite(str)
     end
     statusln = function (str)
         if first_status == false then
-            texiowrite ("term", kill_line)
-            texiowrite ("term", str)
-        else
-            texiowrite_nl ("term", str)
+            iowrite (kill_line)
         end
+        iowrite (str)
     end
 else
     writeln = function (str)

@@ -31,6 +31,7 @@ local fontloaderinfo           = fontloader.info
 local fontloaderclose          = fontloader.close
 local fontloaderopen           = fontloader.open
 local fontloaderto_table       = fontloader.to_table
+local gzipload                 = gzip.load
 local gzipsave                 = gzip.save
 local iolines                  = io.lines
 local ioopen                   = io.open
@@ -396,27 +397,37 @@ end
 
 --- string -> (string * table)
 local load_lua_file = function (path)
-    local foundname = filereplacesuffix(path, "luc")
+    local foundname = filereplacesuffix (path, "luc")
 
-    local fh = ioopen(foundname, "rb") -- try bin first
+    if false then
+    local fh = ioopen (foundname, "rb") -- try bin first
     if fh then
         local chunk = fh:read"*all"
         fh:close()
-        code = load(chunk, "b")
+        code = load (chunk, "b")
     end
+end
 
     if not code then --- fall back to text file
-        foundname = filereplacesuffix(path, "lua")
+        foundname = filereplacesuffix (path, "lua")
         fh = ioopen(foundname, "rb")
         if fh then
             local chunk = fh:read"*all"
             fh:close()
-            code = load(chunk, "t")
+            code = load (chunk, "t")
+        end
+    end
+
+    if not code then --- probe gzipped file
+        foundname = filereplacesuffix (path, "lua.gz")
+        local chunk = gzipload (foundname)
+        if chunk then
+            code = load (chunk, "t")
         end
     end
 
     if not code then return nil, nil end
-    return foundname, code()
+    return foundname, code ()
 end
 
 --- define locals in scope
@@ -3136,11 +3147,6 @@ save_lookups = function ( )
     return false
 end
 
-local tabletogzip = function (filename, ...)
-    local serialized = tableserialize(true, ...)
-    gzipsave (filenmaeserialized)
-end
-
 --- save_names() is usually called without the argument
 --- dbobj? -> bool
 save_names = function (currentnames)
@@ -3151,22 +3157,35 @@ save_names = function (currentnames)
     local luaname, lucname = path.lua, path.luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
         osremove (lucname)
+        local gzname = luaname .. ".gz"
         if luaotfloadconfig.compress then
             local serialized = tableserialize (currentnames, true)
-            gzipsave (luaname, serialized)
+            gzipsave (gzname, serialized)
             caches.compile (currentnames, "", lucname)
         else
             tabletofile (luaname, currentnames, true)
             caches.compile (currentnames, luaname, lucname)
         end
-        if lfsisfile (luaname) and lfsisfile (lucname) then
-            report ("info", 1, "db", "Font index saved")
+        report ("info", 1, "db", "Font index saved at ...")
+        local success = false
+        if lfsisfile (luaname) then
             report ("info", 3, "db", "Text: " .. luaname)
-            report ("info", 3, "db", "Byte: " .. lucname)
-            return true
+            success = true
         end
-        report ("info", 0, "db", "Could not compile font index")
-        return false
+        if lfsisfile (gzname) then
+            report ("info", 3, "db", "Gzip: " .. gzname)
+            success = true
+        end
+        if lfsisfile (lucname) then
+            report ("info", 3, "db", "Byte: " .. lucname)
+            success = true
+        end
+        if success then
+            return true
+        else
+            report ("info", 0, "db", "Could not compile font index")
+            return false
+        end
     end
     report ("info", 0, "db", "Index file not writable")
     if not fileiswritable (luaname) then

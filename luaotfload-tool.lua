@@ -214,6 +214,7 @@ This tool is part of the luaotfload package. Valid options are:
   -u --update                  update the database
   -n --no-reload               suppress db update
   -f --force                   force re-indexing all fonts
+  -c --compress                gzip index file (text version only)
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
   --formats=[+|-]EXTENSIONS    set, add, or subtract formats to index

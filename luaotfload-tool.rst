@@ -20,6 +20,7 @@ SYNOPSIS
 **luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ]
                              [ --prefer-texmf ] [ --dry-run ]
                              [ --formats=[+|-]EXTENSIONS ]
+                             [ --compress ]
 
 **luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
                                     [ --no-reload ]
@@ -62,6 +63,8 @@ update mode
                         all fonts.
 --no-reload, -n         Suppress auto-updates to the database (e.g.
                         when ``--find`` is passed an unknown name).
+--compress              Filter plain text version of font index through
+                        gzip.
 
 --prefer-texmf, -p      Organize the file name database in a way so
                         that it prefer fonts in the *TEXMF* tree over

@@ -9,6 +9,8 @@ Change History
     * Test runner (script mktests)
     * New luaotfload-tool option: ``--no-reload``
     * ``luaotfload-tool --find`` now understands request syntax
+    * option ``--compress`` filters text (Lua script) version of the font
+      index through gzip
 
 2013/07/10, luaotfload v2.3a
     * Detect LuaJIT interpreter (LuaJITTeX)

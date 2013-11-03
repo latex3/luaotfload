@@ -31,6 +31,7 @@ local fontloaderinfo           = fontloader.info
 local fontloaderclose          = fontloader.close
 local fontloaderopen           = fontloader.open
 local fontloaderto_table       = fontloader.to_table
+local gzipsave                 = gzip.save
 local iolines                  = io.lines
 local ioopen                   = io.open
 local kpseexpand_path          = kpse.expand_path
@@ -83,6 +84,7 @@ local tablecopy                = table.copy
 local tablefastcopy            = table.fastcopy
 local tabletofile              = table.tofile
 local tabletohash              = table.tohash
+local tableserialize           = table.serialize
 
 --- the font loader namespace is “fonts”, same as in Context
 --- we need to put some fallbacks into place for when running
@@ -3134,6 +3136,11 @@ save_lookups = function ( )
     return false
 end
 
+local tabletogzip = function (filename, ...)
+    local serialized = tableserialize(true, ...)
+    gzipsave (filenmaeserialized)
+end
+
 --- save_names() is usually called without the argument
 --- dbobj? -> bool
 save_names = function (currentnames)
@@ -3143,9 +3150,15 @@ save_names = function (currentnames)
     local path = names.path.index
     local luaname, lucname = path.lua, path.luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
-        tabletofile (luaname, currentnames, true)
         osremove (lucname)
-        caches.compile (currentnames, luaname, lucname)
+        if luaotfloadconfig.compress then
+            local serialized = tableserialize (currentnames, true)
+            gzipsave (luaname, serialized)
+            caches.compile (currentnames, "", lucname)
+        else
+            tabletofile (luaname, currentnames, true)
+            caches.compile (currentnames, luaname, lucname)
+        end
         if lfsisfile (luaname) and lfsisfile (lucname) then
             report ("info", 1, "db", "Font index saved")
             report ("info", 3, "db", "Text: " .. luaname)

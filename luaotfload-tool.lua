@@ -1065,6 +1065,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
     local long_options = {
         alias              = 1,
         cache              = 1,
+        compress           = "c",
         diagnose           = 1,
         ["dry-run"]        = "D",
         ["flush-lookups"]  = "l",
@@ -1091,7 +1092,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         warnings           = "w",
     }
 
-    local short_options = "bDfFiIlnpqRSuvVhw"
+    local short_options = "bcDfFiIlnpqRSuvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -1177,6 +1178,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "R" then
             ---  dev only, undocumented
             luaotfloadconfig.skip_read = true
+        elseif v == "c" then
+            luaotfloadconfig.compress = true
         end
     end
 

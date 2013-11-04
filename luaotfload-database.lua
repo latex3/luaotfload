@@ -648,16 +648,21 @@ Existence of the resolved file name is verified differently depending
 on whether the index entry has a texmf flag set.
 --doc]]--
 
-local get_font_file = function (fullnames, entry)
-    local basename = entry.basename
-    if entry.location == "texmf" then
+local get_font_file = function (index)
+    local entry = name_index.mappings [index]
+    if not entry then
+        return false
+    end
+    local filedata = entry.file
+    local basename = filedata.base
+    if filedata.location == "texmf" then
         if kpselookup(basename) then
-            return true, basename, entry.subfont
+            return true, basename, filedata.subfont
         end
-    else
-        local fullname = fullnames[entry.index]
-        if lfsisfile(fullname) then
-            return true, basename, entry.subfont
+    else --- system, local
+        local fullname = name_index.files.full [index]
+        if lfsisfile (fullname) then
+            return true, basename, filedata.subfont
         end
     end
     return false
@@ -1096,17 +1101,206 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
 end --- resolve()
 ]===]
 
+local choose_closest = function (distances)
+    local closest = 2^51
+    local match
+    for i = 1, #distances do
+        local d, index = unpack (distances [i])
+        if d < closest then
+            closest = d
+            match   = index
+        end
+    end
+    return match
+end
+
+--[[doc--
+
+    choose_size -- Pick a font face of appropriate size from the list
+    of family members with matching style. There are three categories:
+
+        1. exact matches: if there is a face whose design size equals
+           the asked size, it is returned immediately and no further
+           candidates are inspected.
+
+        2. range matches: of all faces in whose design range the
+           requested size falls the one whose center the requested
+           size is closest to is returned.
+
+        3. out-of-range matches: of all other faces (i. e. whose range
+           is above or below the asked size) the one is chosen whose
+           boundary (upper or lower) is closest to the requested size.
+
+        4. default matches: if no design size or a design size of zero
+           is requested, the face with the default size is returned.
+
+--doc]]--
+
+--- int * int * int * int list -> int -> int
+local choose_size = function (sizes, askedsize)
+    local mappings = name_index.mappings
+    local match    = sizes.default
+    local exact
+    local inrange  = { } --- distance * index list
+    local norange  = { } --- distance * index list
+    local fontname, subfont
+    if askedsize ~= 0 then
+        --- firstly, look for an exactly matching design size or
+        --- matching range
+        for i = 1, #sizes do
+            local dsnsize, high, low, index = unpack (sizes [i])
+            if dsnsize == askedsize then
+                --- exact match, this is what we were looking for
+                exact = index
+                goto skip
+            elseif askedsize < low then
+                --- below range, add to the norange table
+                local d = low - askedsize
+                norange [#norange + 1] = { d, index }
+            elseif askedsize > high then
+                --- beyond range, add to the norange table
+                local d = askedsize - high
+                norange [#norange + 1] = { d, index }
+            else
+                --- range match
+                local d = ((low + high) / 2) - askedsize
+                if d < 0 then
+                    d = -d
+                end
+                inrange [#inrange + 1] = { d, index }
+            end
+        end
+    end
+::skip::
+    if exact then
+        match = exact
+    elseif #inrange > 0 then
+        match = choose_closest (inrange)
+    elseif #norange > 0 then
+        match = choose_closest (norange)
+    end
+    return match
+end
+
+local format_precedence = {
+    "otf",   "ttc", "ttf",
+    "dfont", "afm", "pfb",
+    "pfa",
+}
+
+local location_precedence = {
+    "local", "system", "texmf",
+}
+
+--[[doc--
+
+    resolve_familyname -- Query the families table for an entry
+    matching the specification.
+    The parameters “name” and “style” are pre-sanitized.
+
+--doc]]--
+--- spec -> string -> string -> int -> string * int
+local resolve_familyname = function (specification, name, style, askedsize)
+    local families   = name_index.families
+    local mappings   = name_index.mappings
+    local candidates = nil
+    --- arrow code alert
+    for i = 1, #location_precedence do
+        local location = location_precedence [i]
+        local locgroup = families [location]
+        for j = 1, #format_precedence do
+            local format       = format_precedence [j]
+            local fmtgroup     = locgroup [format]
+            if fmtgroup then
+                local familygroup  = fmtgroup [name]
+                if familygroup then
+                    local stylegroup = familygroup [style]
+                    if stylegroup then --- suitable match
+                        candidates = stylegroup
+                        goto done
+                    end
+                end
+            end
+        end
+    end
+    if true then
+        return nil, nil
+    end
+::done::
+    index = choose_size (candidates, askedsize)
+    local success, resolved, subfont = get_font_file (index)
+    if not success then
+        return nil, nil
+    end
+    report ("info", 2, "db", "Match found: %s(%d)",
+            resolved, subfont or 0)
+    return resolved, subfont
+end
+
+local resolve_fontname = function (specification, name, style, askedsize)
+    local resolved, subfont
+    --[[ TODO ]]
+    return resolved, subfont
+end
+
+--[[doc--
+
+    resolve_name -- Perform a name: lookup. This first queries the
+    font families table and, if there is no match for the spec, the
+    font names table.
+    The return value is a pair consisting of the file name and the
+    subfont index if appropriate..
+
+--doc]]--
+
+--- table -> string * (int | bool)
 resolve_name = function (specification)
+    local resolved, subfont
     if not name_index then name_index = load_names () end
+    local name      = sanitize_fontname (specification.name)
+    local style     = sanitize_fontname (specification.style) or "r"
+    local askedsize = specification.optsize
+
+    if askedsize then
+        askedsize = tonumber (askedsize)
+    else
+        askedsize = specification.size
+        if askedsize and askedsize >= 0 then
+            askedsize = askedsize / 65536
+        else
+            askedsize = 0
+        end
+    end
+
+    resolved, subfont = resolve_familyname (specification, name, style, askedsize)
+    if not resolved then
+        resolved, subfont = resolve_fontname (specification, name, style, askedsize)
+    end
+    if not resolved then
+        resolved = specification.name, false
+    end
+    return resolved, subfont
 end
 
 resolve_fullpath = function (fontname, ext) --- getfilename()
     if not name_index then name_index = load_names () end
     local files = name_index.files
-    local idx = files.base[fontname]
-             or files.bare[fontname]
-    if idx then
-        return files.full[idx]
+    local basedata = files.base
+    local baredata = files.bare
+    for i = 1, #location_precedence do
+        local location = location_precedence [i]
+        local basenames = basedata [location]
+        local barenames = baredata [location] [ext]
+        local idx
+        if basenames ~= nil then
+            idx = basenames [fontname]
+        end
+        if not idx and barenames ~= nil then
+            idx = barenames [fontname]
+        end
+        if idx then
+            return files.full [idx]
+        end
     end
     return ""
 end

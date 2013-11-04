@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 09/13/13 10:59:07
+-- merge date  : 11/04/13 11:52:02
 
 do -- begin closure to overcome local limits and interference
 
@@ -134,6 +134,7 @@ local utfbom_16_le=P('\255\254')
 local utfbom_8=P('\239\187\191')   
 local utfbom=utfbom_32_be+utfbom_32_le+utfbom_16_be+utfbom_16_le+utfbom_8
 local utftype=utfbom_32_be*Cc("utf-32-be")+utfbom_32_le*Cc("utf-32-le")+utfbom_16_be*Cc("utf-16-be")+utfbom_16_le*Cc("utf-16-le")+utfbom_8*Cc("utf-8")+alwaysmatched*Cc("utf-8") 
+local utfstricttype=utfbom_32_be*Cc("utf-32-be")+utfbom_32_le*Cc("utf-32-le")+utfbom_16_be*Cc("utf-16-be")+utfbom_16_le*Cc("utf-16-le")+utfbom_8*Cc("utf-8")
 local utfoffset=utfbom_32_be*Cc(4)+utfbom_32_le*Cc(4)+utfbom_16_be*Cc(2)+utfbom_16_le*Cc(2)+utfbom_8*Cc(3)+Cc(0)
 local utf8next=R("\128\191")
 patterns.utfbom_32_be=utfbom_32_be
@@ -149,6 +150,7 @@ patterns.utf8three=R("\224\239")*utf8next*utf8next
 patterns.utf8four=R("\240\244")*utf8next*utf8next*utf8next
 patterns.utfbom=utfbom
 patterns.utftype=utftype
+patterns.utfstricttype=utfstricttype
 patterns.utfoffset=utfoffset
 local utf8char=patterns.utf8one+patterns.utf8two+patterns.utf8three+patterns.utf8four
 local validutf8char=utf8char^0*endofstring*Cc(true)+Cc(false)
@@ -2611,6 +2613,31 @@ function number.signed(i)
     return "-",-i
   end
 end
+local zero=P("0")^1/""
+local plus=P("+")/""
+local minus=P("-")
+local separator=S(".")
+local digit=R("09")
+local trailing=zero^1*#S("eE")
+local exponent=(S("eE")*(plus+Cs((minus*zero^0*P(-1))/"")+minus)*zero^0*(P(-1)*Cc("0")+P(1)^1))
+local pattern_a=Cs(minus^0*digit^1*(separator/""*trailing+separator*(trailing+digit)^0)*exponent)
+local pattern_b=Cs((exponent+P(1))^0)
+function number.sparseexponent(f,n)
+  if not n then
+    n=f
+    f="%e"
+  end
+  local tn=type(n)
+  if tn=="string" then 
+    local m=tonumber(n)
+    if m then
+      return lpegmatch((f=="%e" or f=="%E") and pattern_a or pattern_b,format(f,m))
+    end
+  elseif tn=="number" then
+    return lpegmatch((f=="%e" or f=="%E") and pattern_a or pattern_b,format(f,n))
+  end
+  return tostring(n)
+end
 local preamble=[[
 local type = type
 local tostring = tostring
@@ -2629,6 +2656,7 @@ local autosingle = string.autosingle
 local autodouble = string.autodouble
 local sequenced = table.sequenced
 local formattednumber = number.formatted
+local sparseexponent = number.sparseexponent
 ]]
 local template=[[
 %s
@@ -2700,6 +2728,14 @@ end
 local format_E=function(f)
   n=n+1
   return format("format('%%%sE',a%s)",f,n)
+end
+local format_j=function(f)
+  n=n+1
+  return format("sparseexponent('%%%se',a%s)",f,n)
+end
+local format_J=function(f)
+  n=n+1
+  return format("sparseexponent('%%%sE',a%s)",f,n)
 end
 local format_x=function(f)
   n=n+1
@@ -2858,6 +2894,10 @@ local format_M=function(f)
   end
   return format([[formattednumber(a%s,%q,",")]],n,f)
 end
+local format_z=function(f)
+  n=n+(tonumber(f) or 1)
+  return "''" 
+end
 local format_rest=function(s)
   return format("%q",s) 
 end
@@ -2891,12 +2931,13 @@ local builder=Cs { "start",
 +V("c")+V("C")+V("S") 
 +V("Q") 
 +V("N")
-+V("r")+V("h")+V("H")+V("u")+V("U")+V("p")+V("b")+V("t")+V("T")+V("l")+V("L")+V("I")+V("h") 
-+V("w") 
++V("r")+V("h")+V("H")+V("u")+V("U")+V("p")+V("b")+V("t")+V("T")+V("l")+V("L")+V("I")+V("w") 
 +V("W") 
 +V("a") 
 +V("A") 
-+V("m")+V("M")
++V("j")+V("J") 
++V("m")+V("M") 
++V("z")
 +V("*") 
       )+V("*")
     )*(P(-1)+Carg(1))
@@ -2932,8 +2973,11 @@ local builder=Cs { "start",
   ["I"]=(prefix_any*P("I"))/format_I,
   ["w"]=(prefix_any*P("w"))/format_w,
   ["W"]=(prefix_any*P("W"))/format_W,
+  ["j"]=(prefix_any*P("j"))/format_j,
+  ["J"]=(prefix_any*P("J"))/format_J,
   ["m"]=(prefix_tab*P("m"))/format_m,
   ["M"]=(prefix_tab*P("M"))/format_M,
+  ["z"]=(prefix_any*P("z"))/format_z,
   ["a"]=(prefix_any*P("a"))/format_a,
   ["A"]=(prefix_any*P("A"))/format_A,
   ["*"]=Cs(((1-P("%"))^1+P("%%")/"%%")^1)/format_rest,
@@ -3398,10 +3442,12 @@ nodes.handlers={}
 local nodecodes={} for k,v in next,node.types  () do nodecodes[string.gsub(v,"_","")]=k end
 local whatcodes={} for k,v in next,node.whatsits() do whatcodes[string.gsub(v,"_","")]=k end
 local glyphcodes={ [0]="character","glyph","ligature","ghost","left","right" }
+local disccodes={ [0]="discretionary","explicit","automatic","regular","first","second" }
 nodes.nodecodes=nodecodes
 nodes.whatcodes=whatcodes
 nodes.whatsitcodes=whatcodes
 nodes.glyphcodes=glyphcodes
+nodes.disccodes=disccodes
 local free_node=node.free
 local remove_node=node.remove
 local new_node=node.new
@@ -5072,6 +5118,9 @@ fonts.names.resolvespec=fonts.names.resolve
 function fonts.names.getfilename(askedname,suffix) 
   return ""
 end
+function fonts.names.ignoredfile(filename) 
+  return false 
+end
 
 end -- closure
 
@@ -5236,6 +5285,7 @@ afm.syncspace=true
 afm.addligatures=true 
 afm.addtexligatures=true 
 afm.addkerns=true 
+local applyruntimefixes=fonts.treatments and fonts.treatments.applyfixes
 local function setmode(tfmdata,value)
   if value then
     tfmdata.properties.mode=lower(value)
@@ -5425,7 +5475,7 @@ end
 local addkerns,addligatures,addtexligatures,unify,normalize 
 function afm.load(filename)
   filename=resolvers.findfile(filename,'afm') or ""
-  if filename~="" then
+  if filename~="" and not fonts.names.ignoredfile(filename) then
     local name=file.removesuffix(file.basename(filename))
     local data=containers.read(afm.cache,name)
     local attr=lfs.attributes(filename)
@@ -5474,6 +5524,9 @@ function afm.load(filename)
         report_afm("saving %a in cache",name)
         data=containers.write(afm.cache,name,data)
         data=containers.read(afm.cache,name)
+      end
+      if applyruntimefixes and data then
+        applyruntimefixes(filename,data)
       end
     end
     return data
@@ -6325,7 +6378,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.745 
+otf.version=2.747 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -6346,11 +6399,17 @@ local syncspace=true
 local forcenotdef=false
 local includesubfonts=false
 local overloadkerns=false 
+local applyruntimefixes=fonts.treatments and fonts.treatments.applyfixes
 local wildcard="*"
 local default="dflt"
 local fontloaderfields=fontloader.fields
 local mainfields=nil
 local glyphfields=nil 
+local formats=fonts.formats
+formats.otf="opentype"
+formats.ttf="truetype"
+formats.ttc="truetype"
+formats.dfont="truetype"
 registerdirective("fonts.otf.loader.cleanup",function(v) cleanup=tonumber(v) or (v and 1) or 0 end)
 registerdirective("fonts.otf.loader.force",function(v) forceload=v end)
 registerdirective("fonts.otf.loader.usemetatables",function(v) usemetatables=v end)
@@ -6358,6 +6417,9 @@ registerdirective("fonts.otf.loader.pack",function(v) packdata=v end)
 registerdirective("fonts.otf.loader.syncspace",function(v) syncspace=v end)
 registerdirective("fonts.otf.loader.forcenotdef",function(v) forcenotdef=v end)
 registerdirective("fonts.otf.loader.overloadkerns",function(v) overloadkerns=v end)
+local function otf_format(filename)
+  return formats[lower(file.suffix(filename))]
+end
 local function load_featurefile(raw,featurefile)
   if featurefile and featurefile~="" then
     if trace_loading then
@@ -6544,7 +6606,7 @@ end
 function enhancers.register(what,action) 
   actions[what]=action
 end
-function otf.load(filename,format,sub,featurefile)
+function otf.load(filename,sub,featurefile) 
   local base=file.basename(file.removesuffix(filename))
   local name=file.removesuffix(base)
   local attr=lfs.attributes(filename)
@@ -6642,7 +6704,7 @@ function otf.load(filename,format,sub,featurefile)
       data={
         size=size,
         time=time,
-        format=format,
+        format=otf_format(filename),
         featuredata=featurefiles,
         resources={
           filename=resolvers.unresolve(filename),
@@ -6708,6 +6770,9 @@ function otf.load(filename,format,sub,featurefile)
       report_otf("loading from cache using hash %a",hash)
     end
     enhance("unpack",data,filename,nil,false)
+    if applyruntimefixes then
+      applyruntimefixes(filename,data)
+    end
     enhance("add dimensions",data,filename,nil,false)
     if trace_sequences then
       showfeatureorder(data,filename)
@@ -7183,14 +7248,6 @@ local g_directions={
   gsub_reversecontextchain=-1,
   gpos_reversecontextchain=-1,
 }
-local function supported(features)
-  for i=1,#features do
-    if features[i].ismac then
-      return false
-    end
-  end
-  return true
-end
 actions["reorganize subtables"]=function(data,filename,raw)
   local resources=data.resources
   local sequences={}
@@ -7204,7 +7261,6 @@ actions["reorganize subtables"]=function(data,filename,raw)
       for k=1,#dw do
         local gk=dw[k]
         local features=gk.features
-        if not features or supported(features) then 
           local typ=gk.type
           local chain=g_directions[typ] or 0
           local subtables=gk.subtables
@@ -7267,7 +7323,6 @@ actions["reorganize subtables"]=function(data,filename,raw)
               markclass=markclass,
             }
           end
-        end
       end
     end
   end
@@ -7954,10 +8009,19 @@ local function copytotfm(data,cache_id)
         end
       end
     end
+    local filename=constructors.checkedfilename(resources)
+    local fontname=metadata.fontname
+    local fullname=metadata.fullname or fontname
+    local units=metadata.units_per_em or 1000
+    if units==0 then 
+      units=1000 
+      metadata.units_per_em=1000
+      report_otf("changing %a units to %a",0,units)
+    end
     local monospaced=metadata.isfixedpitch or (pfminfo.panose and pfminfo.panose.proportion=="Monospaced")
     local charwidth=pfminfo.avgwidth 
-    local italicangle=metadata.italicangle
     local charxheight=pfminfo.os2_xheight and pfminfo.os2_xheight>0 and pfminfo.os2_xheight
+    local italicangle=metadata.italicangle
     properties.monospaced=monospaced
     parameters.italicangle=italicangle
     parameters.charwidth=charwidth
@@ -7986,15 +8050,6 @@ local function copytotfm(data,cache_id)
       end
     end
     spaceunits=tonumber(spaceunits) or 500
-    local filename=constructors.checkedfilename(resources)
-    local fontname=metadata.fontname
-    local fullname=metadata.fullname or fontname
-    local units=metadata.units_per_em or 1000
-    if units==0 then 
-      units=1000 
-      metadata.units_per_em=1000
-      report_otf("changing %a units to %a",0,units)
-    end
     parameters.slant=0
     parameters.space=spaceunits     
     parameters.space_stretch=units/2  
@@ -8033,7 +8088,7 @@ local function copytotfm(data,cache_id)
     parameters.units=units
     properties.space=spacer
     properties.encodingbytes=2
-    properties.format=data.format or fonts.formats[filename] or "opentype"
+    properties.format=data.format or otf_format(filename) or formats.otf
     properties.noglyphnames=true
     properties.filename=filename
     properties.fontname=fontname
@@ -8058,9 +8113,8 @@ local function otftotfm(specification)
     local name=specification.name
     local sub=specification.sub
     local filename=specification.filename
-    local format=specification.format
     local features=specification.features.normal
-    local rawdata=otf.load(filename,format,sub,features and features.featurefile)
+    local rawdata=otf.load(filename,sub,features and features.featurefile)
     if rawdata and next(rawdata) then
       rawdata.lookuphash={}
       tfmdata=copytotfm(rawdata,cache_id)
@@ -8142,41 +8196,33 @@ function otf.collectlookups(rawdata,kind,script,language)
   end
   return nil,nil
 end
-local function check_otf(forced,specification,suffix,what)
+local function check_otf(forced,specification,suffix)
   local name=specification.name
   if forced then
-    name=file.addsuffix(name,suffix,true)
+    name=specification.forcedname 
   end
   local fullname=findbinfile(name,suffix) or ""
   if fullname=="" then
     fullname=fonts.names.getfilename(name,suffix) or ""
   end
-  if fullname~="" then
+  if fullname~="" and not fonts.names.ignoredfile(fullname) then
     specification.filename=fullname
-    specification.format=what
     return read_from_otf(specification)
   end
 end
-local function opentypereader(specification,suffix,what)
+local function opentypereader(specification,suffix)
   local forced=specification.forced or ""
-  if forced=="otf" then
-    return check_otf(true,specification,forced,"opentype")
-  elseif forced=="ttf" or forced=="ttc" or forced=="dfont" then
-    return check_otf(true,specification,forced,"truetype")
+  if formats[forced] then
+    return check_otf(true,specification,forced)
   else
-    return check_otf(false,specification,suffix,what)
+    return check_otf(false,specification,suffix)
   end
 end
-readers.opentype=opentypereader
-local formats=fonts.formats
-formats.otf="opentype"
-formats.ttf="truetype"
-formats.ttc="truetype"
-formats.dfont="truetype"
-function readers.otf (specification) return opentypereader(specification,"otf",formats.otf ) end
-function readers.ttf (specification) return opentypereader(specification,"ttf",formats.ttf ) end
-function readers.ttc (specification) return opentypereader(specification,"ttf",formats.ttc ) end
-function readers.dfont(specification) return opentypereader(specification,"ttf",formats.dfont) end
+readers.opentype=opentypereader 
+function readers.otf (specification) return opentypereader(specification,"otf") end
+function readers.ttf (specification) return opentypereader(specification,"ttf") end
+function readers.ttc (specification) return opentypereader(specification,"ttf") end
+function readers.dfont(specification) return opentypereader(specification,"ttf") end
 function otf.scriptandlanguage(tfmdata,attr)
   local properties=tfmdata.properties
   return properties.script or "dflt",properties.language or "dflt"
@@ -9283,6 +9329,11 @@ local features={
   medi=s_medi,
   fina=s_fina,
   isol=s_isol,
+  rphf=s_rphf,
+  half=s_half,
+  pref=s_pref,
+  blwf=s_blwf,
+  pstf=s_pstf,
 }
 analyzers.states=states
 analyzers.features=features
@@ -9659,6 +9710,7 @@ local default="dflt"
 local nodecodes=nodes.nodecodes
 local whatcodes=nodes.whatcodes
 local glyphcodes=nodes.glyphcodes
+local disccodes=nodes.disccodes
 local glyph_code=nodecodes.glyph
 local glue_code=nodecodes.glue
 local disc_code=nodecodes.disc
@@ -9666,6 +9718,7 @@ local whatsit_code=nodecodes.whatsit
 local math_code=nodecodes.math
 local dir_code=whatcodes.dir
 local localpar_code=whatcodes.localpar
+local discretionary_code=disccodes.discretionary
 local ligature_code=glyphcodes.ligature
 local privateattribute=attributes.private
 local a_state=privateattribute('state')
@@ -9913,13 +9966,13 @@ local function get_alternative_glyph(start,alternatives,value,trace_alternatives
     end
   end
 end
-local function multiple_glyphs(head,start,multiple) 
+local function multiple_glyphs(head,start,multiple,ignoremarks)
   local nofmultiples=#multiple
   if nofmultiples>0 then
     setfield(start,"char",multiple[1])
     if nofmultiples>1 then
       local sn=getnext(start)
-      for k=2,nofmultiples do 
+      for k=2,nofmultiples do
         local n=copy_node(start) 
         setfield(n,"char",multiple[k])
         setfield(n,"next",sn)
@@ -9954,11 +10007,11 @@ function handlers.gsub_alternate(head,start,kind,lookupname,alternative,sequence
   end
   return head,start,true
 end
-function handlers.gsub_multiple(head,start,kind,lookupname,multiple)
+function handlers.gsub_multiple(head,start,kind,lookupname,multiple,sequence)
   if trace_multiples then
     logprocess("%s: replacing %s by multiple %s",pref(kind,lookupname),gref(getchar(start)),gref(multiple))
   end
-  return multiple_glyphs(head,start,multiple)
+  return multiple_glyphs(head,start,multiple,sequence.flags[1])
 end
 function handlers.gsub_ligature(head,start,kind,lookupname,ligature,sequence)
   local s,stop,discfound=getnext(start),nil,false
@@ -10292,7 +10345,6 @@ function handlers.gpos_pair(head,start,kind,lookupname,kerns,sequence)
         prev=snext
         snext=getnext(snext)
       else
-        local krn=kerns[nextchar]
         if not krn then
         elseif type(krn)=="table" then
           if lookuptype=="pair" then 
@@ -10365,34 +10417,6 @@ function chainprocs.reversesub(head,start,stop,kind,chainname,currentcontext,loo
     return head,start,false
   end
 end
-local function delete_till_stop(start,stop,ignoremarks) 
-  local n=1
-  if start==stop then
-  elseif ignoremarks then
-    repeat 
-      local next=getnext(start)
-      if not marks[getchar(next)] then
-        local components=getfield(next,"components")
-        if components then 
-          flush_node_list(components)
-        end
-        delete_node(start,next)
-      end
-      n=n+1
-    until next==stop
-  else 
-    repeat
-      local next=getnext(start)
-      local components=getfield(next,"components")
-      if components then 
-        flush_node_list(components)
-      end
-      delete_node(start,next)
-      n=n+1
-    until next==stop
-  end
-  return n
-end
 function chainprocs.gsub_single(head,start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname,chainindex)
   local current=start
   local subtables=currentlookup.subtables
@@ -10432,7 +10456,6 @@ function chainprocs.gsub_single(head,start,stop,kind,chainname,currentcontext,lo
 end
 chainmores.gsub_single=chainprocs.gsub_single
 function chainprocs.gsub_multiple(head,start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname)
-  delete_till_stop(start,stop) 
   local startchar=getchar(start)
   local subtables=currentlookup.subtables
   local lookupname=subtables[1]
@@ -10451,7 +10474,7 @@ function chainprocs.gsub_multiple(head,start,stop,kind,chainname,currentcontext,
       if trace_multiples then
         logprocess("%s: replacing %s by multiple characters %s",cref(kind,chainname,chainlookupname,lookupname),gref(startchar),gref(replacements))
       end
-      return multiple_glyphs(head,start,replacements)
+      return multiple_glyphs(head,start,replacements,currentlookup.flags[1])
     end
   end
   return head,start,false
@@ -10835,6 +10858,7 @@ function chainprocs.gpos_single(head,start,stop,kind,chainname,currentcontext,lo
   end
   return head,start,false
 end
+chainmores.gpos_single=chainprocs.gpos_single
 function chainprocs.gpos_pair(head,start,stop,kind,chainname,currentcontext,lookuphash,currentlookup,chainlookupname,chainindex,sequence)
   local snext=getnext(start)
   if snext then
@@ -10903,6 +10927,7 @@ function chainprocs.gpos_pair(head,start,stop,kind,chainname,currentcontext,look
   end
   return head,start,false
 end
+chainmores.gpos_pair=chainprocs.gpos_pair
 local function show_skip(kind,chainname,char,ck,class)
   if ck[9] then
     logwarning("%s: skipping char %s, class %a, rule %a, lookuptype %a, %a => %a",cref(kind,chainname),gref(char),class,ck[1],ck[2],ck[9],ck[10])
@@ -10910,6 +10935,10 @@ local function show_skip(kind,chainname,char,ck,class)
     logwarning("%s: skipping char %s, class %a, rule %a, lookuptype %a",cref(kind,chainname),gref(char),class,ck[1],ck[2])
   end
 end
+local quit_on_no_replacement=true
+directives.register("otf.chain.quitonnoreplacement",function(value) 
+  quit_on_no_replacement=value
+end)
 local function normal_handle_contextchain(head,start,kind,chainname,contexts,sequence,lookuphash)
   local flags=sequence.flags
   local done=false
@@ -11119,7 +11148,11 @@ local function normal_handle_contextchain(head,start,kind,chainname,contexts,seq
           if chainlookup then
             local cp=chainprocs[chainlookup.type]
             if cp then
-              head,start,done=cp(head,start,last,kind,chainname,ck,lookuphash,chainlookup,chainlookupname,nil,sequence)
+              local ok
+              head,start,ok=cp(head,start,last,kind,chainname,ck,lookuphash,chainlookup,chainlookupname,nil,sequence)
+              if ok then
+                done=true
+              end
             else
               logprocess("%s: %s is not yet supported",cref(kind,chainname,chainlookupname),chainlookup.type)
             end
@@ -11146,19 +11179,24 @@ local function normal_handle_contextchain(head,start,kind,chainname,contexts,seq
               end
             end
             local chainlookupname=chainlookups[i]
-            local chainlookup=lookuptable[chainlookupname] 
-            local cp=chainlookup and chainmores[chainlookup.type]
-            if cp then
-              local ok,n
-              head,start,ok,n=cp(head,start,last,kind,chainname,ck,lookuphash,chainlookup,chainlookupname,i,sequence)
-              if ok then
-                done=true
-                i=i+(n or 1)
-              else
-                i=i+1
-              end
-            else
+            local chainlookup=lookuptable[chainlookupname]
+            if not chainlookup then
               i=i+1
+            else
+              local cp=chainmores[chainlookup.type]
+              if not cp then
+                logprocess("%s: %s is not yet supported",cref(kind,chainname,chainlookupname),chainlookup.type)
+                i=i+1
+              else
+                local ok,n
+                head,start,ok,n=cp(head,start,last,kind,chainname,ck,lookuphash,chainlookup,chainlookupname,i,sequence)
+                if ok then
+                  done=true
+                  i=i+(n or 1)
+                else
+                  i=i+1
+                end
+              end
             end
             if start then
               start=getnext(start)
@@ -11171,7 +11209,7 @@ local function normal_handle_contextchain(head,start,kind,chainname,contexts,seq
         if replacements then
           head,start,done=chainprocs.reversesub(head,start,last,kind,chainname,ck,lookuphash,replacements) 
         else
-          done=true 
+          done=quit_on_no_replacement 
           if trace_contexts then
             logprocess("%s: skipping match",cref(kind,chainname))
           end
@@ -11368,6 +11406,40 @@ local function featuresprocessor(head,font,attr)
         if not lookupcache then 
           report_missing_cache(typ,lookupname)
         else
+          local function subrun(start)
+            local head=start
+            local done=false
+            while start do
+              local id=getid(start)
+              if id==glyph_code and getfont(start)==font and getsubtype(start)<256 then
+                local a=getattr(start,0)
+                if a then
+                  a=(a==attr) and (not attribute or getattr(start,a_state)==attribute)
+                else
+                  a=not attribute or getattr(start,a_state)==attribute
+                end
+                if a then
+                  local lookupmatch=lookupcache[getchar(start)]
+                  if lookupmatch then
+                    local ok
+                    head,start,ok=handler(head,start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,1)
+                    if ok then
+                      done=true
+                    end
+                  end
+                  if start then start=getnext(start) end
+                else
+                  start=getnext(start)
+                end
+              else
+                start=getnext(start)
+              end
+            end
+            if done then
+              success=true
+              return head
+            end
+          end
           while start do
             local id=getid(start)
             if id==glyph_code then
@@ -11394,6 +11466,25 @@ local function featuresprocessor(head,font,attr)
               else
                 start=getnext(start)
               end
+            elseif id==disc_code then
+              if getsubtype(start)==discretionary_code then
+                local pre=getfield(start,"pre")
+                if pre then
+                  local new=subrun(pre)
+                  if new then setfield(start,"pre",new) end
+                end
+                local post=getfield(start,"post")
+                if post then
+                  local new=subrun(post)
+                  if new then setfield(start,"post",new) end
+                end
+                local replace=getfield(start,"replace")
+                if replace then
+                  local new=subrun(replace)
+                  if new then setfield(start,"replace",new) end
+                end
+              end
+              start=getnext(start)
             elseif id==whatsit_code then 
               local subtype=getsubtype(start)
               if subtype==dir_code then
@@ -11438,6 +11529,51 @@ local function featuresprocessor(head,font,attr)
           end
         end
       else
+        local function subrun(start)
+          local head=start
+          local done=false
+          while start do
+            local id=getid(start)
+            if id==glyph_code and getfont(start)==font and getsubtype(start)<256 then
+              local a=getattr(start,0)
+              if a then
+                a=(a==attr) and (not attribute or getattr(start,a_state)==attribute)
+              else
+                a=not attribute or getattr(start,a_state)==attribute
+              end
+              if a then
+                for i=1,ns do
+                  local lookupname=subtables[i]
+                  local lookupcache=lookuphash[lookupname]
+                  if lookupcache then
+                    local lookupmatch=lookupcache[getchar(start)]
+                    if lookupmatch then
+                      local ok
+                      head,start,ok=handler(head,start,dataset[4],lookupname,lookupmatch,sequence,lookuphash,i)
+                      if ok then
+                        done=true
+                        break
+                      elseif not start then
+                        break
+                      end
+                    end
+                  else
+                    report_missing_cache(typ,lookupname)
+                  end
+                end
+                if start then start=getnext(start) end
+              else
+                start=getnext(start)
+              end
+            else
+              start=getnext(start)
+            end
+          end
+          if done then
+            success=true
+            return head
+          end
+        end
         while start do
           local id=getid(start)
           if id==glyph_code then
@@ -11475,6 +11611,25 @@ local function featuresprocessor(head,font,attr)
             else
               start=getnext(start)
             end
+          elseif id==disc_code then
+            if getsubtype(start)==discretionary_code then
+              local pre=getfield(start,"pre")
+              if pre then
+                local new=subrun(pre)
+                if new then setfield(start,"pre",new) end
+              end
+              local post=getfield(start,"post")
+              if post then
+                local new=subrun(post)
+                if new then setfield(start,"post",new) end
+              end
+              local replace=getfield(start,"replace")
+              if replace then
+                local new=subrun(replace)
+                if new then setfield(start,"replace",new) end
+              end
+            end
+            start=getnext(start)
           elseif id==whatsit_code then
             local subtype=getsubtype(start)
             if subtype==dir_code then
@@ -12635,6 +12790,7 @@ if not modules then modules={} end modules ['font-def']={
 local format,gmatch,match,find,lower,gsub=string.format,string.gmatch,string.match,string.find,string.lower,string.gsub
 local tostring,next=tostring,next
 local lpegmatch=lpeg.match
+local suffixonly,removesuffix=file.suffix,file.removesuffix
 local allocate=utilities.storage.allocate
 local trace_defining=false trackers .register("fonts.defining",function(v) trace_defining=v end)
 local directive_embedall=false directives.register("fonts.embedall",function(v) directive_embedall=v end)
@@ -12724,10 +12880,11 @@ definers.resolvers=definers.resolvers or {}
 local resolvers=definers.resolvers
 function resolvers.file(specification)
   local name=resolvefile(specification.name) 
-  local suffix=file.suffix(name)
+  local suffix=lower(suffixonly(name))
   if fonts.formats[suffix] then
     specification.forced=suffix
-    specification.name=file.removesuffix(name)
+    specification.forcedname=name
+    specification.name=removesuffix(name)
   else
     specification.name=name 
   end
@@ -12739,10 +12896,11 @@ function resolvers.name(specification)
     if resolved then
       specification.resolved=resolved
       specification.sub=sub
-      local suffix=file.suffix(resolved)
+      local suffix=lower(suffixonly(resolved))
       if fonts.formats[suffix] then
         specification.forced=suffix
-        specification.name=file.removesuffix(resolved)
+        specification.forcedname=resolved
+        specification.name=removesuffix(resolved)
       else
         specification.name=resolved
       end
@@ -12758,8 +12916,9 @@ function resolvers.spec(specification)
     if resolved then
       specification.resolved=resolved
       specification.sub=sub
-      specification.forced=file.suffix(resolved)
-      specification.name=file.removesuffix(resolved)
+      specification.forced=lower(suffixonly(resolved))
+      specification.forcedname=resolved
+      specification.name=removesuffix(resolved)
     end
   else
     resolvers.name(specification)
@@ -12774,8 +12933,7 @@ function definers.resolve(specification)
   end
   if specification.forced=="" then
     specification.forced=nil
-  else
-    specification.forced=specification.forced
+    specification.forcedname=nil
   end
   specification.hash=lower(specification.name..' @ '..constructors.hashfeatures(specification))
   if specification.sub and specification.sub~="" then
@@ -12820,7 +12978,7 @@ function definers.loadfont(specification)
   if not tfmdata then
     local forced=specification.forced or ""
     if forced~="" then
-      local reader=readers[lower(forced)]
+      local reader=readers[lower(forced)] 
       tfmdata=reader and reader(specification)
       if not tfmdata then
         report_defining("forced type %a of %a not found",forced,specification.name)

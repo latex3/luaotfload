@@ -1904,8 +1904,11 @@ loadmodule"colors.lua"     --- “font-clr”
 %
 %    \begin{macrocode}
 
+local filesuffix          = file.suffix
+local fileremovesuffix    = file.removesuffix
 local request_resolvers   = fonts.definers.resolvers
-local formats             = fonts.formats -- nice table; does lowercasing ...
+local formats             = fonts.formats
+local names               = fonts.names
 formats.ofm               = "type1"
 
 %    \end{macrocode}
@@ -1922,23 +1925,27 @@ formats.ofm               = "type1"
 % With the release version 2.2 the file names are indexed in the database
 % as well and we are ready to resolve \verb|file:| lookups this way.
 % Thus we no longer need to call the \identifier{kpathsea} library in
-% most cases when looking up font files, only when generating the database.
+% most cases when looking up font files, only when generating the database,
+% and when verifying the existence of a file in the \fileent{texmf} tree.
 %
 %    \begin{macrocode}
 
-local resolvefile = fonts.names.crude_file_lookup
---local resolvefile = fonts.names.crude_file_lookup_verbose
+local resolve_file        = names.crude_file_lookup
+--local resolve_file        = names.crude_file_lookup_verbose
+local resolve_name        = names.resolve_name
 
-request_resolvers.file = function (specification)
-    local name    = resolvefile(specification.name)
-    local suffix  = file.suffix(name)
+local file_resolver = function (specification)
+    local name    = resolve_file (specification.name)
+    local suffix  = filesuffix(name)
     if formats[suffix] then
-        specification.forced  = suffix
-        specification.name    = file.removesuffix(name)
+        specification.forced      = suffix
+        specification.forcedname  = file.removesuffix(name)
     else
         specification.name = name
     end
 end
+
+request_resolvers.file = file_resolver
 
 %    \end{macrocode}
 % We classify as \verb|anon:| those requests that have neither a
@@ -1974,7 +1981,8 @@ request_resolvers.anon = function (specification)
     for i=1, #type1_formats do
         local format = type1_formats[i]
         if resolvers.findfile(name, format) then
-            specification.name = file.addsuffix(name, format)
+            specification.forcedname = file.addsuffix(name, format)
+            specification.forced     = format
             return
         end
     end
@@ -2011,9 +2019,9 @@ request_resolvers.path = function (specification)
         logs.names_report("log", 1, "load",
           "path lookup of %q unsuccessful, falling back to file:",
           name)
-        request_resolvers.file(specification)
+        file_resolver (specification)
     else
-      local suffix = file.suffix(name)
+      local suffix = filesuffix (name)
       if formats[suffix] then
         specification.forced  = suffix
         specification.name    = file.removesuffix(name)
@@ -2032,12 +2040,12 @@ end
 
 request_resolvers.kpse = function (specification)
     local name       = specification.name
-    local suffix     = file.suffix(name)
+    local suffix     = filesuffix(name)
     if suffix and formats[suffix] then
         name = file.removesuffix(name)
         if resolvers.findfile(name, suffix) then
-            specification.forced = suffix
-            specification.name   = name
+            specification.forced       = suffix
+            specification.forcedname   = name
             return
         end
     end
@@ -2047,6 +2055,28 @@ request_resolvers.kpse = function (specification)
             specification.name   = name
             return
         end
+    end
+end
+
+%    \end{macrocode}
+% The \verb|name:| resolver wraps the database function
+% \luafunction{resolve_name}.
+%
+%    \begin{macrocode}
+
+--- fonts.names.resolvers.name -- Customized version of the
+--- generic name resolver.
+
+request_resolvers.name = function (specification)
+    local resolved, subfont = resolve_name (specification)
+    if resolved then
+        specification.resolved   = resolved
+        specification.sub        = subfont
+        specification.forced     = filesuffix (resolved)
+        specification.forcedname = resolved
+        specification.name       = fileremovesuffix (resolved)
+    else
+        file_resolver (specification)
     end
 end
 

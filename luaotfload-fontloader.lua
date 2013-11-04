@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 11/01/13 12:20:30
+-- merge date  : 11/04/13 11:52:02
 
 do -- begin closure to overcome local limits and interference
 
@@ -2613,6 +2613,31 @@ function number.signed(i)
     return "-",-i
   end
 end
+local zero=P("0")^1/""
+local plus=P("+")/""
+local minus=P("-")
+local separator=S(".")
+local digit=R("09")
+local trailing=zero^1*#S("eE")
+local exponent=(S("eE")*(plus+Cs((minus*zero^0*P(-1))/"")+minus)*zero^0*(P(-1)*Cc("0")+P(1)^1))
+local pattern_a=Cs(minus^0*digit^1*(separator/""*trailing+separator*(trailing+digit)^0)*exponent)
+local pattern_b=Cs((exponent+P(1))^0)
+function number.sparseexponent(f,n)
+  if not n then
+    n=f
+    f="%e"
+  end
+  local tn=type(n)
+  if tn=="string" then 
+    local m=tonumber(n)
+    if m then
+      return lpegmatch((f=="%e" or f=="%E") and pattern_a or pattern_b,format(f,m))
+    end
+  elseif tn=="number" then
+    return lpegmatch((f=="%e" or f=="%E") and pattern_a or pattern_b,format(f,n))
+  end
+  return tostring(n)
+end
 local preamble=[[
 local type = type
 local tostring = tostring
@@ -2631,6 +2656,7 @@ local autosingle = string.autosingle
 local autodouble = string.autodouble
 local sequenced = table.sequenced
 local formattednumber = number.formatted
+local sparseexponent = number.sparseexponent
 ]]
 local template=[[
 %s
@@ -2702,6 +2728,14 @@ end
 local format_E=function(f)
   n=n+1
   return format("format('%%%sE',a%s)",f,n)
+end
+local format_j=function(f)
+  n=n+1
+  return format("sparseexponent('%%%se',a%s)",f,n)
+end
+local format_J=function(f)
+  n=n+1
+  return format("sparseexponent('%%%sE',a%s)",f,n)
 end
 local format_x=function(f)
   n=n+1
@@ -2860,6 +2894,10 @@ local format_M=function(f)
   end
   return format([[formattednumber(a%s,%q,",")]],n,f)
 end
+local format_z=function(f)
+  n=n+(tonumber(f) or 1)
+  return "''" 
+end
 local format_rest=function(s)
   return format("%q",s) 
 end
@@ -2893,12 +2931,13 @@ local builder=Cs { "start",
 +V("c")+V("C")+V("S") 
 +V("Q") 
 +V("N")
-+V("r")+V("h")+V("H")+V("u")+V("U")+V("p")+V("b")+V("t")+V("T")+V("l")+V("L")+V("I")+V("h") 
-+V("w") 
++V("r")+V("h")+V("H")+V("u")+V("U")+V("p")+V("b")+V("t")+V("T")+V("l")+V("L")+V("I")+V("w") 
 +V("W") 
 +V("a") 
 +V("A") 
-+V("m")+V("M")
++V("j")+V("J") 
++V("m")+V("M") 
++V("z")
 +V("*") 
       )+V("*")
     )*(P(-1)+Carg(1))
@@ -2934,8 +2973,11 @@ local builder=Cs { "start",
   ["I"]=(prefix_any*P("I"))/format_I,
   ["w"]=(prefix_any*P("w"))/format_w,
   ["W"]=(prefix_any*P("W"))/format_W,
+  ["j"]=(prefix_any*P("j"))/format_j,
+  ["J"]=(prefix_any*P("J"))/format_J,
   ["m"]=(prefix_tab*P("m"))/format_m,
   ["M"]=(prefix_tab*P("M"))/format_M,
+  ["z"]=(prefix_any*P("z"))/format_z,
   ["a"]=(prefix_any*P("a"))/format_a,
   ["A"]=(prefix_any*P("A"))/format_A,
   ["*"]=Cs(((1-P("%"))^1+P("%%")/"%%")^1)/format_rest,

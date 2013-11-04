@@ -30,7 +30,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
     fontdbutil  -> font_names   [label="--update",
                                  style=dashed]
 
-    luaotfload -> otfl_fonts_merged [label="merged"]
+    luaotfload -> otfl_fonts_merged   [label="merged"]
     luaotfload -> merged_lua_libs     [label="unmerged", style=solid]
     luaotfload -> merged_luatex_fonts [label="unmerged", style=solid]
     luaotfload -> merged_context_libs [label="unmerged", style=solid]
@@ -139,7 +139,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
      *                   style  = "filled,rounded",
      *                   penwidth=2]
      */
-    otfl_fonts_merged [label = "luaotfload-merged.lua",
+    otfl_fonts_merged [label = "luaotfload-fontloader.lua",
                        shape = rect,
                        width  = "3.2cm",
                        height = "1.2cm",

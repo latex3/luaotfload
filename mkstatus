@@ -52,7 +52,7 @@ local names = {
   "luaotfload-letterspace.lua",
   "luaotfload-loaders.lua",
   "luaotfload.lua",
-  "luaotfload-merged.lua",
+  "luaotfload-fontloader.lua",
   "luaotfload-override.lua",
   "luaotfload-tool.lua",
   "luaotfload-typo-krn.lua",

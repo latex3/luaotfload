@@ -95,6 +95,7 @@ fonts.names                    = fonts.names    or { }
 fonts.definers                 = fonts.definers or { }
 
 local names                    = fonts.names
+local name_index               = nil -- upvalue for names.data
 
 local luaotfloadconfig         = config.luaotfload --- always present
 luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
@@ -271,7 +272,7 @@ This is a sketch of the luaotfload db:
 
     type dbobj = {
         families    : familytable;
-        filenames   : filemap;
+        files       : filemap;
         status      : filestatus;
         mappings    : fontentry list;
         meta        : metadata;
@@ -382,7 +383,7 @@ local initialize_namedata = function (formats) --- returns dbobj
         status          = { }, -- was: status; map abspath -> mapping
         mappings        = { }, -- TODO: check if still necessary after rewrite
         names           = { },
---      filenames       = { }, -- created later
+--      files           = { }, -- created later
         meta            = {
             formats    = formats,
             statistics = { },
@@ -442,7 +443,7 @@ local load_lookups
 local read_blacklist
 local read_fonts_conf
 local reload_db
-local resolve
+local resolve_name
 local resolve_cached
 local resolve_fullpath
 local save_names
@@ -452,7 +453,6 @@ local get_font_filter
 local set_font_filter
 
 --- state of the database
-local fonts_loaded   = false
 local fonts_reloaded = false
 
 --- limit output when approximate font matching (luaotfload-tool -F)
@@ -494,7 +494,6 @@ load_names = function (dry_run)
             report ("both", 0, "db", "Database creation unsuccessful.")
         end
     end
-    fonts_loaded = true
     return data
 end
 
@@ -590,18 +589,17 @@ end
 
 --- string -> (string * string * bool)
 crude_file_lookup_verbose = function (filename)
-    if not names.data then names.data = load_names() end
-    local data      = names.data
-    local mappings  = data.mappings
-    local filenames = data.filenames
+    if not name_index then name_index = load_names() end
+    local mappings  = name_index.mappings
+    local files     = name_index.files
     local found
 
     --- look up in db first ...
-    found = verbose_lookup(filenames, "bare", filename)
+    found = verbose_lookup(files, "bare", filename)
     if found then
         return found, nil, true
     end
-    found = verbose_lookup(filenames, "base", filename)
+    found = verbose_lookup(files, "base", filename)
     if found then
         return found, nil, true
     end
@@ -618,18 +616,17 @@ end
 
 --- string -> (string * string * bool)
 crude_file_lookup = function (filename)
-    if not names.data then names.data = load_names() end
-    local data      = names.data
-    local mappings  = data.mappings
-    local filenames = data.filenames
+    if not name_index then name_index = load_names() end
+    local mappings  = name_index.mappings
+    local files     = name_index.files
 
     local found
 
-    found = filenames.base[filename]
-         or filenames.bare[filename]
+    found = files.base[filename]
+         or files.bare[filename]
 
     if found then
-        found = filenames.full[found]
+        found = files.full[found]
         if found == nil then
             found = dummy_findfile(filename)
         end
@@ -672,15 +669,15 @@ the texmf or filesystem.
 --doc]]--
 
 local verify_font_file = function (basename)
-    if not names.data then names.data = load_names() end
-    local filenames = names.data.filenames
-    local idx = filenames.base[basename]
+    if not name_index then name_index = load_names() end
+    local files = name_index.files
+    local idx = files.base[basename]
     if not idx then
         return false
     end
 
     --- firstly, check filesystem
-    local fullname = filenames.full[idx]
+    local fullname = files.full[idx]
     if fullname and lfsisfile(fullname) then
         return true
     end
@@ -881,6 +878,7 @@ the font database created by the luaotfload-tool script.
 --- 'a -> 'a -> table -> (string * string | bool * bool)
 ---
 
+--[===[
 resolve = function (_, _, specification) -- the 1st two parameters are used by ConTeXt
     if not fonts_loaded then names.data = load_names() end
     local data = names.data
@@ -1006,7 +1004,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         --- “found” is really synonymous with “registered in the db”.
         local entry = found[1]
         local success, filename, subfont
-            = get_font_file(data.filenames.full, entry)
+            = get_font_file(data.files.full, entry)
         if success == true then
             report("log", 0, "resolve",
                 "Font family='%s', subfamily='%s' found: %s",
@@ -1047,7 +1045,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         end
 
         local success, filename, subfont
-            = get_font_file(data.filenames.full, match)
+            = get_font_file(data.files.full, match)
         if success == true then
             report("log", 0, "resolve",
                 "Font family='%s', subfamily='%s' found: %s",
@@ -1058,7 +1056,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
 
     elseif fallback then
         local success, filename, subfont
-            = get_font_file(data.filenames.full, fallback)
+            = get_font_file(data.files.full, fallback)
         if success == true then
             report("log", 0, "resolve",
                 "No exact match for request %s; using fallback",
@@ -1074,7 +1072,7 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
         --- pick the first candidate encountered
         local entry = candidates[1]
         local success, filename, subfont
-            = get_font_file(data.filenames.full, entry)
+            = get_font_file(data.files.full, entry)
         if success == true then
             report("log", 0, "resolve",
                 "Font family='%s', subfamily='%s' found: %s",
@@ -1096,16 +1094,19 @@ resolve = function (_, _, specification) -- the 1st two parameters are used by C
     --- else, default to requested name
     return specification.name, false, false
 end --- resolve()
+]===]
+
+resolve_name = function (specification)
+    if not name_index then name_index = load_names () end
+end
 
 resolve_fullpath = function (fontname, ext) --- getfilename()
-    if not fonts_loaded then
-        names.data = load_names()
-    end
-    local filenames = names.data.filenames
-    local idx = filenames.base[fontname]
-             or filenames.bare[fontname]
+    if not name_index then name_index = load_names () end
+    local files = name_index.files
+    local idx = files.base[fontname]
+             or files.bare[fontname]
     if idx then
-        return filenames.full[idx]
+        return files.full[idx]
     end
     return ""
 end
@@ -1115,7 +1116,7 @@ end
 
 --- string -> ('a -> 'a) -> 'a list -> 'a
 reload_db = function (why, caller, ...)
-    local namedata  = names.data
+    local namedata  = name_index
     local formats   = tableconcat (namedata.meta.formats, ",")
 
     report ("both", 1, "db",
@@ -1127,7 +1128,7 @@ reload_db = function (why, caller, ...)
 
     if namedata then
         fonts_reloaded = true
-        names.data = namedata
+        name_index = namedata
         return caller (...)
     end
 
@@ -1167,16 +1168,14 @@ find_closest = function (name, limit)
     local name     = sanitize_fontname (name)
     limit          = limit or fuzzy_limit
 
-    if not fonts_loaded then names.data = load_names() end
-
-    local data = names.data
-
-    if type(data) ~= "table" then
+    if not name_index then name_index = load_names () end
+    if not name_index or type (name_index) ~= "table" then
         if not fonts_reloaded then
             return reload_db("no database", find_closest, name)
         end
         return false
     end
+
     local by_distance   = { } --- (int, string list) dict
     local distances     = { } --- int list
     local cached        = { } --- (string, int) dict
@@ -2473,7 +2472,7 @@ local generate_filedata = function (mappings)
 
     local nmappings  = #mappings
 
-    local filenames  = {
+    local files  = {
         bare = {
             ["local"]   = { },
             system      = { }, --- mapped to mapping format -> index in full
@@ -2487,9 +2486,9 @@ local generate_filedata = function (mappings)
         full = { }, --- non-texmf
     }
 
-    local base = filenames.base
-    local bare = filenames.bare
-    local full = filenames.full
+    local base = files.base
+    local bare = files.bare
+    local full = files.full
 
     local conflicts = {
         basenames = 0,
@@ -2586,7 +2585,7 @@ local generate_filedata = function (mappings)
 --        addmap(sys)
 --    end
 
-    return filenames
+    return files
 end
 
 local match_synonyms = function (pattern)
@@ -3025,7 +3024,7 @@ update_names = function (currentnames, force, dry_run)
         report ("info", 2, "db",
                 "Skipping database update")
         --- skip all db updates
-        return currentnames or names.data
+        return currentnames or name_index
     end
 
     local starttime                 = osgettimeofday ()
@@ -3101,7 +3100,7 @@ update_names = function (currentnames, force, dry_run)
     report ("info", 3, "db",
             "Rebuilt in %0.f ms.",
             1000 * (osgettimeofday () - starttime))
-    names.data = targetnames
+    name_index = targetnames
 
     if dry_run ~= true then
 
@@ -3151,7 +3150,7 @@ end
 --- dbobj? -> bool
 save_names = function (currentnames)
     if not currentnames then
-        currentnames = names.data
+        currentnames = name_index
     end
     local path = names.path.index
     local luaname, lucname = path.lua, path.luc
@@ -3354,6 +3353,7 @@ names.set_font_filter             = set_font_filter
 names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
 names.load                        = load_names
+names.data                        = function () return name_index end
 names.save                        = save_names
 names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
@@ -3373,8 +3373,8 @@ if luaotfloadconfig.resolver == "cached" then
     names.resolve     = resolve_cached
     names.resolvespec = resolve_cached
 else
-    names.resolve     = resolve
-    names.resolvespec = resolve
+    names.resolvespec  = resolve_name
+    names.resolve_name = resolve_name
 end
 
 names.find_closest = find_closest

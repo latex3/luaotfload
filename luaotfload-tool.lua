@@ -677,7 +677,7 @@ The font info knows two levels of detail:
 --doc]]--
 
 local show_font_info = function (basename, askedname, detail, warnings)
-    local filenames = names.data.filenames
+    local filenames = names.data().filenames
     local index     = filenames.base[basename]
     local fullname  = filenames.full[index]
     askedname = sanitize_fontname (askedname)
@@ -775,7 +775,7 @@ actions.generate = function (job)
     fontnames = names.update(fontnames, job.force_reload, job.dry_run)
     logs.names_report("info", 2, "db",
         "Fonts in the database: %i", #fontnames.mappings)
-    if names.data then
+    if names.data() then
         return true, true
     end
     return false, false
@@ -933,8 +933,9 @@ local splitcomma = names.patterns.splitcomma
 
 actions.list = function (job)
     local criterion     = job.criterion
-
     local asked_fields  = job.asked_fields
+    local name_index    = names.data ()
+
     if asked_fields then
         asked_fields = lpegmatch(splitcomma, asked_fields)
     else
@@ -942,11 +943,11 @@ actions.list = function (job)
         asked_fields = { "fullname", "version", }
     end
 
-    if not names.data then
-        names.data = names.load()
+    if not name_index then
+        name_index = names.load()
     end
 
-    local mappings  = names.data.mappings
+    local mappings  = name_index.mappings
     local nmappings = #mappings
 
     if criterion == "*" then

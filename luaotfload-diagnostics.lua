@@ -54,12 +54,12 @@ end
 local check_index = function (errcnt)
 
     out "================= font names =================="
+    local name_index = names.data()
 
-    if not names.data then
-        names.data = names.load ()
+    if not name_index then
+        name_index = names.load ()
     end
 
-    local namedata = names.data
     local mappings = namedata.mappings
 
     if not namedata and namedata.formats and namedata.version then

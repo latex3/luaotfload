@@ -588,6 +588,8 @@ aux.sprint_math_dimension = sprint_math_dimension
 local namesresolve      = fonts.names.resolve
 local namesscan_dir     = fonts.names.scan_dir
 
+--[====[-- TODO -> port this to new db model
+
 --- local directories -------------------------------------------------
 
 --- migrated from luaotfload-database.lua
@@ -595,7 +597,7 @@ local namesscan_dir     = fonts.names.scan_dir
 
 --- string -> (int * int)
 local scan_external_dir = function (dir)
-  local old_names, new_names = names.data
+  local old_names, new_names = names.data()
   if not old_names then
     old_names = load_names()
   end
@@ -611,6 +613,12 @@ local scan_external_dir = function (dir)
 end
 
 aux.scan_external_dir = scan_external_dir
+
+--]====]--
+
+aux.scan_external_dir = function ()
+  print "ERROR: scan_external_dir() is not implemented"
+end
 
 --- db queries --------------------------------------------------------
 

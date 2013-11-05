@@ -993,7 +993,12 @@ actions.list = function (job)
             local categories, by_category = { }, { }
             for i=1, nmappings do
                 local entry = mappings[i]
-                local value = entry[criterion]
+                local tmp   = entry
+                local chain = stringsplit (criterion, "->")
+                for i = 1, #chain - 1 do
+                    tmp = tmp [chain [i]]
+                end
+                local value = tmp [chain [#chain]]
                 if value then
                     --value = tostring(value)
                     local entries = by_category[value]

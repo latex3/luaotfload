@@ -960,7 +960,7 @@ actions.list = function (job)
 
     if not asked_fields then
         --- some defaults
-        asked_fields = { "names->fullname", "version", }
+        asked_fields = { "plainname", "version", }
     end
 
     if not name_index then

@@ -125,7 +125,9 @@ query mode
                         1) the character ``*``, selecting all entries;
                         2) a field of a database entry, for instance
                            *version* or *format**, according to which
-                           the output will be sorted; or
+                           the output will be sorted.
+                           Information in an unstripped database (see
+                           the option ``--no-strip`` above) is nested:
                            Subfields of a record can be addressed using
                            the ``->`` separator, e. g.
                            ``file->location``, ``style->units_per_em``,
@@ -157,11 +159,13 @@ query mode
 
 --fields=FIELDS         Comma-separated list of fields that should be
                         printed.
+                        Information in an unstripped database (see the
+                        option ``--no-strip`` above) is nested:
                         Subfields of a record can be addressed using
                         the ``->`` separator, e. g.
                         ``file->location``, ``style->units_per_em``,
                         or ``names->sanitized->english->subfamily``.
-                        The default is *names->fullname,version*.
+                        The default is plainname,version*.
                         (Only meaningful with ``--list``.)
 
 font and lookup caches

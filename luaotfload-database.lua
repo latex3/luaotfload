@@ -1355,7 +1355,8 @@ local organize_namedata = function (metadata,
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
     if metadata.fontstyle_name then
         --- not present in all fonts, often differs from the preferred
-        --- subfamily as well as subfamily fields, e.g. with LMSans10-BoldOblique:
+        --- subfamily as well as subfamily fields, e.g. with
+        --- LMSans10-BoldOblique:
         ---     subfamily:      “Bold Italic”
         ---     prefmodifiers:  “10 Bold Oblique”
         ---     fontstyle_name: “Bold Oblique”
@@ -1364,9 +1365,6 @@ local organize_namedata = function (metadata,
                 fontnames.fontstyle_name = name.name
             end
         end
-
-        --print (fontnames.metadata.fontname, "|>", english_names.subfamily, "<>", english_names.prefmodifiers)
-        --print (fontnames.metadata.fontname, "|>", english_names.subfamily, "<>", fontnames.fontstyle_name)
     end
 
     return {
@@ -1391,14 +1389,13 @@ local split_fontname = function (fontname)
     end
 end
 
-local organize_styledata = function (fontname, metadata, english_names, info)
+local organize_styledata = function (fontname,
+                                     metadata,
+                                     english_names,
+                                     info)
     local pfminfo   = metadata.pfminfo
     local names     = metadata.names
 
---    print (">", pfminfo.avgwidth,
---            (metadata.italicangle == info.italicangle) and "T" or
---            string.format ("%f / %f", metadata.italicangle, info.italicangle),
---            pfminfo.width, pfminfo.weight, info.weight)
     return {
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
         size            = get_size_info (metadata),
@@ -1474,8 +1471,8 @@ end
 --- string -> int -> bool -> string -> fontentry
 
 t1_fullinfo = function (filename, _subfont, location, basename, format)
-    local namedata = { }
-    local metadata = load_font_file (filename)
+    local sanitized
+    local metadata  = load_font_file (filename)
 
     local fontname      = metadata.fontname
     local fullname      = metadata.fullname
@@ -1483,68 +1480,35 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
     local italicangle   = metadata.italicangle
     local weight        = metadata.weight --- string identifier
 
-    --- we have to improvise and detect whether we deal with
-    --- italics since pfb fonts don’t come with a “subfamily”
-    --- field
-    local style
-    if italicangle == 0 then
-        style = false
-    else
-        style = "italic"
-    end
-
-    local style_synonyms_set = style_synonyms.set
-    if weight then
-        weight = sanitize_fontname (weight)
-        local tmp = ""
-        if style_synonyms_set.bold[weight] then
-            tmp = "bold"
-        end
-        if style then
-            style = tmp .. style
-        else
-            if style_synonyms_set.regular[weight] then
-                style = "regular"
-            else
-                style = tmp
-            end
-        end
-    end
-
-    if not style or style == "" then
-        style = "regular"
-        --- else italic
-    end
-
-    namedata.sanitized = sanitize_fontnames ({
+    sanitized = sanitize_fontnames ({
         fontname        = fontname,
         psname          = fullname,
         pfullname       = fullname,
         metafamily      = family,
-        family          = familyname,
+        familyname      = familyname,
         subfamily       = weight,
         prefmodifiers   = style,
     })
 
-    namedata.fontname      = fontname
-    namedata.fullname      = fullname
-    namedata.familyname    = familyname
-
-    namedata.slant         = italicangle
-    namedata.units_per_em  = 1000 --- ps fonts standard
-    namedata.version       = metadata.version
-    namedata.weight        = metadata.pfminfo.weight --- integer
-    namedata.width         = metadata.pfminfo.width
-
-    namedata.size          = false
-
-    namedata.filename      = filename --> sys
-    namedata.basename      = basename --> texmf
-    namedata.format        = format
-    namedata.location      = location or "system"
-    namedata.subfont       = false
-
-    return namedata
+    return {
+        basename         = basename,
+        fullpath         = filename,
+        subfont          = false,
+        location         = location or "system",
+        format           = format,
+        fullname         = sanitized.fullname,
+        fontname         = sanitized.fontname,
+        familyname       = sanitized.familyname,
+        plainname        = fullname,
+        psname           = sanitized.fontname,
+        version          = metadata.version,
+        size             = false,
+        splitstyle       = split_fontname (fontname),
+        fontstyle_name   = sanitized.subfamily,
+        weight           = { metadata.pfminfo.weight,
+                             sanitized.subfamily },
+        italicangle      = italicangle,
+    }
 end
 
 local loaders = {
@@ -1698,7 +1662,6 @@ local read_font_names = function (fullname,
     local format    = stringlower (filesuffix (basename))
     local loader    = loaders [format] --- ot_fullinfo, t1_fullinfo
 
-    local loader = loaders[format] --- ot_fullinfo, t1_fullinfo
     if not loader then
         report ("both", 0, "db",
                 "Unknown format: %q, skipping.", format)
@@ -2091,8 +2054,8 @@ local scan_dir = function (dirname, currentnames, targetnames,
                            "Would have been loading %q", fullname)
         else
             report_status ("both", "db", "Loading font %q", fullname)
-            local new = load_font (fullname, fontnames,
-                                   newfontnames, texmf)
+            local new = read_font_names (fullname, currentnames,
+                                         targetnames, texmf)
             if new == true then
                 n_new = n_new + 1
             end
@@ -2627,13 +2590,14 @@ do
                                  subfamily)
         if italicangle ~= 0 then
             return true
-        elseif fontstyle_name and lpegmatch (italic, fontstyle_name) then
+        elseif fontstyle_name ~= nil and lpegmatch (italic, fontstyle_name) then
             return true
-        elseif prefmodifiers and lpegmatch (italic, prefmodifiers) then
+        elseif prefmodifiers ~= nil and lpegmatch (italic, prefmodifiers) then
             return lpegmatch (italic, prefmodifiers)
-        else
-            return lpegmatch (italic, subfamily)
+        elseif subfamily ~= nil and lpegmatch (italic, subfamily) then
+            return true
         end
+        return false
     end
 
     determine_bold = function (fontstyle_name,
@@ -2642,13 +2606,14 @@ do
                                subfamily)
         if weight [2] == "bold" then
             return true
-        elseif fontstyle_name and lpegmatch (bold, fontstyle_name) then
+        elseif fontstyle_name ~= nil and lpegmatch (bold, fontstyle_name) then
             return true
-        elseif prefmodifiers and lpegmatch (bold, prefmodifiers) then
+        elseif prefmodifiers ~= nil and lpegmatch (bold, prefmodifiers) then
             return true
-        else
-            return lpegmatch (bold, subfamily)
+        elseif subfamily ~= nil and lpegmatch (bold, subfamily) then
+            return true
         end
+        return false
     end
 
     local splitfontname = lpeg.splitat "-"

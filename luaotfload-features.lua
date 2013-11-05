@@ -1097,9 +1097,9 @@ local select_lookup = function (request)
 end
 
 local supported = {
-    b    = "bold",
-    i    = "italic",
-    bi   = "bolditalic",
+    b    = "b",
+    i    = "i",
+    bi   = "bi",
     aat  = false,
     icu  = false,
     gr   = false,

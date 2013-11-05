@@ -20,6 +20,7 @@ SYNOPSIS
 **luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ]
                              [ --prefer-texmf ] [ --dry-run ]
                              [ --formats=[+|-]EXTENSIONS ]
+                             [ --compress ] [ --no-strip ]
 
 **luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
                                     [ --no-reload ]
@@ -62,6 +63,12 @@ update mode
                         all fonts.
 --no-reload, -n         Suppress auto-updates to the database (e.g.
                         when ``--find`` is passed an unknown name).
+--no-strip              Do not strip redundant information after
+                        building the database. Warning: this will
+                        inflate the index to about two to three times
+                        the normal size.
+--compress              Filter plain text version of font index through
+                        gzip.
 
 --prefer-texmf, -p      Organize the file name database in a way so
                         that it prefer fonts in the *TEXMF* tree over
@@ -117,14 +124,48 @@ query mode
 
                         1) the character ``*``, selecting all entries;
                         2) a field of a database entry, for instance
-                           *fullname* or *units_per_em*, according to
-                           which the output will be sorted; or
+                           *version* or *format**, according to which
+                           the output will be sorted.
+                           Information in an unstripped database (see
+                           the option ``--no-strip`` above) is nested:
+                           Subfields of a record can be addressed using
+                           the ``->`` separator, e. g.
+                           ``file->location``, ``style->units_per_em``,
+                           or
+                           ``names->sanitized->english->prefmodifiers``.
+                           NB: shell syntax requires that arguments
+                           containing ``->`` be properly quoted!
                         3) an expression of the form ``field:value`` to
                            limit the output to entries whose ``field``
                            matches ``value``.
 
+                        For example, in order to output file names and
+                        corresponding versions, sorted by the font
+                        format::
+
+                            ./luaotfload-tool.lua --list="format" --fields="file->base,version"
+
+                        This prints::
+
+                            otf latinmodern-math.otf  Version 1.958
+                            otf lmromancaps10-oblique.otf 2.004
+                            otf lmmono8-regular.otf 2.004
+                            otf lmmonoproplt10-bold.otf 2.004
+                            otf lmsans10-oblique.otf  2.004
+                            otf lmromanslant8-regular.otf 2.004
+                            otf lmroman12-italic.otf  2.004
+                            otf lmsansdemicond10-oblique.otf  2.004
+                            ...
+
 --fields=FIELDS         Comma-separated list of fields that should be
-                        printed.  The default is *fullname,version*.
+                        printed.
+                        Information in an unstripped database (see the
+                        option ``--no-strip`` above) is nested:
+                        Subfields of a record can be addressed using
+                        the ``->`` separator, e. g.
+                        ``file->location``, ``style->units_per_em``,
+                        or ``names->sanitized->english->subfamily``.
+                        The default is plainname,version*.
                         (Only meaningful with ``--list``.)
 
 font and lookup caches

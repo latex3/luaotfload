@@ -99,7 +99,8 @@ local name_index               = nil -- upvalue for names.data
 
 local luaotfloadconfig         = config.luaotfload --- always present
 luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
-luaotfloadconfig.formats       = luaotfloadconfig.formats or "otf,ttf,ttc,dfont"
+luaotfloadconfig.formats       = luaotfloadconfig.formats  or "otf,ttf,ttc,dfont"
+luaotfloadconfig.strip         = luaotfloadconfig.strip == true
 
 if luaotfloadconfig.update_live ~= false then
     --- this option allows for disabling updates
@@ -699,16 +700,15 @@ local get_font_file = function (index)
     if not entry then
         return false
     end
-    local filedata = entry.file
-    local basename = filedata.base
-    if filedata.location == "texmf" then
+    local basename = entry.basename
+    if entry.location == "texmf" then
         if kpselookup(basename) then
-            return true, basename, filedata.subfont
+            return true, basename, entry.subfont
         end
     else --- system, local
         local fullname = name_index.files.full [index]
         if lfsisfile (fullname) then
-            return true, basename, filedata.subfont
+            return true, basename, entry.subfont
         end
     end
     return false
@@ -1004,16 +1004,12 @@ end
 local resolve_fontname = function (specification, name)
     local mappings  = name_index.mappings
     for i = 1, #mappings do
-        local face      = mappings [i]
-        local sanitized = face.names.sanitized
-        local info      = sanitized.info
-        local english   = sanitized.english
-        if info.fontname == name
-            or info.fullname == name
-            or english.psname == name
-            or english.fullname == name
+        local face = mappings [i]
+        if     face.fontname == name
+            or face.fullname == name
+            or face.psname   == name
         then
-            return face.file.base, face.file.subfont
+            return face.basename, face.subfont
         end
     end
     return nil, nil
@@ -1192,8 +1188,6 @@ find_closest = function (name, limit)
 
     for n = 1, n_fonts do
         local current    = mappings[n]
-        local names      = current.names
-        local sanitized  = names.sanitized
         --[[
             This is simplistic but surpisingly fast.
             Matching is performed against the “fullname” field
@@ -1203,26 +1197,22 @@ find_closest = function (name, limit)
             font name categories as well as whatever agrep
             does.
         --]]
-        if names then
-            local fullname  = names.fullname
-            local sfullname = sanitized.info.fullname
-                           or sanitized.english.fullname
-                           or sanitized.metadata.fullname
-            local dist      = cached[sfullname]--- maybe already calculated
+        local fullname  = current.plainname
+        local sfullname = current.fullname
+        local dist      = cached[sfullname]--- maybe already calculated
 
-            if not dist then
-                dist = iterative_levenshtein(name, sfullname)
-                cached[sfullname] = dist
-            end
-            local namelst = by_distance[dist]
-            if not namelst then --- first entry
-                namelst = { fullname }
-                distances[#distances+1] = dist
-            else --- append
-                namelst[#namelst+1] = fullname
-            end
-            by_distance[dist] = namelst
+        if not dist then
+            dist = iterative_levenshtein(name, sfullname)
+            cached[sfullname] = dist
         end
+        local namelst = by_distance[dist]
+        if not namelst then --- first entry
+            namelst = { fullname }
+            distances[#distances+1] = dist
+        else --- append
+            namelst[#namelst+1] = fullname
+        end
+        by_distance[dist] = namelst
     end
 
     --- print the matches according to their distance
@@ -2507,14 +2497,29 @@ local generate_filedata = function (mappings)
         local entry    = mappings [index]
 
         local filedata = entry.file
+        local format
+        local location
+        local fullpath
+        local basename
+        local barename
+        local subfont
 
-        local format   = entry.format   --- otf, afm, ...
-        local location = filedata.location --- texmf, system, ...
+        if filedata then --- new entry
+            format   = entry.format   --- otf, afm, ...
+            location = filedata.location --- texmf, system, ...
+            fullpath = filedata.full
+            basename = filedata.base
+            barename = filenameonly (fullpath)
+            subfont  = filedata.subfont
+        else
+            format   = entry.format   --- otf, afm, ...
+            location = entry.location --- texmf, system, ...
+            fullpath = entry.fullpath
+            basename = entry.basename
+            barename = filenameonly (fullpath)
+            subfont  = entry.subfont
+        end
 
-        local fullname = filedata.full
-        local basename = filedata.base
-        local barename = filenameonly (fullname)
-        local subfont  = filedata.subfont
 
         entry.index    = index
 
@@ -2578,9 +2583,9 @@ local generate_filedata = function (mappings)
             bare [location] [format] = inbare
         end
 
-        --- 3) add to fullname map
+        --- 3) add to fullpath map
 
-        full [index] = fullname
+        full [index] = fullpath
     end
 
     --- TODO adapt to new mechanism!
@@ -2694,6 +2699,46 @@ do
     end
 end
 
+local pull_values = function (entry)
+    local file              = entry.file
+    local names             = entry.names
+    local style             = entry.style
+    local sanitized         = names.sanitized
+    local english           = sanitized.english
+    local info              = sanitized.info
+
+    --- pull file info ...
+    entry.basename          = file.base
+    entry.fullpath          = file.full
+    entry.location          = file.location
+    entry.subfont           = file.subfont
+
+    --- pull name info ...
+    entry.psname            = english.psname
+    entry.fontname          = info.fontname
+    entry.fullname          = english.fullname or info.fullname
+    entry.familyname        = english.preffamily
+                           or english.family
+                           or info.familyname
+    entry.fontstyle_name    = sanitized.fontstyle_name
+    entry.plainname         = names.fullname
+    entry.prefmodifiers     = english.prefmodifiers
+    entry.subfamily         = english.subfamily
+
+    --- pull style info ...
+    entry.italicangle       = style.italicangle
+    entry.size              = style.size
+    entry.splitstyle        = style.split
+    entry.weight            = style.weight
+
+    if luaotfloadconfig.strip == true then
+    --if false then
+        entry.file  = nil
+        entry.names = nil
+        entry.style = nil
+    end
+end
+
 local collect_families = function (mappings)
 
     report ("info", 2, "db", "Analyzing families, sizes, and styles.")
@@ -2706,15 +2751,14 @@ local collect_families = function (mappings)
 
     for i = 1, #mappings do
 
-        local entry     = mappings [i]
-        local file      = entry.file
-        local names     = entry.names
-        local style     = entry.style
+        local entry = mappings [i]
 
-        local location  = file.location
+        if entry.file then
+            pull_values (entry)
+        end
+
+        local location  = entry.location
         local format    = entry.format
-        local english   = names.sanitized.english
-        local info      = names.sanitized.info
 
         local subtable  = families [location] [format]
         if not subtable then
@@ -2722,19 +2766,17 @@ local collect_families = function (mappings)
             families [location] [format] = subtable
         end
 
-        local familyname        = english.preffamily
-                               or english.family
-                               or info.familyname
-        local fullname          = english.fullname or info.fullname
-        local fontname          = info.fontname
+        --local fullname          = english.fullname or info.fullname
+        --local fontname          = info.fontname
 
-        local fontstyle_name    = names.sanitized.fontstyle_name
-        local prefmodifiers     = english.prefmodifiers
-        local subfamily         = english.subfamily
+        local familyname        = entry.familyname
+        local fontstyle_name    = entry.fontstyle_name
+        local prefmodifiers     = entry.prefmodifiers
+        local subfamily         = entry.subfamily
 
-        local weight            = style.weight
-        local italicangle       = style.italicangle
-        local splitstyle        = style.split
+        local weight            = entry.weight
+        local italicangle       = entry.italicangle
+        local splitstyle        = entry.splitstyle
 
         local modifier          = pick_style (fontstyle_name,
                                               prefmodifiers,
@@ -2786,7 +2828,7 @@ local collect_families = function (mappings)
                 styletable.default = entry.index
             end
 
-            local size = style.size --- dsnsize * high * low
+            local size = entry.size --- dsnsize * high * low
             if size then
                 styletable [#styletable + 1] = {
                     size [1],
@@ -2800,6 +2842,7 @@ local collect_families = function (mappings)
         end
     end
 
+    collectgarbage "collect"
     return families
 end
 

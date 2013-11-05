@@ -944,7 +944,9 @@ actions.list = function (job)
 
     if asked_fields then
         asked_fields = lpegmatch(splitcomma, asked_fields)
-    else
+    end
+
+    if not asked_fields then
         --- some defaults
         asked_fields = { "names->fullname", "version", }
     end

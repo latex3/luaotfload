@@ -20,7 +20,7 @@ SYNOPSIS
 **luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ]
                              [ --prefer-texmf ] [ --dry-run ]
                              [ --formats=[+|-]EXTENSIONS ]
-                             [ --compress ]
+                             [ --compress ] [ --no-strip ]
 
 **luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
                                     [ --no-reload ]
@@ -63,6 +63,10 @@ update mode
                         all fonts.
 --no-reload, -n         Suppress auto-updates to the database (e.g.
                         when ``--find`` is passed an unknown name).
+--no-strip              Do not strip redundant information after
+                        building the database. Warning: this will
+                        inflate the index to about two to three times
+                        the normal size.
 --compress              Filter plain text version of font index through
                         gzip.
 

@@ -112,6 +112,9 @@ luaotfloadconfig.index_file   = luaotfloadconfig.index_file
 luaotfloadconfig.formats      = luaotfloadconfig.formats
                              or "otf,ttf,ttc,dfont"
 luaotfloadconfig.reload       = false
+if not luaotfloadconfig.strip then
+    luaotfloadconfig.strip = true
+end
 
 do -- we don’t have file.basename and the likes yet, so inline parser ftw
     local slash        = P"/"
@@ -214,6 +217,7 @@ This tool is part of the luaotfload package. Valid options are:
 
   -u --update                  update the database
   -n --no-reload               suppress db update
+  --no-strip                   keep redundant information in db
   -f --force                   force re-indexing all fonts
   -c --compress                gzip index file (text version only)
   -l --flush-lookups           empty lookup cache of font requests
@@ -1109,6 +1113,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         list               = 1,
         log                = 1,
         ["no-reload"]      = "n",
+        ["no-strip"]       = 0,
         ["skip-read"]      = "R",
         ["prefer-texmf"]   = "p",
         quiet              = "q",
@@ -1208,6 +1213,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             luaotfloadconfig.skip_read = true
         elseif v == "c" then
             luaotfloadconfig.compress = true
+        elseif v == "no-strip" then
+            luaotfloadconfig.strip = false
         end
     end
 

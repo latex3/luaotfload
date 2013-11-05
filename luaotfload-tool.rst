@@ -127,7 +127,12 @@ query mode
                            matches ``value``.
 
 --fields=FIELDS         Comma-separated list of fields that should be
-                        printed.  The default is *fullname,version*.
+                        printed.
+                        Subfields of a record can be addressed using
+                        the ``->`` separator, e. g.
+                        ``file->location``, ``style->units_per_em``,
+                        or ``names->sanitized->english->subfamily``.
+                        The default is *names->fullname,version*.
                         (Only meaningful with ``--list``.)
 
 font and lookup caches

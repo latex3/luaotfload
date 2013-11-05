@@ -837,7 +837,7 @@ actions.query = function (job)
     if tmpspec.lookup == "name"
     or tmpspec.lookup == "anon" --- not *exactly* as resolvers.anon
     then
-        foundname, subfont = names.resolve (nil, nil, tmpspec)
+        foundname, subfont = names.resolve_name (tmpspec)
         if foundname then
             foundname, _, success = names.crude_file_lookup (foundname)
         end

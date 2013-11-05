@@ -140,6 +140,16 @@ local noncomma          = 1-comma
 local splitcomma        = Ct((C(noncomma^1) + comma)^1)
 patterns.splitcomma     = splitcomma
 
+local format_precedence = {
+    "otf",   "ttc", "ttf",
+    "dfont", "afm", "pfb",
+    "pfa",
+}
+
+local location_precedence = {
+    "local", "system", "texmf",
+}
+
 --[[doc--
     We use the functions in the cache.* namespace that come with the
     fontloader (see luat-basics-gen). it’s safe to use for the most part
@@ -614,23 +624,51 @@ crude_file_lookup_verbose = function (filename)
     return filename, nil, false
 end
 
+local lookup_filename = function (filename)
+    if not name_index then name_index = load_names () end
+    local files    = name_index.files
+    local basedata = files.base
+    local baredata = files.bare
+    for i = 1, #location_precedence do
+        local location = location_precedence [i]
+        local basenames = basedata [location]
+        local barenames = baredata [location]
+        local idx
+        if basenames ~= nil then
+            idx = basenames [filename]
+            if idx then
+                goto done
+            end
+        end
+        if barenames ~= nil then
+            for j = 1, #format_precedence do
+                local format  = format_precedence [j]
+                local filemap = barenames [format]
+                if filemap then
+                    idx = barenames [format] [filename]
+                    if idx then
+                        break
+                    end
+                end
+            end
+        end
+::done::
+        if idx then
+            return files.full [idx]
+        end
+    end
+end
+
 --- string -> (string * string * bool)
 crude_file_lookup = function (filename)
-    if not name_index then name_index = load_names() end
-    local mappings  = name_index.mappings
-    local files     = name_index.files
+    local found = lookup_filename (filename)
 
-    local found
-
-    found = files.base[filename]
-         or files.bare[filename]
+    if not found then
+        found = dummy_findfile(filename)
+    end
 
     if found then
-        found = files.full[found]
-        if found == nil then
-            found = dummy_findfile(filename)
-        end
-        return found or filename, nil, true
+        return found, nil, true
     end
 
     for i=1, #type1_formats do
@@ -1181,16 +1219,6 @@ local choose_size = function (sizes, askedsize)
     end
     return match
 end
-
-local format_precedence = {
-    "otf",   "ttc", "ttf",
-    "dfont", "afm", "pfb",
-    "pfa",
-}
-
-local location_precedence = {
-    "local", "system", "texmf",
-}
 
 --[[doc--
 

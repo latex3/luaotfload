@@ -138,6 +138,7 @@ config.lualibs.load_extended    = true
 
 require "lualibs"
 local tabletohash               = table.tohash
+local stringsplit               = string.split
 
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
@@ -882,14 +883,19 @@ end
 
 local get_fields get_fields = function (entry, fields, acc, n)
     if not acc then
-        return get_fields(entry, fields, { }, 1)
+        return get_fields (entry, fields, { }, 1)
     end
 
-    local field = fields[n]
+    local field = fields [n]
     if field then
-        local value = entry[field]
+        local chain = stringsplit (field, "->")
+        local tmp   = entry
+        for i = 1, #chain - 1 do
+            tmp = tmp [chain [i]]
+        end
+        local value = tmp [chain [#chain]]
         acc[#acc+1] = value or false
-        return get_fields(entry, fields, acc, n+1)
+        return get_fields (entry, fields, acc, n+1)
     end
     return acc
 end
@@ -940,7 +946,7 @@ actions.list = function (job)
         asked_fields = lpegmatch(splitcomma, asked_fields)
     else
         --- some defaults
-        asked_fields = { "fullname", "version", }
+        asked_fields = { "names->fullname", "version", }
     end
 
     if not name_index then
@@ -1018,6 +1024,8 @@ actions.list = function (job)
             texiowrite_nl(formatted)
         end
     end
+
+    texiowrite_nl ""
 
     return true, true
 end

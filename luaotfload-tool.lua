@@ -892,9 +892,17 @@ local get_fields get_fields = function (entry, fields, acc, n)
         local tmp   = entry
         for i = 1, #chain - 1 do
             tmp = tmp [chain [i]]
+            if not tmp then
+                --- invalid field
+                break
+            end
         end
-        local value = tmp [chain [#chain]]
-        acc[#acc+1] = value or false
+        if tmp then
+            local value = tmp [chain [#chain]]
+            acc[#acc+1] = value or false
+        else
+            acc[#acc+1] = false
+        end
         return get_fields (entry, fields, acc, n+1)
     end
     return acc
@@ -997,8 +1005,11 @@ actions.list = function (job)
                 local chain = stringsplit (criterion, "->")
                 for i = 1, #chain - 1 do
                     tmp = tmp [chain [i]]
+                    if not tmp then
+                        break
+                    end
                 end
-                local value = tmp [chain [#chain]]
+                local value = tmp and tmp [chain [#chain]] or "<none>"
                 if value then
                     --value = tostring(value)
                     local entries = by_category[value]

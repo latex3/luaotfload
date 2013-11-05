@@ -1421,12 +1421,13 @@ find_closest = function (name, limit)
     local by_distance   = { } --- (int, string list) dict
     local distances     = { } --- int list
     local cached        = { } --- (string, int) dict
-    local mappings      = data.mappings
+    local mappings      = name_index.mappings
     local n_fonts       = #mappings
 
     for n = 1, n_fonts do
         local current    = mappings[n]
-        local cnames     = current.sanitized
+        local names      = current.names
+        local sanitized  = names.sanitized
         --[[
             This is simplistic but surpisingly fast.
             Matching is performed against the “fullname” field
@@ -1436,10 +1437,13 @@ find_closest = function (name, limit)
             font name categories as well as whatever agrep
             does.
         --]]
-        if cnames then
-            local fullname, sfullname = current.fullname, cnames.fullname
+        if names then
+            local fullname  = names.fullname
+            local sfullname = sanitized.info.fullname
+                           or sanitized.english.fullname
+                           or sanitized.metadata.fullname
+            local dist      = cached[sfullname]--- maybe already calculated
 
-            local dist = cached[sfullname]--- maybe already calculated
             if not dist then
                 dist = iterative_levenshtein(name, sfullname)
                 cached[sfullname] = dist
@@ -1588,10 +1592,6 @@ local organize_namedata = function (metadata,
             fontname      = info.fontname,
         },
     }
-
---    print (fontnames.english.fullname,
---           fontnames.metadata.fullname,
---           fontnames.info.fullname)
 
     if metadata.fontstyle_name then
         --- not present in all fonts, often differs from the preferred

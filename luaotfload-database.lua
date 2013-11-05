@@ -1265,10 +1265,22 @@ local resolve_familyname = function (specification, name, style, askedsize)
     return resolved, subfont
 end
 
-local resolve_fontname = function (specification, name, style, askedsize)
-    local resolved, subfont
-    --[[ TODO ]]
-    return resolved, subfont
+local resolve_fontname = function (specification, name)
+    local mappings  = name_index.mappings
+    for i = 1, #mappings do
+        local face      = mappings [i]
+        local sanitized = face.names.sanitized
+        local info      = sanitized.info
+        local english   = sanitized.english
+        if info.fontname == name
+            or info.fullname == name
+            or english.psname == name
+            or english.fullname == name
+        then
+            return face.file.base, face.file.subfont
+        end
+    end
+    return nil, nil
 end
 
 --[[doc--
@@ -1302,7 +1314,7 @@ resolve_name = function (specification)
 
     resolved, subfont = resolve_familyname (specification, name, style, askedsize)
     if not resolved then
-        resolved, subfont = resolve_fontname (specification, name, style, askedsize)
+        resolved, subfont = resolve_fontname (specification, name)
     end
     if not resolved then
         resolved = specification.name, false

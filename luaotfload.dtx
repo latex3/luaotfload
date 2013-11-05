@@ -1550,6 +1550,9 @@ config.luaotfload.names_dir       = config.luaotfload.names_dir        or "names
 config.luaotfload.cache_dir       = config.luaotfload.cache_dir        or "fonts"
 config.luaotfload.index_file      = config.luaotfload.index_file       or "luaotfload-names.lua"
 config.luaotfload.formats         = config.luaotfload.formats          or "otf,ttf,ttc,dfont"
+if not config.luaotfload.strip then
+    config.luaotfload.strip = true
+end
 
 luaotfload.module = {
     name          = "luaotfload",

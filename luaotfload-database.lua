@@ -154,6 +154,10 @@ local location_precedence = {
     "local", "system", "texmf",
 }
 
+local set_location_precedence = function (precedence)
+    location_precedence = precedence
+end
+
 --[[doc--
     We use the functions in the cache.* namespace that come with the
     fontloader (see luat-basics-gen). it’s safe to use for the most part
@@ -2505,16 +2509,6 @@ local generate_filedata = function (mappings)
         full [index] = fullpath
     end
 
-    --- TODO adapt to new mechanism!
---    if luaotfloadconfig.prioritize == "texmf" then
---        report("both", 2, "db", "Preferring texmf fonts")
---        addmap(sys)
---        addmap(texmf)
---    else --- sys
---        addmap(texmf)
---        addmap(sys)
---    end
-
     return files
 end
 
@@ -2530,7 +2524,7 @@ local check_regular
 
 do
     local italic = match_synonyms (P"oblique" + P"slanted" + P"italic")
-    local bold   = match_synonyms (P"bold" + P"demi", P"heavy", P"black", P"ultra")
+    local bold   = match_synonyms (P"bold" + P"demi" + P"heavy" + P"black" + P"ultra")
 
     determine_italic = function (fontstyle_name,
                                  italicangle,
@@ -3323,6 +3317,7 @@ names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 names.read_blacklist              = read_blacklist
 names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath
+names.set_location_precedence     = set_location_precedence
 
 --- font cache
 names.purge_cache    = purge_cache

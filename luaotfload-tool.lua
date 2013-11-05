@@ -1195,8 +1195,10 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.cache = optarg[n]
         elseif v == "D" then
             result.dry_run = true
-        elseif v == "p" then  --- TODO adapt to new db structure
-            luaotfloadconfig.prioritize = "texmf"
+        elseif v == "p" then
+            names.set_location_precedence {
+                "local", "texmf", "system"
+            }
         elseif v == "b" then
             action_pending["blacklist"] = true
         elseif v == "diagnose" then

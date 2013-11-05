@@ -1911,6 +1911,8 @@ local formats             = fonts.formats
 local names               = fonts.names
 formats.ofm               = "type1"
 
+fonts.encodings.known     = fonts.encodings.known or { }
+
 %    \end{macrocode}
 % \identifier{luaotfload} promises easy access to system fonts.
 % Without additional precautions, this cannot be achieved by

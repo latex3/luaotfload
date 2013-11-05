@@ -875,278 +875,6 @@ local add_to_match = function (found, size, face)
     return found, continue
 end
 
---[[doc--
-
-Luatex-fonts, the font-loader package luaotfload imports, comes with
-basic file location facilities (see luatex-fonts-syn.lua).
-However, not only does the builtin functionality rely on Context’s font
-name database, it is also too limited to be of more than basic use.
-For this reason, luaotfload supplies its own resolvers that accesses
-the font database created by the luaotfload-tool script.
-
---doc]]--
-
-
----
---- the request specification has the fields:
----
----   · features: table
----     · normal: set of { ccmp clig itlc kern liga locl mark mkmk rlig }
----     · ???
----   · forced:   string
----   · lookup:   "name"
----   · method:   string
----   · name:     string
----   · resolved: string
----   · size:     int
----   · specification: string (== <lookup> ":" <name>)
----   · sub:      string
----
---- The “size” field deserves special attention: if its value is
---- negative, then it actually specifies a scalefactor of the
---- design size of the requested font. This happens e.g. if a font is
---- requested without an explicit “at size”. If the font is part of a
---- larger collection with different design sizes, this complicates
---- matters a bit: Normally, the resolver prefers fonts that have a
---- design size as close as possible to the requested size. If no
---- size specified, then the design size is implied. But which design
---- size should that be? Xetex appears to pick the “normal” (unmarked)
---- size: with Adobe fonts this would be the one that is neither
---- “caption” nor “subhead” nor “display” &c ... For fonts by Adobe this
---- seems to be the one that does not receive a “prefmodifiers” field.
---- (IOW Adobe uses the “prefmodifiers” field to encode the design size
---- in more or less human readable format.) However, this is not true
---- of LM and EB Garamond. As this matters only where there are
---- multiple design sizes to a given font/style combination, we put a
---- workaround in place that chooses that unmarked version.
-
----
---- the first return value of “resolve” is the file name of the
---- requested font (string)
---- the second is of type bool or string and indicates the subfont of a
---- ttc
----
---- 'a -> 'a -> table -> (string * string | bool * bool)
----
-
---[===[
-resolve = function (_, _, specification) -- the 1st two parameters are used by ConTeXt
-    if not fonts_loaded then names.data = load_names() end
-    local data = names.data
-
-    local name  = sanitize_fontname (specification.name)
-    local style = sanitize_fontname (specification.style) or "regular"
-
-    local askedsize
-
-    if specification.optsize then
-        askedsize = tonumber(specification.optsize)
-    else
-        local specsize = specification.size
-        if specsize and specsize >= 0 then
-            askedsize = specsize / 65536
-        end
-    end
-
-    if type(data) ~= "table" then
-         --- this catches a case where load_names() doesn’t
-         --- return a database object, which can happen only
-         --- in case there is valid Lua code in the database,
-         --- but it’s not a table, e.g. it contains an integer.
-        if not fonts_reloaded then
-            return reload_db("invalid database; not a table",
-                             resolve, nil, nil, specification)
-        end
-        --- unsucessfully reloaded; bail
-        return specification.name, false, false
-    end
-
-    if not data.mappings then
-        if not fonts_reloaded then
-            return reload_db("invalid database; missing font mapping",
-                             resolve, nil, nil, specification)
-        end
-        return specification.name, false, false
-    end
-
-    local synonym_set       = style_synonyms.set
-    local stylesynonyms     = synonym_set[style]
-    local regularsynonyms   = synonym_set.regular
-
-    local exact      = { } --> collect exact style matches
-    local synonymous = { } --> collect matching style synonyms
-    local fallback         --> e.g. non-matching style (fontspec is anal about this)
-    local candidates = { } --> secondary results, incomplete matches
-
-    for n, face in next, data.mappings do
-        local family, metafamily
-        local prefmodifiers, fontstyle_name, subfamily
-        local psname, fullname, fontname, pfullname
-
-        local facenames = face.sanitized
-        if facenames then
-            family          = facenames.family
-            subfamily       = facenames.subfamily
-            fontstyle_name  = facenames.fontstyle_name
-            prefmodifiers   = facenames.prefmodifiers or fontstyle_name or subfamily
-            fullname        = facenames.fullname
-            psname          = facenames.psname
-            fontname        = facenames.fontname
-            pfullname       = facenames.pfullname
-            metafamily      = facenames.metafamily
-        end
-        fontname    = fontname  or sanitize_fontname (face.fontname)
-        pfullname   = pfullname or sanitize_fontname (face.fullname)
-
-        if     name == family
-            or name == metafamily
-        then
-            if     style == prefmodifiers
-                or style == fontstyle_name
-            then
-                local continue
-                exact, continue = add_to_match(exact, askedsize, face)
-                if continue == false then break end
-            elseif style == subfamily then
-                exact = add_to_match(exact, askedsize, face)
-            elseif stylesynonyms and stylesynonyms[prefmodifiers]
-                or regularsynonyms[prefmodifiers]
-            then
-                --- treat synonyms for prefmodifiers as first-class
-                --- (needed to prioritize DejaVu Book over Condensed)
-                exact = add_to_match(exact, askedsize, face)
-            elseif name == fullname
-                or name == pfullname
-                or name == fontname
-                or name == psname
-            then
-                synonymous = add_to_match(synonymous, askedsize, face)
-            elseif stylesynonyms and stylesynonyms[subfamily]
-                or regularsynonyms[subfamily]
-            then
-                synonymous = add_to_match(synonymous, askedsize, face)
-            elseif prefmodifiers == "regular"
-                or subfamily     == "regular" then
-                fallback = face
-            else --- mark as last straw but continue
-                candidates[#candidates+1] = face
-            end
-        else
-            if name == fullname
-            or name == pfullname
-            or name == fontname
-            or name == psname then
-                local continue
-                exact, continue = add_to_match(exact, askedsize, face)
-                if continue == false then break end
-            end
-        end
-    end
-
-    local found
-    if next(exact) then
-        found = exact
-    else
-        found = synonymous
-    end
-
-    --- this is a monster
-    if #found == 1 then
-        --- “found” is really synonymous with “registered in the db”.
-        local entry = found[1]
-        local success, filename, subfont
-            = get_font_file(data.files.full, entry)
-        if success == true then
-            report("log", 0, "resolve",
-                "Font family='%s', subfamily='%s' found: %s",
-                name, style, filename
-            )
-            return filename, subfont, true
-        end
-
-    elseif #found > 1 then
-        -- we found matching font(s) but not in the requested optical
-        -- sizes, so we loop through the matches to find the one with
-        -- least difference from the requested size.
-        local match
-
-        if askedsize then  --- choose by design size
-            local closest
-            local least = math.huge -- initial value is infinity
-
-            for i, face in next, found do
-                local dsnsize = face.size and face.size [1] or 0
-                local difference = mathabs (dsnsize - askedsize)
-                if difference < least then
-                    closest = face
-                    least   = difference
-                end
-            end
-
-            match = closest
-        else --- choose “unmarked” match, for Adobe fonts this
-             --- is the one without a “prefmodifiers” field.
-            match = found [1] --- fallback
-            for i, face in next, found do
-                if not face.sanitized.prefmodifiers then
-                    match = face
-                    break
-                end
-            end
-        end
-
-        local success, filename, subfont
-            = get_font_file(data.files.full, match)
-        if success == true then
-            report("log", 0, "resolve",
-                "Font family='%s', subfamily='%s' found: %s",
-                name, style, filename
-            )
-            return filename, subfont, true
-        end
-
-    elseif fallback then
-        local success, filename, subfont
-            = get_font_file(data.files.full, fallback)
-        if success == true then
-            report("log", 0, "resolve",
-                "No exact match for request %s; using fallback",
-                specification.specification
-            )
-            report("log", 0, "resolve",
-                "Font family='%s', subfamily='%s' found: %s",
-                name, style, filename
-            )
-            return filename, subfont, true
-        end
-    elseif next(candidates) then
-        --- pick the first candidate encountered
-        local entry = candidates[1]
-        local success, filename, subfont
-            = get_font_file(data.files.full, entry)
-        if success == true then
-            report("log", 0, "resolve",
-                "Font family='%s', subfamily='%s' found: %s",
-                name, style, filename
-            )
-            return filename, subfont, true
-        end
-    end
-
-    --- no font found so far
-    if not fonts_reloaded then
-        --- last straw: try reloading the database
-        return reload_db(
-            "unresolved font name: '" .. name .. "'",
-            resolve, nil, nil, specification
-        )
-    end
-
-    --- else, default to requested name
-    return specification.name, false, false
-end --- resolve()
-]===]
-
 local choose_closest = function (distances)
     local closest = 2^51
     local match
@@ -1298,6 +1026,44 @@ end
     font names table.
     The return value is a pair consisting of the file name and the
     subfont index if appropriate..
+
+    the request specification has the fields:
+
+      · features: table
+        · normal: set of { ccmp clig itlc kern liga locl mark mkmk rlig }
+        · ???
+      · forced:   string
+      · lookup:   "name"
+      · method:   string
+      · name:     string
+      · resolved: string
+      · size:     int
+      · specification: string (== <lookup> ":" <name>)
+      · sub:      string
+
+    The “size” field deserves special attention: if its value is
+    negative, then it actually specifies a scalefactor of the
+    design size of the requested font. This happens e.g. if a font is
+    requested without an explicit “at size”. If the font is part of a
+    larger collection with different design sizes, this complicates
+    matters a bit: Normally, the resolver prefers fonts that have a
+    design size as close as possible to the requested size. If no
+    size specified, then the design size is implied. But which design
+    size should that be? Xetex appears to pick the “normal” (unmarked)
+    size: with Adobe fonts this would be the one that is neither
+    “caption” nor “subhead” nor “display” &c ... For fonts by Adobe this
+    seems to be the one that does not receive a “prefmodifiers” field.
+    (IOW Adobe uses the “prefmodifiers” field to encode the design size
+    in more or less human readable format.) However, this is not true
+    of LM and EB Garamond. As this matters only where there are
+    multiple design sizes to a given font/style combination, we put a
+    workaround in place that chooses that unmarked version.
+
+    The first return value of “resolve_name” is the file name of the
+    requested font (string). It can be passed to the fullname resolver
+    get_font_file().
+    The second value is either “false” or an integer indicating the
+    subfont index in a TTC.
 
 --doc]]--
 

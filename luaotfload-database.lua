@@ -2526,12 +2526,6 @@ local generate_filedata = function (mappings)
             barename = filenameonly (fullpath)
             subfont  = entry.subfont
         end
-    end
-
-    local addmap = function (lst)
-        --- this will overwrite existing entries
-        for i=1, #lst do
-            local idx, base, bare, intexmf, full = unpack(lst[i])
 
         entry.index    = index
 

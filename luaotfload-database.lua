@@ -2524,7 +2524,7 @@ local check_regular
 
 do
     local italic = match_synonyms (P"oblique" + P"slanted" + P"italic")
-    local bold   = match_synonyms (P"bold" + P"demi" + P"heavy" + P"black" + P"ultra")
+    local bold   = match_synonyms (P"bold")
 
     determine_italic = function (fontstyle_name,
                                  italicangle,

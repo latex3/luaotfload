@@ -149,8 +149,10 @@ logs.set_logout = set_logout
 
 local log = function (category, fmt, ...)
     local res = { module_name, "|", category, ":" }
-    if fmt then res[#res+1] = stringformat(fmt, ...) end
-    texiowrite_nl(logout, tableconcat(res, " "))
+    if fmt then
+        res [#res + 1] = stringformat (fmt, ...)
+    end
+    texiowrite_nl (logout, tableconcat(res, " "))
 end
 
 --- with faux db update with maximum verbosity:

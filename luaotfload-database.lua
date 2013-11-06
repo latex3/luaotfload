@@ -20,100 +20,105 @@ local C, Cc, Cf, Cg, Cs, Ct
     = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Cs, lpeg.Ct
 
 --- Luatex builtins
-local load                    = load
-local next                    = next
-local pcall                   = pcall
-local require                 = require
-local tonumber                = tonumber
-local unpack                  = table.unpack
+local load                     = load
+local next                     = next
+local pcall                    = pcall
+local require                  = require
+local tonumber                 = tonumber
+local unpack                   = table.unpack
 
-local fontloaderinfo          = fontloader.info
-local fontloaderclose         = fontloader.close
-local fontloaderopen          = fontloader.open
-local fontloaderto_table      = fontloader.to_table
-local iolines                 = io.lines
-local ioopen                  = io.open
-local kpseexpand_path         = kpse.expand_path
-local kpseexpand_var          = kpse.expand_var
-local kpsefind_file           = kpse.find_file
-local kpselookup              = kpse.lookup
-local kpsereadable_file       = kpse.readable_file
-local lfsattributes           = lfs.attributes
-local lfschdir                = lfs.chdir
-local lfscurrentdir           = lfs.currentdir
-local lfsdir                  = lfs.dir
-local mathabs                 = math.abs
-local mathmin                 = math.min
-local osremove                = os.remove
-local stringfind              = string.find
-local stringformat            = string.format
-local stringgmatch            = string.gmatch
-local stringgsub              = string.gsub
-local stringlower             = string.lower
-local stringsub               = string.sub
-local stringupper             = string.upper
-local tableconcat             = table.concat
-local tablesort               = table.sort
-local texiowrite_nl           = texio.write_nl
-local utf8gsub                = unicode.utf8.gsub
-local utf8lower               = unicode.utf8.lower
+local fontloaderinfo           = fontloader.info
+local fontloaderclose          = fontloader.close
+local fontloaderopen           = fontloader.open
+local fontloaderto_table       = fontloader.to_table
+local gzipopen                 = gzip.open
+local iolines                  = io.lines
+local ioopen                   = io.open
+local kpseexpand_path          = kpse.expand_path
+local kpseexpand_var           = kpse.expand_var
+local kpsefind_file            = kpse.find_file
+local kpselookup               = kpse.lookup
+local kpsereadable_file        = kpse.readable_file
+local lfsattributes            = lfs.attributes
+local lfschdir                 = lfs.chdir
+local lfscurrentdir            = lfs.currentdir
+local lfsdir                   = lfs.dir
+local mathabs                  = math.abs
+local mathmin                  = math.min
+local osgettimeofday           = os.gettimeofday
+local osremove                 = os.remove
+local stringfind               = string.find
+local stringformat             = string.format
+local stringgmatch             = string.gmatch
+local stringgsub               = string.gsub
+local stringlower              = string.lower
+local stringsub                = string.sub
+local stringupper              = string.upper
+local tableconcat              = table.concat
+local tablesort                = table.sort
+local texiowrite_nl            = texio.write_nl
+local utf8gsub                 = unicode.utf8.gsub
+local utf8lower                = unicode.utf8.lower
+local zlibcompress             = zlib.compress
 
 --- these come from Lualibs/Context
-local getwritablepath         = caches.getwritablepath
-local filebasename            = file.basename
-local filecollapsepath        = file.collapsepath or file.collapse_path
-local filedirname             = file.dirname
-local fileextname             = file.extname
-local fileiswritable          = file.iswritable
-local filejoin                = file.join
-local filenameonly            = file.nameonly
-local filereplacesuffix       = file.replacesuffix
-local filesplitpath           = file.splitpath or file.split_path
-local filesuffix              = file.suffix
-local lfsisdir                = lfs.isdir
-local lfsisfile               = lfs.isfile
-local lfsmkdirs               = lfs.mkdirs
-local stringis_empty          = string.is_empty
-local stringsplit             = string.split
-local stringstrip             = string.strip
-local tableappend             = table.append
-local tablecopy               = table.copy
-local tablefastcopy           = table.fastcopy
-local tabletofile             = table.tofile
-local tabletohash             = table.tohash
-
-local runasscript             = caches == nil
-
+local filebasename             = file.basename
+local filecollapsepath         = file.collapsepath or file.collapse_path
+local filedirname              = file.dirname
+local fileextname              = file.extname
+local fileiswritable           = file.iswritable
+local filejoin                 = file.join
+local filenameonly             = file.nameonly
+local filereplacesuffix        = file.replacesuffix
+local filesplitpath            = file.splitpath or file.split_path
+local filesuffix               = file.suffix
+local getwritablepath          = caches.getwritablepath
+local lfsisdir                 = lfs.isdir
+local lfsisfile                = lfs.isfile
+local lfsmkdirs                = lfs.mkdirs
+local lpegsplitat              = lpeg.splitat
+local stringis_empty           = string.is_empty
+local stringsplit              = string.split
+local stringstrip              = string.strip
+local tableappend              = table.append
+local tablecopy                = table.copy
+local tablefastcopy            = table.fastcopy
+local tabletofile              = table.tofile
+local tabletohash              = table.tohash
+local tableserialize           = table.serialize
+local runasscript              = caches == nil
 --- the font loader namespace is “fonts”, same as in Context
 --- we need to put some fallbacks into place for when running
 --- as a script
 fonts                          = fonts          or { }
 fonts.names                    = fonts.names    or { }
 fonts.definers                 = fonts.definers or { }
-local names                    = fonts.names --- font index namespace
 
-config                         = config or { }
-config.luaotfload              = config.luaotfload or { }
-config.luaotfload.resolver     = config.luaotfload.resolver or "normal"
-config.luaotfload.formats      = config.luaotfload.formats or "otf,ttf,ttc,dfont"
+local luaotfloadconfig         = config.luaotfload --- always present
+luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
+luaotfloadconfig.formats       = luaotfloadconfig.formats  or "otf,ttf,ttc,dfont"
+luaotfloadconfig.strip         = luaotfloadconfig.strip == true
 
-if config.luaotfload.update_live ~= false then
+if luaotfloadconfig.update_live ~= false then
     --- this option allows for disabling updates
     --- during a TeX run
-    config.luaotfload.update_live = true
+    luaotfloadconfig.update_live = true
 end
 
-names.version        = 2.210
-names.data           = nil      --- contains the loaded database
-names.lookups        = nil      --- contains the lookup cache
+local names                    = fonts.names
+local name_index               = nil --> upvalue for names.data
+local lookup_cache             = nil --> for names.lookups
+names.version                  = 2.4
+names.data                     = nil      --- contains the loaded database
+names.lookups                  = nil      --- contains the lookup cache
 
-names.path           = { index = { }, lookups = { } }
-names.path.globals   = {
-    prefix           = "", --- writable_path/names_dir
-    names_dir        = config.luaotfload.names_dir or "names",
-    index_file       = config.luaotfload.index_file
-                    or "luaotfload-names.lua",
-    lookups_file     = "luaotfload-lookup-cache.lua",
+names.path                     = { index = { }, lookups = { } }
+names.path.globals             = {
+    prefix                     = "", --- writable_path/names_dir
+    names_dir                  = luaotfloadconfig.names_dir or "names",
+    index_file                 = luaotfloadconfig.index_file
+                              or "luaotfload-names.lua",
+    lookups_file               = "luaotfload-lookup-cache.lua",
 }
 
 --- string -> (string * string)
@@ -138,6 +143,20 @@ local comma             = P","
 local noncomma          = 1-comma
 local splitcomma        = Ct((C(noncomma^1) + comma)^1)
 patterns.splitcomma     = splitcomma
+
+local format_precedence = {
+    "otf",   "ttc", "ttf",
+    "dfont", "afm", "pfb",
+    "pfa",
+}
+
+local location_precedence = {
+    "local", "system", "texmf",
+}
+
+local set_location_precedence = function (precedence)
+    location_precedence = precedence
+end
 
 --[[doc--
     We use the functions in the cache.* namespace that come with the
@@ -167,11 +186,11 @@ if not runasscript then
     end
 
     globals.prefix     = prefix
-    local lookups      = names.path.lookups
+    local lookup_path  = names.path.lookups
     local index        = names.path.index
     local lookups_file = filejoin (prefix, globals.lookups_file)
     local index_file   = filejoin (prefix, globals.index_file)
-    lookups.lua, lookups.luc = make_luanames (lookups_file)
+    lookup_path.lua, lookup_path.luc = make_luanames (lookups_file)
     index.lua, index.luc     = make_luanames (index_file)
 else --- running as script, inject some dummies
     caches = { }
@@ -183,12 +202,40 @@ end
 Auxiliary functions
 --doc]]--
 
+--- fontnames contain all kinds of garbage; as a precaution we
+--- lowercase and strip them of non alphanumerical characters
+
 --- string -> string
-local sanitize_string = function (str)
+
+local invalidchars = "[^%a%d]"
+
+local sanitize_fontname = function (str)
     if str ~= nil then
-        return utf8gsub(utf8lower(str), "[^%a%d]", "")
+        str = utf8gsub (utf8lower (str), invalidchars, "")
+        return str
     end
     return nil
+end
+
+local sanitize_fontnames = function (rawnames)
+    local result = { }
+    for category, namedata in next, rawnames do
+
+        if type (namedata) == "string" then
+            result [category] = utf8gsub (utf8lower (namedata),
+                                          invalidchars,
+                                          "")
+        else
+            local target = { }
+            for field, name in next, namedata do
+                target [field] = utf8gsub (utf8lower (name),
+                                        invalidchars,
+                                        "")
+            end
+            result [category] = target
+        end
+    end
+    return result
 end
 
 local find_files_indeed
@@ -242,17 +289,44 @@ end
 This is a sketch of the luaotfload db:
 
     type dbobj = {
-        formats         : string list; // { "otf", "ttf", "ttc", "dfont" }
-        mappings        : fontentry list;
-        status          : filestatus;
-        version         : float;
-        // new in v2.3; these supersede the basenames / barenames
-        // hashes from v2.2
-        filenames       : filemap;
+        families    : familytable;
+        files       : filemap;
+        status      : filestatus;
+        mappings    : fontentry list;
+        meta        : metadata;
+        names       : namedata; // TODO: check for relevance after db is finalized
+    }
+    and familytable = {
+        local  : (format, familyentry) hash; // specified with include dir
+        texmf  : (format, familyentry) hash;
+        system : (format, familyentry) hash;
+    }
+    and familyentry = {
+        regular     : sizes;
+        italic      : sizes;
+        bold        : sizes;
+        bolditalic  : sizes;
+    }
+    and sizes = {
+        default : int;              // points into mappings or names
+        optical : (int, int) list;  // design size -> index entry
+    }
+    and metadata = {
+        formats     : string list; // { "otf", "ttf", "ttc", "dfont" }
+        statistics  : TODO;
+        version     : float;
     }
     and filemap = {
-        base : (string, int) hash; // basename -> idx
-        bare : (string, int) hash; // barename -> idx
+        base : {
+            local  : (string, int) hash; // basename -> idx
+            system : (string, int) hash;
+            texmf  : (string, int) hash;
+        };
+        bare : {
+            local  : (string, (string, int) hash) hash; // location -> (barename -> idx)
+            system : (string, (string, int) hash) hash;
+            texmf  : (string, (string, int) hash) hash;
+        };
         full : (int, string) hash; // idx -> full path
     }
     and fontentry = {
@@ -275,13 +349,14 @@ This is a sketch of the luaotfload db:
         size         : int list;
         slant        : int;
         subfont      : int;
-        texmf        : bool;
+        location     : local | system | texmf;
         weight       : int;
         width        : int;
-        units_per_em : int;        // mainly 1000, but also 2048 or 256
+        units_per_em : int;         // mainly 1000, but also 2048 or 256
     }
-    and filestatus = (fullname,
-                      { index : int list; timestamp : int }) dict
+    and filestatus = (string,       // fullname
+                      { index       : int list; // pointer into mappings
+                        timestamp   : int;      }) dict
 
 beware that this is a reconstruction and may be incomplete.
 
@@ -320,14 +395,57 @@ mtx-fonts has in names.tma:
 
 --doc]]--
 
-local fontnames_init = function (formats) --- returns dbobj
+local initialize_namedata = function (formats) --- returns dbobj
     return {
-        mappings        = { },
-        status          = { },
---      filenames       = { }, -- created later
-        version         = names.version,
-        formats         = formats,
+        --families        = { },
+        status          = { }, -- was: status; map abspath -> mapping
+        mappings        = { }, -- TODO: check if still necessary after rewrite
+        names           = { },
+--      files           = { }, -- created later
+        meta            = {
+            formats    = formats,
+            statistics = { },
+            version    = names.version,
+        },
     }
+end
+
+--[[doc--
+
+    Since Luaotfload does not depend on the lualibs anymore we
+    have to put our own small wrappers for the gzip library in
+    place.
+
+    load_gzipped -- Read and decompress and entire gzipped file.
+    Returns the uncompressed content as a string.
+
+--doc]]--
+
+local load_gzipped = function (filename)
+    local gh = gzipopen (filename,"rb")
+    if gh then
+        local data = gh:read "*all"
+        gh:close ()
+        return data
+    end
+end
+
+--[[doc--
+
+    save_gzipped -- Compress and write a string to file. The return
+    value is the number of bytes written. Zlib parameters are: best
+    compression and default strategy.
+
+--doc]]--
+
+local save_gzipped = function (filename, data)
+    local gh = gzipopen (filename, "wb9")
+    if gh then
+        gh:write (data)
+        local bytes = gh:seek ()
+        gh:close ()
+        return bytes
+    end
 end
 
 --- When loading a lua file we try its binary complement first, which
@@ -336,27 +454,36 @@ end
 
 --- string -> (string * table)
 local load_lua_file = function (path)
-    local foundname = filereplacesuffix(path, "luc")
+    local foundname = filereplacesuffix (path, "luc")
+    local code      = nil
 
-    local fh = ioopen(foundname, "rb") -- try bin first
+    local fh = ioopen (foundname, "rb") -- try bin first
     if fh then
         local chunk = fh:read"*all"
         fh:close()
-        code = load(chunk, "b")
+        code = load (chunk, "b")
     end
 
     if not code then --- fall back to text file
-        foundname = filereplacesuffix(path, "lua")
+        foundname = filereplacesuffix (path, "lua")
         fh = ioopen(foundname, "rb")
         if fh then
             local chunk = fh:read"*all"
             fh:close()
-            code = load(chunk, "t")
+            code = load (chunk, "t")
+        end
+    end
+
+    if not code then --- probe gzipped file
+        foundname = filereplacesuffix (path, "lua.gz")
+        local chunk = load_gzipped (foundname)
+        if chunk then
+            code = load (chunk, "t")
         end
     end
 
     if not code then return nil, nil end
-    return foundname, code()
+    return foundname, code ()
 end
 
 --- define locals in scope
@@ -371,7 +498,7 @@ local load_lookups
 local read_blacklist
 local read_fonts_conf
 local reload_db
-local resolve
+local resolve_name
 local resolve_cached
 local resolve_fullpath
 local save_names
@@ -381,7 +508,6 @@ local get_font_filter
 local set_font_filter
 
 --- state of the database
-local fonts_loaded   = false
 local fonts_reloaded = false
 
 --- limit output when approximate font matching (luaotfload-tool -F)
@@ -389,16 +515,16 @@ local fuzzy_limit = 1 --- display closest only
 
 --- bool? -> dbobj
 load_names = function (dry_run)
-    local starttime = os.gettimeofday ()
+    local starttime = osgettimeofday ()
     local foundname, data = load_lua_file (names.path.index.lua)
 
     if data then
-        report ("both", 1, "db",
+        report ("both", 2, "db",
                 "Font names database loaded", "%s", foundname)
         report ("info", 3, "db", "Loading took %0.f ms",
-                1000*(os.gettimeofday()-starttime))
+                1000 * (osgettimeofday () - starttime))
 
-        local db_version, nms_version = data.version, names.version
+        local db_version, nms_version = data.meta.version, names.version
         if db_version ~= nms_version then
             report ("both", 0, "db",
                     [[Version mismatch; expected %4.3f, got %4.3f]],
@@ -417,17 +543,16 @@ load_names = function (dry_run)
                 [[Font names database not found, generating new one.]])
         report ("both", 0, "db",
                 [[This can take several minutes; please be patient.]])
-        data = update_names (fontnames_init (get_font_filter ()),
+        data = update_names (initialize_namedata (get_font_filter ()),
                              nil, dry_run)
         if not data then
             report ("both", 0, "db", "Database creation unsuccessful.")
         end
     end
-    fonts_loaded = true
     return data
 end
 
---- unit -> dbobj
+--- unit -> unit
 load_lookups = function ( )
     local foundname, data = load_lua_file(names.path.lookups.lua)
     if data then
@@ -438,60 +563,22 @@ load_lookups = function ( )
                "No lookup cache, creating empty.")
         data = { }
     end
-    return data
+    lookup_cache = data
 end
 
-local style_synonyms = { set = { } }
-do
-    local combine = function (ta, tb)
-        local result = { }
-        for i=1, #ta do
-            for j=1, #tb do
-                result[#result+1] = ta[i] .. tb[j]
-            end
-        end
-        return result
-    end
+local regular_synonym = {
+    book    = "r",
+    normal  = "r",
+    plain   = "r",
+    regular = "r",
+    roman   = "r",
+}
 
-    --- read this: http://blogs.adobe.com/typblography/2008/05/indesign_font_conflicts.html
-    --- tl;dr: font style synonyms are unreliable.
-    ---
-    --- Context matches font names against lists of known identifiers
-    --- for weight, style, width, and variant, so that including
-    --- the family name there are five dimensions for choosing a
-    --- match. The sad thing is, while this is a decent heuristic it
-    --- makes no sense to imitate it in luaotfload because the user
-    --- interface must fit into the much more limited Xetex scheme that
-    --- distinguishes between merely four style categories (variants):
-    --- “regular”, “italic”, “bold”, and “bolditalic”. As a result,
-    --- some of the styles are lumped together although they can differ
-    --- significantly (like “medium” and “bold”).
-
-    --- Xetex (XeTeXFontMgr.cpp) appears to recognize only “plain”,
-    --- “normal”, and “roman” as synonyms for “regular”.
-    local list = {
-        regular    = { "normal",         "roman",
-                       "plain",          "book",
-                       "light",          "extralight",
-                       "ultralight", },
-        bold       = { "demi",           "demibold",
-                       "semibold",       "boldregular",
-                       "medium",         "mediumbold",
-                       "ultrabold",      "extrabold",
-                       "heavy",          "black",
-                       "bold", },
-        italic     = { "regularitalic",  "normalitalic",
-                       "oblique",        "slanted",
-                       "italic", },
-    }
-
-    list.bolditalic     = combine(list.bold, list.italic)
-    style_synonyms.list = list
-
-    for category, synonyms in next, style_synonyms.list do
-        style_synonyms.set[category] = tabletohash(synonyms, true)
-    end
-end
+local italic_synonym = {
+    oblique = true,
+    slanted = true,
+    italic  = true,
+}
 
 local type1_formats = { "tfm", "ofm", }
 
@@ -519,18 +606,17 @@ end
 
 --- string -> (string * string * bool)
 crude_file_lookup_verbose = function (filename)
-    if not names.data then names.data = load_names() end
-    local data      = names.data
-    local mappings  = data.mappings
-    local filenames = data.filenames
+    if not name_index then name_index = load_names() end
+    local mappings  = name_index.mappings
+    local files     = name_index.files
     local found
 
     --- look up in db first ...
-    found = verbose_lookup(filenames, "bare", filename)
+    found = verbose_lookup(files, "bare", filename)
     if found then
         return found, nil, true
     end
-    found = verbose_lookup(filenames, "base", filename)
+    found = verbose_lookup(files, "base", filename)
     if found then
         return found, nil, true
     end
@@ -545,24 +631,51 @@ crude_file_lookup_verbose = function (filename)
     return filename, nil, false
 end
 
+local lookup_filename = function (filename)
+    if not name_index then name_index = load_names () end
+    local files    = name_index.files
+    local basedata = files.base
+    local baredata = files.bare
+    for i = 1, #location_precedence do
+        local location = location_precedence [i]
+        local basenames = basedata [location]
+        local barenames = baredata [location]
+        local idx
+        if basenames ~= nil then
+            idx = basenames [filename]
+            if idx then
+                goto done
+            end
+        end
+        if barenames ~= nil then
+            for j = 1, #format_precedence do
+                local format  = format_precedence [j]
+                local filemap = barenames [format]
+                if filemap then
+                    idx = barenames [format] [filename]
+                    if idx then
+                        break
+                    end
+                end
+            end
+        end
+::done::
+        if idx then
+            return files.full [idx]
+        end
+    end
+end
+
 --- string -> (string * string * bool)
 crude_file_lookup = function (filename)
-    if not names.data then names.data = load_names() end
-    local data      = names.data
-    local mappings  = data.mappings
-    local filenames = data.filenames
+    local found = lookup_filename (filename)
 
-    local found
-
-    found = filenames.base[filename]
-         or filenames.bare[filename]
+    if not found then
+        found = dummy_findfile(filename)
+    end
 
     if found then
-        found = filenames.full[found]
-        if found == nil then
-            found = dummy_findfile(filename)
-        end
-        return found or filename, nil, true
+        return found, nil, true
     end
 
     for i=1, #type1_formats do
@@ -580,15 +693,19 @@ Existence of the resolved file name is verified differently depending
 on whether the index entry has a texmf flag set.
 --doc]]--
 
-local get_font_file = function (fullnames, entry)
+local get_font_file = function (index)
+    local entry = name_index.mappings [index]
+    if not entry then
+        return false
+    end
     local basename = entry.basename
-    if entry.texmf == true then
+    if entry.location == "texmf" then
         if kpselookup(basename) then
             return true, basename, entry.subfont
         end
-    else
-        local fullname = fullnames[entry.index]
-        if lfsisfile(fullname) then
+    else --- system, local
+        local fullname = name_index.files.full [index]
+        if lfsisfile (fullname) then
             return true, basename, entry.subfont
         end
     end
@@ -597,28 +714,18 @@ end
 
 --[[doc--
 We need to verify if the result of a cached lookup actually exists in
-the texmf or filesystem.
+the texmf or filesystem. Again, due to the schizoprenic nature of the
+font managment we have to check both the system path and the texmf.
 --doc]]--
 
 local verify_font_file = function (basename)
-    if not names.data then names.data = load_names() end
-    local filenames = names.data.filenames
-    local idx = filenames.base[basename]
-    if not idx then
-        return false
-    end
-
-    --- firstly, check filesystem
-    local fullname = filenames.full[idx]
-    if fullname and lfsisfile(fullname) then
+    local path = resolve_fullpath (basename)
+    if path and lfsisfile(path) then
         return true
     end
-
-    --- secondly, locate via kpathsea
     if kpsefind_file(basename) then
         return true
     end
-
     return false
 end
 
@@ -653,8 +760,8 @@ Idk what the “spec” resolver is for.
                     optsize, size
         spec:       name, sub           resolved, sub, name, forced
 
-* name: contains both the name resolver from luatex-fonts and resolve()
-  below
+* name: contains both the name resolver from luatex-fonts and
+  resolve_name() below
 
 From my reading of font-def.lua, what a resolver does is
 basically rewrite the “name” field of the specification record
@@ -683,20 +790,20 @@ local hash_request = function (specification)
 end
 
 --- 'a -> 'a -> table -> (string * int|boolean * boolean)
-resolve_cached = function (_, _, specification)
-    if not names.lookups then names.lookups = load_lookups() end
+resolve_cached = function (specification)
+    if not lookup_cache then load_lookups () end
     local request = hash_request(specification)
     report("both", 4, "cache", "Looking for %q in cache ...",
            request)
 
-    local found = names.lookups[request]
+    local found = lookup_cache [request]
 
     --- case 1) cache positive ----------------------------------------
     if found then --- replay fields from cache hit
         report("info", 4, "cache", "Found!")
         local basename = found[1]
         --- check the presence of the file in case it’s been removed
-        local success = verify_font_file(basename)
+        local success = verify_font_file (basename)
         if success == true then
             return basename, found[2], true
         end
@@ -707,18 +814,24 @@ resolve_cached = function (_, _, specification)
 
     --- case 2) cache negative ----------------------------------------
     --- first we resolve normally ...
-    local filename, subfont, success = resolve(nil, nil, specification)
-    if not success then return filename, subfont, false end
+    local filename, subfont = resolve_name (specification)
+    if not filename then
+        return nil, nil
+    end
     --- ... then we add the fields to the cache ... ...
     local entry = { filename, subfont }
     report("both", 4, "cache", "New entry: %s", request)
-    names.lookups[request] = entry
+    lookup_cache [request] = entry
+
+    --- obviously, the updated cache needs to be stored.
+    --- TODO this should trigger a save only once the
+    ---      document is compiled (finish_pdffile callback?)
     report("both", 5, "cache", "Saving updated cache")
-    local success = save_lookups()
+    local success = save_lookups ()
     if not success then --- sad, but not critical
-        report("both", 0, "cache", "Could not write to cache")
+        report("both", 0, "cache", "Error writing cache.")
     end
-    return filename, subfont, true
+    return filename, subfont
 end
 
 --- this used to be inlined; with the lookup cache we don’t
@@ -752,285 +865,244 @@ local add_to_match = function (found, size, face)
     return found, continue
 end
 
+local choose_closest = function (distances)
+    local closest = 2^51
+    local match
+    for i = 1, #distances do
+        local d, index = unpack (distances [i])
+        if d < closest then
+            closest = d
+            match   = index
+        end
+    end
+    return match
+end
+
 --[[doc--
 
-Luatex-fonts, the font-loader package luaotfload imports, comes with
-basic file location facilities (see luatex-fonts-syn.lua).
-However, not only does the builtin functionality rely on Context’s font
-name database, it is also too limited to be of more than basic use.
-For this reason, luaotfload supplies its own resolvers that accesses
-the font database created by the luaotfload-tool script.
+    choose_size -- Pick a font face of appropriate size from the list
+    of family members with matching style. There are three categories:
+
+        1. exact matches: if there is a face whose design size equals
+           the asked size, it is returned immediately and no further
+           candidates are inspected.
+
+        2. range matches: of all faces in whose design range the
+           requested size falls the one whose center the requested
+           size is closest to is returned.
+
+        3. out-of-range matches: of all other faces (i. e. whose range
+           is above or below the asked size) the one is chosen whose
+           boundary (upper or lower) is closest to the requested size.
+
+        4. default matches: if no design size or a design size of zero
+           is requested, the face with the default size is returned.
 
 --doc]]--
 
-
----
---- the request specification has the fields:
----
----   · features: table
----     · normal: set of { ccmp clig itlc kern liga locl mark mkmk rlig }
----     · ???
----   · forced:   string
----   · lookup:   "name"
----   · method:   string
----   · name:     string
----   · resolved: string
----   · size:     int
----   · specification: string (== <lookup> ":" <name>)
----   · sub:      string
----
---- The “size” field deserves special attention: if its value is
---- negative, then it actually specifies a scalefactor of the
---- design size of the requested font. This happens e.g. if a font is
---- requested without an explicit “at size”. If the font is part of a
---- larger collection with different design sizes, this complicates
---- matters a bit: Normally, the resolver prefers fonts that have a
---- design size as close as possible to the requested size. If no
---- size specified, then the design size is implied. But which design
---- size should that be? Xetex appears to pick the “normal” (unmarked)
---- size: with Adobe fonts this would be the one that is neither
---- “caption” nor “subhead” nor “display” &c ... For fonts by Adobe this
---- seems to be the one that does not receive a “prefmodifiers” field.
---- (IOW Adobe uses the “prefmodifiers” field to encode the design size
---- in more or less human readable format.) However, this is not true
---- of LM and EB Garamond. As this matters only where there are
---- multiple design sizes to a given font/style combination, we put a
---- workaround in place that chooses that unmarked version.
-
----
---- the first return value of “resolve” is the file name of the
---- requested font (string)
---- the second is of type bool or string and indicates the subfont of a
---- ttc
----
---- 'a -> 'a -> table -> (string * string | bool * bool)
----
-
-resolve = function (_, _, specification) -- the 1st two parameters are used by ConTeXt
-    if not fonts_loaded then names.data = load_names() end
-    local data = names.data
-
-    local name  = sanitize_string(specification.name)
-    local style = sanitize_string(specification.style) or "regular"
-
-    local askedsize
-
-    if specification.optsize then
-        askedsize = tonumber(specification.optsize)
-    else
-        local specsize = specification.size
-        if specsize and specsize >= 0 then
-            askedsize = specsize / 65536
+--- int * int * int * int list -> int -> int
+local choose_size = function (sizes, askedsize)
+    local mappings = name_index.mappings
+    local match    = sizes.default
+    local exact
+    local inrange  = { } --- distance * index list
+    local norange  = { } --- distance * index list
+    local fontname, subfont
+    if askedsize ~= 0 then
+        --- firstly, look for an exactly matching design size or
+        --- matching range
+        for i = 1, #sizes do
+            local dsnsize, high, low, index = unpack (sizes [i])
+            if dsnsize == askedsize then
+                --- exact match, this is what we were looking for
+                exact = index
+                goto skip
+            elseif askedsize < low then
+                --- below range, add to the norange table
+                local d = low - askedsize
+                norange [#norange + 1] = { d, index }
+            elseif askedsize > high then
+                --- beyond range, add to the norange table
+                local d = askedsize - high
+                norange [#norange + 1] = { d, index }
+            else
+                --- range match
+                local d = ((low + high) / 2) - askedsize
+                if d < 0 then
+                    d = -d
+                end
+                inrange [#inrange + 1] = { d, index }
+            end
         end
     end
-
-    if type(data) ~= "table" then
-         --- this catches a case where load_names() doesn’t
-         --- return a database object, which can happen only
-         --- in case there is valid Lua code in the database,
-         --- but it’s not a table, e.g. it contains an integer.
-        if not fonts_reloaded then
-            return reload_db("invalid database; not a table",
-                             resolve, nil, nil, specification)
-        end
-        --- unsucessfully reloaded; bail
-        return specification.name, false, false
+::skip::
+    if exact then
+        match = exact
+    elseif #inrange > 0 then
+        match = choose_closest (inrange)
+    elseif #norange > 0 then
+        match = choose_closest (norange)
     end
+    return match
+end
 
-    if not data.mappings then
-        if not fonts_reloaded then
-            return reload_db("invalid database; missing font mapping",
-                             resolve, nil, nil, specification)
+--[[doc--
+
+    resolve_familyname -- Query the families table for an entry
+    matching the specification.
+    The parameters “name” and “style” are pre-sanitized.
+
+--doc]]--
+--- spec -> string -> string -> int -> string * int
+local resolve_familyname = function (specification, name, style, askedsize)
+    local families   = name_index.families
+    local mappings   = name_index.mappings
+    local candidates = nil
+    --- arrow code alert
+    for i = 1, #location_precedence do
+        local location = location_precedence [i]
+        local locgroup = families [location]
+        for j = 1, #format_precedence do
+            local format       = format_precedence [j]
+            local fmtgroup     = locgroup [format]
+            if fmtgroup then
+                local familygroup  = fmtgroup [name]
+                if familygroup then
+                    local stylegroup = familygroup [style]
+                    if stylegroup then --- suitable match
+                        candidates = stylegroup
+                        goto done
+                    end
+                end
+            end
         end
-        return specification.name, false, false
     end
+    if true then
+        return nil, nil
+    end
+::done::
+    index = choose_size (candidates, askedsize)
+    local success, resolved, subfont = get_font_file (index)
+    if not success then
+        return nil, nil
+    end
+    report ("info", 2, "db", "Match found: %s(%d)",
+            resolved, subfont or 0)
+    return resolved, subfont
+end
 
-    local synonym_set       = style_synonyms.set
-    local stylesynonyms     = synonym_set[style]
-    local regularsynonyms   = synonym_set.regular
-
-    local exact      = { } --> collect exact style matches
-    local synonymous = { } --> collect matching style synonyms
-    local fallback         --> e.g. non-matching style (fontspec is anal about this)
-    local candidates = { } --> secondary results, incomplete matches
-
-    for n, face in next, data.mappings do
-        local family, metafamily
-        local prefmodifiers, fontstyle_name, subfamily
-        local psname, fullname, fontname, pfullname
-
-        local facenames = face.sanitized
-        if facenames then
-            family          = facenames.family
-            subfamily       = facenames.subfamily
-            fontstyle_name  = facenames.fontstyle_name
-            prefmodifiers   = facenames.prefmodifiers or fontstyle_name or subfamily
-            fullname        = facenames.fullname
-            psname          = facenames.psname
-            fontname        = facenames.fontname
-            pfullname       = facenames.pfullname
-            metafamily      = facenames.metafamily
-        end
-        fontname    = fontname  or sanitize_string(face.fontname)
-        pfullname   = pfullname or sanitize_string(face.fullname)
-
-        if     name == family
-            or name == metafamily
+local resolve_fontname = function (specification, name)
+    local mappings  = name_index.mappings
+    for i = 1, #mappings do
+        local face = mappings [i]
+        if     face.fontname == name
+            or face.fullname == name
+            or face.psname   == name
         then
-            if     style == prefmodifiers
-                or style == fontstyle_name
-            then
-                local continue
-                exact, continue = add_to_match(exact, askedsize, face)
-                if continue == false then break end
-            elseif style == subfamily then
-                exact = add_to_match(exact, askedsize, face)
-            elseif stylesynonyms and stylesynonyms[prefmodifiers]
-                or regularsynonyms[prefmodifiers]
-            then
-                --- treat synonyms for prefmodifiers as first-class
-                --- (needed to prioritize DejaVu Book over Condensed)
-                exact = add_to_match(exact, askedsize, face)
-            elseif name == fullname
-                or name == pfullname
-                or name == fontname
-                or name == psname
-            then
-                synonymous = add_to_match(synonymous, askedsize, face)
-            elseif stylesynonyms and stylesynonyms[subfamily]
-                or regularsynonyms[subfamily]
-            then
-                synonymous = add_to_match(synonymous, askedsize, face)
-            elseif prefmodifiers == "regular"
-                or subfamily     == "regular" then
-                fallback = face
-            else --- mark as last straw but continue
-                candidates[#candidates+1] = face
-            end
-        else
-            if name == fullname
-            or name == pfullname
-            or name == fontname
-            or name == psname then
-                local continue
-                exact, continue = add_to_match(exact, askedsize, face)
-                if continue == false then break end
-            end
+            return face.basename, face.subfont
         end
     end
+    return nil, nil
+end
 
-    local found
-    if next(exact) then
-        found = exact
+--[[doc--
+
+    resolve_name -- Perform a name: lookup. This first queries the
+    font families table and, if there is no match for the spec, the
+    font names table.
+    The return value is a pair consisting of the file name and the
+    subfont index if appropriate..
+
+    the request specification has the fields:
+
+      · features: table
+        · normal: set of { ccmp clig itlc kern liga locl mark mkmk rlig }
+        · ???
+      · forced:   string
+      · lookup:   "name"
+      · method:   string
+      · name:     string
+      · resolved: string
+      · size:     int
+      · specification: string (== <lookup> ":" <name>)
+      · sub:      string
+
+    The “size” field deserves special attention: if its value is
+    negative, then it actually specifies a scalefactor of the
+    design size of the requested font. This happens e.g. if a font is
+    requested without an explicit “at size”. If the font is part of a
+    larger collection with different design sizes, this complicates
+    matters a bit: Normally, the resolver prefers fonts that have a
+    design size as close as possible to the requested size. If no
+    size specified, then the design size is implied. But which design
+    size should that be? Xetex appears to pick the “normal” (unmarked)
+    size: with Adobe fonts this would be the one that is neither
+    “caption” nor “subhead” nor “display” &c ... For fonts by Adobe this
+    seems to be the one that does not receive a “prefmodifiers” field.
+    (IOW Adobe uses the “prefmodifiers” field to encode the design size
+    in more or less human readable format.) However, this is not true
+    of LM and EB Garamond. As this matters only where there are
+    multiple design sizes to a given font/style combination, we put a
+    workaround in place that chooses that unmarked version.
+
+    The first return value of “resolve_name” is the file name of the
+    requested font (string). It can be passed to the fullname resolver
+    get_font_file().
+    The second value is either “false” or an integer indicating the
+    subfont index in a TTC.
+
+--doc]]--
+
+--- table -> string * (int | bool)
+resolve_name = function (specification)
+    local resolved, subfont
+    if not name_index then name_index = load_names () end
+    local name      = sanitize_fontname (specification.name)
+    local style     = sanitize_fontname (specification.style) or "r"
+    local askedsize = specification.optsize
+
+    if askedsize then
+        askedsize = tonumber (askedsize)
     else
-        found = synonymous
-    end
-
-    --- this is a monster
-    if #found == 1 then
-        --- “found” is really synonymous with “registered in the db”.
-        local entry = found[1]
-        local success, filename, subfont
-            = get_font_file(data.filenames.full, entry)
-        if success == true then
-            report("log", 0, "resolve",
-                "Font family='%s', subfamily='%s' found: %s",
-                name, style, filename
-            )
-            return filename, subfont, true
-        end
-
-    elseif #found > 1 then
-        -- we found matching font(s) but not in the requested optical
-        -- sizes, so we loop through the matches to find the one with
-        -- least difference from the requested size.
-        local match
-
-        if askedsize then  --- choose by design size
-            local closest
-            local least = math.huge -- initial value is infinity
-
-            for i, face in next, found do
-                local dsnsize = face.size and face.size [1] or 0
-                local difference = mathabs (dsnsize - askedsize)
-                if difference < least then
-                    closest = face
-                    least   = difference
-                end
-            end
-
-            match = closest
-        else --- choose “unmarked” match, for Adobe fonts this
-             --- is the one without a “prefmodifiers” field.
-            match = found [1] --- fallback
-            for i, face in next, found do
-                if not face.sanitized.prefmodifiers then
-                    match = face
-                    break
-                end
-            end
-        end
-
-        local success, filename, subfont
-            = get_font_file(data.filenames.full, match)
-        if success == true then
-            report("log", 0, "resolve",
-                "Font family='%s', subfamily='%s' found: %s",
-                name, style, filename
-            )
-            return filename, subfont, true
-        end
-
-    elseif fallback then
-        local success, filename, subfont
-            = get_font_file(data.filenames.full, fallback)
-        if success == true then
-            report("log", 0, "resolve",
-                "No exact match for request %s; using fallback",
-                specification.specification
-            )
-            report("log", 0, "resolve",
-                "Font family='%s', subfamily='%s' found: %s",
-                name, style, filename
-            )
-            return filename, subfont, true
-        end
-    elseif next(candidates) then
-        --- pick the first candidate encountered
-        local entry = candidates[1]
-        local success, filename, subfont
-            = get_font_file(data.filenames.full, entry)
-        if success == true then
-            report("log", 0, "resolve",
-                "Font family='%s', subfamily='%s' found: %s",
-                name, style, filename
-            )
-            return filename, subfont, true
+        askedsize = specification.size
+        if askedsize and askedsize >= 0 then
+            askedsize = askedsize / 65536
+        else
+            askedsize = 0
         end
     end
 
-    --- no font found so far
-    if not fonts_reloaded then
-        --- last straw: try reloading the database
-        return reload_db(
-            "unresolved font name: '" .. name .. "'",
-            resolve, nil, nil, specification
-        )
+    resolved, subfont = resolve_familyname (specification, name, style, askedsize)
+    if not resolved then
+        resolved, subfont = resolve_fontname (specification, name)
     end
-
-    --- else, default to requested name
-    return specification.name, false, false
-end --- resolve()
+    if not resolved then
+        resolved = specification.name, false
+    end
+    return resolved, subfont
+end
 
 resolve_fullpath = function (fontname, ext) --- getfilename()
-    if not fonts_loaded then
-        names.data = load_names()
-    end
-    local filenames = names.data.filenames
-    local idx = filenames.base[fontname]
-             or filenames.bare[fontname]
-    if idx then
-        return filenames.full[idx]
+    if not name_index then name_index = load_names () end
+    local files = name_index.files
+    local basedata = files.base
+    local baredata = files.bare
+    for i = 1, #location_precedence do
+        local location = location_precedence [i]
+        local basenames = basedata [location]
+        local idx
+        if basenames ~= nil then
+            idx = basenames [fontname]
+        end
+        if ext then
+            local barenames = baredata [location] [ext]
+            if not idx and barenames ~= nil then
+                idx = barenames [fontname]
+            end
+        end
+        if idx then
+            return files.full [idx]
+        end
     end
     return ""
 end
@@ -1040,18 +1112,19 @@ end
 
 --- string -> ('a -> 'a) -> 'a list -> 'a
 reload_db = function (why, caller, ...)
-    local namedata  = names.data
-    local formats   = tableconcat (namedata.formats, ",")
+    local namedata  = name_index
+    local formats   = tableconcat (namedata.meta.formats, ",")
 
     report ("both", 1, "db",
             "Reload initiated (formats: %s); reason: %q",
             formats, why)
 
     set_font_filter (formats)
-    names.data = update_names (names.data, false, false)
+    namedata = update_names (namedata, false, false)
 
-    if names.data then
+    if namedata then
         fonts_reloaded = true
+        name_index = namedata
         return caller (...)
     end
 
@@ -1088,28 +1161,25 @@ end
 
 --- string -> int -> bool
 find_closest = function (name, limit)
-    local name     = sanitize_string(name)
+    local name     = sanitize_fontname (name)
     limit          = limit or fuzzy_limit
 
-    if not fonts_loaded then names.data = load_names() end
-
-    local data = names.data
-
-    if type(data) ~= "table" then
+    if not name_index then name_index = load_names () end
+    if not name_index or type (name_index) ~= "table" then
         if not fonts_reloaded then
             return reload_db("no database", find_closest, name)
         end
         return false
     end
+
     local by_distance   = { } --- (int, string list) dict
     local distances     = { } --- int list
     local cached        = { } --- (string, int) dict
-    local mappings      = data.mappings
+    local mappings      = name_index.mappings
     local n_fonts       = #mappings
 
     for n = 1, n_fonts do
         local current    = mappings[n]
-        local cnames     = current.sanitized
         --[[
             This is simplistic but surpisingly fast.
             Matching is performed against the “fullname” field
@@ -1119,23 +1189,22 @@ find_closest = function (name, limit)
             font name categories as well as whatever agrep
             does.
         --]]
-        if cnames then
-            local fullname, sfullname = current.fullname, cnames.fullname
+        local fullname  = current.plainname
+        local sfullname = current.fullname
+        local dist      = cached[sfullname]--- maybe already calculated
 
-            local dist = cached[sfullname]--- maybe already calculated
-            if not dist then
-                dist = iterative_levenshtein(name, sfullname)
-                cached[sfullname] = dist
-            end
-            local namelst = by_distance[dist]
-            if not namelst then --- first entry
-                namelst = { fullname }
-                distances[#distances+1] = dist
-            else --- append
-                namelst[#namelst+1] = fullname
-            end
-            by_distance[dist] = namelst
+        if not dist then
+            dist = iterative_levenshtein(name, sfullname)
+            cached[sfullname] = dist
         end
+        local namelst = by_distance[dist]
+        if not namelst then --- first entry
+            namelst = { fullname }
+            distances[#distances+1] = dist
+        else --- append
+            namelst[#namelst+1] = fullname
+        end
+        by_distance[dist] = namelst
     end
 
     --- print the matches according to their distance
@@ -1160,93 +1229,30 @@ find_closest = function (name, limit)
     return false
 end --- find_closest()
 
-local sanitize_names = function (names)
-    local res = { }
-    for idx, name in next, names do
-        res[idx] = sanitize_string(name)
-    end
-    return res
-end
-
 local load_font_file = function (filename, subfont)
     local rawfont, _msg = fontloaderopen (filename, subfont)
     if not rawfont then
         report ("log", 1, "db", "ERROR: failed to open %s", filename)
         return
     end
+
     local metadata = fontloaderto_table (rawfont)
     fontloaderclose (rawfont)
+
+    metadata.glyphs     = nil
+    metadata.subfonts   = nil
+    metadata.gpos       = nil
+    metadata.gsub       = nil
+    metadata.lookups    = nil
+
     collectgarbage "collect"
+
     return metadata
 end
 
---[[doc--
-The data inside an Opentype font file can be quite heterogeneous.
-Thus in order to get the relevant information, parts of the original
-table as returned by the font file reader need to be relocated.
---doc]]--
+--- rawdata -> (int * int * int | bool)
 
---- string -> int -> bool -> string -> fontentry
-ot_fullinfo = function (filename, subfont, texmf, basename)
-    local namedata = { }
-
-    local metadata = load_font_file (filename, subfont)
-    if not metadata then
-        return nil
-    end
-
-    local english_names
-
-    if metadata.names then
-        for _, raw_namedata in next, metadata.names do
-            if raw_namedata.lang == "English (US)" then
-                english_names = raw_namedata.names
-            end
-        end
-    else
-        -- no names table, propably a broken font
-        report("log", 1, "db",
-               "Broken font %s rejected due to missing names table.",
-               basename)
-        return
-    end
-
-    local fontnames = {
-        --- see
-        --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
-        fullname      = english_names.compatfull
-                     or english_names.fullname,
-        family        = english_names.preffamilyname
-                     or english_names.family,
-        prefmodifiers = english_names.prefmodifiers,
-        subfamily     = english_names.subfamily,
-        psname        = english_names.postscriptname,
-        pfullname     = metadata.fullname,
-        fontname      = metadata.fontname,
-        metafamily    = metadata.familyname,
-    }
-
-    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
-    if metadata.fontstyle_name then
-        for _, name in next, metadata.fontstyle_name do
-            if name.lang == 1033 then --- I hate magic numbers
-                fontnames.fontstyle_name = name.name
-            end
-        end
-    end
-
-    namedata.sanitized     = sanitize_names (fontnames)
-    namedata.fontname      = metadata.fontname
-    namedata.fullname      = metadata.fullname
-    namedata.familyname    = metadata.familyname
-    namedata.weight        = metadata.pfminfo.weight
-    namedata.width         = metadata.pfminfo.width
-    namedata.slant         = metadata.italicangle
-    --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
-    namedata.units_per_em  = metadata.units_per_em
-    namedata.version       = metadata.version
-    -- don't waste the space with zero values
-
+local get_size_info = function (metadata)
     local design_size         = metadata.design_size
     local design_range_top    = metadata.design_range_top
     local design_range_bottom = metadata.design_range_bottom
@@ -1259,20 +1265,186 @@ ot_fullinfo = function (filename, subfont, texmf, basename)
         design_size         = (design_size         or fallback_size) / 10
         design_range_top    = (design_range_top    or fallback_size) / 10
         design_range_bottom = (design_range_bottom or fallback_size) / 10
-        namedata.size = {
+        return {
             design_size, design_range_top, design_range_bottom,
         }
-    else
-        namedata.size = false
     end
 
-    --- file location data (used to be filename field)
-    namedata.filename      = filename --> sys
-    namedata.basename      = basename --> texmf
-    namedata.texmf         = texmf or false
-    namedata.subfont       = subfont
+    return false
+end
 
-    return namedata
+local get_english_names = function (names, basename)
+
+    local english_names
+
+    if names then
+        for _, raw_namedata in next, names do
+            if raw_namedata.lang == "English (US)" then
+                english_names = raw_namedata.names
+            end
+        end
+    else
+        -- no names table, probably a broken font
+        report("log", 1, "db",
+               "Broken font %s rejected due to missing names table.",
+               basename)
+        return nil
+    end
+
+    return english_names
+end
+
+local organize_namedata = function (metadata,
+                                    english_names,
+                                    basename,
+                                    info)
+
+    --print (english_names.family, "<>", english_names.preffamilyname)
+    local fontnames = {
+        --- see
+        --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
+        --- http://www.microsoft.com/typography/OTSPEC/name.htm#NameIDs
+        english = {
+            --- where a “compatfull” field is given, the value of “fullname” is
+            --- either identical or differs by separating the style
+            --- with a hyphen and omitting spaces. (According to the
+            --- spec, “compatfull” is “Macintosh only”.)
+            --- Of the three “fullname” fields, this one appears to be the one
+            --- with the entire name given in a legible,
+            --- non-abbreviated fashion, for most fonts at any rate.
+            --- However, in some fonts (e.g. CMU) all three fields are
+            --- identical.
+            fullname      = english_names.compatfull
+                         or english_names.fullname,
+            --- we keep both the “preferred family” and the “family”
+            --- values around since both are valid but can turn out
+            --- quite differently, e.g. with Latin Modern:
+            ---     preffamily: “Latin Modern Sans”,
+            ---     family:     “LM Sans 10”
+            preffamily    = english_names.preffamilyname,
+            family        = english_names.family,
+            prefmodifiers = english_names.prefmodifiers,
+            subfamily     = english_names.subfamily,
+            psname        = english_names.postscriptname,
+        },
+
+        metadata = {
+            fullname      = metadata.fullname,
+            fontname      = metadata.fontname,
+            familyname    = metadata.familyname,
+        },
+
+        info = {
+            fullname      = info.fullname,
+            familyname    = info.familyname,
+            fontname      = info.fontname,
+        },
+    }
+
+    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
+    if metadata.fontstyle_name then
+        --- not present in all fonts, often differs from the preferred
+        --- subfamily as well as subfamily fields, e.g. with
+        --- LMSans10-BoldOblique:
+        ---     subfamily:      “Bold Italic”
+        ---     prefmodifiers:  “10 Bold Oblique”
+        ---     fontstyle_name: “Bold Oblique”
+        for _, name in next, metadata.fontstyle_name do
+            if name.lang == 1033 then --- I hate magic numbers
+                fontnames.fontstyle_name = name.name
+            end
+        end
+    end
+
+    return {
+        sanitized     = sanitize_fontnames (fontnames),
+        fontname      = metadata.fontname,
+        fullname      = metadata.fullname,
+        familyname    = metadata.familyname,
+    }
+
+end
+
+
+local dashsplitter = lpegsplitat "-"
+
+local split_fontname = function (fontname)
+    --- sometimes the style hides in the latter part of the
+    --- fontname, separated by a dash, e.g. “Iwona-Regular”,
+    --- “GFSSolomos-Regular”
+    local splitted = { lpegmatch (dashsplitter, fontname) }
+    if next (splitted) then
+        return sanitize_fontname (splitted [#splitted])
+    end
+end
+
+local organize_styledata = function (fontname,
+                                     metadata,
+                                     english_names,
+                                     info)
+    local pfminfo   = metadata.pfminfo
+    local names     = metadata.names
+
+    return {
+    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
+        size            = get_size_info (metadata),
+        weight          = {
+            pfminfo.weight,                     -- integer (multiple of 100?)
+            sanitize_fontname (info.weight),    -- style name
+        },
+        split           = split_fontname (fontname),
+        width           = pfminfo.width,
+        italicangle     = metadata.italicangle,
+--        italicangle     = {
+--            metadata.italicangle,   -- float
+--            info.italicangle,       -- truncated to integer point size?
+--        },
+    --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
+        units_per_em    = metadata.units_per_em,
+        version         = metadata.version,
+    }
+end
+
+--[[doc--
+The data inside an Opentype font file can be quite heterogeneous.
+Thus in order to get the relevant information, parts of the original
+table as returned by the font file reader need to be relocated.
+--doc]]--
+
+--- string -> int -> bool -> string -> fontentry
+
+ot_fullinfo = function (filename,
+                        subfont,
+                        location,
+                        basename,
+                        format,
+                        info)
+
+    local metadata = load_font_file (filename, subfont)
+    if not metadata then
+        return nil
+    end
+
+    local english_names = get_english_names (metadata.names, basename)
+    local namedata      = organize_namedata (metadata,
+                                             english_names,
+                                             basename,
+                                             info)
+    local style         = organize_styledata (namedata.fontname,
+                                              metadata,
+                                              english_names,
+                                              info)
+
+    return {
+        file            = { base        = basename,
+                            full        = filename,
+                            subfont     = subfont,
+                            location    = location or "system" },
+        format          = format,
+        names           = namedata,
+        style           = style,
+        version         = metadata.version,
+    }
 end
 
 --[[doc--
@@ -1286,9 +1458,10 @@ end
 --doc]]--
 
 --- string -> int -> bool -> string -> fontentry
-t1_fullinfo = function (filename, _subfont, texmf, basename)
-    local namedata = { }
-    local metadata = load_font_file (filename)
+
+t1_fullinfo = function (filename, _subfont, location, basename, format)
+    local sanitized
+    local metadata  = load_font_file (filename)
 
     local fontname      = metadata.fontname
     local fullname      = metadata.fullname
@@ -1296,66 +1469,35 @@ t1_fullinfo = function (filename, _subfont, texmf, basename)
     local italicangle   = metadata.italicangle
     local weight        = metadata.weight --- string identifier
 
-    --- we have to improvise and detect whether we deal with
-    --- italics since pfb fonts don’t come with a “subfamily”
-    --- field
-    local style
-    if italicangle == 0 then
-        style = false
-    else
-        style = "italic"
-    end
-
-    local style_synonyms_set = style_synonyms.set
-    if weight then
-        weight = sanitize_string (weight)
-        local tmp = ""
-        if style_synonyms_set.bold[weight] then
-            tmp = "bold"
-        end
-        if style then
-            style = tmp .. style
-        else
-            if style_synonyms_set.regular[weight] then
-                style = "regular"
-            else
-                style = tmp
-            end
-        end
-    end
-
-    if not style or style == "" then
-        style = "regular"
-        --- else italic
-    end
-
-    namedata.sanitized = sanitize_names ({
+    sanitized = sanitize_fontnames ({
         fontname        = fontname,
         psname          = fullname,
         pfullname       = fullname,
         metafamily      = family,
-        family          = familyname,
+        familyname      = familyname,
         subfamily       = weight,
         prefmodifiers   = style,
     })
 
-    namedata.fontname      = fontname
-    namedata.fullname      = fullname
-    namedata.familyname    = familyname
-
-    namedata.slant         = italicangle
-    namedata.units_per_em  = 1000 --- ps fonts standard
-    namedata.version       = metadata.version
-    namedata.weight        = metadata.pfminfo.weight --- integer
-    namedata.width         = metadata.pfminfo.width
-
-    namedata.size          = false
-
-    namedata.filename      = filename --> sys
-    namedata.basename      = basename --> texmf
-    namedata.texmf         = texmf or false
-    namedata.subfont       = false
-    return namedata
+    return {
+        basename         = basename,
+        fullpath         = filename,
+        subfont          = false,
+        location         = location or "system",
+        format           = format,
+        fullname         = sanitized.fullname,
+        fontname         = sanitized.fontname,
+        familyname       = sanitized.familyname,
+        plainname        = fullname,
+        psname           = sanitized.fontname,
+        version          = metadata.version,
+        size             = false,
+        splitstyle       = split_fontname (fontname),
+        fontstyle_name   = sanitized.subfamily,
+        weight           = { metadata.pfminfo.weight,
+                             sanitized.subfamily },
+        italicangle      = italicangle,
+    }
 end
 
 local loaders = {
@@ -1368,103 +1510,187 @@ local loaders = {
     pfa     = t1_fullinfo,
 }
 
---- we return true if the fond is new or re-indexed
+--- not side-effect free!
+
+local compare_timestamps = function (fullname,
+                                     currentstatus,
+                                     currententrystatus,
+                                     currentmappings,
+                                     targetstatus,
+                                     targetentrystatus,
+                                     targetmappings)
+
+    local currenttimestamp = currententrystatus
+                         and currententrystatus.timestamp
+    local targettimestamp  = lfsattributes (fullname, "modification")
+
+    if targetentrystatus ~= nil
+    and targetentrystatus.timestamp == targettimestamp then
+        report ("log", 3, "db", "Font %q already read.", fullname)
+        return false
+    end
+
+    targetentrystatus.timestamp = targettimestamp
+    targetentrystatus.index     = targetentrystatus.index or { }
+
+    if  currenttimestamp == targettimestamp
+    and not targetentrystatus.index [1]
+    then
+        --- copy old namedata into new
+
+        for _, currentindex in next, currententrystatus.index do
+
+            local targetindex   = #targetentrystatus.index
+            local fullinfo      = currentmappings [currentindex]
+            local location      = #targetmappings + 1
+
+            targetmappings [location]                 = fullinfo
+            targetentrystatus.index [targetindex + 1] = location
+        end
+
+        report ("log", 3, "db", "Font %q already indexed.", fullname)
+
+        return false
+    end
+
+    return true
+end
+
+local insert_fullinfo = function (fullname,
+                                  basename,
+                                  n_font,
+                                  loader,
+                                  format,
+                                  location,
+                                  targetmappings,
+                                  targetentrystatus,
+                                  info)
+
+    local subfont
+    if n_font ~= false then
+        subfont = n_font - 1
+    else
+        subfont = false
+        n_font  = 1
+    end
+
+    local fullinfo = loader (fullname, subfont,
+                             location, basename,
+                             format, info)
+
+    if not fullinfo then
+        return false
+    end
+
+    local index = targetentrystatus.index [n_font]
+
+    if not index then
+        index = #targetmappings + 1
+    end
+
+    targetmappings [index]            = fullinfo
+    targetentrystatus.index [n_font]  = index
+
+    return true
+end
+
+
+
+--- we return true if the font is new or re-indexed
 --- string -> dbobj -> dbobj -> bool
-local load_font = function (fullname, fontnames, newfontnames, texmf)
-    local newmappings   = newfontnames.mappings
-    local newstatus     = newfontnames.status --- by full path
 
-    local mappings      = fontnames.mappings
-    local status        = fontnames.status
+local read_font_names = function (fullname,
+                                  currentnames,
+                                  targetnames,
+                                  location)
 
-    local basename      = filebasename(fullname)
-    local barename      = filenameonly(fullname)
+    local targetmappings        = targetnames.mappings
+    local targetstatus          = targetnames.status --- by full path
+    local targetentrystatus     = targetstatus [fullname]
 
-    local format        = stringlower (filesuffix (basename))
+    if targetentrystatus == nil then
+        targetentrystatus        = { }
+        targetstatus [fullname]  = targetentrystatus
+    end
 
-    local entryname     = fullname
-    if texmf == true then
+    local currentmappings       = currentnames.mappings
+    local currentstatus         = currentnames.status
+    local currententrystatus    = currentstatus [fullname]
+
+    local basename              = filebasename (fullname)
+    local barename              = filenameonly (fullname)
+    local entryname             = fullname
+
+    if location == "texmf" then
         entryname = basename
     end
 
-    if names.blacklist[fullname] or names.blacklist[basename]
-    then
+    --- 1) skip if blacklisted
+
+    if names.blacklist[fullname] or names.blacklist[basename] then
         report("log", 2, "db",
                "Ignoring blacklisted font %q", fullname)
         return false
     end
 
-    local new_timestamp, current_timestamp
-    current_timestamp   = status[fullname]
-                      and status[fullname].timestamp
-    new_timestamp       = lfsattributes(fullname, "modification")
+    --- 2) skip if known with same timestamp
 
-    local newentrystatus = newstatus[fullname]
-    --- newentrystatus: nil | false | table
-    if newentrystatus and newentrystatus.timestamp == new_timestamp then
-        -- already indexed this run
-        return false
-    end
-
-    newstatus[fullname]      = newentrystatus or { }
-    local newentrystatus     = newstatus[fullname]
-    newentrystatus.timestamp = new_timestamp
-    newentrystatus.index     = newentrystatus.index or { }
-
-    if  current_timestamp == new_timestamp
-    and not newentrystatus.index[1]
+    if not compare_timestamps (fullname,
+                               currentstatus,
+                               currententrystatus,
+                               currentmappings,
+                               targetstatus,
+                               targetentrystatus,
+                               targetmappings)
     then
-        for _, v in next, status[fullname].index do
-            local index      = #newentrystatus.index
-            local fullinfo   = mappings[v]
-            local location   = #newmappings + 1
-            newmappings[location]          = fullinfo --- keep
-            newentrystatus.index[index+1]  = location --- is this actually used anywhere?
-        end
-        report("log", 2, "db", "Font %q already indexed", basename)
         return false
     end
 
-    local loader = loaders[format] --- ot_fullinfo, t1_fullinfo
+    --- 3) new font; choose a loader, abort if unknown
+
+    local format    = stringlower (filesuffix (basename))
+    local loader    = loaders [format] --- ot_fullinfo, t1_fullinfo
+
     if not loader then
         report ("both", 0, "db",
                 "Unknown format: %q, skipping.", format)
         return false
     end
 
-    local info = fontloaderinfo(fullname)
-    if info then
-        if type(info) == "table" and #info > 1 then --- ttc
-            for n_font = 1, #info do
-                local fullinfo = loader (fullname, n_font-1, texmf, basename)
-                if not fullinfo then
-                    return false
-                end
-                local location = #newmappings+1
-                local index    = newentrystatus.index[n_font]
-                if not index then index = location end
+    --- 4) get basic info, abort if fontloader can’t read it
 
-                newmappings[index]            = fullinfo
-                newentrystatus.index[n_font]  = index
-            end
-        else
-            local fullinfo = loader (fullname, false, texmf, basename)
-            if not fullinfo then
-                return false
-            end
-            local location  = #newmappings+1
-            local index     = newentrystatus.index[1]
-            if not index then index = location end
+    local info = fontloaderinfo (fullname)
 
-            newmappings[index]       = fullinfo
-            newentrystatus.index[1]  = index
-        end
-
-    else --- missing info
-        report("log", 1, "db", "Failed to load %q", basename)
+    if not info then
+        report ("log", 1, "db",
+                "Failed to read basic information from %q", basename)
         return false
     end
-    return true
+
+
+    --- 5) check for subfonts and process each of them
+
+    if type (info) == "table" and #info > 1 then --- ttc
+
+        local success = false --- true if at least one subfont got read
+
+        for n_font = 1, #info do
+            if insert_fullinfo (fullname, basename, n_font,
+                                loader, format, location,
+                                targetmappings, targetentrystatus,
+                                info)
+            then
+                success = true
+            end
+        end
+
+        return success
+    end
+
+    return insert_fullinfo (fullname, basename, false,
+                            loader, format, location,
+                            targetmappings, targetentrystatus,
+                            info)
 end
 
 local path_normalize
@@ -1542,7 +1768,7 @@ local create_blacklist = function (blacklist, whitelist)
     local result = { }
     local dirs   = { }
 
-    report("info", 1, "db", "Blacklisting %q files and directories",
+    report("info", 2, "db", "Blacklisting %d files and directories",
            #blacklist)
     for i=1, #blacklist do
         local entry = blacklist[i]
@@ -1553,7 +1779,7 @@ local create_blacklist = function (blacklist, whitelist)
         end
     end
 
-    report("info", 1, "db", "Whitelisting %q files", #whitelist)
+    report("info", 2, "db", "Whitelisting %d files", #whitelist)
     for i=1, #whitelist do
         result[whitelist[i]] = nil
     end
@@ -1677,7 +1903,7 @@ do
     end
 
     --- initialize
-    set_font_filter (config.luaotfload.formats)
+    set_font_filter (luaotfloadconfig.formats)
 end
 
 local process_dir_tree
@@ -1780,29 +2006,30 @@ end
     scan_dir() scans a directory and populates the list of fonts
     with all the fonts it finds.
 
-        · dirname   : name of the directory to scan
-        · fontnames : current font db object
-        · newnames  : font db object to fill
-        · dry_run   : don’t touch anything
+        · dirname       : name of the directory to scan
+        · currentnames  : current font db object
+        · targetnames   : font db object to fill
+        · dry_run       : don’t touch anything
 
 --doc]]--
 
 --- string -> dbobj -> dbobj -> bool -> bool -> (int * int)
-local scan_dir = function (dirname, fontnames, newfontnames,
-                           dry_run, texmf)
+
+local scan_dir = function (dirname, currentnames, targetnames,
+                           dry_run, location)
     if lpegmatch (p_blacklist, dirname) then
-        report ("both", 3, "db",
+        report ("both", 4, "db",
                 "Skipping blacklisted directory %s", dirname)
         --- ignore
         return 0, 0
     end
-    local found = find_font_files (dirname, texmf ~= true)
+    local found = find_font_files (dirname, location ~= "texmf")
     if not found then
-        report ("both", 3, "db",
+        report ("both", 4, "db",
                 "No such directory: %q; skipping.", dirname)
         return 0, 0
     end
-    report ("both", 3, "db", "Scanning directory %s", dirname)
+    report ("both", 4, "db", "Scanning directory %s", dirname)
 
     local n_new = 0   --- total of fonts collected
     local n_found = #found
@@ -1816,8 +2043,8 @@ local scan_dir = function (dirname, fontnames, newfontnames,
                            "Would have been loading %q", fullname)
         else
             report_status ("both", "db", "Loading font %q", fullname)
-            local new = load_font (fullname, fontnames,
-                                   newfontnames, texmf)
+            local new = read_font_names (fullname, currentnames,
+                                         targetnames, texmf)
             if new == true then
                 n_new = n_new + 1
             end
@@ -1853,7 +2080,8 @@ local path_separator = ostype == "windows" and ";" or ":"
 --doc]]--
 
 --- dbobj -> dbobj -> bool? -> (int * int)
-local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
+
+local scan_texmf_fonts = function (currentnames, targetnames, dry_run)
 
     local n_scanned, n_new, fontdirs = 0, 0
     local osfontdir = kpseexpand_path "$OSFONTDIR"
@@ -1882,8 +2110,8 @@ local scan_texmf_fonts = function (fontnames, newfontnames, dry_run)
                 "Initiating scan of %d directories.", #tasks)
         report_status_start (2, 4)
         for _, d in next, tasks do
-            local found, new = scan_dir (d, fontnames, newfontnames,
-                                         dry_run, true)
+            local found, new = scan_dir (d, currentnames, targetnames,
+                                         dry_run, "texmf")
             n_scanned = n_scanned + found
             n_new     = n_new     + new
         end
@@ -2048,6 +2276,10 @@ do --- closure for read_fonts_conf()
                 --- We exclude paths with texmf in them, as they should be
                 --- found anyway; also duplicates are ignored by checking
                 --- if they are elements of dirs_done.
+                ---
+                --- FIXME does this mean we cannot access paths from
+                --- distributions (e.g. Context minimals) installed
+                --- separately?
                 if not (stringfind(path, "texmf") or dirs_done[path]) then
                     acc[#acc+1] = path
                     dirs_done[path] = true
@@ -2159,18 +2391,19 @@ end
 --doc]]--
 
 --- dbobj -> dbobj -> bool? -> (int * int)
-local scan_os_fonts = function (fontnames, newfontnames,
+local scan_os_fonts = function (currentnames,
+                                targetnames,
                                 dry_run)
 
     local n_scanned, n_new = 0, 0
-    report ("info", 1, "db", "Scanning OS fonts...")
+    report ("info", 2, "db", "Scanning OS fonts...")
     report ("info", 3, "db",
             "Searching in static system directories...")
 
     report_status_start (2, 4)
     for _, d in next, get_os_dirs () do
-        local found, new = scan_dir (d, fontnames,
-                                     newfontnames, dry_run)
+        local found, new = scan_dir (d, currentnames,
+                                     targetnames, dry_run)
         n_scanned = n_scanned + found
         n_new     = n_new     + new
     end
@@ -2181,149 +2414,654 @@ end
 
 --- unit -> (bool, lookup_cache)
 flush_lookup_cache = function ()
-    if not names.lookups then names.lookups = load_lookups() end
-    names.lookups = { }
+    lookup_cache = { }
     collectgarbage "collect"
-    return true, names.lookups
+    return true, lookup_cache
 end
 
---- dbobj -> dbobj
-local gen_fast_lookups = function (fontnames)
-    report("both", 1, "db", "Creating filename map")
-    local mappings   = fontnames.mappings
+
+--- fontentry list -> filemap
+
+local generate_filedata = function (mappings)
+
+    report ("both", 2, "db", "Creating filename map.")
+
     local nmappings  = #mappings
-    --- this is needlessly complicated due to texmf priorization
-    local filenames  = {
-        bare = { },
-        base = { },
+
+    local files  = {
+        bare = {
+            ["local"]   = { },
+            system      = { }, --- mapped to mapping format -> index in full
+            texmf       = { }, --- mapped to mapping format -> “true”
+        },
+        base = {
+            ["local"]   = { },
+            system      = { }, --- mapped to index in “full”
+            texmf       = { }, --- set; all values are “true”
+        },
         full = { }, --- non-texmf
     }
 
-    local texmf, sys = { }, { } -- quintuple list
+    local base = files.base
+    local bare = files.bare
+    local full = files.full
 
-    for idx = 1, nmappings do
-        local entry    = mappings[idx]
-        local filename = entry.filename
-        local basename = entry.basename
-        local bare     = filenameonly(filename)
-        local subfont  = entry.subfont
+    local conflicts = {
+        basenames = 0,
+        barenames = 0,
+    }
 
-        entry.index    = idx
----     unfortunately, the sys/texmf schism prevents us from
----     doing away the full name, so we cannot avoid the
----     substantial duplication
---      entry.filename = nil
+    for index = 1, nmappings do
+        local entry    = mappings [index]
 
-        if entry.texmf == true then
-            texmf[#texmf+1] = { idx, basename, bare, true, nil }
+        local filedata = entry.file
+        local format
+        local location
+        local fullpath
+        local basename
+        local barename
+        local subfont
+
+        if filedata then --- new entry
+            format   = entry.format   --- otf, afm, ...
+            location = filedata.location --- texmf, system, ...
+            fullpath = filedata.full
+            basename = filedata.base
+            barename = filenameonly (fullpath)
+            subfont  = filedata.subfont
         else
-            sys[#sys+1] = { idx, basename, bare, false, filename }
+            format   = entry.format   --- otf, afm, ...
+            location = entry.location --- texmf, system, ...
+            fullpath = entry.fullpath
+            basename = entry.basename
+            barename = filenameonly (fullpath)
+            subfont  = entry.subfont
         end
-    end
 
-    local addmap = function (lst)
-        --- this will overwrite existing entries
-        for i=1, #lst do
-            local idx, base, bare, intexmf, full = unpack(lst[i])
+        entry.index    = index
 
-            local known = filenames.base[base] or filenames.bare[bare]
-            if known then --- known
-                report("both", 3, "db",
-                       "Font file %q already indexed (%d)",
-                       base, idx)
-                report("both", 3, "db", "> old location: %s",
-                       (filenames.full[known] or "texmf"))
-                report("both", 3, "db", "> new location: %s",
-                       (intexmf and "texmf" or full))
-            end
+        --- 1) add to basename table
 
-            filenames.bare[bare] = idx
-            filenames.base[base] = idx
-            if intexmf == true then
-                filenames.full[idx] = nil
+        local inbase = base [location] --- no format since the suffix is known
+
+        if inbase then
+            local present = inbase [basename]
+            if present then
+                report ("both", 4, "db",
+                        "Conflicting basename: %q already indexed \z
+                         in category %s, ignoring.",
+                        barename, location)
+                conflicts.basenames = conflicts.basenames + 1
+
+                --- track conflicts per font
+                local conflictdata = entry.conflicts
+
+                if not conflictdata then
+                    entry.conflicts = { basename = present }
+                else -- some conflicts already detected
+                    conflictdata.basename = present
+                end
+
             else
-                filenames.full[idx] = full
+                inbase [basename] = index
+            end
+        else
+            inbase = { basename = index }
+            base [location] = inbase
+        end
+
+        --- 2) add to barename table
+
+        local inbare = bare [location] [format]
+
+        if inbare then
+            local present = inbare [barename]
+            if present then
+                report ("both", 4, "db",
+                        "Conflicting barename: %q already indexed \z
+                         in category %s/%s, ignoring.",
+                        barename, location, format)
+                conflicts.barenames = conflicts.barenames + 1
+
+                --- track conflicts per font
+                local conflictdata = entry.conflicts
+
+                if not conflictdata then
+                    entry.conflicts = { barename = present }
+                else -- some conflicts already detected
+                    conflictdata.barename = present
+                end
+
+            else
+                inbare [barename] = index
+            end
+        else
+            inbare = { [barename] = index }
+            bare [location] [format] = inbare
+        end
+
+        --- 3) add to fullpath map
+
+        full [index] = fullpath
+    end
+
+    return files
+end
+
+local pick_style
+local check_regular
+
+do
+    local splitfontname = lpeg.splitat "-"
+
+    local choose_exact = function (field)
+        if italic_synonym [field] then
+            return "i"
+        elseif field == "bold" then
+            return "b"
+        elseif field == "bolditalic" or field == "boldoblique" then
+            return "bi"
+        end
+
+        return false
+    end
+
+    pick_style = function (fontstyle_name,
+                           prefmodifiers,
+                           subfamily,
+                           splitstyle)
+        local style
+        if fontstyle_name then
+            style = choose_exact (fontstyle_name)
+        end
+        if not style then
+            if prefmodifiers then
+                style = choose_exact (prefmodifiers)
+            elseif subfamily then
+                --style = choose_exact (subfamily)
+            end
+        end
+        if not style and splitstyle then
+            style = choose_exact (splitstyle)
+        end
+        return style
+    end
+
+    --- we use only exact matches here since there are constructs
+    --- like “regularitalic” (Cabin, Bodoni Old Fashion)
+
+    check_regular = function (fontstyle_name,
+                              prefmodifiers,
+                              subfamily,
+                              splitstyle)
+
+        if fontstyle_name then
+            return regular_synonym [fontstyle_name]
+        elseif prefmodifiers then
+            return regular_synonym [prefmodifiers]
+        elseif subfamily then
+            return regular_synonym [subfamily]
+        elseif splitstyle then
+            return regular_synonym [splitstyle]
+        end
+
+        return nil
+    end
+end
+
+local pull_values = function (entry)
+    local file              = entry.file
+    local names             = entry.names
+    local style             = entry.style
+    local sanitized         = names.sanitized
+    local english           = sanitized.english
+    local info              = sanitized.info
+    local metadata          = sanitized.metadata
+
+    --- pull file info ...
+    entry.basename          = file.base
+    entry.fullpath          = file.full
+    entry.location          = file.location
+    entry.subfont           = file.subfont
+
+    --- pull name info ...
+    entry.psname            = english.psname
+    entry.fontname          = info.fontname
+    entry.fullname          = english.fullname or info.fullname
+    entry.prefmodifiers     = english.prefmodifiers
+    local metafamily        = metadata.familyname
+    local familyname        = english.preffamily or english.family
+    entry.familyname        = familyname
+    if familyname ~= metafamily then
+        entry.metafamily    = metadata.familyname
+    end
+    entry.fontstyle_name    = sanitized.fontstyle_name
+    entry.plainname         = names.fullname
+    entry.subfamily         = english.subfamily
+
+    --- pull style info ...
+    entry.italicangle       = style.italicangle
+    entry.size              = style.size
+    entry.splitstyle        = style.split
+    entry.weight            = style.weight
+
+    if luaotfloadconfig.strip == true then
+        entry.file  = nil
+        entry.names = nil
+        entry.style = nil
+    end
+end
+
+local add_family = function (name, subtable, modifier, entry)
+    local familytable = subtable [name]
+    if not familytable then
+        familytable = { }
+        subtable [name] = familytable
+    end
+
+    --- the style table is treated as an unordered list
+    local styletable = familytable [modifier]
+    if not styletable then
+        styletable = { }
+        familytable [modifier] = styletable
+    end
+
+    if not entry.prefmodifiers then --- default size for this style/family combo
+        styletable.default = entry.index
+    end
+
+    local size = entry.size --- dsnsize * high * low
+    if size then
+        styletable [#styletable + 1] = {
+            size [1],
+            size [2],
+            size [3],
+            entry.index,
+        }
+    else
+        styletable.default = entry.index
+    end
+end
+
+local collect_families = function (mappings)
+
+    report ("info", 2, "db", "Analyzing families, sizes, and styles.")
+
+    local families = {
+        ["local"]  = { },
+        system     = { },
+        texmf      = { },
+    }
+
+    for i = 1, #mappings do
+
+        local entry = mappings [i]
+
+        if entry.file then
+            pull_values (entry)
+        end
+
+        local location  = entry.location
+        local format    = entry.format
+
+        local subtable  = families [location] [format]
+        if not subtable then
+            subtable  = { }
+            families [location] [format] = subtable
+        end
+
+        local familyname        = entry.familyname
+        local metafamily        = entry.metafamily
+        local fontstyle_name    = entry.fontstyle_name
+        local prefmodifiers     = entry.prefmodifiers
+        local subfamily         = entry.subfamily
+
+        local weight            = entry.weight
+        local italicangle       = entry.italicangle
+        local splitstyle        = entry.splitstyle
+
+        local modifier          = pick_style (fontstyle_name,
+                                              prefmodifiers,
+                                              subfamily,
+                                              splitstyle)
+
+        if not modifier then --- regular, exact only
+            modifier = check_regular (fontstyle_name,
+                                      prefmodifiers,
+                                      subfamily,
+                                      splitstyle)
+        end
+
+        if modifier then
+            add_family (familyname, subtable, modifier, entry)
+            --- registering the metafamilies is unreliable within the
+            --- same table as identifiers might interfere with an
+            --- unmarked style that lacks a metafamily, e.g.
+            ---
+            ---         iwona condensed regular ->
+            ---                     family:     iwonacond
+            ---                     metafamily: iwona
+            ---         iwona regular ->
+            ---                     family:     iwona
+            ---                     metafamily: ø
+            ---
+            --- Both would be registered as under the same family,
+            --- i.e. “iwona”, and depending on the loading order
+            --- the query “name:iwona” can resolve to the condensed
+            --- version instead of the actual unmarked one. The only
+            --- way around this would be to introduce a separate
+            --- table for metafamilies and do fallback queries on it.
+            --- At the moment this is not pressing enough to justify
+            --- further increasing the index size, maybe if need
+            --- arises from the user side.
+--            if metafamily and metafamily ~= familyname then
+--                add_family (metafamily, subtable, modifier, entry)
+--            end
+        end
+    end
+
+    collectgarbage "collect"
+    return families
+end
+
+local cmp_sizes = function (a, b)
+    return a [1] < b [1]
+end
+
+local order_design_sizes = function (families)
+
+    report ("info", 2, "db", "Ordering design sizes.")
+
+    for location, data in next, families do
+        for format, data in next, data do
+            for familyname, data in next, data do
+                for style, data in next, data do
+                    tablesort (data, cmp_sizes)
+                end
             end
         end
     end
 
-    if config.luaotfload.prioritize == "texmf" then
-        report("both", 1, "db", "Preferring texmf fonts")
-        addmap(sys)
-        addmap(texmf)
-    else --- sys
-        addmap(texmf)
-        addmap(sys)
+    return families
+end
+
+local retrieve_namedata = function (currentnames,
+                                    targetnames,
+                                    dry_run,
+                                    n_rawnames,
+                                    n_newnames)
+
+    local rawnames, new = scan_texmf_fonts (currentnames,
+                                            targetnames,
+                                            dry_run)
+
+    n_rawnames    = n_rawnames + rawnames
+    n_newnames    = n_newnames + new
+
+    rawnames, new = scan_os_fonts (currentnames, targetnames, dry_run)
+
+    n_rawnames    = n_rawnames + rawnames
+    n_newnames    = n_newnames + new
+
+    return n_rawnames, n_newnames
+end
+
+
+--- dbobj -> stats
+
+local collect_statistics = function (mappings)
+    local sum_dsnsize, n_dsnsize = 0, 0
+
+    local fullname, family, families = { }, { }, { }
+    local subfamily, prefmodifiers, fontstyle_name = { }, { }, { }
+
+    local addtohash = function (hash, item)
+        if item then
+            local times = hash [item]
+            if times then
+                hash [item] = times + 1
+            else
+                hash [item] = 1
+            end
+        end
     end
 
-    fontnames.filenames = filenames
-    texmf, sys = nil, nil
-    collectgarbage "collect"
-    return fontnames
+    local appendtohash = function (hash, key, value)
+        if key and value then
+            local entry = hash [key]
+            if entry then
+                entry [#entry + 1] = value
+            else
+                hash [key] = { value }
+            end
+        end
+    end
+
+    local addtoset = function (hash, key, value)
+        if key and value then
+            local set = hash [key]
+            if set then
+                set [value] = true
+            else
+                hash [key] = { [value] = true }
+            end
+        end
+    end
+
+    local setsize = function (set)
+        local n = 0
+        for _, _ in next, set do
+            n = n + 1
+        end
+        return n
+    end
+
+    local hashsum = function (hash)
+        local n = 0
+        for _, m in next, hash do
+            n = n + m
+        end
+        return n
+    end
+
+    for _, entry in next, mappings do
+        local style        = entry.style
+        local names        = entry.names.sanitized
+        local englishnames = names.english
+
+        addtohash (fullname,        englishnames.fullname)
+        addtohash (family,          englishnames.family)
+        addtohash (subfamily,       englishnames.subfamily)
+        addtohash (prefmodifiers,   englishnames.prefmodifiers)
+        addtohash (fontstyle_name,  names.fontstyle_name)
+
+        addtoset (families, englishnames.family, englishnames.fullname)
+
+        local sizeinfo = entry.style.size
+        if sizeinfo then
+            sum_dsnsize = sum_dsnsize + sizeinfo [1]
+            n_dsnsize = n_dsnsize + 1
+        end
+    end
+
+    --inspect (families)
+
+    local n_fullname = setsize (fullname)
+    local n_family   = setsize (family)
+
+    if logs.get_loglevel () > 1 then
+        local pprint_top = function (hash, n, set)
+
+            local freqs = { }
+            local items = { }
+
+            for item, value in next, hash do
+                if set then
+                    freq = setsize (value)
+                else
+                    freq = value
+                end
+                local ifreq = items [freq]
+                if ifreq then
+                    ifreq [#ifreq + 1] = item
+                else
+                    items [freq] = { item }
+                    freqs [#freqs + 1] = freq
+                end
+            end
+
+            tablesort (freqs)
+
+            local from = #freqs
+            local to   = from - (n - 1)
+            if to < 1 then
+                to = 1
+            end
+
+            for i = from, to, -1 do
+                local freq     = freqs [i]
+                local itemlist = items [freq]
+
+                if type (itemlist) == "table" then
+                    itemlist = tableconcat (itemlist, ", ")
+                end
+
+                report ("both", 0, "db",
+                        "       · %4d × %s.",
+                        freq, itemlist)
+            end
+        end
+
+        report ("both", 0, "", "~~~~ font index statistics ~~~~")
+        report ("both", 0, "db",
+                "   · Collected %d fonts (%d names) in %d families.",
+                #mappings, n_fullname, n_family)
+        pprint_top (families, 4, true)
+
+        report ("both", 0, "db",
+                "   · %d different “subfamily” kinds",
+                setsize (subfamily))
+        pprint_top (subfamily, 4)
+
+        report ("both", 0, "db",
+                "   · %d different “prefmodifiers” kinds",
+                setsize (prefmodifiers))
+        pprint_top (prefmodifiers, 4)
+
+        report ("both", 0, "db",
+                "   · %d different “fontstyle_name” kinds",
+                setsize (fontstyle_name))
+        pprint_top (fontstyle_name, 4)
+    end
+
+    local mean_dsnsize = 0
+    if n_dsnsize > 0 then
+        mean_dsnsize = sum_dsnsize / n_dsnsize
+    end
+
+    return {
+        mean_dsnsize = mean_dsnsize,
+        names = {
+            fullname = n_fullname,
+            families = n_family,
+        },
+--        style = {
+--            subfamily = subfamily,
+--            prefmodifiers = prefmodifiers,
+--            fontstyle_name = fontstyle_name,
+--        },
+    }
 end
 
 --- force:      dictate rebuild from scratch
 --- dry_dun:    don’t write to the db, just scan dirs
 
 --- dbobj? -> bool? -> bool? -> dbobj
-update_names = function (fontnames, force, dry_run)
+update_names = function (currentnames, force, dry_run)
 
-    if config.luaotfload.update_live == false then
-        report("info", 1, "db",
-               "Skipping database update")
+    local targetnames
+
+    if luaotfloadconfig.update_live == false then
+        report ("info", 2, "db",
+                "Skipping database update")
         --- skip all db updates
-        return fontnames or names.data
+        return currentnames or name_index
     end
 
-    local starttime = os.gettimeofday()
-    local n_scanned, n_new = 0, 0
+    local starttime                 = osgettimeofday ()
+    local n_rawnames, n_newnames    = 0, 0
 
     --[[
     The main function, scans everything
-    - “newfontnames” is the final table to return
+    - “targetnames” is the final table to return
     - force is whether we rebuild it from scratch or not
     ]]
     report("both", 1, "db", "Updating the font names database"
                          .. (force and " forcefully" or ""))
 
-    if force then
-        fontnames = fontnames_init (get_font_filter ())
+    --- pass 1 get raw data: read font files (normal case) or reuse
+    --- information present in index
+
+    if luaotfloadconfig.skip_read == true then
+        --- the difference to a “dry run” is that we don’t search
+        --- for font files entirely. we also ignore the “force”
+        --- parameter since it concerns only the font files.
+        report ("info", 2, "db",
+                "Ignoring font files, reusing old data.")
+        currentnames = load_names (false)
+        targetnames  = currentnames
     else
-        if not fontnames then
-            fontnames = load_names (dry_run)
+        if force then
+            currentnames = initialize_namedata (get_font_filter ())
+        else
+            if not currentnames then
+                currentnames = load_names (dry_run)
+            end
+            if currentnames.meta.version ~= names.version then
+                report ("both", 1, "db", "No font names database or old "
+                                    .. "one found; generating new one")
+                currentnames = initialize_namedata (get_font_filter ())
+            end
         end
-        if fontnames.version ~= names.version then
-            report ("both", 1, "db", "No font names database or old "
-                                  .. "one found; generating new one")
-            fontnames = fontnames_init (get_font_filter ())
-        end
+
+        targetnames = initialize_namedata (get_font_filter ())
+
+        read_blacklist ()
+
+        local n_raw, n_new= retrieve_namedata (currentnames,
+                                               targetnames,
+                                               dry_run,
+                                               n_rawnames,
+                                               n_newnames)
+        report ("info", 3, "db",
+                "Scanned %d font files; %d new entries.",
+                n_rawnames, n_newnames)
     end
-    local newfontnames = fontnames_init (get_font_filter ())
-    read_blacklist ()
 
-    local scanned, new
-    scanned, new = scan_texmf_fonts (fontnames, newfontnames, dry_run)
-    n_scanned = n_scanned + scanned
-    n_new     = n_new     + new
-
-    scanned, new = scan_os_fonts (fontnames, newfontnames, dry_run)
-    n_scanned = n_scanned + scanned
-    n_new     = n_new     + new
+    --- pass 2 (optional): collect some stats about the raw font info
+    if luaotfloadconfig.statistics == true then
+        targetnames.meta.statistics = collect_statistics
+                                            (targetnames.mappings)
+    end
 
     --- we always generate the file lookup tables because
     --- non-texmf entries are redirected there and the mapping
     --- needs to be 100% consistent
-    newfontnames = gen_fast_lookups(newfontnames)
 
-    --- stats:
-    ---            before rewrite   | after rewrite
-    ---   partial:         804 ms   |   701 ms
-    ---   forced:        45384 ms   | 44714 ms
-    report("info", 3, "db",
-           "Scanned %d font files; %d new entries.", n_scanned, n_new)
-    report("info", 3, "db",
-           "Rebuilt in %0.f ms", 1000*(os.gettimeofday()-starttime))
-    names.data = newfontnames
+    --- pass 3: build filename table
+    targetnames.files       = generate_filedata (targetnames.mappings)
+
+    --- pass 4: build family lookup table
+    targetnames.families    = collect_families (targetnames.mappings)
+
+    --- pass 5: order design size tables
+    targetnames.families    = order_design_sizes (targetnames.families)
+
+
+    report ("info", 3, "db",
+            "Rebuilt in %0.f ms.",
+            1000 * (osgettimeofday () - starttime))
+    name_index = targetnames
 
     if dry_run ~= true then
 
@@ -2331,26 +3069,25 @@ update_names = function (fontnames, force, dry_run)
 
         local success, _lookups = flush_lookup_cache ()
         if success then
-            local success = names.save_lookups ()
+            local success = save_lookups ()
             if success then
                 logs.names_report ("info", 2, "cache",
                                    "Lookup cache emptied")
-                return newfontnames
+                return targetnames
             end
         end
     end
-    return newfontnames
+    return targetnames
 end
 
 --- unit -> bool
 save_lookups = function ( )
-    local lookups = names.lookups
     local path    = names.path.lookups
     local luaname, lucname = path.lua, path.luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
-        tabletofile (luaname, lookups, true)
+        tabletofile (luaname, lookup_cache, true)
         osremove (lucname)
-        caches.compile (lookups, luaname, lucname)
+        caches.compile (lookup_cache, luaname, lucname)
         --- double check ...
         if lfsisfile (luaname) and lfsisfile (lucname) then
             report ("both", 3, "cache", "Lookup cache saved")
@@ -2371,22 +3108,43 @@ end
 
 --- save_names() is usually called without the argument
 --- dbobj? -> bool
-save_names = function (fontnames)
-    if not fontnames then fontnames = names.data end
+save_names = function (currentnames)
+    if not currentnames then
+        currentnames = name_index
+    end
     local path = names.path.index
     local luaname, lucname = path.lua, path.luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
-        tabletofile (luaname, fontnames, true)
         osremove (lucname)
-        caches.compile (fontnames, luaname, lucname)
-        if lfsisfile (luaname) and lfsisfile (lucname) then
-            report ("info", 1, "db", "Font index saved")
-            report ("info", 3, "db", "Text: " .. luaname)
-            report ("info", 3, "db", "Byte: " .. lucname)
-            return true
+        local gzname = luaname .. ".gz"
+        if luaotfloadconfig.compress then
+            local serialized = tableserialize (currentnames, true)
+            save_gzipped (gzname, serialized)
+            caches.compile (currentnames, "", lucname)
+        else
+            tabletofile (luaname, currentnames, true)
+            caches.compile (currentnames, luaname, lucname)
         end
-        report ("info", 0, "db", "Could not compile font index")
-        return false
+        report ("info", 1, "db", "Font index saved at ...")
+        local success = false
+        if lfsisfile (luaname) then
+            report ("info", 3, "db", "Text: " .. luaname)
+            success = true
+        end
+        if lfsisfile (gzname) then
+            report ("info", 3, "db", "Gzip: " .. gzname)
+            success = true
+        end
+        if lfsisfile (lucname) then
+            report ("info", 3, "db", "Byte: " .. lucname)
+            success = true
+        end
+        if success then
+            return true
+        else
+            report ("info", 0, "db", "Could not compile font index")
+            return false
+        end
     end
     report ("info", 0, "db", "Index file not writable")
     if not fileiswritable (luaname) then
@@ -2477,7 +3235,7 @@ end
 local getwritablecachepath = function ( )
     --- fonts.handlers.otf doesn’t exist outside a Luatex run,
     --- so we have to improvise
-    local writable = getwritablepath (config.luaotfload.cache_dir)
+    local writable = getwritablepath (luaotfloadconfig.cache_dir)
     if writable then
         return writable
     end
@@ -2485,7 +3243,7 @@ end
 
 local getreadablecachepaths = function ( )
     local readables = caches.getreadablepaths
-                        (config.luaotfload.cache_dir)
+                        (luaotfloadconfig.cache_dir)
     local result    = { }
     if readables then
         for i=1, #readables do
@@ -2555,13 +3313,15 @@ names.set_font_filter             = set_font_filter
 names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
 names.load                        = load_names
+names.data                        = function () return name_index end
 names.save                        = save_names
 names.update                      = update_names
 names.crude_file_lookup           = crude_file_lookup
 names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 names.read_blacklist              = read_blacklist
-names.sanitize_string             = sanitize_string
+names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath
+names.set_location_precedence     = set_location_precedence
 
 --- font cache
 names.purge_cache    = purge_cache
@@ -2569,13 +3329,13 @@ names.erase_cache    = erase_cache
 names.show_cache     = show_cache
 
 --- replace the resolver from luatex-fonts
-if config.luaotfload.resolver == "cached" then
+if luaotfloadconfig.resolver == "cached" then
     report("both", 2, "cache", "caching of name: lookups active")
-    names.resolve     = resolve_cached
-    names.resolvespec = resolve_cached
+    names.resolvespec  = resolve_cached
+    names.resolve_name = resolve_cached
 else
-    names.resolve     = resolve
-    names.resolvespec = resolve
+    names.resolvespec  = resolve_name
+    names.resolve_name = resolve_name
 end
 
 names.find_closest = find_closest

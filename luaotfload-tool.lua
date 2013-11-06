@@ -102,13 +102,19 @@ to be the more appropriate.
 
 config                        = config or { }
 local config                  = config
-config.luaotfload             = config.luaotfload or { }
-config.luaotfload.version     = config.luaotfload.version   or version
-config.luaotfload.names_dir   = config.luaotfload.names_dir or "names"
-config.luaotfload.cache_dir   = config.luaotfload.cache_dir or "fonts"
-config.luaotfload.index_file  = config.luaotfload.index_file
+local luaotfloadconfig        = config.luaotfload or { }
+config.luaotfload             = luaotfloadconfig
+luaotfloadconfig.version      = luaotfloadconfig.version   or version
+luaotfloadconfig.names_dir    = luaotfloadconfig.names_dir or "names"
+luaotfloadconfig.cache_dir    = luaotfloadconfig.cache_dir or "fonts"
+luaotfloadconfig.index_file   = luaotfloadconfig.index_file
                              or "luaotfload-names.lua"
-config.luaotfload.formats     = config.luaotfload.formats or "otf,ttf,ttc,dfont"
+luaotfloadconfig.formats      = luaotfloadconfig.formats
+                             or "otf,ttf,ttc,dfont"
+luaotfloadconfig.reload       = false
+if not luaotfloadconfig.strip then
+    luaotfloadconfig.strip = true
+end
 
 do -- we don’t have file.basename and the likes yet, so inline parser ftw
     local slash        = P"/"
@@ -122,9 +128,9 @@ do -- we don’t have file.basename and the likes yet, so inline parser ftw
 
     local self = lpegmatch(p_basename, stringlower(arg[0]))
     if self == "luaotfload-tool" then
-        config.luaotfload.self = "luaotfload-tool"
+        luaotfloadconfig.self = "luaotfload-tool"
     else
-        config.luaotfload.self = "mkluatexfontdb"
+        luaotfloadconfig.self = "mkluatexfontdb"
     end
 end
 
@@ -135,6 +141,7 @@ config.lualibs.load_extended    = true
 
 require "lualibs"
 local tabletohash               = table.tohash
+local stringsplit               = string.split
 
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
@@ -170,9 +177,9 @@ local names = fonts.names
 
 local status_file                    = "luaotfload-status"
 local luaotfloadstatus               = require (status_file)
-config.luaotfload.status             = luaotfloadstatus
+luaotfloadconfig.status              = luaotfloadstatus
 
-local sanitize_string                = names.sanitize_string
+local sanitize_fontname              = names.sanitize_fontname
 
 local pathdata      = names.path
 local names_plain   = pathdata.index.lua
@@ -210,7 +217,9 @@ This tool is part of the luaotfload package. Valid options are:
 
   -u --update                  update the database
   -n --no-reload               suppress db update
+  --no-strip                   keep redundant information in db
   -f --force                   force re-indexing all fonts
+  -c --compress                gzip index file (text version only)
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
   --formats=[+|-]EXTENSIONS    set, add, or subtract formats to index
@@ -283,16 +292,16 @@ Enter 'luaotfload-tool --help' for a larger list of options.
 local help_msg = function (version)
     local template = help_messages[version]
     iowrite(stringformat(template,
-                         config.luaotfload.self,
+                         luaotfloadconfig.self,
                          names_plain,
                          names_bin,
                          caches.getwritablepath (
-                         config.luaotfload.cache_dir)))
+                         luaotfloadconfig.cache_dir)))
 end
 
 local version_msg = function ( )
     local out = function (...) texiowrite_nl (stringformat (...)) end
-    out ("%s version %q", config.luaotfload.self, version)
+    out ("%s version %q", luaotfloadconfig.self, version)
     out ("revision %q", luaotfloadstatus.notes.revision)
     out ("database version %q", names.version)
     out ("Lua interpreter: %s; version %q", runtime[1], runtime[2])
@@ -656,7 +665,7 @@ subfont_by_name = function (lst, askedname, n)
 
     local font = lst[n]
     if font then
-        if sanitize_string(font.fullname) == askedname then
+        if sanitize_fontname (font.fullname) == askedname then
             return font
         end
         return subfont_by_name (lst, askedname, n+1)
@@ -673,10 +682,10 @@ The font info knows two levels of detail:
 --doc]]--
 
 local show_font_info = function (basename, askedname, detail, warnings)
-    local filenames = names.data.filenames
+    local filenames = names.data().filenames
     local index     = filenames.base[basename]
     local fullname  = filenames.full[index]
-    askedname = sanitize_string(askedname)
+    askedname = sanitize_fontname (askedname)
     if not fullname then -- texmf
         fullname = resolvers.findfile(basename)
     end
@@ -771,7 +780,7 @@ actions.generate = function (job)
     fontnames = names.update(fontnames, job.force_reload, job.dry_run)
     logs.names_report("info", 2, "db",
         "Fonts in the database: %i", #fontnames.mappings)
-    if names.data then
+    if names.data() then
         return true, true
     end
     return false, false
@@ -833,7 +842,7 @@ actions.query = function (job)
     if tmpspec.lookup == "name"
     or tmpspec.lookup == "anon" --- not *exactly* as resolvers.anon
     then
-        foundname, subfont = names.resolve (nil, nil, tmpspec)
+        foundname, subfont = names.resolve_name (tmpspec)
         if foundname then
             foundname, _, success = names.crude_file_lookup (foundname)
         end
@@ -878,14 +887,27 @@ end
 
 local get_fields get_fields = function (entry, fields, acc, n)
     if not acc then
-        return get_fields(entry, fields, { }, 1)
+        return get_fields (entry, fields, { }, 1)
     end
 
-    local field = fields[n]
+    local field = fields [n]
     if field then
-        local value = entry[field]
-        acc[#acc+1] = value or false
-        return get_fields(entry, fields, acc, n+1)
+        local chain = stringsplit (field, "->")
+        local tmp   = entry
+        for i = 1, #chain - 1 do
+            tmp = tmp [chain [i]]
+            if not tmp then
+                --- invalid field
+                break
+            end
+        end
+        if tmp then
+            local value = tmp [chain [#chain]]
+            acc[#acc+1] = value or false
+        else
+            acc[#acc+1] = false
+        end
+        return get_fields (entry, fields, acc, n+1)
     end
     return acc
 end
@@ -929,20 +951,23 @@ local splitcomma = names.patterns.splitcomma
 
 actions.list = function (job)
     local criterion     = job.criterion
-
     local asked_fields  = job.asked_fields
+    local name_index    = names.data ()
+
     if asked_fields then
         asked_fields = lpegmatch(splitcomma, asked_fields)
-    else
+    end
+
+    if not asked_fields then
         --- some defaults
-        asked_fields = { "fullname", "version", }
+        asked_fields = { "plainname", "version", }
     end
 
-    if not names.data then
-        names.data = names.load()
+    if not name_index then
+        name_index = names.load()
     end
 
-    local mappings  = names.data.mappings
+    local mappings  = name_index.mappings
     local nmappings = #mappings
 
     if criterion == "*" then
@@ -980,7 +1005,15 @@ actions.list = function (job)
             local categories, by_category = { }, { }
             for i=1, nmappings do
                 local entry = mappings[i]
-                local value = entry[criterion]
+                local tmp   = entry
+                local chain = stringsplit (criterion, "->")
+                for i = 1, #chain - 1 do
+                    tmp = tmp [chain [i]]
+                    if not tmp then
+                        break
+                    end
+                end
+                local value = tmp and tmp [chain [#chain]] or "<none>"
                 if value then
                     --value = tostring(value)
                     local entries = by_category[value]
@@ -1013,6 +1046,8 @@ actions.list = function (job)
             texiowrite_nl(formatted)
         end
     end
+
+    texiowrite_nl ""
 
     return true, true
 end
@@ -1062,12 +1097,14 @@ local process_cmdline = function ( ) -- unit -> jobspec
     local long_options = {
         alias              = 1,
         cache              = 1,
+        compress           = "c",
         diagnose           = 1,
         ["dry-run"]        = "D",
         ["flush-lookups"]  = "l",
         fields             = 1,
         find               = 1,
         force              = "f",
+        formats            = 1,
         fuzzy              = "F",
         help               = "h",
         info               = "i",
@@ -1076,17 +1113,19 @@ local process_cmdline = function ( ) -- unit -> jobspec
         list               = 1,
         log                = 1,
         ["no-reload"]      = "n",
+        ["no-strip"]       = 0,
+        ["skip-read"]      = "R",
         ["prefer-texmf"]   = "p",
         quiet              = "q",
         ["show-blacklist"] = "b",
-        formats            = 1,
+        stats              = "S",
         update             = "u",
         verbose            = 1,
         version            = "V",
         warnings           = "w",
     }
 
-    local short_options = "bDfFiIlnpquvVhw"
+    local short_options = "bcDfFiIlnpqRSuvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -1143,7 +1182,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.show_info = true
             result.full_info = true
         elseif v == "alias" then
-            config.luaotfload.self = optarg[n]
+            luaotfloadconfig.self = optarg[n]
         elseif v == "l" then
             action_pending["flush"] = true
         elseif v == "list" then
@@ -1157,7 +1196,9 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "D" then
             result.dry_run = true
         elseif v == "p" then
-            config.luaotfload.prioritize = "texmf"
+            names.set_location_precedence {
+                "local", "texmf", "system"
+            }
         elseif v == "b" then
             action_pending["blacklist"] = true
         elseif v == "diagnose" then
@@ -1166,11 +1207,20 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "formats" then
             names.set_font_filter (optarg[n])
         elseif v == "n" then
-            config.luaotfload.update_live = false
+            luaotfloadconfig.update_live = false
+        elseif v == "S" then
+            luaotfloadconfig.statistics = true
+        elseif v == "R" then
+            ---  dev only, undocumented
+            luaotfloadconfig.skip_read = true
+        elseif v == "c" then
+            luaotfloadconfig.compress = true
+        elseif v == "no-strip" then
+            luaotfloadconfig.strip = false
         end
     end
 
-    if config.luaotfload.self == "mkluatexfontdb" then
+    if luaotfloadconfig.self == "mkluatexfontdb" then --- TODO drop legacy ballast after 2.4
         result.help_version = "mkluatexfontdb"
         action_pending["generate"] = true
         result.log_level = math.max(1, result.log_level)

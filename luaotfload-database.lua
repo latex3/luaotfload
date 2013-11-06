@@ -2734,9 +2734,29 @@ local collect_families = function (mappings)
 
         if modifier then
             add_family (familyname, subtable, modifier, entry)
-            if metafamily ~= nil then
-                add_family (metafamily, subtable, modifier, entry)
-            end
+            --- registering the metafamilies is unreliable within the
+            --- same table as identifiers might interfere with an
+            --- unmarked style that lacks a metafamily, e.g.
+            ---
+            ---         iwona condensed regular ->
+            ---                     family:     iwonacond
+            ---                     metafamily: iwona
+            ---         iwona regular ->
+            ---                     family:     iwona
+            ---                     metafamily: ø
+            ---
+            --- Both would be registered as under the same family,
+            --- i.e. “iwona”, and depending on the loading order
+            --- the query “name:iwona” can resolve to the condensed
+            --- version instead of the actual unmarked one. The only
+            --- way around this would be to introduce a separate
+            --- table for metafamilies and do fallback queries on it.
+            --- At the moment this is not pressing enough to justify
+            --- further increasing the index size, maybe if need
+            --- arises from the user side.
+--            if metafamily and metafamily ~= familyname then
+--                add_family (metafamily, subtable, modifier, entry)
+--            end
         end
     end
 

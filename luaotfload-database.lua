@@ -31,8 +31,6 @@ local fontloaderinfo           = fontloader.info
 local fontloaderclose          = fontloader.close
 local fontloaderopen           = fontloader.open
 local fontloaderto_table       = fontloader.to_table
-local gzipload                 = gzip.load
-local gzipsave                 = gzip.save
 local iolines                  = io.lines
 local ioopen                   = io.open
 local kpseexpand_path          = kpse.expand_path
@@ -60,6 +58,7 @@ local tablesort                = table.sort
 local texiowrite_nl            = texio.write_nl
 local utf8gsub                 = unicode.utf8.gsub
 local utf8lower                = unicode.utf8.lower
+local zlibcompress             = zlib.compress
 
 --- these come from Lualibs/Context
 local filebasename             = file.basename
@@ -94,9 +93,6 @@ fonts                          = fonts          or { }
 fonts.names                    = fonts.names    or { }
 fonts.definers                 = fonts.definers or { }
 
-local names                    = fonts.names
-local name_index               = nil -- upvalue for names.data
-
 local luaotfloadconfig         = config.luaotfload --- always present
 luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
 luaotfloadconfig.formats       = luaotfloadconfig.formats  or "otf,ttf,ttc,dfont"
@@ -108,6 +104,9 @@ if luaotfloadconfig.update_live ~= false then
     luaotfloadconfig.update_live = true
 end
 
+local names                    = fonts.names
+local name_index               = nil --> upvalue for names.data
+local lookup_cache             = nil --> for names.lookups
 names.version                  = 2.4
 names.data                     = nil      --- contains the loaded database
 names.lookups                  = nil      --- contains the lookup cache
@@ -186,11 +185,11 @@ if not runasscript then
     end
 
     globals.prefix     = prefix
-    local lookups      = names.path.lookups
+    local lookup_path  = names.path.lookups
     local index        = names.path.index
     local lookups_file = filejoin (prefix, globals.lookups_file)
     local index_file   = filejoin (prefix, globals.index_file)
-    lookups.lua, lookups.luc = make_luanames (lookups_file)
+    lookup_path.lua, lookup_path.luc = make_luanames (lookups_file)
     index.lua, index.luc     = make_luanames (index_file)
 else --- running as script, inject some dummies
     caches = { }
@@ -410,6 +409,33 @@ local initialize_namedata = function (formats) --- returns dbobj
     }
 end
 
+--[[doc--
+
+    Since Luaotfload does not depend on the lualibs anymore we
+    have to put our own small wrappers for the gzip library in
+    place.
+
+--doc]]--
+
+local load_gzipped = function (filename)
+    local gh = gzip.open (filename,"rb")
+    if gh then
+        local data = gh:read "*all"
+        gh:close ()
+        return data
+    end
+end
+
+local save_gzipped = function (filename, data)
+    local gh = ioopen (filename, "wb")
+    if gh then
+        local bin = zlibcompress (data, 9, nil, 15 + 16)
+        gh:write (bin)
+        gh:close ()
+        return #bin
+    end
+end
+
 --- When loading a lua file we try its binary complement first, which
 --- is assumed to be located at an identical path, carrying the suffix
 --- .luc.
@@ -417,15 +443,14 @@ end
 --- string -> (string * table)
 local load_lua_file = function (path)
     local foundname = filereplacesuffix (path, "luc")
+    local code      = nil
 
-    if false then
     local fh = ioopen (foundname, "rb") -- try bin first
     if fh then
         local chunk = fh:read"*all"
         fh:close()
         code = load (chunk, "b")
     end
-end
 
     if not code then --- fall back to text file
         foundname = filereplacesuffix (path, "lua")
@@ -439,7 +464,7 @@ end
 
     if not code then --- probe gzipped file
         foundname = filereplacesuffix (path, "lua.gz")
-        local chunk = gzipload (foundname)
+        local chunk = load_gzipped (foundname)
         if chunk then
             code = load (chunk, "t")
         end
@@ -515,7 +540,7 @@ load_names = function (dry_run)
     return data
 end
 
---- unit -> dbobj
+--- unit -> unit
 load_lookups = function ( )
     local foundname, data = load_lua_file(names.path.lookups.lua)
     if data then
@@ -526,7 +551,7 @@ load_lookups = function ( )
                "No lookup cache, creating empty.")
         data = { }
     end
-    return data
+    lookup_cache = data
 end
 
 local regular_synonym = {
@@ -677,28 +702,18 @@ end
 
 --[[doc--
 We need to verify if the result of a cached lookup actually exists in
-the texmf or filesystem.
+the texmf or filesystem. Again, due to the schizoprenic nature of the
+font managment we have to check both the system path and the texmf.
 --doc]]--
 
 local verify_font_file = function (basename)
-    if not name_index then name_index = load_names() end
-    local files = name_index.files
-    local idx = files.base[basename]
-    if not idx then
-        return false
-    end
-
-    --- firstly, check filesystem
-    local fullname = files.full[idx]
-    if fullname and lfsisfile(fullname) then
+    local path = resolve_fullpath (basename)
+    if path and lfsisfile(path) then
         return true
     end
-
-    --- secondly, locate via kpathsea
     if kpsefind_file(basename) then
         return true
     end
-
     return false
 end
 
@@ -733,8 +748,8 @@ Idk what the “spec” resolver is for.
                     optsize, size
         spec:       name, sub           resolved, sub, name, forced
 
-* name: contains both the name resolver from luatex-fonts and resolve()
-  below
+* name: contains both the name resolver from luatex-fonts and
+  resolve_name() below
 
 From my reading of font-def.lua, what a resolver does is
 basically rewrite the “name” field of the specification record
@@ -763,20 +778,20 @@ local hash_request = function (specification)
 end
 
 --- 'a -> 'a -> table -> (string * int|boolean * boolean)
-resolve_cached = function (_, _, specification)
-    if not names.lookups then names.lookups = load_lookups() end
+resolve_cached = function (specification)
+    if not lookup_cache then load_lookups () end
     local request = hash_request(specification)
     report("both", 4, "cache", "Looking for %q in cache ...",
            request)
 
-    local found = names.lookups[request]
+    local found = lookup_cache [request]
 
     --- case 1) cache positive ----------------------------------------
     if found then --- replay fields from cache hit
         report("info", 4, "cache", "Found!")
         local basename = found[1]
         --- check the presence of the file in case it’s been removed
-        local success = verify_font_file(basename)
+        local success = verify_font_file (basename)
         if success == true then
             return basename, found[2], true
         end
@@ -787,22 +802,24 @@ resolve_cached = function (_, _, specification)
 
     --- case 2) cache negative ----------------------------------------
     --- first we resolve normally ...
-    local filename, subfont, success = resolve(nil, nil, specification)
-    if not success then return filename, subfont, false end
+    local filename, subfont = resolve_name (specification)
+    if not filename then
+        return nil, nil
+    end
     --- ... then we add the fields to the cache ... ...
     local entry = { filename, subfont }
     report("both", 4, "cache", "New entry: %s", request)
-    names.lookups[request] = entry
+    lookup_cache [request] = entry
 
     --- obviously, the updated cache needs to be stored.
     --- TODO this should trigger a save only once the
     ---      document is compiled (finish_pdffile callback?)
     report("both", 5, "cache", "Saving updated cache")
-    local success = save_lookups()
+    local success = save_lookups ()
     if not success then --- sad, but not critical
-        report("both", 0, "cache", "Could not write to cache")
+        report("both", 0, "cache", "Error writing cache.")
     end
-    return filename, subfont, true
+    return filename, subfont
 end
 
 --- this used to be inlined; with the lookup cache we don’t
@@ -1061,13 +1078,15 @@ resolve_fullpath = function (fontname, ext) --- getfilename()
     for i = 1, #location_precedence do
         local location = location_precedence [i]
         local basenames = basedata [location]
-        local barenames = baredata [location] [ext]
         local idx
         if basenames ~= nil then
             idx = basenames [fontname]
         end
-        if not idx and barenames ~= nil then
-            idx = barenames [fontname]
+        if ext then
+            local barenames = baredata [location] [ext]
+            if not idx and barenames ~= nil then
+                idx = barenames [fontname]
+            end
         end
         if idx then
             return files.full [idx]
@@ -2383,10 +2402,9 @@ end
 
 --- unit -> (bool, lookup_cache)
 flush_lookup_cache = function ()
-    if not names.lookups then names.lookups = load_lookups() end
-    names.lookups = { }
+    lookup_cache = { }
     collectgarbage "collect"
-    return true, names.lookups
+    return true, lookup_cache
 end
 
 
@@ -3038,7 +3056,7 @@ update_names = function (currentnames, force, dry_run)
 
         local success, _lookups = flush_lookup_cache ()
         if success then
-            local success = names.save_lookups ()
+            local success = save_lookups ()
             if success then
                 logs.names_report ("info", 2, "cache",
                                    "Lookup cache emptied")
@@ -3051,13 +3069,12 @@ end
 
 --- unit -> bool
 save_lookups = function ( )
-    local lookups = names.lookups
     local path    = names.path.lookups
     local luaname, lucname = path.lua, path.luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
-        tabletofile (luaname, lookups, true)
+        tabletofile (luaname, lookup_cache, true)
         osremove (lucname)
-        caches.compile (lookups, luaname, lucname)
+        caches.compile (lookup_cache, luaname, lucname)
         --- double check ...
         if lfsisfile (luaname) and lfsisfile (lucname) then
             report ("both", 3, "cache", "Lookup cache saved")
@@ -3089,7 +3106,7 @@ save_names = function (currentnames)
         local gzname = luaname .. ".gz"
         if luaotfloadconfig.compress then
             local serialized = tableserialize (currentnames, true)
-            gzipsave (gzname, serialized)
+            save_gzipped (gzname, serialized)
             caches.compile (currentnames, "", lucname)
         else
             tabletofile (luaname, currentnames, true)
@@ -3301,8 +3318,8 @@ names.show_cache     = show_cache
 --- replace the resolver from luatex-fonts
 if luaotfloadconfig.resolver == "cached" then
     report("both", 2, "cache", "caching of name: lookups active")
-    names.resolve     = resolve_cached
-    names.resolvespec = resolve_cached
+    names.resolvespec  = resolve_cached
+    names.resolve_name = resolve_cached
 else
     names.resolvespec  = resolve_name
     names.resolve_name = resolve_name

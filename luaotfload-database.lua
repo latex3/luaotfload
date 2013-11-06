@@ -1079,6 +1079,11 @@ resolve_name = function (specification)
     if not resolved then
         resolved = specification.name, false
     end
+    if not resolved then
+        if not fonts_reloaded then
+            return reload_db ("Font not found.", resolve_name, specification)
+        end
+    end
     return resolved, subfont
 end
 

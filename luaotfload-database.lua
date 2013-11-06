@@ -580,6 +580,17 @@ local italic_synonym = {
     italic  = true,
 }
 
+local style_category = {
+    regular     = "r",
+    bold        = "b",
+    bolditalic  = "bi",
+    italic      = "i",
+    r           = "regular",
+    b           = "bold",
+    bi          = "bolditalic",
+    i           = "italic",
+}
+
 local type1_formats = { "tfm", "ofm", }
 
 local dummy_findfile = resolvers.findfile -- from basics-gen
@@ -991,16 +1002,42 @@ local resolve_familyname = function (specification, name, style, askedsize)
     return resolved, subfont
 end
 
-local resolve_fontname = function (specification, name)
-    local mappings  = name_index.mappings
+local resolve_fontname = function (specification, name, style)
+    local mappings    = name_index.mappings
+    local fallback    = nil
+    local lastresort  = nil
+    style = style_category [style]
     for i = 1, #mappings do
         local face = mappings [i]
+        local prefmodifiers = face.prefmodifiers
+        local subfamily     = face.subfamily
         if     face.fontname == name
             or face.fullname == name
             or face.psname   == name
         then
             return face.basename, face.subfont
+        elseif face.familyname == name then
+            if prefmodifiers == style
+                or subfamily == style
+            then
+                fallback = face
+            elseif regular_synonym [prefmodifiers]
+                or regular_synonym [subfamily]
+            then
+                lastresort = face
+            end
+        elseif face.metafamily == name
+            and (regular_synonym [prefmodifiers]
+                 or regular_synonym [subfamily])
+        then
+            lastresort = face
         end
+    end
+    if fallback then
+        return fallback.basename, fallback.subfont
+    end
+    if lastresort then
+        return lastresort.basename, lastresort.subfont
     end
     return nil, nil
 end
@@ -1072,16 +1109,24 @@ resolve_name = function (specification)
         end
     end
 
-    resolved, subfont = resolve_familyname (specification, name, style, askedsize)
+    resolved, subfont = resolve_familyname (specification,
+                                            name,
+                                            style,
+                                            askedsize)
     if not resolved then
-        resolved, subfont = resolve_fontname (specification, name)
+        resolved, subfont = resolve_fontname (specification,
+                                              name,
+                                              style)
     end
     if not resolved then
         resolved = specification.name, false
     end
+
     if not resolved then
         if not fonts_reloaded then
-            return reload_db ("Font not found.", resolve_name, specification)
+            return reload_db ("Font not found.",
+                              resolve_name,
+                              specification)
         end
     end
     return resolved, subfont

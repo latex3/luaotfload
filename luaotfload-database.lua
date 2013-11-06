@@ -2747,6 +2747,7 @@ local collect_families = function (mappings)
 --
         if not modifier then --- regular, exact only
             modifier = check_regular (fontstyle_name,
+                                      prefmodifiers,
                                       subfamily,
                                       splitstyle)
         end

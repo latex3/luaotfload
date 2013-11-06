@@ -31,6 +31,7 @@ local fontloaderinfo           = fontloader.info
 local fontloaderclose          = fontloader.close
 local fontloaderopen           = fontloader.open
 local fontloaderto_table       = fontloader.to_table
+local gzipopen                 = gzip.open
 local iolines                  = io.lines
 local ioopen                   = io.open
 local kpseexpand_path          = kpse.expand_path
@@ -415,10 +416,13 @@ end
     have to put our own small wrappers for the gzip library in
     place.
 
+    load_gzipped -- Read and decompress and entire gzipped file.
+    Returns the uncompressed content as a string.
+
 --doc]]--
 
 local load_gzipped = function (filename)
-    local gh = gzip.open (filename,"rb")
+    local gh = gzipopen (filename,"rb")
     if gh then
         local data = gh:read "*all"
         gh:close ()
@@ -426,13 +430,21 @@ local load_gzipped = function (filename)
     end
 end
 
+--[[doc--
+
+    save_gzipped -- Compress and write a string to file. The return
+    value is the number of bytes written. Zlib parameters are: best
+    compression and default strategy.
+
+--doc]]--
+
 local save_gzipped = function (filename, data)
-    local gh = ioopen (filename, "wb")
+    local gh = gzipopen (filename, "wb9")
     if gh then
-        local bin = zlibcompress (data, 9, nil, 15 + 16)
-        gh:write (bin)
+        gh:write (data)
+        local bytes = gh:seek ()
         gh:close ()
-        return #bin
+        return bytes
     end
 end
 

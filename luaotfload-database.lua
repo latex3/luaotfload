@@ -530,11 +530,17 @@ load_lookups = function ( )
 end
 
 local regular_synonym = {
-    book    = true,
-    normal  = true,
-    plain   = true,
-    regular = true,
-    roman   = true,
+    book    = "r",
+    normal  = "r",
+    plain   = "r",
+    regular = "r",
+    roman   = "r",
+}
+
+local italic_synonym = {
+    oblique = true,
+    slanted = true,
+    italic  = true,
 }
 
 local type1_formats = { "tfm", "ofm", }
@@ -1294,7 +1300,7 @@ local organize_namedata = function (metadata,
         metadata = {
             fullname      = metadata.fullname,
             fontname      = metadata.fontname,
-            metafamily    = metadata.familyname,
+            familyname    = metadata.familyname,
         },
 
         info = {
@@ -2512,56 +2518,16 @@ local generate_filedata = function (mappings)
     return files
 end
 
-local match_synonyms = function (pattern)
-    local nopattern = 1 - pattern
-    return nopattern^0 * pattern * Cc (true) + Cc (false)
-end
-
 local determine_italic
 local determine_bold
 local pick_style
 local check_regular
 
 do
-    local italic = match_synonyms (P"oblique" + P"slanted" + P"italic")
-    local bold   = match_synonyms (P"bold")
-
-    determine_italic = function (fontstyle_name,
-                                 italicangle,
-                                 prefmodifiers,
-                                 subfamily)
-        if italicangle ~= 0 then
-            return true
-        elseif fontstyle_name ~= nil and lpegmatch (italic, fontstyle_name) then
-            return true
-        elseif prefmodifiers ~= nil and lpegmatch (italic, prefmodifiers) then
-            return lpegmatch (italic, prefmodifiers)
-        elseif subfamily ~= nil and lpegmatch (italic, subfamily) then
-            return true
-        end
-        return false
-    end
-
-    determine_bold = function (fontstyle_name,
-                               weight,
-                               prefmodifiers,
-                               subfamily)
-        if weight [2] == "bold" then
-            return true
-        elseif fontstyle_name ~= nil and lpegmatch (bold, fontstyle_name) then
-            return true
-        elseif prefmodifiers ~= nil and lpegmatch (bold, prefmodifiers) then
-            return true
-        elseif subfamily ~= nil and lpegmatch (bold, subfamily) then
-            return true
-        end
-        return false
-    end
-
     local splitfontname = lpeg.splitat "-"
 
     local choose_exact = function (field)
-        if field == "italic" or field == "oblique" then
+        if italic_synonym [field] then
             return "i"
         elseif field == "bold" then
             return "b"
@@ -2577,17 +2543,18 @@ do
                            subfamily,
                            splitstyle)
         local style
-        if fontstyle_name ~= nil then
-            style = choose_exact (prefmodifiers)
-        end
-        if not style and prefmodifiers ~= nil then
-            style = choose_exact (prefmodifiers)
+        if fontstyle_name then
+            style = choose_exact (fontstyle_name)
         end
         if not style then
-            style = choose_exact (subfamily)
+            if prefmodifiers then
+                style = choose_exact (prefmodifiers)
+            elseif subfamily then
+                --style = choose_exact (subfamily)
+            end
         end
-        if not style and splitstyle ~= nil then
-            choose_exact (splitstyle)
+        if not style and splitstyle then
+            style = choose_exact (splitstyle)
         end
         return style
     end
@@ -2600,12 +2567,14 @@ do
                               subfamily,
                               splitstyle)
 
-        if regular_synonym [fontstyle_name]
-            or regular_synonym [prefmodifiers]
-            or regular_synonym [subfamily]
-            or regular_synonym [splitstyle]
-        then
-            return "r"
+        if fontstyle_name then
+            return regular_synonym [fontstyle_name]
+        elseif prefmodifiers then
+            return regular_synonym [prefmodifiers]
+        elseif subfamily then
+            return regular_synonym [subfamily]
+        elseif splitstyle then
+            return regular_synonym [splitstyle]
         end
 
         return nil
@@ -2619,6 +2588,7 @@ local pull_values = function (entry)
     local sanitized         = names.sanitized
     local english           = sanitized.english
     local info              = sanitized.info
+    local metadata          = sanitized.metadata
 
     --- pull file info ...
     entry.basename          = file.base
@@ -2630,12 +2600,15 @@ local pull_values = function (entry)
     entry.psname            = english.psname
     entry.fontname          = info.fontname
     entry.fullname          = english.fullname or info.fullname
-    entry.familyname        = english.preffamily
-                           or english.family
-                           or info.familyname
+    entry.prefmodifiers     = english.prefmodifiers
+    local metafamily        = metadata.familyname
+    local familyname        = english.preffamily or english.family
+    entry.familyname        = familyname
+    if familyname ~= metafamily then
+        entry.metafamily    = metadata.familyname
+    end
     entry.fontstyle_name    = sanitized.fontstyle_name
     entry.plainname         = names.fullname
-    entry.prefmodifiers     = english.prefmodifiers
     entry.subfamily         = english.subfamily
 
     --- pull style info ...
@@ -2645,10 +2618,40 @@ local pull_values = function (entry)
     entry.weight            = style.weight
 
     if luaotfloadconfig.strip == true then
-    --if false then
         entry.file  = nil
         entry.names = nil
         entry.style = nil
+    end
+end
+
+local add_family = function (name, subtable, modifier, entry)
+    local familytable = subtable [name]
+    if not familytable then
+        familytable = { }
+        subtable [name] = familytable
+    end
+
+    --- the style table is treated as an unordered list
+    local styletable = familytable [modifier]
+    if not styletable then
+        styletable = { }
+        familytable [modifier] = styletable
+    end
+
+    if not entry.prefmodifiers then --- default size for this style/family combo
+        styletable.default = entry.index
+    end
+
+    local size = entry.size --- dsnsize * high * low
+    if size then
+        styletable [#styletable + 1] = {
+            size [1],
+            size [2],
+            size [3],
+            entry.index,
+        }
+    else
+        styletable.default = entry.index
     end
 end
 
@@ -2679,10 +2682,8 @@ local collect_families = function (mappings)
             families [location] [format] = subtable
         end
 
-        --local fullname          = english.fullname or info.fullname
-        --local fontname          = info.fontname
-
         local familyname        = entry.familyname
+        local metafamily        = entry.metafamily
         local fontstyle_name    = entry.fontstyle_name
         local prefmodifiers     = entry.prefmodifiers
         local subfamily         = entry.subfamily
@@ -2696,24 +2697,24 @@ local collect_families = function (mappings)
                                               subfamily,
                                               splitstyle)
 
-        if not modifier then --- guess
-            local italic = determine_italic (fontstyle_name,
-                                             italicangle,
-                                             prefmodifiers,
-                                             subfamily)
-            local bold = determine_bold (fontstyle_name,
-                                         weight,
-                                         prefmodifiers,
-                                         subfamily)
-            if bold and italic then
-                modifier = "bi"
-            elseif bold then
-                modifier = "b"
-            elseif italic then
-                modifier = "i"
-            end
-        end
-
+--        if not modifier then --- guess
+--            local italic = determine_italic (fontstyle_name,
+--                                             italicangle,
+--                                             prefmodifiers,
+--                                             subfamily)
+--            local bold = determine_bold (fontstyle_name,
+--                                         weight,
+--                                         prefmodifiers,
+--                                         subfamily)
+--            if bold and italic then
+--                modifier = "bi"
+--            elseif bold then
+--                modifier = "b"
+--            elseif italic then
+--                modifier = "i"
+--            end
+--        end
+--
         if not modifier then --- regular, exact only
             modifier = check_regular (fontstyle_name,
                                       subfamily,
@@ -2721,36 +2722,9 @@ local collect_families = function (mappings)
         end
 
         if modifier then
-            --- stub; here we will continue building a list of optical sizes
-            --- no size -> hash “normal”
-            --- other sizes -> indexed tuples { dsnsize, high, low, idx }
-            local familytable = subtable [familyname]
-            if not familytable then
-                familytable = { }
-                subtable [familyname] = familytable
-            end
-
-            --- the style table is treated as an unordered list
-            local styletable = familytable [modifier]
-            if not styletable then
-                styletable = { }
-                familytable [modifier] = styletable
-            end
-
-            if not prefmodifiers then --- default size for this style/family combo
-                styletable.default = entry.index
-            end
-
-            local size = entry.size --- dsnsize * high * low
-            if size then
-                styletable [#styletable + 1] = {
-                    size [1],
-                    size [2],
-                    size [3],
-                    entry.index,
-                }
-            else
-                styletable.default = entry.index
+            add_family (familyname, subtable, modifier, entry)
+            if metafamily ~= nil then
+                add_family (metafamily, subtable, modifier, entry)
             end
         end
     end

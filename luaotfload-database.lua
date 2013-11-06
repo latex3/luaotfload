@@ -2518,8 +2518,6 @@ local generate_filedata = function (mappings)
     return files
 end
 
-local determine_italic
-local determine_bold
 local pick_style
 local check_regular
 
@@ -2697,24 +2695,6 @@ local collect_families = function (mappings)
                                               subfamily,
                                               splitstyle)
 
---        if not modifier then --- guess
---            local italic = determine_italic (fontstyle_name,
---                                             italicangle,
---                                             prefmodifiers,
---                                             subfamily)
---            local bold = determine_bold (fontstyle_name,
---                                         weight,
---                                         prefmodifiers,
---                                         subfamily)
---            if bold and italic then
---                modifier = "bi"
---            elseif bold then
---                modifier = "b"
---            elseif italic then
---                modifier = "i"
---            end
---        end
---
         if not modifier then --- regular, exact only
             modifier = check_regular (fontstyle_name,
                                       subfamily,

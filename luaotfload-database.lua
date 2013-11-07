@@ -2628,12 +2628,12 @@ do
             if prefmodifiers then
                 style = choose_exact (prefmodifiers)
             elseif subfamily then
-                --style = choose_exact (subfamily)
+                style = choose_exact (subfamily)
             end
         end
-        if not style and splitstyle then
-            style = choose_exact (splitstyle)
-        end
+--        if not style and splitstyle then
+--            style = choose_exact (splitstyle)
+--        end
         return style
     end
 

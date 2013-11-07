@@ -149,7 +149,7 @@ local default_spec = {
 
 local resolve_font_name = function ()
   local failed, total = 0, 0
-  local resolve_name = names.resolve
+  local resolve_name = names.resolve_name
   for nset = 1, #font_name_tests do
     local set = font_name_tests[nset]
 
@@ -161,7 +161,7 @@ local resolve_font_name = function ()
         local input_spec = table.copy (default_spec)
         input_spec.name = input
         input_spec.specification = input_spec.lookup .. ":" .. input
-        local result = resolve_name (nil, nil, input_spec) == output
+        local result = resolve_name (input_spec) == output
         total = total + 1
         if not result then
           failed = failed + 1
@@ -174,7 +174,7 @@ local resolve_font_name = function ()
                                     or default_spec.lookup)
                                 .. ":" .. input_spec.name
         input_spec.optsize = input_spec.optsize or default_spec.optsize
-        local result = resolve_name (nil, nil, input_spec) == output
+        local result = resolve_name (input_spec) == output
         total = total + 1
         if not result then
           failed = failed + 1
@@ -218,3 +218,4 @@ end
 
 return main ()
 
+--- vim:ft=lua:ts=2:et:sw=2

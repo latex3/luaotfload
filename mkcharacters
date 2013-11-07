@@ -153,3 +153,4 @@ end
   io.write "Emergency exit.\n"
   os.exit(1)
 
+--- vim:ft=lua:ts=2:et:sw=2

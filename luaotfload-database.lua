@@ -30,7 +30,7 @@ local unpack                   = table.unpack
 local fontloaderinfo           = fontloader.info
 local fontloaderclose          = fontloader.close
 local fontloaderopen           = fontloader.open
-local fontloaderto_table       = fontloader.to_table
+----- fontloaderto_table       = fontloader.to_table
 local gzipopen                 = gzip.open
 local iolines                  = io.lines
 local ioopen                   = io.open
@@ -1281,27 +1281,9 @@ end --- find_closest()
 
 --[[doc--
 
-    load_font_file -- Extract relevant information from a font. The
-    fields we require for the index are, by category:
-
-        -- style:
-               .design_size
-               .design_range_top
-               .design_range_bottom
-               .pfminfo (table)
-               .italicangle
-               .units_per_em
-               .fontstyle_name
-        -- font names:
-               .names (table)
-               .fullname
-               .fontname
-               .familyname
-        -- .version
-
-    Since we don’t actually require metrics and glyph information we
-    can omit calling the very expensive ``fontloader.to_table()``
-    altogether.
+    load_font_file -- Safely open a font file. See
+    <http://www.ntg.nl/pipermail/ntg-context/2013/075885.html>
+    regarding the omission of ``fontloader.close()``.
 
 --doc]]--
 
@@ -1311,29 +1293,7 @@ local load_font_file = function (filename, subfont)
         report ("log", 1, "db", "ERROR: failed to open %s", filename)
         return
     end
-
---  local metadata = fontloaderto_table (rawfont)
-    local fontstyle_name = rawfont.fontstyle_name
-    local names          = rawfont.names
-    local pfminfo        = rawfont.pfminfo
-
-    local metadata = {
-        design_size             = rawfont.design_size,
-        design_range_top        = rawfont.design_range_top,
-        design_range_bottom     = rawfont.design_range_bottom,
-        names                   = names and tablecopy (names) or { },
-        fullname                = rawfont.fullname,
-        fontstyle_name          = fontstyle_name and tablecopy (fontstyle_name) or { },
-        fontname                = rawfont.fontname,
-        familyname              = rawfont.familyname,
-        pfminfo                 = pfminfo and tablecopy (pfminfo) or { },
-        italicangle             = rawfont.italicangle,
-        units_per_em            = rawfont.units_per_em,
-        version                 = rawfont.version,
-    }
-    fontloaderclose (rawfont)
-    collectgarbage "collect"
-    return metadata
+    return rawfont
 end
 
 --- rawdata -> (int * int * int | bool)

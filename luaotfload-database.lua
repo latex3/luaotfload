@@ -1279,6 +1279,32 @@ find_closest = function (name, limit)
     return false
 end --- find_closest()
 
+--[[doc--
+
+    load_font_file -- Extract relevant information from a font. The
+    fields we require for the index are, by category:
+
+        -- style:
+               .design_size
+               .design_range_top
+               .design_range_bottom
+               .pfminfo (table)
+               .italicangle
+               .units_per_em
+               .fontstyle_name
+        -- font names:
+               .names (table)
+               .fullname
+               .fontname
+               .familyname
+        -- .version
+
+    Since we don’t actually require metrics and glyph information we
+    can omit calling the very expensive ``fontloader.to_table()``
+    altogether.
+
+--doc]]--
+
 local load_font_file = function (filename, subfont)
     local rawfont, _msg = fontloaderopen (filename, subfont)
     if not rawfont then
@@ -1286,17 +1312,27 @@ local load_font_file = function (filename, subfont)
         return
     end
 
-    local metadata = fontloaderto_table (rawfont)
+--  local metadata = fontloaderto_table (rawfont)
+    local fontstyle_name = rawfont.fontstyle_name
+    local names          = rawfont.names
+    local pfminfo        = rawfont.pfminfo
+
+    local metadata = {
+        design_size             = rawfont.design_size,
+        design_range_top        = rawfont.design_range_top,
+        design_range_bottom     = rawfont.design_range_bottom,
+        names                   = names and tablecopy (names) or { },
+        fullname                = rawfont.fullname,
+        fontstyle_name          = fontstyle_name and tablecopy (fontstyle_name) or { },
+        fontname                = rawfont.fontname,
+        familyname              = rawfont.familyname,
+        pfminfo                 = pfminfo and tablecopy (pfminfo) or { },
+        italicangle             = rawfont.italicangle,
+        units_per_em            = rawfont.units_per_em,
+        version                 = rawfont.version,
+    }
     fontloaderclose (rawfont)
-
-    metadata.glyphs     = nil
-    metadata.subfonts   = nil
-    metadata.gpos       = nil
-    metadata.gsub       = nil
-    metadata.lookups    = nil
-
     collectgarbage "collect"
-
     return metadata
 end
 
@@ -2446,8 +2482,8 @@ local scan_os_fonts = function (currentnames,
                                 dry_run)
 
     local n_scanned, n_new = 0, 0
-    report ("info", 2, "db", "Scanning OS fonts...")
-    report ("info", 3, "db",
+    report ("info", 1, "db", "Scanning OS fonts...")
+    report ("info", 2, "db",
             "Searching in static system directories...")
 
     report_status_start (2, 4)
@@ -3175,18 +3211,18 @@ save_names = function (currentnames)
             tabletofile (luaname, currentnames, true)
             caches.compile (currentnames, luaname, lucname)
         end
-        report ("info", 1, "db", "Font index saved at ...")
+        report ("info", 2, "db", "Font index saved at ...")
         local success = false
         if lfsisfile (luaname) then
-            report ("info", 3, "db", "Text: " .. luaname)
+            report ("info", 2, "db", "Text: " .. luaname)
             success = true
         end
         if lfsisfile (gzname) then
-            report ("info", 3, "db", "Gzip: " .. gzname)
+            report ("info", 2, "db", "Gzip: " .. gzname)
             success = true
         end
         if lfsisfile (lucname) then
-            report ("info", 3, "db", "Byte: " .. lucname)
+            report ("info", 2, "db", "Byte: " .. lucname)
             success = true
         end
         if success then

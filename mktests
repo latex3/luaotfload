@@ -77,21 +77,21 @@ local infer_regular_style = {
   { "DejaVu Serif",         "DejaVuSerif.ttf"           },
   { "DejaVu Sans",          "DejaVuSans.ttf"            },
   { "Adobe Garamond Pro",   "agaramondpro_regular.otf"  },
-  { "Garamond Premier Pro", "GaramondPremrPro-Capt.otf" },
+  { "Garamond Premier Pro", "GaramondPremrPro.otf"      },
   { "CMU Serif",            "cmunrm.otf"                },
   { "CMU Sans Serif",       "cmunss.otf"                },
 }
 
 local choose_optical_size = {
-  { { name = "Latin Modern Roman", optsize =  0 }, "lmroman5-regular.otf"        },
+  { { name = "Latin Modern Roman", optsize =  1 }, "lmroman5-regular.otf"        },
   { { name = "Latin Modern Roman", optsize = 10 }, "lmroman10-regular.otf"       },
   { { name = "Latin Modern Roman", optsize = 12 }, "lmroman12-regular.otf"       },
   { { name = "Latin Modern Roman", optsize = 42 }, "lmroman17-regular.otf"       },
-  { { name = "EB Garamond", optsize =  0 }, "EBGaramond08-Regular.otf"           },
+  { { name = "EB Garamond", optsize =  1 }, "EBGaramond08-Regular.otf"           },
   { { name = "EB Garamond", optsize =  8 }, "EBGaramond08-Regular.otf"           },
   { { name = "EB Garamond", optsize = 12 }, "EBGaramond12-Regular.otf"           },
   { { name = "EB Garamond", optsize = 42 }, "EBGaramond12-Regular.otf"           },
-  { { name = "Garamond Premier Pro", optsize =  0 }, "GaramondPremrPro-Capt.otf" },
+  { { name = "Garamond Premier Pro", optsize =  1 }, "GaramondPremrPro-Capt.otf" },
   { { name = "Garamond Premier Pro", optsize = 10 }, "GaramondPremrPro.otf"      },
   { { name = "Garamond Premier Pro", optsize = 15 }, "GaramondPremrPro-Subh.otf" },
   { { name = "Garamond Premier Pro", optsize = 42 }, "GaramondPremrPro-Disp.otf" },
@@ -133,6 +133,13 @@ local resolve_t1_font = {
   { { name = "Nimbus Roman No9 L",    style = "bolditalic" }, "utmbi8a.pfb"  },
 }
 
+local translate_style = {
+  regular     = "r",
+  italic      = "i",
+  bold        = "b",
+  bolditalic  = "bi",
+}
+
 local font_name_tests = {
   infer_regular_style,
   choose_optical_size,
@@ -149,7 +156,7 @@ local default_spec = {
 
 local resolve_font_name = function ()
   local failed, total = 0, 0
-  local resolve_name = names.resolve
+  local resolve_name = names.resolve_name
   for nset = 1, #font_name_tests do
     local set = font_name_tests[nset]
 
@@ -161,7 +168,7 @@ local resolve_font_name = function ()
         local input_spec = table.copy (default_spec)
         input_spec.name = input
         input_spec.specification = input_spec.lookup .. ":" .. input
-        local result = resolve_name (nil, nil, input_spec) == output
+        local result = resolve_name (input_spec) == output
         total = total + 1
         if not result then
           failed = failed + 1
@@ -174,7 +181,8 @@ local resolve_font_name = function ()
                                     or default_spec.lookup)
                                 .. ":" .. input_spec.name
         input_spec.optsize = input_spec.optsize or default_spec.optsize
-        local result = resolve_name (nil, nil, input_spec) == output
+        input_spec.style   = translate_style [input_spec.style]
+        local result = resolve_name (input_spec) == output
         total = total + 1
         if not result then
           failed = failed + 1
@@ -218,3 +226,4 @@ end
 
 return main ()
 
+--- vim:ft=lua:ts=2:et:sw=2

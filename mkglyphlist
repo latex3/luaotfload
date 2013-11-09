@@ -169,3 +169,5 @@ end
 
 
 return main()
+
+--- vim:ft=lua:ts=2:et:sw=2

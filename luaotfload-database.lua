@@ -6,10 +6,35 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
     license   = "GNU GPL v2"
 }
 
---- TODO: if the specification is an absolute filename with a font not in the
---- database, add the font to the database and load it. There is a small
---- difficulty with the filenames of the TEXMF tree that are referenced as
---- relative paths...
+--[[doc--
+
+    Some statistics:
+
+        a) TL 2012,     mkluatexfontdb --force
+        b) v2.4,        luaotfload-tool --update --force
+        c) v2.4,        luaotfload-tool --update --force --formats=+afm,pfa,pfb
+        d) Context,     mtxrun --script fonts --reload --force
+
+    (Keep in mind that Context does index fewer fonts since it
+    considers only the contents of the minimals tree, not the
+    tex live one!)
+
+                time (m:s)       peak VmSize (B)
+            a     1:19              386 018
+            b     0:37              715 797
+            c     2:27            1 017 674
+            d     0:44            1 082 313
+
+    Most of the increase in memory consumption from version 1.x to 2.2+
+    can be attributed to the move from single-pass to a multi-pass
+    approach to building the index: Information is first gathered from
+    all reachable fonts and only afterwards processed, classified and
+    discarded.  Also, there is a good deal of additional stuff kept in
+    the database now: two extra tables for file names and font families
+    have been added, making font lookups more efficient while improving
+    maintainability of the code.
+
+--doc]]--
 
 local lpeg = require "lpeg"
 
@@ -1481,7 +1506,7 @@ ot_fullinfo = function (filename,
                                               english_names,
                                               info)
 
-    return {
+    local res = {
         file            = { base        = basename,
                             full        = filename,
                             subfont     = subfont,
@@ -1491,6 +1516,10 @@ ot_fullinfo = function (filename,
         style           = style,
         version         = metadata.version,
     }
+    --- Closing the file manually is a tad faster and more memory
+    --- efficient than having it closed by the gc
+    fontloaderclose (metadata)
+    return res
 end
 
 --[[doc--

@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ["features"] = {
-    version   = "2.3a",
+    version   = "2.4",
     comment   = "companion to luaotfload.lua",
     author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",

@@ -4,7 +4,7 @@
 --  DESCRIPTION:  functionality accessible by the --diagnose option
 -- REQUIREMENTS:  luaotfload-tool.lua
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  1.0
+--      VERSION:  2.4
 --      CREATED:  2013-07-28 10:01:18+0200
 -----------------------------------------------------------------------
 --

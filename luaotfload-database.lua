@@ -19,7 +19,7 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
     considers only the contents of the minimals tree, not the
     tex live one!)
 
-                time (m:s)       peak VmSize (B)
+                time (m:s)       peak VmSize (kB)
             a     1:19              386 018
             b     0:37              715 797
             c     2:27            1 017 674
@@ -124,11 +124,10 @@ luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
 luaotfloadconfig.formats       = luaotfloadconfig.formats  or "otf,ttf,ttc,dfont"
 luaotfloadconfig.strip         = luaotfloadconfig.strip == true
 
-if luaotfloadconfig.update_live ~= false then
-    --- this option allows for disabling updates
-    --- during a TeX run
-    luaotfloadconfig.update_live = true
-end
+--- this option allows for disabling updates
+--- during a TeX run
+luaotfloadconfig.update_live   = luaotfloadconfig.update_live ~= false
+luaotfloadconfig.compress      = luaotfloadconfig.compress ~= false
 
 local names                    = fonts.names
 local name_index               = nil --> upvalue for names.data

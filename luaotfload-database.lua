@@ -2106,27 +2106,30 @@ local scan_dir = function (dirname, currentnames, targetnames,
     end
     report ("both", 4, "db", "Scanning directory %s", dirname)
 
-    local n_new = 0   --- total of fonts collected
-    local n_found = #found
+    local n_new         = 0   --- total of fonts collected
+    local n_found       = #found
+    local max_fonts     = luaotfloadconfig.max_fonts
+
     report ("both", 4, "db", "%d font files detected", n_found)
     for j=1, n_found do
+        if max_fonts and fonts_read >= max_fonts then
+            break
+        end
+
         local fullname = found[j]
         fullname = path_normalize(fullname)
         local new
-        if not luaotfloadconfig.max_fonts
-            or luaotfloadconfig.max_fonts and fonts_read < luaotfloadconfig.max_fonts
-        then
-            if dry_run == true then
-                report_status ("both", "db",
-                            "Would have been loading %q", fullname)
-            else
-                report_status ("both", "db", "Loading font %q", fullname)
-                local new = read_font_names (fullname, currentnames,
-                                            targetnames, texmf)
-                if new == true then
-                    fonts_read = fonts_read + 1
-                    n_new = n_new + 1
-                end
+
+        if dry_run == true then
+            report_status ("both", "db",
+                        "Would have been loading %q", fullname)
+        else
+            report_status ("both", "db", "Loading font %q", fullname)
+            local new = read_font_names (fullname, currentnames,
+                                        targetnames, texmf)
+            if new == true then
+                fonts_read = fonts_read + 1
+                n_new = n_new + 1
             end
         end
     end

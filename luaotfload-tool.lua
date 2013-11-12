@@ -1224,7 +1224,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "max-fonts" then
             local n = optarg[n]
             if n then
-                n = tonumber(lvl)
+                n = tonumber(n)
                 if n and n > 0 then
                     luaotfloadconfig.max_fonts = n
                 end

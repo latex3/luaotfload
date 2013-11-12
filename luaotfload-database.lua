@@ -1543,6 +1543,7 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
     local familyname    = metadata.familyname
     local italicangle   = metadata.italicangle
     local weight        = metadata.weight --- string identifier
+    local splitstyle    = split_fontname (fontname)
 
     sanitized = sanitize_fontnames ({
         fontname        = fontname,
@@ -1567,8 +1568,8 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         psname           = sanitized.fontname,
         version          = metadata.version,
         size             = false,
-        splitstyle       = split_fontname (fontname),
-        fontstyle_name   = sanitized.subfamily,
+        splitstyle       = splitstyle,
+        fontstyle_name   = splitstyle or sanitized.subfamily,
         weight           = { metadata.pfminfo.weight,
                              sanitized.subfamily },
         italicangle      = italicangle,

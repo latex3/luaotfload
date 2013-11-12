@@ -74,6 +74,8 @@ update mode
 --prefer-texmf, -p      Organize the file name database in a way so
                         that it prefer fonts in the *TEXMF* tree over
                         system fonts if they are installed in both.
+--max-fonts=N           Process at most *N* font files, including fonts
+                        already indexed in the count.
 --formats=EXTENSIONS    Extensions of the font files to index.
                         Where *EXTENSIONS* is a comma-separated list of
                         supported file extensions (otf, ttf, ttc,

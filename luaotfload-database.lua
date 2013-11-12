@@ -533,6 +533,7 @@ local set_font_filter
 
 --- state of the database
 local fonts_reloaded = false
+local fonts_read     = 0
 
 --- limit output when approximate font matching (luaotfload-tool -F)
 local fuzzy_limit = 1 --- display closest only
@@ -2112,15 +2113,20 @@ local scan_dir = function (dirname, currentnames, targetnames,
         local fullname = found[j]
         fullname = path_normalize(fullname)
         local new
-        if dry_run == true then
-            report_status ("both", "db",
-                           "Would have been loading %q", fullname)
-        else
-            report_status ("both", "db", "Loading font %q", fullname)
-            local new = read_font_names (fullname, currentnames,
-                                         targetnames, texmf)
-            if new == true then
-                n_new = n_new + 1
+        if not luaotfloadconfig.max_fonts
+            or luaotfloadconfig.max_fonts and fonts_read < luaotfloadconfig.max_fonts
+        then
+            if dry_run == true then
+                report_status ("both", "db",
+                            "Would have been loading %q", fullname)
+            else
+                report_status ("both", "db", "Loading font %q", fullname)
+                local new = read_font_names (fullname, currentnames,
+                                            targetnames, texmf)
+                if new == true then
+                    fonts_read = fonts_read + 1
+                    n_new = n_new + 1
+                end
             end
         end
     end

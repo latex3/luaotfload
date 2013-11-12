@@ -225,6 +225,7 @@ This tool is part of the luaotfload package. Valid options are:
   -D --dry-run                 skip loading of fonts, just scan
   --formats=[+|-]EXTENSIONS    set, add, or subtract formats to index
   -p --prefer-texmf            prefer fonts in the TEXMF over system fonts
+  --max-fonts=N                process at most N font files
 
   --find="font name"           query the database for a font name
   -F --fuzzy                   look for approximate matches if --find fails
@@ -1114,6 +1115,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         limit              = 1,
         list               = 1,
         log                = 1,
+        ["max-fonts"]      = 1,
         ["no-reload"]      = "n",
         ["no-strip"]       = 0,
         ["skip-read"]      = "R",
@@ -1219,6 +1221,14 @@ local process_cmdline = function ( ) -- unit -> jobspec
             luaotfloadconfig.compress = false
         elseif v == "no-strip" then
             luaotfloadconfig.strip = false
+        elseif v == "max-fonts" then
+            local n = optarg[n]
+            if n then
+                n = tonumber(lvl)
+                if n and n > 0 then
+                    luaotfloadconfig.max_fonts = n
+                end
+            end
         end
     end
 

@@ -9,8 +9,9 @@ Change History
     * Test runner (script mktests)
     * New luaotfload-tool option: ``--no-reload``
     * ``luaotfload-tool --find`` now understands request syntax
-    * option ``--compress`` filters text (Lua script) version of the font
-      index through gzip
+    * text (Lua script) version of the font index is filtered through gzip by
+      default, the ``--no-compress`` option of luaotfload-tool will prevent
+      this
     * rename ``luaotfload-merged.lua`` (the fontloader package from Context)
       to ``luaotfload-fontloader.lua``
 

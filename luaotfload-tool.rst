@@ -20,7 +20,7 @@ SYNOPSIS
 **luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ]
                              [ --prefer-texmf ] [ --dry-run ]
                              [ --formats=[+|-]EXTENSIONS ]
-                             [ --compress ] [ --no-strip ]
+                             [ --no-compress ] [ --no-strip ]
 
 **luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
                                     [ --no-reload ]
@@ -67,8 +67,9 @@ update mode
                         building the database. Warning: this will
                         inflate the index to about two to three times
                         the normal size.
---compress              Filter plain text version of font index through
-                        gzip.
+--no-compress, -c       Do not filter the plain text version of the
+                        font index through gzip. Useful for debugging
+                        if your editor is built without zlib.
 
 --prefer-texmf, -p      Organize the file name database in a way so
                         that it prefer fonts in the *TEXMF* tree over

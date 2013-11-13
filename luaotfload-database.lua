@@ -1536,14 +1536,14 @@ end
 
 t1_fullinfo = function (filename, _subfont, location, basename, format)
     local sanitized
-    local metadata  = load_font_file (filename)
-
+    local metadata      = load_font_file (filename)
     local fontname      = metadata.fontname
     local fullname      = metadata.fullname
     local familyname    = metadata.familyname
     local italicangle   = metadata.italicangle
-    local weight        = metadata.weight --- string identifier
     local splitstyle    = split_fontname (fontname)
+    local style         = ""
+    local weight
 
     sanitized = sanitize_fontnames ({
         fontname        = fontname,
@@ -1551,9 +1551,19 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         pfullname       = fullname,
         metafamily      = family,
         familyname      = familyname,
-        subfamily       = weight,
+        weight          = metadata.weight, --- string identifier
         prefmodifiers   = style,
     })
+
+    weight = sanitized.weight
+
+    if weight == "bold" then
+        style = weight
+    end
+
+    if italicangle ~= 0 then
+        style = style .. "italic"
+    end
 
     return {
         basename         = basename,
@@ -1569,9 +1579,9 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         version          = metadata.version,
         size             = false,
         splitstyle       = splitstyle,
-        fontstyle_name   = splitstyle or sanitized.subfamily,
+        fontstyle_name   = style ~= "" and style or weight,
         weight           = { metadata.pfminfo.weight,
-                             sanitized.subfamily },
+                             weight },
         italicangle      = italicangle,
     }
 end

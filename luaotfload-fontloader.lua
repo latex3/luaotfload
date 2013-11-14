@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 11/09/13 20:21:53
+-- merge date  : 11/14/13 13:48:28
 
 do -- begin closure to overcome local limits and interference
 
@@ -6354,7 +6354,7 @@ local utfbyte=utf.byte
 local format,gmatch,gsub,find,match,lower,strip=string.format,string.gmatch,string.gsub,string.find,string.match,string.lower,string.strip
 local type,next,tonumber,tostring=type,next,tonumber,tostring
 local abs=math.abs
-local getn=table.getn
+local insert=table.insert
 local lpegmatch=lpeg.match
 local reversed,concat,remove=table.reversed,table.concat,table.remove
 local ioflush=io.flush
@@ -6378,7 +6378,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.747 
+otf.version=2.748 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -7032,20 +7032,20 @@ actions["check encoding"]=function(data,filename,raw)
           if parentdescription then
             local altuni=parentdescription.altuni
             if not altuni then
-              altuni={ { unicode=parent } }
+              altuni={ { unicode=unicode } }
               parentdescription.altuni=altuni
               duplicates[parent]={ unicode }
             else
               local done=false
               for i=1,#altuni do
-                if altuni[i].unicode==parent then
+                if altuni[i].unicode==unicode then
                   done=true
                   break
                 end
               end
               if not done then
-                altuni[#altuni+1]={ unicode=parent }
-                table.insert(duplicates[parent],unicode)
+                insert(altuni,{ unicode=unicode })
+                insert(duplicates[parent],unicode)
               end
             end
             if trace_loading then

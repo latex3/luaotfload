@@ -20,7 +20,7 @@ SYNOPSIS
 **luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ]
                              [ --prefer-texmf ] [ --dry-run ]
                              [ --formats=[+|-]EXTENSIONS ]
-                             [ --compress ] [ --no-strip ]
+                             [ --no-compress ] [ --no-strip ]
 
 **luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
                                     [ --no-reload ]
@@ -67,12 +67,15 @@ update mode
                         building the database. Warning: this will
                         inflate the index to about two to three times
                         the normal size.
---compress              Filter plain text version of font index through
-                        gzip.
+--no-compress, -c       Do not filter the plain text version of the
+                        font index through gzip. Useful for debugging
+                        if your editor is built without zlib.
 
 --prefer-texmf, -p      Organize the file name database in a way so
                         that it prefer fonts in the *TEXMF* tree over
                         system fonts if they are installed in both.
+--max-fonts=N           Process at most *N* font files, including fonts
+                        already indexed in the count.
 --formats=EXTENSIONS    Extensions of the font files to index.
                         Where *EXTENSIONS* is a comma-separated list of
                         supported file extensions (otf, ttf, ttc,
@@ -220,11 +223,17 @@ FILES
 
 The font name database is usually located in the directory
 ``texmf-var/luatex-cache/generic/names/`` (``$TEXMFCACHE`` as set in
-``texmf.cnf``) of your *TeX Live* distribution as
-``luaotfload-names.lua``.  The experimental lookup cache will be
-created as ``luaotfload-lookup-cache.lua`` in the same directory.
-Both files are safe to delete, at the cost of regenerating them with
-the next run of *LuaTeX*.
+``texmf.cnf``) of your *TeX Live* distribution as a zlib-compressed
+file ``luaotfload-names.lua.gz``.
+The experimental lookup cache will be created as
+``luaotfload-lookup-cache.lua`` in the same directory.
+These Lua tables are not used directly by Luaotfload, though.
+Instead, they are compiled to Lua bytecode which is written to
+corresponding files with the extension ``.luc`` in the same directory.
+When modifying the files by hand keep in mind that only if the bytecode
+files are missing will Luaotfload use the plain version instead.
+Both kinds of files are safe to delete, at the cost of regenerating
+them with the next run of *LuaTeX*.
 
 SEE ALSO
 =======================================================================

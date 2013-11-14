@@ -1,15 +1,40 @@
 if not modules then modules = { } end modules ['luaotfload-database'] = {
-    version   = "2.3b",
+    version   = "2.4",
     comment   = "companion to luaotfload.lua",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
     license   = "GNU GPL v2"
 }
 
---- TODO: if the specification is an absolute filename with a font not in the
---- database, add the font to the database and load it. There is a small
---- difficulty with the filenames of the TEXMF tree that are referenced as
---- relative paths...
+--[[doc--
+
+    Some statistics:
+
+        a) TL 2012,     mkluatexfontdb --force
+        b) v2.4,        luaotfload-tool --update --force
+        c) v2.4,        luaotfload-tool --update --force --formats=+afm,pfa,pfb
+        d) Context,     mtxrun --script fonts --reload --force
+
+    (Keep in mind that Context does index fewer fonts since it
+    considers only the contents of the minimals tree, not the
+    tex live one!)
+
+                time (m:s)       peak VmSize (kB)
+            a     1:19              386 018
+            b     0:37              715 797
+            c     2:27            1 017 674
+            d     0:44            1 082 313
+
+    Most of the increase in memory consumption from version 1.x to 2.2+
+    can be attributed to the move from single-pass to a multi-pass
+    approach to building the index: Information is first gathered from
+    all reachable fonts and only afterwards processed, classified and
+    discarded.  Also, there is a good deal of additional stuff kept in
+    the database now: two extra tables for file names and font families
+    have been added, making font lookups more efficient while improving
+    maintainability of the code.
+
+--doc]]--
 
 local lpeg = require "lpeg"
 
@@ -99,11 +124,10 @@ luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
 luaotfloadconfig.formats       = luaotfloadconfig.formats  or "otf,ttf,ttc,dfont"
 luaotfloadconfig.strip         = luaotfloadconfig.strip == true
 
-if luaotfloadconfig.update_live ~= false then
-    --- this option allows for disabling updates
-    --- during a TeX run
-    luaotfloadconfig.update_live = true
-end
+--- this option allows for disabling updates
+--- during a TeX run
+luaotfloadconfig.update_live   = luaotfloadconfig.update_live ~= false
+luaotfloadconfig.compress      = luaotfloadconfig.compress ~= false
 
 local names                    = fonts.names
 local name_index               = nil --> upvalue for names.data
@@ -509,6 +533,7 @@ local set_font_filter
 
 --- state of the database
 local fonts_reloaded = false
+local fonts_read     = 0
 
 --- limit output when approximate font matching (luaotfload-tool -F)
 local fuzzy_limit = 1 --- display closest only
@@ -1481,7 +1506,7 @@ ot_fullinfo = function (filename,
                                               english_names,
                                               info)
 
-    return {
+    local res = {
         file            = { base        = basename,
                             full        = filename,
                             subfont     = subfont,
@@ -1491,6 +1516,10 @@ ot_fullinfo = function (filename,
         style           = style,
         version         = metadata.version,
     }
+    --- Closing the file manually is a tad faster and more memory
+    --- efficient than having it closed by the gc
+    fontloaderclose (metadata)
+    return res
 end
 
 --[[doc--
@@ -1507,13 +1536,14 @@ end
 
 t1_fullinfo = function (filename, _subfont, location, basename, format)
     local sanitized
-    local metadata  = load_font_file (filename)
-
+    local metadata      = load_font_file (filename)
     local fontname      = metadata.fontname
     local fullname      = metadata.fullname
     local familyname    = metadata.familyname
     local italicangle   = metadata.italicangle
-    local weight        = metadata.weight --- string identifier
+    local splitstyle    = split_fontname (fontname)
+    local style         = ""
+    local weight
 
     sanitized = sanitize_fontnames ({
         fontname        = fontname,
@@ -1521,9 +1551,19 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         pfullname       = fullname,
         metafamily      = family,
         familyname      = familyname,
-        subfamily       = weight,
+        weight          = metadata.weight, --- string identifier
         prefmodifiers   = style,
     })
+
+    weight = sanitized.weight
+
+    if weight == "bold" then
+        style = weight
+    end
+
+    if italicangle ~= 0 then
+        style = style .. "italic"
+    end
 
     return {
         basename         = basename,
@@ -1538,10 +1578,10 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         psname           = sanitized.fontname,
         version          = metadata.version,
         size             = false,
-        splitstyle       = split_fontname (fontname),
-        fontstyle_name   = sanitized.subfamily,
+        splitstyle       = splitstyle,
+        fontstyle_name   = style ~= "" and style or weight,
         weight           = { metadata.pfminfo.weight,
-                             sanitized.subfamily },
+                             weight },
         italicangle      = italicangle,
     }
 end
@@ -2077,21 +2117,29 @@ local scan_dir = function (dirname, currentnames, targetnames,
     end
     report ("both", 4, "db", "Scanning directory %s", dirname)
 
-    local n_new = 0   --- total of fonts collected
-    local n_found = #found
+    local n_new         = 0   --- total of fonts collected
+    local n_found       = #found
+    local max_fonts     = luaotfloadconfig.max_fonts
+
     report ("both", 4, "db", "%d font files detected", n_found)
     for j=1, n_found do
+        if max_fonts and fonts_read >= max_fonts then
+            break
+        end
+
         local fullname = found[j]
         fullname = path_normalize(fullname)
         local new
+
         if dry_run == true then
             report_status ("both", "db",
-                           "Would have been loading %q", fullname)
+                        "Would have been loading %q", fullname)
         else
             report_status ("both", "db", "Loading font %q", fullname)
             local new = read_font_names (fullname, currentnames,
-                                         targetnames, texmf)
+                                        targetnames, texmf)
             if new == true then
+                fonts_read = fonts_read + 1
                 n_new = n_new + 1
             end
         end

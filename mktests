@@ -119,18 +119,18 @@ local choose_style = {
 --- this needs a database built with --formats=+pfa,pfb,afm
 
 local resolve_t1_font = {
-  { { name = "URW Gothic L",          style = "regular"    }, "uagk8a.pfb"   },
-  { { name = "URW Gothic L",          style = "italic"     }, "uagko8a.pfb"  },
-  { { name = "URW Gothic L",          style = "bold"       }, "uagd8a.pfb"   },
-  { { name = "URW Gothic L",          style = "bolditalic" }, "uagdo8a.pfb"  },
-  { { name = "Century Schoolbook L",  style = "regular"    }, "uncr8a.pfb"   },
-  { { name = "Century Schoolbook L",  style = "italic"     }, "uncri8a.pfb"  },
-  { { name = "Century Schoolbook L",  style = "bold"       }, "uncb8a.pfb"   },
-  { { name = "Century Schoolbook L",  style = "bolditalic" }, "uncbi8a.pfb"  },
-  { { name = "Nimbus Roman No9 L",    style = "regular"    }, "utmr8a.pfb"   },
-  { { name = "Nimbus Roman No9 L",    style = "italic"     }, "utmri8a.pfb"  },
-  { { name = "Nimbus Roman No9 L",    style = "bold"       }, "utmb8a.pfb"   }, --- medium, actually
-  { { name = "Nimbus Roman No9 L",    style = "bolditalic" }, "utmbi8a.pfb"  },
+  { { name = "URW Gothic L",          style = "regular"    }, "a010013l.pfb"  }, --> “book”
+--  { { name = "URW Gothic L",          style = "italic"     }, "a010033l.pfb"  }, --> “book oblique”
+--  { { name = "URW Gothic L",          style = "bold"       }, "a010015l.pfb"  }, --> “demi”
+--  { { name = "URW Gothic L",          style = "bolditalic" }, "a010035l.pfb"  }, --> “demi oblique”
+  { { name = "Century Schoolbook L",  style = "regular"    }, "c059013l.pfb"  },
+  { { name = "Century Schoolbook L",  style = "italic"     }, "c059033l.pfb"  },
+  { { name = "Century Schoolbook L",  style = "bold"       }, "c059016l.pfb"  },
+  { { name = "Century Schoolbook L",  style = "bolditalic" }, "c059036l.pfb"  },
+  { { name = "Nimbus Roman No9 L",    style = "regular"    }, "n021003l.pfb"  },
+  { { name = "Nimbus Roman No9 L",    style = "italic"     }, "n021023l.pfb"  },
+  { { name = "Nimbus Roman No9 L",    style = "bold"       }, "n021004l.pfb"  }, --- medium, actually
+  { { name = "Nimbus Roman No9 L",    style = "bolditalic" }, "n021024l.pfb"  },
 }
 
 local translate_style = {

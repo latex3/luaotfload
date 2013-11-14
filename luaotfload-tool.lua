@@ -183,6 +183,7 @@ local sanitize_fontname              = names.sanitize_fontname
 
 local pathdata      = names.path
 local names_plain   = pathdata.index.lua
+local names_gzip    = names_plain .. ".gz"
 local names_bin     = pathdata.index.luc
 
 local help_messages = {
@@ -219,11 +220,12 @@ This tool is part of the luaotfload package. Valid options are:
   -n --no-reload               suppress db update
   --no-strip                   keep redundant information in db
   -f --force                   force re-indexing all fonts
-  -c --compress                gzip index file (text version only)
+  -c --no-compress             do not gzip index file (text version only)
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
   --formats=[+|-]EXTENSIONS    set, add, or subtract formats to index
   -p --prefer-texmf            prefer fonts in the TEXMF over system fonts
+  --max-fonts=N                process at most N font files
 
   --find="font name"           query the database for a font name
   -F --fuzzy                   look for approximate matches if --find fails
@@ -293,7 +295,8 @@ local help_msg = function (version)
     local template = help_messages[version]
     iowrite(stringformat(template,
                          luaotfloadconfig.self,
-                         names_plain,
+--                         names_plain,
+                         names_gzip,
                          names_bin,
                          caches.getwritablepath (
                          luaotfloadconfig.cache_dir)))
@@ -1097,7 +1100,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
     local long_options = {
         alias              = 1,
         cache              = 1,
-        compress           = "c",
+        ["no-compress"]    = "c",
         diagnose           = 1,
         ["dry-run"]        = "D",
         ["flush-lookups"]  = "l",
@@ -1112,6 +1115,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         limit              = 1,
         list               = 1,
         log                = 1,
+        ["max-fonts"]      = 1,
         ["no-reload"]      = "n",
         ["no-strip"]       = 0,
         ["skip-read"]      = "R",
@@ -1214,9 +1218,17 @@ local process_cmdline = function ( ) -- unit -> jobspec
             ---  dev only, undocumented
             luaotfloadconfig.skip_read = true
         elseif v == "c" then
-            luaotfloadconfig.compress = true
+            luaotfloadconfig.compress = false
         elseif v == "no-strip" then
             luaotfloadconfig.strip = false
+        elseif v == "max-fonts" then
+            local n = optarg[n]
+            if n then
+                n = tonumber(n)
+                if n and n > 0 then
+                    luaotfloadconfig.max_fonts = n
+                end
+            end
         end
     end
 

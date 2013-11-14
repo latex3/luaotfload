@@ -182,7 +182,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
                 fillcolor  = "#01012222",
                 color      = grey40,
                 style      = "filled,dotted,rounded",
-                label      = "luaotfload-names.lua\nluaotfload-names.luc"]
+                label      = "luaotfload-names.lua.gz\nluaotfload-names.luc"]
 
     status [style      = "filled,dashed",
             shape      = rect,

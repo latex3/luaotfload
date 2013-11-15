@@ -1349,6 +1349,7 @@ local get_english_names = function (names, basename)
     local english_names
 
     if names then
+        inspect(names)
         for _, raw_namedata in next, names do
             if raw_namedata.lang == "English (US)" then
                 english_names = raw_namedata.names
@@ -1369,8 +1370,6 @@ local organize_namedata = function (metadata,
                                     english_names,
                                     basename,
                                     info)
-
-    --print (english_names.family, "<>", english_names.preffamilyname)
     local fontnames = {
         --- see
         --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
@@ -1385,18 +1384,18 @@ local organize_namedata = function (metadata,
             --- non-abbreviated fashion, for most fonts at any rate.
             --- However, in some fonts (e.g. CMU) all three fields are
             --- identical.
-            fullname      = english_names.compatfull
-                         or english_names.fullname,
+            fullname      = --[[ 18 ]] english_names.compatfull
+                         or --[[  4 ]] english_names.fullname,
             --- we keep both the “preferred family” and the “family”
             --- values around since both are valid but can turn out
             --- quite differently, e.g. with Latin Modern:
             ---     preffamily: “Latin Modern Sans”,
             ---     family:     “LM Sans 10”
-            preffamily    = english_names.preffamilyname,
-            family        = english_names.family,
-            prefmodifiers = english_names.prefmodifiers,
-            subfamily     = english_names.subfamily,
-            psname        = english_names.postscriptname,
+            preffamily    = --[[ 16 ]] english_names.preffamilyname,
+            family        = --[[  1 ]] english_names.family,
+            prefmodifiers = --[[ 17 ]] english_names.prefmodifiers,
+            subfamily     = --[[  2 ]] english_names.subfamily,
+            psname        = --[[  6 ]] english_names.postscriptname,
         },
 
         metadata = {

@@ -47,7 +47,6 @@ local C, Cc, Cf, Cg, Cs, Ct
 --- Luatex builtins
 local load                     = load
 local next                     = next
-local pcall                    = pcall
 local require                  = require
 local tonumber                 = tonumber
 local unpack                   = table.unpack
@@ -59,6 +58,7 @@ local fontloaderopen           = fontloader.open
 local gzipopen                 = gzip.open
 local iolines                  = io.lines
 local ioopen                   = io.open
+local iopopen                  = io.popen
 local kpseexpand_path          = kpse.expand_path
 local kpseexpand_var           = kpse.expand_var
 local kpsefind_file            = kpse.find_file
@@ -123,6 +123,26 @@ local luaotfloadconfig         = config.luaotfload --- always present
 luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
 luaotfloadconfig.formats       = luaotfloadconfig.formats  or "otf,ttf,ttc,dfont"
 luaotfloadconfig.strip         = luaotfloadconfig.strip == true
+--- The “termwidth” value is only considered when printing
+--- short status messages, e.g. when building the database
+--- online.
+if not luaotfloadconfig.termwidth then
+    local tw = 79
+    if not (    os.type == "windows" --- Assume broken terminal.
+            or os.getenv "TERM" == "dumb")
+        and iopopen
+    then
+        local p = iopopen "tput cols"
+        if p then
+            result = p:read "*all"
+            p:close ()
+            if result then
+                tw = tonumber (result) or tw
+            end
+        end
+    end
+    luaotfloadconfig.termwidth = tw
+end
 
 --- this option allows for disabling updates
 --- during a TeX run
@@ -1349,6 +1369,7 @@ local get_english_names = function (names, basename)
     local english_names
 
     if names then
+        --inspect(names)
         for _, raw_namedata in next, names do
             if raw_namedata.lang == "English (US)" then
                 english_names = raw_namedata.names
@@ -1369,8 +1390,6 @@ local organize_namedata = function (metadata,
                                     english_names,
                                     basename,
                                     info)
-
-    --print (english_names.family, "<>", english_names.preffamilyname)
     local fontnames = {
         --- see
         --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
@@ -1385,18 +1404,18 @@ local organize_namedata = function (metadata,
             --- non-abbreviated fashion, for most fonts at any rate.
             --- However, in some fonts (e.g. CMU) all three fields are
             --- identical.
-            fullname      = english_names.compatfull
-                         or english_names.fullname,
+            fullname      = --[[ 18 ]] english_names.compatfull
+                         or --[[  4 ]] english_names.fullname,
             --- we keep both the “preferred family” and the “family”
             --- values around since both are valid but can turn out
             --- quite differently, e.g. with Latin Modern:
             ---     preffamily: “Latin Modern Sans”,
             ---     family:     “LM Sans 10”
-            preffamily    = english_names.preffamilyname,
-            family        = english_names.family,
-            prefmodifiers = english_names.prefmodifiers,
-            subfamily     = english_names.subfamily,
-            psname        = english_names.postscriptname,
+            preffamily    = --[[ 16 ]] english_names.preffamilyname,
+            family        = --[[  1 ]] english_names.family,
+            prefmodifiers = --[[ 17 ]] english_names.prefmodifiers,
+            subfamily     = --[[  2 ]] english_names.subfamily,
+            psname        = --[[  6 ]] english_names.postscriptname,
         },
 
         metadata = {
@@ -2087,6 +2106,16 @@ local find_font_files = function (root, recurse)
     end
 end
 
+--- truncate_string -- Cut the first part of a string to fit it
+--- into a given terminal width. The parameter “restrict” (int)
+--- indicates the number of characters already consumed on the
+--- line.
+local ellipsis = ".."
+local truncate_string = function (str, restrict)
+    local wd  = luaotfloadconfig.termwidth - restrict - 2
+    return ellipsis .. stringsub(str, #str - wd)
+end
+
 --[[doc--
 
     scan_dir() scans a directory and populates the list of fonts
@@ -2132,10 +2161,12 @@ local scan_dir = function (dirname, currentnames, targetnames,
         local new
 
         if dry_run == true then
+            local truncated = truncate_string (fullname, 43)
             report_status ("both", "db",
-                        "Would have been loading %q", fullname)
+                        "Would have been loading %s", truncated)
         else
-            report_status ("both", "db", "Loading font %q", fullname)
+            local truncated = truncate_string (fullname, 32)
+            report_status ("both", "db", "Loading font %s", truncated)
             local new = read_font_names (fullname, currentnames,
                                         targetnames, texmf)
             if new == true then

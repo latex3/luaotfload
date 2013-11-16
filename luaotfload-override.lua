@@ -40,20 +40,6 @@ if tex and (tex.jobname or tex.formatname) then
     texjob = true
 end
 
---[[doc--
-We recreate the verbosity levels previously implemented in font-nms:
-
-    ==========================================================
-    lvl      arg  trace_loading  trace_search  suppress_output
-    ----------------------------------------------------------
-    (0)  ->  -q         ⊥              ⊥            ⊤
-    (1)  ->  ∅          ⊥              ⊥            ⊥
-    (2)  ->  -v         ⊤              ⊥            ⊥
-    (>2) ->  -vv        ⊤              ⊤            ⊥
-    ==========================================================
-
---doc]]--
-
 local loglevel = 0 --- default
 local logout   = "log"
 

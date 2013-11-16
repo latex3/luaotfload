@@ -123,26 +123,6 @@ local luaotfloadconfig         = config.luaotfload --- always present
 luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
 luaotfloadconfig.formats       = luaotfloadconfig.formats  or "otf,ttf,ttc,dfont"
 luaotfloadconfig.strip         = luaotfloadconfig.strip == true
---- The “termwidth” value is only considered when printing
---- short status messages, e.g. when building the database
---- online.
-if not luaotfloadconfig.termwidth then
-    local tw = 79
-    if not (    os.type == "windows" --- Assume broken terminal.
-            or os.getenv "TERM" == "dumb")
-        and iopopen
-    then
-        local p = iopopen "tput cols"
-        if p then
-            result = p:read "*all"
-            p:close ()
-            if result then
-                tw = tonumber (result) or tw
-            end
-        end
-    end
-    luaotfloadconfig.termwidth = tw
-end
 
 --- this option allows for disabling updates
 --- during a TeX run
@@ -175,6 +155,31 @@ local report                = logs.names_report
 local report_status         = logs.names_status
 local report_status_start   = logs.names_status_start
 local report_status_stop    = logs.names_status_stop
+
+--- The “termwidth” value is only considered when printing
+--- short status messages, e.g. when building the database
+--- online.
+if not luaotfloadconfig.termwidth then
+    local tw = 79
+    if not (    os.type == "windows" --- Assume broken terminal.
+            or os.getenv "TERM" == "dumb")
+    then
+        local p = iopopen "tput cols"
+        if p then
+            result = tonumber (p:read "*all")
+            p:close ()
+            if result then
+                tw = result
+            else
+                report ("log", 2, "db", "tput returned non-number.")
+            end
+        else
+            report ("log", 2, "db", "Shell escape disabled or tput executable missing.")
+            report ("log", 2, "db", "Assuming 79 cols terminal width.")
+        end
+    end
+    luaotfloadconfig.termwidth = tw
+end
 
 names.patterns          = { }
 local patterns          = names.patterns

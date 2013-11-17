@@ -2167,11 +2167,14 @@ local scan_dir = function (dirname, currentnames, targetnames,
 
         if dry_run == true then
             local truncated = truncate_string (fullname, 43)
-            report_status ("both", "db",
-                        "Would have been loading %s", truncated)
+            report ("log", 2, "db",
+                    "Would have been loading %s", fullname)
+            report_status ("term", "db",
+                           "Would have been loading %s", truncated)
         else
             local truncated = truncate_string (fullname, 32)
-            report_status ("both", "db", "Loading font %s", truncated)
+            report ("log", 2, "db", "Loading font %s", fullname)
+            report_status ("term", "db", "Loading font %s", truncated)
             local new = read_font_names (fullname, currentnames,
                                         targetnames, texmf)
             if new == true then

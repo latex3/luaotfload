@@ -1319,8 +1319,9 @@ find_closest = function (name, limit)
             local dist     = distances[i]
             local namelst  = by_distance[dist]
             report(false, 0, "query",
-                   "Distance from \"%s\": %s\n    ",
-                   name, dist, tableconcat (namelst, "\n    "))
+                   "Distance from \"%s\": %s\n    "
+                   .. tableconcat (namelst, "\n    "),
+                   name, dist)
         end
 
         return true

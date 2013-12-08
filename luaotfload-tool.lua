@@ -685,7 +685,7 @@ The font info knows two levels of detail:
 --doc]]--
 
 local show_font_info = function (basename, askedname, detail, warnings)
-    local filenames = names.data().filenames
+    local filenames = names.data().files
     local index     = filenames.base[basename]
     local fullname  = filenames.full[index]
     askedname = sanitize_fontname (askedname)

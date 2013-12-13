@@ -25,6 +25,8 @@ local lfsreadlink              = lfs.readlink
 local md5                      = require "md5"
 local md5sumhexa               = md5.sumhexa
 
+local ioopen                   = io.open
+
 local osgetenv                 = os.getenv
 local osname                   = os.name
 local osremove                 = os.remove

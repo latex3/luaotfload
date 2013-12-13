@@ -56,10 +56,10 @@ end
 local check_index = function (errcnt)
 
     out "================= font names =================="
-    local name_index = names.data()
+    local namedata = names.data()
 
-    if not name_index then
-        name_index = names.load ()
+    if not namedata then
+        namedata = names.load ()
     end
 
     local mappings = namedata.mappings
@@ -69,9 +69,9 @@ local check_index = function (errcnt)
         return errcnt + 1
     end
 
-    out ("Database version: %.3f.", names.version)
+    out ("Database version: %.3f.", namedata.meta.version)
     out ("Font formats indexed: %s.",
-         tableconcat (namedata.formats, ", "))
+         tableconcat (namedata.meta.formats, ", "))
     out ("%d font files indexed.", #mappings)
 
     local by_format = { }

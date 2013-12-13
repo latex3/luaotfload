@@ -243,7 +243,7 @@ local path = names.path
 local desired_permissions = {
     { "d", {"r","w"}, function () return caches.getwritablepath () end },
     { "d", {"r","w"}, path.globals.prefix },
-    { "f", {"r","w"}, path.index.lua },
+    { "f", {"r","w"}, path.index.lua .. ".gz" },
     { "f", {"r","w"}, path.index.luc },
     { "f", {"r","w"}, path.lookups.lua },
     { "f", {"r","w"}, path.lookups.luc },

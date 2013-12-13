@@ -25,6 +25,8 @@ local lfsreadlink              = lfs.readlink
 local md5                      = require "md5"
 local md5sumhexa               = md5.sumhexa
 
+local ioopen                   = io.open
+
 local osgetenv                 = os.getenv
 local osname                   = os.name
 local osremove                 = os.remove
@@ -54,10 +56,10 @@ end
 local check_index = function (errcnt)
 
     out "================= font names =================="
-    local name_index = names.data()
+    local namedata = names.data()
 
-    if not name_index then
-        name_index = names.load ()
+    if not namedata then
+        namedata = names.load ()
     end
 
     local mappings = namedata.mappings
@@ -67,9 +69,9 @@ local check_index = function (errcnt)
         return errcnt + 1
     end
 
-    out ("Database version: %.3f.", names.version)
+    out ("Database version: %.3f.", namedata.meta.version)
     out ("Font formats indexed: %s.",
-         tableconcat (namedata.formats, ", "))
+         tableconcat (namedata.meta.formats, ", "))
     out ("%d font files indexed.", #mappings)
 
     local by_format = { }
@@ -241,7 +243,7 @@ local path = names.path
 local desired_permissions = {
     { "d", {"r","w"}, function () return caches.getwritablepath () end },
     { "d", {"r","w"}, path.globals.prefix },
-    { "f", {"r","w"}, path.index.lua },
+    { "f", {"r","w"}, path.index.lua .. ".gz" },
     { "f", {"r","w"}, path.index.luc },
     { "f", {"r","w"}, path.lookups.lua },
     { "f", {"r","w"}, path.lookups.luc },

@@ -81,9 +81,9 @@ local stringsub                = string.sub
 local stringupper              = string.upper
 local tableconcat              = table.concat
 local tablesort                = table.sort
-local texiowrite_nl            = texio.write_nl
 local utf8gsub                 = unicode.utf8.gsub
 local utf8lower                = unicode.utf8.lower
+local utf8length               = unicode.utf8.length
 local zlibcompress             = zlib.compress
 
 --- these come from Lualibs/Context
@@ -2115,10 +2115,15 @@ end
 --- into a given terminal width. The parameter “restrict” (int)
 --- indicates the number of characters already consumed on the
 --- line.
-local ellipsis = ".."
 local truncate_string = function (str, restrict)
-    local wd  = luaotfloadconfig.termwidth - restrict - 2
-    return ellipsis .. stringsub(str, #str - wd)
+    local tw  = luaotfloadconfig.termwidth
+    local wd  = tw - restrict
+    local len = utf8length (str)
+    if wd - len < 0 then
+        --- combined length exceeds terminal,
+        str = ".." .. stringsub(str, len - wd + 2)
+    end
+    return str
 end
 
 --[[doc--
@@ -2170,11 +2175,11 @@ local scan_dir = function (dirname, currentnames, targetnames,
             report ("log", 2, "db",
                     "Would have been loading %s.", fullname)
             report_status ("term", "db",
-                           "Would have been loading %s.", truncated)
+                           "Would have been loading %s", truncated)
         else
             local truncated = truncate_string (fullname, 32)
             report ("log", 2, "db", "Loading font %s.", fullname)
-            report_status ("term", "db", "Loading font %s.", truncated)
+            report_status ("term", "db", "Loading font %s", truncated)
             local new = read_font_names (fullname, currentnames,
                                          targetnames, texmf)
             if new == true then
@@ -3424,7 +3429,7 @@ local show_cache = function ( )
     separator ()
     print_cache ("writable path", writable_path,
                  luanames, lucnames, rest)
-    texiowrite_nl""
+    texio.write_nl""
     for i=1,#readable_paths do
         local readable_path = readable_paths[i]
         if readable_path ~= writable_path then

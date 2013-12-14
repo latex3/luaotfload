@@ -773,7 +773,7 @@ actions.blacklist = function (job)
     names.read_blacklist()
     local n = 0
     for n, entry in next, table.sortedkeys(names.blacklist) do
-        texiowrite_nl(stringformat("(%d %s)", n, entry))
+        iowrite (stringformat("(%d %s)\n", n, entry))
     end
     return true, false
 end
@@ -867,7 +867,7 @@ actions.query = function (job)
         end
         if job.show_info then
             show_font_info (foundname, query, job.full_info, job.warnings)
-            texiowrite_nl ""
+            iowrite "\n"
         end
     else
         logs.names_report(false, 0,

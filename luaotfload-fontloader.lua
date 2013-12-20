@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 11/25/13 20:09:50
+-- merge date  : 12/20/13 00:55:14
 
 do -- begin closure to overcome local limits and interference
 
@@ -1667,6 +1667,24 @@ end
 function table.sorted(t,...)
   sort(t,...)
   return t 
+end
+function table.values(t,s) 
+  if t then
+    local values,keys,v={},{},0
+    for key,value in next,t do
+      if not keys[value] then
+        v=v+1
+        values[v]=value
+        keys[k]=key
+      end
+    end
+    if s then
+      sort(values)
+    end
+    return values
+  else
+    return {}
+  end
 end
 
 end -- closure
@@ -6417,8 +6435,25 @@ registerdirective("fonts.otf.loader.pack",function(v) packdata=v end)
 registerdirective("fonts.otf.loader.syncspace",function(v) syncspace=v end)
 registerdirective("fonts.otf.loader.forcenotdef",function(v) forcenotdef=v end)
 registerdirective("fonts.otf.loader.overloadkerns",function(v) overloadkerns=v end)
+function otf.fileformat(filename)
+  local leader=lower(io.loadchunk(filename,4))
+  local suffix=lower(file.suffix(filename))
+  if leader=="otto" then
+    return "opentype","otf",suffix=="otf"
+  elseif leader=="ttcf" then
+    return "truetype","ttc",suffix=="ttc"
+  elseif suffix=="ttc" then
+    return "truetype","ttc",true
+  else
+    return "truetype","ttf",suffix=="ttf"
+  end
+end
 local function otf_format(filename)
-  return formats[lower(file.suffix(filename))]
+  local format,suffix,okay=otf.fileformat(filename)
+  if not okay then
+    report_otf("font %a is actually an %a file",filename,format)
+  end
+  return suffix
 end
 local function load_featurefile(raw,featurefile)
   if featurefile and featurefile~="" then
@@ -8813,6 +8848,7 @@ nodes.injections=nodes.injections or {}
 local injections=nodes.injections
 local nodecodes=nodes.nodecodes
 local glyph_code=nodecodes.glyph
+local disc_code=nodecodes.disc
 local kern_code=nodecodes.kern
 local nuts=nodes.nuts
 local nodepool=nuts.pool
@@ -11445,6 +11481,31 @@ local function featuresprocessor(head,font,attr)
               return head
             end
           end
+          local function kerndisc(disc) 
+            local prev=getprev(disc)
+            local next=getnext(disc)
+            if prev and next then
+              setfield(prev,"next",next)
+              local a=getattr(prev,0)
+              if a then
+                a=(a==attr) and (not attribute or getattr(prev,a_state)==attribute)
+              else
+                a=not attribute or getattr(prev,a_state)==attribute
+              end
+              if a then
+                local lookupmatch=lookupcache[getchar(prev)]
+                if lookupmatch then
+                  local h,d,ok=handler(head,prev,dataset[4],lookupname,lookupmatch,sequence,lookuphash,1)
+                  if ok then
+                    done=true
+                    success=true
+                  end
+                end
+              end
+              setfield(prev,"next",disc)
+            end
+            return next
+          end
           while start do
             local id=getid(start)
             if id==glyph_code then
@@ -11488,6 +11549,8 @@ local function featuresprocessor(head,font,attr)
                   local new=subrun(replace)
                   if new then setfield(start,"replace",new) end
                 end
+elseif typ=="gpos_single" or typ=="gpos_pair" then
+  kerndisc(start)
               end
               start=getnext(start)
             elseif id==whatsit_code then 
@@ -11579,6 +11642,39 @@ local function featuresprocessor(head,font,attr)
             return head
           end
         end
+        local function kerndisc(disc) 
+          local prev=getprev(disc)
+          local next=getnext(disc)
+          if prev and next then
+            setfield(prev,"next",next)
+            local a=getattr(prev,0)
+            if a then
+              a=(a==attr) and (not attribute or getattr(prev,a_state)==attribute)
+            else
+              a=not attribute or getattr(prev,a_state)==attribute
+            end
+            if a then
+              for i=1,ns do
+                local lookupname=subtables[i]
+                local lookupcache=lookuphash[lookupname]
+                if lookupcache then
+                  local lookupmatch=lookupcache[getchar(prev)]
+                  if lookupmatch then
+                    local h,d,ok=handler(head,prev,dataset[4],lookupname,lookupmatch,sequence,lookuphash,i)
+                    if ok then
+                      done=true
+                      break
+                    end
+                  end
+                else
+                  report_missing_cache(typ,lookupname)
+                end
+              end
+            end
+            setfield(prev,"next",disc)
+          end
+          return next
+        end
         while start do
           local id=getid(start)
           if id==glyph_code then
@@ -11633,6 +11729,8 @@ local function featuresprocessor(head,font,attr)
                 local new=subrun(replace)
                 if new then setfield(start,"replace",new) end
               end
+elseif typ=="gpos_single" or typ=="gpos_pair" then
+  kerndisc(start)
             end
             start=getnext(start)
           elseif id==whatsit_code then

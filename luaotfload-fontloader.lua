@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 12/14/13 13:43:12
+-- merge date  : 12/20/13 00:55:14
 
 do -- begin closure to overcome local limits and interference
 
@@ -6435,8 +6435,25 @@ registerdirective("fonts.otf.loader.pack",function(v) packdata=v end)
 registerdirective("fonts.otf.loader.syncspace",function(v) syncspace=v end)
 registerdirective("fonts.otf.loader.forcenotdef",function(v) forcenotdef=v end)
 registerdirective("fonts.otf.loader.overloadkerns",function(v) overloadkerns=v end)
+function otf.fileformat(filename)
+  local leader=lower(io.loadchunk(filename,4))
+  local suffix=lower(file.suffix(filename))
+  if leader=="otto" then
+    return "opentype","otf",suffix=="otf"
+  elseif leader=="ttcf" then
+    return "truetype","ttc",suffix=="ttc"
+  elseif suffix=="ttc" then
+    return "truetype","ttc",true
+  else
+    return "truetype","ttf",suffix=="ttf"
+  end
+end
 local function otf_format(filename)
-  return formats[lower(file.suffix(filename))]
+  local format,suffix,okay=otf.fileformat(filename)
+  if not okay then
+    report_otf("font %a is actually an %a file",filename,format)
+  end
+  return suffix
 end
 local function load_featurefile(raw,featurefile)
   if featurefile and featurefile~="" then
@@ -8831,7 +8848,7 @@ nodes.injections=nodes.injections or {}
 local injections=nodes.injections
 local nodecodes=nodes.nodecodes
 local glyph_code=nodecodes.glyph
-local kern_disc=nodecodes.disc
+local disc_code=nodecodes.disc
 local kern_code=nodecodes.kern
 local nuts=nodes.nuts
 local nodepool=nuts.pool

@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 12/20/13 00:55:14
+-- merge date  : 12/24/13 17:52:44
 
 do -- begin closure to overcome local limits and interference
 
@@ -922,10 +922,13 @@ local function sortedhash(t,cmp)
       s=sortedkeys(t) 
     end
     local n=0
+    local m=#s
     local function kv(s)
-      n=n+1
-      local k=s[n]
-      return k,t[k]
+      if n<m then
+        n=n+1
+        local k=s[n]
+        return k,t[k]
+      end
     end
     return kv,s
   else
@@ -3762,6 +3765,33 @@ function constructors.beforecopyingcharacters(target,original)
 end
 function constructors.aftercopyingcharacters(target,original)
 end
+constructors.sharefonts=false
+constructors.nofsharedfonts=0
+local sharednames={}
+function constructors.trytosharefont(target,tfmdata)
+  if constructors.sharefonts then
+    local characters=target.characters
+    local n=1
+    local t={ target.psname }
+    local u=sortedkeys(characters)
+    for i=1,#u do
+      n=n+1;t[n]=k
+      n=n+1;t[n]=characters[u[i]].index or k
+    end
+    local h=md5.HEX(concat(t," "))
+    local s=sharednames[h]
+    if s then
+      if trace_defining then
+        report_defining("font %a uses backend resources of font %a",target.fullname,s)
+      end
+      target.fullname=s
+      constructors.nofsharedfonts=constructors.nofsharedfonts+1
+      target.properties.sharedwith=s
+    else
+      sharednames[h]=target.fullname
+    end
+  end
+end
 function constructors.enhanceparameters(parameters)
   local xheight=parameters.x_height
   local quad=parameters.quad
@@ -4194,6 +4224,7 @@ function constructors.scale(tfmdata,specification)
     targetcharacters[unicode]=chr
   end
   constructors.aftercopyingcharacters(target,tfmdata)
+  constructors.trytosharefont(target,tfmdata)
   return target
 end
 function constructors.finalize(tfmdata)
@@ -6396,7 +6427,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.748 
+otf.version=2.749 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -6439,21 +6470,23 @@ function otf.fileformat(filename)
   local leader=lower(io.loadchunk(filename,4))
   local suffix=lower(file.suffix(filename))
   if leader=="otto" then
-    return "opentype","otf",suffix=="otf"
+    return formats.otf,suffix=="otf"
   elseif leader=="ttcf" then
-    return "truetype","ttc",suffix=="ttc"
+    return formats.ttc,suffix=="ttc"
   elseif suffix=="ttc" then
-    return "truetype","ttc",true
+    return formats.ttc,true
+  elseif suffix=="dfont" then
+    return formats.dfont,true
   else
-    return "truetype","ttf",suffix=="ttf"
+    return formats.ttf,suffix=="ttf"
   end
 end
 local function otf_format(filename)
-  local format,suffix,okay=otf.fileformat(filename)
+  local format,okay=otf.fileformat(filename)
   if not okay then
     report_otf("font %a is actually an %a file",filename,format)
   end
-  return suffix
+  return format
 end
 local function load_featurefile(raw,featurefile)
   if featurefile and featurefile~="" then

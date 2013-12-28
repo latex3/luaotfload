@@ -411,11 +411,42 @@ end
 --- feature mechanism
 
 otffeatures.register {
-  name        = "letterspace", --"kerncharacters",
-  description = "letterspace", --"kerncharacters",
+  name        = "kernfactor",
+  description = "kernfactor",
   initializers = {
     base = initializefontkerning,
     node = initializefontkerning,
+  }
+}
+
+--[[doc--
+
+  The “letterspace” feature is essentially identical with the above
+  “kernfactor” method, but scales the factor to percentages to match
+  Xetex’s behavior. (See the Xetex reference, page 5, section 1.2.2.)
+
+  Since Xetex doesn’t appear to have a (documented) “max” keyword, we
+  assume all input values are numeric.
+
+--doc]]--
+
+local initializecompatfontkerning = function (tfmdata, percentage)
+  local factor = tonumber (percentage)
+  if not factor then
+    logs.names_report ("both", 0, "letterspace",
+                       "Invalid argument to letterspace: %s (type %q), was expecting percentage as Lua number instead.",
+                       percentage, type (percentage))
+    return
+  end
+  return initializefontkerning (tfmdata, factor * 0.01)
+end
+
+otffeatures.register {
+  name        = "letterspace",
+  description = "letterspace",
+  initializers = {
+    base = initializecompatfontkerning,
+    node = initializecompatfontkerning,
   }
 }
 

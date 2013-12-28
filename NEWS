@@ -18,6 +18,8 @@ Change History
       ``kernfactor`` option that behaves as before.
     * Remove imported version of typo-krn.lua. Xetex-style per-font
       letterspacing is now the canonical method.
+    * Merge functionality from extralibs (fake Context layer) into
+      luaotfload-letterspace.lua as it is only needed there anyways.
 
 2013/07/10, luaotfload v2.3a
     * Detect LuaJIT interpreter (LuaJITTeX)

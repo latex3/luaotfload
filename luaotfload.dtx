@@ -755,9 +755,63 @@ and the derived files
 %
 %        \begin{quote}
 %           \begin{verbatim}
-%           \font\test={Latin Modern Roman}:color=FF0000BB
+%  \font\test={Latin Modern Roman}:color=FF0000BB
 %           \end{verbatim}
 %        \end{quote}
+%
+% \item [kernfactor \& letterspace] \hfill \\
+%        Define a font with letterspacing (tracking) enabled.
+%        In \identifier{luaotfload}, letterspacing is implemented by
+%        inserting additional kerning between glyphs.
+%
+%        This approach is derived from and still quite similar to the
+%        \emphasis{character kerning} (\texmacro{setcharacterkerning} /
+%        \texmacro{definecharacterkerning} \& al.) functionality of
+%        Context, see the file \fileent{typo-krn.lua} there.
+%        The main difference is that \identifier{luaotfload} does not
+%        use \LUATEX attributes to assign letterspacing to regions,
+%        but defines virtual letterspaced versions of a font.
+%
+%        The option \identifier{kernfactor} accepts a numeric value that
+%        determines the letterspacing factor to be applied to the font
+%        size.
+%        E.~g. a kern factor of $0.42$ applied to a $10$ pt font
+%        results in $4.2$ pt of additional kerning applied to each
+%        pair of glyphs.
+%        Ligatures are split into their component glyphs unless
+%        explicitly ignored (see below).
+%
+%        For compatibility with \XETEX an alternative
+%        \identifier{letterspace} option is supplied that interprets the
+%        supplied value as a \emphasis{percentage} of the font size but
+%        is otherwise identical to \identifier{kernfactor}.
+%        Consequently, both definitions in below snippet yield the same
+%        letterspacing width:
+%
+%        \begin{quote}
+%               \begin{verbatim}
+%  \font\iwonakernedA="file:Iwona-Regular.otf:kernfactor=0.125"
+%  \font\iwonakernedB="file:Iwona-Regular.otf:letterspace=12.5"
+%               \end{verbatim}
+%        \end{quote}
+%
+%        Specific pairs of letters and ligatures may be exempt from
+%        letterspacing by defining the \LUA functions
+%        \luafunction{keeptogether} and \luafunction{keepligature},
+%        respectively, inside the namespace \verb|luaotfload.letterspace|.
+%        Both functions are called whenever the letterspacing callback
+%        encounters an appropriate node or set of nodes.
+%        If they return a true-ish value, no extra kern is inserted at
+%        the current position.
+%        \luafunction{keeptogether} receives a pair of consecutive
+%        glyph nodes in order of their appearance in the node list.
+%        \luafunction{keepligature} receives a single node which can be
+%        analyzed into components.
+%        (For details refer to the \emphasis{glyph nodes} section in the
+%        \LUATEX reference manual.)
+%        The implementation of both functions is left entirely to the
+%        user.
+%
 %
 % \item [protrusion \& expansion] \hfill \\
 %        These keys control microtypographic features of the font,
@@ -771,14 +825,15 @@ and the derived files
 %           Alternatively and with loss of information, you can dump
 %           those tables into your terminal by issuing
 %           \begin{verbatim}
-%             \directlua{inspect(fonts.protrusions.setups.default)
-%                        inspect(fonts.expansions.setups.default)}
+%  \directlua{inspect(fonts.protrusions.setups.default)
+%             inspect(fonts.expansions.setups.default)}
 %           \end{verbatim}
 %           at some point after loading \fileent{luaotfload.sty}.
 %        }
 %        For both, only the set \identifier{default} is predefined.
 %
-%        For example, to enable default protrusion\footnote{%
+%        For example, to define a font with the default
+%        protrusion vector applied\footnote{%
 %          You also need to set
 %              \verb|pdfprotrudechars=2| and
 %              \verb|pdfadjustspacing=2|
@@ -791,7 +846,7 @@ and the derived files
 %
 %        \begin{quote}
 %           \begin{verbatim}
-%           \font\test=LatinModernRoman:protrusion=default
+%  \font\test=LatinModernRoman:protrusion=default
 %           \end{verbatim}
 %        \end{quote}
 % \end{description}

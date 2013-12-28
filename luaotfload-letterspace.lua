@@ -6,52 +6,182 @@ if not modules then modules = { } end modules ['letterspace'] = {
     license   = "see context related readme files"
 }
 
+local getmetatable       = getmetatable
+local require            = require
+local setmetatable       = setmetatable
+local tonumber           = tonumber
+
 local next               = next
 local nodes, node, fonts = nodes, node, fonts
 
 local find_node_tail     = node.tail or node.slide
 local free_node          = node.free
-local free_nodelist      = node.flush_list
 local copy_node          = node.copy
-local copy_nodelist      = node.copy_list
+local new_node           = node.new
 local insert_node_before = node.insert_before
-local insert_node_after  = node.insert_after
 
 local nodepool           = nodes.pool
-local tasks              = nodes.tasks
 
 local new_kern           = nodepool.kern
 local new_glue           = nodepool.glue
 
 local nodecodes          = nodes.nodecodes
-local kerncodes          = nodes.kerncodes
-local skipcodes          = nodes.skipcodes
 
 local glyph_code         = nodecodes.glyph
 local kern_code          = nodecodes.kern
 local disc_code          = nodecodes.disc
-local glue_code          = nodecodes.glue
-local hlist_code         = nodecodes.hlist
-local vlist_code         = nodecodes.vlist
 local math_code          = nodecodes.math
-
-local kerning_code       = kerncodes.kerning
-local userkern_code      = kerncodes.userkern
 
 local fonthashes         = fonts.hashes
 local chardata           = fonthashes.characters
 local quaddata           = fonthashes.quads
+local otffeatures        = fonts.constructors.newfeatures "otf"
 
-typesetters              = typesetters or { }
-local typesetters        = typesetters
+--[[doc--
 
-typesetters.kernfont     = typesetters.kernfont or { }
-local kernfont           = typesetters.kernfont
+  Since the letterspacing method was derived initially from Context’s
+  typo-krn.lua we keep the sub-namespace “letterspace” inside the
+  “luaotfload” table.
 
-kernfont.keepligature    = false
-kernfont.keeptogether    = false
+--doc]]--
 
-local kern_injector = function (fillup,kern)
+luaotfload.letterspace   = luaotfload.letterspace or { }
+local letterspace        = luaotfload.letterspace
+
+letterspace.keepligature = false
+letterspace.keeptogether = false
+
+---=================================================================---
+---                     preliminary definitions
+---=================================================================---
+-- We set up a layer emulating some Context internals that are needed
+-- for the letterspacing callback.
+-----------------------------------------------------------------------
+--- node-ini
+-----------------------------------------------------------------------
+
+local bothways  = function (t) return table.swapped (t, t) end
+local kerncodes = bothways { [0] = "fontkern"
+                           , [1] = "userkern"
+                           , [2] = "accentkern"
+                           }
+
+kerncodes.kerning    = kerncodes.fontkern --- idiosyncrasy
+local kerning_code   = kerncodes.kerning
+local userkern_code  = kerncodes.userkern
+
+
+-----------------------------------------------------------------------
+--- node-res
+-----------------------------------------------------------------------
+
+nodes.pool        = nodes.pool or { }
+local pool        = nodes.pool
+
+local kern        = new_node ("kern", kerncodes.userkern)
+local glue_spec   = new_node "glue_spec"
+
+pool.kern = function (k)
+  local n = copy_node (kern)
+  n.kern = k
+  return n
+end
+
+pool.glue = function (width, stretch, shrink,
+                      stretch_order, shrink_order)
+  local n = new_node"glue"
+  if not width then
+    -- no spec
+  elseif width == false or tonumber(width) then
+    local s = copy_node(glue_spec)
+    if width         then s.width         = width         end
+    if stretch       then s.stretch       = stretch       end
+    if shrink        then s.shrink        = shrink        end
+    if stretch_order then s.stretch_order = stretch_order end
+    if shrink_order  then s.shrink_order  = shrink_order  end
+    n.spec = s
+  else
+    -- shared
+    n.spec = copy_node(width)
+  end
+  return n
+end
+
+-----------------------------------------------------------------------
+--- font-hsh
+-----------------------------------------------------------------------
+--- some initialization resembling font-hsh
+local fonthashes         = fonts.hashes
+local identifiers        = fonthashes.identifiers --- was: fontdata
+local chardata           = fonthashes.characters
+local quaddata           = fonthashes.quads
+local parameters         = fonthashes.parameters
+
+--- ('a, 'a) hash -> (('a, 'a) hash -> 'a -> 'a) -> ('a, 'a) hash
+local setmetatableindex = function (t, f)
+  local mt = getmetatable(t)
+  if mt then
+    mt.__index = f
+  else
+    setmetatable(t, { __index = f })
+  end
+  return t
+end
+
+if not parameters then
+  parameters = { }
+  setmetatableindex(parameters, function(t, k)
+    if k == true then
+      return parameters[currentfont()]
+    else
+      local parameters = identifiers[k].parameters
+      t[k] = parameters
+      return parameters
+    end
+  end)
+  --fonthashes.parameters = parameters
+end
+
+if not chardata then
+  chardata = { }
+  setmetatableindex(chardata, function(t, k)
+    if k == true then
+      return chardata[currentfont()]
+    else
+      local tfmdata = identifiers[k]
+      if not tfmdata then --- unsafe
+        tfmdata = font.fonts[k]
+      end
+      if tfmdata then
+        local characters = tfmdata.characters
+        t[k] = characters
+        return characters
+      end
+    end
+  end)
+  fonthashes.characters = chardata
+end
+
+if not quaddata then
+  quaddata = { }
+  setmetatableindex(quaddata, function(t, k)
+    if k == true then
+      return quads[currentfont()]
+    else
+      local parameters = parameters[k]
+      local quad = parameters and parameters.quad or 0
+      t[k] = quad
+      return quad
+    end
+  end)
+  --fonthashes.quads = quaddata
+end
+
+---=================================================================---
+---                 character kerning functionality
+---=================================================================---
+
+local kern_injector = function (fillup, kern)
   if fillup then
     local g = new_glue(kern)
     local s = g.spec
@@ -66,13 +196,11 @@ end
 --[[doc--
 
     Caveat lector.
-    This is a preliminary, makeshift adaptation of the Context
-    character kerning mechanism that emulates XeTeX-style fontwise
-    letterspacing. Note that in its present state it is far inferior to
-    the original, which is attribute-based and ignores font-boundaries.
-    Nevertheless, due to popular demand the following callback has been
-    added. It should not be relied upon to be present in future
-    versions.
+    This is an adaptation of the Context character kerning mechanism
+    that emulates XeTeX-style fontwise letterspacing. Note that in its
+    present state it is far inferior to the original, which is
+    attribute-based and ignores font-boundaries. Nevertheless, due to
+    popular demand the following callback has been added.
 
 --doc]]--
 
@@ -82,8 +210,8 @@ local kerncharacters
 kerncharacters = function (head)
   local start, done   = head, false
   local lastfont      = nil
-  local keepligature  = kernfont.keepligature --- function
-  local keeptogether  = kernfont.keeptogether --- function
+  local keepligature  = letterspace.keepligature --- function
+  local keeptogether  = letterspace.keeptogether --- function
   local fillup        = false
 
   local identifiers   = fonthashes.identifiers
@@ -275,7 +403,139 @@ kerncharacters = function (head)
   return head, done
 end
 
-kernfont.handler = kerncharacters
+---=================================================================---
+---                         integration
+---=================================================================---
+
+--- · callback:     kerncharacters
+--- · enabler:      enablefontkerning
+--- · disabler:     disablefontkerning
+
+--- callback wrappers
+
+--- (node_t -> node_t) -> string -> string list -> bool
+local registered_as = { } --- procname -> callbacks
+local add_processor = function (processor, name, ...)
+  local callbacks = { ... }
+  for i=1, #callbacks do
+    luatexbase.add_to_callback(callbacks[i], processor, name)
+  end
+  registered_as[name] = callbacks --- for removal
+  return true
+end
+
+--- string -> bool
+local remove_processor = function (name)
+  local callbacks = registered_as[name]
+  if callbacks then
+    for i=1, #callbacks do
+      luatexbase.remove_from_callback(callbacks[i], name)
+    end
+    return true
+  end
+  return false --> unregistered
+end
+
+--- now for the simplistic variant
+--- unit -> bool
+local enablefontkerning = function ( )
+  return add_processor( kerncharacters
+                      , "luaotfload.letterspace"
+                      , "pre_linebreak_filter"
+                      , "hpack_filter")
+end
+
+--- unit -> bool
+local disablefontkerning = function ( )
+  return remove_processor "luaotfload.letterspace"
+end
+
+--[[doc--
+
+  Fontwise kerning is enabled via the “kernfactor” option at font
+  definition time. Unlike the Context implementation which relies on
+  Luatex attributes, it uses a font property for passing along the
+  letterspacing factor of a node.
+
+  The callback is activated the first time a letterspaced font is
+  requested and stays active until the end of the run. Since the font
+  is a property of individual glyphs, every glyph in the entire
+  document must be checked for the kern property. This is quite
+  inefficient compared to Context’s attribute based approach, but Xetex
+  compatibility reduces our options significantly.
+
+--doc]]--
+
+
+local fontkerning_enabled = false --- callback state
+
+--- fontobj -> float -> unit
+local initializefontkerning = function (tfmdata, factor)
+  if factor ~= "max" then
+    factor = tonumber (factor) or 0
+  end
+  if factor == "max" or factor ~= 0 then
+    local fontproperties = tfmdata.properties
+    if fontproperties then
+      --- hopefully this field stays unused otherwise
+      fontproperties.kerncharacters = factor
+    end
+    if not fontkerning_enabled then
+      fontkerning_enabled = enablefontkerning ()
+    end
+  end
+end
+
+--- like the font colorization, fontwise kerning is hooked into the
+--- feature mechanism
+
+otffeatures.register {
+  name        = "kernfactor",
+  description = "kernfactor",
+  initializers = {
+    base = initializefontkerning,
+    node = initializefontkerning,
+  }
+}
+
+--[[doc--
+
+  The “letterspace” feature is essentially identical with the above
+  “kernfactor” method, but scales the factor to percentages to match
+  Xetex’s behavior. (See the Xetex reference, page 5, section 1.2.2.)
+
+  Since Xetex doesn’t appear to have a (documented) “max” keyword, we
+  assume all input values are numeric.
+
+--doc]]--
+
+local initializecompatfontkerning = function (tfmdata, percentage)
+  local factor = tonumber (percentage)
+  if not factor then
+    logs.names_report ("both", 0, "letterspace",
+                       "Invalid argument to letterspace: %s (type %q), " ..
+                       "was expecting percentage as Lua number instead.",
+                       percentage, type (percentage))
+    return
+  end
+  return initializefontkerning (tfmdata, factor * 0.01)
+end
+
+otffeatures.register {
+  name        = "letterspace",
+  description = "letterspace",
+  initializers = {
+    base = initializecompatfontkerning,
+    node = initializecompatfontkerning,
+  }
+}
+
+--[[example--
+
+See https://bitbucket.org/phg/lua-la-tex-tests/src/tip/pln-letterspace-8-compare.tex
+for an example.
+
+--example]]--
 
 --- vim:sw=2:ts=2:expandtab:tw=71
 

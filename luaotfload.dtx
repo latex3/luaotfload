@@ -2146,9 +2146,9 @@ elseif font_definer == "patch"  then
                   1)
 end
 
-loadmodule"features.lua"    --- contains what was “font-ltx” and “font-otc”
-loadmodule"extralibs.lua"   --- load additional Context libraries
-loadmodule"auxiliary.lua"   --- additionaly high-level functionality (new)
+loadmodule"features.lua"        --- contains what was “font-ltx” and “font-otc”
+loadmodule"letterspace.lua"     --- extra character kerning
+loadmodule"auxiliary.lua"       --- additionaly high-level functionality (new)
 
 luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 

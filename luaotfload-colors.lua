@@ -130,15 +130,14 @@ local res --- <- state of what?
 
 --- float -> unit
 local function pageresources(alpha)
-    local res2
-    if not res then
-       res = "/TransGs1<</ca 1/CA 1>>"
+    local tpr = tex.pdfpageresources
+    local newtrans = stringformat("/TransGs%s<</ca %s/CA %s>>",
+                                  alpha, alpha, alpha)
+    res = res or ""
+    if stringfind(tpr,newtrans) or stringfind(res,newtrans) then
+    else
+        res = res..newtrans
     end
-    res2 = stringformat("/TransGs%s<</ca %s/CA %s>>",
-                        alpha, alpha, alpha)
-    res  = stringformat("%s%s",
-                        res,
-                        stringfind(res, res2) and "" or res2)
 end
 
 --- we store results of below color handler as tuples of
@@ -280,17 +279,21 @@ end
 
 --- node -> node
 local color_handler = function (head)
-    -- check if our page resources existed in the previous run
-    -- and remove it to avoid duplicating it later
-    if res then
-        local r = "/ExtGState<<" .. res .. ">>"
-        tex.pdfpageresources = stringgsub(tex.pdfpageresources, r, "")
-    end
     local new_head = node_colorize(head, nil, nil)
     -- now append our page resources
     if res and stringfind(res, "%S") then -- test for non-empty string
-        local r = "/ExtGState<<" .. res .. ">>"
-        tex.pdfpageresources = tex.pdfpageresources..r
+        local tpr = tex.pdfpageresources
+        local endtrans = "/TransGs1<</ca 1/CA 1>>"
+        if stringfind(tpr,endtrans) or stringfind(res,endtrans) then
+        else
+            res = res..endtrans
+        end
+        if not stringfind(tpr,"/ExtGState<<.*>>") then
+            tpr = tpr.."/ExtGState<<>>"
+        end
+        tpr = stringgsub(tpr,"/ExtGState<<","%1"..res)
+        tex.pdfpageresources = tpr
+        res = nil -- reset res
     end
     return new_head
 end

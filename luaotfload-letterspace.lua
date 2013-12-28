@@ -62,14 +62,11 @@ kernfont.keeptogether    = false
 --- node-ini
 -----------------------------------------------------------------------
 
-nodes              = nodes or { } --- should be present with luaotfload
-local bothways     = function (t) return table.swapped (t, t) end
-
-local kerncodes = bothways({
-  [0] = "fontkern",
-  [1] = "userkern",
-  [2] = "accentkern",
-})
+local bothways  = function (t) return table.swapped (t, t) end
+local kerncodes = bothways { [0] = "fontkern"
+                           , [1] = "userkern"
+                           , [2] = "accentkern"
+                           }
 
 kerncodes.kerning    = kerncodes.fontkern --- idiosyncrasy
 local kerning_code   = kerncodes.kerning
@@ -144,7 +141,7 @@ if not parameters then
       return parameters
     end
   end)
-  fonthashes.parameters = parameters
+  --fonthashes.parameters = parameters
 end
 
 if not chardata then
@@ -179,7 +176,7 @@ if not quaddata then
       return quad
     end
   end)
-  fonthashes.quads = quaddata
+  --fonthashes.quads = quaddata
 end
 
 ---=================================================================---
@@ -408,14 +405,12 @@ kerncharacters = function (head)
   return head, done
 end
 
-kernfont.handler = kerncharacters
-
 ---=================================================================---
 ---                         integration
 ---=================================================================---
 
 --- kernfont_callback : fontwise
---- · callback:     kernfont.handler
+--- · callback:     kerncharacters
 --- · enabler:      enablefontkerning
 --- · disabler:     disablefontkerning
 
@@ -447,7 +442,7 @@ end
 --- now for the simplistic variant
 --- unit -> bool
 local enablefontkerning = function ( )
-  return add_processor( kernfont.handler
+  return add_processor( kerncharacters
                       , "typesetters.kernfont"
                       , "pre_linebreak_filter"
                       , "hpack_filter")
@@ -458,15 +453,29 @@ local disablefontkerning = function ( )
   return remove_processor "typesetters.kernfont"
 end
 
---- fontwise kerning uses a font property for passing along the
---- letterspacing factor
+--[[doc--
+
+  Fontwise kerning is enabled via the “kernfactor” option at font
+  definition time. Unlike the Context implementation which relies on
+  Luatex attributes, it uses a font property for passing along the
+  letterspacing factor of a node.
+
+  The callback is activated the first time a letterspaced font is
+  requested and stays active until the end of the run. Since the font
+  is a property of individual glyphs, every glyph in the entire
+  document must be checked for the kern property. This is quite
+  inefficient compared to Context’s attribute based approach, but Xetex
+  compatibility reduces our options significantly.
+
+--doc]]--
+
 
 local fontkerning_enabled = false --- callback state
 
 --- fontobj -> float -> unit
 local initializefontkerning = function (tfmdata, factor)
   if factor ~= "max" then
-    factor = tonumber(factor) or 0
+    factor = tonumber (factor) or 0
   end
   if factor == "max" or factor ~= 0 then
     local fontproperties = tfmdata.properties
@@ -475,7 +484,7 @@ local initializefontkerning = function (tfmdata, factor)
       fontproperties.kerncharacters = factor
     end
     if not fontkerning_enabled then
-      fontkerning_enabled = enablefontkerning()
+      fontkerning_enabled = enablefontkerning ()
     end
   end
 end

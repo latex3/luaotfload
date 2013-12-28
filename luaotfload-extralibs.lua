@@ -434,7 +434,8 @@ local initializecompatfontkerning = function (tfmdata, percentage)
   local factor = tonumber (percentage)
   if not factor then
     logs.names_report ("both", 0, "letterspace",
-                       "Invalid argument to letterspace: %s (type %q), was expecting percentage as Lua number instead.",
+                       "Invalid argument to letterspace: %s (type %q), " ..
+                       "was expecting percentage as Lua number instead.",
                        percentage, type (percentage))
     return
   end

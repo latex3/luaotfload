@@ -11,28 +11,20 @@ local nodes, node, fonts = nodes, node, fonts
 
 local find_node_tail     = node.tail or node.slide
 local free_node          = node.free
-local free_nodelist      = node.flush_list
 local copy_node          = node.copy
-local copy_nodelist      = node.copy_list
 local insert_node_before = node.insert_before
-local insert_node_after  = node.insert_after
 
 local nodepool           = nodes.pool
-local tasks              = nodes.tasks
 
 local new_kern           = nodepool.kern
 local new_glue           = nodepool.glue
 
 local nodecodes          = nodes.nodecodes
 local kerncodes          = nodes.kerncodes
-local skipcodes          = nodes.skipcodes
 
 local glyph_code         = nodecodes.glyph
 local kern_code          = nodecodes.kern
 local disc_code          = nodecodes.disc
-local glue_code          = nodecodes.glue
-local hlist_code         = nodecodes.hlist
-local vlist_code         = nodecodes.vlist
 local math_code          = nodecodes.math
 
 local kerning_code       = kerncodes.kerning
@@ -42,8 +34,8 @@ local fonthashes         = fonts.hashes
 local chardata           = fonthashes.characters
 local quaddata           = fonthashes.quads
 
-typesetters              = typesetters or { }
-local typesetters        = typesetters
+luaotfload.typesetters   = luaotfload.typesetters or { }
+local typesetters        = luaotfload.typesetters
 
 typesetters.kernfont     = typesetters.kernfont or { }
 local kernfont           = typesetters.kernfont
@@ -66,13 +58,11 @@ end
 --[[doc--
 
     Caveat lector.
-    This is a preliminary, makeshift adaptation of the Context
-    character kerning mechanism that emulates XeTeX-style fontwise
-    letterspacing. Note that in its present state it is far inferior to
-    the original, which is attribute-based and ignores font-boundaries.
-    Nevertheless, due to popular demand the following callback has been
-    added. It should not be relied upon to be present in future
-    versions.
+    This is an adaptation of the Context character kerning mechanism
+    that emulates XeTeX-style fontwise letterspacing. Note that in its
+    present state it is far inferior to the original, which is
+    attribute-based and ignores font-boundaries. Nevertheless, due to
+    popular demand the following callback has been added.
 
 --doc]]--
 

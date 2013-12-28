@@ -14,6 +14,8 @@ Change History
       this
     * rename ``luaotfload-merged.lua`` (the fontloader package from Context)
       to ``luaotfload-fontloader.lua``
+    * Treat arguments of the ``letterspace`` option as percentages; add
+      ``kernfactor`` option that behaves as before.
 
 2013/07/10, luaotfload v2.3a
     * Detect LuaJIT interpreter (LuaJITTeX)

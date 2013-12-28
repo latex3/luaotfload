@@ -61,7 +61,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
                                        ltail=cluster_merged]
 
     luaotfload_libs -> font_names [label="luaotfload-database.lua"]
-    luaotfload_libs -> typo_krn   [label="luaotfload-extralibs.lua"]
 
     mkstatus    -> status     [label="generates from distribution files",
                                style=dashed]
@@ -147,14 +146,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
                        style  = "filled,rounded",
                        penwidth=2]
 
-    typo_krn [label  = "luaotfload-typo-krn.lua",
-              shape  = rect,
-              width  = "3.2cm",
-              height = "1.2cm",
-              color  = "#01012222",
-              style  = "filled,rounded",
-              penwidth=2]
-
 /* ····································································
  * luaotfload files
  * ································································· */
@@ -208,10 +199,10 @@ strict digraph luaotfload_files { //looks weird with circo ...
         label      = <
             <table cellborder="0" bgcolor="#FFFFFFAA">
                 <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Luaotfload Libraries</font> </td> </th>
-                <tr> <td>luaotfload-auxiliary.lua</td>  <td>luaotfload-features.lua</td>    </tr>
-                <tr> <td>luaotfload-override.lua</td>   <td>luaotfload-loaders.lua</td>     </tr>
-                <tr> <td>luaotfload-database.lua</td>   <td>luaotfload-color.lua</td>       </tr>
-                <tr> <td>luaotfload-extralibs.lua</td>  <td>luaotfload-letterspace.lua</td> </tr>
+                <tr> <td>luaotfload-auxiliary.lua</td>    <td>luaotfload-features.lua</td>    </tr>
+                <tr> <td>luaotfload-override.lua</td>     <td>luaotfload-loaders.lua</td>     </tr>
+                <tr> <td>luaotfload-database.lua</td>     <td>luaotfload-color.lua</td>       </tr>
+                <tr> <td>luaotfload-letterspace.lua</td>                                      </tr>
             </table>
         >,
     ]

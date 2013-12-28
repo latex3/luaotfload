@@ -82,7 +82,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
  * main files
  * ································································· */
 
-    fontdbutil        [label  = "luaotfload-tool.lua\nmkluatexfontdb.lua",
+    fontdbutil        [label  = "luaotfload-tool.lua",
                        shape  = rect,
                        width  = "3.2cm",
                        height = "1.2cm",
@@ -149,7 +149,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
 /* ····································································
  * luaotfload files
  * ································································· */
-
 
     characters [style      = "filled,dashed",
                 shape      = rect,

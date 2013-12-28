@@ -40,18 +40,16 @@ local otffeatures        = fonts.constructors.newfeatures "otf"
 --[[doc--
 
   Since the letterspacing method was derived initially from Context’s
-  typo-krn.lua we keep the sub-namespace “typesetters” inside the
+  typo-krn.lua we keep the sub-namespace “letterspace” inside the
   “luaotfload” table.
 
 --doc]]--
 
-luaotfload.typesetters   = luaotfload.typesetters or { }
-local typesetters        = luaotfload.typesetters
-typesetters.kernfont     = typesetters.kernfont or { }
-local kernfont           = typesetters.kernfont
+luaotfload.letterspace   = luaotfload.letterspace or { }
+local letterspace        = luaotfload.letterspace
 
-kernfont.keepligature    = false
-kernfont.keeptogether    = false
+letterspace.keepligature = false
+letterspace.keeptogether = false
 
 ---=================================================================---
 ---                     preliminary definitions
@@ -212,8 +210,8 @@ local kerncharacters
 kerncharacters = function (head)
   local start, done   = head, false
   local lastfont      = nil
-  local keepligature  = kernfont.keepligature --- function
-  local keeptogether  = kernfont.keeptogether --- function
+  local keepligature  = letterspace.keepligature --- function
+  local keeptogether  = letterspace.keeptogether --- function
   local fillup        = false
 
   local identifiers   = fonthashes.identifiers
@@ -409,7 +407,6 @@ end
 ---                         integration
 ---=================================================================---
 
---- kernfont_callback : fontwise
 --- · callback:     kerncharacters
 --- · enabler:      enablefontkerning
 --- · disabler:     disablefontkerning
@@ -443,14 +440,14 @@ end
 --- unit -> bool
 local enablefontkerning = function ( )
   return add_processor( kerncharacters
-                      , "typesetters.kernfont"
+                      , "luaotfload.letterspace"
                       , "pre_linebreak_filter"
                       , "hpack_filter")
 end
 
 --- unit -> bool
 local disablefontkerning = function ( )
-  return remove_processor "typesetters.kernfont"
+  return remove_processor "luaotfload.letterspace"
 end
 
 --[[doc--

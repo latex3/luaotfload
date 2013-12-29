@@ -126,19 +126,12 @@ registerotffeature {
 --- something is carried around in ``res``
 --- for later use by color_handler() --- but what?
 
-local res --- <- state of what?
+local res = nil
 
 --- float -> unit
 local function pageresources(alpha)
-    local res2
-    if not res then
-       res = "/TransGs1<</ca 1/CA 1>>"
-    end
-    res2 = stringformat("/TransGs%s<</ca %s/CA %s>>",
-                        alpha, alpha, alpha)
-    res  = stringformat("%s%s",
-                        res,
-                        stringfind(res, res2) and "" or res2)
+    res = res or {}
+    res[alpha] = true
 end
 
 --- we store results of below color handler as tuples of
@@ -280,17 +273,25 @@ end
 
 --- node -> node
 local color_handler = function (head)
-    -- check if our page resources existed in the previous run
-    -- and remove it to avoid duplicating it later
-    if res then
-        local r = "/ExtGState<<" .. res .. ">>"
-        tex.pdfpageresources = stringgsub(tex.pdfpageresources, r, "")
-    end
     local new_head = node_colorize(head, nil, nil)
     -- now append our page resources
-    if res and stringfind(res, "%S") then -- test for non-empty string
-        local r = "/ExtGState<<" .. res .. ">>"
-        tex.pdfpageresources = tex.pdfpageresources..r
+    if res then
+        res["1"] = true
+        local tpr, t = tex.pdfpageresources, ""
+        for k in pairs(res) do
+            local str = stringformat("/TransGs%s<</ca %s/CA %s>>", k, k, k)
+            if not stringfind(tpr,str) then
+                t = t .. str
+            end
+        end
+        if t ~= "" then
+            if not stringfind(tpr,"/ExtGState<<.*>>") then
+                tpr = tpr.."/ExtGState<<>>"
+            end
+            tpr = stringgsub(tpr,"/ExtGState<<","%1"..t)
+            tex.pdfpageresources = tpr
+        end
+        res = nil -- reset res
     end
     return new_head
 end

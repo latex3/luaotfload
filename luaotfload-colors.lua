@@ -126,12 +126,12 @@ registerotffeature {
 --- something is carried around in ``res``
 --- for later use by color_handler() --- but what?
 
-local res = {}
+local res = nil
 
 --- float -> unit
 local function pageresources(alpha)
-    res[#res+1] = stringformat("/TransGs%s<</ca %s/CA %s>>",
-                               alpha, alpha, alpha)
+    res = res or {}
+    res[alpha] = true
 end
 
 --- we store results of below color handler as tuples of
@@ -275,13 +275,13 @@ end
 local color_handler = function (head)
     local new_head = node_colorize(head, nil, nil)
     -- now append our page resources
-    if res and #res > 0 then
+    if res then
+        res["1"] = true
         local tpr, t = tex.pdfpageresources, ""
-        res[#res+1] = "/TransGs1<</ca 1/CA 1>>"
-        for i = 1,#res do
-            if stringfind(tpr,res[i]) or stringfind(t,res[i]) then
-            else
-                t = t .. res[i]
+        for k in pairs(res) do
+            local str = stringformat("/TransGs%s<</ca %s/CA %s>>", k, k, k)
+            if not stringfind(tpr,str) then
+                t = t .. str
             end
         end
         if t ~= "" then
@@ -291,7 +291,7 @@ local color_handler = function (head)
             tpr = stringgsub(tpr,"/ExtGState<<","%1"..t)
             tex.pdfpageresources = tpr
         end
-        res = {} -- reset res
+        res = nil -- reset res
     end
     return new_head
 end

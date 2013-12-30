@@ -191,7 +191,7 @@ local help_messages = {
 
 Usage: %s [OPTIONS...]
 
-Operations on the LuaTeX font database.
+Operations on the Luaotfload font names database.
 
 This tool is part of the luaotfload package. Valid options are:
 
@@ -260,7 +260,7 @@ The font cache will be written to
 
 Usage: %s [OPTION]...
 
-Rebuild or update the LuaTeX font database.
+Rebuild or update the Luaotfload font names database.
 
 Valid options:
   -f --force                   force re-indexing all fonts

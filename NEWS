@@ -1,7 +1,7 @@
 Change History
 --------------
 
-2013/XX/XX, luaotfload v2.4
+2013/12/31, luaotfload v2.4
     * Additional self-tests, now in separate file (luaotfload-diagnostics.lua)
     * Better path and directory handling, especially on Windows
     * database now indexes Type1 fonts (PFA, PFB) and makes them accessible

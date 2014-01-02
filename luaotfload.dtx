@@ -2078,13 +2078,14 @@ request_resolvers.path = function (specification)
           name)
         file_resolver (specification)
     else
-      local suffix = filesuffix (name)
-      if formats[suffix] then
-        specification.forced  = suffix
-        specification.name    = file.removesuffix(name)
-      else
-        specification.name = name
-      end
+        local suffix = filesuffix (name)
+        if formats[suffix] then
+            specification.forced      = suffix
+            specification.name        = file.removesuffix(name)
+            specification.forcedname  = name
+        else
+            specification.name = name
+        end
     end
 end
 

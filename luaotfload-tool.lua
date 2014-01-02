@@ -33,8 +33,7 @@ kpse.set_program_name "luatex"
 --[[doc--
 
     We test for Lua 5.1 by means of capability detection to see if
-    we’re running an outdated Luatex.  If so, we hand over control to
-    the legacy db runner.
+    we’re running an outdated Luatex.  If so, we bail.
 
     \url{http://lua-users.org/wiki/LuaVersionCompatibility}
 
@@ -63,8 +62,10 @@ if _G.getfenv ~= nil then -- 5.1 or LJ
         runtime = { "jit", jit.version }
     else
         runtime = { "stock", _VERSION }
-        local oldscript = kpsefind_file "luaotfload-legacy-tool.lua"
-        return require (oldscript)
+        print "FATAL ERROR"
+        print "Luaotfload requires a Luatex version >=0.76."
+        print "Please update your TeX distribution!"
+        os.exit (-1)
     end
 else -- 5.2
     runtime = { "stock", _VERSION }

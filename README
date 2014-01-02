@@ -57,6 +57,9 @@ Here are the recommended installation methods (preferred first).
 Prerequisites
 -------------------------------------------------------------------------------
 
+You need GNU make to use the Makefile. The executable may be called "gmake" on
+your system.
+
 Typesetting the documentation requires LuaTeX and GraphViz. The Docutils are
 needed to generate the manpage.
 

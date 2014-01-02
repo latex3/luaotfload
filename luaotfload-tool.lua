@@ -13,6 +13,8 @@ local version = "2.4" --- <int: major>.<int: minor><alpha: fixes>
 
 --[[doc--
 
+luaotfload-tool(1)
+
 This file was originally written (as \fileent{mkluatexfontdb.lua}) by
 Elie Roux and Khaled Hosny and, as a derived work of ConTeXt, is
 provided under the terms of the GPL v2.0 license as printed in full
@@ -1055,7 +1057,7 @@ end
 
 --[[--
 Command-line processing.
-mkluatexfontdb.lua relies on the script alt_getopt to process argv and
+luaotfload-tool relies on the script alt_getopt to process argv and
 analyzes its output.
 
 TODO with extended lualibs we have the functionality from the

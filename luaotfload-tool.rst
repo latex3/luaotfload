@@ -49,10 +49,6 @@ the *Luaotfload* package. There are two general modes: **update** and
 + **update**:  update the database or rebuild it entirely;
 + **query**:   resolve a font name or display close matches.
 
-Note that if the script is named ``mkluatexfontdb`` it will behave like
-earlier versions (<=1.3) and always update the database first. Also,
-the verbosity level will be set to 2.
-
 OPTIONS
 =======================================================================
 

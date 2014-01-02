@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['letterspace'] = {
-    version   = "2.4",
+    version   = "2.5",
     comment   = "companion to luaotfload.lua",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",

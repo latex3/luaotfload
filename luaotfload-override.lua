@@ -1,9 +1,9 @@
 if not modules then modules = { } end modules ['luat-ovr'] = {
-    version   = "2.4",
-    comment   = "companion to luatex-*.tex",
+    version   = "2.5",
+    comment   = "companion to Luaotfload",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
-    license   = "GNU GPL v2"
+    license   = "GNU GPL v2.0"
 }
 
 --[[doc--

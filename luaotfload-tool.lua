@@ -2,14 +2,14 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-tool.lua
 --  DESCRIPTION:  database functionality
--- REQUIREMENTS:  luaotfload 2.2
+-- REQUIREMENTS:  luaotfload 2.5
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  2.4
---      LICENSE:  GPL v2
---     MODIFIED:  2013-07-28 13:12:04+0200
+--      VERSION:  2.5
+--      LICENSE:  GPL v2.0
+--     MODIFIED:  2014-01-02 21:21:10+0100
 -----------------------------------------------------------------------
 
-local version = "2.4" --- <int: major>.<int: minor><alpha: fixes>
+local version = "2.5" --- <int: major>.<int: minor><alpha: fixes>
 
 --[[doc--
 

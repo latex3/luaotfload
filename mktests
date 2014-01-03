@@ -86,6 +86,11 @@ local infer_regular_style = {
   { "Garamond Premier Pro", "GaramondPremrPro.otf"      },
   { "CMU Serif",            "cmunrm.otf"                },
   { "CMU Sans Serif",       "cmunss.otf"                },
+  { "Minion Pro",           "MinionPro_Regular.otf"     },
+  --- Below test will succeed only if we match for the
+  --- splainname (= sanitized tfmdata.fullname) field
+  --- explicitly.
+  { "Minion Pro Italic",    "MinionPro_It.otf"          },
 }
 
 local choose_optical_size = {
@@ -120,6 +125,25 @@ local choose_style = {
   { { name = "CMU Sans Serif", style = "italic"     }, "cmunsi.otf"   }, -- no “italic” but “oblique”
   { { name = "CMU Sans Serif", style = "bold"       }, "cmunsx.otf"   },
   { { name = "CMU Sans Serif", style = "bolditalic" }, "cmunso.otf"   },
+  --[[--
+    Minion Pro Italic is exceptionally weird regarding identifiers in
+    that the postscript fontname and both info.fontname and
+    info.fullname are given as “minionproit”. Now its english fullname
+    (field 18) is “minionproital”. Only the value “fullname” in the root of
+    the tfmdata structure (not the one returned by fontloader.info()!)
+    accurately yields “Minion Pro Italic”.
+
+    To complete the picture, the file naming isn’t very consistent either:
+    we find the suffixes “Regular” and “Bold”, but “It” and “BoldIt”. What
+    the hell were the designers smoking?
+
+    Also, the full Minion Pro set comes with different optical sizes which
+    for monetary reasons cannot considered here.
+  --]]--
+  { { name = "Minion Pro", style = "regular"    }, "MinionPro_Regular.otf"  },
+  { { name = "Minion Pro", style = "italic"     }, "MinionPro_It.otf"       },
+  { { name = "Minion Pro", style = "bold"       }, "MinionPro_Bold.otf"     },
+  { { name = "Minion Pro", style = "bolditalic" }, "MinionPro_BoldIt.otf"   },
 }
 
 --- this needs a database built with --formats=+pfa,pfb,afm

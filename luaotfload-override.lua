@@ -166,6 +166,8 @@ if texjob == true then
     statusln = function (str)
         if first_status == false then
             iowrite (kill_line)
+        else
+            iowrite "\n"
         end
         iowrite (str)
     end
@@ -326,7 +328,9 @@ end
 local status_stop = function (...)
     if first_status == false then
         status_writer(...)
-        writeln ""
+        if texjob == false then
+            writeln ""
+        end
     end
 end
 

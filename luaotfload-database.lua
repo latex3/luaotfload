@@ -574,7 +574,16 @@ load_names = function (dry_run)
         report ("info", 3, "db", "Loading took %0.f ms.",
                 1000 * (osgettimeofday () - starttime))
 
-        local db_version, nms_version = data.meta.version, names.version
+        local db_version, nms_version
+        if data.meta then
+            db_version = data.meta.version
+        else
+            --- Compatibility branch; the version info used to be
+            --- stored in the table root which is why updating from
+            --- an earlier index version broke.
+            db_version = data.version or -42 --- invalid
+        end
+        nms_version = names.version
         if db_version ~= nms_version then
             report ("both", 0, "db",
                     [[Version mismatch; expected %4.3f, got %4.3f.]],

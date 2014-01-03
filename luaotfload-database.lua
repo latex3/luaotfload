@@ -1070,9 +1070,10 @@ local resolve_fontname = function (specification, name, style)
         local face = mappings [i]
         local prefmodifiers = face.prefmodifiers
         local subfamily     = face.subfamily
-        if     face.fontname == name
-            or face.fullname == name
-            or face.psname   == name
+        if     face.fontname   == name
+            or face.splainname == name
+            or face.fullname   == name
+            or face.psname     == name
         then
             return face.basename, face.subfont
         elseif face.familyname == name then
@@ -1608,6 +1609,7 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         fontname         = sanitized.fontname,
         familyname       = sanitized.familyname,
         plainname        = fullname,
+        splainname       = sanitized.fullname,
         psname           = sanitized.fontname,
         version          = metadata.version,
         size             = false,
@@ -2775,6 +2777,7 @@ local pull_values = function (entry)
     entry.psname            = english.psname
     entry.fontname          = info.fontname
     entry.fullname          = english.fullname or info.fullname
+    entry.splainname        = metadata.fullname
     entry.prefmodifiers     = english.prefmodifiers
     local metafamily        = metadata.familyname
     local familyname        = english.preffamily or english.family

@@ -83,7 +83,7 @@ local tableconcat              = table.concat
 local tablesort                = table.sort
 local utf8gsub                 = unicode.utf8.gsub
 local utf8lower                = unicode.utf8.lower
-local utf8length               = unicode.utf8.length
+local utf8len                  = unicode.utf8.len
 local zlibcompress             = zlib.compress
 
 --- these come from Lualibs/Context
@@ -574,7 +574,16 @@ load_names = function (dry_run)
         report ("info", 3, "db", "Loading took %0.f ms.",
                 1000 * (osgettimeofday () - starttime))
 
-        local db_version, nms_version = data.meta.version, names.version
+        local db_version, nms_version
+        if data.meta then
+            db_version = data.meta.version
+        else
+            --- Compatibility branch; the version info used to be
+            --- stored in the table root which is why updating from
+            --- an earlier index version broke.
+            db_version = data.version or -42 --- invalid
+        end
+        nms_version = names.version
         if db_version ~= nms_version then
             report ("both", 0, "db",
                     [[Version mismatch; expected %4.3f, got %4.3f.]],
@@ -2118,7 +2127,7 @@ end
 local truncate_string = function (str, restrict)
     local tw  = luaotfloadconfig.termwidth
     local wd  = tw - restrict
-    local len = utf8length (str)
+    local len = utf8len (str)
     if wd - len < 0 then
         --- combined length exceeds terminal,
         str = ".." .. stringsub(str, len - wd + 2)

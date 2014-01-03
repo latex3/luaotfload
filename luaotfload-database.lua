@@ -83,7 +83,7 @@ local tableconcat              = table.concat
 local tablesort                = table.sort
 local utf8gsub                 = unicode.utf8.gsub
 local utf8lower                = unicode.utf8.lower
-local utf8length               = unicode.utf8.length
+local utf8len                  = unicode.utf8.len
 local zlibcompress             = zlib.compress
 
 --- these come from Lualibs/Context
@@ -2127,7 +2127,7 @@ end
 local truncate_string = function (str, restrict)
     local tw  = luaotfloadconfig.termwidth
     local wd  = tw - restrict
-    local len = utf8length (str)
+    local len = utf8len (str)
     if wd - len < 0 then
         --- combined length exceeds terminal,
         str = ".." .. stringsub(str, len - wd + 2)

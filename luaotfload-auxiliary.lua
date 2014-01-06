@@ -15,9 +15,6 @@
 luaotfload                  = luaotfload or {}
 luaotfload.aux              = luaotfload.aux or { }
 
-config                      = config or { }
-config.luaotfload           = config.luaotfload or { }
-
 local aux                   = luaotfload.aux
 local log                   = luaotfload.log
 local warning               = luaotfload.log

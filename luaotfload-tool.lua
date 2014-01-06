@@ -2,16 +2,18 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-tool.lua
 --  DESCRIPTION:  database functionality
--- REQUIREMENTS:  luaotfload 2.2
+-- REQUIREMENTS:  luaotfload 2.5
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  2.4
---      LICENSE:  GPL v2
---     MODIFIED:  2013-07-28 13:12:04+0200
+--      VERSION:  2.5
+--      LICENSE:  GPL v2.0
+--     MODIFIED:  2014-01-02 21:21:10+0100
 -----------------------------------------------------------------------
 
-local version = "2.4" --- <int: major>.<int: minor><alpha: fixes>
+local version = "2.5" --- <int: major>.<int: minor><alpha: fixes>
 
 --[[doc--
+
+luaotfload-tool(1)
 
 This file was originally written (as \fileent{mkluatexfontdb.lua}) by
 Elie Roux and Khaled Hosny and, as a derived work of ConTeXt, is
@@ -33,8 +35,7 @@ kpse.set_program_name "luatex"
 --[[doc--
 
     We test for Lua 5.1 by means of capability detection to see if
-    we’re running an outdated Luatex.  If so, we hand over control to
-    the legacy db runner.
+    we’re running an outdated Luatex.  If so, we bail.
 
     \url{http://lua-users.org/wiki/LuaVersionCompatibility}
 
@@ -63,8 +64,10 @@ if _G.getfenv ~= nil then -- 5.1 or LJ
         runtime = { "jit", jit.version }
     else
         runtime = { "stock", _VERSION }
-        local oldscript = kpsefind_file "luaotfload-legacy-tool.lua"
-        return require (oldscript)
+        print "FATAL ERROR"
+        print "Luaotfload requires a Luatex version >=0.76."
+        print "Please update your TeX distribution!"
+        os.exit (-1)
     end
 else -- 5.2
     runtime = { "stock", _VERSION }
@@ -126,12 +129,7 @@ do -- we don’t have file.basename and the likes yet, so inline parser ftw
     local extension    = dot * (1 - slash - dot)^1
     local p_basename   = path^-1 * C(thename) * extension^-1 * P(-1)
 
-    local self = lpegmatch(p_basename, stringlower(arg[0]))
-    if self == "luaotfload-tool" then
-        luaotfloadconfig.self = "luaotfload-tool"
-    else
-        luaotfloadconfig.self = "mkluatexfontdb"
-    end
+    luaotfloadconfig.self = "luaotfload-tool"
 end
 
 config.lualibs                  = config.lualibs or { }
@@ -210,9 +208,6 @@ This tool is part of the luaotfload package. Valid options are:
                                "environment", "index", "permissions", or
                                "repository"
 
-  --alias=<name>               force behavior of "luaotfload-tool" or legacy
-                               "mkluatexfontdb"
-
 -------------------------------------------------------------------------------
                                    DATABASE
 
@@ -257,26 +252,9 @@ The font cache will be written to
 
 ]],
     mkluatexfontdb = [[
-
-Usage: %s [OPTION]...
-
-Rebuild or update the Luaotfload font names database.
-
-Valid options:
-  -f --force                   force re-indexing all fonts
-  -q --quiet                   don't output anything
-  -v --verbose=LEVEL           be more verbose (print the searched directories)
-  -vv                          print the loaded fonts
-  -vvv                         print all steps of directory searching
-  -V --version                 print version and exit
-  -h --help                    print this message
-  --alias=<name>               force behavior of "luaotfload-tool" or legacy
-                               "mkluatexfontdb"
-
-The font database will be saved to
-   %s
-   %s
-
+FATAL ERROR
+As of Luaotfload v2.5, legacy behavior is not supported anymore. Please
+update your scripts and/or habits! Kthxbye.
 ]],
     short = [[
 Usage: luaotfload-tool [--help] [--version] [--verbose=<lvl>]
@@ -1079,7 +1057,7 @@ end
 
 --[[--
 Command-line processing.
-mkluatexfontdb.lua relies on the script alt_getopt to process argv and
+luaotfload-tool relies on the script alt_getopt to process argv and
 analyzes its output.
 
 TODO with extended lualibs we have the functionality from the
@@ -1098,7 +1076,6 @@ local process_cmdline = function ( ) -- unit -> jobspec
     }
 
     local long_options = {
-        alias              = 1,
         cache              = 1,
         ["no-compress"]    = "c",
         diagnose           = 1,
@@ -1185,8 +1162,6 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "I" then
             result.show_info = true
             result.full_info = true
-        elseif v == "alias" then
-            luaotfloadconfig.self = optarg[n]
         elseif v == "l" then
             action_pending["flush"] = true
         elseif v == "list" then
@@ -1232,12 +1207,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         end
     end
 
-    if luaotfloadconfig.self == "mkluatexfontdb" then --- TODO drop legacy ballast after 2.4
-        result.help_version = "mkluatexfontdb"
-        action_pending["generate"] = true
-        result.log_level = math.max(1, result.log_level)
-        logs.set_logout("stdout", finalizers)
-    elseif nopts == 0 then
+    if nopts == 0 then
         action_pending["help"] = true
         result.help_version = "short"
     end

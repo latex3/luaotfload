@@ -1,6 +1,12 @@
 Change History
 --------------
 
+2014/**/**, luaotfload v2.5
+    * Remove legacy code.
+    * Remove compatibility with the old mkluatexfontdb script.
+    * Remove test directory. Use https://bitbucket.org/phg/lua-la-tex-tests
+      instead.
+
 2013/12/31, luaotfload v2.4
     * Additional self-tests, now in separate file (luaotfload-diagnostics.lua)
     * Better path and directory handling, especially on Windows

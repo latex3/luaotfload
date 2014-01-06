@@ -6,9 +6,9 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:      2013-07-31
+:Date:      2014-01-02
 :Copyright: GPL v2.0
-:Version:   2.4
+:Version:   2.5
 :Manual section: 1
 :Manual group: text processing
 
@@ -48,10 +48,6 @@ the *Luaotfload* package. There are two general modes: **update** and
 
 + **update**:  update the database or rebuild it entirely;
 + **query**:   resolve a font name or display close matches.
-
-Note that if the script is named ``mkluatexfontdb`` it will behave like
-earlier versions (<=1.3) and always update the database first. Also,
-the verbosity level will be set to 2.
 
 OPTIONS
 =======================================================================

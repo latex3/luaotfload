@@ -34,12 +34,6 @@ UNPACKED    = luaotfload.sty luaotfload.lua
 GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(RESOURCES) $(MAN)
 SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(RESOURCESCRIPTS)
 
-# test files
-TESTDIR 		= tests
-TESTSTATUS 		= $(wildcard $(TESTDIR)/*.tex $(TESTDIR)/*.ltx)
-TESTSTATUS_SYS 	= $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
-TESTSTATUS_TL 	= $(filter-out $(TESTSTATUS_SYS), $(TESTSTATUS))
-
 # Files grouped by installation location
 SCRIPTSTATUS = $(SCRIPT) $(OLDSCRIPT) $(RESOURCESCRIPTS)
 RUNSTATUS    = $(UNPACKED) $(filter-out $(SCRIPTSTATUS),$(OTFL))
@@ -146,21 +140,6 @@ install: $(ALL_STATUS)
 	@echo "Installing in '$(TEXMFROOT)'."
 	$(run-install)
 
-check: $(RUNSTATUS) $(TESTSTATUS_TL)
-	@rm -rf var
-	@for f in $(TESTSTATUS_TL); do \
-	    echo "check: luatex $$f"; \
-	    luatex --interaction=batchmode $$f \
-	    > /dev/null || exit $$?; \
-	    done
-
-check-all: $(TESTSTATUS_SYS) check
-	@cd $(TESTDIR); for f in $(TESTSTATUS_SYS); do \
-	    echo "check: luatex $$f"; \
-	    $(TESTENV) luatex --interaction=batchmode ../$$f \
-	    > /dev/null || exit $$?; \
-	    done
-
 manifest: 
 	@echo "Source files:"
 	@for f in $(SOURCE); do echo $$f; done
@@ -169,9 +148,9 @@ manifest:
 	@for f in $(GENERATED); do echo $$f; done
 
 clean: 
-	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out $(TESTDIR)/*.log
+	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out
 
 mrproper: clean
-	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE) $(TESTDIR)/*.pdf
+	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE)
 	@$(RM) -r -- $(DISTDIR)
 

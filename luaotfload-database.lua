@@ -1,9 +1,9 @@
 if not modules then modules = { } end modules ['luaotfload-database'] = {
-    version   = "2.4",
+    version   = "2.5",
     comment   = "companion to luaotfload.lua",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
-    license   = "GNU GPL v2"
+    license   = "GNU GPL v2.0"
 }
 
 --[[doc--

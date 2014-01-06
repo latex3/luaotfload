@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 12/24/13 17:52:44
+-- merge date  : 01/06/14 18:10:50
 
 do -- begin closure to overcome local limits and interference
 
@@ -6405,7 +6405,7 @@ local type,next,tonumber,tostring=type,next,tonumber,tostring
 local abs=math.abs
 local insert=table.insert
 local lpegmatch=lpeg.match
-local reversed,concat,remove=table.reversed,table.concat,table.remove
+local reversed,concat,remove,sortedkeys=table.reversed,table.concat,table.remove,table.sortedkeys
 local ioflush=io.flush
 local fastcopy,tohash,derivetable=table.fastcopy,table.tohash,table.derive
 local formatters=string.formatters
@@ -7045,7 +7045,6 @@ actions["prepare glyphs"]=function(data,filename,raw)
         }
         local altuni=glyph.altuni
         if altuni then
-          local d
           for i=1,#altuni do
             local a=altuni[i]
             local u=a.unicode
@@ -7058,14 +7057,7 @@ actions["prepare glyphs"]=function(data,filename,raw)
                 vv={ [u]=unicode }
                 variants[v]=vv
               end
-            elseif d then
-              d[#d+1]=u
-            else
-              d={ u }
             end
-          end
-          if d then
-            duplicates[unicode]=d
           end
         end
       else
@@ -7084,47 +7076,49 @@ actions["check encoding"]=function(data,filename,raw)
   local duplicates=resources.duplicates
   local mapdata=raw.map or {}
   local unicodetoindex=mapdata and mapdata.map or {}
+  local indextounicode=mapdata and mapdata.backmap or {}
   local encname=lower(data.enc_name or mapdata.enc_name or "")
   local criterium=0xFFFF
   if find(encname,"unicode") then 
     if trace_loading then
       report_otf("checking embedded unicode map %a",encname)
     end
-    for unicode,index in next,unicodetoindex do 
-      if unicode<=criterium and not descriptions[unicode] then
-        local parent=indices[index] 
-        if not parent then
-          report_otf("weird, unicode %U points to nowhere with index %H",unicode,index)
-        else
-          local parentdescription=descriptions[parent]
-          if parentdescription then
-            local altuni=parentdescription.altuni
-            if not altuni then
-              altuni={ { unicode=unicode } }
-              parentdescription.altuni=altuni
-              duplicates[parent]={ unicode }
-            else
-              local done=false
-              for i=1,#altuni do
-                if altuni[i].unicode==unicode then
-                  done=true
-                  break
-                end
-              end
-              if not done then
-                insert(altuni,{ unicode=unicode })
-                insert(duplicates[parent],unicode)
+      local hash={}
+      for index,unicode in next,indices do 
+        hash[index]=descriptions[unicode]
+      end
+      local reported={}
+      for unicode,index in next,unicodetoindex do
+        if not descriptions[unicode] then
+          local d=hash[index]
+          if d then
+            if d.unicode~=unicode then
+              local c=d.copies
+              if c then
+                c[unicode]=true
+              else
+                d.copies={ [unicode]=true }
               end
             end
-            if trace_loading then
-              report_otf("weird, unicode %U points to nowhere with index %H",unicode,index)
-            end
-          else
-            report_otf("weird, unicode %U points to %U with index %H",unicode,index)
+          elseif not reported[i] then
+            report_otf("missing index %i",index)
+            reported[i]=true
           end
         end
       end
-    end
+      for index,data in next,hash do 
+        data.copies=sortedkeys(data.copies)
+      end
+      for index,unicode in next,indices do 
+        local description=hash[index]
+        local copies=description.copies
+        if copies then
+          duplicates[unicode]=copies
+          description.copies=nil
+        else
+          report_otf("copies but no unicode parent %U",unicode)
+        end
+      end
   elseif properties.cidinfo then
     report_otf("warning: no unicode map, used cidmap %a",properties.cidinfo.usedname)
   else
@@ -7132,6 +7126,7 @@ actions["check encoding"]=function(data,filename,raw)
   end
   if mapdata then
     mapdata.map={} 
+    mapdata.backmap={} 
   end
 end
 actions["add duplicates"]=function(data,filename,raw)
@@ -7142,28 +7137,37 @@ actions["add duplicates"]=function(data,filename,raw)
   local indices=resources.indices 
   local duplicates=resources.duplicates
   for unicode,d in next,duplicates do
-    for i=1,#d do
-      local u=d[i]
-      if not descriptions[u] then
-        local description=descriptions[unicode]
-        local duplicate=table.copy(description) 
-        duplicate.comment=format("copy of U+%05X",unicode)
-        descriptions[u]=duplicate
-        local n=0
-        for _,description in next,descriptions do
-          if kerns then
-            local kerns=description.kerns
-            for _,k in next,kerns do
-              local ku=k[unicode]
-              if ku then
-                k[u]=ku
-                n=n+1
+    local nofduplicates=#d
+    if nofduplicates>4 then
+      if trace_loading then
+        report_otf("ignoring excessive duplicates of %U (n=%s)",unicode,nofduplicates)
+      end
+    else
+      for i=1,nofduplicates do
+        local u=d[i]
+        if not descriptions[u] then
+          local description=descriptions[unicode]
+          local n=0
+          for _,description in next,descriptions do
+            if kerns then
+              local kerns=description.kerns
+              for _,k in next,kerns do
+                local ku=k[unicode]
+                if ku then
+                  k[u]=ku
+                  n=n+1
+                end
               end
             end
           end
-        end
-        if trace_loading then
-          report_otf("duplicating %U to %U with index %H (%s kerns)",unicode,u,description.index,n)
+          if u>0 then
+            local duplicate=table.copy(description) 
+            duplicate.comment=format("copy of U+%05X",unicode)
+            descriptions[u]=duplicate
+            if trace_loading then
+              report_otf("duplicating %U to %U with index %H (%s kerns)",unicode,u,description.index,n)
+            end
+          end
         end
       end
     end
@@ -8184,6 +8188,24 @@ local function otftotfm(specification)
     local features=specification.features.normal
     local rawdata=otf.load(filename,sub,features and features.featurefile)
     if rawdata and next(rawdata) then
+      local descriptions=rawdata.descriptions
+      local duplicates=rawdata.resources.duplicates
+      if duplicates then
+        local nofduplicates,nofduplicated=0,0
+        for parent,list in next,duplicates do
+          for i=1,#list do
+            local unicode=list[i]
+            if not descriptions[unicode] then
+              descriptions[unicode]=descriptions[parent] 
+              nofduplicated=nofduplicated+1
+            end
+          end
+          nofduplicates=nofduplicates+#list
+        end
+        if trace_otf and nofduplicated~=nofduplicates then
+          report_otf("%i extra duplicates copied out of %i",nofduplicated,nofduplicates)
+        end
+      end
       rawdata.lookuphash={}
       tfmdata=copytotfm(rawdata,cache_id)
       if tfmdata and next(tfmdata) then

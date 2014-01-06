@@ -1,6 +1,6 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 2009-2013
+% Copyright (C) 2009-2014
 %      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
 %      and Khaled Hosny   <khaledhosny@eglug.org>
 %      and Philipp Gesang <philipp.gesang@alumni.uni-heidelberg.de>
@@ -40,7 +40,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload v2.4 OpenType layout system}
+\Msg{* Package: luaotfload v2.5 OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -51,7 +51,7 @@
 \preamble
 This is a generated file.
 
-Copyright (C) 2009-2013
+Copyright (C) 2009-2014
      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
      and Khaled Hosny   <khaledhosny@eglug.org>
      and Philipp Gesang <philipp.gesang@alumni.uni-heidelberg.de>
@@ -111,7 +111,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2013/12/28 v2.4 OpenType layout system]%
+[2014/**/** v2.5 OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
 \usepackage[x11names]{xcolor}
@@ -231,7 +231,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \identifier{luaotfload} package}
-% \date{2013/12/28 v2.4}
+% \date{2014/**/** v2.5}
 % \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
 %         Home:      \url{https://github.com/lualatex/luaotfload}\\
 %         Support:   \email{lualatex-dev@tug.org}}
@@ -855,7 +855,7 @@ and the derived files
 % \identifier{luaotfload} adds a number of features that are not defined
 % in the original \OpenType specification, most of them
 % aiming at emulating the behavior familiar from other \TEX engines.
-% Currently (2013) there are three of them:
+% Currently (2014) there are three of them:
 %
 % \begin{description}
 %
@@ -1608,8 +1608,8 @@ end
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 2.40003,
-    date          = "2013/12/28",
+    version       = 2.50000,
+    date          = "2014/**/**",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -2233,16 +2233,10 @@ luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2013/12/28 v2.4 OpenType layout system]
+    [2014/**/** v2.5 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
-\ifnum\luatexversion<76
-  %% here some deprecation warning would be in order
-  \RequireLuaModule{lualibs}
-  \RequireLuaModule{luaotfload-legacy}
-\else
-  \RequireLuaModule{luaotfload}
-\fi
+\RequireLuaModule{luaotfload}
 \endinput
 %    \end{macrocode}
 % \iffalse

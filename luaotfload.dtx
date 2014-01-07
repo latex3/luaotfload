@@ -1878,10 +1878,11 @@ else--- the loading sequence is known to change, so this might have to
     loadmodule('font-oti.lua')
     loadmodule('font-otf.lua')
     loadmodule('font-otb.lua')
-    loadmodule('node-inj.lua')
+    loadmodule('luatex-fonts-inj.lua')  --> since 2014-01-07, replaces node-inj.lua
     loadmodule('font-ota.lua')
     loadmodule('font-otn.lua')
-    loadmodule('font-otp.lua')--- since 2013-04-23
+    loadmodule('luatex-fonts-otn.lua')  --> since 2014-01-07, replaces font-otn.lua
+    loadmodule('font-otp.lua')          --> since 2013-04-23
     loadmodule('luatex-fonts-lua.lua')
     loadmodule('font-def.lua')
     loadmodule('luatex-fonts-def.lua')

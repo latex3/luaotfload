@@ -256,6 +256,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
                 <tr> <td>luatex-font-tfm.lua</td>   <td>luatex-font-afm.lua</td>   </tr>
                 <tr> <td>luatex-font-afk.lua</td>   <td>luatex-fonts-tfm.lua</td>  </tr>
                 <tr> <td>luatex-fonts-chr.lua</td>  <td>luatex-fonts-lua.lua</td>  </tr>
+                <tr> <td>luatex-fonts-inj.lua</td>  <td>luatex-fonts-otn.lua</td>  </tr>
                 <tr> <td>luatex-fonts-def.lua</td>  <td>luatex-fonts-ext.lua</td>  </tr>
                 <tr> <td>luatex-fonts-cbk.lua</td>                                 </tr>
  
@@ -275,8 +276,8 @@ strict digraph luaotfload_files { //looks weird with circo ...
                 <th> <td colspan="3"> <font point-size="12" face="Iwona Italic"> Font and Node Libraries from Context </font> </td> </th>
                 <tr> <td>data-con.lua</td> <td>font-ini.lua</td> <td>font-con.lua</td> </tr>
                 <tr> <td>font-cid.lua</td> <td>font-map.lua</td> <td>font-oti.lua</td> </tr>
-                <tr> <td>font-otf.lua</td> <td>font-otb.lua</td> <td>node-inj.lua</td> </tr>
-                <tr> <td>font-ota.lua</td> <td>font-otn.lua</td> <td>font-def.lua</td> </tr>
+                <tr> <td>font-otf.lua</td> <td>font-otb.lua</td> <td>font-ota.lua</td> </tr>
+                <tr> <td>font-def.lua</td> </tr>
             </table>
         >,
     ]

@@ -15,28 +15,25 @@
 luaotfload                  = luaotfload or {}
 luaotfload.aux              = luaotfload.aux or { }
 
-config                      = config or { }
-config.luaotfload           = config.luaotfload or { }
+local aux                   = luaotfload.aux
+local log                   = luaotfload.log
+local warning               = luaotfload.log
+local fonthashes            = fonts.hashes
+local identifiers           = fonthashes.identifiers
 
-local aux           = luaotfload.aux
-local log           = luaotfload.log
-local warning       = luaotfload.log
-local fonthashes    = fonts.hashes
-local identifiers   = fonthashes.identifiers
+local fontid                = font.id
+local texsprint             = tex.sprint
 
-local fontid        = font.id
-local texsprint     = tex.sprint
-
-local dofile        = dofile
-local getmetatable  = getmetatable
-local setmetatable  = setmetatable
-local utf8          = unicode.utf8
-local stringlower   = string.lower
-local stringformat  = string.format
-local stringgsub    = string.gsub
-local stringbyte    = string.byte
-local stringfind    = string.find
-local tablecopy     = table.copy
+local dofile                = dofile
+local getmetatable          = getmetatable
+local setmetatable          = setmetatable
+local utf8                  = unicode.utf8
+local stringlower           = string.lower
+local stringformat          = string.format
+local stringgsub            = string.gsub
+local stringbyte            = string.byte
+local stringfind            = string.find
+local tablecopy             = table.copy
 
 -----------------------------------------------------------------------
 ---                          font patches
@@ -76,90 +73,6 @@ end
 
 aux.stop_rewrite_fontname = stop_rewrite_fontname
 
---- as of 2.3 the compatibility hacks for TL 2013 are made optional
-
-if config.luaotfload.compatibility == true then
-
---[[doc--
-
-The font object (tfmdata) structure has changed since version 1.x, so
-in case other packages haven’t been updated we put fallbacks in place
-where they’d expect them. Specifically we have in mind:
-
-  · fontspec
-  · unicode-math
-  · microtype (most likely fixed till TL2013)
-
---doc]]--
-
---- fontobj -> fontobj
-local add_fontdata_fallbacks = function (fontdata)
-  if type(fontdata) == "table" then
-    local fontparameters = fontdata.parameters
-    local metadata
-    if not fontdata.shared then --- that would be a tfm
-      --- we can’t really catch everything that
-      --- goes wrong; for some reason, fontspec.lua
-      --- just assumes it always gets an otf object,
-      --- so its capheight callback, which does not
-      --- bother to do any checks, will access
-      --- fontdata.shared no matter what ...
-      fontdata.units = fontdata.units_per_em
-
-    else --- otf
-      metadata         = fontdata.shared.rawdata.metadata
-      fontdata.name    = metadata.origname or fontdata.name
-      fontdata.units   = fontdata.units_per_em
-      fontdata.size    = fontdata.size or fontparameters.size
-      local resources  = fontdata.resources
-      --- for legacy fontspec.lua and unicode-math.lua
-      fontdata.shared.otfdata = {
-        pfminfo   = { os2_capheight = metadata.pfminfo.os2_capheight },
-        metadata  = { ascent = metadata.ascent },
-      }
-      --- for microtype and fontspec
-      --local fake_features = { }
-      local fake_features = table.copy(resources.features)
-      setmetatable(fake_features, { __index = function (tab, idx)
-          warning("some package (probably fontspec) is outdated")
-          warning(
-            "attempt to index " ..
-            "tfmdata.shared.otfdata.luatex.features (%s)",
-            idx)
-          --os.exit(1)
-          return tab[idx]
-        end,
-      })
-      fontdata.shared.otfdata.luatex = {
-        unicodes = resources.unicodes,
-        features = fake_features,
-      }
-    end
-  end
-  return fontdata
-end
-
-luatexbase.add_to_callback(
-  "luaotfload.patch_font",
-  add_fontdata_fallbacks,
-  "luaotfload.fontdata_fallbacks")
-
---[[doc--
-
-Additionally, the font registry is expected at fonts.identifiers
-(fontspec) or fonts.ids (microtype), but in the meantime it has been
-migrated to fonts.hashes.identifiers.  We’ll make luaotfload satisfy
-those assumptions. (Maybe it’d be more appropriate to use
-font.getfont() since Hans made it a harmless wrapper [1].)
-
-[1] http://www.ntg.nl/pipermail/ntg-context/2013/072166.html
-
---doc]]--
-
-fonts.identifiers = fonts.hashes.identifiers
-fonts.ids         = fonts.hashes.identifiers
-
-end
 
 --[[doc--
 This sets two dimensions apparently relied upon by the unicode-math

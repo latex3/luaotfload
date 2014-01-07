@@ -1199,6 +1199,8 @@ and the derived files
 %                     \incitem{luatex-fonts-tfm.lua}
 %                     \incitem{luatex-fonts-chr.lua}
 %                     \incitem{luatex-fonts-lua.lua}
+%                     \incitem{luatex-fonts-inj.lua}
+%                     \incitem{luatex-fonts-otn.lua}
 %                     \incitem{luatex-fonts-def.lua}
 %                     \incitem{luatex-fonts-ext.lua}
 %                     \incitem{luatex-fonts-cbk.lua}
@@ -1214,8 +1216,7 @@ and the derived files
 %                     \incitem{font-con.lua} \incitem{font-cid.lua}
 %                     \incitem{font-map.lua} \incitem{font-oti.lua}
 %                     \incitem{font-otf.lua} \incitem{font-otb.lua}
-%                     \incitem{node-inj.lua} \incitem{font-ota.lua}
-%                     \incitem{font-otn.lua} \incitem{font-def.lua}
+%                     \incitem{font-ota.lua} \incitem{font-def.lua}
 %                     \incitem{font-otp.lua}
 %                   \end{itemize}
 %                 \end{multicols}
@@ -1594,7 +1595,6 @@ config.luaotfload                 = config.luaotfload or { }
 ------.luaotfload.resolver        = config.luaotfload.resolver         or "normal"
 config.luaotfload.resolver        = config.luaotfload.resolver         or "cached"
 config.luaotfload.definer         = config.luaotfload.definer          or "patch"
-config.luaotfload.compatibility   = config.luaotfload.compatibility    or false
 config.luaotfload.loglevel        = config.luaotfload.loglevel         or 2
 config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_linebreak_filter"
 config.luaotfload.prioritize      = config.luaotfload.prioritize       or "sys"
@@ -1879,10 +1879,10 @@ else--- the loading sequence is known to change, so this might have to
     loadmodule('font-oti.lua')
     loadmodule('font-otf.lua')
     loadmodule('font-otb.lua')
-    loadmodule('node-inj.lua')
+    loadmodule('luatex-fonts-inj.lua')  --> since 2014-01-07, replaces node-inj.lua
     loadmodule('font-ota.lua')
-    loadmodule('font-otn.lua')
-    loadmodule('font-otp.lua')--- since 2013-04-23
+    loadmodule('luatex-fonts-otn.lua')  --> since 2014-01-07, replaces font-otn.lua
+    loadmodule('font-otp.lua')          --> since 2013-04-23
     loadmodule('luatex-fonts-lua.lua')
     loadmodule('font-def.lua')
     loadmodule('luatex-fonts-def.lua')

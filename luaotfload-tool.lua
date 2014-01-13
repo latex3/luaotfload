@@ -349,15 +349,36 @@ local print_heading = function (title, level)
     texiowrite_nl (s .. stringrep(adornchar, textwidth-utf.len(s)))
 end
 
-local show_info_items = function (fontinfo)
-    local items = table.sortedkeys(fontinfo)
-    print_heading(fontinfo.fullname, 1)
-    texiowrite_nl ""
-    for n = 1, #items do
-        local item = items[n]
-        texiowrite_nl(stringformat(
-            info_fmt, item, fontinfo[item]))
+local baseindent = "    "
+
+--[[doc--
+
+    show_info_items -- Together with show_info_table prints the table returned by
+    fontloader.info(), recursing into nested tables if appropriate (as necessitated
+    by Luatex versions 0.78+ which include the pfminfo table in the result.
+
+--doc]]--
+
+local show_info_table show_info_table = function (t, depth)
+    depth           = depth or 0
+    local indent    = stringrep (baseindent, depth)
+    local keys      = table.sortedkeys (t)
+    for n = 1, #keys do
+        local key = keys [n]
+        local val = t [key]
+        if type (val) == "table" then
+            texiowrite_nl (indent .. stringformat (info_fmt, key, "<table>"))
+            show_info_table (val, depth + 1)
+        else
+            texiowrite_nl (indent .. stringformat (info_fmt, key, val))
+        end
     end
+end
+
+local show_info_items = function (fontinfo)
+    print_heading (fontinfo.fullname, 1)
+    texiowrite_nl ""
+    show_info_table (fontinfo)
     texiowrite_nl ""
 end
 

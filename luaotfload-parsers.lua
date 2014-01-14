@@ -1,12 +1,12 @@
 #!/usr/bin/env texlua
------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 --         FILE:  luaotfload-parsers.lua
 --  DESCRIPTION:  various lpeg-based parsers used in Luaotfload
 -- REQUIREMENTS:  Luaotfload > 2.4
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
 --      VERSION:  same as Luaotfload
 --      CREATED:  2014-01-14 10:15:20+0100
------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 --
 
 if not modules then modules = { } end modules ['luaotfload-parsers'] = {
@@ -25,7 +25,7 @@ local lpeg              = require "lpeg"
 local P, R, S           = lpeg.P, lpeg.R, lpeg.S
 local lpegmatch         = lpeg.match
 local C, Cc, Cf         = lpeg.C, lpeg.Cc, lpeg.Cf
-local Cg, Cs, Ct        = lpeg.Cg, lpeg.Cs, lpeg.Ct
+local Cg, Cmt, Cs, Ct   = lpeg.Cg, lpeg.Cmt, lpeg.Cs, lpeg.Ct
 
 local kpse              = kpse
 local kpseexpand_path   = kpse.expand_path
@@ -44,10 +44,38 @@ local report            = logs.report
 local string            = string
 local stringsub         = string.sub
 local stringfind        = string.find
+local stringlower       = string.lower
 
 local lfs               = lfs
 local lfsisfile         = lfs.isfile
 local lfsisdir          = lfs.isdir
+
+-------------------------------------------------------------------------------
+---                         COMMON PATTERNS
+-------------------------------------------------------------------------------
+
+local dot               = P"."
+local colon             = P":"
+local comma             = P","
+local noncomma          = 1 - comma
+local slash             = P"/"
+local equals            = P"="
+local lbrk, rbrk        = P"[", P"]"
+
+local spacing           = S" \t\v"
+local linebreak         = S"\n\r"
+local whitespace        = spacing + linebreak
+local ws                = spacing^0
+local xmlws             = whitespace^1
+
+local digit             = R"09"
+local alpha             = R("az", "AZ")
+local anum              = alpha + digit
+local decimal           = digit^1 * (dot * digit^0)^-1
+
+-------------------------------------------------------------------------------
+---                                FONTCONFIG
+-------------------------------------------------------------------------------
 
 --[[doc--
 
@@ -75,31 +103,27 @@ local lfsisdir          = lfs.isdir
 
 --doc]]--
 
-local alpha             = R("az", "AZ")
-local digit             = R"09"
 local tag_name          = C(alpha^1)
-local whitespace        = S" \n\r\t\v"
-local ws                = whitespace^1
 local comment           = P"<!--" * (1 - P"--")^0 * P"-->"
 
 ---> header specifica
 local xml_declaration   = P"<?xml" * (1 - P"?>")^0 * P"?>"
-local xml_doctype       = P"<!DOCTYPE" * ws
+local xml_doctype       = P"<!DOCTYPE" * xmlws
                         * "fontconfig" * (1 - P">")^0 * P">"
 local header            = xml_declaration^-1
-                        * (xml_doctype + comment + ws)^0
+                        * (xml_doctype + comment + xmlws)^0
 
 ---> enforce root node
-local root_start        = P"<"  * ws^-1 * P"fontconfig" * ws^-1 * P">"
-local root_stop         = P"</" * ws^-1 * P"fontconfig" * ws^-1 * P">"
+local root_start        = P"<"  * xmlws^-1 * P"fontconfig" * xmlws^-1 * P">"
+local root_stop         = P"</" * xmlws^-1 * P"fontconfig" * xmlws^-1 * P">"
 
 local dquote, squote    = P[["]], P"'"
 local xml_namestartchar = S":_" + alpha --- ascii only, funk the rest
 local xml_namechar      = S":._" + alpha + digit
-local xml_name          = ws^-1
+local xml_name          = xmlws^-1
                         * C(xml_namestartchar * xml_namechar^0)
-local xml_attvalue      = dquote * C((1 - S[[%&"]])^1) * dquote * ws^-1
-                        + squote * C((1 - S[[%&']])^1) * squote * ws^-1
+local xml_attvalue      = dquote * C((1 - S[[%&"]])^1) * dquote * xmlws^-1
+                        + squote * C((1 - S[[%&']])^1) * squote * xmlws^-1
 local xml_attr          = Cg(xml_name * P"=" * xml_attvalue)
 local xml_attr_list     = Cf(Ct"" * xml_attr^1, rawset)
 
@@ -113,11 +137,11 @@ local scan_node = function (tag)
     local p_tag = P(tag)
     local with_attributes   = P"<" * p_tag
                             * Cg(xml_attr_list, "attributes")^-1
-                            * ws^-1
+                            * xmlws^-1
                             * P">"
-    local plain             = P"<" * p_tag * ws^-1 * P">"
+    local plain             = P"<" * p_tag * xmlws^-1 * P">"
     local node_start        = plain + with_attributes
-    local node_stop         = P"</" * p_tag * ws^-1 * P">"
+    local node_stop         = P"</" * p_tag * xmlws^-1 * P">"
     --- there is no nesting, the earth is flat ...
     local node              = node_start
                             * Cc(tag) * C(comment + (1 - node_stop)^1)
@@ -295,4 +319,257 @@ end
 
 luaotfload.parsers.read_fonts_conf = read_fonts_conf
 
+
+
+-------------------------------------------------------------------------------
+---                               MISC PARSERS
+-------------------------------------------------------------------------------
+
+
+local trailingslashes   = slash^1 * P(-1)
+local stripslashes      = C((1 - trailingslashes)^0)
+parsers.stripslashes    = stripslashes
+
+local splitcomma        = Ct((C(noncomma^1) + comma)^1)
+parsers.splitcomma      = splitcomma
+
+
+
+-------------------------------------------------------------------------------
+---                          FONT REQUEST
+-------------------------------------------------------------------------------
+
+
+--[[doc------------------------------------------------------------------------
+
+    The luaotfload font request syntax (see manual)
+    has a canonical form:
+
+        \font<csname>=<prefix>:<identifier>:<features>
+
+    where
+      <csname> is the control sequence that activates the font
+      <prefix> is either “file” or “name”, determining the lookup
+      <identifer> is either a file name (no path) or a font
+                  name, depending on the lookup
+      <features> is a list of switches or options, separated by
+                 semicolons or commas; a switch is of the form “+” foo
+                 or “-” foo, options are of the form lhs “=” rhs
+
+    however, to ensure backward compatibility we also have
+    support for Xetex-style requests.
+
+    for the Xetex emulation see:
+    · The XeTeX Reference Guide by Will Robertson, 2011
+    · The XeTeX Companion by Michel Goosens, 2010
+    · About XeTeX by Jonathan Kew, 2005
+
+
+    caueat emptor.
+
+        the request is parsed into one of **four** different lookup
+        categories: the regular ones, file and name, as well as the
+        Xetex compatibility ones, path and anon. (maybe a better choice
+        of identifier would be “ambig”.)
+
+        according to my reconstruction, the correct chaining of the
+        lookups for each category is as follows:
+
+        | File -> ( db/filename lookup )
+
+        | Name -> ( db/name lookup,
+                    db/filename lookup )
+
+        | Path -> ( db/filename lookup,
+                    fullpath lookup )
+
+        | Anon -> ( kpse.find_file(),     // <- for tfm, ofm
+                    db/name lookup,
+                    db/filename lookup,
+                    fullpath lookup )
+
+        caching of successful lookups is essential. we now as of v2.2
+        have a lookup cache that is stored in a separate file. it
+        pertains only to name: lookups, and is described in more detail
+        in luaotfload-database.lua.
+
+-------------------------------------------------------------------------------
+
+    One further incompatibility between Xetex and Luatex-Fonts consists
+    in their option list syntax: apparently, Xetex requires key-value
+    options to be prefixed by a "+" (ascii “plus”) character. We
+    silently accept this as well, dropping the first byte if it is a
+    plus or minus character.
+
+    Reference: https://github.com/lualatex/luaotfload/issues/79#issuecomment-18104483
+
+--doc]]------------------------------------------------------------------------
+
+
+local handle_normal_option = function (key, val)
+    val = stringlower(val)
+    --- the former “toboolean()” handler
+    if val == "true"  then
+        val = true
+    elseif val == "false" then
+        val = false
+    end
+    return key, val
+end
+
+--[[doc--
+
+    Xetex style indexing begins at zero which we just increment before
+    passing it along to the font loader.  Ymmv.
+
+--doc]]--
+
+local handle_xetex_option = function (key, val)
+    val = stringlower(val)
+    local numeric = tonumber(val) --- decimal only; keeps colors intact
+    if numeric then --- ugh
+        if  mathceil(numeric) == numeric then -- integer, possible index
+            val = tostring(numeric + 1)
+        end
+    elseif val == "true"  then
+        val = true
+    elseif val == "false" then
+        val = false
+    end
+    return key, val
+end
+
+--[[doc--
+
+    Instead of silently ignoring invalid options we emit a warning to
+    the log.
+
+    Note that we have to return a pair to please rawset(). This creates
+    an entry on the resulting features hash which will later be removed
+    during set_default_features().
+
+--doc]]--
+
+local handle_invalid_option = function (opt)
+    report("log", 0, "load", "font option %q unknown.", opt)
+    return "", false
+end
+
+--[[doc--
+
+    Dirty test if a file: request is actually a path: lookup; don’t
+    ask! Note this fails on Windows-style absolute paths. These will
+    *really* have to use the correct request.
+
+--doc]]--
+
+local check_garbage = function (_,i, garbage)
+    if stringfind(garbage, "/") then
+        report("log", 0, "load",  --- ffs use path!
+            "warning: path in file: lookups is deprecated; ")
+        report("log", 0, "load", "use bracket syntax instead!")
+        report("log", 0, "load",
+            "position: %d; full match: %q",
+            i, garbage)
+        return true
+    end
+    return false
+end
+
+local featuresep        = comma
+
+--- modifiers ---------------------------------------------------------
+--[[doc--
+    The slash notation: called “modifiers” (Kew) or “font options”
+    (Robertson, Goosens)
+    we only support the shorthands for italic / bold / bold italic
+    shapes, as well as setting optical size, the rest is ignored.
+--doc]]--
+local style_modifier    = (P"BI" + P"IB" + P"bi" + P"ib" + S"biBI")
+                        / stringlower
+local size_modifier     = S"Ss" * P"="    --- optical size
+                        * Cc"optsize" * C(decimal)
+local other_modifier    = P"AAT" + P"aat" --- apple stuff;  unsupported
+                        + P"ICU" + P"icu" --- not applicable
+                        + P"GR"  + P"gr"  --- sil stuff;    unsupported
+local garbage_modifier  = ((1 - colon - slash)^0 * Cc(false))
+local modifier          = slash * (other_modifier      --> ignore
+                                 + Cs(style_modifier)  --> collect
+                                 + Ct(size_modifier)   --> collect
+                                 + garbage_modifier)   --> warn
+local modifier_list     = Cg(Ct(modifier^0), "modifiers")
+
+--- lookups -----------------------------------------------------------
+local fontname          = C((1-S":(/")^1)  --- like luatex-fonts
+local unsupported       = Cmt((1-S":(")^1, check_garbage)
+local prefixed          = P"name:" * ws * Cg(fontname, "name")
+--- initially we intended file: to emulate the behavior of
+--- luatex-fonts, i.e. no paths allowed. after all, we do have XeTeX
+--- emulation with the path lookup and it interferes with db lookups.
+--- turns out fontspec and other widely used packages rely on file:
+--- with paths already, so we’ll add a less strict rule here.  anyways,
+--- we’ll emit a warning.
+                        + P"file:" * ws * Cg(unsupported, "path")
+                        + P"file:" * ws * Cg(fontname, "file")
+--- EXPERIMENTAL: kpse lookup
+                        + P"kpse:" * ws * Cg(fontname, "kpse")
+--- EXPERIMENTAL: custom lookup
+                        + P"my:" * ws * Cg(fontname, "my")
+local unprefixed        = Cg(fontname, "anon")
+local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
+
+--- features ----------------------------------------------------------
+local field_char        = anum + S"+-." --- sic!
+local field             = field_char^1
+--- assignments are “lhs=rhs”
+---              or “+lhs=rhs” (Xetex-style)
+--- switches    are “+key” | “-key”
+local normal_option     = C(field) * ws * equals * ws * C(field) * ws
+local xetex_option      = P"+" * ws * normal_option
+local ignore_option     = (1 - equals - featuresep)^1
+                        * equals
+                        * (1 - featuresep)^1
+local assignment        = xetex_option  / handle_xetex_option
+                        + normal_option / handle_normal_option
+                        + ignore_option / handle_invalid_option
+local switch            = P"+" * ws * C(field) * Cc(true)
+                        + P"-" * ws * C(field) * Cc(false)
+                        +             C(field) * Cc(true)   --- default
+local feature_expr      = ws * Cg(assignment + switch) * ws
+local option            = feature_expr
+local feature_list      = Cf(Ct""
+                           * option
+                           * (featuresep * option^-1)^0
+                           , rawset)
+                        * featuresep^-1
+
+--- other -------------------------------------------------------------
+--- This rule is present in the original parser. It sets the “sub”
+--- field of the specification which allows addressing a specific
+--- font inside a TTC container. Neither in Luatex-Fonts nor in
+--- Luaotfload is this documented, so we might as well silently drop
+--- it. However, as backward compatibility is one of our prime goals we
+--- just insert it here and leave it undocumented until someone cares
+--- to ask. (Note: afair subfonts are numbered, but this rule matches a
+--- string; I won’t mess with it though until someone reports a
+--- problem.)
+--- local subvalue   = P("(") * (C(P(1-S("()"))^1)/issub) * P(")") -- for Kim
+--- Note to self: subfonts apparently start at index 0. Tested with
+--- Cambria.ttc that includes “Cambria Math” at 0 and “Cambria” at 1.
+--- Other values cause luatex to segfault.
+local subfont           = P"(" * Cg((1 - S"()")^1, "sub") * P")"
+--- top-level rules ---------------------------------------------------
+--- \font\foo=<specification>:<features>
+local features          = Cg(feature_list, "features")
+local specification     = (prefixed + unprefixed)
+                        * subfont^-1
+                        * modifier_list^-1
+local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
+                           + specification * (colon    * features)^-1)
+
+--  lpeg.print(font_request)
+--- v2.5 parser: 1065 rules
+--- v1.2 parser:  230 rules
+
+luaotfload.parsers.font_request = font_request
 

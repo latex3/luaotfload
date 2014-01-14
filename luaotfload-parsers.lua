@@ -49,6 +49,10 @@ local lfs               = lfs
 local lfsisfile         = lfs.isfile
 local lfsisdir          = lfs.isdir
 
+-------------------------------------------------------------------------------
+---                                FONTCONFIG
+-------------------------------------------------------------------------------
+
 --[[doc--
 
   For fonts installed on the operating system, there are several
@@ -294,5 +298,21 @@ local read_fonts_conf = function (path_list, find_files)
 end
 
 luaotfload.parsers.read_fonts_conf = read_fonts_conf
+
+
+
+-------------------------------------------------------------------------------
+---                               MISC PARSERS
+-------------------------------------------------------------------------------
+
+
+local trailingslashes   = P"/"^1 * P(-1)
+local stripslashes      = C((1 - trailingslashes)^0)
+parsers.stripslashes    = stripslashes
+
+local comma             = P","
+local noncomma          = 1-comma
+local splitcomma        = Ct((C(noncomma^1) + comma)^1)
+parsers.splitcomma      = splitcomma
 
 

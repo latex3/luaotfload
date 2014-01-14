@@ -6,7 +6,7 @@
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 --      VERSION:  2.5
 --      LICENSE:  GPL v2.0
---     MODIFIED:  2014-01-02 21:21:10+0100
+--     MODIFIED:  2014-01-14 13:17:04+0100
 -----------------------------------------------------------------------
 
 local version = "2.5" --- <int: major>.<int: minor><alpha: fixes>
@@ -950,7 +950,7 @@ set_primary_field = function (fields, addme, acc, n)
     return acc
 end
 
-local splitcomma = names.patterns.splitcomma
+local splitcomma = luaotfload.parsers.splitcomma
 
 actions.list = function (job)
     local criterion     = job.criterion

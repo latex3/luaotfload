@@ -53,6 +53,10 @@ local out = function (...)
     logs.names_report (false, 0, "diagnose", ...)
 end
 
+local parsers                  = luaotfload.parsers
+local stripslashes             = parsers.stripslashes
+local splitcomma               = parsers.splitcomma
+
 local check_index = function (errcnt)
 
     out "================= font names =================="
@@ -162,8 +166,6 @@ local p_permissions = Ct(Cg(Ct(C(1) * C(1) * C(1)), "u")
 local analyze_permissions = function (raw)
     return lpegmatch (p_permissions, raw)
 end
-
-local stripslashes = names.patterns.stripslashes
 
 local get_permissions = function (t, location)
     if stringsub (location, #location) == "/" then
@@ -604,8 +606,6 @@ local anamneses   = {
     "repository",
     "permissions"
 }
-
-local splitcomma = names.patterns.splitcomma
 
 local diagnose = function (job)
     local errcnt = 0

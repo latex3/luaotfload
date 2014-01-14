@@ -44,7 +44,10 @@ local P, R, S, lpegmatch
 local C, Cc, Cf, Cg, Cs, Ct
     = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Cs, lpeg.Ct
 
-local read_fonts_conf = luaotfload.parsers.read_fonts_conf
+local parsers                  = luaotfload.parsers
+local read_fonts_conf          = parsers.read_fonts_conf
+local stripslashes             = parsers.stripslashes
+local splitcomma               = parsers.splitcomma
 
 --- Luatex builtins
 local load                     = load
@@ -182,18 +185,6 @@ if not luaotfloadconfig.termwidth then
     end
     luaotfloadconfig.termwidth = tw
 end
-
-names.patterns          = { }
-local patterns          = names.patterns
-
-local trailingslashes   = P"/"^1 * P(-1)
-local stripslashes      = C((1 - trailingslashes)^0)
-patterns.stripslashes   = stripslashes
-
-local comma             = P","
-local noncomma          = 1-comma
-local splitcomma        = Ct((C(noncomma^1) + comma)^1)
-patterns.splitcomma     = splitcomma
 
 local format_precedence = {
     "otf",   "ttc", "ttf",

@@ -168,6 +168,7 @@ texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities
 
 require"luaotfload-override.lua"  --- this populates the logs.* namespace
+require"luaotfload-parsers"       --- fonts.conf and request syntax
 require"luaotfload-database"
 require"alt_getopt"
 

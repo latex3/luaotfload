@@ -1941,6 +1941,7 @@ logs.set_loglevel(config.luaotfload.loglevel)
 % Now we load the modules written for \identifier{luaotfload}.
 %
 %    \begin{macrocode}
+loadmodule"parsers.lua"    --- new in 2.5; fonts.conf and syntax
 loadmodule"loaders.lua"    --- “font-pfb” new in 2.0, added 2011
 loadmodule"database.lua"   --- “font-nms”
 loadmodule"colors.lua"     --- “font-clr”

@@ -53,6 +53,7 @@ local names = {
   "luaotfload.lua",
   "luaotfload-fontloader.lua",
   "luaotfload-override.lua",
+  "luaotfload-parsers.lua",
   "luaotfload-tool.lua",
   "mkcharacters",
   "mkglyphlist",

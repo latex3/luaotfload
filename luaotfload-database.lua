@@ -36,13 +36,8 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
 
 --doc]]--
 
-local lpeg = require "lpeg"
-
-local P, R, S, lpegmatch
-    = lpeg.P, lpeg.R, lpeg.S, lpeg.match
-
-local C, Cc, Cf, Cg, Cs, Ct
-    = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Cs, lpeg.Ct
+local lpeg                     = require "lpeg"
+local P, Cc, lpegmatch         = lpeg.P, lpeg.Cc, lpeg.match
 
 local parsers                  = luaotfload.parsers
 local read_fonts_conf          = parsers.read_fonts_conf
@@ -65,7 +60,6 @@ local iolines                  = io.lines
 local ioopen                   = io.open
 local iopopen                  = io.popen
 local kpseexpand_path          = kpse.expand_path
-local kpseexpand_var           = kpse.expand_var
 local kpsefind_file            = kpse.find_file
 local kpselookup               = kpse.lookup
 local kpsereadable_file        = kpse.readable_file

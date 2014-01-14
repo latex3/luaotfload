@@ -25,7 +25,7 @@ local lpeg              = require "lpeg"
 local P, R, S           = lpeg.P, lpeg.R, lpeg.S
 local lpegmatch         = lpeg.match
 local C, Cc, Cf         = lpeg.C, lpeg.Cc, lpeg.Cf
-local Cg, Cs, Ct        = lpeg.Cg, lpeg.Cs, lpeg.Ct
+local Cg, Cmt, Cs, Ct   = lpeg.Cg, lpeg.Cmt, lpeg.Cs, lpeg.Ct
 
 local kpse              = kpse
 local kpseexpand_path   = kpse.expand_path
@@ -49,6 +49,29 @@ local stringlower       = string.lower
 local lfs               = lfs
 local lfsisfile         = lfs.isfile
 local lfsisdir          = lfs.isdir
+
+-------------------------------------------------------------------------------
+---                         COMMON PATTERNS
+-------------------------------------------------------------------------------
+
+local dot               = P"."
+local colon             = P":"
+local comma             = P","
+local noncomma          = 1 - comma
+local slash             = P"/"
+local equals            = P"="
+local lbrk, rbrk        = P"[", P"]"
+
+local spacing           = S" \t\v"
+local linebreak         = S"\n\r"
+local whitespace        = spacing + linebreak
+local ws                = spacing^0
+local xmlws             = whitespace^1
+
+local digit             = R"09"
+local alpha             = R("az", "AZ")
+local anum              = alpha + digit
+local decimal           = digit^1 * (dot * digit^0)^-1
 
 -------------------------------------------------------------------------------
 ---                                FONTCONFIG
@@ -80,31 +103,27 @@ local lfsisdir          = lfs.isdir
 
 --doc]]--
 
-local alpha             = R("az", "AZ")
-local digit             = R"09"
 local tag_name          = C(alpha^1)
-local whitespace        = S" \n\r\t\v"
-local ws                = whitespace^1
 local comment           = P"<!--" * (1 - P"--")^0 * P"-->"
 
 ---> header specifica
 local xml_declaration   = P"<?xml" * (1 - P"?>")^0 * P"?>"
-local xml_doctype       = P"<!DOCTYPE" * ws
+local xml_doctype       = P"<!DOCTYPE" * xmlws
                         * "fontconfig" * (1 - P">")^0 * P">"
 local header            = xml_declaration^-1
-                        * (xml_doctype + comment + ws)^0
+                        * (xml_doctype + comment + xmlws)^0
 
 ---> enforce root node
-local root_start        = P"<"  * ws^-1 * P"fontconfig" * ws^-1 * P">"
-local root_stop         = P"</" * ws^-1 * P"fontconfig" * ws^-1 * P">"
+local root_start        = P"<"  * xmlws^-1 * P"fontconfig" * xmlws^-1 * P">"
+local root_stop         = P"</" * xmlws^-1 * P"fontconfig" * xmlws^-1 * P">"
 
 local dquote, squote    = P[["]], P"'"
 local xml_namestartchar = S":_" + alpha --- ascii only, funk the rest
 local xml_namechar      = S":._" + alpha + digit
-local xml_name          = ws^-1
+local xml_name          = xmlws^-1
                         * C(xml_namestartchar * xml_namechar^0)
-local xml_attvalue      = dquote * C((1 - S[[%&"]])^1) * dquote * ws^-1
-                        + squote * C((1 - S[[%&']])^1) * squote * ws^-1
+local xml_attvalue      = dquote * C((1 - S[[%&"]])^1) * dquote * xmlws^-1
+                        + squote * C((1 - S[[%&']])^1) * squote * xmlws^-1
 local xml_attr          = Cg(xml_name * P"=" * xml_attvalue)
 local xml_attr_list     = Cf(Ct"" * xml_attr^1, rawset)
 
@@ -118,11 +137,11 @@ local scan_node = function (tag)
     local p_tag = P(tag)
     local with_attributes   = P"<" * p_tag
                             * Cg(xml_attr_list, "attributes")^-1
-                            * ws^-1
+                            * xmlws^-1
                             * P">"
-    local plain             = P"<" * p_tag * ws^-1 * P">"
+    local plain             = P"<" * p_tag * xmlws^-1 * P">"
     local node_start        = plain + with_attributes
-    local node_stop         = P"</" * p_tag * ws^-1 * P">"
+    local node_stop         = P"</" * p_tag * xmlws^-1 * P">"
     --- there is no nesting, the earth is flat ...
     local node              = node_start
                             * Cc(tag) * C(comment + (1 - node_stop)^1)
@@ -307,12 +326,10 @@ luaotfload.parsers.read_fonts_conf = read_fonts_conf
 -------------------------------------------------------------------------------
 
 
-local trailingslashes   = P"/"^1 * P(-1)
+local trailingslashes   = slash^1 * P(-1)
 local stripslashes      = C((1 - trailingslashes)^0)
 parsers.stripslashes    = stripslashes
 
-local comma             = P","
-local noncomma          = 1-comma
 local splitcomma        = Ct((C(noncomma^1) + comma)^1)
 parsers.splitcomma      = splitcomma
 
@@ -459,27 +476,7 @@ local check_garbage = function (_,i, garbage)
     return false
 end
 
-local lpegmatch = lpeg.match
-local P, S, R   = lpeg.P, lpeg.S, lpeg.R
-local C, Cc, Cf, Cg, Cmt, Cs, Ct
-    = lpeg.C, lpeg.Cc, lpeg.Cf, lpeg.Cg, lpeg.Cmt, lpeg.Cs, lpeg.Ct
-
---- terminals and low-level classes -----------------------------------
---- note we could use the predefined ones from lpeg.patterns
-local dot         = P"."
-local colon       = P":"
-local featuresep  = S",;"
-local slash       = P"/"
-local equals      = P"="
-local lbrk, rbrk  = P"[", P"]"
-
-local spacing     = S" \t\v"
-local ws          = spacing^0
-
-local digit       = R"09"
-local alpha       = R("az", "AZ")
-local anum        = alpha + digit
-local decimal     = digit^1 * (dot * digit^0)^-1
+local featuresep        = comma
 
 --- modifiers ---------------------------------------------------------
 --[[doc--

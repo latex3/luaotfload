@@ -30,7 +30,7 @@ RESOURCES	= $(GLYPHS) $(CHARS) $(STATUS)
 GRAPHED     = $(DOTPDF)
 MAN			= $(MANPAGE)
 COMPILED    = $(DOC)
-UNPACKED    = luaotfload.sty luaotfload.lua
+UNPACKED    = luaotfload.sty
 GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(RESOURCES) $(MAN)
 SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(RESOURCESCRIPTS)
 

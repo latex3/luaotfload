@@ -122,7 +122,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
                        style  = "filled,rounded",
                        penwidth=2]
 
-    luaotfload        [label  = "luaotfload.lua",
+    luaotfload        [label  = "luaotfload-main.lua",
                        shape  = rect,
                        width  = "3.2cm",
                        height = "1.2cm",

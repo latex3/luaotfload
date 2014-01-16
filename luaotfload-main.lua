@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------
---         FILE:  luaotfload.lua
+--         FILE:  luaotfload-main.lua
 --  DESCRIPTION:  Luatex fontloader initialization
 -- REQUIREMENTS:  luatex v.0.78 or later, the lualibs package
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
@@ -13,7 +13,7 @@
 --- version 2.4 to 2.5. Thus, the comments are still in TeX (Latex)
 --- markup.
 
-if not modules then modules = { } end modules ["luaotfload"] = {
+if not modules then modules = { } end modules ["luaotfload-main"] = {
     version   = "2.5",
     comment   = "fontloader initialization",
     author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
@@ -311,10 +311,10 @@ loadmodule "fontloader.lua"
 if fonts then
 
     if not fonts._merge_loaded_message_done_ then
-        log [["I am using the merged version of 'luaotfload.lua' here.]]
+        log [["I am using the merged fontloader here.]]
         log [[ If you run into problems or experience unexpected]]
         log [[ behaviour, and if you have ConTeXt installed you can try]]
-        log [[ to delete the file 'luaotfload-merged.lua' as I might]]
+        log [[ to delete the file 'luaotfload-fontloader.lua' as I might]]
         log [[ then use the possibly updated libraries. The merged]]
         log [[ version is not supported as it is a frozen instance.]]
         log [[ Problems can be reported to the ConTeXt mailing list."]]

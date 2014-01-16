@@ -154,6 +154,7 @@ end
 
 --doc]]--
 
+local Cs, P, lpegmatch = lpeg.Cs, lpeg.P, lpeg.match
 
 local p_dot, p_slash = P".",  P"/"
 local p_suffix       = (p_dot * (1 - p_dot - p_slash)^1 * P(-1)) / ""

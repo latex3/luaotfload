@@ -80,7 +80,7 @@ and the derived files
 \Msg{* To finish the installation you have to move the following}
 \Msg{* files into a directory searched by TeX:}
 \Msg{*}
-\Msg{*     luaotfload.sty, luaotfload.lua}
+\Msg{*     luaotfload.sty}
 \Msg{*}
 \Msg{* Happy TeXing!}
 \Msg{*}
@@ -1210,7 +1210,7 @@ and the derived files
 % instead.
 % Their names remain the same as in \CONTEXT (without the
 % \verb|otfl|-prefix) since we imported the relevant section of
-% \fileent{luatex-fonts.lua} unmodified into \fileent{luaotfload.lua}.
+% \fileent{luatex-fonts.lua} unmodified into \fileent{luaotfload-main.lua}.
 % Thus if you prefer running bleeding edge code from the
 % \CONTEXT beta, all you have to do is remove
 % \fileent{luaotfload-merged.lua} from the search path.
@@ -1552,7 +1552,7 @@ and the derived files
 % As of version 2.5, the file \fileent{luaotfload.lua} is no longer
 % generated from the \abbrev{dtx}.
 % Instead, it is maintained separately as a plain \identifier{Lua} file
-% in the Luaotfload \identifier{git} tree.
+% \fileent{luaotfload-main.lua} in the Luaotfload \identifier{git} tree.
 % The file documentation which used to be found in this section has
 % been preserved in the comments.
 %
@@ -1576,7 +1576,7 @@ and the derived files
     [2014/**/** v2.5 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
-\RequireLuaModule{luaotfload}
+\RequireLuaModule{luaotfload-main}
 \endinput
 %    \end{macrocode}
 % \iffalse

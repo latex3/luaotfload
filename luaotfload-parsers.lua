@@ -11,7 +11,7 @@
 
 if not modules then modules = { } end modules ['luaotfload-parsers'] = {
   version   = "2.5",
-  comment   = "companion to luaotfload.lua",
+  comment   = "companion to luaotfload-main.lua",
   author    = "Philipp Gesang",
   copyright = "Luaotfload Development Team",
   license   = "GNU GPL v2.0"

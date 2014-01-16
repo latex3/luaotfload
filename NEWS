@@ -6,6 +6,11 @@ Change History
     * Remove compatibility with the old mkluatexfontdb script.
     * Remove test directory. Use https://bitbucket.org/phg/lua-la-tex-tests
       instead.
+    * Remove luaotfload.lua from luaotfload.dtx; it is now a separate file
+      luaotfload-main.lua.
+    * Move the heavier LPEG parsers from luaotfload-features (syntax) and
+      luaotfload-database (fontconfig) into the new file
+      luaotfload-parsers.lua.
 
 2013/12/31, luaotfload v2.4
     * Additional self-tests, now in separate file (luaotfload-diagnostics.lua)

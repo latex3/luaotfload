@@ -56,6 +56,7 @@ local lfsisdir          = lfs.isdir
 
 local dot               = P"."
 local colon             = P":"
+local semicolon         = P";"
 local comma             = P","
 local noncomma          = 1 - comma
 local slash             = P"/"
@@ -476,7 +477,7 @@ local check_garbage = function (_,i, garbage)
     return false
 end
 
-local featuresep        = comma
+local featuresep = comma + semicolon
 
 --- modifiers ---------------------------------------------------------
 --[[doc--

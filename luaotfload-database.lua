@@ -131,7 +131,7 @@ luaotfloadconfig.compress      = luaotfloadconfig.compress ~= false
 local names                    = fonts.names
 local name_index               = nil --> upvalue for names.data
 local lookup_cache             = nil --> for names.lookups
-names.version                  = 2.4
+names.version                  = 2.5
 names.data                     = nil      --- contains the loaded database
 names.lookups                  = nil      --- contains the lookup cache
 
@@ -2578,9 +2578,7 @@ local add_family = function (name, subtable, modifier, entry)
 
     familytable [#familytable + 1] = {
         index    = entry.index,
-        size     = size and { size [1], size [2], size [3] },
         modifier = modifier,
-        weight   = entry.weight,
     }
 end
 
@@ -2597,7 +2595,7 @@ end
 
 local collect_families = function (mappings)
 
-    report ("info", 2, "db", "Analyzing families, sizes, and styles.")
+    report ("info", 2, "db", "Analyzing families.")
 
     local families = {
         ["local"]  = { },
@@ -2693,7 +2691,7 @@ local style_categories   = { "r", "b", "i", "bi" }
 local bold_categories    = {      "b",      "bi" }
 
 local group_modifiers = function (mappings, families)
-    report ("info", 2, "db", "Analyzing bold weight fallbacks.")
+    report ("info", 2, "db", "Analyzing shapes, weights, and styles.")
     for location, location_data in next, families do
         for format, format_data in next, location_data do
             for familyname, collected in next, format_data do
@@ -3075,10 +3073,12 @@ update_names = function (currentnames, force, dry_run)
 
     --- pass 4: build family lookup table
     targetnames.families    = collect_families  (targetnames.mappings)
+
+    --- pass 5: arrange style and size info
     targetnames.families    = group_modifiers (targetnames.mappings,
                                                targetnames.families)
 
-    --- pass 5: order design size tables
+    --- pass 6: order design size tables
     targetnames.families    = order_design_sizes (targetnames.families)
 
 

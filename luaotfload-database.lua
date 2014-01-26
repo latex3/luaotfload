@@ -2595,7 +2595,7 @@ end
 
 local collect_families = function (mappings)
 
-    report ("info", 2, "db", "Analyzing families, sizes, and styles.")
+    report ("info", 2, "db", "Analyzing families.")
 
     local families = {
         ["local"]  = { },
@@ -2691,7 +2691,7 @@ local style_categories   = { "r", "b", "i", "bi" }
 local bold_categories    = {      "b",      "bi" }
 
 local group_modifiers = function (mappings, families)
-    report ("info", 2, "db", "Analyzing bold weight fallbacks.")
+    report ("info", 2, "db", "Analyzing shapes, weights, and styles.")
     for location, location_data in next, families do
         for format, format_data in next, location_data do
             for familyname, collected in next, format_data do
@@ -3073,10 +3073,12 @@ update_names = function (currentnames, force, dry_run)
 
     --- pass 4: build family lookup table
     targetnames.families    = collect_families  (targetnames.mappings)
+
+    --- pass 5: arrange style and size info
     targetnames.families    = group_modifiers (targetnames.mappings,
                                                targetnames.families)
 
-    --- pass 5: order design size tables
+    --- pass 6: order design size tables
     targetnames.families    = order_design_sizes (targetnames.families)
 
 

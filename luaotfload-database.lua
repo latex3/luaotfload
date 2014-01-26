@@ -1479,10 +1479,7 @@ local organize_styledata = function (fontname,
     return {
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
         size            = get_size_info (metadata),
-        weight          = {
-            pfminfo.weight,                     -- integer (multiple of 100?)
-            sanitize_fontname (info.weight),    -- style name
-        },
+        weight          = pfminfo.weight or 400,
         split           = split_fontname (fontname),
         width           = pfminfo.width,
         italicangle     = metadata.italicangle,
@@ -1601,8 +1598,7 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         size             = false,
         splitstyle       = splitstyle,
         fontstyle_name   = style ~= "" and style or weight,
-        weight           = { metadata.pfminfo.weight,
-                             weight },
+        weight           = metadata.pfminfo.weight or 400,
         italicangle      = italicangle,
     }
 end
@@ -2458,13 +2454,55 @@ local check_regular
 do
     local splitfontname = lpeg.splitat "-"
 
-    local choose_exact = function (field)
-        if italic_synonym [field] then
-            return "i"
-        elseif field == "bold" then
-            return "b"
-        elseif field == "bolditalic" or field == "boldoblique" then
+    --[[doc--
+
+        Regarding the italic angle, only a small minority of fonts advertise
+        oblique shape despite having a zero angle. On my machine, these are
+
+
+            # /luaotfload-tool.lua --list=subfamily:italic --fields=italicangle,plainname | grep -e '\s0\s' | cut -f 2,3
+            0	Quattrocento Sans Italic
+            0	Libre Baskerville Italic
+            0	Cabin Italic
+            0	PersianModern-Italic
+            0	PersianModern-ItalicShadow
+            0	PersianModern-ItalicOutline
+            0	Alegreya SC Italic
+            0	Alegreya Italic
+            0	XB Niloofar Italic
+            0	Bukyvede-Italic
+
+        (Weirdly, some of those set a nonzero italic angle only for the
+        bold italic variant, while neglecting to do so for the oblique
+        shape with normal weight ...)
+        These outliers can be detected by checking the appropriate subfamily
+        etc. fields.
+
+    --doc]]--
+
+    local choose_exact = function (field, weight, italicangle)
+        local i = false
+        local b = false
+
+        if italicangle ~= 0 or italic_synonym [field] then
+            i = true
+        end
+
+        if weight == 700 or field == "bold" then
+            b = true
+        end
+
+        if field == "bolditalic" or field == "boldoblique" then
+            b = true
+            i = true
+        end
+
+        if i and b then
             return "bi"
+        elseif i then
+            return "i"
+        elseif b then
+            return "b"
         end
 
         return false
@@ -2473,16 +2511,18 @@ do
     pick_style = function (fontstyle_name,
                            prefmodifiers,
                            subfamily,
-                           splitstyle)
+                           splitstyle,
+                           weight,
+                           italicangle)
         local style
         if fontstyle_name then
-            style = choose_exact (fontstyle_name)
+            style = choose_exact (fontstyle_name, weight, italicangle)
         end
         if not style then
             if prefmodifiers then
-                style = choose_exact (prefmodifiers)
+                style = choose_exact (prefmodifiers, weight, italicangle)
             elseif subfamily then
-                style = choose_exact (subfamily)
+                style = choose_exact (subfamily, weight, italicangle)
             end
         end
 --        if not style and splitstyle then
@@ -2628,7 +2668,9 @@ local collect_families = function (mappings)
         local modifier          = pick_style (fontstyle_name,
                                               prefmodifiers,
                                               subfamily,
-                                              splitstyle)
+                                              splitstyle,
+                                              weight,
+                                              italicangle)
 
         if not modifier then --- regular, exact only
             modifier = check_regular (fontstyle_name,

@@ -1483,10 +1483,6 @@ local organize_styledata = function (fontname,
         split           = split_fontname (fontname),
         width           = pfminfo.width,
         italicangle     = metadata.italicangle,
---        italicangle     = {
---            metadata.italicangle,   -- float
---            info.italicangle,       -- truncated to integer point size?
---        },
     --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
         units_per_em    = metadata.units_per_em,
         version         = metadata.version,
@@ -2454,37 +2450,11 @@ local check_regular
 do
     local splitfontname = lpeg.splitat "-"
 
-    --[[doc--
-
-        Regarding the italic angle, only a small minority of fonts advertise
-        oblique shape despite having a zero angle. On my machine, these are
-
-
-            # /luaotfload-tool.lua --list=subfamily:italic --fields=italicangle,plainname | grep -e '\s0\s' | cut -f 2,3
-            0	Quattrocento Sans Italic
-            0	Libre Baskerville Italic
-            0	Cabin Italic
-            0	PersianModern-Italic
-            0	PersianModern-ItalicShadow
-            0	PersianModern-ItalicOutline
-            0	Alegreya SC Italic
-            0	Alegreya Italic
-            0	XB Niloofar Italic
-            0	Bukyvede-Italic
-
-        (Weirdly, some of those set a nonzero italic angle only for the
-        bold italic variant, while neglecting to do so for the oblique
-        shape with normal weight ...)
-        These outliers can be detected by checking the appropriate subfamily
-        etc. fields.
-
-    --doc]]--
-
-    local choose_exact = function (field, weight, italicangle)
+    local choose_exact = function (field, weight)
         local i = false
         local b = false
 
-        if italicangle ~= 0 or italic_synonym [field] then
+        if italic_synonym [field] then
             i = true
         end
 
@@ -2512,17 +2482,16 @@ do
                            prefmodifiers,
                            subfamily,
                            splitstyle,
-                           weight,
-                           italicangle)
+                           weight)
         local style
         if fontstyle_name then
-            style = choose_exact (fontstyle_name, weight, italicangle)
+            style = choose_exact (fontstyle_name, weight)
         end
         if not style then
             if prefmodifiers then
-                style = choose_exact (prefmodifiers, weight, italicangle)
+                style = choose_exact (prefmodifiers, weight)
             elseif subfamily then
-                style = choose_exact (subfamily, weight, italicangle)
+                style = choose_exact (subfamily, weight)
             end
         end
 --        if not style and splitstyle then
@@ -2669,8 +2638,7 @@ local collect_families = function (mappings)
                                               prefmodifiers,
                                               subfamily,
                                               splitstyle,
-                                              weight,
-                                              italicangle)
+                                              weight)
 
         if not modifier then --- regular, exact only
             modifier = check_regular (fontstyle_name,

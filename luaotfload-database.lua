@@ -2578,9 +2578,7 @@ local add_family = function (name, subtable, modifier, entry)
 
     familytable [#familytable + 1] = {
         index    = entry.index,
-        size     = size and { size [1], size [2], size [3] },
         modifier = modifier,
-        weight   = entry.weight,
     }
 end
 

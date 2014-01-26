@@ -2450,10 +2450,8 @@ local check_regular
 do
     local splitfontname = lpeg.splitat "-"
 
-    local choose_exact = function (field, weight)
-        local i = false
-        local b = false
-
+    local choose_exact = function (field)
+        --- only clean matches, without guessing
         if italic_synonym [field] then
             return "i"
         end
@@ -2466,34 +2464,37 @@ do
             return "bi"
         end
 
-        if weight == 700 then
-            --- matches only if weight is specified
-            return "b"
-        end
-
         return false
     end
 
     pick_style = function (fontstyle_name,
                            prefmodifiers,
                            subfamily,
-                           splitstyle,
-                           weight)
+                           splitstyle)
         local style
         if fontstyle_name then
-            style = choose_exact (fontstyle_name --[[ , weight ]])
+            style = choose_exact (fontstyle_name)
         end
         if not style then
             if prefmodifiers then
-                style = choose_exact (prefmodifiers --[[ , weight ]])
+                style = choose_exact (prefmodifiers)
             elseif subfamily then
-                style = choose_exact (subfamily, weight)
+                style = choose_exact (subfamily)
             end
         end
---        if not style and splitstyle then
---            style = choose_exact (splitstyle)
---        end
         return style
+    end
+
+    pick_fallback_style = function (italicangle, weight)
+        --- more aggressive, but only to determine bold faces
+        if weight > 500 then --- bold spectrum matches
+            if italicangle == 0 then
+                return tostring (weight)
+            else
+                return tostring (weight) .. "i"
+            end
+        end
+        return false
     end
 
     --- we use only exact matches here since there are constructs
@@ -2573,28 +2574,25 @@ local add_family = function (name, subtable, modifier, entry)
         subtable [name] = familytable
     end
 
-    --- the style table is treated as an unordered list
-    local styletable = familytable [modifier]
-    if not styletable then
-        styletable = { }
-        familytable [modifier] = styletable
-    end
+    local size = entry.size
 
-    if not entry.prefmodifiers then --- default size for this style/family combo
-        styletable.default = entry.index
-    end
+    familytable [#familytable + 1] = {
+        index    = entry.index,
+        size     = size and { size [1], size [2], size [3] },
+        modifier = modifier,
+        weight   = entry.weight,
+    }
+end
 
-    local size = entry.size --- dsnsize * high * low
-    if size then
-        styletable [#styletable + 1] = {
-            size [1],
-            size [2],
-            size [3],
-            entry.index,
-        }
-    else
-        styletable.default = entry.index
+local get_subtable = function (families, entry)
+    local location  = entry.location
+    local format    = entry.format
+    local subtable  = families [location] [format]
+    if not subtable then
+        subtable  = { }
+        families [location] [format] = subtable
     end
+    return subtable
 end
 
 local collect_families = function (mappings)
@@ -2615,14 +2613,7 @@ local collect_families = function (mappings)
             pull_values (entry)
         end
 
-        local location  = entry.location
-        local format    = entry.format
-
-        local subtable  = families [location] [format]
-        if not subtable then
-            subtable  = { }
-            families [location] [format] = subtable
-        end
+        local subtable          = get_subtable (families, entry)
 
         local familyname        = entry.familyname
         local metafamily        = entry.metafamily
@@ -2637,8 +2628,7 @@ local collect_families = function (mappings)
         local modifier          = pick_style (fontstyle_name,
                                               prefmodifiers,
                                               subfamily,
-                                              splitstyle,
-                                              weight)
+                                              splitstyle)
 
         if not modifier then --- regular, exact only
             modifier = check_regular (fontstyle_name,
@@ -2674,10 +2664,125 @@ local collect_families = function (mappings)
 --            if metafamily and metafamily ~= familyname then
 --                add_family (metafamily, subtable, modifier, entry)
 --            end
+        elseif weight > 500 then -- in bold spectrum
+            modifier = pick_fallback_style (italicangle, weight)
+            if modifier then
+                add_family (familyname, subtable, modifier, entry)
+            end
         end
     end
 
     collectgarbage "collect"
+    return families
+end
+
+--[[doc--
+
+    add_bold_spectrum -- For not-quite-bold faces, determine whether
+    they can fill in for a missing bold face slot in a matching family.
+
+    Some families like Lucida do not contain real bold / bold italic
+    members. Instead, they have semibold variants at weight 600 which
+    we must add in a separate pass.
+
+--doc]]--
+
+local bold_spectrum_low  = 501 --- 500 is medium, 900 heavy/black
+local bold_weight        = 700
+local style_categories   = { "r", "b", "i", "bi" }
+local bold_categories    = {      "b",      "bi" }
+
+local group_modifiers = function (mappings, families)
+    report ("info", 2, "db", "Analyzing bold weight fallbacks.")
+    for location, location_data in next, families do
+        for format, format_data in next, location_data do
+            for familyname, collected in next, format_data do
+                local styledata = { } --- will replace the “collected” table
+                --- First, fill in the ordinary style data that
+                --- fits neatly into the four relevant modifier
+                --- categories.
+                for _, modifier in next, style_categories do
+                    local entries
+                    for key, info in next, collected do
+                        if info.modifier == modifier then
+                            if not entries then
+                                entries = { }
+                            end
+                            local index = info.index
+                            local entry = mappings [index]
+                            local size  = entry.size
+                            if size then
+                                entries [#entries + 1] = {
+                                    size [1],
+                                    size [2],
+                                    size [3],
+                                    index,
+                                }
+                            else
+                                entries.default = index
+                            end
+                            collected [key] = nil
+                        end
+                        styledata [modifier] = entries
+                    end
+                end
+
+                --- At this point the family set may still lack
+                --- entries for bold or bold italic. We will fill
+                --- those in using the modifier with the numeric
+                --- weight that is closest to bold (700).
+                if next (collected) then --- there are uncategorized entries
+                    for _, modifier in next, bold_categories do
+                        if not styledata [modifier] then
+                            local closest
+                            local minimum = 2^51
+                            for key, info in next, collected do
+                                local info_modifier = tonumber (info.modifier) and "b" or "bi"
+                                if modifier == info_modifier then
+                                    local index  = info.index
+                                    local entry  = mappings [index]
+                                    local weight = entry.weight
+                                    local diff   = weight < 700 and 700 - weight or weight - 700
+                                    if diff < minimum then
+                                        minimum = diff
+                                        closest = weight
+                                    end
+                                end
+                            end
+                            if closest then
+                                --- We know there is a substitute face for the modifier.
+                                --- Now we scan the list again to extract the size data
+                                --- in case the shape is available at multiple sizes.
+                                local entries = { }
+                                for key, info in next, collected do
+                                    local info_modifier = tonumber (info.modifier) and "b" or "bi"
+                                    if modifier == info_modifier then
+                                        local index  = info.index
+                                        local entry  = mappings [index]
+                                        local size   = entry.size
+                                        if entry.weight == closest then
+                                            if size then
+                                                entries [#entries + 1] =  {
+                                                    size [1],
+                                                    size [2],
+                                                    size [3],
+                                                    index,
+                                                }
+                                            else
+                                                entries.default = index
+                                            end
+                                        end
+                                    end
+                                end
+                                styledata [modifier] = entries
+                            end
+                        end
+                    end
+                end
+                format_data [familyname] = styledata
+            end
+        end
+    end
     return families
 end
 
@@ -2969,7 +3074,9 @@ update_names = function (currentnames, force, dry_run)
     targetnames.files       = generate_filedata (targetnames.mappings)
 
     --- pass 4: build family lookup table
-    targetnames.families    = collect_families (targetnames.mappings)
+    targetnames.families    = collect_families  (targetnames.mappings)
+    targetnames.families    = group_modifiers (targetnames.mappings,
+                                               targetnames.families)
 
     --- pass 5: order design size tables
     targetnames.families    = order_design_sizes (targetnames.families)

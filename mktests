@@ -87,11 +87,11 @@ local infer_regular_style = {
   { "Garamond Premier Pro", "GaramondPremrPro.otf"      },
   { "CMU Serif",            "cmunrm.otf"                },
   { "CMU Sans Serif",       "cmunss.otf"                },
-  { "Minion Pro",           "MinionPro_Regular.otf"     },
+  { "Minion Pro",           "MinionPro-Regular.otf"     },
   --- Below test will succeed only if we match for the
   --- splainname (= sanitized tfmdata.fullname) field
   --- explicitly.
-  { "Minion Pro Italic",    "MinionPro_It.otf"          },
+  { "Minion Pro Italic",    "MinionPro-It.otf"          },
 }
 
 local choose_optical_size = {
@@ -141,10 +141,10 @@ local choose_style = {
     Also, the full Minion Pro set comes with different optical sizes which
     for monetary reasons cannot considered here.
   --]]--
-  { { name = "Minion Pro", style = "regular"    }, "MinionPro_Regular.otf"  },
-  { { name = "Minion Pro", style = "italic"     }, "MinionPro_It.otf"       },
-  { { name = "Minion Pro", style = "bold"       }, "MinionPro_Bold.otf"     },
-  { { name = "Minion Pro", style = "bolditalic" }, "MinionPro_BoldIt.otf"   },
+  { { name = "Minion Pro", style = "regular"    }, "MinionPro-Regular.otf"  },
+  { { name = "Minion Pro", style = "italic"     }, "MinionPro-It.otf"       },
+  { { name = "Minion Pro", style = "bold"       }, "MinionPro-Bold.otf"     },
+  { { name = "Minion Pro", style = "bolditalic" }, "MinionPro-BoldIt.otf"   },
 }
 
 --- this needs a database built with --formats=+pfa,pfb,afm

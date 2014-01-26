@@ -131,7 +131,7 @@ luaotfloadconfig.compress      = luaotfloadconfig.compress ~= false
 local names                    = fonts.names
 local name_index               = nil --> upvalue for names.data
 local lookup_cache             = nil --> for names.lookups
-names.version                  = 2.4
+names.version                  = 2.5
 names.data                     = nil      --- contains the loaded database
 names.lookups                  = nil      --- contains the lookup cache
 

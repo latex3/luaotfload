@@ -88,21 +88,6 @@ end
 
 require(loader_path)
 
---[[doc--
-Depending on how the script is called we change its behavior.
-For backwards compatibility, moving or symlinking the script to a
-file name starting with \fileent{mkluatexfontdb} will cause it to
-trigger a database update on every run.
-Running as \fileent{luaotfload-tool} -- the new name -- will do this upon
-request only.
-
-There are two naming conventions followed here: firstly that of
-utilities such as \fileent{mktexpk}, \fileent{mktexlsr} and the likes,
-and secondly that of \fileent{fmtutil}.
-After support for querying the database was added, the latter appeared
-to be the more appropriate.
---doc]]--
-
 config                        = config or { }
 local config                  = config
 local luaotfloadconfig        = config.luaotfload or { }

@@ -1479,17 +1479,10 @@ local organize_styledata = function (fontname,
     return {
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
         size            = get_size_info (metadata),
-        weight          = {
-            pfminfo.weight,                     -- integer (multiple of 100?)
-            sanitize_fontname (info.weight),    -- style name
-        },
+        weight          = pfminfo.weight or 400,
         split           = split_fontname (fontname),
         width           = pfminfo.width,
         italicangle     = metadata.italicangle,
---        italicangle     = {
---            metadata.italicangle,   -- float
---            info.italicangle,       -- truncated to integer point size?
---        },
     --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
         units_per_em    = metadata.units_per_em,
         version         = metadata.version,
@@ -1601,8 +1594,7 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         size             = false,
         splitstyle       = splitstyle,
         fontstyle_name   = style ~= "" and style or weight,
-        weight           = { metadata.pfminfo.weight,
-                             weight },
+        weight           = metadata.pfminfo.weight or 400,
         italicangle      = italicangle,
     }
 end
@@ -2458,13 +2450,29 @@ local check_regular
 do
     local splitfontname = lpeg.splitat "-"
 
-    local choose_exact = function (field)
+    local choose_exact = function (field, weight)
+        local i = false
+        local b = false
+
         if italic_synonym [field] then
-            return "i"
-        elseif field == "bold" then
-            return "b"
-        elseif field == "bolditalic" or field == "boldoblique" then
+            i = true
+        end
+
+        if weight == 700 or field == "bold" then
+            b = true
+        end
+
+        if field == "bolditalic" or field == "boldoblique" then
+            b = true
+            i = true
+        end
+
+        if i and b then
             return "bi"
+        elseif i then
+            return "i"
+        elseif b then
+            return "b"
         end
 
         return false
@@ -2473,16 +2481,17 @@ do
     pick_style = function (fontstyle_name,
                            prefmodifiers,
                            subfamily,
-                           splitstyle)
+                           splitstyle,
+                           weight)
         local style
         if fontstyle_name then
-            style = choose_exact (fontstyle_name)
+            style = choose_exact (fontstyle_name, weight)
         end
         if not style then
             if prefmodifiers then
-                style = choose_exact (prefmodifiers)
+                style = choose_exact (prefmodifiers, weight)
             elseif subfamily then
-                style = choose_exact (subfamily)
+                style = choose_exact (subfamily, weight)
             end
         end
 --        if not style and splitstyle then
@@ -2628,7 +2637,8 @@ local collect_families = function (mappings)
         local modifier          = pick_style (fontstyle_name,
                                               prefmodifiers,
                                               subfamily,
-                                              splitstyle)
+                                              splitstyle,
+                                              weight)
 
         if not modifier then --- regular, exact only
             modifier = check_regular (fontstyle_name,

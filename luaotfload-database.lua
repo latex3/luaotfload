@@ -2455,23 +2455,19 @@ do
         local b = false
 
         if italic_synonym [field] then
-            i = true
+            return "i"
         end
 
-        if weight == 700 or field == "bold" then
-            b = true
+        if field == "bold" then
+            return "b"
         end
 
         if field == "bolditalic" or field == "boldoblique" then
-            b = true
-            i = true
+            return "bi"
         end
 
-        if i and b then
-            return "bi"
-        elseif i then
-            return "i"
-        elseif b then
+        if weight == 700 then
+            --- matches only if weight is specified
             return "b"
         end
 
@@ -2485,11 +2481,11 @@ do
                            weight)
         local style
         if fontstyle_name then
-            style = choose_exact (fontstyle_name, weight)
+            style = choose_exact (fontstyle_name --[[ , weight ]])
         end
         if not style then
             if prefmodifiers then
-                style = choose_exact (prefmodifiers, weight)
+                style = choose_exact (prefmodifiers --[[ , weight ]])
             elseif subfamily then
                 style = choose_exact (subfamily, weight)
             end
@@ -2506,7 +2502,9 @@ do
     check_regular = function (fontstyle_name,
                               prefmodifiers,
                               subfamily,
-                              splitstyle)
+                              splitstyle,
+                              italicangle,
+                              weight)
 
         if fontstyle_name then
             return regular_synonym [fontstyle_name]
@@ -2516,6 +2514,8 @@ do
             return regular_synonym [subfamily]
         elseif splitstyle then
             return regular_synonym [splitstyle]
+        elseif italicangle == 0 and weight == 400 then
+            return true
         end
 
         return nil
@@ -2644,7 +2644,9 @@ local collect_families = function (mappings)
             modifier = check_regular (fontstyle_name,
                                       prefmodifiers,
                                       subfamily,
-                                      splitstyle)
+                                      splitstyle,
+                                      italicangle,
+                                      weight)
         end
 
         if modifier then

@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 01/14/14 16:21:00
+-- merge date  : 02/01/14 14:22:42
 
 do -- begin closure to overcome local limits and interference
 
@@ -101,7 +101,9 @@ local byte,char,gmatch,format=string.byte,string.char,string.gmatch,string.forma
 local floor=math.floor
 local P,R,S,V,Ct,C,Cs,Cc,Cp,Cmt=lpeg.P,lpeg.R,lpeg.S,lpeg.V,lpeg.Ct,lpeg.C,lpeg.Cs,lpeg.Cc,lpeg.Cp,lpeg.Cmt
 local lpegtype,lpegmatch,lpegprint=lpeg.type,lpeg.match,lpeg.print
-setinspector(function(v) if lpegtype(v) then lpegprint(v) return true end end)
+if setinspector then
+  setinspector(function(v) if lpegtype(v) then lpegprint(v) return true end end)
+end
 lpeg.patterns=lpeg.patterns or {} 
 local patterns=lpeg.patterns
 local anything=P(1)
@@ -395,7 +397,7 @@ function lpeg.replacer(one,two,makefunction,isutf)
     return pattern
   end
 end
-function lpeg.finder(lst,makefunction) 
+function lpeg.finder(lst,makefunction,isutf) 
   local pattern
   if type(lst)=="table" then
     pattern=P(false)
@@ -411,7 +413,11 @@ function lpeg.finder(lst,makefunction)
   else
     pattern=P(lst)
   end
-  pattern=(1-pattern)^0*pattern
+  if isutf then
+    pattern=((utf8char or 1)-pattern)^0*pattern
+  else
+    pattern=(1-pattern)^0*pattern
+  end
   if makefunction then
     return function(str)
       return lpegmatch(pattern,str)
@@ -1636,7 +1642,9 @@ function table.print(t,...)
     serialize(print,t,...)
   end
 end
-setinspector(function(v) if type(v)=="table" then serialize(print,v,"table") return true end end)
+if setinspector then
+  setinspector(function(v) if type(v)=="table" then serialize(print,v,"table") return true end end)
+end
 function table.sub(t,i,j)
   return { unpack(t,i,j) }
 end
@@ -2508,8 +2516,12 @@ local unpack,concat=table.unpack,table.concat
 local P,V,C,S,R,Ct,Cs,Cp,Carg,Cc=lpeg.P,lpeg.V,lpeg.C,lpeg.S,lpeg.R,lpeg.Ct,lpeg.Cs,lpeg.Cp,lpeg.Carg,lpeg.Cc
 local patterns,lpegmatch=lpeg.patterns,lpeg.match
 local utfchar,utfbyte=utf.char,utf.byte
-local loadstripped=_LUAVERSION<5.2 and load or function(str)
-  return load(dump(load(str),true)) 
+local loadstripped=function(str,shortcuts)
+  if shortcuts then
+    return load(dump(load(str),true),nil,nil,shortcuts)
+  else
+    return load(dump(load(str),true))
+  end
 end
 if not number then number={} end 
 local stripper=patterns.stripzeros
@@ -2659,31 +2671,34 @@ function number.sparseexponent(f,n)
   end
   return tostring(n)
 end
-local preamble=[[
-local type = type
-local tostring = tostring
-local tonumber = tonumber
-local format = string.format
-local concat = table.concat
-local signed = number.signed
-local points = number.points
-local basepoints = number.basepoints
-local utfchar = utf.char
-local utfbyte = utf.byte
-local lpegmatch = lpeg.match
-local nspaces = string.nspaces
-local tracedchar = string.tracedchar
-local autosingle = string.autosingle
-local autodouble = string.autodouble
-local sequenced = table.sequenced
-local formattednumber = number.formatted
-local sparseexponent = number.sparseexponent
-]]
 local template=[[
 %s
 %s
 return function(%s) return %s end
 ]]
+local environment={
+  global=global or _G,
+  lpeg=lpeg,
+  type=type,
+  tostring=tostring,
+  tonumber=tonumber,
+  format=string.format,
+  concat=table.concat,
+  signed=number.signed,
+  points=number.points,
+  basepoints=number.basepoints,
+  utfchar=utf.char,
+  utfbyte=utf.byte,
+  lpegmatch=lpeg.match,
+  nspaces=string.nspaces,
+  tracedchar=string.tracedchar,
+  autosingle=string.autosingle,
+  autodouble=string.autodouble,
+  sequenced=table.sequenced,
+  formattednumber=number.formatted,
+  sparseexponent=number.sparseexponent,
+}
+local preamble=""
 local arguments={ "a1" } 
 setmetatable(arguments,{ __index=function(t,k)
     local v=t[k-1]..",a"..k
@@ -3005,8 +3020,8 @@ local builder=Cs { "start",
   ["!"]=Carg(2)*prefix_any*P("!")*C((1-P("!"))^1)*P("!")/format_extension,
 }
 local direct=Cs (
-    P("%")/""*Cc([[local format = string.format return function(str) return format("%]])*(S("+- .")+R("09"))^0*S("sqidfgGeExXo")*Cc([[",str) end]])*P(-1)
-  )
+  P("%")*(S("+- .")+R("09"))^0*S("sqidfgGeExXo")*P(-1)/[[local format = string.format return function(str) return format("%0",str) end]]
+)
 local function make(t,str)
   local f
   local p
@@ -3018,7 +3033,7 @@ local function make(t,str)
     p=lpegmatch(builder,str,1,"..",t._extensions_) 
     if n>0 then
       p=format(template,preamble,t._preamble_,arguments[n],p)
-      f=loadstripped(p)()
+      f=loadstripped(p,t._environment_)() 
     else
       f=function() return str end
     end
@@ -3031,7 +3046,11 @@ local function use(t,fmt,...)
 end
 strings.formatters={}
 function strings.formatters.new()
-  local t={ _extensions_={},_preamble_="",_type_="formatter" }
+  local e={} 
+  for k,v in next,environment do
+    e[k]=v
+  end
+  local t={ _extensions_={},_preamble_="",_environment_=e,_type_="formatter" }
   setmetatable(t,{ __index=make,__call=use })
   return t
 end
@@ -3041,8 +3060,12 @@ string.formatter=function(str,...) return formatters[str](...) end
 local function add(t,name,template,preamble)
   if type(t)=="table" and t._type_=="formatter" then
     t._extensions_[name]=template or "%s"
-    if preamble then
+    if type(preamble)=="string" then
       t._preamble_=preamble.."\n"..t._preamble_ 
+    elseif type(preamble)=="table" then
+      for k,v in next,preamble do
+        t._environment_[k]=v
+      end
     end
   end
 end
@@ -3051,9 +3074,9 @@ patterns.xmlescape=Cs((P("<")/"&lt;"+P(">")/"&gt;"+P("&")/"&amp;"+P('"')/"&quot;
 patterns.texescape=Cs((C(S("#$%\\{}"))/"\\%1"+P(1))^0)
 patterns.luaescape=Cs(((1-S('"\n'))^1+P('"')/'\\"'+P('\n')/'\\n"')^0) 
 patterns.luaquoted=Cs(Cc('"')*((1-S('"\n'))^1+P('"')/'\\"'+P('\n')/'\\n"')^0*Cc('"'))
-add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],[[local xmlescape = lpeg.patterns.xmlescape]])
-add(formatters,"tex",[[lpegmatch(texescape,%s)]],[[local texescape = lpeg.patterns.texescape]])
-add(formatters,"lua",[[lpegmatch(luaescape,%s)]],[[local luaescape = lpeg.patterns.luaescape]])
+add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],{ xmlescape=lpeg.patterns.xmlescape })
+add(formatters,"tex",[[lpegmatch(texescape,%s)]],{ texescape=lpeg.patterns.texescape })
+add(formatters,"lua",[[lpegmatch(luaescape,%s)]],{ luaescape=lpeg.patterns.luaescape })
 
 end -- closure
 

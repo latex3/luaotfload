@@ -6,9 +6,9 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:      2013-07-31
+:Date:      2014-02-05
 :Copyright: GPL v2.0
-:Version:   2.4
+:Version:   2.4-3
 :Manual section: 1
 :Manual group: text processing
 
@@ -197,7 +197,7 @@ miscellaneous
                            directory (the name will be chosen
                            automatically (**experimental!**).
 
---version, -V           Show version number and exit.
+--version, -V           Show version info of components and exit.
 --help, -h              Show help message and exit.
 
 --diagnose=CHECK        Run the diagnostic procedure *CHECK*. Available

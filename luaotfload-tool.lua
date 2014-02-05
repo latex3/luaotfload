@@ -104,18 +104,7 @@ if not luaotfloadconfig.strip then
     luaotfloadconfig.strip = true
 end
 
-do -- we don’t have file.basename and the likes yet, so inline parser ftw
-    local slash        = P"/"
-    local dot          = P"."
-    local noslash      = 1 - slash
-    local slashes      = slash^1
-    local path         =  slashes^-1 * (noslash^1 * slashes)^1
-    local thename      = (1 - slash - dot)^1
-    local extension    = dot * (1 - slash - dot)^1
-    local p_basename   = path^-1 * C(thename) * extension^-1 * P(-1)
-
-    luaotfloadconfig.self = "luaotfload-tool"
-end
+luaotfloadconfig.self           = "luaotfload-tool"
 
 config.lualibs                  = config.lualibs or { }
 config.lualibs.verbose          = false
@@ -175,12 +164,13 @@ local help_messages = {
 
 Usage: %s [OPTIONS...]
 
-Operations on the Luaotfload font names database.
+    Luaotfload font management and diagnostic utility.
+    This program is part of the Luaotfload package.
 
-This tool is part of the luaotfload package. Valid options are:
+    Valid options are:
 
 -------------------------------------------------------------------------------
-                             VERBOSITY AND LOGGING
+                           VERBOSITY AND DIAGNOSTICS
 
   -q --quiet                   don't output anything
   -v --verbose=LEVEL           be more verbose (print the searched directories)
@@ -266,8 +256,16 @@ local help_msg = function (version)
                          luaotfloadconfig.cache_dir)))
 end
 
+local about = [[
+%s:
+        Luaotfload font management and diagnostic utility.
+        License: GNU GPL v2.0.
+        Report problems to <https://github.com/lualatex/luaotfload/issues>
+]]
+
 local version_msg = function ( )
     local out = function (...) texiowrite_nl (stringformat (...)) end
+    out (about, luaotfloadconfig.self)
     out ("%s version %q", luaotfloadconfig.self, version)
     out ("revision %q", luaotfloadstatus.notes.revision)
     out ("database version %q", names.version)

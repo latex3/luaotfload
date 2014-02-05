@@ -1376,21 +1376,34 @@ local get_english_names = function (names, basename)
                 english_names = raw_namedata.names
             end
         end
-    else
-        -- no names table, probably a broken font
-        report("log", 1, "db",
-               "Broken font %s rejected due to missing names table.",
-               basename)
-        return nil
     end
 
-    return english_names
+    if not english_names then
+        -- no (English) names table, probably a broken font
+        report("both", 3, "db",
+               "%s: missing or broken names table.", basename)
+    end
+
+    return english_names or { }
 end
 
 local organize_namedata = function (metadata,
                                     english_names,
                                     basename,
                                     info)
+    local default_name = english_names.compatfull
+                      or english_names.fullname
+                      or english_names.postscriptname
+                      or metadata.fullname
+                      or metadata.fontname
+                      or info.fullname --- TODO check if fontloader.info() is ready for prime
+                      or info.fontname
+    local default_family = english_names.preffamily
+                        or english_names.family
+                        or metadata.familyname
+                        or info.familyname
+--    local default_modifier = english_names.prefmodifiers
+--                          or english_names.subfamily
     local fontnames = {
         --- see
         --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
@@ -1406,14 +1419,15 @@ local organize_namedata = function (metadata,
             --- However, in some fonts (e.g. CMU) all three fields are
             --- identical.
             fullname      = --[[ 18 ]] english_names.compatfull
-                         or --[[  4 ]] english_names.fullname,
+                         or --[[  4 ]] english_names.fullname
+                         or default_name,
             --- we keep both the “preferred family” and the “family”
             --- values around since both are valid but can turn out
             --- quite differently, e.g. with Latin Modern:
             ---     preffamily: “Latin Modern Sans”,
             ---     family:     “LM Sans 10”
             preffamily    = --[[ 16 ]] english_names.preffamilyname,
-            family        = --[[  1 ]] english_names.family,
+            family        = --[[  1 ]] english_names.family or default_family,
             prefmodifiers = --[[ 17 ]] english_names.prefmodifiers,
             subfamily     = --[[  2 ]] english_names.subfamily,
             psname        = --[[  6 ]] english_names.postscriptname,
@@ -1477,7 +1491,7 @@ local organize_styledata = function (fontname,
     local names     = metadata.names
 
     return {
-    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
+    --- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
         size            = get_size_info (metadata),
         weight          = pfminfo.weight or 400,
         split           = split_fontname (fontname),
@@ -2568,6 +2582,9 @@ local pull_values = function (entry)
 end
 
 local add_family = function (name, subtable, modifier, entry)
+    if not name then --- probably borked font
+        return
+    end
     local familytable = subtable [name]
     if not familytable then
         familytable = { }

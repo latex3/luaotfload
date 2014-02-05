@@ -104,18 +104,7 @@ if not luaotfloadconfig.strip then
     luaotfloadconfig.strip = true
 end
 
-do -- we don’t have file.basename and the likes yet, so inline parser ftw
-    local slash        = P"/"
-    local dot          = P"."
-    local noslash      = 1 - slash
-    local slashes      = slash^1
-    local path         =  slashes^-1 * (noslash^1 * slashes)^1
-    local thename      = (1 - slash - dot)^1
-    local extension    = dot * (1 - slash - dot)^1
-    local p_basename   = path^-1 * C(thename) * extension^-1 * P(-1)
-
-    luaotfloadconfig.self = "luaotfload-tool"
-end
+luaotfloadconfig.self           = "luaotfload-tool"
 
 config.lualibs                  = config.lualibs or { }
 config.lualibs.verbose          = false

@@ -132,7 +132,7 @@ luaotfloadconfig.compress      = luaotfloadconfig.compress ~= false
 local names                    = fonts.names
 local name_index               = nil --> upvalue for names.data
 local lookup_cache             = nil --> for names.lookups
-names.version                  = 2.4
+names.version                  = 2.41
 names.data                     = nil      --- contains the loaded database
 names.lookups                  = nil      --- contains the lookup cache
 
@@ -1395,16 +1395,26 @@ local get_english_names = function (names, basename)
         report("log", 1, "db",
                "Broken font %s rejected due to missing names table.",
                basename)
-        return nil
     end
 
-    return english_names
+    return english_names or { }
 end
 
 local organize_namedata = function (metadata,
                                     english_names,
                                     basename,
                                     info)
+    local default_name = english_names.compatfull
+                      or english_names.fullname
+                      or english_names.postscriptname
+                      or metadata.fullname
+                      or metadata.fontname
+                      or info.fullname --- TODO check if fontloader.info() is ready for prime
+                      or info.fontname
+    local default_family = english_names.preffamily
+                        or english_names.family
+                        or metadata.familyname
+                        or info.familyname
     local fontnames = {
         --- see
         --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
@@ -1420,14 +1430,15 @@ local organize_namedata = function (metadata,
             --- However, in some fonts (e.g. CMU) all three fields are
             --- identical.
             fullname      = --[[ 18 ]] english_names.compatfull
-                         or --[[  4 ]] english_names.fullname,
+                         or --[[  4 ]] english_names.fullname
+                         or default_name,
             --- we keep both the “preferred family” and the “family”
             --- values around since both are valid but can turn out
             --- quite differently, e.g. with Latin Modern:
             ---     preffamily: “Latin Modern Sans”,
             ---     family:     “LM Sans 10”
             preffamily    = --[[ 16 ]] english_names.preffamilyname,
-            family        = --[[  1 ]] english_names.family,
+            family        = --[[  1 ]] english_names.family or default_family,
             prefmodifiers = --[[ 17 ]] english_names.prefmodifiers,
             subfamily     = --[[  2 ]] english_names.subfamily,
             psname        = --[[  6 ]] english_names.postscriptname,
@@ -2803,6 +2814,9 @@ local pull_values = function (entry)
 end
 
 local add_family = function (name, subtable, modifier, entry)
+    if not name then
+        return
+    end
     local familytable = subtable [name]
     if not familytable then
         familytable = { }

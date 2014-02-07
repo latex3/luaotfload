@@ -105,6 +105,7 @@ local stringis_empty           = string.is_empty
 local stringsplit              = string.split
 local stringstrip              = string.strip
 local tableappend              = table.append
+local tablecontains            = table.contains
 local tablecopy                = table.copy
 local tablefastcopy            = table.fastcopy
 local tabletofile              = table.tofile
@@ -1331,6 +1332,13 @@ end --- find_closest()
     <http://www.ntg.nl/pipermail/ntg-context/2013/075885.html>
     regarding the omission of ``fontloader.close()``.
 
+    TODO --   check if fontloader.info() is ready for prime in 0.78+
+         --   fields /tables needed:
+                    -- names
+                    -- postscriptname
+                    -- validation_state
+                    -- ..
+
 --doc]]--
 
 local load_font_file = function (filename, subfont)
@@ -1365,8 +1373,24 @@ local get_size_info = function (metadata)
     return false
 end
 
-local get_english_names = function (names, basename)
+local get_english_names = function (metadata, basename)
+    local validation_state = metadata.validation_state
+    if validation_state
+        and tablecontains (validation_state, "bad_ps_fontname")
+    then
+        report("both", 3, "db",
+               "%s has invalid postscript font names, using dummies.",
+               basename)
+        --- Broken names table, e.g. avkv.ttf with UTF-16 strings;
+        --- we put some dummies in place like the fontloader
+        --- (font-otf.lua) does.
+        return {
+            fontname = "bad-fontname-" .. basename,
+            fullname = "bad-fullname-" .. basename,
+        }
+    end
 
+    local names = metadata.names
     local english_names
 
     if names then
@@ -1396,7 +1420,7 @@ local organize_namedata = function (metadata,
                       or english_names.postscriptname
                       or metadata.fullname
                       or metadata.fontname
-                      or info.fullname --- TODO check if fontloader.info() is ready for prime
+                      or info.fullname
                       or info.fontname
     local default_family = english_names.preffamily
                         or english_names.family
@@ -1467,7 +1491,6 @@ local organize_namedata = function (metadata,
         fullname      = metadata.fullname,
         familyname    = metadata.familyname,
     }
-
 end
 
 
@@ -1523,7 +1546,7 @@ ot_fullinfo = function (filename,
         return nil
     end
 
-    local english_names = get_english_names (metadata.names, basename)
+    local english_names = get_english_names (metadata, basename)
     local namedata      = organize_namedata (metadata,
                                              english_names,
                                              basename,

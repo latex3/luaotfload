@@ -193,7 +193,8 @@ miscellaneous
                            directory (the name will be chosen
                            automatically (**experimental!**).
 
---version, -V           Show version number and exit.
+--version, -V           Show version numbers of components as well as
+                        some basic information and exit.
 --help, -h              Show help message and exit.
 
 --diagnose=CHECK        Run the diagnostic procedure *CHECK*. Available

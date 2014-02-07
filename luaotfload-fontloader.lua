@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 02/01/14 14:22:42
+-- merge date  : 02/07/14 00:57:35
 
 do -- begin closure to overcome local limits and interference
 
@@ -6450,7 +6450,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.750 
+otf.version=2.751 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -6602,6 +6602,7 @@ local valid_fields=table.tohash {
   "upos",
   "use_typo_metrics",
   "uwidth",
+  "validation_state",
   "version",
   "vert_base",
   "weight",
@@ -7913,6 +7914,11 @@ actions["check metadata"]=function(data,filename,raw)
     for i=1,#ttftables do
       ttftables[i].data="deleted"
     end
+  end
+  if metadata.validation_state and table.contains(metadata.validation_state,"bad_ps_fontname") then
+    local name=file.nameonly(filename)
+    metadata.fontname="bad-fontname-"..name
+    metadata.fullname="bad-fullname-"..name
   end
 end
 actions["cleanup tables"]=function(data,filename,raw)

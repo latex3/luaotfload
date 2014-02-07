@@ -1373,23 +1373,7 @@ local get_size_info = function (metadata)
     return false
 end
 
-local get_english_names = function (metadata, basename)
-    local validation_state = metadata.validation_state
-    if validation_state
-        and tablecontains (validation_state, "bad_ps_fontname")
-    then
-        report("both", 3, "db",
-               "%s has invalid postscript font names, using dummies.",
-               basename)
-        --- Broken names table, e.g. avkv.ttf with UTF-16 strings;
-        --- we put some dummies in place like the fontloader
-        --- (font-otf.lua) does.
-        return {
-            fontname = "bad-fontname-" .. basename,
-            fullname = "bad-fullname-" .. basename,
-        }
-    end
-
+local get_english_names = function (metadata)
     local names = metadata.names
     local english_names
 
@@ -1397,34 +1381,78 @@ local get_english_names = function (metadata, basename)
         --inspect(names)
         for _, raw_namedata in next, names do
             if raw_namedata.lang == "English (US)" then
-                english_names = raw_namedata.names
+                return raw_namedata.names
             end
         end
     end
 
-    if not english_names then
-        -- no (English) names table, probably a broken font
-        report("both", 3, "db",
-               "%s: missing or broken names table.", basename)
-    end
-
-    return english_names or { }
+    -- no (English) names table, probably a broken font
+    report("both", 3, "db",
+            "%s: missing or broken English names table.", basename)
+    return { fontname = metadata.fontname,
+             fullname = metadata.fullname, }
 end
 
-local organize_namedata = function (metadata,
+--[[--
+    In case of broken PS names we set some dummies. However, we cannot
+    directly modify the font data as returned by fontloader.open() because
+    it is a userdata object.
+
+    For this reason we copy what is necessary whilst keeping the table
+    structure the same as in the tfmdata.
+--]]--
+local get_raw_info = function (metadata, basename)
+    local fullname
+    local fontname
+    local psname
+
+    local validation_state = metadata.validation_state
+    if validation_state
+        and tablecontains (validation_state, "bad_ps_fontname")
+    then
+        --- Broken names table, e.g. avkv.ttf with UTF-16 strings;
+        --- we put some dummies in place like the fontloader
+        --- (font-otf.lua) does.
+        report("both", 3, "db",
+               "%s has invalid postscript font names, using dummies.",
+               basename)
+        fontname = "bad-fontname-" .. basename
+        fullname = "bad-fullname-" .. basename
+    else
+        fontname = metadata.fontname
+        fullname = metadata.fullname
+    end
+
+    return {
+        familyname          = metadata.familyname,
+        fontname            = fontname,
+        fontstyle_name      = metadata.fontstyle_name,
+        fullname            = fullname,
+        italicangle         = metadata.italicangle,
+        names               = metadata.names,
+        pfminfo             = metadata.pfminfo,
+        units_per_em        = metadata.units_per_em,
+        version             = metadata.version,
+        design_size         = metadata.design_size,
+        design_range_top    = metadata.design_range_top,
+        design_range_bottom = metadata.design_range_bottom,
+    }
+end
+
+local organize_namedata = function (rawinfo,
                                     english_names,
                                     basename,
                                     info)
     local default_name = english_names.compatfull
                       or english_names.fullname
                       or english_names.postscriptname
-                      or metadata.fullname
-                      or metadata.fontname
+                      or rawinfo.fullname
+                      or rawinfo.fontname
                       or info.fullname
                       or info.fontname
     local default_family = english_names.preffamily
                         or english_names.family
-                        or metadata.familyname
+                        or rawinfo.familyname
                         or info.familyname
 --    local default_modifier = english_names.prefmodifiers
 --                          or english_names.subfamily
@@ -1458,9 +1486,9 @@ local organize_namedata = function (metadata,
         },
 
         metadata = {
-            fullname      = metadata.fullname,
-            fontname      = metadata.fontname,
-            familyname    = metadata.familyname,
+            fullname      = rawinfo.fullname,
+            fontname      = rawinfo.fontname,
+            familyname    = rawinfo.familyname,
         },
 
         info = {
@@ -1471,14 +1499,14 @@ local organize_namedata = function (metadata,
     }
 
     -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
-    if metadata.fontstyle_name then
+    if rawinfo.fontstyle_name then
         --- not present in all fonts, often differs from the preferred
         --- subfamily as well as subfamily fields, e.g. with
         --- LMSans10-BoldOblique:
         ---     subfamily:      “Bold Italic”
         ---     prefmodifiers:  “10 Bold Oblique”
         ---     fontstyle_name: “Bold Oblique”
-        for _, name in next, metadata.fontstyle_name do
+        for _, name in next, rawinfo.fontstyle_name do
             if name.lang == 1033 then --- I hate magic numbers
                 fontnames.fontstyle_name = name.name
             end
@@ -1487,9 +1515,9 @@ local organize_namedata = function (metadata,
 
     return {
         sanitized     = sanitize_fontnames (fontnames),
-        fontname      = metadata.fontname,
-        fullname      = metadata.fullname,
-        familyname    = metadata.familyname,
+        fontname      = rawinfo.fontname,
+        fullname      = rawinfo.fullname,
+        familyname    = rawinfo.familyname,
     }
 end
 
@@ -1546,13 +1574,18 @@ ot_fullinfo = function (filename,
         return nil
     end
 
-    local english_names = get_english_names (metadata, basename)
-    local namedata      = organize_namedata (metadata,
+    local rawinfo = get_raw_info (metadata, basename)
+    --- Closing the file manually is a tad faster and more memory
+    --- efficient than having it closed by the gc
+    fontloaderclose (metadata)
+
+    local english_names = get_english_names (rawinfo)
+    local namedata      = organize_namedata (rawinfo,
                                              english_names,
                                              basename,
                                              info)
     local style         = organize_styledata (namedata.fontname,
-                                              metadata,
+                                              rawinfo,
                                               english_names,
                                               info)
 
@@ -1564,11 +1597,8 @@ ot_fullinfo = function (filename,
         format          = format,
         names           = namedata,
         style           = style,
-        version         = metadata.version,
+        version         = rawinfo.version,
     }
-    --- Closing the file manually is a tad faster and more memory
-    --- efficient than having it closed by the gc
-    fontloaderclose (metadata)
     return res
 end
 
@@ -2577,7 +2607,7 @@ local pull_values = function (entry)
 
     --- pull name info ...
     entry.psname            = english.psname
-    entry.fontname          = info.fontname
+    entry.fontname          = info.fontname or metadata.fontname
     entry.fullname          = english.fullname or info.fullname
     entry.splainname        = metadata.fullname
     entry.prefmodifiers     = english.prefmodifiers

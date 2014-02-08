@@ -409,7 +409,8 @@ add_to_callback("hpack_filter",
 add_to_callback("find_vf_file",
                 find_vf_file, "luaotfload.find_vf_file")
 
-loadmodule "override.lua"   --- “luat-ovr”
+loadmodule "log.lua"        --- messages; used to be part of -override
+loadmodule "override.lua"   --- load glyphlist on demand
 
 logs.set_loglevel(config.luaotfload.loglevel)
 

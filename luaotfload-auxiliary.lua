@@ -17,7 +17,7 @@ luaotfload.aux              = luaotfload.aux or { }
 
 local aux                   = luaotfload.aux
 local log                   = luaotfload.log
-local warning               = luaotfload.log
+local report                = log.names_report
 local fonthashes            = fonts.hashes
 local identifiers           = fonthashes.identifiers
 
@@ -54,8 +54,8 @@ local start_rewrite_fontname = function ()
       rewrite_fontname,
       "luaotfload.rewrite_fontname")
     rewriting = true
-    logs.names_report ("log", 0, "aux",
-                       "start rewriting tfmdata.name field")
+    report ("log", 0, "aux",
+            "start rewriting tfmdata.name field")
   end
 end
 
@@ -66,8 +66,8 @@ local stop_rewrite_fontname = function ()
     luatexbase.remove_fromt_callback
       ("luaotfload.patch_font", "luaotfload.rewrite_fontname")
     rewriting = false
-    logs.names_report ("log", 0, "aux",
-                       "stop rewriting tfmdata.name field")
+    report ("log", 0, "aux",
+            "stop rewriting tfmdata.name field")
   end
 end
 
@@ -366,7 +366,7 @@ do
 
   local load_chardef = function ()
 
-    log ("Loading character metadata from %s.", chardef)
+    report ("both", 1, "aux", "Loading character metadata from %s.", chardef)
     chardata = dofile (kpse.find_file (chardef, "lua"))
 
     if chardata == nil then
@@ -424,19 +424,19 @@ local provides_script = function (font_id, asked_script)
         --- where method: "gpos" | "gsub"
         for feature, data in next, featuredata do
           if data[asked_script] then
-            log(stringformat(
-              "font no %d (%s) defines feature %s for script %s",
-              font_id, fontname, feature, asked_script))
+            report ("log", 1, "aux",
+                    "font no %d (%s) defines feature %s for script %s",
+                    font_id, fontname, feature, asked_script)
             return true
           end
         end
       end
-      log(stringformat(
-        "font no %d (%s) defines no feature for script %s",
-        font_id, fontname, asked_script))
+      report ("log", 0, "aux",
+              "font no %d (%s) defines no feature for script %s",
+              font_id, fontname, asked_script)
     end
   end
-  log(stringformat("no font with id %d", font_id))
+  report ("log", 0, "aux", "no font with id %d", font_id)
   return false
 end
 
@@ -463,20 +463,22 @@ local provides_language = function (font_id, asked_script, asked_language)
         for feature, data in next, featuredata do
           local scriptdata = data[asked_script]
           if scriptdata and scriptdata[asked_language] then
-            log(stringformat("font no %d (%s) defines feature %s "
-                          .. "for script %s with language %s",
-                             font_id, fontname, feature,
-                             asked_script, asked_language))
+            report ("log", 1, "aux",
+                    "font no %d (%s) defines feature %s "
+                    .. "for script %s with language %s",
+                    font_id, fontname, feature,
+                    asked_script, asked_language)
             return true
           end
         end
       end
-      log(stringformat(
-        "font no %d (%s) defines no feature for script %s with language %s",
-        font_id, fontname, asked_script, asked_language))
+      report ("log", 0, "aux",
+              "font no %d (%s) defines no feature "
+              .. "for script %s with language %s",
+              font_id, fontname, asked_script, asked_language)
     end
   end
-  log(stringformat("no font with id %d", font_id))
+  report ("log", 0, "aux", "no font with id %d", font_id)
   return false
 end
 
@@ -534,20 +536,21 @@ local provides_feature = function (font_id,        asked_script,
         if feature then
           local scriptdata = feature[asked_script]
           if scriptdata and scriptdata[asked_language] then
-            log(stringformat("font no %d (%s) defines feature %s "
-                          .. "for script %s with language %s",
-                             font_id, fontname, asked_feature,
-                             asked_script, asked_language))
+            report ("log", 1, "aux",
+                    "font no %d (%s) defines feature %s "
+                    .. "for script %s with language %s",
+                    font_id, fontname, asked_feature,
+                    asked_script, asked_language)
             return true
           end
         end
       end
-      log(stringformat(
-        "font no %d (%s) does not define feature %s for script %s with language %s",
-        font_id, fontname, asked_feature, asked_script, asked_language))
+      report ("log", 0, "aux",
+              "font no %d (%s) does not define feature %s for script %s with language %s",
+              font_id, fontname, asked_feature, asked_script, asked_language)
     end
   end
-  log(stringformat("no font with id %d", font_id))
+  report ("log", 0, "aux", "no font with id %d", font_id)
   return false
 end
 

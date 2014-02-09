@@ -44,6 +44,13 @@ local read_fonts_conf          = parsers.read_fonts_conf
 local stripslashes             = parsers.stripslashes
 local splitcomma               = parsers.splitcomma
 
+local log                      = luaotfload.log
+local report                   = log.names_report
+local report_status            = log.names_status
+local report_status_start      = log.names_status_start
+local report_status_stop       = log.names_status_stop
+
+
 --- Luatex builtins
 local load                     = load
 local next                     = next
@@ -151,11 +158,6 @@ local make_luanames = function (path)
            filereplacesuffix(path, "luc")
 end
 
-local report                = logs.names_report
-local report_status         = logs.names_status
-local report_status_start   = logs.names_status_start
-local report_status_stop    = logs.names_status_stop
-
 --- The “termwidth” value is only considered when printing
 --- short status messages, e.g. when building the database
 --- online.
@@ -231,7 +233,11 @@ if not runasscript then
     index.lua, index.luc     = make_luanames (index_file)
 else --- running as script, inject some dummies
     caches = { }
-    logs   = { report = function () end }
+    local dummy_function = function () end
+    log   = { report                = dummy_function,
+              report_status         = dummy_function,
+              report_status_start   = dummy_function,
+              report_status_stop    = dummy_function, }
 end
 
 
@@ -2284,7 +2290,7 @@ local scan_texmf_fonts = function (currentnames, targetnames, dry_run)
         report ("info", 1, "db", "Scanning TEXMF fonts...")
     else
         report ("info", 1, "db", "Scanning TEXMF and OS fonts...")
-        if logs.get_loglevel () > 3 then
+        if log.get_loglevel () > 3 then
             local osdirs = filesplitpath (osfontdir)
             report ("info", 0, "db",
                     "$OSFONTDIR has %d entries:", #osdirs)
@@ -2979,7 +2985,7 @@ local collect_statistics = function (mappings)
     local n_fullname = setsize (fullname)
     local n_family   = setsize (family)
 
-    if logs.get_loglevel () > 1 then
+    if log.get_loglevel () > 1 then
         local pprint_top = function (hash, n, set)
 
             local freqs = { }
@@ -3165,7 +3171,7 @@ update_names = function (currentnames, force, dry_run)
         if success then
             local success = save_lookups ()
             if success then
-                logs.names_report ("info", 2, "cache",
+                report ("info", 2, "cache",
                                    "Lookup cache emptied.")
                 return targetnames
             end
@@ -3354,7 +3360,7 @@ end
 local purge_cache = function ( )
     local writable_path = getwritablecachepath ()
     local luanames, lucnames, rest = collect_cache(writable_path)
-    if logs.get_loglevel() > 1 then
+    if log.get_loglevel() > 1 then
         print_cache("writable path", writable_path, luanames, lucnames, rest)
     end
     local success = purge_from_cache("writable path", writable_path, luanames, false)
@@ -3365,7 +3371,7 @@ end
 local erase_cache = function ( )
     local writable_path = getwritablecachepath ()
     local luanames, lucnames, rest, all = collect_cache(writable_path)
-    if logs.get_loglevel() > 1 then
+    if log.get_loglevel() > 1 then
         print_cache("writable path", writable_path, luanames, lucnames, rest)
     end
     local success = purge_from_cache("writable path", writable_path, all, true)

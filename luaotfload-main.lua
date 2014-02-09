@@ -4,7 +4,7 @@
 -- REQUIREMENTS:  luatex v.0.78 or later, the lualibs package
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2014-01-16 06:51:20+0100
+--     MODIFIED:  2014-02-09 14:42:22+0100
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -45,6 +45,7 @@ if not modules then modules = { } end modules ["luaotfload-main"] = {
 
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
+luaotfload.log                    = luaotfload.log or { }
 
 config                            = config or { }
 config.luaotfload                 = config.luaotfload or { }
@@ -91,10 +92,12 @@ local dummy_function = function () end
 local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
 
-luaotfload.error        = error
-luaotfload.warning      = warning
-luaotfload.info         = info
-luaotfload.log          = log
+luaotfload.log.tex        = {
+    error        = error,
+    warning      = warning,
+    info         = info,
+    log          = log,
+}
 
 --[[doc--
 
@@ -143,6 +146,12 @@ local loadmodule = function (name)
     require(fl_prefix .."-"..name)
 end
 
+loadmodule "log.lua"        --- messages; used to be part of -override
+local log             = luaotfload.log
+local report          = log.names_report
+
+log.set_loglevel(config.luaotfload.loglevel)
+
 --[[doc--
 
   Before \TeX Live 2013 version, \LUATEX had a bug that made ofm fonts
@@ -167,7 +176,8 @@ local find_vf_file = function (name)
         fullname = kpsefind_file(lpegmatch(p_removesuffix, name), "ovf")
     end
     if fullname then
-        log("loading virtual font file %s.", fullname)
+        report ("log", 0, "main",
+                "loading virtual font file %s.", fullname)
     end
     return fullname
 end
@@ -251,7 +261,7 @@ end
 local context_environment = { }
 
 local push_namespaces = function ()
-    log("push namespace for font loader")
+    report ("log", 1, "main", "push namespace for font loader")
     local normalglobal = { }
     for k, v in next, _G do
         normalglobal[k] = v
@@ -264,7 +274,7 @@ local pop_namespaces = function (normalglobal, isolate)
         local _G = _G
         local mode = "non-destructive"
         if isolate then mode = "destructive" end
-        log("pop namespace from font loader -- " .. mode)
+        report ("log", 1, "main", "pop namespace from font loader -- " .. mode)
         for k, v in next, _G do
             if not normalglobal[k] then
                 context_environment[k] = v
@@ -279,7 +289,8 @@ local pop_namespaces = function (normalglobal, isolate)
         -- just to be sure:
         setmetatable(context_environment,_G)
     else
-        log("irrecoverable error during pop_namespace: no globals to restore")
+        report ("both", 0, "main",
+                "irrecoverable error during pop_namespace: no globals to restore")
         os.exit()
     end
 end
@@ -312,13 +323,13 @@ loadmodule "fontloader.lua"
 if fonts then
 
     if not fonts._merge_loaded_message_done_ then
-        log [["I am using the merged fontloader here.]]
-        log [[ If you run into problems or experience unexpected]]
-        log [[ behaviour, and if you have ConTeXt installed you can try]]
-        log [[ to delete the file 'luaotfload-fontloader.lua' as I might]]
-        log [[ then use the possibly updated libraries. The merged]]
-        log [[ version is not supported as it is a frozen instance.]]
-        log [[ Problems can be reported to the ConTeXt mailing list."]]
+        report ("log", 0, "main", [["I am using the merged fontloader here.]])
+        report ("log", 0, "main", [[ If you run into problems or experience unexpected]])
+        report ("log", 0, "main", [[ behaviour, and if you have ConTeXt installed you can try]])
+        report ("log", 0, "main", [[ to delete the file 'luaotfload-fontloader.lua' as I might]])
+        report ("log", 0, "main", [[ then use the possibly updated libraries. The merged]])
+        report ("log", 0, "main", [[ version is not supported as it is a frozen instance.]])
+        report ("log", 0, "main", [[ Problems can be reported to the ConTeXt mailing list."]])
     end
     fonts._merge_loaded_message_done_ = true
 
@@ -376,7 +387,7 @@ end --- non-merge fallback scope
 
 pop_namespaces(our_environment, false)-- true)
 
-log("fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
+report ("both", 0, "main", "fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
 
 --[[doc--
 
@@ -409,10 +420,7 @@ add_to_callback("hpack_filter",
 add_to_callback("find_vf_file",
                 find_vf_file, "luaotfload.find_vf_file")
 
-loadmodule "log.lua"        --- messages; used to be part of -override
 loadmodule "override.lua"   --- load glyphlist on demand
-
-logs.set_loglevel(config.luaotfload.loglevel)
 
 --[[doc--
 
@@ -535,9 +543,9 @@ request_resolvers.anon = function (specification)
     local exists, _ = lfsisfile(name)
     if exists then --- garbage; we do this because we are nice,
                    --- not because it is correct
-        logs.names_report("log", 1, "load", "file %q exists", name)
-        logs.names_report("log", 1, "load",
-          "... overriding borked anon: lookup with path: lookup")
+        log.names_report("log", 1, "load", "file %q exists", name)
+        log.names_report("log", 1, "load",
+                         "... overriding borked anon: lookup with path: lookup")
         specification.name = name
         request_resolvers.path(specification)
         return
@@ -559,9 +567,9 @@ request_resolvers.path = function (specification)
     local name       = specification.name
     local exists, _  = lfsisfile(name)
     if not exists then -- resort to file: lookup
-        logs.names_report("log", 1, "load",
-          "path lookup of %q unsuccessful, falling back to file:",
-          name)
+        log.names_report("log", 1, "load",
+                         "path lookup of %q unsuccessful, falling back to file:",
+                         name)
         file_resolver (specification)
     else
         local suffix = filesuffix (name)

@@ -7,8 +7,10 @@ if not modules then modules = { } end modules ["luaotfload-override"] = {
 }
 
 local findfile      = resolvers.findfile
-local names_report  = logs.names_report
 local encodings     = fonts.encodings
+
+local log           = luaotfload.log
+local names_report  = log.names_report
 
 --[[doc--
 

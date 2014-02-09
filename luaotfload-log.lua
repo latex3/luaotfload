@@ -15,6 +15,10 @@ because we lack a user interface to toggle per-subsystem tracing.
 
 local module_name       = "luaotfload" --- prefix for messages
 
+luaotfload              = luaotfload or { }
+luaotfload.log          = luaotfload.log or { }
+local log               = luaotfload.log
+
 local ioopen            = io.open
 local iowrite           = io.write
 local lfsisdir          = lfs.isdir
@@ -48,17 +52,13 @@ local set_loglevel = function (n)
     end
     return true
 end
-logs.setloglevel    = set_loglevel
-logs.set_loglevel   = set_loglevel
-logs.set_log_level  = set_loglevel --- accomodating lazy typists
+log.set_loglevel   = set_loglevel
 
 --- unit -> int
 local get_loglevel = function ( )
     return loglevel
 end
-logs.getloglevel    = get_loglevel
-logs.get_loglevel   = get_loglevel
-logs.get_log_level  = get_loglevel
+log.get_loglevel   = get_loglevel
 
 local writeln  --- pointer to terminal/log writer
 local statusln --- terminal writer that reuses the current line
@@ -128,9 +128,9 @@ local set_logout = function (s, finalizers)
     return finalizers
 end
 
-logs.set_logout = set_logout
+log.set_logout = set_logout
 
-local log = function (category, fmt, ...)
+local basic_logger = function (category, fmt, ...)
     local res = { module_name, "|", category, ":" }
     if fmt then
         res [#res + 1] = stringformat (fmt, ...)
@@ -219,7 +219,7 @@ local level_ids = { common  = 1, loading = 2, search  = 3 }
     over. (This is a little sub-optimal performance-wise since the
     function calls to the logger are executed regardless.) The log
     level during a Luatex run can be adjusted by setting the “loglevel”
-    field in config.luaotfload, or by calling logs.set_loglevel() as
+    field in config.luaotfload, or by calling log.set_loglevel() as
     defined above.
 
 --doc]]--
@@ -232,9 +232,9 @@ local names_report = function (mode, lvl, ...)
 
     if loglevel >= lvl then
         if mode == "log" then
-            log (...)
+            basic_logger (...)
         elseif mode == "both" and logout ~= "redirect" then
-            log (...)
+            basic_logger (...)
             stdout (writeln, ...)
         else
             stdout (writeln, ...)
@@ -242,7 +242,7 @@ local names_report = function (mode, lvl, ...)
     end
 end
 
-logs.names_report = names_report
+log.names_report = names_report
 
 --[[doc--
 
@@ -266,10 +266,10 @@ logs.names_report = names_report
 
 local status_logger = function (mode, ...)
     if mode == "log" then
-        log (...)
+        basic_logger (...)
     else
         if mode == "both" and logout ~= "redirect" then
-            log (...)
+            basic_logger (...)
             stdout (statusln, ...)
         else
             stdout (statusln, ...)
@@ -331,9 +331,9 @@ local status_stop = function (...)
     end
 end
 
-logs.names_status = function (...) status_writer (...) end
-logs.names_status_start = status_start
-logs.names_status_stop  = status_stop
+log.names_status = function (...) status_writer (...) end
+log.names_status_start = status_start
+log.names_status_stop  = status_stop
 
 --[[doc--
 

@@ -38,8 +38,8 @@ local filedirname       = file.dirname
 local io                = io
 local ioopen            = io.open
 
-local logs              = logs
-local report            = logs.report
+local log               = luaotfload.log
+local report            = log.names_report
 
 local string            = string
 local stringsub         = string.sub

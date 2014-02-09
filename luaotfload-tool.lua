@@ -9,7 +9,10 @@
 --     MODIFIED:  2014-01-14 13:17:04+0100
 -----------------------------------------------------------------------
 
-local version = "2.5" --- <int: major>.<int: minor><alpha: fixes>
+luaotfload          = luaotfload or { }
+local version       = "2.5" --- <int: major>.<int: minor>-<int: fixes>
+luaotfload.version  = version
+luaotfload.self     = "luaotfload-tool"
 
 --[[doc--
 
@@ -104,8 +107,6 @@ if not luaotfloadconfig.strip then
     luaotfloadconfig.strip = true
 end
 
-luaotfloadconfig.self           = "luaotfload-tool"
-
 config.lualibs                  = config.lualibs or { }
 config.lualibs.verbose          = false
 config.lualibs.prefer_merged    = true
@@ -141,23 +142,24 @@ require"luaotfload-basics-gen.lua"
 texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities
 
-require"luaotfload-log.lua"       --- this populates the logs.* namespace
+require"luaotfload-log.lua"       --- this populates the luaotfload.log.* namespace
 require"luaotfload-parsers"       --- fonts.conf and request syntax
 require"luaotfload-database"
 require"alt_getopt"
 
-local names = fonts.names
-
+local names                          = fonts.names
 local status_file                    = "luaotfload-status"
 local luaotfloadstatus               = require (status_file)
 luaotfloadconfig.status              = luaotfloadstatus
-
 local sanitize_fontname              = names.sanitize_fontname
 
-local pathdata      = names.path
-local names_plain   = pathdata.index.lua
-local names_gzip    = names_plain .. ".gz"
-local names_bin     = pathdata.index.luc
+local log                            = luaotfload.log
+local names_report                   = log.names_report -- TODO improve identifier
+
+local pathdata                       = names.path
+local names_plain                    = pathdata.index.lua
+local names_gzip                     = names_plain .. ".gz"
+local names_bin                      = pathdata.index.luc
 
 local help_messages = {
     ["luaotfload-tool"] = [[
@@ -248,7 +250,7 @@ Enter 'luaotfload-tool --help' for a larger list of options.
 local help_msg = function (version)
     local template = help_messages[version]
     iowrite(stringformat(template,
-                         luaotfloadconfig.self,
+                         luaotfload.self,
 --                         names_plain,
                          names_gzip,
                          names_bin,
@@ -265,8 +267,8 @@ local about = [[
 
 local version_msg = function ( )
     local out = function (...) texiowrite_nl (stringformat (...)) end
-    out (about, luaotfloadconfig.self)
-    out ("%s version %q", luaotfloadconfig.self, version)
+    out (about, luaotfload.self)
+    out ("%s version %q", luaotfload.self, version)
     out ("revision %q", luaotfloadstatus.notes.revision)
     out ("database version %q", names.version)
     out ("Lua interpreter: %s; version %q", runtime[1], runtime[2])
@@ -681,7 +683,7 @@ local show_font_info = function (basename, askedname, detail, warnings)
         if nfonts > 0 then -- true type collection
             local subfont
             if askedname then
-                logs.names_report(true, 1, "resolve",
+                log.names_report(true, 1, "resolve",
                     [[%s is part of the font collection %s]],
                     askedname, basename)
                 subfont = subfont_by_name(shortinfo, askedname)
@@ -692,10 +694,10 @@ local show_font_info = function (basename, askedname, detail, warnings)
                     show_full_info(fullname, subfont, warnings)
                 end
             else -- list all subfonts
-                logs.names_report(true, 1, "resolve",
+                log.names_report(true, 1, "resolve",
                     [[%s is a font collection]], basename)
                 for subfont = 1, nfonts do
-                    logs.names_report(true, 1, "resolve",
+                    log.names_report(true, 1, "resolve",
                         [[Showing info for font no. %d]], n)
                     show_info_items(shortinfo[subfont])
                     if detail == true then
@@ -710,7 +712,7 @@ local show_font_info = function (basename, askedname, detail, warnings)
             end
         end
     else
-        logs.names_report(true, 1, "resolve",
+        log.names_report(true, 1, "resolve",
             "Font %s not found", filename)
     end
 end
@@ -735,10 +737,10 @@ action_pending.generate = false --- this is the default action
 local actions = { } --- (jobspec -> (bool * bool)) list
 
 actions.loglevel = function (job)
-    logs.set_loglevel(job.log_level)
-    logs.names_report("info", 3, "util",
+    log.set_loglevel(job.log_level)
+    log.names_report("info", 3, "util",
                       "Setting log level", "%d", job.log_level)
-    logs.names_report("log", 2, "util", "Lua=%s", _VERSION)
+    log.names_report("log", 2, "util", "Lua=%s", _VERSION)
     return true, true
 end
 
@@ -764,7 +766,7 @@ end
 actions.generate = function (job)
     local fontnames, savedname
     fontnames = names.update(fontnames, job.force_reload, job.dry_run)
-    logs.names_report("info", 2, "db",
+    log.names_report("info", 2, "db",
         "Fonts in the database: %i", #fontnames.mappings)
     if names.data() then
         return true, true
@@ -777,7 +779,7 @@ actions.flush = function (job)
     if success then
         local success = names.save_lookups()
         if success then
-            logs.names_report("info", 2, "cache", "Lookup cache emptied")
+            log.names_report("info", 2, "cache", "Lookup cache emptied")
             return true, true
         end
     end
@@ -793,7 +795,7 @@ local cache_directives = {
 actions.cache = function (job)
     local directive = cache_directives[job.cache]
     if not directive or type(directive) ~= "function" then
-        logs.names_report("info", 2, "cache",
+        log.names_report("info", 2, "cache",
                           "Invalid font cache directive %s.", job.cache)
         return false, false
     end
@@ -838,14 +840,14 @@ actions.query = function (job)
     end
 
     if success then
-        logs.names_report(false, 0,
+        log.names_report(false, 0,
             "resolve", "Font %q found!", query)
         if subfont then
-            logs.names_report(false, 0, "resolve",
+            log.names_report(false, 0, "resolve",
                 "Resolved file name %q, subfont nr. %q",
                 foundname, subfont)
         else
-            logs.names_report(false, 0, "resolve",
+            log.names_report(false, 0, "resolve",
                               "Resolved file name %q", foundname)
         end
         if job.show_info then
@@ -853,12 +855,12 @@ actions.query = function (job)
             iowrite "\n"
         end
     else
-        logs.names_report(false, 0,
+        log.names_report(false, 0,
             "resolve", "Cannot find %q in index.", query)
-        logs.names_report(false, 0,
+        log.names_report(false, 0,
             "resolve", "Hint: use the --fuzzy option to display suggestions.", query)
         if job.fuzzy == true then
-            logs.names_report(false, 0,
+            log.names_report(false, 0,
                 "resolve", "Looking for close matches, this may take a while ...")
             local _success = names.find_closest(query, job.fuzzy_limit)
         end
@@ -957,7 +959,7 @@ actions.list = function (job)
     local nmappings = #mappings
 
     if criterion == "*" then
-        logs.names_report(false, 1, "list", "All %d entries", nmappings)
+        log.names_report(false, 1, "list", "All %d entries", nmappings)
         for i=1, nmappings do
             local entry     = mappings[i]
             local fields    = get_fields(entry, asked_fields)
@@ -972,12 +974,12 @@ actions.list = function (job)
         criterion          = criterion[1]
         asked_fields       = set_primary_field(asked_fields, criterion)
 
-        logs.names_report(false, 1, "list", "By %s", criterion)
+        log.names_report(false, 1, "list", "By %s", criterion)
 
         --- firstly, build a list of fonts to operate on
         local targets = { }
         if asked_value then --- only those whose value matches
-            logs.names_report(false, 2, "list", "Restricting to value %s", asked_value)
+            log.names_report(false, 2, "list", "Restricting to value %s", asked_value)
             for i=1, nmappings do
                 local entry = mappings[i]
                 if  entry[criterion]
@@ -1022,7 +1024,7 @@ actions.list = function (job)
             end
         end
         local ntargets = #targets
-        logs.names_report(false, 2, "list", "%d entries", ntargets)
+        log.names_report(false, 2, "list", "%d entries", ntargets)
 
         --- now, output the collection
         for i=1, ntargets do
@@ -1150,7 +1152,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "log" then
             local str = optarg[n]
             if str then
-                finalizers = logs.set_logout(str, finalizers)
+                finalizers = log.set_logout(str, finalizers)
             end
         elseif v == "find" then
             action_pending["query"] = true
@@ -1230,23 +1232,23 @@ local main = function ( ) -- unit -> int
         local actionname = action_sequence[i]
         local exit       = false
         if action_pending[actionname] then
-            logs.names_report("log", 3, "util", "Preparing for task",
+            log.names_report("log", 3, "util", "Preparing for task",
                               "%s", actionname)
 
             local action             = actions[actionname]
             local success, continue  = action(job)
 
             if not success then
-                logs.names_report(false, 0, "util",
+                log.names_report(false, 0, "util",
                     "Could not finish task", "%s", actionname)
                 retval = -1
                 exit   = true
             elseif not continue then
-                logs.names_report(false, 3, "util",
+                log.names_report(false, 3, "util",
                     "Task completed, exiting", "%s", actionname)
                 exit   = true
             else
-                logs.names_report(false, 3, "util",
+                log.names_report(false, 3, "util",
                     "Task completed successfully", "%s", actionname)
             end
         end

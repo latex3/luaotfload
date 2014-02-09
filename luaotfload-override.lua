@@ -10,7 +10,7 @@ local findfile      = resolvers.findfile
 local encodings     = fonts.encodings
 
 local log           = luaotfload.log
-local names_report  = log.names_report
+local report        = log.report
 
 --[[doc--
 
@@ -38,11 +38,11 @@ setmetatable(fonts.encodings.agl, { __index = function (t, k)
     end
     local glyphlist = findfile "luaotfload-glyphlist.lua"
     if glyphlist then
-        names_report("log", 1, "load", "loading the Adobe glyph list")
+        report ("log", 1, "load", "loading the Adobe glyph list")
     else
         glyphlist = findfile "font-age.lua"
-        names_report("both", 0, "load",
-                     "loading the extended glyph list from ConTeXt")
+        report ("both", 0, "load",
+                "loading the extended glyph list from ConTeXt")
     end
     local unicodes = dofile(glyphlist)
     encodings.agl  = { unicodes = unicodes }

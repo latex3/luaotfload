@@ -200,7 +200,7 @@ local level_ids = { common  = 1, loading = 2, search  = 3 }
 
 --[[doc--
 
-    The names_report logger is used more or less all over luaotfload.
+    The report() logger is used more or less all over luaotfload.
     Its requirements are twofold:
 
     1) Provide two logging channels, the terminal and the log file;
@@ -224,7 +224,7 @@ local level_ids = { common  = 1, loading = 2, search  = 3 }
 
 --doc]]--
 
-local names_report = function (mode, lvl, ...)
+local report = function (mode, lvl, ...)
     if type(lvl) == "string" then
         lvl = level_ids[lvl]
     end
@@ -242,7 +242,7 @@ local names_report = function (mode, lvl, ...)
     end
 end
 
-log.names_report = names_report
+log.report = report
 
 --[[doc--
 
@@ -301,7 +301,7 @@ local status_start = function (low, high)
     or os.getenv "TERM" == "dumb"
     then
         status_writer = function (mode, ...)
-            names_report (mode, high, ...)
+            report (mode, high, ...)
         end
         return
     end
@@ -310,7 +310,7 @@ local status_start = function (low, high)
         status_writer = status_logger
     else
         status_writer = function (mode, ...)
-            names_report (mode, high, ...)
+            report (mode, high, ...)
         end
     end
 end
@@ -348,7 +348,7 @@ log.names_status_stop  = status_stop
 --doc]]--
 
 local texioreporter = function (message)
-    names_report("log", 2, message)
+    report ("log", 2, message)
 end
 
 texio.reporter = texioreporter
@@ -386,10 +386,10 @@ if fonts then --- need to be running TeX
         if k == "unicodes" then
             local glyphlist = resolvers.findfile"luaotfload-glyphlist.lua"
             if glyphlist then
-                names_report("log", 1, "load", "loading the Adobe glyph list")
+                report ("log", 1, "load", "loading the Adobe glyph list")
             else
                 glyphlist = resolvers.findfile"font-age.lua"
-                names_report("both", 0, "load",
+                report ("both", 0, "load",
                     "loading the extended glyph list from ConTeXt")
             end
             local unicodes      = dofile(glyphlist)

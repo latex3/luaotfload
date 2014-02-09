@@ -49,7 +49,7 @@ function fonts.definers.getspecification(str)
 end
 
 local log              = luaotfload.log
-local report           = log.names_report
+local report           = log.report
 
 local stringfind       = string.find
 local stringlower      = string.lower

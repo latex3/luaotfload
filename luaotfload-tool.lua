@@ -154,7 +154,7 @@ luaotfloadconfig.status              = luaotfloadstatus
 local sanitize_fontname              = names.sanitize_fontname
 
 local log                            = luaotfload.log
-local names_report                   = log.names_report -- TODO improve identifier
+local report                         = log.report
 
 local pathdata                       = names.path
 local names_plain                    = pathdata.index.lua
@@ -683,9 +683,9 @@ local show_font_info = function (basename, askedname, detail, warnings)
         if nfonts > 0 then -- true type collection
             local subfont
             if askedname then
-                log.names_report(true, 1, "resolve",
-                    [[%s is part of the font collection %s]],
-                    askedname, basename)
+                report (true, 1, "resolve",
+                        [[%s is part of the font collection %s]],
+                        askedname, basename)
                 subfont = subfont_by_name(shortinfo, askedname)
             end
             if subfont then
@@ -694,11 +694,11 @@ local show_font_info = function (basename, askedname, detail, warnings)
                     show_full_info(fullname, subfont, warnings)
                 end
             else -- list all subfonts
-                log.names_report(true, 1, "resolve",
-                    [[%s is a font collection]], basename)
+                report (true, 1, "resolve",
+                        [[%s is a font collection]], basename)
                 for subfont = 1, nfonts do
-                    log.names_report(true, 1, "resolve",
-                        [[Showing info for font no. %d]], n)
+                    report (true, 1, "resolve",
+                            [[Showing info for font no. %d]], n)
                     show_info_items(shortinfo[subfont])
                     if detail == true then
                         show_full_info(fullname, subfont, warnings)
@@ -712,8 +712,7 @@ local show_font_info = function (basename, askedname, detail, warnings)
             end
         end
     else
-        log.names_report(true, 1, "resolve",
-            "Font %s not found", filename)
+        report (true, 1, "resolve", "Font %s not found", filename)
     end
 end
 
@@ -738,9 +737,8 @@ local actions = { } --- (jobspec -> (bool * bool)) list
 
 actions.loglevel = function (job)
     log.set_loglevel(job.log_level)
-    log.names_report("info", 3, "util",
-                      "Setting log level", "%d", job.log_level)
-    log.names_report("log", 2, "util", "Lua=%s", _VERSION)
+    report ("info", 3, "util", "Setting log level", "%d", job.log_level)
+    report ("log", 2, "util", "Lua=%q", _VERSION)
     return true, true
 end
 
@@ -766,8 +764,7 @@ end
 actions.generate = function (job)
     local fontnames, savedname
     fontnames = names.update(fontnames, job.force_reload, job.dry_run)
-    log.names_report("info", 2, "db",
-        "Fonts in the database: %i", #fontnames.mappings)
+    report ("info", 2, "db", "Fonts in the database: %i", #fontnames.mappings)
     if names.data() then
         return true, true
     end
@@ -779,7 +776,7 @@ actions.flush = function (job)
     if success then
         local success = names.save_lookups()
         if success then
-            log.names_report("info", 2, "cache", "Lookup cache emptied")
+            report ("info", 2, "cache", "Lookup cache emptied")
             return true, true
         end
     end
@@ -795,8 +792,8 @@ local cache_directives = {
 actions.cache = function (job)
     local directive = cache_directives[job.cache]
     if not directive or type(directive) ~= "function" then
-        log.names_report("info", 2, "cache",
-                          "Invalid font cache directive %s.", job.cache)
+        report ("info", 2, "cache",
+                "Invalid font cache directive %s.", job.cache)
         return false, false
     end
     if directive() then
@@ -840,28 +837,27 @@ actions.query = function (job)
     end
 
     if success then
-        log.names_report(false, 0,
-            "resolve", "Font %q found!", query)
+        report (false, 0, "resolve", "Font %q found!", query)
         if subfont then
-            log.names_report(false, 0, "resolve",
-                "Resolved file name %q, subfont nr. %q",
+            report (false, 0, "resolve",
+                    "Resolved file name %q, subfont nr. %q",
                 foundname, subfont)
         else
-            log.names_report(false, 0, "resolve",
-                              "Resolved file name %q", foundname)
+            report (false, 0, "resolve",
+                    "Resolved file name %q", foundname)
         end
         if job.show_info then
             show_font_info (foundname, query, job.full_info, job.warnings)
             iowrite "\n"
         end
     else
-        log.names_report(false, 0,
-            "resolve", "Cannot find %q in index.", query)
-        log.names_report(false, 0,
-            "resolve", "Hint: use the --fuzzy option to display suggestions.", query)
+        report (false, 0, "resolve", "Cannot find %q in index.", query)
+        report (false, 0, "resolve",
+                "Hint: use the --fuzzy option to display suggestions.",
+                query)
         if job.fuzzy == true then
-            log.names_report(false, 0,
-                "resolve", "Looking for close matches, this may take a while ...")
+            report (false, 0, "resolve",
+                    "Looking for close matches, this may take a while ...")
             local _success = names.find_closest(query, job.fuzzy_limit)
         end
     end
@@ -959,7 +955,7 @@ actions.list = function (job)
     local nmappings = #mappings
 
     if criterion == "*" then
-        log.names_report(false, 1, "list", "All %d entries", nmappings)
+        report (false, 1, "list", "All %d entries", nmappings)
         for i=1, nmappings do
             local entry     = mappings[i]
             local fields    = get_fields(entry, asked_fields)
@@ -974,12 +970,12 @@ actions.list = function (job)
         criterion          = criterion[1]
         asked_fields       = set_primary_field(asked_fields, criterion)
 
-        log.names_report(false, 1, "list", "By %s", criterion)
+        report (false, 1, "list", "By %s", criterion)
 
         --- firstly, build a list of fonts to operate on
         local targets = { }
         if asked_value then --- only those whose value matches
-            log.names_report(false, 2, "list", "Restricting to value %s", asked_value)
+            report (false, 2, "list", "Restricting to value %s", asked_value)
             for i=1, nmappings do
                 local entry = mappings[i]
                 if  entry[criterion]
@@ -1024,7 +1020,7 @@ actions.list = function (job)
             end
         end
         local ntargets = #targets
-        log.names_report(false, 2, "list", "%d entries", ntargets)
+        report (false, 2, "list", "%d entries", ntargets)
 
         --- now, output the collection
         for i=1, ntargets do
@@ -1232,24 +1228,23 @@ local main = function ( ) -- unit -> int
         local actionname = action_sequence[i]
         local exit       = false
         if action_pending[actionname] then
-            log.names_report("log", 3, "util", "Preparing for task",
-                              "%s", actionname)
+            report ("log", 3, "util", "Preparing for task", "%s", actionname)
 
             local action             = actions[actionname]
             local success, continue  = action(job)
 
             if not success then
-                log.names_report(false, 0, "util",
-                    "Could not finish task", "%s", actionname)
+                report (false, 0, "util",
+                        "Could not finish task", "%s", actionname)
                 retval = -1
                 exit   = true
             elseif not continue then
-                log.names_report(false, 3, "util",
-                    "Task completed, exiting", "%s", actionname)
-                exit   = true
+                report (false, 3, "util",
+                        "Task completed, exiting", "%s", actionname)
+                exit = true
             else
-                log.names_report(false, 3, "util",
-                    "Task completed successfully", "%s", actionname)
+                report (false, 3, "util",
+                        "Task completed successfully", "%s", actionname)
             end
         end
         if exit then break end

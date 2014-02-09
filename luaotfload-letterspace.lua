@@ -7,7 +7,7 @@ if not modules then modules = { } end modules ['letterspace'] = {
 }
 
 local log                = luaotfload.log
-local report             = log.names_report
+local report             = log.report
 
 local getmetatable       = getmetatable
 local require            = require
@@ -515,10 +515,10 @@ otffeatures.register {
 local initializecompatfontkerning = function (tfmdata, percentage)
   local factor = tonumber (percentage)
   if not factor then
-    names_report ("both", 0, "letterspace",
-                  "Invalid argument to letterspace: %s (type %q), " ..
-                  "was expecting percentage as Lua number instead.",
-                  percentage, type (percentage))
+    report ("both", 0, "letterspace",
+            "Invalid argument to letterspace: %s (type %q), " ..
+            "was expecting percentage as Lua number instead.",
+            percentage, type (percentage))
     return
   end
   return initializefontkerning (tfmdata, factor * 0.01)

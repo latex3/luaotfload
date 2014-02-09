@@ -49,9 +49,9 @@ local lpeg                     = require "lpeg"
 local C, Cg, Ct                = lpeg.C, lpeg.Cg, lpeg.Ct
 local lpegmatch                = lpeg.match
 
-local names_report             = luaotfload.log.names_report
+local report                   = luaotfload.log.report
 local out = function (...)
-    names_report (false, 0, "diagnose", ...)
+    report (false, 0, "diagnose", ...)
 end
 
 local parsers                  = luaotfload.parsers

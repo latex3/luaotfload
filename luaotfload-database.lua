@@ -45,7 +45,7 @@ local stripslashes             = parsers.stripslashes
 local splitcomma               = parsers.splitcomma
 
 local log                      = luaotfload.log
-local report                   = log.names_report
+local report                   = log.report
 local report_status            = log.names_status
 local report_status_start      = log.names_status_start
 local report_status_stop       = log.names_status_stop

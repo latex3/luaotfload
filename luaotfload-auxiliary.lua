@@ -17,7 +17,7 @@ luaotfload.aux              = luaotfload.aux or { }
 
 local aux                   = luaotfload.aux
 local log                   = luaotfload.log
-local report                = log.names_report
+local report                = log.report
 local fonthashes            = fonts.hashes
 local identifiers           = fonthashes.identifiers
 

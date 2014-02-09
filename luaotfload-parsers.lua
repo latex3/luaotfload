@@ -39,7 +39,7 @@ local io                = io
 local ioopen            = io.open
 
 local log               = luaotfload.log
-local report            = log.names_report
+local report            = log.report
 
 local string            = string
 local stringsub         = string.sub

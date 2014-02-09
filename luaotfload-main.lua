@@ -148,7 +148,7 @@ end
 
 loadmodule "log.lua"        --- messages; used to be part of -override
 local log             = luaotfload.log
-local report          = log.names_report
+local report          = log.report
 
 log.set_loglevel(config.luaotfload.loglevel)
 
@@ -387,7 +387,8 @@ end --- non-merge fallback scope
 
 pop_namespaces(our_environment, false)-- true)
 
-report ("both", 0, "main", "fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
+report ("both", 0, "main",
+        "fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
 
 --[[doc--
 
@@ -543,9 +544,9 @@ request_resolvers.anon = function (specification)
     local exists, _ = lfsisfile(name)
     if exists then --- garbage; we do this because we are nice,
                    --- not because it is correct
-        log.names_report("log", 1, "load", "file %q exists", name)
-        log.names_report("log", 1, "load",
-                         "... overriding borked anon: lookup with path: lookup")
+        report ("log", 1, "load", "file %q exists", name)
+        report ("log", 1, "load",
+                "... overriding borked anon: lookup with path: lookup")
         specification.name = name
         request_resolvers.path(specification)
         return
@@ -567,9 +568,9 @@ request_resolvers.path = function (specification)
     local name       = specification.name
     local exists, _  = lfsisfile(name)
     if not exists then -- resort to file: lookup
-        log.names_report("log", 1, "load",
-                         "path lookup of %q unsuccessful, falling back to file:",
-                         name)
+        report ("log", 1, "load",
+                "path lookup of %q unsuccessful, falling back to file:",
+                name)
         file_resolver (specification)
     else
         local suffix = filesuffix (name)

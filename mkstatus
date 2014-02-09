@@ -50,6 +50,7 @@ local names = {
   "luaotfload-glyphlist.lua",
   "luaotfload-letterspace.lua",
   "luaotfload-loaders.lua",
+  "luaotfload-log.lua",
   "luaotfload-main.lua",
   "luaotfload-fontloader.lua",
   "luaotfload-override.lua",

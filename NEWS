@@ -11,6 +11,7 @@ Change History
     * Move the heavier LPEG parsers from luaotfload-features (syntax) and
       luaotfload-database (fontconfig) into the new file
       luaotfload-parsers.lua.
+    * Move logging routines from luaotfload-override in to luaotfload-log.
 
 2013/12/31, luaotfload v2.4
     * Additional self-tests, now in separate file (luaotfload-diagnostics.lua)

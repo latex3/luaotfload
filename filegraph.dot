@@ -200,8 +200,9 @@ strict digraph luaotfload_files { //looks weird with circo ...
                 <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Luaotfload Libraries</font> </td> </th>
                 <tr> <td>luaotfload-auxiliary.lua</td>    <td>luaotfload-features.lua</td>    </tr>
                 <tr> <td>luaotfload-override.lua</td>     <td>luaotfload-loaders.lua</td>     </tr>
+                <tr> <td>luaotfload-log.lua</td>          <td>luaotfload-letterspace.lua</td> </tr>
                 <tr> <td>luaotfload-parsers.lua</td>      <td>luaotfload-database.lua</td>    </tr>
-                <tr> <td>luaotfload-color.lua</td>        <td>luaotfload-letterspace.lua</td> </tr>
+                <tr> <td>luaotfload-color.lua</td>                                            </tr>
             </table>
         >,
     ]

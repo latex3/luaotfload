@@ -46,6 +46,8 @@ local stringsub         = string.sub
 local stringfind        = string.find
 local stringlower       = string.lower
 
+local mathceil          = math.ceil
+
 local lfs               = lfs
 local lfsisfile         = lfs.isfile
 local lfsisdir          = lfs.isdir

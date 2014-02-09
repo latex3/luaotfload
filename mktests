@@ -30,7 +30,7 @@ kpse.set_program_name "luatex"
 
 require "lualibs"
 require "luaotfload-basics-gen.lua"
-require "luaotfload-override.lua"
+require "luaotfload-log.lua"
 require "luaotfload-parsers"
 require "luaotfload-database"
 

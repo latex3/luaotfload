@@ -188,10 +188,10 @@ miscellaneous
                         troubleshooting), where *CHANNEL* can be
 
                         1) ``stdout`` -> all output will be
-                           dumped to the terminal; or
+                           dumped to the terminal (default); or
                         2) ``file`` -> write to a file to the temporary
                            directory (the name will be chosen
-                           automatically (**experimental!**).
+                           automatically.
 
 --version, -V           Show version numbers of components as well as
                         some basic information and exit.

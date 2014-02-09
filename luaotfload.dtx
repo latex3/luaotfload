@@ -67,13 +67,6 @@ and the derived files
 
 \endpreamble
 
-\let\MetaPrefix\DoubleperCent
-
-\generate{%
-  \usedir{tex/luatex/luaotfload}%
-  \file{luaotfload.sty}{\from{luaotfload.dtx}{package}}%
-}
-
 \obeyspaces
 \Msg{************************************************************************}
 \Msg{*}
@@ -1558,30 +1551,12 @@ and the derived files
 %
 % \section{\fileent{luaotfload.sty}}
 %
-% \iffalse
-%<*package>
-% \fi
-%
-%    Classical Plain+\LATEX package initialization.
-%
-%    \begin{macrocode}
-\csname ifluaotfloadloaded\endcsname
-\let\ifluaotfloadloaded\endinput
-\bgroup\expandafter\expandafter\expandafter\egroup
-\expandafter\ifx\csname ProvidesPackage\endcsname\relax
-  \input luatexbase.sty
-\else
-  \NeedsTeXFormat{LaTeX2e}
-  \ProvidesPackage{luaotfload}%
-    [2014/42/42 v2.5 OpenType layout system]
-  \RequirePackage{luatexbase}
-\fi
-\RequireLuaModule{luaotfload-main}
-\endinput
-%    \end{macrocode}
-% \iffalse
-%</package>
-% \fi
+% As of version 2.5, the file \fileent{luaotfload.sty} is no longer
+% generated from the \abbrev{dtx}.
+% Instead, it is maintained separately as a plain \identifier{\TEX} file
+% in the Luaotfload \identifier{git} tree.
+% The file documentation which used to be found in this section has
+% been preserved in the comments.
 %
 % \clearpage
 % \section{The GNU GPL License v2}

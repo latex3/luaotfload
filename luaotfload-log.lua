@@ -19,9 +19,9 @@ local ioopen            = io.open
 local iowrite           = io.write
 local lfsisdir          = lfs.isdir
 local lfsisfile         = lfs.isfile
-local md5sumhexa        = md5.sumhexa
 local osdate            = os.date
 local ostime            = os.time
+local osuuid            = os.uuid
 local select            = select
 local stringformat      = string.format
 local stringsub         = string.sub
@@ -75,9 +75,7 @@ local choose_logfile = function ( )
     if lfsisdir (tmppath) then
         local fname
         repeat --- ensure that file of that name doesn’t exist
-            --- TODO this could use os.uuid() instead of md5
-            fname = tmppath .. "/luaotfload-log-"
-                            .. stringsub (md5sumhexa (ostime ()), 1, 8)
+            fname = tmppath .. "/luaotfload-log-" .. osuuid()
         until not lfsisfile (fname)
         iowrite (stringformat (log_msg, fname, fname))
         return ioopen (fname, "w")

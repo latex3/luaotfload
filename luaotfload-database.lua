@@ -1986,13 +1986,16 @@ read_blacklist = function ()
     local whitelist = { }
 
     if files and type(files) == "table" then
-        for _,v in next, files do
-            for line in iolines(v) do
+        for _, path in next, files do
+            for line in iolines (path) do
                 line = stringstrip(line) -- to get rid of lines like " % foo"
-                local first_chr = stringsub(line, 1, 1) --- faster than find
+                local first_chr = stringsub(line, 1, 1)
                 if first_chr == "%" or stringis_empty(line) then
                     -- comment or empty line
                 elseif first_chr == "-" then
+                    report ("both", 3, "db",
+                            "Whitelisted file %q via %q.",
+                            line, path)
                     whitelist[#whitelist+1] = stringsub(line, 2, -1)
                 else
                     local cmt = stringfind(line, "%%")
@@ -2000,7 +2003,9 @@ read_blacklist = function ()
                         line = stringsub(line, 1, cmt - 1)
                     end
                     line = stringstrip(line)
-                    report("log", 2, "db", "Blacklisted file %q.", line)
+                    report ("both", 3, "db",
+                            "Blacklisted file %q via %q.",
+                            line, path)
                     blacklist[#blacklist+1] = line
                 end
             end

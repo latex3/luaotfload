@@ -1,20 +1,20 @@
-NAME				= luaotfload
-DOCPDF			= $(NAME).pdf
-DOCDTX			= $(NAME).dtx
+NAME		= luaotfload
+DOCPDF		= $(NAME).pdf
+DOCDTX		= $(NAME).dtx
 
 SCRIPTNAME	= luaotfload-tool
-MANSOURCE		= $(SCRIPTNAME).rst
-MANPAGE			= $(SCRIPTNAME).1
+MANSOURCE	= $(SCRIPTNAME).rst
+MANPAGE		= $(SCRIPTNAME).1
 
-GRAPH				= filegraph
-DOTPDF			= $(GRAPH).pdf
-DOT					= $(GRAPH).dot
+GRAPH		= filegraph
+DOTPDF		= $(GRAPH).pdf
+DOT		= $(GRAPH).dot
 
-DOCS				= $(DOTPDF) $(DOCPDF) $(MANPAGE)
+DOCS		= $(DOTPDF) $(DOCPDF) $(MANPAGE)
 
 DO_LATEXMK	= @latexmk -e '$$max_repeat = 5' -pdf -lualatex -silent $< >/dev/null
 # latexmk does only one run on my machine, so we’re not going to rely on it
-DO_LATEX		= @lualatex -interaction=batchmode $< >/dev/null
+DO_LATEX	= @lualatex -interaction=batchmode $< >/dev/null
 DO_GRAPHVIZ	= @dot -Tpdf -o $@ $< > /dev/null
 DO_DOCUTILS	= @rst2man $< >$@ 2>/dev/null
 
@@ -44,3 +44,4 @@ clean:
 mrproper: clean
 	@$(RM) -- $(DOCS)
 
+# vim:set noexpandtab:tabstop=8:shiftwidth=2

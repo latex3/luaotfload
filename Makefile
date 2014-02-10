@@ -80,13 +80,13 @@ pdf: $(DOCPDF)
 manual: $(MANPAGE)
 
 $(DOTPDF):
-	@make -C $(DOCSRCDIR) graph
+	@$(MAKE) -C $(DOCSRCDIR) graph
 
 $(DOCPDF):
-	@make -C $(DOCSRCDIR) doc
+	@$(MAKE) -C $(DOCSRCDIR) doc
 
 $(MANPAGE):
-	@make -C $(DOCSRCDIR) manual
+	@$(MAKE) -C $(DOCSRCDIR) manual
 
 $(GLYPHS): /dev/null
 	$(DO_GLYPHS)
@@ -143,11 +143,11 @@ manifest:
 	@for f in $(GENERATED); do echo $$f; done
 
 clean:
-	make -C $(DOCSRCDIR) $@
+	$(MAKE) -C $(DOCSRCDIR) $@
 	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out
 
 mrproper: clean
-	make -C $(DOCSRCDIR) $@
+	$(MAKE) -C $(DOCSRCDIR) $@
 	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE)
 	@$(RM) -r -- $(DISTDIR)
 

@@ -5,19 +5,21 @@
 --  DESCRIPTION:  part of the luaotfload package
 -- REQUIREMENTS:  lua, lpeg, luasocket, the lualibs package
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  2.4
---      CREATED:  04/23/2013 12:42:17 PM CEST
+--      VERSION:  2.5
+--     MODIFIED:  2014-02-11 06:44:50+0100
 -----------------------------------------------------------------------
 -- interesting thread on the Context list:
 -- http://www.ntg.nl/pipermail/ntg-context/2008/029057.html
+--
+-- N.B. this script assumes network connectivity!
 -----------------------------------------------------------------------
 
 
 -----------------------------------------------------------------------
 --                              config
 -----------------------------------------------------------------------
-local glyphfile     = "./glyphlist.txt"
-local font_age      = "./luaotfload-glyphlist.lua"
+local glyphfile     = "./build/glyphlist.txt"
+local font_age      = "./build/luaotfload-glyphlist.lua"
 local glyph_source  = "http://partners.adobe.com/public/developer/en/opentype/glyphlist.txt"
 
 -----------------------------------------------------------------------
@@ -133,6 +135,7 @@ end
 local get_raw get_raw = function (retry)
   local fh = io.open(glyphfile, "rb")
   if fh then
+    print ("info: reading glyph list from", glyphfile)
     local data = fh:read"*all"
     fh:close()
     if data then return data end

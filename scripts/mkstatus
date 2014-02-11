@@ -32,7 +32,7 @@ local lfsisdir     = lfs.isdir
 -----------------------------------------------------------------------
 
 local verbose  = false
-local filelist = "luaotfload-status.lua" --- result
+local filelist = "./build/luaotfload-status.lua" --- result
 
 local names = {
   --- only the runtime files and scripts

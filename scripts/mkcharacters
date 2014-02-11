@@ -5,8 +5,8 @@
 --  DESCRIPTION:  import parts of char-def.lua
 -- REQUIREMENTS:  lua, ConTeXt, the lualibs package
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  2.4
---      CREATED:  2013-05-17 12:41:39+0200
+--      VERSION:  2.5
+--     MODIFIED: 2014-02-11 07:24:25+0100
 -----------------------------------------------------------------------
 -- we create a stripped-down version of char-def.lua
 -----------------------------------------------------------------------
@@ -14,7 +14,7 @@
 -----------------------------------------------------------------------
 --                              config
 -----------------------------------------------------------------------
-local charfile      = "./luaotfload-characters.lua"
+local charfile      = "./build/luaotfload-characters.lua"
 local chardef       = "/home/phg/base/char-def.lua"
 
 ---  for every code point char-def.lua provides a set of fields. they

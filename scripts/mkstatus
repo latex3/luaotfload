@@ -24,11 +24,14 @@ local md5sumhexa   = md5.sumhexa
 local ioloaddata   = io.loaddata
 local iosavedata   = io.savedata
 local iopopen      = io.popen
+local iowrite      = io.write
+local lfsisdir     = lfs.isdir
 
 -----------------------------------------------------------------------
 -- settings
 -----------------------------------------------------------------------
 
+local verbose  = false
 local filelist = "luaotfload-status.lua" --- result
 
 local names = {
@@ -56,9 +59,9 @@ local names = {
   "luaotfload-override.lua",
   "luaotfload-parsers.lua",
   "luaotfload-tool.lua",
-  "mkcharacters",
-  "mkglyphlist",
-  "mkstatus",
+  { "scripts", "mkcharacters", },
+  { "scripts", "mkglyphlist",  },
+  { "scripts", "mkstatus",     },
 }
 
 -----------------------------------------------------------------------
@@ -122,17 +125,38 @@ hash_all = function (list, acc)
     return hash_all (table.fastcopy (names), { })
   end
 
-  local fname = list[#list]
+  local finfo = list[#list]
   list[#list] = nil
-  if fname then
-    local sum = hash_file (fname)
-    acc[#acc+1] = { fname, sum }
+  if finfo then
+    local fpath
+    if type (finfo) == "table" then
+      local d, f = finfo [1], finfo [2]
+      if lfs.isdir (d) then
+        fpath = file.join (d, f)
+      else
+        fpath = f
+      end
+    else
+      fpath = finfo
+    end
+    if verbose then
+      iowrite "· md5("
+      iowrite (fpath)
+    end
+    local sum = hash_file (fpath)
+    if verbose then
+      iowrite ") = \""
+      iowrite (sum)
+      iowrite "\"\n"
+    end
+    acc[#acc+1] = { fpath, sum }
     return hash_all (list, acc)
   end
   return acc
 end
 
 local main = function ()
+  if arg [1] == "-v" then verbose = true end
   local hashes      = hash_all ()
   local notes       = git_info ()
   local serialized  = table.serialize ({ notes = notes,

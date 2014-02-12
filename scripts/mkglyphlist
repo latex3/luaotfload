@@ -146,7 +146,7 @@ local get_raw get_raw = function (retry)
     if glyphdata then
       local fh = io.open(glyphfile, "wb")
       if not fh then
-        print"error: glyph file not writable"
+        print (string.format ("error: glyph file (%s) not writable", glyphfile))
         os.exit(-1)
       end
       fh:write(glyphdata)

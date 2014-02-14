@@ -77,6 +77,8 @@ DO_GLYPHS	= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS	= $(LUA) $(CHARSCRIPT)  > /dev/null
 DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
 
+show: showtargets
+
 all: $(GENERATED)
 builddir: $(BUILDDIR)
 resources: $(RESOURCES)
@@ -169,5 +171,25 @@ mrproper: clean
 	$(MAKE) -C $(DOCSRCDIR) $@
 	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE)
 	@$(RM) -r -- $(BUILDDIR)
+
+###############################################################################
+showtargets:
+	@echo "Available targets:"
+	@echo
+	@echo "       all         build everything: documentation, resources,"
+	@echo "       world       build everything and package zipballs"
+	@echo "       doc         compile PDF documentation"
+	@echo "       resources   generate resource files (chars, glyphs)"
+	@echo
+	@echo "       pdf         build luaotfload.pdf"
+	@echo "       manual      crate manpage for luaotfload-tool (requires Docutils)"
+	@echo "       graph       generate file graph (requires GraphViz)"
+	@echo
+	@echo "       chars       import char-def.lua as luaotfload-characters.lua"
+	@echo "       status      create repository info (luaotfload-status.lua)"
+	@echo
+	@echo "       tds         package a zipball according to the TDS"
+	@echo "       ctan        package a zipball for uploading to CTAN"
+	@echo
 
 # vim:noexpandtab:tabstop=8:shiftwidth=2

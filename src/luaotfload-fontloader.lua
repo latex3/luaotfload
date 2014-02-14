@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 02/07/14 00:57:35
+-- merge date  : 02/13/14 11:27:58
 
 do -- begin closure to overcome local limits and interference
 
@@ -82,6 +82,7 @@ function optionalrequire(...)
     return result
   end
 end
+lua.mask=load([[τεχ = 1]]) and "utf" or "ascii"
 
 end -- closure
 
@@ -172,9 +173,11 @@ patterns.spacer=spacer
 patterns.whitespace=whitespace
 patterns.nonspacer=nonspacer
 patterns.nonwhitespace=nonwhitespace
-local stripper=spacer^0*C((spacer^0*nonspacer^1)^0)
+local stripper=spacer^0*C((spacer^0*nonspacer^1)^0)   
+local fullstripper=whitespace^0*C((whitespace^0*nonwhitespace^1)^0)
 local collapser=Cs(spacer^0/""*nonspacer^0*((spacer^0/" "*nonspacer^1)^0))
 patterns.stripper=stripper
+patterns.fullstripper=fullstripper
 patterns.collapser=collapser
 patterns.lowercase=lowercase
 patterns.uppercase=uppercase
@@ -754,10 +757,14 @@ function string.limit(str,n,sentinel)
   end
 end
 local stripper=patterns.stripper
+local fullstripper=patterns.fullstripper
 local collapser=patterns.collapser
 local longtostring=patterns.longtostring
 function string.strip(str)
   return lpegmatch(stripper,str) or ""
+end
+function string.fullstrip(str)
+  return lpegmatch(fullstripper,str) or ""
 end
 function string.collapsespaces(str)
   return lpegmatch(collapser,str) or ""

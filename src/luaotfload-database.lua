@@ -535,28 +535,28 @@ local load_lua_file = function (path)
 end
 
 --- define locals in scope
+local collect_families
 local crude_file_lookup
 local crude_file_lookup_verbose
 local find_closest
 local flush_lookup_cache
-local ot_fullinfo
-local t1_fullinfo
-local load_names
+local generate_filedata
+local get_font_filter
+local group_modifiers
 local load_lookups
+local load_names
+local order_design_sizes
+local ot_fullinfo
 local read_blacklist
 local reload_db
-local resolve_name
 local resolve_cached
 local resolve_fullpath
-local save_names
+local resolve_name
 local save_lookups
-local update_names
-local get_font_filter
+local save_names
 local set_font_filter
-local generate_filedata
-local collect_families
-local group_modifiers
-local order_design_sizes
+local t1_fullinfo
+local update_names
 
 --- state of the database
 local fonts_reloaded = false
@@ -1170,9 +1170,6 @@ resolve_name = function (specification)
         resolved, subfont = resolve_fontname (specification,
                                               name,
                                               style)
-    end
-    if not resolved then
-        resolved = specification.name, false
     end
 
     if not resolved then
@@ -2407,20 +2404,16 @@ end
 
 --doc]]--
 
-local scan_local_fonts = function ()
+local scan_local_fonts = function (currentnames,
+                                   targetnames,
+                                   dry_run)
     local n_scanned, n_new  = 0, 0
     local pwd               = lfscurrentdir ()
-    local name_index        = name_index
     report ("both", 1, "db", "Scanning fonts in $PWD (%q) ...", pwd)
 
-    n_scanned, n_new = scan_dir (pwd, name_index, name_index, false, "local")
+    n_scanned, n_new = scan_dir (pwd, currentnames, targetnames, false, "local")
     if n_new > 0 then
-        name_index.files       = generate_filedata (name_index.mappings)
-        name_index.families    = collect_families  (name_index.mappings)
-        name_index.families    = group_modifiers (name_index.mappings,
-                                                  name_index.families)
-        name_index.families    = order_design_sizes (name_index.families)
-        name_index.meta["local"] = true --- prevent saving to disk
+        targetnames.meta["local"] = true --- prevent saving to disk
     end
 
     return n_scanned, n_new
@@ -2938,6 +2931,13 @@ local retrieve_namedata = function (currentnames,
     n_rawnames    = n_rawnames + rawnames
     n_newnames    = n_newnames + new
 
+    if luaotfloadconfig.scan_local == true then
+        rawnames, new = scan_local_fonts (currentnames, targetnames, dry_run)
+
+        n_rawnames    = n_rawnames + rawnames
+        n_newnames    = n_newnames + new
+    end
+
     return n_rawnames, n_newnames
 end
 
@@ -3113,8 +3113,8 @@ end
 
 --- dbobj? -> bool? -> bool? -> dbobj
 update_names = function (currentnames, force, dry_run)
-
     local targetnames
+    local n_raw, n_new = 0, 0
 
     if luaotfloadconfig.update_live == false then
         report ("info", 2, "db",
@@ -3123,8 +3123,7 @@ update_names = function (currentnames, force, dry_run)
         return currentnames or name_index
     end
 
-    local starttime                 = osgettimeofday ()
-    local n_rawnames, n_newnames    = 0, 0
+    local starttime = osgettimeofday ()
 
     --[[
     The main function, scans everything
@@ -3163,14 +3162,14 @@ update_names = function (currentnames, force, dry_run)
 
         read_blacklist ()
 
-        local n_raw, n_new = retrieve_namedata (currentnames,
-                                                targetnames,
-                                                dry_run,
-                                                n_rawnames,
-                                                n_newnames)
+        n_raw, n_new = retrieve_namedata (currentnames,
+                                          targetnames,
+                                          dry_run,
+                                          0,
+                                          0)
         report ("info", 3, "db",
                 "Scanned %d font files; %d new entries.",
-                n_rawnames, n_newnames)
+                n_raw, n_new)
     end
 
     --- pass 2 (optional): collect some stats about the raw font info
@@ -3204,11 +3203,15 @@ update_names = function (currentnames, force, dry_run)
 
     if dry_run ~= true then
 
-        local success, reason = save_names ()
-        if not success then
-            report ("both", 0, "db",
-                    "Failed to save database to disk: %s",
-                    reason)
+        if n_new == 0 then
+            report ("info", 2, "db", "No new fonts found, skip saving to disk.")
+        else
+            local success, reason = save_names ()
+            if not success then
+                report ("both", 0, "db",
+                        "Failed to save database to disk: %s",
+                        reason)
+            end
         end
 
         if flush_lookup_cache () and save_lookups () then

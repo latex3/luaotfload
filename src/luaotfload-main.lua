@@ -1,10 +1,10 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
 --  DESCRIPTION:  Luatex fontloader initialization
--- REQUIREMENTS:  luatex v.0.78 or later, the lualibs package
+-- REQUIREMENTS:  luatex v.0.78 or later; the lualibs package
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2014-02-09 14:42:22+0100
+--     MODIFIED:  2014-02-14 22:51:09+0100
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -59,6 +59,7 @@ config.luaotfload.names_dir       = config.luaotfload.names_dir        or "names
 config.luaotfload.cache_dir       = config.luaotfload.cache_dir        or "fonts"
 config.luaotfload.index_file      = config.luaotfload.index_file       or "luaotfload-names.lua"
 config.luaotfload.formats         = config.luaotfload.formats          or "otf,ttf,ttc,dfont"
+config.luaotfload.scan_local      = config.luaotfload.scan_local == true
 
 if not config.luaotfload.strip then
     config.luaotfload.strip = true

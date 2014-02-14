@@ -193,6 +193,7 @@ Usage: %s [OPTIONS...]
   -n --no-reload               suppress db update
   --no-strip                   keep redundant information in db
   -f --force                   force re-indexing all fonts
+  -L --local                   scan font files in $PWD
   -c --no-compress             do not gzip index file (text version only)
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
@@ -236,7 +237,7 @@ update your scripts and/or habits! Kthxbye.
 ]],
     short = [[
 Usage: luaotfload-tool [--help] [--version] [--verbose=<lvl>]
-                       [--update] [--force] [--prefer-texmf]
+                       [--update] [--force] [--prefer-texmf] [--local]
                        [--dry-run] [--formats=<extension list>]
                        [--find=<font name>] [--fuzzy] [--info] [--inspect]
                        [--list=<criterion>] [--fields=<field list>]

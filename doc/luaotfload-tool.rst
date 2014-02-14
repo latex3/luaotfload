@@ -21,6 +21,7 @@ SYNOPSIS
                              [ --prefer-texmf ] [ --dry-run ]
                              [ --formats=[+|-]EXTENSIONS ]
                              [ --no-compress ] [ --no-strip ]
+                             [ --local ]
 
 **luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
                                     [ --no-reload ]
@@ -57,6 +58,13 @@ update mode
 --update, -u            Update the database; indexes new fonts.
 --force, -f             Force rebuilding of the database; re-indexes
                         all fonts.
+--local, -L             Include font files in ``$PWD``. This option
+                        will cause large parts of the database to be
+                        rebuilt. Thus it is quite inefficient.
+                        Additionally, if local font files are found,
+                        the database is prevented from being saved
+                        to disk, so the local fonts need to be parsed
+                        with every invocation of ``luaotfload-tool``.
 --no-reload, -n         Suppress auto-updates to the database (e.g.
                         when ``--find`` is passed an unknown name).
 --no-strip              Do not strip redundant information after

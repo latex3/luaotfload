@@ -140,7 +140,7 @@ luaotfloadconfig.compress      = luaotfloadconfig.compress ~= false
 local names                    = fonts.names
 local name_index               = nil --> upvalue for names.data
 local lookup_cache             = nil --> for names.lookups
-names.version                  = 2.5
+names.version                  = 2.51
 names.data                     = nil      --- contains the loaded database
 names.lookups                  = nil      --- contains the lookup cache
 
@@ -356,6 +356,7 @@ This is a sketch of the luaotfload db:
         optical : (int, int) list;  // design size -> index entry
     }
     and metadata = {
+        local       : bool;        (* set if local fonts were added to the db *)
         formats     : string list; // { "otf", "ttf", "ttc", "dfont" }
         statistics  : TODO;
         version     : float;
@@ -439,7 +440,9 @@ mtx-fonts has in names.tma:
 
 --doc]]--
 
-local initialize_namedata = function (formats) --- returns dbobj
+--- string list -> dbobj
+
+local initialize_namedata = function (formats)
     return {
         --families        = { },
         status          = { }, -- was: status; map abspath -> mapping
@@ -447,6 +450,7 @@ local initialize_namedata = function (formats) --- returns dbobj
         names           = { },
 --      files           = { }, -- created later
         meta            = {
+            ["local"]  = false,
             formats    = formats,
             statistics = { },
             version    = names.version,
@@ -549,6 +553,10 @@ local save_lookups
 local update_names
 local get_font_filter
 local set_font_filter
+local generate_filedata
+local collect_families
+local group_modifiers
+local order_design_sizes
 
 --- state of the database
 local fonts_reloaded = false
@@ -568,7 +576,7 @@ load_names = function (dry_run)
         report ("info", 3, "db", "Loading took %0.f ms.",
                 1000 * (osgettimeofday () - starttime))
 
-        local db_version, nms_version
+        local db_version, names_version
         if data.meta then
             db_version = data.meta.version
         else
@@ -577,11 +585,11 @@ load_names = function (dry_run)
             --- an earlier index version broke.
             db_version = data.version or -42 --- invalid
         end
-        nms_version = names.version
-        if db_version ~= nms_version then
+        names_version = names.version
+        if db_version ~= names_version then
             report ("both", 0, "db",
                     [[Version mismatch; expected %4.3f, got %4.3f.]],
-                    nms_version, db_version)
+                    names_version, db_version)
             if not fonts_reloaded then
                 report ("both", 0, "db", [[Force rebuild.]])
                 data = update_names ({ }, true, false)
@@ -2207,7 +2215,7 @@ local scan_dir = function (dirname, currentnames, targetnames,
         --- ignore
         return 0, 0
     end
-    local found = find_font_files (dirname, location ~= "texmf")
+    local found = find_font_files (dirname, location ~= "texmf" and location ~= "local")
     if not found then
         report ("both", 4, "db",
                 "No such directory: %q; skipping.", dirname)
@@ -2380,17 +2388,49 @@ local scan_os_fonts = function (currentnames,
     return n_scanned, n_new
 end
 
---- unit -> (bool, lookup_cache)
+--- unit -> bool
 flush_lookup_cache = function ()
     lookup_cache = { }
     collectgarbage "collect"
-    return true, lookup_cache
+    return true
 end
 
+--[[doc--
+
+    scan_local_fonts() -- Scan font files in $PWD (during a TeX run)
+    and add them to the database.
+
+    This sets the “local” flag in the subtable “meta” to prevent the
+    merged table from being saved to disk.
+    
+    TODO the local tree could be cached in $PWD.
+
+--doc]]--
+
+local scan_local_fonts = function ()
+    local n_scanned, n_new  = 0, 0
+    local pwd               = lfscurrentdir ()
+    local name_index        = name_index
+    report ("both", 1, "db", "Scanning fonts in $PWD (%q) ...", pwd)
+
+    n_scanned, n_new = scan_dir (pwd, name_index, name_index, false, "local")
+    if n_new > 0 then
+        name_index.files       = generate_filedata (name_index.mappings)
+        name_index.families    = collect_families  (name_index.mappings)
+        name_index.families    = group_modifiers (name_index.mappings,
+                                                  name_index.families)
+        name_index.families    = order_design_sizes (name_index.families)
+        name_index.meta["local"] = true --- prevent saving to disk
+    end
+
+    return n_scanned, n_new
+end
+
+--- dbobj -> dbobj -> int * int
 
 --- fontentry list -> filemap
 
-local generate_filedata = function (mappings)
+generate_filedata = function (mappings)
 
     report ("both", 2, "db", "Creating filename map.")
 
@@ -2668,7 +2708,7 @@ local get_subtable = function (families, entry)
     return subtable
 end
 
-local collect_families = function (mappings)
+collect_families = function (mappings)
 
     report ("info", 2, "db", "Analyzing families.")
 
@@ -2765,7 +2805,7 @@ local bold_weight        = 700
 local style_categories   = { "r", "b", "i", "bi" }
 local bold_categories    = {      "b",      "bi" }
 
-local group_modifiers = function (mappings, families)
+group_modifiers = function (mappings, families)
     report ("info", 2, "db", "Analyzing shapes, weights, and styles.")
     for location, location_data in next, families do
         for format, format_data in next, location_data do
@@ -2863,7 +2903,7 @@ local cmp_sizes = function (a, b)
     return a [1] < b [1]
 end
 
-local order_design_sizes = function (families)
+order_design_sizes = function (families)
 
     report ("info", 2, "db", "Ordering design sizes.")
 
@@ -3123,11 +3163,11 @@ update_names = function (currentnames, force, dry_run)
 
         read_blacklist ()
 
-        local n_raw, n_new= retrieve_namedata (currentnames,
-                                               targetnames,
-                                               dry_run,
-                                               n_rawnames,
-                                               n_newnames)
+        local n_raw, n_new = retrieve_namedata (currentnames,
+                                                targetnames,
+                                                dry_run,
+                                                n_rawnames,
+                                                n_newnames)
         report ("info", 3, "db",
                 "Scanned %d font files; %d new entries.",
                 n_rawnames, n_newnames)
@@ -3164,16 +3204,16 @@ update_names = function (currentnames, force, dry_run)
 
     if dry_run ~= true then
 
-        save_names ()
+        local success, reason = save_names ()
+        if not success then
+            report ("both", 0, "db",
+                    "Failed to save database to disk: %s",
+                    reason)
+        end
 
-        local success, _lookups = flush_lookup_cache ()
-        if success then
-            local success = save_lookups ()
-            if success then
-                report ("info", 2, "cache",
-                                   "Lookup cache emptied.")
-                return targetnames
-            end
+        if flush_lookup_cache () and save_lookups () then
+            report ("both", 2, "cache", "Lookup cache emptied.")
+            return targetnames
         end
     end
     return targetnames
@@ -3206,10 +3246,15 @@ save_lookups = function ( )
 end
 
 --- save_names() is usually called without the argument
---- dbobj? -> bool
+--- dbobj? -> bool * string option
 save_names = function (currentnames)
     if not currentnames then
         currentnames = name_index
+    end
+    if not currentnames or type (currentnames) ~= "table" then
+        return false, "invalid names table"
+    elseif currentnames.meta and currentnames.meta["local"] then
+        return false, "table contains local entries"
     end
     local path = names.path.index
     local luaname, lucname = path.lua, path.luc
@@ -3421,6 +3466,7 @@ names.read_blacklist              = read_blacklist
 names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath
 names.set_location_precedence     = set_location_precedence
+names.scan_local_fonts            = scan_local_fonts
 
 --- font cache
 names.purge_cache    = purge_cache

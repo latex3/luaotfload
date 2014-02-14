@@ -9,7 +9,8 @@ BUILDDIR	= ./build
 MISCDIR		= ./misc
 
 SRC		= $(wildcard $(SRCSRCDIR)/luaotfload-*.lua)
-SRC		= $(MISCDIR)/luaotfload-blacklist.cnf
+SRC		+= $(SRCSRCDIR)/luaotfload.sty
+SRC		+= $(MISCDIR)/luaotfload-blacklist.cnf
 
 GLYPHSCRIPT	= $(SCRIPTSRCDIR)/mkglyphlist
 CHARSCRIPT	= $(SCRIPTSRCDIR)/mkcharacters
@@ -76,6 +77,8 @@ DO_GLYPHS	= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS	= $(LUA) $(CHARSCRIPT)  > /dev/null
 DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
 
+show: showtargets
+
 all: $(GENERATED)
 builddir: $(BUILDDIR)
 resources: $(RESOURCES)
@@ -130,7 +133,7 @@ endef
 
 define run-install
 @mkdir -p $(SCRIPTDIR) && cp -- $(SCRIPTSTATUS) $(SCRIPTDIR)
-@mkdir -p $(RUNDIR)    && cp -- $(RUNSTATUS) $(RUNDIR)
+@mkdir -p $(RUNDIR)    && cp -- $(RESOURCES) $(RUNSTATUS) $(RUNDIR)
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf
@@ -142,7 +145,7 @@ $(TDS_ZIP): $(DOCS) $(ALL_STATUS)
 	@cd $(TEXMFROOT) && zip -9 ../$@ -r . >/dev/null
 	@$(RM) -r -- $(TEXMFROOT)
 
-.PHONY: install manifest clean mrproper
+.PHONY: install manifest clean mrproper show showtargets
 
 install: $(ALL_STATUS)
 	@echo "Installing in '$(TEXMFROOT)'."
@@ -168,5 +171,25 @@ mrproper: clean
 	$(MAKE) -C $(DOCSRCDIR) $@
 	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE)
 	@$(RM) -r -- $(BUILDDIR)
+
+###############################################################################
+showtargets:
+	@echo "Available targets:"
+	@echo
+	@echo "       all         build everything: documentation, resources,"
+	@echo "       world       build everything and package zipballs"
+	@echo "       doc         compile PDF documentation"
+	@echo "       resources   generate resource files (chars, glyphs)"
+	@echo
+	@echo "       pdf         build luaotfload.pdf"
+	@echo "       manual      crate manpage for luaotfload-tool (requires Docutils)"
+	@echo "       graph       generate file graph (requires GraphViz)"
+	@echo
+	@echo "       chars       import char-def.lua as luaotfload-characters.lua"
+	@echo "       status      create repository info (luaotfload-status.lua)"
+	@echo
+	@echo "       tds         package a zipball according to the TDS"
+	@echo "       ctan        package a zipball for uploading to CTAN"
+	@echo
 
 # vim:noexpandtab:tabstop=8:shiftwidth=2

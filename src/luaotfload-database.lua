@@ -76,6 +76,7 @@ local lfscurrentdir            = lfs.currentdir
 local lfsdir                   = lfs.dir
 local mathabs                  = math.abs
 local mathmin                  = math.min
+local osgetenv                 = os.getenv
 local osgettimeofday           = os.gettimeofday
 local osremove                 = os.remove
 local stringfind               = string.find
@@ -164,7 +165,7 @@ end
 if not luaotfloadconfig.termwidth then
     local tw = 79
     if not (    os.type == "windows" --- Assume broken terminal.
-            or os.getenv "TERM" == "dumb")
+            or osgetenv "TERM" == "dumb")
     then
         local p = iopopen "tput cols"
         if p then
@@ -802,29 +803,20 @@ We’ll just store successful name: lookups in a separate cache file.
 
 type lookup_cache = (string, (string * num)) dict
 
-Complete, needs testing:
- ×  1) add cache to dbobj
- ×  2) wrap lookups in cached versions
- ×  3) make caching optional (via the config table) for debugging
- ×  4) make names_update() cache aware (nil if “force”)
- ×  5) add logging
- ×  6) add cache control to luaotfload-tool
- ×  7) incr db version (now 2.203)
- ×  8) save cache only at the end of a run
-
-The spec is modified in place (ugh), so we’ll have to catalogue what
-fields actually influence its behavior.
+The spec is expected to be modified in place (ugh), so we’ll have to
+catalogue what fields actually influence its behavior.
 
 Idk what the “spec” resolver is for.
 
         lookup      inspects            modifies
+        ----------  -----------------   ---------------------------
         file:       name                forced, name
-        name:*      name, style, sub,   resolved, sub, name, forced
+        name:[*]    name, style, sub,   resolved, sub, name, forced
                     optsize, size
         spec:       name, sub           resolved, sub, name, forced
 
-* name: contains both the name resolver from luatex-fonts and
-  resolve_name() below
+[*] name: contains both the name resolver from luatex-fonts and
+    resolve_name() below
 
 From my reading of font-def.lua, what a resolver does is
 basically rewrite the “name” field of the specification record
@@ -2278,10 +2270,12 @@ end
 local path_separator = ostype == "windows" and ";" or ":"
 
 --[[doc--
+
     scan_texmf_fonts() scans all fonts in the texmf tree through the
     kpathsea variables OPENTYPEFONTS and TTFONTS of texmf.cnf.
     The current working directory comes as “.” (texlive) or absolute
     path (miktex) and will always be filtered out.
+
 --doc]]--
 
 --- dbobj -> dbobj -> bool? -> (int * int)
@@ -2337,7 +2331,7 @@ local function get_os_dirs ()
             "/Network/Library/Fonts",
         }
     elseif os.type == "windows" or os.type == "msdos" then
-        local windir = os.getenv("WINDIR")
+        local windir = osgetenv("WINDIR")
         return { filejoin(windir, 'Fonts') }
     else
         local fonts_conves = { --- plural, much?

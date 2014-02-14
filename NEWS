@@ -8,6 +8,8 @@ Change History
       instead.
     * Remove luaotfload.lua from luaotfload.dtx; it is now a separate file
       luaotfload-main.lua.
+    * Standard source tree structure: the code is now located in the ./doc,
+      ./scripts, ./src, ./build, and ./misc directories.
     * Move the heavier LPEG parsers from luaotfload-features (syntax) and
       luaotfload-database (fontconfig) into the new file
       luaotfload-parsers.lua.

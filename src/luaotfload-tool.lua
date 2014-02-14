@@ -723,9 +723,9 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel",     "help",  "version", "diagnose",
-    "blacklist",    "cache", "flush",   "generate",
-    "scan_local",   "list",  "query",
+    "loglevel",   "help",  "version", "diagnose",
+    "blacklist",  "cache", "flush",   "generate",
+    "list",       "query",
 }
 
 local action_pending  = tabletohash(action_sequence, false)
@@ -768,11 +768,6 @@ actions.generate = function (job)
         return true, true
     end
     return false, false
-end
-
-actions.scan_local = function (job)
-    names.scan_local_fonts ()
-    return true, true
 end
 
 actions.flush = function (job)

@@ -145,7 +145,7 @@ $(TDS_ZIP): $(DOCS) $(ALL_STATUS)
 	@cd $(TEXMFROOT) && zip -9 ../$@ -r . >/dev/null
 	@$(RM) -r -- $(TEXMFROOT)
 
-.PHONY: install manifest clean mrproper
+.PHONY: install manifest clean mrproper show showtargets
 
 install: $(ALL_STATUS)
 	@echo "Installing in '$(TEXMFROOT)'."

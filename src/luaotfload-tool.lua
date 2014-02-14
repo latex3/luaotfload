@@ -1174,7 +1174,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
             action_pending["flush"] = true
         elseif v == "L" then
             action_pending["generate"] = true
-            action_pending["scan_local"] = true
+            luaotfloadconfig.scan_local = true
         elseif v == "list" then
             action_pending["list"] = true
             result.criterion = optarg[n]

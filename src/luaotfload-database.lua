@@ -140,7 +140,7 @@ luaotfloadconfig.compress      = luaotfloadconfig.compress ~= false
 local names                    = fonts.names
 local name_index               = nil --> upvalue for names.data
 local lookup_cache             = nil --> for names.lookups
-names.version                  = 2.5
+names.version                  = 2.51
 names.data                     = nil      --- contains the loaded database
 names.lookups                  = nil      --- contains the lookup cache
 
@@ -356,6 +356,7 @@ This is a sketch of the luaotfload db:
         optical : (int, int) list;  // design size -> index entry
     }
     and metadata = {
+        local       : bool;        (* set if local fonts were added to the db *)
         formats     : string list; // { "otf", "ttf", "ttc", "dfont" }
         statistics  : TODO;
         version     : float;
@@ -439,7 +440,9 @@ mtx-fonts has in names.tma:
 
 --doc]]--
 
-local initialize_namedata = function (formats) --- returns dbobj
+--- string list -> dbobj
+
+local initialize_namedata = function (formats)
     return {
         --families        = { },
         status          = { }, -- was: status; map abspath -> mapping
@@ -447,6 +450,7 @@ local initialize_namedata = function (formats) --- returns dbobj
         names           = { },
 --      files           = { }, -- created later
         meta            = {
+            ["local"]  = false,
             formats    = formats,
             statistics = { },
             version    = names.version,
@@ -2380,11 +2384,11 @@ local scan_os_fonts = function (currentnames,
     return n_scanned, n_new
 end
 
---- unit -> (bool, lookup_cache)
+--- unit -> bool
 flush_lookup_cache = function ()
     lookup_cache = { }
     collectgarbage "collect"
-    return true, lookup_cache
+    return true
 end
 
 
@@ -3164,16 +3168,16 @@ update_names = function (currentnames, force, dry_run)
 
     if dry_run ~= true then
 
-        save_names ()
+        local success, reason = save_names ()
+        if not success then
+            report ("both", 0, "db",
+                    "Failed to save database to disk: %s",
+                    reason)
+        end
 
-        local success, _lookups = flush_lookup_cache ()
-        if success then
-            local success = save_lookups ()
-            if success then
-                report ("info", 2, "cache",
-                                   "Lookup cache emptied.")
-                return targetnames
-            end
+        if flush_lookup_cache () and save_lookups () then
+            report ("both", 2, "cache", "Lookup cache emptied.")
+            return targetnames
         end
     end
     return targetnames
@@ -3210,6 +3214,11 @@ end
 save_names = function (currentnames)
     if not currentnames then
         currentnames = name_index
+    end
+    if not currentnames or type (currentnames) ~= "table" then
+        return false, "invalid names table"
+    elseif currentnames.meta and currentnames.meta["local"] then
+        return false, "table contains local entries"
     end
     local path = names.path.index
     local luaname, lucname = path.lua, path.luc

@@ -772,7 +772,7 @@ actions.generate = function (job)
 end
 
 actions.flush = function (job)
-    local success, lookups = names.flush_lookup_cache()
+    local success = names.flush_lookup_cache()
     if success then
         local success = names.save_lookups()
         if success then

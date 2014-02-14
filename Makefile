@@ -1,11 +1,15 @@
 # Makefile for luaotfload
 
 NAME		= luaotfload
-LUAOTFLOAD	= $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf
 
 DOCSRCDIR	= ./doc
 SCRIPTSRCDIR	= ./scripts
+SRCSRCDIR	= ./src
 BUILDDIR	= ./build
+MISCDIR		= ./misc
+
+SRC		= $(wildcard $(SRCSRCDIR)/luaotfload-*.lua)
+SRC		= $(MISCDIR)/luaotfload-blacklist.cnf
 
 GLYPHSCRIPT	= $(SCRIPTSRCDIR)/mkglyphlist
 CHARSCRIPT	= $(SCRIPTSRCDIR)/mkcharacters
@@ -15,17 +19,17 @@ GLYPHSOURCE	= $(BUILDDIR)/glyphlist.txt
 
 RESOURCESCRIPTS = $(GLYPHSCRIPT) $(CHARSCRIPT) $(STATUSSCRIPT)
 
-SCRIPTNAME	= luaotfload-tool
-SCRIPT		= $(SCRIPTNAME).lua
+TOOLNAME	= luaotfload-tool
+TOOL		= $(SRCSRCDIR)/$(TOOLNAME).lua
 
 GRAPH		= filegraph
 DOCSRC		= $(DOCSRCDIR)/$(NAME).dtx
 GRAPHSRC	= $(DOCSRCDIR)/$(GRAPH).dot
-MANSRC		= $(DOCSRCDIR)/$(SCRIPTNAME).rst
+MANSRC		= $(DOCSRCDIR)/$(TOOLNAME).rst
 
 DOCPDF		= $(DOCSRCDIR)/$(NAME).pdf
 DOTPDF		= $(DOCSRCDIR)/$(GRAPH).pdf
-MANPAGE		= $(DOCSRCDIR)/$(SCRIPTNAME).1
+MANPAGE		= $(DOCSRCDIR)/$(TOOLNAME).1
 
 DOCS		= $(DOCPDF) $(DOTPDF) $(MANPAGE)
 
@@ -34,21 +38,21 @@ GLYPHS		= $(BUILDDIR)/$(NAME)-glyphlist.lua
 CHARS		= $(BUILDDIR)/$(NAME)-characters.lua
 STATUS		= $(BUILDDIR)/$(NAME)-status.lua
 RESOURCES	= $(GLYPHS) $(CHARS) $(STATUS)
-SOURCE		= $(DOCSRC) $(MANSRC) $(LUAOTFLOAD) README Makefile NEWS $(RESOURCESCRIPTS)
+SOURCE		= $(DOCSRC) $(MANSRC) $(SRC) README Makefile NEWS $(RESOURCESCRIPTS)
 
 # Files grouped by installation location
-SCRIPTSTATUS	= $(SCRIPT) $(OLDSCRIPT) $(RESOURCESCRIPTS)
-RUNSTATUS	= $(filter-out $(SCRIPTSTATUS),$(LUAOTFLOAD))
+SCRIPTSTATUS	= $(TOOL) $(RESOURCESCRIPTS)
+RUNSTATUS	= $(filter-out $(SCRIPTSTATUS),$(SRC))
 DOCSTATUS	= $(DOCPDF) $(DOTPDF) README NEWS
 MANSTATUS	= $(MANPAGE)
 SRCSTATUS	= $(DOCSRC) $(MANSRC) $(GRAPHSRC) Makefile
 
 # The following definitions should be equivalent
 # ALL_STATUS = $(RUNSTATUS) $(DOCSTATUS) $(SRCSTATUS)
-ALL_STATUS = $(RESOURCES) $(SOURCE)
+ALL_STATUS 	= $(RESOURCES) $(SOURCE)
 
 # Installation locations
-FORMAT = luatex
+FORMAT 		= luatex
 SCRIPTDIR	= $(TEXMFROOT)/scripts/$(NAME)
 RUNDIR		= $(TEXMFROOT)/tex/$(FORMAT)/$(NAME)
 DOCDIR		= $(TEXMFROOT)/doc/$(FORMAT)/$(NAME)
@@ -57,10 +61,10 @@ SRCDIR		= $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
 TEXMFROOT	= $(shell kpsewhich --var-value TEXMFHOME)
 
 # CTAN-friendly subdirectory for packaging
-DISTDIR		= ./$(NAME)
+DISTDIR		= $(BUILDDIR)/$(NAME)
 
-CTAN_ZIP	= $(NAME).zip
-TDS_ZIP		= $(NAME).tds.zip
+CTAN_ZIP	= $(BUILDDIR)/$(NAME).zip
+TDS_ZIP		= $(BUILDDIR)/$(NAME).tds.zip
 ZIPS		= $(CTAN_ZIP) $(TDS_ZIP)
 
 LUA		= texlua
@@ -74,9 +78,9 @@ DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
 
 all: $(GENERATED)
 builddir: $(BUILDDIR)
-resources: builddir $(RESOURCES)
-chars: builddir $(CHARS)
-status: builddir $(STATUS)
+resources: $(RESOURCES)
+chars: $(CHARS)
+status: $(STATUS)
 ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)
 world: all ctan
@@ -95,13 +99,13 @@ $(DOCPDF):
 $(MANPAGE):
 	@$(MAKE) -C $(DOCSRCDIR) manual
 
-$(GLYPHS): /dev/null
+$(GLYPHS): builddir
 	$(DO_GLYPHS)
 
-$(CHARS): /dev/null
+$(CHARS): builddir
 	$(DO_CHARS)
 
-$(STATUS): /dev/null
+$(STATUS): builddir
 	$(DO_STATUS)
 
 $(BUILDDIR): /dev/null
@@ -126,7 +130,7 @@ endef
 
 define run-install
 @mkdir -p $(SCRIPTDIR) && cp -- $(SCRIPTSTATUS) $(SCRIPTDIR)
-@mkdir -p $(RUNDIR) && cp -- $(RUNSTATUS) $(RUNDIR)
+@mkdir -p $(RUNDIR)    && cp -- $(RUNSTATUS) $(RUNDIR)
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf
@@ -163,6 +167,6 @@ clean:
 mrproper: clean
 	$(MAKE) -C $(DOCSRCDIR) $@
 	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE)
-	@$(RM) -r -- $(DISTDIR) $(BUILDDIR)
+	@$(RM) -r -- $(BUILDDIR)
 
-# vim:set noexpandtab:tabstop=8:shiftwidth=2
+# vim:noexpandtab:tabstop=8:shiftwidth=2

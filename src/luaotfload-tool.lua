@@ -723,9 +723,9 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel",  "help",  "version", "diagnose",
-    "blacklist", "cache", "flush",   "generate",
-    "list",      "query",
+    "loglevel",     "help",  "version", "diagnose",
+    "blacklist",    "cache", "flush",   "generate",
+    "scan_local",   "list",  "query",
 }
 
 local action_pending  = tabletohash(action_sequence, false)
@@ -762,13 +762,17 @@ actions.blacklist = function (job)
 end
 
 actions.generate = function (job)
-    local fontnames, savedname
-    fontnames = names.update(fontnames, job.force_reload, job.dry_run)
+    local fontnames = names.update(fontnames, job.force_reload, job.dry_run)
     report ("info", 2, "db", "Fonts in the database: %i", #fontnames.mappings)
     if names.data() then
         return true, true
     end
     return false, false
+end
+
+actions.scan_local = function (job)
+    names.scan_local_fonts ()
+    return true, true
 end
 
 actions.flush = function (job)
@@ -1094,6 +1098,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         inspect            = "I",
         limit              = 1,
         list               = 1,
+        ["local"]          = "L",
         log                = 1,
         ["max-fonts"]      = 1,
         ["no-reload"]      = "n",
@@ -1109,7 +1114,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         warnings           = "w",
     }
 
-    local short_options = "bcDfFiIlnpqRSuvVhw"
+    local short_options = "bcDfFiIlLnpqRSuvVhw"
 
     local options, _, optarg =
         alt_getopt.get_ordered_opts (arg, short_options, long_options)
@@ -1167,6 +1172,9 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.full_info = true
         elseif v == "l" then
             action_pending["flush"] = true
+        elseif v == "L" then
+            action_pending["generate"] = true
+            action_pending["scan_local"] = true
         elseif v == "list" then
             action_pending["list"] = true
             result.criterion = optarg[n]

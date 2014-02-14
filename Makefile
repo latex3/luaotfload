@@ -9,7 +9,8 @@ BUILDDIR	= ./build
 MISCDIR		= ./misc
 
 SRC		= $(wildcard $(SRCSRCDIR)/luaotfload-*.lua)
-SRC		= $(MISCDIR)/luaotfload-blacklist.cnf
+SRC		+= $(SRCSRCDIR)/luaotfload.sty
+SRC		+= $(MISCDIR)/luaotfload-blacklist.cnf
 
 GLYPHSCRIPT	= $(SCRIPTSRCDIR)/mkglyphlist
 CHARSCRIPT	= $(SCRIPTSRCDIR)/mkcharacters
@@ -130,7 +131,7 @@ endef
 
 define run-install
 @mkdir -p $(SCRIPTDIR) && cp -- $(SCRIPTSTATUS) $(SCRIPTDIR)
-@mkdir -p $(RUNDIR)    && cp -- $(RUNSTATUS) $(RUNDIR)
+@mkdir -p $(RUNDIR)    && cp -- $(RESOURCES) $(RUNSTATUS) $(RUNDIR)
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf

@@ -24,7 +24,7 @@ TOOLNAME	= luaotfload-tool
 TOOL		= $(SRCSRCDIR)/$(TOOLNAME).lua
 
 GRAPH		= filegraph
-DOCSRC		= $(DOCSRCDIR)/$(NAME).dtx
+DOCSRC		= $(addprefix $(DOCSRCDIR)/$(NAME), -main.tex -latex.tex)
 GRAPHSRC	= $(DOCSRCDIR)/$(GRAPH).dot
 MANSRC		= $(DOCSRCDIR)/$(TOOLNAME).rst
 

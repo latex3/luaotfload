@@ -1,0 +1,132 @@
+%% Copyright (C) 2009-2014
+%%
+%%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
+%%      and Khaled Hosny   <khaledhosny@eglug.org>
+%%      and Philipp Gesang <philipp.gesang@alumni.uni-heidelberg.de>
+%%
+%% This file is part of Luaotfload.
+%%
+%%      Home:      https://github.com/lualatex/luaotfload
+%%      Support:   <lualatex-dev@tug.org>.
+%%
+%% Luaotfload is under the GPL v2.0 (exactly) license.
+%%
+%% ----------------------------------------------------------------------------
+%%
+%% Luaotfload is free software; you can redistribute it and/or
+%% modify it under the terms of the GNU General Public License
+%% as published by the Free Software Foundation; version 2
+%% of the License.
+%%
+%% Luaotfload is distributed in the hope that it will be useful,
+%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+%% GNU General Public License for more details.
+%%
+%% You should have received a copy of the GNU General Public License
+%% along with Luaotfload; if not, see <http://www.gnu.org/licenses/>.
+%%
+%% ----------------------------------------------------------------------------
+%%
+
+\documentclass{ltxdoc}
+
+\usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
+\usepackage[x11names]{xcolor}
+
+\def\primarycolor{DodgerBlue4}  %%-> rgb  16  78 139 | #104e8b
+\def\secondarycolor{Goldenrod4} %%-> rgb 139 105 200 | #8b6914
+
+\usepackage[
+    bookmarks=true,
+   colorlinks=true,
+    linkcolor=\primarycolor,
+     urlcolor=\secondarycolor,
+    citecolor=\primarycolor,
+     pdftitle={The luaotfload package},
+   pdfsubject={OpenType layout system for Plain TeX and LaTeX},
+    pdfauthor={Elie Roux & Khaled Hosny & Philipp Gesang},
+  pdfkeywords={luatex, lualatex, unicode, opentype}
+]{hyperref}
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+
+\setmainfont[
+% Numbers     = OldStyle, %% buggy with font cache
+  Ligatures   = TeX,
+  BoldFont    = {Linux Libertine O Bold},
+  ItalicFont  = {Linux Libertine O Italic},
+  SlantedFont = {Linux Libertine O Italic},
+]{Linux Libertine O}
+\setmonofont[Ligatures=TeX,Scale=MatchLowercase]{Liberation Mono}
+%setsansfont[Ligatures=TeX]{Linux Biolinum O}
+\setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
+%setmathfont{XITS Math}
+
+\usepackage{hologo}
+
+\newcommand\TEX      {\TeX\xspace}
+\newcommand\LUA      {Lua\xspace}
+\newcommand\PDFTEX   {pdf\TeX\xspace}
+\newcommand\LUATEX   {Lua\TeX\xspace}
+\newcommand\XETEX    {\XeTeX\xspace}
+\newcommand\LATEX    {\LaTeX\xspace}
+\newcommand\LUALATEX {Lua\LaTeX\xspace}
+\newcommand\CONTEXT  {Con\TeX t\xspace}
+\newcommand\OpenType {\identifier{Open\kern-.25ex Type}\xspace}
+
+\def\definehighlight[#1][#2]%
+ {\ifcsname #1\endcsname\else
+    \expandafter\def\csname #1\endcsname%
+      {\bgroup#2\csname #1_indeed\endcsname}
+    \expandafter\def\csname #1_indeed\endcsname##1%
+      {##1\egroup}%
+  \fi}
+
+\def\restoreunderscore{\catcode`\_=12\relax}
+
+\definehighlight    [fileent][\ttfamily\restoreunderscore]         %% files, dirs
+\definehighlight   [texmacro][\sffamily\itshape\textbackslash]     %% cs
+\definehighlight[luafunction][\sffamily\itshape\restoreunderscore] %% lua identifiers
+\definehighlight [identifier][\sffamily]                           %% names
+\definehighlight     [abbrev][\rmfamily\scshape]                   %% acronyms
+\definehighlight   [emphasis][\rmfamily\slshape]                   %% level 1 emph
+
+\newcommand*\email[1]{\href{mailto:#1}{#1}}
+
+\renewcommand\partname{Part}%% gets rid of the stupid “file” heading
+
+\usepackage{syntax}%% bnf for font request syntax
+
+\usepackage{titlesec}
+
+\def\movecountertomargin#1{\llap{\rmfamily\upshape#1\hskip2em}}
+\def\zeropoint{0pt}
+\titleformat \part
+             {\normalsize\rmfamily\bfseries}
+             {\movecountertomargin\thepart} \zeropoint {}
+\titleformat \section
+             {\normalsize\rmfamily\scshape}
+             {\movecountertomargin\thesection} \zeropoint {}
+\titleformat \subsection
+             {\small\rmfamily\itshape}
+             {\movecountertomargin\thesubsection} \zeropoint {}
+\titleformat \subsubsection
+             {\normalsize\rmfamily\upshape}
+             {\movecountertomargin\thesubsubsection} \zeropoint {}
+
+\usepackage{tocloft}
+\renewcommand \cftpartfont   {\rmfamily\upshape}
+\renewcommand \cftsecfont    {\rmfamily\upshape}
+\renewcommand \cftsubsecfont {\rmfamily\upshape}
+\setlength \cftbeforepartskip {1ex}
+\setlength \cftbeforesecskip  {1ex}
+
+\VerbatimFootnotes
+
+\begin {document}
+	\input {luaotfload-main.tex}
+\end {document}
+
+

@@ -1,6 +1,6 @@
 NAME		= luaotfload
 DOCPDF		= $(NAME).pdf
-DOCDTX		= $(NAME).dtx
+DOCSRC		= $(NAME)-latex.tex
 
 SCRIPTNAME	= luaotfload-tool
 MANSOURCE	= $(SCRIPTNAME).rst
@@ -23,10 +23,11 @@ all: manual doc
 graph: $(DOTPDF)
 manual: $(MANPAGE)
 
-$(DOCPDF): $(DOCDTX)
-	@echo "creating PDF documentation ($(DOCPDF))"
+$(DOCPDF): $(DOCSRC)
+	@echo "creating PDF documentation ($@)"
 	$(DO_LATEX)
 	$(DO_LATEX)
+	mv -f -- $(<:tex=pdf) $@
 
 $(MANPAGE): $(MANSOURCE)
 	@echo "creating man page ($(MANPAGE))"
@@ -44,4 +45,4 @@ clean:
 mrproper: clean
 	@$(RM) -- $(DOCS)
 
-# vim:set noexpandtab:tabstop=8:shiftwidth=2
+# vim:noexpandtab:tabstop=8:shiftwidth=2

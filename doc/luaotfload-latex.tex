@@ -1,3 +1,4 @@
+\luatexsuppresslongerror1%% sigh ...
 %% Copyright (C) 2009-2014
 %%
 %%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
@@ -30,6 +31,8 @@
 %%
 
 \documentclass{ltxdoc}
+
+\makeatletter
 
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
 \usepackage[x11names]{xcolor}
@@ -125,8 +128,150 @@
 
 \VerbatimFootnotes
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% structurals
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def \definestructural #1{%
+  \expandafter \let \csname end#1\endcsname \relax
+
+  \expandafter \def \csname begin#1\endcsname {%
+    \@ifnextchar[{\csname begin#1indeed\endcsname}
+                 {\csname begin#1indeed\endcsname[]}%
+  }
+
+  \expandafter \def \csname begin#1indeed\endcsname [##1]##2{%
+    \edef \first {##1}%
+    \ifx \first \empty
+      \csname #1\endcsname [##2]{##2}%
+    \else
+      \csname #1\endcsname [\first]{##2}%
+    \fi
+  }
+}
+
+\definestructural {section}
+\definestructural {subsection}
+\definestructural {subsubsection}
+
+\def \fakesection #1{\section*{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% codelistings; this sucks hard since we lack access to buffers
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcount \othercatcode  \othercatcode 12
+\newcount \activecatcode \othercatcode 13
+
+\newluatexcatcodetable \vrbcatcodes
+\setluatexcatcodetable \vrbcatcodes {%
+  \luatexcatcodetable \CatcodeTableIniTeX
+  \catcode  9 \othercatcode %% \tabasciicode
+  \catcode 13 \othercatcode %% \endoflineasciicode
+  \catcode 12 \othercatcode %% \formfeedasciicode
+  \catcode 26 \othercatcode %% \endoffileasciicode
+  \catcode 32 \othercatcode %% \spaceasciicode
+}
+
+\newluatexcatcodetable \literalcatcodes
+\setluatexcatcodetable \literalcatcodes {%
+  \luatexcatcodetable \CatcodeTableString
+  \catcode 32 \activecatcode %% \spaceasciicode
+}
+
+\def \beginlisting {%
+  \begingroup
+    \luatexcatcodetable \vrbcatcodes
+    \beginlistingindeed%
+}
+
+\directlua {
+  local texprint   = tex.print
+  document         = document or { }
+  document.printlines = function (buffer)
+    for _, line in next, string.explode (buffer, "\noexpand\n") do
+      texprint (-1, line)
+      texprint (-1, "")
+    end
+  end
+}
+
+\def \beginlistingindeed#1\endlisting{%
+  \endgroup
+  \begingroup
+    \ttfamily
+    \small
+    \begin {quote}
+      \bgroup
+        \luatexcatcodetable \literalcatcodes
+        \obeyspaces
+        \obeylines
+        \directlua{document.printlines ([==[\detokenize {#1}]==])}
+      \egroup
+    \end {quote}
+  \endgroup
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% enumerations and lists
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def \definelist [#1]#2{% name, itemcode
+  \expandafter \def \csname begin#1\endcsname {%
+    \begin {itemize}
+      \let \normalitem = \item
+      \def \altitem ####1{%
+        \def \first {####1}%
+        #2
+      }
+  }
+
+  \expandafter \def \csname end#1\endcsname {%
+    \end {itemize}
+  }
+}
+
+\definelist  [definitions]{\normalitem {\fileent {\first}}}
+\definelist     [filelist]{\normalitem {\fileent {\first}}\space--\hskip 1em}
+\definelist [functionlist]{\normalitem {\luafunction {\first}}\hfill\break}
+
+\def \beginenumeration {\begin {enumerate}}
+\def \endenumeration   {\end {enumerate}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% columns
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def \begindoublecolumns {\begin {multicols} {2}}
+\def \enddoublecolumns   {\end {multicols}}
+
+\def \begintriplecolumns {\begin {multicols} {3}}
+\def \endtriplecolumns   {\end {multicols}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% alignment
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def \begincentered {\begin {center}}
+\def \endcentered   {\end {center}}
+\makeatother
+
+\def \beginnarrower {\begin {quote}}
+\def \endnarrower   {\end {quote}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% special elements
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def \beginabstractcontent {\begin {abstract}}
+\def \endabstractcontent   {\end {abstract}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% main
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin {document}
-	\input {luaotfload-main.tex}
+  \input {luaotfload-main.tex}
 \end {document}
 
 

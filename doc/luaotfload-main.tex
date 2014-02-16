@@ -37,19 +37,17 @@
 
 \maketitle
 
-\begin{abstract}
+\beginabstractcontent
 	This package is an adaptation of the \CONTEXT font loading system.
 	It allows for loading \OpenType fonts with an extended syntax and adds
 	support for a variety of font features.
-\end{abstract}
+\endabstractcontent
 
 
 \tableofcontents
 
-\part{Package Description}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Introduction}
+\beginsection {Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Font management and installation has always been painful with \TEX.  A
@@ -95,8 +93,10 @@ for handling \OpenType fonts.
 Additionally, it provides means for accessing fonts known to the operating
 system conveniently by indexing the metadata.
 
+\endsection
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Thanks}
+\beginsection {Thanks}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \identifier{Luaotfload} is part of \LUALATEX, the community-driven
@@ -119,18 +119,21 @@ code to \LATEX a breeze due to the extra effort he invested into
 isolating it from the rest of \CONTEXT, not to mention his assistance
 in the task and willingness to respond to our suggestions.
 
+\endsection
 
-\section{Loading Fonts}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {Loading Fonts}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \identifier{luaotfload} supports an extended font request syntax:
 
-\begin{quote}
+\beginnarrower
 			|\font\foo={|%
 			\meta{prefix}|:|%
 			\meta{font name}|:|%
 			\meta{font features}|}|%
 			\meta{\TEX font features}
-\end{quote}
+\endnarrower
 
 \noindent
 The curly brackets are optional and escape the spaces in the enclosed
@@ -208,14 +211,14 @@ for a more formal description see figure \ref{font-syntax}.
   \label{font-syntax}
 \end {figure}
 
-\subsection{Prefix -- the \identifier{luaotfload}{ }Way}
+\beginsubsection{Prefix -- the \identifier{luaotfload}{ }Way}
 
 In \identifier{luaotfload}, the canonical syntax for font requests
 requires a \emphasis{prefix}:
 %
-\begin{quote}
+\beginnarrower
   |\font\fontname=|\meta{prefix}|:|\meta{fontname}\dots
-\end{quote}
+\endnarrower
 %
 where \meta{prefix} is either \verb|file:| or \verb|name:|.\footnote{%
   The development version also knows two further prefixes,
@@ -300,7 +303,9 @@ The file names corresponding to the example font names above are
 	\fileent{GFSBodoni.otf}, and
 	\fileent{PTZ56F.ttf}.
 
-\subsection{Compatibility Layer}
+\endsubsection
+
+\beginsubsection {Compatibility Layer}
 
 In addition to the regular prefixed requests, \identifier{luaotfload}
 accepts loading fonts the \XETEX way.
@@ -308,9 +313,9 @@ accepts loading fonts the \XETEX way.
 There are again two modes: bracketed and unbracketed.
 A bracketed request looks as follows.
 
-\begin{quote}
+\beginnarrower
   |\font\fontname=[|\meta{path to file}|]|
-\end{quote}
+\endnarrower
 
 \noindent
 Inside the square brackets, every character except for a closing
@@ -319,9 +324,9 @@ bracket is permitted, allowing for specifying paths to a font file.
 Naturally, path-less file names are equally valid and processed the
 same way as an ordinary \verb|file:| lookup.
 
-\begin{quote}
+\beginnarrower
   |\font\fontname=|\meta{font name} \dots
-\end{quote}
+\endnarrower
 
 Unbracketed (or, for lack of a better word: \emphasis{anonymous})
 font requests resemble the conventional \TEX syntax.
@@ -337,9 +342,9 @@ fall back to a \verb|file:| lookup if no database entry matches
 Furthermore, \identifier{luaotfload} supports the slashed (shorthand)
 font style notation from \XETEX.
 
-\begin{quote}
+\beginnarrower
   |\font\fontname=|\meta{font name}|/|\meta{modifier}\dots
-\end{quote}
+\endnarrower
 
 \noindent
 Currently, four style modifiers are supported:
@@ -350,18 +355,18 @@ Currently, four style modifiers are supported:
 Other “slashed” modifiers are too specific to the \XETEX engine and
 have no meaning in \LUATEX.
 
-\subsection{Examples}
+\endsubsection
 
-\subsubsection{Loading by File Name}
+\beginsubsection{Examples}
+
+\beginsubsubsection{Loading by File Name}
 
 For example, conventional \abbrev{type1} font can be loaded with a \verb|file:|
 request like so:
 
-\begin{quote}
-  \begin{verbatim}
-  \font\lmromanten={file:ec-lmr10} at 10pt
-  \end{verbatim}
-\end{quote}
+\beginlisting
+  \font \lmromanten = {file:ec-lmr10} at 10pt
+\endlisting
 
 The \OpenType version of Janusz Nowacki’s font \emphasis{Antykwa
 Półtawskiego}\footnote{%
@@ -370,49 +375,42 @@ Półtawskiego}\footnote{%
 }
 in its condensed variant can be loaded as follows:
 
-\begin{quote}
-  \begin{verbatim}
-  \font\apcregular=file:antpoltltcond-regular.otf at 42pt
-  \end{verbatim}
-\end{quote}
+\beginlisting
+  \font \apcregular = file:antpoltltcond-regular.otf at 42pt
+\endlisting
 
 The next example shows how to load the \emphasis{Porson} font digitized by
 the Greek Font Society using \XETEX-style syntax and an absolute path from a
 non-standard directory:
 
-\begin{quote}
-  \begin{verbatim}
-  \font\gfsporson="[/tmp/GFSPorson.otf]" at 12pt
-  \end{verbatim}
-\end{quote}
+\beginlisting
+  \font \gfsporson = "[/tmp/GFSPorson.otf]" at 12pt
+\endlisting
 
-\subsubsection{Loading by Font Name}
+\endsubsubsection
+
+\beginsubsubsection{Loading by Font Name}
 
 The \verb|name:| lookup does not depend on cryptic filenames:
 
-\begin{quote}
-  \begin{verbatim}
-  \font\pagellaregular={name:TeX Gyre Pagella} at 9pt
-  \end{verbatim}
-\end{quote}
+\beginlisting
+  \font \pagellaregular = {name:TeX Gyre Pagella} at 9pt
+\endlisting
 
 A bit more specific but essentially the same lookup would be:
 
-\begin{quote}
-  \begin{verbatim}
-  \font\pagellaregular={name:TeX Gyre Pagella Regular} at 9pt
-  \end{verbatim}
-\end{quote}
+\beginlisting
+  \font \pagellaregular = {name:TeX Gyre Pagella Regular} at 9pt
+\endlisting
 
 \noindent
 Which fits nicely with the whole set:
 
-\begin{quote}
-  \begin{verbatim}
-  \font\pagellaregular   ={name:TeX Gyre Pagella Regular}    at 9pt
-  \font\pagellaitalic    ={name:TeX Gyre Pagella Italic}     at 9pt
-  \font\pagellabold      ={name:TeX Gyre Pagella Bold}       at 9pt
-  \font\pagellabolditalic={name:TeX Gyre Pagella Bolditalic} at 9pt
+\beginlisting
+  \font\pagellaregular    = {name:TeX Gyre Pagella Regular}    at 9pt
+  \font\pagellaitalic     = {name:TeX Gyre Pagella Italic}     at 9pt
+  \font\pagellabold       = {name:TeX Gyre Pagella Bold}       at 9pt
+  \font\pagellabolditalic = {name:TeX Gyre Pagella Bolditalic} at 9pt
 
   {\pagellaregular     foo bar baz\endgraf}
   {\pagellaitalic      foo bar baz\endgraf}
@@ -420,10 +418,11 @@ Which fits nicely with the whole set:
   {\pagellabolditalic  foo bar baz\endgraf}
 
   ...
-  \end{verbatim}
-\end{quote}
+\endlisting
 
-\subsubsection{Modifiers}
+\endsubsubsection
+
+\beginsubsubsection{Modifiers}
 
 If the entire \emphasis{Iwona} family\footnote{%
   \url{http://jmn.pl/kurier-i-iwona/},
@@ -432,47 +431,47 @@ If the entire \emphasis{Iwona} family\footnote{%
 is installed in some location accessible by \identifier{luaotfload},
 the regular shape can be loaded as follows:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
   \font\iwona=Iwona at 20pt
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \noindent
 To load the most common of the other styles, the slash notation can
 be employed as shorthand:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
   \font\iwonaitalic    =Iwona/I    at 20pt
   \font\iwonabold      =Iwona/B    at 20pt
   \font\iwonabolditalic=Iwona/BI   at 20pt
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \noindent
 which is equivalent to these full names:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
   \font\iwonaitalic    ="Iwona Italic"       at 20pt
   \font\iwonabold      ="Iwona Bold"         at 20pt
   \font\iwonabolditalic="Iwona BoldItalic"   at 20pt
-  \end{verbatim}
-\end{quote}
+\endlisting
 
-\section {Font features}
+\endsubsubsection
+\endsubsection
+\endsection
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {Font features}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \emphasis{Font features} are the second to last component in the
 general scheme for font requests:
 
-\begin{quote}
+\beginnarrower
       |\font\foo={|%
       \meta{prefix}|:|%
       \meta{font name}|:|%
       \meta{font features}|}|%
       \meta{\TEX font features}
-\end{quote}
+\endnarrower
 
 \noindent
 If style modifiers are present (\XETEX style), they must precede
@@ -487,11 +486,9 @@ and font options.
 Prepending a font feature with a |+| (plus sign) enables it, whereas
 a |-| (minus) disables it. For instance, the request
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
   \font\test=LatinModernRoman:+clig;-kern
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \noindent activates contextual ligatures (|clig|) and disables
 kerning (|kern|).
@@ -501,11 +498,9 @@ the feature in a key/value expression.
 %
 The following request has the same meaning as the last one:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
   \font\test=LatinModernRoman:clig=true;kern=false
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \noindent
 Furthermore, this second syntax is required should a font feature
@@ -520,11 +515,9 @@ obviously, |random|.
 
 %% TODO 	verify that this actually works with a font that supports
 %%      	the salt/random feature!\fi
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
   \font\librmsaltfirst=LatinModernRoman:salt=1
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \noindent Other font options include:
 
@@ -588,6 +581,13 @@ obviously, |random|.
        The syntax is documented in \identifier{Adobe}’s
        \OpenType Feature File Specification.\footnote{%
          Cf. \url{http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
+				 Feature file support is part of the engine which at the
+				 time of this writing (2014) implements the spec only
+				 partially.
+				 See the
+				 \href{http://tracker.luatex.org/view.php?id=231}
+              {\LUATEX tracker}
+					for details.
        }
 
        For a demonstration of how to set a |tkrn| feature consult
@@ -604,11 +604,9 @@ obviously, |random|.
 
        For example, in order to set text in semitransparent red:
 
-       \begin{quote}
-          \begin{verbatim}
+			 \beginlisting
  \font\test={Latin Modern Roman}:color=FF0000BB
-          \end{verbatim}
-       \end{quote}
+			 \endlisting
 
 \item [kernfactor \& letterspace] \hfill \\
        Define a font with letterspacing (tracking) enabled.
@@ -644,12 +642,10 @@ obviously, |random|.
        Consequently, both definitions in below snippet yield the same
        letterspacing width:
 
-       \begin{quote}
-              \begin{verbatim}
+			 \beginlisting
  \font\iwonakernedA="file:Iwona-Regular.otf:kernfactor=0.125"
  \font\iwonakernedB="file:Iwona-Regular.otf:letterspace=12.5"
-              \end{verbatim}
-       \end{quote}
+ 			 \endlisting
 
        Specific pairs of letters and ligatures may be exempt from
        letterspacing by defining the \LUA functions
@@ -688,10 +684,10 @@ obviously, |random|.
 					%
           Alternatively and with loss of information, you can dump
           those tables into your terminal by issuing
-          \begin{verbatim}
+					\beginlisting
  \directlua{inspect(fonts.protrusions.setups.default)
             inspect(fonts.expansions.setups.default)}
-          \end{verbatim}
+					\endlisting
           at some point after loading \fileent{luaotfload.sty}.
        }
 			 %
@@ -709,11 +705,9 @@ obviously, |random|.
          for details.
        }:
 
-       \begin{quote}
-          \begin{verbatim}
+			 \beginlisting
  \font\test=LatinModernRoman:protrusion=default
-          \end{verbatim}
-       \end{quote}
+ 			 \endlisting
 \end{description}
 
 \paragraph{Non-standard font features}
@@ -756,8 +750,12 @@ Currently (2014) there are three of them:
 \end{description}
 
 
+\endsection
 
-\section{Font names database}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {Font names database}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \label{sec:fontdb}
 
 As mentioned above, \identifier{luaotfload} keeps track of which
@@ -792,12 +790,8 @@ inspects every font file on your computer.
 This is particularly noticeable if it occurs during a typesetting run.
 In any case, subsequent updates to the database will be quite fast.
 
-\subsection[luaotfload-tool / mkluatexfontdb.lua]%
-           {\fileent{luaotfload-tool} /
-            \fileent{mkluatexfontdb.lua}\footnote{%
-  The script may be named just \fileent{mkluatexfontdb} in your
-  distribution.
-}}
+\beginsubsection[luaotfload-tool]
+								{\fileent{luaotfload-tool}}
 
 It can still be desirable at times to do some of these steps
 manually, and without having to compile a document.
@@ -826,29 +820,23 @@ pass it as an argument to \fileent{texlua}.\footnote{%
 Invoked with the argument \verb|--update| it will perform a database
 update, scanning for fonts not indexed.
 
-\begin{quote}
-  \begin{verbatim}
-    luaotfload-tool --update
-  \end{verbatim}
-\end{quote}
+\beginlisting
+	luaotfload-tool --update
+\endlisting
 
 Adding the \verb|--force| switch will initiate a complete
 rebuild of the database.
 
-\begin{quote}
-  \begin{verbatim}
-    luaotfload-tool --update --force
-  \end{verbatim}
-\end{quote}
-
-For sake of backwards compatibility, \fileent{luaotfload-tool} may be
-renamed or symlinked to \fileent{mkluatexfontdb}.
-%
+\beginlisting
+	luaotfload-tool --update --force
+\endlisting
 Whenever it is run under this name, it will update the database
 first, mimicking the behavior of earlier versions of
 \identifier{luaotfload}.
 
-\subsection{Search Paths}
+\endsubsection
+
+\beginsubsection{Search Paths}
 
 \identifier{luaotfload} scans those directories where fonts are
 expected to be located on a given system.
@@ -875,7 +863,7 @@ directories.
   \caption{List of paths searched for each supported operating
            system.}
   \renewcommand{\arraystretch}{1.2}
-  \begin{center}
+	\begincentered
     \begin{tabular}{lp{.5\textwidth}}
       Windows     & \verb|%WINDIR%\Fonts|
       \\
@@ -888,12 +876,14 @@ directories.
                     \fileent{/Network/Library/Fonts}
       \\
     \end{tabular}
-  \end{center}
+	\endcentered
   \label{table-searchpaths}
   \hrule
 \end{table}
 
-\subsection{Querying from Outside}
+\endsubsection
+
+\beginsubsection{Querying from Outside}
 
 \fileent{luaotfload-tool} also provides rudimentary means of
 accessing the information collected in the font database.
@@ -904,11 +894,9 @@ matching name.
 %
 For instance, the invocation
 
-\begin{quote}
-  \begin{verbatim}
-    luaotfload-tool  --find="Iwona Regular"
-  \end{verbatim}
-\end{quote}
+\beginlisting
+	luaotfload-tool  --find="Iwona Regular"
+\endlisting
 
 \noindent
 will verify if “Iwona Regular” is found in the database and can be
@@ -922,11 +910,9 @@ Suppose you cannot precisely remember if the variant of
 \identifier{Iwona} you are looking for was “Bright” or “Light”.
 The query
 
-\begin{quote}
-  \begin{verbatim}
-    luaotfload-tool  -F --find="Iwona Bright"
-  \end{verbatim}
-\end{quote}
+\beginlisting
+	luaotfload-tool  -F --find="Iwona Bright"
+\endlisting
 
 \noindent
 will tell you that indeed the latter name is correct.
@@ -934,11 +920,9 @@ will tell you that indeed the latter name is correct.
 Basic information about fonts in the database can be displayed
 using the \verb|-i| option (\verb|--info|).
 %
-\begin{quote}
-  \begin{verbatim}
-    luaotfload-tool  -i --find="Iwona Light Italic"
-  \end{verbatim}
-\end{quote}
+\beginlisting
+	luaotfload-tool  -i --find="Iwona Light Italic"
+\endlisting
 %
 \noindent
 The meaning of the printed values is described in section 4.4 of the
@@ -948,11 +932,9 @@ The meaning of the printed values is described in section 4.4 of the
 
 For a much more detailed report about a given font try the \verb|-I| option
 instead (\verb|--inspect|).
-\begin{quote}
-  \begin{verbatim}
-    luaotfload-tool  -I --find="Iwona Light Italic"
-  \end{verbatim}
-\end{quote}
+\beginlisting
+	luaotfload-tool  -I --find="Iwona Light Italic"
+\endlisting
 
 \verb|luaotfload-tool --help| will list the available command line
 switches, including some not discussed in detail here.
@@ -963,7 +945,9 @@ capabilities refer to the manpage
   Or see \verb|luaotfload-tool.rst| in the source directory.
 }
 
-\subsection{Blacklisting Fonts}
+\endsubsection
+
+\beginsubsection {Blacklisting Fonts}
 \label{font-blacklist}
 
 Some fonts are problematic in general, or just in \LUATEX.
@@ -1004,14 +988,19 @@ without modifying the global file.
 %
 An example with explicit paths:
 
-\begin{verbatim}
+\beginlisting
 % example otf-blacklist.cnf
 /Library/Fonts/GillSans.ttc  % Luaotfload ignores this font.
 -/Library/Fonts/Optima.ttc   % This one is usable again, even if
                              % blacklisted somewhere else.
-\end{verbatim}
+\endlisting
 
-\section{Files from \CONTEXT and \LUATEX-Fonts}
+\endsubsection
+\endsection
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {Files from \CONTEXT and \LUATEX-Fonts}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \identifier{luaotfload} relies on code originally written by Hans
 Hagen\footnote{%
@@ -1069,60 +1058,56 @@ too developed by Hans Hagen.\footnote{%
 It houses several \LUA files that can be classed in three
 categories.
 
-  \begin{itemize}
-    \let\normalitem=\item
-    \def\incitem#1{%
-      \normalitem{\fileent{#1}}
-    }
+\begindefinitions
     \normalitem \emphasis{\LUA utility libraries}, a subset
                 of what is provided by the \identifier{lualibs}
                 package.
 
-                \begin{multicols}{2}
-                  \begin{itemize}
-                    \incitem{l-lua.lua}       \incitem{l-lpeg.lua}
-                    \incitem{l-function.lua}  \incitem{l-string.lua}
-                    \incitem{l-table.lua}     \incitem{l-io.lua}
-                    \incitem{l-file.lua}      \incitem{l-boolean.lua}
-                    \incitem{l-math.lua}      \incitem{util-str.lua}
-                  \end{itemize}
-                \end{multicols}
+								\begindoublecolumns
+									\begindefinitions
+											\altitem{l-lua.lua}       \altitem{l-lpeg.lua}
+											\altitem{l-function.lua}  \altitem{l-string.lua}
+											\altitem{l-table.lua}     \altitem{l-io.lua}
+											\altitem{l-file.lua}      \altitem{l-boolean.lua}
+											\altitem{l-math.lua}      \altitem{util-str.lua}
+									\enddefinitions
+								\enddoublecolumns
 
     \normalitem The \emphasis{font loader} itself.
                 These files have been written for
                 \LUATEX-Fonts and they are distributed along
                 with \identifier{luaotfload}.
-                \begin{multicols}{2}
-                  \begin{itemize}
-                    \incitem{luatex-basics-gen.lua}
-                    \incitem{luatex-basics-nod.lua}
-                    \incitem{luatex-fonts-enc.lua}
-                    \incitem{luatex-fonts-syn.lua}
-                    \incitem{luatex-fonts-tfm.lua}
-                    \incitem{luatex-fonts-chr.lua}
-                    \incitem{luatex-fonts-lua.lua}
-                    \incitem{luatex-fonts-inj.lua}
-                    \incitem{luatex-fonts-otn.lua}
-                    \incitem{luatex-fonts-def.lua}
-                    \incitem{luatex-fonts-ext.lua}
-                    \incitem{luatex-fonts-cbk.lua}
-                  \end{itemize}
-                \end{multicols}
+								\begindoublecolumns
+									\begindefinitions
+                    \altitem{luatex-basics-gen.lua}
+                    \altitem{luatex-basics-nod.lua}
+                    \altitem{luatex-fonts-enc.lua}
+                    \altitem{luatex-fonts-syn.lua}
+                    \altitem{luatex-fonts-tfm.lua}
+                    \altitem{luatex-fonts-chr.lua}
+                    \altitem{luatex-fonts-lua.lua}
+                    \altitem{luatex-fonts-inj.lua}
+                    \altitem{luatex-fonts-otn.lua}
+                    \altitem{luatex-fonts-def.lua}
+                    \altitem{luatex-fonts-ext.lua}
+                    \altitem{luatex-fonts-cbk.lua}
+									\enddefinitions
+								\enddoublecolumns
 
     \normalitem Code related to \emphasis{font handling and
                 node processing}, taken directly from
                 \CONTEXT.
-                \begin{multicols}{2}
-                  \begin{itemize}
-                    \incitem{data-con.lua} \incitem{font-ini.lua}
-                    \incitem{font-con.lua} \incitem{font-cid.lua}
-                    \incitem{font-map.lua} \incitem{font-oti.lua}
-                    \incitem{font-otf.lua} \incitem{font-otb.lua}
-                    \incitem{font-ota.lua} \incitem{font-def.lua}
-                    \incitem{font-otp.lua}
-                  \end{itemize}
-                \end{multicols}
-  \end{itemize}
+								\begindoublecolumns
+									\begindefinitions
+                    \altitem{data-con.lua} \altitem{font-ini.lua}
+                    \altitem{font-con.lua} \altitem{font-cid.lua}
+                    \altitem{font-map.lua} \altitem{font-oti.lua}
+                    \altitem{font-otf.lua} \altitem{font-otb.lua}
+                    \altitem{font-ota.lua} \altitem{font-def.lua}
+                    \altitem{font-otp.lua}
+									\enddefinitions
+								\enddoublecolumns
+\enddefinitions
 
 Note that if \identifier{luaotfload} cannot locate the
 merged file, it will load the individual \LUA libraries
@@ -1150,29 +1135,25 @@ In addition to these, \identifier{luaotfload} requires a number of
 files not contained in the merge. Some of these have no equivalent in
 \LUATEX-Fonts or \CONTEXT, some were taken unmodified from the latter.
 
-\begin{itemize}
-    \let\normalitem=\item
-    \def\ouritem#1{%
-      \normalitem{\fileent{#1}}%
-      \space--\hskip1em
-    }
-    \ouritem {luaotfload-features.lua}     font feature handling;
+
+\beginfilelist
+    \altitem {luaotfload-features.lua}     font feature handling;
                                            incorporates some of the code from
                                            \fileent{font-otc} from \CONTEXT;
-    \ouritem {luaotfload-override.lua}     overrides the \CONTEXT logging
+    \altitem {luaotfload-override.lua}     overrides the \CONTEXT logging
                                            functionality.
-    \ouritem {luaotfload-loaders.lua}      registers the \OpenType
+    \altitem {luaotfload-loaders.lua}      registers the \OpenType
                                            font reader as handler for
                                            Postscript fonts
                                            (\abbrev{pfa}, \abbrev{pfb}).
-    \ouritem {luaotfload-parsers.lua}      various \abbrev{lpeg}-based parsers.
-    \ouritem {luaotfload-database.lua}     font names database.
-    \ouritem {luaotfload-colors.lua}       color handling.
-    \ouritem {luaotfload-auxiliary.lua}    access to internal functionality
+    \altitem {luaotfload-parsers.lua}      various \abbrev{lpeg}-based parsers.
+    \altitem {luaotfload-database.lua}     font names database.
+    \altitem {luaotfload-colors.lua}       color handling.
+    \altitem {luaotfload-auxiliary.lua}    access to internal functionality
                                            for package authors
                                            (proposals for additions welcome).
-    \ouritem {luaotfload-letterspace.lua}  font-based letterspacing.
-\end{itemize}
+    \altitem {luaotfload-letterspace.lua}  font-based letterspacing.
+\endfilelist
 
 \begin{figure}[b]
   \caption{Schematic of the files in \identifier{Luaotfload}}
@@ -1180,7 +1161,11 @@ files not contained in the merge. Some of these have no equivalent in
   \label{file-graph}
 \end{figure}
 
-\section{Auxiliary Functions}
+\endsection
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {Auxiliary Functions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 With release version 2.2, \identifier{luaotfload} received
 additional functions for package authors to call from outside
@@ -1210,7 +1195,7 @@ Note that the current interface is not yet set in stone and the
 development team is open to suggestions for improvements or
 additions.
 
-\subsection{Callback Functions}
+\beginsubsection {Callback Functions}
 
 The \luafunction{patch_font} callback is inserted in the wrapper
 \identifier{luaotfload} provides for the font definition callback
@@ -1222,8 +1207,7 @@ the font loader is done creating it.
 For a short demonstration of its usefulness, here is a snippet that
 writes an entire font object to the file \fileent{fontdump.lua}:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
   \input luaotfload.sty
   \directlua{
     local dumpfile    = "fontdump.lua"
@@ -1240,8 +1224,7 @@ writes an entire font object to the file \fileent{fontdump.lua}:
   }
   \font\dumpme=name:Iwona
   \bye
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \emphasis{Beware}: this creates a Lua file of around 150,000 lines of
 code, taking up 3~\abbrev{mb} of disk space.
@@ -1250,7 +1233,7 @@ By inspecting the output you can get a first impression of how a font
 is structured in \LUATEX’s memory, what elements it is composed of,
 and in what ways it can be rearranged.
 
-\subsubsection{Compatibility with Earlier Versions}
+\beginsubsubsection {Compatibility with Earlier Versions}
 
 As has been touched on in the preface to this section, the structure
 of the object as returned by the fontloader underwent rather drastic
@@ -1267,99 +1250,100 @@ units factor, and the font name have again been made accessible from
 the toplevel of the table even though they were migrated to different
 subtables in the meantime.
 
-\subsubsection{Patches}
+\endsubsubsection
+
+\beginsubsubsection{Patches}
 
 These are mostly concerned with establishing compatibility with \XETEX.
 
-\begin{itemize}
-  \let\normalitem=\item
-  \def\ouritem#1{%
-    \normalitem{\luafunction{#1}}%
-    \hfill\break
-  }
+\beginfunctionlist
 
-  \ouritem  {set_sscale_dimens}
+  \altitem  {set_sscale_dimens}
             Calculate \texmacro{fontdimen}s 10 and 11 to emulate \XETEX.
 
-  \ouritem  {set_capheight}
+  \altitem  {set_capheight}
             Calculates \texmacro{fontdimen} 8 like \XETEX.
 
-  \ouritem  {patch_cambria_domh}
+  \altitem  {patch_cambria_domh}
             Correct some values of the font \emphasis{Cambria Math}.
 
-\end{itemize}
+\endfunctionlist
 
-\subsection{Package Author’s Interface}
+\endsubsection
+
+\beginsubsection {Package Author’s Interface}
 
 As \LUATEX release 1.0 is nearing, the demand for a reliable interface
 for package authors increases.
 
-\subsubsection{Font Properties}
+\endsubsubsection
+
+\beginsubsubsection{Font Properties}
 
 Below functions mostly concern querying the different components of a
 font like for instance the glyphs it contains, or what font features
 are defined for which scripts.
 
-\begin{itemize}
-  \let\normalitem=\item
-  \def\ouritem#1{%
-    \normalitem{\luafunction{#1}}%
-    \hfill\break
-  }
+\beginfunctionlist
 
-  \ouritem  {aux.font_has_glyph (id : int, index : int)}
+  \altitem  {aux.font_has_glyph (id : int, index : int)}
             Predicate that returns true if the font \luafunction{id}
             has glyph \luafunction{index}.
 
-  \ouritem  {aux.slot_of_name(name : string)}
+  \altitem  {aux.slot_of_name(name : string)}
             Translates an Adobe Glyph name to the corresponding glyph
             slot.
 
-  \ouritem  {aux.name_of_slot(slot : int)}
+  \altitem  {aux.name_of_slot(slot : int)}
             The inverse of \luafunction{slot_of_name}; note that this
             might be incomplete as multiple glyph names may map to the
             same codepoint, only one of which is returned by
             \luafunction{name_of_slot}.
 
-  \ouritem  {aux.provides_script(id : int, script : string)}
+  \altitem  {aux.provides_script(id : int, script : string)}
             Test if a font supports \luafunction{script}.
 
-  \ouritem  {aux.provides_language(id : int, script : string, language : string)}
+  \altitem  {aux.provides_language(id : int, script : string, language : string)}
             Test if a font defines \luafunction{language} for a given
             \luafunction{script}.
 
-  \ouritem  {aux.provides_feature(id : int, script : string,
+  \altitem  {aux.provides_feature(id : int, script : string,
              language : string, feature : string)}
             Test if a font defines \luafunction{feature} for
             \luafunction{language} for a given \luafunction{script}.
 
-  \ouritem  {aux.get_math_dimension(id : int, dimension : string)}
+  \altitem  {aux.get_math_dimension(id : int, dimension : string)}
             Get the dimension \luafunction{dimension} of font \luafunction{id}.
 
-  \ouritem  {aux.sprint_math_dimension(id : int, dimension : string)}
+  \altitem  {aux.sprint_math_dimension(id : int, dimension : string)}
             Same as \luafunction{get_math_dimension()}, but output the value
             in scaled points at the \TEX end.
 
-\end{itemize}
+\endfunctionlist
 
-\subsubsection{Database}
+\endsubsubsection
 
-\begin{itemize}
-  \let\normalitem=\item
-  \def\ouritem#1{%
-    \normalitem{\luafunction{#1}}%
-    \hfill\break
-  }
+%% not implemented, may come back later
+% \beginsubsubsection{Database}
+% 
+% \beginfunctionlist
+%   \altitem  {aux.scan_external_dir(dir : string)}
+%             Include fonts in directory \luafunction{dir} in font lookups without
+%             adding them to the database.
+% 
+% \endfunctionlist
+% 
+% \endsubsubsection
 
-  \ouritem  {aux.scan_external_dir(dir : string)}
-            Include fonts in directory \luafunction{dir} in font lookups without
-            adding them to the database.
+\endsubsection
+\endsection
 
-\end{itemize}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {Troubleshooting}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Troubleshooting}
+\beginsubsection {Database Generation}
 
-\subsection {Database Generation}
 If you encounter problems with some fonts, please first update to the
 latest version of this package before reporting a bug, as
 \identifier{luaotfload} is under active development and still a moving
@@ -1373,30 +1357,24 @@ requests and the likes.
 Bug reports are more likely to be addressed if they contain the output
 of
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
     luaotfload-tool --diagnose=environment,files,permissions
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \noindent Consult the man page for a description of these options.
 
 Errors during database generation can be traced by increasing the
 verbosity level and redirecting log output to \fileent{stdout}:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
     luaotfload-tool -fuvvv --log=stdout
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \noindent or to a file in \fileent{/tmp}:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
     luaotfload-tool -fuvvv --log=file
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \noindent In the latter case, invoke the \verb|tail(1)| utility on the
 file for live monitoring of the progress.
@@ -1407,7 +1385,9 @@ log file is likely to be the culprit.
 Please specify it when reporting a bug, and blacklist it for the time
 being (see above, page \pageref{font-blacklist}).
 
-\subsection {Font Features}
+\endsubsection
+
+\beginsubsection {Font Features}
 
 A common problem is the lack of features for some
 \OpenType fonts even when specified.
@@ -1421,22 +1401,20 @@ fix it.
 %
 For example with \verb|latn|:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
     \font\test=file:MyFont.otf:script=latn;+liga;
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 You can get a list of features that a font defines for scripts and
 languages by querying it in \fileent{luaotfload-tool}:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
     luaotfload-tool --find="Iwona" --inspect
-  \end{verbatim}
-\end{quote}
+\endlisting
 
-\subsection {\LUATEX Programming}
+\endsubsection
+
+\beginsubsection {\LUATEX Programming}
 
 Another strategy that helps avoiding problems is to not access raw
 \LUATEX internals directly.
@@ -1448,11 +1426,9 @@ Thus, whenever possible prefer the functions in the \luafunction{aux}
 namespace over direct manipulation of font objects. For example, raw
 access to the \luafunction{font.fonts} table like:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
     local somefont = font.fonts[2]
-  \end{verbatim}
-\end{quote}
+\endlisting
 
 \noindent can render already defined fonts unusable.
 %
@@ -1469,8 +1445,7 @@ both \luafunction{font.getfont()} and \luafunction{font.fonts}.
 %
 In this case, best define you own accessor:
 
-\begin{quote}
-  \begin{verbatim}
+\beginlisting
     local unsafe_getfont = function (id)
         local tfmdata = font.getfont (id)
         if not tfmdata then
@@ -1481,35 +1456,15 @@ In this case, best define you own accessor:
 
     --- use like getfont()
     local somefont = unsafe_getfont (2)
-  \end{verbatim}
-\end{quote}
+\endlisting
 
-\part{Implementation}
-
-\section {\fileent{luaotfload.lua}}
-
-As of version 2.5, the file \fileent{luaotfload.lua} is no longer
-generated from the \abbrev{dtx}.
-%
-Instead, it is maintained separately as a plain \identifier{Lua} file
-\fileent{luaotfload-main.lua} in the Luaotfload \identifier{git} tree.
-%
-The file documentation which used to be found in this section has been
-preserved in the comments.
-
-\section{\fileent{luaotfload.sty}}
-
-As of version 2.5, the file \fileent{luaotfload.sty} is no longer
-generated from the \abbrev{dtx}.
-%
-Instead, it is maintained separately as a plain \identifier{\TEX} file
-in the Luaotfload \identifier{git} tree.
-%
-The file documentation which used to be found in this section has
-been preserved in the comments.
+\endsubsection
+\endsection
 
 \clearpage
-\section{The GNU GPL License v2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {The GNU GPL License v2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The GPL requires the complete license text to be distributed along
 with the code. I recommend the canonical source, instead:
@@ -1521,32 +1476,28 @@ You might want to zoom in.
 \begin{lrbox}{\gpl}
 \begin{minipage}{3\textwidth}
 \columnsep=3\columnsep
-\begin{multicols}{3}
-\begin{center}
-{\Large GNU GENERAL PUBLIC LICENSE\par}
-\bigskip
-{Version 2, June 1991}
-\end{center}
+\begintriplecolumns
+\begincentered
+	{\Large GNU GENERAL PUBLIC LICENSE\par}
+	\bigskip
+	{Version 2, June 1991}
 
-\begin{center}
-{\parindent 0in
+	{\parindent 0in
 
-Copyright \textcopyright\ 1989, 1991 Free Software Foundation, Inc.
+	Copyright \textcopyright\ 1989, 1991 Free Software Foundation, Inc.
 
-\bigskip
+	\bigskip
 
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+	51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 
-\bigskip
+	\bigskip
 
-Everyone is permitted to copy and distribute verbatim copies
-of this license document, but changing it is not allowed.
-}
-\end{center}
+	Everyone is permitted to copy and distribute verbatim copies
+	of this license document, but changing it is not allowed.
+	}
 
-\begin{center}
-{\bf\large Preamble}
-\end{center}
+	{\bf\large Preamble}
+\endcentered
 
 
 The licenses for most software are designed to take away your freedom to
@@ -1595,12 +1546,12 @@ be licensed for everyone's free use or not licensed at all.
 The precise terms and conditions for copying, distribution and
 modification follow.
 
-\begin{center}
-{\Large \sc Terms and Conditions For Copying, Distribution and
-  Modification}
-\end{center}
+\begincentered
+	{\Large \sc Terms and Conditions For Copying, Distribution and
+	 Modification}
+\endcentered
 
-\begin{enumerate}
+\beginenumeration
 \item
 This License applies to any program or other work which contains a notice
 placed by the copyright holder saying it may be distributed under the
@@ -1635,7 +1586,7 @@ of it, thus forming a work based on the Program, and copy and
 distribute such modifications or work under the terms of Section 1
 above, provided that you also meet all of these conditions:
 
-\begin{enumerate}
+\beginenumeration
 
 \item
 You must cause the modified files to carry prominent notices stating that
@@ -1659,7 +1610,7 @@ License.  (Exception: if the Program itself is interactive but
 does not normally print such an announcement, your work based on
 the Program is not required to print an announcement.)
 
-\end{enumerate}
+\endenumeration
 
 
 These requirements apply to the modified work as a whole.  If
@@ -1687,7 +1638,7 @@ You may copy and distribute the Program (or a work based on it,
 under Section 2) in object code or executable form under the terms of
 Sections 1 and 2 above provided that you also do one of the following:
 
-\begin{enumerate}
+\beginenumeration
 
 \item
 
@@ -1712,7 +1663,7 @@ allowed only for noncommercial distribution and only if you
 received the program in object code or executable form with such
 an offer, in accord with Subsection b above.)
 
-\end{enumerate}
+\endenumeration
 
 
 The source code for a work means the preferred form of the work for
@@ -1825,11 +1776,9 @@ make exceptions for this.  Our decision will be guided by the two goals
 of preserving the free status of all derivatives of our free software and
 of promoting the sharing and reuse of software generally.
 
-\begin{center}
-{\Large\sc
-No Warranty
-}
-\end{center}
+\begincentered
+	{\Large\sc No Warranty}
+\endcentered
 
 \item
 {\sc Because the program is licensed free of charge, there is no warranty
@@ -1853,17 +1802,19 @@ you or third parties or a failure of the program to operate with any other
 programs), even if such holder or other party has been advised of the
 possibility of such damages.}
 
-\end{enumerate}
+\endenumeration
 
 
-\begin{center}
-{\Large\sc End of Terms and Conditions}
-\end{center}
+\begincentered
+	{\Large\sc End of Terms and Conditions}
+\endcentered
 
 
 \pagebreak[2]
 
-\section*{Appendix: How to Apply These Terms to Your New Programs}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\fakesection {Appendix: How to Apply These Terms to Your New Programs}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 If you develop a new program, and you want it to be of the greatest
 possible use to the public, the best way to achieve this is to make it
@@ -1875,36 +1826,36 @@ terms.
   the exclusion of warranty; and each file should have at least the
   ``copyright'' line and a pointer to where the full notice is found.
 
-\begin{quote}
-one line to give the program's name and a brief idea of what it does. \\
-Copyright (C) yyyy  name of author \\
+\beginnarrower
+	one line to give the program's name and a brief idea of what it does. \\
+	Copyright (C) yyyy  name of author \\
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-\end{quote}
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+\endnarrower
 
 Also add information on how to contact you by electronic and paper mail.
 
 If the program is interactive, make it output a short notice like this
 when it starts in an interactive mode:
 
-\begin{quote}
-Gnomovision version 69, Copyright (C) yyyy  name of author \\
-Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'. \\
-This is free software, and you are welcome to redistribute it
-under certain conditions; type `show c' for details.
-\end{quote}
+\beginnarrower
+	Gnomovision version 69, Copyright (C) yyyy  name of author \\
+	Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'. \\
+	This is free software, and you are welcome to redistribute it
+	under certain conditions; type `show c' for details.
+\endnarrower
 
 
 The hypothetical commands {\tt show w} and {\tt show c} should show the
@@ -1917,13 +1868,13 @@ You should also get your employer (if you work as a programmer) or your
 school, if any, to sign a ``copyright disclaimer'' for the program, if
 necessary.  Here is a sample; alter the names:
 
-\begin{quote}
+\beginnarrower
 Yoyodyne, Inc., hereby disclaims all copyright interest in the program \\
 `Gnomovision' (which makes passes at compilers) written by James Hacker. \\
 
 signature of Ty Coon, 1 April 1989 \\
 Ty Coon, President of Vice
-\end{quote}
+\endnarrower
 
 
 This General Public License does not permit incorporating your program
@@ -1932,13 +1883,15 @@ may consider it more useful to permit linking proprietary applications
 with the library.  If this is what you want to do, use the GNU Library
 General Public License instead of this License.
 
-\end{multicols}
+\endtriplecolumns
 \end{minipage}
 \end{lrbox}
 
-\begin{center}
-\scalebox{0.33}{\usebox{\gpl}}
-\end{center}
+\begincentered
+	\scalebox{0.33}{\usebox{\gpl}}
+\endcentered
+
+\endsection
 
 \endinput
 

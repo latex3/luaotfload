@@ -157,6 +157,18 @@
 \def \fakesection #1{\section*{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% inline verbatim
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Context offers both \type{…} and \type<<…>>, but not an unbalanced
+%% one that we could map directly onto Latex’s \verb|…|.
+
+%% TODO
+%\def \inlinecode·#1·{%
+  %\verb·#1·%
+%}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% codelistings; this sucks hard since we lack access to buffers
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -203,6 +215,7 @@
     \small
     \begin {quote}
       \bgroup
+        \addfontfeature {RawFeature=-tlig;-liga}%% So one can’t just turn them all off at once using the ``Ligatures`` key?
         \luatexcatcodetable \literalcatcodes
         \obeyspaces
         \obeylines
@@ -254,7 +267,6 @@
 
 \def \begincentered {\begin {center}}
 \def \endcentered   {\end {center}}
-\makeatother
 
 \def \beginnarrower {\begin {quote}}
 \def \endnarrower   {\end {quote}}
@@ -266,9 +278,59 @@
 \def \beginabstractcontent {\begin {abstract}}
 \def \endabstractcontent   {\end {abstract}}
 
+\let \setdocumenttitle      \title
+\let \setdocumentdate       \date
+\let \setdocumentauthor     \author
+\let \typesetdocumenttitle  \maketitle
+
+\let \typesetcontent        \tableofcontent
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% figure floats
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def \beginsyntaxfloat #1{%% the request syntax diagram
+  \begin {figure} [b]
+    \def \syntaxcaption {#1}%
+    \setlength\grammarparsep{12pt plus 2pt minus 2pt}%
+    \setlength\grammarindent{5cm}%
+    \begingroup
+      \small
+      \begin {grammar}
+}
+
+\def \endsyntaxfloat {%
+      \end {grammar}
+    \endgroup
+    \caption \syntaxcaption
+    \label{font-syntax}
+  \end {figure}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% hyperlinks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\protected \def \hyperlink{%
+  \@ifnextchar[{\hyperlinkindeed}%
+               {\hyperlinkindeed[]}%
+}
+
+\def \hyperlinkindeed [#1]#2{%
+  \def \first {#1}%
+  \ifx \first \empty
+    \url {#2}%
+  \else
+    \href {#2}{#1}%
+  \fi%
+}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% main
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\makeatother
 
 \begin {document}
   \input {luaotfload-main.tex}

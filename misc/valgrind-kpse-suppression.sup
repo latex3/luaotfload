@@ -1,0 +1,111 @@
+{
+   kpathsea-garbage-1
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:kpathsea_cnf_get
+}
+
+{
+   kpathsea-garbage-2
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:kpse_program_basename
+}
+
+
+{
+   kpathsea-garbage-3
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:kpse_find_file
+}
+
+
+{
+   kpathsea-garbage-4
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:find_file
+}
+
+{
+   kpathsea-garbage-5
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:lua_kpse_lookup
+}
+
+{
+   kpathsea-garbage-6
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:find_file
+}
+
+
+{
+   kpathsea-garbage-7
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:expand_path
+}
+
+{
+   kpathsea-garbage-8
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:do_lua_kpathsea_lookup
+}
+
+
+{
+   kpathsea-garbage-9
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:kpathsea_find_file
+}
+
+
+{
+   kpathsea-garbage-10
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:kpathsea_init_db
+}
+
+
+{
+   kpathsea-garbage-11
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:kpathsea_find_file_generic
+}
+
+
+{
+   kpathsea-garbage-12
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:expand_var
+}
+
+
+{
+   kpathsea-garbage-13
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:init_path
+}

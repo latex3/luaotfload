@@ -109,3 +109,23 @@
    ...
    fun:init_path
 }
+
+
+{
+   kpathsea-garbage-14
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:kpse_in_name_ok
+}
+
+
+{
+   kpathsea-garbage-15
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:kpathsea_var_value
+}
+
+

@@ -212,18 +212,18 @@ requires a \emphasis{prefix}:
   |\font\fontname=|\meta{prefix}|:|\meta{fontname}\dots
 \endnarrower
 %
-where \meta{prefix} is either \inlinecode·file:· or \verb|name:|.\footnote{%
+where \meta{prefix} is either \inlinecode{file:} or \inlinecode {name:}.\footnote{%
   The development version also knows two further prefixes,
-  \verb|kpse:| and \verb|my:|.
+  \inlinecode {kpse:} and \inlinecode {my:}.
   %
-  A \verb|kpse| lookup is restricted to files that can be found by
+  A \inlinecode {kpse} lookup is restricted to files that can be found by
   \identifier{kpathsea} and
   will not attempt to locate system fonts.
   %
   This behavior can be of value when an extra degree of encapsulation is
   needed, for instance when supplying a customized tex distribution.
 
-  The \verb|my| lookup takes this a step further: it lets you define
+  The \inlinecode {my} lookup takes this a step further: it lets you define
   a custom resolver function and hook it into the \luafunction{resolve_font}
   callback.
   %
@@ -264,7 +264,7 @@ usually listed in drop-down menus and the like.\footnote{%
   If in doubt, use filenames.
   %
   \fileent{luaotfload-tool} can perform the matching for you with the
-  option \verb|--find=<name>|, and you can use the file name it returns
+  option \inlinecode {--find=<name>}, and you can use the file name it returns
   in your font definition.
 }
 %
@@ -277,11 +277,11 @@ create the database.
 
 File names are whatever your file system allows them to be, except
 that that they may not contain the characters
-  \verb|(|,
-  \verb|:|, and
-  \verb|/|.
+  \inlinecode {(},
+  \inlinecode {:}, and
+  \inlinecode {/}.
 %
-As is obvious from the last exception, the \verb|file:| lookup will
+As is obvious from the last exception, the \inlinecode {file:} lookup will
 not process paths to the font location -- only those
 files found when generating the database are addressable this way.
 %
@@ -312,7 +312,7 @@ Inside the square brackets, every character except for a closing
 bracket is permitted, allowing for specifying paths to a font file.
 %
 Naturally, path-less file names are equally valid and processed the
-same way as an ordinary \verb|file:| lookup.
+same way as an ordinary \inlinecode {file:} lookup.
 
 \beginnarrower
   |\font\fontname=|\meta{font name} \dots
@@ -325,8 +325,8 @@ However, they have a broader spectrum of possible interpretations:
 before anything else, \identifier{luaotfload} attempts to load a
 traditional \TEX Font Metric (\abbrev{tfm} or \abbrev{ofm}).
 %
-If this fails, it performs a \verb|name:| lookup, which itself will
-fall back to a \verb|file:| lookup if no database entry matches
+If this fails, it performs a \inlinecode {name:} lookup, which itself will
+fall back to a \inlinecode {file:} lookup if no database entry matches
 \meta{font name}.
 
 Furthermore, \identifier{luaotfload} supports the slashed (shorthand)
@@ -338,9 +338,9 @@ font style notation from \XETEX.
 
 \noindent
 Currently, four style modifiers are supported:
-  \verb|I| for italic shape,
-  \verb|B| for bold   weight,
-  \verb|BI| or \verb|IB| for the combination of both.
+  \inlinecode {I} for italic shape,
+  \inlinecode {B} for bold   weight,
+  \inlinecode {BI} or \inlinecode {IB} for the combination of both.
 %
 Other “slashed” modifiers are too specific to the \XETEX engine and
 have no meaning in \LUATEX.
@@ -351,8 +351,8 @@ have no meaning in \LUATEX.
 
 \beginsubsubsection{Loading by File Name}
 
-For example, conventional \abbrev{type1} font can be loaded with a \verb|file:|
-request like so:
+For example, conventional \abbrev{type1} font can be loaded with a
+\inlinecode {file:} request like so:
 
 \beginlisting
   \font \lmromanten = {file:ec-lmr10} at 10pt
@@ -381,7 +381,7 @@ non-standard directory:
 
 \beginsubsubsection{Loading by Font Name}
 
-The \verb|name:| lookup does not depend on cryptic filenames:
+The \inlinecode {name:} lookup does not depend on cryptic filenames:
 
 \beginlisting
   \font \pagellaregular = {name:TeX Gyre Pagella} at 9pt
@@ -639,7 +639,7 @@ obviously, |random|.
        Specific pairs of letters and ligatures may be exempt from
        letterspacing by defining the \LUA functions
        \luafunction{keeptogether} and \luafunction{keepligature},
-       respectively, inside the namespace \verb|luaotfload.letterspace|.
+       respectively, inside the namespace \inlinecode {luaotfload.letterspace}.
        %
        Both functions are called whenever the letterspacing callback
        encounters an appropriate node or set of nodes.
@@ -685,8 +685,8 @@ obviously, |random|.
        For example, to define a font with the default
        protrusion vector applied\footnote{%
          You also need to set
-             \verb|pdfprotrudechars=2| and
-             \verb|pdfadjustspacing=2|
+             \inlinecode {pdfprotrudechars=2} and
+             \inlinecode {pdfadjustspacing=2}
          to activate protrusion and expansion, respectively.
          See the
          \hyperlink [\PDFTEX manual]{http://mirrors.ctan.org/systems/pdftex/manual/pdftex-a.pdf}%
@@ -716,19 +716,19 @@ Currently (2014) there are three of them:
           Applies legacy \TEX ligatures:
 
           \begin{tabular}{rlrl}
-             ``  &  \verb|``|  &  ''  &  \verb|''|  \\
-             `   &  \verb|`|   &  '   &  \verb|'|   \\
-             "   &  \verb|"|   &  --  &  \verb|--|  \\
-             --- &  \verb|---| &  !`  &  \verb|!`|  \\
-             ?`  &  \verb|?`|  &      &             \\
+             ``  &  \inlinecode {``}  &  ''  &  \inlinecode {''}  \\
+             `   &  \inlinecode {`}   &  '   &  \inlinecode {'}   \\
+             "   &  \inlinecode {"}   &  --  &  \inlinecode {--}  \\
+             --- &  \inlinecode {---} &  !`  &  \inlinecode {!`}  \\
+             ?`  &  \inlinecode {?`}  &      &                    \\
           \end{tabular}
 
           \footnote{%
-            These contain the feature set \verb|trep| of earlier
+            These contain the feature set \inlinecode {trep} of earlier
             versions of \identifier{luaotfload}.
 
             Note to \XETEX users: this is the equivalent of the
-            assignment \verb|mapping=text-tex| using \XETEX's input
+            assignment \inlinecode {mapping=text-tex} using \XETEX's input
             remapping feature.
           }
 
@@ -752,9 +752,10 @@ fonts are available to \LUATEX by means of a \emphasis{database}.
 This allows referring to fonts not only by explicit filenames but
 also by the proper names contained in the metadata which is often
 more accessible to humans.\footnote{%
-  The tool \hyperlink[\fileent{otfinfo}]{http://www.lcdf.org/type/} (comes
-  with \TEX Live), when invoked on a font file with the \verb|-i|
-  option, lists the variety of name fields defined for it.
+  The tool \hyperlink[\fileent{otfinfo}]{http://www.lcdf.org/type/}
+  (comes with \TEX Live), when invoked on a font file with the
+  \inlinecode {-i} option, lists the variety of name fields defined for
+  it.
 }
 
 When \identifier{luaotfload} is asked to load a font by a font name,
@@ -789,7 +790,7 @@ To this end, \identifier{luaotfload} comes with the utility
 functionality.
 %
 Being a \LUA script, there are two ways to run it:
-either make it executable (\verb|chmod +x| on unixoid systems) or
+either make it executable (\inlinecode {chmod +x} on unixoid systems) or
 pass it as an argument to \fileent{texlua}.\footnote{%
   Tests by the maintainer show only marginal performance gain by
   running with Luigi Scarso’s
@@ -801,17 +802,17 @@ pass it as an argument to \fileent{texlua}.\footnote{%
   On \abbrev{MS} \identifier{Windows} systems, the script can be run
   either by calling the wrapper application
   \fileent{luaotfload-tool.exe} or as
-  \verb|texlua.exe luaotfload-tool.lua|.
+  \inlinecode {texlua.exe luaotfload-tool.lua}.
 }
 %
-Invoked with the argument \verb|--update| it will perform a database
+Invoked with the argument \inlinecode {--update} it will perform a database
 update, scanning for fonts not indexed.
 
 \beginlisting
   luaotfload-tool --update
 \endlisting
 
-Adding the \verb|--force| switch will initiate a complete
+Adding the \inlinecode {--force} switch will initiate a complete
 rebuild of the database.
 
 \beginlisting
@@ -830,17 +831,17 @@ expected to be located on a given system.
 %
 On a Linux machine it follows the paths listed in the
 \identifier{Fontconfig} configuration files;
-consult \verb|man 5 fonts.conf| for further information.
+consult \inlinecode {man 5 fonts.conf} for further information.
 %
 On \identifier{Windows} systems, the standard location is
-\verb|Windows\Fonts|,
+\inlinecode {Windows\\Fonts},
 %
 while \identifier{Mac OS~X} requires a multitude of paths to
 be examined.
 %
 The complete list is is given in table \ref{table-searchpaths}.
 Other paths can be specified by setting the environment variable
-\verb+OSFONTDIR+.
+\inlinecode {OSFONTDIR}.
 %
 If it is non-empty, then search will be extended to the included
 directories.
@@ -852,7 +853,7 @@ directories.
   \renewcommand{\arraystretch}{1.2}
   \begincentered
     \begin{tabular}{lp{.5\textwidth}}
-      Windows     & \verb|%WINDIR%\Fonts|
+      Windows     & \inlinecode {\%WINDIR\%\\Fonts}
       \\
       Linux       & \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break
                     \fileent{/etc/fonts/fonts.conf}
@@ -875,7 +876,7 @@ directories.
 \fileent{luaotfload-tool} also provides rudimentary means of
 accessing the information collected in the font database.
 %
-If the option \verb|--find=|\emphasis{name} is given, the script will
+If the option \inlinecode {--find=}\emphasis{name} is given, the script will
 try and search the fonts indexed by \identifier{luaotfload} for a
 matching name.
 %
@@ -890,7 +891,7 @@ will verify if “Iwona Regular” is found in the database and can be
 readily requested in a document.
 
 If you are unsure about the actual font name, then add the
-\verb|-F| (or \verb|--fuzzy|) switch to the command line to enable
+\inlinecode {-F} (or \inlinecode {--fuzzy}) switch to the command line to enable
 approximate matching.
 %
 Suppose you cannot precisely remember if the variant of
@@ -905,7 +906,7 @@ The query
 will tell you that indeed the latter name is correct.
 
 Basic information about fonts in the database can be displayed
-using the \verb|-i| option (\verb|--info|).
+using the \inlinecode {-i} option (\inlinecode {--info}).
 %
 \beginlisting
   luaotfload-tool  -i --find="Iwona Light Italic"
@@ -917,19 +918,19 @@ The meaning of the printed values is described in section 4.4 of the
   In \TEX Live: \fileent{texmf-dist/doc/luatex/base/luatexref-t.pdf}.
 }
 
-For a much more detailed report about a given font try the \verb|-I| option
-instead (\verb|--inspect|).
+For a much more detailed report about a given font try the
+\inlinecode {-I} option instead (\inlinecode {--inspect}).
 \beginlisting
   luaotfload-tool  -I --find="Iwona Light Italic"
 \endlisting
 
-\verb|luaotfload-tool --help| will list the available command line
+\inlinecode {luaotfload-tool --help} will list the available command line
 switches, including some not discussed in detail here.
 %
 For a full documentation of \identifier{luaotfload-tool} and its
 capabilities refer to the manpage
-(\verb|man 1 luaotfload-tool|).\footnote{%
-  Or see \verb|luaotfload-tool.rst| in the source directory.
+(\inlinecode {man 1 luaotfload-tool}).\footnote{%
+  Or see \inlinecode {luaotfload-tool.rst} in the source directory.
 }
 
 \endsubsection
@@ -941,7 +942,7 @@ Some fonts are problematic in general, or just in \LUATEX.
 %
 If you find that compiling your document takes far too long or eats
 away all your system’s memory, you can track down the culprit by
-running \verb|luaotfload-tool -v| to increase verbosity.
+running \inlinecode {luaotfload-tool -v} to increase verbosity.
 %
 Take a note of the \emphasis{filename} of the font that database
 creation fails with and append it to the file
@@ -960,7 +961,7 @@ Place this file to some location where the \identifier{kpse}
 library can find it, e.~g.
 \fileent{texmf-local/tex/luatex/luaotfload} if you are running
 \identifier{\TEX Live},\footnote{%
-  You may have to run \verb|mktexlsr| if you created a new file in
+  You may have to run \inlinecode {mktexlsr} if you created a new file in
   your \fileent{texmf} tree.
 }
 or just leave it in the working directory of your document.
@@ -1032,7 +1033,7 @@ too developed by Hans Hagen.\footnote{%
   \hyperlink [part of \CONTEXT]{http://repo.or.cz/w/context.git/blob_plain/refs/heads/origin:/scripts/context/lua/mtx-package.lua}
   and requires \fileent{mtxrun}.
   Run
-  \verb|mtxrun --script package --help|
+  \inlinecode {mtxrun --script package --help}
   to display further information.
   For the actual merging code see the file
   \fileent{util-mrg.lua} that is part of \CONTEXT.
@@ -1096,7 +1097,7 @@ merged file, it will load the individual \LUA libraries
 instead.
 %
 Their names remain the same as in \CONTEXT (without the
-\verb|otfl|-prefix) since we imported the relevant section of
+\inlinecode {otfl}-prefix) since we imported the relevant section of
 \fileent{luatex-fonts.lua} unmodified into \fileent{luaotfload-main.lua}.
 Thus if you prefer running bleeding edge code from the
 \CONTEXT beta, all you have to do is remove
@@ -1358,7 +1359,7 @@ verbosity level and redirecting log output to \fileent{stdout}:
     luaotfload-tool -fuvvv --log=file
 \endlisting
 
-\noindent In the latter case, invoke the \verb|tail(1)| utility on the
+\noindent In the latter case, invoke the \inlinecode {tail(1)} utility on the
 file for live monitoring of the progress.
 
 If database generation fails, the font last printed to the terminal or
@@ -1375,13 +1376,13 @@ A common problem is the lack of features for some
 \OpenType fonts even when specified.
 %
 This can be related to the fact that some fonts do not provide features
-for the \verb|dflt| script (see above on page \pageref{script-tag}),
+for the \inlinecode {dflt} script (see above on page \pageref{script-tag}),
 which is the default one in this package.
 %
 If this happens, assigning a noth script when the font is defined should
 fix it.
 %
-For example with \verb|latn|:
+For example with \inlinecode {latn}:
 
 \beginlisting
     \font\test=file:MyFont.otf:script=latn;+liga;

@@ -34,11 +34,11 @@
 
 \makeatletter
 
-\usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
-\usepackage[x11names]{xcolor}
+\usepackage {metalogo,multicol,mdwlist,fancyvrb,xspace}
+\usepackage [x11names] {xcolor}
 
-\def\primarycolor{DodgerBlue4}  %%-> rgb  16  78 139 | #104e8b
-\def\secondarycolor{Goldenrod4} %%-> rgb 139 105 200 | #8b6914
+\def \primarycolor   {DodgerBlue4} %%-> rgb  16  78 139 | #104e8b
+\def \secondarycolor {Goldenrod4}  %%-> rgb 139 105 200 | #8b6914
 
 \usepackage[
     bookmarks=true,
@@ -46,14 +46,14 @@
     linkcolor=\primarycolor,
      urlcolor=\secondarycolor,
     citecolor=\primarycolor,
-     pdftitle={The luaotfload package},
+     pdftitle={The Luaotfload package},
    pdfsubject={OpenType layout system for Plain TeX and LaTeX},
     pdfauthor={Elie Roux & Khaled Hosny & Philipp Gesang},
   pdfkeywords={luatex, lualatex, unicode, opentype}
 ]{hyperref}
 
-\usepackage{fontspec}
-\usepackage{unicode-math}
+\usepackage {fontspec}
+\usepackage {unicode-math}
 
 \setmainfont[
 % Numbers     = OldStyle, %% buggy with font cache
@@ -163,10 +163,14 @@
 %% Context offers both \type{…} and \type<<…>>, but not an unbalanced
 %% one that we could map directly onto Latex’s \verb|…|.
 
-%% TODO
-%\def \inlinecode·#1·{%
-  %\verb·#1·%
-%}
+\usepackage {listings}
+\lstset {
+  basicstyle=\ttfamily,
+}
+
+\def \inlinecode #1{%
+  \lstinline {#1}%
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% codelistings; this sucks hard since we lack access to buffers

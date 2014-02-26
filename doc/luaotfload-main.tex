@@ -144,6 +144,7 @@ A selection of individual parts of the syntax are discussed below;
 for a more formal description see figure \ref{font-syntax}.
 
 \beginsyntaxfloat
+  {font-syntax}
   {Font request syntax.
    Braces or double quotes around the
    \emphasis{specification} rule will
@@ -509,210 +510,212 @@ obviously, |random|.
   \font\librmsaltfirst=LatinModernRoman:salt=1
 \endlisting
 
-\noindent Other font options include:
+\beginsubsection {Basic font features}
 
-\begin{description}
+\begindescriptions
 
-\item [mode] \hfill \\
-       \identifier{luaotfload} has two \OpenType processing
-       \emphasis{modes}:
-       \identifier{base} and \identifier{node}.
+  \altitem {mode}
+         \identifier{luaotfload} has two \OpenType processing
+         \emphasis{modes}:
+         \identifier{base} and \identifier{node}.
 
-       \identifier{base} mode works by mapping \OpenType
-       features to traditional \TEX ligature and kerning mechanisms.
-       %
-       Supporting only non-contextual substitutions and kerning
-       pairs, it is the slightly faster, albeit somewhat limited, variant.
-       %
-       \identifier{node} mode works by processing \TeX’s internal
-       node list directly at the \LUA end and supports
-       a wider range of \OpenType features.
-       %
-       The downside is that the intricate operations required for
-       \identifier{node} mode may slow down typesetting especially
-       with complex fonts and it does not work in math mode.
-
-       By default \identifier{luaotfload} is in \identifier{node}
-       mode, and \identifier{base} mode has to be requested where needed,
-       e.~g. for math fonts.
-
-\item [script] \label{script-tag} \hfill \\
-       An \OpenType script tag;\footnote{%
-         See \hyperlink {http://www.microsoft.com/typography/otspec/scripttags.htm}
-         for a list of valid values.
+         \identifier{base} mode works by mapping \OpenType
+         features to traditional \TEX ligature and kerning mechanisms.
          %
-         For scripts derived from the Latin alphabet the value
-         |latn| is good choice.
-       }
-       the default value is |dlft|.
-       %
-       Some fonts, including very popular ones by foundries like Adobe,
-       do not assign features to the |dflt| script, in
-       which case the script needs to be set explicitly.
+         Supporting only non-contextual substitutions and kerning
+         pairs, it is the slightly faster, albeit somewhat limited, variant.
+         %
+         \identifier{node} mode works by processing \TeX’s internal
+         node list directly at the \LUA end and supports
+         a wider range of \OpenType features.
+         %
+         The downside is that the intricate operations required for
+         \identifier{node} mode may slow down typesetting especially
+         with complex fonts and it does not work in math mode.
 
-\item [language] \hfill \\
-       An \OpenType language system identifier,\footnote{%
-         Cf. \hyperlink {http://www.microsoft.com/typography/otspec/languagetags.htm}.
-       }
-       defaulting to |dflt|.
+         By default \identifier{luaotfload} is in \identifier{node}
+         mode, and \identifier{base} mode has to be requested where needed,
+         e.~g. for math fonts.
 
-\item [featurefile] \hfill \\
-       A comma-separated list of feature files to be applied to the
-       font.
-       %
-       Feature files contain a textual representation of
-       \OpenType tables and extend the features of a font
-       on fly.
-       %
-       After they are applied to a font, features defined in a
-       feature file can be enabled or disabled just like any
-       other font feature.
-       %
-       The syntax is documented in \identifier{Adobe}’s
-       \OpenType Feature File Specification.\footnote{%
-         Cf. \hyperlink {http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
-         Feature file support is part of the engine which at the
-         time of this writing (2014) implements the spec only
-         partially.
-         See the
-         \hyperlink [\LUATEX tracker]{http://tracker.luatex.org/view.php?id=231}
-          for details.
-       }
+  \altitem {script} \label{script-tag}
+         An \OpenType script tag;\footnote{%
+           See \hyperlink {http://www.microsoft.com/typography/otspec/scripttags.htm}
+           for a list of valid values.
+           %
+           For scripts derived from the Latin alphabet the value
+           |latn| is good choice.
+         }
+         the default value is |dlft|.
+         %
+         Some fonts, including very popular ones by foundries like Adobe,
+         do not assign features to the |dflt| script, in
+         which case the script needs to be set explicitly.
 
-       For a demonstration of how to set a |tkrn| feature consult
-       the file |tkrn.fea| that is part of \identifier{luaotfload}.
-       It can be read and applied as follows:
+  \altitem {language}
+         An \OpenType language system identifier,\footnote{%
+           Cf. \hyperlink {http://www.microsoft.com/typography/otspec/languagetags.htm}.
+         }
+         defaulting to |dflt|.
 
-       |\font\test=Latin Modern Roman:featurefile=tkrn.fea;+tkrn|
+  \altitem {featurefile}
+         A comma-separated list of feature files to be applied to the
+         font.
+         %
+         Feature files contain a textual representation of
+         \OpenType tables and extend the features of a font
+         on fly.
+         %
+         After they are applied to a font, features defined in a
+         feature file can be enabled or disabled just like any
+         other font feature.
+         %
+         The syntax is documented in \identifier{Adobe}’s
+         \OpenType Feature File Specification.\footnote{%
+           Cf. \hyperlink {http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
+           Feature file support is part of the engine which at the
+           time of this writing (2014) implements the spec only
+           partially.
+           See the
+           \hyperlink [\LUATEX tracker]{http://tracker.luatex.org/view.php?id=231}
+            for details.
+         }
 
-\item [color] \hfill \\
-       A font color, defined as a triplet of two-digit hexadecimal
-       \abbrev{rgb} values, with an optional fourth value for
-       transparency
-       (where |00| is completely transparent and |FF| is opaque).
+         For a demonstration of how to set a |tkrn| feature consult
+         the file |tkrn.fea| that is part of \identifier{luaotfload}.
+         It can be read and applied as follows:
 
-       For example, in order to set text in semitransparent red:
+         |\font\test=Latin Modern Roman:featurefile=tkrn.fea;+tkrn|
 
-       \beginlisting
- \font\test={Latin Modern Roman}:color=FF0000BB
-       \endlisting
+  \altitem {color}
+         A font color, defined as a triplet of two-digit hexadecimal
+         \abbrev{rgb} values, with an optional fourth value for
+         transparency
+         (where |00| is completely transparent and |FF| is opaque).
 
-\item [kernfactor \& letterspace] \hfill \\
-       Define a font with letterspacing (tracking) enabled.
-       %
-       In \identifier{luaotfload}, letterspacing is implemented by
-       inserting additional kerning between glyphs.
+         For example, in order to set text in semitransparent red:
 
-       This approach is derived from and still quite similar to the
-       \emphasis{character kerning} (\texmacro{setcharacterkerning} /
-       \texmacro{definecharacterkerning} \& al.) functionality of
-       Context, see the file \fileent{typo-krn.lua} there.
-       %
-       The main difference is that \identifier{luaotfload} does not
-       use \LUATEX attributes to assign letterspacing to regions,
-       but defines virtual letterspaced versions of a font.
+         \beginlisting
+\font\test={Latin Modern Roman}:color=FF0000BB
+         \endlisting
 
-       The option \identifier{kernfactor} accepts a numeric value that
-       determines the letterspacing factor to be applied to the font
-       size.
-       %
-       E.~g. a kern factor of $0.42$ applied to a $10$ pt font
-       results in $4.2$ pt of additional kerning applied to each
-       pair of glyphs.
-       %
-       Ligatures are split into their component glyphs unless
-       explicitly ignored (see below).
+  \altitem {kernfactor \& letterspace}
+         Define a font with letterspacing (tracking) enabled.
+         %
+         In \identifier{luaotfload}, letterspacing is implemented by
+         inserting additional kerning between glyphs.
 
-       For compatibility with \XETEX an alternative
-       \identifier{letterspace} option is supplied that interprets the
-       supplied value as a \emphasis{percentage} of the font size but
-       is otherwise identical to \identifier{kernfactor}.
-       %
-       Consequently, both definitions in below snippet yield the same
-       letterspacing width:
+         This approach is derived from and still quite similar to the
+         \emphasis{character kerning} (\texmacro{setcharacterkerning} /
+         \texmacro{definecharacterkerning} \& al.) functionality of
+         Context, see the file \fileent{typo-krn.lua} there.
+         %
+         The main difference is that \identifier{luaotfload} does not
+         use \LUATEX attributes to assign letterspacing to regions,
+         but defines virtual letterspaced versions of a font.
 
-       \beginlisting
- \font\iwonakernedA="file:Iwona-Regular.otf:kernfactor=0.125"
- \font\iwonakernedB="file:Iwona-Regular.otf:letterspace=12.5"
-       \endlisting
+         The option \identifier{kernfactor} accepts a numeric value that
+         determines the letterspacing factor to be applied to the font
+         size.
+         %
+         E.~g. a kern factor of $0.42$ applied to a $10$ pt font
+         results in $4.2$ pt of additional kerning applied to each
+         pair of glyphs.
+         %
+         Ligatures are split into their component glyphs unless
+         explicitly ignored (see below).
 
-       Specific pairs of letters and ligatures may be exempt from
-       letterspacing by defining the \LUA functions
-       \luafunction{keeptogether} and \luafunction{keepligature},
-       respectively, inside the namespace \inlinecode {luaotfload.letterspace}.
-       %
-       Both functions are called whenever the letterspacing callback
-       encounters an appropriate node or set of nodes.
-       %
-       If they return a true-ish value, no extra kern is inserted at
-       the current position.
-       %
-       \luafunction{keeptogether} receives a pair of consecutive
-       glyph nodes in order of their appearance in the node list.
-       %
-       \luafunction{keepligature} receives a single node which can be
-       analyzed into components.
-       %
-       (For details refer to the \emphasis{glyph nodes} section in the
-       \LUATEX reference manual.)
-       %
-       The implementation of both functions is left entirely to the
-       user.
+         For compatibility with \XETEX an alternative
+         \identifier{letterspace} option is supplied that interprets the
+         supplied value as a \emphasis{percentage} of the font size but
+         is otherwise identical to \identifier{kernfactor}.
+         %
+         Consequently, both definitions in below snippet yield the same
+         letterspacing width:
+
+         \beginlisting
+\font\iwonakernedA="file:Iwona-Regular.otf:kernfactor=0.125"
+\font\iwonakernedB="file:Iwona-Regular.otf:letterspace=12.5"
+         \endlisting
+
+         Specific pairs of letters and ligatures may be exempt from
+         letterspacing by defining the \LUA functions
+         \luafunction{keeptogether} and \luafunction{keepligature},
+         respectively, inside the namespace \inlinecode {luaotfload.letterspace}.
+         %
+         Both functions are called whenever the letterspacing callback
+         encounters an appropriate node or set of nodes.
+         %
+         If they return a true-ish value, no extra kern is inserted at
+         the current position.
+         %
+         \luafunction{keeptogether} receives a pair of consecutive
+         glyph nodes in order of their appearance in the node list.
+         %
+         \luafunction{keepligature} receives a single node which can be
+         analyzed into components.
+         %
+         (For details refer to the \emphasis{glyph nodes} section in the
+         \LUATEX reference manual.)
+         %
+         The implementation of both functions is left entirely to the
+         user.
 
 
-\item [protrusion \& expansion] \hfill \\
-       These keys control microtypographic features of the font,
-       namely \emphasis{character protrusion} and \emphasis{font
-       expansion}.
-       %
-       Their arguments are names of \LUA tables that contain
-       values for the respective features.\footnote{%
-          For examples of the table layout please refer to the
-          section of the file \fileent{luaotfload-fonts-ext.lua} where the
-          default values are defined.
-          %
-          Alternatively and with loss of information, you can dump
-          those tables into your terminal by issuing
-          \beginlisting
- \directlua{inspect(fonts.protrusions.setups.default)
-            inspect(fonts.expansions.setups.default)}
-          \endlisting
-          at some point after loading \fileent{luaotfload.sty}.
-       }
-       %
-       For both, only the set \identifier{default} is predefined.
+  \altitem {protrusion \& expansion}
+         These keys control microtypographic features of the font,
+         namely \emphasis{character protrusion} and \emphasis{font
+         expansion}.
+         %
+         Their arguments are names of \LUA tables that contain
+         values for the respective features.\footnote{%
+            For examples of the table layout please refer to the
+            section of the file \fileent{luaotfload-fonts-ext.lua} where the
+            default values are defined.
+            %
+            Alternatively and with loss of information, you can dump
+            those tables into your terminal by issuing
+            \beginlisting
+\directlua{inspect(fonts.protrusions.setups.default)
+           inspect(fonts.expansions.setups.default)}
+            \endlisting
+            at some point after loading \fileent{luaotfload.sty}.
+         }
+         %
+         For both, only the set \identifier{default} is predefined.
 
-       For example, to define a font with the default
-       protrusion vector applied\footnote{%
-         You also need to set
-             \inlinecode {pdfprotrudechars=2} and
-             \inlinecode {pdfadjustspacing=2}
-         to activate protrusion and expansion, respectively.
-         See the
-         \hyperlink [\PDFTEX manual]{http://mirrors.ctan.org/systems/pdftex/manual/pdftex-a.pdf}%
-         for details.
-       }:
+         For example, to define a font with the default
+         protrusion vector applied\footnote{%
+           You also need to set
+               \inlinecode {pdfprotrudechars=2} and
+               \inlinecode {pdfadjustspacing=2}
+           to activate protrusion and expansion, respectively.
+           See the
+           \hyperlink [\PDFTEX manual]{http://mirrors.ctan.org/systems/pdftex/manual/pdftex-a.pdf}%
+           for details.
+         }:
 
-       \beginlisting
- \font\test=LatinModernRoman:protrusion=default
-       \endlisting
-\end{description}
+         \beginlisting
+\font\test=LatinModernRoman:protrusion=default
+         \endlisting
+\enddescriptions
 
-\paragraph{Non-standard font features}
+\endsubsection
+
+\beginsubsection {Non-standard font features}
 \identifier{luaotfload} adds a number of features that are not defined
 in the original \OpenType specification, most of them
 aiming at emulating the behavior familiar from other \TEX engines.
 %
 Currently (2014) there are three of them:
 
-\begin{description}
+\begindescriptions
 
-  \item [anum]
+  \altitem {anum}
           Substitutes the glyphs in the \abbrev{ascii} number range
           with their counterparts from eastern Arabic or Persian,
           depending on the value of \identifier{language}.
 
-  \item [tlig]
+  \altitem {tlig}
           Applies legacy \TEX ligatures:
 
           \begin{tabular}{rlrl}
@@ -732,12 +735,12 @@ Currently (2014) there are three of them:
             remapping feature.
           }
 
-  \item [itlc]
+  \altitem {itlc}
           Computes italic correction values (active by default).
 
-\end{description}
+\enddescriptions
 
-
+\endsubsection
 \endsection
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1138,11 +1141,11 @@ files not contained in the merge. Some of these have no equivalent in
     \altitem {luaotfload-letterspace.lua}  font-based letterspacing.
 \endfilelist
 
-\begin{figure}[b]
-  \caption{Schematic of the files in \identifier{Luaotfload}}
+\beginfigurefloat
+  {file-graph}
+  {Schematic of the files in \identifier{Luaotfload}}
   \includegraphics[width=\textwidth]{filegraph.pdf}
-  \label{file-graph}
-\end{figure}
+\endfigurefloat
 
 \endsection
 
@@ -1308,14 +1311,14 @@ are defined for which scripts.
 
 %% not implemented, may come back later
 % \beginsubsubsection{Database}
-% 
+%
 % \beginfunctionlist
 %   \altitem  {aux.scan_external_dir(dir : string)}
 %             Include fonts in directory \luafunction{dir} in font lookups without
 %             adding them to the database.
-% 
+%
 % \endfunctionlist
-% 
+%
 % \endsubsubsection
 
 \endsubsection

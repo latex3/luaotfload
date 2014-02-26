@@ -248,9 +248,10 @@
   }
 }
 
-\definelist  [definitions]{\normalitem {\fileent {\first}}}
-\definelist     [filelist]{\normalitem {\fileent {\first}}\space--\hskip 1em}
-\definelist [functionlist]{\normalitem {\luafunction {\first}}\hfill\break}
+\definelist  [descriptions]{\normalitem {\textbf \first}\hfill\break}
+\definelist   [definitions]{\normalitem {\fileent {\first}}}
+\definelist      [filelist]{\normalitem {\fileent {\first}}\space--\hskip 1em}
+\definelist  [functionlist]{\normalitem {\luafunction {\first}}\hfill\break}
 
 \def \beginenumeration {\begin {enumerate}}
 \def \endenumeration   {\end {enumerate}}
@@ -293,9 +294,11 @@
 %% figure floats
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\def \beginsyntaxfloat #1{%% the request syntax diagram
+%% syntax definition
+\def \beginsyntaxfloat #1#2{%% #1:label #2:caption
   \begin {figure} [b]
-    \def \syntaxcaption {#1}%
+    \edef \syntaxlabel  {#1}%
+    \def \syntaxcaption {#2}%
     \setlength\grammarparsep{12pt plus 2pt minus 2pt}%
     \setlength\grammarindent{5cm}%
     \begingroup
@@ -307,8 +310,22 @@
       \end {grammar}
     \endgroup
     \caption \syntaxcaption
-    \label{font-syntax}
+    \label   \syntaxlabel
   \end {figure}
+}
+
+%% figures, e.g. the file graph
+\def \beginfigurefloat #1#2{%% #1:label #2:caption
+  \begingroup
+    \begin {figure} [b]
+      \edef \figurelabel {#1}%
+      \caption {#2}%
+}
+
+\def \endfigurefloat {%
+      \label \figurelabel
+    \end {figure}
+  \endgroup
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

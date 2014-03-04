@@ -127,10 +127,10 @@ in the task and willingness to respond to our suggestions.
 \identifier{luaotfload} supports an extended font request syntax:
 
 \beginnarrower
-      |\font\foo={|%
-      \meta{prefix}|:|%
-      \meta{font name}|:|%
-      \meta{font features}|}|%
+      \inlinecode{\\font\\foo=\{}%
+      \meta{prefix}\inlinecode{:}%
+      \meta{font name}\inlinecode{:}%
+      \meta{font features}\inlinecode{\}}%
       \meta{\TEX font features}
 \endnarrower
 
@@ -210,7 +210,7 @@ In \identifier{luaotfload}, the canonical syntax for font requests
 requires a \emphasis{prefix}:
 %
 \beginnarrower
-  |\font\fontname=|\meta{prefix}|:|\meta{fontname}\dots
+  \inlinecode{\\font\\fontname=}\meta{prefix}\inlinecode{:}\meta{fontname}\dots
 \endnarrower
 %
 where \meta{prefix} is either \inlinecode{file:} or \inlinecode {name:}.\footnote{%
@@ -305,7 +305,7 @@ There are again two modes: bracketed and unbracketed.
 A bracketed request looks as follows.
 
 \beginnarrower
-  |\font\fontname=[|\meta{path to file}|]|
+  \inlinecode{\\font\\fontname=[}\meta{path to file}\inlinecode{]}
 \endnarrower
 
 \noindent
@@ -316,7 +316,7 @@ Naturally, path-less file names are equally valid and processed the
 same way as an ordinary \inlinecode {file:} lookup.
 
 \beginnarrower
-  |\font\fontname=|\meta{font name} \dots
+  \inlinecode{\\font\\fontname=}\meta{font name} \dots
 \endnarrower
 
 Unbracketed (or, for lack of a better word: \emphasis{anonymous})
@@ -334,7 +334,7 @@ Furthermore, \identifier{luaotfload} supports the slashed (shorthand)
 font style notation from \XETEX.
 
 \beginnarrower
-  |\font\fontname=|\meta{font name}|/|\meta{modifier}\dots
+  \inlinecode{\\font\\fontname=}\meta{font name}\inlinecode{/}\meta{modifier}\dots
 \endnarrower
 
 \noindent
@@ -423,7 +423,7 @@ is installed in some location accessible by \identifier{luaotfload},
 the regular shape can be loaded as follows:
 
 \beginlisting
-  \font\iwona=Iwona at 20pt
+  \font \iwona = Iwona at 20pt
 \endlisting
 
 \noindent
@@ -431,18 +431,18 @@ To load the most common of the other styles, the slash notation can
 be employed as shorthand:
 
 \beginlisting
-  \font\iwonaitalic    =Iwona/I    at 20pt
-  \font\iwonabold      =Iwona/B    at 20pt
-  \font\iwonabolditalic=Iwona/BI   at 20pt
+  \font \iwonaitalic     = Iwona/I    at 20pt
+  \font \iwonabold       = Iwona/B    at 20pt
+  \font \iwonabolditalic = Iwona/BI   at 20pt
 \endlisting
 
 \noindent
 which is equivalent to these full names:
 
 \beginlisting
-  \font\iwonaitalic    ="Iwona Italic"       at 20pt
-  \font\iwonabold      ="Iwona Bold"         at 20pt
-  \font\iwonabolditalic="Iwona BoldItalic"   at 20pt
+  \font \iwonaitalic     = "Iwona Italic"       at 20pt
+  \font \iwonabold       = "Iwona Bold"         at 20pt
+  \font \iwonabolditalic = "Iwona BoldItalic"   at 20pt
 \endlisting
 
 \endsubsubsection
@@ -457,10 +457,10 @@ which is equivalent to these full names:
 general scheme for font requests:
 
 \beginnarrower
-      |\font\foo={|%
-      \meta{prefix}|:|%
-      \meta{font name}|:|%
-      \meta{font features}|}|%
+      \inlinecode{\\font\\foo=\{}%
+      \meta{prefix}\inlinecode{:}%
+      \meta{font name}\inlinecode{:}%
+      \meta{font features}\inlinecode{\}}%
       \meta{\TEX font features}
 \endnarrower
 
@@ -474,40 +474,40 @@ tags\footnote{%
 }
 and font options.
 %
-Prepending a font feature with a |+| (plus sign) enables it, whereas
-a |-| (minus) disables it. For instance, the request
+Prepending a font feature with a \inlinecode{+} (plus sign) enables it,
+whereas a \inlinecode{-} (minus) disables it. For instance, the request
 
 \beginlisting
-  \font\test=LatinModernRoman:+clig;-kern
+  \font \test = LatinModernRoman:+clig;-kern
 \endlisting
 
-\noindent activates contextual ligatures (|clig|) and disables
-kerning (|kern|).
+\noindent activates contextual ligatures (\inlinecode{clig}) and
+disables kerning (\inlinecode{kern}).
 %
-Alternatively the options |true| or |false| can be passed to
-the feature in a key/value expression.
+Alternatively the options \inlinecode{true} or \inlinecode{false} can
+be passed to the feature in a key/value expression.
 %
 The following request has the same meaning as the last one:
 
 \beginlisting
-  \font\test=LatinModernRoman:clig=true;kern=false
+  \font \test = LatinModernRoman:clig=true;kern=false
 \endlisting
 
 \noindent
 Furthermore, this second syntax is required should a font feature
 accept other options besides a true/false switch.
 %
-For example, \emphasis{stylistic alternates} (|salt|) are variants of
-given glyphs.
+For example, \emphasis{stylistic alternates} (\inlinecode{salt}) are
+variants of given glyphs.
 %
 They can be selected either explicitly by supplying the variant
 index (starting from one), or randomly by setting the value to,
-obviously, |random|.
+obviously, \inlinecode{random}.
 
 %% TODO   verify that this actually works with a font that supports
 %%        the salt/random feature!\fi
 \beginlisting
-  \font\librmsaltfirst=LatinModernRoman:salt=1
+  \font \librmsaltfirst = LatinModernRoman:salt=1
 \endlisting
 
 \beginsubsection {Basic font features}
@@ -543,19 +543,19 @@ obviously, |random|.
            for a list of valid values.
            %
            For scripts derived from the Latin alphabet the value
-           |latn| is good choice.
+           \inlinecode{latn} is good choice.
          }
-         the default value is |dlft|.
+         the default value is \inlinecode{dlft}.
          %
          Some fonts, including very popular ones by foundries like Adobe,
-         do not assign features to the |dflt| script, in
+         do not assign features to the \inlinecode{dflt} script, in
          which case the script needs to be set explicitly.
 
   \altitem {language}
          An \OpenType language system identifier,\footnote{%
            Cf. \hyperlink {http://www.microsoft.com/typography/otspec/languagetags.htm}.
          }
-         defaulting to |dflt|.
+         defaulting to \inlinecode{dflt}.
 
   \altitem {featurefile}
          A comma-separated list of feature files to be applied to the
@@ -580,22 +580,23 @@ obviously, |random|.
             for details.
          }
 
-         For a demonstration of how to set a |tkrn| feature consult
-         the file |tkrn.fea| that is part of \identifier{luaotfload}.
+         For a demonstration of how to set a \inlinecode{tkrn} feature consult
+         the file \inlinecode{tkrn.fea} that is part of \identifier{luaotfload}.
          It can be read and applied as follows:
 
-         |\font\test=Latin Modern Roman:featurefile=tkrn.fea;+tkrn|
+         \inlinecode{\\font \\test = Latin Modern Roman:featurefile=tkrn.fea;+tkrn}
 
   \altitem {color}
          A font color, defined as a triplet of two-digit hexadecimal
          \abbrev{rgb} values, with an optional fourth value for
          transparency
-         (where |00| is completely transparent and |FF| is opaque).
+         (where \inlinecode{00} is completely transparent and
+         \inlinecode{FF} is opaque).
 
          For example, in order to set text in semitransparent red:
 
          \beginlisting
-\font\test={Latin Modern Roman}:color=FF0000BB
+\font \test = "Latin Modern Roman:color=FF0000BB"
          \endlisting
 
   \altitem {kernfactor \& letterspace}
@@ -633,8 +634,8 @@ obviously, |random|.
          letterspacing width:
 
          \beginlisting
-\font\iwonakernedA="file:Iwona-Regular.otf:kernfactor=0.125"
-\font\iwonakernedB="file:Iwona-Regular.otf:letterspace=12.5"
+\font \iwonakernedA = "file:Iwona-Regular.otf:kernfactor=0.125"
+\font \iwonakernedB = "file:Iwona-Regular.otf:letterspace=12.5"
          \endlisting
 
          Specific pairs of letters and ligatures may be exempt from
@@ -695,7 +696,7 @@ obviously, |random|.
          }:
 
          \beginlisting
-\font\test=LatinModernRoman:protrusion=default
+\font \test = LatinModernRoman:protrusion=default
          \endlisting
 \enddescriptions
 
@@ -849,14 +850,11 @@ Other paths can be specified by setting the environment variable
 If it is non-empty, then search will be extended to the included
 directories.
 
-\begin{table}[t]
-  \hrule
-  \caption{List of paths searched for each supported operating
-           system.}
-  \renewcommand{\arraystretch}{1.2}
+\begintablefloat {table-searchpaths}
+  {List of paths searched for each supported operating system.}
   \begincentered
     \begin{tabular}{lp{.5\textwidth}}
-      Windows     & \inlinecode {\%WINDIR\%\\Fonts}
+      Windows     & \inlinecode {\% WINDIR\%\\ Fonts}
       \\
       Linux       & \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break
                     \fileent{/etc/fonts/fonts.conf}
@@ -868,9 +866,7 @@ directories.
       \\
     \end{tabular}
   \endcentered
-  \label{table-searchpaths}
-  \hrule
-\end{table}
+\endtablefloat
 
 \endsubsection
 
@@ -957,7 +953,7 @@ plain filename should suffice.
 %
 File extensions (\fileent{.otf}, \fileent{.ttf}, etc.) may be omitted.
 %
-Anything after a percent (|%|) character until the end of the line
+Anything after a percent (\inlinecode {\%}) character until the end of the line
 is ignored, so use this to add comments.
 %
 Place this file to some location where the \identifier{kpse}
@@ -973,7 +969,7 @@ or just leave it in the working directory of your document.
 \fileent{luaotfload-blacklist.cnf} it finds, so the fonts in
 \fileent{./luaotfload-blacklist.cnf} extend the global blacklist.
 
-Furthermore, a filename prepended with a dash character (|-|) is
+Furthermore, a filename prepended with a dash character (\inlinecode{-}) is
 removed from the blacklist, causing it to be temporarily whitelisted
 without modifying the global file.
 %
@@ -1208,7 +1204,7 @@ writes an entire font object to the file \fileent{fontdump.lua}:
       "my_private_callbacks.dump_font"
     )
   }
-  \font\dumpme=name:Iwona
+  \font \dumpme = name:Iwona
   \bye
 \endlisting
 
@@ -1388,7 +1384,7 @@ fix it.
 For example with \inlinecode {latn}:
 
 \beginlisting
-    \font\test=file:MyFont.otf:script=latn;+liga;
+    \font \test = file:MyFont.otf:script=latn;+liga;
 \endlisting
 
 You can get a list of features that a font defines for scripts and

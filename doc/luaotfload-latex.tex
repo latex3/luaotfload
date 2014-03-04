@@ -89,12 +89,16 @@
 
 \def\restoreunderscore{\catcode`\_=12\relax}
 
-\definehighlight    [fileent][\ttfamily\restoreunderscore]         %% files, dirs
-\definehighlight   [texmacro][\sffamily\itshape\textbackslash]     %% cs
-\definehighlight[luafunction][\sffamily\itshape\restoreunderscore] %% lua identifiers
-\definehighlight [identifier][\sffamily]                           %% names
-\definehighlight     [abbrev][\rmfamily\scshape]                   %% acronyms
-\definehighlight   [emphasis][\rmfamily\slshape]                   %% level 1 emph
+\definehighlight      [fileent][\ttfamily\restoreunderscore]         %% files, dirs
+\definehighlight     [texmacro][\sffamily\itshape\textbackslash]     %% cs
+\definehighlight  [luafunction][\sffamily\itshape\restoreunderscore] %% lua identifiers
+\definehighlight   [identifier][\sffamily]                           %% names
+\definehighlight       [abbrev][\rmfamily\scshape]                   %% acronyms
+\definehighlight     [emphasis][\rmfamily\slshape]                   %% level 1 emph
+
+\definehighlight    [Largefont][\Large]                              %% font size
+\definehighlight    [smallcaps][\sc]                                 %% font feature
+\definehighlight [proportional][\tt]                                 %% font switch
 
 \newcommand*\email[1]{\href{mailto:#1}{#1}}
 
@@ -291,7 +295,7 @@
 \let \typesetcontent        \tableofcontent
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% figure floats
+%% floats
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% syntax definition
@@ -328,6 +332,24 @@
   \endgroup
 }
 
+%% tables
+
+\def \begintablefloat #1#2{%% #1:label #2:caption
+  \begingroup
+    \begin {table} [t]
+      \hrule
+      \edef \floatlabel {#1}%
+      \caption {#2}%
+}
+
+\def \endtablefloat {%
+      \label \floatlabel
+      \hrule
+    \end {table}
+  \endgroup
+}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% hyperlinks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -346,6 +368,13 @@
   \fi%
 }
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% escaped characters
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\let \charpercent   \textpercent
+\let \charbackslash \textbackslash
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% main

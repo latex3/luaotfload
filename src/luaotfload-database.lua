@@ -1346,6 +1346,7 @@ end --- find_closest()
 
 local load_font_file = function (filename, subfont)
     local rawfont, _msg = fontloaderopen (filename, subfont)
+    --local rawfont, _msg = fontloaderinfo (filename, subfont)
     if not rawfont then
         report ("log", 1, "db", "ERROR: failed to open %s.", filename)
         return
@@ -1406,12 +1407,13 @@ end
 --]]--
 local get_raw_info = function (metadata, basename)
     local fullname
-    local fontname
+    local fontname = metadata.fontname
+    local fullname = metadata.fullname
     local psname
 
     local validation_state = metadata.validation_state
-    if validation_state
-        and tablecontains (validation_state, "bad_ps_fontname")
+    if (validation_state and tablecontains (validation_state, "bad_ps_fontname"))
+        or not fontname
     then
         --- Broken names table, e.g. avkv.ttf with UTF-16 strings;
         --- we put some dummies in place like the fontloader
@@ -1421,9 +1423,6 @@ local get_raw_info = function (metadata, basename)
                basename)
         fontname = "bad-fontname-" .. basename
         fullname = "bad-fullname-" .. basename
-    else
-        fontname = metadata.fontname
-        fullname = metadata.fullname
     end
 
     return {
@@ -1541,7 +1540,7 @@ local organize_styledata = function (fontname,
                                      metadata,
                                      english_names,
                                      info)
-    local pfminfo   = metadata.pfminfo
+    local pfminfo   = metadata.pfminfo or { }
     local names     = metadata.names
 
     return {

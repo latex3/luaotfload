@@ -719,13 +719,13 @@ Currently (2014) there are three of them:
   \altitem {tlig}
           Applies legacy \TEX ligatures:
 
-          \begin{tabular}{rlrl}
-             ``  &  \inlinecode {``}  &  ''  &  \inlinecode {''}  \\
-             `   &  \inlinecode {`}   &  '   &  \inlinecode {'}   \\
-             "   &  \inlinecode {"}   &  --  &  \inlinecode {--}  \\
-             --- &  \inlinecode {---} &  !`  &  \inlinecode {!`}  \\
-             ?`  &  \inlinecode {?`}  &      &                    \\
-          \end{tabular}
+          \begintabulate [rlrl]
+             \beginrow ``  \newcell  \inlinecode {``}  \newcell  ''  \newcell  \inlinecode {''}  \endrow
+             \beginrow `   \newcell  \inlinecode {`}   \newcell  '   \newcell  \inlinecode {'}   \endrow
+             \beginrow "   \newcell  \inlinecode {"}   \newcell  --  \newcell  \inlinecode {--}  \endrow
+             \beginrow --- \newcell  \inlinecode {---} \newcell  !`  \newcell  \inlinecode {!`}  \endrow
+             \beginrow ?`  \newcell  \inlinecode {?`}  \newcell      \newcell                    \endrow
+          \endtabulate
 
           \footnote{%
             These contain the feature set \inlinecode {trep} of earlier
@@ -853,18 +853,21 @@ directories.
 \begintablefloat {table-searchpaths}
   {List of paths searched for each supported operating system.}
   \begincentered
-    \begin{tabular}{lp{.5\textwidth}}
-      Windows     & \inlinecode {\% WINDIR\%\\ Fonts}
-      \\
-      Linux       & \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break
-                    \fileent{/etc/fonts/fonts.conf}
-      \\
-      Mac         & \fileent{\textasciitilde/Library/Fonts},\break
-                    \fileent{/Library/Fonts},\break
-                    \fileent{/System/Library/Fonts}, and\hfill\break
-                    \fileent{/Network/Library/Fonts}
-      \\
-    \end{tabular}
+    \begintabulate [lp{.5\textwidth}]
+      \beginrow
+        Windows   \newcell \inlinecode {\% WINDIR\%\\ Fonts}
+      \endrow
+      \beginrow
+        Linux     \newcell \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break
+                           \fileent{/etc/fonts/fonts.conf}
+      \endrow
+      \beginrow
+        Mac       \newcell \fileent{\textasciitilde/Library/Fonts},\break
+                           \fileent{/Library/Fonts},\break
+                           \fileent{/System/Library/Fonts}, and\hfill\break
+                           \fileent{/Network/Library/Fonts}
+      \endrow
+    \endtabulate
   \endcentered
 \endtablefloat
 

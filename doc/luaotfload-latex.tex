@@ -370,11 +370,35 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% tables
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Our tables aren’t anything special so we stick with “tabular” on the
+%% Latex end.
+%%
+%% This is going to be largely incompatible with Context since format
+%% specifications work quite differently (even between different
+%% Context table variants).
+
+\def \begintabulate [#1]#2\endtabulate{%
+  \begingroup
+    \let \beginrow  = \relax %% -> \NC in Context
+    \let \newcell   = &      %% -> \NC
+    \let \endrow    = \cr    %% -> \NC \NR
+    \begin {tabular}{#1}%
+      #2
+    \end {tabular}
+  \endgroup
+}
+
+\let \endtabulate \relax
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% escaped characters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \let \charpercent   \textpercent
 \let \charbackslash \textbackslash
+\let \chartilde     \textasciitilde
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% main

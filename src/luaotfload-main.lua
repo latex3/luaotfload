@@ -61,7 +61,7 @@ config.luaotfload.index_file      = config.luaotfload.index_file       or "luaot
 config.luaotfload.formats         = config.luaotfload.formats          or "otf,ttf,ttc,dfont"
 config.luaotfload.scan_local      = config.luaotfload.scan_local == true
 
-if not config.luaotfload.strip then
+if config.luaotfload.strip == nil then
     config.luaotfload.strip = true
 end
 

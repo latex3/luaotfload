@@ -12,6 +12,8 @@ SRC		= $(wildcard $(SRCSRCDIR)/luaotfload-*.lua)
 SRC		+= $(SRCSRCDIR)/luaotfload.sty
 SRC		+= $(MISCDIR)/luaotfload-blacklist.cnf
 
+VGND		= $(MISCDIR)/valgrind-kpse-suppression.sup
+
 GLYPHSCRIPT	= $(SCRIPTSRCDIR)/mkglyphlist
 CHARSCRIPT	= $(SCRIPTSRCDIR)/mkcharacters
 STATUSSCRIPT	= $(SCRIPTSRCDIR)/mkstatus
@@ -39,12 +41,12 @@ GLYPHS		= $(BUILDDIR)/$(NAME)-glyphlist.lua
 CHARS		= $(BUILDDIR)/$(NAME)-characters.lua
 STATUS		= $(BUILDDIR)/$(NAME)-status.lua
 RESOURCES	= $(GLYPHS) $(CHARS) $(STATUS)
-SOURCE		= $(DOCSRC) $(MANSRC) $(SRC) README Makefile NEWS $(RESOURCESCRIPTS)
+SOURCE		= $(DOCSRC) $(MANSRC) $(SRC) README COPYING Makefile NEWS $(RESOURCESCRIPTS)
 
 # Files grouped by installation location
 SCRIPTSTATUS	= $(TOOL) $(RESOURCESCRIPTS)
 RUNSTATUS	= $(filter-out $(SCRIPTSTATUS),$(SRC))
-DOCSTATUS	= $(DOCPDF) $(DOTPDF) README NEWS
+DOCSTATUS	= $(DOCPDF) $(DOTPDF) README NEWS COPYING
 MANSTATUS	= $(MANPAGE)
 SRCSTATUS	= $(DOCSRC) $(MANSRC) $(GRAPHSRC) Makefile
 
@@ -64,8 +66,10 @@ TEXMFROOT	= $(shell kpsewhich --var-value TEXMFHOME)
 # CTAN-friendly subdirectory for packaging
 DISTDIR		= $(BUILDDIR)/$(NAME)
 
-CTAN_ZIP	= $(BUILDDIR)/$(NAME).zip
-TDS_ZIP		= $(BUILDDIR)/$(NAME).tds.zip
+CTAN_ZIPFILE	= $(NAME).zip
+TDS_ZIPFILE	= $(NAME).tds.zip
+CTAN_ZIP	= $(BUILDDIR)/$(CTAN_ZIPFILE)
+TDS_ZIP		= $(BUILDDIR)/$(TDS_ZIPFILE)
 ZIPS		= $(CTAN_ZIP) $(TDS_ZIP)
 
 LUA		= texlua
@@ -116,17 +120,17 @@ $(BUILDDIR): /dev/null
 
 define make-ctandir
 @$(RM) -rf $(DISTDIR)
-@mkdir -p $(DISTDIR) && cp $(SOURCE) $(COMPILED) $(DISTDIR)
+@mkdir -p $(DISTDIR) && cp $(VGND) $(SOURCE) $(COMPILED) $(DISTDIR)
 endef
 
 $(CTAN_ZIP): $(DOCS) $(SOURCE) $(COMPILED) $(TDS_ZIP)
 	@echo "Making $@ for CTAN upload."
 	@$(RM) -- $@
 	$(make-ctandir)
-	@zip -r -9 $@ $(TDS_ZIP) $(DISTDIR) >/dev/null
+	cd $(BUILDDIR) && zip -r -9 $(CTAN_ZIPFILE) $(TDS_ZIPFILE) $(NAME) >/dev/null
 
 define run-install-doc
-@mkdir -p $(DOCDIR) && cp -- $(DOCSTATUS) $(DOCDIR)
+@mkdir -p $(DOCDIR) && cp -- $(DOCSTATUS) $(VGND) $(DOCDIR)
 @mkdir -p $(SRCDIR) && cp -- $(SRCSTATUS) $(SRCDIR)
 @mkdir -p $(MANDIR) && cp -- $(MANSTATUS) $(MANDIR)
 endef

@@ -34,11 +34,11 @@
 
 \makeatletter
 
-\usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
-\usepackage[x11names]{xcolor}
+\usepackage {metalogo,multicol,mdwlist,fancyvrb,xspace}
+\usepackage [x11names] {xcolor}
 
-\def\primarycolor{DodgerBlue4}  %%-> rgb  16  78 139 | #104e8b
-\def\secondarycolor{Goldenrod4} %%-> rgb 139 105 200 | #8b6914
+\def \primarycolor   {DodgerBlue4} %%-> rgb  16  78 139 | #104e8b
+\def \secondarycolor {Goldenrod4}  %%-> rgb 139 105 200 | #8b6914
 
 \usepackage[
     bookmarks=true,
@@ -46,14 +46,14 @@
     linkcolor=\primarycolor,
      urlcolor=\secondarycolor,
     citecolor=\primarycolor,
-     pdftitle={The luaotfload package},
+     pdftitle={The Luaotfload package},
    pdfsubject={OpenType layout system for Plain TeX and LaTeX},
     pdfauthor={Elie Roux & Khaled Hosny & Philipp Gesang},
   pdfkeywords={luatex, lualatex, unicode, opentype}
 ]{hyperref}
 
-\usepackage{fontspec}
-\usepackage{unicode-math}
+\usepackage {fontspec}
+\usepackage {unicode-math}
 
 \setmainfont[
 % Numbers     = OldStyle, %% buggy with font cache
@@ -89,12 +89,16 @@
 
 \def\restoreunderscore{\catcode`\_=12\relax}
 
-\definehighlight    [fileent][\ttfamily\restoreunderscore]         %% files, dirs
-\definehighlight   [texmacro][\sffamily\itshape\textbackslash]     %% cs
-\definehighlight[luafunction][\sffamily\itshape\restoreunderscore] %% lua identifiers
-\definehighlight [identifier][\sffamily]                           %% names
-\definehighlight     [abbrev][\rmfamily\scshape]                   %% acronyms
-\definehighlight   [emphasis][\rmfamily\slshape]                   %% level 1 emph
+\definehighlight      [fileent][\ttfamily\restoreunderscore]         %% files, dirs
+\definehighlight     [texmacro][\sffamily\itshape\textbackslash]     %% cs
+\definehighlight  [luafunction][\sffamily\itshape\restoreunderscore] %% lua identifiers
+\definehighlight   [identifier][\sffamily]                           %% names
+\definehighlight       [abbrev][\rmfamily\scshape]                   %% acronyms
+\definehighlight     [emphasis][\rmfamily\slshape]                   %% level 1 emph
+
+\definehighlight    [Largefont][\Large]                              %% font size
+\definehighlight    [smallcaps][\sc]                                 %% font feature
+\definehighlight [proportional][\tt]                                 %% font switch
 
 \newcommand*\email[1]{\href{mailto:#1}{#1}}
 
@@ -157,6 +161,22 @@
 \def \fakesection #1{\section*{#1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% inline verbatim
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Context offers both \type{…} and \type<<…>>, but not an unbalanced
+%% one that we could map directly onto Latex’s \verb|…|.
+
+\usepackage {listings}
+\lstset {
+  basicstyle=\ttfamily,
+}
+
+\def \inlinecode #1{%
+  \lstinline {#1}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% codelistings; this sucks hard since we lack access to buffers
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -203,6 +223,7 @@
     \small
     \begin {quote}
       \bgroup
+        \addfontfeature {RawFeature=-tlig;-liga}%% So one can’t just turn them all off at once using the ``Ligatures`` key?
         \luatexcatcodetable \literalcatcodes
         \obeyspaces
         \obeylines
@@ -231,12 +252,10 @@
   }
 }
 
-\definelist  [definitions]{\normalitem {\fileent {\first}}}
-\definelist     [filelist]{\normalitem {\fileent {\first}}\space--\hskip 1em}
-\definelist [functionlist]{\normalitem {\luafunction {\first}}\hfill\break}
-
-\def \beginenumeration {\begin {enumerate}}
-\def \endenumeration   {\end {enumerate}}
+\definelist  [descriptions]{\normalitem {\textbf \first}\hfill\break}
+\definelist   [definitions]{\normalitem {\fileent {\first}}}
+\definelist      [filelist]{\normalitem {\fileent {\first}}\space--\hskip 1em}
+\definelist  [functionlist]{\normalitem {\luafunction {\first}}\hfill\break}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% columns
@@ -245,16 +264,12 @@
 \def \begindoublecolumns {\begin {multicols} {2}}
 \def \enddoublecolumns   {\end {multicols}}
 
-\def \begintriplecolumns {\begin {multicols} {3}}
-\def \endtriplecolumns   {\end {multicols}}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% alignment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \def \begincentered {\begin {center}}
 \def \endcentered   {\end {center}}
-\makeatother
 
 \def \beginnarrower {\begin {quote}}
 \def \endnarrower   {\end {quote}}
@@ -266,9 +281,124 @@
 \def \beginabstractcontent {\begin {abstract}}
 \def \endabstractcontent   {\end {abstract}}
 
+\let \setdocumenttitle      \title
+\let \setdocumentdate       \date
+\let \setdocumentauthor     \author
+\let \typesetdocumenttitle  \maketitle
+
+\let \typesetcontent        \tableofcontent
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% floats
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% syntax definition
+\def \beginsyntaxfloat #1#2{%% #1:label #2:caption
+  \begin {figure} [b]
+    \edef \syntaxlabel  {#1}%
+    \def \syntaxcaption {#2}%
+    \setlength\grammarparsep{12pt plus 2pt minus 2pt}%
+    \setlength\grammarindent{5cm}%
+    \begingroup
+      \small
+      \begin {grammar}
+}
+
+\def \endsyntaxfloat {%
+      \end {grammar}
+    \endgroup
+    \caption \syntaxcaption
+    \label   \syntaxlabel
+  \end {figure}
+}
+
+%% figures, e.g. the file graph
+\def \beginfigurefloat #1#2{%% #1:label #2:caption
+  \begingroup
+    \begin {figure} [b]
+      \edef \figurelabel {#1}%
+      \caption {#2}%
+}
+
+\def \endfigurefloat {%
+      \label \figurelabel
+    \end {figure}
+  \endgroup
+}
+
+%% tables
+
+\def \begintablefloat #1#2{%% #1:label #2:caption
+  \begingroup
+    \begin {table} [t]
+      \hrule
+      \edef \floatlabel {#1}%
+      \caption {#2}%
+}
+
+\def \endtablefloat {%
+      \label \floatlabel
+      \hrule
+    \end {table}
+  \endgroup
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% hyperlinks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\protected \def \hyperlink{%
+  \@ifnextchar[{\hyperlinkindeed}%
+               {\hyperlinkindeed[]}%
+}
+
+\def \hyperlinkindeed [#1]#2{%
+  \def \first {#1}%
+  \ifx \first \empty
+    \url {#2}%
+  \else
+    \href {#2}{#1}%
+  \fi%
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% tables
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Our tables aren’t anything special so we stick with “tabular” on the
+%% Latex end.
+%%
+%% This is going to be largely incompatible with Context since format
+%% specifications work quite differently (even between different
+%% Context table variants).
+
+\def \begintabulate [#1]#2\endtabulate{%
+  \begingroup
+    \let \beginrow  = \relax %% -> \NC in Context
+    \let \newcell   = &      %% -> \NC
+    \let \endrow    = \cr    %% -> \NC \NR
+    \begin {tabular}{#1}%
+      #2
+    \end {tabular}
+  \endgroup
+}
+
+\let \endtabulate \relax
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% escaped characters
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\let \charpercent   \textpercent
+\let \charbackslash \textbackslash
+\let \chartilde     \textasciitilde
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% main
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\makeatother
 
 \begin {document}
   \input {luaotfload-main.tex}

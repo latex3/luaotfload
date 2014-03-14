@@ -11483,8 +11483,8 @@ local autofeatures=fonts.analyzers.features
 local function initialize(sequence,script,language,enabled)
   local features=sequence.features
   if features then
-    for i=1,#order do 
-      local kind=order[i] 
+    for i=1,#features do
+      local kind=features[i]
       local valid=enabled[kind]
       if valid then
         local scripts=features[kind] 

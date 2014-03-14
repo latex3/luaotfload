@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 02/14/14 17:07:59
+-- merge date  : 03/07/14 11:42:21
 
 do -- begin closure to overcome local limits and interference
 
@@ -901,6 +901,36 @@ local function sortedkeys(tab)
     return {}
   end
 end
+local function sortedhashonly(tab)
+  if tab then
+    local srt,s={},0
+    for key,_ in next,tab do
+      if type(key)=="string" then
+        s=s+1
+        srt[s]=key
+      end
+    end
+    sort(srt)
+    return srt
+  else
+    return {}
+  end
+end
+local function sortedindexonly(tab)
+  if tab then
+    local srt,s={},0
+    for key,_ in next,tab do
+      if type(key)=="number" then
+        s=s+1
+        srt[s]=key
+      end
+    end
+    sort(srt)
+    return srt
+  else
+    return {}
+  end
+end
 local function sortedhashkeys(tab,cmp) 
   if tab then
     local srt,s={},0
@@ -926,6 +956,8 @@ function table.allkeys(t)
   return sortedkeys(keys)
 end
 table.sortedkeys=sortedkeys
+table.sortedhashonly=sortedhashonly
+table.sortedindexonly=sortedindexonly
 table.sortedhashkeys=sortedhashkeys
 local function nothing() end
 local function sortedhash(t,cmp)
@@ -1723,7 +1755,7 @@ local byte,find,gsub,format=string.byte,string.find,string.gsub,string.format
 local concat=table.concat
 local floor=math.floor
 local type=type
-if string.find(os.getenv("PATH"),";") then
+if string.find(os.getenv("PATH"),";",1,true) then
   io.fileseparator,io.pathseparator="\\",";"
 else
   io.fileseparator,io.pathseparator="/",":"
@@ -2607,11 +2639,39 @@ local pattern=Carg(1)/function(t)
 function strings.tabtospace(str,tab)
   return lpegmatch(pattern,str,1,tab or 7)
 end
-function strings.striplong(str) 
-  str=gsub(str,"^%s*","")
-  str=gsub(str,"[\n\r]+ *","\n")
-  return str
+local newline=patterns.newline
+local endofstring=patterns.endofstring
+local whitespace=patterns.whitespace
+local spacer=patterns.spacer
+local space=spacer^0
+local nospace=space/""
+local endofline=nospace*newline
+local stripend=(whitespace^1*endofstring)/""
+local normalline=(nospace*((1-space*(newline+endofstring))^1)*nospace)
+local stripempty=endofline^1/""
+local normalempty=endofline^1
+local singleempty=endofline*(endofline^0/"")
+local doubleempty=endofline*endofline^-1*(endofline^0/"")
+local stripstart=stripempty
+local p_retain_normal=Cs ((normalline+normalempty )^0 )
+local p_retain_collapse=Cs ((normalline+doubleempty )^0 )
+local p_retain_noempty=Cs ((normalline+singleempty )^0 )
+local p_prune_normal=Cs (stripstart*(stripend+normalline+normalempty )^0 )
+local p_prune_collapse=Cs (stripstart*(stripend+normalline+doubleempty )^0 )
+local p_prune_noempty=Cs (stripstart*(stripend+normalline+singleempty )^0 )
+local striplinepatterns={
+  ["prune"]=p_prune_normal,
+  ["prune and collapse"]=p_prune_collapse,
+  ["prune and no empty"]=p_prune_noempty,
+  ["retain"]=p_retain_normal,
+  ["retain and collapse"]=p_retain_collapse,
+  ["retain and no empty"]=p_retain_noempty,
+}
+strings.striplinepatterns=striplinepatterns
+function strings.striplines(str,how)
+  return str and lpegmatch(how and striplinepatterns[how] or p_prune_collapse,str) or str
 end
+strings.striplong=strings.striplines
 function strings.nice(str)
   str=gsub(str,"[:%-+_]+"," ") 
   return str
@@ -6504,7 +6564,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.751 
+otf.version=2.754 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -7047,15 +7107,22 @@ actions["prepare glyphs"]=function(data,filename,raw)
             local glyph=cidglyphs[index]
             if glyph then
               local unicode=glyph.unicode
+if   unicode>=0x00E000 and unicode<=0x00F8FF then
+                unicode=-1
+elseif unicode>=0x0F0000 and unicode<=0x0FFFFD then
+                unicode=-1
+elseif unicode>=0x100000 and unicode<=0x10FFFD then
+                unicode=-1
+end
               local name=glyph.name or cidnames[index]
-              if not unicode or unicode==-1 or unicode>=criterium then
+              if not unicode or unicode==-1 then 
                 unicode=cidunicodes[index]
               end
               if unicode and descriptions[unicode] then
                 report_otf("preventing glyph %a at index %H to overload unicode %U",name or "noname",index,unicode)
                 unicode=-1
               end
-              if not unicode or unicode==-1 or unicode>=criterium then
+              if not unicode or unicode==-1 then 
                 if not name then
                   name=format("u%06X",private)
                 end
@@ -7101,7 +7168,7 @@ actions["prepare glyphs"]=function(data,filename,raw)
       if glyph then
         local unicode=glyph.unicode
         local name=glyph.name
-        if not unicode or unicode==-1 or unicode>=criterium then
+        if not unicode or unicode==-1 then 
           unicode=private
           unicodes[name]=private
           if trace_private then
@@ -7156,47 +7223,43 @@ actions["check encoding"]=function(data,filename,raw)
   local unicodetoindex=mapdata and mapdata.map or {}
   local indextounicode=mapdata and mapdata.backmap or {}
   local encname=lower(data.enc_name or mapdata.enc_name or "")
-  local criterium=0xFFFF
+  local criterium=0xFFFF 
+  local privateoffset=constructors.privateoffset
   if find(encname,"unicode") then 
     if trace_loading then
       report_otf("checking embedded unicode map %a",encname)
     end
-      local hash={}
-      for index,unicode in next,indices do 
-        hash[index]=descriptions[unicode]
-      end
-      local reported={}
-      for unicode,index in next,unicodetoindex do
-        if not descriptions[unicode] then
-          local d=hash[index]
+    local reported={}
+    for maybeunicode,index in next,unicodetoindex do
+      if descriptions[maybeunicode] then
+      else
+        local unicode=indices[index]
+        if not unicode then
+        elseif maybeunicode==unicode then
+        elseif unicode>privateoffset then
+        else
+          local d=descriptions[unicode]
           if d then
-            if d.unicode~=unicode then
-              local c=d.copies
-              if c then
-                c[unicode]=true
-              else
-                d.copies={ [unicode]=true }
-              end
+            local c=d.copies
+            if c then
+              c[maybeunicode]=true
+            else
+              d.copies={ [maybeunicode]=true }
             end
-          elseif not reported[i] then
+          elseif index and not reported[index] then
             report_otf("missing index %i",index)
-            reported[i]=true
+            reported[index]=true
           end
         end
       end
-      for index,data in next,hash do 
-        data.copies=sortedkeys(data.copies)
+    end
+    for unicode,data in next,descriptions do
+      local d=data.copies
+      if d then
+        duplicates[unicode]=sortedkeys(d)
+        data.copies=nil
       end
-      for index,unicode in next,indices do 
-        local description=hash[index]
-        local copies=description.copies
-        if copies then
-          duplicates[unicode]=copies
-          description.copies=nil
-        else
-          report_otf("copies but no unicode parent %U",unicode)
-        end
-      end
+    end
   elseif properties.cidinfo then
     report_otf("warning: no unicode map, used cidmap %a",properties.cidinfo.usedname)
   else
@@ -7238,7 +7301,7 @@ actions["add duplicates"]=function(data,filename,raw)
               end
             end
           end
-          if u>0 then
+          if u>0 then 
             local duplicate=table.copy(description) 
             duplicate.comment=format("copy of U+%05X",unicode)
             descriptions[u]=duplicate
@@ -7440,10 +7503,16 @@ actions["reorganize subtables"]=function(data,filename,raw)
             report_otf("skipping weird lookup number %s",k)
           elseif features then
             local f={}
+            local o={}
             for i=1,#features do
               local df=features[i]
               local tag=strip(lower(df.tag))
-              local ft=f[tag] if not ft then ft={} f[tag]=ft end
+              local ft=f[tag]
+              if not ft then
+                ft={}
+                f[tag]=ft
+                o[#o+1]=tag
+              end
               local dscripts=df.scripts
               for i=1,#dscripts do
                 local d=dscripts[i]
@@ -7463,6 +7532,7 @@ actions["reorganize subtables"]=function(data,filename,raw)
               subtables=subtables,
               markclass=markclass,
               features=f,
+              order=o,
             }
           else
             lookups[name]={
@@ -9042,9 +9112,9 @@ function injections.setkern(current,factor,rlmode,x,tfmchr)
     return 0,0
   end
 end
-function injections.setmark(start,base,factor,rlmode,ba,ma,index,baseismark) 
-  local dx,dy=factor*(ba[1]-ma[1]),factor*(ba[2]-ma[2])   
-  local bound=base[a_markbase]          
+function injections.setmark(start,base,factor,rlmode,ba,ma) 
+  local dx,dy=factor*(ba[1]-ma[1]),factor*(ba[2]-ma[2])
+  local bound=base[a_markbase]
   local index=1
   if bound then
     local mb=marks[bound]
@@ -9063,7 +9133,7 @@ function injections.setmark(start,base,factor,rlmode,ba,ma,index,baseismark)
   base[a_markbase]=bound
   start[a_markmark]=bound
   start[a_markdone]=index
-  marks[bound]={ [index]={ dx,dy,rlmode,baseismark } }
+  marks[bound]={ [index]={ dx,dy,rlmode } }
   return dx,dy,bound
 end
 local function dir(n)
@@ -11412,10 +11482,13 @@ end)
 local autofeatures=fonts.analyzers.features 
 local function initialize(sequence,script,language,enabled)
   local features=sequence.features
-  if features then
-    for kind,scripts in next,features do
+  local order=features.order
+  if order then
+    for i=1,#order do 
+      local kind=order[i] 
       local valid=enabled[kind]
       if valid then
+        local scripts=features[kind] 
         local languages=scripts[script] or scripts[wildcard]
         if languages and (languages[language] or languages[wildcard]) then
           return { valid,autofeatures[kind] or false,sequence.chain or 0,kind,sequence }
@@ -11447,12 +11520,12 @@ function otf.dataset(tfmdata,font)
     }
     rs[language]=rl
     local sequences=tfmdata.resources.sequences
-for s=1,#sequences do
-  local v=enabled and initialize(sequences[s],script,language,enabled)
-  if v then
-    rl[#rl+1]=v
-  end
-end
+    for s=1,#sequences do
+      local v=enabled and initialize(sequences[s],script,language,enabled)
+      if v then
+        rl[#rl+1]=v
+      end
+    end
   end
   return rl
 end
@@ -12479,6 +12552,14 @@ local function packdata(data)
               features[script]=pack_normal(feature)
             end
           end
+          local order=sequence.order
+          if order then
+            sequence.order=pack_indexed(order)
+          end
+          local markclass=sequence.markclass
+          if markclass then
+            sequence.markclass=pack_boolean(markclass)
+          end
         end
       end
       local lookups=resources.lookups
@@ -12889,6 +12970,20 @@ local function unpackdata(data)
                   features[script]=tv
                 end
               end
+            end
+          end
+          local order=feature.order
+          if order then
+            local tv=tables[order]
+            if tv then
+              feature.order=tv
+            end
+          end
+          local markclass=feature.markclass
+          if markclass then
+            local tv=tables[markclass]
+            if tv then
+              feature.markclass=tv
             end
           end
         end

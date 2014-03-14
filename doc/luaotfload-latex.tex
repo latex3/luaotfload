@@ -245,6 +245,8 @@
         \def \first {####1}%
         #2
       }
+      \let \beginaltitem \altitem
+      \let \endaltitem   \relax
   }
 
   \expandafter \def \csname end#1\endcsname {%

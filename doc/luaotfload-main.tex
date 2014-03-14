@@ -1,3 +1,16 @@
+%\beginsection {foo}
+  %bar baz
+%\endsection
+
+%\begindescriptions
+
+  %\beginaltitem {mode} foo
+         %%\identifier{luaotfload} has two \OpenType processing
+         %%\emphasis{modes}:
+%\enddescriptions
+
+%\endinput
+
 %% Copyright (C) 2009-2014
 %%
 %%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
@@ -514,7 +527,7 @@ obviously, \inlinecode{random}.
 
 \begindescriptions
 
-  \altitem {mode}
+  \beginaltitem {mode}
          \identifier{luaotfload} has two \OpenType processing
          \emphasis{modes}:
          \identifier{base} and \identifier{node}.
@@ -536,8 +549,9 @@ obviously, \inlinecode{random}.
          By default \identifier{luaotfload} is in \identifier{node}
          mode, and \identifier{base} mode has to be requested where needed,
          e.~g. for math fonts.
+  \endaltitem
 
-  \altitem {script} \label{script-tag}
+  \beginaltitem {script} \label{script-tag}
          An \OpenType script tag;\footnote{%
            See \hyperlink {http://www.microsoft.com/typography/otspec/scripttags.htm}
            for a list of valid values.
@@ -550,14 +564,16 @@ obviously, \inlinecode{random}.
          Some fonts, including very popular ones by foundries like Adobe,
          do not assign features to the \inlinecode{dflt} script, in
          which case the script needs to be set explicitly.
+  \endaltitem
 
-  \altitem {language}
+  \beginaltitem {language}
          An \OpenType language system identifier,\footnote{%
            Cf. \hyperlink {http://www.microsoft.com/typography/otspec/languagetags.htm}.
          }
          defaulting to \inlinecode{dflt}.
+  \endaltitem
 
-  \altitem {featurefile}
+  \beginaltitem {featurefile}
          A comma-separated list of feature files to be applied to the
          font.
          %
@@ -585,8 +601,9 @@ obviously, \inlinecode{random}.
          It can be read and applied as follows:
 
          \inlinecode{\\font \\test = Latin Modern Roman:featurefile=tkrn.fea;+tkrn}
+  \endaltitem
 
-  \altitem {color}
+  \beginaltitem {color}
          A font color, defined as a triplet of two-digit hexadecimal
          \abbrev{rgb} values, with an optional fourth value for
          transparency
@@ -598,8 +615,9 @@ obviously, \inlinecode{random}.
          \beginlisting
 \font \test = "Latin Modern Roman:color=FF0000BB"
          \endlisting
+  \endaltitem
 
-  \altitem {kernfactor \& letterspace}
+  \beginaltitem {kernfactor \& letterspace}
          Define a font with letterspacing (tracking) enabled.
          %
          In \identifier{luaotfload}, letterspacing is implemented by
@@ -660,9 +678,10 @@ obviously, \inlinecode{random}.
          %
          The implementation of both functions is left entirely to the
          user.
+  \endaltitem
 
 
-  \altitem {protrusion \& expansion}
+  \beginaltitem {protrusion \& expansion}
          These keys control microtypographic features of the font,
          namely \emphasis{character protrusion} and \emphasis{font
          expansion}.
@@ -698,6 +717,7 @@ obviously, \inlinecode{random}.
          \beginlisting
 \font \test = LatinModernRoman:protrusion=default
          \endlisting
+  \endaltitem
 \enddescriptions
 
 \endsubsection
@@ -711,12 +731,13 @@ Currently (2014) there are three of them:
 
 \begindescriptions
 
-  \altitem {anum}
+  \beginaltitem {anum}
           Substitutes the glyphs in the \abbrev{ascii} number range
           with their counterparts from eastern Arabic or Persian,
           depending on the value of \identifier{language}.
+  \endaltitem
 
-  \altitem {tlig}
+  \beginaltitem {tlig}
           Applies legacy \TEX ligatures:
 
           \begintabulate [rlrl]
@@ -735,9 +756,11 @@ Currently (2014) there are three of them:
             assignment \inlinecode {mapping=text-tex} using \XETEX's input
             remapping feature.
           }
+  \endaltitem
 
-  \altitem {itlc}
+  \beginaltitem {itlc}
           Computes italic correction values (active by default).
+  \endaltitem
 
 \enddescriptions
 
@@ -1050,11 +1073,16 @@ categories.
 
                 \begindoublecolumns
                   \begindefinitions
-                      \altitem{l-lua.lua}       \altitem{l-lpeg.lua}
-                      \altitem{l-function.lua}  \altitem{l-string.lua}
-                      \altitem{l-table.lua}     \altitem{l-io.lua}
-                      \altitem{l-file.lua}      \altitem{l-boolean.lua}
-                      \altitem{l-math.lua}      \altitem{util-str.lua}
+                      \beginaltitem {l-lua.lua}       \endaltitem
+                      \beginaltitem {l-lpeg.lua}      \endaltitem
+                      \beginaltitem {l-function.lua}  \endaltitem
+                      \beginaltitem {l-string.lua}    \endaltitem
+                      \beginaltitem {l-table.lua}     \endaltitem
+                      \beginaltitem {l-io.lua}        \endaltitem
+                      \beginaltitem {l-file.lua}      \endaltitem
+                      \beginaltitem {l-boolean.lua}   \endaltitem
+                      \beginaltitem {l-math.lua}      \endaltitem
+                      \beginaltitem {util-str.lua}    \endaltitem
                   \enddefinitions
                 \enddoublecolumns
 
@@ -1064,18 +1092,18 @@ categories.
                 with \identifier{luaotfload}.
                 \begindoublecolumns
                   \begindefinitions
-                    \altitem{luatex-basics-gen.lua}
-                    \altitem{luatex-basics-nod.lua}
-                    \altitem{luatex-fonts-enc.lua}
-                    \altitem{luatex-fonts-syn.lua}
-                    \altitem{luatex-fonts-tfm.lua}
-                    \altitem{luatex-fonts-chr.lua}
-                    \altitem{luatex-fonts-lua.lua}
-                    \altitem{luatex-fonts-inj.lua}
-                    \altitem{luatex-fonts-otn.lua}
-                    \altitem{luatex-fonts-def.lua}
-                    \altitem{luatex-fonts-ext.lua}
-                    \altitem{luatex-fonts-cbk.lua}
+                    \beginaltitem{luatex-basics-gen.lua} \endaltitem
+                    \beginaltitem{luatex-basics-nod.lua} \endaltitem
+                    \beginaltitem{luatex-fonts-enc.lua}  \endaltitem
+                    \beginaltitem{luatex-fonts-syn.lua}  \endaltitem
+                    \beginaltitem{luatex-fonts-tfm.lua}  \endaltitem
+                    \beginaltitem{luatex-fonts-chr.lua}  \endaltitem
+                    \beginaltitem{luatex-fonts-lua.lua}  \endaltitem
+                    \beginaltitem{luatex-fonts-inj.lua}  \endaltitem
+                    \beginaltitem{luatex-fonts-otn.lua}  \endaltitem
+                    \beginaltitem{luatex-fonts-def.lua}  \endaltitem
+                    \beginaltitem{luatex-fonts-ext.lua}  \endaltitem
+                    \beginaltitem{luatex-fonts-cbk.lua}  \endaltitem
                   \enddefinitions
                 \enddoublecolumns
 
@@ -1084,12 +1112,17 @@ categories.
                 \CONTEXT.
                 \begindoublecolumns
                   \begindefinitions
-                    \altitem{data-con.lua} \altitem{font-ini.lua}
-                    \altitem{font-con.lua} \altitem{font-cid.lua}
-                    \altitem{font-map.lua} \altitem{font-oti.lua}
-                    \altitem{font-otf.lua} \altitem{font-otb.lua}
-                    \altitem{font-ota.lua} \altitem{font-def.lua}
-                    \altitem{font-otp.lua}
+                    \beginaltitem{data-con.lua} \endaltitem
+                    \beginaltitem{font-ini.lua} \endaltitem
+                    \beginaltitem{font-con.lua} \endaltitem
+                    \beginaltitem{font-cid.lua} \endaltitem
+                    \beginaltitem{font-map.lua} \endaltitem
+                    \beginaltitem{font-oti.lua} \endaltitem
+                    \beginaltitem{font-otf.lua} \endaltitem
+                    \beginaltitem{font-otb.lua} \endaltitem
+                    \beginaltitem{font-ota.lua} \endaltitem
+                    \beginaltitem{font-def.lua} \endaltitem
+                    \beginaltitem{font-otp.lua} \endaltitem
                   \enddefinitions
                 \enddoublecolumns
 \enddefinitions
@@ -1122,22 +1155,33 @@ files not contained in the merge. Some of these have no equivalent in
 
 
 \beginfilelist
-    \altitem {luaotfload-features.lua}     font feature handling;
-                                           incorporates some of the code from
-                                           \fileent{font-otc} from \CONTEXT;
-    \altitem {luaotfload-override.lua}     overrides the \CONTEXT logging
-                                           functionality.
-    \altitem {luaotfload-loaders.lua}      registers the \OpenType
-                                           font reader as handler for
-                                           Postscript fonts
-                                           (\abbrev{pfa}, \abbrev{pfb}).
-    \altitem {luaotfload-parsers.lua}      various \abbrev{lpeg}-based parsers.
-    \altitem {luaotfload-database.lua}     font names database.
-    \altitem {luaotfload-colors.lua}       color handling.
-    \altitem {luaotfload-auxiliary.lua}    access to internal functionality
-                                           for package authors
-                                           (proposals for additions welcome).
-    \altitem {luaotfload-letterspace.lua}  font-based letterspacing.
+    \beginaltitem {luaotfload-features.lua}
+      font feature handling; incorporates some of the code from
+      \fileent{font-otc} from \CONTEXT;
+    \endaltitem
+    \beginaltitem {luaotfload-override.lua}
+      overrides the \CONTEXT logging functionality.
+    \endaltitem
+    \beginaltitem {luaotfload-loaders.lua}
+      registers the \OpenType font reader as handler for Postscript
+      fonts (\abbrev{pfa}, \abbrev{pfb}).
+    \endaltitem
+    \beginaltitem {luaotfload-parsers.lua}
+      various \abbrev{lpeg}-based parsers.
+    \endaltitem
+    \beginaltitem {luaotfload-database.lua}
+      font names database.
+    \endaltitem
+    \beginaltitem {luaotfload-colors.lua}
+      color handling.
+    \endaltitem
+    \beginaltitem {luaotfload-auxiliary.lua}
+      access to internal functionality for package authors (proposals
+      for additions welcome).
+    \endaltitem
+    \beginaltitem {luaotfload-letterspace.lua}
+      font-based letterspacing.
+    \endaltitem
 \endfilelist
 
 \beginfigurefloat
@@ -1243,14 +1287,17 @@ These are mostly concerned with establishing compatibility with \XETEX.
 
 \beginfunctionlist
 
-  \altitem  {set_sscale_dimens}
-            Calculate \texmacro{fontdimen}s 10 and 11 to emulate \XETEX.
+  \beginaltitem  {set_sscale_dimens}
+    Calculate \texmacro{fontdimen}s 10 and 11 to emulate \XETEX.
+  \endaltitem
 
-  \altitem  {set_capheight}
-            Calculates \texmacro{fontdimen} 8 like \XETEX.
+  \beginaltitem  {set_capheight}
+    Calculates \texmacro{fontdimen} 8 like \XETEX.
+  \endaltitem
 
-  \altitem  {patch_cambria_domh}
-            Correct some values of the font \emphasis{Cambria Math}.
+  \beginaltitem  {patch_cambria_domh}
+    Correct some values of the font \emphasis{Cambria Math}.
+  \endaltitem
 
 \endfunctionlist
 
@@ -1271,38 +1318,46 @@ are defined for which scripts.
 
 \beginfunctionlist
 
-  \altitem  {aux.font_has_glyph (id : int, index : int)}
+  \beginaltitem  {aux.font_has_glyph (id : int, index : int)}
             Predicate that returns true if the font \luafunction{id}
             has glyph \luafunction{index}.
+  \endaltitem
 
-  \altitem  {aux.slot_of_name(name : string)}
+  \beginaltitem  {aux.slot_of_name(name : string)}
             Translates an Adobe Glyph name to the corresponding glyph
             slot.
+  \endaltitem
 
-  \altitem  {aux.name_of_slot(slot : int)}
+  \beginaltitem  {aux.name_of_slot(slot : int)}
             The inverse of \luafunction{slot_of_name}; note that this
             might be incomplete as multiple glyph names may map to the
             same codepoint, only one of which is returned by
             \luafunction{name_of_slot}.
+  \endaltitem
 
-  \altitem  {aux.provides_script(id : int, script : string)}
+  \beginaltitem  {aux.provides_script(id : int, script : string)}
             Test if a font supports \luafunction{script}.
+  \endaltitem
 
-  \altitem  {aux.provides_language(id : int, script : string, language : string)}
+  \beginaltitem  {aux.provides_language(id : int, script : string, language : string)}
             Test if a font defines \luafunction{language} for a given
             \luafunction{script}.
+  \endaltitem
 
-  \altitem  {aux.provides_feature(id : int, script : string,
+  \beginaltitem  {aux.provides_feature(id : int, script : string,
              language : string, feature : string)}
             Test if a font defines \luafunction{feature} for
             \luafunction{language} for a given \luafunction{script}.
+  \endaltitem
 
-  \altitem  {aux.get_math_dimension(id : int, dimension : string)}
+  \beginaltitem  {aux.get_math_dimension(id : int, dimension : string)}
             Get the dimension \luafunction{dimension} of font \luafunction{id}.
+  \endaltitem
 
-  \altitem  {aux.sprint_math_dimension(id : int, dimension : string)}
+  \beginaltitem  {aux.sprint_math_dimension(id : int, dimension : string)}
             Same as \luafunction{get_math_dimension()}, but output the value
             in scaled points at the \TEX end.
+  \endaltitem
 
 \endfunctionlist
 
@@ -1312,7 +1367,7 @@ are defined for which scripts.
 % \beginsubsubsection{Database}
 %
 % \beginfunctionlist
-%   \altitem  {aux.scan_external_dir(dir : string)}
+%   \beginaltitem  {aux.scan_external_dir(dir : string)}
 %             Include fonts in directory \luafunction{dir} in font lookups without
 %             adding them to the database.
 %

@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 03/07/14 11:42:21
+-- merge date  : 03/16/14 11:40:51
 
 do -- begin closure to overcome local limits and interference
 
@@ -2652,13 +2652,13 @@ local stripempty=endofline^1/""
 local normalempty=endofline^1
 local singleempty=endofline*(endofline^0/"")
 local doubleempty=endofline*endofline^-1*(endofline^0/"")
-local stripstart=stripempty
-local p_retain_normal=Cs ((normalline+normalempty )^0 )
-local p_retain_collapse=Cs ((normalline+doubleempty )^0 )
-local p_retain_noempty=Cs ((normalline+singleempty )^0 )
+local stripstart=stripempty^0
 local p_prune_normal=Cs (stripstart*(stripend+normalline+normalempty )^0 )
 local p_prune_collapse=Cs (stripstart*(stripend+normalline+doubleempty )^0 )
 local p_prune_noempty=Cs (stripstart*(stripend+normalline+singleempty )^0 )
+local p_retain_normal=Cs ((normalline+normalempty )^0 )
+local p_retain_collapse=Cs ((normalline+doubleempty )^0 )
+local p_retain_noempty=Cs ((normalline+singleempty )^0 )
 local striplinepatterns={
   ["prune"]=p_prune_normal,
   ["prune and collapse"]=p_prune_collapse,
@@ -2837,7 +2837,7 @@ local format_i=function(f)
   if f and f~="" then
     return format("format('%%%si',a%s)",f,n)
   else
-    return format("format('%%i',a%s)",n)
+    return format("format('%%i',a%s)",n) 
   end
 end
 local format_d=format_i
@@ -2848,6 +2848,10 @@ end
 local format_f=function(f)
   n=n+1
   return format("format('%%%sf',a%s)",f,n)
+end
+local format_F=function(f)
+  n=n+1
+  return format("((a%s == 0 and '0') or (a%s == 1 and '1') or format('%%%sf',a%s))",n,n,f,n)
 end
 local format_g=function(f)
   n=n+1
@@ -3063,7 +3067,7 @@ local builder=Cs { "start",
     (
       P("%")/""*(
         V("!") 
-+V("s")+V("q")+V("i")+V("d")+V("f")+V("g")+V("G")+V("e")+V("E")+V("x")+V("X")+V("o")
++V("s")+V("q")+V("i")+V("d")+V("f")+V("F")+V("g")+V("G")+V("e")+V("E")+V("x")+V("X")+V("o")
 +V("c")+V("C")+V("S") 
 +V("Q") 
 +V("N")
@@ -3083,6 +3087,7 @@ local builder=Cs { "start",
   ["i"]=(prefix_any*P("i"))/format_i,
   ["d"]=(prefix_any*P("d"))/format_d,
   ["f"]=(prefix_any*P("f"))/format_f,
+  ["F"]=(prefix_any*P("F"))/format_F,
   ["g"]=(prefix_any*P("g"))/format_g,
   ["G"]=(prefix_any*P("G"))/format_G,
   ["e"]=(prefix_any*P("e"))/format_e,
@@ -3130,7 +3135,7 @@ local function make(t,str)
     f=loadstripped(p)()
   else
     n=0
-    p=lpegmatch(builder,str,1,"..",t._extensions_) 
+    p=lpegmatch(builder,str,1,t._connector_,t._extensions_) 
     if n>0 then
       p=format(template,preamble,t._preamble_,arguments[n],p)
       f=loadstripped(p,t._environment_)() 
@@ -3146,18 +3151,18 @@ local function use(t,fmt,...)
 end
 strings.formatters={}
 if _LUAVERSION<5.2 then
-  function strings.formatters.new()
-    local t={ _extensions_={},_preamble_=preamble,_environment_={},_type_="formatter" }
+  function strings.formatters.new(noconcat)
+    local t={ _type_="formatter",_connector_=noconcat and "," or "..",_extensions_={},_preamble_=preamble,_environment_={} }
     setmetatable(t,{ __index=make,__call=use })
     return t
   end
 else
-  function strings.formatters.new()
+  function strings.formatters.new(noconcat)
     local e={} 
     for k,v in next,environment do
       e[k]=v
     end
-    local t={ _extensions_={},_preamble_="",_environment_=e,_type_="formatter" }
+    local t={ _type_="formatter",_connector_=noconcat and "," or "..",_extensions_={},_preamble_="",_environment_=e }
     setmetatable(t,{ __index=make,__call=use })
     return t
   end
@@ -8978,8 +8983,9 @@ basemethods.shared={
 basemethod="independent"
 local function featuresinitializer(tfmdata,value)
   if true then 
-    local t=trace_preparing and os.clock()
+    local starttime=trace_preparing and os.clock()
     local features=tfmdata.shared.features
+    local fullname=trace_preparing and tfmdata.properties.fullname
     if features then
       applybasemethod("initializehashes",tfmdata)
       local collectlookups=otf.collectlookups
@@ -8989,26 +8995,34 @@ local function featuresinitializer(tfmdata,value)
       local language=properties.language
       local basesubstitutions=rawdata.resources.features.gsub
       local basepositionings=rawdata.resources.features.gpos
-      if basesubstitutions then
-        for feature,data in next,basesubstitutions do
-          local value=features[feature]
-          if value then
-            local validlookups,lookuplist=collectlookups(rawdata,feature,script,language)
-            if validlookups then
-              applybasemethod("preparesubstitutions",tfmdata,feature,value,validlookups,lookuplist)
-              registerbasefeature(feature,value)
-            end
-          end
-        end
-      end
-      if basepositionings then
-        for feature,data in next,basepositionings do
-          local value=features[feature]
-          if value then
-            local validlookups,lookuplist=collectlookups(rawdata,feature,script,language)
-            if validlookups then
-              applybasemethod("preparepositionings",tfmdata,feature,features[feature],validlookups,lookuplist)
-              registerbasefeature(feature,value)
+      if basesubstitutions or basepositionings then
+        local sequences=tfmdata.resources.sequences
+        for s=1,#sequences do
+          local sequence=sequences[s]
+          local sfeatures=sequence.features
+          if sfeatures then
+            local order=sequence.order
+            if order then
+              for i=1,#order do 
+                local feature=order[i]
+                if features[feature] then
+                  local validlookups,lookuplist=collectlookups(rawdata,feature,script,language)
+                  if not validlookups then
+                  elseif basesubstitutions and basesubstitutions[feature] then
+                    if trace_preparing then
+                      report_prepare("filtering base feature %a for %a",feature,fullname)
+                    end
+                    applybasemethod("preparesubstitutions",tfmdata,feature,value,validlookups,lookuplist)
+                    registerbasefeature(feature,value)
+                  elseif basepositionings and basepositionings[feature] then
+                    if trace_preparing then
+                      report_prepare("filtering base feature %a for %a",feature,fullname)
+                    end
+                    applybasemethod("preparepositionings",tfmdata,feature,features[feature],validlookups,lookuplist)
+                    registerbasefeature(feature,value)
+                  end
+                end
+              end
             end
           end
         end
@@ -9016,7 +9030,7 @@ local function featuresinitializer(tfmdata,value)
       registerbasehash(tfmdata)
     end
     if trace_preparing then
-      report_prepare("preparation time is %0.3f seconds for %a",os.clock()-t,tfmdata.properties.fullname)
+      report_prepare("preparation time is %0.3f seconds for %a",os.clock()-starttime,fullname)
     end
   end
 end
@@ -11482,9 +11496,9 @@ end)
 local autofeatures=fonts.analyzers.features 
 local function initialize(sequence,script,language,enabled)
   local features=sequence.features
-  local order=features.order
-  if order then
-    for i=1,#order do 
+  if features then
+    local order=features.order
+    for i=1,#order do
       local kind=order[i] 
       local valid=enabled[kind]
       if valid then

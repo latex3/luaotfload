@@ -83,8 +83,8 @@
 \definefontfeature [monospace]           [liga=no,tlig=no,onum=no]
 
 \definefontfamily [mainface] [serif] [Linux Libertine O] [features=default]
-%\definefontfamily [mainface] [serif] [Liberation Serif] [feature=default]
-%\definefontfamily [mainface] [sans]  [Iwona]             [feature=default]
+%definefontfamily [mainface] [serif] [Liberation Serif] [feature=default]
+%definefontfamily [mainface] [sans]  [Iwona]             [feature=default]
 \definefontfamily [mainface] [sans]  [Iwona Medium] [
   feature=default,
   it=file:IwonaMedium-Italic.otf,
@@ -128,7 +128,9 @@
 \definetype [luafunction] [style=typing:luafunction]
 \setuptyping [style=ttx]
 
-\definebodyfontenvironment [8pt]
+\definebodyfontenvironment  [8pt]
+\definebodyfontenvironment [10pt]
+\definebodyfontenvironment [12pt]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% headings
@@ -196,7 +198,26 @@
 %% Context offers both \type{…} and \type<<…>>, but not an unbalanced
 %% one that we could map directly onto Latex’s \verb|…|.
 
-\definetype [inlinecode] [style=emphasis:nonproportional]
+\definetype [inlinecode_indeed] [style=emphasis:nonproportional]
+
+%% The listings macros don’t seem to handle backslashes and braces
+%% well. We emulate this behavior by handling the escaping in Lua.
+
+\startluacode
+  local lpeg           = require "lpeg"
+  local Cs, P, S       = lpeg.Cs, lpeg.P, lpeg.S
+  local lpegmatch      = lpeg.match
+  local unescape_char  = S[[\letterbackslash\letterleftbrace\letterrightbrace]]
+  local backslash      = P[[\letterbackslash]]
+  local unescape       = Cs (((backslash / "" * unescape_char) + 1)^0)
+  commands.unescape_things = function (str)
+    context.type (lpegmatch (unescape, str))
+  end
+\stopluacode
+
+\unexpanded \def \inlinecode #content{%
+  \ctxcommand {unescape_things \!!bs \detokenize {#content}\!!es}%
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% codelistings
@@ -208,6 +229,7 @@
 }
 
 \unexpanded \def \endlisting {\typebuffer [listing]}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% enumerations and lists
@@ -308,7 +330,13 @@
 %% special elements
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\def \meta #1{<{\italic #1}>}
+\definefont [lmromantenregular] [file:lmroman10-regular.otf*default]
+
+\def \meta #1{%
+  {\lmromantenregular<}%
+  {\italic #1}%
+  {\lmromantenregular>}%
+}
 
 \def \beginabstractcontent {%
   \grabbufferdatadirect{abstractcontent}{beginabstractcontent}{endabstractcontent}%

@@ -79,26 +79,64 @@
 \newcommand\CONTEXT  {Con\TeX t\xspace}
 \newcommand\OpenType {\identifier{Open\kern-.25ex Type}\xspace}
 
-\def\definehighlight[#1][#2]%
- {\ifcsname #1\endcsname\else
-    \expandafter\def\csname #1\endcsname%
-      {\bgroup#2\csname #1_indeed\endcsname}
-    \expandafter\def\csname #1_indeed\endcsname##1%
-      {##1\egroup}%
-  \fi}
+%% \groupedcommand, with some omissions taken from syst-aux.mkiv
+\let \handlegroupnormalbefore \relax
+\let \handlegroupnormalafter  \relax
+
+\protected \def \handlegroupnormal #1#2{%
+  \bgroup % 1
+  \def \handlegroupbefore {#1}%
+  \def \handlegroupafter  {#2}%
+  \afterassignment \handlegroupnormalbefore
+  \let \next =
+}
+
+\def \handlegroupnormalbefore {%
+  \bgroup % 2
+  \handlegroupbefore
+  \bgroup % 3
+  \aftergroup \handlegroupnormalafter%
+}
+
+\def \handlegroupnormalafter {%
+  \handlegroupafter
+  \egroup % 3
+  \egroup % 2
+}
+
+\let \groupedcommand \handlegroupnormal %% only the two arg version
+
+\def \definehighlight [#1][#2]{%
+  \ifcsname #1\endcsname\else
+    \expandafter\def\csname #1\endcsname{%
+      \leavevmode
+      \groupedcommand {#2}\empty%
+    }
+  \fi%
+}
+
+%% old, simplistic definition: obsolete now that we have
+%% \groupedcommand
+%\def\definehighlight[#1][#2]%
+ %{\ifcsname #1\endcsname\else
+    %\expandafter\def\csname #1\endcsname%
+      %{\bgroup#2\csname #1_indeed\endcsname}
+    %\expandafter\def\csname #1_indeed\endcsname##1%
+      %{##1\egroup}%
+  %\fi}
 
 \def\restoreunderscore{\catcode`\_=12\relax}
 
-\definehighlight      [fileent][\ttfamily\restoreunderscore]         %% files, dirs
-\definehighlight     [texmacro][\sffamily\itshape\textbackslash]     %% cs
-\definehighlight  [luafunction][\sffamily\itshape\restoreunderscore] %% lua identifiers
-\definehighlight   [identifier][\sffamily]                           %% names
-\definehighlight       [abbrev][\rmfamily\scshape]                   %% acronyms
-\definehighlight     [emphasis][\rmfamily\slshape]                   %% level 1 emph
+\definehighlight         [fileent][\ttfamily\restoreunderscore]         %% files, dirs
+\definehighlight        [texmacro][\sffamily\itshape\textbackslash]     %% cs
+\definehighlight     [luafunction][\sffamily\itshape\restoreunderscore] %% lua identifiers
+\definehighlight      [identifier][\sffamily]                           %% names
+\definehighlight          [abbrev][\rmfamily\scshape]                   %% acronyms
+\definehighlight        [emphasis][\rmfamily\slshape]                   %% level 1 emph
 
-\definehighlight    [Largefont][\Large]                              %% font size
-\definehighlight    [smallcaps][\sc]                                 %% font feature
-\definehighlight [proportional][\tt]                                 %% font switch
+\definehighlight       [Largefont][\Large]                              %% font size
+\definehighlight       [smallcaps][\sc]                                 %% font feature
+\definehighlight [nonproportional][\tt]                                 %% font switch
 
 \newcommand*\email[1]{\href{mailto:#1}{#1}}
 
@@ -170,6 +208,7 @@
 \usepackage {listings}
 \lstset {
   basicstyle=\ttfamily,
+  escapechar=Ö,
 }
 
 \def \inlinecode #1{%
@@ -245,8 +284,10 @@
         \def \first {####1}%
         #2
       }
-      \let \beginaltitem \altitem
-      \let \endaltitem   \relax
+      \let \beginnormalitem \item
+      \let \endnormalitem   \relax
+      \let \beginaltitem    \altitem
+      \let \endaltitem      \relax
   }
 
   \expandafter \def \csname end#1\endcsname {%
@@ -280,6 +321,9 @@
 %% special elements
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\let \beginfrontmatter \relax
+\let \endfrontmatter   \relax
+
 \def \beginabstractcontent {\begin {abstract}}
 \def \endabstractcontent   {\end {abstract}}
 
@@ -288,7 +332,9 @@
 \let \setdocumentauthor     \author
 \let \typesetdocumenttitle  \maketitle
 
-\let \typesetcontent        \tableofcontent
+\AtBeginDocument {%% seriously?
+  \let \typesetcontent \tableofcontents%
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% floats
@@ -315,34 +361,22 @@
 }
 
 %% figures, e.g. the file graph
-\def \beginfigurefloat #1#2{%% #1:label #2:caption
-  \begingroup
-    \begin {figure} [b]
-      \edef \figurelabel {#1}%
-      \caption {#2}%
-}
-
-\def \endfigurefloat {%
-      \label \figurelabel
-    \end {figure}
-  \endgroup
+\def \figurefloat #1#2#3{%% #1:label #2:caption #3:file
+  \begin {figure} [b]
+    \caption {#2}%
+    \includegraphics[width=\textwidth]{#3}%
+    \label {#1}
+  \end {figure}
 }
 
 %% tables
-
-\def \begintablefloat #1#2{%% #1:label #2:caption
-  \begingroup
-    \begin {table} [t]
-      \hrule
-      \edef \floatlabel {#1}%
-      \caption {#2}%
-}
-
-\def \endtablefloat {%
-      \label \floatlabel
-      \hrule
-    \end {table}
-  \endgroup
+\def \tablefloat #1#2{%% #1:label #2:caption
+  \begin {table} [t]
+    \hrule
+    \caption {#2}%
+    \label {#1}
+    \hrule
+  \end {table}
 }
 
 
@@ -401,6 +435,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \makeatother
+
+\newif \ifcontextmkiv \contextmkivfalse
 
 \begin {document}
   \input {luaotfload-main.tex}

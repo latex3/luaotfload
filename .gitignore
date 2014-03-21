@@ -39,5 +39,22 @@ tests/*.ovf
 tests/*.sty
 tests/luaotfload*
 
-# temporary directory
+# temporary directories
+build/*
+testing/*
+tests/*
 tmp/*
+
+# tex side-effects
+doc/*.aux
+doc/*.log
+doc/*.out
+doc/*.pdf
+doc/*.tmp
+doc/*.toc
+doc/*.tuc
+doc/*.vimout
+
+# valgrind log
+src/*.log
+

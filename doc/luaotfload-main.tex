@@ -1,16 +1,3 @@
-%\beginsection {foo}
-  %bar baz
-%\endsection
-
-%\begindescriptions
-
-  %\beginaltitem {mode} foo
-         %%\identifier{luaotfload} has two \OpenType processing
-         %%\emphasis{modes}:
-%\enddescriptions
-
-%\endinput
-
 %% Copyright (C) 2009-2014
 %%
 %%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
@@ -42,21 +29,25 @@
 %% ----------------------------------------------------------------------------
 %%
 
-\setdocumenttitle  {The \identifier{luaotfload} package}
-\setdocumentdate   {2014/**/** v2.5}
-\setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang\\
-                    Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
-                    Support: \email     {lualatex-dev@tug.org}}
+\beginfrontmatter
 
-\typesetdocumenttitle
+  \setdocumenttitle  {The \identifier{luaotfload} package}
+  \setdocumentdate   {2014/**/** v2.5}
+  \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang\\
+                      Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
+                      Support: \email     {lualatex-dev@tug.org}}
 
-\beginabstractcontent
-  This package is an adaptation of the \CONTEXT font loading system.
-  It allows for loading \OpenType fonts with an extended syntax and adds
-  support for a variety of font features.
-\endabstractcontent
+  \typesetdocumenttitle
 
-\tableofcontents
+  \beginabstractcontent
+    This package is an adaptation of the \CONTEXT font loading system.
+    It allows for loading \OpenType fonts with an extended syntax and adds
+    support for a variety of font features.
+  \endabstractcontent
+
+\endfrontmatter
+
+\typesetcontent
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Introduction}
@@ -140,10 +131,10 @@ in the task and willingness to respond to our suggestions.
 \identifier{luaotfload} supports an extended font request syntax:
 
 \beginnarrower
-      \inlinecode{\\font\\foo=\{}%
-      \meta{prefix}\inlinecode{:}%
-      \meta{font name}\inlinecode{:}%
-      \meta{font features}\inlinecode{\}}%
+      \nonproportional{\string\font\string\foo\space= \string{}%
+      \meta{prefix}\nonproportional{:}%
+      \meta{font name}\nonproportional{:}%
+      \meta{font features}\nonproportional{\string}}%
       \meta{\TEX font features}
 \endnarrower
 
@@ -165,18 +156,18 @@ for a more formal description see figure \ref{font-syntax}.
    In addition to the font style modifiers
    (\emphasis{slash-notation}) given above, there
    are others that are recognized but will be silently
-   ignored: {\ttfamily aat},
-            {\ttfamily icu}, and
-            {\ttfamily gr}.
+   ignored: \nonproportional{aat},
+            \nonproportional{icu}, and
+            \nonproportional{gr}.
    The special terminals are:
-   {\sc feature\textunderscore id} for a valid font
+   \smallcaps {feature\textunderscore id} for a valid font
       feature name and
-   {\sc feature\textunderscore value} for the corresponding
+   \smallcaps {feature\textunderscore value} for the corresponding
       value.
-   {\sc tfmname} is the name of a \abbrev{tfm} file.
-   {\sc digit}  again refers to bytes 48--57, and
-   {\sc all\textunderscore characters} to all byte values.
-   {\sc csname} and {\sc dimension} are the \TEX concepts.}
+   \smallcaps {tfmname} is the name of a \abbrev{tfm} file.
+   \smallcaps {digit}  again refers to bytes 48--57, and
+   \smallcaps {all\textunderscore characters} to all byte values.
+   \smallcaps {csname} and \smallcaps {dimension} are the \TEX concepts.}
 %
       <definition>      ::= `\\font', {\sc csname}, `=', <font request>, [ <size> ] ;
 
@@ -223,7 +214,11 @@ In \identifier{luaotfload}, the canonical syntax for font requests
 requires a \emphasis{prefix}:
 %
 \beginnarrower
-  \inlinecode{\\font\\fontname=}\meta{prefix}\inlinecode{:}\meta{fontname}\dots
+  \nonproportional{\string\font\string\fontname\space= }%
+  \meta{prefix}%
+  \nonproportional{:}%
+  \meta{fontname}%
+  \dots
 \endnarrower
 %
 where \meta{prefix} is either \inlinecode{file:} or \inlinecode {name:}.\footnote{%
@@ -318,7 +313,9 @@ There are again two modes: bracketed and unbracketed.
 A bracketed request looks as follows.
 
 \beginnarrower
-  \inlinecode{\\font\\fontname=[}\meta{path to file}\inlinecode{]}
+  \nonproportional{\string\font\string\fontname\space = [}%
+  \meta{/path/to/file}%
+  \nonproportional{]}
 \endnarrower
 
 \noindent
@@ -329,7 +326,9 @@ Naturally, path-less file names are equally valid and processed the
 same way as an ordinary \inlinecode {file:} lookup.
 
 \beginnarrower
-  \inlinecode{\\font\\fontname=}\meta{font name} \dots
+  \nonproportional{\string\font\string\fontname\space= }%
+  \meta{font name}
+  \dots
 \endnarrower
 
 Unbracketed (or, for lack of a better word: \emphasis{anonymous})
@@ -347,7 +346,11 @@ Furthermore, \identifier{luaotfload} supports the slashed (shorthand)
 font style notation from \XETEX.
 
 \beginnarrower
-  \inlinecode{\\font\\fontname=}\meta{font name}\inlinecode{/}\meta{modifier}\dots
+  \nonproportional{\string\font\string\fontname\space= }%
+  \meta{font name}%
+  \nonproportional{/}%
+  \meta{modifier}
+  \dots
 \endnarrower
 
 \noindent
@@ -470,11 +473,14 @@ which is equivalent to these full names:
 general scheme for font requests:
 
 \beginnarrower
-      \inlinecode{\\font\\foo=\{}%
-      \meta{prefix}\inlinecode{:}%
-      \meta{font name}\inlinecode{:}%
-      \meta{font features}\inlinecode{\}}%
-      \meta{\TEX font features}
+  \nonproportional{\string\font\string\foo\space= "}%
+  \meta{prefix}%
+  \nonproportional{:}%
+  \meta{font name}%
+  \nonproportional{:}%
+  \meta{font features}%
+  \meta{\TEX font features}%
+  \nonproportional{"}
 \endnarrower
 
 \noindent
@@ -680,6 +686,12 @@ obviously, \inlinecode{random}.
          user.
   \endaltitem
 
+\ifcontextmkiv
+  \startbuffer [printvectors]
+  \directlua{inspect(fonts.protrusions.setups.default)
+             inspect(fonts.expansions.setups.default)}
+  \stopbuffer
+\fi
 
   \beginaltitem {protrusion \& expansion}
          These keys control microtypographic features of the font,
@@ -694,10 +706,14 @@ obviously, \inlinecode{random}.
             %
             Alternatively and with loss of information, you can dump
             those tables into your terminal by issuing
-            \beginlisting
-\directlua{inspect(fonts.protrusions.setups.default)
-           inspect(fonts.expansions.setups.default)}
-            \endlisting
+            \unless \ifcontextmkiv
+              \beginlisting
+ \directlua{inspect(fonts.protrusions.setups.default)
+            inspect(fonts.expansions.setups.default)}
+              \endlisting
+            \else
+              \typebuffer [printvectors]
+            \fi
             at some point after loading \fileent{luaotfload.sty}.
          }
          %
@@ -740,13 +756,28 @@ Currently (2014) there are three of them:
   \beginaltitem {tlig}
           Applies legacy \TEX ligatures:
 
-          \begintabulate [rlrl]
-             \beginrow ``  \newcell  \inlinecode {``}  \newcell  ''  \newcell  \inlinecode {''}  \endrow
-             \beginrow `   \newcell  \inlinecode {`}   \newcell  '   \newcell  \inlinecode {'}   \endrow
-             \beginrow "   \newcell  \inlinecode {"}   \newcell  --  \newcell  \inlinecode {--}  \endrow
-             \beginrow --- \newcell  \inlinecode {---} \newcell  !`  \newcell  \inlinecode {!`}  \endrow
-             \beginrow ?`  \newcell  \inlinecode {?`}  \newcell      \newcell                    \endrow
-          \endtabulate
+          \unless \ifcontextmkiv
+            \begintabulate [rlrl]
+              \beginrow ``  \newcell  \inlinecode {``}  \newcell  ''  \newcell  \inlinecode {''}  \endrow
+              \beginrow `   \newcell  \inlinecode {`}   \newcell  '   \newcell  \inlinecode {'}   \endrow
+              \beginrow "   \newcell  \inlinecode {"}   \newcell  --  \newcell  \inlinecode {--}  \endrow
+              \beginrow --- \newcell  \inlinecode {---} \newcell  !`  \newcell  \inlinecode {!`}  \endrow
+              \beginrow ?`  \newcell  \inlinecode {?`}  \newcell      \newcell                    \endrow
+            \endtabulate
+          \else
+            %% XXX find a way to wrap these in the tabulate environment
+            \startframed [frame=off,width=broad,align=middle]
+              \startframed [frame=off,width=\dimexpr(\textwidth/2)]
+                \startxtable [align=middle]
+                    \startxrow \startxcell ``  \stopxcell \startxcell  \inlinecode {``}  \stopxcell \startxcell  ''  \stopxcell \startxcell  \inlinecode {''}  \stopxcell \stopxrow
+                    \startxrow \startxcell `   \stopxcell \startxcell  \inlinecode {`}   \stopxcell \startxcell  '   \stopxcell \startxcell  \inlinecode {'}   \stopxcell \stopxrow
+                    \startxrow \startxcell "   \stopxcell \startxcell  \inlinecode {"}   \stopxcell \startxcell  --  \stopxcell \startxcell  \inlinecode {--}  \stopxcell \stopxrow
+                    \startxrow \startxcell --- \stopxcell \startxcell  \inlinecode {---} \stopxcell \startxcell  !`  \stopxcell \startxcell  \inlinecode {!`}  \stopxcell \stopxrow
+                    \startxrow \startxcell ?`  \stopxcell \startxcell  \inlinecode {?`}  \stopxcell \startxcell      \stopxcell \startxcell                    \stopxcell \stopxrow
+                \stopxtable
+              \stopframed
+            \stopframed
+          \fi
 
           \footnote{%
             These contain the feature set \inlinecode {trep} of earlier
@@ -873,26 +904,41 @@ Other paths can be specified by setting the environment variable
 If it is non-empty, then search will be extended to the included
 directories.
 
-\begintablefloat {table-searchpaths}
+\tablefloat {table-searchpaths}
   {List of paths searched for each supported operating system.}
-  \begincentered
-    \begintabulate [lp{.5\textwidth}]
-      \beginrow
-        Windows   \newcell \inlinecode {\% WINDIR\%\\ Fonts}
-      \endrow
-      \beginrow
-        Linux     \newcell \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break
-                           \fileent{/etc/fonts/fonts.conf}
-      \endrow
-      \beginrow
-        Mac       \newcell \fileent{\textasciitilde/Library/Fonts},\break
-                           \fileent{/Library/Fonts},\break
-                           \fileent{/System/Library/Fonts}, and\hfill\break
-                           \fileent{/Network/Library/Fonts}
-      \endrow
-    \endtabulate
-  \endcentered
-\endtablefloat
+  {%
+    \unless \ifcontextmkiv
+      \begincentered
+        \begintabulate [lp{.5\textwidth}]
+          \beginrow
+            Windows   \newcell \inlinecode {\% WINDIR\%\\ Fonts}
+          \endrow
+          \beginrow
+            Linux     \newcell \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break
+                               \fileent{/etc/fonts/fonts.conf}
+          \endrow
+          \beginrow
+            Mac       \newcell \fileent{\textasciitilde/Library/Fonts},\break
+                               \fileent{/Library/Fonts},\break
+                               \fileent{/System/Library/Fonts}, and\hfill\break
+                               \fileent{/Network/Library/Fonts}
+          \endrow
+        \endtabulate
+      \endcentered
+    \else
+      \setuplocalinterlinespace [14pt]
+      \starttabulate [|l|p(.5\textwidth)|]
+        \NC Windows   \NC \inlinecode {\% WINDIR\%\\ Fonts} \NC \NR
+        \NC Linux     \NC \fileent{/usr/local/etc/fonts/fonts.conf} and\crlf
+                          \fileent{/etc/fonts/fonts.conf} \NC \NR
+        \NC
+          Mac         \NC \fileent{\textasciitilde/Library/Fonts},\crlf
+                          \fileent{/Library/Fonts},\break
+                          \fileent{/System/Library/Fonts}, and\crlf
+                          \fileent{/Network/Library/Fonts} \NC \NR
+      \stoptabulate
+    \fi%
+  }
 
 \endsubsection
 
@@ -1016,7 +1062,7 @@ An example with explicit paths:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \identifier{luaotfload} relies on code originally written by Hans
-Hagen for the \hyperlink[\identifier\CONTEXT]{http://wiki.contextgarden.net}
+Hagen for the \hyperlink[\identifier{\CONTEXT}]{http://wiki.contextgarden.net}
 format.
 %
 It integrates the font loader as distributed in
@@ -1067,64 +1113,70 @@ It houses several \LUA files that can be classed in three
 categories.
 
 \begindefinitions
-    \normalitem \emphasis{\LUA utility libraries}, a subset
-                of what is provided by the \identifier{lualibs}
-                package.
+  \beginnormalitem
+    \emphasis{\LUA utility libraries}, a subset
+    of what is provided by the \identifier{lualibs}
+    package.
 
-                \begindoublecolumns
-                  \begindefinitions
-                      \beginaltitem {l-lua.lua}       \endaltitem
-                      \beginaltitem {l-lpeg.lua}      \endaltitem
-                      \beginaltitem {l-function.lua}  \endaltitem
-                      \beginaltitem {l-string.lua}    \endaltitem
-                      \beginaltitem {l-table.lua}     \endaltitem
-                      \beginaltitem {l-io.lua}        \endaltitem
-                      \beginaltitem {l-file.lua}      \endaltitem
-                      \beginaltitem {l-boolean.lua}   \endaltitem
-                      \beginaltitem {l-math.lua}      \endaltitem
-                      \beginaltitem {util-str.lua}    \endaltitem
-                  \enddefinitions
-                \enddoublecolumns
+    \begindoublecolumns
+      \begindefinitions
+          \beginaltitem {l-lua.lua}       \endaltitem
+          \beginaltitem {l-lpeg.lua}      \endaltitem
+          \beginaltitem {l-function.lua}  \endaltitem
+          \beginaltitem {l-string.lua}    \endaltitem
+          \beginaltitem {l-table.lua}     \endaltitem
+          \beginaltitem {l-io.lua}        \endaltitem
+          \beginaltitem {l-file.lua}      \endaltitem
+          \beginaltitem {l-boolean.lua}   \endaltitem
+          \beginaltitem {l-math.lua}      \endaltitem
+          \beginaltitem {util-str.lua}    \endaltitem
+      \enddefinitions
+    \enddoublecolumns
+  \endnormalitem
 
-    \normalitem The \emphasis{font loader} itself.
-                These files have been written for
-                \LUATEX-Fonts and they are distributed along
-                with \identifier{luaotfload}.
-                \begindoublecolumns
-                  \begindefinitions
-                    \beginaltitem{luatex-basics-gen.lua} \endaltitem
-                    \beginaltitem{luatex-basics-nod.lua} \endaltitem
-                    \beginaltitem{luatex-fonts-enc.lua}  \endaltitem
-                    \beginaltitem{luatex-fonts-syn.lua}  \endaltitem
-                    \beginaltitem{luatex-fonts-tfm.lua}  \endaltitem
-                    \beginaltitem{luatex-fonts-chr.lua}  \endaltitem
-                    \beginaltitem{luatex-fonts-lua.lua}  \endaltitem
-                    \beginaltitem{luatex-fonts-inj.lua}  \endaltitem
-                    \beginaltitem{luatex-fonts-otn.lua}  \endaltitem
-                    \beginaltitem{luatex-fonts-def.lua}  \endaltitem
-                    \beginaltitem{luatex-fonts-ext.lua}  \endaltitem
-                    \beginaltitem{luatex-fonts-cbk.lua}  \endaltitem
-                  \enddefinitions
-                \enddoublecolumns
+  \beginnormalitem
+    The \emphasis{font loader} itself.
+    These files have been written for
+    \LUATEX-Fonts and they are distributed along
+    with \identifier{luaotfload}.
+    \begindoublecolumns
+      \begindefinitions
+        \beginaltitem{luatex-basics-gen.lua} \endaltitem
+        \beginaltitem{luatex-basics-nod.lua} \endaltitem
+        \beginaltitem{luatex-fonts-enc.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-syn.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-tfm.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-chr.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-lua.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-inj.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-otn.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-def.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-ext.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-cbk.lua}  \endaltitem
+      \enddefinitions
+    \enddoublecolumns
+  \endnormalitem
 
-    \normalitem Code related to \emphasis{font handling and
-                node processing}, taken directly from
-                \CONTEXT.
-                \begindoublecolumns
-                  \begindefinitions
-                    \beginaltitem{data-con.lua} \endaltitem
-                    \beginaltitem{font-ini.lua} \endaltitem
-                    \beginaltitem{font-con.lua} \endaltitem
-                    \beginaltitem{font-cid.lua} \endaltitem
-                    \beginaltitem{font-map.lua} \endaltitem
-                    \beginaltitem{font-oti.lua} \endaltitem
-                    \beginaltitem{font-otf.lua} \endaltitem
-                    \beginaltitem{font-otb.lua} \endaltitem
-                    \beginaltitem{font-ota.lua} \endaltitem
-                    \beginaltitem{font-def.lua} \endaltitem
-                    \beginaltitem{font-otp.lua} \endaltitem
-                  \enddefinitions
-                \enddoublecolumns
+  \beginnormalitem
+    Code related to \emphasis{font handling and
+    node processing}, taken directly from
+    \CONTEXT.
+    \begindoublecolumns
+      \begindefinitions
+        \beginaltitem{data-con.lua} \endaltitem
+        \beginaltitem{font-ini.lua} \endaltitem
+        \beginaltitem{font-con.lua} \endaltitem
+        \beginaltitem{font-cid.lua} \endaltitem
+        \beginaltitem{font-map.lua} \endaltitem
+        \beginaltitem{font-oti.lua} \endaltitem
+        \beginaltitem{font-otf.lua} \endaltitem
+        \beginaltitem{font-otb.lua} \endaltitem
+        \beginaltitem{font-ota.lua} \endaltitem
+        \beginaltitem{font-def.lua} \endaltitem
+        \beginaltitem{font-otp.lua} \endaltitem
+      \enddefinitions
+    \enddoublecolumns
+  \endnormalitem
 \enddefinitions
 
 Note that if \identifier{luaotfload} cannot locate the
@@ -1184,11 +1236,10 @@ files not contained in the merge. Some of these have no equivalent in
     \endaltitem
 \endfilelist
 
-\beginfigurefloat
+\figurefloat
   {file-graph}
   {Schematic of the files in \identifier{Luaotfload}}
-  \includegraphics[width=\textwidth]{filegraph.pdf}
-\endfigurefloat
+  {filegraph.pdf}
 
 \endsection
 

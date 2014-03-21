@@ -560,7 +560,6 @@ local update_names
 
 --- state of the database
 local fonts_reloaded = false
-local fonts_read     = 0
 
 --- limit output when approximate font matching (luaotfload-tool -F)
 local fuzzy_limit = 1 --- display closest only
@@ -2189,72 +2188,43 @@ local truncate_string = function (str, restrict)
     return str
 end
 
+
 --[[doc--
 
-    scan_dir() scans a directory and populates the list of fonts
-    with all the fonts it finds.
-
-        · dirname       : name of the directory to scan
-        · currentnames  : current font db object
-        · targetnames   : font db object to fill
-        · dry_run       : don’t touch anything
+    collect_font_filenames_dir -- Traverse the directory root at
+    ``dirname`` looking for font files. Returns a list of {*filename*;
+    *location*} pairs.
 
 --doc]]--
 
---- string -> dbobj -> dbobj -> bool -> bool -> (int * int)
-
-local scan_dir = function (dirname, currentnames, targetnames,
-                           dry_run, location)
+--- string -> string -> string * string list
+local collect_font_filenames_dir = function (dirname, location)
     if lpegmatch (p_blacklist, dirname) then
         report ("both", 4, "db",
                 "Skipping blacklisted directory %s.", dirname)
         --- ignore
-        return 0, 0
+        return { }
     end
     local found = find_font_files (dirname, location ~= "texmf" and location ~= "local")
     if not found then
         report ("both", 4, "db",
                 "No such directory: %q; skipping.", dirname)
-        return 0, 0
+        return { }
     end
-    report ("both", 4, "db", "Scanning directory %s.", dirname)
 
-    local n_new         = 0   --- total of fonts collected
-    local n_found       = #found
-    local max_fonts     = luaotfloadconfig.max_fonts
+    local nfound = #found
+    local files  = { }
 
-    report ("both", 4, "db", "%d font files detected.", n_found)
-    for j=1, n_found do
-        if max_fonts and fonts_read >= max_fonts then
-            break
-        end
-
+    report ("both", 4, "db",
+            "%d font files detected in %s.",
+            nfound, dirname)
+    for j = 1, nfound do
         local fullname = found[j]
-        fullname = path_normalize(fullname)
-        local new
-
-        if dry_run == true then
-            local truncated = truncate_string (fullname, 43)
-            report ("log", 2, "db",
-                    "Would have been loading %s.", fullname)
-            report_status ("term", "db",
-                           "Would have been loading %s", truncated)
-        else
-            local truncated = truncate_string (fullname, 32)
-            report ("log", 2, "db", "Loading font %s.", fullname)
-            report_status ("term", "db", "Loading font %s", truncated)
-            local new = read_font_names (fullname, currentnames,
-                                         targetnames, texmf)
-            if new == true then
-                fonts_read = fonts_read + 1
-                n_new = n_new + 1
-            end
-        end
+        files[#files + 1] = { path_normalize (fullname), location }
     end
-    report ("both", 4, "db", "Done. %d fonts indexed in %q.",
-            n_found, dirname)
-    return n_found, n_new
+    return files
 end
+
 
 --- string list -> string list
 local filter_out_pwd = function (dirs)
@@ -2275,28 +2245,28 @@ local path_separator = ostype == "windows" and ";" or ":"
 
 --[[doc--
 
-    scan_texmf_fonts() scans all fonts in the texmf tree through the
-    kpathsea variables OPENTYPEFONTS and TTFONTS of texmf.cnf.
+    collect_font_filenames_texmf -- Scan texmf tree for font files
+    relying on the kpathsea variables $OPENTYPEFONTS and $TTFONTS of
+    texmf.cnf.
     The current working directory comes as “.” (texlive) or absolute
     path (miktex) and will always be filtered out.
 
+    Returns a list of { *filename*; *location* } pairs.
+
 --doc]]--
 
---- dbobj -> dbobj -> bool? -> (int * int)
+--- unit -> string * string list
+local collect_font_filenames_texmf = function ()
 
-local scan_texmf_fonts = function (currentnames, targetnames, dry_run)
-
-    local n_scanned, n_new, fontdirs = 0, 0
     local osfontdir = kpseexpand_path "$OSFONTDIR"
 
     if stringis_empty (osfontdir) then
-        report ("info", 1, "db", "Scanning TEXMF fonts...")
+        report ("info", 1, "db", "Scanning TEXMF for fonts...")
     else
-        report ("info", 1, "db", "Scanning TEXMF and OS fonts...")
+        report ("info", 1, "db", "Scanning TEXMF and $OSFONTDIR for fonts...")
         if log.get_loglevel () > 3 then
             local osdirs = filesplitpath (osfontdir)
-            report ("info", 0, "db",
-                    "$OSFONTDIR has %d entries:", #osdirs)
+            report ("info", 0, "db", "$OSFONTDIR has %d entries:", #osdirs)
             for i = 1, #osdirs do
                 report ("info", 0, "db", "[%d] %s", i, osdirs[i])
             end
@@ -2307,24 +2277,22 @@ local scan_texmf_fonts = function (currentnames, targetnames, dry_run)
     fontdirs = fontdirs .. path_separator .. kpseexpand_path "$TTFONTS"
     fontdirs = fontdirs .. path_separator .. kpseexpand_path "$T1FONTS"
 
-    if not stringis_empty (fontdirs) then
-        local tasks = filter_out_pwd (filesplitpath (fontdirs))
-        report ("info", 3, "db",
-                "Initiating scan of %d directories.", #tasks)
-        report_status_start (2, 4)
-        for _, d in next, tasks do
-            local found, new = scan_dir (d, currentnames, targetnames,
-                                         dry_run, "texmf")
-            n_scanned = n_scanned + found
-            n_new     = n_new     + new
-        end
-        report_status_stop ("term", "db", "Scanned %d files, %d new.", n_scanned, n_new)
+    if stringis_empty (fontdirs) then
+        return { }
     end
 
-    return n_scanned, n_new
+    local tasks = filter_out_pwd (filesplitpath (fontdirs))
+    report ("info", 3, "db",
+            "Initiating scan of %d directories.", #tasks)
+
+    local files = { }
+    for _, dir in next, tasks do
+        files = tableappend (files, collect_font_filenames_dir (dir, "texmf"))
+    end
+    report ("term", 3, "db", "Collected %d files.", #files)
+    return files
 end
 
---- TODO stuff those paths into some writable table
 --- unit -> string list
 local function get_os_dirs ()
     if os.name == 'macosx' then
@@ -2350,38 +2318,75 @@ end
 
 --[[doc--
 
-    scan_os_fonts() scans the OS fonts through
-      - fontconfig for Unix (reads the fonts.conf file[s] and scans the
-        directories)
-      - a static set of directories for Windows and MacOSX
+    retrieve_namedata -- Scan the list of collected fonts and populate
+    the list of namedata.
 
-    **NB**: If $OSFONTDIR is nonempty, as it appears to be by default
-            on Windows setups, the system fonts will have already been
-            processed while scanning the TEXMF. Thus, this function is
-            never called.
+        · dirname       : name of the directory to scan
+        · currentnames  : current font db object
+        · targetnames   : font db object to fill
+        · dry_run       : don’t touch anything
+
+    Returns the number of fonts that were actually added to the index.
 
 --doc]]--
 
---- dbobj -> dbobj -> bool? -> (int * int)
-local scan_os_fonts = function (currentnames,
-                                targetnames,
-                                dry_run)
+--- string * string list -> dbobj -> dbobj -> bool? -> int
+local retrieve_namedata = function (files, currentnames, targetnames, dry_run)
+
+    local nfiles    = #files
+    local nnew      = 0
+    local max_fonts = luaotfloadconfig.max_fonts or 2^51
+
+    report ("info", 1, "db", "Scanning %d collected font files ...", nfiles)
+
+    local bylocation = { texmf     = { 0, 0 }
+                       , ["local"] = { 0, 0 }
+                       , system    = { 0, 0 }
+                       }
+    report_status_start (2, 4)
+    for i = 1, (nfiles < max_fonts) and nfiles or max_fonts do
+        local fullname, location   = unpack (files[i])
+        local count                = bylocation[location]
+        count[1]                   = count[1] + 1
+        if dry_run == true then
+            local truncated = truncate_string (fullname, 43)
+            report ("log", 2, "db", "Would have been loading %s.", fullname)
+            report_status ("term", "db", "Would have been loading %s", truncated)
+            --- skip the read_font_names part
+        else
+            local truncated = truncate_string (fullname, 32)
+            report ("log", 2, "db", "Loading font %s.", fullname)
+            report_status ("term", "db", "Loading font %s", truncated)
+            local new = read_font_names (fullname, currentnames,
+                                         targetnames, location)
+            if new == true then
+                nnew     = nnew + 1
+                count[2] = count[2] + 1
+            end
+        end
+    end
+    report_status_stop ("term", "db", "Scanned %d files, %d new.", nfiles, nnew)
+    for location, count in next, bylocation do
+        report ("term", 4, "db", "   * %s: %d files, %d new",
+                location, count[1], count[2])
+    end
+    return nnew
+end
+
+--- unit -> string * string list
+local collect_font_filenames_system = function ()
 
     local n_scanned, n_new = 0, 0
-    report ("info", 1, "db", "Scanning OS fonts...")
+    report ("info", 1, "db", "Scanning system fonts...")
     report ("info", 2, "db",
             "Searching in static system directories...")
 
-    report_status_start (2, 4)
-    for _, d in next, get_os_dirs () do
-        local found, new = scan_dir (d, currentnames,
-                                     targetnames, dry_run)
-        n_scanned = n_scanned + found
-        n_new     = n_new     + new
+    local files = { }
+    for _, dir in next, get_os_dirs () do
+        tableappend (files, collect_font_filenames_dir (dir, "system"))
     end
-    report_status_stop ("term", "db", "Scanned %d files, %d new.", n_scanned, n_new)
-
-    return n_scanned, n_new
+    report ("term", 3, "db", "Collected %d files.", #files)
+    return files
 end
 
 --- unit -> bool
@@ -2393,29 +2398,32 @@ end
 
 --[[doc--
 
-    scan_local_fonts() -- Scan font files in $PWD (during a TeX run)
-    and add them to the database.
+    collect_font_filenames_local -- Scan $PWD (during a TeX run)
+    for font files.
 
-    This sets the “local” flag in the subtable “meta” to prevent the
-    merged table from being saved to disk.
-    
+    Side effect: This sets the “local” flag in the subtable “meta” to
+    prevent the merged table from being saved to disk.
+
     TODO the local tree could be cached in $PWD.
 
 --doc]]--
 
-local scan_local_fonts = function (currentnames,
-                                   targetnames,
-                                   dry_run)
-    local n_scanned, n_new  = 0, 0
-    local pwd               = lfscurrentdir ()
-    report ("both", 1, "db", "Scanning fonts in $PWD (%q) ...", pwd)
+--- unit -> string * string list
+local collect_font_filenames_local = function ()
+    local pwd = lfscurrentdir ()
+    report ("both", 1, "db", "Scanning for fonts in $PWD (%q) ...", pwd)
 
-    n_scanned, n_new = scan_dir (pwd, currentnames, targetnames, false, "local")
-    if n_new > 0 then
+    local files  = collect_font_filenames_dir (pwd, "local")
+    local nfiles = #files
+    if nfiles > 0 then
         targetnames.meta["local"] = true --- prevent saving to disk
+        report ("term", 1, "db", "Found %d files.", pwd)
+    else
+        report ("term", 1, "db",
+                "Couldn’t find a thing here. What a waste.", pwd)
     end
-
-    return n_scanned, n_new
+    report ("term", 3, "db", "Collected %d files.", #files)
+    return files
 end
 
 --- dbobj -> dbobj -> int * int
@@ -2912,34 +2920,17 @@ order_design_sizes = function (families)
     return families
 end
 
-local retrieve_namedata = function (currentnames,
-                                    targetnames,
-                                    dry_run,
-                                    n_rawnames,
-                                    n_newnames)
-
-    local rawnames, new = scan_texmf_fonts (currentnames,
-                                            targetnames,
-                                            dry_run)
-
-    n_rawnames    = n_rawnames + rawnames
-    n_newnames    = n_newnames + new
-
-    rawnames, new = scan_os_fonts (currentnames, targetnames, dry_run)
-
-    n_rawnames    = n_rawnames + rawnames
-    n_newnames    = n_newnames + new
-
-    if luaotfloadconfig.scan_local == true then
-        rawnames, new = scan_local_fonts (currentnames, targetnames, dry_run)
-
-        n_rawnames    = n_rawnames + rawnames
-        n_newnames    = n_newnames + new
+--- dbobj -> dbobj -> int -> int -> string * bool list
+local collect_font_filenames = function ()
+    ---
+    local filenames = { }
+    tableappend (filenames, collect_font_filenames_texmf  ())
+    tableappend (filenames, collect_font_filenames_system ())
+    if luaotfloadconfig.scan_local  == true then
+        tableappend (filenames, collect_font_filenames_local  ())
     end
-
-    return n_rawnames, n_newnames
+    return filenames
 end
-
 
 --- dbobj -> stats
 
@@ -3113,7 +3104,6 @@ end
 --- dbobj? -> bool? -> bool? -> dbobj
 update_names = function (currentnames, force, dry_run)
     local targetnames
-    local n_raw, n_new = 0, 0
 
     if luaotfloadconfig.update_live == false then
         report ("info", 2, "db",
@@ -3131,9 +3121,6 @@ update_names = function (currentnames, force, dry_run)
     ]]
     report("both", 1, "db", "Updating the font names database"
                          .. (force and " forcefully." or "."))
-
-    --- pass 1 get raw data: read font files (normal case) or reuse
-    --- information present in index
 
     if luaotfloadconfig.skip_read == true then
         --- the difference to a “dry run” is that we don’t search
@@ -3161,14 +3148,19 @@ update_names = function (currentnames, force, dry_run)
 
         read_blacklist ()
 
-        n_raw, n_new = retrieve_namedata (currentnames,
-                                          targetnames,
-                                          dry_run,
-                                          0,
-                                          0)
+        --- pass 1: Collect the names of all fonts we are going to process.
+        local font_filenames = collect_font_filenames ()
+
+        --- pass 1 get raw data: read font files (normal case) or reuse
+        --- information present in index
+
+        n_new = retrieve_namedata (font_filenames,
+                                   currentnames,
+                                   targetnames,
+                                   dry_run)
         report ("info", 3, "db",
-                "Scanned %d font files; %d new entries.",
-                n_raw, n_new)
+                "Found %d font files; %d new entries.",
+                #font_filenames, n_new)
     end
 
     --- pass 2 (optional): collect some stats about the raw font info
@@ -3454,7 +3446,6 @@ end
 --- export functionality to the namespace “fonts.names”
 -----------------------------------------------------------------------
 
-names.scan_dir                    = scan_dir
 names.set_font_filter             = set_font_filter
 names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
@@ -3468,7 +3459,6 @@ names.read_blacklist              = read_blacklist
 names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath
 names.set_location_precedence     = set_location_precedence
-names.scan_local_fonts            = scan_local_fonts
 
 --- font cache
 names.purge_cache    = purge_cache

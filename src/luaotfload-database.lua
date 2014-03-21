@@ -3151,8 +3151,8 @@ update_names = function (currentnames, force, dry_run)
         --- pass 1: Collect the names of all fonts we are going to process.
         local font_filenames = collect_font_filenames ()
 
-        --- pass 1 get raw data: read font files (normal case) or reuse
-        --- information present in index
+        --- pass 2: read font files (normal case) or reuse information
+        --- present in index
 
         n_new = retrieve_namedata (font_filenames,
                                    currentnames,
@@ -3163,7 +3163,7 @@ update_names = function (currentnames, force, dry_run)
                 #font_filenames, n_new)
     end
 
-    --- pass 2 (optional): collect some stats about the raw font info
+    --- pass 3 (optional): collect some stats about the raw font info
     if luaotfloadconfig.statistics == true then
         targetnames.meta.statistics = collect_statistics
                                             (targetnames.mappings)
@@ -3173,17 +3173,17 @@ update_names = function (currentnames, force, dry_run)
     --- non-texmf entries are redirected there and the mapping
     --- needs to be 100% consistent
 
-    --- pass 3: build filename table
+    --- pass 4: build filename table
     targetnames.files       = generate_filedata (targetnames.mappings)
 
-    --- pass 4: build family lookup table
+    --- pass 5: build family lookup table
     targetnames.families    = collect_families  (targetnames.mappings)
 
-    --- pass 5: arrange style and size info
+    --- pass 6: arrange style and size info
     targetnames.families    = group_modifiers (targetnames.mappings,
                                                targetnames.families)
 
-    --- pass 6: order design size tables
+    --- pass 7: order design size tables
     targetnames.families    = order_design_sizes (targetnames.families)
 
 

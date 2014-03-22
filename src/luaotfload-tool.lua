@@ -725,8 +725,8 @@ set.
 
 local action_sequence = {
     "loglevel",   "help",  "version", "diagnose",
-    "blacklist",  "cache", "flush",   "generate",
-    "list",       "query",
+    "blacklist",  "cache", "flush",   "bisect",
+    "generate",    "list", "query",
 }
 
 local action_pending  = tabletohash(action_sequence, false)
@@ -769,6 +769,61 @@ actions.generate = function (job)
         return true, true
     end
     return false, false
+end
+
+--[[doc--
+
+    bisect_start -- Begin a bisect session. Determines the number of
+    fonts and sets the initial high, low, and pivot values.
+--doc]]--
+
+local bisect_start = function ()
+end
+
+--[[doc--
+
+    bisect_stop -- Terminate bisection session by removing all state info.
+
+--doc]]--
+
+local bisect_stop = function ()
+end
+
+--[[doc--
+
+    bisect_set -- Prepare the next bisection step by setting high, low,
+    and pivot to new values.
+
+--doc]]--
+
+local bisect_set = function (outcome)
+end
+
+--[[doc--
+
+    bisect_status -- Output information about the current bisect session.
+
+--doc]]--
+
+local bisect_status = function ()
+end
+
+local bisect_modes = {
+    start   = bisect_start,
+    good    = function () bisect_set "good" end,
+    bad     = function () bisect_set "bad" end,
+    stop    = bisect_stop,
+    status  = bisect_status,
+}
+
+actions.bisect = function (job)
+    local mode   = job.bisect
+    local runner = bisect_modes[mode]
+    if not runner then
+        report ("info", 0, "cache", "Unknown bisect directive %q.", mode)
+        return false, false
+    end
+    return true, false
 end
 
 actions.flush = function (job)
@@ -1076,6 +1131,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         criterion    = "",
         query        = "",
         log_level    = 0, --- 2 is approx. the old behavior
+        bisect       = nil,
     }
 
     local long_options = {
@@ -1097,6 +1153,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         ["local"]          = "L",
         log                = 1,
         ["max-fonts"]      = 1,
+        ["bisect"]         = 1,
         ["no-reload"]      = "n",
         ["no-strip"]       = 0,
         ["skip-read"]      = "R",
@@ -1211,6 +1268,9 @@ local process_cmdline = function ( ) -- unit -> jobspec
                     luaotfloadconfig.max_fonts = n
                 end
             end
+        elseif v == "bisect" then
+            result.bisect          = optarg[n]
+            actions_pending.bisect = true
         end
     end
 

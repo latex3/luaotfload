@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 03/16/14 11:40:51
+-- merge date  : 03/22/14 15:31:38
 
 do -- begin closure to overcome local limits and interference
 
@@ -2574,9 +2574,11 @@ end
 if not number then number={} end 
 local stripper=patterns.stripzeros
 local function points(n)
+  n=tonumber(n)
   return (not n or n==0) and "0pt" or lpegmatch(stripper,format("%.5fpt",n/65536))
 end
 local function basepoints(n)
+  n=tonumber(n)
   return (not n or n==0) and "0bp" or lpegmatch(stripper,format("%.5fbp",n*(7200/7227)/65536))
 end
 number.points=points
@@ -6569,7 +6571,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.754 
+otf.version=2.755 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 

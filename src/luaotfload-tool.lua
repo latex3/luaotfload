@@ -894,9 +894,42 @@ end
     bisect_set -- Prepare the next bisection step by setting high, low,
     and pivot to new values.
 
+    The “run” directive always picks the segment below the pivot so we
+    can rely on the “outcome parameter” to be referring to that.
+
 --doc]]--
 
 local bisect_set = function (outcome)
+    local status = read_bisect_status ()
+    if not status then
+        return false, false
+    end
+
+    local nsteps        = #status
+    local lo, hi, pivot = unpack (status[nsteps])
+    report ("info", 3, "bisect", "Previous step %d: lo=%d, hi=%d, pivot=%d.",
+            nsteps, lo, hi, pivot)
+
+    if outcome == "bad" then
+        hi    = pivot
+        pivot = mathfloor ((lo + hi) / 2)
+        report ("info", 0, "bisect",
+                "Continuing with the lower segment: lo=%d, hi=%d, pivot=%d.",
+                lo, hi, pivot)
+    elseif outcome == "good" then
+        lo    = pivot
+        pivot = mathfloor ((lo + hi) / 2)
+        report ("info", 0, "bisect",
+                "Continuing with the upper segment: lo=%d, hi=%d, pivot=%d.",
+                lo, hi, pivot)
+    else -- can’t happen
+        report ("info", 0, "bisect", "What the hell?", lo, hi, pivot)
+        return false, false
+    end
+
+    status[nsteps + 1] = { lo, hi, pivot }
+    write_bisect_status (status)
+    return true, false
 end
 
 --[[doc--
@@ -908,7 +941,7 @@ end
 local bisect_status = function ()
     local status = read_bisect_status ()
     if not status then
-        return false
+        return false, false
     end
     local nsteps = #status
     if nsteps > 1 then
@@ -953,8 +986,8 @@ end
 
 local bisect_modes = {
     start   = bisect_start,
-    good    = function () bisect_set "good" end,
-    bad     = function () bisect_set "bad" end,
+    good    = function () return bisect_set "good" end,
+    bad     = function () return bisect_set "bad" end,
     stop    = bisect_stop,
     status  = bisect_status,
     run     = bisect_run,

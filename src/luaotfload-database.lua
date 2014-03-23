@@ -2922,7 +2922,9 @@ end
 
 --- dbobj -> dbobj -> int -> int -> string * bool list
 local collect_font_filenames = function ()
-    ---
+
+    report ("info", 4, "db", "Scanning the filesystem for font files.")
+
     local filenames = { }
     tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
@@ -2930,6 +2932,23 @@ local collect_font_filenames = function ()
         tableappend (filenames, collect_font_filenames_local  ())
     end
     return filenames
+end
+
+--[[doc
+
+    count_font_files -- Return the number of files found by
+    collect_font_filenames. This function is exported primarily
+    for use with luaotfload-tool.lua in bisect mode.
+
+--doc]]--
+
+--- unit -> int
+local count_font_files = function ()
+    report ("info", 4, "db", "Counting font files.")
+    if not p_blacklist then
+        read_blacklist ()
+    end
+    return #collect_font_filenames ()
 end
 
 --- dbobj -> stats
@@ -3459,6 +3478,7 @@ names.read_blacklist              = read_blacklist
 names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath
 names.set_location_precedence     = set_location_precedence
+names.count_font_files            = count_font_files
 
 --- font cache
 names.purge_cache    = purge_cache

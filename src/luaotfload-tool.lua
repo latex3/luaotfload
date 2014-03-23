@@ -891,6 +891,21 @@ end
 
 --[[doc--
 
+    bisect_terminate -- Wrap up a bisect session by printing the
+    offending font and removing the state file.
+
+--doc]]--
+
+local bisect_terminate = function (nsteps, culprit)
+    report ("info", 1, "bisect",
+            "Bisection completed after %d steps.", nsteps)
+    report ("info", 0, "bisect",
+            "Bad file: %s.", names.nth_font_filename (culprit))
+    return bisect_stop ()
+end
+
+--[[doc--
+
     bisect_set -- Prepare the next bisection step by setting high, low,
     and pivot to new values.
 
@@ -911,13 +926,19 @@ local bisect_set = function (outcome)
             nsteps, lo, hi, pivot)
 
     if outcome == "bad" then
-        hi    = pivot
+        hi = pivot
+        if lo >= hi then --- complete
+            return bisect_terminate (nsteps, lo)
+        end
         pivot = mathfloor ((lo + hi) / 2)
         report ("info", 0, "bisect",
                 "Continuing with the lower segment: lo=%d, hi=%d, pivot=%d.",
                 lo, hi, pivot)
     elseif outcome == "good" then
-        lo    = pivot
+        lo = pivot + 1
+        if lo >= hi then --- complete
+            return bisect_terminate (nsteps, lo)
+        end
         pivot = mathfloor ((lo + hi) / 2)
         report ("info", 0, "bisect",
                 "Continuing with the upper segment: lo=%d, hi=%d, pivot=%d.",
@@ -987,7 +1008,7 @@ end
 local bisect_modes = {
     start   = bisect_start,
     good    = function () return bisect_set "good" end,
-    bad     = function () return bisect_set "bad" end,
+    bad     = function () return bisect_set "bad"  end,
     stop    = bisect_stop,
     status  = bisect_status,
     run     = bisect_run,

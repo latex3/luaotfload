@@ -2945,6 +2945,22 @@ local collect_font_filenames = function ()
     return filenames
 end
 
+--[[doc--
+
+    nth_font_file -- Return the filename of the nth font.
+
+--doc]]--
+
+--- int -> string
+local nth_font_filename = function (n)
+    report ("info", 4, "db", "Picking the %d font file.", n)
+    if not p_blacklist then
+        read_blacklist ()
+    end
+    local filenames = collect_font_filenames ()
+    return filenames[n] and filenames[n][1] or "<error>"
+end
+
 --[[doc
 
     count_font_files -- Return the number of files found by
@@ -3490,6 +3506,7 @@ names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath
 names.set_location_precedence     = set_location_precedence
 names.count_font_files            = count_font_files
+names.nth_font_filename           = nth_font_filename
 
 --- font cache
 names.purge_cache    = purge_cache

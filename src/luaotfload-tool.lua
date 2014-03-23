@@ -115,6 +115,7 @@ config.lualibs.load_extended    = true
 
 require "lualibs"
 local iosavedata                = io.savedata
+local lfsisdir                  = lfs.isdir
 local lfsisfile                 = lfs.isfile
 local stringsplit               = string.split
 local tableserialize            = table.serialize
@@ -834,6 +835,27 @@ end
 --doc]]--
 
 local bisect_stop = function ()
+    report ("info", 3, "bisect", "Erasing bisection state at %s.", bisect_status_file)
+    if lfsisfile (bisect_status_file) then
+        local success, msg = os.remove (bisect_status_file)
+        if not success then
+            report ("info", 2, "bisect",
+                    "Failed to erase file %s (%s).",
+                     bisect_status_file, msg)
+        end
+    end
+    if lfsisdir (bisect_status_path) then
+        local success, msg = os.remove (bisect_status_path)
+        if not success then
+            report ("info", 2, "bisect",
+                    "Failed to erase directory %s (%s).",
+                     bisect_status_path, msg)
+        end
+    end
+    if lfsisfile (bisect_status_file) then
+        return false
+    end
+    return true
 end
 
 --[[doc--

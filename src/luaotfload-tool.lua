@@ -906,6 +906,21 @@ end
 
 --[[doc--
 
+    list_remainder -- Show remaining fonts in bisect slice.
+
+--doc]]--
+
+local list_remainder = function (lo, hi)
+    local fonts = names.font_slice (lo, hi)
+    report ("info", 0, "bisect", "%d fonts left.", hi - lo)
+    for i = 1, #fonts do
+        report ("info", 1, "bisect", "   · %2d: %s", lo, fonts[i])
+        lo = lo + 1
+    end
+end
+
+--[[doc--
+
     bisect_set -- Prepare the next bisection step by setting high, low,
     and pivot to new values.
 
@@ -950,6 +965,9 @@ local bisect_set = function (outcome)
 
     status[nsteps + 1] = { lo, hi, pivot }
     write_bisect_status (status)
+    if hi - lo <= 10 then
+        list_remainder (lo, hi)
+    end
     return true, false
 end
 

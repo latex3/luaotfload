@@ -2953,12 +2953,31 @@ end
 
 --- int -> string
 local nth_font_filename = function (n)
-    report ("info", 4, "db", "Picking the %d font file.", n)
+    report ("info", 4, "db", "Picking font file no. %d.", n)
     if not p_blacklist then
         read_blacklist ()
     end
     local filenames = collect_font_filenames ()
     return filenames[n] and filenames[n][1] or "<error>"
+end
+
+--[[doc--
+
+    font_slice -- Return the fonts in the range from lo to hi.
+
+--doc]]--
+
+local font_slice = function (lo, hi)
+    report ("info", 4, "db", "Retrieving font files nos. %d--%d.", lo, hi)
+    if not p_blacklist then
+        read_blacklist ()
+    end
+    local filenames = collect_font_filenames ()
+    local result    = { }
+    for i = lo, hi do
+        result[#result + 1] = filenames[i][1]
+    end
+    return result
 end
 
 --[[doc
@@ -3507,6 +3526,7 @@ names.getfilename                 = resolve_fullpath
 names.set_location_precedence     = set_location_precedence
 names.count_font_files            = count_font_files
 names.nth_font_filename           = nth_font_filename
+names.font_slice                  = font_slice
 
 --- font cache
 names.purge_cache    = purge_cache

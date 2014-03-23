@@ -2920,16 +2920,27 @@ order_design_sizes = function (families)
     return families
 end
 
---- dbobj -> dbobj -> int -> int -> string * bool list
+--[[doc--
+
+    collect_font_filenames -- Scan the three search path categories for
+    font files. This constitutes the first pass of the update mode.
+
+--doc]]--
+
+--- unit -> string * bool list
 local collect_font_filenames = function ()
 
     report ("info", 4, "db", "Scanning the filesystem for font files.")
 
     local filenames = { }
+    local bisect    = luaotfloadconfig.bisect
     tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
     if luaotfloadconfig.scan_local  == true then
         tableappend (filenames, collect_font_filenames_local  ())
+    end
+    if bisect then
+        return { unpack (filenames, bisect[1], bisect[2]) }
     end
     return filenames
 end

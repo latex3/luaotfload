@@ -49,20 +49,22 @@ luaotfload.log                    = luaotfload.log or { }
 
 config                            = config or { }
 config.luaotfload                 = config.luaotfload or { }
-------.luaotfload.resolver        = config.luaotfload.resolver         or "normal"
-config.luaotfload.resolver        = config.luaotfload.resolver         or "cached"
-config.luaotfload.definer         = config.luaotfload.definer          or "patch"
-config.luaotfload.loglevel        = config.luaotfload.loglevel         or 2
-config.luaotfload.color_callback  = config.luaotfload.color_callback   or "pre_linebreak_filter"
-config.luaotfload.prioritize      = config.luaotfload.prioritize       or "sys"
-config.luaotfload.names_dir       = config.luaotfload.names_dir        or "names"
-config.luaotfload.cache_dir       = config.luaotfload.cache_dir        or "fonts"
-config.luaotfload.index_file      = config.luaotfload.index_file       or "luaotfload-names.lua"
-config.luaotfload.formats         = config.luaotfload.formats          or "otf,ttf,ttc,dfont"
-config.luaotfload.scan_local      = config.luaotfload.scan_local == true
+local luaotfloadconfig            = config.luaotfload
+----------------.resolver        = luaotfloadconfig.resolver         or "normal"
+luaotfloadconfig.resolver        = luaotfloadconfig.resolver         or "cached"
+luaotfloadconfig.definer         = luaotfloadconfig.definer          or "patch"
+luaotfloadconfig.bisect          = false --- useless when running TeX
+luaotfloadconfig.loglevel        = luaotfloadconfig.loglevel         or 2
+luaotfloadconfig.color_callback  = luaotfloadconfig.color_callback   or "pre_linebreak_filter"
+luaotfloadconfig.prioritize      = luaotfloadconfig.prioritize       or "sys"
+luaotfloadconfig.names_dir       = luaotfloadconfig.names_dir        or "names"
+luaotfloadconfig.cache_dir       = luaotfloadconfig.cache_dir        or "fonts"
+luaotfloadconfig.index_file      = luaotfloadconfig.index_file       or "luaotfload-names.lua"
+luaotfloadconfig.formats         = luaotfloadconfig.formats          or "otf,ttf,ttc,dfont"
+luaotfloadconfig.scan_local      = luaotfloadconfig.scan_local == true
 
-if config.luaotfload.strip == nil then
-    config.luaotfload.strip = true
+if luaotfloadconfig.strip == nil then
+    luaotfloadconfig.strip = true
 end
 
 luaotfload.module = {
@@ -151,7 +153,7 @@ loadmodule "log.lua"        --- messages; used to be part of -override
 local log             = luaotfload.log
 local report          = log.report
 
-log.set_loglevel(config.luaotfload.loglevel)
+log.set_loglevel(luaotfloadconfig.loglevel)
 
 --[[doc--
 
@@ -689,7 +691,7 @@ reset_callback "define_font"
 
 --doc]]--
 
-local font_definer = config.luaotfload.definer
+local font_definer = luaotfloadconfig.definer
 
 if font_definer == "generic"  then
   add_to_callback("define_font",

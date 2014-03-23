@@ -96,6 +96,7 @@ config                        = config or { }
 local config                  = config
 local luaotfloadconfig        = config.luaotfload or { }
 config.luaotfload             = luaotfloadconfig
+luaotfloadconfig.bisect       = false
 luaotfloadconfig.version      = luaotfloadconfig.version   or version
 luaotfloadconfig.names_dir    = luaotfloadconfig.names_dir or "names"
 luaotfloadconfig.cache_dir    = luaotfloadconfig.cache_dir or "fonts"
@@ -855,7 +856,7 @@ local bisect_start = function ()
     if write_bisect_status (data) then
         return true
     end
-    return false
+    return false, false
 end
 
 --[[doc--
@@ -885,7 +886,7 @@ local bisect_stop = function ()
     if lfsisfile (bisect_status_file) then
         return false
     end
-    return true
+    return true, false
 end
 
 --[[doc--
@@ -920,7 +921,34 @@ local bisect_status = function ()
     local current = status[nsteps]
     report ("info", 0, "bisect", "Step %d: lo=%d, hi=%d, pivot=%d.",
             nsteps, unpack (current))
-    return true
+    return true, false
+end
+
+--[[doc--
+
+    bisect_run -- Run Luaotfload utilizing the current bisection state.
+    This should be combined with the --update mode, possibly with the
+    --force option.
+
+    Luaotfload always tests the segment below the pivot first.
+
+--doc]]--
+
+local bisect_run = function ()
+    local status = read_bisect_status ()
+    if not status then
+        return false
+    end
+    local nsteps        = #status
+    local currentstep   = nsteps + 1
+    local current       = status[nsteps]
+    local lo, hi, pivot = unpack (current)
+    report ("info", 3, "bisect", "Previous step %d: lo=%d, hi=%d, pivot=%d.",
+            nsteps, lo, hi, pivot)
+    report ("info", 1, "bisect", "Step %d: Testing fonts from %d to %d.",
+            currentstep, lo, pivot)
+    luaotfloadconfig.bisect = { lo, pivot }
+    return true, true
 end
 
 local bisect_modes = {
@@ -929,6 +957,7 @@ local bisect_modes = {
     bad     = function () bisect_set "bad" end,
     stop    = bisect_stop,
     status  = bisect_status,
+    run     = bisect_run,
 }
 
 actions.bisect = function (job)
@@ -938,10 +967,7 @@ actions.bisect = function (job)
         report ("info", 0, "bisect", "Unknown directive %q.", mode)
         return false, false
     end
-    if runner (job) then
-        return true, false
-    end
-    return false, false
+    return runner (job)
 end
 
 actions.flush = function (job)

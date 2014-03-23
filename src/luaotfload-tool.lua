@@ -793,6 +793,13 @@ local bisect_status_fmt  = [[
 --- vim:ft=lua:ts=8:et:sw=2
 ]]
 
+--[[doc--
+
+    write_bisect_status -- Write the history of the current bisection to disk.
+
+--doc]]--
+
+--- state list -> bool
 local write_bisect_status = function (data)
     local payload = tableserialize (data, true)
     local status  = stringformat (bisect_status_fmt,
@@ -806,6 +813,29 @@ local write_bisect_status = function (data)
     report ("info", 0, "bisect",
             "Failed to write bisection state to %s.", bisect_status_file)
     return false
+end
+
+--[[doc--
+
+    read_bisect_status -- Read the bisect log from disk.
+
+--doc]]--
+
+--- unit -> state list
+local read_bisect_status = function ()
+    report ("info", 4, "bisect", "Testing for status file: %q.", bisect_status_file)
+    if not lfsisfile (bisect_status_file) then
+        report ("info", 2, "bisect", "No such file: %q.", bisect_status_file)
+        report ("info", 0, "bisect", "Not in bisect mode.")
+        return false
+    end
+    report ("info", 4, "bisect", "Reading status file: %q.", bisect_status_file)
+    local success, status = pcall (dofile, bisect_status_file)
+    if not success then
+        report ("info", 0, "bisect", "Could not read status file.")
+        return false
+    end
+    return status
 end
 
 --[[doc--
@@ -875,24 +905,21 @@ end
 --doc]]--
 
 local bisect_status = function ()
-    report ("info", 4, "bisect", "Testing for status file: %q.", bisect_status_file)
-    if not lfsisfile (bisect_status_file) then
-        report ("info", 2, "bisect", "No such file: %q.", bisect_status_file)
-        report ("info", 0, "bisect", "Not in bisect mode.")
-        return true
-    end
-    report ("info", 4, "bisect", "Reading status file: %q.", bisect_status_file)
-    local status = pcall (dofile, bisect_status_file)
+    local status = read_bisect_status ()
     if not status then
-        report ("info", 0, "bisect", "Could not read status file.")
         return false
     end
-    report ("info", 0, "bisect", "Bisecting through %d font files.", #status)
-    for i = #status, 1, -1 do
-        local step = status[i]
-        report ("info", 0, "bisect", "Step %d: lo=%d, hi=%d, pivot=%d.",
-                i, unpack (step))
+    local nsteps = #status
+    if nsteps > 1 then
+        for i = nsteps - 1, 1, -1 do
+            local step = status[i]
+            report ("info", 2, "bisect", "Step %d: lo=%d, hi=%d, pivot=%d.",
+                    i, unpack (step))
+        end
     end
+    local current = status[nsteps]
+    report ("info", 0, "bisect", "Step %d: lo=%d, hi=%d, pivot=%d.",
+            nsteps, unpack (current))
     return true
 end
 

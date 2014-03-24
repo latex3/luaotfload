@@ -847,6 +847,14 @@ end
 --doc]]--
 
 local bisect_start = function ()
+    if lfsisfile (bisect_status_file) then
+        report ("info", 0, "bisect",
+                "Bisect session in progress.",
+                bisect_status_file)
+        report ("info", 0, "bisect",
+                "Use --bisect=stop to erase it before starting over.")
+        return false, false
+    end
     report ("info", 2, "bisect",
             "Starting bisection of font database %q.", bisect_status_file)
     local n     = names.count_font_files ()
@@ -854,7 +862,7 @@ local bisect_start = function ()
     local data  = { { 1, n, pivot } }
     report ("info", 0, "bisect", "Initializing pivot to %d.", pivot)
     if write_bisect_status (data) then
-        return true
+        return true, false
     end
     return false, false
 end
@@ -884,7 +892,7 @@ local bisect_stop = function ()
         end
     end
     if lfsisfile (bisect_status_file) then
-        return false
+        return false, false
     end
     return true, false
 end
@@ -901,7 +909,9 @@ local bisect_terminate = function (nsteps, culprit)
             "Bisection completed after %d steps.", nsteps)
     report ("info", 0, "bisect",
             "Bad file: %s.", names.nth_font_filename (culprit))
-    return bisect_stop ()
+    report ("info", 0, "bisect",
+            "Run with --bisect=stop to finish bisection.")
+    return true, false
 end
 
 --[[doc--
@@ -912,7 +922,7 @@ end
 
 local list_remainder = function (lo, hi)
     local fonts = names.font_slice (lo, hi)
-    report ("info", 0, "bisect", "%d fonts left.", hi - lo)
+    report ("info", 0, "bisect", "%d fonts left.", hi - lo + 1)
     for i = 1, #fonts do
         report ("info", 1, "bisect", "   · %2d: %s", lo, fonts[i])
         lo = lo + 1
@@ -936,13 +946,26 @@ local bisect_set = function (outcome)
     end
 
     local nsteps        = #status
-    local lo, hi, pivot = unpack (status[nsteps])
+    local previous      = status[nsteps]
+    if previous == true then
+        --- Bisection already completed; we exit early through
+        --- bisect_terminate() to avoid further writes to the
+        --- state files that mess up step counting.
+        nsteps = nsteps - 1
+        return bisect_terminate (nsteps, status[nsteps][1])
+    end
+
+    local lo, hi, pivot = unpack (previous)
+
     report ("info", 3, "bisect", "Previous step %d: lo=%d, hi=%d, pivot=%d.",
             nsteps, lo, hi, pivot)
 
     if outcome == "bad" then
         hi = pivot
         if lo >= hi then --- complete
+            status[nsteps + 1] = { lo, lo, lo }
+            status[nsteps + 1] = true
+            write_bisect_status (status)
             return bisect_terminate (nsteps, lo)
         end
         pivot = mathfloor ((lo + hi) / 2)
@@ -952,6 +975,9 @@ local bisect_set = function (outcome)
     elseif outcome == "good" then
         lo = pivot + 1
         if lo >= hi then --- complete
+            status[nsteps + 1] = { lo, lo, lo }
+            write_bisect_status (status)
+            status[nsteps + 1] = true
             return bisect_terminate (nsteps, lo)
         end
         pivot = mathfloor ((lo + hi) / 2)
@@ -1009,7 +1035,7 @@ end
 local bisect_run = function ()
     local status = read_bisect_status ()
     if not status then
-        return false
+        return false, false
     end
     local nsteps        = #status
     local currentstep   = nsteps + 1

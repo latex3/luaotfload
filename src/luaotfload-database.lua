@@ -2335,7 +2335,6 @@ local retrieve_namedata = function (files, currentnames, targetnames, dry_run)
 
     local nfiles    = #files
     local nnew      = 0
-    local max_fonts = luaotfloadconfig.max_fonts or 2^51
 
     report ("info", 1, "db", "Scanning %d collected font files ...", nfiles)
 
@@ -2344,7 +2343,7 @@ local retrieve_namedata = function (files, currentnames, targetnames, dry_run)
                        , system    = { 0, 0 }
                        }
     report_status_start (2, 4)
-    for i = 1, (nfiles < max_fonts) and nfiles or max_fonts do
+    for i = 1, nfiles do
         local fullname, location   = unpack (files[i])
         local count                = bylocation[location]
         count[1]                   = count[1] + 1
@@ -2934,11 +2933,18 @@ local collect_font_filenames = function ()
 
     local filenames = { }
     local bisect    = luaotfloadconfig.bisect
+    local max_fonts = luaotfloadconfig.max_fonts or 2^51 --- XXX revisit for lua 5.3 wrt integers
+
     tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
     if luaotfloadconfig.scan_local  == true then
         tableappend (filenames, collect_font_filenames_local  ())
     end
+    --- Now drop everything above max_fonts.
+    if max_fonts < #filenames then
+        filenames = { unpack (filenames, 1, max_fonts) }
+    end
+    --- And choose the requested slice if in bisect mode.
     if bisect then
         return { unpack (filenames, bisect[1], bisect[2]) }
     end

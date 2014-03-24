@@ -2335,7 +2335,6 @@ local retrieve_namedata = function (files, currentnames, targetnames, dry_run)
 
     local nfiles    = #files
     local nnew      = 0
-    local max_fonts = luaotfloadconfig.max_fonts or 2^51
 
     report ("info", 1, "db", "Scanning %d collected font files ...", nfiles)
 
@@ -2344,7 +2343,7 @@ local retrieve_namedata = function (files, currentnames, targetnames, dry_run)
                        , system    = { 0, 0 }
                        }
     report_status_start (2, 4)
-    for i = 1, (nfiles < max_fonts) and nfiles or max_fonts do
+    for i = 1, nfiles do
         local fullname, location   = unpack (files[i])
         local count                = bylocation[location]
         count[1]                   = count[1] + 1
@@ -2920,16 +2919,88 @@ order_design_sizes = function (families)
     return families
 end
 
---- dbobj -> dbobj -> int -> int -> string * bool list
+--[[doc--
+
+    collect_font_filenames -- Scan the three search path categories for
+    font files. This constitutes the first pass of the update mode.
+
+--doc]]--
+
+--- unit -> string * bool list
 local collect_font_filenames = function ()
-    ---
+
+    report ("info", 4, "db", "Scanning the filesystem for font files.")
+
     local filenames = { }
+    local bisect    = luaotfloadconfig.bisect
+    local max_fonts = luaotfloadconfig.max_fonts or 2^51 --- XXX revisit for lua 5.3 wrt integers
+
     tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
     if luaotfloadconfig.scan_local  == true then
         tableappend (filenames, collect_font_filenames_local  ())
     end
+    --- Now drop everything above max_fonts.
+    if max_fonts < #filenames then
+        filenames = { unpack (filenames, 1, max_fonts) }
+    end
+    --- And choose the requested slice if in bisect mode.
+    if bisect then
+        return { unpack (filenames, bisect[1], bisect[2]) }
+    end
     return filenames
+end
+
+--[[doc--
+
+    nth_font_file -- Return the filename of the nth font.
+
+--doc]]--
+
+--- int -> string
+local nth_font_filename = function (n)
+    report ("info", 4, "db", "Picking font file no. %d.", n)
+    if not p_blacklist then
+        read_blacklist ()
+    end
+    local filenames = collect_font_filenames ()
+    return filenames[n] and filenames[n][1] or "<error>"
+end
+
+--[[doc--
+
+    font_slice -- Return the fonts in the range from lo to hi.
+
+--doc]]--
+
+local font_slice = function (lo, hi)
+    report ("info", 4, "db", "Retrieving font files nos. %d--%d.", lo, hi)
+    if not p_blacklist then
+        read_blacklist ()
+    end
+    local filenames = collect_font_filenames ()
+    local result    = { }
+    for i = lo, hi do
+        result[#result + 1] = filenames[i][1]
+    end
+    return result
+end
+
+--[[doc
+
+    count_font_files -- Return the number of files found by
+    collect_font_filenames. This function is exported primarily
+    for use with luaotfload-tool.lua in bisect mode.
+
+--doc]]--
+
+--- unit -> int
+local count_font_files = function ()
+    report ("info", 4, "db", "Counting font files.")
+    if not p_blacklist then
+        read_blacklist ()
+    end
+    return #collect_font_filenames ()
 end
 
 --- dbobj -> stats
@@ -3459,6 +3530,9 @@ names.read_blacklist              = read_blacklist
 names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath
 names.set_location_precedence     = set_location_precedence
+names.count_font_files            = count_font_files
+names.nth_font_filename           = nth_font_filename
+names.font_slice                  = font_slice
 
 --- font cache
 names.purge_cache    = purge_cache

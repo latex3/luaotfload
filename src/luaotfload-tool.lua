@@ -964,7 +964,7 @@ local bisect_set = function (outcome)
         hi = pivot
         if lo >= hi then --- complete
             status[nsteps + 1] = { lo, lo, lo }
-            status[nsteps + 1] = true
+            status[nsteps + 2] = true
             write_bisect_status (status)
             return bisect_terminate (nsteps, lo)
         end
@@ -977,7 +977,7 @@ local bisect_set = function (outcome)
         if lo >= hi then --- complete
             status[nsteps + 1] = { lo, lo, lo }
             write_bisect_status (status)
-            status[nsteps + 1] = true
+            status[nsteps + 2] = true
             return bisect_terminate (nsteps, lo)
         end
         pivot = mathfloor ((lo + hi) / 2)
@@ -1040,6 +1040,9 @@ local bisect_run = function ()
     local nsteps        = #status
     local currentstep   = nsteps + 1
     local current       = status[nsteps]
+    if current == true then -- final step
+        current = status[nsteps - 1]
+    end
     local lo, hi, pivot = unpack (current)
     report ("info", 3, "bisect", "Previous step %d: lo=%d, hi=%d, pivot=%d.",
             nsteps, lo, hi, pivot)

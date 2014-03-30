@@ -6,16 +6,16 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:      2014-01-02
-:Copyright: GPL v2.0
-:Version:   2.5
-:Manual section: 1
-:Manual group: text processing
+:Date:                  2014-03-30
+:Copyright:             GPL v2.0
+:Version:               2.5
+:Manual section:        1
+:Manual group:          text processing
 
 SYNOPSIS
 =======================================================================
 
-**luaotfload-tool** [ -bDfFiIlnpquvVhw ]
+**luaotfload-tool** [ -bcDfFiIlLnpqRSuvVhw ]
 
 **luaotfload-tool** --update [ --force ] [ --quiet ] [ --verbose ]
                              [ --prefer-texmf ] [ --dry-run ]
@@ -31,6 +31,8 @@ SYNOPSIS
 **luaotfload-tool** --cache=DIRECTIVE
 
 **luaotfload-tool** --list=CRITERION[:VALUE] [ --fields=F1,F2,...,Fn ]
+
+**luaotfload-tool** --bisect=DIRECTIVE
 
 **luaotfload-tool** --help
 
@@ -186,6 +188,58 @@ font and lookup caches
                         2) ``erase`` -> delete Lua and Luc files from
                            cache;
                         3) ``show``  -> print stats.
+
+bisection
+-----------------------------------------------------------------------
+--bisect=DIRECTIVE      Bisection of the font database.
+                        This mode is intended as assistance in
+                        debugging the Luatex engine, especially when
+                        tracking memleaks or buggy fonts.
+
+                        *DIRECTIVE* can be one of the following:
+
+                        1) ``run`` -> Make ``luaotfload-tool`` respect
+                           the bisection progress when running.
+                           Combined with ``--update`` and possibly
+                           ``--force`` this will only process the files
+                           from the start up until the pivot and ignore
+                           the rest.
+                        2) ``start`` -> Start bisection: create a
+                           bisection state file and initialize the low,
+                           high, and pivot indices.
+                        3) ``stop`` -> Terminate the current bisection
+                           session by deleting the state file.
+                        4) ``good`` | ``bad`` -> Mark the section
+                           processed last as “good” or “bad”,
+                           respectively. The next bisection step will
+                           continue with the bad section.
+                        5) ``status`` -> Print status information about
+                           the current bisection session. Hint: Use
+                           with higher verbosity settings for more
+                           output.
+
+                        A bisection session is initiated by issuing the
+                        ``start`` directive. This sets the pivot to the
+                        middle of the list of available font files.
+                        Now run *luaotfload-tool* with the ``--update``
+                        flag set as well as ``--bisect=run``: only the
+                        fonts up to the pivot will be considered. If
+                        that task exhibited the issue you are tracking,
+                        then tell Luaotfload using ``--bisect=bad``.
+                        The next step of ``--bisect=run`` will continue
+                        bisection with the part of the files below the
+                        pivot.
+                        Likewise, issue ``--bisect=good`` in order to
+                        continue with the fonts above the pivot,
+                        assuming the tested part of the list did not
+                        trigger the bug.
+
+                        Once the culprit font is tracked down, ``good``
+                        or ``bad`` will have no effect anymore. ``run``
+                        will always end up processing the single font
+                        file that was left.
+                        Use ``--bisect=stop`` to clear the bisection
+                        state.
 
 miscellaneous
 -----------------------------------------------------------------------

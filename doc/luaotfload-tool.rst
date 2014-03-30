@@ -21,7 +21,7 @@ SYNOPSIS
                              [ --prefer-texmf ] [ --dry-run ]
                              [ --formats=[+|-]EXTENSIONS ]
                              [ --no-compress ] [ --no-strip ]
-                             [ --local ]
+                             [ --local ] [ --max-fonts=N ]
 
 **luaotfload-tool** --find=FONTNAME [ --fuzzy ] [ --info ] [ --inspect ]
                                     [ --no-reload ]
@@ -69,10 +69,6 @@ update mode
                         with every invocation of ``luaotfload-tool``.
 --no-reload, -n         Suppress auto-updates to the database (e.g.
                         when ``--find`` is passed an unknown name).
---no-strip              Do not strip redundant information after
-                        building the database. Warning: this will
-                        inflate the index to about two to three times
-                        the normal size.
 --no-compress, -c       Do not filter the plain text version of the
                         font index through gzip. Useful for debugging
                         if your editor is built without zlib.
@@ -80,8 +76,6 @@ update mode
 --prefer-texmf, -p      Organize the file name database in a way so
                         that it prefer fonts in the *TEXMF* tree over
                         system fonts if they are installed in both.
---max-fonts=N           Process at most *N* font files, including fonts
-                        already indexed in the count.
 --formats=EXTENSIONS    Extensions of the font files to index.
                         Where *EXTENSIONS* is a comma-separated list of
                         supported file extensions (otf, ttf, ttc,
@@ -100,9 +94,6 @@ update mode
                            standard TeX Live installation this will
                            grow the database considerably and slow down
                            font indexing.
-
---dry-run, -D           Don’t load fonts, scan directories only.
-                        (For debugging file system related issues.)
 
 query mode
 -----------------------------------------------------------------------
@@ -127,7 +118,6 @@ query mode
                         library (assumes ``-I``). Automatically enabled
                         if the verbosity level exceeds 2.
 
---show-blacklist, -b    Show blacklisted files (not directories).
 --list=CRITERION        Show entries, where *CRITERION* is one of the
                         following:
 
@@ -189,8 +179,18 @@ font and lookup caches
                            cache;
                         3) ``show``  -> print stats.
 
-bisection
+debugging methods
 -----------------------------------------------------------------------
+--show-blacklist, -b    Show blacklisted files (not directories).
+--dry-run, -D           Don’t load fonts when updating the database;
+                        scan directories only.
+                        (For debugging file system related issues.)
+--no-strip              Do not strip redundant information after
+                        building the database. Warning: this will
+                        inflate the index to about two to three times
+                        the normal size.
+--max-fonts=N           Process at most *N* font files, including fonts
+                        already indexed in the count.
 --bisect=DIRECTIVE      Bisection of the font database.
                         This mode is intended as assistance in
                         debugging the Luatex engine, especially when

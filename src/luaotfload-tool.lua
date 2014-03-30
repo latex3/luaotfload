@@ -222,6 +222,10 @@ Usage: %s [OPTIONS...]
   --fields=<f1>,<f2>,…,<fn>    which fields <f> to print with --list
   -b --show-blacklist          show blacklisted files
 
+  --bisect=<directive>         control database bisection: valid
+                               directives are "start", "stop", "run", "status",
+                               "good", "bad"
+
 The font database will be saved to
    %s
    %s
@@ -249,6 +253,8 @@ Usage: luaotfload-tool [--help] [--version] [--verbose=<lvl>]
                        [--list=<criterion>] [--fields=<field list>]
                        [--cache=<directive>] [--flush-lookups]
                        [--show-blacklist] [--diagnose=<procedure>]
+                       [--no-compress] [--no-strip] [--local]
+                       [--max-fonts=<n>] [--bisect=<directive>]
 
 Enter 'luaotfload-tool --help' for a larger list of options.
 ]]

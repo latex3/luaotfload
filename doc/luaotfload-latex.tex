@@ -208,12 +208,10 @@
 \usepackage {listings}
 \lstset {
   basicstyle=\ttfamily,
-  escapechar=Ö,
 }
 
-\def \inlinecode #1{%
-  \lstinline {#1}%
-}
+%\let \inlinecode \lstinline
+\protected \def \inlinecode {\lstinline}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% codelistings; this sucks hard since we lack access to buffers

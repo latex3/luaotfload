@@ -757,12 +757,15 @@ Currently (2014) there are three of them:
           Applies legacy \TEX ligatures:
 
           \unless \ifcontextmkiv
+            %% Using braced arg syntax with inline code appears to be
+            %% impossible within Latex tables -- just ignore the weird
+            %% exclamation points below.
             \begintabulate [rlrl]
-              \beginrow ``  \newcell  \inlinecode {``}  \newcell  ''  \newcell  \inlinecode {''}  \endrow
-              \beginrow `   \newcell  \inlinecode {`}   \newcell  '   \newcell  \inlinecode {'}   \endrow
-              \beginrow "   \newcell  \inlinecode {"}   \newcell  --  \newcell  \inlinecode {--}  \endrow
-              \beginrow --- \newcell  \inlinecode {---} \newcell  !`  \newcell  \inlinecode {!`}  \endrow
-              \beginrow ?`  \newcell  \inlinecode {?`}  \newcell      \newcell                    \endrow
+              \beginrow ``  \newcell  {\inlinecode !``! } \newcell  ''  \newcell  {\inlinecode !''!} \endrow
+              \beginrow `   \newcell  {\inlinecode !`!  } \newcell  '   \newcell  {\inlinecode !'! } \endrow
+              \beginrow "   \newcell  {\inlinecode !"!  } \newcell  --  \newcell  {\inlinecode !--!} \endrow
+              \beginrow --- \newcell  {\inlinecode !---!} \newcell  !`  \newcell  {\inlinecode ?!`?} \endrow
+              \beginrow ?`  \newcell  {\inlinecode !?`! } \newcell      \newcell                     \endrow
             \endtabulate
           \else
             %% XXX find a way to wrap these in the tabulate environment
@@ -911,7 +914,7 @@ directories.
       \begincentered
         \begintabulate [lp{.5\textwidth}]
           \beginrow
-            Windows   \newcell \inlinecode {\% WINDIR\%\\ Fonts}
+            Windows   \newcell \inlinecode !\% WINDIR\%\\ Fonts!
           \endrow
           \beginrow
             Linux     \newcell \fileent{/usr/local/etc/fonts/fonts.conf} and\hfill\break

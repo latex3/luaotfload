@@ -754,7 +754,14 @@ Currently (2014) there are three of them:
   \endaltitem
 
   \beginaltitem {tlig}
-          Applies legacy \TEX ligatures:
+          Applies legacy \TEX ligatures\footnote{%
+            These contain the feature set \inlinecode {trep} of earlier
+            versions of \identifier{luaotfload}.
+
+            Note to \XETEX users: this is the equivalent of the
+            assignment \inlinecode {mapping=text-tex} using \XETEX's input
+            remapping feature.
+          }:
 
           \unless \ifcontextmkiv
             %% Using braced arg syntax with inline code appears to be
@@ -781,15 +788,6 @@ Currently (2014) there are three of them:
               \stopframed
             \stopframed
           \fi
-
-          \footnote{%
-            These contain the feature set \inlinecode {trep} of earlier
-            versions of \identifier{luaotfload}.
-
-            Note to \XETEX users: this is the equivalent of the
-            assignment \inlinecode {mapping=text-tex} using \XETEX's input
-            remapping feature.
-          }
   \endaltitem
 
   \beginaltitem {itlc}

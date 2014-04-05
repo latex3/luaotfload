@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 03/25/14 02:17:04
+-- merge date  : 04/04/14 00:08:59
 
 do -- begin closure to overcome local limits and interference
 
@@ -3394,6 +3394,17 @@ function caches.loaddata(paths,name)
   for i=1,#paths do
     local data=false
     local luaname,lucname=makefullname(paths[i],name)
+    if lucname and not lfs.isfile(lucname) and type(caches.compile)=="function" then
+      texio.write(string.format("(compiling luc: %s)",lucname))
+      data=loadfile(luaname)
+      if data then
+        data=data()
+      end
+      if data then
+        caches.compile(data,luaname,lucname)
+        return data
+      end
+    end
     if lucname and lfs.isfile(lucname) then 
       texio.write(string.format("(load luc: %s)",lucname))
       data=loadfile(lucname)
@@ -5764,7 +5775,6 @@ unify=function(data,filename)
         if unicode then
           krn[unicode]=kern
         else
-          print(unicode,name)
         end
       end
       description.kerns=krn

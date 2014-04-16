@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/04/14 00:08:59
+-- merge date  : 04/15/14 09:51:32
 
 do -- begin closure to overcome local limits and interference
 
@@ -3628,9 +3628,17 @@ local free_node=node.free
 local remove_node=node.remove
 local new_node=node.new
 local traverse_id=node.traverse_id
-local math_code=nodecodes.math
 nodes.handlers.protectglyphs=node.protect_glyphs
 nodes.handlers.unprotectglyphs=node.unprotect_glyphs
+local math_code=nodecodes.math
+local end_of_math=node.end_of_math
+function node.end_of_math(n)
+  if n.id==math_code and n.subtype==1 then
+    return n
+  else
+    return end_of_math(n)
+  end
+end
 function nodes.remove(head,current,free_too)
   local t=current
   head,current=remove_node(head,current)
@@ -3924,14 +3932,15 @@ constructors.sharefonts=false
 constructors.nofsharedfonts=0
 local sharednames={}
 function constructors.trytosharefont(target,tfmdata)
-  if constructors.sharefonts then
+  if constructors.sharefonts then 
     local characters=target.characters
     local n=1
     local t={ target.psname }
     local u=sortedkeys(characters)
     for i=1,#u do
+      local k=u[i]
       n=n+1;t[n]=k
-      n=n+1;t[n]=characters[u[i]].index or k
+      n=n+1;t[n]=characters[k].index or k
     end
     local h=md5.HEX(concat(t," "))
     local s=sharednames[h]

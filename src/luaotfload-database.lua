@@ -2789,7 +2789,7 @@ end
 
 --[[doc--
 
-    add_bold_spectrum -- For not-quite-bold faces, determine whether
+    group_modifiers -- For not-quite-bold faces, determine whether
     they can fill in for a missing bold face slot in a matching family.
 
     Some families like Lucida do not contain real bold / bold italic

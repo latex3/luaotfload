@@ -39,7 +39,7 @@ local io                = io
 local ioopen            = io.open
 
 local log               = luaotfload.log
-local report            = log.report
+local logreport         = log.report
 
 local string            = string
 local stringsub         = string.sub
@@ -182,7 +182,7 @@ local p_cheapxml          = header * root
 local fonts_conf_scanner = function (path)
   local fh = ioopen(path, "r")
   if not fh then
-    report("both", 3, "db", "Cannot open fontconfig file %s.", path)
+    logreport("both", 3, "db", "Cannot open fontconfig file %s.", path)
     return
   end
   local raw = fh:read"*all"
@@ -190,7 +190,7 @@ local fonts_conf_scanner = function (path)
 
   local confdata = lpegmatch(p_cheapxml, raw)
   if not confdata then
-    report("both", 3, "db", "Cannot scan fontconfig file %s.", path)
+    logreport("both", 3, "db", "Cannot scan fontconfig file %s.", path)
     return
   end
   return confdata
@@ -454,7 +454,7 @@ end
 --doc]]--
 
 local handle_invalid_option = function (opt)
-    report("log", 0, "load", "font option %q unknown.", opt)
+    logreport("log", 0, "load", "font option %q unknown.", opt)
     return "", false
 end
 
@@ -468,12 +468,12 @@ end
 
 local check_garbage = function (_,i, garbage)
     if stringfind(garbage, "/") then
-        report("log", 0, "load",  --- ffs use path!
-            "warning: path in file: lookups is deprecated; ")
-        report("log", 0, "load", "use bracket syntax instead!")
-        report("log", 0, "load",
-            "position: %d; full match: %q",
-            i, garbage)
+        logreport("log", 0, "load",  --- ffs use path!
+                  "warning: path in file: lookups is deprecated; ")
+        logreport("log", 0, "load", "use bracket syntax instead!")
+        logreport("log", 0, "load",
+                  "position: %d; full match: %q",
+                  i, garbage)
         return true
     end
     return false

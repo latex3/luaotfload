@@ -129,3 +129,12 @@
 }
 
 
+{
+   kpathsea-garbage-16
+   Memcheck:Leak
+   match-leak-kinds: all
+   ...
+   fun:kpse_set_program_name
+}
+
+

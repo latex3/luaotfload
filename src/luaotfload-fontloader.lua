@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 03/25/14 02:17:04
+-- merge date  : 04/15/14 09:51:32
 
 do -- begin closure to overcome local limits and interference
 
@@ -3394,6 +3394,17 @@ function caches.loaddata(paths,name)
   for i=1,#paths do
     local data=false
     local luaname,lucname=makefullname(paths[i],name)
+    if lucname and not lfs.isfile(lucname) and type(caches.compile)=="function" then
+      texio.write(string.format("(compiling luc: %s)",lucname))
+      data=loadfile(luaname)
+      if data then
+        data=data()
+      end
+      if data then
+        caches.compile(data,luaname,lucname)
+        return data
+      end
+    end
     if lucname and lfs.isfile(lucname) then 
       texio.write(string.format("(load luc: %s)",lucname))
       data=loadfile(lucname)
@@ -3617,9 +3628,17 @@ local free_node=node.free
 local remove_node=node.remove
 local new_node=node.new
 local traverse_id=node.traverse_id
-local math_code=nodecodes.math
 nodes.handlers.protectglyphs=node.protect_glyphs
 nodes.handlers.unprotectglyphs=node.unprotect_glyphs
+local math_code=nodecodes.math
+local end_of_math=node.end_of_math
+function node.end_of_math(n)
+  if n.id==math_code and n.subtype==1 then
+    return n
+  else
+    return end_of_math(n)
+  end
+end
 function nodes.remove(head,current,free_too)
   local t=current
   head,current=remove_node(head,current)
@@ -3913,14 +3932,15 @@ constructors.sharefonts=false
 constructors.nofsharedfonts=0
 local sharednames={}
 function constructors.trytosharefont(target,tfmdata)
-  if constructors.sharefonts then
+  if constructors.sharefonts then 
     local characters=target.characters
     local n=1
     local t={ target.psname }
     local u=sortedkeys(characters)
     for i=1,#u do
+      local k=u[i]
       n=n+1;t[n]=k
-      n=n+1;t[n]=characters[u[i]].index or k
+      n=n+1;t[n]=characters[k].index or k
     end
     local h=md5.HEX(concat(t," "))
     local s=sharednames[h]
@@ -5764,7 +5784,6 @@ unify=function(data,filename)
         if unicode then
           krn[unicode]=kern
         else
-          print(unicode,name)
         end
       end
       description.kerns=krn

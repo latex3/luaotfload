@@ -16,6 +16,7 @@ Change History
     * Move logging routines from luaotfload-override in to luaotfload-log.
     * Scan local font files (``--local`` flag to luaotfload-tool, flag
       ``scan_local`` during TeX run).
+    * Add bisection mode (``--bisect``) to luaotfload-tool.
 
 2013/12/31, luaotfload v2.4
     * Additional self-tests, now in separate file (luaotfload-diagnostics.lua)

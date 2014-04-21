@@ -338,7 +338,6 @@ This is a sketch of the luaotfload db:
         status      : filestatus;
         mappings    : fontentry list;
         meta        : metadata;
-        names       : namedata; // TODO: check for relevance after db is finalized
     }
     and familytable = {
         local  : (format, familyentry) hash; // specified with include dir
@@ -346,10 +345,10 @@ This is a sketch of the luaotfload db:
         system : (format, familyentry) hash;
     }
     and familyentry = {
-        regular     : sizes;
-        italic      : sizes;
-        bold        : sizes;
-        bolditalic  : sizes;
+        r  : sizes; // regular
+        i  : sizes; // italic
+        b  : sizes; // bold
+        bi : sizes; // bold italic
     }
     and sizes = {
         default : int;              // points into mappings or names
@@ -358,10 +357,10 @@ This is a sketch of the luaotfload db:
     and metadata = {
         local       : bool;        (* set if local fonts were added to the db *)
         formats     : string list; // { "otf", "ttf", "ttc", "dfont" }
-        statistics  : TODO;
-        version     : float;
+        statistics  : TODO;        // created when built with "--stats"
+        version     : float;       // index version
     }
-    and filemap = {
+    and filemap = { // created by generate_filedata()
         base : {
             local  : (string, int) hash; // basename -> idx
             system : (string, int) hash;
@@ -374,36 +373,36 @@ This is a sketch of the luaotfload db:
         };
         full : (int, string) hash; // idx -> full path
     }
-    and fontentry = {
-        barename    : string;
-        familyname  : string;
-        filename    : string;
-        fontname    : string; // <- metadata
-        fullname    : string; // <- metadata
-        sanitized   : {
-            family         : string;
-            fontstyle_name : string; // <- new in 2.4
-            fontname       : string; // <- metadata
-            fullname       : string; // <- namedata.names
-            metafamily     : string;
-            pfullname      : string;
-            prefmodifiers  : string;
-            psname         : string;
-            subfamily      : string;
-        };
-        size         : int list;
-        slant        : int;
-        subfont      : int;
-        location     : local | system | texmf;
-        weight       : int;
-        width        : int;
-        units_per_em : int;         // mainly 1000, but also 2048 or 256
+    and fontentry = { // finalized by collect_families()
+        basename        : string;   // file name without path "foo.otf"
+        conflicts       : { barename : int; basename : int }; // filename conflict with font at index; happens with subfonts
+        familyname      : string;   // sanitized name of the font family the font belongs to, usually from the names table
+        fontname        : string;   // sanitized name of the font
+        fontstyle_name  : string;   // the fontstyle_name field returned by fontloader.info()
+        format          : string;   // "otf" | "ttf" | "dfont" | "pfa" | "pfb" | "afm"
+        fullname        : string;   // sanitized full name of the font including style modifiers
+        fullpath        : string;   // path to font in filesystem
+        index           : int;      // index in the mappings table
+        italicangle     : float;    // italic angle; non-zero with oblique faces
+        location        : string;   // "texmf" | "system" | "local"
+        metafamily      : string;   // alternative family identifier if appropriate, sanitized
+        plainname       : string;   // unsanitized font name
+        prefmodifiers   : string;   // sanitized preferred subfamily (names table 14)
+        psname          : string;   // PostScript name
+        size            : (false | float * float * float);  // if available, size info from the size table converted from decipoints
+        splainname      : string;   // sanitized version of the “plainname” field
+        splitstyle      : string;   // style information obtained by splitting the full name at the last dash
+        subfamily       : string;   // sanitized subfamily (names table 2)
+        subfont         : (int | bool);     // integer if font is part of a TrueType collection ("ttc")
+        version         : string;   // font version string
+        weight          : int;      // usWeightClass
     }
     and filestatus = (string,       // fullname
                       { index       : int list; // pointer into mappings
                         timestamp   : int;      }) dict
 
-beware that this is a reconstruction and may be incomplete.
+beware that this is a reconstruction and may be incomplete or out of
+date. Last update: 2014-04-06, describing version 2.51.
 
 mtx-fonts has in names.tma:
 

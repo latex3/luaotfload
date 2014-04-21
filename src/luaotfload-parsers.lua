@@ -662,7 +662,7 @@ local ini_section       = Ct (ini_heading * ini_variables)
 local ini_sections      = skip_line^0 * ini_section^0
 local config            = Ct (ini_sections)
 
---[[doc--
+--[=[doc--
 
     The INI parser converts an input of the form
 
@@ -690,7 +690,7 @@ local config            = Ct (ini_sections)
                 variables = { ["laan-ev"] = "zip zop zooey",
                               crouton = "Fibrosis \"\\ # " } } }
 
---doc]]--
+--doc]=]--
 
 luaotfload.parsers.config = config
 

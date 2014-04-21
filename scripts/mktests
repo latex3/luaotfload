@@ -26,6 +26,9 @@ config = { luaotfload = {
     update_live   = true, --- suppress db updates
 }}
 
+local lpeg        = require "lpeg"
+local lpegmatch   = lpeg.match
+
 kpse.set_program_name "luatex"
 
 require "lualibs"
@@ -66,10 +69,64 @@ local pprint_spec = function (spec)
 end
 
 -----------------------------------------------------------------------
---- tool tests
+--- parser tests
 -----------------------------------------------------------------------
 
+local test_config_input = [==[
 
+
+[foo]
+bar = baz
+xyzzy = no
+buzz
+
+[lavernica "brutalitops"]
+# It’s a locomotive that runs on us.
+  laan-ev = zip zop zooey   ; jib-jab
+Crouton = "Fibrosis \"\\ # "
+
+]==]
+
+local test_config_output = {
+  { section = { title = "foo" },
+    variables = { bar = "baz",
+                  xyzzy = false,
+                  buzz = true } },
+  { section = { title = "lavernica",
+                subtitle = "brutalitops" },
+    variables = { ["laan-ev"] = "zip zop zooey",
+                  crouton = "Fibrosis \"\\ # " } }
+}
+
+local parse_config = function ()
+  local parser = luaotfload.parsers.config
+  local result = lpegmatch (parser, test_config_input)
+  --- compare values recursively
+  local aux aux = function (t1, t2)
+    --- cheaply non-tail recursive
+    local k1 = table.keys (t1)
+    local k2 = table.keys (t2)
+    if #k1 ~= #k2 then
+      return false
+    end
+    for i = 1, #k1 do
+      local k  = k1[i]
+      local v1 = t1[k]
+      local v2 = t2[k]
+      if type (v1) == "table" then
+        if type (v2) ~= "table" or not aux (v1, v2) then
+          return false
+        end
+      elseif v1 ~= v2 then
+        return false
+      end
+    end
+    return true
+  end
+  return aux (result, test_config_output) and 0 or 1, 1
+end
+
+tests["parse_config"] = parse_config
 
 -----------------------------------------------------------------------
 --- font tests
@@ -227,6 +284,7 @@ local resolve_font_name = function ()
 end
 
 tests ["resolve_font_name"] = resolve_font_name
+
 
 -----------------------------------------------------------------------
 --- runner

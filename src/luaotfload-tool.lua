@@ -45,7 +45,6 @@ kpse.set_program_name "luatex"
 --doc]]--
 
 
-local ioopen          = io.open
 local iowrite         = io.write
 local kpsefind_file   = kpse.find_file
 local mathfloor       = math.floor
@@ -149,7 +148,8 @@ texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities
 
 require"luaotfload-log.lua"       --- this populates the luaotfload.log.* namespace
-require"luaotfload-parsers"       --- fonts.conf and request syntax
+require"luaotfload-parsers"       --- fonts.conf, configuration, and request syntax
+require"luaotfload-configuration" --- configuration file handling
 require"luaotfload-database"
 require"alt_getopt"
 
@@ -736,13 +736,14 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel",   "help",  "version", "diagnose",
-    "blacklist",  "cache", "flush",   "bisect",
-    "generate",    "list", "query",
+    "loglevel", "config",    "help",  "version",
+    "diagnose", "blacklist", "cache", "flush",
+    "bisect",   "generate",  "list",  "query",
 }
 
 local action_pending  = tabletohash(action_sequence, false)
 
+action_pending.config   = true  --- always read the configuration
 action_pending.loglevel = true  --- always set the loglevel
 action_pending.generate = false --- this is the default action
 
@@ -752,6 +753,16 @@ actions.loglevel = function (job)
     log.set_loglevel(job.log_level)
     report ("info", 3, "util", "Setting log level", "%d", job.log_level)
     report ("log", 2, "util", "Lua=%q", _VERSION)
+    return true, true
+end
+
+actions.config = function (job)
+    local config = luaotfload.config.read (job.extra_config)
+    --if job.print_config == true then
+    if true then
+        -- inspect (config)
+        return true, false
+    end
     return true, true
 end
 
@@ -1386,8 +1397,9 @@ local process_cmdline = function ( ) -- unit -> jobspec
     }
 
     local long_options = {
+        ["bisect"]         = 1,
         cache              = 1,
-        ["no-compress"]    = "c",
+        conf               = 1,
         diagnose           = 1,
         ["dry-run"]        = "D",
         ["flush-lookups"]  = "l",
@@ -1404,11 +1416,12 @@ local process_cmdline = function ( ) -- unit -> jobspec
         ["local"]          = "L",
         log                = 1,
         ["max-fonts"]      = 1,
-        ["bisect"]         = 1,
+        ["no-compress"]    = "c",
         ["no-reload"]      = "n",
         ["no-strip"]       = 0,
         ["skip-read"]      = "R",
         ["prefer-texmf"]   = "p",
+        ["print-conf"]     = 0,
         quiet              = "q",
         ["show-blacklist"] = "b",
         stats              = "S",
@@ -1520,8 +1533,20 @@ local process_cmdline = function ( ) -- unit -> jobspec
                 end
             end
         elseif v == "bisect" then
-            result.bisect          = optarg[n]
+            result.bisect         = optarg[n]
             action_pending.bisect = true
+        elseif v == "conf" then
+            local extra = stringexplode (optarg[n], ",+")
+            if extra then
+                local extra_config = result.extra_config
+                if extra_config then
+                    table.append (extra_config, extra)
+                else
+                    result.extra_config = extra
+                end
+            end
+        elseif v == "print-conf" then
+            result.print_config = true
         end
     end
 

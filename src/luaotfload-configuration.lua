@@ -24,6 +24,10 @@ local string                  = string
 local stringsub               = string.sub
 local stringexplode           = string.explode
 
+local table                   = table
+local tableappend             = table.append
+local tablecopy               = table.copy
+
 local io                      = io
 local ioloaddata              = io.loaddata
 
@@ -67,6 +71,27 @@ local config_paths = {
 }
 
 -------------------------------------------------------------------------------
+---                                DEFAULTS
+-------------------------------------------------------------------------------
+
+local luaotfload_defaults = {
+  misc = {
+    bisect  = false,
+    version = luaotfload.version,
+  },
+  paths = {
+    names_dir  = "names",
+    cache_dir  = "fonts",
+    index_file = "luaotfload-names.lua",
+  },
+  db = {
+    formats  = "otf,ttf,ttc,dfont",
+    reload   = false,
+    strip    = true,
+  },
+}
+
+-------------------------------------------------------------------------------
 ---                          OPTION SPECIFICATION
 -------------------------------------------------------------------------------
 
@@ -77,15 +102,18 @@ local function_t  = "function"
 
 local option_spec = {
   db = {
-    formats = {
-      --- e.g. "otf ttf" -> { "otf", "ttf" }
-      in_t        = string_t,
-      out_t       = table_t,
-      transform   = function (str) return stringexplode (str, " +") end
-    },
-    reload = {
-      in_t        = boolean_t,
-    },
+    formats  = { in_t = string_t,  },
+    reload   = { in_t = boolean_t, },
+    strip    = { in_t = boolean_t, },
+  },
+  misc = {
+    bisect   = { in_t = boolean_t, },
+    version  = { in_t = string_t,  },
+  },
+  paths = {
+    names_dir  = { in_t = string_t, },
+    cache_dir  = { in_t = string_t, },
+    index_file = { in_t = string_t, },
   },
 }
 
@@ -145,7 +173,7 @@ local add_config_paths = function (t)
     local path = t[i]
     result[#result + 1] = { path_t, path }
   end
-  config_paths = table.append (result, config_paths)
+  config_paths = tableappend (result, config_paths)
 end
 
 local process_options = function (opts)
@@ -219,6 +247,17 @@ local process_options = function (opts)
   return new
 end
 
+local apply = function (old, new)
+  if not old then
+    return tablecopy (new)
+  end
+  local result = tablecopy (old)
+  for var, val in next, new do
+    result[var] = val
+  end
+  return result
+end
+
 local read = function (extra)
   if extra then
     add_config_paths (extra)
@@ -251,5 +290,11 @@ local read = function (extra)
   return ret
 end
 
-config.read = read
+-------------------------------------------------------------------------------
+---                                 EXPORTS
+-------------------------------------------------------------------------------
+
+config.defaults = luaotfload_defaults
+config.read     = read
+config.apply    = apply
 

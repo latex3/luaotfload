@@ -95,18 +95,6 @@ config                        = config or { }
 local config                  = config
 local luaotfloadconfig        = config.luaotfload or { }
 config.luaotfload             = luaotfloadconfig
-luaotfloadconfig.bisect       = false
-luaotfloadconfig.version      = luaotfloadconfig.version   or version
-luaotfloadconfig.names_dir    = luaotfloadconfig.names_dir or "names"
-luaotfloadconfig.cache_dir    = luaotfloadconfig.cache_dir or "fonts"
-luaotfloadconfig.index_file   = luaotfloadconfig.index_file
-                             or "luaotfload-names.lua"
-luaotfloadconfig.formats      = luaotfloadconfig.formats
-                             or "otf,ttf,ttc,dfont"
-luaotfloadconfig.reload       = false
-if not luaotfloadconfig.strip then
-    luaotfloadconfig.strip = true
-end
 
 config.lualibs                  = config.lualibs or { }
 config.lualibs.verbose          = false
@@ -147,11 +135,11 @@ require"luaotfload-basics-gen.lua"
 texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities
 
-require"luaotfload-log.lua"       --- this populates the luaotfload.log.* namespace
-require"luaotfload-parsers"       --- fonts.conf, configuration, and request syntax
-require"luaotfload-configuration" --- configuration file handling
-require"luaotfload-database"
-require"alt_getopt"
+require "luaotfload-log.lua"       --- this populates the luaotfload.log.* namespace
+require "luaotfload-parsers"       --- fonts.conf, configuration, and request syntax
+require "luaotfload-configuration" --- configuration file handling
+require "luaotfload-database"
+require "alt_getopt"
 
 local names                          = fonts.names
 local status_file                    = "luaotfload-status"
@@ -757,10 +745,13 @@ actions.loglevel = function (job)
 end
 
 actions.config = function (job)
-    local config = luaotfload.config.read (job.extra_config)
+    local defaults      = luaotfload.config.defaults
+    local vars          = luaotfload.config.read (job.extra_config)
+    config.luaotfload   = luaotfload.config.apply (defaults, vars)
     --if job.print_config == true then
     if true then
-        -- inspect (config)
+        --inspect (vars)
+         inspect (config.luaotfload)
         return true, false
     end
     return true, true

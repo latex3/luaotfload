@@ -650,7 +650,7 @@ local style_category = {
     i           = "italic",
 }
 
-local type1_formats = { "tfm", "ofm", }
+local type1_metrics = { "tfm", "ofm", }
 
 local dummy_findfile = resolvers.findfile -- from basics-gen
 
@@ -692,8 +692,8 @@ crude_file_lookup_verbose = function (filename)
     end
 
     --- ofm and tfm, returns pair
-    for i=1, #type1_formats do
-        local format = type1_formats[i]
+    for i=1, #type1_metrics do
+        local format = type1_metrics[i]
         if resolvers.findfile(filename, format) then
             return file.addsuffix(filename, format), format, true
         end
@@ -748,8 +748,8 @@ crude_file_lookup = function (filename)
         return found, nil, true
     end
 
-    for i=1, #type1_formats do
-        local format = type1_formats[i]
+    for i=1, #type1_metrics do
+        local format = type1_metrics[i]
         if resolvers.findfile(filename, format) then
             return file.addsuffix(filename, format), format, true
         end

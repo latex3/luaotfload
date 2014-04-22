@@ -431,10 +431,12 @@ loadmodule "override.lua"   --- load glyphlist on demand
     Now we load the modules written for \identifier{luaotfload}.
 
 --doc]]--
-loadmodule "parsers.lua"    --- new in 2.5; fonts.conf and syntax
-loadmodule "loaders.lua"    --- “font-pfb” new in 2.0, added 2011
-loadmodule "database.lua"   --- “font-nms”
-loadmodule "colors.lua"     --- “font-clr”
+loadmodule "parsers.lua"         --- new in 2.5; fonts.conf and syntax
+loadmodule "loaders.lua"         --- “font-pfb” new in 2.0, added 2011
+loadmodule "configuration.lua"   --- configuration options
+loadmodule "database.lua"        --- “font-nms”
+names.initialize_env ()          --- XXX hack hack hack; we need common initialization
+loadmodule "colors.lua"          --- “font-clr”
 
 --[[doc--
 

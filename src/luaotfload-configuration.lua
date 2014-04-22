@@ -28,6 +28,9 @@ local table                   = table
 local tableappend             = table.append
 local tablecopy               = table.copy
 
+local math                    = math
+local mathfloor               = math.floor
+
 local io                      = io
 local ioloaddata              = io.loaddata
 
@@ -76,20 +79,88 @@ local config_paths = {
 
 local luaotfload_defaults = {
   misc = {
-    bisect  = false,
-    version = luaotfload.version,
+    bisect     = false,
+    version    = luaotfload.version,
+    termwidth  = nil,
+    statistics = false,
   },
   paths = {
-    names_dir  = "names",
-    cache_dir  = "fonts",
-    index_file = "luaotfload-names.lua",
+    names_dir    = "names",
+    cache_dir    = "fonts",
+    index_file   = "luaotfload-names.lua",
+    lookups_file = "luaotfload-lookup-cache.lua",
   },
   db = {
-    formats  = "otf,ttf,ttc,dfont",
-    reload   = false,
-    strip    = true,
+    formats     = "otf,ttf,ttc,dfont",
+    reload      = false,
+    strip       = true,
+    update_live = true,
+    compress    = true,
+    scan_local  = false,
+    skip_read   = false,
   },
 }
+
+-------------------------------------------------------------------------------
+---                          RECONFIGURATION TASKS
+-------------------------------------------------------------------------------
+
+--[[doc--
+
+    Procedures to be executed in order to put the new configuration into effect.
+
+--doc]]--
+
+local reconf_tasks = { }
+
+local min_terminal_width = 40
+
+--- The “termwidth” value is only considered when printing
+--- short status messages, e.g. when building the database
+--- online.
+reconf_tasks.check_termwidth = function ()
+  if config.luaotfload.misc.termwidth == nil then
+      local tw = 79
+      if not (    os.type == "windows" --- Assume broken terminal.
+              or osgetenv "TERM" == "dumb")
+      then
+          local p = iopopen "tput cols"
+          if p then
+              result = tonumber (p:read "*all")
+              p:close ()
+              if result then
+                  tw = result
+              else
+                  logreport ("log", 2, "db", "tput returned non-number.")
+              end
+          else
+              logreport ("log", 2, "db", "Shell escape disabled or tput executable missing.")
+              logreport ("log", 2, "db", "Assuming 79 cols terminal width.")
+          end
+      end
+      config.luaotfload.misc.termwidth = tw
+  end
+  return true
+end
+
+reconf_tasks.set_font_filters = function ()
+  fonts.names.set_font_filter (config.luaotfload.db.formats)
+  return true
+end
+
+reconf_tasks.set_name_resolver = function ()
+  local names = fonts.names
+  --- replace the resolver from luatex-fonts
+  if config.luaotfload.db.resolver == "cached" then
+      logreport("both", 2, "cache", "Caching of name: lookups active.")
+      names.resolvespec  = resolve_cached
+      names.resolve_name = resolve_cached
+  else
+      names.resolvespec  = resolve_name
+      names.resolve_name = resolve_name
+  end
+  return true
+end
 
 -------------------------------------------------------------------------------
 ---                          OPTION SPECIFICATION
@@ -97,18 +168,57 @@ local luaotfload_defaults = {
 
 local string_t    = "string"
 local table_t     = "table"
+local number_t    = "number"
 local boolean_t   = "boolean"
 local function_t  = "function"
 
+local tointeger = function (n)
+  n = tonumber (n)
+  if n then
+    return mathfloor (n + 0.5)
+  end
+end
+
 local option_spec = {
   db = {
-    formats  = { in_t = string_t,  },
-    reload   = { in_t = boolean_t, },
-    strip    = { in_t = boolean_t, },
+    formats      = { in_t = string_t,  },
+    reload       = { in_t = boolean_t, },
+    scan_local   = { in_t = boolean_t, },
+    skip_read    = { in_t = boolean_t, },
+    strip        = { in_t = boolean_t, },
+    update_live  = { in_t = boolean_t, },
+    compress     = { in_t = boolean_t, },
+    max_fonts    = {
+      in_t      = number_t,
+      out_t     = number_t, --- TODO int_t from 5.3.x on
+      transform = tointeger,
+    },
+    resolver     = {
+      in_t      = string_t,
+      out_t     = string_t,
+      transform = function (r)
+        if r == "normal" then
+          return "normal"
+        end
+        return "cached"
+      end,
+    }
   },
   misc = {
-    bisect   = { in_t = boolean_t, },
-    version  = { in_t = string_t,  },
+    bisect      = { in_t = boolean_t, }, --- doesn’t make sense in a config file
+    version     = { in_t = string_t,  },
+    statistics  = { in_t = boolean_t, },
+    termwidth = {
+      in_t      = number_t,
+      out_t     = number_t,
+      transform = function (w)
+        w = tointeger (w)
+        if w < min_terminal_width then
+          return min_terminal_width
+        end
+        return w
+      end,
+    },
   },
   paths = {
     names_dir  = { in_t = string_t, },
@@ -248,7 +358,12 @@ local process_options = function (opts)
 end
 
 local apply = function (old, new)
-  if not old then
+  if not new then
+    if not old then
+      return false
+    end
+    return tablecopy (old)
+  elseif not old then
     return tablecopy (new)
   end
   local result = tablecopy (old)
@@ -256,6 +371,16 @@ local apply = function (old, new)
     result[var] = val
   end
   return result
+end
+
+local reconfigure = function ()
+  for i = 1, #reconf_tasks do
+    local task = reconf_tasks[i]
+    if not task () then
+      return false
+    end
+  end
+  return true
 end
 
 local read = function (extra)
@@ -294,7 +419,8 @@ end
 ---                                 EXPORTS
 -------------------------------------------------------------------------------
 
-config.defaults = luaotfload_defaults
-config.read     = read
-config.apply    = apply
+config.defaults         = luaotfload_defaults
+config.read             = read
+config.apply            = apply
+config.reconfigure      = reconfigure
 

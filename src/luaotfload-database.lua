@@ -127,16 +127,6 @@ fonts                          = fonts          or { }
 fonts.names                    = fonts.names    or { }
 fonts.definers                 = fonts.definers or { }
 
-local luaotfloadconfig         = config.luaotfload --- always present
-luaotfloadconfig.resolver      = luaotfloadconfig.resolver or "normal"
-luaotfloadconfig.formats       = luaotfloadconfig.formats  or "otf,ttf,ttc,dfont"
-luaotfloadconfig.strip         = luaotfloadconfig.strip == true
-
---- this option allows for disabling updates
---- during a TeX run
-luaotfloadconfig.update_live   = luaotfloadconfig.update_live ~= false
-luaotfloadconfig.compress      = luaotfloadconfig.compress ~= false
-
 local names                    = fonts.names
 local name_index               = nil --> upvalue for names.data
 local lookup_cache             = nil --> for names.lookups
@@ -145,43 +135,11 @@ names.data                     = nil      --- contains the loaded database
 names.lookups                  = nil      --- contains the lookup cache
 
 names.path                     = { index = { }, lookups = { } }
-names.path.globals             = {
-    prefix                     = "", --- writable_path/names_dir
-    names_dir                  = luaotfloadconfig.names_dir or "names",
-    index_file                 = luaotfloadconfig.index_file
-                              or "luaotfload-names.lua",
-    lookups_file               = "luaotfload-lookup-cache.lua",
-}
 
 --- string -> (string * string)
 local make_luanames = function (path)
     return filereplacesuffix(path, "lua"),
            filereplacesuffix(path, "luc")
-end
-
---- The “termwidth” value is only considered when printing
---- short status messages, e.g. when building the database
---- online.
-if not luaotfloadconfig.termwidth then
-    local tw = 79
-    if not (    os.type == "windows" --- Assume broken terminal.
-            or osgetenv "TERM" == "dumb")
-    then
-        local p = iopopen "tput cols"
-        if p then
-            result = tonumber (p:read "*all")
-            p:close ()
-            if result then
-                tw = result
-            else
-                report ("log", 2, "db", "tput returned non-number.")
-            end
-        else
-            report ("log", 2, "db", "Shell escape disabled or tput executable missing.")
-            report ("log", 2, "db", "Assuming 79 cols terminal width.")
-        end
-    end
-    luaotfloadconfig.termwidth = tw
 end
 
 local format_precedence = {
@@ -211,34 +169,35 @@ end
     created by different user.
 --doc]]--
 
-if not runasscript then
-    local globals   = names.path.globals
-    local names_dir = globals.names_dir
+--- XXX this belongs into the initialization file!
+local initialize_env = function ()
+    if not runasscript then
+        local paths     = config.luaotfload.paths
 
-    prefix = getwritablepath (names_dir, "")
-    if not prefix then
-        luaotfload.error
-            ("Impossible to find a suitable writeable cache...")
-    else
-        prefix = lpegmatch (stripslashes, prefix)
-        report ("log", 0, "db",
-                "Root cache directory is %s.", prefix)
+        local prefix = getwritablepath (paths.names_dir, "")
+        if not prefix then
+            luaotfload.error
+                ("Impossible to find a suitable writeable cache...")
+        else
+            prefix = lpegmatch (stripslashes, prefix)
+            report ("log", 0, "db",
+                    "Root cache directory is %s.", prefix)
+        end
+
+        local lookup_path  = names.path.lookups
+        local index        = names.path.index
+        local lookups_file = filejoin (prefix, paths.lookups_file)
+        local index_file   = filejoin (prefix, paths.index_file)
+        lookup_path.lua, lookup_path.luc = make_luanames (lookups_file)
+        index.lua, index.luc     = make_luanames (index_file)
+    else --- running as script, inject some dummies
+        caches = { }
+        local dummy_function = function () end
+        log   = { report                = dummy_function,
+                  report_status         = dummy_function,
+                  report_status_start   = dummy_function,
+                  report_status_stop    = dummy_function, }
     end
-
-    globals.prefix     = prefix
-    local lookup_path  = names.path.lookups
-    local index        = names.path.index
-    local lookups_file = filejoin (prefix, globals.lookups_file)
-    local index_file   = filejoin (prefix, globals.index_file)
-    lookup_path.lua, lookup_path.luc = make_luanames (lookups_file)
-    index.lua, index.luc     = make_luanames (index_file)
-else --- running as script, inject some dummies
-    caches = { }
-    local dummy_function = function () end
-    log   = { report                = dummy_function,
-              report_status         = dummy_function,
-              report_status_start   = dummy_function,
-              report_status_stop    = dummy_function, }
 end
 
 
@@ -2072,9 +2031,6 @@ do
     get_font_filter = function (formats)
         return tablefastcopy (current_formats)
     end
-
-    --- initialize
-    set_font_filter (luaotfloadconfig.formats)
 end
 
 local process_dir_tree
@@ -2177,7 +2133,7 @@ end
 --- indicates the number of characters already consumed on the
 --- line.
 local truncate_string = function (str, restrict)
-    local tw  = luaotfloadconfig.termwidth
+    local tw  = config.luaotfload.misc.termwidth
     local wd  = tw - restrict
     local len = utf8len (str)
     if wd - len < 0 then
@@ -2670,7 +2626,7 @@ local pull_values = function (entry)
     entry.splitstyle        = style.split
     entry.weight            = style.weight
 
-    if luaotfloadconfig.strip == true then
+    if config.luaotfload.db.strip == true then
         entry.file  = nil
         entry.names = nil
         entry.style = nil
@@ -2931,12 +2887,12 @@ local collect_font_filenames = function ()
     report ("info", 4, "db", "Scanning the filesystem for font files.")
 
     local filenames = { }
-    local bisect    = luaotfloadconfig.bisect
-    local max_fonts = luaotfloadconfig.max_fonts or 2^51 --- XXX revisit for lua 5.3 wrt integers
+    local bisect    = config.luaotfload.misc.bisect
+    local max_fonts = config.luaotfload.db.max_fonts or 2^51 --- XXX revisit for lua 5.3 wrt integers
 
     tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
-    if luaotfloadconfig.scan_local  == true then
+    if config.luaotfload.db.scan_local == true then
         tableappend (filenames, collect_font_filenames_local  ())
     end
     --- Now drop everything above max_fonts.
@@ -3175,7 +3131,7 @@ end
 update_names = function (currentnames, force, dry_run)
     local targetnames
 
-    if luaotfloadconfig.update_live == false then
+    if config.luaotfload.db.update_live == false then
         report ("info", 2, "db",
                 "Skipping database update.")
         --- skip all db updates
@@ -3192,7 +3148,7 @@ update_names = function (currentnames, force, dry_run)
     report("both", 1, "db", "Updating the font names database"
                          .. (force and " forcefully." or "."))
 
-    if luaotfloadconfig.skip_read == true then
+    if config.luaotfload.db.skip_read == true then
         --- the difference to a “dry run” is that we don’t search
         --- for font files entirely. we also ignore the “force”
         --- parameter since it concerns only the font files.
@@ -3234,7 +3190,7 @@ update_names = function (currentnames, force, dry_run)
     end
 
     --- pass 3 (optional): collect some stats about the raw font info
-    if luaotfloadconfig.statistics == true then
+    if config.luaotfload.misc.statistics == true then
         targetnames.meta.statistics = collect_statistics
                                             (targetnames.mappings)
     end
@@ -3325,7 +3281,7 @@ save_names = function (currentnames)
     if fileiswritable (luaname) and fileiswritable (lucname) then
         osremove (lucname)
         local gzname = luaname .. ".gz"
-        if luaotfloadconfig.compress then
+        if config.luaotfload.db.compress then
             local serialized = tableserialize (currentnames, true)
             save_gzipped (gzname, serialized)
             caches.compile (currentnames, "", lucname)
@@ -3443,7 +3399,7 @@ end
 local getwritablecachepath = function ( )
     --- fonts.handlers.otf doesn’t exist outside a Luatex run,
     --- so we have to improvise
-    local writable = getwritablepath (luaotfloadconfig.cache_dir)
+    local writable = getwritablepath (config.luaotfload.paths.cache_dir)
     if writable then
         return writable
     end
@@ -3451,7 +3407,7 @@ end
 
 local getreadablecachepaths = function ( )
     local readables = caches.getreadablepaths
-                        (luaotfloadconfig.cache_dir)
+                        (config.luaotfload.paths.cache_dir)
     local result    = { }
     if readables then
         for i=1, #readables do
@@ -3516,6 +3472,7 @@ end
 --- export functionality to the namespace “fonts.names”
 -----------------------------------------------------------------------
 
+names.initialize_env              = initialize_env
 names.set_font_filter             = set_font_filter
 names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
@@ -3537,16 +3494,6 @@ names.font_slice                  = font_slice
 names.purge_cache    = purge_cache
 names.erase_cache    = erase_cache
 names.show_cache     = show_cache
-
---- replace the resolver from luatex-fonts
-if luaotfloadconfig.resolver == "cached" then
-    report("both", 2, "cache", "Caching of name: lookups active.")
-    names.resolvespec  = resolve_cached
-    names.resolve_name = resolve_cached
-else
-    names.resolvespec  = resolve_name
-    names.resolve_name = resolve_name
-end
 
 names.find_closest = find_closest
 

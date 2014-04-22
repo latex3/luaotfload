@@ -93,8 +93,7 @@ require(loader_path)
 
 config                        = config or { }
 local config                  = config
-local luaotfloadconfig        = config.luaotfload or { }
-config.luaotfload             = luaotfloadconfig
+config.luaotfload             = config.luaotfload or { }
 
 config.lualibs                  = config.lualibs or { }
 config.lualibs.verbose          = false
@@ -144,16 +143,11 @@ require "alt_getopt"
 local names                          = fonts.names
 local status_file                    = "luaotfload-status"
 local luaotfloadstatus               = require (status_file)
-luaotfloadconfig.status              = luaotfloadstatus
+config.luaotfload.status             = luaotfloadstatus
 local sanitize_fontname              = names.sanitize_fontname
 
 local log                            = luaotfload.log
 local report                         = log.report
-
-local pathdata                       = names.path
-local names_plain                    = pathdata.index.lua
-local names_gzip                     = names_plain .. ".gz"
-local names_bin                      = pathdata.index.luc
 
 local help_messages = {
     ["luaotfload-tool"] = [[
@@ -249,14 +243,19 @@ Enter 'luaotfload-tool --help' for a larger list of options.
 }
 
 local help_msg = function (version)
-    local template = help_messages[version]
+    local template      = help_messages[version]
+    local pathdata      = names.path
+    local paths         = config.luaotfload.paths
+    local names_plain   = paths.index.lua
+    local names_gzip    = names_plain .. ".gz"
+    local names_bin     = paths.index.luc
+
     iowrite(stringformat(template,
                          luaotfload.self,
 --                         names_plain,
                          names_gzip,
                          names_bin,
-                         caches.getwritablepath (
-                            luaotfloadconfig.cache_dir)))
+                         caches.getwritablepath (config.luaotfload.cache_dir)))
 end
 
 local about = [[
@@ -748,12 +747,15 @@ actions.config = function (job)
     local defaults      = luaotfload.config.defaults
     local vars          = luaotfload.config.read (job.extra_config)
     config.luaotfload   = luaotfload.config.apply (defaults, vars)
-    --if job.print_config == true then
-    if true then
+
+    if luaotfload.config.reconfigure () then
         --inspect (vars)
          inspect (config.luaotfload)
         return true, false
+    else
+        return false, false
     end
+    names.initialize_env ()
     return true, true
 end
 
@@ -1056,7 +1058,7 @@ local bisect_run = function ()
             nsteps, lo, hi, pivot)
     report ("info", 1, "bisect", "Step %d: Testing fonts from %d to %d.",
             currentstep, lo, pivot)
-    luaotfloadconfig.bisect = { lo, pivot }
+    config.luaotfload.misc.bisect = { lo, pivot }
     return true, true
 end
 
@@ -1482,7 +1484,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
             action_pending["flush"] = true
         elseif v == "L" then
             action_pending["generate"] = true
-            luaotfloadconfig.scan_local = true
+            config.luaotfload.db.scan_local = true
         elseif v == "list" then
             action_pending["list"] = true
             result.criterion = optarg[n]
@@ -1505,22 +1507,22 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "formats" then
             names.set_font_filter (optarg[n])
         elseif v == "n" then
-            luaotfloadconfig.update_live = false
+            config.luaotfload.db.update_live = false
         elseif v == "S" then
-            luaotfloadconfig.statistics = true
+            config.luaotfload.misc.statistics = true
         elseif v == "R" then
             ---  dev only, undocumented
-            luaotfloadconfig.skip_read = true
+            config.luaotfload.db.skip_read = true
         elseif v == "c" then
-            luaotfloadconfig.compress = false
+            config.luaotfload.db.compress = false
         elseif v == "no-strip" then
-            luaotfloadconfig.strip = false
+            config.luaotfload.db.strip = false
         elseif v == "max-fonts" then
             local n = optarg[n]
             if n then
                 n = tonumber(n)
                 if n and n > 0 then
-                    luaotfloadconfig.max_fonts = n
+                    config.luaotfload.db.max_fonts = n
                 end
             end
         elseif v == "bisect" then

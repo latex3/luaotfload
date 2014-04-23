@@ -357,7 +357,8 @@ local process_options = function (opts)
   return new
 end
 
-local apply = function (old, new)
+local apply
+apply = function (old, new)
   if not new then
     if not old then
       return false
@@ -367,8 +368,19 @@ local apply = function (old, new)
     return tablecopy (new)
   end
   local result = tablecopy (old)
-  for var, val in next, new do
-    result[var] = val
+  for name, section in next, new do
+    local t_section = type (section)
+    if t_section ~= table_t then
+      logreport ("both", 1, "conf",
+                 "Error applying configuration: entry %s is %s, expected table.",
+                 section, t_section)
+      --- ignore
+    else
+      local currentsection = result[name]
+      for var, val in next, section do
+        currentsection[var] = val
+      end
+    end
   end
   return result
 end

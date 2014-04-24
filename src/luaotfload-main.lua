@@ -50,7 +50,7 @@ local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
 
 luaotfload.module = {
-    name          = "luaotfload",
+    name          = "luaotfload-main",
     version       = 2.50000,
     date          = "2014/**/**",
     description   = "OpenType layout system.",

@@ -253,10 +253,9 @@ Enter 'luaotfload-tool --help' for a larger list of options.
 local help_msg = function (version)
     local template      = help_messages[version]
     local pathdata      = names.path
-    local paths         = config.luaotfload.paths
-    local names_plain   = paths.index.lua
+    local names_plain   = pathdata.index.lua
     local names_gzip    = names_plain .. ".gz"
-    local names_bin     = paths.index.luc
+    local names_bin     = pathdata.index.luc
 
     iowrite(stringformat(template,
                          luaotfload.self,

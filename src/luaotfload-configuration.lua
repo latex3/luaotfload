@@ -167,10 +167,8 @@ local set_name_resolver = function ()
     if config.luaotfload.db.resolver == "cached" then
         logreport ("both", 2, "cache", "Caching of name: lookups active.")
         names.resolvespec  = names.resolve_cached
-        names.resolve_name = names.resolve_cached
     else
         names.resolvespec  = names.resolve_name
-        names.resolve_name = names.resolve_name
     end
   end
   return true

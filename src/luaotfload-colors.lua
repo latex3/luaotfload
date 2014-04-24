@@ -20,7 +20,7 @@ explanation: http://tug.org/pipermail/luatex/2013-May/004305.html
 --doc]]--
 
 
-local color_callback = config.luaotfload.color_callback
+local color_callback = config.luaotfload.run.color_callback
 if not color_callback then
     --- maybe this would be better as a method: "early" | "late"
     color_callback = "pre_linebreak_filter"

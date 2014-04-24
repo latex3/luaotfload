@@ -89,11 +89,19 @@ string.quoted = string.quoted or function (str)
   return string.format("%q",str) 
 end
 
-require(loader_path)
+require (loader_path)
 
-config                        = config or { }
-local config                  = config
-config.luaotfload             = config.luaotfload or { }
+--[[doc--
+
+    XXX:
+        Creating the config table will be moved to the common
+        initialization when the times comes.
+
+--doc]]--
+
+config                          = config or { }
+local config                    = config
+config.luaotfload               = config.luaotfload or { }
 
 config.lualibs                  = config.lualibs or { }
 config.lualibs.verbose          = false
@@ -744,15 +752,11 @@ actions.loglevel = function (job)
 end
 
 actions.config = function (job)
-    local defaults      = luaotfload.config.defaults
-    local vars          = luaotfload.config.read (job.extra_config)
-    config.luaotfload   = luaotfload.config.apply (defaults, vars)
+    local defaults      = luaotfload.default_config
+    local vars          = config.actions.read (job.extra_config)
+    config.luaotfload   = config.actions.apply (defaults, vars)
 
-    if luaotfload.config.reconfigure () then
-        --inspect (vars)
-         inspect (config.luaotfload)
-        return true, false
-    else
+    if not config.actions.reconfigure () then
         return false, false
     end
     names.initialize_env ()

@@ -172,8 +172,7 @@ end
 --- XXX this belongs into the initialization file!
 local initialize_env = function ()
     if not runasscript then
-        local paths     = config.luaotfload.paths
-
+        local paths  = config.luaotfload.paths
         local prefix = getwritablepath (paths.names_dir, "")
         if not prefix then
             luaotfload.error
@@ -189,7 +188,7 @@ local initialize_env = function ()
         local lookups_file = filejoin (prefix, paths.lookups_file)
         local index_file   = filejoin (prefix, paths.index_file)
         lookup_path.lua, lookup_path.luc = make_luanames (lookups_file)
-        index.lua, index.luc     = make_luanames (index_file)
+        index.lua,       index.luc       = make_luanames (index_file)
     else --- running as script, inject some dummies
         caches = { }
         local dummy_function = function () end
@@ -2888,7 +2887,7 @@ local collect_font_filenames = function ()
 
     local filenames = { }
     local bisect    = config.luaotfload.misc.bisect
-    local max_fonts = config.luaotfload.db.max_fonts or 2^51 --- XXX revisit for lua 5.3 wrt integers
+    local max_fonts = config.luaotfload.db.max_fonts --- XXX revisit for lua 5.3 wrt integers
 
     tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())

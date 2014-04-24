@@ -18,7 +18,8 @@ if not modules then modules = { } end modules ["luaotfload-configuration"] = {
 }
 
 luaotfload                    = luaotfload or { }
-luaotfload.config             = luaotfload.config or { }
+config                        = config or { }
+config.luaotfload             = { }
 
 local string                  = string
 local stringsub               = string.sub
@@ -33,6 +34,7 @@ local mathfloor               = math.floor
 
 local io                      = io
 local ioloaddata              = io.loaddata
+local iopopen                 = io.popen
 
 local os                      = os
 local osgetenv                = os.getenv
@@ -51,7 +53,7 @@ local file                    = file
 local filejoin                = file.join
 
 local parsers                 = luaotfload.parsers
-local config                  = luaotfload.config
+
 local log                     = luaotfload.log
 local logreport               = log.report
 
@@ -77,27 +79,34 @@ local config_paths = {
 ---                                DEFAULTS
 -------------------------------------------------------------------------------
 
-local luaotfload_defaults = {
+local default_config = {
+  db = {
+    formats     = "otf,ttf,ttc,dfont",
+    reload      = false,
+    scan_local  = false,
+    skip_read   = false,
+    strip       = true,
+    update_live = true,
+    compress    = true,
+    max_fonts   = 2^51,
+  },
+  run = {
+    resolver       = "cached",
+    definer        = "patch",
+    log_level      = 0,
+    color_callback = "pre_linebreak_filter",
+  },
   misc = {
-    bisect     = false,
-    version    = luaotfload.version,
-    termwidth  = nil,
-    statistics = false,
+    bisect         = false,
+    version        = luaotfload.version,
+    statistics     = false,
+    termwidth      = nil,
   },
   paths = {
     names_dir    = "names",
     cache_dir    = "fonts",
     index_file   = "luaotfload-names.lua",
     lookups_file = "luaotfload-lookup-cache.lua",
-  },
-  db = {
-    formats     = "otf,ttf,ttc,dfont",
-    reload      = false,
-    strip       = true,
-    update_live = true,
-    compress    = true,
-    scan_local  = false,
-    skip_read   = false,
   },
 }
 
@@ -111,17 +120,17 @@ local luaotfload_defaults = {
 
 --doc]]--
 
-local reconf_tasks = { }
+local reconf_tasks = nil
 
 local min_terminal_width = 40
 
 --- The “termwidth” value is only considered when printing
 --- short status messages, e.g. when building the database
 --- online.
-reconf_tasks.check_termwidth = function ()
+local check_termwidth = function ()
   if config.luaotfload.misc.termwidth == nil then
       local tw = 79
-      if not (    os.type == "windows" --- Assume broken terminal.
+      if not (   os.type == "windows" --- Assume broken terminal.
               or osgetenv "TERM" == "dumb")
       then
           local p = iopopen "tput cols"
@@ -143,24 +152,41 @@ reconf_tasks.check_termwidth = function ()
   return true
 end
 
-reconf_tasks.set_font_filters = function ()
-  fonts.names.set_font_filter (config.luaotfload.db.formats)
-  return true
-end
-
-reconf_tasks.set_name_resolver = function ()
+local set_font_filter = function ()
   local names = fonts.names
-  --- replace the resolver from luatex-fonts
-  if config.luaotfload.db.resolver == "cached" then
-      logreport("both", 2, "cache", "Caching of name: lookups active.")
-      names.resolvespec  = resolve_cached
-      names.resolve_name = resolve_cached
-  else
-      names.resolvespec  = resolve_name
-      names.resolve_name = resolve_name
+  if names and names.set_font_filter then
+    names.set_font_filter (config.luaotfload.db.formats)
   end
   return true
 end
+
+local set_name_resolver = function ()
+  local names = fonts.names
+  if names and names.resolve_cached then
+    --- replace the resolver from luatex-fonts
+    if config.luaotfload.db.resolver == "cached" then
+        logreport ("both", 2, "cache", "Caching of name: lookups active.")
+        names.resolvespec  = names.resolve_cached
+        names.resolve_name = names.resolve_cached
+    else
+        names.resolvespec  = names.resolve_name
+        names.resolve_name = names.resolve_name
+    end
+  end
+  return true
+end
+
+local set_loglevel = function ()
+  log.set_loglevel (config.luaotfload.run.log_level)
+  return true
+end
+
+reconf_tasks = {
+  { "Set the log level"         , set_loglevel      },
+  { "Check terminal dimensions" , check_termwidth   },
+  { "Set the font filter"       , set_font_filter   },
+  { "Install font name resolver", set_name_resolver },
+}
 
 -------------------------------------------------------------------------------
 ---                          OPTION SPECIFICATION
@@ -193,22 +219,37 @@ local option_spec = {
       out_t     = number_t, --- TODO int_t from 5.3.x on
       transform = tointeger,
     },
-    resolver     = {
+  },
+  run = {
+    resolver = {
       in_t      = string_t,
       out_t     = string_t,
-      transform = function (r)
-        if r == "normal" then
-          return "normal"
-        end
-        return "cached"
+      transform = function (r) return r == "normal" and r or "cached" end,
+    },
+    definer = {
+      in_t      = string_t,
+      out_t     = string_t,
+      transform = function (d) return d == "generic" and d or "patch" end,
+    },
+    log_level = {
+      in_t      = number_t,
+      out_t     = number_t, --- TODO int_t from 5.3.x on
+      transform = tointeger,
+    },
+    color_callback = {
+      in_t      = string_t,
+      out_t     = string_t,
+      transform = function (cb)
+        --- These are the two that make sense.
+        return cb == "pre_output_filter" and cb or "pre_linebreak_filter"
       end,
-    }
+    },
   },
   misc = {
-    bisect      = { in_t = boolean_t, }, --- doesn’t make sense in a config file
-    version     = { in_t = string_t,  },
-    statistics  = { in_t = boolean_t, },
-    termwidth = {
+    bisect          = { in_t = boolean_t, }, --- doesn’t make sense in a config file
+    version         = { in_t = string_t,  },
+    statistics      = { in_t = boolean_t, },
+    termwidth       = {
       in_t      = number_t,
       out_t     = number_t,
       transform = function (w)
@@ -221,9 +262,10 @@ local option_spec = {
     },
   },
   paths = {
-    names_dir  = { in_t = string_t, },
-    cache_dir  = { in_t = string_t, },
-    index_file = { in_t = string_t, },
+    names_dir    = { in_t = string_t, },
+    cache_dir    = { in_t = string_t, },
+    index_file   = { in_t = string_t, },
+    lookups_file = { in_t = string_t, },
   },
 }
 
@@ -251,7 +293,6 @@ local tilde_expand = function (p)
 end
 
 local resolve_config_path = function ()
-  inspect (config_paths)
   for i = 1, #config_paths do
     local t, p = unpack (config_paths[i])
     local fullname
@@ -387,8 +428,10 @@ end
 
 local reconfigure = function ()
   for i = 1, #reconf_tasks do
-    local task = reconf_tasks[i]
+    local name, task = unpack (reconf_tasks[i])
+    logreport ("both", 3, "conf", "Launch post-configuration task %q.", name)
     if not task () then
+      logreport ("both", 0, "conf", "Post-configuration task %q failed.", name)
       return false
     end
   end
@@ -427,12 +470,24 @@ local read = function (extra)
   return ret
 end
 
+local apply_defaults = function ()
+  local defaults      = default_config
+  local vars          = read ()
+  --- Side-effects galore ...
+  config.luaotfload   = apply (defaults, vars)
+  return reconfigure ()
+end
+
 -------------------------------------------------------------------------------
 ---                                 EXPORTS
 -------------------------------------------------------------------------------
 
-config.defaults         = luaotfload_defaults
-config.read             = read
-config.apply            = apply
-config.reconfigure      = reconfigure
+luaotfload.default_config = default_config
+
+config.actions = {
+  read             = read,
+  apply            = apply,
+  apply_defaults   = apply_defaults,
+  reconfigure      = reconfigure,
+}
 

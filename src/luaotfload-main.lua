@@ -43,29 +43,11 @@ if not modules then modules = { } end modules ["luaotfload-main"] = {
 
 --doc]]--
 
+local initial_log_level = 0
+
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
-
-config                            = config or { }
-config.luaotfload                 = config.luaotfload or { }
-local luaotfloadconfig            = config.luaotfload
-----------------.resolver        = luaotfloadconfig.resolver         or "normal"
-luaotfloadconfig.resolver        = luaotfloadconfig.resolver         or "cached"
-luaotfloadconfig.definer         = luaotfloadconfig.definer          or "patch"
-luaotfloadconfig.bisect          = false --- useless when running TeX
-luaotfloadconfig.loglevel        = luaotfloadconfig.loglevel         or 2
-luaotfloadconfig.color_callback  = luaotfloadconfig.color_callback   or "pre_linebreak_filter"
-luaotfloadconfig.prioritize      = luaotfloadconfig.prioritize       or "sys"
-luaotfloadconfig.names_dir       = luaotfloadconfig.names_dir        or "names"
-luaotfloadconfig.cache_dir       = luaotfloadconfig.cache_dir        or "fonts"
-luaotfloadconfig.index_file      = luaotfloadconfig.index_file       or "luaotfload-names.lua"
-luaotfloadconfig.formats         = luaotfloadconfig.formats          or "otf,ttf,ttc,dfont"
-luaotfloadconfig.scan_local      = luaotfloadconfig.scan_local == true
-
-if luaotfloadconfig.strip == nil then
-    luaotfloadconfig.strip = true
-end
 
 luaotfload.module = {
     name          = "luaotfload",
@@ -90,7 +72,7 @@ local add_to_callback, create_callback =
 local reset_callback, call_callback =
       luatexbase.reset_callback, luatexbase.call_callback
 
-local dummy_function = function () end
+local dummy_function    = function () end --- XXX this will be moved to the luaotfload namespace when we have the init module
 
 local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
@@ -146,14 +128,17 @@ end
 
 local fl_prefix = "luaotfload" -- “luatex” for luatex-plain
 local loadmodule = function (name)
-    require(fl_prefix .."-"..name)
+    require (fl_prefix .."-"..name)
 end
 
-loadmodule "log.lua"        --- messages; used to be part of -override
+loadmodule "log.lua"             --- log messages
+--loadmodule "parsers.lua"         --- new in 2.5; fonts.conf and syntax
+--loadmodule "configuration.lua"   --- configuration options
+
 local log             = luaotfload.log
 local report          = log.report
 
-log.set_loglevel(luaotfloadconfig.loglevel)
+log.set_loglevel (default_log_level)
 
 --[[doc--
 
@@ -216,8 +201,7 @@ end
 
 --doc]]--
 
-local starttime = os.gettimeofday()
-
+local starttime         = os.gettimeofday ()
 local trapped_register  = callback.register
 callback.register       = dummy_function
 
@@ -431,12 +415,22 @@ loadmodule "override.lua"   --- load glyphlist on demand
     Now we load the modules written for \identifier{luaotfload}.
 
 --doc]]--
-loadmodule "parsers.lua"         --- new in 2.5; fonts.conf and syntax
-loadmodule "loaders.lua"         --- “font-pfb” new in 2.0, added 2011
+
+loadmodule "parsers.lua"         --- fonts.conf and syntax
 loadmodule "configuration.lua"   --- configuration options
-loadmodule "database.lua"        --- “font-nms”
-names.initialize_env ()          --- XXX hack hack hack; we need common initialization
-loadmodule "colors.lua"          --- “font-clr”
+
+if not config.actions.apply_defaults () then
+    report ("log", 0, "load", "Configuration unsuccessful.")
+end
+
+loadmodule "loaders.lua"         --- Type1 font wrappers
+loadmodule "database.lua"        --- Font management.
+fonts.names.initialize_env ()    --- XXX hack hack hack; we need common initialization
+loadmodule "colors.lua"          --- Per-font colors.
+
+if not config.actions.reconfigure () then
+    report ("log", 0, "load", "Post-configuration hooks failed.")
+end
 
 --[[doc--
 
@@ -673,17 +667,20 @@ create_callback("luaotfload.patch_font", "simple", dummy_function)
 
 local read_font_file = fonts.definers.read
 
---- spec -> size -> id -> tmfdata
-local patch_defined_font = function (specification, size, id)
-    local tfmdata = read_font_file(specification, size, id)
-    if type(tfmdata) == "table" and tfmdata.shared then
-        --- We need to test for the “shared” field here
-        --- or else the fontspec capheight callback will
-        --- operate on tfm fonts.
-        call_callback("luaotfload.patch_font", tfmdata, specification)
-    end
-    return tfmdata
-end
+local definers = {
+    generic = read_font_file,
+    --- spec -> size -> id -> tmfdata
+    patch = function (specification, size, id)
+        local tfmdata = read_font_file (specification, size, id)
+        if type (tfmdata) == "table" and tfmdata.shared then
+            --- We need to test for the “shared” field here
+            --- or else the fontspec capheight callback will
+            --- operate on tfm fonts.
+            call_callback ("luaotfload.patch_font", tfmdata, specification)
+        end
+        return tfmdata
+    end,
+}
 
 reset_callback "define_font"
 
@@ -693,23 +690,12 @@ reset_callback "define_font"
 
 --doc]]--
 
-local font_definer = luaotfloadconfig.definer
+local definer = config.luaotfload.run.definer
+add_to_callback ("define_font", definers[definer], "luaotfload.define_font", 1)
 
-if font_definer == "generic"  then
-  add_to_callback("define_font",
-                  fonts.definers.read,
-                  "luaotfload.define_font",
-                  1)
-elseif font_definer == "patch"  then
-  add_to_callback("define_font",
-                  patch_defined_font,
-                  "luaotfload.define_font",
-                  1)
-end
-
-loadmodule "features.lua"     --- contains what was “font-ltx” and “font-otc”
+loadmodule "features.lua"     --- font request and feature handling
 loadmodule "letterspace.lua"  --- extra character kerning
-loadmodule "auxiliary.lua"    --- additionaly high-level functionality (new)
+loadmodule "auxiliary.lua"    --- additional high-level functionality
 
 luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 

@@ -3488,6 +3488,8 @@ names.set_location_precedence     = set_location_precedence
 names.count_font_files            = count_font_files
 names.nth_font_filename           = nth_font_filename
 names.font_slice                  = font_slice
+names.resolve_cached              = resolve_cached
+names.resolve_name                = resolve_name
 
 --- font cache
 names.purge_cache    = purge_cache

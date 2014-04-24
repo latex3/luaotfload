@@ -67,10 +67,10 @@ local type, next       = type, next
 local kpsefind_file    = kpse.find_file
 local lfsisfile        = lfs.isfile
 
-local add_to_callback, create_callback =
-      luatexbase.add_to_callback, luatexbase.create_callback
-local reset_callback, call_callback =
-      luatexbase.reset_callback, luatexbase.call_callback
+local add_to_callback  = luatexbase.add_to_callback
+local create_callback  = luatexbase.create_callback
+local reset_callback   = luatexbase.reset_callback
+local call_callback    = luatexbase.call_callback
 
 local dummy_function    = function () end --- XXX this will be moved to the luaotfload namespace when we have the init module
 

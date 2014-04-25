@@ -259,7 +259,6 @@ local help_msg = function (version)
 
     iowrite(stringformat(template,
                          luaotfload.self,
---                         names_plain,
                          names_gzip,
                          names_bin,
                          caches.getwritablepath (config.luaotfload.cache_dir)))
@@ -754,7 +753,10 @@ actions.config = function (job)
     local defaults      = luaotfload.default_config
     local vars          = config.actions.read (job.extra_config)
     config.luaotfload   = config.actions.apply (defaults, vars)
+    config.luaotfload   = config.actions.apply (config.luaotfload, job.config)
 
+    --inspect(config.luaotfload)
+    --os.exit()
     if not config.actions.reconfigure () then
         return false, false
     end
@@ -1390,6 +1392,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         query        = "",
         log_level    = 0, --- 2 is approx. the old behavior
         bisect       = nil,
+        config       = { db = { }, misc = { }, run = { }, paths = { } },
     }
 
     local long_options = {
@@ -1508,7 +1511,8 @@ local process_cmdline = function ( ) -- unit -> jobspec
             action_pending["diagnose"] = true
             result.asked_diagnostics = optarg[n]
         elseif v == "formats" then
-            names.set_font_filter (optarg[n])
+            result.config.db.formats = optarg[n]
+            --names.set_font_filter (optarg[n])
         elseif v == "n" then
             config.luaotfload.db.update_live = false
         elseif v == "S" then

@@ -1039,6 +1039,7 @@ local function addfeature(data,feature,specifications)
                 local subtables     = specification.subtables or { specification.data } or { }
                 local featuretype   = types[specification.type or "substitution"]
                 local featureflags  = specification.flags or noflags
+                local featureorder  = specification.order or { feature }
                 local added         = false
                 local featurename   = stringformat("ctx_%s_%s",feature,s)
                 local st = { }
@@ -1107,6 +1108,7 @@ local function addfeature(data,feature,specifications)
                         features  = { [feature] = askedfeatures },
                         flags     = featureflags,
                         name      = featurename,
+                        order     = featureorder,
                         subtables = st,
                         type      = featuretype,
                     }
@@ -1139,6 +1141,7 @@ local function addfeature(data,feature,specifications)
     end
 end
 
+
 otf.enhancers.addfeature = addfeature
 
 local extrafeatures = { }
@@ -1167,6 +1170,7 @@ local tlig = {
             [0x0060] = 0x2018,                   -- quoteright
         },
         flags     = { },
+        order     = { "tlig" },
     },
     {
         type     = "ligature",
@@ -1185,6 +1189,7 @@ local tlig = {
             [0x00BB] = {0x003E, 0x003E},         -- RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
         },
         flags    = { },
+        order    = { "tlig" },
     },
     {
         type     = "ligature",
@@ -1196,6 +1201,7 @@ local tlig = {
             [0x00BF] = {0x003F, 0x0060},         -- questiondown
         },
         flags    = { },
+        order    = { "tlig" },
     },
 }
 
@@ -1247,6 +1253,7 @@ local anum_specification = {
         features = { arab = { far = true, urd = true, snd = true } },
         data     = anum_persian,
         flags    = { },
+        order    = { "anum" },
         valid    = valid,
     },
     {
@@ -1254,23 +1261,16 @@ local anum_specification = {
         features = { arab = { ["*"] = true } },
         data     = anum_arabic,
         flags    = { },
+        order    = { "anum" },
         valid    = valid,
     },
 }
 
---[[doc--
-
-    Below the specifications as given in the removed font-otc.lua.
-    The rest was identical to what this file had from the beginning.
-    Both make the “anum.tex” test pass anyways.
-
---doc]]--
-
-otf.addfeature("anum",anum_specification)
+otf.addfeature ("anum", anum_specification)
 
 registerotffeature {
-    name        = 'anum',
-    description = 'arabic digits',
+    name        = "anum",
+    description = "arabic digits",
 }
 
 -- vim:tw=71:sw=4:ts=4:expandtab

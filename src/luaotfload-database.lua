@@ -656,6 +656,12 @@ crude_file_lookup_verbose = function (filename)
             return file.addsuffix(filename, format), format, true
         end
     end
+
+    if not fonts_reloaded and config.luaotfload.db.update_live == true then
+        return reload_db (stringformat ("File not found: %s.", filename),
+                          crude_file_lookup_verbose,
+                          filename)
+    end
     return filename, nil, false
 end
 
@@ -713,6 +719,11 @@ crude_file_lookup = function (filename)
         end
     end
 
+    if not fonts_reloaded and config.luaotfload.db.update_live == true then
+        return reload_db (stringformat ("File not found: %s.", filename),
+                          crude_file_lookup_verbose,
+                          filename)
+    end
     return filename, nil, false
 end
 
@@ -1129,8 +1140,9 @@ resolve_name = function (specification)
     end
 
     if not resolved then
-        if not fonts_reloaded then
-            return reload_db ("Font not found.",
+        if not fonts_reloaded and config.luaotfload.db.update_live == true then
+            return reload_db (stringformat ("Font %s not found.",
+                                            specification.name or "<?>"),
                               resolve_name,
                               specification)
         end
@@ -1171,7 +1183,7 @@ reload_db = function (why, caller, ...)
     local namedata  = name_index
     local formats   = tableconcat (namedata.meta.formats, ",")
 
-    report ("both", 1, "db",
+    report ("both", 0, "db",
             "Reload initiated (formats: %s); reason: %q.",
             formats, why)
 
@@ -1223,7 +1235,7 @@ find_closest = function (name, limit)
     if not name_index then name_index = load_names () end
     if not name_index or type (name_index) ~= "table" then
         if not fonts_reloaded then
-            return reload_db("no database", find_closest, name)
+            return reload_db("Font index missing.", find_closest, name)
         end
         return false
     end

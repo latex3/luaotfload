@@ -114,6 +114,7 @@ local lfsisdir                  = lfs.isdir
 local lfsisfile                 = lfs.isfile
 local stringsplit               = string.split
 local tableserialize            = table.serialize
+local tablesortedkeys           = table.sortedkeys
 local tabletohash               = table.tohash
 
 --[[doc--
@@ -272,7 +273,8 @@ local about = [[
 ]]
 
 local version_msg = function ( )
-    local out = function (...) texiowrite_nl (stringformat (...)) end
+    local out   = function (...) texiowrite_nl (stringformat (...)) end
+    local uname = os.uname ()
     out (about, luaotfload.self)
     out ("%s version %q", luaotfload.self, version)
     out ("revision %q", luaotfloadstatus.notes.revision)
@@ -282,6 +284,13 @@ local version_msg = function ( )
     out ("Luatex version %.2f.%d",
          status.luatex_version / 100,
          status.luatex_revision)
+    out ("Platform: type=%s name=%s", os.type, os.name)
+
+    local uname_vars = tablesortedkeys (uname)
+    for i = 1, #uname_vars do
+        local var = uname_vars[i]
+        out ("    + %8s: %s", var, uname[var])
+    end
     out ""
 end
 
@@ -354,7 +363,7 @@ local baseindent = "    "
 local show_info_table show_info_table = function (t, depth)
     depth           = depth or 0
     local indent    = stringrep (baseindent, depth)
-    local keys      = table.sortedkeys (t)
+    local keys      = tablesortedkeys (t)
     for n = 1, #keys do
         local key = keys [n]
         local val = t [key]
@@ -777,7 +786,7 @@ end
 actions.blacklist = function (job)
     names.read_blacklist()
     local n = 0
-    for n, entry in next, table.sortedkeys(names.blacklist) do
+    for n, entry in next, tablesortedkeys(names.blacklist) do
         iowrite (stringformat("(%d %s)\n", n, entry))
     end
     return true, false

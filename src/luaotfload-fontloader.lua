@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/08/14 11:18:23
+-- merge date  : 05/12/14 16:53:28
 
 do -- begin closure to overcome local limits and interference
 
@@ -4170,6 +4170,7 @@ function constructors.scale(tfmdata,specification)
     if changed then
       local c=changed[unicode]
       if c then
+local ligatures=character.ligatures
         description=descriptions[c] or descriptions[unicode] or character
         character=characters[c] or character
         index=description.index or c
@@ -4181,6 +4182,9 @@ function constructors.scale(tfmdata,specification)
             touni=tounicode[i] 
           end
         end
+if ligatures and not character.ligatures then
+  character.ligatures=ligatures
+end
       else
         description=descriptions[unicode] or character
         index=description.index or unicode
@@ -8543,13 +8547,14 @@ local function gref(descriptions,n)
       return f_unicode(n)
     end
   elseif n then
-    local num,nam={},{}
-    for i=2,#n do
+    local num,nam,j={},{},0
+    for i=1,#n do
       local ni=n[i]
       if tonumber(ni) then 
+        j=j+1
         local di=descriptions[ni]
-        num[i]=f_unicode(ni)
-        nam[i]=di and di.name or "-"
+        num[j]=f_unicode(ni)
+        nam[j]=di and di.name or "-"
       end
     end
     return f_unilist(num,nam)
@@ -8632,8 +8637,8 @@ local function finalize_ligatures(tfmdata,ligatures)
         local ligature=ligatures[i]
         if ligature then
           local unicode,lookupdata=ligature[1],ligature[2]
-          if trace then
-            trace_ligatures_detail("building % a into %a",lookupdata,unicode)
+          if trace_ligatures_detail then
+            report_prepare("building % a into %a",lookupdata,unicode)
           end
           local size=#lookupdata
           local firstcode=lookupdata[1] 
@@ -8645,8 +8650,8 @@ local function finalize_ligatures(tfmdata,ligatures)
               local firstdata=characters[firstcode]
               if not firstdata then
                 firstcode=private
-                if trace then
-                  trace_ligatures_detail("defining %a as %a",firstname,firstcode)
+                if trace_ligatures_detail then
+                  report_prepare("defining %a as %a",firstname,firstcode)
                 end
                 unicodes[firstname]=firstcode
                 firstdata={ intermediate=true,ligatures={} }
@@ -8669,8 +8674,8 @@ local function finalize_ligatures(tfmdata,ligatures)
                   break
                 end
               end
-              if trace then
-                trace_ligatures_detail("codes (%a,%a) + (%a,%a) -> %a",firstname,firstcode,secondname,secondcode,target)
+              if trace_ligatures_detail then
+                report_prepare("codes (%a,%a) + (%a,%a) -> %a",firstname,firstcode,secondname,secondcode,target)
               end
               local firstligs=firstdata.ligatures
               if firstligs then
@@ -8681,6 +8686,8 @@ local function finalize_ligatures(tfmdata,ligatures)
               firstcode=target
               firstname=secondname
             end
+          elseif trace_ligatures_detail then
+            report_prepare("no glyph (%a,%a) for building %a",firstname,firstcode,target)
           end
           if okay then
             ligatures[i]=false
@@ -8690,12 +8697,14 @@ local function finalize_ligatures(tfmdata,ligatures)
       end
       alldone=done==0
     end
-    if trace then
-      for k,v in next,characters do
-        if v.ligatures then table.print(v,k) end
+    if trace_ligatures_detail then
+      for k,v in table.sortedhash(characters) do
+        if v.ligatures then
+          table.print(v,k)
+        end
       end
     end
-    tfmdata.resources.private=private
+    resources.private=private
   end
 end
 local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplist)
@@ -8914,7 +8923,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
         end
         changed[unicode]=data
       elseif lookuptype=="alternate" then
-        local replacement=data[alternate]
+         local replacement=data[alternate]
         if replacement then
           changed[unicode]=replacement
           if trace_alternatives then

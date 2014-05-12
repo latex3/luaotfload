@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/15/14 09:51:32
+-- merge date  : 05/08/14 11:18:23
 
 do -- begin closure to overcome local limits and interference
 
@@ -4858,6 +4858,7 @@ end
 local fonts=fonts
 fonts.encodings={}
 fonts.encodings.agl={}
+fonts.encodings.known={}
 setmetatable(fonts.encodings.agl,{ __index=function(t,k)
   if k=="unicodes" then
     texio.write(" <loading (extended) adobe glyph list>")

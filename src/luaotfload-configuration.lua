@@ -21,6 +21,9 @@ luaotfload                    = luaotfload or { }
 config                        = config or { }
 config.luaotfload             = { }
 
+local status_file             = "luaotfload-status"
+local luaotfloadstatus        = require (status_file)
+
 local string                  = string
 local stringsub               = string.sub
 local stringexplode           = string.explode
@@ -421,6 +424,7 @@ apply = function (old, new)
       end
     end
   end
+  result.status = luaotfloadstatus
   return result
 end
 

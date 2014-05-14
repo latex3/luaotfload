@@ -150,9 +150,6 @@ require "luaotfload-database"
 require "alt_getopt"
 
 local names                          = fonts.names
-local status_file                    = "luaotfload-status"
-local luaotfloadstatus               = require (status_file)
-config.luaotfload.status             = luaotfloadstatus
 local sanitize_fontname              = names.sanitize_fontname
 
 local log                            = luaotfload.log
@@ -759,10 +756,10 @@ actions.loglevel = function (job)
 end
 
 actions.config = function (job)
-    local defaults      = luaotfload.default_config
-    local vars          = config.actions.read (job.extra_config)
-    config.luaotfload   = config.actions.apply (defaults, vars)
-    config.luaotfload   = config.actions.apply (config.luaotfload, job.config)
+    local defaults            = luaotfload.default_config
+    local vars                = config.actions.read (job.extra_config)
+    config.luaotfload         = config.actions.apply (defaults, vars)
+    config.luaotfload         = config.actions.apply (config.luaotfload, job.config)
 
     --inspect(config.luaotfload)
     --os.exit()

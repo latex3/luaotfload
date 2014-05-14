@@ -119,7 +119,6 @@ local tablefastcopy            = table.fastcopy
 local tabletofile              = table.tofile
 local tabletohash              = table.tohash
 local tableserialize           = table.serialize
-local runasscript              = caches == nil
 --- the font loader namespace is “fonts”, same as in Context
 --- we need to put some fallbacks into place for when running
 --- as a script
@@ -171,25 +170,24 @@ end
 
 --- XXX this belongs into the initialization file!
 local initialize_env = function ()
-    if not runasscript then
-        local paths  = config.luaotfload.paths
-        local prefix = getwritablepath (paths.names_dir, "")
-        if not prefix then
-            luaotfload.error
-                ("Impossible to find a suitable writeable cache...")
-        else
-            prefix = lpegmatch (stripslashes, prefix)
-            report ("log", 0, "db",
-                    "Root cache directory is %s.", prefix)
-        end
+    local paths  = config.luaotfload.paths
+    local prefix = getwritablepath (paths.names_dir, "")
+    if not prefix then
+        luaotfload.error
+            ("Impossible to find a suitable writeable cache...")
+    else
+        prefix = lpegmatch (stripslashes, prefix)
+        report ("log", 0, "db",
+                "Root cache directory is %s.", prefix)
+    end
 
-        local lookup_path  = names.path.lookups
-        local index        = names.path.index
-        local lookups_file = filejoin (prefix, paths.lookups_file)
-        local index_file   = filejoin (prefix, paths.index_file)
-        lookup_path.lua, lookup_path.luc = make_luanames (lookups_file)
-        index.lua,       index.luc       = make_luanames (index_file)
-    else --- running as script, inject some dummies
+    local lookup_path  = names.path.lookups
+    local index        = names.path.index
+    local lookups_file = filejoin (prefix, paths.lookups_file)
+    local index_file   = filejoin (prefix, paths.index_file)
+    lookup_path.lua, lookup_path.luc = make_luanames (lookups_file)
+    index.lua,       index.luc       = make_luanames (index_file)
+    if not caches then
         caches = { }
         local dummy_function = function () end
         log   = { report                = dummy_function,
@@ -3252,7 +3250,7 @@ end
 
 --- unit -> bool
 save_lookups = function ( )
-    local path    = names.path.lookups
+    local path = names.path.lookups
     local luaname, lucname = path.lua, path.luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
         tabletofile (luaname, lookup_cache, true)

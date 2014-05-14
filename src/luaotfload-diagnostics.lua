@@ -9,8 +9,6 @@
 -----------------------------------------------------------------------
 --
 local names                    = fonts.names
-local luatexstatus             = status
-local status                   = config.luaotfload.status
 
 local kpse                     = require "kpse"
 local kpseexpand_path          = kpse.expand_path
@@ -99,8 +97,9 @@ local check_index = function (errcnt)
     return errcnt
 end
 
-local verify_files = function (errcnt, status)
+local verify_files = function (errcnt)
     out "================ verify files ================="
+    local status = config.luaotfload.status
     local hashes = status.hashes
     local notes  = status.notes
     if not hashes or #hashes == 0 then
@@ -243,17 +242,23 @@ end
 
 local path = names.path
 
-local desired_permissions = {
-    { "d", {"r","w"}, function () return caches.getwritablepath () end },
-    { "d", {"r","w"}, path.globals.prefix },
-    { "f", {"r","w"}, path.index.lua .. ".gz" },
-    { "f", {"r","w"}, path.index.luc },
-    { "f", {"r","w"}, path.lookups.lua },
-    { "f", {"r","w"}, path.lookups.luc },
-}
+local desired_permissions
+local init_desired_permissions = function ()
+    inspect(config.luaotfload.paths)
+    local paths = config.luaotfload.paths
+    desired_permissions = {
+        { "d", {"r","w"}, function () return caches.getwritablepath () end },
+        { "d", {"r","w"}, paths.prefix },
+        { "f", {"r","w"}, paths.index_path_lua .. ".gz" },
+        { "f", {"r","w"}, paths.index_path_luc },
+        { "f", {"r","w"}, paths.lookup_path_lua },
+        { "f", {"r","w"}, paths.lookup_path_luc },
+    }
+end
 
 local check_permissions = function (errcnt)
     out [[=============== file permissions ==============]]
+    if not desired_permissions then init_desired_permissions () end
     for i = 1, #desired_permissions do
         local t, spec, path = unpack (desired_permissions[i])
         if type (path) == "function" then
@@ -337,8 +342,7 @@ else
         end
 
         out ("Requesting <%s>.", request)
-        local response, code, headers, status
-            = https.request (request)
+        local response, code, headers, status = https.request (request)
         if status ~= alright then
             out "Request failed!"
             return false
@@ -629,7 +633,7 @@ local diagnose = function (job)
     end
 
     if asked.files == true then
-        errcnt = verify_files (errcnt, status)
+        errcnt = verify_files (errcnt)
         asked.files = nil
     end
 

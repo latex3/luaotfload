@@ -54,6 +54,8 @@ local lfsisdir                = lfs.isdir
 
 local file                    = file
 local filejoin                = file.join
+local filereplacesuffix       = file.replacesuffix
+
 
 local parsers                 = luaotfload.parsers
 
@@ -61,6 +63,9 @@ local log                     = luaotfload.log
 local logreport               = log.report
 
 local config_parser           = parsers.config
+local stripslashes            = parsers.stripslashes
+
+local getwritablepath         = caches.getwritablepath
 
 -------------------------------------------------------------------------------
 ---                                SETTINGS
@@ -106,10 +111,14 @@ local default_config = {
     termwidth      = nil,
   },
   paths = {
-    names_dir    = "names",
-    cache_dir    = "fonts",
-    index_file   = "luaotfload-names.lua",
-    lookups_file = "luaotfload-lookup-cache.lua",
+    names_dir           = "names",
+    cache_dir           = "fonts",
+    index_file          = "luaotfload-names.lua",
+    lookups_file        = "luaotfload-lookup-cache.lua",
+    lookup_path_lua     = nil,
+    lookup_path_luc     = nil,
+    index_path_lua      = nil,
+    index_path_luc      = nil,
   },
 }
 
@@ -182,8 +191,32 @@ local set_loglevel = function ()
   return true
 end
 
+local build_cache_paths = function ()
+  local paths  = config.luaotfload.paths
+  local prefix = getwritablepath (paths.names_dir, "")
+
+  if not prefix then
+    luaotfload.error ("Impossible to find a suitable writeable cache...")
+    return false
+  end
+
+  prefix = lpegmatch (stripslashes, prefix)
+  logreport ("log", 0, "conf", "Root cache directory is %s.", prefix)
+
+  local index_file      = filejoin (prefix, paths.index_file)
+  local lookups_file    = filejoin (prefix, paths.lookups_file)
+
+  paths.prefix          = prefix
+  paths.index_path_lua  = filereplacesuffix (index_file,   "lua")
+  paths.index_path_luc  = filereplacesuffix (index_file,   "luc")
+  paths.lookup_path_lua = filereplacesuffix (lookups_file, "lua")
+  paths.lookup_path_luc = filereplacesuffix (lookups_file, "luc")
+  return true
+end
+
 reconf_tasks = {
   { "Set the log level"         , set_loglevel      },
+  { "Build cache paths"         , build_cache_paths },
   { "Check terminal dimensions" , check_termwidth   },
   { "Set the font filter"       , set_font_filter   },
   { "Install font name resolver", set_name_resolver },
@@ -263,10 +296,14 @@ local option_spec = {
     },
   },
   paths = {
-    names_dir    = { in_t = string_t, },
-    cache_dir    = { in_t = string_t, },
-    index_file   = { in_t = string_t, },
-    lookups_file = { in_t = string_t, },
+    names_dir           = { in_t = string_t, },
+    cache_dir           = { in_t = string_t, },
+    index_file          = { in_t = string_t, },
+    lookups_file        = { in_t = string_t, },
+    lookup_path_lua     = { in_t = string_t, },
+    lookup_path_luc     = { in_t = string_t, },
+    index_path_lua      = { in_t = string_t, },
+    index_path_luc      = { in_t = string_t, },
   },
 }
 

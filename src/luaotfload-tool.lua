@@ -250,10 +250,10 @@ Enter 'luaotfload-tool --help' for a larger list of options.
 
 local help_msg = function (version)
     local template      = help_messages[version]
-    local pathdata      = names.path
-    local names_plain   = pathdata.index.lua
+    local paths         = config.luaotfload.paths
+    local names_plain   = paths.index_path_lua
     local names_gzip    = names_plain .. ".gz"
-    local names_bin     = pathdata.index.luc
+    local names_bin     = paths.index_path_luc
 
     iowrite(stringformat(template,
                          luaotfload.self,
@@ -274,7 +274,7 @@ local version_msg = function ( )
     local uname = os.uname ()
     out (about, luaotfload.self)
     out ("%s version %q", luaotfload.self, version)
-    out ("revision %q", luaotfloadstatus.notes.revision)
+    out ("revision %q", config.luaotfload.status.notes.revision)
     out ("database version %q", names.version)
     out ("Lua interpreter: %s; version %q", runtime[1], runtime[2])
     out ("Luatex SVN revision %d", status.luatex_svn)
@@ -766,7 +766,6 @@ actions.config = function (job)
     if not config.actions.reconfigure () then
         return false, false
     end
-    names.initialize_env ()
     return true, true
 end
 

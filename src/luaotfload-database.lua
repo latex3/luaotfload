@@ -133,8 +133,6 @@ names.version                  = 2.51
 names.data                     = nil      --- contains the loaded database
 names.lookups                  = nil      --- contains the lookup cache
 
-names.path                     = { index = { }, lookups = { } }
-
 --- string -> (string * string)
 local make_luanames = function (path)
     return filereplacesuffix(path, "lua"),
@@ -156,50 +154,9 @@ local set_location_precedence = function (precedence)
 end
 
 --[[doc--
-    We use the functions in the cache.* namespace that come with the
-    fontloader (see luat-basics-gen). it’s safe to use for the most part
-    since most checks and directory creations are already done. It
-    uses TEXMFCACHE or TEXMFVAR as starting points.
 
-    There is one quirk, though: ``getwritablepath()`` will always
-    assume that files in subdirectories of the cache tree are writable.
-    It gives no feedback at all if it fails to open a file in write
-    mode. This may cause trouble when the index or lookup cache were
-    created by different user.
---doc]]--
+    Auxiliary functions
 
---- XXX this belongs into the initialization file!
-local initialize_env = function ()
-    local paths  = config.luaotfload.paths
-    local prefix = getwritablepath (paths.names_dir, "")
-    if not prefix then
-        luaotfload.error
-            ("Impossible to find a suitable writeable cache...")
-    else
-        prefix = lpegmatch (stripslashes, prefix)
-        report ("log", 0, "db",
-                "Root cache directory is %s.", prefix)
-    end
-
-    local lookup_path  = names.path.lookups
-    local index        = names.path.index
-    local lookups_file = filejoin (prefix, paths.lookups_file)
-    local index_file   = filejoin (prefix, paths.index_file)
-    lookup_path.lua, lookup_path.luc = make_luanames (lookups_file)
-    index.lua,       index.luc       = make_luanames (index_file)
-    if not caches then
-        caches = { }
-        local dummy_function = function () end
-        log   = { report                = dummy_function,
-                  report_status         = dummy_function,
-                  report_status_start   = dummy_function,
-                  report_status_stop    = dummy_function, }
-    end
-end
-
-
---[[doc--
-Auxiliary functions
 --doc]]--
 
 --- fontnames contain all kinds of garbage; as a precaution we
@@ -522,7 +479,7 @@ local fuzzy_limit = 1 --- display closest only
 --- bool? -> dbobj
 load_names = function (dry_run)
     local starttime = osgettimeofday ()
-    local foundname, data = load_lua_file (names.path.index.lua)
+    local foundname, data = load_lua_file (config.luaotfload.paths.index_path_lua)
 
     if data then
         report ("both", 2, "db",
@@ -569,7 +526,7 @@ end
 
 --- unit -> unit
 load_lookups = function ( )
-    local foundname, data = load_lua_file(names.path.lookups.lua)
+    local foundname, data = load_lua_file(config.luaotfload.paths.lookup_path_lua)
     if data then
         report("both", 3, "cache",
                "Lookup cache loaded from %s.", foundname)
@@ -3250,8 +3207,8 @@ end
 
 --- unit -> bool
 save_lookups = function ( )
-    local path = names.path.lookups
-    local luaname, lucname = path.lua, path.luc
+    local paths = config.luaotfload.paths
+    local luaname, lucname = paths.lookup_path_lua, paths.lookup_path_luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
         tabletofile (luaname, lookup_cache, true)
         osremove (lucname)
@@ -3285,8 +3242,8 @@ save_names = function (currentnames)
     elseif currentnames.meta and currentnames.meta["local"] then
         return false, "table contains local entries"
     end
-    local path = names.path.index
-    local luaname, lucname = path.lua, path.luc
+    local paths = config.luaotfload.paths
+    local luaname, lucname = paths.index_path_lua, paths.index_path_luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
         osremove (lucname)
         local gzname = luaname .. ".gz"

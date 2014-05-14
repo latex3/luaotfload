@@ -240,8 +240,6 @@ local check_conformance = function (spec, permissions, errcnt)
     return errcnt
 end
 
-local path = names.path
-
 local desired_permissions
 local init_desired_permissions = function ()
     inspect(config.luaotfload.paths)

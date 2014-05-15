@@ -484,6 +484,8 @@ load_names = function (dry_run)
     if data then
         report ("log", 0, "db",
                 "Font names database loaded from %s", foundname)
+        report ("term", 3, "db",
+                "Font names database loaded from %s", foundname)
         report ("info", 3, "db", "Loading took %0.f ms.",
                 1000 * (osgettimeofday () - starttime))
 

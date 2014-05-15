@@ -479,7 +479,6 @@ fonts.encodings.known     = fonts.encodings.known or { }
 
 local resolve_file        = names.crude_file_lookup
 --local resolve_file        = names.crude_file_lookup_verbose
-local resolve_name        = names.resolve_name
 
 local file_resolver = function (specification)
     local name    = resolve_file (specification.name)
@@ -612,8 +611,7 @@ end
 
 --[[doc--
 
-    The \verb|name:| resolver wraps the database function
-    \luafunction{resolve_name}.
+    The \verb|name:| resolver.
 
 --doc]]--
 
@@ -621,7 +619,11 @@ end
 --- generic name resolver.
 
 request_resolvers.name = function (specification)
-    local resolved, subfont = resolve_name (specification)
+    local resolver = names.resolve_cached
+    if config.luaotfload.run.resolver == "normal" then
+        resolver = names.resolve_name
+    end
+    local resolved, subfont = resolver (specification)
     if resolved then
         specification.resolved   = resolved
         specification.sub        = subfont

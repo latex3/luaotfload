@@ -35,6 +35,7 @@ require "lualibs"
 require "luaotfload-basics-gen.lua"
 require "luaotfload-log.lua"
 require "luaotfload-parsers"
+require "luaotfload-configuration"
 require "luaotfload-database"
 
 local names = fonts.names
@@ -292,6 +293,7 @@ tests ["resolve_font_name"] = resolve_font_name
 
 local main = function ()
   local failed, total = 0, 0
+  config.actions.apply_defaults ()
   for name, test in next, tests do
     texio.write_nl ("[" .. name .. "]")
     local newfailed, newtotal = test ()

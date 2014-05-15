@@ -425,7 +425,6 @@ end
 
 loadmodule "loaders.lua"         --- Type1 font wrappers
 loadmodule "database.lua"        --- Font management.
-fonts.names.initialize_env ()    --- XXX hack hack hack; we need common initialization
 loadmodule "colors.lua"          --- Per-font colors.
 
 if not config.actions.reconfigure () then

@@ -6,7 +6,7 @@
 -- REQUIREMENTS:  Luatex > 0.76, Luaotfload
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
 --      VERSION:  2.4
---     MODIFIED:  2013-08-26 09:31:22+0200
+--     MODIFIED:  2014-05-15 22:16:47+0200
 -----------------------------------------------------------------------
 --
 --===================================================================--
@@ -16,16 +16,7 @@
 --===================================================================--
 
 
-local tests = { }
-
-config = { luaotfload = {
-    names_dir     = "names",
-    cache_dir     = "fonts",
-    index_file    = "luaotfload-names.lua",
-    resolver      = "normal",
-    update_live   = true, --- suppress db updates
-}}
-
+local tests       = { }
 local lpeg        = require "lpeg"
 local lpegmatch   = lpeg.match
 

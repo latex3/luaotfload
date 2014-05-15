@@ -167,7 +167,11 @@ end
 local set_font_filter = function ()
   local names = fonts.names
   if names and names.set_font_filter then
-    names.set_font_filter (config.luaotfload.db.formats)
+    local formats = config.luaotfload.db.formats
+    if not formats or formats == "" then
+      formats = default_config.db.formats
+    end
+    names.set_font_filter (formats)
   end
   return true
 end

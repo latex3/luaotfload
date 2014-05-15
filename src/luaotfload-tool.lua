@@ -6,7 +6,7 @@
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 --      VERSION:  2.5
 --      LICENSE:  GPL v2.0
---     MODIFIED:  2014-01-14 13:17:04+0100
+--     MODIFIED:  2014-05-15 21:47:39+0200
 -----------------------------------------------------------------------
 
 luaotfload          = luaotfload or { }
@@ -272,13 +272,13 @@ local about = [[
 local version_msg = function ( )
     local out   = function (...) texiowrite_nl (stringformat (...)) end
     local uname = os.uname ()
+    local meta  = names.getmetadata ()
     out (about, luaotfload.self)
-    out ("%s version %q", luaotfload.self, version)
-    out ("revision %q", config.luaotfload.status.notes.revision)
-    out ("database version %q", names.version)
+    out ("%s version: %q", luaotfload.self, version)
+    out ("Revision: %q", config.luaotfload.status.notes.revision)
     out ("Lua interpreter: %s; version %q", runtime[1], runtime[2])
-    out ("Luatex SVN revision %d", status.luatex_svn)
-    out ("Luatex version %.2f.%d",
+    out ("Luatex SVN revision: %d", status.luatex_svn)
+    out ("Luatex version: %.2f.%d",
          status.luatex_version / 100,
          status.luatex_revision)
     out ("Platform: type=%s name=%s", os.type, os.name)
@@ -288,6 +288,10 @@ local version_msg = function ( )
         local var = uname_vars[i]
         out ("    + %8s: %s", var, uname[var])
     end
+    out ("Index: version=%q created=%q modified=%q",
+         config.luaotfload.status.notes.revision,
+         meta.created or "ages ago",
+         meta.modified or "ages ago")
     out ""
 end
 

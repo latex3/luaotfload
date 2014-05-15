@@ -462,6 +462,7 @@ local get_font_filter
 local group_modifiers
 local load_lookups
 local load_names
+local getmetadata
 local order_design_sizes
 local ot_fullinfo
 local read_blacklist
@@ -529,6 +530,11 @@ load_names = function (dry_run)
         end
     end
     return data
+end
+
+getmetadata = function ()
+    if not name_index then name_index = load_names() end
+    return tablefastcopy (name_index.meta)
 end
 
 --- unit -> unit
@@ -3459,6 +3465,7 @@ names.crude_file_lookup_verbose   = crude_file_lookup_verbose
 names.read_blacklist              = read_blacklist
 names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath
+names.getmetadata                 = getmetadata
 names.set_location_precedence     = set_location_precedence
 names.count_font_files            = count_font_files
 names.nth_font_filename           = nth_font_filename

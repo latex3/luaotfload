@@ -482,8 +482,8 @@ load_names = function (dry_run)
     local foundname, data = load_lua_file (config.luaotfload.paths.index_path_lua)
 
     if data then
-        report ("both", 2, "db",
-                "Font names database loaded", "%s", foundname)
+        report ("log", 0, "db",
+                "Font names database loaded from %s", foundname)
         report ("info", 3, "db", "Loading took %0.f ms.",
                 1000 * (osgettimeofday () - starttime))
 
@@ -528,7 +528,8 @@ end
 load_lookups = function ( )
     local foundname, data = load_lua_file(config.luaotfload.paths.lookup_path_lua)
     if data then
-        report("both", 3, "cache",
+        report("log", 0, "cache", "Lookup cache loaded from %s.", foundname)
+        report("term", 3, "cache",
                "Lookup cache loaded from %s.", foundname)
     else
         report("both", 1, "cache",
@@ -3438,7 +3439,6 @@ end
 --- export functionality to the namespace “fonts.names”
 -----------------------------------------------------------------------
 
-names.initialize_env              = initialize_env
 names.set_font_filter             = set_font_filter
 names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups

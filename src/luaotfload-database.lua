@@ -268,8 +268,10 @@ This is a sketch of the luaotfload db:
         optical : (int, int) list;  // design size -> index entry
     }
     and metadata = {
-        local       : bool;        (* set if local fonts were added to the db *)
+        created     : string       // creation time
         formats     : string list; // { "otf", "ttf", "ttc", "dfont" }
+        local       : bool;        (* set if local fonts were added to the db *)
+        modified    : string       // modification time
         statistics  : TODO;        // created when built with "--stats"
         version     : float;       // index version
     }
@@ -352,9 +354,10 @@ mtx-fonts has in names.tma:
 
 --doc]]--
 
---- string list -> dbobj
+--- string list -> string option -> dbobj
 
-local initialize_namedata = function (formats)
+local initialize_namedata = function (formats, created)
+    local now = os.date "%F %T"
     return {
         --families        = { },
         status          = { }, -- was: status; map abspath -> mapping
@@ -362,8 +365,10 @@ local initialize_namedata = function (formats)
         names           = { },
 --      files           = { }, -- created later
         meta            = {
-            ["local"]  = false,
+            created    = created or now,
             formats    = formats,
+            ["local"]  = false,
+            modified   = now,
             statistics = { },
             version    = names.version,
         },
@@ -3139,7 +3144,8 @@ update_names = function (currentnames, force, dry_run)
             end
         end
 
-        targetnames = initialize_namedata (get_font_filter ())
+        targetnames = initialize_namedata (get_font_filter (),
+                                           currentnames.meta and currentnames.meta.created)
 
         read_blacklist ()
 

@@ -40,7 +40,7 @@
 \input docstrip.tex
 \Msg{************************************************************************}
 \Msg{* Installation}
-\Msg{* Package: luaotfload v2.4-3 OpenType layout system}
+\Msg{* Package: luaotfload v2.4-4 OpenType layout system}
 \Msg{************************************************************************}
 
 \keepsilent
@@ -111,7 +111,7 @@ and the derived files
 %<*driver>
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesFile{luaotfload.drv}%
-  [2014/02/05 v2.4-3 OpenType layout system]%
+  [2014/05/18 v2.4-4 OpenType layout system]%
 \documentclass{ltxdoc}
 \usepackage{metalogo,multicol,mdwlist,fancyvrb,xspace}
 \usepackage[x11names]{xcolor}
@@ -231,7 +231,7 @@ and the derived files
 % \GetFileInfo{luaotfload.drv}
 %
 % \title{The \identifier{luaotfload} package}
-% \date{2014/02/05 v2.4-3}
+% \date{2014/05/18 v2.4-4}
 % \author{Elie Roux · Khaled Hosny · Philipp Gesang\\
 %         Home:      \url{https://github.com/lualatex/luaotfload}\\
 %         Support:   \email{lualatex-dev@tug.org}}
@@ -1608,8 +1608,8 @@ end
 
 luaotfload.module = {
     name          = "luaotfload",
-    version       = 2.40004, --- 2.4-3
-    date          = "2014/02/05",
+    version       = 2.40005, --- 2.4-4
+    date          = "2014/05/18",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -2233,7 +2233,7 @@ luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
-    [2014/02/05 v2.4-3 OpenType layout system]
+    [2014/05/18 v2.4-4 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
 \ifnum\luatexversion<76

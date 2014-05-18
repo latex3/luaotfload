@@ -1,6 +1,10 @@
 Change History
 --------------
 
+2014/05/18, luaotfload v2.4-4
+    * Fix incorrect handling of font file formats (backport of commit
+      828a69ef... to the 2.5 branch).
+
 2014/02/05, luaotfload v2.4-3
     * Add contact info to --version output of luaotfload-tool (backport from
       2.5).

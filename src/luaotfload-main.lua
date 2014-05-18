@@ -565,7 +565,7 @@ request_resolvers.path = function (specification)
     local name       = specification.name
     local exists, _  = lfsisfile(name)
     if not exists then -- resort to file: lookup
-        report ("log", 1, "load",
+        report ("log", 0, "load",
                 "path lookup of %q unsuccessful, falling back to file:",
                 name)
         file_resolver (specification)
@@ -625,6 +625,8 @@ request_resolvers.name = function (specification)
     end
     local resolved, subfont = resolver (specification)
     if resolved then
+        report ("log", 0, "load", "Lookup/name: %q -> \"%s(%d)\"",
+                specification.name, resolved, subfont)
         specification.resolved   = resolved
         specification.sub        = subfont
         specification.forced     = filesuffix (resolved)

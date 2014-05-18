@@ -54,7 +54,7 @@ local start_rewrite_fontname = function ()
       rewrite_fontname,
       "luaotfload.rewrite_fontname")
     rewriting = true
-    report ("log", 0, "aux",
+    report ("log", 1, "aux",
             "start rewriting tfmdata.name field")
   end
 end
@@ -66,7 +66,7 @@ local stop_rewrite_fontname = function ()
     luatexbase.remove_fromt_callback
       ("luaotfload.patch_font", "luaotfload.rewrite_fontname")
     rewriting = false
-    report ("log", 0, "aux",
+    report ("log", 1, "aux",
             "stop rewriting tfmdata.name field")
   end
 end

@@ -808,13 +808,13 @@ local set_default_features = function (speclist)
     end
     speclist.script = script
 
-    report("log", 0, "load",
+    report("log", 1, "load",
         "auto-selecting default features for script: %s",
         script)
 
     local requested = defaults[script]
     if not requested then
-        report("log", 0, "load",
+        report("log", 1, "load",
             "no defaults for script %q, falling back to \"dflt\"",
             script)
         requested = defaults.dflt

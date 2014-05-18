@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/15/14 19:52:15
+-- merge date  : 05/17/14 23:46:22
 
 do -- begin closure to overcome local limits and interference
 
@@ -3459,6 +3459,15 @@ function caches.compile(data,luaname,lucname)
 end
 function table.setmetatableindex(t,f)
   setmetatable(t,{ __index=f })
+end
+arguments={}
+if arg then
+  for i=1,#arg do
+    local k,v=string.match(arg[i],"^%-%-([^=]+)=?(.-)$")
+    if k and v then
+      arguments[k]=v
+    end
+  end
 end
 
 end -- closure

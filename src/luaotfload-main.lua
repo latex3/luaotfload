@@ -63,6 +63,7 @@ local luatexbase       = luatexbase
 
 local setmetatable     = setmetatable
 local type, next       = type, next
+local stringlower      = string.lower
 
 local kpsefind_file    = kpse.find_file
 local lfsisfile        = lfs.isfile
@@ -477,14 +478,14 @@ fonts.encodings.known     = fonts.encodings.known or { }
 
 --doc]]--
 
-local resolve_file        = names.crude_file_lookup
---local resolve_file        = names.crude_file_lookup_verbose
+--local resolve_file        = names.crude_file_lookup
+local resolve_file        = names.crude_file_lookup_verbose
 
 local file_resolver = function (specification)
     local name    = resolve_file (specification.name)
     local suffix  = filesuffix(name)
     if formats[suffix] then
-        specification.forced      = suffix
+        specification.forced      = stringlower (suffix)
         specification.forcedname  = file.removesuffix(name)
     else
         specification.name = name
@@ -522,7 +523,7 @@ request_resolvers.file = file_resolver
 
 --doc]]--
 
-local type1_formats = { "tfm", "ofm", }
+local type1_formats = { "tfm", "ofm", "TFM", "OFM", }
 
 request_resolvers.anon = function (specification)
     local name = specification.name
@@ -572,7 +573,7 @@ request_resolvers.path = function (specification)
     else
         local suffix = filesuffix (name)
         if formats[suffix] then
-            specification.forced      = suffix
+            specification.forced      = stringlower (suffix)
             specification.name        = file.removesuffix(name)
             specification.forcedname  = name
         else
@@ -595,7 +596,7 @@ request_resolvers.kpse = function (specification)
     if suffix and formats[suffix] then
         name = file.removesuffix(name)
         if resolvers.findfile(name, suffix) then
-            specification.forced       = suffix
+            specification.forced       = stringlower (suffix)
             specification.forcedname   = name
             return
         end
@@ -629,7 +630,7 @@ request_resolvers.name = function (specification)
                 specification.name, resolved, subfont)
         specification.resolved   = resolved
         specification.sub        = subfont
-        specification.forced     = filesuffix (resolved)
+        specification.forced     = stringlower (filesuffix (resolved) or "")
         specification.forcedname = resolved
         specification.name       = fileremovesuffix (resolved)
     else

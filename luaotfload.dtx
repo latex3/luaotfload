@@ -1995,7 +1995,7 @@ local file_resolver = function (specification)
     local name    = resolve_file (specification.name)
     local suffix  = filesuffix(name)
     if formats[suffix] then
-        specification.forced      = suffix
+        specification.forced      = string.lower (suffix)
         specification.forcedname  = file.removesuffix(name)
     else
         specification.name = name
@@ -2080,7 +2080,7 @@ request_resolvers.path = function (specification)
     else
         local suffix = filesuffix (name)
         if formats[suffix] then
-            specification.forced      = suffix
+            specification.forced      = string.lower (suffix)
             specification.name        = file.removesuffix(name)
             specification.forcedname  = name
         else
@@ -2102,7 +2102,7 @@ request_resolvers.kpse = function (specification)
     if suffix and formats[suffix] then
         name = file.removesuffix(name)
         if resolvers.findfile(name, suffix) then
-            specification.forced       = suffix
+            specification.forced       = string.lower (suffix)
             specification.forcedname   = name
             return
         end
@@ -2130,7 +2130,7 @@ request_resolvers.name = function (specification)
     if resolved then
         specification.resolved   = resolved
         specification.sub        = subfont
-        specification.forced     = filesuffix (resolved)
+        specification.forced     = string.lower (filesuffix (resolved) or "")
         specification.forcedname = resolved
         specification.name       = fileremovesuffix (resolved)
     else

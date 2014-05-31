@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/18/14 15:57:13
+-- merge date  : 05/30/14 23:26:41
 
 do -- begin closure to overcome local limits and interference
 
@@ -2851,12 +2851,12 @@ local format_f=function(f)
   n=n+1
   return format("format('%%%sf',a%s)",f,n)
 end
-local format_F=function(f)
+local format_F=function()
   n=n+1
   if not f or f=="" then
-    return format("(((a%s > -0.0000000005 and a%s < 0.0000000005) and '0') or (a%s == 1 and '1') or format('%%.9f',a%s))",n,n,n,n)
+    return format("(((a%s > -0.0000000005 and a%s < 0.0000000005) and '0') or format((a%s %% 1 == 0) and '%%i' or '%%.9f',a%s))",n,n,n,n)
   else
-    return format("((a%s == 0 and '0') or (a%s == 1 and '1') or format('%%%sf',a%s))",n,n,f,n)
+    return format("format((a%s %% 1 == 0) and '%%i' or '%%%sf',a%s)",n,f,n)
   end
 end
 local format_g=function(f)

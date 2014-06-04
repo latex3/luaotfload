@@ -244,9 +244,14 @@
 
 \directlua {
   local texprint   = tex.print
+  local stringsub  = string.sub
+  local backslash  = string.byte (0x5c)
   document         = document or { }
   document.printlines = function (buffer)
     for _, line in next, string.explode (buffer, "\noexpand\n") do
+      if stringsub (line, 1, 1) == " " then
+        line = backslash .. line
+      end
       texprint (-1, line)
       texprint (-1, "")
     end

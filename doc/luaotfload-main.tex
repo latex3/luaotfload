@@ -1412,17 +1412,35 @@ are defined for which scripts.
 
 \endsubsubsection
 
+\beginsubsubsection{Database}
+
 %% not implemented, may come back later
-% \beginsubsubsection{Database}
-%
-% \beginfunctionlist
+\beginfunctionlist
 %   \beginaltitem  {aux.scan_external_dir(dir : string)}
 %             Include fonts in directory \luafunction{dir} in font lookups without
 %             adding them to the database.
 %
-% \endfunctionlist
-%
-% \endsubsubsection
+  \beginaltitem  {aux.read_font_index (void)}
+            Read the index file from the appropriate location (usually
+            the bytecode file \fileent{luaotfload-names.luc} somewhere
+            in the \fileent{texmf-var} tree) and return the result as a
+            table. The file is processed with each call so it is up to
+            the user to store the result for later access.
+  \endaltitem
+
+  \beginaltitem  {aux.font_index (void)}
+            Return a reference of the font names table used internally
+            by \identifier{luaotfload}. The index will be read if it
+            has not been loaded up to this point. Also a font scan that
+            overwrites the current index file might be triggered. Since
+            the return value points to the actual index, any
+            modifications to the table might influence runtime behavior
+            of \identifier{luaotfload}.
+  \endaltitem
+
+\endfunctionlist
+
+\endsubsubsection
 
 \endsubsection
 \endsection
@@ -1440,8 +1458,7 @@ target.
 %
 The development takes place on \identifier{github} at
 \hyperlink {https://github.com/lualatex/luaotfload} where there is an issue
-tracker for submitting bug reports, feature requests and the likes
-requests and the likes.
+tracker for submitting bug reports, feature requests and the likes.
 
 Bug reports are more likely to be addressed if they contain the output
 of

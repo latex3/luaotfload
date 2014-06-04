@@ -452,6 +452,7 @@ local load_lua_file = function (path)
 end
 
 --- define locals in scope
+local access_font_index
 local collect_families
 local crude_file_lookup
 local crude_file_lookup_verbose
@@ -530,6 +531,18 @@ load_names = function (dry_run)
         end
     end
     return data
+end
+
+--[[doc--
+
+    access_font_index -- Provide a reference of the index table. Will
+    cause the index to be loaded if not present.
+
+--doc]]--
+
+access_font_index = function ()
+    if not name_index then name_index = load_names () end
+    return name_index
 end
 
 getmetadata = function ()
@@ -3457,6 +3470,7 @@ names.set_font_filter             = set_font_filter
 names.flush_lookup_cache          = flush_lookup_cache
 names.save_lookups                = save_lookups
 names.load                        = load_names
+names.access_font_index           = access_font_index
 names.data                        = function () return name_index end
 names.save                        = save_names
 names.update                      = update_names

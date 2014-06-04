@@ -20,6 +20,7 @@ local log                   = luaotfload.log
 local report                = log.report
 local fonthashes            = fonts.hashes
 local identifiers           = fonthashes.identifiers
+local fontnames             = fonts.names
 
 local fontid                = font.id
 local texsprint             = tex.sprint
@@ -590,8 +591,8 @@ aux.sprint_math_dimension = sprint_math_dimension
 ---                    extra database functions
 -----------------------------------------------------------------------
 
-local namesresolve      = fonts.names.resolve
-local namesscan_dir     = fonts.names.scan_dir
+local namesresolve      = fontnames.resolve
+local namesscan_dir     = fontnames.scan_dir
 
 --[====[-- TODO -> port this to new db model
 
@@ -662,6 +663,42 @@ resolve_fontlist = function (names, n)
 end
 
 aux.resolve_fontlist = resolve_fontlist
+
+--- index access ------------------------------------------------------
+
+--- Based on a discussion on the Luatex mailing list:
+--- http://tug.org/pipermail/luatex/2014-June/004881.html
+
+--[[doc--
+
+  aux.read_font_index -- Read the names index from the canonical
+  location and return its contents. This does not affect the behavior
+  of Luaotfload: The returned table is independent of what the font
+  resolvers use internally. Access is raw: each call to the function
+  will result in the entire table being re-read from disk.
+
+--doc]]--
+
+local load_names        = fontnames.load
+local access_font_index = fontnames.access_font_index
+
+local read_font_index = function ()
+  return load_names (true) or { }
+end
+
+--[[doc--
+
+  aux.font_index -- Access Luaotfload’s internal database. If the
+  database hasn’t been loaded yet this will cause it to be loaded, with
+  all the possible side-effects like for instance creating the index
+  file if it doesn’t exist, reading all font files, &c.
+
+--doc]]--
+
+local font_index = function () return access_font_index () end
+
+aux.read_font_index = read_font_index
+aux.font_index      = font_index
 
 --- loaded fonts ------------------------------------------------------
 

@@ -17,6 +17,8 @@ Change History
     * Scan local font files (``--local`` flag to luaotfload-tool, flag
       ``scan_local`` during TeX run).
     * Add bisection mode (``--bisect``) to luaotfload-tool.
+    * Add functions for accessing the database: ``aux.font_index()`` and
+      ``aux.read_font_index()``.
 
 2013/12/31, luaotfload v2.4
     * Additional self-tests, now in separate file (luaotfload-diagnostics.lua)

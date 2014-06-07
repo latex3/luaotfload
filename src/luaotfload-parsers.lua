@@ -207,17 +207,19 @@ local conf_filter = function (path)
 end
 
 --[[doc--
-      read_fonts_conf_indeed() is called with six arguments; the
+      read_fonts_conf_indeed() is called with seven arguments; the
       latter three are tables that represent the state and are
       always returned.
-      The first three are
+      The first four are
           · the path to the file
           · the expanded $HOME
-          · the expanded $XDG_CONFIG_DIR
+          · the expanded $XDG_CONFIG_HOME
+          · the expanded $XDG_DATA_HOME
 --doc]]--
 --- string -> string -> string -> tab -> tab -> (tab * tab * tab)
 local read_fonts_conf_indeed
-read_fonts_conf_indeed = function (start, home, xdg_home,
+read_fonts_conf_indeed = function (start, home, xdg_config_home,
+                                   xdg_data_home,
                                    acc, done, dirs_done,
                                    find_files)
 
@@ -230,12 +232,11 @@ read_fonts_conf_indeed = function (start, home, xdg_home,
     local pathobj = paths[i]
     local kind, path = pathobj[1], pathobj[2]
     local attributes = pathobj.attributes
-    if attributes and attributes.prefix == "xdg" then
-      --- this prepends the xdg root (usually ~/.config)
-      path = filejoin(xdg_home, path)
-    end
 
     if kind == "dir" then
+      if attributes and attributes.prefix == "xdg" then
+        path = filejoin(xdg_data_home, path)
+      end
       if stringsub(path, 1, 1) == "~" then
         path = filejoin(home, stringsub(path, 2))
       end
@@ -252,6 +253,9 @@ read_fonts_conf_indeed = function (start, home, xdg_home,
       end
 
     elseif kind == "include" then
+      if attributes and attributes.prefix == "xdg" then
+        path = filejoin(xdg_config_home, path)
+      end
       --- here the path can be four things: a directory or a file,
       --- in absolute or relative path.
       if stringsub(path, 1, 1) == "~" then
@@ -268,14 +272,14 @@ read_fonts_conf_indeed = function (start, home, xdg_home,
             --- we exclude path with texmf in them, as they should
             --- be found otherwise
             acc = read_fonts_conf_indeed(
-            path, home, xdg_home,
+            path, home, xdg_config_home, xdg_data_home,
             acc,  done, dirs_done)
           elseif lfsisdir(path) then --- arrow code ahead
             local config_files = find_files (path, conf_filter)
             for _, filename in next, config_files do
               if not done[filename] then
                 acc = read_fonts_conf_indeed(
-                filename, home, xdg_home,
+                filename, home, xdg_config_home, xdg_data_home,
                 acc,      done, dirs_done)
               end
             end
@@ -292,10 +296,10 @@ read_fonts_conf_indeed = function (start, home, xdg_home,
       read_fonts_conf() sets up an accumulator and two sets
       for tracking what’s been done.
 
-      Also, the environment variables HOME and XDG_CONFIG_HOME --
-      which are constants anyways -- are expanded so don’t have to
-      repeat that over and over again as with the old parser.
-      Now they’re just passed on to every call of
+      Also, the environment variables HOME, XDG_DATA_HOME and
+      XDG_CONFIG_HOME -- which are constants anyways -- are expanded
+      so we don’t have to repeat that over and over again as with the
+      old parser. Now they’re just passed on to every call of
       read_fonts_conf_indeed().
 
       read_fonts_conf() is also the only reference visible outside
@@ -306,14 +310,17 @@ read_fonts_conf_indeed = function (start, home, xdg_home,
 
 local read_fonts_conf = function (path_list, find_files)
   local home      = kpseexpand_path"~" --- could be os.getenv"HOME"
-  local xdg_home  = kpseexpand_path"$XDG_CONFIG_HOME"
-  if xdg_home == "" then xdg_home = filejoin(home, ".config") end
+  local xdg_config_home  = kpseexpand_path"$XDG_CONFIG_HOME"
+  if xdg_config_home == "" then xdg_config_home = filejoin(home, ".config") end
+  local xdg_data_home  = kpseexpand_path"$XDG_DATA_HOME"
+  if xdg_data_home == "" then xdg_data_home = filejoin(home, ".local/share") end
   local acc       = { } ---> list: paths collected
   local done      = { } ---> set:  files inspected
   local dirs_done = { } ---> set:  dirs in list
   for i=1, #path_list do --- we keep the state between files
     acc, done, dirs_done = read_fonts_conf_indeed(
-                                path_list[i], home, xdg_home,
+                                path_list[i], home, xdg_config_home,
+                                xdg_data_home,
                                 acc, done, dirs_done,
                                 find_files)
   end

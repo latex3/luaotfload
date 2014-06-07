@@ -19,6 +19,7 @@ Change History
     * Add bisection mode (``--bisect``) to luaotfload-tool.
     * Add functions for accessing the database: ``aux.font_index()`` and
       ``aux.read_font_index()``.
+    * Distinguish XDG configuration paths (Reuben Thomas)
 
 2013/12/31, luaotfload v2.4
     * Additional self-tests, now in separate file (luaotfload-diagnostics.lua)

@@ -77,7 +77,7 @@ local kpse_t = 1
 local config_paths = {
   --- needs adapting for those other OS
   { path_t, "./luaotfloadrc" },
-  { path_t, "~/.config/luaotfload/luaotfloadrc" },
+  { path_t, "~/.config/luaotfload/luaotfload.conf" },
   { path_t, "~/.luaotfloadrc" },
   { kpse_t, "luaotfloadrc" },
   { kpse_t, "luaotfload.conf" },

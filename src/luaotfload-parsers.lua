@@ -311,9 +311,6 @@ read_fonts_conf_indeed = function (start, home, xdg_config_home,
       so we don’t have to repeat that over and over again as with the
       old parser. Now they’re just passed on to every call of
       read_fonts_conf_indeed().
-
-      read_fonts_conf() is also the only reference visible outside
-      the closure.
 --doc]]--
 
 --- list -> (string -> function option -> string list) -> list

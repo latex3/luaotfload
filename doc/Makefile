@@ -3,14 +3,20 @@ DOCPDF		= $(NAME).pdf
 DOCSRC		= $(NAME)-latex.tex
 
 SCRIPTNAME	= luaotfload-tool
-MANSOURCE	= $(SCRIPTNAME).rst
-MANPAGE		= $(SCRIPTNAME).1
+TOOLMANSRC	= $(SCRIPTNAME).rst
+TOOLMAN		= $(SCRIPTNAME).1
+
+CONFNAME	= luaotfload.conf
+CONFMANSRC	= $(CONFNAME).rst
+CONFMAN		= $(CONFNAME).5
+
+MANPAGES	= $(TOOLMAN) $(CONFMAN)
 
 GRAPH		= filegraph
 DOTPDF		= $(GRAPH).pdf
 DOT		= $(GRAPH).dot
 
-DOCS		= $(DOTPDF) $(DOCPDF) $(MANPAGE)
+DOCS		= $(DOTPDF) $(DOCPDF) $(MANPAGES)
 
 DO_LATEXMK	= @latexmk -e '$$max_repeat = 5' -pdf -lualatex -silent $< >/dev/null
 # latexmk does only one run on my machine, so we’re not going to rely on it
@@ -19,9 +25,9 @@ DO_GRAPHVIZ	= @dot -Tpdf -o $@ $< > /dev/null
 DO_DOCUTILS	= @rst2man $< >$@ 2>/dev/null
 
 doc: graph $(DOCPDF)
-all: manual doc
+all: manuals doc
 graph: $(DOTPDF)
-manual: $(MANPAGE)
+manuals: $(TOOLMAN) $(CONFMAN)
 
 $(DOCPDF): $(DOCSRC)
 	@echo "creating PDF documentation ($@)"
@@ -29,8 +35,12 @@ $(DOCPDF): $(DOCSRC)
 	$(DO_LATEX)
 	mv -f -- $(<:tex=pdf) $@
 
-$(MANPAGE): $(MANSOURCE)
-	@echo "creating man page ($(MANPAGE))"
+$(TOOLMAN): $(TOOLMANSRC)
+	@echo "creating man page ($(TOOLMAN))"
+	$(DO_DOCUTILS)
+
+$(CONFMAN): $(CONFMANSRC)
+	@echo "creating man page ($(CONFMAN))"
 	$(DO_DOCUTILS)
 
 $(DOTPDF): $(DOT)

@@ -25,16 +25,20 @@ RESOURCESCRIPTS = $(GLYPHSCRIPT) $(CHARSCRIPT) $(STATUSSCRIPT)
 TOOLNAME	= luaotfload-tool
 TOOL		= $(SRCSRCDIR)/$(TOOLNAME).lua
 
+CONFNAME	= luaotfload.conf
+
 GRAPH		= filegraph
 DOCSRC		= $(addprefix $(DOCSRCDIR)/$(NAME), -main.tex -latex.tex)
 GRAPHSRC	= $(DOCSRCDIR)/$(GRAPH).dot
-MANSRC		= $(DOCSRCDIR)/$(TOOLNAME).rst
+MANSRC		= $(DOCSRCDIR)/$(TOOLNAME).rst $(DOCSRCDIR)/$(CONFNAME).rst
 
 DOCPDF		= $(DOCSRCDIR)/$(NAME).pdf
 DOTPDF		= $(DOCSRCDIR)/$(GRAPH).pdf
-MANPAGE		= $(DOCSRCDIR)/$(TOOLNAME).1
+TOOLMAN 	= $(DOCSRCDIR)/$(TOOLNAME).1
+CONFMAN		= $(DOCSRCDIR)/$(CONFNAME).5
+MANPAGES	= $(TOOLMAN) $(CONFMAN)
 
-DOCS		= $(DOCPDF) $(DOTPDF) $(MANPAGE)
+DOCS		= $(DOCPDF) $(DOTPDF) $(MANPAGES)
 
 # Files grouped by generation mode
 GLYPHS		= $(BUILDDIR)/$(NAME)-glyphlist.lua
@@ -47,7 +51,6 @@ SOURCE		= $(DOCSRC) $(MANSRC) $(SRC) README COPYING Makefile NEWS $(RESOURCESCRI
 SCRIPTSTATUS	= $(TOOL) $(RESOURCESCRIPTS)
 RUNSTATUS	= $(filter-out $(SCRIPTSTATUS),$(SRC))
 DOCSTATUS	= $(DOCPDF) $(DOTPDF) README NEWS COPYING
-MANSTATUS	= $(MANPAGE)
 SRCSTATUS	= $(DOCSRC) $(MANSRC) $(GRAPHSRC) Makefile
 
 # The following definitions should be equivalent
@@ -59,7 +62,8 @@ FORMAT 		= luatex
 SCRIPTDIR	= $(TEXMFROOT)/scripts/$(NAME)
 RUNDIR		= $(TEXMFROOT)/tex/$(FORMAT)/$(NAME)
 DOCDIR		= $(TEXMFROOT)/doc/$(FORMAT)/$(NAME)
-MANDIR		= $(TEXMFROOT)/doc/man/man1/
+MAN1DIR		= $(TEXMFROOT)/doc/man/man1/
+MAN5DIR		= $(TEXMFROOT)/doc/man/man5/
 SRCDIR		= $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
 TEXMFROOT	= $(shell kpsewhich --var-value TEXMFHOME)
 
@@ -95,7 +99,7 @@ world: all ctan
 graph: $(DOTPDF)
 doc: $(DOCS)
 pdf: $(DOCPDF)
-manual: $(MANPAGE)
+manual: $(MANPAGES)
 
 $(DOTPDF):
 	@$(MAKE) -C $(DOCSRCDIR) graph
@@ -103,8 +107,8 @@ $(DOTPDF):
 $(DOCPDF):
 	@$(MAKE) -C $(DOCSRCDIR) doc
 
-$(MANPAGE):
-	@$(MAKE) -C $(DOCSRCDIR) manual
+$(MANPAGES):
+	@$(MAKE) -C $(DOCSRCDIR) manuals
 
 $(GLYPHS): builddir
 	$(DO_GLYPHS)
@@ -132,7 +136,8 @@ $(CTAN_ZIP): $(DOCS) $(SOURCE) $(COMPILED) $(TDS_ZIP)
 define run-install-doc
 @mkdir -p $(DOCDIR) && cp -- $(DOCSTATUS) $(VGND) $(DOCDIR)
 @mkdir -p $(SRCDIR) && cp -- $(SRCSTATUS) $(SRCDIR)
-@mkdir -p $(MANDIR) && cp -- $(MANSTATUS) $(MANDIR)
+@mkdir -p $(MAN1DIR) && cp -- $(TOOLMAN) $(MAN1DIR)
+@mkdir -p $(MAN5DIR) && cp -- $(CONFMAN) $(MAN5DIR)
 endef
 
 define run-install
@@ -186,7 +191,8 @@ showtargets:
 	@echo "       resources   generate resource files (chars, glyphs)"
 	@echo
 	@echo "       pdf         build luaotfload.pdf"
-	@echo "       manual      crate manpage for luaotfload-tool (requires Docutils)"
+	@echo "       manual      crate manpages for luaotfload-tool(1) and"
+	@echo "                   luaotfload.conf(5) (requires Docutils)"
 	@echo "       graph       generate file graph (requires GraphViz)"
 	@echo
 	@echo "       chars       import char-def.lua as luaotfload-characters.lua"

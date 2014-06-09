@@ -626,8 +626,10 @@ request_resolvers.name = function (specification)
     end
     local resolved, subfont = resolver (specification)
     if resolved then
-        report ("log", 0, "load", "Lookup/name: %q -> \"%s(%d)\"",
-                specification.name, resolved, subfont)
+        report ("log", 0, "load", "Lookup/name: %q -> \"%s%s\"",
+                specification.name,
+                resolved,
+                subfont and stringformat ("(%d)", subfont) or "")
         specification.resolved   = resolved
         specification.sub        = subfont
         specification.forced     = stringlower (filesuffix (resolved) or "")

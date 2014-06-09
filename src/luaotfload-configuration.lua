@@ -46,6 +46,7 @@ local lpeg                    = require "lpeg"
 local lpegmatch               = lpeg.match
 
 local kpse                    = kpse
+local kpseexpand_path         = kpse.expand_path
 local kpselookup              = kpse.lookup
 
 local lfs                     = lfs
@@ -74,11 +75,18 @@ local getwritablepath         = caches.getwritablepath
 local path_t = 0
 local kpse_t = 1
 
+local val_home            = kpseexpand_path "~"
+local val_xdg_config_home = kpseexpand_path "$XDG_CONFIG_HOME"
+
+if val_xdg_config_home == "" then val_xdg_config_home = "~/.config" end
+
 local config_paths = {
   --- needs adapting for those other OS
+  { path_t, "./luaotfload.conf" },
   { path_t, "./luaotfloadrc" },
-  { path_t, "~/.config/luaotfload/luaotfload.conf" },
-  { path_t, "~/.luaotfloadrc" },
+  { path_t, filejoin (val_xdg_config_home, "luaotfload/luaotfload.conf") },
+  { path_t, filejoin (val_xdg_config_home, "luaotfload/luaotfloadrc") },
+  { path_t, filejoin (val_home, ".luaotfloadrc") },
   { kpse_t, "luaotfloadrc" },
   { kpse_t, "luaotfload.conf" },
 }

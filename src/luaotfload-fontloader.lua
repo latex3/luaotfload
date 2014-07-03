@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/30/14 23:26:41
+-- merge date  : 07/03/14 14:52:08
 
 do -- begin closure to overcome local limits and interference
 
@@ -217,9 +217,12 @@ patterns.integer=sign^-1*digit^1
 patterns.unsigned=digit^0*period*digit^1
 patterns.float=sign^-1*patterns.unsigned
 patterns.cunsigned=digit^0*comma*digit^1
+patterns.cpunsigned=digit^0*(period+comma)*digit^1
 patterns.cfloat=sign^-1*patterns.cunsigned
+patterns.cpfloat=sign^-1*patterns.cpunsigned
 patterns.number=patterns.float+patterns.integer
 patterns.cnumber=patterns.cfloat+patterns.integer
+patterns.cpnumber=patterns.cpfloat+patterns.integer
 patterns.oct=zero*octdigit^1
 patterns.octal=patterns.oct
 patterns.HEX=zero*P("X")*(digit+uppercase)^1
@@ -636,21 +639,22 @@ function lpeg.append(list,pp,delayed,checked)
   end
   return p
 end
-local function make(t)
-  local p
+local function make(t,hash)
+  local p=P(false)
   local keys=sortedkeys(t)
   for i=1,#keys do
     local k=keys[i]
     local v=t[k]
-    if not p then
+    local h=hash[v]
+    if h then
       if next(v) then
-        p=P(k)*make(v)
+        p=p+P(k)*(make(v,hash)+P(true))
       else
-        p=P(k)
+        p=p+P(k)*P(true)
       end
     else
       if next(v) then
-        p=p+P(k)*make(v)
+        p=p+P(k)*make(v,hash)
       else
         p=p+P(k)
       end
@@ -660,16 +664,20 @@ local function make(t)
 end
 function lpeg.utfchartabletopattern(list) 
   local tree={}
+  local hash={}
   for i=1,#list do
     local t=tree
     for c in gmatch(list[i],".") do
-      if not t[c] then
-        t[c]={}
+      local tc=t[c]
+      if not tc then
+        tc={}
+        t[c]=tc
       end
-      t=t[c]
+      t=tc
     end
+    hash[t]=list[i]
   end
-  return make(tree)
+  return make(tree,hash)
 end
 patterns.containseol=lpeg.finder(eol)
 local function nextstep(n,step,result)
@@ -970,14 +978,14 @@ local function sortedhash(t,cmp)
     end
     local n=0
     local m=#s
-    local function kv(s)
+    local function kv() 
       if n<m then
         n=n+1
         local k=s[n]
         return k,t[k]
       end
     end
-    return kv,s
+    return kv 
   else
     return nothing
   end
@@ -1142,7 +1150,7 @@ local function simple_table(t)
         if tv=="number" then
           nt=nt+1
           if hexify then
-            tt[nt]=format("0x%04X",v)
+            tt[nt]=format("0x%X",v)
           else
             tt[nt]=tostring(v) 
           end
@@ -1173,7 +1181,7 @@ local function do_serialize(root,name,depth,level,indexed)
       local tn=type(name)
       if tn=="number" then
         if hexify then
-          handle(format("%s[0x%04X]={",depth,name))
+          handle(format("%s[0x%X]={",depth,name))
         else
           handle(format("%s[%s]={",depth,name))
         end
@@ -1212,7 +1220,7 @@ local function do_serialize(root,name,depth,level,indexed)
       if compact and first and tk=="number" and k>=first and k<=last then
         if tv=="number" then
           if hexify then
-            handle(format("%s 0x%04X,",depth,v))
+            handle(format("%s 0x%X,",depth,v))
           else
             handle(format("%s %s,",depth,v)) 
           end
@@ -1253,25 +1261,25 @@ local function do_serialize(root,name,depth,level,indexed)
       elseif tv=="number" then
         if tk=="number" then
           if hexify then
-            handle(format("%s [0x%04X]=0x%04X,",depth,k,v))
+            handle(format("%s [0x%X]=0x%X,",depth,k,v))
           else
             handle(format("%s [%s]=%s,",depth,k,v)) 
           end
         elseif tk=="boolean" then
           if hexify then
-            handle(format("%s [%s]=0x%04X,",depth,k and "true" or "false",v))
+            handle(format("%s [%s]=0x%X,",depth,k and "true" or "false",v))
           else
             handle(format("%s [%s]=%s,",depth,k and "true" or "false",v)) 
           end
         elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
           if hexify then
-            handle(format("%s %s=0x%04X,",depth,k,v))
+            handle(format("%s %s=0x%X,",depth,k,v))
           else
             handle(format("%s %s=%s,",depth,k,v)) 
           end
         else
           if hexify then
-            handle(format("%s [%q]=0x%04X,",depth,k,v))
+            handle(format("%s [%q]=0x%X,",depth,k,v))
           else
             handle(format("%s [%q]=%s,",depth,k,v)) 
           end
@@ -1280,7 +1288,7 @@ local function do_serialize(root,name,depth,level,indexed)
         if reduce and tonumber(v) then
           if tk=="number" then
             if hexify then
-              handle(format("%s [0x%04X]=%s,",depth,k,v))
+              handle(format("%s [0x%X]=%s,",depth,k,v))
             else
               handle(format("%s [%s]=%s,",depth,k,v))
             end
@@ -1294,7 +1302,7 @@ local function do_serialize(root,name,depth,level,indexed)
         else
           if tk=="number" then
             if hexify then
-              handle(format("%s [0x%04X]=%q,",depth,k,v))
+              handle(format("%s [0x%X]=%q,",depth,k,v))
             else
               handle(format("%s [%s]=%q,",depth,k,v))
             end
@@ -1310,7 +1318,7 @@ local function do_serialize(root,name,depth,level,indexed)
         if not next(v) then
           if tk=="number" then
             if hexify then
-              handle(format("%s [0x%04X]={},",depth,k))
+              handle(format("%s [0x%X]={},",depth,k))
             else
               handle(format("%s [%s]={},",depth,k))
             end
@@ -1326,7 +1334,7 @@ local function do_serialize(root,name,depth,level,indexed)
           if st then
             if tk=="number" then
               if hexify then
-                handle(format("%s [0x%04X]={ %s },",depth,k,concat(st,", ")))
+                handle(format("%s [0x%X]={ %s },",depth,k,concat(st,", ")))
               else
                 handle(format("%s [%s]={ %s },",depth,k,concat(st,", ")))
               end
@@ -1346,7 +1354,7 @@ local function do_serialize(root,name,depth,level,indexed)
       elseif tv=="boolean" then
         if tk=="number" then
           if hexify then
-            handle(format("%s [0x%04X]=%s,",depth,k,v and "true" or "false"))
+            handle(format("%s [0x%X]=%s,",depth,k,v and "true" or "false"))
           else
             handle(format("%s [%s]=%s,",depth,k,v and "true" or "false"))
           end
@@ -1362,7 +1370,7 @@ local function do_serialize(root,name,depth,level,indexed)
           local f=getinfo(v).what=="C" and dump(dummy) or dump(v)
           if tk=="number" then
             if hexify then
-              handle(format("%s [0x%04X]=load(%q),",depth,k,f))
+              handle(format("%s [0x%X]=load(%q),",depth,k,f))
             else
               handle(format("%s [%s]=load(%q),",depth,k,f))
             end
@@ -1377,7 +1385,7 @@ local function do_serialize(root,name,depth,level,indexed)
       else
         if tk=="number" then
           if hexify then
-            handle(format("%s [0x%04X]=%q,",depth,k,tostring(v)))
+            handle(format("%s [0x%X]=%q,",depth,k,tostring(v)))
           else
             handle(format("%s [%s]=%q,",depth,k,tostring(v)))
           end
@@ -1431,7 +1439,7 @@ local function serialize(_handle,root,name,specification)
     end
   elseif tname=="number" then
     if hexify then
-      handle(format("[0x%04X]={",name))
+      handle(format("[0x%X]={",name))
     else
       handle("["..name.."]={")
     end
@@ -1736,6 +1744,44 @@ function table.values(t,s)
     return values
   else
     return {}
+  end
+end
+function table.filtered(t,pattern,sort,cmp)
+  if t and type(pattern)=="string" then
+    if sort then
+      local s
+      if cmp then
+        s=sortedhashkeys(t,function(a,b) return cmp(t,a,b) end)
+      else
+        s=sortedkeys(t) 
+      end
+      local n=0
+      local m=#s
+      local function kv(s)
+        while n<m do
+          n=n+1
+          local k=s[n]
+          if find(k,pattern) then
+            return k,t[k]
+          end
+        end
+      end
+      return kv,s
+    else
+      local n=next(t)
+      local function iterator()
+        while n do
+          local k=n
+          n=next(t,k)
+          if find(k,pattern) then
+            return k,t[k]
+          end
+        end
+      end
+      return iterator,t
+    end
+  else
+    return nothing
   end
 end
 
@@ -2668,6 +2714,7 @@ local striplinepatterns={
   ["retain"]=p_retain_normal,
   ["retain and collapse"]=p_retain_collapse,
   ["retain and no empty"]=p_retain_noempty,
+  ["collapse"]=patterns.collapser,
 }
 strings.striplinepatterns=striplinepatterns
 function strings.striplines(str,how)
@@ -2851,7 +2898,7 @@ local format_f=function(f)
   n=n+1
   return format("format('%%%sf',a%s)",f,n)
 end
-local format_F=function()
+local format_F=function() 
   n=n+1
   if not f or f=="" then
     return format("(((a%s > -0.0000000005 and a%s < 0.0000000005) and '0') or format((a%s %% 1 == 0) and '%%i' or '%%.9f',a%s))",n,n,n,n)
@@ -3201,6 +3248,15 @@ else
   add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],{ xmlescape=lpeg.patterns.xmlescape })
   add(formatters,"tex",[[lpegmatch(texescape,%s)]],{ texescape=lpeg.patterns.texescape })
   add(formatters,"lua",[[lpegmatch(luaescape,%s)]],{ luaescape=lpeg.patterns.luaescape })
+end
+local dquote=patterns.dquote 
+local equote=patterns.escaped+dquote/'\\"'+1
+local space=patterns.space
+local cquote=Cc('"')
+local pattern=Cs(dquote*(equote-P(-2))^0*dquote)          
++Cs(cquote*(equote-space)^0*space*equote^0*cquote) 
+function string.optionalquoted(str)
+  return lpegmatch(pattern,str) or str
 end
 
 end -- closure
@@ -6608,7 +6664,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.755 
+otf.version=2.756 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -7812,6 +7868,14 @@ actions["reorganize lookups"]=function(data,filename,raw)
                 rule.current=s_hashed(names,s_h_cache)
               end
               rule.glyphs=nil
+              local lookups=rule.lookups
+              if lookups then
+                for i=1,#names do
+                  if not lookups[i] then
+                    lookups[i]="" 
+                  end
+                end
+              end
             end
           end
         end
@@ -9716,6 +9780,7 @@ local isolated={
   [0x0856]=true,[0x0858]=true,[0x0857]=true,
   [0x07FA]=true,
   [zwnj]=true,
+  [0x08AD]=true,
 }
 local final={ 
   [0x0622]=true,[0x0623]=true,[0x0624]=true,[0x0625]=true,
@@ -9733,15 +9798,16 @@ local final={
   [0x06D3]=true,[0x06D5]=true,[0x06EE]=true,[0x06EF]=true,
   [0x0759]=true,[0x075A]=true,[0x075B]=true,[0x076B]=true,
   [0x076C]=true,[0x0771]=true,[0x0773]=true,[0x0774]=true,
-	[0x0778]=true,[0x0779]=true,
+  [0x0778]=true,[0x0779]=true,
   [0x08AA]=true,[0x08AB]=true,[0x08AC]=true,
   [0xFEF5]=true,[0xFEF7]=true,[0xFEF9]=true,[0xFEFB]=true,
-	[0x0710]=true,[0x0715]=true,[0x0716]=true,[0x0717]=true,
-	[0x0718]=true,[0x0719]=true,[0x0728]=true,[0x072A]=true,
-	[0x072C]=true,[0x071E]=true,
+  [0x0710]=true,[0x0715]=true,[0x0716]=true,[0x0717]=true,
+  [0x0718]=true,[0x0719]=true,[0x0728]=true,[0x072A]=true,
+  [0x072C]=true,[0x071E]=true,
   [0x072F]=true,[0x074D]=true,
   [0x0840]=true,[0x0849]=true,[0x0854]=true,[0x0846]=true,
-  [0x084F]=true
+  [0x084F]=true,
+  [0x08AE]=true,[0x08B1]=true,[0x08B2]=true,
 }
 local medial={ 
   [0x0626]=true,[0x0628]=true,[0x062A]=true,[0x062B]=true,
@@ -9801,8 +9867,8 @@ local medial={
   [0x07D2]=true,[0x07D0]=true,[0x07CF]=true,[0x07CD]=true,
   [0x07CB]=true,[0x07D3]=true,[0x07E4]=true,[0x07D5]=true,
   [0x07E6]=true,
-  [tatweel]=true,
-  [zwj]=true,
+  [tatweel]=true,[zwj]=true,
+  [0x08A1]=true,[0x08AF]=true,[0x08B0]=true,
 }
 local arab_warned={}
 local function warning(current,what)

@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 07/03/14 14:52:08
+-- merge date  : 07/06/14 22:50:12
 
 do -- begin closure to overcome local limits and interference
 
@@ -665,17 +665,34 @@ end
 function lpeg.utfchartabletopattern(list) 
   local tree={}
   local hash={}
-  for i=1,#list do
-    local t=tree
-    for c in gmatch(list[i],".") do
-      local tc=t[c]
-      if not tc then
-        tc={}
-        t[c]=tc
+  local n=#list
+  if n==0 then
+    for s in next,list do
+      local t=tree
+      for c in gmatch(s,".") do
+        local tc=t[c]
+        if not tc then
+          tc={}
+          t[c]=tc
+        end
+        t=tc
       end
-      t=tc
+      hash[t]=s
     end
-    hash[t]=list[i]
+  else
+    for i=1,n do
+      local t=tree
+      local s=list[i]
+      for c in gmatch(s,".") do
+        local tc=t[c]
+        if not tc then
+          tc={}
+          t[c]=tc
+        end
+        t=tc
+      end
+      hash[t]=s
+    end
   end
   return make(tree,hash)
 end

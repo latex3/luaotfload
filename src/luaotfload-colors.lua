@@ -34,6 +34,9 @@ local traverse_nodes        = node.traverse
 local insert_node_before    = node.insert_before
 local insert_node_after     = node.insert_after
 
+local texset                = tex.set
+local texget                = tex.get
+
 local stringformat          = string.format
 local stringgsub            = string.gsub
 local stringfind            = string.find
@@ -276,20 +279,24 @@ local color_handler = function (head)
     local new_head = node_colorize(head, nil, nil)
     -- now append our page resources
     if res then
-        res["1"] = true
-        local tpr, t = tex.pdfpageresources, ""
+        res["1"]  = true
+        local tpr = texget("pdfpageresources")
+        local t   = ""
         for k in pairs(res) do
             local str = stringformat("/TransGs%s<</ca %s/CA %s>>", k, k, k)
             if not stringfind(tpr,str) then
                 t = t .. str
             end
         end
+        print""
         if t ~= "" then
+            print(">>", tpr, "<<")
             if not stringfind(tpr,"/ExtGState<<.*>>") then
                 tpr = tpr.."/ExtGState<<>>"
             end
             tpr = stringgsub(tpr,"/ExtGState<<","%1"..t)
-            tex.pdfpageresources = tpr
+            texset("global", "pdfpageresources", tpr)
+            print(">>", tpr, "<<")
         end
         res = nil -- reset res
     end

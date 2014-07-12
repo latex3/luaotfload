@@ -3,7 +3,7 @@
 =======================================================================
 
 -----------------------------------------------------------------------
-                       Luaotfload configuration
+                     Luaotfload configuration file
 -----------------------------------------------------------------------
 
 :Date:                  2014-06-09
@@ -15,12 +15,15 @@
 SYNOPSIS
 =======================================================================
 
-**XDG_CONFIG_HOME/luaotfload/luaotfload.conf**
-**XDG_CONFIG_HOME/luaotfload/luaotfloadrc**
-**~/.luaotfloadrc**
+- **./luaotfload{.conf,rc}**
+- **XDG_CONFIG_HOME/luaotfload/luaotfload{.conf,rc}**
+- **~/.luaotfloadrc**
 
 DESCRIPTION
 =======================================================================
+
+The file ``luaotfload.conf`` contains configuration options for
+*Luaotfload*, a font loading and font management component for LuaTeX.
 
 
 EXAMPLE
@@ -37,13 +40,27 @@ SYNTAX
 VARIABLES
 =======================================================================
 
+
 * TODO, list variables
 
 
 FILES
 =======================================================================
 
-* file locations
+Luaotfload only processes the first configuration file it encounters at
+one of the search locations. The file name may be either
+``luaotfload.conf`` or ``luaotfloadrc``, except for the dotfile in the
+user’s home directory which is expected at ``~/.luaotfloadrc``.
+
+Configuration files are located following a series of steps. The search
+terminates as soon as a suitable file is encountered. The sequence of
+locations that Luaotfload looks at is
+
+i.    The current working directory of the LuaTeX process.
+ii.   The subdirectory ``luaotfload/`` inside the XDG configuration
+      tree, e. g. ``/home/oenothea/config/luaotfload/``.
+iii.  The dotfile.
+iv.   The *TEXMF* (using kpathsea).
 
 
 SEE ALSO
@@ -58,6 +75,12 @@ SEE ALSO
 * LuaTeX                 `<http://luatex.org/>`_
 * Luaotfload on CTAN     `<http://ctan.org/pkg/luaotfload>`_
 
+
+REFERENCES
+=======================================================================
+
+* The XDG base specification
+  `<http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>`_.
 
 AUTHORS
 =======================================================================

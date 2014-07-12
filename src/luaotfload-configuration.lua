@@ -31,6 +31,8 @@ local stringexplode           = string.explode
 local table                   = table
 local tableappend             = table.append
 local tablecopy               = table.copy
+local tableconcat             = table.concat
+local tabletohash             = table.tohash
 
 local math                    = math
 local mathfloor               = math.floor
@@ -44,6 +46,7 @@ local osgetenv                = os.getenv
 
 local lpeg                    = require "lpeg"
 local lpegmatch               = lpeg.match
+local lpegsplitter            = lpeg.splitat ","
 
 local kpse                    = kpse
 local kpseexpand_path         = kpse.expand_path
@@ -90,6 +93,11 @@ local config_paths = {
   { kpse_t, "luaotfloadrc" },
   { kpse_t, "luaotfload.conf" },
 }
+
+local valid_formats = tabletohash {
+  "otf",   "ttc", "ttf", "dfont", "afm", "pfb", "pfa",
+}
+
 
 -------------------------------------------------------------------------------
 ---                                DEFAULTS
@@ -253,7 +261,43 @@ end
 
 local option_spec = {
   db = {
-    formats      = { in_t = string_t,  },
+    formats      = {
+      in_t  = string_t,
+      out_t = string_t,
+      transform = function (f)
+        local fields = { lpegmatch (lpegsplitter, f) }
+
+        --- check validity
+        if not fields then
+          logreport ("both", 0, "conf",
+                     "Expected list of identifiers, got %q.", f)
+          return nil
+        end
+
+        --- strip dupes
+        local known  = { }
+        local result = { }
+        for i = 1, #fields do
+          local field = fields[i]
+          if known[field] ~= true then
+            --- yet unknown, tag as seen
+            known[field] = true
+            --- include in output if valid
+            if valid_formats[field] == true then
+              result[#result + 1] = field
+            else
+              logreport ("both", 4, "conf",
+                          "Invalid font format identifier %q, ignoring.", field)
+            end
+          end
+        end
+        if #result == 0 then
+          --- force defaults
+          return nil
+        end
+        return tableconcat (result, ",")
+      end
+    },
     reload       = { in_t = boolean_t, },
     scan_local   = { in_t = boolean_t, },
     skip_read    = { in_t = boolean_t, },

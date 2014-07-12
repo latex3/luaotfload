@@ -107,7 +107,6 @@ local valid_formats = tabletohash {
 local default_config = {
   db = {
     formats     = "otf,ttf,ttc,dfont",
-    reload      = false,
     scan_local  = false,
     skip_read   = false,
     strip       = true,
@@ -300,7 +299,6 @@ local option_spec = {
         return tableconcat (result, ",")
       end
     },
-    reload       = { in_t = boolean_t, },
     scan_local   = { in_t = boolean_t, },
     skip_read    = { in_t = boolean_t, },
     strip        = { in_t = boolean_t, },

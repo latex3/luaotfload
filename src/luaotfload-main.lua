@@ -478,8 +478,7 @@ fonts.encodings.known     = fonts.encodings.known or { }
 
 --doc]]--
 
---local resolve_file        = names.crude_file_lookup
-local resolve_file        = names.crude_file_lookup_verbose
+local resolve_file        = names.font_file_lookup
 
 local file_resolver = function (specification)
     local name    = resolve_file (specification.name)

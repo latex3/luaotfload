@@ -1153,11 +1153,11 @@ actions.query = function (job)
     then
         foundname, subfont = names.resolve_name (tmpspec)
         if foundname then
-            foundname, _, success = names.crude_file_lookup (foundname)
+            foundname, _, success = names.font_file_lookup (foundname)
         end
     elseif tmpspec.lookup == "file" then
         foundname, _, success =
-            names.crude_file_lookup (tmpspec.name)
+            names.font_file_lookup (tmpspec.name)
     end
 
     if success then

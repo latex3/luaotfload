@@ -454,8 +454,7 @@ end
 --- define locals in scope
 local access_font_index
 local collect_families
-local crude_file_lookup
-local crude_file_lookup_verbose
+local font_file_lookup
 local find_closest
 local flush_lookup_cache
 local generate_filedata
@@ -594,59 +593,6 @@ local type1_metrics = { "tfm", "ofm", }
 
 local dummy_findfile = resolvers.findfile -- from basics-gen
 
---- filemap -> string -> string -> (string | bool)
-local verbose_lookup = function (data, kind, filename)
-    local found = data[kind][filename]
-    if found ~= nil then
-        found = data.full[found]
-        if found == nil then --> texmf
-            report("info", 0, "db",
-                "Crude file lookup: req=%s; hit=%s => kpse.",
-                filename, kind)
-            found = dummy_findfile(filename)
-        else
-            report("info", 0, "db",
-                "Crude file lookup: req=%s; hit=%s; ret=%s.",
-                filename, kind, found)
-        end
-        return found
-    end
-    return false
-end
-
---- string -> (string * string * bool)
-crude_file_lookup_verbose = function (filename)
-    if not name_index then name_index = load_names() end
-    local mappings  = name_index.mappings
-    local files     = name_index.files
-    local found
-
-    --- look up in db first ...
-    found = verbose_lookup(files, "bare", filename)
-    if found then
-        return found, nil, true
-    end
-    found = verbose_lookup(files, "base", filename)
-    if found then
-        return found, nil, true
-    end
-
-    --- ofm and tfm, returns pair
-    for i=1, #type1_metrics do
-        local format = type1_metrics[i]
-        if resolvers.findfile(filename, format) then
-            return file.addsuffix(filename, format), format, true
-        end
-    end
-
-    if not fonts_reloaded and config.luaotfload.db.update_live == true then
-        return reload_db (stringformat ("File not found: %s.", filename),
-                          crude_file_lookup_verbose,
-                          filename)
-    end
-    return filename, nil, false
-end
-
 local lookup_filename = function (filename)
     if not name_index then name_index = load_names () end
     local files    = name_index.files
@@ -682,8 +628,18 @@ local lookup_filename = function (filename)
     end
 end
 
---- string -> (string * string * bool)
-crude_file_lookup = function (filename)
+--[[doc--
+
+    font_file_lookup -- The ``file:`` are ultimately delegated here.
+    The lookups are kind of a blunt instrument since they try locating
+    the file using every conceivable method, which is quite
+    inefficient. Nevertheless, resolving files that way is rarely the
+    bottleneck.
+
+--doc]]--
+
+--- string -> string * string * bool
+font_file_lookup = function (filename)
     local found = lookup_filename (filename)
 
     if not found then
@@ -703,17 +659,28 @@ crude_file_lookup = function (filename)
 
     if not fonts_reloaded and config.luaotfload.db.update_live == true then
         return reload_db (stringformat ("File not found: %s.", filename),
-                          crude_file_lookup_verbose,
+                          font_file_lookup,
                           filename)
     end
     return filename, nil, false
 end
 
 --[[doc--
-Existence of the resolved file name is verified differently depending
-on whether the index entry has a texmf flag set.
+
+    get_font_file -- Look up the file of an entry in the mappings
+    table. If the index is valid, pass on the name and subfont index
+    after verifing the existence of the resolved file. This
+    verification differs depending the index entry’s ``location``
+    field:
+
+        * ``texmf`` fonts are verified using the (slow) function
+          ``kpse.lookup()``;
+        * other locations are tested by resolving the full path and
+          checking for the presence of a file there.
+
 --doc]]--
 
+--- int -> bool * (string * int) option
 local get_font_file = function (index)
     local entry = name_index.mappings [index]
     if not entry then
@@ -3474,8 +3441,7 @@ names.access_font_index           = access_font_index
 names.data                        = function () return name_index end
 names.save                        = save_names
 names.update                      = update_names
-names.crude_file_lookup           = crude_file_lookup
-names.crude_file_lookup_verbose   = crude_file_lookup_verbose
+names.font_file_lookup            = font_file_lookup
 names.read_blacklist              = read_blacklist
 names.sanitize_fontname           = sanitize_fontname
 names.getfilename                 = resolve_fullpath

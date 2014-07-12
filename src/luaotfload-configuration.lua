@@ -27,6 +27,7 @@ local luaotfloadstatus        = require (status_file)
 local string                  = string
 local stringsub               = string.sub
 local stringexplode           = string.explode
+local stringstrip             = string.strip
 
 local table                   = table
 local tableappend             = table.append
@@ -278,7 +279,7 @@ local option_spec = {
         local known  = { }
         local result = { }
         for i = 1, #fields do
-          local field = fields[i]
+          local field = stringstrip (fields[i])
           if known[field] ~= true then
             --- yet unknown, tag as seen
             known[field] = true
@@ -287,7 +288,8 @@ local option_spec = {
               result[#result + 1] = field
             else
               logreport ("both", 4, "conf",
-                          "Invalid font format identifier %q, ignoring.", field)
+                         "Invalid font format identifier %q, ignoring.",
+                         field)
             end
           end
         end

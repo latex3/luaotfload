@@ -137,7 +137,7 @@ loadmodule "log.lua"             --- log messages
 --loadmodule "configuration.lua"   --- configuration options
 
 local log             = luaotfload.log
-local report          = log.report
+local logreport       = log.report
 
 log.set_loglevel (default_log_level)
 
@@ -165,8 +165,8 @@ local find_vf_file = function (name)
         fullname = kpsefind_file(lpegmatch(p_removesuffix, name), "ovf")
     end
     if fullname then
-        report ("log", 0, "main",
-                "loading virtual font file %s.", fullname)
+        logreport ("log", 0, "main",
+                   "loading virtual font file %s.", fullname)
     end
     return fullname
 end
@@ -249,7 +249,7 @@ end
 local context_environment = { }
 
 local push_namespaces = function ()
-    report ("log", 1, "main", "push namespace for font loader")
+    logreport ("log", 1, "main", "push namespace for font loader")
     local normalglobal = { }
     for k, v in next, _G do
         normalglobal[k] = v
@@ -262,7 +262,7 @@ local pop_namespaces = function (normalglobal, isolate)
         local _G = _G
         local mode = "non-destructive"
         if isolate then mode = "destructive" end
-        report ("log", 1, "main", "pop namespace from font loader -- " .. mode)
+        logreport ("log", 1, "main", "pop namespace from font loader -- " .. mode)
         for k, v in next, _G do
             if not normalglobal[k] then
                 context_environment[k] = v
@@ -277,8 +277,8 @@ local pop_namespaces = function (normalglobal, isolate)
         -- just to be sure:
         setmetatable(context_environment,_G)
     else
-        report ("both", 0, "main",
-                "irrecoverable error during pop_namespace: no globals to restore")
+        logreport ("both", 0, "main",
+                   "irrecoverable error during pop_namespace: no globals to restore")
         os.exit()
     end
 end
@@ -311,13 +311,13 @@ loadmodule "fontloader.lua"
 if fonts then
 
     if not fonts._merge_loaded_message_done_ then
-        report ("log", 5, "main", [["I am using the merged fontloader here.]])
-        report ("log", 5, "main", [[ If you run into problems or experience unexpected]])
-        report ("log", 5, "main", [[ behaviour, and if you have ConTeXt installed you can try]])
-        report ("log", 5, "main", [[ to delete the file 'luaotfload-fontloader.lua' as I might]])
-        report ("log", 5, "main", [[ then use the possibly updated libraries. The merged]])
-        report ("log", 5, "main", [[ version is not supported as it is a frozen instance.]])
-        report ("log", 5, "main", [[ Problems can be reported to the ConTeXt mailing list."]])
+        logreport ("log", 5, "main", [["I am using the merged fontloader here.]])
+        logreport ("log", 5, "main", [[ If you run into problems or experience unexpected]])
+        logreport ("log", 5, "main", [[ behaviour, and if you have ConTeXt installed you can try]])
+        logreport ("log", 5, "main", [[ to delete the file 'luaotfload-fontloader.lua' as I might]])
+        logreport ("log", 5, "main", [[ then use the possibly updated libraries. The merged]])
+        logreport ("log", 5, "main", [[ version is not supported as it is a frozen instance.]])
+        logreport ("log", 5, "main", [[ Problems can be reported to the ConTeXt mailing list."]])
     end
     fonts._merge_loaded_message_done_ = true
 
@@ -375,8 +375,8 @@ end --- non-merge fallback scope
 
 pop_namespaces(our_environment, false)-- true)
 
-report ("both", 0, "main",
-        "fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
+logreport ("both", 0, "main",
+           "fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
 
 --[[doc--
 
@@ -421,7 +421,7 @@ loadmodule "parsers.lua"         --- fonts.conf and syntax
 loadmodule "configuration.lua"   --- configuration options
 
 if not config.actions.apply_defaults () then
-    report ("log", 0, "load", "Configuration unsuccessful.")
+    logreport ("log", 0, "load", "Configuration unsuccessful.")
 end
 
 loadmodule "loaders.lua"         --- Type1 font wrappers
@@ -429,7 +429,7 @@ loadmodule "database.lua"        --- Font management.
 loadmodule "colors.lua"          --- Per-font colors.
 
 if not config.actions.reconfigure () then
-    report ("log", 0, "load", "Post-configuration hooks failed.")
+    logreport ("log", 0, "load", "Post-configuration hooks failed.")
 end
 
 --[[doc--
@@ -541,9 +541,9 @@ request_resolvers.anon = function (specification)
     local exists, _ = lfsisfile(name)
     if exists then --- garbage; we do this because we are nice,
                    --- not because it is correct
-        report ("log", 1, "load", "file %q exists", name)
-        report ("log", 1, "load",
-                "... overriding borked anon: lookup with path: lookup")
+        logreport ("log", 1, "load", "file %q exists", name)
+        logreport ("log", 1, "load",
+                   "... overriding borked anon: lookup with path: lookup")
         specification.name = name
         request_resolvers.path(specification)
         return
@@ -565,9 +565,9 @@ request_resolvers.path = function (specification)
     local name       = specification.name
     local exists, _  = lfsisfile(name)
     if not exists then -- resort to file: lookup
-        report ("log", 0, "load",
-                "path lookup of %q unsuccessful, falling back to file:",
-                name)
+        logreport ("log", 0, "load",
+                   "path lookup of %q unsuccessful, falling back to file:",
+                   name)
         file_resolver (specification)
     else
         local suffix = filesuffix (name)
@@ -625,10 +625,10 @@ request_resolvers.name = function (specification)
     end
     local resolved, subfont = resolver (specification)
     if resolved then
-        report ("log", 0, "load", "Lookup/name: %q -> \"%s%s\"",
-                specification.name,
-                resolved,
-                subfont and stringformat ("(%d)", subfont) or "")
+        logreport ("log", 0, "load", "Lookup/name: %q -> \"%s%s\"",
+                   specification.name,
+                   resolved,
+                   subfont and stringformat ("(%d)", subfont) or "")
         specification.resolved   = resolved
         specification.sub        = subfont
         specification.forced     = stringlower (filesuffix (resolved) or "")

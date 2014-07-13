@@ -21,6 +21,7 @@ Change History
       ``aux.read_font_index()``.
     * Distinguish XDG configuration paths (Reuben Thomas)
     * Optional configuration via rc files.
+    * Configure default features via configuration file.
 
 2013/12/31, luaotfload v2.4
     * Additional self-tests, now in separate file (luaotfload-diagnostics.lua)

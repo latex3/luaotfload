@@ -739,7 +739,7 @@ set.
 --]]--
 
 local action_sequence = {
-    "loglevel", "config",    "help",  "version",
+    "config",   "loglevel",  "help",  "version",
     "diagnose", "blacklist", "cache", "flush",
     "bisect",   "generate",  "list",  "query",
 }

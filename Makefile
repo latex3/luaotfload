@@ -86,7 +86,22 @@ DO_GLYPHS	= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS	= $(LUA) $(CHARSCRIPT)  > /dev/null
 DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
 
+define check-lua-files
+@echo validating syntax
+@for f in $$(find . -name '*.lua') ; do	\
+  echo -n checking $$f ...;		\
+  if texluac -p $$f &>/dev/null; then	\
+    echo -e " \e[1;32mgood.\e[m";	\
+  else					\
+    echo -e " \e[1;31mBAD.\e[m";	\
+    exit 1;				\
+  fi;					\
+done
+endef
+
 show: showtargets
+check:
+	$(check-lua-files)
 
 all: ctan
 builddir: $(BUILDDIR)
@@ -146,7 +161,7 @@ define run-install
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf
-$(TDS_ZIP): $(DOCS) $(ALL_STATUS)
+$(TDS_ZIP): $(DOCS) $(ALL_STATUS) check
 	@echo "Making TDS-ready archive $@."
 	@$(RM) -- $@
 	$(run-install-doc)
@@ -184,6 +199,8 @@ mrproper: clean
 ###############################################################################
 showtargets:
 	@echo "Available targets:"
+	@echo
+	@echo "       check       check Lua files for syntax errors"
 	@echo
 	@echo "       doc         compile PDF documentation"
 	@echo "       resources   generate resource files (chars, glyphs)"

@@ -641,6 +641,7 @@ local diagnose = function (job)
     end
 
     if asked.repository == true then
+        local status = config.luaotfload.status
         check_upstream (status.notes.revision)
         asked.repository = nil
     end

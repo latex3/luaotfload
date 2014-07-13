@@ -1,5 +1,5 @@
 ;; Example configuration file for Luaotfload. This file contains the
-;; defaults only.
+;; defaults only, see luaotfload.conf(5) for more information.
 
 [db]
     compress        = true

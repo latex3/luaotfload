@@ -2,10 +2,10 @@
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-configuration.lua
 --  DESCRIPTION:  config file reader
--- REQUIREMENTS:  Luaotfload > 2.4
+-- REQUIREMENTS:  Luaotfload 2.5 or above
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
 --      VERSION:  same as Luaotfload
---      CREATED:  2014-04-21 14:03:52+0200
+--     MODIFIED:  2014-07-13 14:19:32+0200
 -------------------------------------------------------------------------------
 --
 
@@ -47,7 +47,8 @@ local osgetenv                = os.getenv
 
 local lpeg                    = require "lpeg"
 local lpegmatch               = lpeg.match
-local lpegsplitter            = lpeg.splitat ","
+local commasplitter           = lpeg.splitat ","
+local equalssplitter          = lpeg.splitat "="
 
 local kpse                    = kpse
 local kpseexpand_path         = kpse.expand_path
@@ -99,6 +100,33 @@ local valid_formats = tabletohash {
   "otf",   "ttc", "ttf", "dfont", "afm", "pfb", "pfa",
 }
 
+local feature_presets = {
+  arab = {
+    "ccmp", "locl", "isol", "fina", "fin2",
+    "fin3", "medi", "med2", "init", "rlig",
+    "calt", "liga", "cswh", "mset", "curs",
+    "kern", "mark", "mkmk",
+  },
+  deva = {
+    "ccmp", "locl", "init", "nukt", "akhn",
+    "rphf", "blwf", "half", "pstf", "vatu",
+    "pres", "blws", "abvs", "psts", "haln",
+    "calt", "blwm", "abvm", "dist", "kern",
+    "mark", "mkmk",
+  },
+  khmr = {
+    "ccmp", "locl", "pref", "blwf", "abvf",
+    "pstf", "pres", "blws", "abvs", "psts",
+    "clig", "calt", "blwm", "abvm", "dist",
+    "kern", "mark", "mkmk",
+  },
+  thai = {
+    "ccmp", "locl", "liga", "kern", "mark",
+    "mkmk",
+  },
+}
+
+
 
 -------------------------------------------------------------------------------
 ---                                DEFAULTS
@@ -135,6 +163,36 @@ local default_config = {
     lookup_path_luc     = nil,
     index_path_lua      = nil,
     index_path_luc      = nil,
+  },
+  default_features = {
+    global = { mode = "node" },
+    dflt = {
+      "ccmp", "locl", "rlig", "liga", "clig",
+      "kern", "mark", "mkmk", 'itlc',
+    },
+
+    arab = feature_presets.arab,
+    syrc = feature_presets.arab,
+    mong = feature_presets.arab,
+    nko  = feature_presets.arab,
+
+    deva = feature_presets.deva,
+    beng = feature_presets.deva,
+    guru = feature_presets.deva,
+    gujr = feature_presets.deva,
+    orya = feature_presets.deva,
+    taml = feature_presets.deva,
+    telu = feature_presets.deva,
+    knda = feature_presets.deva,
+    mlym = feature_presets.deva,
+    sinh = feature_presets.deva,
+
+    khmr = feature_presets.khmr,
+    tibt = feature_presets.khmr,
+    thai = feature_presets.thai,
+    lao  = feature_presets.thai,
+
+    hang = { "ccmp", "ljmo", "vjmo", "tjmo", },
   },
 }
 
@@ -234,12 +292,32 @@ local build_cache_paths = function ()
   return true
 end
 
+
+local set_default_features = function ()
+  local default_features = config.luaotfload.default_features
+  luaotfload.features    = luaotfload.features or {
+                             global   = { },
+                             defaults = { },
+                           }
+  current_features       = luaotfload.features
+  for var, val in next, default_features do
+    if var == "global" then
+      current_features.global = val
+    else
+      current_features.defaults[var] = val
+    end
+  end
+  return true
+end
+
+
 reconf_tasks = {
-  { "Set the log level"         , set_loglevel      },
-  { "Build cache paths"         , build_cache_paths },
-  { "Check terminal dimensions" , check_termwidth   },
-  { "Set the font filter"       , set_font_filter   },
-  { "Install font name resolver", set_name_resolver },
+  { "Set the log level"         , set_loglevel         },
+  { "Build cache paths"         , build_cache_paths    },
+  { "Check terminal dimensions" , check_termwidth      },
+  { "Set the font filter"       , set_font_filter      },
+  { "Install font name resolver", set_name_resolver    },
+  { "Set default features"      , set_default_features },
 }
 
 -------------------------------------------------------------------------------
@@ -259,13 +337,26 @@ local tointeger = function (n)
   end
 end
 
+local toarray = function (s)
+  local fields = { lpegmatch (commasplitter, s) }
+  local ret    = { }
+  for i = 1, #fields do
+    local field = stringstrip (fields[i])
+    if field and field ~= "" then
+      ret[#ret + 1] = field
+    end
+  end
+  return ret
+end
+
+
 local option_spec = {
   db = {
     formats      = {
       in_t  = string_t,
       out_t = string_t,
       transform = function (f)
-        local fields = { lpegmatch (lpegsplitter, f) }
+        local fields = toarray (f)
 
         --- check validity
         if not fields then
@@ -278,7 +369,7 @@ local option_spec = {
         local known  = { }
         local result = { }
         for i = 1, #fields do
-          local field = stringstrip (fields[i])
+          local field = fields[i]
           if known[field] ~= true then
             --- yet unknown, tag as seen
             known[field] = true
@@ -360,6 +451,34 @@ local option_spec = {
     lookup_path_luc     = { in_t = string_t, },
     index_path_lua      = { in_t = string_t, },
     index_path_luc      = { in_t = string_t, },
+  },
+  default_features = {
+    global = {
+      in_t  = string_t,
+      out_t = table_t,
+      transform = function (s)
+        --- Split key=value arguments into hash.
+        local result = { }
+        local fields = toarray (s)
+        for _, field in next, fields do
+          local var, val = lpegmatch (equalssplitter, field)
+          if var and val then
+            if val == "true" then
+              result[var] = true
+            else
+              result[var] = val
+            end
+          end
+        end
+        return result
+      end,
+    },
+    dflt = { in_t = string_t, out_t = table_t, transform = toarray, },
+    arab = { in_t = string_t, out_t = table_t, transform = toarray, },
+    deva = { in_t = string_t, out_t = table_t, transform = toarray, },
+    khmr = { in_t = string_t, out_t = table_t, transform = toarray, },
+    thai = { in_t = string_t, out_t = table_t, transform = toarray, },
+    hang = { in_t = string_t, out_t = table_t, transform = toarray, },
   },
 }
 
@@ -447,7 +566,7 @@ local process_options = function (opts)
           local vspec = spec[var]
           local t_val = type (val)
           if not vspec then
-            logreport ("both", 0, "conf",
+            logreport ("both", 2, "conf",
                        "Section %d (%s): invalid configuration variable %q (%q); ignoring.",
                        i, title,
                        var, tostring (val))

@@ -65,58 +65,6 @@ local stringformat     = string.format
 local stringis_empty   = string.is_empty
 local mathceil         = math.ceil
 
-local defaults = {
-    dflt = {
-        "ccmp", "locl", "rlig", "liga", "clig",
-        "kern", "mark", "mkmk", 'itlc',
-    },
-    arab = {
-        "ccmp", "locl", "isol", "fina", "fin2",
-        "fin3", "medi", "med2", "init", "rlig",
-        "calt", "liga", "cswh", "mset", "curs",
-        "kern", "mark", "mkmk",
-    },
-    deva = {
-        "ccmp", "locl", "init", "nukt", "akhn",
-        "rphf", "blwf", "half", "pstf", "vatu",
-        "pres", "blws", "abvs", "psts", "haln",
-        "calt", "blwm", "abvm", "dist", "kern",
-        "mark", "mkmk",
-    },
-    khmr = {
-        "ccmp", "locl", "pref", "blwf", "abvf",
-        "pstf", "pres", "blws", "abvs", "psts",
-        "clig", "calt", "blwm", "abvm", "dist",
-        "kern", "mark", "mkmk",
-    },
-    thai = {
-        "ccmp", "locl", "liga", "kern", "mark",
-        "mkmk",
-    },
-    hang = {
-        "ccmp", "ljmo", "vjmo", "tjmo",
-    },
-}
-
-local global_defaults = { mode = "node" }
-
-defaults.beng = defaults.deva
-defaults.guru = defaults.deva
-defaults.gujr = defaults.deva
-defaults.orya = defaults.deva
-defaults.taml = defaults.deva
-defaults.telu = defaults.deva
-defaults.knda = defaults.deva
-defaults.mlym = defaults.deva
-defaults.sinh = defaults.deva
-
-defaults.syrc = defaults.arab
-defaults.mong = defaults.arab
-defaults.nko  = defaults.arab
-
-defaults.tibt = defaults.khmr
-
-defaults.lao  = defaults.thai
 
 ---[[ begin excerpt from font-ott.lua ]]
 
@@ -800,8 +748,8 @@ local set_default_features = function (speclist)
               or "dflt"
         if support_incomplete[script] then
             report("log", 0, "load",
-                "support for the requested script: "
-                .. "%q may be incomplete", script)
+                "Support for the requested script: "
+                .. "%q may be incomplete.", script)
         end
     else
         script = "dflt"
@@ -809,15 +757,15 @@ local set_default_features = function (speclist)
     speclist.script = script
 
     report("log", 1, "load",
-        "auto-selecting default features for script: %s",
+        "Auto-selecting default features for script: %s.",
         script)
 
-    local requested = defaults[script]
+    local requested = luaotfload.features.defaults[script]
     if not requested then
         report("log", 1, "load",
-            "no defaults for script %q, falling back to \"dflt\"",
+            "No default features for script %q, falling back to \"dflt\".",
             script)
-        requested = defaults.dflt
+        requested = luaotfload.features.defaults.dflt
     end
 
     for i=1, #requested do
@@ -825,7 +773,7 @@ local set_default_features = function (speclist)
         if speclist[feat] ~= false then speclist[feat] = true end
     end
 
-    for feat, state in next, global_defaults do
+    for feat, state in next, luaotfload.features.global do
         --- This is primarily intended for setting node
         --- mode unless “base” is requested, as stated
         --- in the manual.

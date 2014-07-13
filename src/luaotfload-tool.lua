@@ -753,9 +753,14 @@ action_pending.generate = false --- this is the default action
 local actions = { } --- (jobspec -> (bool * bool)) list
 
 actions.loglevel = function (job)
-    log.set_loglevel(job.log_level)
-    report ("info", 3, "util", "Setting the log level to %d.", job.log_level)
-    report ("log", 2, "util", "Lua=%q", _VERSION)
+    local lvl = job.log_level
+    if lvl then
+        log.set_loglevel(lvl)
+        report ("info", 3, "util", "Setting the log level to %d.", lvl)
+        report ("log", 2, "util", "Lua=%q", _VERSION)
+    else
+        report ("info", 0, "util", "Invalid loglevel, ignoring.")
+    end
     return true, true
 end
 
@@ -1399,7 +1404,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         warnings     = false,
         criterion    = "",
         query        = "",
-        log_level    = 0, --- 2 is approx. the old behavior
+        log_level    = nil,
         bisect       = nil,
         config       = { db = { }, misc = { }, run = { }, paths = { } },
     }
@@ -1452,11 +1457,13 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "u" then
             action_pending["generate"] = true
         elseif v == "v" then
-            if result.log_level > 0 then
-                result.log_level = result.log_level + 1
+            local lvl = result.log_level
+            if not lvl or lvl < 1 then
+                lvl = 1
             else
-                result.log_level = 1
+                lvl = lvl + 1
             end
+            result.log_level = lvl
         elseif v == "V" then
             action_pending["version"] = true
         elseif v == "h" then

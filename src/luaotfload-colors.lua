@@ -20,14 +20,6 @@ explanation: http://tug.org/pipermail/luatex/2013-May/004305.html
 --doc]]--
 
 
-local color_callback = config.luaotfload.run.color_callback
-if not color_callback then
-    --- maybe this would be better as a method: "early" | "late"
-    color_callback = "pre_linebreak_filter"
---  color_callback = "pre_output_filter" --- old behavior, breaks expansion
-end
-
-
 local newnode               = node.new
 local nodetype              = node.id
 local traverse_nodes        = node.traverse
@@ -307,6 +299,11 @@ local color_callback_activated = 0
 
 --- unit -> unit
 add_color_callback = function ( )
+    local color_callback = config.luaotfload.run.color_callback
+    if not color_callback then
+        color_callback = "pre_linebreak_filter"
+    end
+
     if color_callback_activated == 0 then
         luatexbase.add_to_callback(color_callback,
                                    color_handler,

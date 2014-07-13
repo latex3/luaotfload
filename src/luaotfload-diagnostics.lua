@@ -667,7 +667,7 @@ local diagnose = function (job)
                     carefully and get a clean version from CTAN or
                     github:
 
-                        × http://ctan.org/tex-archive/macros/luatex/generic/luaotfload
+                        × http://www.ctan.org/pkg/luaotfload 
                         × https://github.com/lualatex/luaotfload/releases
 
                     If you are uncertain as to how to proceed, then

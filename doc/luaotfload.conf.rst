@@ -29,7 +29,33 @@ The file ``luaotfload.conf`` contains configuration options for
 EXAMPLE
 =======================================================================
 
+A small Luaotfload configuration file with few customizations could
+look as follows: ::
 
+    [db]
+        formats = afm, pfa, pfb
+        compress = false
+    
+    [misc]
+        termwidth = 60
+    
+    [run]
+        log-level = 6
+
+This will make Luaotfload ignore all font files except for PostScript
+formats. NB: With a default Tex Live install the PS fonts will take
+much longer to index than OpenType or TrueType ones. Also, an
+uncompressed index file will be dumped which is going to be much larger
+due to the huge amount of PostScript fonts indexed. The terminal width
+is truncated to 60 characters which influences the verbose output
+during indexing. Finally, the verbosity is increased greatly: each font
+file being processed will be printed to the stdout on a separate line,
+along with lots of other information.
+
+To observe the difference in behavior, save above snippet to
+``./luaotfload.conf`` and update the font index: ::
+
+    luaotfload --update --force
 
 
 SYNTAX

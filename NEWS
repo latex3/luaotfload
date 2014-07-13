@@ -20,6 +20,7 @@ Change History
     * Add functions for accessing the database: ``aux.font_index()`` and
       ``aux.read_font_index()``.
     * Distinguish XDG configuration paths (Reuben Thomas)
+    * Optional configuration via rc files.
 
 2013/12/31, luaotfload v2.4
     * Additional self-tests, now in separate file (luaotfload-diagnostics.lua)

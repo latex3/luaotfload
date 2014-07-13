@@ -61,7 +61,29 @@ To observe the difference in behavior, save above snippet to
 SYNTAX
 =======================================================================
 
-* TODO, short intro to ``.ini`` file syntax
+The configuration file syntax follows the common INI format. For a more
+detailed description please refer to the section “CONFIGURATION FILE”
+of **git-config**\(1). A brief list of rules is given below:
+
+  * Blank lines and lines starting with a semicolon (``;``) are ignored.
+
+  * A configuration file is partitioned into sections that are declared
+    by specifying the section title in brackets on a separate line: ::
+
+        [some-section]
+        ... section content ...
+
+  * Sections consist of one or more variable assignments of the form
+    ``variable-name = value``  E. g.::
+
+        [foo]
+            bar = baz
+            quux = xyzzy
+            ...
+
+  * Section and variable names may contain only uppercase and lowercase
+    letters as well as dashes (``-``).
+
 
 VARIABLES
 =======================================================================
@@ -158,6 +180,26 @@ effect on the runtime behavior.
 If ``update-live`` is set, Luaotfload will reload the database if it
 cannot find a requested font. Those who prefer to update manually using
 **luaotfload-tool** should unset this flag.
+
+
+Section ``default-features``
+-----------------------------------------------------------------------
+
+By default Luaotfload enables ``node`` mode and picks the default font
+features that are prescribed in the OpenType standard. This behavior
+may be overridden in the ``default-features`` section. Global defaults
+that will be applied for all scripts can be set via the ``global``
+option, others by the script they are to be applied to. For example,
+a setting of ::
+
+  [default-features]
+      global = mode=base,color=0000FF
+      dflt   = smcp,onum
+
+would force *base* mode, tint all fonts blue and activate small
+capitals and text figures globally. Features are specified as a comma
+separated list of variables or variable-value pairs. Variables without
+an explicit value are set to ``true``.
 
 
 Section ``misc``

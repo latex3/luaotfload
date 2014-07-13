@@ -102,26 +102,26 @@ local valid_formats = tabletohash {
 }
 
 local feature_presets = {
-  arab = {
+  arab = tabletohash {
     "ccmp", "locl", "isol", "fina", "fin2",
     "fin3", "medi", "med2", "init", "rlig",
     "calt", "liga", "cswh", "mset", "curs",
     "kern", "mark", "mkmk",
   },
-  deva = {
+  deva = tabletohash {
     "ccmp", "locl", "init", "nukt", "akhn",
     "rphf", "blwf", "half", "pstf", "vatu",
     "pres", "blws", "abvs", "psts", "haln",
     "calt", "blwm", "abvm", "dist", "kern",
     "mark", "mkmk",
   },
-  khmr = {
+  khmr = tabletohash {
     "ccmp", "locl", "pref", "blwf", "abvf",
     "pstf", "pres", "blws", "abvs", "psts",
     "clig", "calt", "blwm", "abvm", "dist",
     "kern", "mark", "mkmk",
   },
-  thai = {
+  thai = tabletohash {
     "ccmp", "locl", "liga", "kern", "mark",
     "mkmk",
   },
@@ -167,7 +167,7 @@ local default_config = {
   },
   default_features = {
     global = { mode = "node" },
-    dflt = {
+    dflt = tabletohash {
       "ccmp", "locl", "rlig", "liga", "clig",
       "kern", "mark", "mkmk", 'itlc',
     },
@@ -193,7 +193,7 @@ local default_config = {
     thai = feature_presets.thai,
     lao  = feature_presets.thai,
 
-    hang = { "ccmp", "ljmo", "vjmo", "tjmo", },
+    hang = tabletohash { "ccmp", "ljmo", "vjmo", "tjmo", },
   },
 }
 

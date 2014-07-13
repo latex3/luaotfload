@@ -124,10 +124,10 @@ $(BUILDDIR): /dev/null
 
 define make-ctandir
 @$(RM) -rf $(DISTDIR)
-@mkdir -p $(DISTDIR) && cp $(VGND) $(CONFDEMO) $(SOURCE) $(COMPILED) $(DISTDIR)
+@mkdir -p $(DISTDIR) && cp $(RESOURCES) $(DOCPDF) $(VGND) $(CONFDEMO) $(SOURCE) $(DISTDIR)
 endef
 
-$(CTAN_ZIP): $(DOCS) $(SOURCE) $(COMPILED) $(TDS_ZIP)
+$(CTAN_ZIP): $(DOCS) $(SOURCE) $(TDS_ZIP)
 	@echo "Making $@ for CTAN upload."
 	@$(RM) -- $@
 	$(make-ctandir)

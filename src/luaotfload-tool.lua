@@ -758,8 +758,6 @@ actions.loglevel = function (job)
         log.set_loglevel(lvl)
         report ("info", 3, "util", "Setting the log level to %d.", lvl)
         report ("log", 2, "util", "Lua=%q", _VERSION)
-    else
-        report ("info", 0, "util", "Invalid loglevel, ignoring.")
     end
     return true, true
 end

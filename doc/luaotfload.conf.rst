@@ -77,15 +77,15 @@ Section ``db``
 +---------------+--------+---------------------------+
 |  formats      |   s    |  ``"otf,ttf,ttc,dfont"``  |
 +---------------+--------+---------------------------+
-|  max_fonts    |   n    |  ``2^51``                 |
+|  max-fonts    |   n    |  ``2^51``                 |
 +---------------+--------+---------------------------+
-|  scan_local   |   b    |  ``false``                |
+|  scan-local   |   b    |  ``false``                |
 +---------------+--------+---------------------------+
-|  skip_read    |   b    |  ``false``                |
+|  skip-read    |   b    |  ``false``                |
 +---------------+--------+---------------------------+
 |  strip        |   b    |  ``true``                 |
 +---------------+--------+---------------------------+
-|  update_live  |   b    |  ``true``                 |
+|  update-live  |   b    |  ``true``                 |
 +---------------+--------+---------------------------+
 
 The flag ``compress`` determines whether the font index (usually
@@ -109,18 +109,18 @@ It corresponds loosely to the ``--formats`` option to
 list does not contain any useful identifiers, the default list
 ``"otf,ttf,ttc,dfont"`` will be used.
 
-The variable ``max_fonts`` determines after processing how many font
+The variable ``max-fonts`` determines after processing how many font
 files the font scanner will terminate the search. This is useful for
 debugging issues with the font index and has the same effect as the
 option ``--max-fonts`` to **luaotfload-tools**.
 
-The ``scan_local`` flag, if set, will incorporate the current working
+The ``scan-local`` flag, if set, will incorporate the current working
 directory as a font search location. NB: This will potentially slow
 down document processing because a font index with local fonts will not
 be saved to disk, so these fonts will have to be re-indexed whenever
 the document is built.
 
-The ``skip_read`` flag is only useful for debugging: It makes
+The ``skip-read`` flag is only useful for debugging: It makes
 Luaotfload skip reading fonts. The font information for rebuilding the
 index is taken from the presently existing one.
 
@@ -129,7 +129,7 @@ from the index that is only useful when processing font files. NB: this
 can increase the size of the index files significantly and has no
 effect on the runtime behavior.
 
-If ``update_live`` is set, Luaotfload will reload the database if it
+If ``update-live`` is set, Luaotfload will reload the database if it
 cannot find a requested font. Those who prefer to update manually using
 **luaotfload-tool** should unset this flag.
 
@@ -166,22 +166,22 @@ Section ``paths``
 +------------------+--------+------------------------------------+
 |  variable        |  type  |  default                           |
 +------------------+--------+------------------------------------+
-|  cache_dir       |   s    |  ``"fonts"``                       |
+|  cache-dir       |   s    |  ``"fonts"``                       |
 +------------------+--------+------------------------------------+
-|  names_dir       |   s    |  ``"names"``                       |
+|  names-dir       |   s    |  ``"names"``                       |
 +------------------+--------+------------------------------------+
-|  index_file      |   s    |  ``"luaotfload-names.lua"``        |
+|  index-file      |   s    |  ``"luaotfload-names.lua"``        |
 +------------------+--------+------------------------------------+
-|  lookups_file    |   s    |  ``"luaotfload-lookup-cache.lua"`` |
+|  lookups-file    |   s    |  ``"luaotfload-lookup-cache.lua"`` |
 +------------------+--------+------------------------------------+
 
-The paths ``cache_dir`` and ``names_dir`` determine the subdirectory
+The paths ``cache-dir`` and ``names-dir`` determine the subdirectory
 inside the Luaotfload subtree of the ``luatex-cache`` directory where
 the font cache and the font index will be stored, respectively.
 
 Inside the index directory, the names of the index file and the font
 lookup cache will be derived from the respective values of
-``index_file`` and ``lookups_file``. This is the filename base for the
+``index-file`` and ``lookups-file``. This is the filename base for the
 bytecode compiled version as well as -- for the index -- the gzipped
 version.
 
@@ -192,16 +192,16 @@ Section ``run``
 +------------------+--------+------------------------------+
 |  variable        |  type  |  default                     |
 +------------------+--------+------------------------------+
-|  color_callback  |   s    |  ``"pre_linebreak_filter"``  |
+|  color-callback  |   s    |  ``"pre_linebreak_filter"``  |
 +------------------+--------+------------------------------+
 |  definer         |   s    |  ``"patch"``                 |
 +------------------+--------+------------------------------+
-|  log_level       |   n    |  ``0``                       |
+|  log-level       |   n    |  ``0``                       |
 +------------------+--------+------------------------------+
 |  resolver        |   s    |  ``"cached"``                |
 +------------------+--------+------------------------------+
 
-The ``color_callback`` option determines the stage at which fonts that
+The ``color-callback`` option determines the stage at which fonts that
 defined with a ``color=xxyyzz`` feature will be colorized. By default
 this happens in a ``pre_linebreak_filter`` but alternatively the
 ``pre_output_filter`` may be chosen, which is faster but might produce
@@ -214,7 +214,7 @@ one that comes with the vanilla fontloader. Beware that this might
 break tools like Fontspect that rely on the ``patch_font`` callback
 provided by Luaotfload to perform important corrections on font data.
 
-The value of ``log_level`` sets the default verbosity of messages
+The value of ``log-level`` sets the default verbosity of messages
 printed by Luaotfload. Only messages defined with a verbosity of less
 than or equal to the supplied value will be output on the terminal.
 At a log level of five Luaotfload can be very noisy. Also, printing too

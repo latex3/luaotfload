@@ -170,7 +170,7 @@ Section ``misc``
 +---------------+--------+-------------------------+
 |  termwidth    |   n    |  ``nil``                |
 +---------------+--------+-------------------------+
-|  version      |   s    |  ``luaotfload.version`` |
+|  version      |   s    |  <Luaotfload version>   |
 +---------------+--------+-------------------------+
 
 With ``statistics`` enabled, extra statistics will be collected during

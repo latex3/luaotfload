@@ -29,7 +29,7 @@ The file ``luaotfload.conf`` contains configuration options for
 EXAMPLE
 =======================================================================
 
-* TODO, small example snippet
+
 
 
 SYNTAX
@@ -208,12 +208,26 @@ this happens in a ``pre_linebreak_filter`` but alternatively the
 inconsistent output. The latter also was the default in the 1.x series
 of Luaotfload.
 
-The value of ``log_level`` set the default verbosity of messages
+The ``definer`` allows for switching the ``define_font`` callback.
+Apart from the default ``patch`` one may also choose the ``generic``
+one that comes with the vanilla fontloader. Beware that this might
+break tools like Fontspect that rely on the ``patch_font`` callback
+provided by Luaotfload to perform important corrections on font data.
+
+The value of ``log_level`` sets the default verbosity of messages
 printed by Luaotfload. Only messages defined with a verbosity of less
 than or equal to the supplied value will be output on the terminal.
 At a log level of five Luaotfload can be very noisy. Also, printing too
 many messages will slow down the interpreter due to line buffering
 being disabled (see **setbuf**\(3)).
+
+The ``resolver`` setting allows choosing the font name resolution
+function: With the default value ``cached`` Luaotfload saves the result
+of a successful font name request to a cache file to speed up
+subsequent lookups. The alternative, ``normal`` circumvents the cache
+and resolves every request individually. (Since to the restructuring of
+the font name index in Luaotfload 2.4 the performance difference
+between the cached and uncached lookups should be marginal.)
 
 
 FILES

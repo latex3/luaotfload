@@ -754,7 +754,7 @@ local actions = { } --- (jobspec -> (bool * bool)) list
 
 actions.loglevel = function (job)
     log.set_loglevel(job.log_level)
-    report ("info", 3, "util", "Setting log level", "%d", job.log_level)
+    report ("info", 3, "util", "Setting the log level to %d.", job.log_level)
     report ("log", 2, "util", "Lua=%q", _VERSION)
     return true, true
 end

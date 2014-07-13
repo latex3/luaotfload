@@ -13,6 +13,7 @@ SRC		+= $(SRCSRCDIR)/luaotfload.sty
 SRC		+= $(MISCDIR)/luaotfload-blacklist.cnf
 
 VGND		= $(MISCDIR)/valgrind-kpse-suppression.sup
+CONFDEMO	= $(MISCDIR)/luaotfload.conf.example
 
 GLYPHSCRIPT	= $(SCRIPTSRCDIR)/mkglyphlist
 CHARSCRIPT	= $(SCRIPTSRCDIR)/mkcharacters
@@ -87,14 +88,13 @@ DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
 
 show: showtargets
 
-all: $(GENERATED)
+all: ctan
 builddir: $(BUILDDIR)
 resources: $(RESOURCES)
 chars: $(CHARS)
 status: $(STATUS)
 ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)
-world: all ctan
 
 graph: $(DOTPDF)
 doc: $(DOCS)
@@ -124,7 +124,7 @@ $(BUILDDIR): /dev/null
 
 define make-ctandir
 @$(RM) -rf $(DISTDIR)
-@mkdir -p $(DISTDIR) && cp $(VGND) $(SOURCE) $(COMPILED) $(DISTDIR)
+@mkdir -p $(DISTDIR) && cp $(VGND) $(CONFDEMO) $(SOURCE) $(COMPILED) $(DISTDIR)
 endef
 
 $(CTAN_ZIP): $(DOCS) $(SOURCE) $(COMPILED) $(TDS_ZIP)
@@ -134,7 +134,7 @@ $(CTAN_ZIP): $(DOCS) $(SOURCE) $(COMPILED) $(TDS_ZIP)
 	cd $(BUILDDIR) && zip -r -9 $(CTAN_ZIPFILE) $(TDS_ZIPFILE) $(NAME) >/dev/null
 
 define run-install-doc
-@mkdir -p $(DOCDIR) && cp -- $(DOCSTATUS) $(VGND) $(DOCDIR)
+@mkdir -p $(DOCDIR) && cp -- $(DOCSTATUS) $(VGND) $(CONFDEMO) $(DOCDIR)
 @mkdir -p $(SRCDIR) && cp -- $(SRCSTATUS) $(SRCDIR)
 @mkdir -p $(MAN1DIR) && cp -- $(TOOLMAN) $(MAN1DIR)
 @mkdir -p $(MAN5DIR) && cp -- $(CONFMAN) $(MAN5DIR)
@@ -185,8 +185,6 @@ mrproper: clean
 showtargets:
 	@echo "Available targets:"
 	@echo
-	@echo "       all         build everything: documentation, resources,"
-	@echo "       world       build everything and package zipballs"
 	@echo "       doc         compile PDF documentation"
 	@echo "       resources   generate resource files (chars, glyphs)"
 	@echo

@@ -446,7 +446,12 @@ local process_options = function (opts)
         for var, val in next, vars do
           local vspec = spec[var]
           local t_val = type (val)
-          if t_val ~= vspec.in_t then
+          if not vspec then
+            logreport ("both", 0, "conf",
+                       "Section %d (%s): invalid configuration variable %q (%q); ignoring.",
+                       i, title,
+                       var, tostring (val))
+          elseif t_val ~= vspec.in_t then
             logreport ("both", 2, "conf",
                        "Section %d (%s): type mismatch of input value %q (%q, %s != %s); ignoring.",
                        i, title,

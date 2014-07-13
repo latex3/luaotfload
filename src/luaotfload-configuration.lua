@@ -28,6 +28,7 @@ local string                  = string
 local stringsub               = string.sub
 local stringexplode           = string.explode
 local stringstrip             = string.strip
+local stringfind              = string.find
 
 local table                   = table
 local tableappend             = table.append
@@ -349,6 +350,22 @@ local toarray = function (s)
   return ret
 end
 
+local tohash = function (s)
+  local result = { }
+  local fields = toarray (s)
+  for _, field in next, fields do
+    local var, val
+    if stringfind (field, "=") then
+      local tmp
+      var, tmp = lpegmatch (equalssplitter, field)
+      if tmp == "true" or tmp == "yes" then val = true else val = tmp end
+    else
+      var, val = field, true
+    end
+    result[var] = val
+  end
+  return result
+end
 
 local option_spec = {
   db = {
@@ -453,32 +470,7 @@ local option_spec = {
     index_path_luc      = { in_t = string_t, },
   },
   default_features = {
-    global = {
-      in_t  = string_t,
-      out_t = table_t,
-      transform = function (s)
-        --- Split key=value arguments into hash.
-        local result = { }
-        local fields = toarray (s)
-        for _, field in next, fields do
-          local var, val = lpegmatch (equalssplitter, field)
-          if var and val then
-            if val == "true" then
-              result[var] = true
-            else
-              result[var] = val
-            end
-          end
-        end
-        return result
-      end,
-    },
-    dflt = { in_t = string_t, out_t = table_t, transform = toarray, },
-    arab = { in_t = string_t, out_t = table_t, transform = toarray, },
-    deva = { in_t = string_t, out_t = table_t, transform = toarray, },
-    khmr = { in_t = string_t, out_t = table_t, transform = toarray, },
-    thai = { in_t = string_t, out_t = table_t, transform = toarray, },
-    hang = { in_t = string_t, out_t = table_t, transform = toarray, },
+    __default = { in_t  = string_t, out_t = table_t, transform = tohash, },
   },
 }
 
@@ -563,7 +555,7 @@ local process_options = function (opts)
         end
 
         for var, val in next, vars do
-          local vspec = spec[var]
+          local vspec = spec[var] or spec.__default
           local t_val = type (val)
           if not vspec then
             logreport ("both", 2, "conf",

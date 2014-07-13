@@ -64,6 +64,7 @@ local luatexbase       = luatexbase
 local setmetatable     = setmetatable
 local type, next       = type, next
 local stringlower      = string.lower
+local stringformat     = string.format
 
 local kpsefind_file    = kpse.find_file
 local lfsisfile        = lfs.isfile

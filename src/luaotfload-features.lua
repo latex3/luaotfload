@@ -724,6 +724,8 @@ local support_incomplete = tabletohash({
 
 --- (string, string) dict -> (string, string) dict
 local set_default_features = function (speclist)
+    local default_features = luaotfload.features
+
     speclist = speclist or { }
     speclist[""] = nil --- invalid options stub
 
@@ -760,20 +762,19 @@ local set_default_features = function (speclist)
         "Auto-selecting default features for script: %s.",
         script)
 
-    local requested = luaotfload.features.defaults[script]
+    local requested = default_features.defaults[script]
     if not requested then
         report("log", 1, "load",
             "No default features for script %q, falling back to \"dflt\".",
             script)
-        requested = luaotfload.features.defaults.dflt
+        requested = default_features.defaults.dflt
     end
 
-    for i=1, #requested do
-        local feat = requested[i]
-        if speclist[feat] ~= false then speclist[feat] = true end
+    for feat, state in next, requested do
+        if not speclist[feat] then speclist[feat] = state end
     end
 
-    for feat, state in next, luaotfload.features.global do
+    for feat, state in next, default_features.global do
         --- This is primarily intended for setting node
         --- mode unless “base” is requested, as stated
         --- in the manual.

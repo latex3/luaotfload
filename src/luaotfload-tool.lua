@@ -796,9 +796,10 @@ actions.blacklist = function (job)
 end
 
 actions.generate = function (job)
-    local fontnames = names.update(fontnames, job.force_reload, job.dry_run)
-    report ("info", 2, "db", "Fonts in the database: %i", #fontnames.mappings)
-    if names.data() then
+    local _ = names.update (fontnames, job.force_reload, job.dry_run)
+    local namedata = names.data ()
+    if namedata then
+        report ("info", 2, "db", "Fonts in the database: %i", #namedata.mappings)
         return true, true
     end
     return false, false
@@ -1504,7 +1505,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
             action_pending["flush"] = true
         elseif v == "L" then
             action_pending["generate"] = true
-            config.luaotfload.db.scan_local = true
+            result.config.db.scan_local = true
         elseif v == "list" then
             action_pending["list"] = true
             result.criterion = optarg[n]
@@ -1528,22 +1529,22 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.config.db.formats = optarg[n]
             --names.set_font_filter (optarg[n])
         elseif v == "n" then
-            config.luaotfload.db.update_live = false
+            result.config.db.update_live = false
         elseif v == "S" then
-            config.luaotfload.misc.statistics = true
+            result.config.misc.statistics = true
         elseif v == "R" then
             ---  dev only, undocumented
-            config.luaotfload.db.skip_read = true
+            result.config.db.skip_read = true
         elseif v == "c" then
-            config.luaotfload.db.compress = false
+            result.config.db.compress = false
         elseif v == "no-strip" then
-            config.luaotfload.db.strip = false
+            result.config.db.strip = false
         elseif v == "max-fonts" then
             local n = optarg[n]
             if n then
                 n = tonumber(n)
                 if n and n > 0 then
-                    config.luaotfload.db.max_fonts = n
+                    result.config.db.max_fonts = n
                 end
             end
         elseif v == "bisect" then

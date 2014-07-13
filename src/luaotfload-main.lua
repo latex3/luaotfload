@@ -311,13 +311,13 @@ loadmodule "fontloader.lua"
 if fonts then
 
     if not fonts._merge_loaded_message_done_ then
-        report ("log", 0, "main", [["I am using the merged fontloader here.]])
-        report ("log", 0, "main", [[ If you run into problems or experience unexpected]])
-        report ("log", 0, "main", [[ behaviour, and if you have ConTeXt installed you can try]])
-        report ("log", 0, "main", [[ to delete the file 'luaotfload-fontloader.lua' as I might]])
-        report ("log", 0, "main", [[ then use the possibly updated libraries. The merged]])
-        report ("log", 0, "main", [[ version is not supported as it is a frozen instance.]])
-        report ("log", 0, "main", [[ Problems can be reported to the ConTeXt mailing list."]])
+        report ("log", 5, "main", [["I am using the merged fontloader here.]])
+        report ("log", 5, "main", [[ If you run into problems or experience unexpected]])
+        report ("log", 5, "main", [[ behaviour, and if you have ConTeXt installed you can try]])
+        report ("log", 5, "main", [[ to delete the file 'luaotfload-fontloader.lua' as I might]])
+        report ("log", 5, "main", [[ then use the possibly updated libraries. The merged]])
+        report ("log", 5, "main", [[ version is not supported as it is a frozen instance.]])
+        report ("log", 5, "main", [[ Problems can be reported to the ConTeXt mailing list."]])
     end
     fonts._merge_loaded_message_done_ = true
 

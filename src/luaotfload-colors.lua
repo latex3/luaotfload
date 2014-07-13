@@ -19,6 +19,8 @@ explanation: http://tug.org/pipermail/luatex/2013-May/004305.html
 
 --doc]]--
 
+local log                   = luaotfload.log
+local logreport             = log.report
 
 local newnode               = node.new
 local nodetype              = node.id
@@ -81,8 +83,9 @@ local sanitize_color_expression = function (digits)
     digits = tostring(digits)
     local sanitized = lpegmatch(valid_digits, digits)
     if not sanitized then
-        luaotfload.warning(
-            "%q is not a valid rgb[a] color expression", digits)
+        logreport("both", 0, "color",
+                  "%q is not a valid rgb[a] color expression",
+                  digits)
         return nil
     end
     return sanitized

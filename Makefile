@@ -87,14 +87,13 @@ DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
 
 show: showtargets
 
-all: $(GENERATED)
+all: ctan
 builddir: $(BUILDDIR)
 resources: $(RESOURCES)
 chars: $(CHARS)
 status: $(STATUS)
 ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)
-world: all ctan
 
 graph: $(DOTPDF)
 doc: $(DOCS)
@@ -185,8 +184,6 @@ mrproper: clean
 showtargets:
 	@echo "Available targets:"
 	@echo
-	@echo "       all         build everything: documentation, resources,"
-	@echo "       world       build everything and package zipballs"
 	@echo "       doc         compile PDF documentation"
 	@echo "       resources   generate resource files (chars, glyphs)"
 	@echo

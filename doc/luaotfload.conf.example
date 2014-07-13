@@ -1,0 +1,30 @@
+;; Example configuration file for Luaotfload. This file contains the
+;; defaults only, see luaotfload.conf(5) for more information.
+
+[db]
+    compress        = true
+    formats         = otf, ttf, ttc, dfont
+    max-fonts       = 2.2517998136852e15
+    scan-local      = false
+    skip-read       = false
+    strip           = true
+    update-live     = true
+
+[misc]
+    statistics      = false
+    termwidth       = nil
+
+[paths]
+    cache-dir       = fonts
+    names-dir       = names
+    index-file      = luaotfload-names.lua
+    lookups-file    = luaotfload-lookup-cache.lua
+
+[run]
+    color-callback  = pre_linebreak_filter
+    definer         = patch
+    log-level       = 0
+    resolver        = cached
+
+;; vim:ft=dosini:et:sw=4:ts=8
+

@@ -1,0 +1,311 @@
+#!/usr/bin/env texlua
+-----------------------------------------------------------------------
+--         FILE:  mktests
+--        USAGE:  ./mktests 
+--  DESCRIPTION:  test the behavior of Luaotfload
+-- REQUIREMENTS:  Luatex > 0.76, Luaotfload
+--       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--      VERSION:  2.4
+--     MODIFIED:  2014-05-15 22:16:47+0200
+-----------------------------------------------------------------------
+--
+--===================================================================--
+--                               NOTE
+--             this is a stub, to be completed long-term
+--                        suggestions welcome
+--===================================================================--
+
+
+local tests       = { }
+local lpeg        = require "lpeg"
+local lpegmatch   = lpeg.match
+
+kpse.set_program_name "luatex"
+
+require "lualibs"
+require "luaotfload-basics-gen.lua"
+require "luaotfload-log.lua"
+require "luaotfload-parsers"
+require "luaotfload-configuration"
+require "luaotfload-database"
+
+local names = fonts.names
+
+-----------------------------------------------------------------------
+--- helper functions
+-----------------------------------------------------------------------
+
+local pprint_resolve = function (input, output, result)
+  texio.write_nl (string.format ("[%s] “%s” -> “%s”",
+                                 result == true and "passed" or "failed",
+                                 input,
+                                 output))
+end
+
+local pprint_result = function (name, failed, total)
+  if failed == 0 then
+    texio.write_nl (string.format ("[%s] all %d passed", name, total))
+  else
+    texio.write_nl (string.format ("[%s] %d of %d failed",
+                                   name,
+                                   failed,
+                                   total))
+  end
+end
+
+local pprint_spec = function (spec)
+  return string.format ("%s/%s*%.2fpt",
+                        spec.specification,
+                        spec.style or "regular",
+                        spec.optsize or 0)
+end
+
+-----------------------------------------------------------------------
+--- parser tests
+-----------------------------------------------------------------------
+
+local test_config_input = [==[
+
+
+[foo]
+bar = baz
+xyzzy = no
+buzz
+
+[lavernica "brutalitops"]
+# It’s a locomotive that runs on us.
+  laan-ev = zip zop zooey   ; jib-jab
+Crouton = "Fibrosis \"\\ # "
+
+]==]
+
+local test_config_output = {
+  { section = { title = "foo" },
+    variables = { bar = "baz",
+                  xyzzy = false,
+                  buzz = true } },
+  { section = { title = "lavernica",
+                subtitle = "brutalitops" },
+    variables = { ["laan-ev"] = "zip zop zooey",
+                  crouton = "Fibrosis \"\\ # " } }
+}
+
+local parse_config = function ()
+  local parser = luaotfload.parsers.config
+  local result = lpegmatch (parser, test_config_input)
+  --- compare values recursively
+  local aux aux = function (t1, t2)
+    --- cheaply non-tail recursive
+    local k1 = table.keys (t1)
+    local k2 = table.keys (t2)
+    if #k1 ~= #k2 then
+      return false
+    end
+    for i = 1, #k1 do
+      local k  = k1[i]
+      local v1 = t1[k]
+      local v2 = t2[k]
+      if type (v1) == "table" then
+        if type (v2) ~= "table" or not aux (v1, v2) then
+          return false
+        end
+      elseif v1 ~= v2 then
+        return false
+      end
+    end
+    return true
+  end
+  return aux (result, test_config_output) and 0 or 1, 1
+end
+
+tests["parse_config"] = parse_config
+
+-----------------------------------------------------------------------
+--- font tests
+-----------------------------------------------------------------------
+
+--- test sets
+
+local infer_regular_style = {
+  --- inferring which one is the correct style for “regular”; can be
+  --- obscured by synonyms like “book” etc.
+  { "Iwona",                "Iwona-Regular.otf"         }, -- trivial case
+  { "DejaVu Serif",         "DejaVuSerif.ttf"           },
+  { "DejaVu Sans",          "DejaVuSans.ttf"            },
+  { "Adobe Garamond Pro",   "agaramondpro_regular.otf"  },
+  { "Garamond Premier Pro", "GaramondPremrPro.otf"      },
+  { "CMU Serif",            "cmunrm.otf"                },
+  { "CMU Sans Serif",       "cmunss.otf"                },
+  { "Minion Pro",           "MinionPro-Regular.otf"     },
+  --- Below test will succeed only if we match for the
+  --- splainname (= sanitized tfmdata.fullname) field
+  --- explicitly.
+  { "Minion Pro Italic",    "MinionPro-It.otf"          },
+}
+
+local choose_optical_size = {
+  { { name = "Latin Modern Roman", optsize =  1 }, "lmroman5-regular.otf"        },
+  { { name = "Latin Modern Roman", optsize = 10 }, "lmroman10-regular.otf"       },
+  { { name = "Latin Modern Roman", optsize = 12 }, "lmroman12-regular.otf"       },
+  { { name = "Latin Modern Roman", optsize = 42 }, "lmroman17-regular.otf"       },
+  { { name = "EB Garamond", optsize =  1 }, "EBGaramond08-Regular.otf"           },
+  { { name = "EB Garamond", optsize =  8 }, "EBGaramond08-Regular.otf"           },
+  { { name = "EB Garamond", optsize = 12 }, "EBGaramond12-Regular.otf"           },
+  { { name = "EB Garamond", optsize = 42 }, "EBGaramond12-Regular.otf"           },
+  { { name = "Garamond Premier Pro", optsize =  1 }, "GaramondPremrPro-Capt.otf" },
+  { { name = "Garamond Premier Pro", optsize = 10 }, "GaramondPremrPro.otf"      },
+  { { name = "Garamond Premier Pro", optsize = 15 }, "GaramondPremrPro-Subh.otf" },
+  { { name = "Garamond Premier Pro", optsize = 42 }, "GaramondPremrPro-Disp.otf" },
+}
+
+local choose_style = {
+  { { name = "DejaVu Sans", style = "regular"    }, "DejaVuSans.ttf"                       },
+  { { name = "DejaVu Sans", style = "italic"     }, "DejaVuSans-Oblique.ttf"               },
+  { { name = "DejaVu Sans", style = "bold"       }, "DejaVuSans-Bold.ttf"                  },
+  { { name = "DejaVu Sans", style = "bolditalic" }, "DejaVuSans-BoldOblique.ttf"           },
+  { { name = "Linux Libertine O", style = "regular"    }, "LinLibertine_R.otf"             },
+  { { name = "Linux Libertine O", style = "italic"     }, "LinLibertine_RI.otf"            },
+  { { name = "Linux Libertine O", style = "bold"       }, "LinLibertine_RB.otf"            },
+  { { name = "Linux Libertine O", style = "bolditalic" }, "LinLibertine_RBI.otf"           },
+  { { name = "Liberation Serif", style = "regular"    }, "LiberationSerif-Regular.ttf"     },
+  { { name = "Liberation Serif", style = "italic"     }, "LiberationSerif-Italic.ttf"      },
+  { { name = "Liberation Serif", style = "bold"       }, "LiberationSerif-Bold.ttf"        },
+  { { name = "Liberation Serif", style = "bolditalic" }, "LiberationSerif-BoldItalic.ttf"  },
+  { { name = "CMU Sans Serif", style = "regular"    }, "cmunss.otf"   }, -- no “regular” but “medium”
+  { { name = "CMU Sans Serif", style = "italic"     }, "cmunsi.otf"   }, -- no “italic” but “oblique”
+  { { name = "CMU Sans Serif", style = "bold"       }, "cmunsx.otf"   },
+  { { name = "CMU Sans Serif", style = "bolditalic" }, "cmunso.otf"   },
+  --[[--
+    Minion Pro Italic is exceptionally weird regarding identifiers in
+    that the postscript fontname and both info.fontname and
+    info.fullname are given as “minionproit”. Now its english fullname
+    (field 18) is “minionproital”. Only the value “fullname” in the root of
+    the tfmdata structure (not the one returned by fontloader.info()!)
+    accurately yields “Minion Pro Italic”.
+
+    To complete the picture, the file naming isn’t very consistent either:
+    we find the suffixes “Regular” and “Bold”, but “It” and “BoldIt”. What
+    the hell were the designers smoking?
+
+    Also, the full Minion Pro set comes with different optical sizes which
+    for monetary reasons cannot considered here.
+  --]]--
+  { { name = "Minion Pro", style = "regular"    }, "MinionPro-Regular.otf"  },
+  { { name = "Minion Pro", style = "italic"     }, "MinionPro-It.otf"       },
+  { { name = "Minion Pro", style = "bold"       }, "MinionPro-Bold.otf"     },
+  { { name = "Minion Pro", style = "bolditalic" }, "MinionPro-BoldIt.otf"   },
+}
+
+--- this needs a database built with --formats=+pfa,pfb,afm
+
+local resolve_t1_font = {
+  { { name = "URW Gothic L",          style = "regular"    }, "a010013l.pfb"  }, --> “book”
+--  { { name = "URW Gothic L",          style = "italic"     }, "a010033l.pfb"  }, --> “book oblique”
+--  { { name = "URW Gothic L",          style = "bold"       }, "a010015l.pfb"  }, --> “demi”
+--  { { name = "URW Gothic L",          style = "bolditalic" }, "a010035l.pfb"  }, --> “demi oblique”
+  { { name = "Century Schoolbook L",  style = "regular"    }, "c059013l.pfb"  },
+  { { name = "Century Schoolbook L",  style = "italic"     }, "c059033l.pfb"  },
+  { { name = "Century Schoolbook L",  style = "bold"       }, "c059016l.pfb"  },
+  { { name = "Century Schoolbook L",  style = "bolditalic" }, "c059036l.pfb"  },
+  { { name = "Nimbus Roman No9 L",    style = "regular"    }, "n021003l.pfb"  },
+  { { name = "Nimbus Roman No9 L",    style = "italic"     }, "n021023l.pfb"  },
+  { { name = "Nimbus Roman No9 L",    style = "bold"       }, "n021004l.pfb"  }, --- medium, actually
+  { { name = "Nimbus Roman No9 L",    style = "bolditalic" }, "n021024l.pfb"  },
+}
+
+local translate_style = {
+  regular     = "r",
+  italic      = "i",
+  bold        = "b",
+  bolditalic  = "bi",
+}
+
+local font_name_tests = {
+  infer_regular_style,
+  choose_optical_size,
+  choose_style,
+  resolve_t1_font,
+}
+
+local default_spec = {
+  name          = false,
+  lookup        = "name",
+  specification = false,
+  optsize       = 0,
+}
+
+local resolve_font_name = function ()
+  local failed, total = 0, 0
+  local resolve_name = names.resolve_name
+  for nset = 1, #font_name_tests do
+    local set = font_name_tests[nset]
+
+    for ntest = 1, #set do
+      local test = set[ntest]
+      local input, output = test[1], test[2]
+
+      if type (input) == "string" then
+        local input_spec = table.copy (default_spec)
+        input_spec.name = input
+        input_spec.specification = input_spec.lookup .. ":" .. input
+        local result = resolve_name (input_spec) == output
+        total = total + 1
+        if not result then
+          failed = failed + 1
+        end
+        pprint_resolve (input, output, result)
+
+      else
+        local input_spec, output = test[1], test[2]
+        input_spec.specification = (input_spec.lookup
+                                    or default_spec.lookup)
+                                .. ":" .. input_spec.name
+        input_spec.optsize = input_spec.optsize or default_spec.optsize
+        input_spec.style   = translate_style [input_spec.style]
+        local result = resolve_name (input_spec) == output
+        total = total + 1
+        if not result then
+          failed = failed + 1
+        end
+        pprint_resolve (pprint_spec (input_spec), output, result)
+      end
+
+    end
+  end
+  return failed, total
+end
+
+tests ["resolve_font_name"] = resolve_font_name
+
+
+-----------------------------------------------------------------------
+--- runner
+-----------------------------------------------------------------------
+
+local main = function ()
+  local failed, total = 0, 0
+  config.actions.apply_defaults ()
+  for name, test in next, tests do
+    texio.write_nl ("[" .. name .. "]")
+    local newfailed, newtotal = test ()
+    total  = total + 1
+    pprint_result (name, newfailed, newtotal)
+    failed = failed + newfailed
+    total  = total  + newtotal
+  end
+
+  if failed == 0 then
+    texio.write_nl (string.format ("[report] all %d tests passed.", total))
+  else
+    texio.write_nl (string.format ("[report] %d of %d tests failed (%d %%).",
+                                   failed,
+                                   total,
+                                   failed / total * 100))
+  end
+  texio.write_nl ""
+  os.exit (0)
+end
+
+return main ()
+
+--- vim:ft=lua:ts=2:et:sw=2

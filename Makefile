@@ -1,89 +1,94 @@
 # Makefile for luaotfload
 
-NAME         = luaotfload
-DOC          = $(NAME).pdf
-DTX          = $(NAME).dtx
-OTFL         = $(wildcard luaotfload-*.lua) luaotfload-blacklist.cnf
+NAME		= luaotfload
 
-GLYPHSCRIPT  = mkglyphlist
-GLYPHSOURCE  = glyphlist.txt
-CHARSCRIPT   = mkcharacters
-STATUSSCRIPT = mkstatus
+DOCSRCDIR	= ./doc
+SCRIPTSRCDIR	= ./scripts
+SRCSRCDIR	= ./src
+BUILDDIR	= ./build
+MISCDIR		= ./misc
+
+SRC		= $(wildcard $(SRCSRCDIR)/luaotfload-*.lua)
+SRC		+= $(SRCSRCDIR)/luaotfload.sty
+SRC		+= $(MISCDIR)/luaotfload-blacklist.cnf
+
+VGND		= $(MISCDIR)/valgrind-kpse-suppression.sup
+
+GLYPHSCRIPT	= $(SCRIPTSRCDIR)/mkglyphlist
+CHARSCRIPT	= $(SCRIPTSRCDIR)/mkcharacters
+STATUSSCRIPT	= $(SCRIPTSRCDIR)/mkstatus
+
+GLYPHSOURCE	= $(BUILDDIR)/glyphlist.txt
 
 RESOURCESCRIPTS = $(GLYPHSCRIPT) $(CHARSCRIPT) $(STATUSSCRIPT)
 
-SCRIPTNAME   = luaotfload-tool
-SCRIPT       = $(SCRIPTNAME).lua
-MANSOURCE	 = $(SCRIPTNAME).rst
-MANPAGE   	 = $(SCRIPTNAME).1
-OLDSCRIPT    = luaotfload-legacy-tool.lua
+TOOLNAME	= luaotfload-tool
+TOOL		= $(SRCSRCDIR)/$(TOOLNAME).lua
 
-GRAPH  		 = filegraph
-DOTPDF 		 = $(GRAPH).pdf
-DOT    		 = $(GRAPH).dot
+CONFNAME	= luaotfload.conf
+
+GRAPH		= filegraph
+DOCSRC		= $(addprefix $(DOCSRCDIR)/$(NAME), -main.tex -latex.tex)
+GRAPHSRC	= $(DOCSRCDIR)/$(GRAPH).dot
+MANSRC		= $(DOCSRCDIR)/$(TOOLNAME).rst $(DOCSRCDIR)/$(CONFNAME).rst
+
+DOCPDF		= $(DOCSRCDIR)/$(NAME).pdf
+DOTPDF		= $(DOCSRCDIR)/$(GRAPH).pdf
+TOOLMAN 	= $(DOCSRCDIR)/$(TOOLNAME).1
+CONFMAN		= $(DOCSRCDIR)/$(CONFNAME).5
+MANPAGES	= $(TOOLMAN) $(CONFMAN)
+
+DOCS		= $(DOCPDF) $(DOTPDF) $(MANPAGES)
 
 # Files grouped by generation mode
-GLYPHS      = luaotfload-glyphlist.lua
-CHARS       = luaotfload-characters.lua
-STATUS      = luaotfload-status.lua
+GLYPHS		= $(BUILDDIR)/$(NAME)-glyphlist.lua
+CHARS		= $(BUILDDIR)/$(NAME)-characters.lua
+STATUS		= $(BUILDDIR)/$(NAME)-status.lua
 RESOURCES	= $(GLYPHS) $(CHARS) $(STATUS)
-GRAPHED     = $(DOTPDF)
-MAN			= $(MANPAGE)
-COMPILED    = $(DOC)
-UNPACKED    = luaotfload.sty luaotfload.lua
-GENERATED   = $(GRAPHED) $(UNPACKED) $(COMPILED) $(RESOURCES) $(MAN)
-SOURCE 		= $(DTX) $(MANSOURCE) $(OTFL) README Makefile NEWS $(RESOURCESCRIPTS)
-
-# test files
-TESTDIR 		= tests
-TESTSTATUS 		= $(wildcard $(TESTDIR)/*.tex $(TESTDIR)/*.ltx)
-TESTSTATUS_SYS 	= $(TESTDIR)/systemfonts.tex $(TESTDIR)/fontconfig_conf_reading.tex
-TESTSTATUS_TL 	= $(filter-out $(TESTSTATUS_SYS), $(TESTSTATUS))
+SOURCE		= $(DOCSRC) $(MANSRC) $(SRC) README COPYING Makefile NEWS $(RESOURCESCRIPTS)
 
 # Files grouped by installation location
-SCRIPTSTATUS = $(SCRIPT) $(OLDSCRIPT) $(RESOURCESCRIPTS)
-RUNSTATUS    = $(UNPACKED) $(filter-out $(SCRIPTSTATUS),$(OTFL))
-DOCSTATUS    = $(DOC) $(DOTPDF) README NEWS
-MANSTATUS	= $(MANPAGE)
-SRCSTATUS    = $(DTX) Makefile
+SCRIPTSTATUS	= $(TOOL) $(RESOURCESCRIPTS)
+RUNSTATUS	= $(filter-out $(SCRIPTSTATUS),$(SRC))
+DOCSTATUS	= $(DOCPDF) $(DOTPDF) README NEWS COPYING
+SRCSTATUS	= $(DOCSRC) $(MANSRC) $(GRAPHSRC) Makefile
 
 # The following definitions should be equivalent
 # ALL_STATUS = $(RUNSTATUS) $(DOCSTATUS) $(SRCSTATUS)
-ALL_STATUS = $(GENERATED) $(SOURCE)
+ALL_STATUS 	= $(RESOURCES) $(SOURCE)
 
 # Installation locations
-FORMAT = luatex
-SCRIPTDIR = $(TEXMFROOT)/scripts/$(NAME)
-RUNDIR    = $(TEXMFROOT)/tex/$(FORMAT)/$(NAME)
-DOCDIR    = $(TEXMFROOT)/doc/$(FORMAT)/$(NAME)
-MANDIR    = $(TEXMFROOT)/doc/man/man1/
-SRCDIR    = $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
-TEXMFROOT = $(shell kpsewhich --var-value TEXMFHOME)
+FORMAT 		= luatex
+SCRIPTDIR	= $(TEXMFROOT)/scripts/$(NAME)
+RUNDIR		= $(TEXMFROOT)/tex/$(FORMAT)/$(NAME)
+DOCDIR		= $(TEXMFROOT)/doc/$(FORMAT)/$(NAME)
+MAN1DIR		= $(TEXMFROOT)/doc/man/man1/
+MAN5DIR		= $(TEXMFROOT)/doc/man/man5/
+SRCDIR		= $(TEXMFROOT)/source/$(FORMAT)/$(NAME)
+TEXMFROOT	= $(shell kpsewhich --var-value TEXMFHOME)
 
 # CTAN-friendly subdirectory for packaging
-DISTDIR	  = ./luaotfload
+DISTDIR		= $(BUILDDIR)/$(NAME)
 
-CTAN_ZIP = $(NAME).zip
-TDS_ZIP  = $(NAME).tds.zip
-ZIPS 	 = $(CTAN_ZIP) $(TDS_ZIP)
+CTAN_ZIPFILE	= $(NAME).zip
+TDS_ZIPFILE	= $(NAME).tds.zip
+CTAN_ZIP	= $(BUILDDIR)/$(CTAN_ZIPFILE)
+TDS_ZIP		= $(BUILDDIR)/$(TDS_ZIPFILE)
+ZIPS		= $(CTAN_ZIP) $(TDS_ZIP)
 
-LUA	= texlua
+LUA		= texlua
 
-DO_TEX 		  	= luatex --interaction=batchmode $< >/dev/null
-DO_LATEXMK	 	= latexmk -e '$$max_repeat = 5' -pdf -lualatex -silent $< >/dev/null
-# latexmk does only one run on my machine, so we’re not going to rely on it
-DO_LATEX  	 	= lualatex -interaction=batchmode $< >/dev/null
-DO_GRAPHVIZ 	= dot -Tpdf -o $@ $< > /dev/null
-DO_GLYPHS 		= $(LUA) $(GLYPHSCRIPT) > /dev/null
-DO_CHARS 		= $(LUA) $(CHARSCRIPT)  > /dev/null
-DO_STATUS 		= $(LUA) $(STATUSSCRIPT)  > /dev/null
-DO_DOCUTILS 	= rst2man $< >$@ 2>/dev/null
+## For now the $(BUILDDIR) is hardcoded in the scripts
+## but we might just as well pass it to them by as environment
+## variables.
+DO_GLYPHS	= $(LUA) $(GLYPHSCRIPT) > /dev/null
+DO_CHARS	= $(LUA) $(CHARSCRIPT)  > /dev/null
+DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
+
+show: showtargets
 
 all: $(GENERATED)
-graph: $(GRAPHED)
-doc: $(GRAPHED) $(COMPILED) $(MAN)
-manual: $(MAN)
-unpack: $(UNPACKED)
+builddir: $(BUILDDIR)
 resources: $(RESOURCES)
 chars: $(CHARS)
 status: $(STATUS)
@@ -91,87 +96,110 @@ ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)
 world: all ctan
 
-$(GLYPHS): /dev/null
+graph: $(DOTPDF)
+doc: $(DOCS)
+pdf: $(DOCPDF)
+manual: $(MANPAGES)
+
+$(DOTPDF):
+	@$(MAKE) -C $(DOCSRCDIR) graph
+
+$(DOCPDF):
+	@$(MAKE) -C $(DOCSRCDIR) doc
+
+$(MANPAGES):
+	@$(MAKE) -C $(DOCSRCDIR) manuals
+
+$(GLYPHS): builddir
 	$(DO_GLYPHS)
 
-$(CHARS): /dev/null
+$(CHARS): builddir
 	$(DO_CHARS)
 
-$(STATUS): /dev/null
+$(STATUS): builddir
 	$(DO_STATUS)
 
-$(GRAPHED): $(DOT)
-	$(DO_GRAPHVIZ)
-
-$(COMPILED): $(DTX)
-	$(DO_LATEX)
-	$(DO_LATEX)
-
-$(UNPACKED): $(DTX)
-	$(DO_TEX)
-
-$(MAN): $(MANSOURCE)
-	$(DO_DOCUTILS)
+$(BUILDDIR): /dev/null
+	mkdir -p $(BUILDDIR)
 
 define make-ctandir
 @$(RM) -rf $(DISTDIR)
-@mkdir -p $(DISTDIR) && cp $(SOURCE) $(COMPILED) $(DISTDIR)
+@mkdir -p $(DISTDIR) && cp $(VGND) $(SOURCE) $(COMPILED) $(DISTDIR)
 endef
 
-$(CTAN_ZIP): $(SOURCE) $(COMPILED) $(TDS_ZIP)
+$(CTAN_ZIP): $(DOCS) $(SOURCE) $(COMPILED) $(TDS_ZIP)
 	@echo "Making $@ for CTAN upload."
 	@$(RM) -- $@
 	$(make-ctandir)
-	@zip -r -9 $@ $(TDS_ZIP) $(DISTDIR) >/dev/null
+	cd $(BUILDDIR) && zip -r -9 $(CTAN_ZIPFILE) $(TDS_ZIPFILE) $(NAME) >/dev/null
+
+define run-install-doc
+@mkdir -p $(DOCDIR) && cp -- $(DOCSTATUS) $(VGND) $(DOCDIR)
+@mkdir -p $(SRCDIR) && cp -- $(SRCSTATUS) $(SRCDIR)
+@mkdir -p $(MAN1DIR) && cp -- $(TOOLMAN) $(MAN1DIR)
+@mkdir -p $(MAN5DIR) && cp -- $(CONFMAN) $(MAN5DIR)
+endef
 
 define run-install
-@mkdir -p $(SCRIPTDIR) && cp $(SCRIPTSTATUS) $(SCRIPTDIR)
-@mkdir -p $(RUNDIR) && cp $(RUNSTATUS) $(RUNDIR)
-@mkdir -p $(DOCDIR) && cp $(DOCSTATUS) $(DOCDIR)
-@mkdir -p $(SRCDIR) && cp $(SRCSTATUS) $(SRCDIR)
-@mkdir -p $(MANDIR) && cp $(MANSTATUS) $(MANDIR)
+@mkdir -p $(SCRIPTDIR) && cp -- $(SCRIPTSTATUS) $(SCRIPTDIR)
+@mkdir -p $(RUNDIR)    && cp -- $(RESOURCES) $(RUNSTATUS) $(RUNDIR)
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf
-$(TDS_ZIP): $(ALL_STATUS)
+$(TDS_ZIP): $(DOCS) $(ALL_STATUS)
 	@echo "Making TDS-ready archive $@."
 	@$(RM) -- $@
+	$(run-install-doc)
 	$(run-install)
 	@cd $(TEXMFROOT) && zip -9 ../$@ -r . >/dev/null
 	@$(RM) -r -- $(TEXMFROOT)
 
-.PHONY: install manifest clean mrproper
+.PHONY: install manifest clean mrproper show showtargets
 
 install: $(ALL_STATUS)
 	@echo "Installing in '$(TEXMFROOT)'."
+	$(run-install-docs)
 	$(run-install)
 
-check: $(RUNSTATUS) $(TESTSTATUS_TL)
-	@rm -rf var
-	@for f in $(TESTSTATUS_TL); do \
-	    echo "check: luatex $$f"; \
-	    luatex --interaction=batchmode $$f \
-	    > /dev/null || exit $$?; \
-	    done
-
-check-all: $(TESTSTATUS_SYS) check
-	@cd $(TESTDIR); for f in $(TESTSTATUS_SYS); do \
-	    echo "check: luatex $$f"; \
-	    $(TESTENV) luatex --interaction=batchmode ../$$f \
-	    > /dev/null || exit $$?; \
-	    done
-
-manifest: 
+manifest:
 	@echo "Source files:"
 	@for f in $(SOURCE); do echo $$f; done
 	@echo ""
 	@echo "Derived files:"
 	@for f in $(GENERATED); do echo $$f; done
 
-clean: 
-	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out $(TESTDIR)/*.log
+CLEANEXTS	= log aux toc idx ind ilg out
+CLEANME		= $(foreach ext,$(CLEANEXTS),$(wildcard *.$(ext)))
+CLEANME		+= $(foreach ext,$(CLEANEXTS),$(wildcard $(BUILDDIR)/*$(ext)))
+
+clean:
+	$(MAKE) -C $(DOCSRCDIR) $@
+	@$(RM) -- $(CLEANME)
 
 mrproper: clean
-	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE) $(TESTDIR)/*.pdf
-	@$(RM) -r -- $(DISTDIR)
+	$(MAKE) -C $(DOCSRCDIR) $@
+	@$(RM) -- $(GENERATED) $(ZIPS) $(GLYPHSOURCE)
+	@$(RM) -r -- $(BUILDDIR)
 
+###############################################################################
+showtargets:
+	@echo "Available targets:"
+	@echo
+	@echo "       all         build everything: documentation, resources,"
+	@echo "       world       build everything and package zipballs"
+	@echo "       doc         compile PDF documentation"
+	@echo "       resources   generate resource files (chars, glyphs)"
+	@echo
+	@echo "       pdf         build luaotfload.pdf"
+	@echo "       manual      crate manpages for luaotfload-tool(1) and"
+	@echo "                   luaotfload.conf(5) (requires Docutils)"
+	@echo "       graph       generate file graph (requires GraphViz)"
+	@echo
+	@echo "       chars       import char-def.lua as luaotfload-characters.lua"
+	@echo "       status      create repository info (luaotfload-status.lua)"
+	@echo
+	@echo "       tds         package a zipball according to the TDS"
+	@echo "       ctan        package a zipball for uploading to CTAN"
+	@echo
+
+# vim:noexpandtab:tabstop=8:shiftwidth=2

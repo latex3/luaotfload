@@ -1,0 +1,173 @@
+#!/usr/bin/env texlua
+-----------------------------------------------------------------------
+--         FILE:  mkstatus.lua
+--        USAGE:  ./mkstatus.lua
+--  DESCRIPTION:  writes the repository state
+-- REQUIREMENTS:  luatex, the lualibs package
+--       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--      VERSION:  1.0
+--      CREATED:  2013-07-07 14:01:12+0200
+-----------------------------------------------------------------------
+--
+-- This script generates a list of hashes that serves as the input
+-- for the file integrity check (option --diagnose). md5 is all we can
+-- assume in Luatex, so it’s really only a superficial test.
+
+kpse.set_program_name "luatex"
+
+local md5 = require "md5"
+
+require "lualibs"
+
+local stringformat = string.format
+local md5sumhexa   = md5.sumhexa
+local ioloaddata   = io.loaddata
+local iosavedata   = io.savedata
+local iopopen      = io.popen
+local iowrite      = io.write
+local lfsisdir     = lfs.isdir
+
+-----------------------------------------------------------------------
+-- settings
+-----------------------------------------------------------------------
+
+local verbose  = false
+local filelist = "./build/luaotfload-status.lua" --- result
+
+local names = {
+  --- only the runtime files and scripts
+  { "src",      "luaotfload-auxiliary.lua",   },
+  { "src",      "luaotfload-basics-gen.lua",  },
+  { "src",      "luaotfload-basics-nod.lua",  },
+  { "build",    "luaotfload-characters.lua",  },
+  { "src",      "luaotfload-colors.lua",      },
+  { "src",      "luaotfload-database.lua",    },
+  { "src",      "luaotfload-diagnostics.lua", },
+  { "src",      "luaotfload-features.lua",    },
+  { "src",      "luaotfload-fonts-cbk.lua",   },
+  { "src",      "luaotfload-fonts-def.lua",   },
+  { "src",      "luaotfload-fonts-enc.lua",   },
+  { "src",      "luaotfload-fonts-ext.lua",   },
+  { "src",      "luaotfload-fonts-lua.lua",   },
+  { "src",      "luaotfload-fonts-tfm.lua",   },
+  { "build",    "luaotfload-glyphlist.lua",   },
+  { "src",      "luaotfload-letterspace.lua", },
+  { "src",      "luaotfload-loaders.lua",     },
+  { "src",      "luaotfload-log.lua",         },
+  { "src",      "luaotfload-main.lua",        },
+  { "src",      "luaotfload-fontloader.lua",  },
+  { "src",      "luaotfload-override.lua",    },
+  { "src",      "luaotfload-parsers.lua",     },
+  { "src",      "luaotfload-tool.lua",        },
+  { "scripts",  "mkcharacters",               },
+  { "scripts",  "mkglyphlist",                },
+  { "scripts",  "mkstatus",                   },
+}
+
+-----------------------------------------------------------------------
+-- helpers
+-----------------------------------------------------------------------
+
+local die = function (...)
+  io.stderr:write "[fatal error]: "
+  io.stderr:write (stringformat (...))
+  io.stderr:write "\naborting.\n"
+  os.exit (1)
+end
+
+local gitcmd = "git log -1 \z
+                    --format=\"return {\z
+                                %n  revision  = [[%H]],\z
+                                %n  timestamp = [[%cd]],\z
+                                %n  committer = [[%cn <%ce>]],\z
+                                %n}\" \z
+                    --date=iso"
+
+local git_info = function ()
+  --io.write (gitcmd)
+  --io.write "\n"
+  local chan = iopopen (gitcmd)
+  if not chan then
+    die ("this script needs to be run inside \z
+          the luaotfload git repository")
+  end
+
+  local data = chan:read "*all"
+  chan:close ()
+  if data and type (data) == "string" and data ~= "" then
+    data = load (data)
+    if not data then
+      die "cannot parse git information"
+    end
+    return data ()
+  end
+  die "cannot read from pipe"
+end
+
+-----------------------------------------------------------------------
+-- functionality
+-----------------------------------------------------------------------
+
+local hash_file = function (fname)
+  if not lfs.isfile (fname) then
+    die ("cannot find %s.", fname)
+  end
+  local raw = ioloaddata (fname)
+  if not raw then
+    die ("cannot read from %s.", fname)
+  end
+  return md5sumhexa (raw)
+end
+
+local hash_all
+hash_all = function (list, acc)
+  if list == nil then
+    return hash_all (table.fastcopy (names), { })
+  end
+
+  local finfo = list[#list]
+  list[#list] = nil
+  if finfo then
+    local fpath
+    if type (finfo) == "table" then
+      local d, f = finfo [1], finfo [2]
+      if lfs.isdir (d) then
+        fpath = file.join (d, f)
+      else
+        fpath = f
+      end
+    else
+      fpath = finfo
+    end
+    if verbose then
+      iowrite "· md5("
+      iowrite (fpath)
+    end
+    local sum = hash_file (fpath)
+    if verbose then
+      iowrite ") = \""
+      iowrite (sum)
+      iowrite "\"\n"
+    end
+    acc[#acc+1] = { fpath, sum }
+    return hash_all (list, acc)
+  end
+  return acc
+end
+
+local main = function ()
+  if arg [1] == "-v" then verbose = true end
+  local hashes      = hash_all ()
+  local notes       = git_info ()
+  local serialized  = table.serialize ({ notes = notes,
+                                         hashes = hashes }, true)
+  local success     = io.savedata (filelist, serialized)
+  if success == false then
+    die ("could not write to %s.", filelist)
+  end
+  return 0
+end
+
+return main ()
+
+--- vim:ft=lua:ts=2:et:sw=2

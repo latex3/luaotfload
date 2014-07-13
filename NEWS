@@ -1,7 +1,7 @@
 Change History
 --------------
 
-2014/**/**, luaotfload v2.5
+2014/07/13, luaotfload v2.5
     * Remove legacy code.
     * Remove compatibility with the old mkluatexfontdb script.
     * Remove test directory. Use https://bitbucket.org/phg/lua-la-tex-tests

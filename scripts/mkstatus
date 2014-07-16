@@ -128,7 +128,7 @@ hash_all = function (list, acc)
   local finfo = list[#list]
   list[#list] = nil
   if finfo then
-    local fpath
+    local fpath, fname
     if type (finfo) == "table" then
       local d, f = finfo [1], finfo [2]
       if lfs.isdir (d) then
@@ -136,6 +136,7 @@ hash_all = function (list, acc)
       else
         fpath = f
       end
+      fname = f
     else
       fpath = finfo
     end
@@ -149,7 +150,7 @@ hash_all = function (list, acc)
       iowrite (sum)
       iowrite "\"\n"
     end
-    acc[#acc+1] = { fpath, sum }
+    acc[#acc+1] = { fname, sum }
     return hash_all (list, acc)
   end
   return acc

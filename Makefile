@@ -72,6 +72,7 @@ TEXMFROOT	= $(shell kpsewhich --var-value TEXMFHOME)
 DISTDIR		= $(BUILDDIR)/$(NAME)
 
 CTAN_ZIPFILE	= $(NAME).zip
+CTAN_ZIPSIG	= $(BUILDDIR)/$(CTAN_ZIPFILE).asc
 TDS_ZIPFILE	= $(NAME).tds.zip
 CTAN_ZIP	= $(BUILDDIR)/$(CTAN_ZIPFILE)
 TDS_ZIP		= $(BUILDDIR)/$(TDS_ZIPFILE)
@@ -138,7 +139,7 @@ $(BUILDDIR): /dev/null
 	mkdir -p $(BUILDDIR)
 
 define make-ctandir
-@$(RM) -rf $(DISTDIR)
+@$(RM) -rf -- $(DISTDIR)
 @mkdir -p $(DISTDIR) && cp $(RESOURCES) $(DOCPDF) $(VGND) $(CONFDEMO) $(SOURCE) $(DISTDIR)
 endef
 
@@ -147,6 +148,11 @@ $(CTAN_ZIP): $(DOCS) $(SOURCE) $(TDS_ZIP)
 	@$(RM) -- $@
 	$(make-ctandir)
 	cd $(BUILDDIR) && zip -r -9 $(CTAN_ZIPFILE) $(TDS_ZIPFILE) $(NAME) >/dev/null
+
+$(CTAN_ZIPSIG): $(CTAN_ZIP)
+	@echo "Signing package $(CTAN_ZIP)"
+	@$(RM) -- $@
+	@gpg --batch --armor --detach-sign "$(CTAN_ZIP)"
 
 define run-install-doc
 @mkdir -p $(DOCDIR) && cp -- $(DOCSTATUS) $(VGND) $(CONFDEMO) $(DOCDIR)
@@ -169,7 +175,9 @@ $(TDS_ZIP): $(DOCS) $(ALL_STATUS) check
 	@cd $(TEXMFROOT) && zip -9 ../$@ -r . >/dev/null
 	@$(RM) -r -- $(TEXMFROOT)
 
-.PHONY: install manifest clean mrproper show showtargets
+sign: $(CTAN_ZIPSIG)
+
+.PHONY: install manifest clean mrproper show showtargets check
 
 install: $(ALL_STATUS)
 	@echo "Installing in '$(TEXMFROOT)'."
@@ -215,6 +223,7 @@ showtargets:
 	@echo
 	@echo "       tds         package a zipball according to the TDS"
 	@echo "       ctan        package a zipball for uploading to CTAN"
+	@echo "       sign        sign zipball"
 	@echo
 
 # vim:noexpandtab:tabstop=8:shiftwidth=2

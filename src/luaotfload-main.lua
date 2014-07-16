@@ -4,7 +4,7 @@
 -- REQUIREMENTS:  luatex v.0.79 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2014-07-13 15:35:13+0200
+--     MODIFIED:  2014-07-16 19:48:30+0200
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -48,11 +48,12 @@ local initial_log_level = 0
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
+luaotfload.version                = "2.5-1" -- FIXME version belongs in common init
 
 luaotfload.module = {
     name          = "luaotfload-main",
-    version       = 2.50000,
-    date          = "2014/07/13",
+    version       = 2.50001,
+    date          = "2014/07/16",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",
@@ -100,7 +101,7 @@ luaotfload.log.tex        = {
 
 --doc]]--
 
-local min_luatex_version = 76
+local min_luatex_version = 79
 
 if tex.luatexversion < min_luatex_version then
     warning ("LuaTeX v%.2f is old, v%.2f or later is recommended.",

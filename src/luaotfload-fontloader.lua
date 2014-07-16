@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 07/06/14 22:50:12
+-- merge date  : 07/14/14 19:25:59
 
 do -- begin closure to overcome local limits and interference
 
@@ -6681,7 +6681,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.756 
+otf.version=2.758 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -7241,7 +7241,7 @@ end
               end
               if not unicode or unicode==-1 then 
                 if not name then
-                  name=format("u%06X",private)
+                  name=format("u%06X.ctx",private)
                 end
                 unicode=private
                 unicodes[name]=private
@@ -7252,7 +7252,7 @@ end
                 nofnames=nofnames+1
               else
                 if not name then
-                  name=format("u%06X",unicode)
+                  name=format("u%06X.ctx",unicode)
                 end
                 unicodes[name]=unicode
                 nofunicodes=nofunicodes+1
@@ -7293,12 +7293,29 @@ end
           end
           private=private+1
         else
+          if unicode>criterium then
+            local taken=descriptions[unicode]
+            if taken then
+              if unicode>=private then
+                private=unicode+1 
+              else
+                private=private+1 
+              end
+              descriptions[private]=taken
+              unicodes[taken.name]=private
+              indices[taken.index]=private
+              if trace_private then
+                report_otf("slot %U is moved to %U due to private in font",unicode)
+              end
+            else
+              if unicode>=private then
+                private=unicode+1 
+              end
+            end
+          end
           unicodes[name]=unicode
         end
         indices[index]=unicode
-        if not name then
-          name=format("u%06X",unicode)
-        end
         descriptions[unicode]={
           boundingbox=glyph.boundingbox,
           name=name,
@@ -7909,7 +7926,9 @@ local function check_variants(unicode,the_variants,splitter,unicodes)
     for i=1,#glyphs do
       local g=glyphs[i]
       if done[g] then
-        report_otf("skipping cyclic reference %U in math variant %U",g,unicode)
+        if i>1 then
+          report_otf("skipping cyclic reference %U in math variant %U",g,unicode)
+        end
       else
         if n==0 then
           n=1

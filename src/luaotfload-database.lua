@@ -357,7 +357,7 @@ mtx-fonts has in names.tma:
 --- string list -> string option -> dbobj
 
 local initialize_namedata = function (formats, created)
-    local now = os.date "%F %T"
+    local now = os.date "%Y-%m-%d %H:%M:%S" --- i. e. "%F %T" on POSIX systems
     return {
         --families        = { },
         status          = { }, -- was: status; map abspath -> mapping

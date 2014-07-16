@@ -91,7 +91,8 @@ local set_logout = function (s, finalizers)
         logout = "redirect"
         local chan = choose_logfile ()
         chan:write (stringformat ("logging initiated at %s",
-                                  osdate ("%F %T", ostime ())))
+                                  osdate ("%Y-%m-%d %h:%m:%s", --- i. e. osdate "%F %T"
+                                          ostime ())))
         local writefile = function (...)
             if select ("#", ...) == 2 then
                 chan:write (select (2, ...))
@@ -117,7 +118,8 @@ local set_logout = function (s, finalizers)
 
         finalizers[#finalizers+1] = function ()
             chan:write (stringformat ("\nlogging finished at %s\n",
-                                      osdate ("%F %T", ostime ())))
+                                      osdate ("%Y-%m-%d %h:%m:%s", --- i. e. osdate "%F %T"
+                                              ostime ())))
             chan:close ()
             texiowrite    = texio.write
             texiowrite_nl = texio.write_nl

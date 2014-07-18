@@ -282,21 +282,33 @@ read_fonts_conf_indeed = function (start,
         path = filejoin(xdg_config_home, path)
       end
       --- here the path can be four things: a directory or a file,
-      --- in absolute or relative path.
+      --- an absolute or relative path.
       if stringsub(path, 1, 1) == "~" then
         path = filejoin(home, stringsub(path, 2))
       elseif --- if the path is relative, we make it absolute
         not ( lfsisfile(path) or lfsisdir(path) )
-        then
+      then
           path = filejoin(filedirname(start), path)
-        end
-        if  lfsisfile(path)
-          and kpsereadable_file(path)
-          and not done[path]
-          then
-            --- we exclude path with texmf in them, as they should
-            --- be found otherwise
-            acc = read_fonts_conf_indeed(path,
+      end
+      if  lfsisfile(path)
+        and kpsereadable_file(path)
+        and not done[path]
+      then
+        --- we exclude path with texmf in them, as they should
+        --- be found otherwise
+        acc = read_fonts_conf_indeed(path,
+                                     home,
+                                     xdg_config_home,
+                                     xdg_data_home,
+                                     acc,
+                                     done,
+                                     dirs_done,
+                                     find_files)
+      elseif lfsisdir(path) then --- arrow code ahead
+        local config_files = find_files (path, conf_filter)
+        for _, filename in next, config_files do
+          if not done[filename] then
+            acc = read_fonts_conf_indeed(filename,
                                          home,
                                          xdg_config_home,
                                          xdg_data_home,
@@ -304,28 +316,16 @@ read_fonts_conf_indeed = function (start,
                                          done,
                                          dirs_done,
                                          find_files)
-          elseif lfsisdir(path) then --- arrow code ahead
-            local config_files = find_files (path, conf_filter)
-            for _, filename in next, config_files do
-              if not done[filename] then
-                acc = read_fonts_conf_indeed(filename,
-                                             home,
-                                             xdg_config_home,
-                                             xdg_data_home,
-                                             acc,
-                                             done,
-                                             dirs_done,
-                                             find_files)
-              end
-            end
-          end --- match “kind”
-        end --- iterate paths
-      end
+          end
+        end
+      end --- match “kind”
+      end --- iterate paths
+  end
 
-      --inspect(acc)
-      --inspect(done)
-      return acc, done, dirs_done
-    end --- read_fonts_conf_indeed()
+  --inspect(acc)
+  --inspect(done)
+  return acc, done, dirs_done
+end --- read_fonts_conf_indeed()
 
 --[[doc--
       read_fonts_conf() sets up an accumulator and two sets

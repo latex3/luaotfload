@@ -4,7 +4,7 @@
 -- REQUIREMENTS:  luatex v.0.79 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2014-07-16 19:48:30+0200
+--     MODIFIED:  2014-07-24 22:08:34+0200
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -48,7 +48,7 @@ local initial_log_level = 0
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
-luaotfload.version                = "2.5-1" -- FIXME version belongs in common init
+luaotfload.version                = "2.5-2" -- FIXME version belongs in common init
 
 luaotfload.module = {
     name          = "luaotfload-main",

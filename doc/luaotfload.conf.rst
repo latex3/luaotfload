@@ -55,7 +55,14 @@ along with lots of other information.
 To observe the difference in behavior, save above snippet to
 ``./luaotfload.conf`` and update the font index: ::
 
-    luaotfload --update --force
+    luaotfload-tool --update --force
+
+The current configuration can be written to disk using
+**luaotfload-tool**: ::
+
+    luaotfload-tool --dumpconf > luaotfload.conf
+
+The result can itself be used as a configuration file.
 
 
 SYNTAX

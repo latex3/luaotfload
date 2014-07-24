@@ -6,7 +6,7 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:                  2014-03-30
+:Date:                  2014-07-24
 :Copyright:             GPL v2.0
 :Version:               2.5
 :Manual section:        1
@@ -41,6 +41,8 @@ SYNOPSIS
 **luaotfload-tool** --show-blacklist
 
 **luaotfload-tool** --diagnose=CHECK
+
+**luaotfload-tool** --conf=FILE --dumpconf
 
 DESCRIPTION
 =======================================================================
@@ -277,6 +279,13 @@ miscellaneous
                         commas, e.g. ``--diagnose=files,permissions``.
                         Specify ``thorough`` to run all checks.
 
+--conf=FILE             Read the configuration from *FILE*. See
+                        **luaotfload.conf**\(%) for documentation
+                        concerning the format and available options.
+--dumpconf              Print the currently active configuration; the
+                        output can be saved to a file and used for
+                        bootstrapping a custom configuration files.
+
 FILES
 =======================================================================
 
@@ -297,7 +306,7 @@ them with the next run of *LuaTeX*.
 SEE ALSO
 =======================================================================
 
-**luatex** (1), **lua** (1)
+**luaotfload.conf**\(5), **luatex**\(1), **lua**\(1)
 
 * ``texdoc luaotfload`` to display the manual for the *Luaotfload*
   package

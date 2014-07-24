@@ -145,21 +145,21 @@ local xml_attr_list     = Cf(Ct"" * xml_attr^1, rawset)
 --doc]]--
 --- string -> bool -> lpeg_t
 local scan_node = function (tag)
-    --- Node attributes go into a table with the index “attributes”
-    --- (relevant for “prefix="xdg"” and the likes).
-    local p_tag = P(tag)
-    local with_attributes   = P"<" * p_tag
-                            * Cg(xml_attr_list, "attributes")^-1
-                            * xmlws^-1
-                            * P">"
-    local plain             = P"<" * p_tag * xmlws^-1 * P">"
-    local node_start        = plain + with_attributes
-    local node_stop         = P"</" * p_tag * xmlws^-1 * P">"
-    --- there is no nesting, the earth is flat ...
-    local node              = node_start
-                            * Cc(tag) * C(comment + (1 - node_stop)^1)
-                            * node_stop
-    return Ct(node) -- returns {string, string [, attributes = { key = val }] }
+  --- Node attributes go into a table with the index “attributes”
+  --- (relevant for “prefix="xdg"” and the likes).
+  local p_tag = P(tag)
+  local with_attributes   = P"<" * p_tag
+                          * Cg(xml_attr_list, "attributes")^-1
+                          * xmlws^-1
+                          * P">"
+  local plain             = P"<" * p_tag * xmlws^-1 * P">"
+  local node_start        = plain + with_attributes
+  local node_stop         = P"</" * p_tag * xmlws^-1 * P">"
+  --- there is no nesting, the earth is flat ...
+  local node              = node_start
+                          * Cc(tag) * C(comment + (1 - node_stop)^1)
+                          * node_stop
+  return Ct(node) -- returns {string, string [, attributes = { key = val }] }
 end
 
 --[[doc--
@@ -452,14 +452,14 @@ parsers.splitcomma      = splitcomma
 
 
 local handle_normal_option = function (key, val)
-    val = stringlower(val)
-    --- the former “toboolean()” handler
-    if val == "true"  then
-        val = true
-    elseif val == "false" then
-        val = false
-    end
-    return key, val
+  val = stringlower(val)
+  --- the former “toboolean()” handler
+  if val == "true"  then
+    val = true
+  elseif val == "false" then
+    val = false
+  end
+  return key, val
 end
 
 --[[doc--
@@ -470,18 +470,18 @@ end
 --doc]]--
 
 local handle_xetex_option = function (key, val)
-    val = stringlower(val)
-    local numeric = tonumber(val) --- decimal only; keeps colors intact
-    if numeric then --- ugh
-        if  mathceil(numeric) == numeric then -- integer, possible index
-            val = tostring(numeric + 1)
-        end
-    elseif val == "true"  then
-        val = true
-    elseif val == "false" then
-        val = false
+  val = stringlower(val)
+  local numeric = tonumber(val) --- decimal only; keeps colors intact
+  if numeric then --- ugh
+    if  mathceil(numeric) == numeric then -- integer, possible index
+      val = tostring(numeric + 1)
     end
-    return key, val
+  elseif val == "true"  then
+    val = true
+  elseif val == "false" then
+    val = false
+  end
+  return key, val
 end
 
 --[[doc--
@@ -496,8 +496,8 @@ end
 --doc]]--
 
 local handle_invalid_option = function (opt)
-    logreport("log", 0, "load", "font option %q unknown.", opt)
-    return "", false
+  logreport("log", 0, "load", "font option %q unknown.", opt)
+  return "", false
 end
 
 --[[doc--
@@ -509,16 +509,16 @@ end
 --doc]]--
 
 local check_garbage = function (_,i, garbage)
-    if stringfind(garbage, "/") then
-        logreport("log", 0, "load",  --- ffs use path!
-                  "warning: path in file: lookups is deprecated; ")
-        logreport("log", 0, "load", "use bracket syntax instead!")
-        logreport("log", 0, "load",
-                  "position: %d; full match: %q",
-                  i, garbage)
-        return true
-    end
-    return false
+  if stringfind(garbage, "/") then
+    logreport("log", 0, "load",  --- ffs use path!
+              "warning: path in file: lookups is deprecated; ")
+    logreport("log", 0, "load", "use bracket syntax instead!")
+    logreport("log", 0, "load",
+              "position: %d; full match: %q",
+              i, garbage)
+    return true
+  end
+  return false
 end
 
 local featuresep = comma + semicolon
@@ -648,9 +648,11 @@ local maybe_cast = function (var)
   end
   return tonumber (var) or var
 end
+
 local escape = function (chr, repl)
   return (backslash * P(chr) / (repl or chr))
 end
+
 local valid_escapes     = escape "\""
                         + escape "\\"
                         + escape ("n", "\n")
@@ -726,4 +728,4 @@ local config            = Ct (ini_sections)
 
 luaotfload.parsers.config = config
 
--- vim:ft=lua:tw=71:et:sts=4:ts=8
+-- vim:ft=lua:tw=71:et:sw=2:sts=4:ts=8

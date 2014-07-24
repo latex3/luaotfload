@@ -6,11 +6,11 @@
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 --      VERSION:  2.5
 --      LICENSE:  GPL v2.0
---     MODIFIED:  2014-07-16 19:45:40+0200
+--     MODIFIED:  2014-07-24 22:10:32+0200
 -----------------------------------------------------------------------
 
 luaotfload          = luaotfload or { }
-local version       = "2.5-1" --- <int: major>.<int: minor>-<int: fixes>
+local version       = "2.5-2" --- <int: major>.<int: minor>-<int: fixes>
 luaotfload.version  = version
 luaotfload.self     = "luaotfload-tool"
 
@@ -739,9 +739,10 @@ set.
 --]]--
 
 local action_sequence = {
-    "config",   "loglevel",  "help",  "version",
-    "diagnose", "blacklist", "cache", "flush",
-    "bisect",   "generate",  "list",  "query",
+    "config"   , "loglevel" , "help"      , "version" ,
+    "dumpconf" , "diagnose" , "blacklist" , "cache"   ,
+    "flush"    , "bisect"   , "generate"  , "list"    ,
+    "query"    ,
 }
 
 local action_pending  = tabletohash(action_sequence, false)
@@ -778,6 +779,11 @@ end
 
 actions.version = function (job)
     version_msg()
+    return true, false
+end
+
+actions.dumpconf = function (job)
+    config.actions.dump ()
     return true, false
 end
 
@@ -1413,6 +1419,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         cache              = 1,
         conf               = 1,
         diagnose           = 1,
+        dumpconf           = 0,
         ["dry-run"]        = "D",
         ["flush-lookups"]  = "l",
         fields             = 1,
@@ -1551,15 +1558,20 @@ local process_cmdline = function ( ) -- unit -> jobspec
             result.bisect         = optarg[n]
             action_pending.bisect = true
         elseif v == "conf" then
-            local extra = stringexplode (optarg[n], ",+")
-            if extra then
-                local extra_config = result.extra_config
-                if extra_config then
-                    table.append (extra_config, extra)
-                else
-                    result.extra_config = extra
+            local confname = optarg[n]
+            if confname then
+                local extra = stringexplode (optarg[n], ",+")
+                if extra then
+                    local extra_config = result.extra_config
+                    if extra_config then
+                        table.append (extra_config, extra)
+                    else
+                        result.extra_config = extra
+                    end
                 end
             end
+        elseif v == "dumpconf" then
+            action_pending["dumpconf"] = true
         elseif v == "print-conf" then
             result.print_config = true
         end

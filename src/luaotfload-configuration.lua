@@ -494,6 +494,25 @@ local format_boolean = function (var, val)
   return stringformat (indent .. "%s = %s", var, val == true and "true" or "false")
 end
 
+local format_keyval = function (var, val)
+  local list = { }
+  local keys = table.sortedkeys (val)
+  for i = 1, #keys do
+    local key    = keys[i]
+    local subval = val[key]
+    if subval == true then
+      list[#list + 1] = stringformat ("%s", key)
+    else
+      list[#list + 1] = stringformat ("%s=%s", key, val[key])
+    end
+  end
+  if next (list) then
+    return stringformat (indent .. "%s = %s",
+                         var,
+                         tableconcat (list, ","))
+  end
+end
+
 local format_section = function (title)
   return stringformat ("[%s]", title)
 end
@@ -542,6 +561,9 @@ local formatters = {
     skip_read   = { false, format_boolean },
     strip       = { false, format_boolean },
     update_live = { false, format_boolean },
+  },
+  default_features = {
+    __default = { true, format_keyval },
   },
   misc = {
     bisect     = { false, format_boolean },
@@ -792,6 +814,10 @@ local dump = function ()
         local var = varnames[j]
         local val = vars[var]
         local comment, sformat = unpack (sformats[var] or { })
+        if not sformat then
+          comment, sformat = unpack (sformats.__default or { })
+        end
+
         if sformat then
           local dashedvar = dashed (var)
           if comment then
@@ -800,6 +826,7 @@ local dump = function ()
             confdata[#confdata + 1] = sformat (dashedvar, val)
           end
         end
+
       end
       confdata[#confdata + 1] = ""
     end

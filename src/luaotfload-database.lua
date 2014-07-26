@@ -3091,9 +3091,9 @@ end
 update_names = function (currentnames, force, dry_run)
     local targetnames
 
-    if config.luaotfload.db.update_live == false then
-        report ("info", 2, "db",
-                "Skipping database update.")
+    local conf = config.luaotfload
+    if conf.run.live ~= false and conf.db.update_live == false then
+        report ("info", 2, "db", "Skipping database update.")
         --- skip all db updates
         return currentnames or name_index
     end

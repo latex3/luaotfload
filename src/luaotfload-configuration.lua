@@ -148,6 +148,7 @@ local default_config = {
     definer        = "patch",
     log_level      = 0,
     color_callback = "pre_linebreak_filter",
+    live           = true,
   },
   misc = {
     bisect         = false,
@@ -419,6 +420,7 @@ local option_spec = {
     },
   },
   run = {
+    live = { in_t = boolean_t, }, --- false for the tool, true for TeX run
     resolver = {
       in_t      = string_t,
       out_t     = string_t,

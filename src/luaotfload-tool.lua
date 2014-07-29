@@ -1411,7 +1411,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         query        = "",
         log_level    = nil,
         bisect       = nil,
-        config       = { db = { }, misc = { }, run = { }, paths = { } },
+        config       = { db = { }, misc = { }, run = { live = false }, paths = { } },
     }
 
     local long_options = {

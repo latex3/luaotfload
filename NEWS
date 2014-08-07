@@ -1,6 +1,11 @@
 Change History
 --------------
 
+2014/XX/XX, luaotfload v2.6
+    * Add ``sign`` target to makefile for automated package signing
+    * Add ``--dumpconf`` option to luaotfload-tool for generating configuration
+      files
+
 2014/07/13, luaotfload v2.5
     * Remove legacy code.
     * Remove compatibility with the old mkluatexfontdb script.

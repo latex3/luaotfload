@@ -723,7 +723,7 @@ local support_incomplete = tabletohash({
 --doc]]--
 
 --- (string, string) dict -> (string, string) dict
-local set_default_features = function (speclist)
+local apply_default_features = function (speclist)
     local default_features = luaotfload.features
 
     speclist = speclist or { }
@@ -771,7 +771,7 @@ local set_default_features = function (speclist)
     end
 
     for feat, state in next, requested do
-        if not speclist[feat] then speclist[feat] = state end
+        if not speclist[feat] == nil then speclist[feat] = state end
     end
 
     for feat, state in next, default_features.global do
@@ -877,7 +877,7 @@ local handle_request = function (specification)
         return specification
     end
     local lookup, name  = select_lookup(request)
-    request.features    = set_default_features(request.features)
+    request.features    = apply_default_features(request.features)
 
     if name then
         specification.name    = name

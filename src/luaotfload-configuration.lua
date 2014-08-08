@@ -483,6 +483,18 @@ local option_spec = {
 ---                               FORMATTERS
 -------------------------------------------------------------------------------
 
+local commented = function (str)
+  return ";" .. str
+end
+
+local underscore_replacer = lpeg.replacer ("_", "-", true)
+
+local dashed = function (var)
+  --- INI spec dictates that dashes are valid in variable names, not
+  --- underscores.
+  return underscore_replacer (var) or var
+end
+
 local indent = "  "
 local format_string = function (var, val)
   return stringformat (indent .. "%s = %s", var, val)
@@ -516,19 +528,7 @@ local format_keyval = function (var, val)
 end
 
 local format_section = function (title)
-  return stringformat ("[%s]", title)
-end
-
-local commented = function (str)
-  return ";" .. str
-end
-
-local underscore_replacer = lpeg.replacer ("_", "-", true)
-
-local dashed = function (var)
-  --- INI spec dictates that dashes are valid in variable names, not
-  --- underscores.
-  return underscore_replacer (var) or var
+  return stringformat ("[%s]", dashed (title))
 end
 
 local conf_header = [==[

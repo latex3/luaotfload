@@ -771,14 +771,14 @@ local apply_default_features = function (speclist)
     end
 
     for feat, state in next, requested do
-        if not speclist[feat] == nil then speclist[feat] = state end
+        if speclist[feat] == nil then speclist[feat] = state end
     end
 
     for feat, state in next, default_features.global do
         --- This is primarily intended for setting node
         --- mode unless “base” is requested, as stated
         --- in the manual.
-        if not speclist[feat] then speclist[feat] = state end
+        if speclist[feat] == nil then speclist[feat] = state end
     end
     return speclist
 end

@@ -432,7 +432,14 @@ local option_spec = {
     definer = {
       in_t      = string_t,
       out_t     = string_t,
-      transform = function (d) return d == "generic" and d or "patch" end,
+      transform = function (d)
+        if   d == "generic"      or d == "patch"
+          or d == "info_generic" or d == "info_patch"
+        then
+          return d
+        end
+        return "patch"
+      end,
     },
     log_level = {
       in_t      = number_t,

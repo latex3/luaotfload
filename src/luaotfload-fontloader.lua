@@ -8310,7 +8310,7 @@ actions["reorganize glyph anchors"]=function(data,filename,raw)
           for tag,specification in next,data do
             for i=1,#specification do
               local si=specification[i]
-              specification[i]={ si.x or 0,si.y or 0 }
+              specification[i]={ si and si.x or 0,si and si.y or 0 }
             end
           end
         else

@@ -4,7 +4,7 @@
 -- REQUIREMENTS:  luatex v.0.79 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2014-07-24 22:08:34+0200
+--     MODIFIED:  2014-08-08 23:14:37+0200
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -672,13 +672,13 @@ create_callback("luaotfload.patch_font", "simple", dummy_function)
 
 --doc]]--
 
-local read_font_file = fonts.definers.read
 
-local definers = {
-    generic = read_font_file,
-    --- spec -> size -> id -> tmfdata
-    patch = function (specification, size, id)
-        local tfmdata = read_font_file (specification, size, id)
+local definers = { } --- (string, spec -> size -> id -> tmfdata) hash_t
+do
+    local read = fonts.definers.read
+
+    local patch = function (specification, size, id)
+        local tfmdata = read (specification, size, id)
         if type (tfmdata) == "table" and tfmdata.shared then
             --- We need to test for the “shared” field here
             --- or else the fontspec capheight callback will
@@ -686,8 +686,30 @@ local definers = {
             call_callback ("luaotfload.patch_font", tfmdata, specification)
         end
         return tfmdata
-    end,
-}
+    end
+
+    local mk_info = function (name)
+        local definer = name == "patch" and patch or read
+        return function (specification, size, id)
+            logreport ("both", 0, "main", "active font definer: %q", name)
+            logreport ("both", 0, "main", "   > defining font no. %d", id)
+            logreport ("both", 0, "main", "   > spec %q", specification)
+            logreport ("both", 0, "main", "   > at size %.2f pt", size / 2^16)
+            local tfmdata = definer (specification, size, id)
+            if not tfmdata then
+                logreport ("both", 0, "main", "font definition failed")
+                return
+            end
+            logreport ("both", 0, "main", "font definition successful")
+            return tfmdata
+        end
+    end
+
+    definers.patch          = patch
+    definers.generic        = read
+    definers.info_patch     = mk_info "patch"
+    definers.info_generic   = mk_info "generic"
+end
 
 reset_callback "define_font"
 

@@ -420,24 +420,22 @@ local provides_script = function (font_id, asked_script)
     local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
     local shared   = tfmdata.shared       if not shared   then return false end
     local fontdata = shared.rawdata       if not fontdata then return false end
-    if fontdata then
-      local fontname = fontdata.metadata.fontname
-      local features = fontdata.resources.features
-      for method, featuredata in next, features do
-        --- where method: "gpos" | "gsub"
-        for feature, data in next, featuredata do
-          if data[asked_script] then
-            report ("log", 1, "aux",
-                    "font no %d (%s) defines feature %s for script %s",
-                    font_id, fontname, feature, asked_script)
-            return true
-          end
+    local fontname = fontdata.metadata.fontname
+    local features = fontdata.resources.features
+    for method, featuredata in next, features do
+      --- where method: "gpos" | "gsub"
+      for feature, data in next, featuredata do
+        if data[asked_script] then
+          report ("log", 1, "aux",
+                  "font no %d (%s) defines feature %s for script %s",
+                  font_id, fontname, feature, asked_script)
+          return true
         end
       end
-      report ("log", 0, "aux",
-              "font no %d (%s) defines no feature for script %s",
-              font_id, fontname, asked_script)
     end
+    report ("log", 0, "aux",
+            "font no %d (%s) defines no feature for script %s",
+            font_id, fontname, asked_script)
   end
   report ("log", 0, "aux", "no font with id %d", font_id)
   return false
@@ -460,28 +458,26 @@ local provides_language = function (font_id, asked_script, asked_language)
     local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
     local shared   = tfmdata.shared       if not shared   then return false end
     local fontdata = shared.rawdata       if not fontdata then return false end
-    if fontdata then
-      local fontname = fontdata.metadata.fontname
-      local features = fontdata.resources.features
-      for method, featuredata in next, features do
-        --- where method: "gpos" | "gsub"
-        for feature, data in next, featuredata do
-          local scriptdata = data[asked_script]
-          if scriptdata and scriptdata[asked_language] then
-            report ("log", 1, "aux",
-                    "font no %d (%s) defines feature %s "
-                    .. "for script %s with language %s",
-                    font_id, fontname, feature,
-                    asked_script, asked_language)
-            return true
-          end
+    local fontname = fontdata.metadata.fontname
+    local features = fontdata.resources.features
+    for method, featuredata in next, features do
+      --- where method: "gpos" | "gsub"
+      for feature, data in next, featuredata do
+        local scriptdata = data[asked_script]
+        if scriptdata and scriptdata[asked_language] then
+          report ("log", 1, "aux",
+                  "font no %d (%s) defines feature %s "
+                  .. "for script %s with language %s",
+                  font_id, fontname, feature,
+                  asked_script, asked_language)
+          return true
         end
       end
-      report ("log", 0, "aux",
-              "font no %d (%s) defines no feature "
-              .. "for script %s with language %s",
-              font_id, fontname, asked_script, asked_language)
     end
+    report ("log", 0, "aux",
+            "font no %d (%s) defines no feature "
+            .. "for script %s with language %s",
+            font_id, fontname, asked_script, asked_language)
   end
   report ("log", 0, "aux", "no font with id %d", font_id)
   return false
@@ -534,28 +530,26 @@ local provides_feature = function (font_id,        asked_script,
     local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
     local shared   = tfmdata.shared       if not shared   then return false end
     local fontdata = shared.rawdata       if not fontdata then return false end
-    if fontdata then
-      local features = fontdata.resources.features
-      local fontname = fontdata.metadata.fontname
-      for method, featuredata in next, features do
-        --- where method: "gpos" | "gsub"
-        local feature = featuredata[asked_feature]
-        if feature then
-          local scriptdata = feature[asked_script]
-          if scriptdata and scriptdata[asked_language] then
-            report ("log", 1, "aux",
-                    "font no %d (%s) defines feature %s "
-                    .. "for script %s with language %s",
-                    font_id, fontname, asked_feature,
-                    asked_script, asked_language)
-            return true
-          end
+    local features = fontdata.resources.features
+    local fontname = fontdata.metadata.fontname
+    for method, featuredata in next, features do
+      --- where method: "gpos" | "gsub"
+      local feature = featuredata[asked_feature]
+      if feature then
+        local scriptdata = feature[asked_script]
+        if scriptdata and scriptdata[asked_language] then
+          report ("log", 1, "aux",
+                  "font no %d (%s) defines feature %s "
+                  .. "for script %s with language %s",
+                  font_id, fontname, asked_feature,
+                  asked_script, asked_language)
+          return true
         end
       end
-      report ("log", 0, "aux",
-              "font no %d (%s) does not define feature %s for script %s with language %s",
-              font_id, fontname, asked_feature, asked_script, asked_language)
     end
+    report ("log", 0, "aux",
+            "font no %d (%s) does not define feature %s for script %s with language %s",
+            font_id, fontname, asked_feature, asked_script, asked_language)
   end
   report ("log", 0, "aux", "no font with id %d", font_id)
   return false

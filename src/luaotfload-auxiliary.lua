@@ -417,7 +417,9 @@ least one feature.
 local provides_script = function (font_id, asked_script)
   asked_script = stringlower(asked_script)
   if font_id and font_id > 0 then
-    local fontdata = identifiers[font_id].shared.rawdata
+    local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
+    local shared   = tfmdata.shared       if not shared   then return false end
+    local fontdata = shared.rawdata       if not fontdata then return false end
     if fontdata then
       local fontname = fontdata.metadata.fontname
       local features = fontdata.resources.features
@@ -455,7 +457,9 @@ local provides_language = function (font_id, asked_script, asked_language)
   asked_script     = stringlower(asked_script)
   asked_language   = stringlower(asked_language)
   if font_id and font_id > 0 then
-    local fontdata = identifiers[font_id].shared.rawdata
+    local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
+    local shared   = tfmdata.shared       if not shared   then return false end
+    local fontdata = shared.rawdata       if not fontdata then return false end
     if fontdata then
       local fontname = fontdata.metadata.fontname
       local features = fontdata.resources.features
@@ -527,7 +531,9 @@ local provides_feature = function (font_id,        asked_script,
   asked_feature   = lpegmatch(strip_garbage, asked_feature)
 
   if font_id and font_id > 0 then
-    local fontdata = identifiers[font_id].shared.rawdata
+    local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
+    local shared   = tfmdata.shared       if not shared   then return false end
+    local fontdata = shared.rawdata       if not fontdata then return false end
     if fontdata then
       local features = fontdata.resources.features
       local fontname = fontdata.metadata.fontname

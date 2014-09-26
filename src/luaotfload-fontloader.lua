@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 07/29/14 00:30:11
+-- merge date  : 09/26/14 11:42:21
 
 do -- begin closure to overcome local limits and interference
 
@@ -2581,11 +2581,11 @@ function string.booleanstring(str)
     return str=="yes" or str=="on" or str=="t"
   end
 end
-function string.is_boolean(str,default)
+function string.is_boolean(str,default,strict)
   if type(str)=="string" then
-    if str=="true" or str=="yes" or str=="on" or str=="t" or str=="1" then
+    if str=="true" or str=="yes" or str=="on" or str=="t" or (not strict and str=="1") then
       return true
-    elseif str=="false" or str=="no" or str=="off" or str=="f" or str=="0" then
+    elseif str=="false" or str=="no" or str=="off" or str=="f" or (not strict and str=="0") then
       return false
     end
   end
@@ -2940,7 +2940,7 @@ local format_f=function(f)
   n=n+1
   return format("format('%%%sf',a%s)",f,n)
 end
-local format_F=function() 
+local format_F=function(f) 
   n=n+1
   if not f or f=="" then
     return format("(((a%s > -0.0000000005 and a%s < 0.0000000005) and '0') or format((a%s %% 1 == 0) and '%%i' or '%%.9f',a%s))",n,n,n,n)
@@ -3173,7 +3173,6 @@ local builder=Cs { "start",
 +V("j")+V("J") 
 +V("m")+V("M") 
 +V("z")
-+V("*") 
       )+V("*")
     )*(P(-1)+Carg(1))
   )^0,
@@ -3217,6 +3216,7 @@ local builder=Cs { "start",
   ["a"]=(prefix_any*P("a"))/format_a,
   ["A"]=(prefix_any*P("A"))/format_A,
   ["*"]=Cs(((1-P("%"))^1+P("%%")/"%%")^1)/format_rest,
+  ["?"]=Cs(((1-P("%"))^1        )^1)/format_rest,
   ["!"]=Carg(2)*prefix_any*P("!")*C((1-P("!"))^1)*P("!")/format_extension,
 }
 local direct=Cs (
@@ -6706,7 +6706,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.759 
+otf.version=2.760 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local fontdata=fonts.hashes.identifiers
 local chardata=characters and characters.data 
@@ -6831,7 +6831,6 @@ local valid_fields=table.tohash {
   "encodingchanged",
   "extrema_bound",
   "familyname",
-  "fontname",
   "fontname",
   "fontstyle_id",
   "fontstyle_name",
@@ -7067,6 +7066,7 @@ function otf.load(filename,sub,featurefile)
           },
           lookuptypes={},
         },
+        warnings={},
         metadata={
         },
         properties={
@@ -8194,6 +8194,10 @@ actions["check glyphs"]=function(data,filename,raw)
     description.glyph=nil
   end
 end
+local valid=(lpeg.R("\x00\x7E")-lpeg.S("(){}[]<>%/ \n\r\f\v"))^0*lpeg.P(-1)
+local function valid_ps_name(str)
+  return str and str~="" and #str<64 and lpegmatch(valid,str) and true or false
+end
 actions["check metadata"]=function(data,filename,raw)
   local metadata=data.metadata
   for _,k in next,mainfields do
@@ -8211,9 +8215,36 @@ actions["check metadata"]=function(data,filename,raw)
     end
   end
   if metadata.validation_state and table.contains(metadata.validation_state,"bad_ps_fontname") then
-    local name=file.nameonly(filename)
-    metadata.fontname="bad-fontname-"..name
-    metadata.fullname="bad-fullname-"..name
+    local function valid(what)
+      local names=raw.names
+      for i=1,#names do
+        local list=names[i]
+        local names=list.names
+        if names then
+          local name=names[what]
+          if name and valid_ps_name(name) then
+            return name
+          end
+        end
+      end
+    end
+    local function check(what)
+      local oldname=metadata[what]
+      if valid_ps_name(oldname) then
+        report_otf("ignoring warning %a because %s %a is proper ASCII","bad_ps_fontname",what,oldname)
+      else
+        local newname=valid(what)
+        if not newname then
+          newname=formatters["bad-%s-%s"](what,file.nameonly(filename))
+        end
+        local warning=formatters["overloading %s from invalid ASCII name %a to %a"](what,oldname,newname)
+        data.warnings[#data.warnings+1]=warning
+        report_otf(warning)
+        metadata[what]=newname
+      end
+    end
+    check("fontname")
+    check("fullname")
   end
 end
 actions["cleanup tables"]=function(data,filename,raw)
@@ -8334,6 +8365,7 @@ end
 local function copytotfm(data,cache_id)
   if data then
     local metadata=data.metadata
+    local warnings=data.warnings
     local resources=data.resources
     local properties=derivetable(data.properties)
     local descriptions=derivetable(data.descriptions)
@@ -8408,6 +8440,7 @@ local function copytotfm(data,cache_id)
     local filename=constructors.checkedfilename(resources)
     local fontname=metadata.fontname
     local fullname=metadata.fullname or fontname
+    local psname=fontname or fullname
     local units=metadata.units_per_em or 1000
     if units==0 then 
       units=1000 
@@ -8489,8 +8522,16 @@ local function copytotfm(data,cache_id)
     properties.filename=filename
     properties.fontname=fontname
     properties.fullname=fullname
-    properties.psname=fontname or fullname
+    properties.psname=psname
     properties.name=filename or fullname
+    if warnings and #warnings>0 then
+      report_otf("warnings for font: %s",filename)
+      report_otf()
+      for i=1,#warnings do
+        report_otf("  %s",warnings[i])
+      end
+      report_otf()
+    end
     return {
       characters=characters,
       descriptions=descriptions,
@@ -8499,6 +8540,7 @@ local function copytotfm(data,cache_id)
       resources=resources,
       properties=properties,
       goodies=goodies,
+      warnings=warnings,
     }
   end
 end

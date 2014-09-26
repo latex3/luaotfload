@@ -691,18 +691,23 @@ do
     local mk_info = function (name)
         local definer = name == "patch" and patch or read
         return function (specification, size, id)
-            logreport ("both", 0, "main",
-                       "active font definer: %q", name)
-            logreport ("both", 0, "main", "   > defining font no. %d", id)
+            logreport ("both", 0, "main", "defining font no. %d", id)
+            logreport ("both", 0, "main", "   > active font definer: %q", name)
             logreport ("both", 0, "main", "   > spec %q", specification)
             logreport ("both", 0, "main", "   > at size %.2f pt", size / 2^16)
-            local tfmdata = definer (specification, size, id)
-            if not tfmdata then
-                logreport ("both", 0, "main", "font definition failed")
+            local result = definer (specification, size, id)
+            if not result then
+                logreport ("both", 0, "main", "   > font definition failed")
                 return
+            elseif type (result) == "number" then
+                logreport ("both", 0, "main", "   > font definition yielded id %d", result)
+                return result
             end
-            logreport ("both", 0, "main", "font definition successful")
-            return tfmdata
+            logreport ("both", 0, "main", "   > font definition successful")
+            logreport ("both", 0, "main", "   > name %q",     result.name     or "<nil>")
+            logreport ("both", 0, "main", "   > fontname %q", result.fontname or "<nil>")
+            logreport ("both", 0, "main", "   > fullname %q", result.fullname or "<nil>")
+            return result
         end
     end
 

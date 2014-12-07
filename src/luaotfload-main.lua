@@ -377,7 +377,7 @@ end --- non-merge fallback scope
 
 pop_namespaces(our_environment, false)-- true)
 
-logreport ("both", 0, "main",
+logreport ("both", 1, "main",
            "fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
 
 --[[doc--

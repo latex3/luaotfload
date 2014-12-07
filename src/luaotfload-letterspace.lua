@@ -321,7 +321,7 @@ kerncharacters = function (head)
             if keeptogether and keeptogether(prev,start) then
               -- keep 'm
             elseif identifiers[lastfont] then
-              local kerns = chardata[lastfont][prevchar].kerns
+              local kerns = chardata[lastfont] and chardata[lastfont][prevchar].kerns
               local kern = kerns and kerns[lastchar] or 0
               krn = kern + quaddata[lastfont]*krn -- here
               insert_node_before(head,start,kern_injector(fillup,krn))
@@ -385,7 +385,7 @@ kerncharacters = function (head)
           elseif identifiers[lastfont] then
             if prv and prv.id == glyph_code and prv.font == lastfont then
               local prevchar, lastchar = prv.char, start.char
-              local kerns = chardata[lastfont][prevchar].kerns
+              local kerns = chardata[lastfont] and chardata[lastfont][prevchar].kerns
               local kern = kerns and kerns[lastchar] or 0
               krn = kern + quaddata[lastfont]*krn -- here
             else

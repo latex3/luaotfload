@@ -227,5 +227,8 @@ showtargets:
 	@echo "       ctan        package a zipball for uploading to CTAN"
 	@echo "       sign        sign zipball"
 	@echo
+	@echo "       clean       cleanup side-effects"
+	@echo "       mrproper    cleanup side-effects as well as make targets"
+	@echo
 
 # vim:noexpandtab:tabstop=8:shiftwidth=2

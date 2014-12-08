@@ -20,6 +20,7 @@ CONFDEMO	= $(MISCDIR)/luaotfload.conf.example
 GLYPHSCRIPT	= $(SCRIPTSRCDIR)/mkglyphlist
 CHARSCRIPT	= $(SCRIPTSRCDIR)/mkcharacters
 STATUSSCRIPT	= $(SCRIPTSRCDIR)/mkstatus
+IMPORTSCRIPT	= $(SCRIPTSRCDIR)/mkimport
 
 GLYPHSOURCE	= $(BUILDDIR)/glyphlist.txt
 
@@ -88,6 +89,7 @@ LUA		= texlua
 DO_GLYPHS	= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS	= $(LUA) $(CHARSCRIPT)  > /dev/null
 DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
+DO_IMPORT	= $(LUA) $(IMPORTSCRIPT)  > /dev/null
 
 define check-lua-files
 @echo validating syntax
@@ -179,7 +181,7 @@ $(TDS_ZIP): $(DOCS) $(ALL_STATUS) check
 
 sign: $(CTAN_ZIPSIG)
 
-.PHONY: install manifest clean mrproper show showtargets check
+.PHONY: install manifest clean mrproper show showtargets check import news
 
 install: $(ALL_STATUS)
 	@echo "Installing in '$(TEXMFROOT)'."

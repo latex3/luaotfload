@@ -5,10 +5,12 @@ NAME		= luaotfload
 DOCSRCDIR	= ./doc
 SCRIPTSRCDIR	= ./scripts
 SRCSRCDIR	= ./src
+FONTLOADERDIR	= $(SRCSRCDIR)/fontloader
 BUILDDIR	= ./build
 MISCDIR		= ./misc
 
 SRC		= $(wildcard $(SRCSRCDIR)/luaotfload-*.lua)
+SRC		+= $(wildcard $(FONTLOADERDIR)/*.lua)
 SRC		+= $(SRCSRCDIR)/luaotfload.sty
 SRC		+= $(MISCDIR)/luaotfload-blacklist.cnf
 

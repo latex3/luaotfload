@@ -129,16 +129,15 @@ end
 --doc]]--
 
 local make_loader = function (prefix)
-    return function (name)
-        require ((prefix or "luaotfload") .."-"..name)
-    end
+    return prefix and function (name) require (prefix .. "-" .. name .. ".lua") end
+                   or function (name) require (name)                            end
 end
 
-local load_luaotfload_module = make_loader ()
+local load_luaotfload_module = make_loader "luaotfload"
 ----- load_luaotfload_module = make_loader "luatex" --=> for Luatex-Plain
-local load_fontloader_module = make_loader "luaotfload" --- XXX adapt
+local load_fontloader_module = make_loader "fontloader"
 
-load_luaotfload_module "log.lua" --- log messages
+load_luaotfload_module "log" --- log messages
 
 local log             = luaotfload.log
 local logreport       = log.report
@@ -309,7 +308,7 @@ tex.attribute[0] = 0
 
 --doc]]--
 
-load_fontloader_module "fontloader.lua"
+load_fontloader_module "fontloader"
 ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 
 if fonts then
@@ -320,7 +319,7 @@ if fonts then
         logreport ("log", 5, "main", [["I am using the merged fontloader here.]])
         logreport ("log", 5, "main", [[ If you run into problems or experience unexpected]])
         logreport ("log", 5, "main", [[ behaviour, and if you have ConTeXt installed you can try]])
-        logreport ("log", 5, "main", [[ to delete the file 'luaotfload-fontloader.lua' as I might]])
+        logreport ("log", 5, "main", [[ to delete the file 'fontloader-fontloader.lua' as I might]])
         logreport ("log", 5, "main", [[ then use the possibly updated libraries. The merged]])
         logreport ("log", 5, "main", [[ version is not supported as it is a frozen instance.]])
         logreport ("log", 5, "main", [[ Problems can be reported to the ConTeXt mailing list."]])
@@ -331,38 +330,38 @@ else--- the loading sequence is known to change, so this might have to
     --- be updated with future updates!
     --- do not modify it though unless there is a change to the merged
     --- package!
-    load_fontloader_module "l-lua.lua"
-    load_fontloader_module "l-lpeg.lua"
-    load_fontloader_module "l-function.lua"
-    load_fontloader_module "l-string.lua"
-    load_fontloader_module "l-table.lua"
-    load_fontloader_module "l-io.lua"
-    load_fontloader_module "l-file.lua"
-    load_fontloader_module "l-boolean.lua"
-    load_fontloader_module "l-math.lua"
-    load_fontloader_module "util-str.lua"
-    load_fontloader_module "luatex-basics-gen.lua"
-    load_fontloader_module "data-con.lua"
-    load_fontloader_module "luatex-basics-nod.lua"
-    load_fontloader_module "font-ini.lua"
-    load_fontloader_module "font-con.lua"
-    load_fontloader_module "luatex-fonts-enc.lua"
-    load_fontloader_module "font-cid.lua"
-    load_fontloader_module "font-map.lua"
-    load_fontloader_module "luatex-fonts-syn.lua"
-    load_fontloader_module "luatex-fonts-tfm.lua"
-    load_fontloader_module "font-oti.lua"
-    load_fontloader_module "font-otf.lua"
-    load_fontloader_module "font-otb.lua"
-    load_fontloader_module "luatex-fonts-inj.lua"  --> since 2014-01-07, replaces node-inj.lua
-    load_fontloader_module "font-ota.lua"
-    load_fontloader_module "luatex-fonts-otn.lua"  --> since 2014-01-07, replaces font-otn.lua
-    load_fontloader_module "font-otp.lua"          --> since 2013-04-23
-    load_fontloader_module "luatex-fonts-lua.lua"
-    load_fontloader_module "font-def.lua"
-    load_fontloader_module "luatex-fonts-def.lua"
-    load_fontloader_module "luatex-fonts-ext.lua"
-    load_fontloader_module "luatex-fonts-cbk.lua"
+    load_fontloader_module "l-lua"
+    load_fontloader_module "l-lpeg"
+    load_fontloader_module "l-function"
+    load_fontloader_module "l-string"
+    load_fontloader_module "l-table"
+    load_fontloader_module "l-io"
+    load_fontloader_module "l-file"
+    load_fontloader_module "l-boolean"
+    load_fontloader_module "l-math"
+    load_fontloader_module "util-str"
+    load_fontloader_module "luatex-basics-gen"
+    load_fontloader_module "data-con"
+    load_fontloader_module "luatex-basics-nod"
+    load_fontloader_module "font-ini"
+    load_fontloader_module "font-con"
+    load_fontloader_module "luatex-fonts-enc"
+    load_fontloader_module "font-cid"
+    load_fontloader_module "font-map"
+    load_fontloader_module "luatex-fonts-syn"
+    load_fontloader_module "luatex-fonts-tfm"
+    load_fontloader_module "font-oti"
+    load_fontloader_module "font-otf"
+    load_fontloader_module "font-otb"
+    load_fontloader_module "luatex-fonts-inj"  --> since 2014-01-07, replaces node-inj.lua
+    load_fontloader_module "font-ota"
+    load_fontloader_module "luatex-fonts-otn"  --> since 2014-01-07, replaces font-otn.lua
+    load_fontloader_module "font-otp"          --> since 2013-04-23
+    load_fontloader_module "luatex-fonts-lua"
+    load_fontloader_module "font-def"
+    load_fontloader_module "luatex-fonts-def"
+    load_fontloader_module "luatex-fonts-ext"
+    load_fontloader_module "luatex-fonts-cbk"
 end --- non-merge fallback scope
 
 --[[doc--
@@ -415,7 +414,7 @@ add_to_callback("hpack_filter",
 add_to_callback("find_vf_file",
                 find_vf_file, "luaotfload.find_vf_file")
 
-load_luaotfload_module "override.lua"   --- load glyphlist on demand
+load_luaotfload_module "override"   --- load glyphlist on demand
 
 --[[doc--
 
@@ -423,16 +422,16 @@ load_luaotfload_module "override.lua"   --- load glyphlist on demand
 
 --doc]]--
 
-load_luaotfload_module "parsers.lua"         --- fonts.conf and syntax
-load_luaotfload_module "configuration.lua"   --- configuration options
+load_luaotfload_module "parsers"         --- fonts.conf and syntax
+load_luaotfload_module "configuration"   --- configuration options
 
 if not config.actions.apply_defaults () then
     logreport ("log", 0, "load", "Configuration unsuccessful.")
 end
 
-load_luaotfload_module "loaders.lua"         --- Type1 font wrappers
-load_luaotfload_module "database.lua"        --- Font management.
-load_luaotfload_module "colors.lua"          --- Per-font colors.
+load_luaotfload_module "loaders"         --- Type1 font wrappers
+load_luaotfload_module "database"        --- Font management.
+load_luaotfload_module "colors"          --- Per-font colors.
 
 if not config.actions.reconfigure () then
     logreport ("log", 0, "load", "Post-configuration hooks failed.")
@@ -732,9 +731,9 @@ reset_callback "define_font"
 local definer = config.luaotfload.run.definer
 add_to_callback ("define_font", definers[definer], "luaotfload.define_font", 1)
 
-load_luaotfload_module "features.lua"     --- font request and feature handling
-load_luaotfload_module "letterspace.lua"  --- extra character kerning
-load_luaotfload_module "auxiliary.lua"    --- additional high-level functionality
+load_luaotfload_module "features"     --- font request and feature handling
+load_luaotfload_module "letterspace"  --- extra character kerning
+load_luaotfload_module "auxiliary"    --- additional high-level functionality
 
 luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 

@@ -1,0 +1,321 @@
+#!/usr/bin/env texlua
+-------------------------------------------------------------------------------
+--         FILE:  mkimport.lua
+--        USAGE:  ./mkimport.lua
+--  DESCRIPTION:  check luaotfload imports against Context
+-- REQUIREMENTS:  luatex, the lualibs package, Context MkIV
+--       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
+--      VERSION:  42
+--      CREATED:  2014-12-08 22:36:15+0100
+-------------------------------------------------------------------------------
+--
+
+-------------------------------------------------------------------------------
+--- PURPOSE
+--- 
+---  - Facilitate detecting changes in the fontloader source.
+---  - Assist in updating source code and (partially) automate importing.
+---  - Account for files in the plain fontloader distribution, alert in case of
+---    additions or deletions.
+---    
+-------------------------------------------------------------------------------
+
+kpse.set_program_name "luatex"
+
+local lfs = require "lfs"
+local md5 = require "md5"
+
+require "lualibs"
+
+local ioloaddata   = io.loaddata
+local iowrite      = io.write
+local md5sumhexa   = md5.sumhexa
+local stringformat = string.format
+
+-------------------------------------------------------------------------------
+-- config
+-------------------------------------------------------------------------------
+
+local context_root      = "/home/phg/context/tex/texmf-context"
+local our_prefix        = "fontloader"
+local fontloader_subdir = "src/fontloader"
+
+local paths = {
+  context    = "tex/context/base",
+  fontloader = "tex/generic/context/luatex",
+}
+
+local prefixes = {
+  context    = nil,
+  fontloader = "luatex",
+}
+
+-------------------------------------------------------------------------------
+-- helpers
+-------------------------------------------------------------------------------
+
+local die = function (...)
+  io.stderr:write "[fatal error]: "
+  io.stderr:write (stringformat (...))
+  io.stderr:write "\naborting.\n"
+  os.exit (1)
+end
+
+local emphasis = function (txt)
+  return stringformat("\x1b[1m%s\x1b[0m", txt)
+end
+
+local msg = function (...)
+  iowrite (stringformat (...))
+  iowrite "\n"
+end
+
+local good_tag   = stringformat("[\x1b[1;30;%dmgood\x1b[0m]  · ", 42)
+local bad_tag    = stringformat("[\x1b[1;30;%dmBAD\x1b[0m]   · ", 41)
+local alert_tag  = stringformat("[\x1b[1;%dmalert\x1b[0m] · "   , 36)
+
+local good = function (...)
+  local msg = (stringformat (...))
+  iowrite (good_tag)
+  iowrite (msg)
+  iowrite "\n"
+end
+
+local bad = function (...)
+  local msg = (stringformat (...))
+  iowrite (bad_tag)
+  iowrite (msg)
+  iowrite "\n"
+end
+
+local attention = function (...)
+  local msg = (stringformat (...))
+  iowrite (alert_tag)
+  iowrite (msg)
+  iowrite "\n"
+end
+
+-------------------------------------------------------------------------------
+-- definitions
+-------------------------------------------------------------------------------
+
+--- Accounting of upstream files. There are different categories:
+---
+---   · *essential*: Files required at runtime.
+---   · *merged*:    Files merged into the fontloader package.
+---   · *ignored*:   Lua files not merged, but part of the format.
+---   · *tex*:       TeX code, i.e. format and examples.
+---   · *lualibs*:   Files merged, but also provided by the Lualibs package.
+
+local imports = {
+  fontloader = {
+    { name = "basics-gen"        , ours = nil          , kind = "essential" },
+    { name = "basics-nod"        , ours = nil          , kind = "merged"    },
+    { name = "basics"            , ours = nil          , kind = "tex"       },
+    { name = "fonts-cbk"         , ours = nil          , kind = "merged"    },
+    { name = "fonts-def"         , ours = nil          , kind = "merged"    },
+    { name = "fonts-demo-vf-1"   , ours = nil          , kind = "ignored"   },
+    { name = "fonts-enc"         , ours = nil          , kind = "merged"    },
+    { name = "fonts-ext"         , ours = nil          , kind = "merged"    },
+    { name = "fonts-inj"         , ours = nil          , kind = "merged"    },
+    { name = "fonts-lua"         , ours = nil          , kind = "merged"    },
+    { name = "fonts-merged"      , ours = "fontloader" , kind = "essential" },
+    { name = "fonts-ota"         , ours = nil          , kind = "merged"    },
+    { name = "fonts-otn"         , ours = nil          , kind = "merged"    },
+    { name = "fonts"             , ours = nil          , kind = "merged"    },
+    { name = "fonts"             , ours = nil          , kind = "tex"       },
+    { name = "fonts-syn"         , ours = nil          , kind = "ignored"   },
+    { name = "fonts-tfm"         , ours = nil          , kind = "merged"    },
+    { name = "languages"         , ours = nil          , kind = "ignored"   },
+    { name = "languages"         , ours = nil          , kind = "tex"       },
+    { name = "math"              , ours = nil          , kind = "ignored"   },
+    { name = "math"              , ours = nil          , kind = "tex"       },
+    { name = "mplib"             , ours = nil          , kind = "ignored"   },
+    { name = "mplib"             , ours = nil          , kind = "tex"       },
+    { name = "plain"             , ours = nil          , kind = "tex"       },
+    { name = "preprocessor"      , ours = nil          , kind = "ignored"   },
+    { name = "preprocessor"      , ours = nil          , kind = "tex"       },
+    { name = "preprocessor-test" , ours = nil          , kind = "tex"       },
+    { name = "swiglib"           , ours = nil          , kind = "ignored"   },
+    { name = "swiglib"           , ours = nil          , kind = "tex"       },
+    { name = "swiglib-test"      , ours = nil          , kind = "ignored"   },
+    { name = "swiglib-test"      , ours = nil          , kind = "tex"       },
+    { name = "test"              , ours = nil          , kind = "tex"       },
+  }, --[[ [fontloader] ]]
+  context = { --=> all merged
+    { name = "data-con"          , ours = "data-con"          , kind = "merged"    },
+    { name = "font-afk"          , ours = "font-afk"          , kind = "merged"    },
+    { name = "font-afm"          , ours = "font-afm"          , kind = "merged"    },
+    { name = "font-cid"          , ours = "font-cid"          , kind = "merged"    },
+    { name = "font-con"          , ours = "font-con"          , kind = "merged"    },
+    { name = "font-def"          , ours = "font-def"          , kind = "merged"    },
+    { name = "font-ini"          , ours = "font-ini"          , kind = "merged"    },
+    { name = "font-map"          , ours = "font-map"          , kind = "merged"    },
+    { name = "font-otb"          , ours = "font-otb"          , kind = "merged"    },
+    { name = "font-otf"          , ours = "font-otf"          , kind = "merged"    },
+    { name = "font-oti"          , ours = "font-oti"          , kind = "merged"    },
+    { name = "font-otp"          , ours = "font-otp"          , kind = "merged"    },
+    { name = "font-tfm"          , ours = "font-tfm"          , kind = "merged"    },
+    { name = "l-boolean"         , ours = "l-boolean"         , kind = "lualibs"   },
+    { name = "l-file"            , ours = "l-file"            , kind = "lualibs"   },
+    { name = "l-function"        , ours = "l-function"        , kind = "lualibs"   },
+    { name = "l-io"              , ours = "l-io"              , kind = "lualibs"   },
+    { name = "l-lpeg"            , ours = "l-lpeg"            , kind = "lualibs"   },
+    { name = "l-lua"             , ours = "l-lua"             , kind = "lualibs"   },
+    { name = "l-math"            , ours = "l-math"            , kind = "lualibs"   },
+    { name = "l-string"          , ours = "l-string"          , kind = "lualibs"   },
+    { name = "l-table"           , ours = "l-table"           , kind = "lualibs"   },
+    { name = "util-str"          , ours = "util-str"          , kind = "lualibs"   },
+  }, --[[ [context] ]]
+} --[[ [imports] ]]
+
+local hash_file = function (fname)
+  if not lfs.isfile (fname) then
+    die ("cannot find %s.", fname)
+  end
+  local raw = ioloaddata (fname)
+  if not raw then
+    die ("cannot read from %s.", fname)
+  end
+  return md5sumhexa (raw)
+end
+
+local derive_category_path = function (cat)
+  local subpath  = paths[cat] or die ("category " .. cat .. " unknown")
+  local location = file.join (context_root, subpath)
+  if not lfs.isdir (location) then
+    die ("invalid base path defined for category "
+         .. cat .. " at " .. location)
+  end
+  return location
+end
+
+local derive_fullname = function (cat, name, kind)
+  local tmp = prefixes[cat]
+  tmp = tmp and tmp .. "-" .. name or name
+  return tmp .. (kind == "tex" and ".tex" or ".lua")
+end
+
+local derive_ourname = function (name)
+  return our_prefix .. "-" .. name .. ".lua"
+end
+
+local is_readable = function (f)
+  local fh = io.open (f, "r")
+  if fh then
+    fh:close()
+    return true
+  end
+  return false
+end
+
+local summarize_news = function (status)
+  local ni = #status.import
+  local nc = #status.create
+  local ng = #status.good
+  local nm = #status.missing
+
+  msg "-----------------------------------------------------------------"
+  msg ("Summary: Inspected %d files.", ni + nc + ng + nm)
+  msg "-----------------------------------------------------------------"
+  if ng > 0 then good      ("%d are up to date", ng) end
+  if ni > 0 then attention ("%d changed"       , ni) end
+  if nc > 0 then attention ("%d new"           , nc) end
+  if nm > 0 then bad       ("%d missing"       , nm) end
+  msg "-----------------------------------------------------------------"
+
+  if nm == 0 and nc == 0 and ni == 0 then
+    return 0
+  end
+
+  return -1
+end
+
+local news = function ()
+  local status = {
+    import  = { },
+    good    = { },
+    create  = { },
+    missing = { },
+  }
+
+  for cat, entries in next, imports do
+    local location = derive_category_path (cat)
+    local nfiles = #entries
+
+    for i = 1, nfiles do
+      local def  = entries[i]
+      local name = def.name
+      local ours = def.ours
+      local kind = def.kind
+      local fullname = derive_fullname (cat, name, kind)
+      local fullpath = file.join (location, fullname)
+      local ourname  = derive_ourname (ours or name)
+      local ourpath  = file.join (fontloader_subdir, ourname) -- relative
+      local imported = false
+
+      if not is_readable (fullpath) then
+        bad ("source for file %s not found at %s",
+             emphasis (ourname),
+             emphasis (fullpath))
+        status.missing[#status.missing + 1] = ourname
+      else
+        --- Source file exists and is readable.
+        if not lfs.isdir (fontloader_subdir) then
+          die ("path for fontloader tree ("
+              .. fontloader_subdir .. ") is not a directory")
+        end
+        if is_readable (ourpath) then imported = true end
+        local src_hash = hash_file (fullpath)
+        local dst_hash = imported and hash_file (ourpath)
+        local same     = src_hash == dst_hash -- same!
+
+        if same then
+          good ("file %s unchanged", emphasis (ourname))
+          status.good[#status.good + 1] = ourname
+        elseif not dst_hash then
+          attention ("new file %s requires import from %s",
+                    emphasis (ourname),
+                    emphasis (fullpath))
+          status.create[#status.create + 1] = ourname
+        else --- src and dst exist but differ
+          attention ("file %s requires import", emphasis (ourname))
+          status.import[#status.import + 1] = ourname
+        end
+      end
+
+    end
+  end
+
+  return summarize_news (status)
+end
+
+local job_kind = table.mirrored {
+  news   = news,
+  import = function () end,
+  tell   = function () end,
+}
+
+-------------------------------------------------------------------------------
+-- functionality
+-------------------------------------------------------------------------------
+
+--- job_kind -> bool
+local check_job = function (j)
+  return job_kind[j]
+end
+
+-------------------------------------------------------------------------------
+-- entry point
+-------------------------------------------------------------------------------
+
+local main = function ()
+  local job = arg[1] or "news"
+  local runner = check_job (job)
+  if not runner then die ("invalid job type “" .. job .. "”.") end
+  return runner(arg)
+end
+
+os.exit (main ())
+
+--- vim:ft=lua:ts=2:et:sw=2

@@ -5,6 +5,7 @@ Change History
     * Add ``sign`` target to makefile for automated package signing
     * Add ``--dumpconf`` option to luaotfload-tool for generating configuration
       files
+    * Move fontloader files to subtree src/fontloader
 
 2014/07/13, luaotfload v2.5
     * Remove legacy code.

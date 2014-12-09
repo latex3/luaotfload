@@ -70,6 +70,12 @@ local msg = function (...)
   iowrite "\n"
 end
 
+local separator_string = string.rep ("-", 79)
+local separator = function ()
+  iowrite (separator_string)
+  iowrite "\n"
+end
+
 local good_tag   = stringformat("[\x1b[1;30;%dmgood\x1b[0m]   · ", 42)
 local bad_tag    = stringformat("[\x1b[1;30;%dmBAD\x1b[0m]    · ", 41)
 local alert_tag  = stringformat("[\x1b[1;%dmalert\x1b[0m]  · "   , 36)
@@ -233,14 +239,14 @@ local summarize_news = function (status)
   local ng = #status.good
   local nm = #status.missing
 
-  msg "-----------------------------------------------------------------"
+  separator ()
   msg ("Summary: Inspected %d files.", ni + nc + ng + nm)
-  msg "-----------------------------------------------------------------"
+  separator ()
   if ng > 0 then good      ("%d are up to date", ng) end
   if ni > 0 then attention ("%d changed"       , ni) end
   if nc > 0 then attention ("%d new"           , nc) end
   if nm > 0 then bad       ("%d missing"       , nm) end
-  msg "-----------------------------------------------------------------"
+  separator ()
 
   if nm == 0 and nc == 0 and ni == 0 then
     return 0
@@ -349,13 +355,13 @@ local summarize_status = function (counters)
   local failed   = counters[import_failed  ] or 0
   local sum = imported + skipped + created + failed
   if sum < 1 then die ("garbage total of imported files: %s", sum) end
-  status ("-----------------------------------------------------------------")
+  separator ()
   status (" RESULT: %d files processed", sum)
-  status ("-----------------------------------------------------------------")
+  separator ()
   if created  > 0 then status ("created:  %d (%d %%)", created , created  * 100 / sum) end
   if imported > 0 then status ("imported: %d (%d %%)", imported, imported * 100 / sum) end
   if skipped  > 0 then status ("skipped:  %d (%d %%)", skipped , skipped  * 100 / sum) end
-  status ("-----------------------------------------------------------------")
+  separator ()
 end
 
 local import_file = function (name, kind, def, cat)

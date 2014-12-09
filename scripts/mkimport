@@ -214,7 +214,8 @@ end
 
 local derive_ourname = function (name, kind)
   local suffix = kind == kind_tex and ".tex" or ".lua"
-  return our_prefix .. "-" .. name .. suffix
+  local subdir = kind == kind_essential and "runtime" or "misc"
+  return subdir, our_prefix .. "-" .. name .. suffix
 end
 
 local is_readable = function (f)
@@ -267,8 +268,8 @@ local news = function ()
       local kind = def.kind
       local fullname = derive_fullname (cat, name, kind)
       local fullpath = file.join (location, fullname)
-      local ourname  = derive_ourname (ours or name)
-      local ourpath  = file.join (fontloader_subdir, ourname) -- relative
+      local subdir, ourname  = derive_ourname (ours or name)
+      local ourpath  = file.join (fontloader_subdir, subdir, ourname) -- relative
       local imported = false
 
       if not is_readable (fullpath) then
@@ -319,7 +320,8 @@ local get_file_definition = function (name, ourname, kind)
       local dkind = def.kind
 
       --- test properties
-      if       derive_ourname (dours, dkind) == ourname  then return def, cat end
+      local subdir, derived = derive_ourname (dours, dkind)
+      if                             derived == ourname  then return def, cat end
       if derive_fullname (cat, dname, dkind) == fullname then return def, cat end
       if                               dours == ourname  then return def, cat end
       if                               dname == fullname then return def, cat end
@@ -370,13 +372,18 @@ local import_file = function (name, kind, def, cat)
   local dkind    = def.kind
   local srcdir   = derive_category_path (cat)
   local fullname = derive_fullname (cat, dname, kind)
-  local ourname  = derive_ourname (dname, kind)
+  local subdir, ourname = derive_ourname (dname, kind)
+  local ourpath  = file.join (fontloader_subdir, subdir)
   local src      = file.join (srcdir, fullname)
-  local dst      = file.join (fontloader_subdir, ourname)
+  local dst      = file.join (ourpath, ourname)
   local new      = not lfs.isfile (dst)
   if not new and hash_file (src) == hash_file (dst) then
     status ("file %s is unchanged, skipping", fullname)
     return import_skipped
+  end
+  if not (lfs.isdir (ourpath) or not lfs.mkdirs (ourpath)) then
+    die ("failed to create directory %s for file %s",
+         ourpath, ourname)
   end
   status ("importing file %s", fullname)
   file.copy (src, dst)

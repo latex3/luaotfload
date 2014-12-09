@@ -433,7 +433,7 @@ local job_kind = table.mirrored {
 
 --- job_kind -> bool
 local check_job = function (j)
-  return job_kind[j] or die ("invalid job type “" .. job .. "”.")
+  return job_kind[j] or die ("invalid job type “%s”.", j)
 end
 
 -------------------------------------------------------------------------------

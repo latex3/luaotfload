@@ -115,67 +115,73 @@ end
 ---   · *tex*:       TeX code, i.e. format and examples.
 ---   · *lualibs*:   Files merged, but also provided by the Lualibs package.
 
+local kind_essential = 0
+local kind_merged    = 1
+local kind_tex       = 2
+local kind_ignored   = 3
+local kind_lualibs   = 4
+
 local imports = {
 
   fontloader = {
-    { name = "basics-gen"        , ours = nil          , kind = "essential" },
-    { name = "basics-nod"        , ours = nil          , kind = "merged"    },
-    { name = "basics"            , ours = nil          , kind = "tex"       },
-    { name = "fonts-cbk"         , ours = nil          , kind = "merged"    },
-    { name = "fonts-def"         , ours = nil          , kind = "merged"    },
-    { name = "fonts-demo-vf-1"   , ours = nil          , kind = "ignored"   },
-    { name = "fonts-enc"         , ours = nil          , kind = "merged"    },
-    { name = "fonts-ext"         , ours = nil          , kind = "merged"    },
-    { name = "fonts-inj"         , ours = nil          , kind = "merged"    },
-    { name = "fonts-lua"         , ours = nil          , kind = "merged"    },
-    { name = "fonts-merged"      , ours = "fontloader" , kind = "essential" },
-    { name = "fonts-ota"         , ours = nil          , kind = "merged"    },
-    { name = "fonts-otn"         , ours = nil          , kind = "merged"    },
-    { name = "fonts"             , ours = nil          , kind = "merged"    },
-    { name = "fonts"             , ours = nil          , kind = "tex"       },
-    { name = "fonts-syn"         , ours = nil          , kind = "ignored"   },
-    { name = "fonts-tfm"         , ours = nil          , kind = "merged"    },
-    { name = "languages"         , ours = nil          , kind = "ignored"   },
-    { name = "languages"         , ours = nil          , kind = "tex"       },
-    { name = "math"              , ours = nil          , kind = "ignored"   },
-    { name = "math"              , ours = nil          , kind = "tex"       },
-    { name = "mplib"             , ours = nil          , kind = "ignored"   },
-    { name = "mplib"             , ours = nil          , kind = "tex"       },
-    { name = "plain"             , ours = nil          , kind = "tex"       },
-    { name = "preprocessor"      , ours = nil          , kind = "ignored"   },
-    { name = "preprocessor"      , ours = nil          , kind = "tex"       },
-    { name = "preprocessor-test" , ours = nil          , kind = "tex"       },
-    { name = "swiglib"           , ours = nil          , kind = "ignored"   },
-    { name = "swiglib"           , ours = nil          , kind = "tex"       },
-    { name = "swiglib-test"      , ours = nil          , kind = "ignored"   },
-    { name = "swiglib-test"      , ours = nil          , kind = "tex"       },
-    { name = "test"              , ours = nil          , kind = "tex"       },
+    { name = "basics-gen"        , ours = nil          , kind = kind_essential },
+    { name = "basics-nod"        , ours = nil          , kind = kind_merged    },
+    { name = "basics"            , ours = nil          , kind = kind_tex       },
+    { name = "fonts-cbk"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-def"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-demo-vf-1"   , ours = nil          , kind = kind_ignored   },
+    { name = "fonts-enc"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-ext"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-inj"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-lua"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-merged"      , ours = "fontloader" , kind = kind_essential },
+    { name = "fonts-ota"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-otn"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts"             , ours = nil          , kind = kind_merged    },
+    { name = "fonts"             , ours = nil          , kind = kind_tex       },
+    { name = "fonts-syn"         , ours = nil          , kind = kind_ignored   },
+    { name = "fonts-tfm"         , ours = nil          , kind = kind_merged    },
+    { name = "languages"         , ours = nil          , kind = kind_ignored   },
+    { name = "languages"         , ours = nil          , kind = kind_tex       },
+    { name = "math"              , ours = nil          , kind = kind_ignored   },
+    { name = "math"              , ours = nil          , kind = kind_tex       },
+    { name = "mplib"             , ours = nil          , kind = kind_ignored   },
+    { name = "mplib"             , ours = nil          , kind = kind_tex       },
+    { name = "plain"             , ours = nil          , kind = kind_tex       },
+    { name = "preprocessor"      , ours = nil          , kind = kind_ignored   },
+    { name = "preprocessor"      , ours = nil          , kind = kind_tex       },
+    { name = "preprocessor-test" , ours = nil          , kind = kind_tex       },
+    { name = "swiglib"           , ours = nil          , kind = kind_ignored   },
+    { name = "swiglib"           , ours = nil          , kind = kind_tex       },
+    { name = "swiglib-test"      , ours = nil          , kind = kind_ignored   },
+    { name = "swiglib-test"      , ours = nil          , kind = kind_tex       },
+    { name = "test"              , ours = nil          , kind = kind_tex       },
   }, --[[ [fontloader] ]]
 
   context = { --=> all merged
-    { name = "data-con"          , ours = "data-con"          , kind = "merged"    },
-    { name = "font-afk"          , ours = "font-afk"          , kind = "merged"    },
-    { name = "font-afm"          , ours = "font-afm"          , kind = "merged"    },
-    { name = "font-cid"          , ours = "font-cid"          , kind = "merged"    },
-    { name = "font-con"          , ours = "font-con"          , kind = "merged"    },
-    { name = "font-def"          , ours = "font-def"          , kind = "merged"    },
-    { name = "font-ini"          , ours = "font-ini"          , kind = "merged"    },
-    { name = "font-map"          , ours = "font-map"          , kind = "merged"    },
-    { name = "font-otb"          , ours = "font-otb"          , kind = "merged"    },
-    { name = "font-otf"          , ours = "font-otf"          , kind = "merged"    },
-    { name = "font-oti"          , ours = "font-oti"          , kind = "merged"    },
-    { name = "font-otp"          , ours = "font-otp"          , kind = "merged"    },
-    { name = "font-tfm"          , ours = "font-tfm"          , kind = "merged"    },
-    { name = "l-boolean"         , ours = "l-boolean"         , kind = "lualibs"   },
-    { name = "l-file"            , ours = "l-file"            , kind = "lualibs"   },
-    { name = "l-function"        , ours = "l-function"        , kind = "lualibs"   },
-    { name = "l-io"              , ours = "l-io"              , kind = "lualibs"   },
-    { name = "l-lpeg"            , ours = "l-lpeg"            , kind = "lualibs"   },
-    { name = "l-lua"             , ours = "l-lua"             , kind = "lualibs"   },
-    { name = "l-math"            , ours = "l-math"            , kind = "lualibs"   },
-    { name = "l-string"          , ours = "l-string"          , kind = "lualibs"   },
-    { name = "l-table"           , ours = "l-table"           , kind = "lualibs"   },
-    { name = "util-str"          , ours = "util-str"          , kind = "lualibs"   },
+    { name = "data-con"          , ours = "data-con"          , kind = kind_merged    },
+    { name = "font-afk"          , ours = "font-afk"          , kind = kind_merged    },
+    { name = "font-afm"          , ours = "font-afm"          , kind = kind_merged    },
+    { name = "font-cid"          , ours = "font-cid"          , kind = kind_merged    },
+    { name = "font-con"          , ours = "font-con"          , kind = kind_merged    },
+    { name = "font-def"          , ours = "font-def"          , kind = kind_merged    },
+    { name = "font-ini"          , ours = "font-ini"          , kind = kind_merged    },
+    { name = "font-map"          , ours = "font-map"          , kind = kind_merged    },
+    { name = "font-otb"          , ours = "font-otb"          , kind = kind_merged    },
+    { name = "font-otf"          , ours = "font-otf"          , kind = kind_merged    },
+    { name = "font-oti"          , ours = "font-oti"          , kind = kind_merged    },
+    { name = "font-otp"          , ours = "font-otp"          , kind = kind_merged    },
+    { name = "font-tfm"          , ours = "font-tfm"          , kind = kind_merged    },
+    { name = "l-boolean"         , ours = "l-boolean"         , kind = kind_lualibs   },
+    { name = "l-file"            , ours = "l-file"            , kind = kind_lualibs   },
+    { name = "l-function"        , ours = "l-function"        , kind = kind_lualibs   },
+    { name = "l-io"              , ours = "l-io"              , kind = kind_lualibs   },
+    { name = "l-lpeg"            , ours = "l-lpeg"            , kind = kind_lualibs   },
+    { name = "l-lua"             , ours = "l-lua"             , kind = kind_lualibs   },
+    { name = "l-math"            , ours = "l-math"            , kind = kind_lualibs   },
+    { name = "l-string"          , ours = "l-string"          , kind = kind_lualibs   },
+    { name = "l-table"           , ours = "l-table"           , kind = kind_lualibs   },
+    { name = "util-str"          , ours = "util-str"          , kind = kind_lualibs   },
   }, --[[ [context] ]]
 } --[[ [imports] ]]
 
@@ -203,11 +209,11 @@ end
 local derive_fullname = function (cat, name, kind)
   local tmp = prefixes[cat]
   tmp = tmp and tmp .. "-" .. name or name
-  return tmp .. (kind == "tex" and ".tex" or ".lua")
+  return tmp .. (kind == kind_tex and ".tex" or ".lua")
 end
 
 local derive_ourname = function (name, kind)
-  local suffix = kind == "tex" and ".tex" or ".lua"
+  local suffix = kind == kind_tex and ".tex" or ".lua"
   return our_prefix .. "-" .. name .. suffix
 end
 

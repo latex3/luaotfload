@@ -108,6 +108,7 @@ end
 ---   · *lualibs*:   Files merged, but also provided by the Lualibs package.
 
 local imports = {
+
   fontloader = {
     { name = "basics-gen"        , ours = nil          , kind = "essential" },
     { name = "basics-nod"        , ours = nil          , kind = "merged"    },
@@ -142,6 +143,7 @@ local imports = {
     { name = "swiglib-test"      , ours = nil          , kind = "tex"       },
     { name = "test"              , ours = nil          , kind = "tex"       },
   }, --[[ [fontloader] ]]
+
   context = { --=> all merged
     { name = "data-con"          , ours = "data-con"          , kind = "merged"    },
     { name = "font-afk"          , ours = "font-afk"          , kind = "merged"    },
@@ -196,8 +198,9 @@ local derive_fullname = function (cat, name, kind)
   return tmp .. (kind == "tex" and ".tex" or ".lua")
 end
 
-local derive_ourname = function (name)
-  return our_prefix .. "-" .. name .. ".lua"
+local derive_ourname = function (name, kind)
+  local suffix = kind == "tex" and ".tex" or ".lua"
+  return our_prefix .. "-" .. name .. suffix
 end
 
 local is_readable = function (f)
@@ -288,11 +291,44 @@ local news = function ()
   end
 
   return summarize_news (status)
-end
+end --[[ [local news = function ()] ]]
+
+local get_file_definition = function (name, ourname, kind)
+  kind = kind or "lua"
+  for cat, defs in next, imports do
+    local fullname = derive_fullname (cat, name, kind)
+    local ndefs = #defs
+    for i = 1, ndefs do
+      local def = defs[i]
+      local dname = def.name
+      local dours = def.ours or def.name
+      local dkind = def.kind
+
+      --- test properties
+      if       derive_ourname (dours, dkind) == ourname  then return def end
+      if derive_fullname (cat, dname, dkind) == fullname then return def end
+      if                               dours == ourname  then return def end
+      if                               dname == fullname then return def end
+    end
+  end
+  --- search unsuccessful
+end --[[ [local get_file_definition = function (name, ourname, kind)] ]]
+
+local import_file = function (name, kind)
+  local ourname = derive_ourname (name)
+  local def     = get_file_definition (name, ourname, kind)
+  if not def then die ("unable to find a definition matching " .. name) end
+end --[[ [local import_file = function (name, kind)] ]]
+
+local import = function (arg)
+  if #arg > 1 then
+    return import_file (arg[2])
+  end
+end --[[ [local import = function (arg)] ]]
 
 local job_kind = table.mirrored {
   news   = news,
-  import = function () end,
+  import = import,
   tell   = function () end,
 }
 

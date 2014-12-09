@@ -70,9 +70,10 @@ local msg = function (...)
   iowrite "\n"
 end
 
-local good_tag   = stringformat("[\x1b[1;30;%dmgood\x1b[0m]  · ", 42)
-local bad_tag    = stringformat("[\x1b[1;30;%dmBAD\x1b[0m]   · ", 41)
-local alert_tag  = stringformat("[\x1b[1;%dmalert\x1b[0m] · "   , 36)
+local good_tag   = stringformat("[\x1b[1;30;%dmgood\x1b[0m]   · ", 42)
+local bad_tag    = stringformat("[\x1b[1;30;%dmBAD\x1b[0m]    · ", 41)
+local alert_tag  = stringformat("[\x1b[1;%dmalert\x1b[0m]  · "   , 36)
+local status_tag = stringformat("[\x1b[0;%dmstatus\x1b[0m] · "   , 36)
 
 local good = function (...)
   local msg = (stringformat (...))
@@ -91,6 +92,13 @@ end
 local attention = function (...)
   local msg = (stringformat (...))
   iowrite (alert_tag)
+  iowrite (msg)
+  iowrite "\n"
+end
+
+local status = function (...)
+  local msg = (stringformat (...))
+  iowrite (status_tag)
   iowrite (msg)
   iowrite "\n"
 end
@@ -314,6 +322,34 @@ local get_file_definition = function (name, ourname, kind)
   --- search unsuccessful
 end --[[ [local get_file_definition = function (name, ourname, kind)] ]]
 
+local import_imported = 0
+local import_skipped  = 1
+local import_failed   = 2
+local import_created  = 3
+
+local import_status = {
+  [import_imported] = "imported",
+  [import_skipped ] = "skipped",
+  [import_failed  ] = "failed",
+  [import_created ] = "created",
+}
+
+local summarize_status = function (counters)
+  local imported = counters[import_imported] or 0
+  local skipped  = counters[import_skipped ] or 0
+  local created  = counters[import_created ] or 0
+  local failed   = counters[import_failed  ] or 0
+  local sum = imported + skipped + created + failed
+  if sum < 1 then die ("garbage total of imported files: %s", sum) end
+  status ("-----------------------------------------------------------------")
+  status (" RESULT: %d files processed", sum)
+  status ("-----------------------------------------------------------------")
+  if created  > 0 then status ("created:  %d (%d %%)", created , created  * 100 / sum) end
+  if imported > 0 then status ("imported: %d (%d %%)", imported, imported * 100 / sum) end
+  if skipped  > 0 then status ("skipped:  %d (%d %%)", skipped , skipped  * 100 / sum) end
+  status ("-----------------------------------------------------------------")
+end
+
 local import_file = function (name, kind, def, cat)
   local expected_ourname = derive_ourname (name)
   if not def or not cat then
@@ -323,20 +359,53 @@ local import_file = function (name, kind, def, cat)
   if not def then die ("unable to find a definition matching " .. name) end
   if not cat then die ("missing category for file " .. name .. " -- WTF‽") end
 
-  local dname  = def.name
-  local dours  = def.ours
-  local dkind  = def.kind
-  local srcdir = derive_category_path (cat)
-  local src    = file.join (srcdir, derive_fullname (cat, dname, kind))
-  local dst    = file.join (fontloader_subdir, expected_ourname)
+  local dname    = def.name
+  local dours    = def.ours
+  local dkind    = def.kind
+  local srcdir   = derive_category_path (cat)
+  local fullname = derive_fullname (cat, dname, kind)
+  local ourname  = derive_ourname (dname, kind)
+  local src      = file.join (srcdir, fullname)
+  local dst      = file.join (fontloader_subdir, ourname)
+  local new      = not lfs.isfile (dst)
+  if not new and hash_file (src) == hash_file (dst) then
+    status ("file %s is unchanged, skipping", fullname)
+    return import_skipped
+  end
+  status ("importing file %s", fullname)
   file.copy (src, dst)
-  return (hash_file (src) == hash_file (dst)) and 0 or 1
+  if hash_file (src) == hash_file (dst) then
+    if new then return import_created end
+    return import_imported end
+  return import_failed
 end --[[ [local import_file = function (name, kind)] ]]
 
 local import = function (arg)
   if #arg > 1 then
-    return import_file (arg[2])
+    local name = arg[2] or die ("invalid filename " .. tostring (arg[2]))
+    local stat = import_file (name)
+    if stat == import_failed then
+      die ("failed to import file " .. name)
+    end
+    status ("import status for file %s: %s", name, import_status[stat])
   end
+  --- Multiple files
+  local statcount = { } -- import status codes -> size_t
+  for cat, defs in next, imports do
+    local ndefs = #defs
+    for i = 1, ndefs do
+      local def  = defs[i]
+      local stat = import_file (def.name, def.kind, def, cat)
+      if stat == import_failed then
+        die (stringformat ("import failed at file %d of %d (%s)",
+                           i, ndefs, def.name))
+      end
+      statcount[stat] = statcount[stat] or 0
+      statcount[stat] = statcount[stat] + 1
+    end
+  end
+  summarize_status (statcount)
+  return 0
 end --[[ [local import = function (arg)] ]]
 
 local job_kind = table.mirrored {

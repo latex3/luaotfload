@@ -268,7 +268,7 @@ local news = function ()
       local kind = def.kind
       local fullname = derive_fullname (cat, name, kind)
       local fullpath = file.join (location, fullname)
-      local subdir, ourname  = derive_ourname (ours or name)
+      local subdir, ourname  = derive_ourname (ours or name, kind)
       local ourpath  = file.join (fontloader_subdir, subdir, ourname) -- relative
       local imported = false
 
@@ -368,11 +368,11 @@ local import_file = function (name, kind, def, cat)
   if not cat then die ("missing category for file " .. name .. " -- WTF‽") end
 
   local dname    = def.name
-  local dours    = def.ours
+  local dours    = def.ours or dname
   local dkind    = def.kind
   local srcdir   = derive_category_path (cat)
   local fullname = derive_fullname (cat, dname, kind)
-  local subdir, ourname = derive_ourname (dname, kind)
+  local subdir, ourname = derive_ourname (dours, kind)
   local ourpath  = file.join (fontloader_subdir, subdir)
   local src      = file.join (srcdir, fullname)
   local dst      = file.join (ourpath, ourname)

@@ -55,7 +55,7 @@ local prefixes = {
 -------------------------------------------------------------------------------
 
 local die = function (...)
-  io.stderr:write "[fatal error]: "
+  io.stderr:write "[\x1b[1;30;41mfatal error\x1b[0m]: "
   io.stderr:write (stringformat (...))
   io.stderr:write "\naborting.\n"
   os.exit (1)
@@ -305,19 +305,32 @@ local get_file_definition = function (name, ourname, kind)
       local dkind = def.kind
 
       --- test properties
-      if       derive_ourname (dours, dkind) == ourname  then return def end
-      if derive_fullname (cat, dname, dkind) == fullname then return def end
-      if                               dours == ourname  then return def end
-      if                               dname == fullname then return def end
+      if       derive_ourname (dours, dkind) == ourname  then return def, cat end
+      if derive_fullname (cat, dname, dkind) == fullname then return def, cat end
+      if                               dours == ourname  then return def, cat end
+      if                               dname == fullname then return def, cat end
     end
   end
   --- search unsuccessful
 end --[[ [local get_file_definition = function (name, ourname, kind)] ]]
 
-local import_file = function (name, kind)
-  local ourname = derive_ourname (name)
-  local def     = get_file_definition (name, ourname, kind)
+local import_file = function (name, kind, def, cat)
+  local expected_ourname = derive_ourname (name)
+  if not def or not cat then
+    def, cat = get_file_definition (name, expected_ourname, kind)
+  end
+
   if not def then die ("unable to find a definition matching " .. name) end
+  if not cat then die ("missing category for file " .. name .. " -- WTF‽") end
+
+  local dname  = def.name
+  local dours  = def.ours
+  local dkind  = def.kind
+  local srcdir = derive_category_path (cat)
+  local src    = file.join (srcdir, derive_fullname (cat, dname, kind))
+  local dst    = file.join (fontloader_subdir, expected_ourname)
+  file.copy (src, dst)
+  return (hash_file (src) == hash_file (dst)) and 0 or 1
 end --[[ [local import_file = function (name, kind)] ]]
 
 local import = function (arg)
@@ -338,7 +351,7 @@ local job_kind = table.mirrored {
 
 --- job_kind -> bool
 local check_job = function (j)
-  return job_kind[j]
+  return job_kind[j] or die ("invalid job type “" .. job .. "”.")
 end
 
 -------------------------------------------------------------------------------
@@ -348,7 +361,6 @@ end
 local main = function ()
   local job = arg[1] or "news"
   local runner = check_job (job)
-  if not runner then die ("invalid job type “" .. job .. "”.") end
   return runner(arg)
 end
 

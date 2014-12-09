@@ -5,7 +5,7 @@ NAME		= luaotfload
 DOCSRCDIR	= ./doc
 SCRIPTSRCDIR	= ./scripts
 SRCSRCDIR	= ./src
-FONTLOADERDIR	= $(SRCSRCDIR)/fontloader
+FONTLOADERDIR	= $(SRCSRCDIR)/fontloader/runtime
 BUILDDIR	= ./build
 MISCDIR		= ./misc
 

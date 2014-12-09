@@ -19,13 +19,26 @@ local nodes = nodes
 local traverse_id = node.traverse_id
 local glyph_code  = nodes.nodecodes.glyph
 
+-- from now on we apply ligaturing and kerning here because it might interfere with complex
+-- opentype discretionary handling where the base ligature pass expect some weird extra
+-- pointers (which then confuse the tail slider that has some checking built in)
+
+local ligaturing  = node.ligaturing
+local kerning     = node.kerning
+
+function node.ligaturing() texio.write_nl("warning: node.ligaturing is already applied") end
+function node.kerning   () texio.write_nl("warning: node.kerning is already applied")    end
+
 function nodes.handlers.characters(head)
     local fontdata = fonts.hashes.identifiers
     if fontdata then
-        local usedfonts, done, prevfont = { }, false, nil
+        local usedfonts, basefonts, prevfont, basefont = { }, { }, nil, nil
         for n in traverse_id(glyph_code,head) do
             local font = n.font
             if font ~= prevfont then
+                if basefont then
+                    basefont[2] = n.prev
+                end
                 prevfont = font
                 local used = usedfonts[font]
                 if not used then
@@ -36,18 +49,32 @@ function nodes.handlers.characters(head)
                             local processors = shared.processes
                             if processors and #processors > 0 then
                                 usedfonts[font] = processors
-                                done = true
+                            else
+                                basefont = { n, nil }
+                                basefonts[#basefonts+1] = basefont
                             end
                         end
                     end
                 end
             end
         end
-        if done then
+        if next(usedfonts) then
             for font, processors in next, usedfonts do
                 for i=1,#processors do
-                    local h, d = processors[i](head,font,0)
-                    head, done = h or head, done or d
+                    head = processors[i](head,font,0) or head
+                end
+            end
+        end
+        if #basefonts > 0 then
+            for i=1,#basefonts do
+                local range = basefonts[i]
+                local start, stop = range[1], range[2]
+                if stop then
+                    ligaturing(start,stop)
+                    kerning(start,stop)
+                else
+                    ligaturing(start)
+                    kerning(start)
                 end
             end
         end
@@ -62,7 +89,7 @@ function nodes.simple_font_handler(head)
     head = nodes.handlers.characters(head)
     nodes.injections.handler(head)
     nodes.handlers.protectglyphs(head)
-    head = node.ligaturing(head)
-    head = node.kerning(head)
+ -- head = node.ligaturing(head)
+ -- head = node.kerning(head)
     return head
 end

@@ -1,0 +1,23 @@
+%D \module
+%D   [       file=luatex-basics,
+%D        version=2009.12.01,
+%D          title=\LUATEX\ Support Macros,
+%D       subtitle=Attribute Allocation,
+%D         author=Hans Hagen,
+%D           date=\currentdate,
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+%D As soon as we feel the need this file will file will contain an extension
+%D to the standard plain register allocation. For the moment we stick to a
+%D rather dumb attribute allocator. We start at 256 because we don't want
+%D any interference with the attributes used in the font handler.
+
+\ifx\newattribute\undefined \else \endinput \fi
+
+\newcount \lastallocatedattribute \lastallocatedattribute=255
+
+\def\newattribute#1%
+  {\global\advance\lastallocatedattribute 1
+   \attributedef#1\lastallocatedattribute}
+
+\endinput

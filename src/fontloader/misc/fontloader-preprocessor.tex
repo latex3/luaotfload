@@ -1,0 +1,14 @@
+%D \module
+%D   [       file=luatex-preprocessor,
+%D        version=2010.12.02,
+%D          title=\LUATEX\ Support Macros,
+%D       subtitle=Generic Preprocessor,
+%D         author=Hans Hagen,
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+\directlua{dofile(kpse.find_file('luatex-preprocessor.lua'))}
+
+\def\inputpreprocessed#1%
+  {\directlua{commands.inputpreprocessed("#1")}}
+
+\endinput

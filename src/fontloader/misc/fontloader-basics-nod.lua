@@ -45,7 +45,7 @@ attributes.private = attributes.private or function(name)
     return number
 end
 
--- Nodes:
+-- Nodes (a subset of context so that we don't get too much unused code):
 
 nodes              = { }
 nodes.pool         = { }
@@ -105,27 +105,14 @@ function nodes.pool.kern(k)
     return n
 end
 
--- experimental
-
-local getfield = node.getfield or function(n,tag)       return n[tag]  end
-local setfield = node.setfield or function(n,tag,value) n[tag] = value end
+local getfield = node.getfield
+local setfield = node.setfield
 
 nodes.getfield = getfield
 nodes.setfield = setfield
 
 nodes.getattr  = getfield
 nodes.setattr  = setfield
-
-if node.getid      then nodes.getid      = node.getid      else function nodes.getid     (n) return getfield(n,"id")      end end
-if node.getsubtype then nodes.getsubtype = node.getsubtype else function nodes.getsubtype(n) return getfield(n,"subtype") end end
-if node.getnext    then nodes.getnext    = node.getnext    else function nodes.getnext   (n) return getfield(n,"next")    end end
-if node.getprev    then nodes.getprev    = node.getprev    else function nodes.getprev   (n) return getfield(n,"prev")    end end
-if node.getchar    then nodes.getchar    = node.getchar    else function nodes.getchar   (n) return getfield(n,"char")    end end
-if node.getfont    then nodes.getfont    = node.getfont    else function nodes.getfont   (n) return getfield(n,"font")    end end
-if node.getlist    then nodes.getlist    = node.getlist    else function nodes.getlist   (n) return getfield(n,"list")    end end
-
-function nodes.tonut (n) return n end
-function nodes.tonode(n) return n end
 
 -- being lazy ... just copy a bunch ... not all needed in generic but we assume
 -- nodes to be kind of private anyway
@@ -175,4 +162,83 @@ nodes.mlist_to_hlist       = node.mlist_to_hlist
 -- we can go nuts (e.g. experimental); this split permits us us keep code
 -- used elsewhere stable but at the same time play around in context
 
-nodes.nuts = nodes
+local direct             = node.direct
+local nuts               = { }
+nodes.nuts               = nuts
+
+local tonode             = direct.tonode
+local tonut              = direct.todirect
+
+nodes.tonode             = tonode
+nodes.tonut              = tonut
+
+nuts.tonode              = tonode
+nuts.tonut               = tonut
+
+
+local getfield           = direct.getfield
+local setfield           = direct.setfield
+
+nuts.getfield            = getfield
+nuts.setfield            = setfield
+nuts.getnext             = direct.getnext
+nuts.getprev             = direct.getprev
+nuts.getid               = direct.getid
+nuts.getattr             = getfield
+nuts.setattr             = setfield
+nuts.getfont             = direct.getfont
+nuts.getsubtype          = direct.getsubtype
+nuts.getchar             = direct.getchar
+
+nuts.insert_before       = direct.insert_before
+nuts.insert_after        = direct.insert_after
+nuts.delete              = direct.delete
+nuts.copy                = direct.copy
+nuts.tail                = direct.tail
+nuts.flush_list          = direct.flush_list
+nuts.end_of_math         = direct.end_of_math
+nuts.traverse            = direct.traverse
+nuts.traverse_id         = direct.traverse_id
+
+nuts.getprop             = nuts.getattr
+nuts.setprop             = nuts.setattr
+
+local new_nut            = direct.new
+nuts.new                 = new_nut
+nuts.pool                = { }
+
+function nuts.pool.kern(k)
+    local n = new_nut("kern",1)
+    setfield(n,"kern",k)
+    return n
+end
+
+-- properties as used in the (new) injector:
+
+local propertydata = direct.get_properties_table()
+nodes.properties   = { data = propertydata }
+
+direct.set_properties_mode(true,true)     -- needed for injection
+
+function direct.set_properties_mode() end -- we really need the set modes
+
+nuts.getprop = function(n,k)
+    local p = propertydata[n]
+    if p then
+        return p[k]
+    end
+end
+
+nuts.setprop = function(n,k,v)
+    if v then
+        local p = propertydata[n]
+        if p then
+            p[k] = v
+        else
+            propertydata[n] = { [k] = v }
+        end
+    end
+end
+
+nodes.setprop = nodes.setproperty
+nodes.getprop = nodes.getproperty

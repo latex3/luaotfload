@@ -11,9 +11,10 @@ if context then
     os.exit()
 end
 
-local fonts         = fonts
-fonts.encodings     = { }
-fonts.encodings.agl = { }
+local fonts           = fonts
+fonts.encodings       = { }
+fonts.encodings.agl   = { }
+fonts.encodings.known = { }
 
 setmetatable(fonts.encodings.agl, { __index = function(t,k)
     if k == "unicodes" then

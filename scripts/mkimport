@@ -45,6 +45,17 @@ local paths = {
   fontloader = "tex/generic/context/luatex",
 }
 
+local subdirs = {
+  "runtime",
+  "misc"
+}
+
+local searchdirs = {
+  --- order is important!
+  fontloader_subdir,
+  context_root
+}
+
 local prefixes = {
   context    = nil,
   fontloader = "luatex",
@@ -427,10 +438,42 @@ local import = function (arg)
   return 0
 end --[[ [local import = function (arg)] ]]
 
+local tell = function (arg)
+  local target = arg[2]
+  if not target then die "no filename given" end
+
+  local look_for
+  --- pick a file
+  if lfs.isfile (target) then --- absolute path given
+    look_for = target
+    goto found
+  else
+    --- search in local tree
+    for i = 1, #searchdirs do
+      local root  = searchdirs[i]
+      for j = 1, #subdirs do
+        local dir  = file.join (searchdirs[i], subdirs[j])
+        local file = file.join (dir, target)
+        if lfs.isfile (file) then
+          look_for = file
+          goto found
+        end
+      end
+    end
+  end
+
+  if not look_for then
+    die ("file %s not found in any of the search locations", target)
+  end
+
+::found::
+  status ("found file %s at %s", target, look_for)
+end
+
 local job_kind = table.mirrored {
   news   = news,
   import = import,
-  tell   = function () end,
+  tell   = tell,
 }
 
 -------------------------------------------------------------------------------

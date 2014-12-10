@@ -438,7 +438,7 @@ local import = function (arg)
   return 0
 end --[[ [local import = function (arg)] ]]
 
-local tell = function (arg)
+local search = function (arg)
   local target = arg[2]
   if not target then die "no filename given" end
 
@@ -462,18 +462,30 @@ local tell = function (arg)
     end
   end
 
-  if not look_for then
-    die ("file %s not found in any of the search locations", target)
-  end
+::fail::
+  if not look_for then return end
 
 ::found::
   status ("found file %s at %s", target, look_for)
+  return look_for
+end
+
+local tell = function (target)
+  local location = search (target)
+  if not location then
+    die ("file %s not found in any of the search locations", target)
+  end
+end
+
+local help = function ()
+  die "not implemented :/"
 end
 
 local job_kind = table.mirrored {
   news   = news,
   import = import,
   tell   = tell,
+  help   = help,
 }
 
 -------------------------------------------------------------------------------
@@ -490,7 +502,7 @@ end
 -------------------------------------------------------------------------------
 
 local main = function ()
-  local job = arg[1] or "news"
+  local job = arg[1] or "help"
   local runner = check_job (job)
   return runner(arg)
 end

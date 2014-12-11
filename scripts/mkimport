@@ -40,7 +40,7 @@ local context_root      = "/home/phg/context/tex/texmf-context"
 local our_prefix        = "fontloader"
 local fontloader_subdir = "src/fontloader"
 
-local paths = {
+local origin_paths = {
   context    = "tex/context/base",
   fontloader = "tex/generic/context/luatex",
 }
@@ -222,7 +222,7 @@ local hash_file = function (fname)
 end
 
 local derive_category_path = function (cat)
-  local subpath  = paths[cat] or die ("category " .. cat .. " unknown")
+  local subpath  = origin_paths[cat] or die ("category " .. cat .. " unknown")
   local location = file.join (context_root, subpath)
   if not lfs.isdir (location) then
     die ("invalid base path defined for category "
@@ -470,15 +470,29 @@ local import = function (arg)
   return 0
 end --[[ [local import = function (arg)] ]]
 
+local find_in_path = function (root, subdir, target)
+  local file = file.join (root, subdir, target)
+  if lfs.isfile (file) then
+    return file
+  end
+end
+
 local search_paths = function (target)
   for i = 1, #searchdirs do
     local root  = searchdirs[i]
+
     for j = 1, #subdirs do
-      local dir  = file.join (searchdirs[i], subdirs[j])
-      local file = file.join (dir, target)
-      if lfs.isfile (file) then return file end
+      local found = find_in_path (root, subdirs[j], target)
+      if found then return found end
     end
+
   end
+
+  local found = find_in_path (context_root, origin_paths.context, target)
+  if found then return found end
+
+  local found = find_in_path (context_root, origin_paths.fontloader, target)
+  if found then return found end
   return false
 end
 
@@ -494,8 +508,9 @@ local search_defs = function (target)
         if found then return found end
       end
 
-      local dfull = dname .. derive_suffix (def.kind)
-      if target == dfull then
+      local dkind = def.kind
+      local dfull = derive_fullname (cat, dname, dkind)
+      if derive_fullname (cat, target, dkind) == dfull then
         local found = search_paths (dfull)
         if found then return found end
       end
@@ -503,7 +518,7 @@ local search_defs = function (target)
       local dours = def.ours
       if dours then
 
-        local _, ourname = derive_ourname (dours, kind)
+        local _, ourname = derive_ourname (dours, dkind)
         if target == dours then
           local found = search_paths (ourname)
           if found then return found end

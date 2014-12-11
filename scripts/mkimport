@@ -138,6 +138,14 @@ local kind_tex       = 2
 local kind_ignored   = 3
 local kind_lualibs   = 4
 
+local kind_name = {
+  [0] = "essential",
+  [1] = "merged"   ,
+  [2] = "tex"      ,
+  [3] = "ignored"  ,
+  [4] = "lualibs"  ,
+}
+
 local imports = {
 
   fontloader = {
@@ -228,6 +236,18 @@ local derive_suffix = function (kind)
   return ".lua"
 end
 
+local pfxlen
+local strip_prefix = function (fname)
+  if not pfxlen then pfxlen = #our_prefix end
+  if #fname <= pfxlen + 2 then
+    --- too short to accomodate prefix + basename
+    return
+  end
+  if string.sub (fname, 1, pfxlen) == our_prefix then
+    return string.sub (fname, pfxlen + 2)
+  end
+end
+
 local derive_fullname = function (cat, name, kind)
   local tmp = prefixes[cat]
   tmp = tmp and tmp .. "-" .. name or name
@@ -238,6 +258,13 @@ local derive_ourname = function (name, kind)
   local suffix = derive_suffix (kind)
   local subdir = kind == kind_essential and "runtime" or "misc"
   return subdir, our_prefix .. "-" .. name .. suffix
+end
+
+local format_file_definition = function (def)
+  return stringformat ("name = \"%s\", kind = \"%s\"",
+                       def.name,
+                       kind_name[def.kind] or def.kind)
+      .. (def.ours and (", ours = \"" .. def.ours .. "\"") or "")
 end
 
 local is_readable = function (f)
@@ -493,10 +520,7 @@ local search_defs = function (target)
   return false
 end
 
-local search = function (arg)
-  local target = arg[2]
-  if not target then die "no filename given" end
-
+local search = function (target)
   local look_for
   --- pick a file
   if lfs.isfile (target) then --- absolute path given
@@ -518,15 +542,63 @@ local search = function (arg)
   if not look_for then return end
 
 ::found::
-  status ("found file %s at %s", target, look_for)
   return look_for
 end
 
-local tell = function (target)
+local find_matching_def = function (location)
+  local basename = file.basename (location)
+  if not basename then die ("corrupt path %s", location) end
+  local barename = file.removesuffix (basename)
+  local pfxless  = strip_prefix (barename)
+  local kind     = file.suffix (pfxless) or "lua"
+  for cat, defs in next, imports do
+    for _, def in next, defs do
+      local dname = def.name
+      local dours = def.ours
+      if dname == pfxless
+      or dname == barename
+      -- dname == basename -- can’t happen for lack of suffix
+      or dours == pfxless
+      or dours == barename
+      then
+        return cat, def
+      end
+    end
+  end
+  return false
+end
+
+local describe = function (target, location)
+  --- Map files to import definitions
+  separator ()
+  status ("found file %s at %s", target, location)
+  local cat, def = find_matching_def (location)
+  if not cat or not def then
+    die ("file %s not found in registry", location)
+  end
+
+  local dname           = def.name
+  local dkind           = def.kind
+  local subdir, ourname = derive_ourname (dname, dkind)
+  separator ()
+  status ("category       %s", cat)
+  status ("kind           %s", kind_name[dkind])
+  status ("in Context     %s", derive_fullname (cat, def.name, def.kind))
+  status ("in Luaotfload  %s", ourname)
+  separator ()
+  return 0
+end
+
+local tell = function (arg)
+  local target = arg[2]
+  if not target then die "no filename given" end
+
   local location = search (target)
   if not location then
     die ("file %s not found in any of the search locations", target)
   end
+
+  return describe (target, location)
 end
 
 local help = function ()

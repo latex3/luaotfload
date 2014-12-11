@@ -223,14 +223,19 @@ local derive_category_path = function (cat)
   return location
 end
 
+local derive_suffix = function (kind)
+  if kind == kind_tex then return ".tex" end
+  return ".lua"
+end
+
 local derive_fullname = function (cat, name, kind)
   local tmp = prefixes[cat]
   tmp = tmp and tmp .. "-" .. name or name
-  return tmp .. (kind == kind_tex and ".tex" or ".lua")
+  return tmp .. derive_suffix (kind)
 end
 
 local derive_ourname = function (name, kind)
-  local suffix = kind == kind_tex and ".tex" or ".lua"
+  local suffix = derive_suffix (kind)
   local subdir = kind == kind_essential and "runtime" or "misc"
   return subdir, our_prefix .. "-" .. name .. suffix
 end
@@ -438,6 +443,56 @@ local import = function (arg)
   return 0
 end --[[ [local import = function (arg)] ]]
 
+local search_paths = function (target)
+  for i = 1, #searchdirs do
+    local root  = searchdirs[i]
+    for j = 1, #subdirs do
+      local dir  = file.join (searchdirs[i], subdirs[j])
+      local file = file.join (dir, target)
+      if lfs.isfile (file) then return file end
+    end
+  end
+  return false
+end
+
+local search_defs = function (target)
+  for cat, defs in next, imports do
+    local ndefs = #defs
+    for i = 1, ndefs do
+      local def = defs[i]
+
+      local dname = def.name
+      if target == dname then
+        local found = search_paths (target .. derive_suffix (def.kind))
+        if found then return found end
+      end
+
+      local dfull = dname .. derive_suffix (def.kind)
+      if target == dfull then
+        local found = search_paths (dfull)
+        if found then return found end
+      end
+
+      local dours = def.ours
+      if dours then
+
+        local _, ourname = derive_ourname (dours, kind)
+        if target == dours then
+          local found = search_paths (ourname)
+          if found then return found end
+        end
+
+        if target == ourname then
+          local found = search_paths (ourname)
+          if found then return found end
+        end
+      end
+
+    end
+  end
+  return false
+end
+
 local search = function (arg)
   local target = arg[2]
   if not target then die "no filename given" end
@@ -448,18 +503,15 @@ local search = function (arg)
     look_for = target
     goto found
   else
-    --- search in local tree
-    for i = 1, #searchdirs do
-      local root  = searchdirs[i]
-      for j = 1, #subdirs do
-        local dir  = file.join (searchdirs[i], subdirs[j])
-        local file = file.join (dir, target)
-        if lfs.isfile (file) then
-          look_for = file
-          goto found
-        end
-      end
-    end
+
+    --- search as file name in local tree
+    look_for = search_paths (target)
+    if look_for then goto found end
+
+    --- seach the definitions
+    look_for = search_defs (target)
+    if look_for then goto found end
+
   end
 
 ::fail::

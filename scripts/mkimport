@@ -36,9 +36,10 @@ local stringformat = string.format
 -- config
 -------------------------------------------------------------------------------
 
-local context_root      = "/home/phg/context/tex/texmf-context"
-local our_prefix        = "fontloader"
-local fontloader_subdir = "src/fontloader"
+local context_root        = "/home/phg/context/tex/texmf-context"
+local our_prefix          = "fontloader"
+local luatex_fonts_prefix = "luatex"
+local fontloader_subdir   = "src/fontloader"
 
 local origin_paths = {
   context    = "tex/context/base",
@@ -236,15 +237,17 @@ local derive_suffix = function (kind)
   return ".lua"
 end
 
-local pfxlen
-local strip_prefix = function (fname)
-  if not pfxlen then pfxlen = #our_prefix end
-  if #fname <= pfxlen + 2 then
+local pfxlen = { }
+local strip_prefix = function (fname, prefix)
+  prefix = prefix or our_prefix
+  if not pfxlen[prefix] then pfxlen[prefix] = #prefix end
+  local len = pfxlen[prefix]
+  if #fname <= len + 2 then
     --- too short to accomodate prefix + basename
     return
   end
-  if string.sub (fname, 1, pfxlen) == our_prefix then
-    return string.sub (fname, pfxlen + 2)
+  if string.sub (fname, 1, len) == prefix then
+    return string.sub (fname, len + 2)
   end
 end
 
@@ -497,39 +500,52 @@ local search_paths = function (target)
 end
 
 local search_defs = function (target)
+  local variants = { target, --[[ unstripped ]] }
+  local tmp
+  tmp = strip_prefix (target)
+  if tmp then variants[#variants + 1] = tmp end
+  tmp = strip_prefix (target, luatex_fonts_prefix)
+  if tmp then variants[#variants + 1] = tmp end
+
+  local nvariants = #variants
+
   for cat, defs in next, imports do
     local ndefs = #defs
     for i = 1, ndefs do
       local def = defs[i]
 
-      local dname = def.name
-      if target == dname then
-        local found = search_paths (target .. derive_suffix (def.kind))
-        if found then return found end
-      end
+      for i = 1, nvariants do
+        local variant = variants[i]
 
-      local dkind = def.kind
-      local dfull = derive_fullname (cat, dname, dkind)
-      if derive_fullname (cat, target, dkind) == dfull then
-        local found = search_paths (dfull)
-        if found then return found end
-      end
-
-      local dours = def.ours
-      if dours then
-
-        local _, ourname = derive_ourname (dours, dkind)
-        if target == dours then
-          local found = search_paths (ourname)
+        local dname = def.name
+        if variant == dname then
+          local found = search_paths (variant .. derive_suffix (def.kind))
           if found then return found end
         end
 
-        if target == ourname then
-          local found = search_paths (ourname)
+        local dkind = def.kind
+        local dfull = derive_fullname (cat, dname, dkind)
+        if derive_fullname (cat, variant, dkind) == dfull then
+          local found = search_paths (dfull)
           if found then return found end
         end
-      end
 
+        local dours = def.ours
+        if dours then
+
+          local _, ourname = derive_ourname (dours, dkind)
+          if variant == dours then
+            local found = search_paths (ourname)
+            if found then return found end
+          end
+
+          if variant == ourname then
+            local found = search_paths (ourname)
+            if found then return found end
+          end
+        end
+
+      end
     end
   end
   return false

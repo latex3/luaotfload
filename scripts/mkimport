@@ -478,7 +478,14 @@ local tell = function (target)
 end
 
 local help = function ()
-  die "not implemented :/"
+  iowrite "usage: mkinfo  <command> [<args>]\n"
+  iowrite "\n"
+  iowrite "Where <command> is one of\n"
+  iowrite "   help      Print this help message\n"
+  iowrite "   tell      Display information about a file’s integration\n"
+  iowrite "   news      Check Context for updated files\n"
+  iowrite "   import    Update with files from Context\n"
+  iowrite "\n"
 end
 
 local job_kind = table.mirrored {

@@ -351,7 +351,12 @@ end
 --
 
 function table.setmetatableindex(t,f)
+    if type(t) ~= "table" then
+        f = f or t
+        t = { }
+    end
     setmetatable(t,{ __index = f })
+    return t
 end
 
 -- helper for plain:

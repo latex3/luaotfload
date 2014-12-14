@@ -1,0 +1,112 @@
+%D \module
+%D   [       file=luatex-test,
+%D        version=2009.12.01,
+%D          title=\LUATEX\ Support Macros,
+%D       subtitle=Simple Test File,
+%D         author=Hans Hagen,
+%D           date=\currentdate,
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+%D See \type {luatex-plain.tex} (or on my machine \type {luatex.tex}
+%D for how to make a format.
+
+% You can generate a font database with:
+%
+%   mtxrun --script fonts --reload --save
+%
+% The file luatex-fonts-names.lua has to be moved to a place
+% where kpse can find it.
+
+\pdfoutput=1
+
+\font\testa=file:lmroman10-regular                  at 12pt \testa \input tufte \par
+\font\testb=file:lmroman12-regular:+liga;           at 24pt \testb effe flink fietsen \par
+\font\testc=file:lmroman12-regular:mode=node;+liga; at 24pt \testc effe flink fietsen \par
+\font\testd=name:lmroman10bold                      at 12pt \testd a bit bold \par
+
+\font\oeps=cmr10
+
+\font\oeps=[lmroman12-regular]:+liga at 30pt \oeps crap
+\font\oeps=[lmroman12-regular]       at 40pt \oeps more crap
+
+\font\cidtest=adobesongstd-light
+
+\font\mathtest=cambria(math) {\mathtest 123}
+
+\font\gothic=msgothic(ms-gothic) {\gothic whatever}
+
+\font\testy=file:IranNastaliq.ttf:mode=node;script=arab;language=dflt;+calt;+ccmp;+init;+isol;+medi;+fina;+liga;+rlig;+kern;+mark;+mkmk at 14pt
+\testy این یک متن نمونه است با قلم ذر که درست آمده است.
+
+\pdfprotrudechars2 \pdfadjustspacing2
+
+\font\testb=file:lmroman12-regular:+liga;extend=1.5         at 12pt \testb \input tufte \par
+\font\testb=file:lmroman12-regular:+liga;slant=0.8          at 12pt \testb \input tufte \par
+\font\testb=file:lmroman12-regular:+liga;protrusion=default at 12pt \testb \input tufte \par
+
+\setmplibformat{plain}
+
+\mplibcode
+    beginfig(1) ;
+        draw fullcircle
+            scaled 10cm
+            withcolor red
+            withpen pencircle xscaled 4mm yscaled 2mm rotated 30 ;
+    endfig ;
+\endmplibcode
+
+\font\mine=file:luatex-fonts-demo-vf-1.lua at 12pt
+
+\mine \input tufte \par
+
+% \font\mine=file:luatex-fonts-demo-vf-2.lua at 12pt \mine [abab] \par
+% \font\mine=file:luatex-fonts-demo-vf-3.lua at 12pt \mine [abab] \par
+
+\font\test=dejavuserif:+kern at 10pt  \test
+
+
+\bgroup \hsize 1mm \noindent Циолковский \par \egroup
+
+\loadpatterns{ru}
+
+\bgroup \hsize 1mm \noindent Циолковский \par \egroup
+
+a bit of math
+
+$\it e=mc^2 \bf  e=mc^2  \Uchar"1D49D$
+
+$$\left( { {1} \over { {1} \over {x} } } \right) $$
+
+$$\sqrt {2} { { {1} \over { {1} \over {x} } } } $$
+
+\font\cows=file:koeieletters.afm at 50pt
+
+\cows Hello World!
+
+% math test
+
+\latinmodern
+
+\def\sqrt{\Uroot "0 "221A{}}
+
+\def\root#1\of{\Uroot "0 "221A{#1}}
+
+Inline $\sqrt{x}{1.2}$ math. % same for $\root n of x$
+
+$\root3\of x$
+
+$\sin{x}$
+
+\lucidabright
+
+\def\sqrt{\Uroot "0 "221A{}}
+
+\def\root#1\of{\Uroot "0 "221A{#1}}
+
+Inline $\sqrt{x}{1.2}$ math. % same for $\root n of x$
+
+$\root3\of x$
+
+$\sin{x}$
+
+\end

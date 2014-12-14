@@ -1,0 +1,20 @@
+%D \module
+%D   [       file=luatex-swiglib,
+%D        version=2013.03.30,
+%D          title=\LUATEX\ Support Macros,
+%D       subtitle=Generic \SWIGLIB\ Font Handler,
+%D         author=Hans Hagen,
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+%D This is an experimental setup. Usage:
+%D
+%D \starttyping
+%D local gm = swiglib("gmwand.core")
+%D local gm = require("swiglib.gmwand.core")
+%D local sq = swiglib("mysql.core")
+%D local sq = swiglib("mysql.core","5.6")
+%D \stoptyping
+
+\directlua {
+    dofile(kpse.find_file("luatex-swiglib.lua","tex"))
+}

@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 12/06/14 14:20:08
+-- merge date  : 12/11/14 12:02:53
 
 do -- begin closure to overcome local limits and interference
 
@@ -2831,9 +2831,10 @@ local striplinepatterns={
   ["retain and no empty"]=p_retain_noempty,
   ["collapse"]=patterns.collapser,
 }
+setmetatable(striplinepatterns,{ __index=function(t,k) return p_prune_collapse end })
 strings.striplinepatterns=striplinepatterns
 function strings.striplines(str,how)
-  return str and lpegmatch(how and striplinepatterns[how] or p_prune_collapse,str) or str
+  return str and lpegmatch(striplinepatterns[how],str) or str
 end
 strings.striplong=strings.striplines
 function strings.nice(str)
@@ -14560,14 +14561,20 @@ local fonts=fonts
 local nodes=nodes
 local traverse_id=node.traverse_id
 local glyph_code=nodes.nodecodes.glyph
+local disc_code=nodes.nodecodes.disc
 local ligaturing=node.ligaturing
 local kerning=node.kerning
-function node.ligaturing() texio.write_nl("warning: node.ligaturing is already applied") end
-function node.kerning  () texio.write_nl("warning: node.kerning is already applied")  end
+local basepass=true
+function nodes.handlers.setbasepass(v)
+  basepass=v
+end
 function nodes.handlers.characters(head)
   local fontdata=fonts.hashes.identifiers
   if fontdata then
-    local usedfonts,basefonts,prevfont,basefont={},{},nil,nil
+    local usedfonts={}
+    local basefonts={}
+    local prevfont=nil
+    local basefont=nil
     for n in traverse_id(glyph_code,head) do
       local font=n.font
       if font~=prevfont then
@@ -14584,9 +14591,33 @@ function nodes.handlers.characters(head)
               local processors=shared.processes
               if processors and #processors>0 then
                 usedfonts[font]=processors
-              else
+              elseif basepass then
                 basefont={ n,nil }
                 basefonts[#basefonts+1]=basefont
+              end
+            end
+          end
+        end
+      end
+    end
+    for d in traverse_id(disc_code,head) do
+      local r=d.replace
+      if r then
+        for n in traverse_id(glyph_code,r) do
+          local font=n.font
+          if font~=prevfont then
+            prevfont=font
+            local used=usedfonts[font]
+            if not used then
+              local tfmdata=fontdata[font] 
+              if tfmdata then
+                local shared=tfmdata.shared 
+                if shared then
+                  local processors=shared.processes
+                  if processors and #processors>0 then
+                    usedfonts[font]=processors
+                  end
+                end
               end
             end
           end
@@ -14600,7 +14631,7 @@ function nodes.handlers.characters(head)
         end
       end
     end
-    if #basefonts>0 then
+    if basepass and #basefonts>0 then
       for i=1,#basefonts do
         local range=basefonts[i]
         local start,stop=range[1],range[2]
@@ -14621,6 +14652,10 @@ end
 function nodes.simple_font_handler(head)
   head=nodes.handlers.characters(head)
   nodes.injections.handler(head)
+  if not basepass then
+    head=ligaturing(head)
+    head=kerning(head)
+  end
   nodes.handlers.protectglyphs(head)
   return head
 end

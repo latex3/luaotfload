@@ -7,7 +7,7 @@ if not modules then modules = { } end modules ['letterspace'] = {
 }
 
 local log                = luaotfload.log
-local report             = log.report
+local logreport          = log.report
 
 local getmetatable       = getmetatable
 local require            = require
@@ -17,14 +17,26 @@ local tonumber           = tonumber
 local next               = next
 local nodes, node, fonts = nodes, node, fonts
 
-local find_node_tail     = node.tail or node.slide
-local free_node          = node.free
-local copy_node          = node.copy
-local new_node           = node.new
-local insert_node_before = node.insert_before
+--- As of December 2014 the faster ``node.direct.*`` interface is
+--- preferred.
+local nodedirect         = nodes.nuts
+local getchar            = nodedirect.getchar
+local getfont            = nodedirect.getfont
+local getid              = nodedirect.getid
+local getnext            = nodedirect.getnext
+local getprev            = nodedirect.getprev
+local getfield           = nodedirect.getfield
+local setfield           = nodedirect.setfield
+local find_node_tail     = nodedirect.tail
+local todirect           = nodedirect.tonut
+local tonode             = nodedirect.tonode
 
-local nodepool           = nodes.pool
+local insert_node_before = nodedirect.insert_before
+local free_node          = nodedirect.free
+local copy_node          = nodedirect.copy
+local new_node           = nodedirect.new
 
+local nodepool           = nodedirect.pool
 local new_kern           = nodepool.kern
 local new_glue           = nodepool.glue
 
@@ -78,34 +90,24 @@ local userkern_code  = kerncodes.userkern
 --- node-res
 -----------------------------------------------------------------------
 
-nodes.pool        = nodes.pool or { }
-local pool        = nodes.pool
-
-local kern        = new_node ("kern", kerncodes.userkern)
 local glue_spec   = new_node "glue_spec"
 
-pool.kern = function (k)
-  local n = copy_node (kern)
-  n.kern = k
-  return n
-end
-
-pool.glue = function (width, stretch, shrink,
-                      stretch_order, shrink_order)
-  local n = new_node"glue"
+nodepool.glue = function (width, stretch, shrink,
+                          stretch_order, shrink_order)
+  local n = new_node "glue"
   if not width then
     -- no spec
   elseif width == false or tonumber(width) then
     local s = copy_node(glue_spec)
-    if width         then s.width         = width         end
-    if stretch       then s.stretch       = stretch       end
-    if shrink        then s.shrink        = shrink        end
-    if stretch_order then s.stretch_order = stretch_order end
-    if shrink_order  then s.shrink_order  = shrink_order  end
-    n.spec = s
+    if width         then setfield(s, "width"        , width        )  end
+    if stretch       then setfield(s, "stretch"      , stretch      )  end
+    if shrink        then setfield(s, "shrink"       , shrink       )  end
+    if stretch_order then setfield(s, "stretch_order", stretch_order)  end
+    if shrink_order  then setfield(s, "shrink_order" , shrink_order )  end
+    setfield(n, "spec", s)
   else
     -- shared
-    n.spec = copy_node(width)
+    setfield(n, "spec", copy_node(width))
   end
   return n
 end
@@ -187,13 +189,12 @@ end
 local kern_injector = function (fillup, kern)
   if fillup then
     local g = new_glue(kern)
-    local s = g.spec
-    s.stretch = kern
-    s.stretch_order = 1
+    local s = getfield(g, "spec")
+    setfield(s, "stretch", kern)
+    setfield(s, "stretch_order", 1)
     return g
-  else
-    return new_kern(kern)
   end
+  return new_kern(kern)
 end
 
 --[[doc--
@@ -223,12 +224,12 @@ kerncharacters = function (head)
   local firstkern     = true
 
   while start do
-    local id = start.id
+    local id = getid(start)
     if id == glyph_code then
 
       --- 1) look up kern factor (slow, but cached rudimentarily)
       local krn
-      local fontid = start.font
+      local fontid = getfont(start)
       do
         krn = kernfactors[fontid]
         if not krn then
@@ -249,7 +250,7 @@ kerncharacters = function (head)
           goto nextnode
         elseif firstkern then
           firstkern = false
-          if (id ~= disc_code) and (not start.components) then
+          if (id ~= disc_code) and (not getfield(start, "components")) then
             --- not a ligature, skip node
             goto nextnode
           end
@@ -266,7 +267,7 @@ kerncharacters = function (head)
       lastfont = fontid
 
       --- 2) resolve ligatures
-      local c = start.components
+      local c = getfield(start, "components")
 
       if c then
         if keepligature and keepligature(start) then
@@ -274,20 +275,20 @@ kerncharacters = function (head)
         else
           --- c = kerncharacters (c) --> taken care of after replacing
           local s = start
-          local p, n = s.prev, s.next
+          local p, n = getprev(s), s.next
           local tail = find_node_tail(c)
           if p then
-            p.next = c
-            c.prev = p
+            setfield(p, "next", c)
+            p = getprev(c)
           else
             head = c
           end
           if n then
-            n.prev = tail
+            tail = getprev(n)
           end
-          tail.next = n
+          setnext(tail, "next", n)
           start = c
-          s.components = nil
+          setfield(s, "components", nil)
           -- we now leak nodes !
           --  free_node(s)
           done = true
@@ -295,30 +296,40 @@ kerncharacters = function (head)
       end -- kern ligature
 
       --- 3) apply the extra kerning
-      local prev = start.prev
+      local prev = getprev(start)
       if prev then
-        local pid = prev.id
+        local pid = getid(prev)
 
         if not pid then
           -- nothing
 
         elseif pid == kern_code then
-          if prev.subtype == kerning_code   --- context does this by means of an
-          or prev.subtype == userkern_code  --- attribute; we may need a test
+          local prev_subtype = getsubtype(prev)
+          if prev_subtype == kerning_code   --- context does this by means of an
+          or prev_subtype == userkern_code  --- attribute; we may need a test
           then
-            if keeptogether and prev.prev.id == glyph_code and keeptogether(prev.prev,start) then
+
+            local pprev    = getprev(prev)
+            local pprev_id = getid(pprev)
+
+            if    keeptogether
+              and pprev_id == glyph_code
+              and keeptogether(pprev, start)
+            then
               -- keep
             else
-              prev.subtype = userkern_code
-              prev.kern = prev.kern + quaddata[lastfont]*krn -- here
+              prev_subtype = userkern_code
+              local prev_kern = getfield(prev, "kern")
+              prev_kern = prev_kern + quaddata[lastfont] * krn
               done = true
             end
           end
 
         elseif pid == glyph_code then
-          if prev.font == lastfont then
-            local prevchar, lastchar = prev.char, start.char
-            if keeptogether and keeptogether(prev,start) then
+          if getfont(prev) == lastfont then
+            local prevchar = getchar(prev)
+            local lastchar = getchar(start)
+            if keeptogether and keeptogether(prev, start) then
               -- keep 'm
             elseif identifiers[lastfont] then
               local kerns = chardata[lastfont] and chardata[lastfont][prevchar].kerns
@@ -337,31 +348,34 @@ kerncharacters = function (head)
           -- a bit too complicated, we can best not copy and just calculate
           -- but we could have multiple glyphs involved so ...
           local disc = prev -- disc
-          local pre, post, replace = disc.pre, disc.post, disc.replace
-          local prv, nxt = disc.prev, disc.next
+          local pre     = getfield(disc, "pre")
+          local post    = getfield(disc, "post")
+          local replace = getfield(disc, "replace")
+          local prv     = getprev(disc)
+          local nxt     = getnext(disc)
 
           if pre and prv then -- must pair with start.prev
             -- this one happens in most cases
             local before = copy_node(prv)
-            pre.prev = before
-            before.next = pre
-            before.prev = nil
+            setfield(pre, "prev", before)
+            setfield(before, "next", pre)
+            setfield(before, "prev", nil)
             pre = kerncharacters (before)
-            pre = pre.next
-            pre.prev = nil
-            disc.pre = pre
+            pre = getnext(pre)
+            setfield(pre, "prev", nil)
+            setfield(disc, "pre", pre)
             free_node(before)
           end
 
           if post and nxt then  -- must pair with start
             local after = copy_node(nxt)
             local tail = find_node_tail(post)
-            tail.next = after
-            after.prev = tail
-            after.next = nil
+            setfield(tail, "next", after)
+            setfield(after, "prev", tail)
+            setfield(after, "next", nil)
             post = kerncharacters (post)
-            tail.next = nil
-            disc.post = post
+            setfield(tail, "next", nil)
+            setfield(disc, "post", post)
             free_node(after)
           end
 
@@ -369,29 +383,34 @@ kerncharacters = function (head)
             local before = copy_node(prv)
             local after = copy_node(nxt)
             local tail = find_node_tail(replace)
-            replace.prev = before
-            before.next = replace
-            before.prev = nil
-            tail.next = after
-            after.prev = tail
-            after.next = nil
+            setfield(replace, "prev", before)
+            setfield(before,  "next", replace)
+            setfield(before,  "prev", nil)
+            setfield(tail,    "next", after)
+            setfield(after,   "prev", tail)
+            setfield(after,   "next", nil)
             replace = kerncharacters (before)
-            replace = replace.next
-            replace.prev = nil
-            after.prev.next = nil
-            disc.replace = replace
+            replace = getnext(replace)
+            setfield(replace, "prev",      nil)
+            setfield(after,   "prev.next", nil)
+            setfield(disc,    "replace",   replace)
             free_node(after)
             free_node(before)
+
           elseif identifiers[lastfont] then
-            if prv and prv.id == glyph_code and prv.font == lastfont then
-              local prevchar, lastchar = prv.char, start.char
+            if    prv
+              and getid(prv)   == glyph_code
+              and getfont(prv) == lastfont
+            then
+              local prevchar = getchar(prv)
+              local lastchar = getchar(start)
               local kerns = chardata[lastfont] and chardata[lastfont][prevchar].kerns
               local kern = kerns and kerns[lastchar] or 0
               krn = kern + quaddata[lastfont]*krn -- here
             else
               krn = quaddata[lastfont]*krn -- here
             end
-            disc.replace = kern_injector(false,krn) -- only kerns permitted, no glue
+            setfield(disc, "replace", kern_injector(false, krn))
           end
 
         end
@@ -400,7 +419,7 @@ kerncharacters = function (head)
 
     ::nextnode::
     if start then
-      start = start.next
+      start = getnext(start)
     end
   end
   return head, done
@@ -439,19 +458,37 @@ local remove_processor = function (name)
   return false --> unregistered
 end
 
---- now for the simplistic variant
+--- When font kerning is requested, usually by defining a font with the
+--- ``letterspace`` parameter, we inject a wrapper for the
+--- ``kerncharacters()`` node processor in the relevant callbacks. This
+--- wrapper initially converts the received head node into its “direct”
+--- counterpart. Likewise, the callback result is converted back to an
+--- ordinary node prior to returning. Internally, ``kerncharacters()``
+--- performs all node operations on direct nodes.
+
 --- unit -> bool
 local enablefontkerning = function ( )
-  return add_processor( kerncharacters
+
+  local handler = function (hd)
+    local direct_hd = todirect (hd)
+    local hd, _done = kerncharacters (hd)
+    if not hd then --- bad
+      logreport ("both", 0, "letterspace",
+                 "kerncharacters() failed to return a valid new head")
+    end
+    return tonode (hd)
+  end
+
+  return add_processor( handler
                       , "luaotfload.letterspace"
                       , "pre_linebreak_filter"
                       , "hpack_filter")
 end
 
 --- unit -> bool
-local disablefontkerning = function ( )
-  return remove_processor "luaotfload.letterspace"
-end
+---al disablefontkerning = function ( )
+---eturn remove_processor "luaotfload.letterspace"
+---
 
 --[[doc--
 
@@ -515,10 +552,10 @@ otffeatures.register {
 local initializecompatfontkerning = function (tfmdata, percentage)
   local factor = tonumber (percentage)
   if not factor then
-    report ("both", 0, "letterspace",
-            "Invalid argument to letterspace: %s (type %q), " ..
-            "was expecting percentage as Lua number instead.",
-            percentage, type (percentage))
+    logreport ("both", 0, "letterspace",
+               "Invalid argument to letterspace: %s (type %q), " ..
+               "was expecting percentage as Lua number instead.",
+               percentage, type (percentage))
     return
   end
   return initializefontkerning (tfmdata, factor * 0.01)

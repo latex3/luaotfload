@@ -1,0 +1,674 @@
+#!/usr/bin/env texlua
+-------------------------------------------------------------------------------
+--         FILE:  mkimport.lua
+--        USAGE:  ./mkimport.lua
+--  DESCRIPTION:  check luaotfload imports against Context
+-- REQUIREMENTS:  luatex, the lualibs package, Context MkIV
+--       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
+--      VERSION:  42
+--      CREATED:  2014-12-08 22:36:15+0100
+-------------------------------------------------------------------------------
+--
+
+-------------------------------------------------------------------------------
+--- PURPOSE
+--- 
+---  - Facilitate detecting changes in the fontloader source.
+---  - Assist in updating source code and (partially) automate importing.
+---  - Account for files in the plain fontloader distribution, alert in case of
+---    additions or deletions.
+---    
+-------------------------------------------------------------------------------
+
+kpse.set_program_name "luatex"
+
+local lfs = require "lfs"
+local md5 = require "md5"
+
+require "lualibs"
+
+local ioloaddata   = io.loaddata
+local iowrite      = io.write
+local md5sumhexa   = md5.sumhexa
+local stringformat = string.format
+
+-------------------------------------------------------------------------------
+-- config
+-------------------------------------------------------------------------------
+
+local context_root        = "/home/phg/context/tex/texmf-context"
+local our_prefix          = "fontloader"
+local luatex_fonts_prefix = "luatex"
+local fontloader_subdir   = "src/fontloader"
+
+local origin_paths = {
+  context    = "tex/context/base",
+  fontloader = "tex/generic/context/luatex",
+}
+
+local subdirs = {
+  "runtime",
+  "misc"
+}
+
+local searchdirs = {
+  --- order is important!
+  fontloader_subdir,
+  context_root
+}
+
+local prefixes = {
+  context    = nil,
+  fontloader = "luatex",
+}
+
+-------------------------------------------------------------------------------
+-- helpers
+-------------------------------------------------------------------------------
+
+local die = function (...)
+  io.stderr:write "[\x1b[1;30;41mfatal error\x1b[0m]: "
+  io.stderr:write (stringformat (...))
+  io.stderr:write "\naborting.\n"
+  os.exit (1)
+end
+
+local emphasis = function (txt)
+  return stringformat("\x1b[1m%s\x1b[0m", txt)
+end
+
+local msg = function (...)
+  iowrite (stringformat (...))
+  iowrite "\n"
+end
+
+local separator_string = string.rep ("-", 79)
+local separator = function ()
+  iowrite (separator_string)
+  iowrite "\n"
+end
+
+local good_tag   = stringformat("[\x1b[1;30;%dmgood\x1b[0m]   · ", 42)
+local bad_tag    = stringformat("[\x1b[1;30;%dmBAD\x1b[0m]    · ", 41)
+local alert_tag  = stringformat("[\x1b[1;%dmalert\x1b[0m]  · "   , 36)
+local status_tag = stringformat("[\x1b[0;%dmstatus\x1b[0m] · "   , 36)
+
+local good = function (...)
+  local msg = (stringformat (...))
+  iowrite (good_tag)
+  iowrite (msg)
+  iowrite "\n"
+end
+
+local bad = function (...)
+  local msg = (stringformat (...))
+  iowrite (bad_tag)
+  iowrite (msg)
+  iowrite "\n"
+end
+
+local attention = function (...)
+  local msg = (stringformat (...))
+  iowrite (alert_tag)
+  iowrite (msg)
+  iowrite "\n"
+end
+
+local status = function (...)
+  local msg = (stringformat (...))
+  iowrite (status_tag)
+  iowrite (msg)
+  iowrite "\n"
+end
+
+-------------------------------------------------------------------------------
+-- definitions
+-------------------------------------------------------------------------------
+
+--- Accounting of upstream files. There are different categories:
+---
+---   · *essential*: Files required at runtime.
+---   · *merged*:    Files merged into the fontloader package.
+---   · *ignored*:   Lua files not merged, but part of the format.
+---   · *tex*:       TeX code, i.e. format and examples.
+---   · *lualibs*:   Files merged, but also provided by the Lualibs package.
+
+local kind_essential = 0
+local kind_merged    = 1
+local kind_tex       = 2
+local kind_ignored   = 3
+local kind_lualibs   = 4
+
+local kind_name = {
+  [0] = "essential",
+  [1] = "merged"   ,
+  [2] = "tex"      ,
+  [3] = "ignored"  ,
+  [4] = "lualibs"  ,
+}
+
+local imports = {
+
+  fontloader = {
+    { name = "basics-gen"        , ours = nil          , kind = kind_essential },
+    { name = "basics-nod"        , ours = nil          , kind = kind_merged    },
+    { name = "basics"            , ours = nil          , kind = kind_tex       },
+    { name = "fonts-cbk"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-def"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-demo-vf-1"   , ours = nil          , kind = kind_ignored   },
+    { name = "fonts-enc"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-ext"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-inj"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-lua"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-merged"      , ours = "fontloader" , kind = kind_essential },
+    { name = "fonts-ota"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-otn"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts"             , ours = nil          , kind = kind_merged    },
+    { name = "fonts"             , ours = nil          , kind = kind_tex       },
+    { name = "fonts-syn"         , ours = nil          , kind = kind_ignored   },
+    { name = "fonts-tfm"         , ours = nil          , kind = kind_merged    },
+    { name = "languages"         , ours = nil          , kind = kind_ignored   },
+    { name = "languages"         , ours = nil          , kind = kind_tex       },
+    { name = "math"              , ours = nil          , kind = kind_ignored   },
+    { name = "math"              , ours = nil          , kind = kind_tex       },
+    { name = "mplib"             , ours = nil          , kind = kind_ignored   },
+    { name = "mplib"             , ours = nil          , kind = kind_tex       },
+    { name = "plain"             , ours = nil          , kind = kind_tex       },
+    { name = "preprocessor"      , ours = nil          , kind = kind_ignored   },
+    { name = "preprocessor"      , ours = nil          , kind = kind_tex       },
+    { name = "preprocessor-test" , ours = nil          , kind = kind_tex       },
+    { name = "swiglib"           , ours = nil          , kind = kind_ignored   },
+    { name = "swiglib"           , ours = nil          , kind = kind_tex       },
+    { name = "swiglib-test"      , ours = nil          , kind = kind_ignored   },
+    { name = "swiglib-test"      , ours = nil          , kind = kind_tex       },
+    { name = "test"              , ours = nil          , kind = kind_tex       },
+  }, --[[ [fontloader] ]]
+
+  context = { --=> all merged
+    { name = "data-con"          , ours = "data-con"          , kind = kind_merged    },
+    { name = "font-afk"          , ours = "font-afk"          , kind = kind_merged    },
+    { name = "font-afm"          , ours = "font-afm"          , kind = kind_merged    },
+    { name = "font-cid"          , ours = "font-cid"          , kind = kind_merged    },
+    { name = "font-con"          , ours = "font-con"          , kind = kind_merged    },
+    { name = "font-def"          , ours = "font-def"          , kind = kind_merged    },
+    { name = "font-ini"          , ours = "font-ini"          , kind = kind_merged    },
+    { name = "font-map"          , ours = "font-map"          , kind = kind_merged    },
+    { name = "font-otb"          , ours = "font-otb"          , kind = kind_merged    },
+    { name = "font-otf"          , ours = "font-otf"          , kind = kind_merged    },
+    { name = "font-oti"          , ours = "font-oti"          , kind = kind_merged    },
+    { name = "font-otp"          , ours = "font-otp"          , kind = kind_merged    },
+    { name = "font-tfm"          , ours = "font-tfm"          , kind = kind_merged    },
+    { name = "l-boolean"         , ours = "l-boolean"         , kind = kind_lualibs   },
+    { name = "l-file"            , ours = "l-file"            , kind = kind_lualibs   },
+    { name = "l-function"        , ours = "l-function"        , kind = kind_lualibs   },
+    { name = "l-io"              , ours = "l-io"              , kind = kind_lualibs   },
+    { name = "l-lpeg"            , ours = "l-lpeg"            , kind = kind_lualibs   },
+    { name = "l-lua"             , ours = "l-lua"             , kind = kind_lualibs   },
+    { name = "l-math"            , ours = "l-math"            , kind = kind_lualibs   },
+    { name = "l-string"          , ours = "l-string"          , kind = kind_lualibs   },
+    { name = "l-table"           , ours = "l-table"           , kind = kind_lualibs   },
+    { name = "util-str"          , ours = "util-str"          , kind = kind_lualibs   },
+  }, --[[ [context] ]]
+} --[[ [imports] ]]
+
+local hash_file = function (fname)
+  if not lfs.isfile (fname) then
+    die ("cannot find %s.", fname)
+  end
+  local raw = ioloaddata (fname)
+  if not raw then
+    die ("cannot read from %s.", fname)
+  end
+  return md5sumhexa (raw)
+end
+
+local derive_category_path = function (cat)
+  local subpath  = origin_paths[cat] or die ("category " .. cat .. " unknown")
+  local location = file.join (context_root, subpath)
+  if not lfs.isdir (location) then
+    die ("invalid base path defined for category "
+         .. cat .. " at " .. location)
+  end
+  return location
+end
+
+local derive_suffix = function (kind)
+  if kind == kind_tex then return ".tex" end
+  return ".lua"
+end
+
+local pfxlen = { }
+local strip_prefix = function (fname, prefix)
+  prefix = prefix or our_prefix
+  if not pfxlen[prefix] then pfxlen[prefix] = #prefix end
+  local len = pfxlen[prefix]
+  if #fname <= len + 2 then
+    --- too short to accomodate prefix + basename
+    return
+  end
+  if string.sub (fname, 1, len) == prefix then
+    return string.sub (fname, len + 2)
+  end
+end
+
+local derive_fullname = function (cat, name, kind)
+  local tmp = prefixes[cat]
+  tmp = tmp and tmp .. "-" .. name or name
+  return tmp .. derive_suffix (kind)
+end
+
+local derive_ourname = function (name, kind)
+  local suffix = derive_suffix (kind)
+  local subdir = kind == kind_essential and "runtime" or "misc"
+  return subdir, our_prefix .. "-" .. name .. suffix
+end
+
+local format_file_definition = function (def)
+  return stringformat ("name = \"%s\", kind = \"%s\"",
+                       def.name,
+                       kind_name[def.kind] or def.kind)
+      .. (def.ours and (", ours = \"" .. def.ours .. "\"") or "")
+end
+
+local is_readable = function (f)
+  local fh = io.open (f, "r")
+  if fh then
+    fh:close()
+    return true
+  end
+  return false
+end
+
+local summarize_news = function (status)
+  local ni = #status.import
+  local nc = #status.create
+  local ng = #status.good
+  local nm = #status.missing
+
+  separator ()
+  msg ("Summary: Inspected %d files.", ni + nc + ng + nm)
+  separator ()
+  if ng > 0 then good      ("%d are up to date", ng) end
+  if ni > 0 then attention ("%d changed"       , ni) end
+  if nc > 0 then attention ("%d new"           , nc) end
+  if nm > 0 then bad       ("%d missing"       , nm) end
+  separator ()
+
+  if nm == 0 and nc == 0 and ni == 0 then
+    return 0
+  end
+
+  return -1
+end
+
+local news = function ()
+  local status = {
+    import  = { },
+    good    = { },
+    create  = { },
+    missing = { },
+  }
+
+  for cat, entries in next, imports do
+    local location = derive_category_path (cat)
+    local nfiles = #entries
+
+    for i = 1, nfiles do
+      local def  = entries[i]
+      local name = def.name
+      local ours = def.ours
+      local kind = def.kind
+      local fullname = derive_fullname (cat, name, kind)
+      local fullpath = file.join (location, fullname)
+      local subdir, ourname  = derive_ourname (ours or name, kind)
+      local ourpath  = file.join (fontloader_subdir, subdir, ourname) -- relative
+      local imported = false
+
+      if not is_readable (fullpath) then
+        bad ("source for file %s not found at %s",
+             emphasis (ourname),
+             emphasis (fullpath))
+        status.missing[#status.missing + 1] = ourname
+      else
+        --- Source file exists and is readable.
+        if not lfs.isdir (fontloader_subdir) then
+          die ("path for fontloader tree ("
+              .. fontloader_subdir .. ") is not a directory")
+        end
+        if is_readable (ourpath) then imported = true end
+        local src_hash = hash_file (fullpath)
+        local dst_hash = imported and hash_file (ourpath)
+        local same     = src_hash == dst_hash -- same!
+
+        if same then
+          good ("file %s unchanged", emphasis (ourname))
+          status.good[#status.good + 1] = ourname
+        elseif not dst_hash then
+          attention ("new file %s requires import from %s",
+                    emphasis (ourname),
+                    emphasis (fullpath))
+          status.create[#status.create + 1] = ourname
+        else --- src and dst exist but differ
+          attention ("file %s requires import", emphasis (ourname))
+          status.import[#status.import + 1] = ourname
+        end
+      end
+
+    end
+  end
+
+  return summarize_news (status)
+end --[[ [local news = function ()] ]]
+
+local get_file_definition = function (name, ourname, kind)
+  kind = kind or "lua"
+  for cat, defs in next, imports do
+    local fullname = derive_fullname (cat, name, kind)
+    local ndefs = #defs
+    for i = 1, ndefs do
+      local def = defs[i]
+      local dname = def.name
+      local dours = def.ours or def.name
+      local dkind = def.kind
+
+      --- test properties
+      local subdir, derived = derive_ourname (dours, dkind)
+      if                             derived == ourname  then return def, cat end
+      if derive_fullname (cat, dname, dkind) == fullname then return def, cat end
+      if                               dours == ourname  then return def, cat end
+      if                               dname == fullname then return def, cat end
+    end
+  end
+  --- search unsuccessful
+end --[[ [local get_file_definition = function (name, ourname, kind)] ]]
+
+local import_imported = 0
+local import_skipped  = 1
+local import_failed   = 2
+local import_created  = 3
+
+local import_status = {
+  [import_imported] = "imported",
+  [import_skipped ] = "skipped",
+  [import_failed  ] = "failed",
+  [import_created ] = "created",
+}
+
+local summarize_status = function (counters)
+  local imported = counters[import_imported] or 0
+  local skipped  = counters[import_skipped ] or 0
+  local created  = counters[import_created ] or 0
+  local failed   = counters[import_failed  ] or 0
+  local sum = imported + skipped + created + failed
+  if sum < 1 then die ("garbage total of imported files: %s", sum) end
+  separator ()
+  status (" RESULT: %d files processed", sum)
+  separator ()
+  if created  > 0 then status ("created:  %d (%d %%)", created , created  * 100 / sum) end
+  if imported > 0 then status ("imported: %d (%d %%)", imported, imported * 100 / sum) end
+  if skipped  > 0 then status ("skipped:  %d (%d %%)", skipped , skipped  * 100 / sum) end
+  separator ()
+end
+
+local import_file = function (name, kind, def, cat)
+  local expected_ourname = derive_ourname (name)
+  if not def or not cat then
+    def, cat = get_file_definition (name, expected_ourname, kind)
+  end
+
+  if not def then die ("unable to find a definition matching " .. name) end
+  if not cat then die ("missing category for file " .. name .. " -- WTF‽") end
+
+  local dname    = def.name
+  local dours    = def.ours or dname
+  local dkind    = def.kind
+  local srcdir   = derive_category_path (cat)
+  local fullname = derive_fullname (cat, dname, kind)
+  local subdir, ourname = derive_ourname (dours, kind)
+  local ourpath  = file.join (fontloader_subdir, subdir)
+  local src      = file.join (srcdir, fullname)
+  local dst      = file.join (ourpath, ourname)
+  local new      = not lfs.isfile (dst)
+  if not new and hash_file (src) == hash_file (dst) then
+    status ("file %s is unchanged, skipping", fullname)
+    return import_skipped
+  end
+  if not (lfs.isdir (ourpath) or not lfs.mkdirs (ourpath)) then
+    die ("failed to create directory %s for file %s",
+         ourpath, ourname)
+  end
+  status ("importing file %s", fullname)
+  file.copy (src, dst)
+  if hash_file (src) == hash_file (dst) then
+    if new then return import_created end
+    return import_imported end
+  return import_failed
+end --[[ [local import_file = function (name, kind)] ]]
+
+local import = function (arg)
+  if #arg > 1 then
+    local name = arg[2] or die ("invalid filename " .. tostring (arg[2]))
+    local stat = import_file (name)
+    if stat == import_failed then
+      die ("failed to import file " .. name)
+    end
+    status ("import status for file %s: %s", name, import_status[stat])
+  end
+  --- Multiple files
+  local statcount = { } -- import status codes -> size_t
+  for cat, defs in next, imports do
+    local ndefs = #defs
+    for i = 1, ndefs do
+      local def  = defs[i]
+      local stat = import_file (def.name, def.kind, def, cat)
+      if stat == import_failed then
+        die (stringformat ("import failed at file %d of %d (%s)",
+                           i, ndefs, def.name))
+      end
+      statcount[stat] = statcount[stat] or 0
+      statcount[stat] = statcount[stat] + 1
+    end
+  end
+  summarize_status (statcount)
+  return 0
+end --[[ [local import = function (arg)] ]]
+
+local find_in_path = function (root, subdir, target)
+  local file = file.join (root, subdir, target)
+  if lfs.isfile (file) then
+    return file
+  end
+end
+
+local search_paths = function (target)
+  for i = 1, #searchdirs do
+    local root  = searchdirs[i]
+
+    for j = 1, #subdirs do
+      local found = find_in_path (root, subdirs[j], target)
+      if found then return found end
+    end
+
+  end
+
+  local found = find_in_path (context_root, origin_paths.context, target)
+  if found then return found end
+
+  local found = find_in_path (context_root, origin_paths.fontloader, target)
+  if found then return found end
+  return false
+end
+
+local search_defs = function (target)
+  local variants = { target, --[[ unstripped ]] }
+  local tmp
+  tmp = strip_prefix (target)
+  if tmp then variants[#variants + 1] = tmp end
+  tmp = strip_prefix (target, luatex_fonts_prefix)
+  if tmp then variants[#variants + 1] = tmp end
+
+  local nvariants = #variants
+
+  for cat, defs in next, imports do
+    local ndefs = #defs
+    for i = 1, ndefs do
+      local def = defs[i]
+
+      for i = 1, nvariants do
+        local variant = variants[i]
+
+        local dname = def.name
+        if variant == dname then
+          local found = search_paths (variant .. derive_suffix (def.kind))
+          if found then return found end
+        end
+
+        local dkind = def.kind
+        local dfull = derive_fullname (cat, dname, dkind)
+        if derive_fullname (cat, variant, dkind) == dfull then
+          local found = search_paths (dfull)
+          if found then return found end
+        end
+
+        local dours = def.ours
+        if dours then
+
+          local _, ourname = derive_ourname (dours, dkind)
+          if variant == dours then
+            local found = search_paths (ourname)
+            if found then return found end
+          end
+
+          if variant == ourname then
+            local found = search_paths (ourname)
+            if found then return found end
+          end
+        end
+
+      end
+    end
+  end
+  return false
+end
+
+local search = function (target)
+  local look_for
+  --- pick a file
+  if lfs.isfile (target) then --- absolute path given
+    look_for = target
+    goto found
+  else
+
+    --- search as file name in local tree
+    look_for = search_paths (target)
+    if look_for then goto found end
+
+    --- seach the definitions
+    look_for = search_defs (target)
+    if look_for then goto found end
+
+  end
+
+::fail::
+  if not look_for then return end
+
+::found::
+  return look_for
+end
+
+local find_matching_def = function (location)
+  local basename = file.basename (location)
+  if not basename then die ("corrupt path %s", location) end
+  local barename = file.removesuffix (basename)
+  local pfxless  = strip_prefix (barename)
+  local kind     = file.suffix (pfxless) or "lua"
+  for cat, defs in next, imports do
+    for _, def in next, defs do
+      local dname = def.name
+      local dours = def.ours
+      if dname == pfxless
+      or dname == barename
+      -- dname == basename -- can’t happen for lack of suffix
+      or dours == pfxless
+      or dours == barename
+      then
+        return cat, def
+      end
+    end
+  end
+  return false
+end
+
+local describe = function (target, location)
+  --- Map files to import definitions
+  separator ()
+  status ("found file %s at %s", target, location)
+  local cat, def = find_matching_def (location)
+  if not cat or not def then
+    die ("file %s not found in registry", location)
+  end
+
+  local dname           = def.name
+  local dkind           = def.kind
+  local subdir, ourname = derive_ourname (dname, dkind)
+  separator ()
+  status ("category       %s", cat)
+  status ("kind           %s", kind_name[dkind])
+  status ("in Context     %s", derive_fullname (cat, def.name, def.kind))
+  status ("in Luaotfload  %s", ourname)
+  separator ()
+  return 0
+end
+
+local tell = function (arg)
+  local target = arg[2]
+  if not target then die "no filename given" end
+
+  local location = search (target)
+  if not location then
+    die ("file %s not found in any of the search locations", target)
+  end
+
+  return describe (target, location)
+end
+
+local help = function ()
+  iowrite "usage: mkinfo  <command> [<args>]\n"
+  iowrite "\n"
+  iowrite "Where <command> is one of\n"
+  iowrite "   help      Print this help message\n"
+  iowrite "   tell      Display information about a file’s integration\n"
+  iowrite "   news      Check Context for updated files\n"
+  iowrite "   import    Update with files from Context\n"
+  iowrite "\n"
+end
+
+local job_kind = table.mirrored {
+  news   = news,
+  import = import,
+  tell   = tell,
+  help   = help,
+}
+
+-------------------------------------------------------------------------------
+-- functionality
+-------------------------------------------------------------------------------
+
+--- job_kind -> bool
+local check_job = function (j)
+  return job_kind[j] or die ("invalid job type “%s”.", j)
+end
+
+-------------------------------------------------------------------------------
+-- entry point
+-------------------------------------------------------------------------------
+
+local main = function ()
+  local job = arg[1] or "help"
+  local runner = check_job (job)
+  return runner(arg)
+end
+
+os.exit (main ())
+
+--- vim:ft=lua:ts=2:et:sw=2

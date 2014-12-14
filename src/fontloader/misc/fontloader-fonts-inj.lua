@@ -8,10 +8,9 @@ if not modules then modules = { } end modules ['node-inj'] = {
 
 -- This is very experimental (this will change when we have luatex > .50 and
 -- a few pending thingies are available. Also, Idris needs to make a few more
--- test fonts. Btw, future versions of luatex will have extended glyph properties
--- that can be of help. Some optimizations can go away when we have faster machines.
+-- test fonts. Some optimizations can go away when we have faster machines.
 
--- todo: make a special one for context
+-- todo: ignore kerns between disc and glyph
 
 local next = next
 local utfchar = utf.char
@@ -31,12 +30,30 @@ local injections         = nodes.injections
 local nodecodes          = nodes.nodecodes
 local glyph_code         = nodecodes.glyph
 local kern_code          = nodecodes.kern
-local nodepool           = nodes.pool
+
+local nuts               = nodes.nuts
+local nodepool           = nuts.pool
+
 local newkern            = nodepool.kern
 
-local traverse_id        = node.traverse_id
-local insert_node_before = node.insert_before
-local insert_node_after  = node.insert_after
+local tonode             = nuts.tonode
+local tonut              = nuts.tonut
+
+local getfield           = nuts.getfield
+local getnext            = nuts.getnext
+local getprev            = nuts.getprev
+local getid              = nuts.getid
+local getattr            = nuts.getattr
+local getfont            = nuts.getfont
+local getsubtype         = nuts.getsubtype
+local getchar            = nuts.getchar
+
+local setfield           = nuts.setfield
+local setattr            = nuts.setattr
+
+local traverse_id        = nuts.traverse_id
+local insert_node_before = nuts.insert_before
+local insert_node_after  = nuts.insert_after
 
 local a_kernpair = attributes.private('kernpair')
 local a_ligacomp = attributes.private('ligacomp')
@@ -46,6 +63,8 @@ local a_markdone = attributes.private('markdone')
 local a_cursbase = attributes.private('cursbase')
 local a_curscurs = attributes.private('curscurs')
 local a_cursdone = attributes.private('cursdone')
+
+local unsetvalue = attributes.unsetvalue
 
 -- This injector has been tested by Idris Samawi Hamid (several arabic fonts as well as
 -- the rather demanding Husayni font), Khaled Hosny (latin and arabic) and Kaj Eigner
@@ -67,12 +86,39 @@ local kerns    = { }
 -- For the moment we pass the r2l key ... volt/arabtype tests .. idris: this needs
 -- checking with husayni (volt and fontforge).
 
+function injections.reset(n)
+--     if getattr(n,a_kernpair) then
+--         setattr(n,a_kernpair,unsetvalue)
+--     end
+--     if getattr(n,a_markdone) then
+--         setattr(n,a_markbase,unsetvalue)
+--         setattr(n,a_markmark,unsetvalue)
+--         setattr(n,a_markdone,unsetvalue)
+--     end
+--     if getattr(n,a_cursdone) then
+--         setattr(n,a_cursbase,unsetvalue)
+--         setattr(n,a_curscurs,unsetvalue)
+--         setattr(n,a_cursdone,unsetvalue)
+--     end
+--     if getattr(n,a_ligacomp) then
+--         setattr(n,a_ligacomp,unsetvalue)
+--     end
+end
+
+function injections.setligaindex(n,index)
+    setattr(n,a_ligacomp,index)
+end
+
+function injections.getligaindex(n,default)
+    return getattr(n,a_ligacomp) or default
+end
+
 function injections.setcursive(start,nxt,factor,rlmode,exit,entry,tfmstart,tfmnext)
     local dx, dy = factor*(exit[1]-entry[1]), factor*(exit[2]-entry[2])
     local ws, wn = tfmstart.width, tfmnext.width
     local bound = #cursives + 1
-    start[a_cursbase] = bound
-    nxt[a_curscurs] = bound
+    setattr(start,a_cursbase,bound)
+    setattr(nxt,a_curscurs,bound)
     cursives[bound] = { rlmode, dx, dy, ws, wn }
     return dx, dy, bound
 end
@@ -81,14 +127,14 @@ function injections.setpair(current,factor,rlmode,r2lflag,spec,tfmchr)
     local x, y, w, h = factor*spec[1], factor*spec[2], factor*spec[3], factor*spec[4]
     -- dy = y - h
     if x ~= 0 or w ~= 0 or y ~= 0 or h ~= 0 then
-        local bound = current[a_kernpair]
+        local bound = getattr(current,a_kernpair)
         if bound then
             local kb = kerns[bound]
             -- inefficient but singles have less, but weird anyway, needs checking
             kb[2], kb[3], kb[4], kb[5] = (kb[2] or 0) + x, (kb[3] or 0) + y, (kb[4] or 0)+ w, (kb[5] or 0) + h
         else
             bound = #kerns + 1
-            current[a_kernpair] = bound
+            setattr(current,a_kernpair,bound)
             kerns[bound] = { rlmode, x, y, w, h, r2lflag, tfmchr.width }
         end
         return x, y, w, h, bound
@@ -100,7 +146,7 @@ function injections.setkern(current,factor,rlmode,x,tfmchr)
     local dx = factor*x
     if dx ~= 0 then
         local bound = #kerns + 1
-        current[a_kernpair] = bound
+        setattr(current,a_kernpair,bound)
         kerns[bound] = { rlmode, dx }
         return dx, bound
     else
@@ -108,9 +154,9 @@ function injections.setkern(current,factor,rlmode,x,tfmchr)
     end
 end
 
-function injections.setmark(start,base,factor,rlmode,ba,ma,index,baseismark) -- ba=baseanchor, ma=markanchor
-    local dx, dy = factor*(ba[1]-ma[1]), factor*(ba[2]-ma[2])     -- the index argument is no longer used but when this
-    local bound = base[a_markbase]                    -- fails again we should pass it
+function injections.setmark(start,base,factor,rlmode,ba,ma) -- ba=baseanchor, ma=markanchor
+    local dx, dy = factor*(ba[1]-ma[1]), factor*(ba[2]-ma[2])
+    local bound = getattr(base,a_markbase)
     local index = 1
     if bound then
         local mb = marks[bound]
@@ -118,20 +164,19 @@ function injections.setmark(start,base,factor,rlmode,ba,ma,index,baseismark) -- 
          -- if not index then index = #mb + 1 end
             index = #mb + 1
             mb[index] = { dx, dy, rlmode }
-            start[a_markmark] = bound
-            start[a_markdone] = index
+            setattr(start,a_markmark,bound)
+            setattr(start,a_markdone,index)
             return dx, dy, bound
         else
-            report_injections("possible problem, %U is base mark without data (id %a)",base.char,bound)
+            report_injections("possible problem, %U is base mark without data (id %a)",getchar(base),bound)
         end
     end
---     index = index or 1
     index = index or 1
     bound = #marks + 1
-    base[a_markbase] = bound
-    start[a_markmark] = bound
-    start[a_markdone] = index
-    marks[bound] = { [index] = { dx, dy, rlmode, baseismark } }
+    setattr(base,a_markbase,bound)
+    setattr(start,a_markmark,bound)
+    setattr(start,a_markdone,index)
+    marks[bound] = { [index] = { dx, dy, rlmode } }
     return dx, dy, bound
 end
 
@@ -142,15 +187,15 @@ end
 local function trace(head)
     report_injections("begin run")
     for n in traverse_id(glyph_code,head) do
-        if n.subtype < 256 then
-            local kp = n[a_kernpair]
-            local mb = n[a_markbase]
-            local mm = n[a_markmark]
-            local md = n[a_markdone]
-            local cb = n[a_cursbase]
-            local cc = n[a_curscurs]
-            local char = n.char
-            report_injections("font %s, char %U, glyph %c",n.font,char,char)
+        if getsubtype(n) < 256 then
+            local kp = getattr(n,a_kernpair)
+            local mb = getattr(n,a_markbase)
+            local mm = getattr(n,a_markmark)
+            local md = getattr(n,a_markdone)
+            local cb = getattr(n,a_cursbase)
+            local cc = getattr(n,a_curscurs)
+            local char = getchar(n)
+            report_injections("font %s, char %U, glyph %c",getfont(n),char,char)
             if kp then
                 local k = kerns[kp]
                 if k[3] then
@@ -198,22 +243,24 @@ local function show_result(head)
     local current = head
     local skipping = false
     while current do
-        local id = current.id
+        local id = getid(current)
         if id == glyph_code then
-            report_injections("char: %C, width %p, xoffset %p, yoffset %p",current.char,current.width,current.xoffset,current.yoffset)
+            report_injections("char: %C, width %p, xoffset %p, yoffset %p",
+                getchar(current),getfield(current,"width"),getfield(current,"xoffset"),getfield(current,"yoffset"))
             skipping = false
         elseif id == kern_code then
-            report_injections("kern: %p",current.kern)
+            report_injections("kern: %p",getfield(current,"kern"))
             skipping = false
         elseif not skipping then
             report_injections()
             skipping = true
         end
-        current = current.next
+        current = getnext(current)
     end
 end
 
 function injections.handler(head,where,keep)
+    head = tonut(head)
     local has_marks, has_cursives, has_kerns = next(marks), next(cursives), next(kerns)
     if has_marks or has_cursives then
         if trace_injections then
@@ -224,17 +271,18 @@ function injections.handler(head,where,keep)
         if has_kerns then -- move outside loop
             local nf, tm = nil, nil
             for n in traverse_id(glyph_code,head) do -- only needed for relevant fonts
-                if n.subtype < 256 then
+                if getsubtype(n) < 256 then
                     nofvalid = nofvalid + 1
                     valid[nofvalid] = n
-                    if n.font ~= nf then
-                        nf = n.font
-                        tm = fontdata[nf].resources.marks
+                    local f = getfont(n)
+                    if f ~= nf then
+                        nf = f
+                        tm = fontdata[nf].resources.marks -- other hash in ctx
                     end
                     if tm then
-                        mk[n] = tm[n.char]
+                        mk[n] = tm[getchar(n)]
                     end
-                    local k = n[a_kernpair]
+                    local k = getattr(n,a_kernpair)
                     if k then
                         local kk = kerns[k]
                         if kk then
@@ -254,15 +302,16 @@ function injections.handler(head,where,keep)
         else
             local nf, tm = nil, nil
             for n in traverse_id(glyph_code,head) do
-                if n.subtype < 256 then
+                if getsubtype(n) < 256 then
                     nofvalid = nofvalid + 1
                     valid[nofvalid] = n
-                    if n.font ~= nf then
-                        nf = n.font
-                        tm = fontdata[nf].resources.marks
+                    local f = getfont(n)
+                    if f ~= nf then
+                        nf = f
+                        tm = fontdata[nf].resources.marks -- other hash in ctx
                     end
                     if tm then
-                        mk[n] = tm[n.char]
+                        mk[n] = tm[getchar(n)]
                     end
                 end
             end
@@ -272,7 +321,7 @@ function injections.handler(head,where,keep)
             local cx = { }
             if has_kerns and next(ky) then
                 for n, k in next, ky do
-                    n.yoffset = k
+                    setfield(n,"yoffset",k)
                 end
             end
             -- todo: reuse t and use maxt
@@ -283,9 +332,9 @@ function injections.handler(head,where,keep)
                 for i=1,nofvalid do -- valid == glyphs
                     local n = valid[i]
                     if not mk[n] then
-                        local n_cursbase = n[a_cursbase]
+                        local n_cursbase = getattr(n,a_cursbase)
                         if p_cursbase then
-                            local n_curscurs = n[a_curscurs]
+                            local n_curscurs = getattr(n,a_curscurs)
                             if p_cursbase == n_curscurs then
                                 local c = cursives[n_curscurs]
                                 if c then
@@ -310,20 +359,20 @@ function injections.handler(head,where,keep)
                                 end
                             end
                         elseif maxt > 0 then
-                            local ny = n.yoffset
+                            local ny = getfield(n,"yoffset")
                             for i=maxt,1,-1 do
                                 ny = ny + d[i]
                                 local ti = t[i]
-                                ti.yoffset = ti.yoffset + ny
+                                setfield(ti,"yoffset",getfield(ti,"yoffset") + ny)
                             end
                             maxt = 0
                         end
                         if not n_cursbase and maxt > 0 then
-                            local ny = n.yoffset
+                            local ny = getfield(n,"yoffset")
                             for i=maxt,1,-1 do
                                 ny = ny + d[i]
                                 local ti = t[i]
-                                ti.yoffset = ny
+                                setfield(ti,"yoffset",ny) -- maybe add to current yoffset
                             end
                             maxt = 0
                         end
@@ -331,11 +380,11 @@ function injections.handler(head,where,keep)
                     end
                 end
                 if maxt > 0 then
-                    local ny = n.yoffset
+                    local ny = getfield(n,"yoffset") -- hm, n unset ?
                     for i=maxt,1,-1 do
                         ny = ny + d[i]
                         local ti = t[i]
-                        ti.yoffset = ny
+                        setfield(ti,"yoffset",ny)
                     end
                     maxt = 0
                 end
@@ -346,57 +395,83 @@ function injections.handler(head,where,keep)
             if has_marks then
                 for i=1,nofvalid do
                     local p = valid[i]
-                    local p_markbase = p[a_markbase]
+                    local p_markbase = getattr(p,a_markbase)
                     if p_markbase then
-                        local mrks = marks[p_markbase]
-                        local nofmarks = #mrks
-                        for n in traverse_id(glyph_code,p.next) do
-                            local n_markmark = n[a_markmark]
+                        local mrks      = marks[p_markbase]
+                        local nofmarks  = #mrks
+                        for n in traverse_id(glyph_code,getnext(p)) do
+                            local n_markmark = getattr(n,a_markmark)
                             if p_markbase == n_markmark then
-                                local index = n[a_markdone] or 1
+                                local index = getattr(n,a_markdone) or 1
                                 local d = mrks[index]
                                 if d then
                                     local rlmode = d[3]
                                     --
                                     local k = wx[p]
+                                    local px = getfield(p,"xoffset")
+                                    local ox = 0
                                     if k then
                                         local x = k[2]
                                         local w = k[4]
                                         if w then
                                             if rlmode and rlmode >= 0 then
                                                 -- kern(x) glyph(p) kern(w-x) mark(n)
-                                                n.xoffset = p.xoffset - p.width + d[1] - (w-x)
+                                                ox = px - getfield(p,"width") + d[1] - (w-x)
+                                             -- report_injections("l2r case 1: %p",ox)
                                             else
                                                 -- kern(w-x) glyph(p) kern(x) mark(n)
-                                                n.xoffset = p.xoffset - d[1] - x
+                                                ox = px - d[1] - x
+                                             -- report_injections("r2l case 1: %p",ox)
                                             end
                                         else
                                             if rlmode and rlmode >= 0 then
                                                 -- okay for husayni
-                                                n.xoffset = p.xoffset - p.width + d[1]
+                                                ox = px - getfield(p,"width") + d[1]
+                                             -- report_injections("r2l case 2: %p",ox)
                                             else
                                                 -- needs checking: is x ok here?
-                                                n.xoffset = p.xoffset - d[1] - x
+                                                ox = px - d[1] - x
+                                             -- report_injections("r2l case 2: %p",ox)
                                             end
                                         end
                                     else
+                                     -- if rlmode and rlmode >= 0 then
+                                     --     ox = px - getfield(p,"width") + d[1]
+                                     --  -- report_injections("l2r case 3: %p",ox)
+                                     -- else
+                                     --     ox = px - d[1]
+                                     --  -- report_injections("r2l case 3: %p",ox)
+                                     -- end
+                                        --
+                                        -- we need to deal with fonts that have marks with width
+                                        --
+                                        local wp = getfield(p,"width")
+                                        local wn = getfield(n,"width") -- in arial marks have widths
                                         if rlmode and rlmode >= 0 then
-                                            n.xoffset = p.xoffset - p.width + d[1]
+                                            ox = px - wp + d[1]
+                                         -- report_injections("l2r case 3: %p",ox)
                                         else
-                                            n.xoffset = p.xoffset - d[1]
+                                            ox = px - d[1]
+                                         -- report_injections("r2l case 3: %p",ox)
                                         end
-                                        local w = n.width
-                                        if w ~= 0 then
-                                            insert_node_before(head,n,newkern(-w/2))
-                                            insert_node_after(head,n,newkern(-w/2))
+                                        if wn ~= 0 then
+                                            -- bad: we should center
+                                            insert_node_before(head,n,newkern(-wn/2))
+                                            insert_node_after(head,n,newkern(-wn/2))
+                                         -- wx[n] = { 0, -wn/2, 0, -wn }
                                         end
+                                        -- so far
                                     end
-                                    --                                    --
+                                    setfield(n,"xoffset",ox)
+                                    --
+                                    local py = getfield(p,"yoffset")
+                                    local oy = 0
                                     if mk[p] then
-                                        n.yoffset = p.yoffset + d[2]
+                                        oy = py + d[2]
                                     else
-                                        n.yoffset = n.yoffset + p.yoffset + d[2]
+                                        oy = getfield(n,"yoffset") + py + d[2]
                                     end
+                                    setfield(n,"yoffset",oy)
                                     --
                                     if nofmarks == 1 then
                                         break
@@ -404,6 +479,8 @@ function injections.handler(head,where,keep)
                                         nofmarks = nofmarks - 1
                                     end
                                 end
+                            elseif not n_markmark then
+                                break -- HH: added 2013-09-12: no need to deal with non marks
                             else
                                 -- KE: there can be <mark> <mkmk> <mark> sequences in ligatures
                             end
@@ -465,7 +542,7 @@ function injections.handler(head,where,keep)
          -- if trace_injections then
          --     show_result(head)
          -- end
-            return head, true
+            return tonode(head), true
         elseif not keep then
             kerns, cursives, marks = { }, { }, { }
         end
@@ -474,14 +551,14 @@ function injections.handler(head,where,keep)
             trace(head)
         end
         for n in traverse_id(glyph_code,head) do
-            if n.subtype < 256 then
-                local k = n[a_kernpair]
+            if getsubtype(n) < 256 then
+                local k = getattr(n,a_kernpair)
                 if k then
                     local kk = kerns[k]
                     if kk then
                         local rl, x, y, w = kk[1], kk[2] or 0, kk[3], kk[4]
                         if y and y ~= 0 then
-                            n.yoffset = y -- todo: h ?
+                            setfield(n,"yoffset",y) -- todo: h ?
                         end
                         if w then
                             -- copied from above
@@ -518,9 +595,9 @@ function injections.handler(head,where,keep)
      -- if trace_injections then
      --     show_result(head)
      -- end
-        return head, true
+        return tonode(head), true
     else
         -- no tracing needed
     end
-    return head, false
+    return tonode(head), false
 end

@@ -5,10 +5,12 @@ NAME		= luaotfload
 DOCSRCDIR	= ./doc
 SCRIPTSRCDIR	= ./scripts
 SRCSRCDIR	= ./src
+FONTLOADERDIR	= $(SRCSRCDIR)/fontloader/runtime
 BUILDDIR	= ./build
 MISCDIR		= ./misc
 
 SRC		= $(wildcard $(SRCSRCDIR)/luaotfload-*.lua)
+SRC		+= $(wildcard $(FONTLOADERDIR)/*.lua)
 SRC		+= $(SRCSRCDIR)/luaotfload.sty
 SRC		+= $(MISCDIR)/luaotfload-blacklist.cnf
 
@@ -18,6 +20,7 @@ CONFDEMO	= $(MISCDIR)/luaotfload.conf.example
 GLYPHSCRIPT	= $(SCRIPTSRCDIR)/mkglyphlist
 CHARSCRIPT	= $(SCRIPTSRCDIR)/mkcharacters
 STATUSSCRIPT	= $(SCRIPTSRCDIR)/mkstatus
+IMPORTSCRIPT	= $(SCRIPTSRCDIR)/mkimport
 
 GLYPHSOURCE	= $(BUILDDIR)/glyphlist.txt
 
@@ -86,6 +89,7 @@ LUA		= texlua
 DO_GLYPHS	= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS	= $(LUA) $(CHARSCRIPT)  > /dev/null
 DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
+DO_IMPORT	= $(LUA) $(IMPORTSCRIPT)  > /dev/null
 
 define check-lua-files
 @echo validating syntax
@@ -177,7 +181,7 @@ $(TDS_ZIP): $(DOCS) $(ALL_STATUS) check
 
 sign: $(CTAN_ZIPSIG)
 
-.PHONY: install manifest clean mrproper show showtargets check
+.PHONY: install manifest clean mrproper show showtargets check import news
 
 install: $(ALL_STATUS)
 	@echo "Installing in '$(TEXMFROOT)'."
@@ -224,6 +228,9 @@ showtargets:
 	@echo "       tds         package a zipball according to the TDS"
 	@echo "       ctan        package a zipball for uploading to CTAN"
 	@echo "       sign        sign zipball"
+	@echo
+	@echo "       clean       cleanup side-effects"
+	@echo "       mrproper    cleanup side-effects as well as make targets"
 	@echo
 
 # vim:noexpandtab:tabstop=8:shiftwidth=2

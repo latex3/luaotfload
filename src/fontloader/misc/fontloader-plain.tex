@@ -1,0 +1,27 @@
+%D \module
+%D   [       file=luatex-plain,
+%D        version=2009.12.01,
+%D          title=\LUATEX\ Macros,
+%D       subtitle=Plain Format,
+%D         author=Hans Hagen,
+%D           date=\currentdate,
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+\input plain
+
+\directlua {tex.enableprimitives('', tex.extraprimitives())}
+
+\pdfoutput=1
+
+\everyjob \expandafter {%
+    \the\everyjob
+    \input {luatex-basics}%
+    \input {luatex-fonts}%
+    \input {luatex-math}%
+    \input {luatex-languages}%
+    \input {luatex-mplib}%
+}
+
+\edef\fmtversion{\fmtversion+luatex}
+
+\dump

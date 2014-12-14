@@ -1,0 +1,11 @@
+% luatex --fmt=luatex=plain luatex-swiglib-test.tex
+
+\input luatex-swiglib.tex
+
+\directlua {
+    dofile("luatex-swiglib-test.lua")
+}
+
+\pdfximage {luatex-swiglib-test.jpg} \pdfrefximage\pdflastximage
+
+\end

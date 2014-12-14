@@ -1,0 +1,30 @@
+\ifdefined\inputpreprocessed
+
+    \def\TestOne[#1]%
+      {test one: [#1]\par}
+
+    \def\TestTwo#some%
+      {test two: #some\par}
+
+    \def\TestThree[#whatever][#more]%
+      {test three: [#more] and [#whatever]\par}
+
+    \def\TestFour[#one]#two%
+      {\def\TestFive[#alpha][#one]%
+         {test four and five: [#one], [#two] and [#alpha]}\par}
+
+    \def\TestSix[#{one}]#{two}%
+      {test six: [#{one}] and #{two}\par}
+
+    \TestOne  [one]
+    \TestTwo  {one}
+    \TestThree[one][two]
+    \TestFour [one]{two}
+    \TestFive [one][two]
+    \TestSix  [one]{two}
+
+\else
+    \input{luatex-preprocessor.tex}
+    \inputpreprocessed{luatex-preprocessor-test.tex}
+    \expandafter \end
+\fi

@@ -6,6 +6,9 @@ Change History
     * Add ``--dumpconf`` option to luaotfload-tool for generating configuration
       files
     * Move fontloader files to subtree src/fontloader
+    * New script ``mkimport`` facilitates maintainance of code imported from
+      Context
+    * Revised letterspacing, now utilizing the ``node.direct`` interface
 
 2014/07/13, luaotfload v2.5
     * Remove legacy code.

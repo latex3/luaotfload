@@ -129,6 +129,35 @@ luatexbase.add_to_callback(
   "luaotfload.patch_font",
   patch_cambria_domh,
   "luaotfload.aux.patch_cambria_domh")
+  
+
+--[[doc--
+
+  Add missing field to fonts that lack it. Addresses issue
+  https://github.com/lualatex/luaotfload/issues/253
+
+  This is considered a hack, especially since importing the
+  unicode-math package fixes the problem quite nicely.
+
+--doc]]--
+
+--- fontobj -> unit
+local fixup_fontdata = function (data)
+
+  local t = type (data)
+  --- Some OT fonts like Libertine R lack the resources table, causing
+  --- the fontloader to nil-index.
+  if t == "table" then
+    if data and not data.resources then data.resources = { } end
+  end
+
+end
+
+luatexbase.add_to_callback(
+  "luaotfload.patch_font_unsafe",
+  fixup_fontdata,
+  "luaotfload.aux.fixup_fontdata")
+  
 
 --[[doc--
 

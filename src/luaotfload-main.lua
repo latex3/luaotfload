@@ -354,7 +354,7 @@ else--- the loading sequence is known to change, so this might have to
     load_fontloader_module "font-otf"
     load_fontloader_module "font-otb"
     load_fontloader_module "luatex-fonts-inj"  --> since 2014-01-07, replaces node-inj.lua
-    load_fontloader_module "font-ota"
+    load_fontloader_module "luatex-fonts-ota"
     load_fontloader_module "luatex-fonts-otn"  --> since 2014-01-07, replaces font-otn.lua
     load_fontloader_module "font-otp"          --> since 2013-04-23
     load_fontloader_module "luatex-fonts-lua"
@@ -657,14 +657,19 @@ end
 
 --[[doc--
 
-    We create a callback for patching fonts on the fly, to be used by
-    other packages.
-    It initially contains the empty function that we are going to
+    We create callbacks for patching fonts on the fly, to be used by
+    other packages. In addition to the regular \identifier{patch_font}
+    callback there is an unsafe variant \identifier{patch_font_unsafe}
+    that will be invoked even if the target font lacks certain essential
+    tfmdata tables.
+
+    The callbacks initially contain the empty function that we are going to
     override below.
 
 --doc]]--
 
-create_callback("luaotfload.patch_font", "simple", dummy_function)
+create_callback("luaotfload.patch_font",        "simple", dummy_function)
+create_callback("luaotfload.patch_font_unsafe", "simple", dummy_function)
 
 --[[doc--
 
@@ -681,14 +686,16 @@ do
     local read = fonts.definers.read
 
     local patch = function (specification, size, id)
-        local tfmdata = read (specification, size, id)
-        if type (tfmdata) == "table" and tfmdata.shared then
+        local fontdata = read (specification, size, id)
+        if type (fontdata) == "table" and fontdata.shared then
             --- We need to test for the “shared” field here
             --- or else the fontspec capheight callback will
             --- operate on tfm fonts.
-            call_callback ("luaotfload.patch_font", tfmdata, specification)
+            call_callback ("luaotfload.patch_font", fontdata, specification)
+        else
+            call_callback ("luaotfload.patch_font_unsafe", fontdata, specification)
         end
-        return tfmdata
+        return fontdata
     end
 
     local mk_info = function (name)

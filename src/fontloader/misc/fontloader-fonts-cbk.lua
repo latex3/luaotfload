@@ -18,21 +18,28 @@ local nodes = nodes
 
 local traverse_id = node.traverse_id
 local glyph_code  = nodes.nodecodes.glyph
+local disc_code   = nodes.nodecodes.disc
 
 -- from now on we apply ligaturing and kerning here because it might interfere with complex
 -- opentype discretionary handling where the base ligature pass expect some weird extra
 -- pointers (which then confuse the tail slider that has some checking built in)
 
-local ligaturing  = node.ligaturing
-local kerning     = node.kerning
+local ligaturing    = node.ligaturing
+local kerning       = node.kerning
 
-function node.ligaturing() texio.write_nl("warning: node.ligaturing is already applied") end
-function node.kerning   () texio.write_nl("warning: node.kerning is already applied")    end
+local basepass      = true
+
+function nodes.handlers.setbasepass(v)
+    basepass = v
+end
 
 function nodes.handlers.characters(head)
     local fontdata = fonts.hashes.identifiers
     if fontdata then
-        local usedfonts, basefonts, prevfont, basefont = { }, { }, nil, nil
+        local usedfonts = { }
+        local basefonts = { }
+        local prevfont  = nil
+        local basefont  = nil
         for n in traverse_id(glyph_code,head) do
             local font = n.font
             if font ~= prevfont then
@@ -49,9 +56,33 @@ function nodes.handlers.characters(head)
                             local processors = shared.processes
                             if processors and #processors > 0 then
                                 usedfonts[font] = processors
-                            else
+                            elseif basepass then
                                 basefont = { n, nil }
                                 basefonts[#basefonts+1] = basefont
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        for d in traverse_id(disc_code,head) do
+            local r = d.replace
+            if r then
+                for n in traverse_id(glyph_code,r) do
+                    local font = n.font
+                    if font ~= prevfont then
+                        prevfont = font
+                        local used = usedfonts[font]
+                        if not used then
+                            local tfmdata = fontdata[font] --
+                            if tfmdata then
+                                local shared = tfmdata.shared -- we need to check shared, only when same features
+                                if shared then
+                                    local processors = shared.processes
+                                    if processors and #processors > 0 then
+                                        usedfonts[font] = processors
+                                    end
+                                end
                             end
                         end
                     end
@@ -65,7 +96,7 @@ function nodes.handlers.characters(head)
                 end
             end
         end
-        if #basefonts > 0 then
+        if basepass and #basefonts > 0 then
             for i=1,#basefonts do
                 local range = basefonts[i]
                 local start, stop = range[1], range[2]
@@ -85,11 +116,13 @@ function nodes.handlers.characters(head)
 end
 
 function nodes.simple_font_handler(head)
---  lang.hyphenate(head)
+ -- lang.hyphenate(head)
     head = nodes.handlers.characters(head)
     nodes.injections.handler(head)
+    if not basepass then
+        head = ligaturing(head)
+        head = kerning(head)
+    end
     nodes.handlers.protectglyphs(head)
- -- head = node.ligaturing(head)
- -- head = node.kerning(head)
     return head
 end

@@ -219,10 +219,12 @@ local striplinepatterns = {
     ["collapse"]            = patterns.collapser, -- how about: stripper fullstripper
 }
 
+setmetatable(striplinepatterns,{ __index = function(t,k) return p_prune_collapse end })
+
 strings.striplinepatterns = striplinepatterns
 
 function strings.striplines(str,how)
-    return str and lpegmatch(how and striplinepatterns[how] or p_prune_collapse,str) or str
+    return str and lpegmatch(striplinepatterns[how],str) or str
 end
 
 -- also see: string.collapsespaces

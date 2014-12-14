@@ -94,7 +94,7 @@ end
 --     return not find(str,"%S")
 -- end
 
-local pattern = P(" ")^0 * P(-1)
+local pattern = P(" ")^0 * P(-1) -- maybe also newlines
 
 -- patterns.onlyspaces = pattern
 

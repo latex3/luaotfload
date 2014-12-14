@@ -989,8 +989,8 @@ actions["add duplicates"] = function(data,filename,raw)
                     local description = descriptions[unicode]
                     local n = 0
                     for _, description in next, descriptions do
+                        local kerns = description.kerns
                         if kerns then
-                            local kerns = description.kerns
                             for _, k in next, kerns do
                                 local ku = k[unicode]
                                 if ku then
@@ -1724,6 +1724,8 @@ actions["merge kern classes"] = function(data,filename,raw)
                     local lookup = subtable.lookup or subtable.name
                     if kernclass then -- the next one is quite slow
                         if #kernclass > 0 then
+                            -- it's a table with one entry .. a future luatex can just
+                            -- omit that level
                             kernclass = kernclass[1]
                             lookup    = type(kernclass.lookup) == "string" and kernclass.lookup or lookup
                             report_otf("fixing kernclass table of lookup %a",lookup)

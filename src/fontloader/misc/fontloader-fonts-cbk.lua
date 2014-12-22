@@ -29,11 +29,28 @@ local kerning       = node.kerning
 
 local basepass      = true
 
+local function l_warning() texio.write_nl("warning: node.ligaturing called directly") l_warning = nil end
+local function k_warning() texio.write_nl("warning: node.kerning called directly")    k_warning = nil end
+
+function node.ligaturing(...)
+    if basepass and l_warning then
+        l_warning()
+    end
+    return ligaturing(...)
+end
+
+function node.kerning(...)
+    if basepass and k_warning then
+        k_warning()
+    end
+    return kerning(...)
+end
+
 function nodes.handlers.setbasepass(v)
     basepass = v
 end
 
-function nodes.handlers.characters(head)
+function nodes.handlers.nodepass(head)
     local fontdata = fonts.hashes.identifiers
     if fontdata then
         local usedfonts = { }
@@ -115,14 +132,27 @@ function nodes.handlers.characters(head)
     end
 end
 
-function nodes.simple_font_handler(head)
- -- lang.hyphenate(head)
-    head = nodes.handlers.characters(head)
-    nodes.injections.handler(head)
+function nodes.handlers.basepass(head)
     if not basepass then
         head = ligaturing(head)
         head = kerning(head)
     end
-    nodes.handlers.protectglyphs(head)
-    return head
+    return head, true
+end
+
+local nodepass    = nodes.handlers.nodepass
+local basepass    = nodes.handlers.basepass
+local injectpass  = nodes.injections.handler
+local protectpass = nodes.handlers.protectglyphs
+
+function nodes.simple_font_handler(head)
+    if head then
+        head = nodepass(head)
+        head = injectpass(head)
+        head = basepass(head)
+        protectpass(head)
+        return head, true
+    else
+        return head, false
+    end
 end

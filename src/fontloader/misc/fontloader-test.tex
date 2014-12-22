@@ -35,14 +35,16 @@
 
 \font\gothic=msgothic(ms-gothic) {\gothic whatever}
 
-\font\testy=file:IranNastaliq.ttf:mode=node;script=arab;language=dflt;+calt;+ccmp;+init;+isol;+medi;+fina;+liga;+rlig;+kern;+mark;+mkmk at 14pt
-\testy این یک متن نمونه است با قلم ذر که درست آمده است.
+\bgroup
 
-\pdfprotrudechars2 \pdfadjustspacing2
+    \pdfprotrudechars2
+    \pdfadjustspacing2
 
-\font\testb=file:lmroman12-regular:+liga;extend=1.5         at 12pt \testb \input tufte \par
-\font\testb=file:lmroman12-regular:+liga;slant=0.8          at 12pt \testb \input tufte \par
-\font\testb=file:lmroman12-regular:+liga;protrusion=default at 12pt \testb \input tufte \par
+    \font\testb=file:lmroman12-regular:+liga;extend=1.5         at 12pt \testb \input tufte \par
+    \font\testb=file:lmroman12-regular:+liga;slant=0.8          at 12pt \testb \input tufte \par
+    \font\testb=file:lmroman12-regular:+liga;protrusion=default at 12pt \testb \input tufte \par
+
+\egroup
 
 \setmplibformat{plain}
 

@@ -154,8 +154,8 @@ nodes.unset_attribute      = node.unset_attribute
 
 nodes.protect_glyphs       = node.protect_glyphs
 nodes.unprotect_glyphs     = node.unprotect_glyphs
-nodes.kerning              = node.kerning
-nodes.ligaturing           = node.ligaturing
+-----.kerning              = node.kerning
+-----.ligaturing           = node.ligaturing
 nodes.mlist_to_hlist       = node.mlist_to_hlist
 
 -- in generic code, at least for some time, we stay nodes, while in context
@@ -194,8 +194,12 @@ nuts.insert_before       = direct.insert_before
 nuts.insert_after        = direct.insert_after
 nuts.delete              = direct.delete
 nuts.copy                = direct.copy
+nuts.copy_list           = direct.copy_list
 nuts.tail                = direct.tail
 nuts.flush_list          = direct.flush_list
+nuts.free                = direct.free
+nuts.remove              = direct.remove
+nuts.is_node             = direct.is_node
 nuts.end_of_math         = direct.end_of_math
 nuts.traverse            = direct.traverse
 nuts.traverse_id         = direct.traverse_id

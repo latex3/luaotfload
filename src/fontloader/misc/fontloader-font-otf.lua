@@ -2000,6 +2000,8 @@ actions["reorganize glyph lookups"] = function(data,filename,raw)
 
 end
 
+local zero = { 0, 0 }
+
 actions["reorganize glyph anchors"] = function(data,filename,raw) -- when we replace inplace we safe entries
     local descriptions = data.descriptions
     for unicode, description in next, descriptions do
@@ -2008,14 +2010,37 @@ actions["reorganize glyph anchors"] = function(data,filename,raw) -- when we rep
             for class, data in next, anchors do
                 if class == "baselig" then
                     for tag, specification in next, data do
-                        for i=1,#specification do
-                            local si = specification[i]
-                            specification[i] = { si.x or 0, si.y or 0 }
+                     -- for i=1,#specification do
+                     --     local si = specification[i]
+                     --     specification[i] = { si.x or 0, si.y or 0 }
+                     -- end
+                        -- can be sparse so we need to fill the holes
+                        local n = 0
+                        for k, v in next, specification do
+                            if k > n then
+                                n = k
+                            end
+                            local x, y = v.x, v.y
+                            if x or y then
+                                specification[k] = { x or 0, y or 0 }
+                            else
+                                specification[k] = zero
+                            end
                         end
+                        local t = { }
+                        for i=1,n do
+                            t[i] = specification[i] or zero
+                        end
+                        data[tag] = t -- so # is okay (nicer for packer)
                     end
                 else
                     for tag, specification in next, data do
-                        data[tag] = { specification.x or 0, specification.y or 0 }
+                        local x, y = specification.x, specification.y
+                        if x or y then
+                            data[tag] = { x or 0, y or 0 }
+                        else
+                            data[tag] = zero
+                        end
                     end
                 end
             end

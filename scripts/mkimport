@@ -610,11 +610,11 @@ local describe = function (target, location)
 
   local dname           = def.name
   local dkind           = def.kind
-  local subdir, ourname = derive_ourname (dname, dkind)
+  local subdir, ourname = derive_ourname (def.ours or dname, dkind)
   separator ()
   status ("category       %s", cat)
   status ("kind           %s", kind_name[dkind])
-  status ("in Context     %s", derive_fullname (cat, def.name, def.kind))
+  status ("in Context     %s", derive_fullname (cat, dname, dkind))
   status ("in Luaotfload  %s", ourname)
   separator ()
   return 0

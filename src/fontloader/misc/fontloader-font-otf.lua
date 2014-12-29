@@ -56,12 +56,13 @@ otf.glists               = { "gsub", "gpos" }
 otf.version              = 2.802 -- beware: also sync font-mis.lua
 otf.cache                = containers.define("fonts", "otf", otf.version, true)
 
-local fontdata           = fonts.hashes.identifiers
-local chardata           = characters and characters.data -- not used
-
+local hashes             = fonts.hashes
 local definers           = fonts.definers
 local readers            = fonts.readers
 local constructors       = fonts.constructors
+
+local fontdata           = hashes     and hashes.identifiers
+local chardata           = characters and characters.data -- not used
 
 local otffeatures        = constructors.newfeatures("otf")
 local registerotffeature = otffeatures.register
@@ -84,7 +85,12 @@ local applyruntimefixes  = fonts.treatments and fonts.treatments.applyfixes
 local wildcard           = "*"
 local default            = "dflt"
 
-local fontloaderfields   = fontloader.fields
+local fontloader         = fontloader
+local open_font          = fontloader.open
+local close_font         = fontloader.close
+local font_fields        = fontloader.fields
+local apply_featurefile  = fontloader.apply_featurefile
+
 local mainfields         = nil
 local glyphfields        = nil -- not used yet
 
@@ -137,7 +143,7 @@ local function load_featurefile(raw,featurefile)
         if trace_loading then
             report_otf("using featurefile %a", featurefile)
         end
-        fontloader.apply_featurefile(raw, featurefile)
+        apply_featurefile(raw, featurefile)
     end
 end
 
@@ -437,12 +443,12 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
         report_otf("loading %a, hash %a",filename,hash)
         local fontdata, messages
         if sub then
-            fontdata, messages = fontloader.open(filename,sub)
+            fontdata, messages = open_font(filename,sub)
         else
-            fontdata, messages = fontloader.open(filename)
+            fontdata, messages = open_font(filename)
         end
         if fontdata then
-            mainfields = mainfields or (fontloaderfields and fontloaderfields(fontdata))
+            mainfields = mainfields or (font_fields and font_fields(fontdata))
         end
         if trace_loading and messages and #messages > 0 then
             if type(messages) == "string" then
@@ -526,7 +532,7 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
                 report_otf("preprocessing and caching time %s, packtime %s",
                     elapsedtime(data),packdata and elapsedtime(packtime) or 0)
             end
-            fontloader.close(fontdata) -- free memory
+            close_font(fontdata) -- free memory
             if cleanup > 3 then
                 collectgarbage("collect")
             end

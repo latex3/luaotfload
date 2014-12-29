@@ -15,51 +15,53 @@ if not lfs then
     lfs = optionalrequire("lfs")
 end
 
-if not lfs then
-
-    lfs = {
-        getcurrentdir = function()
-            return "."
-        end,
-        attributes = function()
-            return nil
-        end,
-        isfile = function(name)
-            local f = io.open(name,'rb')
-            if f then
-                f:close()
-                return true
-            end
-        end,
-        isdir = function(name)
-            print("you need to load lfs")
-            return false
-        end
-    }
-
-elseif not lfs.isfile then
-
-    local attributes = lfs.attributes
-
-    function lfs.isdir(name)
-        return attributes(name,"mode") == "directory"
-    end
-
-    function lfs.isfile(name)
-        return attributes(name,"mode") == "file"
-    end
-
- -- function lfs.isdir(name)
- --     local a = attributes(name)
- --     return a and a.mode == "directory"
- -- end
-
- -- function lfs.isfile(name)
- --     local a = attributes(name)
- --     return a and a.mode == "file"
- -- end
-
-end
+-- -- see later
+--
+-- if not lfs then
+--
+--     lfs = {
+--         getcurrentdir = function()
+--             return "."
+--         end,
+--         attributes = function()
+--             return nil
+--         end,
+--         isfile = function(name)
+--             local f = io.open(name,'rb')
+--             if f then
+--                 f:close()
+--                 return true
+--             end
+--         end,
+--         isdir = function(name)
+--             print("you need to load lfs")
+--             return false
+--         end
+--     }
+--
+-- elseif not lfs.isfile then
+--
+--     local attributes = lfs.attributes
+--
+--     function lfs.isdir(name)
+--         return attributes(name,"mode") == "directory"
+--     end
+--
+--     function lfs.isfile(name)
+--         return attributes(name,"mode") == "file"
+--     end
+--
+--  -- function lfs.isdir(name)
+--  --     local a = attributes(name)
+--  --     return a and a.mode == "directory"
+--  -- end
+--
+--  -- function lfs.isfile(name)
+--  --     local a = attributes(name)
+--  --     return a and a.mode == "file"
+--  -- end
+--
+-- end
 
 local insert, concat = table.insert, table.concat
 local match, find, gmatch = string.match, string.find, string.gmatch
@@ -71,6 +73,28 @@ local checkedsplit = string.checkedsplit
 -- file.patterns  = patterns
 
 local P, R, S, C, Cs, Cp, Cc, Ct = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.Cs, lpeg.Cp, lpeg.Cc, lpeg.Ct
+
+-- better this way:
+
+local tricky     = S("/\\") * P(-1)
+local attributes = lfs.attributes
+
+if sandbox then
+    sandbox.redefine(lfs.isfile,"lfs.isfile")
+    sandbox.redefine(lfs.isdir, "lfs.isdir")
+end
+
+function lfs.isdir(name)
+    if lpegmatch(tricky,name) then
+        return attributes(name,"mode") == "directory"
+    else
+        return attributes(name.."/.","mode") == "directory"
+    end
+end
+
+function lfs.isfile(name)
+    return attributes(name,"mode") == "file"
+end
 
 local colon     = P(":")
 local period    = P(".")
@@ -552,23 +576,6 @@ function file.collapsepath(str,anchor) -- anchor: false|nil, true, "."
             return newelements
         end
     end
-end
-
--- better this way:
-
-local tricky     = S("/\\") * P(-1)
-local attributes = lfs.attributes
-
-function lfs.isdir(name)
-    if lpegmatch(tricky,name) then
-        return attributes(name,"mode") == "directory"
-    else
-        return attributes(name.."/.","mode") == "directory"
-    end
-end
-
-function lfs.isfile(name)
-    return attributes(name,"mode") == "file"
 end
 
 -- local function test(str,...)

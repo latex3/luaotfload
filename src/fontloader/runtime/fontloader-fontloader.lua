@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 12/21/14 22:25:48
+-- merge date  : 12/29/14 10:01:59
 
 do -- begin closure to overcome local limits and interference
 
@@ -84,6 +84,13 @@ function optionalrequire(...)
 end
 if lua then
   lua.mask=load([[τεχ = 1]]) and "utf" or "ascii"
+end
+local flush=io.flush
+if flush then
+  local execute=os.execute if execute then function os.execute(...) flush() return execute(...) end end
+  local exec=os.exec  if exec  then function os.exec  (...) flush() return exec  (...) end end
+  local spawn=os.spawn  if spawn  then function os.spawn (...) flush() return spawn (...) end end
+  local popen=io.popen  if popen  then function io.popen (...) flush() return popen (...) end end
 end
 
 end -- closure
@@ -964,8 +971,9 @@ function table.keys(t)
   end
 end
 local function compare(a,b)
-  local ta,tb=type(a),type(b) 
-  if ta==tb then
+  local ta=type(a) 
+  local tb=type(b) 
+  if ta==tb and ta=="number" then
     return a<b
   else
     return tostring(a)<tostring(b) 
@@ -1288,7 +1296,7 @@ local function do_serialize(root,name,depth,level,indexed)
       end
     end
   end
-  if root and next(root) then
+  if root and next(root)~=nil then
     local first,last=nil,0
     if compact then
       last=#root
@@ -1321,7 +1329,7 @@ local function do_serialize(root,name,depth,level,indexed)
             handle(format("%s %q,",depth,v))
           end
         elseif tv=="table" then
-          if not next(v) then
+          if next(v)==nil then
             handle(format("%s {},",depth))
           elseif inline then 
             local st=simple_table(v)
@@ -1405,7 +1413,7 @@ local function do_serialize(root,name,depth,level,indexed)
           end
         end
       elseif tv=="table" then
-        if not next(v) then
+        if next(v)==nil then
           if tk=="number" then
             if hexify then
               handle(format("%s [0x%X]={},",depth,k))
@@ -1547,7 +1555,7 @@ local function serialize(_handle,root,name,specification)
       local dummy=root._w_h_a_t_e_v_e_r_
       root._w_h_a_t_e_v_e_r_=nil
     end
-    if next(root) then
+    if next(root)~=nil then
       do_serialize(root,name,"",0)
     end
   end
@@ -1682,7 +1690,7 @@ local function sparse(old,nest,keeptables)
     if not (v=="" or v==false) then
       if nest and type(v)=="table" then
         v=sparse(v,nest)
-        if keeptables or next(v) then
+        if keeptables or next(v)~=nil then
           new[k]=v
         end
       else
@@ -1799,10 +1807,10 @@ function table.sub(t,i,j)
   return { unpack(t,i,j) }
 end
 function table.is_empty(t)
-  return not t or not next(t)
+  return not t or next(t)==nil
 end
 function table.has_one_entry(t)
-  return t and not next(t,next(t))
+  return t and next(t,next(t))==nil
 end
 function table.loweredkeys(t) 
   local l={}
@@ -1871,7 +1879,7 @@ function table.filtered(t,pattern,sort,cmp)
     else
       local n=next(t)
       local function iterator()
-        while n do
+        while n~=nil do
           local k=n
           n=next(t,k)
           if find(k,pattern) then
@@ -2195,8 +2203,6 @@ function io.readstring(f,n,m)
   local str=gsub(f:read(n),"\000","")
   return str
 end
-if not io.i_limiter then function io.i_limiter() end end 
-if not io.o_limiter then function io.o_limiter() end end
 
 end -- closure
 
@@ -2214,41 +2220,28 @@ local file=file
 if not lfs then
   lfs=optionalrequire("lfs")
 end
-if not lfs then
-  lfs={
-    getcurrentdir=function()
-      return "."
-    end,
-    attributes=function()
-      return nil
-    end,
-    isfile=function(name)
-      local f=io.open(name,'rb')
-      if f then
-        f:close()
-        return true
-      end
-    end,
-    isdir=function(name)
-      print("you need to load lfs")
-      return false
-    end
-  }
-elseif not lfs.isfile then
-  local attributes=lfs.attributes
-  function lfs.isdir(name)
-    return attributes(name,"mode")=="directory"
-  end
-  function lfs.isfile(name)
-    return attributes(name,"mode")=="file"
-  end
-end
 local insert,concat=table.insert,table.concat
 local match,find,gmatch=string.match,string.find,string.gmatch
 local lpegmatch=lpeg.match
 local getcurrentdir,attributes=lfs.currentdir,lfs.attributes
 local checkedsplit=string.checkedsplit
 local P,R,S,C,Cs,Cp,Cc,Ct=lpeg.P,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Cp,lpeg.Cc,lpeg.Ct
+local tricky=S("/\\")*P(-1)
+local attributes=lfs.attributes
+if sandbox then
+  sandbox.redefine(lfs.isfile,"lfs.isfile")
+  sandbox.redefine(lfs.isdir,"lfs.isdir")
+end
+function lfs.isdir(name)
+  if lpegmatch(tricky,name) then
+    return attributes(name,"mode")=="directory"
+  else
+    return attributes(name.."/.","mode")=="directory"
+  end
+end
+function lfs.isfile(name)
+  return attributes(name,"mode")=="file"
+end
 local colon=P(":")
 local period=P(".")
 local periods=P("..")
@@ -2534,18 +2527,6 @@ function file.collapsepath(str,anchor)
       return newelements
     end
   end
-end
-local tricky=S("/\\")*P(-1)
-local attributes=lfs.attributes
-function lfs.isdir(name)
-  if lpegmatch(tricky,name) then
-    return attributes(name,"mode")=="directory"
-  else
-    return attributes(name.."/.","mode")=="directory"
-  end
-end
-function lfs.isfile(name)
-  return attributes(name,"mode")=="file"
 end
 local validchars=R("az","09","AZ","--","..")
 local pattern_a=lpeg.replacer(1-validchars)
@@ -2874,10 +2855,10 @@ string.tracedchars=tracedchars
 strings.tracers=tracedchars
 function string.tracedchar(b)
   if type(b)=="number" then
-    return tracedchars[b] or (utfchar(b).." (U+"..format('%05X',b)..")")
+    return tracedchars[b] or (utfchar(b).." (U+"..format("%05X",b)..")")
   else
     local c=utfbyte(b)
-    return tracedchars[c] or (b.." (U+"..format('%05X',c)..")")
+    return tracedchars[c] or (b.." (U+"..(c and format("%05X",c) or "?????")..")")
   end
 end
 function number.signed(i)
@@ -3981,7 +3962,7 @@ fonts.analyzers={}
 fonts.readers={}
 fonts.definers={ methods={} }
 fonts.loggers={ register=function() end }
-fontloader.totable=fontloader.to_table
+fontloader.totable=fontloader.to_table 
 
 end -- closure
 
@@ -5915,6 +5896,10 @@ local findbinfile=resolvers.findbinfile
 local definers=fonts.definers
 local readers=fonts.readers
 local constructors=fonts.constructors
+local fontloader=fontloader
+local font_to_table=fontloader.to_table
+local open_font=fontloader.open
+local close_font=fontloader.close
 local afm=constructors.newhandler("afm")
 local pfb=constructors.newhandler("pfb")
 local afmfeatures=constructors.newfeatures("afm")
@@ -6030,10 +6015,10 @@ local function get_variables(data,fontmetrics)
 end
 local function get_indexes(data,pfbname)
   data.resources.filename=resolvers.unresolve(pfbname) 
-  local pfbblob=fontloader.open(pfbname)
+  local pfbblob=open_font(pfbname)
   if pfbblob then
     local characters=data.characters
-    local pfbdata=fontloader.to_table(pfbblob)
+    local pfbdata=font_to_table(pfbblob)
     if pfbdata then
       local glyphs=pfbdata.glyphs
       if glyphs then
@@ -6058,7 +6043,7 @@ local function get_indexes(data,pfbname)
     elseif trace_loading then
       report_afm("no data in pfb file %a",pfbname)
     end
-    fontloader.close(pfbblob)
+    close_font(pfbblob)
   elseif trace_loading then
     report_afm("invalid pfb file %a",pfbname)
   end
@@ -7074,11 +7059,12 @@ local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
 otf.version=2.802 
 otf.cache=containers.define("fonts","otf",otf.version,true)
-local fontdata=fonts.hashes.identifiers
-local chardata=characters and characters.data 
+local hashes=fonts.hashes
 local definers=fonts.definers
 local readers=fonts.readers
 local constructors=fonts.constructors
+local fontdata=hashes   and hashes.identifiers
+local chardata=characters and characters.data 
 local otffeatures=constructors.newfeatures("otf")
 local registerotffeature=otffeatures.register
 local enhancers=allocate()
@@ -7095,7 +7081,11 @@ local overloadkerns=false
 local applyruntimefixes=fonts.treatments and fonts.treatments.applyfixes
 local wildcard="*"
 local default="dflt"
-local fontloaderfields=fontloader.fields
+local fontloader=fontloader
+local open_font=fontloader.open
+local close_font=fontloader.close
+local font_fields=fontloader.fields
+local apply_featurefile=fontloader.apply_featurefile
 local mainfields=nil
 local glyphfields=nil 
 local formats=fonts.formats
@@ -7136,7 +7126,7 @@ local function load_featurefile(raw,featurefile)
     if trace_loading then
       report_otf("using featurefile %a",featurefile)
     end
-    fontloader.apply_featurefile(raw,featurefile)
+    apply_featurefile(raw,featurefile)
   end
 end
 local function showfeatureorder(rawdata,filename)
@@ -7387,12 +7377,12 @@ function otf.load(filename,sub,featurefile)
     report_otf("loading %a, hash %a",filename,hash)
     local fontdata,messages
     if sub then
-      fontdata,messages=fontloader.open(filename,sub)
+      fontdata,messages=open_font(filename,sub)
     else
-      fontdata,messages=fontloader.open(filename)
+      fontdata,messages=open_font(filename)
     end
     if fontdata then
-      mainfields=mainfields or (fontloaderfields and fontloaderfields(fontdata))
+      mainfields=mainfields or (font_fields and font_fields(fontdata))
     end
     if trace_loading and messages and #messages>0 then
       if type(messages)=="string" then
@@ -7466,7 +7456,7 @@ function otf.load(filename,sub,featurefile)
         report_otf("preprocessing and caching time %s, packtime %s",
           elapsedtime(data),packdata and elapsedtime(packtime) or 0)
       end
-      fontloader.close(fontdata) 
+      close_font(fontdata) 
       if cleanup>3 then
         collectgarbage("collect")
       end

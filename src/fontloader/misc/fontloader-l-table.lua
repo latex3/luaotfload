@@ -49,9 +49,19 @@ function table.keys(t)
     end
 end
 
+-- local function compare(a,b)
+--     local ta, tb = type(a), type(b) -- needed, else 11 < 2
+--     if ta == tb then
+--         return a < b
+--     else
+--         return tostring(a) < tostring(b) -- not that efficient
+--     end
+-- end
+
 local function compare(a,b)
-    local ta, tb = type(a), type(b) -- needed, else 11 < 2
-    if ta == tb then
+    local ta = type(a) -- needed, else 11 < 2
+    local tb = type(b) -- needed, else 11 < 2
+    if ta == tb and ta == "number" then
         return a < b
     else
         return tostring(a) < tostring(b) -- not that efficient
@@ -469,7 +479,7 @@ local function do_serialize(root,name,depth,level,indexed)
         end
     end
     -- we could check for k (index) being number (cardinal)
-    if root and next(root) then
+    if root and next(root) ~= nil then
      -- local first, last = nil, 0 -- #root cannot be trusted here (will be ok in 5.2 when ipairs is gone)
      -- if compact then
      --     -- NOT: for k=1,#root do (we need to quit at nil)
@@ -513,7 +523,7 @@ local function do_serialize(root,name,depth,level,indexed)
                         handle(format("%s %q,",depth,v))
                     end
                 elseif tv == "table" then
-                    if not next(v) then
+                    if next(v) == nil then
                         handle(format("%s {},",depth))
                     elseif inline then -- and #t > 0
                         local st = simple_table(v)
@@ -597,7 +607,7 @@ local function do_serialize(root,name,depth,level,indexed)
                     end
                 end
             elseif tv == "table" then
-                if not next(v) then
+                if next(v) == nil then
                     if tk == "number" then
                         if hexify then
                             handle(format("%s [0x%X]={},",depth,k))
@@ -683,7 +693,7 @@ local function do_serialize(root,name,depth,level,indexed)
             --~ end
         end
     end
-   if level > 0 then
+    if level > 0 then
         handle(format("%s},",depth))
     end
 end
@@ -748,7 +758,7 @@ local function serialize(_handle,root,name,specification) -- handle wins
             root._w_h_a_t_e_v_e_r_ = nil
         end
         -- Let's forget about empty tables.
-        if next(root) then
+        if next(root) ~= nil then
             do_serialize(root,name,"",0)
         end
     end
@@ -928,7 +938,7 @@ local function sparse(old,nest,keeptables)
         if not (v == "" or v == false) then
             if nest and type(v) == "table" then
                 v = sparse(v,nest)
-                if keeptables or next(v) then
+                if keeptables or next(v) ~= nil then
                     new[k] = v
                 end
             else
@@ -1066,11 +1076,11 @@ end
 -- slower than #t on indexed tables (#t only returns the size of the numerically indexed slice)
 
 function table.is_empty(t)
-    return not t or not next(t)
+    return not t or next(t) == nil
 end
 
 function table.has_one_entry(t)
-    return t and not next(t,next(t))
+    return t and next(t,next(t)) == nil
 end
 
 -- new
@@ -1157,7 +1167,7 @@ function table.filtered(t,pattern,sort,cmp)
         else
             local n = next(t)
             local function iterator()
-                while n do
+                while n ~= nil do
                     local k = n
                     n = next(t,k)
                     if find(k,pattern) then

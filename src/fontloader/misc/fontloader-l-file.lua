@@ -157,8 +157,8 @@ file.suffix       = suffixonly
 file.suffixesonly = suffixesonly
 file.suffixes     = suffixesonly
 
-file.dirname    = pathpart   -- obsolete
-file.extname    = suffixonly -- obsolete
+file.dirname      = pathpart   -- obsolete
+file.extname      = suffixonly -- obsolete
 
 -- actually these are schemes
 

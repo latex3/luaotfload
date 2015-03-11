@@ -633,7 +633,7 @@ local tell = function (arg)
 end
 
 local help = function ()
-  iowrite "usage: mkinfo  <command> [<args>]\n"
+  iowrite "usage: mkimport  <command> [<args>]\n"
   iowrite "\n"
   iowrite "Where <command> is one of\n"
   iowrite "   help      Print this help message\n"

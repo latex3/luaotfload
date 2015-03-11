@@ -4,7 +4,7 @@
 -- REQUIREMENTS:  luatex v.0.79 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2014-08-08 23:14:37+0200
+--     MODIFIED:  2015-03-11 07:49:20+0100
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -101,12 +101,15 @@ luaotfload.log.tex        = {
 
 --doc]]--
 
-local min_luatex_version = 79
+local min_luatex_version  = 79      --- i. e. 0.79
+local use_fallback_loader = false   --- for older engines
 
 if tex.luatexversion < min_luatex_version then
     warning ("LuaTeX v%.2f is old, v%.2f or later is recommended.",
              tex.luatexversion  / 100,
              min_luatex_version / 100)
+    warning ("using fallback fontloader -- newer functionality not available")
+    use_fallback_loader = true
     --- we install a fallback for older versions as a safety
     if not node.end_of_math then
         local math_t          = node.id "math"
@@ -306,9 +309,17 @@ tex.attribute[0] = 0
 
     Now that things are sorted out we can finally load the fontloader.
 
+    For less current distibutions we ship the code from TL 2013 that should be
+    compatible with Luatex 0.76.
+
 --doc]]--
 
-load_fontloader_module "fontloader"
+if use_fallback_loader == true then
+    load_fontloader_module "tl2013"
+else
+    load_fontloader_module "fontloader"
+end
+
 ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 
 if fonts then

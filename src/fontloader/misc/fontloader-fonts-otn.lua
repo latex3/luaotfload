@@ -6,6 +6,9 @@ if not modules then modules = { } end modules ['font-otn'] = {
     license   = "see context related readme files",
 }
 
+-- todo: looks like we have a leak somewhere (probably in ligatures)
+-- todo: copy attributes to disc
+
 -- this is a context version which can contain experimental code, but when we
 -- have serious patches we also need to change the other two font-otn files
 
@@ -243,6 +246,7 @@ local setcursive         = injections.setcursive
 local setkern            = injections.setkern
 local setpair            = injections.setpair
 local resetinjection     = injections.reset
+local copyinjection      = injections.copy
 local setligaindex       = injections.setligaindex
 local getligaindex       = injections.getligaindex
 
@@ -354,12 +358,18 @@ local function copy_glyph(g) -- next and prev are untouched !
     if components then
         setfield(g,"components",nil)
         local n = copy_node(g)
+        copyinjection(n,g) -- we need to preserve the lig indices
         setfield(g,"components",components)
         return n
     else
-        return copy_node(g)
+        local n = copy_node(g)
+        copyinjection(n,g) -- we need to preserve the lig indices
+        return n
     end
 end
+
+-- 
+
 
 -- start is a mark and we need to keep that one
 

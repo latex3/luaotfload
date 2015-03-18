@@ -29,4 +29,4 @@ fonts.readers       = { }
 fonts.definers      = { methods = { } }
 fonts.loggers       = { register = function() end }
 
-fontloader.totable  = fontloader.to_table
+fontloader.totable  = fontloader.to_table -- not used

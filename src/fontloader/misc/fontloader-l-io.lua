@@ -339,11 +339,6 @@ function io.readstring(f,n,m)
     return str
 end
 
---
-
-if not io.i_limiter then function io.i_limiter() end end -- dummy so we can test safely
-if not io.o_limiter then function io.o_limiter() end end -- dummy so we can test safely
-
 -- This works quite ok:
 --
 -- function io.piped(command,writer)

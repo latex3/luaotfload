@@ -48,6 +48,11 @@ local definers           = fonts.definers
 local readers            = fonts.readers
 local constructors       = fonts.constructors
 
+local fontloader         = fontloader
+local font_to_table      = fontloader.to_table
+local open_font          = fontloader.open
+local close_font         = fontloader.close
+
 local afm                = constructors.newhandler("afm")
 local pfb                = constructors.newhandler("pfb")
 
@@ -222,10 +227,10 @@ end
 
 local function get_indexes(data,pfbname)
     data.resources.filename = resolvers.unresolve(pfbname) -- no shortcut
-    local pfbblob = fontloader.open(pfbname)
+    local pfbblob = open_font(pfbname)
     if pfbblob then
         local characters = data.characters
-        local pfbdata = fontloader.to_table(pfbblob)
+        local pfbdata = font_to_table(pfbblob)
         if pfbdata then
             local glyphs = pfbdata.glyphs
             if glyphs then
@@ -251,7 +256,7 @@ local function get_indexes(data,pfbname)
         elseif trace_loading then
             report_afm("no data in pfb file %a",pfbname)
         end
-        fontloader.close(pfbblob)
+        close_font(pfbblob)
     elseif trace_loading then
         report_afm("invalid pfb file %a",pfbname)
     end

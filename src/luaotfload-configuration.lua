@@ -5,7 +5,7 @@
 -- REQUIREMENTS:  Luaotfload 2.5 or above
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2014-07-24 21:49:31+0200
+--     MODIFIED:  2015-03-16 07:48:58+0100
 -------------------------------------------------------------------------------
 --
 
@@ -130,6 +130,19 @@ local feature_presets = {
   },
 }
 
+--[[doc--
+
+  We allow loading of arbitrary fontloaders. Nevertheless we maintain a
+  list of the “official” ones shipped with Luaotfload so we can emit a
+  different log message.
+
+--doc]]--
+
+local registered_loaders = {
+  default    = "fontloader",
+  fontloader = "fontloader",
+  tl2013     = "tl2013",
+}
 
 
 -------------------------------------------------------------------------------
@@ -441,6 +454,23 @@ local option_spec = {
         return "patch"
       end,
     },
+    fontloader = {
+      in_t      = string_t,
+      out_t     = string_t,
+      transform = function (id)
+        local ldr = registered_loaders[id]
+        if ldr ~= nil then
+          logreport ("log", 2, "conf",
+                     "Using predefined fontloader \"%s\".", ldr)
+          return ldr
+        end
+        logreport ("log", 0, "conf",
+                    "Requested fontloader \"%s\" not defined, "
+                    .. "use at your own risk.",
+                    id)
+        return id
+      end,
+    },
     log_level = {
       in_t      = number_t,
       out_t     = number_t, --- TODO int_t from 5.3.x on
@@ -589,6 +619,7 @@ local formatters = {
   run = {
     color_callback  = { false, format_string  },
     definer         = { false, format_string  },
+    fontloader      = { false, format_string  },
     log_level       = { false, format_integer },
     resolver        = { false, format_string  },
   },

@@ -72,15 +72,15 @@ local function read_from_tfm(specification)
         properties.filename = specification.filename
         properties.format   = fonts.formats.tfm -- better than nothing
         parameters.size     = size
-        shared.rawdata      = { }
-        shared.features     = features
-        shared.processes    = next(features) and tfm.setfeatures(tfmdata,features) or nil
         --
         tfmdata.properties  = properties
         tfmdata.resources   = resources
         tfmdata.parameters  = parameters
         tfmdata.shared      = shared
         --
+        shared.rawdata      = { }
+        shared.features     = features
+        shared.processes    = next(features) and tfm.setfeatures(tfmdata,features) or nil
         parameters.slant         = parameters.slant          or parameters[1] or 0
         parameters.space         = parameters.space          or parameters[2] or 0
         parameters.space_stretch = parameters.space_stretch  or parameters[3] or 0

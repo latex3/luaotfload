@@ -165,3 +165,14 @@ end
 if lua then
     lua.mask = load([[τεχ = 1]]) and "utf" or "ascii"
 end
+
+local flush   = io.flush
+
+if flush then
+
+    local execute = os.execute if execute then function os.execute(...) flush() return execute(...) end end
+    local exec    = os.exec    if exec    then function os.exec   (...) flush() return exec   (...) end end
+    local spawn   = os.spawn   if spawn   then function os.spawn  (...) flush() return spawn  (...) end end
+    local popen   = io.popen   if popen   then function io.popen  (...) flush() return popen  (...) end end
+
+end

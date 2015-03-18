@@ -15,8 +15,13 @@ local dummyfunction = function()
 end
 
 local dummyreporter = function(c)
-    return function(...)
-        (texio.reporter or texio.write_nl)(c .. " : " .. string.formatters(...))
+    return function(f,...)
+        local r = texio.reporter or texio.write_nl
+        if f then
+            r(c .. " : " .. string.formatters(f,...))
+        else
+            r("")
+        end
     end
 end
 

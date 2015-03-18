@@ -116,13 +116,14 @@ function nodes.handlers.nodepass(head)
         if basepass and #basefonts > 0 then
             for i=1,#basefonts do
                 local range = basefonts[i]
-                local start, stop = range[1], range[2]
+                local start = range[1]
+                local stop  = range[2]
                 if stop then
-                    ligaturing(start,stop)
-                    kerning(start,stop)
-                else
-                    ligaturing(start)
-                    kerning(start)
+                    start, stop = ligaturing(start,stop)
+                    start, stop = kerning(start,stop)
+                elseif start then
+                    start = ligaturing(start)
+                    start = kerning(start)
                 end
             end
         end

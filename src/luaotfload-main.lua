@@ -101,15 +101,15 @@ luaotfload.log.tex        = {
 
 --doc]]--
 
-local min_luatex_version  = 79      --- i. e. 0.79
-local use_fallback_loader = false   --- for older engines
+local min_luatex_version  = 79             --- i. e. 0.79
+local fontloader_package  = "fontloader"   --- default: from current Context
 
 if tex.luatexversion < min_luatex_version then
     warning ("LuaTeX v%.2f is old, v%.2f or later is recommended.",
              tex.luatexversion  / 100,
              min_luatex_version / 100)
     warning ("using fallback fontloader -- newer functionality not available")
-    use_fallback_loader = true
+    fontloader_package = "tl2014" --- TODO fallback should be configurable too
     --- we install a fallback for older versions as a safety
     if not node.end_of_math then
         local math_t          = node.id "math"
@@ -309,16 +309,12 @@ tex.attribute[0] = 0
 
     Now that things are sorted out we can finally load the fontloader.
 
-    For less current distibutions we ship the code from TL 2013 that should be
+    For less current distibutions we ship the code from TL 2014 that should be
     compatible with Luatex 0.76.
 
 --doc]]--
 
-if use_fallback_loader == true then
-    load_fontloader_module "tl2013"
-else
-    load_fontloader_module "fontloader"
-end
+load_fontloader_module (fontloader_package)
 
 ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 

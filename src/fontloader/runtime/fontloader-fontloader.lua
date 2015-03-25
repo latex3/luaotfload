@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 03/10/15 12:09:17
+-- merge date  : 03/25/15 22:13:54
 
 do -- begin closure to overcome local limits and interference
 
@@ -660,24 +660,48 @@ function lpeg.append(list,pp,delayed,checked)
   end
   return p
 end
+local p_false=P(false)
+local p_true=P(true)
 local function make(t,hash)
-  local p=P(false)
+  local p=p_false
   local keys=sortedkeys(t)
+  local function making(t,w)
+    local p=p_false
+    local keys=sortedkeys(t)
+    for i=1,#keys do
+      local k=keys[i]
+      local v=t[k]
+      if w then
+        if v==true then
+          p=p+P(k)*p_true
+        else
+          p=p+P(k)*(making(v,w)+p_true)
+        end
+      else
+        if v==true then
+          p=p+P(k)
+        else
+          p=p+P(k)*making(v,w)
+        end
+      end
+    end
+    return p
+  end
   for i=1,#keys do
     local k=keys[i]
     local v=t[k]
     local h=hash[v]
     if h then
-      if next(v) then
-        p=p+P(k)*(make(v,hash)+P(true))
+      if v==true then
+        p=p+P(k)*p_true
       else
-        p=p+P(k)*P(true)
+        p=p+P(k)*(making(v,true)+p_true)
       end
     else
-      if next(v) then
-        p=p+P(k)*make(v,hash)
-      else
+      if v==true then
         p=p+P(k)
+      else
+        p=p+P(k)*making(v,false)
       end
     end
   end
@@ -685,34 +709,55 @@ local function make(t,hash)
 end
 function lpeg.utfchartabletopattern(list) 
   local tree={}
-  local hash={}
+  local hash
   local n=#list
   if n==0 then
+    hash=list
     for s in next,list do
       local t=tree
+      local p,pk
       for c in gmatch(s,".") do
-        local tc=t[c]
-        if not tc then
-          tc={}
-          t[c]=tc
+        if t==true then
+          t={ [c]=true }
+          p[pk]=t
+          p=t
+          t=true
+        else
+          local tc=t[c]
+          if not tc then
+            tc=true
+            t[c]=tc
+          end
+          p=t
+          t=tc
         end
-        t=tc
+        pk=c
       end
-      hash[t]=s
     end
   else
+    hash={}
     for i=1,n do
       local t=tree
       local s=list[i]
+      local p,pk
       for c in gmatch(s,".") do
-        local tc=t[c]
-        if not tc then
-          tc={}
-          t[c]=tc
+        if t==true then
+          t={ [c]=true }
+          p[pk]=t
+          p=t
+          t=true
+        else
+          local tc=t[c]
+          if not tc then
+            tc=true
+            t[c]=true
+          end
+          p=t
+          t=tc
         end
-        t=tc
+        pk=c
       end
-      hash[t]=s
+      hash[s]=true
     end
   end
   return make(tree,hash)
@@ -5280,6 +5325,7 @@ local report_fonts=logs.reporter("fonts","loading")
 local fonts=fonts or {}
 local mappings=fonts.mappings or {}
 fonts.mappings=mappings
+local allocate=utilities.storage.allocate
 local function loadlumtable(filename) 
   local lumname=file.replacesuffix(file.basename(filename),"lum")
   local lumfile=resolvers.findfile(lumname,"map") or ""
@@ -5381,7 +5427,7 @@ mappings.fromunicode16=fromunicode16
 local ligseparator=P("_")
 local varseparator=P(".")
 local namesplitter=Ct(C((1-ligseparator-varseparator)^1)*(ligseparator*C((1-ligseparator-varseparator)^1))^0)
-local overloads={
+local overloads=allocate {
   IJ={ name="I_J",unicode={ 0x49,0x4A },mess=0x0132 },
   ij={ name="i_j",unicode={ 0x69,0x6A },mess=0x0133 },
   ff={ name="f_f",unicode={ 0x66,0x66 },mess=0xFB00 },

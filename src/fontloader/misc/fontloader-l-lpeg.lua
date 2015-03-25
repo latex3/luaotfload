@@ -888,24 +888,155 @@ end
 --     return make(tree)
 -- end
 
+local p_false = P(false)
+local p_true  = P(true)
+
+-- local function make(t,hash)
+--     local p    = p_false
+--     local keys = sortedkeys(t)
+--     for i=1,#keys do
+--         local k = keys[i]
+--         local v = t[k]
+--         local h = hash[v]
+--         if h then
+--             if next(v) then
+--                 p = p + P(k) * (make(v,hash) + p_true)
+--             else
+--                 p = p + P(k) * p_true
+--             end
+--         else
+--             if next(v) then
+--                 p = p + P(k) * make(v,hash)
+--             else
+--                 p = p + P(k)
+--             end
+--         end
+--     end
+--     return p
+-- end
+
+-- local function make(t,hash)
+--     local p    = p_false
+--     local keys = sortedkeys(t)
+--     local function making(t,w)
+--         local p    = p_false
+--         local keys = sortedkeys(t)
+--         for i=1,#keys do
+--             local k = keys[i]
+--             local v = t[k]
+--             if w then
+--                 if next(v) then
+--                     p = p + P(k) * (making(v,w) + p_true)
+--                 else
+--                     p = p + P(k) * p_true
+--                 end
+--             else
+--                 if next(v) then
+--                     p = p + P(k) * making(v,w)
+--                 else
+--                     p = p + P(k)
+--                 end
+--             end
+--         end
+--         return p
+--     end
+--     for i=1,#keys do
+--         local k = keys[i]
+--         local v = t[k]
+--         local h = hash[v]
+--         if h then
+--             if next(v) then
+--                 p = p + P(k) * (making(v,true) + p_true)
+--             else
+--                 p = p + P(k) * p_true
+--             end
+--         else
+--             if next(v) then
+--                 p = p + P(k) * making(v,false)
+--             else
+--                 p = p + P(k)
+--             end
+--         end
+--     end
+--     return p
+-- end
+--
+-- function lpeg.utfchartabletopattern(list) -- goes to util-lpg
+--     local tree = { }
+--     local hash = { }
+--     local n = #list
+--     if n == 0 then
+--         for s in next, list do
+--             local t = tree
+--             for c in gmatch(s,".") do
+--                 local tc = t[c]
+--                 if not tc then
+--                     tc = { }
+--                     t[c] = tc
+--                 end
+--                 t = tc
+--             end
+--             hash[t] = s
+--         end
+--     else
+--         for i=1,n do
+--             local t = tree
+--             local s = list[i]
+--             for c in gmatch(s,".") do
+--                 local tc = t[c]
+--                 if not tc then
+--                     tc = { }
+--                     t[c] = tc
+--                 end
+--                 t = tc
+--             end
+--             hash[t] = s
+--         end
+--     end
+--     return make(tree,hash)
+-- end
+
+
 local function make(t,hash)
-    local p = P(false)
+    local p    = p_false
     local keys = sortedkeys(t)
+    local function making(t,w)
+        local p    = p_false
+        local keys = sortedkeys(t)
+        for i=1,#keys do
+            local k = keys[i]
+            local v = t[k]
+            if w then
+                if v == true then
+                    p = p + P(k) * p_true
+                else
+                    p = p + P(k) * (making(v,w) + p_true)
+                end
+            else
+                if v == true then
+                    p = p + P(k)
+                else
+                    p = p + P(k) * making(v,w)
+                end
+            end
+        end
+        return p
+    end
     for i=1,#keys do
         local k = keys[i]
         local v = t[k]
         local h = hash[v]
         if h then
-            if next(v) then
-                p = p + P(k) * (make(v,hash) + P(true))
+            if v == true then
+                p = p + P(k) * p_true
             else
-                p = p + P(k) * P(true)
+                p = p + P(k) * (making(v,true) + p_true)
             end
         else
-            if next(v) then
-                p = p + P(k) * make(v,hash)
-            else
+            if v == true then
                 p = p + P(k)
+            else
+                p = p + P(k) * making(v,false)
             end
         end
     end
@@ -914,41 +1045,62 @@ end
 
 function lpeg.utfchartabletopattern(list) -- goes to util-lpg
     local tree = { }
-    local hash = { }
+--         local hash = { }
+    local hash
     local n = #list
     if n == 0 then
-        -- we could always use this branch
+        hash = list
         for s in next, list do
             local t = tree
+            local p, pk
             for c in gmatch(s,".") do
-                local tc = t[c]
-                if not tc then
-                    tc = { }
-                    t[c] = tc
+                if t == true then
+                    t = { [c] = true }
+                    p[pk] = t
+                    p = t
+                    t = true
+                else
+                    local tc = t[c]
+                    if not tc then
+                        tc = true
+                        t[c] = tc
+                    end
+                    p = t
+                    t = tc
                 end
-                t = tc
+                pk = c
             end
-            hash[t] = s
         end
     else
+        hash = { }
         for i=1,n do
             local t = tree
             local s = list[i]
+            local p, pk
             for c in gmatch(s,".") do
-                local tc = t[c]
-                if not tc then
-                    tc = { }
-                    t[c] = tc
+                if t == true then
+                    t = { [c] = true }
+                    p[pk] = t
+                    p = t
+                    t = true
+                else
+                    local tc = t[c]
+                    if not tc then
+                        tc = true
+                        t[c] = true
+                    end
+                    p = t
+                    t = tc
                 end
-                t = tc
+                pk = c
             end
-            hash[t] = s
+            hash[s] = true
         end
     end
     return make(tree,hash)
 end
 
--- inspect ( lpeg.utfchartabletopattern {
+-- lpeg.utfchartabletopattern {
 --     utfchar(0x00A0), -- nbsp
 --     utfchar(0x2000), -- enquad
 --     utfchar(0x2001), -- emquad
@@ -964,7 +1116,7 @@ end
 --     utfchar(0x200B), -- zerowidthspace
 --     utfchar(0x202F), -- narrownobreakspace
 --     utfchar(0x205F), -- math thinspace
--- } )
+-- }
 
 -- a few handy ones:
 --

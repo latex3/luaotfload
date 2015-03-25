@@ -23,6 +23,8 @@ local fonts         = fonts or { }
 local mappings      = fonts.mappings or { }
 fonts.mappings      = mappings
 
+local allocate      = utilities.storage.allocate
+
 --[[ldx--
 <p>Eventually this code will disappear because map files are kind
 of obsolete. Some code may move to runtime or auxiliary modules.</p>
@@ -194,7 +196,7 @@ local namesplitter = Ct(C((1 - ligseparator - varseparator)^1) * (ligseparator *
 -- to be completed .. for fonts that use unicodes for ligatures which
 -- is a actually a bad thing and should be avoided in the first place
 
-local overloads = {
+local overloads = allocate {
     IJ  = { name = "I_J",   unicode = { 0x49, 0x4A },       mess = 0x0132 },
     ij  = { name = "i_j",   unicode = { 0x69, 0x6A },       mess = 0x0133 },
     ff  = { name = "f_f",   unicode = { 0x66, 0x66 },       mess = 0xFB00 },

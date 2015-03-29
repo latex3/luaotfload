@@ -52,16 +52,22 @@
 --- around in the Luaotfload fontloader is therefore unnecessary.
 --- Packaging needs to account for this difference.
 
-loadmodule("l-lua.lua")
-loadmodule("l-lpeg.lua")
-loadmodule("l-function.lua")
-loadmodule("l-string.lua")
-loadmodule("l-table.lua")
-loadmodule("l-io.lua")
-loadmodule("l-file.lua")
-loadmodule("l-boolean.lua")
-loadmodule("l-math.lua")
-loadmodule("util-str.lua")
+loadmodule "l-lua.lua"
+loadmodule "l-lpeg.lua"
+loadmodule "l-function.lua"
+loadmodule "l-string.lua"
+loadmodule "l-table.lua"
+loadmodule "l-io.lua"
+loadmodule "l-file.lua"
+loadmodule "l-boolean.lua"
+loadmodule "l-math.lua"
+loadmodule "util-str.lua"
+
+--- The files below constitute the “fontloader proper”. Some of the
+--- functionality like file resolvers is overloaded later by
+--- Luaotfload. Consequently, the resulting package is pretty
+--- bare-bones and not usable independently.
+
 loadmodule("luatex-basics-gen.lua")
 loadmodule("data-con.lua")
 loadmodule("luatex-basics-nod.lua")

@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 03/25/15 22:13:54
+-- merge date  : 03/28/15 22:37:53
 
 do -- begin closure to overcome local limits and interference
 
@@ -662,46 +662,40 @@ function lpeg.append(list,pp,delayed,checked)
 end
 local p_false=P(false)
 local p_true=P(true)
-local function make(t,hash)
-  local p=p_false
-  local keys=sortedkeys(t)
-  local function making(t,w)
+local function make(t)
+  local function making(t)
     local p=p_false
     local keys=sortedkeys(t)
+    local okay=t[""]
     for i=1,#keys do
       local k=keys[i]
-      local v=t[k]
-      if w then
+      if k~="" then
+        local v=t[k]
         if v==true then
           p=p+P(k)*p_true
+        elseif v==false then
+        elseif okay then
+          p=p+P(k)*(making(v)+p_true)
         else
-          p=p+P(k)*(making(v,w)+p_true)
-        end
-      else
-        if v==true then
-          p=p+P(k)
-        else
-          p=p+P(k)*making(v,w)
+          p=p+P(k)*making(v)
         end
       end
     end
     return p
   end
+  local p=p_false
+  local keys=sortedkeys(t)
   for i=1,#keys do
     local k=keys[i]
-    local v=t[k]
-    local h=hash[v]
-    if h then
+    if k~="" then
+      local v=t[k]
       if v==true then
         p=p+P(k)*p_true
+      elseif v==false then
+      elseif v[""] then
+        p=p+P(k)*(making(v)+p_true)
       else
-        p=p+P(k)*(making(v,true)+p_true)
-      end
-    else
-      if v==true then
-        p=p+P(k)
-      else
-        p=p+P(k)*making(v,false)
+        p=p+P(k)*making(v)
       end
     end
   end
@@ -709,58 +703,76 @@ local function make(t,hash)
 end
 function lpeg.utfchartabletopattern(list) 
   local tree={}
-  local hash
   local n=#list
   if n==0 then
-    hash=list
     for s in next,list do
       local t=tree
       local p,pk
       for c in gmatch(s,".") do
         if t==true then
-          t={ [c]=true }
+          t={ [c]=true,[""]=true }
           p[pk]=t
           p=t
-          t=true
+          t=false
+        elseif t==false then
+          t={ [c]=false }
+          p[pk]=t
+          p=t
+          t=false
         else
           local tc=t[c]
           if not tc then
-            tc=true
-            t[c]=tc
+            tc=false
+            t[c]=false
           end
           p=t
           t=tc
         end
         pk=c
+      end
+      if t==false then
+        p[pk]=true
+      elseif t==true then
+      else
+        t[""]=true
       end
     end
   else
-    hash={}
     for i=1,n do
-      local t=tree
       local s=list[i]
+      local t=tree
       local p,pk
       for c in gmatch(s,".") do
         if t==true then
-          t={ [c]=true }
+          t={ [c]=true,[""]=true }
           p[pk]=t
           p=t
-          t=true
+          t=false
+        elseif t==false then
+          t={ [c]=false }
+          p[pk]=t
+          p=t
+          t=false
         else
           local tc=t[c]
           if not tc then
-            tc=true
-            t[c]=true
+            tc=false
+            t[c]=false
           end
           p=t
           t=tc
         end
         pk=c
       end
-      hash[s]=true
+      if t==false then
+        p[pk]=true
+      elseif t==true then
+      else
+        t[""]=true
+      end
     end
   end
-  return make(tree,hash)
+  return make(tree)
 end
 patterns.containseol=lpeg.finder(eol)
 local function nextstep(n,step,result)

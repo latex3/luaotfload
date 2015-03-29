@@ -1,7 +1,7 @@
 Change History
 --------------
 
-2014/XX/XX, luaotfload v2.6
+2015/0X/XX, luaotfload v2.6
     * Add ``sign`` target to makefile for automated package signing
     * Add ``--dumpconf`` option to luaotfload-tool for generating configuration
       files

@@ -2,10 +2,10 @@
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-configuration.lua
 --  DESCRIPTION:  config file reader
--- REQUIREMENTS:  Luaotfload 2.5 or above
+-- REQUIREMENTS:  Luaotfload 2.6 or above
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2015-03-16 07:48:58+0100
+--     MODIFIED:  2015-03-29 12:46:43+0200
 -------------------------------------------------------------------------------
 --
 

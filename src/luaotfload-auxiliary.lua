@@ -2,10 +2,10 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-auxiliary.lua
 --  DESCRIPTION:  part of luaotfload
--- REQUIREMENTS:  luaotfload 2.5
+-- REQUIREMENTS:  luaotfload 2.6
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  2.5
---     MODIFIED:  2014-01-02 21:24:25+0100
+--      VERSION:  2.6
+--     MODIFIED:  2015-03-29 12:43:26+0200
 -----------------------------------------------------------------------
 --
 

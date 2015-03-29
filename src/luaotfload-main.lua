@@ -1,10 +1,10 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
 --  DESCRIPTION:  Luatex fontloader initialization
--- REQUIREMENTS:  luatex v.0.79 or later; packages lualibs, luatexbase
+-- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2015-03-11 07:49:20+0100
+--     MODIFIED:  2015-03-29 12:41:09+0200
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -14,7 +14,7 @@
 --- markup.
 
 if not modules then modules = { } end modules ["luaotfload-main"] = {
-    version   = "2.5",
+    version   = "2.6",
     comment   = "fontloader initialization",
     author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
@@ -48,12 +48,12 @@ local initial_log_level = 0
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
-luaotfload.version                = "2.5-2" -- FIXME version belongs in common init
+luaotfload.version                = "2.6" -- FIXME version belongs in common init
 
 luaotfload.module = {
     name          = "luaotfload-main",
-    version       = 2.50001,
-    date          = "2014/07/16",
+    version       = 2.60000,
+    date          = "2015/03/29",
     description   = "OpenType layout system.",
     author        = "Elie Roux & Hans Hagen",
     copyright     = "Elie Roux",

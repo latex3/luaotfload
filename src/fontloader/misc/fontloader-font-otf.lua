@@ -107,6 +107,7 @@ registerdirective("fonts.otf.loader.pack",          function(v) packdata      = 
 registerdirective("fonts.otf.loader.syncspace",     function(v) syncspace     = v end)
 registerdirective("fonts.otf.loader.forcenotdef",   function(v) forcenotdef   = v end)
 registerdirective("fonts.otf.loader.overloadkerns", function(v) overloadkerns = v end)
+-----------------("fonts.otf.loader.alldimensions", function(v) alldimensions = v end)
 
 function otf.fileformat(filename)
     local leader = lower(io.loadchunk(filename,4))
@@ -637,17 +638,27 @@ actions["add dimensions"] = function(data,filename)
          --     d.name = ".notdef"
          -- end
             if bb then
-                local ht, dp = bb[4], -bb[2]
-                if ht == 0 or ht < 0 then
-                    -- not set
-                else
-                    d.height = ht
-                end
-                if dp == 0 or dp < 0 then
-                    -- not set
-                else
-                    d.depth  = dp
-                end
+                local ht =  bb[4]
+                local dp = -bb[2]
+             -- if alldimensions then
+             --     if ht ~= 0 then
+             --         d.height = ht
+             --     end
+             --     if dp ~= 0 then
+             --         d.depth  = dp
+             --     end
+             -- else
+                    if ht == 0 or ht < 0 then
+                        -- not set
+                    else
+                        d.height = ht
+                    end
+                    if dp == 0 or dp < 0 then
+                        -- not set
+                    else
+                        d.depth  = dp
+                    end
+             -- end
             end
         end
     end

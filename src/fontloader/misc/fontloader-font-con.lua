@@ -507,6 +507,7 @@ function constructors.scale(tfmdata,specification)
     local nonames          = properties.noglyphnames
     local haskerns         = properties.haskerns     or properties.mode == "base" -- we can have afm in node mode
     local hasligatures     = properties.hasligatures or properties.mode == "base" -- we can have afm in node mode
+    local realdimensions   = properties.realdimensions
     --
     if changed and not next(changed) then
         changed = false
@@ -618,6 +619,27 @@ function constructors.scale(tfmdata,specification)
         local width  = description.width
         local height = description.height
         local depth  = description.depth
+        if realdimensions then
+            -- this is mostly for checking issues
+            if not height or height == 0 then
+                local bb = description.boundingbox
+                local ht =  bb[4]
+                if ht ~= 0 then
+                    height = ht
+                end
+                if not depth or depth == 0 then
+                    local dp = -bb[2]
+                    if dp ~= 0 then
+                        depth = dp
+                    end
+                end
+            elseif not depth or depth == 0 then
+                local dp = -description.boundingbox[2]
+                if dp ~= 0 then
+                    depth = dp
+                end
+            end
+        end
         if width  then width  = hdelta*width  else width  = scaledwidth  end
         if height then height = vdelta*height else height = scaledheight end
     --  if depth  then depth  = vdelta*depth  else depth  = scaleddepth  end

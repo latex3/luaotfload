@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 03/28/15 22:37:53
+-- merge date  : 04/12/15 15:41:22
 
 do -- begin closure to overcome local limits and interference
 
@@ -666,7 +666,6 @@ local function make(t)
   local function making(t)
     local p=p_false
     local keys=sortedkeys(t)
-    local okay=t[""]
     for i=1,#keys do
       local k=keys[i]
       if k~="" then
@@ -674,12 +673,13 @@ local function make(t)
         if v==true then
           p=p+P(k)*p_true
         elseif v==false then
-        elseif okay then
-          p=p+P(k)*(making(v)+p_true)
         else
           p=p+P(k)*making(v)
         end
       end
+    end
+    if t[""] then
+      p=p+p_true
     end
     return p
   end
@@ -692,8 +692,6 @@ local function make(t)
       if v==true then
         p=p+P(k)*p_true
       elseif v==false then
-      elseif v[""] then
-        p=p+P(k)*(making(v)+p_true)
       else
         p=p+P(k)*making(v)
       end
@@ -4393,7 +4391,8 @@ function constructors.scale(tfmdata,specification)
   local stackmath=not properties.nostackmath
   local nonames=properties.noglyphnames
   local haskerns=properties.haskerns   or properties.mode=="base" 
-  local hasligatures=properties.hasligatures or properties.mode=="base"
+  local hasligatures=properties.hasligatures or properties.mode=="base" 
+  local realdimensions=properties.realdimensions
   if changed and not next(changed) then
     changed=false
   end
@@ -4474,6 +4473,26 @@ function constructors.scale(tfmdata,specification)
     local width=description.width
     local height=description.height
     local depth=description.depth
+    if realdimensions then
+      if not height or height==0 then
+        local bb=description.boundingbox
+        local ht=bb[4]
+        if ht~=0 then
+          height=ht
+        end
+        if not depth or depth==0 then
+          local dp=-bb[2]
+          if dp~=0 then
+            depth=dp
+          end
+        end
+      elseif not depth or depth==0 then
+        local dp=-description.boundingbox[2]
+        if dp~=0 then
+          depth=dp
+        end
+      end
+    end
     if width then width=hdelta*width else width=scaledwidth end
     if height then height=vdelta*height else height=scaledheight end
     if depth and depth~=0 then
@@ -7609,15 +7628,16 @@ actions["add dimensions"]=function(data,filename)
         report_otf("mark %a with width %b found in %a",d.name or "<noname>",wd,basename)
       end
       if bb then
-        local ht,dp=bb[4],-bb[2]
-        if ht==0 or ht<0 then
-        else
-          d.height=ht
-        end
-        if dp==0 or dp<0 then
-        else
-          d.depth=dp
-        end
+        local ht=bb[4]
+        local dp=-bb[2]
+          if ht==0 or ht<0 then
+          else
+            d.height=ht
+          end
+          if dp==0 or dp<0 then
+          else
+            d.depth=dp
+          end
       end
     end
   end

@@ -841,7 +841,7 @@ local function make(t)
     local function making(t)
         local p    = p_false
         local keys = sortedkeys(t)
-        local okay = t[""]
+--         local okay = t[""]
         for i=1,#keys do
             local k = keys[i]
             if k ~= "" then
@@ -850,12 +850,15 @@ local function make(t)
                     p = p + P(k) * p_true
                 elseif v == false then
                     -- can't happen
-                elseif okay then
-                    p = p + P(k) * (making(v) + p_true)
+--                 elseif okay then
+--                     p = p + P(k) * (making(v) + p_true)
                 else
                     p = p + P(k) * making(v)
                 end
             end
+        end
+        if t[""] then
+            p = p + p_true
         end
         return p
     end
@@ -869,8 +872,8 @@ local function make(t)
                 p = p + P(k) * p_true
             elseif v == false then
                 -- can't happen
-            elseif v[""] then
-                p = p + P(k) * (making(v) + p_true)
+--             elseif v[""] then
+--                 p = p + P(k) * (making(v) + p_true)
             else
                 p = p + P(k) * making(v)
             end
@@ -956,10 +959,11 @@ function lpeg.utfchartabletopattern(list) -- goes to util-lpg
     return make(tree)
 end
 
--- local t = { "a", "abc", "ac", "abe", "abxyz", "xy", "bef" }
+-- local t = { "a", "abc", "ac", "abe", "abxyz", "xy", "bef","aa" }
 -- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/string.upper + 1)^1)
---
+
 -- inspect(lpegmatch(p,"a"))
+-- inspect(lpegmatch(p,"aa"))
 -- inspect(lpegmatch(p,"aaaa"))
 -- inspect(lpegmatch(p,"ac"))
 -- inspect(lpegmatch(p,"bc"))
@@ -973,6 +977,14 @@ end
 -- inspect(lpegmatch(p,"bax"))
 -- inspect(lpegmatch(p,"abxyz"))
 -- inspect(lpegmatch(p,"foobarbefcrap"))
+
+-- local t = { ["^"] = 1, ["^^"] = 2, ["^^^"] = 3, ["^^^^"] = 4 }
+-- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/t + 1)^1)
+-- inspect(lpegmatch(p," ^ ^^ ^^^ ^^^^ ^^^^^ ^^^^^^ ^^^^^^^ "))
+
+-- local t = { ["^^"] = 2, ["^^^"] = 3, ["^^^^"] = 4 }
+-- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/t + 1)^1)
+-- inspect(lpegmatch(p," ^ ^^ ^^^ ^^^^ ^^^^^ ^^^^^^ ^^^^^^^ "))
 
 -- lpeg.utfchartabletopattern {
 --     utfchar(0x00A0), -- nbsp

@@ -29,7 +29,6 @@ if not modules then modules = { } end modules ['font-otn'] = {
 
 -- todo:
 --
--- kerning is probably not yet ok for latin around dics nodes (interesting challenge)
 -- extension infrastructure (for usage out of context)
 -- sorting features according to vendors/renderers
 -- alternative loop quitters
@@ -169,6 +168,7 @@ local report_chain    = logs.reporter("fonts","otf chain")
 local report_process  = logs.reporter("fonts","otf process")
 local report_prepare  = logs.reporter("fonts","otf prepare")
 local report_warning  = logs.reporter("fonts","otf warning")
+local report_run      = logs.reporter("fonts","otf run")
 
 registertracker("otf.verbose_chain", function(v) otf.setcontextchain(v and "verbose") end)
 registertracker("otf.normal_chain",  function(v) otf.setcontextchain(v and "normal")  end)
@@ -197,12 +197,18 @@ local getfont            = nuts.getfont
 local getsubtype         = nuts.getsubtype
 local getchar            = nuts.getchar
 
+local insert_node_before = nuts.insert_before
 local insert_node_after  = nuts.insert_after
 local delete_node        = nuts.delete
+local remove_node        = nuts.remove
 local copy_node          = nuts.copy
+local copy_node_list     = nuts.copy_list
 local find_node_tail     = nuts.tail
 local flush_node_list    = nuts.flush_list
+local free_node          = nuts.free
 local end_of_math        = nuts.end_of_math
+local traverse_nodes     = nuts.traverse
+local traverse_id        = nuts.traverse_id
 
 local setmetatableindex  = table.setmetatableindex
 
@@ -226,13 +232,15 @@ local dir_code           = whatcodes.dir
 local localpar_code      = whatcodes.localpar
 
 local discretionary_code = disccodes.discretionary
+local regular_code       = disccodes.regular
+local automatic_code     = disccodes.automatic
 
 local ligature_code      = glyphcodes.ligature
 
 local privateattribute   = attributes.private
 
 -- Something is messed up: we have two mark / ligature indices, one at the injection
--- end and one here ... this is bases in KE's patches but there is something fishy
+-- end and one here ... this is based on KE's patches but there is something fishy
 -- there as I'm pretty sure that for husayni we need some connection (as it's much
 -- more complex than an average font) but I need proper examples of all cases, not
 -- of only some.
@@ -2627,6 +2635,7 @@ elseif typ == "gpos_single" or typ == "gpos_pair" then
         if trace_steps then -- ?
             registerstep(head)
         end
+
     end
 
     head = tonode(head)

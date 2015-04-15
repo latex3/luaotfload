@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/12/15 15:41:22
+-- merge date  : 04/15/15 01:44:50
 
 do -- begin closure to overcome local limits and interference
 
@@ -11276,6 +11276,7 @@ local report_chain=logs.reporter("fonts","otf chain")
 local report_process=logs.reporter("fonts","otf process")
 local report_prepare=logs.reporter("fonts","otf prepare")
 local report_warning=logs.reporter("fonts","otf warning")
+local report_run=logs.reporter("fonts","otf run")
 registertracker("otf.verbose_chain",function(v) otf.setcontextchain(v and "verbose") end)
 registertracker("otf.normal_chain",function(v) otf.setcontextchain(v and "normal") end)
 registertracker("otf.replacements","otf.singles,otf.multiples,otf.alternatives,otf.ligatures")
@@ -11298,12 +11299,18 @@ local setprop=nuts.setprop
 local getfont=nuts.getfont
 local getsubtype=nuts.getsubtype
 local getchar=nuts.getchar
+local insert_node_before=nuts.insert_before
 local insert_node_after=nuts.insert_after
 local delete_node=nuts.delete
+local remove_node=nuts.remove
 local copy_node=nuts.copy
+local copy_node_list=nuts.copy_list
 local find_node_tail=nuts.tail
 local flush_node_list=nuts.flush_list
+local free_node=nuts.free
 local end_of_math=nuts.end_of_math
+local traverse_nodes=nuts.traverse
+local traverse_id=nuts.traverse_id
 local setmetatableindex=table.setmetatableindex
 local zwnj=0x200C
 local zwj=0x200D
@@ -11321,6 +11328,8 @@ local math_code=nodecodes.math
 local dir_code=whatcodes.dir
 local localpar_code=whatcodes.localpar
 local discretionary_code=disccodes.discretionary
+local regular_code=disccodes.regular
+local automatic_code=disccodes.automatic
 local ligature_code=glyphcodes.ligature
 local privateattribute=attributes.private
 local a_state=privateattribute('state')

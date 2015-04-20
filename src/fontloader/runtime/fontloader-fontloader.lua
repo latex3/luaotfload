@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/15/15 01:44:50
+-- merge date  : 04/18/15 14:41:50
 
 do -- begin closure to overcome local limits and interference
 
@@ -2713,6 +2713,9 @@ if not modules then modules={} end modules ['l-math']={
   license="see context related readme files"
 }
 local floor,sin,cos,tan=math.floor,math.sin,math.cos,math.tan
+if not math.ceiling then
+  math.ceiling=math.ceil
+end
 if not math.round then
   function math.round(x) return floor(x+0.5) end
 end

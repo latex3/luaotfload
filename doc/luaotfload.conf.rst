@@ -6,9 +6,9 @@
                      Luaotfload configuration file
 -----------------------------------------------------------------------
 
-:Date:                  2014-06-09
+:Date:                  2015-04-20
 :Copyright:             GPL v2.0
-:Version:               2.5
+:Version:               2.6
 :Manual section:        5
 :Manual group:          text processing
 
@@ -98,8 +98,9 @@ VARIABLES
 Variables in belong into a configuration section and their values must
 be of a certain type. Some of them have further constraints. For
 example, the “color callback” must be a string of one of the values
-``pre_linebreak_filter`` or ``pre_output_filter``, defined in the
-section *run*.
+``post_linebreak_filter``, ``pre_linebreak_filter``, or
+``pre_output_filter``, defined in the section *run* of the
+configuration file.
 
 Currently, the configuration is organized into four sections:
 
@@ -267,7 +268,7 @@ Section ``run``
 +------------------+--------+------------------------------+
 |  variable        |  type  |  default                     |
 +------------------+--------+------------------------------+
-|  color-callback  |   s    |  ``"pre_linebreak_filter"``  |
+|  color-callback  |   s    |  ``"post_linebreak_filter"`` |
 +------------------+--------+------------------------------+
 |  definer         |   s    |  ``"patch"``                 |
 +------------------+--------+------------------------------+
@@ -278,10 +279,14 @@ Section ``run``
 
 The ``color-callback`` option determines the stage at which fonts that
 defined with a ``color=xxyyzz`` feature will be colorized. By default
-this happens in a ``pre_linebreak_filter`` but alternatively the
-``pre_output_filter`` may be chosen, which is faster but might produce
-inconsistent output. The latter also was the default in the 1.x series
-of Luaotfload.
+this happens in a ``post_linebreak_filter`` but alternatively the
+``pre_linebreak_filter`` or ``pre_output_filter`` may be chosen, which
+is faster but might produce inconsistent output. The
+``pre_output_filter`` used to be the default in the 1.x series of
+Luaotfload, whilst later versions up to and including 2.5 hooked into
+the ``pre_linebreak_filter`` which naturally didn’t affect any glyphs
+inserting during hyphenation. Both are kept around as options to
+restore the previous behavior if necessary.
 
 The ``definer`` allows for switching the ``define_font`` callback.
 Apart from the default ``patch`` one may also choose the ``generic``

@@ -31,6 +31,7 @@ local ioloaddata   = io.loaddata
 local iowrite      = io.write
 local md5sumhexa   = md5.sumhexa
 local stringformat = string.format
+local tableconcat  = table.concat
 
 -------------------------------------------------------------------------------
 -- config
@@ -632,6 +633,61 @@ local tell = function (arg)
   return describe (target, location)
 end
 
+--[[doc--
+
+  Packaging works as follows:
+
+      * Files are looked up the usual way, allowing us to override the
+        distribution-supplied scripts with our own alternatives in the
+        local path.
+
+      * The merged package is written to the same directory as the
+        packaging script (not ``$PWD``).
+
+  There is some room for improvements: Instead of reading a file with
+  fixed content from disk, the merge script could be composed
+  on-the-fly from a list of files and then written to memory (not sure
+  though if we can access shm_open or memfd and the likes from Lua).
+
+--doc]]--
+
+local package = function (args)
+  local orig_dir    = lfs.currentdir ()
+  local base_dir    = orig_dir .. "/src/fontloader/"
+  local merge_name  = base_dir .. "luaotfload-package.lua"
+  --- output name is fixed so we have to deal with it but maybe we can
+  --- get a patch to mtx-package upstreamed in the future
+  local output_name = base_dir .. "luaotfload-package-merged.lua"
+  local target_name = stringformat ("fontloader-%s.lua",
+                                    os.date ("%F"))
+  status ("assuming fontloader source in      %s", base_dir)
+  status ("reading merge instructions from    %s", merge_name)
+  status ("writing output to                  %s", target_name)
+
+  --- check preconditions
+
+  if not lfs.isdir (base_dir)           then die ("directory %s does not exist", emphasis (base_dir   )) end
+  if not lfs.isfile (merge_name)        then die ("missing merge file at %s",    emphasis (merge_name )) end
+  if not file.is_writable (output_name) then die ("cannot write to %s",          emphasis (output_name)) end
+  if not file.is_writable (target_name) then die ("cannot write to %s",          emphasis (target_name)) end
+  if not lfs.chdir (base_dir)           then die ("failed to cd into %s",        emphasis (base_dir   )) end
+
+  --- perform merge
+
+  local cmd = { "mtxrun", "--script", "package", "--merge", merge_name }
+  status ("invoking %s as “%s”",
+          emphasis "mtx-package",
+          tableconcat (cmd, " "))
+
+  --- check postconditions
+
+  --- clean up
+
+  if not lfs.chdir (orig_dir) then
+    status ("warning: failed to cd retour into %s", emphasis (orig_dir))
+  end
+end
+
 local help = function ()
   iowrite "usage: mkimport  <command> [<args>]\n"
   iowrite "\n"
@@ -640,14 +696,16 @@ local help = function ()
   iowrite "   tell      Display information about a file’s integration\n"
   iowrite "   news      Check Context for updated files\n"
   iowrite "   import    Update with files from Context\n"
+  iowrite "   package   Invoke mtx-package on the current fontloader\n"
   iowrite "\n"
 end
 
 local job_kind = table.mirrored {
-  news   = news,
-  import = import,
-  tell   = tell,
-  help   = help,
+  help    = help,
+  import  = import,
+  news    = news,
+  package = package,
+  tell    = tell,
 }
 
 -------------------------------------------------------------------------------

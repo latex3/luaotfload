@@ -180,7 +180,7 @@ local default_config = {
     resolver       = "cached",
     definer        = "patch",
     log_level      = 0,
-    color_callback = "pre_linebreak_filter",
+    color_callback = "post_linebreak_filter",
     live           = true,
   },
   misc = {

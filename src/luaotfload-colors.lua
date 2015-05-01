@@ -220,13 +220,23 @@ color_whatsit = function (head, curr, color, push, tail)
     return head, curr, color
 end
 
+-- number -> string | nil
+local get_font_color = function (font_id)
+    local tfmdata    = identifiers[font_id]
+    local font_color = tfmdata and tfmdata.properties and tfmdata.properties.color
+    if font_color then
+        font_color   = font_color:gsub("(%x%x%x%x%x%x)[fF][fF]$", "%1")
+    end
+    return font_color
+end
+
+local cnt = 0
+
 --[[doc--
 While the second argument and second returned value are apparently
 always nil when the function is called, they temporarily take string
 values during the node list traversal.
 --doc]]--
-
-local cnt = 0
 
 --- (node * (string | nil)) -> (node * (string | nil))
 local node_colorize
@@ -252,12 +262,10 @@ node_colorize = function (head, current_color)
             cnt = cnt - 1
 
         elseif n_id == glyph_t then
-            local tfmdata = identifiers[getfont(n)]
-
             --- colorization is restricted to those fonts
             --- that received the “color” property upon
             --- loading (see ``setcolor()`` above)
-            local font_color = tfmdata and tfmdata.properties  and tfmdata.properties.color
+            local font_color = get_font_color(getfont(n))
             if font_color ~= current_color then
                 if current_color then
                     head, n, current_color = color_whatsit(head, n, current_color, false)
@@ -270,8 +278,7 @@ node_colorize = function (head, current_color)
             if current_color and color_callback == "pre_linebreak_filter" then
                 local nn = getnext(n)
                 while nn and getid(nn) == glyph_t do
-                    local tfmdata = identifiers[getfont(nn)]
-                    local font_color = tfmdata and tfmdata.properties  and tfmdata.properties.color
+                    local font_color = get_font_color(getfont(nn))
                     if font_color == current_color then
                         n = nn
                     else

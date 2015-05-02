@@ -73,10 +73,11 @@ local lpegmatch      = lpeg.match
 local C, Cg, Ct, P, R, S = lpeg.C, lpeg.Cg, lpeg.Ct, lpeg.P, lpeg.R, lpeg.S
 
 local digit16        = R("09", "af", "AF")
+local opaque         = S("fF") * S("fF")
 local octet          = C(digit16 * digit16)
 
 local p_rgb          = octet * octet * octet
-local p_rgba         = p_rgb * octet
+local p_rgba         = p_rgb * (octet - opaque)
 local valid_digits   = C(p_rgba + p_rgb) -- matches eight or six hex digits
 
 local p_Crgb         = Cg(octet/hex_to_dec, "red") --- for captures
@@ -224,9 +225,6 @@ end
 local get_font_color = function (font_id)
     local tfmdata    = identifiers[font_id]
     local font_color = tfmdata and tfmdata.properties and tfmdata.properties.color
-    if font_color then
-        font_color   = font_color:gsub("(%x%x%x%x%x%x)[fF][fF]$", "%1")
-    end
     return font_color
 end
 

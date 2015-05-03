@@ -10,6 +10,8 @@ if not modules then modules = { } end modules ['l-lpeg'] = {
 -- if i can use new features like capture / 2 and .B (at first sight the xml
 -- parser is some 5% slower)
 
+-- lpeg.P("abc") is faster than lpeg.P("a") * lpeg.P("b") * lpeg.P("c")
+
 -- a new lpeg fails on a #(1-P(":")) test and really needs a + P(-1)
 
 -- move utf    -> l-unicode
@@ -19,7 +21,7 @@ lpeg = require("lpeg")
 
 -- The latest lpeg doesn't have print any more, and even the new ones are not
 -- available by default (only when debug mode is enabled), which is a pitty as
--- as it helps nailign down bottlenecks. Performance seems comparable: some 10%
+-- as it helps nailing down bottlenecks. Performance seems comparable: some 10%
 -- slower pattern compilation, same parsing speed, although,
 --
 -- local p = lpeg.C(lpeg.P(1)^0 * lpeg.P(-1))
@@ -841,7 +843,6 @@ local function make(t)
     local function making(t)
         local p    = p_false
         local keys = sortedkeys(t)
---         local okay = t[""]
         for i=1,#keys do
             local k = keys[i]
             if k ~= "" then
@@ -850,8 +851,6 @@ local function make(t)
                     p = p + P(k) * p_true
                 elseif v == false then
                     -- can't happen
---                 elseif okay then
---                     p = p + P(k) * (making(v) + p_true)
                 else
                     p = p + P(k) * making(v)
                 end
@@ -872,14 +871,39 @@ local function make(t)
                 p = p + P(k) * p_true
             elseif v == false then
                 -- can't happen
---             elseif v[""] then
---                 p = p + P(k) * (making(v) + p_true)
             else
                 p = p + P(k) * making(v)
             end
         end
     end
     return p
+end
+
+local function collapse(t,x)
+    if type(t) ~= "table" then
+        return t, x
+    else
+        local n = next(t)
+        if n == nil then
+            return t, x
+        elseif next(t,n) == nil then
+            -- one entry
+            local k = n
+            local v = t[k]
+            if type(v) == "table" then
+                return collapse(v,x..k)
+            else
+                return v, x .. k
+            end
+        else
+            local tt = { }
+            for k, v in next, t do
+                local vv, kk = collapse(v,k)
+                tt[kk] = vv
+            end
+            return tt, x
+        end
+    end
 end
 
 function lpeg.utfchartabletopattern(list) -- goes to util-lpg
@@ -955,9 +979,13 @@ function lpeg.utfchartabletopattern(list) -- goes to util-lpg
             end
         end
     end
+--     collapse(tree,"") -- needs testing, maybe optional, slightly faster because P("x")*P("X") seems slower than P"(xX") (why)
 --     inspect(tree)
     return make(tree)
 end
+
+-- local t = { "start", "stoep", "staart", "paard" }
+-- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/string.upper + 1)^1)
 
 -- local t = { "a", "abc", "ac", "abe", "abxyz", "xy", "bef","aa" }
 -- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/string.upper + 1)^1)

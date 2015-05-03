@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 04/18/15 14:41:50
+-- merge date  : 05/01/15 18:45:14
 
 do -- begin closure to overcome local limits and interference
 
@@ -698,6 +698,31 @@ local function make(t)
     end
   end
   return p
+end
+local function collapse(t,x)
+  if type(t)~="table" then
+    return t,x
+  else
+    local n=next(t)
+    if n==nil then
+      return t,x
+    elseif next(t,n)==nil then
+      local k=n
+      local v=t[k]
+      if type(v)=="table" then
+        return collapse(v,x..k)
+      else
+        return v,x..k
+      end
+    else
+      local tt={}
+      for k,v in next,t do
+        local vv,kk=collapse(v,k)
+        tt[kk]=vv
+      end
+      return tt,x
+    end
+  end
 end
 function lpeg.utfchartabletopattern(list) 
   local tree={}

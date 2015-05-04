@@ -40,6 +40,8 @@ local setattribute          = nodedirect.set_attribute
 
 local texset                = tex.set
 local texget                = tex.get
+local texsettoks            = tex.settoks
+local texgettoks            = tex.gettoks
 
 local stringformat          = string.format
 
@@ -318,7 +320,12 @@ local color_handler = function (head)
     -- now append our page resources
     if res then
         res["1"]  = true
-        local tpr = texget("pdfpageresources") -- respect other packages. we need a guidance
+        local tpr = texget("pdfpageresources")
+        local pgf_loaded = tpr:find("/ExtGState %d+ 0 R")
+        if pgf_loaded then
+            tpr = texgettoks("pgf@sys@pgf@resource@list@extgs@toks") -- see luaotfload.sty
+        end
+
         local t   = ""
         for k in pairs(res) do
             local str = stringformat("/TransGs%s<</ca %s>>", k, k) -- don't touch stroking elements
@@ -327,11 +334,15 @@ local color_handler = function (head)
             end
         end
         if t ~= "" then
-            if not tpr:find("/ExtGState<<.*>>") then
-                tpr = tpr .. "/ExtGState<<>>"
+            if pgf_loaded then
+                texsettoks("global", "pgf@sys@pgf@resource@list@extgs@toks", tpr..t)
+            else
+                if not tpr:find("/ExtGState<<.*>>") then
+                    tpr = tpr .. "/ExtGState<<>>"
+                end
+                tpr = tpr:gsub("/ExtGState<<", "%1"..t)
+                texset("global", "pdfpageresources", tpr)
             end
-            tpr = tpr:gsub("/ExtGState<<", "%1"..t)
-            texset("global", "pdfpageresources", tpr)
         end
         res = nil -- reset res
     end

@@ -33,7 +33,7 @@
 \csname ifluaotfloadloaded\endcsname
 \let\ifluaotfloadloaded\endinput
 \bgroup\expandafter\expandafter\expandafter\egroup
-\expandafter\ifx\csname ProvidesPackage\endcsname\relax
+\expandafter\ifx\csname RequirePackage\endcsname\relax
   \input luatexbase.sty
 \else
   \NeedsTeXFormat{LaTeX2e}
@@ -45,3 +45,13 @@
 \fi
 \RequireLuaModule{luaotfload-main}
 
+% for compatibility with beamer class, which loads pgf package.
+% under non-beamer class, tikz (pgf) should be loaded before luaotfload.
+\ifcsname pgf@sys@pgf@resource@list@extgs\endcsname\else\endinput\fi
+\count255=\the\catcode`@\relax
+\catcode`@=11\relax
+\newtoks\pgf@sys@pgf@resource@list@extgs@toks
+\def\pgf@sys@pgf@resource@list@extgs{\the\pgf@sys@pgf@resource@list@extgs@toks}
+\def\pgf@sys@addpdfresource@extgs@plain#1{\global\pgf@sys@pgf@resource@list@extgs@toks
+  \expandafter{\the\pgf@sys@pgf@resource@list@extgs@toks #1}}
+\catcode`@=\the\count255\relax

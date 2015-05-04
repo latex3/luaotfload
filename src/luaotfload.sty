@@ -46,10 +46,9 @@
 \RequireLuaModule{luaotfload-main}
 
 % for compatibility with beamer class, which loads pgf package.
-\expandafter\newtoks\csname pgf@sys@pgf@resource@list@extgs@toks\endcsname
 \ifcsname selectfont\endcsname
-\AtBeginDocument{
-  \@ifpackageloaded{pgf}{
+  \AtBeginDocument{\@ifpackageloaded{pgf}{
+    \csname newtoks\endcsname\pgf@sys@pgf@resource@list@extgs@toks
     \def\pgf@sys@pgf@resource@list@extgs{\the\pgf@sys@pgf@resource@list@extgs@toks}
     \def\pgf@sys@addpdfresource@extgs@plain#1{\global\pgf@sys@pgf@resource@list@extgs@toks
       \expandafter{\the\pgf@sys@pgf@resource@list@extgs@toks #1}}
@@ -59,6 +58,7 @@
 \ifcsname pgf@sys@pgf@resource@list@extgs\endcsname\else\endinput\fi
 \count255=\the\catcode`@\relax
 \catcode`@=11\relax
+\newtoks\pgf@sys@pgf@resource@list@extgs@toks
 \def\pgf@sys@pgf@resource@list@extgs{\the\pgf@sys@pgf@resource@list@extgs@toks}
 \def\pgf@sys@addpdfresource@extgs@plain#1{\global\pgf@sys@pgf@resource@list@extgs@toks
   \expandafter{\the\pgf@sys@pgf@resource@list@extgs@toks #1}}

@@ -47,7 +47,7 @@
 
 % for compatibility with beamer class, which loads pgf package.
 \ifcsname selectfont\endcsname
-  \AtBeginDocument{\@ifpackageloaded{pgf}{
+  \AtBeginDocument{\@ifpackageloaded{pgfsys}{
     \csname newtoks\endcsname\pgf@sys@pgf@resource@list@extgs@toks
     \def\pgf@sys@pgf@resource@list@extgs{\the\pgf@sys@pgf@resource@list@extgs@toks}
     \def\pgf@sys@addpdfresource@extgs@plain#1{\global\pgf@sys@pgf@resource@list@extgs@toks

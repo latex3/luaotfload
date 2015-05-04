@@ -44,7 +44,12 @@ end
 
 if not number then number = { } end -- temp hack for luatex-fonts
 
-local stripper = patterns.stripzeros
+local stripper    = patterns.stripzeros
+local newline     = patterns.newline
+local endofstring = patterns.endofstring
+local whitespace  = patterns.whitespace
+local spacer      = patterns.spacer
+local spaceortab  = patterns.spaceortab
 
 local function points(n)
     n = tonumber(n)
@@ -62,12 +67,12 @@ number.basepoints = basepoints
 -- str = " \n \ntest  \n test\ntest "
 -- print("["..string.gsub(string.collapsecrlf(str),"\n","+").."]")
 
-local rubish     = patterns.spaceortab^0 * patterns.newline
-local anyrubish  = patterns.spaceortab + patterns.newline
+local rubish     = spaceortab^0 * newline
+local anyrubish  = spaceortab + newline
 local anything   = patterns.anything
-local stripped   = (patterns.spaceortab^1 / "") * patterns.newline
+local stripped   = (spaceortab^1 / "") * newline
 local leading    = rubish^0 / ""
-local trailing   = (anyrubish^1 * patterns.endofstring) / ""
+local trailing   = (anyrubish^1 * endofstring) / ""
 local redundant  = rubish^3 / "\n"
 
 local pattern = Cs(leading * (trailing + redundant + stripped + anything)^0)
@@ -129,7 +134,7 @@ local pattern =
               return ""
           end
       end
-    + patterns.newline * Cp() / function(position)
+    + newline * Cp() / function(position)
           extra, start = 0, position
       end
     + patterns.anything
@@ -161,11 +166,6 @@ end
 --     str = gsub(str,"[\n\r]+ *","\n")
 --     return str
 -- end
-
-local newline     = patterns.newline
-local endofstring = patterns.endofstring
-local whitespace  = patterns.whitespace
-local spacer      = patterns.spacer
 
 local space       = spacer^0
 local nospace     = space/""
@@ -1116,4 +1116,10 @@ local pattern =
 
 function string.optionalquoted(str)
     return lpegmatch(pattern,str) or str
+end
+
+local pattern = Cs((newline / os.newline + 1)^0)
+
+function string.replacenewlines(str)
+    return lpegmatch(pattern,str)
 end

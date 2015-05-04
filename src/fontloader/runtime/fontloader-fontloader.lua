@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/01/15 18:45:14
+-- merge date  : 05/04/15 19:00:43
 
 do -- begin closure to overcome local limits and interference
 
@@ -2798,6 +2798,11 @@ else
 end
 if not number then number={} end 
 local stripper=patterns.stripzeros
+local newline=patterns.newline
+local endofstring=patterns.endofstring
+local whitespace=patterns.whitespace
+local spacer=patterns.spacer
+local spaceortab=patterns.spaceortab
 local function points(n)
   n=tonumber(n)
   return (not n or n==0) and "0pt" or lpegmatch(stripper,format("%.5fpt",n/65536))
@@ -2808,12 +2813,12 @@ local function basepoints(n)
 end
 number.points=points
 number.basepoints=basepoints
-local rubish=patterns.spaceortab^0*patterns.newline
-local anyrubish=patterns.spaceortab+patterns.newline
+local rubish=spaceortab^0*newline
+local anyrubish=spaceortab+newline
 local anything=patterns.anything
-local stripped=(patterns.spaceortab^1/"")*patterns.newline
+local stripped=(spaceortab^1/"")*newline
 local leading=rubish^0/""
-local trailing=(anyrubish^1*patterns.endofstring)/""
+local trailing=(anyrubish^1*endofstring)/""
 local redundant=rubish^3/"\n"
 local pattern=Cs(leading*(trailing+redundant+stripped+anything)^0)
 function strings.collapsecrlf(str)
@@ -2859,17 +2864,13 @@ local pattern=Carg(1)/function(t)
      else
        return ""
      end
-   end+patterns.newline*Cp()/function(position)
+   end+newline*Cp()/function(position)
      extra,start=0,position
    end+patterns.anything
  )^1)
 function strings.tabtospace(str,tab)
   return lpegmatch(pattern,str,1,tab or 7)
 end
-local newline=patterns.newline
-local endofstring=patterns.endofstring
-local whitespace=patterns.whitespace
-local spacer=patterns.spacer
 local space=spacer^0
 local nospace=space/""
 local endofline=nospace*newline
@@ -3437,6 +3438,10 @@ local pattern=Cs(dquote*(equote-P(-2))^0*dquote)
 +Cs(cquote*(equote-space)^0*space*equote^0*cquote) 
 function string.optionalquoted(str)
   return lpegmatch(pattern,str) or str
+end
+local pattern=Cs((newline/os.newline+1)^0)
+function string.replacenewlines(str)
+  return lpegmatch(pattern,str)
 end
 
 end -- closure

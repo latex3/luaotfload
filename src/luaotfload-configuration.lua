@@ -4,15 +4,16 @@
 --  DESCRIPTION:  config file reader
 -- REQUIREMENTS:  Luaotfload 2.6 or above
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--       AUTHOR:  Dohyun Kim <nomosnomos@gmail.com>
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2015-03-29 12:46:43+0200
+--     MODIFIED:  2015-05-05
 -------------------------------------------------------------------------------
 --
 
 if not modules then modules = { } end modules ["luaotfload-configuration"] = {
-  version   = "2.5",
+  version   = "2.6",
   comment   = "part of Luaotfload",
-  author    = "Philipp Gesang",
+  author    = "Philipp Gesang, Dohyun Kim",
   copyright = "Luaotfload Development Team",
   license   = "GNU GPL v2.0"
 }

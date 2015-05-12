@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 05/04/15 19:00:43
+-- merge date  : 05/12/15 17:57:50
 
 do -- begin closure to overcome local limits and interference
 
@@ -10509,9 +10509,9 @@ local function inject_cursives(glyphs,nofglyphs)
     end
   end
 end
-local function inject_kerns(head,glyphs,nofglyphs)
-  for i=1,#glyphs do
-    local n=glyphs[i]
+local function inject_kerns(head,list,length)
+  for i=1,length do
+    local n=list[i]
     local pn=rawget(properties,n)
     if pn then
       local i=rawget(pn,"injections")
@@ -10548,6 +10548,9 @@ local function inject_everything(head,where)
     end
     inject_kerns(head,glyphs,nofglyphs)
   end
+  if nofmarks>0 then
+    inject_kerns(head,marks,nofmarks)
+	end
   if keepregisteredcounts then
     keepregisteredcounts=false
   else
@@ -10838,7 +10841,7 @@ local function inject_pairs_only(head,where)
           if getsubtype(n)<256 then
             local p=rawget(properties,n)
             if p then
-              local i=rawget(pn,"replaceinjections")
+              local i=rawget(p,"replaceinjections")
               if i then
                 local yoffset=i.yoffset
                 if yoffset and yoffset~=0 then

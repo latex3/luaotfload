@@ -92,8 +92,6 @@ luaotfload.log.tex        = {
 
 --[[doc--
 
-    XXX remove
-
      We set the minimum version requirement for \LUATEX to v0.76,
      because the font loader requires recent features like direct
      attribute indexing and \luafunction{node.end_of_math()} that aren’t
@@ -116,15 +114,6 @@ if tex.luatexversion < min_luatex_version then
     warning ("using fallback fontloader -- newer functionality not available")
     fontloader_package = "tl2014" --- TODO fallback should be configurable too
     --- we install a fallback for older versions as a safety
-    if not node.end_of_math then
-        local math_t          = node.id "math"
-        local traverse_nodes  = node.traverse_id
-        node.end_of_math = function (n)
-            for n in traverse_nodes (math_t, n.next) do
-                return n
-            end
-        end
-    end
 end
 
 --[[doc--
@@ -154,38 +143,6 @@ local log             = luaotfload.log
 local logreport       = log.report
 
 log.set_loglevel (default_log_level)
-
---[[doc--
-
-  XXX remove
-
-  Before \TeX Live 2013 version, \LUATEX had a bug that made ofm fonts
-  fail when called with their extension. There was a side-effect making
-  ofm totally unloadable when luaotfload was present. The following
-  lines are a patch for this bug. The utility of these lines is
-  questionable as they are not necessary since \TeX Live 2013. They
-  should be removed in the next version.
-
---doc]]--
-
-local Cs, P, lpegmatch = lpeg.Cs, lpeg.P, lpeg.match
-
-local p_dot, p_slash = P".",  P"/"
-local p_suffix       = (p_dot * (1 - p_dot - p_slash)^1 * P(-1)) / ""
-local p_removesuffix = Cs((p_suffix + 1)^1)
-
-local find_vf_file = function (name)
-    local fullname = kpsefind_file(name, "ovf")
-    if not fullname then
-        --fullname = kpsefind_file(file.removesuffix(name), "ovf")
-        fullname = kpsefind_file(lpegmatch(p_removesuffix, name), "ovf")
-    end
-    if fullname then
-        logreport ("log", 0, "main",
-                   "loading virtual font file %s.", fullname)
-    end
-    return fullname
-end
 
 --[[doc--
 
@@ -428,8 +385,6 @@ add_to_callback("hpack_filter",
                 nodes.simple_font_handler,
                 "luaotfload.node_processor",
                 1)
-add_to_callback("find_vf_file",
-                find_vf_file, "luaotfload.find_vf_file")
 
 load_luaotfload_module "override"   --- load glyphlist on demand
 

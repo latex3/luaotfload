@@ -1,10 +1,10 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
---  DESCRIPTION:  Luatex fontloader initialization
+--  DESCRIPTION:  Luaotfload initialization
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2015-03-29 12:41:09+0200
+--     MODIFIED:  2015-05-26 07:51:29+0200
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -13,14 +13,34 @@
 --- version 2.4 to 2.5. Thus, the comments are still in TeX (Latex)
 --- markup.
 
-if not modules then modules = { } end modules ["luaotfload-main"] = {
-    version   = "2.6",
-    comment   = "fontloader initialization",
-    author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
-    copyright = "PRAGMA ADE / ConTeXt Development Team",
-    license   = "GNU General Public License v. 2.0"
-}
+local initial_log_level = 0
 
+luaotfload                        = luaotfload or { }
+local luaotfload                  = luaotfload
+luaotfload.log                    = luaotfload.log or { }
+luaotfload.version                = "2.6"
+luaotfload.loaders                = { }
+
+local authors = "\z
+    Hans Hagen,\z
+    Khaled Hosny,\z
+    Elie Roux,\z
+    Will Robertson,\z
+    Philipp Gesang,\z
+    Dohyun Kim,\z
+    Reuben Thomas\z
+"
+
+
+luaotfload.module = {
+    name          = "luaotfload-main",
+    version       = 2.60001,
+    date          = "2015/05/26",
+    description   = "OpenType layout system.",
+    author        = authors,
+    copyright     = authors,
+    license       = "GPL v2.0"
+}
 
 --[[doc--
 
@@ -42,23 +62,6 @@ if not modules then modules = { } end modules ["luaotfload-main"] = {
     willingness to incorporate our suggestions.
 
 --doc]]--
-
-local initial_log_level = 0
-
-luaotfload                        = luaotfload or { }
-local luaotfload                  = luaotfload
-luaotfload.log                    = luaotfload.log or { }
-luaotfload.version                = "2.6" -- FIXME version belongs in common init
-
-luaotfload.module = {
-    name          = "luaotfload-main",
-    version       = 2.60000,
-    date          = "2015/03/29",
-    description   = "OpenType layout system.",
-    author        = "Elie Roux & Hans Hagen",
-    copyright     = "Elie Roux",
-    license       = "GPL v2.0"
-}
 
 local luatexbase       = luatexbase
 
@@ -88,6 +91,8 @@ luaotfload.log.tex        = {
 }
 
 --[[doc--
+
+    XXX remove
 
      We set the minimum version requirement for \LUATEX to v0.76,
      because the font loader requires recent features like direct
@@ -140,6 +145,9 @@ local load_luaotfload_module = make_loader "luaotfload"
 ----- load_luaotfload_module = make_loader "luatex" --=> for Luatex-Plain
 local load_fontloader_module = make_loader "fontloader"
 
+luaotfload.loaders.luaotfload = load_luaotfload_module
+luaotfload.loaders.fontloader = load_fontloader_module
+
 load_luaotfload_module "log" --- log messages
 
 local log             = luaotfload.log
@@ -148,6 +156,8 @@ local logreport       = log.report
 log.set_loglevel (default_log_level)
 
 --[[doc--
+
+  XXX remove
 
   Before \TeX Live 2013 version, \LUATEX had a bug that made ofm fonts
   fail when called with their extension. There was a side-effect making

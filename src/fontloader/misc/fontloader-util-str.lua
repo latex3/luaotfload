@@ -1118,7 +1118,7 @@ function string.optionalquoted(str)
     return lpegmatch(pattern,str) or str
 end
 
-local pattern = Cs((newline / os.newline + 1)^0)
+local pattern = Cs((newline / (os.newline or "\r") + 1)^0)
 
 function string.replacenewlines(str)
     return lpegmatch(pattern,str)

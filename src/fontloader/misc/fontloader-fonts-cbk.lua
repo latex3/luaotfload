@@ -17,6 +17,9 @@ local nodes = nodes
 -- Fonts: (might move to node-gef.lua)
 
 local traverse_id = node.traverse_id
+local free_node   = node.free
+local remove_node = node.remove
+
 local glyph_code  = nodes.nodecodes.glyph
 local disc_code   = nodes.nodecodes.disc
 
@@ -57,6 +60,8 @@ function nodes.handlers.nodepass(head)
         local basefonts = { }
         local prevfont  = nil
         local basefont  = nil
+        local variants  = nil
+        local redundant = nil
         for n in traverse_id(glyph_code,head) do
             local font = n.font
             if font ~= prevfont then
@@ -78,8 +83,45 @@ function nodes.handlers.nodepass(head)
                                 basefonts[#basefonts+1] = basefont
                             end
                         end
+                        local resources = tfmdata.resources
+                        variants  = resources and resources.variants
+                        variants = variants and next(variants) and variants or false
+                    end
+                else
+                    local tfmdata = fontdata[prevfont]
+                    if tfmdata then
+                        local resources = tfmdata.resources
+                        variants = resources and resources.variants
+                        variants = variants and next(variants) and variants or false
                     end
                 end
+            end
+            if variants then
+                local char = n.char
+                if char >= 0xFE00 and (char <= 0xFE0F or (char >= 0xE0100 and char <= 0xE01EF)) then
+                    local hash = variants[char]
+                    if hash then
+                        local p = n.prev
+                        if p and p.id == glyph_code then
+                            local variant = hash[p.char]
+                            if variant then
+                                p.char = variant
+                                if not redundant then
+                                    redundant = { n }
+                                else
+                                    redundant[#redundant+1] = n
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        if redundant then
+            for i=1,#redundant do
+                local n = redundant[i]
+                remove_node(head,n)
+                free_node(n)
             end
         end
         for d in traverse_id(disc_code,head) do

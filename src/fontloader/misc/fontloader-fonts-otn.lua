@@ -376,7 +376,7 @@ local function copy_glyph(g) -- next and prev are untouched !
     end
 end
 
--- 
+--
 
 
 -- start is a mark and we need to keep that one
@@ -1834,15 +1834,8 @@ local function normal_handle_contextchain(head,start,kind,chainname,contexts,seq
                             break
                         end
                     end
-                elseif f == 2 then
-                    match = seq[1][32]
                 else
-                    for n=f-1,1 do
-                        if not seq[n][32] then
-                            match = false
-                            break
-                        end
-                    end
+                    match = false
                 end
             end
             -- after
@@ -1895,15 +1888,8 @@ local function normal_handle_contextchain(head,start,kind,chainname,contexts,seq
                             break
                         end
                     end
-                elseif s-l == 1 then
-                    match = seq[s][32]
                 else
-                    for n=l+1,s do
-                        if not seq[n][32] then
-                            match = false
-                            break
-                        end
-                    end
+                    match = false
                 end
             end
         end

@@ -36,6 +36,7 @@ local elapsedtime        = statistics.elapsedtime
 local findbinfile        = resolvers.findbinfile
 
 local trace_private      = false  registertracker("otf.private",        function(v) trace_private   = v end)
+local trace_subfonts     = false  registertracker("otf.subfonts",       function(v) trace_subfonts  = v end)
 local trace_loading      = false  registertracker("otf.loading",        function(v) trace_loading   = v end)
 local trace_features     = false  registertracker("otf.features",       function(v) trace_features  = v end)
 local trace_dynamics     = false  registertracker("otf.dynamics",       function(v) trace_dynamics  = v end)
@@ -53,7 +54,7 @@ local otf                = fonts.handlers.otf
 
 otf.glists               = { "gsub", "gpos" }
 
-otf.version              = 2.803 -- beware: also sync font-mis.lua
+otf.version              = 2.812 -- beware: also sync font-mis.lua
 otf.cache                = containers.define("fonts", "otf", otf.version, true)
 
 local hashes             = fonts.hashes
@@ -699,6 +700,7 @@ end
 -- not setting hasitalics and class (when nil) during table cronstruction can save some mem
 
 actions["prepare glyphs"] = function(data,filename,raw)
+    local tableversion = tonumber(raw.table_version) or 0
     local rawglyphs    = raw.glyphs
     local rawsubfonts  = raw.subfonts
     local rawcidinfo   = raw.cidinfo
@@ -722,80 +724,138 @@ actions["prepare glyphs"] = function(data,filename,raw)
             local cidmap = fonts.cid.getmap(rawcidinfo)
             if cidmap then
                 rawcidinfo.usedname = cidmap.usedname
-                local nofnames, nofunicodes = 0, 0
-                local cidunicodes, cidnames = cidmap.unicodes, cidmap.names
+                local nofnames    = 0
+                local nofunicodes = 0
+                local cidunicodes = cidmap.unicodes
+                local cidnames    = cidmap.names
+                local cidtotal    = 0
+                local unique      = trace_subfonts and { }
                 for cidindex=1,#rawsubfonts do
                     local subfont   = rawsubfonts[cidindex]
                     local cidglyphs = subfont.glyphs
                     if includesubfonts then
                         metadata.subfonts[cidindex] = somecopy(subfont)
                     end
-                    -- we have delayed loading so we cannot use next
-                    for index=0,subfont.glyphcnt-1 do -- we could take the previous glyphcnt instead of 0
-                        local glyph = cidglyphs[index]
-                        if glyph then
-                            local unicode = glyph.unicode
-                            if     unicode >= 0x00E000 and unicode <= 0x00F8FF then
-                                unicode = -1
-                            elseif unicode >= 0x0F0000 and unicode <= 0x0FFFFD then
-                                unicode = -1
-                            elseif unicode >= 0x100000 and unicode <= 0x10FFFD then
-                                unicode = -1
-                            end
-                            local name = glyph.name or cidnames[index]
-                            if not unicode or unicode == -1 then -- or unicode >= criterium then
-                                unicode = cidunicodes[index]
-                            end
-                            if unicode and descriptions[unicode] then
-                                if trace_private then
-                                    report_otf("preventing glyph %a at index %H to overload unicode %U",name or "noname",index,unicode)
-                                end
-                                unicode = -1
-                            end
-                            if not unicode or unicode == -1 then -- or unicode >= criterium then
-                                if not name then
-                                    name = format("u%06X.ctx",private)
-                                end
-                                unicode = private
-                                unicodes[name] = private
-                                if trace_private then
-                                    report_otf("glyph %a at index %H is moved to private unicode slot %U",name,index,private)
-                                end
-                                private = private + 1
-                                nofnames = nofnames + 1
-                            else
-                             -- if unicode > criterium then
-                             --     local taken = descriptions[unicode]
-                             --     if taken then
-                             --         private = private + 1
-                             --         descriptions[private] = taken
-                             --         unicodes[taken.name] = private
-                             --         indices[taken.index] = private
-                             --         if trace_private then
-                             --             report_otf("slot %U is moved to %U due to private in font",unicode)
-                             --         end
-                             --     end
-                             -- end
-                                if not name then
-                                    name = format("u%06X.ctx",unicode)
-                                end
-                                unicodes[name] = unicode
-                                nofunicodes = nofunicodes + 1
-                            end
-                            indices[index] = unicode -- each index is unique (at least now)
-                            local description = {
-                             -- width       = glyph.width,
-                                boundingbox = glyph.boundingbox,
-                                name        = glyph.name or name or "unknown", -- uniXXXX
-                                cidindex    = cidindex,
-                                index       = index,
-                                glyph       = glyph,
-                            }
-                            descriptions[unicode] = description
-                        else
-                         -- report_otf("potential problem: glyph %U is used but empty",index)
-                        end
+                    local cidcnt, cidmin, cidmax
+                    if tableversion > 0.3 then
+                        -- we have delayed loading so we cannot use next
+                        cidcnt = subfont.glyphcnt
+                        cidmin = subfont.glyphmin
+                        cidmax = subfont.glyphmax
+                    else
+                        cidcnt = subfont.glyphcnt
+                        cidmin = 0
+                        cidmax = cidcnt - 1
                     end
+                    if trace_subfonts then
+                        local cidtot = cidmax - cidmin + 1
+                        cidtotal = cidtotal + cidtot
+                        report_otf("subfont: %i, min: %i, max: %i, cnt: %i, n: %i",cidindex,cidmin,cidmax,cidtot,cidcnt)
+                    end
+                    if cidcnt > 0 then
+                        for cidslot=cidmin,cidmax do
+                            local glyph = cidglyphs[cidslot]
+                            if glyph then
+                                local index = tableversion > 0.3 and glyph.orig_pos or cidslot
+                                if trace_subfonts then
+                                    unique[index] = true
+                                end
+                                local unicode = glyph.unicode
+                                if     unicode >= 0x00E000 and unicode <= 0x00F8FF then
+                                    unicode = -1
+                                elseif unicode >= 0x0F0000 and unicode <= 0x0FFFFD then
+                                    unicode = -1
+                                elseif unicode >= 0x100000 and unicode <= 0x10FFFD then
+                                    unicode = -1
+                                end
+                                local name = glyph.name or cidnames[index]
+                                if not unicode or unicode == -1 then -- or unicode >= criterium then
+                                    unicode = cidunicodes[index]
+                                end
+                                if unicode and descriptions[unicode] then
+                                    if trace_private then
+                                        report_otf("preventing glyph %a at index %H to overload unicode %U",name or "noname",index,unicode)
+                                    end
+                                    unicode = -1
+                                end
+                                if not unicode or unicode == -1 then -- or unicode >= criterium then
+                                    if not name then
+                                        name = format("u%06X.ctx",private)
+                                    end
+                                    unicode = private
+                                    unicodes[name] = private
+                                    if trace_private then
+                                        report_otf("glyph %a at index %H is moved to private unicode slot %U",name,index,private)
+                                    end
+                                    private = private + 1
+                                    nofnames = nofnames + 1
+                                else
+                                 -- if unicode > criterium then
+                                 --     local taken = descriptions[unicode]
+                                 --     if taken then
+                                 --         private = private + 1
+                                 --         descriptions[private] = taken
+                                 --         unicodes[taken.name] = private
+                                 --         indices[taken.index] = private
+                                 --         if trace_private then
+                                 --             report_otf("slot %U is moved to %U due to private in font",unicode)
+                                 --         end
+                                 --     end
+                                 -- end
+                                    if not name then
+                                        name = format("u%06X.ctx",unicode)
+                                    end
+                                    unicodes[name] = unicode
+                                    nofunicodes = nofunicodes + 1
+                                end
+                                indices[index] = unicode -- each index is unique (at least now)
+                                local description = {
+                                 -- width       = glyph.width,
+                                    boundingbox = glyph.boundingbox,
+                                 -- name        = glyph.name or name or "unknown", -- uniXXXX
+                                    name        = name or "unknown", -- uniXXXX
+                                    cidindex    = cidindex,
+                                    index       = cidslot,
+                                    glyph       = glyph,
+                                }
+                                descriptions[unicode] = description
+local altuni = glyph.altuni
+if altuni then
+ -- local d
+    for i=1,#altuni do
+        local a = altuni[i]
+        local u = a.unicode
+        if u ~= unicode then
+            local v = a.variant
+            if v then
+                -- tricky: no addition to d? needs checking but in practice such dups are either very simple
+                -- shapes or e.g cjk with not that many features
+                local vv = variants[v]
+                if vv then
+                    vv[u] = unicode
+                else -- xits-math has some:
+                    vv = { [u] = unicode }
+                    variants[v] = vv
+                end
+         -- elseif d then
+         --     d[#d+1] = u
+         -- else
+         --     d = { u }
+            end
+        end
+    end
+ -- if d then
+ --     duplicates[unicode] = d -- is this needed ?
+ -- end
+end
+                            end
+                        end
+                    else
+                        report_otf("potential problem: no glyphs found in subfont %i",cidindex)
+                    end
+                end
+                if trace_subfonts then
+                    report_otf("nofglyphs: %i, unique: %i",cidtotal,table.count(unique))
                 end
                 if trace_loading then
                     report_otf("cid font remapped, %s unicode points, %s symbolic names, %s glyphs",nofunicodes, nofnames, nofunicodes+nofnames)
@@ -809,87 +869,97 @@ actions["prepare glyphs"] = function(data,filename,raw)
 
     else
 
-        for index=0,raw.glyphcnt-1 do -- not raw.glyphmax-1 (as that will crash)
-            local glyph = rawglyphs[index]
-            if glyph then
-                local unicode = glyph.unicode
-                local name    = glyph.name
-                if not unicode or unicode == -1 then -- or unicode >= criterium then
-                    unicode = private
-                    unicodes[name] = private
-                    if trace_private then
-                        report_otf("glyph %a at index %H is moved to private unicode slot %U",name,index,private)
-                    end
-                    private = private + 1
-                else
-                    -- We have a font that uses and exposes the private area. As this is rather unreliable it's
-                    -- advised no to trust slots here (better use glyphnames). Anyway, we need a double check:
-                    -- we need to move already moved entries and we also need to bump the next private to after
-                    -- the (currently) last slot. This could leave us with a hole but we have holes anyway.
-                    if unicode > criterium then
-                        -- \definedfont[file:HANBatang-LVT.ttf] \fontchar{uF0135} \char"F0135
-                        local taken = descriptions[unicode]
-                        if taken then
-                            if unicode >= private then
-                                private = unicode + 1 -- restart private (so we can have mixed now)
+        local cnt = raw.glyphcnt or 0
+        local min = tableversion > 0.3 and raw.glyphmin or 0
+        local max = tableversion > 0.3 and raw.glyphmax or (raw.glyphcnt - 1)
+        if cnt > 0 then
+--             for index=0,cnt-1 do
+            for index=min,max do
+                local glyph = rawglyphs[index]
+                if glyph then
+                    local unicode = glyph.unicode
+                    local name    = glyph.name
+                    if not unicode or unicode == -1 then -- or unicode >= criterium then
+                        unicode = private
+                        unicodes[name] = private
+                        if trace_private then
+                            report_otf("glyph %a at index %H is moved to private unicode slot %U",name,index,private)
+                        end
+                        private = private + 1
+                    else
+                        -- We have a font that uses and exposes the private area. As this is rather unreliable it's
+                        -- advised no to trust slots here (better use glyphnames). Anyway, we need a double check:
+                        -- we need to move already moved entries and we also need to bump the next private to after
+                        -- the (currently) last slot. This could leave us with a hole but we have holes anyway.
+                        if unicode > criterium then
+                            -- \definedfont[file:HANBatang-LVT.ttf] \fontchar{uF0135} \char"F0135
+                            local taken = descriptions[unicode]
+                            if taken then
+                                if unicode >= private then
+                                    private = unicode + 1 -- restart private (so we can have mixed now)
+                                else
+                                    private = private + 1 -- move on
+                                end
+                                descriptions[private] = taken
+                                unicodes[taken.name] = private
+                                indices[taken.index] = private
+                                if trace_private then
+                                    report_otf("slot %U is moved to %U due to private in font",unicode)
+                                end
                             else
-                                private = private + 1 -- move on
-                            end
-                            descriptions[private] = taken
-                            unicodes[taken.name] = private
-                            indices[taken.index] = private
-                            if trace_private then
-                                report_otf("slot %U is moved to %U due to private in font",unicode)
-                            end
-                        else
-                            if unicode >= private then
-                                private = unicode + 1 -- restart (so we can have mixed now)
+                                if unicode >= private then
+                                    private = unicode + 1 -- restart (so we can have mixed now)
+                                end
                             end
                         end
+                        unicodes[name] = unicode
                     end
-                    unicodes[name] = unicode
-                end
-                indices[index] = unicode
-             -- if not name then
-             --     name = format("u%06X",unicode) -- u%06X.ctx
-             -- end
-                descriptions[unicode] = {
-                 -- width       = glyph.width,
-                    boundingbox = glyph.boundingbox,
-                    name        = name,
-                    index       = index,
-                    glyph       = glyph,
-                }
-                local altuni = glyph.altuni
-                if altuni then
-                 -- local d
-                    for i=1,#altuni do
-                        local a = altuni[i]
-                        local u = a.unicode
-                        local v = a.variant
-                        if v then
-                            -- tricky: no addition to d? needs checking but in practice such dups are either very simple
-                            -- shapes or e.g cjk with not that many features
-                            local vv = variants[v]
-                            if vv then
-                                vv[u] = unicode
-                            else -- xits-math has some:
-                                vv = { [u] = unicode }
-                                variants[v] = vv
-                            end
-                     -- elseif d then
-                     --     d[#d+1] = u
-                     -- else
-                     --     d = { u }
-                        end
-                    end
-                 -- if d then
-                 --     duplicates[unicode] = d -- is this needed ?
+                    indices[index] = unicode
+                 -- if not name then
+                 --     name = format("u%06X",unicode) -- u%06X.ctx
                  -- end
+                    descriptions[unicode] = {
+                     -- width       = glyph.width,
+                        boundingbox = glyph.boundingbox,
+                        name        = name,
+                        index       = index,
+                        glyph       = glyph,
+                    }
+                    local altuni = glyph.altuni
+                    if altuni then
+                     -- local d
+                        for i=1,#altuni do
+                            local a = altuni[i]
+                            local u = a.unicode
+                            if u ~= unicode then
+                                local v = a.variant
+                                if v then
+                                    -- tricky: no addition to d? needs checking but in practice such dups are either very simple
+                                    -- shapes or e.g cjk with not that many features
+                                    local vv = variants[v]
+                                    if vv then
+                                        vv[u] = unicode
+                                    else -- xits-math has some:
+                                        vv = { [u] = unicode }
+                                        variants[v] = vv
+                                    end
+                             -- elseif d then
+                             --     d[#d+1] = u
+                             -- else
+                             --     d = { u }
+                                end
+                            end
+                        end
+                     -- if d then
+                     --     duplicates[unicode] = d -- is this needed ?
+                     -- end
+                    end
+                else
+                    report_otf("potential problem: glyph %U is used but empty",index)
                 end
-            else
-                report_otf("potential problem: glyph %U is used but empty",index)
             end
+        else
+            report_otf("potential problem: no glyphs found")
         end
 
     end
@@ -974,8 +1044,8 @@ actions["check encoding"] = function(data,filename,raw)
     end
 
     if mapdata then
-        mapdata.map     = { } -- clear some memory
-        mapdata.backmap = { } -- clear some memory
+        mapdata.map     = { } -- clear some memory (virtual and created each time anyway)
+        mapdata.backmap = { } -- clear some memory (virtual and created each time anyway)
     end
 end
 
@@ -991,7 +1061,6 @@ actions["add duplicates"] = function(data,filename,raw)
     local unicodes     = resources.unicodes -- name to unicode
     local indices      = resources.indices  -- index to unicodes
     local duplicates   = resources.duplicates
-
     for unicode, d in next, duplicates do
         local nofduplicates = #d
         if nofduplicates > 4 then

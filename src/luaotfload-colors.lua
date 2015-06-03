@@ -321,9 +321,10 @@ local color_handler = function (head)
     if res then
         res["1"]  = true
         local tpr = texget("pdfpageresources")
-        local pgf_loaded = tpr:find("/ExtGState %d+ 0 R")
+        local no_extgs = not tpr:find("/ExtGState<<.*>>")
+        local pgf_loaded = no_extgs and luaotfload.pgf_loaded
         if pgf_loaded then
-            tpr = texgettoks("pgf@sys@pgf@resource@list@extgs@toks") -- see luaotfload.sty
+            tpr = texgettoks(pgf_loaded) -- see luaotfload.sty
         end
 
         local t   = ""
@@ -335,9 +336,9 @@ local color_handler = function (head)
         end
         if t ~= "" then
             if pgf_loaded then
-                texsettoks("global", "pgf@sys@pgf@resource@list@extgs@toks", tpr..t)
+                texsettoks("global", pgf_loaded, tpr..t)
             else
-                if not tpr:find("/ExtGState<<.*>>") then
+                if no_extgs then
                     tpr = tpr .. "/ExtGState<<>>"
                 end
                 tpr = tpr:gsub("/ExtGState<<", "%1"..t)

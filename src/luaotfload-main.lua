@@ -4,7 +4,7 @@
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2015-05-26 07:51:29+0200
+--     MODIFIED:  2015-06-09 23:08:18+0200
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -13,8 +13,7 @@
 --- version 2.4 to 2.5. Thus, the comments are still in TeX (Latex)
 --- markup.
 
-local initial_log_level = 0
-
+local initial_log_level           = 0
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
@@ -65,6 +64,7 @@ luaotfload.module = {
 
 local luatexbase       = luatexbase
 
+local require          = require
 local setmetatable     = setmetatable
 local type, next       = type, next
 local stringlower      = string.lower
@@ -78,7 +78,7 @@ local create_callback  = luatexbase.create_callback
 local reset_callback   = luatexbase.reset_callback
 local call_callback    = luatexbase.call_callback
 
-local dummy_function    = function () end --- XXX this will be moved to the luaotfload namespace when we have the init module
+local dummy_function = function () end --- XXX this will be moved to the luaotfload namespace when we have the init module
 
 local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
@@ -105,7 +105,8 @@ luaotfload.log.tex        = {
 --doc]]--
 
 local min_luatex_version  = 79             --- i. e. 0.79
-local fontloader_package  = "fontloader"   --- default: from current Context
+--local fontloader_package  = "fontloader"   --- default: from current Context
+local fontloader_package  = "slim"
 
 if tex.luatexversion < min_luatex_version then
     warning ("LuaTeX v%.2f is old, v%.2f or later is recommended.",
@@ -137,7 +138,7 @@ local load_fontloader_module = make_loader "fontloader"
 luaotfload.loaders.luaotfload = load_luaotfload_module
 luaotfload.loaders.fontloader = load_fontloader_module
 
-load_luaotfload_module "log" --- log messages
+load_luaotfload_module "init" --- fontloader initialization
 
 local log             = luaotfload.log
 local logreport       = log.report

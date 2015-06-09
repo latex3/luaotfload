@@ -14,6 +14,7 @@
   Initialization phases:
 
       - Load Lualibs from package
+      - Set up the logger routines
       - Load Fontloader
           - as package specified in configuration
           - from Context install
@@ -29,10 +30,30 @@
 
 --doc]]--
 
+config                          = config or { }
+local config                    = config
+config.luaotfload               = config.luaotfload or { }
+
+config.lualibs                  = config.lualibs or { }
+config.lualibs.verbose          = false
+config.lualibs.prefer_merged    = true
+config.lualibs.load_extended    = true
+
+require "lualibs"
+
+if not lualibs    then error("this module requires Luaotfload") end
 if not luaotfload then error("this module requires Luaotfload") end
 
 local load_luaotfload_module = luaotfload.loaders.luaotfload
 local load_fontloader_module = luaotfload.loaders.fontloader
 
+--[[doc--
 
+    The logger needs to be in place prior to loading the fontloader due
+    to order of initialization being crucial for the logger functions
+    that are swapped.
+
+--doc]]--
+
+load_luaotfload_module "log"
 

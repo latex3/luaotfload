@@ -647,10 +647,10 @@ local function inject_cursives(glyphs,nofglyphs)
     end
 end
 
-local function inject_kerns(head,glyphs,nofglyphs)
+local function inject_kerns(head,list,length)
  -- todo: pre/post/replace
-    for i=1,#glyphs do
-        local n = glyphs[i]
+    for i=1,length do
+        local n  = list[i]
         local pn = rawget(properties,n)
         if pn then
             local i = rawget(pn,"injections")
@@ -688,6 +688,9 @@ local function inject_everything(head,where)
         end
         inject_kerns(head,glyphs,nofglyphs)
     end
+    if nofmarks > 0 then
+        inject_kerns(head,marks,nofmarks)
+	end
     if keepregisteredcounts then
         keepregisteredcounts  = false
     else
@@ -998,7 +1001,7 @@ local function inject_pairs_only(head,where)
                     if getsubtype(n) < 256 then
                         local p = rawget(properties,n)
                         if p then
-                            local i = rawget(pn,"replaceinjections")
+                            local i = rawget(p,"replaceinjections")
                             if i then
                                 local yoffset = i.yoffset
                                 if yoffset and yoffset ~= 0 then

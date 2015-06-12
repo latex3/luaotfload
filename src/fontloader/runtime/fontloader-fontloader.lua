@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 03/10/15 12:09:17
+-- merge date  : 05/24/15 12:42:55
 
 do -- begin closure to overcome local limits and interference
 
@@ -660,62 +660,142 @@ function lpeg.append(list,pp,delayed,checked)
   end
   return p
 end
-local function make(t,hash)
-  local p=P(false)
+local p_false=P(false)
+local p_true=P(true)
+local function make(t)
+  local function making(t)
+    local p=p_false
+    local keys=sortedkeys(t)
+    for i=1,#keys do
+      local k=keys[i]
+      if k~="" then
+        local v=t[k]
+        if v==true then
+          p=p+P(k)*p_true
+        elseif v==false then
+        else
+          p=p+P(k)*making(v)
+        end
+      end
+    end
+    if t[""] then
+      p=p+p_true
+    end
+    return p
+  end
+  local p=p_false
   local keys=sortedkeys(t)
   for i=1,#keys do
     local k=keys[i]
-    local v=t[k]
-    local h=hash[v]
-    if h then
-      if next(v) then
-        p=p+P(k)*(make(v,hash)+P(true))
+    if k~="" then
+      local v=t[k]
+      if v==true then
+        p=p+P(k)*p_true
+      elseif v==false then
       else
-        p=p+P(k)*P(true)
-      end
-    else
-      if next(v) then
-        p=p+P(k)*make(v,hash)
-      else
-        p=p+P(k)
+        p=p+P(k)*making(v)
       end
     end
   end
   return p
 end
+local function collapse(t,x)
+  if type(t)~="table" then
+    return t,x
+  else
+    local n=next(t)
+    if n==nil then
+      return t,x
+    elseif next(t,n)==nil then
+      local k=n
+      local v=t[k]
+      if type(v)=="table" then
+        return collapse(v,x..k)
+      else
+        return v,x..k
+      end
+    else
+      local tt={}
+      for k,v in next,t do
+        local vv,kk=collapse(v,k)
+        tt[kk]=vv
+      end
+      return tt,x
+    end
+  end
+end
 function lpeg.utfchartabletopattern(list) 
   local tree={}
-  local hash={}
   local n=#list
   if n==0 then
     for s in next,list do
       local t=tree
+      local p,pk
       for c in gmatch(s,".") do
-        local tc=t[c]
-        if not tc then
-          tc={}
-          t[c]=tc
+        if t==true then
+          t={ [c]=true,[""]=true }
+          p[pk]=t
+          p=t
+          t=false
+        elseif t==false then
+          t={ [c]=false }
+          p[pk]=t
+          p=t
+          t=false
+        else
+          local tc=t[c]
+          if not tc then
+            tc=false
+            t[c]=false
+          end
+          p=t
+          t=tc
         end
-        t=tc
+        pk=c
       end
-      hash[t]=s
+      if t==false then
+        p[pk]=true
+      elseif t==true then
+      else
+        t[""]=true
+      end
     end
   else
     for i=1,n do
-      local t=tree
       local s=list[i]
+      local t=tree
+      local p,pk
       for c in gmatch(s,".") do
-        local tc=t[c]
-        if not tc then
-          tc={}
-          t[c]=tc
+        if t==true then
+          t={ [c]=true,[""]=true }
+          p[pk]=t
+          p=t
+          t=false
+        elseif t==false then
+          t={ [c]=false }
+          p[pk]=t
+          p=t
+          t=false
+        else
+          local tc=t[c]
+          if not tc then
+            tc=false
+            t[c]=false
+          end
+          p=t
+          t=tc
         end
-        t=tc
+        pk=c
       end
-      hash[t]=s
+      if t==false then
+        p[pk]=true
+      elseif t==true then
+      else
+        t[""]=true
+      end
     end
   end
-  return make(tree,hash)
+  return make(tree)
 end
 patterns.containseol=lpeg.finder(eol)
 local function nextstep(n,step,result)
@@ -961,7 +1041,7 @@ end
 function table.keys(t)
   if t then
     local keys,k={},0
-    for key,_ in next,t do
+    for key in next,t do
       k=k+1
       keys[k]=key
     end
@@ -972,32 +1052,51 @@ function table.keys(t)
 end
 local function compare(a,b)
   local ta=type(a) 
-  local tb=type(b) 
-  if ta==tb and ta=="number" then
-    return a<b
-  else
-    return tostring(a)<tostring(b) 
+  if ta=="number" then
+    local tb=type(b) 
+    if ta==tb then
+      return a<b
+    elseif tb=="string" then
+      return tostring(a)<b
+    end
+  elseif ta=="string" then
+    local tb=type(b) 
+    if ta==tb then
+      return a<b
+    else
+      return a<tostring(b)
+    end
   end
+  return tostring(a)<tostring(b) 
 end
 local function sortedkeys(tab)
   if tab then
     local srt,category,s={},0,0 
-    for key,_ in next,tab do
+    for key in next,tab do
       s=s+1
       srt[s]=key
       if category==3 then
+      elseif category==1 then
+        if type(key)~="string" then
+          category=3
+        end
+      elseif category==2 then
+        if type(key)~="number" then
+          category=3
+        end
       else
         local tkey=type(key)
         if tkey=="string" then
-          category=(category==2 and 3) or 1
+          category=1
         elseif tkey=="number" then
-          category=(category==1 and 3) or 2
+          category=2
         else
           category=3
         end
       end
     end
-    if category==0 or category==3 then
+    if s<2 then
+    elseif category==3 then
       sort(srt,compare)
     else
       sort(srt)
@@ -1010,13 +1109,15 @@ end
 local function sortedhashonly(tab)
   if tab then
     local srt,s={},0
-    for key,_ in next,tab do
+    for key in next,tab do
       if type(key)=="string" then
         s=s+1
         srt[s]=key
       end
     end
-    sort(srt)
+    if s>1 then
+      sort(srt)
+    end
     return srt
   else
     return {}
@@ -1025,13 +1126,15 @@ end
 local function sortedindexonly(tab)
   if tab then
     local srt,s={},0
-    for key,_ in next,tab do
+    for key in next,tab do
       if type(key)=="number" then
         s=s+1
         srt[s]=key
       end
     end
-    sort(srt)
+    if s>1 then
+      sort(srt)
+    end
     return srt
   else
     return {}
@@ -1040,13 +1143,15 @@ end
 local function sortedhashkeys(tab,cmp) 
   if tab then
     local srt,s={},0
-    for key,_ in next,tab do
+    for key in next,tab do
       if key then
         s=s+1
         srt[s]=key
       end
     end
-    sort(srt,cmp)
+    if s>1 then
+      sort(srt,cmp)
+    end
     return srt
   else
     return {}
@@ -1055,7 +1160,7 @@ end
 function table.allkeys(t)
   local keys={}
   for k,v in next,t do
-    for k,v in next,v do
+    for k in next,v do
       keys[k]=true
     end
   end
@@ -1074,19 +1179,21 @@ local function sortedhash(t,cmp)
     else
       s=sortedkeys(t) 
     end
-    local n=0
     local m=#s
-    local function kv() 
-      if n<m then
-        n=n+1
-        local k=s[n]
-        return k,t[k]
+    if m==1 then
+      return next,t
+    elseif m>0 then
+      local n=0
+      return function()
+        if n<m then
+          n=n+1
+          local k=s[n]
+          return k,t[k]
+        end
       end
     end
-    return kv 
-  else
-    return nothing
   end
+  return nothing
 end
 table.sortedhash=sortedhash
 table.sortedpairs=sortedhash 
@@ -1228,39 +1335,36 @@ function table.fromhash(t)
   end
   return hsh
 end
-local noquotes,hexify,handle,reduce,compact,inline,functions
+local noquotes,hexify,handle,compact,inline,functions
 local reserved=table.tohash { 
   'and','break','do','else','elseif','end','false','for','function','if',
   'in','local','nil','not','or','repeat','return','then','true','until','while',
   'NaN','goto',
 }
 local function simple_table(t)
-  if #t>0 then
+  local nt=#t
+  if nt>0 then
     local n=0
     for _,v in next,t do
       n=n+1
     end
-    if n==#t then
-      local tt,nt={},0
-      for i=1,#t do
+    if n==nt then
+      local tt={}
+      for i=1,nt do
         local v=t[i]
         local tv=type(v)
         if tv=="number" then
-          nt=nt+1
           if hexify then
-            tt[nt]=format("0x%X",v)
+            tt[i]=format("0x%X",v)
           else
-            tt[nt]=tostring(v) 
+            tt[i]=tostring(v) 
           end
         elseif tv=="string" then
-          nt=nt+1
-          tt[nt]=format("%q",v)
+          tt[i]=format("%q",v)
         elseif tv=="boolean" then
-          nt=nt+1
-          tt[nt]=v and "true" or "false"
+          tt[i]=v and "true" or "false"
         else
-          tt=nil
-          break
+          return nil
         end
       end
       return tt
@@ -1314,7 +1418,8 @@ local function do_serialize(root,name,depth,level,indexed)
     for i=1,#sk do
       local k=sk[i]
       local v=root[k]
-      local tv,tk=type(v),type(k)
+      local tv=type(v)
+      local tk=type(k)
       if compact and first and tk=="number" and k>=first and k<=last then
         if tv=="number" then
           if hexify then
@@ -1323,11 +1428,7 @@ local function do_serialize(root,name,depth,level,indexed)
             handle(format("%s %s,",depth,v)) 
           end
         elseif tv=="string" then
-          if reduce and tonumber(v) then
-            handle(format("%s %s,",depth,v))
-          else
-            handle(format("%s %q,",depth,v))
-          end
+          handle(format("%s %q,",depth,v))
         elseif tv=="table" then
           if next(v)==nil then
             handle(format("%s {},",depth))
@@ -1383,34 +1484,18 @@ local function do_serialize(root,name,depth,level,indexed)
           end
         end
       elseif tv=="string" then
-        if reduce and tonumber(v) then
-          if tk=="number" then
-            if hexify then
-              handle(format("%s [0x%X]=%s,",depth,k,v))
-            else
-              handle(format("%s [%s]=%s,",depth,k,v))
-            end
-          elseif tk=="boolean" then
-            handle(format("%s [%s]=%s,",depth,k and "true" or "false",v))
-          elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
-            handle(format("%s %s=%s,",depth,k,v))
+        if tk=="number" then
+          if hexify then
+            handle(format("%s [0x%X]=%q,",depth,k,v))
           else
-            handle(format("%s [%q]=%s,",depth,k,v))
+            handle(format("%s [%s]=%q,",depth,k,v))
           end
+        elseif tk=="boolean" then
+          handle(format("%s [%s]=%q,",depth,k and "true" or "false",v))
+        elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+          handle(format("%s %s=%q,",depth,k,v))
         else
-          if tk=="number" then
-            if hexify then
-              handle(format("%s [0x%X]=%q,",depth,k,v))
-            else
-              handle(format("%s [%s]=%q,",depth,k,v))
-            end
-          elseif tk=="boolean" then
-            handle(format("%s [%s]=%q,",depth,k and "true" or "false",v))
-          elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
-            handle(format("%s %s=%q,",depth,k,v))
-          else
-            handle(format("%s [%q]=%q,",depth,k,v))
-          end
+          handle(format("%s [%q]=%q,",depth,k,v))
         end
       elseif tv=="table" then
         if next(v)==nil then
@@ -1507,7 +1592,6 @@ local function serialize(_handle,root,name,specification)
     noquotes=specification.noquotes
     hexify=specification.hexify
     handle=_handle or specification.handle or print
-    reduce=specification.reduce or false
     functions=specification.functions
     compact=specification.compact
     inline=specification.inline and compact
@@ -1524,7 +1608,6 @@ local function serialize(_handle,root,name,specification)
     noquotes=false
     hexify=false
     handle=_handle or print
-    reduce=false
     compact=true
     inline=true
     functions=true
@@ -2658,6 +2741,9 @@ if not modules then modules={} end modules ['l-math']={
   license="see context related readme files"
 }
 local floor,sin,cos,tan=math.floor,math.sin,math.cos,math.tan
+if not math.ceiling then
+  math.ceiling=math.ceil
+end
 if not math.round then
   function math.round(x) return floor(x+0.5) end
 end
@@ -2715,6 +2801,11 @@ else
 end
 if not number then number={} end 
 local stripper=patterns.stripzeros
+local newline=patterns.newline
+local endofstring=patterns.endofstring
+local whitespace=patterns.whitespace
+local spacer=patterns.spacer
+local spaceortab=patterns.spaceortab
 local function points(n)
   n=tonumber(n)
   return (not n or n==0) and "0pt" or lpegmatch(stripper,format("%.5fpt",n/65536))
@@ -2725,12 +2816,12 @@ local function basepoints(n)
 end
 number.points=points
 number.basepoints=basepoints
-local rubish=patterns.spaceortab^0*patterns.newline
-local anyrubish=patterns.spaceortab+patterns.newline
+local rubish=spaceortab^0*newline
+local anyrubish=spaceortab+newline
 local anything=patterns.anything
-local stripped=(patterns.spaceortab^1/"")*patterns.newline
+local stripped=(spaceortab^1/"")*newline
 local leading=rubish^0/""
-local trailing=(anyrubish^1*patterns.endofstring)/""
+local trailing=(anyrubish^1*endofstring)/""
 local redundant=rubish^3/"\n"
 local pattern=Cs(leading*(trailing+redundant+stripped+anything)^0)
 function strings.collapsecrlf(str)
@@ -2776,17 +2867,13 @@ local pattern=Carg(1)/function(t)
      else
        return ""
      end
-   end+patterns.newline*Cp()/function(position)
+   end+newline*Cp()/function(position)
      extra,start=0,position
    end+patterns.anything
  )^1)
 function strings.tabtospace(str,tab)
   return lpegmatch(pattern,str,1,tab or 7)
 end
-local newline=patterns.newline
-local endofstring=patterns.endofstring
-local whitespace=patterns.whitespace
-local spacer=patterns.spacer
 local space=spacer^0
 local nospace=space/""
 local endofline=nospace*newline
@@ -3354,6 +3441,10 @@ local pattern=Cs(dquote*(equote-P(-2))^0*dquote)
 +Cs(cquote*(equote-space)^0*space*equote^0*cquote) 
 function string.optionalquoted(str)
   return lpegmatch(pattern,str) or str
+end
+local pattern=Cs((newline/(os.newline or "\r")+1)^0)
+function string.replacenewlines(str)
+  return lpegmatch(pattern,str)
 end
 
 end -- closure
@@ -4336,7 +4427,8 @@ function constructors.scale(tfmdata,specification)
   local stackmath=not properties.nostackmath
   local nonames=properties.noglyphnames
   local haskerns=properties.haskerns   or properties.mode=="base" 
-  local hasligatures=properties.hasligatures or properties.mode=="base"
+  local hasligatures=properties.hasligatures or properties.mode=="base" 
+  local realdimensions=properties.realdimensions
   if changed and not next(changed) then
     changed=false
   end
@@ -4417,6 +4509,26 @@ function constructors.scale(tfmdata,specification)
     local width=description.width
     local height=description.height
     local depth=description.depth
+    if realdimensions then
+      if not height or height==0 then
+        local bb=description.boundingbox
+        local ht=bb[4]
+        if ht~=0 then
+          height=ht
+        end
+        if not depth or depth==0 then
+          local dp=-bb[2]
+          if dp~=0 then
+            depth=dp
+          end
+        end
+      elseif not depth or depth==0 then
+        local dp=-description.boundingbox[2]
+        if dp~=0 then
+          depth=dp
+        end
+      end
+    end
     if width then width=hdelta*width else width=scaledwidth end
     if height then height=vdelta*height else height=scaledheight end
     if depth and depth~=0 then
@@ -5280,6 +5392,7 @@ local report_fonts=logs.reporter("fonts","loading")
 local fonts=fonts or {}
 local mappings=fonts.mappings or {}
 fonts.mappings=mappings
+local allocate=utilities.storage.allocate
 local function loadlumtable(filename) 
   local lumname=file.replacesuffix(file.basename(filename),"lum")
   local lumfile=resolvers.findfile(lumname,"map") or ""
@@ -5381,7 +5494,7 @@ mappings.fromunicode16=fromunicode16
 local ligseparator=P("_")
 local varseparator=P(".")
 local namesplitter=Ct(C((1-ligseparator-varseparator)^1)*(ligseparator*C((1-ligseparator-varseparator)^1))^0)
-local overloads={
+local overloads=allocate {
   IJ={ name="I_J",unicode={ 0x49,0x4A },mess=0x0132 },
   ij={ name="i_j",unicode={ 0x69,0x6A },mess=0x0133 },
   ff={ name="f_f",unicode={ 0x66,0x66 },mess=0xFB00 },
@@ -7050,6 +7163,7 @@ local stoptiming=statistics.stoptiming
 local elapsedtime=statistics.elapsedtime
 local findbinfile=resolvers.findbinfile
 local trace_private=false registertracker("otf.private",function(v) trace_private=v end)
+local trace_subfonts=false registertracker("otf.subfonts",function(v) trace_subfonts=v end)
 local trace_loading=false registertracker("otf.loading",function(v) trace_loading=v end)
 local trace_features=false registertracker("otf.features",function(v) trace_features=v end)
 local trace_dynamics=false registertracker("otf.dynamics",function(v) trace_dynamics=v end)
@@ -7062,7 +7176,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.803 
+otf.version=2.812 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local hashes=fonts.hashes
 local definers=fonts.definers
@@ -7551,15 +7665,16 @@ actions["add dimensions"]=function(data,filename)
         report_otf("mark %a with width %b found in %a",d.name or "<noname>",wd,basename)
       end
       if bb then
-        local ht,dp=bb[4],-bb[2]
-        if ht==0 or ht<0 then
-        else
-          d.height=ht
-        end
-        if dp==0 or dp<0 then
-        else
-          d.depth=dp
-        end
+        local ht=bb[4]
+        local dp=-bb[2]
+          if ht==0 or ht<0 then
+          else
+            d.height=ht
+          end
+          if dp==0 or dp<0 then
+          else
+            d.depth=dp
+          end
       end
     end
   end
@@ -7594,6 +7709,7 @@ local function somecopy(old)
   end
 end
 actions["prepare glyphs"]=function(data,filename,raw)
+  local tableversion=tonumber(raw.table_version) or 0
   local rawglyphs=raw.glyphs
   local rawsubfonts=raw.subfonts
   local rawcidinfo=raw.cidinfo
@@ -7614,65 +7730,113 @@ actions["prepare glyphs"]=function(data,filename,raw)
       local cidmap=fonts.cid.getmap(rawcidinfo)
       if cidmap then
         rawcidinfo.usedname=cidmap.usedname
-        local nofnames,nofunicodes=0,0
-        local cidunicodes,cidnames=cidmap.unicodes,cidmap.names
+        local nofnames=0
+        local nofunicodes=0
+        local cidunicodes=cidmap.unicodes
+        local cidnames=cidmap.names
+        local cidtotal=0
+        local unique=trace_subfonts and {}
         for cidindex=1,#rawsubfonts do
           local subfont=rawsubfonts[cidindex]
           local cidglyphs=subfont.glyphs
           if includesubfonts then
             metadata.subfonts[cidindex]=somecopy(subfont)
           end
-          for index=0,subfont.glyphcnt-1 do 
-            local glyph=cidglyphs[index]
-            if glyph then
-              local unicode=glyph.unicode
-              if   unicode>=0x00E000 and unicode<=0x00F8FF then
-                unicode=-1
-              elseif unicode>=0x0F0000 and unicode<=0x0FFFFD then
-                unicode=-1
-              elseif unicode>=0x100000 and unicode<=0x10FFFD then
-                unicode=-1
-              end
-              local name=glyph.name or cidnames[index]
-              if not unicode or unicode==-1 then 
-                unicode=cidunicodes[index]
-              end
-              if unicode and descriptions[unicode] then
-                if trace_private then
-                  report_otf("preventing glyph %a at index %H to overload unicode %U",name or "noname",index,unicode)
-                end
-                unicode=-1
-              end
-              if not unicode or unicode==-1 then 
-                if not name then
-                  name=format("u%06X.ctx",private)
-                end
-                unicode=private
-                unicodes[name]=private
-                if trace_private then
-                  report_otf("glyph %a at index %H is moved to private unicode slot %U",name,index,private)
-                end
-                private=private+1
-                nofnames=nofnames+1
-              else
-                if not name then
-                  name=format("u%06X.ctx",unicode)
-                end
-                unicodes[name]=unicode
-                nofunicodes=nofunicodes+1
-              end
-              indices[index]=unicode 
-              local description={
-                boundingbox=glyph.boundingbox,
-                name=glyph.name or name or "unknown",
-                cidindex=cidindex,
-                index=index,
-                glyph=glyph,
-              }
-              descriptions[unicode]=description
-            else
-            end
+          local cidcnt,cidmin,cidmax
+          if tableversion>0.3 then
+            cidcnt=subfont.glyphcnt
+            cidmin=subfont.glyphmin
+            cidmax=subfont.glyphmax
+          else
+            cidcnt=subfont.glyphcnt
+            cidmin=0
+            cidmax=cidcnt-1
           end
+          if trace_subfonts then
+            local cidtot=cidmax-cidmin+1
+            cidtotal=cidtotal+cidtot
+            report_otf("subfont: %i, min: %i, max: %i, cnt: %i, n: %i",cidindex,cidmin,cidmax,cidtot,cidcnt)
+          end
+          if cidcnt>0 then
+            for cidslot=cidmin,cidmax do
+              local glyph=cidglyphs[cidslot]
+              if glyph then
+                local index=tableversion>0.3 and glyph.orig_pos or cidslot
+                if trace_subfonts then
+                  unique[index]=true
+                end
+                local unicode=glyph.unicode
+                if   unicode>=0x00E000 and unicode<=0x00F8FF then
+                  unicode=-1
+                elseif unicode>=0x0F0000 and unicode<=0x0FFFFD then
+                  unicode=-1
+                elseif unicode>=0x100000 and unicode<=0x10FFFD then
+                  unicode=-1
+                end
+                local name=glyph.name or cidnames[index]
+                if not unicode or unicode==-1 then 
+                  unicode=cidunicodes[index]
+                end
+                if unicode and descriptions[unicode] then
+                  if trace_private then
+                    report_otf("preventing glyph %a at index %H to overload unicode %U",name or "noname",index,unicode)
+                  end
+                  unicode=-1
+                end
+                if not unicode or unicode==-1 then 
+                  if not name then
+                    name=format("u%06X.ctx",private)
+                  end
+                  unicode=private
+                  unicodes[name]=private
+                  if trace_private then
+                    report_otf("glyph %a at index %H is moved to private unicode slot %U",name,index,private)
+                  end
+                  private=private+1
+                  nofnames=nofnames+1
+                else
+                  if not name then
+                    name=format("u%06X.ctx",unicode)
+                  end
+                  unicodes[name]=unicode
+                  nofunicodes=nofunicodes+1
+                end
+                indices[index]=unicode 
+                local description={
+                  boundingbox=glyph.boundingbox,
+                  name=name or "unknown",
+                  cidindex=cidindex,
+                  index=cidslot,
+                  glyph=glyph,
+                }
+                descriptions[unicode]=description
+local altuni=glyph.altuni
+if altuni then
+  for i=1,#altuni do
+    local a=altuni[i]
+    local u=a.unicode
+    if u~=unicode then
+      local v=a.variant
+      if v then
+        local vv=variants[v]
+        if vv then
+          vv[u]=unicode
+        else 
+          vv={ [u]=unicode }
+          variants[v]=vv
+        end
+      end
+    end
+  end
+end
+              end
+            end
+          else
+            report_otf("potential problem: no glyphs found in subfont %i",cidindex)
+          end
+        end
+        if trace_subfonts then
+          report_otf("nofglyphs: %i, unique: %i",cidtotal,table.count(unique))
         end
         if trace_loading then
           report_otf("cid font remapped, %s unicode points, %s symbolic names, %s glyphs",nofunicodes,nofnames,nofunicodes+nofnames)
@@ -7684,68 +7848,77 @@ actions["prepare glyphs"]=function(data,filename,raw)
       report_otf("font %a has no glyphs",filename)
     end
   else
-    for index=0,raw.glyphcnt-1 do 
-      local glyph=rawglyphs[index]
-      if glyph then
-        local unicode=glyph.unicode
-        local name=glyph.name
-        if not unicode or unicode==-1 then 
-          unicode=private
-          unicodes[name]=private
-          if trace_private then
-            report_otf("glyph %a at index %H is moved to private unicode slot %U",name,index,private)
-          end
-          private=private+1
-        else
-          if unicode>criterium then
-            local taken=descriptions[unicode]
-            if taken then
-              if unicode>=private then
-                private=unicode+1 
+    local cnt=raw.glyphcnt or 0
+    local min=tableversion>0.3 and raw.glyphmin or 0
+    local max=tableversion>0.3 and raw.glyphmax or (raw.glyphcnt-1)
+    if cnt>0 then
+      for index=min,max do
+        local glyph=rawglyphs[index]
+        if glyph then
+          local unicode=glyph.unicode
+          local name=glyph.name
+          if not unicode or unicode==-1 then 
+            unicode=private
+            unicodes[name]=private
+            if trace_private then
+              report_otf("glyph %a at index %H is moved to private unicode slot %U",name,index,private)
+            end
+            private=private+1
+          else
+            if unicode>criterium then
+              local taken=descriptions[unicode]
+              if taken then
+                if unicode>=private then
+                  private=unicode+1 
+                else
+                  private=private+1 
+                end
+                descriptions[private]=taken
+                unicodes[taken.name]=private
+                indices[taken.index]=private
+                if trace_private then
+                  report_otf("slot %U is moved to %U due to private in font",unicode)
+                end
               else
-                private=private+1 
+                if unicode>=private then
+                  private=unicode+1 
+                end
               end
-              descriptions[private]=taken
-              unicodes[taken.name]=private
-              indices[taken.index]=private
-              if trace_private then
-                report_otf("slot %U is moved to %U due to private in font",unicode)
-              end
-            else
-              if unicode>=private then
-                private=unicode+1 
+            end
+            unicodes[name]=unicode
+          end
+          indices[index]=unicode
+          descriptions[unicode]={
+            boundingbox=glyph.boundingbox,
+            name=name,
+            index=index,
+            glyph=glyph,
+          }
+          local altuni=glyph.altuni
+          if altuni then
+            for i=1,#altuni do
+              local a=altuni[i]
+              local u=a.unicode
+              if u~=unicode then
+                local v=a.variant
+                if v then
+                  local vv=variants[v]
+                  if vv then
+                    vv[u]=unicode
+                  else 
+                    vv={ [u]=unicode }
+                    variants[v]=vv
+                  end
+                end
               end
             end
           end
-          unicodes[name]=unicode
+        else
+          report_otf("potential problem: glyph %U is used but empty",index)
         end
-        indices[index]=unicode
-        descriptions[unicode]={
-          boundingbox=glyph.boundingbox,
-          name=name,
-          index=index,
-          glyph=glyph,
-        }
-        local altuni=glyph.altuni
-        if altuni then
-          for i=1,#altuni do
-            local a=altuni[i]
-            local u=a.unicode
-            local v=a.variant
-            if v then
-              local vv=variants[v]
-              if vv then
-                vv[u]=unicode
-              else 
-                vv={ [u]=unicode }
-                variants[v]=vv
-              end
-            end
-          end
-        end
-      else
-        report_otf("potential problem: glyph %U is used but empty",index)
       end
+    else
+      report_otf("potential problem: no glyphs found")
     end
   end
   resources.private=private
@@ -10398,9 +10571,9 @@ local function inject_cursives(glyphs,nofglyphs)
     end
   end
 end
-local function inject_kerns(head,glyphs,nofglyphs)
-  for i=1,#glyphs do
-    local n=glyphs[i]
+local function inject_kerns(head,list,length)
+  for i=1,length do
+    local n=list[i]
     local pn=rawget(properties,n)
     if pn then
       local i=rawget(pn,"injections")
@@ -10437,6 +10610,9 @@ local function inject_everything(head,where)
     end
     inject_kerns(head,glyphs,nofglyphs)
   end
+  if nofmarks>0 then
+    inject_kerns(head,marks,nofmarks)
+	end
   if keepregisteredcounts then
     keepregisteredcounts=false
   else
@@ -10727,7 +10903,7 @@ local function inject_pairs_only(head,where)
           if getsubtype(n)<256 then
             local p=rawget(properties,n)
             if p then
-              local i=rawget(pn,"replaceinjections")
+              local i=rawget(p,"replaceinjections")
               if i then
                 local yoffset=i.yoffset
                 if yoffset and yoffset~=0 then
@@ -11198,6 +11374,7 @@ local report_chain=logs.reporter("fonts","otf chain")
 local report_process=logs.reporter("fonts","otf process")
 local report_prepare=logs.reporter("fonts","otf prepare")
 local report_warning=logs.reporter("fonts","otf warning")
+local report_run=logs.reporter("fonts","otf run")
 registertracker("otf.verbose_chain",function(v) otf.setcontextchain(v and "verbose") end)
 registertracker("otf.normal_chain",function(v) otf.setcontextchain(v and "normal") end)
 registertracker("otf.replacements","otf.singles,otf.multiples,otf.alternatives,otf.ligatures")
@@ -11220,12 +11397,18 @@ local setprop=nuts.setprop
 local getfont=nuts.getfont
 local getsubtype=nuts.getsubtype
 local getchar=nuts.getchar
+local insert_node_before=nuts.insert_before
 local insert_node_after=nuts.insert_after
 local delete_node=nuts.delete
+local remove_node=nuts.remove
 local copy_node=nuts.copy
+local copy_node_list=nuts.copy_list
 local find_node_tail=nuts.tail
 local flush_node_list=nuts.flush_list
+local free_node=nuts.free
 local end_of_math=nuts.end_of_math
+local traverse_nodes=nuts.traverse
+local traverse_id=nuts.traverse_id
 local setmetatableindex=table.setmetatableindex
 local zwnj=0x200C
 local zwj=0x200D
@@ -11243,6 +11426,8 @@ local math_code=nodecodes.math
 local dir_code=whatcodes.dir
 local localpar_code=whatcodes.localpar
 local discretionary_code=disccodes.discretionary
+local regular_code=disccodes.regular
+local automatic_code=disccodes.automatic
 local ligature_code=glyphcodes.ligature
 local privateattribute=attributes.private
 local a_state=privateattribute('state')
@@ -12596,15 +12781,8 @@ local function normal_handle_contextchain(head,start,kind,chainname,contexts,seq
               break
             end
           end
-        elseif f==2 then
-          match=seq[1][32]
         else
-          for n=f-1,1 do
-            if not seq[n][32] then
-              match=false
-              break
-            end
-          end
+          match=false
         end
       end
       if match and s>l then
@@ -12654,15 +12832,8 @@ local function normal_handle_contextchain(head,start,kind,chainname,contexts,seq
               break
             end
           end
-        elseif s-l==1 then
-          match=seq[s][32]
         else
-          for n=l+1,s do
-            if not seq[n][32] then
-              match=false
-              break
-            end
-          end
+          match=false
         end
       end
     end
@@ -15039,6 +15210,8 @@ end
 local fonts=fonts
 local nodes=nodes
 local traverse_id=node.traverse_id
+local free_node=node.free
+local remove_node=node.remove
 local glyph_code=nodes.nodecodes.glyph
 local disc_code=nodes.nodecodes.disc
 local ligaturing=node.ligaturing
@@ -15068,6 +15241,8 @@ function nodes.handlers.nodepass(head)
     local basefonts={}
     local prevfont=nil
     local basefont=nil
+    local variants=nil
+    local redundant=nil
     for n in traverse_id(glyph_code,head) do
       local font=n.font
       if font~=prevfont then
@@ -15089,8 +15264,45 @@ function nodes.handlers.nodepass(head)
                 basefonts[#basefonts+1]=basefont
               end
             end
+            local resources=tfmdata.resources
+            variants=resources and resources.variants
+            variants=variants and next(variants) and variants or false
+          end
+        else
+          local tfmdata=fontdata[prevfont]
+          if tfmdata then
+            local resources=tfmdata.resources
+            variants=resources and resources.variants
+            variants=variants and next(variants) and variants or false
           end
         end
+      end
+      if variants then
+        local char=n.char
+        if char>=0xFE00 and (char<=0xFE0F or (char>=0xE0100 and char<=0xE01EF)) then
+          local hash=variants[char]
+          if hash then
+            local p=n.prev
+            if p and p.id==glyph_code then
+              local variant=hash[p.char]
+              if variant then
+                p.char=variant
+                if not redundant then
+                  redundant={ n }
+                else
+                  redundant[#redundant+1]=n
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+    if redundant then
+      for i=1,#redundant do
+        local n=redundant[i]
+        remove_node(head,n)
+        free_node(n)
       end
     end
     for d in traverse_id(disc_code,head) do

@@ -8,6 +8,10 @@ if not modules then modules = { } end modules ['l-math'] = {
 
 local floor, sin, cos, tan = math.floor, math.sin, math.cos, math.tan
 
+if not math.ceiling then
+    math.ceiling = math.ceil
+end
+
 if not math.round then
     function math.round(x) return floor(x + 0.5) end
 end

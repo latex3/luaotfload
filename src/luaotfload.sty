@@ -1,8 +1,9 @@
-%% Copyright (C) 2009-2014
+%% Copyright (C) 2009-2015
 %%
 %%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
 %%      and Khaled Hosny   <khaledhosny@eglug.org>
 %%      and Philipp Gesang <philipp.gesang@alumni.uni-heidelberg.de>
+%%      and Dohyun Kim     <nomosnomos@gmail.com>
 %%
 %% This file is part of Luaotfload.
 %%
@@ -33,15 +34,35 @@
 \csname ifluaotfloadloaded\endcsname
 \let\ifluaotfloadloaded\endinput
 \bgroup\expandafter\expandafter\expandafter\egroup
-\expandafter\ifx\csname ProvidesPackage\endcsname\relax
+\expandafter\ifx\csname selectfont\endcsname\relax
   \input luatexbase.sty
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
     %% FIXME  The date is meaningless, we need to find a way to
     %%        use the git revision instead.
-    [2014/07/24 v2.5-2 OpenType layout system]
+    [2015/03/29 v2.6 OpenType layout system]
   \RequirePackage{luatexbase}
 \fi
 \RequireLuaModule{luaotfload-main}
 
+% for compatibility with beamer class, which loads pgf package.
+\ifcsname selectfont\endcsname
+  \AtBeginDocument{\@ifpackageloaded{pgfsys}{
+    \csname newtoks\endcsname\pgf@sys@pgf@resource@list@extgs@toks
+    \directlua{luaotfload.pgf_loaded=\the\allocationnumber}
+    \def\pgf@sys@pgf@resource@list@extgs{\the\pgf@sys@pgf@resource@list@extgs@toks}
+    \def\pgf@sys@addpdfresource@extgs@plain#1{\global\pgf@sys@pgf@resource@list@extgs@toks
+      \expandafter{\the\pgf@sys@pgf@resource@list@extgs@toks #1}}
+  }{}}
+\endinput\fi
+% under plain tex, tikz (pgf) should be loaded before luaotfload.
+\ifcsname pgf@sys@pgf@resource@list@extgs\endcsname\else\endinput\fi
+\count255=\the\catcode`@\relax
+\catcode`@=11\relax
+\newtoks\pgf@sys@pgf@resource@list@extgs@toks
+\directlua{luaotfload.pgf_loaded=\the\allocationnumber}
+\def\pgf@sys@pgf@resource@list@extgs{\the\pgf@sys@pgf@resource@list@extgs@toks}
+\def\pgf@sys@addpdfresource@extgs@plain#1{\global\pgf@sys@pgf@resource@list@extgs@toks
+  \expandafter{\the\pgf@sys@pgf@resource@list@extgs@toks #1}}
+\catcode`@=\the\count255\relax

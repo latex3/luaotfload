@@ -1,7 +1,7 @@
 if not modules then modules = { } end modules ['luaotfload-colors'] = {
-    version   = "2.5",
+    version   = "2.6",
     comment   = "companion to luaotfload-main.lua (font color)",
-    author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
+    author    = "Khaled Hosny, Elie Roux, Philipp Gesang, Dohyun Kim",
     copyright = "Luaotfload Development Team",
     license   = "GNU GPL v2.0"
 }
@@ -22,19 +22,28 @@ explanation: http://tug.org/pipermail/luatex/2013-May/004305.html
 local log                   = luaotfload.log
 local logreport             = log.report
 
-local newnode               = node.new
-local nodetype              = node.id
-local traverse_nodes        = node.traverse
-local insert_node_before    = node.insert_before
-local insert_node_after     = node.insert_after
+local nodedirect            = node.direct
+local newnode               = nodedirect.new
+local insert_node_before    = nodedirect.insert_before
+local insert_node_after     = nodedirect.insert_after
+local todirect              = nodedirect.todirect
+local tonode                = nodedirect.tonode
+local setfield              = nodedirect.setfield
+local getid                 = nodedirect.getid
+local getfont               = nodedirect.getfont
+local getlist               = nodedirect.getlist
+local getsubtype            = nodedirect.getsubtype
+local getnext               = nodedirect.getnext
+local nodetail              = nodedirect.tail
+local getattribute          = nodedirect.has_attribute
+local setattribute          = nodedirect.set_attribute
 
 local texset                = tex.set
 local texget                = tex.get
+local texsettoks            = tex.settoks
+local texgettoks            = tex.gettoks
 
 local stringformat          = string.format
-local stringgsub            = string.gsub
-local stringfind            = string.find
-local stringsub             = string.sub
 
 local otffeatures           = fonts.constructors.newfeatures("otf")
 local identifiers           = fonts.hashes.identifiers
@@ -66,10 +75,11 @@ local lpegmatch      = lpeg.match
 local C, Cg, Ct, P, R, S = lpeg.C, lpeg.Cg, lpeg.Ct, lpeg.P, lpeg.R, lpeg.S
 
 local digit16        = R("09", "af", "AF")
+local opaque         = S("fF") * S("fF")
 local octet          = C(digit16 * digit16)
 
 local p_rgb          = octet * octet * octet
-local p_rgba         = p_rgb * octet
+local p_rgba         = p_rgb * (octet - opaque)
 local valid_digits   = C(p_rgba + p_rgb) -- matches eight or six hex digits
 
 local p_Crgb         = Cg(octet/hex_to_dec, "red") --- for captures
@@ -174,42 +184,53 @@ end
 
 --- Luatex internal types
 
+local nodetype          = node.id
 local glyph_t           = nodetype("glyph")
 local hlist_t           = nodetype("hlist")
 local vlist_t           = nodetype("vlist")
 local whatsit_t         = nodetype("whatsit")
-local page_insert_t     = nodetype("page_insert")
-local sub_box_t         = nodetype("sub_box")
+local disc_t            = nodetype("disc")
+local pdfliteral_t      = node.subtype("pdf_literal")
+local colorstack_t      = node.subtype("pdf_colorstack")
 
---- node -> nil | -1 | color‽
-local lookup_next_color
-lookup_next_color = function (head) --- paragraph material
-    for n in traverse_nodes(head) do
-        local n_id = n.id
+local color_callback
+local color_attr        = luatexbase.new_attribute("luaotfload_color_attribute")
 
-        if n_id == glyph_t then
-            local n_font
-            if  identifiers[n_font]
-            and identifiers[n_font].properties
-            and identifiers[n_font].properties.color
-            then
-                return identifiers[n.font].properties.color
-            else
-                return -1
-            end
-
-        elseif n_id == vlist_t or n_id == hlist_t or n_id == sub_box_t then
-            local r = lookup_next_color(n.list)
-            if r then
-                return r
-            end
-
-        elseif n_id == whatsit_t or n_id == page_insert_t then
-            return -1
+-- (node * node * string * bool * (bool | nil)) -> (node * node * (string | nil))
+local color_whatsit
+color_whatsit = function (head, curr, color, push, tail)
+    local pushdata  = hex_to_rgba(color)
+    local colornode = newnode(whatsit_t, colorstack_t)
+    setfield(colornode, "stack", 0)
+    setfield(colornode, "command", push and 1 or 2) -- 1: push, 2: pop
+    setfield(colornode, "data", push and pushdata or nil)
+    if tail then
+        head, curr = insert_node_after (head, curr, colornode)
+    else
+        head = insert_node_before(head, curr, colornode)
+    end
+    if not push and color:len() > 6 then
+        local colornode = newnode(whatsit_t, pdfliteral_t)
+        setfield(colornode, "mode", 2)
+        setfield(colornode, "data", "/TransGs1 gs")
+        if tail then
+            head, curr = insert_node_after (head, curr, colornode)
+        else
+            head = insert_node_before(head, curr, colornode)
         end
     end
-    return nil
+    color = push and color or nil
+    return head, curr, color
 end
+
+-- number -> string | nil
+local get_font_color = function (font_id)
+    local tfmdata    = identifiers[font_id]
+    local font_color = tfmdata and tfmdata.properties and tfmdata.properties.color
+    return font_color
+end
+
+local cnt = 0
 
 --[[doc--
 While the second argument and second returned value are apparently
@@ -217,99 +238,140 @@ always nil when the function is called, they temporarily take string
 values during the node list traversal.
 --doc]]--
 
-local cnt = 0
---- node -> string -> int -> (node * string)
+--- (node * (string | nil)) -> (node * (string | nil))
 local node_colorize
-node_colorize = function (head, current_color, next_color)
-    for n in traverse_nodes(head) do
-        local n_id      = n.id
-        local nextnode  = n.next
+node_colorize = function (head, current_color)
+    local n = head
+    while n do
+        local n_id = getid(n)
 
-        if n_id == hlist_t or n_id == vlist_t or n_id == sub_box_t then
-            local next_color_in = lookup_next_color(nextnode) or next_color
-            n.list, current_color = node_colorize(n.list, current_color, next_color_in)
+        if n_id == hlist_t or n_id == vlist_t then
+            cnt = cnt + 1
+            local n_list = getlist(n)
+            if getattribute(n_list, color_attr) then
+                if current_color then
+                    head, n, current_color = color_whatsit(head, n, current_color, false)
+                end
+            else
+                n_list, current_color = node_colorize(n_list, current_color)
+                if current_color and getsubtype(n) == 1 then -- created by linebreak
+                    n_list, _, current_color = color_whatsit(n_list, nodetail(n_list), current_color, false, true)
+                end
+                setfield(n, "head", n_list)
+            end
+            cnt = cnt - 1
 
         elseif n_id == glyph_t then
-            cnt = cnt + 1
-            local tfmdata = identifiers[n.font]
-
             --- colorization is restricted to those fonts
             --- that received the “color” property upon
             --- loading (see ``setcolor()`` above)
-            if tfmdata and tfmdata.properties  and tfmdata.properties.color then
-                local font_color = tfmdata.properties.color
---                luaotfload.info(
---                    "n: %d; %s; %d %s, %s",
---                    cnt, utf.char(n.char), n.font, "<TRUE>", font_color)
-                if font_color ~= current_color then
-                    local pushcolor = hex_to_rgba(font_color)
-                    local push      = newnode(whatsit_t, 8)
-                    push.mode       = 1
-                    push.data       = pushcolor
-                    head            = insert_node_before(head, n, push)
-                    current_color   = font_color
+            local font_color = get_font_color(getfont(n))
+            if font_color ~= current_color then
+                if current_color then
+                    head, n, current_color = color_whatsit(head, n, current_color, false)
                 end
-                local next_color_in = lookup_next_color (nextnode) or next_color
-                if next_color_in ~= font_color then
-                    local _, popcolor = hex_to_rgba(font_color)
-                    local pop         = newnode(whatsit_t, 8)
-                    pop.mode          = 1
-                    pop.data          = popcolor
-                    head              = insert_node_after(head, n, pop)
-                    current_color     = nil
+                if font_color then
+                    head, n, current_color = color_whatsit(head, n, font_color, true)
                 end
-
---            else
---                luaotfload.info(
---                    "n: %d; %s; %d %s",
---                    cnt, utf.char(n.char), n.font, "<FALSE>")
             end
+
+            if current_color and color_callback == "pre_linebreak_filter" then
+                local nn = getnext(n)
+                while nn and getid(nn) == glyph_t do
+                    local font_color = get_font_color(getfont(nn))
+                    if font_color == current_color then
+                        n = nn
+                    else
+                        break
+                    end
+                    nn = getnext(nn)
+                end
+                if getid(nn) == disc_t then
+                    head, n, current_color = color_whatsit(head, nn, current_color, false, true)
+                else
+                    head, n, current_color = color_whatsit(head, n, current_color, false, true)
+                end
+            end
+
+        elseif n_id == whatsit_t then
+            if current_color then
+                head, n, current_color = color_whatsit(head, n, current_color, false)
+            end
+
         end
+
+        n = getnext(n)
     end
+
+    if cnt == 0 and current_color then
+        head, _, current_color = color_whatsit(head, nodetail(head), current_color, false, true)
+    end
+
+    setattribute(head, color_attr, 1)
     return head, current_color
 end
 
 --- node -> node
 local color_handler = function (head)
-    local new_head = node_colorize(head, nil, nil)
+    head = todirect(head)
+    head = node_colorize(head)
+    head = tonode(head)
+
     -- now append our page resources
     if res then
         res["1"]  = true
         local tpr = texget("pdfpageresources")
+        local no_extgs = not tpr:find("/ExtGState<<.*>>")
+        local pgf_loaded = no_extgs and luaotfload.pgf_loaded
+        if pgf_loaded then
+            tpr = texgettoks(pgf_loaded) -- see luaotfload.sty
+        end
+
         local t   = ""
         for k in pairs(res) do
-            local str = stringformat("/TransGs%s<</ca %s/CA %s>>", k, k, k)
-            if not stringfind(tpr,str) then
+            local str = stringformat("/TransGs%s<</ca %s>>", k, k) -- don't touch stroking elements
+            if not tpr:find(str) then
                 t = t .. str
             end
         end
-        print""
         if t ~= "" then
-            print(">>", tpr, "<<")
-            if not stringfind(tpr,"/ExtGState<<.*>>") then
-                tpr = tpr.."/ExtGState<<>>"
+            if pgf_loaded then
+                texsettoks("global", pgf_loaded, tpr..t)
+            else
+                if no_extgs then
+                    tpr = tpr .. "/ExtGState<<>>"
+                end
+                tpr = tpr:gsub("/ExtGState<<", "%1"..t)
+                texset("global", "pdfpageresources", tpr)
             end
-            tpr = stringgsub(tpr,"/ExtGState<<","%1"..t)
-            texset("global", "pdfpageresources", tpr)
-            print(">>", tpr, "<<")
         end
         res = nil -- reset res
     end
-    return new_head
+    return head
 end
 
 local color_callback_activated = 0
 
 --- unit -> unit
 add_color_callback = function ( )
-    local color_callback = config.luaotfload.run.color_callback
+    color_callback = config.luaotfload.run.color_callback
     if not color_callback then
-        color_callback = "pre_linebreak_filter"
+        color_callback = "post_linebreak_filter"
     end
 
     if color_callback_activated == 0 then
         luatexbase.add_to_callback(color_callback,
                                    color_handler,
+                                   "luaotfload.color_handler")
+        luatexbase.add_to_callback("hpack_filter",
+                                   function (head, groupcode)
+                                       if  groupcode == "hbox"          or
+                                           groupcode == "adjusted_hbox" or
+                                           groupcode == "align_set"     then
+                                           head = color_handler(head)
+                                       end
+                                       return head
+                                   end,
                                    "luaotfload.color_handler")
         color_callback_activated = 1
     end

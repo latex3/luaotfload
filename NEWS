@@ -1,7 +1,7 @@
 Change History
 --------------
 
-2014/XX/XX, luaotfload v2.6
+2015/0X/XX, luaotfload v2.6
     * Add ``sign`` target to makefile for automated package signing
     * Add ``--dumpconf`` option to luaotfload-tool for generating configuration
       files
@@ -9,6 +9,8 @@ Change History
     * New script ``mkimport`` facilitates maintainance of code imported from
       Context
     * Revised letterspacing, now utilizing the ``node.direct`` interface
+    * Revized colorization of fonts, utilizing ``node.direct`` (Dohyun Kim)
+    * Colorization was moved to the ``post_linebreak_filter`` stage
 
 2014/07/13, luaotfload v2.5
     * Remove legacy code.

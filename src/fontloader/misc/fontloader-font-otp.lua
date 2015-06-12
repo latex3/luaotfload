@@ -9,6 +9,8 @@ if not modules then modules = { } end modules ['font-otp'] = {
 -- todo: pack math (but not that much to share)
 --
 -- pitfall 5.2: hashed tables can suddenly become indexed with nil slots
+--
+-- unless we sort all hashes we can get a different pack order (no big deal but size can differ)
 
 local next, type = next, type
 local sort, concat = table.sort, table.concat

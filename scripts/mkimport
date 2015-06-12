@@ -20,6 +20,8 @@
 ---    
 -------------------------------------------------------------------------------
 
+local debug = false
+
 kpse.set_program_name "luatex"
 
 local lfs = require "lfs"
@@ -27,10 +29,17 @@ local md5 = require "md5"
 
 require "lualibs"
 
-local ioloaddata   = io.loaddata
-local iowrite      = io.write
-local md5sumhexa   = md5.sumhexa
-local stringformat = string.format
+local fileiswritable   = file.is_writable
+local ioloaddata       = io.loaddata
+local iopopen          = io.popen
+local iowrite          = io.write
+local lfschdir         = lfs.chdir
+local lfsisdir         = lfs.isdir
+local lfsisfile        = lfs.isfile
+local md5sumhexa       = md5.sumhexa
+local osgettimeofday   = os.gettimeofday
+local stringformat     = string.format
+local tableconcat      = table.concat
 
 -------------------------------------------------------------------------------
 -- config
@@ -212,7 +221,7 @@ local imports = {
 } --[[ [imports] ]]
 
 local hash_file = function (fname)
-  if not lfs.isfile (fname) then
+  if not lfsisfile (fname) then
     die ("cannot find %s.", fname)
   end
   local raw = ioloaddata (fname)
@@ -225,7 +234,7 @@ end
 local derive_category_path = function (cat)
   local subpath  = origin_paths[cat] or die ("category " .. cat .. " unknown")
   local location = file.join (context_root, subpath)
-  if not lfs.isdir (location) then
+  if not lfsisdir (location) then
     die ("invalid base path defined for category "
          .. cat .. " at " .. location)
   end
@@ -331,7 +340,7 @@ local news = function ()
         status.missing[#status.missing + 1] = ourname
       else
         --- Source file exists and is readable.
-        if not lfs.isdir (fontloader_subdir) then
+        if not lfsisdir (fontloader_subdir) then
           die ("path for fontloader tree ("
               .. fontloader_subdir .. ") is not a directory")
         end
@@ -428,12 +437,12 @@ local import_file = function (name, kind, def, cat)
   local ourpath  = file.join (fontloader_subdir, subdir)
   local src      = file.join (srcdir, fullname)
   local dst      = file.join (ourpath, ourname)
-  local new      = not lfs.isfile (dst)
+  local new      = not lfsisfile (dst)
   if not new and hash_file (src) == hash_file (dst) then
     status ("file %s is unchanged, skipping", fullname)
     return import_skipped
   end
-  if not (lfs.isdir (ourpath) or not lfs.mkdirs (ourpath)) then
+  if not (lfsisdir (ourpath) or not lfs.mkdirs (ourpath)) then
     die ("failed to create directory %s for file %s",
          ourpath, ourname)
   end
@@ -475,7 +484,7 @@ end --[[ [local import = function (arg)] ]]
 
 local find_in_path = function (root, subdir, target)
   local file = file.join (root, subdir, target)
-  if lfs.isfile (file) then
+  if lfsisfile (file) then
     return file
   end
 end
@@ -554,7 +563,7 @@ end
 local search = function (target)
   local look_for
   --- pick a file
-  if lfs.isfile (target) then --- absolute path given
+  if lfsisfile (target) then --- absolute path given
     look_for = target
     goto found
   else
@@ -632,6 +641,100 @@ local tell = function (arg)
   return describe (target, location)
 end
 
+--[[doc--
+
+  Packaging works as follows:
+
+      * Files are looked up the usual way, allowing us to override the
+        distribution-supplied scripts with our own alternatives in the
+        local path.
+
+      * The merged package is written to the same directory as the
+        packaging script (not ``$PWD``).
+
+  There is some room for improvements: Instead of reading a file with
+  fixed content from disk, the merge script could be composed
+  on-the-fly from a list of files and then written to memory (not sure
+  though if we can access shm_open or memfd and the likes from Lua).
+
+--doc]]--
+
+local package = function (args)
+  local t0          = osgettimeofday ()
+  local orig_dir    = lfs.currentdir ()
+  local base_dir    = orig_dir .. "/src/fontloader/"
+  local merge_name  = base_dir .. "luaotfload-package.lua"
+  --- output name is fixed so we have to deal with it but maybe we can
+  --- get a patch to mtx-package upstreamed in the future
+  local output_name = base_dir .. "luaotfload-package-merged.lua"
+  local target_name = stringformat ("fontloader-%s.lua",
+                                    os.date ("%F"))
+  status ("assuming fontloader source in      %s", base_dir)
+  status ("reading merge instructions from    %s", merge_name)
+  status ("writing output to                  %s", target_name)
+
+  --- check preconditions
+
+  if not lfsisdir (base_dir)          then die ("directory %s does not exist", emphasis (base_dir   )) end
+  if not lfsisfile (merge_name)       then die ("missing merge file at %s",    emphasis (merge_name )) end
+  if not fileiswritable (output_name) then die ("cannot write to %s",          emphasis (output_name)) end
+  if not fileiswritable (target_name) then die ("cannot write to %s",          emphasis (target_name)) end
+  if not lfschdir (base_dir)          then die ("failed to cd into %s",        emphasis (base_dir   )) end
+
+  if lfsisfile (output_name) then
+    status ("output file already exists at “%s”, unlinking", output_name)
+    local ret, err = os.remove (output_name)
+    if ret == nil then
+      if not lfschdir (orig_dir) then
+        status ("warning: failed to cd retour into %s", emphasis (orig_dir))
+      end
+      die ("failed to remove existing merge package")
+    end
+  end
+    --die ("missing merge file at %s",    emphasis (merge_name )) end
+
+  --- perform merge
+
+  local cmd = { "mtxrun", "--script", "package", "--merge", merge_name }
+  local shl = tableconcat (cmd, " ")
+
+  status ("invoking %s as “%s”", emphasis "mtx-package", shl)
+
+  local fh = iopopen (shl, "r")
+
+  if not fh then
+    if not lfschdir (orig_dir) then
+      status ("warning: failed to cd retour into %s", emphasis (orig_dir))
+    end
+    die ("merge failed; failed to invoke mtxrun")
+  end
+
+  local junk = fh.read (fh, "*all")
+  if not junk then
+    status ("warning: received no output from mtxrun; this is strange")
+  end
+
+  fh.close (fh)
+
+  if debug then print (junk) end
+
+  --- clean up
+
+  if not lfschdir (orig_dir) then
+    status ("warning: failed to cd retour into %s", emphasis (orig_dir))
+  end
+
+  --- check postconditions
+
+  if not lfsisfile (output_name) then die ("merge failed; package not found at " .. output_name)   end
+
+  --- at this point we know that mtxrun was invoked correctly and the
+  --- result file has been created
+
+  status ("merge complete; operation finished in %.0f ms",
+          (osgettimeofday() - t0) * 1000)
+end
+
 local help = function ()
   iowrite "usage: mkimport  <command> [<args>]\n"
   iowrite "\n"
@@ -640,14 +743,16 @@ local help = function ()
   iowrite "   tell      Display information about a file’s integration\n"
   iowrite "   news      Check Context for updated files\n"
   iowrite "   import    Update with files from Context\n"
+  iowrite "   package   Invoke mtx-package on the current fontloader\n"
   iowrite "\n"
 end
 
 local job_kind = table.mirrored {
-  news   = news,
-  import = import,
-  tell   = tell,
-  help   = help,
+  help    = help,
+  import  = import,
+  news    = news,
+  package = package,
+  tell    = tell,
 }
 
 -------------------------------------------------------------------------------

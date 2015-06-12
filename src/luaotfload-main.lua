@@ -1,10 +1,10 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
---  DESCRIPTION:  Luatex fontloader initialization
--- REQUIREMENTS:  luatex v.0.79 or later; packages lualibs, luatexbase
+--  DESCRIPTION:  Luaotfload initialization
+-- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
---     MODIFIED:  2015-03-11 07:49:20+0100
+--     MODIFIED:  2015-06-09 23:08:18+0200
 -----------------------------------------------------------------------
 --
 --- Note:
@@ -13,14 +13,33 @@
 --- version 2.4 to 2.5. Thus, the comments are still in TeX (Latex)
 --- markup.
 
-if not modules then modules = { } end modules ["luaotfload-main"] = {
-    version   = "2.5",
-    comment   = "fontloader initialization",
-    author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
-    copyright = "PRAGMA ADE / ConTeXt Development Team",
-    license   = "GNU General Public License v. 2.0"
-}
+local initial_log_level           = 0
+luaotfload                        = luaotfload or { }
+local luaotfload                  = luaotfload
+luaotfload.log                    = luaotfload.log or { }
+luaotfload.version                = "2.6"
+luaotfload.loaders                = { }
 
+local authors = "\z
+    Hans Hagen,\z
+    Khaled Hosny,\z
+    Elie Roux,\z
+    Will Robertson,\z
+    Philipp Gesang,\z
+    Dohyun Kim,\z
+    Reuben Thomas\z
+"
+
+
+luaotfload.module = {
+    name          = "luaotfload-main",
+    version       = 2.60001,
+    date          = "2015/05/26",
+    description   = "OpenType layout system.",
+    author        = authors,
+    copyright     = authors,
+    license       = "GPL v2.0"
+}
 
 --[[doc--
 
@@ -43,25 +62,9 @@ if not modules then modules = { } end modules ["luaotfload-main"] = {
 
 --doc]]--
 
-local initial_log_level = 0
-
-luaotfload                        = luaotfload or { }
-local luaotfload                  = luaotfload
-luaotfload.log                    = luaotfload.log or { }
-luaotfload.version                = "2.5-2" -- FIXME version belongs in common init
-
-luaotfload.module = {
-    name          = "luaotfload-main",
-    version       = 2.50001,
-    date          = "2014/07/16",
-    description   = "OpenType layout system.",
-    author        = "Elie Roux & Hans Hagen",
-    copyright     = "Elie Roux",
-    license       = "GPL v2.0"
-}
-
 local luatexbase       = luatexbase
 
+local require          = require
 local setmetatable     = setmetatable
 local type, next       = type, next
 local stringlower      = string.lower
@@ -75,7 +78,7 @@ local create_callback  = luatexbase.create_callback
 local reset_callback   = luatexbase.reset_callback
 local call_callback    = luatexbase.call_callback
 
-local dummy_function    = function () end --- XXX this will be moved to the luaotfload namespace when we have the init module
+local dummy_function = function () end --- XXX this will be moved to the luaotfload namespace when we have the init module
 
 local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
@@ -102,7 +105,8 @@ luaotfload.log.tex        = {
 --doc]]--
 
 local min_luatex_version  = 79             --- i. e. 0.79
-local fontloader_package  = "fontloader"   --- default: from current Context
+--local fontloader_package  = "fontloader"   --- default: from current Context
+local fontloader_package  = "slim"
 
 if tex.luatexversion < min_luatex_version then
     warning ("LuaTeX v%.2f is old, v%.2f or later is recommended.",
@@ -111,15 +115,6 @@ if tex.luatexversion < min_luatex_version then
     warning ("using fallback fontloader -- newer functionality not available")
     fontloader_package = "tl2014" --- TODO fallback should be configurable too
     --- we install a fallback for older versions as a safety
-    if not node.end_of_math then
-        local math_t          = node.id "math"
-        local traverse_nodes  = node.traverse_id
-        node.end_of_math = function (n)
-            for n in traverse_nodes (math_t, n.next) do
-                return n
-            end
-        end
-    end
 end
 
 --[[doc--
@@ -140,42 +135,15 @@ local load_luaotfload_module = make_loader "luaotfload"
 ----- load_luaotfload_module = make_loader "luatex" --=> for Luatex-Plain
 local load_fontloader_module = make_loader "fontloader"
 
-load_luaotfload_module "log" --- log messages
+luaotfload.loaders.luaotfload = load_luaotfload_module
+luaotfload.loaders.fontloader = load_fontloader_module
+
+load_luaotfload_module "init" --- fontloader initialization
 
 local log             = luaotfload.log
 local logreport       = log.report
 
 log.set_loglevel (default_log_level)
-
---[[doc--
-
-  Before \TeX Live 2013 version, \LUATEX had a bug that made ofm fonts
-  fail when called with their extension. There was a side-effect making
-  ofm totally unloadable when luaotfload was present. The following
-  lines are a patch for this bug. The utility of these lines is
-  questionable as they are not necessary since \TeX Live 2013. They
-  should be removed in the next version.
-
---doc]]--
-
-local Cs, P, lpegmatch = lpeg.Cs, lpeg.P, lpeg.match
-
-local p_dot, p_slash = P".",  P"/"
-local p_suffix       = (p_dot * (1 - p_dot - p_slash)^1 * P(-1)) / ""
-local p_removesuffix = Cs((p_suffix + 1)^1)
-
-local find_vf_file = function (name)
-    local fullname = kpsefind_file(name, "ovf")
-    if not fullname then
-        --fullname = kpsefind_file(file.removesuffix(name), "ovf")
-        fullname = kpsefind_file(lpegmatch(p_removesuffix, name), "ovf")
-    end
-    if fullname then
-        logreport ("log", 0, "main",
-                   "loading virtual font file %s.", fullname)
-    end
-    return fullname
-end
 
 --[[doc--
 
@@ -418,8 +386,6 @@ add_to_callback("hpack_filter",
                 nodes.simple_font_handler,
                 "luaotfload.node_processor",
                 1)
-add_to_callback("find_vf_file",
-                find_vf_file, "luaotfload.find_vf_file")
 
 load_luaotfload_module "override"   --- load glyphlist on demand
 
@@ -540,8 +506,10 @@ request_resolvers.anon = function (specification)
     local name = specification.name
     for i=1, #type1_formats do
         local format = type1_formats[i]
+        local suffix = filesuffix (name)
         if resolvers.findfile(name, format) then
-            specification.forcedname = file.addsuffix(name, format)
+            local usename = suffix == format and file.removesuffix (name) or name
+            specification.forcedname = file.addsuffix (usename, format)
             specification.forced     = format
             return
         end

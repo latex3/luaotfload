@@ -27,4 +27,8 @@ formats.pfb  = "type1"
 readers.pfb  = pfb_reader
 handlers.pfb = { }
 
+formats.ofm  = "type1"
+readers.ofm  = readers.tfm
+handlers.ofm = { }
+
 -- vim:tw=71:sw=2:ts=2:expandtab

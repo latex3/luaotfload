@@ -23,6 +23,8 @@ local fonts         = fonts or { }
 local mappings      = fonts.mappings or { }
 fonts.mappings      = mappings
 
+local allocate      = utilities.storage.allocate
+
 --[[ldx--
 <p>Eventually this code will disappear because map files are kind
 of obsolete. Some code may move to runtime or auxiliary modules.</p>
@@ -194,7 +196,7 @@ local namesplitter = Ct(C((1 - ligseparator - varseparator)^1) * (ligseparator *
 -- to be completed .. for fonts that use unicodes for ligatures which
 -- is a actually a bad thing and should be avoided in the first place
 
-local overloads = {
+local overloads = allocate {
     IJ  = { name = "I_J",   unicode = { 0x49, 0x4A },       mess = 0x0132 },
     ij  = { name = "i_j",   unicode = { 0x69, 0x6A },       mess = 0x0133 },
     ff  = { name = "f_f",   unicode = { 0x66, 0x66 },       mess = 0xFB00 },
@@ -311,6 +313,59 @@ function mappings.addtounicode(data,filename)
             -- The next time I look into this, I'll add an extra analysis step to the otf loader (we can
             -- resolve some tounicodes by looking into the gsub data tables that are bound to glyphs.
             --
+-- a real tricky last resort:
+--
+--             local lookups = glyph.lookups
+--             if lookups then
+--                 for _, lookup in next, lookups do -- assume consistency else we need to sort
+--                     for i=1,#lookup do
+--                         local l = lookup[i]
+--                         if l.type == "ligature" then
+--                             local s = l.specification
+--                             if s.char == glyph.name then
+--                                 local components = s.components
+--                                 if components then
+--                                     local t, n = { }, 0
+--                                     unicode = true
+--                                     for l=1,#components do
+--                                         local base = components[l]
+--                                         local u = unicodes[base] or unicodevector[base]
+--                                         if not u then
+--                                             break
+--                                         elseif type(u) == "table" then
+--                                             if u[1] >= private then
+--                                                 unicode = false
+--                                                 break
+--                                             end
+--                                             n = n + 1
+--                                             t[n] = u[1]
+--                                         else
+--                                             if u >= private then
+--                                                 unicode = false
+--                                                 break
+--                                             end
+--                                             n = n + 1
+--                                             t[n] = u
+--                                         end
+--                                     end
+--                                     if n == 0 then -- done then
+--                                         -- nothing
+--                                     elseif n == 1 then
+--                                         glyph.unicode = t[1]
+--                                     else
+--                                         glyph.unicode = t
+--                                     end
+--                                     nl = nl + 1
+--                                     break
+--                                 end
+--                             end
+--                         end
+--                     end
+--                     if unicode then
+--                         break
+--                     end
+--                 end
+--             end
             if not unicode or unicode == "" then
                 local split = lpegmatch(namesplitter,name)
                 local nsplit = split and #split or 0

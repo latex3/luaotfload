@@ -10,6 +10,8 @@ if not modules then modules = { } end modules ['l-lpeg'] = {
 -- if i can use new features like capture / 2 and .B (at first sight the xml
 -- parser is some 5% slower)
 
+-- lpeg.P("abc") is faster than lpeg.P("a") * lpeg.P("b") * lpeg.P("c")
+
 -- a new lpeg fails on a #(1-P(":")) test and really needs a + P(-1)
 
 -- move utf    -> l-unicode
@@ -19,7 +21,7 @@ lpeg = require("lpeg")
 
 -- The latest lpeg doesn't have print any more, and even the new ones are not
 -- available by default (only when debug mode is enabled), which is a pitty as
--- as it helps nailign down bottlenecks. Performance seems comparable: some 10%
+-- as it helps nailing down bottlenecks. Performance seems comparable: some 10%
 -- slower pattern compilation, same parsing speed, although,
 --
 -- local p = lpeg.C(lpeg.P(1)^0 * lpeg.P(-1))
@@ -834,121 +836,185 @@ end
 
 -- experiment:
 
--- local function make(t)
---     local p
---     local keys = sortedkeys(t)
---     for i=1,#keys do
---         local k = keys[i]
---         local v = t[k]
---         if not p then
---             if next(v) then
---                 p = P(k) * make(v)
---             else
---                 p = P(k)
---             end
---         else
---             if next(v) then
---                 p = p + P(k) * make(v)
---             else
---                 p = p + P(k)
---             end
---         end
---     end
---     return p
--- end
+local p_false = P(false)
+local p_true  = P(true)
 
--- local function make(t)
---     local p = P(false)
---     local keys = sortedkeys(t)
---     for i=1,#keys do
---         local k = keys[i]
---         local v = t[k]
---         if next(v) then
---             p = p + P(k) * make(v)
---         else
---             p = p + P(k)
---         end
---     end
---     return p
--- end
-
--- function lpeg.utfchartabletopattern(list) -- goes to util-lpg
---     local tree = { }
---     for i=1,#list do
---         local t = tree
---         for c in gmatch(list[i],".") do
---             local tc = t[c]
---             if not tc then
---                 tc = { }
---                 t[c] = tc
---             end
---             t = tc
---         end
---     end
---     return make(tree)
--- end
-
-local function make(t,hash)
-    local p = P(false)
+local function make(t)
+    local function making(t)
+        local p    = p_false
+        local keys = sortedkeys(t)
+        for i=1,#keys do
+            local k = keys[i]
+            if k ~= "" then
+                local v = t[k]
+                if v == true then
+                    p = p + P(k) * p_true
+                elseif v == false then
+                    -- can't happen
+                else
+                    p = p + P(k) * making(v)
+                end
+            end
+        end
+        if t[""] then
+            p = p + p_true
+        end
+        return p
+    end
+    local p    = p_false
     local keys = sortedkeys(t)
     for i=1,#keys do
         local k = keys[i]
-        local v = t[k]
-        local h = hash[v]
-        if h then
-            if next(v) then
-                p = p + P(k) * (make(v,hash) + P(true))
+        if k ~= "" then
+            local v = t[k]
+            if v == true then
+                p = p + P(k) * p_true
+            elseif v == false then
+                -- can't happen
             else
-                p = p + P(k) * P(true)
-            end
-        else
-            if next(v) then
-                p = p + P(k) * make(v,hash)
-            else
-                p = p + P(k)
+                p = p + P(k) * making(v)
             end
         end
     end
     return p
 end
 
+local function collapse(t,x)
+    if type(t) ~= "table" then
+        return t, x
+    else
+        local n = next(t)
+        if n == nil then
+            return t, x
+        elseif next(t,n) == nil then
+            -- one entry
+            local k = n
+            local v = t[k]
+            if type(v) == "table" then
+                return collapse(v,x..k)
+            else
+                return v, x .. k
+            end
+        else
+            local tt = { }
+            for k, v in next, t do
+                local vv, kk = collapse(v,k)
+                tt[kk] = vv
+            end
+            return tt, x
+        end
+    end
+end
+
 function lpeg.utfchartabletopattern(list) -- goes to util-lpg
     local tree = { }
-    local hash = { }
     local n = #list
     if n == 0 then
-        -- we could always use this branch
         for s in next, list do
             local t = tree
+            local p, pk
             for c in gmatch(s,".") do
-                local tc = t[c]
-                if not tc then
-                    tc = { }
-                    t[c] = tc
+                if t == true then
+                    t = { [c] = true, [""] = true }
+                    p[pk] = t
+                    p = t
+                    t = false
+                elseif t == false then
+                    t = { [c] = false }
+                    p[pk] = t
+                    p = t
+                    t = false
+                else
+                    local tc = t[c]
+                    if not tc then
+                        tc = false
+                        t[c] = false
+                    end
+                    p = t
+                    t = tc
                 end
-                t = tc
+                pk = c
             end
-            hash[t] = s
+            if t == false then
+                p[pk] = true
+            elseif t == true then
+                -- okay
+            else
+                t[""] = true
+            end
         end
     else
         for i=1,n do
-            local t = tree
             local s = list[i]
+            local t = tree
+            local p, pk
             for c in gmatch(s,".") do
-                local tc = t[c]
-                if not tc then
-                    tc = { }
-                    t[c] = tc
+                if t == true then
+                    t = { [c] = true, [""] = true }
+                    p[pk] = t
+                    p = t
+                    t = false
+                elseif t == false then
+                    t = { [c] = false }
+                    p[pk] = t
+                    p = t
+                    t = false
+                else
+                    local tc = t[c]
+                    if not tc then
+                        tc = false
+                        t[c] = false
+                    end
+                    p = t
+                    t = tc
                 end
-                t = tc
+                pk = c
             end
-            hash[t] = s
+            if t == false then
+                p[pk] = true
+            elseif t == true then
+                -- okay
+            else
+                t[""] = true
+            end
         end
     end
-    return make(tree,hash)
+--     collapse(tree,"") -- needs testing, maybe optional, slightly faster because P("x")*P("X") seems slower than P"(xX") (why)
+--     inspect(tree)
+    return make(tree)
 end
 
--- inspect ( lpeg.utfchartabletopattern {
+-- local t = { "start", "stoep", "staart", "paard" }
+-- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/string.upper + 1)^1)
+
+-- local t = { "a", "abc", "ac", "abe", "abxyz", "xy", "bef","aa" }
+-- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/string.upper + 1)^1)
+
+-- inspect(lpegmatch(p,"a"))
+-- inspect(lpegmatch(p,"aa"))
+-- inspect(lpegmatch(p,"aaaa"))
+-- inspect(lpegmatch(p,"ac"))
+-- inspect(lpegmatch(p,"bc"))
+-- inspect(lpegmatch(p,"zzbczz"))
+-- inspect(lpegmatch(p,"zzabezz"))
+-- inspect(lpegmatch(p,"ab"))
+-- inspect(lpegmatch(p,"abc"))
+-- inspect(lpegmatch(p,"abe"))
+-- inspect(lpegmatch(p,"xa"))
+-- inspect(lpegmatch(p,"bx"))
+-- inspect(lpegmatch(p,"bax"))
+-- inspect(lpegmatch(p,"abxyz"))
+-- inspect(lpegmatch(p,"foobarbefcrap"))
+
+-- local t = { ["^"] = 1, ["^^"] = 2, ["^^^"] = 3, ["^^^^"] = 4 }
+-- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/t + 1)^1)
+-- inspect(lpegmatch(p," ^ ^^ ^^^ ^^^^ ^^^^^ ^^^^^^ ^^^^^^^ "))
+
+-- local t = { ["^^"] = 2, ["^^^"] = 3, ["^^^^"] = 4 }
+-- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/t + 1)^1)
+-- inspect(lpegmatch(p," ^ ^^ ^^^ ^^^^ ^^^^^ ^^^^^^ ^^^^^^^ "))
+
+-- lpeg.utfchartabletopattern {
 --     utfchar(0x00A0), -- nbsp
 --     utfchar(0x2000), -- enquad
 --     utfchar(0x2001), -- emquad
@@ -964,7 +1030,7 @@ end
 --     utfchar(0x200B), -- zerowidthspace
 --     utfchar(0x202F), -- narrownobreakspace
 --     utfchar(0x205F), -- math thinspace
--- } )
+-- }
 
 -- a few handy ones:
 --

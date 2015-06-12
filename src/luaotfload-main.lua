@@ -506,8 +506,10 @@ request_resolvers.anon = function (specification)
     local name = specification.name
     for i=1, #type1_formats do
         local format = type1_formats[i]
+        local suffix = filesuffix (name)
         if resolvers.findfile(name, format) then
-            specification.forcedname = file.addsuffix(name, format)
+            local usename = suffix == format and file.removesuffix (name) or name
+            specification.forcedname = file.addsuffix (usename, format)
             specification.forced     = format
             return
         end

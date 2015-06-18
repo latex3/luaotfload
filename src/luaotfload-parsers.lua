@@ -295,6 +295,9 @@ read_fonts_conf_indeed = function (depth,
       --- distributions (e.g. Context minimals) installed
       --- separately?
       if not (stringfind(path, "texmf") or dirs_done[path]) then
+        logreport ("log", 5, "db",
+                   "New fontconfig path at %s.",
+                   path)
         acc[#acc+1] = path
         dirs_done[path] = true
       end
@@ -316,8 +319,8 @@ read_fonts_conf_indeed = function (depth,
         and kpsereadable_file(path)
       then
         if done[path] then
-          logreport("log", 3, "load",
-                    "Skipping file at %s, already included.", opt)
+          logreport("log", 3, "db",
+                    "Skipping file at %s, already included.", path)
         else
           done[path] = true
           acc = read_fonts_conf_indeed(depth + 1,
@@ -334,15 +337,21 @@ read_fonts_conf_indeed = function (depth,
         local config_files = find_files (path, conf_filter)
         for _, filename in next, config_files do
           if not done[filename] then
-            acc = read_fonts_conf_indeed(depth + 1,
-                                         filename,
-                                         home,
-                                         xdg_config_home,
-                                         xdg_data_home,
-                                         acc,
-                                         done,
-                                         dirs_done,
-                                         find_files)
+            if done[path] then
+              logreport ("log", 3, "db",
+                         "Skipping file at %s, already included.", path)
+            else
+              done[path] = true
+              acc = read_fonts_conf_indeed(depth + 1,
+                                           filename,
+                                           home,
+                                           xdg_config_home,
+                                           xdg_data_home,
+                                           acc,
+                                           done,
+                                           dirs_done,
+                                           find_files)
+            end
           end
         end
       end --- match “kind”

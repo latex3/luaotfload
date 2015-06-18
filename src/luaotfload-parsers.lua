@@ -190,6 +190,7 @@ local p_cheapxml          = header * root
 --doc]]--
 --- string -> path list
 local fonts_conf_scanner = function (path)
+  logreport("both", 5, "db", "Read fontconfig file %s.", path)
   local fh = ioopen(path, "r")
   if not fh then
     logreport("both", 3, "db", "Cannot open fontconfig file %s.", path)
@@ -197,12 +198,17 @@ local fonts_conf_scanner = function (path)
   end
   local raw = fh:read"*all"
   fh:close()
+  logreport("both", 7, "db",
+            "Reading fontconfig file %s completed (%d bytes).",
+            path, #raw)
 
+  logreport("both", 5, "db", "Scan fontconfig file %s.", path)
   local confdata = lpegmatch(p_cheapxml, raw)
   if not confdata then
     logreport("both", 3, "db", "Cannot scan fontconfig file %s.", path)
     return
   end
+  logreport("both", 7, "db", "Scan of fontconfig file %s completed.", path)
   return confdata
 end
 

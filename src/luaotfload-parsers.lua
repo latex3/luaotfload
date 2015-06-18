@@ -17,9 +17,11 @@ if not modules then modules = { } end modules ['luaotfload-parsers'] = {
   license   = "GNU GPL v2.0"
 }
 
-luaotfload              = luaotfload or { }
-luaotfload.parsers      = luaotfload.parsers or { }
-local parsers           = luaotfload.parsers
+luaotfload                 = luaotfload or { }
+luaotfload.parsers         = luaotfload.parsers or { }
+local parsers              = luaotfload.parsers
+parsers.traversal_maxdepth = 42 --- prevent stack overflows
+local traversal_maxdepth   = parsers.traversal_maxdepth --- TODO could be an option
 
 local rawset            = rawset
 
@@ -226,8 +228,9 @@ end
 
       read_fonts_conf_indeed() -- Scan paths included from fontconfig
       configuration files recursively. Called with eight arguments.
-      The first four are
+      The first five are
 
+          · the current recursion depth
           · the path to the file
           · the expanded $HOME
           · the expanded $XDG_CONFIG_HOME
@@ -240,12 +243,13 @@ end
 
 --doc]]--
 
---- string -> string -> string -> string
+--- size_t -> string -> string -> string -> string
 ---     -> string list -> string list -> string list
 ---     -> (string -> fun option -> string list)
 ---     -> tab * tab * tab
 local read_fonts_conf_indeed
-read_fonts_conf_indeed = function (start,
+read_fonts_conf_indeed = function (depth,
+                                   start,
                                    home,
                                    xdg_config_home,
                                    xdg_data_home,
@@ -253,6 +257,18 @@ read_fonts_conf_indeed = function (start,
                                    done,
                                    dirs_done,
                                    find_files)
+
+  logreport ("both", 4, "db",
+             "Fontconfig scanner processing path %s.",
+             start)
+  if depth >= traversal_maxdepth then
+    --- prevent overflow of Lua call stack
+    logreport ("both", 0, "db",
+               "Fontconfig scanner hit recursion limit (%d); "
+               .. "aborting directory traversal.",
+               traversal_maxdepth)
+    return acc, done, dirs_done
+  end
 
   local paths = fonts_conf_scanner(start)
   if not paths then --- nothing to do
@@ -301,10 +317,11 @@ read_fonts_conf_indeed = function (start,
       then
         if done[path] then
           logreport("log", 3, "load",
-                    "skipping file at %s, already included.", opt)
+                    "Skipping file at %s, already included.", opt)
         else
           done[path] = true
-          acc = read_fonts_conf_indeed(path,
+          acc = read_fonts_conf_indeed(depth + 1,
+                                       path,
                                        home,
                                        xdg_config_home,
                                        xdg_data_home,
@@ -317,7 +334,8 @@ read_fonts_conf_indeed = function (start,
         local config_files = find_files (path, conf_filter)
         for _, filename in next, config_files do
           if not done[filename] then
-            acc = read_fonts_conf_indeed(filename,
+            acc = read_fonts_conf_indeed(depth + 1,
+                                         filename,
                                          home,
                                          xdg_config_home,
                                          xdg_data_home,
@@ -328,7 +346,7 @@ read_fonts_conf_indeed = function (start,
           end
         end
       end --- match “kind”
-      end --- iterate paths
+    end --- iterate paths
   end
 
   --inspect(acc)
@@ -359,7 +377,8 @@ local read_fonts_conf = function (path_list, find_files)
   local done      = { } ---> set:  files inspected
   local dirs_done = { } ---> set:  dirs in list
   for i=1, #path_list do --- we keep the state between files
-    acc, done, dirs_done = read_fonts_conf_indeed(path_list[i],
+    acc, done, dirs_done = read_fonts_conf_indeed(0,
+                                                  path_list[i],
                                                   home,
                                                   xdg_config_home,
                                                   xdg_data_home,

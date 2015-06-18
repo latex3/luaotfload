@@ -298,18 +298,21 @@ read_fonts_conf_indeed = function (start,
       end
       if  lfsisfile(path)
         and kpsereadable_file(path)
-        and not done[path]
       then
-        --- we exclude path with texmf in them, as they should
-        --- be found otherwise
-        acc = read_fonts_conf_indeed(path,
-                                     home,
-                                     xdg_config_home,
-                                     xdg_data_home,
-                                     acc,
-                                     done,
-                                     dirs_done,
-                                     find_files)
+        if done[path] then
+          logreport("log", 3, "load",
+                    "skipping file at %s, already included.", opt)
+        else
+          done[path] = true
+          acc = read_fonts_conf_indeed(path,
+                                       home,
+                                       xdg_config_home,
+                                       xdg_data_home,
+                                       acc,
+                                       done,
+                                       dirs_done,
+                                       find_files)
+        end
       elseif lfsisdir(path) then --- arrow code ahead
         local config_files = find_files (path, conf_filter)
         for _, filename in next, config_files do

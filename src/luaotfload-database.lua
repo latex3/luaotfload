@@ -482,8 +482,8 @@ local fonts_reloaded = false
 --- limit output when approximate font matching (luaotfload-tool -F)
 local fuzzy_limit = 1 --- display closest only
 
---- bool? -> dbobj
-load_names = function (dry_run)
+--- bool? -> -> bool? -> dbobj option
+load_names = function (dry_run, no_rebuild)
     local starttime = osgettimeofday ()
     local foundname, data = load_lua_file (config.luaotfload.paths.index_path_lua)
 
@@ -519,6 +519,11 @@ load_names = function (dry_run)
             end
         end
     else
+        if no_rebuild == true then
+            report ("both", 2, "db",
+                    [[Database does not exist, skipping rebuild though.]])
+            return false
+        end
         report ("both", 0, "db",
                 [[Font names database not found, generating new one.]])
         report ("both", 0, "db",
@@ -545,8 +550,11 @@ access_font_index = function ()
 end
 
 getmetadata = function ()
-    if not name_index then name_index = load_names() end
-    return tablefastcopy (name_index.meta)
+    if not name_index then
+        name_index = load_names (false, true)
+        if name_index then return tablefastcopy (name_index.meta) end
+    end
+    return false
 end
 
 --- unit -> unit

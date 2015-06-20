@@ -17,9 +17,11 @@ if not modules then modules = { } end modules ['luaotfload-parsers'] = {
   license   = "GNU GPL v2.0"
 }
 
-luaotfload              = luaotfload or { }
-luaotfload.parsers      = luaotfload.parsers or { }
-local parsers           = luaotfload.parsers
+luaotfload                 = luaotfload or { }
+luaotfload.parsers         = luaotfload.parsers or { }
+local parsers              = luaotfload.parsers
+parsers.traversal_maxdepth = 42 --- prevent stack overflows
+local traversal_maxdepth   = parsers.traversal_maxdepth --- TODO could be an option
 
 local rawset            = rawset
 
@@ -190,6 +192,7 @@ local p_cheapxml          = header * root
 --doc]]--
 --- string -> path list
 local fonts_conf_scanner = function (path)
+  logreport("both", 5, "db", "Read fontconfig file %s.", path)
   local fh = ioopen(path, "r")
   if not fh then
     logreport("both", 3, "db", "Cannot open fontconfig file %s.", path)
@@ -197,12 +200,17 @@ local fonts_conf_scanner = function (path)
   end
   local raw = fh:read"*all"
   fh:close()
+  logreport("both", 7, "db",
+            "Reading fontconfig file %s completed (%d bytes).",
+            path, #raw)
 
+  logreport("both", 5, "db", "Scan fontconfig file %s.", path)
   local confdata = lpegmatch(p_cheapxml, raw)
   if not confdata then
     logreport("both", 3, "db", "Cannot scan fontconfig file %s.", path)
     return
   end
+  logreport("both", 7, "db", "Scan of fontconfig file %s completed.", path)
   return confdata
 end
 
@@ -220,8 +228,9 @@ end
 
       read_fonts_conf_indeed() -- Scan paths included from fontconfig
       configuration files recursively. Called with eight arguments.
-      The first four are
+      The first five are
 
+          · the current recursion depth
           · the path to the file
           · the expanded $HOME
           · the expanded $XDG_CONFIG_HOME
@@ -234,12 +243,13 @@ end
 
 --doc]]--
 
---- string -> string -> string -> string
+--- size_t -> string -> string -> string -> string
 ---     -> string list -> string list -> string list
 ---     -> (string -> fun option -> string list)
 ---     -> tab * tab * tab
 local read_fonts_conf_indeed
-read_fonts_conf_indeed = function (start,
+read_fonts_conf_indeed = function (depth,
+                                   start,
                                    home,
                                    xdg_config_home,
                                    xdg_data_home,
@@ -247,6 +257,18 @@ read_fonts_conf_indeed = function (start,
                                    done,
                                    dirs_done,
                                    find_files)
+
+  logreport ("both", 4, "db",
+             "Fontconfig scanner processing path %s.",
+             start)
+  if depth >= traversal_maxdepth then
+    --- prevent overflow of Lua call stack
+    logreport ("both", 0, "db",
+               "Fontconfig scanner hit recursion limit (%d); "
+               .. "aborting directory traversal.",
+               traversal_maxdepth)
+    return acc, done, dirs_done
+  end
 
   local paths = fonts_conf_scanner(start)
   if not paths then --- nothing to do
@@ -273,6 +295,9 @@ read_fonts_conf_indeed = function (start,
       --- distributions (e.g. Context minimals) installed
       --- separately?
       if not (stringfind(path, "texmf") or dirs_done[path]) then
+        logreport ("log", 5, "db",
+                   "New fontconfig path at %s.",
+                   path)
         acc[#acc+1] = path
         dirs_done[path] = true
       end
@@ -292,34 +317,45 @@ read_fonts_conf_indeed = function (start,
       end
       if  lfsisfile(path)
         and kpsereadable_file(path)
-        and not done[path]
       then
-        --- we exclude path with texmf in them, as they should
-        --- be found otherwise
-        acc = read_fonts_conf_indeed(path,
-                                     home,
-                                     xdg_config_home,
-                                     xdg_data_home,
-                                     acc,
-                                     done,
-                                     dirs_done,
-                                     find_files)
+        if done[path] then
+          logreport("log", 3, "db",
+                    "Skipping file at %s, already included.", path)
+        else
+          done[path] = true
+          acc = read_fonts_conf_indeed(depth + 1,
+                                       path,
+                                       home,
+                                       xdg_config_home,
+                                       xdg_data_home,
+                                       acc,
+                                       done,
+                                       dirs_done,
+                                       find_files)
+        end
       elseif lfsisdir(path) then --- arrow code ahead
         local config_files = find_files (path, conf_filter)
         for _, filename in next, config_files do
           if not done[filename] then
-            acc = read_fonts_conf_indeed(filename,
-                                         home,
-                                         xdg_config_home,
-                                         xdg_data_home,
-                                         acc,
-                                         done,
-                                         dirs_done,
-                                         find_files)
+            if done[path] then
+              logreport ("log", 3, "db",
+                         "Skipping file at %s, already included.", path)
+            else
+              done[path] = true
+              acc = read_fonts_conf_indeed(depth + 1,
+                                           filename,
+                                           home,
+                                           xdg_config_home,
+                                           xdg_data_home,
+                                           acc,
+                                           done,
+                                           dirs_done,
+                                           find_files)
+            end
           end
         end
       end --- match “kind”
-      end --- iterate paths
+    end --- iterate paths
   end
 
   --inspect(acc)
@@ -350,7 +386,8 @@ local read_fonts_conf = function (path_list, find_files)
   local done      = { } ---> set:  files inspected
   local dirs_done = { } ---> set:  dirs in list
   for i=1, #path_list do --- we keep the state between files
-    acc, done, dirs_done = read_fonts_conf_indeed(path_list[i],
+    acc, done, dirs_done = read_fonts_conf_indeed(0,
+                                                  path_list[i],
                                                   home,
                                                   xdg_config_home,
                                                   xdg_data_home,

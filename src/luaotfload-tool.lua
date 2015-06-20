@@ -288,10 +288,14 @@ local version_msg = function ( )
         local var = uname_vars[i]
         out ("    + %8s: %s", var, uname[var])
     end
-    out ("Index: version=%q created=%q modified=%q",
-         config.luaotfload.status.notes.revision,
-         meta.created or "ages ago",
-         meta.modified or "ages ago")
+    if meta == false then
+        out("No database metadata available.")
+    else
+        out ("Index: version=%q created=%q modified=%q",
+             config.luaotfload.status.notes.revision,
+             meta.created or "ages ago",
+             meta.modified or "ages ago")
+    end
     out ""
 end
 

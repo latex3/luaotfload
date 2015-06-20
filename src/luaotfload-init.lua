@@ -96,7 +96,7 @@ log.set_loglevel (default_log_level)
 local starttime         = os.gettimeofday ()
 local trapped_register  = callback.register
 callback.register = function (id)
-  logreport ("log", 4, "main",
+  logreport ("log", 4, "init",
              "Dummy callback.register() invoked on %s.",
              id)
 end
@@ -145,7 +145,7 @@ end
 local context_environment = { }
 
 local push_namespaces = function ()
-    logreport ("log", 4, "main", "push namespace for font loader")
+    logreport ("log", 4, "init", "push namespace for font loader")
     local normalglobal = { }
     for k, v in next, _G do
         normalglobal[k] = v
@@ -158,7 +158,7 @@ local pop_namespaces = function (normalglobal, isolate)
         local _G = _G
         local mode = "non-destructive"
         if isolate then mode = "destructive" end
-        logreport ("log", 4, "main", "pop namespace from font loader -- " .. mode)
+        logreport ("log", 4, "init", "pop namespace from font loader -- " .. mode)
         for k, v in next, _G do
             if not normalglobal[k] then
                 context_environment[k] = v
@@ -173,7 +173,7 @@ local pop_namespaces = function (normalglobal, isolate)
         -- just to be sure:
         setmetatable(context_environment,_G)
     else
-        logreport ("both", 0, "main",
+        logreport ("both", 0, "init",
                    "irrecoverable error during pop_namespace: no globals to restore")
         os.exit()
     end
@@ -213,13 +213,13 @@ if fonts then
     --- The Initialization is highly idiosyncratic.
 
     if not fonts._merge_loaded_message_done_ then
-        logreport ("log", 5, "main", [["I am using the merged fontloader here.]])
-        logreport ("log", 5, "main", [[ If you run into problems or experience unexpected]])
-        logreport ("log", 5, "main", [[ behaviour, and if you have ConTeXt installed you can try]])
-        logreport ("log", 5, "main", [[ to delete the file 'fontloader-fontloader.lua' as I might]])
-        logreport ("log", 5, "main", [[ then use the possibly updated libraries. The merged]])
-        logreport ("log", 5, "main", [[ version is not supported as it is a frozen instance.]])
-        logreport ("log", 5, "main", [[ Problems can be reported to the ConTeXt mailing list."]])
+        logreport ("log", 5, "init", [["I am using the merged fontloader here.]])
+        logreport ("log", 5, "init", [[ If you run into problems or experience unexpected]])
+        logreport ("log", 5, "init", [[ behaviour, and if you have ConTeXt installed you can try]])
+        logreport ("log", 5, "init", [[ to delete the file 'fontloader-fontloader.lua' as I might]])
+        logreport ("log", 5, "init", [[ then use the possibly updated libraries. The merged]])
+        logreport ("log", 5, "init", [[ version is not supported as it is a frozen instance.]])
+        logreport ("log", 5, "init", [[ Problems can be reported to the ConTeXt mailing list."]])
     end
     fonts._merge_loaded_message_done_ = true
 
@@ -277,7 +277,7 @@ end --- non-merge fallback scope
 
 pop_namespaces(our_environment, false)-- true)
 
-logreport ("both", 1, "main",
+logreport ("both", 1, "init",
            "fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
 
 --[[doc--

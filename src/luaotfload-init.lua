@@ -218,22 +218,7 @@ local init_main = function ()
 
   ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 
-  if fonts then
-
-    --- The Initialization is highly idiosyncratic.
-
-    if not fonts._merge_loaded_message_done_ then
-      logreport ("log", 5, "init", [["I am using the merged fontloader here.]])
-      logreport ("log", 5, "init", [[ If you run into problems or experience unexpected]])
-      logreport ("log", 5, "init", [[ behaviour, and if you have ConTeXt installed you can try]])
-      logreport ("log", 5, "init", [[ to delete the file 'fontloader-fontloader.lua' as I might]])
-      logreport ("log", 5, "init", [[ then use the possibly updated libraries. The merged]])
-      logreport ("log", 5, "init", [[ version is not supported as it is a frozen instance.]])
-      logreport ("log", 5, "init", [[ Problems can be reported to the ConTeXt mailing list."]])
-    end
-    fonts._merge_loaded_message_done_ = true
-
-  else
+  if not fonts then
     --- the loading sequence is known to change, so this might have to
     --- be updated with future updates!
     --- do not modify it though unless there is a change to the merged

@@ -155,6 +155,7 @@ luaotfload.loaders.luaotfload = load_luaotfload_module
 luaotfload.loaders.fontloader = load_fontloader_module
 
 luaotfload.init = load_luaotfload_module "init" --- fontloader initialization
+luaotfload.init.init ()
 
 local log             = luaotfload.log
 local logreport       = log.report

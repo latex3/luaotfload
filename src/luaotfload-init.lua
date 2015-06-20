@@ -30,37 +30,8 @@
 
 --doc]]--
 
-config                          = config or { }
-local config                    = config
-config.luaotfload               = config.luaotfload or { }
-
-config.lualibs                  = config.lualibs or { }
-config.lualibs.verbose          = false
-config.lualibs.prefer_merged    = true
-config.lualibs.load_extended    = true
-
-require "lualibs"
-
-if not lualibs    then error("this module requires Luaotfload") end
-if not luaotfload then error("this module requires Luaotfload") end
-
-local load_luaotfload_module = luaotfload.loaders.luaotfload
-local load_fontloader_module = luaotfload.loaders.fontloader
-
---[[doc--
-
-    The logger needs to be in place prior to loading the fontloader due
-    to order of initialization being crucial for the logger functions
-    that are swapped.
-
---doc]]--
-
-load_luaotfload_module "log"
-
-local log             = luaotfload.log
-local logreport       = log.report
-
-log.set_loglevel (default_log_level)
+local log        --- filled in after loading the log module
+local logreport  --- filled in after loading the log module
 
 --[[doc--
 
@@ -93,16 +64,45 @@ log.set_loglevel (default_log_level)
 
 --doc]]--
 
-local starttime         = os.gettimeofday ()
-local trapped_register  = callback.register
-callback.register = function (id)
-  logreport ("log", 4, "init",
-             "Dummy callback.register() invoked on %s.",
-             id)
-end
 
+local init_pre = function ()
 
---[[doc--
+  local store                  = { }
+  config                       = config or { } --- global
+  config.luaotfload            = config.luaotfload or { }
+  config.lualibs               = config.lualibs    or { }
+  config.lualibs.verbose       = false
+  config.lualibs.prefer_merged = true
+  config.lualibs.load_extended = true
+
+  require "lualibs"
+
+  if not lualibs    then error "this module requires Luaotfload" end
+  if not luaotfload then error "this module requires Luaotfload" end
+
+  --[[doc--
+
+    The logger needs to be in place prior to loading the fontloader due
+    to order of initialization being crucial for the logger functions
+    that are swapped.
+
+  --doc]]--
+
+  luaotfload.loaders.luaotfload "log"
+  log       = luaotfload.log
+  logreport = log.report
+  log.set_loglevel (default_log_level)
+
+  logreport ("log", 4, "init", "Concealing callback.register().")
+  store.trapped_register = callback.register
+
+  callback.register = function (id)
+    logreport ("log", 4, "init",
+               "Dummy callback.register() invoked on %s.",
+               id)
+  end
+
+  --[[doc--
 
     By default, the fontloader requires a number of \emphasis{private
     attributes} for internal use.
@@ -117,23 +117,22 @@ end
     The attribute identifiers are prefixed “\fileent{luaotfload@}” to
     avoid name clashes.
 
---doc]]--
+  --doc]]--
 
-do
-    local new_attribute    = luatexbase.new_attribute
-    local the_attributes   = luatexbase.attributes
+  local new_attribute    = luatexbase.new_attribute
+  local the_attributes   = luatexbase.attributes
 
-    attributes = attributes or { }
+  attributes = attributes or { } --- this writes a global, sorry
 
-    attributes.private = function (name)
-        local attr   = "luaotfload@" .. name --- used to be: “otfl@”
-        local number = the_attributes[attr]
-        if not number then
-            number = new_attribute(attr)
-        end
-        return number
-    end
-end
+  attributes.private = function (name)
+    local attr   = "luaotfload@" .. name --- used to be: “otfl@”
+    local number = the_attributes[attr]
+    if not number then number = new_attribute(attr) end
+    return number
+  end
+
+  return store
+end --- [init_pre]
 
 --[[doc--
 
@@ -141,8 +140,6 @@ end
     \fileent{luatex-fonts.lua}.
 
 --doc]]--
-
-local context_environment = { }
 
 local push_namespaces = function ()
     logreport ("log", 4, "init", "push namespace for font loader")
@@ -153,7 +150,9 @@ local push_namespaces = function ()
     return normalglobal
 end
 
-local pop_namespaces = function (normalglobal, isolate)
+local pop_namespaces = function (normalglobal,
+                                 isolate,
+                                 context_environment)
     if normalglobal then
         local _G = _G
         local mode = "non-destructive"
@@ -171,59 +170,71 @@ local pop_namespaces = function (normalglobal, isolate)
             _G[k] = v
         end
         -- just to be sure:
-        setmetatable(context_environment,_G)
+        setmetatable(context_environment, _G)
     else
         logreport ("both", 0, "init",
                    "irrecoverable error during pop_namespace: no globals to restore")
-        os.exit()
+        os.exit ()
     end
 end
 
-luaotfload.context_environment  = context_environment
-luaotfload.push_namespaces      = push_namespaces
-luaotfload.pop_namespaces       = pop_namespaces
+local init_adapt = function ()
 
-local our_environment = push_namespaces()
+  luaotfload.context_environment  = { }
+  luaotfload.push_namespaces      = push_namespaces
+  luaotfload.pop_namespaces       = pop_namespaces
 
---[[doc--
+  local our_environment = push_namespaces ()
 
-    The font loader requires that the attribute with index zero be
-    zero. We happily oblige.
-    (Cf. \fileent{luatex-fonts-nod.lua}.)
+  --[[doc--
 
---doc]]--
+      The font loader requires that the attribute with index zero be
+      zero. We happily oblige.
+      (Cf. \fileent{luatex-fonts-nod.lua}.)
 
-tex.attribute[0] = 0
+  --doc]]--
 
---[[doc--
+  tex.attribute[0] = 0
 
-    Now that things are sorted out we can finally load the fontloader.
+  return our_environment
 
-    For less current distibutions we ship the code from TL 2014 that should be
-    compatible with Luatex 0.76.
+end --- [init_adapt]
 
---doc]]--
+local init_main = function ()
 
-load_fontloader_module (luaotfload.fontloader_package)
+  local load_fontloader_module = luaotfload.loaders.fontloader
 
----load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
+  --[[doc--
 
-if fonts then
+      Now that things are sorted out we can finally load the
+      fontloader.
+
+      For less current distibutions we ship the code from TL 2014 that
+      should be compatible with Luatex 0.76.
+
+  --doc]]--
+
+  load_fontloader_module (luaotfload.fontloader_package)
+
+  ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
+
+  if fonts then
 
     --- The Initialization is highly idiosyncratic.
 
     if not fonts._merge_loaded_message_done_ then
-        logreport ("log", 5, "init", [["I am using the merged fontloader here.]])
-        logreport ("log", 5, "init", [[ If you run into problems or experience unexpected]])
-        logreport ("log", 5, "init", [[ behaviour, and if you have ConTeXt installed you can try]])
-        logreport ("log", 5, "init", [[ to delete the file 'fontloader-fontloader.lua' as I might]])
-        logreport ("log", 5, "init", [[ then use the possibly updated libraries. The merged]])
-        logreport ("log", 5, "init", [[ version is not supported as it is a frozen instance.]])
-        logreport ("log", 5, "init", [[ Problems can be reported to the ConTeXt mailing list."]])
+      logreport ("log", 5, "init", [["I am using the merged fontloader here.]])
+      logreport ("log", 5, "init", [[ If you run into problems or experience unexpected]])
+      logreport ("log", 5, "init", [[ behaviour, and if you have ConTeXt installed you can try]])
+      logreport ("log", 5, "init", [[ to delete the file 'fontloader-fontloader.lua' as I might]])
+      logreport ("log", 5, "init", [[ then use the possibly updated libraries. The merged]])
+      logreport ("log", 5, "init", [[ version is not supported as it is a frozen instance.]])
+      logreport ("log", 5, "init", [[ Problems can be reported to the ConTeXt mailing list."]])
     end
     fonts._merge_loaded_message_done_ = true
 
-else--- the loading sequence is known to change, so this might have to
+  else
+    --- the loading sequence is known to change, so this might have to
     --- be updated with future updates!
     --- do not modify it though unless there is a change to the merged
     --- package!
@@ -259,9 +270,11 @@ else--- the loading sequence is known to change, so this might have to
     load_fontloader_module "luatex-fonts-def"
     load_fontloader_module "luatex-fonts-ext"
     load_fontloader_module "luatex-fonts-cbk"
-end --- non-merge fallback scope
+  end --- non-merge fallback scope
 
-local init_cleanup = function ()
+end --- [init_main]
+
+local init_cleanup = function (store)
   --- reinstate all the stuff we had to move out of the way to
   --- accomodate the loader
 
@@ -279,7 +292,9 @@ local init_cleanup = function ()
 
   --doc]]--
 
-  pop_namespaces(our_environment, false)-- true)
+  luaotfload.pop_namespaces (store.our_environment,
+                             false,
+                             luaotfload.context_environment)
 
   --[[doc--
 
@@ -289,7 +304,9 @@ local init_cleanup = function ()
 
   --doc]]--
 
-  callback.register = trapped_register
+  logreport ("log", 4, "init",
+             "Restoring original callback.register().")
+  callback.register = store.trapped_register
 end --- [init_cleanup]
 
 local init_post = function ()
@@ -318,12 +335,14 @@ end --- [init_post]
 
 return {
   init = function ()
-    init_prepare ()
+    local starttime = os.gettimeofday ()
+    local store = init_pre ()
+    store.our_environment = init_adapt ()
     init_main ()
-    init_cleanup ()
+    init_cleanup (store)
     logreport ("both", 1, "init",
                "fontloader loaded in %0.3f seconds",
-               os.gettimeofday()-starttime)
+               os.gettimeofday() - starttime)
     init_post ()
   end
 }

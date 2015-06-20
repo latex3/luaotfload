@@ -309,3 +309,11 @@ luatexbase.add_to_callback("hpack_filter",
                            "luaotfload.node_processor",
                            1)
 
+return {
+  init = function ()
+    init_prepare ()
+    init_main ()
+    init_cleanup ()
+  end
+}
+

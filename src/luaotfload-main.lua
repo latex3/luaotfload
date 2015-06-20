@@ -143,7 +143,7 @@ end
 local make_loader = function (prefix)
     return function (name)
         local modname = make_loader_name (prefix, name)
-        require (modname)
+        return require (modname)
     end
 end
 
@@ -154,7 +154,7 @@ local load_fontloader_module = make_loader "fontloader"
 luaotfload.loaders.luaotfload = load_luaotfload_module
 luaotfload.loaders.fontloader = load_fontloader_module
 
-load_luaotfload_module "init" --- fontloader initialization
+luaotfload.init = load_luaotfload_module "init" --- fontloader initialization
 
 local log             = luaotfload.log
 local logreport       = log.report

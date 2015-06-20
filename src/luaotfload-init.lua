@@ -261,59 +261,70 @@ else--- the loading sequence is known to change, so this might have to
     load_fontloader_module "luatex-fonts-cbk"
 end --- non-merge fallback scope
 
---[[doc--
+local init_cleanup = function ()
+  --- reinstate all the stuff we had to move out of the way to
+  --- accomodate the loader
 
-    Here we adjust the globals created during font loader
-    initialization. If the second argument to
-    \luafunction{pop_namespaces()} is \verb|true| this will restore the
-    state of \luafunction{_G}, eliminating every global generated since
-    the last call to \luafunction{push_namespaces()}. At the moment we
-    see no reason to do this, and since the font loader is considered
-    an essential part of \identifier{luatex} as well as a very well
-    organized piece of code, we happily concede it the right to add to
-    \luafunction{_G} if needed.
+  --[[doc--
 
---doc]]--
+      Here we adjust the globals created during font loader
+      initialization. If the second argument to
+      \luafunction{pop_namespaces()} is \verb|true| this will restore the
+      state of \luafunction{_G}, eliminating every global generated since
+      the last call to \luafunction{push_namespaces()}. At the moment we
+      see no reason to do this, and since the font loader is considered
+      an essential part of \identifier{luatex} as well as a very well
+      organized piece of code, we happily concede it the right to add to
+      \luafunction{_G} if needed.
 
-pop_namespaces(our_environment, false)-- true)
+  --doc]]--
 
-logreport ("both", 1, "init",
-           "fontloader loaded in %0.3f seconds", os.gettimeofday()-starttime)
+  pop_namespaces(our_environment, false)-- true)
 
---[[doc--
+  --[[doc--
 
-    \subsection{Callbacks}
-    After the fontloader is ready we can restore the callback trap from
-    \identifier{luatexbase}.
+      \subsection{Callbacks}
+        After the fontloader is ready we can restore the callback trap
+        from \identifier{luatexbase}.
 
---doc]]--
+  --doc]]--
 
-callback.register = trapped_register
+  callback.register = trapped_register
+end --- [init_cleanup]
 
---[[doc--
+local init_post = function ()
+  --- hook for actions that need to take place after the fontloader is
+  --- installed
 
-    We do our own callback handling with the means provided by
+  --[[doc--
+
+    we do our own callback handling with the means provided by
     luatexbase.
-    Note: \luafunction{pre_linebreak_filter} and
-    \luafunction{hpack_filter} are coupled in \CONTEXT in the concept
-    of \emphasis{node processor}.
+    note: \luafunction{pre_linebreak_filter} and
+    \luafunction{hpack_filter} are coupled in \context in the
+    concept of \emphasis{node processor}.
 
---doc]]--
+  --doc]]--
 
-luatexbase.add_to_callback("pre_linebreak_filter",
-                           nodes.simple_font_handler,
-                           "luaotfload.node_processor",
-                           1)
-luatexbase.add_to_callback("hpack_filter",
-                           nodes.simple_font_handler,
-                           "luaotfload.node_processor",
-                           1)
+  luatexbase.add_to_callback("pre_linebreak_filter",
+                             nodes.simple_font_handler,
+                             "luaotfload.node_processor",
+                             1)
+  luatexbase.add_to_callback("hpack_filter",
+                             nodes.simple_font_handler,
+                             "luaotfload.node_processor",
+                             1)
+end --- [init_post]
 
 return {
   init = function ()
     init_prepare ()
     init_main ()
     init_cleanup ()
+    logreport ("both", 1, "init",
+               "fontloader loaded in %0.3f seconds",
+               os.gettimeofday()-starttime)
+    init_post ()
   end
 }
 

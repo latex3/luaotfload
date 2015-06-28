@@ -40,10 +40,9 @@ local setattribute          = nodedirect.set_attribute
 
 local texset                = tex.set
 local texget                = tex.get
-local texsettoks            = tex.settoks
-local texgettoks            = tex.gettoks
 
 local stringformat          = string.format
+local concat                = table.concat
 
 local otffeatures           = fonts.constructors.newfeatures("otf")
 local identifiers           = fonts.hashes.identifiers
@@ -311,6 +310,9 @@ node_colorize = function (head, current_color)
     return head, current_color
 end
 
+local pgf_extgs = { }
+luaotfload.pgf_extgs = pgf_extgs
+
 --- node -> node
 local color_handler = function (head)
     head = todirect(head)
@@ -324,7 +326,7 @@ local color_handler = function (head)
         local no_extgs = not tpr:find("/ExtGState<<.*>>")
         local pgf_loaded = no_extgs and luaotfload.pgf_loaded
         if pgf_loaded then
-            tpr = texgettoks(pgf_loaded) -- see luaotfload.sty
+            tpr = concat(pgf_extgs)
         end
 
         local t   = ""
@@ -336,7 +338,7 @@ local color_handler = function (head)
         end
         if t ~= "" then
             if pgf_loaded then
-                texsettoks("global", pgf_loaded, tpr..t)
+                pgf_extgs[#pgf_extgs+1] = t
             else
                 if no_extgs then
                     tpr = tpr .. "/ExtGState<<>>"
@@ -376,6 +378,14 @@ add_color_callback = function ( )
         color_callback_activated = 1
     end
 end
+
+tex.sprint("\\count255=\\catcode`@ \\catcode`@=11 ",
+    "\\ifdefined\\AtBeginDocument\\else\\def\\AtBeginDocument#1{#1}\\fi",
+    "\\AtBeginDocument{\\ifdefined\\pgfutil@everybye",
+    "\\directlua{luaotfload.pgf_loaded=true}\\begingroup",
+    "\\toks@{\\pgf@sys@addpdfresource@extgs@plain{\\directlua{tex.sprint(luaotfload.pgf_extgs)}}}",
+    "\\edef\\x{\\endgroup\\noexpand\\pgfutil@everybye{\\the\\toks@\\the\\pgfutil@everybye}}\\x",
+    "\\fi}\\catcode`@=\\count255 ")
 
 -- vim:tw=71:sw=4:ts=4:expandtab
 

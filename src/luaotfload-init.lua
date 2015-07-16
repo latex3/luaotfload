@@ -315,9 +315,77 @@ local init_post_install_callbacks = function ()
                              1)
 end
 
+local init_post_load_agl = function ()
+
+  --[[doc--
+
+      Adobe Glyph List.
+      -----------------------------------------------------------------
+
+      Context provides a somewhat different font-age.lua from an
+      unclear origin. Unfortunately, the file name it reads from is
+      hard-coded in font-enc.lua, so we have to replace the entire
+      table.
+
+      This shouldn’t cause any complications. Due to its implementation
+      the glyph list will be loaded upon loading a OTF or TTF for the
+      first time during a TeX run. (If one sticks to TFM/OFM then it is
+      never read at all.) For this reason we can install a metatable
+      that looks up the file of our choosing and only falls back to the
+      Context one in case it cannot be found.
+
+  --doc]]--
+
+  local findfile  = resolvers.findfile
+  local encodings = fonts.encodings
+
+  if not findfile or not encodings then
+    --- Might happen during refactoring; we continue graciously but in
+    --- a somewhat defect state.
+    logreport ("log", 0, "init",
+               "preconditions unmet, skipping the Adobe Glyph List; "
+               .. "this is a Luaotfload bug.")
+    return
+  end
+
+  local agl_init = { }      --- start out empty, fill on demand
+  encodings.agl  = agl_init --- ugh, replaced again later
+
+  setmetatable (agl_init, { __index = function (t, k)
+
+    if k ~= "unicodes" then
+      return nil
+    end
+
+    local glyphlist = findfile "luaotfload-glyphlist.lua"
+    if glyphlist then
+      logreport ("log", 1, "init", "loading the Adobe glyph list")
+    else
+      glyphlist = findfile "font-age.lua"
+      logreport ("both", 0, "init",
+                 "loading the extended glyph list from ConTeXt")
+    end
+
+    if not glyphlist then
+      logreport ("both", 4, "init",
+                 "Adobe glyph list not found, please check your installation.")
+      return nil
+    end
+    logreport ("both", 4, "init",
+               "found Adobe glyph list file at ``%s``, using that.",
+               glyphlist)
+
+    local unicodes = dofile(glyphlist)
+    encodings.agl  = { unicodes = unicodes }
+    return unicodes
+  end })
+
+end
+
 --- (unit -> unit) list
 local init_post_actions = {
   init_post_install_callbacks,
+  init_post_load_agl,
 }
 
 --- unit -> size_t

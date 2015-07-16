@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
---  DESCRIPTION:  Luaotfload initialization
+--  DESCRIPTION:  Luaotfload entry point
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
@@ -159,8 +159,6 @@ luaotfload.init.init ()
 
 local log             = luaotfload.log
 local logreport       = log.report
-
-load_luaotfload_module "override"   --- load glyphlist on demand
 
 --[[doc--
 

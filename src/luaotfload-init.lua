@@ -294,10 +294,7 @@ local init_cleanup = function (store)
   callback.register = store.trapped_register
 end --- [init_cleanup]
 
-local init_post = function ()
-  --- hook for actions that need to take place after the fontloader is
-  --- installed
-
+local init_post_install_callbacks = function ()
   --[[doc--
 
     we do our own callback handling with the means provided by
@@ -316,6 +313,33 @@ local init_post = function ()
                              nodes.simple_font_handler,
                              "luaotfload.node_processor",
                              1)
+end
+
+--- (unit -> unit) list
+local init_post_actions = {
+  init_post_install_callbacks,
+}
+
+--- unit -> size_t
+local init_post = function ()
+  --- hook for actions that need to take place after the fontloader is
+  --- installed
+
+  local n = #init_post_actions
+  for i = 1, n do
+    local action = init_post_actions[i]
+    local taction = type (action)
+    if not action or taction ~= "function" then
+      logreport ("both", 1, "init",
+                 "post hook WARNING: action %d not a function but %s/%s; ignoring.",
+                 i, action, taction)
+    else
+      --- call closure
+      action ()
+    end
+  end
+
+  return n
 end --- [init_post]
 
 return {
@@ -328,7 +352,8 @@ return {
     logreport ("both", 1, "init",
                "fontloader loaded in %0.3f seconds",
                os.gettimeofday() - starttime)
-    init_post ()
+    local n = init_post ()
+    logreport ("both", 5, "init", "post hook terminated, %d actions performed", n)
   end
 }
 

@@ -56,7 +56,7 @@ local names = {
   { "src",      "luaotfload-log.lua",         },
   { "src",      "luaotfload-main.lua",        },
   { "src/fontloader/runtime",      "fontloader-fontloader.lua",  },
-  { "src",      "luaotfload-override.lua",    },
+  --{ "src",      "luaotfload-override.lua",    }, --> part of init now
   { "src",      "luaotfload-parsers.lua",     },
   { "src",      "luaotfload-tool.lua",        },
   { "scripts",  "mkcharacters",               },

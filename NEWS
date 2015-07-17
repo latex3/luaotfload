@@ -11,6 +11,8 @@ Change History
     * Revised letterspacing, now utilizing the ``node.direct`` interface
     * Revized colorization of fonts, utilizing ``node.direct`` (Dohyun Kim)
     * Colorization was moved to the ``post_linebreak_filter`` stage
+    * Move remaining functionality from ``luaotfload-override`` into
+      initialization
 
 2014/07/13, luaotfload v2.5
     * Remove legacy code.

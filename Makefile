@@ -6,6 +6,7 @@ DOCSRCDIR	= ./doc
 SCRIPTSRCDIR	= ./scripts
 SRCSRCDIR	= ./src
 FONTLOADERDIR	= $(SRCSRCDIR)/fontloader/runtime
+PACKAGEDIR	= $(SRCSRCDIR)/fontloader/
 BUILDDIR	= ./build
 MISCDIR		= ./misc
 
@@ -48,6 +49,7 @@ DOCS		= $(DOCPDF) $(DOTPDF) $(MANPAGES)
 GLYPHS		= $(BUILDDIR)/$(NAME)-glyphlist.lua
 CHARS		= $(BUILDDIR)/$(NAME)-characters.lua
 STATUS		= $(BUILDDIR)/$(NAME)-status.lua
+LOADER		= $(BUILDDIR)/fontloader-$(shell date +%F).lua
 RESOURCES	= $(GLYPHS) $(CHARS) $(STATUS)
 SOURCE		= $(DOCSRC) $(MANSRC) $(SRC) README COPYING Makefile NEWS $(RESOURCESCRIPTS)
 
@@ -88,8 +90,9 @@ LUA		= texlua
 ## variables.
 DO_GLYPHS	= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS	= $(LUA) $(CHARSCRIPT)  > /dev/null
-DO_STATUS	= $(LUA) $(STATUSSCRIPT)  > /dev/null
-DO_IMPORT	= $(LUA) $(IMPORTSCRIPT)  > /dev/null
+DO_STATUS	= $(LUA) $(STATUSSCRIPT) > /dev/null
+DO_IMPORT	= $(LUA) $(IMPORTSCRIPT) import
+DO_PACKAGE	= $(LUA) $(IMPORTSCRIPT) package $(PACKAGEDIR)/luaotfload-package.lua $(LOADER)
 
 define check-lua-files
 @echo validating syntax
@@ -113,8 +116,12 @@ builddir: $(BUILDDIR)
 resources: $(RESOURCES)
 chars: $(CHARS)
 status: $(STATUS)
+package: loader
+loader: $(LOADER)
 ctan: $(CTAN_ZIP)
 tds: $(TDS_ZIP)
+import:
+	$(DO_IMPORT)
 
 graph: $(DOTPDF)
 doc: $(DOCS)
@@ -138,6 +145,9 @@ $(CHARS): builddir
 
 $(STATUS): builddir
 	$(DO_STATUS)
+
+$(LOADER): builddir
+	$(DO_PACKAGE)
 
 $(BUILDDIR): /dev/null
 	mkdir -p $(BUILDDIR)
@@ -222,6 +232,7 @@ showtargets:
 	@echo "                   luaotfload.conf(5) (requires Docutils)"
 	@echo "       graph       generate file graph (requires GraphViz)"
 	@echo
+	@echo "       loader      merge fontloader"
 	@echo "       chars       import char-def.lua as luaotfload-characters.lua"
 	@echo "       status      create repository info (luaotfload-status.lua)"
 	@echo

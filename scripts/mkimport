@@ -33,11 +33,13 @@ local os  = require "os"
 
 require "lualibs"
 
+local filedirname      = file.dirname
 local fileiswritable   = file.is_writable
 local ioloaddata       = io.loaddata
 local iopopen          = io.popen
 local iowrite          = io.write
 local lfschdir         = lfs.chdir
+local lfscurrentdir    = lfs.currentdir
 local lfsisdir         = lfs.isdir
 local lfsisfile        = lfs.isfile
 local md5sumhexa       = md5.sumhexa
@@ -670,16 +672,42 @@ end
 local build_paths = function (argv)
   if not argv or type (argv) ~= "table" then die "build_paths" end
 
-  local orig_dir = lfs.currentdir ()
-  local base_dir = orig_dir .. loader_orig_dir
+  local orig_dir    = lfscurrentdir ()
+  local base_dir    = orig_dir .. loader_orig_dir
+  local target_name = orig_dir .. loader_target_dir
+                   .. stringformat (loader_target_name, os.date ("%F"))
+  local merge_name  = base_dir .. loader_merge_name
+  local output_name = base_dir .. loader_output_name
+
+  if #argv >= 2 then
+    local fname = argv[2]
+    local dir   = filedirname (fname) .. "/"
+    if not lfsisdir (dir) then
+      die ("second argument must be point into existing directory, not “%s”",
+           argv[2])
+    end
+    base_dir    = dir
+    merge_name  = fname
+    output_name = dir .. loader_output_name
+  end
+
+  if #argv == 3 then
+    --- also set the target name
+    local fname = argv[3]
+    local dir   = filedirname (fname)
+    if not lfsisdir (dir) then
+      die ("third argument must be point into writable directory, not “%s”",
+           argv[3])
+    end
+    target_name = fname
+  end
 
   local ret = {
     orig_dir    = orig_dir,
     base_dir    = base_dir,
-    merge_name  = base_dir .. loader_merge_name,
-    target_name = orig_dir .. loader_target_dir
-                  .. stringformat (loader_target_name, os.date ("%F")),
-    output_name = base_dir .. loader_output_name,
+    merge_name  = merge_name,
+    target_name = target_name,
+    output_name = output_name,
   }
   return ret
 end
@@ -717,7 +745,7 @@ local package = function (argv)
   if not lfsisfile (paths.merge_name)       then die ("missing merge file at %s",    emphasis (paths.merge_name )) end
   if not fileiswritable (paths.output_name) then die ("cannot write to %s",          emphasis (paths.output_name)) end
   if not fileiswritable (paths.target_name) then die ("cannot write to %s",          emphasis (paths.target_name)) end
-  if not lfschdir (paths.base_dir)          then die ("failed to cd into %s",        emphasis (paths.base_dir   )) end
+---- not lfschdir (paths.base_dir)          then die ("failed to cd into %s",        emphasis (paths.base_dir   )) end
 
   if lfsisfile (paths.output_name) then
     status ("output file already exists at “%s”, unlinking",
@@ -768,10 +796,16 @@ local package = function (argv)
 
   --- check postconditions
 
-  if not lfsisfile (paths.output_name) then die ("merge failed; package not found at " .. paths.output_name)   end
+  if not lfsisfile (paths.output_name) then
+    die ("merge failed; package not found at " .. paths.output_name)
+  end
 
   --- at this point we know that mtxrun was invoked correctly and the
   --- result file has been created
+
+  if lfsisfile (paths.target_name) then
+    status ("target file %s exists, overwriting", emphasis (paths.target_name))
+  end
 
   local res, err = osrename (paths.output_name, paths.target_name)
 

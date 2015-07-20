@@ -6,7 +6,7 @@ DOCSRCDIR	= ./doc
 SCRIPTSRCDIR	= ./scripts
 SRCSRCDIR	= ./src
 FONTLOADERDIR	= $(SRCSRCDIR)/fontloader/runtime
-PACKAGEDIR	= $(SRCSRCDIR)/fontloader/
+PACKAGEDIR	= $(SRCSRCDIR)/fontloader
 BUILDDIR	= ./build
 MISCDIR		= ./misc
 

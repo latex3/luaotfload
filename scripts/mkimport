@@ -1,7 +1,7 @@
 #!/usr/bin/env texlua
 -------------------------------------------------------------------------------
 --         FILE:  mkimport.lua
---        USAGE:  ./mkimport.lua
+--        USAGE:  texlua ./mkimport.lua
 --  DESCRIPTION:  check luaotfload imports against Context
 -- REQUIREMENTS:  luatex, the lualibs package, Context MkIV
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
@@ -12,12 +12,15 @@
 
 -------------------------------------------------------------------------------
 --- PURPOSE
---- 
+---
 ---  - Facilitate detecting changes in the fontloader source.
 ---  - Assist in updating source code and (partially) automate importing.
+---
 ---  - Account for files in the plain fontloader distribution, alert in case of
 ---    additions or deletions.
----    
+---
+---  - Fontloader packaging.
+---
 -------------------------------------------------------------------------------
 
 local debug = false
@@ -26,6 +29,7 @@ kpse.set_program_name "luatex"
 
 local lfs = require "lfs"
 local md5 = require "md5"
+local os  = require "os"
 
 require "lualibs"
 
@@ -37,7 +41,9 @@ local lfschdir         = lfs.chdir
 local lfsisdir         = lfs.isdir
 local lfsisfile        = lfs.isfile
 local md5sumhexa       = md5.sumhexa
+local osdate           = os.date
 local osgettimeofday   = os.gettimeofday
+local osrename         = os.rename
 local stringformat     = string.format
 local tableconcat      = table.concat
 
@@ -70,6 +76,26 @@ local prefixes = {
   context    = nil,
   fontloader = "luatex",
 }
+
+--[[doc--
+
+    The output name is fixed so we have to deal with it but maybe we
+    can get a patch to mtx-package upstreamed in the future. In any
+    case, we are content with renaming the result for the time being.
+
+    The target name is constructed on the fly from the current date.
+    TODO It should be possible to supply a name and possibly
+    destination path on the command line.
+
+    Paths are relative to the base directory (``$PWD``).
+
+--doc]]--
+
+local loader_merge_name  = "luaotfload-package.lua"
+local loader_output_name = "luaotfload-package-merged.lua"
+local loader_target_name = "fontloader-%s.lua"
+local loader_orig_dir    = "/src/fontloader/"
+local loader_target_dir  = "/build/"
 
 -------------------------------------------------------------------------------
 -- helpers
@@ -662,15 +688,16 @@ end
 local package = function (args)
   local t0          = osgettimeofday ()
   local orig_dir    = lfs.currentdir ()
-  local base_dir    = orig_dir .. "/src/fontloader/"
-  local merge_name  = base_dir .. "luaotfload-package.lua"
+  local base_dir    = orig_dir .. loader_orig_dir
+  local merge_name  = base_dir .. loader_merge_name
   --- output name is fixed so we have to deal with it but maybe we can
   --- get a patch to mtx-package upstreamed in the future
-  local output_name = base_dir .. "luaotfload-package-merged.lua"
-  local target_name = stringformat ("fontloader-%s.lua",
-                                    os.date ("%F"))
+  local output_name = base_dir .. loader_output_name
+  local target_name = orig_dir .. loader_target_dir
+                   .. stringformat (loader_target_name, os.date ("%F"))
   status ("assuming fontloader source in      %s", base_dir)
   status ("reading merge instructions from    %s", merge_name)
+  status ("mtx-package result at              %s", output_name)
   status ("writing output to                  %s", target_name)
 
   --- check preconditions
@@ -731,8 +758,16 @@ local package = function (args)
   --- at this point we know that mtxrun was invoked correctly and the
   --- result file has been created
 
+  local res, err = osrename (output_name, target_name)
+
+  if res == nil then
+    die ("merge failed; failed to move package from %s to %s",
+         output_name, target_name)
+  end
+
   status ("merge complete; operation finished in %.0f ms",
           (osgettimeofday() - t0) * 1000)
+  status ("a fresh fontloader at %s is ready to roll", target_name)
 end
 
 local help = function ()

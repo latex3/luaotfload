@@ -667,6 +667,23 @@ local tell = function (arg)
   return describe (target, location)
 end
 
+local build_paths = function (argv)
+  if not argv or type (argv) ~= "table" then die "build_paths" end
+
+  local orig_dir = lfs.currentdir ()
+  local base_dir = orig_dir .. loader_orig_dir
+
+  local ret = {
+    orig_dir    = orig_dir,
+    base_dir    = base_dir,
+    merge_name  = base_dir .. loader_merge_name,
+    target_name = orig_dir .. loader_target_dir
+                  .. stringformat (loader_target_name, os.date ("%F")),
+    output_name = base_dir .. loader_output_name,
+  }
+  return ret
+end
+
 --[[doc--
 
   Packaging works as follows:
@@ -685,44 +702,40 @@ end
 
 --doc]]--
 
-local package = function (args)
-  local t0          = osgettimeofday ()
-  local orig_dir    = lfs.currentdir ()
-  local base_dir    = orig_dir .. loader_orig_dir
-  local merge_name  = base_dir .. loader_merge_name
-  --- output name is fixed so we have to deal with it but maybe we can
-  --- get a patch to mtx-package upstreamed in the future
-  local output_name = base_dir .. loader_output_name
-  local target_name = orig_dir .. loader_target_dir
-                   .. stringformat (loader_target_name, os.date ("%F"))
-  status ("assuming fontloader source in      %s", base_dir)
-  status ("reading merge instructions from    %s", merge_name)
-  status ("mtx-package result at              %s", output_name)
-  status ("writing output to                  %s", target_name)
+local package = function (argv)
+  local t0    = osgettimeofday ()
+  local paths = build_paths (argv)
+
+  status ("assuming fontloader source in      %s", paths.base_dir)
+  status ("reading merge instructions from    %s", paths.merge_name)
+  status ("mtx-package result at              %s", paths.output_name)
+  status ("writing output to                  %s", paths.target_name)
 
   --- check preconditions
 
-  if not lfsisdir (base_dir)          then die ("directory %s does not exist", emphasis (base_dir   )) end
-  if not lfsisfile (merge_name)       then die ("missing merge file at %s",    emphasis (merge_name )) end
-  if not fileiswritable (output_name) then die ("cannot write to %s",          emphasis (output_name)) end
-  if not fileiswritable (target_name) then die ("cannot write to %s",          emphasis (target_name)) end
-  if not lfschdir (base_dir)          then die ("failed to cd into %s",        emphasis (base_dir   )) end
+  if not lfsisdir (paths.base_dir)          then die ("directory %s does not exist", emphasis (paths.base_dir   )) end
+  if not lfsisfile (paths.merge_name)       then die ("missing merge file at %s",    emphasis (paths.merge_name )) end
+  if not fileiswritable (paths.output_name) then die ("cannot write to %s",          emphasis (paths.output_name)) end
+  if not fileiswritable (paths.target_name) then die ("cannot write to %s",          emphasis (paths.target_name)) end
+  if not lfschdir (paths.base_dir)          then die ("failed to cd into %s",        emphasis (paths.base_dir   )) end
 
-  if lfsisfile (output_name) then
-    status ("output file already exists at “%s”, unlinking", output_name)
-    local ret, err = os.remove (output_name)
+  if lfsisfile (paths.output_name) then
+    status ("output file already exists at “%s”, unlinking",
+            paths.output_name)
+    local ret, err = os.remove (paths.output_name)
     if ret == nil then
-      if not lfschdir (orig_dir) then
-        status ("warning: failed to cd retour into %s", emphasis (orig_dir))
+      if not lfschdir (paths.orig_dir) then
+        status ("warning: failed to cd retour into %s",
+                emphasis (paths.orig_dir))
       end
       die ("failed to remove existing merge package")
     end
   end
-    --die ("missing merge file at %s",    emphasis (merge_name )) end
+    --die ("missing merge file at %s",    emphasis (paths.merge_name )) end
 
   --- perform merge
 
-  local cmd = { "mtxrun", "--script", "package", "--merge", merge_name }
+  local cmd = { "mtxrun", "--script", "package", "--merge", paths.merge_name }
   local shl = tableconcat (cmd, " ")
 
   status ("invoking %s as “%s”", emphasis "mtx-package", shl)
@@ -730,8 +743,9 @@ local package = function (args)
   local fh = iopopen (shl, "r")
 
   if not fh then
-    if not lfschdir (orig_dir) then
-      status ("warning: failed to cd retour into %s", emphasis (orig_dir))
+    if not lfschdir (paths.orig_dir) then
+      status ("warning: failed to cd retour into %s",
+              emphasis (paths.orig_dir))
     end
     die ("merge failed; failed to invoke mtxrun")
   end
@@ -747,27 +761,28 @@ local package = function (args)
 
   --- clean up
 
-  if not lfschdir (orig_dir) then
-    status ("warning: failed to cd retour into %s", emphasis (orig_dir))
+  if not lfschdir (paths.orig_dir) then
+    status ("warning: failed to cd retour into %s",
+            emphasis (paths.orig_dir))
   end
 
   --- check postconditions
 
-  if not lfsisfile (output_name) then die ("merge failed; package not found at " .. output_name)   end
+  if not lfsisfile (paths.output_name) then die ("merge failed; package not found at " .. paths.output_name)   end
 
   --- at this point we know that mtxrun was invoked correctly and the
   --- result file has been created
 
-  local res, err = osrename (output_name, target_name)
+  local res, err = osrename (paths.output_name, paths.target_name)
 
   if res == nil then
     die ("merge failed; failed to move package from %s to %s",
-         output_name, target_name)
+         paths.output_name, paths.target_name)
   end
 
   status ("merge complete; operation finished in %.0f ms",
           (osgettimeofday() - t0) * 1000)
-  status ("a fresh fontloader at %s is ready to roll", target_name)
+  status ("a fresh fontloader at %s is ready to roll", paths.target_name)
 end
 
 local help = function ()

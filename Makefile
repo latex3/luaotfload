@@ -50,7 +50,7 @@ GLYPHS		= $(BUILDDIR)/$(NAME)-glyphlist.lua
 CHARS		= $(BUILDDIR)/$(NAME)-characters.lua
 STATUS		= $(BUILDDIR)/$(NAME)-status.lua
 LOADER		= $(BUILDDIR)/fontloader-$(shell date +%F).lua
-RESOURCES	= $(GLYPHS) $(CHARS) $(STATUS)
+RESOURCES	= $(GLYPHS) $(CHARS) $(LOADER) $(STATUS)
 SOURCE		= $(DOCSRC) $(MANSRC) $(SRC) README COPYING Makefile NEWS $(RESOURCESCRIPTS)
 
 # Files grouped by installation location

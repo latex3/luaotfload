@@ -197,7 +197,7 @@ local imports = {
     { name = "fonts-ext"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-inj"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-lua"         , ours = nil          , kind = kind_merged    },
-    { name = "fonts-merged"      , ours = "fontloader" , kind = kind_essential },
+    { name = "fonts-merged"      , ours = "reference"  , kind = kind_essential },
     { name = "fonts-ota"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-otn"         , ours = nil          , kind = kind_merged    },
     { name = "fonts"             , ours = nil          , kind = kind_merged    },

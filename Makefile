@@ -90,7 +90,7 @@ LUA		= texlua
 ## variables.
 DO_GLYPHS	= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS	= $(LUA) $(CHARSCRIPT)  > /dev/null
-DO_STATUS	= $(LUA) $(STATUSSCRIPT) $(LOADER) >/dev/null
+DO_STATUS	= $(LUA) $(STATUSSCRIPT) --fontloader=$(LOADER) >/dev/null
 DO_IMPORT	= $(LUA) $(IMPORTSCRIPT) import >/dev/null
 DO_PACKAGE	= $(LUA) $(IMPORTSCRIPT) package \
 		  $(PACKAGEDIR)/luaotfload-package.lua $(LOADER) >/dev/null

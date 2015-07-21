@@ -140,9 +140,9 @@ local feature_presets = {
 --doc]]--
 
 local registered_loaders = {
-  default    = "fontloader",
-  fontloader = "fontloader",
-  tl2013     = "tl2013",
+  default   = luaotfloadstatus and luaotfloadstatus.notes.loader or "reference",
+  reference = "reference",
+  tl2014    = "tl2014",
 }
 
 --[[doc--

@@ -26,6 +26,7 @@ local iosavedata   = io.savedata
 local iopopen      = io.popen
 local iowrite      = io.write
 local lfsisdir     = lfs.isdir
+local stringmatch  = string.match
 
 -----------------------------------------------------------------------
 -- settings
@@ -158,26 +159,35 @@ hash_all = function (list, acc)
 end
 
 local handle_argv = function (argv)
+  local ret  = { files = { }, loader = nil }
   local argc = #argv
-  if argc < 1 then return { } end
+  if argc < 1 then return ret end
   local argoff = 1
   if argv [1] == "-v" then
     verbose = true
-    if argc == 1 then return { } end
+    if argc == 1 then return ret end
     argoff  = 2
   end
   local aux aux = function (acc, i)
     if i > argc then return acc else
       local cur = argv[i]
-      if type (cur) == "string" and lfs.isfile (cur) then
-        acc[#acc + 1] = cur
+      if type (cur) == "string" then
+        local loader = stringmatch (cur, "--fontloader=(.+)$")
+        if loader then
+          cur = loader
+          acc.loader = file.basename (cur)
+        end
+        if lfs.isfile (cur) then
+          local files = acc.files
+          files[#files + 1] = cur
+        end
       else
         die ("file not found: %s", tostring (cur))
       end
       return aux (acc, i + 1)
     end
   end
-  return aux ({ }, argoff)
+  return aux (ret, argoff)
 end
 
 local add_files
@@ -196,9 +206,10 @@ end
 
 local main = function ()
   local raw_extra   = handle_argv (arg)
-  local cuit_extra  = add_files (raw_extra)
+  local cuit_extra  = add_files (raw_extra.files)
   local hashes      = hash_all (cuit_extra)
   local notes       = git_info ()
+  notes.loader      = raw_extra.loader
   local serialized  = table.serialize ({ notes = notes,
                                          hashes = hashes }, true)
   local success     = io.savedata (filelist, serialized)

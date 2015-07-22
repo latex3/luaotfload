@@ -26,6 +26,7 @@ local iosavedata   = io.savedata
 local iopopen      = io.popen
 local iowrite      = io.write
 local lfsisdir     = lfs.isdir
+local stringmatch  = string.match
 
 -----------------------------------------------------------------------
 -- settings
@@ -55,8 +56,8 @@ local names = {
   { "src",      "luaotfload-loaders.lua",     },
   { "src",      "luaotfload-log.lua",         },
   { "src",      "luaotfload-main.lua",        },
-  { "src/fontloader/runtime",      "fontloader-fontloader.lua",  },
-  { "src",      "luaotfload-override.lua",    },
+  { "src/fontloader/runtime",      "fontloader-reference.lua",  },
+  --{ "src",      "luaotfload-override.lua",    }, --> part of init now
   { "src",      "luaotfload-parsers.lua",     },
   { "src",      "luaotfload-tool.lua",        },
   { "scripts",  "mkcharacters",               },
@@ -121,8 +122,9 @@ end
 
 local hash_all
 hash_all = function (list, acc)
-  if list == nil then
-    return hash_all (table.fastcopy (names), { })
+  if acc == nil then
+    local base = table.fastcopy (names)
+    return hash_all (table.append (base, list), { })
   end
 
   local finfo = list[#list]
@@ -156,10 +158,58 @@ hash_all = function (list, acc)
   return acc
 end
 
+local handle_argv = function (argv)
+  local ret  = { files = { }, loader = nil }
+  local argc = #argv
+  if argc < 1 then return ret end
+  local argoff = 1
+  if argv [1] == "-v" then
+    verbose = true
+    if argc == 1 then return ret end
+    argoff  = 2
+  end
+  local aux aux = function (acc, i)
+    if i > argc then return acc else
+      local cur = argv[i]
+      if type (cur) == "string" then
+        local loader = stringmatch (cur, "--fontloader=(.+)$")
+        if loader then
+          cur = loader
+          acc.loader = file.basename (cur)
+        end
+        if lfs.isfile (cur) then
+          local files = acc.files
+          files[#files + 1] = cur
+        end
+      else
+        die ("file not found: %s", tostring (cur))
+      end
+      return aux (acc, i + 1)
+    end
+  end
+  return aux (ret, argoff)
+end
+
+local add_files
+add_files = function (lst, acc)
+  if lst == nil then return end
+  if acc == nil then return add_files (lst, { }) end
+  local len   = #lst
+  if len == 0 then return acc end
+  local cur   = lst[len]
+  local fname = file.basename (cur)
+  local path  = file.dirname (cur)
+  acc[#acc + 1] = { path, fname }
+  lst[len] = nil
+  return add_files (lst, acc)
+end
+
 local main = function ()
-  if arg [1] == "-v" then verbose = true end
-  local hashes      = hash_all ()
+  local raw_extra   = handle_argv (arg)
+  local cuit_extra  = add_files (raw_extra.files)
+  local hashes      = hash_all (cuit_extra)
   local notes       = git_info ()
+  notes.loader      = raw_extra.loader
   local serialized  = table.serialize ({ notes = notes,
                                          hashes = hashes }, true)
   local success     = io.savedata (filelist, serialized)

@@ -471,12 +471,15 @@ local enablefontkerning = function ( )
 
   local handler = function (hd)
     local direct_hd = todirect (hd)
-    local hd, _done = kerncharacters (hd)
-    if not hd then --- bad
+    logreport ("term", 5, "letterspace",
+               "kerncharacters() invoked with node.direct interface \z
+               (``%s`` -> ``%s``)", tostring (hd), tostring (direct_hd))
+    local direct_hd, _done = kerncharacters (direct_hd)
+    if not direct_hd then --- bad
       logreport ("both", 0, "letterspace",
                  "kerncharacters() failed to return a valid new head")
     end
-    return tonode (hd)
+    return tonode (direct_hd)
   end
 
   return add_processor( handler

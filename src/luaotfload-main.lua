@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
---  DESCRIPTION:  Luaotfload initialization
+--  DESCRIPTION:  Luaotfload entry point
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 --      VERSION:  same as Luaotfload
@@ -20,9 +20,7 @@ luaotfload.log                    = luaotfload.log or { }
 luaotfload.version                = "2.6"
 luaotfload.loaders                = { }
 luaotfload.min_luatex_version     = 79             --- i. e. 0.79
-luaotfload.fontloader_package     = "fontloader"   --- default: from current Context
-----------.fontloader_package     = "slim"
-
+luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 local authors = "\z
     Hans Hagen,\z
@@ -155,12 +153,10 @@ luaotfload.loaders.luaotfload = load_luaotfload_module
 luaotfload.loaders.fontloader = load_fontloader_module
 
 luaotfload.init = load_luaotfload_module "init" --- fontloader initialization
-luaotfload.init.init ()
 
+local store           = luaotfload.init.early ()
 local log             = luaotfload.log
 local logreport       = log.report
-
-load_luaotfload_module "override"   --- load glyphlist on demand
 
 --[[doc--
 
@@ -174,6 +170,8 @@ load_luaotfload_module "configuration"   --- configuration options
 if not config.actions.apply_defaults () then
     logreport ("log", 0, "load", "Configuration unsuccessful.")
 end
+
+luaotfload.init.main (store)
 
 load_luaotfload_module "loaders"         --- Type1 font wrappers
 load_luaotfload_module "database"        --- Font management.

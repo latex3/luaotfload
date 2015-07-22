@@ -65,7 +65,7 @@ local logreport  --- filled in after loading the log module
 --doc]]--
 
 
-local init_pre = function ()
+local init_early = function ()
 
   local store                  = { }
   config                       = config or { } --- global
@@ -74,6 +74,7 @@ local init_pre = function ()
   config.lualibs.verbose       = false
   config.lualibs.prefer_merged = true
   config.lualibs.load_extended = true
+  fonts                        = fonts or { }
 
   require "lualibs"
 
@@ -131,8 +132,10 @@ local init_pre = function ()
     return number
   end
 
+  luaotfload.loaders.fontloader "basics-gen"
+
   return store
-end --- [init_pre]
+end --- [init_early]
 
 --[[doc--
 
@@ -180,11 +183,8 @@ end
 
 local init_adapt = function ()
 
-  luaotfload.context_environment  = { }
-  luaotfload.push_namespaces      = push_namespaces
-  luaotfload.pop_namespaces       = pop_namespaces
-
-  local our_environment = push_namespaces ()
+  local context_environment  = { }
+  local our_environment      = push_namespaces ()
 
   --[[doc--
 
@@ -196,7 +196,7 @@ local init_adapt = function ()
 
   tex.attribute[0] = 0
 
-  return our_environment
+  return our_environment, context_environment
 
 end --- [init_adapt]
 
@@ -277,9 +277,9 @@ local init_cleanup = function (store)
 
   --doc]]--
 
-  luaotfload.pop_namespaces (store.our_environment,
-                             false,
-                             luaotfload.context_environment)
+  pop_namespaces (store.our_environment,
+                  false,
+                  store.context_environment)
 
   --[[doc--
 
@@ -294,10 +294,7 @@ local init_cleanup = function (store)
   callback.register = store.trapped_register
 end --- [init_cleanup]
 
-local init_post = function ()
-  --- hook for actions that need to take place after the fontloader is
-  --- installed
-
+local init_post_install_callbacks = function ()
   --[[doc--
 
     we do our own callback handling with the means provided by
@@ -316,19 +313,122 @@ local init_post = function ()
                              nodes.simple_font_handler,
                              "luaotfload.node_processor",
                              1)
+end
+
+local init_post_load_agl = function ()
+
+  --[[doc--
+
+      Adobe Glyph List.
+      -----------------------------------------------------------------
+
+      Context provides a somewhat different font-age.lua from an
+      unclear origin. Unfortunately, the file name it reads from is
+      hard-coded in font-enc.lua, so we have to replace the entire
+      table.
+
+      This shouldn’t cause any complications. Due to its implementation
+      the glyph list will be loaded upon loading a OTF or TTF for the
+      first time during a TeX run. (If one sticks to TFM/OFM then it is
+      never read at all.) For this reason we can install a metatable
+      that looks up the file of our choosing and only falls back to the
+      Context one in case it cannot be found.
+
+  --doc]]--
+
+  local findfile  = resolvers.findfile
+  local encodings = fonts.encodings
+
+  if not findfile or not encodings then
+    --- Might happen during refactoring; we continue graciously but in
+    --- a somewhat defect state.
+    logreport ("log", 0, "init",
+               "preconditions unmet, skipping the Adobe Glyph List; "
+               .. "this is a Luaotfload bug.")
+    return
+  end
+
+  if next (fonts.encodings.agl) then
+      --- unnecessary because the file shouldn’t be loaded at this time
+      --- but we’re just making sure
+      fonts.encodings.agl = nil
+      collectgarbage"collect"
+  end
+
+  local agl_init = { }      --- start out empty, fill on demand
+  encodings.agl  = agl_init --- ugh, replaced again later
+
+  setmetatable (agl_init, { __index = function (t, k)
+
+    if k ~= "unicodes" then
+      return nil
+    end
+
+    local glyphlist = findfile "luaotfload-glyphlist.lua"
+    if glyphlist then
+      logreport ("log", 1, "init", "loading the Adobe glyph list")
+    else
+      glyphlist = findfile "font-age.lua"
+      logreport ("both", 0, "init",
+                 "loading the extended glyph list from ConTeXt")
+    end
+
+    if not glyphlist then
+      logreport ("both", 4, "init",
+                 "Adobe glyph list not found, please check your installation.")
+      return nil
+    end
+    logreport ("both", 4, "init",
+               "found Adobe glyph list file at ``%s``, using that.",
+               glyphlist)
+
+    local unicodes = dofile(glyphlist)
+    encodings.agl  = { unicodes = unicodes }
+    return unicodes
+  end })
+
+end
+
+--- (unit -> unit) list
+local init_post_actions = {
+  init_post_install_callbacks,
+  init_post_load_agl,
+}
+
+--- unit -> size_t
+local init_post = function ()
+  --- hook for actions that need to take place after the fontloader is
+  --- installed
+
+  local n = #init_post_actions
+  for i = 1, n do
+    local action = init_post_actions[i]
+    local taction = type (action)
+    if not action or taction ~= "function" then
+      logreport ("both", 1, "init",
+                 "post hook WARNING: action %d not a function but %s/%s; ignoring.",
+                 i, action, taction)
+    else
+      --- call closure
+      action ()
+    end
+  end
+
+  return n
 end --- [init_post]
 
 return {
-  init = function ()
+  early = init_early,
+  main = function (store)
     local starttime = os.gettimeofday ()
-    local store = init_pre ()
-    store.our_environment = init_adapt ()
+    store.our_environment, store.context_environment = init_adapt ()
     init_main ()
     init_cleanup (store)
     logreport ("both", 1, "init",
                "fontloader loaded in %0.3f seconds",
                os.gettimeofday() - starttime)
-    init_post ()
+    local n = init_post ()
+    logreport ("both", 5, "init", "post hook terminated, %d actions performed", n)
   end
 }
 

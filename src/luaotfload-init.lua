@@ -65,7 +65,7 @@ local logreport  --- filled in after loading the log module
 --doc]]--
 
 
-local init_pre = function ()
+local init_early = function ()
 
   local store                  = { }
   config                       = config or { } --- global
@@ -74,6 +74,7 @@ local init_pre = function ()
   config.lualibs.verbose       = false
   config.lualibs.prefer_merged = true
   config.lualibs.load_extended = true
+  fonts                        = fonts or { }
 
   require "lualibs"
 
@@ -131,8 +132,10 @@ local init_pre = function ()
     return number
   end
 
+  luaotfload.loaders.fontloader "basics-gen"
+
   return store
-end --- [init_pre]
+end --- [init_early]
 
 --[[doc--
 
@@ -345,6 +348,13 @@ local init_post_load_agl = function ()
     return
   end
 
+  if next (fonts.encodings.agl) then
+      --- unnecessary because the file shouldn’t be loaded at this time
+      --- but we’re just making sure
+      fonts.encodings.agl = nil
+      collectgarbage"collect"
+  end
+
   local agl_init = { }      --- start out empty, fill on demand
   encodings.agl  = agl_init --- ugh, replaced again later
 
@@ -408,9 +418,9 @@ local init_post = function ()
 end --- [init_post]
 
 return {
-  init = function ()
+  early = init_early,
+  main = function (store)
     local starttime = os.gettimeofday ()
-    local store = init_pre ()
     store.our_environment, store.context_environment = init_adapt ()
     init_main ()
     init_cleanup (store)

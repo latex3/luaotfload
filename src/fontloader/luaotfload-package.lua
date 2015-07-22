@@ -63,12 +63,16 @@ loadmodule "l-boolean.lua"
 loadmodule "l-math.lua"
 loadmodule "util-str.lua"
 
+--- Another file containing auxiliary definitions must be present
+--- prior to initialization of the configuration.
+
+loadmodule "luatex-basics-gen.lua"
+
 --- The files below constitute the “fontloader proper”. Some of the
 --- functionality like file resolvers is overloaded later by
 --- Luaotfload. Consequently, the resulting package is pretty
 --- bare-bones and not usable independently.
 
-loadmodule("luatex-basics-gen.lua")
 loadmodule("data-con.lua")
 loadmodule("luatex-basics-nod.lua")
 loadmodule("font-ini.lua")

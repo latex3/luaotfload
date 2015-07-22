@@ -153,8 +153,8 @@ luaotfload.loaders.luaotfload = load_luaotfload_module
 luaotfload.loaders.fontloader = load_fontloader_module
 
 luaotfload.init = load_luaotfload_module "init" --- fontloader initialization
-luaotfload.init.init ()
 
+local store           = luaotfload.init.early ()
 local log             = luaotfload.log
 local logreport       = log.report
 
@@ -170,6 +170,8 @@ load_luaotfload_module "configuration"   --- configuration options
 if not config.actions.apply_defaults () then
     logreport ("log", 0, "load", "Configuration unsuccessful.")
 end
+
+luaotfload.init.main (store)
 
 load_luaotfload_module "loaders"         --- Type1 font wrappers
 load_luaotfload_module "database"        --- Font management.

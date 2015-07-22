@@ -180,11 +180,8 @@ end
 
 local init_adapt = function ()
 
-  luaotfload.context_environment  = { }
-  luaotfload.push_namespaces      = push_namespaces
-  luaotfload.pop_namespaces       = pop_namespaces
-
-  local our_environment = push_namespaces ()
+  local context_environment  = { }
+  local our_environment      = push_namespaces ()
 
   --[[doc--
 
@@ -196,7 +193,7 @@ local init_adapt = function ()
 
   tex.attribute[0] = 0
 
-  return our_environment
+  return our_environment, context_environment
 
 end --- [init_adapt]
 
@@ -277,9 +274,9 @@ local init_cleanup = function (store)
 
   --doc]]--
 
-  luaotfload.pop_namespaces (store.our_environment,
-                             false,
-                             luaotfload.context_environment)
+  pop_namespaces (store.our_environment,
+                  false,
+                  store.context_environment)
 
   --[[doc--
 
@@ -414,7 +411,7 @@ return {
   init = function ()
     local starttime = os.gettimeofday ()
     local store = init_pre ()
-    store.our_environment = init_adapt ()
+    store.our_environment, store.context_environment = init_adapt ()
     init_main ()
     init_cleanup (store)
     logreport ("both", 1, "init",

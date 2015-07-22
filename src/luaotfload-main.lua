@@ -20,9 +20,7 @@ luaotfload.log                    = luaotfload.log or { }
 luaotfload.version                = "2.6"
 luaotfload.loaders                = { }
 luaotfload.min_luatex_version     = 79             --- i. e. 0.79
-luaotfload.fontloader_package     = "fontloader"   --- default: from current Context
-----------.fontloader_package     = "slim"
-
+luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 local authors = "\z
     Hans Hagen,\z

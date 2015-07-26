@@ -13,6 +13,7 @@ Change History
     * Colorization was moved to the ``post_linebreak_filter`` stage
     * Move remaining functionality from ``luaotfload-override`` into
       initialization
+    * Write names index if fonts were removed
 
 2014/07/13, luaotfload v2.5
     * Remove legacy code.

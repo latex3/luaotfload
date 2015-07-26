@@ -2241,6 +2241,28 @@ end
 
 --[[doc--
 
+    count_removed -- Count paths that do not exist in the file system.
+
+--doc]]--
+
+--- string list -> size_t
+local count_removed = function (old)
+    report("log", 4, "db", "Checking removed files.")
+    local nrem = 0
+    local nold = #old
+    for i = 1, nold do
+        local f = old[i]
+        if not kpsereadable_file (f) then
+            report("log", 2, "db",
+                   "File %s does not exist in file system.")
+            nrem = nrem + 1
+        end
+    end
+    return nrem
+end
+
+--[[doc--
+
     retrieve_namedata -- Scan the list of collected fonts and populate
     the list of namedata.
 
@@ -2253,7 +2275,7 @@ end
 
 --doc]]--
 
---- string * string list -> dbobj -> dbobj -> bool? -> int
+--- string * string list -> dbobj -> dbobj -> bool? -> int * int
 local retrieve_namedata = function (files, currentnames, targetnames, dry_run)
 
     local nfiles    = #files
@@ -2348,10 +2370,7 @@ local collect_font_filenames_local = function ()
     return files
 end
 
---- dbobj -> dbobj -> int * int
-
 --- fontentry list -> filemap
-
 generate_filedata = function (mappings)
 
     report ("both", 2, "db", "Creating filename map.")
@@ -2383,7 +2402,6 @@ generate_filedata = function (mappings)
 
     for index = 1, nmappings do
         local entry    = mappings [index]
-
         local filedata = entry.file
         local format
         local location
@@ -2473,7 +2491,7 @@ generate_filedata = function (mappings)
         --- 3) add to fullpath map
 
         full [index] = fullpath
-    end
+    end --- mapping traversal
 
     return files
 end
@@ -2849,7 +2867,7 @@ end
 
 --doc]]--
 
---- unit -> string * bool list
+--- unit -> string * string list
 local collect_font_filenames = function ()
 
     report ("info", 4, "db", "Scanning the filesystem for font files.")
@@ -3098,6 +3116,8 @@ end
 --- dbobj? -> bool? -> bool? -> dbobj
 update_names = function (currentnames, force, dry_run)
     local targetnames
+    local n_new = 0
+    local n_rem = 0
 
     local conf = config.luaotfload
     if conf.run.live ~= false and conf.db.update_live == false then
@@ -3149,13 +3169,16 @@ update_names = function (currentnames, force, dry_run)
         --- pass 2: read font files (normal case) or reuse information
         --- present in index
 
+        n_rem = count_removed (currentnames.files.full)
+
         n_new = retrieve_namedata (font_filenames,
                                    currentnames,
                                    targetnames,
                                    dry_run)
+
         report ("info", 3, "db",
-                "Found %d font files; %d new entries.",
-                #font_filenames, n_new)
+                "Found %d font files; %d new, %d stale entries.",
+                #font_filenames, n_new, n_rem)
     end
 
     --- pass 3 (optional): collect some stats about the raw font info
@@ -3181,7 +3204,6 @@ update_names = function (currentnames, force, dry_run)
     --- pass 7: order design size tables
     targetnames.families    = order_design_sizes (targetnames.families)
 
-
     report ("info", 3, "db",
             "Rebuilt in %0.f ms.",
             1000 * (osgettimeofday () - starttime))
@@ -3189,8 +3211,9 @@ update_names = function (currentnames, force, dry_run)
 
     if dry_run ~= true then
 
-        if n_new == 0 then
-            report ("info", 2, "db", "No new fonts found, skip saving to disk.")
+        if n_new + n_rem == 0 then
+            report ("info", 2, "db",
+                    "No new or removed fonts, skip saving to disk.")
         else
             local success, reason = save_names ()
             if not success then

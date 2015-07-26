@@ -9,6 +9,8 @@
 -----------------------------------------------------------------------
 --
 
+local setmetatable = setmetatable
+
 --[[doc--
 
   Initialization phases:

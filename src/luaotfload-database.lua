@@ -454,22 +454,19 @@ end
 --- define locals in scope
 local access_font_index
 local collect_families
-local font_file_lookup
 local find_closest
 local flush_lookup_cache
 local generate_filedata
 local get_font_filter
 local group_modifiers
-local load_lookups
 local load_names
+local lookup_font_name
 local getmetadata
 local order_design_sizes
 local ot_fullinfo
 local read_blacklist
 local reload_db
-local resolve_cached
-local resolve_fullpath
-local resolve_name
+local lookup_fullpath
 local save_lookups
 local save_names
 local set_font_filter
@@ -558,6 +555,7 @@ getmetadata = function ()
 end
 
 --- unit -> unit
+local load_lookups
 load_lookups = function ( )
     local foundname, data = load_lua_file(config.luaotfload.paths.lookup_path_lua)
     if data then
@@ -638,7 +636,7 @@ end
 
 --[[doc--
 
-    font_file_lookup -- The ``file:`` are ultimately delegated here.
+    lookup_font_file -- The ``file:`` are ultimately delegated here.
     The lookups are kind of a blunt instrument since they try locating
     the file using every conceivable method, which is quite
     inefficient. Nevertheless, resolving files that way is rarely the
@@ -647,7 +645,8 @@ end
 --doc]]--
 
 --- string -> string * string * bool
-font_file_lookup = function (filename)
+local lookup_font_file
+lookup_font_file = function (filename)
     local found = lookup_filename (filename)
 
     if not found then
@@ -667,7 +666,7 @@ font_file_lookup = function (filename)
 
     if not fonts_reloaded and config.luaotfload.db.update_live == true then
         return reload_db (stringformat ("File not found: %s.", filename),
-                          font_file_lookup,
+                          lookup_font_file,
                           filename)
     end
     return filename, nil, false
@@ -715,7 +714,7 @@ font managment we have to check both the system path and the texmf.
 --doc]]--
 
 local verify_font_file = function (basename)
-    local path = resolve_fullpath (basename)
+    local path = lookup_fullpath (basename)
     if path and lfsisfile(path) then
         return true
     end
@@ -748,7 +747,7 @@ Idk what the “spec” resolver is for.
         spec:       name, sub           resolved, sub, name, forced
 
 [*] name: contains both the name resolver from luatex-fonts and
-    resolve_name() below
+    lookup_font_name () below
 
 From my reading of font-def.lua, what a resolver does is
 basically rewrite the “name” field of the specification record
@@ -777,7 +776,8 @@ local hash_request = function (specification)
 end
 
 --- 'a -> 'a -> table -> (string * int|boolean * boolean)
-resolve_cached = function (specification)
+local lookup_font_name_cached
+lookup_font_name_cached = function (specification)
     if not lookup_cache then load_lookups () end
     local request = hash_request(specification)
     report("both", 4, "cache", "Looking for %q in cache ...",
@@ -801,7 +801,7 @@ resolve_cached = function (specification)
 
     --- case 2) cache negative ----------------------------------------
     --- first we resolve normally ...
-    local filename, subfont = resolve_name (specification)
+    local filename, subfont = lookup_font_name (specification)
     if not filename then
         return nil, nil
     end
@@ -935,13 +935,13 @@ end
 
 --[[doc--
 
-    resolve_familyname -- Query the families table for an entry
+    lookup_familyname -- Query the families table for an entry
     matching the specification.
     The parameters “name” and “style” are pre-sanitized.
 
 --doc]]--
 --- spec -> string -> string -> int -> string * int
-local resolve_familyname = function (specification, name, style, askedsize)
+local lookup_familyname = function (specification, name, style, askedsize)
     local families   = name_index.families
     local mappings   = name_index.mappings
     local candidates = nil
@@ -978,7 +978,7 @@ local resolve_familyname = function (specification, name, style, askedsize)
     return resolved, subfont
 end
 
-local resolve_fontname = function (specification, name, style)
+local lookup_fontname = function (specification, name, style)
     local mappings    = name_index.mappings
     local fallback    = nil
     local lastresort  = nil
@@ -1021,7 +1021,7 @@ end
 
 --[[doc--
 
-    resolve_name -- Perform a name: lookup. This first queries the
+    lookup_font_name -- Perform a name: lookup. This first queries the
     font families table and, if there is no match for the spec, the
     font names table.
     The return value is a pair consisting of the file name and the
@@ -1059,7 +1059,7 @@ end
     multiple design sizes to a given font/style combination, we put a
     workaround in place that chooses that unmarked version.
 
-    The first return value of “resolve_name” is the file name of the
+    The first return value of “lookup_font_name” is the file name of the
     requested font (string). It can be passed to the fullname resolver
     get_font_file().
     The second value is either “false” or an integer indicating the
@@ -1068,7 +1068,7 @@ end
 --doc]]--
 
 --- table -> string * (int | bool)
-resolve_name = function (specification)
+lookup_font_name = function (specification)
     local resolved, subfont
     if not name_index then name_index = load_names () end
     local name      = sanitize_fontname (specification.name)
@@ -1086,28 +1086,28 @@ resolve_name = function (specification)
         end
     end
 
-    resolved, subfont = resolve_familyname (specification,
-                                            name,
-                                            style,
-                                            askedsize)
+    resolved, subfont = lookup_familyname (specification,
+                                           name,
+                                           style,
+                                           askedsize)
     if not resolved then
-        resolved, subfont = resolve_fontname (specification,
-                                              name,
-                                              style)
+        resolved, subfont = lookup_fontname (specification,
+                                             name,
+                                             style)
     end
 
     if not resolved then
         if not fonts_reloaded and config.luaotfload.db.update_live == true then
             return reload_db (stringformat ("Font %s not found.",
                                             specification.name or "<?>"),
-                              resolve_name,
+                              lookup_font_name,
                               specification)
         end
     end
     return resolved, subfont
 end
 
-resolve_fullpath = function (fontname, ext) --- getfilename()
+lookup_fullpath = function (fontname, ext) --- getfilename()
     if not name_index then name_index = load_names () end
     local files = name_index.files
     local basedata = files.base
@@ -2241,6 +2241,28 @@ end
 
 --[[doc--
 
+    count_removed -- Count paths that do not exist in the file system.
+
+--doc]]--
+
+--- string list -> size_t
+local count_removed = function (old)
+    report("log", 4, "db", "Checking removed files.")
+    local nrem = 0
+    local nold = #old
+    for i = 1, nold do
+        local f = old[i]
+        if not kpsereadable_file (f) then
+            report("log", 2, "db",
+                   "File %s does not exist in file system.")
+            nrem = nrem + 1
+        end
+    end
+    return nrem
+end
+
+--[[doc--
+
     retrieve_namedata -- Scan the list of collected fonts and populate
     the list of namedata.
 
@@ -2253,7 +2275,7 @@ end
 
 --doc]]--
 
---- string * string list -> dbobj -> dbobj -> bool? -> int
+--- string * string list -> dbobj -> dbobj -> bool? -> int * int
 local retrieve_namedata = function (files, currentnames, targetnames, dry_run)
 
     local nfiles    = #files
@@ -2348,10 +2370,7 @@ local collect_font_filenames_local = function ()
     return files
 end
 
---- dbobj -> dbobj -> int * int
-
 --- fontentry list -> filemap
-
 generate_filedata = function (mappings)
 
     report ("both", 2, "db", "Creating filename map.")
@@ -2383,7 +2402,6 @@ generate_filedata = function (mappings)
 
     for index = 1, nmappings do
         local entry    = mappings [index]
-
         local filedata = entry.file
         local format
         local location
@@ -2473,7 +2491,7 @@ generate_filedata = function (mappings)
         --- 3) add to fullpath map
 
         full [index] = fullpath
-    end
+    end --- mapping traversal
 
     return files
 end
@@ -2849,7 +2867,7 @@ end
 
 --doc]]--
 
---- unit -> string * bool list
+--- unit -> string * string list
 local collect_font_filenames = function ()
 
     report ("info", 4, "db", "Scanning the filesystem for font files.")
@@ -3098,6 +3116,8 @@ end
 --- dbobj? -> bool? -> bool? -> dbobj
 update_names = function (currentnames, force, dry_run)
     local targetnames
+    local n_new = 0
+    local n_rem = 0
 
     local conf = config.luaotfload
     if conf.run.live ~= false and conf.db.update_live == false then
@@ -3149,13 +3169,16 @@ update_names = function (currentnames, force, dry_run)
         --- pass 2: read font files (normal case) or reuse information
         --- present in index
 
+        n_rem = count_removed (currentnames.files.full)
+
         n_new = retrieve_namedata (font_filenames,
                                    currentnames,
                                    targetnames,
                                    dry_run)
+
         report ("info", 3, "db",
-                "Found %d font files; %d new entries.",
-                #font_filenames, n_new)
+                "Found %d font files; %d new, %d stale entries.",
+                #font_filenames, n_new, n_rem)
     end
 
     --- pass 3 (optional): collect some stats about the raw font info
@@ -3181,7 +3204,6 @@ update_names = function (currentnames, force, dry_run)
     --- pass 7: order design size tables
     targetnames.families    = order_design_sizes (targetnames.families)
 
-
     report ("info", 3, "db",
             "Rebuilt in %0.f ms.",
             1000 * (osgettimeofday () - starttime))
@@ -3189,8 +3211,9 @@ update_names = function (currentnames, force, dry_run)
 
     if dry_run ~= true then
 
-        if n_new == 0 then
-            report ("info", 2, "db", "No new fonts found, skip saving to disk.")
+        if n_new + n_rem == 0 then
+            report ("info", 2, "db",
+                    "No new or removed fonts, skip saving to disk.")
         else
             local success, reason = save_names ()
             if not success then
@@ -3449,17 +3472,18 @@ names.access_font_index           = access_font_index
 names.data                        = function () return name_index end
 names.save                        = save_names
 names.update                      = update_names
-names.font_file_lookup            = font_file_lookup
+names.lookup_font_file            = lookup_font_file
+names.lookup_font_name            = lookup_font_name
+names.lookup_font_name_cached     = lookup_font_name_cached
+names.getfilename                 = lookup_fullpath
+names.lookup_fullpath             = lookup_fullpath
 names.read_blacklist              = read_blacklist
 names.sanitize_fontname           = sanitize_fontname
-names.getfilename                 = resolve_fullpath
 names.getmetadata                 = getmetadata
 names.set_location_precedence     = set_location_precedence
 names.count_font_files            = count_font_files
 names.nth_font_filename           = nth_font_filename
 names.font_slice                  = font_slice
-names.resolve_cached              = resolve_cached
-names.resolve_name                = resolve_name
 
 --- font cache
 names.purge_cache    = purge_cache

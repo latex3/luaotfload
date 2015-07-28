@@ -249,7 +249,9 @@ do
     definers.info_generic   = mk_info "generic"
 end
 
-reset_callback "define_font"
+if not reset_callback == nil then
+  reset_callback "define_font"
+end
 
 --[[doc--
 

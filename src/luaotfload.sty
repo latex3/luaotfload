@@ -35,16 +35,24 @@
 \let\ifluaotfloadloaded\endinput
 \bgroup\expandafter\expandafter\expandafter\egroup
 \expandafter\ifx\csname selectfont\endcsname\relax
+ \ifdefined\newluafunction\else
   \input luatexbase.sty
+ \fi
 \else
   \NeedsTeXFormat{LaTeX2e}
   \ProvidesPackage{luaotfload}%
     %% FIXME  The date is meaningless, we need to find a way to
     %%        use the git revision instead.
     [2015/03/29 v2.6 OpenType layout system]
-  \RequirePackage{luatexbase}
+ \ifdefined\newluafunction\else
+    \RequirePackage{luatexbase}
+ \fi
 \fi
-\RequireLuaModule{luaotfload-main}
+\ifdefined \RequireLuaModule
+ \RequireLuaModule{luaotfload-main}
+\else
+  \directlua{require("luaotfload-main")}
+\fi
 
 % for compatibility with beamer class, which loads pgf package.
 \ifcsname selectfont\endcsname

@@ -44,7 +44,6 @@ local texsettoks            = tex.settoks
 local texgettoks            = tex.gettoks
 
 local stringformat          = string.format
-local concat                = table.concat
 
 local otffeatures           = fonts.constructors.newfeatures("otf")
 local identifiers           = fonts.hashes.identifiers

@@ -324,7 +324,7 @@ local color_handler = function (head)
         local no_extgs = not tpr:find("/ExtGState<<.*>>")
         local pgf_loaded = no_extgs and luaotfload.pgf_loaded
         if pgf_loaded then
-            tpr = texgettoks(pgf_loaded) -- see luaotfload.sty
+            tpr = texgettoks(pgf_loaded)
         end
 
         local t   = ""

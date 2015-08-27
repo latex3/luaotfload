@@ -266,4 +266,12 @@ load_luaotfload_module "auxiliary"    --- additional high-level functionality
 
 luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 
+luaotfload.main = function ()
+    local starttime = os.gettimeofday ()
+    --- XXX stub
+    logreport ("both", 0, "main",
+               "initialization completed in %0.3f seconds",
+               os.gettimeofday() - starttime)
+end
+
 -- vim:tw=79:sw=4:ts=4:et

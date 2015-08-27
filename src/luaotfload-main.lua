@@ -163,7 +163,9 @@ luaotfload.main = function ()
     local starttime = os.gettimeofday ()
 
     luaotfload.loaders = load_luaotfload_module "loaders" --- Font loading; callbacks
-    luaotfload.loaders.install ()
+    if not luaotfload.loaders.install () then
+        logreport ("log", 0, "load", "Callback and loader initialization failed.")
+    end
 
     load_luaotfload_module "database"        --- Font management.
     load_luaotfload_module "colors"          --- Per-font colors.

@@ -26,7 +26,7 @@ local install_formats = function ()
   local aux = function (which, reader)
     if   not which  or type (which) ~= "string"
       or not reader or type (reader) ~= "function" then
-      logreport ("both", 2, "main", "error installing reader for “%s”", which)
+      logreport ("both", 2, "loaders", "Error installing reader for “%s”.", which)
       return false
     end
     formats  [which] = "type1"
@@ -70,22 +70,22 @@ do
   local mk_info = function (name)
     local definer = name == "patch" and patch or read
     return function (specification, size, id)
-      logreport ("both", 0, "main", "defining font no. %d", id)
-      logreport ("both", 0, "main", "   > active font definer: %q", name)
-      logreport ("both", 0, "main", "   > spec %q", specification)
-      logreport ("both", 0, "main", "   > at size %.2f pt", size / 2^16)
+      logreport ("both", 0, "loaders", "defining font no. %d", id)
+      logreport ("both", 0, "loaders", "   > active font definer: %q", name)
+      logreport ("both", 0, "loaders", "   > spec %q", specification)
+      logreport ("both", 0, "loaders", "   > at size %.2f pt", size / 2^16)
       local result = definer (specification, size, id)
       if not result then
-        logreport ("both", 0, "main", "   > font definition failed")
+        logreport ("both", 0, "loaders", "   > font definition failed")
         return
       elseif type (result) == "number" then
-        logreport ("both", 0, "main", "   > font definition yielded id %d", result)
+        logreport ("both", 0, "loaders", "   > font definition yielded id %d", result)
         return result
       end
-      logreport ("both", 0, "main", "   > font definition successful")
-      logreport ("both", 0, "main", "   > name %q",     result.name     or "<nil>")
-      logreport ("both", 0, "main", "   > fontname %q", result.fontname or "<nil>")
-      logreport ("both", 0, "main", "   > fullname %q", result.fullname or "<nil>")
+      logreport ("both", 0, "loaders", "   > font definition successful")
+      logreport ("both", 0, "loaders", "   > name %q",     result.name     or "<nil>")
+      logreport ("both", 0, "loaders", "   > fontname %q", result.fontname or "<nil>")
+      logreport ("both", 0, "loaders", "   > fullname %q", result.fullname or "<nil>")
       return result
     end
   end
@@ -129,11 +129,11 @@ return {
   install = function ()
     local ret = true
     if not install_formats () then
-      logreport ("both", 0, "main", "error initializing OFM/PF{A,B} loaders")
+      logreport ("log", 0, "loaders", "Error initializing OFM/PF{A,B} loaders.")
       ret = false
     end
     if not install_callbacks () then
-      logreport ("both", 0, "main", "error installing font loader callbacks")
+      logreport ("log", 0, "loaders", "Error installing font loader callbacks.")
       ret = false
     end
     return ret

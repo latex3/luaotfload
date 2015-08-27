@@ -67,12 +67,6 @@ luaotfload.module = {
 local luatexbase       = luatexbase
 local require          = require
 local type             = type
-local add_to_callback  = luatexbase.add_to_callback
-local create_callback  = luatexbase.create_callback
-local reset_callback   = luatexbase.reset_callback
-local call_callback    = luatexbase.call_callback
-
-local dummy_function = function () end --- XXX this will be moved to the luaotfload namespace when we have the init module
 
 local error, warning, info, log =
     luatexbase.provides_module(luaotfload.module)
@@ -165,110 +159,28 @@ end
 
 luaotfload.init.main (store)
 
-load_luaotfload_module "loaders"         --- Type1 font wrappers
-load_luaotfload_module "database"        --- Font management.
-load_luaotfload_module "colors"          --- Per-font colors.
-
-luaotfload.resolvers = load_luaotfload_module "resolvers" --- Font lookup
-
-luaotfload.resolvers.install ()
-
-if not config.actions.reconfigure () then
-    logreport ("log", 0, "load", "Post-configuration hooks failed.")
-end
-
---[[doc--
-
-    We create callbacks for patching fonts on the fly, to be used by
-    other packages. In addition to the regular \identifier{patch_font}
-    callback there is an unsafe variant \identifier{patch_font_unsafe}
-    that will be invoked even if the target font lacks certain essential
-    tfmdata tables.
-
-    The callbacks initially contain the empty function that we are going to
-    override below.
-
---doc]]--
-
-create_callback("luaotfload.patch_font",        "simple", dummy_function)
-create_callback("luaotfload.patch_font_unsafe", "simple", dummy_function)
-
---[[doc--
-
-    \subsection{\CONTEXT override}
-    \label{define-font}
-    We provide a simplified version of the original font definition
-    callback.
-
---doc]]--
-
-
-local definers = { } --- (string, spec -> size -> id -> tmfdata) hash_t
-do
-    local read = fonts.definers.read
-
-    local patch = function (specification, size, id)
-        local fontdata = read (specification, size, id)
-        if type (fontdata) == "table" and fontdata.shared then
-            --- We need to test for the “shared” field here
-            --- or else the fontspec capheight callback will
-            --- operate on tfm fonts.
-            call_callback ("luaotfload.patch_font", fontdata, specification)
-        else
-            call_callback ("luaotfload.patch_font_unsafe", fontdata, specification)
-        end
-        return fontdata
-    end
-
-    local mk_info = function (name)
-        local definer = name == "patch" and patch or read
-        return function (specification, size, id)
-            logreport ("both", 0, "main", "defining font no. %d", id)
-            logreport ("both", 0, "main", "   > active font definer: %q", name)
-            logreport ("both", 0, "main", "   > spec %q", specification)
-            logreport ("both", 0, "main", "   > at size %.2f pt", size / 2^16)
-            local result = definer (specification, size, id)
-            if not result then
-                logreport ("both", 0, "main", "   > font definition failed")
-                return
-            elseif type (result) == "number" then
-                logreport ("both", 0, "main", "   > font definition yielded id %d", result)
-                return result
-            end
-            logreport ("both", 0, "main", "   > font definition successful")
-            logreport ("both", 0, "main", "   > name %q",     result.name     or "<nil>")
-            logreport ("both", 0, "main", "   > fontname %q", result.fontname or "<nil>")
-            logreport ("both", 0, "main", "   > fullname %q", result.fullname or "<nil>")
-            return result
-        end
-    end
-
-    definers.patch          = patch
-    definers.generic        = read
-    definers.info_patch     = mk_info "patch"
-    definers.info_generic   = mk_info "generic"
-end
-
-reset_callback "define_font"
-
---[[doc--
-
-    Finally we register the callbacks.
-
---doc]]--
-
-local definer = config.luaotfload.run.definer
-add_to_callback ("define_font", definers[definer], "luaotfload.define_font", 1)
-
-load_luaotfload_module "features"     --- font request and feature handling
-load_luaotfload_module "letterspace"  --- extra character kerning
-load_luaotfload_module "auxiliary"    --- additional high-level functionality
-
-luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
-
 luaotfload.main = function ()
     local starttime = os.gettimeofday ()
-    --- XXX stub
+
+    luaotfload.loaders = load_luaotfload_module "loaders" --- Font loading; callbacks
+    luaotfload.loaders.install ()
+
+    load_luaotfload_module "database"        --- Font management.
+    load_luaotfload_module "colors"          --- Per-font colors.
+
+    luaotfload.resolvers = load_luaotfload_module "resolvers" --- Font lookup
+    luaotfload.resolvers.install ()
+
+    if not config.actions.reconfigure () then
+        logreport ("log", 0, "load", "Post-configuration hooks failed.")
+    end
+
+    load_luaotfload_module "features"     --- font request and feature handling
+    load_luaotfload_module "letterspace"  --- extra character kerning
+    load_luaotfload_module "auxiliary"    --- additional high-level functionality
+
+    luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
+
     logreport ("both", 0, "main",
                "initialization completed in %0.3f seconds",
                os.gettimeofday() - starttime)

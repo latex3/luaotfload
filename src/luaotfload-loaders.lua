@@ -12,12 +12,7 @@
 if not lualibs    then error "this module requires Luaotfload" end
 if not luaotfload then error "this module requires Luaotfload" end
 
-local logreport        = luaotfload.log and luaotfload.log.report or print
-local add_to_callback  = luatexbase.add_to_callback
-local create_callback  = luatexbase.create_callback
-local reset_callback   = luatexbase.reset_callback
-local call_callback    = luatexbase.call_callback
-local dummy_function   = function () end
+local logreport = luaotfload.log and luaotfload.log.report or print
 
 local install_formats = function ()
   local fonts = fonts
@@ -29,7 +24,11 @@ local install_formats = function ()
   if not readers or not handlers or not formats then return false end
 
   local aux = function (which, reader)
-    if not which or type (which) ~= "string" then return false end
+    if   not which  or type (which) ~= "string"
+      or not reader or type (reader) ~= "function" then
+      logreport ("both", 2, "main", "error installing reader for “%s”", which)
+      return false
+    end
     formats  [which] = "type1"
     readers  [which] = reader
     handlers [which] = { }
@@ -51,7 +50,7 @@ end
 --doc]]--
 
 
-local definers = { } --- (string, spec -> size -> id -> tmfdata) hash_t
+local definers --- (string, spec -> size -> id -> tmfdata) hash_t
 do
   local read = fonts.definers.read
 
@@ -61,7 +60,7 @@ do
       --- We need to test for the “shared” field here
       --- or else the fontspec capheight callback will
       --- operate on tfm fonts.
-      call_callback ("luaotfload.patch_font", fontdata, specification)
+      luatexbase.call_callback ("luaotfload.patch_font", fontdata, specification)
     else
       call_callback ("luaotfload.patch_font_unsafe", fontdata, specification)
     end
@@ -91,10 +90,12 @@ do
     end
   end
 
-  definers.patch          = patch
-  definers.generic        = read
-  definers.info_patch     = mk_info "patch"
-  definers.info_generic   = mk_info "generic"
+  definers = {
+    patch          = patch,
+    generic        = read,
+    info_patch     = mk_info "patch",
+    info_generic   = mk_info "generic",
+  }
 end
 
 --[[doc--
@@ -110,18 +111,32 @@ end
 
 --doc]]--
 
+local install_callbacks = function ()
+  local create_callback  = luatexbase.create_callback
+  local dummy_function   = function () end
+  create_callback ("luaotfload.patch_font",        "simple", dummy_function)
+  create_callback ("luaotfload.patch_font_unsafe", "simple", dummy_function)
+  luatexbase.reset_callback "define_font"
+  local definer = config.luaotfload.run.definer
+  luatexbase.add_to_callback ("define_font",
+                              definers[definer or "patch"],
+                              "luaotfload.define_font",
+                              1)
+  return true
+end
+
 return {
   install = function ()
+    local ret = true
     if not install_formats () then
       logreport ("both", 0, "main", "error initializing OFM/PF{A,B} loaders")
+      ret = false
     end
-    create_callback("luaotfload.patch_font",        "simple", dummy_function)
-    create_callback("luaotfload.patch_font_unsafe", "simple", dummy_function)
-
-    reset_callback "define_font"
-    local definer = config.luaotfload.run.definer
-    add_to_callback ("define_font", definers[definer or "patch"],
-                     "luaotfload.define_font", 1)
+    if not install_callbacks () then
+      logreport ("both", 0, "main", "error installing font loader callbacks")
+      ret = false
+    end
+    return ret
   end
 }
--- vim:tw=71:sw=2:ts=2:expandtab
+-- vim:tw=79:sw=2:ts=2:expandtab

@@ -192,6 +192,7 @@ local whatsit_t         = nodetype("whatsit")
 local disc_t            = nodetype("disc")
 local pdfliteral_t      = node.subtype("pdf_literal")
 local colorstack_t      = node.subtype("pdf_colorstack")
+local mlist_to_hlist    = node.mlist_to_hlist
 
 local color_callback
 local color_attr        = luatexbase.new_attribute("luaotfload_color_attribute")
@@ -230,8 +231,6 @@ local get_font_color = function (font_id)
     return font_color
 end
 
-local cnt = 0
-
 --[[doc--
 While the second argument and second returned value are apparently
 always nil when the function is called, they temporarily take string
@@ -240,26 +239,24 @@ values during the node list traversal.
 
 --- (node * (string | nil)) -> (node * (string | nil))
 local node_colorize
-node_colorize = function (head, current_color)
+node_colorize = function (head, toplevel, current_color)
     local n = head
     while n do
         local n_id = getid(n)
 
         if n_id == hlist_t or n_id == vlist_t then
-            cnt = cnt + 1
             local n_list = getlist(n)
             if getattribute(n_list, color_attr) then
                 if current_color then
                     head, n, current_color = color_whatsit(head, n, current_color, false)
                 end
             else
-                n_list, current_color = node_colorize(n_list, current_color)
+                n_list, current_color = node_colorize(n_list, false, current_color)
                 if current_color and getsubtype(n) == 1 then -- created by linebreak
                     n_list, _, current_color = color_whatsit(n_list, nodetail(n_list), current_color, false, true)
                 end
                 setfield(n, "head", n_list)
             end
-            cnt = cnt - 1
 
         elseif n_id == glyph_t then
             --- colorization is restricted to those fonts
@@ -303,7 +300,7 @@ node_colorize = function (head, current_color)
         n = getnext(n)
     end
 
-    if cnt == 0 and current_color then
+    if toplevel and current_color then
         head, _, current_color = color_whatsit(head, nodetail(head), current_color, false, true)
     end
 
@@ -314,7 +311,7 @@ end
 --- node -> node
 local color_handler = function (head)
     head = todirect(head)
-    head = node_colorize(head)
+    head = node_colorize(head, true)
     head = tonode(head)
 
     -- now append our page resources
@@ -351,6 +348,8 @@ local color_handler = function (head)
 end
 
 local color_callback_activated = 0
+local add_to_callback          = luatexbase.add_to_callback
+local priority_in_callback     = luatexbase.priority_in_callback
 
 --- unit -> unit
 add_color_callback = function ( )
@@ -360,19 +359,30 @@ add_color_callback = function ( )
     end
 
     if color_callback_activated == 0 then
-        luatexbase.add_to_callback(color_callback,
-                                   color_handler,
-                                   "luaotfload.color_handler")
-        luatexbase.add_to_callback("hpack_filter",
-                                   function (head, groupcode)
-                                       if  groupcode == "hbox"          or
-                                           groupcode == "adjusted_hbox" or
-                                           groupcode == "align_set"     then
-                                           head = color_handler(head)
-                                       end
-                                       return head
-                                   end,
-                                   "luaotfload.color_handler")
+        add_to_callback(color_callback,
+                        color_handler,
+                        "luaotfload.color_handler")
+        add_to_callback("hpack_filter",
+                        function (head, groupcode)
+                            if  groupcode == "hbox"          or
+                                groupcode == "adjusted_hbox" or
+                                groupcode == "align_set"     then
+                                head = color_handler(head)
+                            end
+                            return head
+                        end,
+                        "luaotfload.color_handler")
+        add_to_callback("mlist_to_hlist",
+                        function (head, display_type, need_penalties)
+                            if priority_in_callback("mlist_to_hlist","luaotfload.color_handler") == 1 then
+                                head = mlist_to_hlist(head, display_type, need_penalties)
+                            end
+                            if display_type == "text" then
+                                return head
+                            end
+                            return color_handler(head)
+                        end,
+                        "luaotfload.color_handler")
         color_callback_activated = 1
     end
 end

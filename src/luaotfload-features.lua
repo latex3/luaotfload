@@ -921,23 +921,12 @@ end
 
 ---[[ end included font-ltx.lua ]]
 
---[[doc--
-This uses the code from luatex-fonts-merged (<- font-otc.lua) instead
-of the removed luaotfload-font-otc.lua.
-
-TODO find out how far we get setting features without these lines,
-relying on luatex-fonts only (it *does* handle features somehow, after
-all).
---doc]]--
-
--- we assume that the other otf stuff is loaded already
+-- We assume that the other otf stuff is loaded already; though there’s
+-- another check below during the initialization phase.
 
 ---[[ begin snippet from font-otc.lua ]]
 local trace_loading       = false  trackers.register("otf.loading", function(v) trace_loading = v end)
 local report_otf          = logs.reporter("fonts","otf loading")
-
-local otf                 = fonts.handlers.otf
-local registerotffeature  = otf.features.register
 
 --[[HH--
 
@@ -960,7 +949,7 @@ setmetatableindex(types, function(t,k) t[k] = k return k end) -- "key"
 local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
 local noflags    = { }
 
-local function addfeature(data,feature,specifications)
+local function addfeature (data, feature, specifications)
     local descriptions = data.descriptions
     local resources    = data.resources
     local lookups      = resources.lookups
@@ -1100,26 +1089,9 @@ local function addfeature(data,feature,specifications)
     end
 end
 
-
-otf.enhancers.addfeature = addfeature
-
-local extrafeatures = { }
-
-function otf.addfeature(name,specification)
-    extrafeatures[name] = specification
-end
-
-local function enhance(data,filename,raw)
-    for feature, specification in next, extrafeatures do
-        addfeature(data,feature,specification)
-    end
-end
-
-otf.enhancers.register("check extra features",enhance)
-
 ---[[ end snippet from font-otc.lua ]]
 
-local tlig = {
+local tlig_specification = {
     {
         type      = "substitution",
         features  = everywhere,
@@ -1166,9 +1138,6 @@ local tlig = {
         prepend  = true,
     },
 }
-
-otf.addfeature ("tlig", tlig)
-otf.addfeature ("trep", { })
 
 local anum_arabic = { --- these are the same as in font-otc
     [0x0030] = 0x0660,
@@ -1228,11 +1197,45 @@ local anum_specification = {
     },
 }
 
-otf.addfeature ("anum", anum_specification)
+return {
+    init = function ()
 
-registerotffeature {
-    name        = "anum",
-    description = "arabic digits",
+        if not fonts and fonts.handlers then
+            logreport ("log", 0, "color",
+                       "OTF mechanisms missing -- did you forget to \z
+                       load a font loader?")
+            return false
+        end
+
+        local otf = fonts.handlers.otf
+
+        local extrafeatures = {
+            tlig = tlig_specification,
+            trep = { },
+            anum = anum_specification,
+        }
+
+        otf.enhancers.register ("check extra features",
+                                function (data,filename, raw)
+                                    for feature, specification in next, extrafeatures do
+                                        addfeature (data, feature, specification)
+                                    end
+                                end)
+
+        logreport = luaotfload.log.report
+        if not fonts then
+            logreport ("log", 0, "color",
+                       "OTF mechanisms missing -- did you forget to \z
+                       load a font loader?")
+            return false
+        end
+
+        otf.features.register {
+            name        = "anum",
+            description = "arabic digits",
+        }
+        return true
+    end
 }
 
 -- vim:tw=71:sw=4:ts=4:expandtab

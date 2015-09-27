@@ -3491,9 +3491,8 @@ return {
         --- the font loader namespace is “fonts”, same as in Context
         --- we need to put some fallbacks into place for when running
         --- as a script
-        log             = luaotfload.log
-        logreport       = log.report
-        fonts           = fonts or { }
+        if not fonts then return false end
+        logreport       = luaotfload.log.report
         local fonts     = fonts
         fonts.names     = fonts.names or names
         fonts.definers  = fonts.definers or { }
@@ -3504,6 +3503,7 @@ return {
         names.lookups   = nil      --- contains the lookup cache
 
         for sym, ref in next, export do names[sym] = ref end
+        return true
     end
 }
 

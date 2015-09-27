@@ -126,7 +126,7 @@ local install_callbacks = function ()
 end
 
 return {
-  install = function ()
+  init = function ()
     local ret = true
     if not install_formats () then
       logreport ("log", 0, "loaders", "Error initializing OFM/PF{A,B} loaders.")

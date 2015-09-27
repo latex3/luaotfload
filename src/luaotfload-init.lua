@@ -431,6 +431,8 @@ return {
                os.gettimeofday() - starttime)
     local n = init_post ()
     logreport ("both", 5, "init", "post hook terminated, %d actions performed", n)
+    return true
   end
 }
 
+-- vim:tw=79:sw=2:ts=2:expandtab

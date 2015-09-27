@@ -919,6 +919,10 @@ return {
       reconfigure      = reconfigure,
       dump             = dump,
     }
+    if not apply_defaults () then
+      logreport ("log", 0, "load",
+                 "Configuration unsuccessful: error loading default settings.")
+    end
     return true
   end
 }

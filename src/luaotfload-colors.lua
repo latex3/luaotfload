@@ -19,8 +19,7 @@ explanation: http://tug.org/pipermail/luatex/2013-May/004305.html
 
 --doc]]--
 
-local log                   = luaotfload.log
-local logreport             = log.report
+local logreport             = luaotfload and luaotfload.log.report or print
 
 local nodedirect            = node.direct
 local newnode               = nodedirect.new
@@ -44,10 +43,7 @@ local texsettoks            = tex.settoks
 local texgettoks            = tex.gettoks
 
 local stringformat          = string.format
-
-local otffeatures           = fonts.constructors.newfeatures("otf")
 local identifiers           = fonts.hashes.identifiers
-local registerotffeature    = otffeatures.register
 
 local add_color_callback --[[ this used to be a global‽ ]]
 
@@ -100,36 +96,6 @@ local sanitize_color_expression = function (digits)
     end
     return sanitized
 end
-
---[[doc--
-``setcolor`` modifies tfmdata.properties.color in place
---doc]]--
-
---- fontobj -> string -> unit
----
----         (where “string” is a rgb value as three octet
----         hexadecimal, with an optional fourth transparency
----         value)
----
-local setcolor = function (tfmdata, value)
-    local sanitized  = sanitize_color_expression(value)
-    local properties = tfmdata.properties
-
-    if sanitized then
-        properties.color = sanitized
-        add_color_callback()
-    end
-end
-
-registerotffeature {
-    name        = "color",
-    description = "color",
-    initializers = {
-        base = setcolor,
-        node = setcolor,
-    }
-}
-
 
 --- something is carried around in ``res``
 --- for later use by color_handler() --- but what?
@@ -376,6 +342,48 @@ add_color_callback = function ( )
         color_callback_activated = 1
     end
 end
+
+--[[doc--
+``setcolor`` modifies tfmdata.properties.color in place
+--doc]]--
+
+--- fontobj -> string -> unit
+---
+---         (where “string” is a rgb value as three octet
+---         hexadecimal, with an optional fourth transparency
+---         value)
+---
+local setcolor = function (tfmdata, value)
+    local sanitized  = sanitize_color_expression(value)
+    local properties = tfmdata.properties
+
+    if sanitized then
+        properties.color = sanitized
+        add_color_callback()
+    end
+end
+
+return {
+    init = function ()
+        logreport = luaotfload.log.report
+        if not fonts then
+            logreport ("log", 0, "color",
+                       "OTF mechanisms missing -- did you forget to \z
+                       load a font loader?")
+            return false
+        end
+        fonts.handlers.otf.features.register {
+            name        = "color",
+            description = "color",
+            initializers = {
+                base = setcolor,
+                node = setcolor,
+            }
+        }
+        return true
+    end
+}
+
 
 -- vim:tw=71:sw=4:ts=4:expandtab
 

@@ -13,6 +13,9 @@
 --- version 2.4 to 2.5. Thus, the comments are still in TeX (Latex)
 --- markup.
 
+local os                          = os
+local osgettimeofday              = os.gettimeofday
+
 local initial_log_level           = 0
 luaotfload                        = luaotfload or { }
 config                            = config     or { }
@@ -125,70 +128,95 @@ local make_loader_name = function (prefix, name)
     return name
 end
 
+local timing_info = {
+    t_load = { },
+    t_init = { },
+}
+
 local make_loader = function (prefix)
     return function (name)
+        local t_0 = osgettimeofday ()
         local modname = make_loader_name (prefix, name)
-        return require (modname)
+        local data = require (modname)
+        local t_end = osgettimeofday ()
+        timing_info.t_load [name] = t_end - t_0
+        return data
     end
 end
 
-local load_luaotfload_module = make_loader "luaotfload"
------ load_luaotfload_module = make_loader "luatex" --=> for Luatex-Plain
-local load_fontloader_module = make_loader "fontloader"
+local install_loaders = function ()
+    local loaders      = { }
+    local loadmodule   = make_loader "luaotfload"
+    loaders.luaotfload = loadmodule
+    loaders.fontloader = make_loader "fontloader"
+----loaders.plaintex   = make_loader "luatex" --=> for Luatex-Plain
 
-luaotfload.loaders.luaotfload = load_luaotfload_module
-luaotfload.loaders.fontloader = load_fontloader_module
+    loaders.initialize = function (name)
+        local tmp       = loadmodule (name)
+        local logreport = luaotfload.log.report
+        if type (tmp) == "table" then
+            local init = tmp.init
+            if init and type (init) == "function" then
+                local t_0 = osgettimeofday ()
+                if not init () then
+                    logreport ("log", 0, "load",
+                               "Failed to load module “%s”.", name)
+                    return
+                end
+                local t_end = osgettimeofday ()
+                local d_t = t_end - t_0
+                logreport ("log", 4, "load",
+                           "Module “%s” loaded in %d ms.",
+                           d_t)
+                timing_info.t_init [name] = d_t
+            end
+        end
+    end
 
---[[doc--
+    return loaders
+end
 
-    Now we load the modules written for \identifier{luaotfload}.
-
---doc]]--
 
 luaotfload.main = function ()
-    local starttime = os.gettimeofday ()
-    local init      = load_luaotfload_module "init" --- fontloader initialization
-    local store     = init.early ()                 --- injects the log module too
+
+    luaotfload.loaders = install_loaders ()
+    local loaders    = luaotfload.loaders
+    local loadmodule = loaders.luaotfload
+    local initialize = loaders.initialize
+
+    local starttime = osgettimeofday ()
+    local init      = loadmodule "init" --- fontloader initialization
+    local store     = init.early ()     --- injects the log module too
     local logreport = luaotfload.log.report
 
-    local tmp = load_luaotfload_module "parsers" --- fonts.conf and syntax
-    if not tmp.init () then
-        logreport ("log", 0, "load", "Failed to install the parsers module.")
-    end
-
-    local tmp = load_luaotfload_module "configuration"   --- configuration options
-    if not tmp.init() or not config.actions.apply_defaults () then
-        logreport ("log", 0, "load", "Configuration unsuccessful.")
-    end
+    initialize "parsers"         --- fonts.conf and syntax
+    initialize "configuration"   --- configuration options
 
     if not init.main (store) then
         logreport ("log", 0, "load", "Main fontloader initialization failed.")
     end
 
-    luaotfload.loaders = load_luaotfload_module "loaders" --- Font loading; callbacks
-    if not luaotfload.loaders.install () then
-        logreport ("log", 0, "load", "Callback and loader initialization failed.")
-    end
+    initialize "loaders"         --- Font loading; callbacks
+    initialize "database"        --- Font management.
+    initialize "colors"          --- Per-font colors.
 
-    load_luaotfload_module "database"        --- Font management.
-    load_luaotfload_module "colors"          --- Per-font colors.
-
-    luaotfload.resolvers = load_luaotfload_module "resolvers" --- Font lookup
+    luaotfload.resolvers = loadmodule "resolvers" --- Font lookup
     luaotfload.resolvers.install ()
 
     if not config.actions.reconfigure () then
         logreport ("log", 0, "load", "Post-configuration hooks failed.")
     end
 
-    load_luaotfload_module "features"     --- font request and feature handling
-    load_luaotfload_module "letterspace"  --- extra character kerning
-    load_luaotfload_module "auxiliary"    --- additional high-level functionality
+    initialize "features"     --- font request and feature handling
+    loadmodule "letterspace"  --- extra character kerning
+    loadmodule "auxiliary"    --- additional high-level functionality
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 
     logreport ("both", 0, "main",
                "initialization completed in %0.3f seconds",
-               os.gettimeofday() - starttime)
+               osgettimeofday() - starttime)
+----inspect (timing_info)
 end
 
 -- vim:tw=79:sw=4:ts=4:et

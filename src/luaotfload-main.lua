@@ -139,31 +139,30 @@ local load_fontloader_module = make_loader "fontloader"
 luaotfload.loaders.luaotfload = load_luaotfload_module
 luaotfload.loaders.fontloader = load_fontloader_module
 
-luaotfload.init = load_luaotfload_module "init" --- fontloader initialization
-
-local store           = luaotfload.init.early ()
-local log             = luaotfload.log
-local logreport       = log.report
-
 --[[doc--
 
     Now we load the modules written for \identifier{luaotfload}.
 
 --doc]]--
 
-luaotfload.init.main (store)
-
 luaotfload.main = function ()
     local starttime = os.gettimeofday ()
+    local init      = load_luaotfload_module "init" --- fontloader initialization
+    local store     = init.early ()                 --- injects the log module too
+    local logreport = luaotfload.log.report
 
     local tmp = load_luaotfload_module "parsers" --- fonts.conf and syntax
     if not tmp.init () then
-        logreport ("log", 0, "load", "Failed to install the parsers.")
+        logreport ("log", 0, "load", "Failed to install the parsers module.")
     end
 
     local tmp = load_luaotfload_module "configuration"   --- configuration options
     if not tmp.init() or not config.actions.apply_defaults () then
         logreport ("log", 0, "load", "Configuration unsuccessful.")
+    end
+
+    if not init.main (store) then
+        logreport ("log", 0, "load", "Main fontloader initialization failed.")
     end
 
     luaotfload.loaders = load_luaotfload_module "loaders" --- Font loading; callbacks

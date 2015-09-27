@@ -2,26 +2,14 @@
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-parsers.lua
 --  DESCRIPTION:  various lpeg-based parsers used in Luaotfload
--- REQUIREMENTS:  Luaotfload > 2.4
---       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+-- REQUIREMENTS:  Luaotfload > 2.6
+--       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
 --      VERSION:  same as Luaotfload
 --      CREATED:  2014-01-14 10:15:20+0100
 -------------------------------------------------------------------------------
 --
 
-if not modules then modules = { } end modules ['luaotfload-parsers'] = {
-  version   = "2.5",
-  comment   = "companion to luaotfload-main.lua",
-  author    = "Philipp Gesang",
-  copyright = "Luaotfload Development Team",
-  license   = "GNU GPL v2.0"
-}
-
-luaotfload                 = luaotfload or { }
-luaotfload.parsers         = luaotfload.parsers or { }
-local parsers              = luaotfload.parsers
-parsers.traversal_maxdepth = 42 --- prevent stack overflows
-local traversal_maxdepth   = parsers.traversal_maxdepth --- TODO could be an option
+local traversal_maxdepth  = 42 --- prevent stack overflows
 
 local rawset            = rawset
 
@@ -42,8 +30,7 @@ local filedirname       = file.dirname
 local io                = io
 local ioopen            = io.open
 
-local log               = luaotfload.log
-local logreport         = log.report
+local logreport         = print
 
 local string            = string
 local stringsub         = string.sub
@@ -399,10 +386,6 @@ local read_fonts_conf = function (path_list, find_files)
   return acc
 end
 
-luaotfload.parsers.read_fonts_conf = read_fonts_conf
-
-
-
 -------------------------------------------------------------------------------
 ---                               MISC PARSERS
 -------------------------------------------------------------------------------
@@ -410,10 +393,8 @@ luaotfload.parsers.read_fonts_conf = read_fonts_conf
 
 local trailingslashes   = slash^1 * P(-1)
 local stripslashes      = C((1 - trailingslashes)^0)
-parsers.stripslashes    = stripslashes
 
 local splitcomma        = Ct((C(noncomma^1) + comma)^1)
-parsers.splitcomma      = splitcomma
 
 
 
@@ -653,8 +634,6 @@ local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
 --- v2.5 parser: 1065 rules
 --- v1.2 parser:  230 rules
 
-luaotfload.parsers.font_request = font_request
-
 -------------------------------------------------------------------------------
 ---                                INI FILES
 -------------------------------------------------------------------------------
@@ -731,7 +710,7 @@ local ini_variables     = Cg (Cf (Ct "" * ini_variable^0, rawset), "variables")
 
 local ini_section       = Ct (ini_heading * ini_variables)
 local ini_sections      = skip_line^0 * ini_section^0
-local config            = Ct (ini_sections)
+local parse_config      = Ct (ini_sections)
 
 --[=[doc--
 
@@ -763,6 +742,22 @@ local config            = Ct (ini_sections)
 
 --doc]=]--
 
-luaotfload.parsers.config = config
+return {
+  init = function ()
+    logreport = luaotfload.log.report
+    luaotfload.parsers = {
+      --- parameters
+      traversal_maxdepth    = traversal_maxdepth,
+      --- main parsers
+      read_fonts_conf       = read_fonts_conf,
+      font_request          = font_request,
+      config                = parse_config,
+      --- common patterns
+      stripslashes          = stripslashes,
+      splitcomma            = splitcomma,
+    }
+    return true
+  end
+}
 
 -- vim:ft=lua:tw=71:et:sw=2:sts=4:ts=8

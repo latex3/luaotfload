@@ -150,7 +150,11 @@ local logreport       = log.report
 
 --doc]]--
 
-load_luaotfload_module "parsers"         --- fonts.conf and syntax
+local tmp = load_luaotfload_module "parsers" --- fonts.conf and syntax
+if not tmp.init () then
+    logreport ("log", 0, "load", "Failed to install the parsers.")
+end
+
 load_luaotfload_module "configuration"   --- configuration options
 
 if not config.actions.apply_defaults () then

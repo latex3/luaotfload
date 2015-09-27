@@ -38,8 +38,8 @@ local logreport  --- filled in after loading the log module
 --[[doc--
 
     \subsection{Preparing the Font Loader}
-    We treat the fontloader as a black box so behavior is consistent
-    between formats.
+    We treat the fontloader as a semi-black box so behavior is
+    consistent between formats.
     We load the fontloader code directly in the same fashion as the
     Plain format \identifier{luatex-fonts} that is part of Context.
     How this is executed depends on the presence on the

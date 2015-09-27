@@ -15,6 +15,7 @@
 
 local initial_log_level           = 0
 luaotfload                        = luaotfload or { }
+config                            = config     or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
 luaotfload.version                = "2.6"
@@ -150,21 +151,20 @@ local logreport       = log.report
 
 --doc]]--
 
-local tmp = load_luaotfload_module "parsers" --- fonts.conf and syntax
-if not tmp.init () then
-    logreport ("log", 0, "load", "Failed to install the parsers.")
-end
-
-load_luaotfload_module "configuration"   --- configuration options
-
-if not config.actions.apply_defaults () then
-    logreport ("log", 0, "load", "Configuration unsuccessful.")
-end
-
 luaotfload.init.main (store)
 
 luaotfload.main = function ()
     local starttime = os.gettimeofday ()
+
+    local tmp = load_luaotfload_module "parsers" --- fonts.conf and syntax
+    if not tmp.init () then
+        logreport ("log", 0, "load", "Failed to install the parsers.")
+    end
+
+    local tmp = load_luaotfload_module "configuration"   --- configuration options
+    if not tmp.init() or not config.actions.apply_defaults () then
+        logreport ("log", 0, "load", "Configuration unsuccessful.")
+    end
 
     luaotfload.loaders = load_luaotfload_module "loaders" --- Font loading; callbacks
     if not luaotfload.loaders.install () then

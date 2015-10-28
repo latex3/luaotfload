@@ -72,15 +72,8 @@ local luatexbase       = luatexbase
 local require          = require
 local type             = type
 
-local error, warning, info, log =
+local _error, _warning, _info, _log =
     luatexbase.provides_module(luaotfload.module)
-
-luaotfload.log.tex        = {
-    error        = error,
-    warning      = warning,
-    info         = info,
-    log          = log,
-}
 
 --[[doc--
 
@@ -167,7 +160,7 @@ local install_loaders = function ()
                 local d_t = t_end - t_0
                 logreport ("log", 4, "load",
                            "Module “%s” loaded in %d ms.",
-                           d_t)
+                           name, d_t)
                 timing_info.t_init [name] = d_t
             end
         end

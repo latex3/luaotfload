@@ -354,7 +354,7 @@ local initialize_namedata = function (formats, created)
         status          = { }, -- was: status; map abspath -> mapping
         mappings        = { }, -- TODO: check if still necessary after rewrite
         names           = { },
---      files           = { }, -- created later
+        files           = { }, -- created later
         meta            = {
             created    = created or now,
             formats    = formats,
@@ -2236,7 +2236,12 @@ end
 --doc]]--
 
 --- string list -> size_t
-local count_removed = function (old)
+local count_removed = function (files)
+    if not files or not files.full then
+        logreport ("log", 4, "db", "Empty file store; no data to work with.")
+        return 0
+    end
+    local old = files.full
     logreport ("log", 4, "db", "Checking removed files.")
     local nrem = 0
     local nold = #old
@@ -3161,7 +3166,7 @@ update_names = function (currentnames, force, dry_run)
         --- pass 2: read font files (normal case) or reuse information
         --- present in index
 
-        n_rem = count_removed (currentnames.files.full)
+        n_rem = count_removed (currentnames.files)
 
         n_new = retrieve_namedata (font_filenames,
                                    currentnames,

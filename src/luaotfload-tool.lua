@@ -145,16 +145,59 @@ utilities                            = backup.utilities
 
 fonts = { names = { } } -- for db; normally provided by the fontloaders
 
-require "luaotfload-log.lua"       --- this populates the luaotfload.log.* namespace
-require "luaotfload-parsers"       --- fonts.conf, configuration, and request syntax
-require "luaotfload-configuration" --- configuration file handling
-require "luaotfload-database"
+local require_init = { }
+
+local loadmodule = function (name)
+    local v = require ("luaotfload-" .. name)
+    if v then
+        local mod = { }
+        local tv  = type (v)
+        if tv == "table" then
+            mod.name = name
+            mod.init = v.init
+            require_init [#require_init + 1] = mod
+        elseif tv == "function" then
+            mod.name = name
+            mod.init = v
+            require_init [#require_init + 1] = mod
+        end
+    end
+end
+
 require "alt_getopt"
+
+loadmodule "log.lua"       --- this populates the luaotfload.log.* namespace
+loadmodule "parsers"       --- fonts.conf, configuration, and request syntax
+loadmodule "configuration" --- configuration file handling
+loadmodule "database"
 
 local logreport
 
 local init_modules = function ()
+    --- NB we don’t command the logger at this point.
+    local todo = #require_init
+    local ret  = true
+    for i = 1, todo do
+        local mod  = require_init[i]
+        local name = mod.name
+        local init = mod.init
+        if type (init) ~= "function" then
+            error ("luaotfload broken; module "
+                   .. name .. " missing initializers!")
+        end
+        local v = mod.init ()
+        if v == true then
+            --- evaluated well
+        elseif type (v) == "table" then
+            luaotfload[name] = v
+        else
+            error ("luaotfload broken; initialization of module "
+                   .. name .. " returned " .. tostring (v) .. ".")
+            return false
+        end
+    end
     logreport = luaotfload.log.report
+    return ret
 end
 
 

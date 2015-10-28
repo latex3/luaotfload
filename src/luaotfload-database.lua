@@ -39,11 +39,6 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
 local lpeg                     = require "lpeg"
 local P, Cc, lpegmatch         = lpeg.P, lpeg.Cc, lpeg.match
 
-local parsers                  = luaotfload.parsers
-local read_fonts_conf          = parsers.read_fonts_conf
-local stripslashes             = parsers.stripslashes
-local splitcomma               = parsers.splitcomma
-
 local log                      = luaotfload.log
 local logreport                = log and log.report or print -- overriden later on
 local report_status            = log.names_status
@@ -1820,8 +1815,6 @@ do
     end
 end
 
-fonts.path_normalize = path_normalize
-
 local blacklist = { }
 local p_blacklist --- prefixes of dirs
 
@@ -1953,6 +1946,9 @@ do
             return
         end
 
+        if splitcomma == nil then
+            splitcomma = luaotfload.parsers and luaotfload.parsers.splitcomma
+        end
         if stringsub (formats, 1, 1) == "+" then -- add
             formats = lpegmatch (splitcomma, stringsub (formats, 2))
             if formats then
@@ -2138,10 +2134,12 @@ local collect_font_filenames_dir = function (dirname, location)
     return files
 end
 
-
 --- string list -> string list
 local filter_out_pwd = function (dirs)
     local result = { }
+    if stripslashes == nil then
+        stripslashes = luaotfload.parsers and luaotfload.parsers.stripslashes
+    end
     local pwd = path_normalize (lpegmatch (stripslashes,
                                            lfscurrentdir ()))
     for i = 1, #dirs do
@@ -2223,7 +2221,10 @@ local function get_os_dirs ()
             "/usr/local/etc/fonts/fonts.conf",
             "/etc/fonts/fonts.conf",
         }
-        local os_dirs = read_fonts_conf(fonts_conves, find_files)
+        if not luaotfload.parsers then
+            logreport ("log", 0, "db", "Fatal: no fonts.conf parser.")
+        end
+        local os_dirs = luaotfload.parsers.read_fonts_conf(fonts_conves, find_files)
         return os_dirs
     end
     return {}
@@ -3488,7 +3489,6 @@ local export = {
     show_cache                  = show_cache,
     find_closest                = find_closest,
     -- for testing purpose
-    read_fonts_conf             = read_fonts_conf,
 }
 
 return {

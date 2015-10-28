@@ -143,14 +143,13 @@ require"luaotfload-basics-gen.lua"
 texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities
 
+fonts = { names = { } } -- for db; normally provided by the fontloaders
+
 require "luaotfload-log.lua"       --- this populates the luaotfload.log.* namespace
 require "luaotfload-parsers"       --- fonts.conf, configuration, and request syntax
 require "luaotfload-configuration" --- configuration file handling
 require "luaotfload-database"
 require "alt_getopt"
-
-local names                          = fonts.names
-local sanitize_fontname              = names.sanitize_fontname
 
 local log                            = luaotfload.log
 local report                         = log.report
@@ -272,7 +271,7 @@ local about = [[
 local version_msg = function ( )
     local out   = function (...) texiowrite_nl (stringformat (...)) end
     local uname = os.uname ()
-    local meta  = names.getmetadata ()
+    local meta  = fonts.names.getmetadata ()
     out (about, luaotfload.self)
     out ("%s version: %q", luaotfload.self, version)
     out ("Revision: %q", config.luaotfload.status.notes.revision)
@@ -673,7 +672,7 @@ subfont_by_name = function (lst, askedname, n)
 
     local font = lst[n]
     if font then
-        if sanitize_fontname (font.fullname) == askedname then
+        if fonts.names.sanitize_fontname (font.fullname) == askedname then
             return font
         end
         return subfont_by_name (lst, askedname, n+1)
@@ -690,10 +689,10 @@ The font info knows two levels of detail:
 --doc]]--
 
 local show_font_info = function (basename, askedname, detail, warnings)
-    local filenames = names.data().files
+    local filenames = fonts.names.data().files
     local index     = filenames.base[basename]
     local fullname  = filenames.full[index]
-    askedname = sanitize_fontname (askedname)
+    askedname = fonts.names.sanitize_fontname (askedname)
     if not fullname then -- texmf
         fullname = resolvers.findfile(basename)
     end
@@ -797,17 +796,17 @@ actions.help = function (job)
 end
 
 actions.blacklist = function (job)
-    names.read_blacklist()
+    fonts.names.read_blacklist()
     local n = 0
-    for n, entry in next, tablesortedkeys(names.blacklist) do
+    for n, entry in next, tablesortedkeys(fonts.names.blacklist) do
         iowrite (stringformat("(%d %s)\n", n, entry))
     end
     return true, false
 end
 
 actions.generate = function (job)
-    local _ = names.update (fontnames, job.force_reload, job.dry_run)
-    local namedata = names.data ()
+    local _ = fonts.names.update (fontnames, job.force_reload, job.dry_run)
+    local namedata = fonts.names.data ()
     if namedata then
         report ("info", 2, "db", "Fonts in the database: %i", #namedata.mappings)
         return true, true
@@ -895,7 +894,7 @@ local bisect_start = function ()
     end
     report ("info", 2, "bisect",
             "Starting bisection of font database %q.", bisect_status_file)
-    local n     = names.count_font_files ()
+    local n     = fonts.names.count_font_files ()
     local pivot = mathfloor (n / 2)
     local data  = { { 1, n, pivot } }
     report ("info", 0, "bisect", "Initializing pivot to %d.", pivot)
@@ -946,7 +945,7 @@ local bisect_terminate = function (nsteps, culprit)
     report ("info", 1, "bisect",
             "Bisection completed after %d steps.", nsteps)
     report ("info", 0, "bisect",
-            "Bad file: %s.", names.nth_font_filename (culprit))
+            "Bad file: %s.", fonts.names.nth_font_filename (culprit))
     report ("info", 0, "bisect",
             "Run with --bisect=stop to finish bisection.")
     return true, false
@@ -959,7 +958,7 @@ end
 --doc]]--
 
 local list_remainder = function (lo, hi)
-    local fonts = names.font_slice (lo, hi)
+    local fonts = fonts.names.font_slice (lo, hi)
     report ("info", 0, "bisect", "%d fonts left.", hi - lo + 1)
     for i = 1, #fonts do
         report ("info", 1, "bisect", "   · %2d: %s", lo, fonts[i])
@@ -1110,9 +1109,9 @@ actions.bisect = function (job)
 end
 
 actions.flush = function (job)
-    local success = names.flush_lookup_cache()
+    local success = fonts.names.flush_lookup_cache()
     if success then
-        local success = names.save_lookups()
+        local success = fonts.names.save_lookups()
         if success then
             report ("info", 2, "cache", "Lookup cache emptied")
             return true, true
@@ -1122,9 +1121,9 @@ actions.flush = function (job)
 end
 
 local cache_directives = {
-    ["purge"] = names.purge_cache,
-    ["erase"] = names.erase_cache,
-    ["show"]  = names.show_cache,
+    ["purge"] = fonts.names.purge_cache,
+    ["erase"] = fonts.names.erase_cache,
+    ["show"]  = fonts.names.show_cache,
 }
 
 actions.cache = function (job)
@@ -1154,7 +1153,7 @@ actions.query = function (job)
         features      = { },
     }
 
-    tmpspec = names.handle_request (tmpspec)
+    tmpspec = fonts.names.handle_request (tmpspec)
 
     if not tmpspec.size then
         tmpspec.size = 655360 --- assume 10pt
@@ -1165,13 +1164,13 @@ actions.query = function (job)
     if tmpspec.lookup == "name"
     or tmpspec.lookup == "anon" --- not *exactly* as resolvers.anon
     then
-        foundname, subfont = names.resolve_name (tmpspec)
+        foundname, subfont = fonts.names.resolve_name (tmpspec)
         if foundname then
-            foundname, _, success = names.font_file_lookup (foundname)
+            foundname, _, success = fonts.names.font_file_lookup (foundname)
         end
     elseif tmpspec.lookup == "file" then
         foundname, _, success =
-            names.font_file_lookup (tmpspec.name)
+            fonts.names.font_file_lookup (tmpspec.name)
     end
 
     if success then
@@ -1196,7 +1195,7 @@ actions.query = function (job)
         if job.fuzzy == true then
             report (false, 0, "resolve",
                     "Looking for close matches, this may take a while ...")
-            local _success = names.find_closest(query, job.fuzzy_limit)
+            local _success = fonts.names.find_closest(query, job.fuzzy_limit)
         end
     end
     return true, true
@@ -1274,7 +1273,7 @@ local splitcomma = luaotfload.parsers.splitcomma
 actions.list = function (job)
     local criterion     = job.criterion
     local asked_fields  = job.asked_fields
-    local name_index    = names.data ()
+    local name_index    = fonts.names.data ()
 
     if asked_fields then
         asked_fields = lpegmatch(splitcomma, asked_fields)
@@ -1286,7 +1285,7 @@ actions.list = function (job)
     end
 
     if not name_index then
-        name_index = names.load()
+        name_index = fonts.names.load()
     end
 
     local mappings  = name_index.mappings
@@ -1528,7 +1527,7 @@ local process_cmdline = function ( ) -- unit -> jobspec
         elseif v == "D" then
             result.dry_run = true
         elseif v == "p" then
-            names.set_location_precedence {
+            fonts.names.set_location_precedence {
                 "local", "texmf", "system"
             }
         elseif v == "b" then

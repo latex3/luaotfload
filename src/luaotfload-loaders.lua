@@ -62,7 +62,7 @@ do
       --- operate on tfm fonts.
       luatexbase.call_callback ("luaotfload.patch_font", fontdata, specification)
     else
-      call_callback ("luaotfload.patch_font_unsafe", fontdata, specification)
+      luatexbase.call_callback ("luaotfload.patch_font_unsafe", fontdata, specification)
     end
     return fontdata
   end

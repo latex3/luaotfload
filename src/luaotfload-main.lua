@@ -109,15 +109,15 @@ end
 
 local make_loader_name = function (prefix, name)
     local msg = luaotfload.log and luaotfload.log.report or print
-    if prefix then
+    if prefix and name then
         msg ("log", 7, "load",
-             "Composing fontloader name from constitutents %s, %s",
+             "Composing module name from constituents %s, %s",
              prefix, name)
         return prefix .. "-" .. name .. ".lua"
     end
     msg ("log", 7, "load",
-         "Loading fontloader file %s literally.",
-         name)
+         "Loading module %s literally.",
+         tostring (name))
     return name
 end
 

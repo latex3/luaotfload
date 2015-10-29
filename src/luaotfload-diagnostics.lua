@@ -655,27 +655,27 @@ local diagnose = function (job)
               you may sleep well.")
         return true, false
     end
-    out (         [[===============================================
-                                        WARNING
-                    ===============================================
+    out (             [[===============================================
+                                            WARNING
+                        ===============================================
 
-                    The diagnostic detected %d errors.
+                        The diagnostic detected %d errors.
 
-                    This version of luaotfload may have been
-                    tampered with. Modified versions of the
-                    luaotfload source are unsupported. Read the log
-                    carefully and get a clean version from CTAN or
-                    github:
+                        This version of luaotfload may have been
+                        tampered with. Modified versions of the
+                        luaotfload source are unsupported. Read the log
+                        carefully and get a clean version from CTAN or
+                        github:
 
-                        × http://www.ctan.org/pkg/luaotfload 
-                        × https://github.com/lualatex/luaotfload/releases
+                            × http://www.ctan.org/pkg/luaotfload 
+                            × https://github.com/lualatex/luaotfload/releases
 
-                    If you are uncertain as to how to proceed, then
-                    ask on the lualatex mailing list:
+                        If you are uncertain as to how to proceed, then
+                        ask on the lualatex mailing list:
 
-                        http://www.tug.org/mailman/listinfo/lualatex-dev
+                            http://www.tug.org/mailman/listinfo/lualatex-dev
 
-                    ===============================================
+                        ===============================================
 ]],          errcnt)
     return true, false
 end

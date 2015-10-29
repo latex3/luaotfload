@@ -3501,7 +3501,8 @@ return {
         logreport       = luaotfload.log.report
         local fonts     = fonts
         fonts.names     = fonts.names or names
-        fonts.definers  = fonts.definers or { }
+        fonts.formats   = fonts.formats or { }
+        fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
         names.version   = 2.51

@@ -76,14 +76,12 @@ else -- 5.2
     runtime = { "stock", _VERSION }
 end
 
-
 local C, Ct, P, S  = lpeg.C, lpeg.Ct, lpeg.P, lpeg.S
 local lpegmatch    = lpeg.match
 
 local loader_file = "luatexbase.loader.lua"
 local loader_path = assert(kpsefind_file(loader_file, "lua"),
                            "File '"..loader_file.."' not found")
-
 
 string.quoted = string.quoted or function (str)
   return string.format("%q",str) 
@@ -171,6 +169,7 @@ loadmodule "log.lua"       --- this populates the luaotfload.log.* namespace
 loadmodule "parsers"       --- fonts.conf, configuration, and request syntax
 loadmodule "configuration" --- configuration file handling
 loadmodule "database"
+loadmodule "resolvers"     --- Font lookup
 
 local logreport
 
@@ -237,7 +236,7 @@ Usage: %s [OPTIONS...]
   -c --no-compress             do not gzip index file (text version only)
   -l --flush-lookups           empty lookup cache of font requests
   -D --dry-run                 skip loading of fonts, just scan
-  --formats=[+|-]EXTENSIONS    set, add, or subtract formats to index
+  --formats=[+|-]EXTENSIONS    set, add, or subtract file formats
   -p --prefer-texmf            prefer fonts in the TEXMF over system fonts
   --max-fonts=N                process at most N font files
 
@@ -1227,7 +1226,7 @@ actions.query = function (job)
     if tmpspec.lookup == "name"
     or tmpspec.lookup == "anon" --- not *exactly* as resolvers.anon
     then
-        foundname, subfont = fonts.names.resolve_name (tmpspec)
+        foundname, subfont = fonts.definers.resolvers.name (tmpspec)
         if foundname then
             foundname, _, success = fonts.names.font_file_lookup (foundname)
         end

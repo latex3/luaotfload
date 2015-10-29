@@ -194,7 +194,7 @@ luaotfload.main = function ()
     initialize "colors"          --- Per-font colors.
 
     luaotfload.resolvers = loadmodule "resolvers" --- Font lookup
-    luaotfload.resolvers.install ()
+    luaotfload.resolvers.init ()
 
     if not config.actions.reconfigure () then
         logreport ("log", 0, "load", "Post-configuration hooks failed.")

@@ -109,6 +109,7 @@ config.lualibs.prefer_merged    = true
 config.lualibs.load_extended    = true
 
 require "lualibs"
+
 local iosavedata                = io.savedata
 local lfsisdir                  = lfs.isdir
 local lfsisfile                 = lfs.isfile
@@ -138,7 +139,7 @@ local backup = {
 }
 
 texio.write, texio.write_nl          = dummy_function, dummy_function
-require"luaotfload-basics-gen.lua"
+require "luaotfload-basics-gen.lua"
 
 texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities
@@ -216,8 +217,7 @@ Usage: %s [OPTIONS...]
 
   -q --quiet                   don't output anything
   -v --verbose=LEVEL           be more verbose (print the searched directories)
-  -vv                          print the loaded fonts
-  -vvv                         print all steps of directory searching
+  -v, -vv .. -vvvvvvvvv        set loglevel in unary
   --log=stdout                 redirect log output to stdout
 
   -V --version                 print version and exit

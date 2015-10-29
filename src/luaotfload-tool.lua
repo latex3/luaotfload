@@ -1226,13 +1226,12 @@ actions.query = function (job)
     if tmpspec.lookup == "name"
     or tmpspec.lookup == "anon" --- not *exactly* as resolvers.anon
     then
-        foundname, subfont = fonts.definers.resolvers.name (tmpspec)
+        foundname, _, success = fonts.names.lookup_font_name (tmpspec)
         if foundname then
-            foundname, _, success = fonts.names.font_file_lookup (foundname)
+            foundname, _, success = fonts.names.lookup_font_file (foundname)
         end
     elseif tmpspec.lookup == "file" then
-        foundname, _, success =
-            fonts.names.font_file_lookup (tmpspec.name)
+        foundname, _, success = fonts.names.lookup_font_file (tmpspec.name)
     end
 
     if success then

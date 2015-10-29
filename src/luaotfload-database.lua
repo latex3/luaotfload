@@ -1921,9 +1921,8 @@ end
 local p_font_filter
 
 do
-    local current_formats = { }
-
     local extension_pattern = function (list)
+        if type (list) ~= "table" or #list == 0 then return P(-1) end
         local pat
         for i=#list, 1, -1 do
             local e = list[i]
@@ -1939,6 +1938,8 @@ do
 
     --- small helper to adjust the font filter pattern (--formats
     --- option)
+
+    local current_formats = { }
 
     set_font_filter = function (formats)
 

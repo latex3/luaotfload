@@ -152,14 +152,14 @@ end
 
 local keys = { }
 
-function keys.FontName    (data,line) data.metadata.fontname     = strip    (line) -- get rid of spaces
-                                      data.metadata.fullname     = strip    (line) end
-function keys.ItalicAngle (data,line) data.metadata.italicangle  = tonumber (line) end
-function keys.IsFixedPitch(data,line) data.metadata.isfixedpitch = toboolean(line,true) end
-function keys.CharWidth   (data,line) data.metadata.charwidth    = tonumber (line) end
-function keys.XHeight     (data,line) data.metadata.xheight      = tonumber (line) end
-function keys.Descender   (data,line) data.metadata.descender    = tonumber (line) end
-function keys.Ascender    (data,line) data.metadata.ascender     = tonumber (line) end
+function keys.FontName    (data,line) data.metadata.fontname    = strip    (line) -- get rid of spaces
+                                      data.metadata.fullname    = strip    (line) end
+function keys.ItalicAngle (data,line) data.metadata.italicangle = tonumber (line) end
+function keys.IsFixedPitch(data,line) data.metadata.monospaced  = toboolean(line,true) end
+function keys.CharWidth   (data,line) data.metadata.charwidth   = tonumber (line) end
+function keys.XHeight     (data,line) data.metadata.xheight     = tonumber (line) end
+function keys.Descender   (data,line) data.metadata.descender   = tonumber (line) end
+function keys.Ascender    (data,line) data.metadata.ascender    = tonumber (line) end
 function keys.Comment     (data,line)
  -- Comment DesignSize 12 (pts)
  -- Comment TFM designsize: 12 (in points)
@@ -640,7 +640,7 @@ local function copytotfm(data)
         local spacer     = "space"
         local spaceunits = 500
         --
-        local monospaced  = metadata.isfixedpitch
+        local monospaced  = metadata.monospaced
         local charwidth   = metadata.charwidth
         local italicangle = metadata.italicangle
         local charxheight = metadata.xheight and metadata.xheight > 0 and metadata.xheight

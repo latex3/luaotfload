@@ -160,12 +160,31 @@ function nodes.handlers.nodepass(head)
                 local range = basefonts[i]
                 local start = range[1]
                 local stop  = range[2]
-                if stop then
-                    start, stop = ligaturing(start,stop)
-                    start, stop = kerning(start,stop)
-                elseif start then
-                    start = ligaturing(start)
-                    start = kerning(start)
+                -- maybe even: if start and start ~= stop then
+                if start or stop then
+                    local prev  = nil
+                    local next  = nil
+                    local front = start == head
+                    if stop then
+                        next  = stop.next
+                        start, stop = ligaturing(start,stop)
+                        start, stop = kerning(start,stop)
+                    elseif start then
+                        prev  = start.prev
+                        start = ligaturing(start)
+                        start = kerning(start)
+                    end
+                    if prev then
+                        start.prev = prev
+                        prev.next  = start
+                    end
+                    if next then
+                        stop.next  = next
+                        next.prev  = stop
+                    end
+                    if front then
+                        head = start
+                    end
                 end
             end
         end
@@ -176,7 +195,7 @@ function nodes.handlers.nodepass(head)
 end
 
 function nodes.handlers.basepass(head)
-    if not basepass then
+    if basepass then
         head = ligaturing(head)
         head = kerning(head)
     end

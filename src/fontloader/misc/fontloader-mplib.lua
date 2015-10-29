@@ -22,7 +22,9 @@ if metapost and metapost.version then
 
 else
 
-    local format, concat, abs, match = string.format, table.concat, math.abs, string.match
+    local format, match, gsub = string.format, string.match, string.gsub
+    local concat = table.concat
+    local abs = math.abs
 
     local mplib = require ('mplib')
     local kpse  = require ('kpse')
@@ -144,10 +146,101 @@ else
         metapost.make = metapost.make or function()
         end
 
+        local template = [[
+            \pdfoutput=1
+            \pdfpkresolution600
+            \pdfcompresslevel=9
+            %s\relax
+            \hsize=100in
+            \vsize=\hsize
+            \hoffset=-1in
+            \voffset=\hoffset
+            \topskip=0pt
+            \setbox0=\hbox{%s}\relax
+            \pageheight=\ht0
+            \pagewidth=\wd0
+            \box0
+            \bye
+        ]]
+
+        metapost.texrunner = "mtxrun --script plain"
+
+        local texruns = 0   -- per document
+        local texhash = { } -- per document
+
+        function metapost.maketext(mpd,str,what)
+            -- inefficient but one can always use metafun .. it's more a test
+            -- feature
+            local verbatimtex = mpd.verbatimtex
+            if not verbatimtex then
+                verbatimtex = { }
+                mpd.verbatimtex = verbatimtex
+            end
+            if what == 1 then
+                table.insert(verbatimtex,str)
+            else
+                local texcode = format(template,concat(verbatimtex,"\n"),str)
+                local texdone = texhash[texcode]
+                local jobname = tex.jobname
+                if not texdone then
+                    texruns = texruns + 1
+                    texdone = texruns
+                    texhash[texcode] = texdone
+                    local texname = format("%s-mplib-%s.tmp",jobname,texdone)
+                    local logname = format("%s-mplib-%s.log",jobname,texdone)
+                    local pdfname = format("%s-mplib-%s.pdf",jobname,texdone)
+                    io.savedata(texname,texcode)
+                    os.execute(format("%s %s",metapost.texrunner,texname))
+                    os.remove(texname)
+                    os.remove(logname)
+                end
+                return format('"image::%s-mplib-%s.pdf" infont defaultfont',jobname,texdone)
+            end
+        end
+
+        local function mpprint(buffer,...)
+            for i=1,select("#",...) do
+                local value = select(i,...)
+                if value ~= nil then
+                    local t = type(value)
+                    if t == "number" then
+                        buffer[#buffer+1] = format("%.16f",value)
+                    elseif t == "string" then
+                        buffer[#buffer+1] = value
+                    elseif t == "table" then
+                        buffer[#buffer+1] = "(" .. concat(value,",") .. ")"
+                    else -- boolean or whatever
+                        buffer[#buffer+1] = tostring(value)
+                    end
+                end
+            end
+        end
+
+        function metapost.runscript(mpd,code)
+            local code = loadstring(code)
+            if type(code) == "function" then
+                local buffer = { }
+                function metapost.print(...)
+                    mpprint(buffer,...)
+                end
+                code()
+             -- mpd.buffer = buffer -- for tracing
+                return concat(buffer,"")
+            end
+            return ""
+        end
+
         function metapost.load(name)
+            local mpd = {
+                buffer   = { },
+                verbatim = { }
+            }
             local mpx = mplib.new {
                 ini_version = true,
-                find_file = metapost.finder,
+                find_file   = metapost.finder,
+                make_text   = function(...) return metapost.maketext (mpd,...) end,
+                run_script  = function(...) return metapost.runscript(mpd,...) end,
+                extensions  = 1,
             }
             local result
             if not mpx then
@@ -217,8 +310,8 @@ else
         return figure:objects()
     end
 
-    function metapost.convert(result, flusher)
-        metapost.flush(result, flusher)
+    function metapost.convert(result,flusher)
+        metapost.flush(result,flusher)
         return true -- done
     end
 
@@ -239,8 +332,13 @@ else
     end
 
     function pdf_textfigure(font,size,text,width,height,depth)
-        text = text:gsub(".","\\hbox{%1}") -- kerning happens in metapost
-        tex.sprint(format("\\MPLIBtextext{%s}{%s}{%s}{%s}{%s}",font,size,text,0,-( 7200/ 7227)/65536*depth))
+        local how, what = match(text,"^(.-)::(.+)$")
+        if how == "image" then
+            tex.sprint(format("\\MPLIBpdftext{%s}{%s}",what,depth))
+        else
+            text = gsub(text,".","\\hbox{%1}") -- kerning happens in metapost
+            tex.sprint(format("\\MPLIBtextext{%s}{%s}{%s}{%s}",font,size,text,depth))
+        end
     end
 
     local bend_tolerance = 131/65536
@@ -375,8 +473,10 @@ else
                                     pdf_literalcode("Q")
                                 else
                                     local cs = object.color
+                                    local cr = false
                                     if cs and #cs > 0 then
-                                        pdf_literalcode(metapost.colorconverter(cs))
+                                        cs, cr = metapost.colorconverter(cs)
+                                        pdf_literalcode(cs)
                                     end
                                     local ml = object.miterlimit
                                     if ml and ml ~= miterlimit then

@@ -321,14 +321,14 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
 
     for unicode, character in next, characters do
         local description = descriptions[unicode]
-        local lookups = description.slookups
+        local lookups     = description.slookups
         if lookups then
             for l=1,#lookuplist do
                 local lookupname = lookuplist[l]
                 local lookupdata = lookups[lookupname]
                 if lookupdata then
                     local lookuptype = lookuptypes[lookupname]
-                    local action = actions[lookuptype]
+                    local action     = actions[lookuptype]
                     if action then
                         action(lookupdata,lookuptags,lookupname,description,unicode)
                     end
@@ -342,7 +342,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
                 local lookuplist = lookups[lookupname]
                 if lookuplist then
                     local lookuptype = lookuptypes[lookupname]
-                    local action = actions[lookuptype]
+                    local action     = actions[lookuptype]
                     if action then
                         for i=1,#lookuplist do
                             action(lookuplist[i],lookuptags,lookupname,description,unicode)
@@ -614,8 +614,8 @@ local function featuresinitializer(tfmdata,value)
             local collectlookups    = otf.collectlookups
             local rawdata           = tfmdata.shared.rawdata
             local properties        = tfmdata.properties
-            local script            = properties.script
-            local language          = properties.language
+            local script            = properties.script   -- or "dflt" -- can be nil
+            local language          = properties.language -- or "dflt" -- can be nil
             local basesubstitutions = rawdata.resources.features.gsub
             local basepositionings  = rawdata.resources.features.gpos
             --

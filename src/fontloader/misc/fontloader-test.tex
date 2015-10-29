@@ -1,3 +1,5 @@
+% texformat=luatex-plain
+
 %D \module
 %D   [       file=luatex-test,
 %D        version=2009.12.01,
@@ -33,12 +35,12 @@
 
 \font\mathtest=cambria(math) {\mathtest 123}
 
-\font\gothic=msgothic(ms-gothic) {\gothic whatever}
+% \font\gothic=msgothic(ms-gothic) {\gothic whatever} % no longer in windows 10
 
 \bgroup
 
-    \pdfprotrudechars2
-    \pdfadjustspacing2
+    \ifdefined\pdfprotrudechars \pdfprotrudechars \else \protrudechars \fi 2 \relax
+    \ifdefined\pdfadjustspacing \pdfadjustspacing \else \adjustspacing \fi 2 \relax
 
     \font\testb=file:lmroman12-regular:+liga;extend=1.5         at 12pt \testb \input tufte \par
     \font\testb=file:lmroman12-regular:+liga;slant=0.8          at 12pt \testb \input tufte \par
@@ -48,12 +50,30 @@
 
 \setmplibformat{plain}
 
+\directlua {
+    function MpTest()
+        metapost.print("fullcircle scaled 3cm")
+    end
+}
+
 \mplibcode
     beginfig(1) ;
         draw fullcircle
             scaled 10cm
             withcolor red
             withpen pencircle xscaled 4mm yscaled 2mm rotated 30 ;
+        draw "test" infont defaultfont scaled 4 ;
+        verbatimtex \sl etex;
+        draw btex some more test etex scaled 2 ;
+        currentpicture := currentpicture shifted (0,1cm) ;
+        verbatimtex \bf etex;
+        draw btex another test etex scaled 2 ;
+        currentpicture := currentpicture shifted (0,1cm) ;
+        draw btex another test etex scaled 2 ;
+        draw
+            runscript("MpTest()")
+            withcolor green
+            withpen pencircle xscaled 2mm yscaled 1mm rotated 20 ;
     endfig ;
 \endmplibcode
 

@@ -1250,13 +1250,14 @@ actions.query = function (job)
         end
     else
         logreport (false, 0, "resolve", "Cannot find %q in index.", query)
-        logreport (false, 0, "resolve",
-                   "Hint: use the --fuzzy option to display suggestions.",
-                   query)
         if job.fuzzy == true then
             logreport (false, 0, "resolve",
                        "Looking for close matches, this may take a while ...")
             local _success = fonts.names.find_closest(query, job.fuzzy_limit)
+        else
+            logreport (false, 0, "resolve",
+                       "Hint: use the --fuzzy option to display suggestions.",
+                       query)
         end
     end
     return true, true

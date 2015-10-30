@@ -1171,6 +1171,25 @@ local iterative_levenshtein = function (s1, s2)
   return costs[len2]--- lower right has the distance
 end
 
+--- string list -> string list
+local delete_dupes = function (lst)
+    local n0 = #lst
+    if n0 == 0 then return lst end
+    tablesort (lst)
+    local ret = { }
+    local last
+    for i = 1, n0 do
+        local cur = lst[i]
+        if cur ~= last then
+            last = cur
+            ret[#ret + 1] = cur
+        end
+    end
+    logreport (false, 8, "query",
+               "Removed %d duplicate names.", n0 - #ret)
+    return ret
+end
+
 --- string -> int -> bool
 find_closest = function (name, limit)
     local name     = sanitize_fontname (name)
@@ -1216,6 +1235,7 @@ find_closest = function (name, limit)
         else --- append
             namelst[#namelst+1] = fullname
         end
+
         by_distance[dist] = namelst
     end
 
@@ -1229,11 +1249,11 @@ find_closest = function (name, limit)
 
         for i = 1, limit do
             local dist     = distances[i]
-            local namelst  = by_distance[dist]
+            local namelst  = delete_dupes (by_distance[dist])
             logreport (false, 0, "query",
                        "Distance from \"%s\": %s\n    "
                        .. tableconcat (namelst, "\n    "),
-                   name, dist)
+                       name, dist)
         end
 
         return true

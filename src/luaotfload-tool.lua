@@ -79,15 +79,9 @@ end
 local C, Ct, P, S  = lpeg.C, lpeg.Ct, lpeg.P, lpeg.S
 local lpegmatch    = lpeg.match
 
-local loader_file = "luatexbase.loader.lua"
-local loader_path = assert(kpsefind_file(loader_file, "lua"),
-                           "File '"..loader_file.."' not found")
-
 string.quoted = string.quoted or function (str)
   return string.format("%q",str) 
 end
-
-require (loader_path)
 
 --[[doc--
 

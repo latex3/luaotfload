@@ -1116,31 +1116,31 @@ libraries.
 During a \TEX\ run, the fontloader initialization and injection happens
 in the module \fileent{luaotfload-init.lua}.
 
-A number of \emphasis{\LUA utility libraries} that are already provided
-by \identifier{lualibs} package are not part of the \identifier{luaotfload}
-fontloader.\footnote{%
+A number of \emphasis{\LUA utility libraries} are not part of the
+\identifier{luaotfload} fontloader, contrary to its equivalent in
+\LUATEX-Fonts. These are already provided by the \identifier{lualibs}
+and have thus been omitted from the merge.\footnote{%
   Faithful listeners will remember the pre-2.6 era when the fontloader
   used to be integrated as-is which caused all kinds of code
-  duplication with the pervasive \identifier{Lualibs} package.
+  duplication with the pervasive \identifier{lualibs} package.
   This conceptual glitch has since been amended by tightening the
   coupling with the excellent \CONTEXT\ toolchain.
 }
-\beginnarrower
-  \begindoublecolumns
-    \begindefinitions
-        \beginaltitem {l-lua.lua}       \endaltitem
-        \beginaltitem {l-lpeg.lua}      \endaltitem
-        \beginaltitem {l-function.lua}  \endaltitem
-        \beginaltitem {l-string.lua}    \endaltitem
-        \beginaltitem {l-table.lua}     \endaltitem
-        \beginaltitem {l-io.lua}        \endaltitem
-        \beginaltitem {l-file.lua}      \endaltitem
-        \beginaltitem {l-boolean.lua}   \endaltitem
-        \beginaltitem {l-math.lua}      \endaltitem
-        \beginaltitem {util-str.lua}    \endaltitem
-    \enddefinitions
-  \enddoublecolumns
-\endnarrower
+
+\begindoublecolumns
+  \begindefinitions
+      \beginaltitem {l-lua.lua}       \endaltitem
+      \beginaltitem {l-lpeg.lua}      \endaltitem
+      \beginaltitem {l-function.lua}  \endaltitem
+      \beginaltitem {l-string.lua}    \endaltitem
+      \beginaltitem {l-table.lua}     \endaltitem
+      \beginaltitem {l-io.lua}        \endaltitem
+      \beginaltitem {l-file.lua}      \endaltitem
+      \beginaltitem {l-boolean.lua}   \endaltitem
+      \beginaltitem {l-math.lua}      \endaltitem
+      \beginaltitem {util-str.lua}    \endaltitem
+  \enddefinitions
+\enddoublecolumns
 
 The reference fontloader is home to several \LUA files that can be
 grouped twofold as below:

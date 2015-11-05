@@ -7,23 +7,15 @@
 --     MODIFIED:  2015-06-09 23:08:18+0200
 -----------------------------------------------------------------------
 --
---- Note:
---- This file was part of the original luaotfload.dtx and has been
---- converted to a pure Lua file during the transition from Luaotfload
---- version 2.4 to 2.5. Thus, the comments are still in TeX (Latex)
---- markup.
 
-local os                          = os
 local osgettimeofday              = os.gettimeofday
-
-local initial_log_level           = 0
-luaotfload                        = luaotfload or { }
 config                            = config     or { }
+luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
 luaotfload.version                = "2.6"
 luaotfload.loaders                = { }
-luaotfload.min_luatex_version     = 79             --- i. e. 0.79
+luaotfload.min_luatex_version     = 80             --- i. e. 0.79
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 local authors = "\z
@@ -40,7 +32,7 @@ local authors = "\z
 luaotfload.module = {
     name          = "luaotfload-main",
     version       = 2.60001,
-    date          = "2015/05/26",
+    date          = "2015/11/05",
     description   = "OpenType layout system.",
     author        = authors,
     copyright     = authors,

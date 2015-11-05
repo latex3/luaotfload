@@ -5,8 +5,6 @@
 --  DESCRIPTION:  import parts of char-def.lua
 -- REQUIREMENTS:  lua, ConTeXt, the lualibs package
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  2.5
---     MODIFIED: 2014-02-11 07:24:25+0100
 -----------------------------------------------------------------------
 -- we create a stripped-down version of char-def.lua
 -----------------------------------------------------------------------

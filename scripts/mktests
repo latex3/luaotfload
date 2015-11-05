@@ -5,8 +5,6 @@
 --  DESCRIPTION:  test the behavior of Luaotfload
 -- REQUIREMENTS:  Luatex > 0.76, Luaotfload
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  2.4
---     MODIFIED:  2014-05-15 22:16:47+0200
 -----------------------------------------------------------------------
 --
 --===================================================================--

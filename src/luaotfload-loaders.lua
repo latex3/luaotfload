@@ -4,7 +4,6 @@
 --  DESCRIPTION:  Luaotfload callback handling
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Hans Hagen, Khaled Hosny, Elie Roux
---      VERSION:  just consult Git, okay?
 -----------------------------------------------------------------------
 --
 --- Contains parts of the earlier main script.

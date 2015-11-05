@@ -3,8 +3,6 @@
 --  DESCRIPTION:  Luaotfload entry point
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
---      VERSION:  same as Luaotfload
---     MODIFIED:  2015-06-09 23:08:18+0200
 -----------------------------------------------------------------------
 --
 

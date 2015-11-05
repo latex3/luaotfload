@@ -4,8 +4,6 @@
 --  DESCRIPTION:  Luaotfload font loader initialization
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
---      VERSION:  1.0
---      CREATED:  2015-05-26 07:50:54+0200
 -----------------------------------------------------------------------
 --
 

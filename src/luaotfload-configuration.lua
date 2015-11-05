@@ -5,7 +5,6 @@
 -- REQUIREMENTS:  Luaotfload 2.6 or above
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
 --       AUTHOR:  Dohyun Kim <nomosnomos@gmail.com>
---      VERSION:  same as Luaotfload
 -------------------------------------------------------------------------------
 --
 

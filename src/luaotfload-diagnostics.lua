@@ -4,8 +4,6 @@
 --  DESCRIPTION:  functionality accessible by the --diagnose option
 -- REQUIREMENTS:  luaotfload-tool.lua
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  2.5
---     MODIFIED:  2014-01-02 21:23:06+0100
 -----------------------------------------------------------------------
 --
 local names                    = fonts.names

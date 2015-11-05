@@ -4,8 +4,6 @@
 --  DESCRIPTION:  part of luaotfload
 -- REQUIREMENTS:  luaotfload 2.6
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  2.6
---     MODIFIED:  2015-03-29 12:43:26+0200
 -----------------------------------------------------------------------
 --
 

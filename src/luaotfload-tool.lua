@@ -4,9 +4,7 @@
 --  DESCRIPTION:  database functionality
 -- REQUIREMENTS:  luaotfload 2.6
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  2.6
 --      LICENSE:  GPL v2.0
---     MODIFIED:  2015-03-29 12:43:00+0200
 -----------------------------------------------------------------------
 
 luaotfload          = luaotfload or { }

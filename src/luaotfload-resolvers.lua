@@ -5,8 +5,6 @@
 --  DESCRIPTION:  Resolvers for hooking into the fontloader
 -- REQUIREMENTS:  Luaotfload and a decent bit of courage
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
---      VERSION:  1.0
---      CREATED:  2015-07-23 07:31:50+0200
 -----------------------------------------------------------------------
 --
 --- The bare fontloader uses a set of simplistic file name resolvers

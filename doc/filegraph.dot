@@ -10,8 +10,8 @@ strict digraph luaotfload_files { //looks weird with circo ...
     size           = "21cm";
 
     rankdir        = LR;
-    ranksep  = 0.618;
-    nodesep  = 1.618;
+    ranksep        = 0.618;
+    nodesep        = 1.618;
 
     edge [
         arrowhead = onormal,
@@ -30,37 +30,38 @@ strict digraph luaotfload_files { //looks weird with circo ...
     fontdbutil  -> font_names   [label="--update",
                                  style=dashed]
 
-    luaotfload -> otfl_fonts_merged   [label="merged"]
-    luaotfload -> merged_lua_libs     [label="unmerged", style=solid]
-    luaotfload -> merged_luatex_fonts [label="unmerged", style=solid]
-    luaotfload -> merged_context_libs [label="unmerged", style=solid]
+    luaotfload -> merged_lua_libs     [style=solid]
+    luaotfload -> luaotfload_init     [label="main()",   style=solid]
+    luaotfload -> luaotfload_libs     [label="main()",   style=solid]
 
-    luaotfload -> luaotfload_libs
-    luaotfload -> otfl_blacklist_cnf
+    fontloader        -> merged_luatex_fonts [label="merged",
+                                              style=dotted,
+                                              lhead=cluster_merged]
+    fontloader        -> merged_context_libs [label="merged",
+                                              style=dotted,
+                                              lhead=cluster_merged]
 
-    otfl_fonts_merged -> merged_lua_libs     [label="merged",
-                                              style=dotted,
-                                              lhead=cluster_merged]
-    otfl_fonts_merged -> merged_luatex_fonts [label="merged",
-                                              style=dotted,
-                                              lhead=cluster_merged]
-    otfl_fonts_merged -> merged_context_libs [label="merged",
-                                              style=dotted,
-                                              lhead=cluster_merged]
+    luaotfload_init -> luaotfload_log        [label="init_early()", style=solid]
+    luaotfload_init -> luaotfload_basics_gen [label="init_early()", style=solid]
+    luaotfload_init -> fontloader            [label="init_main()",  style=solid]
+
+    luaotfload_init -> merged_luatex_fonts [label="unmerged", style=solid]
+    luaotfload_init -> merged_context_libs [label="unmerged", style=solid]
 
     merged_luatex_fonts -> font_age [label="luatex-fonts-enc.lua",
                                      ltail=cluster_merged]
 
     fontdbutil -> fontdbutil_diagnostics [label="--diagnose"]
-
     fontdbutil -> status [label="version information"]
 
-    fontdbutil_diagnostics -> status [constraint=no, label="hash files"]
+    luaotfload_package -> fontloader [label="merges", style=dashed]
 
     merged_luatex_fonts -> characters [label="luaotfload-auxiliary.lua",
                                        ltail=cluster_merged]
 
-    luaotfload_libs -> font_names [label="luaotfload-database.lua"]
+    luaotfload_libs -> font_names         [label="luaotfload-database.lua"]
+    luaotfload_libs -> otfl_blacklist_cnf [label="luaotfload-database.lua"]
+
 
     mkstatus    -> status     [label="generates from distribution files",
                                style=dashed]
@@ -71,12 +72,29 @@ strict digraph luaotfload_files { //looks weird with circo ...
     mkcharacters -> characters     [label="generates from Context’s char-def.lua",
                                     style=dashed]
 
+    fontdbutil_diagnostics -> status [label="hash files"]
+
+    mkimport -> merged_luatex_fonts [label="pulls", style=dashed, constraint=no];
+    mkimport -> merged_context_libs [label="pulls", style=dashed, constraint=no];
+
     subgraph { rank = same;
-               mkcharacters;
-               mkglyphlist;
-               mkstatus;
                fontdbutil;
                luaotfload }
+
+    subgraph cluster_scripts {
+        node [style=filled, color=white];
+        style     = "filled,rounded";
+        color     = "#44000011:#CCCCCC77";
+        //nodesep   = "3.0";
+        rank      = same;
+        label     = "Standalone scripts";
+        gradientangle=90;
+        mkcharacters;
+        mkglyphlist;
+        mkimport;
+        mktest;
+        mkstatus;
+    }
 
 /* ····································································
  * main files
@@ -90,6 +108,14 @@ strict digraph luaotfload_files { //looks weird with circo ...
                        style  = "filled,rounded",
                        penwidth=2]
 
+    luaotfload_package [label  = "luaotfload-package.lua",
+                        shape  = rect,
+                        width  = "3.2cm",
+                        height = "1.2cm",
+                        color  = "#01012222",
+                        style  = "filled,rounded",
+                        penwidth=2]
+
     fontdbutil_diagnostics [label  = "luaotfload-diagnostics.lua",
                             shape  = rect,
                             width  = "3.2cm",
@@ -98,27 +124,43 @@ strict digraph luaotfload_files { //looks weird with circo ...
                             style  = "filled,rounded",
                             penwidth=2]
 
+    mktest           [label  = "mktest",
+                       shape  = rect,
+                       width  = "3.2cm",
+                       height = "0.618cm",
+                       color  = "#FFFFFF66",
+                       style  = "filled,rounded",
+                       penwidth=2]
+
+    mkimport          [label  = "mkimport",
+                       shape  = rect,
+                       width  = "3.2cm",
+                       height = "0.618cm",
+                       color  = "#FFFFFF66",
+                       style  = "filled,rounded",
+                       penwidth=2]
+
     mkstatus          [label  = "mkstatus",
                        shape  = rect,
                        width  = "3.2cm",
-                       height = "1.2cm",
-                       color  = "#01012222",
+                       height = "0.618cm",
+                       color  = "#FFFFFF66",
                        style  = "filled,rounded",
                        penwidth=2]
 
     mkglyphlist       [label  = "mkglyphlist",
                        shape  = rect,
                        width  = "3.2cm",
-                       height = "1.2cm",
-                       color  = "#01012222",
+                       height = "0.618cm",
+                       color  = "#FFFFFF66",
                        style  = "filled,rounded",
                        penwidth=2]
 
     mkcharacters      [label  = "mkcharacters",
                        shape  = rect,
                        width  = "3.2cm",
-                       height = "1.2cm",
-                       color  = "#01012222",
+                       height = "0.618cm",
+                       color  = "#FFFFFF66",
                        style  = "filled,rounded",
                        penwidth=2]
 
@@ -138,13 +180,37 @@ strict digraph luaotfload_files { //looks weird with circo ...
      *                   style  = "filled,rounded",
      *                   penwidth=2]
      */
-    otfl_fonts_merged [label = "luaotfload-fontloader.lua",
-                       shape = rect,
-                       width  = "3.2cm",
-                       height = "1.2cm",
-                       color  = "#01012222",
-                       style  = "filled,rounded",
-                       penwidth=2]
+    luaotfload_init       [label = "luaotfload-init.lua",
+                           shape = rect,
+                           width  = "3.2cm",
+                           height = "1.2cm",
+                           color  = "#44440122",
+                           style  = "filled,rounded",
+                           penwidth=2]
+
+    luaotfload_log        [label = "luaotfload-log.lua",
+                           shape = rect,
+                           width  = "3.2cm",
+                           height = "1.2cm",
+                           color  = "#44440122",
+                           style  = "filled,rounded",
+                           penwidth=2]
+
+    luaotfload_basics_gen [label = "fontloader-basics-gen.lua",
+                           shape = rect,
+                           width  = "3.2cm",
+                           height = "1.2cm",
+                           color  = "#FFFFFF66",
+                           style  = "filled,rounded",
+                           penwidth=2]
+
+    fontloader            [label = "fontloader-reference.lua",
+                           shape = rect,
+                           width  = "3.2cm",
+                           height = "1.2cm",
+                           color  = "#FFFFFF66",
+                           style  = "filled,rounded",
+                           penwidth=2]
 
 /* ····································································
  * luaotfload files
@@ -193,15 +259,16 @@ strict digraph luaotfload_files { //looks weird with circo ...
     luaotfload_libs [
         shape      = box,
         style      = "filled,rounded",
-        color      = "grey90:goldenrod4",
+        color      = "grey90",
         fontsize   = 10,
         label      = <
             <table cellborder="0" bgcolor="#FFFFFFAA">
                 <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Luaotfload Libraries</font> </td> </th>
-                <tr> <td>luaotfload-auxiliary.lua</td>    <td>luaotfload-features.lua</td>    </tr>
-                <tr> <td>luaotfload-loaders.lua</td>      <td>luaotfload-color.lua</td>       </tr>
-                <tr> <td>luaotfload-log.lua</td>          <td>luaotfload-letterspace.lua</td> </tr>
-                <tr> <td>luaotfload-parsers.lua</td>      <td>luaotfload-database.lua</td>    </tr>
+                <tr> <td>luaotfload-auxiliary.lua</td>    <td>luaotfload-features.lua</td>      </tr>
+                <tr> <td>luaotfload-loaders.lua</td>      <td>luaotfload-colors.lua</td>        </tr>
+                <tr> <td>luaotfload-resolvers.lua</td>    <td>luaotfload-letterspace.lua</td>   </tr>
+                <tr> <td>luaotfload-parsers.lua</td>      <td>luaotfload-database.lua</td>      </tr>
+                <tr> <td>luaotfload-configuration.lua</td><td></td>                             </tr>
             </table>
         >,
     ]
@@ -213,28 +280,40 @@ strict digraph luaotfload_files { //looks weird with circo ...
    subgraph cluster_merged {
        node [style=filled, color=white];
        style     = "filled,rounded";
-       color     = "grey90:dodgerblue4";
+       color     = "#912CEE33";
        //nodesep   = "3.0";
        rank      = same;
        label     = "Merged Libraries";
        gradientangle=0;
-       merged_lua_libs;
        merged_luatex_fonts;
        merged_context_libs;
    }
 
-    otfl_fonts_merged -> merged_lua_libs
-    otfl_fonts_merged -> merged_luatex_fonts
-    otfl_fonts_merged -> merged_context_libs
+    fontloader -> merged_luatex_fonts
+    fontloader -> merged_context_libs
+
+   subgraph cluster_fontloader {
+       node [style=filled, color=white];
+       style     = "filled,rounded";
+       color     = "bisque";
+       //nodesep   = "3.0";
+       rank      = same;
+       label     = "Fontloader";
+       gradientangle=0;
+       luaotfload_basics_gen;
+       fontloader;
+   }
 
     merged_lua_libs [
         shape      = box,
         style      = "filled,rounded",
-        color      = "#FFFFFFAA",
+        color      = "#CCCC1166",
+        fontsize   = 10,
         fontsize   = 10,
         label      = <
             <table border="0">
-                <th> <td colspan="3"> <font point-size="12" face="Iwona Italic">Lua Libraries from Context</font> </td> </th>
+                <th> <td colspan="3"> <font point-size="12" face="Iwona Italic">
+                        Lualibs &ndash; Lua Libraries from Context</font> </td> </th>
                 <tr> <td>l-lua.lua</td>     <td>l-lpeg.lua</td>    <td>l-function.lua</td>  </tr>
                 <tr> <td>l-string.lua</td>  <td>l-table.lua</td>   <td>l-io.lua</td>        </tr>
                 <tr> <td>l-file.lua</td>    <td>l-boolean.lua</td> <td>l-math.lua</td>      </tr>
@@ -251,17 +330,13 @@ strict digraph luaotfload_files { //looks weird with circo ...
         label      = <
             <table border="0">
                 <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Font Loader (LuaTeX-Fonts)</font> </td> </th>
-                <tr> <td>luatex-basics-gen.lua</td> <td>luatex-basics-nod.lua</td> </tr>
+                <tr> <td>luatex-fonts-cbk.lua</td>  <td>luatex-basics-nod.lua</td> </tr>
                 <tr> <td>luatex-fonts-enc.lua</td>  <td>luatex-fonts-syn.lua</td>  </tr>
                 <tr> <td>luatex-font-tfm.lua</td>   <td>luatex-font-afm.lua</td>   </tr>
                 <tr> <td>luatex-font-afk.lua</td>   <td>luatex-fonts-tfm.lua</td>  </tr>
                 <tr> <td>luatex-fonts-chr.lua</td>  <td>luatex-fonts-lua.lua</td>  </tr>
                 <tr> <td>luatex-fonts-inj.lua</td>  <td>luatex-fonts-otn.lua</td>  </tr>
                 <tr> <td>luatex-fonts-def.lua</td>  <td>luatex-fonts-ext.lua</td>  </tr>
-                <tr> <td>luatex-fonts-cbk.lua</td>                                 </tr>
- 
- 
- 
             </table>
         >,
     ]

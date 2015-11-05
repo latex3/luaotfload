@@ -47,7 +47,7 @@ $(DOTPDF): $(DOT)
 	@echo "creating file graph ($(DOTPDF))"
 	$(DO_GRAPHVIZ)
 
-.PHONY: clean mrproper
+.PHONY: clean mrproper graph doc all manuals
 
 clean:
 	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out

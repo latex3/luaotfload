@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2015/03/29 v2.6}
+  \setdocumentdate   {2015/11/05 v2.6}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       Support: \email     {lualatex-dev@tug.org}}
@@ -233,7 +233,7 @@ where \meta{prefix} is either \inlinecode{file:} or \inlinecode {name:}.\footnot
   needed, for instance when supplying a customized tex distribution.
 
   The \inlinecode {my} lookup takes this a step further: it lets you define
-  a custom resolver function and hook it into the \luafunction{resolve_font}
+  a custom resolver function and hook it into the \luaident{resolve_font}
   callback.
   %
   This ensures full control over how a file is located.
@@ -664,7 +664,7 @@ obviously, \inlinecode{random}.
 
          Specific pairs of letters and ligatures may be exempt from
          letterspacing by defining the \LUA functions
-         \luafunction{keeptogether} and \luafunction{keepligature},
+         \luaident{keeptogether} and \luaident{keepligature},
          respectively, inside the namespace \inlinecode {luaotfload.letterspace}.
          %
          Both functions are called whenever the letterspacing callback
@@ -673,10 +673,10 @@ obviously, \inlinecode{random}.
          If they return a true-ish value, no extra kern is inserted at
          the current position.
          %
-         \luafunction{keeptogether} receives a pair of consecutive
+         \luaident{keeptogether} receives a pair of consecutive
          glyph nodes in order of their appearance in the node list.
          %
-         \luafunction{keepligature} receives a single node which can be
+         \luaident{keepligature} receives a single node which can be
          analyzed into components.
          %
          (For details refer to the \emphasis{glyph nodes} section in the
@@ -1254,7 +1254,7 @@ The purpose of this addition twofold.
 Firstly, \identifier{luaotfload} failed to provide a stable interface
 to internals in the past which resulted in an unmanageable situation
 of different packages abusing the raw access to font objects by means
-of the \luafunction{patch_font} callback.
+of the \luaident{patch_font} callback.
 %
 When the structure of the font object changed due to an update, all
 of these imploded and several packages had to be fixed while
@@ -1275,7 +1275,7 @@ additions.
 
 \beginsubsection {Callback Functions}
 
-The \luafunction{patch_font} callback is inserted in the wrapper
+The \luaident{patch_font} callback is inserted in the wrapper
 \identifier{luaotfload} provides for the font definition callback.
 %
 At this place it allows manipulating the font object immediately after
@@ -1367,8 +1367,8 @@ are defined for which scripts.
 \beginfunctionlist
 
   \beginaltitem  {aux.font_has_glyph (id : int, index : int)}
-            Predicate that returns true if the font \luafunction{id}
-            has glyph \luafunction{index}.
+            Predicate that returns true if the font \luaident{id}
+            has glyph \luaident{index}.
   \endaltitem
 
   \beginaltitem  {aux.slot_of_name(name : string)}
@@ -1377,33 +1377,33 @@ are defined for which scripts.
   \endaltitem
 
   \beginaltitem  {aux.name_of_slot(slot : int)}
-            The inverse of \luafunction{slot_of_name}; note that this
+            The inverse of \luaident{slot_of_name}; note that this
             might be incomplete as multiple glyph names may map to the
             same codepoint, only one of which is returned by
-            \luafunction{name_of_slot}.
+            \luaident{name_of_slot}.
   \endaltitem
 
   \beginaltitem  {aux.provides_script(id : int, script : string)}
-            Test if a font supports \luafunction{script}.
+            Test if a font supports \luaident{script}.
   \endaltitem
 
   \beginaltitem  {aux.provides_language(id : int, script : string, language : string)}
-            Test if a font defines \luafunction{language} for a given
-            \luafunction{script}.
+            Test if a font defines \luaident{language} for a given
+            \luaident{script}.
   \endaltitem
 
   \beginaltitem  {aux.provides_feature(id : int, script : string,
              language : string, feature : string)}
-            Test if a font defines \luafunction{feature} for
-            \luafunction{language} for a given \luafunction{script}.
+            Test if a font defines \luaident{feature} for
+            \luaident{language} for a given \luaident{script}.
   \endaltitem
 
   \beginaltitem  {aux.get_math_dimension(id : int, dimension : string)}
-            Get the dimension \luafunction{dimension} of font \luafunction{id}.
+            Get the dimension \luaident{dimension} of font \luaident{id}.
   \endaltitem
 
   \beginaltitem  {aux.sprint_math_dimension(id : int, dimension : string)}
-            Same as \luafunction{get_math_dimension()}, but output the value
+            Same as \luaident{get_math_dimension()}, but output the value
             in scaled points at the \TEX end.
   \endaltitem
 
@@ -1416,7 +1416,7 @@ are defined for which scripts.
 %% not implemented, may come back later
 \beginfunctionlist
 %   \beginaltitem  {aux.scan_external_dir(dir : string)}
-%             Include fonts in directory \luafunction{dir} in font lookups without
+%             Include fonts in directory \luaident{dir} in font lookups without
 %             adding them to the database.
 %
   \beginaltitem  {aux.read_font_index (void)}
@@ -1527,9 +1527,9 @@ Another strategy that helps avoiding problems is to not access raw
 Some of them, even though they are dangerous to access, have not been
 overridden or disabled.
 %
-Thus, whenever possible prefer the functions in the \luafunction{aux}
+Thus, whenever possible prefer the functions in the \luaident{aux}
 namespace over direct manipulation of font objects. For example, raw
-access to the \luafunction{font.fonts} table like:
+access to the \luaident{font.fonts} table like:
 
 \beginlisting
     local somefont = font.fonts[2]
@@ -1537,16 +1537,16 @@ access to the \luafunction{font.fonts} table like:
 
 \noindent can render already defined fonts unusable.
 %
-Instead, the function \luafunction{font.getfont()} should be used
+Instead, the function \luaident{font.getfont()} should be used
 because it has been replaced by a safe variant.
 
-However, \luafunction{font.getfont()} only covers fonts handled by the
+However, \luaident{font.getfont()} only covers fonts handled by the
 font loader, e.~g. \identifier{OpenType} and \identifier{TrueType}
 fonts, but not \abbrev{tfm} or \abbrev{ofm}.
 %
 Should you absolutely require access to all fonts known to \LUATEX,
 including the virtual and autogenerated ones, then you need to query
-both \luafunction{font.getfont()} and \luafunction{font.fonts}.
+both \luaident{font.getfont()} and \luaident{font.fonts}.
 %
 In this case, best define you own accessor:
 

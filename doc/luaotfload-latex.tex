@@ -1,4 +1,4 @@
-\luatexsuppresslongerror1%% sigh ...
+\suppresslongerror1%% sigh ...
 %% Copyright (C) 2009-2014
 %%
 %%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
@@ -129,7 +129,7 @@
 
 \definehighlight         [fileent][\ttfamily\restoreunderscore]         %% files, dirs
 \definehighlight        [texmacro][\sffamily\itshape\textbackslash]     %% cs
-\definehighlight     [luafunction][\sffamily\itshape\restoreunderscore] %% lua identifiers
+\definehighlight        [luaident][\sffamily\itshape\restoreunderscore] %% lua identifiers
 \definehighlight      [identifier][\sffamily]                           %% names
 \definehighlight          [abbrev][\rmfamily\scshape]                   %% acronyms
 \definehighlight        [emphasis][\rmfamily\slshape]                   %% level 1 emph
@@ -301,7 +301,7 @@
 \definelist  [descriptions]{\normalitem {\textbf \first}\hfill\break}
 \definelist   [definitions]{\normalitem {\fileent {\first}}}
 \definelist      [filelist]{\normalitem {\fileent {\first}}\space--\hskip 1em}
-\definelist  [functionlist]{\normalitem {\luafunction {\first}}\hfill\break}
+\definelist  [functionlist]{\normalitem {\luaident {\first}}\hfill\break}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% columns

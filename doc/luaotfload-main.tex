@@ -686,7 +686,7 @@ obviously, \inlinecode{random}.
          user.
   \endaltitem
 
-\ifcontextmkiv
+\iffalse
   \startbuffer [printvectors]
   \directlua{inspect(fonts.protrusions.setups.default)
              inspect(fonts.expansions.setups.default)}
@@ -706,7 +706,7 @@ obviously, \inlinecode{random}.
             %
             Alternatively and with loss of information, you can dump
             those tables into your terminal by issuing
-            \unless \ifcontextmkiv
+            \unless \iffalse
               \beginlisting
  \directlua{inspect(fonts.protrusions.setups.default)
             inspect(fonts.expansions.setups.default)}
@@ -763,7 +763,7 @@ Currently (2014) there are three of them:
             remapping feature.
           }:
 
-          \unless \ifcontextmkiv
+          \unless \iffalse
             %% Using braced arg syntax with inline code appears to be
             %% impossible within Latex tables -- just ignore the weird
             %% exclamation points below.
@@ -905,7 +905,7 @@ directories.
 \tablefloat {table-searchpaths}
   {List of paths searched for each supported operating system.}
   {%
-    \unless \ifcontextmkiv
+    \unless \iffalse
       \begincentered
         \begintabulate [lp{.5\textwidth}]
           \beginrow
@@ -1263,17 +1263,76 @@ files not contained in the merge. Some of these have no equivalent in
 \endsection
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {Packaging a Fontloader}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+TODO % it’s simple, though
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Configuration Files}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\emphasis{Caution}: For the authoritative documentation, consult the
-manpage for \fileent{luaotfload.conf(5)}.
+\beginnarrower
+  \emphasis{Caution}: For the authoritative documentation, consult the
+  manpage for \fileent{luaotfload.conf(5)}.
+\endnarrower
+
+The runtime behavior of \identifier{Luaotfload} can be customized by
+means of a configuration file.
+% location
+At startup, it attempts to locate a file called \fileent
+{luaotfload.conf} or \fileent {luaotfloadrc} at a number of candidate
+locations:
+
+\begincentered
+  \begindefinitions
+    \beginnormalitem \fileent{./luaotfload.conf}                            \endnormalitem
+    \beginnormalitem \fileent{./luaotfloadrc}                               \endnormalitem
+    \beginnormalitem \fileent{\$XDG_CONFIG_HOME/luaotfload/luaotfload.conf} \endnormalitem
+    \beginnormalitem \fileent{\$XDG_CONFIG_HOME/luaotfload/luaotfload.rc}   \endnormalitem
+    \beginnormalitem \fileent{~/.luaotfloadrc}                              \endnormalitem
+  \enddefinitions
+\endcentered
+
+\beginnarrower
+  \emphasis{Caution}: The configuration potentially modifies the final
+  document. A project-local file belongs under version control along
+  with the rest of the document. This is to ensure that everybody who
+  builds the project also receives the same customizations as the
+  author.
+\endnarrower
+
+% syntax
+% example settings
+
+An example for customization via \fileent {luaotfload.conf} might look
+as below:
+
+\beginlisting
+; Example luaotfload.conf containing a rudimentary configuration
+[db]
+  update-live = false
+[run]
+  color-callback = pre_linebreak_filter
+  definer = info_patch
+  log-level = 5
+[default-features]
+  global = mode=base
+\endlisting
+
+This specifies that for the given project, \identifier{Luaotfload}
+shall not attempt to automatically scan for fonts if it can’t resolve a
+request. The font-based colorization will happen during \LUATEX’s
+pre-linebreak filter. The fontloader will output verbose information
+about the fonts at definition time along with globally increased
+verbosity. Lastly, the fontloader defaults to the less expensive
+\luaident{base} mode like it does in \CONTEXT.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Auxiliary Functions}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-With release version 2.2, \identifier{luaotfload} received
+With release version 2.2, \identifier{Luaotfload} received
 additional functions for package authors to call from outside
 (see the file \fileent{luaotfload-auxiliary.lua} for details).
 %

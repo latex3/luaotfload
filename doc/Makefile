@@ -1,6 +1,6 @@
 NAME		= luaotfload
 DOCPDF		= $(NAME).pdf
-DOCSRC		= $(NAME)-latex.tex
+DOCSRC		= $(NAME)-latex.tex $(NAME)-main.tex
 
 SCRIPTNAME	= luaotfload-tool
 TOOLMANSRC	= $(SCRIPTNAME).rst

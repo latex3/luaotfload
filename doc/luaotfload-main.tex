@@ -1303,8 +1303,14 @@ locations:
 \endnarrower
 
 % syntax
+The syntax is fairly close to the format used by
+\fileent{git-config(1)} which in turn was derived from the popular
+\identifier{.INI} format: Lines of key-value pairs are grouped under
+different configuration “sections”.\footnote{%
+  The configuration parser in \fileent {luoatfload-parsers.lua} might
+  be employed by other packages for similar purposes.
+}
 % example settings
-
 An example for customization via \fileent {luaotfload.conf} might look
 as below:
 

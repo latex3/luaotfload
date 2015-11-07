@@ -43,6 +43,11 @@
     This package is an adaptation of the \CONTEXT font loading system.
     It allows for loading \OpenType fonts with an extended syntax and adds
     support for a variety of font features.
+
+    After discussion of the font loading API, this manual gives an
+    overview of the core components of \identifier{Luaotfload}: The
+    packaged font loader code, the names database, configuration, and
+    helper functions on the \LUA\ end.
   \endabstractcontent
 
 \endfrontmatter
@@ -1056,8 +1061,10 @@ An example with explicit paths:
 \endsection
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\beginsection {The Fontloader Package}
+\beginsection {The Fontloader}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\beginsubsection {Overview}
 
 To a large extent, \identifier{luaotfload} relies on code originally
 written by Hans Hagen for the
@@ -1085,6 +1092,10 @@ This job has been greatly alleviated since the advent of
 \LUATEX-Fonts, prior to which the individual dependencies had to be
 manually spotted and extracted from the \CONTEXT source code in a
 complicated and error-prone fashion.
+
+\endsubsection
+
+\beginsubsection {Contents and Dependencies}
 
 Below is a commented list of the files distributed with
 \identifier{luaotfload} in one way or the other.
@@ -1260,13 +1271,22 @@ files not contained in the merge. Some of these have no equivalent in
   {Schematic of the files in \identifier{Luaotfload}}
   {filegraph.pdf}
 
-\endsection
+\endsubsection
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\beginsection {Packaging a Fontloader}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsubsection {Packaging}
+
+The fontloader code is integrated as an isolated component that can be
+switched out on demand.
+To specify the fontloader you wish to use, the configuration file
+(described in section \ref{sec:conf}) provides the option
+\inlinecode{fontloader}. Its value can be one of the identifiers
+\inlinecode{default} or \inlinecode{reference} or the name of a file
+somewhere in the search path of \LUATEX.
 
 TODO % it’s simple, though
+
+\endsubsection
+\endsection
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Configuration Files}
@@ -1277,6 +1297,7 @@ TODO % it’s simple, though
   manpage for \fileent{luaotfload.conf(5)}.
 \endnarrower
 
+\label{sec:conf}
 The runtime behavior of \identifier{Luaotfload} can be customized by
 means of a configuration file.
 % location

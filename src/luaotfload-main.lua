@@ -127,11 +127,23 @@ local make_loader = function (prefix)
     end
 end
 
+--[[doc--
+    Certain files are kept around that aren’t loaded because they are part of
+    the imported fontloader. In order to keep the initialization structure
+    intact we also provide a no-op version of the module loader that can be
+    called in the expected places.
+--doc]]--
+
+local dummy_loader = function (name)
+    luaotfload.log.report("log", 3, "load", "Skipping module “%s”.", name)
+end
+
 local install_loaders = function ()
     local loaders      = { }
     local loadmodule   = make_loader "luaotfload"
     loaders.luaotfload = loadmodule
     loaders.fontloader = make_loader "fontloader"
+    loaders.ignore     = dummy_loader
 ----loaders.plaintex   = make_loader "luatex" --=> for Luatex-Plain
 
     loaders.initialize = function (name)

@@ -203,6 +203,7 @@ end --- [init_adapt]
 local init_main = function ()
 
   local load_fontloader_module = luaotfload.loaders.fontloader
+  local ignore_module          = luaotfload.loaders.ignore
 
   --[[doc--
 
@@ -214,26 +215,33 @@ local init_main = function ()
 
   --doc]]--
 
+  logreport ("log", 4, "init",
+             "Loading fontloader as merged package.")
   load_fontloader_module (luaotfload.fontloader_package)
 
   ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 
   if not fonts then
-    --- the loading sequence is known to change, so this might have to
-    --- be updated with future updates!
-    --- do not modify it though unless there is a change to the merged
-    --- package!
-    load_fontloader_module "l-lua"
-    load_fontloader_module "l-lpeg"
-    load_fontloader_module "l-function"
-    load_fontloader_module "l-string"
-    load_fontloader_module "l-table"
-    load_fontloader_module "l-io"
-    load_fontloader_module "l-file"
-    load_fontloader_module "l-boolean"
-    load_fontloader_module "l-math"
-    load_fontloader_module "util-str"
-    load_fontloader_module "luatex-basics-gen"
+    logreport ("log", 4, "init",
+               "Loading fontloader components individually.")
+    --- The loading sequence is known to change, so this might have to be
+    --- updated with future updates. Do not modify it though unless there is
+    --- a change to the upstream package!
+
+    --- Since 2.6 those are directly provided by the Lualibs package.
+    ignore_module "l-lua"
+    ignore_module "l-lpeg"
+    ignore_module "l-function"
+    ignore_module "l-string"
+    ignore_module "l-table"
+    ignore_module "l-io"
+    ignore_module "l-file"
+    ignore_module "l-boolean"
+    ignore_module "l-math"
+    ignore_module "util-str"
+    ignore_module "luatex-basics-gen"
+
+    --- These constitute the fontloader proper.
     load_fontloader_module "data-con"
     load_fontloader_module "luatex-basics-nod"
     load_fontloader_module "font-ini"

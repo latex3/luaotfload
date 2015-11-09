@@ -127,9 +127,11 @@ local feature_presets = {
 --doc]]--
 
 local registered_loaders = {
-  default   = luaotfloadstatus and luaotfloadstatus.notes.loader or "reference",
-  reference = "reference",
-  tl2014    = "tl2014",
+  default    = luaotfloadstatus and luaotfloadstatus.notes.loader or "reference",
+  reference  = "reference",
+  unpackaged = "unpackaged",
+  context    = "context",
+  tl2014     = "tl2014",
 }
 
 --[[doc--

@@ -215,14 +215,11 @@ local init_main = function ()
 
   --doc]]--
 
-  logreport ("log", 4, "init",
-             "Loading fontloader as merged package.")
-  load_fontloader_module (luaotfload.fontloader_package)
+  local fontloader = config.luaotfload and config.luaotfload.run.fontloader
+                                        or "reference"
 
-  ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
-
-  if not fonts then
-    logreport ("log", 4, "init",
+  if fontloader == "unpackaged" then
+    logreport ("both", 4, "init",
                "Loading fontloader components individually.")
     --- The loading sequence is known to change, so this might have to be
     --- updated with future updates. Do not modify it though unless there is
@@ -243,27 +240,43 @@ local init_main = function ()
 
     --- These constitute the fontloader proper.
     load_fontloader_module "data-con"
-    load_fontloader_module "luatex-basics-nod"
+    load_fontloader_module "basics-nod"
     load_fontloader_module "font-ini"
     load_fontloader_module "font-con"
-    load_fontloader_module "luatex-fonts-enc"
+    load_fontloader_module "fonts-enc"
     load_fontloader_module "font-cid"
     load_fontloader_module "font-map"
-    load_fontloader_module "luatex-fonts-syn"
-    load_fontloader_module "luatex-fonts-tfm"
+    load_fontloader_module "fonts-syn"
+    load_fontloader_module "fonts-tfm"
     load_fontloader_module "font-oti"
     load_fontloader_module "font-otf"
     load_fontloader_module "font-otb"
-    load_fontloader_module "luatex-fonts-inj"  --> since 2014-01-07, replaces node-inj.lua
-    load_fontloader_module "luatex-fonts-ota"
-    load_fontloader_module "luatex-fonts-otn"  --> since 2014-01-07, replaces font-otn.lua
-    load_fontloader_module "font-otp"          --> since 2013-04-23
-    load_fontloader_module "luatex-fonts-lua"
+    load_fontloader_module "fonts-inj"  --> since 2014-01-07, replaces node-inj.lua
+    load_fontloader_module "fonts-ota"
+    load_fontloader_module "fonts-otn"  --> since 2014-01-07, replaces font-otn.lua
+    load_fontloader_module "font-otp"   --> since 2013-04-23
+    load_fontloader_module "fonts-lua"
     load_fontloader_module "font-def"
-    load_fontloader_module "luatex-fonts-def"
-    load_fontloader_module "luatex-fonts-ext"
-    load_fontloader_module "luatex-fonts-cbk"
-  end --- non-merge fallback scope
+    load_fontloader_module "fonts-def"
+    load_fontloader_module "fonts-ext"
+    load_fontloader_module "fonts-cbk"
+
+  elseif fontloader == "context" then
+    logreport ("both", 4, "init",
+               "Loading fontloader components from context.")
+    logreport ("both", 0, "init", "NOT IMPLEMENTED YET.")
+    os.exit(-42)
+
+  elseif fontloader then
+    fontloader = tostring (fontloader)
+    --- “reference”, “default”
+    logreport ("both", 4, "init",
+               "Attempting to load fontloader “%s”.",
+               fontloader)
+    load_fontloader_module (luaotfload.fontloader_package)
+  end
+
+  ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 
 end --- [init_main]
 

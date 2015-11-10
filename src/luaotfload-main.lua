@@ -99,16 +99,24 @@ end
 
 local make_loader_name = function (prefix, name)
     local msg = luaotfload.log and luaotfload.log.report or print
-    if prefix and name then
-        msg ("log", 7, "load",
-             "Composing module name from constituents %s, %s",
-             prefix, name)
-        return prefix .. "-" .. name .. ".lua"
+    if not name then
+        msg ("both", 0, "load",
+             "Fatal error: make_loader_name (“%s”, “%s”).",
+             tostring (prefix), tostring (name))
+        return "dummy-name"
     end
-    msg ("log", 7, "load",
-         "Loading module %s literally.",
-         tostring (name))
-    return name
+    name = tostring (name)
+    if prefix == false then
+        msg ("log", 9, "load",
+             "No prefix requested, passing module name “%s” unmodified.",
+             name)
+        return tostring (name) .. ".lua"
+    end
+    prefix = tostring (prefix)
+    msg ("log", 9, "load",
+         "Composing module name from constituents %s, %s.",
+         prefix, name)
+    return prefix .. "-" .. name .. ".lua"
 end
 
 local timing_info = {
@@ -135,7 +143,17 @@ end
 --doc]]--
 
 local dummy_loader = function (name)
-    luaotfload.log.report("log", 3, "load", "Skipping module “%s”.", name)
+    luaotfload.log.report("log", 3, "load", "Skipping module “%s” on purpose.", name)
+end
+
+local context_loader = function (name)
+    luaotfload.log.report("log", 3, "load", "Loading module “%s” from Context.", name)
+    local t_0 = osgettimeofday ()
+    local modname = make_loader_name (false, name)
+    local data = require (modname)
+    local t_end = osgettimeofday ()
+    timing_info.t_load [name] = t_end - t_0
+    return data
 end
 
 local install_loaders = function ()
@@ -143,6 +161,7 @@ local install_loaders = function ()
     local loadmodule   = make_loader "luaotfload"
     loaders.luaotfload = loadmodule
     loaders.fontloader = make_loader "fontloader"
+    loaders.context    = context_loader
     loaders.ignore     = dummy_loader
 ----loaders.plaintex   = make_loader "luatex" --=> for Luatex-Plain
 

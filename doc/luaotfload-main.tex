@@ -1201,17 +1201,17 @@ grouped twofold as below:
   \endnormalitem
 \enddefinitions
 
-Note that if \identifier{luaotfload} cannot locate the
-merged file, it will load the individual \LUA libraries
-instead.
+As an alternative to the merged file, \identifier {Luaotfload} may load
+individual unpackaged \LUA libraries that come with the source, or even
+use the files from Context directly.
 %
-Their names remain the same as in \CONTEXT (without the
-\inlinecode {luaotfload}-prefix) since the initialization mirrors
-the sequence in \LUATEX-Fonts.
-%% FIXME this is a config option nowadays!
-%Thus if you prefer running bleeding edge code from the \CONTEXT beta,
-%all you have to do is remove \fileent{luaotfload-merged.lua} from the
-%search path.
+Thus if you prefer running bleeding edge code from the \CONTEXT beta,
+all you have to do is to choose the \inlinecode {context} fontloader
+via the configuration file (see section \ref{sec:conf} below).
+%
+This will make \identifier {Luaotfload} locate the \CONTEXT source via
+\identifier{kpathsea} lookups and use those instead of the fontloader
+%% TODO allow choosing the context path
 
 Also, the merged file at some point loads the Adobe Glyph List from a
 \LUA table that is contained in \fileent{luaotfload-glyphlist.lua},
@@ -1282,8 +1282,6 @@ To specify the fontloader you wish to use, the configuration file
 \inlinecode{fontloader}. Its value can be one of the identifiers
 \inlinecode{default} or \inlinecode{reference} or the name of a file
 somewhere in the search path of \LUATEX.
-
-TODO % it’s simple, though
 
 \endsubsection
 \endsection

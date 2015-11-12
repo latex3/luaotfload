@@ -134,6 +134,33 @@ local registered_loaders = {
   tl2014     = "tl2014",
 }
 
+local pick_fontloader = function (s)
+  local ldr = registered_loaders[s]
+  if ldr ~= nil and type (ldr) == "string" then
+    logreport ("log", 2, "conf", "Using predefined fontloader \"%s\".", ldr)
+    return ldr
+  end
+  local idx = stringfind (s, ":")
+  if idx and idx > 2 then
+    if stringsub (s, 1, idx - 1) == "context" then
+      local pth = stringsub (s, idx + 1)
+      pth = stringstrip (pth)
+      logreport ("log", 2, "conf", "Context base path specified at \"%s\".", pth)
+      if lfsisdir (pth) then
+        logreport ("log", 5, "conf", "Context base path exists at \"%s\".", pth)
+        return { "context", pth }
+      end
+      pth = kpseexpand_path (pth)
+      if lfsisdir (pth) then
+        logreport ("log", 5, "conf", "Context base path exists at \"%s\".", pth)
+        return { "context", pth }
+      end
+      logreport ("both", 0, "conf", "Context base path not found at \"%s\".", pth)
+    end
+  end
+  return nil
+end
+
 --[[doc--
 
   The ``post_linebreak_filter`` has been made the default callback for
@@ -468,10 +495,8 @@ local option_spec = {
       in_t      = string_t,
       out_t     = string_t,
       transform = function (id)
-        local ldr = registered_loaders[id]
+        local ldr = pick_fontloader (id)
         if ldr ~= nil then
-          logreport ("log", 2, "conf",
-                     "Using predefined fontloader \"%s\".", ldr)
           return ldr
         end
         logreport ("log", 0, "conf",

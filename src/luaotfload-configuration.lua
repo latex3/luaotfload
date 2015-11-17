@@ -148,12 +148,12 @@ local pick_fontloader = function (s)
       logreport ("log", 2, "conf", "Context base path specified at \"%s\".", pth)
       if lfsisdir (pth) then
         logreport ("log", 5, "conf", "Context base path exists at \"%s\".", pth)
-        return { "context", pth }
+        return pth
       end
       pth = kpseexpand_path (pth)
       if lfsisdir (pth) then
         logreport ("log", 5, "conf", "Context base path exists at \"%s\".", pth)
-        return { "context", pth }
+        return pth
       end
       logreport ("both", 0, "conf", "Context base path not found at \"%s\".", pth)
     end

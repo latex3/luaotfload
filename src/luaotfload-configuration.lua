@@ -198,7 +198,7 @@ local default_config = {
     definer        = "patch",
     log_level      = 0,
     color_callback = "post_linebreak_filter",
-    live           = true,
+    fontloader     = "default",
   },
   misc = {
     bisect         = false,

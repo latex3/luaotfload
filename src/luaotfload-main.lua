@@ -98,7 +98,8 @@ end
 --doc]]--
 
 local make_loader_name = function (prefix, name)
-    local msg = luaotfload.log and luaotfload.log.report or print
+    local msg = luaotfload.log and luaotfload.log.report
+             or function (...) texio.write_nl ("log", ...) end
     if not name then
         msg ("both", 0, "load",
              "Fatal error: make_loader_name (“%s”, “%s”).",
@@ -143,17 +144,43 @@ end
 --doc]]--
 
 local dummy_loader = function (name)
-    luaotfload.log.report("log", 3, "load", "Skipping module “%s” on purpose.", name)
+    luaotfload.log.report ("log", 3, "load",
+                           "Skipping module “%s” on purpose.",
+                           name)
 end
 
-local context_loader = function (name)
-    luaotfload.log.report("log", 3, "load", "Loading module “%s” from Context.", name)
+local context_loader = function (name, path)
+    luaotfload.log.report ("log", 3, "load",
+                           "Loading module “%s” from Context.",
+                           name)
     local t_0 = osgettimeofday ()
     local modname = make_loader_name (false, name)
-    local data = require (modname)
+    local modpath = modname
+    if path then
+        if lfs.isdir (path) then
+            luaotfload.log.report ("log", 3, "load",
+                                   "Prepending path “%s”.",
+                                   path)
+            modpath = file.join (path, modname)
+        else
+            luaotfload.log.report ("both", 0, "load",
+                                   "Non-existant path “%s” specified, ignoring.",
+                                   path)
+        end
+    end
+    local ret = require (modpath)
     local t_end = osgettimeofday ()
     timing_info.t_load [name] = t_end - t_0
-    return data
+
+    if ret ~= true then
+        --- require () returns “true” upon success unless the loaded file
+        --- yields a non-zero exit code. This isn’t per se indicating that
+        --- something isn’t right, but against HH’s coding practices. We’ll
+        --- silently ignore this ever happening on lower log levels.
+        luaotfload.log.report ("log", 4, "load",
+                               "Module “%s” returned “%s”.", ret)
+    end
+    return ret
 end
 
 local install_loaders = function ()

@@ -182,6 +182,10 @@ local pop_namespaces = function (normalglobal,
     end
 end
 
+--- below paths are relative to the texmf-context
+local ltx = "tex/generic/context/luatex"
+local ctx = "tex/context/base"
+
 local context_modules = {
 
   --- Since 2.6 those are directly provided by the Lualibs package.
@@ -197,28 +201,28 @@ local context_modules = {
   { false, "util-str"   },
 
   --- These constitute the fontloader proper.
-  { true,  "luatex-basics-gen" },
-  { true,  "data-con"          },
-  { true,  "luatex-basics-nod" },
-  { true,  "font-ini"          },
-  { true,  "font-con"          },
-  { true,  "luatex-fonts-enc"  },
-  { true,  "font-cid"          },
-  { true,  "font-map"          },
-  { true,  "luatex-fonts-syn"  },
-  { true,  "luatex-fonts-tfm"  },
-  { true,  "font-oti"          },
-  { true,  "font-otf"          },
-  { true,  "font-otb"          },
-  { true,  "luatex-fonts-inj"  }, --> since 2014-01-07, replaces node-inj.lua
-  { true,  "luatex-fonts-ota"  },
-  { true,  "luatex-fonts-otn"  }, --> since 2014-01-07, replaces font-otn.lua
-  { true,  "font-otp"          }, --> since 2013-04-23
-  { true,  "luatex-fonts-lua"  },
-  { true,  "font-def"          },
-  { true,  "luatex-fonts-def"  },
-  { true,  "luatex-fonts-ext"  },
-  { true,  "luatex-fonts-cbk"  },
+  { ltx,   "luatex-basics-gen" },
+  { ctx,   "data-con"          },
+  { ltx,   "luatex-basics-nod" },
+  { ctx,   "font-ini"          },
+  { ctx,   "font-con"          },
+  { ltx,   "luatex-fonts-enc"  },
+  { ctx,   "font-cid"          },
+  { ctx,   "font-map"          },
+  { ltx,   "luatex-fonts-syn"  },
+  { ltx,   "luatex-fonts-tfm"  },
+  { ctx,   "font-oti"          },
+  { ctx,   "font-otf"          },
+  { ctx,   "font-otb"          },
+  { ltx,   "luatex-fonts-inj"  }, --> since 2014-01-07, replaces node-inj.lua
+  { ltx,   "luatex-fonts-ota"  },
+  { ltx,   "luatex-fonts-otn"  }, --> since 2014-01-07, replaces font-otn.lua
+  { ctx,   "font-otp"          }, --> since 2013-04-23
+  { ltx,   "luatex-fonts-lua"  },
+  { ctx,   "font-def"          },
+  { ltx,   "luatex-fonts-def"  },
+  { ltx,   "luatex-fonts-ext"  },
+  { ltx,   "luatex-fonts-cbk"  },
 
 } --[[context_modules]]
 
@@ -231,11 +235,16 @@ local load_context_modules = function (pth)
              "Loading fontloader components from context.")
   local n = #context_modules
   for i = 1, n do
-    local state, spec = unpack (context_modules [i])
-    if state == false then
+    local sub, spec = unpack (context_modules [i])
+    if sub == false then
       ignore_module (spec)
-    elseif state == true then
-      load_context_module (spec)
+    elseif type (sub) == "string" then
+      load_context_module (spec, file.join (pth, sub))
+    else
+      logreport ("both", 0, "init",
+                 "Internal error, please report. \z
+                  This is not your fault.")
+      os.exit (-1)
     end
   end
 

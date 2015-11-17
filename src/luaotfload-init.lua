@@ -182,6 +182,65 @@ local pop_namespaces = function (normalglobal,
     end
 end
 
+local context_modules = {
+
+  --- Since 2.6 those are directly provided by the Lualibs package.
+  { false, "l-lua"      },
+  { false, "l-lpeg"     },
+  { false, "l-function" },
+  { false, "l-string"   },
+  { false, "l-table"    },
+  { false, "l-io"       },
+  { false, "l-file"     },
+  { false, "l-boolean"  },
+  { false, "l-math"     },
+  { false, "util-str"   },
+
+  --- These constitute the fontloader proper.
+  { true,  "luatex-basics-gen" },
+  { true,  "data-con"          },
+  { true,  "luatex-basics-nod" },
+  { true,  "font-ini"          },
+  { true,  "font-con"          },
+  { true,  "luatex-fonts-enc"  },
+  { true,  "font-cid"          },
+  { true,  "font-map"          },
+  { true,  "luatex-fonts-syn"  },
+  { true,  "luatex-fonts-tfm"  },
+  { true,  "font-oti"          },
+  { true,  "font-otf"          },
+  { true,  "font-otb"          },
+  { true,  "luatex-fonts-inj"  }, --> since 2014-01-07, replaces node-inj.lua
+  { true,  "luatex-fonts-ota"  },
+  { true,  "luatex-fonts-otn"  }, --> since 2014-01-07, replaces font-otn.lua
+  { true,  "font-otp"          }, --> since 2013-04-23
+  { true,  "luatex-fonts-lua"  },
+  { true,  "font-def"          },
+  { true,  "luatex-fonts-def"  },
+  { true,  "luatex-fonts-ext"  },
+  { true,  "luatex-fonts-cbk"  },
+
+} --[[context_modules]]
+
+local load_context_modules = function (pth)
+
+  local load_context_module    = luaotfload.loaders.context
+  local ignore_module          = luaotfload.loaders.ignore
+
+  logreport ("both", 2, "init",
+             "Loading fontloader components from context.")
+  local n = #context_modules
+  for i = 1, n do
+    local state, spec = unpack (context_modules [i])
+    if state == false then
+      ignore_module (spec)
+    elseif state == true then
+      load_context_module (spec)
+    end
+  end
+
+end
+
 local init_adapt = function ()
 
   local context_environment  = { }
@@ -204,7 +263,6 @@ end --- [init_adapt]
 local init_main = function ()
 
   local load_fontloader_module = luaotfload.loaders.fontloader
-  local load_context_module    = luaotfload.loaders.context
   local ignore_module          = luaotfload.loaders.ignore
 
   --[[doc--
@@ -265,50 +323,15 @@ local init_main = function ()
     load_fontloader_module "fonts-cbk"
 
   elseif fontloader == "context" then
-    logreport ("both", 4, "init",
-               "Loading fontloader components from context.")
-    logreport ("both", 0, "init", "NOT IMPLEMENTED YET.")
-    --- Since 2.6 those are directly provided by the Lualibs package.
-    ignore_module "l-lua"
-    ignore_module "l-lpeg"
-    ignore_module "l-function"
-    ignore_module "l-string"
-    ignore_module "l-table"
-    ignore_module "l-io"
-    ignore_module "l-file"
-    ignore_module "l-boolean"
-    ignore_module "l-math"
-    ignore_module "util-str"
-
-    --- These constitute the fontloader proper.
-    load_context_module "luatex-basics-gen"
-    load_context_module "data-con"
-    load_context_module "luatex-basics-nod"
-    load_context_module "font-ini"
-    load_context_module "font-con"
-    load_context_module "luatex-fonts-enc"
-    load_context_module "font-cid"
-    load_context_module "font-map"
-    load_context_module "luatex-fonts-syn"
-    load_context_module "luatex-fonts-tfm"
-    load_context_module "font-oti"
-    load_context_module "font-otf"
-    load_context_module "font-otb"
-    load_context_module "luatex-fonts-inj"  --> since 2014-01-07, replaces node-inj.lua
-    load_context_module "luatex-fonts-ota"
-    load_context_module "luatex-fonts-otn"  --> since 2014-01-07, replaces font-otn.lua
-    load_context_module "font-otp"   --> since 2013-04-23
-    load_context_module "luatex-fonts-lua"
-    load_context_module "font-def"
-    load_context_module "luatex-fonts-def"
-    load_context_module "luatex-fonts-ext"
-    load_context_module "luatex-fonts-cbk"
+    logreport ("both", 2, "init",
+               "Attempting to load Context modules in lookup path.")
+    load_context_modules ()
 
   elseif lfs.isdir (fontloader) then
     logreport ("both", 2, "init",
                "Attempting to load Context files under prefix “%s”.",
                fontloader)
-    TODO()
+    load_context_modules (fontloader)
 
   elseif lfs.isfile (fontloader) then
     logreport ("both", 2, "init",

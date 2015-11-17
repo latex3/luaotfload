@@ -8,6 +8,7 @@
 --
 
 local setmetatable = setmetatable
+local kpselookup   = kpse.lookup
 
 --[[doc--
 
@@ -218,6 +219,7 @@ local init_main = function ()
 
   local fontloader = config.luaotfload and config.luaotfload.run.fontloader
                                         or "reference"
+  fontloader = tostring (fontloader)
 
   if fontloader == "unpackaged" then
     logreport ("both", 4, "init",
@@ -302,13 +304,34 @@ local init_main = function ()
     load_context_module "luatex-fonts-ext"
     load_context_module "luatex-fonts-cbk"
 
-  elseif fontloader then
-    fontloader = tostring (fontloader)
-    --- “reference”, “default”
-    logreport ("both", 4, "init",
-               "Attempting to load fontloader “%s”.",
+  elseif lfs.isdir (fontloader) then
+    logreport ("both", 2, "init",
+               "Attempting to load Context files under prefix “%s”.",
                fontloader)
-    load_fontloader_module (luaotfload.fontloader_package)
+    TODO()
+
+  elseif lfs.isfile (fontloader) then
+    logreport ("both", 2, "init",
+               "Attempting to load fontloader from absolute path “%s”.",
+               fontloader)
+    local _void = require (fontloader)
+
+  elseif kpselookup (fontloader) then
+    local pth = kpselookup (fontloader)
+    logreport ("both", 2, "init",
+               "Attempting to load fontloader “%s” from kpse-resolved path “%s”.",
+               fontloader, path)
+    local _void = require (path)
+
+  else --- “reference”, “default”
+    logreport ("log", 6, "init",
+               "No match for fontloader spec “%s”.",
+               fontloader)
+    fontloader = luaotfload.fontloader_package
+    logreport ("log", 4, "init",
+               "Using predefined fontloader “%s”.",
+               fontloader)
+    load_fontloader_module (fontloader)
   end
 
   ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context

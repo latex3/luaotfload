@@ -292,7 +292,11 @@ local init_main = function ()
                                         or "reference"
   fontloader = tostring (fontloader)
 
-  if fontloader == "unpackaged" then
+  if fontloader == "reference" or fontloader == "default" then
+    logreport ("log", 4, "init", "Using reference fontloader.")
+    load_fontloader_module (luaotfload.fontloader_package)
+
+  elseif fontloader == "unpackaged" then
     logreport ("both", 4, "init",
                "Loading fontloader components individually.")
     --- The loading sequence is known to change, so this might have to be
@@ -359,7 +363,7 @@ local init_main = function ()
                fontloader, path)
     local _void = require (path)
 
-  else --- “reference”, “default”
+  else
     logreport ("log", 6, "init",
                "No match for fontloader spec “%s”.",
                fontloader)
@@ -372,6 +376,9 @@ local init_main = function ()
 
   ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 
+  logreport ("both", 0, "init",
+             "Context OpenType loader version “%s”",
+             fonts.handlers.otf.version)
 end --- [init_main]
 
 local init_cleanup = function (store)

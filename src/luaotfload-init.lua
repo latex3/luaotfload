@@ -228,8 +228,8 @@ local context_modules = {
 
 local load_context_modules = function (pth)
 
-  local load_context_module    = luaotfload.loaders.context
-  local ignore_module          = luaotfload.loaders.ignore
+  local load_module   = luaotfload.loaders.context
+  local ignore_module = luaotfload.loaders.ignore
 
   logreport ("both", 2, "init",
              "Loading fontloader components from context.")
@@ -239,7 +239,11 @@ local load_context_modules = function (pth)
     if sub == false then
       ignore_module (spec)
     elseif type (sub) == "string" then
-      load_context_module (spec, file.join (pth, sub))
+      if pth then
+        load_module (spec, file.join (pth, sub))
+      else
+        load_module (spec)
+      end
     else
       logreport ("both", 0, "init",
                  "Internal error, please report. \z

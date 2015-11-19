@@ -308,9 +308,9 @@ local set_name_resolver = function ()
     --- replace the resolver from luatex-fonts
     if config.luaotfload.db.resolver == "cached" then
         logreport ("both", 2, "cache", "Caching of name: lookups active.")
-        names.resolvespec  = names.resolve_cached
+        names.resolvespec  = fonts.names.lookup_font_name_cached
     else
-        names.resolvespec  = names.resolve_name
+        names.resolvespec  = fonts.names.lookup_font_name
     end
   end
   return true

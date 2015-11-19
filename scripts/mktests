@@ -18,14 +18,68 @@ local tests       = { }
 local lpeg        = require "lpeg"
 local lpegmatch   = lpeg.match
 
+config            = { luaotfload = { } }
+luatexbase        = { }
+
 kpse.set_program_name "luatex"
 
 require "lualibs"
 require "luaotfload-basics-gen.lua"
 require "luaotfload-log.lua"
-require "luaotfload-parsers"
-require "luaotfload-configuration"
-require "luaotfload-database"
+
+fonts = { names = { } } -- for db; normally provided by the fontloaders
+
+local require_init = { }
+
+local loadmodule = function (name)
+    local v = require ("luaotfload-" .. name)
+    if v then
+        local mod = { }
+        local tv  = type (v)
+        if tv == "table" then
+            mod.name = name
+            mod.init = v.init
+            require_init [#require_init + 1] = mod
+        elseif tv == "function" then
+            mod.name = name
+            mod.init = v
+            require_init [#require_init + 1] = mod
+        end
+    end
+end
+
+require "alt_getopt"
+
+loadmodule "log.lua"       --- this populates the luaotfload.log.* namespace
+loadmodule "parsers"       --- fonts.conf, configuration, and request syntax
+loadmodule "configuration" --- configuration file handling
+loadmodule "database"
+loadmodule "resolvers"     --- Font lookup
+
+do --- init_modules
+    --- NB we don’t command the logger at this point.
+    local todo = #require_init
+    local ret  = true
+    for i = 1, todo do
+        local mod  = require_init[i]
+        local name = mod.name
+        local init = mod.init
+        if type (init) ~= "function" then
+            error ("luaotfload broken; module "
+                   .. name .. " missing initializers!")
+        end
+        local v = mod.init ()
+        if v == true then
+            --- evaluated well
+        elseif type (v) == "table" then
+            luaotfload[name] = v
+        else
+            error ("luaotfload broken; initialization of module "
+                   .. name .. " returned " .. tostring (v) .. ".")
+            return false
+        end
+    end
+end
 
 local names = fonts.names
 
@@ -234,7 +288,6 @@ local default_spec = {
 
 local resolve_font_name = function ()
   local failed, total = 0, 0
-  local resolve_name = names.resolve_name
   for nset = 1, #font_name_tests do
     local set = font_name_tests[nset]
 
@@ -246,7 +299,7 @@ local resolve_font_name = function ()
         local input_spec = table.copy (default_spec)
         input_spec.name = input
         input_spec.specification = input_spec.lookup .. ":" .. input
-        local result = resolve_name (input_spec) == output
+        local result = fonts.names.lookup_font_name (input_spec) == output
         total = total + 1
         if not result then
           failed = failed + 1
@@ -260,7 +313,7 @@ local resolve_font_name = function ()
                                 .. ":" .. input_spec.name
         input_spec.optsize = input_spec.optsize or default_spec.optsize
         input_spec.style   = translate_style [input_spec.style]
-        local result = resolve_name (input_spec) == output
+        local result = fonts.names.lookup_font_name (input_spec) == output
         total = total + 1
         if not result then
           failed = failed + 1

@@ -5,8 +5,6 @@
 --  DESCRIPTION:  import parts of char-def.lua
 -- REQUIREMENTS:  lua, ConTeXt, the lualibs package
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  2.5
---     MODIFIED: 2014-02-11 07:24:25+0100
 -----------------------------------------------------------------------
 -- we create a stripped-down version of char-def.lua
 -----------------------------------------------------------------------
@@ -15,7 +13,7 @@
 --                              config
 -----------------------------------------------------------------------
 local charfile      = "./build/luaotfload-characters.lua"
-local chardef       = "/home/phg/base/char-def.lua"
+local chardef       = arg[1]
 
 ---  for every code point char-def.lua provides a set of fields. they
 ---  are:
@@ -65,12 +63,20 @@ for _, lib in next, { "lualibs-lua.lua",
   require(found)
 end
 
+if not chardef then
+  chardef = kpse.expand_path("~/context/tex/texmf-context/tex/context/base/")
+          .. "/char-def.lua"
+end
+
 if not (chardef and lfs.isfile(chardef)) then
   --- we could grab the file from contextgarden but as Context is part
   --- of TL it’s not worth bothering 
   chardef = assert(kpse.find_file("char-def.lua", "lua"),
                    "Could not find ConTeXt.")
 end
+
+io.write(string.format("extracting data from char-def.lua at %s\n",
+                       chardef))
 
 -----------------------------------------------------------------------
 --                           functionality

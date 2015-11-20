@@ -3,23 +3,17 @@
 --  DESCRIPTION:  Luaotfload entry point
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
---      VERSION:  same as Luaotfload
---     MODIFIED:  2015-06-09 23:08:18+0200
 -----------------------------------------------------------------------
 --
---- Note:
---- This file was part of the original luaotfload.dtx and has been
---- converted to a pure Lua file during the transition from Luaotfload
---- version 2.4 to 2.5. Thus, the comments are still in TeX (Latex)
---- markup.
 
-local initial_log_level           = 0
+local osgettimeofday              = os.gettimeofday
+config                            = config     or { }
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
 luaotfload.version                = "2.6"
 luaotfload.loaders                = { }
-luaotfload.min_luatex_version     = 79             --- i. e. 0.79
+luaotfload.min_luatex_version     = 80             --- i. e. 0.79
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 local authors = "\z
@@ -36,7 +30,7 @@ local authors = "\z
 luaotfload.module = {
     name          = "luaotfload-main",
     version       = 2.60001,
-    date          = "2015/05/26",
+    date          = "2015/11/05",
     description   = "OpenType layout system.",
     author        = authors,
     copyright     = authors,
@@ -67,22 +61,9 @@ luaotfload.module = {
 local luatexbase       = luatexbase
 local require          = require
 local type             = type
-local add_to_callback  = luatexbase.add_to_callback
-local create_callback  = luatexbase.create_callback
-local reset_callback   = luatexbase.reset_callback
-local call_callback    = luatexbase.call_callback
 
-local dummy_function = function () end --- XXX this will be moved to the luaotfload namespace when we have the init module
-
-local error, warning, info, log =
+local _error, _warning, _info, _log =
     luatexbase.provides_module(luaotfload.module)
-
-luaotfload.log.tex        = {
-    error        = error,
-    warning      = warning,
-    info         = info,
-    log          = log,
-}
 
 --[[doc--
 
@@ -117,153 +98,166 @@ end
 --doc]]--
 
 local make_loader_name = function (prefix, name)
-    local msg = luaotfload.log and luaotfload.log.report or print
-    if prefix then
-        msg ("log", 7, "load",
-             "Composing fontloader name from constitutents %s, %s",
-             prefix, name)
-        return prefix .. "-" .. name .. ".lua"
+    local msg = luaotfload.log and luaotfload.log.report
+             or function (...) texio.write_nl ("log", ...) end
+    if not name then
+        msg ("both", 0, "load",
+             "Fatal error: make_loader_name (“%s”, “%s”).",
+             tostring (prefix), tostring (name))
+        return "dummy-name"
     end
-    msg ("log", 7, "load",
-         "Loading fontloader file %s literally.",
-         name)
-    return name
+    name = tostring (name)
+    if prefix == false then
+        msg ("log", 9, "load",
+             "No prefix requested, passing module name “%s” unmodified.",
+             name)
+        return tostring (name) .. ".lua"
+    end
+    prefix = tostring (prefix)
+    msg ("log", 9, "load",
+         "Composing module name from constituents %s, %s.",
+         prefix, name)
+    return prefix .. "-" .. name .. ".lua"
 end
+
+local timing_info = {
+    t_load = { },
+    t_init = { },
+}
 
 local make_loader = function (prefix)
     return function (name)
+        local t_0 = osgettimeofday ()
         local modname = make_loader_name (prefix, name)
-        return require (modname)
+        local data = require (modname)
+        local t_end = osgettimeofday ()
+        timing_info.t_load [name] = t_end - t_0
+        return data
     end
 end
 
-local load_luaotfload_module = make_loader "luaotfload"
------ load_luaotfload_module = make_loader "luatex" --=> for Luatex-Plain
-local load_fontloader_module = make_loader "fontloader"
-
-luaotfload.loaders.luaotfload = load_luaotfload_module
-luaotfload.loaders.fontloader = load_fontloader_module
-
-luaotfload.init = load_luaotfload_module "init" --- fontloader initialization
-
-local store           = luaotfload.init.early ()
-local log             = luaotfload.log
-local logreport       = log.report
-
 --[[doc--
-
-    Now we load the modules written for \identifier{luaotfload}.
-
+    Certain files are kept around that aren’t loaded because they are part of
+    the imported fontloader. In order to keep the initialization structure
+    intact we also provide a no-op version of the module loader that can be
+    called in the expected places.
 --doc]]--
 
-load_luaotfload_module "parsers"         --- fonts.conf and syntax
-load_luaotfload_module "configuration"   --- configuration options
-
-if not config.actions.apply_defaults () then
-    logreport ("log", 0, "load", "Configuration unsuccessful.")
+local dummy_loader = function (name)
+    luaotfload.log.report ("log", 3, "load",
+                           "Skipping module “%s” on purpose.",
+                           name)
 end
 
-luaotfload.init.main (store)
-
-load_luaotfload_module "loaders"         --- Type1 font wrappers
-load_luaotfload_module "database"        --- Font management.
-load_luaotfload_module "colors"          --- Per-font colors.
-
-luaotfload.resolvers = load_luaotfload_module "resolvers" --- Font lookup
-
-luaotfload.resolvers.install ()
-
-if not config.actions.reconfigure () then
-    logreport ("log", 0, "load", "Post-configuration hooks failed.")
-end
-
---[[doc--
-
-    We create callbacks for patching fonts on the fly, to be used by
-    other packages. In addition to the regular \identifier{patch_font}
-    callback there is an unsafe variant \identifier{patch_font_unsafe}
-    that will be invoked even if the target font lacks certain essential
-    tfmdata tables.
-
-    The callbacks initially contain the empty function that we are going to
-    override below.
-
---doc]]--
-
-create_callback("luaotfload.patch_font",        "simple", dummy_function)
-create_callback("luaotfload.patch_font_unsafe", "simple", dummy_function)
-
---[[doc--
-
-    \subsection{\CONTEXT override}
-    \label{define-font}
-    We provide a simplified version of the original font definition
-    callback.
-
---doc]]--
-
-
-local definers = { } --- (string, spec -> size -> id -> tmfdata) hash_t
-do
-    local read = fonts.definers.read
-
-    local patch = function (specification, size, id)
-        local fontdata = read (specification, size, id)
-        if type (fontdata) == "table" and fontdata.shared then
-            --- We need to test for the “shared” field here
-            --- or else the fontspec capheight callback will
-            --- operate on tfm fonts.
-            call_callback ("luaotfload.patch_font", fontdata, specification)
+local context_loader = function (name, path)
+    luaotfload.log.report ("log", 3, "load",
+                           "Loading module “%s” from Context.",
+                           name)
+    local t_0 = osgettimeofday ()
+    local modname = make_loader_name (false, name)
+    local modpath = modname
+    if path then
+        if lfs.isdir (path) then
+            luaotfload.log.report ("log", 3, "load",
+                                   "Prepending path “%s”.",
+                                   path)
+            modpath = file.join (path, modname)
         else
-            call_callback ("luaotfload.patch_font_unsafe", fontdata, specification)
-        end
-        return fontdata
-    end
-
-    local mk_info = function (name)
-        local definer = name == "patch" and patch or read
-        return function (specification, size, id)
-            logreport ("both", 0, "main", "defining font no. %d", id)
-            logreport ("both", 0, "main", "   > active font definer: %q", name)
-            logreport ("both", 0, "main", "   > spec %q", specification)
-            logreport ("both", 0, "main", "   > at size %.2f pt", size / 2^16)
-            local result = definer (specification, size, id)
-            if not result then
-                logreport ("both", 0, "main", "   > font definition failed")
-                return
-            elseif type (result) == "number" then
-                logreport ("both", 0, "main", "   > font definition yielded id %d", result)
-                return result
-            end
-            logreport ("both", 0, "main", "   > font definition successful")
-            logreport ("both", 0, "main", "   > name %q",     result.name     or "<nil>")
-            logreport ("both", 0, "main", "   > fontname %q", result.fontname or "<nil>")
-            logreport ("both", 0, "main", "   > fullname %q", result.fullname or "<nil>")
-            return result
+            luaotfload.log.report ("both", 0, "load",
+                                   "Non-existant path “%s” specified, ignoring.",
+                                   path)
         end
     end
+    local ret = require (modpath)
+    local t_end = osgettimeofday ()
+    timing_info.t_load [name] = t_end - t_0
 
-    definers.patch          = patch
-    definers.generic        = read
-    definers.info_patch     = mk_info "patch"
-    definers.info_generic   = mk_info "generic"
+    if ret ~= true then
+        --- require () returns “true” upon success unless the loaded file
+        --- yields a non-zero exit code. This isn’t per se indicating that
+        --- something isn’t right, but against HH’s coding practices. We’ll
+        --- silently ignore this ever happening on lower log levels.
+        luaotfload.log.report ("log", 4, "load",
+                               "Module “%s” returned “%s”.", ret)
+    end
+    return ret
 end
 
-reset_callback "define_font"
+local install_loaders = function ()
+    local loaders      = { }
+    local loadmodule   = make_loader "luaotfload"
+    loaders.luaotfload = loadmodule
+    loaders.fontloader = make_loader "fontloader"
+    loaders.context    = context_loader
+    loaders.ignore     = dummy_loader
+----loaders.plaintex   = make_loader "luatex" --=> for Luatex-Plain
 
---[[doc--
+    loaders.initialize = function (name)
+        local tmp       = loadmodule (name)
+        local logreport = luaotfload.log.report
+        if type (tmp) == "table" then
+            local init = tmp.init
+            if init and type (init) == "function" then
+                local t_0 = osgettimeofday ()
+                if not init () then
+                    logreport ("log", 0, "load",
+                               "Failed to load module “%s”.", name)
+                    return
+                end
+                local t_end = osgettimeofday ()
+                local d_t = t_end - t_0
+                logreport ("log", 4, "load",
+                           "Module “%s” loaded in %d ms.",
+                           name, d_t)
+                timing_info.t_init [name] = d_t
+            end
+        end
+    end
 
-    Finally we register the callbacks.
+    return loaders
+end
 
---doc]]--
 
-local definer = config.luaotfload.run.definer
-add_to_callback ("define_font", definers[definer], "luaotfload.define_font", 1)
+luaotfload.main = function ()
 
-load_luaotfload_module "features"     --- font request and feature handling
-load_luaotfload_module "letterspace"  --- extra character kerning
-load_luaotfload_module "auxiliary"    --- additional high-level functionality
+    luaotfload.loaders = install_loaders ()
+    local loaders    = luaotfload.loaders
+    local loadmodule = loaders.luaotfload
+    local initialize = loaders.initialize
 
-luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
+    local starttime = osgettimeofday ()
+    local init      = loadmodule "init" --- fontloader initialization
+    local store     = init.early ()     --- injects the log module too
+    local logreport = luaotfload.log.report
+
+    initialize "parsers"         --- fonts.conf and syntax
+    initialize "configuration"   --- configuration options
+
+    if not init.main (store) then
+        logreport ("log", 0, "load", "Main fontloader initialization failed.")
+    end
+
+    initialize "loaders"         --- Font loading; callbacks
+    initialize "database"        --- Font management.
+    initialize "colors"          --- Per-font colors.
+
+    luaotfload.resolvers = loadmodule "resolvers" --- Font lookup
+    luaotfload.resolvers.init ()
+
+    if not config.actions.reconfigure () then
+        logreport ("log", 0, "load", "Post-configuration hooks failed.")
+    end
+
+    initialize "features"     --- font request and feature handling
+    loadmodule "letterspace"  --- extra character kerning
+    loadmodule "auxiliary"    --- additional high-level functionality
+
+    luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
+
+    logreport ("both", 0, "main",
+               "initialization completed in %0.3f seconds",
+               osgettimeofday() - starttime)
+----inspect (timing_info)
+end
 
 -- vim:tw=79:sw=4:ts=4:et

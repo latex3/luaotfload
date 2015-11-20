@@ -24,6 +24,7 @@ local constructors             = fonts.constructors
 local encodings                = fonts.encodings
 
 local tfm                      = constructors.newhandler("tfm")
+tfm.version                    = 1.000
 
 local tfmfeatures              = constructors.newfeatures("tfm")
 local registertfmfeature       = tfmfeatures.register

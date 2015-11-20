@@ -1,6 +1,6 @@
 NAME		= luaotfload
 DOCPDF		= $(NAME).pdf
-DOCSRC		= $(NAME)-latex.tex
+DOCSRC		= $(NAME)-latex.tex $(NAME)-main.tex
 
 SCRIPTNAME	= luaotfload-tool
 TOOLMANSRC	= $(SCRIPTNAME).rst
@@ -47,7 +47,7 @@ $(DOTPDF): $(DOT)
 	@echo "creating file graph ($(DOTPDF))"
 	$(DO_GRAPHVIZ)
 
-.PHONY: clean mrproper
+.PHONY: clean mrproper graph doc all manuals
 
 clean:
 	@$(RM) -- *.log *.aux *.toc *.idx *.ind *.ilg *.out

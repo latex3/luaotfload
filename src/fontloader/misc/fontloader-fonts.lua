@@ -27,16 +27,10 @@ if not modules then modules = { } end modules ['luatex-fonts'] = {
 -- also add more helper code here, but that depends to what extend metatex (sidetrack of context)
 -- evolves into a low level layer (depends on time, as usual).
 
-texio.write_nl("")
-texio.write_nl("--------------------------------------------------------------------------------")
-texio.write_nl("The font code has been brought in sync with the context version of 2014.12.21 so")
-texio.write_nl("if things don't work out as expected the interfacing needs to be checked. When")
-texio.write_nl("this works as expected a second upgrade will happen that gives a more complete")
-texio.write_nl("support and another sync with the context code (that new code is currently being")
-texio.write_nl("tested. The base pass is now integrated in the main pass. The results can differ")
-texio.write_nl("from those in context because there we integrate some mechanisms differently.")
-texio.write_nl("--------------------------------------------------------------------------------")
-texio.write_nl("")
+-- The code here is the same as in context version 2015.09.11 but the rendering in context can be
+-- different from generic. This can be a side effect of additional callbacks, additional features
+-- and interferences between mechanisms between macro packages. We use the rendering in context
+-- and luatex-plain as reference for issues.
 
 utf = utf or unicode.utf8
 
@@ -221,9 +215,9 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule('font-oti.lua')
         loadmodule('font-otf.lua')
         loadmodule('font-otb.lua')
-        loadmodule('luatex-fonts-inj.lua')
+        loadmodule('luatex-fonts-inj.lua') -- normally the same as font-inj.lua
         loadmodule('luatex-fonts-ota.lua')
-        loadmodule('luatex-fonts-otn.lua')
+        loadmodule('luatex-fonts-otn.lua') -- normally the same as font-otn.lua
         loadmodule('font-otp.lua')
         loadmodule('luatex-fonts-lua.lua')
         loadmodule('font-def.lua')         -- this code (stripped) might end up in luatex-fonts-def.lua

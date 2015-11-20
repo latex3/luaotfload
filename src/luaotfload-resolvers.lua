@@ -5,8 +5,6 @@
 --  DESCRIPTION:  Resolvers for hooking into the fontloader
 -- REQUIREMENTS:  Luaotfload and a decent bit of courage
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
---      VERSION:  1.0
---      CREATED:  2015-07-23 07:31:50+0200
 -----------------------------------------------------------------------
 --
 --- The bare fontloader uses a set of simplistic file name resolvers
@@ -37,14 +35,8 @@ local stringlower         = string.lower
 local stringformat        = string.format
 local filesuffix          = file.suffix
 local fileremovesuffix    = file.removesuffix
-local formats             = fonts.formats
-local names               = fonts.names
-local encodings           = fonts.encodings
 local luatexbase          = luatexbase
 local logreport           = luaotfload.log.report
-
-formats.ofm               = "type1"
-encodings.known           = encodings.known or { }
 
 --[[doc--
 
@@ -70,9 +62,9 @@ encodings.known           = encodings.known or { }
 
 local resolve_file
 resolve_file = function (specification)
-    local name   = names.lookup_font_file (specification.name)
+    local name   = fonts.names.lookup_font_file (specification.name)
     local suffix = filesuffix (name)
-    if formats[suffix] then
+    if fonts.formats[suffix] then
         specification.forced      = stringlower (suffix)
         specification.forcedname  = fileremovesuffix(name)
     else
@@ -101,7 +93,7 @@ resolve_path = function (specification)
         resolve_file (specification)
     else
         local suffix = filesuffix (name)
-        if formats[suffix] then
+        if fonts.formats[suffix] then
             specification.forced      = stringlower (suffix)
             specification.name        = fileremovesuffix(name)
             specification.forcedname  = name
@@ -122,9 +114,9 @@ end
 
 local resolve_name
 resolve_name = function (specification)
-    local resolver = names.lookup_font_name_cached
+    local resolver = fonts.names.lookup_font_name_cached
     if config.luaotfload.run.resolver == "normal" then
-        resolver = names.lookup_font_name
+        resolver = fonts.names.lookup_font_name
     end
     local resolved, subfont = resolver (specification)
     if resolved then
@@ -210,7 +202,7 @@ local resolve_kpse
 resolve_kpse = function (specification)
     local name       = specification.name
     local suffix     = filesuffix (name)
-    if suffix and formats[suffix] then
+    if suffix and fonts.formats[suffix] then
         name = fileremovesuffix (name)
         if resolvers.findfile (name, suffix) then
             specification.forced       = stringlower (suffix)
@@ -218,7 +210,7 @@ resolve_kpse = function (specification)
             return
         end
     end
-    for t, format in next, formats do --- brute force
+    for t, format in next, fonts.formats do --- brute force
         if kpsefind_file (name, format) then
             specification.forced = t
             specification.name   = name
@@ -238,8 +230,11 @@ local resolve_my = function (specification)
 end
 
 return {
-    install = function ( )
-        luatexbase.create_callback ("luaotfload.resolve_font", "simple", function () end)
+    init = function ( )
+        if luatexbase and luatexbase.create_callback then
+            luatexbase.create_callback ("luaotfload.resolve_font",
+                                        "simple", function () end)
+        end
         logreport ("log", 5, "resolvers", "installing font resolvers", name)
         local request_resolvers = fonts.definers.resolvers
         request_resolvers.file = resolve_file
@@ -248,8 +243,11 @@ return {
         request_resolvers.path = resolve_path
         request_resolvers.kpse = resolve_kpse
         request_resolvers.my   = resolve_my
+        fonts.formats.ofm      = "type1"
+        fonts.encodings        = fonts.encodings       or { }
+        fonts.encodings.known  = fonts.encodings.known or { }
         return true
-    end, --- [.install]
+    end, --- [.init]
 }
 
 --- vim:ft=lua:ts=8:sw=4:et

@@ -82,7 +82,7 @@ local lpegtype, lpegmatch, lpegprint = lpeg.type, lpeg.match, lpeg.print
 -- let's start with an inspector:
 
 if setinspector then
-    setinspector(function(v) if lpegtype(v) then lpegprint(v) return true end end)
+    setinspector("lpeg",function(v) if lpegtype(v) then lpegprint(v) return true end end)
 end
 
 -- Beware, we predefine a bunch of patterns here and one reason for doing so

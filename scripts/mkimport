@@ -5,8 +5,6 @@
 --  DESCRIPTION:  check luaotfload imports against Context
 -- REQUIREMENTS:  luatex, the lualibs package, Context MkIV
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
---      VERSION:  42
---      CREATED:  2014-12-08 22:36:15+0100
 -------------------------------------------------------------------------------
 --
 
@@ -53,7 +51,7 @@ local tableconcat      = table.concat
 -- config
 -------------------------------------------------------------------------------
 
-local context_root        = "/home/phg/context/tex/texmf-context"
+local parms               = { }
 local our_prefix          = "fontloader"
 local luatex_fonts_prefix = "luatex"
 local fontloader_subdir   = "src/fontloader"
@@ -71,7 +69,6 @@ local subdirs = {
 local searchdirs = {
   --- order is important!
   fontloader_subdir,
-  context_root
 }
 
 local prefixes = {
@@ -261,7 +258,7 @@ end
 
 local derive_category_path = function (cat)
   local subpath  = origin_paths[cat] or die ("category " .. cat .. " unknown")
-  local location = file.join (context_root, subpath)
+  local location = file.join (parms.context_root, subpath)
   if not lfsisdir (location) then
     die ("invalid base path defined for category "
          .. cat .. " at " .. location)
@@ -484,7 +481,8 @@ end --[[ [local import_file = function (name, kind)] ]]
 
 local import = function (arg)
   if #arg > 1 then
-    local name = arg[2] or die ("invalid filename " .. tostring (arg[2]))
+    local tgt  = parms.target
+    local name = tgt or die ("invalid filename " .. tostring (tgt))
     local stat = import_file (name)
     if stat == import_failed then
       die ("failed to import file " .. name)
@@ -528,10 +526,10 @@ local search_paths = function (target)
 
   end
 
-  local found = find_in_path (context_root, origin_paths.context, target)
+  local found = find_in_path (parms.context_root, origin_paths.context, target)
   if found then return found end
 
-  local found = find_in_path (context_root, origin_paths.fontloader, target)
+  local found = find_in_path (parms.context_root, origin_paths.fontloader, target)
   if found then return found end
   return false
 end
@@ -658,7 +656,7 @@ local describe = function (target, location)
 end
 
 local tell = function (arg)
-  local target = arg[2]
+  local target = parms.target
   if not target then die "no filename given" end
 
   local location = search (target)
@@ -848,12 +846,31 @@ local check_job = function (j)
   return job_kind[j] or die ("invalid job type “%s”.", j)
 end
 
+local parse_argv = function (argv)
+  local job
+  local tgt
+  local pth
+
+  local argc = #arg
+  if argc < 1 or argc > 3 then return "help" end
+  job = arg[1] or "help"
+  if argc > 1 then
+    tgt = arg[2]
+    if argc == 3 then pth = arg[3] end
+  end
+  if not pth then pth = "~/context/tex/texmf-context" end
+  parms.context_root = kpse.expand_path (pth)
+  parms.target       = tgt
+  searchdirs [#searchdirs + 1] = pth
+  return job
+end
+
 -------------------------------------------------------------------------------
 -- entry point
 -------------------------------------------------------------------------------
 
 local main = function ()
-  local job = arg[1] or "help"
+  local job = parse_argv (arg)
   local runner = check_job (job)
   return runner(arg)
 end

@@ -129,22 +129,36 @@ local print, select, tostring = print, select, tostring
 
 local inspectors = { }
 
-function setinspector(inspector) -- global function
-    inspectors[#inspectors+1] = inspector
+function setinspector(kind,inspector) -- global function
+    inspectors[kind] = inspector
 end
 
 function inspect(...) -- global function
     for s=1,select("#",...) do
         local value = select(s,...)
-        local done = false
-        for i=1,#inspectors do
-            done = inspectors[i](value)
-            if done then
-                break
+        if value == nil then
+            print("nil")
+        else
+            local done  = false
+            -- type driven (table)
+            local kind      = type(value)
+            local inspector = inspectors[kind]
+            if inspector then
+                done = inspector(value)
+                if done then
+                    break
+                end
             end
-        end
-        if not done then
-            print(tostring(value))
+            -- whatever driven (token, node, ...)
+            for kind, inspector in next, inspectors do
+                done = inspector(value)
+                if done then
+                    break
+                end
+            end
+            if not done then
+                print(tostring(value))
+            end
         end
     end
 end

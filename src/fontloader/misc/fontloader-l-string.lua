@@ -192,10 +192,11 @@ string.itself  = function(s) return s end
 
 -- also handy (see utf variant)
 
-local pattern = Ct(C(1)^0) -- string and not utf !
+local pattern_c = Ct( C(1)      ^0) -- string and not utf !
+local pattern_b = Ct((C(1)/byte)^0)
 
-function string.totable(str)
-    return lpegmatch(pattern,str)
+function string.totable(str,bytes)
+    return lpegmatch(bytes and pattern_b or pattern_c,str)
 end
 
 -- handy from within tex:

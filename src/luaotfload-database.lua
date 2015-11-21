@@ -2166,7 +2166,11 @@ local filter_out_pwd = function (dirs)
     for i = 1, #dirs do
         --- better safe than sorry
         local dir = path_normalize (lpegmatch (stripslashes, dirs[i]))
-        if not (dir == "." or dir == pwd) then
+        if dir == "." or dir == pwd then
+            logreport ("both", 3, "db",
+                       "Path “%s” matches $PWD (“%s”), skipping.",
+                       dir, pwd)
+        else
             result[#result+1] = dir
         end
     end

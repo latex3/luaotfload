@@ -2177,7 +2177,7 @@ local filter_out_pwd = function (dirs)
     return result
 end
 
-local path_separator = ostype == "windows" and ";" or ":"
+local path_separator = os.type == "windows" and ";" or ":"
 
 --[[doc--
 

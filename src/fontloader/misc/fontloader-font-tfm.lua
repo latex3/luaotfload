@@ -25,6 +25,8 @@ local encodings                = fonts.encodings
 
 local tfm                      = constructors.newhandler("tfm")
 tfm.version                    = 1.000
+tfm.maxnestingdepth            = 5
+tfm.maxnestingsize             = 65536*1024
 
 local tfmfeatures              = constructors.newfeatures("tfm")
 local registertfmfeature       = tfmfeatures.register
@@ -45,6 +47,18 @@ supplied by <l n='luatex'/>.</p>
 -- ofm directive blocks local path search unless set; btw, in context we
 -- don't support ofm files anyway as this format is obsolete
 
+-- we need to deal with nested virtual fonts, but because we load in the
+-- frontend we also need to make sure we don't nest too deep (esp when sizes
+-- get large)
+--
+-- (VTITLE Example of a recursion)
+-- (MAPFONT D 0 (FONTNAME recurse)(FONTAT D 2))
+-- (CHARACTER C A (CHARWD D 1)(CHARHT D 1)(MAP (SETRULE D 1 D 1)))
+-- (CHARACTER C B (CHARWD D 2)(CHARHT D 2)(MAP (SETCHAR C A)))
+-- (CHARACTER C C (CHARWD D 4)(CHARHT D 4)(MAP (SETCHAR C B)))
+--
+-- we added the same checks as below to the luatex engine
+
 function tfm.setfeatures(tfmdata,features)
     local okay = constructors.initializefeatures("tfm",tfmdata,features,trace_features,report_tfm)
     if okay then
@@ -54,9 +68,12 @@ function tfm.setfeatures(tfmdata,features)
     end
 end
 
+local depth = { } -- table.setmetatableindex("number")
+
 local function read_from_tfm(specification)
-    local filename = specification.filename
-    local size     = specification.size
+    local filename  = specification.filename
+    local size      = specification.size
+    depth[filename] = (depth[filename] or 0) + 1
     if trace_defining then
         report_defining("loading tfm file %a at size %s",filename,size)
     end
@@ -104,6 +121,25 @@ local function read_from_tfm(specification)
                     end
                     properties.virtualized = true
                     tfmdata.fonts = vfdata.fonts
+                    tfmdata.type = "virtual" -- else nested calls with cummulative scaling
+                    local fontlist = vfdata.fonts
+                    local name = file.nameonly(filename)
+                    for i=1,#fontlist do
+                        local n = fontlist[i].name
+                        local s = fontlist[i].size
+                        local d = depth[filename]
+                        s = constructors.scaled(s,vfdata.designsize)
+                        if d > tfm.maxnestingdepth then
+                            report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
+                            fontlist[i] = { id = 0 }
+                        elseif (d > 1) and (s > tfm.maxnestingsize) then
+                            report_defining("virtual font %a exceeds size %s",n,s)
+                            fontlist[i] = { id = 0 }
+                        else
+                            local t, id = fonts.constructors.readanddefine(n,s)
+                            fontlist[i] = { id = id }
+                        end
+                    end
                 end
             end
         end
@@ -122,7 +158,10 @@ local function read_from_tfm(specification)
         resources.unicodes      = { }
         resources.lookuptags    = { }
         --
+        depth[filename] = depth[filename] - 1
         return tfmdata
+    else
+        depth[filename] = depth[filename] - 1
     end
 end
 

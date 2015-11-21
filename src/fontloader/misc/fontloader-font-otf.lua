@@ -1999,9 +1999,10 @@ actions["merge kern classes"] = function(data,filename,raw)
                     local kernclass = subtable.kernclass -- name is inconsistent with anchor_classes
                     local lookup = subtable.lookup or subtable.name
                     if kernclass then -- the next one is quite slow
+                        -- as fas as i can see the kernclass is a table with one entry and offsets
+                        -- have no [1] so we could remov eon elevel (kernclass) and start offsets
+                        -- at 1 but we're too far down the road now to fix that
                         if #kernclass > 0 then
-                            -- it's a table with one entry .. a future luatex can just
-                            -- omit that level
                             kernclass = kernclass[1]
                             lookup    = type(kernclass.lookup) == "string" and kernclass.lookup or lookup
                             report_otf("fixing kernclass table of lookup %a",lookup)
@@ -2028,15 +2029,17 @@ actions["merge kern classes"] = function(data,filename,raw)
                             if splt then
                                 local extrakerns = { }
                                 local baseoffset = (fk-1) * maxseconds
-                                for sk=2,maxseconds do -- will become 1 based in future luatex
-                                    local sv = seconds[sk]
                              -- for sk, sv in next, seconds do
-                                    local splt = split[sv]
-                                    if splt then -- redundant test
-                                        local offset = offsets[baseoffset + sk]
-                                        if offset then
-                                            for i=1,#splt do
-                                                extrakerns[splt[i]] = offset
+                                for sk=2,maxseconds do
+                                    local sv = seconds[sk]
+                                    if sv then
+                                        local splt = split[sv]
+                                        if splt then -- redundant test
+                                            local offset = offsets[baseoffset + sk]
+                                            if offset then
+                                                for i=1,#splt do
+                                                    extrakerns[splt[i]] = offset
+                                                end
                                             end
                                         end
                                     end
@@ -2583,6 +2586,7 @@ local function copytotfm(data,cache_id)
                     -- watch out: luatex uses horiz_variants for the parts
                     --
                     local italic   = m.italic
+                    local vitalic  = m.vitalic
                     --
                     local variants = m.hvariants
                     local parts    = m.hparts
@@ -2623,11 +2627,13 @@ local function copytotfm(data,cache_id)
                         c.vert_variants = parts
                     elseif parts then
                         character.vert_variants = parts
-                        italic = m.vitalic
                     end
                     --
                     if italic and italic ~= 0 then
                         character.italic = italic -- overload
+                    end
+                    if vitalic and vitalic ~= 0 then
+                        character.vert_italic = vitalic
                     end
                     --
                     local accent = m.accent

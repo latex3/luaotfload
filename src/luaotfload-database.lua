@@ -2166,14 +2166,18 @@ local filter_out_pwd = function (dirs)
     for i = 1, #dirs do
         --- better safe than sorry
         local dir = path_normalize (lpegmatch (stripslashes, dirs[i]))
-        if not (dir == "." or dir == pwd) then
+        if dir == "." or dir == pwd then
+            logreport ("both", 3, "db",
+                       "Path “%s” matches $PWD (“%s”), skipping.",
+                       dir, pwd)
+        else
             result[#result+1] = dir
         end
     end
     return result
 end
 
-local path_separator = ostype == "windows" and ";" or ":"
+local path_separator = os.type == "windows" and ";" or ":"
 
 --[[doc--
 
@@ -2193,14 +2197,14 @@ local collect_font_filenames_texmf = function ()
     local osfontdir = kpseexpand_path "$OSFONTDIR"
 
     if stringis_empty (osfontdir) then
-        logreport ("info", 1, "db", "Scanning TEXMF for fonts...")
+        logreport ("both", 1, "db", "Scanning TEXMF for fonts...")
     else
-        logreport ("info", 1, "db", "Scanning TEXMF and $OSFONTDIR for fonts...")
+        logreport ("both", 1, "db", "Scanning TEXMF and $OSFONTDIR for fonts...")
         if log.get_loglevel () > 3 then
             local osdirs = filesplitpath (osfontdir)
-            logreport ("info", 0, "db", "$OSFONTDIR has %d entries:", #osdirs)
+            logreport ("both", 0, "db", "$OSFONTDIR has %d entries:", #osdirs)
             for i = 1, #osdirs do
-                logreport ("info", 0, "db", "[%d] %s", i, osdirs[i])
+                logreport ("both", 0, "db", "[%d] %s", i, osdirs[i])
             end
         end
     end
@@ -2214,14 +2218,14 @@ local collect_font_filenames_texmf = function ()
     end
 
     local tasks = filter_out_pwd (filesplitpath (fontdirs))
-    logreport ("info", 3, "db",
+    logreport ("both", 3, "db",
                "Initiating scan of %d directories.", #tasks)
 
     local files = { }
     for _, dir in next, tasks do
         files = tableappend (files, collect_font_filenames_dir (dir, "texmf"))
     end
-    logreport ("term", 3, "db", "Collected %d files.", #files)
+    logreport ("both", 3, "db", "Collected %d files.", #files)
     return files
 end
 

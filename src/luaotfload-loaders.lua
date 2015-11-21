@@ -110,12 +110,22 @@ end
 
 --doc]]--
 
+local function reset_callback(name,make_false)
+  for _,v in pairs(luatexbase.callback_descriptions(name))
+  do
+    luatexbase.remove_from_callback(name,v)
+  end
+  if make_false == true then
+    luatexbase.disable_callback(name)
+  end
+end
+
 local install_callbacks = function ()
   local create_callback  = luatexbase.create_callback
   local dummy_function   = function () end
   create_callback ("luaotfload.patch_font",        "simple", dummy_function)
   create_callback ("luaotfload.patch_font_unsafe", "simple", dummy_function)
-  luatexbase.reset_callback "define_font"
+  reset_callback "define_font"
   local definer = config.luaotfload.run.definer
   luatexbase.add_to_callback ("define_font",
                               definers[definer or "patch"],

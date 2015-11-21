@@ -13,6 +13,10 @@
 
 % We assume that pdf is used.
 
+\ifdefined\pdfextension
+    \input luatex-pdf \relax
+\fi
+
 \pdfoutput 1
 
 % We set the page dimensions because otherwise the backend does weird things

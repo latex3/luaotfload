@@ -1,6 +1,6 @@
 -- merged file : luatex-fonts-merged.lua
 -- parent file : luatex-fonts.lua
--- merge date  : 10/09/15 21:28:28
+-- merge date  : 11/19/15 19:13:15
 
 do -- begin closure to overcome local limits and interference
 
@@ -4211,8 +4211,8 @@ end
 constructors.setfactor()
 function constructors.scaled(scaledpoints,designsize) 
   if scaledpoints<0 then
+    local factor=constructors.factor
     if designsize then
-      local factor=constructors.factor
       if designsize>factor then 
         return (- scaledpoints/1000)*designsize 
       else
@@ -4649,6 +4649,10 @@ function constructors.scale(tfmdata,specification)
             chr.horiz_variants=t
           end
         end
+      end
+      local vi=character.vert_italic
+      if vi and vi~=0 then
+        chr.vert_italic=vi*hdelta
       end
       local va=character.accent
       if va then
@@ -5833,6 +5837,8 @@ local constructors=fonts.constructors
 local encodings=fonts.encodings
 local tfm=constructors.newhandler("tfm")
 tfm.version=1.000
+tfm.maxnestingdepth=5
+tfm.maxnestingsize=65536*1024
 local tfmfeatures=constructors.newfeatures("tfm")
 local registertfmfeature=tfmfeatures.register
 constructors.resolvevirtualtoo=false 
@@ -5845,9 +5851,11 @@ function tfm.setfeatures(tfmdata,features)
     return {} 
   end
 end
+local depth={} 
 local function read_from_tfm(specification)
   local filename=specification.filename
   local size=specification.size
+  depth[filename]=(depth[filename] or 0)+1
   if trace_defining then
     report_defining("loading tfm file %a at size %s",filename,size)
   end
@@ -5891,6 +5899,25 @@ local function read_from_tfm(specification)
           end
           properties.virtualized=true
           tfmdata.fonts=vfdata.fonts
+          tfmdata.type="virtual" 
+          local fontlist=vfdata.fonts
+          local name=file.nameonly(filename)
+          for i=1,#fontlist do
+            local n=fontlist[i].name
+            local s=fontlist[i].size
+            local d=depth[filename]
+            s=constructors.scaled(s,vfdata.designsize)
+            if d>tfm.maxnestingdepth then
+              report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
+              fontlist[i]={ id=0 }
+            elseif (d>1) and (s>tfm.maxnestingsize) then
+              report_defining("virtual font %a exceeds size %s",n,s)
+              fontlist[i]={ id=0 }
+            else
+              local t,id=fonts.constructors.readanddefine(n,s)
+              fontlist[i]={ id=id }
+            end
+          end
         end
       end
     end
@@ -5906,7 +5933,10 @@ local function read_from_tfm(specification)
     properties.haslogatures=true
     resources.unicodes={}
     resources.lookuptags={}
+    depth[filename]=depth[filename]-1
     return tfmdata
+  else
+    depth[filename]=depth[filename]-1
   end
 end
 local function check_tfm(specification,fullname) 
@@ -8652,7 +8682,7 @@ actions["merge kern classes"]=function(data,filename,raw)
           local subtable=subtables[s]
           local kernclass=subtable.kernclass 
           local lookup=subtable.lookup or subtable.name
-          if kernclass then 
+          if kernclass then
             if #kernclass>0 then
               kernclass=kernclass[1]
               lookup=type(kernclass.lookup)=="string" and kernclass.lookup or lookup
@@ -8677,14 +8707,16 @@ actions["merge kern classes"]=function(data,filename,raw)
               if splt then
                 local extrakerns={}
                 local baseoffset=(fk-1)*maxseconds
-                for sk=2,maxseconds do 
+                for sk=2,maxseconds do
                   local sv=seconds[sk]
-                  local splt=split[sv]
-                  if splt then 
-                    local offset=offsets[baseoffset+sk]
-                    if offset then
-                      for i=1,#splt do
-                        extrakerns[splt[i]]=offset
+                  if sv then
+                    local splt=split[sv]
+                    if splt then 
+                      local offset=offsets[baseoffset+sk]
+                      if offset then
+                        for i=1,#splt do
+                          extrakerns[splt[i]]=offset
+                        end
                       end
                     end
                   end
@@ -9145,6 +9177,7 @@ local function copytotfm(data,cache_id)
         local m=d.math
         if m then
           local italic=m.italic
+          local vitalic=m.vitalic
           local variants=m.hvariants
           local parts=m.hparts
           if variants then
@@ -9171,10 +9204,12 @@ local function copytotfm(data,cache_id)
             c.vert_variants=parts
           elseif parts then
             character.vert_variants=parts
-            italic=m.vitalic
           end
           if italic and italic~=0 then
             character.italic=italic 
+          end
+          if vitalic and vitalic~=0 then
+            character.vert_italic=vitalic
           end
           local accent=m.accent
           if accent then
@@ -11610,7 +11645,6 @@ local disccodes=nodes.disccodes
 local glyph_code=nodecodes.glyph
 local glue_code=nodecodes.glue
 local disc_code=nodecodes.disc
-local whatsit_code=nodecodes.whatsit
 local math_code=nodecodes.math
 local dir_code=whatcodes.dir
 local localpar_code=whatcodes.localpar
@@ -14245,42 +14279,6 @@ local function featuresprocessor(head,font,attr)
                 comprun(start,c_run)
                 start=getnext(start)
               end
-            elseif id==whatsit_code then 
-              local subtype=getsubtype(start)
-              if subtype==dir_code then
-                local dir=getfield(start,"dir")
-                if dir=="+TLT" then
-                  topstack=topstack+1
-                  dirstack[topstack]=dir
-                  rlmode=1
-                elseif dir=="+TRT" then
-                  topstack=topstack+1
-                  dirstack[topstack]=dir
-                  rlmode=-1
-                elseif dir=="-TLT" or dir=="-TRT" then
-                  topstack=topstack-1
-                  rlmode=dirstack[topstack]=="+TRT" and -1 or 1
-                else
-                  rlmode=rlparmode
-                end
-                if trace_directions then
-                  report_process("directions after txtdir %a: parmode %a, txtmode %a, # stack %a, new dir %a",dir,rlparmode,rlmode,topstack,newdir)
-                end
-              elseif subtype==localpar_code then
-                local dir=getfield(start,"dir")
-                if dir=="TRT" then
-                  rlparmode=-1
-                elseif dir=="TLT" then
-                  rlparmode=1
-                else
-                  rlparmode=0
-                end
-                rlmode=rlparmode
-                if trace_directions then
-                  report_process("directions after pardir %a: parmode %a, txtmode %a",dir,rlparmode,rlmode)
-                end
-              end
-              start=getnext(start)
             elseif id==math_code then
               start=getnext(end_of_math(start))
             else
@@ -14501,42 +14499,6 @@ local function featuresprocessor(head,font,attr)
               comprun(start,c_run)
               start=getnext(start)
             end
-          elseif id==whatsit_code then
-            local subtype=getsubtype(start)
-            if subtype==dir_code then
-              local dir=getfield(start,"dir")
-              if dir=="+TLT" then
-                topstack=topstack+1
-                dirstack[topstack]=dir
-                rlmode=1
-              elseif dir=="+TRT" then
-                topstack=topstack+1
-                dirstack[topstack]=dir
-                rlmode=-1
-              elseif dir=="-TLT" or dir=="-TRT" then
-                topstack=topstack-1
-                rlmode=dirstack[topstack]=="+TRT" and -1 or 1
-              else
-                rlmode=rlparmode
-              end
-              if trace_directions then
-                report_process("directions after txtdir %a: parmode %a, txtmode %a, # stack %a, new dir %a",dir,rlparmode,rlmode,topstack,newdir)
-              end
-            elseif subtype==localpar_code then
-              local dir=getfield(start,"dir")
-              if dir=="TRT" then
-                rlparmode=-1
-              elseif dir=="TLT" then
-                rlparmode=1
-              else
-                rlparmode=0
-              end
-              rlmode=rlparmode
-              if trace_directions then
-                report_process("directions after pardir %a: parmode %a, txtmode %a",dir,rlparmode,rlmode)
-              end
-            end
-            start=getnext(start)
           elseif id==math_code then
             start=getnext(end_of_math(start))
           else

@@ -129,7 +129,7 @@ local backup = {
 }
 
 texio.write, texio.write_nl          = dummy_function, dummy_function
-require "luaotfload-basics-gen.lua"
+require "fontloader-basics-gen.lua"
 
 texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities

@@ -12,9 +12,8 @@ if not modules then modules = { } end modules ['font-otp'] = {
 --
 -- unless we sort all hashes we can get a different pack order (no big deal but size can differ)
 
-local next, type = next, type
+local next, type, tostring = next, type, tostring
 local sort, concat = table.sort, table.concat
-local sortedhash = table.sortedhash
 
 local trace_packing = false  trackers.register("otf.packing", function(v) trace_packing = v end)
 local trace_loading = false  trackers.register("otf.loading", function(v) trace_loading = v end)
@@ -148,6 +147,7 @@ end
 -- we then need to sort more thanks to random hashing
 
 local function packdata(data)
+
     if data then
      -- stripdata(data)
         local h, t, c = { }, { }, { }
@@ -537,6 +537,7 @@ local unpacked_mt = {
 }
 
 local function unpackdata(data)
+
     if data then
         local tables = data.tables
         if tables then

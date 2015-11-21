@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2015/03/29 v2.6}
+  \setdocumentdate   {2015/11/05 v2.6}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       Support: \email     {lualatex-dev@tug.org}}
@@ -43,6 +43,11 @@
     This package is an adaptation of the \CONTEXT font loading system.
     It allows for loading \OpenType fonts with an extended syntax and adds
     support for a variety of font features.
+
+    After discussion of the font loading API, this manual gives an
+    overview of the core components of \identifier{Luaotfload}: The
+    packaged font loader code, the names database, configuration, and
+    helper functions on the \LUA\ end.
   \endabstractcontent
 
 \endfrontmatter
@@ -233,7 +238,7 @@ where \meta{prefix} is either \inlinecode{file:} or \inlinecode {name:}.\footnot
   needed, for instance when supplying a customized tex distribution.
 
   The \inlinecode {my} lookup takes this a step further: it lets you define
-  a custom resolver function and hook it into the \luafunction{resolve_font}
+  a custom resolver function and hook it into the \luaident{resolve_font}
   callback.
   %
   This ensures full control over how a file is located.
@@ -664,7 +669,7 @@ obviously, \inlinecode{random}.
 
          Specific pairs of letters and ligatures may be exempt from
          letterspacing by defining the \LUA functions
-         \luafunction{keeptogether} and \luafunction{keepligature},
+         \luaident{keeptogether} and \luaident{keepligature},
          respectively, inside the namespace \inlinecode {luaotfload.letterspace}.
          %
          Both functions are called whenever the letterspacing callback
@@ -673,10 +678,10 @@ obviously, \inlinecode{random}.
          If they return a true-ish value, no extra kern is inserted at
          the current position.
          %
-         \luafunction{keeptogether} receives a pair of consecutive
+         \luaident{keeptogether} receives a pair of consecutive
          glyph nodes in order of their appearance in the node list.
          %
-         \luafunction{keepligature} receives a single node which can be
+         \luaident{keepligature} receives a single node which can be
          analyzed into components.
          %
          (For details refer to the \emphasis{glyph nodes} section in the
@@ -686,7 +691,7 @@ obviously, \inlinecode{random}.
          user.
   \endaltitem
 
-\ifcontextmkiv
+\iffalse
   \startbuffer [printvectors]
   \directlua{inspect(fonts.protrusions.setups.default)
              inspect(fonts.expansions.setups.default)}
@@ -706,7 +711,7 @@ obviously, \inlinecode{random}.
             %
             Alternatively and with loss of information, you can dump
             those tables into your terminal by issuing
-            \unless \ifcontextmkiv
+            \unless \iffalse
               \beginlisting
  \directlua{inspect(fonts.protrusions.setups.default)
             inspect(fonts.expansions.setups.default)}
@@ -763,7 +768,7 @@ Currently (2014) there are three of them:
             remapping feature.
           }:
 
-          \unless \ifcontextmkiv
+          \unless \iffalse
             %% Using braced arg syntax with inline code appears to be
             %% impossible within Latex tables -- just ignore the weird
             %% exclamation points below.
@@ -905,7 +910,7 @@ directories.
 \tablefloat {table-searchpaths}
   {List of paths searched for each supported operating system.}
   {%
-    \unless \ifcontextmkiv
+    \unless \iffalse
       \begincentered
         \begintabulate [lp{.5\textwidth}]
           \beginrow
@@ -1056,27 +1061,28 @@ An example with explicit paths:
 \endsection
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\beginsection {Files from \CONTEXT and \LUATEX-Fonts}
+\beginsection {The Fontloader}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\identifier{luaotfload} relies on code originally written by Hans
-Hagen for the \hyperlink[\identifier{\CONTEXT}]{http://wiki.contextgarden.net}
+\beginsubsection {Overview}
+
+To a large extent, \identifier{luaotfload} relies on code originally
+written by Hans Hagen for the
+\hyperlink[\identifier{\CONTEXT}]{http://wiki.contextgarden.net}
 format.
 %
-It integrates the font loader as distributed in
-the \identifier{\LUATEX-Fonts} package.
+It integrates the font loader, written entirely in \LUA, as distributed
+in the \identifier{\LUATEX-Fonts} package.
 %
 The original \LUA source files have been combined using the
-\fileent{mtx-package} script into a single, self-contained blob.
-In this form the font loader has no further dependencies\footnote{%
-  It covers, however, to some extent the functionality of the
-  \identifier{lualibs} package.
-}
-and requires only minor adaptions to integrate into
+\fileent{mtx-package} script into a single, self-contained blob. In
+this form the font loader depends only on the \identifier{lualibs}
+package and requires only minor adaptions to integrate into
 \identifier{luaotfload}.
-%
-The guiding principle is to let \CONTEXT/\LUATEX-Fonts take care of
-the implementation, and update the imported code from time to time.
+
+The guiding principle is to let \CONTEXT/\LUATEX-Fonts take care of the
+implementation, and update the imported code as frequently as
+necessary.
 %
 As maintainers, we aim at importing files from upstream essentially
 \emphasis{unmodified}, except for renaming them to prevent name
@@ -1087,19 +1093,23 @@ This job has been greatly alleviated since the advent of
 manually spotted and extracted from the \CONTEXT source code in a
 complicated and error-prone fashion.
 
+\endsubsection
+
+\beginsubsection {Contents and Dependencies}
+
 Below is a commented list of the files distributed with
 \identifier{luaotfload} in one way or the other.
 %
 See figure \ref{file-graph} on page \pageref{file-graph} for a
 graphical representation of the dependencies.
 %
-From \LUATEX-Fonts, only the file \fileent{luatex-fonts-merged.lua}
-has been imported as \fileent{luaotfload-fontloader.lua}.
-%
-It is generated by \fileent{mtx-package}, a \LUA source code merging
-too developed by Hans Hagen.\footnote{%
-  \fileent{mtx-package} is
-  \hyperlink [part of \CONTEXT]{http://repo.or.cz/w/context.git/blob_plain/refs/heads/origin:/scripts/context/lua/mtx-package.lua}
+Through the script \fileent{luaotfload-package.lua} the \CONTEXT
+utility \fileent{mtx-package} is invoked to create the
+\identifier{luaotfload} fontloader as a merged (amalgamated) source
+file.\footnote{%
+  \fileent{mtx-package}, a \LUA source code merging tool developed by
+  Hans Hagen, is
+  \hyperlink [part of \CONTEXT]{https://bitbucket.org/phg/context-mirror/src/726a663be481042003566d4614266b940b5a0c91/scripts/context/lua/mtx-package.lua?at=beta}
   and requires \fileent{mtxrun}.
   Run
   \inlinecode {mtxrun --script package --help}
@@ -1107,31 +1117,46 @@ too developed by Hans Hagen.\footnote{%
   For the actual merging code see the file
   \fileent{util-mrg.lua} that is part of \CONTEXT.
 }
-It houses several \LUA files that can be classed in three
-categories.
+%
+This file constitutes the “reference fontloader” and is part of the
+\identifier{luaotfload} package as \fileent{fontloader-reference.lua}.
+A companion to it, \fileent{luatex-basics-gen.lua} must be loaded
+beforehand to set up parts of the environment required by the \CONTEXT
+libraries.
+%
+During a \TEX\ run, the fontloader initialization and injection happens
+in the module \fileent{luaotfload-init.lua}.
+
+A number of \emphasis{\LUA utility libraries} are not part of the
+\identifier{luaotfload} fontloader, contrary to its equivalent in
+\LUATEX-Fonts. These are already provided by the \identifier{lualibs}
+and have thus been omitted from the merge.\footnote{%
+  Faithful listeners will remember the pre-2.6 era when the fontloader
+  used to be integrated as-is which caused all kinds of code
+  duplication with the pervasive \identifier{lualibs} package.
+  This conceptual glitch has since been amended by tightening the
+  coupling with the excellent \CONTEXT\ toolchain.
+}
+
+\begindoublecolumns
+  \begindefinitions
+      \beginaltitem {l-lua.lua}       \endaltitem
+      \beginaltitem {l-lpeg.lua}      \endaltitem
+      \beginaltitem {l-function.lua}  \endaltitem
+      \beginaltitem {l-string.lua}    \endaltitem
+      \beginaltitem {l-table.lua}     \endaltitem
+      \beginaltitem {l-io.lua}        \endaltitem
+      \beginaltitem {l-file.lua}      \endaltitem
+      \beginaltitem {l-boolean.lua}   \endaltitem
+      \beginaltitem {l-math.lua}      \endaltitem
+      \beginaltitem {util-str.lua}    \endaltitem
+  \enddefinitions
+\enddoublecolumns
+
+The reference fontloader is home to several \LUA files that can be
+grouped twofold as below:
 
 \begindefinitions
-  \beginnormalitem
-    \emphasis{\LUA utility libraries}, a subset
-    of what is provided by the \identifier{lualibs}
-    package.
-
-    \begindoublecolumns
-      \begindefinitions
-          \beginaltitem {l-lua.lua}       \endaltitem
-          \beginaltitem {l-lpeg.lua}      \endaltitem
-          \beginaltitem {l-function.lua}  \endaltitem
-          \beginaltitem {l-string.lua}    \endaltitem
-          \beginaltitem {l-table.lua}     \endaltitem
-          \beginaltitem {l-io.lua}        \endaltitem
-          \beginaltitem {l-file.lua}      \endaltitem
-          \beginaltitem {l-boolean.lua}   \endaltitem
-          \beginaltitem {l-math.lua}      \endaltitem
-          \beginaltitem {util-str.lua}    \endaltitem
-      \enddefinitions
-    \enddoublecolumns
-  \endnormalitem
-
   \beginnormalitem
     The \emphasis{font loader} itself.
     These files have been written for
@@ -1139,7 +1164,6 @@ categories.
     with \identifier{luaotfload}.
     \begindoublecolumns
       \begindefinitions
-        \beginaltitem{luatex-basics-gen.lua} \endaltitem
         \beginaltitem{luatex-basics-nod.lua} \endaltitem
         \beginaltitem{luatex-fonts-enc.lua}  \endaltitem
         \beginaltitem{luatex-fonts-syn.lua}  \endaltitem
@@ -1177,16 +1201,17 @@ categories.
   \endnormalitem
 \enddefinitions
 
-Note that if \identifier{luaotfload} cannot locate the
-merged file, it will load the individual \LUA libraries
-instead.
+As an alternative to the merged file, \identifier {Luaotfload} may load
+individual unpackaged \LUA libraries that come with the source, or even
+use the files from Context directly.
 %
-Their names remain the same as in \CONTEXT (without the
-\inlinecode {otfl}-prefix) since we imported the relevant section of
-\fileent{luatex-fonts.lua} unmodified into \fileent{luaotfload-main.lua}.
-Thus if you prefer running bleeding edge code from the
-\CONTEXT beta, all you have to do is remove
-\fileent{luaotfload-merged.lua} from the search path.
+Thus if you prefer running bleeding edge code from the \CONTEXT beta,
+all you have to do is to choose the \inlinecode {context} fontloader
+via the configuration file (see section \ref{sec:conf} below).
+%
+This will make \identifier {Luaotfload} locate the \CONTEXT source via
+\identifier{kpathsea} lookups and use those instead of the fontloader
+%% TODO allow choosing the context path
 
 Also, the merged file at some point loads the Adobe Glyph List from a
 \LUA table that is contained in \fileent{luaotfload-glyphlist.lua},
@@ -1194,8 +1219,9 @@ which is automatically generated by the script
 \fileent{mkglyphlist}.\footnote{%
   See \fileent{luaotfload-font-enc.lua}.
   The hard-coded file name is why we have to replace the procedure
-  that loads the file in \fileent{luaotfload-override.lua}.
+  that loads the file in \fileent{luaotfload-init.lua}.
 }
+%
 There is a make target \identifier{glyphs} that will create a fresh
 glyph list so we don’t need to import it from \CONTEXT any longer.
 
@@ -1209,7 +1235,10 @@ files not contained in the merge. Some of these have no equivalent in
       font feature handling; incorporates some of the code from
       \fileent{font-otc} from \CONTEXT;
     \endaltitem
-    \beginaltitem {luaotfload-override.lua}
+    \beginaltitem {luaotfload-configuration.lua}
+      handling of \fileent{luaotfload.conf(5)}.
+    \endaltitem
+    \beginaltitem {luaotfload-log.lua}
       overrides the \CONTEXT logging functionality.
     \endaltitem
     \beginaltitem {luaotfload-loaders.lua}
@@ -1221,6 +1250,9 @@ files not contained in the merge. Some of these have no equivalent in
     \endaltitem
     \beginaltitem {luaotfload-database.lua}
       font names database.
+    \endaltitem
+    \beginaltitem {luaotfload-resolvers.lua}
+      file name resolvers.
     \endaltitem
     \beginaltitem {luaotfload-colors.lua}
       color handling.
@@ -1239,13 +1271,93 @@ files not contained in the merge. Some of these have no equivalent in
   {Schematic of the files in \identifier{Luaotfload}}
   {filegraph.pdf}
 
+\endsubsection
+
+\beginsubsection {Packaging}
+
+The fontloader code is integrated as an isolated component that can be
+switched out on demand.
+To specify the fontloader you wish to use, the configuration file
+(described in section \ref{sec:conf}) provides the option
+\inlinecode{fontloader}. Its value can be one of the identifiers
+\inlinecode{default} or \inlinecode{reference} or the name of a file
+somewhere in the search path of \LUATEX.
+
+\endsubsection
 \endsection
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {Configuration Files}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\beginnarrower
+  \emphasis{Caution}: For the authoritative documentation, consult the
+  manpage for \fileent{luaotfload.conf(5)}.
+\endnarrower
+
+\label{sec:conf}
+The runtime behavior of \identifier{Luaotfload} can be customized by
+means of a configuration file.
+% location
+At startup, it attempts to locate a file called \fileent
+{luaotfload.conf} or \fileent {luaotfloadrc} at a number of candidate
+locations:
+
+\begincentered
+  \begindefinitions
+    \beginnormalitem \fileent{./luaotfload.conf}                            \endnormalitem
+    \beginnormalitem \fileent{./luaotfloadrc}                               \endnormalitem
+    \beginnormalitem \fileent{\$XDG_CONFIG_HOME/luaotfload/luaotfload.conf} \endnormalitem
+    \beginnormalitem \fileent{\$XDG_CONFIG_HOME/luaotfload/luaotfload.rc}   \endnormalitem
+    \beginnormalitem \fileent{~/.luaotfloadrc}                              \endnormalitem
+  \enddefinitions
+\endcentered
+
+\beginnarrower
+  \emphasis{Caution}: The configuration potentially modifies the final
+  document. A project-local file belongs under version control along
+  with the rest of the document. This is to ensure that everybody who
+  builds the project also receives the same customizations as the
+  author.
+\endnarrower
+
+% syntax
+The syntax is fairly close to the format used by
+\fileent{git-config(1)} which in turn was derived from the popular
+\identifier{.INI} format: Lines of key-value pairs are grouped under
+different configuration “sections”.\footnote{%
+  The configuration parser in \fileent {luoatfload-parsers.lua} might
+  be employed by other packages for similar purposes.
+}
+% example settings
+An example for customization via \fileent {luaotfload.conf} might look
+as below:
+
+\beginlisting
+; Example luaotfload.conf containing a rudimentary configuration
+[db]
+  update-live = false
+[run]
+  color-callback = pre_linebreak_filter
+  definer = info_patch
+  log-level = 5
+[default-features]
+  global = mode=base
+\endlisting
+
+This specifies that for the given project, \identifier{Luaotfload}
+shall not attempt to automatically scan for fonts if it can’t resolve a
+request. The font-based colorization will happen during \LUATEX’s
+pre-linebreak filter. The fontloader will output verbose information
+about the fonts at definition time along with globally increased
+verbosity. Lastly, the fontloader defaults to the less expensive
+\luaident{base} mode like it does in \CONTEXT.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Auxiliary Functions}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-With release version 2.2, \identifier{luaotfload} received
+With release version 2.2, \identifier{Luaotfload} received
 additional functions for package authors to call from outside
 (see the file \fileent{luaotfload-auxiliary.lua} for details).
 %
@@ -1254,7 +1366,7 @@ The purpose of this addition twofold.
 Firstly, \identifier{luaotfload} failed to provide a stable interface
 to internals in the past which resulted in an unmanageable situation
 of different packages abusing the raw access to font objects by means
-of the \luafunction{patch_font} callback.
+of the \luaident{patch_font} callback.
 %
 When the structure of the font object changed due to an update, all
 of these imploded and several packages had to be fixed while
@@ -1275,7 +1387,7 @@ additions.
 
 \beginsubsection {Callback Functions}
 
-The \luafunction{patch_font} callback is inserted in the wrapper
+The \luaident{patch_font} callback is inserted in the wrapper
 \identifier{luaotfload} provides for the font definition callback.
 %
 At this place it allows manipulating the font object immediately after
@@ -1367,8 +1479,8 @@ are defined for which scripts.
 \beginfunctionlist
 
   \beginaltitem  {aux.font_has_glyph (id : int, index : int)}
-            Predicate that returns true if the font \luafunction{id}
-            has glyph \luafunction{index}.
+            Predicate that returns true if the font \luaident{id}
+            has glyph \luaident{index}.
   \endaltitem
 
   \beginaltitem  {aux.slot_of_name(name : string)}
@@ -1377,33 +1489,33 @@ are defined for which scripts.
   \endaltitem
 
   \beginaltitem  {aux.name_of_slot(slot : int)}
-            The inverse of \luafunction{slot_of_name}; note that this
+            The inverse of \luaident{slot_of_name}; note that this
             might be incomplete as multiple glyph names may map to the
             same codepoint, only one of which is returned by
-            \luafunction{name_of_slot}.
+            \luaident{name_of_slot}.
   \endaltitem
 
   \beginaltitem  {aux.provides_script(id : int, script : string)}
-            Test if a font supports \luafunction{script}.
+            Test if a font supports \luaident{script}.
   \endaltitem
 
   \beginaltitem  {aux.provides_language(id : int, script : string, language : string)}
-            Test if a font defines \luafunction{language} for a given
-            \luafunction{script}.
+            Test if a font defines \luaident{language} for a given
+            \luaident{script}.
   \endaltitem
 
   \beginaltitem  {aux.provides_feature(id : int, script : string,
              language : string, feature : string)}
-            Test if a font defines \luafunction{feature} for
-            \luafunction{language} for a given \luafunction{script}.
+            Test if a font defines \luaident{feature} for
+            \luaident{language} for a given \luaident{script}.
   \endaltitem
 
   \beginaltitem  {aux.get_math_dimension(id : int, dimension : string)}
-            Get the dimension \luafunction{dimension} of font \luafunction{id}.
+            Get the dimension \luaident{dimension} of font \luaident{id}.
   \endaltitem
 
   \beginaltitem  {aux.sprint_math_dimension(id : int, dimension : string)}
-            Same as \luafunction{get_math_dimension()}, but output the value
+            Same as \luaident{get_math_dimension()}, but output the value
             in scaled points at the \TEX end.
   \endaltitem
 
@@ -1416,7 +1528,7 @@ are defined for which scripts.
 %% not implemented, may come back later
 \beginfunctionlist
 %   \beginaltitem  {aux.scan_external_dir(dir : string)}
-%             Include fonts in directory \luafunction{dir} in font lookups without
+%             Include fonts in directory \luaident{dir} in font lookups without
 %             adding them to the database.
 %
   \beginaltitem  {aux.read_font_index (void)}
@@ -1527,9 +1639,9 @@ Another strategy that helps avoiding problems is to not access raw
 Some of them, even though they are dangerous to access, have not been
 overridden or disabled.
 %
-Thus, whenever possible prefer the functions in the \luafunction{aux}
+Thus, whenever possible prefer the functions in the \luaident{aux}
 namespace over direct manipulation of font objects. For example, raw
-access to the \luafunction{font.fonts} table like:
+access to the \luaident{font.fonts} table like:
 
 \beginlisting
     local somefont = font.fonts[2]
@@ -1537,16 +1649,16 @@ access to the \luafunction{font.fonts} table like:
 
 \noindent can render already defined fonts unusable.
 %
-Instead, the function \luafunction{font.getfont()} should be used
+Instead, the function \luaident{font.getfont()} should be used
 because it has been replaced by a safe variant.
 
-However, \luafunction{font.getfont()} only covers fonts handled by the
+However, \luaident{font.getfont()} only covers fonts handled by the
 font loader, e.~g. \identifier{OpenType} and \identifier{TrueType}
 fonts, but not \abbrev{tfm} or \abbrev{ofm}.
 %
 Should you absolutely require access to all fonts known to \LUATEX,
 including the virtual and autogenerated ones, then you need to query
-both \luafunction{font.getfont()} and \luafunction{font.fonts}.
+both \luaident{font.getfont()} and \luaident{font.fonts}.
 %
 In this case, best define you own accessor:
 

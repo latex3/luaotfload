@@ -5,8 +5,6 @@
 --  DESCRIPTION:  part of the luaotfload package
 -- REQUIREMENTS:  lua, lpeg, luasocket, the lualibs package
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  2.5
---     MODIFIED:  2014-02-11 06:44:50+0100
 -----------------------------------------------------------------------
 -- interesting thread on the Context list:
 -- http://www.ntg.nl/pipermail/ntg-context/2008/029057.html

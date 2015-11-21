@@ -14,6 +14,9 @@ Change History
     * Move remaining functionality from ``luaotfload-override`` into
       initialization
     * Write names index if fonts were removed
+    * Separate module loading from initialization
+    * Custom fontloader package with the files from Lualibs removed
+    * Lualibs are now a dependency when used in a TeX run as well
 
 2014/07/13, luaotfload v2.5
     * Remove legacy code.

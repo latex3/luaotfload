@@ -106,20 +106,35 @@
 
 %D Text items have a special handler:
 
-\def\MPLIBtextext#1#2#3#4#5%
+\def\MPLIBtextext#1#2#3#4%
   {\begingroup
    \setbox\mplibscratchbox\hbox
      {\font\temp=#1 at #2bp%
       \temp
       #3}%
    \setbox\mplibscratchbox\hbox
-     {\hskip#4 bp%
-      \raise#5 bp%
+     {\raise#4sp%
       \box\mplibscratchbox}%
    \wd\mplibscratchbox0pt%
    \ht\mplibscratchbox0pt%
    \dp\mplibscratchbox0pt%
    \box\mplibscratchbox
    \endgroup}
+
+\def\MPLIBpdftext#1#2%
+  {\ifcsname mplib::#1\endcsname
+     % already done, forgotten outside convert group
+     \message{<reusing mplib: #1>}%
+   \else
+     \message{<embedding mplib: #1>}%
+     \immediate\pdfximage{#1}% we cannot remove the file as it is included last
+     \expandafter\edef\csname mplib::#1\endcsname{\the\pdflastximage}%
+   \fi
+   \setbox\mplibscratchbox\hbox
+     {\raise#2sp\hbox{\pdfrefximage\csname mplib::#1\endcsname}}%
+   \wd\mplibscratchbox0pt%
+   \ht\mplibscratchbox0pt%
+   \dp\mplibscratchbox0pt%
+   \box\mplibscratchbox}
 
 \endinput

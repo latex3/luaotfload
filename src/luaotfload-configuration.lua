@@ -5,8 +5,6 @@
 -- REQUIREMENTS:  Luaotfload 2.6 or above
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
 --       AUTHOR:  Dohyun Kim <nomosnomos@gmail.com>
---      VERSION:  same as Luaotfload
---     MODIFIED:  2015-05-05
 -------------------------------------------------------------------------------
 --
 
@@ -18,17 +16,12 @@ if not modules then modules = { } end modules ["luaotfload-configuration"] = {
   license   = "GNU GPL v2.0"
 }
 
-luaotfload                    = luaotfload or { }
-config                        = config or { }
-config.luaotfload             = { }
-
 local status_file             = "luaotfload-status"
 local luaotfloadstatus        = require (status_file)
 
-local stringexplode           = string.explode
+local string                  = string
 local stringfind              = string.find
 local stringformat            = string.format
-local string                  = string
 local stringstrip             = string.strip
 local stringsub               = string.sub
 
@@ -55,9 +48,7 @@ local lpegmatch               = lpeg.match
 local commasplitter           = lpeg.splitat ","
 local equalssplitter          = lpeg.splitat "="
 
-local kpse                    = kpse
 local kpseexpand_path         = kpse.expand_path
-local kpselookup              = kpse.lookup
 
 local lfs                     = lfs
 local lfsisfile               = lfs.isfile
@@ -67,16 +58,12 @@ local file                    = file
 local filejoin                = file.join
 local filereplacesuffix       = file.replacesuffix
 
-
-local parsers                 = luaotfload.parsers
-
-local log                     = luaotfload.log
-local logreport               = log.report
-
-local config_parser           = parsers.config
-local stripslashes            = parsers.stripslashes
-
+local logreport               = print -- overloaded later
 local getwritablepath         = caches.getwritablepath
+
+
+local config_parser -- set later during init
+local stripslashes  -- set later during init
 
 -------------------------------------------------------------------------------
 ---                                SETTINGS
@@ -140,10 +127,39 @@ local feature_presets = {
 --doc]]--
 
 local registered_loaders = {
-  default   = luaotfloadstatus and luaotfloadstatus.notes.loader or "reference",
-  reference = "reference",
-  tl2014    = "tl2014",
+  default    = luaotfloadstatus and luaotfloadstatus.notes.loader or "reference",
+  reference  = "reference",
+  unpackaged = "unpackaged",
+  context    = "context",
+  tl2014     = "tl2014",
 }
+
+local pick_fontloader = function (s)
+  local ldr = registered_loaders[s]
+  if ldr ~= nil and type (ldr) == "string" then
+    logreport ("log", 2, "conf", "Using predefined fontloader \"%s\".", ldr)
+    return ldr
+  end
+  local idx = stringfind (s, ":")
+  if idx and idx > 2 then
+    if stringsub (s, 1, idx - 1) == "context" then
+      local pth = stringsub (s, idx + 1)
+      pth = stringstrip (pth)
+      logreport ("log", 2, "conf", "Context base path specified at \"%s\".", pth)
+      if lfsisdir (pth) then
+        logreport ("log", 5, "conf", "Context base path exists at \"%s\".", pth)
+        return pth
+      end
+      pth = kpseexpand_path (pth)
+      if lfsisdir (pth) then
+        logreport ("log", 5, "conf", "Context base path exists at \"%s\".", pth)
+        return pth
+      end
+      logreport ("both", 0, "conf", "Context base path not found at \"%s\".", pth)
+    end
+  end
+  return nil
+end
 
 --[[doc--
 
@@ -182,7 +198,7 @@ local default_config = {
     definer        = "patch",
     log_level      = 0,
     color_callback = "post_linebreak_filter",
-    live           = true,
+    fontloader     = "default",
   },
   misc = {
     bisect         = false,
@@ -292,17 +308,20 @@ local set_name_resolver = function ()
     --- replace the resolver from luatex-fonts
     if config.luaotfload.db.resolver == "cached" then
         logreport ("both", 2, "cache", "Caching of name: lookups active.")
-        names.resolvespec  = names.resolve_cached
+        names.resolvespec  = fonts.names.lookup_font_name_cached
     else
-        names.resolvespec  = names.resolve_name
+        names.resolvespec  = fonts.names.lookup_font_name
     end
   end
   return true
 end
 
 local set_loglevel = function ()
-  log.set_loglevel (config.luaotfload.run.log_level)
-  return true
+  if luaotfload then
+    luaotfload.log.set_loglevel (config.luaotfload.run.log_level)
+    return true
+  end
+  return false
 end
 
 local build_cache_paths = function ()
@@ -476,10 +495,8 @@ local option_spec = {
       in_t      = string_t,
       out_t     = string_t,
       transform = function (id)
-        local ldr = registered_loaders[id]
+        local ldr = pick_fontloader (id)
         if ldr ~= nil then
-          logreport ("log", 2, "conf",
-                     "Using predefined fontloader \"%s\".", ldr)
           return ldr
         end
         logreport ("log", 0, "conf",
@@ -846,7 +863,7 @@ local read = function (extra)
     return false
   end
 
-  local parsed = lpegmatch (parsers.config, raw)
+  local parsed = lpegmatch (config_parser, raw)
   if not parsed then
     logreport ("both", 2, "conf", "Error parsing configuration file %q.", readme)
     return false
@@ -912,13 +929,27 @@ end
 ---                                 EXPORTS
 -------------------------------------------------------------------------------
 
-luaotfload.default_config = default_config
+return {
+  init = function ()
+    config.luaotfload = { }
+    logreport         = luaotfload.log.report
+    local parsers     = luaotfload.parsers
+    config_parser     = parsers.config
+    stripslashes      = parsers.stripslashes
 
-config.actions = {
-  read             = read,
-  apply            = apply,
-  apply_defaults   = apply_defaults,
-  reconfigure      = reconfigure,
-  dump             = dump,
+    luaotfload.default_config = default_config
+    config.actions = {
+      read             = read,
+      apply            = apply,
+      apply_defaults   = apply_defaults,
+      reconfigure      = reconfigure,
+      dump             = dump,
+    }
+    if not apply_defaults () then
+      logreport ("log", 0, "load",
+                 "Configuration unsuccessful: error loading default settings.")
+    end
+    return true
+  end
 }
 

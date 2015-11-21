@@ -56,6 +56,9 @@ local whatcodes    = { } for k,v in next, node.whatsits() do whatcodes[string.gs
 local glyphcodes   = { [0] = "character", "glyph", "ligature", "ghost", "left", "right" }
 local disccodes    = { [0] = "discretionary", "explicit", "automatic", "regular", "first", "second" }
 
+for i=0,#glyphcodes do glyphcodes[glyphcodes[i]] = i end
+for i=0,#disccodes  do disccodes [disccodes [i]] = i end
+
 nodes.nodecodes    = nodecodes
 nodes.whatcodes    = whatcodes
 nodes.whatsitcodes = whatcodes

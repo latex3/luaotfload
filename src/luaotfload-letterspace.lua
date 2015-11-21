@@ -27,6 +27,7 @@ local getnext            = nodedirect.getnext
 local getprev            = nodedirect.getprev
 local getfield           = nodedirect.getfield
 local setfield           = nodedirect.setfield
+local getsubtype         = nodedirect.getsubtype
 local find_node_tail     = nodedirect.tail
 local todirect           = nodedirect.tonut
 local tonode             = nodedirect.tonode

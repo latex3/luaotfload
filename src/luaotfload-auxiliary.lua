@@ -4,8 +4,6 @@
 --  DESCRIPTION:  part of luaotfload
 -- REQUIREMENTS:  luaotfload 2.6
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
---      VERSION:  2.6
---     MODIFIED:  2015-03-29 12:43:26+0200
 -----------------------------------------------------------------------
 --
 
@@ -19,6 +17,7 @@ local aux                   = luaotfload.aux
 local log                   = luaotfload.log
 local report                = log.report
 local fonthashes            = fonts.hashes
+local encodings             = fonts.encodings
 local identifiers           = fonthashes.identifiers
 local fontnames             = fonts.names
 
@@ -214,8 +213,6 @@ luatexbase.add_to_callback(
 ---                      glyphs and characters
 -----------------------------------------------------------------------
 
-local agl = fonts.encodings.agl
-
 --- int -> int -> bool
 local font_has_glyph = function (font_id, codepoint)
   local fontdata = fonts.hashes.identifiers[font_id]
@@ -232,7 +229,7 @@ aux.font_has_glyph = font_has_glyph
 local raw_slot_of_name = function (font_id, glyphname)
   local fontdata = font.fonts[font_id]
   if fontdata.type == "virtual" then --- get base font for glyph idx
-    local codepoint  = agl.unicodes[glyphname]
+    local codepoint  = encodings.agl.unicodes[glyphname]
     local glyph      = fontdata.characters[codepoint]
     if fontdata.characters[codepoint] then
       return codepoint
@@ -293,7 +290,7 @@ local indices
 --- int -> (string | false)
 local name_of_slot = function (codepoint)
   if not indices then --- this will load the glyph list
-    local unicodes = agl.unicodes
+    local unicodes = encodings.agl.unicodes
     indices = table.swapped(unicodes)
   end
   local glyphname = indices[codepoint]

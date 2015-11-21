@@ -11,7 +11,30 @@
 
 \directlua {tex.enableprimitives('', tex.extraprimitives())}
 
-\pdfoutput=1
+% We assume that pdf is used.
+
+\ifdefined\pdfextension
+    \input luatex-pdf \relax
+\fi
+
+\pdfoutput 1
+
+% We set the page dimensions because otherwise the backend does weird things
+% when we have for instance this on a line of its own:
+%
+%   \hbox to 100cm {\hss wide indeed\hss}
+%
+% The page dimension calculation is a fuzzy one as there are some compensations
+% for the \hoffset and \voffset and such. I remember long discussions and much
+% trial and error in figuring this out during pdftex development times. Where
+% a dvi driver will project on a papersize (and thereby clip) the pdf backend
+% has to deal with the lack of a page concept on tex by some guessing. Normally
+% a macro package will set the dimensions to something reasonable anyway.
+
+\pagewidth   8.5in
+\pageheight 11.0in
+
+% We load some code at runtime:
 
 \everyjob \expandafter {%
     \the\everyjob
@@ -20,8 +43,10 @@
     \input {luatex-math}%
     \input {luatex-languages}%
     \input {luatex-mplib}%
-  % \input {luatex-gadgets}%
+    \input {luatex-gadgets}%
 }
+
+% We also patch the version number:
 
 \edef\fmtversion{\fmtversion+luatex}
 

@@ -6,7 +6,7 @@ if not modules then modules = { } end modules ['util-str'] = {
     license   = "see context related readme files"
 }
 
-utilities         = utilities or {}
+utilities         = utilities or { }
 utilities.strings = utilities.strings or { }
 local strings     = utilities.strings
 
@@ -354,7 +354,16 @@ function string.autosingle(s,sep)
     return ("'" .. tostring(s) .. "'")
 end
 
-local tracedchars  = { }
+local tracedchars  = { [0] =
+    -- the regular bunch
+    "[null]", "[soh]", "[stx]", "[etx]", "[eot]", "[enq]", "[ack]", "[bel]",
+    "[bs]",   "[ht]",  "[lf]",  "[vt]",  "[ff]",  "[cr]",  "[so]",  "[si]",
+    "[dle]",  "[dc1]", "[dc2]", "[dc3]", "[dc4]", "[nak]", "[syn]", "[etb]",
+    "[can]",  "[em]",  "[sub]", "[esc]", "[fs]",  "[gs]",  "[rs]",  "[us]",
+    -- plus space
+    "[space]", -- 0x20
+}
+
 string.tracedchars = tracedchars
 strings.tracers    = tracedchars
 

@@ -1,4 +1,4 @@
-\luatexsuppresslongerror1%% sigh ...
+\suppresslongerror1%% sigh ...
 %% Copyright (C) 2009-2014
 %%
 %%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
@@ -129,7 +129,7 @@
 
 \definehighlight         [fileent][\ttfamily\restoreunderscore]         %% files, dirs
 \definehighlight        [texmacro][\sffamily\itshape\textbackslash]     %% cs
-\definehighlight     [luafunction][\sffamily\itshape\restoreunderscore] %% lua identifiers
+\definehighlight        [luaident][\sffamily\itshape\restoreunderscore] %% lua identifiers
 \definehighlight      [identifier][\sffamily]                           %% names
 \definehighlight          [abbrev][\rmfamily\scshape]                   %% acronyms
 \definehighlight        [emphasis][\rmfamily\slshape]                   %% level 1 emph
@@ -220,9 +220,9 @@
 \newcount \othercatcode  \othercatcode 12
 \newcount \activecatcode \othercatcode 13
 
-\newluatexcatcodetable \vrbcatcodes
-\setluatexcatcodetable \vrbcatcodes {%
-  \luatexcatcodetable \CatcodeTableIniTeX
+\newcatcodetable \vrbcatcodes
+\setcatcodetable \vrbcatcodes {%
+  \catcodetable \CatcodeTableIniTeX
   \catcode  9 \othercatcode %% \tabasciicode
   \catcode 13 \othercatcode %% \endoflineasciicode
   \catcode 12 \othercatcode %% \formfeedasciicode
@@ -230,48 +230,85 @@
   \catcode 32 \othercatcode %% \spaceasciicode
 }
 
-\newluatexcatcodetable \literalcatcodes
-\setluatexcatcodetable \literalcatcodes {%
-  \luatexcatcodetable \CatcodeTableString
+\directlua {
+  document = document or { }
+  document.vrbcatcodesidx = tonumber (\the \vrbcatcodes)
+}
+
+\newcatcodetable \literalcatcodes
+\setcatcodetable \literalcatcodes {%
+  \catcodetable \CatcodeTableString
   \catcode 32 \activecatcode %% \spaceasciicode
 }
 
+\def \listingsurroundskip {\vskip \baselineskip}
+
 \def \beginlisting {%
+  \noindent
   \begingroup
-    \luatexcatcodetable \vrbcatcodes
+    \catcodetable \vrbcatcodes
     \beginlistingindeed%
 }
 
 \directlua {
-  local texprint   = tex.print
-  local stringsub  = string.sub
-  local backslash  = string.byte (0x5c)
-  document         = document or { }
+  local texsprint       = tex.sprint
+  local stringis_empty  = string.is_empty
+  local stringsub       = string.sub
+  local stringgsub      = string.gsub
+  %local backslash       = unicode.utf8.char (0x200c)
+  local backslash       = unicode.utf8.char (0x5c)
+  local escaped         = [[\string\string\string\]]
   document.printlines = function (buffer)
-    for _, line in next, string.explode (buffer, "\noexpand\n") do
-      if stringsub (line, 1, 1) == " " then
-        line = backslash .. line
+    local lines = string.explode (buffer, "\noexpand\n")
+    print ""
+    for i, line in next, lines do
+      local line = stringgsub (line, backslash, escaped)
+      if stringis_empty (line) then
+        print (i, "listing: <empty line />")
+        texsprint [[\string\listingpar]]
+      else
+        local line = [[\string\beginlistingline]]
+                  .. line
+                  .. [[\string\endlistingline]]
+                  .. [[\string\listingpar]]
+        print (i, "listing: «" .. line .. "»")
+        texsprint (document.vrbcatcodesidx, line)
       end
-      texprint (-1, line)
-      texprint (-1, "")
     end
   end
+}
+
+\def \listingpar {\endgraf}
+
+\let \endlistingline \relax
+\let \endlisting     \relax
+
+\protected \def \beginlistingline{%
+  \leavevmode
+  \begingroup
+    \beginlistinglineindeed%
+}
+
+\def \beginlistinglineindeed #1\endlistingline{%
+  \endgroup
+  \hbox{%
+    \addfontfeature {RawFeature=-tlig;-liga}%% So one can’t just turn them all off at once using the ``Ligatures`` key?
+    \obeyspaces
+    #1}%
 }
 
 \def \beginlistingindeed#1\endlisting{%
   \endgroup
   \begingroup
+    \endgraf
+    \listingsurroundskip
     \ttfamily
     \small
-    \begin {quote}
-      \bgroup
-        \addfontfeature {RawFeature=-tlig;-liga}%% So one can’t just turn them all off at once using the ``Ligatures`` key?
-        \luatexcatcodetable \literalcatcodes
-        \obeyspaces
-        \obeylines
-        \directlua{document.printlines ([==[\detokenize {#1}]==])}
-      \egroup
-    \end {quote}
+    \parindent = 0em
+    \leftskip = 2em
+    \hangindent = 2em
+    \directlua{document.printlines ([==[\detokenize {#1}]==])}%
+    \listingsurroundskip
   \endgroup
 }
 
@@ -301,7 +338,7 @@
 \definelist  [descriptions]{\normalitem {\textbf \first}\hfill\break}
 \definelist   [definitions]{\normalitem {\fileent {\first}}}
 \definelist      [filelist]{\normalitem {\fileent {\first}}\space--\hskip 1em}
-\definelist  [functionlist]{\normalitem {\luafunction {\first}}\hfill\break}
+\definelist  [functionlist]{\normalitem {\luaident {\first}}\hfill\break}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% columns

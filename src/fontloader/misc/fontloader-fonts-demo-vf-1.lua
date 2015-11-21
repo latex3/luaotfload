@@ -17,6 +17,7 @@ return function(specification)
             { "special", "pdf:1 0 0 rg" },
             { "special", "pdf:0 1 0 rg" },
             { "special", "pdf:0 0 1 rg" },
+            { "special", "pdf:0 0 1 rg" },
         }
         local chars = {
             identifiers[id1].characters,
@@ -26,7 +27,12 @@ return function(specification)
         for u, v in next, f1.characters do
             local n = math.floor(math.random(1,3)+0.5)
             local c = chars[n][u] or v
-            v.commands = { color[n], { 'slot', n, u }, color[0] }
+            v.commands = {
+                color[n],
+                { 'slot', n, u },
+                color[0],
+                { 'nop' }
+            }
             v.kerns    = nil
             v.width    = c.width
             v.height   = c.height

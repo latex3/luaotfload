@@ -4,12 +4,11 @@
 --  DESCRIPTION:  Luaotfload font loader initialization
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
---      VERSION:  1.0
---      CREATED:  2015-05-26 07:50:54+0200
 -----------------------------------------------------------------------
 --
 
 local setmetatable = setmetatable
+local kpselookup   = kpse.lookup
 
 --[[doc--
 
@@ -38,8 +37,8 @@ local logreport  --- filled in after loading the log module
 --[[doc--
 
     \subsection{Preparing the Font Loader}
-    We treat the fontloader as a black box so behavior is consistent
-    between formats.
+    We treat the fontloader as a semi-black box so behavior is
+    consistent between formats.
     We load the fontloader code directly in the same fashion as the
     Plain format \identifier{luatex-fonts} that is part of Context.
     How this is executed depends on the presence on the
@@ -183,6 +182,78 @@ local pop_namespaces = function (normalglobal,
     end
 end
 
+--- below paths are relative to the texmf-context
+local ltx = "tex/generic/context/luatex"
+local ctx = "tex/context/base"
+
+local context_modules = {
+
+  --- Since 2.6 those are directly provided by the Lualibs package.
+  { false, "l-lua"      },
+  { false, "l-lpeg"     },
+  { false, "l-function" },
+  { false, "l-string"   },
+  { false, "l-table"    },
+  { false, "l-io"       },
+  { false, "l-file"     },
+  { false, "l-boolean"  },
+  { false, "l-math"     },
+  { false, "util-str"   },
+
+  --- These constitute the fontloader proper.
+  { ltx,   "luatex-basics-gen" },
+  { ctx,   "data-con"          },
+  { ltx,   "luatex-basics-nod" },
+  { ctx,   "font-ini"          },
+  { ctx,   "font-con"          },
+  { ltx,   "luatex-fonts-enc"  },
+  { ctx,   "font-cid"          },
+  { ctx,   "font-map"          },
+  { ltx,   "luatex-fonts-syn"  },
+  { ltx,   "luatex-fonts-tfm"  },
+  { ctx,   "font-oti"          },
+  { ctx,   "font-otf"          },
+  { ctx,   "font-otb"          },
+  { ltx,   "luatex-fonts-inj"  }, --> since 2014-01-07, replaces node-inj.lua
+  { ltx,   "luatex-fonts-ota"  },
+  { ltx,   "luatex-fonts-otn"  }, --> since 2014-01-07, replaces font-otn.lua
+  { ctx,   "font-otp"          }, --> since 2013-04-23
+  { ltx,   "luatex-fonts-lua"  },
+  { ctx,   "font-def"          },
+  { ltx,   "luatex-fonts-def"  },
+  { ltx,   "luatex-fonts-ext"  },
+  { ltx,   "luatex-fonts-cbk"  },
+
+} --[[context_modules]]
+
+local load_context_modules = function (pth)
+
+  local load_module   = luaotfload.loaders.context
+  local ignore_module = luaotfload.loaders.ignore
+
+  logreport ("both", 2, "init",
+             "Loading fontloader components from context.")
+  local n = #context_modules
+  for i = 1, n do
+    local sub, spec = unpack (context_modules [i])
+    if sub == false then
+      ignore_module (spec)
+    elseif type (sub) == "string" then
+      if pth then
+        load_module (spec, file.join (pth, sub))
+      else
+        load_module (spec)
+      end
+    else
+      logreport ("both", 0, "init",
+                 "Internal error, please report. \z
+                  This is not your fault.")
+      os.exit (-1)
+    end
+  end
+
+end
+
 local init_adapt = function ()
 
   local context_environment  = { }
@@ -205,6 +276,7 @@ end --- [init_adapt]
 local init_main = function ()
 
   local load_fontloader_module = luaotfload.loaders.fontloader
+  local ignore_module          = luaotfload.loaders.ignore
 
   --[[doc--
 
@@ -216,49 +288,103 @@ local init_main = function ()
 
   --doc]]--
 
-  load_fontloader_module (luaotfload.fontloader_package)
+  local fontloader = config.luaotfload and config.luaotfload.run.fontloader
+                                        or "reference"
+  fontloader = tostring (fontloader)
 
-  ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
+  if fontloader == "reference" or fontloader == "default" then
+    logreport ("log", 4, "init", "Using reference fontloader.")
+    load_fontloader_module (luaotfload.fontloader_package)
 
-  if not fonts then
-    --- the loading sequence is known to change, so this might have to
-    --- be updated with future updates!
-    --- do not modify it though unless there is a change to the merged
-    --- package!
-    load_fontloader_module "l-lua"
-    load_fontloader_module "l-lpeg"
-    load_fontloader_module "l-function"
-    load_fontloader_module "l-string"
-    load_fontloader_module "l-table"
-    load_fontloader_module "l-io"
-    load_fontloader_module "l-file"
-    load_fontloader_module "l-boolean"
-    load_fontloader_module "l-math"
-    load_fontloader_module "util-str"
-    load_fontloader_module "luatex-basics-gen"
+  elseif fontloader == "unpackaged" then
+    logreport ("both", 4, "init",
+               "Loading fontloader components individually.")
+    --- The loading sequence is known to change, so this might have to be
+    --- updated with future updates. Do not modify it though unless there is
+    --- a change to the upstream package!
+
+    --- Since 2.6 those are directly provided by the Lualibs package.
+    ignore_module "l-lua"
+    ignore_module "l-lpeg"
+    ignore_module "l-function"
+    ignore_module "l-string"
+    ignore_module "l-table"
+    ignore_module "l-io"
+    ignore_module "l-file"
+    ignore_module "l-boolean"
+    ignore_module "l-math"
+    ignore_module "util-str"
+    ignore_module "luatex-basics-gen"
+
+    --- These constitute the fontloader proper.
     load_fontloader_module "data-con"
-    load_fontloader_module "luatex-basics-nod"
+    load_fontloader_module "basics-nod"
     load_fontloader_module "font-ini"
     load_fontloader_module "font-con"
-    load_fontloader_module "luatex-fonts-enc"
+    load_fontloader_module "fonts-enc"
     load_fontloader_module "font-cid"
     load_fontloader_module "font-map"
-    load_fontloader_module "luatex-fonts-syn"
-    load_fontloader_module "luatex-fonts-tfm"
+    load_fontloader_module "fonts-syn"
+    load_fontloader_module "fonts-tfm"
     load_fontloader_module "font-oti"
     load_fontloader_module "font-otf"
     load_fontloader_module "font-otb"
-    load_fontloader_module "luatex-fonts-inj"  --> since 2014-01-07, replaces node-inj.lua
-    load_fontloader_module "luatex-fonts-ota"
-    load_fontloader_module "luatex-fonts-otn"  --> since 2014-01-07, replaces font-otn.lua
-    load_fontloader_module "font-otp"          --> since 2013-04-23
-    load_fontloader_module "luatex-fonts-lua"
+    load_fontloader_module "fonts-inj"  --> since 2014-01-07, replaces node-inj.lua
+    load_fontloader_module "fonts-ota"
+    load_fontloader_module "fonts-otn"  --> since 2014-01-07, replaces font-otn.lua
+    load_fontloader_module "font-otp"   --> since 2013-04-23
+    load_fontloader_module "fonts-lua"
     load_fontloader_module "font-def"
-    load_fontloader_module "luatex-fonts-def"
-    load_fontloader_module "luatex-fonts-ext"
-    load_fontloader_module "luatex-fonts-cbk"
-  end --- non-merge fallback scope
+    load_fontloader_module "fonts-def"
+    load_fontloader_module "fonts-ext"
+    load_fontloader_module "fonts-cbk"
 
+  elseif fontloader == "context" then
+    logreport ("both", 2, "init",
+               "Attempting to load Context modules in lookup path.")
+    load_context_modules ()
+
+  elseif lfs.isdir (fontloader) then
+    logreport ("both", 2, "init",
+               "Attempting to load Context files under prefix “%s”.",
+               fontloader)
+    load_context_modules (fontloader)
+
+  elseif lfs.isfile (fontloader) then
+    logreport ("both", 2, "init",
+               "Attempting to load fontloader from absolute path “%s”.",
+               fontloader)
+    local _void = require (fontloader)
+
+  elseif kpselookup (fontloader) then
+    local pth = kpselookup (fontloader)
+    logreport ("both", 2, "init",
+               "Attempting to load fontloader “%s” from kpse-resolved path “%s”.",
+               fontloader, path)
+    local _void = require (path)
+
+  elseif fontloader then
+    logreport ("log", 4, "init",
+               "Using predefined fontloader “%s”.",
+               fontloader)
+    load_fontloader_module (fontloader)
+
+  else
+    logreport ("log", 4, "init",
+               "No match for requested fontloader “%s”.",
+               fontloader)
+    fontloader = luaotfload.fontloader_package
+    logreport ("log", 4, "init",
+               "Defaulting to predefined fontloader “%s”.",
+               fontloader)
+    load_fontloader_module (fontloader)
+  end
+
+  ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
+
+  logreport ("both", 0, "init",
+             "Context OpenType loader version “%s”",
+             fonts.handlers.otf.version)
 end --- [init_main]
 
 local init_cleanup = function (store)
@@ -431,6 +557,8 @@ return {
                os.gettimeofday() - starttime)
     local n = init_post ()
     logreport ("both", 5, "init", "post hook terminated, %d actions performed", n)
+    return true
   end
 }
 
+-- vim:tw=79:sw=2:ts=2:expandtab

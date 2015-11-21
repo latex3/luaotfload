@@ -33,17 +33,17 @@
 %%
 \csname ifluaotfloadloaded\endcsname
 \let\ifluaotfloadloaded\endinput
-\bgroup\expandafter\expandafter\expandafter\egroup
-\expandafter\ifx\csname selectfont\endcsname\relax
-  \input luatexbase.sty
-\else
-  \NeedsTeXFormat{LaTeX2e}
+\ifx\newluafunction\@undefined
+  \input ltluatex
+\fi
+\ifdefined\ProvidesPackage
   \ProvidesPackage{luaotfload}%
     %% FIXME  The date is meaningless, we need to find a way to
     %%        use the git revision instead.
-    [2015/03/29 v2.6 OpenType layout system]
-  \RequirePackage{luatexbase}
+    [2015/03/29 v2.6  OpenType layout system]
 \fi
-\RequireLuaModule{luaotfload-main}
-\directlua{local _void = luaotfload.main ()}
+\directlua{
+require('luaotfload-main')
+local _void = luaotfload.main ()
+}
 

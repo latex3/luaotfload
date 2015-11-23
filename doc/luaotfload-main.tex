@@ -1209,9 +1209,21 @@ Thus if you prefer running bleeding edge code from the \CONTEXT beta,
 all you have to do is to choose the \inlinecode {context} fontloader
 via the configuration file (see section \ref{sec:conf} below).
 %
-This will make \identifier {Luaotfload} locate the \CONTEXT source via
-\identifier{kpathsea} lookups and use those instead of the fontloader
-%% TODO allow choosing the context path
+This will make \identifier {Luaotfload} locate the \CONTEXT source by
+means of \identifier{kpathsea} lookups and use those instead of the
+merged package.
+%
+The parameter may be extended with a path to the \CONTEXT
+\fileent{texmf}, separated with a colon:
+
+\beginlisting
+[run]
+  fontloader = context:~/context/tex/texmf-context
+\endlisting
+
+This setting allows accessing an installation -- e. g. the standalone
+distribution or a source repository -- outside the current \TEX
+distribution.
 
 Also, the merged file at some point loads the Adobe Glyph List from a
 \LUA table that is contained in \fileent{luaotfload-glyphlist.lua},

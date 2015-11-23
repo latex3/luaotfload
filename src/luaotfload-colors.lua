@@ -315,7 +315,16 @@ end
 
 local color_callback_activated = 0
 local add_to_callback          = luatexbase.add_to_callback
-local priority_in_callback     = luatexbase.priority_in_callback
+local function priority_in_callback (name,description)
+  for i,v in ipairs(luatexbase.callback_descriptions(name))
+  do
+    if v == description then
+      return i
+    end
+  end
+  return false
+end
+
 
 --- unit -> unit
 add_color_callback = function ( )

@@ -684,7 +684,7 @@ local build_paths = function (argv)
     --- also set the target name
     local fname = argv[3]
     local dir   = filedirname (fname)
-    if not lfsisdir (dir) then
+    if not string.is_empty (dir) and not lfsisdir (dir) then
       die ("third argument must be point into writable directory, not “%s”",
            argv[3])
     end

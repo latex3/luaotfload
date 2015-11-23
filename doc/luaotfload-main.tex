@@ -611,7 +611,9 @@ obviously, \inlinecode{random}.
          the file \inlinecode{tkrn.fea} that is part of \identifier{luaotfload}.
          It can be read and applied as follows:
 
-         \inlinecode{\\font \\test = Latin Modern Roman:featurefile=tkrn.fea;+tkrn}
+         \beginlisting
+      \font \test = Latin Modern Roman:featurefile=tkrn.fea;+tkrn
+         \endlisting
   \endaltitem
 
   \beginaltitem {color}
@@ -624,7 +626,7 @@ obviously, \inlinecode{random}.
          For example, in order to set text in semitransparent red:
 
          \beginlisting
-\font \test = "Latin Modern Roman:color=FF0000BB"
+      \font \test = "Latin Modern Roman:color=FF0000BB"
          \endlisting
   \endaltitem
 
@@ -663,8 +665,8 @@ obviously, \inlinecode{random}.
          letterspacing width:
 
          \beginlisting
-\font \iwonakernedA = "file:Iwona-Regular.otf:kernfactor=0.125"
-\font \iwonakernedB = "file:Iwona-Regular.otf:letterspace=12.5"
+    \font \iwonakernedA = "file:Iwona-Regular.otf:kernfactor=0.125"
+    \font \iwonakernedB = "file:Iwona-Regular.otf:letterspace=12.5"
          \endlisting
 
          Specific pairs of letters and ligatures may be exempt from
@@ -736,7 +738,7 @@ obviously, \inlinecode{random}.
          }:
 
          \beginlisting
-\font \test = LatinModernRoman:protrusion=default
+      \font \test = LatinModernRoman:protrusion=default
          \endlisting
   \endaltitem
 \enddescriptions

@@ -480,15 +480,6 @@ local import_file = function (name, kind, def, cat)
 end --[[ [local import_file = function (name, kind)] ]]
 
 local import = function (arg)
-  if #arg > 1 then
-    local tgt  = parms.target
-    local name = tgt or die ("invalid filename " .. tostring (tgt))
-    local stat = import_file (name)
-    if stat == import_failed then
-      die ("failed to import file " .. name)
-    end
-    status ("import status for file %s: %s", name, import_status[stat])
-  end
   --- Multiple files
   local statcount = { } -- import status codes -> size_t
   for cat, defs in next, imports do
@@ -693,7 +684,7 @@ local build_paths = function (argv)
     --- also set the target name
     local fname = argv[3]
     local dir   = filedirname (fname)
-    if not lfsisdir (dir) then
+    if not string.is_empty (dir) and not lfsisdir (dir) then
       die ("third argument must be point into writable directory, not “%s”",
            argv[3])
     end

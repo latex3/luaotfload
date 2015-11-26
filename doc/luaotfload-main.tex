@@ -611,7 +611,9 @@ obviously, \inlinecode{random}.
          the file \inlinecode{tkrn.fea} that is part of \identifier{luaotfload}.
          It can be read and applied as follows:
 
-         \inlinecode{\\font \\test = Latin Modern Roman:featurefile=tkrn.fea;+tkrn}
+         \beginlisting
+      \font \test = Latin Modern Roman:featurefile=tkrn.fea;+tkrn
+         \endlisting
   \endaltitem
 
   \beginaltitem {color}
@@ -624,7 +626,7 @@ obviously, \inlinecode{random}.
          For example, in order to set text in semitransparent red:
 
          \beginlisting
-\font \test = "Latin Modern Roman:color=FF0000BB"
+      \font \test = "Latin Modern Roman:color=FF0000BB"
          \endlisting
   \endaltitem
 
@@ -663,8 +665,8 @@ obviously, \inlinecode{random}.
          letterspacing width:
 
          \beginlisting
-\font \iwonakernedA = "file:Iwona-Regular.otf:kernfactor=0.125"
-\font \iwonakernedB = "file:Iwona-Regular.otf:letterspace=12.5"
+    \font \iwonakernedA = "file:Iwona-Regular.otf:kernfactor=0.125"
+    \font \iwonakernedB = "file:Iwona-Regular.otf:letterspace=12.5"
          \endlisting
 
          Specific pairs of letters and ligatures may be exempt from
@@ -736,7 +738,7 @@ obviously, \inlinecode{random}.
          }:
 
          \beginlisting
-\font \test = LatinModernRoman:protrusion=default
+      \font \test = LatinModernRoman:protrusion=default
          \endlisting
   \endaltitem
 \enddescriptions
@@ -1206,12 +1208,8 @@ individual unpackaged \LUA libraries that come with the source, or even
 use the files from Context directly.
 %
 Thus if you prefer running bleeding edge code from the \CONTEXT beta,
-all you have to do is to choose the \inlinecode {context} fontloader
-via the configuration file (see section \ref{sec:conf} below).
-%
-This will make \identifier {Luaotfload} locate the \CONTEXT source via
-\identifier{kpathsea} lookups and use those instead of the fontloader
-%% TODO allow choosing the context path
+choose the \inlinecode {context} fontloader via the configuration file
+(see sections \ref{sec:conf} and \ref{sec:pkg} below).
 
 Also, the merged file at some point loads the Adobe Glyph List from a
 \LUA table that is contained in \fileent{luaotfload-glyphlist.lua},
@@ -1279,11 +1277,60 @@ The fontloader code is integrated as an isolated component that can be
 switched out on demand.
 To specify the fontloader you wish to use, the configuration file
 (described in section \ref{sec:conf}) provides the option
-\inlinecode{fontloader}. Its value can be one of the identifiers
-\inlinecode{default} or \inlinecode{reference} or the name of a file
-somewhere in the search path of \LUATEX.
+\inlinecode{fontloader}.
+Its value can be one of the identifiers \inlinecode{default} or
+\inlinecode{reference} or the name of a file somewhere in the search
+path of \LUATEX.
+%
+This will make \identifier {Luaotfload} locate the \CONTEXT source by
+means of \identifier{kpathsea} lookups and use those instead of the
+merged package.
+%
+The parameter may be extended with a path to the \CONTEXT
+\fileent{texmf}, separated with a colon:
+
+\beginlisting
+[run]
+  fontloader = context:~/context/tex/texmf-context
+\endlisting
+
+\noindent This setting allows accessing an installation -- e. g. the
+standalone distribution or a source repository -- outside the current
+\TEX distribution.
+
+Like the \identifier{Lualibs} package, the reference fontloader is
+deployed as a \emphasis{merged package} containing a series of \LUA
+files joined together in their expected order and stripped of
+non-significant parts.
+%
+The \fileent{mkimport} utility assists in pulling the files from a
+\CONTEXT tree and packaging them for use with \identifier{Luaotfload}.%
+\footnote{%
+  These tasks are performed, respectively, by the build targets
+  \inlinecode{import} and \inlinecode{package} of the
+  \identifier{Luaotfload} makefile.
+}
+%
+The state of the files currently in \identifier{Luaotfload}’s
+repository can be queried:
+\beginlisting
+./scripts/mkimport news
+\endlisting
+%
+The subcommand for importing takes the prefix of the desired \CONTEXT
+\identifier{texmf} as an optional argument:
+\beginlisting
+./scripts/mkimport import ~/context/tex/texmf-context
+\endlisting
+%
+Whereas the command for packaging requires a path to the
+\emphasis{package description file} and the output name to be passed.
+\beginlisting
+./scripts/mkimport package ./src/fontloader/luaotfload-package.lua fontloader-custom.lua
+\endlisting
 
 \endsubsection
+
 \endsection
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

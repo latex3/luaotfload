@@ -17,6 +17,7 @@ Change History
     * Separate module loading from initialization
     * Custom fontloader package with the files from Lualibs removed
     * Lualibs are now a dependency when used in a TeX run as well
+    * Respect interword spaces when letterspacing
 
 2014/07/13, luaotfload v2.5
     * Remove legacy code.

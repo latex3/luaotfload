@@ -6,6 +6,9 @@ if not modules then modules = { } end modules ['letterspace'] = {
     license   = "see context related readme files"
 }
 
+--- This code diverged quite a bit from its origin in Context. Please
+--- do *not* report bugs on the Context list.
+
 local log                = luaotfload.log
 local logreport          = log.report
 
@@ -39,7 +42,6 @@ local new_node           = nodedirect.new
 
 local nodepool           = nodedirect.pool
 local new_kern           = nodepool.kern
-local new_glue           = nodepool.glue
 
 local nodecodes          = nodes.nodecodes
 
@@ -47,6 +49,7 @@ local glyph_code         = nodecodes.glyph
 local kern_code          = nodecodes.kern
 local disc_code          = nodecodes.disc
 local math_code          = nodecodes.math
+local glue_code          = nodecodes.glue
 
 local fonthashes         = fonts.hashes
 local chardata           = fonthashes.characters
@@ -81,11 +84,17 @@ local kerncodes = bothways { [0] = "fontkern"
                            , [1] = "userkern"
                            , [2] = "accentkern"
                            }
+local skipcodes = bothways {  [0] = "userskip"
+                           , [13] = "spaceskip"
+                           , [14] = "xspaceskip"
+                           }
 
-kerncodes.kerning    = kerncodes.fontkern --- idiosyncrasy
-local kerning_code   = kerncodes.kerning
-local userkern_code  = kerncodes.userkern
-
+kerncodes.kerning       = kerncodes.fontkern --- idiosyncrasy
+local kerning_code      = kerncodes.kerning
+local userkern_code     = kerncodes.userkern
+local userskip_code     = skipcodes.userskip
+local spaceskip_code    = skipcodes.spaceskip
+local xspaceskip_code   = skipcodes.xspaceskip
 
 -----------------------------------------------------------------------
 --- node-res
@@ -93,19 +102,30 @@ local userkern_code  = kerncodes.userkern
 
 local glue_spec   = new_node "glue_spec"
 
-nodepool.glue = function (width, stretch, shrink,
-                          stretch_order, shrink_order)
+local new_gluespec = function (width,
+                               stretch,       shrink,
+                               stretch_order, shrink_order)
+  local spec = copy_node(glue_spec)
+  if width         then setfield(spec, "width"        , width        )  end
+  if stretch       then setfield(spec, "stretch"      , stretch      )  end
+  if shrink        then setfield(spec, "shrink"       , shrink       )  end
+  if stretch_order then setfield(spec, "stretch_order", stretch_order)  end
+  if shrink_order  then setfield(spec, "shrink_order" , shrink_order )  end
+  return spec
+end
+
+local new_glue = function (width, stretch, shrink,
+                           stretch_order, shrink_order)
   local n = new_node "glue"
-  if not width then
+  if not width then return n end
     -- no spec
-  elseif width == false or tonumber(width) then
-    local s = copy_node(glue_spec)
-    if width         then setfield(s, "width"        , width        )  end
-    if stretch       then setfield(s, "stretch"      , stretch      )  end
-    if shrink        then setfield(s, "shrink"       , shrink       )  end
-    if stretch_order then setfield(s, "stretch_order", stretch_order)  end
-    if shrink_order  then setfield(s, "shrink_order" , shrink_order )  end
-    setfield(n, "spec", s)
+  if width == false then
+    local width = tonumber(width)
+    if width then
+      setfield(n, "spec",
+               new_gluespec(width, stretch, shrink,
+                            stretch_order, shrink_order))
+    end
   else
     -- shared
     setfield(n, "spec", copy_node(width))
@@ -198,6 +218,22 @@ local kern_injector = function (fillup, kern)
   return new_kern(kern)
 end
 
+local kernable_skip = function (n)
+  local st = getsubtype (n)
+  return st == userskip_code
+      or st == spaceskip_code
+      or st == xspaceskip_code
+end
+
+local function spec_injector (fillup, width, stretch, shrink)
+  if fillup then
+    local spec = new_gluespec(width, 2 * stretch, 2 * shrink)
+    setfield(spec, "stretch_order", 1)
+    return spec
+  end
+  return new_gluespec(width,stretch,shrink)
+end
+
 --[[doc--
 
     Caveat lector.
@@ -221,13 +257,11 @@ kerncharacters = function (head)
 
   local identifiers   = fonthashes.identifiers
   local kernfactors   = kernfactors
-
   local firstkern     = true
 
   while start do
     local id = getid(start)
     if id == glyph_code then
-
       --- 1) look up kern factor (slow, but cached rudimentarily)
       local krn
       local fontid = getfont(start)
@@ -303,6 +337,21 @@ kerncharacters = function (head)
 
         if not pid then
           -- nothing
+
+        elseif pid == glue_code and kernable_skip(prev) then
+          local spec = getfield(prev, "spec")
+          local wd   = getfield(spec, "width")
+          if wd > 0 then
+            --- formula taken from Context
+            ---      existing_width extended by four times the
+            ---      width times the font’s kernfactor
+            local newwd     = wd + --[[two en to a quad]] 4 * wd * krn
+            local stretched = (getfield(spec,"stretch") * newwd) / wd
+            local shrunk    = (getfield(spec,"shrink")  * newwd) / wd
+            setfield(prev, "spec",
+                     spec_injector(fillup, newwd, stretched, shrunk))
+            done = true
+          end
 
         elseif pid == kern_code then
           local prev_subtype = getsubtype(prev)
@@ -412,11 +461,10 @@ kerncharacters = function (head)
               krn = quaddata[lastfont]*krn -- here
             end
             setfield(disc, "replace", kern_injector(false, krn))
-          end
-
-        end
-      end
-    end
+          end --[[if replace and prv and nxt]]
+        end --[[if not pid]]
+      end --[[if prev]]
+    end --[[if id == glyph_code]]
 
     ::nextnode::
     if start then

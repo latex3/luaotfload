@@ -313,9 +313,15 @@ local color_handler = function (head)
     return head
 end
 
+local color_callback_name      = "luaotfload.color_handler"
 local color_callback_activated = 0
 local add_to_callback          = luatexbase.add_to_callback
-local priority_in_callback     = luatexbase.priority_in_callback
+
+--- unit -> bool
+local mlist_to_hlist_initial = function ()
+    local cdesc = luatexbase.callback_descriptions "mlist_to_hlist"
+    return cdesc and cdesc[1] == color_callback_name
+end
 
 --- unit -> unit
 add_color_callback = function ( )
@@ -327,7 +333,7 @@ add_color_callback = function ( )
     if color_callback_activated == 0 then
         add_to_callback(color_callback,
                         color_handler,
-                        "luaotfload.color_handler")
+                        color_callback_name)
         add_to_callback("hpack_filter",
                         function (head, groupcode)
                             if  groupcode == "hbox"          or
@@ -337,10 +343,10 @@ add_color_callback = function ( )
                             end
                             return head
                         end,
-                        "luaotfload.color_handler")
+                        color_callback_name)
         add_to_callback("mlist_to_hlist",
                         function (head, display_type, need_penalties)
-                            if priority_in_callback("mlist_to_hlist","luaotfload.color_handler") == 1 then
+                            if mlist_to_hlist_initial () then
                                 head = mlist_to_hlist(head, display_type, need_penalties)
                             end
                             if display_type == "text" then
@@ -348,7 +354,7 @@ add_color_callback = function ( )
                             end
                             return color_handler(head)
                         end,
-                        "luaotfload.color_handler")
+                        color_callback_name)
         color_callback_activated = 1
     end
 end

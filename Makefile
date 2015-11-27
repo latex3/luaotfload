@@ -194,10 +194,14 @@ sign: $(CTAN_ZIPSIG)
 
 .PHONY: install manifest clean mrproper show showtargets check import news
 
-install: $(ALL_STATUS)
-	@echo "Installing in '$(TEXMFROOT)'."
-	$(run-install-docs)
-	$(run-install)
+install:
+	@echo "	××××××××××××××××××××××××××××××××"
+	@echo "	There is no “install” target."
+	@echo "	××××××××××××××××××××××××××××××××"
+	@echo "	Compile a TDS zipball (make tds)"
+	@echo "	and extract that into your local"
+	@echo "	TEXMF instead."
+	@echo "	××××××××××××××××××××××××××××××××"
 
 manifest:
 	@echo "Source files:"

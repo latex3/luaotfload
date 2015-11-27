@@ -237,6 +237,9 @@ showtargets:
 	@echo "       chars       import char-def.lua as luaotfload-characters.lua"
 	@echo "       status      create repository info (luaotfload-status.lua)"
 	@echo
+	@echo "       import      grab files from upstream"
+	@echo "       package     package fontloader"
+	@echo
 	@echo "       tds         package a zipball according to the TDS"
 	@echo "       ctan        package a zipball for uploading to CTAN"
 	@echo "       sign        sign zipball"

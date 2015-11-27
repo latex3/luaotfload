@@ -1287,9 +1287,11 @@ files not contained in the merge. Some of these have no equivalent in
 \label{sec:pkg}%
 The fontloader code is integrated as an isolated component that can be
 switched out on demand.
+%
 To specify the fontloader you wish to use, the configuration file
 (described in section \ref{sec:conf}) provides the option
 \inlinecode{fontloader}.
+%
 Its value can be one of the identifiers \inlinecode{default} or
 \inlinecode{reference} (see above, section \ref{package}) or the name
 of a file somewhere in the search path of \LUATEX.
@@ -1316,11 +1318,6 @@ together in their expected order and stripped of non-significant parts.
 %
 The \fileent{mkimport} utility assists in pulling the files from a
 \CONTEXT tree and packaging them for use with \identifier{Luaotfload}.%
-\footnote{%
-  These tasks are performed, respectively, by the build targets
-  \inlinecode{import} and \inlinecode{package} of the
-  \identifier{Luaotfload} makefile.
-}
 %
 The state of the files currently in \identifier{Luaotfload}’s
 repository can be queried:
@@ -1339,6 +1336,21 @@ Whereas the command for packaging requires a path to the
 \beginlisting
 ./scripts/mkimport package ./src/fontloader/luaotfload-package.lua fontloader-custom.lua
 \endlisting
+
+From the toplevel makefile, the targets \inlinecode{import} and
+\inlinecode{package} provide easy access to the commands as invoked during
+the \identifier{Luaotfload} build process.\footnote{%
+  \emphasis{Hint for those interested in the packaging process}: issue
+  \inlinecode{make show} for a list of available build routines.
+}
+These will call \inlinecode{mkimport} script with the correct
+parameters to generate a datestamped package.
+%
+Whether files have been updated in the upstream distribution can be
+queried by \inlinecode{./scripts/mkimport news}.
+%
+This will compare the imported files with their counterparts in the
+\CONTEXT distribution and report changes.
 
 \endsubsection
 

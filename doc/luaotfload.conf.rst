@@ -297,27 +297,29 @@ break tools like Fontspect that rely on the ``patch_font`` callback
 provided by Luaotfload to perform important corrections on font data.
 
 The fontloader backend can be selected by setting the value of
-``fontloader``. Other than the default, which selects the packaged
-``reference`` loader as shipped with Luaotfload, a file name accessible
-by kpathsea can be specified. Alternatively, the individual files that
-constitute the fontloader can be loaded directly. While less efficient,
-this greatly aids debugging since error messages will reference the
-actual line numbers of the source files and explanatory comments are
-not stripped. Currently, three distinct loading strategies are
-available: ``unpackaged`` will load the batch that is part of
-Luaotfload. These contain the identical source code that the reference
-fontloader has been compiled from. Another option, ``context`` will
-attempt to load the same files by their names in the Context format
-from the search path. Consequently this option allows to use the
-version of Context that comes with the TeX distribution. Distros tend
-to prefer the stable version (“current” in Context jargon) of those
-files so certain bugs encountered in the more bleeding edge Luaotfload
-can be avoided this way. A third option is to use ``context`` with a
-colon to specify a directory prefix where the *TEXMF* is located that
-the files should be loaded from, e. g. ``context:~/context/tex/texmf-context``.
-This can be used when referencing another distribution like the Context
-minimals that is installed under a different path not indexed by
-kpathsea.
+``fontloader``. The most important choices are ``default``, which will
+load the dedicated Luaotfload fontloader, and ``reference``, the
+upstream package as shipped with Luaotfload. Other than those, a file
+name accessible via kpathsea can be specified.
+
+Alternatively, the individual files that constitute the fontloader can
+be loaded directly. While less efficient, this greatly aids debugging
+since error messages will reference the actual line numbers of the
+source files and explanatory comments are not stripped. Currently,
+three distinct loading strategies are available: ``unpackaged`` will
+load the batch that is part of Luaotfload. These contain the identical
+source code that the reference fontloader has been compiled from.
+Another option, ``context`` will attempt to load the same files by
+their names in the Context format from the search path. Consequently
+this option allows to use the version of Context that comes with the
+TeX distribution. Distros tend to prefer the stable version (“current”
+in Context jargon) of those files so certain bugs encountered in the
+more bleeding edge Luaotfload can be avoided this way. A third option
+is to use ``context`` with a colon to specify a directory prefix where
+the *TEXMF* is located that the files should be loaded from, e. g.
+``context:~/context/tex/texmf-context``. This can be used when
+referencing another distribution like the Context minimals that is
+installed under a different path not indexed by kpathsea.
 
 The value of ``log-level`` sets the default verbosity of messages
 printed by Luaotfload. Only messages defined with a verbosity of less

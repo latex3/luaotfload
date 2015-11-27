@@ -204,7 +204,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
                            style  = "filled,rounded",
                            penwidth=2]
 
-    fontloader            [label = "fontloader-reference.lua",
+    fontloader            [label = "fontloader-YY-MM-DD.lua",
                            shape = rect,
                            width  = "3.2cm",
                            height = "1.2cm",

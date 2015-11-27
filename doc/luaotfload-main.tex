@@ -1105,6 +1105,7 @@ Below is a commented list of the files distributed with
 See figure \ref{file-graph} on page \pageref{file-graph} for a
 graphical representation of the dependencies.
 %
+\label{package}%
 Through the script \fileent{luaotfload-package.lua} the \CONTEXT
 utility \fileent{mtx-package} is invoked to create the
 \identifier{luaotfload} fontloader as a merged (amalgamated) source
@@ -1120,14 +1121,24 @@ file.\footnote{%
   \fileent{util-mrg.lua} that is part of \CONTEXT.
 }
 %
-This file constitutes the “reference fontloader” and is part of the
-\identifier{luaotfload} package as \fileent{fontloader-reference.lua}.
+This file constitutes the “default fontloader” and is part of the
+\identifier{luaotfload} package as \fileent{fontloader-YY-MM-DD.lua},
+where the uppercase letters are placeholders for the build date.
+%
 A companion to it, \fileent{luatex-basics-gen.lua} must be loaded
 beforehand to set up parts of the environment required by the \CONTEXT
 libraries.
 %
 During a \TEX\ run, the fontloader initialization and injection happens
 in the module \fileent{luaotfload-init.lua}.
+%
+Additionally, the “reference fontloader” as imported from \LUATEX-Fonts
+is provided as the file \fileent{fontloader-reference.lua}.
+%
+This file is self-contained in that it packages all the auxiliary \LUA
+libraries too, as Luaotfload did up to the 2.5 series; since that job
+has been offloaded to the \identifier{Lualibs} package, loading this
+fontloader introduces a certain code duplication.
 
 A number of \emphasis{\LUA utility libraries} are not part of the
 \identifier{luaotfload} fontloader, contrary to its equivalent in
@@ -1273,14 +1284,15 @@ files not contained in the merge. Some of these have no equivalent in
 
 \beginsubsection {Packaging}
 
+\label{sec:pkg}%
 The fontloader code is integrated as an isolated component that can be
 switched out on demand.
 To specify the fontloader you wish to use, the configuration file
 (described in section \ref{sec:conf}) provides the option
 \inlinecode{fontloader}.
 Its value can be one of the identifiers \inlinecode{default} or
-\inlinecode{reference} or the name of a file somewhere in the search
-path of \LUATEX.
+\inlinecode{reference} (see above, section \ref{package}) or the name
+of a file somewhere in the search path of \LUATEX.
 %
 This will make \identifier {Luaotfload} locate the \CONTEXT source by
 means of \identifier{kpathsea} lookups and use those instead of the
@@ -1298,10 +1310,9 @@ The parameter may be extended with a path to the \CONTEXT
 standalone distribution or a source repository -- outside the current
 \TEX distribution.
 
-Like the \identifier{Lualibs} package, the reference fontloader is
-deployed as a \emphasis{merged package} containing a series of \LUA
-files joined together in their expected order and stripped of
-non-significant parts.
+Like the \identifier{Lualibs} package, the fontloader is deployed as a
+\emphasis{merged package} containing a series of \LUA files joined
+together in their expected order and stripped of non-significant parts.
 %
 The \fileent{mkimport} utility assists in pulling the files from a
 \CONTEXT tree and packaging them for use with \identifier{Luaotfload}.%

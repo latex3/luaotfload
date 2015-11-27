@@ -35,35 +35,95 @@ local stringmatch  = string.match
 local verbose  = false
 local filelist = "./build/luaotfload-status.lua" --- result
 
+local srcdir    = "src"
+local builddir  = "build"
+local scriptdir = "scripts"
+local loaderdir = "src/fontloader"
+local rtdir     = "src/fontloader/runtime"
+local miscdir   = "src/fontloader/misc"
+
 local names = {
-  --- only the runtime files and scripts
-  { "src",      "luaotfload-auxiliary.lua",   },
-  { "src/fontloader/runtime",      "fontloader-basics-gen.lua",  },
-  --{ "src/fontloader",      "fontloader-basics-nod.lua",  },
-  { "build",    "luaotfload-characters.lua",  },
-  { "src",      "luaotfload-colors.lua",      },
-  { "src",      "luaotfload-database.lua",    },
-  { "src",      "luaotfload-diagnostics.lua", },
-  { "src",      "luaotfload-features.lua",    },
-  --{ "src/fontloader",      "fontloader-fonts-cbk.lua",   },
-  --{ "src/fontloader",      "fontloader-fonts-def.lua",   },
-  --{ "src/fontloader",      "fontloader-fonts-enc.lua",   },
-  --{ "src/fontloader",      "fontloader-fonts-ext.lua",   },
-  --{ "src/fontloader",      "fontloader-fonts-lua.lua",   },
-  --{ "src/fontloader",      "fontloader-fonts-tfm.lua",   },
-  { "build",    "luaotfload-glyphlist.lua",   },
-  { "src",      "luaotfload-letterspace.lua", },
-  { "src",      "luaotfload-loaders.lua",     },
-  { "src",      "luaotfload-log.lua",         },
-  { "src",      "luaotfload-main.lua",        },
-  { "src/fontloader/runtime",      "fontloader-reference.lua",  },
-  --{ "src",      "luaotfload-override.lua",    }, --> part of init now
-  { "src",      "luaotfload-parsers.lua",     },
-  { "src",      "luaotfload-tool.lua",        },
-  { "scripts",  "mkcharacters",               },
-  { "scripts",  "mkglyphlist",                },
-  { "scripts",  "mkstatus",                   },
-}
+
+  --- Luaotfload runtime files
+  { srcdir,       "luaotfload-auxiliary.lua",       },
+  { srcdir,       "luaotfload-colors.lua",          },
+  { srcdir,       "luaotfload-configuration.lua",   },
+  { srcdir,       "luaotfload-database.lua",        },
+  { srcdir,       "luaotfload-diagnostics.lua",     },
+  { srcdir,       "luaotfload-features.lua",        },
+  { srcdir,       "luaotfload-init.lua",            },
+  { srcdir,       "luaotfload-letterspace.lua",     },
+  { srcdir,       "luaotfload-loaders.lua",         },
+  { srcdir,       "luaotfload-log.lua",             },
+  { srcdir,       "luaotfload-main.lua",            },
+  { srcdir,       "luaotfload-parsers.lua",         },
+  { srcdir,       "luaotfload-resolvers.lua",       },
+  { srcdir,       "luaotfload-tool.lua",            },
+
+  --- generated files
+  { builddir,     "luaotfload-characters.lua",      },
+  { builddir,     "luaotfload-glyphlist.lua",       },
+
+  --- scripts
+  { scriptdir,    "mkcharacters",                   },
+  { scriptdir,    "mkglyphlist",                    },
+  { scriptdir,    "mkimport",                       },
+  { scriptdir,    "mkstatus",                       },
+  { scriptdir,    "mktests",                        },
+
+  --- merge script
+  { loaderdir,    "luaotfload-package.lua",         },
+
+  --- fontloader runtimes
+  { rtdir,        "fontloader-basics-gen.lua",      },
+  { rtdir,        "fontloader-reference.lua",       },
+  { rtdir,        "fontloader-tl2014.lua",          },
+
+  --- fontloader constituents
+  { miscdir,      "fontloader-basics-nod.lua",      },
+  { miscdir,      "fontloader-data-con.lua",        },
+  { miscdir,      "fontloader-font-afk.lua",        },
+  { miscdir,      "fontloader-font-afm.lua",        },
+  { miscdir,      "fontloader-font-cid.lua",        },
+  { miscdir,      "fontloader-font-con.lua",        },
+  { miscdir,      "fontloader-font-def.lua",        },
+  { miscdir,      "fontloader-font-ini.lua",        },
+  { miscdir,      "fontloader-font-map.lua",        },
+  { miscdir,      "fontloader-font-otb.lua",        },
+  { miscdir,      "fontloader-font-otf.lua",        },
+  { miscdir,      "fontloader-font-oti.lua",        },
+  { miscdir,      "fontloader-font-otp.lua",        },
+  { miscdir,      "fontloader-fonts-cbk.lua",       },
+  { miscdir,      "fontloader-fonts-def.lua",       },
+  { miscdir,      "fontloader-fonts-demo-vf-1.lua", },
+  { miscdir,      "fontloader-fonts-enc.lua",       },
+  { miscdir,      "fontloader-fonts-ext.lua",       },
+  { miscdir,      "fontloader-fonts-inj.lua",       },
+  { miscdir,      "fontloader-fonts.lua",           },
+  { miscdir,      "fontloader-fonts-lua.lua",       },
+  { miscdir,      "fontloader-fonts-ota.lua",       },
+  { miscdir,      "fontloader-fonts-otn.lua",       },
+  { miscdir,      "fontloader-fonts-syn.lua",       },
+  { miscdir,      "fontloader-fonts-tfm.lua",       },
+  { miscdir,      "fontloader-font-tfm.lua",        },
+  { miscdir,      "fontloader-languages.lua",       },
+  { miscdir,      "fontloader-l-boolean.lua",       },
+  { miscdir,      "fontloader-l-file.lua",          },
+  { miscdir,      "fontloader-l-function.lua",      },
+  { miscdir,      "fontloader-l-io.lua",            },
+  { miscdir,      "fontloader-l-lpeg.lua",          },
+  { miscdir,      "fontloader-l-lua.lua",           },
+  { miscdir,      "fontloader-l-math.lua",          },
+  { miscdir,      "fontloader-l-string.lua",        },
+  { miscdir,      "fontloader-l-table.lua",         },
+  { miscdir,      "fontloader-math.lua",            },
+  { miscdir,      "fontloader-mplib.lua",           },
+  { miscdir,      "fontloader-preprocessor.lua",    },
+  { miscdir,      "fontloader-swiglib.lua",         },
+  { miscdir,      "fontloader-swiglib-test.lua",    },
+  { miscdir,      "fontloader-util-str.lua",        },
+
+} --[[local names]]
 
 -----------------------------------------------------------------------
 -- helpers

@@ -858,7 +858,7 @@ end
 --- bisect mode
 -------------------------------------------------------------------------------
 
-local bisect_status_path = caches.getwritablepath "bisect"
+local bisect_status_path = caches.getwritablepath ("bisect", "")
 local bisect_status_file = bisect_status_path .."/" .. "luaotfload-bisect-status.lua"
 local bisect_status_fmt  = [[
 --[==[-------------------------------------------------------------------------
@@ -1174,14 +1174,17 @@ actions.flush = function (job)
     return false, false
 end
 
-local cache_directives = {
-    ["purge"] = fonts.names.purge_cache,
-    ["erase"] = fonts.names.erase_cache,
-    ["show"]  = fonts.names.show_cache,
-}
+local cache_directives = function ()
+    --- These exist only after initialization.
+    return {
+        ["purge"] = fonts.names.purge_cache,
+        ["erase"] = fonts.names.erase_cache,
+        ["show"]  = fonts.names.show_cache,
+    }
+end
 
 actions.cache = function (job)
-    local directive = cache_directives[job.cache]
+    local directive = cache_directives()[job.cache]
     if not directive or type(directive) ~= "function" then
         logreport ("info", 2, "cache",
                    "Invalid font cache directive %s.", job.cache)

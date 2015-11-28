@@ -62,8 +62,7 @@ local luatexbase       = luatexbase
 local require          = require
 local type             = type
 
-local _error, _warning, _info, _log =
-    luatexbase.provides_module(luaotfload.module)
+luatexbase.provides_module (luaotfload.module)
 
 --[[doc--
 

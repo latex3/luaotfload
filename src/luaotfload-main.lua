@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
 --  DESCRIPTION:  Luaotfload entry point
--- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
+-- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 -----------------------------------------------------------------------
 --

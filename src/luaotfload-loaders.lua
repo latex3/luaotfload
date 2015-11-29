@@ -2,8 +2,9 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-loaders.lua
 --  DESCRIPTION:  Luaotfload callback handling
--- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
---       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Hans Hagen, Khaled Hosny, Elie Roux
+-- REQUIREMENTS:  luatex v.0.80 or later; package lualibs
+--       AUTHOR:  Philipp Gesang <phg@phi-gamma.net>
+--       AUTHOR:  Hans Hagen, Khaled Hosny, Elie Roux, David Carlisle
 -----------------------------------------------------------------------
 --
 --- Contains parts of the earlier main script.

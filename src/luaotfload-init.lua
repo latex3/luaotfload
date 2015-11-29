@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-init.lua
 --  DESCRIPTION:  Luaotfload font loader initialization
--- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
+-- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
 -----------------------------------------------------------------------
 --

@@ -3,7 +3,7 @@
 --         FILE:  luaotfload-diagnostics.lua
 --  DESCRIPTION:  functionality accessible by the --diagnose option
 -- REQUIREMENTS:  luaotfload-tool.lua
---       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--       AUTHOR:  Philipp Gesang <phg@phi-gamma.net>
 -----------------------------------------------------------------------
 --
 local names                    = fonts.names

@@ -3,7 +3,7 @@
 --         FILE:  luaotfload-configuration.lua
 --  DESCRIPTION:  config file reader
 -- REQUIREMENTS:  Luaotfload 2.6 or above
---       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--       AUTHOR:  Philipp Gesang, <phg@phi-gamma.net>
 --       AUTHOR:  Dohyun Kim <nomosnomos@gmail.com>
 -------------------------------------------------------------------------------
 --

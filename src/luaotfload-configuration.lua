@@ -126,8 +126,12 @@ local feature_presets = {
 
 --doc]]--
 
+local default_fontloader = function ()
+  return luaotfloadstatus and luaotfloadstatus.notes.loader or "reference"
+end
+
 local registered_loaders = {
-  default    = luaotfloadstatus and luaotfloadstatus.notes.loader or "reference",
+  default    = default_fontloader (),
   reference  = "reference",
   unpackaged = "unpackaged",
   context    = "context",
@@ -198,7 +202,7 @@ local default_config = {
     definer        = "patch",
     log_level      = 0,
     color_callback = "post_linebreak_filter",
-    fontloader     = "default",
+    fontloader     = default_fontloader (),
   },
   misc = {
     bisect         = false,

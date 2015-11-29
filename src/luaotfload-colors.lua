@@ -1,7 +1,7 @@
 if not modules then modules = { } end modules ['luaotfload-colors'] = {
     version   = "2.6",
     comment   = "companion to luaotfload-main.lua (font color)",
-    author    = "Khaled Hosny, Elie Roux, Philipp Gesang, Dohyun Kim",
+    author    = "Khaled Hosny, Elie Roux, Philipp Gesang, Dohyun Kim, David Carlisle",
     copyright = "Luaotfload Development Team",
     license   = "GNU GPL v2.0"
 }
@@ -36,11 +36,6 @@ local getnext               = nodedirect.getnext
 local nodetail              = nodedirect.tail
 local getattribute          = nodedirect.has_attribute
 local setattribute          = nodedirect.set_attribute
-
-local texset                = tex.set
-local texget                = tex.get
-local texsettoks            = tex.settoks
-local texgettoks            = tex.gettoks
 
 local stringformat          = string.format
 local identifiers           = fonts.hashes.identifiers
@@ -274,6 +269,12 @@ node_colorize = function (head, toplevel, current_color)
     return head, current_color
 end
 
+local getpageres = pdf.getpageresources or function() return pdf.pageresources end
+local setpageres = pdf.setpageresources or function(s) pdf.pageresources = s end
+local catat11    = luatexbase.registernumber("catcodetable@atletter")
+local gettoks, scantoks = tex.gettoks, tex.scantoks
+local pgf = { bye = "pgfutil@everybye", extgs = "\\pgf@sys@addpdfresource@extgs@plain" }
+
 --- node -> node
 local color_handler = function (head)
     head = todirect(head)
@@ -283,12 +284,11 @@ local color_handler = function (head)
     -- now append our page resources
     if res then
         res["1"]  = true
-        local tpr = texget("pdfpageresources")
-        local no_extgs = not tpr:find("/ExtGState<<.*>>")
-        local pgf_loaded = no_extgs and luaotfload.pgf_loaded
-        if pgf_loaded then
-            tpr = texgettoks(pgf_loaded)
+        if scantoks and pgf.bye and not pgf.loaded then
+            pgf.loaded = token.create(pgf.bye).cmdname == "assign_toks"
+            pgf.bye    = pgf.loaded and pgf.bye
         end
+        local tpr = pgf.loaded and gettoks(pgf.bye) or getpageres() or ""
 
         local t   = ""
         for k in pairs(res) do
@@ -298,14 +298,14 @@ local color_handler = function (head)
             end
         end
         if t ~= "" then
-            if pgf_loaded then
-                texsettoks("global", pgf_loaded, tpr..t)
+            if pgf.loaded then
+                scantoks("global", pgf.bye, catat11, stringformat("%s{%s}%s", pgf.extgs, t, tpr))
             else
-                if no_extgs then
-                    tpr = tpr .. "/ExtGState<<>>"
+                local tpr, n = tpr:gsub("/ExtGState<<", "%1"..t)
+                if n == 0 then
+                    tpr = stringformat("%s/ExtGState<<%s>>", tpr, t)
                 end
-                tpr = tpr:gsub("/ExtGState<<", "%1"..t)
-                texset("global", "pdfpageresources", tpr)
+                setpageres(tpr)
             end
         end
         res = nil -- reset res

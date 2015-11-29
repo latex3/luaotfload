@@ -2,8 +2,9 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-loaders.lua
 --  DESCRIPTION:  Luaotfload callback handling
--- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
---       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Hans Hagen, Khaled Hosny, Elie Roux
+-- REQUIREMENTS:  luatex v.0.80 or later; package lualibs
+--       AUTHOR:  Philipp Gesang <phg@phi-gamma.net>
+--       AUTHOR:  Hans Hagen, Khaled Hosny, Elie Roux, David Carlisle
 -----------------------------------------------------------------------
 --
 --- Contains parts of the earlier main script.
@@ -110,13 +111,22 @@ end
 
 --doc]]--
 
-local function reset_callback(name,make_false)
-  for _,v in pairs(luatexbase.callback_descriptions(name))
-  do
-    luatexbase.remove_from_callback(name,v)
-  end
-  if make_false == true then
-    luatexbase.disable_callback(name)
+local purge_define_font = function ()
+  local cdesc = luatexbase.callback_descriptions "define_font"
+  --- define_font is an “exclusive” callback, meaning that there can
+  --- only ever be one entry. Everything beyond that would indicate
+  --- that something is broken.
+  local _, d = next (cdesc)
+  if d then
+    local i, d2 = next (cdesc, 1)
+    if d2 then --> issue warning
+      logreport ("both", 0, "loaders",
+                 "Callback table for define_font contains multiple entries: \z
+                  { [%d] = “%s” } -- seems fishy.", i, d2)
+    end
+    logreport ("log", 0, "loaders",
+               "Entry ``%s`` present in define_font callback; overriding.", d)
+    luatexbase.remove_from_callback ("define_font", d)
   end
 end
 
@@ -125,7 +135,7 @@ local install_callbacks = function ()
   local dummy_function   = function () end
   create_callback ("luaotfload.patch_font",        "simple", dummy_function)
   create_callback ("luaotfload.patch_font_unsafe", "simple", dummy_function)
-  reset_callback "define_font"
+  purge_define_font ()
   local definer = config.luaotfload.run.definer
   luatexbase.add_to_callback ("define_font",
                               definers[definer or "patch"],

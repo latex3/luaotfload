@@ -3,7 +3,7 @@
 --         FILE:  luaotfload-diagnostics.lua
 --  DESCRIPTION:  functionality accessible by the --diagnose option
 -- REQUIREMENTS:  luaotfload-tool.lua
---       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--       AUTHOR:  Philipp Gesang <phg@phi-gamma.net>
 -----------------------------------------------------------------------
 --
 local names                    = fonts.names
@@ -171,6 +171,11 @@ local get_permissions = function (t, location)
         location = lpegmatch (stripslashes, location)
     end
     local attributes = lfsattributes (location)
+    if not attributes then
+        print""
+        print("attr", location, attributes)
+        os.exit()
+    end
 
     if not attributes and t == "f" then
         attributes = get_tentative_attributes (location)
@@ -238,12 +243,10 @@ local check_conformance = function (spec, permissions, errcnt)
     return errcnt
 end
 
-local desired_permissions
 local init_desired_permissions = function ()
-    inspect(config.luaotfload.paths)
     local paths = config.luaotfload.paths
-    desired_permissions = {
-        { "d", {"r","w"}, function () return caches.getwritablepath () end },
+    return {
+        { "d", {"r","w"}, function () return caches.getwritablepath ("", "") end },
         { "d", {"r","w"}, paths.prefix },
         { "f", {"r","w"}, paths.index_path_lua .. ".gz" },
         { "f", {"r","w"}, paths.index_path_luc },
@@ -254,7 +257,7 @@ end
 
 local check_permissions = function (errcnt)
     out [[=============== file permissions ==============]]
-    if not desired_permissions then init_desired_permissions () end
+    local desired_permissions = init_desired_permissions ()
     for i = 1, #desired_permissions do
         local t, spec, path = unpack (desired_permissions[i])
         if type (path) == "function" then

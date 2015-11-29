@@ -3414,7 +3414,7 @@ end
 local getwritablecachepath = function ( )
     --- fonts.handlers.otf doesn’t exist outside a Luatex run,
     --- so we have to improvise
-    local writable = getwritablepath (config.luaotfload.paths.cache_dir)
+    local writable = getwritablepath (config.luaotfload.paths.cache_dir, "")
     if writable then
         return writable
     end

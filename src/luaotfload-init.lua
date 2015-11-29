@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-init.lua
 --  DESCRIPTION:  Luaotfload font loader initialization
--- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, luatexbase
+-- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
 -----------------------------------------------------------------------
 --
@@ -292,8 +292,17 @@ local init_main = function ()
                                         or "reference"
   fontloader = tostring (fontloader)
 
-  if fontloader == "reference" or fontloader == "default" then
+  if fontloader == "reference" then
     logreport ("log", 4, "init", "Using reference fontloader.")
+    load_fontloader_module (luaotfload.fontloader_package)
+
+  elseif fontloader == "default" then
+    --- Same as above but loader name not correctly replaced by the file name
+    --- of our fontloader package. Perhaps something’s wrong with the status
+    --- file which contains the datestamped filename? In any case, it can’t
+    --- hurt reporting it as a bug.
+    logreport ("both", 0, "init", "Fontloader substitution failed, got “default”.")
+    logreport ("log",  4, "init", "Falling back to reference fontloader.")
     load_fontloader_module (luaotfload.fontloader_package)
 
   elseif fontloader == "unpackaged" then

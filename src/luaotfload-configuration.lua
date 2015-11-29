@@ -3,7 +3,7 @@
 --         FILE:  luaotfload-configuration.lua
 --  DESCRIPTION:  config file reader
 -- REQUIREMENTS:  Luaotfload 2.6 or above
---       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--       AUTHOR:  Philipp Gesang, <phg@phi-gamma.net>
 --       AUTHOR:  Dohyun Kim <nomosnomos@gmail.com>
 -------------------------------------------------------------------------------
 --
@@ -126,8 +126,12 @@ local feature_presets = {
 
 --doc]]--
 
+local default_fontloader = function ()
+  return luaotfloadstatus and luaotfloadstatus.notes.loader or "reference"
+end
+
 local registered_loaders = {
-  default    = luaotfloadstatus and luaotfloadstatus.notes.loader or "reference",
+  default    = default_fontloader (),
   reference  = "reference",
   unpackaged = "unpackaged",
   context    = "context",
@@ -198,7 +202,7 @@ local default_config = {
     definer        = "patch",
     log_level      = 0,
     color_callback = "post_linebreak_filter",
-    fontloader     = "default",
+    fontloader     = default_fontloader (),
   },
   misc = {
     bisect         = false,

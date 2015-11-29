@@ -98,7 +98,13 @@ end
 
 local make_loader_name = function (prefix, name)
     local msg = luaotfload.log and luaotfload.log.report
-             or function (...) texio.write_nl ("log", ...) end
+             or function (stream, lvl, cat, ...)
+                 if lvl > 1 then --[[not pressing]] return end
+                 texio.write_nl ("log",
+                                 string.format ("luaotfload | %s : ",
+                                                tostring (cat)))
+                 texio.write (string.format (...))
+             end
     if not name then
         msg ("both", 0, "load",
              "Fatal error: make_loader_name (“%s”, “%s”).",

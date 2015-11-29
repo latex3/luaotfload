@@ -63,7 +63,7 @@ aux.start_rewrite_fontname = start_rewrite_fontname
 
 local stop_rewrite_fontname = function ()
   if rewriting == true then
-    luatexbase.remove_fromt_callback
+    luatexbase.remove_from_callback
       ("luaotfload.patch_font", "luaotfload.rewrite_fontname")
     rewriting = false
     report ("log", 1, "aux",

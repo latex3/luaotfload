@@ -366,7 +366,7 @@ local init_main = function ()
     local _void = require (fontloader)
 
   elseif kpselookup (fontloader) then
-    local pth = kpselookup (fontloader)
+    local path = kpselookup (fontloader)
     logreport ("both", 2, "init",
                "Attempting to load fontloader “%s” from kpse-resolved path “%s”.",
                fontloader, path)

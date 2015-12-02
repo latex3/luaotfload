@@ -29,7 +29,7 @@ all: manuals doc
 graph: $(DOTPDF)
 manuals: $(TOOLMAN) $(CONFMAN)
 
-$(DOCPDF): $(DOCSRC)
+$(DOCPDF): $(DOCSRC) graph
 	@echo "creating PDF documentation ($@)"
 	$(DO_LATEX)
 	$(DO_LATEX)

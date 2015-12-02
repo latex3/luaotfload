@@ -296,7 +296,7 @@ local help_msg = function (version)
                          luaotfload.self,
                          names_gzip,
                          names_bin,
-                         caches.getwritablepath (config.luaotfload.cache_dir)))
+                         caches.getwritablepath (config.luaotfload.paths.cache_dir, "")))
 end
 
 local about = [[

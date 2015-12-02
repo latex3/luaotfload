@@ -183,7 +183,7 @@ endef
 define run-install
 @mkdir -p $(SCRIPTDIR) && cp -- $(SCRIPTSTATUS) $(SCRIPTDIR)
 @mkdir -p $(RUNDIR)    && cp -- $(RESOURCES) $(RUNSTATUS) $(RUNDIR)
-@mkdir -p $(SRCDIR)    && cp -- $(LOADERSRC) $(SRCDIR)
+@mkdir -p $(RUNDIR)    && cp -- $(LOADERSRC) $(RUNDIR)
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf

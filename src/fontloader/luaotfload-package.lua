@@ -2,10 +2,9 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-package.lua
 --  DESCRIPTION:  Luatex fontloader packaging
--- REQUIREMENTS:  luatex
+-- REQUIREMENTS:  luatex, mtx-package
 --       AUTHOR:  Philipp Gesang
 --      LICENSE:  GNU GPL v2.0
---      CREATED:  2015-03-29 12:07:33+0200
 -----------------------------------------------------------------------
 --
 

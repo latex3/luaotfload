@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['luaotfload-database'] = {
-    version   = "2.5",
+    version   = "2.6",
     comment   = "companion to luaotfload-main.lua",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
@@ -3529,7 +3529,7 @@ return {
         fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
-        names.version   = 2.51
+        names.version   = 2.6
         names.data      = nil      --- contains the loaded database
         names.lookups   = nil      --- contains the lookup cache
 

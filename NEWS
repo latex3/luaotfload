@@ -1,23 +1,24 @@
 Change History
 --------------
 
-2015/0X/XX, luaotfload v2.6
-    * Add ``sign`` target to makefile for automated package signing
+2015/12/09, luaotfload v2.6
+    * Add ``sign`` target to makefile for automated package signing.
     * Add ``--dumpconf`` option to luaotfload-tool for generating configuration
-      files
-    * Move fontloader files to subtree src/fontloader
+      files.
+    * Move fontloader files to subtree src/fontloader.
     * New script ``mkimport`` facilitates maintainance of code imported from
-      Context
-    * Revised letterspacing, now utilizing the ``node.direct`` interface
-    * Revized colorization of fonts, utilizing ``node.direct`` (Dohyun Kim)
-    * Colorization was moved to the ``post_linebreak_filter`` stage
+      Context.
+    * Revised letterspacing, now utilizing the ``node.direct`` interface.
+    * Revized colorization of fonts, utilizing ``node.direct`` (Dohyun Kim).
+    * Colorization was moved to the ``post_linebreak_filter`` stage.
     * Move remaining functionality from ``luaotfload-override`` into
-      initialization
-    * Write names index if fonts were removed
-    * Separate module loading from initialization
-    * Custom fontloader package with the files from Lualibs removed
-    * Lualibs are now a dependency when used in a TeX run as well
-    * Respect interword spaces when letterspacing
+      initialization.
+    * Write names index if fonts were removed.
+    * Separate module loading from initialization.
+    * Custom fontloader package with the files from Lualibs removed.
+    * Swappable fontloader via configuration option.
+    * Lualibs are now a dependency when used in a TeX run as well.
+    * Respect interword spaces when letterspacing.
 
 2014/07/13, luaotfload v2.5
     * Remove legacy code.

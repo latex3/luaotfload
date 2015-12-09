@@ -6,6 +6,7 @@ DOCSRCDIR	= ./doc
 SCRIPTSRCDIR	= ./scripts
 SRCSRCDIR	= ./src
 FONTLOADERDIR	= $(SRCSRCDIR)/fontloader/runtime
+FONTLOADERSRCDIR= $(SRCSRCDIR)/fontloader/misc
 PACKAGEDIR	= $(SRCSRCDIR)/fontloader
 BUILDDIR	= ./build
 MISCDIR		= ./misc
@@ -22,10 +23,12 @@ GLYPHSCRIPT	= $(SCRIPTSRCDIR)/mkglyphlist
 CHARSCRIPT	= $(SCRIPTSRCDIR)/mkcharacters
 STATUSSCRIPT	= $(SCRIPTSRCDIR)/mkstatus
 IMPORTSCRIPT	= $(SCRIPTSRCDIR)/mkimport
+TESTSCRIPT	= $(SCRIPTSRCDIR)/mktests
 
 GLYPHSOURCE	= $(BUILDDIR)/glyphlist.txt
 
 RESOURCESCRIPTS = $(GLYPHSCRIPT) $(CHARSCRIPT) $(STATUSSCRIPT)
+RESOURCESCRIPTS+= $(IMPORTSCRIPT) $(TESTSCRIPT)
 
 TOOLNAME	= luaotfload-tool
 TOOL		= $(SRCSRCDIR)/$(TOOLNAME).lua
@@ -34,6 +37,9 @@ CONFNAME	= luaotfload.conf
 
 GRAPH		= filegraph
 DOCSRC		= $(addprefix $(DOCSRCDIR)/$(NAME), -main.tex -latex.tex)
+LOADERSRC	= $(wildcard $(FONTLOADERSRCDIR)/*.lua)
+LOADERSRC	+= $(wildcard $(FONTLOADERSRCDIR)/*.tex)
+LOADERSRC	+= $(PACKAGEDIR)/luaotfload-package.lua
 GRAPHSRC	= $(DOCSRCDIR)/$(GRAPH).dot
 MANSRC		= $(DOCSRCDIR)/$(TOOLNAME).rst $(DOCSRCDIR)/$(CONFNAME).rst
 
@@ -51,7 +57,8 @@ CHARS		= $(BUILDDIR)/$(NAME)-characters.lua
 STATUS		= $(BUILDDIR)/$(NAME)-status.lua
 LOADER		= $(BUILDDIR)/fontloader-$(shell date +%F).lua
 RESOURCES	= $(GLYPHS) $(CHARS) $(LOADER) $(STATUS)
-SOURCE		= $(DOCSRC) $(MANSRC) $(SRC) README COPYING Makefile NEWS $(RESOURCESCRIPTS)
+SOURCE		= $(DOCSRC) $(LOADERSRC) $(MANSRC)
+SOURCE		+= $(SRC) README COPYING Makefile NEWS $(RESOURCESCRIPTS)
 
 # Files grouped by installation location
 SCRIPTSTATUS	= $(TOOL) $(RESOURCESCRIPTS)
@@ -162,7 +169,7 @@ $(CTAN_ZIP): $(DOCS) $(SOURCE) $(TDS_ZIP)
 	@echo "Making $@ for CTAN upload."
 	@$(RM) -- $@
 	$(make-ctandir)
-	cd $(BUILDDIR) && zip -r -9 $(CTAN_ZIPFILE) $(TDS_ZIPFILE) $(NAME) >/dev/null
+	@cd $(BUILDDIR) && zip -r -9 $(CTAN_ZIPFILE) $(TDS_ZIPFILE) $(NAME) >/dev/null
 
 $(CTAN_ZIPSIG): $(CTAN_ZIP)
 	@echo "Signing package $(CTAN_ZIP)"
@@ -170,8 +177,8 @@ $(CTAN_ZIPSIG): $(CTAN_ZIP)
 	@gpg --batch --armor --detach-sign "$(CTAN_ZIP)"
 
 define run-install-doc
-@mkdir -p $(DOCDIR) && cp -- $(DOCSTATUS) $(VGND) $(CONFDEMO) $(DOCDIR)
-@mkdir -p $(SRCDIR) && cp -- $(SRCSTATUS) $(SRCDIR)
+@mkdir -p $(DOCDIR)  && cp -- $(DOCSTATUS) $(VGND) $(CONFDEMO) $(DOCDIR)
+@mkdir -p $(SRCDIR)  && cp -- $(SRCSTATUS) $(SRCDIR)
 @mkdir -p $(MAN1DIR) && cp -- $(TOOLMAN) $(MAN1DIR)
 @mkdir -p $(MAN5DIR) && cp -- $(CONFMAN) $(MAN5DIR)
 endef
@@ -179,6 +186,7 @@ endef
 define run-install
 @mkdir -p $(SCRIPTDIR) && cp -- $(SCRIPTSTATUS) $(SCRIPTDIR)
 @mkdir -p $(RUNDIR)    && cp -- $(RESOURCES) $(RUNSTATUS) $(RUNDIR)
+@mkdir -p $(RUNDIR)    && cp -- $(LOADERSRC) $(RUNDIR)
 endef
 
 $(TDS_ZIP): TEXMFROOT=./tmp-texmf

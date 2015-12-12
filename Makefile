@@ -39,7 +39,6 @@ GRAPH		= filegraph
 DOCSRC		= $(addprefix $(DOCSRCDIR)/$(NAME), -main.tex -latex.tex)
 LOADERSRC	= $(wildcard $(FONTLOADERSRCDIR)/*.lua)
 LOADERSRC	+= $(wildcard $(FONTLOADERSRCDIR)/*.tex)
-LOADERSRC	+= $(PACKAGEDIR)/luaotfload-package.lua
 GRAPHSRC	= $(DOCSRCDIR)/$(GRAPH).dot
 MANSRC		= $(DOCSRCDIR)/$(TOOLNAME).rst $(DOCSRCDIR)/$(CONFNAME).rst
 
@@ -99,8 +98,7 @@ DO_GLYPHS	= $(LUA) $(GLYPHSCRIPT) > /dev/null
 DO_CHARS	= $(LUA) $(CHARSCRIPT)  > /dev/null
 DO_STATUS	= $(LUA) $(STATUSSCRIPT) --fontloader=$(LOADER) >/dev/null
 DO_IMPORT	= $(LUA) $(IMPORTSCRIPT) import >/dev/null
-DO_PACKAGE	= $(LUA) $(IMPORTSCRIPT) package \
-		  $(PACKAGEDIR)/luaotfload-package.lua $(LOADER) >/dev/null
+DO_PACKAGE	= $(LUA) $(IMPORTSCRIPT) package $(LOADER) >/dev/null
 
 define check-lua-files
 @echo validating syntax
@@ -200,7 +198,7 @@ $(TDS_ZIP): $(DOCS) $(ALL_STATUS) check
 
 sign: $(CTAN_ZIPSIG)
 
-.PHONY: install manifest clean mrproper show showtargets check import news
+.PHONY: package install manifest clean mrproper show showtargets check import news
 
 install:
 	@echo "	××××××××××××××××××××××××××××××××"

@@ -71,9 +71,6 @@ local names = {
   { scriptdir,    "mkstatus",                       },
   { scriptdir,    "mktests",                        },
 
-  --- merge script
-  { loaderdir,    "luaotfload-package.lua",         },
-
   --- fontloader runtimes
   { rtdir,        "fontloader-basics-gen.lua",      },
   { rtdir,        "fontloader-reference.lua",       },

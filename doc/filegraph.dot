@@ -54,7 +54,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
     fontdbutil -> fontdbutil_diagnostics [label="--diagnose"]
     fontdbutil -> status [label="version information"]
 
-    luaotfload_package -> fontloader [label="merges", style=dashed]
+    mkimport -> fontloader [label="merges", style=dashed]
 
     merged_luatex_fonts -> characters [label="luaotfload-auxiliary.lua",
                                        ltail=cluster_merged]
@@ -107,14 +107,6 @@ strict digraph luaotfload_files { //looks weird with circo ...
                        color  = "#01012222",
                        style  = "filled,rounded",
                        penwidth=2]
-
-    luaotfload_package [label  = "luaotfload-package.lua",
-                        shape  = rect,
-                        width  = "3.2cm",
-                        height = "1.2cm",
-                        color  = "#01012222",
-                        style  = "filled,rounded",
-                        penwidth=2]
 
     fontdbutil_diagnostics [label  = "luaotfload-diagnostics.lua",
                             shape  = rect,

@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2015/12/09 v2.6}
+  \setdocumentdate   {2015/12/12 v2.6}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       Support: \email     {lualatex-dev@tug.org}}
@@ -1076,8 +1076,8 @@ format.
 It integrates the font loader, written entirely in \LUA, as distributed
 in the \identifier{\LUATEX-Fonts} package.
 %
-The original \LUA source files have been combined using the
-\fileent{mtx-package} script into a single, self-contained blob. In
+The original \LUA source files have been combined using the \CONTEXT
+packaging library into a single, self-contained blob. In
 this form the font loader depends only on the \identifier{lualibs}
 package and requires only minor adaptions to integrate into
 \identifier{luaotfload}.
@@ -1106,17 +1106,14 @@ See figure \ref{file-graph} on page \pageref{file-graph} for a
 graphical representation of the dependencies.
 %
 \label{package}%
-Through the script \fileent{luaotfload-package.lua} the \CONTEXT
-utility \fileent{mtx-package} is invoked to create the
-\identifier{luaotfload} fontloader as a merged (amalgamated) source
-file.\footnote{%
-  \fileent{mtx-package}, a \LUA source code merging tool developed by
-  Hans Hagen, is
-  \hyperlink [part of \CONTEXT]{https://bitbucket.org/phg/context-mirror/src/726a663be481042003566d4614266b940b5a0c91/scripts/context/lua/mtx-package.lua?at=beta}
-  and requires \fileent{mtxrun}.
-  Run
-  \inlinecode {mtxrun --script package --help}
-  to display further information.
+Through the script \fileent{mkimport} a \CONTEXT library
+is invoked to create the \identifier{luaotfload} fontloader as a merged
+(amalgamated) source file.\footnote{%
+  In \CONTEXT, this facility can be accessed by means of a
+  \hyperlink[script]{https://bitbucket.org/phg/context-mirror/src/beta/scripts/context/lua/mtx-package.lua?at=beta}
+  which is integrated into \fileent{mtxrun} as a subcommand.
+  Run \inlinecode {mtxrun --script package --help} to display further
+  information.
   For the actual merging code see the file
   \fileent{util-mrg.lua} that is part of \CONTEXT.
 }
@@ -1334,7 +1331,7 @@ The subcommand for importing takes the prefix of the desired \CONTEXT
 Whereas the command for packaging requires a path to the
 \emphasis{package description file} and the output name to be passed.
 \beginlisting
-./scripts/mkimport package ./src/fontloader/luaotfload-package.lua fontloader-custom.lua
+./scripts/mkimport package fontloader-custom.lua
 \endlisting
 
 From the toplevel makefile, the targets \inlinecode{import} and

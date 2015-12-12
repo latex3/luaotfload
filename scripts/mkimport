@@ -39,6 +39,7 @@ assert (utilities and utilities.merger and utilities.merger.compact
 local filedirname      = file.dirname
 local fileiswritable   = file.is_writable
 local ioloaddata       = io.loaddata
+local iosavedata       = io.savedata
 local iopopen          = io.popen
 local iowrite          = io.write
 local lfschdir         = lfs.chdir
@@ -810,7 +811,7 @@ local luaotfload_header = [==[
   build %s by %s@%s
 -------------------------------------------------------------------------------
 
-  © %s Hans Hagen / Pragma ADE
+  © %s PRAGMA ADE / ConTeXt Development Team
 
   The code in this file is provided under the GPL v2.0 license. See the
   file COPYING in the Luaotfload repository for details.
@@ -848,7 +849,7 @@ local make_header = function (files)
 end
 
 
-local scope_start         = "\ndo  --- [luaotfload, %s scope for “%s”] ---\n\n"
+local scope_start         = "\ndo  --- [luaotfload, %s scope for “%s” %s] ---\n\n"
 local scope_stop          = "\nend --- [luaotfload, %s scope for “%s”] ---\n\n"
 local luaotfload_modeline = "\n--- vim:ft=lua:sw=2:ts=8:et:tw=79\n"
 
@@ -861,12 +862,12 @@ local assemble_fontloader = function (tgt, dst)
     local cur = required [i]
     local subdir, ourname = derive_ourname (cur, kind_merged)
     local ourpath = file.join (fontloader_subdir, subdir, ourname)
-    local data = io.loaddata (ourpath)
+    local data = ioloaddata (ourpath)
     if not data then
       bad ("file “%s” cannot be loaded from “%s”", ourname, ourpath)
       return false
     end
-    sequence[#sequence + 1] = stringformat (scope_start, tgt, cur)
+    sequence[#sequence + 1] = stringformat (scope_start, tgt, cur, md5sumhexa (data))
     sequence[#sequence + 1] = compact (data)
     sequence[#sequence + 1] = stringformat (scope_stop , tgt, cur)
   end
@@ -878,10 +879,10 @@ local assemble_fontloader = function (tgt, dst)
     bad ("packaging result not well-formed")
     bad ("error message: “%s”", err)
     bad ("dumping to fontloader-junk.lua")
-    io.savedata ("fontloader-junk.lua", raw)
+    iosavedata ("fontloader-junk.lua", raw)
     return false
   end
-  io.savedata (dst, raw)
+  iosavedata (dst, raw)
   status ("amalgamated %d files, written to “%s”.",
           #required, dst)
   return dst

@@ -12,6 +12,12 @@
 -- This script generates a list of hashes that serves as the input
 -- for the file integrity check (option --diagnose). md5 is all we can
 -- assume in Luatex, so it’s really only a superficial test.
+--
+-- Not that this file also incorporates the Git revision information.
+-- Of this, only the actual commit hash is authoritative. The latest
+-- tag is included for reference only. Besides that, it’s meaningless.
+-- Do not rely on it: Two distinct versions of Luaotfload might very
+-- well share the same tag.
 
 kpse.set_program_name "luatex"
 
@@ -133,31 +139,41 @@ local die = function (...)
   os.exit (1)
 end
 
-local gitcmd = "git log -1 \z
+local logcmd = "git log -1 \z
                     --format=\"return {\z
                                 %n  revision  = [[%H]],\z
                                 %n  timestamp = [[%cd]],\z
                                 %n  committer = [[%cn <%ce>]],\z
                                 %n}\" \z
                     --date=iso"
+local describecmd = "git describe --all"
 
-local git_info = function ()
-  --io.write (gitcmd)
-  --io.write "\n"
-  local chan = iopopen (gitcmd)
+local readpipe = function (cmd)
+  local chan = iopopen (cmd)
   if not chan then
     die ("this script needs to be run inside \z
           the luaotfload git repository")
   end
-
   local data = chan:read "*all"
   chan:close ()
+  return data
+end
+
+local git_info = function ()
+  --io.write (logcmd)
+  --io.write "\n"
+  local desc = readpipe (describecmd)
+  if not desc then die "cannot parse git information" end
+  local desc = string.explode (string.fullstrip (desc), "/")[2]
+  local data = readpipe (logcmd)
   if data and type (data) == "string" and data ~= "" then
     data = load (data)
     if not data then
       die "cannot parse git information"
     end
-    return data ()
+    data = data ()
+    data.description = desc
+    return data
   end
   die "cannot read from pipe"
 end

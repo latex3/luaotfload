@@ -948,6 +948,8 @@ setmetatableindex(types, function(t,k) t[k] = k return k end) -- "key"
 
 --- start locals for addfeature()
 
+local utfbyte = unicode.utf8.byte
+
 local otf = handlers and handlers.otf --- filled in later during initialization
 
 local normalized = {
@@ -1224,10 +1226,10 @@ local tlig_specification = {
         features  = everywhere,
         data      = {
             [0x0022] = 0x201D,                   -- quotedblright
-            --[0x0027] = 0x2019,                   -- quoteleft
-            --[0x0060] = 0x2018,                   -- quoteright
+            [0x0027] = 0x2019,                   -- quoteleft
+            [0x0060] = 0x2018,                   -- quoteright
         },
-        flags     = no_flags,
+        flags     = noflags,
         order     = { "tlig" },
         prepend   = true,
     },
@@ -1247,7 +1249,7 @@ local tlig_specification = {
             [0x00AB] = {0x003C, 0x003C},         -- LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
             [0x00BB] = {0x003E, 0x003E},         -- RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
         },
-        flags    = no_flags,
+        flags    = noflags,
         order    = { "tlig" },
         prepend  = true,
     },
@@ -1260,7 +1262,7 @@ local tlig_specification = {
             [0x00A1] = {0x0021, 0x0060},         -- exclamdown
             [0x00BF] = {0x003F, 0x0060},         -- questiondown
         },
-        flags    = no_flags,
+        flags    = noflags,
         order    = { "tlig" },
         prepend  = true,
     },
@@ -1310,7 +1312,7 @@ local anum_specification = {
         type     = "substitution",
         features = { arab = { far = true, urd = true, snd = true } },
         data     = anum_persian,
-        flags    = no_flags,
+        flags    = noflags,
         order    = { "anum" },
         valid    = valid,
     },
@@ -1318,7 +1320,7 @@ local anum_specification = {
         type     = "substitution",
         features = { arab = { ["*"] = true } },
         data     = anum_arabic,
-        flags    = no_flags,
+        flags    = noflags,
         order    = { "anum" },
         valid    = valid,
     },
@@ -1328,7 +1330,7 @@ return {
     init = function ()
 
         if not fonts and fonts.handlers then
-            logreport ("log", 0, "color",
+            logreport ("log", 0, "features",
                        "OTF mechanisms missing -- did you forget to \z
                        load a font loader?")
             return false
@@ -1343,15 +1345,21 @@ return {
         }
 
         otf.enhancers.register ("check extra features",
-                                function (data,filename, raw)
+                                function (data, filename, raw)
                                     for feature, specification in next, extrafeatures do
+                                        logreport ("both", 3, "features",
+                                                   "register synthetic feature “%s” for %s font “%s”(%d)",
+                                                   feature,
+                                                   data.format,
+                                                   tostring (data.metadata and data.metadata.fontname or "<unknown>"),
+                                                   data.subfont or -1)
                                         addfeature (data, feature, specification)
                                     end
                                 end)
 
         logreport = luaotfload.log.report
         if not fonts then
-            logreport ("log", 0, "color",
+            logreport ("log", 0, "features",
                        "OTF mechanisms missing -- did you forget to \z
                        load a font loader?")
             return false

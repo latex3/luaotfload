@@ -938,14 +938,6 @@ local report_otf          = logs.reporter("fonts","otf loading")
 
 --HH]]--
 
-local types = {
-    substitution = "gsub_single",
-    ligature     = "gsub_ligature",
-    alternate    = "gsub_alternate",
-}
-
-setmetatableindex(types, function(t,k) t[k] = k return k end) -- "key"
-
 --- start locals for addfeature()
 
 local utfbyte = unicode.utf8.byte
@@ -968,6 +960,8 @@ local types = {
     multiple     = "gsub_multiple",
     kern         = "gpos_pair",
 }
+
+setmetatableindex(types, function(t,k) t[k] = k return k end) -- "key"
 
 --- stop locals for addfeature()
 
@@ -1220,6 +1214,8 @@ end
 
 ---[[ end snippet from font-otc.lua ]]
 
+local tlig_order = { "tlig" }
+
 local tlig_specification = {
     {
         type      = "substitution",
@@ -1230,7 +1226,7 @@ local tlig_specification = {
             [0x0060] = 0x2018,                   -- quoteright
         },
         flags     = noflags,
-        order     = { "tlig" },
+        order     = tlig_order,
         prepend   = true,
     },
     {
@@ -1250,7 +1246,7 @@ local tlig_specification = {
             [0x00BB] = {0x003E, 0x003E},         -- RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
         },
         flags    = noflags,
-        order    = { "tlig" },
+        order    = tlig_order,
         prepend  = true,
     },
     {
@@ -1263,7 +1259,7 @@ local tlig_specification = {
             [0x00BF] = {0x003F, 0x0060},         -- questiondown
         },
         flags    = noflags,
-        order    = { "tlig" },
+        order    = tlig_order,
         prepend  = true,
     },
 }

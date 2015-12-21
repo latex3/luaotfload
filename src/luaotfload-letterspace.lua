@@ -20,17 +20,35 @@ local tonumber           = tonumber
 local next               = next
 local nodes, node, fonts = nodes, node, fonts
 
---- As of December 2014 the faster ``node.direct.*`` interface is
---- preferred.
 local nodedirect         = nodes.nuts
-local getchar            = nodedirect.getchar
-local getfont            = nodedirect.getfont
-local getid              = nodedirect.getid
-local getnext            = nodedirect.getnext
-local getprev            = nodedirect.getprev
+
 local getfield           = nodedirect.getfield
 local setfield           = nodedirect.setfield
-local getsubtype         = nodedirect.getsubtype
+
+local field_setter = function (name) return function (n, ...) setfield (n, name, ...) end end
+local field_getter = function (name) return function (n, ...) getfield (n, name, ...) end end
+
+--- As of December 2014 the faster ``node.direct.*`` interface is
+--- preferred.
+
+local getfont            = nodedirect.getfont
+local getid              = nodedirect.getid
+
+local getnext            = nodedirect.getnext or field_getter "next"
+local setnext            = nodedirect.setnext or field_setter "next"
+
+local getprev            = nodedirect.getprev or field_getter "prev"
+local setprev            = nodedirect.setprev or field_setter "prev"
+
+local getdisc            = nodedirect.getdisc or field_getter "disc"
+local setdisc            = nodedirect.setdisc or field_setter "disc"
+
+local getsubtype         = nodedirect.getsubtype or field_getter "subtype"
+local setsubtype         = nodedirect.setsubtype or field_setter "subtype"
+
+local getchar            = nodedirect.getchar or field_getter "subtype"
+local setchar            = nodedirect.setchar or field_setter "subtype"
+
 local find_node_tail     = nodedirect.tail
 local todirect           = nodedirect.tonut
 local tonode             = nodedirect.tonode
@@ -310,10 +328,11 @@ kerncharacters = function (head)
         else
           --- c = kerncharacters (c) --> taken care of after replacing
           local s = start
-          local p, n = getprev(s), s.next
+          local p = getprev(s)
+          local n = getnext(s)
           local tail = find_node_tail(c)
           if p then
-            setfield(p, "next", c)
+            setnext(p, c)
             p = getprev(c)
           else
             head = c
@@ -321,7 +340,7 @@ kerncharacters = function (head)
           if n then
             tail = getprev(n)
           end
-          setnext(tail, "next", n)
+          setnext(tail, n)
           start = c
           setfield(s, "components", nil)
           -- we now leak nodes !
@@ -368,7 +387,7 @@ kerncharacters = function (head)
             then
               -- keep
             else
-              prev_subtype = userkern_code
+              setsubtype (prev, userkern_code)
               local prev_kern = getfield(prev, "kern")
               prev_kern = prev_kern + quaddata[lastfont] * krn
               done = true
@@ -395,24 +414,20 @@ kerncharacters = function (head)
           end
 
         elseif pid == disc_code then
-          -- a bit too complicated, we can best not copy and just calculate
-          -- but we could have multiple glyphs involved so ...
           local disc = prev -- disc
-          local pre     = getfield(disc, "pre")
-          local post    = getfield(disc, "post")
-          local replace = getfield(disc, "replace")
-          local prv     = getprev(disc)
-          local nxt     = getnext(disc)
+          local pre, post, replace = getdisc (disc)
+          local prv = getprev(disc)
+          local nxt = getnext(disc)
 
           if pre and prv then -- must pair with start.prev
             -- this one happens in most cases
             local before = copy_node(prv)
-            setfield(pre, "prev", before)
-            setfield(before, "next", pre)
-            setfield(before, "prev", nil)
+            setprev(pre,    before)
+            setnext(before, pre)
+            setprev(before, nil)
             pre = kerncharacters (before)
             pre = getnext(pre)
-            setfield(pre, "prev", nil)
+            setprev(pre, nil)
             setfield(disc, "pre", pre)
             free_node(before)
           end
@@ -420,11 +435,11 @@ kerncharacters = function (head)
           if post and nxt then  -- must pair with start
             local after = copy_node(nxt)
             local tail = find_node_tail(post)
-            setfield(tail, "next", after)
-            setfield(after, "prev", tail)
-            setfield(after, "next", nil)
+            setnext(tail,  after)
+            setprev(after, tail)
+            setnext(after, nil)
             post = kerncharacters (post)
-            setfield(tail, "next", nil)
+            setnext(tail, nil)
             setfield(disc, "post", post)
             free_node(after)
           end
@@ -433,17 +448,17 @@ kerncharacters = function (head)
             local before = copy_node(prv)
             local after = copy_node(nxt)
             local tail = find_node_tail(replace)
-            setfield(replace, "prev", before)
-            setfield(before,  "next", replace)
-            setfield(before,  "prev", nil)
-            setfield(tail,    "next", after)
-            setfield(after,   "prev", tail)
-            setfield(after,   "next", nil)
+            setprev(replace, before)
+            setnext(before,  replace)
+            setprev(before,  nil)
+            setnext(tail,    after)
+            setprev(after,   tail)
+            setnext(after,   nil)
             replace = kerncharacters (before)
             replace = getnext(replace)
-            setfield(replace,        "prev",      nil)
-            setfield(getprev(after), "next",      nil)
-            setfield(disc,           "replace",   replace)
+            setprev(replace, nil)
+            setnext(getprev(after), nil)
+            setfield(disc, "replace",   replace)
             free_node(after)
             free_node(before)
 

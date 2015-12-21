@@ -390,6 +390,7 @@ kerncharacters = function (head)
               setsubtype (prev, userkern_code)
               local prev_kern = getfield(prev, "kern")
               prev_kern = prev_kern + quaddata[lastfont] * krn
+              setfield (prev, "kern", prev_kern)
               done = true
             end
           end

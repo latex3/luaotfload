@@ -65,6 +65,36 @@ local logreport  --- filled in after loading the log module
 
 --doc]]--
 
+local glyph_codes =
+  { [0] = "character"
+  , [1] = "glyph"
+  , [2] = "ligature"
+  , [3] = "ghost"
+  , [4] = "left"
+  , [5] = "right"
+  }
+
+local disc_codes  =
+  { [0] = "discretionary"
+  , [1] = "explicit"
+  , [2] = "automatic"
+  , [3] = "regular"
+  , [4] = "first"
+  , [5] = "second"
+  }
+
+local node_types = { disc = disc_codes, glyph = glyph_codes }
+
+local luatex_stubs = function ()
+  if not node.subtypes then
+    node.subtypes = function (t) return node_types [t] or { } end
+    local direct = node.direct
+    local getfield = direct.getfield
+    local setfield = direct.setfield
+    direct.setchar = direct.setchar or function (n, ...) setfield (n, "char", ...) end
+    direct.getchar = direct.getchar or function (n) getfield (n, "char")    end
+  end
+end
 
 local init_early = function ()
 
@@ -81,6 +111,8 @@ local init_early = function ()
 
   if not lualibs    then error "this module requires Luaotfload" end
   if not luaotfload then error "this module requires Luaotfload" end
+
+  luatex_stubs ()
 
   --[[doc--
 
@@ -214,9 +246,9 @@ local context_modules = {
   { ctx,   "font-oti"          },
   { ctx,   "font-otf"          },
   { ctx,   "font-otb"          },
-  { ltx,   "luatex-fonts-inj"  }, --> since 2014-01-07, replaces node-inj.lua
+  { ltx,   "font-inj"          },
   { ltx,   "luatex-fonts-ota"  },
-  { ltx,   "luatex-fonts-otn"  }, --> since 2014-01-07, replaces font-otn.lua
+  { ltx,   "font-otn"          },
   { ctx,   "font-otp"          }, --> since 2013-04-23
   { ltx,   "luatex-fonts-lua"  },
   { ctx,   "font-def"          },
@@ -338,9 +370,9 @@ local init_main = function ()
     load_fontloader_module "font-oti"
     load_fontloader_module "font-otf"
     load_fontloader_module "font-otb"
-    load_fontloader_module "fonts-inj"  --> since 2014-01-07, replaces node-inj.lua
+    load_fontloader_module "font-inj"
     load_fontloader_module "fonts-ota"
-    load_fontloader_module "fonts-otn"  --> since 2014-01-07, replaces font-otn.lua
+    load_fontloader_module "font-otn"
     load_fontloader_module "font-otp"   --> since 2013-04-23
     load_fontloader_module "fonts-lua"
     load_fontloader_module "font-def"

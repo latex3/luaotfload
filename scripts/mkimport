@@ -196,11 +196,9 @@ local imports = {
     { name = "fonts-demo-vf-1"   , ours = nil          , kind = kind_ignored   },
     { name = "fonts-enc"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-ext"         , ours = nil          , kind = kind_merged    },
-    { name = "fonts-inj"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-lua"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-merged"      , ours = "reference"  , kind = kind_essential },
     { name = "fonts-ota"         , ours = nil          , kind = kind_merged    },
-    { name = "fonts-otn"         , ours = nil          , kind = kind_merged    },
     { name = "fonts"             , ours = nil          , kind = kind_merged    },
     { name = "fonts"             , ours = nil          , kind = kind_tex       },
     { name = "fonts-syn"         , ours = nil          , kind = kind_ignored   },
@@ -230,10 +228,12 @@ local imports = {
     { name = "font-con"          , ours = "font-con"          , kind = kind_merged    },
     { name = "font-def"          , ours = "font-def"          , kind = kind_merged    },
     { name = "font-ini"          , ours = "font-ini"          , kind = kind_merged    },
+    { name = "font-inj"          , ours = "font-inj"          , kind = kind_merged    },
     { name = "font-map"          , ours = "font-map"          , kind = kind_merged    },
     { name = "font-otb"          , ours = "font-otb"          , kind = kind_merged    },
     { name = "font-otf"          , ours = "font-otf"          , kind = kind_merged    },
     { name = "font-oti"          , ours = "font-oti"          , kind = kind_merged    },
+    { name = "font-otn"          , ours = "font-otn"          , kind = kind_merged    },
     { name = "font-otp"          , ours = "font-otp"          , kind = kind_merged    },
     { name = "font-tfm"          , ours = "font-tfm"          , kind = kind_merged    },
     { name = "l-boolean"         , ours = "l-boolean"         , kind = kind_lualibs   },
@@ -282,9 +282,9 @@ local package = {
 ---   [24] font-oti.lua
 ---   [25] font-otf.lua
 ---   [26] font-otb.lua
----   [27] luatex-fonts-inj.lua
+---   [27] font-inj.lua
 ---   [28] luatex-fonts-ota.lua
----   [29] luatex-fonts-otn.lua
+---   [30] font-otn.lua
 ---   [30] font-otp.lua
 ---   [31] luatex-fonts-lua.lua
 ---   [32] font-def.lua
@@ -336,9 +336,9 @@ local package = {
     "font-oti",
     "font-otf",
     "font-otb",
-    "fonts-inj",
+    "font-inj",
     "fonts-ota",
-    "fonts-otn",
+    "font-otn",
     "font-otp",
     "fonts-lua",
     "font-def",

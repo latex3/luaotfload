@@ -938,18 +938,39 @@ local report_otf          = logs.reporter("fonts","otf loading")
 
 --HH]]--
 
+--- start locals for addfeature()
+
+local utfbyte = unicode.utf8.byte
+
+local otf = handlers and handlers.otf --- filled in later during initialization
+
+local normalized = {
+    substitution = "substitution",
+    single       = "substitution",
+    ligature     = "ligature",
+    alternate    = "alternate",
+    multiple     = "multiple",
+    kern         = "kern",
+}
+
 local types = {
     substitution = "gsub_single",
     ligature     = "gsub_ligature",
     alternate    = "gsub_alternate",
+    multiple     = "gsub_multiple",
+    kern         = "gpos_pair",
 }
 
 setmetatableindex(types, function(t,k) t[k] = k return k end) -- "key"
 
-local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
-local noflags    = { }
+--- stop locals for addfeature()
 
-local function addfeature (data, feature, specifications)
+local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
+local noflags = { }
+
+local tohash = table.tohash
+
+local function ancient_addfeature (data, feature, specifications)
     local descriptions = data.descriptions
     local resources    = data.resources
     local lookups      = resources.lookups
@@ -1089,7 +1110,255 @@ local function addfeature (data, feature, specifications)
     end
 end
 
+local function current_addfeature(data,feature,specifications)
+    local descriptions = data.descriptions
+    local resources    = data.resources
+    local features     = resources.features
+    local sequences    = resources.sequences
+    if not features or not sequences then
+        return
+    end
+    local gsubfeatures = features.gsub
+    if gsubfeatures and gsubfeatures[feature] then
+        return -- already present
+    end
+    local fontfeatures = resources.features or everywhere
+    local unicodes     = resources.unicodes
+    local splitter     = lpeg.splitter(" ",unicodes)
+    local done         = 0
+    local skip         = 0
+    if not specifications[1] then
+        -- so we accept a one entry specification
+        specifications = { specifications }
+    end
+
+    local function tounicode(code)
+        if not code then
+            return
+        elseif type(code) == "number" then
+            return code
+        else
+            return unicodes[code] or utfbyte(code)
+        end
+    end
+
+    local coverup      = otf.coverup
+    local coveractions = coverup.actions
+    local stepkey      = coverup.stepkey
+    local register     = coverup.register
+
+    for s=1,#specifications do
+        local specification = specifications[s]
+        local valid         = specification.valid
+        if not valid or valid(data,specification,feature) then
+            local initialize = specification.initialize
+            if initialize then
+                -- when false is returned we initialize only once
+                specification.initialize = initialize(specification,data) and initialize or nil
+            end
+            local askedfeatures = specification.features or everywhere
+            local askedsteps    = specifications.steps or specification.subtables or { specification.data } or { }
+            local defaulttype   = specification.type or "substitution"
+            local featureflags  = specification.flags or noflags
+            local featureorder  = specification.order or { feature }
+            local added         = false
+            local nofsteps      = 0
+            local steps         = { }
+            for i=1,#askedsteps do
+                local list        = askedsteps[i]
+                local coverage    = { }
+                local cover       = coveractions[featuretype]
+                local format      = nil
+                local featuretype = normalized[list.type or defaulttype] or "substitution"
+                if not cover then
+                    -- unknown
+                elseif featuretype == "substitution" then
+                    for code, replacement in next, list do
+                        local unicode     = tounicode(code)
+                        local description = descriptions[unicode]
+                        if description then
+                            if type(replacement) == "table" then
+                                replacement = replacement[1]
+                            end
+                            replacement = tounicode(replacement)
+                            if replacement and descriptions[replacement] then
+                                cover(coverage,unicode,replacement)
+                                done = done + 1
+                            else
+                                skip = skip + 1
+                            end
+                        else
+                            skip = skip + 1
+                        end
+                    end
+                elseif featuretype == "ligature" then
+                    for code, ligature in next, list do
+                        local unicode     = tounicode(code)
+                        local description = descriptions[unicode]
+                        if description then
+                            if type(ligature) == "string" then
+                                ligature = { lpegmatch(splitter,ligature) }
+                            end
+                            local present = true
+                            for i=1,#ligature do
+                                local l = ligature[i]
+                                local u = tounicode(l)
+                                if descriptions[u] then
+                                    ligature[i] = u
+                                else
+                                    present = false
+                                    break
+                                end
+                            end
+                            if present then
+                                cover(coverage,unicode,ligature)
+                                done = done + 1
+                            else
+                                skip = skip + 1
+                            end
+                        else
+                            skip = skip + 1
+                        end
+                    end
+                elseif featuretype == "alternate" then
+                    for code, replacement in next, list do
+                        local unicode     = tounicode(code)
+                        local description = descriptions[unicode]
+                        if not description then
+                            skip = skip + 1
+                        elseif type(replacement) == "table" then
+                            local r = { }
+                            for i=1,#replacement do
+                                local u = tounicode(replacement[i])
+                                r[i] = descriptions[u] and u or unicode
+                            end
+                            cover(coverage,unicode,r)
+                            done = done + 1
+                        else
+                            local u = tounicode(replacement)
+                            if u then
+                                cover(coverage,unicode,{ u })
+                                done = done + 1
+                            else
+                                skip = skip + 1
+                            end
+                        end
+                    end
+                elseif featuretype == "multiple" then -- todo: unicode can be table
+                    for code, replacement in next, list do
+                        local unicode     = tounicode(code)
+                        local description = descriptions[unicode]
+                        if not description then
+                            skip = skip + 1
+                        elseif type(replacement) == "table" then
+                            local r, n = { }, 0
+                            for i=1,#replacement do
+                                local u = tounicode(replacement[i])
+                                if descriptions[u] then
+                                    n = n + 1
+                                    r[n] = u
+                                end
+                            end
+                            if n > 0 then
+                                cover(coverage,unicode,r)
+                                done = done + 1
+                            else
+                                skip = skip + 1
+                            end
+                        else
+                            local u = tounicode(replacement)
+                            if u then
+                                cover(coverage,unicode,{ u })
+                                done = done + 1
+                            else
+                                skip = skip + 1
+                            end
+                        end
+                    end
+                elseif featuretype == "kern" then
+                    for code, replacement in next, list do
+                        local unicode     = tounicode(code)
+                        local description = descriptions[unicode]
+                        if description and type(replacement) == "table" then
+                            local r = { }
+                            for k, v in next, replacement do
+                                local u = tounicode(k)
+                                if u then
+                                    r[u] = v
+                                end
+                            end
+                            if next(r) then
+                                cover(coverage,unicode,r)
+                                done = done + 1
+                            else
+                                skip = skip + 1
+                            end
+                        else
+                            skip = skip + 1
+                        end
+                    end
+                    format = "kern"
+                end
+                if next(coverage) then
+                    added = true
+                    nofsteps = nofsteps + 1
+                    steps[nofsteps] = register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
+                end
+            end
+            if added then
+                -- script = { lang1, lang2, lang3 } or script = { lang1 = true, ... }
+                for k, v in next, askedfeatures do
+                    if v[1] then
+                        askedfeatures[k] = tohash(v)
+                    end
+                end
+                local sequence = {
+                    chain     = 0,
+                    features  = { [feature] = askedfeatures },
+                    flags     = featureflags,
+                    name      = feature, -- not needed
+                    order     = featureorder,
+                    [stepkey] = steps,
+                    nofsteps  = nofsteps,
+                    type      = types[featuretype],
+                }
+                if specification.prepend then
+                    insert(sequences,1,sequence)
+                else
+                    insert(sequences,sequence)
+                end
+                -- register in metadata (merge as there can be a few)
+                if not gsubfeatures then
+                    gsubfeatures  = { }
+                    fontfeatures.gsub = gsubfeatures
+                end
+                local k = gsubfeatures[feature]
+                if not k then
+                    k = { }
+                    gsubfeatures[feature] = k
+                end
+                for script, languages in next, askedfeatures do
+                    local kk = k[script]
+                    if not kk then
+                        kk = { }
+                        k[script] = kk
+                    end
+                    for language, value in next, languages do
+                        kk[language] = value
+                    end
+                end
+            end
+        end
+    end
+    if trace_loading then
+        report_otf("registering feature %a, affected glyphs %a, skipped glyphs %a",feature,done,skip)
+    end
+end
+
+
 ---[[ end snippet from font-otc.lua ]]
+
+local tlig_order = { "tlig" }
 
 local tlig_specification = {
     {
@@ -1100,8 +1369,8 @@ local tlig_specification = {
             [0x0027] = 0x2019,                   -- quoteleft
             [0x0060] = 0x2018,                   -- quoteright
         },
-        flags     = { },
-        order     = { "tlig" },
+        flags     = noflags,
+        order     = tlig_order,
         prepend   = true,
     },
     {
@@ -1120,8 +1389,8 @@ local tlig_specification = {
             [0x00AB] = {0x003C, 0x003C},         -- LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
             [0x00BB] = {0x003E, 0x003E},         -- RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
         },
-        flags    = { },
-        order    = { "tlig" },
+        flags    = noflags,
+        order    = tlig_order,
         prepend  = true,
     },
     {
@@ -1133,8 +1402,8 @@ local tlig_specification = {
             [0x00A1] = {0x0021, 0x0060},         -- exclamdown
             [0x00BF] = {0x003F, 0x0060},         -- questiondown
         },
-        flags    = { },
-        order    = { "tlig" },
+        flags    = noflags,
+        order    = tlig_order,
         prepend  = true,
     },
 }
@@ -1183,7 +1452,7 @@ local anum_specification = {
         type     = "substitution",
         features = { arab = { far = true, urd = true, snd = true } },
         data     = anum_persian,
-        flags    = { },
+        flags    = noflags,
         order    = { "anum" },
         valid    = valid,
     },
@@ -1191,7 +1460,7 @@ local anum_specification = {
         type     = "substitution",
         features = { arab = { ["*"] = true } },
         data     = anum_arabic,
-        flags    = { },
+        flags    = noflags,
         order    = { "anum" },
         valid    = valid,
     },
@@ -1201,13 +1470,13 @@ return {
     init = function ()
 
         if not fonts and fonts.handlers then
-            logreport ("log", 0, "color",
+            logreport ("log", 0, "features",
                        "OTF mechanisms missing -- did you forget to \z
                        load a font loader?")
             return false
         end
 
-        local otf = fonts.handlers.otf
+        otf = fonts.handlers.otf
 
         local extrafeatures = {
             tlig = tlig_specification,
@@ -1215,16 +1484,26 @@ return {
             anum = anum_specification,
         }
 
+        --- hack for backwards compat with TL2014 loader
+        local addfeature = otf.version < 2.8 and current_addfeature
+                                              or ancient_addfeature
+
         otf.enhancers.register ("check extra features",
-                                function (data,filename, raw)
+                                function (data, filename, raw)
                                     for feature, specification in next, extrafeatures do
+                                        logreport ("both", 3, "features",
+                                                   "register synthetic feature “%s” for %s font “%s”(%d)",
+                                                   feature,
+                                                   data.format,
+                                                   tostring (data.metadata and data.metadata.fontname or "<unknown>"),
+                                                   data.subfont or -1)
                                         addfeature (data, feature, specification)
                                     end
                                 end)
 
         logreport = luaotfload.log.report
         if not fonts then
-            logreport ("log", 0, "color",
+            logreport ("log", 0, "features",
                        "OTF mechanisms missing -- did you forget to \z
                        load a font loader?")
             return false

@@ -941,6 +941,7 @@ local report_otf          = logs.reporter("fonts","otf loading")
 --- start locals for addfeature()
 
 local utfbyte = unicode.utf8.byte
+local utfchar = unicode.utf8.char
 
 local otf = handlers and handlers.otf --- filled in later during initialization
 
@@ -1110,7 +1111,7 @@ local function ancient_addfeature (data, feature, specifications)
     end
 end
 
-local function addfeature(data,feature,specifications)
+local function current_addfeature(data,feature,specifications)
     local descriptions = data.descriptions
     local resources    = data.resources
     local features     = resources.features
@@ -1356,8 +1357,6 @@ end
 
 ---[[ end snippet from font-otc.lua ]]
 
-local tlig_order = { "tlig" }
-
 local tlig_specification = {
     {
         type      = "substitution",
@@ -1368,7 +1367,7 @@ local tlig_specification = {
             [0x0060] = 0x2018,                   -- quoteright
         },
         flags     = noflags,
-        order     = tlig_order,
+        order     = { "tlig" },
         prepend   = true,
     },
     {
@@ -1388,7 +1387,7 @@ local tlig_specification = {
             [0x00BB] = {0x003E, 0x003E},         -- RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
         },
         flags    = noflags,
-        order    = tlig_order,
+        order    = { "tlig" },
         prepend  = true,
     },
     {
@@ -1401,9 +1400,22 @@ local tlig_specification = {
             [0x00BF] = {0x003F, 0x0060},         -- questiondown
         },
         flags    = noflags,
-        order    = tlig_order,
+        order    = { "tlig" },
         prepend  = true,
     },
+}
+
+local tlig_specification = {
+    type      = "substitution",
+    features  = everywhere,
+    data      = {
+        [0x0022] = 0x201D,                   -- quotedblright
+        [0x0027] = 0x2019,                   -- quoteleft
+        [0x0060] = 0x2018,                   -- quoteright
+    },
+    flags     = noflags,
+    order     = { "tlig" },
+    prepend   = true,
 }
 
 local anum_arabic = { --- these are the same as in font-otc
@@ -1464,8 +1476,64 @@ local anum_specification = {
     },
 }
 
+local rot13_specification = {
+    type      = "substitution",
+    features  = everywhere,
+    data      = {
+        [65] = 78, [ 97] = 110, [78] = 65, [110] =  97,
+        [66] = 79, [ 98] = 111, [79] = 66, [111] =  98,
+        [67] = 80, [ 99] = 112, [80] = 67, [112] =  99,
+        [68] = 81, [100] = 113, [81] = 68, [113] = 100,
+        [69] = 82, [101] = 114, [82] = 69, [114] = 101,
+        [70] = 83, [102] = 115, [83] = 70, [115] = 102,
+        [71] = 84, [103] = 116, [84] = 71, [116] = 103,
+        [72] = 85, [104] = 117, [85] = 72, [117] = 104,
+        [73] = 86, [105] = 118, [86] = 73, [118] = 105,
+        [74] = 87, [106] = 119, [87] = 74, [119] = 106,
+        [75] = 88, [107] = 120, [88] = 75, [120] = 107,
+        [76] = 89, [108] = 121, [89] = 76, [121] = 108,
+        [77] = 90, [109] = 122, [90] = 77, [122] = 109,
+    },
+    flags     = noflags,
+    order     = { "rot13" },
+    prepend   = true,
+}
+
+local extrafeatures = {
+    tlig  = { tlig_specification,  "tex ligatures and substitutions" },
+    anum  = { anum_specification,  "arabic numerals"                 },
+    rot13 = { rot13_specification, "rot13"                           },
+}
+
+function add_otf_feature (name, specification)
+    if type (name) == "table" then
+        specification = name
+        name = specification.name
+    end
+    if type (name) == "string" then
+        extrafeatures[name] = specification
+    end
+end
+
+otf.addfeature           = add_otf_feature
+
+local install_extra_features = function (data, filename, raw)
+    for feature, specification in next, extrafeatures do
+        logreport ("both", 3, "features",
+                   "register synthetic feature “%s” for %s font “%s”(%d)",
+                   feature,
+                   data.format,
+                   tostring (data.metadata and data.metadata.fontname or "<unknown>"),
+                   data.subfont or -1)
+        otf.features.register { name = feature, description = specification[2] }
+        otf.enhancers.addfeature (data, feature, specification[1])
+    end
+end
+
 return {
     init = function ()
+
+        logreport = luaotfload.log.report
 
         if not fonts and fonts.handlers then
             logreport ("log", 0, "features",
@@ -1476,41 +1544,13 @@ return {
 
         otf = fonts.handlers.otf
 
-        local extrafeatures = {
-            tlig = tlig_specification,
-            trep = { },
-            anum = anum_specification,
-        }
-
         --- hack for backwards compat with TL2014 loader
-        local addfeature = otf.version < 2.8 and current_addfeature
-                                              or ancient_addfeature
+        otf.enhancers.addfeature = otf.version < 2.8 and ancient_addfeature
+                                                      or current_addfeature
 
         otf.enhancers.register ("check extra features",
-                                function (data, filename, raw)
-                                    for feature, specification in next, extrafeatures do
-                                        logreport ("both", 3, "features",
-                                                   "register synthetic feature “%s” for %s font “%s”(%d)",
-                                                   feature,
-                                                   data.format,
-                                                   tostring (data.metadata and data.metadata.fontname or "<unknown>"),
-                                                   data.subfont or -1)
-                                        addfeature (data, feature, specification)
-                                    end
-                                end)
+                                install_extra_features)
 
-        logreport = luaotfload.log.report
-        if not fonts then
-            logreport ("log", 0, "features",
-                       "OTF mechanisms missing -- did you forget to \z
-                       load a font loader?")
-            return false
-        end
-
-        otf.features.register {
-            name        = "anum",
-            description = "arabic digits",
-        }
         return true
     end
 }

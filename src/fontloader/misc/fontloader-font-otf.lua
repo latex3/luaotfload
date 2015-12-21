@@ -58,7 +58,7 @@ local otf                = fonts.handlers.otf
 
 otf.glists               = { "gsub", "gpos" }
 
-otf.version              = 2.819 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version              = 2.820 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                = containers.define("fonts", "otf", otf.version, true)
 
 local hashes             = fonts.hashes
@@ -2959,7 +2959,7 @@ otf.coverup = {
         kern         = justset,
     },
     register = function(coverage,lookuptype,format,feature,n,descriptions,resources)
-        local name = formatters["ctx_%s_%s"](feature,n)
+        local name = formatters["ctx_%s_%s_%s"](feature,lookuptype,n) -- we can have a mix of types
         if lookuptype == "kern" then
             resources.lookuptypes[name] = "position"
         else
@@ -2973,7 +2973,6 @@ otf.coverup = {
             else
                 description.slookups = { [name] = c }
             end
--- inspect(feature,description)
         end
         return name
     end

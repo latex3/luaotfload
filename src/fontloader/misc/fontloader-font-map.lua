@@ -74,6 +74,71 @@ end
 local f_single = formatters["%04X"]
 local f_double = formatters["%04X%04X"]
 
+-- 0.684 0.661 0,672 0.650 : cache at lua end (more mem)
+-- 0.682 0,672 0.698 0.657 : no cache (moderate mem i.e. lua strings)
+-- 0.644 0.647 0.655 0.645 : convert in c (less mem in theory)
+
+-- local tounicodes = table.setmetatableindex(function(t,unicode)
+--     local s
+--     if unicode < 0x10000 then
+--         s = f_single(unicode)
+--     elseif unicode < 0x1FFFFFFFFF then
+--         s = f_double(floor(unicode/1024),unicode%1024+0xDC00)
+--     else
+--         s = false
+--     end
+--     t[unicode] = s
+--     return s
+-- end)
+--
+-- local function tounicode16(unicode,name)
+--     local s = tounicodes[unicode]
+--     if s then
+--         return s
+--     else
+--         report_fonts("can't convert %a in %a into tounicode",unicode,name)
+--     end
+-- end
+--
+-- local function tounicode16sequence(unicodes,name)
+--     local t = { }
+--     for l=1,#unicodes do
+--         local u = unicodes[l]
+--         local s = tounicodes[u]
+--         if s then
+--             t[l] = s
+--         else
+--             report_fonts ("can't convert %a in %a into tounicode",u,name)
+--             return
+--         end
+--     end
+--     return concat(t)
+-- end
+--
+-- local function tounicode(unicode,name)
+--     if type(unicode) == "table" then
+--         local t = { }
+--         for l=1,#unicode do
+--             local u = unicode[l]
+--             local s = tounicodes[u]
+--             if s then
+--                 t[l] = s
+--             else
+--                 report_fonts ("can't convert %a in %a into tounicode",u,name)
+--                 return
+--             end
+--         end
+--         return concat(t)
+--     else
+--         local s = tounicodes[unicode]
+--         if s then
+--             return s
+--         else
+--             report_fonts("can't convert %a in %a into tounicode",unicode,name)
+--         end
+--     end
+-- end
+
 local function tounicode16(unicode,name)
     if unicode < 0x10000 then
         return f_single(unicode)
@@ -125,7 +190,6 @@ local function tounicode(unicode,name)
         end
     end
 end
-
 
 local function fromunicode16(str)
     if #str == 4 then

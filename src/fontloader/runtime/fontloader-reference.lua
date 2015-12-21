@@ -1,6 +1,6 @@
--- merged file : luatex-fonts-merged.lua
--- parent file : luatex-fonts.lua
--- merge date  : 11/19/15 19:13:15
+-- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
+-- parent file : c:/data/develop/context/sources/luatex-fonts.lua
+-- merge date  : 12/21/15 16:29:15
 
 do -- begin closure to overcome local limits and interference
 
@@ -3901,15 +3901,21 @@ end
 nodes={}
 nodes.pool={}
 nodes.handlers={}
-local nodecodes={} for k,v in next,node.types  () do nodecodes[string.gsub(v,"_","")]=k end
-local whatcodes={} for k,v in next,node.whatsits() do whatcodes[string.gsub(v,"_","")]=k end
-local glyphcodes={ [0]="character","glyph","ligature","ghost","left","right" }
-local disccodes={ [0]="discretionary","explicit","automatic","regular","first","second" }
-for i=0,#glyphcodes do glyphcodes[glyphcodes[i]]=i end
-for i=0,#disccodes do disccodes [disccodes [i]]=i end
+local nodecodes={}
+local glyphcodes=node.subtypes("glyph")
+local disccodes=node.subtypes("disc")
+for k,v in next,node.types() do
+  v=string.gsub(v,"_","")
+  nodecodes[k]=v
+  nodecodes[v]=k
+end
+for i=0,#glyphcodes do
+  glyphcodes[glyphcodes[i]]=i
+end
+for i=0,#disccodes do
+  disccodes[disccodes[i]]=i
+end
 nodes.nodecodes=nodecodes
-nodes.whatcodes=whatcodes
-nodes.whatsitcodes=whatcodes
 nodes.glyphcodes=glyphcodes
 nodes.disccodes=disccodes
 local free_node=node.free
@@ -3973,7 +3979,6 @@ nodes.traverse_id=node.traverse_id
 nodes.slide=node.slide
 nodes.vpack=node.vpack
 nodes.first_glyph=node.first_glyph
-nodes.first_character=node.first_character
 nodes.has_glyph=node.has_glyph or node.first_glyph
 nodes.current_attr=node.current_attr
 nodes.do_ligature_n=node.do_ligature_n
@@ -4002,13 +4007,27 @@ local setfield=direct.setfield
 nuts.getfield=getfield
 nuts.setfield=setfield
 nuts.getnext=direct.getnext
+nuts.setnext=direct.setnext
 nuts.getprev=direct.getprev
+nuts.setprev=direct.setprev
+nuts.getboth=direct.getboth
+nuts.setboth=direct.setboth
 nuts.getid=direct.getid
-nuts.getattr=getfield
+nuts.getattr=direct.get_attribute or direct.has_attribute or getfield
 nuts.setattr=setfield
 nuts.getfont=direct.getfont
+nuts.setfont=direct.setfont
 nuts.getsubtype=direct.getsubtype
+nuts.setsubtype=direct.setsubtype or function(n,s) setfield(n,"subtype",s) end
 nuts.getchar=direct.getchar
+nuts.setchar=direct.setchar
+nuts.getdisc=direct.getdisc
+nuts.setdisc=direct.setdisc
+nuts.setlink=direct.setlink
+nuts.getlist=direct.getlist
+nuts.setlist=direct.setlist  or function(n,l) setfield(n,"list",l) end
+nuts.getleader=direct.getleader
+nuts.setleader=direct.setleader or function(n,l) setfield(n,"leader",l) end
 nuts.insert_before=direct.insert_before
 nuts.insert_after=direct.insert_after
 nuts.delete=direct.delete
@@ -4022,6 +4041,9 @@ nuts.is_node=direct.is_node
 nuts.end_of_math=direct.end_of_math
 nuts.traverse=direct.traverse
 nuts.traverse_id=direct.traverse_id
+nuts.traverse_char=direct.traverse_char
+nuts.ligaturing=direct.ligaturing
+nuts.kerning=direct.kerning
 nuts.getprop=nuts.getattr
 nuts.setprop=nuts.setattr
 local new_nut=direct.new
@@ -7048,8 +7070,9 @@ local fonts=fonts
 local constructors=fonts.constructors
 local otf=constructors.newhandler("otf")
 local otffeatures=constructors.newfeatures("otf")
-local otftables=otf.tables
 local registerotffeature=otffeatures.register
+local otftables=otf.tables or {}
+otf.tables=otftables
 local allocate=utilities.storage.allocate
 registerotffeature {
   name="features",
@@ -7113,6 +7136,64 @@ registerotffeature {
     node=setscript,
   }
 }
+otftables.featuretypes=allocate {
+  gpos_single="position",
+  gpos_pair="position",
+  gpos_cursive="position",
+  gpos_mark2base="position",
+  gpos_mark2ligature="position",
+  gpos_mark2mark="position",
+  gpos_context="position",
+  gpos_contextchain="position",
+  gsub_single="substitution",
+  gsub_multiple="substitution",
+  gsub_alternate="substitution",
+  gsub_ligature="substitution",
+  gsub_context="substitution",
+  gsub_contextchain="substitution",
+  gsub_reversecontextchain="substitution",
+  gsub_reversesub="substitution",
+}
+function otffeatures.checkeddefaultscript(featuretype,autoscript,scripts)
+  if featuretype=="position" then
+    local default=scripts.dflt
+    if default then
+      if autoscript=="position" or autoscript==true then
+        return default
+      else
+        report_otf("script feature %s not applied, enable default positioning")
+      end
+    else
+    end
+  elseif featuretype=="substitution" then
+    local default=scripts.dflt
+    if default then
+      if autoscript=="substitution" or autoscript==true then
+        return default
+      end
+    end
+  end
+end
+function otffeatures.checkeddefaultlanguage(featuretype,autolanguage,languages)
+  if featuretype=="position" then
+    local default=languages.dflt
+    if default then
+      if autolanguage=="position" or autolanguage==true then
+        return default
+      else
+        report_otf("language feature %s not applied, enable default positioning")
+      end
+    else
+    end
+  elseif featuretype=="substitution" then
+    local default=languages.dflt
+    if default then
+      if autolanguage=="substitution" or autolanguage==true then
+        return default
+      end
+    end
+  end
+end
 
 end -- closure
 
@@ -7156,7 +7237,7 @@ local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
 otf.glists={ "gsub","gpos" }
-otf.version=2.819 
+otf.version=2.820 
 otf.cache=containers.define("fonts","otf",otf.version,true)
 local hashes=fonts.hashes
 local definers=fonts.definers
@@ -9492,7 +9573,7 @@ otf.coverup={
     kern=justset,
   },
   register=function(coverage,lookuptype,format,feature,n,descriptions,resources)
-    local name=formatters["ctx_%s_%s"](feature,n)
+    local name=formatters["ctx_%s_%s_%s"](feature,lookuptype,n) 
     if lookuptype=="kern" then
       resources.lookuptypes[name]="position"
     else
@@ -10224,8 +10305,10 @@ function injections.resetcounts()
 end
 function injections.reset(n)
   local p=rawget(properties,n)
-  if p and rawget(p,"injections") then
-    p.injections=nil
+  if p then
+    p.injections=false 
+  else
+    properties[n]=false 
   end
 end
 function injections.copy(target,source)
@@ -10242,10 +10325,17 @@ function injections.copy(target,source)
           injections=si,
         }
       end
+    elseif tp then
+      tp.injections=false 
     else
-      if tp then
-        tp.injections=nil
-      end
+      properties[target]={ injections={} }
+    end
+  else
+    local tp=rawget(properties,target)
+    if tp then
+      tp.injections=false 
+    else
+      properties[target]=false 
     end
   end
 end
@@ -10480,10 +10570,11 @@ local function show(n,what,nested,symbol)
         local markx=i.markx   or 0
         local marky=i.marky   or 0
         local markdir=i.markdir  or 0
-        local markbase=i.markbase or 0 
+        local markbase=i.markbase or 0
         local cursivex=i.cursivex or 0
         local cursivey=i.cursivey or 0
         local ligaindex=i.ligaindex or 0
+        local cursbase=i.cursiveanchor
         local margin=nested and 4 or 2
         if rightkern~=0 or yoffset~=0 then
           report_injections("%w%s pair: lx %p, rx %p, dy %p",margin,symbol,leftkern,rightkern,yoffset)
@@ -10494,7 +10585,13 @@ local function show(n,what,nested,symbol)
           report_injections("%w%s mark: dx %p, dy %p, dir %s, base %s",margin,symbol,markx,marky,markdir,markbase~=0 and "yes" or "no")
         end
         if cursivex~=0 or cursivey~=0 then
-          report_injections("%w%s curs: dx %p, dy %p",margin,symbol,cursivex,cursivey)
+          if cursbase then
+            report_injections("%w%s curs: base dx %p, dy %p",margin,symbol,cursivex,cursivey)
+          else
+            report_injections("%w%s curs: dx %p, dy %p",margin,symbol,cursivex,cursivey)
+          end
+        elseif cursbase then
+          report_injections("%w%s curs: base",margin,symbol)
         end
         if ligaindex~=0 then
           report_injections("%w%s liga: index %i",margin,symbol,ligaindex)
@@ -11177,7 +11274,7 @@ end -- closure
 
 do -- begin closure to overcome local limits and interference
 
-if not modules then modules={} end modules ['font-otx']={
+if not modules then modules={} end modules ['luatex-fonts-ota']={
   version=1.001,
   comment="companion to font-otf.lua (analysing)",
   author="Hans Hagen, PRAGMA-ADE, Hasselt NL",
@@ -11194,7 +11291,6 @@ local initializers=allocate()
 local methods=allocate()
 analyzers.initializers=initializers
 analyzers.methods=methods
-analyzers.useunicodemarks=false
 local a_state=attributes.private('state')
 local nuts=nodes.nuts
 local tonut=nuts.tonut
@@ -11250,6 +11346,7 @@ local features={
 }
 analyzers.states=states
 analyzers.features=features
+analyzers.useunicodemarks=false
 function analyzers.setstate(head,font)
   local useunicodemarks=analyzers.useunicodemarks
   local tfmdata=fontdata[font]
@@ -11263,7 +11360,10 @@ function analyzers.setstate(head,font)
       local char=getchar(current)
       local d=descriptions[char]
       if d then
-        if d.class=="mark" or (useunicodemarks and categories[char]=="mn") then
+        if d.class=="mark" then
+          done=true
+          setprop(current,a_state,s_mark)
+        elseif useunicodemarks and categories[char]=="mn" then
           done=true
           setprop(current,a_state,s_mark)
         elseif n==0 then
@@ -11612,7 +11712,9 @@ local tonut=nuts.tonut
 local getfield=nuts.getfield
 local setfield=nuts.setfield
 local getnext=nuts.getnext
+local setnext=nuts.setnext
 local getprev=nuts.getprev
+local setprev=nuts.setprev
 local getid=nuts.getid
 local getattr=nuts.getattr
 local setattr=nuts.setattr
@@ -11620,7 +11722,9 @@ local getprop=nuts.getprop
 local setprop=nuts.setprop
 local getfont=nuts.getfont
 local getsubtype=nuts.getsubtype
+local setsubtype=nuts.setsubtype
 local getchar=nuts.getchar
+local setchar=nuts.setchar
 local insert_node_before=nuts.insert_before
 local insert_node_after=nuts.insert_after
 local delete_node=nuts.delete
@@ -11639,15 +11743,14 @@ local zwj=0x200D
 local wildcard="*"
 local default="dflt"
 local nodecodes=nodes.nodecodes
-local whatcodes=nodes.whatcodes
 local glyphcodes=nodes.glyphcodes
 local disccodes=nodes.disccodes
 local glyph_code=nodecodes.glyph
 local glue_code=nodecodes.glue
 local disc_code=nodecodes.disc
 local math_code=nodecodes.math
-local dir_code=whatcodes.dir
-local localpar_code=whatcodes.localpar
+local dir_code=nodecodes.dir
+local localpar_code=nodecodes.localpar
 local discretionary_code=disccodes.discretionary
 local ligature_code=glyphcodes.ligature
 local privateattribute=attributes.private
@@ -11767,8 +11870,8 @@ local function flattendisk(head,disc)
     if replace then
       if next then
         local tail=find_node_tail(replace)
-        setfield(tail,"next",next)
-        setfield(next,"prev",tail)
+        setnext(tail,next)
+        setprev(next,tail)
       end
       return replace,replace
     elseif next then
@@ -11782,17 +11885,17 @@ local function flattendisk(head,disc)
     if replace then
       local tail=find_node_tail(replace)
       if next then
-        setfield(tail,"next",next)
-        setfield(next,"prev",tail)
+        setnext(tail,next)
+        setprev(next,tail)
       end
-      setfield(prev,"next",replace)
-      setfield(replace,"prev",prev)
+      setnext(prev,replace)
+      setprev(replace,prev)
       return head,replace
     else
       if next then
-        setfield(next,"prev",prev)
+        setprev(next,prev)
       end
-      setfield(prev,"next",next)
+      setnext(prev,next)
       return head,next
     end
   end
@@ -11805,14 +11908,14 @@ local function appenddisc(disc,list)
   local ptail=find_node_tail(post)
   local rtail=find_node_tail(replace)
   if post then
-    setfield(ptail,"next",phead)
-    setfield(phead,"prev",ptail)
+    setnext(ptail,phead)
+    setprev(phead,ptail)
   else
     setfield(disc,"post",phead)
   end
   if replace then
-    setfield(rtail,"next",rhead)
-    setfield(rhead,"prev",rtail)
+    setnext(rtail,rhead)
+    setprev(rhead,rtail)
   else
     setfield(disc,"replace",rhead)
   end
@@ -11823,24 +11926,24 @@ local function markstoligature(kind,lookupname,head,start,stop,char)
   else
     local prev=getprev(start)
     local next=getnext(stop)
-    setfield(start,"prev",nil)
-    setfield(stop,"next",nil)
+    setprev(start,nil)
+    setnext(stop,nil)
     local base=copy_glyph(start)
     if head==start then
       head=base
     end
     resetinjection(base)
-    setfield(base,"char",char)
-    setfield(base,"subtype",ligature_code)
+    setchar(base,char)
+    setsubtype(base,ligature_code)
     setfield(base,"components",start)
     if prev then
-      setfield(prev,"next",base)
+      setnext(prev,base)
     end
     if next then
-      setfield(next,"prev",base)
+      setprev(next,base)
     end
-    setfield(base,"next",next)
-    setfield(base,"prev",prev)
+    setnext(base,next)
+    setprev(base,prev)
     return head,base
   end
 end
@@ -11868,7 +11971,7 @@ local function toligature(kind,lookupname,head,start,stop,char,markflag,discfoun
   end
   if start==stop and getchar(start)==char then
     resetinjection(start)
-    setfield(start,"char",char)
+    setchar(start,char)
     return head,start
   end
   local components=getfield(start,"components")
@@ -11877,24 +11980,24 @@ local function toligature(kind,lookupname,head,start,stop,char,markflag,discfoun
   local prev=getprev(start)
   local next=getnext(stop)
   local comp=start
-  setfield(start,"prev",nil)
-  setfield(stop,"next",nil)
+  setprev(start,nil)
+  setnext(stop,nil)
   local base=copy_glyph(start)
   if start==head then
     head=base
   end
   resetinjection(base)
-  setfield(base,"char",char)
-  setfield(base,"subtype",ligature_code)
+  setchar(base,char)
+  setsubtype(base,ligature_code)
   setfield(base,"components",comp) 
   if prev then
-    setfield(prev,"next",base)
+    setnext(prev,base)
   end
   if next then
-    setfield(next,"prev",base)
+    setprev(next,base)
   end
-  setfield(base,"prev",prev)
-  setfield(base,"next",next)
+  setprev(base,prev)
+  setnext(base,next)
   if not discfound then
     local deletemarks=markflag~="mark"
     local components=start
@@ -11934,41 +12037,41 @@ local function toligature(kind,lookupname,head,start,stop,char,markflag,discfoun
       start=getnext(start)
     end
   else
-    local discprev=getfield(discfound,"prev")
-    local discnext=getfield(discfound,"next")
+    local discprev=getprev(discfound)
+    local discnext=getnext(discfound)
     if discprev and discnext then
       local pre=getfield(discfound,"pre")
       local post=getfield(discfound,"post")
       local replace=getfield(discfound,"replace")
       if not replace then 
-        local prev=getfield(base,"prev")
+        local prev=getprev(base)
         local copied=copy_node_list(comp)
-        setfield(discnext,"prev",nil) 
-        setfield(discprev,"next",nil) 
+        setprev(discnext,nil) 
+        setnext(discprev,nil) 
         if pre then
-          setfield(discprev,"next",pre)
-          setfield(pre,"prev",discprev)
+          setnext(discprev,pre)
+          setprev(pre,discprev)
         end
         pre=comp
         if post then
           local tail=find_node_tail(post)
-          setfield(tail,"next",discnext)
-          setfield(discnext,"prev",tail)
-          setfield(post,"prev",nil)
+          setnext(tail,discnext)
+          setprev(discnext,tail)
+          setprev(post,nil)
         else
           post=discnext
         end
-        setfield(prev,"next",discfound)
-        setfield(discfound,"prev",prev)
-        setfield(discfound,"next",next)
-        setfield(next,"prev",discfound)
-        setfield(base,"next",nil)
-        setfield(base,"prev",nil)
+        setnext(prev,discfound)
+        setprev(discfound,prev)
+        setnext(discfound,next)
+        setprev(next,discfound)
+        setnext(base,nil)
+        setprev(base,nil)
         setfield(base,"components",copied)
         setfield(discfound,"pre",pre)
         setfield(discfound,"post",post)
         setfield(discfound,"replace",base)
-        setfield(discfound,"subtype",discretionary_code)
+        setsubtype(discfound,discretionary_code)
         base=prev 
       end
     end
@@ -11979,19 +12082,19 @@ local function multiple_glyphs(head,start,multiple,ignoremarks)
   local nofmultiples=#multiple
   if nofmultiples>0 then
     resetinjection(start)
-    setfield(start,"char",multiple[1])
+    setchar(start,multiple[1])
     if nofmultiples>1 then
       local sn=getnext(start)
       for k=2,nofmultiples do
         local n=copy_node(start) 
         resetinjection(n)
-        setfield(n,"char",multiple[k])
-        setfield(n,"prev",start)
-        setfield(n,"next",sn)
+        setchar(n,multiple[k])
+        setprev(n,start)
+        setnext(n,sn)
         if sn then
-          setfield(sn,"prev",n)
+          setprev(sn,n)
         end
-        setfield(start,"next",n)
+        setnext(start,n)
         start=n
       end
     end
@@ -12039,7 +12142,7 @@ function handlers.gsub_single(head,start,kind,lookupname,replacement)
     logprocess("%s: replacing %s by single %s",pref(kind,lookupname),gref(getchar(start)),gref(replacement))
   end
   resetinjection(start)
-  setfield(start,"char",replacement)
+  setchar(start,replacement)
   return head,start,true
 end
 function handlers.gsub_alternate(head,start,kind,lookupname,alternative,sequence)
@@ -12050,7 +12153,7 @@ function handlers.gsub_alternate(head,start,kind,lookupname,alternative,sequence
       logprocess("%s: replacing %s by alternative %a to %s, %s",pref(kind,lookupname),gref(getchar(start)),choice,gref(choice),comment)
     end
     resetinjection(start)
-    setfield(start,"char",choice)
+    setchar(start,choice)
   else
     if trace_alternatives then
       logwarning("%s: no variant %a for %s, %s",pref(kind,lookupname),value,gref(getchar(start)),comment)
@@ -12144,7 +12247,7 @@ function handlers.gsub_ligature(head,start,kind,lookupname,ligature,sequence)
         end
       else
         resetinjection(start)
-        setfield(start,"char",lig)
+        setchar(start,lig)
         if trace_ligatures then
           logprocess("%s: replacing %s by (no real) ligature %s case 3",pref(kind,lookupname),gref(startchar),gref(lig))
         end
@@ -12471,7 +12574,7 @@ function chainprocs.reversesub(head,start,stop,kind,chainname,currentcontext,loo
       logprocess("%s: single reverse replacement of %s by %s",cref(kind,chainname),gref(char),gref(replacement))
     end
     resetinjection(start)
-    setfield(start,"char",replacement)
+    setchar(start,replacement)
     return head,start,true
   else
     return head,start,false
@@ -12503,7 +12606,7 @@ function chainprocs.gsub_single(head,start,stop,kind,chainname,currentcontext,lo
             logprocess("%s: replacing single %s by %s",cref(kind,chainname,chainlookupname,lookupname,chainindex),gref(currentchar),gref(replacement))
           end
           resetinjection(current)
-          setfield(current,"char",replacement)
+          setchar(current,replacement)
         end
       end
       return head,start,true
@@ -12561,7 +12664,7 @@ function chainprocs.gsub_alternate(head,start,stop,kind,chainname,currentcontext
               logprocess("%s: replacing %s by alternative %a to %s, %s",cref(kind,chainname,chainlookupname,lookupname),gref(char),choice,gref(choice),comment)
             end
             resetinjection(start)
-            setfield(start,"char",choice)
+            setchar(start,choice)
           else
             if trace_alternatives then
               logwarning("%s: no variant %a for %s, %s",cref(kind,chainname,chainlookupname,lookupname),value,gref(char),comment)
@@ -13056,13 +13159,13 @@ local function chaindisk(head,start,last,kind,chainname,ck,lookuphash,chainlooku
       local tail=nil
       if prev then
         tail=prev
-        setfield(current,"prev",sweepnode)
+        setprev(current,sweepnode)
       else
         tail=find_node_tail(head)
       end
-      setfield(sweepnode,"next",current)
-      setfield(head,"prev",nil)
-      setfield(tail,"next",nil)
+      setnext(sweepnode,current)
+      setprev(head,nil)
+      setnext(tail,nil)
       appenddisc(sweepnode,head)
     end
   end
@@ -13150,12 +13253,12 @@ local function chaindisk(head,start,last,kind,chainname,ck,lookuphash,chainlooku
       startishead=cf==head
       cprev=getprev(cprev)
     end
-    setfield(lookaheaddisc,"prev",cprev)
+    setprev(lookaheaddisc,cprev)
     if cprev then
-      setfield(cprev,"next",lookaheaddisc)
+      setnext(cprev,lookaheaddisc)
     end
-    setfield(cf,"prev",nil)
-    setfield(cl,"next",nil)
+    setprev(cf,nil)
+    setnext(cl,nil)
     if startishead then
       head=lookaheaddisc
     end
@@ -13177,13 +13280,13 @@ local function chaindisk(head,start,last,kind,chainname,ck,lookuphash,chainlooku
       new,cnew,ok=chainproc(new,cnew,clast,kind,chainname,ck,lookuphash,chainlookup,chainlookupname,nil,sequence)
     end
     if pre then
-      setfield(cl,"next",pre)
-      setfield(pre,"prev",cl)
+      setnext(cl,pre)
+      setprev(pre,cl)
     end
     if replace then
       local tail=find_node_tail(new)
-      setfield(tail,"next",replace)
-      setfield(replace,"prev",tail)
+      setnext(tail,replace)
+      setprev(replace,tail)
     end
     setfield(lookaheaddisc,"pre",cf)   
     setfield(lookaheaddisc,"replace",new) 
@@ -13201,11 +13304,11 @@ local function chaindisk(head,start,last,kind,chainname,ck,lookuphash,chainlooku
       cnext=getnext(cnext)
     end
     if cnext then
-      setfield(cnext,"prev",backtrackdisc)
+      setprev(cnext,backtrackdisc)
     end
-    setfield(backtrackdisc,"next",cnext)
-    setfield(cf,"prev",nil)
-    setfield(cl,"next",nil)
+    setnext(backtrackdisc,cnext)
+    setprev(cf,nil)
+    setnext(cl,nil)
     local replace=getfield(backtrackdisc,"replace")
     local post=getfield(backtrackdisc,"post")
     local new=copy_node_list(cf)
@@ -13225,15 +13328,15 @@ local function chaindisk(head,start,last,kind,chainname,ck,lookuphash,chainlooku
     end
     if post then
       local tail=find_node_tail(post)
-      setfield(tail,"next",cf)
-      setfield(cf,"prev",tail)
+      setnext(tail,cf)
+      setprev(cf,tail)
     else
       post=cf
     end
     if replace then
       local tail=find_node_tail(replace)
-      setfield(tail,"next",new)
-      setfield(new,"prev",tail)
+      setnext(tail,new)
+      setprev(new,tail)
     else
       replace=new
     end
@@ -13761,25 +13864,40 @@ otf.chainhandlers={
   normal=normal_handle_contextchain,
   verbose=verbose_handle_contextchain,
 }
+local handle_contextchain=nil
+function chained_contextchain(head,start,stop,...)
+  local steps=currentlookup.steps
+  local nofsteps=currentlookup.nofsteps
+  if nofsteps>1 then
+    reportmoresteps(dataset,sequence)
+  end
+  return handle_contextchain(head,start,...)
+end
 function otf.setcontextchain(method)
   if not method or method=="normal" or not otf.chainhandlers[method] then
-    if handlers.contextchain then 
+    if handle_contextchain then 
       logwarning("installing normal contextchain handler")
     end
-    handlers.contextchain=normal_handle_contextchain
+    handle_contextchain=normal_handle_contextchain
   else
     logwarning("installing contextchain handler %a",method)
     local handler=otf.chainhandlers[method]
-    handlers.contextchain=function(...)
+    handle_contextchain=function(...)
       return handler(currentfont,...) 
     end
   end
-  handlers.gsub_context=handlers.contextchain
-  handlers.gsub_contextchain=handlers.contextchain
-  handlers.gsub_reversecontextchain=handlers.contextchain
-  handlers.gpos_contextchain=handlers.contextchain
-  handlers.gpos_context=handlers.contextchain
+  handlers.gsub_context=handle_contextchain
+  handlers.gsub_contextchain=handle_contextchain
+  handlers.gsub_reversecontextchain=handle_contextchain
+  handlers.gpos_contextchain=handle_contextchain
+  handlers.gpos_context=handle_contextchain
+  handlers.contextchain=handle_contextchain
 end
+chainprocs.gsub_context=chained_contextchain
+chainprocs.gsub_contextchain=chained_contextchain
+chainprocs.gsub_reversecontextchain=chained_contextchain
+chainprocs.gpos_contextchain=chained_contextchain
+chainprocs.gpos_context=chained_contextchain
 otf.setcontextchain()
 local missing={} 
 local function logprocess(...)
@@ -13807,19 +13925,32 @@ setmetatableindex(lookuphashes,function(t,font)
   t[font]=lookuphash
   return lookuphash
 end)
-local autofeatures=fonts.analyzers.features 
-local function initialize(sequence,script,language,enabled)
+local autofeatures=fonts.analyzers.features
+local featuretypes=otf.tables.featuretypes
+local defaultscript=otf.features.checkeddefaultscript
+local defaultlanguage=otf.features.checkeddefaultlanguage
+local function initialize(sequence,script,language,enabled,autoscript,autolanguage)
   local features=sequence.features
   if features then
     local order=sequence.order
     if order then
-      for i=1,#order do 
-        local kind=order[i] 
+      local featuretype=featuretypes[sequence.type or "unknown"]
+      for i=1,#order do
+        local kind=order[i]
         local valid=enabled[kind]
         if valid then
-          local scripts=features[kind] 
-          local languages=scripts[script] or scripts[wildcard]
-          if languages and (languages[language] or languages[wildcard]) then
+          local scripts=features[kind]
+          local languages=scripts and (
+            scripts[script] or
+            scripts[wildcard] or
+            (autoscript and defaultscript(featuretype,autoscript,scripts))
+          )
+          local enabled=languages and (
+            languages[language] or
+            languages[wildcard] or
+            (autolanguage and defaultlanguage(featuretype,autolanguage,languages))
+          )
+          if enabled then
             return { valid,autofeatures[kind] or false,sequence,kind }
           end
         end
@@ -13835,6 +13966,8 @@ function otf.dataset(tfmdata,font)
   local language=properties.language or "dflt"
   local script=properties.script  or "dflt"
   local enabled=shared.features
+  local autoscript=enabled and enabled.autoscript
+  local autolanguage=enabled and enabled.autolanguage
   local res=resolved[font]
   if not res then
     res={}
@@ -13852,7 +13985,7 @@ function otf.dataset(tfmdata,font)
     rs[language]=rl
     local sequences=tfmdata.resources.sequences
     for s=1,#sequences do
-      local v=enabled and initialize(sequences[s],script,language,enabled)
+      local v=enabled and initialize(sequences[s],script,language,enabled,autoscript,autolanguage)
       if v then
         rl[#rl+1]=v
       end
@@ -13882,57 +14015,57 @@ local function kernrun(disc,run)
   if not pre then
   elseif prev then
     local nest=getprev(pre)
-    setfield(pre,"prev",prev)
-    setfield(prev,"next",pre)
+    setprev(pre,prev)
+    setnext(prev,pre)
     run(prevmarks,"preinjections")
-    setfield(pre,"prev",nest)
-    setfield(prev,"next",disc)
+    setprev(pre,nest)
+    setnext(prev,disc)
   else
     run(pre,"preinjections")
   end
   if not post then
   elseif next then
     local tail=find_node_tail(post)
-    setfield(tail,"next",next)
-    setfield(next,"prev",tail)
+    setnext(tail,next)
+    setprev(next,tail)
     run(post,"postinjections",next)
-    setfield(tail,"next",nil)
-    setfield(next,"prev",disc)
+    setnext(tail,nil)
+    setprev(next,disc)
   else
     run(post,"postinjections")
   end
   if not replace and prev and next then
-    setfield(prev,"next",next)
-    setfield(next,"prev",prev)
+    setnext(prev,next)
+    setprev(next,prev)
     run(prevmarks,"injections",next)
-    setfield(prev,"next",disc)
-    setfield(next,"prev",disc)
+    setnext(prev,disc)
+    setprev(next,disc)
   elseif prev and next then
     local tail=find_node_tail(replace)
     local nest=getprev(replace)
-    setfield(replace,"prev",prev)
-    setfield(prev,"next",replace)
-    setfield(tail,"next",next)
-    setfield(next,"prev",tail)
+    setprev(replace,prev)
+    setnext(prev,replace)
+    setnext(tail,next)
+    setprev(next,tail)
     run(prevmarks,"replaceinjections",next)
-    setfield(replace,"prev",nest)
-    setfield(prev,"next",disc)
-    setfield(tail,"next",nil)
-    setfield(next,"prev",disc)
+    setprev(replace,nest)
+    setnext(prev,disc)
+    setnext(tail,nil)
+    setprev(next,disc)
   elseif prev then
     local nest=getprev(replace)
-    setfield(replace,"prev",prev)
-    setfield(prev,"next",replace)
+    setprev(replace,prev)
+    setnext(prev,replace)
     run(prevmarks,"replaceinjections")
-    setfield(replace,"prev",nest)
-    setfield(prev,"next",disc)
+    setprev(replace,nest)
+    setnext(prev,disc)
   elseif next then
     local tail=find_node_tail(replace)
-    setfield(tail,"next",next)
-    setfield(next,"prev",tail)
+    setnext(tail,next)
+    setprev(next,tail)
     run(replace,"replaceinjections",next)
-    setfield(tail,"next",nil)
-    setfield(next,"prev",disc)
+    setnext(tail,nil)
+    setprev(next,disc)
   else
     run(replace,"replaceinjections")
   end
@@ -13979,21 +14112,21 @@ local function testrun(disc,trun,crun)
       local prev=getprev(disc)
       if prev then
         local tail=find_node_tail(replace)
-        setfield(tail,"next",next)
-        setfield(next,"prev",tail)
+        setnext(tail,next)
+        setprev(next,tail)
         if trun(replace,next) then
           setfield(disc,"replace",nil) 
-          setfield(prev,"next",replace)
-          setfield(replace,"prev",prev)
-          setfield(next,"prev",tail)
-          setfield(tail,"next",next)
-          setfield(disc,"prev",nil)
-          setfield(disc,"next",nil)
+          setnext(prev,replace)
+          setprev(replace,prev)
+          setprev(next,tail)
+          setnext(tail,next)
+          setprev(disc,nil)
+          setnext(disc,nil)
           flush_node_list(disc)
           return replace 
         else
-          setfield(tail,"next",nil)
-          setfield(next,"prev",disc)
+          setnext(tail,nil)
+          setprev(next,disc)
         end
       else
       end
@@ -14011,19 +14144,19 @@ local function discrun(disc,drun,krun)
     report_run("disc") 
   end
   if next and prev then
-    setfield(prev,"next",next)
+    setnext(prev,next)
     drun(prev)
-    setfield(prev,"next",disc)
+    setnext(prev,disc)
   end
   local pre=getfield(disc,"pre")
   if not pre then
   elseif prev then
     local nest=getprev(pre)
-    setfield(pre,"prev",prev)
-    setfield(prev,"next",pre)
+    setprev(pre,prev)
+    setnext(prev,pre)
     krun(prev,"preinjections")
-    setfield(pre,"prev",nest)
-    setfield(prev,"next",disc)
+    setprev(pre,nest)
+    setnext(prev,disc)
   else
     krun(pre,"preinjections")
   end
@@ -14281,6 +14414,40 @@ local function featuresprocessor(head,font,attr)
               end
             elseif id==math_code then
               start=getnext(end_of_math(start))
+            elseif id==dir_code then
+              local dir=getfield(start,"dir")
+              if dir=="+TLT" then
+                topstack=topstack+1
+                dirstack[topstack]=dir
+                rlmode=1
+              elseif dir=="+TRT" then
+                topstack=topstack+1
+                dirstack[topstack]=dir
+                rlmode=-1
+              elseif dir=="-TLT" or dir=="-TRT" then
+                topstack=topstack-1
+                rlmode=dirstack[topstack]=="+TRT" and -1 or 1
+              else
+                rlmode=rlparmode
+              end
+              if trace_directions then
+                report_process("directions after txtdir %a: parmode %a, txtmode %a, # stack %a, new dir %a",dir,rlparmode,rlmode,topstack,newdir)
+              end
+              start=getnext(start)
+            elseif id==localpar_code then
+              local dir=getfield(start,"dir")
+              if dir=="TRT" then
+                rlparmode=-1
+              elseif dir=="TLT" then
+                rlparmode=1
+              else
+                rlparmode=0
+              end
+              rlmode=rlparmode
+              if trace_directions then
+                report_process("directions after pardir %a: parmode %a, txtmode %a",dir,rlparmode,rlmode)
+              end
+              start=getnext(start)
             else
               start=getnext(start)
             end
@@ -14501,6 +14668,40 @@ local function featuresprocessor(head,font,attr)
             end
           elseif id==math_code then
             start=getnext(end_of_math(start))
+          elseif id==dir_code then
+            local dir=getfield(start,"dir")
+            if dir=="+TLT" then
+              topstack=topstack+1
+              dirstack[topstack]=dir
+              rlmode=1
+            elseif dir=="+TRT" then
+              topstack=topstack+1
+              dirstack[topstack]=dir
+              rlmode=-1
+            elseif dir=="-TLT" or dir=="-TRT" then
+              topstack=topstack-1
+              rlmode=dirstack[topstack]=="+TRT" and -1 or 1
+            else
+              rlmode=rlparmode
+            end
+            if trace_directions then
+              report_process("directions after txtdir %a: parmode %a, txtmode %a, # stack %a, new dir %a",dir,rlparmode,rlmode,topstack,newdir)
+            end
+            start=getnext(start)
+          elseif id==localpar_code then
+            local dir=getfield(start,"dir")
+            if dir=="TRT" then
+              rlparmode=-1
+            elseif dir=="TLT" then
+              rlparmode=1
+            else
+              rlparmode=0
+            end
+            rlmode=rlparmode
+            if trace_directions then
+              report_process("directions after pardir %a: parmode %a, txtmode %a",dir,rlparmode,rlmode)
+            end
+            start=getnext(start)
           else
             start=getnext(start)
           end
@@ -14636,10 +14837,10 @@ local function split(replacement,original)
   end
   return result
 end
-local valid={
-  coverage={ chainsub=true,chainpos=true,contextsub=true },
+local valid={ 
+  coverage={ chainsub=true,chainpos=true,contextsub=true,contextpos=true },
   reversecoverage={ reversesub=true },
-  glyphs={ chainsub=true,chainpos=true },
+  glyphs={ chainsub=true,chainpos=true,contextsub=true,contextpos=true },
 }
 local function prepare_contextchains(tfmdata)
   local rawdata=tfmdata.shared.rawdata
@@ -15952,7 +16153,7 @@ end -- closure
 
 do -- begin closure to overcome local limits and interference
 
-if not modules then modules={} end modules ['luatex-font-def']={
+if not modules then modules={} end modules ['luatex-fonts-def']={
   version=1.001,
   comment="companion to luatex-*.tex",
   author="Hans Hagen, PRAGMA-ADE, Hasselt NL",

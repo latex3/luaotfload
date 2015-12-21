@@ -51,17 +51,23 @@ nodes              = { }
 nodes.pool         = { }
 nodes.handlers     = { }
 
-local nodecodes    = { } for k,v in next, node.types   () do nodecodes[string.gsub(v,"_","")] = k end
-local whatcodes    = { } for k,v in next, node.whatsits() do whatcodes[string.gsub(v,"_","")] = k end
-local glyphcodes   = { [0] = "character", "glyph", "ligature", "ghost", "left", "right" }
-local disccodes    = { [0] = "discretionary", "explicit", "automatic", "regular", "first", "second" }
+local nodecodes    = { }
+local glyphcodes   = node.subtypes("glyph")
+local disccodes    = node.subtypes("disc")
 
-for i=0,#glyphcodes do glyphcodes[glyphcodes[i]] = i end
-for i=0,#disccodes  do disccodes [disccodes [i]] = i end
+for k, v in next, node.types() do
+    v = string.gsub(v,"_","")
+    nodecodes[k] = v
+    nodecodes[v] = k
+end
+for i=0,#glyphcodes do
+    glyphcodes[glyphcodes[i]] = i
+end
+for i=0,#disccodes do
+    disccodes[disccodes[i]] = i
+end
 
 nodes.nodecodes    = nodecodes
-nodes.whatcodes    = whatcodes
-nodes.whatsitcodes = whatcodes
 nodes.glyphcodes   = glyphcodes
 nodes.disccodes    = disccodes
 
@@ -140,7 +146,6 @@ nodes.slide                = node.slide
 nodes.vpack                = node.vpack
 
 nodes.first_glyph          = node.first_glyph
-nodes.first_character      = node.first_character
 nodes.has_glyph            = node.has_glyph or node.first_glyph
 
 nodes.current_attr         = node.current_attr
@@ -178,20 +183,33 @@ nodes.tonut              = tonut
 nuts.tonode              = tonode
 nuts.tonut               = tonut
 
-
 local getfield           = direct.getfield
 local setfield           = direct.setfield
 
 nuts.getfield            = getfield
 nuts.setfield            = setfield
 nuts.getnext             = direct.getnext
+nuts.setnext             = direct.setnext
 nuts.getprev             = direct.getprev
+nuts.setprev             = direct.setprev
+nuts.getboth             = direct.getboth
+nuts.setboth             = direct.setboth
 nuts.getid               = direct.getid
-nuts.getattr             = getfield
+nuts.getattr             = direct.get_attribute or direct.has_attribute or getfield
 nuts.setattr             = setfield
 nuts.getfont             = direct.getfont
+nuts.setfont             = direct.setfont
 nuts.getsubtype          = direct.getsubtype
+nuts.setsubtype          = direct.setsubtype or function(n,s) setfield(n,"subtype",s) end
 nuts.getchar             = direct.getchar
+nuts.setchar             = direct.setchar
+nuts.getdisc             = direct.getdisc
+nuts.setdisc             = direct.setdisc
+nuts.setlink             = direct.setlink
+nuts.getlist             = direct.getlist
+nuts.setlist             = direct.setlist    or function(n,l) setfield(n,"list",l) end
+nuts.getleader           = direct.getleader
+nuts.setleader           = direct.setleader  or function(n,l) setfield(n,"leader",l) end
 
 nuts.insert_before       = direct.insert_before
 nuts.insert_after        = direct.insert_after
@@ -206,6 +224,9 @@ nuts.is_node             = direct.is_node
 nuts.end_of_math         = direct.end_of_math
 nuts.traverse            = direct.traverse
 nuts.traverse_id         = direct.traverse_id
+nuts.traverse_char       = direct.traverse_char
+nuts.ligaturing          = direct.ligaturing
+nuts.kerning             = direct.kerning
 
 nuts.getprop             = nuts.getattr
 nuts.setprop             = nuts.setattr

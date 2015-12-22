@@ -89,10 +89,17 @@ local luatex_stubs = function ()
   if not node.subtypes then
     node.subtypes = function (t) return node_types [t] or { } end
     local direct = node.direct
+
     local getfield = direct.getfield
     local setfield = direct.setfield
+
     direct.setchar = direct.setchar or function (n, ...) setfield (n, "char", ...) end
-    direct.getchar = direct.getchar or function (n) getfield (n, "char")    end
+    direct.setprev = direct.setprev or function (n, ...) setfield (n, "prev", ...) end
+    direct.setnext = direct.setnext or function (n, ...) setfield (n, "next", ...) end
+
+    direct.getchar = direct.getchar or function (n) getfield (n, "char") end
+    direct.getprev = direct.getprev or function (n) getfield (n, "prev") end
+    direct.getnext = direct.getnext or function (n) getfield (n, "next") end
   end
 end
 

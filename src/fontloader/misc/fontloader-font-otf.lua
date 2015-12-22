@@ -296,7 +296,8 @@ local ordered_enhancers = {
 
     "expand lookups", -- a temp hack awaiting the lua loader
 
---     "check extra features", -- after metadata and duplicates
+--[[phg-- PATCH: Next line restores font features --phg]]--
+    "check extra features", -- after metadata and duplicates
 
     "cleanup tables",
 
@@ -600,7 +601,9 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
             applyruntimefixes(filename,data)
         end
         enhance("add dimensions",data,filename,nil,false)
+--[[phg-- This was hand-patched to restore the fontloader
 enhance("check extra features",data,filename)
+--phg]]--
         if trace_sequences then
             showfeatureorder(data,filename)
         end

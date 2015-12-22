@@ -164,7 +164,9 @@ local git_info = function ()
   --io.write "\n"
   local desc = readpipe (describecmd)
   if not desc then die "cannot parse git information" end
-  local desc = string.explode (string.fullstrip (desc), "/")[2]
+  desc = string.fullstrip (desc)
+  local desc = string.explode (desc, "/")[2] or desc
+  if not desc then die "cannot parse sanitized git information" end
   local data = readpipe (logcmd)
   if data and type (data) == "string" and data ~= "" then
     data = load (data)

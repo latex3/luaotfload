@@ -101,11 +101,11 @@ local names = {
   { miscdir,      "fontloader-fonts-demo-vf-1.lua", },
   { miscdir,      "fontloader-fonts-enc.lua",       },
   { miscdir,      "fontloader-fonts-ext.lua",       },
-  { miscdir,      "fontloader-fonts-inj.lua",       },
+  { miscdir,      "fontloader-font-inj.lua",        },
   { miscdir,      "fontloader-fonts.lua",           },
   { miscdir,      "fontloader-fonts-lua.lua",       },
   { miscdir,      "fontloader-fonts-ota.lua",       },
-  { miscdir,      "fontloader-fonts-otn.lua",       },
+  { miscdir,      "fontloader-font-otn.lua",        },
   { miscdir,      "fontloader-fonts-syn.lua",       },
   { miscdir,      "fontloader-fonts-tfm.lua",       },
   { miscdir,      "fontloader-font-tfm.lua",        },
@@ -164,7 +164,9 @@ local git_info = function ()
   --io.write "\n"
   local desc = readpipe (describecmd)
   if not desc then die "cannot parse git information" end
-  local desc = string.explode (string.fullstrip (desc), "/")[2]
+  desc = string.fullstrip (desc)
+  local desc = string.explode (desc, "/")[2] or desc
+  if not desc then die "cannot parse sanitized git information" end
   local data = readpipe (logcmd)
   if data and type (data) == "string" and data ~= "" then
     data = load (data)

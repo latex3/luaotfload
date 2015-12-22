@@ -58,7 +58,7 @@ local otf                = fonts.handlers.otf
 
 otf.glists               = { "gsub", "gpos" }
 
-otf.version              = 2.819 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version              = 2.820 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                = containers.define("fonts", "otf", otf.version, true)
 
 local hashes             = fonts.hashes
@@ -296,7 +296,8 @@ local ordered_enhancers = {
 
     "expand lookups", -- a temp hack awaiting the lua loader
 
---     "check extra features", -- after metadata and duplicates
+--[[phg-- PATCH: Next line restores font features --phg]]--
+    "check extra features", -- after metadata and duplicates
 
     "cleanup tables",
 
@@ -600,7 +601,9 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
             applyruntimefixes(filename,data)
         end
         enhance("add dimensions",data,filename,nil,false)
+--[[phg-- This was hand-patched to restore the fontloader
 enhance("check extra features",data,filename)
+--phg]]--
         if trace_sequences then
             showfeatureorder(data,filename)
         end
@@ -2959,7 +2962,7 @@ otf.coverup = {
         kern         = justset,
     },
     register = function(coverage,lookuptype,format,feature,n,descriptions,resources)
-        local name = formatters["ctx_%s_%s"](feature,n)
+        local name = formatters["ctx_%s_%s_%s"](feature,lookuptype,n) -- we can have a mix of types
         if lookuptype == "kern" then
             resources.lookuptypes[name] = "position"
         else
@@ -2973,7 +2976,6 @@ otf.coverup = {
             else
                 description.slookups = { [name] = c }
             end
--- inspect(feature,description)
         end
         return name
     end

@@ -1,4 +1,4 @@
-if not modules then modules = { } end modules ['font-otx'] = {
+if not modules then modules = { } end modules ['luatex-fonts-ota'] = {
     version   = 1.001,
     comment   = "companion to font-otf.lua (analysing)",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
@@ -24,7 +24,6 @@ local methods             = allocate()
 
 analyzers.initializers    = initializers
 analyzers.methods         = methods
-analyzers.useunicodemarks = false
 
 local a_state             = attributes.private('state')
 
@@ -98,8 +97,9 @@ local features = {
     pstf = s_pstf,
 }
 
-analyzers.states   = states
-analyzers.features = features
+analyzers.states          = states
+analyzers.features        = features
+analyzers.useunicodemarks = false
 
 -- todo: analyzers per script/lang, cross font, so we need an font id hash -> script
 -- e.g. latin -> hyphenate, arab -> 1/2/3 analyze -- its own namespace
@@ -117,7 +117,10 @@ function analyzers.setstate(head,font)
             local char = getchar(current)
             local d = descriptions[char]
             if d then
-                if d.class == "mark" or (useunicodemarks and categories[char] == "mn") then
+                if d.class == "mark" then
+                    done = true
+                    setprop(current,a_state,s_mark)
+                elseif useunicodemarks and categories[char] == "mn" then
                     done = true
                     setprop(current,a_state,s_mark)
                 elseif n == 0 then
@@ -136,7 +139,9 @@ function analyzers.setstate(head,font)
                 first, last, n = nil, nil, 0
             end
         elseif id == disc_code then
-            -- always in the middle
+            -- always in the middle .. it doesn't make much sense to assign a property
+            -- here ... we might at some point decide to flag the components when present
+            -- but even then it's kind of bogus
             setprop(current,a_state,s_medi)
             last = current
         else -- finish
@@ -213,17 +218,6 @@ registerotffeature {
 
 methods.latn = analyzers.setstate
 
--- This info eventually can go into char-def and we will have a state
--- table for generic then (unicode recognized all states but in practice
--- only has only
---
--- isolated : isol
--- final    : isol_fina
--- medial   : isol_fina_medi_init
---
--- so in practice, without analyzer it's rather useless info which is
--- why having it in char-def makes only sense for special purposes (like)
--- like tracing cq. visualizing.
 
 local tatweel = 0x0640
 local zwnj    = 0x200C
@@ -343,8 +337,6 @@ local medial = { -- isol_fina_medi_init
 }
 
 local arab_warned = { }
-
--- todo: gref
 
 local function warning(current,what)
     local char = getchar(current)

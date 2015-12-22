@@ -74,7 +74,6 @@ local nofregisteredkerns    = 0
 local nofregisteredpairs    = 0
 local nofregisteredmarks    = 0
 local nofregisteredcursives = 0
------ markanchors           = { } -- one base can have more marks
 local keepregisteredcounts  = false
 
 function injections.keepcounts()
@@ -91,10 +90,41 @@ end
 
 -- We need to make sure that a possible metatable will not kick in unexpectedly.
 
+-- function injections.reset(n)
+--     local p = rawget(properties,n)
+--     if p and rawget(p,"injections") then
+--         p.injections = nil
+--     end
+-- end
+
+-- function injections.copy(target,source)
+--     local sp = rawget(properties,source)
+--     if sp then
+--         local tp = rawget(properties,target)
+--         local si = rawget(sp,"injections")
+--         if si then
+--             si = fastcopy(si)
+--             if tp then
+--                 tp.injections = si
+--             else
+--                 propertydata[target] = {
+--                     injections = si,
+--                 }
+--             end
+--         else
+--             if tp then
+--                 tp.injections = nil
+--             end
+--         end
+--     end
+-- end
+
 function injections.reset(n)
     local p = rawget(properties,n)
-    if p and rawget(p,"injections") then
-        p.injections = nil
+    if p then
+        p.injections = false -- { }
+    else
+        properties[n] = false -- { injections = { } }
     end
 end
 
@@ -112,10 +142,17 @@ function injections.copy(target,source)
                     injections = si,
                 }
             end
+        elseif tp then
+            tp.injections = false -- { }
         else
-            if tp then
-                tp.injections = nil
-            end
+            properties[target] = { injections = { } }
+        end
+    else
+        local tp = rawget(properties,target)
+        if tp then
+            tp.injections = false -- { }
+        else
+            properties[target] = false -- { injections = { } }
         end
     end
 end
@@ -367,10 +404,11 @@ local function show(n,what,nested,symbol)
                 local markx     = i.markx     or 0
                 local marky     = i.marky     or 0
                 local markdir   = i.markdir   or 0
-                local markbase  = i.markbase  or 0 -- will be markbasenode
+                local markbase  = i.markbase  or 0
                 local cursivex  = i.cursivex  or 0
                 local cursivey  = i.cursivey  or 0
                 local ligaindex = i.ligaindex or 0
+                local cursbase  = i.cursiveanchor
                 local margin    = nested and 4 or 2
                 --
                 if rightkern ~= 0 or yoffset ~= 0 then
@@ -382,7 +420,13 @@ local function show(n,what,nested,symbol)
                     report_injections("%w%s mark: dx %p, dy %p, dir %s, base %s",margin,symbol,markx,marky,markdir,markbase ~= 0 and "yes" or "no")
                 end
                 if cursivex ~= 0 or cursivey ~= 0 then
-                    report_injections("%w%s curs: dx %p, dy %p",margin,symbol,cursivex,cursivey)
+                    if cursbase then
+                        report_injections("%w%s curs: base dx %p, dy %p",margin,symbol,cursivex,cursivey)
+                    else
+                        report_injections("%w%s curs: dx %p, dy %p",margin,symbol,cursivex,cursivey)
+                    end
+                elseif cursbase then
+                    report_injections("%w%s curs: base",margin,symbol)
                 end
                 if ligaindex ~= 0 then
                     report_injections("%w%s liga: index %i",margin,symbol,ligaindex)

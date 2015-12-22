@@ -215,9 +215,11 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule('font-oti.lua')
         loadmodule('font-otf.lua')
         loadmodule('font-otb.lua')
-        loadmodule('luatex-fonts-inj.lua') -- normally the same as font-inj.lua
+        ----------('luatex-fonts-inj.lua') -- normally the same as font-inj.lua / beware loadmodule is parsed
+        loadmodule('font-inj.lua')
         loadmodule('luatex-fonts-ota.lua')
-        loadmodule('luatex-fonts-otn.lua') -- normally the same as font-otn.lua
+        ----------('luatex-fonts-otn.lua') -- normally the same as font-otn.lua / beware loadmodule is parsed
+        loadmodule('font-otn.lua')
         loadmodule('font-otp.lua')
         loadmodule('luatex-fonts-lua.lua')
         loadmodule('font-def.lua')         -- this code (stripped) might end up in luatex-fonts-def.lua

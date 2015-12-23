@@ -1405,19 +1405,6 @@ local tlig_specification = {
     },
 }
 
-local tlig_specification = {
-    type      = "substitution",
-    features  = everywhere,
-    data      = {
-        [0x0022] = 0x201D,                   -- quotedblright
-        [0x0027] = 0x2019,                   -- quoteleft
-        [0x0060] = 0x2018,                   -- quoteright
-    },
-    flags     = noflags,
-    order     = { "tlig" },
-    prepend   = true,
-}
-
 local anum_arabic = { --- these are the same as in font-otc
     [0x0030] = 0x0660,
     [0x0031] = 0x0661,

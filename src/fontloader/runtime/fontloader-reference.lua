@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 12/21/15 16:29:15
+-- merge date  : 12/22/15 10:50:54
 
 do -- begin closure to overcome local limits and interference
 
@@ -7418,6 +7418,7 @@ local ordered_enhancers={
   "check encoding",
   "add duplicates",
   "expand lookups",
+  "check extra features",
   "cleanup tables",
   "compact lookups",
   "purge names",
@@ -7688,7 +7689,6 @@ function otf.load(filename,sub,featurefile)
       applyruntimefixes(filename,data)
     end
     enhance("add dimensions",data,filename,nil,false)
-enhance("check extra features",data,filename)
     if trace_sequences then
       showfeatureorder(data,filename)
     end

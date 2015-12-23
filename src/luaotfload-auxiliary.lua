@@ -10,10 +10,7 @@
 --- this file addresses issue #24
 --- https://github.com/lualatex/luaotfload/issues/24#
 
-luaotfload                  = luaotfload or {}
-luaotfload.aux              = luaotfload.aux or { }
-
-local aux                   = luaotfload.aux
+luaotfload                  = luaotfload or { }
 local log                   = luaotfload.log
 local logreport             = log.report
 local fonthashes            = fonts.hashes
@@ -34,6 +31,9 @@ local stringgsub            = string.gsub
 local stringbyte            = string.byte
 local stringfind            = string.find
 local tablecopy             = table.copy
+
+local aux                   = { }
+local luaotfload_callbacks  = { }
 
 -----------------------------------------------------------------------
 ---                          font patches
@@ -89,10 +89,9 @@ local set_sscale_dimens = function (fontdata)
   return fontdata
 end
 
-luatexbase.add_to_callback(
-  "luaotfload.patch_font",
-  set_sscale_dimens,
-  "luaotfload.aux.set_sscale_dimens")
+luaotfload_callbacks [#luaotfload_callbacks + 1] = {
+  "patch_font", set_sscale_dimens, "set_sscale_dimens",
+}
 
 --- fontobj -> int
 local lookup_units = function (fontdata)
@@ -124,11 +123,10 @@ local patch_cambria_domh = function (fontdata)
   end
 end
 
-luatexbase.add_to_callback(
-  "luaotfload.patch_font",
-  patch_cambria_domh,
-  "luaotfload.aux.patch_cambria_domh")
-  
+luaotfload_callbacks [#luaotfload_callbacks + 1] = {
+  "patch_font", patch_cambria_domh, "patch_cambria_domh",
+}
+
 
 --[[doc--
 
@@ -152,11 +150,10 @@ local fixup_fontdata = function (data)
 
 end
 
-luatexbase.add_to_callback(
-  "luaotfload.patch_font_unsafe",
-  fixup_fontdata,
-  "luaotfload.aux.fixup_fontdata")
-  
+luaotfload_callbacks [#luaotfload_callbacks + 1] = {
+  "patch_font_unsafe", fixup_fontdata, "fixup_fontdata",
+}
+
 
 --[[doc--
 
@@ -204,10 +201,9 @@ local set_capheight = function (fontdata)
     end
 end
 
-luatexbase.add_to_callback(
-  "luaotfload.patch_font",
-  set_capheight,
-  "luaotfload.aux.set_capheight")
+luaotfload_callbacks [#luaotfload_callbacks + 1] = {
+  "patch_font", set_capheight, "set_capheight",
+}
 
 -----------------------------------------------------------------------
 ---                      glyphs and characters
@@ -843,4 +839,43 @@ end
 
 aux.get_quad = get_quad
 
--- vim:tw=71:sw=2:ts=2:expandtab
+
+-----------------------------------------------------------------------
+---                         initialization
+-----------------------------------------------------------------------
+
+local inject_callbacks = function (lst)
+  if not lst and next (lst) then return false end
+
+  local inject = function (def)
+    local cb, fn, id = unpack (def)
+    cb = tostring (cb)
+    id = tostring (id)
+    if not cb or not fn or not id or not type (fn) == "function" then
+      logreport ("both", 0, "aux", "Invalid callback requested (%q, %s, %q).",
+                 cb, tostring (fn), id)
+      return false
+    end
+    cb = stringformat ("luaotfload.%s",     cb)
+    id = stringformat ("luaotfload.aux.%s", id)
+    logreport ("log", 5, "aux", "Installing callback %q->%q.", cb, id)
+    luatexbase.add_to_callback (cb, fn, id)
+    return true
+  end
+
+  local ret = true
+  for i = 1, #lst do ret = inject (lst [i]) end
+  return ret
+end
+
+return {
+  init = function ()
+    local ret = true
+    luaotfload.aux = aux
+    ret = inject_callbacks (luaotfload_callbacks)
+    return ret
+  end
+}
+
+-- vim:tw=79:sw=2:ts=8:et
+

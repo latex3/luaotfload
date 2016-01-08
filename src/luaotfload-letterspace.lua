@@ -40,6 +40,16 @@ local setnext            = nodedirect.setnext or field_setter "next"
 local getprev            = nodedirect.getprev or field_getter "prev"
 local setprev            = nodedirect.setprev or field_setter "prev"
 
+--- since r5336
+local getboth            = nodedirect.getboth or function (n)
+  return getprev (n), getnext (n)
+end
+
+local setlink            = nodedirect.setlink or function (a, b)
+  setnext (a, b)
+  setprev (b, a)
+end
+
 local getdisc            = nodedirect.getdisc or field_getter "disc"
 local setdisc            = nodedirect.setdisc or field_setter "disc"
 
@@ -325,27 +335,26 @@ kerncharacters = function (head)
       if c then
         if keepligature and keepligature(start) then
           -- keep 'm
+          c = nil
         else
-          --- c = kerncharacters (c) --> taken care of after replacing
-          local s = start
-          local p = getprev(s)
-          local n = getnext(s)
-          local tail = find_node_tail(c)
-          if p then
-            setnext(p, c)
-            p = getprev(c)
-          else
-            head = c
+          while c do
+            local s = start
+            local p, n = getboth (s)
+            if p then
+              setlink (p, c)
+            else
+              head = c
+            end
+            if n then
+              local tail = find_node_tail(c)
+              setlink (tail, n)
+            end
+            start = c
+            setfield(s, "components", nil)
+            free_node(s)
+            done = true
+            c = getfield (start, "components")
           end
-          if n then
-            tail = getprev(n)
-          end
-          setnext(tail, n)
-          start = c
-          setfield(s, "components", nil)
-          -- we now leak nodes !
-          --  free_node(s)
-          done = true
         end
       end -- kern ligature
 

@@ -1147,20 +1147,26 @@ local utfchar = unicode.utf8.char
 local otf = handlers and handlers.otf --- filled in later during initialization
 
 local normalized = {
-    substitution = "substitution",
-    single       = "substitution",
-    ligature     = "ligature",
-    alternate    = "alternate",
-    multiple     = "multiple",
-    kern         = "kern",
+    substitution      = "substitution",
+    single            = "substitution",
+    ligature          = "ligature",
+    alternate         = "alternate",
+    multiple          = "multiple",
+    kern              = "kern",
+    pair              = "pair",
+    chainsubstitution = "chainsubstitution",
+    chainposition     = "chainposition",
 }
 
 local types = {
-    substitution = "gsub_single",
-    ligature     = "gsub_ligature",
-    alternate    = "gsub_alternate",
-    multiple     = "gsub_multiple",
-    kern         = "gpos_pair",
+    substitution      = "gsub_single",
+    ligature          = "gsub_ligature",
+    alternate         = "gsub_alternate",
+    multiple          = "gsub_multiple",
+    kern              = "gpos_pair",
+    pair              = "gpos_pair",
+    chainsubstitution = "gsub_contextchain",
+    chainposition     = "gpos_contextchain",
 }
 
 setmetatableindex(types, function(t,k) t[k] = k return k end) -- "key"
@@ -1168,7 +1174,7 @@ setmetatableindex(types, function(t,k) t[k] = k return k end) -- "key"
 --- stop locals for addfeature()
 
 local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
-local noflags = { }
+local noflags = { false, false, false, false }
 
 local tohash = table.tohash
 

@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 12/22/15 10:50:54
+-- merge date  : 01/08/16 19:09:31
 
 do -- begin closure to overcome local limits and interference
 
@@ -144,7 +144,7 @@ local uppercase=R("AZ")
 local underscore=P("_")
 local hexdigit=digit+lowercase+uppercase
 local cr,lf,crlf=P("\r"),P("\n"),P("\r\n")
-local newline=P("\r")*(P("\n")+P(true))+P("\n")
+local newline=P("\r")*(P("\n")+P(true))+P("\n") 
 local escaped=P("\\")*anything
 local squote=P("'")
 local dquote=P('"')
@@ -9571,6 +9571,8 @@ otf.coverup={
     multiple=justset,
     ligature=justset,
     kern=justset,
+    chainsubstitution=justset,
+    chainposition=justset,
   },
   register=function(coverage,lookuptype,format,feature,n,descriptions,resources)
     local name=formatters["ctx_%s_%s_%s"](feature,lookuptype,n) 

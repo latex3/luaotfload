@@ -3894,10 +3894,7 @@ local function prepare_contextchains(tfmdata)
                                     sequence[nofsequences] = after[n]
                                 end
                             end
---[[phg-- Hard patch: This crashes, see https://github.com/lualatex/luaotfload/issues/303
                             if sequence[1] then
---phg]]--
-                            if sequence[start] then
                                 -- Replacements only happen with reverse lookups as they are single only. We
                                 -- could pack them into current (replacement value instead of true) and then
                                 -- use sequence[start] instead but it's somewhat ugly.

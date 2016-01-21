@@ -287,7 +287,6 @@ local ordered_enhancers = {
 
     "check glyphs",
     "check metadata",
---     "check extra features", -- after metadata
 
     "prepare tounicode",
 
@@ -296,7 +295,6 @@ local ordered_enhancers = {
 
     "expand lookups", -- a temp hack awaiting the lua loader
 
---[[phg-- PATCH: Next line restores font features --phg]]--
     "check extra features", -- after metadata and duplicates
 
     "cleanup tables",
@@ -601,9 +599,6 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
             applyruntimefixes(filename,data)
         end
         enhance("add dimensions",data,filename,nil,false)
---[[phg-- This was hand-patched to restore the fontloader
-enhance("check extra features",data,filename)
---phg]]--
         if trace_sequences then
             showfeatureorder(data,filename)
         end
@@ -2955,11 +2950,13 @@ end
 otf.coverup = {
     stepkey = "subtables",
     actions = {
-        substitution = justset,
-        alternate    = justset,
-        multiple     = justset,
-        ligature     = justset,
-        kern         = justset,
+        substitution      = justset,
+        alternate         = justset,
+        multiple          = justset,
+        ligature          = justset,
+        kern              = justset,
+        chainsubstitution = justset,
+        chainposition     = justset,
     },
     register = function(coverage,lookuptype,format,feature,n,descriptions,resources)
         local name = formatters["ctx_%s_%s_%s"](feature,lookuptype,n) -- we can have a mix of types

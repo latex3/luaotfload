@@ -51,15 +51,11 @@ nodes              = { }
 nodes.pool         = { }
 nodes.handlers     = { }
 
-local nodecodes    = { }
+local nodecodes    = { } for k,v in next, node.types   () do nodecodes[string.gsub(v,"_","")] = k end
+local whatcodes    = { } for k,v in next, node.whatsits() do whatcodes[string.gsub(v,"_","")] = k end
 local glyphcodes   = node.subtypes("glyph")
 local disccodes    = node.subtypes("disc")
 
-for k, v in next, node.types() do
-    v = string.gsub(v,"_","")
-    nodecodes[k] = v
-    nodecodes[v] = k
-end
 for i=0,#glyphcodes do
     glyphcodes[glyphcodes[i]] = i
 end
@@ -67,6 +63,7 @@ for i=0,#disccodes do
     disccodes[disccodes[i]] = i
 end
 
+nodes.whatcodes    = whatcodes
 nodes.nodecodes    = nodecodes
 nodes.glyphcodes   = glyphcodes
 nodes.disccodes    = disccodes

@@ -246,6 +246,7 @@ local zwj                = 0x200D
 local wildcard           = "*"
 local default            = "dflt"
 
+local whatcodes          = nodes.whatcodes
 local nodecodes          = nodes.nodecodes
 local glyphcodes         = nodes.glyphcodes
 local disccodes          = nodes.disccodes
@@ -253,9 +254,10 @@ local disccodes          = nodes.disccodes
 local glyph_code         = nodecodes.glyph
 local glue_code          = nodecodes.glue
 local disc_code          = nodecodes.disc
+local whatsit_code       = nodecodes.whatsit
 local math_code          = nodecodes.math
-local dir_code           = nodecodes.dir
-local localpar_code      = nodecodes.localpar
+local dir_code           = nodecodes.dir or whatcodes.dir
+local localpar_code      = nodecodes.localpar or whatcodes.localpar
 
 local discretionary_code = disccodes.discretionary
 local ligature_code      = glyphcodes.ligature
@@ -3358,6 +3360,37 @@ local function featuresprocessor(head,font,attr)
                                 comprun(start,c_run)
                                 start = getnext(start)
                             end
+                        elseif id == whatsit_code then
+                            local subtype = getsubtype(start)
+                            if subtype == dir_code then
+                                local dir = getfield(start,"dir")
+                                if dir == "+TLT" then
+                                    topstack = topstack + 1
+                                    dirstack[topstack] = dir
+                                    rlmode = 1
+                                elseif dir == "+TRT" then
+                                    topstack = topstack + 1
+                                    dirstack[topstack] = dir
+                                    rlmode = -1
+                                elseif dir == "-TLT" or dir == "-TRT" then
+                                    topstack = topstack - 1
+                                    rlmode = dirstack[topstack] == "+TRT" and -1 or 1
+                                else
+                                    rlmode = rlparmode
+                                end
+                            elseif subtype == localpar_code then
+                                local dir = getfield(start,"dir")
+                                if dir == "TRT" then
+                                    rlparmode = -1
+                                elseif dir == "TLT" then
+                                    rlparmode = 1
+                                else
+                                    rlparmode = 0
+                                end
+                                -- one might wonder if the par dir should be looked at, so we might as well drop the n
+                                rlmode = rlparmode
+                            end
+                            start = getnext(start)
                         elseif id == math_code then
                             start = getnext(end_of_math(start))
                         elseif id == dir_code then
@@ -3628,6 +3661,36 @@ local function featuresprocessor(head,font,attr)
                             comprun(start,c_run)
                             start = getnext(start)
                         end
+                    elseif id == whatsit_code then
+                        local subtype = getsubtype(start)
+                        if subtype == dir_code then
+                            local dir = getfield(start,"dir")
+                            if dir == "+TLT" then
+                                topstack = topstack + 1
+                                dirstack[topstack] = dir
+                                rlmode = 1
+                            elseif dir == "+TRT" then
+                                topstack = topstack + 1
+                                dirstack[topstack] = dir
+                                rlmode = -1
+                            elseif dir == "-TLT" or dir == "-TRT" then
+                                topstack = topstack - 1
+                                rlmode = dirstack[topstack] == "+TRT" and -1 or 1
+                            else
+                                rlmode = rlparmode
+                            end
+                        elseif subtype == localpar_code then
+                            local dir = getfield(start,"dir")
+                            if dir == "TRT" then
+                                rlparmode = -1
+                            elseif dir == "TLT" then
+                                rlparmode = 1
+                            else
+                                rlparmode = 0
+                            end
+                            rlmode = rlparmode
+                        end
+                        start = getnext(start)
                     elseif id == math_code then
                         start = getnext(end_of_math(start))
                     elseif id == dir_code then

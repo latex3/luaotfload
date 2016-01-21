@@ -256,7 +256,7 @@ local context_modules = {
   { ltx,   "font-inj"          },
   { ltx,   "luatex-fonts-ota"  },
   { ltx,   "font-otn"          },
-  { ctx,   "font-otp"          }, --> since 2013-04-23
+  { ctx,   "font-otp"          },
   { ltx,   "luatex-fonts-lua"  },
   { ctx,   "font-def"          },
   { ltx,   "luatex-fonts-def"  },
@@ -332,7 +332,7 @@ local init_main = function ()
   fontloader = tostring (fontloader)
 
   if fontloader == "reference" then
-    logreport ("log", 4, "init", "Using reference fontloader.")
+    logreport ("log", 0, "init", "Using reference fontloader.")
     load_fontloader_module (luaotfload.fontloader_package)
 
   elseif fontloader == "default" then
@@ -345,7 +345,7 @@ local init_main = function ()
     load_fontloader_module (luaotfload.fontloader_package)
 
   elseif fontloader == "unpackaged" then
-    logreport ("both", 4, "init",
+    logreport ("log", 0, "init",
                "Loading fontloader components individually.")
     --- The loading sequence is known to change, so this might have to be
     --- updated with future updates. Do not modify it though unless there is
@@ -388,41 +388,41 @@ local init_main = function ()
     load_fontloader_module "fonts-cbk"
 
   elseif fontloader == "context" then
-    logreport ("both", 2, "init",
-               "Attempting to load Context modules in lookup path.")
+    logreport ("log", 0, "init",
+               "Loading Context modules in lookup path.")
     load_context_modules ()
 
   elseif lfs.isdir (fontloader) then
-    logreport ("both", 2, "init",
-               "Attempting to load Context files under prefix “%s”.",
+    logreport ("log", 0, "init",
+               "Loading Context files under prefix “%s”.",
                fontloader)
     load_context_modules (fontloader)
 
   elseif lfs.isfile (fontloader) then
-    logreport ("both", 2, "init",
-               "Attempting to load fontloader from absolute path “%s”.",
+    logreport ("log", 0, "init",
+               "Loading fontloader from absolute path “%s”.",
                fontloader)
     local _void = require (fontloader)
 
   elseif kpselookup (fontloader) then
     local path = kpselookup (fontloader)
-    logreport ("both", 2, "init",
-               "Attempting to load fontloader “%s” from kpse-resolved path “%s”.",
+    logreport ("log", 0, "init",
+               "Loading fontloader “%s” from kpse-resolved path “%s”.",
                fontloader, path)
     local _void = require (path)
 
   elseif fontloader then
-    logreport ("log", 4, "init",
+    logreport ("log", 0, "init",
                "Using predefined fontloader “%s”.",
                fontloader)
     load_fontloader_module (fontloader)
 
   else
-    logreport ("log", 4, "init",
+    logreport ("log", 0, "init",
                "No match for requested fontloader “%s”.",
                fontloader)
     fontloader = luaotfload.fontloader_package
-    logreport ("log", 4, "init",
+    logreport ("log", 0, "init",
                "Defaulting to predefined fontloader “%s”.",
                fontloader)
     load_fontloader_module (fontloader)

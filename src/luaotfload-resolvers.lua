@@ -62,14 +62,18 @@ local logreport           = luaotfload.log.report
 
 local resolve_file
 resolve_file = function (specification)
-    local name   = fonts.names.lookup_font_file (specification.name)
+    local name, _format, success = fonts.names.lookup_font_file (specification.name)
     local suffix = filesuffix (name)
     if fonts.formats[suffix] then
         specification.forced      = stringlower (suffix)
-        specification.forcedname  = fileremovesuffix(name)
+        specification.forcedname  = fileremovesuffix (name)
     else
         specification.name = name
     end
+    if success ~= true then
+        logreport ("log", 1, "resolve", "file lookup of %q unsuccessful", name)
+    end
+    return success
 end
 
 --[[doc--
@@ -85,22 +89,22 @@ end
 local resolve_path
 resolve_path = function (specification)
     local name       = specification.name
-    local exists, _  = lfsisfile(name)
+    local exists, _  = lfsisfile (name)
     if not exists then -- resort to file: lookup
-        logreport ("log", 0, "load",
+        logreport ("log", 1, "resolve",
                    "path lookup of %q unsuccessful, falling back to file:",
                    name)
-        resolve_file (specification)
-    else
-        local suffix = filesuffix (name)
-        if fonts.formats[suffix] then
-            specification.forced      = stringlower (suffix)
-            specification.name        = fileremovesuffix(name)
-            specification.forcedname  = name
-        else
-            specification.name = name
-        end
+        return resolve_file (specification)
     end
+    local suffix = filesuffix (name)
+    if fonts.formats [suffix] then
+        specification.forced      = stringlower (suffix)
+        specification.name        = fileremovesuffix (name)
+        specification.forcedname  = name
+    else
+        specification.name = name
+    end
+    return true
 end
 
 --[[doc--
@@ -120,18 +124,17 @@ resolve_name = function (specification)
     end
     local resolved, subfont = resolver (specification)
     if resolved then
-        logreport ("log", 0, "load", "Lookup/name: %q -> \"%s%s\"",
-                   specification.name,
-                   resolved,
+        logreport ("log", 1, "resolve", "name lookup %q -> \"%s%s\"",
+                   specification.name, resolved,
                    subfont and stringformat ("(%d)", subfont) or "")
         specification.resolved   = resolved
         specification.sub        = subfont
         specification.forced     = stringlower (filesuffix (resolved) or "")
         specification.forcedname = resolved
         specification.name       = fileremovesuffix (resolved)
-    else
-        resolve_file (specification)
+        return true
     end
+    return resolve_file (specification)
 end
 
 --[[doc--
@@ -158,36 +161,74 @@ end
 
 --doc]]--
 
-local type1_formats = { "tfm", "ofm", "TFM", "OFM", }
+local tex_formats = { "tfm", "ofm", "TFM", "OFM", }
 
-local resolve_anon
-resolve_anon = function (specification)
+local resolve_tex_format = function (specification)
     local name = specification.name
-    for i=1, #type1_formats do
-        local format = type1_formats[i]
+    for i=1, #tex_formats do
+        local format = tex_formats [i]
         local suffix = filesuffix (name)
-        if resolvers.findfile(name, format) then
+        if resolvers.findfile (name, format) then
             local usename = suffix == format and fileremovesuffix (name) or name
             specification.forcedname = file.addsuffix (usename, format)
             specification.forced     = format
-            return
+            return true
         end
     end
-    --- under some weird circumstances absolute paths get
-    --- passed to the definer; we have to catch them
-    --- before the name: resolver misinterprets them.
-    name = specification.specification
-    local exists, _ = lfsisfile(name)
-    if exists then --- garbage; we do this because we are nice,
-                   --- not because it is correct
-        logreport ("log", 1, "load", "file %q exists", name)
-        logreport ("log", 1, "load",
-                   "... overriding borked anon: lookup with path: lookup")
-        specification.name = name
-        resolve_path (specification)
-        return
+    return false
+end
+
+local resolve_path_if_exists = function (specification)
+    local spec = specification.specification
+    local exists, _void = lfsisfile (spec)
+    if exists then
+        --- If this path is taken a file matching the specification
+        --- literally was found. In this situation, Luaotfload is
+        --- expected to load that file directly, even though we provide
+        --- explicit “file” and “path” lookups to address exactly this
+        --- situation.
+        logreport ("log", 1, "resolve",
+                   "file %q exists, performing path lookup", spec)
+        specification.name = spec
+        return resolve_path (specification)
     end
-    resolve_name (specification)
+    return false
+end
+
+local resolve_methods = {
+    tex  = resolve_tex_format,
+    path = resolve_path_if_exists,
+    name = resolve_name,
+}
+
+local resolve_sequence = function (seq, specification)
+    for i = 1, #seq do
+        local id  = seq [i]
+        local mth = resolve_methods [id]
+        logreport ("both", 0, "resolve", "step %d: apply method %q (%s)", i, id, mth)
+        if mth (specification) == true then
+            logreport ("both", 0, "resolve",
+                       "%d: method %q indicated lookup success", i, id)
+            logreport ("both", 0, "resolve",
+                       "method %q resolved %q -> %s (%s)",
+                       id, specification.specification,
+                       specification.name,
+                       specification.forcedname)
+            return true
+        end
+    end
+    logreport ("both", 0, "resolve",
+               "sequence of %d lookups yielded nothing appropriate", #seq)
+    return false
+end
+
+local default_anon_sequence = {
+    "tex", "path", "name",
+}
+
+local resolve_anon
+resolve_anon = function (specification)
+    return resolve_sequence (default_anon_sequence, specification)
 end
 
 --[[doc--
@@ -207,16 +248,17 @@ resolve_kpse = function (specification)
         if resolvers.findfile (name, suffix) then
             specification.forced       = stringlower (suffix)
             specification.forcedname   = name
-            return
+            return true
         end
     end
     for t, format in next, fonts.formats do --- brute force
         if kpsefind_file (name, format) then
             specification.forced = t
             specification.name   = name
-            return
+            return true
         end
     end
+    return false
 end
 
 --[[doc--
@@ -250,5 +292,5 @@ return {
     end, --- [.init]
 }
 
---- vim:ft=lua:ts=8:sw=4:et
+--- vim:ft=lua:ts=8:sw=4:et:tw=79
 

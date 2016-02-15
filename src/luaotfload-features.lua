@@ -993,7 +993,10 @@ local import_values = {
     { "mode",   true },
 }
 
-local lookup_types = { "anon", "file", "kpse", "my", "name", "path" }
+local lookup_types = { "anon"  , "file", "kpse"
+                     , "my"    , "name", "path"
+                     , "combo"
+                     }
 
 local select_lookup = function (request)
     for i=1, #lookup_types do
@@ -1049,6 +1052,7 @@ end
 local handle_request = function (specification)
     local request = lpegmatch(luaotfload.parsers.font_request,
                               specification.specification)
+----inspect(request)
     if not request then
         --- happens when called with an absolute path
         --- in an anonymous lookup;
@@ -1077,7 +1081,13 @@ local handle_request = function (specification)
         specification.lookup = "path"
         return specification
     end
+
     local lookup, name  = select_lookup(request)
+    if lookup == "combo" then
+        report ("both", 0, "load",
+                "‘combo’ lookup not implemented at this stage.")
+        os.exit(-42)
+    end
     request.features    = apply_default_features(request.features)
 
     if name then
@@ -1749,4 +1759,4 @@ return {
     end
 }
 
--- vim:tw=71:sw=4:ts=4:expandtab
+-- vim:tw=79:sw=4:ts=4:expandtab

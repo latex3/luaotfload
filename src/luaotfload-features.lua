@@ -19,6 +19,7 @@ local C                 = lpeg.C
 
 local table             = table
 local tabletohash       = table.tohash
+local tablesort         = table.sort
 local setmetatableindex = table.setmetatableindex
 local insert            = table.insert
 
@@ -28,6 +29,7 @@ local insert            = table.insert
 local fonts             = fonts
 local definers          = fonts.definers
 local handlers          = fonts.handlers
+local fontidentifiers   = fonts.hashes and fonts.hashes.identifiers
 
 local as_script, normalize
 
@@ -65,6 +67,104 @@ local stringformat     = string.format
 local stringis_empty   = string.is_empty
 local mathceil         = math.ceil
 
+local cmp_by_idx = function (a, b) return a.idx < b.idx end
+
+local handle_combination = function (combo, spec)
+    if not combo [1] then
+        report ("both", 0, "load", "Empty font combination requested.")
+        return false
+    end
+    inspect(combo)
+
+    if not fontidentifiers then
+        fontidentifiers = fonts.hashes and fonts.hashes.identifiers
+    end
+
+    local chain   = { }
+    local fontids = { }
+    local n       = #combo
+
+    tablesort (combo, cmp_by_idx)
+
+    --- pass 1: skim combo and resolve fonts
+    report ("both", 0, "load", "Combining %d fonts.", n)
+    for i = 1, n do
+        local cur = combo [i]
+        local id  = cur.id
+        local idx = cur.idx
+        local fnt = fontidentifiers [id]
+        if fnt then
+            local chars = cur.chars
+            report ("both", 0, "load",
+                    " *> %.2d: include font %d at rank %d (%d items).",
+                    i, id, idx, (chars and #chars or 0))
+            chain   [#chain + 1]   = { fnt, chars, idx = idx }
+            fontids [#fontids + 1] = id
+        else
+            report ("both", 0, "load",
+                    " *> %.2d: font %d at rank %d unknown, skipping.",
+                    n, id, idx)
+            --- TODO might instead attempt to define the font at this point
+            ---      but that’d require some modifications to the syntax
+        end
+    end
+
+    local nc = #chain
+    if nc == 0 then
+        report ("both", 0, "load",
+                " *> no valid font (of %d) in combination.", n)
+        return false
+    end
+
+    local basefnt = chain [1] [1]
+    if nc == 1 then
+        report ("both", 0, "load",
+                " *> combination boils down to a single font (%s) \z
+                 of %d initially specified; not pursuing this any \z
+                 further.", basefnt.fullname, n)
+        return basefnt
+    end
+
+    local basechar       = basefnt.characters
+    local baseprop       = basefnt.properties
+    baseprop.name        = spec.name
+    baseprop.virtualized = true
+    baseprop.fonts       = fontids
+
+    for i = 2, nc do
+        local cur = chain [i]
+        local fnt = cur [1]
+        local def = cur [2]
+        local src = fnt.characters
+        local cnt = 0
+
+        local pickchr = function (uc)
+            local chr = src [uc]
+            if chr then
+                chr.commands = { "slot", i, uc }
+                basechar [uc] = chr
+                cnt = cnt + 1
+            end
+        end
+
+        for j = 1, #def do
+            local this = def [j]
+            if type (this) == "number" then
+                pickchr (this)
+            elseif type (this) == "table" then
+                for uc = this [1], this [2] do pickchr (uc) end
+            else
+                report ("both", 0, "load",
+                        " *> item no. %d of combination definition \z
+                         %d not processable.", j, i)
+            end
+        end
+        report ("both", 0, "load",
+                " *> font %d / %d: imported %d glyphs into combo.",
+                i, nc, cnt)
+    end
+    return basefnt
+end
 
 ---[[ begin excerpt from font-ott.lua ]]
 
@@ -1082,13 +1182,12 @@ local handle_request = function (specification)
         return specification
     end
 
-    local lookup, name  = select_lookup(request)
+    local lookup, name = select_lookup (request)
     if lookup == "combo" then
-        report ("both", 0, "load",
-                "‘combo’ lookup not implemented at this stage.")
-        os.exit(-42)
+        return handle_combination (request.combo, specification)
     end
-    request.features    = apply_default_features(request.features)
+
+    request.features = apply_default_features(request.features)
 
     if name then
         specification.name    = name
@@ -1126,8 +1225,8 @@ if as_script == true then --- skip the remainder of the file
     return
 else
     local registersplit = definers.registersplit
-    registersplit (":", handle_request, "cryptic")
-    registersplit ("",  handle_request, "more cryptic") -- catches \font\text=[names]
+    registersplit (":", handle_request, "common")
+    registersplit ("",  handle_request, "xetex path style") -- catches \font\text=[names]
 end
 
 ---[[ end included font-ltx.lua ]]

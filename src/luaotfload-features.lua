@@ -69,9 +69,14 @@ local mathceil         = math.ceil
 
 local cmp_by_idx = function (a, b) return a.idx < b.idx end
 
+local defined_combos = 0
+
 local handle_combination = function (combo, spec)
+    defined_combos = defined_combos + 1
     if not combo [1] then
-        report ("both", 0, "load", "Empty font combination requested.")
+        report ("both", 0, "load",
+                "combo %d: Empty font combination requested.",
+                defined_combos)
         return false
     end
 
@@ -86,7 +91,8 @@ local handle_combination = function (combo, spec)
     tablesort (combo, cmp_by_idx)
 
     --- pass 1: skim combo and resolve fonts
-    report ("both", 0, "load", "Combining %d fonts.", n)
+    report ("both", 0, "load", "combo %d: combining %d fonts.",
+            defined_combos, n)
     for i = 1, n do
         local cur = combo [i]
         local id  = cur.id
@@ -98,7 +104,7 @@ local handle_combination = function (combo, spec)
                     " *> %.2d: include font %d at rank %d (%d items).",
                     i, id, idx, (chars and #chars or 0))
             chain   [#chain + 1]   = { fnt, chars, idx = idx }
-            fontids [#fontids + 1] = id
+            fontids [#fontids + 1] = { id = id }
         else
             report ("both", 0, "load",
                     " *> %.2d: font %d at rank %d unknown, skipping.",
@@ -128,7 +134,7 @@ local handle_combination = function (combo, spec)
     local baseprop       = basefnt.properties
     baseprop.name        = spec.name
     baseprop.virtualized = true
-    baseprop.fonts       = fontids
+    basefnt.fonts        = fontids
 
     for i = 2, nc do
         local cur = chain [i]
@@ -140,7 +146,7 @@ local handle_combination = function (combo, spec)
         local pickchr = function (uc)
             local chr = src [uc]
             if chr then
-                chr.commands = { "slot", i, uc }
+                chr.commands = { { "slot", i, uc } }
                 basechar [uc] = chr
                 cnt = cnt + 1
             end
@@ -169,11 +175,11 @@ local handle_combination = function (combo, spec)
                 " *> font %d / %d: imported %d glyphs into combo.",
                 i, nc, cnt)
     end
-    spec.lookup = nil
-    spec.method = nil
-    spec.name   = spec.specification
-    spec.forced = nil
-    spec.data   = function () return basefnt end
+    spec.file       = basefnt.filename
+    spec.name       = stringformat ("luaotfload<%d>", defined_combos)
+    spec.features   = { normal = { spec.specification } }
+    spec.forced     = "evl"
+    spec.eval       = function () return basefnt end
     return spec
 end
 

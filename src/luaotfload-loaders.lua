@@ -32,14 +32,13 @@ local lua_reader = function (specification)
   end
 end
 
-local data_reader = function (specification)
-  local data = specification.data
-  if data and type (data) == "function" then
-    logreport ("both", 0, "loaders",
-               "data: found tfmdata for “%s”, injecting.",
-               specification.name)
-    return data ()
-  end
+local eval_reader = function (specification)
+  local eval = specification.eval
+  if not eval or type (eval) ~= "function" then return nil end
+  logreport ("both", 0, "loaders",
+             "eval: found tfmdata for “%s”, injecting.",
+             specification.name)
+  return eval ()
 end
 
 local install_formats = function ()
@@ -71,7 +70,7 @@ local install_formats = function ()
     return true
   end
 
-  return aux ("dat", data_reader)
+  return aux ("evl", eval_reader)
      and aux ("lua", lua_reader)
      and aux ("pfa", function (spec) return readers.opentype (spec, "pfa", "type1") end)
      and aux ("pfb", function (spec) return readers.opentype (spec, "pfb", "type1") end)

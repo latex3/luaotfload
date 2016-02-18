@@ -74,7 +74,6 @@ local handle_combination = function (combo, spec)
         report ("both", 0, "load", "Empty font combination requested.")
         return false
     end
-    inspect(combo)
 
     if not fontidentifiers then
         fontidentifiers = fonts.hashes and fonts.hashes.identifiers
@@ -150,9 +149,16 @@ local handle_combination = function (combo, spec)
         for j = 1, #def do
             local this = def [j]
             if type (this) == "number" then
+                report ("both", 0, "load",
+                        " *> [%d][%d]: import codepoint U+%.4X",
+                        i, j, this)
                 pickchr (this)
             elseif type (this) == "table" then
-                for uc = this [1], this [2] do pickchr (uc) end
+                local lo, hi = unpack (this)
+                report ("both", 0, "load",
+                        " *> [%d][%d]: import codepoint range U+%.4X--U+%.4X",
+                        i, j, lo, hi)
+                for uc = lo, hi do pickchr (uc) end
             else
                 report ("both", 0, "load",
                         " *> item no. %d of combination definition \z
@@ -163,7 +169,12 @@ local handle_combination = function (combo, spec)
                 " *> font %d / %d: imported %d glyphs into combo.",
                 i, nc, cnt)
     end
-    return basefnt
+    spec.lookup = nil
+    spec.method = nil
+    spec.name   = spec.specification
+    spec.forced = nil
+    spec.data   = function () return basefnt end
+    return spec
 end
 
 ---[[ begin excerpt from font-ott.lua ]]

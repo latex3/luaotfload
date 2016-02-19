@@ -565,19 +565,21 @@ local modifier_list     = Cg(Ct(modifier^0), "modifiers")
 
 --- combining ---------------------------------------------------------
 ---
---- \font \three = combo:1/42,2/99/0xdeadbeef,3/1/U+2a-U+1337*42
----                      v +~ v +~ +~~~~~~~~~ v v +~~~ +~~~~~ +~
----                      | |  | |  |          | | |    |      |
----                      | |  | |  |          | | |    |      |
----        idx   :     --+-÷--+-÷--÷----------+ | +----+      |
----                        |    |  |            | |           |
----        id    :     ----+----+--÷------------+ +-----------+
----                                |              |
----        chars :     ------------+--------------+
+--- \font \three = combo: 1->42; 2->99,0xdeadbeef; 3->(1,U+2a-U+1337*42)
+---                       v  +~  v  +~ +~~~~~~~~~  v   v +~~~ +~~~~~ +~
+---                       |  |   |  |  |           |   | |    |      |
+---                       |  |   |  |  |           |   | |    |      |
+---        idx   :     ---+--÷---+--÷--÷-----------+   | +----+      |
+---                          |      |  |               | |           |
+---        id    :     ------+------+--÷---------------+ +-----------+
+---                                    |                 |
+---        chars :     ----------------+-----------------+
 ---
-local comborowsep       = ws * comma * ws
-local combocolsep       = ws * slash * ws
-local comborangesep     = ws * asterisk * ws
+local comborowsep       = ws * semicolon * ws
+local combomapsep       = ws * P"->"     * ws
+local combodefsep       = ws * comma     * ws
+local comborangesep     = ws * asterisk  * ws
+
 local combohex          = hex     / tonumber
 local combouint         = digit^1 / tonumber
 local tonumber16        = function (s) return tonumber (s, 16) end
@@ -585,12 +587,20 @@ local combouni          = P"U+" * (digit^1 / tonumber16)
 local combonum          = combohex + combouni + combouint
 local comborange        = Ct(combonum * dash * combonum) + combonum
 local combochars        = comborange * (comborangesep * comborange)^0
-local combodef1         = Ct(                Cg(combouint, "idx") --> no chars
-                             * combocolsep * Cg(combouint, "id" ))
-local combodef          = Ct(                Cg(combouint, "idx"  )
-                             * combocolsep * Cg(combouint, "id"   )
-                             * combocolsep * Cg(Ct(combochars^1), "chars"))
+local parenthesized     = function (p) return P"(" * ws * p * ws * P")" end
+
+local comboidxpat       = Cg(combouint, "idx")
+local comboidpat        = Cg(combouint, "id" )
+local combocharspat     = comboidpat * combodefsep * Cg(Ct(combochars^1), "chars")
+
+local comboidx          = parenthesized (comboidxpat  ) + comboidxpat
+local comboid           = parenthesized (comboidpat   ) + comboidpat
+local comboidchars      = parenthesized (combocharspat) + combocharspat
+
+local combodef1         = Ct(comboidx * combomapsep * comboid) --> no chars
+local combodef          = Ct(comboidx * combomapsep * comboidchars)
 local combolist         = Ct(combodef1 * (comborowsep * combodef)^1)
+
 --- lookups -----------------------------------------------------------
 local fontname          = C((1-S":(/")^1)  --- like luatex-fonts
 local unsupported       = Cmt((1-S":(")^1, check_garbage)

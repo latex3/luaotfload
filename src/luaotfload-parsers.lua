@@ -591,11 +591,12 @@ local parenthesized     = function (p) return P"(" * ws * p * ws * P")" end
 
 local comboidxpat       = Cg(combouint, "idx")
 local comboidpat        = Cg(combouint, "id" )
-local combocharspat     = comboidpat * combodefsep * Cg(Ct(combochars^1), "chars")
+local combocharspat     = Cg(P"fallback" * Cc(true) + Ct(combochars^1), "chars")
+local comboidcharspat   = comboidpat * combodefsep * combocharspat
 
-local comboidx          = parenthesized (comboidxpat  ) + comboidxpat
-local comboid           = parenthesized (comboidpat   ) + comboidpat
-local comboidchars      = parenthesized (combocharspat) + combocharspat
+local comboidx          = parenthesized (comboidxpat    ) + comboidxpat
+local comboid           = parenthesized (comboidpat     ) + comboidpat
+local comboidchars      = parenthesized (comboidcharspat) + comboidcharspat
 
 local combodef1         = Ct(comboidx * combomapsep * comboid) --> no chars
 local combodef          = Ct(comboidx * combomapsep * comboidchars)

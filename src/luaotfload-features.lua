@@ -100,9 +100,15 @@ local handle_combination = function (combo, spec)
         local fnt = fontidentifiers [id]
         if fnt then
             local chars = cur.chars
-            report ("both", 0, "load",
-                    " *> %.2d: include font %d at rank %d (%d items).",
-                    i, id, idx, (chars and #chars or 0))
+            if chars == true then
+                report ("both", 0, "load",
+                        " *> %.2d: fallback font %d at rank %d.",
+                        i, id, idx)
+            else
+                report ("both", 0, "load",
+                        " *> %.2d: include font %d at rank %d (%d items).",
+                        i, id, idx, (chars and #chars or 0))
+            end
             chain   [#chain + 1]   = { fnt, chars, idx = idx }
             fontids [#fontids + 1] = { id = id }
         else
@@ -143,8 +149,12 @@ local handle_combination = function (combo, spec)
         local src = fnt.characters
         local cnt = 0
 
-        local pickchr = function (uc)
+        local pickchr = function (uc, unavailable)
             local chr = src [uc]
+            if unavailable == true and basechar [uc] then
+                --- fallback mode: already known
+                return
+            end
             if chr then
                 chr.commands = { { "slot", i, uc } }
                 basechar [uc] = chr
@@ -152,23 +162,27 @@ local handle_combination = function (combo, spec)
             end
         end
 
-        for j = 1, #def do
-            local this = def [j]
-            if type (this) == "number" then
-                report ("both", 0, "load",
-                        " *> [%d][%d]: import codepoint U+%.4X",
-                        i, j, this)
-                pickchr (this)
-            elseif type (this) == "table" then
-                local lo, hi = unpack (this)
-                report ("both", 0, "load",
-                        " *> [%d][%d]: import codepoint range U+%.4X--U+%.4X",
-                        i, j, lo, hi)
-                for uc = lo, hi do pickchr (uc) end
-            else
-                report ("both", 0, "load",
-                        " *> item no. %d of combination definition \z
-                         %d not processable.", j, i)
+        if def == true then --> fallback; grab all currently unavailable
+            for uc, _chr in next, src do pickchr (uc, true) end
+        else --> grab only defined range
+            for j = 1, #def do
+                local this = def [j]
+                if type (this) == "number" then
+                    report ("both", 0, "load",
+                            " *> [%d][%d]: import codepoint U+%.4X",
+                            i, j, this)
+                    pickchr (this)
+                elseif type (this) == "table" then
+                    local lo, hi = unpack (this)
+                    report ("both", 0, "load",
+                            " *> [%d][%d]: import codepoint range U+%.4X--U+%.4X",
+                            i, j, lo, hi)
+                    for uc = lo, hi do pickchr (uc) end
+                else
+                    report ("both", 0, "load",
+                            " *> item no. %d of combination definition \z
+                             %d not processable.", j, i)
+                end
             end
         end
         report ("both", 0, "load",

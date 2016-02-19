@@ -575,19 +575,22 @@ local modifier_list     = Cg(Ct(modifier^0), "modifiers")
 ---                                |              |
 ---        chars :     ------------+--------------+
 ---
+local comborowsep       = ws * comma * ws
+local combocolsep       = ws * slash * ws
+local comborangesep     = ws * asterisk * ws
 local combohex          = hex     / tonumber
 local combouint         = digit^1 / tonumber
 local tonumber16        = function (s) return tonumber (s, 16) end
 local combouni          = P"U+" * (digit^1 / tonumber16)
 local combonum          = combohex + combouni + combouint
 local comborange        = Ct(combonum * dash * combonum) + combonum
-local combochars        = comborange * (asterisk * comborange)^0
-local combodef1         = Ct(          Cg(combouint, "idx") --> no chars
-                             * slash * Cg(combouint, "id" ))
-local combodef          = Ct(          Cg(combouint, "idx"  )
-                             * slash * Cg(combouint, "id"   )
-                             * slash * Cg(Ct(combochars^1), "chars"))
-local combolist         = Ct(combodef1 * (comma * combodef)^1)
+local combochars        = comborange * (comborangesep * comborange)^0
+local combodef1         = Ct(                Cg(combouint, "idx") --> no chars
+                             * combocolsep * Cg(combouint, "id" ))
+local combodef          = Ct(                Cg(combouint, "idx"  )
+                             * combocolsep * Cg(combouint, "id"   )
+                             * combocolsep * Cg(Ct(combochars^1), "chars"))
+local combolist         = Ct(combodef1 * (comborowsep * combodef)^1)
 --- lookups -----------------------------------------------------------
 local fontname          = C((1-S":(/")^1)  --- like luatex-fonts
 local unsupported       = Cmt((1-S":(")^1, check_garbage)

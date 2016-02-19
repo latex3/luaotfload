@@ -1,5 +1,9 @@
 Change History
 --------------
+2016/mm/dd, luaotfload v2.7:
+    * Rework lookup chaining.
+    * Combining glyphs from different fonts (``combo: ...`` requests).
+    * Glyph fallbacks.
 
 2015/12/09, luaotfload v2.6
     * Add ``sign`` target to makefile for automated package signing.

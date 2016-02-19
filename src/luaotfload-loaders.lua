@@ -14,13 +14,42 @@ if not luaotfload then error "this module requires Luaotfload" end
 
 local logreport = luaotfload.log and luaotfload.log.report or print
 
+local lua_reader = function (specification)
+  local fullname = specification.filename or ""
+  if fullname == "" then
+    local forced = specification.forced or ""
+    if forced ~= "" then
+      fullname = specification.name .. "." .. forced
+    else
+      fullname = specification.name
+    end
+  end
+  local fullname = resolvers.findfile (fullname) or ""
+  if fullname ~= "" then
+    local loader = loadfile (fullname)
+    loader = loader and loader ()
+    return loader and loader (specification)
+  end
+end
+
+local eval_reader = function (specification)
+  local eval = specification.eval
+  if not eval or type (eval) ~= "function" then return nil end
+  logreport ("both", 0, "loaders",
+             "eval: found tfmdata for “%s”, injecting.",
+             specification.name)
+  return eval ()
+end
+
 local install_formats = function ()
   local fonts = fonts
   if not fonts then return false end
 
-  local readers  = fonts.readers
-  local handlers = fonts.handlers
-  local formats  = fonts.formats
+  local readers   = fonts.readers
+  local sequence  = readers.sequence
+  local seqset    = table.tohash (sequence)
+  local handlers  = fonts.handlers
+  local formats   = fonts.formats
   if not readers or not handlers or not formats then return false end
 
   local aux = function (which, reader)
@@ -32,10 +61,18 @@ local install_formats = function ()
     formats  [which] = "type1"
     readers  [which] = reader
     handlers [which] = { }
+    if not seqset [which] then
+      logreport ("both", 0, "loaders",
+                 "Extending reader sequence for “%s”.", which)
+      sequence [#sequence + 1] = which
+      seqset   [which]         = true
+    end
     return true
   end
 
-  return aux ("pfa", function (spec) return readers.opentype (spec, "pfa", "type1") end)
+  return aux ("evl", eval_reader)
+     and aux ("lua", lua_reader)
+     and aux ("pfa", function (spec) return readers.opentype (spec, "pfa", "type1") end)
      and aux ("pfb", function (spec) return readers.opentype (spec, "pfb", "type1") end)
      and aux ("ofm", readers.tfm)
 end
@@ -86,6 +123,7 @@ do
       logreport ("both", 0, "loaders", "   > name %q",     result.name     or "<nil>")
       logreport ("both", 0, "loaders", "   > fontname %q", result.fontname or "<nil>")
       logreport ("both", 0, "loaders", "   > fullname %q", result.fullname or "<nil>")
+      logreport ("both", 0, "loaders", "   > type %s",     result.type     or "<nil>")
       return result
     end
   end

@@ -19,6 +19,7 @@ local C                 = lpeg.C
 
 local table             = table
 local tabletohash       = table.tohash
+local tablesort         = table.sort
 local setmetatableindex = table.setmetatableindex
 local insert            = table.insert
 
@@ -28,6 +29,7 @@ local insert            = table.insert
 local fonts             = fonts
 local definers          = fonts.definers
 local handlers          = fonts.handlers
+local fontidentifiers   = fonts.hashes and fonts.hashes.identifiers
 
 local as_script, normalize
 
@@ -65,6 +67,135 @@ local stringformat     = string.format
 local stringis_empty   = string.is_empty
 local mathceil         = math.ceil
 
+local cmp_by_idx = function (a, b) return a.idx < b.idx end
+
+local defined_combos = 0
+
+local handle_combination = function (combo, spec)
+    defined_combos = defined_combos + 1
+    if not combo [1] then
+        report ("both", 0, "load",
+                "combo %d: Empty font combination requested.",
+                defined_combos)
+        return false
+    end
+
+    if not fontidentifiers then
+        fontidentifiers = fonts.hashes and fonts.hashes.identifiers
+    end
+
+    local chain   = { }
+    local fontids = { }
+    local n       = #combo
+
+    tablesort (combo, cmp_by_idx)
+
+    --- pass 1: skim combo and resolve fonts
+    report ("both", 0, "load", "combo %d: combining %d fonts.",
+            defined_combos, n)
+    for i = 1, n do
+        local cur = combo [i]
+        local id  = cur.id
+        local idx = cur.idx
+        local fnt = fontidentifiers [id]
+        if fnt then
+            local chars = cur.chars
+            if chars == true then
+                report ("both", 0, "load",
+                        " *> %.2d: fallback font %d at rank %d.",
+                        i, id, idx)
+            else
+                report ("both", 0, "load",
+                        " *> %.2d: include font %d at rank %d (%d items).",
+                        i, id, idx, (chars and #chars or 0))
+            end
+            chain   [#chain + 1]   = { fnt, chars, idx = idx }
+            fontids [#fontids + 1] = { id = id }
+        else
+            report ("both", 0, "load",
+                    " *> %.2d: font %d at rank %d unknown, skipping.",
+                    n, id, idx)
+            --- TODO might instead attempt to define the font at this point
+            ---      but that’d require some modifications to the syntax
+        end
+    end
+
+    local nc = #chain
+    if nc == 0 then
+        report ("both", 0, "load",
+                " *> no valid font (of %d) in combination.", n)
+        return false
+    end
+
+    local basefnt = chain [1] [1]
+    if nc == 1 then
+        report ("both", 0, "load",
+                " *> combination boils down to a single font (%s) \z
+                 of %d initially specified; not pursuing this any \z
+                 further.", basefnt.fullname, n)
+        return basefnt
+    end
+
+    local basechar       = basefnt.characters
+    local baseprop       = basefnt.properties
+    baseprop.name        = spec.name
+    baseprop.virtualized = true
+    basefnt.fonts        = fontids
+
+    for i = 2, nc do
+        local cur = chain [i]
+        local fnt = cur [1]
+        local def = cur [2]
+        local src = fnt.characters
+        local cnt = 0
+
+        local pickchr = function (uc, unavailable)
+            local chr = src [uc]
+            if unavailable == true and basechar [uc] then
+                --- fallback mode: already known
+                return
+            end
+            if chr then
+                chr.commands = { { "slot", i, uc } }
+                basechar [uc] = chr
+                cnt = cnt + 1
+            end
+        end
+
+        if def == true then --> fallback; grab all currently unavailable
+            for uc, _chr in next, src do pickchr (uc, true) end
+        else --> grab only defined range
+            for j = 1, #def do
+                local this = def [j]
+                if type (this) == "number" then
+                    report ("both", 0, "load",
+                            " *> [%d][%d]: import codepoint U+%.4X",
+                            i, j, this)
+                    pickchr (this)
+                elseif type (this) == "table" then
+                    local lo, hi = unpack (this)
+                    report ("both", 0, "load",
+                            " *> [%d][%d]: import codepoint range U+%.4X--U+%.4X",
+                            i, j, lo, hi)
+                    for uc = lo, hi do pickchr (uc) end
+                else
+                    report ("both", 0, "load",
+                            " *> item no. %d of combination definition \z
+                             %d not processable.", j, i)
+                end
+            end
+        end
+        report ("both", 0, "load",
+                " *> font %d / %d: imported %d glyphs into combo.",
+                i, nc, cnt)
+    end
+    spec.file       = basefnt.filename
+    spec.name       = stringformat ("luaotfload<%d>", defined_combos)
+    spec.features   = { normal = { spec.specification } }
+    spec.forced     = "evl"
+    spec.eval       = function () return basefnt end
+    return spec
+end
 
 ---[[ begin excerpt from font-ott.lua ]]
 
@@ -993,7 +1124,10 @@ local import_values = {
     { "mode",   true },
 }
 
-local lookup_types = { "anon", "file", "kpse", "my", "name", "path" }
+local lookup_types = { "anon"  , "file", "kpse"
+                     , "my"    , "name", "path"
+                     , "combo"
+                     }
 
 local select_lookup = function (request)
     for i=1, #lookup_types do
@@ -1049,6 +1183,7 @@ end
 local handle_request = function (specification)
     local request = lpegmatch(luaotfload.parsers.font_request,
                               specification.specification)
+----inspect(request)
     if not request then
         --- happens when called with an absolute path
         --- in an anonymous lookup;
@@ -1077,8 +1212,13 @@ local handle_request = function (specification)
         specification.lookup = "path"
         return specification
     end
-    local lookup, name  = select_lookup(request)
-    request.features    = apply_default_features(request.features)
+
+    local lookup, name = select_lookup (request)
+    if lookup == "combo" then
+        return handle_combination (request.combo, specification)
+    end
+
+    request.features = apply_default_features(request.features)
 
     if name then
         specification.name    = name
@@ -1116,8 +1256,8 @@ if as_script == true then --- skip the remainder of the file
     return
 else
     local registersplit = definers.registersplit
-    registersplit (":", handle_request, "cryptic")
-    registersplit ("",  handle_request, "more cryptic") -- catches \font\text=[names]
+    registersplit (":", handle_request, "common")
+    registersplit ("",  handle_request, "xetex path style") -- catches \font\text=[names]
 end
 
 ---[[ end included font-ltx.lua ]]
@@ -1749,4 +1889,4 @@ return {
     end
 }
 
--- vim:tw=71:sw=4:ts=4:expandtab
+-- vim:tw=79:sw=4:ts=4:expandtab

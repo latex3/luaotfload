@@ -583,8 +583,6 @@ local style_category = {
 
 local type1_metrics = { "tfm", "ofm", }
 
-local dummy_findfile = resolvers.findfile -- from basics-gen
-
 local lookup_filename = function (filename)
     if not name_index then name_index = load_names () end
     local files    = name_index.files
@@ -629,6 +627,8 @@ end
     bottleneck.
 
 --doc]]--
+
+local dummy_findfile = resolvers.findfile -- from basics-gen
 
 --- string -> string * string * bool
 local lookup_font_file

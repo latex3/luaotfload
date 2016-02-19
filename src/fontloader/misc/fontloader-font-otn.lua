@@ -3897,9 +3897,9 @@ local function split(replacement,original)
 end
 
 local valid = { -- does contextpos work?
-    coverage        = { chainsub = true, chainpos = true, contextsub = true, contextpos = true },
+    coverage        = { chainsub = true, chainpos = true, contextsub = true, contextpos = false },
     reversecoverage = { reversesub = true },
-    glyphs          = { chainsub = true, chainpos = true, contextsub = true, contextpos = true },
+    glyphs          = { chainsub = true, chainpos = true, contextsub = true, contextpos = false },
 }
 
 local function prepare_contextchains(tfmdata)

@@ -6,7 +6,7 @@
                      Luaotfload configuration file
 -----------------------------------------------------------------------
 
-:Date:                  2015-12-09
+:Date:                  2016-02-04
 :Copyright:             GPL v2.0
 :Version:               2.6
 :Manual section:        5
@@ -155,10 +155,10 @@ The list of ``formats`` must be a comma separated sequence of strings
 containing one or more of these elements:
 
 * ``otf``               (OpenType format),
-* ``ttf`` and ``ttc``   (TrueType format),
+* ``ttf`` and ``ttc``       (TrueType format),
 * ``dfont``             (Macintosh TrueType format),
 * ``afm``               (Adobe Font Metrics),
-* ``pfb`` and ``pfa``   (PostScript format).
+* ``pfb`` and ``pfa``       (PostScript format).
 
 It corresponds loosely to the ``--formats`` option to
 **luaotfload-tool**. Invalid or duplicate members are ignored; if the
@@ -293,7 +293,7 @@ restore the previous behavior if necessary.
 The ``definer`` allows for switching the ``define_font`` callback.
 Apart from the default ``patch`` one may also choose the ``generic``
 one that comes with the vanilla fontloader. Beware that this might
-break tools like Fontspect that rely on the ``patch_font`` callback
+break tools like Fontspec that rely on the ``patch_font`` callback
 provided by Luaotfload to perform important corrections on font data.
 
 The fontloader backend can be selected by setting the value of

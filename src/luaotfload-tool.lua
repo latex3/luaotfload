@@ -310,14 +310,15 @@ local version_msg = function ( )
     local out   = function (...) texiowrite_nl (stringformat (...)) end
     local uname = os.uname ()
     local meta  = fonts.names.getmetadata ()
+    local info  = status.list ()
     out (about, luaotfload.self)
     out ("%s version: %q", luaotfload.self, version)
     out ("Revision: %q", config.luaotfload.status.notes.revision)
     out ("Lua interpreter: %s; version %q", runtime[1], runtime[2])
-    out ("Luatex SVN revision: %d", status.luatex_svn)
+--[[out ("Luatex SVN revision: %d", info.luatex_svn)]] --> SVN r5624
     out ("Luatex version: %.2f.%d",
-         status.luatex_version / 100,
-         status.luatex_revision)
+         info.luatex_version / 100,
+         info.luatex_revision)
     out ("Platform: type=%s name=%s", os.type, os.name)
 
     local uname_vars = tablesortedkeys (uname)

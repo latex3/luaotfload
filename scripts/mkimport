@@ -63,7 +63,7 @@ local luatex_fonts_prefix = "luatex"
 local fontloader_subdir   = "src/fontloader"
 
 local origin_paths = {
-  context    = "tex/context/base",
+  context    = "tex/context/base/mkiv",
   fontloader = "tex/generic/context/luatex",
 }
 
@@ -105,10 +105,20 @@ local loader_target_dir  = "/build/"
 -------------------------------------------------------------------------------
 
 local die = function (...)
-  io.stderr:write "[\x1b[1;30;41mfatal error\x1b[0m]: "
+  io.stderr:write "[\x1b[1;30;41mfatal error\x1b[0m] "
   io.stderr:write (stringformat (...))
   io.stderr:write "\naborting.\n"
   os.exit (1)
+end
+
+local uncertain = 0
+
+local hmm = function (...)
+  uncertain = uncertain + 1
+  --[[ sorta like an error but non-fatal ]]
+  io.stderr:write "[\x1b[1;31merror\x1b[0m] "
+  io.stderr:write (stringformat (...))
+  io.stderr:write "; continuing nontheless.\n"
 end
 
 local emphasis = function (txt)
@@ -352,7 +362,8 @@ local package = {
 
 local hash_file = function (fname)
   if not lfsisfile (fname) then
-    die ("cannot find %s.", fname)
+    hmm ("cannot find %s", fname)
+    return nil
   end
   local raw = ioloaddata (fname)
   if not raw then
@@ -476,20 +487,21 @@ local news = function ()
         end
         if is_readable (ourpath) then imported = true end
         local src_hash = hash_file (fullpath)
-        local dst_hash = imported and hash_file (ourpath)
-        local same     = src_hash == dst_hash -- same!
-
-        if same then
-          good ("file %s unchanged", emphasis (ourname))
-          status.good[#status.good + 1] = ourname
-        elseif not dst_hash then
-          attention ("new file %s requires import from %s",
-                    emphasis (ourname),
-                    emphasis (fullpath))
-          status.create[#status.create + 1] = ourname
-        else --- src and dst exist but differ
-          attention ("file %s requires import", emphasis (ourname))
-          status.import[#status.import + 1] = ourname
+        if src_hash then
+          local dst_hash = imported and hash_file (ourpath)
+          local same     = src_hash == dst_hash -- same!
+          if same then
+            good ("file %s unchanged", emphasis (ourname))
+            status.good[#status.good + 1] = ourname
+          elseif not dst_hash then
+            attention ("new file %s requires import from %s",
+                      emphasis (ourname),
+                      emphasis (fullpath))
+            status.create[#status.create + 1] = ourname
+          else --- src and dst exist but differ
+            attention ("file %s requires import", emphasis (ourname))
+            status.import[#status.import + 1] = ourname
+          end
         end
       end
 
@@ -541,7 +553,7 @@ local summarize_status = function (counters)
   local sum = imported + skipped + created + failed
   if sum < 1 then die ("garbage total of imported files: %s", sum) end
   separator ()
-  status (" RESULT: %d files processed", sum)
+  status (" RESULT: %d files processed, %d errors", sum, uncertain)
   separator ()
   if created  > 0 then status ("created:  %d (%d %%)", created , created  * 100 / sum) end
   if imported > 0 then status ("imported: %d (%d %%)", imported, imported * 100 / sum) end
@@ -593,7 +605,7 @@ local import = function (arg)
       local def  = defs[i]
       local stat = import_file (def.name, def.kind, def, cat)
       if stat == import_failed then
-        die (stringformat ("import failed at file %d of %d (%s)",
+        hmm (stringformat ("import failed at file %d of %d (%s)",
                            i, ndefs, def.name))
       end
       statcount[stat] = statcount[stat] or 0
@@ -601,7 +613,7 @@ local import = function (arg)
     end
   end
   summarize_status (statcount)
-  return 0
+  return uncertain == 0 and 0 or -42
 end --[[ [local import = function (arg)] ]]
 
 local find_in_path = function (root, subdir, target)

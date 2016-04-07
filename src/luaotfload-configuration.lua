@@ -2,14 +2,14 @@
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-configuration.lua
 --  DESCRIPTION:  config file reader
--- REQUIREMENTS:  Luaotfload 2.6 or above
+-- REQUIREMENTS:  Luaotfload 2.7 or above
 --       AUTHOR:  Philipp Gesang, <phg@phi-gamma.net>
 --       AUTHOR:  Dohyun Kim <nomosnomos@gmail.com>
 -------------------------------------------------------------------------------
 --
 
 if not modules then modules = { } end modules ["luaotfload-configuration"] = {
-  version   = "2.6",
+  version   = "2.7",
   comment   = "part of Luaotfload",
   author    = "Philipp Gesang, Dohyun Kim",
   copyright = "Luaotfload Development Team",

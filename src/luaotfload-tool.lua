@@ -2,13 +2,13 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-tool.lua
 --  DESCRIPTION:  database functionality
--- REQUIREMENTS:  luaotfload 2.6
+-- REQUIREMENTS:  luaotfload 2.7
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 --      LICENSE:  GPL v2.0
 -----------------------------------------------------------------------
 
 luaotfload          = luaotfload or { }
-local version       = "2.6"
+local version       = "2.7"
 luaotfload.version  = version
 luaotfload.self     = "luaotfload-tool"
 

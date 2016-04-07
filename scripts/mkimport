@@ -63,7 +63,7 @@ local luatex_fonts_prefix = "luatex"
 local fontloader_subdir   = "src/fontloader"
 
 local origin_paths = {
-  context    = "tex/context/base/mkiv",
+  context    = { "tex/context/base/mkiv", "tex/context/base", },
   fontloader = "tex/generic/context/luatex",
 }
 
@@ -201,18 +201,13 @@ local imports = {
     { name = "basics-gen"        , ours = nil          , kind = kind_essential },
     { name = "basics-nod"        , ours = nil          , kind = kind_merged    },
     { name = "basics"            , ours = nil          , kind = kind_tex       },
-    { name = "fonts-cbk"         , ours = nil          , kind = kind_merged    },
-    { name = "fonts-def"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-demo-vf-1"   , ours = nil          , kind = kind_ignored   },
     { name = "fonts-enc"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-ext"         , ours = nil          , kind = kind_merged    },
-    { name = "fonts-lua"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-merged"      , ours = "reference"  , kind = kind_essential },
-    { name = "fonts-ota"         , ours = nil          , kind = kind_merged    },
     { name = "fonts"             , ours = nil          , kind = kind_merged    },
     { name = "fonts"             , ours = nil          , kind = kind_tex       },
     { name = "fonts-syn"         , ours = nil          , kind = kind_ignored   },
-    { name = "fonts-tfm"         , ours = nil          , kind = kind_merged    },
     { name = "languages"         , ours = nil          , kind = kind_ignored   },
     { name = "languages"         , ours = nil          , kind = kind_tex       },
     { name = "math"              , ours = nil          , kind = kind_ignored   },
@@ -234,18 +229,31 @@ local imports = {
     { name = "data-con"          , ours = "data-con"          , kind = kind_merged    },
     { name = "font-afk"          , ours = "font-afk"          , kind = kind_merged    },
     { name = "font-afm"          , ours = "font-afm"          , kind = kind_merged    },
+    { name = "font-cff"          , ours = "font-cff"          , kind = kind_merged    },
     { name = "font-cid"          , ours = "font-cid"          , kind = kind_merged    },
     { name = "font-con"          , ours = "font-con"          , kind = kind_merged    },
     { name = "font-def"          , ours = "font-def"          , kind = kind_merged    },
+    { name = "font-dsp"          , ours = "font-dsp"          , kind = kind_merged    },
+    { name = "font-gbn"          , ours = "font-gbn"          , kind = kind_merged    },
     { name = "font-ini"          , ours = "font-ini"          , kind = kind_merged    },
     { name = "font-inj"          , ours = "font-inj"          , kind = kind_merged    },
+    { name = "font-lua"          , ours = "font-lua"          , kind = kind_merged    },
     { name = "font-map"          , ours = "font-map"          , kind = kind_merged    },
+    { name = "font-osd"          , ours = "font-osd"          , kind = kind_merged    },
+    { name = "font-ota"          , ours = "font-ota"          , kind = kind_merged    },
     { name = "font-otb"          , ours = "font-otb"          , kind = kind_merged    },
+    { name = "font-otd"          , ours = "font-otd"          , kind = kind_merged    },
     { name = "font-otf"          , ours = "font-otf"          , kind = kind_merged    },
     { name = "font-oti"          , ours = "font-oti"          , kind = kind_merged    },
-    { name = "font-otn"          , ours = "font-otn"          , kind = kind_merged    },
-    { name = "font-otp"          , ours = "font-otp"          , kind = kind_merged    },
+    { name = "font-otj"          , ours = "font-otj"          , kind = kind_merged    },
+    { name = "font-otl"          , ours = "font-otl"          , kind = kind_merged    },
+    { name = "font-oto"          , ours = "font-oto"          , kind = kind_merged    },
+    { name = "font-otr"          , ours = "font-otr"          , kind = kind_merged    },
+    { name = "font-ots"          , ours = "font-ots"          , kind = kind_merged    },
+    { name = "font-oup"          , ours = "font-oup"          , kind = kind_merged    },
     { name = "font-tfm"          , ours = "font-tfm"          , kind = kind_merged    },
+    { name = "font-ttf"          , ours = "font-ttf"          , kind = kind_merged    },
+
     { name = "l-boolean"         , ours = "l-boolean"         , kind = kind_lualibs   },
     { name = "l-file"            , ours = "l-file"            , kind = kind_lualibs   },
     { name = "l-function"        , ours = "l-function"        , kind = kind_lualibs   },
@@ -256,6 +264,7 @@ local imports = {
     { name = "l-string"          , ours = "l-string"          , kind = kind_lualibs   },
     { name = "l-table"           , ours = "l-table"           , kind = kind_lualibs   },
     { name = "util-str"          , ours = "util-str"          , kind = kind_lualibs   },
+    { name = "util-fil"          , ours = "util-fil"          , kind = kind_lualibs   },
   }, --[[ [context] ]]
 } --[[ [imports] ]]
 
@@ -276,33 +285,39 @@ local package = {
 ---   [08] l-boolean.lua
 ---   [09] l-math.lua
 ---   [10] util-str.lua
----   [11] luatex-basics-gen.lua
----   [12] data-con.lua
----   [13] luatex-basics-nod.lua
----   [14] font-ini.lua
----   [15] font-con.lua
----   [16] luatex-fonts-enc.lua
----   [17] font-cid.lua
----   [18] font-map.lua
----   [19] luatex-fonts-syn.lua
----   [20] font-tfm.lua
----   [21] font-afm.lua
----   [22] font-afk.lua
----   [23] luatex-fonts-tfm.lua
----   [24] font-oti.lua
----   [25] font-otf.lua
----   [26] font-otb.lua
----   [27] font-inj.lua
----   [28] luatex-fonts-ota.lua
----   [30] font-otn.lua
----   [30] font-otp.lua
----   [31] luatex-fonts-lua.lua
----   [32] font-def.lua
----   [33] luatex-fonts-def.lua
----   [34] luatex-fonts-ext.lua
----   [35] luatex-fonts-cbk.lua
+---   [11] util-fil.lua
+---   [12] luatex-basics-gen.lua
+---   [13] data-con.lua
+---   [14] luatex-basics-nod.lua
+---   [15] luatex-basics-chr.lua
+---   [16] font-ini.lua
+---   [17] font-con.lua
+---   [18] luatex-fonts-enc.lua
+---   [19] font-cid.lua
+---   [20] font-map.lua
+---   [21] luatex-fonts-syn.lua
+---   [22] font-tfm.lua
+---   [23] font-afm.lua
+---   [24] font-afk.lua
+---   [25] font-oti.lua
+---   [26] font-otr.lua
+---   [27] font-cff.lua
+---   [28] font-ttf.lua
+---   [29] font-dsp.lua
+---   [30] font-oup.lua
+---   [31] font-otl.lua
+---   [32] font-oto.lua
+---   [33] font-otj.lua
+---   [34] font-ota.lua
+---   [35] font-ots.lua
+---   [36] font-osd.lua
+---   [37] font-lua.lua
+---   [38] font-def.lua
+---   [39] font-xtx.lua
+---   [40] luatex-fonts-ext.lua
+---   [41] font-gbn.lua
 ---
---- Of these, nos. 01--10 are provided by the Lualibs. Keeping them
+--- Of these, nos. 01--11 are provided by the Lualibs. Keeping them
 --- around in the Luaotfload fontloader is therefore unnecessary.
 --- Packaging needs to account for this difference.
 
@@ -316,11 +331,17 @@ local package = {
     "l-boolean",
     "l-math",
     "util-str",
+    "util-fil",
 
 --- Another file containing auxiliary definitions must be present
 --- prior to initialization of the configuration.
 
     "luatex-basics-gen",
+
+--- We have a custom script for autogenerating data so we don’t use the
+--- definitions from upstream.
+
+    "basics-chr",
 
   }, --[[ [package.optional] ]]
 
@@ -342,19 +363,23 @@ local package = {
     "font-tfm",
     "font-afm",
     "font-afk",
-    "fonts-tfm",
+    "font-tfm",
     "font-oti",
-    "font-otf",
-    "font-otb",
-    "font-inj",
-    "fonts-ota",
-    "font-otn",
-    "font-otp",
-    "fonts-lua",
+    "font-otr",
+    "font-cff",
+    "font-ttf",
+    "font-dsp",
+    "font-oup",
+    "font-otl",
+    "font-oto",
+    "font-otj",
+    "font-ota",
+    "font-ots",
+    "font-osd",
+    "font-lua",
     "font-def",
-    "fonts-def",
     "fonts-ext",
-    "fonts-cbk",
+    "font-gbn",
 
   }, --[[ [package.required] ]]
 
@@ -372,12 +397,27 @@ local hash_file = function (fname)
   return md5sumhexa (raw)
 end
 
+local first_existing_subpath = function (pfx, subs)
+  if not subs then return nil end
+  local t_subs = type (subs)
+  if t_subs == "table" then
+    for i = 1, #subs do
+      local sub = subs[i]
+      local pth = file.join (pfx, sub)
+      if lfsisdir (pth) then return pth end
+    end
+  elseif t_subs == "string" then
+    local pth = file.join (pfx, subs)
+    if lfsisdir (pth) then return pth end
+  end
+  return nil
+end
+
 local derive_category_path = function (cat)
-  local subpath  = origin_paths[cat] or die ("category " .. cat .. " unknown")
-  local location = file.join (parms.context_root, subpath)
-  if not lfsisdir (location) then
-    die ("invalid base path defined for category "
-         .. cat .. " at " .. location)
+  local location = first_existing_subpath (parms.context_root,
+                                           origin_paths[cat])
+  if not location then
+    die ("invalid base path defined for category " .. cat)
   end
   return location
 end

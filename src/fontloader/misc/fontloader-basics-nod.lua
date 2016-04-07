@@ -51,11 +51,15 @@ nodes              = { }
 nodes.pool         = { }
 nodes.handlers     = { }
 
-local nodecodes    = { } for k,v in next, node.types   () do nodecodes[string.gsub(v,"_","")] = k end
-local whatcodes    = { } for k,v in next, node.whatsits() do whatcodes[string.gsub(v,"_","")] = k end
+local nodecodes    = { }
 local glyphcodes   = node.subtypes("glyph")
 local disccodes    = node.subtypes("disc")
 
+for k, v in next, node.types() do
+    v = string.gsub(v,"_","")
+    nodecodes[k] = v
+    nodecodes[v] = k
+end
 for i=0,#glyphcodes do
     glyphcodes[glyphcodes[i]] = i
 end
@@ -63,7 +67,6 @@ for i=0,#disccodes do
     disccodes[disccodes[i]] = i
 end
 
-nodes.whatcodes    = whatcodes
 nodes.nodecodes    = nodecodes
 nodes.glyphcodes   = glyphcodes
 nodes.disccodes    = disccodes
@@ -207,6 +210,44 @@ nuts.getlist             = direct.getlist
 nuts.setlist             = direct.setlist    or function(n,l) setfield(n,"list",l) end
 nuts.getleader           = direct.getleader
 nuts.setleader           = direct.setleader  or function(n,l) setfield(n,"leader",l) end
+
+if not direct.is_glyph then
+    local getchar    = direct.getchar
+    local getid      = direct.getid
+    local getfont    = direct.getfont
+    local glyph_code = nodes.nodecodes.glyph
+    function direct.is_glyph(n,f)
+        local id   = getid(n)
+        if id == glyph_code then
+            if f and getfont(n) == f then
+                return getchar(n)
+            else
+                return false
+            end
+        else
+            return nil, id
+        end
+    end
+    function direct.is_char(n,f)
+        local id = getid(n)
+        if id == glyph_code then
+            if getsubtype(n) >= 256 then
+                return false
+            elseif f and getfont(n) == f then
+                return getchar(n)
+            else
+                return false
+            end
+        else
+            return nil, id
+        end
+    end
+end
+
+nuts.ischar              = direct.is_char
+nuts.is_char             = direct.is_char
+nuts.isglyph             = direct.is_glyph
+nuts.is_glyph            = direct.is_glyph
 
 nuts.insert_before       = direct.insert_before
 nuts.insert_after        = direct.insert_after

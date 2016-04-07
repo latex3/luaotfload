@@ -80,12 +80,11 @@ local f_double = formatters["%04X%04X"]
 
 -- local tounicodes = table.setmetatableindex(function(t,unicode)
 --     local s
---     if unicode < 0x10000 then
+--     if unicode < 0xD7FF or (unicode > 0xDFFF and unicode <= 0xFFFF) then
 --         s = f_single(unicode)
---     elseif unicode < 0x1FFFFFFFFF then
---         s = f_double(floor(unicode/1024),unicode%1024+0xDC00)
 --     else
---         s = false
+--         unicode = unicode - 0x10000
+--         s = f_double(floor(unicode/1024)+0xD800,unicode%1024+0xDC00)
 --     end
 --     t[unicode] = s
 --     return s
@@ -140,12 +139,11 @@ local f_double = formatters["%04X%04X"]
 -- end
 
 local function tounicode16(unicode,name)
-    if unicode < 0x10000 then
+    if unicode < 0xD7FF or (unicode > 0xDFFF and unicode <= 0xFFFF) then
         return f_single(unicode)
-    elseif unicode < 0x1FFFFFFFFF then
-        return f_double(floor(unicode/1024),unicode%1024+0xDC00)
     else
-        report_fonts("can't convert %a in %a into tounicode",unicode,name)
+        unicode = unicode - 0x10000
+        return f_double(floor(unicode/1024)+0xD800,unicode%1024+0xDC00)
     end
 end
 
@@ -153,13 +151,11 @@ local function tounicode16sequence(unicodes,name)
     local t = { }
     for l=1,#unicodes do
         local u = unicodes[l]
-        if u < 0x10000 then
+        if u < 0xD7FF or (u > 0xDFFF and u <= 0xFFFF) then
             t[l] = f_single(u)
-        elseif unicode < 0x1FFFFFFFFF then
-            t[l] = f_double(floor(u/1024),u%1024+0xDC00)
         else
-            report_fonts ("can't convert %a in %a into tounicode",u,name)
-            return
+            u = u - 0x10000
+            t[l] = f_double(floor(u/1024)+0xD800,u%1024+0xDC00)
         end
     end
     return concat(t)
@@ -170,23 +166,20 @@ local function tounicode(unicode,name)
         local t = { }
         for l=1,#unicode do
             local u = unicode[l]
-            if u < 0x10000 then
+            if u < 0xD7FF or (u > 0xDFFF and u <= 0xFFFF) then
                 t[l] = f_single(u)
-            elseif u < 0x1FFFFFFFFF then
-                t[l] = f_double(floor(u/1024),u%1024+0xDC00)
             else
-                report_fonts ("can't convert %a in %a into tounicode",u,name)
-                return
+                u = u - 0x10000
+                t[l] = f_double(floor(u/1024)+0xD800,u%1024+0xDC00)
             end
         end
         return concat(t)
     else
-        if unicode < 0x10000 then
+        if unicode < 0xD7FF or (unicode > 0xDFFF and unicode <= 0xFFFF) then
             return f_single(unicode)
-        elseif unicode < 0x1FFFFFFFFF then
-            return f_double(floor(unicode/1024),unicode%1024+0xDC00)
         else
-            report_fonts("can't convert %a in %a into tounicode",unicode,name)
+            unicode = unicode - 0x10000
+            return f_double(floor(unicode/1024)+0xD800,unicode%1024+0xDC00)
         end
     end
 end
@@ -196,7 +189,8 @@ local function fromunicode16(str)
         return tonumber(str,16)
     else
         local l, r = match(str,"(....)(....)")
-        return (tonumber(l,16))*0x400  + tonumber(r,16) - 0xDC00
+     -- return (tonumber(l,16))*0x400  + tonumber(r,16) - 0xDC00
+        return 0x10000 + (tonumber(l,16)-0xD800)*0x400  + tonumber(r,16) - 0xDC00
     end
 end
 
@@ -212,26 +206,6 @@ end
 --
 -- local function fromunicode16(str)
 --     return lpegmatch(p,str)
--- end
-
--- This is quite a bit faster but at the cost of some memory but if we
--- do this we will also use it elsewhere so let's not follow this route
--- now. I might use this method in the plain variant (no caching there)
--- but then I need a flag that distinguishes between code branches.
---
--- local cache = { }
---
--- function mappings.tounicode16(unicode)
---     local s = cache[unicode]
---     if not s then
---         if unicode < 0x10000 then
---             s = format("%04X",unicode)
---         else
---             s = format("%04X%04X",unicode/0x400+0xD800,unicode%0x400+0xDC00)
---         end
---         cache[unicode] = s
---     end
---     return s
 -- end
 
 mappings.makenameparser      = makenameparser

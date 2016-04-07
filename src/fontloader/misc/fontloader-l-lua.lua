@@ -19,11 +19,19 @@ if not modules then modules = { } end modules ['l-lua'] = {
 
 -- compatibility hacksand helpers
 
-local major, minor = string.match(_VERSION,"^[^%d]+(%d+)%.(%d+).*$")
+_MAJORVERSION, _MINORVERSION = string.match(_VERSION,"^[^%d]+(%d+)%.(%d+).*$")
 
-_MAJORVERSION = tonumber(major) or 5
-_MINORVERSION = tonumber(minor) or 1
+_MAJORVERSION = tonumber(_MAJORVERSION) or 5
+_MINORVERSION = tonumber(_MINORVERSION) or 1
 _LUAVERSION   = _MAJORVERSION + _MINORVERSION/10
+
+if _LUAVERSION < 5.2 and jit then
+    --
+    -- we want loadstring cum suis to behave like 5.2
+    --
+    _MINORVERSION = 2
+    _LUAVERSION   = 5.2
+end
 
 -- lpeg
 

@@ -683,7 +683,7 @@ function constructors.scale(tfmdata,specification)
             chr.unicode   = isunicode
             chr.tounicode = tounicode(isunicode)
             -- in luatex > 0.85 we can do this:
-         -- chr.tounicode = isunicode
+-- chr.tounicode = isunicode
         end
         if hasquality then
             -- we could move these calculations elsewhere (saves calculations)

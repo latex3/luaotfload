@@ -360,7 +360,6 @@ local package = {
     "font-tfm",
     "font-afm",
     "font-afk",
-    "font-tfm",
     "font-oti",
     "font-otr",
     "font-cff",

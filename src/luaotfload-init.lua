@@ -238,6 +238,7 @@ local context_modules = {
   { false, "l-boolean"  },
   { false, "l-math"     },
   { false, "util-str"   },
+  { false, "util-fil"   },
 
   --- These constitute the fontloader proper.
   { ltx,   "luatex-basics-gen" },
@@ -247,21 +248,27 @@ local context_modules = {
   { ctx,   "font-con"          },
   { ltx,   "luatex-fonts-enc"  },
   { ctx,   "font-cid"          },
-  { ltx,   "luatex-fonts-syn"  },
-  { ltx,   "luatex-fonts-tfm"  },
-  { ctx,   "font-oti"          },
-  { ctx,   "font-otf"          },
-  { ctx,   "font-otb"          },
-  { ctx,   "font-inj"          },
-  { ltx,   "luatex-fonts-ota"  },
-  { ctx,   "font-otn"          },
-  { ctx,   "font-otp"          },
-  { ltx,   "luatex-fonts-lua"  },
-  { ctx,   "font-def"          },
-  { ltx,   "luatex-fonts-def"  },
-  { ltx,   "luatex-fonts-ext"  },
-  { ltx,   "luatex-fonts-cbk"  },
   { ctx,   "font-map"          },
+  { ltx,   "luatex-fonts-syn"  },
+  { ctx,   "font-tfm"          },
+  { ctx,   "font-afm"          },
+  { ctx,   "font-afk"          },
+  { ctx,   "font-oti"          },
+  { ctx,   "font-otr"          },
+  { ctx,   "font-cff"          },
+  { ctx,   "font-ttf"          },
+  { ctx,   "font-dsp"          },
+  { ctx,   "font-oup"          },
+  { ctx,   "font-otl"          },
+  { ctx,   "font-oto"          },
+  { ctx,   "font-otj"          },
+  { ctx,   "font-ota"          },
+  { ctx,   "font-ots"          },
+  { ctx,   "font-osd"          },
+  { ctx,   "font-lua"          },
+  { ctx,   "font-def"          },
+  { ltx,   "luatex-fonts-ext"  },
+  { ctx,   "font-gbn"          },
 
 } --[[context_modules]]
 
@@ -362,9 +369,9 @@ local init_main = function ()
     ignore_module "l-boolean"
     ignore_module "l-math"
     ignore_module "util-str"
+    ignore_module "util-fil"
     ignore_module "luatex-basics-gen"
 
-    --- These constitute the fontloader proper.
     load_fontloader_module "data-con"
     load_fontloader_module "basics-nod"
     load_fontloader_module "font-ini"
@@ -373,19 +380,25 @@ local init_main = function ()
     load_fontloader_module "font-cid"
     load_fontloader_module "font-map"
     load_fontloader_module "fonts-syn"
-    load_fontloader_module "fonts-tfm"
+    load_fontloader_module "font-tfm"
+    load_fontloader_module "font-afm"
+    load_fontloader_module "font-afk"
     load_fontloader_module "font-oti"
-    load_fontloader_module "font-otf"
-    load_fontloader_module "font-otb"
-    load_fontloader_module "font-inj"
-    load_fontloader_module "fonts-ota"
-    load_fontloader_module "font-otn"
-    load_fontloader_module "font-otp"   --> since 2013-04-23
-    load_fontloader_module "fonts-lua"
+    load_fontloader_module "font-otr"
+    load_fontloader_module "font-cff"
+    load_fontloader_module "font-ttf"
+    load_fontloader_module "font-dsp"
+    load_fontloader_module "font-oup"
+    load_fontloader_module "font-otl"
+    load_fontloader_module "font-oto"
+    load_fontloader_module "font-otj"
+    load_fontloader_module "font-ota"
+    load_fontloader_module "font-ots"
+    load_fontloader_module "font-osd"
+    load_fontloader_module "font-lua"
     load_fontloader_module "font-def"
-    load_fontloader_module "fonts-def"
     load_fontloader_module "fonts-ext"
-    load_fontloader_module "fonts-cbk"
+    load_fontloader_module "font-gbn"
 
   elseif fontloader == "context" then
     logreport ("log", 0, "init",

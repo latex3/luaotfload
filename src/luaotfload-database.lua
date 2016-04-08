@@ -57,7 +57,8 @@ local fontloaderinfo           = fontloader.info
 local fontloaderclose          = fontloader.close
 local fontloaderopen           = fontloader.open
 ----- fontloaderto_table       = fontloader.to_table
-local gzipopen                 = gzip.open
+local gzipload                 = gzip.load
+local gzipsave                 = gzip.save
 local iolines                  = io.lines
 local ioopen                   = io.open
 local iopopen                  = io.popen
@@ -361,44 +362,6 @@ local initialize_namedata = function (formats, created)
     }
 end
 
---[[doc--
-
-    Since Luaotfload does not depend on the lualibs anymore we
-    have to put our own small wrappers for the gzip library in
-    place.
-
-    load_gzipped -- Read and decompress and entire gzipped file.
-    Returns the uncompressed content as a string.
-
---doc]]--
-
-local load_gzipped = function (filename)
-    local gh = gzipopen (filename,"rb")
-    if gh then
-        local data = gh:read "*all"
-        gh:close ()
-        return data
-    end
-end
-
---[[doc--
-
-    save_gzipped -- Compress and write a string to file. The return
-    value is the number of bytes written. Zlib parameters are: best
-    compression and default strategy.
-
---doc]]--
-
-local save_gzipped = function (filename, data)
-    local gh = gzipopen (filename, "wb9")
-    if gh then
-        gh:write (data)
-        local bytes = gh:seek ()
-        gh:close ()
-        return bytes
-    end
-end
-
 --- When loading a lua file we try its binary complement first, which
 --- is assumed to be located at an identical path, carrying the suffix
 --- .luc.
@@ -427,7 +390,7 @@ local load_lua_file = function (path)
 
     if not code then --- probe gzipped file
         foundname = filereplacesuffix (path, "lua.gz")
-        local chunk = load_gzipped (foundname)
+        local chunk = gzipload (foundname)
         if chunk then
             code = load (chunk, "t")
         end
@@ -3298,7 +3261,7 @@ save_names = function (currentnames)
         local gzname = luaname .. ".gz"
         if config.luaotfload.db.compress then
             local serialized = tableserialize (currentnames, true)
-            save_gzipped (gzname, serialized)
+            gzipsave (gzname, serialized)
             caches.compile (currentnames, "", lucname)
         else
             tabletofile (luaname, currentnames, true)

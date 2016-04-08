@@ -338,6 +338,9 @@ local init_main = function ()
                                         or "reference"
   fontloader = tostring (fontloader)
 
+  --- Preload the characters table. This may vanish later.
+  characters = luaotfload.loaders.luaotfload "characters"
+
   if fontloader == "reference" then
     logreport ("log", 0, "init", "Using reference fontloader.")
     load_fontloader_module (luaotfload.fontloader_package)

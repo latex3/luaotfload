@@ -173,25 +173,30 @@ local set_capheight = function (fontdata)
     local shared     = fontdata.shared
     local parameters = fontdata.parameters
     local capheight
-    if shared and shared.rawdata.metadata.pfminfo then
+    if    shared
+      and shared.rawdata.metadata
+      and shared.rawdata.metadata.pfminfo
+    then
       local units_per_em   = parameters.units
       local size           = parameters.size
       local os2_capheight  = shared.rawdata.metadata.pfminfo.os2_capheight
 
-      if os2_capheight > 0 then
+      if capheight and os2_capheight > 0 then
         capheight = os2_capheight / units_per_em * size
       else
-        local X8 = stringbyte"X"
-        if fontdata.characters[X8] then
-          capheight = fontdata.characters[X8].height
+        local X8_str = stringbyte"X"
+        local X8_chr = fontdata.characters[X8_str]
+        if X8_chr then
+          capheight = X8_chr.height
         else
           capheight = parameters.ascender / units_per_em * size
         end
       end
     else
-      local X8 = stringbyte"X"
-      if fontdata.characters[X8] then
-        capheight = fontdata.characters[X8].height
+      local X8_str = stringbyte "X"
+      local X8_chr = fontdata.characters[X8_str]
+      if X8_chr then
+        capheight = X8_chr.height
       end
     end
     if capheight then

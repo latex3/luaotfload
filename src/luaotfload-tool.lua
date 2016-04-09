@@ -130,11 +130,38 @@ local backup = {
 
 texio.write, texio.write_nl          = dummy_function, dummy_function
 require "fontloader-basics-gen.lua"
-
 texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities
 
-fonts = { names = { } } -- for db; normally provided by the fontloaders
+require "fontloader-data-con"
+require "fontloader-font-ini"
+require "fontloader-font-con"
+require "fontloader-fonts-enc"
+require "fontloader-font-cid"
+require "fontloader-font-map"
+require "fontloader-font-tfm"
+require "fontloader-font-afm"
+require "fontloader-font-afk"
+require "fontloader-font-oti"
+require "fontloader-font-otr"
+require "fontloader-font-cff"
+require "fontloader-font-ttf"
+require "fontloader-font-dsp"
+require "fontloader-font-oup"
+require "fontloader-font-otl"
+require "fontloader-font-oto"
+------- "fontloader-font-otj"
+------- "fontloader-font-ota"
+------- "fontloader-font-ots"
+------- "fontloader-font-osd"
+require "fontloader-font-lua"
+require "fontloader-font-def"
+require "fontloader-fonts-ext"
+------- "fontloader-font-gbn"
+
+fonts = fonts or { }
+local fontsnames = fonts.names or { }
+fonts.names      = fontsnames
 
 local require_init = { }
 

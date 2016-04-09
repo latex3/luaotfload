@@ -53,10 +53,13 @@ local require                  = require
 local tonumber                 = tonumber
 local unpack                   = table.unpack
 
-local fontloaderinfo           = fontloader.info
-local fontloaderclose          = fontloader.close
-local fontloaderopen           = fontloader.open
------ fontloaderto_table       = fontloader.to_table
+local fonts                    = fonts              or { }
+local fontshandlers            = fonts.handlers     or { }
+local otfhandler               = fonts.handlers.otf or { }
+fonts.handlers                 = fontshandlers
+
+local otfreadersgetinfo        = otfhandler.readers.getinfo
+
 local gzipload                 = gzip.load
 local gzipsave                 = gzip.save
 local iolines                  = io.lines
@@ -1224,24 +1227,8 @@ find_closest = function (name, limit)
     return false
 end --- find_closest()
 
---[[doc--
-
-    load_font_file -- Safely open a font file. See
-    <http://www.ntg.nl/pipermail/ntg-context/2013/075885.html>
-    regarding the omission of ``fontloader.close()``.
-
-    TODO --   check if fontloader.info() is ready for prime in 0.78+
-         --   fields /tables needed:
-                    -- names
-                    -- postscriptname
-                    -- validation_state
-                    -- ..
-
---doc]]--
-
 local load_font_file = function (filename, subfont)
-    local rawfont, _msg = fontloaderopen (filename, subfont)
-    --local rawfont, _msg = fontloaderinfo (filename, subfont)
+    local rawfont, _msg = otfreadersgetinfo (filename, subfont)
     if not rawfont then
         logreport ("log", 1, "db", "ERROR: failed to open %s.", filename)
         return
@@ -1293,9 +1280,7 @@ local get_english_names = function (metadata)
 end
 
 --[[--
-    In case of broken PS names we set some dummies. However, we cannot
-    directly modify the font data as returned by fontloader.open() because
-    it is a userdata object.
+    In case of broken PS names we set some dummies.
 
     For this reason we copy what is necessary whilst keeping the table
     structure the same as in the tfmdata.
@@ -1471,11 +1456,7 @@ ot_fullinfo = function (filename,
         return nil
     end
 
-    local rawinfo = get_raw_info (metadata, basename)
-    --- Closing the file manually is a tad faster and more memory
-    --- efficient than having it closed by the gc
-    fontloaderclose (metadata)
-
+    local rawinfo       = get_raw_info (metadata, basename)
     local english_names = get_english_names (rawinfo)
     local namedata      = organize_namedata (rawinfo,
                                              english_names,
@@ -1629,15 +1610,7 @@ local insert_fullinfo = function (fullname,
                                   targetentrystatus,
                                   info)
 
-    local subfont
-    if n_font ~= false then
-        subfont = n_font - 1
-    else
-        subfont = false
-        n_font  = 1
-    end
-
-    local fullinfo = loader (fullname, subfont,
+    local fullinfo = loader (fullname, n_font,
                              location, basename,
                              format, info)
 
@@ -1722,7 +1695,7 @@ local read_font_names = function (fullname,
 
     --- 4) get basic info, abort if fontloader can’t read it
 
-    local info = fontloaderinfo (fullname)
+    local info = otfreadersgetinfo (fullname)
 
     if not info then
         logreport ("log", 1, "db",

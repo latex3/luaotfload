@@ -58,7 +58,8 @@ local fontshandlers            = fonts.handlers     or { }
 local otfhandler               = fonts.handlers.otf or { }
 fonts.handlers                 = fontshandlers
 
-local otfreadersgetinfo        = otfhandler.readers.getinfo
+local read_font_file           = otfhandler.readers.getinfo
+local read_font_info           = read_font_file
 
 local gzipload                 = gzip.load
 local gzipsave                 = gzip.save
@@ -1228,7 +1229,7 @@ find_closest = function (name, limit)
 end --- find_closest()
 
 local load_font_file = function (filename, subfont)
-    local rawfont, _msg = otfreadersgetinfo (filename, subfont)
+    local rawfont, _msg = read_font_file (filename, subfont)
     if not rawfont then
         logreport ("log", 1, "db", "ERROR: failed to open %s.", filename)
         return
@@ -1695,7 +1696,7 @@ local read_font_names = function (fullname,
 
     --- 4) get basic info, abort if fontloader can’t read it
 
-    local info = otfreadersgetinfo (fullname)
+    local info = read_font_file (fullname)
 
     if not info then
         logreport ("log", 1, "db",
@@ -3419,6 +3420,17 @@ local show_cache = function ( )
     return true
 end
 
+local use_fontforge = function (val)
+    if val == true then
+        local fontloader = fontloader
+        read_font_info   = fontloader.info
+        read_font_file   = fontloader.open
+    else
+        read_font_file   = otfhandler.readers.getinfo
+        read_font_info   = read_font_file
+    end
+end
+
 -----------------------------------------------------------------------
 --- export functionality to the namespace “fonts.names”
 -----------------------------------------------------------------------
@@ -3449,7 +3461,8 @@ local export = {
     erase_cache                 = erase_cache,
     show_cache                  = show_cache,
     find_closest                = find_closest,
-    -- for testing purpose
+    --- transitionary
+    use_fontforge               = use_fontforge,
 }
 
 return {

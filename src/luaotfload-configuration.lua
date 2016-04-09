@@ -203,6 +203,7 @@ local default_config = {
     log_level      = 0,
     color_callback = "post_linebreak_filter",
     fontloader     = default_fontloader (),
+    use_fontforge  = false,
   },
   misc = {
     bisect         = false,
@@ -369,6 +370,18 @@ local set_default_features = function ()
   return true
 end
 
+local set_fontforge = function ()
+  if not _G.fontloader then
+    logreport ("both", 0, "db", "The fontloader library is missing.")
+    return false
+  end
+  local names = fonts.names
+  if names and names.use_fontforge then
+    logreport ("log", 0, "db", "Loading font data with FontForge.")
+    names.use_fontforge (true)
+  end
+  return true
+end
 
 reconf_tasks = {
   { "Set the log level"         , set_loglevel         },
@@ -377,6 +390,7 @@ reconf_tasks = {
   { "Set the font filter"       , set_font_filter      },
   { "Install font name resolver", set_name_resolver    },
   { "Set default features"      , set_default_features },
+  { "Set fontforge"             , set_fontforge        },
 }
 
 -------------------------------------------------------------------------------
@@ -509,6 +523,7 @@ local option_spec = {
                     id)
         return id
       end,
+      use_fontforge = { in_t = boolean_t, },
     },
     log_level = {
       in_t      = number_t,
@@ -672,6 +687,7 @@ local formatters = {
     fontloader      = { false, format_string  },
     log_level       = { false, format_integer },
     resolver        = { false, format_string  },
+    use_fontforge   = { false, format_boolean },
   },
 }
 

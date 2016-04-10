@@ -60,6 +60,7 @@ fonts.handlers                 = fontshandlers
 
 local read_font_file           = otfhandler.readers.getinfo
 local read_font_info           = read_font_file
+local close_font_file          = function () end
 
 local gzipload                 = gzip.load
 local gzipsave                 = gzip.save
@@ -1456,6 +1457,8 @@ ot_fullinfo = function (filename,
     if not metadata then
         return nil
     end
+
+    close_font_file (metadata) --> FF only
 
     local rawinfo       = get_raw_info (metadata, basename)
     local english_names = get_english_names (rawinfo)
@@ -3425,9 +3428,11 @@ local use_fontforge = function (val)
         local fontloader = fontloader
         read_font_info   = fontloader.info
         read_font_file   = fontloader.open
+        close_font_file  = fontloader.close
     else
         read_font_file   = otfhandler.readers.getinfo
         read_font_info   = read_font_file
+        close_font_file  = function () end
     end
 end
 

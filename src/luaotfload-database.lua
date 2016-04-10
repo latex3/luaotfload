@@ -1266,7 +1266,6 @@ local get_english_names = function (metadata)
     local english_names
 
     if names then
-        --inspect(names)
         for _, raw_namedata in next, names do
             if raw_namedata.lang == "English (US)" then
                 return raw_namedata.names
@@ -1458,8 +1457,6 @@ ot_fullinfo = function (filename,
         return nil
     end
 
-    close_font_file (metadata) --> FF only
-
     local rawinfo       = get_raw_info (metadata, basename)
     local english_names = get_english_names (rawinfo)
     local namedata      = organize_namedata (rawinfo,
@@ -1481,6 +1478,7 @@ ot_fullinfo = function (filename,
         style           = style,
         version         = rawinfo.version,
     }
+    close_font_file (metadata) --> FF only
     return res
 end
 

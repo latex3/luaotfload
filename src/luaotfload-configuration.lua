@@ -371,14 +371,25 @@ local set_default_features = function ()
 end
 
 local set_fontforge = function ()
-  if not _G.fontloader then
-    logreport ("both", 0, "db", "The fontloader library is missing.")
-    return false
-  end
   local names = fonts.names
-  if names and names.use_fontforge then
+  if not names or not names.use_fontforge then
+    --- happens normally on the first run
+    logreport ("log", 4, "db", "Database not present.")
+    return true
+  end
+  local use_ff = config.luaotfload.run.use_fontforge
+  if use_ff == true then
+    if not _G.fontloader then
+      logreport ("both", 0, "db",
+                 "Fontforge loader was requested but the fontloader \z
+                  library is missing.")
+      return false
+    end
     logreport ("log", 0, "db", "Loading font data with FontForge.")
     names.use_fontforge (true)
+  else
+    logreport ("log", 4, "db", "Loading font data with the Lua loader.")
+    names.use_fontforge (false)
   end
   return true
 end
@@ -523,8 +534,8 @@ local option_spec = {
                     id)
         return id
       end,
-      use_fontforge = { in_t = boolean_t, },
     },
+    use_fontforge = { in_t = boolean_t, },
     log_level = {
       in_t      = number_t,
       out_t     = number_t, --- TODO int_t from 5.3.x on

@@ -148,7 +148,7 @@ local function reportskippedtable(tag)
 end
 
 -- We have quite some data tables. We are somewhat ff compatible with names but as I used
--- the information form the microsoft site there can be differences. Eventually I might end
+-- the information from the microsoft site there can be differences. Eventually I might end
 -- up with a different ordering and naming.
 
 local reservednames = { [0] =
@@ -163,14 +163,14 @@ local reservednames = { [0] =
     "manufacturer",
     "designer",
     "description", -- descriptor in ff
-    "venderurl",
+    "vendorurl",
     "designerurl",
     "license",
     "licenseurl",
     "reserved",
     "typographicfamily",    -- preffamilyname
     "typographicsubfamily", -- prefmodifiers
-    "compatiblefullname", -- for mac
+    "compatiblefullname",   -- for mac
     "sampletext",
     "cidfindfontname",
     "wwsfamily",
@@ -244,7 +244,16 @@ local decoders = {
     macintosh = { },
     iso       = { },
     windows   = {
-        ["unicode bmp"] = utf16_to_utf8_be
+        -- maybe always utf16
+        ["unicode semantics"]           = utf16_to_utf8_be,
+        ["unicode bmp"]                 = utf16_to_utf8_be,
+        ["unicode full"]                = utf16_to_utf8_be,
+        ["unicode 1.0 semantics"]       = utf16_to_utf8_be,
+        ["unicode 1.1 semantics"]       = utf16_to_utf8_be,
+        ["unicode 2.0 bmp"]             = utf16_to_utf8_be,
+        ["unicode 2.0 full"]            = utf16_to_utf8_be,
+        ["unicode variation sequences"] = utf16_to_utf8_be,
+        ["unicode full repertoire"]     = utf16_to_utf8_be,
     },
     custom    = { },
 }
@@ -702,7 +711,17 @@ local panosewidths = {
 -- useful information about what we deal with. The complication is that we need
 -- to filter the best one available.
 
-function readers.name(f,fontdata)
+local platformnames = {
+    postscriptname       = true,
+    fullname             = true,
+    family               = true,
+    subfamily            = true,
+    typographicfamily    = true,
+    typographicsubfamily = true,
+    compatiblefullname   = true,
+}
+
+function readers.name(f,fontdata,specification)
     local datatable = fontdata.tables.name
     if datatable then
         setposition(f,datatable.offset)
@@ -710,6 +729,7 @@ function readers.name(f,fontdata)
         local nofnames = readushort(f)
         local offset   = readushort(f)
         -- we can also provide a raw list as extra, todo as option
+        local start    = datatable.offset + offset
         local namelists = {
             unicode   = { },
             windows   = { },
@@ -738,7 +758,7 @@ function readers.name(f,fontdata)
                                     language = language,
                                     name     = name,
                                     length   = readushort(f),
-                                    offset   = readushort(f),
+                                    offset   = start + readushort(f),
                                 }
                             else
                                 skipshort(f,2)
@@ -766,7 +786,6 @@ function readers.name(f,fontdata)
         --
         -- we need to choose one we like, for instance an unicode one
         --
-        local start = datatable.offset + offset
         local names = { }
         local done  = { }
         --
@@ -783,7 +802,7 @@ function readers.name(f,fontdata)
                     local encoding = name.encoding
                     local language = name.language
                     if (not e or encoding == e) and (not l or language == l) then
-                        setposition(f,start+name.offset)
+                        setposition(f,name.offset)
                         local content = readstring(f,name.length)
                         local decoder = decoders[platform]
                         if decoder then
@@ -812,8 +831,54 @@ function readers.name(f,fontdata)
         filter("unicode")
         --
         fontdata.names = names
+        --
+        if specification.platformnames then
+            local collected = { }
+            for platform, namelist in next, namelists do
+                local filtered = false
+                for i=1,#namelist do
+                    local entry = namelist[i]
+                    local name  = entry.name
+                    if platformnames[name] then
+                        setposition(f,entry.offset)
+                        local content  = readstring(f,entry.length)
+                        local encoding = entry.encoding
+                        local decoder  = decoders[platform]
+                        if decoder then
+                            decoder = decoder[encoding]
+                        end
+                        if decoder then
+                            content = decoder(content)
+                        end
+                        if filtered then
+                            filtered[name] = content
+                        else
+                            filtered = { [name] = content }
+                        end
+                    end
+                end
+                if filtered then
+                    collected[platform] = filtered
+                end
+            end
+            fontdata.platformnames = collected
+        end
     else
         fontdata.names = { }
+    end
+end
+
+----- validutf = lpeg.patterns.utf8character^0 * P(-1)
+local validutf = lpeg.patterns.validutf8
+
+local function getname(fontdata,key)
+    local names = fontdata.names
+    if names then
+        local value = names[key]
+        if value then
+            local content = value.content
+            return lpegmatch(validutf,content) and content or nil
+        end
     end
 end
 
@@ -1733,69 +1798,69 @@ otf.unpackoutlines = unpackoutlines
 -- some properties in order to read following tables. When details is true we also
 -- initialize the glyphs data.
 
------ validutf = lpeg.patterns.utf8character^0 * P(-1)
-local validutf = lpeg.patterns.validutf8
-
-local function getname(fontdata,key)
-    local names = fontdata.names
-    if names then
-        local value = names[key]
-        if value then
-            local content = value.content
-            return lpegmatch(validutf,content) and content or nil
-        end
-    end
-end
-
-local function getinfo(maindata,sub)
+local function getinfo(maindata,sub,platformnames)
     local fontdata = sub and maindata.subfonts and maindata.subfonts[sub] or maindata
-    local names = fontdata.names
+    local names    = fontdata.names
+    local info     = nil
     if names then
-        local metrics    = fontdata.windowsmetrics or { }
-        local postscript = fontdata.postscript or { }
-        local fontheader = fontdata.fontheader or { }
-        local cffinfo    = fontdata.cffinfo or { }
-        local filename   = fontdata.filename
-        local weight     = getname(fontdata,"weight") or cffinfo.weight or metrics.weight
-        local width      = getname(fontdata,"width")  or cffinfo.width  or metrics.width
-        return { -- we inherit some inconsistencies/choices from ff
-            subfontindex = fontdata.subfontindex or sub or 0,
-         -- filename     = filename,
-         -- version      = name("version"),
-         -- format       = fontdata.format,
-            fontname     = getname(fontdata,"postscriptname"),
-            fullname     = getname(fontdata,"fullname"), -- or file.nameonly(filename)
-            familyname   = getname(fontdata,"typographicfamily") or getname(fontdata,"family"),
-            subfamily    = getname(fontdata,"subfamily"),
-            modifiers    = getname(fontdata,"typographicsubfamily"),
-            weight       = weight and lower(weight),
-            width        = width and lower(width),
-            pfmweight    = metrics.weightclass or 400, -- will become weightclass
-            pfmwidth     = metrics.widthclass or 5,    -- will become widthclass
-            panosewidth  = metrics.panosewidth,
-            panoseweight = metrics.panoseweight,
-            italicangle  = postscript.italicangle or 0,
-            units        = fontheader.units or 0,
-            designsize   = fontdata.designsize,
-            minsize      = fontdata.minsize,
-            maxsize      = fontdata.maxsize,
-            monospaced   = (tonumber(postscript.monospaced or 0) > 0) or metrics.panosewidth == "monospaced",
-            averagewidth = metrics.averagewidth,
-            xheight      = metrics.xheight,
-            ascender     = metrics.typoascender,
-            descender    = metrics.typodescender,
+        local metrics        = fontdata.windowsmetrics or { }
+        local postscript     = fontdata.postscript or { }
+        local fontheader     = fontdata.fontheader or { }
+        local cffinfo        = fontdata.cffinfo or { }
+        local filename       = fontdata.filename
+        local weight         = getname(fontdata,"weight") or cffinfo.weight or metrics.weight
+        local width          = getname(fontdata,"width")  or cffinfo.width  or metrics.width
+        local fontname       = getname(fontdata,"postscriptname")
+        local fullname       = getname(fontdata,"fullname")
+        local family         = getname(fontdata,"family")
+        local subfamily      = getname(fontdata,"subfamily")
+        local familyname     = getname(fontdata,"typographicfamily") or family
+        local subfamilyname  = getname(fontdata,"typographicsubfamily") or subfamily
+        local compatiblename = getname(fontdata,"compatiblefullname")
+        info = { -- we inherit some inconsistencies/choices from ff
+            subfontindex   = fontdata.subfontindex or sub or 0,
+         -- filename       = filename,
+            version        = getname(fontdata,"version"),
+         -- format         = fontdata.format,
+            fontname       = fontname,
+            fullname       = fullname,
+            family         = family,
+            subfamily      = subfamily,
+            familyname     = familyname,
+            subfamilyname  = subfamilyname,
+            compatiblename = compatiblename,
+            weight         = weight and lower(weight),
+            width          = width and lower(width),
+            pfmweight      = metrics.weightclass or 400, -- will become weightclass
+            pfmwidth       = metrics.widthclass or 5,    -- will become widthclass
+            panosewidth    = metrics.panosewidth,
+            panoseweight   = metrics.panoseweight,
+            italicangle    = postscript.italicangle or 0,
+            units          = fontheader.units or 0,
+            designsize     = fontdata.designsize,
+            minsize        = fontdata.minsize,
+            maxsize        = fontdata.maxsize,
+            monospaced     = (tonumber(postscript.monospaced or 0) > 0) or metrics.panosewidth == "monospaced",
+            averagewidth   = metrics.averagewidth,
+            xheight        = metrics.xheight,
+            capheight      = metrics.capheight, -- not always present and probably crap
+            ascender       = metrics.typoascender,
+            descender      = metrics.typodescender,
+            platformnames  = platformnames and fontdata.platformnames or nil,
         }
     elseif n then
-        return {
+        info = {
             filename = fontdata.filename,
             comment  = "there is no info for subfont " .. n,
         }
     else
-        return {
+        info = {
             filename = fontdata.filename,
             comment  = "there is no info",
         }
     end
+ -- inspect(info)
+    return info
 end
 
 local function loadtables(f,specification,offset)
@@ -1869,6 +1934,7 @@ local function readdata(f,offset,specification)
             return -- keep searching
         end
     end
+    --
     --
     readers["os/2"](f,fontdata,specification)
     readers["head"](f,fontdata,specification)
@@ -1989,7 +2055,10 @@ local function loadfont(specification,n)
         specification.details = true
     end
     if specification.details then
-        specification.info = true
+        specification.info = true -- not really used any more
+    end
+    if specification.platformnames then
+        specification.platformnames = true -- not really used any more
     end
     local function message(str)
         report("fatal error in file %a: %s\n%s",specification.filename,str,debug.traceback())
@@ -2043,7 +2112,7 @@ function readers.loadfont(filename,n)
             descriptions  = fontdata.descriptions,
             format        = fontdata.format,
             goodies       = { },
-            metadata      = getinfo(fontdata,n),
+            metadata      = getinfo(fontdata,n), -- no platformnames here !
             properties    = {
                 hasitalics = fontdata.hasitalics or false,
             },
@@ -2067,27 +2136,38 @@ function readers.loadfont(filename,n)
     end
 end
 
-function readers.getinfo(filename,n,details)
+function readers.getinfo(filename,specification) -- string, nil|number|table
+    -- platformnames is optional and not used by context (a too unpredictable mess
+    -- that only add to the confusion) .. so it's only for checking things
+    local subfont      = nil
+    local platformname = false
+    if type(specification) == "table" then
+        subfont       = tonumber(specification.subfont)
+        platformnames = specification.platformnames
+    else
+        subfont       = tonumber(specification)
+    end
     local fontdata = loadfont {
-        filename = filename,
-        details  = true,
+        filename      = filename,
+        details       = true,
+        platformnames = platformnames,
     }
     if fontdata then
         local subfonts = fontdata.subfonts
         if not subfonts then
-            return getinfo(fontdata)
-        elseif type(n) ~= "number" then
+            return getinfo(fontdata,nil,platformnames)
+        elseif not subfont then
             local info = { }
             for i=1,#subfonts do
-                info[i] = getinfo(fontdata,i)
+                info[i] = getinfo(fontdata,i,platformnames)
             end
             return info
-        elseif n > 1 and n <= subfonts then
-            return getinfo(fontdata,n)
+        elseif subfont > 1 and subfont <= #subfonts then
+            return getinfo(fontdata,subfont,platformnames)
         else
             return {
                 filename = filename,
-                comment  = "there is no subfont " .. n .. " in this file"
+                comment  = "there is no subfont " .. subfont .. " in this file"
             }
         end
     else

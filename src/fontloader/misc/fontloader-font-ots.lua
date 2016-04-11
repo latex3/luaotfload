@@ -2716,8 +2716,8 @@ function otf.dataset(tfmdata,font) -- generic variant, overloaded in context
     return rl
 end
 
-local function report_disc(n)
-    report_run("kern: %s > %s",disc,languages.serializediscretionary(disc))
+local function report_disc(what,n)
+    report_run("%s: %s > %s",what,n,languages.serializediscretionary(n))
 end
 
 local function kernrun(disc,k_run,font,attr,...)
@@ -2725,7 +2725,7 @@ local function kernrun(disc,k_run,font,attr,...)
     -- we catch <font 1><disc font 2>
     --
     if trace_kernruns then
-        report_disc("kern")
+        report_disc("kern",disc)
     end
     --
     local prev, next = getboth(disc)
@@ -2819,7 +2819,7 @@ end
 
 local function comprun(disc,c_run,...)
     if trace_compruns then
-        report_disc("comp")
+        report_disc("comp",disc)
     end
     --
     local pre, post, replace = getdisc(disc)
@@ -2866,31 +2866,35 @@ end
 
 local function testrun(disc,t_run,c_run,...)
     if trace_testruns then
-        report_disc("test")
+        report_disc("test",disc)
     end
     local prev, next = getboth(disc)
     if not next then
         -- weird discretionary
         return
     end
-    local pre, post, replace, pretail, posttail, replacetail = getdisc(disc)
+    local pre, post, replace, pretail, posttail, replacetail = getdisc(disc,true)
     local done = false
     if replace and prev then
-        -- only look ahead
-     -- local nest = getprev(replace)
+        -- this is a bit strange as we only do replace here and not post
+        -- anyway, we only look ahead ... the idea is that we discard a
+        -- disc when there is a ligature crossing the replace boundary
         setlink(replacetail,next)
-        if t_run(replace,next,...) then
-            setfield(disc,"replace",nil) -- beware, side effects of nest so first
+        local ok, overflow = t_run(replace,next,...)
+        if ok and overflow then
+            -- so, we can have crossed the boundary
+            setfield(disc,"replace",nil)
             setlink(prev,replace)
-            setlink(replacetail,next)
+         -- setlink(replacetail,next)
             setboth(disc)
             flush_node_list(disc)
             return replace, true -- restart .. tricky !
         else
+            -- we stay inside the disc
             setnext(replacetail)
             setprev(next,disc)
         end
- --       pre, post, replace, pretail, posttail, replacetail = getdisc(disc)
+     -- pre, post, replace, pretail, posttail, replacetail = getdisc(disc,true)
     end
     --
     -- like comprun
@@ -2945,7 +2949,7 @@ end
 -- local function discrun(disc,drun,krun)
 --     local prev, next = getboth(disc)
 --     if trace_discruns then
---        report_disc("disc")
+--        report_disc("disc",disc)
 --     end
 --     if next and prev then
 --         setnext(prev,next)
@@ -3043,7 +3047,13 @@ local function t_run_single(start,stop,font,attr,lookupcache)
                     -- if we need more than ligatures we can outline the code and use functions
                     local s = getnext(start)
                     local l = nil
+                    local d = 0
                     while s do
+                        if s == stop then
+                            d = 1
+                        elseif d > 0 then
+                            d = d + 1
+                        end
                         local lg = lookupmatch[getchar(s)]
                         if lg then
                             l = lg
@@ -3053,7 +3063,7 @@ local function t_run_single(start,stop,font,attr,lookupcache)
                         end
                     end
                     if l and l.ligature then
-                        return true
+                        return true, d > 1
                     end
                 end
             end
@@ -3168,7 +3178,13 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
                             -- if we need more than ligatures we can outline the code and use functions
                             local s = getnext(start)
                             local l = nil
+                            local d = 0
                             while s do
+                                if s == stop then
+                                    d = 1
+                                elseif d > 0 then
+                                    d = d + 1
+                                end
                                 local lg = lookupmatch[getchar(s)]
                                 if lg then
                                     l = lg
@@ -3178,7 +3194,7 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
                                 end
                             end
                             if l and l.ligature then
-                                return true
+                                return true, d > 1
                             end
                         end
                     else

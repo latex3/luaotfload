@@ -19,7 +19,6 @@ local nodes = nodes
 local nuts        = nodes.nuts -- context abstraction of direct nodes
 
 local traverse_id = nuts.traverse_id
-local free_node   = nuts.free
 local remove_node = nuts.remove
 
 local glyph_code  = nodes.nodecodes.glyph
@@ -137,9 +136,7 @@ function nodes.handlers.nodepass(head)
         end
         if redundant then
             for i=1,#redundant do
-                local n = redundant[i]
-                remove_node(nuthead,n)
-                free_node(n)
+                remove_node(nuthead,redundant[i],true)
             end
         end
         for d in traverse_id(disc_code,nuthead) do

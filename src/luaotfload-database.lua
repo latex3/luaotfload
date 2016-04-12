@@ -58,9 +58,10 @@ local fontshandlers            = fonts.handlers     or { }
 local otfhandler               = fonts.handlers.otf or { }
 fonts.handlers                 = fontshandlers
 
-local read_font_file           = otfhandler.readers.getinfo
+local read_font_file           = otfhandler.readers.loadfont
 local read_font_info           = read_font_file
 local close_font_file          = function () end
+local get_english_names
 
 local gzipload                 = gzip.load
 local gzipsave                 = gzip.save
@@ -297,7 +298,6 @@ This is a sketch of the luaotfload db:
         prefmodifiers   : string;   // sanitized preferred subfamily (names table 14)
         psname          : string;   // PostScript name
         size            : (false | float * float * float);  // if available, size info from the size table converted from decipoints
-        splainname      : string;   // sanitized version of the “plainname” field
         splitstyle      : string;   // style information obtained by splitting the full name at the last dash
         subfamily       : string;   // sanitized subfamily (names table 2)
         subfont         : (int | bool);     // integer if font is part of a TrueType collection ("ttc")
@@ -943,7 +943,6 @@ local lookup_fontname = function (specification, name, style)
         local prefmodifiers = face.prefmodifiers
         local subfamily     = face.subfamily
         if     face.fontname   == name
-            or face.splainname == name
             or face.fullname   == name
             or face.psname     == name
         then
@@ -1240,10 +1239,10 @@ end
 
 --- rawdata -> (int * int * int | bool)
 
-local get_size_info = function (metadata)
-    local design_size         = metadata.design_size
-    local design_range_top    = metadata.design_range_top
-    local design_range_bottom = metadata.design_range_bottom
+local get_size_info = function (rawinfo)
+    local design_size         = rawinfo.design_size
+    local design_range_top    = rawinfo.design_range_top
+    local design_range_bottom = rawinfo.design_range_bottom
 
     local fallback_size = design_size         ~= 0 and design_size
                        or design_range_bottom ~= 0 and design_range_bottom
@@ -1261,10 +1260,14 @@ local get_size_info = function (metadata)
     return false
 end
 
-local get_english_names = function (metadata)
-    local names = metadata.names
-    local english_names
+--[[doc--
+    get_english_names_from_ff -- For legacy Fontforge-style names
+    tables. Extracted from the actual names table, not the font item
+    itself.
+--doc]]--
 
+local get_english_names_from_ff = function (metadata)
+    local names = metadata.names
     if names then
         for _, raw_namedata in next, names do
             if raw_namedata.lang == "English (US)" then
@@ -1280,6 +1283,33 @@ local get_english_names = function (metadata)
              fullname = metadata.fullname, }
 end
 
+--[[doc--
+    map_enlish_names -- Names-table for Lua fontloader objects. This
+    may vanish eventually once we ditch Fontforge completely. Only
+    subset of entries of that table are actually relevant so we’ll
+    stick to that part.
+--doc]]--
+
+local names_items = {
+    compatfull       = "compatiblename",
+    fullname         = "fullname",
+    postscriptname   = "fontname",
+    preffamily       = "familyname",
+    prefmodifiers    = "subfamilyname",
+    family           = "family",
+    subfamily        = "subfamily",
+}
+
+local map_english_names = function (metadata)
+    local nameinfo = { }
+    for ours, theirs in next, names_items do
+        nameinfo [ours] = metadata [theirs]
+    end
+    return nameinfo
+end
+
+get_english_names = map_english_names
+
 --[[--
     In case of broken PS names we set some dummies.
 
@@ -1287,10 +1317,8 @@ end
     structure the same as in the tfmdata.
 --]]--
 local get_raw_info = function (metadata, basename)
-    local fullname
     local fontname = metadata.fontname
     local fullname = metadata.fullname
-    local psname
 
     local validation_state = metadata.validation_state
     if (validation_state and tablecontains (validation_state, "bad_ps_fontname"))
@@ -1313,32 +1341,31 @@ local get_raw_info = function (metadata, basename)
         fullname            = fullname,
         italicangle         = metadata.italicangle,
         names               = metadata.names,
-        pfminfo             = metadata.pfminfo,
         units_per_em        = metadata.units_per_em,
         version             = metadata.version,
-        design_size         = metadata.design_size,
-        design_range_top    = metadata.design_range_top,
-        design_range_bottom = metadata.design_range_bottom,
+        design_size         = metadata.design_size         or metadata.designsize,
+        design_range_top    = metadata.design_range_top    or metadata.maxsize,
+        design_range_bottom = metadata.design_range_bottom or metadata.minsize,
     }
 end
 
 local organize_namedata = function (rawinfo,
-                                    english_names,
+                                    nametable,
                                     basename,
                                     info)
-    local default_name = english_names.compatfull
-                      or english_names.fullname
-                      or english_names.postscriptname
+    local default_name = nametable.compatfull
+                      or nametable.fullname
+                      or nametable.postscriptname
                       or rawinfo.fullname
                       or rawinfo.fontname
                       or info.fullname
                       or info.fontname
-    local default_family = english_names.preffamily
-                        or english_names.family
+    local default_family = nametable.preffamily
+                        or nametable.family
                         or rawinfo.familyname
                         or info.familyname
---    local default_modifier = english_names.prefmodifiers
---                          or english_names.subfamily
+--    local default_modifier = nametable.prefmodifiers
+--                          or nametable.subfamily
     local fontnames = {
         --- see
         --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
@@ -1353,19 +1380,19 @@ local organize_namedata = function (rawinfo,
             --- non-abbreviated fashion, for most fonts at any rate.
             --- However, in some fonts (e.g. CMU) all three fields are
             --- identical.
-            fullname      = --[[ 18 ]] english_names.compatfull
-                         or --[[  4 ]] english_names.fullname
+            fullname      = --[[ 18 ]] nametable.compatfull
+                         or --[[  4 ]] nametable.fullname
                          or default_name,
             --- we keep both the “preferred family” and the “family”
             --- values around since both are valid but can turn out
             --- quite differently, e.g. with Latin Modern:
             ---     preffamily: “Latin Modern Sans”,
             ---     family:     “LM Sans 10”
-            preffamily    = --[[ 16 ]] english_names.preffamilyname,
-            family        = --[[  1 ]] english_names.family or default_family,
-            prefmodifiers = --[[ 17 ]] english_names.prefmodifiers,
-            subfamily     = --[[  2 ]] english_names.subfamily,
-            psname        = --[[  6 ]] english_names.postscriptname,
+            preffamily    = --[[ 16 ]] nametable.preffamilyname,
+            family        = --[[  1 ]] nametable.family or default_family,
+            prefmodifiers = --[[ 17 ]] nametable.prefmodifiers,
+            subfamily     = --[[  2 ]] nametable.subfamily or rawinfo.subfamilyname,
+            psname        = --[[  6 ]] nametable.postscriptname,
         },
 
         metadata = {
@@ -1417,22 +1444,19 @@ local split_fontname = function (fontname)
     end
 end
 
-local organize_styledata = function (fontname,
-                                     metadata,
-                                     english_names,
-                                     info)
-    local pfminfo   = metadata.pfminfo or { }
-    local names     = metadata.names
+local organize_styledata = function (metadata, rawinfo, info)
+    local pfminfo   = metadata.pfminfo
+    local names     = rawinfo.names
 
     return {
     --- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
-        size            = get_size_info (metadata),
-        weight          = pfminfo.weight or 400,
-        split           = split_fontname (fontname),
-        width           = pfminfo.width,
+        size            = get_size_info (rawinfo),
+        weight          = pfminfo and pfminfo.weight or metadata.pfmweight or 400,
+        split           = split_fontname (rawinfo.fontname),
+        width           = pfminfo and pfminfo.width or metadata.pfmwidth,
         italicangle     = metadata.italicangle,
     --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
-        units_per_em    = metadata.units_per_em,
+        units_per_em    = metadata.units_per_em or metadata.units,
         version         = metadata.version,
     }
 end
@@ -1458,14 +1482,13 @@ ot_fullinfo = function (filename,
     end
 
     local rawinfo       = get_raw_info (metadata, basename)
-    local english_names = get_english_names (rawinfo)
+    local nametable     = get_english_names (metadata)
     local namedata      = organize_namedata (rawinfo,
-                                             english_names,
+                                             nametable,
                                              basename,
                                              info)
-    local style         = organize_styledata (namedata.fontname,
+    local style         = organize_styledata (metadata,
                                               rawinfo,
-                                              english_names,
                                               info)
 
     local res = {
@@ -1508,7 +1531,6 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
     sanitized = sanitize_fontnames ({
         fontname        = fontname,
         psname          = fullname,
-        pfullname       = fullname,
         metafamily      = family,
         familyname      = familyname,
         weight          = metadata.weight, --- string identifier
@@ -1535,13 +1557,12 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         fontname         = sanitized.fontname,
         familyname       = sanitized.familyname,
         plainname        = fullname,
-        splainname       = sanitized.fullname,
         psname           = sanitized.fontname,
         version          = metadata.version,
         size             = false,
         splitstyle       = splitstyle,
         fontstyle_name   = style ~= "" and style or weight,
-        weight           = metadata.pfminfo.weight or 400,
+        weight           = metadata.pfminfo and pfminfo.weight or 400,
         italicangle      = italicangle,
     }
 end
@@ -2553,7 +2574,6 @@ local pull_values = function (entry)
     entry.psname            = english.psname
     entry.fontname          = info.fontname or metadata.fontname
     entry.fullname          = english.fullname or info.fullname
-    entry.splainname        = metadata.fullname
     entry.prefmodifiers     = english.prefmodifiers
     local metafamily        = metadata.familyname
     local familyname        = english.preffamily or english.family
@@ -2587,8 +2607,6 @@ local add_family = function (name, subtable, modifier, entry)
         familytable = { }
         subtable [name] = familytable
     end
-
-    local size = entry.size
 
     familytable [#familytable + 1] = {
         index    = entry.index,
@@ -3423,14 +3441,16 @@ end
 
 local use_fontforge = function (val)
     if val == true then
-        local fontloader = fontloader
-        read_font_info   = fontloader.info
-        read_font_file   = fontloader.open
-        close_font_file  = fontloader.close
+        local fontloader  = fontloader
+        read_font_info    = fontloader.info
+        read_font_file    = fontloader.open
+        close_font_file   = fontloader.close
+        get_english_names = get_english_names_from_ff
     else
-        read_font_file   = otfhandler.readers.getinfo
-        read_font_info   = read_font_file
-        close_font_file  = function () end
+        read_font_file    = otfhandler.readers.getinfo
+        read_font_info    = read_font_file
+        close_font_file   = function () end
+        get_english_names = map_english_names
     end
 end
 

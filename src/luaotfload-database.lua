@@ -8,31 +8,105 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
 
 --[[doc--
 
-    Some statistics:
+    With version 2.7 we killed of the Fontforge libraries in favor of
+    the Lua implementation of the OT format reader. There were many
+    reasons to do this on top of the fact that FF won’t be around at
+    version 1.0 anymore: In addition to maintainability, memory safety
+    and general code hygiene, the new reader shows an amazing
+    performance: Scanning of the 3200 font files on my system takes
+    around 23 s now, as opposed to 74 s with the Fontforge libs. Memory
+    usage has improved drastically as well, as illustrated by these
+    profiles:
 
-        a) TL 2012,     mkluatexfontdb --force
-        b) v2.4,        luaotfload-tool --update --force
-        c) v2.4,        luaotfload-tool --update --force --formats=+afm,pfa,pfb
-        d) Context,     mtxrun --script fonts --reload --force
+       GB
+   1.324^                                                   #
+        |                                                   #
+        |                                                 ::#
+        |                                                 : #::
+        |                                                @: #:
+        |                                                @: #:
+        |                                              @@@: #:
+        |                                            @@@ @: #:
+        |                           @@               @ @ @: #:
+        |                           @             @@:@ @ @: #: :
+        |                          @@ :           @ :@ @ @: #: :
+        |          @@:           ::@@ :@@       ::@ :@ @ @: #: :            :::
+        |         @@ :          :: @@ :@        : @ :@ @ @: #: :           :: :
+        |         @@ :         ::: @@ :@      ::: @ :@ @ @: #: ::          :: :
+        |       @@@@ ::       :::: @@ :@      : : @ :@ @ @: #: ::        :::: ::
+        |      :@ @@ ::       :::: @@ :@ :   :: : @ :@ @ @: #: ::       :: :: ::
+        |     @:@ @@ ::      ::::: @@ :@ : :::: : @ :@ @ @: #: ::::   :::: :: ::
+        |    @@:@ @@ ::    ::::::: @@ :@ : : :: : @ :@ @ @: #: :::   @: :: :: ::@
+        |   @@@:@ @@ ::   :: ::::: @@ :@ ::: :: : @ :@ @ @: #: :::   @: :: :: ::@
+        | @@@@@:@ @@ ::::::: ::::: @@ :@ ::: :: : @ :@ @ @: #: ::: ::@: :: :: ::@
+      0 +----------------------------------------------------------------------->GB
+        0                                                                   16.29
 
-    (Keep in mind that Context does index fewer fonts since it
-    considers only the contents of the minimals tree, not the
-    tex live one!)
+    This is the memory usage during a complete database rebuild with
+    the Fontforge libraries. The same action using the new
+    ``getinfo()`` method gives a different picture:
 
-                time (m:s)       peak VmSize (kB)
-            a     1:19              386 018
-            b     0:37              715 797
-            c     2:27            1 017 674
-            d     0:44            1 082 313
+        MB
+    43.37^                                                                   #
+         |                                                            @ @   @#
+         |                                                  @@        @ @   @# :
+         |                                                 @@@ :   @: @ @   @# :
+         |                                          @      @@@ : : @: @ @: :@# :
+         |                            @             @      @@@ : : @: @ @: :@# :
+         |                            @ :        : :@      @@@:::: @::@ @: :@#:: :
+         |               ::    :      @ :  @   : :::@   @ :@@@:::::@::@ @:::@#::::
+         |         :  @  :    :: :   :@:: :@:  :::::@   @ :@@@:::::@::@:@:::@#::::
+         |        :: :@  :  @ ::@:@:::@:: :@:  :::::@: :@ :@@@:::::@::@:@:::@#::::
+         |        :: :@::: :@ ::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         |      :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         |  :::::@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         |  ::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+       0 +----------------------------------------------------------------------->GB
+         0                                                                   3.231
 
-    Most of the increase in memory consumption from version 1.x to 2.2+
-    can be attributed to the move from single-pass to a multi-pass
-    approach to building the index: Information is first gathered from
-    all reachable fonts and only afterwards processed, classified and
-    discarded.  Also, there is a good deal of additional stuff kept in
-    the database now: two extra tables for file names and font families
-    have been added, making font lookups more efficient while improving
-    maintainability of the code.
+    FF peaks at around 1.4 GB after 12.5 GB worth of allocations,
+    whereas the Lua implementation arrives at around 45 MB after 3.2 GB
+    total:
+
+             impl           time(B)         total(B)   useful-heap(B) extra-heap(B)
+        fontforge    12,496,407,184    1,421,150,144    1,327,888,638    93,261,506
+              lua     3,263,698,960       45,478,640       37,231,892     8,246,748
+
+    Much of the inefficiency of Fontforge is a direct consequence of
+    having to parse the entire font to extract what essentially boils
+    down to a couple hundred bytes of metadata per font. Since some
+    information like design sizes (oh, Adobe!) is stuffed away in
+    Opentype tables, the vastly more efficient approach of
+    fontloader.info() proves insufficient for indexing. Thus, we ended
+    up using fontloader.open() which causes even the character tables
+    to be parsed, which incidentally are responsible for most of the
+    allocations during that peak of 1.4 GB measured above, along with
+    the encodings:
+
+        20.67% (293,781,048B) 0x6A8F72: SplineCharCreate (splineutil.c:3878)
+        09.82% (139,570,318B) 0x618ACD: _FontViewBaseCreate (fontviewbase.c:84)
+        08.77% (124,634,384B) 0x6A8FB3: SplineCharCreate (splineutil.c:3885)
+        04.53% (64,436,904B) in 80 places, all below massif's threshold (1.00%)
+        02.68% (38,071,520B) 0x64E14E: addKernPair (parsettfatt.c:493)
+        01.04% (14,735,320B) 0x64DE7D: addPairPos (parsettfatt.c:452)
+        39.26% (557,942,484B) 0x64A4E0: PsuedoEncodeUnencoded (parsettf.c:5706)
+
+    What gives? For 2.7 we expect a rougher transition than a year back
+    due to the complete revamp of the OT loading code. Breakage of
+    fragile aspects like font and style names has been anticipated and
+    addressed prior to the 2016 pretest release. In contrast to the
+    earlier approach of letting FF do a complete dump and then harvest
+    identifiers from the output we now have to coordinate with upstream
+    as to which fields are actually needed in order to provide a
+    similarly acceptable name → file lookup. On the bright side, these
+    things are a lot simpler to fix than the rather tedious work of
+    having users update their Luatex binary =)
 
 --doc]]--
 

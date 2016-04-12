@@ -443,7 +443,7 @@ do
       load_chardef ()
     end
 
-    return characters [k]
+    return rawget (characters, k)
   end
 
   setmetatableindex (characters, charindex)

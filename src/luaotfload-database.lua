@@ -1303,7 +1303,7 @@ find_closest = function (name, limit)
 end --- find_closest()
 
 local load_font_file = function (filename, subfont)
-    local rawfont, _msg = read_font_file (filename, subfont)
+    local rawfont, _msg = read_font_file (filename, subfont, true)
     if not rawfont then
         logreport ("log", 1, "db", "ERROR: failed to open %s.", filename)
         return
@@ -1375,9 +1375,15 @@ local names_items = {
 }
 
 local map_english_names = function (metadata)
+    local namesource
+    local platformames = metadata.platformnames
+    if platformnames then
+        namesource = platformnames.windows or platformnames.macintosh
+    end
+    namesource = namesource or metadata
     local nameinfo = { }
     for ours, theirs in next, names_items do
-        nameinfo [ours] = metadata [theirs]
+        nameinfo [ours] = namesource [theirs]
     end
     return nameinfo
 end
@@ -1605,7 +1611,7 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
     sanitized = sanitize_fontnames ({
         fontname        = fontname,
         psname          = fullname,
-        metafamily      = family,
+        metafamily      = familyname,
         familyname      = familyname,
         weight          = metadata.weight, --- string identifier
         prefmodifiers   = style,

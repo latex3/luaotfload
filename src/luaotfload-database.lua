@@ -372,7 +372,6 @@ This is a sketch of the luaotfload db:
         prefmodifiers   : string;   // sanitized preferred subfamily (names table 14)
         psname          : string;   // PostScript name
         size            : (false | float * float * float);  // if available, size info from the size table converted from decipoints
-        splitstyle      : string;   // style information obtained by splitting the full name at the last dash
         subfamily       : string;   // sanitized subfamily (names table 2)
         subfont         : (int | bool);     // integer if font is part of a TrueType collection ("ttc")
         version         : string;   // font version string
@@ -610,6 +609,12 @@ local italic_synonym = {
     oblique = true,
     slanted = true,
     italic  = true,
+}
+
+local bold_synonym = {
+    bold  = true,
+    black = true,
+    heavy = true,
 }
 
 local style_category = {
@@ -1365,19 +1370,50 @@ end
 --doc]]--
 
 local names_items = {
-    compatfull       = "compatiblename",
+    compatfull       = "compatiblefullname",
     fullname         = "fullname",
-    postscriptname   = "fontname",
-    preffamily       = "familyname",
-    prefmodifiers    = "subfamilyname",
+    postscriptname   = "postscriptname",
+    preffamily       = "typographicfamily",
+    prefmodifiers    = "typographicsubfamily",
     family           = "family",
     subfamily        = "subfamily",
 }
 
 local map_english_names = function (metadata)
     local namesource
-    local platformames = metadata.platformnames
+    local platformnames = metadata.platformnames
+    --[[--
+        Hans added the “platformnames” option for us to access parts of
+        the original name table. The names are unreliable and
+        completely disorganized, sure, but the Windows variant of the
+        field often contains the superior information. Case in point:
+
+          ["platformnames"]={
+           ["macintosh"]={
+            ["compatiblefullname"]="Garamond Premr Pro Smbd It",
+            ["family"]="Garamond Premier Pro",
+            ["fullname"]="Garamond Premier Pro Semibold Italic",
+            ["postscriptname"]="GaramondPremrPro-SmbdIt",
+            ["subfamily"]="Semibold Italic",
+           },
+           ["windows"]={
+            ["family"]="Garamond Premr Pro Smbd",
+            ["fullname"]="GaramondPremrPro-SmbdIt",
+            ["postscriptname"]="GaramondPremrPro-SmbdIt",
+            ["subfamily"]="Italic",
+            ["typographicfamily"]="Garamond Premier Pro",
+            ["typographicsubfamily"]="Semibold Italic",
+           },
+          },
+
+        The essential bit is contained as “typographicfamily” (which we
+        call for historical reasons the “preferred family”) and the
+        “subfamily”. Only  Why this is the case, only Adobe knows for
+        certain.
+    --]]--
     if platformnames then
+        --inspect(metadata)
+        --namesource = platformnames.macintosh or platformnames.windows
         namesource = platformnames.windows or platformnames.macintosh
     end
     namesource = namesource or metadata
@@ -1531,7 +1567,8 @@ local organize_styledata = function (metadata, rawinfo, info)
     return {
     --- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
         size            = get_size_info (rawinfo),
-        weight          = pfminfo and pfminfo.weight or metadata.pfmweight or 400,
+        pfmweight       = pfminfo and pfminfo.weight or metadata.pfmweight or 400,
+        weight          = rawinfo.weight or metadata.weight or "unspecified",
         split           = split_fontname (rawinfo.fontname),
         width           = pfminfo and pfminfo.width or metadata.pfmwidth,
         italicangle     = metadata.italicangle,
@@ -1604,7 +1641,6 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
     local fullname      = metadata.fullname
     local familyname    = metadata.familyname
     local italicangle   = metadata.italicangle
-    local splitstyle    = split_fontname (fontname)
     local style         = ""
     local weight
 
@@ -1640,7 +1676,6 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         psname           = sanitized.fontname,
         version          = metadata.version,
         size             = false,
-        splitstyle       = splitstyle,
         fontstyle_name   = style ~= "" and style or weight,
         weight           = metadata.pfminfo and pfminfo.weight or 400,
         italicangle      = italicangle,
@@ -2557,23 +2592,27 @@ generate_filedata = function (mappings)
 end
 
 local pick_style
+local pick_fallback_style
 local check_regular
 
 do
-    local splitfontname = lpeg.splitat "-"
-
     local choose_exact = function (field)
         --- only clean matches, without guessing
         if italic_synonym [field] then
             return "i"
         end
 
-        if field == "bold" then
+        if stringsub (field, 1, 10) == "bolditalic"
+        or stringsub (field, 1, 11) == "boldoblique" then
+            return "bi"
+        end
+
+        if stringsub (field, 1, 4) == "bold" then
             return "b"
         end
 
-        if field == "bolditalic" or field == "boldoblique" then
-            return "bi"
+        if stringsub (field, 1, 6) == "italic" then
+            return "i"
         end
 
         return false
@@ -2581,10 +2620,9 @@ do
 
     pick_style = function (fontstyle_name,
                            prefmodifiers,
-                           subfamily,
-                           splitstyle)
+                           subfamily)
         local style
-        if fontstyle_name then
+        if fontstyle_name --[[ff only]] then
             style = choose_exact (fontstyle_name)
         end
         if not style then
@@ -2597,9 +2635,9 @@ do
         return style
     end
 
-    pick_fallback_style = function (italicangle, weight)
+    pick_fallback_style = function (italicangle, weight, pfmweight)
         --- more aggressive, but only to determine bold faces
-        if weight > 500 then --- bold spectrum matches
+        if pfmweight > 500 or bold_synonym [weight] then --- bold spectrum matches
             if italicangle == 0 then
                 return tostring (weight)
             else
@@ -2615,23 +2653,29 @@ do
     check_regular = function (fontstyle_name,
                               prefmodifiers,
                               subfamily,
-                              splitstyle,
                               italicangle,
-                              weight)
+                              weight,
+                              pfmweight)
+        local plausible_weight
+        --[[--
+          This filters out undesirable candidates that specify their
+          prefmodifiers or subfamily as “regular” but are actually of
+          “semibold” or other weight—another drawback of the
+          oversimplifying classification into only three styles (r, i,
+          b, bi).
+        --]]--
 
-        if fontstyle_name then
-            return regular_synonym [fontstyle_name]
-        elseif prefmodifiers then
-            return regular_synonym [prefmodifiers]
-        elseif subfamily then
-            return regular_synonym [subfamily]
-        elseif splitstyle then
-            return regular_synonym [splitstyle]
-        elseif italicangle == 0 and weight == 400 then
-            return true
+        if italicangle == 0 then
+            if     pfmweight == 400                    then plausible_weight = true
+            elseif weight and regular_synonym [weight] then plausible_weight = true end
         end
 
-        return nil
+        if plausible_weight then
+            return fontstyle_name and regular_synonym [fontstyle_name]
+                or prefmodifiers  and regular_synonym [prefmodifiers]
+                or subfamily      and regular_synonym [subfamily]
+        end
+        return false
     end
 end
 
@@ -2655,12 +2699,7 @@ local pull_values = function (entry)
     entry.fontname          = info.fontname or metadata.fontname
     entry.fullname          = english.fullname or info.fullname
     entry.prefmodifiers     = english.prefmodifiers
-    local metafamily        = metadata.familyname
-    local familyname        = english.preffamily or english.family
-    entry.familyname        = familyname
-    if familyname ~= metafamily then
-        entry.metafamily    = metadata.familyname
-    end
+    entry.familyname        = metadata.familyname or english.preffamily or english.family
     entry.fontstyle_name    = sanitized.fontstyle_name
     entry.plainname         = names.fullname
     entry.subfamily         = english.subfamily
@@ -2668,8 +2707,8 @@ local pull_values = function (entry)
     --- pull style info ...
     entry.italicangle       = style.italicangle
     entry.size              = style.size
-    entry.splitstyle        = style.split
     entry.weight            = style.weight
+    entry.pfmweight         = style.pfmweight
 
     if config.luaotfload.db.strip == true then
         entry.file  = nil
@@ -2726,56 +2765,39 @@ collect_families = function (mappings)
         local subtable          = get_subtable (families, entry)
 
         local familyname        = entry.familyname
-        local metafamily        = entry.metafamily
         local fontstyle_name    = entry.fontstyle_name
         local prefmodifiers     = entry.prefmodifiers
         local subfamily         = entry.subfamily
 
         local weight            = entry.weight
+        local pfmweight         = entry.pfmweight
         local italicangle       = entry.italicangle
-        local splitstyle        = entry.splitstyle
 
         local modifier          = pick_style (fontstyle_name,
                                               prefmodifiers,
-                                              subfamily,
-                                              splitstyle)
+                                              subfamily)
 
         if not modifier then --- regular, exact only
             modifier = check_regular (fontstyle_name,
                                       prefmodifiers,
                                       subfamily,
-                                      splitstyle,
                                       italicangle,
-                                      weight)
+                                      weight,
+                                      pfmweight)
         end
+        --if familyname == "garamondpremierpro" then
+        --print(entry.fullname, "reg?",modifier, "->",fontstyle_name,
+                              --prefmodifiers,
+                              --subfamily,
+                              --italicangle,
+                              --pfmweight,
+                              --weight)
+                              --end
 
         if modifier then
             add_family (familyname, subtable, modifier, entry)
-            --- registering the metafamilies is unreliable within the
-            --- same table as identifiers might interfere with an
-            --- unmarked style that lacks a metafamily, e.g.
-            ---
-            ---         iwona condensed regular ->
-            ---                     family:     iwonacond
-            ---                     metafamily: iwona
-            ---         iwona regular ->
-            ---                     family:     iwona
-            ---                     metafamily: ø
-            ---
-            --- Both would be registered as under the same family,
-            --- i.e. “iwona”, and depending on the loading order
-            --- the query “name:iwona” can resolve to the condensed
-            --- version instead of the actual unmarked one. The only
-            --- way around this would be to introduce a separate
-            --- table for metafamilies and do fallback queries on it.
-            --- At the moment this is not pressing enough to justify
-            --- further increasing the index size, maybe if need
-            --- arises from the user side.
---            if metafamily and metafamily ~= familyname then
---                add_family (metafamily, subtable, modifier, entry)
---            end
-        elseif weight > 500 then -- in bold spectrum
-            modifier = pick_fallback_style (italicangle, weight)
+        elseif pfmweight > 500 then -- in bold spectrum
+            modifier = pick_fallback_style (italicangle, weight, pfmweight)
             if modifier then
                 add_family (familyname, subtable, modifier, entry)
             end
@@ -2851,7 +2873,7 @@ group_modifiers = function (mappings, families)
                                 if modifier == info_modifier then
                                     local index  = info.index
                                     local entry  = mappings [index]
-                                    local weight = entry.weight
+                                    local weight = entry.pfmweight
                                     local diff   = weight < 700 and 700 - weight or weight - 700
                                     if diff < minimum then
                                         minimum = diff
@@ -2870,7 +2892,7 @@ group_modifiers = function (mappings, families)
                                         local index  = info.index
                                         local entry  = mappings [index]
                                         local size   = entry.size
-                                        if entry.weight == closest then
+                                        if entry.pfmweight == closest then
                                             if size then
                                                 entries [#entries + 1] =  {
                                                     size [1],
@@ -2933,7 +2955,7 @@ local collect_font_filenames = function ()
     local bisect    = config.luaotfload.misc.bisect
     local max_fonts = config.luaotfload.db.max_fonts --- XXX revisit for lua 5.3 wrt integers
 
-    tableappend (filenames, collect_font_filenames_texmf  ())
+    --tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
     if config.luaotfload.db.scan_local == true then
         tableappend (filenames, collect_font_filenames_local  ())

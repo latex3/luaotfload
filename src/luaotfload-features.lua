@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ["features"] = {
-    version   = "2.7",
+    version   = "2.6",
     comment   = "companion to luaotfload-main.lua",
     author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
@@ -31,13 +31,14 @@ local definers          = fonts.definers
 local handlers          = fonts.handlers
 local fontidentifiers   = fonts.hashes and fonts.hashes.identifiers
 
-local as_script, normalize
+local config            = config or { luaotfload = { run = { } } }
 
-if handlers then
+local as_script         = true
+local normalize         = function () end
+
+if config.luaotfload.run.live == true then
     normalize = handlers.otf.features.normalize
-else
-    normalize = function () end
-    as_script = true
+    as_script = false
 end
 
 

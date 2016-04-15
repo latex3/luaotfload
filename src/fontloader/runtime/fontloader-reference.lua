@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 04/11/16 19:04:35
+-- merge date  : 04/13/16 16:46:44
 
 do -- begin closure to overcome local limits and interference
 
@@ -9292,15 +9292,15 @@ local function unpackoutlines(data)
 end
 otf.packoutlines=packoutlines
 otf.unpackoutlines=unpackoutlines
-local function getinfo(maindata,sub,platformnames)
+local function getinfo(maindata,sub,platformnames,rawfamilynames)
   local fontdata=sub and maindata.subfonts and maindata.subfonts[sub] or maindata
   local names=fontdata.names
   local info=nil
   if names then
     local metrics=fontdata.windowsmetrics or {}
-    local postscript=fontdata.postscript or {}
-    local fontheader=fontdata.fontheader or {}
-    local cffinfo=fontdata.cffinfo or {}
+    local postscript=fontdata.postscript   or {}
+    local fontheader=fontdata.fontheader   or {}
+    local cffinfo=fontdata.cffinfo    or {}
     local filename=fontdata.filename
     local weight=getname(fontdata,"weight") or cffinfo.weight or metrics.weight
     local width=getname(fontdata,"width") or cffinfo.width or metrics.width
@@ -9308,9 +9308,14 @@ local function getinfo(maindata,sub,platformnames)
     local fullname=getname(fontdata,"fullname")
     local family=getname(fontdata,"family")
     local subfamily=getname(fontdata,"subfamily")
-    local familyname=getname(fontdata,"typographicfamily") or family
-    local subfamilyname=getname(fontdata,"typographicsubfamily") or subfamily
-    local compatiblename=getname(fontdata,"compatiblefullname")
+    local familyname=getname(fontdata,"typographicfamily")
+    local subfamilyname=getname(fontdata,"typographicsubfamily")
+    local compatiblename=getname(fontdata,"compatiblefullname") 
+    if rawfamilynames then
+    else
+      if not  familyname then  familyname=family end
+      if not subfamilyname then subfamilyname=subfamily end
+    end
     info={ 
       subfontindex=fontdata.subfontindex or sub or 0,
       version=getname(fontdata,"version"),
@@ -9606,9 +9611,11 @@ end
 function readers.getinfo(filename,specification)
   local subfont=nil
   local platformname=false
+  local rawfamilynames=false
   if type(specification)=="table" then
     subfont=tonumber(specification.subfont)
     platformnames=specification.platformnames
+    rawfamilynames=specification.rawfamilynames
   else
     subfont=tonumber(specification)
   end
@@ -9620,15 +9627,15 @@ function readers.getinfo(filename,specification)
   if fontdata then
     local subfonts=fontdata.subfonts
     if not subfonts then
-      return getinfo(fontdata,nil,platformnames)
+      return getinfo(fontdata,nil,platformnames,rawfamilynames)
     elseif not subfont then
       local info={}
       for i=1,#subfonts do
-        info[i]=getinfo(fontdata,i,platformnames)
+        info[i]=getinfo(fontdata,i,platformnames,rawfamilynames)
       end
       return info
     elseif subfont>1 and subfont<=#subfonts then
-      return getinfo(fontdata,subfont,platformnames)
+      return getinfo(fontdata,subfont,platformnames,rawfamilynames)
     else
       return {
         filename=filename,

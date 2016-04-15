@@ -1798,15 +1798,15 @@ otf.unpackoutlines = unpackoutlines
 -- some properties in order to read following tables. When details is true we also
 -- initialize the glyphs data.
 
-local function getinfo(maindata,sub,platformnames)
+local function getinfo(maindata,sub,platformnames,rawfamilynames)
     local fontdata = sub and maindata.subfonts and maindata.subfonts[sub] or maindata
     local names    = fontdata.names
     local info     = nil
     if names then
         local metrics        = fontdata.windowsmetrics or { }
-        local postscript     = fontdata.postscript or { }
-        local fontheader     = fontdata.fontheader or { }
-        local cffinfo        = fontdata.cffinfo or { }
+        local postscript     = fontdata.postscript     or { }
+        local fontheader     = fontdata.fontheader     or { }
+        local cffinfo        = fontdata.cffinfo        or { }
         local filename       = fontdata.filename
         local weight         = getname(fontdata,"weight") or cffinfo.weight or metrics.weight
         local width          = getname(fontdata,"width")  or cffinfo.width  or metrics.width
@@ -1814,9 +1814,15 @@ local function getinfo(maindata,sub,platformnames)
         local fullname       = getname(fontdata,"fullname")
         local family         = getname(fontdata,"family")
         local subfamily      = getname(fontdata,"subfamily")
-        local familyname     = getname(fontdata,"typographicfamily") or family
-        local subfamilyname  = getname(fontdata,"typographicsubfamily") or subfamily
-        local compatiblename = getname(fontdata,"compatiblefullname")
+        local familyname     = getname(fontdata,"typographicfamily")
+        local subfamilyname  = getname(fontdata,"typographicsubfamily")
+        local compatiblename = getname(fontdata,"compatiblefullname") -- kind of useless
+        if rawfamilynames then
+            -- for PG (for now, as i need to check / adapt context to catch a no-fallback case)
+        else
+            if not    familyname then    familyname =    family end
+            if not subfamilyname then subfamilyname = subfamily end
+        end
         info = { -- we inherit some inconsistencies/choices from ff
             subfontindex   = fontdata.subfontindex or sub or 0,
          -- filename       = filename,
@@ -2139,31 +2145,34 @@ end
 function readers.getinfo(filename,specification) -- string, nil|number|table
     -- platformnames is optional and not used by context (a too unpredictable mess
     -- that only add to the confusion) .. so it's only for checking things
-    local subfont      = nil
-    local platformname = false
+    local subfont        = nil
+    local platformname   = false
+    local rawfamilynames = false
     if type(specification) == "table" then
-        subfont       = tonumber(specification.subfont)
-        platformnames = specification.platformnames
+        subfont        = tonumber(specification.subfont)
+        platformnames  = specification.platformnames
+        rawfamilynames = specification.rawfamilynames
     else
         subfont       = tonumber(specification)
     end
     local fontdata = loadfont {
-        filename      = filename,
-        details       = true,
-        platformnames = platformnames,
+        filename       = filename,
+        details        = true,
+        platformnames  = platformnames,
+     -- rawfamilynames = rawfamilynames,
     }
     if fontdata then
         local subfonts = fontdata.subfonts
         if not subfonts then
-            return getinfo(fontdata,nil,platformnames)
+            return getinfo(fontdata,nil,platformnames,rawfamilynames)
         elseif not subfont then
             local info = { }
             for i=1,#subfonts do
-                info[i] = getinfo(fontdata,i,platformnames)
+                info[i] = getinfo(fontdata,i,platformnames,rawfamilynames)
             end
             return info
         elseif subfont > 1 and subfont <= #subfonts then
-            return getinfo(fontdata,subfont,platformnames)
+            return getinfo(fontdata,subfont,platformnames,rawfamilynames)
         else
             return {
                 filename = filename,

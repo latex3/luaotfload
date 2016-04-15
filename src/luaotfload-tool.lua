@@ -104,6 +104,7 @@ local iosavedata                = io.savedata
 local lfsisdir                  = lfs.isdir
 local lfsisfile                 = lfs.isfile
 local stringsplit               = string.split
+local tablekeys                 = table.keys
 local tableserialize            = table.serialize
 local tablesortedkeys           = table.sortedkeys
 local tabletohash               = table.tohash
@@ -425,7 +426,7 @@ local baseindent = "    "
 --[[doc--
 
     show_info_items -- Together with show_info_table prints the table returned by
-    fontloader.info(), recursing into nested tables if appropriate (as necessitated
+    readers.getinfo(), recursing into nested tables if appropriate (as necessitated
     by Luatex versions 0.78+ which include the pfminfo table in the result.
 
 --doc]]--
@@ -485,15 +486,16 @@ local p_words      = Ct(p_word * (p_whitespace * p_word)^0)
 --- string -> int -> string list
 local reflow = function (text, width)
     local words
-    if type(text) == "string" then
+    local t_text = type (text)
+    if t_text == "string" then
         words = lpegmatch(p_words, text)
         if #words < 2 then
             return { text }
         end
-    else
+    elseif t_text == "table" then
         words = text
-        if #words < 2 then
-            return words
+        if #text < 2 then
+            return text
         end
     end
 
@@ -540,42 +542,20 @@ local print_field = function (key, val)
     end
 end
 
-local display_names = function (names)
-    print_heading("Font Metadata", 2)
-    for i=1, #names do
-        local lang, namedata = names[i].lang, names[i].names
-        print_heading(stringformat("Language: %s ", i, lang), 3)
-        texiowrite_nl ""
-        if namedata then
-            for field, value in next, namedata do
-                print_field(field, value)
-            end
-        end
-    end
-end
-
 --- see luafflib.c
 local general_fields = {
     --- second: l -> literal | n -> length | d -> date
     { "fullname",            "l", "font name"           },
     { "version",             "l", "font version"        },
-    { "creationtime",        "d", "creation time"       },
-    { "modificationtime",    "d", "modification time"   },
     { "subfonts",            "n", "number of subfonts"  },
     { "glyphcnt",            "l", "number of glyphs"    },
     { "weight",              "l", "weight indicator"    },
-    { "design_size",         "l", "design size"         },
-    { "design_range_bottom", "l", "design size min"     },
-    { "design_range_top",    "l", "design size max"     },
-    { "fontstyle_id",        "l", "font style id"       },
-    { "fontstyle_name",      "S", "font style name"     },
-    { "strokewidth",         "l", "stroke width"        },
-    { "units_per_em",        "l", "units per em"        },
-    { "ascent",              "l", "ascender height"     },
-    { "descent",             "l", "descender height"    },
-    { "comments",            "l", "comments"            },
-    { "os2_version",         "l", "os2 version"         },
-    { "sfd_version",         "l", "sfd version"         },
+    { "designsize",          "l", "design size"         },
+    { "minsize",             "l", "design size min"     },
+    { "maxsize",             "l", "design size max"     },
+    { "units",               "l", "units per em"        },
+    { "ascender",            "l", "ascender height"     },
+    { "descender",           "l", "descender height"    },
 }
 
 local display_general = function (fullinfo)
@@ -635,7 +615,7 @@ local print_features = function (features)
         for script, languages in next, data do
             local field     = stringformat(key_fmt, script).. fieldseparator .. " "
             local wd_field  = #field
-            local lines     = reflow(languages.list, textwidth - wd_field)
+            local lines     = reflow(tablekeys(languages), textwidth - wd_field)
             local indent    = stringrep(" ", wd_field)
             texiowrite_nl(field)
             texiowrite(lines[1])
@@ -648,67 +628,32 @@ local print_features = function (features)
     end
 end
 
-local extract_feature_info = function (set)
-    local collected = { }
-    for i=1, #set do
-        local features = set[i].features
-        if features then
-            for j=1, #features do
-                local feature   = features[j]
-                local scripts   = feature.scripts
-                local tagname   = stringlower(feature.tag)
-                local entry     = collected[tagname] or { }
-
-                for k=1, #scripts do
-                    local script     = scripts[k]
-                    local scriptname = stringlower(script.script)
-                    local c_script   = entry[scriptname] or {
-                                            list = { },
-                                            set  = { },
-                                        }
-                    local list, set  = c_script.list, c_script.set
-
-                    for l=1, #script.langs do
-                        local langname = stringlower(script.langs[l])
-                        if not set[langname] then
-                            list[#list+1] = langname
-                            set[langname] = true
-                        end
-                    end
-                    entry[scriptname] = c_script
-                end
-                collected[tagname]  = entry
-            end
-        end
-    end
-    return collected
-end
-
 local display_feature_set = function (set)
-    local collected = extract_feature_info(set)
-    print_features(collected)
+    print_features(set)
 end
 
-local display_features = function (gsub, gpos)
+local display_features_type = function (id, feat)
+    if next (feat) then
+        print_heading(id, 3)
+        display_feature_set(feat)
+        return true
+    end
+    return false
+end
+
+local display_features = function (features)
     texiowrite_nl ""
+    print_heading("Features", 2)
 
-    if gsub or gpos then
-        print_heading("Features", 2)
-
-        if gsub then
-            print_heading("GSUB Features", 3)
-            display_feature_set(gsub)
-        end
-
-        if gpos then
-            print_heading("GPOS Features", 3)
-            display_feature_set(gpos)
-        end
+    if not display_features_type ("GSUB Features", features.gsub)
+    or not display_features_type ("GPOS Features", features.gpos)
+    then
+        texiowrite_nl("font defines neither gsub nor gpos features")
     end
 end
 
 local show_full_info = function (path, subfont, warnings)
-    local rawinfo, warn = fontloader.open(path, subfont)
+    local rawinfo, warn = fonts.handlers.otf.readers.loadfont (path, subfont)
     if warnings then
         show_fontloader_warnings(warn)
     end
@@ -716,19 +661,9 @@ local show_full_info = function (path, subfont, warnings)
         texiowrite_nl(stringformat([[cannot open font %s]], path))
         return
     end
-    local fontdata = { }
-    local fullinfo = fontloader.to_table(rawinfo)
-    local fields = fontloader.fields(rawinfo)
-    fontloader.close(rawinfo)
-    display_names(fullinfo.names)
-    display_general(fullinfo)
-    display_features(fullinfo.gsub, fullinfo.gpos)
+    display_general(rawinfo)
+    display_features(rawinfo.resources.features)
 end
-
---- Subfonts returned by fontloader.info() do not correspond
---- to the actual indices required by fontloader.open(), so
---- we try and locate the correct one by matching the request
---- against the full name.
 
 local subfont_by_name
 subfont_by_name = function (lst, askedname, n)
@@ -741,7 +676,7 @@ subfont_by_name = function (lst, askedname, n)
         if fonts.names.sanitize_fontname (font.fullname) == askedname then
             return font
         end
-        return subfont_by_name (lst, askedname, n+1)
+        return subfont_by_name (lst, askedname, n)
     end
     return false
 end
@@ -749,9 +684,9 @@ end
 --[[doc--
 The font info knows two levels of detail:
 
-    a)  basic information returned by fontloader.info(); and
+    a)  basic information returned by readers.getinfo(); and
     b)  detailed information that is a subset of the font table
-        returned by fontloader.open().
+        returned by readers.loadfont().
 --doc]]--
 
 local show_font_info = function (basename, askedname, detail, warnings)
@@ -763,7 +698,7 @@ local show_font_info = function (basename, askedname, detail, warnings)
         fullname = resolvers.findfile(basename)
     end
     if fullname then
-        local shortinfo = fontloader.info(fullname)
+        local shortinfo, _warn = fonts.handlers.otf.readers.getinfo (fullname)
         local nfonts   = #shortinfo
         if nfonts > 0 then -- true type collection
             local subfont

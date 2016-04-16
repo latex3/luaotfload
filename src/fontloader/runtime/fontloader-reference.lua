@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 04/13/16 16:46:44
+-- merge date  : 04/16/16 15:27:56
 
 do -- begin closure to overcome local limits and interference
 
@@ -6673,6 +6673,92 @@ function mappings.addtounicode(data,filename,checklookups)
   if type(checklookups)=="function" then
     checklookups(data,missing,nofmissing)
   end
+  local unset={}
+  for unic,glyph in next,descriptions do
+    if not glyph.unicode and glyph.class=="ligature" then
+      unset[unic]=glyph
+    end
+  end
+  if next(unset) then
+    local sequences=resources.sequences
+    local collected={}
+    for i=1,#sequences do
+      local sequence=sequences[i]
+      if sequence.type=="gsub_ligature" then
+        local steps=sequence.steps
+        if steps then
+          local l={}
+          local function traverse(p,k,v)
+            if k=="ligature" then
+              collected[v]={ unpack(l) }
+            else
+              table.insert(l,k)
+              for k,vv in next,v do
+                traverse(p,k,vv)
+              end
+              table.remove(l)
+            end
+          end
+          for i=1,#steps do
+            local coverage=steps[i].coverage
+            if coverage then
+              for k,v in next,coverage do
+                traverse(k,k,v)
+              end
+            end
+          end
+        end
+      end
+    end
+    if next(collected) then
+      while true do
+        local done=false
+        for k,v in next,collected do
+          for i=1,#v do
+            local vi=v[i]
+            if vi==k then
+              collected[k]=nil
+              unset[k]=nil
+            else
+              local c=collected[vi]
+              if c then
+                done=true
+                local t={}
+                local n=i-1
+                for j=1,n do
+                  t[j]=t[j]
+                end
+                for j=1,#c do
+                  n=n+1
+                  t[n]=c[j]
+                end
+                for j=i+1,#v do
+                  n=n+1
+                  t[n]=t[j]
+                end
+                collected[k]=t
+                break
+              end
+            end
+          end
+        end
+        if not done then
+          break
+        end
+      end
+      local n=0
+      for k,v in next,unset do
+        u=collected[k]
+        if u then
+          v.unicode=u
+          n=n+1
+        end
+      end
+      if trace_mapping and n>0 then
+        report_fonts("%n ligature tounicode mappings deduced from gsub ligature feaures",n)
+      end
+    end
+  end
   if trace_mapping then
     for unic,glyph in table.sortedhash(descriptions) do
       local name=glyph.name
@@ -12506,7 +12592,7 @@ local function handlemark(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyp
         local b=basecoverage[i]
         if components then
           for c=1,#components do
-            local classes=components[i]
+            local classes=components[c]
             if classes then
               for i=1,nofclasses do
                 local anchor=readanchor(f,classes[i])
@@ -15378,7 +15464,7 @@ local trace_defining=false registertracker("fonts.defining",function(v) trace_de
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.016 
+otf.version=3.017 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 local otfreaders=otf.readers
 local hashes=fonts.hashes
@@ -20017,7 +20103,6 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                   end
                   break
                 end
-                current=getnext(current)
               elseif char==false then
                 if discfound then
                   notmatchreplace[discfound]=true

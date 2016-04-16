@@ -2385,7 +2385,6 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                     end
                                     break
                                 end
-                                current = getnext(current)
                             elseif char == false then
                                 if discfound then
                                     notmatchreplace[discfound] = true

@@ -1147,7 +1147,7 @@ local function handlemark(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyp
                 local b = basecoverage[i]
                 if components then
                     for c=1,#components do
-                        local classes = components[i]
+                        local classes = components[c]
                         if classes then
                             for i=1,nofclasses do
                                 local anchor = readanchor(f,classes[i])

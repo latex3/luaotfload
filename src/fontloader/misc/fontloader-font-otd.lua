@@ -133,6 +133,8 @@ local wildcard = "*"
 
 -- what about analyze in local and not in font
 
+-- needs checking: some added features can pass twice
+
 local function initialize(sequence,script,language,s_enabled,a_enabled,font,attr,dynamic,ra,autoscript,autolanguage)
     local features = sequence.features
     if features then

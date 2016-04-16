@@ -392,6 +392,7 @@ local format_counter = function (stack)
 end
 
 local print_heading = function (title, level)
+    if not title then return end
     local structuredata
     if currentdepth == level then -- top is current
         counterstack[#counterstack] = counterstack[#counterstack] + 1
@@ -547,15 +548,19 @@ local general_fields = {
     --- second: l -> literal | n -> length | d -> date
     { "fullname",            "l", "font name"           },
     { "version",             "l", "font version"        },
-    { "subfonts",            "n", "number of subfonts"  },
-    { "glyphcnt",            "l", "number of glyphs"    },
+    { "width",               "l", "width"               },
+    { "averagewidth",        "l", "average width"       },
+    { "panosewidth",         "l", "panose width"        },
     { "weight",              "l", "weight indicator"    },
+    { "pfmweight",           "l", "numerical weight"    },
+    { "panoseweight",        "l", "panose weight"       },
     { "designsize",          "l", "design size"         },
     { "minsize",             "l", "design size min"     },
     { "maxsize",             "l", "design size max"     },
     { "units",               "l", "units per em"        },
     { "ascender",            "l", "ascender height"     },
     { "descender",           "l", "descender height"    },
+    { "capheight",           "l", "capital height"      },
 }
 
 local display_general = function (fullinfo)
@@ -661,7 +666,7 @@ local show_full_info = function (path, subfont, warnings)
         texiowrite_nl(stringformat([[cannot open font %s]], path))
         return
     end
-    display_general(rawinfo)
+    display_general(rawinfo.metadata)
     display_features(rawinfo.resources.features)
 end
 
@@ -698,7 +703,11 @@ local show_font_info = function (basename, askedname, detail, warnings)
         fullname = resolvers.findfile(basename)
     end
     if fullname then
-        local shortinfo, _warn = fonts.handlers.otf.readers.getinfo (fullname)
+        local shortinfo = fonts.handlers.otf.readers.getinfo (fullname, {
+                            subfont        = nil,
+                            platformnames  = true,
+                            rawfamilynames = true,
+                        })
         local nfonts   = #shortinfo
         if nfonts > 0 then -- true type collection
             local subfont

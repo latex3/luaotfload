@@ -1853,12 +1853,18 @@ otf.addfeature           = add_otf_feature
 
 local install_extra_features = function (data, filename, raw)
     for feature, specification in next, extrafeatures do
+        local fontname
+        local subfont
+        local metadata = data.metadata
+        if metadata then
+            fontname = tostring (data.metadata.fontname)
+            subfont  = tonumber (metadata.subfontindex)
+        end
+        if not fontname then fontname = "<unknown>" end
+        if not subfont  then subfont  = -1          end
         logreport ("both", 3, "features",
                    "register synthetic feature “%s” for %s font “%s”(%d)",
-                   feature,
-                   data.format,
-                   tostring (data.metadata and data.metadata.fontname or "<unknown>"),
-                   data.subfont or -1)
+                   feature, data.format, fontname, subfont)
         otf.features.register { name = feature, description = specification[2] }
         otf.enhancers.addfeature (data, feature, specification[1])
     end

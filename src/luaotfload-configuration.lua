@@ -189,13 +189,14 @@ local permissible_color_callbacks = {
 
 local default_config = {
   db = {
-    formats     = "otf,ttf,ttc,dfont",
-    scan_local  = false,
-    skip_read   = false,
-    strip       = true,
-    update_live = true,
-    compress    = true,
-    max_fonts   = 2^51,
+    formats         = "otf,ttf,ttc,dfont",
+    scan_local      = false,
+    skip_read       = false,
+    strip           = true,
+    update_live     = true,
+    compress        = true,
+    max_fonts       = 2^51,
+    use_fontforge   = false,
   },
   run = {
     resolver       = "cached",
@@ -203,7 +204,6 @@ local default_config = {
     log_level      = 0,
     color_callback = "post_linebreak_filter",
     fontloader     = default_fontloader (),
-    use_fontforge  = false,
   },
   misc = {
     bisect         = false,
@@ -377,7 +377,7 @@ local set_fontforge = function ()
     logreport ("log", 4, "db", "Database not present.")
     return true
   end
-  local use_ff = config.luaotfload.run.use_fontforge
+  local use_ff = config.luaotfload.db.use_fontforge
   if use_ff == true then
     if not _G.fontloader then
       logreport ("both", 0, "db",
@@ -500,6 +500,7 @@ local option_spec = {
       out_t     = number_t, --- TODO int_t from 5.3.x on
       transform = tointeger,
     },
+    use_fontforge = { in_t = boolean_t, },
   },
   run = {
     live = { in_t = boolean_t, }, --- false for the tool, true for TeX run
@@ -535,7 +536,6 @@ local option_spec = {
         return id
       end,
     },
-    use_fontforge = { in_t = boolean_t, },
     log_level = {
       in_t      = number_t,
       out_t     = number_t, --- TODO int_t from 5.3.x on
@@ -669,13 +669,14 @@ local conf_footer = [==[
 
 local formatters = {
   db = {
-    compress    = { false, format_boolean },
-    formats     = { false, format_string  },
-    max_fonts   = { false, format_integer },
-    scan_local  = { false, format_boolean },
-    skip_read   = { false, format_boolean },
-    strip       = { false, format_boolean },
-    update_live = { false, format_boolean },
+    compress       = { false, format_boolean },
+    formats        = { false, format_string  },
+    max_fonts      = { false, format_integer },
+    scan_local     = { false, format_boolean },
+    skip_read      = { false, format_boolean },
+    strip          = { false, format_boolean },
+    update_live    = { false, format_boolean },
+    use_fontforge  = { false, format_boolean },
   },
   default_features = {
     __default = { true, format_keyval },
@@ -698,7 +699,6 @@ local formatters = {
     fontloader      = { false, format_string  },
     log_level       = { false, format_integer },
     resolver        = { false, format_string  },
-    use_fontforge   = { false, format_boolean },
   },
 }
 

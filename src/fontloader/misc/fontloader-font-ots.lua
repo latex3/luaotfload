@@ -22,8 +22,8 @@ if not modules then modules = { } end modules ['font-ots'] = { -- sequences
 --
 -- This is a version of font-otn.lua adapted to the new font loader code. It
 -- is a context version which can contain experimental code, but when we
--- have serious patches we will backport to the font-otn files. There will
--- be a generic variant too.
+-- have serious patches we will backport to the font-otn files. The plain
+-- loader that ships with context also uses this now.
 --
 -- todo: looks like we have a leak somewhere (probably in ligatures)
 -- todo: copy attributes to disc

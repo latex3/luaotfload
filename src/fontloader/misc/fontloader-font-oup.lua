@@ -736,6 +736,83 @@ local function stripredundant(fontdata)
     end
 end
 
+function readers.getcomponents(fontdata) -- handy for resolving ligatures when names are missing
+    local resources    = fontdata.resources
+    local descriptions = fontdata.descriptions
+    if resources then
+        local sequences = resources.sequences
+        if sequences then
+            local collected = { }
+            for i=1,#sequences do
+                local sequence = sequences[i]
+                if sequence.type == "gsub_ligature" then
+                    local steps  = sequence.steps
+                    if steps then
+                        local l = { }
+                        local function traverse(p,k,v)
+                            if k == "ligature" then
+                                collected[v] = { unpack(l) }
+                            else
+                                insert(l,k)
+                                for k, vv in next, v do
+                                    traverse(p,k,vv)
+                                end
+                                remove(l)
+                            end
+                        end
+                        for i=1,#steps do
+                        -- we actually had/have this in base mode
+                            local coverage = steps[i].coverage
+                            if coverage then
+                                for k, v in next, coverage do
+                                    traverse(k,k,v)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            if next(collected) then
+                while true do
+                    local done = false
+                    for k, v in next, collected do
+                        for i=1,#v do
+                            local vi = v[i]
+                            if vi == k then
+                                collected[k] = nil
+                            else
+                                local c = collected[vi]
+                                if c then
+                                    done = true
+                                    local t = { }
+                                    local n = i - 1
+                                    for j=1,n do
+                                        t[j] = t[j]
+                                    end
+                                    for j=1,#c do
+                                        n = n + 1
+                                        t[n] = c[j]
+                                    end
+                                    for j=i+1,#v do
+                                        n = n + 1
+                                        t[n] = t[j]
+                                    end
+                                    collected[k] = t
+                                    break
+                                end
+                            end
+                        end
+                    end
+                    if not done then
+                        break
+                    end
+                end
+                return collected
+            end
+        end
+    end
+end
+
 function readers.rehash(fontdata,hashmethod) -- TODO: combine loops in one
     if not (fontdata and fontdata.glyphs) then
         return
@@ -757,6 +834,7 @@ function readers.rehash(fontdata,hashmethod) -- TODO: combine loops in one
         unifymissing(fontdata)
         stripredundant(fontdata)
     end
+    -- maybe here components
 end
 
 function readers.checkhash(fontdata)

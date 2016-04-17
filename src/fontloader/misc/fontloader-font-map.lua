@@ -437,94 +437,41 @@ function mappings.addtounicode(data,filename,checklookups)
     if type(checklookups) == "function" then
         checklookups(data,missing,nofmissing)
     end
+
     -- todo: go lowercase
 
-    local unset = { }
-    for unic, glyph in next, descriptions do
+    local collected = false
+    local unicoded  = 0
+    for unicode, glyph in next, descriptions do
         if not glyph.unicode and glyph.class == "ligature" then
-            unset[unic] = glyph
-        end
-    end
-    if next(unset) then
-        local sequences = resources.sequences
-        local collected = { }
-        for i=1,#sequences do
-            local sequence = sequences[i]
-            if sequence.type == "gsub_ligature" then
-                local steps  = sequence.steps
-                if steps then
-                    local l = { }
-                    local function traverse(p,k,v)
-                        if k == "ligature" then
-                            collected[v] = { unpack(l) }
-                        else
-                            table.insert(l,k)
-                            for k, vv in next, v do
-                                traverse(p,k,vv)
-                            end
-                            table.remove(l)
-                        end
-                    end
-                    for i=1,#steps do
-                    -- we actually had/have this in base mode
-                        local coverage = steps[i].coverage
-                        if coverage then
-                            for k, v in next, coverage do
-                                traverse(k,k,v)
-                            end
-                        end
-                    end
-                end
-            end
-        end
-        if next(collected) then
-            while true do
-                local done = false
-                for k, v in next, collected do
-                    for i=1,#v do
-                        local vi = v[i]
-                        if vi == k then
-                            collected[k] = nil
-                            unset[k] = nil
-                        else
-                            local c = collected[vi]
-                            if c then
-                                done = true
-                                local t = { }
-                                local n = i - 1
-                                for j=1,n do
-                                    t[j] = t[j]
-                                end
-                                for j=1,#c do
-                                    n = n + 1
-                                    t[n] = c[j]
-                                end
-                                for j=i+1,#v do
-                                    n = n + 1
-                                    t[n] = t[j]
-                                end
-                                collected[k] = t
-                                break
-                            end
-                        end
-                    end
-                end
-                if not done then
+            if not collected then
+                collected = fonts.handlers.otf.readers.getcomponents(data)
+                if not collected then
                     break
                 end
             end
-            local n = 0
-            for k, v in next, unset do
-                u = collected[k]
-                if u then
-                    v.unicode = u
-                    n = n + 1
+            local u = collected[unicode] -- always tables
+            if u then
+                local n = #u
+                for i=1,n do
+                    if u[i] > private then
+                        n = 0
+                        break
+                    end
+                end
+                if n > 0 then
+                    if n > 1 then
+                        glyph.unicode = u
+                    else
+                        glyph.unicode = u[1]
+                    end
+                    unicoded = unicoded + 1
                 end
             end
-            if trace_mapping and n > 0 then
-                report_fonts("%n ligature tounicode mappings deduced from gsub ligature feaures",n)
-            end
         end
+    end
+    if trace_mapping and unicoded > 0 then
+        report_fonts("%n ligature tounicode mappings deduced from gsub ligature features",unicoded)
     end
 
     if trace_mapping then

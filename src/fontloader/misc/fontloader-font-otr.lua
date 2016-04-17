@@ -21,10 +21,6 @@ if not modules then modules = { } end modules ['font-otr'] = {
 -- compatible output as well (We're not that far from it as currently I can load
 -- all data reasonable fast.)
 
--- This code is not yet ready for generic i.e. I want to be free to change the
--- keys and values. Especially the gpos/gsub/gdef/math needs checking (this
--- is implemented in font-dsp.lua).
-
 -- We can omit redundant glyphs names i.e. ones that match the agl or
 -- are just a unicode string but it doesn't save that much. It will be an option
 -- some day.
@@ -2146,7 +2142,7 @@ function readers.getinfo(filename,specification) -- string, nil|number|table
     -- platformnames is optional and not used by context (a too unpredictable mess
     -- that only add to the confusion) .. so it's only for checking things
     local subfont        = nil
-    local platformname   = false
+    local platformnames  = false
     local rawfamilynames = false
     if type(specification) == "table" then
         subfont        = tonumber(specification.subfont)

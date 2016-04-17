@@ -2,14 +2,14 @@
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-configuration.lua
 --  DESCRIPTION:  config file reader
--- REQUIREMENTS:  Luaotfload 2.6 or above
+-- REQUIREMENTS:  Luaotfload 2.7 or above
 --       AUTHOR:  Philipp Gesang, <phg@phi-gamma.net>
 --       AUTHOR:  Dohyun Kim <nomosnomos@gmail.com>
 -------------------------------------------------------------------------------
 --
 
 if not modules then modules = { } end modules ["luaotfload-configuration"] = {
-  version   = "2.6",
+  version   = "2.7",
   comment   = "part of Luaotfload",
   author    = "Philipp Gesang, Dohyun Kim",
   copyright = "Luaotfload Development Team",
@@ -203,6 +203,7 @@ local default_config = {
     log_level      = 0,
     color_callback = "post_linebreak_filter",
     fontloader     = default_fontloader (),
+    use_fontforge  = false,
   },
   misc = {
     bisect         = false,
@@ -369,6 +370,29 @@ local set_default_features = function ()
   return true
 end
 
+local set_fontforge = function ()
+  local names = fonts.names
+  if not names or not names.use_fontforge then
+    --- happens normally on the first run
+    logreport ("log", 4, "db", "Database not present.")
+    return true
+  end
+  local use_ff = config.luaotfload.run.use_fontforge
+  if use_ff == true then
+    if not _G.fontloader then
+      logreport ("both", 0, "db",
+                 "Fontforge loader was requested but the fontloader \z
+                  library is missing.")
+      return false
+    end
+    logreport ("log", 0, "db", "Loading font data with FontForge.")
+    names.use_fontforge (true)
+  else
+    logreport ("log", 4, "db", "Loading font data with the Lua loader.")
+    names.use_fontforge (false)
+  end
+  return true
+end
 
 reconf_tasks = {
   { "Set the log level"         , set_loglevel         },
@@ -377,6 +401,7 @@ reconf_tasks = {
   { "Set the font filter"       , set_font_filter      },
   { "Install font name resolver", set_name_resolver    },
   { "Set default features"      , set_default_features },
+  { "Set fontforge"             , set_fontforge        },
 }
 
 -------------------------------------------------------------------------------
@@ -510,6 +535,7 @@ local option_spec = {
         return id
       end,
     },
+    use_fontforge = { in_t = boolean_t, },
     log_level = {
       in_t      = number_t,
       out_t     = number_t, --- TODO int_t from 5.3.x on
@@ -672,6 +698,7 @@ local formatters = {
     fontloader      = { false, format_string  },
     log_level       = { false, format_integer },
     resolver        = { false, format_string  },
+    use_fontforge   = { false, format_boolean },
   },
 }
 

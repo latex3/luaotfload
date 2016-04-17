@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['luaotfload-database'] = {
-    version   = "2.6",
+    version   = "2.7",
     comment   = "companion to luaotfload-main.lua",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
@@ -8,31 +8,105 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
 
 --[[doc--
 
-    Some statistics:
+    With version 2.7 we killed of the Fontforge libraries in favor of
+    the Lua implementation of the OT format reader. There were many
+    reasons to do this on top of the fact that FF won’t be around at
+    version 1.0 anymore: In addition to maintainability, memory safety
+    and general code hygiene, the new reader shows an amazing
+    performance: Scanning of the 3200 font files on my system takes
+    around 23 s now, as opposed to 74 s with the Fontforge libs. Memory
+    usage has improved drastically as well, as illustrated by these
+    profiles:
 
-        a) TL 2012,     mkluatexfontdb --force
-        b) v2.4,        luaotfload-tool --update --force
-        c) v2.4,        luaotfload-tool --update --force --formats=+afm,pfa,pfb
-        d) Context,     mtxrun --script fonts --reload --force
+       GB
+   1.324^                                                   #
+        |                                                   #
+        |                                                 ::#
+        |                                                 : #::
+        |                                                @: #:
+        |                                                @: #:
+        |                                              @@@: #:
+        |                                            @@@ @: #:
+        |                           @@               @ @ @: #:
+        |                           @             @@:@ @ @: #: :
+        |                          @@ :           @ :@ @ @: #: :
+        |          @@:           ::@@ :@@       ::@ :@ @ @: #: :            :::
+        |         @@ :          :: @@ :@        : @ :@ @ @: #: :           :: :
+        |         @@ :         ::: @@ :@      ::: @ :@ @ @: #: ::          :: :
+        |       @@@@ ::       :::: @@ :@      : : @ :@ @ @: #: ::        :::: ::
+        |      :@ @@ ::       :::: @@ :@ :   :: : @ :@ @ @: #: ::       :: :: ::
+        |     @:@ @@ ::      ::::: @@ :@ : :::: : @ :@ @ @: #: ::::   :::: :: ::
+        |    @@:@ @@ ::    ::::::: @@ :@ : : :: : @ :@ @ @: #: :::   @: :: :: ::@
+        |   @@@:@ @@ ::   :: ::::: @@ :@ ::: :: : @ :@ @ @: #: :::   @: :: :: ::@
+        | @@@@@:@ @@ ::::::: ::::: @@ :@ ::: :: : @ :@ @ @: #: ::: ::@: :: :: ::@
+      0 +----------------------------------------------------------------------->GB
+        0                                                                   16.29
 
-    (Keep in mind that Context does index fewer fonts since it
-    considers only the contents of the minimals tree, not the
-    tex live one!)
+    This is the memory usage during a complete database rebuild with
+    the Fontforge libraries. The same action using the new
+    ``getinfo()`` method gives a different picture:
 
-                time (m:s)       peak VmSize (kB)
-            a     1:19              386 018
-            b     0:37              715 797
-            c     2:27            1 017 674
-            d     0:44            1 082 313
+        MB
+    43.37^                                                                   #
+         |                                                            @ @   @#
+         |                                                  @@        @ @   @# :
+         |                                                 @@@ :   @: @ @   @# :
+         |                                          @      @@@ : : @: @ @: :@# :
+         |                            @             @      @@@ : : @: @ @: :@# :
+         |                            @ :        : :@      @@@:::: @::@ @: :@#:: :
+         |               ::    :      @ :  @   : :::@   @ :@@@:::::@::@ @:::@#::::
+         |         :  @  :    :: :   :@:: :@:  :::::@   @ :@@@:::::@::@:@:::@#::::
+         |        :: :@  :  @ ::@:@:::@:: :@:  :::::@: :@ :@@@:::::@::@:@:::@#::::
+         |        :: :@::: :@ ::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         |      :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         |  :::::@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         |  ::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+         | :::: :@::::@::: :@:::@:@: :@::::@::::::::@:::@::@@@:::::@::@:@:::@#::::
+       0 +----------------------------------------------------------------------->GB
+         0                                                                   3.231
 
-    Most of the increase in memory consumption from version 1.x to 2.2+
-    can be attributed to the move from single-pass to a multi-pass
-    approach to building the index: Information is first gathered from
-    all reachable fonts and only afterwards processed, classified and
-    discarded.  Also, there is a good deal of additional stuff kept in
-    the database now: two extra tables for file names and font families
-    have been added, making font lookups more efficient while improving
-    maintainability of the code.
+    FF peaks at around 1.4 GB after 12.5 GB worth of allocations,
+    whereas the Lua implementation arrives at around 45 MB after 3.2 GB
+    total:
+
+             impl           time(B)         total(B)   useful-heap(B) extra-heap(B)
+        fontforge    12,496,407,184    1,421,150,144    1,327,888,638    93,261,506
+              lua     3,263,698,960       45,478,640       37,231,892     8,246,748
+
+    Much of the inefficiency of Fontforge is a direct consequence of
+    having to parse the entire font to extract what essentially boils
+    down to a couple hundred bytes of metadata per font. Since some
+    information like design sizes (oh, Adobe!) is stuffed away in
+    Opentype tables, the vastly more efficient approach of
+    fontloader.info() proves insufficient for indexing. Thus, we ended
+    up using fontloader.open() which causes even the character tables
+    to be parsed, which incidentally are responsible for most of the
+    allocations during that peak of 1.4 GB measured above, along with
+    the encodings:
+
+        20.67% (293,781,048B) 0x6A8F72: SplineCharCreate (splineutil.c:3878)
+        09.82% (139,570,318B) 0x618ACD: _FontViewBaseCreate (fontviewbase.c:84)
+        08.77% (124,634,384B) 0x6A8FB3: SplineCharCreate (splineutil.c:3885)
+        04.53% (64,436,904B) in 80 places, all below massif's threshold (1.00%)
+        02.68% (38,071,520B) 0x64E14E: addKernPair (parsettfatt.c:493)
+        01.04% (14,735,320B) 0x64DE7D: addPairPos (parsettfatt.c:452)
+        39.26% (557,942,484B) 0x64A4E0: PsuedoEncodeUnencoded (parsettf.c:5706)
+
+    What gives? For 2.7 we expect a rougher transition than a year back
+    due to the complete revamp of the OT loading code. Breakage of
+    fragile aspects like font and style names has been anticipated and
+    addressed prior to the 2016 pretest release. In contrast to the
+    earlier approach of letting FF do a complete dump and then harvest
+    identifiers from the output we now have to coordinate with upstream
+    as to which fields are actually needed in order to provide a
+    similarly acceptable name → file lookup. On the bright side, these
+    things are a lot simpler to fix than the rather tedious work of
+    having users update their Luatex binary =)
 
 --doc]]--
 
@@ -53,11 +127,18 @@ local require                  = require
 local tonumber                 = tonumber
 local unpack                   = table.unpack
 
-local fontloaderinfo           = fontloader.info
-local fontloaderclose          = fontloader.close
-local fontloaderopen           = fontloader.open
------ fontloaderto_table       = fontloader.to_table
-local gzipopen                 = gzip.open
+local fonts                    = fonts              or { }
+local fontshandlers            = fonts.handlers     or { }
+local otfhandler               = fonts.handlers.otf or { }
+fonts.handlers                 = fontshandlers
+
+local read_font_file           = otfhandler.readers.loadfont
+local read_font_info           = read_font_file
+local close_font_file          = function () end
+local get_english_names
+
+local gzipload                 = gzip.load
+local gzipsave                 = gzip.save
 local iolines                  = io.lines
 local ioopen                   = io.open
 local iopopen                  = io.popen
@@ -291,8 +372,6 @@ This is a sketch of the luaotfload db:
         prefmodifiers   : string;   // sanitized preferred subfamily (names table 14)
         psname          : string;   // PostScript name
         size            : (false | float * float * float);  // if available, size info from the size table converted from decipoints
-        splainname      : string;   // sanitized version of the “plainname” field
-        splitstyle      : string;   // style information obtained by splitting the full name at the last dash
         subfamily       : string;   // sanitized subfamily (names table 2)
         subfont         : (int | bool);     // integer if font is part of a TrueType collection ("ttc")
         version         : string;   // font version string
@@ -361,44 +440,6 @@ local initialize_namedata = function (formats, created)
     }
 end
 
---[[doc--
-
-    Since Luaotfload does not depend on the lualibs anymore we
-    have to put our own small wrappers for the gzip library in
-    place.
-
-    load_gzipped -- Read and decompress and entire gzipped file.
-    Returns the uncompressed content as a string.
-
---doc]]--
-
-local load_gzipped = function (filename)
-    local gh = gzipopen (filename,"rb")
-    if gh then
-        local data = gh:read "*all"
-        gh:close ()
-        return data
-    end
-end
-
---[[doc--
-
-    save_gzipped -- Compress and write a string to file. The return
-    value is the number of bytes written. Zlib parameters are: best
-    compression and default strategy.
-
---doc]]--
-
-local save_gzipped = function (filename, data)
-    local gh = gzipopen (filename, "wb9")
-    if gh then
-        gh:write (data)
-        local bytes = gh:seek ()
-        gh:close ()
-        return bytes
-    end
-end
-
 --- When loading a lua file we try its binary complement first, which
 --- is assumed to be located at an identical path, carrying the suffix
 --- .luc.
@@ -427,7 +468,7 @@ local load_lua_file = function (path)
 
     if not code then --- probe gzipped file
         foundname = filereplacesuffix (path, "lua.gz")
-        local chunk = load_gzipped (foundname)
+        local chunk = gzipload (foundname)
         if chunk then
             code = load (chunk, "t")
         end
@@ -568,6 +609,12 @@ local italic_synonym = {
     oblique = true,
     slanted = true,
     italic  = true,
+}
+
+local bold_synonym = {
+    bold  = true,
+    black = true,
+    heavy = true,
 }
 
 local style_category = {
@@ -975,7 +1022,6 @@ local lookup_fontname = function (specification, name, style)
         local prefmodifiers = face.prefmodifiers
         local subfamily     = face.subfamily
         if     face.fontname   == name
-            or face.splainname == name
             or face.fullname   == name
             or face.psname     == name
         then
@@ -1261,24 +1307,8 @@ find_closest = function (name, limit)
     return false
 end --- find_closest()
 
---[[doc--
-
-    load_font_file -- Safely open a font file. See
-    <http://www.ntg.nl/pipermail/ntg-context/2013/075885.html>
-    regarding the omission of ``fontloader.close()``.
-
-    TODO --   check if fontloader.info() is ready for prime in 0.78+
-         --   fields /tables needed:
-                    -- names
-                    -- postscriptname
-                    -- validation_state
-                    -- ..
-
---doc]]--
-
 local load_font_file = function (filename, subfont)
-    local rawfont, _msg = fontloaderopen (filename, subfont)
-    --local rawfont, _msg = fontloaderinfo (filename, subfont)
+    local rawfont, _msg = read_font_file (filename, subfont, true)
     if not rawfont then
         logreport ("log", 1, "db", "ERROR: failed to open %s.", filename)
         return
@@ -1288,10 +1318,10 @@ end
 
 --- rawdata -> (int * int * int | bool)
 
-local get_size_info = function (metadata)
-    local design_size         = metadata.design_size
-    local design_range_top    = metadata.design_range_top
-    local design_range_bottom = metadata.design_range_bottom
+local get_size_info = function (rawinfo)
+    local design_size         = rawinfo.design_size
+    local design_range_top    = rawinfo.design_range_top
+    local design_range_bottom = rawinfo.design_range_bottom
 
     local fallback_size = design_size         ~= 0 and design_size
                        or design_range_bottom ~= 0 and design_range_bottom
@@ -1309,12 +1339,15 @@ local get_size_info = function (metadata)
     return false
 end
 
-local get_english_names = function (metadata)
-    local names = metadata.names
-    local english_names
+--[[doc--
+    get_english_names_from_ff -- For legacy Fontforge-style names
+    tables. Extracted from the actual names table, not the font item
+    itself.
+--doc]]--
 
+local get_english_names_from_ff = function (metadata)
+    local names = metadata.names
     if names then
-        --inspect(names)
         for _, raw_namedata in next, names do
             if raw_namedata.lang == "English (US)" then
                 return raw_namedata.names
@@ -1329,19 +1362,79 @@ local get_english_names = function (metadata)
              fullname = metadata.fullname, }
 end
 
+--[[doc--
+    map_enlish_names -- Names-table for Lua fontloader objects. This
+    may vanish eventually once we ditch Fontforge completely. Only
+    subset of entries of that table are actually relevant so we’ll
+    stick to that part.
+--doc]]--
+
+local names_items = {
+    compatfull       = "compatiblefullname",
+    fullname         = "fullname",
+    postscriptname   = "postscriptname",
+    preffamily       = "typographicfamily",
+    prefmodifiers    = "typographicsubfamily",
+    family           = "family",
+    subfamily        = "subfamily",
+}
+
+local map_english_names = function (metadata)
+    local namesource
+    local platformnames = metadata.platformnames
+    --[[--
+        Hans added the “platformnames” option for us to access parts of
+        the original name table. The names are unreliable and
+        completely disorganized, sure, but the Windows variant of the
+        field often contains the superior information. Case in point:
+
+          ["platformnames"]={
+           ["macintosh"]={
+            ["compatiblefullname"]="Garamond Premr Pro Smbd It",
+            ["family"]="Garamond Premier Pro",
+            ["fullname"]="Garamond Premier Pro Semibold Italic",
+            ["postscriptname"]="GaramondPremrPro-SmbdIt",
+            ["subfamily"]="Semibold Italic",
+           },
+           ["windows"]={
+            ["family"]="Garamond Premr Pro Smbd",
+            ["fullname"]="GaramondPremrPro-SmbdIt",
+            ["postscriptname"]="GaramondPremrPro-SmbdIt",
+            ["subfamily"]="Italic",
+            ["typographicfamily"]="Garamond Premier Pro",
+            ["typographicsubfamily"]="Semibold Italic",
+           },
+          },
+
+        The essential bit is contained as “typographicfamily” (which we
+        call for historical reasons the “preferred family”) and the
+        “subfamily”. Only  Why this is the case, only Adobe knows for
+        certain.
+    --]]--
+    if platformnames then
+        --inspect(metadata)
+        --namesource = platformnames.macintosh or platformnames.windows
+        namesource = platformnames.windows or platformnames.macintosh
+    end
+    namesource = namesource or metadata
+    local nameinfo = { }
+    for ours, theirs in next, names_items do
+        nameinfo [ours] = namesource [theirs]
+    end
+    return nameinfo
+end
+
+get_english_names = map_english_names
+
 --[[--
-    In case of broken PS names we set some dummies. However, we cannot
-    directly modify the font data as returned by fontloader.open() because
-    it is a userdata object.
+    In case of broken PS names we set some dummies.
 
     For this reason we copy what is necessary whilst keeping the table
     structure the same as in the tfmdata.
 --]]--
 local get_raw_info = function (metadata, basename)
-    local fullname
     local fontname = metadata.fontname
     local fullname = metadata.fullname
-    local psname
 
     local validation_state = metadata.validation_state
     if (validation_state and tablecontains (validation_state, "bad_ps_fontname"))
@@ -1364,32 +1457,31 @@ local get_raw_info = function (metadata, basename)
         fullname            = fullname,
         italicangle         = metadata.italicangle,
         names               = metadata.names,
-        pfminfo             = metadata.pfminfo,
         units_per_em        = metadata.units_per_em,
         version             = metadata.version,
-        design_size         = metadata.design_size,
-        design_range_top    = metadata.design_range_top,
-        design_range_bottom = metadata.design_range_bottom,
+        design_size         = metadata.design_size         or metadata.designsize,
+        design_range_top    = metadata.design_range_top    or metadata.maxsize,
+        design_range_bottom = metadata.design_range_bottom or metadata.minsize,
     }
 end
 
 local organize_namedata = function (rawinfo,
-                                    english_names,
+                                    nametable,
                                     basename,
                                     info)
-    local default_name = english_names.compatfull
-                      or english_names.fullname
-                      or english_names.postscriptname
+    local default_name = nametable.compatfull
+                      or nametable.fullname
+                      or nametable.postscriptname
                       or rawinfo.fullname
                       or rawinfo.fontname
                       or info.fullname
                       or info.fontname
-    local default_family = english_names.preffamily
-                        or english_names.family
+    local default_family = nametable.preffamily
+                        or nametable.family
                         or rawinfo.familyname
                         or info.familyname
---    local default_modifier = english_names.prefmodifiers
---                          or english_names.subfamily
+--    local default_modifier = nametable.prefmodifiers
+--                          or nametable.subfamily
     local fontnames = {
         --- see
         --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
@@ -1404,19 +1496,19 @@ local organize_namedata = function (rawinfo,
             --- non-abbreviated fashion, for most fonts at any rate.
             --- However, in some fonts (e.g. CMU) all three fields are
             --- identical.
-            fullname      = --[[ 18 ]] english_names.compatfull
-                         or --[[  4 ]] english_names.fullname
+            fullname      = --[[ 18 ]] nametable.compatfull
+                         or --[[  4 ]] nametable.fullname
                          or default_name,
             --- we keep both the “preferred family” and the “family”
             --- values around since both are valid but can turn out
             --- quite differently, e.g. with Latin Modern:
             ---     preffamily: “Latin Modern Sans”,
             ---     family:     “LM Sans 10”
-            preffamily    = --[[ 16 ]] english_names.preffamilyname,
-            family        = --[[  1 ]] english_names.family or default_family,
-            prefmodifiers = --[[ 17 ]] english_names.prefmodifiers,
-            subfamily     = --[[  2 ]] english_names.subfamily,
-            psname        = --[[  6 ]] english_names.postscriptname,
+            preffamily    = --[[ 16 ]] nametable.preffamilyname,
+            family        = --[[  1 ]] nametable.family or default_family,
+            prefmodifiers = --[[ 17 ]] nametable.prefmodifiers,
+            subfamily     = --[[  2 ]] nametable.subfamily or rawinfo.subfamilyname,
+            psname        = --[[  6 ]] nametable.postscriptname,
         },
 
         metadata = {
@@ -1468,22 +1560,20 @@ local split_fontname = function (fontname)
     end
 end
 
-local organize_styledata = function (fontname,
-                                     metadata,
-                                     english_names,
-                                     info)
-    local pfminfo   = metadata.pfminfo or { }
-    local names     = metadata.names
+local organize_styledata = function (metadata, rawinfo, info)
+    local pfminfo   = metadata.pfminfo
+    local names     = rawinfo.names
 
     return {
     --- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
-        size            = get_size_info (metadata),
-        weight          = pfminfo.weight or 400,
-        split           = split_fontname (fontname),
-        width           = pfminfo.width,
+        size            = get_size_info (rawinfo),
+        pfmweight       = pfminfo and pfminfo.weight or metadata.pfmweight or 400,
+        weight          = rawinfo.weight or metadata.weight or "unspecified",
+        split           = split_fontname (rawinfo.fontname),
+        width           = pfminfo and pfminfo.width or metadata.pfmwidth,
         italicangle     = metadata.italicangle,
     --- this is for querying, see www.ntg.nl/maps/40/07.pdf for details
-        units_per_em    = metadata.units_per_em,
+        units_per_em    = metadata.units_per_em or metadata.units,
         version         = metadata.version,
     }
 end
@@ -1508,19 +1598,14 @@ ot_fullinfo = function (filename,
         return nil
     end
 
-    local rawinfo = get_raw_info (metadata, basename)
-    --- Closing the file manually is a tad faster and more memory
-    --- efficient than having it closed by the gc
-    fontloaderclose (metadata)
-
-    local english_names = get_english_names (rawinfo)
+    local rawinfo       = get_raw_info (metadata, basename)
+    local nametable     = get_english_names (metadata)
     local namedata      = organize_namedata (rawinfo,
-                                             english_names,
+                                             nametable,
                                              basename,
                                              info)
-    local style         = organize_styledata (namedata.fontname,
+    local style         = organize_styledata (metadata,
                                               rawinfo,
-                                              english_names,
                                               info)
 
     local res = {
@@ -1533,6 +1618,7 @@ ot_fullinfo = function (filename,
         style           = style,
         version         = rawinfo.version,
     }
+    close_font_file (metadata) --> FF only
     return res
 end
 
@@ -1555,15 +1641,13 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
     local fullname      = metadata.fullname
     local familyname    = metadata.familyname
     local italicangle   = metadata.italicangle
-    local splitstyle    = split_fontname (fontname)
     local style         = ""
     local weight
 
     sanitized = sanitize_fontnames ({
         fontname        = fontname,
         psname          = fullname,
-        pfullname       = fullname,
-        metafamily      = family,
+        metafamily      = familyname,
         familyname      = familyname,
         weight          = metadata.weight, --- string identifier
         prefmodifiers   = style,
@@ -1589,13 +1673,11 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
         fontname         = sanitized.fontname,
         familyname       = sanitized.familyname,
         plainname        = fullname,
-        splainname       = sanitized.fullname,
         psname           = sanitized.fontname,
         version          = metadata.version,
         size             = false,
-        splitstyle       = splitstyle,
         fontstyle_name   = style ~= "" and style or weight,
-        weight           = metadata.pfminfo.weight or 400,
+        weight           = metadata.pfminfo and pfminfo.weight or 400,
         italicangle      = italicangle,
     }
 end
@@ -1666,15 +1748,7 @@ local insert_fullinfo = function (fullname,
                                   targetentrystatus,
                                   info)
 
-    local subfont
-    if n_font ~= false then
-        subfont = n_font - 1
-    else
-        subfont = false
-        n_font  = 1
-    end
-
-    local fullinfo = loader (fullname, subfont,
+    local fullinfo = loader (fullname, n_font,
                              location, basename,
                              format, info)
 
@@ -1759,7 +1833,7 @@ local read_font_names = function (fullname,
 
     --- 4) get basic info, abort if fontloader can’t read it
 
-    local info = fontloaderinfo (fullname)
+    local info = read_font_file (fullname)
 
     if not info then
         logreport ("log", 1, "db",
@@ -2518,23 +2592,27 @@ generate_filedata = function (mappings)
 end
 
 local pick_style
+local pick_fallback_style
 local check_regular
 
 do
-    local splitfontname = lpeg.splitat "-"
-
     local choose_exact = function (field)
         --- only clean matches, without guessing
         if italic_synonym [field] then
             return "i"
         end
 
-        if field == "bold" then
+        if stringsub (field, 1, 10) == "bolditalic"
+        or stringsub (field, 1, 11) == "boldoblique" then
+            return "bi"
+        end
+
+        if stringsub (field, 1, 4) == "bold" then
             return "b"
         end
 
-        if field == "bolditalic" or field == "boldoblique" then
-            return "bi"
+        if stringsub (field, 1, 6) == "italic" then
+            return "i"
         end
 
         return false
@@ -2542,10 +2620,9 @@ do
 
     pick_style = function (fontstyle_name,
                            prefmodifiers,
-                           subfamily,
-                           splitstyle)
+                           subfamily)
         local style
-        if fontstyle_name then
+        if fontstyle_name --[[ff only]] then
             style = choose_exact (fontstyle_name)
         end
         if not style then
@@ -2558,9 +2635,9 @@ do
         return style
     end
 
-    pick_fallback_style = function (italicangle, weight)
+    pick_fallback_style = function (italicangle, weight, pfmweight)
         --- more aggressive, but only to determine bold faces
-        if weight > 500 then --- bold spectrum matches
+        if pfmweight > 500 or bold_synonym [weight] then --- bold spectrum matches
             if italicangle == 0 then
                 return tostring (weight)
             else
@@ -2576,23 +2653,29 @@ do
     check_regular = function (fontstyle_name,
                               prefmodifiers,
                               subfamily,
-                              splitstyle,
                               italicangle,
-                              weight)
+                              weight,
+                              pfmweight)
+        local plausible_weight
+        --[[--
+          This filters out undesirable candidates that specify their
+          prefmodifiers or subfamily as “regular” but are actually of
+          “semibold” or other weight—another drawback of the
+          oversimplifying classification into only three styles (r, i,
+          b, bi).
+        --]]--
 
-        if fontstyle_name then
-            return regular_synonym [fontstyle_name]
-        elseif prefmodifiers then
-            return regular_synonym [prefmodifiers]
-        elseif subfamily then
-            return regular_synonym [subfamily]
-        elseif splitstyle then
-            return regular_synonym [splitstyle]
-        elseif italicangle == 0 and weight == 400 then
-            return true
+        if italicangle == 0 then
+            if     pfmweight == 400                    then plausible_weight = true
+            elseif weight and regular_synonym [weight] then plausible_weight = true end
         end
 
-        return nil
+        if plausible_weight then
+            return fontstyle_name and regular_synonym [fontstyle_name]
+                or prefmodifiers  and regular_synonym [prefmodifiers]
+                or subfamily      and regular_synonym [subfamily]
+        end
+        return false
     end
 end
 
@@ -2615,14 +2698,8 @@ local pull_values = function (entry)
     entry.psname            = english.psname
     entry.fontname          = info.fontname or metadata.fontname
     entry.fullname          = english.fullname or info.fullname
-    entry.splainname        = metadata.fullname
     entry.prefmodifiers     = english.prefmodifiers
-    local metafamily        = metadata.familyname
-    local familyname        = english.preffamily or english.family
-    entry.familyname        = familyname
-    if familyname ~= metafamily then
-        entry.metafamily    = metadata.familyname
-    end
+    entry.familyname        = metadata.familyname or english.preffamily or english.family
     entry.fontstyle_name    = sanitized.fontstyle_name
     entry.plainname         = names.fullname
     entry.subfamily         = english.subfamily
@@ -2630,8 +2707,8 @@ local pull_values = function (entry)
     --- pull style info ...
     entry.italicangle       = style.italicangle
     entry.size              = style.size
-    entry.splitstyle        = style.split
     entry.weight            = style.weight
+    entry.pfmweight         = style.pfmweight
 
     if config.luaotfload.db.strip == true then
         entry.file  = nil
@@ -2649,8 +2726,6 @@ local add_family = function (name, subtable, modifier, entry)
         familytable = { }
         subtable [name] = familytable
     end
-
-    local size = entry.size
 
     familytable [#familytable + 1] = {
         index    = entry.index,
@@ -2690,56 +2765,39 @@ collect_families = function (mappings)
         local subtable          = get_subtable (families, entry)
 
         local familyname        = entry.familyname
-        local metafamily        = entry.metafamily
         local fontstyle_name    = entry.fontstyle_name
         local prefmodifiers     = entry.prefmodifiers
         local subfamily         = entry.subfamily
 
         local weight            = entry.weight
+        local pfmweight         = entry.pfmweight
         local italicangle       = entry.italicangle
-        local splitstyle        = entry.splitstyle
 
         local modifier          = pick_style (fontstyle_name,
                                               prefmodifiers,
-                                              subfamily,
-                                              splitstyle)
+                                              subfamily)
 
         if not modifier then --- regular, exact only
             modifier = check_regular (fontstyle_name,
                                       prefmodifiers,
                                       subfamily,
-                                      splitstyle,
                                       italicangle,
-                                      weight)
+                                      weight,
+                                      pfmweight)
         end
+        --if familyname == "garamondpremierpro" then
+        --print(entry.fullname, "reg?",modifier, "->",fontstyle_name,
+                              --prefmodifiers,
+                              --subfamily,
+                              --italicangle,
+                              --pfmweight,
+                              --weight)
+                              --end
 
         if modifier then
             add_family (familyname, subtable, modifier, entry)
-            --- registering the metafamilies is unreliable within the
-            --- same table as identifiers might interfere with an
-            --- unmarked style that lacks a metafamily, e.g.
-            ---
-            ---         iwona condensed regular ->
-            ---                     family:     iwonacond
-            ---                     metafamily: iwona
-            ---         iwona regular ->
-            ---                     family:     iwona
-            ---                     metafamily: ø
-            ---
-            --- Both would be registered as under the same family,
-            --- i.e. “iwona”, and depending on the loading order
-            --- the query “name:iwona” can resolve to the condensed
-            --- version instead of the actual unmarked one. The only
-            --- way around this would be to introduce a separate
-            --- table for metafamilies and do fallback queries on it.
-            --- At the moment this is not pressing enough to justify
-            --- further increasing the index size, maybe if need
-            --- arises from the user side.
---            if metafamily and metafamily ~= familyname then
---                add_family (metafamily, subtable, modifier, entry)
---            end
-        elseif weight > 500 then -- in bold spectrum
-            modifier = pick_fallback_style (italicangle, weight)
+        elseif pfmweight > 500 then -- in bold spectrum
+            modifier = pick_fallback_style (italicangle, weight, pfmweight)
             if modifier then
                 add_family (familyname, subtable, modifier, entry)
             end
@@ -2815,7 +2873,7 @@ group_modifiers = function (mappings, families)
                                 if modifier == info_modifier then
                                     local index  = info.index
                                     local entry  = mappings [index]
-                                    local weight = entry.weight
+                                    local weight = entry.pfmweight
                                     local diff   = weight < 700 and 700 - weight or weight - 700
                                     if diff < minimum then
                                         minimum = diff
@@ -2834,7 +2892,7 @@ group_modifiers = function (mappings, families)
                                         local index  = info.index
                                         local entry  = mappings [index]
                                         local size   = entry.size
-                                        if entry.weight == closest then
+                                        if entry.pfmweight == closest then
                                             if size then
                                                 entries [#entries + 1] =  {
                                                     size [1],
@@ -2897,7 +2955,7 @@ local collect_font_filenames = function ()
     local bisect    = config.luaotfload.misc.bisect
     local max_fonts = config.luaotfload.db.max_fonts --- XXX revisit for lua 5.3 wrt integers
 
-    tableappend (filenames, collect_font_filenames_texmf  ())
+    --tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
     if config.luaotfload.db.scan_local == true then
         tableappend (filenames, collect_font_filenames_local  ())
@@ -3298,7 +3356,7 @@ save_names = function (currentnames)
         local gzname = luaname .. ".gz"
         if config.luaotfload.db.compress then
             local serialized = tableserialize (currentnames, true)
-            save_gzipped (gzname, serialized)
+            gzipsave (gzname, serialized)
             caches.compile (currentnames, "", lucname)
         else
             tabletofile (luaname, currentnames, true)
@@ -3483,6 +3541,21 @@ local show_cache = function ( )
     return true
 end
 
+local use_fontforge = function (val)
+    if val == true then
+        local fontloader  = fontloader
+        read_font_info    = fontloader.info
+        read_font_file    = fontloader.open
+        close_font_file   = fontloader.close
+        get_english_names = get_english_names_from_ff
+    else
+        read_font_file    = otfhandler.readers.getinfo
+        read_font_info    = read_font_file
+        close_font_file   = function () end
+        get_english_names = map_english_names
+    end
+end
+
 -----------------------------------------------------------------------
 --- export functionality to the namespace “fonts.names”
 -----------------------------------------------------------------------
@@ -3513,7 +3586,8 @@ local export = {
     erase_cache                 = erase_cache,
     show_cache                  = show_cache,
     find_closest                = find_closest,
-    -- for testing purpose
+    --- transitionary
+    use_fontforge               = use_fontforge,
 }
 
 return {

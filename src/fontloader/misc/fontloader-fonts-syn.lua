@@ -36,15 +36,14 @@ end
 local fonts = fonts
 fonts.names = fonts.names or { }
 
-fonts.names.version    = 1.001 -- not the same as in context but matches mtx-fonts --simple
-fonts.names.basename   = "luatex-fonts-names"
-fonts.names.new_to_old = { }
-fonts.names.old_to_new = { }
-fonts.names.cache      = containers.define("fonts","data",fonts.names.version,true)
+fonts.names.version  = 1.001 -- not the same as in context but matches mtx-fonts --simple
+fonts.names.basename = "luatex-fonts-names"
+fonts.names.cache    = containers.define("fonts","data",fonts.names.version,true)
 
-local data, loaded = nil, false
+local data           = nil
+local loaded         = false
 
-local fileformats = { "lua", "tex", "other text files" }
+local fileformats    = { "lua", "tex", "other text files" }
 
 function fonts.names.reportmissingbase()
     texio.write("<missing font database, run: mtxrun --script fonts --reload --simple>")

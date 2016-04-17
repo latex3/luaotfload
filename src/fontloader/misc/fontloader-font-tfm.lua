@@ -34,6 +34,7 @@ local registertfmfeature       = tfmfeatures.register
 constructors.resolvevirtualtoo = false -- wil be set in font-ctx.lua
 
 fonts.formats.tfm              = "type1" -- we need to have at least a value here
+fonts.formats.ofm              = "type1" -- we need to have at least a value here
 
 --[[ldx--
 <p>The next function encapsulates the standard <l n='tfm'/> loader as
@@ -196,3 +197,5 @@ function readers.tfm(specification)
     end
     return check_tfm(specification,fullname)
 end
+
+readers.ofm = readers.tfm

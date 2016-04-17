@@ -4,16 +4,17 @@
 --        USAGE:  ./mkcharacters.lua 
 --  DESCRIPTION:  import parts of char-def.lua
 -- REQUIREMENTS:  lua, ConTeXt, the lualibs package
---       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
+--       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
 -----------------------------------------------------------------------
--- we create a stripped-down version of char-def.lua
+-- We create a stripped-down version of char-def.lua, suitable for use
+-- with the generic font loader.
 -----------------------------------------------------------------------
 
 -----------------------------------------------------------------------
 --                              config
 -----------------------------------------------------------------------
-local charfile      = "./build/luaotfload-characters.lua"
-local chardef       = arg[1]
+local mkivpath      = arg[1]
+local charfile      = arg[2] or "./build/luaotfload-characters.lua"
 
 ---  for every code point char-def.lua provides a set of fields. they
 ---  are:
@@ -54,29 +55,36 @@ local import = {
 
 kpse.set_program_name"luatex"
 
-for _, lib in next, { "lualibs-lua.lua",
-                      "lualibs-lpeg.lua",
-                      "lualibs-table.lua", } do
-  local found = assert(kpse.find_file(lib, "lua"),
-                       "Could not locate " .. lib .. ".\n"
-                       .. "Please install the lualibs package.")
-  require(found)
+require "lualibs"
+
+local chardef
+local charini
+
+if not mkivpath then
+  mkivpath = assert (kpse.expand_path
+                      "~/context/tex/texmf-context/tex/context/base/mkiv/",
+                     "Failed to locate ConTeXt.")
 end
 
-if not chardef then
-  chardef = kpse.expand_path("~/context/tex/texmf-context/tex/context/base/")
-          .. "/char-def.lua"
-end
+chardef = mkivpath .. "/char-def.lua"
+charini = mkivpath .. "/char-ini.lua"
 
+--- we could grab the files from contextgarden but as Context is part
+--- of TL it’s not worth bothering
 if not (chardef and lfs.isfile(chardef)) then
-  --- we could grab the file from contextgarden but as Context is part
-  --- of TL it’s not worth bothering 
   chardef = assert(kpse.find_file("char-def.lua", "lua"),
-                   "Could not find ConTeXt.")
+                   "Failed to locate file char-def.lua from ConTeXt.")
+end
+
+if not (charini and lfs.isfile(charini)) then
+  charini = assert(kpse.find_file("char-ini.lua", "lua"),
+                   "Failed to locate file char-ini.lua from ConTeXt.")
 end
 
 io.write(string.format("extracting data from char-def.lua at %s\n",
                        chardef))
+io.write(string.format("loading code from char-ini.lua at %s\n",
+                       charini))
 
 -----------------------------------------------------------------------
 --                           functionality
@@ -127,6 +135,60 @@ local extract_fields = function (data)
   return extract_fields_indeed(data, {}, nil)
 end
 
+--[[ extract_classifiers : from luatex-basics-prepare.tex ]]
+
+local extract_classifiers = function (chardata)
+  dofile (charini)
+  local s_init = 1    local s_rphf =  7
+  local s_medi = 2    local s_half =  8
+  local s_fina = 3    local s_pref =  9
+  local s_isol = 4    local s_blwf = 10
+  local s_mark = 5    local s_pstf = 11
+  local s_rest = 6
+
+  local mappers = {
+    l = s_init,  -- left
+    d = s_medi,  -- double
+    c = s_medi,  -- joiner
+    r = s_fina,  -- right
+    u = s_isol,  -- nonjoiner
+  }
+
+  local first_arabic,  last_arabic  = characters.blockrange("arabic")
+  local first_syriac,  last_syriac  = characters.blockrange("syriac")
+  local first_mandiac, last_mandiac = characters.blockrange("mandiac")
+  local first_nko,     last_nko     = characters.blockrange("nko")
+
+  local classifiers = { }
+
+  for k, c in next, chardata do
+    if k > 0 then
+      local c = chardata[k]
+      if c then
+        local arabic = c.arabic
+        if arabic then
+          classifiers[k] = mappers[arabic]
+          elseif k >= first_arabic  and k <= last_arabic  or k >= first_syriac  and k <= last_syriac  or
+            k >= first_mandiac and k <= last_mandiac or k >= first_nko     and k <= last_nko     then
+            if c.category == "mn" then
+              classifiers[k] = s_mark
+            else
+              classifiers[k] = s_rest
+            end
+          end
+        end
+      end
+    end
+    return classifiers
+  end
+
+local amend_table_fields = function (data, classifiers)
+  --- installed by luatex-basics-prepare.tex
+  data.characters  = { }
+  data.classifiers = classifiers
+  return data
+end
+
 local writedata = function (data)
   local outchan = io.open(charfile, "w")
   if not outchan then
@@ -140,8 +202,10 @@ end
 
 do
   local chardata    = get_characters()
+  local classifiers = extract_classifiers(chardata)
   local stripped    = extract_fields(chardata)
-  local serialized  = table.serialize(stripped, true, {
+  local amended     = amend_table_fields(stripped, classifiers)
+  local serialized  = table.serialize(amended, true, {
     compact   = true,
     noquotes  = true,
     hexify    = true, --- for consistency with char-def

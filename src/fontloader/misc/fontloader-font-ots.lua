@@ -756,8 +756,14 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature)
                 -- kind of weird
                 break
             elseif id == disc_code then
-                lastdisc = current
-                current  = getnext(current)
+                if getfield(current,"replace") then
+                    -- this only happens when we didn't normalize ... in a future version we will
+                    -- assume normalization of disc nodes
+                    break
+                else
+                    lastdisc=current
+                    current=getnext(current)
+                end
             else
                 break
             end

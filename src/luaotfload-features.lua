@@ -36,11 +36,10 @@ local config            = config or { luaotfload = { run = { } } }
 local as_script         = true
 local normalize         = function () end
 
-if config.luaotfload.run.live == true then
+if config.luaotfload.run.live ~= false then
     normalize = handlers.otf.features.normalize
     as_script = false
 end
-
 
 --HH A bit of tuning for definitions.
 

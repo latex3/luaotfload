@@ -2955,7 +2955,7 @@ local collect_font_filenames = function ()
     local bisect    = config.luaotfload.misc.bisect
     local max_fonts = config.luaotfload.db.max_fonts --- XXX revisit for lua 5.3 wrt integers
 
-    --tableappend (filenames, collect_font_filenames_texmf  ())
+    tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
     if config.luaotfload.db.scan_local == true then
         tableappend (filenames, collect_font_filenames_local  ())

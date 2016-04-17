@@ -1246,6 +1246,10 @@ local handle_request = function (specification)
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.
     specification.features.normal = normalize (request.features)
+    local subfont = tonumber (specification.sub)
+    if subfont and subfont >= 0 then
+        specification.sub = subfont + 1
+    end
     return specification
 end
 

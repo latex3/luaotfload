@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 04/17/16 11:56:26
+-- merge date  : 04/18/16 18:53:40
 
 do -- begin closure to overcome local limits and interference
 
@@ -13503,7 +13503,7 @@ if not modules then modules={} end modules ['font-oup']={
 local next,type=next,type
 local P,R,S=lpeg.P,lpeg.R,lpeg.S
 local lpegmatch=lpeg.match
-local insert,remove,copy=table.insert,table.remove,table.copy
+local insert,remove,copy,unpack=table.insert,table.remove,table.copy,table.unpack
 local formatters=string.formatters
 local sortedkeys=table.sortedkeys
 local sortedhash=table.sortedhash
@@ -14169,7 +14169,6 @@ local function stripredundant(fontdata)
 end
 function readers.getcomponents(fontdata) 
   local resources=fontdata.resources
-  local descriptions=fontdata.descriptions
   if resources then
     local sequences=resources.sequences
     if sequences then
@@ -14210,6 +14209,7 @@ function readers.getcomponents(fontdata)
               local vi=v[i]
               if vi==k then
                 collected[k]=nil
+                break
               else
                 local c=collected[vi]
                 if c then
@@ -14217,7 +14217,7 @@ function readers.getcomponents(fontdata)
                   local t={}
                   local n=i-1
                   for j=1,n do
-                    t[j]=t[j]
+                    t[j]=v[j]
                   end
                   for j=1,#c do
                     n=n+1
@@ -14225,7 +14225,7 @@ function readers.getcomponents(fontdata)
                   end
                   for j=i+1,#v do
                     n=n+1
-                    t[n]=t[j]
+                    t[n]=v[j]
                   end
                   collected[k]=t
                   break
@@ -18678,6 +18678,9 @@ function handlers.gsub_multiple(head,start,dataset,sequence,multiple)
 end
 function handlers.gsub_ligature(head,start,dataset,sequence,ligature)
   local current=getnext(start)
+  if not current then
+    return head,start,false,nil
+  end
   local stop=nil
   local startchar=getchar(start)
   if marks[startchar] then
@@ -18736,6 +18739,24 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature)
       elseif char==false then
         break
       elseif id==disc_code then
+        local replace=getfield(current,"replace")
+        if replace then
+          while replace do
+            local char,id=ischar(replace,currentfont)
+            if char then
+              local lg=ligature[char] 
+              if lg then
+                ligature=lg
+                replace=getnext(replace)
+              else
+                return head,start,false,false
+              end
+            else
+              return head,start,false,false
+            end
+          end
+          stop=current
+        end
         lastdisc=current
         current=getnext(current)
       else
@@ -20539,7 +20560,7 @@ local function comprun(disc,c_run,...)
   if renewed then
     setdisc(disc,pre,post,replace)
   end
-  return getnext(disc),done
+  return getnext(disc),renewed
 end
 local function testrun(disc,t_run,c_run,...)
   if trace_testruns then
@@ -20605,8 +20626,9 @@ end
 local nesting=0
 local function c_run_single(head,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
   local done=false
-  local start=sweephead[head]
-  if start then
+  local sweep=sweephead[head]
+  if sweep then
+    start=sweep
     sweephead[head]=nil
   else
     start=head
@@ -20631,6 +20653,8 @@ local function c_run_single(head,font,attr,lookupcache,step,dataset,sequence,rlm
         start=getnext(start)
       end
     elseif char==false then
+      return head,done
+    elseif sweep then
       return head,done
     else
       start=getnext(start)
@@ -20696,8 +20720,9 @@ local function k_run_single(sub,injection,last,font,attr,lookupcache,step,datase
 end
 local function c_run_multiple(head,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
   local done=false
-  local start=sweephead[head]
-  if start then
+  local sweep=sweephead[head]
+  if sweep then
+    start=sweep
     sweephead[head]=nil
   else
     start=head
@@ -20733,6 +20758,8 @@ local function c_run_multiple(head,font,attr,steps,nofsteps,dataset,sequence,rlm
         start=getnext(start)
       end
     elseif char==false then
+      return head,done
+    elseif sweep then
       return head,done
     else
       start=getnext(start)
@@ -23867,6 +23894,7 @@ local nodes=nodes
 local nuts=nodes.nuts 
 local traverse_id=nuts.traverse_id
 local remove_node=nuts.remove
+local free_node=nuts.free
 local glyph_code=nodes.nodecodes.glyph
 local disc_code=nodes.nodecodes.disc
 local tonode=nuts.tonode
@@ -23874,11 +23902,13 @@ local tonut=nuts.tonut
 local getfont=nuts.getfont
 local getchar=nuts.getchar
 local getid=nuts.getid
+local getboth=nuts.getboth
 local getprev=nuts.getprev
 local getnext=nuts.getnext
 local getdisc=nuts.getdisc
 local setchar=nuts.setchar
 local setlink=nuts.setlink
+local setprev=nuts.setprev
 local n_ligaturing=node.ligaturing
 local n_kerning=node.kerning
 local ligaturing=nuts.ligaturing
@@ -23968,7 +23998,26 @@ function nodes.handlers.nodepass(head)
     end
     if redundant then
       for i=1,#redundant do
-        remove_node(nuthead,redundant[i],true)
+        local r=redundant[i]
+        local p,n=getboth(r)
+        if r==nuthead then
+          nuthead=n
+          setprev(n)
+        else
+          setlink(p,n)
+        end
+        if b>0 then
+          for i=1,b do
+            local bi=basefonts[i]
+            if r==bi[1] then
+              bi[1]=n
+            end
+            if r==bi[2] then
+              bi[2]=n
+            end
+          end
+        end
+        free_node(r)
       end
     end
     for d in traverse_id(disc_code,nuthead) do

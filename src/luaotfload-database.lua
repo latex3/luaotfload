@@ -1842,7 +1842,7 @@ local read_font_names = function (fullname,
 
     --- 5) check for subfonts and process each of them
 
-    if type (info) == "table" and #info > 1 then --- ttc
+    if type (info) == "table" and #info >= 1 then --- ttc
 
         local success = false --- true if at least one subfont got read
 

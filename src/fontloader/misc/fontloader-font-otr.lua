@@ -2167,7 +2167,7 @@ function readers.getinfo(filename,specification) -- string, nil|number|table
                 info[i] = getinfo(fontdata,i,platformnames,rawfamilynames)
             end
             return info
-        elseif subfont > 1 and subfont <= #subfonts then
+        elseif subfont >= 1 and subfont <= #subfonts then
             return getinfo(fontdata,subfont,platformnames,rawfamilynames)
         else
             return {

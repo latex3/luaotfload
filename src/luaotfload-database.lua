@@ -1437,14 +1437,12 @@ local get_raw_info = function (metadata, basename)
     local fullname = metadata.fullname
 
     local validation_state = metadata.validation_state
-    if (validation_state and tablecontains (validation_state, "bad_ps_fontname"))
-        or not fontname
-    then
+    if not fontname or not fullname then
         --- Broken names table, e.g. avkv.ttf with UTF-16 strings;
         --- we put some dummies in place like the fontloader
         --- (font-otf.lua) does.
         logreport ("both", 3, "db",
-                   "%s has invalid postscript font names, using dummies.",
+                   "invalid names table of font %s, using dummies.",
                    basename)
         fontname = "bad-fontname-" .. basename
         fullname = "bad-fullname-" .. basename

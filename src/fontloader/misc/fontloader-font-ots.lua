@@ -696,6 +696,9 @@ end
 
 function handlers.gsub_ligature(head,start,dataset,sequence,ligature)
     local current   = getnext(start)
+    if not current then
+        return head, start, false, nil
+    end
     local stop      = nil
     local startchar = getchar(start)
     if marks[startchar] then
@@ -756,6 +759,28 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature)
                 -- kind of weird
                 break
             elseif id == disc_code then
+                -- tricky .. we also need to do pre here
+                local replace = getfield(current,"replace")
+                if replace then
+                    -- of{f-}{}{f}e  o{f-}{}{f}fe  o{-}{}{ff}e (oe and ff ligature)
+                    -- we can end up here when we have a start run .. testruns start at a disc but
+                    -- so here we have the other case: char + disc
+                    while replace do
+                        local char, id = ischar(replace,currentfont)
+                        if char then
+                            local lg = ligature[char] -- can there be multiple in a row? maybe in a bad font
+                            if lg then
+                                ligature = lg
+                                replace  = getnext(replace)
+                            else
+                                return head, start, false, false
+                            end
+                        else
+                            return head, start, false, false
+                        end
+                    end
+                    stop = current
+                end
                 lastdisc = current
                 current  = getnext(current)
             else
@@ -1281,6 +1306,7 @@ function chainprocs.gsub_ligature(head,start,stop,dataset,sequence,currentlookup
         local nofreplacements = 1
         local skipmark        = currentlookup.flags[1] -- sequence.flags?
         while current do
+            -- todo: ischar ... can there really be disc nodes here?
             local id = getid(current)
             if id == disc_code then
                 if not discfound then
@@ -2755,6 +2781,8 @@ local function kernrun(disc,k_run,font,attr,...)
         next = false
     end
     --
+    -- we need to get rid of this nest mess some day .. has to be done otherwise
+    --
     if pre then
         if k_run(pre,"injections",nil,font,attr,...) then
             done = true
@@ -2762,7 +2790,7 @@ local function kernrun(disc,k_run,font,attr,...)
         if prev then
             local nest = getprev(pre)
             setlink(prev,pre)
-            if k_run(prevmarks,"preinjections",pre,font,attr,...) then -- getnext(pre))
+            if k_run(prevmarks,"preinjections",pre,font,attr,...) then -- or prev?
                 done = true
             end
             setprev(pre,nest)
@@ -2860,7 +2888,7 @@ local function comprun(disc,c_run,...)
         setdisc(disc,pre,post,replace)
     end
     --
-    return getnext(disc), done
+    return getnext(disc), renewed
 end
 
 local function testrun(disc,t_run,c_run,...)
@@ -3000,8 +3028,9 @@ local nesting = 0
 
 local function c_run_single(head,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
     local done  = false
-    local start = sweephead[head]
-    if start then
+    local sweep = sweephead[head]
+    if sweep then
+        start = sweep
         sweephead[head] = nil
     else
         start = head
@@ -3027,8 +3056,11 @@ local function c_run_single(head,font,attr,lookupcache,step,dataset,sequence,rlm
             end
         elseif char == false then
             return head, done
+        elseif sweep then
+            -- else we loose the rest
+            return head, done
         else
-            -- weird
+            -- in disc component
             start = getnext(start)
         end
     end
@@ -3113,8 +3145,9 @@ end
 
 local function c_run_multiple(head,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
     local done  = false
-    local start = sweephead[head]
-    if start then
+    local sweep = sweephead[head]
+    if sweep then
+        start = sweep
         sweephead[head] = nil
     else
         start = head
@@ -3154,8 +3187,11 @@ local function c_run_multiple(head,font,attr,steps,nofsteps,dataset,sequence,rlm
         elseif char == false then
             -- whatever glyph
             return head, done
+        elseif sweep then
+            -- else we loose the rest
+            return head, done
         else
-            -- very unlikely
+            -- in disc component
             start = getnext(start)
         end
     end

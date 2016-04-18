@@ -6,7 +6,7 @@
                      Luaotfload configuration file
 -----------------------------------------------------------------------
 
-:Date:                  2016-04-07
+:Date:                  2016-04-18
 :Copyright:             GPL v2.0
 :Version:               2.7
 :Manual section:        5
@@ -126,23 +126,25 @@ the variable is unset.
 Section ``db``
 -----------------------------------------------------------------------
 
-+---------------+--------+---------------------------+
-|  variable     |  type  |  default                  |
-+---------------+--------+---------------------------+
-|  compress     |   b    |  ``true``                 |
-+---------------+--------+---------------------------+
-|  formats      |   s    |  ``"otf,ttf,ttc,dfont"``  |
-+---------------+--------+---------------------------+
-|  max-fonts    |   n    |  ``2^51``                 |
-+---------------+--------+---------------------------+
-|  scan-local   |   b    |  ``false``                |
-+---------------+--------+---------------------------+
-|  skip-read    |   b    |  ``false``                |
-+---------------+--------+---------------------------+
-|  strip        |   b    |  ``true``                 |
-+---------------+--------+---------------------------+
-|  update-live  |   b    |  ``true``                 |
-+---------------+--------+---------------------------+
++-----------------+--------+---------------------------+
+|  variable       |  type  |  default                  |
++-----------------+--------+---------------------------+
+|  compress       |   b    |  ``true``                 |
++-----------------+--------+---------------------------+
+|  formats        |   s    |  ``"otf,ttf,ttc,dfont"``  |
++-----------------+--------+---------------------------+
+|  max-fonts      |   n    |  ``2^51``                 |
++-----------------+--------+---------------------------+
+|  scan-local     |   b    |  ``false``                |
++-----------------+--------+---------------------------+
+|  skip-read      |   b    |  ``false``                |
++-----------------+--------+---------------------------+
+|  strip          |   b    |  ``true``                 |
++-----------------+--------+---------------------------+
+|  update-live    |   b    |  ``true``                 |
++-----------------+--------+---------------------------+
+|  use-fontforge  |   b    |  ``false``                |
++-----------------+--------+---------------------------+
 
 The flag ``compress`` determines whether the font index (usually
 ``luaotfload-names.lua[.gz]`` will be stored in compressed forms.
@@ -189,6 +191,10 @@ If ``update-live`` is set, Luaotfload will reload the database if it
 cannot find a requested font. Those who prefer to update manually using
 **luaotfload-tool** should unset this flag.
 
+The option ``use-fontforge`` switches name scanning back to the old
+method that relies on the builtin ``fontloader`` library. This is
+interesting for reference until the Fontforge code will be removed
+eventually.
 
 Section ``default-features``
 -----------------------------------------------------------------------
@@ -381,6 +387,5 @@ AUTHORS
 *Luaotfload* is maintained by the LuaLaTeX dev team
 (`<https://github.com/lualatex/>`_).
 
-This manual page was written by Philipp Gesang
-<philipp.gesang@alumni.uni-heidelberg.de>.
+This manual page was written by Philipp Gesang <phg@phi-gamma.net>.
 

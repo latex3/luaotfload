@@ -9,7 +9,7 @@ if not modules then modules = { } end modules ['font-oup'] = {
 local next, type = next, type
 local P, R, S = lpeg.P, lpeg.R, lpeg.S
 local lpegmatch = lpeg.match
-local insert, remove, copy = table.insert, table.remove, table.copy
+local insert, remove, copy, unpack = table.insert, table.remove, table.copy, table.unpack
 
 local formatters        = string.formatters
 local sortedkeys        = table.sortedkeys
@@ -737,8 +737,7 @@ local function stripredundant(fontdata)
 end
 
 function readers.getcomponents(fontdata) -- handy for resolving ligatures when names are missing
-    local resources    = fontdata.resources
-    local descriptions = fontdata.descriptions
+    local resources = fontdata.resources
     if resources then
         local sequences = resources.sequences
         if sequences then
@@ -761,7 +760,7 @@ function readers.getcomponents(fontdata) -- handy for resolving ligatures when n
                             end
                         end
                         for i=1,#steps do
-                        -- we actually had/have this in base mode
+                         -- we actually had/have this in base mode
                             local coverage = steps[i].coverage
                             if coverage then
                                 for k, v in next, coverage do
@@ -773,13 +772,25 @@ function readers.getcomponents(fontdata) -- handy for resolving ligatures when n
                 end
             end
             if next(collected) then
+                -- remove self referring
+             -- for k, v in next, collected do
+             --     for i=1,#v do
+             --         local vi = v[i]
+             --         if vi == k then
+             --          -- report("removing self referring ligature @ slot %5X from collected (1)",k)
+             --             collected[k] = nil
+             --         end
+             --     end
+             -- end
                 while true do
                     local done = false
                     for k, v in next, collected do
                         for i=1,#v do
                             local vi = v[i]
                             if vi == k then
+                             -- report("removing self referring ligature @ slot %5X from collected (2)",k)
                                 collected[k] = nil
+                                break
                             else
                                 local c = collected[vi]
                                 if c then
@@ -787,7 +798,7 @@ function readers.getcomponents(fontdata) -- handy for resolving ligatures when n
                                     local t = { }
                                     local n = i - 1
                                     for j=1,n do
-                                        t[j] = t[j]
+                                        t[j] = v[j]
                                     end
                                     for j=1,#c do
                                         n = n + 1
@@ -795,7 +806,7 @@ function readers.getcomponents(fontdata) -- handy for resolving ligatures when n
                                     end
                                     for j=i+1,#v do
                                         n = n + 1
-                                        t[n] = t[j]
+                                        t[n] = v[j]
                                     end
                                     collected[k] = t
                                     break

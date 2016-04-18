@@ -20,6 +20,7 @@ local nuts        = nodes.nuts -- context abstraction of direct nodes
 
 local traverse_id = nuts.traverse_id
 local remove_node = nuts.remove
+local free_node   = nuts.free
 
 local glyph_code  = nodes.nodecodes.glyph
 local disc_code   = nodes.nodecodes.disc
@@ -30,11 +31,13 @@ local tonut       = nuts.tonut
 local getfont     = nuts.getfont
 local getchar     = nuts.getchar
 local getid       = nuts.getid
+local getboth     = nuts.getboth
 local getprev     = nuts.getprev
 local getnext     = nuts.getnext
 local getdisc     = nuts.getdisc
 local setchar     = nuts.setchar
 local setlink     = nuts.setlink
+local setprev     = nuts.setprev
 
 -- from now on we apply ligaturing and kerning here because it might interfere with complex
 -- opentype discretionary handling where the base ligature pass expect some weird extra
@@ -136,7 +139,26 @@ function nodes.handlers.nodepass(head)
         end
         if redundant then
             for i=1,#redundant do
-                remove_node(nuthead,redundant[i],true)
+                local r = redundant[i]
+                local p, n = getboth(r)
+                if r == nuthead then
+                    nuthead = n
+                    setprev(n)
+                else
+                    setlink(p,n)
+                end
+                if b > 0 then
+                    for i=1,b do
+                        local bi = basefonts[i]
+                        if r == bi[1] then
+                            bi[1] = n
+                        end
+                        if r == bi[2] then
+                            bi[2] = n
+                        end
+                    end
+                end
+                free_node(r)
             end
         end
         for d in traverse_id(disc_code,nuthead) do

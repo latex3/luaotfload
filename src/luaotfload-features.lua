@@ -36,11 +36,10 @@ local config            = config or { luaotfload = { run = { } } }
 local as_script         = true
 local normalize         = function () end
 
-if config.luaotfload.run.live == true then
+if config.luaotfload.run.live ~= false then
     normalize = handlers.otf.features.normalize
     as_script = false
 end
-
 
 --HH A bit of tuning for definitions.
 
@@ -1247,6 +1246,10 @@ local handle_request = function (specification)
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.
     specification.features.normal = normalize (request.features)
+    local subfont = tonumber (specification.sub)
+    if subfont and subfont >= 0 then
+        specification.sub = subfont + 1
+    end
     return specification
 end
 
@@ -1854,12 +1857,18 @@ otf.addfeature           = add_otf_feature
 
 local install_extra_features = function (data, filename, raw)
     for feature, specification in next, extrafeatures do
+        local fontname
+        local subfont
+        local metadata = data.metadata
+        if metadata then
+            fontname = tostring (data.metadata.fontname)
+            subfont  = tonumber (metadata.subfontindex)
+        end
+        if not fontname then fontname = "<unknown>" end
+        if not subfont  then subfont  = -1          end
         logreport ("both", 3, "features",
                    "register synthetic feature “%s” for %s font “%s”(%d)",
-                   feature,
-                   data.format,
-                   tostring (data.metadata and data.metadata.fontname or "<unknown>"),
-                   data.subfont or -1)
+                   feature, data.format, fontname, subfont)
         otf.features.register { name = feature, description = specification[2] }
         otf.enhancers.addfeature (data, feature, specification[1])
     end

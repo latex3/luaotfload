@@ -309,7 +309,7 @@ strict digraph luaotfload_files { //looks weird with circo ...
                 <tr> <td>l-lua.lua</td>     <td>l-lpeg.lua</td>    <td>l-function.lua</td>  </tr>
                 <tr> <td>l-string.lua</td>  <td>l-table.lua</td>   <td>l-io.lua</td>        </tr>
                 <tr> <td>l-file.lua</td>    <td>l-boolean.lua</td> <td>l-math.lua</td>      </tr>
-                <tr> <td>util-str.lua</td>                                                  </tr>
+                <tr> <td>util-str.lua</td>  <td>util-fil.lua</td>                           </tr>
             </table>
         >,
     ]
@@ -322,13 +322,17 @@ strict digraph luaotfload_files { //looks weird with circo ...
         label      = <
             <table border="0">
                 <th> <td colspan="2"> <font point-size="12" face="Iwona Italic">Font Loader (LuaTeX-Fonts)</font> </td> </th>
-                <tr> <td>luatex-fonts-cbk.lua</td>  <td>luatex-basics-nod.lua</td> </tr>
-                <tr> <td>luatex-fonts-enc.lua</td>  <td>luatex-fonts-syn.lua</td>  </tr>
-                <tr> <td>luatex-font-tfm.lua</td>   <td>luatex-font-afm.lua</td>   </tr>
-                <tr> <td>luatex-font-afk.lua</td>   <td>luatex-fonts-tfm.lua</td>  </tr>
-                <tr> <td>luatex-fonts-chr.lua</td>  <td>luatex-fonts-lua.lua</td>  </tr>
-                <tr> <td>luatex-fonts-inj.lua</td>  <td>luatex-fonts-otn.lua</td>  </tr>
-                <tr> <td>luatex-fonts-def.lua</td>  <td>luatex-fonts-ext.lua</td>  </tr>
+                <tr>
+                    <td>luatex-basics-nod.lua</td>
+                    <td>luatex-basics-chr.lua</td>
+                </tr>
+                <tr>
+                    <td>luatex-fonts-enc.lua</td>
+                    <td>luatex-fonts-syn.lua</td>
+                </tr>
+                <tr>
+                    <td>luatex-fonts-ext.lua</td>
+                </tr>
             </table>
         >,
     ]
@@ -341,10 +345,46 @@ strict digraph luaotfload_files { //looks weird with circo ...
         label      = <
             <table border="0">
                 <th> <td colspan="3"> <font point-size="12" face="Iwona Italic"> Font and Node Libraries from Context </font> </td> </th>
-                <tr> <td>data-con.lua</td> <td>font-ini.lua</td> <td>font-con.lua</td> </tr>
-                <tr> <td>font-cid.lua</td> <td>font-map.lua</td> <td>font-oti.lua</td> </tr>
-                <tr> <td>font-otf.lua</td> <td>font-otb.lua</td> <td>font-ota.lua</td> </tr>
-                <tr> <td>font-def.lua</td> </tr>
+                <tr>
+                    <td>data-con.lua</td>
+                    <td>font-ini.lua</td>
+                    <td>font-con.lua</td>
+                </tr>
+                <tr>
+                    <td>font-cid.lua</td>
+                    <td>font-map.lua</td>
+                    <td>font-tfm.lua</td>
+                </tr>
+                <tr>
+                    <td>font-afm.lua</td>
+                    <td>font-afk.lua</td>
+                    <td>font-oti.lua</td>
+                </tr>
+                <tr>
+                    <td>font-otr.lua</td>
+                    <td>font-cff.lua</td>
+                    <td>font-ttf.lua</td>
+                </tr>
+                <tr>
+                    <td>font-dsp.lua</td>
+                    <td>font-oup.lua</td>
+                    <td>font-otl.lua</td>
+                </tr>
+                <tr>
+                    <td>font-oto.lua</td>
+                    <td>font-otj.lua</td>
+                    <td>font-ota.lua</td>
+                </tr>
+                <tr>
+                    <td>font-ots.lua</td>
+                    <td>font-osd.lua</td>
+                    <td>font-lua.lua</td>
+                </tr>
+                <tr>
+                    <td>font-def.lua</td>
+                    <td>font-xtx.lua</td>
+                    <td>font-gbn.lua</td>
+                </tr>
             </table>
         >,
     ]

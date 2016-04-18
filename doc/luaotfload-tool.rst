@@ -6,7 +6,7 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:                  2016-04-07
+:Date:                  2016-04-18
 :Copyright:             GPL v2.0
 :Version:               2.7
 :Manual section:        1
@@ -329,6 +329,5 @@ AUTHORS
 The fontloader code is provided by Hans Hagen of Pragma ADE, Hasselt
 NL (`<http://pragma-ade.com/>`__).
 
-This manual page was written by Philipp Gesang
-<philipp.gesang@alumni.uni-heidelberg.de>.
+This manual page was written by Philipp Gesang <phg@phi-gamma.net>.
 

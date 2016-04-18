@@ -6,7 +6,7 @@
                      Luaotfload configuration file
 -----------------------------------------------------------------------
 
-:Date:                  2016-04-17
+:Date:                  2016-04-18
 :Copyright:             GPL v2.0
 :Version:               2.7
 :Manual section:        5
@@ -387,6 +387,5 @@ AUTHORS
 *Luaotfload* is maintained by the LuaLaTeX dev team
 (`<https://github.com/lualatex/>`_).
 
-This manual page was written by Philipp Gesang
-<philipp.gesang@alumni.uni-heidelberg.de>.
+This manual page was written by Philipp Gesang <phg@phi-gamma.net>.
 

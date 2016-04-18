@@ -1160,6 +1160,7 @@ and have thus been omitted from the merge.\footnote{%
       \beginaltitem {l-boolean.lua}   \endaltitem
       \beginaltitem {l-math.lua}      \endaltitem
       \beginaltitem {util-str.lua}    \endaltitem
+      \beginaltitem {util-fil.lua}    \endaltitem
   \enddefinitions
 \enddoublecolumns
 
@@ -1169,30 +1170,28 @@ grouped twofold as below:
 \begindefinitions
   \beginnormalitem
     The \emphasis{font loader} itself.
-    These files have been written for
-    \LUATEX-Fonts and they are distributed along
-    with \identifier{luaotfload}.
+    These files have been written for \LUATEX-Fonts and they are
+    distributed along with \identifier{luaotfload} so as to resemble
+    the state of the code when it was imported. Their purpose is either
+    to give a slightly aged version of a file if upstream considers
+    latest developments for not yet ready for use outside Context; or,
+    to install placeholders or minimalist versions of APIs relied upon
+    but usually provided by parts of Context not included in the
+    fontloader.
     \begindoublecolumns
       \begindefinitions
         \beginaltitem{luatex-basics-nod.lua} \endaltitem
+        \beginaltitem{luatex-basics-chr.lua} \endaltitem
         \beginaltitem{luatex-fonts-enc.lua}  \endaltitem
         \beginaltitem{luatex-fonts-syn.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-tfm.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-chr.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-lua.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-inj.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-otn.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-def.lua}  \endaltitem
         \beginaltitem{luatex-fonts-ext.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-cbk.lua}  \endaltitem
       \enddefinitions
     \enddoublecolumns
   \endnormalitem
 
   \beginnormalitem
-    Code related to \emphasis{font handling and
-    node processing}, taken directly from
-    \CONTEXT.
+    Code related to \emphasis{font handling and node processing}, taken
+    directly from \CONTEXT.
     \begindoublecolumns
       \begindefinitions
         \beginaltitem{data-con.lua} \endaltitem
@@ -1200,12 +1199,25 @@ grouped twofold as below:
         \beginaltitem{font-con.lua} \endaltitem
         \beginaltitem{font-cid.lua} \endaltitem
         \beginaltitem{font-map.lua} \endaltitem
+        \beginaltitem{font-tfm.lua} \endaltitem
+        \beginaltitem{font-afm.lua} \endaltitem
+        \beginaltitem{font-afk.lua} \endaltitem
         \beginaltitem{font-oti.lua} \endaltitem
-        \beginaltitem{font-otf.lua} \endaltitem
-        \beginaltitem{font-otb.lua} \endaltitem
+        \beginaltitem{font-otr.lua} \endaltitem
+        \beginaltitem{font-cff.lua} \endaltitem
+        \beginaltitem{font-ttf.lua} \endaltitem
+        \beginaltitem{font-dsp.lua} \endaltitem
+        \beginaltitem{font-oup.lua} \endaltitem
+        \beginaltitem{font-otl.lua} \endaltitem
+        \beginaltitem{font-oto.lua} \endaltitem
+        \beginaltitem{font-otj.lua} \endaltitem
         \beginaltitem{font-ota.lua} \endaltitem
+        \beginaltitem{font-ots.lua} \endaltitem
+        \beginaltitem{font-osd.lua} \endaltitem
+        \beginaltitem{font-lua.lua} \endaltitem
         \beginaltitem{font-def.lua} \endaltitem
-        \beginaltitem{font-otp.lua} \endaltitem
+        \beginaltitem{font-xtx.lua} \endaltitem
+        \beginaltitem{font-gbn.lua} \endaltitem
       \enddefinitions
     \enddoublecolumns
   \endnormalitem

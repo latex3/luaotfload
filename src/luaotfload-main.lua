@@ -13,7 +13,7 @@ local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
 luaotfload.version                = "2.7"
 luaotfload.loaders                = { }
-luaotfload.min_luatex_version     = 80             --- i. e. 0.80
+luaotfload.min_luatex_version     = 95             --- i. e. 0.80
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 local authors = "\z
@@ -30,7 +30,7 @@ local authors = "\z
 luaotfload.module = {
     name          = "luaotfload-main",
     version       = 2.70001,
-    date          = "2016/02/19",
+    date          = "2016/04/19",
     description   = "OpenType layout system.",
     author        = authors,
     copyright     = authors,
@@ -63,29 +63,6 @@ local require          = require
 local type             = type
 
 luatexbase.provides_module (luaotfload.module)
-
---[[doc--
-
-     We set the minimum version requirement for \LUATEX to v0.76,
-     because the font loader requires recent features like direct
-     attribute indexing and \luafunction{node.end_of_math()} that aren’t
-     available in earlier versions.\footnote{%
-      See Taco’s announcement of v0.76:
-      \url{http://comments.gmane.org/gmane.comp.tex.luatex.user/4042}
-      and this commit by Hans that introduced those features.
-      \url{http://repo.or.cz/w/context.git/commitdiff/a51f6cf6ee087046a2ae5927ed4edff0a1acec1b}.
-    }
-
---doc]]--
-
-if tex.luatexversion < luaotfload.min_luatex_version then
-    warning ("LuaTeX v%.2f is old, v%.2f or later is recommended.",
-             tex.luatexversion  / 100,
-             luaotfload.min_luatex_version / 100)
-    warning ("using fallback fontloader -- newer functionality not available")
-    luaotfload.fontloader_package = "tl2014" --- TODO fallback should be configurable too
-    --- we install a fallback for older versions as a safety
-end
 
 --[[doc--
 

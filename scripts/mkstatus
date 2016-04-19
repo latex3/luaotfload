@@ -5,7 +5,6 @@
 --  DESCRIPTION:  writes the repository state
 -- REQUIREMENTS:  luatex, the lualibs package
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
---      VERSION:  1.0
 --      CREATED:  2013-07-07 14:01:12+0200
 -----------------------------------------------------------------------
 --
@@ -80,7 +79,6 @@ local names = {
   --- fontloader runtimes
   { rtdir,        "fontloader-basics-gen.lua",      },
   { rtdir,        "fontloader-reference.lua",       },
-  { rtdir,        "fontloader-tl2014.lua",          },
 
   --- fontloader constituents
   { miscdir,      "fontloader-basics-nod.lua",      },

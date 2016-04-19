@@ -135,7 +135,6 @@ local registered_loaders = {
   reference  = "reference",
   unpackaged = "unpackaged",
   context    = "context",
-  tl2014     = "tl2014",
 }
 
 local pick_fontloader = function (s)

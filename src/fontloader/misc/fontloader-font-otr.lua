@@ -2020,7 +2020,7 @@ local function loadfontdata(specification)
                         ttcversion  = ttcversion,
                         nofsubfonts = nofsubfonts,
                     }
-                    for i=1,fontdata.nofsubfonts do
+                    for i=1,nofsubfonts do
                         subfonts[i] = readdata(f,offsets[i],specification)
                     end
                 end
@@ -2167,7 +2167,7 @@ function readers.getinfo(filename,specification) -- string, nil|number|table
                 info[i] = getinfo(fontdata,i,platformnames,rawfamilynames)
             end
             return info
-        elseif subfont > 1 and subfont <= #subfonts then
+        elseif subfont >= 1 and subfont <= #subfonts then
             return getinfo(fontdata,subfont,platformnames,rawfamilynames)
         else
             return {

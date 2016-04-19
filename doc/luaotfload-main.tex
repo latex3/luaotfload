@@ -807,6 +807,36 @@ Currently (2014) there are three of them:
 \endsection
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\beginsection {Combining fonts}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Version 2.7 and later support combining characters from multiple fonts into a
+single virtualized one. This requires that the affected fonts be loaded in
+advance as well as a special \emphasis{request syntax}. Furthermore, this
+allows to define \emphasis{fallback fonts} to supplement fonts that may lack
+certain required glyphs.
+
+For example, the \identifier{Latin Modern} family of fonts does, as indicated
+in the name, not provide Cyrillic glyphs. If Latin script dominates in the copy
+with interspersed Cyrillic, a fallback can be created from a similiar looking
+font like \identifier{Computer Modern Unicode}, taking advantage of the fact
+that it too derives from Knuth’s original \identifier{Computer Modern} series:
+
+\beginlisting
+  \input luaotfload.sty
+  \font \lm  = file:lmroman10-regular.otf:mode=base
+  \font \cmu = file:cmunrm.otf:mode=base
+  \font \lmu = "combo: 1->\fontid\lm; 2->\fontid\cmu,fallback"
+  \lmu Eh bien, mon prince. Gênes et Lueques ne sont plus que des
+       apanages, des поместья, de la famille Buonaparte.
+  \bye
+\endlisting
+
+TODO
+
+\endsection
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Font names database}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1779,3 +1809,4 @@ Distributions probably package it as \fileent
 
 \endinput
 
+% vim:ft=tex:tw=79:et:sw=2

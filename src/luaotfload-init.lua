@@ -460,9 +460,6 @@ local init_main = function ()
       Now that things are sorted out we can finally load the
       fontloader.
 
-      For less current distibutions we ship the code from TL 2014 that
-      should be compatible with Luatex 0.76.
-
   --doc]]--
 
   local fontloader = config.luaotfload and config.luaotfload.run.fontloader

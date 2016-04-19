@@ -360,7 +360,6 @@ This is a sketch of the luaotfload db:
         conflicts       : { barename : int; basename : int }; // filename conflict with font at index; happens with subfonts
         familyname      : string;   // sanitized name of the font family the font belongs to, usually from the names table
         fontname        : string;   // sanitized name of the font
-        fontstyle_name  : string;   // the fontstyle_name field returned by fontloader.info()
         format          : string;   // "otf" | "ttf" | "dfont" | "pfa" | "pfb" | "afm"
         fullname        : string;   // sanitized full name of the font including style modifiers
         fullpath        : string;   // path to font in filesystem
@@ -1842,7 +1841,7 @@ local read_font_names = function (fullname,
 
     --- 5) check for subfonts and process each of them
 
-    if type (info) == "table" and #info > 1 then --- ttc
+    if type (info) == "table" and #info >= 1 then --- ttc
 
         local success = false --- true if at least one subfont got read
 

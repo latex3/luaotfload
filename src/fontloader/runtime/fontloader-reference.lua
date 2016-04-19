@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 04/18/16 18:53:40
+-- merge date  : 04/18/16 22:12:36
 
 do -- begin closure to overcome local limits and interference
 
@@ -9536,7 +9536,7 @@ local function loadfontdata(specification)
             ttcversion=ttcversion,
             nofsubfonts=nofsubfonts,
           }
-          for i=1,fontdata.nofsubfonts do
+          for i=1,nofsubfonts do
             subfonts[i]=readdata(f,offsets[i],specification)
           end
         end
@@ -9667,7 +9667,7 @@ function readers.getinfo(filename,specification)
         info[i]=getinfo(fontdata,i,platformnames,rawfamilynames)
       end
       return info
-    elseif subfont>1 and subfont<=#subfonts then
+    elseif subfont>=1 and subfont<=#subfonts then
       return getinfo(fontdata,subfont,platformnames,rawfamilynames)
     else
       return {

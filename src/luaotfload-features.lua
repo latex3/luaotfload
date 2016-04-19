@@ -1856,19 +1856,29 @@ end
 otf.addfeature           = add_otf_feature
 
 local install_extra_features = function (data, filename, raw)
+    local metadata = data and data.metadata
+    if not metadata then
+        logreport ("both", 4, "features",
+                   "no metadata received from font “%s”; not \z
+                    installing extra features.", filename)
+        return
+    end
+    local format = data.format
+    if not format then
+        logreport ("both", 4, "features",
+                   "no format info for font “%s”/“%s”; not \z
+                   installing extra features.",
+                   fontname, filename)
+        return
+    end
     for feature, specification in next, extrafeatures do
-        local fontname
-        local subfont
-        local metadata = data.metadata
-        if metadata then
-            fontname = tostring (data.metadata.fontname)
-            subfont  = tonumber (metadata.subfontindex)
-        end
         if not fontname then fontname = "<unknown>" end
         if not subfont  then subfont  = -1          end
+        local fontname = tostring (data.metadata.fontname) or "<unknown>"
+        local subfont  = tonumber (metadata.subfontindex)  or -1
         logreport ("both", 3, "features",
                    "register synthetic feature “%s” for %s font “%s”(%d)",
-                   feature, data.format, fontname, subfont)
+                   feature, format, fontname, subfont)
         otf.features.register { name = feature, description = specification[2] }
         otf.enhancers.addfeature (data, feature, specification[1])
     end

@@ -2020,7 +2020,7 @@ local function loadfontdata(specification)
                         ttcversion  = ttcversion,
                         nofsubfonts = nofsubfonts,
                     }
-                    for i=1,fontdata.nofsubfonts do
+                    for i=1,nofsubfonts do
                         subfonts[i] = readdata(f,offsets[i],specification)
                     end
                 end

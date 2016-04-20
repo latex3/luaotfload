@@ -41,6 +41,14 @@ local eval_reader = function (specification)
   return eval ()
 end
 
+local unsupported_reader = function (format)
+  return function (specification)
+    logreport ("both", 0, "loaders",
+               "font format “%s” unsupported; cannot load %s.",
+               format, tostring (specification.name))
+  end
+end
+
 local install_formats = function ()
   local fonts = fonts
   if not fonts then return false end
@@ -72,8 +80,8 @@ local install_formats = function ()
 
   return aux ("evl", eval_reader)
      and aux ("lua", lua_reader)
-     and aux ("pfa", function (spec) return readers.opentype (spec, "pfa", "type1") end)
-     and aux ("pfb", function (spec) return readers.opentype (spec, "pfb", "type1") end)
+     and aux ("pfa", unsupported_reader "pfa")
+     and aux ("pfb", unsupported_reader "pfb")
      and aux ("ofm", readers.tfm)
 end
 

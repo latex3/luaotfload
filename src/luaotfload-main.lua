@@ -13,7 +13,7 @@ local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
 luaotfload.version                = "2.7"
 luaotfload.loaders                = { }
-luaotfload.min_luatex_version     = 95             --- i. e. 0.80
+luaotfload.min_luatex_version     = 95             --- i. e. 0.95
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 local authors = "\z

@@ -1322,146 +1322,6 @@ local noflags = { false, false, false, false }
 
 local tohash = table.tohash
 
-local function ancient_addfeature (data, feature, specifications)
-    local descriptions = data.descriptions
-    local resources    = data.resources
-    local lookups      = resources.lookups
-    local gsubfeatures = resources.features.gsub
-    if gsubfeatures and gsubfeatures[feature] then
-        -- already present
-    else
-        local sequences    = resources.sequences
-        local fontfeatures = resources.features
-        local unicodes     = resources.unicodes
-        local lookuptypes  = resources.lookuptypes
-        local splitter     = lpeg.splitter(" ",unicodes)
-        local done         = 0
-        local skip         = 0
-        if not specifications[1] then
-            -- so we accept a one entry specification
-            specifications = { specifications }
-        end
-        -- subtables are tables themselves but we also accept flattened singular subtables
-        for s=1,#specifications do
-            local specification = specifications[s]
-            local valid         = specification.valid
-            if not valid or valid(data,specification,feature) then
-                local initialize = specification.initialize
-                if initialize then
-                    -- when false is returned we initialize only once
-                    specification.initialize = initialize(specification) and initialize or nil
-                end
-                local askedfeatures = specification.features or everywhere
-                local subtables     = specification.subtables or { specification.data } or { }
-                local featuretype   = types[specification.type or "substitution"]
-                local featureflags  = specification.flags or noflags
-                local featureorder  = specification.order or { feature }
-                local added         = false
-                local featurename   = stringformat("ctx_%s_%s",feature,s)
-                local st = { }
-                for t=1,#subtables do
-                    local list = subtables[t]
-                    local full = stringformat("%s_%s",featurename,t)
-                    st[t] = full
-                    if featuretype == "gsub_ligature" then
-                        lookuptypes[full] = "ligature"
-                        for code, ligature in next, list do
-                            local unicode = tonumber(code) or unicodes[code]
-                            local description = descriptions[unicode]
-                            if description then
-                                local slookups = description.slookups
-                                if type(ligature) == "string" then
-                                    ligature = { lpegmatch(splitter,ligature) }
-                                end
-                                local present = true
-                                for i=1,#ligature do
-                                    if not descriptions[ligature[i]] then
-                                        present = false
-                                        break
-                                    end
-                                end
-                                if present then
-                                    if slookups then
-                                        slookups[full] = ligature
-                                    else
-                                        description.slookups = { [full] = ligature }
-                                    end
-                                    done, added = done + 1, true
-                                else
-                                    skip = skip + 1
-                                end
-                            end
-                        end
-                    elseif featuretype == "gsub_single" then
-                        lookuptypes[full] = "substitution"
-                        for code, replacement in next, list do
-                            local unicode = tonumber(code) or unicodes[code]
-                            local description = descriptions[unicode]
-                            if description then
-                                local slookups = description.slookups
-                                replacement = tonumber(replacement) or unicodes[replacement]
-                                if descriptions[replacement] then
-                                    if slookups then
-                                        slookups[full] = replacement
-                                    else
-                                        description.slookups = { [full] = replacement }
-                                    end
-                                    done, added = done + 1, true
-                                end
-                            end
-                        end
-                    end
-                end
-                if added then
-                    -- script = { lang1, lang2, lang3 } or script = { lang1 = true, ... }
-                    for k, v in next, askedfeatures do
-                        if v[1] then
-                            askedfeatures[k] = tabletohash(v)
-                        end
-                    end
-                    local sequence = {
-                        chain     = 0,
-                        features  = { [feature] = askedfeatures },
-                        flags     = featureflags,
-                        name      = featurename,
-                        order     = featureorder,
-                        subtables = st,
-                        type      = featuretype,
-                    }
-                    if specification.prepend then
-                        insert(sequences,1,sequence)
-                    else
-                        insert(sequences,sequence)
-                    end
-                    -- register in metadata (merge as there can be a few)
-                    if not gsubfeatures then
-                        gsubfeatures  = { }
-                        fontfeatures.gsub = gsubfeatures
-                    end
-                    local k = gsubfeatures[feature]
-                    if not k then
-                        k = { }
-                        gsubfeatures[feature] = k
-                    end
-                    for script, languages in next, askedfeatures do
-                        local kk = k[script]
-                        if not kk then
-                            kk = { }
-                            k[script] = kk
-                        end
-                        for language, value in next, languages do
-                            kk[language] = value
-                        end
-                    end
-                end
-            end
-        end
-        if trace_loading then
-            report_otf("registering feature %a, affected glyphs %a, skipped glyphs %a",feature,done,skip)
-        end
-    end
-end
-
 local function current_addfeature(data,feature,specifications)
     local descriptions = data.descriptions
     local resources    = data.resources
@@ -1856,19 +1716,29 @@ end
 otf.addfeature           = add_otf_feature
 
 local install_extra_features = function (data, filename, raw)
+    local metadata = data and data.metadata
+    if not metadata then
+        logreport ("both", 4, "features",
+                   "no metadata received from font “%s”; not \z
+                    installing extra features.", filename)
+        return
+    end
+    local format = data.format
+    if not format then
+        logreport ("both", 4, "features",
+                   "no format info for font “%s”/“%s”; not \z
+                   installing extra features.",
+                   fontname, filename)
+        return
+    end
     for feature, specification in next, extrafeatures do
-        local fontname
-        local subfont
-        local metadata = data.metadata
-        if metadata then
-            fontname = tostring (data.metadata.fontname)
-            subfont  = tonumber (metadata.subfontindex)
-        end
         if not fontname then fontname = "<unknown>" end
         if not subfont  then subfont  = -1          end
+        local fontname = tostring (data.metadata.fontname) or "<unknown>"
+        local subfont  = tonumber (metadata.subfontindex)  or -1
         logreport ("both", 3, "features",
                    "register synthetic feature “%s” for %s font “%s”(%d)",
-                   feature, data.format, fontname, subfont)
+                   feature, format, fontname, subfont)
         otf.features.register { name = feature, description = specification[2] }
         otf.enhancers.addfeature (data, feature, specification[1])
     end
@@ -1887,11 +1757,7 @@ return {
         end
 
         otf = fonts.handlers.otf
-
-        --- hack for backwards compat with TL2014 loader
-        otf.enhancers.addfeature = otf.version < 2.8 and ancient_addfeature
-                                                      or current_addfeature
-
+        otf.enhancers.addfeature = current_addfeature
         otf.enhancers.register ("check extra features",
                                 install_extra_features)
 

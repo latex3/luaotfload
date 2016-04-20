@@ -584,38 +584,6 @@ obviously, \inlinecode{random}.
          defaulting to \inlinecode{dflt}.
   \endaltitem
 
-  \beginaltitem {featurefile}
-         A comma-separated list of feature files to be applied to the
-         font.
-         %
-         Feature files contain a textual representation of
-         \OpenType tables and extend the features of a font
-         on fly.
-         %
-         After they are applied to a font, features defined in a
-         feature file can be enabled or disabled just like any
-         other font feature.
-         %
-         The syntax is documented in \identifier{Adobe}’s
-         \OpenType Feature File Specification.\footnote{%
-           Cf. \hyperlink {http://www.adobe.com/devnet/opentype/afdko/topic_feature_file_syntax.html}.
-           Feature file support is part of the engine which at the
-           time of this writing (2014) implements the spec only
-           partially.
-           See the
-           \hyperlink [\LUATEX tracker]{http://tracker.luatex.org/view.php?id=231}
-            for details.
-         }
-
-         For a demonstration of how to set a \inlinecode{tkrn} feature consult
-         the file \inlinecode{tkrn.fea} that is part of \identifier{luaotfload}.
-         It can be read and applied as follows:
-
-         \beginlisting
-      \font \test = Latin Modern Roman:featurefile=tkrn.fea;+tkrn
-         \endlisting
-  \endaltitem
-
   \beginaltitem {color}
          A font color, defined as a triplet of two-digit hexadecimal
          \abbrev{rgb} values, with an optional fourth value for
@@ -816,6 +784,8 @@ advance as well as a special \emphasis{request syntax}. Furthermore, this
 allows to define \emphasis{fallback fonts} to supplement fonts that may lack
 certain required glyphs.
 
+\beginsubsection {Fallbacks}
+
 For example, the \identifier{Latin Modern} family of fonts does, as indicated
 in the name, not provide Cyrillic glyphs. If Latin script dominates in the copy
 with interspersed Cyrillic, a fallback can be created from a similiar looking
@@ -832,7 +802,59 @@ that it too derives from Knuth’s original \identifier{Computer Modern} series:
   \bye
 \endlisting
 
-TODO
+As simple as this may look on the first glance, this approach is entirely
+inappropriate if more than a couple letters are required from a different font.
+Because the combination pulls nothing except the glyph data, all of the
+important other information that constitute a proper font -- kerning, styles,
+features, and suchlike -- will be missing.
+
+\endsubsection %% Fallbacks
+
+\beginsubsection {Combinations}
+
+Generalizing the idea of a \emphasis{fallback font}, it is also possible to
+pick definite sets of glyphs from multiple fonts. On a bad day, for instance,
+it may be the sanest choice to start out with \identifier{EB Garamond} italics,
+typeset all decimal digits in the bold italics of \identifier{GNU Freefont},
+and tone down the punctuation with extra thin glyphs from \identifier{Source
+Sans}:
+
+\beginlisting
+  \def \feats     {-tlig;-liga;mode=base;-kern}
+  \def \fileone   {EBGaramond12-Italic.otf}
+  \def \filetwo   {FreeMonoBoldOblique.otf}
+  \def \filethree {SourceSansPro-ExtraLight.otf}
+
+  \input luaotfload.sty
+
+  \font \one   = file:\fileone  :\feats
+  \font \two   = file:\filetwo  :\feats
+  \font \three = file:\filethree:\feats
+
+  \font \onetwothree = "combo:  1 -> \fontid\one;
+                                2 -> \fontid\two,   0x30-0x39;
+                                3 -> \fontid\three, 0x21*0x3f;
+
+  {\onetwothree \TeX—0123456789—?!}
+  \bye
+\endlisting
+
+\noindent Despite the atrocious result, the example demonstrates well the
+syntax that is used to specify ranges and fonts. Fonts are being referred to by
+their internal index which can be obtained by passing the font command into the
+\texmacro{fontid} macro, e. g. \inlinecode{\fontid\one}, after a font has been
+defined. The first component of the combination is the base font which will be
+extended by the others. It is specified by the index alone.
+
+All further fonts require either the literal \inlinecode{fallback} or a list of
+codepoint definitions to be appended after a comma. The elements of this list
+again denote either single codepoints like \inlinecode{0x21} (referring to the
+exclamation point character) or ranges of codepoints (\inlinecode{0x30-0x39}).
+Elements are separated by the \identifier{ASCII} asterisk character
+(\inlinecode{*}). The characters referenced in the list will be imported from
+the respective font, if available.
+
+\endsubsection %% Combinations
 
 \endsection
 

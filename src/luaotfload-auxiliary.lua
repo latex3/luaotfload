@@ -42,7 +42,15 @@ local luaotfload_callbacks  = { }
 --- https://github.com/khaledhosny/luaotfload/issues/54
 
 local rewrite_fontname = function (tfmdata, specification)
-  tfmdata.name = [["]] .. specification .. [["]]
+  local format = tfmdata.format or tfmdata.properties.format
+  if format ~= "type1" then
+    if stringfind (specification, " ") then
+      tfmdata.name = stringformat ("%q", specification)
+    else
+      --- other specs should parse just fine
+      tfmdata.name = specification
+    end
+  end
 end
 
 local rewriting = false

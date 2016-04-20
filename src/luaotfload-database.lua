@@ -207,8 +207,7 @@ local make_luanames = function (path)
 end
 
 local format_precedence = {
-    "otf",   "ttc", "ttf",
-    "dfont", "afm",
+    "otf",  "ttc", "ttf", "afm",
     --- "pfb", "pfa",
 }
 
@@ -336,7 +335,7 @@ This is a sketch of the luaotfload db:
     }
     and metadata = {
         created     : string       // creation time
-        formats     : string list; // { "otf", "ttf", "ttc", "dfont" }
+        formats     : string list; // { "otf", "ttf", "ttc" }
         local       : bool;        (* set if local fonts were added to the db *)
         modified    : string       // modification time
         statistics  : TODO;        // created when built with "--stats"
@@ -360,7 +359,7 @@ This is a sketch of the luaotfload db:
         conflicts       : { barename : int; basename : int }; // filename conflict with font at index; happens with subfonts
         familyname      : string;   // sanitized name of the font family the font belongs to, usually from the names table
         fontname        : string;   // sanitized name of the font
-        format          : string;   // "otf" | "ttf" | "dfont" | "afm"
+        format          : string;   // "otf" | "ttf" | "afm"
         fullname        : string;   // sanitized full name of the font including style modifiers
         fullpath        : string;   // path to font in filesystem
         index           : int;      // index in the mappings table
@@ -1619,7 +1618,6 @@ ot_fullinfo = function (filename,
 end
 
 local loaders = {
-    dfont   = ot_fullinfo,
     otf     = ot_fullinfo,
     ttc     = ot_fullinfo,
     ttf     = ot_fullinfo,

@@ -3,7 +3,7 @@
 
 [db]
     compress        = true
-    formats         = otf, ttf, ttc, dfont
+    formats         = otf, ttf, ttc
     max-fonts       = 2.2517998136852e15
     scan-local      = false
     skip-read       = false

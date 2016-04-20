@@ -83,6 +83,7 @@ local install_formats = function ()
      and aux ("pfa", unsupported_reader "pfa")
      and aux ("pfb", unsupported_reader "pfb")
      and aux ("ofm", readers.tfm)
+     and aux ("dfont", unsupported_reader "dfont")
 end
 
 --[[doc--

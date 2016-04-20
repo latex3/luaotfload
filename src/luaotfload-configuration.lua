@@ -89,7 +89,7 @@ local config_paths = {
 }
 
 local valid_formats = tabletohash {
-  "otf", "ttc", "ttf", "dfont", "afm", --"pfb", "pfa",
+  "otf", "ttc", "ttf", "afm", --"pfb", "pfa",
 }
 
 local feature_presets = {
@@ -188,7 +188,7 @@ local permissible_color_callbacks = {
 
 local default_config = {
   db = {
-    formats         = "otf,ttf,ttc,dfont",
+    formats         = "otf,ttf,ttc",
     scan_local      = false,
     skip_read       = false,
     strip           = true,

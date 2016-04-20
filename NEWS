@@ -6,7 +6,8 @@ Change History
     * Glyph fallbacks.
     * Latest fontloader code.
     * Adapt packaging to changed upstream file layout.
-    * Remove support for builtin Fontforge libraries.
+    * Remove support for builtin Fontforge libraries (this includes the PFA,
+      PFB, and feature file readers).
 
 2015/12/09, luaotfload v2.6
     * Add ``sign`` target to makefile for automated package signing.

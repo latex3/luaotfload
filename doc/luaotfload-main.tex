@@ -188,8 +188,29 @@ for a more formal description see figure \ref{font-syntax}.
       <specification>    ::= <prefixed spec>, [ <subfont no> ], \{ <modifier> \}
       \alt                   <anon lookup>, \{ <modifier> \} ;
 
-      <prefixed spec>    ::= `file:', <file lookup>
+      <prefixed spec>    ::= `combo:', <combo list>
+      \alt                   `file:', <file lookup>
       \alt                   `name:', <name lookup> ;
+
+      <combo list>       ::= <combo def 1>, \{ `;', <combo def>  \} ;
+
+      <combo def 1>      ::= <combo id>, `->', <combo id> ;
+
+      <combo def>        ::= <combo id>, `->', <combo id chars> ;
+
+      <combo id>         ::= (`(', \{ {\sc digit} \}, `)' | \{ {\sc digit} \} ) ;
+
+      <combo id chars>   ::= (`(', \{ {\sc digit} \}, `,', <combo chars>, `)'
+      \alt                   \{ {\sc digit} \} ) ;
+
+      <combo chars>      ::= `fallback'
+      \alt                   \{ <combo range>, \{ `*', <combo range> \} \} ;
+
+      <combo range>      ::= <combo num>, [ `-', <combo num> ] ;
+
+      <combo num>        ::= `0x', \{ {\sc hexdigit}  \}
+      \alt                   `U+', \{ {\sc digit} \}
+      \alt                   \{ {\sc digit} \} ;
 
       <file lookup>      ::= \{ <name character> \} ;
 
@@ -227,12 +248,11 @@ requires a \emphasis{prefix}:
 \endnarrower
 %
 where \meta{prefix} is either \inlinecode{file:} or \inlinecode {name:}.\footnote{%
-  The development version also knows two further prefixes,
-  \inlinecode {kpse:} and \inlinecode {my:}.
+  \identifier{Luaotfload} also knows two further prefixes, \inlinecode {kpse:}
+  and \inlinecode {my:}.
   %
   A \inlinecode {kpse} lookup is restricted to files that can be found by
-  \identifier{kpathsea} and
-  will not attempt to locate system fonts.
+  \identifier{kpathsea} and will not attempt to locate system fonts.
   %
   This behavior can be of value when an extra degree of encapsulation is
   needed, for instance when supplying a customized tex distribution.
@@ -373,7 +393,7 @@ have no meaning in \LUATEX.
 
 \beginsubsubsection{Loading by File Name}
 
-For example, conventional \abbrev{type1} font can be loaded with a
+For example, conventional \TeX\ font can be loaded with a
 \inlinecode {file:} request like so:
 
 \beginlisting
@@ -783,6 +803,8 @@ single virtualized one. This requires that the affected fonts be loaded in
 advance as well as a special \emphasis{request syntax}. Furthermore, this
 allows to define \emphasis{fallback fonts} to supplement fonts that may lack
 certain required glyphs.
+
+Combinations are created by defining a font using the \luaident{combo:} prefix.
 
 \beginsubsection {Fallbacks}
 

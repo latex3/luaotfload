@@ -89,7 +89,7 @@ local config_paths = {
 }
 
 local valid_formats = tabletohash {
-  "otf", "ttc", "ttf", "afm", --"pfb", "pfa",
+  "otf", "ttc", "ttf", "afm", "pfb"
 }
 
 local feature_presets = {

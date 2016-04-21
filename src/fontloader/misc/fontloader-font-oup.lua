@@ -378,7 +378,12 @@ local function copyduplicates(fontdata)
                             t[#t+1] = f_character_y(u)
                         end
                     end
-                    report("duplicates: % t",t)
+                    local n = #t
+                    if n > 25 then
+                        report("duplicates: %i : %s .. %s ",n,t[1],t[n])
+                    else
+                        report("duplicates: %i : % t",n,t)
+                    end
                 else
                     -- what a mess
                 end
@@ -577,13 +582,12 @@ local function checklookups(fontdata,missing,nofmissing)
             if r then
                 local name = descriptions[i].name or f_index(i)
                 if not ignore[name] then
-                    done[#done+1] = name
+                    done[name] = true
                 end
             end
         end
-        if #done > 0 then
-            table.sort(done)
-            report("not unicoded: % t",done)
+        if next(done) then
+            report("not unicoded: % t",table.sortedkeys(done))
         end
     end
 end

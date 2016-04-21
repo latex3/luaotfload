@@ -92,12 +92,10 @@ local remapper = {
     otf    = "opentype fonts",
     ttf    = "truetype fonts",
     ttc    = "truetype fonts",
-    dfont  = "truetype fonts", -- "truetype dictionary",
     cid    = "cid maps",
     cidmap = "cid maps",
-    fea    = "font feature files",
-    pfa    = "type1 fonts", -- this is for Khaled, in ConTeXt we don't use this!
-    pfb    = "type1 fonts", -- this is for Khaled, in ConTeXt we don't use this!
+ -- fea    = "font feature files", -- no longer supported
+    pfb    = "type1 fonts",        -- needed for vector loading
     afm    = "afm",
 }
 

@@ -19,6 +19,8 @@ local trace_mapping = false  trackers.register("fonts.mapping", function(v) trac
 
 local report_fonts  = logs.reporter("fonts","loading") -- not otf only
 
+local force_ligatures = false  directives.register("fonts.mapping.forceligatures",function(v) force_ligatures = v end)
+
 local fonts         = fonts or { }
 local mappings      = fonts.mappings or { }
 fonts.mappings      = mappings
@@ -443,7 +445,7 @@ function mappings.addtounicode(data,filename,checklookups)
     local collected = false
     local unicoded  = 0
     for unicode, glyph in next, descriptions do
-        if not glyph.unicode and glyph.class == "ligature" then
+        if glyph.class == "ligature" and (force_ligatures or not glyph.unicode) then
             if not collected then
                 collected = fonts.handlers.otf.readers.getcomponents(data)
                 if not collected then

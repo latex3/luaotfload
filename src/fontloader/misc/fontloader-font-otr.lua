@@ -1066,14 +1066,13 @@ readers.hmtx = function(f,fontdata,specification)
             local nofmetrics      = fontdata.horizontalheader.nofhmetrics
             local glyphs          = fontdata.glyphs
             local nofglyphs       = fontdata.nofglyphs
-            local nofrepeated     = nofglyphs - nofmetrics
             local width           = 0 -- advance
             local leftsidebearing = 0
             for i=0,nofmetrics-1 do
                 local glyph     = glyphs[i]
                 width           = readshort(f)
                 leftsidebearing = readshort(f)
-                if advance ~= 0 then
+                if width ~= 0 then
                     glyph.width = width
                 end
              -- if leftsidebearing ~= 0 then
@@ -1082,8 +1081,8 @@ readers.hmtx = function(f,fontdata,specification)
             end
             -- The next can happen in for instance a monospace font or in a cjk font
             -- with fixed widths.
-            for i=nofmetrics,nofrepeated do
-                local glyph     = glyphs[i]
+            for i=nofmetrics,nofglyphs-1 do
+                local glyph = glyphs[i]
                 if width ~= 0 then
                     glyph.width = width
                 end

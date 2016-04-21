@@ -28,9 +28,11 @@ don't have this issue.</p>
 local fonts, logs, trackers, containers, resolvers = fonts, logs, trackers, containers, resolvers
 
 local next, type, tonumber = next, type, tonumber
-local format, match, gmatch, lower, gsub, strip = string.format, string.match, string.gmatch, string.lower, string.gsub, string.strip
-local abs = math.abs
-local P, S, C, R, lpegmatch, patterns = lpeg.P, lpeg.S, lpeg.C, lpeg.R, lpeg.match, lpeg.patterns
+local match, gmatch, lower, gsub, strip, find = string.match, string.gmatch, string.lower, string.gsub, string.strip, string.find
+local char, byte, sub = string.char, string.byte, string.sub
+local abs, mod = math.abs, math.mod
+local bxor, rshift = bit32.bxor, bit32.rshift
+local P, S, R, Cmt, C, Ct, Cs, lpegmatch, patterns = lpeg.P, lpeg.S, lpeg.R, lpeg.Cmt, lpeg.C, lpeg.Ct, lpeg.Cs, lpeg.match, lpeg.patterns
 local derivetable = table.derive
 
 local trace_features     = false  trackers.register("afm.features",   function(v) trace_features = v end)
@@ -47,11 +49,6 @@ local findbinfile        = resolvers.findbinfile
 local definers           = fonts.definers
 local readers            = fonts.readers
 local constructors       = fonts.constructors
-
-local fontloader         = fontloader
-local font_to_table      = fontloader.to_table
-local open_font          = fontloader.open
-local close_font         = fontloader.close
 
 local afm                = constructors.newhandler("afm")
 local pfb                = constructors.newhandler("pfb")
@@ -171,7 +168,7 @@ end
 local function get_charmetrics(data,charmetrics,vector)
     local characters = data.characters
     local chr, ind = { }, 0
-    for k,v in gmatch(charmetrics,"([%a]+) +(.-) *;") do
+    for k, v in gmatch(charmetrics,"([%a]+) +(.-) *;") do
         if k == 'C'  then
             v = tonumber(v)
             if v < 0 then
@@ -225,41 +222,193 @@ local function get_variables(data,fontmetrics)
     end
 end
 
-local function get_indexes(data,pfbname)
-    data.resources.filename = resolvers.unresolve(pfbname) -- no shortcut
-    local pfbblob = open_font(pfbname)
-    if pfbblob then
-        local characters = data.characters
-        local pfbdata = font_to_table(pfbblob)
-        if pfbdata then
-            local glyphs = pfbdata.glyphs
-            if glyphs then
-                if trace_loading then
-                    report_afm("getting index data from %a",pfbname)
-                end
-                for index, glyph in next, glyphs do
-            --  for index, glyph in table.sortedhash(glyphs) do
-                    local name = glyph.name
-                    if name then
-                        local char = characters[name]
-                        if char then
-                            if trace_indexing then
-                                report_afm("glyph %a has index %a",name,index)
-                            end
-                            char.index = index
+local get_indexes
+
+do
+
+    -- old font loader
+
+    local fontloader = fontloader
+
+    if fontloader then
+
+        local font_to_table = fontloader.to_table
+        local open_font     = fontloader.open
+        local close_font    = fontloader.close
+
+        local function get_indexes_old(data,pfbname)
+            local pfbblob = open_font(pfbname)
+            if pfbblob then
+                local characters = data.characters
+                local pfbdata = font_to_table(pfbblob)
+                if pfbdata then
+                    local glyphs = pfbdata.glyphs
+                    if glyphs then
+                        if trace_loading then
+                            report_afm("getting index data from %a",pfbname)
                         end
+                        for index, glyph in next, glyphs do
+                            local name = glyph.name
+                            if name then
+                                local char = characters[name]
+                                if char then
+                                    if trace_indexing then
+                                        report_afm("glyph %a has index %a",name,index)
+                                    end
+                                    char.index = index
+                                end
+                            end
+                        end
+                    elseif trace_loading then
+                        report_afm("no glyph data in pfb file %a",pfbname)
                     end
+                elseif trace_loading then
+                    report_afm("no data in pfb file %a",pfbname)
                 end
+                close_font(pfbblob)
             elseif trace_loading then
-                report_afm("no glyph data in pfb file %a",pfbname)
+                report_afm("invalid pfb file %a",pfbname)
             end
-        elseif trace_loading then
-            report_afm("no data in pfb file %a",pfbname)
         end
-        close_font(pfbblob)
-    elseif trace_loading then
-        report_afm("invalid pfb file %a",pfbname)
+
     end
+
+    -- new (unfinished) font loader but i see no differences between
+    -- old and new (one bad vector with old)
+
+    local n, m
+
+    local progress = function(str,position,name,size)
+        local forward = position + tonumber(size) + 3 + 2
+        n = n + 1
+        if n >= m then
+            return #str, name
+        elseif forward < #str then
+            return forward, name
+        else
+            return #str, name
+        end
+    end
+
+    local initialize = function(str,position,size)
+        n = 0
+        m = tonumber(size)
+        return position + 1
+    end
+
+    local charstrings = P("/CharStrings")
+    local name        = P("/") * C((R("az")+R("AZ")+R("09")+S("-_."))^1)
+    local size        = C(R("09")^1)
+    local spaces      = P(" ")^1
+
+    local p_filternames = Ct (
+        (1-charstrings)^0 * charstrings * spaces * Cmt(size,initialize)
+      * (Cmt(name * P(" ")^1 * C(R("09")^1), progress) + P(1))^1
+    )
+
+    -- if one of first 4 not 0-9A-F then binary else hex
+
+    local decrypt
+
+    do
+
+        local r, c1, c2, n = 0, 0, 0, 0
+
+        local function step(c)
+            local cipher = byte(c)
+            local plain  = bxor(cipher,rshift(r,8))
+            r = mod((cipher + r) * c1 + c2,65536)
+            return char(plain)
+        end
+
+        decrypt = function(binary)
+            r, c1, c2, n = 55665, 52845, 22719, 4
+            binary       = gsub(binary,".",step)
+            return sub(binary,n+1)
+        end
+
+     -- local pattern = Cs((P(1) / step)^1)
+     --
+     -- decrypt = function(binary)
+     --     r, c1, c2, n = 55665, 52845, 22719, 4
+     --     binary = lpegmatch(pattern,binary)
+     --     return sub(binary,n+1)
+     -- end
+
+    end
+
+    local function loadpfbvector(filename)
+        -- for the moment limited to encoding only
+
+        local data = io.loaddata(resolvers.findfile(filename))
+
+        if not find(data,"!PS%-AdobeFont%-") then
+            print("no font",filename)
+            return
+        end
+
+        if not data then
+            print("no data",filename)
+            return
+        end
+
+        local ascii, binary = match(data,"(.*)eexec%s+......(.*)")
+
+        if not binary then
+            print("no binary",filename)
+            return
+        end
+
+        binary = decrypt(binary,4)
+
+        local vector = lpegmatch(p_filternames,binary)
+
+        vector[0] = table.remove(vector,1)
+
+        if not vector then
+            print("no vector",filename)
+            return
+        end
+
+        return vector
+
+    end
+
+    get_indexes = function(data,pfbname)
+        local vector = loadpfbvector(pfbname)
+        if vector then
+            local characters = data.characters
+            if trace_loading then
+                report_afm("getting index data from %a",pfbname)
+            end
+            for index=1,#vector do
+                local name = vector[index]
+                local char = characters[name]
+                if char then
+                    if trace_indexing then
+                        report_afm("glyph %a has index %a",name,index)
+                    end
+                    char.index = index
+                end
+            end
+        end
+    end
+
+    if fontloader then
+
+        afm.use_new_indexer = true
+        get_indexes_new     = get_indexes
+
+        get_indexes = function(data,pfbname)
+            if afm.use_new_indexer then
+                return get_indexes_new(data,pfbname)
+            else
+                return get_indexes_old(data,pfbname)
+            end
+        end
+
+    end
+
 end
 
 local function readafm(filename)
@@ -351,8 +500,9 @@ function afm.load(filename)
             data = readafm(filename)
             if data then
                 if pfbname ~= "" then
+                    data.resources.filename = resolvers.unresolve(pfbname)
                     get_indexes(data,pfbname)
-                elseif trace_loading then
+               elseif trace_loading then
                     report_afm("no pfb file for %a",filename)
                  -- data.resources.filename = "unset" -- better than loading the afm file
                 end

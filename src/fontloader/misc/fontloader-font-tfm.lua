@@ -155,7 +155,7 @@ local function read_from_tfm(specification)
         end
         -- let's play safe:
         properties.haskerns     = true
-        properties.haslogatures = true
+        properties.hasligatures = true
         resources.unicodes      = { }
         resources.lookuptags    = { }
         --

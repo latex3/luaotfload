@@ -207,9 +207,8 @@ local make_luanames = function (path)
 end
 
 local format_precedence = {
-    "otf",   "ttc", "ttf",
-    "dfont", "afm", "pfb",
-    "pfa",
+    "otf",  "ttc", "ttf", "afm",
+    --- "pfb", "pfa",
 }
 
 local location_precedence = {
@@ -336,7 +335,7 @@ This is a sketch of the luaotfload db:
     }
     and metadata = {
         created     : string       // creation time
-        formats     : string list; // { "otf", "ttf", "ttc", "dfont" }
+        formats     : string list; // { "otf", "ttf", "ttc" }
         local       : bool;        (* set if local fonts were added to the db *)
         modified    : string       // modification time
         statistics  : TODO;        // created when built with "--stats"
@@ -360,7 +359,7 @@ This is a sketch of the luaotfload db:
         conflicts       : { barename : int; basename : int }; // filename conflict with font at index; happens with subfonts
         familyname      : string;   // sanitized name of the font family the font belongs to, usually from the names table
         fontname        : string;   // sanitized name of the font
-        format          : string;   // "otf" | "ttf" | "dfont" | "pfa" | "pfb" | "afm"
+        format          : string;   // "otf" | "ttf" | "afm"
         fullname        : string;   // sanitized full name of the font including style modifiers
         fullpath        : string;   // path to font in filesystem
         index           : int;      // index in the mappings table
@@ -496,7 +495,6 @@ local lookup_fullpath
 local save_lookups
 local save_names
 local set_font_filter
-local t1_fullinfo
 local update_names
 
 --- state of the database
@@ -1619,74 +1617,13 @@ ot_fullinfo = function (filename,
     return res
 end
 
---[[doc--
-
-    Type1 font inspector. In comparison with OTF, PFB’s contain a good
-    deal less name fields which makes it tricky in some parts to find a
-    meaningful representation for the database.
-
-    Good read: http://www.adobe.com/devnet/font/pdfs/5004.AFM_Spec.pdf
-
---doc]]--
-
---- string -> int -> bool -> string -> fontentry
-
-t1_fullinfo = function (filename, _subfont, location, basename, format)
-    local sanitized
-    local metadata      = load_font_file (filename)
-    local fontname      = metadata.fontname
-    local fullname      = metadata.fullname
-    local familyname    = metadata.familyname
-    local italicangle   = metadata.italicangle
-    local style         = ""
-    local weight
-
-    sanitized = sanitize_fontnames ({
-        fontname        = fontname,
-        psname          = fullname,
-        metafamily      = familyname,
-        familyname      = familyname,
-        weight          = metadata.weight, --- string identifier
-        prefmodifiers   = style,
-    })
-
-    weight = sanitized.weight
-
-    if weight == "bold" then
-        style = weight
-    end
-
-    if italicangle ~= 0 then
-        style = style .. "italic"
-    end
-
-    return {
-        basename         = basename,
-        fullpath         = filename,
-        subfont          = false,
-        location         = location or "system",
-        format           = format,
-        fullname         = sanitized.fullname,
-        fontname         = sanitized.fontname,
-        familyname       = sanitized.familyname,
-        plainname        = fullname,
-        psname           = sanitized.fontname,
-        version          = metadata.version,
-        size             = false,
-        fontstyle_name   = style ~= "" and style or weight,
-        weight           = metadata.pfminfo and pfminfo.weight or 400,
-        italicangle      = italicangle,
-    }
-end
-
 local loaders = {
-    dfont   = ot_fullinfo,
     otf     = ot_fullinfo,
     ttc     = ot_fullinfo,
     ttf     = ot_fullinfo,
 
-    pfb     = t1_fullinfo,
-    pfa     = t1_fullinfo,
+----pfb     = t1_fullinfo, --> may come back one day, so
+----pfa     = t1_fullinfo, --> we keep the indirection
 }
 
 --- not side-effect free!

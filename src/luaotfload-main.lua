@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
 --  DESCRIPTION:  Luaotfload entry point
--- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs
+-- REQUIREMENTS:  luatex v.0.95 or later; packages lualibs
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 -----------------------------------------------------------------------
 --
@@ -29,8 +29,8 @@ local authors = "\z
 
 luaotfload.module = {
     name          = "luaotfload-main",
-    version       = 2.70001,
-    date          = "2016/04/19",
+    version       = 2.70002,
+    date          = "2016/04/21",
     description   = "OpenType layout system.",
     author        = authors,
     copyright     = authors,

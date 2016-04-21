@@ -6,7 +6,7 @@
                      Luaotfload configuration file
 -----------------------------------------------------------------------
 
-:Date:                  2016-04-18
+:Date:                  2016-04-21
 :Copyright:             GPL v2.0
 :Version:               2.7
 :Manual section:        5
@@ -33,7 +33,7 @@ A small Luaotfload configuration file with few customizations could
 look as follows: ::
 
     [db]
-        formats = afm, pfa, pfb
+        formats = afm,ttf
         compress = false
     
     [misc]
@@ -43,10 +43,9 @@ look as follows: ::
         log-level = 6
 
 This will make Luaotfload ignore all font files except for PostScript
-formats. NB: With a default Tex Live install the PS fonts will take
-much longer to index than OpenType or TrueType ones. Also, an
+binary fonts with a matching AFM file, and Truetype fonts. Also, an
 uncompressed index file will be dumped which is going to be much larger
-due to the huge amount of PostScript fonts indexed. The terminal width
+than the default gzip’ed index. The terminal width
 is truncated to 60 characters which influences the verbose output
 during indexing. Finally, the verbosity is increased greatly: each font
 file being processed will be printed to the stdout on a separate line,
@@ -131,7 +130,7 @@ Section ``db``
 +-----------------+--------+---------------------------+
 |  compress       |   b    |  ``true``                 |
 +-----------------+--------+---------------------------+
-|  formats        |   s    |  ``"otf,ttf,ttc,dfont"``  |
+|  formats        |   s    |  ``"otf,ttf,ttc"``        |
 +-----------------+--------+---------------------------+
 |  max-fonts      |   n    |  ``2^51``                 |
 +-----------------+--------+---------------------------+
@@ -158,14 +157,12 @@ containing one or more of these elements:
 
 * ``otf``               (OpenType format),
 * ``ttf`` and ``ttc``       (TrueType format),
-* ``dfont``             (Macintosh TrueType format),
 * ``afm``               (Adobe Font Metrics),
-* ``pfb`` and ``pfa``       (PostScript format).
 
 It corresponds loosely to the ``--formats`` option to
 **luaotfload-tool**. Invalid or duplicate members are ignored; if the
 list does not contain any useful identifiers, the default list
-``"otf,ttf,ttc,dfont"`` will be used.
+``"otf,ttf,ttc"`` will be used.
 
 The variable ``max-fonts`` determines after processing how many font
 files the font scanner will terminate the search. This is useful for

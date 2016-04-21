@@ -1,13 +1,13 @@
 Change History
 --------------
-2016/mm/dd, luaotfload v2.7:
+2016/04/21, luaotfload v2.7:
     * Rework lookup chaining.
     * Combining glyphs from different fonts (``combo: ...`` requests).
     * Glyph fallbacks.
     * Latest fontloader code.
     * Adapt packaging to changed upstream file layout.
     * Remove support for builtin Fontforge libraries (this includes the PFA,
-      PFB, and feature file readers).
+      PFB, DFONT, and feature file readers).
 
 2015/12/09, luaotfload v2.6
     * Add ``sign`` target to makefile for automated package signing.

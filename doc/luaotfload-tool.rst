@@ -6,7 +6,7 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:                  2016-04-18
+:Date:                  2016-04-21
 :Copyright:             GPL v2.0
 :Version:               2.7
 :Manual section:        1
@@ -80,22 +80,19 @@ update mode
                         system fonts if they are installed in both.
 --formats=EXTENSIONS    Extensions of the font files to index.
                         Where *EXTENSIONS* is a comma-separated list of
-                        supported file extensions (otf, ttf, ttc,
-                        dfont, pfa, and pfb).  If the list is prefixed
+                        supported file extensions (otf, ttf, ttc).
+                        If the list is prefixed
                         with a ``+`` sign, the given list is added to
                         the currently active one; ``-`` subtracts.
-                        Default: *otf,ttf,ttc,dfont*.
+                        Default: *otf,ttf,ttc*.
                         Examples:
 
                         1) ``--formats=-ttc,ttf`` would skip
                            TrueType fonts and font collections;
                         2) ``--formats=otf`` would scan only OpenType
                            files;
-                        3) ``--formats=+pfb`` includes binary
-                           Postscript files. **Warning**: with a
-                           standard TeX Live installation this will
-                           grow the database considerably and slow down
-                           font indexing.
+                        3) ``--formats=+afm`` includes binary
+                           Postscript files accompanied by an AFM file.
 
 query mode
 -----------------------------------------------------------------------

@@ -3596,7 +3596,7 @@ return {
         fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
-        names.version   = 2.6
+        names.version   = 2.7
         names.data      = nil      --- contains the loaded database
         names.lookups   = nil      --- contains the lookup cache
 

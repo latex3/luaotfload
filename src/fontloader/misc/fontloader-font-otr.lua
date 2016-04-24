@@ -60,15 +60,15 @@ if not modules then modules = { } end modules ['font-otr'] = {
 -- faster but it might not be the real bottleneck as we still need to juggle data. It
 -- is probably more memory efficient as no intermediate strings are involved.
 
-if not characters then
-    require("char-def")
-    require("char-ini")
-end
+-- if not characters then
+--     require("char-def")
+--     require("char-ini")
+-- end
 
 local next, type, unpack = next, type, unpack
 local byte, lower, char, strip, gsub = string.byte, string.lower, string.char, string.strip, string.gsub
 local bittest = bit32.btest
-local concat, remove, unpack = table.concat, table.remov, table.unpack
+local concat, remove, unpack, fastcopy = table.concat, table.remov, table.unpack, table.fastcopy
 local floor, mod, abs, sqrt, round = math.floor, math.mod, math.abs, math.sqrt, math.round
 local P, R, S, C, Cs, Cc, Ct, Carg, Cmt = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.Cs, lpeg.Cc, lpeg.Ct, lpeg.Carg, lpeg.Cmt
 local lpegmatch = lpeg.match
@@ -1186,6 +1186,8 @@ local sequence = {
     { 3,  0,  6 },
     -- variants
     { 0,  5, 14 },
+    -- last resort ranges
+    { 3, 10, 13 },
 }
 
 -- local sequence = {
@@ -1388,7 +1390,7 @@ formatreaders[12] = function(f,fontdata,offset)
         local last  = readulong(f)
         local index = readulong(f)
         if trace_cmap then
-            report("format 12 from %C to %C",first,last)
+            report("format 12 from %C to %C starts at index %i",first,last,index)
         end
         for unicode=first,last do
             local glyph = glyphs[index]
@@ -1411,6 +1413,53 @@ formatreaders[12] = function(f,fontdata,offset)
                 end
             end
             index = index + 1
+        end
+    end
+    return nofdone
+end
+
+formatreaders[13] = function(f,fontdata,offset)
+    --
+    -- this fector is only used for simple fallback fonts
+    --
+    setposition(f,offset+2+2+4+4) -- skip format reserved length language
+    local mapping    = fontdata.mapping
+    local glyphs     = fontdata.glyphs
+    local duplicates = fontdata.duplicates
+    local nofgroups  = readulong(f)
+    local nofdone    = 0
+    for i=1,nofgroups do
+        local first = readulong(f)
+        local last  = readulong(f)
+        local index = readulong(f)
+        if first < privateoffset then
+            if trace_cmap then
+                report("format 13 from %C to %C get index %i",first,last,index)
+            end
+            local glyph   = glyphs[index]
+            local unicode = glyph.unicode
+            if not unicode then
+                unicode = first
+                glyph.unicode = unicode
+                first = first + 1
+            end
+            local list     = duplicates[unicode]
+            mapping[index] = unicode
+            if not list then
+                list = { }
+                duplicates[unicode] = list
+            end
+            if last >= privateoffset then
+                local limit = privateoffset - 1
+                report("format 13 from %C to %C pruned to %C",first,last,limit)
+                last = limit
+            end
+            for unicode=first,last do
+                list[unicode] = true
+            end
+            nofdone = nofdone + last - first + 1
+        else
+            report("format 13 from %C to %C ignored",first,last)
         end
     end
     return nofdone
@@ -2225,7 +2274,7 @@ function readers.extend(fontdata)
     end
 end
 
---
+-- for now .. this will move to a context specific file
 
 if fonts.hashes then
 

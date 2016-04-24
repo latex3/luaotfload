@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 04/21/16 12:13:25
+-- merge date  : 04/22/16 09:10:04
 
 do -- begin closure to overcome local limits and interference
 
@@ -7002,7 +7002,7 @@ local afm=constructors.newhandler("afm")
 local pfb=constructors.newhandler("pfb")
 local afmfeatures=constructors.newfeatures("afm")
 local registerafmfeature=afmfeatures.register
-afm.version=1.500 
+afm.version=1.501 
 afm.cache=containers.define("fonts","afm",afm.version,true)
 afm.autoprefixed=true 
 afm.helpdata={} 
@@ -7367,7 +7367,8 @@ end
 local uparser=fonts.mappings.makenameparser()
 unify=function(data,filename)
   local unicodevector=fonts.encodings.agl.unicodes 
-  local unicodes,names={},{}
+  local unicodes={}
+  local names={}
   local private=constructors.privateoffset
   local descriptions=data.descriptions
   for name,blob in next,data.characters do
@@ -8244,14 +8245,10 @@ if not modules then modules={} end modules ['font-otr']={
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"
 }
-if not characters then
-  require("char-def")
-  require("char-ini")
-end
 local next,type,unpack=next,type,unpack
 local byte,lower,char,strip,gsub=string.byte,string.lower,string.char,string.strip,string.gsub
 local bittest=bit32.btest
-local concat,remove,unpack=table.concat,table.remov,table.unpack
+local concat,remove,unpack,fastcopy=table.concat,table.remov,table.unpack,table.fastcopy
 local floor,mod,abs,sqrt,round=math.floor,math.mod,math.abs,math.sqrt,math.round
 local P,R,S,C,Cs,Cc,Ct,Carg,Cmt=lpeg.P,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Cc,lpeg.Ct,lpeg.Carg,lpeg.Cmt
 local lpegmatch=lpeg.match
@@ -8896,6 +8893,7 @@ local sequence={
   { 0,0,6 },
   { 3,0,6 },
   { 0,5,14 },
+  { 3,10,13 },
 }
 local supported={}
 for i=1,#sequence do
@@ -9067,7 +9065,7 @@ formatreaders[12]=function(f,fontdata,offset)
     local last=readulong(f)
     local index=readulong(f)
     if trace_cmap then
-      report("format 12 from %C to %C",first,last)
+      report("format 12 from %C to %C starts at index %i",first,last,index)
     end
     for unicode=first,last do
       local glyph=glyphs[index]
@@ -9089,6 +9087,49 @@ formatreaders[12]=function(f,fontdata,offset)
         end
       end
       index=index+1
+    end
+  end
+  return nofdone
+end
+formatreaders[13]=function(f,fontdata,offset)
+  setposition(f,offset+2+2+4+4) 
+  local mapping=fontdata.mapping
+  local glyphs=fontdata.glyphs
+  local duplicates=fontdata.duplicates
+  local nofgroups=readulong(f)
+  local nofdone=0
+  for i=1,nofgroups do
+    local first=readulong(f)
+    local last=readulong(f)
+    local index=readulong(f)
+    if first<privateoffset then
+      if trace_cmap then
+        report("format 13 from %C to %C get index %i",first,last,index)
+      end
+      local glyph=glyphs[index]
+      local unicode=glyph.unicode
+      if not unicode then
+        unicode=first
+        glyph.unicode=unicode
+        first=first+1
+      end
+      local list=duplicates[unicode]
+      mapping[index]=unicode
+      if not list then
+        list={}
+        duplicates[unicode]=list
+      end
+      if last>=privateoffset then
+        local limit=privateoffset-1
+        report("format 13 from %C to %C pruned to %C",first,last,limit)
+        last=limit
+      end
+      for unicode=first,last do
+        list[unicode]=true
+      end
+      nofdone=nofdone+last-first+1
+    else
+      report("format 13 from %C to %C ignored",first,last)
     end
   end
   return nofdone
@@ -13932,20 +13973,27 @@ local function copyduplicates(fontdata)
         local du=descriptions[u]
         if du then
           local t={ f_character_y(u),"@",f_index(du.index),"->" }
+          local n=0
+          local m=25
           for u in next,d do
             if descriptions[u] then
-              t[#t+1]=f_character_n(u)
+              if n<m then
+                t[n+4]=f_character_n(u)
+              end
             else
               local c=copy(du)
+              c.unicode=u 
               descriptions[u]=c
-              t[#t+1]=f_character_y(u)
+              if n<m then
+                t[n+4]=f_character_y(u)
+              end
             end
+            n=n+1
           end
-          local n=#t
-          if n>25 then
-            report("duplicates: %i : %s .. %s ",n,t[1],t[n])
-          else
+          if n<=m then
             report("duplicates: %i : % t",n,t)
+          else
+            report("duplicates: %i : % t ...",n,t)
           end
         else
         end

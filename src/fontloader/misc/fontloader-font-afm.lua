@@ -56,7 +56,7 @@ local pfb                = constructors.newhandler("pfb")
 local afmfeatures        = constructors.newfeatures("afm")
 local registerafmfeature = afmfeatures.register
 
-afm.version              = 1.500 -- incrementing this number one up will force a re-cache
+afm.version              = 1.501 -- incrementing this number one up will force a re-cache
 afm.cache                = containers.define("fonts", "afm", afm.version, true)
 afm.autoprefixed         = true -- this will become false some day (catches texnansi-blabla.*)
 
@@ -547,9 +547,10 @@ local uparser = fonts.mappings.makenameparser()
 
 unify = function(data, filename)
     local unicodevector = fonts.encodings.agl.unicodes -- loaded runtime in context
-    local unicodes, names = { }, { }
-    local private = constructors.privateoffset
-    local descriptions = data.descriptions
+    local unicodes      = { }
+    local names         = { }
+    local private       = constructors.privateoffset
+    local descriptions  = data.descriptions
     for name, blob in next, data.characters do
         local code = unicodevector[name] -- or characters.name_to_unicode[name]
         if not code then

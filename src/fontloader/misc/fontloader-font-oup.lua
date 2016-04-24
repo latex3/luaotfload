@@ -367,22 +367,28 @@ local function copyduplicates(fontdata)
             for u, d in next, duplicates do
                 local du = descriptions[u]
                 if du then
-                    local t  = { f_character_y(u), "@", f_index(du.index), "->" }
+                    local t = { f_character_y(u), "@", f_index(du.index), "->" }
+                    local n = 0
+                    local m = 25
                     for u in next, d do
                         if descriptions[u] then
-                            t[#t+1] = f_character_n(u)
+                            if n < m then
+                                t[n+4] = f_character_n(u)
+                            end
                         else
                             local c = copy(du)
-                         -- c.unicode = u -- maybe
+                            c.unicode = u -- better this way
                             descriptions[u] = c
-                            t[#t+1] = f_character_y(u)
+                            if n < m then
+                                t[n+4] = f_character_y(u)
+                            end
                         end
+                        n = n + 1
                     end
-                    local n = #t
-                    if n > 25 then
-                        report("duplicates: %i : %s .. %s ",n,t[1],t[n])
-                    else
+                    if n <= m then
                         report("duplicates: %i : % t",n,t)
+                    else
+                        report("duplicates: %i : % t ...",n,t)
                     end
                 else
                     -- what a mess

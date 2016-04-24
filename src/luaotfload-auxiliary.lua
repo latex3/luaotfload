@@ -317,6 +317,12 @@ aux.name_of_slot      = name_of_slot
 -----------------------------------------------------------------------
 --- lots of arrowcode ahead
 
+local get_features = function (tfmdata)
+  local resources = tfmdata.resources  if not resources then return false end
+  local features  = resources.features if not features  then return false end
+  return features
+end
+
 --[[doc--
 This function, modeled after “check_script()” from fontspec, returns
 true if in the given font, the script “asked_script” is accounted for in at
@@ -325,13 +331,23 @@ least one feature.
 
 --- int -> string -> bool
 local provides_script = function (font_id, asked_script)
+  if not font_id      or type (font_id)      ~= "number"
+  or not asked_script or type (asked_script) ~= "string"
+  then
+    logreport ("both", 0, "aux",
+               "invalid parameters to provides_language(%s, %s)",
+               tostring (font_id), tostring (asked_script))
+    return false
+  end
   asked_script = stringlower(asked_script)
   if font_id and font_id > 0 then
-    local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
-    local shared   = tfmdata.shared       if not shared   then return false end
-    local fontdata = shared.rawdata       if not fontdata then return false end
-    local fontname = fontdata.metadata.fontname
-    local features = fontdata.resources.features
+    local tfmdata = identifiers[font_id]
+    if not tfmdata then return false end
+    local features = get_features (tfmdata)
+    if features == false then
+      logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
+      return false
+    end
     for method, featuredata in next, features do
       --- where method: "gpos" | "gsub"
       for feature, data in next, featuredata do
@@ -362,14 +378,27 @@ feature.
 
 --- int -> string -> string -> bool
 local provides_language = function (font_id, asked_script, asked_language)
-  asked_script     = stringlower(asked_script)
-  asked_language   = stringlower(asked_language)
+  if not font_id        or type (font_id)        ~= "number"
+  or not asked_script   or type (asked_script)   ~= "string"
+  or not asked_language or type (asked_language) ~= "string"
+  then
+    logreport ("both", 0, "aux",
+               "invalid parameters to provides_language(%s, %s, %s)",
+               tostring (font_id),
+               tostring (asked_script),
+               tostring (asked_language))
+    return false
+  end
+  asked_script   = stringlower(asked_script)
+  asked_language = stringlower(asked_language)
   if font_id and font_id > 0 then
-    local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
-    local shared   = tfmdata.shared       if not shared   then return false end
-    local fontdata = shared.rawdata       if not fontdata then return false end
-    local fontname = fontdata.metadata.fontname
-    local features = fontdata.resources.features
+    local tfmdata = identifiers[font_id]
+    if not tfmdata then return false end
+    local features = get_features (tfmdata)
+    if features == false then
+      logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
+      return false
+    end
     for method, featuredata in next, features do
       --- where method: "gpos" | "gsub"
       for feature, data in next, featuredata do
@@ -432,16 +461,29 @@ accounted for in the script with tag “asked_script” in feature
 --- int -> string -> string -> string -> bool
 local provides_feature = function (font_id,        asked_script,
                                    asked_language, asked_feature)
+  if not font_id        or type (font_id)        ~= "number"
+  or not asked_script   or type (asked_script)   ~= "string"
+  or not asked_language or type (asked_language) ~= "string"
+  or not asked_feature  or type (asked_feature)  ~= "string"
+  then
+    logreport ("both", 0, "aux",
+               "invalid parameters to provides_language(%s, %s, %s, %s)",
+               tostring (font_id),        tostring (asked_script),
+               tostring (asked_language), tostring (asked_feature))
+    return false
+  end
   asked_script    = stringlower(asked_script)
   asked_language  = stringlower(asked_language)
   asked_feature   = lpegmatch(strip_garbage, asked_feature)
 
   if font_id and font_id > 0 then
-    local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
-    local shared   = tfmdata.shared       if not shared   then return false end
-    local fontdata = shared.rawdata       if not fontdata then return false end
-    local features = fontdata.resources.features
-    local fontname = fontdata.metadata.fontname
+    local tfmdata  = identifiers[font_id]
+    if not tfmdata then return false end
+    local features = get_features (tfmdata)
+    if features == false then
+      logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
+      return false
+    end
     for method, featuredata in next, features do
       --- where method: "gpos" | "gsub"
       local feature = featuredata[asked_feature]

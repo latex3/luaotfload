@@ -263,20 +263,27 @@ end
 
 --- int -> string -> bool -> (int | false)
 local slot_of_name = function (font_id, glyphname, unsafe)
-  local fontdata = identifiers[font_id]
-  if fontdata then
-    local unicode = fontdata.resources.unicodes[glyphname]
-    if unicode then
-      if type(unicode) == "number" then
-        return unicode
-      else
-        return unicode[1] --- for multiple components
-      end
---  else
---    --- missing
+  if not font_id   or type (font_id)   ~= "number"
+  or not glyphname or type (glyphname) ~= "string"
+  then
+    logreport ("both", 0, "aux",
+               "invalid parameters to slot_of_name (%s, %s)",
+               tostring (font_id), tostring (glyphname))
+    return false
+  end
+
+  local tfmdata = identifiers [font_id]
+  if not tfmdata then return raw_slot_of_name (font_id, glyphname) end
+  local resources = tfmdata.resources  if not resources then return false end
+  local unicodes  = resources.unicodes if not unicodes  then return false end
+
+  local unicode = unicodes [glyphname]
+  if unicode then
+    if type (unicode) == "number" then
+      return unicode
+    else
+      return unicode [1] --- for multiple components
     end
-  elseif unsafe == true then -- for Robert
-    return raw_slot_of_name(font_id, glyphname)
   end
   return false
 end
@@ -335,7 +342,7 @@ local provides_script = function (font_id, asked_script)
   or not asked_script or type (asked_script) ~= "string"
   then
     logreport ("both", 0, "aux",
-               "invalid parameters to provides_language(%s, %s)",
+               "invalid parameters to provides_script(%s, %s)",
                tostring (font_id), tostring (asked_script))
     return false
   end
@@ -467,7 +474,7 @@ local provides_feature = function (font_id,        asked_script,
   or not asked_feature  or type (asked_feature)  ~= "string"
   then
     logreport ("both", 0, "aux",
-               "invalid parameters to provides_language(%s, %s, %s, %s)",
+               "invalid parameters to provides_feature(%s, %s, %s, %s)",
                tostring (font_id),        tostring (asked_script),
                tostring (asked_language), tostring (asked_feature))
     return false

@@ -305,11 +305,23 @@ local indices
 
 --- int -> (string | false)
 local name_of_slot = function (codepoint)
+  if not codepoint or type (codepoint) ~= "number" then
+    logreport ("both", 0, "aux",
+               "invalid parameters to name_of_slot (%s)",
+               tostring (codepoint))
+    return false
+  end
+
   if not indices then --- this will load the glyph list
     local unicodes = encodings.agl.unicodes
-    indices = table.swapped(unicodes)
+    if not unicodes or not next (unicodes)then
+      logreport ("both", 0, "aux",
+                 "name_of_slot: failed to load the AGL.")
+    end
+    indices = table.swapped (unicodes)
   end
-  local glyphname = indices[codepoint]
+
+  local glyphname = indices [codepoint]
   if glyphname then
     return glyphname
   end

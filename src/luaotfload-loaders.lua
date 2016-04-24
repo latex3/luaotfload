@@ -49,6 +49,14 @@ local unsupported_reader = function (format)
   end
 end
 
+local afm_compat_message = function (specification, method)
+  logreport ("both", 0, "loaders",
+             "PFB format only supported with matching \z
+              AFM; redirecting (“%s”, “%s”).",
+             tostring (specification.name), tostring (method))
+  return fonts.readers.afm (specification, method)
+end
+
 local install_formats = function ()
   local fonts = fonts
   if not fonts then return false end
@@ -81,7 +89,7 @@ local install_formats = function ()
   return aux ("evl", eval_reader)
      and aux ("lua", lua_reader)
      and aux ("pfa", unsupported_reader "pfa")
-     and aux ("pfb", unsupported_reader "pfb")
+     and aux ("pfb", afm_compat_message) --- pfb loader is incomplete
      and aux ("ofm", readers.tfm)
      and aux ("dfont", unsupported_reader "dfont")
 end

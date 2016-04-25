@@ -177,14 +177,32 @@ Comment from fontspec:
 
 --doc]]--
 
-local capheight_reference_char = stringbyte "X" -- might be ‘M’, ‘Ж’, or ‘ξ’.
+local capheight_reference_chars      = { "X", "M", "Ж", "ξ", }
+local capheight_reference_codepoints do
+  local utfbyte = unicode.utf8.byte
+  capheight_reference_codepoints = { }
+  for i = 1, #capheight_reference_chars do
+    local chr = capheight_reference_chars [i]
+    capheight_reference_codepoints [i] = utfbyte (chr)
+  end
+end
 
 local determine_capheight = function (fontdata)
   local parameters = fontdata.parameters if not parameters then return false end
   local characters = fontdata.characters if not characters then return false end
-  local refchar    = characters [capheight_reference_char]
-  if refchar then
-    return refchar.height
+  --- Pretty simplistic but it does return *some* value for most fonts;
+  --- we could also refine the approach to return some kind of average
+  --- of all capital letters or a user-provided subset.
+  for i = 1, #capheight_reference_codepoints do
+    local refcp   = capheight_reference_codepoints [i]
+    local refchar = characters [refcp]
+    if refchar then
+      logreport ("both", 4, "aux",
+                 "picked height of character ‘%s’ (U+%d) as \\fontdimen8 \z
+                  candidate",
+                 capheight_reference_chars [i], refcp)
+      return refchar.height
+    end
   end
   return false
 end

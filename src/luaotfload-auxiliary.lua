@@ -177,40 +177,72 @@ Comment from fontspec:
 
 --doc]]--
 
-local set_capheight = function (fontdata)
-    local shared     = fontdata.shared
-    local parameters = fontdata.parameters
-    local capheight
-    if    shared
-      and shared.rawdata.metadata
-      and shared.rawdata.metadata.pfminfo
-    then
-      local units_per_em   = parameters.units
-      local size           = parameters.size
-      local os2_capheight  = shared.rawdata.metadata.pfminfo.os2_capheight
+local capheight_reference_char = stringbyte "X" -- might be ‘M’, ‘Ж’, or ‘ξ’.
 
-      if capheight and os2_capheight > 0 then
-        capheight = os2_capheight / units_per_em * size
-      else
-        local X8_str = stringbyte"X"
-        local X8_chr = fontdata.characters[X8_str]
-        if X8_chr then
-          capheight = X8_chr.height
-        else
-          capheight = parameters.ascender / units_per_em * size
-        end
-      end
-    else
-      local X8_str = stringbyte "X"
-      local X8_chr = fontdata.characters[X8_str]
-      if X8_chr then
-        capheight = X8_chr.height
-      end
+local determine_capheight = function (fontdata)
+  local parameters = fontdata.parameters if not parameters then return false end
+  local characters = fontdata.characters if not characters then return false end
+  local refchar    = characters [capheight_reference_char]
+  if refchar then
+    return refchar.height
+  end
+  return false
+end
+
+local query_ascender = function (fontdata)
+  local parameters = fontdata.parameters if not parameters then return false end
+  local metadata   = fontdata.metadata   if not metadata   then return false end
+  local ascender   = metadata.ascender   if not ascender   then return false end
+  local units      = metadata.units      if units == 0     then return false end
+  local size       = parameters.size     if not size       then return false end
+  return ascender * size / units
+end
+
+local query_capheight = function (fontdata)
+  local parameters = fontdata.parameters if not parameters then return false end
+  local metadata   = fontdata.metadata   if not metadata   then return false end
+  local capheight  = metadata.capheight  if not capheight  then return false end
+  local units      = metadata.units      if units == 0     then return false end
+  local size       = parameters.size     if not size       then return false end
+  return capheight * size / units
+end
+
+local query_fontdimen8 = function (fontdata)
+  local parameters = fontdata.parameters if not parameters then return false end
+  local fontdimen8 = parameters [8]
+  if fontdimen8 then return fontdimen8 end
+  return false
+end
+
+local caphtfmt = function (ref, ht)
+  if not ht  then return "<none>"      end
+  if not ref then return tostring (ht) end
+  return stringformat ("%s(δ=%s)", ht, ht - ref)
+end
+
+local set_capheight = function (fontdata)
+    if not fontdata then
+      logreport ("both", 0, "aux",
+                 "error: set_capheight() received garbage")
+      return
     end
+    local capheight_dimen8   = query_fontdimen8    (fontdata)
+    local capheight_alleged  = query_capheight     (fontdata)
+    local capheight_ascender = query_ascender      (fontdata)
+    local capheight_measured = determine_capheight (fontdata)
+    logreport ("term", 4, "aux",
+               "capht: param[8]=%s advertised=%s ascender=%s measured=%s",
+               tostring (capheight_dimen8),
+               caphtfmt (capheight_dimen8, capheight_alleged),
+               caphtfmt (capheight_dimen8, capheight_ascender),
+               caphtfmt (capheight_dimen8, capheight_measured))
+    if capheight_dimen8 then --- nothing to do
+      return
+    end
+
+    local capheight = capheight_alleged or capheight_ascender or capheight_measured
     if capheight then
-      --- is this legit? afaics there’s nothing else on the
-      --- array part of that table
-      fontdata.parameters[8] = capheight
+      fontdata.parameters [8] = capheight
     end
 end
 

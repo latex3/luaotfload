@@ -43,14 +43,14 @@ end
 
 local unsupported_reader = function (format)
   return function (specification)
-    logreport ("both", 0, "loaders",
+    logreport ("both", 4, "loaders",
                "font format “%s” unsupported; cannot load %s.",
                format, tostring (specification.name))
   end
 end
 
 local afm_compat_message = function (specification, method)
-  logreport ("both", 0, "loaders",
+  logreport ("both", 4, "loaders",
              "PFB format only supported with matching \z
               AFM; redirecting (“%s”, “%s”).",
              tostring (specification.name), tostring (method))
@@ -78,7 +78,7 @@ local install_formats = function ()
     readers  [which] = reader
     handlers [which] = { }
     if not seqset [which] then
-      logreport ("both", 0, "loaders",
+      logreport ("both", 3, "loaders",
                  "Extending reader sequence for “%s”.", which)
       sequence [#sequence + 1] = which
       seqset   [which]         = true

@@ -205,20 +205,18 @@ local resolve_sequence = function (seq, specification)
     for i = 1, #seq do
         local id  = seq [i]
         local mth = resolve_methods [id]
-        logreport ("both", 0, "resolve", "step %d: apply method %q (%s)", i, id, mth)
+        logreport ("both", 3, "resolve", "step %d: apply method %q (%s)", i, id, mth)
         if mth (specification) == true then
-            logreport ("both", 0, "resolve",
-                       "%d: method %q indicated lookup success", i, id)
-            logreport ("both", 0, "resolve",
-                       "method %q resolved %q -> %s (%s)",
-                       id, specification.specification,
+            logreport ("both", 3, "resolve",
+                       "%d: method %q resolved %q -> %s (%s).",
+                       i, id, specification.specification,
                        specification.name,
                        specification.forcedname)
             return true
         end
     end
     logreport ("both", 0, "resolve",
-               "sequence of %d lookups yielded nothing appropriate", #seq)
+               "sequence of %d lookups yielded nothing appropriate.", #seq)
     return false
 end
 

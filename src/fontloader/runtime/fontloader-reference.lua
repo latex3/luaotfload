@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 04/22/16 09:10:04
+-- merge date  : 04/25/16 13:30:09
 
 do -- begin closure to overcome local limits and interference
 
@@ -6984,7 +6984,7 @@ local fonts,logs,trackers,containers,resolvers=fonts,logs,trackers,containers,re
 local next,type,tonumber=next,type,tonumber
 local match,gmatch,lower,gsub,strip,find=string.match,string.gmatch,string.lower,string.gsub,string.strip,string.find
 local char,byte,sub=string.char,string.byte,string.sub
-local abs,mod=math.abs,math.mod
+local abs=math.abs
 local bxor,rshift=bit32.bxor,bit32.rshift
 local P,S,R,Cmt,C,Ct,Cs,lpegmatch,patterns=lpeg.P,lpeg.S,lpeg.R,lpeg.Cmt,lpeg.C,lpeg.Ct,lpeg.Cs,lpeg.match,lpeg.patterns
 local derivetable=table.derive
@@ -7183,7 +7183,7 @@ do
     local function step(c)
       local cipher=byte(c)
       local plain=bxor(cipher,rshift(r,8))
-      r=mod((cipher+r)*c1+c2,65536)
+      r=((cipher+r)*c1+c2)%65536
       return char(plain)
     end
     decrypt=function(binary)
@@ -8249,7 +8249,7 @@ local next,type,unpack=next,type,unpack
 local byte,lower,char,strip,gsub=string.byte,string.lower,string.char,string.strip,string.gsub
 local bittest=bit32.btest
 local concat,remove,unpack,fastcopy=table.concat,table.remov,table.unpack,table.fastcopy
-local floor,mod,abs,sqrt,round=math.floor,math.mod,math.abs,math.sqrt,math.round
+local floor,abs,sqrt,round=math.floor,math.abs,math.sqrt,math.round
 local P,R,S,C,Cs,Cc,Ct,Carg,Cmt=lpeg.P,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Cc,lpeg.Ct,lpeg.Carg,lpeg.Cmt
 local lpegmatch=lpeg.match
 local setmetatableindex=table.setmetatableindex
@@ -8952,10 +8952,10 @@ formatreaders[4]=function(f,fontdata,offset)
     elseif offset==0xFFFF then
     elseif offset==0 then
       if trace_cmap then
-        report("format 4.%i segment %2i from %C upto %C at index %H",1,segment,startchar,endchar,mod(startchar+delta,65536))
+        report("format 4.%i segment %2i from %C upto %C at index %H",1,segment,startchar,endchar,(startchar+delta)%65536)
       end
       for unicode=startchar,endchar do
-        local index=mod(unicode+delta,65536)
+        local index=(unicode+delta)%65536
         if index and index>0 then
           local glyph=glyphs[index]
           if glyph then
@@ -8984,13 +8984,13 @@ formatreaders[4]=function(f,fontdata,offset)
     else
       local shift=(segment-nofsegments+offset/2)-startchar
       if trace_cmap then
-        report("format 4.%i segment %2i from %C upto %C at index %H",0,segment,startchar,endchar,mod(startchar+delta,65536))
+        report("format 4.%i segment %2i from %C upto %C at index %H",0,segment,startchar,endchar,(startchar+delta)%65536)
       end
       for unicode=startchar,endchar do
         local slot=shift+unicode
         local index=indices[slot]
         if index and index>0 then
-          index=mod(index+delta,65536)
+          index=(index+delta)%65536
           local glyph=glyphs[index]
           if glyph then
             local gu=glyph.unicode
@@ -16680,8 +16680,6 @@ local attributes,nodes,node=attributes,nodes,node
 fonts=fonts
 local hashes=fonts.hashes
 local fontdata=hashes.identifiers
-local parameters=fonts.hashes.parameters
-local resources=fonts.hashes.resources
 nodes.injections=nodes.injections or {}
 local injections=nodes.injections
 local tracers=nodes.tracers
@@ -17871,7 +17869,7 @@ local function injectspaces(head)
   local function updatefont(font,trig)
     leftkerns=trig.left
     rightkerns=trig.right
-    local par=parameters[font]
+    local par=fontdata[font].parameters 
     factor=par.factor
     threshold=par.spacing.width-1 
     lastfont=font
@@ -18719,7 +18717,21 @@ local function toligature(head,start,stop,char,dataset,sequence,markflag,discfou
       local pre,post,replace,pretail,posttail,replacetail=getdisc(discfound,true)
       if not replace then 
         local prev=getprev(base)
-        local copied=copy_node_list(comp)
+local current=comp
+local previous=nil
+local copied=nil
+while current do
+  if getid(current)==glyph_code then
+    local n=copy_node(current)
+    if copied then
+      setlink(previous,n)
+    else
+      copied=n
+    end
+    previous=n
+  end
+  current=getnext(current)
+end
         setprev(discnext,nil) 
         setnext(discprev,nil) 
         if pre then

@@ -30,7 +30,7 @@ local fonts, logs, trackers, containers, resolvers = fonts, logs, trackers, cont
 local next, type, tonumber = next, type, tonumber
 local match, gmatch, lower, gsub, strip, find = string.match, string.gmatch, string.lower, string.gsub, string.strip, string.find
 local char, byte, sub = string.char, string.byte, string.sub
-local abs, mod = math.abs, math.mod
+local abs = math.abs
 local bxor, rshift = bit32.bxor, bit32.rshift
 local P, S, R, Cmt, C, Ct, Cs, lpegmatch, patterns = lpeg.P, lpeg.S, lpeg.R, lpeg.Cmt, lpeg.C, lpeg.Ct, lpeg.Cs, lpeg.match, lpeg.patterns
 local derivetable = table.derive
@@ -317,7 +317,7 @@ do
         local function step(c)
             local cipher = byte(c)
             local plain  = bxor(cipher,rshift(r,8))
-            r = mod((cipher + r) * c1 + c2,65536)
+            r = ((cipher + r) * c1 + c2) % 65536
             return char(plain)
         end
 

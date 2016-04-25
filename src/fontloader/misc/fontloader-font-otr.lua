@@ -69,7 +69,7 @@ local next, type, unpack = next, type, unpack
 local byte, lower, char, strip, gsub = string.byte, string.lower, string.char, string.strip, string.gsub
 local bittest = bit32.btest
 local concat, remove, unpack, fastcopy = table.concat, table.remov, table.unpack, table.fastcopy
-local floor, mod, abs, sqrt, round = math.floor, math.mod, math.abs, math.sqrt, math.round
+local floor, abs, sqrt, round = math.floor, math.abs, math.sqrt, math.round
 local P, R, S, C, Cs, Cc, Ct, Carg, Cmt = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.Cs, lpeg.Cc, lpeg.Ct, lpeg.Carg, lpeg.Cmt
 local lpegmatch = lpeg.match
 
@@ -1270,10 +1270,10 @@ formatreaders[4] = function(f,fontdata,offset)
             -- bad encoding
         elseif offset == 0 then
             if trace_cmap then
-                report("format 4.%i segment %2i from %C upto %C at index %H",1,segment,startchar,endchar,mod(startchar + delta,65536))
+                report("format 4.%i segment %2i from %C upto %C at index %H",1,segment,startchar,endchar,(startchar + delta) % 65536)
             end
             for unicode=startchar,endchar do
-                local index = mod(unicode + delta,65536)
+                local index = (unicode + delta) % 65536
                 if index and index > 0 then
                     local glyph = glyphs[index]
                     if glyph then
@@ -1303,13 +1303,13 @@ formatreaders[4] = function(f,fontdata,offset)
         else
             local shift = (segment-nofsegments+offset/2) - startchar
             if trace_cmap then
-                report("format 4.%i segment %2i from %C upto %C at index %H",0,segment,startchar,endchar,mod(startchar + delta,65536))
+                report("format 4.%i segment %2i from %C upto %C at index %H",0,segment,startchar,endchar,(startchar + delta) % 65536)
             end
             for unicode=startchar,endchar do
                 local slot  = shift + unicode
                 local index = indices[slot]
                 if index and index > 0 then
-                    index = mod(index + delta,65536)
+                    index = (index + delta) % 65536
                     local glyph = glyphs[index]
                     if glyph then
                         local gu = glyph.unicode

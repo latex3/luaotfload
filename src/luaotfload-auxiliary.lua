@@ -88,13 +88,12 @@ package.
 --doc]]--
 
 local set_sscale_dimens = function (fontdata)
-  local mathconstants = fontdata.MathConstants
-  local parameters    = fontdata.parameters
-  if mathconstants then
-    parameters[10] = mathconstants.ScriptPercentScaleDown or 70
-    parameters[11] = mathconstants.ScriptScriptPercentScaleDown or 50
-  end
-  return fontdata
+  local resources     = fontdata.resources      if not resources     then return end
+  local mathconstants = resources.MathConstants if not mathconstants then return end
+  local parameters    = fontdata.parameters     if not parameters    then return end
+  --- the default values below are complete crap
+  parameters [10] = mathconstants.ScriptPercentScaleDown       or 70
+  parameters [11] = mathconstants.ScriptScriptPercentScaleDown or 50
 end
 
 luaotfload_callbacks [#luaotfload_callbacks + 1] = {
@@ -104,8 +103,8 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
 --- fontobj -> int
 local lookup_units = function (fontdata)
   local metadata = fontdata.shared and fontdata.shared.rawdata.metadata
-  if metadata and metadata.units_per_em then
-    return metadata.units_per_em
+  if metadata and metadata.units then
+    return metadata.units
   elseif fontdata.parameters and fontdata.parameters.units then
     return fontdata.parameters.units
   elseif fontdata.units then --- v1.x
@@ -122,9 +121,9 @@ local patch_cambria_domh = function (fontdata)
   local mathconstants = fontdata.MathConstants
   if mathconstants and fontdata.psname == "CambriaMath" then
     --- my test Cambria has 2048
-    local units_per_em = fontdata.units_per_em or lookup_units(fontdata)
-    local sz           = fontdata.parameters.size or fontdata.size
-    local mh           = 2800 / units_per_em * sz
+    local units = fontdata.units or lookup_units(fontdata)
+    local sz    = fontdata.parameters.size or fontdata.size
+    local mh    = 2800 / units * sz
     if mathconstants.DisplayOperatorMinHeight < mh then
       mathconstants.DisplayOperatorMinHeight = mh
     end

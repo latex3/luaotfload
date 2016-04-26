@@ -111,9 +111,33 @@ local make_loader = function (prefix)
     return function (name)
         local t_0 = osgettimeofday ()
         local modname = make_loader_name (prefix, name)
-        local data = require (modname)
+        --- We don’t want the stack info from inside, so just pcall().
+        local ok, data = pcall (require, modname)
         local t_end = osgettimeofday ()
         timing_info.t_load [name] = t_end - t_0
+        if not ok then
+            io.write "\n"
+            local msg = luaotfload.log and luaotfload.log.report or print
+            msg ("both", 0, "load", "FATAL ERROR")
+            msg ("both", 0, "load", "  × Failed to load module %q.",
+                 tostring (modname))
+            local lines = string.split (data, "\n\t")
+            if not lines then
+                msg ("both", 0, "load", "  × Error message: %q", data)
+            else
+                msg ("both", 0, "load", "  × Error message:")
+                for i = 1, #lines do
+                    msg ("both", 0, "load", "    × %q.", lines [i])
+                end
+            end
+            io.write "\n\n"
+            local debug = debug
+            if debug then
+                io.write (debug.traceback())
+                io.write "\n\n"
+            end
+            os.exit(-1)
+        end
         return data
     end
 end

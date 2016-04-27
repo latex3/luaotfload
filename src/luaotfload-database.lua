@@ -208,7 +208,7 @@ end
 
 local format_precedence = {
     "otf",  "ttc", "ttf", "afm",
-    --- "pfb", "pfa",
+    -- "pfb" --- may come back before Luatex 1.0
 }
 
 local location_precedence = {
@@ -359,7 +359,7 @@ This is a sketch of the luaotfload db:
         conflicts       : { barename : int; basename : int }; // filename conflict with font at index; happens with subfonts
         familyname      : string;   // sanitized name of the font family the font belongs to, usually from the names table
         fontname        : string;   // sanitized name of the font
-        format          : string;   // "otf" | "ttf" | "afm"
+        format          : string;   // "otf" | "ttf" | "afm" (* | "pfb" *)
         fullname        : string;   // sanitized full name of the font including style modifiers
         fullpath        : string;   // path to font in filesystem
         index           : int;      // index in the mappings table
@@ -478,7 +478,6 @@ end
 
 --- define locals in scope
 local access_font_index
-local collect_families
 local find_closest
 local flush_lookup_cache
 local generate_filedata
@@ -495,6 +494,7 @@ local lookup_fullpath
 local save_lookups
 local save_names
 local set_font_filter
+local t1_fullinfo
 local update_names
 
 --- state of the database
@@ -595,11 +595,11 @@ load_lookups = function ( )
 end
 
 local regular_synonym = {
-    book    = "r",
-    normal  = "r",
-    plain   = "r",
-    regular = "r",
-    roman   = "r",
+    book    = true,
+    normal  = true,
+    plain   = true,
+    regular = true,
+    roman   = true,
 }
 
 local italic_synonym = {
@@ -1034,7 +1034,7 @@ local lookup_fontname = function (specification, name, style)
                 lastresort = face
             end
         elseif face.metafamily == name
-            and (regular_synonym [prefmodifiers]
+            and (   regular_synonym [prefmodifiers]
                  or regular_synonym [subfamily])
         then
             lastresort = face
@@ -1409,7 +1409,6 @@ local map_english_names = function (metadata)
         certain.
     --]]--
     if platformnames then
-        --inspect(metadata)
         --namesource = platformnames.macintosh or platformnames.windows
         namesource = platformnames.windows or platformnames.macintosh
     end
@@ -1448,7 +1447,6 @@ local get_raw_info = function (metadata, basename)
     return {
         familyname          = metadata.familyname,
         fontname            = fontname,
-        fontstyle_name      = metadata.fontstyle_name,
         fullname            = fullname,
         italicangle         = metadata.italicangle,
         names               = metadata.names,
@@ -1518,21 +1516,6 @@ local organize_namedata = function (rawinfo,
             fontname      = info.fontname,
         },
     }
-
-    -- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
-    if rawinfo.fontstyle_name then
-        --- not present in all fonts, often differs from the preferred
-        --- subfamily as well as subfamily fields, e.g. with
-        --- LMSans10-BoldOblique:
-        ---     subfamily:      “Bold Italic”
-        ---     prefmodifiers:  “10 Bold Oblique”
-        ---     fontstyle_name: “Bold Oblique”
-        for _, name in next, rawinfo.fontstyle_name do
-            if name.lang == 1033 then --- I hate magic numbers
-                fontnames.fontstyle_name = name.name
-            end
-        end
-    end
 
     return {
         sanitized     = sanitize_fontnames (fontnames),
@@ -1617,13 +1600,71 @@ ot_fullinfo = function (filename,
     return res
 end
 
+--[[doc--
+
+    Type1 font inspector. In comparison with OTF, PFB’s contain a good
+    deal less name fields which makes it tricky in some parts to find a
+    meaningful representation for the database.
+
+    Good read: http://www.adobe.com/devnet/font/pdfs/5004.AFM_Spec.pdf
+
+--doc]]--
+
+--- string -> int -> bool -> string -> fontentry
+
+t1_fullinfo = function (filename, _subfont, location, basename, format)
+    local sanitized
+    local metadata      = load_font_file (filename)
+    local fontname      = metadata.fontname
+    local fullname      = metadata.fullname
+    local familyname    = metadata.familyname
+    local italicangle   = metadata.italicangle
+    local style         = ""
+    local weight
+
+    sanitized = sanitize_fontnames ({
+        fontname        = fontname,
+        psname          = fullname,
+        metafamily      = familyname,
+        familyname      = familyname,
+        weight          = metadata.weight, --- string identifier
+        prefmodifiers   = style,
+    })
+
+    weight = sanitized.weight
+
+    if weight == "bold" then
+        style = weight
+    end
+
+    if italicangle ~= 0 then
+        style = style .. "italic"
+    end
+
+    return {
+        basename         = basename,
+        fullpath         = filename,
+        subfont          = false,
+        location         = location or "system",
+        format           = format,
+        fullname         = sanitized.fullname,
+        fontname         = sanitized.fontname,
+        familyname       = sanitized.familyname,
+        plainname        = fullname,
+        psname           = sanitized.fontname,
+        version          = metadata.version,
+        size             = false,
+        prefmodifiers    = style ~= "" and style or weight,
+        weight           = metadata.pfminfo and pfminfo.weight or 400,
+        italicangle      = italicangle,
+    }
+end
+
 local loaders = {
     otf     = ot_fullinfo,
     ttc     = ot_fullinfo,
     ttf     = ot_fullinfo,
-
-----pfb     = t1_fullinfo, --> may come back one day, so
-----pfa     = t1_fullinfo, --> we keep the indirection
+--- pfb     = t1_fullinfo,
 }
 
 --- not side-effect free!
@@ -2525,6 +2566,9 @@ generate_filedata = function (mappings)
     return files
 end
 
+local bold_spectrum_low  = 501 --- 500 is medium, 900 heavy/black
+local bold_weight        = 700
+
 local pick_style
 local pick_fallback_style
 local check_regular
@@ -2552,31 +2596,33 @@ do
         return false
     end
 
-    pick_style = function (fontstyle_name,
-                           prefmodifiers,
+    pick_style = function (prefmodifiers,
                            subfamily)
         local style
-        if fontstyle_name --[[ff only]] then
-            style = choose_exact (fontstyle_name)
-        end
-        if not style then
-            if prefmodifiers then
-                style = choose_exact (prefmodifiers)
-            elseif subfamily then
-                style = choose_exact (subfamily)
-            end
+        if prefmodifiers then
+            style = choose_exact (prefmodifiers)
+        elseif subfamily then
+            style = choose_exact (subfamily)
         end
         return style
     end
 
     pick_fallback_style = function (italicangle, weight, pfmweight)
-        --- more aggressive, but only to determine bold faces
-        if pfmweight > 500 or bold_synonym [weight] then --- bold spectrum matches
+        --[[--
+            More aggressive, but only to determine bold faces.
+            Note: Before you make this test more inclusive, ensure
+            no fonts are matched in the bold synonym spectrum over
+            a literally “bold[italic]” one. In the past, heuristics
+            been tried but ultimately caused unwanted modifiers
+            polluting the lookup table. What doesn’t work is, e. g.
+            treating weights > 500 as bold or allowing synonyms like
+            “heavy”, “black”.
+        --]]-- 
+        if pfmweight == bold_weight then --- bold spectrum matches
             if italicangle == 0 then
-                return tostring (weight)
-            else
-                return tostring (weight) .. "i"
+                return "b"
             end
+            return "bi"
         end
         return false
     end
@@ -2584,13 +2630,12 @@ do
     --- we use only exact matches here since there are constructs
     --- like “regularitalic” (Cabin, Bodoni Old Fashion)
 
-    check_regular = function (fontstyle_name,
-                              prefmodifiers,
+    check_regular = function (prefmodifiers,
                               subfamily,
                               italicangle,
                               weight,
                               pfmweight)
-        local plausible_weight
+        local plausible_weight = false
         --[[--
           This filters out undesirable candidates that specify their
           prefmodifiers or subfamily as “regular” but are actually of
@@ -2605,9 +2650,11 @@ do
         end
 
         if plausible_weight then
-            return fontstyle_name and regular_synonym [fontstyle_name]
-                or prefmodifiers  and regular_synonym [prefmodifiers]
-                or subfamily      and regular_synonym [subfamily]
+            if prefmodifiers  and regular_synonym [prefmodifiers]
+            or subfamily      and regular_synonym [subfamily]
+            then
+                return "r"
+            end
         end
         return false
     end
@@ -2634,7 +2681,6 @@ local pull_values = function (entry)
     entry.fullname          = english.fullname or info.fullname
     entry.prefmodifiers     = english.prefmodifiers
     entry.familyname        = metadata.familyname or english.preffamily or english.family
-    entry.fontstyle_name    = sanitized.fontstyle_name
     entry.plainname         = names.fullname
     entry.subfamily         = english.subfamily
 
@@ -2678,7 +2724,7 @@ local get_subtable = function (families, entry)
     return subtable
 end
 
-collect_families = function (mappings)
+local collect_families = function (mappings)
 
     logreport ("info", 2, "db", "Analyzing families.")
 
@@ -2699,7 +2745,6 @@ collect_families = function (mappings)
         local subtable          = get_subtable (families, entry)
 
         local familyname        = entry.familyname
-        local fontstyle_name    = entry.fontstyle_name
         local prefmodifiers     = entry.prefmodifiers
         local subfamily         = entry.subfamily
 
@@ -2707,34 +2752,22 @@ collect_families = function (mappings)
         local pfmweight         = entry.pfmweight
         local italicangle       = entry.italicangle
 
-        local modifier          = pick_style (fontstyle_name,
-                                              prefmodifiers,
-                                              subfamily)
+        local modifier          = pick_style (prefmodifiers, subfamily)
 
         if not modifier then --- regular, exact only
-            modifier = check_regular (fontstyle_name,
-                                      prefmodifiers,
+            modifier = check_regular (prefmodifiers,
                                       subfamily,
                                       italicangle,
                                       weight,
                                       pfmweight)
         end
-        --if familyname == "garamondpremierpro" then
-        --print(entry.fullname, "reg?",modifier, "->",fontstyle_name,
-                              --prefmodifiers,
-                              --subfamily,
-                              --italicangle,
-                              --pfmweight,
-                              --weight)
-                              --end
+
+        if not modifier then
+            modifier = pick_fallback_style (italicangle, weight, pfmweight)
+        end
 
         if modifier then
             add_family (familyname, subtable, modifier, entry)
-        elseif pfmweight > 500 then -- in bold spectrum
-            modifier = pick_fallback_style (italicangle, weight, pfmweight)
-            if modifier then
-                add_family (familyname, subtable, modifier, entry)
-            end
         end
     end
 
@@ -2753,8 +2786,6 @@ end
 
 --doc]]--
 
-local bold_spectrum_low  = 501 --- 500 is medium, 900 heavy/black
-local bold_weight        = 700
 local style_categories   = { "r", "b", "i", "bi" }
 local bold_categories    = {      "b",      "bi" }
 
@@ -2963,7 +2994,7 @@ local collect_statistics = function (mappings)
     local sum_dsnsize, n_dsnsize = 0, 0
 
     local fullname, family, families = { }, { }, { }
-    local subfamily, prefmodifiers, fontstyle_name = { }, { }, { }
+    local subfamily, prefmodifiers = { }, { }
 
     local addtohash = function (hash, item)
         if item then
@@ -3023,7 +3054,6 @@ local collect_statistics = function (mappings)
         addtohash (family,          englishnames.family)
         addtohash (subfamily,       englishnames.subfamily)
         addtohash (prefmodifiers,   englishnames.prefmodifiers)
-        addtohash (fontstyle_name,  names.fontstyle_name)
 
         addtoset (families, englishnames.family, englishnames.fullname)
 
@@ -3098,10 +3128,6 @@ local collect_statistics = function (mappings)
                    setsize (prefmodifiers))
         pprint_top (prefmodifiers, 4)
 
-        logreport ("both", 0, "db",
-                   "   · %d different “fontstyle_name” kinds.",
-                   setsize (fontstyle_name))
-        pprint_top (fontstyle_name, 4)
     end
 
     local mean_dsnsize = 0
@@ -3118,7 +3144,6 @@ local collect_statistics = function (mappings)
 --        style = {
 --            subfamily = subfamily,
 --            prefmodifiers = prefmodifiers,
---            fontstyle_name = fontstyle_name,
 --        },
     }
 end
@@ -3483,8 +3508,16 @@ local use_fontforge = function (val)
         close_font_file   = fontloader.close
         get_english_names = get_english_names_from_ff
     else
-        read_font_file    = otfhandler.readers.getinfo
-        read_font_info    = read_font_file
+        local wrapper = function (filename, subfont)
+            return otfhandler.readers.getinfo (filename,
+                                               { subfont        = subfont
+                                               , details        = false
+                                               , platformnames  = true
+                                               , rawfamilynames = true
+                                               })
+        end
+        read_font_file    = wrapper
+        read_font_info    = wrapper
         close_font_file   = function () end
         get_english_names = map_english_names
     end
@@ -3537,7 +3570,7 @@ return {
         fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
-        names.version   = 2.6
+        names.version   = 2.7
         names.data      = nil      --- contains the loaded database
         names.lookups   = nil      --- contains the lookup cache
 

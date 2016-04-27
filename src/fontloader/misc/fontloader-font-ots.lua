@@ -9,6 +9,9 @@ if not modules then modules = { } end modules ['font-ots'] = { -- sequences
 -- to be checked: discrun doesn't seem to do something useful now (except run the
 -- check again) so if we need it again we'll do a zwnjrun or so
 
+-- components will go away and be replaced by a property table which simplifies
+-- code (also more efficient)
+
 -- beware, on my development machine we test a slightly a more optimized version
 
 -- assumptions:
@@ -566,7 +569,22 @@ local function toligature(head,start,stop,char,dataset,sequence,markflag,discfou
             local pre, post, replace, pretail, posttail, replacetail = getdisc(discfound,true)
             if not replace then -- todo: signal simple hyphen
                 local prev = getprev(base)
-                local copied = copy_node_list(comp)
+--                 local copied = copy_node_list(comp)
+local current  = comp
+local previous = nil
+local copied   = nil
+while current do
+    if getid(current) == glyph_code then
+        local n = copy_node(current)
+        if copied then
+            setlink(previous,n)
+        else
+            copied = n
+        end
+        previous = n
+    end
+    current = getnext(current)
+end
                 setprev(discnext,nil) -- also blocks funny assignments
                 setnext(discprev,nil) -- also blocks funny assignments
                 if pre then
@@ -2126,7 +2144,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                 else
                     local discfound = nil
                     local n = f + 1
-                    last = getnext(last)
+                    last = getnext(last) -- the second in current (first already matched)
                     while n <= l do
                         if not last and (sweeptype == "post" or sweeptype == "replace") then
                             last      = getnext(sweepnode)
@@ -2167,7 +2185,6 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                     end
                                     break
                                 end
-                                last = getnext(last)
                             elseif char == false then
                                 if discfound then
                                     notmatchreplace[discfound] = true
@@ -2220,6 +2237,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                     end
                                     match = not notmatchpre[last]
                                 end
+                                -- maybe only if match
                                 last = getnext(last)
                             else
                                 match = false
@@ -2255,8 +2273,12 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                             if trace_skips then
                                                 show_skip(dataset,sequence,char,ck,class)
                                             end
+                                            prev = getprev(prev) -- moved here
                                         elseif seq[n][char] then
-                                            n = n -1
+                                            if n > 1 then -- new test
+                                                prev = getprev(prev) -- moved here
+                                            end
+                                            n = n - 1
                                         else
                                             if discfound then
                                                 notmatchreplace[discfound] = true
@@ -2275,7 +2297,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                         end
                                         break
                                     end
-                                    prev = getprev(prev)
+                                 -- prev = getprev(prev) -- moved up
                                 elseif char == false then
                                     if discfound then
                                         notmatchreplace[discfound] = true
@@ -2339,21 +2361,20 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                             if not match then
                                                 break
                                             end
-                                        else
-                                            -- skip 'm
                                         end
-                                    else
-                                        -- skip 'm
                                     end
+                                    -- maybe only if match
+                                    prev = getprev(prev)
                                 elseif seq[n][32] then
                                     n = n - 1
+                                    prev = getprev(prev)
                                 else
                                     match = false
                                     break
                                 end
-                                prev = getprev(prev)
                             elseif seq[n][32] then -- somewhat special, as zapfino can have many preceding spaces
                                 n = n - 1
+                                prev = getprev(prev) -- was absent
                             else
                                 match = false
                                 break
@@ -2391,7 +2412,11 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                         if trace_skips then
                                             show_skip(dataset,sequence,char,ck,class)
                                         end
+                                        current = getnext(current) -- was absent
                                     elseif seq[n][char] then
+                                        if n < s then -- new test
+                                            current = getnext(current) -- was absent
+                                        end
                                         n = n + 1
                                     else
                                         if discfound then
@@ -2467,16 +2492,17 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                 else
                                     -- skip 'm
                                 end
+                                -- maybe only if match
+                                current = getnext(current)
                             elseif seq[n][32] then -- brrr
                                 n = n + 1
                             else
                                 match = false
                                 break
                             end
-                            current = getnext(current)
                         elseif seq[n][32] then
                             n = n + 1
-current = getnext(current)
+                            current = getnext(current)
                         else
                             match = false
                             break

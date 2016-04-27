@@ -367,18 +367,29 @@ local function copyduplicates(fontdata)
             for u, d in next, duplicates do
                 local du = descriptions[u]
                 if du then
-                    local t  = { f_character_y(u), "@", f_index(du.index), "->" }
+                    local t = { f_character_y(u), "@", f_index(du.index), "->" }
+                    local n = 0
+                    local m = 25
                     for u in next, d do
                         if descriptions[u] then
-                            t[#t+1] = f_character_n(u)
+                            if n < m then
+                                t[n+4] = f_character_n(u)
+                            end
                         else
                             local c = copy(du)
-                         -- c.unicode = u -- maybe
+                            c.unicode = u -- better this way
                             descriptions[u] = c
-                            t[#t+1] = f_character_y(u)
+                            if n < m then
+                                t[n+4] = f_character_y(u)
+                            end
                         end
+                        n = n + 1
                     end
-                    report("duplicates: % t",t)
+                    if n <= m then
+                        report("duplicates: %i : % t",n,t)
+                    else
+                        report("duplicates: %i : % t ...",n,t)
+                    end
                 else
                     -- what a mess
                 end
@@ -577,13 +588,12 @@ local function checklookups(fontdata,missing,nofmissing)
             if r then
                 local name = descriptions[i].name or f_index(i)
                 if not ignore[name] then
-                    done[#done+1] = name
+                    done[name] = true
                 end
             end
         end
-        if #done > 0 then
-            table.sort(done)
-            report("not unicoded: % t",done)
+        if next(done) then
+            report("not unicoded: % t",table.sortedkeys(done))
         end
     end
 end

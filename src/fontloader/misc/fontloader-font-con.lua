@@ -776,9 +776,14 @@ function constructors.scale(tfmdata,specification)
         elseif autoitalicamount then -- itlc feature
             local vi = description.italic
             if not vi then
-                local vi = description.boundingbox[3] - description.width + autoitalicamount
-                if vi > 0 then -- < 0 indicates no overshoot or a very small auto italic
-                    chr.italic = vi*hdelta
+                local bb = description.boundingbox
+                if bb then
+                    local vi = bb[3] - description.width + autoitalicamount
+                    if vi > 0 then -- < 0 indicates no overshoot or a very small auto italic
+                        chr.italic = vi*hdelta
+                    end
+                else
+                 -- report_defining("no boundingbox for character %C in font %a, fullname %a, filename %a",unicode,name,fullname,filename)
                 end
             elseif vi ~= 0 then
                 chr.italic = vi*hdelta

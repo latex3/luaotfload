@@ -88,13 +88,12 @@ package.
 --doc]]--
 
 local set_sscale_dimens = function (fontdata)
-  local mathconstants = fontdata.MathConstants
-  local parameters    = fontdata.parameters
-  if mathconstants then
-    parameters[10] = mathconstants.ScriptPercentScaleDown or 70
-    parameters[11] = mathconstants.ScriptScriptPercentScaleDown or 50
-  end
-  return fontdata
+  local resources     = fontdata.resources      if not resources     then return end
+  local mathconstants = resources.MathConstants if not mathconstants then return end
+  local parameters    = fontdata.parameters     if not parameters    then return end
+  --- the default values below are complete crap
+  parameters [10] = mathconstants.ScriptPercentScaleDown       or 70
+  parameters [11] = mathconstants.ScriptScriptPercentScaleDown or 50
 end
 
 luaotfload_callbacks [#luaotfload_callbacks + 1] = {
@@ -104,8 +103,8 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
 --- fontobj -> int
 local lookup_units = function (fontdata)
   local metadata = fontdata.shared and fontdata.shared.rawdata.metadata
-  if metadata and metadata.units_per_em then
-    return metadata.units_per_em
+  if metadata and metadata.units then
+    return metadata.units
   elseif fontdata.parameters and fontdata.parameters.units then
     return fontdata.parameters.units
   elseif fontdata.units then --- v1.x
@@ -122,9 +121,9 @@ local patch_cambria_domh = function (fontdata)
   local mathconstants = fontdata.MathConstants
   if mathconstants and fontdata.psname == "CambriaMath" then
     --- my test Cambria has 2048
-    local units_per_em = fontdata.units_per_em or lookup_units(fontdata)
-    local sz           = fontdata.parameters.size or fontdata.size
-    local mh           = 2800 / units_per_em * sz
+    local units = fontdata.units or lookup_units(fontdata)
+    local sz    = fontdata.parameters.size or fontdata.size
+    local mh    = 2800 / units * sz
     if mathconstants.DisplayOperatorMinHeight < mh then
       mathconstants.DisplayOperatorMinHeight = mh
     end
@@ -177,40 +176,95 @@ Comment from fontspec:
 
 --doc]]--
 
-local set_capheight = function (fontdata)
-    local shared     = fontdata.shared
-    local parameters = fontdata.parameters
-    local capheight
-    if    shared
-      and shared.rawdata.metadata
-      and shared.rawdata.metadata.pfminfo
-    then
-      local units_per_em   = parameters.units
-      local size           = parameters.size
-      local os2_capheight  = shared.rawdata.metadata.pfminfo.os2_capheight
+local capheight_reference_chars      = { "X", "M", "Ж", "ξ", }
+local capheight_reference_codepoints do
+  local utfbyte = unicode.utf8.byte
+  capheight_reference_codepoints = { }
+  for i = 1, #capheight_reference_chars do
+    local chr = capheight_reference_chars [i]
+    capheight_reference_codepoints [i] = utfbyte (chr)
+  end
+end
 
-      if capheight and os2_capheight > 0 then
-        capheight = os2_capheight / units_per_em * size
-      else
-        local X8_str = stringbyte"X"
-        local X8_chr = fontdata.characters[X8_str]
-        if X8_chr then
-          capheight = X8_chr.height
-        else
-          capheight = parameters.ascender / units_per_em * size
-        end
-      end
-    else
-      local X8_str = stringbyte "X"
-      local X8_chr = fontdata.characters[X8_str]
-      if X8_chr then
-        capheight = X8_chr.height
-      end
+local determine_capheight = function (fontdata)
+  local parameters = fontdata.parameters if not parameters then return false end
+  local characters = fontdata.characters if not characters then return false end
+  --- Pretty simplistic but it does return *some* value for most fonts;
+  --- we could also refine the approach to return some kind of average
+  --- of all capital letters or a user-provided subset.
+  for i = 1, #capheight_reference_codepoints do
+    local refcp   = capheight_reference_codepoints [i]
+    local refchar = characters [refcp]
+    if refchar then
+      logreport ("both", 4, "aux",
+                 "picked height of character ‘%s’ (U+%d) as \\fontdimen8 \z
+                  candidate",
+                 capheight_reference_chars [i], refcp)
+      return refchar.height
     end
+  end
+  return false
+end
+
+local query_ascender = function (fontdata)
+  local parameters = fontdata.parameters if not parameters then return false end
+  local shared     = fontdata.shared     if not shared     then return false end
+  local rawdata    = shared.rawdata      if not rawdata    then return false end
+  local metadata   = rawdata.metadata    if not metadata   then return false end
+  local ascender   = parameters.ascender
+                  or metadata.ascender   if not ascender   then return false end
+  local units      = metadata.units      if units == 0     then return false end
+  local size       = parameters.size     if not size       then return false end
+  return ascender * size / units
+end
+
+local query_capheight = function (fontdata)
+  local parameters = fontdata.parameters  if not parameters then return false end
+  local shared     = fontdata.shared      if not shared     then return false end
+  local rawdata    = shared.rawdata       if not rawdata    then return false end
+  local metadata   = rawdata.metadata     if not metadata   then return false end
+  local capheight  = metadata.capheight   if not capheight  then return false end
+  local units      = metadata.units       if units == 0     then return false end
+  local size       = parameters.size      if not size       then return false end
+  return capheight * size / units
+end
+
+local query_fontdimen8 = function (fontdata)
+  local parameters = fontdata.parameters if not parameters then return false end
+  local fontdimen8 = parameters [8]
+  if fontdimen8 then return fontdimen8 end
+  return false
+end
+
+local caphtfmt = function (ref, ht)
+  if not ht  then return "<none>"      end
+  if not ref then return tostring (ht) end
+  return stringformat ("%s(δ=%s)", ht, ht - ref)
+end
+
+local set_capheight = function (fontdata)
+    if not fontdata then
+      logreport ("both", 0, "aux",
+                 "error: set_capheight() received garbage")
+      return
+    end
+    local capheight_dimen8   = query_fontdimen8    (fontdata)
+    local capheight_alleged  = query_capheight     (fontdata)
+    local capheight_ascender = query_ascender      (fontdata)
+    local capheight_measured = determine_capheight (fontdata)
+    logreport ("term", 4, "aux",
+               "capht: param[8]=%s advertised=%s ascender=%s measured=%s",
+               tostring (capheight_dimen8),
+               caphtfmt (capheight_dimen8, capheight_alleged),
+               caphtfmt (capheight_dimen8, capheight_ascender),
+               caphtfmt (capheight_dimen8, capheight_measured))
+    if capheight_dimen8 then --- nothing to do
+      return
+    end
+
+    local capheight = capheight_alleged or capheight_ascender or capheight_measured
     if capheight then
-      --- is this legit? afaics there’s nothing else on the
-      --- array part of that table
-      fontdata.parameters[8] = capheight
+      fontdata.parameters [8] = capheight
     end
 end
 
@@ -263,20 +317,27 @@ end
 
 --- int -> string -> bool -> (int | false)
 local slot_of_name = function (font_id, glyphname, unsafe)
-  local fontdata = identifiers[font_id]
-  if fontdata then
-    local unicode = fontdata.resources.unicodes[glyphname]
-    if unicode then
-      if type(unicode) == "number" then
-        return unicode
-      else
-        return unicode[1] --- for multiple components
-      end
---  else
---    --- missing
+  if not font_id   or type (font_id)   ~= "number"
+  or not glyphname or type (glyphname) ~= "string"
+  then
+    logreport ("both", 0, "aux",
+               "invalid parameters to slot_of_name (%s, %s)",
+               tostring (font_id), tostring (glyphname))
+    return false
+  end
+
+  local tfmdata = identifiers [font_id]
+  if not tfmdata then return raw_slot_of_name (font_id, glyphname) end
+  local resources = tfmdata.resources  if not resources then return false end
+  local unicodes  = resources.unicodes if not unicodes  then return false end
+
+  local unicode = unicodes [glyphname]
+  if unicode then
+    if type (unicode) == "number" then
+      return unicode
+    else
+      return unicode [1] --- for multiple components
     end
-  elseif unsafe == true then -- for Robert
-    return raw_slot_of_name(font_id, glyphname)
   end
   return false
 end
@@ -298,11 +359,23 @@ local indices
 
 --- int -> (string | false)
 local name_of_slot = function (codepoint)
+  if not codepoint or type (codepoint) ~= "number" then
+    logreport ("both", 0, "aux",
+               "invalid parameters to name_of_slot (%s)",
+               tostring (codepoint))
+    return false
+  end
+
   if not indices then --- this will load the glyph list
     local unicodes = encodings.agl.unicodes
-    indices = table.swapped(unicodes)
+    if not unicodes or not next (unicodes)then
+      logreport ("both", 0, "aux",
+                 "name_of_slot: failed to load the AGL.")
+    end
+    indices = table.swapped (unicodes)
   end
-  local glyphname = indices[codepoint]
+
+  local glyphname = indices [codepoint]
   if glyphname then
     return glyphname
   end
@@ -317,6 +390,12 @@ aux.name_of_slot      = name_of_slot
 -----------------------------------------------------------------------
 --- lots of arrowcode ahead
 
+local get_features = function (tfmdata)
+  local resources = tfmdata.resources  if not resources then return false end
+  local features  = resources.features if not features  then return false end
+  return features
+end
+
 --[[doc--
 This function, modeled after “check_script()” from fontspec, returns
 true if in the given font, the script “asked_script” is accounted for in at
@@ -325,13 +404,23 @@ least one feature.
 
 --- int -> string -> bool
 local provides_script = function (font_id, asked_script)
+  if not font_id      or type (font_id)      ~= "number"
+  or not asked_script or type (asked_script) ~= "string"
+  then
+    logreport ("both", 0, "aux",
+               "invalid parameters to provides_script(%s, %s)",
+               tostring (font_id), tostring (asked_script))
+    return false
+  end
   asked_script = stringlower(asked_script)
   if font_id and font_id > 0 then
-    local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
-    local shared   = tfmdata.shared       if not shared   then return false end
-    local fontdata = shared.rawdata       if not fontdata then return false end
-    local fontname = fontdata.metadata.fontname
-    local features = fontdata.resources.features
+    local tfmdata = identifiers[font_id]
+    if not tfmdata then return false end
+    local features = get_features (tfmdata)
+    if features == false then
+      logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
+      return false
+    end
     for method, featuredata in next, features do
       --- where method: "gpos" | "gsub"
       for feature, data in next, featuredata do
@@ -362,14 +451,27 @@ feature.
 
 --- int -> string -> string -> bool
 local provides_language = function (font_id, asked_script, asked_language)
-  asked_script     = stringlower(asked_script)
-  asked_language   = stringlower(asked_language)
+  if not font_id        or type (font_id)        ~= "number"
+  or not asked_script   or type (asked_script)   ~= "string"
+  or not asked_language or type (asked_language) ~= "string"
+  then
+    logreport ("both", 0, "aux",
+               "invalid parameters to provides_language(%s, %s, %s)",
+               tostring (font_id),
+               tostring (asked_script),
+               tostring (asked_language))
+    return false
+  end
+  asked_script   = stringlower(asked_script)
+  asked_language = stringlower(asked_language)
   if font_id and font_id > 0 then
-    local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
-    local shared   = tfmdata.shared       if not shared   then return false end
-    local fontdata = shared.rawdata       if not fontdata then return false end
-    local fontname = fontdata.metadata.fontname
-    local features = fontdata.resources.features
+    local tfmdata = identifiers[font_id]
+    if not tfmdata then return false end
+    local features = get_features (tfmdata)
+    if features == false then
+      logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
+      return false
+    end
     for method, featuredata in next, features do
       --- where method: "gpos" | "gsub"
       for feature, data in next, featuredata do
@@ -432,16 +534,29 @@ accounted for in the script with tag “asked_script” in feature
 --- int -> string -> string -> string -> bool
 local provides_feature = function (font_id,        asked_script,
                                    asked_language, asked_feature)
+  if not font_id        or type (font_id)        ~= "number"
+  or not asked_script   or type (asked_script)   ~= "string"
+  or not asked_language or type (asked_language) ~= "string"
+  or not asked_feature  or type (asked_feature)  ~= "string"
+  then
+    logreport ("both", 0, "aux",
+               "invalid parameters to provides_feature(%s, %s, %s, %s)",
+               tostring (font_id),        tostring (asked_script),
+               tostring (asked_language), tostring (asked_feature))
+    return false
+  end
   asked_script    = stringlower(asked_script)
   asked_language  = stringlower(asked_language)
   asked_feature   = lpegmatch(strip_garbage, asked_feature)
 
   if font_id and font_id > 0 then
-    local tfmdata  = identifiers[font_id] if not tfmdata  then return false end
-    local shared   = tfmdata.shared       if not shared   then return false end
-    local fontdata = shared.rawdata       if not fontdata then return false end
-    local features = fontdata.resources.features
-    local fontname = fontdata.metadata.fontname
+    local tfmdata  = identifiers[font_id]
+    if not tfmdata then return false end
+    local features = get_features (tfmdata)
+    if features == false then
+      logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
+      return false
+    end
     for method, featuredata in next, features do
       --- where method: "gpos" | "gsub"
       local feature = featuredata[asked_feature]

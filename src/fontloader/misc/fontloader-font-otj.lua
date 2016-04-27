@@ -49,8 +49,8 @@ local attributes, nodes, node = attributes, nodes, node
 fonts                    = fonts
 local hashes             = fonts.hashes
 local fontdata           = hashes.identifiers
-local parameters         = fonts.hashes.parameters
-local resources          = fonts.hashes.resources
+----- parameters         = fonts.hashes.parameters -- not in generic
+----- resources          = fonts.hashes.resources  -- not in generic
 
 nodes.injections         = nodes.injections or { }
 local injections         = nodes.injections
@@ -1444,7 +1444,7 @@ local function injectspaces(head)
      -- end
         leftkerns  = trig.left
         rightkerns = trig.right
-        local par  = parameters[font]
+        local par  = fontdata[font].parameters -- fallback for generic
         factor     = par.factor
         threshold  = par.spacing.width - 1 -- get rid of rounding errors
         lastfont   = font

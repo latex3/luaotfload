@@ -1410,7 +1410,6 @@ local map_english_names = function (metadata)
         certain.
     --]]--
     if platformnames then
-        --inspect(metadata)
         --namesource = platformnames.macintosh or platformnames.windows
         namesource = platformnames.windows or platformnames.macintosh
     end
@@ -3501,8 +3500,16 @@ local use_fontforge = function (val)
         close_font_file   = fontloader.close
         get_english_names = get_english_names_from_ff
     else
-        read_font_file    = otfhandler.readers.getinfo
-        read_font_info    = read_font_file
+        local wrapper = function (filename, subfont)
+            return otfhandler.readers.getinfo (filename,
+                                               { subfont        = subfont
+                                               , details        = false
+                                               , platformnames  = true
+                                               , rawfamilynames = true
+                                               })
+        end
+        read_font_file    = wrapper
+        read_font_info    = wrapper
         close_font_file   = function () end
         get_english_names = map_english_names
     end

@@ -722,10 +722,10 @@ local blank_line        = ws * eol
 local skip_line         = comment_line + blank_line
 local ini_id_char       = alpha + (dash / "_")
 local ini_id            = Cs(alpha * ini_id_char^0) / stringlower
-local ini_value_char    = (valid_escapes + (1 - newline - backslash - comment_char))
+local ini_value_char    = (valid_escapes + (1 - linebreak - backslash - comment_char))
 local ini_value         = (Cs (ini_value_char^0) / string.strip)
                         * (comment_char * (1 - eol)^0)^-1
-local ini_string_char   = (valid_escapes + (1 - newline - dquote - backslash))
+local ini_string_char   = (valid_escapes + (1 - linebreak - dquote - backslash))
 local ini_string        = dquote
                         * Cs (ini_string_char^0)
                         * dquote

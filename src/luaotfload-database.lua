@@ -2608,8 +2608,17 @@ do
     end
 
     pick_fallback_style = function (italicangle, weight, pfmweight)
-        --- more aggressive, but only to determine bold faces
-        if pfmweight == bold_weight or bold_synonym [weight] then --- bold spectrum matches
+        --[[--
+            More aggressive, but only to determine bold faces.
+            Note: Before you make this test more inclusive, ensure
+            no fonts are matched in the bold synonym spectrum over
+            a literally “bold[italic]” one. In the past, heuristics
+            been tried but ultimately caused unwanted modifiers
+            polluting the lookup table. What doesn’t work is, e. g.
+            treating weights > 500 as bold or allowing synonyms like
+            “heavy”, “black”.
+        --]]-- 
+        if pfmweight == bold_weight then --- bold spectrum matches
             if italicangle == 0 then
                 return "b"
             end
@@ -2753,13 +2762,12 @@ local collect_families = function (mappings)
                                       pfmweight)
         end
 
+        if not modifier then
+            modifier = pick_fallback_style (italicangle, weight, pfmweight)
+        end
+
         if modifier then
             add_family (familyname, subtable, modifier, entry)
-        elseif pfmweight >= bold_spectrum_low then -- in bold spectrum
-            modifier = pick_fallback_style (italicangle, weight, pfmweight)
-            if modifier then
-                add_family (familyname, subtable, modifier, entry)
-            end
         end
     end
 

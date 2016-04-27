@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 04/25/16 13:30:09
+-- merge date  : 04/27/16 10:18:10
 
 do -- begin closure to overcome local limits and interference
 
@@ -20036,7 +20036,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
         else
           local discfound=nil
           local n=f+1
-          last=getnext(last)
+          last=getnext(last) 
           while n<=l do
             if not last and (sweeptype=="post" or sweeptype=="replace") then
               last=getnext(sweepnode)
@@ -20077,7 +20077,6 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                   end
                   break
                 end
-                last=getnext(last)
               elseif char==false then
                 if discfound then
                   notmatchreplace[discfound]=true
@@ -20162,8 +20161,12 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                       if trace_skips then
                         show_skip(dataset,sequence,char,ck,class)
                       end
+                      prev=getprev(prev) 
                     elseif seq[n][char] then
-                      n=n -1
+                      if n>1 then 
+                        prev=getprev(prev) 
+                      end
+                      n=n-1
                     else
                       if discfound then
                         notmatchreplace[discfound]=true
@@ -20182,7 +20185,6 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                     end
                     break
                   end
-                  prev=getprev(prev)
                 elseif char==false then
                   if discfound then
                     notmatchreplace[discfound]=true
@@ -20244,19 +20246,19 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                       if not match then
                         break
                       end
-                    else
                     end
-                  else
                   end
+                  prev=getprev(prev)
                 elseif seq[n][32] then
                   n=n-1
+                  prev=getprev(prev)
                 else
                   match=false
                   break
                 end
-                prev=getprev(prev)
               elseif seq[n][32] then 
                 n=n-1
+                prev=getprev(prev) 
               else
                 match=false
                 break
@@ -20291,7 +20293,11 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                     if trace_skips then
                       show_skip(dataset,sequence,char,ck,class)
                     end
+                    current=getnext(current) 
                   elseif seq[n][char] then
+                    if n<s then 
+                      current=getnext(current) 
+                    end
                     n=n+1
                   else
                     if discfound then
@@ -20365,16 +20371,16 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                   end
                 else
                 end
+                current=getnext(current)
               elseif seq[n][32] then 
                 n=n+1
               else
                 match=false
                 break
               end
-              current=getnext(current)
             elseif seq[n][32] then
               n=n+1
-current=getnext(current)
+              current=getnext(current)
             else
               match=false
               break

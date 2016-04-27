@@ -525,7 +525,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
                             end
                         end
                         local noflookups = readushort(f)
-                        local lookups = { }
+                        local lookups    = { }
                         for i=1,noflookups do
                             lookups[readushort(f)+1] = readushort(f) + 1
                         end

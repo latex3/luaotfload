@@ -478,7 +478,6 @@ end
 
 --- define locals in scope
 local access_font_index
-local collect_families
 local find_closest
 local flush_lookup_cache
 local generate_filedata
@@ -2567,6 +2566,9 @@ generate_filedata = function (mappings)
     return files
 end
 
+local bold_spectrum_low  = 501 --- 500 is medium, 900 heavy/black
+local bold_weight        = 700
+
 local pick_style
 local pick_fallback_style
 local check_regular
@@ -2607,7 +2609,7 @@ do
 
     pick_fallback_style = function (italicangle, weight, pfmweight)
         --- more aggressive, but only to determine bold faces
-        if pfmweight > 500 or bold_synonym [weight] then --- bold spectrum matches
+        if pfmweight == bold_weight or bold_synonym [weight] then --- bold spectrum matches
             if italicangle == 0 then
                 return "b"
             end
@@ -2713,7 +2715,7 @@ local get_subtable = function (families, entry)
     return subtable
 end
 
-collect_families = function (mappings)
+local collect_families = function (mappings)
 
     logreport ("info", 2, "db", "Analyzing families.")
 
@@ -2753,7 +2755,7 @@ collect_families = function (mappings)
 
         if modifier then
             add_family (familyname, subtable, modifier, entry)
-        elseif pfmweight > 500 then -- in bold spectrum
+        elseif pfmweight >= bold_spectrum_low then -- in bold spectrum
             modifier = pick_fallback_style (italicangle, weight, pfmweight)
             if modifier then
                 add_family (familyname, subtable, modifier, entry)
@@ -2776,8 +2778,6 @@ end
 
 --doc]]--
 
-local bold_spectrum_low  = 501 --- 500 is medium, 900 heavy/black
-local bold_weight        = 700
 local style_categories   = { "r", "b", "i", "bi" }
 local bold_categories    = {      "b",      "bi" }
 

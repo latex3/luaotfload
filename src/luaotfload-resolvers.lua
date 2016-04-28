@@ -29,6 +29,7 @@ if not luaotfload then error "this module requires Luaotfload" end
 --doc]]--
 
 local next                = next
+local tableconcat         = table.concat
 local kpsefind_file       = kpse.find_file
 local lfsisfile           = lfs.isfile
 local stringlower         = string.lower
@@ -226,7 +227,14 @@ local default_anon_sequence = {
 
 local resolve_anon
 resolve_anon = function (specification)
-    return resolve_sequence (default_anon_sequence, specification)
+    local seq = default_anon_sequence
+    if config and config.luaotfload then
+        local anonseq = config.luaotfload.run.anon_sequence
+        if anonseq and next (anonseq) then
+            seq = anonseq
+        end
+    end
+    return resolve_sequence (seq, specification)
 end
 
 --[[doc--

@@ -92,6 +92,10 @@ local valid_formats = tabletohash {
   "otf", "ttc", "ttf", "afm", "pfb"
 }
 
+local default_anon_sequence = {
+  "tex", "path", "name",
+}
+
 local feature_presets = {
   arab = tabletohash {
     "ccmp", "locl", "isol", "fina", "fin2",
@@ -198,6 +202,7 @@ local default_config = {
     use_fontforge   = false,
   },
   run = {
+    anon_sequence  = default_anon_sequence,
     resolver       = "cached",
     definer        = "patch",
     log_level      = 0,
@@ -502,6 +507,22 @@ local option_spec = {
     use_fontforge = { in_t = boolean_t, },
   },
   run = {
+    anon_sequence = {
+      in_t      = string_t,
+      out_t     = table_t,
+      transform = function (s)
+        if s ~= "default" then
+          local bits = { lpegmatch (commasplitter, s) }
+          if next (bits) then
+            logreport ("both", 2, "conf",
+                       "overriding anon lookup sequence %s.",
+                       tableconcat (bits, ","))
+            return bits
+          end
+        end
+        return default_anon_sequence
+      end
+    },
     live = { in_t = boolean_t, }, --- false for the tool, true for TeX run
     resolver = {
       in_t      = string_t,
@@ -639,6 +660,15 @@ local format_keyval = function (var, val)
   end
 end
 
+local format_list = function (var, val)
+  local elts = { }
+  for i = 1, #val do elts [i] = val [i] end
+  if next (elts) then
+    return stringformat (indent .. "%s = %s",
+                         var, tableconcat (elts, ","))
+  end
+end
+
 local format_section = function (title)
   return stringformat ("[%s]", dashed (title))
 end
@@ -693,6 +723,7 @@ local formatters = {
     lookups_file = { false, format_string },
   },
   run = {
+    anon_sequence   = { false, format_list    },
     color_callback  = { false, format_string  },
     definer         = { false, format_string  },
     fontloader      = { false, format_string  },

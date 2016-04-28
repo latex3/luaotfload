@@ -97,7 +97,7 @@ local default_anon_sequence = {
 }
 
 local valid_resolvers = tabletohash {
-  "tex", "path", "name", "file"
+  "tex", "path", "name", "file", "my"
 }
 
 local feature_presets = {

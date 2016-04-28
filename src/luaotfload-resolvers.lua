@@ -196,11 +196,20 @@ local resolve_path_if_exists = function (specification)
     return false
 end
 
+--[[doc--
+    Custom file resolvers via callback.
+--doc]]--
+
+local resolve_my = function (specification)
+    luatexbase.call_callback ("luaotfload.resolve_font", specification)
+end
+
 local resolve_methods = {
     tex  = resolve_tex_format,
     path = resolve_path_if_exists,
     name = resolve_name,
     file = resolve_file,
+    my   = resolve_my,
 }
 
 local resolve_sequence = function (seq, specification)
@@ -271,16 +280,6 @@ resolve_kpse = function (specification)
         end
     end
     return false
-end
-
---[[doc--
-
-    Also {\bfseries EXPERIMENTAL}: custom file resolvers via callback.
-
---doc]]--
-
-local resolve_my = function (specification)
-    luatexbase.call_callback ("luaotfload.resolve_font", specification)
 end
 
 return {

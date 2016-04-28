@@ -295,7 +295,9 @@ and retrieved from the index (``name:Foo Regular``). This behavior can
 be configured by specifying a list as the value to ``anon-sequence``.
 Available items are ``tex``, ``path``, ``name`` -- representing the
 lookups described above, respectively --, and ``file`` for searching a
-filename but not an absolute path.
+filename but not an absolute path. Also, ``my`` lookups are valid
+values but they should only be used from within TeX documents, because
+there is no means of customizing a ``my`` lookups on the command line.
 
 The ``color-callback`` option determines the stage at which fonts that
 defined with a ``color=xxyyzz`` feature will be colorized. By default

@@ -96,6 +96,8 @@ local default_anon_sequence = {
   "tex", "path", "name",
 }
 
+local valid_resolvers = tabletohash (default_anon_sequence)
+
 local feature_presets = {
   arab = tabletohash {
     "ccmp", "locl", "isol", "fina", "fin2",
@@ -514,10 +516,33 @@ local option_spec = {
         if s ~= "default" then
           local bits = { lpegmatch (commasplitter, s) }
           if next (bits) then
-            logreport ("both", 2, "conf",
-                       "overriding anon lookup sequence %s.",
-                       tableconcat (bits, ","))
-            return bits
+            local seq = { }
+            local done = { }
+            for i = 1, #bits do
+              local bit = bits [i]
+              if valid_resolvers [bit] then
+                if not done [bit] then
+                  done [bit] = true
+                  seq [#seq + 1] = bit
+                else
+                  logreport ("both", 0, "conf",
+                             "ignoring duplicate resolver %s at position %d \z
+                              in lookup sequence",
+                             bit, i)
+                end
+              else
+                logreport ("both", 0, "conf",
+                           "lookup sequence contains invalid item %s \z
+                            at position %d.",
+                           bit, i)
+              end
+            end
+            if next (seq) then
+              logreport ("both", 2, "conf",
+                         "overriding anon lookup sequence %s.",
+                         tableconcat (seq, ","))
+              return seq
+            end
           end
         end
         return default_anon_sequence

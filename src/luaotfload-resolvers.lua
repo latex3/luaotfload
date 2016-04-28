@@ -200,20 +200,26 @@ local resolve_methods = {
     tex  = resolve_tex_format,
     path = resolve_path_if_exists,
     name = resolve_name,
+    file = resolve_file,
 }
 
 local resolve_sequence = function (seq, specification)
     for i = 1, #seq do
         local id  = seq [i]
         local mth = resolve_methods [id]
-        logreport ("both", 3, "resolve", "step %d: apply method %q (%s)", i, id, mth)
-        if mth (specification) == true then
-            logreport ("both", 3, "resolve",
-                       "%d: method %q resolved %q -> %s (%s).",
-                       i, id, specification.specification,
-                       specification.name,
-                       specification.forcedname)
-            return true
+        if not mth then
+            logreport ("both", 0, "resolve",
+                       "step %d: invalid lookup method %q", i, id)
+        else
+            logreport ("both", 3, "resolve", "step %d: apply method %q (%s)", i, id, mth)
+            if mth (specification) == true then
+                logreport ("both", 3, "resolve",
+                           "%d: method %q resolved %q -> %s (%s).",
+                           i, id, specification.specification,
+                           specification.name,
+                           specification.forcedname)
+                return true
+            end
         end
     end
     logreport ("both", 0, "resolve",

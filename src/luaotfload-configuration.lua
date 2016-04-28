@@ -93,10 +93,12 @@ local valid_formats = tabletohash {
 }
 
 local default_anon_sequence = {
-  "tex", "path", "name",
+  "tex", "path", "name"
 }
 
-local valid_resolvers = tabletohash (default_anon_sequence)
+local valid_resolvers = tabletohash {
+  "tex", "path", "name", "file"
+}
 
 local feature_presets = {
   arab = tabletohash {

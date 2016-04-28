@@ -1160,16 +1160,21 @@ actions.query = function (job)
         tmpspec.size = 655360 --- assume 10pt
     end
 
-    local foundname, subfont, success
+    local foundname, subfont, success, needle
 
-    if tmpspec.lookup == "name"
-    or tmpspec.lookup == "anon" --- not *exactly* as resolvers.anon
-    then
-        foundname, _, success = fonts.names.lookup_font_name (tmpspec)
-        if foundname then
-            foundname, _, success = fonts.names.lookup_font_file (foundname)
+    if tmpspec.lookup == "name" then
+        if fonts.definers.resolvers.name (tmpspec) then
+            needle = tmpspec.resolved
+        end
+    elseif tmpspec.lookup == "anon" then
+        if fonts.definers.resolvers.anon (tmpspec) then
+            needle = tmpspec.resolved or tmpspec.name
         end
     elseif tmpspec.lookup == "file" then
+        needle = tmpspec.name
+    end
+
+    if needle then
         foundname, _, success = fonts.names.lookup_font_file (tmpspec.name)
     end
 

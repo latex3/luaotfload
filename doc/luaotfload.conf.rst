@@ -6,7 +6,7 @@
                      Luaotfload configuration file
 -----------------------------------------------------------------------
 
-:Date:                  2016-04-21
+:Date:                  2016-04-28
 :Copyright:             GPL v2.0
 :Version:               2.7
 :Manual section:        5
@@ -271,6 +271,8 @@ Section ``run``
 +------------------+--------+------------------------------+
 |  variable        |  type  |  default                     |
 +------------------+--------+------------------------------+
+|  anon-sequence   |   s    |  ``"tex,path,name"``         |
++------------------+--------+------------------------------+
 |  color-callback  |   s    |  ``"post_linebreak_filter"`` |
 +------------------+--------+------------------------------+
 |  definer         |   s    |  ``"patch"``                 |
@@ -281,6 +283,21 @@ Section ``run``
 +------------------+--------+------------------------------+
 |  fontloader      |   s    |  ``"default"``               |
 +------------------+--------+------------------------------+
+
+Unqualified font lookups are treated with the flexible “anonymous”
+mechanism. This involves a chain of lookups applied successively until
+the first one yields a match. By default, the lookup will first search
+for TFM fonts using the Kpathsea library. If this wasn’t successful, an
+attempt is made at interpreting the request as an absolute path (like
+the ``[/path/to/font/foo.ttf]`` syntax) or a file name
+(``file:foo.ttf``). Finally, the request is interpreted as a font name
+and retrieved from the index (``name:Foo Regular``). This behavior can
+be configured by specifying a list as the value to ``anon-sequence``.
+Available items are ``tex``, ``path``, ``name`` -- representing the
+lookups described above, respectively --, and ``file`` for searching a
+filename but not an absolute path. Also, ``my`` lookups are valid
+values but they should only be used from within TeX documents, because
+there is no means of customizing a ``my`` lookups on the command line.
 
 The ``color-callback`` option determines the stage at which fonts that
 defined with a ``color=xxyyzz`` feature will be colorized. By default

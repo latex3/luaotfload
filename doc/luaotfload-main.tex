@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2016/04/21 v2.7}
+  \setdocumentdate   {2016/04/28 v2.7}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       Support: \email     {lualatex-dev@tug.org}}
@@ -363,9 +363,14 @@ However, they have a broader spectrum of possible interpretations:
 before anything else, \identifier{luaotfload} attempts to load a
 traditional \TEX Font Metric (\abbrev{tfm} or \abbrev{ofm}).
 %
-If this fails, it performs a \inlinecode {name:} lookup, which itself will
-fall back to a \inlinecode {file:} lookup if no database entry matches
-\meta{font name}.
+If this fails, it performs a \inlinecode {path:} lookup, which itself will
+fall back to a \inlinecode {file:} lookup.
+%
+Lastly, if none of the above succeeded, attempt to resolve the request as a
+\inlinecode {name:} lookup by searching the font index for \meta{font name}.
+%
+The behavior of this “anonymous” lookup is configurable, see the configuation
+manpage for details.
 
 Furthermore, \identifier{luaotfload} supports the slashed (shorthand)
 font style notation from \XETEX.

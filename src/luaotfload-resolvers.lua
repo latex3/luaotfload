@@ -29,6 +29,7 @@ if not luaotfload then error "this module requires Luaotfload" end
 --doc]]--
 
 local next                = next
+local tableconcat         = table.concat
 local kpsefind_file       = kpse.find_file
 local lfsisfile           = lfs.isfile
 local stringlower         = string.lower
@@ -195,24 +196,39 @@ local resolve_path_if_exists = function (specification)
     return false
 end
 
+--[[doc--
+    Custom file resolvers via callback.
+--doc]]--
+
+local resolve_my = function (specification)
+    luatexbase.call_callback ("luaotfload.resolve_font", specification)
+end
+
 local resolve_methods = {
     tex  = resolve_tex_format,
     path = resolve_path_if_exists,
     name = resolve_name,
+    file = resolve_file,
+    my   = resolve_my,
 }
 
 local resolve_sequence = function (seq, specification)
     for i = 1, #seq do
         local id  = seq [i]
         local mth = resolve_methods [id]
-        logreport ("both", 3, "resolve", "step %d: apply method %q (%s)", i, id, mth)
-        if mth (specification) == true then
-            logreport ("both", 3, "resolve",
-                       "%d: method %q resolved %q -> %s (%s).",
-                       i, id, specification.specification,
-                       specification.name,
-                       specification.forcedname)
-            return true
+        if not mth then
+            logreport ("both", 0, "resolve",
+                       "step %d: invalid lookup method %q", i, id)
+        else
+            logreport ("both", 3, "resolve", "step %d: apply method %q (%s)", i, id, mth)
+            if mth (specification) == true then
+                logreport ("both", 3, "resolve",
+                           "%d: method %q resolved %q -> %s (%s).",
+                           i, id, specification.specification,
+                           specification.name,
+                           specification.forcedname)
+                return true
+            end
         end
     end
     logreport ("both", 0, "resolve",
@@ -226,7 +242,14 @@ local default_anon_sequence = {
 
 local resolve_anon
 resolve_anon = function (specification)
-    return resolve_sequence (default_anon_sequence, specification)
+    local seq = default_anon_sequence
+    if config and config.luaotfload then
+        local anonseq = config.luaotfload.run.anon_sequence
+        if anonseq and next (anonseq) then
+            seq = anonseq
+        end
+    end
+    return resolve_sequence (seq, specification)
 end
 
 --[[doc--
@@ -257,16 +280,6 @@ resolve_kpse = function (specification)
         end
     end
     return false
-end
-
---[[doc--
-
-    Also {\bfseries EXPERIMENTAL}: custom file resolvers via callback.
-
---doc]]--
-
-local resolve_my = function (specification)
-    luatexbase.call_callback ("luaotfload.resolve_font", specification)
 end
 
 return {

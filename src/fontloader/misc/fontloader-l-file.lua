@@ -436,7 +436,7 @@ local deslasher = lpeg.replacer(S("\\/")^1,"/")
 
 function file.join(one, two, three, ...)
     if not two then
-        return one == "" and one or lpegmatch(stripper,one)
+        return one == "" and one or lpegmatch(reslasher,one)
     end
     if one == "" then
         return lpegmatch(stripper,three and concat({ two, three, ... },"/") or two)

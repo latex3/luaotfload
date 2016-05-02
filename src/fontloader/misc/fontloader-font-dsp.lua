@@ -1144,8 +1144,8 @@ local function handlemark(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyp
             end
             for i=1,nofbaserecords do
                 local components = baserecords[i]
-                local b = basecoverage[i]
                 if components then
+                    local b = basecoverage[i]
                     for c=1,#components do
                         local classes = components[c]
                         if classes then
@@ -1160,7 +1160,7 @@ local function handlemark(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyp
                                 end
                             end
                         end
-                        components[i] = classes
+--                         components[i] = classes
                     end
                 end
             end

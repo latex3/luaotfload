@@ -3347,7 +3347,7 @@ local function txtdirstate(start,stack,top,rlparmode)
         new = rlparmode
     end
     if trace_directions then
-        report_process("directions after txtdir %a: parmode %a, txtmode %a, level %a",dir,mref(rlparmode),mref(new),topstack)
+        report_process("directions after txtdir %a: parmode %a, txtmode %a, level %a",dir,mref(rlparmode),mref(new),top)
     end
     return getnext(start), top, new
 end

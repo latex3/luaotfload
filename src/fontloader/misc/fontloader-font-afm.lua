@@ -228,7 +228,8 @@ do
 
     -- old font loader
 
-    local fontloader = fontloader
+    local fontloader      = fontloader
+    local get_indexes_old = false
 
     if fontloader then
 
@@ -236,7 +237,7 @@ do
         local open_font     = fontloader.open
         local close_font    = fontloader.close
 
-        local function get_indexes_old(data,pfbname)
+        get_indexes_old = function(data,pfbname)
             local pfbblob = open_font(pfbname)
             if pfbblob then
                 local characters = data.characters
@@ -394,7 +395,7 @@ do
         end
     end
 
-    if fontloader then
+    if get_indexes_old then
 
         afm.use_new_indexer = true
         get_indexes_new     = get_indexes
@@ -598,7 +599,15 @@ unify = function(data, filename)
     resources.private = private
 end
 
+local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
+local noflags    = { false, false, false, false }
+
+afm.experimental_normalize = false
+
 normalize = function(data)
+    if type(afm.experimental_normalize) == "function" then
+        afm.experimental_normalize(data)
+    end
 end
 
 fixnames = function(data)
@@ -615,7 +624,6 @@ fixnames = function(data)
         end
     end
 end
-
 
 --[[ldx--
 <p>These helpers extend the basic table with extra ligatures, texligatures

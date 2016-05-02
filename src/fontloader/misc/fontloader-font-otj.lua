@@ -1202,9 +1202,11 @@ local function inject_everything(head,where)
                             else
                              -- local i = rawget(p,"emptyinjections")
                                 local i = p.emptyinjections
-                                local leftkern = i.leftkern
-                                if leftkern and leftkern ~= 0 then
-                                    setfield(prev,"replace",newkern(leftkern)) -- maybe also leftkern
+                                if i then
+                                    local leftkern = i.leftkern
+                                    if leftkern and leftkern ~= 0 then
+                                        setfield(prev,"replace",newkern(leftkern)) -- maybe also leftkern
+                                    end
                                 end
                             end
                             if done then

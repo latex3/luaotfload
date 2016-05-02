@@ -277,7 +277,7 @@ local kernfactors = { } --- fontid -> factor
 
 local kerncharacters
 kerncharacters = function (head)
-  local start, done   = head, false
+  local start         = head
   local lastfont      = nil
   local keepligature  = letterspace.keepligature --- function
   local keeptogether  = letterspace.keeptogether --- function
@@ -352,7 +352,6 @@ kerncharacters = function (head)
             start = c
             setfield(s, "components", nil)
             free_node(s)
-            done = true
             c = getfield (start, "components")
           end
         end
@@ -378,7 +377,6 @@ kerncharacters = function (head)
             local shrunk    = (getfield(spec,"shrink")  * newwd) / wd
             setfield(prev, "spec",
                      spec_injector(fillup, newwd, stretched, shrunk))
-            done = true
           end
 
         elseif pid == kern_code then
@@ -400,7 +398,6 @@ kerncharacters = function (head)
               local prev_kern = getfield(prev, "kern")
               prev_kern = prev_kern + quaddata[lastfont] * krn
               setfield (prev, "kern", prev_kern)
-              done = true
             end
           end
 
@@ -422,14 +419,12 @@ kerncharacters = function (head)
                   if kerns then kern = kerns[lastchar] end
                   krn = kern + quaddata[lastfont]*krn -- here
                   insert_node_before(head,start,kern_injector(fillup,krn))
-                  done = true
                 end
               end
             end
           else
             krn = quaddata[lastfont]*krn -- here
             insert_node_before(head,start,kern_injector(fillup,krn))
-            done = true
           end
 
         elseif pid == disc_code then
@@ -514,7 +509,7 @@ kerncharacters = function (head)
       start = getnext(start)
     end
   end
-  return head, done
+  return head
 end
 
 ---=================================================================---
@@ -566,7 +561,7 @@ local enablefontkerning = function ( )
     logreport ("term", 5, "letterspace",
                "kerncharacters() invoked with node.direct interface \z
                (``%s`` -> ``%s``)", tostring (hd), tostring (direct_hd))
-    local direct_hd, _done = kerncharacters (direct_hd)
+    local direct_hd = kerncharacters (direct_hd)
     if not direct_hd then --- bad
       logreport ("both", 0, "letterspace",
                  "kerncharacters() failed to return a valid new head")

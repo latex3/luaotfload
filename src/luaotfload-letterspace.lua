@@ -411,11 +411,20 @@ kerncharacters = function (head)
             if keeptogether and keeptogether(prev, start) then
               -- keep 'm
             elseif identifiers[lastfont] then
-              local kerns = chardata[lastfont] and chardata[lastfont][prevchar].kerns
-              local kern = kerns and kerns[lastchar] or 0
-              krn = kern + quaddata[lastfont]*krn -- here
-              insert_node_before(head,start,kern_injector(fillup,krn))
-              done = true
+              local lastfontchars = chardata[lastfont]
+              if lastfontchars then
+                local prevchardata  = lastfontchars[prevchar]
+                if not prevchardata then
+                  --- font doesn’t contain the glyph
+                else
+                  local kern = 0
+                  local kerns = prevchardata.kerns
+                  if kerns then kern = kerns[lastchar] end
+                  krn = kern + quaddata[lastfont]*krn -- here
+                  insert_node_before(head,start,kern_injector(fillup,krn))
+                  done = true
+                end
+              end
             end
           else
             krn = quaddata[lastfont]*krn -- here
@@ -477,10 +486,19 @@ kerncharacters = function (head)
               and getid(prv)   == glyph_code
               and getfont(prv) == lastfont
             then
+              local kern     = 0
               local prevchar = getchar(prv)
               local lastchar = getchar(start)
-              local kerns = chardata[lastfont] and chardata[lastfont][prevchar].kerns
-              local kern = kerns and kerns[lastchar] or 0
+              local lastfontchars = chardata[lastfont]
+              if lastfontchars then
+                local prevchardata = lastfontchars[prevchar]
+                if not prevchardata then
+                  --- font doesn’t contain the glyph
+                else
+                  local kerns = prevchardata.kerns
+                  if kerns then kern = kerns[lastchar] end
+                end
+              end
               krn = kern + quaddata[lastfont]*krn -- here
             else
               krn = quaddata[lastfont]*krn -- here

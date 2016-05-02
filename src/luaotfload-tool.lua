@@ -7,10 +7,11 @@
 --      LICENSE:  GPL v2.0
 -----------------------------------------------------------------------
 
-luaotfload          = luaotfload or { }
-local version       = "2.7"
-luaotfload.version  = version
-luaotfload.self     = "luaotfload-tool"
+luaotfload                     = luaotfload or { }
+local version                  = "2.7"
+luaotfload.version             = version
+luaotfload.min_luatex_version  = { 0, 95, 0 }   --- i. e. 0.95.0
+luaotfload.self                = "luaotfload-tool"
 
 --[[doc--
 
@@ -33,16 +34,6 @@ see the luaotfload documentation for more info. Report bugs to
 
 kpse.set_program_name "luatex"
 
---[[doc--
-
-    We test for Lua 5.1 by means of capability detection to see if
-    we’re running an outdated Luatex.  If so, we bail.
-
-    \url{http://lua-users.org/wiki/LuaVersionCompatibility}
-
---doc]]--
-
-
 local iowrite         = io.write
 local kpsefind_file   = kpse.find_file
 local mathfloor       = math.floor
@@ -64,11 +55,14 @@ if _G.getfenv ~= nil then -- 5.1 or LJ
     if _G.jit ~= nil then
         runtime = { "jit", jit.version }
     else
+        local minimum = luaotfload.min_luatex_version
         runtime = { "stock", _VERSION }
-        print "FATAL ERROR"
-        print "Luaotfload requires a Luatex version >=0.76."
-        print "Please update your TeX distribution!"
-        os.exit (-1)
+        texio.write_nl ("term and log",
+                        string.format ("\tFATAL ERROR\n\z
+                                        \tLuaotfload requires a Luatex version >= %d.%d.%d.\n\z
+                                        \tPlease update your TeX distribution!\n\n",
+                                       (unpack or table.unpack) (minimum)))
+        error "version check failed"
     end
 else -- 5.2
     runtime = { "stock", _VERSION }

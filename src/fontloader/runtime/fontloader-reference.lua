@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 04/27/16 10:18:10
+-- merge date  : 05/01/16 09:52:32
 
 do -- begin closure to overcome local limits and interference
 
@@ -2545,7 +2545,7 @@ local reslasher=lpeg.replacer(S("\\/"),"/")
 local deslasher=lpeg.replacer(S("\\/")^1,"/")
 function file.join(one,two,three,...)
   if not two then
-    return one=="" and one or lpegmatch(stripper,one)
+    return one=="" and one or lpegmatch(reslasher,one)
   end
   if one=="" then
     return lpegmatch(stripper,three and concat({ two,three,... },"/") or two)
@@ -7114,11 +7114,12 @@ end
 local get_indexes
 do
   local fontloader=fontloader
+  local get_indexes_old=false
   if fontloader then
     local font_to_table=fontloader.to_table
     local open_font=fontloader.open
     local close_font=fontloader.close
-    local function get_indexes_old(data,pfbname)
+    get_indexes_old=function(data,pfbname)
       local pfbblob=open_font(pfbname)
       if pfbblob then
         local characters=data.characters
@@ -7235,7 +7236,7 @@ do
       end
     end
   end
-  if fontloader then
+  if get_indexes_old then
     afm.use_new_indexer=true
     get_indexes_new=get_indexes
     get_indexes=function(data,pfbname)
@@ -7415,7 +7416,13 @@ unify=function(data,filename)
   resources.marks={}
   resources.private=private
 end
+local everywhere={ ["*"]={ ["*"]=true } } 
+local noflags={ false,false,false,false }
+afm.experimental_normalize=false
 normalize=function(data)
+  if type(afm.experimental_normalize)=="function" then
+    afm.experimental_normalize(data)
+  end
 end
 fixnames=function(data)
   for k,v in next,data.descriptions do
@@ -12678,8 +12685,8 @@ local function handlemark(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyp
       end
       for i=1,nofbaserecords do
         local components=baserecords[i]
-        local b=basecoverage[i]
         if components then
+          local b=basecoverage[i]
           for c=1,#components do
             local classes=components[c]
             if classes then
@@ -12694,7 +12701,6 @@ local function handlemark(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyp
                 end
               end
             end
-            components[i]=classes
           end
         end
       end
@@ -15639,7 +15645,7 @@ local trace_defining=false registertracker("fonts.defining",function(v) trace_de
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.018 
+otf.version=3.019 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 local otfreaders=otf.readers
 local hashes=fonts.hashes
@@ -17657,9 +17663,11 @@ local function inject_everything(head,where)
                 end
               else
                 local i=p.emptyinjections
-                local leftkern=i.leftkern
-                if leftkern and leftkern~=0 then
-                  setfield(prev,"replace",newkern(leftkern)) 
+                if i then
+                  local leftkern=i.leftkern
+                  if leftkern and leftkern~=0 then
+                    setfield(prev,"replace",newkern(leftkern)) 
+                  end
                 end
               end
               if done then
@@ -21029,7 +21037,7 @@ local function txtdirstate(start,stack,top,rlparmode)
     new=rlparmode
   end
   if trace_directions then
-    report_process("directions after txtdir %a: parmode %a, txtmode %a, level %a",dir,mref(rlparmode),mref(new),topstack)
+    report_process("directions after txtdir %a: parmode %a, txtmode %a, level %a",dir,mref(rlparmode),mref(new),top)
   end
   return getnext(start),top,new
 end

@@ -50,13 +50,23 @@ local texiowrite      = texio.write
 local tonumber        = tonumber
 local type            = type
 
-local runtime
-if _G.getfenv ~= nil then -- 5.1 or LJ
-    if _G.jit ~= nil then
-        runtime = { "jit", jit.version }
-    else
-        local minimum = luaotfload.min_luatex_version
-        runtime = { "stock", _VERSION }
+do
+    local runtime         = _G.jit and { "jit"  , jit.version }
+                                    or { "stock", _VERSION }
+    local stats           = status and status.list ()
+    local minimum         = luaotfload.min_luatex_version
+    local actual          = { 0, 0, 0 }
+    if stats then
+        local major    = stats.luatex_version / 100
+        local minor    = stats.luatex_version % 100
+        local revision = stats.luatex_revision --[[ : string ]]
+        local revno    = tonumber (revision)
+        actual         = { major, minor, revno or 0 }
+    end
+
+    if actual [1] < minimum [1] or actual [2] < minimum [2]
+    or actual [3] < minimum [3]
+    then
         texio.write_nl ("term and log",
                         string.format ("\tFATAL ERROR\n\z
                                         \tLuaotfload requires a Luatex version >= %d.%d.%d.\n\z
@@ -64,8 +74,8 @@ if _G.getfenv ~= nil then -- 5.1 or LJ
                                        (unpack or table.unpack) (minimum)))
         error "version check failed"
     end
-else -- 5.2
-    runtime = { "stock", _VERSION }
+    luaotfload.runtime        = runtime
+    luaotfload.luatex_version = actual
 end
 
 local C, Ct, P, S  = lpeg.C, lpeg.Ct, lpeg.P, lpeg.S
@@ -330,15 +340,18 @@ local version_msg = function ( )
     local out   = function (...) texiowrite_nl (stringformat (...)) end
     local uname = os.uname ()
     local meta  = fonts.names.getmetadata ()
-    local info  = status.list ()
+
+    local runtime = luaotfload.runtime
+    local actual  = luaotfload.luatex_version
+    local status  = config.luaotfload.status
+    local notes   = status and status.notes or { }
+
     out (about, luaotfload.self)
     out ("%s version: %q", luaotfload.self, version)
-    out ("Revision: %q", config.luaotfload.status.notes.revision)
+    out ("Revision: %q", notes.revision)
     out ("Lua interpreter: %s; version %q", runtime[1], runtime[2])
 --[[out ("Luatex SVN revision: %d", info.luatex_svn)]] --> SVN r5624
-    out ("Luatex version: %.2f.%d",
-         info.luatex_version / 100,
-         info.luatex_revision)
+    out ("Luatex version: %d.%d", actual [1], actual [2])
     out ("Platform: type=%s name=%s", os.type, os.name)
 
     local uname_vars = tablesortedkeys (uname)
@@ -350,7 +363,7 @@ local version_msg = function ( )
         out("No database metadata available.")
     else
         out ("Index: version=%q created=%q modified=%q",
-             config.luaotfload.status.notes.revision,
+             meta.version or "too old",
              meta.created or "ages ago",
              meta.modified or "ages ago")
     end

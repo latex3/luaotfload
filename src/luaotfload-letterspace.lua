@@ -28,9 +28,6 @@ local setfield           = nodedirect.setfield
 local field_setter = function (name) return function (n, ...) setfield (n, name, ...) end end
 local field_getter = function (name) return function (n, ...) getfield (n, name, ...) end end
 
---- As of December 2014 the faster ``node.direct.*`` interface is
---- preferred.
-
 local getfont            = nodedirect.getfont
 local getid              = nodedirect.getid
 
@@ -351,7 +348,7 @@ kerncharacters = function (head)
             end
             start = c
             setfield(s, "components", nil)
-            free_node(s)
+            --free_node(s) --> double free with multipart components
             c = getfield (start, "components")
           end
         end

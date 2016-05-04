@@ -189,6 +189,7 @@ local handle_combination = function (combo, spec)
                 " *> font %d / %d: imported %d glyphs into combo.",
                 i, nc, cnt)
     end
+    spec.lookup     = "combo"
     spec.file       = basefnt.filename
     spec.name       = stringformat ("luaotfload<%d>", defined_combos)
     spec.features   = { normal = { spec.specification } }

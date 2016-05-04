@@ -348,6 +348,9 @@ local version_msg = function ( )
 
     out (about, luaotfload.self)
     out ("%s version: %q", luaotfload.self, version)
+    if notes.description then
+        out ("Luaotfload: %q", notes.description)
+    end
     out ("Revision: %q", notes.revision)
     out ("Lua interpreter: %s; version %q", runtime[1], runtime[2])
 --[[out ("Luatex SVN revision: %d", info.luatex_svn)]] --> SVN r5624

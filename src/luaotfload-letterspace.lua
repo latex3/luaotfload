@@ -413,7 +413,7 @@ kerncharacters = function (head)
                 else
                   local kern = 0
                   local kerns = prevchardata.kerns
-                  if kerns then kern = kerns[lastchar] end
+                  if kerns then kern = kerns[lastchar] or kern end
                   krn = kern + quaddata[lastfont]*krn -- here
                   insert_node_before(head,start,kern_injector(fillup,krn))
                 end
@@ -488,7 +488,7 @@ kerncharacters = function (head)
                   --- font doesn’t contain the glyph
                 else
                   local kerns = prevchardata.kerns
-                  if kerns then kern = kerns[lastchar] end
+                  if kerns then kern = kerns[lastchar] or kern end
                 end
               end
               krn = kern + quaddata[lastfont]*krn -- here

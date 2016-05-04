@@ -74,7 +74,7 @@ local defined_combos = 0
 local handle_combination = function (combo, spec)
     defined_combos = defined_combos + 1
     if not combo [1] then
-        report ("both", 0, "load",
+        report ("both", 0, "features",
                 "combo %d: Empty font combination requested.",
                 defined_combos)
         return false
@@ -91,7 +91,7 @@ local handle_combination = function (combo, spec)
     tablesort (combo, cmp_by_idx)
 
     --- pass 1: skim combo and resolve fonts
-    report ("both", 0, "load", "combo %d: combining %d fonts.",
+    report ("both", 2, "features", "combo %d: combining %d fonts.",
             defined_combos, n)
     for i = 1, n do
         local cur = combo [i]
@@ -101,18 +101,18 @@ local handle_combination = function (combo, spec)
         if fnt then
             local chars = cur.chars
             if chars == true then
-                report ("both", 0, "load",
+                report ("both", 2, "features",
                         " *> %.2d: fallback font %d at rank %d.",
                         i, id, idx)
             else
-                report ("both", 0, "load",
+                report ("both", 2, "features",
                         " *> %.2d: include font %d at rank %d (%d items).",
                         i, id, idx, (chars and #chars or 0))
             end
             chain   [#chain + 1]   = { fnt, chars, idx = idx }
             fontids [#fontids + 1] = { id = id }
         else
-            report ("both", 0, "load",
+            report ("both", 0, "features",
                     " *> %.2d: font %d at rank %d unknown, skipping.",
                     n, id, idx)
             --- TODO might instead attempt to define the font at this point
@@ -122,14 +122,14 @@ local handle_combination = function (combo, spec)
 
     local nc = #chain
     if nc == 0 then
-        report ("both", 0, "load",
+        report ("both", 0, "features",
                 " *> no valid font (of %d) in combination.", n)
         return false
     end
 
     local basefnt = chain [1] [1]
     if nc == 1 then
-        report ("both", 0, "load",
+        report ("both", 0, "features",
                 " *> combination boils down to a single font (%s) \z
                  of %d initially specified; not pursuing this any \z
                  further.", basefnt.fullname, n)
@@ -168,27 +168,28 @@ local handle_combination = function (combo, spec)
             for j = 1, #def do
                 local this = def [j]
                 if type (this) == "number" then
-                    report ("both", 0, "load",
+                    report ("both", 2, "features",
                             " *> [%d][%d]: import codepoint U+%.4X",
                             i, j, this)
                     pickchr (this)
                 elseif type (this) == "table" then
                     local lo, hi = unpack (this)
-                    report ("both", 0, "load",
+                    report ("both", 2, "features",
                             " *> [%d][%d]: import codepoint range U+%.4X--U+%.4X",
                             i, j, lo, hi)
                     for uc = lo, hi do pickchr (uc) end
                 else
-                    report ("both", 0, "load",
+                    report ("both", 0, "features",
                             " *> item no. %d of combination definition \z
                              %d not processable.", j, i)
                 end
             end
         end
-        report ("both", 0, "load",
+        report ("both", 2, "features",
                 " *> font %d / %d: imported %d glyphs into combo.",
                 i, nc, cnt)
     end
+    spec.lookup     = "combo"
     spec.file       = basefnt.filename
     spec.name       = stringformat ("luaotfload<%d>", defined_combos)
     spec.features   = { normal = { spec.specification } }
@@ -1081,7 +1082,7 @@ local apply_default_features = function (speclist)
               or (scripts[script] and script)
               or "dflt"
         if support_incomplete[script] then
-            report("log", 0, "load",
+            report("log", 0, "features",
                 "Support for the requested script: "
                 .. "%q may be incomplete.", script)
         end
@@ -1090,13 +1091,13 @@ local apply_default_features = function (speclist)
     end
     speclist.script = script
 
-    report("log", 1, "load",
+    report("log", 2, "features",
         "Auto-selecting default features for script: %s.",
         script)
 
     local requested = default_features.defaults[script]
     if not requested then
-        report("log", 1, "load",
+        report("log", 2, "features",
             "No default features for script %q, falling back to \"dflt\".",
             script)
         requested = default_features.defaults.dflt
@@ -1157,8 +1158,7 @@ local handle_slashed = function (modifiers)
             optsize = tonumber(mod[2])
         elseif mod == false then
             --- ignore
-            report("log", 0,
-                "load", "unsupported font option: %s", v)
+            report("log", 0, "features", "unsupported font option: %s", v)
         elseif supported[mod] then
             style = supported[mod]
         elseif not stringis_empty(mod) then
@@ -1189,9 +1189,9 @@ local handle_request = function (specification)
         --- in an anonymous lookup;
         --- we try to behave as friendly as possible
         --- just go with it ...
-        report("log", 1, "load", "invalid request %q of type anon",
+        report("log", 1, "features", "invalid request %q of type anon",
             specification.specification)
-        report("log", 1, "load",
+        report("log", 1, "features",
                "use square bracket syntax or consult the documentation.")
         --- The result of \fontname must be re-feedable into \font
         --- which is expected by the Latex font mechanism. Now this
@@ -1255,7 +1255,7 @@ end
 
 if as_script == true then --- skip the remainder of the file
     fonts.names.handle_request = handle_request
-    report ("log", 5, "load",
+    report ("log", 5, "features",
             "Exiting early from luaotfload-features.lua.")
     return
 else

@@ -100,17 +100,21 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
   "patch_font", set_sscale_dimens, "set_sscale_dimens",
 }
 
+local default_units = 1000
+
 --- fontobj -> int
 local lookup_units = function (fontdata)
-  local metadata = fontdata.shared and fontdata.shared.rawdata.metadata
-  if metadata and metadata.units then
-    return metadata.units
-  elseif fontdata.parameters and fontdata.parameters.units then
-    return fontdata.parameters.units
-  elseif fontdata.units then --- v1.x
-    return fontdata.units
+  local units = fontdata.units
+  if units and units > 0 then return units end
+  local shared     = fontdata.shared    if not shared     then return default_units end
+  local rawdata    = shared.rawdata     if not rawdata    then return default_units end
+  local metadata   = rawdata.metadata   if not metadata   then return default_units end
+  local capheight  = metadata.capheight if not capheight  then return default_units end
+  local units      = metadata.units or fontdata.units
+  if not units or units == 0 then
+    return default_units
   end
-  return 1000
+  return units
 end
 
 --[[doc--
@@ -213,8 +217,9 @@ local query_ascender = function (fontdata)
   local metadata   = rawdata.metadata    if not metadata   then return false end
   local ascender   = parameters.ascender
                   or metadata.ascender   if not ascender   then return false end
-  local units      = metadata.units      if units == 0     then return false end
   local size       = parameters.size     if not size       then return false end
+  local units = lookup_units (fontdata)
+  if not units or units == 0 then return false end
   return ascender * size / units
 end
 
@@ -224,8 +229,9 @@ local query_capheight = function (fontdata)
   local rawdata    = shared.rawdata       if not rawdata    then return false end
   local metadata   = rawdata.metadata     if not metadata   then return false end
   local capheight  = metadata.capheight   if not capheight  then return false end
-  local units      = metadata.units       if units == 0     then return false end
   local size       = parameters.size      if not size       then return false end
+  local units = lookup_units (fontdata)
+  if not units or units == 0 then return false end
   return capheight * size / units
 end
 

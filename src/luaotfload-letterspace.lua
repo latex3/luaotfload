@@ -28,9 +28,6 @@ local setfield           = nodedirect.setfield
 local field_setter = function (name) return function (n, ...) setfield (n, name, ...) end end
 local field_getter = function (name) return function (n, ...) getfield (n, name, ...) end end
 
---- As of December 2014 the faster ``node.direct.*`` interface is
---- preferred.
-
 local getfont            = nodedirect.getfont
 local getid              = nodedirect.getid
 
@@ -351,7 +348,7 @@ kerncharacters = function (head)
             end
             start = c
             setfield(s, "components", nil)
-            free_node(s)
+            --free_node(s) --> double free with multipart components
             c = getfield (start, "components")
           end
         end
@@ -416,7 +413,7 @@ kerncharacters = function (head)
                 else
                   local kern = 0
                   local kerns = prevchardata.kerns
-                  if kerns then kern = kerns[lastchar] end
+                  if kerns then kern = kerns[lastchar] or kern end
                   krn = kern + quaddata[lastfont]*krn -- here
                   insert_node_before(head,start,kern_injector(fillup,krn))
                 end
@@ -491,7 +488,7 @@ kerncharacters = function (head)
                   --- font doesn’t contain the glyph
                 else
                   local kerns = prevchardata.kerns
-                  if kerns then kern = kerns[lastchar] end
+                  if kerns then kern = kerns[lastchar] or kern end
                 end
               end
               krn = kern + quaddata[lastfont]*krn -- here

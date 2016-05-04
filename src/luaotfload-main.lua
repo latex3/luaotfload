@@ -13,8 +13,29 @@ local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
 luaotfload.version                = "2.7"
 luaotfload.loaders                = { }
-luaotfload.min_luatex_version     = 95             --- i. e. 0.95
+luaotfload.min_luatex_version     = { 0, 95, 0 }   --- i. e. 0.95.0
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
+
+if not tex or not tex.luatexversion then
+    error "this program must be run in TeX mode" --- or call tex.initialize() =)
+else
+    --- version check
+    local major    = tex.luatexversion / 100
+    local minor    = tex.luatexversion % 100
+    local revision = tex.luatexrevision --[[ : string ]]
+    local revno    = tonumber (revision)
+    local minimum  = luaotfload.min_luatex_version
+    if major < minimum [1] or minor < minimum [2]
+    or revno and revno < minimum [3]
+    then
+        texio.write_nl ("term and log",
+                        string.format ("\tFATAL ERROR\n\z
+                                        \tLuaotfload requires a Luatex version >= %d.%d.%d.\n\z
+                                        \tPlease update your TeX distribution!\n\n",
+                                       (unpack or table.unpack) (minimum)))
+        error "version check failed"
+    end
+end
 
 local authors = "\z
     Hans Hagen,\z

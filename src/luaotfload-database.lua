@@ -207,8 +207,7 @@ local make_luanames = function (path)
 end
 
 local format_precedence = {
-    "otf",  "ttc", "ttf", "afm",
-    -- "pfb" --- may come back before Luatex 1.0
+    "otf",  "ttc", "ttf", "afm", "pfb"
 }
 
 local location_precedence = {
@@ -1664,7 +1663,8 @@ local loaders = {
     otf     = ot_fullinfo,
     ttc     = ot_fullinfo,
     ttf     = ot_fullinfo,
---- pfb     = t1_fullinfo,
+    afm     = t1_fullinfo,
+    pfb     = t1_fullinfo,
 }
 
 --- not side-effect free!
@@ -2057,6 +2057,16 @@ do
     end
 end
 
+local locate_matching_pfb = function (afmfile, dir)
+    local pfbname = filereplacesuffix (afmfile, "pfb")
+    local pfbpath = dir .. "/" .. pfbname
+    if lfsisfile (pfbpath) then
+        return pfbpath
+    end
+    --- Check for match in texmf too
+    return kpsefind_file (pfbname, "type1 fonts")
+end
+
 local process_dir_tree
 process_dir_tree = function (acc, dirs)
     if not next (dirs) then --- done
@@ -2084,12 +2094,10 @@ process_dir_tree = function (acc, dirs)
                     ent = stringlower (ent)
 
                     if lpegmatch (p_font_filter, ent) then
+                        newfiles[#newfiles+1] = fullpath
                         if filesuffix (ent) == "afm" then
-                            --- fontloader.open() will load the afm
-                            --- iff both files are in the same directory
-                            local pfbpath = filereplacesuffix
-                                                    (fullpath, "pfb")
-                            if lfsisfile (pfbpath) then
+                            local pfbpath = locate_matching_pfb (ent, dir)
+                            if pfbpath then
                                 newfiles[#newfiles+1] = pfbpath
                             end
                         else
@@ -2121,12 +2129,8 @@ local process_dir = function (dir)
                     if lpegmatch (p_font_filter, ent)
                     then
                         if filesuffix (ent) == "afm" then
-                            --- fontloader.open() will load the afm
-                            --- iff both files are in the same
-                            --- directory
-                            local pfbpath = filereplacesuffix
-                                                    (fullpath, "pfb")
-                            if lfsisfile (pfbpath) then
+                            local pfbpath = locate_matching_pfb (ent, dir)
+                            if pfbpath then
                                 files[#files+1] = pfbpath
                             end
                         else
@@ -2261,6 +2265,7 @@ local collect_font_filenames_texmf = function ()
     fontdirs = kpseexpand_path "$OPENTYPEFONTS"
     fontdirs = fontdirs .. path_separator .. kpseexpand_path "$TTFONTS"
     fontdirs = fontdirs .. path_separator .. kpseexpand_path "$T1FONTS"
+    fontdirs = fontdirs .. path_separator .. kpseexpand_path "$AFMFONTS"
 
     if stringis_empty (fontdirs) then
         return { }

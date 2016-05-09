@@ -3652,6 +3652,9 @@ registerotffeature {
     }
 }
 
+otf.nodemodeinitializer = featuresinitializer
+otf.featuresprocessor   = featuresprocessor
+
 -- This can be used for extra handlers, but should be used with care!
 
 otf.handlers = handlers -- used in devanagari

@@ -450,3 +450,5 @@ registerotffeature {
         base     = featuresinitializer,
     }
 }
+
+otf.basemodeinitializer = featuresinitializer

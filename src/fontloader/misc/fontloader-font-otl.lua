@@ -101,6 +101,12 @@ registerdirective("fonts.otf.loader.forcenotdef",   function(v) forcenotdef   = 
 --     end
 -- end
 
+-- Enhancers are used to apply fixes and extensions to fonts. For instance, we use them
+-- to implement tlig and trep features. They are not neccessarily bound to opentype
+-- fonts but can also apply to type one fonts, given that they obey the structure of an
+-- opentype font. They are not to be confused with format specific features but maybe
+-- some are so generic that they might eventually move to this mechanism.
+
 local ordered_enhancers = {
     "check extra features",
 }
@@ -302,7 +308,7 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
         --
         enhancers.apply(data,filename,data)
         --
-        constructors.addcoreunicodes(unicodes)
+     -- constructors.addcoreunicodes(data.resources.unicodes) -- still needed ?
         --
         if applyruntimefixes then
             applyruntimefixes(filename,data)

@@ -230,8 +230,6 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule('luatex-fonts-syn.lua')
 
         loadmodule('font-tfm.lua')
-        loadmodule('font-afm.lua')
-        loadmodule('font-afk.lua')
         loadmodule('font-oti.lua')
 
         -- These are the old loader and processing modules. These use the built-in font loader and
@@ -259,6 +257,11 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule('font-ota.lua')
         loadmodule('font-ots.lua')
         loadmodule('font-osd.lua')
+
+        -- type one code
+
+        loadmodule('font-one.lua') -- was font-afm.lua
+        loadmodule('font-afk.lua')
 
         -- common code
 

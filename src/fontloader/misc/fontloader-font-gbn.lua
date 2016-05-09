@@ -126,17 +126,19 @@ function nodes.handlers.nodepass(head)
                             local variant = hash[getchar(p)]
                             if variant then
                                 setchar(p,variant)
-                                if not redundant then
-                                    redundant = { n }
-                                else
-                                    redundant[#redundant+1] = n
-                                end
                             end
                         end
+                    end
+                    -- per generic user request we always remove selectors
+                    if not redundant then
+                        redundant = { n }
+                    else
+                        redundant[#redundant+1] = n
                     end
                 end
             end
         end
+        local nofbasefonts = #basefonts
         if redundant then
             for i=1,#redundant do
                 local r = redundant[i]
@@ -147,8 +149,8 @@ function nodes.handlers.nodepass(head)
                 else
                     setlink(p,n)
                 end
-                if b > 0 then
-                    for i=1,b do
+                if nofbasefonts > 0 then
+                    for i=1,nofbasefonts do
                         local bi = basefonts[i]
                         if r == bi[1] then
                             bi[1] = n
@@ -192,8 +194,8 @@ function nodes.handlers.nodepass(head)
                 end
             end
         end
-        if basemodepass and #basefonts > 0 then
-            for i=1,#basefonts do
+        if basemodepass and nofbasefonts > 0 then
+            for i=1,nofbasefonts do
                 local range = basefonts[i]
                 local start = range[1]
                 local stop  = range[2]

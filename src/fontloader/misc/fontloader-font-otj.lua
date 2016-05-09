@@ -1255,11 +1255,11 @@ local function inject_everything(head,where)
                                 insert_node_after(pre,n,newkern(rightkern))
                                 done = true
                             end
-                        end
-                        if hasmarks then
-                            local pm = i.markbasenode
-                            if pm then
-                                processmark(pm,current,i)
+                            if hasmarks then
+                                local pm = i.markbasenode
+                                if pm then
+                                    processmark(pm,current,i)
+                                end
                             end
                         end
                     end
@@ -1287,11 +1287,11 @@ local function inject_everything(head,where)
                                 insert_node_after(post,n,newkern(rightkern))
                                 done = true
                             end
-                        end
-                        if hasmarks then
-                            local pm = i.markbasenode
-                            if pm then
-                                processmark(pm,current,i)
+                            if hasmarks then
+                                local pm = i.markbasenode
+                                if pm then
+                                    processmark(pm,current,i)
+                                end
                             end
                         end
                     end
@@ -1319,11 +1319,11 @@ local function inject_everything(head,where)
                                 insert_node_after(replace,n,newkern(rightkern))
                                 done = true
                             end
-                        end
-                        if hasmarks then
-                            local pm = i.markbasenode
-                            if pm then
-                                processmark(pm,current,i)
+                            if hasmarks then
+                                local pm = i.markbasenode
+                                if pm then
+                                    processmark(pm,current,i)
+                                end
                             end
                         end
                     end

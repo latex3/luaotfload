@@ -797,7 +797,7 @@ actions.blacklist = function (job)
 end
 
 actions.generate = function (job)
-    local _ = fonts.names.update (fontnames, job.force_reload, job.dry_run)
+    local _ = fonts.names.update ({ }, job.force_reload, job.dry_run)
     local namedata = fonts.names.data ()
     if namedata then
         logreport ("info", 2, "db",

@@ -251,8 +251,6 @@ local context_modules = {
   { ctx,   "font-map"          },
   { ltx,   "luatex-fonts-syn"  },
   { ctx,   "font-tfm"          },
-  { ctx,   "font-afm"          },
-  { ctx,   "font-afk"          },
   { ctx,   "font-oti"          },
   { ctx,   "font-otr"          },
   { ctx,   "font-cff"          },
@@ -265,6 +263,8 @@ local context_modules = {
   { ctx,   "font-ota"          },
   { ctx,   "font-ots"          },
   { ctx,   "font-osd"          },
+  { ctx,   "font-one"          },
+  { ctx,   "font-afk"          },
   { ctx,   "font-lua"          },
   { ctx,   "font-def"          },
   { ltx,   "luatex-fonts-ext"  },
@@ -509,8 +509,6 @@ local init_main = function ()
     load_fontloader_module "font-map"
     load_fontloader_module "fonts-syn"
     load_fontloader_module "font-tfm"
-    load_fontloader_module "font-afm"
-    load_fontloader_module "font-afk"
     load_fontloader_module "font-oti"
     load_fontloader_module "font-otr"
     load_fontloader_module "font-cff"
@@ -523,6 +521,8 @@ local init_main = function ()
     load_fontloader_module "font-ota"
     load_fontloader_module "font-ots"
     load_fontloader_module "font-osd"
+    load_fontloader_module "font-one"
+    load_fontloader_module "font-afk"
     load_fontloader_module "font-lua"
     load_fontloader_module "font-def"
     load_fontloader_module "fonts-ext"

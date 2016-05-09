@@ -1,4 +1,4 @@
-if not modules then modules = { } end modules ['font-afm'] = {
+if not modules then modules = { } end modules ['font-one'] = {
     version   = 1.001,
     comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
@@ -7,22 +7,16 @@ if not modules then modules = { } end modules ['font-afm'] = {
 }
 
 --[[ldx--
-<p>Some code may look a bit obscure but this has to do with the
-fact that we also use this code for testing and much code evolved
-in the transition from <l n='tfm'/> to <l n='afm'/> to <l
-n='otf'/>.</p>
+<p>Some code may look a bit obscure but this has to do with the fact that we also use
+this code for testing and much code evolved in the transition from <l n='tfm'/> to
+<l n='afm'/> to <l n='otf'/>.</p>
 
-<p>The following code still has traces of intermediate font support
-where we handles font encodings. Eventually font encoding goes
-away.</p>
+<p>The following code still has traces of intermediate font support where we handles
+font encodings. Eventually font encoding went away but we kept some code around in
+other modules.</p>
 
-<p>The embedding of a font involves creating temporary files and
-depending on your system setup that can fail. It took more than a
-day to figure out why sometimes embedding failed in mingw luatex
-where running on a real path like c:\... failed while running on
-say e:\... being a link worked well. The native windows binaries
-don't have this issue.</p>
-
+<p>This version implements a node mode approach so that users can also more easily
+add features.</p>
 --ldx]]--
 
 local fonts, logs, trackers, containers, resolvers = fonts, logs, trackers, containers, resolvers
@@ -52,38 +46,24 @@ local constructors       = fonts.constructors
 
 local afm                = constructors.newhandler("afm")
 local pfb                = constructors.newhandler("pfb")
+local otf                = fonts.handlers.otf
+
+local otfreaders         = otf.readers
+local otfenhancers       = otf.enhancers
 
 local afmfeatures        = constructors.newfeatures("afm")
 local registerafmfeature = afmfeatures.register
 
-afm.version              = 1.501 -- incrementing this number one up will force a re-cache
+afm.version              = 1.505 -- incrementing this number one up will force a re-cache
 afm.cache                = containers.define("fonts", "afm", afm.version, true)
 afm.autoprefixed         = true -- this will become false some day (catches texnansi-blabla.*)
 
 afm.helpdata             = { }  -- set later on so no local for this
 afm.syncspace            = true -- when true, nicer stretch values
-afm.addligatures         = true -- best leave this set to true
-afm.addtexligatures      = true -- best leave this set to true
-afm.addkerns             = true -- best leave this set to true
 
 local overloads          = fonts.mappings.overloads
 
 local applyruntimefixes  = fonts.treatments and fonts.treatments.applyfixes
-
-local function setmode(tfmdata,value)
-    if value then
-        tfmdata.properties.mode = lower(value)
-    end
-end
-
-registerafmfeature {
-    name         = "mode",
-    description  = "mode",
-    initializers = {
-        base = setmode,
-        node = setmode,
-    }
-}
 
 --[[ldx--
 <p>We start with the basic reader which we give a name similar to the
@@ -222,60 +202,12 @@ local function get_variables(data,fontmetrics)
     end
 end
 
+-- new (unfinished) pfb loader but i see no differences between
+-- old and new (one bad vector with old)
+
 local get_indexes
 
 do
-
-    -- old font loader
-
-    local fontloader      = fontloader
-    local get_indexes_old = false
-
-    if fontloader then
-
-        local font_to_table = fontloader.to_table
-        local open_font     = fontloader.open
-        local close_font    = fontloader.close
-
-        get_indexes_old = function(data,pfbname)
-            local pfbblob = open_font(pfbname)
-            if pfbblob then
-                local characters = data.characters
-                local pfbdata = font_to_table(pfbblob)
-                if pfbdata then
-                    local glyphs = pfbdata.glyphs
-                    if glyphs then
-                        if trace_loading then
-                            report_afm("getting index data from %a",pfbname)
-                        end
-                        for index, glyph in next, glyphs do
-                            local name = glyph.name
-                            if name then
-                                local char = characters[name]
-                                if char then
-                                    if trace_indexing then
-                                        report_afm("glyph %a has index %a",name,index)
-                                    end
-                                    char.index = index
-                                end
-                            end
-                        end
-                    elseif trace_loading then
-                        report_afm("no glyph data in pfb file %a",pfbname)
-                    end
-                elseif trace_loading then
-                    report_afm("no data in pfb file %a",pfbname)
-                end
-                close_font(pfbblob)
-            elseif trace_loading then
-                report_afm("invalid pfb file %a",pfbname)
-            end
-        end
-
-    end
-
-    -- new (unfinished) font loader but i see no differences between
-    -- old and new (one bad vector with old)
 
     local n, m
 
@@ -395,21 +327,6 @@ do
         end
     end
 
-    if get_indexes_old then
-
-        afm.use_new_indexer = true
-        get_indexes_new     = get_indexes
-
-        get_indexes = function(data,pfbname)
-            if afm.use_new_indexer then
-                return get_indexes_new(data,pfbname)
-            else
-                return get_indexes_old(data,pfbname)
-            end
-        end
-
-    end
-
 end
 
 local function readafm(filename)
@@ -469,15 +386,17 @@ local function readafm(filename)
 end
 
 --[[ldx--
-<p>We cache files. Caching is taken care of in the loader. We cheat a bit
-by adding ligatures and kern information to the afm derived data. That
-way we can set them faster when defining a font.</p>
+<p>We cache files. Caching is taken care of in the loader. We cheat a bit by adding
+ligatures and kern information to the afm derived data. That way we can set them faster
+when defining a font.</p>
+
+<p>We still keep the loading two phased: first we load the data in a traditional
+fashion and later we transform it to sequences.</p>
 --ldx]]--
 
-local addkerns, addligatures, addtexligatures, unify, normalize, fixnames -- we will implement these later
+local addkerns, unify, normalize, fixnames, addligatures, addtexligatures
 
 function afm.load(filename)
-    -- hm, for some reasons not resolved yet
     filename = resolvers.findfile(filename,'afm') or ""
     if filename ~= "" and not fonts.names.ignoredfile(filename) then
         local name = file.removesuffix(file.basename(filename))
@@ -503,38 +422,55 @@ function afm.load(filename)
                 if pfbname ~= "" then
                     data.resources.filename = resolvers.unresolve(pfbname)
                     get_indexes(data,pfbname)
-               elseif trace_loading then
+                elseif trace_loading then
                     report_afm("no pfb file for %a",filename)
                  -- data.resources.filename = "unset" -- better than loading the afm file
                 end
-                report_afm("unifying %a",filename)
+                -- we now have all the data loaded
+                if trace_loading then
+                    report_afm("unifying %a",filename)
+                end
                 unify(data,filename)
-                if afm.addligatures then
-                    report_afm("add ligatures")
-                    addligatures(data)
+                if trace_loading then
+                    report_afm("add ligatures") -- there can be missing ones
                 end
-                if afm.addtexligatures then
-                    report_afm("add tex ligatures")
-                    addtexligatures(data)
-                end
-                if afm.addkerns then
+                addligatures(data)
+                if trace_loading then
                     report_afm("add extra kerns")
-                    addkerns(data)
+                end
+                addkerns(data)
+                if trace_loading then
+                    report_afm("normalizing")
                 end
                 normalize(data)
+                if trace_loading then
+                    report_afm("fixing names")
+                end
                 fixnames(data)
-                report_afm("add tounicode data")
+                if trace_loading then
+                    report_afm("add tounicode data")
+                end
+             -- otfreaders.addunicodetable(data) -- only when not done yet
                 fonts.mappings.addtounicode(data,filename)
+             -- otfreaders.extend(data)
+                otfreaders.pack(data)
                 data.size = size
                 data.time = time
                 data.pfbsize = pfbsize
                 data.pfbtime = pfbtime
                 report_afm("saving %a in cache",name)
-                data.resources.unicodes = nil -- consistent with otf but here we save not much
+             -- data.resources.unicodes = nil -- consistent with otf but here we save not much
                 data = containers.write(afm.cache, name, data)
                 data = containers.read(afm.cache,name)
             end
-            if applyruntimefixes and data then
+        end
+        if data then
+         -- constructors.addcoreunicodes(unicodes)
+            otfreaders.unpack(data)
+            otfreaders.expand(data) -- inline tables
+            otfreaders.addunicodetable(data) -- only when not done yet
+            otfenhancers.apply(data,filename,data)
+            if applyruntimefixes then
                 applyruntimefixes(filename,data)
             end
         end
@@ -602,12 +538,105 @@ end
 local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
 local noflags    = { false, false, false, false }
 
-afm.experimental_normalize = false
-
 normalize = function(data)
-    if type(afm.experimental_normalize) == "function" then
-        afm.experimental_normalize(data)
+    local ligatures  = setmetatableindex("table")
+    local kerns      = setmetatableindex("table")
+    local extrakerns = setmetatableindex("table")
+    for u, c in next, data.descriptions do
+        local l = c.ligatures
+        local k = c.kerns
+        local e = c.extrakerns
+        if l then
+            ligatures[u] = l
+            for u, v in next, l do
+                l[u] = { ligature = v }
+            end
+            c.ligatures = nil
+        end
+        if k then
+            kerns[u] = k
+            for u, v in next, k do
+                k[u] = v -- { v, 0 }
+            end
+            c.kerns = nil
+        end
+        if e then
+            extrakerns[u] = e
+            for u, v in next, e do
+                e[u] = v -- { v, 0 }
+            end
+            c.extrakerns = nil
+        end
     end
+    local features = {
+        gpos = { },
+        gsub = { },
+    }
+    local sequences = {
+        -- only filled ones
+    }
+    if next(ligatures) then
+        features.gsub.liga = everywhere
+        data.properties.hasligatures = true
+        sequences[#sequences+1] = {
+            features = {
+                liga = everywhere,
+            },
+            flags    = noflags,
+            name     = "s_s_0",
+            nofsteps = 1,
+            order    = { "liga" },
+            type     = "gsub_ligature",
+            steps    = {
+                {
+                    coverage = ligatures,
+                },
+            },
+        }
+    end
+    if next(kerns) then
+        features.gpos.kern = everywhere
+        data.properties.haskerns = true
+        sequences[#sequences+1] = {
+            features = {
+                kern = everywhere,
+            },
+            flags    = noflags,
+            name     = "p_s_0",
+            nofsteps = 1,
+            order    = { "kern" },
+            type     = "gpos_pair",
+            steps    = {
+                {
+                    format   = "kern",
+                    coverage = kerns,
+                },
+            },
+        }
+    end
+    if next(extrakerns) then
+        features.gpos.extrakerns = everywhere
+        data.properties.haskerns = true
+        sequences[#sequences+1] = {
+            features = {
+                extrakerns = everywhere,
+            },
+            flags    = noflags,
+            name     = "p_s_1",
+            nofsteps = 1,
+            order    = { "extrakerns" },
+            type     = "gpos_pair",
+            steps    = {
+                {
+                    format   = "kern",
+                    coverage = extrakerns,
+                },
+            },
+        }
+    end
+    -- todo: compress kerns
+    data.resources.features  = features
+    data.resources.sequences = sequences
 end
 
 fixnames = function(data)
@@ -982,6 +1011,8 @@ local function afmtotfm(specification)
                         tfmdata.shared = shared
                     end
                     shared.rawdata   = rawdata
+                    shared.dynamics  = { }
+                    tfmdata.changed  = { }
                     shared.features  = features
                     shared.processes = afm.setfeatures(tfmdata,features)
                 end
@@ -1089,53 +1120,36 @@ local function texreplacements(tfmdata,value)
     end
 end
 
-local function ligatures   (tfmdata,value) prepareligatures(tfmdata,'ligatures',   value) end
-local function texligatures(tfmdata,value) prepareligatures(tfmdata,'texligatures',value) end
-local function kerns       (tfmdata,value) preparekerns    (tfmdata,'kerns',       value) end
+-- local function ligatures   (tfmdata,value) prepareligatures(tfmdata,'ligatures',   value) end
+-- local function texligatures(tfmdata,value) prepareligatures(tfmdata,'texligatures',value) end
+-- local function kerns       (tfmdata,value) preparekerns    (tfmdata,'kerns',       value) end
 local function extrakerns  (tfmdata,value) preparekerns    (tfmdata,'extrakerns',  value) end
 
+local function setmode(tfmdata,value)
+    if value then
+        tfmdata.properties.mode = lower(value)
+    end
+end
+
 registerafmfeature {
-    name         = "liga",
-    description  = "traditional ligatures",
+    name         = "mode",
+    description  = "mode",
     initializers = {
-        base = ligatures,
-        node = ligatures,
+        base = setmode,
+        node = setmode,
     }
 }
 
 registerafmfeature {
-    name         = "kern",
-    description  = "intercharacter kerning",
+    name         = "features",
+    description  = "features",
+    default      = true,
     initializers = {
-        base = kerns,
-        node = kerns,
-    }
-}
-
-registerafmfeature {
-    name         = "extrakerns",
-    description  = "additional intercharacter kerning",
-    initializers = {
-        base = extrakerns,
-        node = extrakerns,
-    }
-}
-
-registerafmfeature {
-    name         = 'tlig',
-    description  = 'tex ligatures',
-    initializers = {
-        base = texligatures,
-        node = texligatures,
-    }
-}
-
-registerafmfeature {
-    name         = 'trep',
-    description  = 'tex replacements',
-    initializers = {
-        base = texreplacements,
-        node = texreplacements,
+        node     = otf.nodemodeinitializer,
+        base     = otf.basemodeinitializer,
+    },
+    processors   = {
+        node     = otf.featuresprocessor,
     }
 }
 

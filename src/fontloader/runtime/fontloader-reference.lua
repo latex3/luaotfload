@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 05/08/16 17:30:49
+-- merge date  : 05/10/16 23:43:55
 
 do -- begin closure to overcome local limits and interference
 
@@ -6414,7 +6414,7 @@ local fonts=fonts or {}
 local mappings=fonts.mappings or {}
 fonts.mappings=mappings
 local allocate=utilities.storage.allocate
-local hex=R("AF","09")
+local hex=R("AF","af","09")
 local hexfour=(hex*hex*hex^-2)/function(s) return tonumber(s,16) end
 local hexsix=(hex*hex*hex^-4)/function(s) return tonumber(s,16) end
 local dec=(R("09")^1)/tonumber
@@ -6549,127 +6549,128 @@ function mappings.addtounicode(data,filename,checklookups)
   end
   local ns=0
   local nl=0
-  for unic,glyph in next,descriptions do
+  for du,glyph in next,descriptions do
     local name=glyph.name
     if name then
-      local index=glyph.index
-      local r=overloads[name]
-      if r then
-        glyph.unicode=r.unicode
-      elseif not unic or unic==-1 or unic>=private or (unic>=0xE000 and unic<=0xF8FF) or unic==0xFFFE or unic==0xFFFF then
-        local unicode=unicodevector[name] or contextvector[name]
-        if unicode then
-          glyph.unicode=unicode
-          ns=ns+1
-        end
-        if (not unicode) and usedmap then
-          local foundindex=lpegmatch(oparser,name)
-          if foundindex then
-            unicode=cidcodes[foundindex] 
-            if unicode then
-              glyph.unicode=unicode
-              ns=ns+1
-            else
-              local reference=cidnames[foundindex] 
-              if reference then
-                local foundindex=lpegmatch(oparser,reference)
-                if foundindex then
-                  unicode=cidcodes[foundindex]
-                  if unicode then
-                    glyph.unicode=unicode
-                    ns=ns+1
-                  end
-                end
-                if not unicode or unicode=="" then
-                  local foundcodes,multiple=lpegmatch(uparser,reference)
-                  if foundcodes then
-                    glyph.unicode=foundcodes
-                    if multiple then
-                      nl=nl+1
-                      unicode=true
-                    else
+      local overload=overloads[name]
+      if overload then
+        glyph.unicode=overload.unicode
+      else
+        local gu=glyph.unicode 
+        if not gu or gu==-1 or du>=private or (du>=0xE000 and du<=0xF8FF) or du==0xFFFE or du==0xFFFF then
+          local unicode=unicodevector[name] or contextvector[name]
+          if unicode then
+            glyph.unicode=unicode
+            ns=ns+1
+          end
+          if (not unicode) and usedmap then
+            local foundindex=lpegmatch(oparser,name)
+            if foundindex then
+              unicode=cidcodes[foundindex] 
+              if unicode then
+                glyph.unicode=unicode
+                ns=ns+1
+              else
+                local reference=cidnames[foundindex] 
+                if reference then
+                  local foundindex=lpegmatch(oparser,reference)
+                  if foundindex then
+                    unicode=cidcodes[foundindex]
+                    if unicode then
+                      glyph.unicode=unicode
                       ns=ns+1
-                      unicode=foundcodes
+                    end
+                  end
+                  if not unicode or unicode=="" then
+                    local foundcodes,multiple=lpegmatch(uparser,reference)
+                    if foundcodes then
+                      glyph.unicode=foundcodes
+                      if multiple then
+                        nl=nl+1
+                        unicode=true
+                      else
+                        ns=ns+1
+                        unicode=foundcodes
+                      end
                     end
                   end
                 end
               end
             end
           end
-        end
-        if not unicode or unicode=="" then
-          local split=lpegmatch(namesplitter,name)
-          local nsplit=split and #split or 0 
-          if nsplit==0 then
-          elseif nsplit==1 then
-            local base=split[1]
-            local u=unicodes[base] or unicodevector[base] or contextvector[name]
-            if not u then
-            elseif type(u)=="table" then
-              if u[1]<private then
+          if not unicode or unicode=="" then
+            local split=lpegmatch(namesplitter,name)
+            local nsplit=split and #split or 0 
+            if nsplit==0 then
+            elseif nsplit==1 then
+              local base=split[1]
+              local u=unicodes[base] or unicodevector[base] or contextvector[name]
+              if not u then
+              elseif type(u)=="table" then
+                if u[1]<private then
+                  unicode=u
+                  glyph.unicode=unicode
+                end
+              elseif u<private then
                 unicode=u
                 glyph.unicode=unicode
               end
-            elseif u<private then
-              unicode=u
-              glyph.unicode=unicode
-            end
-          else
-            local t,n={},0
-            for l=1,nsplit do
-              local base=split[l]
-              local u=unicodes[base] or unicodevector[base] or contextvector[name]
-              if not u then
-                break
-              elseif type(u)=="table" then
-                if u[1]>=private then
-                  break
-                end
-                n=n+1
-                t[n]=u[1]
-              else
-                if u>=private then
-                  break
-                end
-                n=n+1
-                t[n]=u
-              end
-            end
-            if n>0 then
-              if n==1 then
-                unicode=t[1]
-              else
-                unicode=t
-              end
-              glyph.unicode=unicode
-            end
-          end
-          nl=nl+1
-        end
-        if not unicode or unicode=="" then
-          local foundcodes,multiple=lpegmatch(uparser,name)
-          if foundcodes then
-            glyph.unicode=foundcodes
-            if multiple then
-              nl=nl+1
-              unicode=true
             else
-              ns=ns+1
-              unicode=foundcodes
+              local t,n={},0
+              for l=1,nsplit do
+                local base=split[l]
+                local u=unicodes[base] or unicodevector[base] or contextvector[name]
+                if not u then
+                  break
+                elseif type(u)=="table" then
+                  if u[1]>=private then
+                    break
+                  end
+                  n=n+1
+                  t[n]=u[1]
+                else
+                  if u>=private then
+                    break
+                  end
+                  n=n+1
+                  t[n]=u
+                end
+              end
+              if n>0 then
+                if n==1 then
+                  unicode=t[1]
+                else
+                  unicode=t
+                end
+                glyph.unicode=unicode
+              end
+            end
+            nl=nl+1
+          end
+          if not unicode or unicode=="" then
+            local foundcodes,multiple=lpegmatch(uparser,name)
+            if foundcodes then
+              glyph.unicode=foundcodes
+              if multiple then
+                nl=nl+1
+                unicode=true
+              else
+                ns=ns+1
+                unicode=foundcodes
+              end
             end
           end
-        end
-        local r=overloads[unicode]
-        if r then
-          unicode=r.unicode
-          glyph.unicode=unicode
-        end
-        if not unicode then
-          missing[unic]=true
-          nofmissing=nofmissing+1
+          local r=overloads[unicode]
+          if r then
+            unicode=r.unicode
+            glyph.unicode=unicode
+          end
+          if not unicode then
+            missing[du]=true
+            nofmissing=nofmissing+1
+          end
         end
       end
-    else
     end
   end
   if type(checklookups)=="function" then
@@ -13052,7 +13053,8 @@ local function checklookups(fontdata,missing,nofmissing)
     local done={}
     for i,r in next,missing do
       if r then
-        local name=descriptions[i].name or f_index(i)
+        local data=descriptions[i]
+        local name=data and data.name or f_index(i)
         if not ignore[name] then
           done[name]=true
         end
@@ -14514,7 +14516,7 @@ local trace_defining=false registertracker("fonts.defining",function(v) trace_de
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.019 
+otf.version=3.020 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 local otfreaders=otf.readers
 local hashes=fonts.hashes
@@ -22260,19 +22262,20 @@ if not modules then modules={} end modules ['font-one']={
   license="see context related readme files"
 }
 local fonts,logs,trackers,containers,resolvers=fonts,logs,trackers,containers,resolvers
-local next,type,tonumber=next,type,tonumber
+local next,type,tonumber,rawget=next,type,tonumber,rawget
 local match,gmatch,lower,gsub,strip,find=string.match,string.gmatch,string.lower,string.gsub,string.strip,string.find
 local char,byte,sub=string.char,string.byte,string.sub
 local abs=math.abs
 local bxor,rshift=bit32.bxor,bit32.rshift
-local P,S,R,Cmt,C,Ct,Cs,lpegmatch,patterns=lpeg.P,lpeg.S,lpeg.R,lpeg.Cmt,lpeg.C,lpeg.Ct,lpeg.Cs,lpeg.match,lpeg.patterns
-local derivetable=table.derive
+local P,S,R,Cmt,C,Ct,Cs,Carg=lpeg.P,lpeg.S,lpeg.R,lpeg.Cmt,lpeg.C,lpeg.Ct,lpeg.Cs,lpeg.Carg
+local lpegmatch,patterns=lpeg.match,lpeg.patterns
 local trace_features=false trackers.register("afm.features",function(v) trace_features=v end)
 local trace_indexing=false trackers.register("afm.indexing",function(v) trace_indexing=v end)
 local trace_loading=false trackers.register("afm.loading",function(v) trace_loading=v end)
 local trace_defining=false trackers.register("fonts.defining",function(v) trace_defining=v end)
 local report_afm=logs.reporter("fonts","afm loading")
 local setmetatableindex=table.setmetatableindex
+local derivetable=table.derive
 local findbinfile=resolvers.findbinfile
 local definers=fonts.definers
 local readers=fonts.readers
@@ -22284,7 +22287,7 @@ local otfreaders=otf.readers
 local otfenhancers=otf.enhancers
 local afmfeatures=constructors.newfeatures("afm")
 local registerafmfeature=afmfeatures.register
-afm.version=1.505 
+afm.version=1.507 
 afm.cache=containers.define("fonts","afm",afm.version,true)
 afm.autoprefixed=true 
 afm.helpdata={} 
@@ -22294,35 +22297,52 @@ local applyruntimefixes=fonts.treatments and fonts.treatments.applyfixes
 local comment=P("Comment")
 local spacing=patterns.spacer 
 local lineend=patterns.newline 
-local words=C((1-lineend)^1)
-local number=C((R("09")+S("."))^1)/tonumber*spacing^0
-local data=lpeg.Carg(1)
+local words=spacing*C((1-lineend)^1)
+local number=spacing*C((R("09")+S("."))^1)/tonumber*spacing^0
+local data=Carg(1)
+local plus=P("plus")*number
+local minus=P("minus")*number
 local pattern=(
   comment*spacing*(
-      data*(
-        ("CODINGSCHEME"*spacing*words                   )/function(fd,a)                   end+("DESIGNSIZE"*spacing*number*words               )/function(fd,a)   fd[ 1]=a    end+("CHECKSUM"*spacing*number*words               )/function(fd,a)   fd[ 2]=a    end+("SPACE"*spacing*number*"plus"*number*"minus"*number)/function(fd,a,b,c) fd[ 3],fd[ 4],fd[ 5]=a,b,c end+("QUAD"*spacing*number                   )/function(fd,a)   fd[ 6]=a    end+("EXTRASPACE"*spacing*number                   )/function(fd,a)   fd[ 7]=a    end+("NUM"*spacing*number*number*number          )/function(fd,a,b,c) fd[ 8],fd[ 9],fd[10]=a,b,c end+("DENOM"*spacing*number*number              )/function(fd,a,b ) fd[11],fd[12]=a,b  end+("SUP"*spacing*number*number*number          )/function(fd,a,b,c) fd[13],fd[14],fd[15]=a,b,c end+("SUB"*spacing*number*number              )/function(fd,a,b)  fd[16],fd[17]=a,b  end+("SUPDROP"*spacing*number                   )/function(fd,a)   fd[18]=a    end+("SUBDROP"*spacing*number                   )/function(fd,a)   fd[19]=a    end+("DELIM"*spacing*number*number              )/function(fd,a,b)  fd[20],fd[21]=a,b  end+("AXISHEIGHT"*spacing*number                   )/function(fd,a)   fd[22]=a    end
-      )+(1-lineend)^0
-    )+(1-comment)^1
+    data*(
+      ("CODINGSCHEME"*words          )/function(t,a)                  end+("DESIGNSIZE"*number*words      )/function(t,a)   t[ 1]=a    end+("CHECKSUM"*number*words      )/function(t,a)   t[ 2]=a    end+("SPACE"*number*plus*minus  )/function(t,a,b,c) t[ 3],t[ 4],t[ 5]=a,b,c end+("QUAD"*number          )/function(t,a)   t[ 6]=a    end+("EXTRASPACE"*number          )/function(t,a)   t[ 7]=a    end+("NUM"*number*number*number )/function(t,a,b,c) t[ 8],t[ 9],t[10]=a,b,c end+("DENOM"*number*number     )/function(t,a,b)  t[11],t[12]=a,b  end+("SUP"*number*number*number )/function(t,a,b,c) t[13],t[14],t[15]=a,b,c end+("SUB"*number*number     )/function(t,a,b)  t[16],t[17]=a,b  end+("SUPDROP"*number          )/function(t,a)   t[18]=a    end+("SUBDROP"*number          )/function(t,a)   t[19]=a    end+("DELIM"*number*number     )/function(t,a,b)  t[20],t[21]=a,b  end+("AXISHEIGHT"*number          )/function(t,a)   t[22]=a    end
+    )+(1-lineend)^0
+  )+(1-comment)^1
 )^0
 local function scan_comment(str)
   local fd={}
   lpegmatch(pattern,str,1,fd)
   return fd
 end
-local keys={}
-function keys.FontName  (data,line) data.metadata.fontname=strip  (line) 
-                   data.metadata.fullname=strip  (line) end
-function keys.ItalicAngle (data,line) data.metadata.italicangle=tonumber (line) end
-function keys.IsFixedPitch(data,line) data.metadata.monospaced=toboolean(line,true) end
-function keys.CharWidth  (data,line) data.metadata.charwidth=tonumber (line) end
-function keys.XHeight   (data,line) data.metadata.xheight=tonumber (line) end
-function keys.Descender  (data,line) data.metadata.descender=tonumber (line) end
-function keys.Ascender  (data,line) data.metadata.ascender=tonumber (line) end
-function keys.Comment   (data,line)
-  line=lower(line)
-  local designsize=match(line,"designsize[^%d]*(%d+)")
-  if designsize then data.metadata.designsize=tonumber(designsize) end
-end
+local keys={
+  FontName=function(data,line)
+    data.metadata.fontname=strip(line) 
+    data.metadata.fullname=strip(line)
+  end,
+  ItalicAngle=function(data,line)
+    data.metadata.italicangle=tonumber(line)
+  end,
+  IsFixedPitch=function(data,line)
+    data.metadata.monospaced=toboolean(line,true)
+  end,
+  CharWidth=function(data,line)
+    data.metadata.charwidth=tonumber(line)
+  end,
+  XHeight=function(data,line)
+    data.metadata.xheight=tonumber(line)
+  end,
+  Descender=function(data,line)
+    data.metadata.descender=tonumber (line)
+  end,
+  Ascender=function(data,line)
+    data.metadata.ascender=tonumber (line)
+  end,
+  Comment=function(data,line)
+    line=lower(line)
+    local designsize=match(line,"designsize[^%d]*(%d+)")
+    if designsize then data.metadata.designsize=tonumber(designsize) end
+  end,
+}
 local function get_charmetrics(data,charmetrics,vector)
   local characters=data.characters
   local chr,ind={},0
@@ -22483,29 +22503,29 @@ local function readafm(filename)
       descriptions={
       },
     }
-    afmblob=gsub(afmblob,"StartCharMetrics(.-)EndCharMetrics",function(charmetrics)
+    for charmetrics in gmatch(afmblob,"StartCharMetrics(.-)EndCharMetrics") do
       if trace_loading then
         report_afm("loading char metrics")
       end
       get_charmetrics(data,charmetrics,vector)
-      return ""
-    end)
-    afmblob=gsub(afmblob,"StartKernPairs(.-)EndKernPairs",function(kernpairs)
+      break
+    end
+    for kernpairs in gmatch(afmblob,"StartKernPairs(.-)EndKernPairs") do
       if trace_loading then
         report_afm("loading kern pairs")
       end
       get_kernpairs(data,kernpairs)
-      return ""
-    end)
-    afmblob=gsub(afmblob,"StartFontMetrics%s+([%d%.]+)(.-)EndFontMetrics",function(version,fontmetrics)
+      break
+    end
+    for version,fontmetrics in gmatch(afmblob,"StartFontMetrics%s+([%d%.]+)(.-)EndFontMetrics") do
       if trace_loading then
         report_afm("loading variables")
       end
       data.afmversion=version
       get_variables(data,fontmetrics)
       data.fontdimens=scan_comment(fontmetrics) 
-      return ""
-    end)
+      break
+    end
     return data
   else
     if trace_loading then
@@ -22514,7 +22534,29 @@ local function readafm(filename)
     return nil
   end
 end
-local addkerns,unify,normalize,fixnames,addligatures,addtexligatures
+local enhancers={
+}
+local steps={
+  "unify names",
+  "add ligatures",
+  "add extra kerns",
+  "normalize features",
+  "fix names",
+}
+local function applyenhancers(data,filename)
+  for i=1,#steps do
+    local step=steps[i]
+    local enhancer=enhancers[step]
+    if enhancer then
+      if trace_loading then
+        report_afm("applying enhancer %a",step)
+      end
+      enhancer(data,filename)
+    else
+      report_afm("invalid enhancer %a",step)
+    end
+  end
+end
 function afm.load(filename)
   filename=resolvers.findfile(filename,'afm') or ""
   if filename~="" and not fonts.names.ignoredfile(filename) then
@@ -22543,29 +22585,7 @@ function afm.load(filename)
         elseif trace_loading then
           report_afm("no pfb file for %a",filename)
         end
-        if trace_loading then
-          report_afm("unifying %a",filename)
-        end
-        unify(data,filename)
-        if trace_loading then
-          report_afm("add ligatures") 
-        end
-        addligatures(data)
-        if trace_loading then
-          report_afm("add extra kerns")
-        end
-        addkerns(data)
-        if trace_loading then
-          report_afm("normalizing")
-        end
-        normalize(data)
-        if trace_loading then
-          report_afm("fixing names")
-        end
-        fixnames(data)
-        if trace_loading then
-          report_afm("add tounicode data")
-        end
+        applyenhancers(data,filename)
         fonts.mappings.addtounicode(data,filename)
         otfreaders.pack(data)
         data.size=size
@@ -22587,12 +22607,10 @@ function afm.load(filename)
       end
     end
     return data
-  else
-    return nil
   end
 end
-local uparser=fonts.mappings.makenameparser()
-unify=function(data,filename)
+local uparser=fonts.mappings.makenameparser() 
+enhancers["unify names"]=function(data,filename)
   local unicodevector=fonts.encodings.agl.unicodes 
   local unicodes={}
   local names={}
@@ -22602,7 +22620,7 @@ unify=function(data,filename)
     local code=unicodevector[name] 
     if not code then
       code=lpegmatch(uparser,name)
-      if not code then
+      if type(code)~="number" then
         code=private
         private=private+1
         report_afm("assigning private slot %U for unknown glyph name %a",code,name)
@@ -22644,7 +22662,7 @@ unify=function(data,filename)
 end
 local everywhere={ ["*"]={ ["*"]=true } } 
 local noflags={ false,false,false,false }
-normalize=function(data)
+enhancers["normalize features"]=function(data)
   local ligatures=setmetatableindex("table")
   local kerns=setmetatableindex("table")
   local extrakerns=setmetatableindex("table")
@@ -22742,7 +22760,7 @@ normalize=function(data)
   data.resources.features=features
   data.resources.sequences=sequences
 end
-fixnames=function(data)
+enhancers["fix names"]=function(data)
   for k,v in next,data.descriptions do
     local n=v.name
     local r=overloads[n]
@@ -22781,9 +22799,10 @@ local addthem=function(rawdata,ligatures)
     end
   end
 end
-addligatures=function(rawdata) addthem(rawdata,afm.helpdata.ligatures  ) end
-addtexligatures=function(rawdata) addthem(rawdata,afm.helpdata.texligatures) end
-addkerns=function(rawdata) 
+enhancers["add ligatures"]=function(rawdata)
+  addthem(rawdata,afm.helpdata.ligatures)
+end
+enhancers["add extra kerns"]=function(rawdata) 
   local descriptions=rawdata.descriptions
   local resources=rawdata.resources
   local unicodes=resources.unicodes
@@ -23083,71 +23102,6 @@ local function read_from_afm(specification)
   end
   return tfmdata
 end
-local function prepareligatures(tfmdata,ligatures,value)
-  if value then
-    local descriptions=tfmdata.descriptions
-    local hasligatures=false
-    for unicode,character in next,tfmdata.characters do
-      local description=descriptions[unicode]
-      local dligatures=description.ligatures
-      if dligatures then
-        local cligatures=character.ligatures
-        if not cligatures then
-          cligatures={}
-          character.ligatures=cligatures
-        end
-        for unicode,ligature in next,dligatures do
-          cligatures[unicode]={
-            char=ligature,
-            type=0
-          }
-        end
-        hasligatures=true
-      end
-    end
-    tfmdata.properties.hasligatures=hasligatures
-  end
-end
-local function preparekerns(tfmdata,kerns,value)
-  if value then
-    local rawdata=tfmdata.shared.rawdata
-    local resources=rawdata.resources
-    local unicodes=resources.unicodes
-    local descriptions=tfmdata.descriptions
-    local haskerns=false
-    for u,chr in next,tfmdata.characters do
-      local d=descriptions[u]
-      local newkerns=d[kerns]
-      if newkerns then
-        local kerns=chr.kerns
-        if not kerns then
-          kerns={}
-          chr.kerns=kerns
-        end
-        for k,v in next,newkerns do
-          local uk=unicodes[k]
-          if uk then
-            kerns[uk]=v
-          end
-        end
-        haskerns=true
-      end
-    end
-    tfmdata.properties.haskerns=haskerns
-  end
-end
-local list={
-  [0x0027]=0x2019,
-}
-local function texreplacements(tfmdata,value)
-  local descriptions=tfmdata.descriptions
-  local characters=tfmdata.characters
-  for k,v in next,list do
-    characters [k]=characters [v] 
-    descriptions[k]=descriptions[v] 
-  end
-end
-local function extrakerns (tfmdata,value) preparekerns  (tfmdata,'extrakerns',value) end
 local function setmode(tfmdata,value)
   if value then
     tfmdata.properties.mode=lower(value)
@@ -23228,7 +23182,7 @@ function readers.pfb(specification,method)
   if trace_defining then
     report_afm("using afm reader for %a",original)
   end
-  specification.specification=gsub(original,"%.pfb",".afm")
+  specification.specification=file.replacesuffix(original,"afm")
   specification.forced="afm"
   return readers.afm(specification,method)
 end

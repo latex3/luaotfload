@@ -21,13 +21,13 @@ add features.</p>
 
 local fonts, logs, trackers, containers, resolvers = fonts, logs, trackers, containers, resolvers
 
-local next, type, tonumber = next, type, tonumber
+local next, type, tonumber, rawget = next, type, tonumber, rawget
 local match, gmatch, lower, gsub, strip, find = string.match, string.gmatch, string.lower, string.gsub, string.strip, string.find
 local char, byte, sub = string.char, string.byte, string.sub
 local abs = math.abs
 local bxor, rshift = bit32.bxor, bit32.rshift
-local P, S, R, Cmt, C, Ct, Cs, lpegmatch, patterns = lpeg.P, lpeg.S, lpeg.R, lpeg.Cmt, lpeg.C, lpeg.Ct, lpeg.Cs, lpeg.match, lpeg.patterns
-local derivetable = table.derive
+local P, S, R, Cmt, C, Ct, Cs, Carg = lpeg.P, lpeg.S, lpeg.R, lpeg.Cmt, lpeg.C, lpeg.Ct, lpeg.Cs, lpeg.Carg
+local lpegmatch, patterns = lpeg.match, lpeg.patterns
 
 local trace_features     = false  trackers.register("afm.features",   function(v) trace_features = v end)
 local trace_indexing     = false  trackers.register("afm.indexing",   function(v) trace_indexing = v end)
@@ -37,6 +37,7 @@ local trace_defining     = false  trackers.register("fonts.defining", function(v
 local report_afm         = logs.reporter("fonts","afm loading")
 
 local setmetatableindex  = table.setmetatableindex
+local derivetable        = table.derive
 
 local findbinfile        = resolvers.findbinfile
 
@@ -54,7 +55,7 @@ local otfenhancers       = otf.enhancers
 local afmfeatures        = constructors.newfeatures("afm")
 local registerafmfeature = afmfeatures.register
 
-afm.version              = 1.505 -- incrementing this number one up will force a re-cache
+afm.version              = 1.507 -- incrementing this number one up will force a re-cache
 afm.cache                = containers.define("fonts", "afm", afm.version, true)
 afm.autoprefixed         = true -- this will become false some day (catches texnansi-blabla.*)
 
@@ -66,54 +67,55 @@ local overloads          = fonts.mappings.overloads
 local applyruntimefixes  = fonts.treatments and fonts.treatments.applyfixes
 
 --[[ldx--
-<p>We start with the basic reader which we give a name similar to the
-built in <l n='tfm'/> and <l n='otf'/> reader.</p>
+<p>We start with the basic reader which we give a name similar to the built in <l n='tfm'/>
+and <l n='otf'/> reader.</p>
 --ldx]]--
 
---~ Comment FONTIDENTIFIER LMMATHSYMBOLS10
---~ Comment CODINGSCHEME TEX MATH SYMBOLS
---~ Comment DESIGNSIZE 10.0 pt
---~ Comment CHECKSUM O 4261307036
---~ Comment SPACE 0 plus 0 minus 0
---~ Comment QUAD 1000
---~ Comment EXTRASPACE 0
---~ Comment NUM 676.508 393.732 443.731
---~ Comment DENOM 685.951 344.841
---~ Comment SUP 412.892 362.892 288.889
---~ Comment SUB 150 247.217
---~ Comment SUPDROP 386.108
---~ Comment SUBDROP 50
---~ Comment DELIM 2390 1010
---~ Comment AXISHEIGHT 250
+-- Comment FONTIDENTIFIER LMMATHSYMBOLS10
+-- Comment CODINGSCHEME TEX MATH SYMBOLS
+-- Comment DESIGNSIZE 10.0 pt
+-- Comment CHECKSUM O 4261307036
+-- Comment SPACE 0 plus 0 minus 0
+-- Comment QUAD 1000
+-- Comment EXTRASPACE 0
+-- Comment NUM 676.508 393.732 443.731
+-- Comment DENOM 685.951 344.841
+-- Comment SUP 412.892 362.892 288.889
+-- Comment SUB 150 247.217
+-- Comment SUPDROP 386.108
+-- Comment SUBDROP 50
+-- Comment DELIM 2390 1010
+-- Comment AXISHEIGHT 250
 
 local comment = P("Comment")
 local spacing = patterns.spacer  -- S(" \t")^1
 local lineend = patterns.newline -- S("\n\r")
-local words   = C((1 - lineend)^1)
-local number  = C((R("09") + S("."))^1) / tonumber * spacing^0
-local data    = lpeg.Carg(1)
+local words   = spacing * C((1 - lineend)^1)
+local number  = spacing * C((R("09") + S("."))^1) / tonumber * spacing^0
+local data    = Carg(1)
+local plus    = P("plus") * number
+local minus   = P("minus") * number
 
 local pattern = ( -- needs testing ... not used anyway as we no longer need math afm's
-    comment * spacing *
-        (
-            data * (
-                ("CODINGSCHEME" * spacing * words                                      ) / function(fd,a)                                      end +
-                ("DESIGNSIZE"   * spacing * number * words                             ) / function(fd,a)     fd[ 1]                 = a       end +
-                ("CHECKSUM"     * spacing * number * words                             ) / function(fd,a)     fd[ 2]                 = a       end +
-                ("SPACE"        * spacing * number * "plus" * number * "minus" * number) / function(fd,a,b,c) fd[ 3], fd[ 4], fd[ 5] = a, b, c end +
-                ("QUAD"         * spacing * number                                     ) / function(fd,a)     fd[ 6]                 = a       end +
-                ("EXTRASPACE"   * spacing * number                                     ) / function(fd,a)     fd[ 7]                 = a       end +
-                ("NUM"          * spacing * number * number * number                   ) / function(fd,a,b,c) fd[ 8], fd[ 9], fd[10] = a, b, c end +
-                ("DENOM"        * spacing * number * number                            ) / function(fd,a,b  ) fd[11], fd[12]         = a, b    end +
-                ("SUP"          * spacing * number * number * number                   ) / function(fd,a,b,c) fd[13], fd[14], fd[15] = a, b, c end +
-                ("SUB"          * spacing * number * number                            ) / function(fd,a,b)   fd[16], fd[17]         = a, b    end +
-                ("SUPDROP"      * spacing * number                                     ) / function(fd,a)     fd[18]                 = a       end +
-                ("SUBDROP"      * spacing * number                                     ) / function(fd,a)     fd[19]                 = a       end +
-                ("DELIM"        * spacing * number * number                            ) / function(fd,a,b)   fd[20], fd[21]         = a, b    end +
-                ("AXISHEIGHT"   * spacing * number                                     ) / function(fd,a)     fd[22]                 = a       end
-            )
-          + (1-lineend)^0
+    comment * spacing * (
+        data * (
+            ("CODINGSCHEME" * words                    ) / function(t,a)                                   end +
+            ("DESIGNSIZE"   * number * words           ) / function(t,a)     t[ 1]               = a       end +
+            ("CHECKSUM"     * number * words           ) / function(t,a)     t[ 2]               = a       end +
+            ("SPACE"        * number * plus * minus    ) / function(t,a,b,c) t[ 3], t[ 4], t[ 5] = a, b, c end +
+            ("QUAD"         * number                   ) / function(t,a)     t[ 6]               = a       end +
+            ("EXTRASPACE"   * number                   ) / function(t,a)     t[ 7]               = a       end +
+            ("NUM"          * number * number * number ) / function(t,a,b,c) t[ 8], t[ 9], t[10] = a, b, c end +
+            ("DENOM"        * number * number          ) / function(t,a,b)   t[11], t[12]        = a, b    end +
+            ("SUP"          * number * number * number ) / function(t,a,b,c) t[13], t[14], t[15] = a, b, c end +
+            ("SUB"          * number * number          ) / function(t,a,b)   t[16], t[17]        = a, b    end +
+            ("SUPDROP"      * number                   ) / function(t,a)     t[18]               = a       end +
+            ("SUBDROP"      * number                   ) / function(t,a)     t[19]               = a       end +
+            ("DELIM"        * number * number          ) / function(t,a,b)   t[20], t[21]        = a, b    end +
+            ("AXISHEIGHT"   * number                   ) / function(t,a)     t[22]               = a       end
         )
+      + (1-lineend)^0
+    )
   + (1-comment)^1
 )^0
 
@@ -123,27 +125,47 @@ local function scan_comment(str)
     return fd
 end
 
--- On a rainy day I will rewrite this in lpeg ... or we can use the (slower) fontloader
--- as in now supports afm/pfb loading but it's not too bad to have different methods
--- for testing approaches.
+-- Comment DesignSize 12 (pts)
+-- Comment TFM designsize: 12 (in points)
 
-local keys = { }
+local keys = {
 
-function keys.FontName    (data,line) data.metadata.fontname    = strip    (line) -- get rid of spaces
-                                      data.metadata.fullname    = strip    (line) end
-function keys.ItalicAngle (data,line) data.metadata.italicangle = tonumber (line) end
-function keys.IsFixedPitch(data,line) data.metadata.monospaced  = toboolean(line,true) end
-function keys.CharWidth   (data,line) data.metadata.charwidth   = tonumber (line) end
-function keys.XHeight     (data,line) data.metadata.xheight     = tonumber (line) end
-function keys.Descender   (data,line) data.metadata.descender   = tonumber (line) end
-function keys.Ascender    (data,line) data.metadata.ascender    = tonumber (line) end
-function keys.Comment     (data,line)
- -- Comment DesignSize 12 (pts)
- -- Comment TFM designsize: 12 (in points)
-    line = lower(line)
-    local designsize = match(line,"designsize[^%d]*(%d+)")
-    if designsize then data.metadata.designsize = tonumber(designsize) end
-end
+    FontName = function(data,line)
+        data.metadata.fontname = strip(line) -- get rid of spaces
+        data.metadata.fullname = strip(line)
+    end,
+
+    ItalicAngle  = function(data,line)
+        data.metadata.italicangle = tonumber(line)
+    end,
+
+    IsFixedPitch = function(data,line)
+        data.metadata.monospaced = toboolean(line,true)
+    end,
+
+    CharWidth = function(data,line)
+        data.metadata.charwidth = tonumber(line)
+    end,
+
+    XHeight = function(data,line)
+        data.metadata.xheight = tonumber(line)
+    end,
+
+    Descender = function(data,line)
+        data.metadata.descender = tonumber (line)
+    end,
+
+    Ascender = function(data,line)
+        data.metadata.ascender = tonumber (line)
+    end,
+
+    Comment = function(data,line)
+        line = lower(line)
+        local designsize = match(line,"designsize[^%d]*(%d+)")
+        if designsize then data.metadata.designsize = tonumber(designsize) end
+    end,
+
+}
 
 local function get_charmetrics(data,charmetrics,vector)
     local characters = data.characters
@@ -202,8 +224,10 @@ local function get_variables(data,fontmetrics)
     end
 end
 
--- new (unfinished) pfb loader but i see no differences between
--- old and new (one bad vector with old)
+--[[ldx--
+<p>We now use a new (unfinished) pfb loader but I see no differences between the old
+and new vectors (we actually had one bad vector with the old loader).</p>
+--ldx]]--
 
 local get_indexes
 
@@ -353,29 +377,30 @@ local function readafm(filename)
                 -- the final store
             },
         }
-        afmblob = gsub(afmblob,"StartCharMetrics(.-)EndCharMetrics", function(charmetrics)
+--         afmblob = gsub(afmblob,"StartCharMetrics(.-)EndCharMetrics", function(charmetrics)
+        for charmetrics in gmatch(afmblob,"StartCharMetrics(.-)EndCharMetrics") do
             if trace_loading then
                 report_afm("loading char metrics")
             end
             get_charmetrics(data,charmetrics,vector)
-            return ""
-        end)
-        afmblob = gsub(afmblob,"StartKernPairs(.-)EndKernPairs", function(kernpairs)
+            break
+        end
+        for kernpairs in gmatch(afmblob,"StartKernPairs(.-)EndKernPairs") do
             if trace_loading then
                 report_afm("loading kern pairs")
             end
             get_kernpairs(data,kernpairs)
-            return ""
-        end)
-        afmblob = gsub(afmblob,"StartFontMetrics%s+([%d%.]+)(.-)EndFontMetrics", function(version,fontmetrics)
+            break
+        end
+        for version, fontmetrics in gmatch(afmblob,"StartFontMetrics%s+([%d%.]+)(.-)EndFontMetrics") do
             if trace_loading then
                 report_afm("loading variables")
             end
             data.afmversion = version
             get_variables(data,fontmetrics)
             data.fontdimens = scan_comment(fontmetrics) -- todo: all lpeg, no time now
-            return ""
-        end)
+            break
+        end
         return data
     else
         if trace_loading then
@@ -391,10 +416,38 @@ ligatures and kern information to the afm derived data. That way we can set them
 when defining a font.</p>
 
 <p>We still keep the loading two phased: first we load the data in a traditional
-fashion and later we transform it to sequences.</p>
+fashion and later we transform it to sequences. Then we apply some methods also
+used in opentype fonts (like <t>tlig</t>).</p>
 --ldx]]--
 
-local addkerns, unify, normalize, fixnames, addligatures, addtexligatures
+local enhancers = {
+    -- It's cleaner to implement them after we've seen what we are
+    -- dealing with.
+}
+
+local steps     = {
+    "unify names",
+    "add ligatures",
+    "add extra kerns",
+    "normalize features",
+    "fix names",
+--  "add tounicode data",
+}
+
+local function applyenhancers(data,filename)
+    for i=1,#steps do
+        local step     = steps[i]
+        local enhancer = enhancers[step]
+        if enhancer then
+            if trace_loading then
+                report_afm("applying enhancer %a",step)
+            end
+            enhancer(data,filename)
+        else
+            report_afm("invalid enhancer %a",step)
+        end
+    end
+end
 
 function afm.load(filename)
     filename = resolvers.findfile(filename,'afm') or ""
@@ -427,29 +480,7 @@ function afm.load(filename)
                  -- data.resources.filename = "unset" -- better than loading the afm file
                 end
                 -- we now have all the data loaded
-                if trace_loading then
-                    report_afm("unifying %a",filename)
-                end
-                unify(data,filename)
-                if trace_loading then
-                    report_afm("add ligatures") -- there can be missing ones
-                end
-                addligatures(data)
-                if trace_loading then
-                    report_afm("add extra kerns")
-                end
-                addkerns(data)
-                if trace_loading then
-                    report_afm("normalizing")
-                end
-                normalize(data)
-                if trace_loading then
-                    report_afm("fixing names")
-                end
-                fixnames(data)
-                if trace_loading then
-                    report_afm("add tounicode data")
-                end
+                applyenhancers(data,filename)
              -- otfreaders.addunicodetable(data) -- only when not done yet
                 fonts.mappings.addtounicode(data,filename)
              -- otfreaders.extend(data)
@@ -475,14 +506,14 @@ function afm.load(filename)
             end
         end
         return data
-    else
-        return nil
     end
 end
 
-local uparser = fonts.mappings.makenameparser()
+-- we run a more advanced analyzer later on anyway
 
-unify = function(data, filename)
+local uparser = fonts.mappings.makenameparser() -- each time
+
+enhancers["unify names"] = function(data, filename)
     local unicodevector = fonts.encodings.agl.unicodes -- loaded runtime in context
     local unicodes      = { }
     local names         = { }
@@ -492,7 +523,7 @@ unify = function(data, filename)
         local code = unicodevector[name] -- or characters.name_to_unicode[name]
         if not code then
             code = lpegmatch(uparser,name)
-            if not code then
+            if type(code) ~= "number" then
                 code = private
                 private = private + 1
                 report_afm("assigning private slot %U for unknown glyph name %a",code,name)
@@ -538,7 +569,7 @@ end
 local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
 local noflags    = { false, false, false, false }
 
-normalize = function(data)
+enhancers["normalize features"] = function(data)
     local ligatures  = setmetatableindex("table")
     local kerns      = setmetatableindex("table")
     local extrakerns = setmetatableindex("table")
@@ -639,7 +670,7 @@ normalize = function(data)
     data.resources.sequences = sequences
 end
 
-fixnames = function(data)
+enhancers["fix names"] = function(data)
     for k, v in next, data.descriptions do
         local n = v.name
         local r = overloads[n]
@@ -686,8 +717,13 @@ local addthem = function(rawdata,ligatures)
     end
 end
 
-addligatures    = function(rawdata) addthem(rawdata,afm.helpdata.ligatures   ) end
-addtexligatures = function(rawdata) addthem(rawdata,afm.helpdata.texligatures) end
+enhancers["add ligatures"] = function(rawdata)
+    addthem(rawdata,afm.helpdata.ligatures)
+end
+
+-- enhancers["add tex ligatures"] = function(rawdata)
+--     addthem(rawdata,afm.helpdata.texligatures)
+-- end
 
 --[[ldx--
 <p>We keep the extra kerns in separate kerning tables so that we can use
@@ -701,7 +737,7 @@ them selectively.</p>
 -- we don't use the character database. (Ok, we can have a context specific
 -- variant).
 
-addkerns = function(rawdata) -- using shcodes is not robust here
+enhancers["add extra kerns"] = function(rawdata) -- using shcodes is not robust here
     local descriptions = rawdata.descriptions
     local resources    = rawdata.resources
     local unicodes     = resources.unicodes
@@ -929,10 +965,9 @@ local function copytotfm(data)
 end
 
 --[[ldx--
-<p>Originally we had features kind of hard coded for <l n='afm'/>
-files but since I expect to support more font formats, I decided
-to treat this fontformat like any other and handle features in a
-more configurable way.</p>
+<p>Originally we had features kind of hard coded for <l n='afm'/> files but since I
+expect to support more font formats, I decided to treat this fontformat like any
+other and handle features in a more configurable way.</p>
 --ldx]]--
 
 function afm.setfeatures(tfmdata,features)
@@ -1046,84 +1081,8 @@ local function read_from_afm(specification)
 end
 
 --[[ldx--
-<p>Here comes the implementation of a few features. We only implement
-those that make sense for this format.</p>
+<p>We have the usual two modes and related features initializers and processors.</p>
 --ldx]]--
-
-local function prepareligatures(tfmdata,ligatures,value)
-    if value then
-        local descriptions = tfmdata.descriptions
-        local hasligatures = false
-        for unicode, character in next, tfmdata.characters do
-            local description = descriptions[unicode]
-            local dligatures = description.ligatures
-            if dligatures then
-                local cligatures = character.ligatures
-                if not cligatures then
-                    cligatures = { }
-                    character.ligatures = cligatures
-                end
-                for unicode, ligature in next, dligatures do
-                    cligatures[unicode] = {
-                        char = ligature,
-                        type = 0
-                    }
-                end
-                hasligatures = true
-            end
-        end
-        tfmdata.properties.hasligatures = hasligatures
-    end
-end
-
-local function preparekerns(tfmdata,kerns,value)
-    if value then
-        local rawdata      = tfmdata.shared.rawdata
-        local resources    = rawdata.resources
-        local unicodes     = resources.unicodes
-        local descriptions = tfmdata.descriptions
-        local haskerns     = false
-        for u, chr in next, tfmdata.characters do
-            local d = descriptions[u]
-            local newkerns = d[kerns]
-            if newkerns then
-                local kerns = chr.kerns
-                if not kerns then
-                    kerns = { }
-                    chr.kerns = kerns
-                end
-                for k,v in next, newkerns do
-                    local uk = unicodes[k]
-                    if uk then
-                        kerns[uk] = v
-                    end
-                end
-                haskerns = true
-            end
-        end
-        tfmdata.properties.haskerns = haskerns
-    end
-end
-
-local list = {
- -- [0x0022] = 0x201D,
-    [0x0027] = 0x2019,
- -- [0x0060] = 0x2018,
-}
-
-local function texreplacements(tfmdata,value)
-    local descriptions = tfmdata.descriptions
-    local characters   = tfmdata.characters
-    for k, v in next, list do
-        characters  [k] = characters  [v] -- we forget about kerns
-        descriptions[k] = descriptions[v] -- we forget about kerns
-    end
-end
-
--- local function ligatures   (tfmdata,value) prepareligatures(tfmdata,'ligatures',   value) end
--- local function texligatures(tfmdata,value) prepareligatures(tfmdata,'texligatures',value) end
--- local function kerns       (tfmdata,value) preparekerns    (tfmdata,'kerns',       value) end
-local function extrakerns  (tfmdata,value) preparekerns    (tfmdata,'extrakerns',  value) end
 
 local function setmode(tfmdata,value)
     if value then
@@ -1214,7 +1173,7 @@ function readers.pfb(specification,method) -- only called when forced
     if trace_defining then
         report_afm("using afm reader for %a",original)
     end
-    specification.specification = gsub(original,"%.pfb",".afm")
+    specification.specification = file.replacesuffix(original,"afm")
     specification.forced = "afm"
     return readers.afm(specification,method)
 end

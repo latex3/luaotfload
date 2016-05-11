@@ -586,7 +586,8 @@ local function checklookups(fontdata,missing,nofmissing)
         local done = { }
         for i, r in next, missing do
             if r then
-                local name = descriptions[i].name or f_index(i)
+                local data = descriptions[i]
+                local name = data and data.name or f_index(i)
                 if not ignore[name] then
                     done[name] = true
                 end

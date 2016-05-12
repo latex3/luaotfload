@@ -51,17 +51,21 @@ end
 
 local afm_reader = fonts.readers.afm
 
-local afm_compat_message = function (specification)
+local afm_loader = function (specification)
   local name     = specification.name
   local filename = specification.filename
-  logreport ("both", 4, "loaders",
-             "PFB format only supported with matching \z
-              AFM; redirecting (“%s”, “afm”).",
-             tostring (specification.name))
   specification.forced     = "afm"
   specification.forcedname = filename
   specification.filename   = file.replacesuffix (filename, "afm")
   return afm_reader (specification, "afm")
+end
+
+local afm_compat_message = function (specification)
+  logreport ("both", 4, "loaders",
+             "PFB format only supported with matching \z
+              AFM; redirecting (“%s”, “afm”).",
+             tostring (specification.name))
+  return afm_loader (specification)
 end
 
 local install_formats = function ()
@@ -71,9 +75,8 @@ local install_formats = function ()
   local readers   = fonts.readers
   local sequence  = readers.sequence
   local seqset    = table.tohash (sequence)
-  local handlers  = fonts.handlers
   local formats   = fonts.formats
-  if not readers or not handlers or not formats then return false end
+  if not readers or not formats then return false end
 
   local aux = function (which, reader)
     if   not which  or type (which) ~= "string"
@@ -83,7 +86,6 @@ local install_formats = function ()
     end
     formats  [which] = "type1"
     readers  [which] = reader
-    handlers [which] = { }
     if not seqset [which] then
       logreport ("both", 3, "loaders",
                  "Extending reader sequence for “%s”.", which)
@@ -96,7 +98,7 @@ local install_formats = function ()
   return aux ("evl", eval_reader)
      and aux ("lua", lua_reader)
      and aux ("pfa", unsupported_reader "pfa")
-     and aux ("afm", function (spec) return afm_reader (spec, "afm") end)
+     and aux ("afm", afm_loader)
      and aux ("pfb", afm_compat_message) --- pfb loader is incomplete
      and aux ("ofm", readers.tfm)
      and aux ("dfont", unsupported_reader "dfont")

@@ -1221,8 +1221,12 @@ local handle_request = function (specification)
     request.features = apply_default_features(request.features)
 
     if name then
-        specification.name    = name
-        specification.lookup  = lookup or specification.lookup
+        if lookup == "file" then
+            specification.filename = name
+            name = file.removesuffix (name)
+        end
+        specification.name     = name
+        specification.lookup   = lookup or specification.lookup
     end
 
     if request.modifiers then
@@ -1245,7 +1249,12 @@ local handle_request = function (specification)
     --- The next line sets the “rand” feature to “random”; I haven’t
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.
-    specification.features.normal = normalize (request.features)
+    local features = specification.features
+    if not features then
+        features = { }
+        specification.features = features
+    end
+    features.normal = normalize (request.features)
     local subfont = tonumber (specification.sub)
     if subfont and subfont >= 0 then
         specification.sub = subfont + 1
@@ -1253,8 +1262,9 @@ local handle_request = function (specification)
     return specification
 end
 
+fonts.names.handle_request = handle_request
+
 if as_script == true then --- skip the remainder of the file
-    fonts.names.handle_request = handle_request
     report ("log", 5, "features",
             "Exiting early from luaotfload-features.lua.")
     return

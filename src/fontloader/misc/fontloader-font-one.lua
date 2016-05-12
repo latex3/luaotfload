@@ -87,143 +87,6 @@ and <l n='otf'/> reader.</p>
 -- Comment DELIM 2390 1010
 -- Comment AXISHEIGHT 250
 
-local comment = P("Comment")
-local spacing = patterns.spacer  -- S(" \t")^1
-local lineend = patterns.newline -- S("\n\r")
-local words   = spacing * C((1 - lineend)^1)
-local number  = spacing * C((R("09") + S("."))^1) / tonumber * spacing^0
-local data    = Carg(1)
-local plus    = P("plus") * number
-local minus   = P("minus") * number
-
-local pattern = ( -- needs testing ... not used anyway as we no longer need math afm's
-    comment * spacing * (
-        data * (
-            ("CODINGSCHEME" * words                    ) / function(t,a)                                   end +
-            ("DESIGNSIZE"   * number * words           ) / function(t,a)     t[ 1]               = a       end +
-            ("CHECKSUM"     * number * words           ) / function(t,a)     t[ 2]               = a       end +
-            ("SPACE"        * number * plus * minus    ) / function(t,a,b,c) t[ 3], t[ 4], t[ 5] = a, b, c end +
-            ("QUAD"         * number                   ) / function(t,a)     t[ 6]               = a       end +
-            ("EXTRASPACE"   * number                   ) / function(t,a)     t[ 7]               = a       end +
-            ("NUM"          * number * number * number ) / function(t,a,b,c) t[ 8], t[ 9], t[10] = a, b, c end +
-            ("DENOM"        * number * number          ) / function(t,a,b)   t[11], t[12]        = a, b    end +
-            ("SUP"          * number * number * number ) / function(t,a,b,c) t[13], t[14], t[15] = a, b, c end +
-            ("SUB"          * number * number          ) / function(t,a,b)   t[16], t[17]        = a, b    end +
-            ("SUPDROP"      * number                   ) / function(t,a)     t[18]               = a       end +
-            ("SUBDROP"      * number                   ) / function(t,a)     t[19]               = a       end +
-            ("DELIM"        * number * number          ) / function(t,a,b)   t[20], t[21]        = a, b    end +
-            ("AXISHEIGHT"   * number                   ) / function(t,a)     t[22]               = a       end
-        )
-      + (1-lineend)^0
-    )
-  + (1-comment)^1
-)^0
-
-local function scan_comment(str)
-    local fd = { }
-    lpegmatch(pattern,str,1,fd)
-    return fd
-end
-
--- Comment DesignSize 12 (pts)
--- Comment TFM designsize: 12 (in points)
-
-local keys = {
-
-    FontName = function(data,line)
-        data.metadata.fontname = strip(line) -- get rid of spaces
-        data.metadata.fullname = strip(line)
-    end,
-
-    ItalicAngle  = function(data,line)
-        data.metadata.italicangle = tonumber(line)
-    end,
-
-    IsFixedPitch = function(data,line)
-        data.metadata.monospaced = toboolean(line,true)
-    end,
-
-    CharWidth = function(data,line)
-        data.metadata.charwidth = tonumber(line)
-    end,
-
-    XHeight = function(data,line)
-        data.metadata.xheight = tonumber(line)
-    end,
-
-    Descender = function(data,line)
-        data.metadata.descender = tonumber (line)
-    end,
-
-    Ascender = function(data,line)
-        data.metadata.ascender = tonumber (line)
-    end,
-
-    Comment = function(data,line)
-        line = lower(line)
-        local designsize = match(line,"designsize[^%d]*(%d+)")
-        if designsize then data.metadata.designsize = tonumber(designsize) end
-    end,
-
-}
-
-local function get_charmetrics(data,charmetrics,vector)
-    local characters = data.characters
-    local chr, ind = { }, 0
-    for k, v in gmatch(charmetrics,"([%a]+) +(.-) *;") do
-        if k == 'C'  then
-            v = tonumber(v)
-            if v < 0 then
-                ind = ind + 1 -- ?
-            else
-                ind = v
-            end
-            chr = {
-                index = ind
-            }
-        elseif k == 'WX' then
-            chr.width = tonumber(v)
-        elseif k == 'N'  then
-            characters[v] = chr
-        elseif k == 'B'  then
-            local llx, lly, urx, ury = match(v,"^ *(.-) +(.-) +(.-) +(.-)$")
-            chr.boundingbox = { tonumber(llx), tonumber(lly), tonumber(urx), tonumber(ury) }
-        elseif k == 'L'  then
-            local plus, becomes = match(v,"^(.-) +(.-)$")
-            local ligatures = chr.ligatures
-            if ligatures then
-                ligatures[plus] = becomes
-            else
-                chr.ligatures = { [plus] = becomes }
-            end
-        end
-    end
-end
-
-local function get_kernpairs(data,kernpairs)
-    local characters = data.characters
-    for one, two, value in gmatch(kernpairs,"KPX +(.-) +(.-) +(.-)\n") do
-        local chr = characters[one]
-        if chr then
-            local kerns = chr.kerns
-            if kerns then
-                kerns[two] = tonumber(value)
-            else
-                chr.kerns = { [two] = tonumber(value) }
-            end
-        end
-    end
-end
-
-local function get_variables(data,fontmetrics)
-    for key, rest in gmatch(fontmetrics,"(%a+) *(.-)[\n\r]") do
-        local keyhandler = keys[key]
-        if keyhandler then
-            keyhandler(data,rest)
-        end
-    end
-end
-
 --[[ldx--
 <p>We now use a new (unfinished) pfb loader but I see no differences between the old
 and new vectors (we actually had one bad vector with the old loader).</p>
@@ -353,6 +216,196 @@ do
 
 end
 
+--[[ldx--
+<p>We start with the basic reader which we give a name similar to the built in <l n='tfm'/>
+and <l n='otf'/> reader.</p>
+--ldx]]--
+
+-- Comment FONTIDENTIFIER LMMATHSYMBOLS10
+-- Comment CODINGSCHEME TEX MATH SYMBOLS
+-- Comment DESIGNSIZE 10.0 pt
+-- Comment CHECKSUM O 4261307036
+-- Comment SPACE 0 plus 0 minus 0
+-- Comment QUAD 1000
+-- Comment EXTRASPACE 0
+-- Comment NUM 676.508 393.732 443.731
+-- Comment DENOM 685.951 344.841
+-- Comment SUP 412.892 362.892 288.889
+-- Comment SUB 150 247.217
+-- Comment SUPDROP 386.108
+-- Comment SUBDROP 50
+-- Comment DELIM 2390 1010
+-- Comment AXISHEIGHT 250
+-- Comment DesignSize 12 (pts)
+-- Comment TFM designsize: 12 (in points)
+
+local parser  do -- no need for a further speedup with locals
+
+    local spacing   = patterns.spacer
+    local lineend   = patterns.newline
+    local number    = spacing * (R("09") + S("."))^1 / tonumber
+    local name      = spacing * C((1-spacing)^1)
+    local words     = spacing * (1 - lineend)^1 / strip
+    local rest      = (1 - lineend)^0
+    local fontdata  = Carg(1)
+    local semicolon = spacing * P(";")
+    local plus      = P("plus") * number
+    local minus     = P("minus") * number
+
+    -- kern pairs
+
+    local function addkernpair(data,one,two,value)
+        local chr = data.characters[one]
+        if chr then
+            local kerns = chr.kerns
+            if kerns then
+                kerns[two] = tonumber(value)
+            else
+                chr.kerns = { [two] = tonumber(value) }
+            end
+        end
+    end
+
+    local p_kernpair = (fontdata * P("KPX") * name * name * number) / addkernpair
+
+    -- char metrics
+
+    local chr = false
+    local ind = 0
+
+    local function start()
+        ind = 0
+        chr = { }
+    end
+
+    local function stop()
+        ind = 0
+        chr = false
+    end
+
+    local function setindex(i)
+        if i < 0 then
+            ind = ind + 1 -- ?
+        else
+            ind = i
+        end
+        chr = {
+            index = ind
+        }
+    end
+
+    local function setwidth(width)
+        chr.width = width
+    end
+
+    local function setname(data,name)
+        data.characters[name] = chr
+    end
+
+    local function setboundingbox(boundingbox)
+        chr.boundingbox = boundingbox
+    end
+
+    local function setligature(plus,becomes)
+        local ligatures = chr.ligatures
+        if ligatures then
+            ligatures[plus] = becomes
+        else
+            chr.ligatures = { [plus] = becomes }
+        end
+    end
+
+    local p_charmetric = ( (
+        P("C")  * number          / setindex
+      + P("WX") * number          / setwidth
+      + P("N")  * fontdata * name / setname
+      + P("B")  * Ct((number)^4)  / setboundingbox
+      + P("L")  * (name)^2        / setligature
+      ) * semicolon )^1
+
+    local p_charmetrics = P("StartCharMetrics") * number * (p_charmetric + (1-P("EndCharMetrics")))^0 * P("EndCharMetrics")
+    local p_kernpairs   = P("StartKernPairs")   * number * (p_kernpair   + (1-P("EndKernPairs"))  )^0 * P("EndKernPairs")
+
+    local function set_1(data,key,a)     data.metadata[lower(key)] = a           end
+    local function set_2(data,key,a,b)   data.metadata[lower(key)] = { a, b }    end
+    local function set_3(data,key,a,b,c) data.metadata[lower(key)] = { a, b, c } end
+
+    local p_parameters = P(false)
+      + P("FontName") * fontdata * words / function(data,line)
+            data.metadata.fontname = line
+            data.metadata.fullname = line
+        end
+      + P("ItalicAngle") * fontdata * number / function(data,angle)
+            data.metadata.italicangle = angle
+        end
+      + P("IsFixedPitch") * fontdata * name  / function(data,pitch)
+            data.metadata.monospaced = toboolean(pitch,true)
+        end
+      + P("CharWidth") * fontdata * number / function(data,width)
+            data.metadata.charwidth = width
+        end
+      + P("XHeight") * fontdata * number / function(data,xheight)
+            data.metadata.xheight = xheight
+        end
+      + P("Descender") * fontdata * number / function(data,descender)
+            data.metadata.descender = descender
+        end
+      + P("Ascender") * fontdata * number / function(data,ascender)
+            data.metadata.ascender = ascender
+        end
+      + P("Comment") * spacing * ( P(false)
+          + (fontdata * C("DESIGNSIZE")     * number                   * rest) / set_1 -- 1
+          + (fontdata * C("TFM designsize") * number                   * rest) / set_1
+          + (fontdata * C("DesignSize")     * number                   * rest) / set_1
+          + (fontdata * C("CODINGSCHEME")   * words                    * rest) / set_1 --
+          + (fontdata * C("CHECKSUM")       * number * words           * rest) / set_1 -- 2
+          + (fontdata * C("SPACE")          * number * plus * minus    * rest) / set_3 -- 3 4 5
+          + (fontdata * C("QUAD")           * number                   * rest) / set_1 -- 6
+          + (fontdata * C("EXTRASPACE")     * number                   * rest) / set_1 -- 7
+          + (fontdata * C("NUM")            * number * number * number * rest) / set_3 -- 8 9 10
+          + (fontdata * C("DENOM")          * number * number          * rest) / set_2 -- 11 12
+          + (fontdata * C("SUP")            * number * number * number * rest) / set_3 -- 13 14 15
+          + (fontdata * C("SUB")            * number * number          * rest) / set_2 -- 16 17
+          + (fontdata * C("SUPDROP")        * number                   * rest) / set_1 -- 18
+          + (fontdata * C("SUBDROP")        * number                   * rest) / set_1 -- 19
+          + (fontdata * C("DELIM")          * number * number          * rest) / set_2 -- 20 21
+          + (fontdata * C("AXISHEIGHT")     * number                   * rest) / set_1 -- 22
+        )
+
+    parser = (P("StartFontMetrics") / start)
+            * (
+                p_charmetrics
+              + p_kernpairs
+              + p_parameters
+              + (1-P("EndFontMetrics"))
+              )^0
+            * (P("EndFontMetrics") / stop)
+
+end
+
+
+local data = {
+    resources = {
+        filename = resolvers.unresolve(filename),
+--         version  = afm.version,
+        creator  = "context mkiv",
+    },
+    properties = {
+        hasitalics = false,
+    },
+    goodies = {
+    },
+    metadata   = {
+        filename = file.removesuffix(file.basename(filename))
+    },
+    characters = {
+        -- a temporary store
+    },
+    descriptions = {
+        -- the final store
+    },
+}
+
 local function readafm(filename)
     local ok, afmblob, size = resolvers.loadbinfile(filename) -- has logging
     if ok and afmblob then
@@ -377,30 +430,7 @@ local function readafm(filename)
                 -- the final store
             },
         }
---         afmblob = gsub(afmblob,"StartCharMetrics(.-)EndCharMetrics", function(charmetrics)
-        for charmetrics in gmatch(afmblob,"StartCharMetrics(.-)EndCharMetrics") do
-            if trace_loading then
-                report_afm("loading char metrics")
-            end
-            get_charmetrics(data,charmetrics,vector)
-            break
-        end
-        for kernpairs in gmatch(afmblob,"StartKernPairs(.-)EndKernPairs") do
-            if trace_loading then
-                report_afm("loading kern pairs")
-            end
-            get_kernpairs(data,kernpairs)
-            break
-        end
-        for version, fontmetrics in gmatch(afmblob,"StartFontMetrics%s+([%d%.]+)(.-)EndFontMetrics") do
-            if trace_loading then
-                report_afm("loading variables")
-            end
-            data.afmversion = version
-            get_variables(data,fontmetrics)
-            data.fontdimens = scan_comment(fontmetrics) -- todo: all lpeg, no time now
-            break
-        end
+        lpegmatch(parser,afmblob,1,data)
         return data
     else
         if trace_loading then
@@ -929,11 +959,31 @@ local function copytotfm(data)
             end
             --
         end
-        local fd = data.fontdimens
-        if fd and fd[8] and fd[9] and fd[10] then -- math
-            for k,v in next, fd do
-                parameters[k] = v
-            end
+        --
+        if metadata.sup then
+            local dummy    = { 0, 0, 0}
+            parameters[ 1] = metadata.designsize or 0
+            parameters[ 2] = metadata.checksum or 0
+            parameters[ 3],
+            parameters[ 4],
+            parameters[ 5] = unpack(metadata.space or dummy)
+            parameters[ 6] = metadata.quad or 0
+            parameters[ 7] = metadata.extraspace or 0
+            parameters[ 8],
+            parameters[ 9],
+            parameters[10] = unpack(metadata.num or dummy)
+            parameters[11],
+            parameters[12] = unpack(metadata.denom or dummy)
+            parameters[13],
+            parameters[14],
+            parameters[15] = unpack(metadata.sup or dummy)
+            parameters[16],
+            parameters[17] = unpack(metadata.sub or dummy)
+            parameters[18] = metadata.supdrop or 0
+            parameters[19] = metadata.subdrop or 0
+            parameters[20],
+            parameters[21] = unpack(metadata.delim or dummy)
+            parameters[22] = metadata.axisheight
         end
         --
         parameters.designsize = (metadata.designsize or 10)*65536

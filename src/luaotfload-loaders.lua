@@ -104,6 +104,22 @@ local install_formats = function ()
      and aux ("dfont", unsupported_reader "dfont")
 end
 
+local not_found_msg = function (specification, size, id)
+  logreport ("both", 0, "loaders", "")
+  logreport ("both", 0, "loaders",
+             "--------------------------------------------------------")
+  logreport ("both", 0, "loaders", "")
+  logreport ("both", 0, "loaders", "Font definition failed for:")
+  logreport ("both", 0, "loaders", "")
+  logreport ("both", 0, "loaders", "   > id            : %d", id)
+  logreport ("both", 0, "loaders", "   > specification : %q", specification)
+  if size > 0 then
+    logreport ("both", 0, "loaders", "   > size          : %.2f pt", size / 2^16)
+  end
+  logreport ("both", 0, "loaders", "")
+  logreport ("both", 0, "loaders",
+             "--------------------------------------------------------")
+end
 --[[doc--
 
     \subsection{\CONTEXT override}
@@ -120,6 +136,7 @@ do
 
   local patch = function (specification, size, id)
     local fontdata = read (specification, size, id)
+----if not fontdata then not_found_msg (specification, size, id) end
     if type (fontdata) == "table" and fontdata.shared then
       --- We need to test for the “shared” field here
       --- or else the fontspec capheight callback will
@@ -139,10 +156,8 @@ do
       logreport ("both", 0, "loaders", "   > spec %q", specification)
       logreport ("both", 0, "loaders", "   > at size %.2f pt", size / 2^16)
       local result = definer (specification, size, id)
-      if not result then
-        logreport ("both", 0, "loaders", "   > font definition failed")
-        return
-      elseif type (result) == "number" then
+      if not result then return not_found_msg (specification, size, id) end
+      if type (result) == "number" then
         logreport ("both", 0, "loaders", "   > font definition yielded id %d", result)
         return result
       end

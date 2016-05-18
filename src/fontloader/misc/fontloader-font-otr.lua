@@ -1874,6 +1874,7 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames)
          -- format         = fontdata.format,
             fontname       = fontname,
             fullname       = fullname,
+         -- cfffullname    = cff.fullname,
             family         = family,
             subfamily      = subfamily,
             familyname     = familyname,

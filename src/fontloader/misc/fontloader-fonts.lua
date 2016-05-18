@@ -260,6 +260,7 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
 
         -- type one code
 
+        loadmodule('font-onr.lua') -- was font-afm.lua
         loadmodule('font-one.lua') -- was font-afm.lua
         loadmodule('font-afk.lua')
 

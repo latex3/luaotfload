@@ -55,7 +55,7 @@ local otfenhancers       = otf.enhancers
 local afmfeatures        = constructors.newfeatures("afm")
 local registerafmfeature = afmfeatures.register
 
-afm.version              = 1.507 -- incrementing this number one up will force a re-cache
+afm.version              = 1.512 -- incrementing this number one up will force a re-cache
 afm.cache                = containers.define("fonts", "afm", afm.version, true)
 afm.autoprefixed         = true -- this will become false some day (catches texnansi-blabla.*)
 
@@ -65,380 +65,6 @@ afm.syncspace            = true -- when true, nicer stretch values
 local overloads          = fonts.mappings.overloads
 
 local applyruntimefixes  = fonts.treatments and fonts.treatments.applyfixes
-
---[[ldx--
-<p>We start with the basic reader which we give a name similar to the built in <l n='tfm'/>
-and <l n='otf'/> reader.</p>
---ldx]]--
-
--- Comment FONTIDENTIFIER LMMATHSYMBOLS10
--- Comment CODINGSCHEME TEX MATH SYMBOLS
--- Comment DESIGNSIZE 10.0 pt
--- Comment CHECKSUM O 4261307036
--- Comment SPACE 0 plus 0 minus 0
--- Comment QUAD 1000
--- Comment EXTRASPACE 0
--- Comment NUM 676.508 393.732 443.731
--- Comment DENOM 685.951 344.841
--- Comment SUP 412.892 362.892 288.889
--- Comment SUB 150 247.217
--- Comment SUPDROP 386.108
--- Comment SUBDROP 50
--- Comment DELIM 2390 1010
--- Comment AXISHEIGHT 250
-
---[[ldx--
-<p>We now use a new (unfinished) pfb loader but I see no differences between the old
-and new vectors (we actually had one bad vector with the old loader).</p>
---ldx]]--
-
-local get_indexes
-
-do
-
-    local n, m
-
-    local progress = function(str,position,name,size)
-        local forward = position + tonumber(size) + 3 + 2
-        n = n + 1
-        if n >= m then
-            return #str, name
-        elseif forward < #str then
-            return forward, name
-        else
-            return #str, name
-        end
-    end
-
-    local initialize = function(str,position,size)
-        n = 0
-        m = tonumber(size)
-        return position + 1
-    end
-
-    local charstrings = P("/CharStrings")
-    local name        = P("/") * C((R("az")+R("AZ")+R("09")+S("-_."))^1)
-    local size        = C(R("09")^1)
-    local spaces      = P(" ")^1
-
-    local p_filternames = Ct (
-        (1-charstrings)^0 * charstrings * spaces * Cmt(size,initialize)
-      * (Cmt(name * P(" ")^1 * C(R("09")^1), progress) + P(1))^1
-    )
-
-    -- if one of first 4 not 0-9A-F then binary else hex
-
-    local decrypt
-
-    do
-
-        local r, c1, c2, n = 0, 0, 0, 0
-
-        local function step(c)
-            local cipher = byte(c)
-            local plain  = bxor(cipher,rshift(r,8))
-            r = ((cipher + r) * c1 + c2) % 65536
-            return char(plain)
-        end
-
-        decrypt = function(binary)
-            r, c1, c2, n = 55665, 52845, 22719, 4
-            binary       = gsub(binary,".",step)
-            return sub(binary,n+1)
-        end
-
-     -- local pattern = Cs((P(1) / step)^1)
-     --
-     -- decrypt = function(binary)
-     --     r, c1, c2, n = 55665, 52845, 22719, 4
-     --     binary = lpegmatch(pattern,binary)
-     --     return sub(binary,n+1)
-     -- end
-
-    end
-
-    local function loadpfbvector(filename)
-        -- for the moment limited to encoding only
-
-        local data = io.loaddata(resolvers.findfile(filename))
-
-        if not find(data,"!PS%-AdobeFont%-") then
-            print("no font",filename)
-            return
-        end
-
-        if not data then
-            print("no data",filename)
-            return
-        end
-
-        local ascii, binary = match(data,"(.*)eexec%s+......(.*)")
-
-        if not binary then
-            print("no binary",filename)
-            return
-        end
-
-        binary = decrypt(binary,4)
-
-        local vector = lpegmatch(p_filternames,binary)
-
-        vector[0] = table.remove(vector,1)
-
-        if not vector then
-            print("no vector",filename)
-            return
-        end
-
-        return vector
-
-    end
-
-    get_indexes = function(data,pfbname)
-        local vector = loadpfbvector(pfbname)
-        if vector then
-            local characters = data.characters
-            if trace_loading then
-                report_afm("getting index data from %a",pfbname)
-            end
-            for index=1,#vector do
-                local name = vector[index]
-                local char = characters[name]
-                if char then
-                    if trace_indexing then
-                        report_afm("glyph %a has index %a",name,index)
-                    end
-                    char.index = index
-                end
-            end
-        end
-    end
-
-end
-
---[[ldx--
-<p>We start with the basic reader which we give a name similar to the built in <l n='tfm'/>
-and <l n='otf'/> reader.</p>
---ldx]]--
-
--- Comment FONTIDENTIFIER LMMATHSYMBOLS10
--- Comment CODINGSCHEME TEX MATH SYMBOLS
--- Comment DESIGNSIZE 10.0 pt
--- Comment CHECKSUM O 4261307036
--- Comment SPACE 0 plus 0 minus 0
--- Comment QUAD 1000
--- Comment EXTRASPACE 0
--- Comment NUM 676.508 393.732 443.731
--- Comment DENOM 685.951 344.841
--- Comment SUP 412.892 362.892 288.889
--- Comment SUB 150 247.217
--- Comment SUPDROP 386.108
--- Comment SUBDROP 50
--- Comment DELIM 2390 1010
--- Comment AXISHEIGHT 250
--- Comment DesignSize 12 (pts)
--- Comment TFM designsize: 12 (in points)
-
-local parser  do -- no need for a further speedup with locals
-
-    local spacing   = patterns.spacer
-    local lineend   = patterns.newline
-    local number    = spacing * (R("09") + S("."))^1 / tonumber
-    local name      = spacing * C((1-spacing)^1)
-    local words     = spacing * (1 - lineend)^1 / strip
-    local rest      = (1 - lineend)^0
-    local fontdata  = Carg(1)
-    local semicolon = spacing * P(";")
-    local plus      = P("plus") * number
-    local minus     = P("minus") * number
-
-    -- kern pairs
-
-    local function addkernpair(data,one,two,value)
-        local chr = data.characters[one]
-        if chr then
-            local kerns = chr.kerns
-            if kerns then
-                kerns[two] = tonumber(value)
-            else
-                chr.kerns = { [two] = tonumber(value) }
-            end
-        end
-    end
-
-    local p_kernpair = (fontdata * P("KPX") * name * name * number) / addkernpair
-
-    -- char metrics
-
-    local chr = false
-    local ind = 0
-
-    local function start()
-        ind = 0
-        chr = { }
-    end
-
-    local function stop()
-        ind = 0
-        chr = false
-    end
-
-    local function setindex(i)
-        if i < 0 then
-            ind = ind + 1 -- ?
-        else
-            ind = i
-        end
-        chr = {
-            index = ind
-        }
-    end
-
-    local function setwidth(width)
-        chr.width = width
-    end
-
-    local function setname(data,name)
-        data.characters[name] = chr
-    end
-
-    local function setboundingbox(boundingbox)
-        chr.boundingbox = boundingbox
-    end
-
-    local function setligature(plus,becomes)
-        local ligatures = chr.ligatures
-        if ligatures then
-            ligatures[plus] = becomes
-        else
-            chr.ligatures = { [plus] = becomes }
-        end
-    end
-
-    local p_charmetric = ( (
-        P("C")  * number          / setindex
-      + P("WX") * number          / setwidth
-      + P("N")  * fontdata * name / setname
-      + P("B")  * Ct((number)^4)  / setboundingbox
-      + P("L")  * (name)^2        / setligature
-      ) * semicolon )^1
-
-    local p_charmetrics = P("StartCharMetrics") * number * (p_charmetric + (1-P("EndCharMetrics")))^0 * P("EndCharMetrics")
-    local p_kernpairs   = P("StartKernPairs")   * number * (p_kernpair   + (1-P("EndKernPairs"))  )^0 * P("EndKernPairs")
-
-    local function set_1(data,key,a)     data.metadata[lower(key)] = a           end
-    local function set_2(data,key,a,b)   data.metadata[lower(key)] = { a, b }    end
-    local function set_3(data,key,a,b,c) data.metadata[lower(key)] = { a, b, c } end
-
-    local p_parameters = P(false)
-      + P("FontName") * fontdata * words / function(data,line)
-            data.metadata.fontname = line
-            data.metadata.fullname = line
-        end
-      + P("ItalicAngle") * fontdata * number / function(data,angle)
-            data.metadata.italicangle = angle
-        end
-      + P("IsFixedPitch") * fontdata * name  / function(data,pitch)
-            data.metadata.monospaced = toboolean(pitch,true)
-        end
-      + P("CharWidth") * fontdata * number / function(data,width)
-            data.metadata.charwidth = width
-        end
-      + P("XHeight") * fontdata * number / function(data,xheight)
-            data.metadata.xheight = xheight
-        end
-      + P("Descender") * fontdata * number / function(data,descender)
-            data.metadata.descender = descender
-        end
-      + P("Ascender") * fontdata * number / function(data,ascender)
-            data.metadata.ascender = ascender
-        end
-      + P("Comment") * spacing * ( P(false)
-          + (fontdata * C("DESIGNSIZE")     * number                   * rest) / set_1 -- 1
-          + (fontdata * C("TFM designsize") * number                   * rest) / set_1
-          + (fontdata * C("DesignSize")     * number                   * rest) / set_1
-          + (fontdata * C("CODINGSCHEME")   * words                    * rest) / set_1 --
-          + (fontdata * C("CHECKSUM")       * number * words           * rest) / set_1 -- 2
-          + (fontdata * C("SPACE")          * number * plus * minus    * rest) / set_3 -- 3 4 5
-          + (fontdata * C("QUAD")           * number                   * rest) / set_1 -- 6
-          + (fontdata * C("EXTRASPACE")     * number                   * rest) / set_1 -- 7
-          + (fontdata * C("NUM")            * number * number * number * rest) / set_3 -- 8 9 10
-          + (fontdata * C("DENOM")          * number * number          * rest) / set_2 -- 11 12
-          + (fontdata * C("SUP")            * number * number * number * rest) / set_3 -- 13 14 15
-          + (fontdata * C("SUB")            * number * number          * rest) / set_2 -- 16 17
-          + (fontdata * C("SUPDROP")        * number                   * rest) / set_1 -- 18
-          + (fontdata * C("SUBDROP")        * number                   * rest) / set_1 -- 19
-          + (fontdata * C("DELIM")          * number * number          * rest) / set_2 -- 20 21
-          + (fontdata * C("AXISHEIGHT")     * number                   * rest) / set_1 -- 22
-        )
-
-    parser = (P("StartFontMetrics") / start)
-            * (
-                p_charmetrics
-              + p_kernpairs
-              + p_parameters
-              + (1-P("EndFontMetrics"))
-              )^0
-            * (P("EndFontMetrics") / stop)
-
-end
-
-
-local data = {
-    resources = {
-        filename = resolvers.unresolve(filename),
---         version  = afm.version,
-        creator  = "context mkiv",
-    },
-    properties = {
-        hasitalics = false,
-    },
-    goodies = {
-    },
-    metadata   = {
-        filename = file.removesuffix(file.basename(filename))
-    },
-    characters = {
-        -- a temporary store
-    },
-    descriptions = {
-        -- the final store
-    },
-}
-
-local function readafm(filename)
-    local ok, afmblob, size = resolvers.loadbinfile(filename) -- has logging
-    if ok and afmblob then
-        local data = {
-            resources = {
-                filename = resolvers.unresolve(filename),
-                version  = afm.version,
-                creator  = "context mkiv",
-            },
-            properties = {
-                hasitalics = false,
-            },
-            goodies = {
-            },
-            metadata   = {
-                filename = file.removesuffix(file.basename(filename))
-            },
-            characters = {
-                -- a temporary store
-            },
-            descriptions = {
-                -- the final store
-            },
-        }
-        lpegmatch(parser,afmblob,1,data)
-        return data
-    else
-        if trace_loading then
-            report_afm("no valid afm file %a",filename)
-        end
-        return nil
-    end
-end
 
 --[[ldx--
 <p>We cache files. Caching is taken care of in the loader. We cheat a bit by adding
@@ -500,16 +126,8 @@ function afm.load(filename)
         end
         if not data or data.size ~= size or data.time ~= time or data.pfbsize ~= pfbsize or data.pfbtime ~= pfbtime then
             report_afm("reading %a",filename)
-            data = readafm(filename)
+            data = afm.readers.loadfont(filename,pfbname)
             if data then
-                if pfbname ~= "" then
-                    data.resources.filename = resolvers.unresolve(pfbname)
-                    get_indexes(data,pfbname)
-                elseif trace_loading then
-                    report_afm("no pfb file for %a",filename)
-                 -- data.resources.filename = "unset" -- better than loading the afm file
-                end
-                -- we now have all the data loaded
                 applyenhancers(data,filename)
              -- otfreaders.addunicodetable(data) -- only when not done yet
                 fonts.mappings.addtounicode(data,filename)
@@ -961,29 +579,29 @@ local function copytotfm(data)
         end
         --
         if metadata.sup then
-            local dummy    = { 0, 0, 0}
-            parameters[ 1] = metadata.designsize or 0
-            parameters[ 2] = metadata.checksum or 0
+            local dummy    = { 0, 0, 0 }
+            parameters[ 1] = metadata.designsize        or 0
+            parameters[ 2] = metadata.checksum          or 0
             parameters[ 3],
             parameters[ 4],
-            parameters[ 5] = unpack(metadata.space or dummy)
-            parameters[ 6] = metadata.quad or 0
-            parameters[ 7] = metadata.extraspace or 0
+            parameters[ 5] = unpack(metadata.space      or dummy)
+            parameters[ 6] =        metadata.quad       or 0
+            parameters[ 7] =        metadata.extraspace or 0
             parameters[ 8],
             parameters[ 9],
-            parameters[10] = unpack(metadata.num or dummy)
+            parameters[10] = unpack(metadata.num        or dummy)
             parameters[11],
-            parameters[12] = unpack(metadata.denom or dummy)
+            parameters[12] = unpack(metadata.denom      or dummy)
             parameters[13],
             parameters[14],
-            parameters[15] = unpack(metadata.sup or dummy)
+            parameters[15] = unpack(metadata.sup        or dummy)
             parameters[16],
-            parameters[17] = unpack(metadata.sub or dummy)
-            parameters[18] = metadata.supdrop or 0
-            parameters[19] = metadata.subdrop or 0
+            parameters[17] = unpack(metadata.sub        or dummy)
+            parameters[18] =        metadata.supdrop    or 0
+            parameters[19] =        metadata.subdrop    or 0
             parameters[20],
-            parameters[21] = unpack(metadata.delim or dummy)
-            parameters[22] = metadata.axisheight
+            parameters[21] = unpack(metadata.delim      or dummy)
+            parameters[22] =        metadata.axisheight or 0
         end
         --
         parameters.designsize = (metadata.designsize or 10)*65536

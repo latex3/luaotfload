@@ -1122,7 +1122,6 @@ local import_values = {
     -- "style", "optsize",--> from slashed notation; handled otherwise
     { "lookup", false },
     { "sub",    false },
-    { "mode",   true },
 }
 
 local lookup_types = { "anon"  , "file", "kpse"
@@ -1222,8 +1221,10 @@ local handle_request = function (specification)
 
     if name then
         if lookup == "file" then
-            specification.filename = name
-            name = file.removesuffix (name)
+            local suffix = file.suffix (name)
+            specification.forcedname = name
+            specification.forced     = suffix
+            name                     = file.removesuffix (name)
         end
         specification.name     = name
         specification.lookup   = lookup or specification.lookup

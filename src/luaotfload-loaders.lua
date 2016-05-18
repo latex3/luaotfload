@@ -52,12 +52,9 @@ end
 local afm_reader = fonts.readers.afm
 
 local afm_loader = function (specification)
-  local name     = specification.name
-  local filename = specification.filename
-  specification.forced     = "afm"
-  specification.forcedname = filename
-  specification.filename   = file.replacesuffix (filename, "afm")
-  return afm_reader (specification, "afm")
+  specification.forced = "afm"
+  specification.sub    = false
+  return afm_reader (specification)
 end
 
 local afm_compat_message = function (specification)

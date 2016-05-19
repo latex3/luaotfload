@@ -263,6 +263,7 @@ local context_modules = {
   { ctx,   "font-ota"          },
   { ctx,   "font-ots"          },
   { ctx,   "font-osd"          },
+  { ctx,   "font-onr"          },
   { ctx,   "font-one"          },
   { ctx,   "font-afk"          },
   { ctx,   "font-lua"          },
@@ -521,6 +522,7 @@ local init_main = function ()
     load_fontloader_module "font-ota"
     load_fontloader_module "font-ots"
     load_fontloader_module "font-osd"
+    load_fontloader_module "font-onr"
     load_fontloader_module "font-one"
     load_fontloader_module "font-afk"
     load_fontloader_module "font-lua"

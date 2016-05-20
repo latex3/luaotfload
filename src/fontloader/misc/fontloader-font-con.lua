@@ -10,7 +10,6 @@ if not modules then modules = { } end modules ['font-con'] = {
 
 local next, tostring, rawget = next, tostring, rawget
 local format, match, lower, gsub = string.format, string.match, string.lower, string.gsub
-local utfbyte = utf.byte
 local sort, insert, concat, sortedkeys, serialize, fastcopy = table.sort, table.insert, table.concat, table.sortedkeys, table.serialize, table.fastcopy
 local derivetable = table.derive
 
@@ -1286,7 +1285,6 @@ function constructors.initializefeatures(what,tfmdata,features,trace,report)
         local properties       = tfmdata.properties or { } -- brrr
         local whathandler      = handlers[what]
         local whatfeatures     = whathandler.features
-        local whatinitializers = whatfeatures.initializers
         local whatmodechecker  = whatfeatures.modechecker
         -- properties.mode can be enforces (for instance in font-otd)
         local mode             = properties.mode or (whatmodechecker and whatmodechecker(tfmdata,features,features.mode)) or features.mode or "base"

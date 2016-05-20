@@ -812,7 +812,8 @@ local function check_afm(specification,fullname)
 end
 
 function readers.afm(specification,method)
-    local fullname, tfmdata = specification.filename or "", nil
+    local fullname = specification.filename or ""
+    local tfmdata  = nil
     if fullname == "" then
         local forced = specification.forced or ""
         if forced ~= "" then
@@ -841,7 +842,16 @@ function readers.pfb(specification,method) -- only called when forced
     if trace_defining then
         report_afm("using afm reader for %a",original)
     end
-    specification.specification = file.replacesuffix(original,"afm")
     specification.forced = "afm"
+    local function swap(name)
+        local value = specification[swap]
+        if value then
+            specification[swap] = gsub("%.pfb",".afm",1)
+        end
+    end
+    swap("filename")
+    swap("fullname")
+    swap("forcedname")
+    swap("specification")
     return readers.afm(specification,method)
 end

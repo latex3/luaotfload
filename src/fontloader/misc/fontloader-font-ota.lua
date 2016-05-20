@@ -44,7 +44,6 @@ local getchar             = nuts.getchar
 local ischar              = nuts.is_char
 
 local traverse_id         = nuts.traverse_id
-local traverse_node_list  = nuts.traverse
 local end_of_math         = nuts.end_of_math
 
 local nodecodes           = nodes.nodecodes

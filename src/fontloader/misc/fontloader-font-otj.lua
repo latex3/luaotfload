@@ -27,7 +27,6 @@ if not modules then modules = { } end modules ['font-otj'] = {
 if not nodes.properties then return end
 
 local next, rawget = next, rawget
-local utfchar = utf.char
 local fastcopy = table.fastcopy
 
 local registertracker = trackers.register
@@ -92,7 +91,6 @@ local traverse_id        = nuts.traverse_id
 local traverse_char      = nuts.traverse_char
 local insert_node_before = nuts.insert_before
 local insert_node_after  = nuts.insert_after
-local find_tail          = nuts.tail
 
 local properties         = nodes.properties.data
 

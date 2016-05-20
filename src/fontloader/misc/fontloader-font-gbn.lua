@@ -19,7 +19,6 @@ local nodes = nodes
 local nuts        = nodes.nuts -- context abstraction of direct nodes
 
 local traverse_id = nuts.traverse_id
-local remove_node = nuts.remove
 local free_node   = nuts.free
 
 local glyph_code  = nodes.nodecodes.glyph

@@ -99,7 +99,7 @@ readers.streamreader    = streamreader
 
 local openfile          = streamreader.open
 local closefile         = streamreader.close
-local skipbytes         = streamreader.skip
+----- skipbytes         = streamreader.skip
 local setposition       = streamreader.setposition
 local skipshort         = streamreader.skipshort
 local readbytes         = streamreader.readbytes
@@ -108,7 +108,7 @@ local readbyte          = streamreader.readcardinal1  --  8-bit unsigned integer
 local readushort        = streamreader.readcardinal2  -- 16-bit unsigned integer
 local readuint          = streamreader.readcardinal3  -- 24-bit unsigned integer
 local readulong         = streamreader.readcardinal4  -- 24-bit unsigned integer
-local readchar          = streamreader.readinteger1   --  8-bit   signed integer
+----- readchar          = streamreader.readinteger1   --  8-bit   signed integer
 local readshort         = streamreader.readinteger2   -- 16-bit   signed integer
 local readlong          = streamreader.readinteger4   -- 24-bit unsigned integer
 local readfixed         = streamreader.readfixed4

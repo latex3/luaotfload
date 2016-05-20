@@ -29,7 +29,7 @@ tfm.maxnestingdepth            = 5
 tfm.maxnestingsize             = 65536*1024
 
 local tfmfeatures              = constructors.newfeatures("tfm")
-local registertfmfeature       = tfmfeatures.register
+----- registertfmfeature       = tfmfeatures.register
 
 constructors.resolvevirtualtoo = false -- wil be set in font-ctx.lua
 

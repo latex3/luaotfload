@@ -36,9 +36,6 @@ local contextmerged      = specifiers.contextmerged
 
 local setmetatableindex  = table.setmetatableindex
 
-local otffeatures        = fonts.constructors.newfeatures("otf")
-local registerotffeature = otffeatures.register
-
 local a_to_script        = { }
 local a_to_language      = { }
 

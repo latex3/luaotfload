@@ -69,7 +69,6 @@ local readers           = fonts.handlers.otf.readers
 local streamreader      = readers.streamreader
 
 local setposition       = streamreader.setposition
-local skipbytes         = streamreader.skip
 local skipshort         = streamreader.skipshort
 local readushort        = streamreader.readcardinal2  -- 16-bit unsigned integer
 local readulong         = streamreader.readcardinal4  -- 24-bit unsigned integer

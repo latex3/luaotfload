@@ -10,7 +10,6 @@ local tonumber, next, type = tonumber, next, type
 
 local match, format, find, concat, gsub, lower = string.match, string.format, string.find, table.concat, string.gsub, string.lower
 local P, R, S, C, Ct, Cc, lpegmatch = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.Ct, lpeg.Cc, lpeg.match
-local utfbyte = utf.byte
 local floor = math.floor
 local formatters = string.formatters
 

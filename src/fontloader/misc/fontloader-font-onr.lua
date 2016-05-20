@@ -33,6 +33,7 @@ local trace_indexing     = false  trackers.register("afm.indexing",   function(v
 local trace_loading      = false  trackers.register("afm.loading",    function(v) trace_loading  = v end)
 
 local report_afm         = logs.reporter("fonts","afm loading")
+local report_afm         = logs.reporter("fonts","pfb loading")
 
 fonts                    = fonts or { }
 local handlers           = fonts.handlers or { }
@@ -122,19 +123,19 @@ do
         local data = io.loaddata(resolvers.findfile(filename))
 
         if not data then
-            print("no data",filename)
+            report_pfb("no data in %a",filename)
             return
         end
 
-        if not find(data,"!PS%-AdobeFont%-") then
-            print("no font",filename)
+        if not (find(data,"!PS%-AdobeFont%-") or find(data,"%%!FontType1")) then
+            report_pfb("no font in %a",filename)
             return
         end
 
         local ascii, binary = match(data,"(.*)eexec%s+......(.*)")
 
         if not binary then
-            print("no binary",filename)
+            report_pfb("no binary data in %a",filename)
             return
         end
 
@@ -148,7 +149,7 @@ do
         end
 
         if not vector then
-            print("no vector",filename)
+            report_pfb("no vector in %a",filename)
             return
         end
 
@@ -184,16 +185,18 @@ and <l n='otf'/> reader. We only need data that is relevant for our use. We don'
 more complex arrangements like multiple master (obsolete), direction specific kerning, etc.</p>
 --ldx]]--
 
-local spacing   = patterns.whitespace
-local lineend   = patterns.newline
-local number    = spacing * S("+-")^-1 * (R("09") + S("."))^1 / tonumber
-local name      = spacing * C((1-spacing)^1)
-local words     = spacing * (1 - lineend)^1 / strip
-local rest      = (1 - lineend)^0
-local fontdata  = Carg(1)
-local semicolon = spacing * P(";")
-local plus      = P("plus") * number
-local minus     = P("minus") * number
+local spacer     = patterns.spacer
+local whitespace = patterns.whitespace
+local lineend    = patterns.newline
+local spacing    = spacer^0
+local number     = spacing * S("+-")^-1 * (R("09") + S("."))^1 / tonumber
+local name       = spacing * C((1 - whitespace)^1)
+local words      = spacing * ((1 - lineend)^1 / strip)
+local rest       = (1 - lineend)^0
+local fontdata   = Carg(1)
+local semicolon  = spacing * P(";")
+local plus       = spacing * P("plus") * number
+local minus      = spacing * P("minus") * number
 
 -- kern pairs
 
@@ -333,6 +336,10 @@ local fullparser = ( P("StartFontMetrics") * fontdata * name / start )
                  * ( p_charmetrics + p_kernpairs + p_parameters + (1-P("EndFontMetrics")) )^0
                  * ( P("EndFontMetrics") / stop )
 
+local fullparser = ( P("StartFontMetrics") * fontdata * name / start )
+                 * ( p_charmetrics + p_kernpairs + p_parameters + (1-P("EndFontMetrics")) )^0
+                 * ( P("EndFontMetrics") / stop )
+
 local infoparser = ( P("StartFontMetrics") * fontdata * name / start )
                  * ( p_parameters + (1-P("EndFontMetrics")) )^0
                  * ( P("EndFontMetrics") / stop )
@@ -402,4 +409,3 @@ function readers.getinfo(filename)
         return data.metadata
     end
 end
-

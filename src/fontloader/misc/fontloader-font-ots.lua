@@ -145,10 +145,8 @@ local report_direct   = logs.reporter("fonts","otf direct")
 local report_subchain = logs.reporter("fonts","otf subchain")
 local report_chain    = logs.reporter("fonts","otf chain")
 local report_process  = logs.reporter("fonts","otf process")
------ report_prepare  = logs.reporter("fonts","otf prepare")
 local report_warning  = logs.reporter("fonts","otf warning")
 local report_run      = logs.reporter("fonts","otf run")
-local report_check    = logs.reporter("fonts","otf check")
 
 registertracker("otf.replacements", "otf.singles,otf.multiples,otf.alternatives,otf.ligatures")
 registertracker("otf.positions","otf.marks,otf.kerns,otf.cursive")
@@ -185,10 +183,7 @@ local setlink            = nuts.setlink
 
 local ischar             = nuts.is_char
 
-local insert_node_before = nuts.insert_before
 local insert_node_after  = nuts.insert_after
-local delete_node        = nuts.delete
-local remove_node        = nuts.remove
 local copy_node          = nuts.copy
 local copy_node_list     = nuts.copy_list
 local find_node_tail     = nuts.tail
@@ -3064,7 +3059,7 @@ local function c_run_single(head,font,attr,lookupcache,step,dataset,sequence,rlm
     while start do
         local char = ischar(start,font)
         if char then
-            local a = getattr(start,0)
+            local a = attr and getattr(start,0)
             if not a or (a == attr) then
                 local lookupmatch = lookupcache[char]
                 if lookupmatch then
@@ -3097,7 +3092,7 @@ local function t_run_single(start,stop,font,attr,lookupcache)
     while start ~= stop do
         local char = ischar(start,font)
         if char then
-            local a = getattr(start,0)
+            local a = attr and getattr(start,0)
             if not a or (a == attr) then
                 local lookupmatch = lookupcache[char]
                 if lookupmatch then -- hm, hyphens can match (tlig) so we need to really check
@@ -3132,7 +3127,7 @@ local function t_run_single(start,stop,font,attr,lookupcache)
 end
 
 -- local function d_run_single(prev,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
---     local a = getattr(prev,0)
+--     local a = attr and getattr(prev,0)
 --     if not a or (a == attr) then
 --         local char = ischar(prev) -- can be disc
 --         if char then
@@ -3149,7 +3144,7 @@ end
 -- end
 
 local function k_run_single(sub,injection,last,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
-    local a = getattr(sub,0)
+    local a = attr and getattr(sub,0)
     if not a or (a == attr) then
         for n in traverse_nodes(sub) do -- only gpos
             if n == last then
@@ -3181,7 +3176,7 @@ local function c_run_multiple(head,font,attr,steps,nofsteps,dataset,sequence,rlm
     while start do
         local char = ischar(start,font)
         if char then
-            local a = getattr(start,0)
+            local a = attr and getattr(start,0)
             if not a or (a == attr) then
                 for i=1,nofsteps do
                     local step        = steps[i]
@@ -3228,7 +3223,7 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
     while start ~= stop do
         local char = ischar(start,font)
         if char then
-            local a = getattr(start,0)
+            local a = attr and getattr(start,0)
             if not a or (a == attr) then
                 for i=1,nofsteps do
                     local step = steps[i]
@@ -3271,7 +3266,7 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
 end
 
 -- local function d_run_multiple(prev,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
---     local a = getattr(prev,0)
+--     local a = attr and getattr(prev,0)
 --     if not a or (a == attr) then
 --         local char = ischar(prev) -- can be disc
 --         if char then
@@ -3297,7 +3292,7 @@ end
 -- end
 
 local function k_run_multiple(sub,injection,last,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
-    local a = getattr(sub,0)
+    local a = attr and getattr(sub,0)
     if not a or (a == attr) then
         for n in traverse_nodes(sub) do -- only gpos
             if n == last then
@@ -3394,6 +3389,10 @@ local function featuresprocessor(head,font,attr)
 
     end
 
+    if attr == 0 then
+        attr = false -- some 10% faster when no dynamics but hardly measureable on real runs
+    end
+
     head = tonut(head)
 
     if trace_steps then
@@ -3405,7 +3404,7 @@ local function featuresprocessor(head,font,attr)
     local done      = false
     local datasets  = otf.dataset(tfmdata,font,attr)
 
-    local dirstack  = { } -- could move outside function btu we can have local runss
+    local dirstack  = { } -- could move outside function but we can have local runs
 
     sweephead       = { }
 
@@ -3451,7 +3450,7 @@ local function featuresprocessor(head,font,attr)
             while start do
                 local char = ischar(start,font)
                 if char then
-                    local a = getattr(start,0)
+                    local a = attr and getattr(start,0)
                     if not a or (a == attr) then
                         for i=1,nofsteps do
                             local step = steps[i]
@@ -3489,14 +3488,12 @@ local function featuresprocessor(head,font,attr)
                 local step = steps[1]
                 local lookupcache = step.coverage
                 if not lookupcache then
-                 -- can't happen, no check in loop either
                     report_missing_coverage(dataset,sequence)
                 else
-
                     while start do
                         local char, id = ischar(start,font)
                         if char then
-                            local a = getattr(start,0)
+                            local a = attr and getattr(start,0)
                             if a then
                                 a = (a == attr) and (not attribute or getprop(start,a_state) == attribute)
                             else
@@ -3553,7 +3550,7 @@ local function featuresprocessor(head,font,attr)
                 while start do
                     local char, id = ischar(start,font)
                     if char then
-                        local a = getattr(start,0)
+                        local a = attr and getattr(start,0)
                         if a then
                             a = (a == attr) and (not attribute or getprop(start,a_state) == attribute)
                         else

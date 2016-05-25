@@ -1598,6 +1598,14 @@ do
 
         local reported = { }
 
+        local function report_issue(i,what,sequence,kind)
+            local name = sequence.name
+            if not reported[name] then
+                report("rule %i in %s lookup %a has %s lookups",i,what,name,kind)
+                reported[name] = true
+            end
+        end
+
         for i=lastsequence+1,nofsequences do
             local sequence = sequences[i]
             local steps    = sequence.steps
@@ -1609,18 +1617,10 @@ do
                         local rule     = rules[i]
                         local rlookups = rule.lookups
                         if not rlookups then
-                            local name = sequence.name
-                            if not reported[name] then
-                                report("rule %i in %s lookup %a has %s lookups",i,what,name,"no")
-                                reported[name] = true
-                            end
+                            report_issue(i,what,sequence,"no")
                         elseif not next(rlookups) then
-                            local name = sequence.name
-                            if not reported[name] then
-                                -- can be ok as it aborts a chain sequence
-                                report("rule %i in %s lookup %a has %s lookups",i,what,name,"empty")
-                                reported[name] = true
-                            end
+                            -- can be ok as it aborts a chain sequence
+                            report_issue(i,what,sequence,"empty")
                             rule.lookups = nil
                         else
                             for index, lookupid in sortedhash(rlookups) do -- nicer
@@ -1630,21 +1630,34 @@ do
                                     -- as in another one
                                     nofsublookups = nofsublookups + 1
                                  -- report("registering %i as sublookup %i",lookupid,nofsublookups)
-                                    local d = lookups[lookupid].done
-                                    h = {
-                                        index     = nofsublookups, -- handy for tracing
-                                        name      = f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
-                                        derived   = true,          -- handy for tracing
-                                        steps     = d.steps,
-                                        nofsteps  = d.nofsteps,
-                                        type      = d.lookuptype,
-                                        markclass = d.markclass or nil,
-                                        flags     = d.flags,
-                                     -- chain     = d.chain,
-                                    }
-                                    sublookuplist[nofsublookups] = h
-                                    sublookuphash[lookupid] = nofsublookups
-                                    sublookupcheck[lookupid] = 1
+                                    local lookup = lookups[lookupid]
+                                    if lookup then
+                                        local d = lookup.done
+                                        if d then
+                                            h = {
+                                                index     = nofsublookups, -- handy for tracing
+                                                name      = f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
+                                                derived   = true,          -- handy for tracing
+                                                steps     = d.steps,
+                                                nofsteps  = d.nofsteps,
+                                                type      = d.lookuptype,
+                                                markclass = d.markclass or nil,
+                                                flags     = d.flags,
+                                             -- chain     = d.chain,
+                                            }
+                                            sublookuplist[nofsublookups] = h
+                                            sublookuphash[lookupid] = nofsublookups
+                                            sublookupcheck[lookupid] = 1
+                                        else
+                                            report_issue(i,what,sequence,"missing")
+                                            rule.lookups = nil
+                                            break
+                                        end
+                                    else
+                                        report_issue(i,what,sequence,"bad")
+                                        rule.lookups = nil
+                                        break
+                                    end
                                 else
                                     sublookupcheck[lookupid] = sublookupcheck[lookupid] + 1
                                 end

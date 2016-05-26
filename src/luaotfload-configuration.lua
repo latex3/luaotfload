@@ -387,17 +387,9 @@ local set_fontforge = function ()
   end
   local use_ff = config.luaotfload.db.use_fontforge
   if use_ff == true then
-    if not _G.fontloader then
       logreport ("both", 0, "db",
-                 "Fontforge loader was requested but the fontloader \z
-                  library is missing.")
-      return false
+                 "Fontforge loader was requested but not supported anymore.")
     end
-    logreport ("log", 0, "db", "Loading font data with FontForge.")
-    names.use_fontforge (true)
-  else
-    logreport ("log", 4, "db", "Loading font data with the Lua loader.")
-    names.use_fontforge (false)
   end
   return true
 end

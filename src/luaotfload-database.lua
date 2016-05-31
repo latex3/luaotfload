@@ -2537,6 +2537,7 @@ end
 
 local bold_spectrum_low  = 501 --- 500 is medium, 900 heavy/black
 local bold_weight        = 700
+local normal_width       = 5
 
 local pick_style
 local pick_fallback_style
@@ -2569,13 +2570,15 @@ do
         local style
         if typographicsubfamily then
             style = choose_exact (typographicsubfamily)
+            if style then return style end
         elseif subfamily then
             style = choose_exact (subfamily)
+            if style then return style end
         end
-        return style
+        return false
     end
 
-    pick_fallback_style = function (italicangle, weight, pfmweight)
+    pick_fallback_style = function (italicangle, pfmweight, width)
         --[[--
             More aggressive, but only to determine bold faces.
             Note: Before you make this test more inclusive, ensure
@@ -2586,7 +2589,8 @@ do
             treating weights > 500 as bold or allowing synonyms like
             “heavy”, “black”.
         --]]-- 
-        if pfmweight == bold_weight then --- bold spectrum matches
+        if width == normal_width and pfmweight == bold_weight then
+            --- bold spectrum matches
             if italicangle == 0 then
                 return "b"
             end
@@ -2602,6 +2606,7 @@ do
                               subfamily,
                               italicangle,
                               weight,
+                              width,
                               pfmweight)
         local plausible_weight = false
         --[[--
@@ -2611,17 +2616,32 @@ do
           oversimplifying classification into only three styles (r, i,
           b, bi).
         --]]--
-
         if italicangle == 0 then
-            if     pfmweight == 400                    then plausible_weight = true
-            elseif weight and regular_synonym [weight] then plausible_weight = true end
+            if pfmweight == 400 then
+                --[[--
+                  Some fonts like Dejavu advertise an undistinguished
+                  regular and a “condensed” version with the same
+                  weight whilst also providing the style info in the
+                  typographic subfamily instead of the subfamily (i. e.
+                  the converse of what Adobe’s doing). The only way to
+                  weed out the undesired pseudo-regular shape is to
+                  peek at its advertised width (4 vs. 5).
+                --]]--
+                if width then
+                    plausible_weight = width == normal_width
+                else
+                    plausible_weight = true
+                end
+            elseif weight and regular_synonym [weight] then
+                plausible_weight = true
+            end
         end
 
         if plausible_weight then
-            if typographicsubfamily  and regular_synonym [typographicsubfamily]
-            or subfamily             and regular_synonym [subfamily]
-            then
-                return "r"
+            if subfamily then
+                if regular_synonym [subfamily] then return "r" end
+            elseif typographicsubfamily then
+                if regular_synonym [typographicsubfamily] then return "r" end
             end
         end
         return false
@@ -2656,6 +2676,7 @@ local pull_values = function (entry)
     entry.italicangle       = style.italicangle
     entry.size              = style.size
     entry.weight            = style.weight
+    entry.width             = style.width
     entry.pfmweight         = style.pfmweight
 
     if config.luaotfload.db.strip == true then
@@ -2715,6 +2736,7 @@ local collect_families = function (mappings)
         local typographicsubfamily = entry.typographicsubfamily
         local subfamily            = entry.subfamily
         local weight               = entry.weight
+        local width                = entry.width
         local pfmweight            = entry.pfmweight
         local italicangle          = entry.italicangle
         local modifier             = pick_style (typographicsubfamily, subfamily)
@@ -2724,11 +2746,12 @@ local collect_families = function (mappings)
                                       subfamily,
                                       italicangle,
                                       weight,
+                                      width,
                                       pfmweight)
         end
 
         if not modifier then
-            modifier = pick_fallback_style (italicangle, weight, pfmweight)
+            modifier = pick_fallback_style (italicangle, pfmweight, width)
         end
 
         if modifier then

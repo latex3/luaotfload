@@ -212,15 +212,19 @@ end
 
 local query_ascender = function (fontdata)
   local parameters = fontdata.parameters if not parameters then return false end
+  local ascender   = parameters.ascender
+  if ascender then
+    return ascender --- pre-scaled
+  end
+
   local shared     = fontdata.shared     if not shared     then return false end
   local rawdata    = shared.rawdata      if not rawdata    then return false end
   local metadata   = rawdata.metadata    if not metadata   then return false end
-  local ascender   = parameters.ascender
-                  or metadata.ascender   if not ascender   then return false end
+  ascender         = metadata.ascender   if not ascender   then return false end
   local size       = parameters.size     if not size       then return false end
   local units = lookup_units (fontdata)
   if not units or units == 0 then return false end
-  return ascender * size / units
+  return ascender * size / units --- scaled
 end
 
 local query_capheight = function (fontdata)

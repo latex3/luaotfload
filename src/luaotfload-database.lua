@@ -1402,8 +1402,9 @@ local get_raw_info = function (metadata, basename)
         --- we put some dummies in place like the fontloader
         --- (font-otf.lua) does.
         logreport ("both", 3, "db",
-                   "invalid names table of font %s, using dummies.",
-                   basename)
+                   "Invalid names table of font %s, using dummies. \z
+                    Reported: fontname=%q, fullname=%q.",
+                   basename, fontname, fullname)
         fontname = "bad-fontname-" .. basename
         fullname = "bad-fullname-" .. basename
     end

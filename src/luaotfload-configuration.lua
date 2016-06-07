@@ -389,7 +389,6 @@ local set_fontforge = function ()
   if use_ff == true then
       logreport ("both", 0, "db",
                  "Fontforge loader was requested but not supported anymore.")
-    end
   end
   return true
 end

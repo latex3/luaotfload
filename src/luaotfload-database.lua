@@ -2033,7 +2033,7 @@ local locate_matching_pfb = function (afmfile, dir)
 end
 
 local process_dir_tree
-process_dir_tree = function (acc, dirs)
+process_dir_tree = function (acc, dirs, done)
     if not next (dirs) then --- done
         return acc
     end
@@ -2042,46 +2042,56 @@ process_dir_tree = function (acc, dirs)
     local dir   = dirs[#dirs]
     dirs[#dirs] = nil
 
-    if lfschdir (dir) then
-        lfschdir (pwd)
+    if not lfschdir (dir) then
+        --- Cannot cd; skip.
+        return process_dir_tree (acc, dirs, done)
+    end
 
-        local newfiles = { }
-        local blacklist = names.blacklist
-        for ent in lfsdir (dir) do
-            --- filter right away
-            if ent ~= "." and ent ~= ".." and not blacklist[ent] then
-                local fullpath = dir .. "/" .. ent
-                if lfsisdir (fullpath)
-                and not lpegmatch (p_blacklist, fullpath)
-                then
-                    dirs[#dirs+1] = fullpath
-                elseif lfsisfile (fullpath) then
-                    ent = stringlower (ent)
+    dir = lfscurrentdir () --- resolve symlinks
+    lfschdir (pwd)
+    if tablecontains (done, dir) then
+        --- Already traversed. Note that it’d be unsafe to rely on the
+        --- hash part above due to Lua only processing up to 32 bytes
+        --- of string data. The lookup shouldn’t impact performance too
+        --- much but we could check the performance of alternative data
+        --- structures at some point.
+        return process_dir_tree (acc, dirs, done)
+    end
 
-                    if lpegmatch (p_font_filter, ent) then
-                        newfiles[#newfiles+1] = fullpath
-                        if filesuffix (ent) == "afm" then
-                            local pfbpath = locate_matching_pfb (ent, dir)
-                            if pfbpath then
-                                newfiles[#newfiles+1] = pfbpath
-                            end
-                        else
-                            newfiles[#newfiles+1] = fullpath
+    local newfiles = { }
+    local blacklist = names.blacklist
+    for ent in lfsdir (dir) do
+        --- filter right away
+        if ent ~= "." and ent ~= ".." and not blacklist[ent] then
+            local fullpath = dir .. "/" .. ent
+            if lfsisdir (fullpath)
+            and not lpegmatch (p_blacklist, fullpath)
+            then
+                dirs[#dirs+1] = fullpath
+            elseif lfsisfile (fullpath) then
+                ent = stringlower (ent)
+                if lpegmatch (p_font_filter, ent) then
+                    newfiles[#newfiles+1] = fullpath
+                    if filesuffix (ent) == "afm" then
+                        local pfbpath = locate_matching_pfb (ent, dir)
+                        if pfbpath then
+                            newfiles[#newfiles+1] = pfbpath
                         end
+                    else
+                        newfiles[#newfiles+1] = fullpath
                     end
-
                 end
             end
         end
-        return process_dir_tree (tableappend (acc, newfiles), dirs)
     end
-    --- cannot cd; skip
-    return process_dir_tree (acc, dirs)
+    done [#done + 1] = dir
+    return process_dir_tree (tableappend (acc, newfiles), dirs, done)
 end
 
 local process_dir = function (dir)
     local pwd = lfscurrentdir ()
     if lfschdir (dir) then
+        dir = lfscurrentdir () --- resolve symlinks
         lfschdir (pwd)
 
         local files = { }
@@ -2114,7 +2124,7 @@ end
 local find_font_files = function (root, recurse)
     if lfsisdir (root) then
         if recurse == true then
-            return process_dir_tree ({}, { root })
+            return process_dir_tree ({}, { root }, {})
         else --- kpathsea already delivered the necessary subdirs
             return process_dir (root)
         end

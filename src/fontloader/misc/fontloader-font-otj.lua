@@ -753,7 +753,7 @@ local function inject_pairs_only(head,where)
                         end
                         local leftkern = i.leftkern
                         if leftkern and leftkern ~= 0 then
-                            insert_node_before(head,current,newkern(leftkern))
+                            head = insert_node_before(head,current,newkern(leftkern))
                         end
                         local rightkern = i.rightkern
                         if rightkern and rightkern ~= 0 then
@@ -1521,10 +1521,19 @@ function injections.handler(head,where)
         head = injectspaces(head)
     end
     if nofregisteredmarks > 0 or nofregisteredcursives > 0 then
+        if trace_injections then
+            report_injections("injection variant %a","everything")
+        end
         return inject_everything(head,where)
     elseif nofregisteredpairs > 0 then
+        if trace_injections then
+            report_injections("injection variant %a","pairs")
+        end
         return inject_pairs_only(head,where)
     elseif nofregisteredkerns > 0 then
+        if trace_injections then
+            report_injections("injection variant %a","kerns")
+        end
         return inject_kerns_only(head,where)
     else
         return head, false

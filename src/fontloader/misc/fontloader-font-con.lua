@@ -337,6 +337,20 @@ function constructors.enhanceparameters(parameters)
     }
 end
 
+local function mathkerns(v,vdelta)
+    local k = { }
+    for i=1,#v do
+        local entry  = v[i]
+        local height = entry.height
+        local kern   = entry.kern
+        k[i] = {
+            height = height and vdelta*height or 0,
+            kern   = kern   and vdelta*kern   or 0,
+        }
+    end
+    return k
+end
+
 function constructors.scale(tfmdata,specification)
     local target         = { } -- the new table
     --
@@ -748,22 +762,15 @@ function constructors.scale(tfmdata,specification)
                 chr.top_accent = vdelta*va
             end
             if stackmath then
-                local mk = character.mathkerns -- not in math ?
+                local mk = character.mathkerns
                 if mk then
-                    local kerns = { }
-                    local v = mk.top_right    if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
-                    end     kerns.top_right    = k end
-                    local v = mk.top_left     if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
-                    end     kerns.top_left     = k end
-                    local v = mk.bottom_left  if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
-                    end     kerns.bottom_left  = k end
-                    local v = mk.bottom_right if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
-                    end     kerns.bottom_right = k end
-                    chr.mathkern = kerns -- singular -> should be patched in luatex !
+                    local tr, tl, br, bl = mk.topright, mk.topleft, mk.bottomright, mk.bottomleft
+                    chr.mathkern = { -- singular -> should be patched in luatex !
+                        top_right    = tr and mathkerns(tr,vdelta) or nil,
+                        top_left     = tl and mathkerns(tl,vdelta) or nil,
+                        bottom_right = br and mathkerns(br,vdelta) or nil,
+                        bottom_left  = bl and mathkerns(bl,vdelta) or nil,
+                    }
                 end
             end
             if hasitalics then

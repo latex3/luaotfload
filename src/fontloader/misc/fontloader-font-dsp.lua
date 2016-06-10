@@ -715,6 +715,8 @@ function gsubhandlers.single(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofg
     end
 end
 
+-- we see coverage format 0x300 in some old ms fonts
+
 local function sethandler(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyphs,what)
     local tableoffset = lookupoffset + offset
     setposition(f,tableoffset)
@@ -1628,12 +1630,12 @@ do
                                 if not h then
                                     -- here we have a lookup that is used independent as well
                                     -- as in another one
-                                    nofsublookups = nofsublookups + 1
-                                 -- report("registering %i as sublookup %i",lookupid,nofsublookups)
                                     local lookup = lookups[lookupid]
                                     if lookup then
                                         local d = lookup.done
                                         if d then
+                                            nofsublookups = nofsublookups + 1
+                                         -- report("registering %i as sublookup %i",lookupid,nofsublookups)
                                             h = {
                                                 index     = nofsublookups, -- handy for tracing
                                                 name      = f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
@@ -2027,16 +2029,15 @@ local function readmathglyphinfo(f,fontdata,offset)
             local function get(offset)
                 setposition(f,kernoffset+offset)
                 local n = readushort(f)
-                if n > 0 then
+                if n == 0 then
+                    local k = readmathvalue(f)
+                    if k == 0 then
+                        -- no need for it (happens sometimes)
+                    else
+                        return { { kern = k } }
+                    end
+                else
                     local l = { }
-                 -- for i=1,n do
-                 --     l[i] = { readushort(f), 0 } -- height, kern
-                 --     skipshort(f)
-                 -- end
-                 -- for i=1,n do
-                 --     l[i][2] = readushort(f)
-                 --     skipshort(f)
-                 -- end
                     for i=1,n do
                         l[i] = { height = readmathvalue(f) }
                     end
@@ -2071,10 +2072,10 @@ local function readmathglyphinfo(f,fontdata,offset)
                     if next(kernset) then
                         local glyph = glyphs[coverage[i]]
                         local math  = glyph.math
-                        if not math then
-                            glyph.math = { kerns = kernset }
-                        else
+                        if math then
                             math.kerns = kernset
+                        else
+                            glyph.math = { kerns = kernset }
                         end
                     end
                 end

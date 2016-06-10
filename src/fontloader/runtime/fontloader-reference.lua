@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 05/22/16 15:18:33
+-- merge date  : 05/31/16 09:02:55
 
 do -- begin closure to overcome local limits and interference
 
@@ -5286,6 +5286,19 @@ function constructors.enhanceparameters(parameters)
     extra=extra,
   }
 end
+local function mathkerns(v,vdelta)
+  local k={}
+  for i=1,#v do
+    local entry=v[i]
+    local height=entry.height
+    local kern=entry.kern
+    k[i]={
+      height=height and vdelta*height or 0,
+      kern=kern  and vdelta*kern  or 0,
+    }
+  end
+  return k
+end
 function constructors.scale(tfmdata,specification)
   local target={}
   if tonumber(specification) then
@@ -5624,22 +5637,15 @@ function constructors.scale(tfmdata,specification)
         chr.top_accent=vdelta*va
       end
       if stackmath then
-        local mk=character.mathkerns 
+        local mk=character.mathkerns
         if mk then
-          local kerns={}
-          local v=mk.top_right  if v then local k={} for i=1,#v do local vi=v[i]
-            k[i]={ height=vdelta*vi.height,kern=vdelta*vi.kern }
-          end   kerns.top_right=k end
-          local v=mk.top_left   if v then local k={} for i=1,#v do local vi=v[i]
-            k[i]={ height=vdelta*vi.height,kern=vdelta*vi.kern }
-          end   kerns.top_left=k end
-          local v=mk.bottom_left if v then local k={} for i=1,#v do local vi=v[i]
-            k[i]={ height=vdelta*vi.height,kern=vdelta*vi.kern }
-          end   kerns.bottom_left=k end
-          local v=mk.bottom_right if v then local k={} for i=1,#v do local vi=v[i]
-            k[i]={ height=vdelta*vi.height,kern=vdelta*vi.kern }
-          end   kerns.bottom_right=k end
-          chr.mathkern=kerns 
+          local tr,tl,br,bl=mk.topright,mk.topleft,mk.bottomright,mk.bottomleft
+          chr.mathkern={ 
+            top_right=tr and mathkerns(tr,vdelta) or nil,
+            top_left=tl and mathkerns(tl,vdelta) or nil,
+            bottom_right=br and mathkerns(br,vdelta) or nil,
+            bottom_left=bl and mathkerns(bl,vdelta) or nil,
+          }
         end
       end
       if hasitalics then
@@ -11953,6 +11959,13 @@ do
       end
     end
     local reported={}
+    local function report_issue(i,what,sequence,kind)
+      local name=sequence.name
+      if not reported[name] then
+        report("rule %i in %s lookup %a has %s lookups",i,what,name,kind)
+        reported[name]=true
+      end
+    end
     for i=lastsequence+1,nofsequences do
       local sequence=sequences[i]
       local steps=sequence.steps
@@ -11964,37 +11977,42 @@ do
             local rule=rules[i]
             local rlookups=rule.lookups
             if not rlookups then
-              local name=sequence.name
-              if not reported[name] then
-                report("rule %i in %s lookup %a has %s lookups",i,what,name,"no")
-                reported[name]=true
-              end
+              report_issue(i,what,sequence,"no")
             elseif not next(rlookups) then
-              local name=sequence.name
-              if not reported[name] then
-                report("rule %i in %s lookup %a has %s lookups",i,what,name,"empty")
-                reported[name]=true
-              end
+              report_issue(i,what,sequence,"empty")
               rule.lookups=nil
             else
               for index,lookupid in sortedhash(rlookups) do 
                 local h=sublookuphash[lookupid]
                 if not h then
-                  nofsublookups=nofsublookups+1
-                  local d=lookups[lookupid].done
-                  h={
-                    index=nofsublookups,
-                    name=f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
-                    derived=true,
-                    steps=d.steps,
-                    nofsteps=d.nofsteps,
-                    type=d.lookuptype,
-                    markclass=d.markclass or nil,
-                    flags=d.flags,
-                  }
-                  sublookuplist[nofsublookups]=h
-                  sublookuphash[lookupid]=nofsublookups
-                  sublookupcheck[lookupid]=1
+                  local lookup=lookups[lookupid]
+                  if lookup then
+                    local d=lookup.done
+                    if d then
+                      nofsublookups=nofsublookups+1
+                      h={
+                        index=nofsublookups,
+                        name=f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
+                        derived=true,
+                        steps=d.steps,
+                        nofsteps=d.nofsteps,
+                        type=d.lookuptype,
+                        markclass=d.markclass or nil,
+                        flags=d.flags,
+                      }
+                      sublookuplist[nofsublookups]=h
+                      sublookuphash[lookupid]=nofsublookups
+                      sublookupcheck[lookupid]=1
+                    else
+                      report_issue(i,what,sequence,"missing")
+                      rule.lookups=nil
+                      break
+                    end
+                  else
+                    report_issue(i,what,sequence,"bad")
+                    rule.lookups=nil
+                    break
+                  end
                 else
                   sublookupcheck[lookupid]=sublookupcheck[lookupid]+1
                 end
@@ -12335,7 +12353,13 @@ local function readmathglyphinfo(f,fontdata,offset)
       local function get(offset)
         setposition(f,kernoffset+offset)
         local n=readushort(f)
-        if n>0 then
+        if n==0 then
+          local k=readmathvalue(f)
+          if k==0 then
+          else
+            return { { kern=k } }
+          end
+        else
           local l={}
           for i=1,n do
             l[i]={ height=readmathvalue(f) }
@@ -12371,10 +12395,10 @@ local function readmathglyphinfo(f,fontdata,offset)
           if next(kernset) then
             local glyph=glyphs[coverage[i]]
             local math=glyph.math
-            if not math then
-              glyph.math={ kerns=kernset }
-            else
+            if math then
               math.kerns=kernset
+            else
+              glyph.math={ kerns=kernset }
             end
           end
         end
@@ -14508,7 +14532,7 @@ local trace_defining=false registertracker("fonts.defining",function(v) trace_de
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.020 
+otf.version=3.021 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 local otfreaders=otf.readers
 local hashes=fonts.hashes
@@ -16147,7 +16171,7 @@ local function inject_pairs_only(head,where)
             end
             local leftkern=i.leftkern
             if leftkern and leftkern~=0 then
-              insert_node_before(head,current,newkern(leftkern))
+              head=insert_node_before(head,current,newkern(leftkern))
             end
             local rightkern=i.rightkern
             if rightkern and rightkern~=0 then
@@ -16808,10 +16832,19 @@ function injections.handler(head,where)
     head=injectspaces(head)
   end
   if nofregisteredmarks>0 or nofregisteredcursives>0 then
+    if trace_injections then
+      report_injections("injection variant %a","everything")
+    end
     return inject_everything(head,where)
   elseif nofregisteredpairs>0 then
+    if trace_injections then
+      report_injections("injection variant %a","pairs")
+    end
     return inject_pairs_only(head,where)
   elseif nofregisteredkerns>0 then
+    if trace_injections then
+      report_injections("injection variant %a","kerns")
+    end
     return inject_kerns_only(head,where)
   else
     return head,false

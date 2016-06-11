@@ -1296,8 +1296,9 @@ local report_otf          = logs.reporter("fonts","otf loading")
 
 --- start locals for addfeature()
 
-local utfbyte = unicode.utf8.byte
-local utfchar = unicode.utf8.char
+local utf8    = unicode.utf8
+local utfbyte = utf8.byte
+local utflen  = utf8.len
 
 local otf = handlers and handlers.otf --- filled in later during initialization
 

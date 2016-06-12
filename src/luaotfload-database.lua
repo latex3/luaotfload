@@ -1396,7 +1396,6 @@ local get_raw_info = function (metadata, basename)
     local fontname = metadata.fontname
     local fullname = metadata.fullname
 
-    local validation_state = metadata.validation_state
     if not fontname or not fullname then
         --- Broken names table, e.g. avkv.ttf with UTF-16 strings;
         --- we put some dummies in place like the fontloader
@@ -1404,7 +1403,8 @@ local get_raw_info = function (metadata, basename)
         logreport ("both", 3, "db",
                    "Invalid names table of font %s, using dummies. \z
                     Reported: fontname=%q, fullname=%q.",
-                   basename, fontname, fullname)
+                   tostring (basename), tostring (fontname),
+                   tostring (fullname))
         fontname = "bad-fontname-" .. basename
         fullname = "bad-fullname-" .. basename
     end

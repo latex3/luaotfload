@@ -23,12 +23,12 @@ local readers                  = fonts.readers
 local constructors             = fonts.constructors
 local encodings                = fonts.encodings
 
-local tfm                      = constructors.newhandler("tfm")
+local tfm                      = constructors.handlers.tfm
 tfm.version                    = 1.000
 tfm.maxnestingdepth            = 5
 tfm.maxnestingsize             = 65536*1024
 
-local tfmfeatures              = constructors.newfeatures("tfm")
+local tfmfeatures              = constructors.features.tfm
 ----- registertfmfeature       = tfmfeatures.register
 
 constructors.resolvevirtualtoo = false -- wil be set in font-ctx.lua

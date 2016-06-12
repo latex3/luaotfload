@@ -132,6 +132,10 @@ local wildcard = "*"
 
 -- needs checking: some added features can pass twice
 
+local P, C, Cc, lpegmatch = lpeg.P, lpeg.C, lpeg.Cc, lpeg.match
+
+local pattern = P("always") * (P(-1) * Cc(true) + P(":") * C((1-P(-1))^1))
+
 local function initialize(sequence,script,language,s_enabled,a_enabled,font,attr,dynamic,ra,autoscript,autolanguage)
     local features = sequence.features
     if features then
@@ -148,21 +152,34 @@ local function initialize(sequence,script,language,s_enabled,a_enabled,font,attr
                     e_e = s_enabled and s_enabled[kind] -- the value (font)
                 end
                 if e_e then
-                    local scripts = features[kind] --
-                    local languages = scripts[script] or scripts[wildcard]
-                    if not languages and autoscript then
-                        langages = defaultscript(featuretype,autoscript,scripts)
-                    end
-                    if languages then
-                        -- we need detailed control over default becase we want to trace
-                        -- only first attribute match check, so we assume simple fina's
-                        local valid = false
-                        if languages[language] then
-                            valid = e_e
-                        elseif languages[wildcard] then
-                            valid = e_e
-                        elseif autolanguage and defaultlanguage(featuretype,autolanguage,languages) then
-                            valid = e_e
+                    local valid = type(e_e) == "string" and lpegmatch(pattern,e_e)
+                    if valid then
+                        -- we have hit always
+                        local attribute = autofeatures[kind] or false
+                        if trace_applied then
+                            report_process(
+                                "font %s, dynamic %a (%a), feature %a, script %a, language %a, lookup %a, value %a",
+                                    font,attr or 0,dynamic,kind,"*","*",sequence.name,valid)
+                        end
+                        ra[#ra+1] = { valid, attribute, sequence, kind }
+                    else
+                        -- we already checked for e_e
+                        local scripts   = features[kind] --
+                        local languages = scripts[script] or scripts[wildcard]
+                        if not languages and autoscript then
+                            langages = defaultscript(featuretype,autoscript,scripts)
+                        end
+                        if languages then
+                            -- we need detailed control over default becase we want to trace
+                            -- only first attribute match check, so we assume simple fina's
+                         -- local valid = false
+                            if languages[language] then
+                                valid = e_e
+                            elseif languages[wildcard] then
+                                valid = e_e
+                            elseif autolanguage and defaultlanguage(featuretype,autolanguage,languages) then
+                                valid = e_e
+                            end
                         end
                         if valid then
                             local attribute = autofeatures[kind] or false
@@ -241,6 +258,7 @@ function otf.dataset(tfmdata,font,attr) -- attr only when explicit (as in specia
             local autoscript   = (s_enabled and s_enabled.autoscript  ) or (a_enabled and a_enabled.autoscript  )
             local autolanguage = (s_enabled and s_enabled.autolanguage) or (a_enabled and a_enabled.autolanguage)
             for s=1,#sequences do
+                -- just return nil or ra step
                 initialize(sequences[s],script,language,s_enabled,a_enabled,font,attr,dynamic,ra,autoscript,autolanguage)
             end
         end

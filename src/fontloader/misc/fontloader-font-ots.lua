@@ -124,7 +124,7 @@ local trace_cursive      = false  registertracker("otf.cursive",      function(v
 local trace_preparing    = false  registertracker("otf.preparing",    function(v) trace_preparing    = v end)
 local trace_bugs         = false  registertracker("otf.bugs",         function(v) trace_bugs         = v end)
 local trace_details      = false  registertracker("otf.details",      function(v) trace_details      = v end)
-local trace_applied      = false  registertracker("otf.applied",      function(v) trace_applied      = v end)
+----- trace_applied      = false  registertracker("otf.applied",      function(v) trace_applied      = v end)
 local trace_steps        = false  registertracker("otf.steps",        function(v) trace_steps        = v end)
 local trace_skips        = false  registertracker("otf.skips",        function(v) trace_skips        = v end)
 local trace_directions   = false  registertracker("otf.directions",   function(v) trace_directions   = v end)
@@ -239,7 +239,7 @@ local cursonce           = true
 local fonthashes         = fonts.hashes
 local fontdata           = fonthashes.identifiers
 
-local otffeatures        = fonts.constructors.newfeatures("otf")
+local otffeatures        = fonts.constructors.features.otf
 local registerotffeature = otffeatures.register
 
 local onetimemessage     = fonts.loggers.onetimemessage or function() end
@@ -3389,9 +3389,13 @@ local function featuresprocessor(head,font,attr)
 
     end
 
-    if attr == 0 then
-        attr = false -- some 10% faster when no dynamics but hardly measureable on real runs
-    end
+    -- some 10% faster when no dynamics but hardly measureable on real runs .. but: it only
+    -- works when we have no other dynamics as otherwise the zero run will be applied to the
+    -- whole stream for which we then need to pass another variable which we won't
+
+    -- if attr == 0 then
+    --     attr = false
+    -- end
 
     head = tonut(head)
 
@@ -3484,7 +3488,6 @@ local function featuresprocessor(head,font,attr)
             local start = head -- local ?
             rlmode = 0 -- to be checked ?
             if nofsteps == 1 then -- happens often
-
                 local step = steps[1]
                 local lookupcache = step.coverage
                 if not lookupcache then

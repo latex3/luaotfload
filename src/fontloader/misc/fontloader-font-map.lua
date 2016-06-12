@@ -139,7 +139,7 @@ local f_double = formatters["%04X%04X"]
 --     end
 -- end
 
-local function tounicode16(unicode,name)
+local function tounicode16(unicode)
     if unicode < 0xD7FF or (unicode > 0xDFFF and unicode <= 0xFFFF) then
         return f_single(unicode)
     else
@@ -148,7 +148,7 @@ local function tounicode16(unicode,name)
     end
 end
 
-local function tounicode16sequence(unicodes,name)
+local function tounicode16sequence(unicodes)
     local t = { }
     for l=1,#unicodes do
         local u = unicodes[l]

@@ -12,7 +12,7 @@ if context then
 end
 
 local fonts       = fonts
-local otffeatures = fonts.constructors.newfeatures("otf")
+local otffeatures = fonts.constructors.features.otf
 
 -- A few generic extensions.
 

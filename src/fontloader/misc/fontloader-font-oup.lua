@@ -707,6 +707,19 @@ local function unifyglyphs(fontdata,usenames)
         end
     end
     --
+    local colorpalettes = resources.colorpalettes
+    if colorpalettes then
+        for index=1,#glyphs do
+            local colors = glyphs[index].colors
+            if colors then
+                for i=1,#colors do
+                    local c = colors[i]
+                    c.slot = indices[c.slot]
+                end
+            end
+        end
+    end
+    --
     fontdata.private      = private
     fontdata.glyphs       = nil
     fontdata.names        = names
@@ -1159,6 +1172,7 @@ function readers.pack(data)
         local sequences  = resources.sequences
         local sublookups = resources.sublookups
         local features   = resources.features
+        local palettes   = resources.colorpalettes
 
         local chardata     = characters and characters.data
         local descriptions = data.descriptions or data.glyphs
@@ -1191,6 +1205,14 @@ function readers.pack(data)
                         end
                     end
                 end
+             -- if palettes then
+             --     local color = description.color
+             --     if color then
+             --         for i=1,#color do
+             --             color[i] = pack_normal(color[i])
+             --         end
+             --     end
+             -- end
             end
 
             local function packthem(sequences)
@@ -1313,6 +1335,16 @@ function readers.pack(data)
                         list[feature] = pack_normal(spec)
                     end
                 end
+            end
+
+            if palettes then
+                for i=1,#palettes do
+                    local p = palettes[i]
+                    for j=1,#p do
+                        p[j] = pack_indexed(p[j])
+                    end
+                end
+
             end
 
             if not success(1,pass) then
@@ -1462,6 +1494,7 @@ function readers.unpack(data)
             local sequences    = resources.sequences
             local sublookups   = resources.sublookups
             local features     = resources.features
+            local palettes     = resources.colorpalettes
             local unpacked     = { }
             setmetatable(unpacked,unpacked_mt)
             for unicode, description in next, descriptions do
@@ -1488,6 +1521,17 @@ function readers.unpack(data)
                         end
                     end
                 end
+             -- if palettes then
+             --     local color = description.color
+             --     if color then
+             --         for i=1,#color do
+             --             local tv = tables[color[i]]
+             --             if tv then
+             --                 color[i] = tv
+             --             end
+             --         end
+             --     end
+             -- end
             end
 
             local function unpackthem(sequences)
@@ -1712,6 +1756,18 @@ function readers.unpack(data)
                         local tv = tables[spec]
                         if tv then
                             list[feature] = tv
+                        end
+                    end
+                end
+            end
+
+            if palettes then
+                for i=1,#palettes do
+                    local p = palettes[i]
+                    for j=1,#p do
+                        local tv = tables[p[j]]
+                        if tv then
+                            p[j] = tv
                         end
                     end
                 end

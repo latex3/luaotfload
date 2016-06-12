@@ -53,8 +53,12 @@ local report_otf         = logs.reporter("fonts","otf loading")
 local fonts              = fonts
 local otf                = fonts.handlers.otf
 
-otf.version              = 3.021 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version              = 3.022 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                = containers.define("fonts", "otl", otf.version, true)
+otf.svgcache             = containers.define("fonts", "svg", otf.version, true)
+otf.pdfcache             = containers.define("fonts", "pdf", otf.version, true)
+
+otf.svgenabled           = false
 
 local otfreaders         = otf.readers
 
@@ -63,7 +67,7 @@ local definers           = fonts.definers
 local readers            = fonts.readers
 local constructors       = fonts.constructors
 
-local otffeatures        = constructors.newfeatures("otf")
+local otffeatures        = constructors.features.otf
 local registerotffeature = otffeatures.register
 
 local enhancers          = allocate()
@@ -270,6 +274,25 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
         --
         --
         if data then
+            --
+            local resources = data.resources
+            local svgshapes = resources.svgshapes
+            if svgshapes then
+                resources.svgshapes = nil
+                if otf.svgenabled then
+                    local timestamp = os.date()
+                    -- work in progress ... a bit boring to do
+                    containers.write(otf.svgcache,hash, {
+                        svgshapes = svgshapes,
+                        timestamp = timestamp,
+                    })
+                    data.properties.svg = {
+                        hash      = hash,
+                        timestamp = timestamp,
+                    }
+                end
+            end
+            --
             otfreaders.compact(data)
             otfreaders.rehash(data,"unicodes")
             otfreaders.addunicodetable(data)
@@ -346,7 +369,6 @@ end
 local function copytotfm(data,cache_id)
     if data then
         local metadata       = data.metadata
-        local resources      = data.resources
         local properties     = derivetable(data.properties)
         local descriptions   = derivetable(data.descriptions)
         local goodies        = derivetable(data.goodies)

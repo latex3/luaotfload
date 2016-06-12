@@ -24,6 +24,8 @@ if not modules then modules = { } end modules ['font-otj'] = {
 -- The use_advance code is just a test and is meant for testing and manuals. There is no
 -- performance (or whatever) gain and using kerns is somewhat cleaner (at least for now).
 
+-- Maybe: subtype fontkern when pure kerns.
+
 if not nodes.properties then return end
 
 local next, rawget = next, rawget

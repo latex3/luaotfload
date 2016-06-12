@@ -55,7 +55,7 @@ local fontdata            = fonts.hashes.identifiers
 local categories          = characters and characters.categories or { } -- sorry, only in context
 local chardata            = characters and characters.data
 
-local otffeatures         = fonts.constructors.newfeatures("otf")
+local otffeatures         = fonts.constructors.features.otf
 local registerotffeature  = otffeatures.register
 
 --[[ldx--

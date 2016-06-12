@@ -45,14 +45,14 @@ local definers           = fonts.definers
 local readers            = fonts.readers
 local constructors       = fonts.constructors
 
-local afm                = constructors.newhandler("afm")
-local pfb                = constructors.newhandler("pfb")
+local afm                = constructors.handlers.afm
+local pfb                = constructors.handlers.pfb
 local otf                = fonts.handlers.otf
 
 local otfreaders         = otf.readers
 local otfenhancers       = otf.enhancers
 
-local afmfeatures        = constructors.newfeatures("afm")
+local afmfeatures        = constructors.features.afm
 local registerafmfeature = afmfeatures.register
 
 afm.version              = 1.512 -- incrementing this number one up will force a re-cache

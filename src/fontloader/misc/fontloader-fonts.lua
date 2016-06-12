@@ -186,6 +186,7 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule("l-file.lua")
         loadmodule("l-boolean.lua")
         loadmodule("l-math.lua")
+        loadmodule("l-unicode.lua")
 
         -- A few slightly higher level support modules:
 
@@ -257,6 +258,7 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule('font-ota.lua')
         loadmodule('font-ots.lua')
         loadmodule('font-osd.lua')
+        loadmodule('font-ocl.lua') -- svg needs 0.97 (for fix in memstreams)
 
         -- type one code
 

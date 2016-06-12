@@ -1298,23 +1298,29 @@ find_closest = function (name, limit)
     return false
 end --- find_closest()
 
+--- string -> uint -> bool * (string | rawdata)
 local read_font_file = function (filename, subfont)
-    return otfhandler.readers.getinfo (filename,
-                                       { subfont        = subfont
-                                       , details        = false
-                                       , platformnames  = true
-                                       , rawfamilynames = true
-                                       })
+    local fontdata = otfhandler.readers.getinfo (filename,
+                                                 { subfont        = subfont
+                                                 , details        = false
+                                                 , platformnames  = true
+                                                 , rawfamilynames = true
+                                                 })
+    local msg = fontdata.comment
+    if msg then
+        return false, msg
+    end
+    return true, fontdata
 end
 
 local load_font_file = function (filename, subfont)
-    local rawfont, _msg = read_font_file (filename, subfont)
-
-    if not rawfont then
-        logreport ("log", 1, "db", "ERROR: failed to open %s.", filename)
+    local err, ret = read_font_file (filename, subfont)
+    if err == false then
+        logreport ("both", 1, "db", "ERROR: failed to open %q: %q.",
+                   tostring (filename), tostring (ret))
         return
     end
-    return rawfont
+    return ret
 end
 
 --- rawdata -> (int * int * int | bool)
@@ -1773,11 +1779,12 @@ local read_font_names = function (fullname,
 
     --- 4) get basic info, abort if fontloader can’t read it
 
-    local info = read_font_file (fullname)
+    local err, info = read_font_file (fullname)
 
-    if not info then
+    if err == false then
         logreport ("log", 1, "db",
-                   "Failed to read basic information from %q", basename)
+                   "Failed to read basic information from %q: %q",
+                    basename, tostring (info))
         return false
     end
 

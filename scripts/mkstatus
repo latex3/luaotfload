@@ -113,6 +113,7 @@ local names = {
   { miscdir,      "fontloader-font-ota.lua",        },
   { miscdir,      "fontloader-font-ots.lua",        },
   { miscdir,      "fontloader-font-osd.lua",        },
+  { miscdir,      "fontloader-font-ocl.lua",        },
 
   --- lua libraries
   { miscdir,      "fontloader-languages.lua",       },

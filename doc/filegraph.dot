@@ -385,6 +385,9 @@ strict digraph luaotfload_files { //looks weird with circo ...
                     <td>font-xtx.lua</td>
                     <td>font-gbn.lua</td>
                 </tr>
+                <tr>
+                    <td>font-ocl.lua</td>
+                </tr>
             </table>
         >,
     ]

@@ -228,7 +228,6 @@ local imports = {
   context = { --=> all merged
     { name = "data-con"          , ours = "data-con"          , kind = kind_merged    },
     { name = "font-afk"          , ours = "font-afk"          , kind = kind_merged    },
-    { name = "font-afm"          , ours = "font-afm"          , kind = kind_merged    },
     { name = "font-cff"          , ours = "font-cff"          , kind = kind_merged    },
     { name = "font-cid"          , ours = "font-cid"          , kind = kind_merged    },
     { name = "font-con"          , ours = "font-con"          , kind = kind_merged    },
@@ -238,6 +237,9 @@ local imports = {
     { name = "font-ini"          , ours = "font-ini"          , kind = kind_merged    },
     { name = "font-lua"          , ours = "font-lua"          , kind = kind_merged    },
     { name = "font-map"          , ours = "font-map"          , kind = kind_merged    },
+    { name = "font-ocl"          , ours = "font-ocl"          , kind = kind_merged    },
+    { name = "font-onr"          , ours = "font-onr"          , kind = kind_merged    },
+    { name = "font-one"          , ours = "font-one"          , kind = kind_merged    },
     { name = "font-osd"          , ours = "font-osd"          , kind = kind_merged    },
     { name = "font-ota"          , ours = "font-ota"          , kind = kind_merged    },
     { name = "font-otd"          , ours = "font-otd"          , kind = kind_merged    },
@@ -294,25 +296,27 @@ local package = {
 ---   [20] font-map.lua
 ---   [21] luatex-fonts-syn.lua
 ---   [22] font-tfm.lua
----   [23] font-afm.lua
----   [24] font-afk.lua
----   [25] font-oti.lua
----   [26] font-otr.lua
----   [27] font-cff.lua
----   [28] font-ttf.lua
----   [29] font-dsp.lua
----   [30] font-oup.lua
----   [31] font-otl.lua
----   [32] font-oto.lua
----   [33] font-otj.lua
----   [34] font-ota.lua
----   [35] font-ots.lua
----   [36] font-osd.lua
----   [37] font-lua.lua
----   [38] font-def.lua
----   [39] font-xtx.lua
----   [40] luatex-fonts-ext.lua
----   [41] font-gbn.lua
+---   [23] font-oti.lua
+---   [24] font-otr.lua
+---   [25] font-cff.lua
+---   [26] font-ttf.lua
+---   [27] font-dsp.lua
+---   [28] font-oup.lua
+---   [29] font-otl.lua
+---   [30] font-oto.lua
+---   [31] font-otj.lua
+---   [32] font-ota.lua
+---   [33] font-ots.lua
+---   [34] font-osd.lua
+---   [35] font-ocl.lua
+---   [36] font-onr.lua
+---   [37] font-one.lua
+---   [38] font-afk.lua
+---   [39] font-lua.lua
+---   [40] font-def.lua
+---   [41] font-xtx.lua
+---   [42] luatex-fonts-ext.lua
+---   [43] font-gbn.lua
 ---
 --- Of these, nos. 01--11 are provided by the Lualibs. Keeping them
 --- around in the Luaotfload fontloader is therefore unnecessary.
@@ -358,8 +362,6 @@ local package = {
     "font-map",
     "fonts-syn",
     "font-tfm",
-    "font-afm",
-    "font-afk",
     "font-oti",
     "font-otr",
     "font-cff",
@@ -372,6 +374,10 @@ local package = {
     "font-ota",
     "font-ots",
     "font-osd",
+    "font-ocl",
+    "font-onr",
+    "font-one",
+    "font-afk",
     "font-lua",
     "font-def",
     "fonts-ext",

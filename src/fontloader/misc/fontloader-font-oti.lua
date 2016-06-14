@@ -11,8 +11,8 @@ local lower = string.lower
 local fonts              = fonts
 local constructors       = fonts.constructors
 
-local otf                = constructors.newhandler("otf")
-local otffeatures        = constructors.newfeatures("otf")
+local otf                = constructors.handlers.otf
+local otffeatures        = constructors.features.otf
 local registerotffeature = otffeatures.register
 
 local otftables          = otf.tables or { }

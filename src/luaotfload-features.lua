@@ -1122,7 +1122,6 @@ local import_values = {
     -- "style", "optsize",--> from slashed notation; handled otherwise
     { "lookup", false },
     { "sub",    false },
-    { "mode",   true },
 }
 
 local lookup_types = { "anon"  , "file", "kpse"
@@ -1221,8 +1220,14 @@ local handle_request = function (specification)
     request.features = apply_default_features(request.features)
 
     if name then
-        specification.name    = name
-        specification.lookup  = lookup or specification.lookup
+        if lookup == "file" then
+            local suffix = file.suffix (name)
+            specification.forcedname = name
+            specification.forced     = suffix
+            name                     = file.removesuffix (name)
+        end
+        specification.name     = name
+        specification.lookup   = lookup or specification.lookup
     end
 
     if request.modifiers then
@@ -1245,7 +1250,12 @@ local handle_request = function (specification)
     --- The next line sets the “rand” feature to “random”; I haven’t
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.
-    specification.features.normal = normalize (request.features)
+    local features = specification.features
+    if not features then
+        features = { }
+        specification.features = features
+    end
+    features.normal = normalize (request.features)
     local subfont = tonumber (specification.sub)
     if subfont and subfont >= 0 then
         specification.sub = subfont + 1
@@ -1253,8 +1263,9 @@ local handle_request = function (specification)
     return specification
 end
 
+fonts.names.handle_request = handle_request
+
 if as_script == true then --- skip the remainder of the file
-    fonts.names.handle_request = handle_request
     report ("log", 5, "features",
             "Exiting early from luaotfload-features.lua.")
     return
@@ -1285,8 +1296,9 @@ local report_otf          = logs.reporter("fonts","otf loading")
 
 --- start locals for addfeature()
 
-local utfbyte = unicode.utf8.byte
-local utfchar = unicode.utf8.char
+local utf8    = unicode.utf8
+local utfbyte = utf8.byte
+local utflen  = utf8.len
 
 local otf = handlers and handlers.otf --- filled in later during initialization
 
@@ -1330,15 +1342,15 @@ local function current_addfeature(data,feature,specifications)
     if not features or not sequences then
         return
     end
-    local gsubfeatures = features.gsub
-    if gsubfeatures and gsubfeatures[feature] then
-        return -- already present
-    end
+    -- feature has to be unique but the name entry wins eventually
+
     local fontfeatures = resources.features or everywhere
     local unicodes     = resources.unicodes
     local splitter     = lpeg.splitter(" ",unicodes)
     local done         = 0
     local skip         = 0
+    local aglunicodes  = false
+
     if not specifications[1] then
         -- so we accept a one entry specification
         specifications = { specifications }
@@ -1347,11 +1359,24 @@ local function current_addfeature(data,feature,specifications)
     local function tounicode(code)
         if not code then
             return
-        elseif type(code) == "number" then
-            return code
-        else
-            return unicodes[code] or utfbyte(code)
         end
+        if type(code) == "number" then
+            return code
+        end
+        local u = unicodes[code]
+        if u then
+            return u
+        end
+        if utflen(code) == 1 then
+            u = utfbyte(code)
+            if u then
+                return u
+            end
+        end
+        if not aglunicodes then
+            aglunicodes = fonts.encodings.agl.unicodes -- delayed
+        end
+        return aglunicodes[code]
     end
 
     local coverup      = otf.coverup
@@ -1359,9 +1384,281 @@ local function current_addfeature(data,feature,specifications)
     local stepkey      = coverup.stepkey
     local register     = coverup.register
 
+    local function prepare_substitution(list,featuretype)
+        local coverage = { }
+        local cover    = coveractions[featuretype]
+        for code, replacement in next, list do
+            local unicode     = tounicode(code)
+            local description = descriptions[unicode]
+            if description then
+                if type(replacement) == "table" then
+                    replacement = replacement[1]
+                end
+                replacement = tounicode(replacement)
+                if replacement and descriptions[replacement] then
+                    cover(coverage,unicode,replacement)
+                    done = done + 1
+                else
+                    skip = skip + 1
+                end
+            else
+                skip = skip + 1
+            end
+        end
+        return coverage
+    end
+
+    local function prepare_alternate(list,featuretype)
+        local coverage = { }
+        local cover    = coveractions[featuretype]
+        for code, replacement in next, list do
+            local unicode     = tounicode(code)
+            local description = descriptions[unicode]
+            if not description then
+                skip = skip + 1
+            elseif type(replacement) == "table" then
+                local r = { }
+                for i=1,#replacement do
+                    local u = tounicode(replacement[i])
+                    r[i] = descriptions[u] and u or unicode
+                end
+                cover(coverage,unicode,r)
+                done = done + 1
+            else
+                local u = tounicode(replacement)
+                if u then
+                    cover(coverage,unicode,{ u })
+                    done = done + 1
+                else
+                    skip = skip + 1
+                end
+            end
+        end
+        return coverage
+    end
+
+    local function prepare_multiple(list,featuretype)
+        local coverage = { }
+        local cover    = coveractions[featuretype]
+        for code, replacement in next, list do
+            local unicode     = tounicode(code)
+            local description = descriptions[unicode]
+            if not description then
+                skip = skip + 1
+            elseif type(replacement) == "table" then
+                local r, n = { }, 0
+                for i=1,#replacement do
+                    local u = tounicode(replacement[i])
+                    if descriptions[u] then
+                        n = n + 1
+                        r[n] = u
+                    end
+                end
+                if n > 0 then
+                    cover(coverage,unicode,r)
+                    done = done + 1
+                else
+                    skip = skip + 1
+                end
+            else
+                local u = tounicode(replacement)
+                if u then
+                    cover(coverage,unicode,{ u })
+                    done = done + 1
+                else
+                    skip = skip + 1
+                end
+            end
+        end
+        return coverage
+    end
+
+    local function prepare_ligature(list,featuretype)
+        local coverage = { }
+        local cover    = coveractions[featuretype]
+        for code, ligature in next, list do
+            local unicode     = tounicode(code)
+            local description = descriptions[unicode]
+            if description then
+                if type(ligature) == "string" then
+                    ligature = { lpegmatch(splitter,ligature) }
+                end
+                local present = true
+                for i=1,#ligature do
+                    local l = ligature[i]
+                    local u = tounicode(l)
+                    if descriptions[u] then
+                        ligature[i] = u
+                    else
+                        present = false
+                        break
+                    end
+                end
+                if present then
+                    cover(coverage,unicode,ligature)
+                    done = done + 1
+                else
+                    skip = skip + 1
+                end
+            else
+                skip = skip + 1
+            end
+        end
+        return coverage
+    end
+
+    local function prepare_kern(list,featuretype)
+        local coverage = { }
+        local cover    = coveractions[featuretype]
+        for code, replacement in next, list do
+            local unicode     = tounicode(code)
+            local description = descriptions[unicode]
+            if description and type(replacement) == "table" then
+                local r = { }
+                for k, v in next, replacement do
+                    local u = tounicode(k)
+                    if u then
+                        r[u] = v
+                    end
+                end
+                if next(r) then
+                    cover(coverage,unicode,r)
+                    done = done + 1
+                else
+                    skip = skip + 1
+                end
+            else
+                skip = skip + 1
+            end
+        end
+        return coverage
+    end
+
+    local function prepare_pair(list,featuretype)
+        local coverage = { }
+        local cover    = coveractions[featuretype]
+        if cover then
+            for code, replacement in next, list do
+                local unicode     = tounicode(code)
+                local description = descriptions[unicode]
+                if description and type(replacement) == "table" then
+                    local r = { }
+                    for k, v in next, replacement do
+                        local u = tounicode(k)
+                        if u then
+                            r[u] = v
+                        end
+                    end
+                    if next(r) then
+                        cover(coverage,unicode,r)
+                        done = done + 1
+                    else
+                        skip = skip + 1
+                    end
+                else
+                    skip = skip + 1
+                end
+            end
+        else
+            report_otf("unknown cover type %a",featuretype)
+        end
+        return coverage
+    end
+
+    local function prepare_chain(list,featuretype,sublookups)
+        -- todo: coveractions
+        local rules    = list.rules
+        local coverage = { }
+        if rules then
+            local rulehash     = { }
+            local rulesize     = 0
+            local sequence     = { }
+            local nofsequences = 0
+            local lookuptype   = types[featuretype]
+            for nofrules=1,#rules do
+                local rule         = rules[nofrules]
+                local current      = rule.current
+                local before       = rule.before
+                local after        = rule.after
+                local replacements = rule.replacements or false
+                local sequence     = { }
+                local nofsequences = 0
+                if before then
+                    for n=1,#before do
+                        nofsequences = nofsequences + 1
+                        sequence[nofsequences] = before[n]
+                    end
+                end
+                local start = nofsequences + 1
+                for n=1,#current do
+                    nofsequences = nofsequences + 1
+                    sequence[nofsequences] = current[n]
+                end
+                local stop = nofsequences
+                if after then
+                    for n=1,#after do
+                        nofsequences = nofsequences + 1
+                        sequence[nofsequences] = after[n]
+                    end
+                end
+                local lookups = rule.lookups or false
+                local subtype = nil
+                if lookups and sublookups then
+                    for k, v in next, lookups do
+                        local lookup = sublookups[v]
+                        if lookup then
+                            lookups[k] = lookup
+                            if not subtype then
+                                subtype = lookup.type
+                            end
+                        else
+                            -- already expanded
+                        end
+                    end
+                end
+                if nofsequences > 0 then -- we merge coverage into one
+                    -- we copy as we can have different fonts
+                    local hashed = { }
+                    for i=1,nofsequences do
+                        local t = { }
+                        local s = sequence[i]
+                        for i=1,#s do
+                            local u = tounicode(s[i])
+                            if u then
+                                t[u] = true
+                            end
+                        end
+                        hashed[i] = t
+                    end
+                    sequence = hashed
+                    -- now we create the rule
+                    rulesize = rulesize + 1
+                    rulehash[rulesize] = {
+                        nofrules,     -- 1
+                        lookuptype,   -- 2
+                        sequence,     -- 3
+                        start,        -- 4
+                        stop,         -- 5
+                        lookups,      -- 6 (6/7 also signal of what to do)
+                        replacements, -- 7
+                        subtype,      -- 8
+                    }
+                    for unic in next, sequence[start] do
+                        local cu = coverage[unic]
+                        if not cu then
+                            coverage[unic] = rulehash -- can now be done cleaner i think
+                        end
+                    end
+                end
+            end
+        end
+        return coverage
+    end
+
     for s=1,#specifications do
         local specification = specifications[s]
         local valid         = specification.valid
+        local feature       = specification.name or feature
         if not valid or valid(data,specification,feature) then
             local initialize = specification.initialize
             if initialize then
@@ -1369,185 +1666,133 @@ local function current_addfeature(data,feature,specifications)
                 specification.initialize = initialize(specification,data) and initialize or nil
             end
             local askedfeatures = specification.features or everywhere
-            local askedsteps    = specifications.steps or specification.subtables or { specification.data } or { }
+            local askedsteps    = specification.steps or specification.subtables or { specification.data } or { }
             local featuretype   = normalized[specification.type or "substitution"] or "substitution"
             local featureflags  = specification.flags or noflags
             local featureorder  = specification.order or { feature }
-            local added         = false
+            local featurechain  = (featuretype == "chainsubstitution" or featuretype == "chainposition") and 1 or 0
             local nofsteps      = 0
             local steps         = { }
+            local sublookups    = specification.lookups
+            local category      = nil
+            if sublookups then
+                local s = { }
+                for i=1,#sublookups do
+                    local specification = sublookups[i]
+                    local askedsteps    = specification.steps or specification.subtables or { specification.data } or { }
+                    local featuretype   = normalized[specification.type or "substitution"] or "substitution"
+                    local featureflags  = specification.flags or noflags
+                    local nofsteps      = 0
+                    local steps         = { }
+                    for i=1,#askedsteps do
+                        local list     = askedsteps[i]
+                        local coverage = nil
+                        local format   = nil
+                        if featuretype == "substitution" then
+                            coverage = prepare_substitution(list,featuretype)
+                        elseif featuretype == "ligature" then
+                            coverage = prepare_ligature(list,featuretype)
+                        elseif featuretype == "alternate" then
+                            coverage = prepare_alternate(list,featuretype)
+                        elseif featuretype == "multiple" then
+                            coverage = prepare_multiple(list,featuretype)
+                        elseif featuretype == "kern" then
+                            format   = "kern"
+                            coverage = prepare_kern(list,featuretype)
+                        elseif featuretype == "pair" then
+                            format   = "pair"
+                            coverage = prepare_pair(list,featuretype)
+                        end
+                        if coverage and next(coverage) then
+                            nofsteps = nofsteps + 1
+                            steps[nofsteps] = register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
+                        end
+                    end
+                    s[i] = {
+                        [stepkey] = steps,
+                        nofsteps  = nofsteps,
+                        type      = types[featuretype],
+                    }
+                end
+                sublookups = s
+            end
             for i=1,#askedsteps do
                 local list     = askedsteps[i]
-                local coverage = { }
-                local cover    = coveractions[featuretype]
+                local coverage = nil
                 local format   = nil
-                if not cover then
-                    -- unknown
-                elseif featuretype == "substitution" then
-                    for code, replacement in next, list do
-                        local unicode     = tounicode(code)
-                        local description = descriptions[unicode]
-                        if description then
-                            if type(replacement) == "table" then
-                                replacement = replacement[1]
-                            end
-                            replacement = tounicode(replacement)
-                            if replacement and descriptions[replacement] then
-                                cover(coverage,unicode,replacement)
-                                done = done + 1
-                            else
-                                skip = skip + 1
-                            end
-                        else
-                            skip = skip + 1
-                        end
-                    end
+                if featuretype == "substitution" then
+                    category = "gsub"
+                    coverage = prepare_substitution(list,featuretype)
                 elseif featuretype == "ligature" then
-                    for code, ligature in next, list do
-                        local unicode     = tounicode(code)
-                        local description = descriptions[unicode]
-                        if description then
-                            if type(ligature) == "string" then
-                                ligature = { lpegmatch(splitter,ligature) }
-                            end
-                            local present = true
-                            for i=1,#ligature do
-                                local l = ligature[i]
-                                local u = tounicode(l)
-                                if descriptions[u] then
-                                    ligature[i] = u
-                                else
-                                    present = false
-                                    break
-                                end
-                            end
-                            if present then
-                                cover(coverage,unicode,ligature)
-                                done = done + 1
-                            else
-                                skip = skip + 1
-                            end
-                        else
-                            skip = skip + 1
-                        end
-                    end
+                    category = "gsub"
+                    coverage = prepare_ligature(list,featuretype)
                 elseif featuretype == "alternate" then
-                    for code, replacement in next, list do
-                        local unicode     = tounicode(code)
-                        local description = descriptions[unicode]
-                        if not description then
-                            skip = skip + 1
-                        elseif type(replacement) == "table" then
-                            local r = { }
-                            for i=1,#replacement do
-                                local u = tounicode(replacement[i])
-                                r[i] = descriptions[u] and u or unicode
-                            end
-                            cover(coverage,unicode,r)
-                            done = done + 1
-                        else
-                            local u = tounicode(replacement)
-                            if u then
-                                cover(coverage,unicode,{ u })
-                                done = done + 1
-                            else
-                                skip = skip + 1
-                            end
-                        end
-                    end
-                elseif featuretype == "multiple" then -- todo: unicode can be table
-                    for code, replacement in next, list do
-                        local unicode     = tounicode(code)
-                        local description = descriptions[unicode]
-                        if not description then
-                            skip = skip + 1
-                        elseif type(replacement) == "table" then
-                            local r, n = { }, 0
-                            for i=1,#replacement do
-                                local u = tounicode(replacement[i])
-                                if descriptions[u] then
-                                    n = n + 1
-                                    r[n] = u
-                                end
-                            end
-                            if n > 0 then
-                                cover(coverage,unicode,r)
-                                done = done + 1
-                            else
-                                skip = skip + 1
-                            end
-                        else
-                            local u = tounicode(replacement)
-                            if u then
-                                cover(coverage,unicode,{ u })
-                                done = done + 1
-                            else
-                                skip = skip + 1
-                            end
-                        end
-                    end
+                    category = "gsub"
+                    coverage = prepare_alternate(list,featuretype)
+                elseif featuretype == "multiple" then
+                    category = "gsub"
+                    coverage = prepare_multiple(list,featuretype)
                 elseif featuretype == "kern" then
-                    for code, replacement in next, list do
-                        local unicode     = tounicode(code)
-                        local description = descriptions[unicode]
-                        if description and type(replacement) == "table" then
-                            local r = { }
-                            for k, v in next, replacement do
-                                local u = tounicode(k)
-                                if u then
-                                    r[u] = v
-                                end
-                            end
-                            if next(r) then
-                                cover(coverage,unicode,r)
-                                done = done + 1
-                            else
-                                skip = skip + 1
-                            end
-                        else
-                            skip = skip + 1
-                        end
-                    end
-                    format = "kern"
+                    category = "gpos"
+                    format   = "kern"
+                    coverage = prepare_kern(list,featuretype)
+                elseif featuretype == "pair" then
+                    category = "gpos"
+                    format   = "pair"
+                    coverage = prepare_pair(list,featuretype)
+                elseif featuretype == "chainsubstitution" then
+                    category = "gsub"
+                    coverage = prepare_chain(list,featuretype,sublookups)
+                elseif featuretype == "chainposition" then
+                    category = "gpos"
+                    coverage = prepare_chain(list,featuretype,sublookups)
+                else
+                    report_otf("not registering feature %a, unknown category",feature)
+                    return
                 end
-                if next(coverage) then
-                    added = true
+                if coverage and next(coverage) then
                     nofsteps = nofsteps + 1
                     steps[nofsteps] = register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
                 end
             end
-            if added then
+            if nofsteps > 0 then
                 -- script = { lang1, lang2, lang3 } or script = { lang1 = true, ... }
                 for k, v in next, askedfeatures do
                     if v[1] then
                         askedfeatures[k] = tohash(v)
                     end
                 end
+                if featureflags[1] then featureflags[1] = "mark" end
+                if featureflags[2] then featureflags[2] = "ligature" end
+                if featureflags[3] then featureflags[3] = "base" end
                 local sequence = {
-                    chain     = 0,
+                    chain     = featurechain,
                     features  = { [feature] = askedfeatures },
                     flags     = featureflags,
-                    name      = feature, -- not needed
+                    name      = feature, -- redundant
                     order     = featureorder,
                     [stepkey] = steps,
                     nofsteps  = nofsteps,
                     type      = types[featuretype],
                 }
+                -- todo : before|after|index
                 if specification.prepend then
                     insert(sequences,1,sequence)
                 else
                     insert(sequences,sequence)
                 end
                 -- register in metadata (merge as there can be a few)
-                if not gsubfeatures then
-                    gsubfeatures  = { }
-                    fontfeatures.gsub = gsubfeatures
+                local features = fontfeatures[category]
+                if not features then
+                    features  = { }
+                    fontfeatures[category] = features
                 end
-                local k = gsubfeatures[feature]
+                local k = features[feature]
                 if not k then
                     k = { }
-                    gsubfeatures[feature] = k
+                    features[feature] = k
                 end
+                --
                 for script, languages in next, askedfeatures do
                     local kk = k[script]
                     if not kk then

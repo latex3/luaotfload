@@ -53,8 +53,12 @@ local report_otf         = logs.reporter("fonts","otf loading")
 local fonts              = fonts
 local otf                = fonts.handlers.otf
 
-otf.version              = 3.019 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version              = 3.022 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                = containers.define("fonts", "otl", otf.version, true)
+otf.svgcache             = containers.define("fonts", "svg", otf.version, true)
+otf.pdfcache             = containers.define("fonts", "pdf", otf.version, true)
+
+otf.svgenabled           = false
 
 local otfreaders         = otf.readers
 
@@ -63,7 +67,7 @@ local definers           = fonts.definers
 local readers            = fonts.readers
 local constructors       = fonts.constructors
 
-local otffeatures        = constructors.newfeatures("otf")
+local otffeatures        = constructors.features.otf
 local registerotffeature = otffeatures.register
 
 local enhancers          = allocate()
@@ -100,6 +104,12 @@ registerdirective("fonts.otf.loader.forcenotdef",   function(v) forcenotdef   = 
 --         -- TODO: apply_featurefile(raw, featurefile)
 --     end
 -- end
+
+-- Enhancers are used to apply fixes and extensions to fonts. For instance, we use them
+-- to implement tlig and trep features. They are not neccessarily bound to opentype
+-- fonts but can also apply to type one fonts, given that they obey the structure of an
+-- opentype font. They are not to be confused with format specific features but maybe
+-- some are so generic that they might eventually move to this mechanism.
 
 local ordered_enhancers = {
     "check extra features",
@@ -264,6 +274,25 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
         --
         --
         if data then
+            --
+            local resources = data.resources
+            local svgshapes = resources.svgshapes
+            if svgshapes then
+                resources.svgshapes = nil
+                if otf.svgenabled then
+                    local timestamp = os.date()
+                    -- work in progress ... a bit boring to do
+                    containers.write(otf.svgcache,hash, {
+                        svgshapes = svgshapes,
+                        timestamp = timestamp,
+                    })
+                    data.properties.svg = {
+                        hash      = hash,
+                        timestamp = timestamp,
+                    }
+                end
+            end
+            --
             otfreaders.compact(data)
             otfreaders.rehash(data,"unicodes")
             otfreaders.addunicodetable(data)
@@ -302,7 +331,7 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
         --
         enhancers.apply(data,filename,data)
         --
-        constructors.addcoreunicodes(unicodes)
+     -- constructors.addcoreunicodes(data.resources.unicodes) -- still needed ?
         --
         if applyruntimefixes then
             applyruntimefixes(filename,data)
@@ -340,7 +369,6 @@ end
 local function copytotfm(data,cache_id)
     if data then
         local metadata       = data.metadata
-        local resources      = data.resources
         local properties     = derivetable(data.properties)
         local descriptions   = derivetable(data.descriptions)
         local goodies        = derivetable(data.goodies)

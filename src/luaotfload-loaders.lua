@@ -49,12 +49,22 @@ local unsupported_reader = function (format)
   end
 end
 
-local afm_compat_message = function (specification, method)
+local afm_reader = fonts.readers.afm
+
+local afm_loader = function (specification)
+  specification.forced      = "afm"
+  specification.sub         = false
+  specification.forcedname  = file.addsuffix(specification.name, "afm")
+  inspect(specification)
+  return afm_reader (specification, "afm")
+end
+
+local afm_compat_message = function (specification)
   logreport ("both", 4, "loaders",
              "PFB format only supported with matching \z
-              AFM; redirecting (“%s”, “%s”).",
-             tostring (specification.name), tostring (method))
-  return fonts.readers.afm (specification, method)
+              AFM; redirecting (“%s”, “afm”).",
+             tostring (specification.name))
+  return afm_loader (specification)
 end
 
 local install_formats = function ()
@@ -64,9 +74,8 @@ local install_formats = function ()
   local readers   = fonts.readers
   local sequence  = readers.sequence
   local seqset    = table.tohash (sequence)
-  local handlers  = fonts.handlers
   local formats   = fonts.formats
-  if not readers or not handlers or not formats then return false end
+  if not readers or not formats then return false end
 
   local aux = function (which, reader)
     if   not which  or type (which) ~= "string"
@@ -76,7 +85,6 @@ local install_formats = function ()
     end
     formats  [which] = "type1"
     readers  [which] = reader
-    handlers [which] = { }
     if not seqset [which] then
       logreport ("both", 3, "loaders",
                  "Extending reader sequence for “%s”.", which)
@@ -89,11 +97,28 @@ local install_formats = function ()
   return aux ("evl", eval_reader)
      and aux ("lua", lua_reader)
      and aux ("pfa", unsupported_reader "pfa")
+     and aux ("afm", afm_loader)
      and aux ("pfb", afm_compat_message) --- pfb loader is incomplete
      and aux ("ofm", readers.tfm)
      and aux ("dfont", unsupported_reader "dfont")
 end
 
+local not_found_msg = function (specification, size, id)
+  logreport ("both", 0, "loaders", "")
+  logreport ("both", 0, "loaders",
+             "--------------------------------------------------------")
+  logreport ("both", 0, "loaders", "")
+  logreport ("both", 0, "loaders", "Font definition failed for:")
+  logreport ("both", 0, "loaders", "")
+  logreport ("both", 0, "loaders", "   > id            : %d", id)
+  logreport ("both", 0, "loaders", "   > specification : %q", specification)
+  if size > 0 then
+    logreport ("both", 0, "loaders", "   > size          : %.2f pt", size / 2^16)
+  end
+  logreport ("both", 0, "loaders", "")
+  logreport ("both", 0, "loaders",
+             "--------------------------------------------------------")
+end
 --[[doc--
 
     \subsection{\CONTEXT override}
@@ -110,6 +135,7 @@ do
 
   local patch = function (specification, size, id)
     local fontdata = read (specification, size, id)
+----if not fontdata then not_found_msg (specification, size, id) end
     if type (fontdata) == "table" and fontdata.shared then
       --- We need to test for the “shared” field here
       --- or else the fontspec capheight callback will
@@ -129,10 +155,8 @@ do
       logreport ("both", 0, "loaders", "   > spec %q", specification)
       logreport ("both", 0, "loaders", "   > at size %.2f pt", size / 2^16)
       local result = definer (specification, size, id)
-      if not result then
-        logreport ("both", 0, "loaders", "   > font definition failed")
-        return
-      elseif type (result) == "number" then
+      if not result then return not_found_msg (specification, size, id) end
+      if type (result) == "number" then
         logreport ("both", 0, "loaders", "   > font definition yielded id %d", result)
         return result
       end

@@ -12,8 +12,6 @@ if not modules then modules = { } end modules ['font-ini'] = {
 
 local allocate = utilities.storage.allocate
 
-local report_defining = logs.reporter("fonts","defining")
-
 fonts               = fonts or { }
 local fonts         = fonts
 

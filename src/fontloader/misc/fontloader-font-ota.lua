@@ -44,7 +44,6 @@ local getchar             = nuts.getchar
 local ischar              = nuts.is_char
 
 local traverse_id         = nuts.traverse_id
-local traverse_node_list  = nuts.traverse
 local end_of_math         = nuts.end_of_math
 
 local nodecodes           = nodes.nodecodes
@@ -56,7 +55,7 @@ local fontdata            = fonts.hashes.identifiers
 local categories          = characters and characters.categories or { } -- sorry, only in context
 local chardata            = characters and characters.data
 
-local otffeatures         = fonts.constructors.newfeatures("otf")
+local otffeatures         = fonts.constructors.features.otf
 local registerotffeature  = otffeatures.register
 
 --[[ldx--

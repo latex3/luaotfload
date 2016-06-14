@@ -24,10 +24,11 @@ if not modules then modules = { } end modules ['font-otj'] = {
 -- The use_advance code is just a test and is meant for testing and manuals. There is no
 -- performance (or whatever) gain and using kerns is somewhat cleaner (at least for now).
 
+-- Maybe: subtype fontkern when pure kerns.
+
 if not nodes.properties then return end
 
 local next, rawget = next, rawget
-local utfchar = utf.char
 local fastcopy = table.fastcopy
 
 local registertracker = trackers.register
@@ -92,7 +93,6 @@ local traverse_id        = nuts.traverse_id
 local traverse_char      = nuts.traverse_char
 local insert_node_before = nuts.insert_before
 local insert_node_after  = nuts.insert_after
-local find_tail          = nuts.tail
 
 local properties         = nodes.properties.data
 
@@ -755,7 +755,7 @@ local function inject_pairs_only(head,where)
                         end
                         local leftkern = i.leftkern
                         if leftkern and leftkern ~= 0 then
-                            insert_node_before(head,current,newkern(leftkern))
+                            head = insert_node_before(head,current,newkern(leftkern))
                         end
                         local rightkern = i.rightkern
                         if rightkern and rightkern ~= 0 then
@@ -1255,11 +1255,11 @@ local function inject_everything(head,where)
                                 insert_node_after(pre,n,newkern(rightkern))
                                 done = true
                             end
-                        end
-                        if hasmarks then
-                            local pm = i.markbasenode
-                            if pm then
-                                processmark(pm,current,i)
+                            if hasmarks then
+                                local pm = i.markbasenode
+                                if pm then
+                                    processmark(pm,current,i)
+                                end
                             end
                         end
                     end
@@ -1287,11 +1287,11 @@ local function inject_everything(head,where)
                                 insert_node_after(post,n,newkern(rightkern))
                                 done = true
                             end
-                        end
-                        if hasmarks then
-                            local pm = i.markbasenode
-                            if pm then
-                                processmark(pm,current,i)
+                            if hasmarks then
+                                local pm = i.markbasenode
+                                if pm then
+                                    processmark(pm,current,i)
+                                end
                             end
                         end
                     end
@@ -1319,11 +1319,11 @@ local function inject_everything(head,where)
                                 insert_node_after(replace,n,newkern(rightkern))
                                 done = true
                             end
-                        end
-                        if hasmarks then
-                            local pm = i.markbasenode
-                            if pm then
-                                processmark(pm,current,i)
+                            if hasmarks then
+                                local pm = i.markbasenode
+                                if pm then
+                                    processmark(pm,current,i)
+                                end
                             end
                         end
                     end
@@ -1523,10 +1523,19 @@ function injections.handler(head,where)
         head = injectspaces(head)
     end
     if nofregisteredmarks > 0 or nofregisteredcursives > 0 then
+        if trace_injections then
+            report_injections("injection variant %a","everything")
+        end
         return inject_everything(head,where)
     elseif nofregisteredpairs > 0 then
+        if trace_injections then
+            report_injections("injection variant %a","pairs")
+        end
         return inject_pairs_only(head,where)
     elseif nofregisteredkerns > 0 then
+        if trace_injections then
+            report_injections("injection variant %a","kerns")
+        end
         return inject_kerns_only(head,where)
     else
         return head, false

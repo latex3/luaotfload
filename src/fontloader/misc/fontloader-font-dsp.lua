@@ -69,7 +69,6 @@ local readers           = fonts.handlers.otf.readers
 local streamreader      = readers.streamreader
 
 local setposition       = streamreader.setposition
-local skipbytes         = streamreader.skip
 local skipshort         = streamreader.skipshort
 local readushort        = streamreader.readcardinal2  -- 16-bit unsigned integer
 local readulong         = streamreader.readcardinal4  -- 24-bit unsigned integer
@@ -77,6 +76,7 @@ local readshort         = streamreader.readinteger2   -- 16-bit   signed integer
 local readfword         = readshort
 local readstring        = streamreader.readstring
 local readtag           = streamreader.readtag
+local readbytes         = streamreader.readbytes
 
 local gsubhandlers      = { }
 local gposhandlers      = { }
@@ -715,6 +715,8 @@ function gsubhandlers.single(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofg
         report("unsupported subtype %a in %a substitution",subtype,"single")
     end
 end
+
+-- we see coverage format 0x300 in some old ms fonts
 
 local function sethandler(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyphs,what)
     local tableoffset = lookupoffset + offset
@@ -1599,6 +1601,14 @@ do
 
         local reported = { }
 
+        local function report_issue(i,what,sequence,kind)
+            local name = sequence.name
+            if not reported[name] then
+                report("rule %i in %s lookup %a has %s lookups",i,what,name,kind)
+                reported[name] = true
+            end
+        end
+
         for i=lastsequence+1,nofsequences do
             local sequence = sequences[i]
             local steps    = sequence.steps
@@ -1610,18 +1620,10 @@ do
                         local rule     = rules[i]
                         local rlookups = rule.lookups
                         if not rlookups then
-                            local name = sequence.name
-                            if not reported[name] then
-                                report("rule %i in %s lookup %a has %s lookups",i,what,name,"no")
-                                reported[name] = true
-                            end
+                            report_issue(i,what,sequence,"no")
                         elseif not next(rlookups) then
-                            local name = sequence.name
-                            if not reported[name] then
-                                -- can be ok as it aborts a chain sequence
-                                report("rule %i in %s lookup %a has %s lookups",i,what,name,"empty")
-                                reported[name] = true
-                            end
+                            -- can be ok as it aborts a chain sequence
+                            report_issue(i,what,sequence,"empty")
                             rule.lookups = nil
                         else
                             for index, lookupid in sortedhash(rlookups) do -- nicer
@@ -1629,23 +1631,36 @@ do
                                 if not h then
                                     -- here we have a lookup that is used independent as well
                                     -- as in another one
-                                    nofsublookups = nofsublookups + 1
-                                 -- report("registering %i as sublookup %i",lookupid,nofsublookups)
-                                    local d = lookups[lookupid].done
-                                    h = {
-                                        index     = nofsublookups, -- handy for tracing
-                                        name      = f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
-                                        derived   = true,          -- handy for tracing
-                                        steps     = d.steps,
-                                        nofsteps  = d.nofsteps,
-                                        type      = d.lookuptype,
-                                        markclass = d.markclass or nil,
-                                        flags     = d.flags,
-                                     -- chain     = d.chain,
-                                    }
-                                    sublookuplist[nofsublookups] = h
-                                    sublookuphash[lookupid] = nofsublookups
-                                    sublookupcheck[lookupid] = 1
+                                    local lookup = lookups[lookupid]
+                                    if lookup then
+                                        local d = lookup.done
+                                        if d then
+                                            nofsublookups = nofsublookups + 1
+                                         -- report("registering %i as sublookup %i",lookupid,nofsublookups)
+                                            h = {
+                                                index     = nofsublookups, -- handy for tracing
+                                                name      = f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
+                                                derived   = true,          -- handy for tracing
+                                                steps     = d.steps,
+                                                nofsteps  = d.nofsteps,
+                                                type      = d.lookuptype,
+                                                markclass = d.markclass or nil,
+                                                flags     = d.flags,
+                                             -- chain     = d.chain,
+                                            }
+                                            sublookuplist[nofsublookups] = h
+                                            sublookuphash[lookupid] = nofsublookups
+                                            sublookupcheck[lookupid] = 1
+                                        else
+                                            report_issue(i,what,sequence,"missing")
+                                            rule.lookups = nil
+                                            break
+                                        end
+                                    else
+                                        report_issue(i,what,sequence,"bad")
+                                        rule.lookups = nil
+                                        break
+                                    end
                                 else
                                     sublookupcheck[lookupid] = sublookupcheck[lookupid] + 1
                                 end
@@ -2015,16 +2030,15 @@ local function readmathglyphinfo(f,fontdata,offset)
             local function get(offset)
                 setposition(f,kernoffset+offset)
                 local n = readushort(f)
-                if n > 0 then
+                if n == 0 then
+                    local k = readmathvalue(f)
+                    if k == 0 then
+                        -- no need for it (happens sometimes)
+                    else
+                        return { { kern = k } }
+                    end
+                else
                     local l = { }
-                 -- for i=1,n do
-                 --     l[i] = { readushort(f), 0 } -- height, kern
-                 --     skipshort(f)
-                 -- end
-                 -- for i=1,n do
-                 --     l[i][2] = readushort(f)
-                 --     skipshort(f)
-                 -- end
                     for i=1,n do
                         l[i] = { height = readmathvalue(f) }
                     end
@@ -2059,10 +2073,10 @@ local function readmathglyphinfo(f,fontdata,offset)
                     if next(kernset) then
                         local glyph = glyphs[coverage[i]]
                         local math  = glyph.math
-                        if not math then
-                            glyph.math = { kerns = kernset }
-                        else
+                        if math then
                             math.kerns = kernset
+                        else
+                            glyph.math = { kerns = kernset }
                         end
                     end
                 end
@@ -2178,7 +2192,7 @@ function readers.math(f,fontdata,specification)
             setposition(f,tableoffset)
             local version = readulong(f)
             if version ~= 0x00010000 then
-                report("table version %a of %a is not supported (yet), maybe font %s is bad",version,what,fontdata.filename)
+                report("table version %a of %a is not supported (yet), maybe font %s is bad",version,"math",fontdata.filename)
                 return
             end
             local constants = readushort(f)
@@ -2196,5 +2210,148 @@ function readers.math(f,fontdata,specification)
                 readmathvariants(f,fontdata,tableoffset+variants)
             end
         end
+    end
+end
+
+function readers.colr(f,fontdata,specification)
+    local datatable = fontdata.tables.colr
+    if datatable then
+        if specification.glyphs then
+            local tableoffset = datatable.offset
+            setposition(f,tableoffset)
+            local version = readushort(f)
+            if version ~= 0 then
+                report("table version %a of %a is not supported (yet), maybe font %s is bad",version,"colr",fontdata.filename)
+                return
+            end
+            if not fontdata.tables.cpal then
+                report("color table %a in font %a has no mandate %a table","colr",fontdata.filename,"cpal")
+                fontdata.colorpalettes = { }
+            end
+            local glyphs       = fontdata.glyphs
+            local nofglyphs    = readushort(f)
+            local baseoffset   = readulong(f)
+            local layeroffset  = readulong(f)
+            local noflayers    = readushort(f)
+            local layerrecords = { }
+            local maxclass     = 0
+            -- The special value 0xFFFF is foreground (but we index from 1). It
+            -- more looks like indices into a palette so 'class' is a better name
+            -- than 'palette'.
+            setposition(f,tableoffset + layeroffset)
+            for i=1,noflayers do
+                local slot    = readushort(f)
+                local class = readushort(f)
+                if class < 0xFFFF then
+                    class = class + 1
+                    if class > maxclass then
+                        maxclass = class
+                    end
+                end
+                layerrecords[i] = {
+                    slot  = slot,
+                    class = class,
+                }
+            end
+            fontdata.maxcolorclass = maxclass
+            setposition(f,tableoffset + baseoffset)
+            for i=0,nofglyphs-1 do
+                local glyphindex = readushort(f)
+                local firstlayer = readushort(f)
+                local noflayers  = readushort(f)
+                local t = { }
+                for i=1,noflayers do
+                    t[i] = layerrecords[firstlayer+i]
+                end
+                glyphs[glyphindex].colors = t
+            end
+        end
+        fontdata.hascolor = true
+    end
+end
+
+function readers.cpal(f,fontdata,specification)
+    if specification.glyphs then
+        local datatable = fontdata.tables.cpal
+        if datatable then
+            local tableoffset = datatable.offset
+            setposition(f,tableoffset)
+            local version = readushort(f)
+            if version > 1 then
+                report("table version %a of %a is not supported (yet), maybe font %s is bad",version,"cpal",fontdata.filename)
+                return
+            end
+            local nofpaletteentries  = readushort(f)
+            local nofpalettes        = readushort(f)
+            local nofcolorrecords    = readushort(f)
+            local firstcoloroffset   = readulong(f)
+            local colorrecords       = { }
+            local palettes           = { }
+            for i=1,nofpalettes do
+                palettes[i] = readushort(f)
+            end
+            if version == 1 then
+                -- used for guis
+                local palettettypesoffset = readulong(f)
+                local palettelabelsoffset = readulong(f)
+                local paletteentryoffset  = readulong(f)
+            end
+            setposition(f,tableoffset+firstcoloroffset)
+            for i=1,nofcolorrecords do
+                local b, g, r, a = readbytes(f,4)
+                colorrecords[i] = {
+                    r, g, b, a ~= 255 and a or nil,
+                }
+            end
+            for i=1,nofpalettes do
+                local p = { }
+                local o = palettes[i]
+                for j=1,nofpaletteentries do
+                    p[j] = colorrecords[o+j]
+                end
+                palettes[i] = p
+            end
+            fontdata.colorpalettes = palettes
+        end
+    end
+end
+
+function readers.svg(f,fontdata,specification)
+    local datatable = fontdata.tables.svg
+    if datatable then
+        if specification.glyphs then
+            local tableoffset = datatable.offset
+            setposition(f,tableoffset)
+            local version = readushort(f)
+            if version ~= 0 then
+                report("table version %a of %a is not supported (yet), maybe font %s is bad",version,"svg",fontdata.filename)
+                return
+            end
+            local glyphs      = fontdata.glyphs
+            local indexoffset = tableoffset + readulong(f)
+            local reserved    = readulong(f)
+            setposition(f,indexoffset)
+            local nofentries  = readushort(f)
+            local entries     = { }
+            for i=1,nofentries do
+                entries[i] = {
+                    first  = readushort(f),
+                    last   = readushort(f),
+                    offset = indexoffset + readulong(f),
+                    length = readulong(f),
+                }
+            end
+            for i=1,nofentries do
+                local entry = entries[i]
+                setposition(f,entry.offset)
+                entries[i] = {
+                    first = entry.first,
+                    last  = entry.last,
+                    data  = readstring(f,entry.length)
+                }
+            end
+            fontdata.svgshapes = entries
+        end
+        fontdata.hascolor = true
     end
 end

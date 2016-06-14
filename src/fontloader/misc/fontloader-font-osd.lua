@@ -79,13 +79,10 @@ fonts.analyzers.methods  = fonts.analyzers.methods or { node = { otf = { } } }
 
 local otf                = fonts.handlers.otf
 
-local nodecodes          = nodes.nodecodes
-local glyph_code         = nodecodes.glyph
-
 local handlers           = otf.handlers
 local methods            = fonts.analyzers.methods
 
-local otffeatures        = fonts.constructors.newfeatures("otf")
+local otffeatures        = fonts.constructors.features.otf
 local registerotffeature = otffeatures.register
 
 local nuts               = nodes.nuts

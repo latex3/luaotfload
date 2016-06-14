@@ -84,7 +84,8 @@ local names = {
   { miscdir,      "fontloader-basics-nod.lua",      },
   { miscdir,      "fontloader-data-con.lua",        },
   { miscdir,      "fontloader-font-afk.lua",        },
-  { miscdir,      "fontloader-font-afm.lua",        },
+  { miscdir,      "fontloader-font-onr.lua",        },
+  { miscdir,      "fontloader-font-one.lua",        },
   { miscdir,      "fontloader-font-cid.lua",        },
   { miscdir,      "fontloader-font-con.lua",        },
   { miscdir,      "fontloader-font-def.lua",        },
@@ -112,6 +113,7 @@ local names = {
   { miscdir,      "fontloader-font-ota.lua",        },
   { miscdir,      "fontloader-font-ots.lua",        },
   { miscdir,      "fontloader-font-osd.lua",        },
+  { miscdir,      "fontloader-font-ocl.lua",        },
 
   --- lua libraries
   { miscdir,      "fontloader-languages.lua",       },

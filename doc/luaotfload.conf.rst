@@ -188,10 +188,8 @@ If ``update-live`` is set, Luaotfload will reload the database if it
 cannot find a requested font. Those who prefer to update manually using
 **luaotfload-tool** should unset this flag.
 
-The option ``use-fontforge`` switches name scanning back to the old
-method that relies on the builtin ``fontloader`` library. This is
-interesting for reference until the Fontforge code will be removed
-eventually.
+The option ``use-fontforge`` had a meaning during the transition to the
+Lua-only Opentype reader. At present it is ignored.
 
 Section ``default-features``
 -----------------------------------------------------------------------

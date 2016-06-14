@@ -9,6 +9,7 @@
 
 local setmetatable = setmetatable
 local kpselookup   = kpse.lookup
+local lfsisdir     = lfs.isdir
 
 --[[doc--
 
@@ -223,7 +224,7 @@ end
 
 --- below paths are relative to the texmf-context
 local ltx = "tex/generic/context/luatex"
-local ctx = "tex/context/base"
+local ctx = { "tex/context/base/mkiv", "tex/context/base" }
 
 local context_modules = {
 
@@ -251,8 +252,6 @@ local context_modules = {
   { ctx,   "font-map"          },
   { ltx,   "luatex-fonts-syn"  },
   { ctx,   "font-tfm"          },
-  { ctx,   "font-afm"          },
-  { ctx,   "font-afk"          },
   { ctx,   "font-oti"          },
   { ctx,   "font-otr"          },
   { ctx,   "font-cff"          },
@@ -265,6 +264,10 @@ local context_modules = {
   { ctx,   "font-ota"          },
   { ctx,   "font-ots"          },
   { ctx,   "font-osd"          },
+  { ctx,   "font-ocl"          },
+  { ctx,   "font-onr"          },
+  { ctx,   "font-one"          },
+  { ctx,   "font-afk"          },
   { ctx,   "font-lua"          },
   { ctx,   "font-def"          },
   { ltx,   "luatex-fonts-ext"  },
@@ -284,17 +287,37 @@ local load_context_modules = function (pth)
     local sub, spec = unpack (context_modules [i])
     if sub == false then
       ignore_module (spec)
-    elseif type (sub) == "string" then
-      if pth then
-        load_module (spec, file.join (pth, sub))
-      else
-        load_module (spec)
-      end
     else
-      logreport ("both", 0, "init",
-                 "Internal error, please report. \z
-                  This is not your fault.")
-      os.exit (-1)
+      local tsub = type (sub)
+      if not pth then
+        load_module (spec)
+      elseif tsub == "string" then
+        load_module (spec, file.join (pth, sub))
+      elseif tsub == "table" then
+        local pfx
+        local nsub = #sub
+        for j = 1, nsub do
+          local full = file.join (pth, sub [j])
+          if lfsisdir (full) then --- pick the first real one
+            pfx = full
+            break
+          end
+        end
+        if pfx then
+          load_module (spec, pfx)
+        else
+          logreport ("both", 0, "init",
+                     "None of the %d search paths for module %q exist; \z
+                      falling back to default path.",
+                     nsub, tostring (spec))
+          load_module (spec) --- maybe we’ll get by after all?
+        end
+      else
+        logreport ("both", 0, "init",
+                   "Internal error, please report. \z
+                    This is not your fault.")
+        os.exit (-1)
+      end
     end
   end
 
@@ -509,8 +532,6 @@ local init_main = function ()
     load_fontloader_module "font-map"
     load_fontloader_module "fonts-syn"
     load_fontloader_module "font-tfm"
-    load_fontloader_module "font-afm"
-    load_fontloader_module "font-afk"
     load_fontloader_module "font-oti"
     load_fontloader_module "font-otr"
     load_fontloader_module "font-cff"
@@ -523,6 +544,10 @@ local init_main = function ()
     load_fontloader_module "font-ota"
     load_fontloader_module "font-ots"
     load_fontloader_module "font-osd"
+    load_fontloader_module "font-ocl"
+    load_fontloader_module "font-onr"
+    load_fontloader_module "font-one"
+    load_fontloader_module "font-afk"
     load_fontloader_module "font-lua"
     load_fontloader_module "font-def"
     load_fontloader_module "fonts-ext"
@@ -533,7 +558,7 @@ local init_main = function ()
                "Loading Context modules in lookup path.")
     load_context_modules ()
 
-  elseif lfs.isdir (fontloader) then
+  elseif lfsisdir (fontloader) then
     logreport ("log", 0, "init",
                "Loading Context files under prefix “%s”.",
                fontloader)

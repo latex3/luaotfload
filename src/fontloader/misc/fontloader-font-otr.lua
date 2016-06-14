@@ -99,7 +99,7 @@ readers.streamreader    = streamreader
 
 local openfile          = streamreader.open
 local closefile         = streamreader.close
-local skipbytes         = streamreader.skip
+----- skipbytes         = streamreader.skip
 local setposition       = streamreader.setposition
 local skipshort         = streamreader.skipshort
 local readbytes         = streamreader.readbytes
@@ -108,7 +108,7 @@ local readbyte          = streamreader.readcardinal1  --  8-bit unsigned integer
 local readushort        = streamreader.readcardinal2  -- 16-bit unsigned integer
 local readuint          = streamreader.readcardinal3  -- 24-bit unsigned integer
 local readulong         = streamreader.readcardinal4  -- 24-bit unsigned integer
-local readchar          = streamreader.readinteger1   --  8-bit   signed integer
+----- readchar          = streamreader.readinteger1   --  8-bit   signed integer
 local readshort         = streamreader.readinteger2   -- 16-bit   signed integer
 local readlong          = streamreader.readinteger4   -- 24-bit unsigned integer
 local readfixed         = streamreader.readfixed4
@@ -129,12 +129,11 @@ local function readlongdatetime(f)
     return 0x100000000 * d + 0x1000000 * e + 0x10000 * f + 0x100 * g + h
 end
 
-local tableversion      = 0.004
-local privateoffset     = fonts.constructors and fonts.constructors.privateoffset or 0xF0000 -- 0x10FFFF
+local tableversion    = 0.004
+readers.tableversion  = tableversion
+local privateoffset   = fonts.constructors and fonts.constructors.privateoffset or 0xF0000 -- 0x10FFFF
+local reportedskipped = { }
 
-readers.tableversion    = tableversion
-
-local reportedskipped   = { }
 
 local function reportskippedtable(tag)
     if not reportedskipped[tag] then
@@ -1657,6 +1656,26 @@ function readers.glyf(f,fontdata,specification) -- part goes to cff module
     end
 end
 
+-- Experimental (we need fonts).
+
+function readers.colr(f,fontdata,specification)
+    if specification.glyphs then
+        reportskippedtable("colr")
+    end
+end
+
+function readers.cpal(f,fontdata,specification)
+    if specification.glyphs then
+        reportskippedtable("cpal")
+    end
+end
+
+function readers.svg(f,fontdata,specification)
+    if specification.glyphs then
+        reportskippedtable("svg")
+    end
+end
+
 -- Here we have a table that we really need for later processing although a more advanced gpos table
 -- can also be available. Todo: we need a 'fake' lookup for this (analogue to ff).
 
@@ -1874,6 +1893,7 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames)
          -- format         = fontdata.format,
             fontname       = fontname,
             fullname       = fullname,
+         -- cfffullname    = cff.fullname,
             family         = family,
             subfamily      = subfamily,
             familyname     = familyname,
@@ -1996,6 +2016,9 @@ local function readdata(f,offset,specification)
     readers["cmap"](f,fontdata,specification)
     readers["loca"](f,fontdata,specification)
     readers["glyf"](f,fontdata,specification)
+    readers["colr"](f,fontdata,specification)
+    readers["cpal"](f,fontdata,specification)
+    readers["svg" ](f,fontdata,specification)
     readers["kern"](f,fontdata,specification)
     readers["gdef"](f,fontdata,specification)
     readers["gsub"](f,fontdata,specification)
@@ -2164,7 +2187,9 @@ function readers.loadfont(filename,n)
             goodies       = { },
             metadata      = getinfo(fontdata,n), -- no platformnames here !
             properties    = {
-                hasitalics = fontdata.hasitalics or false,
+                hasitalics    = fontdata.hasitalics or false,
+                maxcolorclass = fontdata.maxcolorclass,
+                hascolor      = fontdata.hascolor or false,
             },
             resources     = {
              -- filename      = fontdata.filename,
@@ -2181,6 +2206,8 @@ function readers.loadfont(filename,n)
                 version       = getname(fontdata,"version"),
                 cidinfo       = fontdata.cidinfo,
                 mathconstants = fontdata.mathconstants,
+                colorpalettes = fontdata.colorpalettes,
+                svgshapes     = fontdata.svgshapes,
             },
         }
     end

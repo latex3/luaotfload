@@ -10,7 +10,6 @@ if not modules then modules = { } end modules ['font-con'] = {
 
 local next, tostring, rawget = next, tostring, rawget
 local format, match, lower, gsub = string.format, string.match, string.lower, string.gsub
-local utfbyte = utf.byte
 local sort, insert, concat, sortedkeys, serialize, fastcopy = table.sort, table.insert, table.concat, table.sortedkeys, table.serialize, table.fastcopy
 local derivetable = table.derive
 
@@ -336,6 +335,20 @@ function constructors.enhanceparameters(parameters)
         shrink  = shrink,
         extra   = extra,
     }
+end
+
+local function mathkerns(v,vdelta)
+    local k = { }
+    for i=1,#v do
+        local entry  = v[i]
+        local height = entry.height
+        local kern   = entry.kern
+        k[i] = {
+            height = height and vdelta*height or 0,
+            kern   = kern   and vdelta*kern   or 0,
+        }
+    end
+    return k
 end
 
 function constructors.scale(tfmdata,specification)
@@ -749,22 +762,15 @@ function constructors.scale(tfmdata,specification)
                 chr.top_accent = vdelta*va
             end
             if stackmath then
-                local mk = character.mathkerns -- not in math ?
+                local mk = character.mathkerns
                 if mk then
-                    local kerns = { }
-                    local v = mk.top_right    if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
-                    end     kerns.top_right    = k end
-                    local v = mk.top_left     if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
-                    end     kerns.top_left     = k end
-                    local v = mk.bottom_left  if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
-                    end     kerns.bottom_left  = k end
-                    local v = mk.bottom_right if v then local k = { } for i=1,#v do local vi = v[i]
-                        k[i] = { height = vdelta*vi.height, kern = vdelta*vi.kern }
-                    end     kerns.bottom_right = k end
-                    chr.mathkern = kerns -- singular -> should be patched in luatex !
+                    local tr, tl, br, bl = mk.topright, mk.topleft, mk.bottomright, mk.bottomleft
+                    chr.mathkern = { -- singular -> should be patched in luatex !
+                        top_right    = tr and mathkerns(tr,vdelta) or nil,
+                        top_left     = tl and mathkerns(tl,vdelta) or nil,
+                        bottom_right = br and mathkerns(br,vdelta) or nil,
+                        bottom_left  = bl and mathkerns(bl,vdelta) or nil,
+                    }
                 end
             end
             if hasitalics then
@@ -1043,6 +1049,29 @@ function constructors.hashfeatures(specification) -- will be overloaded
     return "unknown"
 end
 
+-- hashmethods.normal = function(list)
+--     local s = { }
+--     local n = 0
+--     for k, v in next, list do
+--         if not k then
+--             -- no need to add to hash
+--         elseif k == "number" or k == "features" then
+--             -- no need to add to hash (maybe we need a skip list)
+--         else
+--             n = n + 1
+--             s[n] = k
+--         end
+--     end
+--     if n > 0 then
+--         sort(s)
+--         for i=1,n do
+--             local k = s[i]
+--             s[i] = k .. '=' .. tostring(list[k])
+--         end
+--         return concat(s,"+")
+--     end
+-- end
+
 hashmethods.normal = function(list)
     local s = { }
     local n = 0
@@ -1053,15 +1082,11 @@ hashmethods.normal = function(list)
             -- no need to add to hash (maybe we need a skip list)
         else
             n = n + 1
-            s[n] = k
+            s[n] = k .. '=' .. tostring(v)
         end
     end
     if n > 0 then
         sort(s)
-        for i=1,n do
-            local k = s[i]
-            s[i] = k .. '=' .. tostring(list[k])
-        end
         return concat(s,"+")
     end
 end
@@ -1230,7 +1255,11 @@ function constructors.getfeatureaction(what,where,mode,name)
     end
 end
 
-function constructors.newhandler(what) -- could be a metatable newindex
+local newhandler        = { }
+constructors.handlers   = newhandler -- downward compatible
+constructors.newhandler = newhandler
+
+local function setnewhandler(what) -- could be a metatable newindex
     local handler = handlers[what]
     if not handler then
         handler = { }
@@ -1239,7 +1268,16 @@ function constructors.newhandler(what) -- could be a metatable newindex
     return handler
 end
 
-function constructors.newfeatures(what) -- could be a metatable newindex
+setmetatable(newhandler, {
+    __call  = function(t,k) local v = t[k] return v end,
+    __index = function(t,k) local v = setnewhandler(k) t[k] = v return v end,
+})
+
+local newfeatures        = { }
+constructors.newfeatures = newfeatures -- downward compatible
+constructors.features    = newfeatures
+
+local function setnewfeatures(what)
     local handler = handlers[what]
     local features = handler.features
     if not features then
@@ -1258,6 +1296,11 @@ function constructors.newfeatures(what) -- could be a metatable newindex
     end
     return features
 end
+
+setmetatable(newfeatures, {
+    __call  = function(t,k) local v = t[k] return v end,
+    __index = function(t,k) local v = setnewfeatures(k) t[k] = v return v end,
+})
 
 --[[ldx--
 <p>We need to check for default features. For this we provide
@@ -1286,7 +1329,6 @@ function constructors.initializefeatures(what,tfmdata,features,trace,report)
         local properties       = tfmdata.properties or { } -- brrr
         local whathandler      = handlers[what]
         local whatfeatures     = whathandler.features
-        local whatinitializers = whatfeatures.initializers
         local whatmodechecker  = whatfeatures.modechecker
         -- properties.mode can be enforces (for instance in font-otd)
         local mode             = properties.mode or (whatmodechecker and whatmodechecker(tfmdata,features,features.mode)) or features.mode or "base"

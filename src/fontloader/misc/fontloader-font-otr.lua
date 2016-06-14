@@ -1659,19 +1659,19 @@ end
 -- Experimental (we need fonts).
 
 function readers.colr(f,fontdata,specification)
-    if specification.details then
+    if specification.glyphs then
         reportskippedtable("colr")
     end
 end
 
 function readers.cpal(f,fontdata,specification)
-    if specification.details then
+    if specification.glyphs then
         reportskippedtable("cpal")
     end
 end
 
 function readers.svg(f,fontdata,specification)
-    if specification.details then
+    if specification.glyphs then
         reportskippedtable("svg")
     end
 end
@@ -2189,6 +2189,7 @@ function readers.loadfont(filename,n)
             properties    = {
                 hasitalics    = fontdata.hasitalics or false,
                 maxcolorclass = fontdata.maxcolorclass,
+                hascolor      = fontdata.hascolor or false,
             },
             resources     = {
              -- filename      = fontdata.filename,

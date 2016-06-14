@@ -2214,9 +2214,9 @@ function readers.math(f,fontdata,specification)
 end
 
 function readers.colr(f,fontdata,specification)
-    if specification.details then
-        local datatable = fontdata.tables.colr
-        if datatable then
+    local datatable = fontdata.tables.colr
+    if datatable then
+        if specification.glyphs then
             local tableoffset = datatable.offset
             setposition(f,tableoffset)
             local version = readushort(f)
@@ -2266,11 +2266,12 @@ function readers.colr(f,fontdata,specification)
                 glyphs[glyphindex].colors = t
             end
         end
+        fontdata.hascolor = true
     end
 end
 
 function readers.cpal(f,fontdata,specification)
-    if specification.details then
+    if specification.glyphs then
         local datatable = fontdata.tables.cpal
         if datatable then
             local tableoffset = datatable.offset
@@ -2316,9 +2317,9 @@ function readers.cpal(f,fontdata,specification)
 end
 
 function readers.svg(f,fontdata,specification)
-    if specification.details then
-        local datatable = fontdata.tables.svg
-        if datatable then
+    local datatable = fontdata.tables.svg
+    if datatable then
+        if specification.glyphs then
             local tableoffset = datatable.offset
             setposition(f,tableoffset)
             local version = readushort(f)
@@ -2351,5 +2352,6 @@ function readers.svg(f,fontdata,specification)
             end
             fontdata.svgshapes = entries
         end
+        fontdata.hascolor = true
     end
 end

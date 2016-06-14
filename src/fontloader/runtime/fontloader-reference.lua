@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 06/10/16 23:51:36
+-- merge date  : 06/13/16 17:00:29
 
 do -- begin closure to overcome local limits and interference
 
@@ -8802,17 +8802,17 @@ function readers.glyf(f,fontdata,specification)
   end
 end
 function readers.colr(f,fontdata,specification)
-  if specification.details then
+  if specification.glyphs then
     reportskippedtable("colr")
   end
 end
 function readers.cpal(f,fontdata,specification)
-  if specification.details then
+  if specification.glyphs then
     reportskippedtable("cpal")
   end
 end
 function readers.svg(f,fontdata,specification)
-  if specification.details then
+  if specification.glyphs then
     reportskippedtable("svg")
   end
 end
@@ -9283,6 +9283,7 @@ function readers.loadfont(filename,n)
       properties={
         hasitalics=fontdata.hasitalics or false,
         maxcolorclass=fontdata.maxcolorclass,
+        hascolor=fontdata.hascolor or false,
       },
       resources={
         filename=filename,
@@ -13169,9 +13170,9 @@ function readers.math(f,fontdata,specification)
   end
 end
 function readers.colr(f,fontdata,specification)
-  if specification.details then
-    local datatable=fontdata.tables.colr
-    if datatable then
+  local datatable=fontdata.tables.colr
+  if datatable then
+    if specification.glyphs then
       local tableoffset=datatable.offset
       setposition(f,tableoffset)
       local version=readushort(f)
@@ -13218,10 +13219,11 @@ function readers.colr(f,fontdata,specification)
         glyphs[glyphindex].colors=t
       end
     end
+    fontdata.hascolor=true
   end
 end
 function readers.cpal(f,fontdata,specification)
-  if specification.details then
+  if specification.glyphs then
     local datatable=fontdata.tables.cpal
     if datatable then
       local tableoffset=datatable.offset
@@ -13265,9 +13267,9 @@ function readers.cpal(f,fontdata,specification)
   end
 end
 function readers.svg(f,fontdata,specification)
-  if specification.details then
-    local datatable=fontdata.tables.svg
-    if datatable then
+  local datatable=fontdata.tables.svg
+  if datatable then
+    if specification.glyphs then
       local tableoffset=datatable.offset
       setposition(f,tableoffset)
       local version=readushort(f)
@@ -13300,6 +13302,7 @@ function readers.svg(f,fontdata,specification)
       end
       fontdata.svgshapes=entries
     end
+    fontdata.hascolor=true
   end
 end
 

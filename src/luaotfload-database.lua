@@ -416,10 +416,8 @@ mtx-fonts has in names.tma:
 local initialize_namedata = function (formats, created)
     local now = os.date "%Y-%m-%d %H:%M:%S" --- i. e. "%F %T" on POSIX systems
     return {
-        --families        = { },
         status          = { }, -- was: status; map abspath -> mapping
         mappings        = { }, -- TODO: check if still necessary after rewrite
-        names           = { },
         files           = { }, -- created later
         meta            = {
             created    = created or now,
@@ -526,7 +524,8 @@ load_names = function (dry_run, no_rebuild)
                        names_version, db_version)
             if not fonts_reloaded then
                 logreport ("both", 0, "db", [[Force rebuild.]])
-                data = update_names ({ }, true, false)
+                data = update_names (initialize_namedata (get_font_filter ()),
+                                     true, false)
                 if not data then
                     logreport ("both", 0, "db",
                                "Database creation unsuccessful.")
@@ -3193,7 +3192,7 @@ update_names = function (currentnames, force, dry_run)
         if force then
             currentnames = initialize_namedata (get_font_filter ())
         else
-            if not currentnames then
+            if not currentnames or not next (currentnames) then
                 currentnames = load_names (dry_run)
             end
             if currentnames.meta.version ~= names.version then
@@ -3553,7 +3552,7 @@ return {
         fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
-        names.version   = 2.8
+        names.version   = 2.9
         names.data      = nil      --- contains the loaded database
         names.lookups   = nil      --- contains the lookup cache
 

@@ -8,6 +8,8 @@ if not modules then modules = { } end modules ['font-ocl'] = {
 
 -- todo : user list of colors
 
+local tostring, next = tostring, next
+
 local formatters = string.formatters
 
 local otf = fonts.handlers.otf
@@ -168,31 +170,81 @@ if context and xml.convert then
 
     local report_svg = logs.reporter("fonts","svg conversion")
 
+    local xmlconvert = xml.convert
+    local xmlfirst   = xml.first
+    local loaddata   = io.loaddata
+    local savedata   = io.savedata
+    local remove     = os.remove
+
+ -- function otfsvg.topdf(svgshapes)
+ --     local svgfile   = "temp-otf-svg-shape.svg"
+ --     local pdffile   = "temp-otf-svg-shape.pdf"
+ --     local command   = "inkscape " .. svgfile .. " --export-pdf=" .. pdffile
+ --     local testrun   = false
+ --     local pdfshapes = { }
+ --     local nofshapes = #svgshapes
+ --     report_svg("processing %i svg containers",nofshapes)
+ --     statistics.starttiming()
+ --     for i=1,nofshapes do
+ --         local entry = svgshapes[i]
+ --         for j=entry.first,entry.last do
+ --             local svg  = xmlconvert(entry.data)
+ --             local data = xmlfirst(svg,"/svg[@id='glyph"..j.."']")
+ --             savedata(svgfile,tostring(data))
+ --             report_svg("processing svg shape of glyph %i in container %i",j,i)
+ --             os.execute(command)
+ --             pdfshapes[j] = loaddata(pdffile)
+ --         end
+ --         if testrun and i > testrun then
+ --             report_svg("quiting test run")
+ --             break
+ --         end
+ --     end
+ --     remove(svgfile)
+ --     statistics.stoptiming()
+ --     report_svg("conversion time: %0.3f",statistics.elapsedtime())
+ --     return pdfshapes
+ -- end
+
     function otfsvg.topdf(svgshapes)
-        local svgfile   = "temp-otf-svg-shape.svg"
-        local pdffile   = "temp-otf-svg-shape.pdf"
-        local command   = "inkscape " .. svgfile .. " --export-pdf=" .. pdffile
-     -- local command   = [[python "c:\Users\Hans Hagen\AppData\Roaming\Python\Scripts\cairosvg" -f pdf ]] .. svgfile .. " -o " .. pdffile
-        local testrun   = false
+        local inkscape  = io.popen("inkscape --shell 2>&1","w")
         local pdfshapes = { }
         local nofshapes = #svgshapes
+        local f_svgfile = formatters["temp-otf-svg-shape-%i.svg"]
+        local f_pdffile = formatters["temp-otf-svg-shape-%i.pdf"]
+        local f_convert = formatters["%s --export-pdf=%s\n"]
         report_svg("processing %i svg containers",nofshapes)
+        statistics.starttiming()
         for i=1,nofshapes do
             local entry = svgshapes[i]
             for j=entry.first,entry.last do
-                local svg  = xml.convert(entry.data)
-                local data = xml.first(svg,"/svg[@id='glyph"..j.."']")
-                io.savedata(svgfile,tostring(data))
-                report_svg("processing svg shape of glyph %i in container %i",j,i)
-                os.execute(command)
-                pdfshapes[j] = io.loaddata(pdffile)
-            end
-            if testrun and i > testrun then
-                report_svg("quiting test run")
-                break
+                local svg  = xmlconvert(entry.data)
+                local root = svg and xmlfirst(svg,"/svg[@id='glyph"..j.."']")
+                local data = root and tostring(root)
+                if data and data ~= "" then
+                    local svgfile = f_svgfile(j)
+                    local pdffile = f_pdffile(j)
+                    savedata(svgfile,data)
+                    inkscape:write(f_convert(svgfile,pdffile))
+                    pdfshapes[j] = true
+                end
             end
         end
-        os.remove(svgfile)
+        inkscape:write("quit\n")
+     -- while inkscape:read("*a") do
+     --     os.sleep(0.1)
+     -- end
+        inkscape:close()
+        report_svg("processing %i pdf results",nofshapes)
+        for i in next, pdfshapes do
+            local svgfile = f_svgfile(i)
+            local pdffile = f_pdffile(i)
+            pdfshapes[i] = loaddata(pdffile)
+            remove(svgfile)
+            remove(pdffile)
+        end
+        statistics.stoptiming()
+        report_svg("conversion time: %0.3f",statistics.elapsedtime())
         return pdfshapes
     end
 

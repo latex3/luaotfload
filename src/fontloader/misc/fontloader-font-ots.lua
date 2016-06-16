@@ -192,6 +192,7 @@ local free_node          = nuts.free
 local end_of_math        = nuts.end_of_math
 local traverse_nodes     = nuts.traverse
 local traverse_id        = nuts.traverse_id
+local remove_node        = nuts.remove
 
 local setmetatableindex  = table.setmetatableindex
 
@@ -1236,7 +1237,7 @@ function chainprocs.gsub_multiple(head,start,stop,dataset,sequence,currentlookup
         if trace_multiples then
             logprocess("%s: replacing %s by multiple characters %s",cref(dataset,sequence),gref(startchar),gref(replacement))
         end
-        return multiple_glyphs(head,start,replacement,currentlookup.flags[1]) -- not sequence.flags?
+        return multiple_glyphs(head,start,replacement,sequence.flags[1])
     end
     return head, start, false
 end
@@ -2033,67 +2034,6 @@ local function chaindisk(head,start,last,dataset,sequence,chainlookup,rlmode,k,c
     return head, start, ok
 end
 
--- helpers from elsewhere
-
--- local function currentmatch(current,n,l)
---     while current do
---         if getid(current) ~= glyph_code then
---             return false
---         elseif seq[n][getchar(current)] then
---             n = n + 1
---             current = getnext(current)
---             if not current then
---                 return true, n, current
---             elseif n > l then
---              -- match = false
---                 return true, n, current
---             end
---         else
---             return false
---         end
---     end
--- end
---
--- local function aftermatch(current,n,l)
---     while current do
---         if getid(current) ~= glyph_code then
---             return false
---         elseif seq[n][getchar(current)] then
---             n = n + 1
---             current = getnext(current)
---             if not current then
---                 return true, n, current
---             elseif n > l then
---              -- match = false
---                 return true, n, current
---             end
---         else
---             return false
---         end
---     end
--- end
---
--- local function beforematch(current,n)
---     local finish  = getprev(current)
---     local current = find_node_tail(current)
---     while current do
---         if getid(current) ~= glyph_code then
---             return false
---         elseif seq[n][getchar(current)] then
---             n = n - 1
---             current = getprev(current)
---             if not current or current == finish then
---                 return true, n, current
---             elseif n < 1 then
---              -- match = false
---                 return true, n, current
---             end
---         else
---             return false
---         end
---     end
--- end
-
 local noflags = { false, false, false, false }
 
 local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
@@ -2116,9 +2056,10 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
         local ck      = contexts[k]
         local seq     = ck[3]
         local s       = #seq
+        local size    = 1
         -- f..l = mid string
         if s == 1 then
-            -- never happens
+            -- this seldom happens as it makes no sense (bril, ebgaramond, husayni, minion)
             local char = ischar(current,currentfont)
             if char then
                 match = seq[1][char]
@@ -2129,48 +2070,34 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
             local f = ck[4]
             local l = ck[5]
             -- current match
-            if f == 1 and f == l then -- current only
-                -- already a hit
-             -- match = true
-            else -- before/current/after | before/current | current/after
-                -- no need to test first hit (to be optimized)
-                if f == l then -- new, else last out of sync (f is > 1)
-                 -- match = true
-                else
-                    local discfound = nil
-                    local n = f + 1
-                    last = getnext(last) -- the second in current (first already matched)
-                    while n <= l do
-                        if not last and (sweeptype == "post" or sweeptype == "replace") then
-                            last      = getnext(sweepnode)
-                            sweeptype = nil
-                        end
-                        if last then
-                            local char, id = ischar(last,currentfont)
-                            if char then
-                                local ccd = descriptions[char]
-                                if ccd then
-                                    local class = ccd.class or "base"
-                                    if class == skipmark or class == skipligature or class == skipbase or (markclass and class == "mark" and not markclass[char]) then
-                                        skipped = true
-                                        if trace_skips then
-                                            show_skip(dataset,sequence,char,ck,class)
-                                        end
-                                        last = getnext(last)
-                                    elseif seq[n][char] then
-                                        if n < l then
-                                            last = getnext(last)
-                                        end
-                                        n = n + 1
-                                    else
-                                        if discfound then
-                                            notmatchreplace[discfound] = true
-                                            match = not notmatchpre[discfound]
-                                        else
-                                            match = false
-                                        end
-                                        break
+            size = l - f + 1
+            if size > 1 then
+                -- before/current/after | before/current | current/after
+                local discfound = nil
+                local n = f + 1
+                last = getnext(last) -- the second in current (first already matched)
+                while n <= l do
+                    if not last and (sweeptype == "post" or sweeptype == "replace") then
+                        last      = getnext(sweepnode)
+                        sweeptype = nil
+                    end
+                    if last then
+                        local char, id = ischar(last,currentfont)
+                        if char then
+                            local ccd = descriptions[char]
+                            if ccd then
+                                local class = ccd.class or "base"
+                                if class == skipmark or class == skipligature or class == skipbase or (markclass and class == "mark" and not markclass[char]) then
+                                    skipped = true
+                                    if trace_skips then
+                                        show_skip(dataset,sequence,char,ck,class)
                                     end
+                                    last = getnext(last)
+                                elseif seq[n][char] then
+                                    if n < l then
+                                        last = getnext(last)
+                                    end
+                                    n = n + 1
                                 else
                                     if discfound then
                                         notmatchreplace[discfound] = true
@@ -2180,7 +2107,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                     end
                                     break
                                 end
-                            elseif char == false then
+                            else
                                 if discfound then
                                     notmatchreplace[discfound] = true
                                     match = not notmatchpre[discfound]
@@ -2188,60 +2115,68 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                     match = false
                                 end
                                 break
-                            elseif id == disc_code then
-                                diskseen              = true
-                                discfound             = last
-                                notmatchpre[last]     = nil
-                                notmatchpost[last]    = true
-                                notmatchreplace[last] = nil
-                                local pre, post, replace = getdisc(last)
-                                if pre then
-                                    local n = n
-                                    while pre do
-                                        if seq[n][getchar(pre)] then
-                                            n = n + 1
-                                            pre = getnext(pre)
-                                            if n > l then
-                                                break
-                                            end
-                                        else
-                                            notmatchpre[last] = true
-                                            break
-                                        end
-                                    end
-                                    if n <= l then
-                                        notmatchpre[last] = true
-                                    end
-                                else
-                                    notmatchpre[last] = true
-                                end
-                                if replace then
-                                    -- so far we never entered this branch
-                                    while replace do
-                                        if seq[n][getchar(replace)] then
-                                            n = n + 1
-                                            replace = getnext(replace)
-                                            if n > l then
-                                                break
-                                            end
-                                        else
-                                            notmatchreplace[last] = true
-                                            match = not notmatchpre[last]
-                                            break
-                                        end
-                                    end
-                                    match = not notmatchpre[last]
-                                end
-                                -- maybe only if match
-                                last = getnext(last)
+                            end
+                        elseif char == false then
+                            if discfound then
+                                notmatchreplace[discfound] = true
+                                match = not notmatchpre[discfound]
                             else
                                 match = false
-                                break
                             end
+                            break
+                        elseif id == disc_code then
+                            diskseen              = true
+                            discfound             = last
+                            notmatchpre[last]     = nil
+                            notmatchpost[last]    = true
+                            notmatchreplace[last] = nil
+                            local pre, post, replace = getdisc(last)
+                            if pre then
+                                local n = n
+                                while pre do
+                                    if seq[n][getchar(pre)] then
+                                        n = n + 1
+                                        pre = getnext(pre)
+                                        if n > l then
+                                            break
+                                        end
+                                    else
+                                        notmatchpre[last] = true
+                                        break
+                                    end
+                                end
+                                if n <= l then
+                                    notmatchpre[last] = true
+                                end
+                            else
+                                notmatchpre[last] = true
+                            end
+                            if replace then
+                                -- so far we never entered this branch
+                                while replace do
+                                    if seq[n][getchar(replace)] then
+                                        n = n + 1
+                                        replace = getnext(replace)
+                                        if n > l then
+                                            break
+                                        end
+                                    else
+                                        notmatchreplace[last] = true
+                                        match = not notmatchpre[last]
+                                        break
+                                    end
+                                end
+                                match = not notmatchpre[last]
+                            end
+                            -- maybe only if match
+                            last = getnext(last)
                         else
                             match = false
                             break
                         end
+                    else
+                        match = false
+                        break
                     end
                 end
             end
@@ -2509,7 +2444,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
             end
         end
         if match then
-            -- can lookups be of a different type ?
+            -- Can lookups be of a different type?
             local diskchain = diskseen or sweepnode
             if trace_contexts then
                 local rule       = ck[1]
@@ -2523,8 +2458,12 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
             local chainlookups = ck[6]
             if chainlookups then
                 local nofchainlookups = #chainlookups
-                -- we can speed this up if needed
-                if nofchainlookups == 1 then
+                -- Lookups can be like { 1, false, 3 } or { false, 2 } or basically anything and
+                -- #lookups can be less than #current
+                if size == 1 then
+                 -- if nofchainlookups > size then
+                 --     -- bad rules
+                 -- end
                     local chainlookup = chainlookups[1]
                     local chainkind   = chainlookup.type
                     local chainproc   = chainprocs[chainkind]
@@ -2542,8 +2481,16 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                         logprocess("%s: %s is not yet supported (1)",cref(dataset,sequence),chainkind)
                     end
                  else
+                    -- See LookupType 5: Contextual Substitution Subtable. Now it becomes messy. The
+                    -- easiest case is where #current maps on #lookups i.e. one-to-one. But what if
+                    -- we have a ligature. Cf the spec we then need to advance one character but we
+                    -- really need to test it as there are fonts out there that are fuzzy and have
+                    -- too many lookups:
+                    --
+                    -- U+1105 U+119E U+1105 U+119E : sourcehansansklight: script=hang ccmp=yes
+                    --
                     local i = 1
-                    while start and true do
+                    while start do
                         if skipped then
                             while start do -- todo: use properties
                                 local char = getchar(start)
@@ -2560,12 +2507,8 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                 end
                             end
                         end
-                        -- see remark in ms standard under : LookupType 5: Contextual Substitution Subtable
-                        local chainlookup = chainlookups[1] -- should be i when they can be different
-                        if not chainlookup then
-                            -- we just advance
-                            i = i + 1 -- shouldn't that be #current
-                        else
+                        local chainlookup = chainlookups[i]
+                        if chainlookup then
                             local chainkind = chainlookup.type
                             local chainproc = chainprocs[chainkind]
                             if chainproc then
@@ -2578,29 +2521,18 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                                 -- messy since last can be changed !
                                 if ok then
                                     done = true
-                                    if n and n > 1 then
-                                        -- we have a ligature (cf the spec we advance one but we really need to test it
-                                        -- as there are fonts out there that are fuzzy and have too many lookups:
-                                        --
-                                        -- U+1105 U+119E U+1105 U+119E : sourcehansansklight: script=hang ccmp=yes
-                                        --
-                                        if i + n > nofchainlookups then
-                                         -- if trace_contexts then
-                                         --     logprocess("%s: quitting lookups",cref(dataset,sequence))
-                                         -- end
-                                            break
-                                        else
-                                            -- we need to carry one
-                                        end
+                                    if n and n > 1 and i + n > nofchainlookups then
+                                        -- this is a safeguard, we just ignore the rest of the lookups
+                                        break
                                     end
                                 end
                             else
                                 -- actually an error
                                 logprocess("%s: %s is not yet supported (2)",cref(dataset,sequence),chainkind)
                             end
-                            i = i + 1
                         end
-                        if i > nofchainlookups or not start then
+                        i = i + 1
+                        if i > size or not start then
                             break
                         elseif start then
                             start = getnext(start)
@@ -2608,6 +2540,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                     end
                 end
             else
+                -- todo: needs checking for holes in the replacements
                 local replacements = ck[7]
                 if replacements then
                     head, start, done = reversesub(head,start,last,dataset,sequence,replacements,rlmode)

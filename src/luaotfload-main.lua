@@ -50,8 +50,8 @@ local authors = "\z
 
 luaotfload.module = {
     name          = "luaotfload-main",
-    version       = 2.70002,
-    date          = "2016/04/21",
+    version       = 2.70003,
+    date          = "2016/06/16",
     description   = "OpenType layout system.",
     author        = authors,
     copyright     = authors,

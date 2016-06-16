@@ -53,7 +53,7 @@ local report_otf         = logs.reporter("fonts","otf loading")
 local fonts              = fonts
 local otf                = fonts.handlers.otf
 
-otf.version              = 3.022 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version              = 3.023 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                = containers.define("fonts", "otl", otf.version, true)
 otf.svgcache             = containers.define("fonts", "svg", otf.version, true)
 otf.pdfcache             = containers.define("fonts", "pdf", otf.version, true)
@@ -747,7 +747,7 @@ end
 otf.getgsub = getgsub -- returns value, gsub_kind
 
 function otf.getsubstitution(tfmdata,k,kind,value)
-    local found, kind = getgsub(tfmdata,k,kind)
+    local found, kind = getgsub(tfmdata,k,kind,value)
     if not found then
         --
     elseif kind == "gsub_single" then

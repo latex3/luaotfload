@@ -365,6 +365,26 @@ end
 -- We generalize the chained lookups so that we can do with only one handler
 -- when processing them.
 
+local function readlookuparray(f,noflookups)
+    local lookups = { }
+    if noflookups > 0 then
+        local length = 0
+        for i=1,noflookups do
+            local index = readushort(f) + 1
+            if index > length then
+                length = index
+            end
+            lookups[index] = readushort(f) + 1
+        end
+        for index=1,length do
+            if not lookups[index] then
+                lookups[index] = false
+            end
+        end
+    end
+    return lookups
+end
+
 local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyphs,what)
     local tableoffset = lookupoffset + offset
     setposition(f,tableoffset)
@@ -389,10 +409,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
                         for i=2,nofcurrent do
                             current[i] = { readushort(f) }
                         end
-                        local lookups = { }
-                        for i=1,noflookups do
-                            lookups[readushort(f)+1] = readushort(f) + 1
-                        end
+                        local lookups = readlookuparray(f,noflookups)
                         rules[#rules+1] = {
                             current = current,
                             lookups = lookups
@@ -435,10 +452,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
                                 for i=2,nofcurrent do
                                     current[i] = currentclasses[readushort(f) + 1]
                                 end
-                                local lookups = { }
-                                for i=1,noflookups do
-                                    lookups[readushort(f)+1] = readushort(f) + 1
-                                end
+                                local lookups = readlookuparray(f,noflookups)
                                 rules[#rules+1] = {
                                     current = current,
                                     lookups = lookups
@@ -462,10 +476,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
     elseif subtype == 3 then
         local current    = readarray(f)
         local noflookups = readushort(f)
-        local lookups    = { }
-        for i=1,noflookups do
-            lookups[readushort(f)+1] = readushort(f) + 1
-        end
+        local lookups    = readlookuparray(f,noflookups)
         current = readcoveragearray(f,tableoffset,current,true)
         return {
             format = "coverage",
@@ -525,10 +536,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
                             end
                         end
                         local noflookups = readushort(f)
-                        local lookups    = { }
-                        for i=1,noflookups do
-                            lookups[readushort(f)+1] = readushort(f) + 1
-                        end
+                        local lookups    = readlookuparray(f,noflookups)
                         rules[#rules+1] = {
                             before  = before,
                             current = current,
@@ -596,10 +604,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
                                 end
                                 -- no sequence index here (so why in context as it saves nothing)
                                 local noflookups = readushort(f)
-                                local lookups    = { }
-                                for i=1,noflookups do
-                                    lookups[readushort(f)+1] = readushort(f) + 1
-                                end
+                                local lookups    = readlookuparray(f,noflookups)
                                 rules[#rules+1] = {
                                     before  = before,
                                     current = current,
@@ -627,10 +632,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
         local current    = readarray(f)
         local after      = readarray(f)
         local noflookups = readushort(f)
-        local lookups    = { }
-        for i=1,noflookups do
-            lookups[readushort(f)+1] = readushort(f) + 1
-        end
+        local lookups    = readlookuparray(f,noflookups)
         before  = readcoveragearray(f,tableoffset,before,true)
         current = readcoveragearray(f,tableoffset,current,true)
         after   = readcoveragearray(f,tableoffset,after,true)
@@ -1626,45 +1628,58 @@ do
                             report_issue(i,what,sequence,"empty")
                             rule.lookups = nil
                         else
-                            for index, lookupid in sortedhash(rlookups) do -- nicer
-                                local h = sublookuphash[lookupid]
-                                if not h then
-                                    -- here we have a lookup that is used independent as well
-                                    -- as in another one
-                                    local lookup = lookups[lookupid]
-                                    if lookup then
-                                        local d = lookup.done
-                                        if d then
-                                            nofsublookups = nofsublookups + 1
-                                         -- report("registering %i as sublookup %i",lookupid,nofsublookups)
-                                            h = {
-                                                index     = nofsublookups, -- handy for tracing
-                                                name      = f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
-                                                derived   = true,          -- handy for tracing
-                                                steps     = d.steps,
-                                                nofsteps  = d.nofsteps,
-                                                type      = d.lookuptype,
-                                                markclass = d.markclass or nil,
-                                                flags     = d.flags,
-                                             -- chain     = d.chain,
-                                            }
-                                            sublookuplist[nofsublookups] = h
-                                            sublookuphash[lookupid] = nofsublookups
-                                            sublookupcheck[lookupid] = 1
+                            -- we can have holes in rlookups
+                         -- for index, lookupid in sortedhash(rlookups) do
+                            local length = #rlookups
+--                             for index in next, rlookups do
+--                                 if index > length then
+--                                     length = index
+--                                 end
+--                             end
+                            for index=1,length do
+                                local lookupid = rlookups[index]
+                                if lookupid then
+                                    local h = sublookuphash[lookupid]
+                                    if not h then
+                                        -- here we have a lookup that is used independent as well
+                                        -- as in another one
+                                        local lookup = lookups[lookupid]
+                                        if lookup then
+                                            local d = lookup.done
+                                            if d then
+                                                nofsublookups = nofsublookups + 1
+                                             -- report("registering %i as sublookup %i",lookupid,nofsublookups)
+                                                h = {
+                                                    index     = nofsublookups, -- handy for tracing
+                                                    name      = f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
+                                                    derived   = true,          -- handy for tracing
+                                                    steps     = d.steps,
+                                                    nofsteps  = d.nofsteps,
+                                                    type      = d.lookuptype,
+                                                    markclass = d.markclass or nil,
+                                                    flags     = d.flags,
+                                                 -- chain     = d.chain,
+                                                }
+                                                sublookuplist[nofsublookups] = h
+                                                sublookuphash[lookupid] = nofsublookups
+                                                sublookupcheck[lookupid] = 1
+                                            else
+                                                report_issue(i,what,sequence,"missing")
+                                                rule.lookups = nil
+                                                break
+                                            end
                                         else
-                                            report_issue(i,what,sequence,"missing")
+                                            report_issue(i,what,sequence,"bad")
                                             rule.lookups = nil
                                             break
                                         end
                                     else
-                                        report_issue(i,what,sequence,"bad")
-                                        rule.lookups = nil
-                                        break
+                                        sublookupcheck[lookupid] = sublookupcheck[lookupid] + 1
                                     end
+                                    rlookups[index] = h or false
                                 else
-                                    sublookupcheck[lookupid] = sublookupcheck[lookupid] + 1
+                                    rlookups[index] = false
                                 end
-                                rlookups[index] = h
                             end
                         end
                     end

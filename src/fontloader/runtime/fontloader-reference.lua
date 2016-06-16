@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 06/13/16 17:00:29
+-- merge date  : 06/15/16 20:18:05
 
 do -- begin closure to overcome local limits and interference
 
@@ -11479,6 +11479,25 @@ local function covered(subset,all)
   end
   return used
 end
+local function readlookuparray(f,noflookups)
+  local lookups={}
+  if noflookups>0 then
+    local length=0
+    for i=1,noflookups do
+      local index=readushort(f)+1
+      if index>length then
+        length=index
+      end
+      lookups[index]=readushort(f)+1
+    end
+    for index=1,length do
+      if not lookups[index] then
+        lookups[index]=false
+      end
+    end
+  end
+  return lookups
+end
 local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyphs,what)
   local tableoffset=lookupoffset+offset
   setposition(f,tableoffset)
@@ -11503,10 +11522,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
             for i=2,nofcurrent do
               current[i]={ readushort(f) }
             end
-            local lookups={}
-            for i=1,noflookups do
-              lookups[readushort(f)+1]=readushort(f)+1
-            end
+            local lookups=readlookuparray(f,noflookups)
             rules[#rules+1]={
               current=current,
               lookups=lookups
@@ -11547,10 +11563,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
                 for i=2,nofcurrent do
                   current[i]=currentclasses[readushort(f)+1]
                 end
-                local lookups={}
-                for i=1,noflookups do
-                  lookups[readushort(f)+1]=readushort(f)+1
-                end
+                local lookups=readlookuparray(f,noflookups)
                 rules[#rules+1]={
                   current=current,
                   lookups=lookups
@@ -11574,10 +11587,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
   elseif subtype==3 then
     local current=readarray(f)
     local noflookups=readushort(f)
-    local lookups={}
-    for i=1,noflookups do
-      lookups[readushort(f)+1]=readushort(f)+1
-    end
+    local lookups=readlookuparray(f,noflookups)
     current=readcoveragearray(f,tableoffset,current,true)
     return {
       format="coverage",
@@ -11632,10 +11642,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
               end
             end
             local noflookups=readushort(f)
-            local lookups={}
-            for i=1,noflookups do
-              lookups[readushort(f)+1]=readushort(f)+1
-            end
+            local lookups=readlookuparray(f,noflookups)
             rules[#rules+1]={
               before=before,
               current=current,
@@ -11700,10 +11707,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
                   end
                 end
                 local noflookups=readushort(f)
-                local lookups={}
-                for i=1,noflookups do
-                  lookups[readushort(f)+1]=readushort(f)+1
-                end
+                local lookups=readlookuparray(f,noflookups)
                 rules[#rules+1]={
                   before=before,
                   current=current,
@@ -11731,10 +11735,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
     local current=readarray(f)
     local after=readarray(f)
     local noflookups=readushort(f)
-    local lookups={}
-    for i=1,noflookups do
-      lookups[readushort(f)+1]=readushort(f)+1
-    end
+    local lookups=readlookuparray(f,noflookups)
     before=readcoveragearray(f,tableoffset,before,true)
     current=readcoveragearray(f,tableoffset,current,true)
     after=readcoveragearray(f,tableoffset,after,true)
@@ -12629,41 +12630,47 @@ do
               report_issue(i,what,sequence,"empty")
               rule.lookups=nil
             else
-              for index,lookupid in sortedhash(rlookups) do 
-                local h=sublookuphash[lookupid]
-                if not h then
-                  local lookup=lookups[lookupid]
-                  if lookup then
-                    local d=lookup.done
-                    if d then
-                      nofsublookups=nofsublookups+1
-                      h={
-                        index=nofsublookups,
-                        name=f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
-                        derived=true,
-                        steps=d.steps,
-                        nofsteps=d.nofsteps,
-                        type=d.lookuptype,
-                        markclass=d.markclass or nil,
-                        flags=d.flags,
-                      }
-                      sublookuplist[nofsublookups]=h
-                      sublookuphash[lookupid]=nofsublookups
-                      sublookupcheck[lookupid]=1
+              local length=#rlookups
+              for index=1,length do
+                local lookupid=rlookups[index]
+                if lookupid then
+                  local h=sublookuphash[lookupid]
+                  if not h then
+                    local lookup=lookups[lookupid]
+                    if lookup then
+                      local d=lookup.done
+                      if d then
+                        nofsublookups=nofsublookups+1
+                        h={
+                          index=nofsublookups,
+                          name=f_lookupname(lookupprefix,"d",lookupid+lookupidoffset),
+                          derived=true,
+                          steps=d.steps,
+                          nofsteps=d.nofsteps,
+                          type=d.lookuptype,
+                          markclass=d.markclass or nil,
+                          flags=d.flags,
+                        }
+                        sublookuplist[nofsublookups]=h
+                        sublookuphash[lookupid]=nofsublookups
+                        sublookupcheck[lookupid]=1
+                      else
+                        report_issue(i,what,sequence,"missing")
+                        rule.lookups=nil
+                        break
+                      end
                     else
-                      report_issue(i,what,sequence,"missing")
+                      report_issue(i,what,sequence,"bad")
                       rule.lookups=nil
                       break
                     end
                   else
-                    report_issue(i,what,sequence,"bad")
-                    rule.lookups=nil
-                    break
+                    sublookupcheck[lookupid]=sublookupcheck[lookupid]+1
                   end
+                  rlookups[index]=h or false
                 else
-                  sublookupcheck[lookupid]=sublookupcheck[lookupid]+1
+                  rlookups[index]=false
                 end
-                rlookups[index]=h
               end
             end
           end
@@ -14486,7 +14493,8 @@ function readers.pack(data)
                   local r=rule.before    if r then for i=1,#r do r[i]=pack_boolean(r[i]) end end
                   local r=rule.after    if r then for i=1,#r do r[i]=pack_boolean(r[i]) end end
                   local r=rule.current   if r then for i=1,#r do r[i]=pack_boolean(r[i]) end end
-                  local r=rule.replacements if r then rule.replacements=pack_flat  (r)  end 
+                  local r=rule.lookups   if r then rule.lookups=pack_mixed (r)  end
+                  local r=rule.replacements if r then rule.replacements=pack_flat  (r)  end
                 end
               end
             end
@@ -14830,9 +14838,16 @@ function readers.unpack(data)
                       end
                     end
                   end
+                  local lookups=rule.lookups
+                  if lookups then
+                    local tv=tables[lookups]
+                    if tv then
+                      rule.lookups=tv
+                    end
+                  end
                   local replacements=rule.replacements
                   if replacements then
-                    local tv=tables[replace]
+                    local tv=tables[replacements]
                     if tv then
                       rule.replacements=tv
                     end
@@ -15348,7 +15363,7 @@ local trace_defining=false registertracker("fonts.defining",function(v) trace_de
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.022 
+otf.version=3.023 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pdfcache=containers.define("fonts","pdf",otf.version,true)
@@ -15901,7 +15916,7 @@ local function getgsub(tfmdata,k,kind,value)
 end
 otf.getgsub=getgsub 
 function otf.getsubstitution(tfmdata,k,kind,value)
-  local found,kind=getgsub(tfmdata,k,kind)
+  local found,kind=getgsub(tfmdata,k,kind,value)
   if not found then
   elseif kind=="gsub_single" then
     return found
@@ -18149,6 +18164,7 @@ local free_node=nuts.free
 local end_of_math=nuts.end_of_math
 local traverse_nodes=nuts.traverse
 local traverse_id=nuts.traverse_id
+local remove_node=nuts.remove
 local setmetatableindex=table.setmetatableindex
 local zwnj=0x200C
 local zwj=0x200D
@@ -19022,7 +19038,7 @@ function chainprocs.gsub_multiple(head,start,stop,dataset,sequence,currentlookup
     if trace_multiples then
       logprocess("%s: replacing %s by multiple characters %s",cref(dataset,sequence),gref(startchar),gref(replacement))
     end
-    return multiple_glyphs(head,start,replacement,currentlookup.flags[1]) 
+    return multiple_glyphs(head,start,replacement,sequence.flags[1])
   end
   return head,start,false
 end
@@ -19750,6 +19766,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
     local ck=contexts[k]
     local seq=ck[3]
     local s=#seq
+    local size=1
     if s==1 then
       local char=ischar(current,currentfont)
       if char then
@@ -19758,44 +19775,33 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
     else
       local f=ck[4]
       local l=ck[5]
-      if f==1 and f==l then
-      else
-        if f==l then
-        else
-          local discfound=nil
-          local n=f+1
-          last=getnext(last) 
-          while n<=l do
-            if not last and (sweeptype=="post" or sweeptype=="replace") then
-              last=getnext(sweepnode)
-              sweeptype=nil
-            end
-            if last then
-              local char,id=ischar(last,currentfont)
-              if char then
-                local ccd=descriptions[char]
-                if ccd then
-                  local class=ccd.class or "base"
-                  if class==skipmark or class==skipligature or class==skipbase or (markclass and class=="mark" and not markclass[char]) then
-                    skipped=true
-                    if trace_skips then
-                      show_skip(dataset,sequence,char,ck,class)
-                    end
-                    last=getnext(last)
-                  elseif seq[n][char] then
-                    if n<l then
-                      last=getnext(last)
-                    end
-                    n=n+1
-                  else
-                    if discfound then
-                      notmatchreplace[discfound]=true
-                      match=not notmatchpre[discfound]
-                    else
-                      match=false
-                    end
-                    break
+      size=l-f+1
+      if size>1 then
+        local discfound=nil
+        local n=f+1
+        last=getnext(last) 
+        while n<=l do
+          if not last and (sweeptype=="post" or sweeptype=="replace") then
+            last=getnext(sweepnode)
+            sweeptype=nil
+          end
+          if last then
+            local char,id=ischar(last,currentfont)
+            if char then
+              local ccd=descriptions[char]
+              if ccd then
+                local class=ccd.class or "base"
+                if class==skipmark or class==skipligature or class==skipbase or (markclass and class=="mark" and not markclass[char]) then
+                  skipped=true
+                  if trace_skips then
+                    show_skip(dataset,sequence,char,ck,class)
                   end
+                  last=getnext(last)
+                elseif seq[n][char] then
+                  if n<l then
+                    last=getnext(last)
+                  end
+                  n=n+1
                 else
                   if discfound then
                     notmatchreplace[discfound]=true
@@ -19805,7 +19811,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                   end
                   break
                 end
-              elseif char==false then
+              else
                 if discfound then
                   notmatchreplace[discfound]=true
                   match=not notmatchpre[discfound]
@@ -19813,58 +19819,66 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                   match=false
                 end
                 break
-              elseif id==disc_code then
-                diskseen=true
-                discfound=last
-                notmatchpre[last]=nil
-                notmatchpost[last]=true
-                notmatchreplace[last]=nil
-                local pre,post,replace=getdisc(last)
-                if pre then
-                  local n=n
-                  while pre do
-                    if seq[n][getchar(pre)] then
-                      n=n+1
-                      pre=getnext(pre)
-                      if n>l then
-                        break
-                      end
-                    else
-                      notmatchpre[last]=true
-                      break
-                    end
-                  end
-                  if n<=l then
-                    notmatchpre[last]=true
-                  end
-                else
-                  notmatchpre[last]=true
-                end
-                if replace then
-                  while replace do
-                    if seq[n][getchar(replace)] then
-                      n=n+1
-                      replace=getnext(replace)
-                      if n>l then
-                        break
-                      end
-                    else
-                      notmatchreplace[last]=true
-                      match=not notmatchpre[last]
-                      break
-                    end
-                  end
-                  match=not notmatchpre[last]
-                end
-                last=getnext(last)
+              end
+            elseif char==false then
+              if discfound then
+                notmatchreplace[discfound]=true
+                match=not notmatchpre[discfound]
               else
                 match=false
-                break
               end
+              break
+            elseif id==disc_code then
+              diskseen=true
+              discfound=last
+              notmatchpre[last]=nil
+              notmatchpost[last]=true
+              notmatchreplace[last]=nil
+              local pre,post,replace=getdisc(last)
+              if pre then
+                local n=n
+                while pre do
+                  if seq[n][getchar(pre)] then
+                    n=n+1
+                    pre=getnext(pre)
+                    if n>l then
+                      break
+                    end
+                  else
+                    notmatchpre[last]=true
+                    break
+                  end
+                end
+                if n<=l then
+                  notmatchpre[last]=true
+                end
+              else
+                notmatchpre[last]=true
+              end
+              if replace then
+                while replace do
+                  if seq[n][getchar(replace)] then
+                    n=n+1
+                    replace=getnext(replace)
+                    if n>l then
+                      break
+                    end
+                  else
+                    notmatchreplace[last]=true
+                    match=not notmatchpre[last]
+                    break
+                  end
+                end
+                match=not notmatchpre[last]
+              end
+              last=getnext(last)
             else
               match=false
               break
             end
+          else
+            match=false
+            break
           end
         end
       end
@@ -20133,7 +20147,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
       local chainlookups=ck[6]
       if chainlookups then
         local nofchainlookups=#chainlookups
-        if nofchainlookups==1 then
+        if size==1 then
           local chainlookup=chainlookups[1]
           local chainkind=chainlookup.type
           local chainproc=chainprocs[chainkind]
@@ -20152,7 +20166,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
           end
          else
           local i=1
-          while start and true do
+          while start do
             if skipped then
               while start do 
                 local char=getchar(start)
@@ -20169,10 +20183,8 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                 end
               end
             end
-            local chainlookup=chainlookups[1] 
-            if not chainlookup then
-              i=i+1 
-            else
+            local chainlookup=chainlookups[i]
+            if chainlookup then
               local chainkind=chainlookup.type
               local chainproc=chainprocs[chainkind]
               if chainproc then
@@ -20184,19 +20196,16 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                 end
                 if ok then
                   done=true
-                  if n and n>1 then
-                    if i+n>nofchainlookups then
-                      break
-                    else
-                    end
+                  if n and n>1 and i+n>nofchainlookups then
+                    break
                   end
                 end
               else
                 logprocess("%s: %s is not yet supported (2)",cref(dataset,sequence),chainkind)
               end
-              i=i+1
             end
-            if i>nofchainlookups or not start then
+            i=i+1
+            if i>size or not start then
               break
             elseif start then
               start=getnext(start)
@@ -23108,6 +23117,7 @@ if not modules then modules={} end modules ['font-ocl']={
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"
 }
+local tostring,next=tostring,next
 local formatters=string.formatters
 local otf=fonts.handlers.otf
 local f_color_start=formatters["pdf:direct: %f %f %f rg"]
@@ -23226,30 +23236,47 @@ do
 end
 if context and xml.convert then
   local report_svg=logs.reporter("fonts","svg conversion")
+  local xmlconvert=xml.convert
+  local xmlfirst=xml.first
+  local loaddata=io.loaddata
+  local savedata=io.savedata
+  local remove=os.remove
   function otfsvg.topdf(svgshapes)
-    local svgfile="temp-otf-svg-shape.svg"
-    local pdffile="temp-otf-svg-shape.pdf"
-    local command="inkscape "..svgfile.." --export-pdf="..pdffile
-    local testrun=false
+    local inkscape=io.popen("inkscape --shell 2>&1","w")
     local pdfshapes={}
     local nofshapes=#svgshapes
+    local f_svgfile=formatters["temp-otf-svg-shape-%i.svg"]
+    local f_pdffile=formatters["temp-otf-svg-shape-%i.pdf"]
+    local f_convert=formatters["%s --export-pdf=%s\n"]
     report_svg("processing %i svg containers",nofshapes)
+    statistics.starttiming()
     for i=1,nofshapes do
       local entry=svgshapes[i]
       for j=entry.first,entry.last do
-        local svg=xml.convert(entry.data)
-        local data=xml.first(svg,"/svg[@id='glyph"..j.."']")
-        io.savedata(svgfile,tostring(data))
-        report_svg("processing svg shape of glyph %i in container %i",j,i)
-        os.execute(command)
-        pdfshapes[j]=io.loaddata(pdffile)
-      end
-      if testrun and i>testrun then
-        report_svg("quiting test run")
-        break
+        local svg=xmlconvert(entry.data)
+        local root=svg and xmlfirst(svg,"/svg[@id='glyph"..j.."']")
+        local data=root and tostring(root)
+        if data and data~="" then
+          local svgfile=f_svgfile(j)
+          local pdffile=f_pdffile(j)
+          savedata(svgfile,data)
+          inkscape:write(f_convert(svgfile,pdffile))
+          pdfshapes[j]=true
+        end
       end
     end
-    os.remove(svgfile)
+    inkscape:write("quit\n")
+    inkscape:close()
+    report_svg("processing %i pdf results",nofshapes)
+    for i in next,pdfshapes do
+      local svgfile=f_svgfile(i)
+      local pdffile=f_pdffile(i)
+      pdfshapes[i]=loaddata(pdffile)
+      remove(svgfile)
+      remove(pdffile)
+    end
+    statistics.stoptiming()
+    report_svg("conversion time: %0.3f",statistics.elapsedtime())
     return pdfshapes
   end
 else

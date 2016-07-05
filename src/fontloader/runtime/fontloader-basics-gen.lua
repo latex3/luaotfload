@@ -97,6 +97,7 @@ local remapper = {
  -- fea    = "font feature files", -- no longer supported
     pfb    = "type1 fonts",        -- needed for vector loading
     afm    = "afm",
+    enc    = "enc files",
 }
 
 function resolvers.findfile(name,fileformat)

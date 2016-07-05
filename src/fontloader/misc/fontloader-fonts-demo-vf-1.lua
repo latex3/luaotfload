@@ -1,3 +1,11 @@
+if not modules then modules = { } end modules ['luatex-fonts-demo-vf-1'] = {
+    version   = 1.001,
+    comment   = "companion to luatex-*.tex",
+    author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
+    copyright = "PRAGMA ADE / ConTeXt Development Team",
+    license   = "see context related readme files"
+}
+
 local identifiers = fonts.hashes.identifiers
 
 return function(specification)

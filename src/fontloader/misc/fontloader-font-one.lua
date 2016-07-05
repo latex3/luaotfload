@@ -86,7 +86,8 @@ local steps     = {
     "add ligatures",
     "add extra kerns",
     "normalize features",
-    "fix names",
+    "check extra features",
+    "fix names", -- what a hack ...
 --  "add tounicode data",
 }
 
@@ -317,6 +318,8 @@ enhancers["normalize features"] = function(data)
     data.resources.features  = features
     data.resources.sequences = sequences
 end
+
+enhancers["check extra features"] = otf.enhancers.enhance
 
 enhancers["fix names"] = function(data)
     for k, v in next, data.descriptions do
@@ -752,18 +755,12 @@ end
 <p>We have the usual two modes and related features initializers and processors.</p>
 --ldx]]--
 
-local function setmode(tfmdata,value)
-    if value then
-        tfmdata.properties.mode = lower(value)
-    end
-end
-
 registerafmfeature {
     name         = "mode",
     description  = "mode",
     initializers = {
-        base = setmode,
-        node = setmode,
+        base = otf.modeinitializer,
+        node = otf.modeinitializer,
     }
 }
 
@@ -781,8 +778,6 @@ registerafmfeature {
 }
 
 -- readers
-
-local check_tfm   = readers.check_tfm
 
 fonts.formats.afm = "type1"
 fonts.formats.pfb = "type1"
@@ -820,7 +815,8 @@ function readers.afm(specification,method)
             tfmdata = check_afm(specification,specification.name .. "." .. forced)
         end
         if not tfmdata then
-            method = method or definers.method or "afm or tfm"
+            local check_tfm = readers.check_tfm
+            method = (check_tfm and (method or definers.method or "afm or tfm")) or "afm"
             if method == "tfm" then
                 tfmdata = check_tfm(specification,specification.name)
             elseif method == "afm" then

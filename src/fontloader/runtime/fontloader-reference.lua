@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 06/15/16 20:18:05
+-- merge date  : 07/01/16 16:28:20
 
 do -- begin closure to overcome local limits and interference
 
@@ -1487,6 +1487,7 @@ local function do_serialize(root,name,depth,level,indexed)
           else
             handle(format("%s [%s]=%s,",depth,k and "true" or "false",v)) 
           end
+        elseif tk~="string" then
         elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
           if hexify then
             handle(format("%s %s=0x%X,",depth,k,v))
@@ -1509,6 +1510,7 @@ local function do_serialize(root,name,depth,level,indexed)
           end
         elseif tk=="boolean" then
           handle(format("%s [%s]=%q,",depth,k and "true" or "false",v))
+        elseif tk~="string" then
         elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
           handle(format("%s %s=%q,",depth,k,v))
         else
@@ -1524,6 +1526,7 @@ local function do_serialize(root,name,depth,level,indexed)
             end
           elseif tk=="boolean" then
             handle(format("%s [%s]={},",depth,k and "true" or "false"))
+          elseif tk~="string" then
           elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
             handle(format("%s %s={},",depth,k))
           else
@@ -1540,6 +1543,7 @@ local function do_serialize(root,name,depth,level,indexed)
               end
             elseif tk=="boolean" then
               handle(format("%s [%s]={ %s },",depth,k and "true" or "false",concat(st,", ")))
+            elseif tk~="string" then
             elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
               handle(format("%s %s={ %s },",depth,k,concat(st,", ")))
             else
@@ -1560,6 +1564,7 @@ local function do_serialize(root,name,depth,level,indexed)
           end
         elseif tk=="boolean" then
           handle(format("%s [%s]=%s,",depth,tostring(k),v and "true" or "false"))
+        elseif tk~="string" then
         elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
           handle(format("%s %s=%s,",depth,k,v and "true" or "false"))
         else
@@ -1576,6 +1581,7 @@ local function do_serialize(root,name,depth,level,indexed)
             end
           elseif tk=="boolean" then
             handle(format("%s [%s]=load(%q),",depth,k and "true" or "false",f))
+          elseif tk~="string" then
           elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
             handle(format("%s %s=load(%q),",depth,k,f))
           else
@@ -1591,6 +1597,7 @@ local function do_serialize(root,name,depth,level,indexed)
           end
         elseif tk=="boolean" then
           handle(format("%s [%s]=%q,",depth,k and "true" or "false",tostring(v)))
+        elseif tk~="string" then
         elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
           handle(format("%s %s=%q,",depth,k,tostring(v)))
         else
@@ -4161,7 +4168,7 @@ end
 function files.readinteger1(f) 
   local n=byte(f:read(1))
   if n>=0x80 then
-    return n-0xFF-1
+    return n-0x100
   else
     return n
   end
@@ -4177,7 +4184,7 @@ function files.readinteger2(f)
   local a,b=byte(f:read(2),1,2)
   local n=0x100*a+b
   if n>=0x8000 then
-    return n-0xFFFF-1
+    return n-0x10000
   else
     return n
   end
@@ -4185,6 +4192,15 @@ end
 function files.readcardinal3(f)
   local a,b,c=byte(f:read(3),1,3)
   return 0x10000*a+0x100*b+c
+end
+function files.readinteger3(f)
+  local a,b,c=byte(f:read(3),1,3)
+  local n=0x10000*a+0x100*b+c
+  if n>=0x80000 then
+    return n-0x1000000
+  else
+    return n
+  end
 end
 function files.readcardinal4(f)
   local a,b,c,d=byte(f:read(4),1,4)
@@ -4194,7 +4210,7 @@ function files.readinteger4(f)
   local a,b,c,d=byte(f:read(4),1,4)
   local n=0x1000000*a+0x10000*b+0x100*c+d
   if n>=0x8000000 then
-    return n-0xFFFFFFFF-1
+    return n-0x100000000
   else
     return n
   end
@@ -4203,7 +4219,7 @@ function files.readfixed4(f)
   local a,b,c,d=byte(f:read(4),1,4)
   local n=0x100*a+b
   if n>=0x8000 then
-    return n-0xFFFF-1+(0x100*c+d)/0xFFFF
+    return n-0x10000+(0x100*c+d)/0xFFFF
   else
     return n+(0x100*c+d)/0xFFFF
   end
@@ -4311,6 +4327,7 @@ local remapper={
   cidmap="cid maps",
   pfb="type1 fonts",
   afm="afm",
+  enc="enc files",
 }
 function resolvers.findfile(name,fileformat)
   name=string.gsub(name,"\\","/")
@@ -5673,7 +5690,7 @@ if not modules then modules={} end modules ['font-con']={
   license="see context related readme files"
 }
 local next,tostring,rawget=next,tostring,rawget
-local format,match,lower,gsub=string.format,string.match,string.lower,string.gsub
+local format,match,lower,gsub,find=string.format,string.match,string.lower,string.gsub,string.find
 local sort,insert,concat,sortedkeys,serialize,fastcopy=table.sort,table.insert,table.concat,table.sortedkeys,table.serialize,table.fastcopy
 local derivetable=table.derive
 local trace_defining=false trackers.register("fonts.defining",function(v) trace_defining=v end)
@@ -5693,89 +5710,6 @@ constructors.version=1.01
 constructors.cache=containers.define("fonts","constructors",constructors.version,false)
 constructors.privateoffset=0xF0000 
 constructors.cacheintex=true
-constructors.keys={
-  properties={
-    encodingbytes="number",
-    embedding="number",
-    cidinfo={},
-    format="string",
-    fontname="string",
-    fullname="string",
-    filename="filename",
-    psname="string",
-    name="string",
-    virtualized="boolean",
-    hasitalics="boolean",
-    autoitalicamount="basepoints",
-    nostackmath="boolean",
-    noglyphnames="boolean",
-    mode="string",
-    hasmath="boolean",
-    mathitalics="boolean",
-    textitalics="boolean",
-    finalized="boolean",
-  },
-  parameters={
-    mathsize="number",
-    scriptpercentage="float",
-    scriptscriptpercentage="float",
-    units="cardinal",
-    designsize="scaledpoints",
-    expansion={
-                  stretch="integerscale",
-                  shrink="integerscale",
-                  step="integerscale",
-                  auto="boolean",
-                 },
-    protrusion={
-                  auto="boolean",
-                 },
-    slantfactor="float",
-    extendfactor="float",
-    factor="float",
-    hfactor="float",
-    vfactor="float",
-    size="scaledpoints",
-    units="scaledpoints",
-    scaledpoints="scaledpoints",
-    slantperpoint="scaledpoints",
-    spacing={
-                  width="scaledpoints",
-                  stretch="scaledpoints",
-                  shrink="scaledpoints",
-                  extra="scaledpoints",
-                 },
-    xheight="scaledpoints",
-    quad="scaledpoints",
-    ascender="scaledpoints",
-    descender="scaledpoints",
-    synonyms={
-                  space="spacing.width",
-                  spacestretch="spacing.stretch",
-                  spaceshrink="spacing.shrink",
-                  extraspace="spacing.extra",
-                  x_height="xheight",
-                  space_stretch="spacing.stretch",
-                  space_shrink="spacing.shrink",
-                  extra_space="spacing.extra",
-                  em="quad",
-                  ex="xheight",
-                  slant="slantperpoint",
-                 },
-  },
-  description={
-    width="basepoints",
-    height="basepoints",
-    depth="basepoints",
-    boundingbox={},
-  },
-  character={
-    width="scaledpoints",
-    height="scaledpoints",
-    depth="scaledpoints",
-    italic="scaledpoints",
-  },
-}
 local designsizes=allocate()
 constructors.designsizes=designsizes
 local loadedfonts=allocate()
@@ -5913,6 +5847,23 @@ local function mathkerns(v,vdelta)
   end
   return k
 end
+local psfake=0
+local function fixedpsname(psname,fallback)
+  local usedname=psname
+  if psname and psname~="" then
+    if find(psname," ") then
+      usedname=gsub(psname,"[%s]+","-")
+    else
+    end
+  elseif not fallback or fallback=="" then
+    psfake=psfake+1
+    psname="fakename-"..psfake
+  else
+    psname=fallback
+    usedname=gsub(psname,"[^a-zA-Z0-9]+","-")
+  end
+  return usedname,psname~=usedname
+end
 function constructors.scale(tfmdata,specification)
   local target={}
   if tonumber(specification) then
@@ -5986,14 +5937,12 @@ function constructors.scale(tfmdata,specification)
   target.cidinfo=properties.cidinfo
   target.format=properties.format
   target.cache=constructors.cacheintex and "yes" or "renew"
-  local fontname=properties.fontname or tfmdata.fontname 
-  local fullname=properties.fullname or tfmdata.fullname 
-  local filename=properties.filename or tfmdata.filename 
-  local psname=properties.psname  or tfmdata.psname  
+  local fontname=properties.fontname or tfmdata.fontname
+  local fullname=properties.fullname or tfmdata.fullname
+  local filename=properties.filename or tfmdata.filename
+  local psname=properties.psname  or tfmdata.psname
   local name=properties.name   or tfmdata.name
-  if not psname or psname=="" then
-    psname=fontname or (fullname and fonts.names.cleanname(fullname))
-  end
+  local psname,psfixed=fixedpsname(psname,fontname or fullname or file.nameonly(filename))
   target.fontname=fontname
   target.fullname=fullname
   target.filename=filename
@@ -6106,8 +6055,9 @@ function constructors.scale(tfmdata,specification)
     end
   end
   if trace_defining then
-    report_defining("defining tfm, name %a, fullname %a, filename %a, hscale %a, vscale %a, math %a, italics %a",
-      name,fullname,filename,hdelta,vdelta,hasmath and "enabled" or "disabled",hasitalics and "enabled" or "disabled")
+    report_defining("defining tfm, name %a, fullname %a, filename %a, %spsname %a, hscale %a, vscale %a, math %a, italics %a",
+      name,fullname,filename,psfixed and "(fixed) " or "",psname,hdelta,vdelta,
+      hasmath and "enabled" or "disabled",hasitalics and "enabled" or "disabled")
   end
   constructors.beforecopyingcharacters(target,tfmdata)
   local sharedkerns={}
@@ -6849,19 +6799,61 @@ if context then
   os.exit()
 end
 local fonts=fonts
-fonts.encodings={}
-fonts.encodings.agl={}
-fonts.encodings.known={}
-setmetatable(fonts.encodings.agl,{ __index=function(t,k)
+local encodings={}
+fonts.encodings=encodings
+encodings.agl={}
+encodings.known={}
+setmetatable(encodings.agl,{ __index=function(t,k)
   if k=="unicodes" then
     texio.write(" <loading (extended) adobe glyph list>")
     local unicodes=dofile(resolvers.findfile("font-age.lua"))
-    fonts.encodings.agl={ unicodes=unicodes }
+    encodings.agl={ unicodes=unicodes }
     return unicodes
   else
     return nil
   end
 end })
+encodings.cache=containers.define("fonts","enc",encodings.version,true)
+function encodings.load(filename)
+  local name=file.removesuffix(filename)
+  local data=containers.read(encodings.cache,name)
+  if data then
+    return data
+  end
+  local vector,tag,hash,unicodes={},"",{},{}
+  local foundname=resolvers.findfile(filename,'enc')
+  if foundname and foundname~="" then
+    local ok,encoding,size=resolvers.loadbinfile(foundname)
+    if ok and encoding then
+      encoding=string.gsub(encoding,"%%(.-)\n","")
+      local unicoding=encodings.agl.unicodes
+      local tag,vec=string.match(encoding,"/(%w+)%s*%[(.*)%]%s*def")
+      local i=0
+      for ch in string.gmatch(vec,"/([%a%d%.]+)") do
+        if ch~=".notdef" then
+          vector[i]=ch
+          if not hash[ch] then
+            hash[ch]=i
+          else
+          end
+          local u=unicoding[ch]
+          if u then
+            unicodes[u]=i
+          end
+        end
+        i=i+1
+      end
+    end
+  end
+  local data={
+    name=name,
+    tag=tag,
+    vector=vector,
+    hash=hash,
+    unicodes=unicodes
+  }
+  return containers.write(encodings.cache,name,data)
+end
 
 end -- closure
 
@@ -7033,7 +7025,7 @@ local P,R,S,C,Ct,Cc,lpegmatch=lpeg.P,lpeg.R,lpeg.S,lpeg.C,lpeg.Ct,lpeg.Cc,lpeg.m
 local floor=math.floor
 local formatters=string.formatters
 local trace_loading=false trackers.register("fonts.loading",function(v) trace_loading=v end)
-local trace_mapping=false trackers.register("fonts.mapping",function(v) trace_unimapping=v end)
+local trace_mapping=false trackers.register("fonts.mapping",function(v) trace_mapping=v end)
 local report_fonts=logs.reporter("fonts","loading") 
 local force_ligatures=false directives.register("fonts.mapping.forceligatures",function(v) force_ligatures=v end)
 local fonts=fonts or {}
@@ -7149,6 +7141,9 @@ function mappings.addtounicode(data,filename,checklookups)
   local resources=data.resources
   local unicodes=resources.unicodes
   if not unicodes then
+    if trace_mapping then
+      report_fonts("no unicode list, quitting tounicode for %a",filename)
+    end
     return
   end
   local properties=data.properties
@@ -7337,8 +7332,8 @@ function mappings.addtounicode(data,filename,checklookups)
   end
   if trace_mapping then
     for unic,glyph in table.sortedhash(descriptions) do
-      local name=glyph.name
-      local index=glyph.index
+      local name=glyph.name or "-"
+      local index=glyph.index or 0
       local unicode=glyph.unicode
       if unicode then
         if type(unicode)=="table" then
@@ -7441,164 +7436,6 @@ end -- closure
 
 do -- begin closure to overcome local limits and interference
 
-if not modules then modules={} end modules ['font-tfm']={
-  version=1.001,
-  comment="companion to font-ini.mkiv",
-  author="Hans Hagen, PRAGMA-ADE, Hasselt NL",
-  copyright="PRAGMA ADE / ConTeXt Development Team",
-  license="see context related readme files"
-}
-local next=next
-local match=string.match
-local trace_defining=false trackers.register("fonts.defining",function(v) trace_defining=v end)
-local trace_features=false trackers.register("tfm.features",function(v) trace_features=v end)
-local report_defining=logs.reporter("fonts","defining")
-local report_tfm=logs.reporter("fonts","tfm loading")
-local findbinfile=resolvers.findbinfile
-local fonts=fonts
-local handlers=fonts.handlers
-local readers=fonts.readers
-local constructors=fonts.constructors
-local encodings=fonts.encodings
-local tfm=constructors.handlers.tfm
-tfm.version=1.000
-tfm.maxnestingdepth=5
-tfm.maxnestingsize=65536*1024
-local tfmfeatures=constructors.features.tfm
-constructors.resolvevirtualtoo=false 
-fonts.formats.tfm="type1" 
-fonts.formats.ofm="type1"
-function tfm.setfeatures(tfmdata,features)
-  local okay=constructors.initializefeatures("tfm",tfmdata,features,trace_features,report_tfm)
-  if okay then
-    return constructors.collectprocessors("tfm",tfmdata,features,trace_features,report_tfm)
-  else
-    return {} 
-  end
-end
-local depth={} 
-local function read_from_tfm(specification)
-  local filename=specification.filename
-  local size=specification.size
-  depth[filename]=(depth[filename] or 0)+1
-  if trace_defining then
-    report_defining("loading tfm file %a at size %s",filename,size)
-  end
-  local tfmdata=font.read_tfm(filename,size) 
-  if tfmdata then
-    local features=specification.features and specification.features.normal or {}
-    local resources=tfmdata.resources or {}
-    local properties=tfmdata.properties or {}
-    local parameters=tfmdata.parameters or {}
-    local shared=tfmdata.shared   or {}
-    properties.name=tfmdata.name
-    properties.fontname=tfmdata.fontname
-    properties.psname=tfmdata.psname
-    properties.filename=specification.filename
-    properties.format=fonts.formats.tfm 
-    parameters.size=size
-    tfmdata.properties=properties
-    tfmdata.resources=resources
-    tfmdata.parameters=parameters
-    tfmdata.shared=shared
-    shared.rawdata={}
-    shared.features=features
-    shared.processes=next(features) and tfm.setfeatures(tfmdata,features) or nil
-    parameters.slant=parameters.slant     or parameters[1] or 0
-    parameters.space=parameters.space     or parameters[2] or 0
-    parameters.space_stretch=parameters.space_stretch or parameters[3] or 0
-    parameters.space_shrink=parameters.space_shrink  or parameters[4] or 0
-    parameters.x_height=parameters.x_height    or parameters[5] or 0
-    parameters.quad=parameters.quad      or parameters[6] or 0
-    parameters.extra_space=parameters.extra_space  or parameters[7] or 0
-    constructors.enhanceparameters(parameters)
-    if constructors.resolvevirtualtoo then
-      fonts.loggers.register(tfmdata,file.suffix(filename),specification) 
-      local vfname=findbinfile(specification.name,'ovf')
-      if vfname and vfname~="" then
-        local vfdata=font.read_vf(vfname,size) 
-        if vfdata then
-          local chars=tfmdata.characters
-          for k,v in next,vfdata.characters do
-            chars[k].commands=v.commands
-          end
-          properties.virtualized=true
-          tfmdata.fonts=vfdata.fonts
-          tfmdata.type="virtual" 
-          local fontlist=vfdata.fonts
-          local name=file.nameonly(filename)
-          for i=1,#fontlist do
-            local n=fontlist[i].name
-            local s=fontlist[i].size
-            local d=depth[filename]
-            s=constructors.scaled(s,vfdata.designsize)
-            if d>tfm.maxnestingdepth then
-              report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
-              fontlist[i]={ id=0 }
-            elseif (d>1) and (s>tfm.maxnestingsize) then
-              report_defining("virtual font %a exceeds size %s",n,s)
-              fontlist[i]={ id=0 }
-            else
-              local t,id=fonts.constructors.readanddefine(n,s)
-              fontlist[i]={ id=id }
-            end
-          end
-        end
-      end
-    end
-    local allfeatures=tfmdata.shared.features or specification.features.normal
-    constructors.applymanipulators("tfm",tfmdata,allfeatures.normal,trace_features,report_tfm)
-    if not features.encoding then
-      local encoding,filename=match(properties.filename,"^(.-)%-(.*)$") 
-      if filename and encoding and encodings.known and encodings.known[encoding] then
-        features.encoding=encoding
-      end
-    end
-    properties.haskerns=true
-    properties.hasligatures=true
-    resources.unicodes={}
-    resources.lookuptags={}
-    depth[filename]=depth[filename]-1
-    return tfmdata
-  else
-    depth[filename]=depth[filename]-1
-  end
-end
-local function check_tfm(specification,fullname) 
-  local foundname=findbinfile(fullname,'tfm') or ""
-  if foundname=="" then
-    foundname=findbinfile(fullname,'ofm') or "" 
-  end
-  if foundname=="" then
-    foundname=fonts.names.getfilename(fullname,"tfm") or ""
-  end
-  if foundname~="" then
-    specification.filename=foundname
-    specification.format="ofm"
-    return read_from_tfm(specification)
-  elseif trace_defining then
-    report_defining("loading tfm with name %a fails",specification.name)
-  end
-end
-readers.check_tfm=check_tfm
-function readers.tfm(specification)
-  local fullname=specification.filename or ""
-  if fullname=="" then
-    local forced=specification.forced or ""
-    if forced~="" then
-      fullname=specification.name.."."..forced
-    else
-      fullname=specification.name
-    end
-  end
-  return check_tfm(specification,fullname)
-end
-readers.ofm=readers.tfm
-
-end -- closure
-
-do -- begin closure to overcome local limits and interference
-
 if not modules then modules={} end modules ['font-oti']={
   version=1.001,
   comment="companion to font-ini.mkiv",
@@ -7625,6 +7462,7 @@ local function setmode(tfmdata,value)
     tfmdata.properties.mode=lower(value)
   end
 end
+otf.modeinitializer=setmode
 local function setlanguage(tfmdata,value)
   if value then
     local cleanvalue=lower(value)
@@ -11355,10 +11193,15 @@ local function readcoverage(f,offset,simple)
   end
   return coverage
 end
-local function readclassdef(f,offset)
+local function readclassdef(f,offset,preset)
   setposition(f,offset)
   local classdefformat=readushort(f)
   local classdef={}
+  if type(preset)=="number" then
+    for k=0,preset-1 do
+      classdef[k]=1
+    end
+  end
   if classdefformat==1 then
     local index=readushort(f)
     local nofclassdef=readushort(f)
@@ -11379,6 +11222,13 @@ local function readclassdef(f,offset)
     end
   else
     report("unknown classdef format %a ",classdefformat)
+  end
+  if type(preset)=="table" then
+    for k in next,preset do
+      if not classdef[k] then
+        classdef[k]=1
+      end
+    end
   end
   return classdef
 end
@@ -11479,7 +11329,7 @@ local function covered(subset,all)
   end
   return used
 end
-local function readlookuparray(f,noflookups)
+local function readlookuparray(f,noflookups,nofcurrent)
   local lookups={}
   if noflookups>0 then
     local length=0
@@ -11522,7 +11372,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
             for i=2,nofcurrent do
               current[i]={ readushort(f) }
             end
-            local lookups=readlookuparray(f,noflookups)
+            local lookups=readlookuparray(f,noflookups,nofcurrent)
             rules[#rules+1]={
               current=current,
               lookups=lookups
@@ -11544,7 +11394,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
     local rules={}
     if subclasssets then
       coverage=readcoverage(f,tableoffset+coverage)
-      currentclassdef=readclassdef(f,tableoffset+currentclassdef)
+      currentclassdef=readclassdef(f,tableoffset+currentclassdef,coverage)
       local currentclasses=classtocoverage(currentclassdef,fontdata.glyphs)
       for class=1,#subclasssets do
         local offset=subclasssets[class]
@@ -11563,7 +11413,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
                 for i=2,nofcurrent do
                   current[i]=currentclasses[readushort(f)+1]
                 end
-                local lookups=readlookuparray(f,noflookups)
+                local lookups=readlookuparray(f,noflookups,nofcurrent)
                 rules[#rules+1]={
                   current=current,
                   lookups=lookups
@@ -11587,7 +11437,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
   elseif subtype==3 then
     local current=readarray(f)
     local noflookups=readushort(f)
-    local lookups=readlookuparray(f,noflookups)
+    local lookups=readlookuparray(f,noflookups,#current)
     current=readcoveragearray(f,tableoffset,current,true)
     return {
       format="coverage",
@@ -11642,7 +11492,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
               end
             end
             local noflookups=readushort(f)
-            local lookups=readlookuparray(f,noflookups)
+            local lookups=readlookuparray(f,noflookups,nofcurrent)
             rules[#rules+1]={
               before=before,
               current=current,
@@ -11668,9 +11518,9 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
     local rules={}
     if subclasssets then
       local coverage=readcoverage(f,tableoffset+coverage)
-      local beforeclassdef=readclassdef(f,tableoffset+beforeclassdef)
-      local currentclassdef=readclassdef(f,tableoffset+currentclassdef)
-      local afterclassdef=readclassdef(f,tableoffset+afterclassdef)
+      local beforeclassdef=readclassdef(f,tableoffset+beforeclassdef,nofglyphs)
+      local currentclassdef=readclassdef(f,tableoffset+currentclassdef,coverage)
+      local afterclassdef=readclassdef(f,tableoffset+afterclassdef,nofglyphs)
       local beforeclasses=classtocoverage(beforeclassdef,fontdata.glyphs)
       local currentclasses=classtocoverage(currentclassdef,fontdata.glyphs)
       local afterclasses=classtocoverage(afterclassdef,fontdata.glyphs)
@@ -11707,7 +11557,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
                   end
                 end
                 local noflookups=readushort(f)
-                local lookups=readlookuparray(f,noflookups)
+                local lookups=readlookuparray(f,noflookups,nofcurrent)
                 rules[#rules+1]={
                   before=before,
                   current=current,
@@ -11735,7 +11585,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
     local current=readarray(f)
     local after=readarray(f)
     local noflookups=readushort(f)
-    local lookups=readlookuparray(f,noflookups)
+    local lookups=readlookuparray(f,noflookups,#current)
     before=readcoveragearray(f,tableoffset,before,true)
     current=readcoveragearray(f,tableoffset,current,true)
     after=readcoveragearray(f,tableoffset,after,true)
@@ -12061,8 +11911,8 @@ function gposhandlers.pair(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofgly
     local nofclasses2=readushort(f) 
     local classlist=readpairclasssets(f,nofclasses1,nofclasses2,format1,format2)
        coverage=readcoverage(f,tableoffset+coverage)
-       classdef1=readclassdef(f,tableoffset+classdef1)
-       classdef2=readclassdef(f,tableoffset+classdef2)
+       classdef1=readclassdef(f,tableoffset+classdef1,coverage)
+       classdef2=readclassdef(f,tableoffset+classdef2,nofglyphs)
     local usedcoverage={}
     for g1,c1 in next,classdef1 do
       if coverage[g1] then
@@ -14090,6 +13940,7 @@ function readers.getcomponents(fontdata)
     end
   end
 end
+readers.unifymissing=unifymissing
 function readers.rehash(fontdata,hashmethod) 
   if not (fontdata and fontdata.glyphs) then
     return
@@ -15363,7 +15214,7 @@ local trace_defining=false registertracker("fonts.defining",function(v) trace_de
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.023 
+otf.version=3.025 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pdfcache=containers.define("fonts","pdf",otf.version,true)
@@ -15541,7 +15392,7 @@ function otf.load(filename,sub,featurefile)
         collectgarbage("collect")
       end
       stoptiming(otfreaders)
-      if elapsedtime then 
+      if elapsedtime then
         report_otf("loading, optimizing, packing and caching time %s",elapsedtime(otfreaders))
       end
       if cleanup>3 then
@@ -15703,13 +15554,13 @@ local function copytotfm(data,cache_id)
         spaceunits,spacer=charwidth,"charwidth"
       end
     end
-    spaceunits=tonumber(spaceunits) or 500
+    spaceunits=tonumber(spaceunits) or units/2
     parameters.slant=0
-    parameters.space=spaceunits     
+    parameters.space=spaceunits      
     parameters.space_stretch=1*units/2  
-    parameters.space_shrink=1*units/3 
-    parameters.x_height=2*units/5 
-    parameters.quad=units   
+    parameters.space_shrink=1*units/3  
+    parameters.x_height=2*units/5  
+    parameters.quad=units    
     if spaceunits<2*units/5 then
     end
     if italicangle and italicangle~=0 then
@@ -16119,7 +15970,7 @@ local function registerbasehash(tfmdata)
     basehash[hash]=base
   end
   properties.basehash=base
-  properties.fullname=properties.fullname.."-"..base
+  properties.fullname=(properties.fullname or properties.name).."-"..base
   applied={}
 end
 local function registerbasefeature(feature,value)
@@ -16187,6 +16038,10 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
   local trace_singles=trace_baseinit and trace_singles
   local trace_alternatives=trace_baseinit and trace_alternatives
   local trace_ligatures=trace_baseinit and trace_ligatures
+  if not changed then
+    changed={}
+    tfmdata.changed=changed
+  end
   for i=1,#lookuplist do
     local sequence=lookuplist[i]
     local steps=sequence.steps
@@ -16340,7 +16195,8 @@ local function featuresinitializer(tfmdata,value)
       local properties=tfmdata.properties
       local script=properties.script
       local language=properties.language
-      local rawfeatures=rawdata.resources.features
+      local rawresources=rawdata.resources
+      local rawfeatures=rawresources and rawresources.features
       local basesubstitutions=rawfeatures and rawfeatures.gsub
       local basepositionings=rawfeatures and rawfeatures.gpos
       if basesubstitutions or basepositionings then
@@ -23117,7 +22973,7 @@ if not modules then modules={} end modules ['font-ocl']={
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"
 }
-local tostring,next=tostring,next
+local tostring,next,format=tostring,next,string.format
 local formatters=string.formatters
 local otf=fonts.handlers.otf
 local f_color_start=formatters["pdf:direct: %f %f %f rg"]
@@ -23234,70 +23090,62 @@ do
     end
   end
 end
-if context and xml.convert then
+do
   local report_svg=logs.reporter("fonts","svg conversion")
-  local xmlconvert=xml.convert
-  local xmlfirst=xml.first
   local loaddata=io.loaddata
   local savedata=io.savedata
   local remove=os.remove
+  if context and xml.convert then
+    local xmlconvert=xml.convert
+    local xmlfirst=xml.first
+    function otfsvg.filterglyph(entry,index)
+      local svg=xmlconvert(entry.data)
+      local root=svg and xmlfirst(svg,"/svg[@id='glyph"..index.."']")
+      local data=root and tostring(root)
+      return data
+    end
+  else
+    function otfsvg.filterglyph(entry,index) 
+      return entry.data
+    end
+  end
   function otfsvg.topdf(svgshapes)
-    local inkscape=io.popen("inkscape --shell 2>&1","w")
+    local inkscape=io.popen("inkscape --shell > temp-otf-svg-shape.log","w")
     local pdfshapes={}
     local nofshapes=#svgshapes
     local f_svgfile=formatters["temp-otf-svg-shape-%i.svg"]
     local f_pdffile=formatters["temp-otf-svg-shape-%i.pdf"]
     local f_convert=formatters["%s --export-pdf=%s\n"]
+    local filterglyph=otfsvg.filterglyph
     report_svg("processing %i svg containers",nofshapes)
     statistics.starttiming()
     for i=1,nofshapes do
       local entry=svgshapes[i]
-      for j=entry.first,entry.last do
-        local svg=xmlconvert(entry.data)
-        local root=svg and xmlfirst(svg,"/svg[@id='glyph"..j.."']")
-        local data=root and tostring(root)
+      for index=entry.first,entry.last do
+        local data=filterglyph(entry,index)
         if data and data~="" then
-          local svgfile=f_svgfile(j)
-          local pdffile=f_pdffile(j)
+          local svgfile=f_svgfile(index)
+          local pdffile=f_pdffile(index)
           savedata(svgfile,data)
           inkscape:write(f_convert(svgfile,pdffile))
-          pdfshapes[j]=true
+          pdfshapes[index]=true
         end
       end
     end
     inkscape:write("quit\n")
     inkscape:close()
     report_svg("processing %i pdf results",nofshapes)
-    for i in next,pdfshapes do
-      local svgfile=f_svgfile(i)
-      local pdffile=f_pdffile(i)
-      pdfshapes[i]=loaddata(pdffile)
+    for index in next,pdfshapes do
+      local svgfile=f_svgfile(index)
+      local pdffile=f_pdffile(index)
+      pdfshapes[index]=loaddata(pdffile)
       remove(svgfile)
       remove(pdffile)
     end
     statistics.stoptiming()
-    report_svg("conversion time: %0.3f",statistics.elapsedtime())
-    return pdfshapes
-  end
-else
-  function otfsvg.topdf(svgshapes)
-    local svgfile="temp-otf-svg-shape.svg"
-    local pdffile="temp-otf-svg-shape.pdf"
-    local command="inkscape "..svgfile.." --export-pdf="..pdffile
-    local pdfshapes={}
-    local nofshapes=#svgshapes
-    texio.write(formatters["[converting %i svg glyphs to pdf using command %q : "](nofshapes,command))
-    for i=1,nofshapes do
-      local entry=svgshapes[i]
-      for j=entry.first,entry.last do
-        texio.write(formatters["%i "](j))
-        io.savedata(svgfile,tostring(entry.data))
-        os.execute(command)
-        pdfshapes[j]=io.loaddata(pdffile)
-      end
+    if statistics.elapsedseconds then
+      report_svg("svg conversion time %s",statistics.elapsedseconds())
     end
-    os.remove(svgfile)
-    texio.write("done]")
     return pdfshapes
   end
 end
@@ -23380,20 +23228,18 @@ if not modules then modules={} end modules ['font-onr']={
   license="see context related readme files"
 }
 local fonts,logs,trackers,resolvers=fonts,logs,trackers,resolvers
-local next,type,tonumber,rawget=next,type,tonumber,rawget
+local next,type,tonumber,rawget,rawset=next,type,tonumber,rawget,rawset
 local match,lower,gsub,strip,find=string.match,string.lower,string.gsub,string.strip,string.find
 local char,byte,sub=string.char,string.byte,string.sub
 local abs=math.abs
 local bxor,rshift=bit32.bxor,bit32.rshift
-local P,S,R,Cmt,C,Ct,Cs,Carg=lpeg.P,lpeg.S,lpeg.R,lpeg.Cmt,lpeg.C,lpeg.Ct,lpeg.Cs,lpeg.Carg
+local P,S,R,Cmt,C,Ct,Cs,Carg,Cf,Cg=lpeg.P,lpeg.S,lpeg.R,lpeg.Cmt,lpeg.C,lpeg.Ct,lpeg.Cs,lpeg.Carg,lpeg.Cf,lpeg.Cg
 local lpegmatch,patterns=lpeg.match,lpeg.patterns
 local trace_indexing=false trackers.register("afm.indexing",function(v) trace_indexing=v end)
 local trace_loading=false trackers.register("afm.loading",function(v) trace_loading=v end)
 local report_afm=logs.reporter("fonts","afm loading")
-local report_afm=logs.reporter("fonts","pfb loading")
-fonts=fonts or {}
-local handlers=fonts.handlers or {}
-fonts.handlers=handlers
+local report_pfb=logs.reporter("fonts","pfb loading")
+local handlers=fonts.handlers
 local afm=handlers.afm or {}
 handlers.afm=afm
 local readers=afm.readers or {}
@@ -23415,16 +23261,25 @@ do
   end
   local initialize=function(str,position,size)
     n=0
-    m=tonumber(size)
+    m=size 
     return position+1
   end
   local charstrings=P("/CharStrings")
+  local encoding=P("/Encoding")
+  local dup=P("dup")
+  local put=P("put")
+  local array=P("array")
   local name=P("/")*C((R("az")+R("AZ")+R("09")+S("-_."))^1)
-  local size=C(R("09")^1)
+  local digits=R("09")^1
+  local cardinal=digits/tonumber
   local spaces=P(" ")^1
+  local spacing=patterns.whitespace^0
   local p_filternames=Ct (
-    (1-charstrings)^0*charstrings*spaces*Cmt(size,initialize)*(Cmt(name*P(" ")^1*C(R("09")^1),progress)+P(1))^1
+    (1-charstrings)^0*charstrings*spaces*Cmt(cardinal,initialize)*(Cmt(name*spaces*cardinal,progress)+P(1))^1
   )
+  local p_filterencoding=(1-encoding)^0*encoding*spaces*digits*spaces*array*(1-dup)^0*Cf(
+      Ct("")*Cg(spacing*dup*spaces*cardinal*spaces*name*spaces*put)^1
+,rawset)
   local decrypt
   do
     local r,c1,c2,n=0,0,0,0
@@ -23457,15 +23312,20 @@ do
     end
     binary=decrypt(binary,4)
     local vector=lpegmatch(p_filternames,binary)
-    if vector[1]==".notdef" then
-      vector[0]=table.remove(vector,1)
+    for i=1,#vector do
+      vector[i-1]=vector[i]
     end
+    vector[#vector]=nil
     if not vector then
       report_pfb("no vector in %a",filename)
       return
     end
-    return vector
+    local encoding=lpegmatch(p_filterencoding,ascii)
+    return vector,encoding
   end
+  local pfb=handlers.pfb or {}
+  handlers.pfb=pfb
+  pfb.loadvector=loadpfbvector
   get_indexes=function(data,pfbname)
     local vector=loadpfbvector(pfbname)
     if vector then
@@ -23691,6 +23551,7 @@ local steps={
   "add ligatures",
   "add extra kerns",
   "normalize features",
+  "check extra features",
   "fix names",
 }
 local function applyenhancers(data,filename)
@@ -23904,6 +23765,7 @@ enhancers["normalize features"]=function(data)
   data.resources.features=features
   data.resources.sequences=sequences
 end
+enhancers["check extra features"]=otf.enhancers.enhance
 enhancers["fix names"]=function(data)
   for k,v in next,data.descriptions do
     local n=v.name
@@ -24265,17 +24127,12 @@ local function read_from_afm(specification)
   end
   return tfmdata
 end
-local function setmode(tfmdata,value)
-  if value then
-    tfmdata.properties.mode=lower(value)
-  end
-end
 registerafmfeature {
   name="mode",
   description="mode",
   initializers={
-    base=setmode,
-    node=setmode,
+    base=otf.modeinitializer,
+    node=otf.modeinitializer,
   }
 }
 registerafmfeature {
@@ -24290,7 +24147,6 @@ registerafmfeature {
     node=otf.featuresprocessor,
   }
 }
-local check_tfm=readers.check_tfm
 fonts.formats.afm="type1"
 fonts.formats.pfb="type1"
 local function check_afm(specification,fullname)
@@ -24325,7 +24181,8 @@ function readers.afm(specification,method)
       tfmdata=check_afm(specification,specification.name.."."..forced)
     end
     if not tfmdata then
-      method=method or definers.method or "afm or tfm"
+      local check_tfm=readers.check_tfm
+      method=(check_tfm and (method or definers.method or "afm or tfm")) or "afm"
       if method=="tfm" then
         tfmdata=check_tfm(specification,specification.name)
       elseif method=="afm" then
@@ -24533,6 +24390,529 @@ end -- closure
 
 do -- begin closure to overcome local limits and interference
 
+if not modules then modules={} end modules ['font-tfm']={
+  version=1.001,
+  comment="companion to font-ini.mkiv",
+  author="Hans Hagen, PRAGMA-ADE, Hasselt NL",
+  copyright="PRAGMA ADE / ConTeXt Development Team",
+  license="see context related readme files"
+}
+local next,type=next,type
+local match,format=string.match,string.format
+local concat,sortedhash=table.concat,table.sortedhash
+local trace_defining=false trackers.register("fonts.defining",function(v) trace_defining=v end)
+local trace_features=false trackers.register("tfm.features",function(v) trace_features=v end)
+local report_defining=logs.reporter("fonts","defining")
+local report_tfm=logs.reporter("fonts","tfm loading")
+local findbinfile=resolvers.findbinfile
+local setmetatableindex=table.setmetatableindex
+local fonts=fonts
+local handlers=fonts.handlers
+local readers=fonts.readers
+local constructors=fonts.constructors
+local encodings=fonts.encodings
+local tfm=constructors.handlers.tfm
+tfm.version=1.000
+tfm.maxnestingdepth=5
+tfm.maxnestingsize=65536*1024
+local otf=fonts.handlers.otf
+local tfmfeatures=constructors.features.tfm
+local registertfmfeature=tfmfeatures.register
+constructors.resolvevirtualtoo=false 
+fonts.formats.tfm="type1" 
+fonts.formats.ofm="type1"
+function tfm.setfeatures(tfmdata,features)
+  local okay=constructors.initializefeatures("tfm",tfmdata,features,trace_features,report_tfm)
+  if okay then
+    return constructors.collectprocessors("tfm",tfmdata,features,trace_features,report_tfm)
+  else
+    return {} 
+  end
+end
+local depth={} 
+local enhancers={}
+local steps={
+  "normalize features",
+  "check extra features"
+}
+enhancers["check extra features"]=otf.enhancers.enhance
+local function applyenhancers(data,filename)
+  for i=1,#steps do
+    local step=steps[i]
+    local enhancer=enhancers[step]
+    if enhancer then
+      if trace_loading then
+        report_tfm("applying enhancer %a",step)
+      end
+      enhancer(data,filename)
+    else
+      report_tfm("invalid enhancer %a",step)
+    end
+  end
+end
+local function read_from_tfm(specification)
+  local filename=specification.filename
+  local size=specification.size
+  depth[filename]=(depth[filename] or 0)+1
+  if trace_defining then
+    report_defining("loading tfm file %a at size %s",filename,size)
+  end
+  local tfmdata=font.read_tfm(filename,size) 
+  if tfmdata then
+    local features=specification.features and specification.features.normal or {}
+    local features=constructors.checkedfeatures("tfm",features)
+    specification.features.normal=features
+    local newtfmdata=(depth[filename]==1) and tfm.reencode(tfmdata,specification)
+    if newtfmdata then
+       tfmdata=newtfmdata
+    end
+    local resources=tfmdata.resources or {}
+    local properties=tfmdata.properties or {}
+    local parameters=tfmdata.parameters or {}
+    local shared=tfmdata.shared   or {}
+    shared.features=features
+    shared.resources=resources
+    properties.name=tfmdata.name      
+    properties.fontname=tfmdata.fontname    
+    properties.psname=tfmdata.psname     
+    properties.fullname=tfmdata.fullname    
+    properties.filename=specification.filename 
+    properties.format=fonts.formats.tfm
+    tfmdata.properties=properties
+    tfmdata.resources=resources
+    tfmdata.parameters=parameters
+    tfmdata.shared=shared
+    shared.rawdata={ resources=resources }
+    shared.features=features
+    if newtfmdata then
+      if not resources.marks then
+        resources.marks={}
+      end
+      if not resources.sequences then
+        resources.sequences={}
+      end
+      if not resources.features then
+        resources.features={
+          gsub={},
+          gpos={},
+        }
+      end
+      if not tfmdata.changed then
+        tfmdata.changed={}
+      end
+      if not tfmdata.descriptions then
+        tfmdata.descriptions=tfmdata.characters
+      end
+      otf.readers.addunicodetable(tfmdata)
+      applyenhancers(tfmdata,filename)
+      constructors.applymanipulators("tfm",tfmdata,features,trace_features,report_tfm)
+      otf.readers.unifymissing(tfmdata)
+      fonts.mappings.addtounicode(tfmdata,filename)
+      tfmdata.tounicode=1
+      local tounicode=fonts.mappings.tounicode
+      for unicode,v in next,tfmdata.characters do
+        local u=v.unicode
+        if u then
+          v.tounicode=tounicode(u)
+        end
+      end
+      if tfmdata.usedbitmap then
+        tfm.addtounicode(tfmdata)
+      end
+    end
+    shared.processes=next(features) and tfm.setfeatures(tfmdata,features) or nil
+    parameters.factor=1 
+    parameters.size=size
+    parameters.slant=parameters.slant     or parameters[1] or 0
+    parameters.space=parameters.space     or parameters[2] or 0
+    parameters.space_stretch=parameters.space_stretch or parameters[3] or 0
+    parameters.space_shrink=parameters.space_shrink  or parameters[4] or 0
+    parameters.x_height=parameters.x_height    or parameters[5] or 0
+    parameters.quad=parameters.quad      or parameters[6] or 0
+    parameters.extra_space=parameters.extra_space  or parameters[7] or 0
+    constructors.enhanceparameters(parameters)
+    if newtfmdata then
+    elseif constructors.resolvevirtualtoo then
+      fonts.loggers.register(tfmdata,file.suffix(filename),specification) 
+      local vfname=findbinfile(specification.name,'ovf')
+      if vfname and vfname~="" then
+        local vfdata=font.read_vf(vfname,size) 
+        if vfdata then
+          local chars=tfmdata.characters
+          for k,v in next,vfdata.characters do
+            chars[k].commands=v.commands
+          end
+          properties.virtualized=true
+          tfmdata.fonts=vfdata.fonts
+          tfmdata.type="virtual" 
+          local fontlist=vfdata.fonts
+          local name=file.nameonly(filename)
+          for i=1,#fontlist do
+            local n=fontlist[i].name
+            local s=fontlist[i].size
+            local d=depth[filename]
+            s=constructors.scaled(s,vfdata.designsize)
+            if d>tfm.maxnestingdepth then
+              report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
+              fontlist[i]={ id=0 }
+            elseif (d>1) and (s>tfm.maxnestingsize) then
+              report_defining("virtual font %a exceeds size %s",n,s)
+              fontlist[i]={ id=0 }
+            else
+              local t,id=fonts.constructors.readanddefine(n,s)
+              fontlist[i]={ id=id }
+            end
+          end
+        end
+      end
+    end
+    properties.haskerns=true
+    properties.hasligatures=true
+    resources.unicodes={}
+    resources.lookuptags={}
+    depth[filename]=depth[filename]-1
+    return tfmdata
+  else
+    depth[filename]=depth[filename]-1
+  end
+end
+local function check_tfm(specification,fullname) 
+  local foundname=findbinfile(fullname,'tfm') or ""
+  if foundname=="" then
+    foundname=findbinfile(fullname,'ofm') or "" 
+  end
+  if foundname=="" then
+    foundname=fonts.names.getfilename(fullname,"tfm") or ""
+  end
+  if foundname~="" then
+    specification.filename=foundname
+    specification.format="ofm"
+    return read_from_tfm(specification)
+  elseif trace_defining then
+    report_defining("loading tfm with name %a fails",specification.name)
+  end
+end
+readers.check_tfm=check_tfm
+function readers.tfm(specification)
+  local fullname=specification.filename or ""
+  if fullname=="" then
+    local forced=specification.forced or ""
+    if forced~="" then
+      fullname=specification.name.."."..forced
+    else
+      fullname=specification.name
+    end
+  end
+  return check_tfm(specification,fullname)
+end
+readers.ofm=readers.tfm
+do
+  local outfiles={}
+  local tfmcache=table.setmetatableindex(function(t,tfmdata)
+    local id=font.define(tfmdata)
+    t[tfmdata]=id
+    return id
+  end)
+  local encdone=table.setmetatableindex("table")
+  function tfm.reencode(tfmdata,specification)
+    local features=specification.features
+    if not features then
+      return
+    end
+    local features=features.normal
+    if not features then
+      return
+    end
+    local tfmfile=file.basename(tfmdata.name)
+    local encfile=features.reencode 
+    local pfbfile=features.pfbfile 
+    local bitmap=features.bitmap  
+    if not encfile then
+      return
+    end
+    local pfbfile=outfiles[tfmfile]
+    if pfbfile==nil then
+      if bitmap then
+        pfbfile=false
+      elseif type(pfbfile)~="string" then
+        pfbfile=tfmfile
+      end
+      if type(pfbfile)=="string" then
+        pfbfile=file.addsuffix(pfbfile,"pfb")
+        report_tfm("using type1 shapes from %a for %a",pfbfile,tfmfile)
+      else
+        report_tfm("using bitmap shapes for %a",tfmfile)
+        pfbfile=false 
+      end
+      outfiles[tfmfile]=pfbfile
+    end
+    local encoding=false
+    local vector=false
+    if type(pfbfile)=="string" then
+      local pfb=fonts.constructors.handlers.pfb
+      if pfb and pfb.loadvector then
+        local v,e=pfb.loadvector(pfbfile)
+        if v then
+          vector=v
+        end
+        if e then
+          encoding=e
+        end
+      end
+    end
+    if type(encfile)=="string" and encfile~="auto" then
+      encoding=fonts.encodings.load(file.addsuffix(encfile,"enc"))
+      if encoding then
+        encoding=encoding.vector
+      end
+    end
+    if not encoding then
+      report_tfm("bad encoding for %a, quitting",tfmfile)
+      return
+    end
+    local unicoding=fonts.encodings.agl and fonts.encodings.agl.unicodes
+    local virtualid=tfmcache[tfmdata]
+    local tfmdata=table.copy(tfmdata) 
+    local characters={}
+    local originals=tfmdata.characters
+    local indices={}
+    local parentfont={ "font",1 }
+    local private=fonts.constructors.privateoffset
+    local reported=encdone[tfmfile][encfile]
+    local backmap=vector and table.swapped(vector)
+    local done={} 
+    for index,name in sortedhash(encoding) do 
+      local unicode=unicoding[name]
+      local original=originals[index]
+      if original then
+        if unicode then
+          original.unicode=unicode
+        else
+          unicode=private
+          private=private+1
+          if not reported then
+            report_tfm("glyph %a in font %a with encoding %a gets unicode %U",name,tfmfile,encfile,unicode)
+          end
+        end
+        characters[unicode]=original
+        indices[index]=unicode
+        original.name=name 
+        if backmap then
+          original.index=backmap[name]
+        else 
+          original.commands={ parentfont,{ "char",index } }
+          original.oindex=index
+        end
+        done[name]=true
+      elseif not done[name] then
+        report_tfm("bad index %a in font %a with name %a",index,tfmfile,name)
+      end
+    end
+    encdone[tfmfile][encfile]=true
+    for k,v in next,characters do
+      local kerns=v.kerns
+      if kerns then
+        local t={}
+        for k,v in next,kerns do
+          local i=indices[k]
+          if i then
+            t[i]=v
+          end
+        end
+        v.kerns=next(t) and t or nil
+      end
+      local ligatures=v.ligatures
+      if ligatures then
+        local t={}
+        for k,v in next,ligatures do
+          local i=indices[k]
+          if i then
+            t[i]=v
+            v.char=indices[v.char]
+          end
+        end
+        v.ligatures=next(t) and t or nil
+      end
+    end
+    tfmdata.fonts={ { id=virtualid } }
+    tfmdata.characters=characters
+    tfmdata.fullname=tfmdata.fullname or tfmdata.name
+    tfmdata.psname=file.nameonly(pfbfile or tfmdata.name)
+    tfmdata.filename=pfbfile
+    tfmdata.encodingbytes=2
+    tfmdata.format="type1"
+    tfmdata.tounicode=1
+    tfmdata.embedding="subset"
+    tfmdata.usedbitmap=bitmap and virtualid
+    return tfmdata
+  end
+end
+do
+  local template=[[
+/CIDInit /ProcSet findresource begin
+  12 dict begin
+  begincmap
+    /CIDSystemInfo << /Registry (TeX) /Ordering (bitmap-%s) /Supplement 0 >> def
+    /CMapName /TeX-bitmap-%s def
+    /CMapType 2 def
+    1 begincodespacerange
+      <00> <FF>
+    endcodespacerange
+    %s beginbfchar
+%s
+    endbfchar
+  endcmap
+CMapName currentdict /CMap defineresource pop end
+end
+end
+]]
+  local flushstreamobject=lpdf and lpdf.flushstreamobject
+  local setfontattributes=pdf.setfontattributes
+  if not flushstreamobject then
+    flushstreamobject=function(data)
+      return pdf.obj {
+        immediate=true,
+        type="stream",
+        string=data,
+      }
+    end
+  end
+  if not setfontattributes then
+    setfontattributes=function(id,data)
+      print(format("your luatex is too old so no tounicode bitmap font%i",id))
+    end
+  end
+  function tfm.addtounicode(tfmdata)
+    local id=tfmdata.usedbitmap
+    local map={}
+    local char={} 
+    for k,v in next,tfmdata.characters do
+      local index=v.oindex
+      local tounicode=v.tounicode
+      if index and tounicode then
+        map[index]=tounicode
+      end
+    end
+    for k,v in sortedhash(map) do
+      char[#char+1]=format("<%02X> <%s>",k,v)
+    end
+    char=concat(char,"\n")
+    local stream=format(template,id,id,#char,char)
+    local reference=flushstreamobject(stream,nil,true)
+    setfontattributes(id,format("/ToUnicode %i 0 R",reference))
+  end
+end
+do
+  local everywhere={ ["*"]={ ["*"]=true } } 
+  local noflags={ false,false,false,false }
+  enhancers["normalize features"]=function(data)
+    local ligatures=setmetatableindex("table")
+    local kerns=setmetatableindex("table")
+    local characters=data.characters
+    for u,c in next,characters do
+      local l=c.ligatures
+      local k=c.kerns
+      if l then
+        ligatures[u]=l
+        for u,v in next,l do
+          l[u]={ ligature=v.char }
+        end
+        c.ligatures=nil
+      end
+      if k then
+        kerns[u]=k
+        for u,v in next,k do
+          k[u]=v 
+        end
+        c.kerns=nil
+      end
+    end
+    for u,l in next,ligatures do
+      for k,v in next,l do
+        local vl=v.ligature
+        local dl=ligatures[vl]
+        if dl then
+          for kk,vv in next,dl do
+            v[kk]=vv 
+          end
+        end
+      end
+    end
+    local features={
+      gpos={},
+      gsub={},
+    }
+    local sequences={
+    }
+    if next(ligatures) then
+      features.gsub.liga=everywhere
+      data.properties.hasligatures=true
+      sequences[#sequences+1]={
+        features={
+          liga=everywhere,
+        },
+        flags=noflags,
+        name="s_s_0",
+        nofsteps=1,
+        order={ "liga" },
+        type="gsub_ligature",
+        steps={
+          {
+            coverage=ligatures,
+          },
+        },
+      }
+    end
+    if next(kerns) then
+      features.gpos.kern=everywhere
+      data.properties.haskerns=true
+      sequences[#sequences+1]={
+        features={
+          kern=everywhere,
+        },
+        flags=noflags,
+        name="p_s_0",
+        nofsteps=1,
+        order={ "kern" },
+        type="gpos_pair",
+        steps={
+          {
+            format="kern",
+            coverage=kerns,
+          },
+        },
+      }
+    end
+    data.resources.features=features
+    data.resources.sequences=sequences
+    data.shared.resources=data.shared.resources or resources
+  end
+end
+registertfmfeature {
+  name="mode",
+  description="mode",
+  initializers={
+    base=otf.modeinitializer,
+    node=otf.modeinitializer,
+  }
+}
+registertfmfeature {
+  name="features",
+  description="features",
+  default=true,
+  initializers={
+    base=otf.basemodeinitializer,
+    node=otf.nodemodeinitializer,
+  },
+  processors={
+    node=otf.featuresprocessor,
+  }
+}
+
+end -- closure
+
+do -- begin closure to overcome local limits and interference
+
 if not modules then modules={} end modules ['font-lua']={
   version=1.001,
   comment="companion to font-ini.mkiv",
@@ -24582,10 +24962,11 @@ if not modules then modules={} end modules ['font-def']={
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"
 }
-local format,gmatch,match,find,lower,gsub=string.format,string.gmatch,string.match,string.find,string.lower,string.gsub
+local lower,gsub=string.lower,string.gsub
 local tostring,next=tostring,next
 local lpegmatch=lpeg.match
 local suffixonly,removesuffix=file.suffix,file.removesuffix
+local formatters=string.formatters
 local allocate=utilities.storage.allocate
 local trace_defining=false trackers .register("fonts.defining",function(v) trace_defining=v end)
 local directive_embedall=false directives.register("fonts.embedall",function(v) directive_embedall=v end)
@@ -24746,7 +25127,7 @@ function definers.applypostprocessors(tfmdata)
       local extrahash=postprocessors[i](tfmdata) 
       if type(extrahash)=="string" and extrahash~="" then
         extrahash=gsub(lower(extrahash),"[^a-z]","-")
-        properties.fullname=format("%s-%s",properties.fullname,extrahash)
+        properties.fullname=formatters["%s-%s"](properties.fullname,extrahash)
       end
     end
   end

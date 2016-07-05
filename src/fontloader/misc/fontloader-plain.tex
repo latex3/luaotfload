@@ -17,7 +17,9 @@
     \input luatex-pdf \relax
 \fi
 
-\pdfoutput 1
+\outputmode 1
+
+% \outputmode 0 \magnification\magstep5
 
 % We set the page dimensions because otherwise the backend does weird things
 % when we have for instance this on a line of its own:
@@ -31,8 +33,8 @@
 % has to deal with the lack of a page concept on tex by some guessing. Normally
 % a macro package will set the dimensions to something reasonable anyway.
 
-\pagewidth   8.5in
-\pageheight 11.0in
+\pagewidth   8.5truein
+\pageheight 11.0truein
 
 % We load some code at runtime:
 

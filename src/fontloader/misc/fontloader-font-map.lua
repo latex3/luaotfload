@@ -13,8 +13,8 @@ local P, R, S, C, Ct, Cc, lpegmatch = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.Ct, l
 local floor = math.floor
 local formatters = string.formatters
 
-local trace_loading = false  trackers.register("fonts.loading", function(v) trace_loading    = v end)
-local trace_mapping = false  trackers.register("fonts.mapping", function(v) trace_unimapping = v end)
+local trace_loading = false  trackers.register("fonts.loading", function(v) trace_loading = v end)
+local trace_mapping = false  trackers.register("fonts.mapping", function(v) trace_mapping = v end)
 
 local report_fonts  = logs.reporter("fonts","loading") -- not otf only
 
@@ -265,6 +265,9 @@ function mappings.addtounicode(data,filename,checklookups)
     local resources = data.resources
     local unicodes  = resources.unicodes
     if not unicodes then
+        if trace_mapping then
+            report_fonts("no unicode list, quitting tounicode for %a",filename)
+        end
         return
     end
     local properties    = data.properties
@@ -474,11 +477,10 @@ function mappings.addtounicode(data,filename,checklookups)
     if trace_mapping and unicoded > 0 then
         report_fonts("%n ligature tounicode mappings deduced from gsub ligature features",unicoded)
     end
-
     if trace_mapping then
         for unic, glyph in table.sortedhash(descriptions) do
-            local name    = glyph.name
-            local index   = glyph.index
+            local name    = glyph.name or "-"
+            local index   = glyph.index or 0
             local unicode = glyph.unicode
             if unicode then
                 if type(unicode) == "table" then

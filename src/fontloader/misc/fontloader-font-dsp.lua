@@ -224,10 +224,15 @@ local function readcoverage(f,offset,simple)
     return coverage
 end
 
-local function readclassdef(f,offset)
+local function readclassdef(f,offset,preset)
     setposition(f,offset)
     local classdefformat = readushort(f)
     local classdef = { }
+    if type(preset) == "number" then
+        for k=0,preset-1 do
+            classdef[k] = 1
+        end
+    end
     if classdefformat == 1 then
         local index       = readushort(f)
         local nofclassdef = readushort(f)
@@ -248,6 +253,13 @@ local function readclassdef(f,offset)
         end
     else
         report("unknown classdef format %a ",classdefformat)
+    end
+    if type(preset) == "table" then
+        for k in next, preset do
+            if not classdef[k] then
+                classdef[k] = 1
+            end
+        end
     end
     return classdef
 end
@@ -365,7 +377,9 @@ end
 -- We generalize the chained lookups so that we can do with only one handler
 -- when processing them.
 
-local function readlookuparray(f,noflookups)
+-- pruned
+
+local function readlookuparray(f,noflookups,nofcurrent)
     local lookups = { }
     if noflookups > 0 then
         local length = 0
@@ -381,9 +395,33 @@ local function readlookuparray(f,noflookups)
                 lookups[index] = false
             end
         end
+     -- if length > nofcurrent then
+     --     report_issue("more lookups than currently matched characters")
+     -- end
     end
     return lookups
 end
+
+-- not pruned
+--
+-- local function readlookuparray(f,noflookups,nofcurrent)
+--     local lookups = { }
+--     for i=1,nofcurrent do
+--         lookups[i] = false
+--     end
+--     for i=1,noflookups do
+--         local index = readushort(f) + 1
+--         if index > nofcurrent then
+--             report_issue("more lookups than currently matched characters")
+--             for i=nofcurrent+1,index-1 do
+--                 lookups[i] = false
+--             end
+--             nofcurrent = index
+--         end
+--         lookups[index] = readushort(f) + 1
+--     end
+--     return lookups
+-- end
 
 local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyphs,what)
     local tableoffset = lookupoffset + offset
@@ -409,7 +447,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
                         for i=2,nofcurrent do
                             current[i] = { readushort(f) }
                         end
-                        local lookups = readlookuparray(f,noflookups)
+                        local lookups = readlookuparray(f,noflookups,nofcurrent)
                         rules[#rules+1] = {
                             current = current,
                             lookups = lookups
@@ -433,7 +471,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
         local rules           = { }
         if subclasssets then
             coverage             = readcoverage(f,tableoffset + coverage)
-            currentclassdef      = readclassdef(f,tableoffset + currentclassdef)
+            currentclassdef      = readclassdef(f,tableoffset + currentclassdef,coverage)
             local currentclasses = classtocoverage(currentclassdef,fontdata.glyphs)
             for class=1,#subclasssets do
                 local offset = subclasssets[class]
@@ -452,7 +490,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
                                 for i=2,nofcurrent do
                                     current[i] = currentclasses[readushort(f) + 1]
                                 end
-                                local lookups = readlookuparray(f,noflookups)
+                                local lookups = readlookuparray(f,noflookups,nofcurrent)
                                 rules[#rules+1] = {
                                     current = current,
                                     lookups = lookups
@@ -476,7 +514,7 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
     elseif subtype == 3 then
         local current    = readarray(f)
         local noflookups = readushort(f)
-        local lookups    = readlookuparray(f,noflookups)
+        local lookups    = readlookuparray(f,noflookups,#current)
         current = readcoveragearray(f,tableoffset,current,true)
         return {
             format = "coverage",
@@ -536,7 +574,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
                             end
                         end
                         local noflookups = readushort(f)
-                        local lookups    = readlookuparray(f,noflookups)
+                        local lookups    = readlookuparray(f,noflookups,nofcurrent)
                         rules[#rules+1] = {
                             before  = before,
                             current = current,
@@ -562,9 +600,9 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
         local rules           = { }
         if subclasssets then
             local coverage        = readcoverage(f,tableoffset + coverage)
-            local beforeclassdef  = readclassdef(f,tableoffset + beforeclassdef)
-            local currentclassdef = readclassdef(f,tableoffset + currentclassdef)
-            local afterclassdef   = readclassdef(f,tableoffset + afterclassdef)
+            local beforeclassdef  = readclassdef(f,tableoffset + beforeclassdef,nofglyphs)
+            local currentclassdef = readclassdef(f,tableoffset + currentclassdef,coverage)
+            local afterclassdef   = readclassdef(f,tableoffset + afterclassdef,nofglyphs)
             local beforeclasses   = classtocoverage(beforeclassdef,fontdata.glyphs)
             local currentclasses  = classtocoverage(currentclassdef,fontdata.glyphs)
             local afterclasses    = classtocoverage(afterclassdef,fontdata.glyphs)
@@ -604,7 +642,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
                                 end
                                 -- no sequence index here (so why in context as it saves nothing)
                                 local noflookups = readushort(f)
-                                local lookups    = readlookuparray(f,noflookups)
+                                local lookups    = readlookuparray(f,noflookups,nofcurrent)
                                 rules[#rules+1] = {
                                     before  = before,
                                     current = current,
@@ -632,7 +670,7 @@ local function chainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,nof
         local current    = readarray(f)
         local after      = readarray(f)
         local noflookups = readushort(f)
-        local lookups    = readlookuparray(f,noflookups)
+        local lookups    = readlookuparray(f,noflookups,#current)
         before  = readcoveragearray(f,tableoffset,before,true)
         current = readcoveragearray(f,tableoffset,current,true)
         after   = readcoveragearray(f,tableoffset,after,true)
@@ -988,8 +1026,8 @@ function gposhandlers.pair(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofgly
         local nofclasses2  = readushort(f) -- incl class 0
         local classlist    = readpairclasssets(f,nofclasses1,nofclasses2,format1,format2)
               coverage     = readcoverage(f,tableoffset+coverage)
-              classdef1    = readclassdef(f,tableoffset+classdef1)
-              classdef2    = readclassdef(f,tableoffset+classdef2)
+              classdef1    = readclassdef(f,tableoffset+classdef1,coverage)
+              classdef2    = readclassdef(f,tableoffset+classdef2,nofglyphs)
         local usedcoverage = { }
         for g1, c1 in next, classdef1 do
             if coverage[g1] then

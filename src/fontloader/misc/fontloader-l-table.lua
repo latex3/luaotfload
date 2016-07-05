@@ -673,6 +673,8 @@ local function do_serialize(root,name,depth,level,indexed)
                     else
                         handle(format("%s [%s]=%s,",depth,k and "true" or "false",v)) -- %.99g
                     end
+                elseif tk ~= "string" then
+                    -- ignore
                 elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
                     if hexify then
                         handle(format("%s %s=0x%X,",depth,k,v))
@@ -695,6 +697,8 @@ local function do_serialize(root,name,depth,level,indexed)
                     end
                 elseif tk == "boolean" then
                     handle(format("%s [%s]=%q,",depth,k and "true" or "false",v))
+                elseif tk ~= "string" then
+                    -- ignore
                 elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
                     handle(format("%s %s=%q,",depth,k,v))
                 else
@@ -710,6 +714,8 @@ local function do_serialize(root,name,depth,level,indexed)
                         end
                     elseif tk == "boolean" then
                         handle(format("%s [%s]={},",depth,k and "true" or "false"))
+                    elseif tk ~= "string" then
+                        -- ignore
                     elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
                         handle(format("%s %s={},",depth,k))
                     else
@@ -726,6 +732,8 @@ local function do_serialize(root,name,depth,level,indexed)
                             end
                         elseif tk == "boolean" then
                             handle(format("%s [%s]={ %s },",depth,k and "true" or "false",concat(st,", ")))
+                        elseif tk ~= "string" then
+                            -- ignore
                         elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
                             handle(format("%s %s={ %s },",depth,k,concat(st,", ")))
                         else
@@ -746,6 +754,8 @@ local function do_serialize(root,name,depth,level,indexed)
                     end
                 elseif tk == "boolean" then
                     handle(format("%s [%s]=%s,",depth,tostring(k),v and "true" or "false"))
+                elseif tk ~= "string" then
+                    -- ignore
                 elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
                     handle(format("%s %s=%s,",depth,k,v and "true" or "false"))
                 else
@@ -763,6 +773,8 @@ local function do_serialize(root,name,depth,level,indexed)
                         end
                     elseif tk == "boolean" then
                         handle(format("%s [%s]=load(%q),",depth,k and "true" or "false",f))
+                    elseif tk ~= "string" then
+                        -- ignore
                     elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
                         handle(format("%s %s=load(%q),",depth,k,f))
                     else
@@ -778,6 +790,8 @@ local function do_serialize(root,name,depth,level,indexed)
                     end
                 elseif tk == "boolean" then
                     handle(format("%s [%s]=%q,",depth,k and "true" or "false",tostring(v)))
+                elseif tk ~= "string" then
+                    -- ignore
                 elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
                     handle(format("%s %s=%q,",depth,k,tostring(v)))
                 else
@@ -1165,7 +1179,7 @@ function table.has_one_entry(t)
     return t and next(t,next(t)) == nil
 end
 
--- new
+-- new (rather basic, not indexed and nested)
 
 function table.loweredkeys(t) -- maybe utf
     local l = { }

@@ -34,6 +34,8 @@ local function setmode(tfmdata,value)
     end
 end
 
+otf.modeinitializer = setmode
+
 local function setlanguage(tfmdata,value)
     if value then
         local cleanvalue = lower(value)

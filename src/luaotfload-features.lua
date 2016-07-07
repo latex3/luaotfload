@@ -1334,14 +1334,37 @@ local noflags = { false, false, false, false }
 
 local tohash = table.tohash
 
-local function current_addfeature(data,feature,specifications)
+local function addfeature(data,feature,specifications)
+
+    -- todo: add some validator / check code so that we're more tolerant to
+    -- user errors
+
+    if not specifications then
+        report_otf("missing specification")
+        return
+    end
+
     local descriptions = data.descriptions
     local resources    = data.resources
     local features     = resources.features
     local sequences    = resources.sequences
+
     if not features or not sequences then
+        report_otf("missing specification")
         return
     end
+
+    local alreadydone = resources.alreadydone
+    if not alreadydone then
+        alreadydone = { }
+        resources.alreadydone = alreadydone
+    end
+    if alreadydone[specifications] then
+        return
+    else
+        alreadydone[specifications] = true
+    end
+
     -- feature has to be unique but the name entry wins eventually
 
     local fontfeatures = resources.features or everywhere
@@ -1351,9 +1374,10 @@ local function current_addfeature(data,feature,specifications)
     local skip         = 0
     local aglunicodes  = false
 
-    if not specifications[1] then
-        -- so we accept a one entry specification
-        specifications = { specifications }
+    local specifications = validspecification(specifications,feature)
+    if not specifications then
+     -- report_otf("invalid specification")
+        return
     end
 
     local function tounicode(code)
@@ -1655,11 +1679,15 @@ local function current_addfeature(data,feature,specifications)
         return coverage
     end
 
-    for s=1,#specifications do
-        local specification = specifications[s]
-        local valid         = specification.valid
-        local feature       = specification.name or feature
-        if not valid or valid(data,specification,feature) then
+    local dataset = specifications.dataset
+
+    for s=1,#dataset do
+        local specification = dataset[s]
+        local valid = specification.valid -- nowhere used
+        local feature = specification.name or feature
+        if not feature or feature == "" then
+            report_otf("no valid name given for extra feature")
+        elseif not valid or valid(data,specification,feature) then -- anum uses this
             local initialize = specification.initialize
             if initialize then
                 -- when false is returned we initialize only once
@@ -1776,10 +1804,37 @@ local function current_addfeature(data,feature,specifications)
                     type      = types[featuretype],
                 }
                 -- todo : before|after|index
-                if specification.prepend then
-                    insert(sequences,1,sequence)
-                else
+                local prepend = specification.prepend
+                if prepend == true then
+                    prepend = 1
+                end
+                if type(prepend) == "number" then
+                    -- okay
+                elseif type(prepend) == "string" then
+                    local index = false
+                    for i=1,#sequences do
+                        local s = sequences[i]
+                        local f = s.features
+                        if f then
+                            for k in next, f do
+                                if k == prepend then
+                                    index = i
+                                    break
+                                end
+                            end
+                            if index then
+                                break
+                            end
+                        end
+                    end
+                    prepend = index
+                elseif prepend == true then
+                    prepend = 1
+                end
+                if not prepend or prepend <= 0 or prepend > #sequences  then
                     insert(sequences,sequence)
+                else
+                    insert(sequences,prepend,sequence)
                 end
                 -- register in metadata (merge as there can be a few)
                 local features = fontfeatures[category]
@@ -1953,12 +2008,17 @@ function add_otf_feature (name, specification)
         specification = name
         name = specification.name
     end
-    if type (name) == "string" then
+    if type (specification) ~= "table" then
+        logreport ("both", 0, "features",
+                   "invalid feature specification “%s”", tostring (name))
+        return
+    end
+    if name and specification then
         extrafeatures[name] = specification
     end
 end
 
-otf.addfeature           = add_otf_feature
+otf.addfeature = add_otf_feature
 
 local install_extra_features = function (data, filename, raw)
     local metadata = data and data.metadata
@@ -2002,7 +2062,7 @@ return {
         end
 
         otf = fonts.handlers.otf
-        otf.enhancers.addfeature = current_addfeature
+        otf.enhancers.addfeature = addfeature
         otf.enhancers.register ("check extra features",
                                 install_extra_features)
 

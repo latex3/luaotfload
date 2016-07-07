@@ -8,7 +8,7 @@
 -----------------------------------------------------------------------
 
 luaotfload                     = luaotfload or { }
-local version                  = "2.7"
+local version                  = "2.8"
 luaotfload.version             = version
 luaotfload.min_luatex_version  = { 0, 95, 0 }   --- i. e. 0.95.0
 luaotfload.self                = "luaotfload-tool"
@@ -138,13 +138,14 @@ require "fontloader-basics-gen.lua"
 texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities
 
+pdf = pdf or { } --- for font-tfm
+
 require "fontloader-data-con"
 require "fontloader-font-ini"
 require "fontloader-font-con"
 require "fontloader-fonts-enc"
 require "fontloader-font-cid"
 require "fontloader-font-map"
-require "fontloader-font-tfm"
 require "fontloader-font-oti"
 require "fontloader-font-otr"
 require "fontloader-font-cff"
@@ -160,6 +161,7 @@ require "fontloader-font-oto"
 require "fontloader-font-onr"
 require "fontloader-font-one"
 require "fontloader-font-afk"
+require "fontloader-font-tfm"
 require "fontloader-font-lua"
 require "fontloader-font-def"
 require "fontloader-fonts-ext"

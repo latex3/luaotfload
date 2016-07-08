@@ -352,7 +352,7 @@ else
         return not (sx==1 and rx==0 and ry==0 and sy==1 and tx==0 and ty==0), t.width
     end
 
-    local function concat(px, py) -- no tx, ty here
+    local function concatinated(px, py) -- no tx, ty here
         return (sy*px-ry*py)/divider,(sx*py-rx*px)/divider
     end
 
@@ -401,29 +401,29 @@ else
         for i=1,#path do
             pth = path[i]
             if not ith then
-               pdf_literalcode("%f %f m",concat(pth.x_coord,pth.y_coord))
+               pdf_literalcode("%f %f m",concatinated(pth.x_coord,pth.y_coord))
             elseif curved(ith,pth) then
-                local a, b = concat(ith.right_x,ith.right_y)
-                local c, d = concat(pth.left_x,pth.left_y)
-                pdf_literalcode("%f %f %f %f %f %f c",a,b,c,d,concat(pth.x_coord, pth.y_coord))
+                local a, b = concatinated(ith.right_x,ith.right_y)
+                local c, d = concatinated(pth.left_x,pth.left_y)
+                pdf_literalcode("%f %f %f %f %f %f c",a,b,c,d,concatinated(pth.x_coord, pth.y_coord))
             else
-               pdf_literalcode("%f %f l",concat(pth.x_coord, pth.y_coord))
+               pdf_literalcode("%f %f l",concatinated(pth.x_coord, pth.y_coord))
             end
             ith = pth
         end
         if not open then
             local one = path[1]
             if curved(pth,one) then
-                local a, b = concat(pth.right_x,pth.right_y)
-                local c, d = concat(one.left_x,one.left_y)
-                pdf_literalcode("%f %f %f %f %f %f c",a,b,c,d,concat(one.x_coord, one.y_coord))
+                local a, b = concatinated(pth.right_x,pth.right_y)
+                local c, d = concatinated(one.left_x,one.left_y)
+                pdf_literalcode("%f %f %f %f %f %f c",a,b,c,d,concatinated(one.x_coord, one.y_coord))
             else
-                pdf_literalcode("%f %f l",concat(one.x_coord,one.y_coord))
+                pdf_literalcode("%f %f l",concatinated(one.x_coord,one.y_coord))
             end
         elseif #path == 1 then
             -- special case .. draw point
             local one = path[1]
-            pdf_literalcode("%f %f l",concat(one.x_coord,one.y_coord))
+            pdf_literalcode("%f %f l",concatinated(one.x_coord,one.y_coord))
         end
         return t
     end

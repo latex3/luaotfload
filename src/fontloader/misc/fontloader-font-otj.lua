@@ -36,7 +36,7 @@ local registertracker = trackers.register
 local trace_injections  = false  registertracker("fonts.injections",         function(v) trace_injections = v end)
 local trace_marks       = false  registertracker("fonts.injections.marks",   function(v) trace_marks      = v end)
 local trace_cursive     = false  registertracker("fonts.injections.cursive", function(v) trace_cursive    = v end)
-local trace_spaces      = false  registertracker("otf.spaces",               function(v) trace_spaces  = v end)
+local trace_spaces      = false  registertracker("fonts.injections.spaces",  function(v) trace_spaces  = v end)
 
 -- use_advance is just an experiment: it makes copying glyphs (instead of new_glyph) dangerous
 
@@ -1092,6 +1092,10 @@ local function inject_everything(head,where)
                             nofmarks = nofmarks + 1
                             marks[nofmarks] = current
                         else
+local yoffset = i.yoffset
+if yoffset and yoffset ~= 0 then
+    setfield(current,"yoffset",yoffset)
+end
                             if hascursives then
                                 local cursivex = i.cursivex
                                 if cursivex then
@@ -1144,10 +1148,10 @@ local function inject_everything(head,where)
                                 end
                             end
                             -- left|glyph|right
-                            local yoffset = i.yoffset
-                            if yoffset and yoffset ~= 0 then
-                                setfield(current,"yoffset",yoffset)
-                            end
+--                             local yoffset = i.yoffset
+--                             if yoffset and yoffset ~= 0 then
+--                                 setfield(current,"yoffset",yoffset)
+--                             end
                             local leftkern = i.leftkern
                             if leftkern and leftkern ~= 0 then
                                 insert_node_before(head,current,newkern(leftkern))
@@ -1422,6 +1426,48 @@ function nodes.injections.setspacekerns(font,sequence)
     end
 end
 
+local getthreshold
+
+if context then
+
+    local threshold  =  1 -- todo: add a few methods for context
+    local parameters = fonts.hashes.parameters
+
+    directives.register("otf.threshold", function(v) threshold = tonumber(v) or 1 end)
+
+    getthreshold  = function(font)
+        local p = parameters[font]
+        local f = p.factor
+        local s = p.spacing
+        local t = threshold * (s and s.width or p.space or 0) - 2
+        return t > 0 and t or 0, f
+    end
+
+else
+
+    injections.threshold = 0
+
+    getthreshold  = function(font)
+        local p = fontdata[font].parameters
+        local f = p.factor
+        local s = p.spacing
+        local t = injections.threshold * (s and s.width or p.space or 0) - 2
+        return t > 0 and t or 0, f
+    end
+
+end
+
+injections.getthreshold = getthreshold
+
+function injections.isspace(n,threshold)
+    if getid(n) == glue_code then
+        local w = getfield(n,"width")
+        if threshold and w > threshold then -- was >=
+            return 32
+        end
+    end
+end
+
 local function injectspaces(head)
 
     if not triggers then
@@ -1438,18 +1484,11 @@ local function injectspaces(head)
     local rightkern  = false
 
     local function updatefont(font,trig)
-     -- local resources  = resources[font]
-     -- local spacekerns = resources.spacekerns
-     -- if spacekerns then
-     --     leftkerns  = spacekerns.left
-     --     rightkerns = spacekerns.right
-     -- end
         leftkerns  = trig.left
         rightkerns = trig.right
-        local par  = fontdata[font].parameters -- fallback for generic
-        factor     = par.factor
-        threshold  = par.spacing.width - 1 -- get rid of rounding errors
         lastfont   = font
+        threshold,
+        factor     = getthreshold(font)
     end
 
     for n in traverse_id(glue_code,tonut(head)) do
@@ -1469,7 +1508,7 @@ local function injectspaces(head)
             end
         end
         if prevchar then
-            local font = getfont(next)
+            local font = getfont(prev)
             local trig = triggers[font]
             if trig then
                 if lastfont ~= font then
@@ -1482,7 +1521,7 @@ local function injectspaces(head)
         end
         if leftkern then
             local old = getfield(n,"width")
-            if old >= threshold then
+            if old > threshold then
                 if rightkern then
                     local new = old + (leftkern + rightkern) * factor
                     if trace_spaces then
@@ -1501,7 +1540,7 @@ local function injectspaces(head)
             leftkern  = false
         elseif rightkern then
             local old = getfield(n,"width")
-            if old >= threshold then
+            if old > threshold then
                 local new = old + rightkern * factor
                 if trace_spaces then
                     report_spaces("[%p -> %p] %C",nextchar,old,new)

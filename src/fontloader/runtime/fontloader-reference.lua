@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 07/01/16 16:28:20
+-- merge date  : 07/13/16 15:09:54
 
 do -- begin closure to overcome local limits and interference
 
@@ -16267,7 +16267,7 @@ local registertracker=trackers.register
 local trace_injections=false registertracker("fonts.injections",function(v) trace_injections=v end)
 local trace_marks=false registertracker("fonts.injections.marks",function(v) trace_marks=v end)
 local trace_cursive=false registertracker("fonts.injections.cursive",function(v) trace_cursive=v end)
-local trace_spaces=false registertracker("otf.spaces",function(v) trace_spaces=v end)
+local trace_spaces=false registertracker("fonts.injections.spaces",function(v) trace_spaces=v end)
 local use_advance=false directives.register("fonts.injections.advance",function(v) use_advance=v end)
 local report_injections=logs.reporter("fonts","injections")
 local report_spaces=logs.reporter("fonts","spaces")
@@ -17149,6 +17149,10 @@ local function inject_everything(head,where)
               nofmarks=nofmarks+1
               marks[nofmarks]=current
             else
+local yoffset=i.yoffset
+if yoffset and yoffset~=0 then
+  setfield(current,"yoffset",yoffset)
+end
               if hascursives then
                 local cursivex=i.cursivex
                 if cursivex then
@@ -17199,10 +17203,6 @@ local function inject_everything(head,where)
                   end
                   cursiveanchor=nil
                 end
-              end
-              local yoffset=i.yoffset
-              if yoffset and yoffset~=0 then
-                setfield(current,"yoffset",yoffset)
               end
               local leftkern=i.leftkern
               if leftkern and leftkern~=0 then
@@ -17450,6 +17450,37 @@ function nodes.injections.setspacekerns(font,sequence)
     triggers={ [font]=sequence }
   end
 end
+local getthreshold
+if context then
+  local threshold=1 
+  local parameters=fonts.hashes.parameters
+  directives.register("otf.threshold",function(v) threshold=tonumber(v) or 1 end)
+  getthreshold=function(font)
+    local p=parameters[font]
+    local f=p.factor
+    local s=p.spacing
+    local t=threshold*(s and s.width or p.space or 0)-2
+    return t>0 and t or 0,f
+  end
+else
+  injections.threshold=0
+  getthreshold=function(font)
+    local p=fontdata[font].parameters
+    local f=p.factor
+    local s=p.spacing
+    local t=injections.threshold*(s and s.width or p.space or 0)-2
+    return t>0 and t or 0,f
+  end
+end
+injections.getthreshold=getthreshold
+function injections.isspace(n,threshold)
+  if getid(n)==glue_code then
+    local w=getfield(n,"width")
+    if threshold and w>threshold then 
+      return 32
+    end
+  end
+end
 local function injectspaces(head)
   if not triggers then
     return head,false
@@ -17465,10 +17496,9 @@ local function injectspaces(head)
   local function updatefont(font,trig)
     leftkerns=trig.left
     rightkerns=trig.right
-    local par=fontdata[font].parameters 
-    factor=par.factor
-    threshold=par.spacing.width-1 
     lastfont=font
+    threshold,
+    factor=getthreshold(font)
   end
   for n in traverse_id(glue_code,tonut(head)) do
     local prev,next=getboth(n)
@@ -17487,7 +17517,7 @@ local function injectspaces(head)
       end
     end
     if prevchar then
-      local font=getfont(next)
+      local font=getfont(prev)
       local trig=triggers[font]
       if trig then
         if lastfont~=font then
@@ -17500,7 +17530,7 @@ local function injectspaces(head)
     end
     if leftkern then
       local old=getfield(n,"width")
-      if old>=threshold then
+      if old>threshold then
         if rightkern then
           local new=old+(leftkern+rightkern)*factor
           if trace_spaces then
@@ -17519,7 +17549,7 @@ local function injectspaces(head)
       leftkern=false
     elseif rightkern then
       local old=getfield(n,"width")
-      if old>=threshold then
+      if old>threshold then
         local new=old+rightkern*factor
         if trace_spaces then
           report_spaces("[%p -> %p] %C",nextchar,old,new)
@@ -17970,11 +18000,7 @@ local trace_kernruns=false registertracker("otf.kernruns",function(v) trace_kern
 local trace_discruns=false registertracker("otf.discruns",function(v) trace_discruns=v end)
 local trace_compruns=false registertracker("otf.compruns",function(v) trace_compruns=v end)
 local trace_testruns=false registertracker("otf.testruns",function(v) trace_testruns=v end)
-local quit_on_no_replacement=true 
-local zwnjruns=true
 local optimizekerns=true
-registerdirective("otf.zwnjruns",function(v) zwnjruns=v end)
-registerdirective("otf.chain.quitonnoreplacement",function(value) quit_on_no_replacement=value end)
 local report_direct=logs.reporter("fonts","otf direct")
 local report_subchain=logs.reporter("fonts","otf subchain")
 local report_chain=logs.reporter("fonts","otf chain")
@@ -18051,6 +18077,7 @@ local getligaindex=injections.getligaindex
 local cursonce=true
 local fonthashes=fonts.hashes
 local fontdata=fonthashes.identifiers
+local fontfeatures=fonthashes.features
 local otffeatures=fonts.constructors.features.otf
 local registerotffeature=otffeatures.register
 local onetimemessage=fonts.loggers.onetimemessage or function() end
@@ -18070,14 +18097,8 @@ local notmatchpre={}
 local notmatchpost={}
 local notmatchreplace={}
 local handlers={}
-local function isspace(n)
-  if getid(n)==glue_code then
-    local w=getfield(n,"width")
-    if w>=threshold then
-      return 32
-    end
-  end
-end
+local isspace=injections.isspace
+local getthreshold=injections.getthreshold
 local checkstep=(nodes and nodes.tracers and nodes.tracers.steppers.check)  or function() end
 local registerstep=(nodes and nodes.tracers and nodes.tracers.steppers.register) or function() end
 local registermessage=(nodes and nodes.tracers and nodes.tracers.steppers.message) or function() end
@@ -18355,7 +18376,7 @@ end
   end
   return head,base
 end
-local function multiple_glyphs(head,start,multiple,ignoremarks)
+local function multiple_glyphs(head,start,multiple,ignoremarks,what)
   local nofmultiples=#multiple
   if nofmultiples>0 then
     resetinjection(start)
@@ -18368,6 +18389,17 @@ local function multiple_glyphs(head,start,multiple,ignoremarks)
         setchar(n,multiple[k])
         insert_node_after(head,start,n)
         start=n
+      end
+      if what==true then
+      elseif what>1 then
+        local m=multiple[nofmultiples]
+        for i=2,what do
+          local n=copy_node(start) 
+          resetinjection(n)
+          setchar(n,m)
+          insert_node_after(head,start,n)
+          start=n
+        end
       end
     end
     return head,start,true
@@ -18439,7 +18471,7 @@ function handlers.gsub_multiple(head,start,dataset,sequence,multiple)
   if trace_multiples then
     logprocess("%s: replacing %s by multiple %s",pref(dataset,sequence),gref(getchar(start)),gref(multiple))
   end
-  return multiple_glyphs(head,start,multiple,sequence.flags[1])
+  return multiple_glyphs(head,start,multiple,sequence.flags[1],dataset[1])
 end
 function handlers.gsub_ligature(head,start,dataset,sequence,ligature)
   local current=getnext(start)
@@ -18894,7 +18926,7 @@ function chainprocs.gsub_multiple(head,start,stop,dataset,sequence,currentlookup
     if trace_multiples then
       logprocess("%s: replacing %s by multiple characters %s",cref(dataset,sequence),gref(startchar),gref(replacement))
     end
-    return multiple_glyphs(head,start,replacement,sequence.flags[1])
+    return multiple_glyphs(head,start,replacement,sequence.flags[1],dataset[1])
   end
   return head,start,false
 end
@@ -18906,7 +18938,7 @@ function chainprocs.gsub_alternate(head,start,stop,dataset,sequence,currentlooku
   end
   local kind=dataset[4]
   local what=dataset[1]
-  local value=what==true and tfmdata.shared.features[kind] or what
+  local value=what==true and tfmdata.shared.features[kind] or what 
   local current=start
   while current do
     local currentchar=ischar(current)
@@ -19847,16 +19879,13 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                     end
                   end
                   prev=getprev(prev)
-                elseif seq[n][32] then
+                elseif seq[n][32] and isspace(prev,threshold) then
                   n=n-1
                   prev=getprev(prev)
                 else
                   match=false
                   break
                 end
-              elseif seq[n][32] then 
-                n=n-1
-                prev=getprev(prev) 
               else
                 match=false
                 break
@@ -19970,15 +19999,13 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
                 else
                 end
                 current=getnext(current)
-              elseif seq[n][32] then 
+              elseif seq[n][32] and isspace(current,threshold) then
                 n=n+1
+                current=getnext(current)
               else
                 match=false
                 break
               end
-            elseif seq[n][32] then
-              n=n+1
-              current=getnext(current)
             else
               match=false
               break
@@ -20073,7 +20100,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode)
         if replacements then
           head,start,done=reversesub(head,start,last,dataset,sequence,replacements,rlmode)
         else
-          done=quit_on_no_replacement 
+          done=true
           if trace_contexts then
             logprocess("%s: skipping match",cref(dataset,sequence))
           end
@@ -20222,10 +20249,10 @@ local function kernrun(disc,k_run,font,attr,...)
       break
     end
   end
-  if prev and (pre or replace) and not ischar(prev,font) then
+  if prev and not ischar(prev,font) then 
     prev=false
   end
-  if next and (post or replace) and not ischar(next,font) then
+  if next and not ischar(next,font) then 
     next=false
   end
   if pre then
@@ -20651,8 +20678,8 @@ local function featuresprocessor(head,font,attr)
     descriptions=tfmdata.descriptions
     characters=tfmdata.characters
     marks=tfmdata.resources.marks
-    factor=tfmdata.parameters.factor
-    threshold=tfmdata.parameters.spacing.width or 65536*10
+    threshold,
+    factor=getthreshold(font)
   elseif currentfont~=font then
     report_warning("nested call with a different font, level %s, quitting",nesting)
     nesting=nesting-1
@@ -20680,14 +20707,11 @@ local function featuresprocessor(head,font,attr)
     local steps=sequence.steps
     local nofsteps=sequence.nofsteps
     if not steps then
-      local h,d,ok=handler(head,start,dataset,sequence,nil,nil,nil,0,font,attr)
+      local h,d,ok=handler(head,head,dataset,sequence,nil,nil,nil,0,font,attr)
       if ok then
         success=true
         if h then
           head=h
-        end
-        if d then
-          start=d
         end
       end
     elseif typ=="gsub_reversecontextchain" then
@@ -20873,9 +20897,25 @@ otf.nodemodeinitializer=featuresinitializer
 otf.featuresprocessor=featuresprocessor
 otf.handlers=handlers
 local setspacekerns=nodes.injections.setspacekerns if not setspacekerns then os.exit() end
-function otf.handlers.trigger_space_kerns(head,start,dataset,sequence,_,_,_,_,font,attr)
-  setspacekerns(font,sequence)
-  return head,start,true
+if fontfeatures then
+  function otf.handlers.trigger_space_kerns(head,start,dataset,sequence,_,_,_,_,font,attr)
+    local features=fontfeatures[font]
+    local enabled=features.spacekern==true and features.kern==true
+    if enabled then
+      setspacekerns(font,sequence)
+    end
+    return head,start,enabled
+  end
+else 
+  function otf.handlers.trigger_space_kerns(head,start,dataset,sequence,_,_,_,_,font,attr)
+    local shared=fontdata[font].shared
+    local features=shared and shared.features
+    local enabled=features and features.spacekern==true and features.kern==true
+    if enabled then
+      setspacekerns(font,sequence)
+    end
+    return head,start,enabled
+  end
 end
 local function hasspacekerns(data)
   local sequences=data.resources.sequences
@@ -20909,8 +20949,8 @@ otf.readers.registerextender {
 local function spaceinitializer(tfmdata,value) 
   local resources=tfmdata.resources
   local spacekerns=resources and resources.spacekerns
-  if spacekerns==nil then
-    local properties=tfmdata.properties
+  local properties=tfmdata.properties
+  if value and spacekerns==nil then
     if properties and properties.hasspacekerns then
       local sequences=resources.sequences
       local left={}
@@ -20923,7 +20963,20 @@ local function spaceinitializer(tfmdata,value)
         if steps then
           local kern=sequence.features.kern
           if kern then
-            feat=feat or kern 
+            if feat then
+              for script,languages in next,kern do
+                local f=feat[k]
+                if f then
+                  for l in next,languages do
+                    f[l]=true
+                  end
+                else
+                  feat[script]=languages
+                end
+              end
+            else
+              feat=kern
+            end
             for i=1,#steps do
               local step=steps[i]
               local coverage=step.coverage

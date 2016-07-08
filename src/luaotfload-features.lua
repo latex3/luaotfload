@@ -1334,6 +1334,42 @@ local noflags = { false, false, false, false }
 
 local tohash = table.tohash
 
+local function validspecification(specification,name)
+    local dataset = specification.dataset
+    if dataset then
+        -- okay
+    elseif specification[1] then
+        dataset = specification
+        specification = { dataset = dataset }
+    else
+        dataset = { { data = specification.data } }
+        specification.data    = nil
+        specification.dataset = dataset
+    end
+    local first = dataset[1]
+    if first then
+        first = first.data
+    end
+    if not first then
+        report_otf("invalid feature specification, no dataset")
+        return
+    end
+    if type(name) ~= "string" then
+        name = specification.name or first.name
+    end
+    if type(name) ~= "string" then
+        report_otf("invalid feature specification, no name")
+        return
+    end
+    local n = #dataset
+    if n > 0 then
+        for i=1,n do
+            setmetatableindex(dataset[i],specification)
+        end
+        return specification, name
+    end
+end
+
 local function addfeature(data,feature,specifications)
 
     -- todo: add some validator / check code so that we're more tolerant to

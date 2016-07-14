@@ -55,7 +55,7 @@ local afm_loader = function (specification)
   specification.forced      = "afm"
   specification.sub         = false
   specification.forcedname  = file.addsuffix(specification.name, "afm")
-  inspect(specification)
+--inspect(specification)
   return afm_reader (specification, "afm")
 end
 
@@ -98,6 +98,7 @@ local install_formats = function ()
      and aux ("lua", lua_reader)
      and aux ("pfa", unsupported_reader "pfa")
      and aux ("afm", afm_loader)
+     and aux ("tfm", afm_loader)
      and aux ("pfb", afm_compat_message) --- pfb loader is incomplete
      and aux ("ofm", readers.tfm)
      and aux ("dfont", unsupported_reader "dfont")

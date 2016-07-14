@@ -9,7 +9,7 @@ if not modules then modules = { } end modules ['font-con'] = {
 -- some names of table entries will be changed (no _)
 
 local next, tostring, rawget = next, tostring, rawget
-local format, match, lower, gsub = string.format, string.match, string.lower, string.gsub
+local format, match, lower, gsub, find = string.format, string.match, string.lower, string.gsub, string.find
 local sort, insert, concat, sortedkeys, serialize, fastcopy = table.sort, table.insert, table.concat, table.sortedkeys, table.serialize, table.fastcopy
 local derivetable = table.derive
 
@@ -45,102 +45,6 @@ constructors.cache           = containers.define("fonts", "constructors", constr
 constructors.privateoffset   = 0xF0000 -- 0x10FFFF
 
 constructors.cacheintex      = true -- so we see the original table in fonts.font
-
--- Some experimental helpers (handy for tracing):
---
--- todo: extra:
---
--- extra_space       => space.extra
--- space             => space.width
--- space_stretch     => space.stretch
--- space_shrink      => space.shrink
-
--- We do keep the x-height, extra_space, space_shrink and space_stretch
--- around as these are low level official names.
-
-constructors.keys = {
-    properties = {
-        encodingbytes          = "number",
-        embedding              = "number",
-        cidinfo                = { },
-        format                 = "string",
-        fontname               = "string",
-        fullname               = "string",
-        filename               = "filename",
-        psname                 = "string",
-        name                   = "string",
-        virtualized            = "boolean",
-        hasitalics             = "boolean",
-        autoitalicamount       = "basepoints",
-        nostackmath            = "boolean",
-        noglyphnames           = "boolean",
-        mode                   = "string",
-        hasmath                = "boolean",
-        mathitalics            = "boolean",
-        textitalics            = "boolean",
-        finalized              = "boolean",
-    },
-    parameters = {
-        mathsize               = "number",
-        scriptpercentage       = "float",
-        scriptscriptpercentage = "float",
-        units                  = "cardinal",
-        designsize             = "scaledpoints",
-        expansion              = {
-                                    stretch = "integerscale", -- might become float
-                                    shrink  = "integerscale", -- might become float
-                                    step    = "integerscale", -- might become float
-                                    auto    = "boolean",
-                                 },
-        protrusion             = {
-                                    auto    = "boolean",
-                                 },
-        slantfactor            = "float",
-        extendfactor           = "float",
-        factor                 = "float",
-        hfactor                = "float",
-        vfactor                = "float",
-        size                   = "scaledpoints",
-        units                  = "scaledpoints",
-        scaledpoints           = "scaledpoints",
-        slantperpoint          = "scaledpoints",
-        spacing                = {
-                                    width   = "scaledpoints",
-                                    stretch = "scaledpoints",
-                                    shrink  = "scaledpoints",
-                                    extra   = "scaledpoints",
-                                 },
-        xheight                = "scaledpoints",
-        quad                   = "scaledpoints",
-        ascender               = "scaledpoints",
-        descender              = "scaledpoints",
-        synonyms               = {
-                                    space         = "spacing.width",
-                                    spacestretch  = "spacing.stretch",
-                                    spaceshrink   = "spacing.shrink",
-                                    extraspace    = "spacing.extra",
-                                    x_height      = "xheight",
-                                    space_stretch = "spacing.stretch",
-                                    space_shrink  = "spacing.shrink",
-                                    extra_space   = "spacing.extra",
-                                    em            = "quad",
-                                    ex            = "xheight",
-                                    slant         = "slantperpoint",
-                                  },
-    },
-    description = {
-        width                  = "basepoints",
-        height                 = "basepoints",
-        depth                  = "basepoints",
-        boundingbox            = { },
-    },
-    character = {
-        width                  = "scaledpoints",
-        height                 = "scaledpoints",
-        depth                  = "scaledpoints",
-        italic                 = "scaledpoints",
-    },
-}
 
 -- This might become an interface:
 
@@ -351,6 +255,27 @@ local function mathkerns(v,vdelta)
     return k
 end
 
+local psfake = 0
+
+local function fixedpsname(psname,fallback)
+    local usedname = psname
+    if psname and psname ~= "" then
+        if find(psname," ") then
+            usedname = gsub(psname,"[%s]+","-")
+        else
+            -- we assume that the name is sane enough (we might sanitize completely some day)
+        end
+    elseif not fallback or fallback == "" then
+        psfake = psfake + 1
+        psname = "fakename-" .. psfake
+    else
+        -- filenames can be a mess so we do a drastic cleanup
+        psname   = fallback
+        usedname = gsub(psname,"[^a-zA-Z0-9]+","-")
+    end
+    return usedname, psname ~= usedname
+end
+
 function constructors.scale(tfmdata,specification)
     local target         = { } -- the new table
     --
@@ -453,22 +378,21 @@ function constructors.scale(tfmdata,specification)
     target.format        = properties.format
     target.cache         = constructors.cacheintex and "yes" or "renew"
     --
-    local fontname = properties.fontname or tfmdata.fontname -- for the moment we fall back on
-    local fullname = properties.fullname or tfmdata.fullname -- names in the tfmdata although
-    local filename = properties.filename or tfmdata.filename -- that is not the right place to
-    local psname   = properties.psname   or tfmdata.psname   -- pass them
+    local fontname = properties.fontname or tfmdata.fontname
+    local fullname = properties.fullname or tfmdata.fullname
+    local filename = properties.filename or tfmdata.filename
+    local psname   = properties.psname   or tfmdata.psname
     local name     = properties.name     or tfmdata.name
     --
-    if not psname or psname == "" then
-     -- name used in pdf file as well as for selecting subfont in ttc/dfont
-        psname = fontname or (fullname and fonts.names.cleanname(fullname))
-    end
+    -- the psname used in pdf file as well as for selecting subfont in ttc
+    --
+    local psname, psfixed = fixedpsname(psname,fontname or fullname or file.nameonly(filename))
+    --
     target.fontname = fontname
     target.fullname = fullname
     target.filename = filename
     target.psname   = psname
     target.name     = name
-    --
     --
     properties.fontname = fontname
     properties.fullname = fullname
@@ -602,8 +526,9 @@ function constructors.scale(tfmdata,specification)
     -- end of context specific trickery
     --
     if trace_defining then
-        report_defining("defining tfm, name %a, fullname %a, filename %a, hscale %a, vscale %a, math %a, italics %a",
-            name,fullname,filename,hdelta,vdelta,hasmath and "enabled" or "disabled",hasitalics and "enabled" or "disabled")
+        report_defining("defining tfm, name %a, fullname %a, filename %a, %spsname %a, hscale %a, vscale %a, math %a, italics %a",
+            name,fullname,filename,psfixed and "(fixed) " or "",psname,hdelta,vdelta,
+            hasmath and "enabled" or "disabled",hasitalics and "enabled" or "disabled")
     end
     --
     constructors.beforecopyingcharacters(target,tfmdata)

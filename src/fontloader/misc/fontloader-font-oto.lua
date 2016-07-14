@@ -120,7 +120,7 @@ local function registerbasehash(tfmdata)
         basehash[hash] = base
     end
     properties.basehash = base
-    properties.fullname = properties.fullname .. "-" .. base
+    properties.fullname = (properties.fullname or properties.name) .. "-" .. base
  -- report_prepare("fullname base hash '%a, featureset %a",tfmdata.properties.fullname,hash)
     applied = { }
 end
@@ -224,6 +224,11 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
     local trace_singles      = trace_baseinit and trace_singles
     local trace_alternatives = trace_baseinit and trace_alternatives
     local trace_ligatures    = trace_baseinit and trace_ligatures
+
+    if not changed then
+        changed = { }
+        tfmdata.changed = changed
+    end
 
     for i=1,#lookuplist do
         local sequence = lookuplist[i]
@@ -392,7 +397,8 @@ local function featuresinitializer(tfmdata,value)
             local properties        = tfmdata.properties
             local script            = properties.script
             local language          = properties.language
-            local rawfeatures       = rawdata.resources.features
+            local rawresources      = rawdata.resources
+            local rawfeatures       = rawresources and rawresources.features
             local basesubstitutions = rawfeatures and rawfeatures.gsub
             local basepositionings  = rawfeatures and rawfeatures.gpos
             --

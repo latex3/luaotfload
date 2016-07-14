@@ -223,6 +223,7 @@ local imports = {
     { name = "swiglib-test"      , ours = nil          , kind = kind_ignored   },
     { name = "swiglib-test"      , ours = nil          , kind = kind_tex       },
     { name = "test"              , ours = nil          , kind = kind_tex       },
+    { name = "plain-tfm"         , ours = nil          , kind = kind_ignored   },
   }, --[[ [fontloader] ]]
 
   context = { --=> all merged
@@ -295,7 +296,6 @@ local package = {
 ---   [19] font-cid.lua
 ---   [20] font-map.lua
 ---   [21] luatex-fonts-syn.lua
----   [22] font-tfm.lua
 ---   [23] font-oti.lua
 ---   [24] font-otr.lua
 ---   [25] font-cff.lua
@@ -312,6 +312,7 @@ local package = {
 ---   [36] font-onr.lua
 ---   [37] font-one.lua
 ---   [38] font-afk.lua
+---   [22] font-tfm.lua
 ---   [39] font-lua.lua
 ---   [40] font-def.lua
 ---   [41] font-xtx.lua
@@ -361,7 +362,6 @@ local package = {
     "font-cid",
     "font-map",
     "fonts-syn",
-    "font-tfm",
     "font-oti",
     "font-otr",
     "font-cff",
@@ -378,6 +378,7 @@ local package = {
     "font-onr",
     "font-one",
     "font-afk",
+    "font-tfm",
     "font-lua",
     "font-def",
     "fonts-ext",

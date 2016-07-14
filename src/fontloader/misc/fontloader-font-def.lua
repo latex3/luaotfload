@@ -8,10 +8,11 @@ if not modules then modules = { } end modules ['font-def'] = {
 
 -- We can overload some of the definers.functions so we don't local them.
 
-local format, gmatch, match, find, lower, gsub = string.format, string.gmatch, string.match, string.find, string.lower, string.gsub
+local lower, gsub = string.lower, string.gsub
 local tostring, next = tostring, next
 local lpegmatch = lpeg.match
 local suffixonly, removesuffix = file.suffix, file.removesuffix
+local formatters = string.formatters
 
 local allocate = utilities.storage.allocate
 
@@ -264,7 +265,7 @@ function definers.applypostprocessors(tfmdata)
             if type(extrahash) == "string" and extrahash ~= "" then
                 -- e.g. a reencoding needs this
                 extrahash = gsub(lower(extrahash),"[^a-z]","-")
-                properties.fullname = format("%s-%s",properties.fullname,extrahash)
+                properties.fullname = formatters["%s-%s"](properties.fullname,extrahash)
             end
         end
     end

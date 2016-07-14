@@ -21,23 +21,21 @@ add features.</p>
 
 local fonts, logs, trackers, resolvers = fonts, logs, trackers, resolvers
 
-local next, type, tonumber, rawget = next, type, tonumber, rawget
+local next, type, tonumber, rawget, rawset = next, type, tonumber, rawget, rawset
 local match, lower, gsub, strip, find = string.match, string.lower, string.gsub, string.strip, string.find
 local char, byte, sub = string.char, string.byte, string.sub
 local abs = math.abs
 local bxor, rshift = bit32.bxor, bit32.rshift
-local P, S, R, Cmt, C, Ct, Cs, Carg = lpeg.P, lpeg.S, lpeg.R, lpeg.Cmt, lpeg.C, lpeg.Ct, lpeg.Cs, lpeg.Carg
+local P, S, R, Cmt, C, Ct, Cs, Carg, Cf, Cg = lpeg.P, lpeg.S, lpeg.R, lpeg.Cmt, lpeg.C, lpeg.Ct, lpeg.Cs, lpeg.Carg, lpeg.Cf, lpeg.Cg
 local lpegmatch, patterns = lpeg.match, lpeg.patterns
 
 local trace_indexing     = false  trackers.register("afm.indexing",   function(v) trace_indexing = v end)
 local trace_loading      = false  trackers.register("afm.loading",    function(v) trace_loading  = v end)
 
 local report_afm         = logs.reporter("fonts","afm loading")
-local report_afm         = logs.reporter("fonts","pfb loading")
+local report_pfb         = logs.reporter("fonts","pfb loading")
 
-fonts                    = fonts or { }
-local handlers           = fonts.handlers or { }
-fonts.handlers           = handlers
+local handlers           = fonts.handlers
 local afm                = handlers.afm or { }
 handlers.afm             = afm
 local readers            = afm.readers or { }
@@ -72,19 +70,35 @@ do
 
     local initialize = function(str,position,size)
         n = 0
-        m = tonumber(size)
+        m = size -- % tonumber(size)
         return position + 1
     end
 
-    local charstrings = P("/CharStrings")
-    local name        = P("/") * C((R("az")+R("AZ")+R("09")+S("-_."))^1)
-    local size        = C(R("09")^1)
-    local spaces      = P(" ")^1
+    local charstrings   = P("/CharStrings")
+    local encoding      = P("/Encoding")
+    local dup           = P("dup")
+    local put           = P("put")
+    local array         = P("array")
+    local name          = P("/") * C((R("az")+R("AZ")+R("09")+S("-_."))^1)
+    local digits        = R("09")^1
+    local cardinal      = digits / tonumber
+    local spaces        = P(" ")^1
+    local spacing       = patterns.whitespace^0
 
     local p_filternames = Ct (
-        (1-charstrings)^0 * charstrings * spaces * Cmt(size,initialize)
-      * (Cmt(name * P(" ")^1 * C(R("09")^1), progress) + P(1))^1
+        (1-charstrings)^0 * charstrings * spaces * Cmt(cardinal,initialize)
+      * (Cmt(name * spaces * cardinal, progress) + P(1))^1
     )
+
+    -- /Encoding 256 array
+    -- 0 1 255 {1 index exch /.notdef put} for
+    -- dup 0 /Foo put
+
+    local p_filterencoding =
+        (1-encoding)^0 * encoding * spaces * digits * spaces * array * (1-dup)^0
+      * Cf(
+            Ct("") * Cg(spacing * dup * spaces * cardinal * spaces * name * spaces * put)^1
+        ,rawset)
 
     -- if one of first 4 not 0-9A-F then binary else hex
 
@@ -143,19 +157,30 @@ do
 
         local vector = lpegmatch(p_filternames,binary)
 
-        if vector[1] == ".notdef" then
-            -- tricky
-            vector[0] = table.remove(vector,1)
+--         if vector[1] == ".notdef" then
+--             -- tricky
+--             vector[0] = table.remove(vector,1)
+--         end
+
+        for i=1,#vector do
+            vector[i-1] = vector[i]
         end
+        vector[#vector] = nil
 
         if not vector then
             report_pfb("no vector in %a",filename)
             return
         end
 
-        return vector
+        local encoding = lpegmatch(p_filterencoding,ascii)
+
+        return vector, encoding
 
     end
+
+    local pfb      = handlers.pfb or { }
+    handlers.pfb   = pfb
+    pfb.loadvector = loadpfbvector
 
     get_indexes = function(data,pfbname)
         local vector = loadpfbvector(pfbname)

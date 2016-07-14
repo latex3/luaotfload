@@ -848,6 +848,8 @@ function readers.getcomponents(fontdata) -- handy for resolving ligatures when n
     end
 end
 
+readers.unifymissing = unifymissing
+
 function readers.rehash(fontdata,hashmethod) -- TODO: combine loops in one
     if not (fontdata and fontdata.glyphs) then
         return

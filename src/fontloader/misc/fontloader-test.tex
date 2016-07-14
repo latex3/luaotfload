@@ -158,4 +158,16 @@ $\sin{x}$
 %     \textdir TRT\amiri بِسْمِ اللَّـهِ الرَّ‌حْمَـٰنِ الرَّ‌حِيمِ
 % \egroup
 
+% assumes csr10.tfm csr10.pfb csr.enc to be present
+
+% \font\foo=file:luatex-plain-tfm.lua:tfm=csr10;enc=csr;pfb=csr10 at 12pt
+%
+% \foo áäčďěíĺľňóôŕřšťúýž ff ffi
+
+% \font\foo=file:csr10.tfm:reencode=csr
+% \font\foo=file:csr10.tfm:reencode=csr;bitmap=yes % use map file
+% \font\foo=file:csr10.tfm:reencode=auto
+%
+% \foo áäčďěíĺľňóôŕřšťúýž ff ffi \input tufte\par
+
 \end

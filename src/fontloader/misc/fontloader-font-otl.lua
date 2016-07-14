@@ -53,7 +53,7 @@ local report_otf         = logs.reporter("fonts","otf loading")
 local fonts              = fonts
 local otf                = fonts.handlers.otf
 
-otf.version              = 3.023 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version              = 3.025 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                = containers.define("fonts", "otl", otf.version, true)
 otf.svgcache             = containers.define("fonts", "svg", otf.version, true)
 otf.pdfcache             = containers.define("fonts", "pdf", otf.version, true)
@@ -305,7 +305,7 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
                 collectgarbage("collect")
             end
             stoptiming(otfreaders)
-            if elapsedtime then -- not in generic
+            if elapsedtime then
                 report_otf("loading, optimizing, packing and caching time %s", elapsedtime(otfreaders))
             end
             if cleanup > 3 then
@@ -339,7 +339,6 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
         --
         data.metadata.math = data.resources.mathconstants
     end
-
 
     return data
 end
@@ -507,14 +506,14 @@ local function copytotfm(data,cache_id)
                 spaceunits, spacer = charwidth, "charwidth"
             end
         end
-        spaceunits = tonumber(spaceunits) or 500 -- brrr
+        spaceunits = tonumber(spaceunits) or units/2
         --
         parameters.slant         = 0
-        parameters.space         = spaceunits          -- 3.333 (cmr10)
+        parameters.space         = spaceunits            -- 3.333 (cmr10)
         parameters.space_stretch = 1*units/2   --  500   -- 1.666 (cmr10)
-        parameters.space_shrink  = 1*units/3 --  333   -- 1.111 (cmr10)
-        parameters.x_height      = 2*units/5 --  400
-        parameters.quad          = units     -- 1000
+        parameters.space_shrink  = 1*units/3   --  333   -- 1.111 (cmr10)
+        parameters.x_height      = 2*units/5   --  400
+        parameters.quad          = units       -- 1000
         if spaceunits < 2*units/5 then
             -- todo: warning
         end

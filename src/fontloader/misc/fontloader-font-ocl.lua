@@ -8,7 +8,7 @@ if not modules then modules = { } end modules ['font-ocl'] = {
 
 -- todo : user list of colors
 
-local tostring, next = tostring, next
+local tostring, next, format = tostring, next, string.format
 
 local formatters = string.formatters
 
@@ -166,34 +166,56 @@ do
 
 end
 
-if context and xml.convert then
+
+do
 
     local report_svg = logs.reporter("fonts","svg conversion")
 
-    local xmlconvert = xml.convert
-    local xmlfirst   = xml.first
     local loaddata   = io.loaddata
     local savedata   = io.savedata
     local remove     = os.remove
 
+    if context and xml.convert then
+
+        local xmlconvert = xml.convert
+        local xmlfirst   = xml.first
+
+        function otfsvg.filterglyph(entry,index)
+            local svg  = xmlconvert(entry.data)
+            local root = svg and xmlfirst(svg,"/svg[@id='glyph"..index.."']")
+            local data = root and tostring(root)
+         -- report_svg("data for glyph %04X: %s",index,data)
+            return data
+        end
+
+    else
+
+        function otfsvg.filterglyph(entry,index) -- can be overloaded
+            return entry.data
+        end
+
+    end
+
  -- function otfsvg.topdf(svgshapes)
- --     local svgfile   = "temp-otf-svg-shape.svg"
- --     local pdffile   = "temp-otf-svg-shape.pdf"
- --     local command   = "inkscape " .. svgfile .. " --export-pdf=" .. pdffile
- --     local testrun   = false
- --     local pdfshapes = { }
- --     local nofshapes = #svgshapes
+ --     local svgfile     = "temp-otf-svg-shape.svg"
+ --     local pdffile     = "temp-otf-svg-shape.pdf"
+ --     local command     = "inkscape " .. svgfile .. " --export-pdf=" .. pdffile
+ --     local testrun     = false
+ --     local pdfshapes   = { }
+ --     local nofshapes   = #svgshapes
+ --     local filterglyph = otfsvg.filterglyph
  --     report_svg("processing %i svg containers",nofshapes)
  --     statistics.starttiming()
  --     for i=1,nofshapes do
  --         local entry = svgshapes[i]
- --         for j=entry.first,entry.last do
- --             local svg  = xmlconvert(entry.data)
- --             local data = xmlfirst(svg,"/svg[@id='glyph"..j.."']")
+ --         for index=entry.first,entry.last do
+ --             local data = filterglyph(entry,index)
  --             savedata(svgfile,tostring(data))
- --             report_svg("processing svg shape of glyph %i in container %i",j,i)
- --             os.execute(command)
- --             pdfshapes[j] = loaddata(pdffile)
+ --             if data and data ~= "" then
+ --                 report_svg("processing svg shape of glyph %i in container %i",index,i)
+ --                 os.execute(command)
+ --                 pdfshapes[index] = loaddata(pdffile)
+ --             end
  --         end
  --         if testrun and i > testrun then
  --             report_svg("quiting test run")
@@ -207,26 +229,25 @@ if context and xml.convert then
  -- end
 
     function otfsvg.topdf(svgshapes)
-        local inkscape  = io.popen("inkscape --shell 2>&1","w")
-        local pdfshapes = { }
-        local nofshapes = #svgshapes
-        local f_svgfile = formatters["temp-otf-svg-shape-%i.svg"]
-        local f_pdffile = formatters["temp-otf-svg-shape-%i.pdf"]
-        local f_convert = formatters["%s --export-pdf=%s\n"]
+        local inkscape    = io.popen("inkscape --shell > temp-otf-svg-shape.log","w")
+        local pdfshapes   = { }
+        local nofshapes   = #svgshapes
+        local f_svgfile   = formatters["temp-otf-svg-shape-%i.svg"]
+        local f_pdffile   = formatters["temp-otf-svg-shape-%i.pdf"]
+        local f_convert   = formatters["%s --export-pdf=%s\n"]
+        local filterglyph = otfsvg.filterglyph
         report_svg("processing %i svg containers",nofshapes)
         statistics.starttiming()
         for i=1,nofshapes do
             local entry = svgshapes[i]
-            for j=entry.first,entry.last do
-                local svg  = xmlconvert(entry.data)
-                local root = svg and xmlfirst(svg,"/svg[@id='glyph"..j.."']")
-                local data = root and tostring(root)
+            for index=entry.first,entry.last do
+                local data = filterglyph(entry,index)
                 if data and data ~= "" then
-                    local svgfile = f_svgfile(j)
-                    local pdffile = f_pdffile(j)
+                    local svgfile = f_svgfile(index)
+                    local pdffile = f_pdffile(index)
                     savedata(svgfile,data)
                     inkscape:write(f_convert(svgfile,pdffile))
-                    pdfshapes[j] = true
+                    pdfshapes[index] = true
                 end
             end
         end
@@ -236,39 +257,17 @@ if context and xml.convert then
      -- end
         inkscape:close()
         report_svg("processing %i pdf results",nofshapes)
-        for i in next, pdfshapes do
-            local svgfile = f_svgfile(i)
-            local pdffile = f_pdffile(i)
-            pdfshapes[i] = loaddata(pdffile)
+        for index in next, pdfshapes do
+            local svgfile = f_svgfile(index)
+            local pdffile = f_pdffile(index)
+            pdfshapes[index] = loaddata(pdffile)
             remove(svgfile)
             remove(pdffile)
         end
         statistics.stoptiming()
-        report_svg("conversion time: %0.3f",statistics.elapsedtime())
-        return pdfshapes
-    end
-
-else
-
-    function otfsvg.topdf(svgshapes)
-        local svgfile   = "temp-otf-svg-shape.svg"
-        local pdffile   = "temp-otf-svg-shape.pdf"
-        local command   = "inkscape " .. svgfile .. " --export-pdf=" .. pdffile
-        local pdfshapes = { }
-        local nofshapes = #svgshapes
-        texio.write(formatters["[converting %i svg glyphs to pdf using command %q : "](nofshapes,command))
-        for i=1,nofshapes do
-            local entry = svgshapes[i]
-            for j=entry.first,entry.last do
-                -- cross our fingers .. some, day i will filter
-                texio.write(formatters["%i "](j))
-                io.savedata(svgfile,tostring(entry.data))
-                os.execute(command)
-                pdfshapes[j] = io.loaddata(pdffile)
-            end
+        if statistics.elapsedseconds then
+            report_svg("svg conversion time %s",statistics.elapsedseconds())
         end
-        os.remove(svgfile)
-        texio.write("done]")
         return pdfshapes
     end
 

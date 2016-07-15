@@ -1259,6 +1259,8 @@ local handle_request = function (specification)
     local subfont = tonumber (specification.sub)
     if subfont and subfont >= 0 then
         specification.sub = subfont + 1
+    else
+        specification.sub = false
     end
     return specification
 end

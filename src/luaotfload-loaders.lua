@@ -49,23 +49,7 @@ local unsupported_reader = function (format)
   end
 end
 
-local afm_reader = fonts.readers.afm
-
-local afm_loader = function (specification)
-  specification.forced      = "afm"
-  specification.sub         = false
-  specification.forcedname  = file.addsuffix(specification.name, "afm")
---inspect(specification)
-  return afm_reader (specification, "afm")
-end
-
-local afm_compat_message = function (specification)
-  logreport ("both", 4, "loaders",
-             "PFB format only supported with matching \z
-              AFM; redirecting (“%s”, “afm”).",
-             tostring (specification.name))
-  return afm_loader (specification)
-end
+local type1_reader = fonts.readers.afm
 
 local install_formats = function ()
   local fonts = fonts
@@ -97,9 +81,9 @@ local install_formats = function ()
   return aux ("evl", eval_reader)
      and aux ("lua", lua_reader)
      and aux ("pfa", unsupported_reader "pfa")
-     and aux ("afm", afm_loader)
-     and aux ("tfm", afm_loader)
-     and aux ("pfb", afm_compat_message) --- pfb loader is incomplete
+     and aux ("afm", type1_reader)
+     and aux ("tfm", type1_reader)
+     and aux ("pfb", type1_reader)
      and aux ("ofm", readers.tfm)
      and aux ("dfont", unsupported_reader "dfont")
 end

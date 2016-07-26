@@ -223,7 +223,6 @@ local imports = {
     { name = "swiglib-test"      , ours = nil          , kind = kind_ignored   },
     { name = "swiglib-test"      , ours = nil          , kind = kind_tex       },
     { name = "test"              , ours = nil          , kind = kind_tex       },
-    { name = "plain-tfm"         , ours = nil          , kind = kind_ignored   },
   }, --[[ [fontloader] ]]
 
   context = { --=> all merged
@@ -243,7 +242,6 @@ local imports = {
     { name = "font-one"          , ours = "font-one"          , kind = kind_merged    },
     { name = "font-osd"          , ours = "font-osd"          , kind = kind_merged    },
     { name = "font-ota"          , ours = "font-ota"          , kind = kind_merged    },
-    { name = "font-otd"          , ours = "font-otd"          , kind = kind_merged    },
     { name = "font-oti"          , ours = "font-oti"          , kind = kind_merged    },
     { name = "font-otj"          , ours = "font-otj"          , kind = kind_merged    },
     { name = "font-otl"          , ours = "font-otl"          , kind = kind_merged    },

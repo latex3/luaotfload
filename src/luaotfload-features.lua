@@ -2068,11 +2068,12 @@ local install_extra_features = function (data, filename, raw)
     end
     local format = data.format
     if not format then
+        --- font not fully loaded, happens with TFM/PFB
         logreport ("both", 4, "features",
-                   "no format info for font “%s”/“%s”; not \z
+                   "no format info for font “%s”; not \z
                    installing extra features.",
-                   fontname, filename)
-        return
+                   filename)
+        --return
     end
     for feature, specification in next, extrafeatures do
         if not fontname then fontname = "<unknown>" end

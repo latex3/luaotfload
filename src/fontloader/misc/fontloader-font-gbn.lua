@@ -19,7 +19,7 @@ local nodes = nodes
 local nuts        = nodes.nuts -- context abstraction of direct nodes
 
 local traverse_id = nuts.traverse_id
-local free_node   = nuts.free
+local flush_node  = nuts.flush_node
 
 local glyph_code  = nodes.nodecodes.glyph
 local disc_code   = nodes.nodecodes.disc
@@ -159,7 +159,7 @@ function nodes.handlers.nodepass(head)
                         end
                     end
                 end
-                free_node(r)
+                flush_node(r)
             end
         end
         for d in traverse_id(disc_code,nuthead) do

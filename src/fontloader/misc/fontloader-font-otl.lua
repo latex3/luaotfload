@@ -574,10 +574,48 @@ local function copytotfm(data,cache_id)
     end
 end
 
+-- These woff files are a kind of joke in a tex environment because one can simply convert
+-- them to ttf/otf and use them as such (after all, we cache them too). The successor format
+-- woff2 is more complex so there we can as well call an external converter which in the end
+-- makes this code kind of obsolete before it's even used. Although ... it might become a
+-- more general conversion plug in.
+
+local converters = {
+    woff = {
+        cachename = "webfonts",
+        action    = otf.readers.woff2otf,
+    }
+}
+
+local function checkconversion(specification)
+    local filename  = specification.filename
+    local converter = converters[lower(file.suffix(filename))]
+    if converter then
+        local base = file.basename(filename)
+        local name = file.removesuffix(base)
+        local attr = lfs.attributes(filename)
+        local size = attr and attr.size or 0
+        local time = attr and attr.modification or 0
+        if size > 0 then
+            local cleanname = containers.cleanname(name)
+            local cachename = caches.setfirstwritablefile(cleanname,converter.cachename)
+            if not io.exists(cachename) or (time ~= lfs.attributes(cachename).modification) then
+                report_otf("caching font %a in %a",filename,cachename)
+                converter.action(filename,cachename) -- todo infoonly
+                lfs.touch(cachename,time,time)
+            end
+            specification.filename = cachename
+        end
+    end
+end
+
 local function otftotfm(specification)
     local cache_id = specification.hash
     local tfmdata  = containers.read(constructors.cache,cache_id)
     if not tfmdata then
+
+        checkconversion(specification) -- for the moment here
+
         local name     = specification.name
         local sub      = specification.sub
         local subindex = specification.subindex
@@ -811,9 +849,14 @@ end
 
 readers.opentype = opentypereader -- kind of useless and obsolete
 
-function readers.otf  (specification) return opentypereader(specification,"otf") end
-function readers.ttf  (specification) return opentypereader(specification,"ttf") end
-function readers.ttc  (specification) return opentypereader(specification,"ttf") end
+function readers.otf(specification) return opentypereader(specification,"otf") end
+function readers.ttf(specification) return opentypereader(specification,"ttf") end
+function readers.ttc(specification) return opentypereader(specification,"ttf") end
+
+function readers.woff(specification)
+    checkconversion(specification)
+    opentypereader(specification,"")
+end
 
 -- this will be overloaded
 

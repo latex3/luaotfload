@@ -94,8 +94,10 @@ otf.readers             = readers
 
 ----- streamreader      = utilities.streams -- faster on big files
 local streamreader      = utilities.files   -- faster on identify
+local streamwriter      = utilities.files
 
 readers.streamreader    = streamreader
+readers.streamwriter    = streamwriter
 
 local openfile          = streamreader.open
 local closefile         = streamreader.close

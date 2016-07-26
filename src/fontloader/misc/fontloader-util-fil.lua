@@ -6,8 +6,10 @@ if not modules then modules = { } end modules ['util-fil'] = {
     license   = "see context related readme files"
 }
 
-local byte = string.byte
+local byte    = string.byte
+local char    = string.char
 local extract = bit32.extract
+local floor   = math.floor
 
 -- Here are a few helpers (the starting point were old ones I used for parsing
 -- flac files). In Lua 5.3 we can probably do this better. Some code will move
@@ -35,6 +37,8 @@ end
 function files.size(f)
     return f:seek("end")
 end
+
+files.getsize = files.size
 
 function files.setposition(f,n)
     if zerobased[f] then
@@ -180,3 +184,32 @@ end
 function files.skiplong(f,n)
     f:read(4*(n or 1))
 end
+
+-- writers (kind of slow)
+
+function files.writecardinal2(f,n)
+    local a = char(n % 256)
+    n = floor(n/256)
+    local b = char(n % 256)
+    f:write(b,a)
+end
+
+function files.writecardinal4(f,n)
+    local a = char(n % 256)
+    n = floor(n/256)
+    local b = char(n % 256)
+    n = floor(n/256)
+    local c = char(n % 256)
+    n = floor(n/256)
+    local d = char(n % 256)
+    f:write(d,c,b,a)
+end
+
+function files.writestring(f,s)
+    f:write(char(byte(s,1,#s)))
+end
+
+function files.writebyte(f,b)
+    f:write(char(b))
+end
+

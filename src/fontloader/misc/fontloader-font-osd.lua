@@ -107,9 +107,9 @@ local ischar             = nuts.is_char
 
 local insert_node_after  = nuts.insert_after
 local copy_node          = nuts.copy
-local free_node          = nuts.free
 local remove_node        = nuts.remove
 local flush_list         = nuts.flush_list
+local flush_node         = nuts.flush_node
 
 local copyinjection      = nodes.injections.copy -- KE: is this necessary? HH: probably not as positioning comes later and we rawget/set
 
@@ -792,7 +792,7 @@ local function deva_reorder(head,start,stop,font,attr,nbspaces)
         if current == stop then
             stop = getprev(stop)
             head = remove_node(head,current)
-            free_node(current)
+            flush_node(current)
             return head, stop, nbspaces
         else
             nbspaces  = nbspaces + 1
@@ -830,7 +830,7 @@ local function deva_reorder(head,start,stop,font,attr,nbspaces)
                                 setchar(current,getchar(tempcurrent)) -- we assumes that the result of blwf consists of one node
                                 local freenode = getnext(current)
                                 setlink(current,tmp)
-                                free_node(freenode)
+                                flush_node(freenode)
                                 flush_list(tempcurrent)
                                 if changestop then
                                     stop = current
@@ -1093,7 +1093,7 @@ local function deva_reorder(head,start,stop,font,attr,nbspaces)
     if getchar(base) == c_nbsp then
         nbspaces = nbspaces - 1
         head = remove_node(head,base)
-        free_node(base)
+        flush_node(base)
     end
 
     return head, stop, nbspaces
@@ -1571,7 +1571,7 @@ local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pa
         if current == stop then
             stop = getprev(stop)
             head = remove_node(head,current)
-            free_node(current)
+            flush_node(current)
             return head, stop, nbspaces
         else
             nbspaces = nbspaces + 1
@@ -1768,7 +1768,7 @@ local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pa
     if getchar(base) == c_nbsp then
         nbspaces = nbspaces - 1
         head = remove_node(head, base)
-        free_node(base)
+        flush_node(base)
     end
 
     return head, stop, nbspaces

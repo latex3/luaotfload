@@ -50,6 +50,7 @@ local unsupported_reader = function (format)
 end
 
 local type1_reader = fonts.readers.afm
+local tfm_reader   = fonts.readers.tfm
 
 local install_formats = function ()
   local fonts = fonts
@@ -82,9 +83,9 @@ local install_formats = function ()
      and aux ("lua", lua_reader)
      and aux ("pfa", unsupported_reader "pfa")
      and aux ("afm", type1_reader)
-     and aux ("tfm", type1_reader)
      and aux ("pfb", type1_reader)
-     and aux ("ofm", readers.tfm)
+     and aux ("tfm", tfm_reader)
+     and aux ("ofm", tfm_reader)
      and aux ("dfont", unsupported_reader "dfont")
 end
 

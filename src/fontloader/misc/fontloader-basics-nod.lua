@@ -71,7 +71,7 @@ nodes.nodecodes    = nodecodes
 nodes.glyphcodes   = glyphcodes
 nodes.disccodes    = disccodes
 
-local free_node    = node.free
+local flush_node   = node.flush_node
 local remove_node  = node.remove
 local new_node     = node.new
 local traverse_id  = node.traverse_id
@@ -95,7 +95,7 @@ function nodes.remove(head, current, free_too)
    head, current = remove_node(head,current)
    if t then
         if free_too then
-            free_node(t)
+            flush_node(t)
             t = nil
         else
             t.next, t.prev = nil, nil
@@ -128,12 +128,14 @@ nodes.setattr  = setfield
 
 nodes.tostring             = node.tostring or tostring
 nodes.copy                 = node.copy
+nodes.copy_node            = node.copy
 nodes.copy_list            = node.copy_list
 nodes.delete               = node.delete
 nodes.dimensions           = node.dimensions
 nodes.end_of_math          = node.end_of_math
 nodes.flush_list           = node.flush_list
 nodes.flush_node           = node.flush_node
+nodes.flush                = node.flush_node
 nodes.free                 = node.free
 nodes.insert_after         = node.insert_after
 nodes.insert_before        = node.insert_before
@@ -149,7 +151,6 @@ nodes.first_glyph          = node.first_glyph
 nodes.has_glyph            = node.has_glyph or node.first_glyph
 
 nodes.current_attr         = node.current_attr
-nodes.do_ligature_n        = node.do_ligature_n
 nodes.has_field            = node.has_field
 nodes.last_node            = node.last_node
 nodes.usedlist             = node.usedlist
@@ -253,9 +254,12 @@ nuts.insert_before       = direct.insert_before
 nuts.insert_after        = direct.insert_after
 nuts.delete              = direct.delete
 nuts.copy                = direct.copy
+nuts.copy_node           = direct.copy
 nuts.copy_list           = direct.copy_list
 nuts.tail                = direct.tail
 nuts.flush_list          = direct.flush_list
+nuts.flush_node          = direct.flush_node
+nuts.flush               = direct.flush
 nuts.free                = direct.free
 nuts.remove              = direct.remove
 nuts.is_node             = direct.is_node

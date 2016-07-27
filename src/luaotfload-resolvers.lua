@@ -173,6 +173,7 @@ local resolve_tex_format = function (specification)
             local usename = suffix == format and fileremovesuffix (name) or name
             specification.forcedname = file.addsuffix (usename, format)
             specification.forced     = format
+----        specification.resolved   = name
             return true
         end
     end

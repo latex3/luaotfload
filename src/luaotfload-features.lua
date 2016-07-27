@@ -2035,28 +2035,60 @@ local rot13_specification = {
     prepend   = true,
 }
 
-local extrafeatures = {
-    tlig  = { tlig_specification,  "tex ligatures and substitutions" },
-    anum  = { anum_specification,  "arabic numerals"                 },
-    rot13 = { rot13_specification, "rot13"                           },
-}
+
+local extrafeatures = { }
+local knownfeatures = { }
 
 function add_otf_feature (name, specification)
     if type (name) == "table" then
         specification = name
-        name = specification.name
     end
+    specification, name = validspecification (specification, name)
     if type (specification) ~= "table" then
         logreport ("both", 0, "features",
                    "invalid feature specification “%s”", tostring (name))
         return
     end
+    specification.name = name
     if name and specification then
-        extrafeatures[name] = specification
+        if knownfeatures [name] then
+            logreport ("both", 0, "features",
+                       "prevent redefinition of extra feature “%s”", name)
+        else
+            extrafeatures [#extrafeatures + 1] = specification
+            knownfeatures [name] = true
+        end
     end
 end
 
 otf.addfeature = add_otf_feature
+
+local autofeatures = {
+    --- always present with Luaotfload
+    { "tlig" , tlig_specification , "tex ligatures and substitutions" },
+    { "anum" , anum_specification , "arabic numerals"                 },
+    { "rot13", rot13_specification, "rot13"                           },
+}
+
+local add_auto_features = function ()
+    local nfeats = #autofeatures
+    logreport ("both", 5, "features",
+               "auto-installing %d feature definitions", nfeats)
+    for i = 1, nfeats do
+        local name, spec, desc = unpack (autofeatures [i])
+        spec.description = desc
+        add_otf_feature (name, spec)
+    end
+end
+
+local function enhance(data,filename,raw)
+    for slot=1,#extrafeatures do
+        local specification = extrafeatures[slot]
+        addfeature(data,specification.name,specification)
+    end
+end
+
+otf.enhancers.enhance = enhance
 
 local install_extra_features = function (data, filename, raw)
     local metadata = data and data.metadata
@@ -2075,14 +2107,16 @@ local install_extra_features = function (data, filename, raw)
                    filename)
         --return
     end
-    for feature, specification in next, extrafeatures do
-        if not fontname then fontname = "<unknown>" end
-        if not subfont  then subfont  = -1          end
+    for i = 1, #extrafeatures do
+        local specification = extrafeatures [i]
+        local feature       = specification.name
         local fontname = tostring (data.metadata.fontname) or "<unknown>"
         local subfont  = tonumber (metadata.subfontindex)  or -1
+        if not fontname then fontname = filename end
+        if not subfont  then subfont  = -1          end
         logreport ("both", 3, "features",
                    "register synthetic feature “%s” for %s font “%s”(%d)",
-                   feature, format, fontname, subfont)
+                   feature, format or "tfm", filename, subfont)
         otf.features.register { name = feature, description = specification[2] }
         otf.enhancers.addfeature (data, feature, specification[1])
     end
@@ -2100,8 +2134,11 @@ return {
             return false
         end
 
+        add_auto_features ()
+
         otf = fonts.handlers.otf
         otf.enhancers.addfeature = addfeature
+        luaotfload_tfm_enhancers_reregister ()
         otf.enhancers.register ("check extra features",
                                 install_extra_features)
 

@@ -85,6 +85,12 @@ local steps     = {
 
 enhancers["check extra features"] = otf.enhancers.enhance
 
+--[[ PHG: begin hack for Luaotfload ]]--
+luaotfload_tfm_enhancers_reregister = function ()
+  enhancers["check extra features"]=otf.enhancers.enhance
+end
+--[[ PHG: end hack for Luaotfload ]]--
+
 local function applyenhancers(data,filename)
     for i=1,#steps do
         local step     = steps[i]

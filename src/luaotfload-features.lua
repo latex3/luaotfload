@@ -31,6 +31,10 @@ local definers          = fonts.definers
 local handlers          = fonts.handlers
 local fontidentifiers   = fonts.hashes and fonts.hashes.identifiers
 
+local otf               = handlers.otf
+local otfenhancers      = otf.enhancers
+local otffeatures       = otf.features
+
 local config            = config or { luaotfload = { run = { } } }
 
 local as_script         = true
@@ -43,9 +47,15 @@ end
 
 --HH A bit of tuning for definitions.
 
-if fonts.constructors then
-    fonts.constructors.namemode = "specification" -- somehow latex needs this (changed name!) => will change into an overload
+local constructors      = fonts.constructors
+
+if constructors then
+    constructors.namemode = "specification" -- somehow latex needs this (changed name!) => will change into an overload
 end
+
+local tfm               = constructors.handlers.tfm
+local tfmfeatures       = constructors.features.tfm
+local tfmenhancers      = constructors.enhancers.tfm
 
 --[[HH--
     tricky: we sort of bypass the parser and directly feed all into
@@ -2081,44 +2091,33 @@ local add_auto_features = function ()
     end
 end
 
-local function enhance(data,filename,raw)
-    for slot=1,#extrafeatures do
-        local specification = extrafeatures[slot]
-        addfeature(data,specification.name,specification)
-    end
-end
-
-otf.enhancers.enhance = enhance
-
 local install_extra_features = function (data, filename, raw)
-    local metadata = data and data.metadata
-    if not metadata then
+    local format = data.format
+    if not format then
+        --- font not fully loaded, happens with TFM/PFB when loaded the
+        --- classical fashion
+        logreport ("both", 4, "features",
+                   "no format info for font “%s”", filename)
+    elseif not data.metadata and format ~= "type1" then
         logreport ("both", 4, "features",
                    "no metadata received from font “%s”; not \z
                     installing extra features.", filename)
         return
     end
-    local format = data.format
-    if not format then
-        --- font not fully loaded, happens with TFM/PFB
-        logreport ("both", 4, "features",
-                   "no format info for font “%s”; not \z
-                   installing extra features.",
-                   filename)
-        --return
-    end
     for i = 1, #extrafeatures do
         local specification = extrafeatures [i]
         local feature       = specification.name
-        local fontname = tostring (data.metadata.fontname) or "<unknown>"
-        local subfont  = tonumber (metadata.subfontindex)  or -1
+        local metadata      = data.metadata
+        local fontname      = metadata and tostring (metadata.fontname)
+                           or data.name or "<unknown>"
+        local subfont       = metadata and tonumber (metadata.subfontindex)
+                           or -1
         if not fontname then fontname = filename end
         if not subfont  then subfont  = -1          end
         logreport ("both", 3, "features",
                    "register synthetic feature “%s” for %s font “%s”(%d)",
                    feature, format or "tfm", filename, subfont)
-        otf.features.register { name = feature, description = specification[2] }
-        otf.enhancers.addfeature (data, feature, specification[1])
+        addfeature (data, feature, specification) --> for otf and type1
     end
 end
 
@@ -2137,10 +2136,11 @@ return {
         add_auto_features ()
 
         otf = fonts.handlers.otf
-        otf.enhancers.addfeature = addfeature
-        luaotfload_tfm_enhancers_reregister ()
-        otf.enhancers.register ("check extra features",
-                                install_extra_features)
+        otfenhancers.addfeature = addfeature
+        tfmenhancers.register ("check extra features",
+                               install_extra_features)
+        otfenhancers.register ("check extra features",
+                               install_extra_features)
 
         return true
     end

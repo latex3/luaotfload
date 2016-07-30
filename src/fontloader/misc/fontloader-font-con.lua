@@ -12,9 +12,10 @@ local next, tostring, rawget = next, tostring, rawget
 local format, match, lower, gsub, find = string.format, string.match, string.lower, string.gsub, string.find
 local sort, insert, concat, sortedkeys, serialize, fastcopy = table.sort, table.insert, table.concat, table.sortedkeys, table.serialize, table.fastcopy
 local derivetable = table.derive
+local ioflush = io.flush
 
-local trace_defining = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
-local trace_scaling  = false  trackers.register("fonts.scaling" , function(v) trace_scaling  = v end)
+local trace_defining  = false  trackers.register("fonts.defining",  function(v) trace_defining = v end)
+local trace_scaling   = false  trackers.register("fonts.scaling",   function(v) trace_scaling  = v end)
 
 local report_defining = logs.reporter("fonts","defining")
 
@@ -1086,146 +1087,269 @@ setmetatableindex(formats, function(t,k)
     return rawget(t,file.suffix(l))
 end)
 
-local locations = { }
+do
 
-local function setindeed(mode,target,group,name,action,position)
-    local t = target[mode]
-    if not t then
-        report_defining("fatal error in setting feature %a, group %a, mode %a",name,group,mode)
-        os.exit()
-    elseif position then
-        -- todo: remove existing
-        insert(t, position, { name = name, action = action })
-    else
-        for i=1,#t do
-            local ti = t[i]
-            if ti.name == name then
-                ti.action = action
-                return
+    local function setindeed(mode,target,group,name,action,position)
+        local t = target[mode]
+        if not t then
+            report_defining("fatal error in setting feature %a, group %a, mode %a",name,group,mode)
+            os.exit()
+        elseif position then
+            -- todo: remove existing
+            insert(t, position, { name = name, action = action })
+        else
+            for i=1,#t do
+                local ti = t[i]
+                if ti.name == name then
+                    ti.action = action
+                    return
+                end
+            end
+            insert(t, { name = name, action = action })
+        end
+    end
+
+    local function set(group,name,target,source)
+        target = target[group]
+        if not target then
+            report_defining("fatal target error in setting feature %a, group %a",name,group)
+            os.exit()
+        end
+        local source = source[group]
+        if not source then
+            report_defining("fatal source error in setting feature %a, group %a",name,group)
+            os.exit()
+        end
+        local node     = source.node
+        local base     = source.base
+        local position = source.position
+        if node then
+            setindeed("node",target,group,name,node,position)
+        end
+        if base then
+            setindeed("base",target,group,name,base,position)
+        end
+    end
+
+    local function register(where,specification)
+        local name = specification.name
+        if name and name ~= "" then
+            local default      = specification.default
+            local description  = specification.description
+            local initializers = specification.initializers
+            local processors   = specification.processors
+            local manipulators = specification.manipulators
+            local modechecker  = specification.modechecker
+            if default then
+                where.defaults[name] = default
+            end
+            if description and description ~= "" then
+                where.descriptions[name] = description
+            end
+            if initializers then
+                set('initializers',name,where,specification)
+            end
+            if processors then
+                set('processors',  name,where,specification)
+            end
+            if manipulators then
+                set('manipulators',name,where,specification)
+            end
+            if modechecker then
+               where.modechecker = modechecker
             end
         end
-        insert(t, { name = name, action = action })
     end
-end
 
-local function set(group,name,target,source)
-    target = target[group]
-    if not target then
-        report_defining("fatal target error in setting feature %a, group %a",name,group)
-        os.exit()
-    end
-    local source = source[group]
-    if not source then
-        report_defining("fatal source error in setting feature %a, group %a",name,group)
-        os.exit()
-    end
-    local node     = source.node
-    local base     = source.base
-    local position = source.position
-    if node then
-        setindeed("node",target,group,name,node,position)
-    end
-    if base then
-        setindeed("base",target,group,name,base,position)
-    end
-end
+    constructors.registerfeature = register
 
-local function register(where,specification)
-    local name = specification.name
-    if name and name ~= "" then
-        local default      = specification.default
-        local description  = specification.description
-        local initializers = specification.initializers
-        local processors   = specification.processors
-        local manipulators = specification.manipulators
-        local modechecker  = specification.modechecker
-        if default then
-            where.defaults[name] = default
-        end
-        if description and description ~= "" then
-            where.descriptions[name] = description
-        end
-        if initializers then
-            set('initializers',name,where,specification)
-        end
-        if processors then
-            set('processors',  name,where,specification)
-        end
-        if manipulators then
-            set('manipulators',name,where,specification)
-        end
-        if modechecker then
-           where.modechecker = modechecker
-        end
-    end
-end
-
-constructors.registerfeature = register
-
-function constructors.getfeatureaction(what,where,mode,name)
-    what = handlers[what].features
-    if what then
-        where = what[where]
-        if where then
-            mode = where[mode]
-            if mode then
-                for i=1,#mode do
-                    local m = mode[i]
-                    if m.name == name then
-                        return m.action
+    function constructors.getfeatureaction(what,where,mode,name)
+        what = handlers[what].features
+        if what then
+            where = what[where]
+            if where then
+                mode = where[mode]
+                if mode then
+                    for i=1,#mode do
+                        local m = mode[i]
+                        if m.name == name then
+                            return m.action
+                        end
                     end
                 end
             end
         end
     end
-end
 
-local newhandler        = { }
-constructors.handlers   = newhandler -- downward compatible
-constructors.newhandler = newhandler
+    local newfeatures        = { }
+    constructors.newfeatures = newfeatures -- downward compatible
+    constructors.features    = newfeatures
 
-local function setnewhandler(what) -- could be a metatable newindex
-    local handler = handlers[what]
-    if not handler then
-        handler = { }
-        handlers[what] = handler
+    local function setnewfeatures(what)
+        local handler  = handlers[what]
+        local features = handler.features
+        if not features then
+            local tables     = handler.tables     -- can be preloaded
+            local statistics = handler.statistics -- can be preloaded
+            features = allocate {
+                defaults     = { },
+                descriptions = tables and tables.features or { },
+                used         = statistics and statistics.usedfeatures or { },
+                initializers = { base = { }, node = { } },
+                processors   = { base = { }, node = { } },
+                manipulators = { base = { }, node = { } },
+            }
+            features.register = function(specification) return register(features,specification) end
+            handler.features = features -- will also become hidden
+        end
+        return features
     end
-    return handler
+
+    setmetatable(newfeatures, {
+        __call  = function(t,k) local v = t[k] return v end,
+        __index = function(t,k) local v = setnewfeatures(k) t[k] = v return v end,
+    })
+
 end
 
-setmetatable(newhandler, {
-    __call  = function(t,k) local v = t[k] return v end,
-    __index = function(t,k) local v = setnewhandler(k) t[k] = v return v end,
-})
+do
 
-local newfeatures        = { }
-constructors.newfeatures = newfeatures -- downward compatible
-constructors.features    = newfeatures
+    local newhandler        = { }
+    constructors.handlers   = newhandler -- downward compatible
+    constructors.newhandler = newhandler
 
-local function setnewfeatures(what)
-    local handler = handlers[what]
-    local features = handler.features
-    if not features then
-        local tables     = handler.tables     -- can be preloaded
-        local statistics = handler.statistics -- can be preloaded
-        features = allocate {
-            defaults     = { },
-            descriptions = tables and tables.features or { },
-            used         = statistics and statistics.usedfeatures or { },
-            initializers = { base = { }, node = { } },
-            processors   = { base = { }, node = { } },
-            manipulators = { base = { }, node = { } },
-        }
-        features.register = function(specification) return register(features,specification) end
-        handler.features = features -- will also become hidden
+    local function setnewhandler(what) -- could be a metatable newindex
+        local handler = handlers[what]
+        if not handler then
+            handler = { }
+            handlers[what] = handler
+        end
+        return handler
     end
-    return features
+
+    setmetatable(newhandler, {
+        __call  = function(t,k) local v = t[k] return v end,
+        __index = function(t,k) local v = setnewhandler(k) t[k] = v return v end,
+    })
+
 end
 
-setmetatable(newfeatures, {
-    __call  = function(t,k) local v = t[k] return v end,
-    __index = function(t,k) local v = setnewfeatures(k) t[k] = v return v end,
-})
+do
+    -- a pitty that we need to be generic as we have nicer mechanisms for this ...
+
+    local newenhancer        = { }
+    constructors.enhancers   = newenhancer
+    constructors.newenhancer = newenhancer
+
+    local function setnewenhancer(format)
+
+        local handler   = handlers[format]
+        local enhancers = handler.enhancers
+
+        if not enhancers then
+
+            local actions = allocate()
+            local before  = allocate()
+            local after   = allocate()
+            local order   = allocate()
+            local patches = { before = before, after = after }
+
+            local trace   = false
+            local report  = logs.reporter("fonts",format .. " enhancing")
+
+            trackers.register(format .. ".loading", function(v) trace = v end)
+
+            local function enhance(name,data,filename,raw)
+                local enhancer = actions[name]
+                if enhancer then
+                    if trace then
+                        report("apply enhancement %a to file %a",name,filename)
+                        ioflush()
+                    end
+                    enhancer(data,filename,raw)
+                else
+                    -- no message as we can have private ones
+                end
+            end
+
+            local function apply(data,filename,raw)
+                local basename = file.basename(lower(filename))
+                if trace then
+                    report("%s enhancing file %a","start",filename)
+                end
+                ioflush() -- we want instant messages
+                for e=1,#order do
+                    local enhancer = order[e]
+                    local b = before[enhancer]
+                    if b then
+                        for pattern, action in next, b do
+                            if find(basename,pattern) then
+                                action(data,filename,raw)
+                            end
+                        end
+                    end
+                    enhance(enhancer,data,filename,raw)
+                    local a = after[enhancer]
+                    if a then
+                        for pattern, action in next, a do
+                            if find(basename,pattern) then
+                                action(data,filename,raw)
+                            end
+                        end
+                    end
+                    ioflush() -- we want instant messages
+                end
+                if trace then
+                    report("%s enhancing file %a","stop",filename)
+                end
+                ioflush() -- we want instant messages
+            end
+
+            local function register(what,action)
+                if action then
+                    if actions[what] then
+                        -- overloading, e.g."check extra features"
+                    else
+                        order[#order+1] = what
+                    end
+                    actions[what] = action
+                else
+                    report("bad enhancer %a",what)
+                end
+            end
+
+            -- fonts.constructors.otf.enhancers.patch("before","migrate metadata","cambria",function() end)
+
+            local function patch(what,where,pattern,action)
+                local pw = patches[what]
+                if pw then
+                    local ww = pw[where]
+                    if ww then
+                        ww[pattern] = action
+                    else
+                        pw[where] = { [pattern] = action}
+                    end
+                end
+            end
+
+            enhancers = {
+                register = register,
+                apply    = apply,
+                patch    = patch,
+                patches  = { register = patch }, -- for old times sake
+            }
+
+            handler.enhancers = enhancers
+        end
+        return enhancers
+    end
+
+    setmetatable(newenhancer, {
+        __call  = function(t,k) local v = t[k] return v end,
+        __index = function(t,k) local v = setnewenhancer(k) t[k] = v return v end,
+    })
+
+end
 
 --[[ldx--
 <p>We need to check for default features. For this we provide

@@ -26,70 +26,67 @@ if not modules then modules = { } end modules ['font-otl'] = {
 local gmatch, find, match, lower, strip = string.gmatch, string.find, string.match, string.lower, string.strip
 local type, next, tonumber, tostring, unpack = type, next, tonumber, tostring, unpack
 local abs = math.abs
-local ioflush = io.flush
 local derivetable = table.derive
 local formatters = string.formatters
 
-local setmetatableindex  = table.setmetatableindex
-local allocate           = utilities.storage.allocate
-local registertracker    = trackers.register
-local registerdirective  = directives.register
-local starttiming        = statistics.starttiming
-local stoptiming         = statistics.stoptiming
-local elapsedtime        = statistics.elapsedtime
-local findbinfile        = resolvers.findbinfile
+local setmetatableindex   = table.setmetatableindex
+local allocate            = utilities.storage.allocate
+local registertracker     = trackers.register
+local registerdirective   = directives.register
+local starttiming         = statistics.starttiming
+local stoptiming          = statistics.stoptiming
+local elapsedtime         = statistics.elapsedtime
+local findbinfile         = resolvers.findbinfile
 
------ trace_private      = false  registertracker("otf.private",        function(v) trace_private   = v end)
------ trace_subfonts     = false  registertracker("otf.subfonts",       function(v) trace_subfonts  = v end)
-local trace_loading      = false  registertracker("otf.loading",        function(v) trace_loading   = v end)
-local trace_features     = false  registertracker("otf.features",       function(v) trace_features  = v end)
------ trace_dynamics     = false  registertracker("otf.dynamics",       function(v) trace_dynamics  = v end)
------ trace_sequences    = false  registertracker("otf.sequences",      function(v) trace_sequences = v end)
------ trace_markwidth    = false  registertracker("otf.markwidth",      function(v) trace_markwidth = v end)
-local trace_defining     = false  registertracker("fonts.defining",     function(v) trace_defining  = v end)
+----- trace_private       = false  registertracker("otf.private",        function(v) trace_private   = v end)
+----- trace_subfonts      = false  registertracker("otf.subfonts",       function(v) trace_subfonts  = v end)
+local trace_loading       = false  registertracker("otf.loading",        function(v) trace_loading   = v end)
+local trace_features      = false  registertracker("otf.features",       function(v) trace_features  = v end)
+----- trace_dynamics      = false  registertracker("otf.dynamics",       function(v) trace_dynamics  = v end)
+----- trace_sequences     = false  registertracker("otf.sequences",      function(v) trace_sequences = v end)
+----- trace_markwidth     = false  registertracker("otf.markwidth",      function(v) trace_markwidth = v end)
+local trace_defining      = false  registertracker("fonts.defining",     function(v) trace_defining  = v end)
 
-local report_otf         = logs.reporter("fonts","otf loading")
+local report_otf          = logs.reporter("fonts","otf loading")
 
-local fonts              = fonts
-local otf                = fonts.handlers.otf
+local fonts               = fonts
+local otf                 = fonts.handlers.otf
 
-otf.version              = 3.025 -- beware: also sync font-mis.lua and in mtx-fonts
-otf.cache                = containers.define("fonts", "otl", otf.version, true)
-otf.svgcache             = containers.define("fonts", "svg", otf.version, true)
-otf.pdfcache             = containers.define("fonts", "pdf", otf.version, true)
+otf.version               = 3.025 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.cache                 = containers.define("fonts", "otl", otf.version, true)
+otf.svgcache              = containers.define("fonts", "svg", otf.version, true)
+otf.pdfcache              = containers.define("fonts", "pdf", otf.version, true)
 
-otf.svgenabled           = false
+otf.svgenabled            = false
 
-local otfreaders         = otf.readers
+local otfreaders          = otf.readers
 
-local hashes             = fonts.hashes
-local definers           = fonts.definers
-local readers            = fonts.readers
-local constructors       = fonts.constructors
+local hashes              = fonts.hashes
+local definers            = fonts.definers
+local readers             = fonts.readers
+local constructors        = fonts.constructors
 
-local otffeatures        = constructors.features.otf
-local registerotffeature = otffeatures.register
+local otffeatures         = constructors.features.otf
+local registerotffeature  = otffeatures.register
 
-local enhancers          = allocate()
-otf.enhancers            = enhancers
-local patches            = { }
-enhancers.patches        = patches
+local otfenhancers        = constructors.enhancers.otf
+local registerotfenhancer = otfenhancers.register
 
-local forceload          = false
-local cleanup            = 0     -- mk: 0=885M 1=765M 2=735M (regular run 730M)
-local syncspace          = true
-local forcenotdef        = false
+local forceload           = false
+local cleanup             = 0     -- mk: 0=885M 1=765M 2=735M (regular run 730M)
+local syncspace           = true
+local forcenotdef         = false
 
-local applyruntimefixes  = fonts.treatments and fonts.treatments.applyfixes
+local applyruntimefixes   = fonts.treatments and fonts.treatments.applyfixes
 
-local wildcard           = "*"
-local default            = "dflt"
+local wildcard            = "*"
+local default             = "dflt"
 
-local formats            = fonts.formats
+local formats             = fonts.formats
 
-formats.otf              = "opentype"
-formats.ttf              = "truetype"
-formats.ttc              = "truetype"
+formats.otf               = "opentype"
+formats.ttf               = "truetype"
+formats.ttc               = "truetype"
 
 registerdirective("fonts.otf.loader.cleanup",       function(v) cleanup       = tonumber(v) or (v and 1) or 0 end)
 registerdirective("fonts.otf.loader.force",         function(v) forceload     = v end)
@@ -105,92 +102,9 @@ registerdirective("fonts.otf.loader.forcenotdef",   function(v) forcenotdef   = 
 --     end
 -- end
 
--- Enhancers are used to apply fixes and extensions to fonts. For instance, we use them
--- to implement tlig and trep features. They are not neccessarily bound to opentype
--- fonts but can also apply to type one fonts, given that they obey the structure of an
--- opentype font. They are not to be confused with format specific features but maybe
--- some are so generic that they might eventually move to this mechanism.
+-- otfenhancers.patch("before","migrate metadata","cambria",function() end)
 
-local ordered_enhancers = {
-    "check extra features",
-}
-
-local actions  = allocate()
-local before   = allocate()
-local after    = allocate()
-
-patches.before = before
-patches.after  = after
-
-local function enhance(name,data,filename,raw)
-    local enhancer = actions[name]
-    if enhancer then
-        if trace_loading then
-            report_otf("apply enhancement %a to file %a",name,filename)
-            ioflush()
-        end
-        enhancer(data,filename,raw)
-    else
-        -- no message as we can have private ones
-    end
-end
-
-function enhancers.apply(data,filename,raw)
-    local basename = file.basename(lower(filename))
-    if trace_loading then
-        report_otf("%s enhancing file %a","start",filename)
-    end
-    ioflush() -- we want instant messages
-    for e=1,#ordered_enhancers do
-        local enhancer = ordered_enhancers[e]
-        local b = before[enhancer]
-        if b then
-            for pattern, action in next, b do
-                if find(basename,pattern) then
-                    action(data,filename,raw)
-                end
-            end
-        end
-        enhance(enhancer,data,filename,raw)
-        local a = after[enhancer]
-        if a then
-            for pattern, action in next, a do
-                if find(basename,pattern) then
-                    action(data,filename,raw)
-                end
-            end
-        end
-        ioflush() -- we want instant messages
-    end
-    if trace_loading then
-        report_otf("%s enhancing file %a","stop",filename)
-    end
-    ioflush() -- we want instant messages
-end
-
--- patches.register("before","migrate metadata","cambria",function() end)
-
-function patches.register(what,where,pattern,action)
-    local pw = patches[what]
-    if pw then
-        local ww = pw[where]
-        if ww then
-            ww[pattern] = action
-        else
-            pw[where] = { [pattern] = action}
-        end
-    end
-end
-
-function patches.report(fmt,...)
-    if trace_loading then
-        report_otf("patching: %s",formatters[fmt](...))
-    end
-end
-
-function enhancers.register(what,action) -- only already registered can be overloaded
-    actions[what] = action
-end
+registerotfenhancer("check extra features", function() end) -- placeholder
 
 function otf.load(filename,sub,featurefile) -- second argument (format) is gone !
     --
@@ -329,7 +243,7 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
         otfreaders.expand(data) -- inline tables
         otfreaders.addunicodetable(data) -- only when not done yet
         --
-        enhancers.apply(data,filename,data)
+        otfenhancers.apply(data,filename,data)
         --
      -- constructors.addcoreunicodes(data.resources.unicodes) -- still needed ?
         --

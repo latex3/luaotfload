@@ -31,9 +31,13 @@ tfm.maxnestingdepth            = 5
 tfm.maxnestingsize             = 65536*1024
 
 local otf                      = fonts.handlers.otf
+local otfenhancers             = otf.enhancers
 
 local tfmfeatures              = constructors.features.tfm
 local registertfmfeature       = tfmfeatures.register
+
+local tfmenhancers             = constructors.enhancers.tfm
+local registertfmenhancer      = tfmenhancers.register
 
 constructors.resolvevirtualtoo = false -- wil be set in font-ctx.lua
 
@@ -73,38 +77,7 @@ function tfm.setfeatures(tfmdata,features)
     end
 end
 
-local depth     = { } -- table.setmetatableindex("number")
-local enhancers = { }
-
-local steps     = {
-    "normalize features",
-    "check extra features"
-}
-
--- otf.enhancers.register("check extra features",enhance)
-
-enhancers["check extra features"] = otf.enhancers.enhance
-
---[[ PHG: begin hack for Luaotfload ]]--
-luaotfload_tfm_enhancers_reregister = function ()
-  enhancers["check extra features"]=otf.enhancers.enhance
-end
---[[ PHG: end hack for Luaotfload ]]--
-
-local function applyenhancers(data,filename)
-    for i=1,#steps do
-        local step     = steps[i]
-        local enhancer = enhancers[step]
-        if enhancer then
-            if trace_loading then
-                report_tfm("applying enhancer %a",step)
-            end
-            enhancer(data,filename)
-        else
-            report_tfm("invalid enhancer %a",step)
-        end
-    end
-end
+local depth = { } -- table.setmetatableindex("number")
 
 -- Normally we just load the tfm data and go on. However there was some demand for
 -- loading good old tfm /pfb files where afm files were lacking and even enc files
@@ -220,7 +193,7 @@ local function read_from_tfm(specification)
             --
             -- We make a pseudo opentype font, e.g. kerns and ligatures etc:
             --
-            applyenhancers(tfmdata,filename)
+            tfmenhancers.apply(tfmdata,filename)
             --
             -- Now user stuff can kick in.
             --
@@ -622,7 +595,7 @@ do
     local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
     local noflags    = { false, false, false, false }
 
-    enhancers["normalize features"] = function(data)
+    local function enhance_normalize_features(data)
         local ligatures  = setmetatableindex("table")
         local kerns      = setmetatableindex("table")
         local characters = data.characters
@@ -707,6 +680,9 @@ do
         data.resources.sequences = sequences
         data.shared.resources = data.shared.resources or resources
     end
+
+    registertfmenhancer("normalize features",   enhance_normalize_features)
+    registertfmenhancer("check extra features", otfenhancers.enhance)
 
 end
 

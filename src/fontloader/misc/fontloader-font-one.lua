@@ -29,42 +29,45 @@ local bxor, rshift = bit32.bxor, bit32.rshift
 local P, S, R, Cmt, C, Ct, Cs, Carg = lpeg.P, lpeg.S, lpeg.R, lpeg.Cmt, lpeg.C, lpeg.Ct, lpeg.Cs, lpeg.Carg
 local lpegmatch, patterns = lpeg.match, lpeg.patterns
 
-local trace_features     = false  trackers.register("afm.features",   function(v) trace_features = v end)
-local trace_indexing     = false  trackers.register("afm.indexing",   function(v) trace_indexing = v end)
-local trace_loading      = false  trackers.register("afm.loading",    function(v) trace_loading  = v end)
-local trace_defining     = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
+local trace_features      = false  trackers.register("afm.features",   function(v) trace_features = v end)
+local trace_indexing      = false  trackers.register("afm.indexing",   function(v) trace_indexing = v end)
+local trace_loading       = false  trackers.register("afm.loading",    function(v) trace_loading  = v end)
+local trace_defining      = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
 
-local report_afm         = logs.reporter("fonts","afm loading")
+local report_afm          = logs.reporter("fonts","afm loading")
 
-local setmetatableindex  = table.setmetatableindex
-local derivetable        = table.derive
+local setmetatableindex   = table.setmetatableindex
+local derivetable         = table.derive
 
-local findbinfile        = resolvers.findbinfile
+local findbinfile         = resolvers.findbinfile
 
-local definers           = fonts.definers
-local readers            = fonts.readers
-local constructors       = fonts.constructors
+local definers            = fonts.definers
+local readers             = fonts.readers
+local constructors        = fonts.constructors
 
-local afm                = constructors.handlers.afm
-local pfb                = constructors.handlers.pfb
-local otf                = fonts.handlers.otf
+local afm                 = constructors.handlers.afm
+local pfb                 = constructors.handlers.pfb
+local otf                 = fonts.handlers.otf
 
-local otfreaders         = otf.readers
-local otfenhancers       = otf.enhancers
+local otfreaders          = otf.readers
+local otfenhancers        = otf.enhancers
 
-local afmfeatures        = constructors.features.afm
-local registerafmfeature = afmfeatures.register
+local afmfeatures         = constructors.features.afm
+local registerafmfeature  = afmfeatures.register
 
-afm.version              = 1.512 -- incrementing this number one up will force a re-cache
-afm.cache                = containers.define("fonts", "afm", afm.version, true)
-afm.autoprefixed         = true -- this will become false some day (catches texnansi-blabla.*)
+local afmenhancers        = constructors.enhancers.afm
+local registerafmenhancer = afmenhancers.register
 
-afm.helpdata             = { }  -- set later on so no local for this
-afm.syncspace            = true -- when true, nicer stretch values
+afm.version               = 1.512 -- incrementing this number one up will force a re-cache
+afm.cache                 = containers.define("fonts", "one", afm.version, true)
+afm.autoprefixed          = true -- this will become false some day (catches texnansi-blabla.*)
 
-local overloads          = fonts.mappings.overloads
+afm.helpdata              = { }  -- set later on so no local for this
+afm.syncspace             = true -- when true, nicer stretch values
 
-local applyruntimefixes  = fonts.treatments and fonts.treatments.applyfixes
+local overloads           = fonts.mappings.overloads
+
+local applyruntimefixes   = fonts.treatments and fonts.treatments.applyfixes
 
 --[[ldx--
 <p>We cache files. Caching is taken care of in the loader. We cheat a bit by adding
@@ -75,36 +78,6 @@ when defining a font.</p>
 fashion and later we transform it to sequences. Then we apply some methods also
 used in opentype fonts (like <t>tlig</t>).</p>
 --ldx]]--
-
-local enhancers = {
-    -- It's cleaner to implement them after we've seen what we are
-    -- dealing with.
-}
-
-local steps     = {
-    "unify names",
-    "add ligatures",
-    "add extra kerns",
-    "normalize features",
-    "check extra features",
-    "fix names", -- what a hack ...
---  "add tounicode data",
-}
-
-local function applyenhancers(data,filename)
-    for i=1,#steps do
-        local step     = steps[i]
-        local enhancer = enhancers[step]
-        if enhancer then
-            if trace_loading then
-                report_afm("applying enhancer %a",step)
-            end
-            enhancer(data,filename)
-        else
-            report_afm("invalid enhancer %a",step)
-        end
-    end
-end
 
 function afm.load(filename)
     filename = resolvers.findfile(filename,'afm') or ""
@@ -129,7 +102,7 @@ function afm.load(filename)
             report_afm("reading %a",filename)
             data = afm.readers.loadfont(filename,pfbname)
             if data then
-                applyenhancers(data,filename)
+                afmenhancers.apply(data,filename)
              -- otfreaders.addunicodetable(data) -- only when not done yet
                 fonts.mappings.addtounicode(data,filename)
              -- otfreaders.extend(data)
@@ -162,7 +135,7 @@ end
 
 local uparser = fonts.mappings.makenameparser() -- each time
 
-enhancers["unify names"] = function(data, filename)
+local function enhance_unify_names(data, filename)
     local unicodevector = fonts.encodings.agl.unicodes -- loaded runtime in context
     local unicodes      = { }
     local names         = { }
@@ -218,7 +191,7 @@ end
 local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
 local noflags    = { false, false, false, false }
 
-enhancers["normalize features"] = function(data)
+local function enhance_normalize_features(data)
     local ligatures  = setmetatableindex("table")
     local kerns      = setmetatableindex("table")
     local extrakerns = setmetatableindex("table")
@@ -319,9 +292,7 @@ enhancers["normalize features"] = function(data)
     data.resources.sequences = sequences
 end
 
-enhancers["check extra features"] = otf.enhancers.enhance
-
-enhancers["fix names"] = function(data)
+local function enhance_fix_names(data)
     for k, v in next, data.descriptions do
         local n = v.name
         local r = overloads[n]
@@ -368,13 +339,9 @@ local addthem = function(rawdata,ligatures)
     end
 end
 
-enhancers["add ligatures"] = function(rawdata)
+local function enhance_add_ligatures(rawdata)
     addthem(rawdata,afm.helpdata.ligatures)
 end
-
--- enhancers["add tex ligatures"] = function(rawdata)
---     addthem(rawdata,afm.helpdata.texligatures)
--- end
 
 --[[ldx--
 <p>We keep the extra kerns in separate kerning tables so that we can use
@@ -388,7 +355,7 @@ them selectively.</p>
 -- we don't use the character database. (Ok, we can have a context specific
 -- variant).
 
-enhancers["add extra kerns"] = function(rawdata) -- using shcodes is not robust here
+local function enhance_add_extra_kerns(rawdata) -- using shcodes is not robust here
     local descriptions = rawdata.descriptions
     local resources    = rawdata.resources
     local unicodes     = resources.unicodes
@@ -851,3 +818,12 @@ function readers.pfb(specification,method) -- only called when forced
     swap("specification")
     return readers.afm(specification,method)
 end
+
+-- now we register them
+
+registerafmenhancer("unify names",          enhance_unify_names)
+registerafmenhancer("add ligatures",        enhance_add_ligatures)
+registerafmenhancer("add extra kerns",      enhance_add_extra_kerns)
+registerafmenhancer("normalize features",   enhance_normalize_features)
+registerafmenhancer("check extra features", otfenhancers.enhance)
+registerafmenhancer("fix names",            enhance_fix_names)

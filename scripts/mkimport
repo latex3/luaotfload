@@ -238,6 +238,7 @@ local imports = {
     { name = "font-lua"          , ours = "font-lua"          , kind = kind_merged    },
     { name = "font-map"          , ours = "font-map"          , kind = kind_merged    },
     { name = "font-ocl"          , ours = "font-ocl"          , kind = kind_merged    },
+    { name = "font-otc"          , ours = "font-otc"          , kind = kind_merged    },
     { name = "font-onr"          , ours = "font-onr"          , kind = kind_merged    },
     { name = "font-one"          , ours = "font-one"          , kind = kind_merged    },
     { name = "font-osd"          , ours = "font-osd"          , kind = kind_merged    },
@@ -307,15 +308,16 @@ local package = {
 ---   [33] font-ots.lua
 ---   [34] font-osd.lua
 ---   [35] font-ocl.lua
----   [36] font-onr.lua
----   [37] font-one.lua
----   [38] font-afk.lua
----   [22] font-tfm.lua
----   [39] font-lua.lua
----   [40] font-def.lua
----   [41] font-xtx.lua
----   [42] luatex-fonts-ext.lua
----   [43] font-gbn.lua
+---   [36] font-otc.lua
+---   [37] font-onr.lua
+---   [38] font-one.lua
+---   [39] font-afk.lua
+---   [40] font-tfm.lua
+---   [41] font-lua.lua
+---   [42] font-def.lua
+---   [43] font-xtx.lua
+---   [44] luatex-fonts-ext.lua
+---   [45] font-gbn.lua
 ---
 --- Of these, nos. 01--11 are provided by the Lualibs. Keeping them
 --- around in the Luaotfload fontloader is therefore unnecessary.
@@ -373,6 +375,7 @@ local package = {
     "font-ots",
     "font-osd",
     "font-ocl",
+    "font-otc",
     "font-onr",
     "font-one",
     "font-afk",

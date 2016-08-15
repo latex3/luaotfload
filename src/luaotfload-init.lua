@@ -264,6 +264,7 @@ local context_modules = {
   { ctx,   "font-ots"          },
   { ctx,   "font-osd"          },
   { ctx,   "font-ocl"          },
+  { ctx,   "font-otc"          },
   { ctx,   "font-onr"          },
   { ctx,   "font-one"          },
   { ctx,   "font-afk"          },

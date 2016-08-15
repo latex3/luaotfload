@@ -259,6 +259,8 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule('font-osd.lua')
         loadmodule('font-ocl.lua') -- svg needs 0.97 (for fix in memstreams)
 
+        loadmodule('font-otc.lua')
+
         -- type one code
 
         loadmodule('font-onr.lua') -- was font-afm.lua

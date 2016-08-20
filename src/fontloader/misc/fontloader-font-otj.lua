@@ -377,7 +377,8 @@ function injections.setkern(current,factor,rlmode,x,injection)
     end
 end
 
-function injections.setmark(start,base,factor,rlmode,ba,ma,tfmbase,mkmk) -- ba=baseanchor, ma=markanchor
+function injections.setmark(start,base,factor,rlmode,ba,ma,tfmbase,mkmk,checkmark) -- ba=baseanchor, ma=markanchor
+
     local dx, dy = factor*(ba[1]-ma[1]), factor*(ba[2]-ma[2])
     nofregisteredmarks = nofregisteredmarks + 1
     if rlmode >= 0 then
@@ -398,6 +399,7 @@ function injections.setmark(start,base,factor,rlmode,ba,ma,tfmbase,mkmk) -- ba=b
                 i.markbase     = nofregisteredmarks
                 i.markbasenode = base
                 i.markmark     = mkmk
+                i.checkmark    = checkmark
             end
         else
             p.injections = {
@@ -407,6 +409,7 @@ function injections.setmark(start,base,factor,rlmode,ba,ma,tfmbase,mkmk) -- ba=b
                 markbase     = nofregisteredmarks,
                 markbasenode = base,
                 markmark     = mkmk,
+                checkmark    = checkmark,
             }
         end
     else
@@ -418,6 +421,7 @@ function injections.setmark(start,base,factor,rlmode,ba,ma,tfmbase,mkmk) -- ba=b
                 markbase     = nofregisteredmarks,
                 markbasenode = base,
                 markmark     = mkmk,
+                checkmark    = checkmark,
             },
         }
     end
@@ -1062,11 +1066,22 @@ local function inject_everything(head,where)
                 ox = px - pn.markx
              -- report_injections("l2r case 3: %p",ox)
          -- end
-            local wn = getfield(n,"width") -- in arial marks have widths
-            if wn ~= 0 then
-                -- bad: we should center
-                pn.leftkern  = -wn/2
-                pn.rightkern = -wn/2
+            if pn.checkmark then
+                local wn = getfield(n,"width") -- in arial marks have widths
+                if wn ~= 0 then
+                    wn = wn/2
+                    if trace_injections then
+                        report_injections("correcting non zero width mark %C",getchar(n))
+                    end
+                    -- -- bad: we should center
+                    -- pn.leftkern  = -wn
+                    -- pn.rightkern = -wn
+                    -- -- we're too late anyway as kerns are already injected so
+                    -- -- we do it the ugly way (no checking if the previous is
+                    -- -- already a kern) .. maybe we should fix the font instead
+                    insert_node_before(n,n,newkern(-wn))
+                    insert_node_after(n,n,newkern(-wn))
+                end
             end
         end
         local oy = getfield(n,"yoffset") + getfield(p,"yoffset") + pn.marky
@@ -1092,10 +1107,10 @@ local function inject_everything(head,where)
                             nofmarks = nofmarks + 1
                             marks[nofmarks] = current
                         else
-local yoffset = i.yoffset
-if yoffset and yoffset ~= 0 then
-    setfield(current,"yoffset",yoffset)
-end
+                            local yoffset = i.yoffset
+                            if yoffset and yoffset ~= 0 then
+                                setfield(current,"yoffset",yoffset)
+                            end
                             if hascursives then
                                 local cursivex = i.cursivex
                                 if cursivex then
@@ -1148,10 +1163,6 @@ end
                                 end
                             end
                             -- left|glyph|right
---                             local yoffset = i.yoffset
---                             if yoffset and yoffset ~= 0 then
---                                 setfield(current,"yoffset",yoffset)
---                             end
                             local leftkern = i.leftkern
                             if leftkern and leftkern ~= 0 then
                                 insert_node_before(head,current,newkern(leftkern))
@@ -1166,7 +1177,7 @@ end
                         local i = p.emptyinjections
                         if i then
                             -- glyph|disc|glyph (special case)
--- okay?
+                            -- okay?
                             local rightkern = i.rightkern
                             if rightkern and rightkern ~= 0 then
                                 if next and getid(next) == disc_code then
@@ -1561,6 +1572,7 @@ function injections.handler(head,where)
     if triggers then
         head = injectspaces(head)
     end
+    -- todo: marks only run too
     if nofregisteredmarks > 0 or nofregisteredcursives > 0 then
         if trace_injections then
             report_injections("injection variant %a","everything")

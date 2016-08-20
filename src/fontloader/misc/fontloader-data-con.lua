@@ -91,7 +91,7 @@ function containers.read(container,name)
     local storage = container.storage
     local stored = storage[name]
     if not stored and container.enabled and caches and containers.usecache then
-        stored = caches.loaddata(container.readables,name)
+        stored = caches.loaddata(container.readables,name,container.writable)
         if stored and stored.cache_version == container.version then
             if trace_cache or trace_containers then
                 report_containers("action %a, category %a, name %a","load",container.subcategory,name)

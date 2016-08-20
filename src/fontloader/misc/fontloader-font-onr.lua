@@ -50,57 +50,9 @@ and <l n='otf'/> reader.</p>
 and new vectors (we actually had one bad vector with the old loader).</p>
 --ldx]]--
 
-local get_indexes
+local get_indexes, get_shapes
 
 do
-
-    local n, m
-
-    local progress = function(str,position,name,size)
-        local forward = position + tonumber(size) + 3 + 2
-        n = n + 1
-        if n >= m then
-            return #str, name
-        elseif forward < #str then
-            return forward, name
-        else
-            return #str, name
-        end
-    end
-
-    local initialize = function(str,position,size)
-        n = 0
-        m = size -- % tonumber(size)
-        return position + 1
-    end
-
-    local charstrings   = P("/CharStrings")
-    local encoding      = P("/Encoding")
-    local dup           = P("dup")
-    local put           = P("put")
-    local array         = P("array")
-    local name          = P("/") * C((R("az")+R("AZ")+R("09")+S("-_."))^1)
-    local digits        = R("09")^1
-    local cardinal      = digits / tonumber
-    local spaces        = P(" ")^1
-    local spacing       = patterns.whitespace^0
-
-    local p_filternames = Ct (
-        (1-charstrings)^0 * charstrings * spaces * Cmt(cardinal,initialize)
-      * (Cmt(name * spaces * cardinal, progress) + P(1))^1
-    )
-
-    -- /Encoding 256 array
-    -- 0 1 255 {1 index exch /.notdef put} for
-    -- dup 0 /Foo put
-
-    local p_filterencoding =
-        (1-encoding)^0 * encoding * spaces * digits * spaces * array * (1-dup)^0
-      * Cf(
-            Ct("") * Cg(spacing * dup * spaces * cardinal * spaces * name * spaces * put)^1
-        ,rawset)
-
-    -- if one of first 4 not 0-9A-F then binary else hex
 
     local decrypt
 
@@ -115,23 +67,107 @@ do
             return char(plain)
         end
 
-        decrypt = function(binary)
-            r, c1, c2, n = 55665, 52845, 22719, 4
+        decrypt = function(binary,initial,seed)
+            r, c1, c2, n = initial, 52845, 22719, seed
             binary       = gsub(binary,".",step)
             return sub(binary,n+1)
         end
 
      -- local pattern = Cs((P(1) / step)^1)
      --
-     -- decrypt = function(binary)
-     --     r, c1, c2, n = 55665, 52845, 22719, 4
+     -- decrypt = function(binary,initial,seed)
+     --     r, c1, c2, n = initial, 52845, 22719, seed
      --     binary = lpegmatch(pattern,binary)
      --     return sub(binary,n+1)
      -- end
 
     end
 
-    local function loadpfbvector(filename)
+    local charstrings   = P("/CharStrings")
+    local subroutines   = P("/Subrs")
+    local encoding      = P("/Encoding")
+    local dup           = P("dup")
+    local put           = P("put")
+    local array         = P("array")
+    local name          = P("/") * C((R("az")+R("AZ")+R("09")+S("-_."))^1)
+    local digits        = R("09")^1
+    local cardinal      = digits / tonumber
+    local spaces        = P(" ")^1
+    local spacing       = patterns.whitespace^0
+
+    local routines, vector, chars, n, m
+
+    local initialize = function(str,position,size)
+        n = 0
+        m = size -- % tonumber(size)
+        return position + 1
+    end
+
+    local setroutine = function(str,position,index,size)
+        local forward = position + tonumber(size)
+        local stream  = sub(str,position+1,forward)
+        routines[index] = decrypt(stream,4330,4)
+        return forward
+    end
+
+    local setvector = function(str,position,name,size)
+        local forward = position + tonumber(size)
+        if n >= m then
+            return #str
+        elseif forward < #str then
+            vector[n] = name
+            n = n + 1 -- we compensate for notdef at the cff loader end
+            return forward
+        else
+            return #str
+        end
+    end
+
+    local setshapes = function(str,position,name,size)
+        local forward = position + tonumber(size)
+        local stream  = sub(str,position+1,forward)
+        if n > m then
+            return #str
+        elseif forward < #str then
+            vector[n] = name
+            n = n + 1
+            chars [n] = decrypt(stream,4330,4)
+            return forward
+        else
+            return #str
+        end
+    end
+
+    local p_rd = spacing * (P("RD") + P("-|"))
+    local p_np = spacing * (P("NP") + P( "|"))
+    local p_nd = spacing * (P("ND") + P( "|"))
+
+    local p_filterroutines = -- dup <i> <n> RD or -| <n encrypted bytes> NP or |
+        (1-subroutines)^0 * subroutines * spaces * Cmt(cardinal,initialize)
+      * (Cmt(cardinal * spaces * cardinal * p_rd, setroutine) * p_np + P(1))^1
+
+    local p_filtershapes = -- /foo <n> RD <n encrypted bytes> ND
+        (1-charstrings)^0 * charstrings * spaces * Cmt(cardinal,initialize)
+      * (Cmt(name * spaces * cardinal * p_rd, setshapes) * p_nd + P(1))^1
+
+    local p_filternames = Ct (
+        (1-charstrings)^0 * charstrings * spaces * Cmt(cardinal,initialize)
+        * (Cmt(name * spaces * cardinal, setvector) + P(1))^1
+    )
+
+    -- /Encoding 256 array
+    -- 0 1 255 {1 index exch /.notdef put} for
+    -- dup 0 /Foo put
+
+    local p_filterencoding =
+        (1-encoding)^0 * encoding * spaces * digits * spaces * array * (1-dup)^0
+      * Cf(
+            Ct("") * Cg(spacing * dup * spaces * cardinal * spaces * name * spaces * put)^1
+        ,rawset)
+
+    -- if one of first 4 not 0-9A-F then binary else hex
+
+    local function loadpfbvector(filename,shapestoo)
         -- for the moment limited to encoding only
 
         local data = io.loaddata(resolvers.findfile(filename))
@@ -153,28 +189,36 @@ do
             return
         end
 
-        binary = decrypt(binary,4)
+        binary = decrypt(binary,55665,4)
 
-        local vector = lpegmatch(p_filternames,binary)
-
---         if vector[1] == ".notdef" then
---             -- tricky
---             vector[0] = table.remove(vector,1)
---         end
-
-        for i=1,#vector do
-            vector[i-1] = vector[i]
-        end
-        vector[#vector] = nil
-
-        if not vector then
-            report_pfb("no vector in %a",filename)
-            return
-        end
-
+        local names    = { }
         local encoding = lpegmatch(p_filterencoding,ascii)
+        local glyphs   = { }
 
-        return vector, encoding
+        routines, vector, chars = { }, { }, { }
+
+        if shapestoo then
+            lpegmatch(p_filterroutines,binary)
+            lpegmatch(p_filtershapes,binary)
+            local data = {
+                dictionaries = {
+                    {
+                        charstrings = chars,
+                        charset     = vector,
+                        subroutines = routines,
+                    }
+                },
+            }
+            fonts.handlers.otf.readers.parsecharstrings(data,glyphs,true,true)
+        else
+            lpegmatch(p_filternames,binary)
+        end
+
+        names = vector
+
+        routines, vector, chars = nil, nil, nil
+
+        return names, encoding, glyphs
 
     end
 
@@ -200,6 +244,11 @@ do
                 end
             end
         end
+    end
+
+    get_shapes = function(pfbname)
+        local vector, encoding, glyphs = loadpfbvector(pfbname,true)
+        return glyphs
     end
 
 end
@@ -427,6 +476,26 @@ function readers.loadfont(afmname,pfbname)
         return data
     end
 end
+
+-- for now, todo: n and check with otf (no afm needed here)
+
+function readers.loadshapes(filename)
+    local fullname = resolvers.findfile(filename) or ""
+    if fullname == "" then
+        return {
+            filename = "not found: " .. filename,
+            glyphs   = { }
+        }
+    else
+        return {
+            filename = fullname,
+            format   = "opentype",
+            glyphs   = get_shapes(fullname) or { },
+            units    = 1000,
+        }
+    end
+end
+
 
 function readers.getinfo(filename)
     local data = read(resolvers.findfile(filename),infoparser)

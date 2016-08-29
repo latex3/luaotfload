@@ -26,6 +26,7 @@ local concat, remove = table.concat, table.remove
 local floor, abs, round, ceil = math.floor, math.abs, math.round, math.ceil
 local P, C, R, S, C, Cs, Ct = lpeg.P, lpeg.C, lpeg.R, lpeg.S, lpeg.C, lpeg.Cs, lpeg.Ct
 local lpegmatch = lpeg.match
+local formatters = string.formatters
 
 local readers           = fonts.handlers.otf.readers
 local streamreader      = readers.streamreader
@@ -594,6 +595,7 @@ do
     local ymax       = 0
     local checked    = false
     local keepcurve  = false
+    local version    = 2
 
     local function showstate(where)
         report("%w%-10s : [%s] n=%i",depth*2,where,concat(stack," ",1,top),top)
@@ -1052,12 +1054,113 @@ do
         end
     end
 
-    local function unsupported()
+    local function unsupported(t)
         if trace_charstrings then
-            showstate("unsupported")
+            showstate("unsupported " .. t)
         end
         top = 0
     end
+
+    local function unsupportedsub(t)
+        if trace_charstrings then
+            showstate("unsupported sub " .. t)
+        end
+        top = 0
+    end
+
+    -- type 1 (not used in type 2)
+
+    local function getstem3()
+        if trace_charstrings then
+            showstate("stem3")
+        end
+        top = 0
+    end
+
+    local function divide()
+        if version == 1 then
+            local d = stack[top]
+            top = top - 1
+            stack[top] = stack[top] / d
+        end
+    end
+
+    local function closepath()
+        if version == 1 then
+            if trace_charstrings then
+                showstate("closepath")
+            end
+        end
+        top = 0
+    end
+
+    local function hsbw()
+        if version == 1 then
+            if trace_charstrings then
+                showstate("dotsection")
+            end
+            width = stack[top]
+        end
+        top = 0
+    end
+
+    local function seac()
+        if version == 1 then
+            if trace_charstrings then
+                showstate("seac")
+            end
+        end
+        top = 0
+    end
+
+    local function sbw()
+        if version == 1 then
+            if trace_charstrings then
+                showstate("sbw")
+            end
+            width = stack[top-1]
+        end
+        top = 0
+    end
+
+    -- these are probably used for special cases i.e. call out to postscript
+
+    local function callothersubr()
+        if version == 1 then
+            -- we don't support this (ok, we could mimick these othersubs)
+            if trace_charstrings then
+                showstate("callothersubr (unsupported)")
+            end
+        end
+        top = 0
+    end
+
+    local function pop()
+        if version == 1 then
+            -- we don't support this
+            if trace_charstrings then
+                showstate("pop (unsupported)")
+            end
+            top = top + 1
+            stack[top] = 0 -- a dummy
+        else
+            top = 0
+        end
+    end
+
+    local function setcurrentpoint()
+        if version == 1 then
+            -- we don't support this
+            if trace_charstrings then
+                showstate("pop (unsupported)")
+            end
+            x = x + stack[top-1]
+            y = y + stack[top]
+        end
+        top = 0
+    end
+
+    -- so far for unsupported postscript
 
     -- Bah, we cannot use a fast lpeg because a hint has an unknown size and a
     -- runtime capture cannot handle that well.
@@ -1076,7 +1179,7 @@ do
         unsupported,  -- 10 -- calllocal,
         unsupported,  -- 11 -- callreturn,
         unsupported,  -- 12 -- elsewhere
-        unsupported,  -- 13 -- hsbw
+        hsbw,         -- 13 -- hsbw (type 1 cff)
         unsupported,  -- 14 -- endchar,
         unsupported,  -- 15
         unsupported,  -- 16
@@ -1098,6 +1201,17 @@ do
     }
 
     local subactions = {
+        -- cff 1
+        [000] = dotsection,
+        [001] = getstem3,
+        [002] = getstem3,
+        [006] = seac,
+        [007] = sbw,
+        [012] = divide,
+        [016] = callothersubr,
+        [017] = pop,
+        [033] = setcurrentpoint,
+        -- cff 2
         [034] = hflex,
         [035] = flex,
         [036] = hflex1,
@@ -1107,23 +1221,29 @@ do
     local p_bytes = Ct((P(1)/byte)^0)
 
     local function call(scope,list,bias,process)
-        local index = stack[top] + bias
-        top = top - 1
-        if trace_charstrings then
-            showvalue(scope,index,true)
-        end
-        local str = list[index]
-        if str then
-            if type(str) == "string" then
-                str = lpegmatch(p_bytes,str)
-                list[index] = str
-            end
-            depth = depth + 1
-            process(str)
-            depth = depth - 1
+        depth = depth + 1
+        if top == 0 then
+            showstate(formatters["unknown %s call"](scope))
+            top = 0
         else
-            report("unknown %s %i",scope,index)
+            local index = stack[top] + bias
+            top = top - 1
+            if trace_charstrings then
+                showvalue(scope,index,true)
+            end
+            local tab = list[index]
+            if tab then
+                if type(tab) == "string" then
+                    tab = lpegmatch(p_bytes,tab)
+                    list[index] = tab
+                end
+                process(tab)
+            else
+                showstate(formatters["unknown %s call %i"](scope,index))
+                top = 0
+            end
         end
+        depth = depth - 1
     end
 
     local function process(tab)
@@ -1131,7 +1251,7 @@ do
         local n = #tab
         while i <= n do
             local t = tab[i]
-            if t >= 32 and t<=246 then
+            if t >= 32 and t <= 246 then
                 -- -107 .. +107
                 top = top + 1
                 stack[top] = t - 139
@@ -1196,7 +1316,7 @@ do
                 local t = tab[i]
                 local a = subactions[t]
                 if a then
-                    a()
+                    a(t)
                 else
                     if trace_charstrings then
                         showvalue("<subaction>",t)
@@ -1207,7 +1327,7 @@ do
             else
                 local a = actions[t]
                 if a then
-                    local s = a()
+                    local s = a(t)
                     if s then
                         i = i + s
                     end
@@ -1260,27 +1380,44 @@ do
  --     end
  -- end
 
-    parsecharstrings = function(data,glyphs,doshapes)
+    local function setbias(globals,locals)
+        if version == 1 then
+            return
+                false,
+                false
+        else
+            local g, l = #globals, #locals
+            return
+                ((g <  1240 and 107) or (g < 33900 and 1131) or 32768) + 1,
+                ((l <  1240 and 107) or (l < 33900 and 1131) or 32768) + 1
+        end
+    end
+
+    parsecharstrings = function(data,glyphs,doshapes,tversion)
         -- for all charstrings
         local dictionary  = data.dictionaries[1]
         local charstrings = dictionary.charstrings
         local charset     = dictionary.charset
+        local private     = dictionary.private or { data = { } }
+
         keepcurve  = doshapes
+        version    = tversion
         stack      = { }
         glyphs     = glyphs or { }
         strings    = data.strings
-        locals     = dictionary.subroutines
-        globals    = data.routines
-        globalbias = #globals
-        localbias  = #locals
-        globalbias = ((globalbias <  1240 and 107) or (globalbias < 33900 and 1131) or 32768) + 1
-        localbias  = ((localbias  <  1240 and 107) or (localbias  < 33900 and 1131) or 32768) + 1
-        local nominalwidth = dictionary.private.data.nominalwidthx or 0
-        local defaultwidth = dictionary.private.data.defaultwidthx or 0
+        globals    = data.routines or { }
+        locals     = dictionary.subroutines or { }
+
+        globalbias, localbias = setbias(globals,locals)
+
+        local nominalwidth = private.data.nominalwidthx or 0
+        local defaultwidth = private.data.defaultwidthx or 0
 
         for i=1,#charstrings do
-            local str   = charstrings[i]
-            local tab   = lpegmatch(p_bytes,str)
+            local tab = charstrings[i]
+            if type(tab) == "string" then
+                tab = lpegmatch(p_bytes,tab)
+            end
             local index = i - 1
             x       = 0
             y       = 0
@@ -1341,20 +1478,23 @@ do
         return glyphs
     end
 
-    parsecharstring = function(data,dictionary,charstring,glyphs,index,doshapes)
+    parsecharstring = function(data,dictionary,tab,glyphs,index,doshapes,tversion)
         local private = dictionary.private
         keepcurve  = doshapes
+        version    = tversion
         strings    = data.strings -- or in dict?
         locals     = dictionary.subroutines or { }
         globals    = data.routines or { }
-        globalbias = #globals
-        localbias  = #locals
-        globalbias = ((globalbias <  1240 and 107) or (globalbias < 33900 and 1131) or 32768) + 1
-        localbias  = ((localbias  <  1240 and 107) or (localbias  < 33900 and 1131) or 32768) + 1
+
+        globalbias, localbias = setbias(globals,locals)
+
         local nominalwidth = private and private.data.nominalwidthx or 0
         local defaultwidth = private and private.data.defaultwidthx or 0
         --
-        local tab = lpegmatch(p_bytes,charstring)
+        if type(tab) == "string" then
+            tab = lpegmatch(p_bytes,tab)
+        end
+        --
         x         = 0
         y         = 0
         width     = false
@@ -1384,7 +1524,8 @@ do
             width = nominalwidth + width
         end
         --
-index = index - 1
+        index = index - 1
+        --
         local glyph = glyphs[index] -- can be autodefined in otr
         if not glyph then
             glyphs[index] = {
@@ -1410,8 +1551,6 @@ index = index - 1
             report("width: %s",tostring(width))
             report("boundingbox: % t",boundingbox)
         end
-        --
-        return charstring
     end
 
     resetcharstrings = function()
@@ -1542,7 +1681,7 @@ local function readcidprivates(f,data)
     parseprivates(data,dictionaries)
 end
 
-local function readnoselect(f,data,glyphs,doshapes)
+local function readnoselect(f,data,glyphs,doshapes,version)
     local dictionaries = data.dictionaries
     local dictionary   = dictionaries[1]
     readglobals(f,data)
@@ -1552,11 +1691,13 @@ local function readnoselect(f,data,glyphs,doshapes)
     readprivates(f,data)
     parseprivates(data,data.dictionaries)
     readlocals(f,data,dictionary)
-    parsecharstrings(data,glyphs,doshapes)
+    parsecharstrings(data,glyphs,doshapes,version)
     resetcharstrings()
 end
 
-local function readfdselect(f,data,glyphs,doshapes)
+readers.parsecharstrings = parsecharstrings
+
+local function readfdselect(f,data,glyphs,doshapes,version)
     local header       = data.header
     local dictionaries = data.dictionaries
     local dictionary   = dictionaries[1]
@@ -1615,7 +1756,7 @@ local function readfdselect(f,data,glyphs,doshapes)
             readlocals(f,data,dictionaries[i])
         end
         for i=1,#charstrings do
-            parsecharstring(data,dictionaries[fdindex[i]+1],charstrings[i],glyphs,i,doshapes)
+            parsecharstring(data,dictionaries[fdindex[i]+1],charstrings[i],glyphs,i,doshapes,version)
         end
         resetcharstrings()
     end

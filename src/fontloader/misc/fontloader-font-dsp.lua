@@ -53,6 +53,7 @@ local bittest = bit32.btest
 local rshift = bit32.rshift
 local concat = table.concat
 local lower = string.lower
+local copy = table.copy
 local sub = string.sub
 local strip = string.strip
 local tohash = table.tohash
@@ -1698,7 +1699,7 @@ do
                                                     flags     = d.flags,
                                                  -- chain     = d.chain,
                                                 }
-                                                sublookuplist[nofsublookups] = h
+                                                sublookuplist[nofsublookups] = copy(h) -- we repack later
                                                 sublookuphash[lookupid] = nofsublookups
                                                 sublookupcheck[lookupid] = 1
                                             else

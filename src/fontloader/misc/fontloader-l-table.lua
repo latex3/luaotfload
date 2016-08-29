@@ -478,7 +478,7 @@ function table.fromhash(t)
     return hsh
 end
 
-local noquotes, hexify, handle, compact, inline, functions
+local noquotes, hexify, handle, compact, inline, functions, metacheck
 
 local reserved = table.tohash { -- intercept a language inconvenience: no reserved words as key
     'and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for', 'function', 'if',
@@ -608,7 +608,8 @@ local function do_serialize(root,name,depth,level,indexed)
         if compact then
             last = #root
             for k=1,last do
-                if root[k] == nil then
+             -- if root[k] == nil then
+                if rawget(root,k) == nil then
                     last = k - 1
                     break
                 end
@@ -817,6 +818,7 @@ local function serialize(_handle,root,name,specification) -- handle wins
         functions = specification.functions
         compact   = specification.compact
         inline    = specification.inline and compact
+        metacheck = specification.metacheck
         if functions == nil then
             functions = true
         end
@@ -826,6 +828,9 @@ local function serialize(_handle,root,name,specification) -- handle wins
         if inline == nil then
             inline = compact
         end
+        if metacheck == nil then
+            metacheck = true
+        end
     else
         noquotes  = false
         hexify    = false
@@ -833,6 +838,7 @@ local function serialize(_handle,root,name,specification) -- handle wins
         compact   = true
         inline    = true
         functions = true
+        metacheck = true
     end
     if tname == "string" then
         if name == "return" then
@@ -857,8 +863,9 @@ local function serialize(_handle,root,name,specification) -- handle wins
     end
     if root then
         -- The dummy access will initialize a table that has a delayed initialization
-        -- using a metatable. (maybe explicitly test for metatable)
-        if getmetatable(root) then -- todo: make this an option, maybe even per subtable
+        -- using a metatable. (maybe explicitly test for metatable). This can crash on
+        -- metatables that check the index against a number.
+        if metacheck and getmetatable(root) then
             local dummy = root._w_h_a_t_e_v_e_r_
             root._w_h_a_t_e_v_e_r_ = nil
         end

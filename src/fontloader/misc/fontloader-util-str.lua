@@ -10,7 +10,7 @@ utilities         = utilities or { }
 utilities.strings = utilities.strings or { }
 local strings     = utilities.strings
 
-local format, gsub, rep, sub = string.format, string.gsub, string.rep, string.sub
+local format, gsub, rep, sub, find = string.format, string.gsub, string.rep, string.sub, string.find
 local load, dump = load, string.dump
 local tonumber, type, tostring = tonumber, type, tostring
 local unpack, concat = table.unpack, table.concat
@@ -385,6 +385,43 @@ function number.signed(i)
     end
 end
 
+-- maybe to util-num
+
+local digit  = patterns.digit
+local period = patterns.period
+local three  = digit * digit * digit
+
+local splitter = Cs (
+    (((1 - (three^1 * period))^1 + C(three)) * (Carg(1) * three)^1 + C((1-period)^1))
+  * (P(1)/"" * Carg(2)) * C(2)
+)
+
+patterns.formattednumber = splitter
+
+function number.formatted(n,sep1,sep2)
+    local s = type(s) == "string" and n or format("%0.2f",n)
+    if sep1 == true then
+        return lpegmatch(splitter,s,1,".",",")
+    elseif sep1 == "." then
+        return lpegmatch(splitter,s,1,sep1,sep2 or ",")
+    elseif sep1 == "," then
+        return lpegmatch(splitter,s,1,sep1,sep2 or ".")
+    else
+        return lpegmatch(splitter,s,1,sep1 or ",",sep2 or ".")
+    end
+end
+
+-- print(number.formatted(1))
+-- print(number.formatted(12))
+-- print(number.formatted(123))
+-- print(number.formatted(1234))
+-- print(number.formatted(12345))
+-- print(number.formatted(123456))
+-- print(number.formatted(1234567))
+-- print(number.formatted(12345678))
+-- print(number.formatted(12345678,true))
+-- print(number.formatted(1234.56,"!","?"))
+
 local zero      = P("0")^1 / ""
 local plus      = P("+")   / ""
 local minus     = P("-")
@@ -732,43 +769,6 @@ local format_W = function(f) -- handy when doing depth related indent
     return format("nspaces[%s]",tonumber(f) or 0)
 end
 
--- maybe to util-num
-
-local digit  = patterns.digit
-local period = patterns.period
-local three  = digit * digit * digit
-
-local splitter = Cs (
-    (((1 - (three^1 * period))^1 + C(three)) * (Carg(1) * three)^1 + C((1-period)^1))
-  * (P(1)/"" * Carg(2)) * C(2)
-)
-
-patterns.formattednumber = splitter
-
-function number.formatted(n,sep1,sep2)
-    local s = type(s) == "string" and n or format("%0.2f",n)
-    if sep1 == true then
-        return lpegmatch(splitter,s,1,".",",")
-    elseif sep1 == "." then
-        return lpegmatch(splitter,s,1,sep1,sep2 or ",")
-    elseif sep1 == "," then
-        return lpegmatch(splitter,s,1,sep1,sep2 or ".")
-    else
-        return lpegmatch(splitter,s,1,sep1 or ",",sep2 or ".")
-    end
-end
-
--- print(number.formatted(1))
--- print(number.formatted(12))
--- print(number.formatted(123))
--- print(number.formatted(1234))
--- print(number.formatted(12345))
--- print(number.formatted(123456))
--- print(number.formatted(1234567))
--- print(number.formatted(12345678))
--- print(number.formatted(12345678,true))
--- print(number.formatted(1234.56,"!","?"))
-
 local format_m = function(f)
     n = n + 1
     if not f or f == "" then
@@ -801,9 +801,16 @@ end
 local format_extension = function(extensions,f,name)
     local extension = extensions[name] or "tostring(%s)"
     local f = tonumber(f) or 1
+    local w = find(extension,"%.%.%.")
     if f == 0 then
+        if w then
+            extension = gsub(extension,"%.%.%.","")
+        end
         return extension
     elseif f == 1 then
+        if w then
+            extension = gsub(extension,"%.%.%.","%%s")
+        end
         n = n + 1
         local a = "a" .. n
         return format(extension,a,a) -- maybe more times?
@@ -811,6 +818,11 @@ local format_extension = function(extensions,f,name)
         local a = "a" .. (n + f + 1)
         return format(extension,a,a)
     else
+        if w then
+            extension = gsub(extension,"%.%.%.",rep("%%s,",f-1).."%%s")
+        end
+        -- we could fill an array and then n = n + 1 unpack(t,n,n+f) but as we
+        -- cache we don't save much and there are hardly any extensions anyway
         local t = { }
         for i=1,f do
             n = n + 1

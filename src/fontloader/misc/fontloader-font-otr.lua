@@ -1747,118 +1747,6 @@ function readers.math(f,fontdata,specification)
     end
 end
 
--- Goodie. A sequence instead of segments costs a bit more memory, some 300K on a
--- dejavu serif and about the same on a pagella regular.
-
-local function packoutlines(data,makesequence)
-    local subfonts = data.subfonts
-    if subfonts then
-        for i=1,#subfonts do
-            packoutlines(subfonts[i],makesequence)
-        end
-        return
-    end
-    local common = data.segments
-    if common then
-        return
-    end
-    local glyphs = data.glyphs
-    if not glyphs then
-        return
-    end
-    if makesequence then
-        for index=1,#glyphs do
-            local glyph = glyphs[index]
-            local segments = glyph.segments
-            if segments then
-                local sequence    = { }
-                local nofsequence = 0
-                for i=1,#segments do
-                    local segment    = segments[i]
-                    local nofsegment = #segment
-                    nofsequence = nofsequence + 1
-                    sequence[nofsequence] = segment[nofsegment]
-                    for i=1,nofsegment-1 do
-                        nofsequence = nofsequence + 1
-                        sequence[nofsequence] = segment[i]
-                    end
-                end
-                glyph.sequence = sequence
-                glyph.segments = nil
-            end
-        end
-    else
-        local hash    = { }
-        local common  = { }
-        local reverse = { }
-        local last    = 0
-        for index=1,#glyphs do
-            local segments = glyphs[index].segments
-            if segments then
-                for i=1,#segments do
-                    local h = concat(segments[i]," ")
-                    hash[h] = (hash[h] or 0) + 1
-                end
-            end
-        end
-        for index=1,#glyphs do
-            local segments = glyphs[index].segments
-            if segments then
-                for i=1,#segments do
-                    local segment = segments[i]
-                    local h = concat(segment," ")
-                    if hash[h] > 1 then -- minimal one shared in order to hash
-                        local idx = reverse[h]
-                        if not idx then
-                            last = last + 1
-                            reverse[h] = last
-                            common[last] = segment
-                            idx = last
-                        end
-                        segments[i] = idx
-                    end
-                end
-            end
-        end
-        if last > 0 then
-            data.segments = common
-        end
-    end
-end
-
-local function unpackoutlines(data)
-    local subfonts = data.subfonts
-    if subfonts then
-        for i=1,#subfonts do
-            unpackoutlines(subfonts[i])
-        end
-        return
-    end
-    local common = data.segments
-    if not common then
-        return
-    end
-    local glyphs = data.glyphs
-    if not glyphs then
-        return
-    end
-    for index=1,#glyphs do
-        local segments = glyphs[index].segments
-        if segments then
-            for i=1,#segments do
-                local c = common[segments[i]]
-                if c then
-                    segments[i] = c
-                end
-            end
-        end
-    end
-    data.segments = nil
-end
-
-otf.packoutlines   = packoutlines
-otf.unpackoutlines = unpackoutlines
-
 -- Now comes the loader. The order of reading these matters as we need to know
 -- some properties in order to read following tables. When details is true we also
 -- initialize the glyphs data.
@@ -2152,6 +2040,15 @@ function readers.loadshapes(filename,n)
         shapes   = true,
         subfont  = n,
     }
+    if fontdata then
+        -- easier on luajit but still we can hit the 64 K stack constants issue
+        for k, v in next, fontdata.glyphs do
+            v.class = nil
+            v.index = nil
+            v.math  = nil
+         -- v.name  = nil
+        end
+    end
     return fontdata and {
      -- version  = 0.123 -- todo
         filename = filename,
@@ -2301,64 +2198,4 @@ function readers.extend(fontdata)
             action(fontdata)
         end
     end
-end
-
--- for now .. this will move to a context specific file
-
-if fonts.hashes then
-
-    local identifiers = fonts.hashes.identifiers
-    local loadshapes  = readers.loadshapes
-
-    readers.version  = 0.006
-    readers.cache    = containers.define("fonts", "shapes", readers.version, true)
-
-    -- todo: loaders per format
-
-    local function load(filename,sub)
-        local base = file.basename(filename)
-        local name = file.removesuffix(base)
-        local kind = file.suffix(filename)
-        local attr = lfs.attributes(filename)
-        local size = attr and attr.size or 0
-        local time = attr and attr.modification or 0
-        local sub  = tonumber(sub)
-        if size > 0 and (kind == "otf" or kind == "ttf" or kind == "tcc") then
-            local hash = containers.cleanname(base) -- including suffix
-            if sub then
-                hash = hash .. "-" .. sub
-            end
-            data = containers.read(readers.cache,hash)
-            if not data or data.time ~= time or data.size  ~= size then
-                data = loadshapes(filename,sub)
-                if data then
-                    data.size   = size
-                    data.format = data.format or (kind == "otf" and "opentype") or "truetype"
-                    data.time   = time
-                    packoutlines(data)
-                    containers.write(readers.cache,hash,data)
-                    data = containers.read(readers.cache,hash) -- frees old mem
-                end
-            end
-            unpackoutlines(data)
-        else
-            data = {
-                filename = filename,
-                size     = 0,
-                time     = time,
-                format   = "unknown",
-                units    = 1000,
-                glyphs   = { }
-            }
-        end
-        return data
-    end
-
-    fonts.hashes.shapes = table.setmetatableindex(function(t,k)
-        local d = identifiers[k]
-        local v = load(d.properties.filename,d.subindex)
-        t[k] = v
-        return v
-    end)
-
 end

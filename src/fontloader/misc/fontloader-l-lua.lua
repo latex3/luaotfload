@@ -198,3 +198,4 @@ if flush then
     local popen   = io.popen   if popen   then function io.popen  (...) flush() return popen  (...) end end
 
 end
+

@@ -1933,7 +1933,7 @@ function readers.gdef(f,fontdata,specification)
                 end
             end
             -- mark sets : todo: just make the same as class sets above
-            if marksetsoffset then
+            if marksetsoffset and marksetsoffset > tableoffset then -- zero offset means no table
                 setposition(f,marksetsoffset)
                 local format = readushort(f)
                 if format == 1 then
@@ -1942,7 +1942,6 @@ function readers.gdef(f,fontdata,specification)
                     for i=1,nofsets do
                         sets[i] = readulong(f)
                     end
-                    -- somehow this fails on e.g. notosansethiopic-bold.ttf
                     for i=1,nofsets do
                         local offset = sets[i]
                         if offset ~= 0 then

@@ -144,7 +144,9 @@ end
 local unscaled = {
     ScriptPercentScaleDown          = true,
     ScriptScriptPercentScaleDown    = true,
-    RadicalDegreeBottomRaisePercent = true
+    RadicalDegreeBottomRaisePercent = true,
+    NoLimitSupFactor                = true,
+    NoLimitSubFactor                = true,
 }
 
 function constructors.assignmathparameters(target,original) -- simple variant, not used in context
@@ -490,13 +492,13 @@ function constructors.scale(tfmdata,specification)
     --
     if hasmath then
         constructors.assignmathparameters(target,tfmdata) -- does scaling and whatever is needed
-        properties.hasmath    = true
-        target.nomath         = false
-        target.MathConstants  = target.mathparameters
+        properties.hasmath      = true
+        target.nomath           = false
+        target.MathConstants    = target.mathparameters
     else
-        properties.hasmath    = false
-        target.nomath         = true
-        target.mathparameters = nil -- nop
+        properties.hasmath      = false
+        target.nomath           = true
+        target.mathparameters   = nil -- nop
     end
     --
     -- Here we support some context specific trickery (this might move to a plugin). During the
@@ -905,42 +907,42 @@ function constructors.finalize(tfmdata)
     -- tfmdata.unscaled
     --
     if not properties.hasmath then
-        properties.hasmath  = not tfmdata.nomath
+        properties.hasmath = not tfmdata.nomath
     end
     --
-    tfmdata.MathConstants  = nil
-    tfmdata.postprocessors = nil
+    tfmdata.MathConstants    = nil
+    tfmdata.postprocessors   = nil
     --
-    tfmdata.fontname       = nil
-    tfmdata.filename       = nil
-    tfmdata.fullname       = nil
-    tfmdata.name           = nil -- most tricky part
-    tfmdata.psname         = nil
+    tfmdata.fontname         = nil
+    tfmdata.filename         = nil
+    tfmdata.fullname         = nil
+    tfmdata.name             = nil -- most tricky part
+    tfmdata.psname           = nil
     --
-    tfmdata.encodingbytes  = nil
-    tfmdata.embedding      = nil
-    tfmdata.tounicode      = nil
-    tfmdata.cidinfo        = nil
-    tfmdata.format         = nil
-    tfmdata.direction      = nil
-    tfmdata.type           = nil
-    tfmdata.nomath         = nil
-    tfmdata.designsize     = nil
+    tfmdata.encodingbytes    = nil
+    tfmdata.embedding        = nil
+    tfmdata.tounicode        = nil
+    tfmdata.cidinfo          = nil
+    tfmdata.format           = nil
+    tfmdata.direction        = nil
+    tfmdata.type             = nil
+    tfmdata.nomath           = nil
+    tfmdata.designsize       = nil
     --
-    tfmdata.size           = nil
-    tfmdata.stretch        = nil
-    tfmdata.shrink         = nil
-    tfmdata.step           = nil
-    tfmdata.auto_expand    = nil
-    tfmdata.auto_protrude  = nil
-    tfmdata.extend         = nil
-    tfmdata.slant          = nil
-    tfmdata.units          = nil
-    tfmdata.units_per_em   = nil
+    tfmdata.size             = nil
+    tfmdata.stretch          = nil
+    tfmdata.shrink           = nil
+    tfmdata.step             = nil
+    tfmdata.auto_expand      = nil
+    tfmdata.auto_protrude    = nil
+    tfmdata.extend           = nil
+    tfmdata.slant            = nil
+    tfmdata.units            = nil
+    tfmdata.units_per_em     = nil
     --
-    tfmdata.cache          = nil
+    tfmdata.cache            = nil
     --
-    properties.finalized   = true
+    properties.finalized     = true
     --
     return tfmdata
 end

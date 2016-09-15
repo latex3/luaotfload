@@ -177,6 +177,7 @@ function string.topattern(str,lowercase,strict)
     end
 end
 
+-- print(string.escapedpattern("abc*234",true))
 -- print(string.escapedpattern("12+34*.tex",false))
 -- print(string.escapedpattern("12+34*.tex",true))
 -- print(string.topattern     ("12+34*.tex",false,false))

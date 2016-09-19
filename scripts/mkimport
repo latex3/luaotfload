@@ -361,7 +361,6 @@ local package = {
     "fonts-enc",
     "font-cid",
     "font-map",
-    "fonts-syn",
     "font-oti",
     "font-otr",
     "font-cff",

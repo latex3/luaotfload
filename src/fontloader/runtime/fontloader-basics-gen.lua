@@ -305,6 +305,7 @@ function caches.loaddata(readables,name,writable)
         local loader = false
         local luaname, lucname = makefullname(path,name)
         if lfs.isfile(lucname) then
+            texio.write(string.format("(load luc: %s)",lucname))
             loader = loadfile(lucname)
         end
         if not loader and lfs.isfile(luaname) then

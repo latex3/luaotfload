@@ -270,3 +270,18 @@ otffeatures.register {
         node = reencode,
     }
 }
+
+local function ignore(tfmdata,key,value)
+    if value then
+        tfmdata.mathparameters = nil
+    end
+end
+
+otffeatures.register {
+    name         = "ignoremathconstants",
+    description  = "ignore math constants table",
+    initializers = {
+        base = ignore,
+        node = ignore,
+    }
+}

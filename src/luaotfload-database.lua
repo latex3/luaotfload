@@ -3506,6 +3506,49 @@ local show_cache = function ( )
 end
 
 -----------------------------------------------------------------------
+--- API assumptions of the fontloader
+-----------------------------------------------------------------------
+--- PHG: we need to investigate these, maybe they’re useful as early
+---      hooks
+
+local ignoredfile = function () return false end
+
+local reportmissingbase = function ()
+    logreport ("info", 0, "db", --> bug‽
+               "Font name database not found but expected by fontloader.")
+    fonts.names.reportmissingbase = nil
+end
+
+local reportmissingname = function ()
+    logreport ("info", 0, "db", --> bug‽
+               "Fontloader attempted to lookup name before Luaotfload \z
+                was initialized.")
+    fonts.names.reportmissingname = nil
+end
+
+local getfilename = function (a1, a2)
+    logreport ("info", 6, "db", --> bug‽
+               "Fontloader looked up font file (%s, %s) before Luaotfload \z
+                was initialized.", tostring(a1), tostring(a2))
+    return lookup_fullpath (a1, a2)
+end
+
+local resolve = function (name, subfont)
+    logreport ("info", 6, "db", --> bug‽
+               "Fontloader attempted to resolve name (%s, %s) before \z
+                Luaotfload was initialized.", tostring(name), tostring(subfont))
+    return lookup_font_name { name = name, sub = subfont }
+end
+
+local api = {
+    ignoredfile       = ignoredfile,
+    reportmissingbase = reportmissingbase,
+    reportmissingname = reportmissingname,
+    getfilename       = getfilename,
+    resolve           = resolve,
+}
+
+-----------------------------------------------------------------------
 --- export functionality to the namespace “fonts.names”
 -----------------------------------------------------------------------
 
@@ -3557,6 +3600,7 @@ return {
         names.lookups   = nil      --- contains the lookup cache
 
         for sym, ref in next, export do names[sym] = ref end
+        for sym, ref in next, api    do names[sym] = names[sym] or ref end
         return true
     end
 }

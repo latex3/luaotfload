@@ -8,7 +8,8 @@ if not modules then modules = { } end modules ['luatex-swiglib'] = {
 
 local savedrequire = require
 
-local libsuffix = os.type == "windows" and ".dll" or ".so"
+local libsuffix = os.type == "windows" and ".dll"    or ".so"
+local pathsplit = "([^" .. io.pathseparator .. "]+)"
 
 function requireswiglib(required,version)
     local library = package.loaded[required]
@@ -17,7 +18,7 @@ function requireswiglib(required,version)
     else
         local name = string.gsub(required,"%.","/") .. libsuffix
         local list = kpse.show_path("clua")
-        for root in string.gmatch(list,"([^;]+)") do
+        for root in string.gmatch(list,pathsplit) do
             local full = false
             if type(version) == "string" and version ~= "" then
                 full = root .. "/" .. version .. "/" .. name

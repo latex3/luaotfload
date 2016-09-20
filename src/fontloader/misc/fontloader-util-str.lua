@@ -826,7 +826,8 @@ local format_extension = function(extensions,f,name)
         local t = { }
         for i=1,f do
             n = n + 1
-            t[#t+1] = "a" .. n
+         -- t[#t+1] = "a" .. n
+            t[i] = "a" .. n
         end
         return format(extension,unpack(t))
     end

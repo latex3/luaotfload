@@ -2752,10 +2752,12 @@ function otf.dataset(tfmdata,font) -- generic variant, overloaded in context
         }
         rs[language] = rl
         local sequences = tfmdata.resources.sequences
-        for s=1,#sequences do
-            local v = enabled and initialize(sequences[s],script,language,enabled,autoscript,autolanguage)
-            if v then
-                rl[#rl+1] = v
+        if sequences then
+            for s=1,#sequences do
+                local v = enabled and initialize(sequences[s],script,language,enabled,autoscript,autolanguage)
+                if v then
+                    rl[#rl+1] = v
+                end
             end
         end
     end

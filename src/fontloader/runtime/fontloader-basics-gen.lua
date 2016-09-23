@@ -434,3 +434,23 @@ if arg then
         end
     end
 end
+
+--- PHG: HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK HACK
+--- 	 certain values are missing from attr-col.lua.
+local function cmyktorgb(c,m,y,k)
+    if not c then
+        return 0, 0, 0, 1
+    else
+        return 1.0 - min(1.0,c+k), 1.0 - min(1.0,m+k), 1.0 - min(1.0,y+k)
+    end
+end
+
+local function graytorgb(s) -- unweighted
+   return 1-s, 1-s, 1-s
+end
+
+attributes                  = attributes or { }
+attributes.colors           = attributes.colors or { }
+attributes.colors.cmyktorgb = cmyktorgb
+attributes.colors.graytorgb = graytorgb
+

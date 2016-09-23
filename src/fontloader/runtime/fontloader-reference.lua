@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 09/12/16 18:27:00
+-- merge date  : 09/23/16 10:13:56
 
 do -- begin closure to overcome local limits and interference
 
@@ -2018,6 +2018,7 @@ if not modules then modules={} end modules ['l-io']={
   license="see context related readme files"
 }
 local io=io
+local open,flush,write,read=io.open,io.flush,io.write,io.read
 local byte,find,gsub,format=string.byte,string.find,string.gsub,string.format
 local concat=table.concat
 local floor=math.floor
@@ -2034,15 +2035,13 @@ local function readall(f)
   local size=f:seek("end")
   if size==0 then
     return ""
-  elseif size<1024*1024 then
-    f:seek("set",0)
+  end
+  f:seek("set",0)
+  if size<1024*1024 then
     return f:read('*all')
   else
-    local done=f:seek("set",0)
     local step
-    if size<1024*1024 then
-      step=1024*1024
-    elseif size>16*1024*1024 then
+    if size>16*1024*1024 then
       step=16*1024*1024
     else
       step=floor(size/(1024*1024))*1024*1024/8
@@ -2060,7 +2059,7 @@ local function readall(f)
 end
 io.readall=readall
 function io.loaddata(filename,textmode) 
-  local f=io.open(filename,(textmode and 'r') or 'rb')
+  local f=open(filename,(textmode and 'r') or 'rb')
   if f then
     local data=readall(f)
     f:close()
@@ -2069,8 +2068,53 @@ function io.loaddata(filename,textmode)
     end
   end
 end
+function io.copydata(source,target,action)
+  local f=open(source,"rb")
+  if f then
+    local g=open(target,"wb")
+    if g then
+      local size=f:seek("end")
+      if size==0 then
+      else
+        f:seek("set",0)
+        if size<1024*1024 then
+          local data=f:read('*all')
+          if action then
+            data=action(data)
+          end
+          if data then
+            g:write(data)
+          end
+        else
+          local step
+          if size>16*1024*1024 then
+            step=16*1024*1024
+          else
+            step=floor(size/(1024*1024))*1024*1024/8
+          end
+          while true do
+            local data=f:read(step)
+            if data then
+              if action then
+                data=action(data)
+              end
+              if data then
+                g:write(data)
+              end
+            else
+              break
+            end
+          end
+        end
+      end
+      g:close()
+    end
+    f:close()
+    flush()
+  end
+end
 function io.savedata(filename,data,joiner)
-  local f=io.open(filename,"wb")
+  local f=open(filename,"wb")
   if f then
     if type(data)=="table" then
       f:write(concat(data,joiner or ""))
@@ -2080,14 +2124,14 @@ function io.savedata(filename,data,joiner)
       f:write(data or "")
     end
     f:close()
-    io.flush()
+    flush()
     return true
   else
     return false
   end
 end
 function io.loadlines(filename,n) 
-  local f=io.open(filename,'r')
+  local f=open(filename,'r')
   if not f then
   elseif n then
     local lines={}
@@ -2113,7 +2157,7 @@ function io.loadlines(filename,n)
   end
 end
 function io.loadchunk(filename,n)
-  local f=io.open(filename,'rb')
+  local f=open(filename,'rb')
   if f then
     local data=f:read(n or 1024)
     f:close()
@@ -2123,7 +2167,7 @@ function io.loadchunk(filename,n)
   end
 end
 function io.exists(filename)
-  local f=io.open(filename)
+  local f=open(filename)
   if f==nil then
     return false
   else
@@ -2132,7 +2176,7 @@ function io.exists(filename)
   end
 end
 function io.size(filename)
-  local f=io.open(filename)
+  local f=open(filename)
   if f==nil then
     return 0
   else
@@ -2141,11 +2185,11 @@ function io.size(filename)
     return s
   end
 end
-function io.noflines(f)
+local function noflines(f)
   if type(f)=="string" then
-    local f=io.open(filename)
+    local f=open(filename)
     if f then
-      local n=f and io.noflines(f) or 0
+      local n=f and noflines(f) or 0
       f:close()
       return n
     else
@@ -2160,6 +2204,7 @@ function io.noflines(f)
     return n
   end
 end
+io.noflines=noflines
 local nextchar={
   [ 4]=function(f)
     return f:read(1,1,1,1)
@@ -2237,16 +2282,16 @@ function io.bytes(f,n)
 end
 function io.ask(question,default,options)
   while true do
-    io.write(question)
+    write(question)
     if options then
-      io.write(format(" [%s]",concat(options,"|")))
+      write(format(" [%s]",concat(options,"|")))
     end
     if default then
-      io.write(format(" [%s]",default))
+      write(format(" [%s]",default))
     end
-    io.write(format(" "))
-    io.flush()
-    local answer=io.read()
+    write(format(" "))
+    flush()
+    local answer=read()
     answer=gsub(answer,"^%s*(.*)%s*$","%1")
     if answer=="" and default then
       return default
@@ -2655,13 +2700,15 @@ function file.robustname(str,strict)
     end
   end
 end
-file.readdata=io.loaddata
-file.savedata=io.savedata
+local loaddata=io.loaddata
+local savedata=io.savedata
+file.readdata=loaddata
+file.savedata=savedata
 function file.copy(oldname,newname)
   if oldname and newname then
-    local data=io.loaddata(oldname)
+    local data=loaddata(oldname)
     if data and data~="" then
-      file.savedata(newname,data)
+      savedata(newname,data)
     end
   end
 end
@@ -20391,10 +20438,12 @@ function otf.dataset(tfmdata,font)
     }
     rs[language]=rl
     local sequences=tfmdata.resources.sequences
-    for s=1,#sequences do
-      local v=enabled and initialize(sequences[s],script,language,enabled,autoscript,autolanguage)
-      if v then
-        rl[#rl+1]=v
+    if sequences then
+      for s=1,#sequences do
+        local v=enabled and initialize(sequences[s],script,language,enabled,autoscript,autolanguage)
+        if v then
+          rl[#rl+1]=v
+        end
       end
     end
   end
@@ -23221,31 +23270,62 @@ if not modules then modules={} end modules ['font-ocl']={
   license="see context related readme files"
 }
 local tostring,next,format=tostring,next,string.format
+local round,max=math.round,math.round
 local formatters=string.formatters
+local tounicode=fonts.mappings.tounicode
+local graytorgb=attributes.colors.graytorgb
+local cmyktorgb=attributes.colors.cmyktorgb
 local otf=fonts.handlers.otf
-local f_color_start=formatters["pdf:direct: %f %f %f rg"]
-local s_color_stop="pdf:direct:"
+local f_color=formatters["pdf:direct:%f %f %f rg"]
+local f_gray=formatters["pdf:direct:%f g"]
+local s_black="pdf:direct:0 g"
 if context then
   local startactualtext=nil
   local stopactualtext=nil
-  function otf.getactualtext(n)
+  function otf.getactualtext(s)
     if not startactualtext then
-      startactualtext=backends.codeinjections.startunicodetoactualtext
-      stopactualtext=backends.codeinjections.stopunicodetoactualtext
+      startactualtext=backends.codeinjections.startunicodetoactualtextdirect
+      stopactualtext=backends.codeinjections.stopunicodetoactualtextdirect
     end
-    return startactualtext(n),stopactualtext()
+    return startactualtext(s),stopactualtext()
   end
 else
   local tounicode=fonts.mappings.tounicode16
-  function otf.getactualtext(n)
-    return "/Span << /ActualText <feff"..tounicode(n).."> >> BDC","EMC"
+  function otf.getactualtext(s)
+    return
+      "/Span << /ActualText <feff"..n.."> >> BDC",
+      "EMC"
+  end
+end
+local sharedpalettes={}
+function otf.registerpalette(name,values)
+  sharedpalettes[name]=values
+  for i=1,#values do
+    local v=values[i]
+    local r,g,b
+    local s=v.s
+    if s then
+      r,g,b=graytorgb(s)
+    else
+      local c,m,y,k=v.c,v.m,v.y,v.k
+      if c or m or y or k then
+        r,g,b=cmyktorgb(c or 0,m or 0,y or 0,k or 0)
+      else
+        r,g,b=v.r,v.g,v.b
+      end
+    end
+    values[i]={
+      max(r and round(r*255) or 0,255),
+      max(g and round(g*255) or 0,255),
+      max(b and round(b*255) or 0,255)
+    }
   end
 end
 local function initializecolr(tfmdata,kind,value) 
   if value then
     local palettes=tfmdata.resources.colorpalettes
     if palettes then
-      local palette=palettes[tonumber(value) or 1] or palettes[1] or {}
+      local palette=sharedpalettes[value] or palettes[tonumber(value) or 1] or palettes[1] or {}
       local classes=#palette
       if classes==0 then
         return
@@ -23260,7 +23340,12 @@ local function initializecolr(tfmdata,kind,value)
       }
       for i=1,classes do
         local p=palette[i]
-        colorvalues[i]={ "special",f_color_start(p[1]/255,p[2]/255,p[3]/255) }
+        local r,g,b=p[1],p[2],p[3]
+        if r==g and g==b then
+          colorvalues[i]={ "special",f_gray(r/255) }
+        else
+          colorvalues[i]={ "special",f_color(r/255,g/255,b/255) }
+        end
       end
       local getactualtext=otf.getactualtext
       for unicode,character in next,characters do
@@ -23268,22 +23353,24 @@ local function initializecolr(tfmdata,kind,value)
         if description then
           local colorlist=description.colors
           if colorlist then
-            local b,e=getactualtext(unicode)
+            local b,e=getactualtext(tounicode(characters[unicode].unicode or 0xFFFD))
             local w=character.width or 0
             local s=#colorlist
-            local n=1
             local t={
-              { "special","pdf:direct: q "..b }
+              { "special","pdf:page:q" },
+              { "special","pdf:raw:"..b }
             }
+            local n=#t
             for i=1,s do
               local entry=colorlist[i]
-              n=n+1 t[n]=colorvalues[entry.class]
+              n=n+1 t[n]=colorvalues[entry.class] or s_black
               n=n+1 t[n]={ "char",entry.slot }
               if s>1 and i<s and w~=0 then
                 n=n+1 t[n]={ "right",-w }
               end
             end
-            n=n+1 t[n]={ "special","pdf:direct:"..e.." Q" }
+            n=n+1 t[n]={ "special","pdf:page:"..e }
+            n=n+1 t[n]={ "special","pdf:raw:Q" }
             character.commands=t
           end
         end

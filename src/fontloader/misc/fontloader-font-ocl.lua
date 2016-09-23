@@ -9,35 +9,69 @@ if not modules then modules = { } end modules ['font-ocl'] = {
 -- todo : user list of colors
 
 local tostring, next, format = tostring, next, string.format
+local round, max = math.round, math.round
 
 local formatters = string.formatters
+local tounicode  = fonts.mappings.tounicode
 
-local otf = fonts.handlers.otf
+local graytorgb  = attributes.colors.graytorgb
+local cmyktorgb  = attributes.colors.cmyktorgb
 
-local f_color_start = formatters["pdf:direct: %f %f %f rg"]
-local s_color_stop  = "pdf:direct:"
+local otf        = fonts.handlers.otf
+
+local f_color    = formatters["pdf:direct:%f %f %f rg"]
+local f_gray     = formatters["pdf:direct:%f g"]
+local s_black    = "pdf:direct:0 g"
 
 if context then
 
     local startactualtext = nil
     local stopactualtext  = nil
 
-    function otf.getactualtext(n)
+    function otf.getactualtext(s)
         if not startactualtext then
-            startactualtext = backends.codeinjections.startunicodetoactualtext
-            stopactualtext  = backends.codeinjections.stopunicodetoactualtext
+            startactualtext = backends.codeinjections.startunicodetoactualtextdirect
+            stopactualtext  = backends.codeinjections.stopunicodetoactualtextdirect
         end
-        return startactualtext(n), stopactualtext()
+        return startactualtext(s), stopactualtext()
     end
 
 else
 
     local tounicode = fonts.mappings.tounicode16
 
-    function otf.getactualtext(n)
-        return "/Span << /ActualText <feff" .. tounicode(n) .. "> >> BDC", "EMC"
+    function otf.getactualtext(s)
+        return
+            "/Span << /ActualText <feff" .. n .. "> >> BDC",
+            "EMC"
     end
 
+end
+
+local sharedpalettes = { }
+
+function otf.registerpalette(name,values)
+    sharedpalettes[name] = values
+    for i=1,#values do
+        local v = values[i]
+        local r, g, b
+        local s = v.s
+        if s then
+            r, g, b = graytorgb(s)
+        else
+            local c, m, y, k = v.c, v.m, v.y, v.k
+            if c or m or y or k then
+                r, g, b = cmyktorgb(c or 0,m or 0,y or 0,k or 0)
+            else
+                r, g, b = v.r, v.g, v.b
+            end
+        end
+        values[i] = {
+            max(r and round(r*255) or 0,255),
+            max(g and round(g*255) or 0,255),
+            max(b and round(b*255) or 0,255)
+        }
+    end
 end
 
 local function initializecolr(tfmdata,kind,value) -- hm, always value
@@ -45,7 +79,7 @@ local function initializecolr(tfmdata,kind,value) -- hm, always value
         local palettes = tfmdata.resources.colorpalettes
         if palettes then
             --
-            local palette = palettes[tonumber(value) or 1] or palettes[1] or { }
+            local palette = sharedpalettes[value] or palettes[tonumber(value) or 1] or palettes[1] or { }
             local classes = #palette
             if classes == 0 then
                 return
@@ -63,7 +97,12 @@ local function initializecolr(tfmdata,kind,value) -- hm, always value
             --
             for i=1,classes do
                 local p = palette[i]
-                colorvalues[i] = { "special", f_color_start(p[1]/255,p[2]/255,p[3]/255) }
+                local r, g, b = p[1], p[2], p[3]
+                if r == g and g == b then
+                    colorvalues[i] = { "special", f_gray(r/255) }
+                else
+                    colorvalues[i] = { "special", f_color(r/255,g/255,b/255) }
+                end
             end
             --
             local getactualtext = otf.getactualtext
@@ -73,22 +112,30 @@ local function initializecolr(tfmdata,kind,value) -- hm, always value
                 if description then
                     local colorlist = description.colors
                     if colorlist then
-                        local b, e = getactualtext(unicode)
+                        local b, e = getactualtext(tounicode(characters[unicode].unicode or 0xFFFD))
                         local w = character.width or 0
                         local s = #colorlist
-                        local n = 1
                         local t = {
-                            { "special", "pdf:direct: q " .. b }
+                            -- We need to force page first because otherwise the q's get outside
+                            -- the font switch and as a consequence the next character has no font
+                            -- set (well, it has: the preceding one). As a consequence these fonts
+                            -- are somewhat inefficient as each glyph gets the font set. It's a
+                            -- side effect of the fact that a font is handled when a character gets
+                            -- flushed.
+                            { "special", "pdf:page:q" },
+                            { "special", "pdf:raw:" .. b }
                         }
+                        local n = #t
                         for i=1,s do
                             local entry = colorlist[i]
-                            n = n + 1 t[n] = colorvalues[entry.class]
+                            n = n + 1 t[n] = colorvalues[entry.class] or s_black
                             n = n + 1 t[n] = { "char", entry.slot }
                             if s > 1 and i < s and w ~= 0 then
                                 n = n + 1 t[n] = { "right", -w }
                             end
                         end
-                        n = n + 1 t[n] = { "special", "pdf:direct:" .. e .. " Q" }
+                        n = n + 1 t[n] = { "special", "pdf:page:" .. e }
+                        n = n + 1 t[n] = { "special", "pdf:raw:Q" }
                         character.commands = t
                     end
                 end

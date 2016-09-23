@@ -607,14 +607,17 @@ function file.robustname(str,strict)
     end
 end
 
-file.readdata = io.loaddata
-file.savedata = io.savedata
+local loaddata = io.loaddata
+local savedata = io.savedata
+
+file.readdata  = loaddata
+file.savedata  = savedata
 
 function file.copy(oldname,newname)
     if oldname and newname then
-        local data = io.loaddata(oldname)
+        local data = loaddata(oldname)
         if data and data ~= "" then
-            file.savedata(newname,data)
+            savedata(newname,data)
         end
     end
 end

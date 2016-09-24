@@ -14,9 +14,6 @@ local round, max = math.round, math.round
 local formatters = string.formatters
 local tounicode  = fonts.mappings.tounicode
 
-local graytorgb  = attributes.colors.graytorgb
-local cmyktorgb  = attributes.colors.cmyktorgb
-
 local otf        = fonts.handlers.otf
 
 local f_color    = formatters["pdf:direct:%f %f %f rg"]
@@ -50,28 +47,49 @@ end
 
 local sharedpalettes = { }
 
-function otf.registerpalette(name,values)
-    sharedpalettes[name] = values
-    for i=1,#values do
-        local v = values[i]
-        local r, g, b
-        local s = v.s
-        if s then
-            r, g, b = graytorgb(s)
-        else
-            local c, m, y, k = v.c, v.m, v.y, v.k
-            if c or m or y or k then
-                r, g, b = cmyktorgb(c or 0,m or 0,y or 0,k or 0)
+if context then
+
+    local graytorgb = attributes.colors.graytorgb
+    local cmyktorgb = attributes.colors.cmyktorgb
+
+    function otf.registerpalette(name,values)
+        sharedpalettes[name] = values
+        for i=1,#values do
+            local v = values[i]
+            local r, g, b
+            local s = v.s
+            if s then
+                r, g, b = graytorgb(s)
             else
-                r, g, b = v.r, v.g, v.b
+                local c, m, y, k = v.c, v.m, v.y, v.k
+                if c or m or y or k then
+                    r, g, b = cmyktorgb(c or 0,m or 0,y or 0,k or 0)
+                else
+                    r, g, b = v.r, v.g, v.b
+                end
             end
+            values[i] = {
+                max(r and round(r*255) or 0,255),
+                max(g and round(g*255) or 0,255),
+                max(b and round(b*255) or 0,255)
+            }
         end
-        values[i] = {
-            max(r and round(r*255) or 0,255),
-            max(g and round(g*255) or 0,255),
-            max(b and round(b*255) or 0,255)
-        }
     end
+
+else -- for generic
+
+    function otf.registerpalette(name,values)
+        sharedpalettes[name] = values
+        for i=1,#values do
+            local v = values[i]
+            values[i] = {
+                max(round((v.r or 0)*255),255),
+                max(round((v.g or 0)*255),255),
+                max(round((v.b or 0)*255),255)
+            }
+        end
+    end
+
 end
 
 local function initializecolr(tfmdata,kind,value) -- hm, always value

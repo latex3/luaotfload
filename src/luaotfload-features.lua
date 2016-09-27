@@ -1340,11 +1340,17 @@ local rot13_specification = {
     prepend   = true,
 }
 
+local interrolig_specification = {
+    { type     = "ligature", data = { [0x203d] = {0x21, 0x3f}, [0x2e18] = {0xa1, 0xbf}, }, },
+    { type     = "ligature", data = { [0x203d] = {0x3f, 0x21}, [0x2e18] = {0xbf, 0xa1}, }, },
+}
+
 local autofeatures = {
     --- always present with Luaotfload; anum for Arabic and Persian is
     --- predefined in font-otc.
     { "tlig" , tlig_specification , "tex ligatures and substitutions" },
     { "rot13", rot13_specification, "rot13"                           },
+    { "!!??",  interrolig_specification, "interrobang substitutions"  },
 }
 
 local add_auto_features = function ()

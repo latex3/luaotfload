@@ -623,7 +623,7 @@ local unprefixed        = Cg(fontname, "anon")
 local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
 
 --- features ----------------------------------------------------------
-local field_char        = anum + S"+-." --- sic!
+local field_char        = anum + S"+-.!?" --- sic!
 local field             = field_char^1
 --- assignments are “lhs=rhs”
 ---              or “+lhs=rhs” (Xetex-style)

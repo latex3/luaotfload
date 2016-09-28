@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
 --  DESCRIPTION:  Luaotfload entry point
--- REQUIREMENTS:  luatex v.0.95 or later; packages lualibs
+-- REQUIREMENTS:  luatex v.0.95.0 or later; package lualibs
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
 -----------------------------------------------------------------------
 --
@@ -11,9 +11,9 @@ config                            = config     or { }
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
-luaotfload.version                = "2.7"
+luaotfload.version                = "2.8"
 luaotfload.loaders                = { }
-luaotfload.min_luatex_version     = { 0, 95, 0 }   --- i. e. 0.95.0
+luaotfload.min_luatex_version     = { 0, 95, 0 }
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 if not tex or not tex.luatexversion then
@@ -25,8 +25,10 @@ else
     local revision = tex.luatexrevision --[[ : string ]]
     local revno    = tonumber (revision)
     local minimum  = luaotfload.min_luatex_version
-    if major < minimum [1] or minor < minimum [2]
-    or revno and revno < minimum [3]
+    local actual   = { major, minor, revno or 0 }
+    if actual [1] < minimum [1]
+    or actual == minimum and actual [2] < minimum [2]
+    or actual == minimum and actual [2] == minimum [2] and actual [3] < minimum [3]
     then
         texio.write_nl ("term and log",
                         string.format ("\tFATAL ERROR\n\z

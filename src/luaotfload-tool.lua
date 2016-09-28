@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-tool.lua
 --  DESCRIPTION:  database functionality
--- REQUIREMENTS:  luaotfload 2.7
+-- REQUIREMENTS:  luaotfload 2.8
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 --      LICENSE:  GPL v2.0
 -----------------------------------------------------------------------
@@ -10,7 +10,7 @@
 luaotfload                     = luaotfload or { }
 local version                  = "2.8"
 luaotfload.version             = version
-luaotfload.min_luatex_version  = { 0, 95, 0 }   --- i. e. 0.95.0
+luaotfload.min_luatex_version  = { 0, 95, 0 }
 luaotfload.self                = "luaotfload-tool"
 
 --[[doc--
@@ -64,8 +64,9 @@ do
         actual         = { major, minor, revno or 0 }
     end
 
-    if actual [1] < minimum [1] or actual [2] < minimum [2]
-    or actual [3] < minimum [3]
+    if actual [1] < minimum [1]
+    or actual == minimum and actual [2] < minimum [2]
+    or actual == minimum and actual [2] == minimum [2] and actual [3] < minimum [3]
     then
         texio.write_nl ("term and log",
                         string.format ("\tFATAL ERROR\n\z

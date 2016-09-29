@@ -181,7 +181,7 @@ end
 
 require "alt_getopt"
 
-loadmodule "log.lua"       --- this populates the luaotfload.log.* namespace
+loadmodule "log"           --- this populates the luaotfload.log.* namespace
 loadmodule "parsers"       --- fonts.conf, configuration, and request syntax
 loadmodule "configuration" --- configuration file handling
 loadmodule "database"
@@ -655,7 +655,7 @@ subfont_by_name = function (lst, askedname, n)
         if fonts.names.sanitize_fontname (font.fullname) == askedname then
             return font
         end
-        return subfont_by_name (lst, askedname, n)
+        return subfont_by_name (lst, askedname, n + 1)
     end
     return false
 end
@@ -668,7 +668,7 @@ The font info knows two levels of detail:
         returned by readers.loadfont().
 --doc]]--
 
-local show_font_info = function (basename, askedname, detail)
+local show_font_info = function (basename, askedname, detail, subfont)
     local filenames = fonts.names.data().files
     local index     = filenames.base[basename]
     local fullname  = filenames.full[index]
@@ -678,7 +678,7 @@ local show_font_info = function (basename, askedname, detail)
     end
     if fullname then
         local shortinfo = fonts.handlers.otf.readers.getinfo (fullname, {
-                            subfont        = nil,
+                            subfont        = subfont,
                             platformnames  = true,
                             rawfamilynames = true,
                         })
@@ -1173,7 +1173,8 @@ actions.query = function (job)
             needle = tmpspec.resolved or tmpspec.name
         end
     elseif tmpspec.lookup == "file" then
-        needle = tmpspec.name
+        needle  = tmpspec.name
+        subfont = tmpspec.sub
     end
 
     if needle then
@@ -1191,7 +1192,8 @@ actions.query = function (job)
                        "Resolved file name %q", foundname)
         end
         if job.show_info then
-            show_font_info (foundname, query, job.full_info)
+            logreport (false, 3, "resolve", "Dump extra info.")
+            show_font_info (foundname, query, job.full_info, subfont)
             iowrite "\n"
         end
     else

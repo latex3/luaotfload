@@ -198,16 +198,18 @@ $(TDS_ZIP): $(DOCS) $(ALL_STATUS) check
 
 sign: $(CTAN_ZIPSIG)
 
-.PHONY: package install manifest clean mrproper show showtargets check import news
+.PHONY: package install manifest clean mrproper show showtargets
+.PHONY: check import news tds ctan sign package loader
 
+ifndef DESTDIR
 install:
-	@echo "	××××××××××××××××××××××××××××××××"
-	@echo "	There is no “install” target."
-	@echo "	××××××××××××××××××××××××××××××××"
-	@echo "	Compile a TDS zipball (make tds)"
-	@echo "	and extract that into your local"
-	@echo "	TEXMF instead."
-	@echo "	××××××××××××××××××××××××××××××××"
+	$(error "in order to install you need to provide $$DESTDIR")
+else
+install: $(TDS_ZIP)
+	$(info installing to destination “$(DESTDIR)”)
+	install -dm755 "$(DESTDIR)"
+	unzip "$(TDS_ZIP)" -d "$(DESTDIR)"
+endif
 
 manifest:
 	@echo "Source files:"

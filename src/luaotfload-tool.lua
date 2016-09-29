@@ -701,7 +701,8 @@ local show_font_info = function (basename, askedname, detail, subfont)
                            [[%s is a font collection]], basename)
                 for subfont = 1, nfonts do
                     logreport (true, 1, "resolve",
-                               [[Showing info for font no. %d]], n)
+                               [[Showing info for font no. %d]],
+                               subfont)
                     show_info_items(shortinfo[subfont])
                     if detail == true then
                         show_full_info(fullname, subfont)

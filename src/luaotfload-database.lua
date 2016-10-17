@@ -3578,8 +3578,6 @@ local export = {
     erase_cache                 = erase_cache,
     show_cache                  = show_cache,
     find_closest                = find_closest,
-    --- transitionary
-    use_fontforge               = false,
 }
 
 return {

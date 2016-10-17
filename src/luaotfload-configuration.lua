@@ -203,7 +203,6 @@ local default_config = {
     update_live     = true,
     compress        = true,
     max_fonts       = 2^51,
-    use_fontforge   = false,
   },
   run = {
     anon_sequence  = default_anon_sequence,
@@ -378,21 +377,6 @@ local set_default_features = function ()
   return true
 end
 
-local set_fontforge = function ()
-  local names = fonts.names
-  if not names or not names.use_fontforge then
-    --- happens normally on the first run
-    logreport ("log", 4, "db", "Database not present.")
-    return true
-  end
-  local use_ff = config.luaotfload.db.use_fontforge
-  if use_ff == true then
-      logreport ("both", 0, "db",
-                 "Fontforge loader was requested but not supported anymore.")
-  end
-  return true
-end
-
 reconf_tasks = {
   { "Set the log level"         , set_loglevel         },
   { "Build cache paths"         , build_cache_paths    },
@@ -400,7 +384,6 @@ reconf_tasks = {
   { "Set the font filter"       , set_font_filter      },
   { "Install font name resolver", set_name_resolver    },
   { "Set default features"      , set_default_features },
-  { "Set fontforge"             , set_fontforge        },
 }
 
 -------------------------------------------------------------------------------
@@ -499,7 +482,6 @@ local option_spec = {
       out_t     = number_t, --- TODO int_t from 5.3.x on
       transform = tointeger,
     },
-    use_fontforge = { in_t = boolean_t, },
   },
   run = {
     anon_sequence = {
@@ -723,7 +705,6 @@ local formatters = {
     skip_read      = { false, format_boolean },
     strip          = { false, format_boolean },
     update_live    = { false, format_boolean },
-    use_fontforge  = { false, format_boolean },
   },
   default_features = {
     __default = { true, format_keyval },

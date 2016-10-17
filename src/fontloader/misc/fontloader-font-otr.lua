@@ -975,7 +975,7 @@ readers.head = function(f,fontdata)
 end
 
 -- This table is a rather simple one. No treatment of values is needed here. Most
--- variables are not used but nofhmetrics is quite important.
+-- variables are not used but nofmetrics is quite important.
 
 readers.hhea = function(f,fontdata,specification)
     if specification.details then
@@ -983,7 +983,7 @@ readers.hhea = function(f,fontdata,specification)
         if datatable then
             setposition(f,datatable.offset)
             fontdata.horizontalheader = {
-                version             = readfixed(f),
+                version             = readfixed(f), -- two ushorts: major minor
                 ascender            = readfword(f),
                 descender           = readfword(f),
                 linegap             = readfword(f),
@@ -999,11 +999,45 @@ readers.hhea = function(f,fontdata,specification)
                 reserved_3          = readshort(f),
                 reserved_4          = readshort(f),
                 metricdataformat    = readshort(f),
-                nofhmetrics         = readushort(f),
+                nofmetrics          = readushort(f),
             }
         else
             fontdata.horizontalheader = {
-                nofhmetrics = 0,
+                nofmetrics = 0,
+            }
+        end
+    end
+end
+
+readers.vhea = function(f,fontdata,specification)
+    if specification.details then
+        local datatable = fontdata.tables.vhea
+        if datatable then
+            setposition(f,datatable.offset)
+            local version = readfixed(f)
+            fontdata.verticalheader = {
+                version              = version,
+                ascender             = readfword(f),
+                descender            = readfword(f),
+                linegap              = readfword(f),
+                maxadvanceheight     = readufword(f),
+                mintopsidebearing    = readfword(f),
+                minbottomsidebearing = readfword(f),
+                maxextent            = readfword(f),
+                caretsloperise       = readshort(f),
+                caretsloperun        = readshort(f),
+                caretoffset          = readshort(f),
+                reserved_1           = readshort(f),
+                reserved_2           = readshort(f),
+                reserved_3           = readshort(f),
+                reserved_4           = readshort(f),
+                metricdataformat     = readshort(f),
+                nofmetrics           = readushort(f),
+            }
+--             inspect(fontdata.verticalheader)
+        else
+            fontdata.verticalheader = {
+                nofmetrics = 0,
             }
         end
     end
@@ -1064,11 +1098,12 @@ readers.hmtx = function(f,fontdata,specification)
         local datatable = fontdata.tables.hmtx
         if datatable then
             setposition(f,datatable.offset)
-            local nofmetrics      = fontdata.horizontalheader.nofhmetrics
-            local glyphs          = fontdata.glyphs
-            local nofglyphs       = fontdata.nofglyphs
-            local width           = 0 -- advance
-            local leftsidebearing = 0
+            local horizontalheader = fontdata.horizontalheader
+            local nofmetrics       = horizontalheader.nofmetrics
+            local glyphs           = fontdata.glyphs
+            local nofglyphs        = fontdata.nofglyphs
+            local width            = 0 -- advance
+            local leftsidebearing  = 0
             for i=0,nofmetrics-1 do
                 local glyph     = glyphs[i]
                 width           = readshort(f)
@@ -1091,6 +1126,53 @@ readers.hmtx = function(f,fontdata,specification)
              --     glyph.lsb = leftsidebearing
              -- end
             end
+        end
+    end
+end
+
+readers.vmtx = function(f,fontdata,specification)
+    if specification.glyphs then
+        local datatable = fontdata.tables.vmtx
+        if datatable then
+            setposition(f,datatable.offset)
+            local verticalheader = fontdata.verticalheader
+            local nofmetrics     = verticalheader.nofmetrics
+            local glyphs         = fontdata.glyphs
+            local nofglyphs      = fontdata.nofglyphs
+            local vheight        = 0
+            local vdefault       = verticalheader.ascender + verticalheader.descender
+            local topsidebearing = 0
+            for i=0,nofmetrics-1 do
+                local glyph     = glyphs[i]
+                vheight         = readshort(f)
+                topsidebearing  = readshort(f)
+                if vheight ~= 0 and vheight ~= vdefault then
+                    glyph.vheight = vheight
+                end
+             -- if topsidebearing ~= 0 then
+             --     glyph.tsb = topsidebearing
+             -- end
+            end
+            -- The next can happen in for instance a monospace font or in a cjk font
+            -- with fixed heights.
+            for i=nofmetrics,nofglyphs-1 do
+                local glyph = glyphs[i]
+                if vheight ~= 0 and vheight ~= vdefault then
+                    glyph.vheight = vheight
+                end
+             -- if topsidebearing ~= 0 then
+             --     glyph.tsb = topsidebearing
+             -- end
+            end
+        end
+    end
+end
+
+readers.vorg = function(f,fontdata,specification)
+    if specification.glyphs then
+        local datatable = fontdata.tables.vorg
+        if datatable then
+            report("todo: %s","vorg")
         end
     end
 end
@@ -1751,7 +1833,7 @@ end
 -- some properties in order to read following tables. When details is true we also
 -- initialize the glyphs data.
 
-local function getinfo(maindata,sub,platformnames,rawfamilynames)
+local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo)
     local fontdata = sub and maindata.subfonts and maindata.subfonts[sub] or maindata
     local names    = fontdata.names
     local info     = nil
@@ -1808,6 +1890,29 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames)
             descender      = metrics.typodescender,
             platformnames  = platformnames and fontdata.platformnames or nil,
         }
+        if metricstoo then
+            local keys = {
+                "version",
+                "ascender", "descender", "linegap",
+             -- "caretoffset", "caretsloperise", "caretsloperun",
+                "maxadvancewidth", "maxadvanceheight", "maxextent",
+             -- "metricdataformat",
+                "minbottomsidebearing", "mintopsidebearing",
+            }
+            local h = fontdata.horizontalheader or { }
+            local v = fontdata.verticalheader   or { }
+            if h then
+                local th = { }
+                local tv = { }
+                for i=1,#keys do
+                    local key = keys[i]
+                    th[key] = h[key] or 0
+                    tv[key] = v[key] or 0
+                end
+                info.horizontalmetrics = th
+                info.verticalmetrics   = tv
+            end
+        end
     elseif n then
         info = {
             filename = fontdata.filename,
@@ -1900,7 +2005,10 @@ local function readdata(f,offset,specification)
     readers["head"](f,fontdata,specification)
     readers["maxp"](f,fontdata,specification)
     readers["hhea"](f,fontdata,specification)
+    readers["vhea"](f,fontdata,specification)
     readers["hmtx"](f,fontdata,specification)
+    readers["vmtx"](f,fontdata,specification)
+    readers["vorg"](f,fontdata,specification)
     readers["post"](f,fontdata,specification)
     readers["cff" ](f,fontdata,specification)
     readers["cmap"](f,fontdata,specification)
@@ -2084,7 +2192,7 @@ function readers.loadfont(filename,n)
             descriptions  = fontdata.descriptions,
             format        = fontdata.format,
             goodies       = { },
-            metadata      = getinfo(fontdata,n), -- no platformnames here !
+            metadata      = getinfo(fontdata,n,false,false,true), -- no platformnames here !
             properties    = {
                 hasitalics    = fontdata.hasitalics or false,
                 maxcolorclass = fontdata.maxcolorclass,

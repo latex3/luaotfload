@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 09/24/16 12:40:11
+-- merge date  : 10/14/16 17:19:03
 
 do -- begin closure to overcome local limits and interference
 
@@ -4245,8 +4245,21 @@ function files.readcardinal2(f)
   local a,b=byte(f:read(2),1,2)
   return 0x100*a+b
 end
+function files.readcardinal2le(f)
+  local b,a=byte(f:read(2),1,2)
+  return 0x100*a+b
+end
 function files.readinteger2(f)
   local a,b=byte(f:read(2),1,2)
+  local n=0x100*a+b
+  if n>=0x8000 then
+    return n-0x10000
+  else
+    return n
+  end
+end
+function files.readinteger2le(f)
+  local b,a=byte(f:read(2),1,2)
   local n=0x100*a+b
   if n>=0x8000 then
     return n-0x10000
@@ -4258,8 +4271,21 @@ function files.readcardinal3(f)
   local a,b,c=byte(f:read(3),1,3)
   return 0x10000*a+0x100*b+c
 end
+function files.readcardinal3le(f)
+  local c,b,a=byte(f:read(3),1,3)
+  return 0x10000*a+0x100*b+c
+end
 function files.readinteger3(f)
   local a,b,c=byte(f:read(3),1,3)
+  local n=0x10000*a+0x100*b+c
+  if n>=0x80000 then
+    return n-0x1000000
+  else
+    return n
+  end
+end
+function files.readinteger3le(f)
+  local c,b,a=byte(f:read(3),1,3)
   local n=0x10000*a+0x100*b+c
   if n>=0x80000 then
     return n-0x1000000
@@ -4271,8 +4297,21 @@ function files.readcardinal4(f)
   local a,b,c,d=byte(f:read(4),1,4)
   return 0x1000000*a+0x10000*b+0x100*c+d
 end
+function files.readcardinal4le(f)
+  local d,c,b,a=byte(f:read(4),1,4)
+  return 0x1000000*a+0x10000*b+0x100*c+d
+end
 function files.readinteger4(f)
   local a,b,c,d=byte(f:read(4),1,4)
+  local n=0x1000000*a+0x10000*b+0x100*c+d
+  if n>=0x8000000 then
+    return n-0x100000000
+  else
+    return n
+  end
+end
+function files.readinteger4le(f)
+  local d,c,b,a=byte(f:read(4),1,4)
   local n=0x1000000*a+0x10000*b+0x100*c+d
   if n>=0x8000000 then
     return n-0x100000000
@@ -6084,10 +6123,14 @@ function constructors.scale(tfmdata,specification)
   local haskerns=properties.haskerns   or properties.mode=="base" 
   local hasligatures=properties.hasligatures or properties.mode=="base" 
   local realdimensions=properties.realdimensions
+  local writingmode=properties.writingmode or "horizontal"
+  local identity=properties.identity or "horizontal"
   if changed and not next(changed) then
     changed=false
   end
   target.type=isvirtual and "virtual" or "real"
+  target.writingmode=writingmode=="vertical" and "vertical" or "horizontal"
+  target.identity=identity=="vertical" and "vertical" or "horizontal"
   target.postprocessors=tfmdata.postprocessors
   local targetslant=(parameters.slant     or parameters[1] or 0)*factors.pt 
   local targetspace=(parameters.space     or parameters[2] or 0)*hdelta
@@ -6473,6 +6516,8 @@ function constructors.finalize(tfmdata)
       cidinfo=tfmdata.cidinfo    or nil,
       format=tfmdata.format    or "type1",
       direction=tfmdata.direction   or 0,
+      writingmode=tfmdata.writingmode  or "horizontal",
+      identity=tfmdata.identity   or "horizontal",
     }
   end
   if not tfmdata.resources then
@@ -6611,7 +6656,11 @@ setmetatableindex(formats,function(t,k)
   return rawget(t,file.suffix(l))
 end)
 do
-  local function setindeed(mode,target,group,name,action,position)
+  local function setindeed(mode,source,target,group,name,position)
+    local action=source[mode]
+    if not action then
+      return
+    end
     local t=target[mode]
     if not t then
       report_defining("fatal error in setting feature %a, group %a, mode %a",name,group,mode)
@@ -6640,15 +6689,10 @@ do
       report_defining("fatal source error in setting feature %a, group %a",name,group)
       os.exit()
     end
-    local node=source.node
-    local base=source.base
     local position=source.position
-    if node then
-      setindeed("node",target,group,name,node,position)
-    end
-    if base then
-      setindeed("base",target,group,name,base,position)
-    end
+    setindeed("node",source,target,group,name,position)
+    setindeed("base",source,target,group,name,position)
+    setindeed("plug",source,target,group,name,position)
   end
   local function register(where,specification)
     local name=specification.name
@@ -6710,9 +6754,9 @@ do
         defaults={},
         descriptions=tables and tables.features or {},
         used=statistics and statistics.usedfeatures or {},
-        initializers={ base={},node={} },
-        processors={ base={},node={} },
-        manipulators={ base={},node={} },
+        initializers={ base={},node={},plug={} },
+        processors={ base={},node={},plug={} },
+        manipulators={ base={},node={},plug={} },
       }
       features.register=function(specification) return register(features,specification) end
       handler.features=features 
@@ -7706,6 +7750,7 @@ registerotffeature {
   initializers={
     base=setmode,
     node=setmode,
+    plug=setmode,
   }
 }
 registerotffeature {
@@ -7714,6 +7759,7 @@ registerotffeature {
   initializers={
     base=setlanguage,
     node=setlanguage,
+    plug=setlanguage,
   }
 }
 registerotffeature {
@@ -7722,6 +7768,7 @@ registerotffeature {
   initializers={
     base=setscript,
     node=setscript,
+    plug=setscript,
   }
 }
 otftables.featuretypes=allocate {
@@ -8291,11 +8338,43 @@ readers.hhea=function(f,fontdata,specification)
         reserved_3=readshort(f),
         reserved_4=readshort(f),
         metricdataformat=readshort(f),
-        nofhmetrics=readushort(f),
+        nofmetrics=readushort(f),
       }
     else
       fontdata.horizontalheader={
-        nofhmetrics=0,
+        nofmetrics=0,
+      }
+    end
+  end
+end
+readers.vhea=function(f,fontdata,specification)
+  if specification.details then
+    local datatable=fontdata.tables.vhea
+    if datatable then
+      setposition(f,datatable.offset)
+      local version=readfixed(f)
+      fontdata.verticalheader={
+        version=version,
+        ascender=readfword(f),
+        descender=readfword(f),
+        linegap=readfword(f),
+        maxadvanceheight=readufword(f),
+        mintopsidebearing=readfword(f),
+        minbottomsidebearing=readfword(f),
+        maxextent=readfword(f),
+        caretsloperise=readshort(f),
+        caretsloperun=readshort(f),
+        caretoffset=readshort(f),
+        reserved_1=readshort(f),
+        reserved_2=readshort(f),
+        reserved_3=readshort(f),
+        reserved_4=readshort(f),
+        metricdataformat=readshort(f),
+        nofmetrics=readushort(f),
+      }
+    else
+      fontdata.verticalheader={
+        nofmetrics=0,
       }
     end
   end
@@ -8346,7 +8425,8 @@ readers.hmtx=function(f,fontdata,specification)
     local datatable=fontdata.tables.hmtx
     if datatable then
       setposition(f,datatable.offset)
-      local nofmetrics=fontdata.horizontalheader.nofhmetrics
+      local horizontalheader=fontdata.horizontalheader
+      local nofmetrics=horizontalheader.nofmetrics
       local glyphs=fontdata.glyphs
       local nofglyphs=fontdata.nofglyphs
       local width=0 
@@ -8365,6 +8445,43 @@ readers.hmtx=function(f,fontdata,specification)
           glyph.width=width
         end
       end
+    end
+  end
+end
+readers.vmtx=function(f,fontdata,specification)
+  if specification.glyphs then
+    local datatable=fontdata.tables.vmtx
+    if datatable then
+      setposition(f,datatable.offset)
+      local verticalheader=fontdata.verticalheader
+      local nofmetrics=verticalheader.nofmetrics
+      local glyphs=fontdata.glyphs
+      local nofglyphs=fontdata.nofglyphs
+      local vheight=0
+      local vdefault=verticalheader.ascender+verticalheader.descender
+      local topsidebearing=0
+      for i=0,nofmetrics-1 do
+        local glyph=glyphs[i]
+        vheight=readshort(f)
+        topsidebearing=readshort(f)
+        if vheight~=0 and vheight~=vdefault then
+          glyph.vheight=vheight
+        end
+      end
+      for i=nofmetrics,nofglyphs-1 do
+        local glyph=glyphs[i]
+        if vheight~=0 and vheight~=vdefault then
+          glyph.vheight=vheight
+        end
+      end
+    end
+  end
+end
+readers.vorg=function(f,fontdata,specification)
+  if specification.glyphs then
+    local datatable=fontdata.tables.vorg
+    if datatable then
+      report("todo: %s","vorg")
     end
   end
 end
@@ -8925,7 +9042,7 @@ function readers.math(f,fontdata,specification)
     reportskippedtable("math")
   end
 end
-local function getinfo(maindata,sub,platformnames,rawfamilynames)
+local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo)
   local fontdata=sub and maindata.subfonts and maindata.subfonts[sub] or maindata
   local names=fontdata.names
   local info=nil
@@ -8978,6 +9095,27 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames)
       descender=metrics.typodescender,
       platformnames=platformnames and fontdata.platformnames or nil,
     }
+    if metricstoo then
+      local keys={
+        "version",
+        "ascender","descender","linegap",
+        "maxadvancewidth","maxadvanceheight","maxextent",
+        "minbottomsidebearing","mintopsidebearing",
+      }
+      local h=fontdata.horizontalheader or {}
+      local v=fontdata.verticalheader  or {}
+      if h then
+        local th={}
+        local tv={}
+        for i=1,#keys do
+          local key=keys[i]
+          th[key]=h[key] or 0
+          tv[key]=v[key] or 0
+        end
+        info.horizontalmetrics=th
+        info.verticalmetrics=tv
+      end
+    end
   elseif n then
     info={
       filename=fontdata.filename,
@@ -9061,7 +9199,10 @@ local function readdata(f,offset,specification)
   readers["head"](f,fontdata,specification)
   readers["maxp"](f,fontdata,specification)
   readers["hhea"](f,fontdata,specification)
+  readers["vhea"](f,fontdata,specification)
   readers["hmtx"](f,fontdata,specification)
+  readers["vmtx"](f,fontdata,specification)
+  readers["vorg"](f,fontdata,specification)
   readers["post"](f,fontdata,specification)
   readers["cff" ](f,fontdata,specification)
   readers["cmap"](f,fontdata,specification)
@@ -9229,7 +9370,7 @@ function readers.loadfont(filename,n)
       descriptions=fontdata.descriptions,
       format=fontdata.format,
       goodies={},
-      metadata=getinfo(fontdata,n),
+      metadata=getinfo(fontdata,n,false,false,true),
       properties={
         hasitalics=fontdata.hasitalics or false,
         maxcolorclass=fontdata.maxcolorclass,
@@ -15877,7 +16018,6 @@ local function getgsub(tfmdata,k,kind,value)
       local properties=tfmdata.properties
       local validlookups,lookuplist=otf.collectlookups(rawdata,kind,properties.script,properties.language)
       if validlookups then
-        local choice=tonumber(value) or 1 
         for i=1,#lookuplist do
           local lookup=lookuplist[i]
           local steps=lookup.steps
@@ -18147,11 +18287,13 @@ local trace_details=false registertracker("otf.details",function(v) trace_detail
 local trace_steps=false registertracker("otf.steps",function(v) trace_steps=v end)
 local trace_skips=false registertracker("otf.skips",function(v) trace_skips=v end)
 local trace_directions=false registertracker("otf.directions",function(v) trace_directions=v end)
+local trace_plugins=false registertracker("otf.plugins",function(v) trace_plugins=v end)
 local trace_kernruns=false registertracker("otf.kernruns",function(v) trace_kernruns=v end)
 local trace_discruns=false registertracker("otf.discruns",function(v) trace_discruns=v end)
 local trace_compruns=false registertracker("otf.compruns",function(v) trace_compruns=v end)
 local trace_testruns=false registertracker("otf.testruns",function(v) trace_testruns=v end)
 local optimizekerns=true
+local alwaysdisc=true  registerdirective("otf.alwaysdisc",function(v) alwaysdisc=v end)
 local report_direct=logs.reporter("fonts","otf direct")
 local report_subchain=logs.reporter("fonts","otf subchain")
 local report_chain=logs.reporter("fonts","otf chain")
@@ -18533,7 +18675,7 @@ local function toligature(head,start,stop,char,dataset,sequence,markflag,discfou
         setlink(discfound,next)
         setboth(base)
         setfield(base,"components",copied)
-        setdisc(discfound,pre,post,base,discretionary_code)
+        setdisc(discfound,pre,post,base) 
         base=prev 
       end
     end
@@ -20702,6 +20844,7 @@ local function t_run_single(start,stop,font,attr,lookupcache)
             return true,d>1
           end
         end
+      else
       end
       start=getnext(start)
     else
@@ -20815,6 +20958,7 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
             report_missing_coverage(dataset,sequence)
           end
         end
+      else
       end
       start=getnext(start)
     else
@@ -20886,6 +21030,9 @@ local function pardirstate(start)
   end
   return getnext(start),new,new
 end
+otf.helpers=otf.helpers or {}
+otf.helpers.txtdirstate=txtdirstate
+otf.helpers.pardirstate=pardirstate
 local function featuresprocessor(head,font,attr)
   local sequences=sequencelists[font] 
   if not sequencelists then
@@ -20913,6 +21060,7 @@ local function featuresprocessor(head,font,attr)
   local rlmode=0
   local done=false
   local datasets=otf.dataset(tfmdata,font,attr)
+  local forcedisc=alwaysdisc or not attr
   local dirstack={} 
   sweephead={}
   for s=1,#datasets do
@@ -21005,16 +21153,21 @@ local function featuresprocessor(head,font,attr)
             elseif char==false then
               start=getnext(start)
             elseif id==disc_code then
-              local ok
-              if gpossing then
-                start,ok=kernrun(start,k_run_single,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
-              elseif typ=="gsub_ligature" then
-                start,ok=testrun(start,t_run_single,c_run_single,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
+              local a=forcedisc or getsubtype(start)==discretionary_code or getattr(start,0)==attr
+              if a then
+                local ok
+                if gpossing then
+                  start,ok=kernrun(start,k_run_single,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
+                elseif typ=="gsub_ligature" then
+                  start,ok=testrun(start,t_run_single,c_run_single,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
+                else
+                  start,ok=comprun(start,c_run_single,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
+                end
+                if ok then
+                  success=true
+                end
               else
-                start,ok=comprun(start,c_run_single,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
-              end
-              if ok then
-                success=true
+                start=getnext(start)
               end
             elseif id==math_code then
               start=getnext(end_of_math(start))
@@ -21066,16 +21219,21 @@ local function featuresprocessor(head,font,attr)
           elseif char==false then
             start=getnext(start)
           elseif id==disc_code then
-            local ok
-            if gpossing then
-              start,ok=kernrun(start,k_run_multiple,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
-            elseif typ=="gsub_ligature" then
-              start,ok=testrun(start,t_run_multiple,c_run_multiple,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
+            local a=forcedisc or getsubtype(start)==discretionary_code or getattr(start,0)==attr
+            if a then
+              local ok
+              if gpossing then
+                start,ok=kernrun(start,k_run_multiple,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
+              elseif typ=="gsub_ligature" then
+                start,ok=testrun(start,t_run_multiple,c_run_multiple,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
+              else
+                start,ok=comprun(start,c_run_multiple,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
+              end
+              if ok then
+                success=true
+              end
             else
-              start,ok=comprun(start,c_run_multiple,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
-            end
-            if ok then
-              success=true
+              start=getnext(start)
             end
           elseif id==math_code then
             start=getnext(end_of_math(start))
@@ -21100,6 +21258,30 @@ local function featuresprocessor(head,font,attr)
   head=tonode(head)
   return head,done
 end
+local plugins={}
+otf.plugins=plugins
+function otf.registerplugin(name,f)
+  if type(name)=="string" and type(f)=="function" then
+    plugins[name]={ name,f }
+  end
+end
+local function plugininitializer(tfmdata,value)
+  if type(value)=="string" then
+    tfmdata.shared.plugin=plugins[value]
+  end
+end
+local function pluginprocessor(head,font)
+  local s=fontdata[font].shared
+  local p=s and s.plugin
+  if p then
+    if trace_plugins then
+      report_process("applying plugin %a",p[1])
+    end
+    return p[2](head,font)
+  else
+    return head,false
+  end
+end
 local function featuresinitializer(tfmdata,value)
 end
 registerotffeature {
@@ -21109,9 +21291,11 @@ registerotffeature {
   initializers={
     position=1,
     node=featuresinitializer,
+    plug=plugininitializer,
   },
   processors={
     node=featuresprocessor,
+    plug=pluginprocessor,
   }
 }
 otf.nodemodeinitializer=featuresinitializer

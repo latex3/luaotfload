@@ -8,7 +8,7 @@ if not modules then modules = { } end modules ['util-fil'] = {
 
 local byte    = string.byte
 local char    = string.char
-local extract = bit32.extract
+local extract = bit32 and bit32.extract
 local floor   = math.floor
 
 -- Here are a few helpers (the starting point were old ones I used for parsing
@@ -206,17 +206,21 @@ function files.readfixed4(f)
     end
 end
 
-function files.read2dot14(f)
-    local a, b = byte(f:read(2),1,2)
-    local n = 0x100 * a + b
-    local m = extract(n,0,30)
-    if n > 0x7FFF then
-        n = extract(n,30,2)
-        return m/0x4000 - 4
-    else
-        n = extract(n,30,2)
-        return n + m/0x4000
+if extract then
+
+    function files.read2dot14(f)
+        local a, b = byte(f:read(2),1,2)
+        local n = 0x100 * a + b
+        local m = extract(n,0,30)
+        if n > 0x7FFF then
+            n = extract(n,30,2)
+            return m/0x4000 - 4
+        else
+            n = extract(n,30,2)
+            return n + m/0x4000
+        end
     end
+
 end
 
 function files.skipshort(f,n)

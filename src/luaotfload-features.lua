@@ -1243,7 +1243,7 @@ local handle_request = function (specification)
         specification.features = features
     end
     features.normal = normalize (request.features)
-    local subfont = tonumber (specification.sub)
+    local subfont = tonumber (request.sub)
     if subfont and subfont >= 0 then
         specification.sub = subfont + 1
     else

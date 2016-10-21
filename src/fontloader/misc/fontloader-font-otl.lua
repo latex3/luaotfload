@@ -675,7 +675,7 @@ local function getgsub(tfmdata,k,kind,value)
             local properties = tfmdata.properties
             local validlookups, lookuplist = otf.collectlookups(rawdata,kind,properties.script,properties.language)
             if validlookups then
-                local choice = tonumber(value) or 1 -- no random here (yet)
+             -- local choice = tonumber(value) or 1 -- no random here (yet)
                 for i=1,#lookuplist do
                     local lookup   = lookuplist[i]
                     local steps    = lookup.steps

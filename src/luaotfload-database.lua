@@ -1511,7 +1511,6 @@ end
 local organize_styledata = function (metadata, rawinfo, info)
     local pfminfo   = metadata.pfminfo
     local names     = rawinfo.names
-
     return {
     --- see http://www.microsoft.com/typography/OTSPEC/features_pt.htm#size
         size            = get_size_info (rawinfo),
@@ -2553,6 +2552,7 @@ generate_filedata = function (mappings)
 end
 
 local bold_spectrum_low  = 501 --- 500 is medium, 900 heavy/black
+local normal_weight      = 400
 local bold_weight        = 700
 local normal_width       = 5
 
@@ -2606,12 +2606,18 @@ do
             treating weights > 500 as bold or allowing synonyms like
             “heavy”, “black”.
         --]]-- 
-        if width == normal_width and pfmweight == bold_weight then
-            --- bold spectrum matches
-            if italicangle == 0 then
-                return "b"
+        if width == normal_width then
+            if pfmweight == bold_weight then
+                --- bold spectrum matches
+                if italicangle == 0 then
+                    return "b"
+                end
+                return "bi"
+            elseif pfmweight == normal_weight then
+                if italicangle ~= 0 then
+                    return "i"
+                end
             end
-            return "bi"
         end
         return false
     end
@@ -3578,8 +3584,6 @@ local export = {
     erase_cache                 = erase_cache,
     show_cache                  = show_cache,
     find_closest                = find_closest,
-    --- transitionary
-    use_fontforge               = false,
 }
 
 return {

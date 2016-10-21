@@ -72,6 +72,7 @@ registerotffeature {
     initializers = {
         base = setmode,
         node = setmode,
+        plug = setmode,
     }
 }
 
@@ -81,6 +82,7 @@ registerotffeature {
     initializers = {
         base = setlanguage,
         node = setlanguage,
+        plug = setlanguage,
     }
 }
 
@@ -90,6 +92,7 @@ registerotffeature {
     initializers = {
         base = setscript,
         node = setscript,
+        plug = setscript,
     }
 }
 
@@ -157,4 +160,3 @@ function otffeatures.checkeddefaultlanguage(featuretype,autolanguage,languages)
         end
     end
 end
-

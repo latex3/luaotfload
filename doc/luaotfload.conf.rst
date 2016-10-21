@@ -142,8 +142,6 @@ Section ``db``
 +-----------------+--------+---------------------------+
 |  update-live    |   b    |  ``true``                 |
 +-----------------+--------+---------------------------+
-|  use-fontforge  |   b    |  ``false``                |
-+-----------------+--------+---------------------------+
 
 The flag ``compress`` determines whether the font index (usually
 ``luaotfload-names.lua[.gz]`` will be stored in compressed forms.
@@ -188,9 +186,6 @@ If ``update-live`` is set, Luaotfload will reload the database if it
 cannot find a requested font. Those who prefer to update manually using
 **luaotfload-tool** should unset this flag. This option does not affect
 rebuilds due to version mismatch.
-
-The option ``use-fontforge`` had a meaning during the transition to the
-Lua-only Opentype reader. At present it is ignored.
 
 Section ``default-features``
 -----------------------------------------------------------------------

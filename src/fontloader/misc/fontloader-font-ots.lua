@@ -128,6 +128,7 @@ local trace_details      = false  registertracker("otf.details",      function(v
 local trace_steps        = false  registertracker("otf.steps",        function(v) trace_steps        = v end)
 local trace_skips        = false  registertracker("otf.skips",        function(v) trace_skips        = v end)
 local trace_directions   = false  registertracker("otf.directions",   function(v) trace_directions   = v end)
+local trace_plugins      = false  registertracker("otf.plugins",      function(v) trace_plugins      = v end)
 
 local trace_kernruns     = false  registertracker("otf.kernruns",     function(v) trace_kernruns     = v end)
 local trace_discruns     = false  registertracker("otf.discruns",     function(v) trace_discruns     = v end)
@@ -136,6 +137,7 @@ local trace_testruns     = false  registertracker("otf.testruns",     function(v
 
 ----- zwnjruns           = true   registerdirective("otf.zwnjruns",     function(v) zwnjruns = v end)
 local optimizekerns      = true
+local alwaysdisc         = true   registerdirective("otf.alwaysdisc", function(v) alwaysdisc = v end)
 
 local report_direct   = logs.reporter("fonts","otf direct")
 local report_subchain = logs.reporter("fonts","otf subchain")
@@ -599,7 +601,7 @@ local function toligature(head,start,stop,char,dataset,sequence,markflag,discfou
                 setlink(discfound,next)
                 setboth(base)
                 setfield(base,"components",copied)
-                setdisc(discfound,pre,post,base,discretionary_code)
+                setdisc(discfound,pre,post,base) -- was discretionary_code
                 base = prev -- restart
             end
         end
@@ -3047,7 +3049,11 @@ end
 -- -- local a = getattr(start,0)
 -- -- if not a or (a == attr) then
 --
--- and even that one is probably not needed.
+-- and even that one is probably not needed. However, we can handle interesting
+-- cases now:
+--
+--  1{2{\oldstyle\discretionary{3}{4}{5}}6}7\par
+--  1{2\discretionary{3{\oldstyle3}}{{\oldstyle4}4}{5{\oldstyle5}5}6}7\par
 
 local nesting = 0
 
@@ -3077,6 +3083,7 @@ local function c_run_single(head,font,attr,lookupcache,step,dataset,sequence,rlm
                     start = getnext(start)
                 end
             else
+                -- go on can be a mixed one
                 start = getnext(start)
             end
         elseif char == false then
@@ -3122,6 +3129,8 @@ local function t_run_single(start,stop,font,attr,lookupcache)
                         return true, d > 1
                     end
                 end
+            else
+                -- go on can be a mixed one
             end
             start = getnext(start)
         else
@@ -3207,6 +3216,7 @@ local function c_run_multiple(head,font,attr,steps,nofsteps,dataset,sequence,rlm
                     start = getnext(start)
                 end
             else
+                -- go on can be a mixed one
                 start = getnext(start)
             end
         elseif char == false then
@@ -3261,6 +3271,8 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
                         report_missing_coverage(dataset,sequence)
                     end
                 end
+            else
+                -- go on can be a mixed one
             end
             start = getnext(start)
         else
@@ -3324,7 +3336,7 @@ local function k_run_multiple(sub,injection,last,font,attr,steps,nofsteps,datase
     end
 end
 
--- to be checkedL nowadays we probably can assume properly matched directions
+-- to be checked, nowadays we probably can assume properly matched directions
 -- so maybe we no longer need a stack
 
 local function txtdirstate(start,stack,top,rlparmode)
@@ -3364,6 +3376,10 @@ local function pardirstate(start)
     end
     return getnext(start), new, new
 end
+
+otf.helpers             = otf.helpers or { }
+otf.helpers.txtdirstate = txtdirstate
+otf.helpers.pardirstate = pardirstate
 
 local function featuresprocessor(head,font,attr)
 
@@ -3413,6 +3429,8 @@ local function featuresprocessor(head,font,attr)
     local done      = false
     local datasets  = otf.dataset(tfmdata,font,attr)
 
+    local forcedisc = alwaysdisc or not attr
+
     local dirstack  = { } -- could move outside function but we can have local runs
 
     sweephead       = { }
@@ -3425,7 +3443,7 @@ local function featuresprocessor(head,font,attr)
     -- Keeping track of the headnode is needed for devanagari (I generalized it a bit
     -- so that multiple cases are also covered.)
 
-    -- We don't goto the next node of a disc node is created so that we can then treat
+    -- We don't goto the next node when a disc node is created so that we can then treat
     -- the pre, post and replace. It's a bit of a hack but works out ok for most cases.
 
     for s=1,#datasets do
@@ -3527,16 +3545,26 @@ local function featuresprocessor(head,font,attr)
                            -- whatever glyph
                            start = getnext(start)
                         elseif id == disc_code then
-                            local ok
-                            if gpossing then
-                                start, ok = kernrun(start,k_run_single,             font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
-                            elseif typ == "gsub_ligature" then
-                                start, ok = testrun(start,t_run_single,c_run_single,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
+                            -- ctx: we could assume the same attr as the surrounding glyphs but then we loose
+                            -- the option to have interesting disc nodes (we gain upto 10% on extreme tests);
+                            -- if a disc would have a font field we could even be more strict (see oldstyle test
+                            -- case)
+                            local a = forcedisc or getsubtype(start) == discretionary_code or getattr(start,0) == attr
+                            if a then
+                                --     local attr = false
+                                local ok
+                                if gpossing then
+                                    start, ok = kernrun(start,k_run_single,             font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
+                                elseif typ == "gsub_ligature" then
+                                    start, ok = testrun(start,t_run_single,c_run_single,font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
+                                else
+                                    start, ok = comprun(start,c_run_single,             font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
+                                end
+                                if ok then
+                                    success = true
+                                end
                             else
-                                start, ok = comprun(start,c_run_single,             font,attr,lookupcache,step,dataset,sequence,rlmode,handler)
-                            end
-                            if ok then
-                                success = true
+                                start = getnext(start)
                             end
                         elseif id == math_code then
                             start = getnext(end_of_math(start))
@@ -3596,16 +3624,22 @@ local function featuresprocessor(head,font,attr)
                     elseif char == false then
                         start = getnext(start)
                     elseif id == disc_code then
-                        local ok
-                        if gpossing then
-                            start, ok = kernrun(start,k_run_multiple,               font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
-                        elseif typ == "gsub_ligature" then
-                            start, ok = testrun(start,t_run_multiple,c_run_multiple,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
+                        -- see comment above
+                        local a = forcedisc or getsubtype(start) == discretionary_code or getattr(start,0) == attr
+                        if a then
+                            local ok
+                            if gpossing then
+                                start, ok = kernrun(start,k_run_multiple,               font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
+                            elseif typ == "gsub_ligature" then
+                                start, ok = testrun(start,t_run_multiple,c_run_multiple,font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
+                            else
+                                start, ok = comprun(start,c_run_multiple,               font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
+                            end
+                            if ok then
+                                success = true
+                            end
                         else
-                            start, ok = comprun(start,c_run_multiple,               font,attr,steps,nofsteps,dataset,sequence,rlmode,handler)
-                        end
-                        if ok then
-                            success = true
+                            start = getnext(start)
                         end
                     elseif id == math_code then
                         start = getnext(end_of_math(start))
@@ -3637,6 +3671,34 @@ end
 
 -- so far
 
+local plugins = { }
+otf.plugins   = plugins
+
+function otf.registerplugin(name,f)
+    if type(name) == "string" and type(f) == "function" then
+        plugins[name] = { name, f }
+    end
+end
+
+local function plugininitializer(tfmdata,value)
+    if type(value) == "string" then
+        tfmdata.shared.plugin = plugins[value]
+    end
+end
+
+local function pluginprocessor(head,font)
+    local s = fontdata[font].shared
+    local p = s and s.plugin
+    if p then
+        if trace_plugins then
+            report_process("applying plugin %a",p[1])
+        end
+        return p[2](head,font)
+    else
+        return head, false
+    end
+end
+
 local function featuresinitializer(tfmdata,value)
     -- nothing done here any more
 end
@@ -3648,9 +3710,11 @@ registerotffeature {
     initializers = {
         position = 1,
         node     = featuresinitializer,
+        plug     = plugininitializer,
     },
     processors   = {
         node     = featuresprocessor,
+        plug     = pluginprocessor,
     }
 }
 

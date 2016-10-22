@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 10/19/16 22:51:32
+-- merge date  : 10/22/16 10:43:17
 
 do -- begin closure to overcome local limits and interference
 
@@ -11398,6 +11398,7 @@ local report=logs.reporter("otf reader")
 local readers=fonts.handlers.otf.readers
 local streamreader=readers.streamreader
 local setposition=streamreader.setposition
+local getposition=streamreader.getposition
 local skipshort=streamreader.skipshort
 local readushort=streamreader.readcardinal2 
 local readulong=streamreader.readcardinal4 
@@ -12453,15 +12454,39 @@ function gposhandlers.extension(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
 end
 do
   local plugins={}
-  function plugins.size(f,fontdata,tableoffset,parameters)
-    if not fontdata.designsize then
-      setposition(f,tableoffset+parameters)
-      local designsize=readushort(f)
-      if designsize>0 then
+  function plugins.size(f,fontdata,tableoffset,feature)
+    if fontdata.designsize then
+    else
+      local function check(offset)
+        setposition(f,offset)
+        local designsize=readushort(f)
+        if designsize>0 then 
+          local fontstyle=readushort(f)
+          local guimenuid=readushort(f)
+          local minsize=readushort(f)
+          local maxsize=readushort(f)
+          if minsize==0 and maxsize==0 and fontstyleid==0 and guimenuid==0 then
+            minsize=designsize
+            maxsize=designsize
+          end
+          if designsize>=minsize and designsize<=maxsize then
+            return minsize,maxsize,designsize
+          end
+        end
+      end
+      local minsize,maxsize,designsize=check(tableoffset+feature.offset+feature.parameters)
+      if not designsize then
+        minsize,maxsize,designsize=check(tableoffset+feature.parameters)
+        if designsize then
+          report("bad size feature in %a, falling back to wrong offset",fontdata.filename or "?")
+        else
+          report("bad size feature in %a,",fontdata.filename or "?")
+        end
+      end
+      if designsize then
+        fontdata.minsize=minsize
+        fontdata.maxsize=maxsize
         fontdata.designsize=designsize
-        skipshort(f,2)
-        fontdata.minsize=readushort(f)
-        fontdata.maxsize=readushort(f)
       end
     end
   end
@@ -12598,7 +12623,7 @@ do
         feature.parameters=parameters
         local plugin=plugins[feature.tag]
         if plugin then
-          plugin(f,fontdata,offset,parameters)
+          plugin(f,fontdata,featureoffset,feature)
         end
       end
     end

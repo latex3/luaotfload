@@ -70,6 +70,7 @@ local readers           = fonts.handlers.otf.readers
 local streamreader      = readers.streamreader
 
 local setposition       = streamreader.setposition
+local getposition       = streamreader.getposition
 local skipshort         = streamreader.skipshort
 local readushort        = streamreader.readcardinal2  -- 16-bit unsigned integer
 local readulong         = streamreader.readcardinal4  -- 24-bit unsigned integer
@@ -397,7 +398,7 @@ local function readlookuparray(f,noflookups,nofcurrent)
             end
         end
      -- if length > nofcurrent then
-     --     report_issue("more lookups than currently matched characters")
+     --     report("more lookups than currently matched characters")
      -- end
     end
     return lookups
@@ -413,7 +414,7 @@ end
 --     for i=1,noflookups do
 --         local index = readushort(f) + 1
 --         if index > nofcurrent then
---             report_issue("more lookups than currently matched characters")
+--             report("more lookups than currently matched characters")
 --             for i=nofcurrent+1,index-1 do
 --                 lookups[i] = false
 --             end
@@ -1285,20 +1286,50 @@ do
 
     local plugins = { }
 
-    function plugins.size(f,fontdata,tableoffset,parameters)
-        if not fontdata.designsize then
-            setposition(f,tableoffset+parameters)
-            local designsize = readushort(f)
-            if designsize > 0 then
-                fontdata.designsize    = designsize
-                skipshort(f,2)
-                fontdata.minsize = readushort(f)
-                fontdata.maxsize = readushort(f)
+    function plugins.size(f,fontdata,tableoffset,feature)
+        if fontdata.designsize then
+            -- yes, there are fonts with multiple size entries ... it probably relates
+            -- to the other two fields (menu entries in some language)
+        else
+            local function check(offset)
+                setposition(f,offset)
+                local designsize = readushort(f)
+                if designsize > 0 then -- we could also have a threshold
+                    local fontstyle = readushort(f)
+                    local guimenuid = readushort(f)
+                    local minsize   = readushort(f)
+                    local maxsize   = readushort(f)
+                    if minsize == 0 and maxsize == 0 and fontstyleid == 0 and guimenuid == 0 then
+                        minsize = designsize
+                        maxsize = designsize
+                    end
+                    if designsize >= minsize and designsize <= maxsize then
+                        return minsize, maxsize, designsize
+                    end
+                end
+            end
+            local minsize, maxsize, designsize = check(tableoffset+feature.offset+feature.parameters)
+            if not designsize then
+                -- some old adobe fonts have: tableoffset+feature.parameters and we could
+                -- use some heuristic but why bother ... this extra check will be removed
+                -- some day and/or when we run into an issue
+                minsize, maxsize, designsize = check(tableoffset+feature.parameters)
+                if designsize then
+                    report("bad size feature in %a, falling back to wrong offset",fontdata.filename or "?")
+                else
+                    report("bad size feature in %a,",fontdata.filename or "?")
+                end
+            end
+            if designsize then
+                fontdata.minsize    = minsize
+                fontdata.maxsize    = maxsize
+                fontdata.designsize = designsize
             end
         end
     end
 
-    -- feature order needs checking ... as we loop over a hash
+    -- feature order needs checking ... as we loop over a hash ... however, in the file
+    -- they are sorted so order is not that relevant
 
     local function reorderfeatures(fontdata,scripts,features)
         local scriptlangs  = { }
@@ -1440,7 +1471,7 @@ do
                 feature.parameters = parameters
                 local plugin = plugins[feature.tag]
                 if plugin then
-                    plugin(f,fontdata,offset,parameters)
+                    plugin(f,fontdata,featureoffset,feature)
                 end
             end
         end

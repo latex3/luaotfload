@@ -14,6 +14,7 @@ because we lack a user interface to toggle per-subsystem tracing.
 --doc]]--
 
 local module_name       = "luaotfload" --- prefix for messages
+local debug             = debug
 
 luaotfload              = luaotfload or { }
 luaotfload.log          = luaotfload.log or { }
@@ -132,10 +133,33 @@ end
 
 log.set_logout = set_logout
 
+local format_error_handler
+if debug then
+    local debugtraceback = debug.traceback
+    format_error_handler = function (err)
+        print ""
+        print (stringformat ("luaotfload error: %q", err))
+        print (stringformat ("Lua interpreter %s", debugtraceback ()))
+        print ""
+    end
+else
+    format_error_handler = function (err)
+        print ""
+        print (stringformat ("luaotfload error: %q", err))
+        print "Lua debug module not available; please enable for a backtrace"
+        print ""
+    end
+end
+
 local basic_logger = function (category, fmt, ...)
-    local res = { module_name, "|", category, ":" }
+    local res = { module_name, "|", category or "UNKNOWN", ":" }
     if fmt then
-        res [#res + 1] = stringformat (fmt, ...)
+        local ok, val = xpcall (stringformat, format_error_handler, fmt, ...)
+        if ok then
+            res [#res + 1] = val
+        else
+            res [#res + 1] = stringformat ("ERROR: %q", val)
+        end
     end
     texiowrite_nl (logout, tableconcat(res, " "))
 end
@@ -354,4 +378,4 @@ local texioreporter = function (message)
 end
 
 texio.reporter = texioreporter
-
+--- vim:shiftwidth=4:expandtab:ft=lua

@@ -520,7 +520,7 @@ load_names = function (dry_run, no_rebuild)
         names_version = names.version
         if db_version ~= names_version then
             logreport ("both", 0, "db",
-                       [[Version mismatch; expected %4.3f, got %4.3f.]],
+                       [[Version mismatch; expected %d, got %d.]],
                        names_version, db_version)
             if not fonts_reloaded then
                 logreport ("both", 0, "db", [[Force rebuild.]])
@@ -1322,28 +1322,40 @@ local load_font_file = function (filename, subfont)
     return ret
 end
 
---- rawdata -> (int * int * int | bool)
+local get_size_info do --- too many upvalues :/
+    local design_dimension_bp = true
+    local pt, bp              = 7227.0, 7200.0
 
-local get_size_info = function (rawinfo)
-    local design_size         = rawinfo.design_size
-    local design_range_top    = rawinfo.design_range_top
-    local design_range_bottom = rawinfo.design_range_bottom
+    --- rawdata -> (int * int * int | bool)
 
-    local fallback_size = design_size         ~= 0 and design_size
-                       or design_range_bottom ~= 0 and design_range_bottom
-                       or design_range_top    ~= 0 and design_range_top
+    get_size_info = function (rawinfo)
+        local design_size         = rawinfo.design_size
+        local design_range_top    = rawinfo.design_range_top
+        local design_range_bottom = rawinfo.design_range_bottom
 
-    if fallback_size then
-        design_size         = (design_size         or fallback_size) / 10
-        design_range_top    = (design_range_top    or fallback_size) / 10
-        design_range_bottom = (design_range_bottom or fallback_size) / 10
-        return {
-            design_size, design_range_top, design_range_bottom,
-        }
+        local fallback_size = design_size         ~= 0 and design_size
+                           or design_range_bottom ~= 0 and design_range_bottom
+                           or design_range_top    ~= 0 and design_range_top
+
+        if fallback_size then
+            design_size         = (design_size         or fallback_size) / 10
+            design_range_top    = (design_range_top    or fallback_size) / 10
+            design_range_bottom = (design_range_bottom or fallback_size) / 10
+
+            if design_dimension_bp == true then
+                design_size         = (design_size         * bp) / pt
+                design_range_top    = (design_range_top    * bp) / pt
+                design_range_bottom = (design_range_bottom * bp) / pt
+            end
+
+            return {
+                design_size, design_range_top, design_range_bottom,
+            }
+        end
+
+        return false
     end
-
-    return false
-end
+end ---[local get_size_info]
 
 --[[doc--
     map_enlish_names -- Names-table for Lua fontloader objects. This
@@ -2605,7 +2617,7 @@ do
             polluting the lookup table. What doesn’t work is, e. g.
             treating weights > 500 as bold or allowing synonyms like
             “heavy”, “black”.
-        --]]-- 
+        --]]--
         if width == normal_width then
             if pfmweight == bold_weight then
                 --- bold spectrum matches
@@ -3599,7 +3611,7 @@ return {
         fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
-        names.version   = 2.9
+        names.version   = 3        --- increase monotonically
         names.data      = nil      --- contains the loaded database
         names.lookups   = nil      --- contains the lookup cache
 

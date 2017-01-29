@@ -92,6 +92,11 @@ local valid_formats = tabletohash {
   "otf", "ttc", "ttf", "afm", "pfb"
 }
 
+--- cf. TeXbook p. 57
+local valid_designsize_dimens = tabletohash {
+  "bp", "pt", "dd"
+}
+
 local default_anon_sequence = {
   "tex", "path", "name"
 }
@@ -203,6 +208,7 @@ local default_config = {
     update_live     = true,
     compress        = true,
     max_fonts       = 2^51,
+    designsize_dimen= "bp",
   },
   run = {
     anon_sequence  = default_anon_sequence,
@@ -314,6 +320,18 @@ local set_font_filter = function ()
   return true
 end
 
+local set_size_dimension = function ()
+  local names = fonts.names
+  if names and names.size_dimension then
+    local dim = config.luaotfload.db.designsize_dimen
+    if not dim or dim == "" then
+      dim = default_config.db.designsize_dimen
+    end
+    names.set_size_dimension (dim)
+  end
+  return true
+end
+
 local set_name_resolver = function ()
   local names = fonts.names
   if names and names.resolve_cached then
@@ -382,6 +400,7 @@ reconf_tasks = {
   { "Build cache paths"         , build_cache_paths    },
   { "Check terminal dimensions" , check_termwidth      },
   { "Set the font filter"       , set_font_filter      },
+  { "Set design size dimension" , set_size_dimension   },
   { "Install font name resolver", set_name_resolver    },
   { "Set default features"      , set_default_features },
 }
@@ -481,6 +500,21 @@ local option_spec = {
       in_t      = number_t,
       out_t     = number_t, --- TODO int_t from 5.3.x on
       transform = tointeger,
+    },
+    designsize_dimen = {
+      in_t  = string_t,
+      out_t = string_t,
+      transform = function (dim)
+        if not valid_designsize_dimens [dim] then
+          local default = valid_designsize_dimens.__default
+          logreport ("both", 0, "conf",
+                     "Invalid dimension %q specified for design sizes, \z
+                      using default %q.", dim, default)
+          return default
+        end
+        logreport ("both", 4, "conf", "Chosen design size dimension %q.", dim)
+        return dim
+      end
     },
   },
   run = {
@@ -698,13 +732,14 @@ local conf_footer = [==[
 
 local formatters = {
   db = {
-    compress       = { false, format_boolean },
-    formats        = { false, format_string  },
-    max_fonts      = { false, format_integer },
-    scan_local     = { false, format_boolean },
-    skip_read      = { false, format_boolean },
-    strip          = { false, format_boolean },
-    update_live    = { false, format_boolean },
+    compress         = { false, format_boolean },
+    designsize_dimen = { false, format_string  },
+    formats          = { false, format_string  },
+    max_fonts        = { false, format_integer },
+    scan_local       = { false, format_boolean },
+    skip_read        = { false, format_boolean },
+    strip            = { false, format_boolean },
+    update_live      = { false, format_boolean },
   },
   default_features = {
     __default = { true, format_keyval },

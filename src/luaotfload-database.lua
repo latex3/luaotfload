@@ -162,7 +162,6 @@ local tablesort                = table.sort
 local utf8gsub                 = unicode.utf8.gsub
 local utf8lower                = unicode.utf8.lower
 local utf8len                  = unicode.utf8.len
-local zlibcompress             = zlib.compress
 
 --- these come from Lualibs/Context
 local filebasename             = file.basename
@@ -1322,9 +1321,34 @@ local load_font_file = function (filename, subfont)
     return ret
 end
 
-local get_size_info do --- too many upvalues :/
-    local design_dimension_bp = true
-    local pt, bp              = 7227.0, 7200.0
+local set_size_dimension
+local get_size_info
+do --- too many upvalues :/
+    --- cf. TeXbook p. 57
+    local dimens = {
+        pt = function (v) return v                     end,
+        bp = function (v) return (v * 7200.0) / 7227.0 end,
+        dd = function (v) return (v * 1157.0) / 1238.0 end,
+    }
+
+    local dimen_pt   = 1
+    local dimen_bp   = 2
+    local dimen_dd   = 3
+
+    local size_dimen     = dimens.bp
+    local set_size_dimen = function (dim)
+        local f = dimens [dim]
+        if f then
+            logreport ("both", 4, "db",
+                       "Interpreting design sizes as %q, factor %.6f.",
+                       dim, f (1.000000))
+            size_dimen = f
+            return
+        end
+        logreport ("both", 0, "db",
+                   "Invalid dimension %q requested for design sizes; \z
+                    ignoring.")
+    end
 
     --- rawdata -> (int * int * int | bool)
 
@@ -1343,9 +1367,9 @@ local get_size_info do --- too many upvalues :/
             design_range_bottom = (design_range_bottom or fallback_size) / 10
 
             if design_dimension_bp == true then
-                design_size         = (design_size         * bp) / pt
-                design_range_top    = (design_range_top    * bp) / pt
-                design_range_bottom = (design_range_bottom * bp) / pt
+                design_size         = size_dimen (design_size        )
+                design_range_top    = size_dimen (design_range_top   )
+                design_range_bottom = size_dimen (design_range_bottom)
             end
 
             return {
@@ -3572,6 +3596,7 @@ local api = {
 
 local export = {
     set_font_filter             = set_font_filter,
+    set_size_dimension          = set_size_dimension,
     flush_lookup_cache          = flush_lookup_cache,
     save_lookups                = save_lookups,
     load                        = load_names,

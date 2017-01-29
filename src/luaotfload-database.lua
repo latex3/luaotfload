@@ -2111,15 +2111,13 @@ process_dir_tree = function (acc, dirs, done)
             elseif lfsisfile (fullpath) then
                 ent = stringlower (ent)
                 if lpegmatch (p_font_filter, ent) then
-                    newfiles[#newfiles+1] = fullpath
                     if filesuffix (ent) == "afm" then
                         local pfbpath = locate_matching_pfb (ent, dir)
                         if pfbpath then
                             newfiles[#newfiles+1] = pfbpath
                         end
-                    else
-                        newfiles[#newfiles+1] = fullpath
                     end
+                    newfiles[#newfiles+1] = fullpath
                 end
             end
         end

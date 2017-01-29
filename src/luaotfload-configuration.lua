@@ -92,11 +92,6 @@ local valid_formats = tabletohash {
   "otf", "ttc", "ttf", "afm", "pfb"
 }
 
---- cf. TeXbook p. 57
-local valid_designsize_dimens = tabletohash {
-  "bp", "pt", "dd"
-}
-
 local default_anon_sequence = {
   "tex", "path", "name"
 }
@@ -322,7 +317,7 @@ end
 
 local set_size_dimension = function ()
   local names = fonts.names
-  if names and names.size_dimension then
+  if names and names.set_size_dimension then
     local dim = config.luaotfload.db.designsize_dimen
     if not dim or dim == "" then
       dim = default_config.db.designsize_dimen
@@ -504,17 +499,6 @@ local option_spec = {
     designsize_dimen = {
       in_t  = string_t,
       out_t = string_t,
-      transform = function (dim)
-        if not valid_designsize_dimens [dim] then
-          local default = valid_designsize_dimens.__default
-          logreport ("both", 0, "conf",
-                     "Invalid dimension %q specified for design sizes, \z
-                      using default %q.", dim, default)
-          return default
-        end
-        logreport ("both", 4, "conf", "Chosen design size dimension %q.", dim)
-        return dim
-      end
     },
   },
   run = {

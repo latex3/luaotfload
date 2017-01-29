@@ -1336,7 +1336,7 @@ do --- too many upvalues :/
     local dimen_dd   = 3
 
     local size_dimen     = dimens.bp
-    local set_size_dimen = function (dim)
+    set_size_dimension = function (dim)
         local f = dimens [dim]
         if f then
             logreport ("both", 4, "db",
@@ -1366,11 +1366,9 @@ do --- too many upvalues :/
             design_range_top    = (design_range_top    or fallback_size) / 10
             design_range_bottom = (design_range_bottom or fallback_size) / 10
 
-            if design_dimension_bp == true then
-                design_size         = size_dimen (design_size        )
-                design_range_top    = size_dimen (design_range_top   )
-                design_range_bottom = size_dimen (design_range_bottom)
-            end
+            design_size         = size_dimen (design_size        )
+            design_range_top    = size_dimen (design_range_top   )
+            design_range_bottom = size_dimen (design_range_bottom)
 
             return {
                 design_size, design_range_top, design_range_bottom,

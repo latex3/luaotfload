@@ -2,13 +2,10 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-auxiliary.lua
 --  DESCRIPTION:  part of luaotfload
--- REQUIREMENTS:  luaotfload 2.7
+-- REQUIREMENTS:  luaotfload 2.8
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 -----------------------------------------------------------------------
 --
-
---- this file addresses issue #24
---- https://github.com/lualatex/luaotfload/issues/24#
 
 luaotfload                  = luaotfload or { }
 local log                   = luaotfload.log

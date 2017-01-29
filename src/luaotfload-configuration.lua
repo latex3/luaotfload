@@ -2,14 +2,14 @@
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-configuration.lua
 --  DESCRIPTION:  config file reader
--- REQUIREMENTS:  Luaotfload 2.7 or above
+-- REQUIREMENTS:  Luaotfload 2.8 or above
 --       AUTHOR:  Philipp Gesang, <phg@phi-gamma.net>
 --       AUTHOR:  Dohyun Kim <nomosnomos@gmail.com>
 -------------------------------------------------------------------------------
 --
 
 if not modules then modules = { } end modules ["luaotfload-configuration"] = {
-  version   = "2.7",
+  version   = "2.8",
   comment   = "part of Luaotfload",
   author    = "Philipp Gesang, Dohyun Kim",
   copyright = "Luaotfload Development Team",
@@ -203,6 +203,7 @@ local default_config = {
     update_live     = true,
     compress        = true,
     max_fonts       = 2^51,
+    designsize_dimen= "bp",
   },
   run = {
     anon_sequence  = default_anon_sequence,
@@ -314,6 +315,18 @@ local set_font_filter = function ()
   return true
 end
 
+local set_size_dimension = function ()
+  local names = fonts.names
+  if names and names.set_size_dimension then
+    local dim = config.luaotfload.db.designsize_dimen
+    if not dim or dim == "" then
+      dim = default_config.db.designsize_dimen
+    end
+    names.set_size_dimension (dim)
+  end
+  return true
+end
+
 local set_name_resolver = function ()
   local names = fonts.names
   if names and names.resolve_cached then
@@ -382,6 +395,7 @@ reconf_tasks = {
   { "Build cache paths"         , build_cache_paths    },
   { "Check terminal dimensions" , check_termwidth      },
   { "Set the font filter"       , set_font_filter      },
+  { "Set design size dimension" , set_size_dimension   },
   { "Install font name resolver", set_name_resolver    },
   { "Set default features"      , set_default_features },
 }
@@ -481,6 +495,10 @@ local option_spec = {
       in_t      = number_t,
       out_t     = number_t, --- TODO int_t from 5.3.x on
       transform = tointeger,
+    },
+    designsize_dimen = {
+      in_t  = string_t,
+      out_t = string_t,
     },
   },
   run = {
@@ -698,13 +716,14 @@ local conf_footer = [==[
 
 local formatters = {
   db = {
-    compress       = { false, format_boolean },
-    formats        = { false, format_string  },
-    max_fonts      = { false, format_integer },
-    scan_local     = { false, format_boolean },
-    skip_read      = { false, format_boolean },
-    strip          = { false, format_boolean },
-    update_live    = { false, format_boolean },
+    compress         = { false, format_boolean },
+    designsize_dimen = { false, format_string  },
+    formats          = { false, format_string  },
+    max_fonts        = { false, format_integer },
+    scan_local       = { false, format_boolean },
+    skip_read        = { false, format_boolean },
+    strip            = { false, format_boolean },
+    update_live      = { false, format_boolean },
   },
   default_features = {
     __default = { true, format_keyval },

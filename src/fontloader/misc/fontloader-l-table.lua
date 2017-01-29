@@ -971,6 +971,41 @@ end
 
 table.flattened = flattened
 
+local function collapsed(t,f,h)
+    if f == nil then
+        f = { }
+        h = { }
+    end
+    for k=1,#t do
+        local v = t[k]
+        if type(v) == "table" then
+            collapsed(v,f,h)
+        elseif not h[v] then
+            f[#f+1] = v
+            h[v] = true
+        end
+    end
+    return f
+end
+
+local function collapsedhash(t,h)
+    if h == nil then
+        h = { }
+    end
+    for k=1,#t do
+        local v = t[k]
+        if type(v) == "table" then
+            collapsedhash(v,h)
+        else
+            h[v] = true
+        end
+    end
+    return h
+end
+
+table.collapsed     = collapsed     -- 20% faster than unique(collapsed(t))
+table.collapsedhash = collapsedhash
+
 local function unnest(t,f) -- only used in mk, for old times sake
     if not f then          -- and only relevant for token lists
         f = { }            -- this one can become obsolete
@@ -1077,7 +1112,7 @@ function table.count(t)
     return n
 end
 
-function table.swapped(t,s) -- hash
+function table.swapped(t,s) -- hash, we need to make sure we don't mess up next
     local n = { }
     if s then
         for k, v in next, s do
@@ -1090,7 +1125,14 @@ function table.swapped(t,s) -- hash
     return n
 end
 
-function table.mirrored(t) -- hash
+function table.hashed(t) -- list, add hash to index (save because we are not yet mixed
+    for i=1,#t do
+        t[t[i]] = i
+    end
+    return t
+end
+
+function table.mirrored(t) -- hash, we need to make sure we don't mess up next
     local n = { }
     for k, v in next, t do
         n[v] = k

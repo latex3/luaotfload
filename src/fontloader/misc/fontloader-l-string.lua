@@ -75,19 +75,19 @@ local collapser    = patterns.collapser
 local longtostring = patterns.longtostring
 
 function string.strip(str)
-    return lpegmatch(stripper,str) or ""
+    return str and lpegmatch(stripper,str) or ""
 end
 
 function string.fullstrip(str)
-    return lpegmatch(fullstripper,str) or ""
+    return str and lpegmatch(fullstripper,str) or ""
 end
 
 function string.collapsespaces(str)
-    return lpegmatch(collapser,str) or ""
+    return str and lpegmatch(collapser,str) or ""
 end
 
 function string.longtostring(str)
-    return lpegmatch(longtostring,str) or ""
+    return str and lpegmatch(longtostring,str) or ""
 end
 
 -- function string.is_empty(str)
@@ -99,7 +99,7 @@ local pattern = P(" ")^0 * P(-1) -- maybe also newlines
 -- patterns.onlyspaces = pattern
 
 function string.is_empty(str)
-    if str == "" then
+    if not str or str == "" then
         return true
     else
         return lpegmatch(pattern,str) and true or false
@@ -163,7 +163,7 @@ function string.escapedpattern(str,simple)
 end
 
 function string.topattern(str,lowercase,strict)
-    if str=="" or type(str) ~= "string" then
+    if str == "" or type(str) ~= "string" then
         return ".*"
     elseif strict then
         str = lpegmatch(pattern_c,str)

@@ -52,8 +52,8 @@ local authors = "\z
 
 luaotfload.module = {
     name          = "luaotfload-main",
-    version       = 2.70003,
-    date          = "2016/06/16",
+    version       = 2.80001,
+    date          = "2017/01/29",
     description   = "OpenType layout system.",
     author        = authors,
     copyright     = authors,
@@ -246,7 +246,17 @@ local install_loaders = function ()
     return loaders
 end
 
+local luaotfload_initialized = false --- prevent multiple invocations
+
 luaotfload.main = function ()
+
+    if luaotfload_initialized then
+        logreport ("log", 0, "load",
+                   "Luaotfload initialization requested but is already \z
+                   loaded, ignoring.")
+        return
+    end
+    luaotfload_initialized = true
 
     luaotfload.loaders = install_loaders ()
     local loaders    = luaotfload.loaders

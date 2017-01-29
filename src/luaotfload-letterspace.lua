@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['letterspace'] = {
-    version   = "2.7",
+    version   = "2.8",
     comment   = "companion to luaotfload-main.lua",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
@@ -61,7 +61,11 @@ local todirect           = nodedirect.tonut
 local tonode             = nodedirect.tonode
 
 local insert_node_before = nodedirect.insert_before
-local free_node          = nodedirect.free
+local free_node          = nodedirect.free -- may cause double free
+local free_node          = function (n)
+  logreport ("term", 5, "letterspace", "not calling free_node(%d)", n)
+  -- free_node (n)
+end
 local copy_node          = nodedirect.copy
 local new_node           = nodedirect.new
 
@@ -348,7 +352,7 @@ kerncharacters = function (head)
             end
             start = c
             setfield(s, "components", nil)
-            --free_node(s) --> double free with multipart components
+            free_node(s) --> double free with multipart components
             c = getfield (start, "components")
           end
         end

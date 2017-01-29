@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['luaotfload-database'] = {
-    version   = "2.7",
+    version   = "2.8",
     comment   = "companion to luaotfload-main.lua",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
     copyright = "Luaotfload Development Team",
@@ -111,7 +111,7 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
 --doc]]--
 
 local lpeg                     = require "lpeg"
-local P, Cc, lpegmatch         = lpeg.P, lpeg.Cc, lpeg.match
+local P, lpegmatch         = lpeg.P, lpeg.match
 
 local log                      = luaotfload.log
 local logreport                = log and log.report or print -- overriden later on
@@ -162,7 +162,6 @@ local tablesort                = table.sort
 local utf8gsub                 = unicode.utf8.gsub
 local utf8lower                = unicode.utf8.lower
 local utf8len                  = unicode.utf8.len
-local zlibcompress             = zlib.compress
 
 --- these come from Lualibs/Context
 local filebasename             = file.basename
@@ -520,7 +519,7 @@ load_names = function (dry_run, no_rebuild)
         names_version = names.version
         if db_version ~= names_version then
             logreport ("both", 0, "db",
-                       [[Version mismatch; expected %4.3f, got %4.3f.]],
+                       [[Version mismatch; expected %d, got %d.]],
                        names_version, db_version)
             if not fonts_reloaded then
                 logreport ("both", 0, "db", [[Force rebuild.]])
@@ -891,8 +890,9 @@ end
 
 --[[doc--
 
-    choose_size -- Pick a font face of appropriate size from the list
-    of family members with matching style. There are three categories:
+    choose_size -- Pick a font face of appropriate size (in sp) from
+    the list of family members with matching style. There are three
+    categories:
 
         1. exact matches: if there is a face whose design size equals
            the asked size, it is returned immediately and no further
@@ -1042,6 +1042,35 @@ local lookup_fontname = function (specification, name, style)
     return nil, nil
 end
 
+local design_size_dimension
+local set_size_dimension
+do
+
+    --- cf. TeXbook p. 57
+    local dimens = {
+        pt = function (v) return v                 end,
+        bp = function (v) return (v * 7200) / 7227 end,
+        dd = function (v) return (v * 1157) / 1238 end,
+    }
+
+    design_size_dimension = dimens.bp
+
+    set_size_dimension = function (dim)
+        local f = dimens [dim]
+        if f then
+            logreport ("both", 4, "db",
+                       "Interpreting design sizes as %q, factor %.6f.",
+                       dim, f (1.000000))
+            design_size_dimension = f
+            return
+        end
+        logreport ("both", 0, "db",
+                   "Invalid dimension %q requested for design sizes; \z
+                    ignoring.")
+    end
+end
+
+
 --[[doc--
 
     lookup_font_name -- Perform a name: lookup. This first queries the
@@ -1099,15 +1128,14 @@ lookup_font_name = function (specification)
     local askedsize = specification.optsize
 
     if askedsize then
-        askedsize = tonumber (askedsize)
+        askedsize = tonumber (askedsize) * 65536
     else
         askedsize = specification.size
-        if askedsize and askedsize >= 0 then
-            askedsize = askedsize / 65536
-        else
+        if not askedsize or askedsize < 0 then
             askedsize = 0
         end
     end
+    askedsize = design_size_dimension (askedsize)
 
     resolved, subfont = lookup_familyname (specification,
                                            name,
@@ -1322,28 +1350,35 @@ local load_font_file = function (filename, subfont)
     return ret
 end
 
---- rawdata -> (int * int * int | bool)
+local get_size_info do --- too many upvalues :/
+    --- rawdata -> (int * int * int | bool)
 
-local get_size_info = function (rawinfo)
-    local design_size         = rawinfo.design_size
-    local design_range_top    = rawinfo.design_range_top
-    local design_range_bottom = rawinfo.design_range_bottom
+    get_size_info = function (rawinfo)
+        local design_size         = rawinfo.design_size
+        local design_range_top    = rawinfo.design_range_top
+        local design_range_bottom = rawinfo.design_range_bottom
 
-    local fallback_size = design_size         ~= 0 and design_size
-                       or design_range_bottom ~= 0 and design_range_bottom
-                       or design_range_top    ~= 0 and design_range_top
+        local fallback_size = design_size         ~= 0 and design_size
+                           or design_range_bottom ~= 0 and design_range_bottom
+                           or design_range_top    ~= 0 and design_range_top
 
-    if fallback_size then
-        design_size         = (design_size         or fallback_size) / 10
-        design_range_top    = (design_range_top    or fallback_size) / 10
-        design_range_bottom = (design_range_bottom or fallback_size) / 10
-        return {
-            design_size, design_range_top, design_range_bottom,
-        }
+        if fallback_size then
+            design_size         = ((design_size         or fallback_size) * 2^16) / 10
+            design_range_top    = ((design_range_top    or fallback_size) * 2^16) / 10
+            design_range_bottom = ((design_range_bottom or fallback_size) * 2^16) / 10
+
+            design_size         = (design_size         * 7200) / 7227
+            design_range_top    = (design_range_top    * 7200) / 7227
+            design_range_bottom = (design_range_bottom * 7200) / 7227
+
+            return {
+                design_size, design_range_top, design_range_bottom,
+            }
+        end
+
+        return false
     end
-
-    return false
-end
+end ---[local get_size_info]
 
 --[[doc--
     map_enlish_names -- Names-table for Lua fontloader objects. This
@@ -1913,7 +1948,7 @@ local create_blacklist = function (blacklist, whitelist)
 
     if p_blacklist == nil then
         --- always return false
-        p_blacklist = Cc(false)
+        p_blacklist = lpeg.Cc(false)
     end
 
     return result
@@ -2605,7 +2640,7 @@ do
             polluting the lookup table. What doesn’t work is, e. g.
             treating weights > 500 as bold or allowing synonyms like
             “heavy”, “black”.
-        --]]-- 
+        --]]--
         if width == normal_width then
             if pfmweight == bold_weight then
                 --- bold spectrum matches
@@ -3560,6 +3595,7 @@ local api = {
 
 local export = {
     set_font_filter             = set_font_filter,
+    set_size_dimension          = set_size_dimension,
     flush_lookup_cache          = flush_lookup_cache,
     save_lookups                = save_lookups,
     load                        = load_names,
@@ -3599,7 +3635,7 @@ return {
         fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
-        names.version   = 2.9
+        names.version   = 4        --- increase monotonically
         names.data      = nil      --- contains the loaded database
         names.lookups   = nil      --- contains the lookup cache
 

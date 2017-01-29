@@ -18,7 +18,7 @@
 -----------------------------------------------------------------------
 local glyphfile     = "./build/glyphlist.txt"
 local font_age      = "./build/luaotfload-glyphlist.lua"
-local glyph_source  = "http://partners.adobe.com/public/developer/en/opentype/glyphlist.txt"
+local glyph_source  = "https://raw.githubusercontent.com/adobe-type-tools/agl-aglfn/master/glyphlist.txt"
 
 -----------------------------------------------------------------------
 --                             fallbacks
@@ -67,7 +67,7 @@ local eol          = P"\n\r" + P"\r\n" + P"\r" + P"\n"
 local space        = P" "
 local alphanum     = R("az", "AZ", "09")
 local hexdigit     = R("af", "AF", "09")
-local eof_tag      = gartenzaun * P"--end"
+local eof_tag      = gartenzaun * P"END"
 local header_line  = gartenzaun * (1-eol)^0 * eol
 local codepoint    = hexdigit^1
 local glyphname    = alphanum^1
@@ -140,19 +140,12 @@ local get_raw get_raw = function (retry)
   elseif not retry then --- attempt download
     print"info: retrieving glyph list from"
     print(glyph_source)
-    local glyphdata = http.request(glyph_source)
-    if glyphdata then
-      local fh = io.open(glyphfile, "wb")
-      if not fh then
-        print (string.format ("error: glyph file (%s) not writable", glyphfile))
-        os.exit(-1)
-      end
-      fh:write(glyphdata)
-      fh:close()
-      return get_raw(true)
+    local cmd = string.format("wget '%s' -o '%s'", glyph_source, glyphfile)
+    local st = os.execute(string.format("wget '%s' -O '%s'", glyph_source, glyphfile))
+    if st ~= 0 then
+      print(string.format("error: download failed; status: %d, command: %q", st, cmd))
+      os.exit(-1)
     end
-    print"error: download failed"
-    os.exit(-1)
   end
   print("error: could not obtain glyph data from "..glyphfile)
   os.exit(-1)

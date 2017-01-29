@@ -125,23 +125,25 @@ the variable is unset.
 Section ``db``
 -----------------------------------------------------------------------
 
-+-----------------+--------+---------------------------+
-|  variable       |  type  |  default                  |
-+-----------------+--------+---------------------------+
-|  compress       |   b    |  ``true``                 |
-+-----------------+--------+---------------------------+
-|  formats        |   s    |  ``"otf,ttf,ttc"``        |
-+-----------------+--------+---------------------------+
-|  max-fonts      |   n    |  ``2^51``                 |
-+-----------------+--------+---------------------------+
-|  scan-local     |   b    |  ``false``                |
-+-----------------+--------+---------------------------+
-|  skip-read      |   b    |  ``false``                |
-+-----------------+--------+---------------------------+
-|  strip          |   b    |  ``true``                 |
-+-----------------+--------+---------------------------+
-|  update-live    |   b    |  ``true``                 |
-+-----------------+--------+---------------------------+
++--------------------+--------+---------------------------+
+|  variable          |  type  |  default                  |
++--------------------+--------+---------------------------+
+|  compress          |   b    |  ``true``                 |
++--------------------+--------+---------------------------+
+|  designsize-dimen  |   b    |  ``bp``                   |
++--------------------+--------+---------------------------+
+|  formats           |   s    |  ``"otf,ttf,ttc"``        |
++--------------------+--------+---------------------------+
+|  max-fonts         |   n    |  ``2^51``                 |
++--------------------+--------+---------------------------+
+|  scan-local        |   b    |  ``false``                |
++--------------------+--------+---------------------------+
+|  skip-read         |   b    |  ``false``                |
++--------------------+--------+---------------------------+
+|  strip             |   b    |  ``true``                 |
++--------------------+--------+---------------------------+
+|  update-live       |   b    |  ``true``                 |
++--------------------+--------+---------------------------+
 
 The flag ``compress`` determines whether the font index (usually
 ``luaotfload-names.lua[.gz]`` will be stored in compressed forms.
@@ -149,6 +151,10 @@ If unset it is equivalent of passing ``--no-compress`` to
 **luaotfload-tool**. Since the file is only created for convenience
 and has no effect on the runtime behavior of Luaotfload, the flag
 should remain set. Most editors come with zlib support anyways.
+
+The setting ``designsize-dimen`` applies when looking up fonts from
+families with design sizes. The default of DTP-style “big points”
+can be changed for ``pt`` or even ``dd``.
 
 The list of ``formats`` must be a comma separated sequence of strings
 containing one or more of these elements:

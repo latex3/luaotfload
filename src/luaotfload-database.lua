@@ -111,7 +111,7 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
 --doc]]--
 
 local lpeg                     = require "lpeg"
-local P, Cc, lpegmatch         = lpeg.P, lpeg.Cc, lpeg.match
+local P, lpegmatch         = lpeg.P, lpeg.match
 
 local log                      = luaotfload.log
 local logreport                = log and log.report or print -- overriden later on
@@ -890,8 +890,9 @@ end
 
 --[[doc--
 
-    choose_size -- Pick a font face of appropriate size from the list
-    of family members with matching style. There are three categories:
+    choose_size -- Pick a font face of appropriate size (in sp) from
+    the list of family members with matching style. There are three
+    categories:
 
         1. exact matches: if there is a face whose design size equals
            the asked size, it is returned immediately and no further
@@ -1041,6 +1042,35 @@ local lookup_fontname = function (specification, name, style)
     return nil, nil
 end
 
+local design_size_dimension
+local set_size_dimension
+do
+
+    --- cf. TeXbook p. 57
+    local dimens = {
+        pt = function (v) return v                 end,
+        bp = function (v) return (v * 7200) / 7227 end,
+        dd = function (v) return (v * 1157) / 1238 end,
+    }
+
+    design_size_dimension = dimens.bp
+
+    set_size_dimension = function (dim)
+        local f = dimens [dim]
+        if f then
+            logreport ("both", 4, "db",
+                       "Interpreting design sizes as %q, factor %.6f.",
+                       dim, f (1.000000))
+            design_size_dimension = f
+            return
+        end
+        logreport ("both", 0, "db",
+                   "Invalid dimension %q requested for design sizes; \z
+                    ignoring.")
+    end
+end
+
+
 --[[doc--
 
     lookup_font_name -- Perform a name: lookup. This first queries the
@@ -1098,15 +1128,14 @@ lookup_font_name = function (specification)
     local askedsize = specification.optsize
 
     if askedsize then
-        askedsize = tonumber (askedsize)
+        askedsize = tonumber (askedsize) * 65536
     else
         askedsize = specification.size
-        if askedsize and askedsize >= 0 then
-            askedsize = askedsize / 65536
-        else
+        if not askedsize or askedsize < 0 then
             askedsize = 0
         end
     end
+    askedsize = design_size_dimension (askedsize)
 
     resolved, subfont = lookup_familyname (specification,
                                            name,
@@ -1321,35 +1350,7 @@ local load_font_file = function (filename, subfont)
     return ret
 end
 
-local set_size_dimension
-local get_size_info
-do --- too many upvalues :/
-    --- cf. TeXbook p. 57
-    local dimens = {
-        pt = function (v) return v                     end,
-        bp = function (v) return (v * 7200.0) / 7227.0 end,
-        dd = function (v) return (v * 1157.0) / 1238.0 end,
-    }
-
-    local dimen_pt   = 1
-    local dimen_bp   = 2
-    local dimen_dd   = 3
-
-    local size_dimen     = dimens.bp
-    set_size_dimension = function (dim)
-        local f = dimens [dim]
-        if f then
-            logreport ("both", 4, "db",
-                       "Interpreting design sizes as %q, factor %.6f.",
-                       dim, f (1.000000))
-            size_dimen = f
-            return
-        end
-        logreport ("both", 0, "db",
-                   "Invalid dimension %q requested for design sizes; \z
-                    ignoring.")
-    end
-
+local get_size_info do --- too many upvalues :/
     --- rawdata -> (int * int * int | bool)
 
     get_size_info = function (rawinfo)
@@ -1362,13 +1363,13 @@ do --- too many upvalues :/
                            or design_range_top    ~= 0 and design_range_top
 
         if fallback_size then
-            design_size         = (design_size         or fallback_size) / 10
-            design_range_top    = (design_range_top    or fallback_size) / 10
-            design_range_bottom = (design_range_bottom or fallback_size) / 10
+            design_size         = ((design_size         or fallback_size) * 2^16) / 10
+            design_range_top    = ((design_range_top    or fallback_size) * 2^16) / 10
+            design_range_bottom = ((design_range_bottom or fallback_size) * 2^16) / 10
 
-            design_size         = size_dimen (design_size        )
-            design_range_top    = size_dimen (design_range_top   )
-            design_range_bottom = size_dimen (design_range_bottom)
+            design_size         = (design_size         * 7200) / 7227
+            design_range_top    = (design_range_top    * 7200) / 7227
+            design_range_bottom = (design_range_bottom * 7200) / 7227
 
             return {
                 design_size, design_range_top, design_range_bottom,
@@ -1947,7 +1948,7 @@ local create_blacklist = function (blacklist, whitelist)
 
     if p_blacklist == nil then
         --- always return false
-        p_blacklist = Cc(false)
+        p_blacklist = lpeg.Cc(false)
     end
 
     return result
@@ -3634,7 +3635,7 @@ return {
         fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
-        names.version   = 3        --- increase monotonically
+        names.version   = 4        --- increase monotonically
         names.data      = nil      --- contains the loaded database
         names.lookups   = nil      --- contains the lookup cache
 

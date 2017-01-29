@@ -237,12 +237,12 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
         if kind == "gsub_single" then
             for i=1,#steps do
                 for unicode, data in next, steps[i].coverage do
-                    if not changed[unicode] then
+                 -- if not changed[unicode] then -- fails for multiple subs in some math fonts
                         if trace_singles then
                             report_substitution(feature,sequence,descriptions,unicode,data)
                         end
                         changed[unicode] = data
-                    end
+                 -- end
                 end
             end
         elseif kind == "gsub_alternate" then

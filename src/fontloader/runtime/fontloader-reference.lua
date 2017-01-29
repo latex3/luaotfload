@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 10/22/16 10:43:17
+-- merge date  : 01/27/17 14:39:39
 
 do -- begin closure to overcome local limits and interference
 
@@ -964,20 +964,20 @@ local fullstripper=patterns.fullstripper
 local collapser=patterns.collapser
 local longtostring=patterns.longtostring
 function string.strip(str)
-  return lpegmatch(stripper,str) or ""
+  return str and lpegmatch(stripper,str) or ""
 end
 function string.fullstrip(str)
-  return lpegmatch(fullstripper,str) or ""
+  return str and lpegmatch(fullstripper,str) or ""
 end
 function string.collapsespaces(str)
-  return lpegmatch(collapser,str) or ""
+  return str and lpegmatch(collapser,str) or ""
 end
 function string.longtostring(str)
-  return lpegmatch(longtostring,str) or ""
+  return str and lpegmatch(longtostring,str) or ""
 end
 local pattern=P(" ")^0*P(-1)
 function string.is_empty(str)
-  if str=="" then
+  if not str or str=="" then
     return true
   else
     return lpegmatch(pattern,str) and true or false
@@ -1739,6 +1739,38 @@ local function flattened(t,f,depth)
   return f
 end
 table.flattened=flattened
+local function collapsed(t,f,h)
+  if f==nil then
+    f={}
+    h={}
+  end
+  for k=1,#t do
+    local v=t[k]
+    if type(v)=="table" then
+      collapsed(v,f,h)
+    elseif not h[v] then
+      f[#f+1]=v
+      h[v]=true
+    end
+  end
+  return f
+end
+local function collapsedhash(t,h)
+  if h==nil then
+    h={}
+  end
+  for k=1,#t do
+    local v=t[k]
+    if type(v)=="table" then
+      collapsedhash(v,h)
+    else
+      h[v]=true
+    end
+  end
+  return h
+end
+table.collapsed=collapsed   
+table.collapsedhash=collapsedhash
 local function unnest(t,f) 
   if not f then     
     f={}      
@@ -1844,6 +1876,12 @@ function table.swapped(t,s)
     n[v]=k
   end
   return n
+end
+function table.hashed(t) 
+  for i=1,#t do
+    t[t[i]]=i
+  end
+  return t
 end
 function table.mirrored(t) 
   local n={}
@@ -9054,8 +9092,8 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo)
     local fontheader=fontdata.fontheader   or {}
     local cffinfo=fontdata.cffinfo    or {}
     local filename=fontdata.filename
-    local weight=getname(fontdata,"weight") or cffinfo.weight or metrics.weight
-    local width=getname(fontdata,"width") or cffinfo.width or metrics.width
+    local weight=getname(fontdata,"weight") or (cffinfo and cffinfo.weight) or (metrics and metrics.weight)
+    local width=getname(fontdata,"width") or (cffinfo and cffinfo.width ) or (metrics and metrics.width )
     local fontname=getname(fontdata,"postscriptname")
     local fullname=getname(fontdata,"fullname")
     local family=getname(fontdata,"family")
@@ -13534,7 +13572,11 @@ local f_unicode=formatters["U%05X"]
 local f_index=formatters["I%05X"]
 local f_character_y=formatters["%C"]
 local f_character_n=formatters["[ %C ]"]
-local doduplicates=true 
+local check_duplicates=true 
+local check_soft_hyphen=false 
+directives.register("otf.checksofthyphen",function(v)
+  check_soft_hyphen=v
+end)
 local function replaced(list,index,replacement)
   if type(list)=="number" then
     return replacement
@@ -13602,7 +13644,7 @@ local function unifyresources(fontdata,indices)
     end
   end
   local done={}
-  local duplicates=doduplicates and resources.duplicates
+  local duplicates=check_duplicates and resources.duplicates
   if duplicates and not next(duplicates) then
     duplicates=false
   end
@@ -13839,10 +13881,31 @@ local function unifyresources(fontdata,indices)
   unifythem(resources.sublookups)
 end
 local function copyduplicates(fontdata)
-  if doduplicates then
+  if check_duplicates then
     local descriptions=fontdata.descriptions
     local resources=fontdata.resources
     local duplicates=resources.duplicates
+    if check_soft_hyphen then
+      local ds=descriptions[0xAD]
+      if not ds or ds.width==0 then
+        if ds then
+          descriptions[0xAD]=nil
+          report("patching soft hyphen")
+        else
+          report("adding soft hyphen")
+        end
+        if not duplicates then
+          duplicates={}
+          resources.duplicates=duplicates
+        end
+        local dh=duplicates[0x2D]
+        if dh then
+          dh[#dh+1]={ [0xAD]=true }
+        else
+          duplicates[0x2D]={ [0xAD]=true }
+        end
+      end
+    end
     if duplicates then
       for u,d in next,duplicates do
         local du=descriptions[u]
@@ -16351,12 +16414,10 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
     if kind=="gsub_single" then
       for i=1,#steps do
         for unicode,data in next,steps[i].coverage do
-          if not changed[unicode] then
             if trace_singles then
               report_substitution(feature,sequence,descriptions,unicode,data)
             end
             changed[unicode]=data
-          end
         end
       end
     elseif kind=="gsub_alternate" then
@@ -18401,6 +18462,7 @@ local fontfeatures=fonthashes.features
 local otffeatures=fonts.constructors.features.otf
 local registerotffeature=otffeatures.register
 local onetimemessage=fonts.loggers.onetimemessage or function() end
+local getrandom=utilities and utilities.randomizer and utilities.randomizer.get
 otf.defaultnodealternate="none"
 local tfmdata=false
 local characters=false
@@ -18746,7 +18808,7 @@ end
 local function get_alternative_glyph(start,alternatives,value)
   local n=#alternatives
   if value=="random" then
-    local r=random(1,n)
+    local r=getrandom and getrandom("glyph",1,n) or random(1,n)
     return alternatives[r],trace_alternatives and formatters["value %a, taking %a"](value,r)
   elseif value=="first" then
     return alternatives[1],trace_alternatives and formatters["value %a, taking %a"](value,1)

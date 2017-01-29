@@ -1,5 +1,5 @@
 if not modules then modules = { } end modules ['luaotfload-colors'] = {
-    version   = "2.7",
+    version   = "2.8",
     comment   = "companion to luaotfload-main.lua (font color)",
     author    = "Khaled Hosny, Elie Roux, Philipp Gesang, Dohyun Kim, David Carlisle",
     copyright = "Luaotfload Development Team",

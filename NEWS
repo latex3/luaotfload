@@ -1,5 +1,13 @@
 Change History
 --------------
+2017-01-29, luaotfload v2.8:
+    * Latest fontloader code.
+    * Support for Luatex 1.0.
+    * Integration of the extended AFM handler.
+    * Fixes to font family assignment.
+    * Skip initialization if Luaotfload is already loaded.
+    * Optical sizes advertised by fonts treated as big points.
+
 2016/04/21, luaotfload v2.7:
     * Rework lookup chaining.
     * Combining glyphs from different fonts (``combo: ...`` requests).

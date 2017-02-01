@@ -1049,8 +1049,8 @@ do
     --- cf. TeXbook p. 57
     local dimens = {
         pt = function (v) return v                 end,
-        bp = function (v) return (v * 7200) / 7227 end,
-        dd = function (v) return (v * 1157) / 1238 end,
+        bp = function (v) return (v * 7227) / 7200 end,
+        dd = function (v) return (v * 1238) / 1157 end,
     }
 
     design_size_dimension = dimens.bp
@@ -1367,9 +1367,9 @@ local get_size_info do --- too many upvalues :/
             design_range_top    = ((design_range_top    or fallback_size) * 2^16) / 10
             design_range_bottom = ((design_range_bottom or fallback_size) * 2^16) / 10
 
-            design_size         = (design_size         * 7200) / 7227
-            design_range_top    = (design_range_top    * 7200) / 7227
-            design_range_bottom = (design_range_bottom * 7200) / 7227
+            design_size         = (design_size         * 7227) / 7200
+            design_range_top    = (design_range_top    * 7227) / 7200
+            design_range_bottom = (design_range_bottom * 7227) / 7200
 
             return {
                 design_size, design_range_top, design_range_bottom,

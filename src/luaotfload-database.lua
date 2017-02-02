@@ -928,7 +928,7 @@ local choose_size = function (sizes, askedsize)
                 --- exact match, this is what we were looking for
                 exact = index
                 goto skip
-            elseif askedsize < low then
+            elseif askedsize <= low then
                 --- below range, add to the norange table
                 local d = low - askedsize
                 norange [#norange + 1] = { d, index }

@@ -1288,28 +1288,11 @@ local tlig_specification = {
         data     = {
             [0x2013] = {0x002D, 0x002D},         -- endash
             [0x2014] = {0x002D, 0x002D, 0x002D}, -- emdash
-            [0x201C] = {0x2018, 0x2018},         -- quotedblleft
-            [0x201D] = {0x2019, 0x2019},         -- quotedblright
-            [0x00A1] = {0x0021, 0x2018},         -- exclamdown
-            [0x00BF] = {0x003F, 0x2018},         -- questiondown
             --- next three originate in T1 encoding; Xetex applies
             --- them too
             [0x201E] = {0x002C, 0x002C},         -- quotedblbase
             [0x00AB] = {0x003C, 0x003C},         -- LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
             [0x00BB] = {0x003E, 0x003E},         -- RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-        },
-        flags    = noflags,
-        order    = { "tlig" },
-        prepend  = true,
-    },
-    {
-        type     = "ligature",
-        features = everywhere,
-        data     = {
-            [0x201C] = {0x0060, 0x0060},         -- quotedblleft
-            [0x201D] = {0x0027, 0x0027},         -- quotedblright
-            [0x00A1] = {0x0021, 0x0060},         -- exclamdown
-            [0x00BF] = {0x003F, 0x0060},         -- questiondown
         },
         flags    = noflags,
         order    = { "tlig" },

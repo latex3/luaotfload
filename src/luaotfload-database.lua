@@ -938,10 +938,19 @@ local choose_size = function (sizes, askedsize)
                 norange [#norange + 1] = { d, index }
             else
                 --- range match
-                local d = ((low + high) / 2) - askedsize
+                local d = 0
+
+                -- should always be true. Just in case there's some
+                -- weried fonts out there
+                if dsnsize > low and dsnsize < high then
+                    d = dsnsize - askedsize
+                else
+                    d = ((low + high) / 2) - askedsize
+                end
                 if d < 0 then
                     d = -d
                 end
+
                 inrange [#inrange + 1] = { d, index }
             end
         end

@@ -928,7 +928,7 @@ local choose_size = function (sizes, askedsize)
                 --- exact match, this is what we were looking for
                 exact = index
                 goto skip
-            elseif askedsize < low then
+            elseif askedsize <= low then
                 --- below range, add to the norange table
                 local d = low - askedsize
                 norange [#norange + 1] = { d, index }
@@ -938,10 +938,19 @@ local choose_size = function (sizes, askedsize)
                 norange [#norange + 1] = { d, index }
             else
                 --- range match
-                local d = ((low + high) / 2) - askedsize
+                local d = 0
+
+                -- should always be true. Just in case there's some
+                -- weried fonts out there
+                if dsnsize > low and dsnsize < high then
+                    d = dsnsize - askedsize
+                else
+                    d = ((low + high) / 2) - askedsize
+                end
                 if d < 0 then
                     d = -d
                 end
+
                 inrange [#inrange + 1] = { d, index }
             end
         end
@@ -1042,26 +1051,54 @@ local lookup_fontname = function (specification, name, style)
     return nil, nil
 end
 
-local design_size_dimension
-local set_size_dimension
+local design_size_dimension  --- scale asked size if not using bp
+local set_size_dimension     --- called from config
 do
 
-    --- cf. TeXbook p. 57
+    --- cf. TeXbook p. 57; the index stores sizes pre-scaled from bp to
+    --- sp. This allows requesting sizes we got from the TeX end
+    --- without further conversion. For the other options *pt* and *dd*
+    --- we scale the requested size as though the value in the font was
+    --- specified in the requested unit.
+
+    --- From @zhouyan:
+
+    --- Let P be the asked size in pt, and Aᵤ = CᵤP, where u is the
+    --- designed unit, pt, bp, or dd, and
+    --- 
+    ---        Cpt = 1,    Cbp = 7200/7227,      Cdd = 1157/1238.
+    --- 
+    --- That is, Aᵤ is the asked size in the desired unit. Let D be the
+    --- de-sign size (assumed to be in the unit of bp) as reported by
+    --- the font (divided by 10; in all the following we ignore the
+    --- factor 2^16 ).
+    --- 
+    --- For simplicity, consider only the case of exact match to the
+    --- design size. That is, we would like to have Aᵤ = D. Let A′ᵤ = αᵤP
+    --- and D′ = βD be the scaled values used in comparisons. For the
+    --- comparison to work correctly, we need,
+    --- 
+    ---         Aᵤ = D  ⟺  A′ᵤ = D′ ,
+    --- 
+    --- and thus αᵤ = βCᵤ. The fix in PR 400 is the case of β = 1. The
+    --- fix for review is β = 7227/7200, and the value of αᵤ is thus
+    --- correct for pt, bp, but not for dd.
+
     local dimens = {
-        pt = function (v) return v                 end,
-        bp = function (v) return (v * 7227) / 7200 end,
-        dd = function (v) return (v * 1238) / 1157 end,
+        bp = false,
+        pt = 7227 / 7200,
+        dd = (7227 / 7200) * (1157 / 1238),
     }
 
     design_size_dimension = dimens.bp
 
     set_size_dimension = function (dim)
-        local f = dimens [dim]
-        if f then
+        local conv = dimens [dim]
+        if conv ~= nil then
             logreport ("both", 4, "db",
                        "Interpreting design sizes as %q, factor %.6f.",
-                       dim, f (1.000000))
-            design_size_dimension = f
+                       dim, conv)
+            design_size_dimension = conv
             return
         end
         logreport ("both", 0, "db",
@@ -1135,7 +1172,10 @@ lookup_font_name = function (specification)
             askedsize = 0
         end
     end
-    askedsize = design_size_dimension (askedsize)
+
+    if design_size_dimension ~= false then
+        askedsize = design_size_dimension * askedsize
+    end
 
     resolved, subfont = lookup_familyname (specification,
                                            name,
@@ -1350,8 +1390,15 @@ local load_font_file = function (filename, subfont)
     return ret
 end
 
+--- Design sizes in the fonts are specified in decipoints. For the
+--- index these values are prescaled to sp which is what we’re dealing
+--- with at the TeX end.
+
 local get_size_info do --- too many upvalues :/
     --- rawdata -> (int * int * int | bool)
+
+    local sp = 2^16        -- pt
+    local bp = 7227 / 7200 -- pt
 
     get_size_info = function (rawinfo)
         local design_size         = rawinfo.design_size
@@ -1363,13 +1410,13 @@ local get_size_info do --- too many upvalues :/
                            or design_range_top    ~= 0 and design_range_top
 
         if fallback_size then
-            design_size         = ((design_size         or fallback_size) * 2^16) / 10
-            design_range_top    = ((design_range_top    or fallback_size) * 2^16) / 10
-            design_range_bottom = ((design_range_bottom or fallback_size) * 2^16) / 10
+            design_size         = ((design_size         or fallback_size) * sp) / 10
+            design_range_top    = ((design_range_top    or fallback_size) * sp) / 10
+            design_range_bottom = ((design_range_bottom or fallback_size) * sp) / 10
 
-            design_size         = (design_size         * 7227) / 7200
-            design_range_top    = (design_range_top    * 7227) / 7200
-            design_range_bottom = (design_range_bottom * 7227) / 7200
+            design_size         = design_size         * bp
+            design_range_top    = design_range_top    * bp
+            design_range_bottom = design_range_bottom * bp
 
             return {
                 design_size, design_range_top, design_range_bottom,

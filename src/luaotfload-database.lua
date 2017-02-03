@@ -1061,10 +1061,33 @@ do
     --- we scale the requested size as though the value in the font was
     --- specified in the requested unit.
 
+    --- From @zhouyan:
+
+    --- Let P be the asked size in pt, and Aᵤ = CᵤP, where u is the
+    --- designed unit, pt, bp, or dd, and
+    --- 
+    ---        Cpt = 1,    Cbp = 7200/7227,      Cdd = 1157/1238.
+    --- 
+    --- That is, Aᵤ is the asked size in the desired unit. Let D be the
+    --- de-sign size (assumed to be in the unit of bp) as reported by
+    --- the font (divided by 10; in all the following we ignore the
+    --- factor 2^16 ).
+    --- 
+    --- For simplicity, consider only the case of exact match to the
+    --- design size. That is, we would like to have Aᵤ = D. Let A′ᵤ = αᵤP
+    --- and D′ = βD be the scaled values used in comparisons. For the
+    --- comparison to work correctly, we need,
+    --- 
+    ---         Aᵤ = D  ⟺  A′ᵤ = D′ ,
+    --- 
+    --- and thus αᵤ = βCᵤ. The fix in PR 400 is the case of β = 1. The
+    --- fix for review is β = 7227/7200, and the value of αᵤ is thus
+    --- correct for pt, bp, but not for dd.
+
     local dimens = {
         bp = false,
         pt = function (v) return v * (7227 / 7200)                 end,
-        dd = function (v) return v * (7227 / 7200) * (1238 / 1157) end,
+        dd = function (v) return v * (7227 / 7200) * (1157 / 1238) end,
     }
 
     design_size_dimension = dimens.bp

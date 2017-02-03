@@ -1086,19 +1086,19 @@ do
 
     local dimens = {
         bp = false,
-        pt = function (v) return v * (7227 / 7200)                 end,
-        dd = function (v) return v * (7227 / 7200) * (1157 / 1238) end,
+        pt = 7227 / 7200,
+        dd = (7227 / 7200) * (1157 / 1238),
     }
 
     design_size_dimension = dimens.bp
 
     set_size_dimension = function (dim)
-        local f = dimens [dim]
-        if f ~= nil then
+        local conv = dimens [dim]
+        if conv ~= nil then
             logreport ("both", 4, "db",
                        "Interpreting design sizes as %q, factor %.6f.",
-                       dim, f (1.000000))
-            design_size_dimension = f
+                       dim, conv)
+            design_size_dimension = conv
             return
         end
         logreport ("both", 0, "db",
@@ -1174,7 +1174,7 @@ lookup_font_name = function (specification)
     end
 
     if design_size_dimension ~= false then
-        askedsize = design_size_dimension (askedsize)
+        askedsize = design_size_dimension * askedsize
     end
 
     resolved, subfont = lookup_familyname (specification,

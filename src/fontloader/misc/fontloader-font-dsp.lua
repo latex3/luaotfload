@@ -1733,6 +1733,7 @@ do
                                                 sublookuplist[nofsublookups] = copy(h) -- we repack later
                                                 sublookuphash[lookupid] = nofsublookups
                                                 sublookupcheck[lookupid] = 1
+                                                h = nofsublookups --- patch by Hans
                                             else
                                                 report_issue(i,what,sequence,"missing")
                                                 rule.lookups = nil

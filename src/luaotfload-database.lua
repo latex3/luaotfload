@@ -3680,7 +3680,7 @@ return {
         fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
-        names.version   = 4        --- increase monotonically
+        names.version   = 5        --- increase monotonically
         names.data      = nil      --- contains the loaded database
         names.lookups   = nil      --- contains the lookup cache
 

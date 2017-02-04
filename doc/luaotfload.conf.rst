@@ -153,8 +153,11 @@ and has no effect on the runtime behavior of Luaotfload, the flag
 should remain set. Most editors come with zlib support anyways.
 
 The setting ``designsize-dimen`` applies when looking up fonts from
-families with design sizes. The default of DTP-style “big points”
-can be changed for ``pt`` or even ``dd``.
+families with design sizes. In Opentype, these are specified as
+“decipoints” where one decipoint equals ten DTP style “big points”.
+When indexing fonts these values are converted to ``sp``. In order to
+treat the values as though they were specified in TeX points or Didot
+points, set ``designsize-dimen`` to ``pt`` or ``dd``.
 
 The list of ``formats`` must be a comma separated sequence of strings
 containing one or more of these elements:

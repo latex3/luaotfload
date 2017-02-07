@@ -1306,30 +1306,18 @@ local tlig_specification = {
             --- quotedblleft:
             --- [''] (GRAVE ACCENT, GRAVE ACCENT)                   → “ (LEFT DOUBLE QUOTATION MARK)
             [0x201C] = {0x0060, 0x0060},
-            --- quotedblleft:
-            --- [‘‘] (LEFT SINGLE QUOTATION MARK, LEFT SINGLE QUOTATION MARK) → “ (LEFT DOUBLE QUOTATION MARK)
-            [0x201C] = {0x2018, 0x2018},
 
             --- quotedblright:
             --- [``] (APOSTROPHE, APOSTROPHE)                       → ” (RIGHT DOUBLE QUOTATION MARK)
             [0x201D] = {0x0027, 0x0027},
-            --- quotedblright:
-            --- [’’] (RIGHT SINGLE QUOTATION MARK, RIGHT SINGLE QUOTATION MARK) → ” (RIGHT DOUBLE QUOTATION MARK)
-            [0x201D] = {0x2019, 0x2019},
 
             --- exclamdown:
             --- [!'] (EXCLAMATION MARK, GRAVE ACCENT)               → ¡ (INVERTED EXCLAMATION MARK)
             [0x00A1] = {0x0021, 0x0060},
-            --- exclamdown:
-            --- [!‘] (EXCLAMATION MARK, LEFT SINGLE QUOTATION MARK) → ¡ (INVERTED EXCLAMATION MARK)
-            [0x00A1] = {0x0021, 0x2018},
 
             --- questiondown:
             --- [?'] (QUESTION MARK, GRAVE ACCENT)                  → ¡ (INVERTED EXCLAMATION MARK)
             [0x00BF] = {0x003F, 0x0060},
-            --- questiondown:
-            --- [?'] (QUESTION MARK, LEFT SINGLE QUOTATION MARK)    → ¡ (INVERTED EXCLAMATION MARK)
-            [0x00BF] = {0x003F, 0x2018},
 
             --- next three originate in T1 encoding (Xetex applies them too)
             --- quotedblbase:

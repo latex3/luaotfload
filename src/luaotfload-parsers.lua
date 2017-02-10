@@ -12,7 +12,8 @@ local traversal_maxdepth  = 42 --- prevent stack overflows
 local rawset            = rawset
 
 local lpeg              = require "lpeg"
-local P, R, S           = lpeg.P, lpeg.R, lpeg.S
+local patterns          = lpeg.patterns
+local P, R, S, V        = lpeg.P, lpeg.R, lpeg.S, lpeg.V
 local lpegmatch         = lpeg.match
 local C, Cc, Cf         = lpeg.C, lpeg.Cc, lpeg.Cf
 local Cg, Cmt, Cs, Ct   = lpeg.Cg, lpeg.Cmt, lpeg.Cs, lpeg.Ct
@@ -57,6 +58,7 @@ local equals            = P"="
 local dash              = P"-"
 local gartenzaun        = P"#"
 local lbrk, rbrk        = P"[", P"]"
+local brackets          = lbrk + rbrk
 local squote            = P"'"
 local dquote            = P"\""
 
@@ -634,7 +636,18 @@ local prefixed          = P"name:" * ws * Cg(fontname, "name")
                         + P"kpse:" * ws * Cg(fontname, "kpse")
                         + P"my:" * ws * Cg(fontname, "my")
 local unprefixed        = Cg(fontname, "anon")
-local path_lookup       = lbrk * Cg(C((1-rbrk)^1), "path") * rbrk
+--- Bracketed “path” lookups: These may contain any character except
+--- for unbalanced brackets. A backslash escapes any following
+--- character. Everything inside the outermost brackets is treated as
+--- part of the filename or path to look up. Subfonts may be specified
+--- in parens *after* the closing bracket. Note that this differs from
+--- Xetex whose syntax expects the subfont passed inside the brackets,
+--- separated by a colon.
+local path_escape       = backslash / "" * patterns.utf8char
+local path_content      = path_escape + (1 - brackets)
+local path_balanced     = { (path_content + V(2))^1
+                          , lbrk * V(1)^-1 * rbrk }
+local path_lookup       = lbrk * Cg(Cs(path_balanced), "path") * rbrk
                         * subfont^-1
 
 --- features ----------------------------------------------------------

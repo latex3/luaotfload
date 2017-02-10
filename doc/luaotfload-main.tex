@@ -183,7 +183,7 @@ for a more formal description see figure \ref{font-syntax}.
       \alt                  <unquoted font request> ;
 
       <unquoted font request> ::= <specification>, [`:', <feature list> ]
-      \alt                        `[', <path lookup> `]', [ [`:'], <feature list> ] ;
+      \alt                        <path lookup>, [ [`:'], <feature list> ] ;
 
       <specification>    ::= <prefixed spec>, [ <subfont no> ], \{ <modifier> \}
       \alt                   <anon lookup>, \{ <modifier> \} ;
@@ -218,7 +218,13 @@ for a more formal description see figure \ref{font-syntax}.
 
       <anon lookup>      ::= {\sc tfmname} | <name lookup> ;
 
-      <path lookup>      ::= \{ {\sc all_characters} - `]' \} ;
+      <path lookup>      ::= `[', \{ <path content> \}, `]', [ <subfont no> ] ;
+
+      <path content>     ::= <path balanced>
+      \alt                   `\\', {\sc all_characters}
+      \alt                   {\sc all_characters} - `]'
+
+      <path balanced>    ::= `[', [ <path content> ], `]'
 
       <modifier>         ::= `/', (`I' | `B' | `BI' | `IB' | `S=', \{ {\sc digit} \} ) ;
 
@@ -608,7 +614,7 @@ obviously, \inlinecode{random}.
            For scripts derived from the Latin alphabet the value
            \inlinecode{latn} is good choice.
          }
-         the default value is \inlinecode{dlft}.
+         the default value is \inlinecode{dflt}.
          %
          Some fonts, including very popular ones by foundries like Adobe,
          do not assign features to the \inlinecode{dflt} script, in

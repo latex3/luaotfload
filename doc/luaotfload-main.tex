@@ -183,7 +183,7 @@ for a more formal description see figure \ref{font-syntax}.
       \alt                  <unquoted font request> ;
 
       <unquoted font request> ::= <specification>, [`:', <feature list> ]
-      \alt                        `[', <path lookup> `]', [ [`:'], <feature list> ] ;
+      \alt                        <path lookup>, [ [`:'], <feature list> ] ;
 
       <specification>    ::= <prefixed spec>, [ <subfont no> ], \{ <modifier> \}
       \alt                   <anon lookup>, \{ <modifier> \} ;
@@ -218,7 +218,13 @@ for a more formal description see figure \ref{font-syntax}.
 
       <anon lookup>      ::= {\sc tfmname} | <name lookup> ;
 
-      <path lookup>      ::= \{ {\sc all_characters} - `]' \} ;
+      <path lookup>      ::= `[', \{ <path content> \}, `]', [ <subfont no> ] ;
+
+      <path content>     ::= <path balanced>
+      \alt                   `\\', {\sc all_characters}
+      \alt                   {\sc all_characters} - `]'
+
+      <path balanced>    ::= `[', [ <path content> ], `]'
 
       <modifier>         ::= `/', (`I' | `B' | `BI' | `IB' | `S=', \{ {\sc digit} \} ) ;
 
@@ -234,6 +240,7 @@ for a more formal description see figure \ref{font-syntax}.
       <name character>   ::= {\sc all_characters} - ( `(' | `/' | `:' ) ;
 \endsyntaxfloat
 
+%% Below guarded space gets borked in index; why‽
 \beginsubsection{Prefix -- the \identifier{luaotfload}{ }Way}
 
 In \identifier{luaotfload}, the canonical syntax for font requests
@@ -329,13 +336,12 @@ The file names corresponding to the example font names above are
 
 \endsubsection
 
-\beginsubsection {Compatibility Layer}
-
-In addition to the regular prefixed requests, \identifier{luaotfload}
-accepts loading fonts the \XETEX way.
+\beginsubsection {Bracketed Lookups}
+\label{sec:conf}
+Bracketed lookups allow for arbitrary character content to be used in a
+definition.
 %
-There are again two modes: bracketed and unbracketed.
-A bracketed request looks as follows.
+A simple bracketed request looks follows the scheme
 
 \beginnarrower
   \nonproportional{\string\font\string\fontname\space = [}%
@@ -344,21 +350,41 @@ A bracketed request looks as follows.
 \endnarrower
 
 \noindent
-Inside the square brackets, every character except for a closing
-bracket is permitted, allowing for specifying paths to a font file.
+Inside the square brackets, every character except for a closing bracket is
+permitted, allowing for  arbitrary paths to a font file -- including Windows
+style paths with UNC or drive letter prepended -- to be specified.
 %
+The \identifier{Luaotfload} syntax differs from \XETEX in that the subfont
+selector goes \emphasis{after} the closing bracket:
+
+\beginnarrower
+  \nonproportional{\string\font\string\fontname\space = [}%
+  \meta{/path/to/file}%
+  \nonproportional{]}
+  \nonproportional{(}n\nonproportional{)}
+\endnarrower
+
 Naturally, path-less file names are equally valid and processed the
 same way as an ordinary \inlinecode {file:} lookup.
+
+\beginsubsection {Compatibility}
+
+In addition to the regular prefixed requests, \identifier{luaotfload}
+accepts loading fonts the \XETEX way.
+%
+There are again two modes: bracketed and unbracketed.
+For the bracketed variety, see above, \ref{sec:conf}.
+
+Unbracketed (or, for lack of a better word: \emphasis{anonymous})
+font requests resemble the conventional \TEX syntax.
 
 \beginnarrower
   \nonproportional{\string\font\string\fontname\space= }%
   \meta{font name}
   \dots
 \endnarrower
+\endsubsection
 
-Unbracketed (or, for lack of a better word: \emphasis{anonymous})
-font requests resemble the conventional \TEX syntax.
-%
 However, they have a broader spectrum of possible interpretations:
 before anything else, \identifier{luaotfload} attempts to load a
 traditional \TEX Font Metric (\abbrev{tfm} or \abbrev{ofm}).
@@ -435,6 +461,13 @@ name.\footnote{%
 \beginlisting
   \font \cambriamain = "file:cambria.ttc(0)" at 10pt
   \font \cambriamath = "file:cambria.ttc(1)" at 10pt
+\endlisting
+
+and likewise, requesting subfont inside a TTC container by path:
+
+\beginlisting
+  \font \asanamain = "[/home/typesetter/.fonts/math/asana.ttc](0):mode=node;+tlig" at 10pt
+  \font \asanamath = "[/home/typesetter/.fonts/math/asana.ttc](1):mode=base" at 10pt
 \endlisting
 
 \endsubsubsection
@@ -608,7 +641,7 @@ obviously, \inlinecode{random}.
            For scripts derived from the Latin alphabet the value
            \inlinecode{latn} is good choice.
          }
-         the default value is \inlinecode{dlft}.
+         the default value is \inlinecode{dflt}.
          %
          Some fonts, including very popular ones by foundries like Adobe,
          do not assign features to the \inlinecode{dflt} script, in

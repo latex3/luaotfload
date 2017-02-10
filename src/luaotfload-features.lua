@@ -1274,9 +1274,17 @@ local tlig_specification = {
         type      = "substitution",
         features  = everywhere,
         data      = {
-            [0x0022] = 0x201D,                   -- quotedblright
-            [0x0027] = 0x2019,                   -- quoteleft
-            [0x0060] = 0x2018,                   -- quoteright
+            --- quotedblright:
+            --- " (QUOTATION MARK)   → ” (RIGHT DOUBLE QUOTATION MARK)
+            [0x0022] = 0x201D,
+
+            --- quoteleft:
+            --- ' (APOSTROPHE)       → ’ (RIGHT SINGLE QUOTATION MARK)
+            [0x0027] = 0x2019,
+
+            --- quoteright:
+            --- ` (GRAVE ACCENT)     → ‘ (LEFT SINGLE QUOTATION MARK)
+            [0x0060] = 0x2018,
         },
         flags     = noflags,
         order     = { "tlig" },
@@ -1286,13 +1294,43 @@ local tlig_specification = {
         type     = "ligature",
         features = everywhere,
         data     = {
-            [0x2013] = {0x002D, 0x002D},         -- endash
-            [0x2014] = {0x002D, 0x002D, 0x002D}, -- emdash
-            --- next three originate in T1 encoding; Xetex applies
-            --- them too
-            [0x201E] = {0x002C, 0x002C},         -- quotedblbase
-            [0x00AB] = {0x003C, 0x003C},         -- LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
-            [0x00BB] = {0x003E, 0x003E},         -- RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
+
+            --- endash:
+            --- [--] (HYPHEN-MINUS, HYPHEN-MINUS)                   → – (EN DASH)
+            [0x2013] = {0x002D, 0x002D},
+
+            --- emdash:
+            --- [---] (HYPHEN-MINUS, HYPHEN-MINUS, HYPHEN-MINUS)    → — (EM DASH)
+            [0x2014] = {0x002D, 0x002D, 0x002D},
+
+            --- quotedblleft:
+            --- [''] (GRAVE ACCENT, GRAVE ACCENT)                   → “ (LEFT DOUBLE QUOTATION MARK)
+            [0x201C] = {0x0060, 0x0060},
+
+            --- quotedblright:
+            --- [``] (APOSTROPHE, APOSTROPHE)                       → ” (RIGHT DOUBLE QUOTATION MARK)
+            [0x201D] = {0x0027, 0x0027},
+
+            --- exclamdown:
+            --- [!'] (EXCLAMATION MARK, GRAVE ACCENT)               → ¡ (INVERTED EXCLAMATION MARK)
+            [0x00A1] = {0x0021, 0x0060},
+
+            --- questiondown:
+            --- [?'] (QUESTION MARK, GRAVE ACCENT)                  → ¡ (INVERTED EXCLAMATION MARK)
+            [0x00BF] = {0x003F, 0x0060},
+
+            --- next three originate in T1 encoding (Xetex applies them too)
+            --- quotedblbase:
+            --- [,,] (COMMA, COMMA)                                 → ¡ (DOUBLE LOW-9 QUOTATION MARK)
+            [0x201E] = {0x002C, 0x002C},
+
+            --- LEFT-POINTING DOUBLE ANGLE QUOTATION MARK:
+            --- [,,] (LESS-THAN SIGN, LESS-THAN SIGN)               → ¡ (LEFT-POINTING ANGLE QUOTATION MARK)
+            [0x00AB] = {0x003C, 0x003C},
+
+            --- RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK:
+            --- [,,] (GREATER-THAN SIGN, GREATER-THAN SIGN)         → ¡ (RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK)
+            [0x00BB] = {0x003E, 0x003E},
         },
         flags    = noflags,
         order    = { "tlig" },

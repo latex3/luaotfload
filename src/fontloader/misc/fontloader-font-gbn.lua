@@ -37,6 +37,7 @@ local getdisc     = nuts.getdisc
 local setchar     = nuts.setchar
 local setlink     = nuts.setlink
 local setprev     = nuts.setprev
+local nodetail    = nuts.tail
 
 -- from now on we apply ligaturing and kerning here because it might interfere with complex
 -- opentype discretionary handling where the base ligature pass expect some weird extra
@@ -200,21 +201,15 @@ function nodes.handlers.nodepass(head)
                 local stop  = range[2]
                 if start then
                     local front = nuthead == start
-                    local prev, next
+                    if not stop then
+                        stop = nodetail(start)
+                    end
                     if stop then
-                        next = getnext(stop)
                         start, stop = ligaturing(start,stop)
                         start, stop = kerning(start,stop)
-                    else
-                        prev  = getprev(start)
-                        start = ligaturing(start)
-                        start = kerning(start)
-                    end
-                    if prev then
-                        setlink(prev,start)
-                    end
-                    if next then
-                        setlink(stop,next)
+                    elseif start then -- safeguard
+                        start, stop = ligaturing(start,stop)
+                        start, stop = kerning(start,stop)
                     end
                     if front and nuthead ~= start then
                         head = tonode(start)

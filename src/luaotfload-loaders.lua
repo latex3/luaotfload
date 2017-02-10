@@ -151,6 +151,11 @@ do
       logreport ("both", 0, "loaders", "   > fontname %q", result.fontname or "<nil>")
       logreport ("both", 0, "loaders", "   > fullname %q", result.fullname or "<nil>")
       logreport ("both", 0, "loaders", "   > type %s",     result.type     or "<nil>")
+      local spec = result.specification
+      if spec then
+        logreport ("both", 0, "loaders", "   > file %q",     spec.filename or "<nil>")
+        logreport ("both", 0, "loaders", "   > subfont %s",  spec.sub      or "<nil>")
+      end
       return result
     end
   end

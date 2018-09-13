@@ -65,15 +65,22 @@ Here are the recommended installation methods (preferred first).
    Alternatively, try your (TeX or Linux) distribution's package management
    system.
 
-2. 
+2.  
+
     a. Download luaotfload.tds.zip from CTAN.
+
     b. Unzip it at the root of one or your TDS trees.
+
     c. You may need to update some filename database after, see your TeX
       distribution's manual for details.
 
+
 3. 
+    
     a. Grab the sources from CTAN or github.
+    
     b. Run 'make install DESTDIR=/path/to/texmf'.
+    
     c. See 2c.
 
 4. Try to figure it out by looking at the Makefile and comments in the sources.

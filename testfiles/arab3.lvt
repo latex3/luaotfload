@@ -1,0 +1,70 @@
+% !Mode:: "TeX:UTF-8:Main"
+% Date: 01.09.2018
+% Description: demonstrates the use of arabluatex. arabtex input is
+% replaced with Arabic Unicode.
+% Requires: arabluatex package
+% Source/Links:
+% https://ctan.org/pkg/arabluatex
+% Remarks:
+% Subtending marks are rendered correctly with this version of
+% luaotfload.
+
+\input regression-test.tex\relax
+\documentclass{article}
+
+
+\pagestyle{empty}
+
+\usepackage{arabluatex}
+\newarbmark{sly}{\arbcolor[red]{^^^^06d6}}{}
+\newarbmark{jim}{\arbcolor[red]{^^^^06da}}{}
+\newarbmark{anum}{^^^^0600}{}
+\newarbmark{ayear}{^^^^0601}{}
+\newarbmark{afn}{^^^^0602}{}
+\newarbmark{apage}{^^^^0603}{}
+\newarbmark{asmv}{^^^^0604}{}
+\newarbmark{aeoa}{^^^^06dd}{}
+\newcommand{\ayah}[1]{#1\arbmark{aeoa}}
+
+\directlua{
+
+function test (head, g)
+  texio.write_nl('')
+  for item in node.traverse(head) do
+    if item.id == node.id'glyph' then
+      texio.write('<' .. item.char .. '>')
+    elseif item.id == node.id'dir' then
+      texio.write('<' .. item.dir .. '>')
+    else
+      texio.write('[' .. item.id .. ':' .. (item.subtype or '?') .. ']')
+    end
+  end
+  return head
+end
+
+luatexbase.add_to_callback("pre_linebreak_filter", test, "test")
+luatexbase.add_to_callback("hpack_filter", test, "test")
+}
+
+
+\begin{document}
+\START
+
+\SetArbDflt
+
+\begin{tabular}{lll}
+  Arabic mark & Unicode code point & Example\\
+  Arabic number sign & 0600 & \arb{1234\arbmark{anum}}\\
+  Arabic sign sanah & 0601 & \arb{2018\arbmark{ayear}}\\
+  Arabic footnote marker & 0602 & \arb{12\arbmark{afn}}\\
+  Arabic sign safha & 0603 & \arb{123\arbmark{apage}}\\
+  Arabic sign samvat & 0604 & \arb{1234\arbmark{asmv}}\\
+  Arabic end of ayah & 06DD & \arb{123\arbmark{aeoa}}
+  \end{tabular}
+
+
+\end{document}
+
+
+
+

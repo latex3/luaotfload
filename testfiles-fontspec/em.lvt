@@ -1,0 +1,22 @@
+\input{fontspec-testsetup.tex}
+\usepackage{fontspec}
+\setmainfont{texgyrepagella}[
+  Extension = .otf,
+  UprightFont = *-regular ,
+  ItalicFont  = *-italic  ,
+  BoldFont    = *-bold    ,
+  BoldItalicFont = *-bolditalic ,
+]
+\begin{document}
+
+\MSG{Checking default emph behaviour.}
+
+hello \CURRNFSS
+\emph{hello \CURRNFSS
+  \emph{hello \CURRNFSS
+    \emph{hello \CURRNFSS
+      \emph{hello \CURRNFSS
+        \emph{hello \CURRNFSS
+        }}}}}
+
+\end{document}

@@ -1,0 +1,20 @@
+% !Mode:: "TeX:UTF-8:Main"
+% Date: 26.06.2018
+% Test luafont-duckchess
+% need to reconsider this
+\input regression-test.tex\relax
+
+\documentclass{article}
+
+%better use a unique name as original to avoid problems with travis
+\font\duckchessfont =
+  [\directlua{tex.sprint(kpse.find_file("luafont-duckchess.lua","misc fonts"))}]:mode=node;+liga;+tlig;original=lmsans10regular
+
+\begin{document}
+\showoutput
+\duckchessfont
+1. 
+\START Nf3 
+\newpage
+\END
+\end{document}

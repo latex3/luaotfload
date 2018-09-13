@@ -1,0 +1,64 @@
+\input{fontspec-testsetup.tex}
+\usepackage{fontspec}
+\begin{document}
+\makeatletter
+
+\TIMO\SEPARATOR\OMIT
+
+\MSG{Loading a font:}
+\setmainfont{texgyretermes-regular.otf}
+\CURRNFSS
+
+\MSG{Adding a colour:}
+\addfontfeatures{Color = AA00AA}
+\CURRNFSS
+
+\MSG{Back to normalfont:}
+\normalfont
+\CURRNFSS
+
+\MSG{Open group and add a different colour:}
+\begingroup
+\addfontfeatures{Color = 00AAAA}
+\CURRNFSS
+
+\MSG{End the group:}
+\endgroup
+\CURRNFSS
+
+
+
+
+\TIMO\SEPARATOR\OMIT
+\MSG{The following demonstrates strange behaviour to be wary of.}
+
+\setmainfont{texgyrepagella-regular.otf}
+\CURRNFSS
+\addfontfeatures{Color = AA00AA,NFSSFamily=\rmdefault}
+\CURRNFSS
+\setmainfont{texgyrepagella-regular.otf}
+\CURRNFSS
+
+
+
+\TIMO\SEPARATOR\OMIT
+\MSG{And check NFSSFamily use inside a group.}
+
+\MSG{Reload another font:}
+\setmainfont{texgyreheros-regular.otf}
+\CURRNFSS
+
+\MSG{Open group and add a different colour,  without changing family:}
+\begingroup
+\addfontfeatures{Color = 00AAAA,NFSSFamily=\rmdefault}
+\CURRNFSS
+
+\MSG{End the group:}
+\endgroup
+\CURRNFSS
+
+
+\TIMO\SEPARATOR\OMIT
+
+
+\end{document}

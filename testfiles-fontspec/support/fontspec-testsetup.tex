@@ -1,0 +1,64 @@
+
+\input{regression-test.tex}
+\documentclass{article}
+\PassOptionsToPackage{check-declarations}{expl3}
+\usepackage{geometry}
+\geometry{
+  papersize={9cm,6cm},margin=0.5cm
+}
+\pagestyle{empty}
+
+\tracingoutput=1\relax
+
+\newcommand\XETEXONLY{%
+  \ifdefined\directlua
+    \def\NEXT{\TIMO\typeout{*** XeTeX-only test ***}\end{document}\endinput}\fi
+  \csname NEXT\endcsname
+}
+\newcommand\LUATEXONLY{%
+  \ifdefined\directlua\else
+    \def\NEXT{\TIMO\typeout{*** LuaTeX-only test ***}\end{document}\endinput}\fi
+  \csname NEXT\endcsname
+}
+
+\newcommand\MSG[1]{%
+  \TIMO
+  \typeout{#1}%
+  \OMIT
+}
+
+\newcommand\FONTNAME{%
+  \TIMO
+  \typeout{\fontname\font}%
+  \OMIT
+}
+
+\makeatletter
+\newcommand\CURRNFSS{%
+  \TIMO
+  \typeout{\curr@fontshape:^^J\space\space\fontname\font}%
+  \OMIT
+}
+\makeatother
+
+\AtBeginDocument{\def\=========================={%
+  \TIMO
+  \SEPARATOR
+  \OMIT
+}}
+
+\newbox\TESTBOX
+\newenvironment{fstest}
+  {%
+   \begingroup
+   \TIMO
+  }
+  {%
+   \clearpage
+   \OMIT
+   \endgroup
+  }
+
+\AtBeginDocument{\START\OMIT}
+
+\AtEndDocument{\OMIT}

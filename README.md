@@ -1,6 +1,4 @@
-*******************************************************************************
-                            The Luaotfload Package
-*******************************************************************************
+# The Luaotfload Package
 
 Luaotfload is an adaptation of the ConTeXt font loading system for the Plain
 and LaTeX formats. It allows OpenType fonts to be loaded with font features
@@ -15,16 +13,22 @@ provided by this package.
 
 Please see the documentation luaotfload.pdf for more information.
 
-This package is developed by the LuaLaTeX dev team on
-<http://github.com/lualatex/luaotfload>. Please report bugs to the issue
-tracker there.
+## New September 2018
+
+This package is currently maintained at 
+<https://github.com/u-fischer/luaotfload>. The active development branch is called `dev-2.9` and should lead to a new 
+CTAN version. The master branch is currently frozen. 
+ 
+Issues can be reported at the issue tracker or at the old issue tracker on 
+<http://github.com/lualatex/luaotfload>. 
+
 
 The development for LuaLaTeX is discussed on the lualatex-dev mailing list. See
 <http://www.tug.org/mailman/listinfo/lualatex-dev> for details.
 
 
-Responsible Persons
--------------------------------------------------------------------------------
+## Responsible Persons
+
 The following people have contributed to this package.
 
 Khaled Hosny             <khaledhosny@eglug.org>
@@ -41,8 +45,7 @@ Philipp Stephani         <st_philipp@yahoo.de>
 David Carlisle           <d.p.carlisle@gmail.com>
 Yan Zhou                 @zhouyan
 
-Installation
--------------------------------------------------------------------------------
+## Installation
 
 Here are the recommended installation methods (preferred first).
 
@@ -61,8 +64,7 @@ Here are the recommended installation methods (preferred first).
 
 4. Try to figure it out by looking at the Makefile and comments in the sources.
 
-Prerequisites
--------------------------------------------------------------------------------
+## Prerequisites
 
 You need GNU make to use the Makefile. The executable may be called "gmake" on
 your system.
@@ -70,8 +72,7 @@ your system.
 Typesetting the documentation requires LuaTeX and GraphViz. The Docutils are
 needed to generate the manpage.
 
-License
--------------------------------------------------------------------------------
+## License
 
 The luaotfload bundle, as a derived work of ConTeXt, is distributed under the
 GNU GPLv2 license:
@@ -82,7 +83,7 @@ This license requires the license itself to be distributed with the work. For
 its full text see the documentation in luaotfload.pdf.
 
 
-                                  DISCLAIMER
+##  DISCLAIMER
 
         This program is free software; you can redistribute it and/or
         modify it under the terms of the GNU General Public License

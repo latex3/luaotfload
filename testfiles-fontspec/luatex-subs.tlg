@@ -1,0 +1,20 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+> \box...=
+\hbox(0.0+0.0)x0.0, direction TLT
+.\TU/texgyrepagella-regualr.otf(0)/m/n/10 0
+.\TU/texgyrepagella-regualr.otf(0)/m/n/10 1
+.\TU/texgyrepagella-regualr.otf(0)/m/n/10 2
+! OK.
+<to be read again> 
+\begingroup 
+l. ...\TIMO\showbox1\OMIT
+> \box...=
+\hbox(7.0+0.2)x17.78, direction TLT
+.\TU/texgyrepagella-regular.otf(0)/m/n/10 0
+.\TU/texgyrepagella-regular.otf(0)/m/n/10 A
+.\TU/texgyrepagella-regular.otf(0)/m/n/10 2
+! OK.
+<to be read again> 
+\begingroup 
+l. ...\TIMO\showbox1\OMIT

@@ -1,0 +1,18 @@
+
+\input{umtest-preamble}
+\usepackage{amsmath}
+\usepackage{unicode-math}
+\begin{document}
+
+\MSG{JUST TEST COMPILATION}
+
+\[
+  r = s₁₂
+\]
+
+\begin{align*}
+  r = s₁₂
+\end{align*}
+
+\end{document}
+

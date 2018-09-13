@@ -1,0 +1,34 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\input{regression-test}
+%\START %to debug pathes.
+\documentclass{article}
+\usepackage{luacode}
+
+\begin{document}
+\START
+\showoutput
+abc
+
+%\directlua{info = status.list()
+%texio.write_nl(table.serialize(info))}
+\begin{luacode}
+
+texio.write_nl(luaotfload.version .. " with " .. string.gsub(tostring(config.luaotfload.run.fontloader),"[%-]","xxx"))
+
+-- t = {kpse.lookup("luaotfload-main.lua",{["all"]=true})}
+--
+-- texio.write_nl(table.serialize(t))
+--
+--
+-- t = {kpse.lookup("luaotfload-status.lua",{["all"]=true})}
+--
+-- texio.write_nl(table.serialize(t))
+--
+-- t = {kpse.lookup("fontloader-2018-09-19.lua",{["all"]=true})} or {"blub"}
+--
+-- texio.write_nl(table.serialize(t))
+
+\end{luacode}
+
+
+\end{document}

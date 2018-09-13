@@ -1,0 +1,32 @@
+\input{fontspec-testsetup.tex}
+\usepackage{fontspec}
+\setmainfont{SourceCodePro}[
+  Extension = .otf ,
+  UprightFont = *-Light ,
+  BoldFont = *-Regular ,
+  FontFace = {k}{n}{*-Black} ,
+]
+\begin{document}
+
+\MSG{Define three levels of strong.}
+\strongfontdeclare{\bfseries,\fontseries{k}\selectfont}
+
+%light
+\MSG{"Light":}
+\CURRNFSS
+%
+\strong{regular
+\MSG{"Regular":}
+\CURRNFSS
+%
+\strong{black
+\MSG{"Black":}
+\CURRNFSS
+%
+\strong{not sure
+\MSG{"Now what? (same again)":}
+\CURRNFSS
+%
+}}}
+
+\end{document}

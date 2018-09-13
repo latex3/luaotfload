@@ -1,0 +1,15 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Define three levels of strong.
+"Light":
+TU/SourceCodePro(0)/m/n:
+  [SourceCodePro-Light.otf]:mode=node;script=latn;language=DFLT;+tlig;
+"Regular":
+TU/SourceCodePro(0)/bx/n:
+  [SourceCodePro-Regular.otf]:mode=node;script=latn;language=DFLT;+tlig;
+"Black":
+TU/SourceCodePro(0)/k/n:
+  [SourceCodePro-Black.otf]:mode=node;script=latn;language=DFLT;+tlig;
+"Now what? (same again)":
+TU/SourceCodePro(0)/k/n:
+  [SourceCodePro-Black.otf]:mode=node;script=latn;language=DFLT;+tlig;

@@ -1,0 +1,34 @@
+\input{fontspec-testsetup.tex}
+\usepackage{fontspec}
+\begin{document}
+\begin{fstest}
+\ExplSyntaxOn
+\def\INTEND{\MSG{CORRECT}}
+\def\WRONG {\MSG{WRONG}}
+
+\OMIT
+\fontspec{texgyrepagella-regular.otf}
+\TIMO
+
+\IfFontFeatureActiveTF{Numbers=Uppercase}{\WRONG}{\INTEND}
+
+\OMIT
+\addfontfeatures{Numbers=Uppercase}
+\TIMO
+
+\IfFontFeatureActiveTF{Numbers=Uppercase}{\INTEND}{\WRONG}
+
+\IfFontFeatureActiveTF{Language=French}{\WRONG}{\INTEND}
+
+\IfFontFeatureActiveTF{Language=Default}{\INTEND}{\WRONG}
+
+\sys_if_engine_xetex:T {
+  \IfFontFeatureActiveTF{Renderer=OpenType}{\INTEND}{\WRONG}
+}
+\sys_if_engine_luatex:T {
+  \IfFontFeatureActiveTF{Renderer=Full}{\INTEND}{\WRONG}
+}
+
+\ExplSyntaxOff
+\end{fstest}
+\end{document}

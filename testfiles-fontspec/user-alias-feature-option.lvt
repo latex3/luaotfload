@@ -1,0 +1,17 @@
+\input{fontspec-testsetup.tex}
+\usepackage{fontspec}
+\begin{document}
+
+\aliasfontfeature{Numbers}{123}
+\aliasfontfeatureoption{Numbers}{Lining}{UC}
+\aliasfontfeatureoption{Numbers}{OldStyle}{LC}
+
+\fontspec[123=UC]{texgyrepagella-regular.otf}
+Numbers: 12345
+\CURRNFSS
+
+\fontspec[123=LC]{texgyrepagella-regular.otf}
+Numbers: 12345
+\CURRNFSS
+
+\end{document}

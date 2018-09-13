@@ -1,0 +1,51 @@
+% !Mode:: "TeX:UTF-8:Main"
+% Date: 11.05.2018
+% Description: adds "Letters=Uppercase" to a font which hasn't this
+% open type feature
+% Requires: external support/font-pont-lower-uppercase.lua, which gives a table of
+% lowercase - uppercase pairs.
+% Source:
+% https://tex.stackexchange.com/questions/370799/fill-a-lua-table-with-lowercase-uppercase-pairs
+% open questions: can copy&paste give lowercase again?
+\input regression-test.tex\relax
+
+\documentclass{article}
+\directlua
+{
+  local lowertouppercase = require "fontpond-lower-uppercase"
+  lowertouppercase["ß"] = {"S","S"}
+
+  fonts.handlers.otf.addfeature
+   {
+     name = "vircase",
+     type = "multiple",
+     data = lowertouppercase
+   }
+}
+
+\usepackage{fontspec}
+
+\setmainfont{OpenSans-Regular.ttf}%
+
+\usepackage{microtype}
+\begin{document}
+Grüße an die Welt! VA
+
+Grüße an die Welt! VA
+
+The code adds a feature to a font which will set everything in uppercase.
+
+It works for all chars and scripts in the font: αυτό είναι ελληνικό
+
+It is possible to fine tune the uppercase (here SS for ß instead of an uppercase ß).
+
+\START\showoutput
+\addfontfeature{RawFeature=+vircase}
+Grüße an die Welt! VA
+
+The code adds a feature to a font which will set everything in uppercase.
+
+It works for all chars and scripts in the font: αυτό είναι ελληνικό
+
+
+\end{document}

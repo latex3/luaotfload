@@ -1,0 +1,103 @@
+\input{fontspec-testsetup.tex}
+\usepackage{fontspec}
+\setmainfont{texgyrepagella}[
+  Extension = .otf,
+  UprightFont = *-regular ,
+  ItalicFont  = *-italic  ,
+  BoldFont    = *-bold    ,
+  BoldItalicFont = *-bolditalic ,
+]
+\begin{document}
+
+\==========================
+\MSG{Declare three emph levels:}
+\==========================
+
+\emfontdeclare{ \itshape , \upshape\scshape , \itshape }
+
+hello \CURRNFSS
+\emph{hello \CURRNFSS
+  \emph{hello \CURRNFSS
+    \emph{hello \CURRNFSS
+      \emph{hello \CURRNFSS
+        \emph{hello \CURRNFSS
+        }}}}}
+
+\==========================
+\MSG{Check manually entering a level of emph: (should be same as above)}
+\==========================
+
+\normalfont
+hello \CURRNFSS
+\textit{hello \CURRNFSS
+  \emph{hello \CURRNFSS
+    \emph{hello \CURRNFSS
+      \emph{hello \CURRNFSS
+        \emph{hello \CURRNFSS
+        }}}}}
+
+
+\==========================
+\MSG{Check just one emphasis (itshape):}
+\==========================
+
+\normalfont
+\emfontdeclare{\itshape}
+hello \CURRNFSS
+\emph{hello \CURRNFSS
+  \emph{hello \CURRNFSS
+    \emph{hello \CURRNFSS
+      \emph{hello \CURRNFSS
+        \emph{hello \CURRNFSS
+        }}}}}
+
+
+\==========================
+\MSG{As above with bold; three emph:}
+\==========================
+
+\emfontdeclare{ \itshape , \upshape\scshape , \itshape }
+\bfseries
+
+hello \CURRNFSS
+\emph{hello \CURRNFSS
+  \emph{hello \CURRNFSS
+    \emph{hello \CURRNFSS
+      \emph{hello \CURRNFSS
+        \emph{hello \CURRNFSS
+        }}}}}
+
+\==========================
+\MSG{As above with bold; manual emph:}
+\==========================
+
+\normalfont
+\bfseries
+
+hello \CURRNFSS
+\textit{hello \CURRNFSS
+  \emph{hello \CURRNFSS
+    \emph{hello \CURRNFSS
+      \emph{hello \CURRNFSS
+        \emph{hello \CURRNFSS
+        }}}}}
+
+\==========================
+\MSG{As above with bold; one emph:}
+\==========================
+
+\normalfont
+\bfseries
+\emfontdeclare{\itshape}
+
+hello \CURRNFSS
+\emph{hello \CURRNFSS
+  \emph{hello \CURRNFSS
+    \emph{hello \CURRNFSS
+      \emph{hello \CURRNFSS
+        \emph{hello \CURRNFSS
+        }}}}}
+
+\==========================
+
+\end{document}

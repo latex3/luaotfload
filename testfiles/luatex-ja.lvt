@@ -1,0 +1,11 @@
+\input {regression-test}
+\documentclass{article}
+\usepackage{luatexja}
+
+\begin{document}
+\START \showoutput
+{\mcfamily   日本語}
+
+{\gtfamily  日本語}
+
+\end{document} 

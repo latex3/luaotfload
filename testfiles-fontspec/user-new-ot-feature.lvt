@@ -1,0 +1,9 @@
+\input{fontspec-testsetup.tex}
+\usepackage{fontspec}
+\begin{document}
+
+\newopentypefeature{Style}{AllAlts}{+aalt}
+\setmainfont{texgyretermes-regular.otf}[Style=AllAlts]
+\CURRNFSS
+
+\end{document}

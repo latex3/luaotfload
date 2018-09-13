@@ -1,5 +1,9 @@
 Change History
 --------------
+2018-09 development of v2.9 begins
+    * added various testfiles for the l3build system/travis tests to the github repository
+    * 
+    
 2017-01-29, luaotfload v2.8:
     * Latest fontloader code.
     * Support for Luatex 1.0.

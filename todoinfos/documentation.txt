@@ -1,0 +1,7 @@
+%% man files ?
+%% in doc
+pandoc luaotfload.conf.rst -f rst -t man -o luaotfload.conf.5
+
+pandoc luaotfload-tool.rst -f rst -t man -o luaotfload-tool.1
+
+%% to pdf by ctan?

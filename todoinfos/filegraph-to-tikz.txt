@@ -1,0 +1,20 @@
+filegraph:
+- should be converted to tikz to get rid of external depency
+- larger fontsize (unreadable currently)
+
+
+pdf: texdoc -l luaotfload and then filegraph.pdf
+source dot-file: https://github.com/u-fischer/luaotfload/blob/master/doc/filegraph.dot
+
+
+\documentclass{ltxdoc}
+\usepackage{fontspec}
+\setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
+\usepackage{tikz}
+
+\begin{document}
+\sffamily %use in picture
+\begin{tikzpicture}
+\node{abc};
+\end{tikzpicture}
+\end{document}

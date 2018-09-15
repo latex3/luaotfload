@@ -41,7 +41,12 @@ typesetfiles     = {"luaotfload-latex.tex"}
 -- installation
 tdsroot = "luatex"
 
-
+sourcefiles  = {
+                "luaotfload.sty",
+                "**/*.lua"
+                }
+                
+installfiles = {"*.sty","*.lua"}
 
 -- l3build settings for tags:
 
@@ -90,6 +95,12 @@ function update_tag (file,content,tagname,tagdate)
  return content
  end
 
+-- install directory is the texmf-tree
+-- print(options["texmfhome"])
+-- can this work??
+-- options["texmfhome"] = lfs.currentdir().."/texmf"
+-- this works:
+-- os.setenv("TEXMFHOME",lfs.currentdir().."/texmf")
 
 kpse.set_program_name ("kpsewhich")
 if not release_date then

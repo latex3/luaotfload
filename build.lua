@@ -21,8 +21,7 @@ checkruns = 3
 
 -- l3build settings local folder descriptions 
 sourcefiledir = "./src"
-docfiledir    = "./doc" -- and some in misc ...
-
+docfiledir    = "./doc" 
 
 -- l3build settings for CTAN/install target
 -- documentation
@@ -36,7 +35,8 @@ docfiles = {
   "README.md" -- perhaps later a README.md in doc which is different to the github readme
   }
 
-typesetfiles = {"luaotfload-latex.tex"}
+typesetdemofiles = {"filegraph.tex"}
+typesetfiles     = {"luaotfload-latex.tex"}
 
 -- installation
 tdsroot = "luatex"

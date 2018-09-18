@@ -43,7 +43,9 @@ tdsroot = "luatex"
 
 sourcefiles  = {
                 "luaotfload.sty",
-                "**/*.lua"
+                "**/*.lua",
+                "luaotfload-blacklist.cnf",
+                
                 }
                 
 installfiles = {"*.sty","*.lua"}

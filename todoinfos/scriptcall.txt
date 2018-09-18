@@ -1,0 +1,22 @@
+-- script calls: %
+
+-- mkcharacters
+-- this create a new luaotfload-character.lua.
+-- with current context one get different (more) table entries
+-- requirements char-def.lua and char-ini.lua
+
+ texlua mkcharacters ./ luaotfload-characters.lua
+
+-- mkglyphlist
+-- without arguments it does retrieve the glyphlist but the generation fails.
+-- manual copy works, but the result is identical to the existing version.
+
+ texlua mkglyphlist glyphlist.txt luaotfload-glyphlist.lua
+
+
+-- mkimport: this imports the files from context. Currently not used until we unterstand it better.
+
+-- mkstatus: updates luaotfload-status.
+-- should all the subfiles be removed?
+
+-- mktests: quite unclear what the tests need to work. Better rely on l3build tests. 

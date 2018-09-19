@@ -239,6 +239,7 @@ local context_modules = {
   { false, "l-file"     },
   { false, "l-boolean"  },
   { false, "l-math"     },
+  { false, "l-unicode"  }, -- NEW UF 19.09.2018
   { false, "util-str"   },
   { false, "util-fil"   },
 
@@ -247,13 +248,16 @@ local context_modules = {
   { ctx,   "data-con"          },
   { ltx,   "luatex-basics-nod" },
   { ctx,   "font-ini"          },
+  { ltx,   "luatex-fonts-mis"  }, -- NEW UF 19.09.2018
   { ctx,   "font-con"          },
   { ltx,   "luatex-fonts-enc"  },
   { ctx,   "font-cid"          },
   { ctx,   "font-map"          },
   { ltx,   "luatex-fonts-syn"  },
+  { ctx,   "font-vfc"          }, -- NEW UF 19.09.2018
   { ctx,   "font-oti"          },
   { ctx,   "font-otr"          },
+  { ctx,   "font-ott"          }, 
   { ctx,   "font-cff"          },
   { ctx,   "font-ttf"          },
   { ctx,   "font-dsp"          },
@@ -272,8 +276,15 @@ local context_modules = {
   { ctx,   "font-tfm"          },
   { ctx,   "font-lua"          },
   { ctx,   "font-def"          },
+  { ltx,   "luatex-fonts-def"  },  
   { ltx,   "luatex-fonts-ext"  },
-  { ctx,   "font-gbn"          },
+  { ctx,   "font-imp-tex"      },
+  { ctx,   "font-imp-ligatures"},
+  { ctx,   "font-imp-italics"  },
+  { ctx,   "font-imp-effects"  },
+  { ltx,   "luatex-fonts-lig"  },
+  { ltx,   "luatex-fonts-gbn"  },
+  
 
 } --[[context_modules]]
 

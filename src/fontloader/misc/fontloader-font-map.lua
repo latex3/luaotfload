@@ -10,14 +10,16 @@ local tonumber, next, type = tonumber, next, type
 
 local match, format, find, concat, gsub, lower = string.match, string.format, string.find, table.concat, string.gsub, string.lower
 local P, R, S, C, Ct, Cc, lpegmatch = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.Ct, lpeg.Cc, lpeg.match
-local floor = math.floor
 local formatters = string.formatters
 local sortedhash, sortedkeys = table.sortedhash, table.sortedkeys
+local rshift = bit32.rshift
 
 local trace_loading = false  trackers.register("fonts.loading", function(v) trace_loading = v end)
 local trace_mapping = false  trackers.register("fonts.mapping", function(v) trace_mapping = v end)
 
 local report_fonts  = logs.reporter("fonts","loading") -- not otf only
+
+-- force_ligatures was true for a while so that these emoji's with bad names work too
 
 local force_ligatures = false  directives.register("fonts.mapping.forceligatures",function(v) force_ligatures = v end)
 
@@ -76,6 +78,9 @@ end
 local f_single = formatters["%04X"]
 local f_double = formatters["%04X%04X"]
 
+-- floor(x/256)  => rshift(x, 8)
+-- floor(x/1024) => rshift(x,10)
+
 -- 0.684 0.661 0,672 0.650 : cache at lua end (more mem)
 -- 0.682 0,672 0.698 0.657 : no cache (moderate mem i.e. lua strings)
 -- 0.644 0.647 0.655 0.645 : convert in c (less mem in theory)
@@ -86,7 +91,7 @@ local f_double = formatters["%04X%04X"]
 --         s = f_single(unicode)
 --     else
 --         unicode = unicode - 0x10000
---         s = f_double(floor(unicode/1024)+0xD800,unicode%1024+0xDC00)
+--         s = f_double(rshift(unicode,10)+0xD800,unicode%1024+0xDC00)
 --     end
 --     t[unicode] = s
 --     return s
@@ -145,7 +150,7 @@ local function tounicode16(unicode)
         return f_single(unicode)
     else
         unicode = unicode - 0x10000
-        return f_double(floor(unicode/1024)+0xD800,unicode%1024+0xDC00)
+        return f_double(rshift(unicode,10)+0xD800,unicode%1024+0xDC00)
     end
 end
 
@@ -157,33 +162,122 @@ local function tounicode16sequence(unicodes)
             t[l] = f_single(u)
         else
             u = u - 0x10000
-            t[l] = f_double(floor(u/1024)+0xD800,u%1024+0xDC00)
+            t[l] = f_double(rshift(u,10)+0xD800,u%1024+0xDC00)
         end
     end
     return concat(t)
 end
 
-local function tounicode(unicode,name)
-    if type(unicode) == "table" then
-        local t = { }
-        for l=1,#unicode do
-            local u = unicode[l]
-            if u < 0xD7FF or (u > 0xDFFF and u <= 0xFFFF) then
-                t[l] = f_single(u)
-            else
-                u = u - 0x10000
-                t[l] = f_double(floor(u/1024)+0xD800,u%1024+0xDC00)
-            end
+-- local function tounicode(unicode)
+--     if type(unicode) == "table" then
+--         local t = { }
+--         for l=1,#unicode do
+--             local u = unicode[l]
+--             if u < 0xD7FF or (u > 0xDFFF and u <= 0xFFFF) then
+--                 t[l] = f_single(u)
+--             else
+--                 u = u - 0x10000
+--                 t[l] = f_double(rshift(u,10)+0xD800,u%1024+0xDC00)
+--             end
+--         end
+--         return concat(t)
+--     else
+--         if unicode < 0xD7FF or (unicode > 0xDFFF and unicode <= 0xFFFF) then
+--             return f_single(unicode)
+--         else
+--             unicode = unicode - 0x10000
+--             return f_double(rshift(unicode,10)+0xD800,unicode%1024+0xDC00)
+--         end
+--     end
+-- end
+
+local unknown = f_single(0xFFFD)
+
+-- local function tounicode(unicode)
+--     if type(unicode) == "table" then
+--         local t = { }
+--         for l=1,#unicode do
+--             t[l] = tounicode(unicode[l])
+--         end
+--         return concat(t)
+--     elseif unicode >= 0x00E000 and unicode <= 0x00F8FF then
+--         return unknown
+--     elseif unicode >= 0x0F0000 and unicode <= 0x0FFFFF then
+--         return unknown
+--     elseif unicode >= 0x100000 and unicode <=  0x10FFFF then
+--         return unknown
+--     elseif unicode < 0xD7FF or (unicode > 0xDFFF and unicode <= 0xFFFF) then
+--         return f_single(unicode)
+--     else
+--         unicode = unicode - 0x10000
+--         return f_double(rshift(unicode,10)+0xD800,unicode%1024+0xDC00)
+--     end
+-- end
+
+-- local hash = table.setmetatableindex(function(t,k)
+--     local v
+--     if k >= 0x00E000 and k <= 0x00F8FF then
+--         v = unknown
+--     elseif k >= 0x0F0000 and k <= 0x0FFFFF then
+--         v = unknown
+--     elseif k >= 0x100000 and k <= 0x10FFFF then
+--         v = unknown
+--     elseif k < 0xD7FF or (k > 0xDFFF and k <= 0xFFFF) then
+--         v = f_single(k)
+--     else
+--         k = k - 0x10000
+--         v = f_double(rshift(k,10)+0xD800,k%1024+0xDC00)
+--     end
+--     t[k] = v
+--     return v
+-- end)
+--
+-- table.makeweak(hash)
+--
+-- local function tounicode(unicode)
+--     if type(unicode) == "table" then
+--         local t = { }
+--         for l=1,#unicode do
+--             t[l] = hash[unicode[l]]
+--         end
+--         return concat(t)
+--     else
+--         return hash[unicode]
+--     end
+-- end
+
+local hash = { }
+local conc = { }
+
+-- table.makeweak(hash)
+
+table.setmetatableindex(hash,function(t,k)
+    if type(k) == "table" then
+        local n = #k
+        for l=1,n do
+            conc[l] = hash[k[l]]
         end
-        return concat(t)
-    else
-        if unicode < 0xD7FF or (unicode > 0xDFFF and unicode <= 0xFFFF) then
-            return f_single(unicode)
-        else
-            unicode = unicode - 0x10000
-            return f_double(floor(unicode/1024)+0xD800,unicode%1024+0xDC00)
-        end
+        return concat(conc,"",1,n)
     end
+    local v
+    if k >= 0x00E000 and k <= 0x00F8FF then
+        v = unknown
+    elseif k >= 0x0F0000 and k <= 0x0FFFFF then
+        v = unknown
+    elseif k >= 0x100000 and k <= 0x10FFFF then
+        v = unknown
+    elseif k < 0xD7FF or (k > 0xDFFF and k <= 0xFFFF) then
+        v = f_single(k)
+    else
+        k = k - 0x10000
+        v = f_double(rshift(k,10)+0xD800,k%1024+0xDC00)
+    end
+    t[k] = v
+    return v
+end)
+
+local function tounicode(unicode)
+    return hash[unicode]
 end
 
 local function fromunicode16(str)
@@ -216,6 +310,8 @@ mappings.tounicode16         = tounicode16
 mappings.tounicode16sequence = tounicode16sequence
 mappings.fromunicode16       = fromunicode16
 
+-- mozilla emoji has bad lig names: name = gsub(name,"(u[a-f0-9_]+)%-([a-f0-9_]+)","%1_%2")
+
 local ligseparator = P("_")
 local varseparator = P(".")
 local namesplitter = Ct(C((1 - ligseparator - varseparator)^1) * (ligseparator * C((1 - ligseparator - varseparator)^1))^0)
@@ -239,7 +335,7 @@ local namesplitter = Ct(C((1 - ligseparator - varseparator)^1) * (ligseparator *
 
 do
 
-    local overloads = allocate {
+    local overloads = {
         IJ  = { name = "I_J",   unicode = { 0x49, 0x4A },       mess = 0x0132 },
         ij  = { name = "i_j",   unicode = { 0x69, 0x6A },       mess = 0x0133 },
         ff  = { name = "f_f",   unicode = { 0x66, 0x66 },       mess = 0xFB00 },
@@ -249,9 +345,12 @@ do
         ffl = { name = "f_f_l", unicode = { 0x66, 0x66, 0x6C }, mess = 0xFB04 },
         fj  = { name = "f_j",   unicode = { 0x66, 0x6A } },
         fk  = { name = "f_k",   unicode = { 0x66, 0x6B } },
+
+     -- endash = { name = "endash", unicode = 0x2013, mess = 0x2013 },
+     -- emdash = { name = "emdash", unicode = 0x2014, mess = 0x2014 },
     }
 
-    local o = { }
+    local o = allocate { }
 
     for k, v in next, overloads do
         local name = v.name
@@ -269,7 +368,7 @@ do
 
 end
 
-function mappings.addtounicode(data,filename,checklookups)
+function mappings.addtounicode(data,filename,checklookups,forceligatures)
     local resources = data.resources
     local unicodes  = resources.unicodes
     if not unicodes then
@@ -464,41 +563,54 @@ function mappings.addtounicode(data,filename,checklookups)
         checklookups(data,missing,nofmissing)
     end
 
-    -- todo: go lowercase
-
-    local collected = false
     local unicoded  = 0
- -- for du, glyph in next, descriptions do
-    for i=1,#dlist do
-        local du    = dlist[i]
-        local glyph = descriptions[du]
-        if glyph.class == "ligature" and (force_ligatures or not glyph.unicode) then
-            if not collected then
-                collected = fonts.handlers.otf.readers.getcomponents(data)
-                if not collected then
-                    break
+    local collected = fonts.handlers.otf.readers.getcomponents(data) -- neglectable overhead
+
+    local function resolve(glyph,u)
+        local n = #u
+        for i=1,n do
+            if u[i] > private then
+                n = 0
+                break
+            end
+        end
+        if n > 0 then
+            if n > 1 then
+                glyph.unicode = u
+            else
+                glyph.unicode = u[1]
+            end
+            unicoded = unicoded + 1
+        end
+    end
+
+    if not collected then
+        -- move on
+    elseif forceligatures or force_ligatures then
+        for i=1,#dlist do
+            local du = dlist[i]
+            if du >= private or (du >= 0xE000 and du <= 0xF8FF) then
+                local u  = collected[du] -- always tables
+                if u then
+                    resolve(descriptions[du],u)
                 end
             end
-            local u = collected[du] -- always tables
-            if u then
-                local n = #u
-                for i=1,n do
-                    if u[i] > private then
-                        n = 0
-                        break
+        end
+    else
+        for i=1,#dlist do
+            local du = dlist[i]
+            if du >= private or (du >= 0xE000 and du <= 0xF8FF) then
+                local glyph = descriptions[du]
+                if glyph.class == "ligature" and not glyph.unicode then
+                    local u = collected[du] -- always tables
+                    if u then
+                         resolve(glyph,u)
                     end
-                end
-                if n > 0 then
-                    if n > 1 then
-                        glyph.unicode = u
-                    else
-                        glyph.unicode = u[1]
-                    end
-                    unicoded = unicoded + 1
                 end
             end
         end
     end
+
     if trace_mapping and unicoded > 0 then
         report_fonts("%n ligature tounicode mappings deduced from gsub ligature features",unicoded)
     end

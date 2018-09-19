@@ -18,7 +18,7 @@ local P, S, C, Ct, Cc, Cs = lpeg.P, lpeg.S, lpeg.C, lpeg.Ct, lpeg.Cc, lpeg.Cs
 --
 --     function string.split(str,pattern)
 --         local t = { }
---         if #str > 0 then
+--         if str ~= "" then
 --             local n = 1
 --             for s in gmatch(str..pattern,"(.-)"..pattern) do
 --                 t[n] = s
@@ -72,6 +72,7 @@ end
 local stripper     = patterns.stripper
 local fullstripper = patterns.fullstripper
 local collapser    = patterns.collapser
+local nospacer     = patterns.nospacer
 local longtostring = patterns.longtostring
 
 function string.strip(str)
@@ -84,6 +85,10 @@ end
 
 function string.collapsespaces(str)
     return str and lpegmatch(collapser,str) or ""
+end
+
+function string.nospaces(str)
+    return str and lpegmatch(nospacer,str) or ""
 end
 
 function string.longtostring(str)
@@ -212,3 +217,24 @@ end
 
 string.quote   = string.quoted
 string.unquote = string.unquoted
+
+-- new
+
+if not string.bytetable then -- used in font-cff.lua
+
+    local limit = 5000 -- we can go to 8000 in luajit and much higher in lua if needed
+
+    function string.bytetable(str) -- from a string
+        local n = #str
+        if n > limit then
+            local t = { byte(str,1,limit) }
+            for i=limit+1,n do
+                t[i] = byte(str,i)
+            end
+            return t
+        else
+            return { byte(str,1,n) }
+        end
+    end
+
+end

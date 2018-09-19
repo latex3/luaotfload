@@ -82,7 +82,11 @@ else
     --ldx]]--
 
     metapost.report = metapost.report or function(...)
-        texio.write(format("<mplib: %s>",format(...)))
+        if logs.report then
+            logs.report("metapost",...)
+        else
+            texio.write(format("<mplib: %s>",format(...)))
+        end
     end
 
     --[[ldx--
@@ -230,7 +234,14 @@ else
             return ""
         end
 
-        function metapost.load(name)
+        local modes = {
+            scaled  = true,
+            decimal = true,
+            binary  = true,
+            double  = true,
+        }
+
+        function metapost.load(name,mode)
             local mpd = {
                 buffer   = { },
                 verbatim = { }
@@ -241,6 +252,7 @@ else
                 make_text   = function(...) return metapost.maketext (mpd,...) end,
                 run_script  = function(...) return metapost.runscript(mpd,...) end,
                 extensions  = 1,
+                math_mode   = mode and modes[mode] and mode or "scaled",
             }
             local result
             if not mpx then
@@ -283,9 +295,9 @@ else
         return true
     end
 
-    function metapost.process(mpx, data)
+    function metapost.process(format,data,mode)
         local converted, result = false, {}
-        mpx = metapost.load(mpx)
+        local mpx = metapost.load(format,mode)
         if mpx and data then
             local result = mpx:execute(data)
             if not result then
@@ -300,6 +312,8 @@ else
             else
                 metapost.report("mp error: unknown error, maybe no beginfig/endfig")
             end
+--             mpx:finish()
+--             mpx = nil
         else
            metapost.report("mp error: mem file not found")
         end
@@ -452,15 +466,19 @@ else
                         pdf_startfigure(fignum,llx,lly,urx,ury)
                         pdf_literalcode("q")
                         if objects then
+                            local savedpath = nil
+                            local savedhtap = nil
                             for o=1,#objects do
                                 local object = objects[o]
                                 local objecttype = object.type
                                 if objecttype == "start_bounds" or objecttype == "stop_bounds" then
                                     -- skip
                                 elseif objecttype == "start_clip" then
+                                    local evenodd = not object.istext and object.postscript == "evenodd"
                                     pdf_literalcode("q")
                                     flushnormalpath(object.path,t,false)
                                     pdf_literalcode("W n")
+                                    pdf_literalcode(evenodd and "W* n" or "W n")
                                 elseif objecttype == "stop_clip" then
                                     pdf_literalcode("Q")
                                     miterlimit, linecap, linejoin, dashed = -1, -1, -1, false
@@ -472,96 +490,147 @@ else
                                     pdf_textfigure(object.font,object.dsize,object.text,object.width,object.height,object.depth)
                                     pdf_literalcode("Q")
                                 else
-                                    local cs = object.color
-                                    local cr = false
-                                    if cs and #cs > 0 then
-                                        cs, cr = metapost.colorconverter(cs)
-                                        pdf_literalcode(cs)
-                                    end
-                                    local ml = object.miterlimit
-                                    if ml and ml ~= miterlimit then
-                                        miterlimit = ml
-                                        pdf_literalcode("%f M",ml)
-                                    end
-                                    local lj = object.linejoin
-                                    if lj and lj ~= linejoin then
-                                        linejoin = lj
-                                        pdf_literalcode("%i j",lj)
-                                    end
-                                    local lc = object.linecap
-                                    if lc and lc ~= linecap then
-                                        linecap = lc
-                                        pdf_literalcode("%i J",lc)
-                                    end
-                                    local dl = object.dash
-                                    if dl then
-                                        local d = format("[%s] %i d",concat(dl.dashes or {}," "),dl.offset)
-                                        if d ~= dashed then
-                                            dashed = d
-                                            pdf_literalcode(dashed)
+                                    local evenodd, collect, both = false, false, false
+                                    local postscript = object.postscript
+                                    if not object.istext then
+                                        if postscript == "evenodd" then
+                                            evenodd = true
+                                        elseif postscript == "collect" then
+                                            collect = true
+                                        elseif postscript == "both" then
+                                            both = true
+                                        elseif postscript == "eoboth" then
+                                            evenodd = true
+                                            both    = true
                                         end
-                                    elseif dashed then
-                                       pdf_literalcode("[] 0 d")
-                                       dashed = false
                                     end
-                                    local path = object.path
-                                    local transformed, penwidth = false, 1
-                                    local open = path and path[1].left_type and path[#path].right_type
-                                    local pen = object.pen
-                                    if pen then
-                                       if pen.type == 'elliptical' then
-                                            transformed, penwidth = pen_characteristics(object) -- boolean, value
-                                            pdf_literalcode("%f w",penwidth)
-                                            if objecttype == 'fill' then
-                                                objecttype = 'both'
-                                            end
-                                       else -- calculated by mplib itself
-                                            objecttype = 'fill'
-                                       end
-                                    end
-                                    if transformed then
-                                        pdf_literalcode("q")
-                                    end
-                                    if path then
-                                        if transformed then
-                                            flushconcatpath(path,open)
+                                    if collect then
+                                        if not savedpath then
+                                            savedpath = { object.path or false }
+                                            savedhtap = { object.htap or false }
                                         else
-                                            flushnormalpath(path,open)
+                                            savedpath[#savedpath+1] = object.path or false
+                                            savedhtap[#savedhtap+1] = object.htap or false
                                         end
-                                        if objecttype == "fill" then
-                                            pdf_literalcode("h f")
-                                        elseif objecttype == "outline" then
-                                            pdf_literalcode((open and "S") or "h S")
-                                        elseif objecttype == "both" then
-                                            pdf_literalcode("h B")
+                                    else
+                                        local cs = object.color
+                                        local cr = false
+                                        if cs and #cs > 0 then
+                                            cs, cr = metapost.colorconverter(cs)
+                                            pdf_literalcode(cs)
                                         end
-                                    end
-                                    if transformed then
-                                        pdf_literalcode("Q")
-                                    end
-                                    local path = object.htap
-                                    if path then
+                                        local ml = object.miterlimit
+                                        if ml and ml ~= miterlimit then
+                                            miterlimit = ml
+                                            pdf_literalcode("%f M",ml)
+                                        end
+                                        local lj = object.linejoin
+                                        if lj and lj ~= linejoin then
+                                            linejoin = lj
+                                            pdf_literalcode("%i j",lj)
+                                        end
+                                        local lc = object.linecap
+                                        if lc and lc ~= linecap then
+                                            linecap = lc
+                                            pdf_literalcode("%i J",lc)
+                                        end
+                                        local dl = object.dash
+                                        if dl then
+                                            local d = format("[%s] %i d",concat(dl.dashes or {}," "),dl.offset)
+                                            if d ~= dashed then
+                                                dashed = d
+                                                pdf_literalcode(dashed)
+                                            end
+                                        elseif dashed then
+                                           pdf_literalcode("[] 0 d")
+                                           dashed = false
+                                        end
+                                        local path = object.path
+                                        local transformed, penwidth = false, 1
+                                        local open = path and path[1].left_type and path[#path].right_type
+                                        local pen = object.pen
+                                        if pen then
+                                           if pen.type == 'elliptical' then
+                                                transformed, penwidth = pen_characteristics(object) -- boolean, value
+                                                pdf_literalcode("%f w",penwidth)
+                                                if objecttype == 'fill' then
+                                                    objecttype = 'both'
+                                                end
+                                           else -- calculated by mplib itself
+                                                objecttype = 'fill'
+                                           end
+                                        end
                                         if transformed then
                                             pdf_literalcode("q")
                                         end
-                                        if transformed then
-                                            flushconcatpath(path,open)
-                                        else
-                                            flushnormalpath(path,open)
-                                        end
-                                        if objecttype == "fill" then
-                                            pdf_literalcode("h f")
-                                        elseif objecttype == "outline" then
-                                            pdf_literalcode((open and "S") or "h S")
-                                        elseif objecttype == "both" then
-                                            pdf_literalcode("h B")
+                                        if path then
+                                            if savedpath then
+                                                for i=1,#savedpath do
+                                                    local path = savedpath[i]
+                                                    if transformed then
+                                                        flushconcatpath(path,open)
+                                                    else
+                                                        flushnormalpath(path,open)
+                                                    end
+                                                end
+                                                savedpath = nil
+                                            end
+                                            if transformed then
+                                                flushconcatpath(path,open)
+                                            else
+                                                flushnormalpath(path,open)
+                                            end
+                                            if objecttype == "fill" then
+                                                pdf_literalcode("h f")
+                                            elseif objecttype == "outline" then
+                                            if both then
+                                                pdf_literalcode(evenodd and "h B*" or "h B")
+                                            else
+                                                pdf_literalcode(open and "S" or "h S")
+                                            end
+                                            elseif objecttype == "both" then
+                                                pdf_literalcode(evenodd and "h B*" or "h B")
+                                            end
                                         end
                                         if transformed then
                                             pdf_literalcode("Q")
                                         end
-                                    end
-                                    if cr then
-                                        pdf_literalcode(cr)
+                                        local path = object.htap
+                                        if path then
+                                            if transformed then
+                                                pdf_literalcode("q")
+                                            end
+                                            if savedhtap then
+                                                for i=1,#savedhtap do
+                                                    local path = savedhtap[i]
+                                                    if transformed then
+                                                        flushconcatpath(path,open)
+                                                    else
+                                                        flushnormalpath(path,open)
+                                                    end
+                                                end
+                                                savedhtap = nil
+                                                evenodd   = true
+                                            end
+                                            if transformed then
+                                                flushconcatpath(path,open)
+                                            else
+                                                flushnormalpath(path,open)
+                                            end
+                                            if objecttype == "fill" then
+                                                pdf_literalcode("h f")
+                                            elseif objecttype == "outline" then
+                                                pdf_literalcode(evenodd and "h f*" or "h f")
+                                            elseif objecttype == "both" then
+                                                pdf_literalcode(evenodd and "h B*" or "h B")
+                                            end
+                                            if transformed then
+                                                pdf_literalcode("Q")
+                                            end
+                                        end
+                                        if cr then
+                                            pdf_literalcode(cr)
+                                        end
                                     end
                                 end
                            end

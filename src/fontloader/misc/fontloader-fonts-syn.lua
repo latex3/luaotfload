@@ -7,7 +7,6 @@ if not modules then modules = { } end modules ['luatex-fonts-syn'] = {
 }
 
 if context then
-    texio.write_nl("fatal error: this module is not for context")
     os.exit()
 end
 
@@ -46,12 +45,12 @@ local loaded         = false
 local fileformats    = { "lua", "tex", "other text files" }
 
 function fonts.names.reportmissingbase()
-    texio.write("<missing font database, run: mtxrun --script fonts --reload --simple>")
+    logs.report("fonts","missing font database, run: mtxrun --script fonts --reload --simple")
     fonts.names.reportmissingbase = nil
 end
 
 function fonts.names.reportmissingname()
-    texio.write("<unknown font in database, run: mtxrun --script fonts --reload --simple>")
+    logs.report("fonts","unknown font in font database, run: mtxrun --script fonts --reload --simple")
     fonts.names.reportmissingname = nil
 end
 
@@ -67,7 +66,7 @@ function fonts.names.resolve(name,sub)
                     local foundname = resolvers.findfile(basename,format) or ""
                     if foundname ~= "" then
                         data = dofile(foundname)
-                        texio.write("<font database loaded: ",foundname,">")
+                        logs.report("fonts","font database '%s' loaded",foundname)
                         break
                     end
                 end

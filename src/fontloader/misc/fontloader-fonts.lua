@@ -8,7 +8,7 @@ if not modules then modules = { } end modules ['luatex-fonts'] = {
 
 -- A merged file is generated with:
 --
---   mtxrun --script package --merge ./luatex-fonts.lua
+--   mtxrun --script package --merge --stripcontext luatex-fonts.lua
 --
 -- A needed resource file is made by:
 --
@@ -67,7 +67,7 @@ end
 if not generic_context.push_namespaces then
 
     function generic_context.push_namespaces()
-        texio.write(" <push namespace>")
+     -- logs.report("system","push namespace")
         local normalglobal = { }
         for k, v in next, _G do
             normalglobal[k] = v
@@ -77,7 +77,7 @@ if not generic_context.push_namespaces then
 
     function generic_context.pop_namespaces(normalglobal,isolate)
         if normalglobal then
-            texio.write(" <pop namespace>")
+         -- logs.report("system","pop namespace")
             for k, v in next, _G do
                 if not normalglobal[k] then
                     generic_context[k] = v
@@ -92,7 +92,7 @@ if not generic_context.push_namespaces then
             -- just to be sure:
             setmetatable(generic_context,_G)
         else
-            texio.write(" <fatal error: invalid pop of generic_context>")
+            logs.report("system","fatal error: invalid pop of generic_context")
             os.exit()
         end
     end
@@ -119,8 +119,25 @@ local starttime = os.gettimeofday()
 
 -- kpse.set_program_name("luatex")
 
+-- One can define texio.reporter as alternative terminal/log writer. That's as far
+-- as I want to go with this.
+
 local ctxkpse = nil
 local verbose = true
+
+if not logs or not logs.report then
+    if not logs then
+        logs = { }
+    end
+    function logs.report(c,f,...)
+        local r = texio.reporter or texio.write_nl
+        if f then
+            r(c .. " : " .. string.format(f,...))
+        else
+            r("")
+        end
+    end
+end
 
 local function loadmodule(name,continue)
     local foundname = kpse.find_file(name,"tex") or ""
@@ -132,12 +149,12 @@ local function loadmodule(name,continue)
     end
     if foundname == "" then
         if not continue then
-            texio.write_nl(string.format(" <luatex-fonts: unable to locate %s>",name))
+            logs.report("system","unable to locate file '%s'",name)
             os.exit()
         end
     else
         if verbose then
-            texio.write(string.format(" <%s>",foundname)) -- no file.basename yet
+            logs.report("system","loading '%s'",foundname) -- no file.basename yet
         end
         dofile(foundname)
     end
@@ -169,13 +186,16 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
 
     else
 
-        -- The following helpers are a bit overkill but I don't want to mess up context code for the
-        -- sake of general generality. Around version 1.0 there will be an official api defined.
+        -- The following helpers are a bit overkill but I don't want to mess up
+        -- context code for the sake of general generality. Around version 1.0
+        -- there will be an official api defined.
         --
-        -- So, I will strip these libraries and see what is really needed so that we don't have this
-        -- overhead in the generic modules. The next section is only there for the packager, so stick
-        -- to using luatex-fonts with luatex-fonts-merged.lua and forget about the rest. The following
-        -- list might change without prior notice (for instance because we shuffled code around).
+        -- So, I will strip these libraries and see what is really needed so that
+        -- we don't have this overhead in the generic modules. The next section
+        -- is only there for the packager, so stick to using luatex-fonts with
+        -- luatex-fonts-merged.lua and forget about the rest. The following list
+        -- might change without prior notice (for instance because we shuffled
+        -- code around).
 
         loadmodule("l-lua.lua")
         loadmodule("l-lpeg.lua")
@@ -193,18 +213,19 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule("util-str.lua")
         loadmodule("util-fil.lua")
 
-        -- The following modules contain code that is either not used at all outside context or will
-        -- fail when enabled due to lack of other modules.
+        -- The following modules contain code that is either not used at all
+        -- outside context or will fail when enabled due to lack of other
+        -- modules.
 
-        -- First we load a few helper modules. This is about the miminum needed to let the font modules
-        -- do their work. Don't depend on their functions as we might strip them in future versions of
-        -- this generic variant.
+        -- First we load a few helper modules. This is about the miminum needed
+        -- to let the font modules do their work. Don't depend on their functions
+        -- as we might strip them in future versions of this generic variant.
 
         loadmodule('luatex-basics-gen.lua')
         loadmodule('data-con.lua')
 
-        -- We do need some basic node support. The code in there is not for general use as it might
-        -- change.
+        -- We do need some basic node support. The code in there is not for
+        -- general use as it might change.
 
         loadmodule('luatex-basics-nod.lua')
 
@@ -212,41 +233,36 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
 
         loadmodule('luatex-basics-chr.lua')
 
-        -- Now come the font modules that deal with traditional tex fonts as well as open type fonts.
+        -- Now come the font modules that deal with traditional tex fonts as well
+        -- as open type fonts.
         --
-        -- The font database file (if used at all) must be put someplace visible for kpse and is not
-        -- shared with context. The mtx-fonts script can be used to generate this file (using the
-        -- --reload --force --simple option).
+        -- The font database file (if used at all) must be put someplace visible
+        -- for kpse and is not shared with context. The mtx-fonts script can be
+        -- used to generate this file (using the --reload --force --simple option).
 
         loadmodule('font-ini.lua')
+        loadmodule('luatex-fonts-mis.lua')
         loadmodule('font-con.lua')
-        loadmodule('luatex-fonts-enc.lua') -- will load font-age on demand
+        loadmodule('luatex-fonts-enc.lua')
         loadmodule('font-cid.lua')
-        loadmodule('font-map.lua')         -- for loading lum file (will be stripped)
+        loadmodule('font-map.lua')
 
-        -- We use a bit simpler database because using the context one demands loading more helper
-        -- code and although it is more flexible (more wauys to resolve and so) it will never be
-        -- uses in plain/latex anyway, so let's stick to a simple approach.
+        -- We use a bit simpler database because using the context one demands
+        -- loading more helper code and although it is more flexible (more ways
+        -- to resolve and so) it will never be uses in plain/latex anyway, so
+        -- let's stick to a simple approach.
 
         loadmodule('luatex-fonts-syn.lua')
 
-        loadmodule('font-oti.lua')
+        -- We need some helpers.
 
-        -- These are the old loader and processing modules. These use the built-in font loader and
-        -- will stay around (but not be extended), only fixed.
+        loadmodule('font-vfc.lua')
 
-        -- font-otf.lua
-        -- font-otb.lua
-        -- font-inj.lua
-        -- font-ota.lua
-        -- font-otn.lua
-        -- font-otp.lua
-
-        -- Here come the new loader and processing modules. The loader is written in Lua and although
-        -- initial loading is somewhat slower, identifying is faster, cached files can be slightly
-        -- more efficient, and processing is somewhat faster (only measureable on complex fonts).
+        -- This is the bulk of opentype code.
 
         loadmodule('font-otr.lua')
+        loadmodule('font-oti.lua')
+        loadmodule('font-ott.lua')
         loadmodule('font-cff.lua')
         loadmodule('font-ttf.lua')
         loadmodule('font-dsp.lua')
@@ -257,31 +273,41 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule('font-ota.lua')
         loadmodule('font-ots.lua')
         loadmodule('font-osd.lua')
-        loadmodule('font-ocl.lua') -- svg needs 0.97 (for fix in memstreams)
-
+        loadmodule('font-ocl.lua')
         loadmodule('font-otc.lua')
 
-        -- type one code
+        -- The code for type one fonts.
 
-        loadmodule('font-onr.lua') -- was font-afm.lua
-        loadmodule('font-one.lua') -- was font-afm.lua
+        loadmodule('font-onr.lua')
+        loadmodule('font-one.lua')
         loadmodule('font-afk.lua')
 
-        -- traditional code
+        -- And for traditional TeX fonts.
 
         loadmodule('font-tfm.lua')
 
-        -- common code
+        -- Some common code.
 
         loadmodule('font-lua.lua')
         loadmodule('font-def.lua')
-        loadmodule('font-xtx.lua')         -- xetex compatible specifiers (plain/latex only)
-        loadmodule('luatex-fonts-ext.lua') -- some extensions
 
-        -- We need to plug into a callback and the following module implements the handlers. Actual
-        -- plugging in happens later.
+        -- We support xetex compatible specifiers (plain/latex only).
 
-        loadmodule('font-gbn.lua')
+        loadmodule('luatex-fonts-def.lua') -- was font-xtx.lua
+
+        -- Here come some additional features.
+
+        loadmodule('luatex-fonts-ext.lua')
+        loadmodule('font-imp-tex.lua')
+        loadmodule('font-imp-ligatures.lua')
+        loadmodule('font-imp-italics.lua')
+        loadmodule('font-imp-effects.lua')
+        loadmodule('luatex-fonts-lig.lua')
+
+        -- We need to plug into a callback and the following module implements the
+        -- handlers. Actual plugging in happens later.
+
+        loadmodule('luatex-fonts-gbn.lua')
 
     end
 
@@ -319,6 +345,6 @@ end
 
 -- We're done.
 
-texio.write(string.format(" <luatex-fonts.lua loaded in %0.3f seconds>", os.gettimeofday()-starttime))
+logs.report("system","luatex-fonts.lua loaded in %0.3f seconds", os.gettimeofday()-starttime)
 
 generic_context.pop_namespaces(whatever)

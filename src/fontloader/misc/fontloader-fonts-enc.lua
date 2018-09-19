@@ -7,7 +7,6 @@ if not modules then modules = { } end modules ['luatex-font-enc'] = {
 }
 
 if context then
-    texio.write_nl("fatal error: this module is not for context")
     os.exit()
 end
 
@@ -19,7 +18,7 @@ encodings.known = { }
 
 setmetatable(encodings.agl, { __index = function(t,k)
     if k == "unicodes" then
-        texio.write(" <loading (extended) adobe glyph list>")
+        logs.report("fonts","loading (extended) adobe glyph list")
         local unicodes = dofile(resolvers.findfile("font-age.lua"))
         encodings.agl = { unicodes = unicodes }
         return unicodes

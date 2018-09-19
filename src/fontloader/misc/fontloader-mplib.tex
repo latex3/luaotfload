@@ -29,6 +29,7 @@
 %D \stoptyping
 
 \def\setmplibformat#1{\def\mplibformat{#1}}
+\def\setmplibmode  #1{\def\mplibmode  {#1}}
 
 \def\setupmplibcatcodes
   {\catcode`\{=12 % could be optional .. not really needed
@@ -39,7 +40,8 @@
    \catcode`\_=12
    \catcode`\%=12
    \catcode`\&=12
-   \catcode`\$=12 }
+   \catcode`\$=12
+   \obeylines}
 
 \def\mplibcode
   {\bgroup
@@ -48,11 +50,12 @@
 
 \long\def\domplibcode#1\endmplibcode
   {\egroup
-   \directlua{metapost.process('\mplibformat',[[#1]])}}
+   \directlua{metapost.process('\mplibformat',[[#1]],'\mplibmode')}}
 
 %D We default to \type {plain} \METAPOST:
 
 \def\mplibformat{plain}
+\def\mplibmode  {scaled}
 
 %D We use a dedicated scratchbox:
 

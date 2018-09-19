@@ -11,8 +11,9 @@ if not modules then modules = { } end modules ['font-def'] = {
 local lower, gsub = string.lower, string.gsub
 local tostring, next = tostring, next
 local lpegmatch = lpeg.match
-local suffixonly, removesuffix = file.suffix, file.removesuffix
+local suffixonly, removesuffix, basename = file.suffix, file.removesuffix, file.basename
 local formatters = string.formatters
+local sortedhash, sortedkeys = table.sortedhash, table.sortedkeys
 
 local allocate = utilities.storage.allocate
 
@@ -20,7 +21,6 @@ local trace_defining     = false  trackers  .register("fonts.defining", function
 local directive_embedall = false  directives.register("fonts.embedall", function(v) directive_embedall = v end)
 
 trackers.register("fonts.loading", "fonts.defining", "otf.loading", "afm.loading", "tfm.loading")
-trackers.register("fonts.all", "fonts.*", "otf.*", "afm.*", "tfm.*")
 
 local report_defining = logs.reporter("fonts","defining")
 
@@ -80,53 +80,6 @@ and prepares a table that will move along as we proceed.</p>
 -- name name(sub) name(sub)*spec name*spec
 -- name@spec*oeps
 
-local splitter, splitspecifiers = nil, "" -- not so nice
-
-local P, C, S, Cc = lpeg.P, lpeg.C, lpeg.S, lpeg.Cc
-
-local left  = P("(")
-local right = P(")")
-local colon = P(":")
-local space = P(" ")
-
-definers.defaultlookup = "file"
-
-local prefixpattern = P(false)
-
-local function addspecifier(symbol)
-    splitspecifiers     = splitspecifiers .. symbol
-    local method        = S(splitspecifiers)
-    local lookup        = C(prefixpattern) * colon
-    local sub           = left * C(P(1-left-right-method)^1) * right
-    local specification = C(method) * C(P(1)^1)
-    local name          = C((1-sub-specification)^1)
-    splitter = P((lookup + Cc("")) * name * (sub + Cc("")) * (specification + Cc("")))
-end
-
-local function addlookup(str,default)
-    prefixpattern = prefixpattern + P(str)
-end
-
-definers.addlookup = addlookup
-
-addlookup("file")
-addlookup("name")
-addlookup("spec")
-
-local function getspecification(str)
-    return lpegmatch(splitter,str or "") -- weird catch
-end
-
-definers.getspecification = getspecification
-
-function definers.registersplit(symbol,action,verbosename)
-    addspecifier(symbol)
-    variants[symbol] = action
-    if verbosename then
-        variants[verbosename] = action
-    end
-end
-
 local function makespecification(specification,lookup,name,sub,method,detail,size)
     size = size or 655360
     if not lookup or lookup == "" then
@@ -151,13 +104,65 @@ local function makespecification(specification,lookup,name,sub,method,detail,siz
     return t
 end
 
-
 definers.makespecification = makespecification
 
-function definers.analyze(specification, size)
-    -- can be optimized with locals
-    local lookup, name, sub, method, detail = getspecification(specification or "")
-    return makespecification(specification, lookup, name, sub, method, detail, size)
+if context then
+
+    local splitter, splitspecifiers = nil, "" -- not so nice
+
+    local P, C, S, Cc, Cs = lpeg.P, lpeg.C, lpeg.S, lpeg.Cc, lpeg.Cs
+
+    local left   = P("(")
+    local right  = P(")")
+    local colon  = P(":")
+    local space  = P(" ")
+    local lbrace = P("{")
+    local rbrace = P("}")
+
+    definers.defaultlookup = "file"
+
+    local prefixpattern = P(false)
+
+    local function addspecifier(symbol)
+        splitspecifiers     = splitspecifiers .. symbol
+        local method        = S(splitspecifiers)
+        local lookup        = C(prefixpattern) * colon
+        local sub           = left * C(P(1-left-right-method)^1) * right
+        local specification = C(method) * C(P(1)^1)
+        local name          = Cs((lbrace/"") * (1-rbrace)^1 * (rbrace/"") + (1-sub-specification)^1)
+        splitter = P((lookup + Cc("")) * name * (sub + Cc("")) * (specification + Cc("")))
+    end
+
+    local function addlookup(str)
+        prefixpattern = prefixpattern + P(str)
+    end
+
+    definers.addlookup = addlookup
+
+    addlookup("file")
+    addlookup("name")
+    addlookup("spec")
+
+    local function getspecification(str)
+        return lpegmatch(splitter,str or "") -- weird catch
+    end
+
+    definers.getspecification = getspecification
+
+    function definers.registersplit(symbol,action,verbosename)
+        addspecifier(symbol)
+        variants[symbol] = action
+        if verbosename then
+            variants[verbosename] = action
+        end
+    end
+
+    function definers.analyze(specification, size)
+        -- can be optimized with locals
+        local lookup, name, sub, method, detail = getspecification(specification or "")
+        return makespecification(specification, lookup, name, sub, method, detail, size)
+    end
+
 end
 
 --[[ldx--
@@ -184,11 +189,30 @@ end
 function resolvers.name(specification)
     local resolve = fonts.names.resolve
     if resolve then
-        local resolved, sub, subindex = resolve(specification.name,specification.sub,specification) -- we pass specification for overloaded versions
+        local resolved, sub, subindex, instance = resolve(specification.name,specification.sub,specification) -- we pass specification for overloaded versions
         if resolved then
             specification.resolved = resolved
             specification.sub      = sub
             specification.subindex = subindex
+            -- new, needed for experiments
+            if instance then
+                specification.instance = instance
+                local features = specification.features
+                if not features then
+                    features = { }
+                    specification.features = features
+                end
+                local normal = features.normal
+                if not normal then
+                    normal = { }
+                    features.normal = normal
+                end
+                normal.instance = instance
+                if not callbacks.supported.glyph_stream_provider then
+                    normal.variableshapes = true -- for the moment
+                end
+            end
+            --
             local suffix = lower(suffixonly(resolved))
             if fonts.formats[suffix] then
                 specification.forced     = suffix
@@ -294,10 +318,71 @@ local function checkembedding(tfmdata)
     tfmdata.embedding = embedding
 end
 
+local function checkfeatures(tfmdata)
+    local resources = tfmdata.resources
+    local shared    = tfmdata.shared
+    if resources and shared then
+        local features     = resources.features
+        local usedfeatures = shared.features
+        if features and usedfeatures then
+            local usedlanguage = usedfeatures.language or "dflt"
+            local usedscript   = usedfeatures.script or "dflt"
+            local function check(what)
+                if what then
+                    local foundlanguages = { }
+                    for feature, scripts in next, what do
+                        if usedscript == "auto" or scripts["*"] then
+                            -- ok
+                        elseif not scripts[usedscript] then
+                         -- report_defining("font %!font:name!, feature %a, no script %a",
+                         --     tfmdata,feature,usedscript)
+                        else
+                            for script, languages in next, scripts do
+                                if languages["*"] then
+                                    -- ok
+                                elseif not languages[usedlanguage] then
+                                    report_defining("font %!font:name!, feature %a, script %a, no language %a",
+                                        tfmdata,feature,script,usedlanguage)
+                                end
+                            end
+                        end
+                        for script, languages in next, scripts do
+                            for language in next, languages do
+                                foundlanguages[language] = true
+                            end
+                        end
+                    end
+                    if false then
+                        foundlanguages["*"] = nil
+                        foundlanguages = sortedkeys(foundlanguages)
+                        for feature, scripts in sortedhash(what) do
+                            for script, languages in next, scripts do
+                                if not languages["*"] then
+                                    for i=1,#foundlanguages do
+                                        local language = foundlanguages[i]
+                                        if not languages[language] then
+                                            report_defining("font %!font:name!, feature %a, script %a, no language %a",
+                                                tfmdata,feature,script,language)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            check(features.gsub)
+            check(features.gpos)
+        end
+    end
+end
+
 function definers.loadfont(specification)
     local hash = constructors.hashinstance(specification)
+    -- todo: also hash by instance / factors
     local tfmdata = loadedfonts[hash] -- hashes by size !
     if not tfmdata then
+        -- normally context will not end up here often (if so there is an issue somewhere)
         local forced = specification.forced or ""
         if forced ~= "" then
             local reader = readers[lower(forced)] -- normally forced is already lowered
@@ -327,16 +412,13 @@ function definers.loadfont(specification)
             checkembedding(tfmdata) -- todo: general postprocessor
             loadedfonts[hash] = tfmdata
             designsizes[specification.hash] = tfmdata.parameters.designsize
+            checkfeatures(tfmdata)
         end
     end
     if not tfmdata then
         report_defining("font with asked name %a is not found using lookup %a",specification.name,specification.lookup)
     end
     return tfmdata
-end
-
-function constructors.checkvirtualids()
-    -- dummy in plain version
 end
 
 function constructors.readanddefine(name,size) -- no id -- maybe a dummy first
@@ -352,7 +434,6 @@ function constructors.readanddefine(name,size) -- no id -- maybe a dummy first
         local tfmdata = definers.loadfont(specification)
         if tfmdata then
             tfmdata.properties.hash = hash
-            constructors.checkvirtualids(tfmdata) -- experiment, will become obsolete when slots can selfreference
             id = font.define(tfmdata)
             definers.register(tfmdata,id)
         else
@@ -437,8 +518,8 @@ function definers.read(specification,size,id) -- id can be optional, name can al
         local properties = tfmdata.properties or { }
         local parameters = tfmdata.parameters or { }
         report_defining("using %a font with id %a, name %a, size %a, bytes %a, encoding %a, fullname %a, filename %a",
-            properties.format or "unknown", id, properties.name, parameters.size, properties.encodingbytes,
-            properties.encodingname, properties.fullname, file.basename(properties.filename))
+            properties.format or "unknown", id or "-", properties.name, parameters.size, properties.encodingbytes,
+            properties.encodingname, properties.fullname, basename(properties.filename))
     end
     statistics.stoptiming(fonts)
     return tfmdata

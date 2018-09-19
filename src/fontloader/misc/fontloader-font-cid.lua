@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['font-cid'] = {
     version   = 1.001,
-    comment   = "companion to font-otf.lua (cidmaps)",
+    comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"

@@ -6,72 +6,85 @@ if not modules then modules = { } end modules ['font-osd'] = { -- script devanag
     license   = "see context related readme files"
 }
 
--- I'll optimize this one with ischar (much faster) when I see a reason (read: I need a
--- proper test case first).
 
--- This is a version of font-odv.lua  adapted to the new font loader and more
--- direct hashing. The initialization code has been adapted (more efficient). One day
--- I'll speed this up ... char swapping and properties.
+-- we need to check nbsphash (context only)
 
 -- A few remarks:
 --
--- This code is a partial rewrite of the code that deals with devanagari. The data and logic
--- is by Kai Eigner and based based on Microsoft's OpenType specifications for specific
--- scripts, but with a few improvements. More information can be found at:
+-- This code is a partial rewrite of the code that deals with devanagari. The data
+-- and logic is by Kai Eigner and based based on Microsoft's OpenType specifications
+-- for specific scripts, but with a few improvements. More information can be found
+-- at:
 --
 -- deva: http://www.microsoft.com/typography/OpenType%20Dev/devanagari/introO.mspx
 -- dev2: http://www.microsoft.com/typography/OpenType%20Dev/devanagari/intro.mspx
 --
--- Rajeesh Nambiar provided patches for the malayalam variant. Thanks to feedback from
--- the mailing list some aspects could be improved.
+-- Rajeesh Nambiar provided patches for the malayalam variant. Thanks to feedback
+-- from the mailing list some aspects could be improved.
 --
--- As I touched nearly all code, reshuffled it, optimized a lot, etc. etc. (imagine how
--- much can get messed up in over a week work) it could be that I introduced bugs. There
--- is more to gain (esp in the functions applied to a range) but I'll do that when
--- everything works as expected. Kai's original code is kept in font-odk.lua as a reference
--- so blame me (HH) for bugs.
+-- As I touched nearly all code, reshuffled it, optimized a lot, etc. etc. (imagine
+-- how much can get messed up in over a week work) it could be that I introduced
+-- bugs. There is more to gain (esp in the functions applied to a range) but I'll do
+-- that when everything works as expected. Kai's original code is kept in
+-- font-odk.lua as a reference so blame me (HH) for bugs. (We no longer ship that
+-- file as the code below has diverted too much and in the meantime has more than
+-- doubled in size.)
 --
--- Interesting is that Kai managed to write this on top of the existing otf handler. Only a
--- few extensions were needed, like a few more analyzing states and dealing with changed
--- head nodes in the core scanner as that only happens here. There's a lot going on here
--- and it's only because I touched nearly all code that I got a bit of a picture of what
--- happens. For in-depth knowledge one needs to consult Kai.
+-- Interesting is that Kai managed to write this on top of the existing otf handler.
+-- Only a few extensions were needed, like a few more analyzing states and dealing
+-- with changed head nodes in the core scanner as that only happens here. There's a
+-- lot going on here and it's only because I touched nearly all code that I got a
+-- bit of a picture of what happens. For in-depth knowledge one needs to consult
+-- Kai.
 --
--- The rewrite mostly deals with efficiency, both in terms of speed and code. We also made
--- sure that it suits generic use as well as use in ConTeXt. I removed some buglets but can
--- as well have messed up the logic by doing this. For this we keep the original around
--- as that serves as reference. Due to the lots of reshuffling glyphs quite some leaks
--- occur(red) but once I'm satisfied with the rewrite I'll weed them. I also integrated
--- initialization etc into the regular mechanisms.
+-- The rewrite mostly deals with efficiency, both in terms of speed and code. We
+-- also made sure that it suits generic use as well as use in ConTeXt. I removed
+-- some buglets but can as well have messed up the logic by doing this. For this we
+-- keep the original around as that serves as reference. Due to the lots of
+-- reshuffling glyphs quite some leaks occur(red) but once I'm satisfied with the
+-- rewrite I'll weed them. I also integrated initialization etc into the regular
+-- mechanisms.
 --
--- In the meantime, we're down from 25.5-3.5=22 seconds to 17.7-3.5=14.2 seconds for a 100
--- page sample (mid 2012) with both variants so it's worth the effort. Some more speedup is
--- to be expected. Due to the method chosen it will never be real fast. If I ever become a
--- power user I'll have a go at some further speed up. I will rename some functions (and
--- features) once we don't need to check the original code. We now use a special subset
--- sequence for use inside the analyzer (after all we could can store this in the dataset
--- and save redundant analysis).
+-- In the meantime, we're down from 25.5-3.5=22 seconds to 17.7-3.5=14.2 seconds for
+-- a 100 page sample (mid 2012) with both variants so it's worth the effort. Some
+-- more speedup is to be expected. Due to the method chosen it will never be real
+-- fast. If I ever become a power user I'll have a go at some further speed up. I
+-- will rename some functions (and features) once we don't need to check the
+-- original code. We now use a special subset sequence for use inside the analyzer
+-- (after all we could can store this in the dataset and save redundant analysis).
 --
--- I might go for an array approach with respect to attributes (and reshuffling). Easier.
+-- By now we have yet another incremental improved version. In the end I might
+-- rewrite the code.
 --
--- Some data will move to char-def.lua (some day).
---
--- By now we have yet another incremental improved version. In the end I might rewrite the
--- code.
-
 -- Hans Hagen, PRAGMA-ADE, Hasselt NL
---
--- We could have c_nukta, c_halant, c_ra is we know that they are never used mixed within
--- one script .. yes or no?
+
+-- Todo:
 --
 -- Matras: according to Microsoft typography specifications "up to one of each type:
 -- pre-, above-, below- or post- base", but that does not seem to be right. It could
 -- become an option.
+--
+-- Resources:
+--
+-- The tables that we had here are now generated from char-def.lua or in the case of
+-- generic usage loaded from luatex-basics-chr.lua. Still a couple of entries need
+-- to be added to char-def.lua but finally I moved the indic specific tables there.
+-- For generic usage one can create the relevant resources by running:
+--
+--     context luatex-basics-prepare.tex
+--
+-- and an overview with:
+--
+--     context --global s-fonts-basics.mkiv
+--
+-- For now we have defined: bengali, devanagari, gujarati, gurmukhi, kannada,
+-- malayalam, oriya, tamil and tolugu but not all are checked. Also, some of the
+-- code below might need to be adapted to the extra scripts.
 
 local insert, imerge, copy = table.insert, table.imerge, table.copy
 local next, type = next, type
 
-local report_devanagari  = logs.reporter("otf","devanagari")
+local report             = logs.reporter("otf","devanagari")
 
 fonts                    = fonts                   or { }
 fonts.analyzers          = fonts.analyzers         or { }
@@ -86,8 +99,6 @@ local otffeatures        = fonts.constructors.features.otf
 local registerotffeature = otffeatures.register
 
 local nuts               = nodes.nuts
-local tonode             = nuts.tonode
-local tonut              = nuts.tonut
 
 local getnext            = nuts.getnext
 local getprev            = nuts.getprev
@@ -121,6 +132,9 @@ local a_state            = attributes.private('state')
 local a_syllabe          = attributes.private('syllabe')
 
 local dotted_circle      = 0x25CC
+local c_nbsp             = 0x00A0
+local c_zwnj             = 0x200C
+local c_zwj              = 0x200D
 
 local states             = fonts.analyzers.states -- not features
 
@@ -139,327 +153,193 @@ replace_all_nbsp = function(head) -- delayed definition
     return replace_all_nbsp(head)
 end
 
-local xprocesscharacters = nil
+local processcharacters = nil
 
 if context then
-    xprocesscharacters = function(head,font)
-        xprocesscharacters = nodes.handlers.characters
-        return xprocesscharacters(head,font)
+    local fontprocesses = fonts.hashes.processes
+    function processcharacters(head,font)
+        local processors = fontprocesses[font]
+        for i=1,#processors do
+            head = processors[i](head,font,0)
+        end
+        return head
     end
 else
-    xprocesscharacters = function(head,font)
-        xprocesscharacters = nodes.handlers.nodepass -- generic
-        return xprocesscharacters(head,font)
+    function processcharacters(head,font)
+        local processors = fontdata[font].shared.processes
+        for i=1,#processors do
+            head = processors[i](head,font,0)
+        end
+        return head
     end
 end
-
-local function processcharacters(head,font)
-    return tonut(xprocesscharacters(tonode(head))) -- can be more efficient in context, just direct call
-end
-
--- local fontprocesses = fonts.hashes.processes
---
--- function processcharacters(head,font)
---     local processors = fontprocesses[font]
---     for i=1,#processors do
---         head = processors[i](head,font,0)
---     end
---     return head, true
--- end
-
--- In due time there will be entries here for scripts like Bengali, Gujarati,
--- Gurmukhi, Kannada, Malayalam, Oriya, Tamil, Telugu. Feel free to provide the
--- code points.
 
 -- We can assume that script are not mixed in the source but if that is the case
 -- we might need to have consonants etc per script and initialize a local table
--- pointing to the right one.
+-- pointing to the right one. But not now.
 
--- new, to be checked:
---
--- U+00978 : DEVANAGARI LETTER MARWARI DDA
--- U+00980 : BENGALI ANJI
--- U+00C00 : TELUGU SIGN COMBINING CANDRABINDU ABOVE
--- U+00C34 : TELUGU LETTER LLLA
--- U+00C81 : KANNADA SIGN CANDRABINDU
--- U+00D01 : MALAYALAM SIGN CANDRABINDU
--- U+00DE6 : SINHALA LITH DIGIT ZERO
--- U+00DE7 : SINHALA LITH DIGIT ONE
--- U+00DE8 : SINHALA LITH DIGIT TWO
--- U+00DE9 : SINHALA LITH DIGIT THREE
--- U+00DEA : SINHALA LITH DIGIT FOUR
--- U+00DEB : SINHALA LITH DIGIT FIVE
--- U+00DEC : SINHALA LITH DIGIT SIX
--- U+00DED : SINHALA LITH DIGIT SEVEN
--- U+00DEE : SINHALA LITH DIGIT EIGHT
--- U+00DEF : SINHALA LITH DIGIT NINE
+local indicgroups = characters and characters.indicgroups
 
-local consonant = {
-    -- devanagari
-    [0x0915] = true, [0x0916] = true, [0x0917] = true, [0x0918] = true,
-    [0x0919] = true, [0x091A] = true, [0x091B] = true, [0x091C] = true,
-    [0x091D] = true, [0x091E] = true, [0x091F] = true, [0x0920] = true,
-    [0x0921] = true, [0x0922] = true, [0x0923] = true, [0x0924] = true,
-    [0x0925] = true, [0x0926] = true, [0x0927] = true, [0x0928] = true,
-    [0x0929] = true, [0x092A] = true, [0x092B] = true, [0x092C] = true,
-    [0x092D] = true, [0x092E] = true, [0x092F] = true, [0x0930] = true,
-    [0x0931] = true, [0x0932] = true, [0x0933] = true, [0x0934] = true,
-    [0x0935] = true, [0x0936] = true, [0x0937] = true, [0x0938] = true,
-    [0x0939] = true, [0x0958] = true, [0x0959] = true, [0x095A] = true,
-    [0x095B] = true, [0x095C] = true, [0x095D] = true, [0x095E] = true,
-    [0x095F] = true, [0x0979] = true, [0x097A] = true,
-    -- kannada
-    [0x0C95] = true, [0x0C96] = true, [0x0C97] = true, [0x0C98] = true,
-    [0x0C99] = true, [0x0C9A] = true, [0x0C9B] = true, [0x0C9C] = true,
-    [0x0C9D] = true, [0x0C9E] = true, [0x0C9F] = true, [0x0CA0] = true,
-    [0x0CA1] = true, [0x0CA2] = true, [0x0CA3] = true, [0x0CA4] = true,
-    [0x0CA5] = true, [0x0CA6] = true, [0x0CA7] = true, [0x0CA8] = true,
-    [0x0CA9] = true, [0x0CAA] = true, [0x0CAB] = true, [0x0CAC] = true,
-    [0x0CAD] = true, [0x0CAE] = true, [0x0CAF] = true, [0x0CB0] = true,
-    [0x0CB1] = true, [0x0CB2] = true, [0x0CB3] = true, [0x0CB4] = true,
-    [0x0CB5] = true, [0x0CB6] = true, [0x0CB7] = true, [0x0CB8] = true,
-    [0x0CB9] = true,
-    [0x0CDE] = true, -- obsolete
-    -- malayalam
-    [0x0D15] = true, [0x0D16] = true, [0x0D17] = true, [0x0D18] = true,
-    [0x0D19] = true, [0x0D1A] = true, [0x0D1B] = true, [0x0D1C] = true,
-    [0x0D1D] = true, [0x0D1E] = true, [0x0D1F] = true, [0x0D20] = true,
-    [0x0D21] = true, [0x0D22] = true, [0x0D23] = true, [0x0D24] = true,
-    [0x0D25] = true, [0x0D26] = true, [0x0D27] = true, [0x0D28] = true,
-    [0x0D29] = true, [0x0D2A] = true, [0x0D2B] = true, [0x0D2C] = true,
-    [0x0D2D] = true, [0x0D2E] = true, [0x0D2F] = true, [0x0D30] = true,
-    [0x0D31] = true, [0x0D32] = true, [0x0D33] = true, [0x0D34] = true,
-    [0x0D35] = true, [0x0D36] = true, [0x0D37] = true, [0x0D38] = true,
-    [0x0D39] = true, [0x0D3A] = true,
-}
+if not indicgroups and characters then
 
-local independent_vowel = {
-    -- devanagari
-    [0x0904] = true, [0x0905] = true, [0x0906] = true, [0x0907] = true,
-    [0x0908] = true, [0x0909] = true, [0x090A] = true, [0x090B] = true,
-    [0x090C] = true, [0x090D] = true, [0x090E] = true, [0x090F] = true,
-    [0x0910] = true, [0x0911] = true, [0x0912] = true, [0x0913] = true,
-    [0x0914] = true, [0x0960] = true, [0x0961] = true, [0x0972] = true,
-    [0x0973] = true, [0x0974] = true, [0x0975] = true, [0x0976] = true,
-    [0x0977] = true,
-    -- kannada
-    [0x0C85] = true, [0x0C86] = true, [0x0C87] = true, [0x0C88] = true,
-    [0x0C89] = true, [0x0C8A] = true, [0x0C8B] = true, [0x0C8C] = true,
-    [0x0C8D] = true, [0x0C8E] = true, [0x0C8F] = true, [0x0C90] = true,
-    [0x0C91] = true, [0x0C92] = true, [0x0C93] = true, [0x0C94] = true,
-    -- malayalam
-    [0x0D05] = true, [0x0D06] = true, [0x0D07] = true, [0x0D08] = true,
-    [0x0D09] = true, [0x0D0A] = true, [0x0D0B] = true, [0x0D0C] = true,
-    [0x0D0E] = true, [0x0D0F] = true, [0x0D10] = true, [0x0D12] = true,
-    [0x0D13] = true, [0x0D14] = true,
-}
+    local indic = {
+        c = { }, -- consonant
+        i = { }, -- independent vowel
+        d = { }, -- dependent vowel
+        m = { }, -- vowel modifier
+        s = { }, -- stress tone mark
+        o = { }, -- other
+    }
 
-local dependent_vowel = { -- matra
-    -- devanagari
-    [0x093A] = true, [0x093B] = true, [0x093E] = true, [0x093F] = true,
-    [0x0940] = true, [0x0941] = true, [0x0942] = true, [0x0943] = true,
-    [0x0944] = true, [0x0945] = true, [0x0946] = true, [0x0947] = true,
-    [0x0948] = true, [0x0949] = true, [0x094A] = true, [0x094B] = true,
-    [0x094C] = true, [0x094E] = true, [0x094F] = true, [0x0955] = true,
-    [0x0956] = true, [0x0957] = true, [0x0962] = true, [0x0963] = true,
-    -- kannada
-    [0x0CBE] = true, [0x0CBF] = true, [0x0CC0] = true, [0x0CC1] = true,
-    [0x0CC2] = true, [0x0CC3] = true, [0x0CC4] = true, [0x0CC5] = true,
-    [0x0CC6] = true, [0x0CC7] = true, [0x0CC8] = true, [0x0CC9] = true,
-    [0x0CCA] = true, [0x0CCB] = true, [0x0CCC] = true,
-    -- malayalam
-    [0x0D3E] = true, [0x0D3F] = true, [0x0D40] = true, [0x0D41] = true,
-    [0x0D42] = true, [0x0D43] = true, [0x0D44] = true, [0x0D46] = true,
-    [0x0D47] = true, [0x0D48] = true, [0x0D4A] = true, [0x0D4B] = true,
-    [0x0D4C] = true, [0x0D57] = true,
-}
+    local indicmarks   = {
+        l = { }, -- left   | pre_mark
+        t = { }, -- top    | above_mark
+        b = { }, -- bottom | below_mark
+        r = { }, -- right  | post_mark
+        s = { }, -- split  | twopart_mark
+    }
 
-local vowel_modifier = {
-    -- devanagari
-    [0x0900] = true, [0x0901] = true, [0x0902] = true, [0x0903] = true,
-    -- A8E0 - A8F1 are cantillation marks for the Samaveda and may not belong here.
-    [0xA8E0] = true, [0xA8E1] = true, [0xA8E2] = true, [0xA8E3] = true,
-    [0xA8E4] = true, [0xA8E5] = true, [0xA8E6] = true, [0xA8E7] = true,
-    [0xA8E8] = true, [0xA8E9] = true, [0xA8EA] = true, [0xA8EB] = true,
-    [0xA8EC] = true, [0xA8ED] = true, [0xA8EE] = true, [0xA8EF] = true,
-    [0xA8F0] = true, [0xA8F1] = true,
-    -- malayalam
-    [0x0D02] = true, [0x0D03] = true,
-}
+    local indicclasses = {
+        nukta    = { },
+        halant   = { },
+        ra       = { },
+        anudatta = { },
+    }
 
-local stress_tone_mark = {
-    [0x0951] = true, [0x0952] = true, [0x0953] = true, [0x0954] = true,
-    -- kannada
-    [0x0CCD] = true,
-    -- malayalam
-    [0x0D4D] = true,
-}
+    local indicorders = {
+        bp = { }, -- before_postscript
+        ap = { }, -- after_postscript
+        bs = { }, -- before_half
+        as = { }, -- after_half
+        bh = { }, -- before_subscript
+        ah = { }, -- after_subscript
+        bm = { }, -- before_main
+        am = { }, -- after_main
+    }
 
-local nukta = {
-    -- devanagari
-    [0x093C] = true,
-    -- kannada:
-    [0x0CBC] = true,
-}
+    for k, v in next, characters.data do
+        local i = v.indic
+        if i then
+            indic[i][k] = true
+            i = v.indicmark
+            if i then
+                if i == "s" then
+                    local s = v.specials
+                    indicmarks[i][k] = { s[2], s[3] }
+                else
+                    indicmarks[i][k] = true
+                end
+            end
+            i = v.indicclass
+            if i then
+                indicclasses[i][k] = true
+            end
+            i = v.indicorder
+            if i then
+                indicorders[i][k] = true
+            end
+        end
+    end
 
-local halant = {
-    -- devanagari
-    [0x094D] = true,
-    -- kannada
-    [0x0CCD] = true,
-    -- malayalam
-    [0x0D4D] = true,
-}
+    indicgroups = {
+        consonant         = indic.c,
+        independent_vowel = indic.i,
+        dependent_vowel   = indic.d,
+        vowel_modifier    = indic.m,
+        stress_tone_mark  = indic.s,
+     -- other             = indic.o,
+        pre_mark          = indicmarks.l,
+        above_mark        = indicmarks.t,
+        below_mark        = indicmarks.b,
+        post_mark         = indicmarks.r,
+        twopart_mark      = indicmarks.s,
+        nukta             = indicclasses.nukta,
+        halant            = indicclasses.halant,
+        ra                = indicclasses.ra,
+        anudatta          = indicclasses.anudatta,
+        before_postscript = indicorders.bp,
+        after_postscript  = indicorders.ap,
+        before_half       = indicorders.bh,
+        after_half        = indicorders.ah,
+        before_subscript  = indicorders.bs,
+        after_subscript   = indicorders.as,
+        before_main       = indicorders.bm,
+        after_main        = indicorders.am,
+    }
 
-local ra = {
-    -- devanagari
-    [0x0930] = true,
-    -- kannada
-    [0x0CB0] = true,
-    -- malayalam
-    [0x0D30] = true,
-}
+    indic        = nil
+    indicmarks   = nil
+    indicclasses = nil
+    indicorders  = nil
 
-local c_anudatta = 0x0952 -- used to be tables
-local c_nbsp     = 0x00A0 -- used to be tables
-local c_zwnj     = 0x200C -- used to be tables
-local c_zwj      = 0x200D -- used to be tables
+    characters.indicgroups = indicgroups
 
-local zw_char = { -- could also be inlined
-    [0x200C] = true,
-    [0x200D] = true,
-}
+end
 
--- 0C82 anusvara
--- 0C83 visarga
--- 0CBD avagraha
--- 0CD5 length mark
--- 0CD6 ai length mark
--- 0CE0 letter ll
--- 0CE1 letter rr
--- 0CE2 vowel sign l
--- 0CE2 vowel sign ll
--- 0CF1 sign
--- 0CF2 sign
--- OCE6 - OCEF digits
+local consonant         = indicgroups.consonant
+local independent_vowel = indicgroups.independent_vowel
+local dependent_vowel   = indicgroups.dependent_vowel
+local vowel_modifier    = indicgroups.vowel_modifier
+local stress_tone_mark  = indicgroups.stress_tone_mark
+local pre_mark          = indicgroups.pre_mark
+local above_mark        = indicgroups.above_mark
+local below_mark        = indicgroups.below_mark
+local post_mark         = indicgroups.post_mark
+local twopart_mark      = indicgroups.twopart_mark
+local nukta             = indicgroups.nukta
+local halant            = indicgroups.halant
+local ra                = indicgroups.ra
+local anudatta          = indicgroups.anudatta
 
-local pre_mark = {
-    [0x093F] = true, [0x094E] = true,
-    -- malayalam
-    [0x0D46] = true, [0x0D47] = true, [0x0D48] = true,
-}
+local before_postscript = indicgroups.before_postscript
+local after_postscript  = indicgroups.after_postscript
+local before_half       = indicgroups.before_half
+local after_half        = indicgroups.after_half
+local before_subscript  = indicgroups.before_subscript
+local after_subscript   = indicgroups.after_subscript
+local before_main       = indicgroups.before_main
+local after_main        = indicgroups.after_main
 
-local above_mark = {
-    [0x0900] = true, [0x0901] = true, [0x0902] = true, [0x093A] = true,
-    [0x0945] = true, [0x0946] = true, [0x0947] = true, [0x0948] = true,
-    [0x0951] = true, [0x0953] = true, [0x0954] = true, [0x0955] = true,
-    [0xA8E0] = true, [0xA8E1] = true, [0xA8E2] = true, [0xA8E3] = true,
-    [0xA8E4] = true, [0xA8E5] = true, [0xA8E6] = true, [0xA8E7] = true,
-    [0xA8E8] = true, [0xA8E9] = true, [0xA8EA] = true, [0xA8EB] = true,
-    [0xA8EC] = true, [0xA8ED] = true, [0xA8EE] = true, [0xA8EF] = true,
-    [0xA8F0] = true, [0xA8F1] = true,
-    -- malayalam
-    [0x0D4E] = true,
-}
+local mark_four = table.merged (
+    pre_mark,
+    above_mark,
+    below_mark,
+    post_mark
+)
 
-local below_mark = {
-    [0x093C] = true, [0x0941] = true, [0x0942] = true, [0x0943] = true,
-    [0x0944] = true, [0x094D] = true, [0x0952] = true, [0x0956] = true,
-    [0x0957] = true, [0x0962] = true, [0x0963] = true,
-}
-
-local post_mark = {
-    [0x0903] = true, [0x093B] = true, [0x093E] = true, [0x0940] = true,
-    [0x0949] = true, [0x094A] = true, [0x094B] = true, [0x094C] = true,
-    [0x094F] = true,
-}
-
-local twopart_mark = {
-    -- malayalam
-    [0x0D4A] = { 0x0D46, 0x0D3E, },	-- ൊ
-    [0x0D4B] = { 0x0D47, 0x0D3E, },	-- ോ
-    [0x0D4C] = { 0x0D46, 0x0D57, },	-- ൌ
-}
-
-local mark_four = { } -- As we access these frequently an extra hash is used.
-
-for k, v in next, pre_mark   do mark_four[k] = pre_mark   end
-for k, v in next, above_mark do mark_four[k] = above_mark end
-for k, v in next, below_mark do mark_four[k] = below_mark end
-for k, v in next, post_mark  do mark_four[k] = post_mark  end
-
-local mark_above_below_post = { }
-
-for k, v in next, above_mark do mark_above_below_post[k] = above_mark end
-for k, v in next, below_mark do mark_above_below_post[k] = below_mark end
-for k, v in next, post_mark  do mark_above_below_post[k] = post_mark  end
-
--- Again, this table can be extended for other scripts than devanagari. Actually,
--- for ConTeXt this kind of data is kept elsewhere so eventually we might move
--- tables to someplace else.
-
-local reorder_class = {
-    -- devanagari
-    [0x0930] = "before postscript",
-    [0x093F] = "before half",
-    [0x0940] = "after subscript",
-    [0x0941] = "after subscript",
-    [0x0942] = "after subscript",
-    [0x0943] = "after subscript",
-    [0x0944] = "after subscript",
-    [0x0945] = "after subscript",
-    [0x0946] = "after subscript",
-    [0x0947] = "after subscript",
-    [0x0948] = "after subscript",
-    [0x0949] = "after subscript",
-    [0x094A] = "after subscript",
-    [0x094B] = "after subscript",
-    [0x094C] = "after subscript",
-    [0x0962] = "after subscript",
-    [0x0963] = "after subscript",
-    [0x093E] = "after subscript",
-    -- kannada:
-    [0x0CB0] = "after postscript", -- todo in code below
-    [0x0CBF] = "before subscript", -- todo in code below
-    [0x0CC6] = "before subscript", -- todo in code below
-    [0x0CCC] = "before subscript", -- todo in code below
-    [0x0CBE] = "before subscript", -- todo in code below
-    [0x0CE2] = "before subscript", -- todo in code below
-    [0x0CE3] = "before subscript", -- todo in code below
-    [0x0CC1] = "before subscript", -- todo in code below
-    [0x0CC2] = "before subscript", -- todo in code below
-    [0x0CC3] = "after subscript",
-    [0x0CC4] = "after subscript",
-    [0x0CD5] = "after subscript",
-    [0x0CD6] = "after subscript",
-    -- malayalam
-}
+local mark_above_below_post = table.merged (
+    above_mark,
+    below_mark,
+    post_mark
+)
 
 -- We use some pseudo features as we need to manipulate the nodelist based
--- on information in the font as well as already applied features.
+-- on information in the font as well as already applied features. We can
+-- probably replace some of the code below by injecting 'real' features
+-- using the extension mechanism.
+
+local zw_char = { -- both_joiners_true
+    [c_zwnj] = true,
+    [c_zwj ] = true,
+}
 
 local dflt_true = {
     dflt = true
 }
 
-local dev2_defaults = {
+local two_defaults = {
     dev2 = dflt_true,
 }
 
-local deva_defaults = {
+local one_defaults = {
     dev2 = dflt_true,
     deva = dflt_true,
 }
 
 local false_flags = { false, false, false, false }
 
-local both_joiners_true = {
-    [0x200C] = true,
-    [0x200D] = true,
-}
-
 local sequence_reorder_matras = {
-    features  = { dv01 = dev2_defaults },
+    features  = { dv01 = two_defaults },
     flags     = false_flags,
     name      = "dv01_reorder_matras",
     order     = { "dv01" },
@@ -467,14 +347,13 @@ local sequence_reorder_matras = {
     nofsteps  = 1,
     steps     = {
         {
-            osdstep  = true,
             coverage = pre_mark,
         }
     }
 }
 
 local sequence_reorder_reph = {
-    features  = { dv02 = dev2_defaults },
+    features  = { dv02 = two_defaults },
     flags     = false_flags,
     name      = "dv02_reorder_reph",
     order     = { "dv02" },
@@ -482,14 +361,13 @@ local sequence_reorder_reph = {
     nofsteps  = 1,
     steps     = {
         {
-            osdstep  = true,
             coverage = { },
         }
     }
 }
 
 local sequence_reorder_pre_base_reordering_consonants = {
-    features  = { dv03 = dev2_defaults },
+    features  = { dv03 = two_defaults },
     flags     = false_flags,
     name      = "dv03_reorder_pre_base_reordering_consonants",
     order     = { "dv03" },
@@ -497,22 +375,21 @@ local sequence_reorder_pre_base_reordering_consonants = {
     nofsteps  = 1,
     steps     = {
         {
-            osdstep  = true,
             coverage = { },
         }
     }
 }
 
 local sequence_remove_joiners = {
-    features  = { dv04 = deva_defaults },
+    features  = { dv04 = one_defaults },
     flags     = false_flags,
     name      = "dv04_remove_joiners",
     order     = { "dv04" },
     type      = "devanagari_remove_joiners",
     nofsteps  = 1,
     steps     = {
-        {  osdstep  = true,
-           coverage = both_joiners_true,
+        {
+           coverage = zw_char, -- both_joiners_true
         },
     }
 }
@@ -522,38 +399,85 @@ local sequence_remove_joiners = {
 -- as it might depends on the font. Not that it's a bottleneck.
 
 local basic_shaping_forms =  {
-    nukt = true,
+ -- init = true, -- new
+ -- abvs = true, -- new
     akhn = true,
-    rphf = true,
-    pref = true,
-    rkrf = true,
     blwf = true,
-    half = true,
-    pstf = true,
-    vatu = true,
+ -- calt = true, -- new
     cjct = true,
+    half = true,
+ -- haln = true, -- new
+    nukt = true,
+    pref = true,
+ -- pres = true, -- new
+    pstf = true,
+ -- psts = true, -- new
+    rkrf = true,
+    rphf = true,
+    vatu = true,
 }
 
 local valid = {
-    akhn = true, -- malayalam
-    rphf = true,
-    pref = true,
-    half = true,
+ -- akhn = true, -- malayalam
+ -- rphf = true,
+ -- pref = true,
+ -- half = true,
+ -- blwf = true,
+ -- pstf = true,
+ -- pres = true, -- malayalam
+ -- blws = true, -- malayalam
+ -- psts = true, -- malayalam
+    abvs = true,
+    akhn = true,
     blwf = true,
+    calt = true,
+    cjct = true,
+    half = true,
+    haln = true,
+    nukt = true,
+    pref = true,
+    pres = true,
     pstf = true,
-    pres = true, -- malayalam
-    blws = true, -- malayalam
-    psts = true, -- malayalam
+    psts = true,
+    rkrf = true,
+    rphf = true,
+    vatu = true,
+    pres = true,
+    abvs = true,
+    blws = true,
+    psts = true,
+    haln = true,
+    calt = true,
 }
+
+local scripts = { }
+
+local scripts_one = { "deva", "mlym", "beng", "gujr", "guru", "knda", "orya", "taml", "telu" }
+local scripts_two = { "dev2", "mlm2", "bng2", "gjr2", "gur2", "knd2", "ory2", "tml2", "tel2" }
+
+local nofscripts = #scripts_one
+
+for i=1,nofscripts do
+    local one = scripts_one[i]
+    local two = scripts_two[i]
+    scripts[one] = true
+    scripts[two] = true
+    two_defaults[one] = dflt_true
+    one_defaults[one] = dflt_true
+    one_defaults[two] = dflt_true
+end
+
+local function valid_one(s) for i=1,nofscripts do if s[scripts_one[i]] then return true end end end
+local function valid_two(s) for i=1,nofscripts do if s[scripts_two[i]] then return true end end end
 
 local function initializedevanagi(tfmdata)
     local script, language = otf.scriptandlanguage(tfmdata,attr) -- todo: take fast variant
-    if script == "deva" or script == "dev2" or script =="mlym" or script == "mlm2" then
+    if scripts[script] then
         local resources  = tfmdata.resources
         local devanagari = resources.devanagari
         if not devanagari then
             --
-            report_devanagari("adding devanagari features to font")
+            report("adding devanagari features to font")
             --
             local gsubfeatures   = resources.features.gsub
             local sequences      = resources.sequences
@@ -572,10 +496,10 @@ local function initializedevanagi(tfmdata)
             end
             local insertindex = lastmatch + 1
             --
-            gsubfeatures["dv01"] = dev2_defaults -- reorder matras
-            gsubfeatures["dv02"] = dev2_defaults -- reorder reph
-            gsubfeatures["dv03"] = dev2_defaults -- reorder pre base reordering consonants
-            gsubfeatures["dv04"] = deva_defaults -- remove joiners
+            gsubfeatures["dv01"] = two_defaults -- reorder matras
+            gsubfeatures["dv02"] = two_defaults -- reorder reph
+            gsubfeatures["dv03"] = two_defaults -- reorder pre base reordering consonants
+            gsubfeatures["dv04"] = one_defaults -- remove joiners
             --
             local reorder_pre_base_reordering_consonants = copy(sequence_reorder_pre_base_reordering_consonants)
             local reorder_reph                           = copy(sequence_reorder_reph)
@@ -631,43 +555,31 @@ local function initializedevanagi(tfmdata)
                         end
                     end
                 end
-                for kind, spec in next, features do -- beware, this is
-                    if spec.dev2 and valid[kind] then
+                for kind, spec in next, features do
+                 -- if spec.dev2 and valid[kind] then
+                    if valid[kind] and valid_two(spec)then
                         for i=1,nofsteps do
                             local step     = steps[i]
                             local coverage = step.coverage
                             if coverage then
                                 local reph = false
                                 if kind == "rphf" then
-                                 --
-                                 -- KE: I don't understand the rationale behind osdstep. The original if
-                                 --     statement checked whether coverage is contextual chaining.
-                                 --
-                                 -- HH: The osdstep signals that we deal with our own feature here, not
-                                 --     one in the font itself so it was just a safeguard against us overloading
-                                 --     something driven by the font.
-                                 --
-                                 -- if step.osdstep then -- selective
-                                    if true then -- always
-                                        -- rphf acts on consonant + halant
-                                        for k, v in next, ra do
-                                            local r = coverage[k]
-                                            if r then
-                                                local h = false
-                                                for k, v in next, halant do
-                                                    local h = r[k]
-                                                    if h then
-                                                        reph = h.ligature or false
-                                                        break
-                                                    end
-                                                end
-                                                if reph then
+                                    -- rphf acts on consonant + halant
+                                    for k, v in next, ra do
+                                        local r = coverage[k]
+                                        if r then
+                                            local h = false
+                                            for k, v in next, halant do
+                                                local h = r[k]
+                                                if h then
+                                                    reph = h.ligature or false
                                                     break
                                                 end
                                             end
+                                            if reph then
+                                                break
+                                            end
                                         end
-                                    else
-                                        -- rphf might be result of other handler/chainproc
                                     end
                                 end
                                 seqsubset[#seqsubset+1] = { kind, coverage, reph }
@@ -716,8 +628,30 @@ local function initializedevanagi(tfmdata)
                 sharedfeatures["pstf"] = true
                 sharedfeatures["pref"] = true
                 sharedfeatures["dv03"] = true -- dv03_reorder_pre_base_reordering_consonants
-                gsubfeatures  ["dv03"] = dev2_defaults -- reorder pre base reordering consonants
+                gsubfeatures  ["dv03"] = two_defaults -- reorder pre base reordering consonants
                 insert(sequences,insertindex,sequence_reorder_pre_base_reordering_consonants)
+         -- elseif script == "beng" then
+         -- elseif script == "bng2" then
+         -- elseif script == "gujr" then
+         -- elseif script == "gjr2" then
+         -- elseif script == "guru" then
+         -- elseif script == "gur2" then
+         -- elseif script == "knda" then
+         -- elseif script == "knd2" then
+            elseif script == "taml" then
+                sharedfeatures["dv04"] = true -- dv04_remove_joiners
+sharedfeatures["pstf"] = true
+            elseif script == "tml2" then
+-- sharedfeatures["pstf"] = true
+-- sharedfeatures["pref"] = true
+--                 sharedfeatures["dv01"] = true -- dv01_reorder_matras
+--                 sharedfeatures["dv02"] = true -- dv02_reorder_reph
+--                 sharedfeatures["dv03"] = true -- dv03_reorder_pre_base_reordering_consonants
+--                 sharedfeatures["dv04"] = true -- dv04_remove_joiners
+         -- elseif script == "telu" then
+         -- elseif script == "tel2" then
+            else
+                report("todo: enable the right features for script %a",script)
             end
         end
     end
@@ -732,9 +666,22 @@ registerotffeature {
     },
 }
 
+local show_syntax_errors = false
+
+local function inject_syntax_error(head,current,char)
+    local signal = copy_node(current)
+    copyinjection(signal,current)
+    if pre_mark[char] then
+        setchar(signal,dotted_circle)
+    else
+        setchar(current,dotted_circle)
+    end
+    return insert_node_after(head,current,signal)
+end
+
 -- hm, this is applied to one character:
 
-local function deva_initialize(font,attr) -- we need a proper hook into the dataset initializer
+local function initialize_one(font,attr) -- we need a proper hook into the dataset initializer
 
     local tfmdata        = fontdata[font]
     local datasets       = otf.dataset(tfmdata,font,attr) -- don't we know this one?
@@ -773,9 +720,9 @@ local function deva_initialize(font,attr) -- we need a proper hook into the data
 
 end
 
-local function deva_reorder(head,start,stop,font,attr,nbspaces)
+local function reorder_one(head,start,stop,font,attr,nbspaces)
 
-    local reph, vattu, blwfcache = deva_initialize(font,attr) -- todo: a hash[font]
+    local reph, vattu, blwfcache = initialize_one(font,attr) -- todo: a hash[font]
 
     local current   = start
     local n         = getnext(start)
@@ -812,40 +759,39 @@ local function deva_reorder(head,start,stop,font,attr,nbspaces)
             lastcons  = current
             current   = getnext(current)
             if current ~= stop then
-                if nukta[getchar(current)] then
+                local char = getchar(current)
+                if nukta[char] then
                     current = getnext(current)
+                    char = getchar(current)
                 end
-                if getchar(current) == c_zwj then
-                    if current ~= stop then
-                        local next = getnext(current)
-                        if next ~= stop and halant[getchar(next)] then
-                            current = next
-                            next = getnext(current)
-                            local tmp = next and getnext(next) or nil -- needs checking
-                            local changestop = next == stop
-                            local tempcurrent = copy_node(next)
-							copyinjection(tempcurrent,next)
-                            local nextcurrent = copy_node(current)
-							copyinjection(nextcurrent,current) -- KE: necessary? HH: probably not as positioning comes later and we rawget/set
-                            setlink(tempcurrent,nextcurrent)
-                            setprop(tempcurrent,a_state,s_blwf)
-                            tempcurrent = processcharacters(tempcurrent,font)
-                            setprop(tempcurrent,a_state,unsetvalue)
-                            if getchar(next) == getchar(tempcurrent) then
-                                flush_list(tempcurrent)
-                                local n = copy_node(current)
-								copyinjection(n,current) -- KE: necessary? HH: probably not as positioning comes later and we rawget/set
-                                setchar(current,dotted_circle)
-                                head = insert_node_after(head, current, n)
-                            else
-                                setchar(current,getchar(tempcurrent)) -- we assumes that the result of blwf consists of one node
-                                local freenode = getnext(current)
-                                setlink(current,tmp)
-                                flush_node(freenode)
-                                flush_list(tempcurrent)
-                                if changestop then
-                                    stop = current
-                                end
+                if char == c_zwj and current ~= stop then
+                    local next = getnext(current)
+                    if next ~= stop and halant[getchar(next)] then
+                        current = next
+                        next = getnext(current)
+                        local tmp = next and getnext(next) or nil -- needs checking
+                        local changestop = next == stop
+                        local tempcurrent = copy_node(next)
+                        copyinjection(tempcurrent,next)
+                        local nextcurrent = copy_node(current)
+                        copyinjection(nextcurrent,current) -- KE: necessary? HH: probably not as positioning comes later and we rawget/set
+                        setlink(tempcurrent,nextcurrent)
+                        setprop(tempcurrent,a_state,s_blwf)
+                        tempcurrent = processcharacters(tempcurrent,font)
+                        setprop(tempcurrent,a_state,unsetvalue)
+                        if getchar(next) == getchar(tempcurrent) then
+                            flush_list(tempcurrent)
+                            if show_syntax_errors then
+                                head, current = inject_syntax_error(head,current,char)
+                            end
+                        else
+                            setchar(current,getchar(tempcurrent)) -- we assumes that the result of blwf consists of one node
+                            local freenode = getnext(current)
+                            setlink(current,tmp)
+                            flush_node(freenode)
+                            flush_list(tempcurrent)
+                            if changestop then
+                                stop = current
                             end
                         end
                     end
@@ -1140,6 +1086,7 @@ function handlers.devanagari_reorder_matras(head,start) -- no leak
                 head = remove_node(head,start)
                 setlink(start,next)
                 setlink(current,start)
+             -- setlink(current,start,next) -- maybe
                 start = startnext
                 break
             end
@@ -1151,41 +1098,39 @@ function handlers.devanagari_reorder_matras(head,start) -- no leak
     return head, start, true
 end
 
--- todo: way more caching of attributes and font
+-- Reph’s original position is always at the beginning of the syllable, (i.e. it is
+-- not reordered at the character reordering stage). However, it will be reordered
+-- according to the basic-forms shaping results. Possible positions for reph,
+-- depending on the script, are; after main, before post-base consonant forms, and
+-- after post-base consonant forms.
 
--- Reph’s original position is always at the beginning of the syllable, (i.e. it is not reordered at the character reordering stage).
--- However, it will be reordered according to the basic-forms shaping results.
--- Possible positions for reph, depending on the script, are; after main, before post-base consonant forms,
--- and after post-base consonant forms.
-
--- 1  If reph should be positioned after post-base consonant forms, proceed to step 5.
--- 2  If the reph repositioning class is not after post-base: target position is after the first explicit halant glyph between
---    the first post-reph consonant and last main consonant. If ZWJ or ZWNJ are following this halant, position is moved after it.
---    If such position is found, this is the target position. Otherwise, proceed to the next step.
---    Note: in old-implementation fonts, where classifications were fixed in shaping engine,
---    there was no case where reph position will be found on this step.
--- 3  If reph should be repositioned after the main consonant: from the first consonant not ligated with main,
---    or find the first consonant that is not a potential pre-base reordering Ra.
--- 4  If reph should be positioned before post-base consonant, find first post-base classified consonant not ligated with main.
---    If no consonant is found, the target position should be before the first matra, syllable modifier sign or vedic sign.
--- 5  If no consonant is found in steps 3 or 4, move reph to a position immediately before the first post-base matra,
---    syllable modifier sign or vedic sign that has a reordering class after the intended reph position.
---    For example, if the reordering position for reph is post-main, it will skip above-base matras that also have a post-main position.
--- 6  Otherwise, reorder reph to the end of the syllable.
-
--- hm, this only looks at the start of a nodelist ... is this supposed to be line based?
+-- In Devanagari reph has reordering position 'before postscript' and dev2 only
+-- follows step 2, 4, and 6.
 
 function handlers.devanagari_reorder_reph(head,start)
-    -- since in Devanagari reph has reordering position 'before postscript' dev2 only follows step 2, 4, and 6,
-    -- the other steps are still ToDo (required for scripts other than dev2)
     local current   = getnext(start)
     local startnext = nil
     local startprev = nil
     local startfont = getfont(start)
     local startattr = getprop(start,a_syllabe)
+    --
+    ::step_1::
+    --
+    -- If reph should be positioned after post-base consonant forms, proceed to step 5.
+    --
+    ::step_2::
+    --
+    -- If the reph repositioning class is not after post-base: target position is after
+    -- the first explicit halant glyph between the first post-reph consonant and last
+    -- main consonant. If ZWJ or ZWNJ are following this halant, position is moved after
+    -- it. If such position is found, this is the target position. Otherwise, proceed to
+    -- the next step. Note: in old-implementation fonts, where classifications were
+    -- fixed in shaping engine, there was no case where reph position will be found on
+    -- this step.
+    --
     while current do
         local char = ischar(current,startfont)
-        if char and getprop(current,a_syllabe) == startattr then -- step 2
+        if char and getprop(current,a_syllabe) == startattr then
             if halant[char] and not getprop(current,a_state) then
                 local next = getnext(current)
                 if next then
@@ -1199,6 +1144,7 @@ function handlers.devanagari_reorder_reph(head,start)
                 head = remove_node(head,start)
                 setlink(start,next)
                 setlink(current,start)
+             -- setlink(current,start,next) -- maybe
                 start = startnext
                 startattr = getprop(start,a_syllabe)
                 break
@@ -1208,17 +1154,31 @@ function handlers.devanagari_reorder_reph(head,start)
             break
         end
     end
+    ::step_3::
+    --
+    -- If reph should be repositioned after the main consonant: from the first consonant
+    -- not ligated with main, or find the first consonant that is not a potential
+    -- pre-base reordering Ra.
+    --
+    -- Kai: todo
+    --
+    ::step_4::
+    --
+    -- If reph should be positioned before post-base consonant, find first post-base
+    -- classified consonant not ligated with main. If no consonant is found, the target
+    -- position should be before the first matra, syllable modifier sign or vedic sign.
+    --
     if not startnext then
         current = getnext(start)
         while current do
             local char = ischar(current,startfont)
-            if char and getprop(current,a_syllabe) == startattr then -- step 4
+            if char and getprop(current,a_syllabe) == startattr then
                 if getprop(current,a_state) == s_pstf then -- post-base
                     startnext = getnext(start)
                     head = remove_node(head,start)
-                    local prev = getprev(current)
-                    setlink(prev,start)
+                    setlink(getprev(current),start)
                     setlink(start,current)
+                 -- setlink(getprev(current),start,current) -- maybe
                     start = startnext
                     startattr = getprop(start,a_syllabe)
                     break
@@ -1229,16 +1189,22 @@ function handlers.devanagari_reorder_reph(head,start)
             end
         end
     end
-    -- todo: determine position for reph with reordering position other than 'before postscript'
-    -- (required for scripts other than dev2)
-    -- leaks
+    --
+    ::step_5::
+    --
+    -- If no consonant is found in steps 3 or 4, move reph to a position immediately
+    -- before the first post-base matra, syllable modifier sign or vedic sign that has a
+    -- reordering class after the intended reph position. For example, if the reordering
+    -- position for reph is post-main, it will skip above-base matras that also have a
+    -- post-main position.
+    --
     if not startnext then
         current = getnext(start)
         local c = nil
         while current do
             local char = ischar(current,startfont)
-            if char and getprop(current,a_syllabe) == startattr then -- step 5
-                if not c and mark_above_below_post[char] and reorder_class[char] ~= "after subscript" then
+            if char and getprop(current,a_syllabe) == startattr then
+                if not c and mark_above_below_post[char] and not after_subscript[char] then
                     c = current
                 end
                 current = getnext(current)
@@ -1250,21 +1216,25 @@ function handlers.devanagari_reorder_reph(head,start)
         if c then
             startnext = getnext(start)
             head = remove_node(head,start)
-            local prev = getprev(c)
-            setlink(prev,start)
+            setlink(getprev(c),start)
             setlink(start,c)
+         -- setlink(getprev(c),start,c) -- maybe
             -- end
             start = startnext
             startattr = getprop(start,a_syllabe)
         end
     end
-    -- leaks
+    --
+    ::step_6::
+    --
+    -- Otherwise, reorder reph to the end of the syllable.
+    --
     if not startnext then
         current = start
         local next = getnext(current)
         while next do
             local nextchar = ischar(next,startfont)
-            if nextchar and getprop(next,a_syllabe) == startattr then --step 6
+            if nextchar and getprop(next,a_syllabe) == startattr then
                 current = next
                 next = getnext(current)
             else
@@ -1274,9 +1244,9 @@ function handlers.devanagari_reorder_reph(head,start)
         if start ~= current then
             startnext = getnext(start)
             head = remove_node(head,start)
-            local next = getnext(current)
-            setlink(start,next)
+            setlink(start,getnext(current))
             setlink(current,start)
+         -- setlink(current,start,getnext(current)) -- maybe
             start = startnext
         end
     end
@@ -1284,16 +1254,20 @@ function handlers.devanagari_reorder_reph(head,start)
     return head, start, true
 end
 
--- we can cache some checking (v)
-
 -- If a pre-base reordering consonant is found, reorder it according to the following rules:
 --
--- 1  Only reorder a glyph produced by substitution during application of the feature.
---    (Note that a font may shape a Ra consonant with the feature generally but block it in certain contexts.)
--- 2  Try to find a target position the same way as for pre-base matra. If it is found, reorder pre-base consonant glyph.
+-- 1  Only reorder a glyph produced by substitution during application of the feature. (Note
+--    that a font may shape a Ra consonant with the feature generally but block it in certain
+--    contexts.)
+-- 2  Try to find a target position the same way as for pre-base matra. If it is found, reorder
+--    pre-base consonant glyph.
 -- 3  If position is not found, reorder immediately before main consonant.
 
--- UNTESTED: NOT CALLED IN EXAMPLE
+-- Here we implement a few handlers:
+--
+--   function(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+--       return head, start, done
+--   end
 
 function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
     local current   = start
@@ -1320,6 +1294,7 @@ function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
                 removenode(start,start)
                 setlink(start,next)
                 setlink(current,start)
+             -- setlink(current,start,next) -- maybe
                 start = startnext
                 break
             end
@@ -1337,9 +1312,9 @@ function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
                 if not consonant[char] and getprop(current,a_state) then -- main
                     startnext = getnext(start)
                     removenode(start,start)
-                    local prev = getprev(current)
-                    setlink(prev,start)
+                    setlink(getprev(current),start)
                     setlink(start,current)
+                 -- setlink(getprev(current),start,current) -- maybe
                     start = startnext
                     break
                 end
@@ -1351,32 +1326,6 @@ function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
     end
     return head, start, true
 end
-
--- function handlers.devanagari_remove_joiners(head,start,kind,lookupname,replacement)
---     local stop = getnext(start)
---     local font = getfont(start)
---     while stop do
---         local char = ischar(stop)
---         if char and (char == c_zwnj or char == c_zwj) then
---             stop = getnext(stop)
---         else
---             break
---         end
---     end
---     if stop then
---         setnext(getprev(stop))
---         setprev(stop,getprev(start))
---     end
---     local prev = getprev(start)
---     if prev then
---         setnext(prev,stop)
---     end
---     if head == start then
---     	head = stop
---     end
---     flush_list(start)
---     return head, stop, true
--- end
 
 function handlers.devanagari_remove_joiners(head,start,kind,lookupname,replacement)
     local stop = getnext(start)
@@ -1399,13 +1348,13 @@ function handlers.devanagari_remove_joiners(head,start,kind,lookupname,replaceme
         setnext(prev)
     end
     if head == start then
-    	head = stop
+        head = stop
     end
     flush_list(start)
     return head, stop, true
 end
 
-local function dev2_initialize(font,attr)
+local function initialize_two(font,attr)
 
     local devanagari = fontdata[font].resources.devanagari
 
@@ -1420,9 +1369,9 @@ end
 -- this one will be merged into the caller: it saves a call, but we will then make function
 -- of the actions
 
-local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pass over (determine stop in sweep)
+local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pass over (determine stop in sweep)
 
-    local seqsubset, reorderreph = dev2_initialize(font,attr)
+    local seqsubset, reorderreph = initialize_two(font,attr)
 
     local reph     = false -- was nil ... probably went unnoticed because never assigned
     local halfpos  = nil
@@ -1433,7 +1382,7 @@ local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pa
 
     for i=1,#seqsubset do
 
-        -- maybe quit if start == stop
+        -- this can be done more efficient, the last test and less getnext
 
         local subset      = seqsubset[i]
         local kind        = subset[1]
@@ -1452,8 +1401,7 @@ local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pa
                         if found[n] then    --above-base: rphf    Consonant + Halant
                             local afternext = next ~= stop and getnext(next)
                             if afternext and zw_char[getchar(afternext)] then -- ZWJ and ZWNJ prevent creation of reph
-                                current = next
-                                current = getnext(current)
+                                current = afternext -- getnext(next)
                             elseif current == start then
                                 setprop(current,a_state,s_rphf)
                                 current = next
@@ -1589,7 +1537,7 @@ local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pa
                         next = getnext(current)
                         local tmp = getnext(next)
                         local changestop = next == stop
-                        setnext(next,nil)
+                        setnext(next)
                         setprop(current,a_state,s_pref)
                         current = processcharacters(current,font)
                         setprop(current,a_state,s_blwf)
@@ -1599,10 +1547,9 @@ local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pa
                         setprop(current,a_state,unsetvalue)
                         if halant[getchar(current)] then
                             setnext(getnext(current),tmp)
-                            local nc = copy_node(current)
-							copyinjection(nc,current)
-                            setchar(current,dotted_circle)
-                            head = insert_node_after(head,current,nc)
+                            if show_syntax_errors then
+                                head, current = inject_syntax_error(head,current,char)
+                            end
                         else
                             setnext(current,tmp) -- assumes that result of pref, blwf, or pstf consists of one node
                             if changestop then
@@ -1690,9 +1637,9 @@ local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pa
                     end
                     start = current
                 end
-                local prev = getprev(halfpos)
-                setlink(prev,current)
+                setlink(getprev(halfpos),current)
                 setlink(current,halfpos)
+             -- setlink(getprev(halfpos),current,halfpos) -- maybe
                 halfpos = current
             elseif above_mark[char] then    -- After main consonant
                 target = basepos
@@ -1721,9 +1668,9 @@ local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pa
                     if current == stop then
                         stop = prev
                     end
-                    local next = getnext(target)
-                    setlink(current,next)
+                    setlink(current,getnext(target))
                     setlink(target,current)
+                 -- setlink(target,current,getnext(target)) -- maybe
                 end
             end
         end
@@ -1750,8 +1697,7 @@ local function dev2_reorder(head,start,stop,font,attr,nbspaces) -- maybe do a pa
             if stop == next then
                 stop = current
             end
-            local prev = getprev(c)
-            setlink(prev,next)
+            setlink(getprev(c),next)
             local nextnext = getnext(next)
             setnext(current,nextnext)
             local nextnextnext = getnext(nextnext)
@@ -1999,7 +1945,7 @@ local function analyze_next_chars_two(c,font)
     if not v then
         return c
     end
-    if v == c_anudatta then
+    if anudatta[v] then
         c = n
         n = getnext(c)
         if not n then
@@ -2098,35 +2044,23 @@ local function analyze_next_chars_two(c,font)
     end
 end
 
-local function inject_syntax_error(head,current,mark)
-    local signal = copy_node(current)
-	copyinjection(signal,current)
-    if mark == pre_mark then -- THIS IS WRONG: pre_mark is a table
-        setchar(signal,dotted_circle)
-    else
-        setchar(current,dotted_circle)
-    end
-    return insert_node_after(head,current,signal)
-end
-
 -- It looks like these two analyzers were written independently but they share
 -- a lot. Common code has been synced.
 
-function methods.deva(head,font,attr)
-    head           = tonut(head)
+local function method_one(head,font,attr)
     local current  = head
     local start    = true
     local done     = false
     local nbspaces = 0
     while current do
-		local char = ischar(current,font)
+        local char = ischar(current,font)
         if char then
             done = true
             local syllablestart = current
             local syllableend   = nil
             local c = current
             local n = getnext(c)
-	        local first = char
+            local first = char
             if n and ra[first] then
                 local second = ischar(n,font)
                 if second and halant[second] then
@@ -2158,10 +2092,10 @@ function methods.deva(head,font,attr)
             end
             if standalone then
                 -- stand alone cluster (at the start of the word only): #[Ra+H]+NBSP+[N]+[<[<ZWJ|ZWNJ>]+H+C>]+[{M}+[N]+[H]]+[SM]+[(VD)]
-				local syllableend = analyze_next_chars_one(c,font,2)
-				current = getnext(syllableend)
+                local syllableend = analyze_next_chars_one(c,font,2)
+                current = getnext(syllableend)
                 if syllablestart ~= syllableend then
-                    head, current, nbspaces = deva_reorder(head,syllablestart,syllableend,font,attr,nbspaces)
+                    head, current, nbspaces = reorder_one(head,syllablestart,syllableend,font,attr,nbspaces)
                     current = getnext(current)
                 end
             else
@@ -2267,7 +2201,7 @@ function methods.deva(head,font,attr)
                         end
                     end
                     if syllablestart ~= syllableend then
-                        head, current, nbspaces = deva_reorder(head,syllablestart,syllableend,font,attr,nbspaces)
+                        head, current, nbspaces = reorder_one(head,syllablestart,syllableend,font,attr,nbspaces)
                         current = getnext(current)
                     end
                 elseif independent_vowel[char] then
@@ -2289,9 +2223,11 @@ function methods.deva(head,font,attr)
                         end
                     end
                 else
-                    local mark = mark_four[char]
-                    if mark then
-                        head, current = inject_syntax_error(head,current,mark)
+                    if show_syntax_errors then
+                        local mark = mark_four[char]
+                        if mark then
+                            head, current = inject_syntax_error(head,current,char)
+                        end
                     end
                     current = getnext(current)
                 end
@@ -2306,16 +2242,13 @@ function methods.deva(head,font,attr)
         head = replace_all_nbsp(head)
     end
 
-    head = tonode(head)
-
     return head, done
 end
 
 -- there is a good change that when we run into one with subtype < 256 that the rest is also done
 -- so maybe we can omit this check (it's pretty hard to get glyphs in the stream out of the blue)
 
-function methods.dev2(head,font,attr)
-    head           = tonut(head)
+local function method_two(head,font,attr)
     local current  = head
     local start    = true
     local done     = false
@@ -2338,7 +2271,7 @@ function methods.dev2(head,font,attr)
                         local nextnextchar = ischar(n,font)
                         if nextnextchar then
                             c = n
-							char = nextnextchar
+                            char = nextnextchar
                         end
                     end
                 end
@@ -2385,14 +2318,14 @@ function methods.dev2(head,font,attr)
             end
         end
         if syllableend and syllablestart ~= syllableend then
-            head, current, nbspaces = dev2_reorder(head,syllablestart,syllableend,font,attr,nbspaces)
+            head, current, nbspaces = reorder_two(head,syllablestart,syllableend,font,attr,nbspaces)
         end
-        if not syllableend then
+        if not syllableend and show_syntax_errors then
             local char = ischar(current,font)
             if char and not getprop(current,a_state) then
                 local mark = mark_four[char]
                 if mark then
-                    head, current = inject_syntax_error(head,current,mark)
+                    head, current = inject_syntax_error(head,current,char)
                 end
             end
         end
@@ -2404,10 +2337,10 @@ function methods.dev2(head,font,attr)
         head = replace_all_nbsp(head)
     end
 
-    head = tonode(head)
-
     return head, done
 end
 
-methods.mlym = methods.deva
-methods.mlm2 = methods.dev2
+for i=1,nofscripts do
+    methods[scripts_one[i]] = method_one
+    methods[scripts_two[i]] = method_two
+end

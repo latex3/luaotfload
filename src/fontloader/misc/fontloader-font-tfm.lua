@@ -21,6 +21,7 @@ local setmetatableindex        = table.setmetatableindex
 
 local fonts                    = fonts
 local handlers                 = fonts.handlers
+local helpers                  = fonts.helpers
 local readers                  = fonts.readers
 local constructors             = fonts.constructors
 local encodings                = fonts.encodings
@@ -38,6 +39,8 @@ local registertfmfeature       = tfmfeatures.register
 
 local tfmenhancers             = constructors.enhancers.tfm
 local registertfmenhancer      = tfmenhancers.register
+
+local charcommand              = helpers.commands.char
 
 constructors.resolvevirtualtoo = false -- wil be set in font-ctx.lua
 
@@ -244,6 +247,8 @@ local function read_from_tfm(specification)
         --
         constructors.enhanceparameters(parameters) -- official copies for us
         --
+        properties.private       =  properties.private or tfmdata.private or privateoffset
+        --
         if newtfmdata then
             --
             -- We do nothing as we assume flat tfm files. It would become real messy
@@ -436,7 +441,7 @@ do
         local originals  = tfmdata.characters
         local indices    = { }
         local parentfont = { "font", 1 }
-        local private    = fonts.constructors.privateoffset
+        local private    = tfmdata or fonts.constructors.privateoffset
         local reported   = encdone[tfmfile][encfile]
 
         -- create characters table
@@ -463,7 +468,7 @@ do
                 if backmap then
                     original.index     = backmap[name]
                 else -- probably bitmap
-                    original.commands = { parentfont, { "char", index } }
+                    original.commands = { parentfont, charcommand[index] } -- or "slot"
                     original.oindex   = index
                 end
                 done[name] = true
@@ -514,6 +519,7 @@ do
         tfmdata.tounicode     = 1
         tfmdata.embedding     = "subset"
         tfmdata.usedbitmap    = bitmap and virtualid
+        tfmdata.private       = private
 
         return tfmdata
     end
@@ -548,7 +554,9 @@ end
     local flushstreamobject = lpdf and lpdf.flushstreamobject
     local setfontattributes = pdf.setfontattributes
 
-    if not flushstreamobject then
+    if flushstreamobject then
+        -- we're in context
+    else
         flushstreamobject = function(data)
             return pdf.obj {
                 immediate = true,

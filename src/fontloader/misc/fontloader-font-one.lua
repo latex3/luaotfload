@@ -22,12 +22,11 @@ add features.</p>
 local fonts, logs, trackers, containers, resolvers = fonts, logs, trackers, containers, resolvers
 
 local next, type, tonumber, rawget = next, type, tonumber, rawget
-local match, gmatch, lower, gsub, strip, find = string.match, string.gmatch, string.lower, string.gsub, string.strip, string.find
-local char, byte, sub = string.char, string.byte, string.sub
+local match, gsub = string.match, string.gsub
 local abs = math.abs
-local bxor, rshift = bit32.bxor, bit32.rshift
 local P, S, R, Cmt, C, Ct, Cs, Carg = lpeg.P, lpeg.S, lpeg.R, lpeg.Cmt, lpeg.C, lpeg.Ct, lpeg.Cs, lpeg.Carg
 local lpegmatch, patterns = lpeg.match, lpeg.patterns
+local sortedhash = table.sortedhash
 
 local trace_features      = false  trackers.register("afm.features",   function(v) trace_features = v end)
 local trace_indexing      = false  trackers.register("afm.indexing",   function(v) trace_indexing = v end)
@@ -40,6 +39,8 @@ local setmetatableindex   = table.setmetatableindex
 local derivetable         = table.derive
 
 local findbinfile         = resolvers.findbinfile
+
+local privateoffset       = fonts.constructors and fonts.constructors.privateoffset or 0xF0000 -- 0x10FFFF
 
 local definers            = fonts.definers
 local readers             = fonts.readers
@@ -58,7 +59,7 @@ local registerafmfeature  = afmfeatures.register
 local afmenhancers        = constructors.enhancers.afm
 local registerafmenhancer = afmenhancers.register
 
-afm.version               = 1.512 -- incrementing this number one up will force a re-cache
+afm.version               = 1.513 -- incrementing this number one up will force a re-cache
 afm.cache                 = containers.define("fonts", "one", afm.version, true)
 afm.autoprefixed          = true -- this will become false some day (catches texnansi-blabla.*)
 
@@ -85,7 +86,7 @@ function afm.load(filename)
         local name = file.removesuffix(file.basename(filename))
         local data = containers.read(afm.cache,name)
         local attr = lfs.attributes(filename)
-        local size, time = attr.size or 0, attr.modification or 0
+        local size, time = attr and attr.size or 0, attr and attr.modification or 0
         --
         local pfbfile = file.replacesuffix(name,"pfb")
         local pfbname = resolvers.findfile(pfbfile,"pfb") or ""
@@ -139,9 +140,9 @@ local function enhance_unify_names(data, filename)
     local unicodevector = fonts.encodings.agl.unicodes -- loaded runtime in context
     local unicodes      = { }
     local names         = { }
-    local private       = constructors.privateoffset
+    local private       = data.private or privateoffset
     local descriptions  = data.descriptions
-    for name, blob in next, data.characters do
+    for name, blob in sortedhash(data.characters) do -- sorting is nicer for privates
         local code = unicodevector[name] -- or characters.name_to_unicode[name]
         if not code then
             code = lpegmatch(uparser,name)
@@ -179,13 +180,13 @@ local function enhance_unify_names(data, filename)
         end
     end
     data.characters = nil
+    data.private    = private
     local resources = data.resources
-    local filename = resources.filename or file.removesuffix(file.basename(filename))
+    local filename  = resources.filename or file.removesuffix(file.basename(filename))
     resources.filename = resolvers.unresolve(filename) -- no shortcut
     resources.unicodes = unicodes -- name to unicode
-    resources.marks = { } -- todo
- -- resources.names = names -- name to index
-    resources.private = private
+    resources.marks    = { } -- todo
+ -- resources.names    = names -- name to index
 end
 
 local everywhere = { ["*"] = { ["*"] = true } } -- or: { ["*"] = { "*" } }
@@ -587,6 +588,7 @@ local function copytotfm(data)
         properties.fullname      = fullname
         properties.psname        = fullname
         properties.name          = filename or fullname or fontname
+        properties.private       = properties.private or data.private or privateoffset
         --
         if next(characters) then
             return {

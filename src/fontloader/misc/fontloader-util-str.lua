@@ -12,17 +12,20 @@ local strings     = utilities.strings
 
 local format, gsub, rep, sub, find = string.format, string.gsub, string.rep, string.sub, string.find
 local load, dump = load, string.dump
-local tonumber, type, tostring = tonumber, type, tostring
+local tonumber, type, tostring, next, setmetatable = tonumber, type, tostring, next, setmetatable
+local unpack, concat = table.unpack, table.concat
 local unpack, concat = table.unpack, table.concat
 local P, V, C, S, R, Ct, Cs, Cp, Carg, Cc = lpeg.P, lpeg.V, lpeg.C, lpeg.S, lpeg.R, lpeg.Ct, lpeg.Cs, lpeg.Cp, lpeg.Carg, lpeg.Cc
 local patterns, lpegmatch = lpeg.patterns, lpeg.match
-local utfchar, utfbyte = utf.char, utf.byte
+local utfchar, utfbyte, utflen = utf.char, utf.byte, utf.len
+
 ----- loadstripped = utilities.lua.loadstripped
 ----- setmetatableindex = table.setmetatableindex
 
 local loadstripped = nil
+local oldfashioned = LUAVERSION < 5.2
 
-if _LUAVERSION < 5.2  then
+if oldfashioned then
 
     loadstripped = function(str,shortcuts)
         return load(str)
@@ -44,21 +47,60 @@ end
 
 if not number then number = { } end -- temp hack for luatex-fonts
 
-local stripper    = patterns.stripzeros
+local stripzero   = patterns.stripzero
+local stripzeros  = patterns.stripzeros
 local newline     = patterns.newline
 local endofstring = patterns.endofstring
+local anything    = patterns.anything
 local whitespace  = patterns.whitespace
+local space       = patterns.space
 local spacer      = patterns.spacer
 local spaceortab  = patterns.spaceortab
+local digit       = patterns.digit
+local sign        = patterns.sign
+local period      = patterns.period
+
+-- local function points(n)
+--     n = tonumber(n)
+--     return (not n or n == 0) and "0pt" or lpegmatch(stripzeros,format("%.5fpt",n/65536))
+-- end
+
+-- local function basepoints(n)
+--     n = tonumber(n)
+--     return (not n or n == 0) and "0bp" or lpegmatch(stripzeros,format("%.5fbp", n*(7200/7227)/65536))
+-- end
+
+local ptf = 1 / 65536
+local bpf = (7200/7227) / 65536
 
 local function points(n)
+    if n == 0 then
+        return "0pt"
+    end
     n = tonumber(n)
-    return (not n or n == 0) and "0pt" or lpegmatch(stripper,format("%.5fpt",n/65536))
+    if not n or n == 0 then
+        return "0pt"
+    end
+    n = n * ptf
+    if n % 1 == 0 then
+        return format("%ipt",n)
+    end
+    return lpegmatch(stripzeros,format("%.5fpt",n)) -- plural as we need to keep the pt
 end
 
 local function basepoints(n)
+    if n == 0 then
+        return "0pt"
+    end
     n = tonumber(n)
-    return (not n or n == 0) and "0bp" or lpegmatch(stripper,format("%.5fbp", n*(7200/7227)/65536))
+    if not n or n == 0 then
+        return "0pt"
+    end
+    n = n * bpf
+    if n % 1 == 0 then
+        return format("%ibp",n)
+    end
+    return lpegmatch(stripzeros,format("%.5fbp",n)) -- plural as we need to keep the pt
 end
 
 number.points     = points
@@ -69,7 +111,6 @@ number.basepoints = basepoints
 
 local rubish     = spaceortab^0 * newline
 local anyrubish  = spaceortab + newline
-local anything   = patterns.anything
 local stripped   = (spaceortab^1 / "") * newline
 local leading    = rubish^0 / ""
 local trailing   = (anyrubish^1 * endofstring) / ""
@@ -137,11 +178,24 @@ local pattern =
     + newline * Cp() / function(position)
           extra, start = 0, position
       end
-    + patterns.anything
+    + anything
   )^1)
 
 function strings.tabtospace(str,tab)
+    -- no real gain in first checking if a \t is there
     return lpegmatch(pattern,str,1,tab or 7)
+end
+
+function string.utfpadding(s,n)
+    if not n or n == 0 then
+        return ""
+    end
+    local l = utflen(s)
+    if n > 0 then
+        return nspaces[n-l]
+    else
+        return nspaces[-n-l]
+    end
 end
 
 -- local t = {
@@ -167,27 +221,31 @@ end
 --     return str
 -- end
 
-local space       = spacer^0
-local nospace     = space/""
-local endofline   = nospace * newline
+local optionalspace = spacer^0
+local nospace       = optionalspace/""
+local endofline     = nospace * newline
 
-local stripend    = (whitespace^1 * endofstring)/""
+local stripend      = (whitespace^1 * endofstring)/""
 
-local normalline  = (nospace * ((1-space*(newline+endofstring))^1) * nospace)
+local normalline    = (nospace * ((1-optionalspace*(newline+endofstring))^1) * nospace)
 
-local stripempty  = endofline^1/""
-local normalempty = endofline^1
-local singleempty = endofline * (endofline^0/"")
-local doubleempty = endofline * endofline^-1 * (endofline^0/"")
+local stripempty    = endofline^1/""
+local normalempty   = endofline^1
+local singleempty   = endofline * (endofline^0/"")
+local doubleempty   = endofline * endofline^-1 * (endofline^0/"")
+local stripstart    = stripempty^0
 
-local stripstart  = stripempty^0
+local intospace     = whitespace^1/" "
+local noleading     = whitespace^1/""
+local notrailing    = noleading * endofstring
 
-local p_prune_normal    = Cs ( stripstart * ( stripend + normalline + normalempty )^0 )
-local p_prune_collapse  = Cs ( stripstart * ( stripend + normalline + doubleempty )^0 )
-local p_prune_noempty   = Cs ( stripstart * ( stripend + normalline + singleempty )^0 )
-local p_retain_normal   = Cs (              (            normalline + normalempty )^0 )
-local p_retain_collapse = Cs (              (            normalline + doubleempty )^0 )
-local p_retain_noempty  = Cs (              (            normalline + singleempty )^0 )
+local p_prune_normal    = Cs ( stripstart * ( stripend   + normalline + normalempty )^0 )
+local p_prune_collapse  = Cs ( stripstart * ( stripend   + normalline + doubleempty )^0 )
+local p_prune_noempty   = Cs ( stripstart * ( stripend   + normalline + singleempty )^0 )
+local p_prune_intospace = Cs ( noleading  * ( notrailing + intospace  + 1           )^0 )
+local p_retain_normal   = Cs (              (              normalline + normalempty )^0 )
+local p_retain_collapse = Cs (              (              normalline + doubleempty )^0 )
+local p_retain_noempty  = Cs (              (              normalline + singleempty )^0 )
 
 -- function striplines(str,prune,collapse,noempty)
 --     if prune then
@@ -213,10 +271,11 @@ local striplinepatterns = {
     ["prune"]               = p_prune_normal,
     ["prune and collapse"]  = p_prune_collapse, -- default
     ["prune and no empty"]  = p_prune_noempty,
+    ["prune and to space"]  = p_prune_intospace,
     ["retain"]              = p_retain_normal,
     ["retain and collapse"] = p_retain_collapse,
     ["retain and no empty"] = p_retain_noempty,
-    ["collapse"]            = patterns.collapser, -- how about: stripper fullstripper
+    ["collapse"]            = patterns.collapser,
 }
 
 setmetatable(striplinepatterns,{ __index = function(t,k) return p_prune_collapse end })
@@ -225,6 +284,10 @@ strings.striplinepatterns = striplinepatterns
 
 function strings.striplines(str,how)
     return str and lpegmatch(striplinepatterns[how],str) or str
+end
+
+function strings.collapse(str) -- maybe also in strings
+    return str and lpegmatch(p_prune_intospace,str) or str
 end
 
 -- also see: string.collapsespaces
@@ -242,13 +305,14 @@ strings.striplong = strings.striplines -- for old times sake
 -- "       zus    wim jet",
 -- "    ",
 -- }, "\n")
-
+--
 -- local str = table.concat( {
 -- "  aaaa",
 -- "  bb",
 -- "  cccccc",
+-- " ",
 -- }, "\n")
-
+--
 -- for k, v in table.sortedhash(utilities.strings.striplinepatterns) do
 --     logs.report("stripper","method: %s, result: [[%s]]",k,utilities.strings.striplines(str,k))
 -- end
@@ -280,41 +344,49 @@ end
 --
 -- More info can be found in cld-mkiv.pdf so here I stick to a simple list.
 --
--- integer          %...i   number
--- integer          %...d   number
--- unsigned         %...u   number
--- character        %...c   number
--- hexadecimal      %...x   number
--- HEXADECIMAL      %...X   number
--- octal            %...o   number
--- string           %...s   string number
--- float            %...f   number
--- checked float    %...F   number
--- exponential      %...e   number
--- exponential      %...E   number
--- autofloat        %...g   number
--- autofloat        %...G   number
--- utf character    %...c   number
--- force tostring   %...S   any
--- force tostring   %Q      any
--- force tonumber   %N      number (strip leading zeros)
--- signed number    %I      number
--- rounded number   %r      number
--- 0xhexadecimal    %...h   character number
--- 0xHEXADECIMAL    %...H   character number
--- U+hexadecimal    %...u   character number
--- U+HEXADECIMAL    %...U   character number
--- points           %p      number (scaled points)
--- basepoints       %b      number (scaled points)
--- table concat     %...t   table
--- table concat     %{.}t   table
--- serialize        %...T   sequenced (no nested tables)
--- serialize        %{.}T   sequenced (no nested tables)
--- boolean (logic)  %l      boolean
--- BOOLEAN          %L      boolean
--- whitespace       %...w
--- automatic        %...a   'whatever' (string, table, ...)
--- automatic        %...A   "whatever" (string, table, ...)
+-- integer            %...i   number
+-- integer            %...d   number
+-- unsigned           %...u   number -- not used
+-- character          %...c   number
+-- hexadecimal        %...x   number
+-- HEXADECIMAL        %...X   number
+-- octal              %...o   number
+-- string             %...s   string number
+-- float              %...f   number
+-- checked float      %...F   number
+-- exponential        %...e   number
+-- exponential        %...E   number
+-- stripped e         %...j   number
+-- stripped E         %...J   number
+-- autofloat          %...g   number
+-- autofloat          %...G   number
+-- utf character      %...c   number
+-- force tostring     %...S   any
+-- force tostring     %Q      any
+-- force tonumber     %N      number (strip leading zeros)
+-- signed number      %I      number
+-- rounded number     %r      number
+-- 0xhexadecimal      %...h   character number
+-- 0xHEXADECIMAL      %...H   character number
+-- U+hexadecimal      %...u   character number
+-- U+HEXADECIMAL      %...U   character number
+-- points             %p      number (scaled points)
+-- basepoints         %b      number (scaled points)
+-- table concat       %...t   table
+-- table concat       %{.}t   table
+-- serialize          %...T   sequenced (no nested tables)
+-- serialize          %{.}T   sequenced (no nested tables)
+-- boolean (logic)    %l      boolean
+-- BOOLEAN            %L      boolean
+-- whitespace         %...w   number
+-- whitespace         %...W   (fixed)
+-- automatic          %...a   'whatever' (string, table, ...)
+-- automatic          %...A   "whatever" (string, table, ...)
+-- zap                %...z   skip
+-- stripped  %...N    %...N
+-- comma/period real  %...m
+-- period/comma real  %...M
+-- formatted float    %...k   n.m
 
 local n = 0
 
@@ -387,27 +459,45 @@ end
 
 -- maybe to util-num
 
-local digit  = patterns.digit
-local period = patterns.period
-local three  = digit * digit * digit
+local two    = digit * digit
+local three  = two * digit
+local prefix = (Carg(1) * three)^1
 
 local splitter = Cs (
-    (((1 - (three^1 * period))^1 + C(three)) * (Carg(1) * three)^1 + C((1-period)^1))
-  * (P(1)/"" * Carg(2)) * C(2)
+    (((1 - (three^1 * period))^1 + C(three)) * prefix + C((1-period)^1))
+  * (anything/"" * Carg(2)) * C(2)
+)
+
+local splitter3 = Cs (
+    three * prefix * endofstring +
+    two   * prefix * endofstring +
+    digit * prefix * endofstring +
+    three +
+    two   +
+    digit
 )
 
 patterns.formattednumber = splitter
 
 function number.formatted(n,sep1,sep2)
-    local s = type(s) == "string" and n or format("%0.2f",n)
-    if sep1 == true then
-        return lpegmatch(splitter,s,1,".",",")
-    elseif sep1 == "." then
-        return lpegmatch(splitter,s,1,sep1,sep2 or ",")
-    elseif sep1 == "," then
-        return lpegmatch(splitter,s,1,sep1,sep2 or ".")
+    if sep1 == false then
+        if type(n) == "number" then
+            n = tostring(n)
+        end
+        return lpegmatch(splitter3,n,1,sep2 or ".")
     else
-        return lpegmatch(splitter,s,1,sep1 or ",",sep2 or ".")
+        if type(n) == "number" then
+            n = format("%0.2f",n)
+        end
+        if sep1 == true then
+            return lpegmatch(splitter,n,1,".",",")
+        elseif sep1 == "." then
+            return lpegmatch(splitter,n,1,sep1,sep2 or ",")
+        elseif sep1 == "," then
+            return lpegmatch(splitter,n,1,sep1,sep2 or ".")
+        else
+            return lpegmatch(splitter,n,1,sep1 or ",",sep2 or ".")
+        end
     end
 end
 
@@ -420,17 +510,45 @@ end
 -- print(number.formatted(1234567))
 -- print(number.formatted(12345678))
 -- print(number.formatted(12345678,true))
+-- print(number.formatted(1,false))
+-- print(number.formatted(12,false))
+-- print(number.formatted(123,false))
+-- print(number.formatted(1234,false))
+-- print(number.formatted(12345,false))
+-- print(number.formatted(123456,false))
+-- print(number.formatted(1234567,false))
+-- print(number.formatted(12345678,false))
 -- print(number.formatted(1234.56,"!","?"))
+
+local p = Cs(
+        P("-")^0
+      * (P("0")^1/"")^0
+      * (1-period)^0
+      * (period * P("0")^1 * endofstring/"" + period^0)
+      * P(1-P("0")^1*endofstring)^0
+    )
+
+function number.compactfloat(n,fmt)
+    if n == 0 then
+        return "0"
+    elseif n == 1 then
+        return "1"
+    end
+    n = lpegmatch(p,format(fmt or "%0.3f",n))
+    if n == "." or n == "" or n == "-" then
+        return "0"
+    end
+    return n
+end
 
 local zero      = P("0")^1 / ""
 local plus      = P("+")   / ""
 local minus     = P("-")
-local separator = S(".")
-local digit     = R("09")
+local separator = period
 local trailing  = zero^1 * #S("eE")
-local exponent  = (S("eE") * (plus + Cs((minus * zero^0 * P(-1))/"") + minus) * zero^0 * (P(-1) * Cc("0") + P(1)^1))
+local exponent  = (S("eE") * (plus + Cs((minus * zero^0 * endofstring)/"") + minus) * zero^0 * (endofstring * Cc("0") + anything^1))
 local pattern_a = Cs(minus^0 * digit^1 * (separator/"" * trailing + separator * (trailing + digit)^0) * exponent)
-local pattern_b = Cs((exponent + P(1))^0)
+local pattern_b = Cs((exponent + anything)^0)
 
 function number.sparseexponent(f,n)
     if not n then
@@ -449,6 +567,31 @@ function number.sparseexponent(f,n)
     return tostring(n)
 end
 
+local hf = { }
+local hs = { }
+
+setmetatable(hf, { __index = function(t,k)
+    local v = "%." .. k .. "f"
+    t[k] = v
+    return v
+end } )
+
+setmetatable(hs, { __index = function(t,k)
+    local v = "%" .. k .. "s"
+    t[k] = v
+    return v
+end } )
+
+function number.formattedfloat(n,b,a)
+    local s = format(hf[a],n)
+    local l = (b or 0) + (a or 0) + 1
+    if #s < l then
+        return format(hs[l],s)
+    else
+        return s
+    end
+end
+
 local template = [[
 %s
 %s
@@ -457,7 +600,7 @@ return function(%s) return %s end
 
 local preamble, environment = "", { }
 
-if _LUAVERSION < 5.2  then
+if oldfashioned then
 
     preamble = [[
 local lpeg=lpeg
@@ -473,12 +616,16 @@ local utfchar=utf.char
 local utfbyte=utf.byte
 local lpegmatch=lpeg.match
 local nspaces=string.nspaces
+local utfpadding=string.utfpadding
 local tracedchar=string.tracedchar
 local autosingle=string.autosingle
 local autodouble=string.autodouble
 local sequenced=table.sequenced
 local formattednumber=number.formatted
 local sparseexponent=number.sparseexponent
+local formattedfloat=number.formattedfloat
+local stripzero=lpeg.patterns.stripzero
+local stripzeros=lpeg.patterns.stripzeros
     ]]
 
 else
@@ -498,12 +645,16 @@ else
         utfbyte         = utf.byte,
         lpegmatch       = lpeg.match,
         nspaces         = string.nspaces,
+        utfpadding      = string.utfpadding,
         tracedchar      = string.tracedchar,
         autosingle      = string.autosingle,
         autodouble      = string.autodouble,
         sequenced       = table.sequenced,
         formattednumber = number.formatted,
         sparseexponent  = number.sparseexponent,
+        formattedfloat  = number.formattedfloat,
+        stripzero       = lpeg.patterns.stripzero,
+        stripzeros      = lpeg.patterns.stripzeros,
     }
 
 end
@@ -520,7 +671,10 @@ setmetatable(arguments, { __index =
     end
 })
 
-local prefix_any = C((S("+- .") + R("09"))^0)
+local prefix_any = C((sign + space + period + digit)^0)
+local prefix_sub = (C((sign + digit)^0) + Cc(0))
+                 * period
+                 * (C((sign + digit)^0) + Cc(0))
 local prefix_tab = P("{") * C((1-P("}"))^0) * P("}") + C((1-R("az","AZ","09","%%"))^0)
 
 -- we've split all cases as then we can optimize them (let's omit the fuzzy u)
@@ -545,9 +699,36 @@ local format_S = function(f) -- can be optimized
     end
 end
 
+local format_right = function(f)
+    n = n + 1
+    f = tonumber(f)
+    if not f or f == 0 then
+        return format("(a%s or '')",n)
+    elseif f > 0 then
+        return format("utfpadding(a%s,%i)..a%s",n,f,n)
+    else
+        return format("a%s..utfpadding(a%s,%i)",n,n,f)
+    end
+end
+
+local format_left = function(f)
+    n = n + 1
+    f = tonumber(f)
+    if not f or f == 0 then
+        return format("(a%s or '')",n)
+    end
+    if f < 0 then
+        return format("utfpadding(a%s,%i)..a%s",n,-f,n)
+    else
+        return format("a%s..utfpadding(a%s,%i)",n,n,-f)
+    end
+end
+
 local format_q = function()
     n = n + 1
-    return format("(a%s and format('%%q',a%s) or '')",n,n) -- goodie: nil check (maybe separate lpeg, not faster)
+    -- lua 5.3 has a different q than lua 5.2 (which does a tostring on numbers)
+ -- return format("(a%s ~= nil and format('%%q',a%s) or '')",n,n)
+    return format("(a%s ~= nil and format('%%q',tostring(a%s)) or '')",n,n)
 end
 
 local format_Q = function() -- can be optimized
@@ -592,6 +773,11 @@ local format_F = function(f) -- beware, no cast to number
     else
         return format("format((a%s %% 1 == 0) and '%%i' or '%%%sf',a%s)",n,f,n)
     end
+end
+
+local format_k = function(b,a) -- slow
+    n = n + 1
+    return format("formattedfloat(a%s,%i,%i)",n,b or 0, a or 0)
 end
 
 local format_g = function(f)
@@ -732,9 +918,43 @@ local format_L = function()
     return format("(a%s and 'TRUE' or 'FALSE')",n)
 end
 
-local format_N = function() -- strips leading zeros
+local format_n = function() -- strips leading and trailing zeros and removes .0
     n = n + 1
-    return format("tostring(tonumber(a%s) or a%s)",n,n)
+    return format("((a%s %% 1 == 0) and format('%%i',a%s) or tostring(a%s))",n,n,n)
+end
+
+-- local format_N = function() -- strips leading and trailing zeros (also accepts string)
+--     n = n + 1
+--     return format("tostring(tonumber(a%s) or a%s)",n,n)
+-- end
+
+-- local format_N = function(f) -- strips leading and trailing zeros
+--     n = n + 1
+--     -- stripzero (singular) as we only have a number
+--     if not f or f == "" then
+--         return format("(((a%s > -0.0000000005 and a%s < 0.0000000005) and '0') or ((a%s %% 1 == 0) and format('%%i',a%s)) or lpegmatch(stripzero,format('%%.9f',a%s)))",n,n,n,n,n)
+--     else
+--         return format("(((a%s %% 1 == 0) and format('%%i',a%s)) or lpegmatch(stripzero,format('%%%sf',a%s)))",n,n,f,n)
+--     end
+-- end
+
+-- local format_N = function(f) -- strips leading and trailing zeros
+--     n = n + 1
+--     -- stripzero (singular) as we only have a number
+--     if not f or f == "" then
+--         return format("(((a%s %% 1 == 0) and format('%%i',a%s)) or ((a%s > -0.0000000005 and a%s < 0.0000000005) and '0') or lpegmatch(stripzero,format('%%.9f',a%s)))",n,n,n,n,n)
+--     else
+--         return format("(((a%s %% 1 == 0) and format('%%i',a%s)) or lpegmatch(stripzero,format('%%%sf',a%s)))",n,n,f,n)
+--     end
+-- end
+
+local format_N = function(f) -- strips leading and trailing zeros
+    n = n + 1
+    -- stripzero (singular) as we only have a number
+    if not f or f == "" then
+        f = ".9"
+    end -- always a leading number !
+    return format("(((a%s %% 1 == 0) and format('%%i',a%s)) or lpegmatch(stripzero,format('%%%sf',a%s)))",n,n,f,n)
 end
 
 local format_a = function(f)
@@ -774,7 +994,11 @@ local format_m = function(f)
     if not f or f == "" then
         f = ","
     end
-    return format([[formattednumber(a%s,%q,".")]],n,f)
+    if f == "0" then
+        return format([[formattednumber(a%s,false)]],n)
+    else
+        return format([[formattednumber(a%s,%q,".")]],n,f)
+    end
 end
 
 local format_M = function(f)
@@ -782,7 +1006,11 @@ local format_M = function(f)
     if not f or f == "" then
         f = "."
     end
-    return format([[formattednumber(a%s,%q,",")]],n,f)
+    if f == "0" then
+        return format([[formattednumber(a%s,false)]],n)
+    else
+        return format([[formattednumber(a%s,%q,",")]],n,f)
+    end
 end
 
 --
@@ -854,7 +1082,9 @@ local builder = Cs { "start",
               + V("C")
               + V("S") -- new
               + V("Q") -- new
+              + V("n") -- new
               + V("N") -- new
+              + V("k") -- new
               --
               + V("r")
               + V("h") + V("H") + V("u") + V("U")
@@ -870,11 +1100,14 @@ local builder = Cs { "start",
               + V("m") + V("M") -- new (formatted number)
               + V("z") -- new
               --
+              + V(">") -- left padding
+              + V("<") -- right padding
+              --
            -- + V("?") -- ignored, probably messed up %
             )
           + V("*")
         )
-     * (P(-1) + Carg(1))
+     * (endofstring + Carg(1))
     )^0,
     --
     ["s"] = (prefix_any * P("s")) / format_s, -- %s => regular %s (string)
@@ -892,8 +1125,10 @@ local builder = Cs { "start",
     ["o"] = (prefix_any * P("o")) / format_o, -- %o => regular %o (octal)
     --
     ["S"] = (prefix_any * P("S")) / format_S, -- %S => %s (tostring)
-    ["Q"] = (prefix_any * P("Q")) / format_S, -- %Q => %q (tostring)
-    ["N"] = (prefix_any * P("N")) / format_N, -- %N => tonumber (strips leading zeros)
+    ["Q"] = (prefix_any * P("Q")) / format_Q, -- %Q => %q (tostring)
+    ["n"] = (prefix_any * P("n")) / format_n, -- %n => tonumber (strips leading and trailing zeros, as well as .0, expects number)
+    ["N"] = (prefix_any * P("N")) / format_N, -- %N => tonumber (strips leading and trailing zeros, also takes string)
+    ["k"] = (prefix_sub * P("k")) / format_k, -- %k => like f but with n.m
     ["c"] = (prefix_any * P("c")) / format_c, -- %c => utf character (extension to regular)
     ["C"] = (prefix_any * P("C")) / format_C, -- %c => U+.... utf character
     --
@@ -916,13 +1151,16 @@ local builder = Cs { "start",
     ["j"] = (prefix_any * P("j")) / format_j, -- %j => %e (float) stripped exponent (irrational)
     ["J"] = (prefix_any * P("J")) / format_J, -- %J => %E (float) stripped exponent (irrational)
     --
-    ["m"] = (prefix_tab * P("m")) / format_m, -- %m => xxx.xxx.xxx,xx (optional prefix instead of .)
-    ["M"] = (prefix_tab * P("M")) / format_M, -- %M => xxx,xxx,xxx.xx (optional prefix instead of ,)
+    ["m"] = (prefix_any * P("m")) / format_m, -- %m => xxx.xxx.xxx,xx (optional prefix instead of .)
+    ["M"] = (prefix_any * P("M")) / format_M, -- %M => xxx,xxx,xxx.xx (optional prefix instead of ,)
     --
-    ["z"] = (prefix_any * P("z")) / format_z, -- %M => xxx,xxx,xxx.xx (optional prefix instead of ,)
+    ["z"] = (prefix_any * P("z")) / format_z, -- %z => skip n arguments
     --
     ["a"] = (prefix_any * P("a")) / format_a, -- %a => '...' (forces tostring)
     ["A"] = (prefix_any * P("A")) / format_A, -- %A => "..." (forces tostring)
+    --
+    ["<"] = (prefix_any * P("<")) / format_left,
+    [">"] = (prefix_any * P(">")) / format_right,
     --
     ["*"] = Cs(((1-P("%"))^1 + P("%%")/"%%")^1) / format_rest, -- rest (including %%)
     ["?"] = Cs(((1-P("%"))^1               )^1) / format_rest, -- rest (including %%)
@@ -930,34 +1168,31 @@ local builder = Cs { "start",
     ["!"] = Carg(2) * prefix_any * P("!") * C((1-P("!"))^1) * P("!") / format_extension,
 }
 
--- we can be clever and only alias what is needed
+-- We can be clever and only alias what is needed:
 
--- local direct = Cs (
---         P("%")/""
---       * Cc([[local format = string.format return function(str) return format("%]])
---       * (S("+- .") + R("09"))^0
---       * S("sqidfgGeExXo")
---       * Cc([[",str) end]])
---       * P(-1)
---     )
+local xx = setmetatable({ }, { __index = function(t,k) local v = format("%02x",k) t[k] = v return v end })
+local XX = setmetatable({ }, { __index = function(t,k) local v = format("%02X",k) t[k] = v return v end })
 
-local direct = Cs (
-    P("%")
-  * (S("+- .") + R("09"))^0
-  * S("sqidfgGeExXo")
-  * P(-1) / [[local format = string.format return function(str) return format("%0",str) end]]
-)
+local preset = {
+    ["%02x"] = function(n) return xx[n] end,
+    ["%02X"] = function(n) return XX[n] end,
+}
+
+local direct =
+    P("%") * (sign + space + period + digit)^0 * S("sqidfgGeExXo") * endofstring
+  / [[local format = string.format return function(str) return format("%0",str) end]]
 
 local function make(t,str)
-    local f
-    local p
+    local f = preset[str]
+    if f then
+        return f
+    end
     local p = lpegmatch(direct,str)
     if p then
-     -- f = loadstripped(p)()
      -- print("builder 1 >",p)
         f = loadstripped(p)()
     else
-        n = 0
+        n = 0 -- used in patterns
      -- p = lpegmatch(builder,str,1,"..",t._extensions_) -- after this we know n
         p = lpegmatch(builder,str,1,t._connector_,t._extensions_) -- after this we know n
         if n > 0 then
@@ -968,6 +1203,7 @@ local function make(t,str)
             f = function() return str end
         end
     end
+ -- if jit then jit.on(f,true) end
     t[str] = f
     return f
 end
@@ -1020,7 +1256,7 @@ strings.formatters = { }
 
 -- _connector_ is an experiment
 
-if _LUAVERSION < 5.2  then
+if oldfashioned then
 
     function strings.formatters.new(noconcat)
         local t = { _type_ = "formatter", _connector_ = noconcat and "," or "..", _extensions_ = { }, _preamble_ = preamble, _environment_ = { } }
@@ -1072,19 +1308,15 @@ strings.formatters.add = add
 
 -- registered in the default instance (should we fall back on this one?)
 
-patterns.xmlescape = Cs((P("<")/"&lt;" + P(">")/"&gt;" + P("&")/"&amp;" + P('"')/"&quot;" + P(1))^0)
-patterns.texescape = Cs((C(S("#$%\\{}"))/"\\%1" + P(1))^0)
+patterns.xmlescape = Cs((P("<")/"&lt;" + P(">")/"&gt;" + P("&")/"&amp;" + P('"')/"&quot;" + anything)^0)
+patterns.texescape = Cs((C(S("#$%\\{}"))/"\\%1" + anything)^0)
 patterns.luaescape = Cs(((1-S('"\n'))^1 + P('"')/'\\"' + P('\n')/'\\n"')^0) -- maybe also \0
 patterns.luaquoted = Cs(Cc('"') * ((1-S('"\n'))^1 + P('"')/'\\"' + P('\n')/'\\n"')^0 * Cc('"'))
 
 -- escaping by lpeg is faster for strings without quotes, slower on a string with quotes, but
 -- faster again when other q-escapables are found (the ones we don't need to escape)
 
--- add(formatters,"xml", [[lpegmatch(xmlescape,%s)]],[[local xmlescape = lpeg.patterns.xmlescape]])
--- add(formatters,"tex", [[lpegmatch(texescape,%s)]],[[local texescape = lpeg.patterns.texescape]])
--- add(formatters,"lua", [[lpegmatch(luaescape,%s)]],[[local luaescape = lpeg.patterns.luaescape]])
-
-if _LUAVERSION < 5.2  then
+if oldfashioned then
 
     add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],"local xmlescape = lpeg.patterns.xmlescape")
     add(formatters,"tex",[[lpegmatch(texescape,%s)]],"local texescape = lpeg.patterns.texescape")
@@ -1133,7 +1365,6 @@ end
 
 local dquote = patterns.dquote -- P('"')
 local equote = patterns.escaped + dquote / '\\"' + 1
-local space  = patterns.space
 local cquote = Cc('"')
 
 local pattern =
@@ -1148,4 +1379,22 @@ local pattern = Cs((newline / (os.newline or "\r") + 1)^0)
 
 function string.replacenewlines(str)
     return lpegmatch(pattern,str)
+end
+
+--
+
+function strings.newcollector()
+    local result, r = { }, 0
+    return
+        function(fmt,str,...) -- write
+            r = r + 1
+            result[r] = str == nil and fmt or formatters[fmt](str,...)
+        end,
+        function(connector) -- flush
+            if result then
+                local str = concat(result,connector)
+                result, r = { }, 0
+                return str
+            end
+        end
 end

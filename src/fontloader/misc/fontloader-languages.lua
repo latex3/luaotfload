@@ -6,6 +6,10 @@ if not modules then modules = { } end modules ['luatex-languages'] = {
     license   = "see context related readme files"
 }
 
+if context then
+    os.exit()
+end
+
 -- We borrow from ConTeXt.
 
 languages = languages or { }
@@ -17,19 +21,18 @@ function languages.loadpatterns(tag)
         loaded[tag] = 0
         local filename = kpse.find_file("lang-" .. tag .. ".lua")
         if not filename or filename == "" then
-            texio.write("<unknown language file for: " .. tag .. ">")
+            logs.report("languages","unknown language file for '%s'",tag)
         else
             local whatever = loadfile(filename)
             if type(whatever) == "function" then
                 whatever = whatever()
                 if type(whatever) == "table" then
-                    texio.write("<language file: " .. tag .. ">")
+                    logs.report("languages","loading language file for '%s'",tag)
                     local characters = whatever.patterns.characters or ""
                     local patterns = whatever.patterns.data or ""
                     local exceptions = whatever.exceptions.data or ""
                     for b in string.utfvalues(characters) do
-                        -- what about uppercase
--- lang.sethjcode(b,b)
+                     -- lang.sethjcode(b,b)
                         tex.setlccode(b,b)
                     end
                     local language = lang.new()
@@ -37,11 +40,11 @@ function languages.loadpatterns(tag)
                     lang.hyphenation(language, exceptions)
                     loaded[tag] = lang.id(language)
                 else
-                    texio.write("<invalid language table: " .. tag .. ">")
+                    logs.report("languages","invalid language table for '%s'",tag)
                     os.exit()
                 end
             else
-                texio.write("<invalid language file: " .. tag .. ">")
+                logs.report("languages","invalid language file for '%s'",tag)
                 os.exit()
             end
         end

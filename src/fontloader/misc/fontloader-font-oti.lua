@@ -160,3 +160,103 @@ function otffeatures.checkeddefaultlanguage(featuretype,autolanguage,languages)
         end
     end
 end
+
+-- the following might become available generic in due time but for now
+-- this is some context playground (development code)
+
+-- if not context then
+--     return
+-- end
+
+-- local helpers        = otf.readers.helpers
+-- local axistofactors  = helpers.axistofactors
+-- local normalizedaxis = helpers.normalizedaxis
+-- local getaxisscale   = helpers.getaxisscale
+-- local cleanname      = containers.cleanname
+
+-- local function validvariable(tfmdata)
+--     if tfmdata.properties.factors then
+--         return
+--     end
+--     local resources    = tfmdata.resources
+--     local variabledata = resources and resources.variabledata
+--     if not variabledata then
+--         return
+--     end
+--     local instances = variabledata.instances
+--     local axis      = variabledata.axis
+--     local segments  = variabledata.segments
+--     if instances and axis then
+--         return instances, axis, segments
+--     end
+-- end
+
+-- local function initializeinstance(tfmdata,value)
+--     if type(value) == "string" then
+--         local instances, axis, segments = validvariable(tfmdata)
+--         if instances then
+--             local values
+--             for i=1,#instances do
+--                 local instance = instances[i]
+--                 if cleanname(instance.subfamily) == value then
+--                     values = instance.values
+--                     break
+--                 end
+--             end
+--             if values then
+--                 local factors = { }
+--                 for i=1,#axis do
+--                     local a = axis[i]
+--                     factors[i] = getaxisscale(segments,a.minimum,a.default,a.maximum,values[i].value)
+--                 end
+--                 tfmdata.properties.instance = {
+--                     hash    = instance,
+--                     factors = factors,
+--                 }
+--             end
+--         else
+--             report("incomplete variable data")
+--         end
+--     end
+-- end
+
+-- local function initializeaxis(tfmdata,value)
+--     if type(value) == "string" then
+--         local instances, axis, segments = validvariable(tfmdata)
+--         if instances then
+--             local values = axistofactors(value)
+--             if values then
+--                 local factors = { }
+--                 for i=1,#axis do
+--                     local a = axis[i]
+--                     local d = a.default
+--                     factors[i] = getaxisscale(segments,a.minimum,d,a.maximum,values[a.name or a.tag] or d)
+--                 end
+--                 tfmdata.properties.instance = {
+--                     hash    = cleanname(value),
+--                     factors = factors,
+--                 }
+--             end
+--         else
+--             report("incomplete variable data")
+--         end
+--     end
+-- end
+
+-- registerotffeature {
+--     name        = "instance",
+--     description = "variation instance",
+--     initializers = {
+--         node = initializeinstance,
+--         base = initializeinstance,
+--     }
+-- }
+
+-- registerotffeature {
+--     name        = "axis",
+--     description = "variation axis",
+--     initializers = {
+--         node = initializeaxis,
+--         base = initializeaxis,
+--     }
+-- }

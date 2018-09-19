@@ -50,6 +50,8 @@ sourcefiles  = {
                 
 installfiles = {"*.sty","*.lua","*.tex"}
 
+scriptfiles = {"luaotfload-tool.lua"} -- how install the mk-scripts???
+
 -- l3build settings for tags:
 
 tagfiles = {

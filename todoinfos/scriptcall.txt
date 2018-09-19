@@ -36,6 +36,6 @@ texlua scripts/mkimport package
 -- mkstatus: updates luaotfload-status.
 -- date must be naturally correct
 
-texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-18.lua
+texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-19.lua
 
 -- mktests: quite unclear what the tests need to work. Better rely on l3build tests.

@@ -58,6 +58,7 @@ doc/*.vimout
 
 *.synctex
 
+*ls-R
 # valgrind log
 src/*.log
 

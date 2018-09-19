@@ -99,7 +99,7 @@ local prefixes = {
 
 local loader_target_name = "fontloader-%s.lua"
 local loader_orig_dir    = "/src/fontloader/"
-local loader_target_dir  = "/build/"
+local loader_target_dir  = "/src/auto/" -- changed UF
 
 -------------------------------------------------------------------------------
 -- helpers

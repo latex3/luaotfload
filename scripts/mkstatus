@@ -39,10 +39,10 @@ local stringmatch  = string.match
 -----------------------------------------------------------------------
 
 local verbose  = false
-local filelist = "./build/luaotfload-status.lua" --- result
+local filelist = "./src/auto/luaotfload-status.lua" --- result
 
 local srcdir    = "src"
-local builddir  = "build"
+local builddir  = "src/auto"
 local scriptdir = "scripts"
 local loaderdir = "src/fontloader"
 local rtdir     = "src/fontloader/runtime"

@@ -5,6 +5,7 @@
 --  DESCRIPTION:  check luaotfload imports against Context
 -- REQUIREMENTS:  luatex, the lualibs package, Context MkIV
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
+--     MODIFIED: 2018-09-18 (Ulrike Fischer)
 -------------------------------------------------------------------------------
 --
 
@@ -204,6 +205,10 @@ local imports = {
     { name = "fonts-demo-vf-1"   , ours = nil          , kind = kind_ignored   },
     { name = "fonts-enc"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-ext"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-ext"         , ours = nil          , kind = kind_merged    },
+    { name = "fonts-def"         , ours = nil          , kind = kind_merged    }, -- NEW/unclear "was font-xtx.lua" 
+    { name = "fonts-gbn"         , ours = nil          , kind = kind_merged    }, -- RENAMED/MOVED UF 18.09.2018
+    { name = "fonts-lig"         , ours = nil          , kind = kind_merged    }, -- NEW UF 18.09.2018
     { name = "fonts-merged"      , ours = "reference"  , kind = kind_essential },
     { name = "fonts"             , ours = nil          , kind = kind_merged    },
     { name = "fonts"             , ours = nil          , kind = kind_tex       },
@@ -231,9 +236,9 @@ local imports = {
     { name = "font-cff"          , ours = "font-cff"          , kind = kind_merged    },
     { name = "font-cid"          , ours = "font-cid"          , kind = kind_merged    },
     { name = "font-con"          , ours = "font-con"          , kind = kind_merged    },
-    { name = "font-def"          , ours = "font-def"          , kind = kind_merged    },
+    { name = "font-def"          , ours = "font-def"          , kind = kind_merged    }, 
     { name = "font-dsp"          , ours = "font-dsp"          , kind = kind_merged    },
-    { name = "font-gbn"          , ours = "font-gbn"          , kind = kind_merged    },
+--    { name = "font-gbn"          , ours = "font-gbn"          , kind = kind_merged    }, --RENAMED now in fontloader UF 18.09.2018
     { name = "font-ini"          , ours = "font-ini"          , kind = kind_merged    },
     { name = "font-lua"          , ours = "font-lua"          , kind = kind_merged    },
     { name = "font-map"          , ours = "font-map"          , kind = kind_merged    },
@@ -247,11 +252,17 @@ local imports = {
     { name = "font-otj"          , ours = "font-otj"          , kind = kind_merged    },
     { name = "font-otl"          , ours = "font-otl"          , kind = kind_merged    },
     { name = "font-oto"          , ours = "font-oto"          , kind = kind_merged    },
+    { name = "font-vfc"          , ours = "font-vfc"          , kind = kind_merged    }, -- NEW UF 18.09.2018
     { name = "font-otr"          , ours = "font-otr"          , kind = kind_merged    },
     { name = "font-ots"          , ours = "font-ots"          , kind = kind_merged    },
+    { name = "font-ott"          , ours = "font-ott"          , kind = kind_merged    }, -- NEW UF 18.09.2018
     { name = "font-oup"          , ours = "font-oup"          , kind = kind_merged    },
     { name = "font-tfm"          , ours = "font-tfm"          , kind = kind_merged    },
     { name = "font-ttf"          , ours = "font-ttf"          , kind = kind_merged    },
+    { name = "font-imp-tex"      , ours = "font-imp-tex"      , kind = kind_merged    },
+    { name = "font-imp-ligatures", ours = "font-imp-ligatures", kind = kind_merged    },
+    { name = "font-imp-italics"  , ours = "font-imp-italics"  , kind = kind_merged    },
+    { name = "font-imp-effects"  , ours = "font-imp-effects"  , kind = kind_merged    },
 
     { name = "l-boolean"         , ours = "l-boolean"         , kind = kind_lualibs   },
     { name = "l-file"            , ours = "l-file"            , kind = kind_lualibs   },
@@ -262,6 +273,7 @@ local imports = {
     { name = "l-math"            , ours = "l-math"            , kind = kind_lualibs   },
     { name = "l-string"          , ours = "l-string"          , kind = kind_lualibs   },
     { name = "l-table"           , ours = "l-table"           , kind = kind_lualibs   },
+    { name = "l-unicode"         , ours = "l-unicode"         , kind = kind_lualibs   }, -- NEW UF 18.09.2018
     { name = "util-str"          , ours = "util-str"          , kind = kind_lualibs   },
     { name = "util-fil"          , ours = "util-fil"          , kind = kind_lualibs   },
   }, --[[ [context] ]]
@@ -270,7 +282,7 @@ local imports = {
 local package = {
 
   optional = { --- components not included in the default package
-
+--- UF: imho this table is not used and is only for information. 
 --- The original initialization sequence by Hans Hagen, see the file
 --- luatex-fonts.lua for details:
 ---
@@ -283,6 +295,7 @@ local package = {
 ---   [07] l-file.lua
 ---   [08] l-boolean.lua
 ---   [09] l-math.lua
+-- NEW     l-unicode.lua
 ---   [10] util-str.lua
 ---   [11] util-fil.lua
 ---   [12] luatex-basics-gen.lua
@@ -290,13 +303,16 @@ local package = {
 ---   [14] luatex-basics-nod.lua
 ---   [15] luatex-basics-chr.lua
 ---   [16] font-ini.lua
+---NEW     luatex-fonts-mis.lua
 ---   [17] font-con.lua
 ---   [18] luatex-fonts-enc.lua
 ---   [19] font-cid.lua
 ---   [20] font-map.lua
 ---   [21] luatex-fonts-syn.lua
+---NEW     font-vfc.lua
+---ORD[24] font-otr.lua 
 ---   [23] font-oti.lua
----   [24] font-otr.lua
+---NEW     font-ott.lua    
 ---   [25] font-cff.lua
 ---   [26] font-ttf.lua
 ---   [27] font-dsp.lua
@@ -315,9 +331,14 @@ local package = {
 ---   [40] font-tfm.lua
 ---   [41] font-lua.lua
 ---   [42] font-def.lua
----   [43] font-xtx.lua
+---REN[43] luatex-fonts-def.lua -- was font-xtx.lua
 ---   [44] luatex-fonts-ext.lua
----   [45] font-gbn.lua
+---NEW     font-imp-tex.lua
+---NEW     font-imp-ligatures.lua
+---NEW     font-imp-italics.lua
+---NEW     font-imp-effects.lua
+---NEW     luatex-fonts-lig.lua  
+---REN[45] luatex-fonts-gbn.lua -- was font-gbn.lua
 ---
 --- Of these, nos. 01--11 are provided by the Lualibs. Keeping them
 --- around in the Luaotfload fontloader is therefore unnecessary.
@@ -332,18 +353,19 @@ local package = {
     "l-file",
     "l-boolean",
     "l-math",
+    "l-unicode", -- NEW UF  18.09.2018
     "util-str",
     "util-fil",
 
 --- Another file containing auxiliary definitions must be present
 --- prior to initialization of the configuration.
 
-    "luatex-basics-gen",
+    "luatex-basics-gen",  -- UF: NAMING? why not basics-gen?? see below
 
 --- We have a custom script for autogenerating data so we don’t use the
 --- definitions from upstream.
 
-    "basics-chr",
+    "basics-chr",        -- UF: NAMING? why not luatex-basics-chr?? see above
 
   }, --[[ [package.optional] ]]
 
@@ -356,13 +378,16 @@ local package = {
 
     "data-con",
     "basics-nod",
+--  "basics-chr", -- is luaotfload-characters.lua the replacement??
     "font-ini",
     "font-con",
     "fonts-enc",
     "font-cid",
     "font-map",
+    "font-vfc", --NEW 18.09.2018
     "font-oti",
     "font-otr",
+    "font-ott", -- NEW 18.09.2018
     "font-cff",
     "font-ttf",
     "font-dsp",
@@ -381,9 +406,15 @@ local package = {
     "font-tfm",
     "font-lua",
     "font-def",
+    "fonts-def",          -- NEW 18.09.2018
     "fonts-ext",
-    "font-gbn",
-
+    "font-imp-tex",       -- NEW
+    "font-imp-ligatures", -- NEW
+    "font-imp-italics",   -- NEW
+    "font-imp-effects",   -- NEW
+    "fonts-lig",          -- NEW   
+    "fonts-gbn",          -- REN
+    
   }, --[[ [package.required] ]]
 
 } --[[ [package] ]]
@@ -823,7 +854,7 @@ local build_paths = function (argv)
 
   local orig_dir    = lfscurrentdir ()
   local base_dir    = orig_dir .. loader_orig_dir
-  local loader_name = stringformat (loader_target_name, os.date ("%F"))
+  local loader_name = stringformat (loader_target_name, os.date ("%Y-%m-%d")) -- changed from %F 18.09.2018
   local target_name = orig_dir .. loader_target_dir .. loader_name
 
   if #argv >= 2 then
@@ -894,7 +925,7 @@ local make_header = function (files)
     filelist [#filelist + 1] = stringformat ("    · %s", ourname)
   end
   return stringformat (luaotfload_header,
-                       os.date "%F %T",
+                       os.date "%Y-%m-%d %X", -- 18.09.2018 changed from %F %T
                        os.getenv "USER" or "anon",
                        os.getenv "HOSTNAME" or "void",
                        os.date "%Y",

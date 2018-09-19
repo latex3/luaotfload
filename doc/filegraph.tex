@@ -55,6 +55,7 @@ l-lua.lua &
 l-math.lua &
 l-string.lua \\
 l-table.lua &
+l-unicode.lua &
 util-fil.lua&
 util-str.lua\\
 };
@@ -88,24 +89,30 @@ font-cid.lua
 font-con.lua
 font-def.lua
 font-dsp.lua
-font-gbn.lua
 font-ini.lua
 font-lua.lua
 font-map.lua
 font-ocl.lua
 font-one.lua
+font-onr.lua
 font-osd.lua
 font-ota.lua
+font-otc.lua
 font-oti.lua
 font-otj.lua
 font-otl.lua
 font-oto.lua
 font-otr.lua
 font-ots.lua
+font-ott.lua
 font-oup.lua
 font-tfm.lua
 font-ttf.lua
-font-xtx.lua
+font-vfc.lua
+font-imp-tex
+font-imp-ligatures\\
+font-imp-italics
+font-imp-effects
 };
 % m10
 \node [below=1cm of m9,font=\ttfamily,
@@ -115,7 +122,8 @@ label={[name=mL10,font=\itshape]Font Loader (LuaTeX-Fonts)}] (m10)
  \begin{tabular}{@{}ll@{}}
  luatex-basics-chr.lua   & luatex-fonts-ext.lua\\
  luatex-basics-nod.lua   & luatex-fonts-syn.lua\\
- luatex-fonts-enc.lua
+ luatex-fonts-enc.lua    & luatex-fonts-def.lua\\
+ luatex-fonts-gbn.lua    &luatex-fonts-lig.lua
  \end{tabular}
 };
 % m11

@@ -1,22 +1,39 @@
--- script calls: %
-
+-- script calls:
+-- start folder: E:\git-projekte\luaotfload>
 -- mkcharacters
 -- this create a new luaotfload-character.lua.
 -- with current context one get different (more) table entries
 -- requirements char-def.lua and char-ini.lua
+-- the file is created in build!
 
- texlua mkcharacters ./ luaotfload-characters.lua
+texlua scripts/mkcharacters D:\context-minimals\context\tex\texmf-context\tex\context\base\mkiv
 
 -- mkglyphlist
--- without arguments it does retrieve the glyphlist but the generation fails.
--- manual copy works, but the result is identical to the existing version.
-
- texlua mkglyphlist glyphlist.txt luaotfload-glyphlist.lua
+-- must be called twice if glyphlist.txt doesn't exist yet.
 
 
--- mkimport: this imports the files from context. Currently not used until we unterstand it better.
+texlua scripts/mkglyphlist
+
+
+-- mkimport: this imports the files from context.
+-- changes: 18.09.2018
+-- Compared the file list with the list in luatex-fonts.lua of context and adapted it.
+
+-- Imported the files with (no idea what the first argument is about ...)
+
+texlua scripts/mkimport import "" D:\context-minimals\context\tex\texmf-context
+
+-- This also imports the merged orginal file and saves it as
+-- fontloader-reference.lua in src/fontloader/runtime
+
+-- Merged with the call
+-- Set USER and HOSTNAME to get a sensible header
+
+texlua scripts/mkimport package
 
 -- mkstatus: updates luaotfload-status.
--- should all the subfiles be removed?
+-- date must be naturally correct
 
--- mktests: quite unclear what the tests need to work. Better rely on l3build tests. 
+texlua scripts/mkstatus --fontloader=./build/fontloader-2018-09-18.lua
+
+-- mktests: quite unclear what the tests need to work. Better rely on l3build tests.

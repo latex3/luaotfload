@@ -1,0 +1,19 @@
+%D \module
+%D   [       file=luatex-fonts,
+%D        version=2009.12.01,
+%D          title=\LUATEX\ Support Macros,
+%D       subtitle=Generic \OPENTYPE\ Font Handler,
+%D         author=Hans Hagen,
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+%D Cf. discussion on \CONTEXT\ list:
+
+% \savinghyphcodes1
+
+\directlua {
+    dofile(kpse.find_file("luatex-languages.lua","tex"))
+}
+
+\def\loadpatterns#1{\directlua{tex.language = languages.loadpatterns("#1")}}
+
+\endinput

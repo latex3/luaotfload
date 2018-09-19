@@ -1,0 +1,2359 @@
+%D \module
+%D   [       file=luatex-math,
+%D        version=2013.04.29,
+%D          title=\LUATEX\ Support Macros,
+%D       subtitle=An example of math,
+%D         author={Hans Hagen & Bruno Voisin},
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+%D This module is in no way a complete plain math implementation. I made this file
+%D because I needed it for a tutorial for (mostly) plain \TEX\ users. There are
+%D several ways to support math in \LUATEX, and this is just one of them. It was the
+%D quickest hack I could come up with and it stays somewhat close to the traditional
+%D approach (and thereby far from the \CONTEXT\ way). This file is mainly meant for
+%D Boguslaw Jackowski.
+
+%D In the perspective of the TUG Lucida Opentype project Bruno Voisin checked the code
+%D and definitions below and suggested some improvements.
+
+% we provide a remap feature
+
+% \protected makes our mp test work (no expansion)
+
+\ifdefined\directlua
+    \directlua{dofile(kpse.find_file('luatex-math.lua'))}
+\fi
+
+% a bunch of fonts:
+
+\let \teni    = \relax
+\let \seveni  = \relax
+\let \fivei   = \relax
+\let \tensy   = \relax
+\let \sevensy = \relax
+\let \fivesy  = \relax
+\let \tenex   = \relax
+\let \sevenbf = \relax
+\let \fivebf  = \relax
+
+\protected\def\latinmodern
+  {\font\tenrm   = file:lmroman10-regular.otf:+liga;+kern;+tlig;+trep at 10pt
+   \font\sevenrm = file:lmroman7-regular.otf:+liga;+kern;+tlig;+trep  at  7pt
+   \font\fiverm  = file:lmroman5-regular.otf:+liga;+kern;+tlig;+trep  at  5pt
+   %
+   \font\tentt   = file:lmmono10-regular.otf                               at 10pt
+   \font\tensl   = file:lmromanslant10-regular.otf:+liga;+kern;+tlig;+trep at 10pt
+   \font\tenit   = file:lmroman10-italic.otf:+liga;+kern;+tlig;+trep       at 10pt
+   \font\tenbf   = file:lmroman10-bold.otf:+liga;+kern;+tlig;+trep         at 10pt
+   \font\tenbi   = file:lmroman10-bolditalic.otf:+liga;+kern;+tlig;+trep   at 10pt
+   %
+   \font\tenos   = file:lmroman10-regular.otf:+onum;+liga;+kern;+tlig;+trep at 10pt
+   \font\sevenos = file:lmroman7-regular.otf:+onum;+liga;+kern;+tlig;+trep  at  7pt
+   \font\fiveos  = file:lmroman5-regular.otf:+onum;+liga;+kern;+tlig;+trep  at  5pt
+   %
+   \font\mathfonttextupright         = file:latinmodern-math.otf:script=math;ssty=0;mathsize=yes at 10pt
+   \font\mathfontscriptupright       = file:latinmodern-math.otf:script=math;ssty=1;mathsize=yes at  7pt
+   \font\mathfontscriptscriptupright = file:latinmodern-math.otf:script=math;ssty=2;mathsize=yes at  5pt
+   %
+   \textfont         0 = \mathfonttextupright
+   \scriptfont       0 = \mathfontscriptupright
+   \scriptscriptfont 0 = \mathfontscriptscriptupright
+   %
+   \textfont         1 = \tenos
+   \scriptfont       1 = \sevenos
+   \scriptscriptfont 1 = \fiveos
+   %
+   \tenrm}
+
+\protected\def\lucidabright
+  {\font\tenrm   = file:lucidabrightot.otf:+liga;+kern;+tlig;+trep at 10pt
+   \font\sevenrm = file:lucidabrightot.otf:+liga;+kern;+tlig;+trep at  7pt
+   \font\fiverm  = file:lucidabrightot.otf:+liga;+kern;+tlig;+trep at  5pt
+   %
+   \font\tentt   = file:lucidasanstypewriterot.otf                             at 10pt
+   \font\tensl   = file:lucidabrightot.otf:slant=0.167;+liga;+kern;+tlig;+trep at 10pt
+   \font\tenit   = file:lucidabrightot-italic.otf:+liga;+kern;+tlig;+trep      at 10pt
+   \font\tenbf   = file:lucidabrightot-demi.otf:+liga;+kern;+tlig;+trep        at 10pt
+   \font\tenbi   = file:lucidabrightot-demiitalic.otf:+liga;+kern;+tlig;+trep  at 10pt
+   %
+   \font\tenos   = file:lucidabrightot.otf:+onum;+liga;+kern;+tlig;+trep at 10pt
+   \font\sevenos = file:lucidabrightot.otf:+onum;+liga;+kern;+tlig;+trep at  7pt
+   \font\fiveos  = file:lucidabrightot.otf:+onum;+liga;+kern;+tlig;+trep at  5pt
+   %
+   \font\mathfonttextupright         = file:lucidabrightmathot.otf:script=math;ssty=0;mathsize=yes at 10pt
+   \font\mathfontscriptupright       = file:lucidabrightmathot.otf:script=math;ssty=1;mathsize=yes at  7pt
+   \font\mathfontscriptscriptupright = file:lucidabrightmathot.otf:script=math;ssty=2;mathsize=yes at  5pt
+   %
+   \textfont         0 = \mathfonttextupright
+   \scriptfont       0 = \mathfontscriptupright
+   \scriptscriptfont 0 = \mathfontscriptscriptupright
+   %
+   \textfont         1 = \tenos
+   \scriptfont       1 = \sevenos
+   \scriptscriptfont 1 = \fiveos
+   %
+   \tenrm}
+
+\ifdefined\directlua
+    \directlua {
+        if arguments["mtx:lucidabright"] then
+            tex.print("\string\\lucidabright")
+        else
+            tex.print("\string\\latinmodern")
+        end
+    }
+\fi
+
+\newtoks\everymathrm
+\newtoks\everymathcal
+\newtoks\everymathit
+\newtoks\everymathsl
+\newtoks\everymathbf
+\newtoks\everymathbi
+\newtoks\everymathtt
+
+% the following commands switch text as well as math
+
+\protected\def\rm{\fam0\relax\the\everymathrm\relax\tenrm\relax}
+\protected\def\it{\fam0\relax\the\everymathit\relax\tenit\relax}
+\protected\def\sl{\fam0\relax\the\everymathsl\relax\tensl\relax}
+\protected\def\bf{\fam0\relax\the\everymathbf\relax\tenbf\relax}
+\protected\def\bi{\fam0\relax\the\everymathbi\relax\tenbi\relax}
+\protected\def\tt{\fam0\relax\the\everymathtt\relax\tentt\relax}
+
+% tex is fast enough for this kind of assignments:
+
+\everymathrm {%
+    % codes
+    \Umathcode"0041="0"0"0041%
+    \Umathcode"0042="0"0"0042%
+    \Umathcode"0043="0"0"0043%
+    \Umathcode"0044="0"0"0044%
+    \Umathcode"0045="0"0"0045%
+    \Umathcode"0046="0"0"0046%
+    \Umathcode"0047="0"0"0047%
+    \Umathcode"0048="0"0"0048%
+    \Umathcode"0049="0"0"0049%
+    \Umathcode"004A="0"0"004A%
+    \Umathcode"004B="0"0"004B%
+    \Umathcode"004C="0"0"004C%
+    \Umathcode"004D="0"0"004D%
+    \Umathcode"004E="0"0"004E%
+    \Umathcode"004F="0"0"004F%
+    \Umathcode"0050="0"0"0050%
+    \Umathcode"0051="0"0"0051%
+    \Umathcode"0052="0"0"0052%
+    \Umathcode"0053="0"0"0053%
+    \Umathcode"0054="0"0"0054%
+    \Umathcode"0055="0"0"0055%
+    \Umathcode"0056="0"0"0056%
+    \Umathcode"0057="0"0"0057%
+    \Umathcode"0058="0"0"0058%
+    \Umathcode"0059="0"0"0059%
+    \Umathcode"005A="0"0"005A%
+    \Umathcode"0061="0"0"0061%
+    \Umathcode"0062="0"0"0062%
+    \Umathcode"0063="0"0"0063%
+    \Umathcode"0064="0"0"0064%
+    \Umathcode"0065="0"0"0065%
+    \Umathcode"0066="0"0"0066%
+    \Umathcode"0067="0"0"0067%
+    \Umathcode"0068="0"0"0068%
+    \Umathcode"0069="0"0"0069%
+    \Umathcode"006A="0"0"006A%
+    \Umathcode"006B="0"0"006B%
+    \Umathcode"006C="0"0"006C%
+    \Umathcode"006D="0"0"006D%
+    \Umathcode"006E="0"0"006E%
+    \Umathcode"006F="0"0"006F%
+    \Umathcode"0070="0"0"0070%
+    \Umathcode"0071="0"0"0071%
+    \Umathcode"0072="0"0"0072%
+    \Umathcode"0073="0"0"0073%
+    \Umathcode"0074="0"0"0074%
+    \Umathcode"0075="0"0"0075%
+    \Umathcode"0076="0"0"0076%
+    \Umathcode"0077="0"0"0077%
+    \Umathcode"0078="0"0"0078%
+    \Umathcode"0079="0"0"0079%
+    \Umathcode"007A="0"0"007A%
+    \Umathcode"0391="0"0"0391%
+    \Umathcode"0392="0"0"0392%
+    \Umathcode"0393="0"0"0393%
+    \Umathcode"0394="0"0"0394%
+    \Umathcode"0395="0"0"0395%
+    \Umathcode"0396="0"0"0396%
+    \Umathcode"0397="0"0"0397%
+    \Umathcode"0398="0"0"0398%
+    \Umathcode"0399="0"0"0399%
+    \Umathcode"039A="0"0"039A%
+    \Umathcode"039B="0"0"039B%
+    \Umathcode"039C="0"0"039C%
+    \Umathcode"039D="0"0"039D%
+    \Umathcode"039E="0"0"039E%
+    \Umathcode"039F="0"0"039F%
+    \Umathcode"03A0="0"0"03A0%
+    \Umathcode"03A1="0"0"03A1%
+    \Umathcode"03A3="0"0"03A3%
+    \Umathcode"03A4="0"0"03A4%
+    \Umathcode"03A5="0"0"03A5%
+    \Umathcode"03A6="0"0"03A6%
+    \Umathcode"03A7="0"0"03A7%
+    \Umathcode"03A8="0"0"03A8%
+    \Umathcode"03A9="0"0"03A9%
+    \Umathcode"03B1="0"0"03B1%
+    \Umathcode"03B2="0"0"03B2%
+    \Umathcode"03B3="0"0"03B3%
+    \Umathcode"03B4="0"0"03B4%
+    \Umathcode"03B5="0"0"03B5%
+    \Umathcode"03B6="0"0"03B6%
+    \Umathcode"03B7="0"0"03B7%
+    \Umathcode"03B8="0"0"03B8%
+    \Umathcode"03B9="0"0"03B9%
+    \Umathcode"03BA="0"0"03BA%
+    \Umathcode"03BB="0"0"03BB%
+    \Umathcode"03BC="0"0"03BC%
+    \Umathcode"03BD="0"0"03BD%
+    \Umathcode"03BE="0"0"03BE%
+    \Umathcode"03BF="0"0"03BF%
+    \Umathcode"03C0="0"0"03C0%
+    \Umathcode"03C1="0"0"03C1%
+    \Umathcode"03C2="0"0"03C2%
+    \Umathcode"03C3="0"0"03C3%
+    \Umathcode"03C4="0"0"03C4%
+    \Umathcode"03C5="0"0"03C5%
+    \Umathcode"03C6="0"0"03C6%
+    \Umathcode"03C7="0"0"03C7%
+    \Umathcode"03C8="0"0"03C8%
+    \Umathcode"03C9="0"0"03C9%
+    \Umathcode"03D1="0"0"03D1%
+    \Umathcode"03D5="0"0"03D5%
+    \Umathcode"03D6="0"0"03D6%
+    \Umathcode"03F0="0"0"03F0%
+    \Umathcode"03F1="0"0"03F1%
+    \Umathcode"03F4="0"0"03F4%
+    \Umathcode"03F5="0"0"03F5%
+    \Umathcode"2202="0"0"2202%
+    \Umathcode"2207="0"0"2207%
+    % commands
+    \Umathchardef\Alpha     "0"0"000391%
+    \Umathchardef\Beta      "0"0"000392%
+    \Umathchardef\Gamma     "0"0"000393%
+    \Umathchardef\Delta     "0"0"000394%
+    \Umathchardef\Epsilon   "0"0"000395%
+    \Umathchardef\Zeta      "0"0"000396%
+    \Umathchardef\Eta       "0"0"000397%
+    \Umathchardef\Theta     "0"0"000398%
+    \Umathchardef\Iota      "0"0"000399%
+    \Umathchardef\Kappa     "0"0"00039A%
+    \Umathchardef\Lambda    "0"0"00039B%
+    \Umathchardef\Mu        "0"0"00039C%
+    \Umathchardef\Nu        "0"0"00039D%
+    \Umathchardef\Xi        "0"0"00039E%
+    \Umathchardef\Omicron   "0"0"00039F%
+    \Umathchardef\Pi        "0"0"0003A0%
+    \Umathchardef\Rho       "0"0"0003A1%
+    \Umathchardef\Sigma     "0"0"0003A3%
+    \Umathchardef\Tau       "0"0"0003A4%
+    \Umathchardef\Upsilon   "0"0"0003A5%
+    \Umathchardef\Phi       "0"0"0003A6%
+    \Umathchardef\Chi       "0"0"0003A7%
+    \Umathchardef\Psi       "0"0"0003A8%
+    \Umathchardef\Omega     "0"0"0003A9%
+    \Umathchardef\alpha     "0"0"0003B1%
+    \Umathchardef\beta      "0"0"0003B2%
+    \Umathchardef\gamma     "0"0"0003B3%
+    \Umathchardef\delta     "0"0"0003B4%
+    \Umathchardef\varepsilon"0"0"0003B5%
+    \Umathchardef\zeta      "0"0"0003B6%
+    \Umathchardef\eta       "0"0"0003B7%
+    \Umathchardef\theta     "0"0"0003B8%
+    \Umathchardef\iota      "0"0"0003B9%
+    \Umathchardef\kappa     "0"0"0003BA%
+    \Umathchardef\lambda    "0"0"0003BB%
+    \Umathchardef\mu        "0"0"0003BC%
+    \Umathchardef\nu        "0"0"0003BD%
+    \Umathchardef\xi        "0"0"0003BE%
+    \Umathchardef\omicron   "0"0"0003BF%
+    \Umathchardef\pi        "0"0"0003C0%
+    \Umathchardef\rho       "0"0"0003C1%
+    \Umathchardef\varsigma  "0"0"0003C2%
+    \Umathchardef\sigma     "0"0"0003C3%
+    \Umathchardef\tau       "0"0"0003C4%
+    \Umathchardef\upsilon   "0"0"0003C5%
+    \Umathchardef\varphi    "0"0"0003C6%
+    \Umathchardef\chi       "0"0"0003C7%
+    \Umathchardef\psi       "0"0"0003C8%
+    \Umathchardef\omega     "0"0"0003C9%
+    \Umathchardef\vartheta  "0"0"0003D1%
+    \Umathchardef\phi       "0"0"0003D5%
+    \Umathchardef\varpi     "0"0"0003D6%
+    \Umathchardef\varkappa  "0"0"0003F0%
+    \Umathchardef\varrho    "0"0"0003F1%
+    \Umathchardef\epsilon   "0"0"0003F5%
+    \Umathchardef\varTheta  "0"0"0003F4%
+    \Umathchardef\digamma   "0"0"0003DC%
+    \relax
+}
+
+\everymathit {%
+    % codes
+    \Umathcode"0041="0"0"1D434%
+    \Umathcode"0042="0"0"1D435%
+    \Umathcode"0043="0"0"1D436%
+    \Umathcode"0044="0"0"1D437%
+    \Umathcode"0045="0"0"1D438%
+    \Umathcode"0046="0"0"1D439%
+    \Umathcode"0047="0"0"1D43A%
+    \Umathcode"0048="0"0"1D43B%
+    \Umathcode"0049="0"0"1D43C%
+    \Umathcode"004A="0"0"1D43D%
+    \Umathcode"004B="0"0"1D43E%
+    \Umathcode"004C="0"0"1D43F%
+    \Umathcode"004D="0"0"1D440%
+    \Umathcode"004E="0"0"1D441%
+    \Umathcode"004F="0"0"1D442%
+    \Umathcode"0050="0"0"1D443%
+    \Umathcode"0051="0"0"1D444%
+    \Umathcode"0052="0"0"1D445%
+    \Umathcode"0053="0"0"1D446%
+    \Umathcode"0054="0"0"1D447%
+    \Umathcode"0055="0"0"1D448%
+    \Umathcode"0056="0"0"1D449%
+    \Umathcode"0057="0"0"1D44A%
+    \Umathcode"0058="0"0"1D44B%
+    \Umathcode"0059="0"0"1D44C%
+    \Umathcode"005A="0"0"1D44D%
+    \Umathcode"0061="0"0"1D44E%
+    \Umathcode"0062="0"0"1D44F%
+    \Umathcode"0063="0"0"1D450%
+    \Umathcode"0064="0"0"1D451%
+    \Umathcode"0065="0"0"1D452%
+    \Umathcode"0066="0"0"1D453%
+    \Umathcode"0067="0"0"1D454%
+    \Umathcode"0068="0"0"0210E%
+    \Umathcode"0069="0"0"1D456%
+    \Umathcode"006A="0"0"1D457%
+    \Umathcode"006B="0"0"1D458%
+    \Umathcode"006C="0"0"1D459%
+    \Umathcode"006D="0"0"1D45A%
+    \Umathcode"006E="0"0"1D45B%
+    \Umathcode"006F="0"0"1D45C%
+    \Umathcode"0070="0"0"1D45D%
+    \Umathcode"0071="0"0"1D45E%
+    \Umathcode"0072="0"0"1D45F%
+    \Umathcode"0073="0"0"1D460%
+    \Umathcode"0074="0"0"1D461%
+    \Umathcode"0075="0"0"1D462%
+    \Umathcode"0076="0"0"1D463%
+    \Umathcode"0077="0"0"1D464%
+    \Umathcode"0078="0"0"1D465%
+    \Umathcode"0079="0"0"1D466%
+    \Umathcode"007A="0"0"1D467%
+    \Umathcode"0391="0"0"1D6E2%
+    \Umathcode"0392="0"0"1D6E3%
+    \Umathcode"0393="0"0"1D6E4%
+    \Umathcode"0394="0"0"1D6E5%
+    \Umathcode"0395="0"0"1D6E6%
+    \Umathcode"0396="0"0"1D6E7%
+    \Umathcode"0397="0"0"1D6E8%
+    \Umathcode"0398="0"0"1D6E9%
+    \Umathcode"0399="0"0"1D6EA%
+    \Umathcode"039A="0"0"1D6EB%
+    \Umathcode"039B="0"0"1D6EC%
+    \Umathcode"039C="0"0"1D6ED%
+    \Umathcode"039D="0"0"1D6EE%
+    \Umathcode"039E="0"0"1D6EF%
+    \Umathcode"039F="0"0"1D6F0%
+    \Umathcode"03A0="0"0"1D6F1%
+    \Umathcode"03A1="0"0"1D6F2%
+    \Umathcode"03A3="0"0"1D6F4%
+    \Umathcode"03A4="0"0"1D6F5%
+    \Umathcode"03A5="0"0"1D6F6%
+    \Umathcode"03A6="0"0"1D6F7%
+    \Umathcode"03A7="0"0"1D6F8%
+    \Umathcode"03A8="0"0"1D6F9%
+    \Umathcode"03A9="0"0"1D6FA%
+    \Umathcode"03B1="0"0"1D6FC%
+    \Umathcode"03B2="0"0"1D6FD%
+    \Umathcode"03B3="0"0"1D6FE%
+    \Umathcode"03B4="0"0"1D6FF%
+    \Umathcode"03B5="0"0"1D700%
+    \Umathcode"03B6="0"0"1D701%
+    \Umathcode"03B7="0"0"1D702%
+    \Umathcode"03B8="0"0"1D703%
+    \Umathcode"03B9="0"0"1D704%
+    \Umathcode"03BA="0"0"1D705%
+    \Umathcode"03BB="0"0"1D706%
+    \Umathcode"03BC="0"0"1D707%
+    \Umathcode"03BD="0"0"1D708%
+    \Umathcode"03BE="0"0"1D709%
+    \Umathcode"03BF="0"0"1D70A%
+    \Umathcode"03C0="0"0"1D70B%
+    \Umathcode"03C1="0"0"1D70C%
+    \Umathcode"03C2="0"0"1D70D%
+    \Umathcode"03C3="0"0"1D70E%
+    \Umathcode"03C4="0"0"1D70F%
+    \Umathcode"03C5="0"0"1D710%
+    \Umathcode"03C6="0"0"1D711%
+    \Umathcode"03C7="0"0"1D712%
+    \Umathcode"03C8="0"0"1D713%
+    \Umathcode"03C9="0"0"1D714%
+    \Umathcode"03D1="0"0"1D717%
+    \Umathcode"03D5="0"0"1D719%
+    \Umathcode"03D6="0"0"1D71B%
+    \Umathcode"03F0="0"0"1D718%
+    \Umathcode"03F1="0"0"1D71A%
+    \Umathcode"03F4="0"0"1D6F3%
+    \Umathcode"03F5="0"0"1D716%
+    \Umathcode"2202="0"0"1D715%
+    \Umathcode"2207="0"0"1D6FB%
+    % commands
+    \Umathchardef\Alpha     "0"0"01D6E2%
+    \Umathchardef\Beta      "0"0"01D6E3%
+    \Umathchardef\Gamma     "0"0"01D6E4%
+    \Umathchardef\Delta     "0"0"01D6E5%
+    \Umathchardef\Epsilon   "0"0"01D6E6%
+    \Umathchardef\Zeta      "0"0"01D6E7%
+    \Umathchardef\Eta       "0"0"01D6E8%
+    \Umathchardef\Theta     "0"0"01D6E9%
+    \Umathchardef\Iota      "0"0"01D6EA%
+    \Umathchardef\Kappa     "0"0"01D6EB%
+    \Umathchardef\Lambda    "0"0"01D6EC%
+    \Umathchardef\Mu        "0"0"01D6ED%
+    \Umathchardef\Nu        "0"0"01D6EE%
+    \Umathchardef\Xi        "0"0"01D6EF%
+    \Umathchardef\Omicron   "0"0"01D6F0%
+    \Umathchardef\Pi        "0"0"01D6F1%
+    \Umathchardef\Rho       "0"0"01D6F2%
+    \Umathchardef\Sigma     "0"0"01D6F4%
+    \Umathchardef\Tau       "0"0"01D6F5%
+    \Umathchardef\Upsilon   "0"0"01D6F6%
+    \Umathchardef\Phi       "0"0"01D6F7%
+    \Umathchardef\Chi       "0"0"01D6F8%
+    \Umathchardef\Psi       "0"0"01D6F9%
+    \Umathchardef\Omega     "0"0"01D6FA%
+    \Umathchardef\alpha     "0"0"01D6FC%
+    \Umathchardef\beta      "0"0"01D6FD%
+    \Umathchardef\gamma     "0"0"01D6FE%
+    \Umathchardef\delta     "0"0"01D6FF%
+    \Umathchardef\varepsilon"0"0"01D700%
+    \Umathchardef\zeta      "0"0"01D701%
+    \Umathchardef\eta       "0"0"01D702%
+    \Umathchardef\theta     "0"0"01D703%
+    \Umathchardef\iota      "0"0"01D704%
+    \Umathchardef\kappa     "0"0"01D705%
+    \Umathchardef\lambda    "0"0"01D706%
+    \Umathchardef\mu        "0"0"01D707%
+    \Umathchardef\nu        "0"0"01D708%
+    \Umathchardef\xi        "0"0"01D709%
+    \Umathchardef\omicron   "0"0"01D70A%
+    \Umathchardef\pi        "0"0"01D70B%
+    \Umathchardef\rho       "0"0"01D70C%
+    \Umathchardef\varsigma  "0"0"01D70D%
+    \Umathchardef\sigma     "0"0"01D70E%
+    \Umathchardef\tau       "0"0"01D70F%
+    \Umathchardef\upsilon   "0"0"01D710%
+    \Umathchardef\varphi    "0"0"01D711%
+    \Umathchardef\chi       "0"0"01D712%
+    \Umathchardef\psi       "0"0"01D713%
+    \Umathchardef\omega     "0"0"01D714%
+    \Umathchardef\epsilon   "0"0"01D716%
+    \Umathchardef\vartheta  "0"0"01D717%
+    \Umathchardef\varkappa  "0"0"01D718%
+    \Umathchardef\phi       "0"0"01D719%
+    \Umathchardef\varrho    "0"0"01D71A%
+    \Umathchardef\varpi     "0"0"01D71B%
+    \Umathchardef\varTheta  "0"0"01D6F3%
+    \Umathchardef\digamma   "0"0"0003DC%
+    \relax
+}
+
+\everymathsl {%
+    \the\everymathit
+}
+
+\everymathbf {%
+    % codes
+    \Umathcode"0030="0"0"1D7CE%
+    \Umathcode"0031="0"0"1D7CF%
+    \Umathcode"0032="0"0"1D7D0%
+    \Umathcode"0033="0"0"1D7D1%
+    \Umathcode"0034="0"0"1D7D2%
+    \Umathcode"0035="0"0"1D7D3%
+    \Umathcode"0036="0"0"1D7D4%
+    \Umathcode"0037="0"0"1D7D5%
+    \Umathcode"0038="0"0"1D7D6%
+    \Umathcode"0039="0"0"1D7D7%
+    \Umathcode"0041="0"0"1D400%
+    \Umathcode"0042="0"0"1D401%
+    \Umathcode"0043="0"0"1D402%
+    \Umathcode"0044="0"0"1D403%
+    \Umathcode"0045="0"0"1D404%
+    \Umathcode"0046="0"0"1D405%
+    \Umathcode"0047="0"0"1D406%
+    \Umathcode"0048="0"0"1D407%
+    \Umathcode"0049="0"0"1D408%
+    \Umathcode"004A="0"0"1D409%
+    \Umathcode"004B="0"0"1D40A%
+    \Umathcode"004C="0"0"1D40B%
+    \Umathcode"004D="0"0"1D40C%
+    \Umathcode"004E="0"0"1D40D%
+    \Umathcode"004F="0"0"1D40E%
+    \Umathcode"0050="0"0"1D40F%
+    \Umathcode"0051="0"0"1D410%
+    \Umathcode"0052="0"0"1D411%
+    \Umathcode"0053="0"0"1D412%
+    \Umathcode"0054="0"0"1D413%
+    \Umathcode"0055="0"0"1D414%
+    \Umathcode"0056="0"0"1D415%
+    \Umathcode"0057="0"0"1D416%
+    \Umathcode"0058="0"0"1D417%
+    \Umathcode"0059="0"0"1D418%
+    \Umathcode"005A="0"0"1D419%
+    \Umathcode"0061="0"0"1D41A%
+    \Umathcode"0062="0"0"1D41B%
+    \Umathcode"0063="0"0"1D41C%
+    \Umathcode"0064="0"0"1D41D%
+    \Umathcode"0065="0"0"1D41E%
+    \Umathcode"0066="0"0"1D41F%
+    \Umathcode"0067="0"0"1D420%
+    \Umathcode"0068="0"0"1D421%
+    \Umathcode"0069="0"0"1D422%
+    \Umathcode"006A="0"0"1D423%
+    \Umathcode"006B="0"0"1D424%
+    \Umathcode"006C="0"0"1D425%
+    \Umathcode"006D="0"0"1D426%
+    \Umathcode"006E="0"0"1D427%
+    \Umathcode"006F="0"0"1D428%
+    \Umathcode"0070="0"0"1D429%
+    \Umathcode"0071="0"0"1D42A%
+    \Umathcode"0072="0"0"1D42B%
+    \Umathcode"0073="0"0"1D42C%
+    \Umathcode"0074="0"0"1D42D%
+    \Umathcode"0075="0"0"1D42E%
+    \Umathcode"0076="0"0"1D42F%
+    \Umathcode"0077="0"0"1D430%
+    \Umathcode"0078="0"0"1D431%
+    \Umathcode"0079="0"0"1D432%
+    \Umathcode"007A="0"0"1D433%
+    \Umathcode"0391="0"0"1D6A8%
+    \Umathcode"0392="0"0"1D6A9%
+    \Umathcode"0393="0"0"1D6AA%
+    \Umathcode"0394="0"0"1D6AB%
+    \Umathcode"0395="0"0"1D6AC%
+    \Umathcode"0396="0"0"1D6AD%
+    \Umathcode"0397="0"0"1D6AE%
+    \Umathcode"0398="0"0"1D6AF%
+    \Umathcode"0399="0"0"1D6B0%
+    \Umathcode"039A="0"0"1D6B1%
+    \Umathcode"039B="0"0"1D6B2%
+    \Umathcode"039C="0"0"1D6B3%
+    \Umathcode"039D="0"0"1D6B4%
+    \Umathcode"039E="0"0"1D6B5%
+    \Umathcode"039F="0"0"1D6B6%
+    \Umathcode"03A0="0"0"1D6B7%
+    \Umathcode"03A1="0"0"1D6B8%
+    \Umathcode"03A3="0"0"1D6BA%
+    \Umathcode"03A4="0"0"1D6BB%
+    \Umathcode"03A5="0"0"1D6BC%
+    \Umathcode"03A6="0"0"1D6BD%
+    \Umathcode"03A7="0"0"1D6BE%
+    \Umathcode"03A8="0"0"1D6BF%
+    \Umathcode"03A9="0"0"1D6C0%
+    \Umathcode"03B1="0"0"1D6C2%
+    \Umathcode"03B2="0"0"1D6C3%
+    \Umathcode"03B3="0"0"1D6C4%
+    \Umathcode"03B4="0"0"1D6C5%
+    \Umathcode"03B5="0"0"1D6C6%
+    \Umathcode"03B6="0"0"1D6C7%
+    \Umathcode"03B7="0"0"1D6C8%
+    \Umathcode"03B8="0"0"1D6C9%
+    \Umathcode"03B9="0"0"1D6CA%
+    \Umathcode"03BA="0"0"1D6CB%
+    \Umathcode"03BB="0"0"1D6CC%
+    \Umathcode"03BC="0"0"1D6CD%
+    \Umathcode"03BD="0"0"1D6CE%
+    \Umathcode"03BE="0"0"1D6CF%
+    \Umathcode"03BF="0"0"1D6D0%
+    \Umathcode"03C0="0"0"1D6D1%
+    \Umathcode"03C1="0"0"1D6D2%
+    \Umathcode"03C2="0"0"1D6D3%
+    \Umathcode"03C3="0"0"1D6D4%
+    \Umathcode"03C4="0"0"1D6D5%
+    \Umathcode"03C5="0"0"1D6D6%
+    \Umathcode"03C6="0"0"1D6D7%
+    \Umathcode"03C7="0"0"1D6D8%
+    \Umathcode"03C8="0"0"1D6D9%
+    \Umathcode"03C9="0"0"1D6DA%
+    \Umathcode"03D1="0"0"1D6DD%
+    \Umathcode"03D5="0"0"1D6DF%
+    \Umathcode"03D6="0"0"1D6E1%
+    \Umathcode"03F0="0"0"1D6DE%
+    \Umathcode"03F1="0"0"1D6E0%
+    \Umathcode"03F4="0"0"1D6B9%
+    \Umathcode"03F5="0"0"1D6DC%
+    \Umathcode"2202="0"0"1D6DB%
+    \Umathcode"2207="0"0"1D6C1%
+    % commands
+    \Umathchardef\Alpha     "0"0"01D6A8%
+    \Umathchardef\Beta      "0"0"01D6A9%
+    \Umathchardef\Gamma     "0"0"01D6AA%
+    \Umathchardef\Delta     "0"0"01D6AB%
+    \Umathchardef\Epsilon   "0"0"01D6AC%
+    \Umathchardef\Zeta      "0"0"01D6AD%
+    \Umathchardef\Eta       "0"0"01D6AE%
+    \Umathchardef\Theta     "0"0"01D6AF%
+    \Umathchardef\Iota      "0"0"01D6B0%
+    \Umathchardef\Kappa     "0"0"01D6B1%
+    \Umathchardef\Lambda    "0"0"01D6B2%
+    \Umathchardef\Mu        "0"0"01D6B3%
+    \Umathchardef\Nu        "0"0"01D6B4%
+    \Umathchardef\Xi        "0"0"01D6B5%
+    \Umathchardef\Omicron   "0"0"01D6B6%
+    \Umathchardef\Pi        "0"0"01D6B7%
+    \Umathchardef\Rho       "0"0"01D6B8%
+    \Umathchardef\Sigma     "0"0"01D6BA%
+    \Umathchardef\Tau       "0"0"01D6BB%
+    \Umathchardef\Upsilon   "0"0"01D6BC%
+    \Umathchardef\Phi       "0"0"01D6BD%
+    \Umathchardef\Chi       "0"0"01D6BE%
+    \Umathchardef\Psi       "0"0"01D6BF%
+    \Umathchardef\Omega     "0"0"01D6C0%
+    \Umathchardef\alpha     "0"0"01D6C2%
+    \Umathchardef\beta      "0"0"01D6C3%
+    \Umathchardef\gamma     "0"0"01D6C4%
+    \Umathchardef\delta     "0"0"01D6C5%
+    \Umathchardef\varepsilon"0"0"01D6C6%
+    \Umathchardef\zeta      "0"0"01D6C7%
+    \Umathchardef\eta       "0"0"01D6C8%
+    \Umathchardef\theta     "0"0"01D6C9%
+    \Umathchardef\iota      "0"0"01D6CA%
+    \Umathchardef\kappa     "0"0"01D6CB%
+    \Umathchardef\lambda    "0"0"01D6CC%
+    \Umathchardef\mu        "0"0"01D6CD%
+    \Umathchardef\nu        "0"0"01D6CE%
+    \Umathchardef\xi        "0"0"01D6CF%
+    \Umathchardef\omicron   "0"0"01D6D0%
+    \Umathchardef\pi        "0"0"01D6D1%
+    \Umathchardef\rho       "0"0"01D6D2%
+    \Umathchardef\varsigma  "0"0"01D6D3%
+    \Umathchardef\sigma     "0"0"01D6D4%
+    \Umathchardef\tau       "0"0"01D6D5%
+    \Umathchardef\upsilon   "0"0"01D6D6%
+    \Umathchardef\varphi    "0"0"01D6D7%
+    \Umathchardef\chi       "0"0"01D6D8%
+    \Umathchardef\psi       "0"0"01D6D9%
+    \Umathchardef\omega     "0"0"01D6DA%
+    \Umathchardef\epsilon   "0"0"01D6DC%
+    \Umathchardef\vartheta  "0"0"01D6DD%
+    \Umathchardef\varkappa  "0"0"01D6DE%
+    \Umathchardef\phi       "0"0"01D6DF%
+    \Umathchardef\varrho    "0"0"01D6E0%
+    \Umathchardef\varpi     "0"0"01D6E1%
+    \Umathchardef\varTheta  "0"0"01D6B9%
+    \Umathchardef\digamma   "0"0"01D7CA%
+    \relax
+}
+
+\everymathbi {%
+    % codes
+    \Umathcode"0030="0"0"1D7CE%
+    \Umathcode"0031="0"0"1D7CF%
+    \Umathcode"0032="0"0"1D7D0%
+    \Umathcode"0033="0"0"1D7D1%
+    \Umathcode"0034="0"0"1D7D2%
+    \Umathcode"0035="0"0"1D7D3%
+    \Umathcode"0036="0"0"1D7D4%
+    \Umathcode"0037="0"0"1D7D5%
+    \Umathcode"0038="0"0"1D7D6%
+    \Umathcode"0039="0"0"1D7D7%
+    \Umathcode"0041="0"0"1D468%
+    \Umathcode"0042="0"0"1D469%
+    \Umathcode"0043="0"0"1D46A%
+    \Umathcode"0044="0"0"1D46B%
+    \Umathcode"0045="0"0"1D46C%
+    \Umathcode"0046="0"0"1D46D%
+    \Umathcode"0047="0"0"1D46E%
+    \Umathcode"0048="0"0"1D46F%
+    \Umathcode"0049="0"0"1D470%
+    \Umathcode"004A="0"0"1D471%
+    \Umathcode"004B="0"0"1D472%
+    \Umathcode"004C="0"0"1D473%
+    \Umathcode"004D="0"0"1D474%
+    \Umathcode"004E="0"0"1D475%
+    \Umathcode"004F="0"0"1D476%
+    \Umathcode"0050="0"0"1D477%
+    \Umathcode"0051="0"0"1D478%
+    \Umathcode"0052="0"0"1D479%
+    \Umathcode"0053="0"0"1D47A%
+    \Umathcode"0054="0"0"1D47B%
+    \Umathcode"0055="0"0"1D47C%
+    \Umathcode"0056="0"0"1D47D%
+    \Umathcode"0057="0"0"1D47E%
+    \Umathcode"0058="0"0"1D47F%
+    \Umathcode"0059="0"0"1D480%
+    \Umathcode"005A="0"0"1D481%
+    \Umathcode"0061="0"0"1D482%
+    \Umathcode"0062="0"0"1D483%
+    \Umathcode"0063="0"0"1D484%
+    \Umathcode"0064="0"0"1D485%
+    \Umathcode"0065="0"0"1D486%
+    \Umathcode"0066="0"0"1D487%
+    \Umathcode"0067="0"0"1D488%
+    \Umathcode"0068="0"0"1D489%
+    \Umathcode"0069="0"0"1D48A%
+    \Umathcode"006A="0"0"1D48B%
+    \Umathcode"006B="0"0"1D48C%
+    \Umathcode"006C="0"0"1D48D%
+    \Umathcode"006D="0"0"1D48E%
+    \Umathcode"006E="0"0"1D48F%
+    \Umathcode"006F="0"0"1D490%
+    \Umathcode"0070="0"0"1D491%
+    \Umathcode"0071="0"0"1D492%
+    \Umathcode"0072="0"0"1D493%
+    \Umathcode"0073="0"0"1D494%
+    \Umathcode"0074="0"0"1D495%
+    \Umathcode"0075="0"0"1D496%
+    \Umathcode"0076="0"0"1D497%
+    \Umathcode"0077="0"0"1D498%
+    \Umathcode"0078="0"0"1D499%
+    \Umathcode"0079="0"0"1D49A%
+    \Umathcode"007A="0"0"1D49B%
+    \Umathcode"0391="0"0"1D71C%
+    \Umathcode"0392="0"0"1D71D%
+    \Umathcode"0393="0"0"1D71E%
+    \Umathcode"0394="0"0"1D71F%
+    \Umathcode"0395="0"0"1D720%
+    \Umathcode"0396="0"0"1D721%
+    \Umathcode"0397="0"0"1D722%
+    \Umathcode"0398="0"0"1D723%
+    \Umathcode"0399="0"0"1D724%
+    \Umathcode"039A="0"0"1D725%
+    \Umathcode"039B="0"0"1D726%
+    \Umathcode"039C="0"0"1D727%
+    \Umathcode"039D="0"0"1D728%
+    \Umathcode"039E="0"0"1D729%
+    \Umathcode"039F="0"0"1D72A%
+    \Umathcode"03A0="0"0"1D72B%
+    \Umathcode"03A1="0"0"1D72C%
+    \Umathcode"03A3="0"0"1D72E%
+    \Umathcode"03A4="0"0"1D72F%
+    \Umathcode"03A5="0"0"1D730%
+    \Umathcode"03A6="0"0"1D731%
+    \Umathcode"03A7="0"0"1D732%
+    \Umathcode"03A8="0"0"1D733%
+    \Umathcode"03A9="0"0"1D734%
+    \Umathcode"03B1="0"0"1D736%
+    \Umathcode"03B2="0"0"1D737%
+    \Umathcode"03B3="0"0"1D738%
+    \Umathcode"03B4="0"0"1D739%
+    \Umathcode"03B5="0"0"1D73A%
+    \Umathcode"03B6="0"0"1D73B%
+    \Umathcode"03B7="0"0"1D73C%
+    \Umathcode"03B8="0"0"1D73D%
+    \Umathcode"03B9="0"0"1D73E%
+    \Umathcode"03BA="0"0"1D73F%
+    \Umathcode"03BB="0"0"1D740%
+    \Umathcode"03BC="0"0"1D741%
+    \Umathcode"03BD="0"0"1D742%
+    \Umathcode"03BE="0"0"1D743%
+    \Umathcode"03BF="0"0"1D744%
+    \Umathcode"03C0="0"0"1D745%
+    \Umathcode"03C1="0"0"1D746%
+    \Umathcode"03C2="0"0"1D747%
+    \Umathcode"03C3="0"0"1D748%
+    \Umathcode"03C4="0"0"1D749%
+    \Umathcode"03C5="0"0"1D74A%
+    \Umathcode"03C6="0"0"1D74B%
+    \Umathcode"03C7="0"0"1D74C%
+    \Umathcode"03C8="0"0"1D74D%
+    \Umathcode"03C9="0"0"1D74E%
+    \Umathcode"03D1="0"0"1D751%
+    \Umathcode"03D5="0"0"1D753%
+    \Umathcode"03D6="0"0"1D755%
+    \Umathcode"03F0="0"0"1D752%
+    \Umathcode"03F1="0"0"1D754%
+    \Umathcode"03F4="0"0"1D72D%
+    \Umathcode"03F5="0"0"1D750%
+    \Umathcode"2202="0"0"1D74F%
+    \Umathcode"2207="0"0"1D735%
+    % commands
+    \Umathchardef\Alpha     "0"0"01D71C%
+    \Umathchardef\Beta      "0"0"01D71D%
+    \Umathchardef\Gamma     "0"0"01D71E%
+    \Umathchardef\Delta     "0"0"01D71F%
+    \Umathchardef\Epsilon   "0"0"01D720%
+    \Umathchardef\Zeta      "0"0"01D721%
+    \Umathchardef\Eta       "0"0"01D722%
+    \Umathchardef\Theta     "0"0"01D723%
+    \Umathchardef\Iota      "0"0"01D724%
+    \Umathchardef\Kappa     "0"0"01D725%
+    \Umathchardef\Lambda    "0"0"01D726%
+    \Umathchardef\Mu        "0"0"01D727%
+    \Umathchardef\Nu        "0"0"01D728%
+    \Umathchardef\Xi        "0"0"01D729%
+    \Umathchardef\Omicron   "0"0"01D72A%
+    \Umathchardef\Pi        "0"0"01D72B%
+    \Umathchardef\Rho       "0"0"01D72C%
+    \Umathchardef\Sigma     "0"0"01D72E%
+    \Umathchardef\Tau       "0"0"01D72F%
+    \Umathchardef\Upsilon   "0"0"01D730%
+    \Umathchardef\Phi       "0"0"01D731%
+    \Umathchardef\Chi       "0"0"01D732%
+    \Umathchardef\Psi       "0"0"01D733%
+    \Umathchardef\Omega     "0"0"01D734%
+    \Umathchardef\alpha     "0"0"01D736%
+    \Umathchardef\beta      "0"0"01D737%
+    \Umathchardef\gamma     "0"0"01D738%
+    \Umathchardef\delta     "0"0"01D739%
+    \Umathchardef\varepsilon"0"0"01D73A%
+    \Umathchardef\zeta      "0"0"01D73B%
+    \Umathchardef\eta       "0"0"01D73C%
+    \Umathchardef\theta     "0"0"01D73D%
+    \Umathchardef\iota      "0"0"01D73E%
+    \Umathchardef\kappa     "0"0"01D73F%
+    \Umathchardef\lambda    "0"0"01D740%
+    \Umathchardef\mu        "0"0"01D741%
+    \Umathchardef\nu        "0"0"01D742%
+    \Umathchardef\xi        "0"0"01D743%
+    \Umathchardef\omicron   "0"0"01D744%
+    \Umathchardef\pi        "0"0"01D745%
+    \Umathchardef\rho       "0"0"01D746%
+    \Umathchardef\varsigma  "0"0"01D747%
+    \Umathchardef\sigma     "0"0"01D748%
+    \Umathchardef\tau       "0"0"01D749%
+    \Umathchardef\upsilon   "0"0"01D74A%
+    \Umathchardef\varphi    "0"0"01D74B%
+    \Umathchardef\chi       "0"0"01D74C%
+    \Umathchardef\psi       "0"0"01D74D%
+    \Umathchardef\omega     "0"0"01D74E%
+    \Umathchardef\epsilon   "0"0"01D750%
+    \Umathchardef\vartheta  "0"0"01D751%
+    \Umathchardef\varkappa  "0"0"01D752%
+    \Umathchardef\phi       "0"0"01D753%
+    \Umathchardef\varrho    "0"0"01D754%
+    \Umathchardef\varpi     "0"0"01D755%
+    \Umathchardef\varTheta  "0"0"01D72D%
+    \Umathchardef\digamma   "0"0"01D7CA%
+    \relax
+}
+
+\everymathtt {%
+    \Umathcode"0030="0"0"1D7F6%
+    \Umathcode"0031="0"0"1D7F7%
+    \Umathcode"0032="0"0"1D7F8%
+    \Umathcode"0033="0"0"1D7F9%
+    \Umathcode"0034="0"0"1D7FA%
+    \Umathcode"0035="0"0"1D7FB%
+    \Umathcode"0036="0"0"1D7FC%
+    \Umathcode"0037="0"0"1D7FD%
+    \Umathcode"0038="0"0"1D7FE%
+    \Umathcode"0039="0"0"1D7FF%
+    \Umathcode"0041="0"0"1D670%
+    \Umathcode"0042="0"0"1D671%
+    \Umathcode"0043="0"0"1D672%
+    \Umathcode"0044="0"0"1D673%
+    \Umathcode"0045="0"0"1D674%
+    \Umathcode"0046="0"0"1D675%
+    \Umathcode"0047="0"0"1D676%
+    \Umathcode"0048="0"0"1D677%
+    \Umathcode"0049="0"0"1D678%
+    \Umathcode"004A="0"0"1D679%
+    \Umathcode"004B="0"0"1D67A%
+    \Umathcode"004C="0"0"1D67B%
+    \Umathcode"004D="0"0"1D67C%
+    \Umathcode"004E="0"0"1D67D%
+    \Umathcode"004F="0"0"1D67E%
+    \Umathcode"0050="0"0"1D67F%
+    \Umathcode"0051="0"0"1D680%
+    \Umathcode"0052="0"0"1D681%
+    \Umathcode"0053="0"0"1D682%
+    \Umathcode"0054="0"0"1D683%
+    \Umathcode"0055="0"0"1D684%
+    \Umathcode"0056="0"0"1D685%
+    \Umathcode"0057="0"0"1D686%
+    \Umathcode"0058="0"0"1D687%
+    \Umathcode"0059="0"0"1D688%
+    \Umathcode"005A="0"0"1D689%
+    \Umathcode"0061="0"0"1D68A%
+    \Umathcode"0062="0"0"1D68B%
+    \Umathcode"0063="0"0"1D68C%
+    \Umathcode"0064="0"0"1D68D%
+    \Umathcode"0065="0"0"1D68E%
+    \Umathcode"0066="0"0"1D68F%
+    \Umathcode"0067="0"0"1D690%
+    \Umathcode"0068="0"0"1D691%
+    \Umathcode"0069="0"0"1D692%
+    \Umathcode"006A="0"0"1D693%
+    \Umathcode"006B="0"0"1D694%
+    \Umathcode"006C="0"0"1D695%
+    \Umathcode"006D="0"0"1D696%
+    \Umathcode"006E="0"0"1D697%
+    \Umathcode"006F="0"0"1D698%
+    \Umathcode"0070="0"0"1D699%
+    \Umathcode"0071="0"0"1D69A%
+    \Umathcode"0072="0"0"1D69B%
+    \Umathcode"0073="0"0"1D69C%
+    \Umathcode"0074="0"0"1D69D%
+    \Umathcode"0075="0"0"1D69E%
+    \Umathcode"0076="0"0"1D69F%
+    \Umathcode"0077="0"0"1D6A0%
+    \Umathcode"0078="0"0"1D6A1%
+    \Umathcode"0079="0"0"1D6A2%
+    \Umathcode"007A="0"0"1D6A3%
+    \relax
+}
+
+% Nothing special here:
+
+\let\mit\it
+
+% We use a special family for this, not that oldstyle in math makes
+% much sense, it's more that in good old tex oldstyle was taken from
+% math fonts. So, just something compatible:
+
+\protected\def\oldstyle{\fam1\relax\tenos\relax}
+
+% Again a text and math one and it had better be used grouped.
+
+\protected\def\cal{\fam0\relax\the\everymathcal\relax\tenit\relax}
+
+\everymathcal {%
+    \Umathcode"0041="0"0"1D49C% A
+    \Umathcode"0042="0"0"0212C% B
+    \Umathcode"0043="0"0"1D49E% C
+    \Umathcode"0044="0"0"1D49F% D
+    \Umathcode"0045="0"0"02130% E
+    \Umathcode"0046="0"0"02131% F
+    \Umathcode"0047="0"0"1D4A2% G
+    \Umathcode"0048="0"0"0210B% H
+    \Umathcode"0049="0"0"02110% I
+    \Umathcode"004A="0"0"1D4A5% J
+    \Umathcode"004B="0"0"1D4A6% K
+    \Umathcode"004C="0"0"02112% L
+    \Umathcode"004D="0"0"02133% M
+    \Umathcode"004E="0"0"1D4A9% N
+    \Umathcode"004F="0"0"1D4AA% O
+    \Umathcode"0050="0"0"1D4AB% P
+    \Umathcode"0051="0"0"1D4AC% Q
+    \Umathcode"0052="0"0"0211B% R
+    \Umathcode"0053="0"0"1D4AE% S
+    \Umathcode"0054="0"0"1D4AF% T
+    \Umathcode"0055="0"0"1D4B0% U
+    \Umathcode"0056="0"0"1D4B1% V
+    \Umathcode"0057="0"0"1D4B2% W
+    \Umathcode"0058="0"0"1D4B3% X
+    \Umathcode"0059="0"0"1D4B4% Y
+    \Umathcode"005A="0"0"1D4B5% Z
+    \Umathcode"0061="0"0"1D4B6% a
+    \Umathcode"0062="0"0"1D4B7% b
+    \Umathcode"0063="0"0"1D4B8% c
+    \Umathcode"0064="0"0"1D4B9% d
+    \Umathcode"0065="0"0"0212F% e
+    \Umathcode"0066="0"0"1D4BB% f
+    \Umathcode"0067="0"0"0210A% g
+    \Umathcode"0068="0"0"1D4BD% h
+    \Umathcode"0069="0"0"1D4BE% i
+    \Umathcode"006A="0"0"1D4BF% j
+    \Umathcode"006B="0"0"1D4C0% k
+    \Umathcode"006C="0"0"1D4C1% l
+    \Umathcode"006D="0"0"1D4C2% m
+    \Umathcode"006E="0"0"1D4C3% n
+    \Umathcode"006F="0"0"02134% o
+    \Umathcode"0070="0"0"1D4C5% p
+    \Umathcode"0071="0"0"1D4C6% q
+    \Umathcode"0072="0"0"1D4C7% r
+    \Umathcode"0073="0"0"1D4C8% s
+    \Umathcode"0074="0"0"1D4C9% t
+    \Umathcode"0075="0"0"1D4CA% u
+    \Umathcode"0076="0"0"1D4CB% v
+    \Umathcode"0077="0"0"1D4CC% w
+    \Umathcode"0078="0"0"1D4CD% x
+    \Umathcode"0079="0"0"1D4CE% y
+    \Umathcode"007A="0"0"1D4CF% z
+}
+
+\Udelcode  "00021 = "0 "00021
+\Udelcode  "00028 = "0 "00028
+\Udelcode  "00028 = "0 "00028
+\Udelcode  "00029 = "0 "00029
+\Udelcode  "00029 = "0 "00029
+\Udelcode  "0002F = "0 "0002F
+\Udelcode  "0002F = "0 "0002F
+\Udelcode  "0002F = "0 "02044
+\Udelcode  "0003F = "0 "0003F
+\Udelcode  "0005B = "0 "0005B
+\Udelcode  "0005B = "0 "0005B
+\Udelcode  "0005D = "0 "0005D
+\Udelcode  "0005D = "0 "0005D
+\Udelcode  "0007B = "0 "0007B
+\Udelcode  "0007B = "0 "0007B
+\Udelcode  "0007C = "0 "0007C
+\Udelcode  "0007C = "0 "0007C
+\Udelcode  "0007C = "0 "0007C
+\Udelcode  "0007C = "0 "0007C
+\Udelcode  "0007C = "0 "0007C
+\Udelcode  "0007D = "0 "0007D
+\Udelcode  "0007D = "0 "0007D
+\Udelcode  "02016 = "0 "02016
+\Udelcode  "02016 = "0 "02016
+\Udelcode  "02016 = "0 "02016
+\Udelcode  "02016 = "0 "02016
+\Udelcode  "02016 = "0 "02016
+\Udelcode  "02044 = "0 "02044
+\Udelcode  "02044 = "0 "02044
+\Udelcode  "02308 = "0 "02308
+\Udelcode  "02308 = "0 "02308
+\Udelcode  "02308 = "0 "02308
+\Udelcode  "02308 = "0 "02308
+\Udelcode  "02308 = "0 "02308
+\Udelcode  "02309 = "0 "02309
+\Udelcode  "02309 = "0 "02309
+\Udelcode  "02309 = "0 "02309
+\Udelcode  "02309 = "0 "02309
+\Udelcode  "02309 = "0 "02309
+\Udelcode  "0230A = "0 "0230A
+\Udelcode  "0230A = "0 "0230A
+\Udelcode  "0230B = "0 "0230B
+\Udelcode  "0230B = "0 "0230B
+\Udelcode  "0231C = "0 "0231C
+\Udelcode  "0231C = "0 "0231C
+\Udelcode  "0231D = "0 "0231D
+\Udelcode  "0231D = "0 "0231D
+\Udelcode  "0231E = "0 "0231E
+\Udelcode  "0231E = "0 "0231E
+\Udelcode  "0231F = "0 "0231F
+\Udelcode  "0231F = "0 "0231F
+\Udelcode  "023B0 = "0 "023B0
+\Udelcode  "023B0 = "0 "023B0
+\Udelcode  "023B1 = "0 "023B1
+\Udelcode  "023B1 = "0 "023B1
+\Udelcode  "027E6 = "0 "027E6
+\Udelcode  "027E6 = "0 "027E6
+\Udelcode  "027E7 = "0 "027E7
+\Udelcode  "027E7 = "0 "027E7
+\Udelcode  "027E8 = "0 "027E8
+\Udelcode  "027E8 = "0 "027E8
+\Udelcode  "027E9 = "0 "027E9
+\Udelcode  "027E9 = "0 "027E9
+\Udelcode  "027EA = "0 "027EA
+\Udelcode  "027EA = "0 "027EA
+\Udelcode  "027EB = "0 "027EB
+\Udelcode  "027EB = "0 "027EB
+\Udelcode  "027EE = "0 "027EE
+\Udelcode  "027EE = "0 "027EE
+\Udelcode  "027EF = "0 "027EF
+\Udelcode  "027EF = "0 "027EF
+
+\Umathcode "00021 = "5 "0 "00021
+\Umathcode "00022 = "0 "0 "00022
+\Umathcode "00027 = "0 "0 "00027
+\Umathcode "00028 = "4 "0 "00028
+\Umathcode "00029 = "5 "0 "00029
+\Umathcode "0002A = "2 "0 "02217
+\Umathcode "0002B = "2 "0 "0002B
+\Umathcode "0002C = "6 "0 "0002C
+\Umathcode "0002D = "2 "0 "02212
+\Umathcode "0002E = "6 "0 "0002E
+\Umathcode "0002F = "4 "0 "02044
+\Umathcode "0003A = "3 "0 "0003A
+\Umathcode "0003B = "6 "0 "0003B
+\Umathcode "0003C = "3 "0 "0003C
+\Umathcode "0003D = "3 "0 "0003D
+\Umathcode "0003E = "3 "0 "0003E
+\Umathcode "0003F = "5 "0 "0003F
+\Umathcode "0005B = "4 "0 "0005B
+\Umathcode "0005C = "0 "0 "0005C
+\Umathcode "0005D = "5 "0 "0005D
+\Umathcode "0007B = "4 "0 "0007B
+\Umathcode "0007C = "0 "0 "0007C
+\Umathcode "0007D = "5 "0 "0007D
+\Umathcode "000A5 = "0 "0 "000A5
+\Umathcode "000A7 = "0 "0 "000A7
+\Umathcode "000AC = "0 "0 "000AC
+\Umathcode "000B1 = "2 "0 "000B1
+\Umathcode "000B6 = "0 "0 "000B6
+\Umathcode "000B7 = "2 "0 "000B7
+\Umathcode "000D7 = "2 "0 "000D7
+\Umathcode "000F0 = "0 "0 "000F0
+\Umathcode "000F7 = "2 "0 "000F7
+\Umathcode "00338 = "3 "0 "00338
+\Umathcode "003F0 = "0 "0 "003F0
+\Umathcode "02016 = "0 "0 "02016
+\Umathcode "02020 = "2 "0 "02020
+\Umathcode "02021 = "2 "0 "02021
+\Umathcode "02022 = "2 "0 "02022
+\Umathcode "02026 = "0 "0 "02026
+\Umathcode "02032 = "0 "0 "02032
+\Umathcode "02033 = "0 "0 "02033
+\Umathcode "02034 = "0 "0 "02034
+\Umathcode "02044 = "0 "0 "02044
+\Umathcode "0207A = "2 "0 "0207A
+\Umathcode "0207B = "2 "0 "0207B
+\Umathcode "020DD = "0 "0 "020DD
+\Umathcode "020DE = "0 "0 "020DE
+\Umathcode "020DF = "0 "0 "020DF
+\Umathcode "02111 = "0 "0 "02111
+\Umathcode "02113 = "0 "0 "02113
+\Umathcode "02118 = "0 "0 "02118
+\Umathcode "0211C = "0 "0 "0211C
+\Umathcode "02132 = "0 "0 "02132
+\Umathcode "02135 = "0 "0 "02135
+\Umathcode "02136 = "0 "0 "02136
+\Umathcode "02137 = "0 "0 "02137
+\Umathcode "02138 = "0 "0 "02138
+\Umathcode "02141 = "0 "0 "02141
+\Umathcode "02142 = "0 "0 "02142
+\Umathcode "02143 = "0 "0 "02143
+\Umathcode "02144 = "0 "0 "02144
+\Umathcode "02145 = "0 "0 "02145
+\Umathcode "02146 = "0 "0 "02146
+\Umathcode "02147 = "0 "0 "02147
+\Umathcode "02148 = "0 "0 "02148
+\Umathcode "02149 = "0 "0 "02149
+\Umathcode "0214A = "0 "0 "0214A
+\Umathcode "0214B = "2 "0 "0214B
+\Umathcode "02190 = "3 "0 "02190
+\Umathcode "02191 = "3 "0 "02191
+\Umathcode "02192 = "3 "0 "02192
+\Umathcode "02193 = "3 "0 "02193
+\Umathcode "02194 = "3 "0 "02194
+\Umathcode "02195 = "3 "0 "02195
+\Umathcode "02196 = "3 "0 "02196
+\Umathcode "02197 = "3 "0 "02197
+\Umathcode "02198 = "3 "0 "02198
+\Umathcode "02199 = "3 "0 "02199
+\Umathcode "0219A = "3 "0 "0219A
+\Umathcode "0219B = "3 "0 "0219B
+\Umathcode "0219C = "3 "0 "0219C
+\Umathcode "0219D = "3 "0 "0219D
+\Umathcode "0219E = "3 "0 "0219E
+\Umathcode "0219F = "3 "0 "0219F
+\Umathcode "021A0 = "3 "0 "021A0
+\Umathcode "021A1 = "3 "0 "021A1
+\Umathcode "021A2 = "3 "0 "021A2
+\Umathcode "021A3 = "3 "0 "021A3
+\Umathcode "021A4 = "3 "0 "021A4
+\Umathcode "021A5 = "3 "0 "021A5
+\Umathcode "021A6 = "3 "0 "021A6
+\Umathcode "021A7 = "3 "0 "021A7
+\Umathcode "021A8 = "0 "0 "021A8
+\Umathcode "021A9 = "3 "0 "021A9
+\Umathcode "021AA = "3 "0 "021AA
+\Umathcode "021AB = "3 "0 "021AB
+\Umathcode "021AC = "3 "0 "021AC
+\Umathcode "021AD = "3 "0 "021AD
+\Umathcode "021AE = "3 "0 "021AE
+\Umathcode "021AF = "3 "0 "021AF
+\Umathcode "021B0 = "3 "0 "021B0
+\Umathcode "021B1 = "3 "0 "021B1
+\Umathcode "021B2 = "3 "0 "021B2
+\Umathcode "021B3 = "3 "0 "021B3
+\Umathcode "021B4 = "0 "0 "021B4
+\Umathcode "021B5 = "0 "0 "021B5
+\Umathcode "021B6 = "3 "0 "021B6
+\Umathcode "021B7 = "3 "0 "021B7
+\Umathcode "021B8 = "3 "0 "021B8
+\Umathcode "021B9 = "3 "0 "021B9
+\Umathcode "021BA = "3 "0 "021BA
+\Umathcode "021BB = "3 "0 "021BB
+\Umathcode "021BC = "3 "0 "021BC
+\Umathcode "021BD = "3 "0 "021BD
+\Umathcode "021BE = "3 "0 "021BE
+\Umathcode "021BF = "3 "0 "021BF
+\Umathcode "021C0 = "3 "0 "021C0
+\Umathcode "021C1 = "3 "0 "021C1
+\Umathcode "021C2 = "3 "0 "021C2
+\Umathcode "021C3 = "3 "0 "021C3
+\Umathcode "021C4 = "3 "0 "021C4
+\Umathcode "021C5 = "3 "0 "021C5
+\Umathcode "021C6 = "3 "0 "021C6
+\Umathcode "021C7 = "3 "0 "021C7
+\Umathcode "021C8 = "3 "0 "021C8
+\Umathcode "021C9 = "3 "0 "021C9
+\Umathcode "021CA = "3 "0 "021CA
+\Umathcode "021CB = "3 "0 "021CB
+\Umathcode "021CC = "3 "0 "021CC
+\Umathcode "021CD = "3 "0 "021CD
+\Umathcode "021CE = "3 "0 "021CE
+\Umathcode "021CF = "3 "0 "021CF
+\Umathcode "021D0 = "3 "0 "021D0
+\Umathcode "021D1 = "3 "0 "021D1
+\Umathcode "021D2 = "3 "0 "021D2
+\Umathcode "021D3 = "3 "0 "021D3
+\Umathcode "021D4 = "3 "0 "021D4
+\Umathcode "021D5 = "3 "0 "021D5
+\Umathcode "021D6 = "3 "0 "021D6
+\Umathcode "021D7 = "3 "0 "021D7
+\Umathcode "021D8 = "3 "0 "021D8
+\Umathcode "021D9 = "3 "0 "021D9
+\Umathcode "021DA = "3 "0 "021DA
+\Umathcode "021DB = "3 "0 "021DB
+\Umathcode "021DC = "3 "0 "021DC
+\Umathcode "021DD = "3 "0 "021DD
+\Umathcode "021DE = "3 "0 "021DE
+\Umathcode "021DF = "3 "0 "021DF
+\Umathcode "021E0 = "3 "0 "021E0
+\Umathcode "021E1 = "3 "0 "021E1
+\Umathcode "021E2 = "3 "0 "021E2
+\Umathcode "021E3 = "3 "0 "021E3
+\Umathcode "021E4 = "3 "0 "021E4
+\Umathcode "021E5 = "3 "0 "021E5
+\Umathcode "021E6 = "0 "0 "021E6
+\Umathcode "021E7 = "0 "0 "021E7
+\Umathcode "021E8 = "0 "0 "021E8
+\Umathcode "021E9 = "0 "0 "021E9
+\Umathcode "021EB = "0 "0 "021EB
+\Umathcode "021F4 = "3 "0 "021F4
+\Umathcode "021F5 = "3 "0 "021F5
+\Umathcode "021F6 = "3 "0 "021F6
+\Umathcode "021F7 = "3 "0 "021F7
+\Umathcode "021F8 = "3 "0 "021F8
+\Umathcode "021F9 = "3 "0 "021F9
+\Umathcode "021FA = "3 "0 "021FA
+\Umathcode "021FB = "3 "0 "021FB
+\Umathcode "021FC = "3 "0 "021FC
+\Umathcode "021FD = "3 "0 "021FD
+\Umathcode "021FE = "3 "0 "021FE
+\Umathcode "021FF = "3 "0 "021FF
+\Umathcode "02200 = "0 "0 "02200
+\Umathcode "02201 = "0 "0 "02201
+\Umathcode "02202 = "0 "0 "02202
+\Umathcode "02203 = "0 "0 "02203
+\Umathcode "02204 = "0 "0 "02204
+\Umathcode "02205 = "0 "0 "02205
+\Umathcode "02208 = "3 "0 "02208
+\Umathcode "02209 = "3 "0 "02209
+\Umathcode "0220B = "3 "0 "0220B
+\Umathcode "0220C = "3 "0 "0220C
+\Umathcode "0220F = "1 "0 "0220F
+\Umathcode "02210 = "1 "0 "02210
+\Umathcode "02211 = "1 "0 "02211
+\Umathcode "02212 = "2 "0 "02212
+\Umathcode "02213 = "2 "0 "02213
+\Umathcode "02214 = "2 "0 "02214
+\Umathcode "02216 = "2 "0 "02216
+\Umathcode "02217 = "2 "0 "02217
+\Umathcode "02218 = "2 "0 "02218
+\Umathcode "02219 = "2 "0 "02219
+\Umathcode "0221D = "3 "0 "0221D
+\Umathcode "0221E = "0 "0 "0221E
+\Umathcode "0221F = "0 "0 "0221F
+\Umathcode "02220 = "0 "0 "02220
+\Umathcode "02221 = "0 "0 "02221
+\Umathcode "02222 = "0 "0 "02222
+\Umathcode "02223 = "2 "0 "02223
+\Umathcode "02224 = "2 "0 "02224
+\Umathcode "02225 = "3 "0 "02225
+\Umathcode "02226 = "3 "0 "02226
+\Umathcode "02227 = "2 "0 "02227
+\Umathcode "02228 = "2 "0 "02228
+\Umathcode "02229 = "2 "0 "02229
+\Umathcode "0222A = "2 "0 "0222A
+\Umathcode "0222B = "1 "0 "0222B
+\Umathcode "0222C = "1 "0 "0222C
+\Umathcode "0222D = "1 "0 "0222D
+\Umathcode "0222E = "1 "0 "0222E
+\Umathcode "0222F = "1 "0 "0222F
+\Umathcode "02230 = "1 "0 "02230
+\Umathcode "02231 = "1 "0 "02231
+\Umathcode "02232 = "1 "0 "02232
+\Umathcode "02233 = "1 "0 "02233
+\Umathcode "02234 = "3 "0 "02234
+\Umathcode "02235 = "3 "0 "02235
+\Umathcode "02236 = "6 "0 "02236
+\Umathcode "02237 = "3 "0 "02237
+\Umathcode "02238 = "2 "0 "02238
+\Umathcode "02239 = "3 "0 "02239
+\Umathcode "0223C = "3 "0 "0223C
+\Umathcode "0223D = "3 "0 "0223D
+\Umathcode "02240 = "2 "0 "02240
+\Umathcode "02241 = "3 "0 "02241
+\Umathcode "02242 = "3 "0 "02242
+\Umathcode "02243 = "3 "0 "02243
+\Umathcode "02244 = "3 "0 "02244
+\Umathcode "02245 = "3 "0 "02245
+\Umathcode "02246 = "3 "0 "02246
+\Umathcode "02247 = "3 "0 "02247
+\Umathcode "02248 = "3 "0 "02248
+\Umathcode "02249 = "3 "0 "02249
+\Umathcode "0224A = "3 "0 "0224A
+\Umathcode "0224C = "3 "0 "0224C
+\Umathcode "0224D = "3 "0 "0224D
+\Umathcode "0224E = "3 "0 "0224E
+\Umathcode "02250 = "3 "0 "02250
+\Umathcode "02251 = "3 "0 "02251
+\Umathcode "02252 = "3 "0 "02252
+\Umathcode "02253 = "3 "0 "02253
+\Umathcode "02254 = "3 "0 "02254
+\Umathcode "02255 = "3 "0 "02255
+\Umathcode "02256 = "3 "0 "02256
+\Umathcode "02257 = "3 "0 "02257
+\Umathcode "02259 = "3 "0 "02259
+\Umathcode "0225A = "3 "0 "0225A
+\Umathcode "0225B = "3 "0 "0225B
+\Umathcode "0225C = "3 "0 "0225C
+\Umathcode "0225D = "3 "0 "0225D
+\Umathcode "0225E = "3 "0 "0225E
+\Umathcode "0225F = "3 "0 "0225F
+\Umathcode "02260 = "3 "0 "02260
+\Umathcode "02261 = "3 "0 "02261
+\Umathcode "02262 = "3 "0 "02262
+\Umathcode "02263 = "3 "0 "02263
+\Umathcode "02264 = "3 "0 "02264
+\Umathcode "02265 = "3 "0 "02265
+\Umathcode "02266 = "3 "0 "02266
+\Umathcode "02267 = "3 "0 "02267
+\Umathcode "02268 = "3 "0 "02268
+\Umathcode "02269 = "3 "0 "02269
+\Umathcode "0226A = "3 "0 "0226A
+\Umathcode "0226B = "3 "0 "0226B
+\Umathcode "0226C = "3 "0 "0226C
+\Umathcode "0226D = "3 "0 "0226D
+\Umathcode "0226E = "3 "0 "0226E
+\Umathcode "0226F = "3 "0 "0226F
+\Umathcode "02270 = "3 "0 "02270
+\Umathcode "02271 = "3 "0 "02271
+\Umathcode "02272 = "3 "0 "02272
+\Umathcode "02273 = "3 "0 "02273
+\Umathcode "02274 = "3 "0 "02274
+\Umathcode "02275 = "3 "0 "02275
+\Umathcode "02276 = "3 "0 "02276
+\Umathcode "02277 = "3 "0 "02277
+\Umathcode "02278 = "3 "0 "02278
+\Umathcode "02279 = "3 "0 "02279
+\Umathcode "0227A = "3 "0 "0227A
+\Umathcode "0227B = "3 "0 "0227B
+\Umathcode "0227C = "3 "0 "0227C
+\Umathcode "0227D = "3 "0 "0227D
+\Umathcode "0227E = "3 "0 "0227E
+\Umathcode "0227F = "3 "0 "0227F
+\Umathcode "02280 = "3 "0 "02280
+\Umathcode "02281 = "3 "0 "02281
+\Umathcode "02282 = "3 "0 "02282
+\Umathcode "02283 = "3 "0 "02283
+\Umathcode "02284 = "3 "0 "02284
+\Umathcode "02285 = "3 "0 "02285
+\Umathcode "02286 = "3 "0 "02286
+\Umathcode "02287 = "3 "0 "02287
+\Umathcode "02288 = "3 "0 "02288
+\Umathcode "02289 = "3 "0 "02289
+\Umathcode "0228A = "3 "0 "0228A
+\Umathcode "0228B = "3 "0 "0228B
+\Umathcode "0228E = "2 "0 "0228E
+\Umathcode "0228F = "3 "0 "0228F
+\Umathcode "02290 = "3 "0 "02290
+\Umathcode "02291 = "2 "0 "02291
+\Umathcode "02292 = "2 "0 "02292
+\Umathcode "02293 = "2 "0 "02293
+\Umathcode "02294 = "2 "0 "02294
+\Umathcode "02295 = "2 "0 "02295
+\Umathcode "02296 = "2 "0 "02296
+\Umathcode "02297 = "2 "0 "02297
+\Umathcode "02298 = "2 "0 "02298
+\Umathcode "02299 = "2 "0 "02299
+\Umathcode "0229A = "2 "0 "0229A
+\Umathcode "0229B = "2 "0 "0229B
+\Umathcode "0229C = "2 "0 "0229C
+\Umathcode "0229D = "2 "0 "0229D
+\Umathcode "0229E = "2 "0 "0229E
+\Umathcode "0229F = "2 "0 "0229F
+\Umathcode "022A0 = "2 "0 "022A0
+\Umathcode "022A1 = "2 "0 "022A1
+\Umathcode "022A2 = "3 "0 "022A2
+\Umathcode "022A3 = "3 "0 "022A3
+\Umathcode "022A4 = "0 "0 "022A4
+\Umathcode "022A5 = "0 "0 "022A5
+\Umathcode "022A7 = "3 "0 "022A7
+\Umathcode "022A8 = "3 "0 "022A8
+\Umathcode "022A9 = "3 "0 "022A9
+\Umathcode "022AA = "3 "0 "022AA
+\Umathcode "022AB = "3 "0 "022AB
+\Umathcode "022AC = "3 "0 "022AC
+\Umathcode "022AD = "3 "0 "022AD
+\Umathcode "022AE = "3 "0 "022AE
+\Umathcode "022AF = "3 "0 "022AF
+\Umathcode "022B2 = "2 "0 "022B2
+\Umathcode "022B3 = "2 "0 "022B3
+\Umathcode "022B8 = "3 "0 "022B8
+\Umathcode "022BA = "2 "0 "022BA
+\Umathcode "022BB = "2 "0 "022BB
+\Umathcode "022BC = "2 "0 "022BC
+\Umathcode "022C0 = "1 "0 "022C0
+\Umathcode "022C1 = "1 "0 "022C1
+\Umathcode "022C2 = "1 "0 "022C2
+\Umathcode "022C3 = "1 "0 "022C3
+\Umathcode "022C4 = "2 "0 "022C4
+\Umathcode "022C5 = "2 "0 "022C5
+\Umathcode "022C6 = "2 "0 "022C6
+\Umathcode "022C7 = "2 "0 "022C7
+\Umathcode "022C8 = "3 "0 "022C8
+\Umathcode "022C9 = "2 "0 "022C9
+\Umathcode "022CA = "2 "0 "022CA
+\Umathcode "022CB = "2 "0 "022CB
+\Umathcode "022CC = "2 "0 "022CC
+\Umathcode "022CE = "2 "0 "022CE
+\Umathcode "022CF = "2 "0 "022CF
+\Umathcode "022D0 = "3 "0 "022D0
+\Umathcode "022D1 = "3 "0 "022D1
+\Umathcode "022D2 = "2 "0 "022D2
+\Umathcode "022D3 = "2 "0 "022D3
+\Umathcode "022D4 = "3 "0 "022D4
+\Umathcode "022D6 = "2 "0 "022D6
+\Umathcode "022D7 = "2 "0 "022D7
+\Umathcode "022D8 = "3 "0 "022D8
+\Umathcode "022D9 = "3 "0 "022D9
+\Umathcode "022DA = "3 "0 "022DA
+\Umathcode "022DB = "3 "0 "022DB
+\Umathcode "022DC = "3 "0 "022DC
+\Umathcode "022DD = "3 "0 "022DD
+\Umathcode "022DE = "3 "0 "022DE
+\Umathcode "022DF = "3 "0 "022DF
+\Umathcode "022E0 = "3 "0 "022E0
+\Umathcode "022E1 = "3 "0 "022E1
+\Umathcode "022E2 = "3 "0 "022E2
+\Umathcode "022E3 = "3 "0 "022E3
+\Umathcode "022E4 = "3 "0 "022E4
+\Umathcode "022E5 = "3 "0 "022E5
+\Umathcode "022E6 = "3 "0 "022E6
+\Umathcode "022E7 = "3 "0 "022E7
+\Umathcode "022E8 = "3 "0 "022E8
+\Umathcode "022E9 = "3 "0 "022E9
+\Umathcode "022EA = "3 "0 "022EA
+\Umathcode "022EB = "3 "0 "022EB
+\Umathcode "022EC = "3 "0 "022EC
+\Umathcode "022ED = "3 "0 "022ED
+\Umathcode "022EE = "0 "0 "022EE
+\Umathcode "022EF = "0 "0 "022EF
+\Umathcode "022F0 = "0 "0 "022F0
+\Umathcode "022F1 = "0 "0 "022F1
+\Umathcode "02300 = "0 "0 "02300
+\Umathcode "02308 = "4 "0 "02308
+\Umathcode "02309 = "5 "0 "02309
+\Umathcode "0230A = "4 "0 "0230A
+\Umathcode "0230B = "5 "0 "0230B
+\Umathcode "0231C = "4 "0 "0231C
+\Umathcode "0231D = "5 "0 "0231D
+\Umathcode "0231E = "4 "0 "0231E
+\Umathcode "0231F = "5 "0 "0231F
+\Umathcode "02322 = "3 "0 "02322
+\Umathcode "02323 = "3 "0 "02323
+\Umathcode "023B0 = "4 "0 "023B0
+\Umathcode "023B1 = "5 "0 "023B1
+\Umathcode "024C7 = "0 "0 "024C7
+\Umathcode "024C8 = "0 "0 "024C8
+\Umathcode "025A0 = "0 "0 "025A0
+\Umathcode "025A1 = "0 "0 "025A1
+\Umathcode "025A2 = "0 "0 "025A2
+\Umathcode "025B2 = "2 "0 "025B2
+\Umathcode "025B3 = "0 "0 "025B3
+\Umathcode "025B6 = "2 "0 "025B6
+\Umathcode "025B7 = "2 "0 "025B7
+\Umathcode "025BC = "2 "0 "025BC
+\Umathcode "025BD = "2 "0 "025BD
+\Umathcode "025C0 = "2 "0 "025C0
+\Umathcode "025C1 = "2 "0 "025C1
+\Umathcode "025CA = "0 "0 "025CA
+\Umathcode "025EF = "2 "0 "025EF
+\Umathcode "02605 = "0 "0 "02605
+\Umathcode "02660 = "0 "0 "02660
+\Umathcode "02661 = "0 "0 "02661
+\Umathcode "02662 = "0 "0 "02662
+\Umathcode "02663 = "0 "0 "02663
+\Umathcode "02666 = "0 "0 "02666
+\Umathcode "0266D = "0 "0 "0266D
+\Umathcode "0266E = "0 "0 "0266E
+\Umathcode "0266F = "0 "0 "0266F
+\Umathcode "02713 = "0 "0 "02713
+\Umathcode "02720 = "0 "0 "02720
+\Umathcode "027E6 = "4 "0 "027E6
+\Umathcode "027E7 = "5 "0 "027E7
+\Umathcode "027E8 = "4 "0 "027E8
+\Umathcode "027E9 = "5 "0 "027E9
+\Umathcode "027EA = "4 "0 "027EA
+\Umathcode "027EB = "5 "0 "027EB
+\Umathcode "027EE = "4 "0 "027EE
+\Umathcode "027EF = "5 "0 "027EF
+\Umathcode "027F5 = "3 "0 "027F5
+\Umathcode "027F6 = "3 "0 "027F6
+\Umathcode "027F7 = "3 "0 "027F7
+\Umathcode "027F8 = "3 "0 "027F8
+\Umathcode "027F9 = "3 "0 "027F9
+\Umathcode "027FA = "3 "0 "027FA
+\Umathcode "027FB = "3 "0 "027FB
+\Umathcode "027FC = "3 "0 "027FC
+\Umathcode "027FD = "3 "0 "027FD
+\Umathcode "027FE = "3 "0 "027FE
+\Umathcode "027FF = "3 "0 "027FF
+\Umathcode "02906 = "3 "0 "02906
+\Umathcode "02907 = "3 "0 "02907
+\Umathcode "0290A = "3 "0 "0290A
+\Umathcode "0290B = "3 "0 "0290B
+\Umathcode "0290C = "3 "0 "0290C
+\Umathcode "0290D = "3 "0 "0290D
+\Umathcode "02911 = "3 "0 "02911
+\Umathcode "02916 = "3 "0 "02916
+\Umathcode "02917 = "3 "0 "02917
+\Umathcode "02921 = "3 "0 "02921
+\Umathcode "02922 = "3 "0 "02922
+\Umathcode "02923 = "3 "0 "02923
+\Umathcode "02924 = "3 "0 "02924
+\Umathcode "02925 = "3 "0 "02925
+\Umathcode "02926 = "3 "0 "02926
+\Umathcode "02A00 = "1 "0 "02A00
+\Umathcode "02A01 = "1 "0 "02A01
+\Umathcode "02A02 = "1 "0 "02A02
+\Umathcode "02A03 = "1 "0 "02A03
+\Umathcode "02A04 = "1 "0 "02A04
+\Umathcode "02A05 = "1 "0 "02A05
+\Umathcode "02A06 = "1 "0 "02A06
+\Umathcode "02A09 = "1 "0 "02A09
+\Umathcode "02A3F = "2 "0 "02A3F
+\Umathcode "02A7D = "3 "0 "02A7D
+\Umathcode "02A7E = "3 "0 "02A7E
+\Umathcode "02A85 = "3 "0 "02A85
+\Umathcode "02A86 = "3 "0 "02A86
+\Umathcode "02A87 = "3 "0 "02A87
+\Umathcode "02A88 = "3 "0 "02A88
+\Umathcode "02A89 = "3 "0 "02A89
+\Umathcode "02A8A = "3 "0 "02A8A
+\Umathcode "02A8B = "3 "0 "02A8B
+\Umathcode "02A8C = "3 "0 "02A8C
+\Umathcode "02A95 = "3 "0 "02A95
+\Umathcode "02A96 = "3 "0 "02A96
+\Umathcode "02AAF = "3 "0 "02AAF
+\Umathcode "02AB0 = "3 "0 "02AB0
+\Umathcode "02AB1 = "3 "0 "02AB1
+\Umathcode "02AB2 = "3 "0 "02AB2
+\Umathcode "02AB3 = "3 "0 "02AB3
+\Umathcode "02AB4 = "3 "0 "02AB4
+\Umathcode "02AB5 = "3 "0 "02AB5
+\Umathcode "02AB6 = "3 "0 "02AB6
+\Umathcode "02AB7 = "3 "0 "02AB7
+\Umathcode "02AB8 = "3 "0 "02AB8
+\Umathcode "02AB9 = "3 "0 "02AB9
+\Umathcode "02ABA = "3 "0 "02ABA
+\Umathcode "02AC5 = "3 "0 "02AC5
+\Umathcode "02AC6 = "3 "0 "02AC6
+\Umathcode "02ACB = "3 "0 "02ACB
+\Umathcode "02ACC = "3 "0 "02ACC
+\Umathcode "12035 = "0 "0 "12035
+\Umathcode "1D6A4 = "0 "0 "1D6A4
+\Umathcode "1D6A5 = "0 "0 "1D6A5
+\Umathcode "1D6FB = "0 "0 "1D6FB
+\Umathcode "1D717 = "0 "0 "1D717
+\Umathcode "1D718 = "0 "0 "1D718
+
+% gaps .. done in lua (as example)
+
+% \Umathcode "1D455 = "0 "0 "0210E
+% \Umathcode "1D49D = "0 "0 "0212C
+% \Umathcode "1D4A0 = "0 "0 "02130
+% \Umathcode "1D4A1 = "0 "0 "02131
+% \Umathcode "1D4A3 = "0 "0 "0210B
+% \Umathcode "1D4A4 = "0 "0 "02110
+% \Umathcode "1D4A7 = "0 "0 "02112
+% \Umathcode "1D4A8 = "0 "0 "02133
+% \Umathcode "1D4AD = "0 "0 "0211B
+% \Umathcode "1D4BA = "0 "0 "0212F
+% \Umathcode "1D4BC = "0 "0 "0210A
+% \Umathcode "1D4C4 = "0 "0 "02134
+% \Umathcode "1D506 = "0 "0 "0212D
+% \Umathcode "1D50B = "0 "0 "0210C
+% \Umathcode "1D50C = "0 "0 "02111
+% \Umathcode "1D515 = "0 "0 "0211C
+% \Umathcode "1D51D = "0 "0 "02128
+% \Umathcode "1D53A = "0 "0 "02102
+% \Umathcode "1D53F = "0 "0 "0210D
+% \Umathcode "1D545 = "0 "0 "02115
+% \Umathcode "1D547 = "0 "0 "02119
+% \Umathcode "1D548 = "0 "0 "0211A
+% \Umathcode "1D549 = "0 "0 "0211D
+% \Umathcode "1D551 = "0 "0 "02124
+
+% initialization
+
+\the\everymathit
+
+% a couple of definitions (we could also use \mathchardef):
+
+\protected\def\acute                     {\Umathaccent"0"0"0000B4 }
+\protected\def\acwopencirclearrow        {\Umathchar  "3"0"0021BA }
+\protected\def\aleph                     {\Umathchar  "0"0"002135 }
+\protected\def\Alpha                     {\Umathchar  "0"0"000391 }
+\protected\def\alpha                     {\Umathchar  "0"0"0003B1 }
+\protected\def\amalg                     {\Umathchar  "2"0"002A3F }
+\protected\def\angle                     {\Umathchar  "0"0"002220 }
+\protected\def\Angstrom                  {\Umathchar  "0"0"00212B }
+\protected\def\approx                    {\Umathchar  "3"0"002248 }
+\protected\def\approxEq                  {\Umathchar  "3"0"002245 }
+\protected\def\approxeq                  {\Umathchar  "3"0"00224A }
+\protected\def\approxnEq                 {\Umathchar  "3"0"002247 }
+\protected\def\arrowvert                 {\Umathchar  "0"0"00007C }
+\protected\def\Arrowvert                 {\Umathchar  "0"0"002016 }
+\protected\def\ast                       {\Umathchar  "2"0"002217 }
+\protected\def\ast                       {\Umathchar  "2"0"002217 }
+\protected\def\asymp                     {\Umathchar  "3"0"00224D }
+\protected\def\backepsilon               {\Umathchar  "0"0"0003F6 }
+\protected\def\backprime                 {\Umathchar  "0"0"012035 }
+\protected\def\backsim                   {\Umathchar  "3"0"00223D }
+\protected\def\backslash                 {\Umathchar  "0"0"00005C }
+\protected\def\bar                       {\Umathaccent"0"0"0000AF }
+\protected\def\barleftarrow              {\Umathchar  "3"0"0021E4 }
+\protected\def\barleftarrowrightarrowbar {\Umathchar  "3"0"0021B9 }
+\protected\def\barovernorthwestarrow     {\Umathchar  "3"0"0021B8 }
+\protected\def\barwedge                  {\Umathchar  "2"0"0022BC }
+\protected\def\because                   {\Umathchar  "3"0"002235 }
+\protected\def\Beta                      {\Umathchar  "0"0"000392 }
+\protected\def\beta                      {\Umathchar  "0"0"0003B2 }
+\protected\def\beth                      {\Umathchar  "0"0"002136 }
+\protected\def\between                   {\Umathchar  "3"0"00226C }
+\protected\def\bigcap                    {\Umathchar  "1"0"0022C2 }
+\protected\def\bigcirc                   {\Umathchar  "2"0"0025EF }
+\protected\def\bigcircle                 {\Umathchar  "2"0"0020DD }
+\protected\def\bigcircle                 {\Umathchar  "2"0"0020DD }
+\protected\def\bigcup                    {\Umathchar  "1"0"0022C3 }
+\protected\def\bigdiamond                {\Umathchar  "0"0"0020DF }
+\protected\def\bigodot                   {\Umathchar  "1"0"002A00 }
+\protected\def\bigoplus                  {\Umathchar  "1"0"002A01 }
+\protected\def\bigotimes                 {\Umathchar  "1"0"002A02 }
+\protected\def\bigsqcap                  {\Umathchar  "1"0"002A05 }
+\protected\def\bigsqcup                  {\Umathchar  "1"0"002A06 }
+\protected\def\bigsquare                 {\Umathchar  "0"0"0020DE }
+\protected\def\bigstar                   {\Umathchar  "0"0"002605 }
+\protected\def\bigtimes                  {\Umathchar  "1"0"002A09 }
+\protected\def\bigtriangledown           {\Umathchar  "2"0"0025BD }
+\protected\def\bigtriangleup             {\Umathchar  "2"0"0025B3 }
+\protected\def\bigudot                   {\Umathchar  "1"0"002A03 }
+\protected\def\biguplus                  {\Umathchar  "1"0"002A04 }
+\protected\def\bigvee                    {\Umathchar  "1"0"0022C1 }
+\protected\def\bigwedge                  {\Umathchar  "1"0"0022C0 }
+\protected\def\blacklozenge              {\Umathchar  "0"0"002666 }
+\protected\def\blacksquare               {\Umathchar  "0"0"0025A0 }
+\protected\def\blacktriangle             {\Umathchar  "2"0"0025B2 }
+\protected\def\blacktriangledown         {\Umathchar  "2"0"0025BC }
+\protected\def\blacktriangleleft         {\Umathchar  "2"0"0025C0 }
+\protected\def\blacktriangleright        {\Umathchar  "2"0"0025B6 }
+\protected\def\bot                       {\Umathchar  "0"0"0022A5 }
+\protected\def\bowtie                    {\Umathchar  "3"0"0022C8 }
+\protected\def\Box                       {\Umathchar  "0"0"0025A1 }
+\protected\def\boxdot                    {\Umathchar  "2"0"0022A1 }
+\protected\def\boxminus                  {\Umathchar  "2"0"00229F }
+\protected\def\boxplus                   {\Umathchar  "2"0"00229E }
+\protected\def\boxtimes                  {\Umathchar  "2"0"0022A0 }
+%protected\def\braceld                   {\Umathchar  "0"0"000000 }
+%protected\def\bracerd                   {\Umathchar  "0"0"000000 }
+%protected\def\bracelu                   {\Umathchar  "0"0"000000 }
+%protected\def\braceru                   {\Umathchar  "0"0"000000 }
+\protected\def\breve                     {\Umathaccent"0"0"0002D8 }
+\protected\def\bullet                    {\Umathchar  "2"0"002022 }
+\protected\def\bullet                    {\Umathchar  "2"0"002022 }
+\protected\def\Bumpeq                    {\Umathchar  "3"0"00224E }
+\protected\def\cap                       {\Umathchar  "2"0"002229 }
+\protected\def\Cap                       {\Umathchar  "2"0"0022D2 }
+\protected\def\carriagereturn            {\Umathchar  "0"0"0021B5 }
+\protected\def\cdot                      {\Umathchar  "2"0"0022C5 }
+\protected\def\cdotp                     {\Umathchar  "6"0"0022C5 }
+\protected\def\cdots                     {\Umathchar  "0"0"0022EF }
+\protected\def\centerdot                 {\Umathchar  "2"0"0000B7 }
+\protected\def\check                     {\Umathaccent"0"0"0002C7 }
+\protected\def\checkmark                 {\Umathchar  "0"0"002713 }
+\protected\def\Chi                       {\Umathchar  "0"0"0003A7 }
+\protected\def\chi                       {\Umathchar  "0"0"0003C7 }
+\protected\def\circ                      {\Umathchar  "2"0"002218 }
+\protected\def\circeq                    {\Umathchar  "3"0"002257 }
+\protected\def\circlearrowleft           {\Umathchar  "3"0"0021BB }
+\protected\def\circlearrowright          {\Umathchar  "3"0"0021BA }
+\protected\def\circledast                {\Umathchar  "2"0"00229B }
+\protected\def\circledcirc               {\Umathchar  "2"0"00229A }
+\protected\def\circleddash               {\Umathchar  "2"0"00229D }
+\protected\def\circledequals             {\Umathchar  "2"0"00229C }
+\protected\def\circledR                  {\Umathchar  "0"0"0024C7 }
+\protected\def\circledS                  {\Umathchar  "0"0"0024C8 }
+\protected\def\circleonrightarrow        {\Umathchar  "3"0"0021F4 }
+\protected\def\clubsuit                  {\Umathchar  "0"0"002663 }
+\protected\def\colon                     {\Umathchar  "6"0"002236 }
+\protected\def\colonequals               {\Umathchar  "3"0"002254 }
+\protected\def\complement                {\Umathchar  "0"0"002201 }
+\protected\def\complexes                 {\Umathchar  "0"0"002102 }
+\protected\def\cong                      {\Umathchar  "3"0"002245 }
+\protected\def\coprod                    {\Umathchar  "1"0"002210 }
+\protected\def\cup                       {\Umathchar  "2"0"00222A }
+\protected\def\Cup                       {\Umathchar  "2"0"0022D3 }
+\protected\def\curlyeqprec               {\Umathchar  "3"0"0022DE }
+\protected\def\curlyeqsucc               {\Umathchar  "3"0"0022DF }
+\protected\def\curlyvee                  {\Umathchar  "2"0"0022CE }
+\protected\def\curlywedge                {\Umathchar  "2"0"0022CF }
+\protected\def\curvearrowleft            {\Umathchar  "3"0"0021B6 }
+\protected\def\curvearrowright           {\Umathchar  "3"0"0021B7 }
+\protected\def\cwopencirclearrow         {\Umathchar  "3"0"0021BB }
+\protected\def\dag                       {\Umathchar  "0"0"002020 }
+\protected\def\dagger                    {\Umathchar  "2"0"002020 }
+\protected\def\daleth                    {\Umathchar  "0"0"002138 }
+\protected\def\dasharrow                 {\Umathchar  "3"0"0021E2 }
+\protected\def\dashedleftarrow           {\Umathchar  "3"0"00290C }
+\protected\def\dashedrightarrow          {\Umathchar  "3"0"00290D }
+\protected\def\dashv                     {\Umathchar  "3"0"0022A3 }
+\protected\def\ddag                      {\Umathchar  "0"0"002021 }
+\protected\def\ddagger                   {\Umathchar  "2"0"002021 }
+\protected\def\dddot                     {\Umathaccent"0"0"0020DB }
+\protected\def\ddot                      {\Umathaccent"0"0"0000A8 }
+\protected\def\ddots                     {\Umathchar  "0"0"0022F1 }
+\protected\def\Ddownarrow                {\Umathchar  "3"0"00290B }
+\protected\def\definedeq                 {\Umathchar  "3"0"00225D }
+\protected\def\Delta                     {\Umathchar  "0"0"000394 }
+\protected\def\delta                     {\Umathchar  "0"0"0003B4 }
+\protected\def\diamond                   {\Umathchar  "2"0"0022C4 }
+\protected\def\diamondsuit               {\Umathchar  "0"0"002662 }
+\protected\def\differentialD             {\Umathchar  "0"0"002145 }
+\protected\def\differentiald             {\Umathchar  "0"0"002146 }
+\protected\def\digamma                   {\Umathchar  "0"0"0003DC }
+\protected\def\div                       {\Umathchar  "2"0"0000F7 }
+\protected\def\divideontimes             {\Umathchar  "2"0"0022C7 }
+\protected\def\divides                   {\Umathchar  "2"0"002223 }
+\protected\def\dot                       {\Umathaccent"0"0"0002D9 }
+\protected\def\doteq                     {\Umathchar  "3"0"002250 }
+\protected\def\Doteq                     {\Umathchar  "3"0"002251 }
+\protected\def\doteqdot                  {\Umathchar  "3"0"002251 }
+\protected\def\dotminus                  {\Umathchar  "2"0"002238 }
+\protected\def\dotplus                   {\Umathchar  "2"0"002214 }
+\protected\def\dots                      {\Umathchar  "0"0"002026 }
+\protected\def\dottedrightarrow          {\Umathchar  "3"0"002911 }
+\protected\def\doublecap                 {\Umathchar  "2"0"0022D2 }
+\protected\def\doublecup                 {\Umathchar  "2"0"0022D3 }
+\protected\def\doubleprime               {\Umathchar  "0"0"002033 }
+\protected\def\downarrow                 {\Umathchar  "3"0"002193 }
+\protected\def\Downarrow                 {\Umathchar  "3"0"0021D3 }
+\protected\def\downdasharrow             {\Umathchar  "3"0"0021E3 }
+\protected\def\downdownarrows            {\Umathchar  "3"0"0021CA }
+\protected\def\downharpoonleft           {\Umathchar  "3"0"0021C3 }
+\protected\def\downharpoonright          {\Umathchar  "3"0"0021C2 }
+\protected\def\downuparrows              {\Umathchar  "3"0"0021F5 }
+\protected\def\downwhitearrow            {\Umathchar  "0"0"0021E9 }
+\protected\def\downzigzagarrow           {\Umathchar  "3"0"0021AF }
+\protected\def\ell                       {\Umathchar  "0"0"002113 }
+\protected\def\emptyset                  {\Umathchar  "0"0"002205 }
+\protected\def\Epsilon                   {\Umathchar  "0"0"000395 }
+\protected\def\epsilon                   {\Umathchar  "0"0"0003F5 }
+\protected\def\eq                        {\Umathchar  "3"0"00003D }
+\protected\def\eqcirc                    {\Umathchar  "3"0"002256 }
+\protected\def\eqgtr                     {\Umathchar  "3"0"0022DD }
+\protected\def\eqless                    {\Umathchar  "3"0"0022DC }
+\protected\def\eqsim                     {\Umathchar  "3"0"002242 }
+\protected\def\eqslantgtr                {\Umathchar  "3"0"002A96 }
+\protected\def\eqslantless               {\Umathchar  "3"0"002A95 }
+\protected\def\equalscolon               {\Umathchar  "3"0"002255 }
+\protected\def\equiv                     {\Umathchar  "3"0"002261 }
+\protected\def\Eta                       {\Umathchar  "0"0"000397 }
+\protected\def\eta                       {\Umathchar  "0"0"0003B7 }
+\protected\def\eth                       {\Umathchar  "0"0"0000F0 }
+\protected\def\Eulerconst                {\Umathchar  "0"0"002107 }
+\protected\def\exists                    {\Umathchar  "0"0"002203 }
+\protected\def\exponentiale              {\Umathchar  "0"0"002147 }
+\protected\def\fallingdotseq             {\Umathchar  "3"0"002252 }
+\protected\def\Finv                      {\Umathchar  "0"0"002132 }
+\protected\def\flat                      {\Umathchar  "0"0"00266D }
+\protected\def\forall                    {\Umathchar  "0"0"002200 }
+\protected\def\frown                     {\Umathchar  "3"0"002322 }
+\protected\def\Game                      {\Umathchar  "0"0"002141 }
+\protected\def\Gamma                     {\Umathchar  "0"0"000393 }
+\protected\def\gamma                     {\Umathchar  "0"0"0003B3 }
+\protected\def\ge                        {\Umathchar  "3"0"002265 }
+\protected\def\geq                       {\Umathchar  "3"0"002265 }
+\protected\def\geqq                      {\Umathchar  "3"0"002267 }
+\protected\def\geqslant                  {\Umathchar  "3"0"002A7E }
+\protected\def\gets                      {\Umathchar  "3"0"002190 }
+\protected\def\gg                        {\Umathchar  "3"0"00226B }
+\protected\def\ggg                       {\Umathchar  "3"0"0022D9 }
+\protected\def\gggtr                     {\Umathchar  "3"0"0022D9 }
+\protected\def\gimel                     {\Umathchar  "0"0"002137 }
+\protected\def\gnapprox                  {\Umathchar  "3"0"002A8A }
+\protected\def\gneqq                     {\Umathchar  "3"0"002269 }
+\protected\def\gnsim                     {\Umathchar  "3"0"0022E7 }
+\protected\def\grave                     {\Umathaccent"0"0"000060 }
+\protected\def\gt                        {\Umathchar  "3"0"00003E }
+\protected\def\gtrapprox                 {\Umathchar  "3"0"002A86 }
+\protected\def\gtrdot                    {\Umathchar  "2"0"0022D7 }
+\protected\def\gtreqless                 {\Umathchar  "3"0"0022DB }
+\protected\def\gtreqqless                {\Umathchar  "3"0"002A8C }
+\protected\def\gtrless                   {\Umathchar  "3"0"002277 }
+\protected\def\gtrsim                    {\Umathchar  "3"0"002273 }
+\protected\def\hat                       {\Umathaccent"0"0"0002C6 }
+\protected\def\hbar                      {\Umathchar  "0"0"00210F }
+\protected\def\heartsuit                 {\Umathchar  "0"0"002661 }
+\protected\def\hookleftarrow             {\Umathchar  "3"0"0021A9 }
+\protected\def\hookrightarrow            {\Umathchar  "3"0"0021AA }
+\protected\def\hslash                    {\Umathchar  "0"0"00210F }
+\protected\def\iiint                     {\Umathchar  "1"0"00222D }
+\protected\def\iiintop                   {\Umathchar  "0"0"00222D }
+\protected\def\iint                      {\Umathchar  "1"0"00222C }
+\protected\def\iintop                    {\Umathchar  "0"0"00222C }
+\protected\def\Im                        {\Umathchar  "0"0"002111 }
+\protected\def\imaginaryi                {\Umathchar  "0"0"002148 }
+\protected\def\imaginaryj                {\Umathchar  "0"0"002149 }
+\protected\def\imath                     {\Umathchar  "0"0"01D6A4 }
+\protected\def\imply                     {\Umathchar  "3"0"0021D2 }
+\protected\def\in                        {\Umathchar  "0"0"002208 }
+\protected\def\infty                     {\Umathchar  "0"0"00221E }
+\protected\def\int                       {\Umathchar  "1"0"00222B }
+\protected\def\intclockwise              {\Umathchar  "1"0"002231 }
+\protected\def\integers                  {\Umathchar  "0"0"002124 }
+\protected\def\intercal                  {\Umathchar  "2"0"0022BA }
+\protected\def\intop                     {\Umathchar  "0"0"00222B }
+\protected\def\Iota                      {\Umathchar  "0"0"000399 }
+\protected\def\iota                      {\Umathchar  "0"0"0003B9 }
+\protected\def\jmath                     {\Umathchar  "0"0"01D6A5 }
+\protected\def\Join                      {\Umathchar  "3"0"0022C8 }
+\protected\def\Kappa                     {\Umathchar  "0"0"00039A }
+\protected\def\kappa                     {\Umathchar  "0"0"0003BA }
+\protected\def\Lambda                    {\Umathchar  "0"0"00039B }
+\protected\def\lambda                    {\Umathchar  "0"0"0003BB }
+\protected\def\land                      {\Umathchar  "2"0"002227 }
+\protected\def\langle                    {\Udelimiter "4"0"0027E8 }
+\protected\def\lbrace                    {\Udelimiter "4"0"00007B }
+\protected\def\lbrack                    {\Udelimiter "4"0"00005B }
+\protected\def\lceil                     {\Udelimiter "4"0"002308 }
+\protected\def\lceiling                  {\Udelimiter "4"0"002308 }
+\protected\def\ldotp                     {\Umathchar  "6"0"00002E }
+\protected\def\ldots                     {\Umathchar  "0"0"002026 }
+\protected\def\Ldsh                      {\Umathchar  "3"0"0021B2 }
+\protected\def\le                        {\Umathchar  "3"0"002264 }
+\protected\def\leadsto                   {\Umathchar  "3"0"0021DD }
+\protected\def\leftarrow                 {\Umathchar  "3"0"002190 }
+\protected\def\Leftarrow                 {\Umathchar  "3"0"0021D0 }
+\protected\def\leftarrowtail             {\Umathchar  "3"0"0021A2 }
+\protected\def\leftarrowtriangle         {\Umathchar  "3"0"0021FD }
+\protected\def\leftdasharrow             {\Umathchar  "3"0"0021E0 }
+\protected\def\leftharpoondown           {\Umathchar  "3"0"0021BD }
+\protected\def\leftharpoonup             {\Umathchar  "3"0"0021BC }
+\protected\def\leftleftarrows            {\Umathchar  "3"0"0021C7 }
+\protected\def\leftrightarrow            {\Umathchar  "3"0"002194 }
+\protected\def\Leftrightarrow            {\Umathchar  "3"0"0021D4 }
+\protected\def\leftrightarrows           {\Umathchar  "3"0"0021C6 }
+\protected\def\leftrightarrowtriangle    {\Umathchar  "3"0"0021FF }
+\protected\def\leftrightharpoons         {\Umathchar  "3"0"0021CB }
+\protected\def\leftrightsquigarrow       {\Umathchar  "3"0"0021AD }
+\protected\def\leftsquigarrow            {\Umathchar  "3"0"0021DC }
+\protected\def\leftthreetimes            {\Umathchar  "2"0"0022CB }
+\protected\def\leftwavearrow             {\Umathchar  "3"0"00219C }
+\protected\def\leftwhitearrow            {\Umathchar  "0"0"0021E6 }
+\protected\def\leq                       {\Umathchar  "3"0"002264 }
+\protected\def\leqq                      {\Umathchar  "3"0"002266 }
+\protected\def\leqslant                  {\Umathchar  "3"0"002A7D }
+\protected\def\lessapprox                {\Umathchar  "3"0"002A85 }
+\protected\def\lessdot                   {\Umathchar  "2"0"0022D6 }
+\protected\def\lesseqgtr                 {\Umathchar  "3"0"0022DA }
+\protected\def\lesseqqgtr                {\Umathchar  "3"0"002A8B }
+\protected\def\lessgtr                   {\Umathchar  "3"0"002276 }
+\protected\def\lesssim                   {\Umathchar  "3"0"002272 }
+\protected\def\lfloor                    {\Udelimiter "4"0"00230A }
+\protected\def\lgroup                    {\Udelimiter "4"0"0027EE }
+\protected\def\lhook                     {\Umathchar  "3"0"0FE322 }
+\protected\def\lhooknwarrow              {\Umathchar  "3"0"002923 }
+\protected\def\lhooksearrow              {\Umathchar  "3"0"002925 }
+\protected\def\linefeed                  {\Umathchar  "0"0"0021B4 }
+\protected\def\ll                        {\Umathchar  "3"0"00226A }
+\protected\def\llangle                   {\Udelimiter "4"0"0027EA }
+\protected\def\llbracket                 {\Udelimiter "4"0"0027E6 }
+\protected\def\llcorner                  {\Udelimiter "4"0"00231E }
+\protected\def\Lleftarrow                {\Umathchar  "3"0"0021DA }
+\protected\def\lll                       {\Umathchar  "3"0"0022D8 }
+\protected\def\llless                    {\Umathchar  "3"0"0022D8 }
+\protected\def\lmoustache                {\Udelimiter "4"0"0023B0 }
+\protected\def\lnapprox                  {\Umathchar  "3"0"002A89 }
+\protected\def\lneq                      {\Umathchar  "3"0"002A87 }
+\protected\def\lneqq                     {\Umathchar  "3"0"002268 }
+\protected\def\lnot                      {\Umathchar  "0"0"0000AC }
+\protected\def\lnsim                     {\Umathchar  "3"0"0022E6 }
+\protected\def\longleftarrow             {\Umathchar  "3"0"0027F5 }
+\protected\def\Longleftarrow             {\Umathchar  "3"0"0027F8 }
+\protected\def\longleftrightarrow        {\Umathchar  "3"0"0027F7 }
+\protected\def\Longleftrightarrow        {\Umathchar  "3"0"0027FA }
+\protected\def\longmapsfrom              {\Umathchar  "3"0"0027FB }
+\protected\def\Longmapsfrom              {\Umathchar  "3"0"0027FD }
+\protected\def\longmapsto                {\Umathchar  "3"0"0027FC }
+\protected\def\Longmapsto                {\Umathchar  "3"0"0027FE }
+\protected\def\longrightarrow            {\Umathchar  "3"0"0027F6 }
+\protected\def\Longrightarrow            {\Umathchar  "3"0"0027F9 }
+\protected\def\longrightsquigarrow       {\Umathchar  "3"0"0027FF }
+\protected\def\looparrowleft             {\Umathchar  "3"0"0021AB }
+\protected\def\looparrowright            {\Umathchar  "3"0"0021AC }
+\protected\def\lor                       {\Umathchar  "2"0"002228 }
+\protected\def\lozenge                   {\Umathchar  "0"0"0025CA }
+\protected\def\lparent                   {\Udelimiter "4"0"000028 }
+\protected\def\lrcorner                  {\Udelimiter "5"0"00231F }
+\protected\def\Lsh                       {\Umathchar  "3"0"0021B0 }
+\protected\def\lt                        {\Umathchar  "3"0"00003C }
+\protected\def\ltimes                    {\Umathchar  "2"0"0022C9 }
+\protected\def\lvert                     {\Udelimiter "4"0"00007C }
+\protected\def\lVert                     {\Udelimiter "4"0"002016 }
+\protected\def\maltese                   {\Umathchar  "0"0"002720 }
+\protected\def\mapsdown                  {\Umathchar  "3"0"0021A7 }
+\protected\def\mapsfrom                  {\Umathchar  "3"0"0021A4 }
+\protected\def\Mapsfrom                  {\Umathchar  "3"0"002906 }
+\protected\def\mapsfromchar              {\Umathchar  "3"0"0FE324 }
+\protected\def\mapsto                    {\Umathchar  "3"0"0021A6 }
+\protected\def\Mapsto                    {\Umathchar  "3"0"002907 }
+\protected\def\mapstochar                {\Umathchar  "3"0"0FE321 }
+\protected\def\mapsup                    {\Umathchar  "3"0"0021A5 }
+\protected\def\mathring                  {\Umathaccent"0"0"0002DA }
+\protected\def\measuredangle             {\Umathchar  "0"0"002221 }
+\protected\def\measuredeq                {\Umathchar  "3"0"00225E }
+\protected\def\mho                       {\Umathchar  "0"0"002127 }
+\protected\def\mid                       {\Umathchar  "3"0"00007C }
+\protected\def\minus                     {\Umathchar  "2"0"002212 }
+\protected\def\minuscolon                {\Umathchar  "2"0"002239 }
+\protected\def\models                    {\Umathchar  "3"0"0022A7 }
+\protected\def\mp                        {\Umathchar  "2"0"002213 }
+\protected\def\Mu                        {\Umathchar  "0"0"00039C }
+\protected\def\mu                        {\Umathchar  "0"0"0003BC }
+\protected\def\multimap                  {\Umathchar  "3"0"0022B8 }
+\protected\def\napprox                   {\Umathchar  "3"0"002249 }
+\protected\def\napproxEq                 {\Umathchar  "3"0"002246 }
+\protected\def\nasymp                    {\Umathchar  "3"0"00226D }
+\protected\def\natural                   {\Umathchar  "0"0"00266E }
+\protected\def\naturalnumbers            {\Umathchar  "0"0"002115 }
+\protected\def\ncong                     {\Umathchar  "3"0"002246 }
+\protected\def\ndivides                  {\Umathchar  "2"0"002224 }
+\protected\def\ne                        {\Umathchar  "3"0"002260 }
+\protected\def\nearrow                   {\Umathchar  "3"0"002197 }
+\protected\def\Nearrow                   {\Umathchar  "3"0"0021D7 }
+\protected\def\neg                       {\Umathchar  "0"0"0000AC }
+\protected\def\negativesign              {\Umathchar  "2"0"00207B }
+\protected\def\neq                       {\Umathchar  "3"0"002260 }
+\protected\def\nequiv                    {\Umathchar  "3"0"002262 }
+\protected\def\neswarrow                 {\Umathchar  "3"0"002922 }
+\protected\def\nexists                   {\Umathchar  "0"0"002204 }
+\protected\def\ngeq                      {\Umathchar  "3"0"002271 }
+\protected\def\ngtr                      {\Umathchar  "3"0"00226F }
+\protected\def\ngtrless                  {\Umathchar  "3"0"002279 }
+\protected\def\ngtrsim                   {\Umathchar  "3"0"002275 }
+\protected\def\nHdownarrow               {\Umathchar  "3"0"0021DF }
+\protected\def\nHuparrow                 {\Umathchar  "3"0"0021DE }
+\protected\def\ni                        {\Umathchar  "3"0"00220B }
+\protected\def\nin                       {\Umathchar  "3"0"002209 }
+\protected\def\nleftarrow                {\Umathchar  "3"0"00219A }
+\protected\def\nLeftarrow                {\Umathchar  "3"0"0021CD }
+\protected\def\nleftrightarrow           {\Umathchar  "3"0"0021AE }
+\protected\def\nLeftrightarrow           {\Umathchar  "3"0"0021CE }
+\protected\def\nleq                      {\Umathchar  "3"0"002270 }
+\protected\def\nless                     {\Umathchar  "3"0"00226E }
+\protected\def\nlessgtr                  {\Umathchar  "3"0"002278 }
+\protected\def\nlesssim                  {\Umathchar  "3"0"002274 }
+\protected\def\nmid                      {\Umathchar  "3"0"002224 }
+\protected\def\nni                       {\Umathchar  "3"0"00220C }
+\protected\def\not                       {\Umathchar  "3"0"000338 }
+\protected\def\notin                     {\Umathchar  "3"0"002209 }
+\protected\def\nowns                     {\Umathchar  "3"0"00220C }
+\protected\def\nparallel                 {\Umathchar  "3"0"002226 }
+\protected\def\nprec                     {\Umathchar  "3"0"002280 }
+\protected\def\npreccurlyeq              {\Umathchar  "3"0"0022E0 }
+\protected\def\nrightarrow               {\Umathchar  "3"0"00219B }
+\protected\def\nRightarrow               {\Umathchar  "3"0"0021CF }
+\protected\def\nsim                      {\Umathchar  "3"0"002241 }
+\protected\def\nsimeq                    {\Umathchar  "3"0"002244 }
+\protected\def\nsqsubseteq               {\Umathchar  "3"0"0022E2 }
+\protected\def\nsqsupseteq               {\Umathchar  "3"0"0022E3 }
+\protected\def\nsubset                   {\Umathchar  "3"0"002284 }
+\protected\def\nsubseteq                 {\Umathchar  "3"0"002288 }
+\protected\def\nsucc                     {\Umathchar  "3"0"002281 }
+\protected\def\nsucccurlyeq              {\Umathchar  "3"0"0022E1 }
+\protected\def\nsupset                   {\Umathchar  "3"0"002285 }
+\protected\def\nsupseteq                 {\Umathchar  "3"0"002289 }
+\protected\def\ntriangleleft             {\Umathchar  "3"0"0022EB }
+\protected\def\ntrianglelefteq           {\Umathchar  "3"0"0022EC }
+\protected\def\ntriangleright            {\Umathchar  "3"0"0022EA }
+\protected\def\ntrianglerighteq          {\Umathchar  "3"0"0022ED }
+\protected\def\Nu                        {\Umathchar  "0"0"00039D }
+\protected\def\nu                        {\Umathchar  "0"0"0003BD }
+\protected\def\nvdash                    {\Umathchar  "3"0"0022AC }
+\protected\def\nvDash                    {\Umathchar  "3"0"0022AD }
+\protected\def\nVdash                    {\Umathchar  "3"0"0022AE }
+\protected\def\nVDash                    {\Umathchar  "3"0"0022AF }
+\protected\def\nvleftarrow               {\Umathchar  "3"0"0021F7 }
+\protected\def\nVleftarrow               {\Umathchar  "3"0"0021FA }
+\protected\def\nvleftrightarrow          {\Umathchar  "3"0"0021F9 }
+\protected\def\nVleftrightarrow          {\Umathchar  "3"0"0021FC }
+\protected\def\nvrightarrow              {\Umathchar  "3"0"0021F8 }
+\protected\def\nVrightarrow              {\Umathchar  "3"0"0021FB }
+\protected\def\nwarrow                   {\Umathchar  "3"0"002196 }
+\protected\def\Nwarrow                   {\Umathchar  "3"0"0021D6 }
+\protected\def\nwsearrow                 {\Umathchar  "3"0"002921 }
+\protected\def\odot                      {\Umathchar  "2"0"002299 }
+\protected\def\ohm                       {\Umathchar  "0"0"002126 }
+\protected\def\oiiint                    {\Umathchar  "1"0"002230 }
+\protected\def\oiint                     {\Umathchar  "1"0"00222F }
+\protected\def\oint                      {\Umathchar  "1"0"00222E }
+\protected\def\ointclockwise             {\Umathchar  "1"0"002232 }
+\protected\def\ointctrclockwise          {\Umathchar  "1"0"002233 }
+\protected\def\Omega                     {\Umathchar  "0"0"0003A9 }
+\protected\def\omega                     {\Umathchar  "0"0"0003C9 }
+\protected\def\Omicron                   {\Umathchar  "0"0"00039F }
+\protected\def\omicron                   {\Umathchar  "0"0"0003BF }
+\protected\def\ominus                    {\Umathchar  "2"0"002296 }
+\protected\def\oplus                     {\Umathchar  "2"0"002295 }
+\protected\def\oslash                    {\Umathchar  "2"0"002298 }
+\protected\def\otimes                    {\Umathchar  "2"0"002297 }
+\protected\def\overbar                   {\Umathaccent"0"0"00203E }
+\protected\def\overbrace                 {\Umathaccent"0"0"0023DE }
+\protected\def\overbracket               {\Umathaccent"0"0"0023B4 }
+\protected\def\overparent                {\Umathaccent"0"0"0023DC }
+\protected\def\owns                      {\Umathchar  "3"0"00220B }
+\protected\def\P                         {\Umathchar  "0"0"0000B6 }
+\protected\def\parallel                  {\Umathchar  "3"0"002225 }
+\protected\def\partial                   {\Umathchar  "0"0"002202 }
+\protected\def\perp                      {\Umathchar  "3"0"0022A5 }
+\protected\def\Phi                       {\Umathchar  "0"0"0003A6 }
+\protected\def\phi                       {\Umathchar  "0"0"0003D5 }
+\protected\def\Pi                        {\Umathchar  "0"0"0003A0 }
+\protected\def\pi                        {\Umathchar  "0"0"0003C0 }
+\protected\def\pitchfork                 {\Umathchar  "3"0"0022D4 }
+\protected\def\Plankconst                {\Umathchar  "0"0"00210E }
+\protected\def\pm                        {\Umathchar  "2"0"0000B1 }
+\protected\def\positivesign              {\Umathchar  "2"0"00207A }
+\protected\def\prec                      {\Umathchar  "3"0"00227A }
+\protected\def\precapprox                {\Umathchar  "3"0"002AB7 }
+\protected\def\preccurlyeq               {\Umathchar  "3"0"00227C }
+\protected\def\preceq                    {\Umathchar  "3"0"002AAF }
+\protected\def\preceqq                   {\Umathchar  "3"0"002AB3 }
+\protected\def\precnapprox               {\Umathchar  "3"0"002AB9 }
+\protected\def\precneq                   {\Umathchar  "3"0"002AB1 }
+\protected\def\precneqq                  {\Umathchar  "3"0"002AB5 }
+\protected\def\precnsim                  {\Umathchar  "3"0"0022E8 }
+\protected\def\precsim                   {\Umathchar  "3"0"00227E }
+\protected\def\prime                     {\Umathchar  "0"0"002032 }
+\protected\def\primes                    {\Umathchar  "0"0"002119 }
+\protected\def\prod                      {\Umathchar  "1"0"00220F }
+\protected\def\PropertyLine              {\Umathchar  "0"0"00214A }
+\protected\def\propto                    {\Umathchar  "3"0"00221D }
+\protected\def\Psi                       {\Umathchar  "0"0"0003A8 }
+\protected\def\psi                       {\Umathchar  "0"0"0003C8 }
+\protected\def\questionedeq              {\Umathchar  "3"0"00225F }
+\protected\def\rangle                    {\Udelimiter "5"0"0027E9 }
+\protected\def\rationals                 {\Umathchar  "0"0"00211A }
+\protected\def\rbrace                    {\Udelimiter "5"0"00007D }
+\protected\def\rbrack                    {\Udelimiter "5"0"00005D }
+\protected\def\rceil                     {\Udelimiter "5"0"002309 }
+\protected\def\rceiling                  {\Udelimiter "5"0"002309 }
+\protected\def\Rdsh                      {\Umathchar  "3"0"0021B3 }
+\protected\def\Re                        {\Umathchar  "0"0"00211C }
+\protected\def\reals                     {\Umathchar  "0"0"00211D }
+\protected\def\Relbar                    {\Umathchar  "3"0"00003D }
+\protected\def\relbar                    {\Umathchar  "3"0"002212 }
+\protected\def\restriction               {\Umathchar  "3"0"0021BE }
+\protected\def\rfloor                    {\Udelimiter "5"0"00230B }
+\protected\def\rgroup                    {\Udelimiter "5"0"0027EF }
+\protected\def\Rho                       {\Umathchar  "0"0"0003A1 }
+\protected\def\rho                       {\Umathchar  "0"0"0003C1 }
+\protected\def\rhook                     {\Umathchar  "3"0"0FE323 }
+\protected\def\rhooknearrow              {\Umathchar  "3"0"002924 }
+\protected\def\rhookswarrow              {\Umathchar  "3"0"002926 }
+\protected\def\rightangle                {\Umathchar  "0"0"00221F }
+\protected\def\rightarrow                {\Umathchar  "3"0"002192 }
+\protected\def\Rightarrow                {\Umathchar  "3"0"0021D2 }
+\protected\def\rightarrowbar             {\Umathchar  "3"0"0021E5 }
+\protected\def\rightarrowtail            {\Umathchar  "3"0"0021A3 }
+\protected\def\rightarrowtriangle        {\Umathchar  "3"0"0021FE }
+\protected\def\rightdasharrow            {\Umathchar  "3"0"0021E2 }
+\protected\def\rightharpoondown          {\Umathchar  "3"0"0021C1 }
+\protected\def\rightharpoonup            {\Umathchar  "3"0"0021C0 }
+\protected\def\rightleftarrows           {\Umathchar  "3"0"0021C4 }
+\protected\def\rightleftharpoons         {\Umathchar  "3"0"0021CC }
+\protected\def\rightrightarrows          {\Umathchar  "3"0"0021C9 }
+\protected\def\rightsquigarrow           {\Umathchar  "3"0"0021DD }
+\protected\def\rightthreearrows          {\Umathchar  "3"0"0021F6 }
+\protected\def\rightthreetimes           {\Umathchar  "2"0"0022CC }
+\protected\def\rightwavearrow            {\Umathchar  "3"0"00219D }
+\protected\def\rightwhitearrow           {\Umathchar  "0"0"0021E8 }
+\protected\def\risingdotseq              {\Umathchar  "3"0"002253 }
+\protected\def\rmoustache                {\Udelimiter "5"0"0023B1 }
+\protected\def\rneq                      {\Umathchar  "3"0"002A88 }
+\protected\def\rparent                   {\Udelimiter "5"0"000029 }
+\protected\def\rrangle                   {\Udelimiter "5"0"0027EB }
+\protected\def\rrbracket                 {\Udelimiter "5"0"0027E7 }
+\protected\def\Rrightarrow               {\Umathchar  "3"0"0021DB }
+\protected\def\Rsh                       {\Umathchar  "3"0"0021B1 }
+\protected\def\rtimes                    {\Umathchar  "2"0"0022CA }
+\protected\def\rvert                     {\Udelimiter "5"0"00007C }
+\protected\def\rVert                     {\Udelimiter "5"0"002016 }
+\protected\def\S                         {\Umathchar  "0"0"0000A7 }
+\protected\def\searrow                   {\Umathchar  "3"0"002198 }
+\protected\def\Searrow                   {\Umathchar  "3"0"0021D8 }
+\protected\def\setminus                  {\Umathchar  "2"0"002216 }
+\protected\def\sharp                     {\Umathchar  "0"0"00266F }
+\protected\def\Sigma                     {\Umathchar  "0"0"0003A3 }
+\protected\def\sigma                     {\Umathchar  "0"0"0003C3 }
+\protected\def\sim                       {\Umathchar  "3"0"00223C }
+\protected\def\simeq                     {\Umathchar  "3"0"002243 }
+\protected\def\slash                     {\Umathchar  "0"0"002044 }
+\protected\def\smile                     {\Umathchar  "3"0"002323 }
+\protected\def\solidus                   {\Udelimiter "5"0"002044 }
+\protected\def\spadesuit                 {\Umathchar  "0"0"002660 }
+\protected\def\sphericalangle            {\Umathchar  "0"0"002222 }
+\protected\def\sqcap                     {\Umathchar  "2"0"002293 }
+\protected\def\sqcup                     {\Umathchar  "2"0"002294 }
+\protected\def\sqsubset                  {\Umathchar  "3"0"00228F }
+\protected\def\sqsubseteq                {\Umathchar  "2"0"002291 }
+\protected\def\sqsubsetneq               {\Umathchar  "3"0"0022E4 }
+\protected\def\sqsupset                  {\Umathchar  "3"0"002290 }
+\protected\def\sqsupseteq                {\Umathchar  "2"0"002292 }
+\protected\def\sqsupsetneq               {\Umathchar  "3"0"0022E5 }
+\protected\def\square                    {\Umathchar  "0"0"0025A1 }
+\protected\def\squaredots                {\Umathchar  "3"0"002237 }
+\protected\def\star                      {\Umathchar  "2"0"0022C6 }
+\protected\def\stareq                    {\Umathchar  "3"0"00225B }
+\protected\def\subset                    {\Umathchar  "3"0"002282 }
+\protected\def\Subset                    {\Umathchar  "3"0"0022D0 }
+\protected\def\subseteq                  {\Umathchar  "3"0"002286 }
+\protected\def\subseteqq                 {\Umathchar  "3"0"002AC5 }
+\protected\def\subsetneq                 {\Umathchar  "3"0"00228A }
+\protected\def\subsetneqq                {\Umathchar  "3"0"002ACB }
+\protected\def\succ                      {\Umathchar  "3"0"00227B }
+\protected\def\succapprox                {\Umathchar  "3"0"002AB8 }
+\protected\def\succcurlyeq               {\Umathchar  "3"0"00227D }
+\protected\def\succeq                    {\Umathchar  "3"0"002AB0 }
+\protected\def\succeqq                   {\Umathchar  "3"0"002AB4 }
+\protected\def\succnapprox               {\Umathchar  "3"0"002ABA }
+\protected\def\succneq                   {\Umathchar  "3"0"002AB2 }
+\protected\def\succneqq                  {\Umathchar  "3"0"002AB6 }
+\protected\def\succnsim                  {\Umathchar  "3"0"0022E9 }
+\protected\def\succsim                   {\Umathchar  "3"0"00227F }
+\protected\def\sum                       {\Umathchar  "1"0"002211 }
+\protected\def\supset                    {\Umathchar  "3"0"002283 }
+\protected\def\Supset                    {\Umathchar  "3"0"0022D1 }
+\protected\def\supseteq                  {\Umathchar  "3"0"002287 }
+\protected\def\supseteqq                 {\Umathchar  "3"0"002AC6 }
+\protected\def\supsetneq                 {\Umathchar  "3"0"00228B }
+\protected\def\supsetneqq                {\Umathchar  "3"0"002ACC }
+\protected\def\surd                      {\Umathchar  "2"0"00221A }
+\protected\def\swarrow                   {\Umathchar  "3"0"002199 }
+\protected\def\Swarrow                   {\Umathchar  "3"0"0021D9 }
+\protected\def\Tau                       {\Umathchar  "0"0"0003A4 }
+\protected\def\tau                       {\Umathchar  "0"0"0003C4 }
+\protected\def\therefore                 {\Umathchar  "3"0"002234 }
+\protected\def\Theta                     {\Umathchar  "0"0"000398 }
+\protected\def\theta                     {\Umathchar  "0"0"0003B8 }
+\protected\def\tilde                     {\Umathaccent"0"0"0002DC }
+\protected\def\times                     {\Umathchar  "2"0"0000D7 }
+\protected\def\to                        {\Umathchar  "3"0"002192 }
+\protected\def\top                       {\Umathchar  "0"0"0022A4 }
+\protected\def\triangle                  {\Umathchar  "0"0"0025B3 }
+\protected\def\triangledown              {\Umathchar  "2"0"0025BD }
+\protected\def\triangleleft              {\Umathchar  "2"0"0025C1 }
+\protected\def\triangleq                 {\Umathchar  "3"0"00225C }
+\protected\def\triangleright             {\Umathchar  "2"0"0025B7 }
+\protected\def\tripleprime               {\Umathchar  "0"0"002034 }
+\protected\def\turnediota                {\Umathchar  "0"0"002129 }
+\protected\def\twoheaddownarrow          {\Umathchar  "3"0"0021A1 }
+\protected\def\twoheadleftarrow          {\Umathchar  "3"0"00219E }
+\protected\def\twoheadrightarrow         {\Umathchar  "3"0"0021A0 }
+\protected\def\twoheadrightarrowtail     {\Umathchar  "3"0"002916 }
+\protected\def\twoheaduparrow            {\Umathchar  "3"0"00219F }
+\protected\def\udots                     {\Umathchar  "0"0"0022F0 }
+\protected\def\ulcorner                  {\Udelimiter "4"0"00231C }
+\protected\def\underbar          {\Umathaccent bottom "0"0"00203E }
+\protected\def\underbrace        {\Umathaccent bottom "0"0"0023DF }
+\protected\def\underbracket      {\Umathaccent bottom "0"0"0023B5 }
+\protected\def\underparent       {\Umathaccent bottom "0"0"0023DD }
+\protected\def\upand                     {\Umathchar  "2"0"00214B }
+\protected\def\uparrow                   {\Umathchar  "3"0"002191 }
+\protected\def\Uparrow                   {\Umathchar  "3"0"0021D1 }
+\protected\def\updasharrow               {\Umathchar  "3"0"0021E1 }
+\protected\def\updownarrow               {\Umathchar  "3"0"002195 }
+\protected\def\Updownarrow               {\Umathchar  "3"0"0021D5 }
+\protected\def\updownarrowbar            {\Umathchar  "0"0"0021A8 }
+\protected\def\updownarrows              {\Umathchar  "3"0"0021C5 }
+\protected\def\upharpoonleft             {\Umathchar  "3"0"0021BF }
+\protected\def\upharpoonright            {\Umathchar  "3"0"0021BE }
+\protected\def\uplus                     {\Umathchar  "2"0"00228E }
+\protected\def\Upsilon                   {\Umathchar  "0"0"0003A5 }
+\protected\def\upsilon                   {\Umathchar  "0"0"0003C5 }
+\protected\def\upuparrows                {\Umathchar  "3"0"0021C8 }
+\protected\def\upwhitearrow              {\Umathchar  "0"0"0021E7 }
+\protected\def\urcorner                  {\Udelimiter "5"0"00231D }
+\protected\def\Uuparrow                  {\Umathchar  "3"0"00290A }
+\protected\def\varepsilon                {\Umathchar  "0"0"0003B5 }
+\protected\def\varkappa                  {\Umathchar  "0"0"0003F0 }
+\protected\def\varkappa                  {\Umathchar  "0"0"0003F0 }
+\protected\def\varnothing                {\Umathchar  "0"0"002300 }
+\protected\def\varphi                    {\Umathchar  "0"0"0003C6 }
+\protected\def\varpi                     {\Umathchar  "0"0"0003D6 }
+\protected\def\varrho                    {\Umathchar  "0"0"01D71A }
+\protected\def\varsigma                  {\Umathchar  "0"0"0003C2 }
+\protected\def\vartheta                  {\Umathchar  "0"0"01D717 }
+\protected\def\varTheta                  {\Umathchar  "0"0"0003D1 }
+\protected\def\vdash                     {\Umathchar  "3"0"0022A2 }
+\protected\def\vDash                     {\Umathchar  "3"0"0022A8 }
+\protected\def\Vdash                     {\Umathchar  "3"0"0022A9 }
+\protected\def\VDash                     {\Umathchar  "3"0"0022AB }
+\protected\def\vdots                     {\Umathchar  "0"0"0022EE }
+\protected\def\vec                       {\Umathaccent"0"0"0020D7 }
+\protected\def\vee                       {\Umathchar  "2"0"002228 }
+\protected\def\veebar                    {\Umathchar  "2"0"0022BB }
+\protected\def\veeeq                     {\Umathchar  "3"0"00225A }
+\protected\def\vert                      {\Udelimiter "0"0"00007C }
+\protected\def\Vert                      {\Udelimiter "0"0"002016 }
+\protected\def\Vvdash                    {\Umathchar  "3"0"0022AA }
+\protected\def\wedge                     {\Umathchar  "2"0"002227 }
+\protected\def\wedgeeq                   {\Umathchar  "3"0"002259 }
+\protected\def\whitearrowupfrombar       {\Umathchar  "0"0"0021EB }
+\protected\def\widehat                   {\Umathaccent"0"0"000302 }
+\protected\def\widetilde                 {\Umathaccent"0"0"000303 }
+\protected\def\wp                        {\Umathchar  "0"0"002118 }
+\protected\def\wr                        {\Umathchar  "2"0"002240 }
+\protected\def\Xi                        {\Umathchar  "0"0"00039E }
+\protected\def\xi                        {\Umathchar  "0"0"0003BE }
+\protected\def\yen                       {\Umathchar  "0"0"0000A5 }
+\protected\def\Zeta                      {\Umathchar  "0"0"000396 }
+\protected\def\zeta                      {\Umathchar  "0"0"0003B6 }
+
+%D The following are suggested by Bruno. As I don't use plain and as the above are
+%D taken from text unicode greek I suppose his list is better:
+
+\protected\def\alpha                     {\Umathchar  "0"0"01D6FC }
+\protected\def\beta                      {\Umathchar  "0"0"01D6FD }
+\protected\def\chi                       {\Umathchar  "0"0"01D712 }
+\protected\def\delta                     {\Umathchar  "0"0"01D6FF }
+\protected\def\digamma                   {\Umathchar  "0"0"0003DC }
+\protected\def\epsilon                   {\Umathchar  "0"0"01D716 }
+\protected\def\eta                       {\Umathchar  "0"0"01D702 }
+\protected\def\gamma                     {\Umathchar  "0"0"01D6FE }
+\protected\def\iota                      {\Umathchar  "0"0"01D704 }
+\protected\def\kappa                     {\Umathchar  "0"0"01D705 }
+\protected\def\lambda                    {\Umathchar  "0"0"01D706 }
+\protected\def\mu                        {\Umathchar  "0"0"01D707 }
+\protected\def\nu                        {\Umathchar  "0"0"01D708 }
+\protected\def\omega                     {\Umathchar  "0"0"01D714 }
+\protected\def\omicron                   {\Umathchar  "0"0"01D70A }
+\protected\def\phi                       {\Umathchar  "0"0"01D719 }
+\protected\def\pi                        {\Umathchar  "0"0"01D70B }
+\protected\def\psi                       {\Umathchar  "0"0"01D713 }
+\protected\def\rho                       {\Umathchar  "0"0"01D70C }
+\protected\def\sigma                     {\Umathchar  "0"0"01D70E }
+\protected\def\tau                       {\Umathchar  "0"0"01D70F }
+\protected\def\theta                     {\Umathchar  "0"0"01D703 }
+\protected\def\upsilon                   {\Umathchar  "0"0"01D710 }
+\protected\def\varepsilon                {\Umathchar  "0"0"01D700 }
+\protected\def\varkappa                  {\Umathchar  "0"0"01D718 }
+\protected\def\varphi                    {\Umathchar  "0"0"01D711 }
+\protected\def\varpi                     {\Umathchar  "0"0"01D71B }
+\protected\def\varrho                    {\Umathchar  "0"0"01D71A }
+\protected\def\varsigma                  {\Umathchar  "0"0"01D70D }
+\protected\def\vartheta                  {\Umathchar  "0"0"01D717 }
+\protected\def\xi                        {\Umathchar  "0"0"01D709 }
+\protected\def\zeta                      {\Umathchar  "0"0"01D701 }
+
+\protected\def\varTheta                  {\Umathchar  "0"0"0003F4 }
+
+% a few definitions:
+
+\protected\def\sqrt     {\Uroot "0 "221A{}}
+\protected\def\root#1\of{\Uroot "0 "221A{#1}}
+
+% \skewchar\teni='177 \skewchar\seveni='177 \skewchar\fivei='177
+% \skewchar\tensy='60 \skewchar\sevensy='60 \skewchar\fivesy='60
+
+\chardef\% = "25
+\chardef\& = "26
+\chardef\# = "23
+\chardef\$ = "24
+\chardef\_ = "5F
+
+\let\ss        ß
+\let\ae        æ
+\let\oe        œ
+\let\o         ø
+\let\AE        Æ
+\let\OE        Œ
+\let\O         Ø
+\let\i         ı
+\let\j         ȷ
+\let\aa        å
+\let\l         ł
+\let\L         Ł
+\let\AA        Å
+\let\copyright ©
+\let\S         §
+\let\P         ¶
+\let\dag       †
+\let\ddag      ‡
+\let\pounds    £
+
+% just use utf
+
+\protected\def\`#1{#1^^^^0300}
+\protected\def\'#1{#1^^^^0301}
+\protected\def\^#1{#1^^^^0302}
+\protected\def\~#1{#1^^^^0303}
+\protected\def\=#1{#1^^^^0304}
+\protected\def\u#1{#1^^^^0306}
+\protected\def\.#1{#1^^^^0307}
+\protected\def\"#1{#1^^^^0308}
+\protected\def\r#1{#1^^^^030a} % not in plain
+\protected\def\H#1{#1^^^^030b}
+\protected\def\v#1{#1^^^^030c}
+\protected\def\d#1{#1^^^^0323}
+\protected\def\c#1{#1^^^^0327}
+\protected\def\k#1{#1^^^^0328} % not in plain
+\protected\def\b#1{#1^^^^0331}
+
+\protected\def\*{\discretionary{\thinspace\the\textfont0\char"00D7}{}{}}
+
+\protected\def\t#1{%
+ %\quitvmode
+  \begingroup
+    \setbox0\hbox{#1}%
+    \setbox2\hbox\bgroup
+      \iffontchar\font"0361\relax
+         \char"0361\relax
+      \else
+         \iffontchar\font"2040\relax\else
+           \the\textfont0
+         \fi
+         \char"2040
+      \fi
+    \egroup
+    \dimen0\wd\ifdim\wd0>\wd2 0\else2\fi
+    \dimen2\dimexpr-\ht2+\ht0+.45ex\relax
+    \hbox to \dimen0\bgroup
+      \hbox to \dimen0{\hss\box0\hss}%
+      \hskip-\dimen0
+      \hbox to \dimen0{\hss\raise\dimen2\box2\hss}%
+    \egroup
+  \endgroup}
+
+% Bruno's variant:
+%
+%  \def\talign#1%
+%    {\leavevmode\vbox{%
+%       \baselineskip  0pt
+%       \lineskip     -1ex
+%       \lineskiplimit 0pt
+%       \ialign{##\crcr#1\crcr}}}
+%
+%  \def\t#1%
+%     {{\setbox0\hbox{%
+%         \iffontchar\font"0361\char"0361\else
+%         \iffontchar\font"2040\else\the\textfont0\fi\char"2040\fi}%
+%       \talign{\hidewidth\unhbox0\hidewidth\crcr#1}}}
+
+% for Bruno, when he tests this file with xetex:
+
+\ifdefined\directlua \else
+
+    \catcode`@=11
+
+    \protected\def\sqrt{\Uradical "0 "221A }
+
+    \protected\def\root#1\of
+      {\setbox\rootbox\hbox\bgroup
+          $\m@th\scriptscriptstyle{#1}$%
+       \egroup
+       \mathpalette\r@@t}
+
+    \catcode`@=12
+
+\fi
+
+\endinput

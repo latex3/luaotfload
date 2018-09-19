@@ -1,0 +1,185 @@
+% texformat=luatex-plain
+
+%D \module
+%D   [       file=luatex-test,
+%D        version=2009.12.01,
+%D          title=\LUATEX\ Support Macros,
+%D       subtitle=Simple Test File,
+%D         author=Hans Hagen,
+%D           date=\currentdate,
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+%D See \type {luatex-plain.tex} (or on my machine \type {luatex.tex}
+%D for how to make a format.
+
+% You can generate a font database with:
+%
+%   mtxrun --script fonts --reload --save
+%
+% The file luatex-fonts-names.lua has to be moved to a place
+% where kpse can find it.
+
+\pdfoutput=1
+
+\font\testa=file:lmroman10-regular                  at 12pt \testa \input tufte \par
+\font\testb=file:lmroman12-regular:+liga;           at 24pt \testb effe flink fietsen \par
+\font\testc=file:lmroman12-regular:mode=node;+liga; at 24pt \testc effe flink fietsen \par
+\font\testd=name:lmroman10bold                      at 12pt \testd a bit bold \par
+
+\font\oeps=cmr10
+
+\font\oeps=[lmroman12-regular]:+liga at 30pt \oeps crap
+\font\oeps=[lmroman12-regular]       at 40pt \oeps more crap
+
+\font\cidtest=adobesongstd-light
+
+\font\mathtest=cambria(math) {\mathtest 123}
+
+% \font\gothic=msgothic(ms-gothic) {\gothic whatever} % no longer in windows 10
+
+\bgroup
+
+    \ifdefined\pdfprotrudechars \pdfprotrudechars \else \protrudechars \fi 2 \relax
+    \ifdefined\pdfadjustspacing \pdfadjustspacing \else \adjustspacing \fi 2 \relax
+
+    \font\testb=file:lmroman12-regular:+liga;extend=1.5         at 12pt \testb \input tufte \par
+    \font\testb=file:lmroman12-regular:+liga;slant=0.8          at 12pt \testb \input tufte \par
+    \font\testb=file:lmroman12-regular:+liga;protrusion=default at 12pt \testb \input tufte \par
+
+\egroup
+
+\setmplibformat{plain}
+
+\directlua {
+    function MpTest()
+        metapost.print("fullcircle scaled 3cm")
+    end
+}
+
+\mplibcode
+    beginfig(1) ;
+        draw fullcircle
+            scaled 10cm
+            withcolor red
+            withpen pencircle xscaled 4mm yscaled 2mm rotated 30 ;
+        draw "test" infont defaultfont scaled 4 ;
+        verbatimtex \sl etex;
+        draw btex some more test etex scaled 2 ;
+        currentpicture := currentpicture shifted (0,1cm) ;
+        verbatimtex \bf etex;
+        draw btex another test etex scaled 2 ;
+        currentpicture := currentpicture shifted (0,1cm) ;
+        draw btex another test etex scaled 2 ;
+        draw
+            runscript("MpTest()")
+            withcolor green
+            withpen pencircle xscaled 2mm yscaled 1mm rotated 20 ;
+    endfig ;
+\endmplibcode
+
+\font\mine=file:luatex-fonts-demo-vf-1.lua at 12pt
+
+\mine \input tufte \par
+
+% \font\mine=file:luatex-fonts-demo-vf-2.lua at 12pt \mine [abab] \par
+% \font\mine=file:luatex-fonts-demo-vf-3.lua at 12pt \mine [abab] \par
+
+\font\test=dejavuserif:+kern at 10pt  \test
+
+
+\bgroup \hsize 1mm \noindent Циолковский \par \egroup
+
+\loadpatterns{ru}
+
+\bgroup \hsize 1mm \noindent Циолковский \par \egroup
+
+a bit of math
+
+$\it e=mc^2 \bf  e=mc^2  \Uchar"1D49D$
+
+$$\left( { {1} \over { {1} \over {x} } } \right) $$
+
+$$\sqrt {2} { { {1} \over { {1} \over {x} } } } $$
+
+\font\cows=file:koeieletters.afm at 50pt
+
+\cows Hello World!
+
+% math test
+
+\latinmodern
+
+\def\sqrt{\Uroot "0 "221A{}}
+
+\def\root#1\of{\Uroot "0 "221A{#1}}
+
+Inline $\sqrt{x}{1.2}$ math. % same for $\root n of x$
+
+$\root3\of x$
+
+$\sin{x}$
+
+\lucidabright
+
+\def\sqrt{\Uroot "0 "221A{}}
+
+\def\root#1\of{\Uroot "0 "221A{#1}}
+
+Inline $\sqrt{x}{1.2}$ math. % same for $\root n of x$
+
+$\root3\of x$
+
+$\sin{x}$
+
+\bgroup
+
+    % drawback: no features (so use basemode)
+
+    \font\crapa=lmroman12-regular:mode=base;liga=yes;kern=yes; at 12pt
+    \font\crapb=lmsans12-regular:mode=base;liga=yes;kern=yes;  at 30pt
+   %\font\mine=file:luatex-fonts-demo-vf-4.lua:1=lmroman12-regular;2=lmsans12-regular{0x41-0x5A+0x30-0x39+0x21}; at 12pt
+    \font\mine=file:luatex-fonts-demo-vf-4.lua:1=\fontid\crapa;2=\fontid\crapb{0x41-0x5A+0x30-0x39+0x21}; at 12pt
+
+    \crapa Test\par
+    \crapb Test\par
+
+    \mine Zomaar een eindje fietsen! En dan weer terug.
+
+\egroup
+
+\bgroup
+
+    \font\boldera=lmroman10-regular:mode=node;liga=yes;kern=yes;
+    \font\bolderb=lmroman10-regular:mode=node;liga=yes;kern=yes;effect=0.1;
+    \font\bolderc=lmroman10-regular:mode=node;liga=yes;kern=yes;effect={width=0.1,auto=yes};
+
+    \boldera Just a line. \par
+    \bolderb Just a line. \par
+    \bolderc Just a line. \par
+
+\egroup
+
+% \font\amiri=file:amiri-regular.ttf:%
+%     mode=node;analyze=yes;language=dflt;script=arab;ccmp=yes;%
+%     init=yes;medi=yes;fina=yes;isol=yes;%
+%     mark=yes;mkmk=yes;kern=yes;curs=yes;%
+%     liga=yes;dlig=yes;rlig=yes;clig=yes;calt=yes %
+%     at 32pt
+
+% \bgroup
+%     \textdir TRT\amiri بِسْمِ اللَّـهِ الرَّ‌حْمَـٰنِ الرَّ‌حِيمِ
+% \egroup
+
+% assumes csr10.tfm csr10.pfb csr.enc to be present
+
+% \font\foo=file:luatex-plain-tfm.lua:tfm=csr10;enc=csr;pfb=csr10 at 12pt
+%
+% \foo áäčďěíĺľňóôŕřšťúýž ff ffi
+
+% \font\foo=file:csr10.tfm:reencode=csr
+% \font\foo=file:csr10.tfm:reencode=csr;bitmap=yes % use map file
+% \font\foo=file:csr10.tfm:reencode=auto
+%
+% \foo áäčďěíĺľňóôŕřšťúýž ff ffi \input tufte\par
+
+\end

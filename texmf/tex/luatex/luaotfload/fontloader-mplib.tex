@@ -1,0 +1,143 @@
+%D \module
+%D   [       file=luatex-mplib,
+%D        version=2009.12.01,
+%D          title=\LUATEX\ Support Macros,
+%D       subtitle=\METAPOST\ to \PDF\ conversion,
+%D         author=Taco Hoekwater \& Hans Hagen,
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+%D This is the companion to the \LUA\ module \type {supp-mpl.lua}. Further
+%D embedding is up to others. A simple example of usage in plain \TEX\ is:
+%D
+%D \starttyping
+%D \pdfoutput=1
+%D
+%D \input luatex-mplib.tex
+%D
+%D \setmplibformat{plain}
+%D
+%D \mplibcode
+%D   beginfig(1);
+%D     draw fullcircle
+%D       scaled 10cm
+%D       withcolor red
+%D       withpen pencircle xscaled 4mm yscaled 2mm rotated 30 ;
+%D   endfig;
+%D \endmplibcode
+%D
+%D \end
+%D \stoptyping
+
+\def\setmplibformat#1{\def\mplibformat{#1}}
+\def\setmplibmode  #1{\def\mplibmode  {#1}}
+
+\def\setupmplibcatcodes
+  {\catcode`\{=12 % could be optional .. not really needed
+   \catcode`\}=12 % could be optional .. not really needed
+   \catcode`\#=12
+   \catcode`\^=12
+   \catcode`\~=12
+   \catcode`\_=12
+   \catcode`\%=12
+   \catcode`\&=12
+   \catcode`\$=12
+   \obeylines}
+
+\def\mplibcode
+  {\bgroup
+   \setupmplibcatcodes
+   \domplibcode}
+
+\long\def\domplibcode#1\endmplibcode
+  {\egroup
+   \directlua{metapost.process('\mplibformat',[[#1]],'\mplibmode')}}
+
+%D We default to \type {plain} \METAPOST:
+
+\def\mplibformat{plain}
+\def\mplibmode  {scaled}
+
+%D We use a dedicated scratchbox:
+
+\ifx\mplibscratchbox\undefined \newbox\mplibscratchbox \fi
+
+%D Now load the needed \LUA\ code.
+
+\directlua{dofile(kpse.find_file('luatex-mplib.lua'))}
+% \directlua{dofile(resolvers.findfile('luatex-mplib.lua'))}
+
+%D The following code takes care of encapsulating the literals:
+
+\def\startMPLIBtoPDF#1#2#3#4%
+  {\hbox\bgroup
+   \xdef\MPllx{#1}\xdef\MPlly{#2}%
+   \xdef\MPurx{#3}\xdef\MPury{#4}%
+   \xdef\MPwidth{\the\dimexpr#3bp-#1bp\relax}%
+   \xdef\MPheight{\the\dimexpr#4bp-#2bp\relax}%
+   \parskip0pt%
+   \leftskip0pt%
+   \parindent0pt%
+   \everypar{}%
+   \setbox\mplibscratchbox\vbox\bgroup
+   \noindent}
+
+\def\stopMPLIBtoPDF
+  {\egroup
+   \setbox\mplibscratchbox\hbox
+     {\hskip-\MPllx bp%
+      \raise-\MPlly bp%
+      \box\mplibscratchbox}%
+   \setbox\mplibscratchbox\vbox to \MPheight
+     {\vfill
+      \hsize\MPwidth
+      \wd\mplibscratchbox0pt%
+      \ht\mplibscratchbox0pt%
+      \dp\mplibscratchbox0pt%
+      \box\mplibscratchbox}%
+   \wd\mplibscratchbox\MPwidth
+   \ht\mplibscratchbox\MPheight
+   \box\mplibscratchbox
+   \egroup}
+
+%D The body of picture, except for text items, is taken care of by:
+
+\ifnum\pdfoutput>0
+    \let\MPLIBtoPDF\pdfliteral
+\else
+    \def\MPLIBtoPDF#1{\special{pdf:literal direct #1}} % not ok yet
+\fi
+
+%D Text items have a special handler:
+
+\def\MPLIBtextext#1#2#3#4%
+  {\begingroup
+   \setbox\mplibscratchbox\hbox
+     {\font\temp=#1 at #2bp%
+      \temp
+      #3}%
+   \setbox\mplibscratchbox\hbox
+     {\raise#4sp%
+      \box\mplibscratchbox}%
+   \wd\mplibscratchbox0pt%
+   \ht\mplibscratchbox0pt%
+   \dp\mplibscratchbox0pt%
+   \box\mplibscratchbox
+   \endgroup}
+
+\def\MPLIBpdftext#1#2%
+  {\ifcsname mplib::#1\endcsname
+     % already done, forgotten outside convert group
+     \message{<reusing mplib: #1>}%
+   \else
+     \message{<embedding mplib: #1>}%
+     \immediate\pdfximage{#1}% we cannot remove the file as it is included last
+     \expandafter\edef\csname mplib::#1\endcsname{\the\pdflastximage}%
+   \fi
+   \setbox\mplibscratchbox\hbox
+     {\raise#2sp\hbox{\pdfrefximage\csname mplib::#1\endcsname}}%
+   \wd\mplibscratchbox0pt%
+   \ht\mplibscratchbox0pt%
+   \dp\mplibscratchbox0pt%
+   \box\mplibscratchbox}
+
+\endinput

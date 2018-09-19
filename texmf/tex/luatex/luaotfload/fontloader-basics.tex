@@ -1,0 +1,93 @@
+%D \module
+%D   [       file=luatex-basics,
+%D        version=2009.12.01,
+%D          title=\LUATEX\ Support Macros,
+%D       subtitle=Attribute Allocation,
+%D         author=Hans Hagen,
+%D           date=\currentdate,
+%D      copyright={PRAGMA ADE \& \CONTEXT\ Development Team}]
+
+%D As soon as we feel the need this file will file will contain an extension
+%D to the standard plain register allocation. For the moment we stick to a
+%D rather dumb attribute allocator. We start at 256 because we don't want
+%D any interference with the attributes used in the font handler.
+
+\ifx\newattribute\undefined \else \endinput \fi
+
+\newcount \lastallocatedattribute \lastallocatedattribute=255
+
+\def\newattribute#1%
+  {\global\advance\lastallocatedattribute 1
+   \attributedef#1\lastallocatedattribute}
+
+% maybe we will have luatex-basics.lua some day for instance when more
+% (pdf) primitives have moved to macros)
+
+\directlua {
+
+    gadgets = gadgets or { } % reserved namespace
+
+    gadgets.functions = { }
+    local registered  = {}
+
+    function gadgets.functions.reverve()
+        local numb = newtoken.scan_int()
+        local name = newtoken.scan_string()
+        local okay = string.gsub(name,"[\string\\ ]","")
+        registered[okay] = numb
+        texio.write_nl("reserving lua function '"..okay.."' with number "..numb)
+    end
+
+    function gadgets.functions.register(name,f)
+        local okay = string.gsub(name,"[\string\\ ]","")
+        local numb = registered[okay]
+        if numb then
+            texio.write_nl("registering lua function '"..okay.."' with number "..numb)
+            lua.get_functions_table()[numb] = f
+        else
+            texio.write_nl("lua function '"..okay.."' is not reserved")
+        end
+    end
+
+}
+
+\newcount\lastallocatedluafunction
+
+\def\newluafunction#1%
+  {\ifdefined#1\else
+     \global\advance\lastallocatedluafunction 1
+     \global\chardef#1\lastallocatedluafunction
+     \directlua{gadgets.functions.reserve()}#1{\detokenize{#1}}%
+   \fi}
+
+% an example of usage (if we ever support it it will go to the plain gadgets module):
+%
+% \directlua {
+%
+%     local cct = nil
+%     local chr = nil
+%
+%     gadgets.functions.register("UcharcatLuaOne",function()
+%         chr = newtoken.scan_int()
+%         cct = tex.getcatcode(chr)
+%         tex.setcatcode(chr,newtoken.scan_int())
+%         tex.sprint(unicode.utf8.char(chr))
+%     end)
+%
+%     gadgets.functions.register("UcharcatLuaTwo",function()
+%         tex.setcatcode(chr,cct)
+%     end)
+%
+% }
+%
+% \def\Ucharcat
+%   {\expandafter\expandafter\expandafter\luafunction
+%    \expandafter\expandafter\expandafter\UcharcatLuaTwo
+%    \luafunction\UcharcatLuaOne}
+%
+% A:\the\catcode65:\Ucharcat 65 11:A:\the\catcode65\par
+% A:\the\catcode65:\Ucharcat 65  5:A:\the\catcode65\par
+% A:\the\catcode65:\Ucharcat 65 11:A:\the\catcode65\par
+
+
+\endinput

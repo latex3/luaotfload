@@ -14,7 +14,7 @@
 --                              config
 -----------------------------------------------------------------------
 local mkivpath      = arg[1]
-local charfile      = arg[2] or "./scr/auto/luaotfload-characters.lua"
+local charfile      = arg[2] or "./src/auto/luaotfload-characters.lua" -- changed UF
 
 ---  for every code point char-def.lua provides a set of fields. they
 ---  are:

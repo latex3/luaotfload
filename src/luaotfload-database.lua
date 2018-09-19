@@ -6,6 +6,8 @@ if not modules then modules = { } end modules ['luaotfload-database'] = {
     license   = "GNU GPL v2.0"
 }
 
+
+
 --[[doc--
 
     With version 2.7 we killed of the Fontforge libraries in favor of
@@ -617,7 +619,11 @@ local style_category = {
     i           = "italic",
 }
 
-local type1_metrics = { "tfm", "ofm", }
+-- MK Determine if casefold search is requested
+local casefold_search =
+    not ({['0'] = true, ['f'] = true, [''] = true})
+        [(kpse.var_value'texmf_casefold_search' or '1'):sub(1,1)]
+-- /MK
 
 local lookup_filename = function (filename)
     if not name_index then name_index = load_names () end
@@ -630,7 +636,10 @@ local lookup_filename = function (filename)
         local barenames = baredata [location]
         local idx
         if basenames ~= nil then
+            -- MK Added fallback
             idx = basenames [filename]
+               or casefold_search and basenames [stringlower(filename)]
+            -- /MK
             if idx then
                 goto done
             end
@@ -640,7 +649,10 @@ local lookup_filename = function (filename)
                 local format  = format_precedence [j]
                 local filemap = barenames [format]
                 if filemap then
+                    -- MK Added fallback
                     idx = barenames [format] [filename]
+                       or casefold_search and barenames [format] [stringlower(filename)]
+                    -- /MK
                     if idx then
                         break
                     end
@@ -668,6 +680,12 @@ local dummy_findfile = resolvers.findfile -- from basics-gen
 
 --- string -> string * string * bool
 local lookup_font_file
+
+-- MK Added mini scope to avoid variable limit
+do
+local type1_metrics = { "tfm", "ofm", }
+-- /MK
+
 lookup_font_file = function (filename)
     local found = lookup_filename (filename)
 
@@ -693,6 +711,9 @@ lookup_font_file = function (filename)
     end
     return filename, nil, false
 end
+-- MK
+end
+-- /MK
 
 --[[doc--
 
@@ -1208,12 +1229,18 @@ lookup_fullpath = function (fontname, ext) --- getfilename()
         local basenames = basedata [location]
         local idx
         if basenames ~= nil then
+            -- MK Added fallback
             idx = basenames [fontname]
+               or casefold_search and basenames [stringlower(fontname)]
+            -- /MK
         end
         if ext then
             local barenames = baredata [location] [ext]
             if not idx and barenames ~= nil then
+                -- MK Added fallback
                 idx = barenames [fontname]
+                   or casefold_search and barenames [stringlower(fontname)]
+                -- /MK
             end
         end
         if idx then
@@ -2567,6 +2594,7 @@ generate_filedata = function (mappings)
 
         local inbase = base [location] --- no format since the suffix is known
 
+        -- MK Added lowercase versions for case-insensitive fallback
         if inbase then
             local present = inbase [basename]
             if present then
@@ -2586,11 +2614,38 @@ generate_filedata = function (mappings)
                 end
 
             else
+                local lowerbasename = stringlower (basename)
+                if basename ~= lowerbasename then
+                    present = inbase [lowerbasename]
+                    if present then
+                        logreport ("both", 4, "db",
+                                   "Conflicting basename: %q already indexed \z
+                                    as %s.",
+                                   barename, mappings[present].basename)
+                        conflicts.basenames = conflicts.basenames + 1
+
+                        --- track conflicts per font
+                        local conflictdata = entry.conflicts
+
+                        if not conflictdata then
+                            entry.conflicts = { basename = present }
+                        else -- some conflicts already detected
+                            conflictdata.basename = present
+                        end
+
+                    else
+                        inbase [lowerbasename] = index
+                    end
+                end
                 inbase [basename] = index
             end
         else
             inbase = { basename = index }
             base [location] = inbase
+            local lowerbasename = stringlower (basename)
+            if basename ~= lowerbasename then
+                inbase [lowerbasename] = index
+            end
         end
 
         --- 2) add to barename table
@@ -2614,14 +2669,40 @@ generate_filedata = function (mappings)
                 else -- some conflicts already detected
                     conflictdata.barename = present
                 end
-
             else
+                local lowerbarename = stringlower (barename)
+                if barename ~= lowerbarename then
+                    present = inbare [lowerbarename]
+                    if present then
+                        logreport ("both", 4, "db",
+                                   "Conflicting barename: %q already indexed \z
+                                    as %s.",
+                                   barename, mappings[present].basename)
+                        conflicts.barenames = conflicts.barenames + 1
+
+                        --- track conflicts per font
+                        local conflictdata = entry.conflicts
+
+                        if not conflictdata then
+                            entry.conflicts = { barename = present }
+                        else -- some conflicts already detected
+                            conflictdata.barename = present
+                        end
+                    else
+                        inbare [lowerbarename] = index
+                    end
+                end
                 inbare [barename] = index
             end
         else
             inbare = { [barename] = index }
             bare [location] [format] = inbare
+            local lowerbarename = stringlower (barename)
+            if barename ~= lowerbarename then
+                inbare [lowerbarename] = index
+            end
         end
+        -- /MK
 
         --- 3) add to fullpath map
 
@@ -3680,7 +3761,10 @@ return {
         fonts.definers  = fonts.definers or { resolvers = { } }
 
         names.blacklist = blacklist
-        names.version   = 5        --- increase monotonically
+        -- MK Changed to rebuild with case insensitive fallback.
+        --    Negative version to indicate generation by modified code.
+        names.version   = -1       --- decrease monotonically
+        -- /MK
         names.data      = nil      --- contains the loaded database
         names.lookups   = nil      --- contains the lookup cache
 

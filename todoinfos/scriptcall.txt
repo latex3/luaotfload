@@ -7,6 +7,9 @@
 -- the file is created in src/auto by default!
 
 texlua scripts/mkcharacters D:\context-minimals\context\tex\texmf-context\tex\context\base\mkiv
+--or
+texlua scripts/mkcharacters "" C:\Users\Nililand-Surface\context\tex\texmf-context
+
 
 -- mkglyphlist
 -- must be called twice if glyphlist.txt doesn't exist yet.

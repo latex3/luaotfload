@@ -1,14 +1,15 @@
 -- script calls:
 -- start folder: E:\git-projekte\luaotfload>
+-- needed environment variables
+-- CONTEXTPATH: should point to ...\context\tex\texmf-context
+--
 -- mkcharacters
 -- this create a new luaotfload-character.lua.
 -- with current context one get different (more) table entries
 -- requirements char-def.lua and char-ini.lua
 -- the file is created in src/auto by default!
 
-texlua scripts/mkcharacters D:\context-minimals\context\tex\texmf-context\tex\context\base\mkiv
---or
-texlua scripts/mkcharacters "" C:\Users\Nililand-Surface\context\tex\texmf-context
+texlua scripts/mkcharacters %CONTEXTPATH%/tex/context/base/mkiv/
 
 
 -- mkglyphlist
@@ -24,9 +25,8 @@ texlua scripts/mkglyphlist
 
 -- Imported the files with (no idea what the first argument is about ...)
 
-texlua scripts/mkimport import "" D:\context-minimals\context\tex\texmf-context
---or
-texlua scripts/mkimport import "" C:\Users\Nililand-Surface\context\tex\texmf-context
+texlua scripts/mkimport import "" %CONTEXTPATH%
+
 
 -- This also imports the merged orginal file and saves it as
 -- fontloader-reference.lua in src/fontloader/runtime

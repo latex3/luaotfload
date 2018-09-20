@@ -1,15 +1,15 @@
 % \iffalse meta-comment
 %
-% Copyright (C) 1992-1994 by David Carlisle, Frank Mittelbach.  
+% Copyright (C) 1992-1994 by David Carlisle, Frank Mittelbach.
 % All rights reserved.
-% 
+%
 % This file is part of the validate package.
-% 
+%
 % IMPORTANT NOTICE:
-% 
+%
 % You are not allowed to change this file.  In case of error
 % write to the email address mentioned in the file readme.val.
-% 
+%
 % \fi
 %                  test2e.tex
                    %%%%%%%%%%%
@@ -26,7 +26,7 @@
 % \def\fileversion{v1.0g}
 % \def\filedate{2015/09/11}
 
-% This file should not be used as a package or class file, 
+% This file should not be used as a package or class file,
 % it should be \input.
 
 % The scope of this \makeatletter will then be the rest of the
@@ -37,7 +37,7 @@
 \scrollmode
 \errorcontextlines=-1
 
-% Use the same \showbox settings as 2.09, unless they are changed in 
+% Use the same \showbox settings as 2.09, unless they are changed in
 % the test file. (2e sets these to -1)
 \showboxbreadth=\maxdimen
 \showboxdepth=\maxdimen
@@ -107,7 +107,7 @@
   \def\@tempa{#1}\ifx\@tempa\@EJ\else
    \OMIT\@warning{Declared format #1,^^JActual format \@EJ}\TIMO\fi}
 
-% The old version got this information from everyjob, 
+% The old version got this information from everyjob,
 % but that does not work with LaTeX2e as \everyjob is cleared.
 \edef\@EJ{\fmtname <\fmtversion>}
 
@@ -145,7 +145,7 @@
 
 
 
-% LaTeX2e always uses NFSS2 so new test files need not use 
+% LaTeX2e always uses NFSS2 so new test files need not use
 % \FONTSELECTION but it is retained for compatibility for test files
 % written for 209/NFSS1.
 %
@@ -193,7 +193,10 @@
 % Arrange that duplicate fonts share internal font id
 % so they are shown with the same csname in luatex
 % to match (pdf)tex and xetex.
+
+% disable this for now on development builds of luatex
 \ifx\directlua\undefined\else
+\ifnum\luatexversion<108
 \directlua{
 local original_fontloader=font.read_tfm
 if (luatexbase==nil) then
@@ -204,34 +207,29 @@ else
   else
     local cbl=luatexbase.callback_descriptions('define_font')
     if(cbl[1]\string~=nil) then
-      % disable this in formats that already have a lua fontloader, segfaults in 1.09 development branches
-      % only really needed for compatibility with pdftex in base tests.
-      % original_fontloader=luatexbase.remove_from_callback('define_font',cbl[1])
-        original_fontloader=nil
+      original_fontloader=luatexbase.remove_from_callback('define_font',cbl[1])
     end
   end
 end
 
-if(original_fontloader \string~=nil) then
 function latexDefineFont(n,s,i)
   local f = nil
   for ii,vv in font.each() do
     if (n == vv.name) then
-      if(vv.size == 
+      if(vv.size ==
         (s > 0 and s
-          or 
+          or
         (- s * vv.designsize) / 1000)) then
         f=ii
 % debugging (not to log, so not affect tlg)
       else
-       print('Font callback: ' .. n .. ' ' .. s .. 
+       print('Font callback: ' .. n .. ' ' .. s ..
 ' ' .. vv.size ..
 ' ' .. vv.designsize ..
 ' ' .. (s > 0 and s or (- s * vv.designsize) / 1000))
       end
     end
   end
-print('>>>', type(f) .. (f or '?'))
   return f or original_fontloader(n,s,i)
 end
 if (luatexbase==nil) then
@@ -239,8 +237,8 @@ if (luatexbase==nil) then
 else
   luatexbase.add_to_callback('define_font',latexDefineFont,"latexDefineFont")
 end
-end
 }
+\fi
 \fi
 
 % Load the map file early so it does not appear in the log.

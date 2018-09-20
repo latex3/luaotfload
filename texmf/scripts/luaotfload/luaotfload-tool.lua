@@ -104,6 +104,15 @@ config.lualibs.prefer_merged    = true
 config.lualibs.load_extended    = true
 
 require "lualibs"
+-- Add polyfill because nospaces didn't make it's way into lualibs
+-- (yet?)
+-- Code from l-lpeg.lua and l-string.lua by PRAGMA-ADE
+if not string.nospaces then
+    local nospacer = lpeg.Cs((lpeg.patterns.whitespace^1/"" + lpeg.patterns.nonwhitespace^1)^0)
+    function string.nospaces(str)
+        return str and lpegmatch(nospacer,str) or ""
+    end
+end
 
 local iosavedata                = io.savedata
 local lfsisdir                  = lfs.isdir

@@ -196,7 +196,7 @@
 
 % disable this for now on development builds of luatex
 \ifx\directlua\undefined\else
-\ifnum\luatexversion<108
+\ifnum\luatexversion<107
 \directlua{
 local original_fontloader=font.read_tfm
 if (luatexbase==nil) then

@@ -24,7 +24,7 @@ t = {kpse.lookup("luaotfload-status.lua",{["all"]=true})}
 
 texio.write_nl(table.serialize(t))
 
-t = {kpse.lookup("fontloader-2018-09-19.lua",{["all"]=true})}
+t = {kpse.lookup("fontloader-2018-09-19.lua",{["all"]=true})} or {"blub"}
 
 texio.write_nl(table.serialize(t))
 

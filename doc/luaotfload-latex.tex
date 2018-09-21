@@ -482,10 +482,10 @@
 
 \begin {document}
   \input {luaotfload-main.tex}
-\clearpage  
-\includepdf[fitpaper]{filegraph}  
-\includepdf[pages=-]{luaotfload-conf.pdf}  
-\includepdf[pages=-]{luaotfload-tool.pdf}  
+\clearpage
+\includepdf[fitpaper,pagecommand={\label{file-graph}}]{filegraph}
+\includepdf[pages=-]{luaotfload-conf.pdf}
+\includepdf[pages=-]{luaotfload-tool.pdf}
 \end {document}
 
 

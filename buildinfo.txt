@@ -78,7 +78,7 @@ Dokumentation
 
 --> luaotfload/doc> rst2man.py luaotfload.conf.rst luaotfload.conf.5
 --> luaotfload/doc> rst2xetex.py luaotfload.conf.rst luaotfload.conf.tex
---> luaotfload/doc> rst2man.py luaotfload-tool.rst luaotfload.tool.1
+--> luaotfload/doc> rst2man.py luaotfload-tool.rst luaotfload-tool.1
 --> luaotfload/doc> rst2xetex.py luaotfload-tool.rst luaotfload-tool.tex
 
 5. Compile the doc (hopefully done by l3build so only info)

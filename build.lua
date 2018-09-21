@@ -24,19 +24,29 @@ sourcefiledir = "./src"
 docfiledir    = "./doc" 
 
 -- l3build settings for CTAN/install target
+packtdszip=true
+
 -- documentation
 
--- check if they should be relative to maindir or docfiledir
+typesetexe = "lualatex"
+
 docfiles = 
  {
   "COPYING",
-  "./misc/luaotfload.conf.example",
+  "./doc/luaotfload.conf.example",
   "NEWS",
-  "./doc/README.md"
+  "./doc/README.md",
   }
 
-textfiles= {"*.md","*.example"}
-
+textfiles = 
+ {
+  "COPYING",
+  "./doc/luaotfload.conf.example",
+  "NEWS",
+  "./doc/README.md",
+  }
+  
+  
 typesetdemofiles = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"}
 typesetfiles     = {"luaotfload-latex.tex"}
 
@@ -44,15 +54,40 @@ typesetfiles     = {"luaotfload-latex.tex"}
 tdsroot = "luatex"
 
 sourcefiles  = {
-                "luaotfload.sty",
-                "**/*.lua",
-                "luaotfload-blacklist.cnf",
-                "**/*.tex"
+ "luaotfload.sty", 
+ "**/luaotfload-*.lua",
+ "**/fontloader-*.lua",
+ "**/fontloader-*.tex",
+ "luaotfload-blacklist.cnf",
+ "./doc/filegraph.tex",
+ "./doc/luaotfload-conf.tex",
+ "./doc/luaotfload-tool.tex"
                 }
                 
-installfiles = {"*.sty","*.lua","*.tex"}
+installfiles = {"luaotfload.sty",
+                "luaotfload-blacklist.cnf",
+                "luaotfload-configuration.lua",
+               "luaotfload-init.lua",
+               "luaotfload-letterspace.lua",
+               "luaotfload-database.lua",
+               "luaotfload-diagnostics.lua",
+               "luaotfload-resolvers.lua",
+               "luaotfload-log.lua",
+               "luaotfload-auxiliary.lua",
+               "luaotfload-main.lua",
+               "luaotfload-glyphlist.lua",
+               "luaotfload-features.lua",
+               "luaotfload-colors.lua",
+               "**/luaotfload-characters.lua",
+               "**/luaotfload-status.lua",
+               "luaotfload-loaders.lua",
+               "luaotfload-parsers.lua",
+               "**/fontloader-*.lua",
+                "**/fontloader-*.tex",
+                }
 
-scriptfiles = {"luaotfload-tool.lua"} -- 
+
+scriptfiles   =  {"luaotfload-tool.lua"} 
 
 scriptmanfiles = {"luaotfload.conf.5","luaotfload-tool.1"}
 

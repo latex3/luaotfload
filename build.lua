@@ -22,6 +22,7 @@ checkruns = 3
 -- l3build settings local folder descriptions 
 sourcefiledir = "./src"
 docfiledir    = "./doc" 
+supportdir    = "./doc"
 
 -- l3build settings for CTAN/install target
 packtdszip=true
@@ -36,6 +37,7 @@ docfiles =
   "./doc/luaotfload.conf.example",
   "NEWS",
   "./doc/README.md",
+  "./doc/luaotfload-main.tex"
   }
 
 textfiles = 
@@ -44,11 +46,14 @@ textfiles =
   "./doc/luaotfload.conf.example",
   "NEWS",
   "./doc/README.md",
+  "./doc/luaotfload-main.tex"
   }
   
   
-typesetdemofiles = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"}
-typesetfiles     = {"luaotfload-latex.tex"}
+typesetdemofiles  = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"}
+typesetsuppfiles   = {"luaotfload-main.tex"}
+typesetfiles      = {"**/luaotfload-latex.tex"}
+typsetcycles = 2 -- for the tests
 
 -- installation
 tdsroot = "luatex"
@@ -61,7 +66,8 @@ sourcefiles  = {
  "luaotfload-blacklist.cnf",
  "./doc/filegraph.tex",
  "./doc/luaotfload-conf.tex",
- "./doc/luaotfload-tool.tex"
+ "./doc/luaotfload-tool.tex",
+ "./doc/luaotfload-main.tex", 
                 }
                 
 installfiles = {"luaotfload.sty",

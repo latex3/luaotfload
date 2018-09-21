@@ -11,4 +11,6 @@ abc
 
 \directlua{info = status.list()
 texio.write_nl(table.serialize(info))}
+
+\directlua{texio.write_nl(luaotfload.version)}
 \end{document}

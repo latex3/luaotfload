@@ -1,11 +1,13 @@
 Change History
 --------------
-2018-09 development of v2.9 begins
+2018-09-21 luaotfload v2.9 
     * added various testfiles for the l3build system/travis tests to the github repository
     * solved a bug regarding directions https://github.com/u-fischer/lua-font-pond/issues/12
     * adapted luaotfload-letterspace to new fontloader
     * solved the case problem see https://github.com/u-fischer/lua-font-pond/issues/6
-    * Fix parsing of font.conf see https://github.com/lualatex/luaotfload/pull/420 
+    * Fix parsing of font.conf see https://github.com/lualatex/luaotfload/pull/420
+    * imported new versions of the context files - fontloader is compatible with luatex 1.08 again
+    * adapted the files list 
     
 2017-01-29, luaotfload v2.8:
     * Latest fontloader code.

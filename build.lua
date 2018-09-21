@@ -1,7 +1,7 @@
 
 packageversion= "2.9"
 packagestatus = "dev"
-packagedate   = "0000-00-00"
+packagedate   = "2018-09-21"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -27,15 +27,17 @@ docfiledir    = "./doc"
 -- documentation
 
 -- check if they should be relative to maindir or docfiledir
-docfiles = {
-  docfiledir.."/luaotfload.conf.rst",
+docfiles = 
+ {
   "COPYING",
   "./misc/luaotfload.conf.example",
   "NEWS",
-  "README.md" -- perhaps later a README.md in doc which is different to the github readme
+  "./doc/README.md"
   }
 
-typesetdemofiles = {"filegraph.tex"}
+textfiles= {"*.md","*.example"}
+
+typesetdemofiles = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"}
 typesetfiles     = {"luaotfload-latex.tex"}
 
 -- installation
@@ -50,7 +52,9 @@ sourcefiles  = {
                 
 installfiles = {"*.sty","*.lua","*.tex"}
 
-scriptfiles = {"luaotfload-tool.lua"} -- how install the mk-scripts???
+scriptfiles = {"luaotfload-tool.lua"} -- 
+
+scriptmanfiles = {"luaotfload.conf.5","luaotfload-tool.1"}
 
 -- l3build settings for tags:
 

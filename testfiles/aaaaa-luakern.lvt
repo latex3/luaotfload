@@ -2,15 +2,20 @@
 \input{regression-test}
 %\START %to debug pathes.
 \documentclass{article}
-
+\usepackage{luacode}
 
 \begin{document}
 \START
 \showoutput
 abc
 
-\directlua{info = status.list()
-texio.write_nl(table.serialize(info))}
+%\directlua{info = status.list()
+%texio.write_nl(table.serialize(info))}
+\begin{luacode}
 
-\directlua{texio.write_nl(luaotfload.version)}
+texio.write_nl(luaotfload.version .. " with " .. string.gsub(tostring(config.luaotfload.run.fontloader),"[%-]","xxx"))
+
+\end{luacode}
+
+
 \end{document}

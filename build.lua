@@ -102,9 +102,7 @@ function update_tag (file,content,tagname,tagdate)
 -- install directory is the texmf-tree
 -- print(options["texmfhome"])
 -- can this work??
--- options["texmfhome"] = lfs.currentdir().."/texmf"
--- this works:
--- os.setenv("TEXMFHOME",lfs.currentdir().."/texmf")
+options["texmfhome"] = "./texmf"
 
 kpse.set_program_name ("kpsewhich")
 if not release_date then

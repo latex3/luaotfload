@@ -9,9 +9,9 @@ luaotfload.fdb_latexmk
 luaotfload.log
 luaotfload.out
 luaotfload.toc
-luaotfload-characters.lua
-luaotfload-glyphlist.lua
-luaotfload-status.lua
+#luaotfload-characters.lua
+#luaotfload-glyphlist.lua
+#luaotfload-status.lua
 filegraph.pdf
 glyphlist.txt
 luaotfload-tool.1

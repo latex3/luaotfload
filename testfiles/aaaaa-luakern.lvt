@@ -9,4 +9,6 @@
 \showoutput
 abc
 
+\directlua{info = status.list()
+texio.write_nl(table.serialize(info))}
 \end{document}

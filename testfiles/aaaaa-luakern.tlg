@@ -1,6 +1,10 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-2.9 with fontloaderxxx2018xxx09xxx19.lua
+[\directlua]:4: unexpected symbol near '%'.
+\luacode@dbg@exec ...code@maybe@printdbg {#1} #1 }
+l. ...\end{luacode}
+The lua interpreter ran into a problem, so the
+remainder of this lua chunk will be ignored.
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT
 .\glue 16.0

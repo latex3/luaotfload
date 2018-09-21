@@ -15,18 +15,18 @@ abc
 
 texio.write_nl(luaotfload.version .. " with " .. string.gsub(tostring(config.luaotfload.run.fontloader),"[%-]","xxx"))
 
-t = {kpse.lookup("luaotfload-main.lua",{["all"]=true})}
-
-texio.write_nl(table.serialize(t))
-
-
-t = {kpse.lookup("luaotfload-status.lua",{["all"]=true})}
-
-texio.write_nl(table.serialize(t))
-
-t = {kpse.lookup("fontloader-2018-09-19.lua",{["all"]=true})} or {"blub"}
-
-texio.write_nl(table.serialize(t))
+%t = {kpse.lookup("luaotfload-main.lua",{["all"]=true})}
+%
+%texio.write_nl(table.serialize(t))
+%
+%
+%t = {kpse.lookup("luaotfload-status.lua",{["all"]=true})}
+%
+%texio.write_nl(table.serialize(t))
+%
+%t = {kpse.lookup("fontloader-2018-09-19.lua",{["all"]=true})} or {"blub"}
+%
+%texio.write_nl(table.serialize(t))
 
 \end{luacode}
 

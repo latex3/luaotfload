@@ -6,9 +6,9 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:                  2017-01-28
+:Date:                  2018-09-21
 :Copyright:             GPL v2.0
-:Version:               2.8
+:Version:               2.9
 :Manual section:        1
 :Manual group:          text processing
 
@@ -318,8 +318,9 @@ Tons, probably.
 AUTHORS
 =======================================================================
 
-*Luaotfload* is maintained by the LuaLaTeX dev team
-(`<https://github.com/lualatex/>`__).
+*Luaotfload* was developed by the LuaLaTeX dev team
+(`<https://github.com/lualatex/>`__). It is currently maintained by Ulrike Fischer
+and Marcel Krüger at `<https://github.com/u-fischer/luaotfload>`__
 The fontloader code is provided by Hans Hagen of Pragma ADE, Hasselt
 NL (`<http://pragma-ade.com/>`__).
 

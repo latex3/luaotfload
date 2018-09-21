@@ -20,10 +20,12 @@ texlua scripts/mkglyphlist
 
 
 -- mkimport: this imports the files from context.
--- changes: 18.09.2018
--- Compared the file list with the list in luatex-fonts.lua of context and adapted it.
+-- changes 18.09.2018: Compared the file list with the list in luatex-fonts.lua of context and adapted it.
+-- check for changes:
 
--- Imported the files with (no idea what the first argument is about ...)
+texlua scripts/mkimport news "" %CONTEXTPATH%
+
+-- Import the files with (no idea what the first argument is about ...)
 
 texlua scripts/mkimport import "" %CONTEXTPATH%
 
@@ -42,3 +44,19 @@ texlua scripts/mkimport package
 texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-19.lua
 
 -- mktests: quite unclear what the tests need to work. Better rely on l3build tests.
+
+
+==============
+Dokumentation
+==============
+-- the man files: (requires docutils)
+-- the man pages should also go in the manual so we need also a pdf
+luaotfload/doc> rst2man.py luaotfload.conf.rst luaotfload.conf.5
+luaotfload/doc> rst2xetex.py luaotfload.conf.rst luaotfload.conf.tex
+luaotfload/doc> lualatex luaotfload.conf.tex
+luaotfload/doc> rst2man.py luaotfload-tool.rst luaotfload.tool.1
+luaotfload/doc> rst2xetex.py luaotfload-tool.rst luaotfload-tool.tex
+luaotfload/doc> lualatex luaotfload-tool.tex
+-- the picture
+luaotfload/doc> lualatex filegraph
+-- the main document

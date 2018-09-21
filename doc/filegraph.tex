@@ -2,13 +2,14 @@
 %created with by @marmot 14.09.2018
 %
 \documentclass[border=3.14mm,tikz]{standalone}
-\usetikzlibrary{fit,matrix,positioning,arrows.meta,decorations.text}
+\usetikzlibrary{fit,matrix,positioning,arrows.meta,decorations.text,shapes.callouts}
 \pgfdeclarelayer{background}
 \pgfdeclarelayer{container}
 \pgfdeclarelayer{foreground}
 \pgfsetlayers{container,background,main,foreground}
 \usepackage {fontspec}
 \usepackage {unicode-math}
+\usepackage{tikzmarmots,tikzducks}
 
 \setmainfont[
 % Numbers     = OldStyle, %% buggy with font cache
@@ -29,7 +30,8 @@ sep=9pt,font=\ttfamily,align=center}]
 % m1
 \matrix [matrix of nodes,font=\ttfamily,nodes={anchor=base west},
 label={[name=mL1,font=\itshape]above:Luaotfload Libraries}] (m1)
-{
+{%
+%<<<<<<<<<<<<<<<<
 luaotfload-auxiliary.lua    &
 luaotfload-colors.lua       \\
 luaotfload-configuration.lua &
@@ -39,13 +41,15 @@ luaotfload-letterspace.lua  \\
 luaotfload-loaders.lua      &
 luaotfload-parsers.lua      \\
 luaotfload-resolvers.lua    \\
+%>>>>>>>>>>>>>>>>
 };
 % m2	
 \node[right=4.2cm of m1,fill=gray!20,draw=gray!30,dashed,basic] (m2) {luaotfload-blacklist.cnf};	
 % m3
 \matrix [below=2cm of m1,matrix of nodes,font=\ttfamily,nodes={anchor=base west},
 label={[name=mL3,font=\itshape,anchor=south]above:Lualibs -- Lua Libraries from Context}] (m3)
-{
+{%
+%<<<<<<<<<<<<<<<<
 l-boolean.lua &
 l-file.lua &
 l-function.lua&
@@ -58,12 +62,18 @@ l-table.lua &
 l-unicode.lua &
 util-fil.lua&
 util-str.lua\\
+%>>>>>>>>>>>>>>>>
 };
 % m4	
 \node[left=2cm of m3,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm] (m4) {luaotfload-main.lua};	
 % m5
 \node[fill=gray!20,draw=gray!30,dashed,basic,inner sep=6mm,anchor=south west] at (m3.south -|
-m2.west)(m5){luaotfload-names.lua.gz\\ luaotfload-names.luc};	
+m2.west)(m5){%
+%<<<<<<<<<<<<<<<<
+luaotfload-names.lua.gz\\ 
+luaotfload-names.luc
+%>>>>>>>>>>>>>>>>
+};	
 % m6
 \node[below=3cm of m3,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm] (m6){luaotfload-init.lua};	
 % m7
@@ -73,15 +83,18 @@ m2.west)(m5){luaotfload-names.lua.gz\\ luaotfload-names.luc};
 row sep=5mm,
 nodes={inner sep=3mm,fill=orange!10,rounded corners},
 label={[name=mL8,font=\it]above:Fontloader}] (m8)
-{
+{%
+%<<<<<<<<<<<<<<<<
 fontloader-basics-gen.lua\\
 fontloader-YY-MM-DD.lua\\
+%<<<<<<<<<<<<<<<<
 };
 % m9
 \node [below right=1cm and 2cm of m6,font=\ttfamily,
 inner sep=3mm,text width=7.3cm,align=left,
 label={[name=mL9,font=\itshape]Font and Node Libraries from Context}] (m9)
 {\spaceskip=1.5em
+%%<<<<<<<<<<<<<<<<
 data-con.lua
 font-afk.lua
 font-cff.lua
@@ -113,6 +126,7 @@ font-imp-tex
 font-imp-ligatures\\
 font-imp-italics
 font-imp-effects
+%>>>>>>>>>>>>>>>>
 };
 % m10
 \node [below=1cm of m9,font=\ttfamily,
@@ -120,10 +134,16 @@ inner sep=3mm,text width=7.3cm,align=center,
 label={[name=mL10,font=\itshape]Font Loader (LuaTeX-Fonts)}] (m10)
 {\tabcolsep=0.5em
  \begin{tabular}{@{}ll@{}}
- luatex-basics-chr.lua   & luatex-fonts-ext.lua\\
- luatex-basics-nod.lua   & luatex-fonts-syn.lua\\
- luatex-fonts-enc.lua    & luatex-fonts-def.lua\\
- luatex-fonts-gbn.lua    &luatex-fonts-lig.lua
+%<<<<<<<<<<<<<<<<
+luatex-basics-chr.lua   & 
+luatex-fonts-ext.lua   \\
+luatex-basics-nod.lua   & 
+luatex-fonts-syn.lua   \\
+luatex-fonts-enc.lua    & 
+luatex-fonts-def.lua   \\
+luatex-fonts-gbn.lua    &
+luatex-fonts-lig.lua
+%>>>>>>>>>>>>>>>> 
  \end{tabular}
 };
 % m11
@@ -133,27 +153,50 @@ label={[name=mL10,font=\itshape]Font Loader (LuaTeX-Fonts)}] (m10)
 row sep=5mm,
 nodes={inner sep=3mm,fill=gray!10,rounded corners,text width=3cm,align=center},
 label={[name=mL12,font=\sffamily]above:Standalone scripts}] (m12)
-{
+{%
+%<<<<<<<<<<<<<<<<
 mkimport\\
 mkglyphlist\\
 mkcharacters\\
 mkstatus\\
 mktest\\
+%>>>>>>>>>>>>>>>> 
 };
 % m13
-\node[below=1.2cm of m10,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	(m13) {luaotfload-glyphlist.lua};
+\node[below=1.2cm of m10,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	(m13) 
+{%
+%<<<<<<<<<<<<<<<<
+luaotfload-glyphlist.lua
+%>>>>>>>>>>>>>>>> 
+};
 % m14
-\node[below=0.8cm of m13,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	(m14) {luaotfload-characters.lua
+\node[below=0.8cm of m13,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	(m14) 
+{%
+%<<<<<<<<<<<<<<<<
+luaotfload-characters.lua
+%>>>>>>>>>>>>>>>> 
 };
 % m15
 \node[below=3cm of m8,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	
-(m15) {luaotfload-tool.lua};
+(m15) {%
+%<<<<<<<<<<<<<<<<
+luaotfload-tool.lua
+%>>>>>>>>>>>>>>>> 
+};
 % m16
 \node[below=1cm of m15,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	
-(m16) {luaotfload-diagnostics.lua};
+(m16) {%
+%<<<<<<<<<<<<<<<<
+luaotfload-diagnostics.lua
+%>>>>>>>>>>>>>>>> 
+};
 % m17
 \node[below=2cm of m16,xshift=3cm,fill=gray!20,draw=gray!30,dashed,basic,inner sep=6pt]	
-(m17) {luaotfload-status.lua};
+(m17) {%
+%<<<<<<<<<<<<<<<<
+luaotfload-status.lua
+%>>>>>>>>>>>>>>>> 
+};
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % envelopes
@@ -212,5 +255,15 @@ to[out=-90,in=180] (m17);
 \draw[<-,dashed,annotate=generates from distribution files] (m17)
 to[out=0,in=-135] ++(5,1) to[out=45,in=0] (m12-4-1);
 \end{scope}
+
+\begin{scope}[shift={([xshift=2cm,yshift=-3cm]current bounding box.north west)}]
+\marmot;
+\duck[invisible];
+\node[anchor=south,draw,text width=3cm,shape=rectangle callout,font=\sffamily\scriptsize,align=center]
+at ([yshift=1cm,xshift=-0.5cm]bill)
+{It looks complicated\\ because it is complicated!};
+%
+\end{scope}
+
 \end{tikzpicture}
 \end{document} 

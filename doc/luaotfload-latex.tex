@@ -1,3 +1,4 @@
+% !Mode:: "TeX:EN:UTF-8:Main"
 \suppresslongerror1%% sigh ...
 %% Copyright (C) 2009-2015
 %%
@@ -48,7 +49,7 @@
     citecolor=\primarycolor,
      pdftitle={The Luaotfload package},
    pdfsubject={OpenType layout system for Plain TeX and LaTeX},
-    pdfauthor={Elie Roux & Khaled Hosny & Philipp Gesang},
+    pdfauthor={Elie Roux & Khaled Hosny & Philipp Gesang & Ulrike Fischer},
   pdfkeywords={luatex, lualatex, unicode, opentype}
 ]{hyperref}
 
@@ -204,7 +205,7 @@
 
 %% Context offers both \type{…} and \type<<…>>, but not an unbalanced
 %% one that we could map directly onto Latex’s \verb|…|.
-
+\usepackage{pdfpages}
 \usepackage {listings}
 \usepackage {luatexbase}
 \lstset {
@@ -386,7 +387,7 @@
   \begin {figure} [b]
     \edef \syntaxlabel  {#1}%
     \def \syntaxcaption {#2}%
-    \setlength\grammarparsep{12pt plus 2pt minus 2pt}%
+    \setlength\grammarparsep{0pt plus 2pt minus 2pt}%
     \setlength\grammarindent{5cm}%
     \begingroup
       \small
@@ -481,6 +482,10 @@
 
 \begin {document}
   \input {luaotfload-main.tex}
+\clearpage  
+\includepdf[fitpaper]{filegraph}  
+\includepdf[pages=-]{luaotfload-conf.pdf}  
+\includepdf[pages=-]{luaotfload-tool.pdf}  
 \end {document}
 
 

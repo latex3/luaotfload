@@ -32,9 +32,10 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2017/01/29 v2.8}
-  \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang\\
+  \setdocumentdate   {2018/09/21 v2.9}
+  \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
+                      New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
                       Support: \email     {lualatex-dev@tug.org}}
 
   \typesetdocumenttitle
@@ -53,6 +54,31 @@
 \endfrontmatter
 
 \typesetcontent
+
+\beginsection {New in version 2.9 (by Ulrike Fischer)}
+
+On the one side there is not much new in this version: The native components of \identifier{Luaotfload} are nearly unchanged. Only a few bugs have been corrected.
+
+On the other side there is a lot new:
+
+\begindescriptions
+
+  \beginaltitem {Fontloader} The fontloader files imported from \CONTEXT\ have been updated to the current version.
+   This was necessary to make \identifier{Luaotfload} compatible with the comimg \LUATEX 1.08. Compared to the previous version from february 2017 quite a number of things have changed. Most importantly the handling of arabic fonts has greatly improved. But this also means that changes in the output are possible.
+  \endaltitem
+
+  \beginaltitem {Lualibs} The update of the fontloader files also required an update of the \identifier{Lualibs} package. This \identifier{Luaotfload} versions needs version 2.6 of \identifier{Lualibs}.
+  \endaltitem
+
+  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LUATEX 1.08 maintenance has been transfered to Ulrike Fischer and Marcel Krüger. The package is currently maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload.git}. Issues should be reported there.
+  \endaltitem
+
+  \beginaltitem {Documentation}
+  The documentation is nearly unchanged. I only added this introduction. I recreated with the help of @marmot the graphic. I updated the file list. I imported as appendix pdf versions of the two man files which are part of the \identifier{Luaotfload} documentation.
+  \endaltitem
+
+\enddescriptions
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Introduction}
@@ -1284,6 +1310,7 @@ and have thus been omitted from the merge.\footnote{%
       \beginaltitem {l-file.lua}      \endaltitem
       \beginaltitem {l-boolean.lua}   \endaltitem
       \beginaltitem {l-math.lua}      \endaltitem
+      \beginaltitem {l-unicode.lua}      \endaltitem
       \beginaltitem {util-str.lua}    \endaltitem
       \beginaltitem {util-fil.lua}    \endaltitem
   \enddefinitions
@@ -1308,8 +1335,11 @@ grouped twofold as below:
         \beginaltitem{luatex-basics-nod.lua} \endaltitem
         \beginaltitem{luatex-basics-chr.lua} \endaltitem
         \beginaltitem{luatex-fonts-enc.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-syn.lua}  \endaltitem
+  %      \beginaltitem{luatex-fonts-syn.lua}  \endaltitem %ignored
         \beginaltitem{luatex-fonts-ext.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-def.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-lig.lua}  \endaltitem
+        \beginaltitem{luatex-fonts-gbn.lua}  \endaltitem
       \enddefinitions
     \enddoublecolumns
   \endnormalitem
@@ -1324,11 +1354,10 @@ grouped twofold as below:
         \beginaltitem{font-con.lua} \endaltitem
         \beginaltitem{font-cid.lua} \endaltitem
         \beginaltitem{font-map.lua} \endaltitem
-        \beginaltitem{font-tfm.lua} \endaltitem
-        \beginaltitem{font-one.lua} \endaltitem
-        \beginaltitem{font-afk.lua} \endaltitem
+        \beginaltitem{font-vfc.lua} \endaltitem
         \beginaltitem{font-oti.lua} \endaltitem
         \beginaltitem{font-otr.lua} \endaltitem
+        \beginaltitem{font-ott.lua} \endaltitem
         \beginaltitem{font-cff.lua} \endaltitem
         \beginaltitem{font-ttf.lua} \endaltitem
         \beginaltitem{font-dsp.lua} \endaltitem
@@ -1340,10 +1369,17 @@ grouped twofold as below:
         \beginaltitem{font-ots.lua} \endaltitem
         \beginaltitem{font-osd.lua} \endaltitem
         \beginaltitem{font-ocl.lua} \endaltitem
+        \beginaltitem{font-otc.lua} \endaltitem
+        \beginaltitem{font-onr.lua} \endaltitem
+        \beginaltitem{font-one.lua} \endaltitem
+        \beginaltitem{font-afk.lua} \endaltitem
+        \beginaltitem{font-tfm.lua} \endaltitem
         \beginaltitem{font-lua.lua} \endaltitem
         \beginaltitem{font-def.lua} \endaltitem
-        \beginaltitem{font-xtx.lua} \endaltitem
-        \beginaltitem{font-gbn.lua} \endaltitem
+        \beginaltitem{font-imp-tex.lua} \endaltitem
+        \beginaltitem{font-imp-ligatures.lua} \endaltitem
+        \beginaltitem{font-imp-italics.lua} \endaltitem
+        \beginaltitem{font-imp-effects.lua} \endaltitem
       \enddefinitions
     \enddoublecolumns
   \endnormalitem
@@ -1410,10 +1446,10 @@ files not contained in the merge. Some of these have no equivalent in
     \endaltitem
 \endfilelist
 
-\figurefloat
-  {file-graph}
-  {Schematic of the files in \identifier{Luaotfload}}
-  {filegraph.pdf}
+%\figurefloat
+%  {file-graph}
+%  {Schematic of the files in \identifier{Luaotfload}}
+%  {filegraph.pdf}
 
 \endsubsection
 

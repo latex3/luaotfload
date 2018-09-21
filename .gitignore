@@ -57,6 +57,7 @@ doc/*.tuc
 doc/*.vimout
 
 *.synctex
+*.synctex.gz
 
 *ls-R
 # valgrind log

@@ -1,5 +1,12 @@
 # The Luaotfload Package
 
+VERSION: 2.9
+
+DATE: 2018-09-21
+
+
+## Description
+
 Luaotfload is an adaptation of the ConTeXt font loading system for the Plain
 and LaTeX formats. It allows OpenType fonts to be loaded with font features
 accessible using an extended font request syntax while providing compatibility
@@ -13,16 +20,13 @@ provided by this package.
 
 Please see the documentation luaotfload.pdf for more information.
 
-## New September 2018
+## Maintenance
 
 This package is currently maintained at 
 <https://github.com/u-fischer/luaotfload>. 
-The active development branch is called `dev-2.9` and should lead shortly to a new 
-CTAN version. The master branch is currently frozen. 
  
 Issues can be reported at the issue tracker or at the old issue tracker on 
 <http://github.com/lualatex/luaotfload>. 
-
 
 The development for LuaLaTeX is discussed on the lualatex-dev mailing list. See
 <http://www.tug.org/mailman/listinfo/lualatex-dev> for details.
@@ -64,12 +68,11 @@ Marcel Krüger            <https://github.com/zauguin>
 
 ## Installation
 
-Here are the recommended installation methods (preferred first).
-
-1.  Install the current version with the package management tools of your TeX system. 
+1.  Install the current version with the package management tools of your TeX system.
+    If you want to install manually: there is a tds-zip file which can be unpacked in a texmf tree. 
 
 2.  If you want to try the development version download the texmf folder in the development branch. 
-
+    at <https://github.com/u-fischer/luaotfload>
 
 ## License
 

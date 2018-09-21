@@ -1,11 +1,11 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
-\input{regression-test}
-\START to debug pathes.
+%\input{regression-test}
+%\START to debug pathes.
 \documentclass{article}
 
 
 \begin{document}
-\START
+%\START
 \showoutput
 abc
 

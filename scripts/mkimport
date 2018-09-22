@@ -201,33 +201,36 @@ local imports = {
   fontloader = {
     { name = "basics-gen"        , ours = nil          , kind = kind_essential },
     { name = "basics-nod"        , ours = nil          , kind = kind_merged    },
-    { name = "basics"            , ours = nil          , kind = kind_tex       },
-    { name = "fonts-demo-vf-1"   , ours = nil          , kind = kind_ignored   },
+--  { name = "basics"            , ours = nil          , kind = kind_tex       }, -- dropped 22.9.18
+--  { name = "fonts-demo-vf-1"   , ours = nil          , kind = kind_ignored   }, -- dropped 22.9.18
     { name = "fonts-enc"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-ext"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-ext"         , ours = nil          , kind = kind_merged    },
     { name = "fonts-def"         , ours = nil          , kind = kind_merged    }, -- NEW/unclear "was font-xtx.lua" 
     { name = "fonts-gbn"         , ours = nil          , kind = kind_merged    }, -- RENAMED/MOVED UF 18.09.2018
     { name = "fonts-lig"         , ours = nil          , kind = kind_merged    }, -- NEW UF 18.09.2018
+    { name = "fonts-mis"         , ours = nil          , kind = kind_merged    }, -- NEW UF 22.09.2018
     { name = "fonts-merged"      , ours = "reference"  , kind = kind_essential },
-    { name = "fonts"             , ours = nil          , kind = kind_merged    },
-    { name = "fonts"             , ours = nil          , kind = kind_tex       },
+    { name = "fonts"             , ours = "reference-load-order", kind = kind_ignored   }, -- corrected 22.09.2018, is not of type merged
+    { name = "fonts"             , ours = "reference-load-order", kind = kind_tex       },
     { name = "fonts-syn"         , ours = nil          , kind = kind_ignored   },
-    { name = "languages"         , ours = nil          , kind = kind_ignored   },
-    { name = "languages"         , ours = nil          , kind = kind_tex       },
-    { name = "math"              , ours = nil          , kind = kind_ignored   },
-    { name = "math"              , ours = nil          , kind = kind_tex       },
-    { name = "mplib"             , ours = nil          , kind = kind_ignored   },
-    { name = "mplib"             , ours = nil          , kind = kind_tex       },
-    { name = "plain"             , ours = nil          , kind = kind_tex       },
-    { name = "preprocessor"      , ours = nil          , kind = kind_ignored   },
-    { name = "preprocessor"      , ours = nil          , kind = kind_tex       },
-    { name = "preprocessor-test" , ours = nil          , kind = kind_tex       },
-    { name = "swiglib"           , ours = nil          , kind = kind_ignored   },
-    { name = "swiglib"           , ours = nil          , kind = kind_tex       },
-    { name = "swiglib-test"      , ours = nil          , kind = kind_ignored   },
-    { name = "swiglib-test"      , ours = nil          , kind = kind_tex       },
-    { name = "test"              , ours = nil          , kind = kind_tex       },
+-- the following file are not functional due to the renaming. They are related to plain and not
+-- needed by luaotfload. So they were dropped. Perhaps one can make a standalone package related to plain testing      
+--    { name = "languages"         , ours = nil          , kind = kind_ignored   },
+--    { name = "languages"         , ours = nil          , kind = kind_tex       },
+--    { name = "math"              , ours = nil          , kind = kind_ignored   }, -- dropped 22.9.18
+--    { name = "math"              , ours = nil          , kind = kind_tex       }, -- dropped 22.9.18
+--    { name = "mplib"             , ours = nil          , kind = kind_ignored   }, -- dropped 22.9.18
+--    { name = "mplib"             , ours = nil          , kind = kind_tex       }, -- dropped 22.9.18
+--    { name = "plain"             , ours = nil          , kind = kind_tex       }, -- dropped 22.9.18
+--    { name = "preprocessor"      , ours = nil          , kind = kind_ignored   }, -- dropped 22.9.18
+--    { name = "preprocessor"      , ours = nil          , kind = kind_tex       }, -- dropped 22.9.18
+--    { name = "preprocessor-test" , ours = nil          , kind = kind_tex       }, -- dropped 22.9.18
+--    { name = "swiglib"           , ours = nil          , kind = kind_ignored   },
+--    { name = "swiglib"           , ours = nil          , kind = kind_tex       },
+--    { name = "swiglib-test"      , ours = nil          , kind = kind_ignored   },
+--    { name = "swiglib-test"      , ours = nil          , kind = kind_tex       },
+--    { name = "test"              , ours = nil          , kind = kind_tex       },
   }, --[[ [fontloader] ]]
 
   context = { --=> all merged
@@ -380,13 +383,14 @@ local package = {
     "basics-nod",
 --  "basics-chr", -- is luaotfload-characters.lua the replacement??
     "font-ini",
+    "fonts-mis",
     "font-con",
     "fonts-enc",
     "font-cid",
     "font-map",
     "font-vfc", --NEW 18.09.2018
-    "font-oti",
     "font-otr",
+    "font-oti",
     "font-ott", -- NEW 18.09.2018
     "font-cff",
     "font-ttf",

@@ -1,6 +1,9 @@
 # Default start location is the main dir luaotfload
-# needed environment variables
+# needed environment variables for the steps 1.-9.
 # CONTEXTPATH: should point to ...\context\tex\texmf-context
+# for the l3build test the texmf-tree of the repo should be known
+# to the tex system
+# The man pages needs docutils
 
 1. Update context
 
@@ -56,10 +59,10 @@ The name contains the current date.
 
 11. Run tests in default TL and with dev-version
 
---> l3build
+--> l3build check
 
 
-11. Update version information everywhere ... (tagging doesn't work for now,
+12. Update version information everywhere ... (tagging doesn't work for now,
     too many different variants)
 
 

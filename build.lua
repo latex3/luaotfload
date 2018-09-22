@@ -32,20 +32,15 @@ typesetexe = "lualatex"
 
 docfiles = 
  {
-  "COPYING",
-  "./doc/luaotfload.conf.example",
-  "NEWS",
-  "./doc/README.md",
-  "./doc/luaotfload-main.tex"
+   "luaotfload.conf.example",
+   "luaotfload-main.tex"
   }
 
 textfiles = 
  {
   "COPYING",
-  "./doc/luaotfload.conf.example",
   "NEWS",
-  "./doc/README.md",
-  "./doc/luaotfload-main.tex"
+  docfiledir .. "/README.md",
   }
   
   

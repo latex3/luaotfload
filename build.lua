@@ -16,13 +16,12 @@ checkconfigs = {
                 "config-plain",
                 "config-fontspec"
                }
-
+checksuppfiles = {"texmf.cnf"}
 checkruns = 3
 
 -- l3build settings local folder descriptions 
 sourcefiledir = "./src"
 docfiledir    = "./doc" 
-supportdir    = "./doc"
 
 -- l3build settings for CTAN/install target
 packtdszip=true
@@ -51,7 +50,7 @@ textfiles =
   
   
 typesetdemofiles  = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"}
-typesetsuppfiles   = {"luaotfload-main.tex"}
+typesetsuppfiles   = {"texmf.cnf"}
 typesetfiles      = {"**/luaotfload-latex.tex"}
 typsetcycles = 2 -- for the tests
 

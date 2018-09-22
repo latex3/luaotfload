@@ -12,22 +12,36 @@
 
 --doc]]--
 
---- mkimport code:
---- Accounting of upstream files. There are different categories:
----
----   · *essential*: Files required at runtime.
----   · *merged*:    Files merged into the fontloader package.
----   · *ignored*:   Lua files not merged, but part of the format.
----   · *tex*:       TeX code, i.e. format and examples.
----   · *lualibs*:   Files merged, but also provided by the Lualibs package.
----   · *original*:  Files merged, but also provided by the Lualibs package.
+--[[doc--
+ (from mkimport code and extended)
+ Accounting of upstream files. There are different categories:
+
+   · *essential*:     Files required at runtime.
+   · *merged*:        Files merged into the fontloader package.
+   · *ignored*:       Lua files not merged, but part of the format.
+   · *tex*:           TeX code, i.e. format and examples.
+   · *lualibs*:       Files imported, but also provided by the Lualibs package.
+   · *library*:       native luaotfload-files of type library
+   · *core*:          native core luaotfload files
+   · *generated*:     generated luaotfload files
+   · *scripts*:       scripts (mk-...)
+   · *docu*:          documentation (should perhaps be more refined
+   
+   
+   
+--doc]]--
+
 
 local kind_essential = 0
 local kind_merged    = 1
 local kind_tex       = 2
 local kind_ignored   = 3
 local kind_lualibs   = 4
-local kind_original  = 5
+local kind_library   = 5
+local kind_core      = 6
+local kind_generated = 7
+local kind_scripts   = 8
+local kind_docu      = 9
 
 local kind_name = {
   [0] = "essential",
@@ -35,92 +49,164 @@ local kind_name = {
   [2] = "tex"      ,
   [3] = "ignored"  ,
   [4] = "lualibs"  ,
-  [5] = "original"
+  [5] = "library"  ,
+  [6] = "core",
+  [7] = "generated",
+  [8] = "scripts",
+  [9] = "docu"
 }
 
 --[[mkimport--
 mkimports needs an 
  --> "import" table with two subtables:
-  --> fontloader, with the files to get from generic, scrtype = "ctxgene"
-  --> context, with the files to get from context,    scrtype = "ctxbase"
+  --> fontloader, with the files to get from generic, cond: scrtype = "ctxgene"
+  --> context, with the files to get from context,    cond: scrtype = "ctxbase"
+  entries are subtables with {name=, ours=, kind= }
 
 and a 
  --> "package" table with 
   --> optional (probably unused)
   --> required = files of type kind_merged
+  entries are the values of name
 
 --mkimport]]--
 
+--[[init.lua --
+initlua needs a table
+--> context_modules
+with the (ordered) entries
 
+{false, "name"}            -- kind_lualibs
+{srcdir,"scrprefix+name"} -- kind_essential or kind_merged 
+
+The same list should be used in local init_main = function ()
+but only without the prefix.
+it is unclear how fonts_syn should be handled!!!!
+
+
+--init.lua]]--
 
 local   srcctxbase = "tex/context/base/mkiv/",
 local   srcctxgene = "tex/generic/context/luatex/",
+
+-- the "real" name of a file is srcpref+name+extension
  
 return 
  {
-    { name = "l-lua"             , ours = "l-lua"             , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "l-lpeg"            , ours = "l-lpeg"            , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "l-function"        , ours = "l-function"        , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "l-string"          , ours = "l-string"          , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "l-table"           , ours = "l-table"           , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "l-io"              , ours = "l-io"              , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "l-file"            , ours = "l-file"            , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "l-boolean"         , ours = "l-boolean"         , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "l-math"            , ours = "l-math"            , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "l-unicode"         , ours = "l-unicode"         , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" }, 
+  -- at first the source files from context
+    { name = "l-lua"             , ours = "l-lua"             , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "l-lpeg"            , ours = "l-lpeg"            , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "l-function"        , ours = "l-function"        , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "l-string"          , ours = "l-string"          , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "l-table"           , ours = "l-table"           , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "l-io"              , ours = "l-io"              , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "l-file"            , ours = "l-file"            , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "l-boolean"         , ours = "l-boolean"         , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "l-math"            , ours = "l-math"            , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "l-unicode"         , ours = "l-unicode"         , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" }, 
 
-    { name = "util-str"          , ours = "util-str"          , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "util-fil"          , ours = "util-fil"          , kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "util-str"          , ours = "util-str"          , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "util-fil"          , ours = "util-fil"          , ext = ".lua", kind = kind_lualibs   , srcdir= srcctxbase, scrtype = "ctxbase" },
 
-    { name = "basics-gen"        , ours = nil                 , kind = kind_essential , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
+    { name = "basics-gen"        , ours = nil                 , ext = ".lua", kind = kind_essential , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
 -- files merged in the fontloader. Two files are ignored
-    { name = "data-con"          , ours = "data-con"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "basics-nod"        , ours = nil                 , kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
-    { name = "basics-chr"        , ours = nil                 , kind = kind_ignored   , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
-    { name = "font-ini"          , ours = "font-ini"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "fonts-mis"         , ours = nil                 , kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
-    { name = "font-con"          , ours = "font-con"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "fonts-enc"         , ours = nil                 , kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
-    { name = "font-cid"          , ours = "font-cid"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-map"          , ours = "font-map"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "fonts-syn"         , ours = nil                 , kind = kind_ignored   , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
-    { name = "font-vfc"          , ours = "font-vfc"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" }, 
-    { name = "font-otr"          , ours = "font-otr"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-oti"          , ours = "font-oti"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-ott"          , ours = "font-ott"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" }, 
-    { name = "font-cff"          , ours = "font-cff"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-ttf"          , ours = "font-ttf"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-dsp"          , ours = "font-dsp"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-oup"          , ours = "font-oup"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-otl"          , ours = "font-otl"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-oto"          , ours = "font-oto"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-otj"          , ours = "font-otj"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-ota"          , ours = "font-ota"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-ots"          , ours = "font-ots"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-osd"          , ours = "font-osd"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-ocl"          , ours = "font-ocl"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-otc"          , ours = "font-otc"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-onr"          , ours = "font-onr"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-one"          , ours = "font-one"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-afk"          , ours = "font-afk"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-tfm"          , ours = "font-tfm"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-lua"          , ours = "font-lua"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-def"          , ours = "font-def"          , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" }, 
-    { name = "fonts-def"         , ours = nil                 , kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
-    { name = "fonts-ext"         , ours = nil                 , kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
-    { name = "font-imp-tex"      , ours = "font-imp-tex"      , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-imp-ligatures", ours = "font-imp-ligatures", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-imp-italics"  , ours = "font-imp-italics"  , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "font-imp-effects"  , ours = "font-imp-effects"  , kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
-    { name = "fonts-lig"         , ours = nil                 , kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
-    { name = "fonts-gbn"         , ours = nil                 , kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
+    { name = "data-con"          , ours = "data-con"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "basics-nod"        , ours = nil                 , ext = ".lua", kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
+    { name = "basics-chr"        , ours = nil                 , ext = ".lua", kind = kind_ignored   , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
+    { name = "font-ini"          , ours = "font-ini"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "fonts-mis"         , ours = nil                 , ext = ".lua", kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
+    { name = "font-con"          , ours = "font-con"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "fonts-enc"         , ours = nil                 , ext = ".lua", kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
+    { name = "font-cid"          , ours = "font-cid"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-map"          , ours = "font-map"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "fonts-syn"         , ours = nil                 , ext = ".lua", kind = kind_ignored   , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
+    { name = "font-vfc"          , ours = "font-vfc"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" }, 
+    { name = "font-otr"          , ours = "font-otr"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-oti"          , ours = "font-oti"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-ott"          , ours = "font-ott"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" }, 
+    { name = "font-cff"          , ours = "font-cff"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-ttf"          , ours = "font-ttf"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-dsp"          , ours = "font-dsp"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-oup"          , ours = "font-oup"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-otl"          , ours = "font-otl"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-oto"          , ours = "font-oto"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-otj"          , ours = "font-otj"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-ota"          , ours = "font-ota"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-ots"          , ours = "font-ots"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-osd"          , ours = "font-osd"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-ocl"          , ours = "font-ocl"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-otc"          , ours = "font-otc"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-onr"          , ours = "font-onr"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-one"          , ours = "font-one"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-afk"          , ours = "font-afk"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-tfm"          , ours = "font-tfm"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-lua"          , ours = "font-lua"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-def"          , ours = "font-def"          , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" }, 
+    { name = "fonts-def"         , ours = nil                 , ext = ".lua", kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
+    { name = "fonts-ext"         , ours = nil                 , ext = ".lua", kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
+    { name = "font-imp-tex"      , ours = "font-imp-tex"      , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-imp-ligatures", ours = "font-imp-ligatures", ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-imp-italics"  , ours = "font-imp-italics"  , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "font-imp-effects"  , ours = "font-imp-effects"  , ext = ".lua", kind = kind_merged    , srcdir= srcctxbase, scrtype = "ctxbase" },
+    { name = "fonts-lig"         , ours = nil                 , ext = ".lua", kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
+    { name = "fonts-gbn"         , ours = nil                 , ext = ".lua", kind = kind_merged    , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
 -- end of files merged
 
-    { name = "fonts-merged"      , ours = "reference"         , kind = kind_essential , srcdir= srcctxgene ,scrtype="ctxgene" , srcpref = "luatex-" },
+    { name = "fonts-merged"      , ours = "reference"         , ext = ".lua", kind = kind_essential , srcdir= srcctxgene ,scrtype = "ctxgene" , srcpref = "luatex-" },
  
 --  this two files are useful as reference for the load order but should not be installed                                                              
-    { name = "fonts"             , ours = "reference-load-order", kind = kind_ignored , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-"    }, -- corrected 22.09.2018, is not of type merged
-    { name = "fonts"             , ours = "reference-load-order", kind = kind_tex     , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-"   },
+    { name = "fonts"             , ours = "load-order-reference", ext = ".lua", kind = kind_ignored , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
+    { name = "fonts"             , ours = "load-order-reference", ext = ".tex", kind = kind_tex     , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
+
+-- the luaotfload files
+    { name = "luaotfload"       ,kind = kind_core, ext =".sty"},
+    { name = "main"              ,kind = kind_core, ext =".lua", srcpref = "luaotfload-" },
+    { name = "init"              ,kind = kind_core, ext =".lua", srcpref = "luaotfload-" },
+    { name = "log"               ,kind = kind_core, ext =".lua", srcpref = "luaotfload-" },
+    { name = "diagnostics"       ,kind = kind_core, ext =".lua", srcpref = "luaotfload-" },
+    
+    { name = "tool"              ,kind = kind_core, ext =".lua", srcpref = "luaotfload-" ,tgtdir = "scripts" },
+    { name = "blacklist"         ,kind = kind_core, ext =".cnf", srcpref = "luaotfload-" },
+
+
+    { name = "auxiliary"         ,kind = kind_library, ext =".lua", srcpref = "luaotfload-" },
+    { name = "colors"            ,kind = kind_library, ext =".lua", srcpref = "luaotfload-" },
+    { name = "configuration"     ,kind = kind_library, ext =".lua", srcpref = "luaotfload-" },
+    { name = "database"          ,kind = kind_library, ext =".lua", srcpref = "luaotfload-" },
+    { name = "features"          ,kind = kind_library, ext =".lua", srcpref = "luaotfload-" }, 
+    { name = "letterspace"       ,kind = kind_library, ext =".lua", srcpref = "luaotfload-" }, 
+    { name = "loaders"           ,kind = kind_library, ext =".lua", srcpref = "luaotfload-" }, 
+    { name = "parsers"           ,kind = kind_library, ext =".lua", srcpref = "luaotfload-" }, 
+    { name = "resolvers"         ,kind = kind_library, ext =".lua", srcpref = "luaotfload-" }, 
+
+    { name = "characters"        ,kind = kind_generated, ext =".lua", srcpref = "luaotfload-", script="mkcharacter" },
+    { name = "glyphlist"         ,kind = kind_generated, ext =".lua", srcpref = "luaotfload-", script="mkglyphlist" },
+    { name = "status"            ,kind = kind_generated, ext =".lua", srcpref = "luaotfload-", script="mkstatus" },
+     
+
+
+-- scripts
+    { name = "mkimport"       ,kind = kind_script},
+    { name = "mkglyphslist"   ,kind = kind_script},
+    { name = "mkcharacters"   ,kind = kind_script},
+    { name = "mkstatus"       ,kind = kind_script},
+    { name = "mktest"         ,kind = kind_script},
+    
+-- documentation (source dirs need perhaps coding ...) but don't overdo for now
+
+   { name = "latex"      , kind= kind_docu, ext = ".tex", scrpref = "luaotfload-", ctan=true,  typeset = true },
+   { name = "main"       , kind= kind_docu, ext = ".tex", scrpref = "luaotfload-", ctan=true,  typeset = false },
+   { name = "conf"       , kind= kind_docu, ext = ".tex", scrpref = "luaotfload-", ctan=true,  typeset = true , generated = true},
+   { name = "tool"       , kind= kind_docu, ext = ".tex", scrpref = "luaotfload-", ctan=true,  typeset = true , generated = true},
+   { name = "filegraph"  , kind= kind_docu, ext = ".tex",                          ctan=true,  typeset = true , generated = true},
+   { name = "conf"       , kind= kind_docu, ext = ".rst", scrpref = "luaotfload.", ctan=false, },
+   { name = "conf"       , kind= kind_docu, ext = ".5"  , scrpref = "luaotfload.", ctan=true, tgtdir = "man" },  
+   { name = "tool"       , kind= kind_docu, ext = ".rst", scrpref = "luaotfload-", ctan=false, },       
+   { name = "tool"       , kind= kind_docu, ext = ".1"  , scrpref = "luaotfload-", ctan=true, tgtdir = "man" },
+   { name = "README"     , kind= kind_docu, ext = ".md" ,  ctan=true},
+   { name = "COPYING"    , kind= kind_docu, ext = ""    ,  ctan=true},
+   { name = "NEWS"       , kind= kind_docu, ext = ""    ,  ctan=true},
+   
 }
 
 
@@ -134,141 +220,5 @@ return
 
 
 
-} 
 
 
-  optional = { --- components not included in the default package
---- UF: imho this table is not used and is only for information. 
---- The original initialization sequence by Hans Hagen, see the file
---- luatex-fonts.lua for details:
----
----   [01] l-lua.lua
----   [02] l-lpeg.lua
----   [03] l-function.lua
----   [04] l-string.lua
----   [05] l-table.lua
----   [06] l-io.lua
----   [07] l-file.lua
----   [08] l-boolean.lua
----   [09] l-math.lua
--- NEW     l-unicode.lua
----   [10] util-str.lua
----   [11] util-fil.lua
----   [12] luatex-basics-gen.lua
----   [13] data-con.lua
----   [14] luatex-basics-nod.lua
----   [15] luatex-basics-chr.lua
----   [16] font-ini.lua
----NEW     luatex-fonts-mis.lua
----   [17] font-con.lua
----   [18] luatex-fonts-enc.lua
----   [19] font-cid.lua
----   [20] font-map.lua
----   [21] luatex-fonts-syn.lua
----NEW     font-vfc.lua
----ORD[24] font-otr.lua 
----   [23] font-oti.lua
----NEW     font-ott.lua    
----   [25] font-cff.lua
----   [26] font-ttf.lua
----   [27] font-dsp.lua
----   [28] font-oup.lua
----   [29] font-otl.lua
----   [30] font-oto.lua
----   [31] font-otj.lua
----   [32] font-ota.lua
----   [33] font-ots.lua
----   [34] font-osd.lua
----   [35] font-ocl.lua
----   [36] font-otc.lua
----   [37] font-onr.lua
----   [38] font-one.lua
----   [39] font-afk.lua
----   [40] font-tfm.lua
----   [41] font-lua.lua
----   [42] font-def.lua
----REN[43] luatex-fonts-def.lua -- was font-xtx.lua
----   [44] luatex-fonts-ext.lua
----NEW     font-imp-tex.lua
----NEW     font-imp-ligatures.lua
----NEW     font-imp-italics.lua
----NEW     font-imp-effects.lua
----NEW     luatex-fonts-lig.lua  
----REN[45] luatex-fonts-gbn.lua -- was font-gbn.lua
----
---- Of these, nos. 01--11 are provided by the Lualibs. Keeping them
---- around in the Luaotfload fontloader is therefore unnecessary.
---- Packaging needs to account for this difference.
-
-    "l-lua",
-    "l-lpeg",
-    "l-function",
-    "l-string",
-    "l-table",
-    "l-io",
-    "l-file",
-    "l-boolean",
-    "l-math",
-    "l-unicode", -- NEW UF  18.09.2018
-    "util-str",
-    "util-fil",
-
---- Another file containing auxiliary definitions must be present
---- prior to initialization of the configuration.
-
-    "luatex-basics-gen",  -- UF: NAMING? why not basics-gen?? see below
-
---- We have a custom script for autogenerating data so we don’t use the
---- definitions from upstream.
-
-    "basics-chr",        -- UF: NAMING? why not luatex-basics-chr?? see above
-
-  }, --[[ [package.optional] ]]
-
---- The files below constitute the “fontloader proper”. Some of the
---- functionality like file resolvers is overloaded later by
---- Luaotfload. Consequently, the resulting package is pretty
---- bare-bones and not usable independently.
-
-  required = {
-
-    "data-con",
-    "basics-nod",
---  "basics-chr", -- is luaotfload-characters.lua the replacement??
-    "font-ini",
-    "font-con",
-    "fonts-enc",
-    "font-cid",
-    "font-map",
-    "font-vfc", --NEW 18.09.2018
-    "font-oti",
-    "font-otr",
-    "font-ott", -- NEW 18.09.2018
-    "font-cff",
-    "font-ttf",
-    "font-dsp",
-    "font-oup",
-    "font-otl",
-    "font-oto",
-    "font-otj",
-    "font-ota",
-    "font-ots",
-    "font-osd",
-    "font-ocl",
-    "font-otc",
-    "font-onr",
-    "font-one",
-    "font-afk",
-    "font-tfm",
-    "font-lua",
-    "font-def",
-    "fonts-def",          -- NEW 18.09.2018
-    "fonts-ext",
-    "font-imp-tex",       -- NEW
-    "font-imp-ligatures", -- NEW
-    "font-imp-italics",   -- NEW
-    "font-imp-effects",   -- NEW
-    "fonts-lig",          -- NEW   
-    "fonts-gbn",          -- REN
-    
-  }, --[[ [package.required] ]]

@@ -95,13 +95,13 @@ local names = {
   { miscdir,      "fontloader-font-oti.lua",        },
 --  { miscdir,      "fontloader-font-gbn.lua",        }, -- renamed
   { miscdir,      "fontloader-font-def.lua",        },
-  { miscdir,      "fontloader-fonts-demo-vf-1.lua", },
   { miscdir,      "fontloader-fonts-enc.lua",       },
   { miscdir,      "fontloader-fonts-ext.lua",       },
   { miscdir,      "fontloader-fonts-def.lua",       }, -- NEW
+  { miscdir,      "fontloader-fonts-mis.lua",       }, -- NEW  
   { miscdir,      "fontloader-fonts-gbn.lua",       }, -- NEW/Renamed
   { miscdir,      "fontloader-fonts-lig.lua",       }, -- NEW
-  { miscdir,      "fontloader-fonts.lua",           },
+--  { miscdir,      "fontloader-fonts.lua",           },
   { miscdir,      "fontloader-font-lua.lua",        },
   { miscdir,      "fontloader-fonts-syn.lua",       },
   { miscdir,      "fontloader-font-tfm.lua",        },
@@ -126,7 +126,7 @@ local names = {
   { miscdir,      "fontloader-font-imp-effects.lua",}, -- NEW
 
   --- lua libraries
-  { miscdir,      "fontloader-languages.lua",       },
+--  { miscdir,      "fontloader-languages.lua",       },
   { miscdir,      "fontloader-l-boolean.lua",       },
   { miscdir,      "fontloader-l-file.lua",          },
   { miscdir,      "fontloader-l-function.lua",      },
@@ -137,11 +137,11 @@ local names = {
   { miscdir,      "fontloader-l-string.lua",        },
   { miscdir,      "fontloader-l-table.lua",         },
   { miscdir,      "fontloader-l-unicode.lua",       },
-  { miscdir,      "fontloader-math.lua",            },
-  { miscdir,      "fontloader-mplib.lua",           },
-  { miscdir,      "fontloader-preprocessor.lua",    },
-  { miscdir,      "fontloader-swiglib.lua",         },
-  { miscdir,      "fontloader-swiglib-test.lua",    },
+--  { miscdir,      "fontloader-math.lua",            },
+--  { miscdir,      "fontloader-mplib.lua",           },
+--  { miscdir,      "fontloader-preprocessor.lua",    },
+--  { miscdir,      "fontloader-swiglib.lua",         },
+--  { miscdir,      "fontloader-swiglib-test.lua",    },
   { miscdir,      "fontloader-util-str.lua",        },
   { miscdir,      "fontloader-util-fil.lua",        },
 

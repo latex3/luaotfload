@@ -71,6 +71,10 @@ and a
 
 --mkimport]]--
 
+--[[mkstatus--
+needs a list of files too ...
+--mkstatus]]--
+
 --[[init.lua --
 initlua needs a table
 --> context_modules
@@ -85,6 +89,8 @@ it is unclear how fonts_syn should be handled!!!!
 
 
 --init.lua]]--
+
+
 
 local   srcctxbase = "tex/context/base/mkiv/",
 local   srcctxgene = "tex/generic/context/luatex/",
@@ -153,10 +159,15 @@ return
 -- end of files merged
 
     { name = "fonts-merged"      , ours = "reference"         , ext = ".lua", kind = kind_essential , srcdir= srcctxgene ,scrtype = "ctxgene" , srcpref = "luatex-" },
+
+
  
 --  this two files are useful as reference for the load order but should not be installed                                                              
     { name = "fonts"             , ours = "load-order-reference", ext = ".lua", kind = kind_ignored , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" }, 
     { name = "fonts"             , ours = "load-order-reference", ext = ".tex", kind = kind_tex     , srcdir= srcctxgene, scrtype = "ctxgene" , srcpref = "luatex-" },
+
+-- the default fontloader. How to code the name??
+    { name = "YYYY-MM-DD"       ,          , ext = ".lua", kind = kind_generated },
 
 -- the luaotfload files
     { name = "luaotfload"       ,kind = kind_core, ext =".sty"},

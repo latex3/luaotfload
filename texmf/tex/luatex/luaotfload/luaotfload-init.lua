@@ -254,7 +254,7 @@ local context_modules = {
   { ltx,   "luatex-fonts-enc"  },
   { ctx,   "font-cid"          },
   { ctx,   "font-map"          },
-  { ltx,   "luatex-fonts-syn"  },
+  { ltx,   "luatex-fonts-syn"  }, -- ignore??
   { ctx,   "font-vfc"          }, -- NEW UF 19.09.2018
   { ctx,   "font-oti"          },
   { ctx,   "font-otr"          },
@@ -540,13 +540,16 @@ local init_main = function ()
     load_fontloader_module "data-con"
     load_fontloader_module "basics-nod"
     load_fontloader_module "font-ini"
+    load_fontloader_module "fonts-mis"
     load_fontloader_module "font-con"
     load_fontloader_module "fonts-enc"
     load_fontloader_module "font-cid"
     load_fontloader_module "font-map"
-    load_fontloader_module "fonts-syn"
+    load_fontloader_module "fonts-syn" -- ignore?
+    load_fontloader_module "font-vfc"
     load_fontloader_module "font-oti"
     load_fontloader_module "font-otr"
+    load_fontloader_module "font-ott"
     load_fontloader_module "font-cff"
     load_fontloader_module "font-ttf"
     load_fontloader_module "font-dsp"
@@ -558,13 +561,20 @@ local init_main = function ()
     load_fontloader_module "font-ots"
     load_fontloader_module "font-osd"
     load_fontloader_module "font-ocl"
+    load_fontloader_module "font-otc"
     load_fontloader_module "font-onr"
     load_fontloader_module "font-one"
     load_fontloader_module "font-afk"
     load_fontloader_module "font-tfm"
     load_fontloader_module "font-lua"
     load_fontloader_module "font-def"
+    load_fontloader_module "fonts-def"
     load_fontloader_module "fonts-ext"
+    load_fontloader_module "font-imp-tex"
+    load_fontloader_module "font-imp-ligatures"
+    load_fontloader_module "font-imp-italics"
+    load_fontloader_module "font-imp-effects"
+    load_fontloader_module "font-lig"
     load_fontloader_module "font-gbn"
 
   elseif fontloader == "context" then

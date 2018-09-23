@@ -1273,8 +1273,8 @@ This file constitutes the “default fontloader” and is part of the
 \identifier{luaotfload} package as \fileent{fontloader-YY-MM-DD.lua},
 where the uppercase letters are placeholders for the build date.
 %
-A companion to it, \fileent{luatex-basics-gen.lua} must be loaded
-beforehand to set up parts of the environment required by the \CONTEXT
+A companion to it, \fileent{luatex-basics-gen.lua} (renamed to \fileent{fontloader-basics-gen.lua} in \identifier{luaotfload})
+must be loaded beforehand to set up parts of the environment required by the \CONTEXT
 libraries.
 %
 During a \TEX\ run, the fontloader initialization and injection happens
@@ -1302,18 +1302,6 @@ and have thus been omitted from the merge.\footnote{%
 \begindoublecolumns
   \begindefinitions
  \directlua{ printctxlibslist ()}
-      \beginaltitem {l-lua.lua}       \endaltitem
-      \beginaltitem {l-lpeg.lua}      \endaltitem
-      \beginaltitem {l-function.lua}  \endaltitem
-      \beginaltitem {l-string.lua}    \endaltitem
-      \beginaltitem {l-table.lua}     \endaltitem
-      \beginaltitem {l-io.lua}        \endaltitem
-      \beginaltitem {l-file.lua}      \endaltitem
-      \beginaltitem {l-boolean.lua}   \endaltitem
-      \beginaltitem {l-math.lua}      \endaltitem
-      \beginaltitem {l-unicode.lua}      \endaltitem
-      \beginaltitem {util-str.lua}    \endaltitem
-      \beginaltitem {util-fil.lua}    \endaltitem
   \enddefinitions
 \enddoublecolumns
 
@@ -1333,14 +1321,7 @@ grouped twofold as below:
     fontloader.
     \begindoublecolumns
       \begindefinitions
-        \beginaltitem{luatex-basics-nod.lua} \endaltitem
-        \beginaltitem{luatex-basics-chr.lua} \endaltitem
-        \beginaltitem{luatex-fonts-enc.lua}  \endaltitem
-  %      \beginaltitem{luatex-fonts-syn.lua}  \endaltitem %ignored
-        \beginaltitem{luatex-fonts-ext.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-def.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-lig.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-gbn.lua}  \endaltitem
+        \directlua{printctxallgenericlist ()}
       \enddefinitions
     \enddoublecolumns
   \endnormalitem
@@ -1350,37 +1331,7 @@ grouped twofold as below:
     directly from \CONTEXT.
     \begindoublecolumns
       \begindefinitions
-        \beginaltitem{data-con.lua} \endaltitem
-        \beginaltitem{font-ini.lua} \endaltitem
-        \beginaltitem{font-con.lua} \endaltitem
-        \beginaltitem{font-cid.lua} \endaltitem
-        \beginaltitem{font-map.lua} \endaltitem
-        \beginaltitem{font-vfc.lua} \endaltitem
-        \beginaltitem{font-oti.lua} \endaltitem
-        \beginaltitem{font-otr.lua} \endaltitem
-        \beginaltitem{font-ott.lua} \endaltitem
-        \beginaltitem{font-cff.lua} \endaltitem
-        \beginaltitem{font-ttf.lua} \endaltitem
-        \beginaltitem{font-dsp.lua} \endaltitem
-        \beginaltitem{font-oup.lua} \endaltitem
-        \beginaltitem{font-otl.lua} \endaltitem
-        \beginaltitem{font-oto.lua} \endaltitem
-        \beginaltitem{font-otj.lua} \endaltitem
-        \beginaltitem{font-ota.lua} \endaltitem
-        \beginaltitem{font-ots.lua} \endaltitem
-        \beginaltitem{font-osd.lua} \endaltitem
-        \beginaltitem{font-ocl.lua} \endaltitem
-        \beginaltitem{font-otc.lua} \endaltitem
-        \beginaltitem{font-onr.lua} \endaltitem
-        \beginaltitem{font-one.lua} \endaltitem
-        \beginaltitem{font-afk.lua} \endaltitem
-        \beginaltitem{font-tfm.lua} \endaltitem
-        \beginaltitem{font-lua.lua} \endaltitem
-        \beginaltitem{font-def.lua} \endaltitem
-        \beginaltitem{font-imp-tex.lua} \endaltitem
-        \beginaltitem{font-imp-ligatures.lua} \endaltitem
-        \beginaltitem{font-imp-italics.lua} \endaltitem
-        \beginaltitem{font-imp-effects.lua} \endaltitem
+      \directlua{printctxfontlist ()}
       \enddefinitions
     \enddoublecolumns
   \endnormalitem

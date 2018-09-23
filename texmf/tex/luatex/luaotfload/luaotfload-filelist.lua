@@ -298,6 +298,18 @@ function luaotfload.filelist.selectctxgenericentries ( filetable )
   return result
 end
 
+-- ignored files are in the list
+function luaotfload.filelist.selectctxallgenericentries ( filetable )
+  local result = {}
+  for i,v in ipairs (filetable) do
+   if v.ctxtype == "ctxgene" and (v.kind==1  or v.kind== 3) then
+    table.insert(result,v)
+   end
+  end
+  return result
+end
+
+
 -- lualibs libraries
 function luaotfload.filelist.selectctxlibsentries ( filetable )
   local result = {}

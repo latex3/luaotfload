@@ -21,6 +21,9 @@
 \setmonofont[Ligatures=TeX,Scale=MatchLowercase]{Liberation Mono}
 %setsansfont[Ligatures=TeX]{Linux Biolinum O}
 \setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
+
+\directlua{require("luaotfload-filelist.lua")}
+
 \begin{document}
 \begin{tikzpicture}[rounded corners,basic/.style={inner
 sep=9pt,font=\ttfamily,align=center}]
@@ -70,7 +73,7 @@ util-str.lua\\
 \node[fill=gray!20,draw=gray!30,dashed,basic,inner sep=6mm,anchor=south west] at (m3.south -|
 m2.west)(m5){%
 %<<<<<<<<<<<<<<<<
-luaotfload-names.lua.gz\\ 
+luaotfload-names.lua.gz\\
 luaotfload-names.luc
 %>>>>>>>>>>>>>>>>
 };	
@@ -93,7 +96,7 @@ fontloader-YY-MM-DD.lua\\
 \node [below right=1cm and 2cm of m6,font=\ttfamily,
 inner sep=3mm,text width=7.3cm,align=left,
 label={[name=mL9,font=\itshape]Font and Node Libraries from Context}] (m9)
-{\spaceskip=1.5em
+{\spaceskip=1.5em \raggedright
 %%<<<<<<<<<<<<<<<<
 data-con.lua
 font-afk.lua
@@ -123,7 +126,7 @@ font-tfm.lua
 font-ttf.lua
 font-vfc.lua
 font-imp-tex
-font-imp-ligatures\\
+font-imp-ligatures
 font-imp-italics
 font-imp-effects
 %>>>>>>>>>>>>>>>>
@@ -135,15 +138,15 @@ label={[name=mL10,font=\itshape]Font Loader (LuaTeX-Fonts)}] (m10)
 {\tabcolsep=0.5em
  \begin{tabular}{@{}ll@{}}
 %<<<<<<<<<<<<<<<<
-luatex-basics-chr.lua   & 
+luatex-basics-chr.lua   &
 luatex-fonts-ext.lua   \\
-luatex-basics-nod.lua   & 
+luatex-basics-nod.lua   &
 luatex-fonts-syn.lua   \\
-luatex-fonts-enc.lua    & 
+luatex-fonts-enc.lua    &
 luatex-fonts-def.lua   \\
 luatex-fonts-gbn.lua    &
 luatex-fonts-lig.lua
-%>>>>>>>>>>>>>>>> 
+%>>>>>>>>>>>>>>>>
  \end{tabular}
 };
 % m11
@@ -160,42 +163,42 @@ mkglyphlist\\
 mkcharacters\\
 mkstatus\\
 mktest\\
-%>>>>>>>>>>>>>>>> 
+%>>>>>>>>>>>>>>>>
 };
 % m13
-\node[below=1.2cm of m10,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	(m13) 
+\node[below=1.2cm of m10,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	(m13)
 {%
 %<<<<<<<<<<<<<<<<
 luaotfload-glyphlist.lua
-%>>>>>>>>>>>>>>>> 
+%>>>>>>>>>>>>>>>>
 };
 % m14
-\node[below=0.8cm of m13,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	(m14) 
+\node[below=0.8cm of m13,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	(m14)
 {%
 %<<<<<<<<<<<<<<<<
 luaotfload-characters.lua
-%>>>>>>>>>>>>>>>> 
+%>>>>>>>>>>>>>>>>
 };
 % m15
 \node[below=3cm of m8,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	
 (m15) {%
 %<<<<<<<<<<<<<<<<
 luaotfload-tool.lua
-%>>>>>>>>>>>>>>>> 
+%>>>>>>>>>>>>>>>>
 };
 % m16
 \node[below=1cm of m15,fill=gray!20,draw=gray!30,thick,basic,inner sep=6mm]	
 (m16) {%
 %<<<<<<<<<<<<<<<<
 luaotfload-diagnostics.lua
-%>>>>>>>>>>>>>>>> 
+%>>>>>>>>>>>>>>>>
 };
 % m17
 \node[below=2cm of m16,xshift=3cm,fill=gray!20,draw=gray!30,dashed,basic,inner sep=6pt]	
 (m17) {%
 %<<<<<<<<<<<<<<<<
 luaotfload-status.lua
-%>>>>>>>>>>>>>>>> 
+%>>>>>>>>>>>>>>>>
 };
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

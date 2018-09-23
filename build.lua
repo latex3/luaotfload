@@ -33,22 +33,17 @@ typesetexe = "lualatex"
 
 docfiles = 
  {
-  "COPYING",
-  "./doc/luaotfload.conf.example",
-  "NEWS",
-  "./doc/README.md",
-  "./doc/luaotfload-main.tex"
+  "luaotfload.conf.example",
+  "luaotfload-main.tex"
   }
 
 textfiles = 
  {
   "COPYING",
-  "./doc/luaotfload.conf.example",
   "NEWS",
-  "./doc/README.md",
-  "./doc/luaotfload-main.tex"
+  docfiledir .. "/README.md",
   }
-  
+    
   
 typesetdemofiles  = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"}
 typesetsuppfiles   = {"luaotfload-main.tex"}
@@ -74,6 +69,7 @@ installfiles = {"luaotfload.sty",
                 "luaotfload-blacklist.cnf",
                 "luaotfload-configuration.lua",
                "luaotfload-init.lua",
+               "luaotfload-filelist.lua",
                "luaotfload-letterspace.lua",
                "luaotfload-database.lua",
                "luaotfload-diagnostics.lua",

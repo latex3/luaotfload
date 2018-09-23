@@ -27,46 +27,51 @@
 require("luaotfload-filelist.lua")
 
 function printctxfontlist ()
- for i,v in ipairs (luaotfload.filelist.ctxfontlist ( luaotfload.filelist.data )) do
-  tex.sprint("\\mbox{"..v.."} ")
+ t= luaotfload.filelist.selectctxfontentries (luaotfload.filelist.data)
+ for i,v in ipairs (t) do
+  tex.sprint("\\mbox{"..v.name..v.ext.."} ")
  end 
 end
 
 function printctxlibslist ()
+ t= luaotfload.filelist.selectctxlibsentries (luaotfload.filelist.data)
  local rowcnt = 0
  local sep = "&"
- for i,v in ipairs (luaotfload.filelist.ctxlibslist ( luaotfload.filelist.data )) do
+ for i,v in ipairs (t) do
   rowcnt = rowcnt + 1
   if rowcnt % 4 == 0 then sep = "\\\\" else sep = "&" end
-  tex.sprint("\\mbox{"..v.."}".. sep)
+  tex.sprint("\\mbox{"..v.name..v.ext.."}".. sep)
  end
 end
 
 function printctxgenericlist ()
+ t= luaotfload.filelist.selectctxgenericentries (luaotfload.filelist.data)
  local rowcnt = 0
  local sep = "&"
- for i,v in ipairs (luaotfload.filelist.ctxgenericlist ( luaotfload.filelist.data )) do
+ for i,v in ipairs (t) do
   rowcnt = rowcnt + 1
   if rowcnt % 2 == 0 then sep = "\\\\" else sep = "&" end
-  tex.sprint("\\mbox{"..v.."}".. sep)
+  tex.sprint("\\mbox{"..v.ctxpref..v.name..v.ext.."}".. sep)
  end
 end
 
 
 function printlibrarylist ()
+ t = luaotfload.filelist.selectlibraryentries (luaotfload.filelist.data)
  local rowcnt = 0
  local sep = "&"
- for i,v in ipairs (luaotfload.filelist.librarylist ( luaotfload.filelist.data )) do
+ for i,v in ipairs (t) do
   rowcnt = rowcnt + 1
   if rowcnt % 2 == 0 then sep = "\\\\" else sep = "&" end
-  tex.sprint("\\mbox{"..v.."}".. sep)
+  tex.sprint("\\mbox{"..v.gitpref..v.name..v.ext.."}".. sep)
  end
 end
 
 function printscriptlist ()
- for i,v in ipairs (luaotfload.filelist.data ) do
+ t = luaotfload.filelist.selectscriptentries (luaotfload.filelist.data)
+ for i,v in ipairs ( t ) do
   if v.kind == 8 then 
-    tex.sprint(v.name .."\\\\")
+    tex.sprint( v.name .."\\\\")
   end  
  end
 end

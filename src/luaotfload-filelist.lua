@@ -275,57 +275,59 @@ luaotfload.filelist.data =
 --local kind_docu      = 9
 
 
--- the list of kind-merged files in ctxbas:
+-- some selections
 
-function luaotfload.filelist.ctxfontlist ( filetable )
+function luaotfload.filelist.selectctxfontentries ( filetable )
   local result = {}
   for i,v in ipairs (filetable) do
    if v.ctxtype == "ctxbase" and v.kind==1 then
-    table.insert(result,v.name..v.ext)
+    table.insert(result,v)
    end
   end
   return result
 end
 
 -- ignored files are not in the list ...
-function luaotfload.filelist.ctxgenericlist ( filetable )
+function luaotfload.filelist.selectctxgenericentries ( filetable )
   local result = {}
   for i,v in ipairs (filetable) do
    if v.ctxtype == "ctxgene" and v.kind==1 then
-    table.insert(result,v.ctxpref..v.name..v.ext)
+    table.insert(result,v)
    end
   end
   return result
 end
 
 -- lualibs libraries
-function luaotfload.filelist.ctxlibslist ( filetable )
+function luaotfload.filelist.selectctxlibsentries ( filetable )
   local result = {}
   for i,v in ipairs (filetable) do
    if v.ctxtype == "ctxbase" and v.kind==4 then
-    table.insert(result,v.name..v.ext)
+    table.insert(result,v)
    end
   end
   return result
 end
 
 -- luaoftload libraries
-function luaotfload.filelist.librarylist ( filetable )
-  local result = {}
-  for i,v in ipairs (filetable) do
-   if  v.kind==5 then
-    table.insert(result,(v.gitpref or "")..v.name..v.ext)
-   end
+
+function luaotfload.filelist.selectlibraryentries (filetable)
+ local result = {}  
+ for i,v in ipairs (filetable) do
+  if v.kind == 5 then
+   table.insert (result,v)
   end
-  return result
-end
+ end
+ return result
+end   
+
 
 -- scripts
-function luaotfload.filelist.scriptlist ( filetable )
+function luaotfload.filelist.selectscriptentries ( filetable )
   local result = {}
   for i,v in ipairs (filetable) do
    if  v.kind==8 then
-    table.insert(result,(v.gitpref or "")..v.name..v.ext)
+    table.insert(result,v)
    end
   end
   return result

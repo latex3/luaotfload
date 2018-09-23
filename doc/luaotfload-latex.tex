@@ -63,7 +63,7 @@
   ItalicFont  = {Linux Libertine O Italic},
   SlantedFont = {Linux Libertine O Italic},
 ]{Linux Libertine O}
-\setmonofont[Ligatures=TeX,Scale=MatchLowercase]{Liberation Mono}
+\setmonofont[Ligatures=TeX,Scale=MatchLowercase]{InconsolataN-Regular.otf}
 %setsansfont[Ligatures=TeX]{Linux Biolinum O}
 \setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
 %setmathfont{XITS Math}
@@ -479,6 +479,21 @@
 \makeatother
 
 \newif \ifcontextmkiv \contextmkivfalse
+
+\usepackage{luacode}
+
+% a few lua functions to grab the file lists.
+\begin{luacode}
+require("luaotfload-filelist.lua")
+
+function printctxlibslist ()
+ for i,v in ipairs (luaotfload.filelist.ctxlibslist ( luaotfload.filelist.data )) do
+  tex.sprint("\\beginaltitem {"..v.."}\\endaltitem")
+ end
+end 
+   
+\end{luacode}
+
 
 \begin {document}
   \input {luaotfload-main.tex}

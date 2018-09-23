@@ -57,7 +57,7 @@
 
 \beginsection {New in version 2.9 (by Ulrike Fischer)}
 
-On the one side there is not much new in this version: The native components of \identifier{Luaotfload} are nearly unchanged. Only a few bugs have been corrected.
+On the one side there is not very much new in this version: The native components of \identifier{Luaotfload} are nearly unchanged. A few bugs have been corrected, the various files lists which loads the components of the font loader have been cleaned up. 
 
 On the other side there is a lot new:
 
@@ -74,7 +74,7 @@ On the other side there is a lot new:
   \endaltitem
 
   \beginaltitem {Documentation}
-  The documentation is nearly unchanged. I only added this introduction. I recreated with the help of @marmot the graphic. I updated the file list. I imported as appendix pdf versions of the two man files which are part of the \identifier{Luaotfload} documentation.
+  The core of documentation is nearly unchanged. I only added this introduction. I recreated with the help of @marmot the graphic. I updated the file lists. I imported as appendix pdf versions of the two man files which are part of the \identifier{Luaotfload} documentation.
   \endaltitem
 
 \enddescriptions
@@ -1301,6 +1301,7 @@ and have thus been omitted from the merge.\footnote{%
 
 \begindoublecolumns
   \begindefinitions
+ \directlua{ printctxlibslist ()}
       \beginaltitem {l-lua.lua}       \endaltitem
       \beginaltitem {l-lpeg.lua}      \endaltitem
       \beginaltitem {l-function.lua}  \endaltitem

@@ -98,7 +98,7 @@ local kind_lualibs   = 4
 local kind_library   = 5
 local kind_core      = 6
 local kind_generated = 7
-local kind_scripts   = 8
+local kind_script   = 8
 local kind_docu      = 9
 
 local kind_name = {
@@ -110,7 +110,7 @@ local kind_name = {
   [5] = "library"  ,
   [6] = "core",
   [7] = "generated",
-  [8] = "scripts",
+  [8] = "script",
   [9] = "docu"
 }
 
@@ -262,23 +262,74 @@ luaotfload.filelist.data =
 
 
 -- functions
+-- list of kind:
+--local kind_essential = 0
+--local kind_merged    = 1
+--local kind_tex       = 2
+--local kind_ignored   = 3
+--local kind_lualibs   = 4
+--local kind_library   = 5
+--local kind_core      = 6
+--local kind_generated = 7
+--local kind_script    = 8
+--local kind_docu      = 9
+
 
 -- the list of kind-merged files in ctxbas:
 
-function luaotfload.filelist.ctxbaslist ( filetable )
+function luaotfload.filelist.ctxfontlist ( filetable )
   local result = {}
   for i,v in ipairs (filetable) do
    if v.ctxtype == "ctxbase" and v.kind==1 then
-    table.insert(result,v.name)
+    table.insert(result,v.name..v.ext)
    end
   end
   return result
 end
 
+-- ignored files are not in the list ...
+function luaotfload.filelist.ctxgenericlist ( filetable )
+  local result = {}
+  for i,v in ipairs (filetable) do
+   if v.ctxtype == "ctxgene" and v.kind==1 then
+    table.insert(result,v.ctxpref..v.name..v.ext)
+   end
+  end
+  return result
+end
 
+-- lualibs libraries
+function luaotfload.filelist.ctxlibslist ( filetable )
+  local result = {}
+  for i,v in ipairs (filetable) do
+   if v.ctxtype == "ctxbase" and v.kind==4 then
+    table.insert(result,v.name..v.ext)
+   end
+  end
+  return result
+end
 
+-- luaoftload libraries
+function luaotfload.filelist.librarylist ( filetable )
+  local result = {}
+  for i,v in ipairs (filetable) do
+   if  v.kind==5 then
+    table.insert(result,(v.gitpref or "")..v.name..v.ext)
+   end
+  end
+  return result
+end
 
-
+-- scripts
+function luaotfload.filelist.scriptlist ( filetable )
+  local result = {}
+  for i,v in ipairs (filetable) do
+   if  v.kind==8 then
+    table.insert(result,(v.gitpref or "")..v.name..v.ext)
+   end
+  end
+  return result
+end
 
 
 

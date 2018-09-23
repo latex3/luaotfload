@@ -22,8 +22,56 @@
 %setsansfont[Ligatures=TeX]{Linux Biolinum O}
 \setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
 
-\directlua{require("luaotfload-filelist.lua")}
+\usepackage{luacode}
+\begin{luacode}
+require("luaotfload-filelist.lua")
 
+function printctxfontlist ()
+ for i,v in ipairs (luaotfload.filelist.ctxfontlist ( luaotfload.filelist.data )) do
+  tex.sprint("\\mbox{"..v.."} ")
+ end 
+end
+
+function printctxlibslist ()
+ local rowcnt = 0
+ local sep = "&"
+ for i,v in ipairs (luaotfload.filelist.ctxlibslist ( luaotfload.filelist.data )) do
+  rowcnt = rowcnt + 1
+  if rowcnt % 4 == 0 then sep = "\\\\" else sep = "&" end
+  tex.sprint("\\mbox{"..v.."}".. sep)
+ end
+end
+
+function printctxgenericlist ()
+ local rowcnt = 0
+ local sep = "&"
+ for i,v in ipairs (luaotfload.filelist.ctxgenericlist ( luaotfload.filelist.data )) do
+  rowcnt = rowcnt + 1
+  if rowcnt % 2 == 0 then sep = "\\\\" else sep = "&" end
+  tex.sprint("\\mbox{"..v.."}".. sep)
+ end
+end
+
+
+function printlibrarylist ()
+ local rowcnt = 0
+ local sep = "&"
+ for i,v in ipairs (luaotfload.filelist.librarylist ( luaotfload.filelist.data )) do
+  rowcnt = rowcnt + 1
+  if rowcnt % 2 == 0 then sep = "\\\\" else sep = "&" end
+  tex.sprint("\\mbox{"..v.."}".. sep)
+ end
+end
+
+function printscriptlist ()
+ for i,v in ipairs (luaotfload.filelist.data ) do
+  if v.kind == 8 then 
+    tex.sprint(v.name .."\\\\")
+  end  
+ end
+end
+
+\end{luacode}
 \begin{document}
 \begin{tikzpicture}[rounded corners,basic/.style={inner
 sep=9pt,font=\ttfamily,align=center}]
@@ -35,15 +83,7 @@ sep=9pt,font=\ttfamily,align=center}]
 label={[name=mL1,font=\itshape]above:Luaotfload Libraries}] (m1)
 {%
 %<<<<<<<<<<<<<<<<
-luaotfload-auxiliary.lua    &
-luaotfload-colors.lua       \\
-luaotfload-configuration.lua &
-luaotfload-database.lua     \\
-luaotfload-features.lua     &
-luaotfload-letterspace.lua  \\
-luaotfload-loaders.lua      &
-luaotfload-parsers.lua      \\
-luaotfload-resolvers.lua    \\
+\directlua{printlibrarylist()}
 %>>>>>>>>>>>>>>>>
 };
 % m2	
@@ -53,18 +93,7 @@ luaotfload-resolvers.lua    \\
 label={[name=mL3,font=\itshape,anchor=south]above:Lualibs -- Lua Libraries from Context}] (m3)
 {%
 %<<<<<<<<<<<<<<<<
-l-boolean.lua &
-l-file.lua &
-l-function.lua&
-l-io.lua \\
-l-lpeg.lua &
-l-lua.lua &
-l-math.lua &
-l-string.lua \\
-l-table.lua &
-l-unicode.lua &
-util-fil.lua&
-util-str.lua\\
+\directlua{printctxlibslist ()}
 %>>>>>>>>>>>>>>>>
 };
 % m4	
@@ -98,37 +127,7 @@ inner sep=3mm,text width=7.3cm,align=left,
 label={[name=mL9,font=\itshape]Font and Node Libraries from Context}] (m9)
 {\spaceskip=1.5em \raggedright
 %%<<<<<<<<<<<<<<<<
-data-con.lua
-font-afk.lua
-font-cff.lua
-font-cid.lua
-font-con.lua
-font-def.lua
-font-dsp.lua
-font-ini.lua
-font-lua.lua
-font-map.lua
-font-ocl.lua
-font-one.lua
-font-onr.lua
-font-osd.lua
-font-ota.lua
-font-otc.lua
-font-oti.lua
-font-otj.lua
-font-otl.lua
-font-oto.lua
-font-otr.lua
-font-ots.lua
-font-ott.lua
-font-oup.lua
-font-tfm.lua
-font-ttf.lua
-font-vfc.lua
-font-imp-tex
-font-imp-ligatures
-font-imp-italics
-font-imp-effects
+\directlua{printctxfontlist()}
 %>>>>>>>>>>>>>>>>
 };
 % m10
@@ -138,14 +137,7 @@ label={[name=mL10,font=\itshape]Font Loader (LuaTeX-Fonts)}] (m10)
 {\tabcolsep=0.5em
  \begin{tabular}{@{}ll@{}}
 %<<<<<<<<<<<<<<<<
-luatex-basics-chr.lua   &
-luatex-fonts-ext.lua   \\
-luatex-basics-nod.lua   &
-luatex-fonts-syn.lua   \\
-luatex-fonts-enc.lua    &
-luatex-fonts-def.lua   \\
-luatex-fonts-gbn.lua    &
-luatex-fonts-lig.lua
+\directlua{printctxgenericlist ()}
 %>>>>>>>>>>>>>>>>
  \end{tabular}
 };
@@ -158,11 +150,7 @@ nodes={inner sep=3mm,fill=gray!10,rounded corners,text width=3cm,align=center},
 label={[name=mL12,font=\sffamily]above:Standalone scripts}] (m12)
 {%
 %<<<<<<<<<<<<<<<<
-mkimport\\
-mkglyphlist\\
-mkcharacters\\
-mkstatus\\
-mktest\\
+\directlua{printscriptlist ()}
 %>>>>>>>>>>>>>>>>
 };
 % m13

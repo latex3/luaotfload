@@ -276,7 +276,9 @@ luaotfload.filelist.data =
 
 
 -- some selections
-
+-- due to the history and setup of the other files, there are not always simple "kind" selections.
+-- ctx base files are splitted in two sets:
+-- 1. font & node
 function luaotfload.filelist.selectctxfontentries ( filetable )
   local result = {}
   for i,v in ipairs (filetable) do
@@ -287,30 +289,7 @@ function luaotfload.filelist.selectctxfontentries ( filetable )
   return result
 end
 
--- ignored files are not in the list ...
-function luaotfload.filelist.selectctxgenericentries ( filetable )
-  local result = {}
-  for i,v in ipairs (filetable) do
-   if v.ctxtype == "ctxgene" and v.kind==1 then
-    table.insert(result,v)
-   end
-  end
-  return result
-end
-
--- ignored files are in the list
-function luaotfload.filelist.selectctxallgenericentries ( filetable )
-  local result = {}
-  for i,v in ipairs (filetable) do
-   if v.ctxtype == "ctxgene" and (v.kind==1  or v.kind== 3) then
-    table.insert(result,v)
-   end
-  end
-  return result
-end
-
-
--- lualibs libraries
+-- 2. lualibs libraries
 function luaotfload.filelist.selectctxlibsentries ( filetable )
   local result = {}
   for i,v in ipairs (filetable) do
@@ -321,9 +300,33 @@ function luaotfload.filelist.selectctxlibsentries ( filetable )
   return result
 end
 
+-- ctx generic files 
+-- 1. ignored files are not in the list ...
+function luaotfload.filelist.selectctxgeneusedentries ( filetable )
+  local result = {}
+  for i,v in ipairs (filetable) do
+   if v.ctxtype == "ctxgene" and v.kind==1 then
+    table.insert(result,v)
+   end
+  end
+  return result
+end
+
+-- 2. ignored files are in the list
+function luaotfload.filelist.selectctxgeneentries ( filetable )
+  local result = {}
+  for i,v in ipairs (filetable) do
+   if v.ctxtype == "ctxgene" and (v.kind==1  or v.kind== 3) then
+    table.insert(result,v)
+   end
+  end
+  return result
+end
+
+-- luaotfload-files (lol) are splitted in core, lib and gene and scr (scripts):
 -- luaoftload libraries
 
-function luaotfload.filelist.selectlibraryentries (filetable)
+function luaotfload.filelist.selectlollibentries (filetable)
  local result = {}  
  for i,v in ipairs (filetable) do
   if v.kind == 5 then
@@ -333,9 +336,34 @@ function luaotfload.filelist.selectlibraryentries (filetable)
  return result
 end   
 
+-- luaoftload core
+
+function luaotfload.filelist.selectlolcoreentries (filetable)
+ local result = {}  
+ for i,v in ipairs (filetable) do
+  if v.kind == 6 then
+   table.insert (result,v)
+  end
+ end
+ return result
+end   
+
+-- luaoftload generated
+
+function luaotfload.filelist.selectlolgeneentries (filetable)
+ local result = {}  
+ for i,v in ipairs (filetable) do
+  if v.kind == 7 then
+   table.insert (result,v)
+  end
+ end
+ return result
+end   
+
+
 
 -- scripts
-function luaotfload.filelist.selectscriptentries ( filetable )
+function luaotfload.filelist.selectlolscrentries ( filetable )
   local result = {}
   for i,v in ipairs (filetable) do
    if  v.kind==8 then

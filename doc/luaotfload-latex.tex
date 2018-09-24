@@ -491,21 +491,21 @@ function printctxlibslist ()
  for i,v in ipairs (t) do
   tex.sprint("\\beginaltitem {"..v.name.. v.ext.."}\\endaltitem")
  end
-end 
+end
 
 function printctxallgenericlist ()
-  t= luaotfload.filelist.selectctxallgenericentries (luaotfload.filelist.data)
+  t= luaotfload.filelist.selectctxgeneentries (luaotfload.filelist.data)
  for i,v in ipairs (t) do
   tex.sprint("\\beginaltitem {"..v.ctxpref..v.name..v.ext.."}\\endaltitem")
  end
-end 
-   
+end
+
 function printctxfontlist ()
   t= luaotfload.filelist.selectctxfontentries (luaotfload.filelist.data)
  for i,v in ipairs (t) do
   tex.sprint("\\beginaltitem {"..v.name..v.ext.."}\\endaltitem")
  end
-end    
+end
 \end{luacode}
 
 

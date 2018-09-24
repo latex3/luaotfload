@@ -30,7 +30,7 @@ function printctxfontlist ()
  t= luaotfload.filelist.selectctxfontentries (luaotfload.filelist.data)
  for i,v in ipairs (t) do
   tex.sprint("\\mbox{"..v.name..v.ext.."} ")
- end 
+ end
 end
 
 function printctxlibslist ()
@@ -45,7 +45,7 @@ function printctxlibslist ()
 end
 
 function printctxgenericlist ()
- t= luaotfload.filelist.selectctxgenericentries (luaotfload.filelist.data)
+ t= luaotfload.filelist.selectctxgeneusedentries (luaotfload.filelist.data)
  local rowcnt = 0
  local sep = "&"
  for i,v in ipairs (t) do
@@ -57,7 +57,7 @@ end
 
 
 function printlibrarylist ()
- t = luaotfload.filelist.selectlibraryentries (luaotfload.filelist.data)
+ t = luaotfload.filelist.selectlollibentries (luaotfload.filelist.data)
  local rowcnt = 0
  local sep = "&"
  for i,v in ipairs (t) do
@@ -68,11 +68,11 @@ function printlibrarylist ()
 end
 
 function printscriptlist ()
- t = luaotfload.filelist.selectscriptentries (luaotfload.filelist.data)
+ t = luaotfload.filelist.selectlolscrentries (luaotfload.filelist.data)
  for i,v in ipairs ( t ) do
-  if v.kind == 8 then 
+  if v.kind == 8 then
     tex.sprint( v.name .."\\\\")
-  end  
+  end
  end
 end
 

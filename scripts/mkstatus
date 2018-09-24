@@ -48,6 +48,16 @@ local loaderdir = "src/fontloader"
 local rtdir     = "src/fontloader/runtime"
 local miscdir   = "src/fontloader/misc"
 
+require ("luaotfload-filelist.lua")
+
+local newnames = {}
+local t = luaotfload.filelist.selectlolcoreentries (luaotfload.filelist.data)
+for i,v in ipairs(t) do 
+ table.insert (newnames, {scrdir, v.gitpref..v.name..v.ext} )
+end 
+
+print (table.serialize(newnames))
+
 local names = {
 
   --- Luaotfload runtime files
@@ -147,6 +157,7 @@ local names = {
 
 } --[[local names]]
 
+print (table.serialize(names))
 -----------------------------------------------------------------------
 -- helpers
 -----------------------------------------------------------------------

@@ -276,6 +276,7 @@ luaotfload.filelist.data =
 
 
 -- some selections
+-- due to the history and setup of the other files, there are not always simple "kind" selections.
 
 function luaotfload.filelist.selectctxfontentries ( filetable )
   local result = {}
@@ -323,7 +324,7 @@ end
 
 -- luaoftload libraries
 
-function luaotfload.filelist.selectlibraryentries (filetable)
+function luaotfload.filelist.selectlollibentries (filetable)
  local result = {}  
  for i,v in ipairs (filetable) do
   if v.kind == 5 then
@@ -333,9 +334,34 @@ function luaotfload.filelist.selectlibraryentries (filetable)
  return result
 end   
 
+-- luaoftload core
+
+function luaotfload.filelist.selectlolcoreentries (filetable)
+ local result = {}  
+ for i,v in ipairs (filetable) do
+  if v.kind == 6 then
+   table.insert (result,v)
+  end
+ end
+ return result
+end   
+
+-- luaoftload generated
+
+function luaotfload.filelist.selectlolgeneentries (filetable)
+ local result = {}  
+ for i,v in ipairs (filetable) do
+  if v.kind == 7 then
+   table.insert (result,v)
+  end
+ end
+ return result
+end   
+
+
 
 -- scripts
-function luaotfload.filelist.selectscriptentries ( filetable )
+function luaotfload.filelist.selectlolscrentries ( filetable )
   local result = {}
   for i,v in ipairs (filetable) do
    if  v.kind==8 then

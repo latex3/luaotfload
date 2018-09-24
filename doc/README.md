@@ -2,7 +2,7 @@
 
 VERSION: 2.9
 
-DATE: 2018-09-21
+DATE: 2018-09-24
 
 
 ## Description
@@ -73,6 +73,13 @@ Marcel Krüger            <https://github.com/zauguin>
 
 2.  If you want to try the development version download the texmf folder in the development branch. 
     at <https://github.com/u-fischer/luaotfload>
+    
+3.  Manual installation:
+    luaotfload-tool.lua belongs in scripts/luatex/luaotfload
+    the other lua-files and the sty and fontloader-reference-load-order.tex belong in tex/luatex/luaotfload
+    luaotfload.conf.5 and luaotfload-tool.1 belong in doc/man
+    the rest in doc/luatex/luaotfload  
+    The main documentation is luaotfload-latex.pdf     
 
 ## License
 

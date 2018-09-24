@@ -100,6 +100,12 @@ The name contains the current date.
  -- REQUIREMENTS:  luaotfload 2.9
 local version                  = "2.9"
 
+13. Update luatotfload-status again so that the hashes are correct.
+
+!!! date must be naturally correct
+
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-24.lua
+
 
 ==============
 Dokumentation

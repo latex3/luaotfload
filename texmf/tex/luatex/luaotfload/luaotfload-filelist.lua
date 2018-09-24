@@ -53,6 +53,9 @@ The "real" name of a file in a location can be build
 - in the git location:     (gitpref or "fontloader-") + (ours or name ) + ext
 - in the tex location:     (gitpref or "fontloader-") + (texname or ours or name ) + ext 
 
+## fields
+ mkstatus: used to ignore some files in mkstatus
+  
  
 ## files which use the file names
 
@@ -205,7 +208,7 @@ luaotfload.filelist.data =
     { name = "fonts"             , ours = "load-order-reference", ext = ".tex", kind = kind_tex     , gitdir=gitdirimp, ctxdir= ctxdirgen, ctxtype = "ctxgene" , ctxpref = "luatex-" },
 
 -- the default fontloader. How to code the name??
-    { name = "YYYY-MM-DD"        , ext = ".lua", kind = kind_generated , gitdir = gitdirgen, texdir = texdirtex,status="auto" },
+    { name = "YYYY-MM-DD"        , ext = ".lua", kind = kind_generated , gitdir = gitdirgen, texdir = texdirtex,mkstatus="auto" },
 
 -- the luaotfload files
     { name = "luaotfload"        ,kind = kind_core, ext =".sty", gitdir=gitdirsrc, texdir=texdirtex, gitpref="",},
@@ -230,7 +233,7 @@ luaotfload.filelist.data =
 
     { name = "characters"        ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkcharacter" },
     { name = "glyphlist"         ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkglyphlist" },
-    { name = "status"            ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkstatus",status="ignore" },
+    { name = "status"            ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkstatus",mkstatus="ignore" },
      
 
 

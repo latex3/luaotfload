@@ -62,7 +62,7 @@ end
 --- generated files
 local t = luaotfload.filelist.selectlolgeneentries (luaotfload.filelist.data)
 for i,v in ipairs(t) do 
-  if v.status then -- do nothing
+  if v.mkstatus then -- do nothing
   else
    table.insert (names, {builddir, v.gitpref..v.name..v.ext} )
   end 

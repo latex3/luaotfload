@@ -16,6 +16,7 @@
 \pagestyle{empty}
 
 \usepackage{arabluatex}
+\newfontfamily\arabicfont[Script=Arabic]{amiri-regular.ttf}\fi}%
 \newarbmark{sly}{\arbcolor[red]{^^^^06d6}}{}
 \newarbmark{jim}{\arbcolor[red]{^^^^06da}}{}
 \newarbmark{anum}{^^^^0600}{}

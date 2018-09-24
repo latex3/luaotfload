@@ -43,11 +43,13 @@ The name contains the current date.
 
 -->   texlua scripts/mkimport package
 
+!!! delete old default fontloader
+
 7. Update luatotfload-status
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-23.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-24.lua
 
 8. Check lualibs status -- perhaps it needs update too
 

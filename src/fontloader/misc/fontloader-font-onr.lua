@@ -200,6 +200,7 @@ do
         binary = decrypt(binary,55665,4)
 
         local names    = { }
+
         local encoding = lpegmatch(p_filterencoding,ascii)
         local glyphs   = { }
 

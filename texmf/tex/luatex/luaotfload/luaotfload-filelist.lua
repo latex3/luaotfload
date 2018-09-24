@@ -3,7 +3,7 @@
 --  DESCRIPTION:  a table with the files of luaotfload
 --      VERSION:  2.9 
 --       AUTHOR:  Ulrike Fischer, <fischer@troubleshooting-tex.de>
---         DATE:  2018-09-24
+--         DATE:  2018-09-23
 -------------------------------------------------------------------------------
 
 
@@ -74,7 +74,8 @@ and a
   entries are the values of name
   
 ### mkstatus
-needs a list of files too ...
+
+this script has been already changed to use luaotfload-filelist.lua
    
 ### luaotfload-init.lua
 
@@ -89,6 +90,14 @@ The same list should be used in local init_main = function ()
 but only without the prefix.
 it is unclear how fonts_syn should be handled!!!!
    
+### filegraph.tex
+has been already adapted
+
+### luaotfload-latex.tex/luaotfload-main.tex
+has been already adapted
+
+### build.lua
+???
    
 --doc]]--
 

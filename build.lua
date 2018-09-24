@@ -11,7 +11,7 @@ stdengine    = "luatex"
 checkengines = {"luatex"}
 checkconfigs = {
                 "build",
-                "config-loader-unpacked",
+                "config-loader-unpackaged",
                 "config-loader-reference",
                 "config-latex-TU",
                 "config-unicode-math",

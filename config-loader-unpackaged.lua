@@ -1,0 +1,1 @@
+testsuppdir  = testfiledir .. "/support-unpackaged"

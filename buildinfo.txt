@@ -64,7 +64,9 @@ The name contains the current date.
 
 12. Update version information everywhere ... (tagging doesn't work for now,
     too many different variants)
-- 
+- sty:
+  %% Copyright (C) 2009-2018
+  [2018/09/24 v2.9  OpenType layout system]  
 
 
 

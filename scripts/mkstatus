@@ -50,15 +50,55 @@ local miscdir   = "src/fontloader/misc"
 
 require ("luaotfload-filelist.lua")
 
-local newnames = {}
-local t = luaotfload.filelist.selectlolcoreentries (luaotfload.filelist.data)
+-- new 24.09.2018 we are building the name list from the file list. 
+local names = {}
+
+--- Luaotfload runtime files
+local t = luaotfload.filelist.selectlolsrcluaentries (luaotfload.filelist.data)
 for i,v in ipairs(t) do 
- table.insert (newnames, {scrdir, v.gitpref..v.name..v.ext} )
+  table.insert (names, {srcdir, v.gitpref..v.name..v.ext} )
 end 
 
-print (table.serialize(newnames))
+--- generated files
+local t = luaotfload.filelist.selectlolgeneentries (luaotfload.filelist.data)
+for i,v in ipairs(t) do 
+  if v.status then -- do nothing
+  else
+   table.insert (names, {builddir, v.gitpref..v.name..v.ext} )
+  end 
+end 
+--- scripts
+local t = luaotfload.filelist.selectlolscrentries (luaotfload.filelist.data)
+for i,v in ipairs(t) do 
+   table.insert (names, {scriptdir , v.gitpref..v.name..v.ext} )
+end 
 
-local names = {
+--- fontloader runtimes
+local t = luaotfload.filelist.selectlolessentries (luaotfload.filelist.data)
+for i,v in ipairs(t) do 
+  table.insert (names, {rtdir, (v.gitpref or "fontloader-")..(v.ours or v.name)..v.ext} )
+end 
+
+--- fontloader constituents -- ignored are not added so fonts-syn is not in the list! 
+local t = luaotfload.filelist.selectctxfontentries (luaotfload.filelist.data)  
+for i,v in ipairs(t) do 
+  table.insert (names, {miscdir, (v.gitpref or "fontloader-")..(v.ours or v.name)..v.ext} )
+end 
+local t = luaotfload.filelist.selectctxgeneusedentries (luaotfload.filelist.data)  
+for i,v in ipairs(t) do 
+  table.insert (names, {miscdir, (v.gitpref or "fontloader-")..(v.ours or v.name)..v.ext} )
+end 
+--- lua libraries
+local t = luaotfload.filelist.selectctxlibsentries (luaotfload.filelist.data)  
+for i,v in ipairs(t) do 
+  table.insert (names, {miscdir, (v.gitpref or "fontloader-")..(v.ours or v.name)..v.ext} )
+end 
+
+
+-- print (table.serialize(names))
+-- this is the old list
+-- keep it for the moment 
+local oldnames = {
 
   --- Luaotfload runtime files
   { srcdir,       "luaotfload-auxiliary.lua",       },
@@ -157,7 +197,7 @@ local names = {
 
 } --[[local names]]
 
-print (table.serialize(names))
+-- print (table.serialize(oldnames))
 -----------------------------------------------------------------------
 -- helpers
 -----------------------------------------------------------------------

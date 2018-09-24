@@ -205,7 +205,7 @@ luaotfload.filelist.data =
     { name = "fonts"             , ours = "load-order-reference", ext = ".tex", kind = kind_tex     , gitdir=gitdirimp, ctxdir= ctxdirgen, ctxtype = "ctxgene" , ctxpref = "luatex-" },
 
 -- the default fontloader. How to code the name??
-    { name = "YYYY-MM-DD"        , ext = ".lua", kind = kind_generated , gitdir = gitdirgen, texdir = texdirtex },
+    { name = "YYYY-MM-DD"        , ext = ".lua", kind = kind_generated , gitdir = gitdirgen, texdir = texdirtex,status="auto" },
 
 -- the luaotfload files
     { name = "luaotfload"        ,kind = kind_core, ext =".sty", gitdir=gitdirsrc, texdir=texdirtex, gitpref="",},
@@ -230,16 +230,16 @@ luaotfload.filelist.data =
 
     { name = "characters"        ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkcharacter" },
     { name = "glyphlist"         ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkglyphlist" },
-    { name = "status"            ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkstatus" },
+    { name = "status"            ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkstatus",status="ignore" },
      
 
 
 -- scripts
     { name = "mkimport"       ,kind = kind_script, gitdir = gitdirscr, gitpref = "", ext=""},
-    { name = "mkglyphslist"   ,kind = kind_script, gitdir = gitdirscr, gitpref = "", ext=""}, 
+    { name = "mkglyphlist"   ,kind = kind_script, gitdir = gitdirscr, gitpref = "", ext=""}, 
     { name = "mkcharacters"   ,kind = kind_script, gitdir = gitdirscr, gitpref = "", ext=""},
     { name = "mkstatus"       ,kind = kind_script, gitdir = gitdirscr, gitpref = "", ext=""},
-    { name = "mktest"         ,kind = kind_script, gitdir = gitdirscr, gitpref = "", ext=""},
+    { name = "mktests"         ,kind = kind_script, gitdir = gitdirscr, gitpref = "", ext=""},
     
 -- documentation (source dirs need perhaps coding ...) but don't overdo for now
 
@@ -323,8 +323,19 @@ function luaotfload.filelist.selectctxgeneentries ( filetable )
   return result
 end
 
--- luaotfload-files (lol) are splitted in core, lib and gene and scr (scripts):
+-- luaotfload-files (lol) are splitted in essential (0), core (6), lib (5) and gene (7) and scr (scripts):
 -- luaoftload libraries
+
+function luaotfload.filelist.selectlolessentries (filetable)
+ local result = {}  
+ for i,v in ipairs (filetable) do
+  if v.kind == 0 then
+   table.insert (result,v)
+  end
+ end
+ return result
+end   
+
 
 function luaotfload.filelist.selectlollibentries (filetable)
  local result = {}  
@@ -347,6 +358,20 @@ function luaotfload.filelist.selectlolcoreentries (filetable)
  end
  return result
 end   
+
+-- core and lib  lua-files
+
+function luaotfload.filelist.selectlolsrcluaentries (filetable)
+ local result = {}  
+ for i,v in ipairs (filetable) do
+  if (v.kind == 5 or  v.kind==6) and v.ext==".lua" then
+   table.insert (result,v)
+  end
+ end
+ return result
+end   
+
+
 
 -- luaoftload generated
 

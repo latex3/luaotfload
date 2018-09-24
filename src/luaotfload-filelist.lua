@@ -74,7 +74,8 @@ and a
   entries are the values of name
   
 ### mkstatus
-needs a list of files too ...
+
+this script has been already changed to use luaotfload-filelist.lua
    
 ### luaotfload-init.lua
 
@@ -89,6 +90,14 @@ The same list should be used in local init_main = function ()
 but only without the prefix.
 it is unclear how fonts_syn should be handled!!!!
    
+### filegraph.tex
+has been already adapted
+
+### luaotfload-latex.tex/luaotfload-main.tex
+has been already adapted
+
+### build.lua
+???
    
 --doc]]--
 

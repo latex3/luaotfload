@@ -66,8 +66,37 @@ The name contains the current date.
     too many different variants)
 - sty:
   %% Copyright (C) 2009-2018
-  [2018/09/24 v2.9  OpenType layout system]  
+  [2018/09/24 v2.9  OpenType layout system]
 
+- auxiliary no date, only version:
+  -- REQUIREMENTS:  luaotfload 2.9
+
+- colors, database, features, letterspace, log: "module"
+      version   = "2.9",
+
+- configuration module and requirements:
+   -- REQUIREMENTS:  Luaotfload 2.8 or above
+  version   = "2.9",
+
+- filelist
+--         DATE:  2018-09-23
+--      VERSION:  2.9
+
+
+- init
+--      VERSION:  2.9 2018-09-24
+
+- loaders, resolvers: no info
+
+- main:
+ luaotfload.version                = "2.9"
+
+- parsers
+ -- REQUIREMENTS:  Luaotfload >= 2.8
+
+- tool
+ -- REQUIREMENTS:  luaotfload 2.9
+local version                  = "2.9"
 
 
 ==============

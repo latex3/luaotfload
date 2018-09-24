@@ -8,6 +8,9 @@ Change History
     * Fix parsing of font.conf see https://github.com/lualatex/luaotfload/pull/420
     * imported new versions of the context files - fontloader is compatible with luatex 1.08 again
     * adapted the files list 
+    * created a luaotfload-filelist.lua which describes the files of the package
+    * removed some not functional files 
+    * adapted mkstatus to use the new file list.
     
 2017-01-29, luaotfload v2.8:
     * Latest fontloader code.

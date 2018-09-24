@@ -547,8 +547,8 @@ local init_main = function ()
     load_fontloader_module "font-map"
     load_fontloader_module "fonts-syn" -- ignore?
     load_fontloader_module "font-vfc"
-    load_fontloader_module "font-oti"
     load_fontloader_module "font-otr"
+    load_fontloader_module "font-oti"    
     load_fontloader_module "font-ott"
     load_fontloader_module "font-cff"
     load_fontloader_module "font-ttf"
@@ -574,8 +574,8 @@ local init_main = function ()
     load_fontloader_module "font-imp-ligatures"
     load_fontloader_module "font-imp-italics"
     load_fontloader_module "font-imp-effects"
-    load_fontloader_module "font-lig"
-    load_fontloader_module "font-gbn"
+    load_fontloader_module "fonts-lig"
+    load_fontloader_module "fonts-gbn"
 
   elseif fontloader == "context" then
     logreport ("log", 0, "init",

@@ -1,7 +1,7 @@
 
 packageversion= "2.9"
 packagestatus = "dev"
-packagedate   = "2018-09-21"
+packagedate   = "2018-09-23"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -11,6 +11,8 @@ stdengine    = "luatex"
 checkengines = {"luatex"}
 checkconfigs = {
                 "build",
+                "config-loader-unpacked",
+                "config-loader-reference",
                 "config-latex-TU",
                 "config-unicode-math",
                 "config-plain",

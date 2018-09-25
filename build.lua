@@ -1,7 +1,7 @@
 
 packageversion= "2.9"
-packagestatus = "dev"
-packagedate   = "2018-09-23"
+packagestatus = "upload"
+packagedate   = "2018-09-24"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -20,13 +20,14 @@ checkconfigs = {
                }
 
 checkruns = 3
+checksuppfiles = {"texmf.cnf"}
 
 excludetests = {"luatex-ja","luatex-ja-travis"}
 
 -- l3build settings local folder descriptions 
 sourcefiledir = "./src"
 docfiledir    = "./doc" 
-supportdir    = "./doc"
+
 
 -- l3build settings for CTAN/install target
 packtdszip=true
@@ -38,7 +39,7 @@ typesetexe = "lualatex"
 docfiles = 
  {
   "luaotfload.conf.example",
-  "luaotfload-main.tex"
+  "luaotfload-main.tex",
   }
 
 textfiles = 
@@ -46,11 +47,13 @@ textfiles =
   "COPYING",
   "NEWS",
   docfiledir .. "/README.md",
+  "./src/fontloader/misc/fontloader-reference-load-order.tex",
+  "./src/fontloader/misc/fontloader-reference-load-order.lua"  
   }
     
   
 typesetdemofiles  = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"}
-typesetsuppfiles   = {"luaotfload-main.tex"}
+typesetsuppfiles  = {"texmf.cnf"}
 typesetfiles      = {"**/luaotfload-latex.tex"}
 typsetcycles = 2 -- for the tests
 
@@ -71,26 +74,28 @@ sourcefiles  = {
                 
 installfiles = {"luaotfload.sty",
                 "luaotfload-blacklist.cnf",
-                "luaotfload-configuration.lua",
-               "luaotfload-init.lua",
-               "luaotfload-filelist.lua",
-               "luaotfload-letterspace.lua",
-               "luaotfload-database.lua",
-               "luaotfload-diagnostics.lua",
-               "luaotfload-resolvers.lua",
-               "luaotfload-log.lua",
-               "luaotfload-auxiliary.lua",
-               "luaotfload-main.lua",
-               "luaotfload-glyphlist.lua",
-               "luaotfload-features.lua",
-               "luaotfload-colors.lua",
-               "**/luaotfload-characters.lua",
-               "**/luaotfload-status.lua",
-               "**/luaotfload-glyphlist.lua",
-               "luaotfload-loaders.lua",
-               "luaotfload-parsers.lua",
-               "**/fontloader-*.lua",
-                "**/fontloader-*.tex",
+                "**/luaotfload-*.lua",
+--                "
+--                "luaotfload-configuration.lua",
+--               "luaotfload-init.lua",
+--               "luaotfload-filelist.lua",
+--               "luaotfload-letterspace.lua",
+--               "luaotfload-database.lua",
+--               "luaotfload-diagnostics.lua",
+--               "luaotfload-resolvers.lua",
+--               "luaotfload-log.lua",
+--               "luaotfload-auxiliary.lua",
+--               "luaotfload-main.lua",
+--               "luaotfload-glyphlist.lua",
+--               "luaotfload-features.lua",
+--               "luaotfload-colors.lua",
+--               "**/luaotfload-characters.lua",
+--               "**/luaotfload-status.lua",
+--               "**/luaotfload-glyphlist.lua",
+--               "luaotfload-loaders.lua",
+--               "luaotfload-parsers.lua",
+                "**/fontloader-*.lua",
+--                "**/fontloader-*.tex",
                 }
 
 

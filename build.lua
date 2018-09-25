@@ -21,6 +21,8 @@ checkconfigs = {
 
 checkruns = 3
 
+excludetests = {"luatex-ja"}
+
 -- l3build settings local folder descriptions 
 sourcefiledir = "./src"
 docfiledir    = "./doc" 

@@ -21,7 +21,7 @@ checkconfigs = {
 
 checkruns = 3
 
-excludetests = {"luatex-ja"}
+excludetests = {"luatex-ja","luatex-ja-travis"}
 
 -- l3build settings local folder descriptions 
 sourcefiledir = "./src"

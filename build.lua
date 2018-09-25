@@ -40,6 +40,8 @@ docfiles =
  {
   "luaotfload.conf.example",
   "luaotfload-main.tex",
+  "luaotfload.conf.rst",
+  "luaotfload-tool.rst"
   }
 
 textfiles = 
@@ -47,8 +49,6 @@ textfiles =
   "COPYING",
   "NEWS",
   docfiledir .. "/README.md",
-  "./src/fontloader/misc/fontloader-reference-load-order.tex",
-  "./src/fontloader/misc/fontloader-reference-load-order.lua"  
   }
     
   
@@ -73,30 +73,17 @@ sourcefiles  = {
  "./doc/luaotfload-main.tex", 
                 }
                 
-installfiles = {"luaotfload.sty",
+installfiles = {
+                "luaotfload.sty",
                 "luaotfload-blacklist.cnf",
                 "**/luaotfload-*.lua",
---                "
---                "luaotfload-configuration.lua",
---               "luaotfload-init.lua",
---               "luaotfload-filelist.lua",
---               "luaotfload-letterspace.lua",
---               "luaotfload-database.lua",
---               "luaotfload-diagnostics.lua",
---               "luaotfload-resolvers.lua",
---               "luaotfload-log.lua",
---               "luaotfload-auxiliary.lua",
---               "luaotfload-main.lua",
---               "luaotfload-glyphlist.lua",
---               "luaotfload-features.lua",
---               "luaotfload-colors.lua",
---               "**/luaotfload-characters.lua",
---               "**/luaotfload-status.lua",
---               "**/luaotfload-glyphlist.lua",
---               "luaotfload-loaders.lua",
---               "luaotfload-parsers.lua",
-                "**/fontloader-*.lua",
---                "**/fontloader-*.tex",
+                "**/fontloader-b*.lua",
+                "**/fontloader-d*.lua",
+                "**/fontloader-f*.lua",
+                "**/fontloader-l*.lua",
+                "**/fontloader-u*.lua",
+                "**/fontloader-reference.lua",
+                "**/fontloader-2*.lua",
                 }
 
 

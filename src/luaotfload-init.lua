@@ -254,7 +254,7 @@ local context_modules = {
   { ltx,   "luatex-fonts-enc"  },
   { ctx,   "font-cid"          },
   { ctx,   "font-map"          },
-  { ltx,   "luatex-fonts-syn"  }, -- ignore??
+--  { ltx,   "luatex-fonts-syn"  }, -- ignore??
   { ctx,   "font-vfc"          }, -- NEW UF 19.09.2018
   { ctx,   "font-oti"          },
   { ctx,   "font-otr"          },
@@ -545,7 +545,7 @@ local init_main = function ()
     load_fontloader_module "fonts-enc"
     load_fontloader_module "font-cid"
     load_fontloader_module "font-map"
-    load_fontloader_module "fonts-syn" -- ignore?
+--    load_fontloader_module "fonts-syn" -- ignore?
     load_fontloader_module "font-vfc"
     load_fontloader_module "font-otr"
     load_fontloader_module "font-oti"    

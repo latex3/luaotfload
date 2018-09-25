@@ -20,7 +20,7 @@ checkconfigs = {
                }
 
 checkruns = 3
-checksuppfiles = {"texmf.cnf"}
+-- checksuppfiles = {"texmf.cnf"} -- later
 
 excludetests = {"luatex-ja","luatex-ja-travis"}
 
@@ -53,7 +53,8 @@ textfiles =
     
   
 typesetdemofiles  = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"}
-typesetsuppfiles  = {"texmf.cnf"}
+-- typesetsuppfiles  = {"texmf.cnf"} --later
+
 typesetfiles      = {"**/luaotfload-latex.tex"}
 typsetcycles = 2 -- for the tests
 

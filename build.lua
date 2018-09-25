@@ -50,7 +50,7 @@ textfiles =
  {
   "COPYING",
   "NEWS",
---  docfiledir .. "/README.md",
+  docfiledir .. "/CTANREADME.md",
   }
     
   

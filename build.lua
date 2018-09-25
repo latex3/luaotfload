@@ -34,6 +34,8 @@ packtdszip=true
 
 -- documentation
 
+ctanreadme= "CTANREADME.md"
+
 typesetexe = "lualatex"
 
 docfiles = 
@@ -48,7 +50,7 @@ textfiles =
  {
   "COPYING",
   "NEWS",
-  docfiledir .. "/README.md",
+--  docfiledir .. "/README.md",
   }
     
   

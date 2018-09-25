@@ -36,35 +36,21 @@ The development for LuaLaTeX is discussed on the lualatex-dev mailing list. See
 
 The following people have contributed to this package.
 
-Khaled Hosny             <khaledhosny@eglug.org>
-
-Elie Roux                <elie.roux@telecom-bretagne.eu>
-
-Will Robertson           <will.robertson@latex-project.org>
-
-Philipp Gesang           <phg@phi-gamma.net>
-
-Dohyun Kim               <nomosnomos@gmail.com>
-
-Reuben Thomas            <https://github.com/rrthomas>
-
-Joseph Wright            <joseph.wright@morningstar2.co.uk>
-
-Manuel Pégourié-Gonnard  <mpg@elzevir.fr>
-
-Olof-Joachim Frahm       <olof@macrolet.net>
-
-Patrick Gundlach         <gundlach@speedata.de>
-
-Philipp Stephani         <st_philipp@yahoo.de>
-
-David Carlisle           <d.p.carlisle@gmail.com>
-
-Yan Zhou                 @zhouyan
-
-Ulrike Fischer           <fischer@troubleshooting-tex.de>
-
-Marcel Krüger            <https://github.com/zauguin> 
+- Khaled Hosny             <khaledhosny@eglug.org>
+- Elie Roux                <elie.roux@telecom-bretagne.eu>
+- Will Robertson           <will.robertson@latex-project.org>
+- Philipp Gesang           <phg@phi-gamma.net>
+- Dohyun Kim               <nomosnomos@gmail.com>
+- Reuben Thomas            <https://github.com/rrthomas>
+- Joseph Wright            <joseph.wright@morningstar2.co.uk>
+- Manuel Pégourié-Gonnard  <mpg@elzevir.fr>
+- Olof-Joachim Frahm       <olof@macrolet.net>
+- Patrick Gundlach         <gundlach@speedata.de>
+- Philipp Stephani         <st_philipp@yahoo.de>
+- David Carlisle           <d.p.carlisle@gmail.com>
+- Yan Zhou                 @zhouyan
+- Ulrike Fischer           <fischer@troubleshooting-tex.de>
+- Marcel Krüger            <https://github.com/zauguin> 
 
 ## Installation
 
@@ -75,11 +61,21 @@ Marcel Krüger            <https://github.com/zauguin>
     at <https://github.com/u-fischer/luaotfload>
     
 3.  Manual installation:
-    luaotfload-tool.lua belongs in scripts/luatex/luaotfload
-    the other lua-files and the sty and fontloader-reference-load-order.tex belong in tex/luatex/luaotfload
-    luaotfload.conf.5 and luaotfload-tool.1 belong in doc/man
-    the rest in doc/luatex/luaotfload  
-    The main documentation is luaotfload-latex.pdf     
+    * luaotfload-tool.lua belongs in scripts/luatex/luaotfload
+    * fontloader-reference-load-order.tex and fontloader-reference-load-order.lua are source files and can got in source or doc
+    * the other lua-files and the sty belong in tex/luatex/luaotfload
+    * luaotfload.conf.5 and luaotfload-tool.1 belong in doc/man
+    * the rest in doc/luatex/luaotfload  
+    
+## Documentation
+
+* The main documentation is luaotfload-latex.pdf. 
+* luaotfload.conf.5 and luaotfload-tool.1 are man-files, their sources are the rst-files. 
+* README.md, NEWS and COPYING contain what their name says.
+* The rest are input files. 
+
+
+    
 
 ## License
 

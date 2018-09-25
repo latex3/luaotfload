@@ -20,24 +20,37 @@ if ! command -v texlua > /dev/null; then
 fi
 
 # Needed for any use of texlua even if not testing LuaTeX
-tlmgr install fontspec graphics l3build latex latex-bin luaotfload luatex microtype opensans fira
-
+tlmgr install l3build latex latex-bin  luatex  
 
 # Required to build plain and LaTeX formats:
 # TeX90 plain for unpacking, pdfLaTeX, LuaLaTeX and XeTeX for tests
-tlmgr install cm etex knuth-lib latex-bin tex tex-ini-files unicode-data 
+tlmgr install cm etex knuth-lib tex tex-ini-files unicode-data 
 
-tlmgr install  sourcecodepro Asana-Math    ebgaramond  tex-gyre  amsfonts gnu-freefont    
+# various tools / dependencies of other packages
+tlmgr install ctablestack filehook ifoddpage ifxetex luatexbase trimspaces
+tlmgr install oberdiek etoolbox xkeyval ucharcat xstring ifluatex 
 
-tlmgr install  tex-gyre-math   geometry  graphics-def   ifluatex      
+# graphics
+tlmgr install graphics xcolor graphics-def pgf
 
-tlmgr install  ifxetex   ucharcat  filehook   xcolor   unicode-math etoolbox amsmath
+# fonts support - perhaps take here luaotfload out of the list ...
+# or is it in the minimal system?
+tlmgr fontspec microtype unicode-math luaotfload
 
-tlmgr install  lm  lm-math xits babel babel-english oberdiek junicode lualatex-math amiri arabluatex
+# fonts
+tlmgr install  sourcecodepro Asana-Math  ebgaramond  tex-gyre  amsfonts gnu-freefont  
+tlmgr install  opensans fira tex-gyre-math junicode lm  lm-math amiri ipaex xits
 
-tlmgr install xkeyval xstring unicode-data luacode environ adjustbox collectbox ms pgf ifoddpage varwidth
+# languages
+tlmgr install  luatexja arabluatex babel babel-english
+          
 
-tlmgr install luatexbase ctablestack trimspaces
+# math
+tlmgr install  amsmath lualatex-math  
+
+# a few more packages
+tlmgr install   luacode environ adjustbox collectbox ms varwidth geometry
+
  
 # Assuming a 'basic' font set up, metafont is required to avoid
 # warnings with some packages and errors with others

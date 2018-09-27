@@ -23,7 +23,7 @@ if not modules then modules = { } end modules ['font-otl'] = {
 
 -- todo: less tounicodes
 
-local gmatch, find, match, lower, strip = string.gmatch, string.find, string.match, string.lower, string.strip
+local lower = string.lower
 local type, next, tonumber, tostring, unpack = type, next, tonumber, tostring, unpack
 local abs = math.abs
 local derivetable = table.derive
@@ -52,12 +52,14 @@ local report_otf          = logs.reporter("fonts","otf loading")
 local fonts               = fonts
 local otf                 = fonts.handlers.otf
 
-otf.version               = 3.027 -- beware: also sync font-mis.lua and in mtx-fonts
-otf.cache                 = containers.define("fonts", "otl", otf.version, true)
-otf.svgcache              = containers.define("fonts", "svg", otf.version, true)
-otf.pdfcache              = containers.define("fonts", "pdf", otf.version, true)
+otf.version               = 3.104 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.cache                 = containers.define("fonts", "otl",  otf.version, true)
+otf.svgcache              = containers.define("fonts", "svg",  otf.version, true)
+otf.sbixcache             = containers.define("fonts", "sbix", otf.version, true)
+otf.pdfcache              = containers.define("fonts", "pdf",  otf.version, true)
 
 otf.svgenabled            = false
+otf.sbixenabled           = false
 
 local otfreaders          = otf.readers
 
@@ -77,6 +79,8 @@ local cleanup             = 0     -- mk: 0=885M 1=765M 2=735M (regular run 730M)
 local syncspace           = true
 local forcenotdef         = false
 
+local privateoffset       = fonts.constructors and fonts.constructors.privateoffset or 0xF0000 -- 0x10FFFF
+
 local applyruntimefixes   = fonts.treatments and fonts.treatments.applyfixes
 
 local wildcard            = "*"
@@ -93,31 +97,43 @@ registerdirective("fonts.otf.loader.force",         function(v) forceload     = 
 registerdirective("fonts.otf.loader.syncspace",     function(v) syncspace     = v end)
 registerdirective("fonts.otf.loader.forcenotdef",   function(v) forcenotdef   = v end)
 
--- local function load_featurefile(raw,featurefile)
---     if featurefile and featurefile ~= "" then
---         if trace_loading then
---             report_otf("using featurefile %a", featurefile)
---         end
---         -- TODO: apply_featurefile(raw, featurefile)
---     end
--- end
-
 -- otfenhancers.patch("before","migrate metadata","cambria",function() end)
 
 registerotfenhancer("check extra features", function() end) -- placeholder
 
-function otf.load(filename,sub,featurefile) -- second argument (format) is gone !
-    --
-    local featurefile = nil -- not supported (yet)
-    --
+-- Kai has memory problems on osx so here is an experiment (I only tested on windows as
+-- my test mac is old and gets no updates and is therefore rather useless.):
+
+local checkmemory = utilities.lua and utilities.lua.checkmemory
+local threshold   = 100 -- MB
+local tracememory = false
+
+registertracker("fonts.otf.loader.memory",function(v) tracememory = v end)
+
+if not checkmemory then -- we need a generic plug (this code might move):
+
+    local collectgarbage = collectgarbage
+
+    checkmemory = function(previous,threshold) -- threshold in MB
+        local current = collectgarbage("count")
+        if previous then
+            local checked = (threshold or 64)*1024
+            if current - previous > checked then
+                collectgarbage("collect")
+                current = collectgarbage("count")
+            end
+        end
+        return current
+    end
+
+end
+
+function otf.load(filename,sub,instance)
     local base = file.basename(file.removesuffix(filename))
-    local name = file.removesuffix(base)
+    local name = file.removesuffix(base) -- already no suffix
     local attr = lfs.attributes(filename)
     local size = attr and attr.size or 0
     local time = attr and attr.modification or 0
-    if featurefile then
-        name = name .. "@" .. file.removesuffix(file.basename(featurefile))
-    end
     -- sub can be number of string
     if sub == "" then
         sub = false
@@ -126,71 +142,30 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
     if sub then
         hash = hash .. "-" .. sub
     end
-    hash = containers.cleanname(hash)
-    local featurefiles
-    if featurefile then
-        featurefiles = { }
-        for s in gmatch(featurefile,"[^,]+") do
-            local name = resolvers.findfile(file.addsuffix(s,'fea'),'fea') or ""
-            if name == "" then
-                report_otf("loading error, no featurefile %a",s)
-            else
-                local attr = lfs.attributes(name)
-                featurefiles[#featurefiles+1] = {
-                    name = name,
-                    size = attr and attr.size or 0,
-                    time = attr and attr.modification or 0,
-                }
-            end
-        end
-        if #featurefiles == 0 then
-            featurefiles = nil
-        end
+    if instance then
+        hash = hash .. "-" .. instance
     end
+    hash = containers.cleanname(hash)
     local data = containers.read(otf.cache,hash)
     local reload = not data or data.size ~= size or data.time ~= time or data.tableversion ~= otfreaders.tableversion
     if forceload then
         report_otf("forced reload of %a due to hard coded flag",filename)
         reload = true
     end
- -- if not reload then
- --     local featuredata = data.featuredata
- --     if featurefiles then
- --         if not featuredata or #featuredata ~= #featurefiles then
- --             reload = true
- --         else
- --             for i=1,#featurefiles do
- --                 local fi, fd = featurefiles[i], featuredata[i]
- --                 if fi.name ~= fd.name or fi.size ~= fd.size or fi.time ~= fd.time then
- --                     reload = true
- --                     break
- --                 end
- --             end
- --         end
- --     elseif featuredata then
- --         reload = true
- --     end
- --     if reload then
- --        report_otf("loading: forced reload due to changed featurefile specification %a",featurefile)
- --     end
- --  end
      if reload then
         report_otf("loading %a, hash %a",filename,hash)
         --
         starttiming(otfreaders)
-        data = otfreaders.loadfont(filename,sub or 1) -- we can pass the number instead (if it comes from a name search)
-        --
-        -- if featurefiles then
-        --     for i=1,#featurefiles do
-        --         load_featurefile(data,featurefiles[i].name)
-        --     end
-        -- end
-        --
-        --
+        data = otfreaders.loadfont(filename,sub or 1,instance) -- we can pass the number instead (if it comes from a name search)
         if data then
-            --
-            local resources = data.resources
-            local svgshapes = resources.svgshapes
+            -- todo: make this a plugin
+            local used       = checkmemory()
+            local resources  = data.resources
+            local svgshapes  = resources.svgshapes
+            local sbixshapes = resources.sbixshapes
+            if cleanup == 0 then
+                checkmemory(used,threshold,tracememory)
+            end
             if svgshapes then
                 resources.svgshapes = nil
                 if otf.svgenabled then
@@ -205,18 +180,51 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
                         timestamp = timestamp,
                     }
                 end
+                if cleanup > 1 then
+                    collectgarbage("collect")
+                else
+                    checkmemory(used,threshold,tracememory)
+                end
+            end
+            if sbixshapes then
+                resources.sbixshapes = nil
+                if otf.sbixenabled then
+                    local timestamp = os.date()
+                    -- work in progress ... a bit boring to do
+                    containers.write(otf.sbixcache,hash, {
+                        sbixshapes = sbixshapes,
+                        timestamp  = timestamp,
+                    })
+                    data.properties.sbix = {
+                        hash      = hash,
+                        timestamp = timestamp,
+                    }
+                end
+                if cleanup > 1 then
+                    collectgarbage("collect")
+                else
+                    checkmemory(used,threshold,tracememory)
+                end
             end
             --
             otfreaders.compact(data)
+            if cleanup == 0 then
+                checkmemory(used,threshold,tracememory)
+            end
             otfreaders.rehash(data,"unicodes")
             otfreaders.addunicodetable(data)
             otfreaders.extend(data)
+            if cleanup == 0 then
+                checkmemory(used,threshold,tracememory)
+            end
             otfreaders.pack(data)
             report_otf("loading done")
             report_otf("saving %a in cache",filename)
             data = containers.write(otf.cache, hash, data)
             if cleanup > 1 then
                 collectgarbage("collect")
+            else
+                checkmemory(used,threshold,tracememory)
             end
             stoptiming(otfreaders)
             if elapsedtime then
@@ -224,10 +232,14 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
             end
             if cleanup > 3 then
                 collectgarbage("collect")
+            else
+                checkmemory(used,threshold,tracememory)
             end
             data = containers.read(otf.cache,hash) -- this frees the old table and load the sparse one
             if cleanup > 2 then
                 collectgarbage("collect")
+            else
+                checkmemory(used,threshold,tracememory)
             end
         else
             data = nil
@@ -243,15 +255,30 @@ function otf.load(filename,sub,featurefile) -- second argument (format) is gone 
         otfreaders.expand(data) -- inline tables
         otfreaders.addunicodetable(data) -- only when not done yet
         --
-        otfenhancers.apply(data,filename,data)
+        otfenhancers.apply(data,filename,data) -- in context one can also use treatments
         --
      -- constructors.addcoreunicodes(data.resources.unicodes) -- still needed ?
         --
         if applyruntimefixes then
-            applyruntimefixes(filename,data)
+            applyruntimefixes(filename,data) -- e.g. see treatments.lfg
         end
         --
         data.metadata.math = data.resources.mathconstants
+        --
+        -- delayed tables (experiment)
+        --
+        local classes = data.resources.classes
+        if not classes then
+            local descriptions = data.descriptions
+            classes = setmetatableindex(function(t,k)
+                local d = descriptions[k]
+                local v = (d and d.class or "base") or false
+                t[k] = v
+                return v
+            end)
+            data.resources.classes = classes
+        end
+        --
     end
 
     return data
@@ -313,7 +340,7 @@ local function copytotfm(data,cache_id)
         end
         if mathspecs then
             for unicode, character in next, characters do
-                local d = descriptions[unicode]
+                local d = descriptions[unicode] -- we could use parent table here
                 local m = d.math
                 if m then
                     -- watch out: luatex uses horiz_variants for the parts
@@ -378,6 +405,7 @@ local function copytotfm(data,cache_id)
         local fontname = metadata.fontname
         local fullname = metadata.fullname or fontname
         local psname   = fontname or fullname
+        local subfont  = metadata.subfontindex
         local units    = metadata.units or 1000
         --
         if units == 0 then -- catch bugs in fonts
@@ -472,9 +500,12 @@ local function copytotfm(data,cache_id)
         properties.fullname      = fullname
         properties.psname        = psname
         properties.name          = filename or fullname
+        properties.subfont       = subfont
         --
      -- properties.name          = specification.name
      -- properties.sub           = specification.sub
+        --
+        properties.private       = properties.private or data.private or privateoffset
         --
         return {
             characters     = characters,
@@ -535,7 +566,8 @@ local function otftotfm(specification)
         local subindex = specification.subindex
         local filename = specification.filename
         local features = specification.features.normal
-        local rawdata  = otf.load(filename,sub,features and features.featurefile)
+        local instance = specification.instance or (features and features.axis)
+        local rawdata  = otf.load(filename,sub,instance)
         if rawdata and next(rawdata) then
             local descriptions = rawdata.descriptions
             rawdata.lookuphash = { } -- to be done
@@ -585,7 +617,7 @@ local function checkmathsize(tfmdata,mathsize)
         local parameters = tfmdata.parameters
         parameters.scriptpercentage       = mathdata.ScriptPercentScaleDown
         parameters.scriptscriptpercentage = mathdata.ScriptScriptPercentScaleDown
-        parameters.mathsize               = mathsize
+        parameters.mathsize               = mathsize -- only when a number !
     end
 end
 
@@ -795,6 +827,7 @@ otf.coverup = {
         multiple          = justset,
         kern              = justset,
         pair              = justset,
+        single            = justset,
         ligature          = function(coverage,unicode,ligature)
             local first = ligature[1]
             local tree  = coverage[first]

@@ -17,27 +17,36 @@ if not modules then modules = { } end modules ['l-lua'] = {
 -- utf.*
 -- bit32
 
--- compatibility hacksand helpers
+local next, type, tonumber = next, type, tonumber
 
-_MAJORVERSION, _MINORVERSION = string.match(_VERSION,"^[^%d]+(%d+)%.(%d+).*$")
+-- compatibility hacks and helpers
 
-_MAJORVERSION = tonumber(_MAJORVERSION) or 5
-_MINORVERSION = tonumber(_MINORVERSION) or 1
-_LUAVERSION   = _MAJORVERSION + _MINORVERSION/10
+LUAMAJORVERSION, LUAMINORVERSION = string.match(_VERSION,"^[^%d]+(%d+)%.(%d+).*$")
 
-if _LUAVERSION < 5.2 and jit then
+LUAMAJORVERSION = tonumber(LUAMAJORVERSION) or 5
+LUAMINORVERSION = tonumber(LUAMINORVERSION) or 1
+LUAVERSION      = LUAMAJORVERSION + LUAMINORVERSION/10
+
+if LUAVERSION < 5.2 and jit then
     --
     -- we want loadstring cum suis to behave like 5.2
     --
-    _MINORVERSION = 2
-    _LUAVERSION   = 5.2
+    MINORVERSION = 2
+    LUAVERSION   = 5.2
 end
+
+_LUAVERSION = LUAVERSION -- for old times sake, will go away
 
 -- lpeg
 
 if not lpeg then
     lpeg = require("lpeg")
 end
+
+-- if utf8 then
+--     utf8lua = utf8
+--     utf8    = nil
+-- end
 
 -- basics:
 
@@ -188,7 +197,7 @@ if lua then
     lua.mask = load([[τεχ = 1]]) and "utf" or "ascii"
 end
 
-local flush   = io.flush
+local flush = io.flush
 
 if flush then
 
@@ -199,3 +208,45 @@ if flush then
 
 end
 
+-- new
+
+FFISUPPORTED = type(ffi) == "table" and ffi.os ~= "" and ffi.arch ~= "" and ffi.load
+
+if not FFISUPPORTED then
+
+    -- Maybe we should check for LUATEXENGINE but that's also a bti tricky as we still
+    -- can have a weird ffi library laying around. Checking for presence of 'jit' is
+    -- also not robust. So for now we hope for the best.
+
+    local okay ; okay, ffi = pcall(require,"ffi")
+
+    FFISUPPORTED = type(ffi) == "table" and ffi.os ~= "" and ffi.arch ~= "" and ffi.load
+
+end
+
+if not FFISUPPORTED then
+    ffi = nil
+elseif not ffi.number then
+    ffi.number = tonumber
+end
+
+if not bit32 then -- and utf8 then
+ -- bit32 = load ( [[ -- replacement code with 5.3 syntax so that 5.2 doesn't bark on it ]] )
+    bit32 = require("l-bit32")
+end
+
+-- We need this due a bug in luatex socket loading:
+
+-- local loaded = package.loaded
+--
+-- if not loaded["socket"] then loaded["socket"] = loaded["socket.core"] end
+-- if not loaded["mime"]   then loaded["mime"]   = loaded["mime.core"]   end
+--
+-- if not socket.mime then socket.mime = package.loaded["mime"] end
+--
+-- if not loaded["socket.mime"] then loaded["socket.mime"] = socket.mime end
+-- if not loaded["socket.http"] then loaded["socket.http"] = socket.http end
+-- if not loaded["socket.ftp"]  then loaded["socket.ftp"]  = socket.ftp  end
+-- if not loaded["socket.smtp"] then loaded["socket.smtp"] = socket.smtp end
+-- if not loaded["socket.tp"]   then loaded["socket.tp"]   = socket.tp   end
+-- if not loaded["socket.url"]  then loaded["socket.url"]  = socket.url  end

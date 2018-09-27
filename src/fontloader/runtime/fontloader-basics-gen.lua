@@ -7,9 +7,17 @@ if not modules then modules = { } end modules ['luat-basics-gen'] = {
 }
 
 if context then
-    texio.write_nl("fatal error: this module is not for context")
     os.exit()
 end
+
+-- We could load a few more of the general context libraries but it would
+-- not make plain / latex users more happy I guess. So, we stick to some
+-- placeholders.
+
+local match, gmatch, gsub, lower = string.match, string.gmatch, string.gsub, string.lower
+local formatters, split, format, dump = string.formatters, string.split, string.format, string.dump
+local loadfile, type = loadfile, type
+local setmetatable, getmetatable, collectgarbage = setmetatable, getmetatable, collectgarbage
 
 local dummyfunction = function()
 end
@@ -18,10 +26,19 @@ local dummyreporter = function(c)
     return function(f,...)
         local r = texio.reporter or texio.write_nl
         if f then
-            r(c .. " : " .. string.formatters(f,...))
+            r(c .. " : " .. (formatters or format)(f,...))
         else
             r("")
         end
+    end
+end
+
+local dummyreport = function(c,f,...)
+    local r = texio.reporter or texio.write_nl
+    if f then
+        r(c .. " : " .. (formatters or format)(f,...))
+    else
+        r("")
     end
 end
 
@@ -59,22 +76,45 @@ logs = {
     new           = dummyreporter,
     reporter      = dummyreporter,
     messenger     = dummyreporter,
-    report        = dummyfunction,
+    report        = dummyreport,
 }
 
 callbacks = {
     register = function(n,f)
         return callback.register(n,f)
     end,
-
 }
 
-utilities = utilities or { } utilities.storage = {
+utilities = utilities or { }
+
+utilities.storage = utilities.storage or {
     allocate = function(t)
         return t or { }
     end,
     mark     = function(t)
         return t or { }
+    end,
+}
+
+utilities.parsers = utilities.parsers or {
+    -- these are less flexible than in context but ok
+    -- for generic purpose
+    settings_to_array = function(s)
+        return split(s,",")
+    end,
+    settings_to_hash  = function(s)
+        local t = { }
+        for k, v in gmatch(s,"([^%s,=]+)=([^%s,]+)") do
+            t[k] = v
+        end
+        return t
+    end,
+    settings_to_hash_colon_too  = function(s)
+        local t = { }
+        for k, v in gmatch(s,"([^%s,=:]+)[=:]([^%s,]+)") do
+            t[k] = v
+        end
+        return t
     end,
 }
 
@@ -98,17 +138,18 @@ local remapper = {
     pfb    = "type1 fonts",        -- needed for vector loading
     afm    = "afm",
     enc    = "enc files",
+    lua    = "tex",
 }
 
 function resolvers.findfile(name,fileformat)
-    name = string.gsub(name,"\\","/")
+    name = gsub(name,"\\","/")
     if not fileformat or fileformat == "" then
         fileformat = file.suffix(name)
         if fileformat == "" then
             fileformat = "tex"
         end
     end
-    fileformat = string.lower(fileformat)
+    fileformat = lower(fileformat)
     fileformat = remapper[fileformat] or fileformat
     local found = kpse.find_file(name,fileformat)
     if not found or found == "" then
@@ -116,13 +157,6 @@ function resolvers.findfile(name,fileformat)
     end
     return found
 end
-
--- function resolvers.findbinfile(name,fileformat)
---     if not fileformat or fileformat == "" then
---         fileformat = file.suffix(name)
---     end
---     return resolvers.findfile(name,(fileformat and remapper[fileformat]) or fileformat)
--- end
 
 resolvers.findbinfile = resolvers.findfile
 
@@ -191,14 +225,14 @@ do
         cachepaths = "."
     end
 
-    cachepaths = string.split(cachepaths,os.type == "windows" and ";" or ":")
+    cachepaths = split(cachepaths,os.type == "windows" and ";" or ":")
 
     for i=1,#cachepaths do
         local cachepath = cachepaths[i]
         if not lfs.isdir(cachepath) then
             lfs.mkdirs(cachepath) -- needed for texlive and latex
             if lfs.isdir(cachepath) then
-                texio.write(string.format("(created cache path: %s)",cachepath))
+                logs.report("system","creating cache path '%s'",cachepath)
             end
         end
         if file.is_writable(cachepath) then
@@ -217,16 +251,16 @@ do
     end
 
     if not writable then
-        texio.write_nl("quiting: fix your writable cache path")
+        logs.report("system","no writeable cache path, quiting")
         os.exit()
     elseif #readables == 0 then
-        texio.write_nl("quiting: fix your readable cache path")
+        logs.report("system","no readable cache path, quiting")
         os.exit()
     elseif #readables == 1 and readables[1] == writable then
-        texio.write(string.format("(using cache: %s)",writable))
+        logs.report("system","using cache '%s'",writable)
     else
-        texio.write(string.format("(using write cache: %s)",writable))
-        texio.write(string.format("(using read cache: %s)",table.concat(readables, " ")))
+        logs.report("system","using write cache '%s'",writable)
+        logs.report("system","using read cache '%s'",table.concat(readables," "))
     end
 
 end
@@ -258,75 +292,34 @@ function caches.is_writable(path,name)
     return fullname and file.is_writable(fullname)
 end
 
--- function caches.loaddata(paths,name)
---     for i=1,#paths do
---         local data = false
---         local luaname, lucname = makefullname(paths[i],name)
---         if lucname and not lfs.isfile(lucname) and type(caches.compile) == "function" then
---             -- in case we used luatex and luajittex mixed ... lub or luc file
---             texio.write(string.format("(compiling luc: %s)",lucname))
---             data = loadfile(luaname)
---             if data then
---                 data = data()
---             end
---             if data then
---                 caches.compile(data,luaname,lucname)
---                 return data
---             end
---         end
---         if lucname and lfs.isfile(lucname) then -- maybe also check for size
---             texio.write(string.format("(load luc: %s)",lucname))
---             data = loadfile(lucname)
---             if data then
---                 data = data()
---             end
---             if data then
---                 return data
---             else
---                 texio.write(string.format("(loading failed: %s)",lucname))
---             end
---         end
---         if luaname and lfs.isfile(luaname) then
---             texio.write(string.format("(load lua: %s)",luaname))
---             data = loadfile(luaname)
---             if data then
---                 data = data()
---             end
---             if data then
---                 return data
---             end
---         end
---     end
--- end
-
 function caches.loaddata(readables,name,writable)
     for i=1,#readables do
         local path   = readables[i]
         local loader = false
         local luaname, lucname = makefullname(path,name)
         if lfs.isfile(lucname) then
-            texio.write(string.format("(load luc: %s)",lucname))
+            logs.report("system","loading luc file '%s'",lucname)
             loader = loadfile(lucname)
         end
         if not loader and lfs.isfile(luaname) then
             -- can be different paths when we read a file database from disk
             local luacrap, lucname = makefullname(writable,name)
-            texio.write(string.format("(compiling luc: %s)",lucname))
+            logs.report("system","compiling luc file '%s'",lucname)
             if lfs.isfile(lucname) then
                 loader = loadfile(lucname)
             end
             caches.compile(data,luaname,lucname)
             if lfs.isfile(lucname) then
-                texio.write(string.format("(load luc: %s)",lucname))
+                logs.report("system","loading luc file '%s'",lucname)
                 loader = loadfile(lucname)
             else
-                texio.write(string.format("(loading failed: %s)",lucname))
+                logs.report("system","error in loading luc file '%s'",lucname)
             end
             if not loader then
-                texio.write(string.format("(load lua: %s)",luaname))
+                logs.report("system","loading lua file '%s'",luaname)
                 loader = loadfile(luaname)
             else
-                texio.write(string.format("(loading failed: %s)",luaname))
+                logs.report("system","error in loading lua file '%s'",luaname)
             end
         end
         if loader then
@@ -341,42 +334,19 @@ end
 function caches.savedata(path,name,data)
     local luaname, lucname = makefullname(path,name)
     if luaname then
-        texio.write(string.format("(save: %s)",luaname))
+        logs.report("system","saving lua file '%s'",luaname)
         table.tofile(luaname,data,true)
         if lucname and type(caches.compile) == "function" then
             os.remove(lucname) -- better be safe
-            texio.write(string.format("(save: %s)",lucname))
+            logs.report("system","saving luc file '%s'",lucname)
             caches.compile(data,luaname,lucname)
         end
     end
 end
 
--- According to KH os.execute is not permitted in plain/latex so there is
--- no reason to use the normal context way. So the method here is slightly
--- different from the one we have in context. We also use different suffixes
--- as we don't want any clashes (sharing cache files is not that handy as
--- context moves on faster.)
---
--- Beware: serialization might fail on large files (so maybe we should pcall
--- this) in which case one should limit the method to luac and enable support
--- for execution.
-
--- function caches.compile(data,luaname,lucname)
---     local d = io.loaddata(luaname)
---     if not d or d == "" then
---         d = table.serialize(data,true) -- slow
---     end
---     if d and d ~= "" then
---         local f = io.open(lucname,'w')
---         if f then
---             local s = loadstring(d)
---             if s then
---                 f:write(string.dump(s,true))
---             end
---             f:close()
---         end
---     end
--- end
+-- The method here is slightly different from the one we have in context. We
+-- also use different suffixes as we don't want any clashes (sharing cache
+-- files is not that handy as context moves on faster.)
 
 function caches.compile(data,luaname,lucname)
     local d = io.loaddata(luaname)
@@ -388,23 +358,14 @@ function caches.compile(data,luaname,lucname)
         if f then
             local s = loadstring(d)
             if s then
-                f:write(string.dump(s,true))
+                f:write(dump(s,true))
             end
             f:close()
         end
     end
 end
 
---
-
--- function table.setmetatableindex(t,f)
---     if type(t) ~= "table" then
---         f = f or t
---         t = { }
---     end
---     setmetatable(t,{ __index = f })
---     return t
--- end
+-- simplfied version:
 
 function table.setmetatableindex(t,f)
     if type(t) ~= "table" then
@@ -422,13 +383,23 @@ function table.setmetatableindex(t,f)
     return t
 end
 
+function table.makeweak(t)
+    local m = getmetatable(t)
+    if m then
+        m.__mode = "v"
+    else
+        setmetatable(t,{ __mode = "v" })
+    end
+    return t
+end
+
 -- helper for plain:
 
 arguments = { }
 
 if arg then
     for i=1,#arg do
-        local k, v = string.match(arg[i],"^%-%-([^=]+)=?(.-)$")
+        local k, v = match(arg[i],"^%-%-([^=]+)=?(.-)$")
         if k and v then
             arguments[k] = v
         end

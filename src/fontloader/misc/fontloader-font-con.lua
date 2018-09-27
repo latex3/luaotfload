@@ -8,11 +8,14 @@ if not modules then modules = { } end modules ['font-con'] = {
 
 -- some names of table entries will be changed (no _)
 
-local next, tostring, rawget = next, tostring, rawget
+local next, tostring, tonumber, rawget = next, tostring, tonumber, rawget
 local format, match, lower, gsub, find = string.format, string.match, string.lower, string.gsub, string.find
-local sort, insert, concat, sortedkeys, serialize, fastcopy = table.sort, table.insert, table.concat, table.sortedkeys, table.serialize, table.fastcopy
+local sort, insert, concat = table.sort, table.insert, table.concat
+local sortedkeys, sortedhash, serialize, fastcopy = table.sortedkeys, table.sortedhash, table.serialize, table.fastcopy
 local derivetable = table.derive
 local ioflush = io.flush
+local round = math.round
+local setmetatable, getmetatable, rawget, rawset = setmetatable, getmetatable, rawget, rawset
 
 local trace_defining  = false  trackers.register("fonts.defining",  function(v) trace_defining = v end)
 local trace_scaling   = false  trackers.register("fonts.scaling",   function(v) trace_scaling  = v end)
@@ -43,7 +46,7 @@ constructors.namemode        = "fullpath" -- will be a function
 constructors.version         = 1.01
 constructors.cache           = containers.define("fonts", "constructors", constructors.version, false)
 
-constructors.privateoffset   = 0xF0000 -- 0x10FFFF
+constructors.privateoffset   = 0xF0000 -- 0x10FFFF | context also uses privates: 0xE000-0xEFFF
 
 constructors.cacheintex      = true -- so we see the original table in fonts.font
 
@@ -85,6 +88,31 @@ function constructors.scaled(scaledpoints, designsize) -- handles designsize in 
         end
     else
         return scaledpoints
+    end
+end
+
+function constructors.getprivate(tfmdata)
+    local properties = tfmdata.properties
+    local private = properties.private
+    properties.private = private + 1
+    return private
+end
+
+function constructors.setmathparameter(tfmdata,name,value)
+    local m = tfmdata.mathparameters
+    local c = tfmdata.MathConstants
+    if m then
+        m[name] = value
+    end
+    if c and c ~= m then
+        c[name] = value
+    end
+end
+
+function constructors.getmathparameter(tfmdata,name)
+    local p = tfmdata.mathparameters or tfmdata.MathConstants
+    if p then
+        return p[name]
     end
 end
 
@@ -221,27 +249,87 @@ function constructors.trytosharefont(target,tfmdata)
     end
 end
 
+-- function constructors.enhanceparameters(parameters)
+--     local xheight = parameters.x_height
+--     local quad    = parameters.quad
+--     local space   = parameters.space
+--     local stretch = parameters.space_stretch
+--     local shrink  = parameters.space_shrink
+--     local extra   = parameters.extra_space
+--     local slant   = parameters.slant
+--     -- synonyms
+--     parameters.xheight       = xheight
+--     parameters.spacestretch  = stretch
+--     parameters.spaceshrink   = shrink
+--     parameters.extraspace    = extra
+--     parameters.em            = quad
+--     parameters.ex            = xheight
+--     parameters.slantperpoint = slant
+--     parameters.spacing = {
+--         width   = space,
+--         stretch = stretch,
+--         shrink  = shrink,
+--         extra   = extra,
+--     }
+-- end
+
+local synonyms = {
+    exheight      = "x_height",
+    xheight       = "x_height",
+    ex            = "x_height",
+    emwidth       = "quad",
+    em            = "quad",
+    spacestretch  = "space_stretch",
+    stretch       = "space_stretch",
+    spaceshrink   = "space_shrink",
+    shrink        = "space_shrink",
+    extraspace    = "extra_space",
+    xspace        = "extra_space",
+    slantperpoint = "slant",
+}
+
 function constructors.enhanceparameters(parameters)
-    local xheight = parameters.x_height
-    local quad    = parameters.quad
-    local space   = parameters.space
-    local stretch = parameters.space_stretch
-    local shrink  = parameters.space_shrink
-    local extra   = parameters.extra_space
-    local slant   = parameters.slant
-    parameters.xheight       = xheight
-    parameters.spacestretch  = stretch
-    parameters.spaceshrink   = shrink
-    parameters.extraspace    = extra
-    parameters.em            = quad
-    parameters.ex            = xheight
-    parameters.slantperpoint = slant
-    parameters.spacing = {
-        width   = space,
-        stretch = stretch,
-        shrink  = shrink,
-        extra   = extra,
-    }
+    local mt = getmetatable(parameters)
+    local getter = function(t,k)
+        if not k then
+            return nil
+        end
+        local s = synonyms[k]
+        if s then
+            return rawget(t,s) or (mt and mt[s]) or nil
+        end
+        if k == "spacing" then
+            return {
+                width   = t.space,
+                stretch = t.space_stretch,
+                shrink  = t.space_shrink,
+                extra   = t.extra_space,
+            }
+        end
+        return mt and mt[k] or nil
+    end
+    local setter = function(t,k,v)
+        if not k then
+            return 0
+        end
+        local s = synonyms[k]
+        if s then
+            rawset(t,s,v)
+        elseif k == "spacing" then
+            if type(v) == "table" then
+                rawset(t,"space",v.width or 0)
+                rawset(t,"space_stretch",v.stretch or 0)
+                rawset(t,"space_shrink",v.shrink or 0)
+                rawset(t,"extra_space",v.extra or 0)
+            end
+        else
+            rawset(t,k,v)
+        end
+    end
+    setmetatable(parameters, {
+        __index    = getter,
+        __newindex = setter,
+    })
 end
 
 local function mathkerns(v,vdelta)
@@ -263,7 +351,7 @@ local psfake = 0
 local function fixedpsname(psname,fallback)
     local usedname = psname
     if psname and psname ~= "" then
-        if find(psname," ") then
+        if find(psname," ",1,true) then
             usedname = gsub(psname,"[%s]+","-")
         else
             -- we assume that the name is sane enough (we might sanitize completely some day)
@@ -321,7 +409,7 @@ function constructors.scale(tfmdata,specification)
     --
     local mathsize    = tonumber(specification.mathsize) or 0
     local textsize    = tonumber(specification.textsize) or scaledpoints
-    local forcedsize  = tonumber(parameters.mathsize   ) or 0
+    local forcedsize  = tonumber(parameters.mathsize   ) or 0 -- can be set by the feature "mathsize"
     local extrafactor = tonumber(specification.factor  ) or 1
     if (mathsize == 2 or forcedsize == 2) and parameters.scriptpercentage then
         scaledpoints = parameters.scriptpercentage * textsize / 100
@@ -329,6 +417,8 @@ function constructors.scale(tfmdata,specification)
         scaledpoints = parameters.scriptscriptpercentage * textsize / 100
     elseif forcedsize > 1000 then -- safeguard
         scaledpoints = forcedsize
+    else
+        -- in context x and xx also use mathsize
     end
     targetparameters.mathsize    = mathsize    -- context specific
     targetparameters.textsize    = textsize    -- context specific
@@ -341,10 +431,6 @@ function constructors.scale(tfmdata,specification)
     local defaultheight = resources.defaultheight or 0
     local defaultdepth  = resources.defaultdepth or 0
     local units         = parameters.units or 1000
-    --
-    if target.fonts then
-        target.fonts = fastcopy(target.fonts) -- maybe we virtualize more afterwards
-    end
     --
     -- boundary keys are no longer needed as we now have a string 'right_boundary'
     -- that can be used in relevant tables (kerns and ligatures) ... not that I ever
@@ -387,7 +473,8 @@ function constructors.scale(tfmdata,specification)
     local psname   = properties.psname   or tfmdata.psname
     local name     = properties.name     or tfmdata.name
     --
-    -- the psname used in pdf file as well as for selecting subfont in ttc
+    -- The psname used in pdf file as well as for selecting subfont in ttc although
+    -- we don't need that subfont look up here (mapfile stuff).
     --
     local psname, psfixed = fixedpsname(psname,fontname or fullname or file.nameonly(filename))
     --
@@ -405,23 +492,9 @@ function constructors.scale(tfmdata,specification)
     -- expansion (hz)
     local expansion = parameters.expansion
     if expansion then
-        target.stretch     = expansion.stretch
-        target.shrink      = expansion.shrink
-        target.step        = expansion.step
-        target.auto_expand = expansion.auto
-    end
-    -- protrusion
-    local protrusion = parameters.protrusion
-    if protrusion then
-        target.auto_protrude = protrusion.auto
-    end
-    -- widening
-    local extendfactor = parameters.extendfactor or 0
-    if extendfactor ~= 0 and extendfactor ~= 1 then
-        hdelta = hdelta * extendfactor
-        target.extend = extendfactor * 1000 -- extent ?
-    else
-        target.extend = 1000 -- extent ?
+        target.stretch = expansion.stretch
+        target.shrink  = expansion.shrink
+        target.step    = expansion.step
     end
     -- slanting
     local slantfactor = parameters.slantfactor or 0
@@ -430,6 +503,31 @@ function constructors.scale(tfmdata,specification)
     else
         target.slant = 0
     end
+    -- widening
+    local extendfactor = parameters.extendfactor or 0
+    if extendfactor ~= 0 and extendfactor ~= 1 then
+        hdelta = hdelta * extendfactor
+        target.extend = extendfactor * 1000
+    else
+        target.extend = 1000 -- extent ?
+    end
+    -- squeezing
+    local squeezefactor = parameters.squeezefactor or 0
+    if squeezefactor ~= 0 and squeezefactor ~= 1 then
+        vdelta = vdelta * squeezefactor
+        target.squeeze = squeezefactor * 1000
+    else
+        target.squeeze = 1000 -- extent ?
+    end
+    -- effects
+    local mode = parameters.mode or 0
+    if mode ~= 0 then
+        target.mode = mode
+    end
+    local width = parameters.width or 0
+    if width ~= 0 then
+        target.width = width * delta * 1000 / 655360
+    end
     --
     targetparameters.factor       = delta
     targetparameters.hfactor      = hdelta
@@ -437,9 +535,11 @@ function constructors.scale(tfmdata,specification)
     targetparameters.size         = scaledpoints
     targetparameters.units        = units
     targetparameters.scaledpoints = askedscaledpoints
+    targetparameters.mode         = mode
+    targetparameters.width        = width
     --
     local isvirtual        = properties.virtualized or tfmdata.type == "virtual"
-    local hasquality       = target.auto_expand or target.auto_protrude
+    local hasquality       = parameters.expansion or parameters.protrusion
     local hasitalics       = properties.hasitalics
     local autoitalicamount = properties.autoitalicamount
     local stackmath        = not properties.nostackmath
@@ -449,6 +549,13 @@ function constructors.scale(tfmdata,specification)
     local realdimensions   = properties.realdimensions
     local writingmode      = properties.writingmode or "horizontal"
     local identity         = properties.identity or "horizontal"
+    --
+    local vfonts = target.fonts
+    if vfonts and #vfonts > 0 then
+        target.fonts = fastcopy(vfonts) -- maybe we virtualize more afterwards
+    elseif isvirtual then
+        target.fonts = { { id = 0 } } -- catch error
+    end
     --
     if changed and not next(changed) then
         changed = false
@@ -485,7 +592,7 @@ function constructors.scale(tfmdata,specification)
         targetparameters.descender = delta * descender
     end
     --
-    constructors.enhanceparameters(targetparameters) -- official copies for us
+    constructors.enhanceparameters(targetparameters) -- official copies for us, now virtual
     --
     local protrusionfactor = (targetquad ~= 0 and 1000/targetquad) or 0
     local scaledwidth      = defaultwidth  * hdelta
@@ -548,10 +655,15 @@ function constructors.scale(tfmdata,specification)
         local chr, description, index
         if changed then
             local c = changed[unicode]
-            if c then
-                description = descriptions[c] or descriptions[unicode] or character
-                character   = characters[c] or character
-                index       = description.index or c
+            if c and c ~= unicode then
+                if c then
+                    description = descriptions[c] or descriptions[unicode] or character
+                    character   = characters[c] or character
+                    index       = description.index or c
+                else
+                    description = descriptions[unicode] or character
+                    index       = description.index or unicode
+                end
             else
                 description = descriptions[unicode] or character
                 index       = description.index or unicode
@@ -657,12 +769,15 @@ function constructors.scale(tfmdata,specification)
                     local t = { }
                     for i=1,#vv do
                         local vvi = vv[i]
-                        t[i] = {
-                            ["start"]    = (vvi["start"]   or 0)*vdelta,
-                            ["end"]      = (vvi["end"]     or 0)*vdelta,
-                            ["advance"]  = (vvi["advance"] or 0)*vdelta,
-                            ["extender"] =  vvi["extender"],
-                            ["glyph"]    =  vvi["glyph"],
+                        local s = vvi["start"]   or 0
+                        local e = vvi["end"]     or 0
+                        local a = vvi["advance"] or 0
+                        t[i] = { -- zero check nicer for 5.3
+                            ["start"]    = s == 0 and 0 or s * vdelta,
+                            ["end"]      = e == 0 and 0 or e * vdelta,
+                            ["advance"]  = a == 0 and 0 or a * vdelta,
+                            ["extender"] = vvi["extender"],
+                            ["glyph"]    = vvi["glyph"],
                         }
                     end
                     chr.vert_variants = t
@@ -672,12 +787,15 @@ function constructors.scale(tfmdata,specification)
                         local t = { }
                         for i=1,#hv do
                             local hvi = hv[i]
-                            t[i] = {
-                                ["start"]    = (hvi["start"]   or 0)*hdelta,
-                                ["end"]      = (hvi["end"]     or 0)*hdelta,
-                                ["advance"]  = (hvi["advance"] or 0)*hdelta,
-                                ["extender"] =  hvi["extender"],
-                                ["glyph"]    =  hvi["glyph"],
+                            local s = hvi["start"]   or 0
+                            local e = hvi["end"]     or 0
+                            local a = hvi["advance"] or 0
+                            t[i] = { -- zero check nicer for 5.3
+                                ["start"]    = s == 0 and 0 or s * hdelta,
+                                ["end"]      = e == 0 and 0 or e * hdelta,
+                                ["advance"]  = a == 0 and 0 or a * hdelta,
+                                ["extender"] = hvi["extender"],
+                                ["glyph"]    = hvi["glyph"],
                             }
                         end
                         chr.horiz_variants = t
@@ -767,7 +885,7 @@ function constructors.scale(tfmdata,specification)
                 local ok = false
                 for i=1,#vc do
                     local key = vc[i][1]
-                    if key == "right" or key == "down" then
+                    if key == "right" or key == "down" or key == "rule" then
                         ok = true
                         break
                     end
@@ -791,7 +909,7 @@ function constructors.scale(tfmdata,specification)
                 else
                     chr.commands = vc
                 end
-                chr.index = nil
+             -- chr.index = nil
             end
         end
         targetcharacters[unicode] = chr
@@ -802,6 +920,24 @@ function constructors.scale(tfmdata,specification)
     constructors.aftercopyingcharacters(target,tfmdata)
     --
     constructors.trytosharefont(target,tfmdata)
+    --
+    -- catch inconsistencies
+    --
+    local vfonts = target.fonts
+--     if isvirtual then
+if isvirtual or target.type == "virtual" or properties.virtualized then
+        properties.virtualized = true
+target.type = "virtual"
+        if not vfonts or #vfonts == 0 then
+            target.fonts = { { id = 0 } }
+        end
+    elseif vfonts then
+        properties.virtualized = true
+        target.type = "virtual"
+        if #vfonts == 0 then
+            target.fonts = { { id = 0 } }
+        end
+    end
     --
     return target
 end
@@ -826,16 +962,9 @@ function constructors.finalize(tfmdata)
     --
     if not parameters.expansion then
         parameters.expansion = {
-            stretch = tfmdata.stretch     or 0,
-            shrink  = tfmdata.shrink      or 0,
-            step    = tfmdata.step        or 0,
-            auto    = tfmdata.auto_expand or false,
-        }
-    end
-    --
-    if not parameters.protrusion then
-        parameters.protrusion = {
-            auto = auto_protrude
+            stretch = tfmdata.stretch or 0,
+            shrink  = tfmdata.shrink  or 0,
+            step    = tfmdata.step    or 0,
         }
     end
     --
@@ -843,12 +972,24 @@ function constructors.finalize(tfmdata)
         parameters.size = tfmdata.size
     end
     --
-    if not parameters.extendfactor then
-        parameters.extendfactor = tfmdata.extend or 0
+    if not parameters.mode then
+        parameters.mode = 0
+    end
+    --
+    if not parameters.width then
+        parameters.width = 0
     end
     --
     if not parameters.slantfactor then
         parameters.slantfactor = tfmdata.slant or 0
+    end
+    --
+    if not parameters.extendfactor then
+        parameters.extendfactor = tfmdata.extend or 0
+    end
+    --
+    if not parameters.squeezefactor then
+        parameters.squeezefactor = tfmdata.squeeze or 0
     end
     --
     local designsize = parameters.designsize
@@ -939,10 +1080,11 @@ function constructors.finalize(tfmdata)
     tfmdata.stretch          = nil
     tfmdata.shrink           = nil
     tfmdata.step             = nil
-    tfmdata.auto_expand      = nil
-    tfmdata.auto_protrude    = nil
-    tfmdata.extend           = nil
     tfmdata.slant            = nil
+    tfmdata.extend           = nil
+    tfmdata.squeeze          = nil
+    tfmdata.mode             = nil
+    tfmdata.width            = nil
     tfmdata.units            = nil
     tfmdata.units_per_em     = nil
     --
@@ -963,48 +1105,25 @@ constructors.hashmethods = hashmethods
 function constructors.hashfeatures(specification) -- will be overloaded
     local features = specification.features
     if features then
-        local t, tn = { }, 0
-        for category, list in next, features do
+        local t, n = { }, 0
+        for category, list in sortedhash(features) do
             if next(list) then
                 local hasher = hashmethods[category]
                 if hasher then
                     local hash = hasher(list)
                     if hash then
-                        tn = tn + 1
-                        t[tn] = category .. ":" .. hash
+                        n = n + 1
+                        t[n] = category .. ":" .. hash
                     end
                 end
             end
         end
-        if tn > 0 then
+        if n > 0 then
             return concat(t," & ")
         end
     end
     return "unknown"
 end
-
--- hashmethods.normal = function(list)
---     local s = { }
---     local n = 0
---     for k, v in next, list do
---         if not k then
---             -- no need to add to hash
---         elseif k == "number" or k == "features" then
---             -- no need to add to hash (maybe we need a skip list)
---         else
---             n = n + 1
---             s[n] = k
---         end
---     end
---     if n > 0 then
---         sort(s)
---         for i=1,n do
---             local k = s[i]
---             s[i] = k .. '=' .. tostring(list[k])
---         end
---         return concat(s,"+")
---     end
--- end
 
 hashmethods.normal = function(list)
     local s = { }
@@ -1016,7 +1135,18 @@ hashmethods.normal = function(list)
             -- no need to add to hash (maybe we need a skip list)
         else
             n = n + 1
-            s[n] = k .. '=' .. tostring(v)
+            if type(v) == "table" then
+                -- table.sequenced
+                local t = { }
+                local m = 0
+                for k, v in next, v do
+                    m = m + 1
+                    t[m] = k .. '=' .. tostring(v)
+                end
+                s[n] = k .. '={' .. concat(t,",") .. "}"
+            else
+                s[n] = k .. '=' .. tostring(v)
+            end
         end
     end
     if n > 0 then
@@ -1026,7 +1156,7 @@ hashmethods.normal = function(list)
 end
 
 --[[ldx--
-<p>In principle we can share tfm tables when we are in node for a font, but then
+<p>In principle we can share tfm tables when we are in need for a font, but then
 we need to define a font switch as an id/attr switch which is no fun, so in that
 case users can best use dynamic features ... so, we will not use that speedup. Okay,
 when we get rid of base mode we can optimize even further by sharing, but then we
@@ -1040,13 +1170,15 @@ function constructors.hashinstance(specification,force)
         specification.hash = hash
     end
     if size < 1000 and designsizes[hash] then
-        size = math.round(constructors.scaled(size,designsizes[hash]))
-        specification.size = size
-    end
-    if fallbacks then
-        return hash .. ' @ ' .. tostring(size) .. ' @ ' .. fallbacks
+        size = round(constructors.scaled(size,designsizes[hash]))
     else
-        return hash .. ' @ ' .. tostring(size)
+        size = round(size)
+    end
+    specification.size = size
+    if fallbacks then
+        return hash .. ' @ ' .. size .. ' @ ' .. fallbacks
+    else
+        return hash .. ' @ ' .. size
     end
 end
 
@@ -1255,11 +1387,13 @@ do
 
         if not enhancers then
 
-            local actions = allocate()
-            local before  = allocate()
-            local after   = allocate()
-            local order   = allocate()
-            local patches = { before = before, after = after }
+            local actions  = allocate() -- no need to allocate thee
+            local before   = allocate()
+            local after    = allocate()
+            local order    = allocate()
+            local known    = { }
+            local nofsteps = 0
+            local patches  = { before = before, after = after }
 
             local trace   = false
             local report  = logs.reporter("fonts",format .. " enhancing")
@@ -1285,7 +1419,7 @@ do
                     report("%s enhancing file %a","start",filename)
                 end
                 ioflush() -- we want instant messages
-                for e=1,#order do
+                for e=1,nofsteps do
                     local enhancer = order[e]
                     local b = before[enhancer]
                     if b then
@@ -1295,7 +1429,7 @@ do
                             end
                         end
                     end
-                    enhance(enhancer,data,filename,raw)
+                    enhance(enhancer,data,filename,raw) -- we have one installed: check extra features
                     local a = after[enhancer]
                     if a then
                         for pattern, action in next, a do
@@ -1317,7 +1451,9 @@ do
                     if actions[what] then
                         -- overloading, e.g."check extra features"
                     else
-                        order[#order+1] = what
+                        nofsteps        = nofsteps + 1
+                        order[nofsteps] = what
+                        known[what]     = nofsteps
                     end
                     actions[what] = action
                 else
@@ -1325,7 +1461,19 @@ do
                 end
             end
 
-            -- fonts.constructors.otf.enhancers.patch("before","migrate metadata","cambria",function() end)
+            -- We used to have a lot of enhancers but no longer with the new font loader. The order of enhancers
+            -- is the order of definition. The before/after patches are there for old times sake and happen
+            -- before or after a (named) enhancer. An example of a set enhancer is "check extra features" so one
+            -- one set patches before or after that is applied. Unknown enhancers are auto-registered. It's a bit
+            -- messy but we keep it for compatibility reasons.
+            --
+            -- fonts.handlers.otf.enhancers.patches.register("before","some patches","somefont",function(data,filename)
+            --     print("!!!!!!!") -- before | after
+            -- end)
+            --
+            -- fonts.handlers.otf.enhancers.register("more patches",function(data,filename)
+            --     print("???????") -- enhance
+            -- end)
 
             local function patch(what,where,pattern,action)
                 local pw = patches[what]
@@ -1334,7 +1482,12 @@ do
                     if ww then
                         ww[pattern] = action
                     else
-                        pw[where] = { [pattern] = action}
+                        pw[where] = { [pattern] = action }
+                        if not known[where] then
+                            nofsteps        = nofsteps + 1
+                            order[nofsteps] = where
+                            known[where]    = nofsteps
+                        end
                     end
                 end
             end
@@ -1343,7 +1496,11 @@ do
                 register = register,
                 apply    = apply,
                 patch    = patch,
-                patches  = { register = patch }, -- for old times sake
+                report   = report,
+                patches  = {
+                    register = patch,
+                    report   = report,
+                }, -- for old times sake
             }
 
             handler.enhancers = enhancers

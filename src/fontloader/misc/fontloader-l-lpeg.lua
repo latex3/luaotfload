@@ -6,6 +6,10 @@ if not modules then modules = { } end modules ['l-lpeg'] = {
     license   = "see context related readme files"
 }
 
+-- we can get too many captures (e.g. on largexml files) which makes me wonder
+-- if P(foo)/"" can't be simplfied to N(foo) i.e. some direct instruction to the
+-- lpeg virtual machine to ignore it
+
 -- lpeg 12 vs lpeg 10: slower compilation, similar parsing speed (i need to check
 -- if i can use new features like capture / 2 and .B (at first sight the xml
 -- parser is some 5% slower)
@@ -17,7 +21,13 @@ if not modules then modules = { } end modules ['l-lpeg'] = {
 -- move utf    -> l-unicode
 -- move string -> l-string or keep it here
 
-lpeg = require("lpeg")
+-- lpeg.B                                 : backward without consumption
+-- lpeg.F = getmetatable(lpeg.P(1)).__len : forward  without consumption
+
+
+lpeg = require("lpeg") -- does lpeg register itself global?
+
+local lpeg = lpeg
 
 -- The latest lpeg doesn't have print any more, and even the new ones are not
 -- available by default (only when debug mode is enabled), which is a pitty as
@@ -103,11 +113,14 @@ patterns.alwaysmatched = alwaysmatched
 local sign             = S('+-')
 local zero             = P('0')
 local digit            = R('09')
+local digits           = digit^1
 local octdigit         = R("07")
+local octdigits        = octdigit^1
 local lowercase        = R("az")
 local uppercase        = R("AZ")
 local underscore       = P("_")
 local hexdigit         = digit + lowercase + uppercase
+local hexdigits        = hexdigit^1
 local cr, lf, crlf     = P("\r"), P("\n"), P("\r\n")
 ----- newline          = crlf + S("\r\n") -- cr + lf
 local newline          = P("\r") * (P("\n") + P(true)) + P("\n")  -- P("\r")^-1 * P("\n")^-1
@@ -187,18 +200,20 @@ local fullstripper     = whitespace^0 * C((whitespace^0 * nonwhitespace^1)^0)
 
 ----- collapser        = Cs(spacer^0/"" * ((spacer^1 * endofstring / "") + (spacer^1/" ") + P(1))^0)
 local collapser        = Cs(spacer^0/"" * nonspacer^0 * ((spacer^0/" " * nonspacer^1)^0))
+local nospacer         = Cs((whitespace^1/"" + nonwhitespace^1)^0)
 
-local b_collapser      = Cs( whitespace^0        /"" * (nonwhitespace^1 + whitespace^1/" ")^0)
-local e_collapser      = Cs((whitespace^1 * P(-1)/"" +  nonwhitespace^1 + whitespace^1/" ")^0)
-local m_collapser      = Cs(                           (nonwhitespace^1 + whitespace^1/" ")^0)
+local b_collapser      = Cs( whitespace^0              /"" * (nonwhitespace^1 + whitespace^1/" ")^0)
+local e_collapser      = Cs((whitespace^1 * endofstring/"" +  nonwhitespace^1 + whitespace^1/" ")^0)
+local m_collapser      = Cs(                                 (nonwhitespace^1 + whitespace^1/" ")^0)
 
-local b_stripper      = Cs( spacer^0        /"" * (nonspacer^1 + spacer^1/" ")^0)
-local e_stripper      = Cs((spacer^1 * P(-1)/"" +  nonspacer^1 + spacer^1/" ")^0)
-local m_stripper      = Cs(                       (nonspacer^1 + spacer^1/" ")^0)
+local b_stripper       = Cs( spacer^0              /"" * (nonspacer^1 + spacer^1/" ")^0)
+local e_stripper       = Cs((spacer^1 * endofstring/"" +  nonspacer^1 + spacer^1/" ")^0)
+local m_stripper       = Cs(                             (nonspacer^1 + spacer^1/" ")^0)
 
 patterns.stripper      = stripper
 patterns.fullstripper  = fullstripper
 patterns.collapser     = collapser
+patterns.nospacer      = nospacer
 
 patterns.b_collapser   = b_collapser
 patterns.m_collapser   = m_collapser
@@ -238,43 +253,50 @@ patterns.doublequoted  = dquote * patterns.nodquote * dquote
 patterns.quoted        = patterns.doublequoted + patterns.singlequoted
 
 patterns.digit         = digit
+patterns.digits        = digits
 patterns.octdigit      = octdigit
+patterns.octdigits     = octdigits
 patterns.hexdigit      = hexdigit
+patterns.hexdigits     = hexdigits
 patterns.sign          = sign
-patterns.cardinal      = digit^1
-patterns.integer       = sign^-1 * digit^1
-patterns.unsigned      = digit^0 * period * digit^1
+patterns.cardinal      = digits
+patterns.integer       = sign^-1 * digits
+patterns.unsigned      = digit^0 * period * digits
 patterns.float         = sign^-1 * patterns.unsigned
-patterns.cunsigned     = digit^0 * comma * digit^1
-patterns.cpunsigned    = digit^0 * (period + comma) * digit^1
+patterns.cunsigned     = digit^0 * comma * digits
+patterns.cpunsigned    = digit^0 * (period + comma) * digits
 patterns.cfloat        = sign^-1 * patterns.cunsigned
 patterns.cpfloat       = sign^-1 * patterns.cpunsigned
 patterns.number        = patterns.float + patterns.integer
 patterns.cnumber       = patterns.cfloat + patterns.integer
 patterns.cpnumber      = patterns.cpfloat + patterns.integer
-patterns.oct           = zero * octdigit^1
+patterns.oct           = zero * octdigits -- hm is this ok
 patterns.octal         = patterns.oct
 patterns.HEX           = zero * P("X") * (digit+uppercase)^1
 patterns.hex           = zero * P("x") * (digit+lowercase)^1
-patterns.hexadecimal   = zero * S("xX") * hexdigit^1
+patterns.hexadecimal   = zero * S("xX") * hexdigits
 
 patterns.hexafloat     = sign^-1
                        * zero * S("xX")
-                       * (hexdigit^0 * period * hexdigit^1 + hexdigit^1 * period * hexdigit^0 + hexdigit^1)
-                       * (S("pP") * sign^-1 * hexdigit^1)^-1
+                       * (hexdigit^0 * period * hexdigits + hexdigits * period * hexdigit^0 + hexdigits)
+                       * (S("pP") * sign^-1 * hexdigits)^-1
 patterns.decafloat     = sign^-1
-                       * (digit^0 * period * digit^1 + digit^1 * period * digit^0 + digit^1)
-                       *  S("eE") * sign^-1 * digit^1
+                       * (digit^0 * period * digits + digits * period * digit^0 + digits)
+                       *  S("eE") * sign^-1 * digits
 
 patterns.propername    = (uppercase + lowercase + underscore) * (uppercase + lowercase + underscore + digit)^0 * endofstring
 
 patterns.somecontent   = (anything - newline - space)^1 -- (utf8char - newline - space)^1
 patterns.beginline     = #(1-newline)
 
-patterns.longtostring  = Cs(whitespace^0/"" * ((patterns.quoted + nonwhitespace^1 + whitespace^1/"" * (P(-1) + Cc(" ")))^0))
+patterns.longtostring  = Cs(whitespace^0/"" * ((patterns.quoted + nonwhitespace^1 + whitespace^1/"" * (endofstring + Cc(" ")))^0))
 
-local function anywhere(pattern) --slightly adapted from website
-    return P { P(pattern) + 1 * V(1) }
+-- local function anywhere(pattern) -- slightly adapted from website
+--     return P { P(pattern) + 1 * V(1) }
+-- end
+
+function anywhere(pattern) -- faster
+    return (1-P(pattern))^0 * P(pattern)
 end
 
 lpeg.anywhere = anywhere
@@ -595,19 +617,27 @@ end
 -- print(7,lpegmatch(lpeg.secondofsplit(":"),"bc"))
 -- print(9,lpegmatch(lpeg.secondofsplit(":","123"),"bc"))
 
--- -- slower:
+-- this was slower but lpeg has been sped up in the meantime, so we no longer
+-- use this (still seems somewhat faster on long strings)
+--
+-- local nany = utf8char/""
 --
 -- function lpeg.counter(pattern)
---     local n, pattern = 0, (lpeg.P(pattern)/function() n = n + 1 end  + lpeg.anything)^0
---     return function(str) n = 0 ; lpegmatch(pattern,str) ; return n end
+--     pattern = Cs((P(pattern)/" " + nany)^0)
+--     return function(str)
+--         return #lpegmatch(pattern,str)
+--     end
 -- end
 
-local nany = utf8char/""
-
-function lpeg.counter(pattern)
-    pattern = Cs((P(pattern)/" " + nany)^0)
-    return function(str)
-        return #lpegmatch(pattern,str)
+function lpeg.counter(pattern,action)
+    local n       = 0
+    local pattern = (P(pattern) / function() n = n + 1 end + anything)^0
+    ----- pattern = (P(pattern) * (P(true) / function() n = n + 1 end) + anything)^0
+    ----- pattern = (P(pattern) * P(function() n = n + 1 end) + anything)^0
+    if action then
+        return function(str) n = 0 ; lpegmatch(pattern,str) ; action(n) end
+    else
+        return function(str) n = 0 ; lpegmatch(pattern,str) ; return n end
     end
 end
 
@@ -839,28 +869,42 @@ end
 local p_false = P(false)
 local p_true  = P(true)
 
-local function make(t)
-    local function making(t)
-        local p    = p_false
-        local keys = sortedkeys(t)
-        for i=1,#keys do
-            local k = keys[i]
-            if k ~= "" then
-                local v = t[k]
-                if v == true then
-                    p = p + P(k) * p_true
-                elseif v == false then
-                    -- can't happen
-                else
-                    p = p + P(k) * making(v)
-                end
-            end
-        end
-        if t[""] then
-            p = p + p_true
-        end
-        return p
-    end
+-- local function collapse(t,x)
+--     if type(t) ~= "table" then
+--         return t, x
+--     else
+--         local n = next(t)
+--         if n == nil then
+--             return t, x
+--         elseif next(t,n) == nil then
+--             -- one entry
+--             local k = n
+--             local v = t[k]
+--             if type(v) == "table" then
+--                 return collapse(v,x..k)
+--             else
+--                 return v, x .. k
+--             end
+--         else
+--             local tt = { }
+--             for k, v in next, t do
+--                 local vv, kk = collapse(v,k)
+--                 tt[kk] = vv
+--             end
+--             return tt, x
+--         end
+--     end
+-- end
+
+local lower = utf and utf.lower or string.lower
+local upper = utf and utf.upper or string.upper
+
+function lpeg.setutfcasers(l,u)
+    lower = l or lower
+    upper = u or upper
+end
+
+local function make1(t,rest)
     local p    = p_false
     local keys = sortedkeys(t)
     for i=1,#keys do
@@ -872,41 +916,39 @@ local function make(t)
             elseif v == false then
                 -- can't happen
             else
-                p = p + P(k) * making(v)
+                p = p + P(k) * make1(v,v[""])
             end
         end
+    end
+    if rest then
+        p = p + p_true
     end
     return p
 end
 
-local function collapse(t,x)
-    if type(t) ~= "table" then
-        return t, x
-    else
-        local n = next(t)
-        if n == nil then
-            return t, x
-        elseif next(t,n) == nil then
-            -- one entry
-            local k = n
+local function make2(t,rest) -- only ascii
+    local p    = p_false
+    local keys = sortedkeys(t)
+    for i=1,#keys do
+        local k = keys[i]
+        if k ~= "" then
             local v = t[k]
-            if type(v) == "table" then
-                return collapse(v,x..k)
+            if v == true then
+                p = p + (P(lower(k))+P(upper(k))) * p_true
+            elseif v == false then
+                -- can't happen
             else
-                return v, x .. k
+                p = p + (P(lower(k))+P(upper(k))) * make2(v,v[""])
             end
-        else
-            local tt = { }
-            for k, v in next, t do
-                local vv, kk = collapse(v,k)
-                tt[kk] = vv
-            end
-            return tt, x
         end
     end
+    if rest then
+        p = p + p_true
+    end
+    return p
 end
 
-function lpeg.utfchartabletopattern(list) -- goes to util-lpg
+local function utfchartabletopattern(list,insensitive) -- goes to util-lpg
     local tree = { }
     local n = #list
     if n == 0 then
@@ -979,10 +1021,20 @@ function lpeg.utfchartabletopattern(list) -- goes to util-lpg
             end
         end
     end
---     collapse(tree,"") -- needs testing, maybe optional, slightly faster because P("x")*P("X") seems slower than P"(xX") (why)
---     inspect(tree)
-    return make(tree)
+ -- collapse(tree,"") -- needs testing, maybe optional, slightly faster because P("x")*P("X") seems slower than P"(xX") (why)
+ -- inspect(tree)
+    return (insensitive and make2 or make1)(tree)
 end
+
+lpeg.utfchartabletopattern = utfchartabletopattern
+
+function lpeg.utfreplacer(list,insensitive)
+    local pattern = Cs((utfchartabletopattern(list,insensitive)/list + utf8character)^0)
+    return function(str)
+        return lpegmatch(pattern,str) or str
+    end
+end
+
 
 -- local t = { "start", "stoep", "staart", "paard" }
 -- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/string.upper + 1)^1)
@@ -990,21 +1042,21 @@ end
 -- local t = { "a", "abc", "ac", "abe", "abxyz", "xy", "bef","aa" }
 -- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/string.upper + 1)^1)
 
--- inspect(lpegmatch(p,"a"))
--- inspect(lpegmatch(p,"aa"))
--- inspect(lpegmatch(p,"aaaa"))
--- inspect(lpegmatch(p,"ac"))
--- inspect(lpegmatch(p,"bc"))
--- inspect(lpegmatch(p,"zzbczz"))
--- inspect(lpegmatch(p,"zzabezz"))
--- inspect(lpegmatch(p,"ab"))
--- inspect(lpegmatch(p,"abc"))
--- inspect(lpegmatch(p,"abe"))
--- inspect(lpegmatch(p,"xa"))
--- inspect(lpegmatch(p,"bx"))
--- inspect(lpegmatch(p,"bax"))
--- inspect(lpegmatch(p,"abxyz"))
--- inspect(lpegmatch(p,"foobarbefcrap"))
+-- inspect(lpegmatch(p,"a")=="A")
+-- inspect(lpegmatch(p,"aa")=="AA")
+-- inspect(lpegmatch(p,"aaaa")=="AAAA")
+-- inspect(lpegmatch(p,"ac")=="AC")
+-- inspect(lpegmatch(p,"bc")=="bc")
+-- inspect(lpegmatch(p,"zzbczz")=="zzbczz")
+-- inspect(lpegmatch(p,"zzabezz")=="zzABEzz")
+-- inspect(lpegmatch(p,"ab")=="Ab")
+-- inspect(lpegmatch(p,"abc")=="ABC")
+-- inspect(lpegmatch(p,"abe")=="ABE")
+-- inspect(lpegmatch(p,"xa")=="xA")
+-- inspect(lpegmatch(p,"bx")=="bx")
+-- inspect(lpegmatch(p,"bax")=="bAx")
+-- inspect(lpegmatch(p,"abxyz")=="ABXYZ")
+-- inspect(lpegmatch(p,"foobarbefcrap")=="foobArBEFcrAp")
 
 -- local t = { ["^"] = 1, ["^^"] = 2, ["^^^"] = 3, ["^^^^"] = 4 }
 -- local p = lpeg.Cs((lpeg.utfchartabletopattern(t)/t + 1)^1)
@@ -1081,25 +1133,38 @@ end
 
 -- moved here (before util-str)
 
------ digit         = R("09")
------ period        = P(".")
------ zero          = P("0")
-local trailingzeros = zero^0 * -digit -- suggested by Roberto R
-local case_1        = period * trailingzeros / ""
-local case_2        = period * (digit - trailingzeros)^1 * (trailingzeros / "")
-local number        = digit^1 * (case_1 + case_2)
-local stripper      = Cs((number + 1)^0)
+do
 
-lpeg.patterns.stripzeros = stripper
+    local trailingzeros = zero^0 * -digit -- suggested by Roberto
+    local stripper      = Cs((
+        digits * (
+            period * trailingzeros / ""
+          + period * (digit - trailingzeros)^1 * (trailingzeros / "")
+        ) + 1
+    )^0)
 
--- local sample = "bla 11.00 bla 11 bla 0.1100 bla 1.00100 bla 0.00 bla 0.001 bla 1.1100 bla 0.100100100 bla 0.00100100100"
--- collectgarbage("collect")
--- str = string.rep(sample,10000)
--- local ts = os.clock()
--- lpegmatch(stripper,str)
--- print(#str, os.clock()-ts, lpegmatch(stripper,sample))
+    lpeg.patterns.stripzeros = stripper -- multiple in string
 
--- for practical reasone we keep this here:
+    local nonzero       = digit - zero
+    local trailingzeros = zero^1 * endofstring
+    local stripper      = Cs( (1-period)^0 * (
+        period *               trailingzeros/""
+      + period * (nonzero^1 + (trailingzeros/"") + zero^1)^0
+      + endofstring
+    ))
+
+    lpeg.patterns.stripzero  = stripper -- slightly more efficient but expects a float !
+
+    -- local sample = "bla 11.00 bla 11 bla 0.1100 bla 1.00100 bla 0.00 bla 0.001 bla 1.1100 bla 0.100100100 bla 0.00100100100"
+    -- collectgarbage("collect")
+    -- str = string.rep(sample,10000)
+    -- local ts = os.clock()
+    -- lpegmatch(stripper,str)
+    -- print(#str, os.clock()-ts, lpegmatch(stripper,sample))
+
+end
+
+-- for practical reasons we keep this here:
 
 local byte_to_HEX = { }
 local byte_to_hex = { }
@@ -1171,3 +1236,22 @@ end
 -- local h = "ADFE0345"
 -- local b = lpegmatch(patterns.hextobytes,h)
 -- print(h,b,string.tohex(b),string.toHEX(b))
+
+local patterns = { } -- can be made weak
+
+local function containsws(what)
+    local p = patterns[what]
+    if not p then
+        local p1 = P(what) * (whitespace + endofstring) * Cc(true)
+        local p2 = whitespace * P(p1)
+        p = P(p1) + P(1-p2)^0 * p2 + Cc(false)
+        patterns[what] = p
+    end
+    return p
+end
+
+lpeg.containsws = containsws
+
+function string.containsws(str,what)
+    return lpegmatch(patterns[what] or containsws(what),str)
+end

@@ -6,7 +6,7 @@ if not modules then modules = { } end modules ['l-table'] = {
     license   = "see context related readme files"
 }
 
-local type, next, tostring, tonumber, ipairs, select = type, next, tostring, tonumber, ipairs, select
+local type, next, tostring, tonumber, select = type, next, tostring, tonumber, select
 local table, string = table, string
 local concat, sort, insert, remove = table.concat, table.sort, table.insert, table.remove
 local format, lower, dump = string.format, string.lower, string.dump
@@ -21,6 +21,10 @@ local floor = math.floor
 -- floats and as such we get unequality e.g. in version comparisons
 
 local stripper = patterns.stripper
+
+function table.getn(t)
+    return t and #t -- for very old times sake
+end
 
 function table.strip(tab)
     local lst, l = { }, 0
@@ -416,7 +420,7 @@ end
 
 -- todo : copy without metatable
 
-local function copy(t, tables) -- taken from lua wiki, slightly adapted
+local function copy(t,tables) -- taken from lua wiki, slightly adapted
     tables = tables or { }
     local tcopy = { }
     if not tables[t] then
@@ -427,7 +431,7 @@ local function copy(t, tables) -- taken from lua wiki, slightly adapted
             if tables[i] then
                 i = tables[i]
             else
-                i = copy(i, tables)
+                i = copy(i,tables)
             end
         end
         if type(v) ~= "table" then
@@ -435,7 +439,7 @@ local function copy(t, tables) -- taken from lua wiki, slightly adapted
         elseif tables[v] then
             tcopy[i] = tables[v]
         else
-            tcopy[i] = copy(v, tables)
+            tcopy[i] = copy(v,tables)
         end
     end
     local mt = getmetatable(t)
@@ -460,7 +464,7 @@ function table.tohash(t,value)
     local h = { }
     if t then
         if value == nil then value = true end
-        for _, v in next, t do -- no ipairs here
+        for _, v in next, t do
             h[v] = value
         end
     end
@@ -469,7 +473,7 @@ end
 
 function table.fromhash(t)
     local hsh, h = { }, 0
-    for k, v in next, t do -- no ipairs here
+    for k, v in next, t do
         if v then
             h = h + 1
             hsh[h] = k
@@ -486,7 +490,7 @@ local reserved = table.tohash { -- intercept a language inconvenience: no reserv
     'NaN', 'goto',
 }
 
--- local function simple_table(t)
+-- local function is_simple_table(t)
 --     if #t > 0 then
 --         local n = 0
 --         for _,v in next, t do
@@ -520,29 +524,67 @@ local reserved = table.tohash { -- intercept a language inconvenience: no reserv
 --     return nil
 -- end
 
-local function simple_table(t)
+-- local function is_simple_table(t)
+--     local nt = #t
+--     if nt > 0 then
+--         local n = 0
+--         for _,v in next, t do
+--             n = n + 1
+--          -- if type(v) == "table" then
+--          --     return nil
+--          -- end
+--         end
+--         if n == nt then
+--             local tt = { }
+--             for i=1,nt do
+--                 local v = t[i]
+--                 local tv = type(v)
+--                 if tv == "number" then
+--                     if hexify then
+--                         tt[i] = format("0x%X",v)
+--                     else
+--                         tt[i] = tostring(v) -- tostring not needed
+--                     end
+--                 elseif tv == "string" then
+--                     tt[i] = format("%q",v)
+--                 elseif tv == "boolean" then
+--                     tt[i] = v and "true" or "false"
+--                 else
+--                     return nil
+--                 end
+--             end
+--             return tt
+--         end
+--     end
+--     return nil
+-- end
+
+local function is_simple_table(t,hexify) -- also used in util-tab so maybe public
     local nt = #t
     if nt > 0 then
         local n = 0
-        for _,v in next, t do
+        for _, v in next, t do
             n = n + 1
-         -- if type(v) == "table" then
-         --     return nil
-         -- end
+            if type(v) == "table" then
+                return nil
+            end
         end
+     -- local haszero = t[0]
+        local haszero = rawget(t,0) -- don't trigger meta
         if n == nt then
             local tt = { }
             for i=1,nt do
                 local v = t[i]
                 local tv = type(v)
                 if tv == "number" then
+                 -- tt[i] = v -- not needed tostring(v)
                     if hexify then
                         tt[i] = format("0x%X",v)
                     else
-                        tt[i] = tostring(v) -- tostring not needed
+                        tt[i] = v -- not needed tostring(v)
                     end
                 elseif tv == "string" then
-                    tt[i] = format("%q",v)
+                    tt[i] = format("%q",v) -- f_string(v)
                 elseif tv == "boolean" then
                     tt[i] = v and "true" or "false"
                 else
@@ -550,10 +592,34 @@ local function simple_table(t)
                 end
             end
             return tt
+        elseif haszero and (n == nt + 1) then
+            local tt = { }
+            for i=0,nt do
+                local v = t[i]
+                local tv = type(v)
+                if tv == "number" then
+                 -- tt[i+1] = v -- not needed tostring(v)
+                    if hexify then
+                        tt[i+1] = format("0x%X",v)
+                    else
+                        tt[i+1] = v -- not needed tostring(v)
+                    end
+                elseif tv == "string" then
+                    tt[i+1] = format("%q",v) -- f_string(v)
+                elseif tv == "boolean" then
+                    tt[i+1] = v and "true" or "false"
+                else
+                    return nil
+                end
+            end
+            tt[1] = "[0] = " .. tt[1]
+            return tt
         end
     end
     return nil
 end
+
+table.is_simple_table = is_simple_table
 
 -- Because this is a core function of mkiv I moved some function calls
 -- inline.
@@ -637,7 +703,7 @@ local function do_serialize(root,name,depth,level,indexed)
                     if next(v) == nil then
                         handle(format("%s {},",depth))
                     elseif inline then -- and #t > 0
-                        local st = simple_table(v)
+                        local st = is_simple_table(v,hexify)
                         if st then
                             handle(format("%s { %s },",depth,concat(st,", ")))
                         else
@@ -723,7 +789,7 @@ local function do_serialize(root,name,depth,level,indexed)
                         handle(format("%s [%q]={},",depth,k))
                     end
                 elseif inline then
-                    local st = simple_table(v)
+                    local st = is_simple_table(v,hexify)
                     if st then
                         if tk == "number" then
                             if hexify then
@@ -1030,7 +1096,9 @@ function table.unnest(t) -- bad name
 end
 
 local function are_equal(a,b,n,m) -- indexed
-    if a and b and #a == #b then
+    if a == b then
+        return true
+    elseif a and b and #a == #b then
         n = n or 1
         m = m or #a
         for i=n,m do
@@ -1052,16 +1120,18 @@ local function are_equal(a,b,n,m) -- indexed
 end
 
 local function identical(a,b) -- assumes same structure
-    for ka, va in next, a do
-        local vb = b[ka]
-        if va == vb then
-            -- same
-        elseif type(va) == "table" and  type(vb) == "table" then
-            if not identical(va,vb) then
+    if a ~= b then
+        for ka, va in next, a do
+            local vb = b[ka]
+            if va == vb then
+                -- same
+            elseif type(va) == "table" and  type(vb) == "table" then
+                if not identical(va,vb) then
+                    return false
+                end
+            else
                 return false
             end
-        else
-            return false
         end
     end
     return true
@@ -1155,27 +1225,35 @@ function table.reversed(t)
     end
 end
 
-function table.reverse(t)
+function table.reverse(t) -- check with 5.3 ?
     if t then
         local n = #t
-        for i=1,floor(n/2) do
-            local j = n - i + 1
+        local m = n + 1
+        for i=1,floor(n/2) do -- maybe just n//2
+            local j = m - i
             t[i], t[j] = t[j], t[i]
         end
         return t
     end
 end
 
-function table.sequenced(t,sep,simple) -- hash only
+local function sequenced(t,sep,simple)
     if not t then
         return ""
+    elseif type(t) == "string" then
+        return t -- handy fallback
     end
     local n = #t
     local s = { }
     if n > 0 then
         -- indexed
         for i=1,n do
-            s[i] = tostring(t[i])
+            local v = t[i]
+            if type(v) == "table" then
+                s[i] = "{" .. sequenced(v,sep,simple) .. "}"
+            else
+                s[i] = tostring(t[i])
+            end
         end
     else
         -- hashed
@@ -1187,16 +1265,26 @@ function table.sequenced(t,sep,simple) -- hash only
                     s[n] = k
                 elseif v and v~= "" then
                     n = n + 1
-                    s[n] = k .. "=" .. tostring(v)
+                    if type(v) == "table" then
+                        s[n] = k .. "={" .. sequenced(v,sep,simple) .. "}"
+                    else
+                        s[n] = k .. "=" .. tostring(v)
+                    end
                 end
             else
                 n = n + 1
-                s[n] = k .. "=" .. tostring(v)
+                if type(v) == "table" then
+                    s[n] = k .. "={" .. sequenced(v,sep,simple) .. "}"
+                else
+                    s[n] = k .. "=" .. tostring(v)
+                end
             end
         end
     end
     return concat(s,sep or " | ")
 end
+
+table.sequenced = sequenced
 
 function table.print(t,...)
     if type(t) ~= "table" then
@@ -1325,4 +1413,27 @@ function table.filtered(t,pattern,sort,cmp)
     else
         return nothing
     end
+end
+
+-- lua 5.3:
+
+if not table.move then
+
+    function table.move(a1,f,e,t,a2)
+        if a2 and a1 ~= a2 then
+            for i=f,e do
+                a2[t] = a1[i]
+                t = t + 1
+            end
+            return a2
+        else
+            t = t + e - f
+            for i=e,f,-1 do
+                a1[t] = a1[i]
+                t = t - 1
+            end
+            return a1
+        end
+    end
+
 end

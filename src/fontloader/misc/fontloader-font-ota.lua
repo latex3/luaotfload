@@ -1,6 +1,6 @@
 if not modules then modules = { } end modules ['font-ota'] = {
     version   = 1.001,
-    comment   = "companion to font-otf.lua (analysing)",
+    comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
@@ -32,7 +32,6 @@ local a_state             = attributes.private('state')
 local nuts                = nodes.nuts
 local tonut               = nuts.tonut
 
-local getfield            = nuts.getfield
 local getnext             = nuts.getnext
 local getprev             = nuts.getprev
 local getprev             = nuts.getprev
@@ -43,7 +42,6 @@ local getsubtype          = nuts.getsubtype
 local getchar             = nuts.getchar
 local ischar              = nuts.is_char
 
-local traverse_id         = nuts.traverse_id
 local end_of_math         = nuts.end_of_math
 
 local nodecodes           = nodes.nodecodes
@@ -72,7 +70,7 @@ local s_isol = 4    local s_blwf = 10
 local s_mark = 5    local s_pstf = 11
 local s_rest = 6
 
-local states = {
+local states = allocate {
     init = s_init,
     medi = s_medi,
     med2 = s_medi,
@@ -89,7 +87,7 @@ local states = {
     pstf = s_pstf,
 }
 
-local features = {
+local features = allocate {
     init = s_init,
     medi = s_medi,
     med2 = s_medi,
@@ -112,6 +110,8 @@ analyzers.useunicodemarks = false
 
 -- todo: analyzers per script/lang, cross font, so we need an font id hash -> script
 -- e.g. latin -> hyphenate, arab -> 1/2/3 analyze -- its own namespace
+
+-- done can go away as can tonut
 
 function analyzers.setstate(head,font)
     local useunicodemarks  = analyzers.useunicodemarks
@@ -248,12 +248,12 @@ local function warning(current,what)
     end
 end
 
-local mappers = {
-    l = s_init,  -- left
-    d = s_medi,  -- double
-    c = s_medi,  -- joiner
-    r = s_fina,  -- right
-    u = s_isol,  -- nonjoiner
+local mappers = allocate {
+    l = s_init, -- left
+    d = s_medi, -- double
+    c = s_medi, -- joiner
+    r = s_fina, -- right
+    u = s_isol, -- nonjoiner
 }
 
 -- we can also use this trick for devanagari

@@ -6,10 +6,6 @@ if not modules then modules = { } end modules ['font-oto'] = { -- original tex
     license   = "see context related readme files"
 }
 
--- This is a version of font-otb adapted to the new fontloader code. We used to have two
--- base initialization methods but now we have only one. This means that instead of the
--- old default (independent) we now use the one more similar to node node (shared).
-
 local concat, unpack = table.concat, table.unpack
 local insert, remove = table.insert, table.remove
 local format, gmatch, gsub, find, match, lower, strip = string.format, string.gmatch, string.gsub, string.find, string.match, string.lower, string.strip
@@ -33,6 +29,8 @@ local otffeatures            = otf.features
 local registerotffeature     = otffeatures.register
 
 otf.defaultbasealternate     = "none" -- first last
+
+local getprivate             = fonts.constructors.getprivate
 
 local wildcard               = "*"
 local default                = "dflt"
@@ -71,21 +69,32 @@ local function cref(feature,sequence)
     return formatters["feature %a, type %a, chain lookup %a"](feature,sequence.type,sequence.name)
 end
 
-
-local function report_alternate(feature,sequence,descriptions,unicode,replacement,value,comment)
-    report_prepare("%s: base alternate %s => %s (%S => %S)",
-        cref(feature,sequence),
-        gref(descriptions,unicode),
-        replacement and gref(descriptions,replacement),
-        value,
-        comment)
+local function report_substitution(feature,sequence,descriptions,unicode,substitution)
+    if unicode == substitution then
+        report_prepare("%s: base substitution %s maps onto itself",
+            cref(feature,sequence),
+            gref(descriptions,unicode))
+    else
+        report_prepare("%s: base substitution %s => %S",
+            cref(feature,sequence),
+            gref(descriptions,unicode),
+            gref(descriptions,substitution))
+    end
 end
 
-local function report_substitution(feature,sequence,descriptions,unicode,substitution)
-    report_prepare("%s: base substitution %s => %S",
-        cref(feature,sequence),
-        gref(descriptions,unicode),
-        gref(descriptions,substitution))
+local function report_alternate(feature,sequence,descriptions,unicode,replacement,value,comment)
+    if unicode == replacement then
+        report_prepare("%s: base alternate %s maps onto itself",
+            cref(feature,sequence),
+            gref(descriptions,unicode))
+    else
+        report_prepare("%s: base alternate %s => %s (%S => %S)",
+            cref(feature,sequence),
+            gref(descriptions,unicode),
+            replacement and gref(descriptions,replacement),
+            value,
+            comment)
+    end
 end
 
 local function report_ligature(feature,sequence,descriptions,unicode,ligature)
@@ -158,13 +167,11 @@ end
 -- messy if we need to take that into account.
 
 local function makefake(tfmdata,name,present)
-    local resources = tfmdata.resources
-    local private   = resources.private
+    local private   = getprivate(tfmdata)
     local character = { intermediate = true, ligatures = { } }
     resources.unicodes[name] = private
     tfmdata.characters[private] = character
     tfmdata.descriptions[private] = { name = name }
-    resources.private = private + 1
     present[name] = private
     return character
 end
@@ -225,6 +232,9 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
     local trace_alternatives = trace_baseinit and trace_alternatives
     local trace_ligatures    = trace_baseinit and trace_ligatures
 
+    -- A chain of changes is handled in font-con which is clesner because
+    -- we can have shared changes and such.
+
     if not changed then
         changed = { }
         tfmdata.changed = changed
@@ -237,39 +247,44 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
         if kind == "gsub_single" then
             for i=1,#steps do
                 for unicode, data in next, steps[i].coverage do
-                 -- if not changed[unicode] then -- fails for multiple subs in some math fonts
-                        if trace_singles then
-                            report_substitution(feature,sequence,descriptions,unicode,data)
-                        end
+                    if unicode ~= data then
                         changed[unicode] = data
-                 -- end
+                    end
+                    if trace_singles then
+                        report_substitution(feature,sequence,descriptions,unicode,data)
+                    end
                 end
             end
         elseif kind == "gsub_alternate" then
             for i=1,#steps do
                 for unicode, data in next, steps[i].coverage do
-                    if not changed[unicode] then
-                        local replacement = data[alternate]
-                        if replacement then
+                    local replacement = data[alternate]
+                    if replacement then
+                        if unicode ~= replacement then
                             changed[unicode] = replacement
-                            if trace_alternatives then
-                                report_alternate(feature,sequence,descriptions,unicode,replacement,value,"normal")
-                            end
-                        elseif defaultalt == "first" then
-                            replacement = data[1]
+                        end
+                        if trace_alternatives then
+                            report_alternate(feature,sequence,descriptions,unicode,replacement,value,"normal")
+                        end
+                    elseif defaultalt == "first" then
+                        replacement = data[1]
+                        if unicode ~= replacement then
                             changed[unicode] = replacement
-                            if trace_alternatives then
-                                report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)
-                            end
-                        elseif defaultalt == "last" then
-                            replacement = data[#data]
-                            if trace_alternatives then
-                                report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)
-                            end
-                        else
-                            if trace_alternatives then
-                                report_alternate(feature,sequence,descriptions,unicode,replacement,value,"unknown")
-                            end
+                        end
+                        if trace_alternatives then
+                            report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)
+                        end
+                    elseif defaultalt == "last" then
+                        replacement = data[#data]
+                        if unicode ~= replacement then
+                            changed[unicode] = replacement
+                        end
+                        if trace_alternatives then
+                            report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)
+                        end
+                    else
+                        if trace_alternatives then
+                            report_alternate(feature,sequence,descriptions,unicode,replacement,value,"unknown")
                         end
                     end
                 end
@@ -289,7 +304,6 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
     local nofligatures = #ligatures
 
     if nofligatures > 0 then
-
         local characters = tfmdata.characters
         local present    = { }
         local done       = trace_baseinit and trace_ligatures and { }
@@ -324,8 +338,9 @@ local function preparepositionings(tfmdata,feature,value,validlookups,lookuplist
         local format   = sequence.format
         if kind == "gpos_pair" then
             for i=1,#steps do
-                local step = steps[i]
-                if step.format == "kern" then
+                local step   = steps[i]
+                local format = step.format
+                if format == "kern" or format == "move" then
                     for unicode, data in next, steps[i].coverage do
                         local character = characters[unicode]
                         local kerns = character.kerns
@@ -353,9 +368,13 @@ local function preparepositionings(tfmdata,feature,value,validlookups,lookuplist
                         local character = characters[unicode]
                         local kerns     = character.kerns
                         for otherunicode, kern in next, data do
-                            if not kern[2] and not (kerns and kerns[otherunicode]) then
+                            -- kern[2] is true (all zero) or a table
+                            local other = kern[2]
+                            if other == true or (not other and not (kerns and kerns[otherunicode])) then
                                 local kern = kern[1]
-                                if kern[1] ~= 0 or kern[2] ~= 0 or kern[4] ~= 0 then
+                                if kern == true then
+                                    -- all zero
+                                elseif kern[1] ~= 0 or kern[2] ~= 0 or kern[4] ~= 0 then
                                     -- a complex pair not suitable for basemode
                                 else
                                     kern = kern[3]
@@ -385,6 +404,53 @@ local function initializehashes(tfmdata)
     -- already done
 end
 
+local function checkmathreplacements(tfmdata,fullname,fixitalics)
+    if tfmdata.mathparameters then
+        local characters = tfmdata.characters
+        local changed    = tfmdata.changed
+        if next(changed) then
+            if trace_preparing or trace_baseinit then
+                report_prepare("checking math replacements for %a",fullname)
+            end
+            for unicode, replacement in next, changed do
+                local u = characters[unicode]
+                local r = characters[replacement]
+                local n = u.next
+                local v = u.vert_variants
+                local h = u.horiz_variants
+                if fixitalics then
+                    -- quite some warnings on stix ...
+                    local ui = u.italic
+                    if ui and not r.italic then
+                        if trace_preparing then
+                            report_prepare("using %i units of italic correction from %C for %U",ui,unicode,replacement)
+                        end
+                        r.italic = ui -- print(ui,ri)
+                    end
+                end
+                if n and not r.next then
+                    if trace_preparing then
+                        report_prepare("forcing %s for %C substituted by %U","incremental step",unicode,replacement)
+                    end
+                    r.next = n
+                end
+                if v and not r.vert_variants then
+                    if trace_preparing then
+                        report_prepare("forcing %s for %C substituted by %U","vertical variants",unicode,replacement)
+                    end
+                    r.vert_variants = v
+                end
+                if h and not r.horiz_variants then
+                    if trace_preparing then
+                        report_prepare("forcing %s for %C substituted by %U","horizontal variants",unicode,replacement)
+                    end
+                    r.horiz_variants = h
+                end
+            end
+        end
+    end
+end
+
 local function featuresinitializer(tfmdata,value)
     if true then -- value then
         local starttime = trace_preparing and os.clock()
@@ -401,6 +467,8 @@ local function featuresinitializer(tfmdata,value)
             local rawfeatures       = rawresources and rawresources.features
             local basesubstitutions = rawfeatures and rawfeatures.gsub
             local basepositionings  = rawfeatures and rawfeatures.gpos
+            local substitutionsdone = false
+            local positioningsdone  = false
             --
             if basesubstitutions or basepositionings then
                 local sequences = tfmdata.resources.sequences
@@ -423,18 +491,24 @@ local function featuresinitializer(tfmdata,value)
                                         end
                                         preparesubstitutions(tfmdata,feature,value,validlookups,lookuplist)
                                         registerbasefeature(feature,value)
+                                        substitutionsdone = true
                                     elseif basepositionings and basepositionings[feature] then
                                         if trace_preparing then
                                             report_prepare("filtering base %a feature %a for %a with value %a","pos",feature,fullname,value)
                                         end
                                         preparepositionings(tfmdata,feature,value,validlookups,lookuplist)
                                         registerbasefeature(feature,value)
+                                        positioningsdone = true
                                     end
                                 end
                             end
                         end
                     end
                 end
+            end
+            --
+            if substitutionsdone then
+                checkmathreplacements(tfmdata,fullname,features.fixitalics)
             end
             --
             registerbasehash(tfmdata)

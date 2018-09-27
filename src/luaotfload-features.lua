@@ -1,10 +1,11 @@
 if not modules then modules = { } end modules ["features"] = {
-    version   = "2.8",
+    version   = "2.9",
     comment   = "companion to luaotfload-main.lua",
-    author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang",
+    author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
 }
+
 
 local type              = type
 local next              = next
@@ -1259,11 +1260,16 @@ if as_script == true then --- skip the remainder of the file
     report ("log", 5, "features",
             "Exiting early from luaotfload-features.lua.")
     return
-else
-    local registersplit = definers.registersplit
-    registersplit (":", handle_request, "common")
-    registersplit ("",  handle_request, "xetex path style") -- catches \font\text=[names]
 end
+
+-- MK: Added
+function fonts.definers.analyze (spec_string, size)
+    return handle_request {
+        size = size,
+        specification = spec_string,
+    }
+end
+-- /MK
 
 -- We assume that the other otf stuff is loaded already; though there’s
 -- another check below during the initialization phase.

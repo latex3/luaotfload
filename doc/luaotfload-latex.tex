@@ -49,7 +49,7 @@
     citecolor=\primarycolor,
      pdftitle={The Luaotfload package},
    pdfsubject={OpenType layout system for Plain TeX and LaTeX},
-    pdfauthor={Elie Roux & Khaled Hosny & Philipp Gesang & Ulrike Fischer},
+    pdfauthor={Elie Roux \& Khaled Hosny \& Philipp Gesang \& Ulrike Fischer},
   pdfkeywords={luatex, lualatex, unicode, opentype}
 ]{hyperref}
 
@@ -513,8 +513,17 @@ end
   \input {luaotfload-main.tex}
 \clearpage
 \includepdf[fitpaper,pagecommand={\label{file-graph}}]{filegraph}
-\includepdf[pages=-]{luaotfload-conf.pdf}
-\includepdf[pages=-]{luaotfload-tool.pdf}
+\clearpage
+
+\includepdf[pages=1,pagecommand={\phantomsection\addcontentsline{toc}{section}{Appendix: Manual of luaotfload.conf}{\thepage}{}}]{luaotfload-conf.pdf}
+\includepdf[pages=2-]{luaotfload-conf.pdf}
+
+\clearpage
+
+\includepdf[pages=1,pagecommand={\phantomsection\addcontentsline{toc}{section}{Appendix: Manual of luaotfload-tool}{\thepage}{}
+}]{luaotfload-tool.pdf}
+\includepdf[pages=2-]{luaotfload-tool.pdf}
+
 \end {document}
 
 

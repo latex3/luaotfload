@@ -1,0 +1,140 @@
+# Default start location is the main dir luaotfload
+# needed environment variables for the steps 1.-9.
+# CONTEXTPATH: should point to ...\context\tex\texmf-context
+# for the l3build test the texmf-tree of the repo should be known
+# to the tex system
+# The man pages needs docutils
+
+1. Update context
+
+2. Check for changes
+
+-->  texlua scripts/mkimport news "" %CONTEXTPATH%
+
+3. Import changes
+
+-->   texlua scripts/mkimport import "" %CONTEXTPATH%
+
+This also imports the merged orginal file and saves it as
+fontloader-reference.lua in src/fontloader/runtime
+
+
+4. Import character definitions
+
+mkcharacters
+this create a new luaotfload-character.lua.
+requirements char-def.lua and char-ini.lua
+the file is created in src/auto by default!
+
+-->   texlua scripts/mkcharacters %CONTEXTPATH%/tex/context/base/mkiv/
+
+5. Update glyphlist
+
+must be called twice if glyphlist.txt doesn't exist yet.
+files are created in src/auto
+
+-->   texlua scripts/mkglyphlist
+
+
+6. Merge the files to get the default fontloader.
+The name contains the current date.
+
+!!! Set USER and HOSTNAME to get a sensible header
+
+-->   texlua scripts/mkimport package
+
+!!! delete old default fontloader
+
+7. Update luatotfload-status
+
+!!! date must be naturally correct
+
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-24.lua
+
+8. Check lualibs status -- perhaps it needs update too
+
+9. Install the files in the texmf (for travis and for the tests)
+
+--> l3build install
+
+10. Install new dev luatex version
+
+11. Run tests in default TL and with dev-version
+
+--> l3build check
+
+
+12. Update version information everywhere ... (tagging doesn't work for now,
+    too many different variants)
+- sty:
+  %% Copyright (C) 2009-2018
+  [2018/09/24 v2.9  OpenType layout system]
+
+- auxiliary no date, only version:
+  -- REQUIREMENTS:  luaotfload 2.9
+
+- colors, database, features, letterspace, log: "module"
+      version   = "2.9",
+
+- configuration module and requirements:
+   -- REQUIREMENTS:  Luaotfload 2.8 or above
+  version   = "2.9",
+
+- filelist
+--         DATE:  2018-09-23
+--      VERSION:  2.9
+
+
+- init
+--      VERSION:  2.9 2018-09-24
+
+- loaders, resolvers: no info
+
+- main:
+ luaotfload.version                = "2.9"
+ und noch mehr weiter unten ...
+
+- parsers
+ -- REQUIREMENTS:  Luaotfload >= 2.8
+
+- tool
+ -- REQUIREMENTS:  luaotfload 2.9
+local version                  = "2.9"
+
+13. Update luatotfload-status again so that the hashes are correct.
+
+!!! date must be naturally correct
+
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-24.lua
+
+
+==============
+Dokumentation
+==============
+
+1. Update NEWS
+
+2. Update README.md (twice, ctan and git)
+
+3. Check text of the other four files
+
+4. Create man file: (requires docutils)
+   the man pages should also go in the manual so we need also a pdf
+
+--> luaotfload/doc> rst2man.py luaotfload.conf.rst luaotfload.conf.5
+--> luaotfload/doc> rst2xetex.py luaotfload.conf.rst luaotfload.conf.tex
+--> luaotfload/doc> rst2man.py luaotfload-tool.rst luaotfload-tool.1
+--> luaotfload/doc> rst2xetex.py luaotfload-tool.rst luaotfload-tool.tex
+
+5. Compile the doc (hopefully done by l3build so only info)
+--> luaotfload/doc> lualatex luaotfload-tool.tex
+--> luaotfload/doc> lualatex luaotfload.conf.tex
+--> luaotfload/doc> lualatex filegraph
+--> luaotfload/doc  lualatex
+
+==============
+Finally
+=============
+
+1. create ctan package
+--> l3build ctan

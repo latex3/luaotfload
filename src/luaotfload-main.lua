@@ -2,7 +2,7 @@
 --         FILE:  luaotfload-main.lua
 --  DESCRIPTION:  Luaotfload entry point
 -- REQUIREMENTS:  luatex v.0.95.0 or later; package lualibs
---       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang
+--       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang, Ulrike Fischer, Marcel Krüger
 -----------------------------------------------------------------------
 --
 
@@ -11,7 +11,7 @@ config                            = config     or { }
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
-luaotfload.version                = "2.8"
+luaotfload.version                = "2.9"
 luaotfload.loaders                = { }
 luaotfload.min_luatex_version     = { 0, 95, 0 }
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
@@ -52,8 +52,8 @@ local authors = "\z
 
 luaotfload.module = {
     name          = "luaotfload-main",
-    version       = 2.80001,
-    date          = "2017/01/29",
+    version       = 2.90001,
+    date          = "2018/09/24",
     description   = "OpenType layout system.",
     author        = authors,
     copyright     = authors,

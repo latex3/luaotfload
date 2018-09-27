@@ -3,9 +3,10 @@
 --         FILE:  luaotfload-parsers.lua
 --  DESCRIPTION:  various lpeg-based parsers used in Luaotfload
 -- REQUIREMENTS:  Luaotfload >= 2.8
---       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
+--       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Marcel Krüger
 -------------------------------------------------------------------------------
 --
+
 
 local traversal_maxdepth  = 42 --- prevent stack overflows
 
@@ -238,6 +239,7 @@ end
 ---     -> (string -> fun option -> string list)
 ---     -> tab * tab * tab
 local read_fonts_conf_indeed
+-- MK Made basedir an explicit parameter to fix relative paths
 read_fonts_conf_indeed = function (depth,
                                    start,
                                    home,
@@ -246,7 +248,8 @@ read_fonts_conf_indeed = function (depth,
                                    acc,
                                    done,
                                    dirs_done,
-                                   find_files)
+                                   find_files,
+                                   basedir)
 
   logreport ("both", 4, "db",
              "Fontconfig scanner processing path %s.",
@@ -303,7 +306,7 @@ read_fonts_conf_indeed = function (depth,
       elseif --- if the path is relative, we make it absolute
         not ( lfsisfile(path) or lfsisdir(path) )
       then
-          path = filejoin(filedirname(start), path)
+          path = filejoin(basedir, path)
       end
       if  lfsisfile(path)
         and kpsereadable_file(path)
@@ -321,17 +324,22 @@ read_fonts_conf_indeed = function (depth,
                                        acc,
                                        done,
                                        dirs_done,
-                                       find_files)
+                                       find_files,
+                                       basedir)
         end
       elseif lfsisdir(path) then --- arrow code ahead
-        local config_files = find_files (path, conf_filter)
-        for _, filename in next, config_files do
-          if not done[filename] then
-            if done[path] then
+        if done[path] then
+          logreport ("log", 3, "db",
+                     "Skipping directory at %s, already included.", path)
+        else
+          done[path] = true
+          local config_files = find_files (path, conf_filter)
+          for _, filename in next, config_files do
+            if done[filename] then
               logreport ("log", 3, "db",
-                         "Skipping file at %s, already included.", path)
+                         "Skipping file at %s, already included.", filename)
             else
-              done[path] = true
+              done[filename] = true
               acc = read_fonts_conf_indeed(depth + 1,
                                            filename,
                                            home,
@@ -340,7 +348,8 @@ read_fonts_conf_indeed = function (depth,
                                            acc,
                                            done,
                                            dirs_done,
-                                           find_files)
+                                           find_files,
+                                           basedir)
             end
           end
         end
@@ -352,6 +361,7 @@ read_fonts_conf_indeed = function (depth,
   --inspect(done)
   return acc, done, dirs_done
 end --- read_fonts_conf_indeed()
+-- /MK
 
 --[[doc--
       read_fonts_conf() sets up an accumulator and two sets
@@ -376,6 +386,7 @@ local read_fonts_conf = function (path_list, find_files)
   local done      = { } ---> set:  files inspected
   local dirs_done = { } ---> set:  dirs in list
   for i=1, #path_list do --- we keep the state between files
+    -- MK Pass the base directory
     acc, done, dirs_done = read_fonts_conf_indeed(0,
                                                   path_list[i],
                                                   home,
@@ -384,7 +395,9 @@ local read_fonts_conf = function (path_list, find_files)
                                                   acc,
                                                   done,
                                                   dirs_done,
-                                                  find_files)
+                                                  find_files,
+                                                  filedirname(path_list[i]))
+    -- /MK
   end
   return acc
 end

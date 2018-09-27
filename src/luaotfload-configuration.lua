@@ -9,7 +9,7 @@
 --
 
 if not modules then modules = { } end modules ["luaotfload-configuration"] = {
-  version   = "2.8",
+  version   = "2.9",
   comment   = "part of Luaotfload",
   author    = "Philipp Gesang, Dohyun Kim",
   copyright = "Luaotfload Development Team",

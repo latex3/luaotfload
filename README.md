@@ -15,10 +15,7 @@ Please see the documentation luaotfload.pdf for more information.
 
 ## New September 2018
 
-This package is currently maintained at 
-<https://github.com/u-fischer/luaotfload>. 
-The active development branch is called `dev-2.9` and should lead shortly to a new 
-CTAN version. The master branch is currently frozen. 
+Luaotfload 2.9 has been pushed to CTAN. The ongoing development is the dev branch. 
  
 Issues can be reported at the issue tracker or at the old issue tracker on 
 <http://github.com/lualatex/luaotfload>. 

@@ -1,0 +1,23 @@
+language: generic
+
+branches:
+  only:
+  - dev-2.9
+
+sudo: required
+services: docker
+
+install:
+ - source texlive.sh
+
+env:
+- TEXMFHOME=${TRAVIS_BUILD_DIR}/texmf
+
+cache:
+  directories:
+    - /tmp/texlive
+    - $HOME/.texlive
+
+
+script: 
+ - l3build check -q -H

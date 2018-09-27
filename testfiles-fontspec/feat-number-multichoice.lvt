@@ -1,0 +1,22 @@
+\input{fontspec-testsetup.tex}
+\usepackage{fontspec}
+\begin{document}
+
+\MSG{This test also checks that "aliased" options are working correctly.}
+
+\fontspec{texgyrepagella-regular.otf}
+\CURRNFSS
+
+\fontspec{texgyrepagella-regular.otf}[Numbers={OldStyle,Monospaced}]
+\CURRNFSS
+
+\fontspec{texgyrepagella-regular.otf}[Numbers={Lowercase,Monospaced}]
+\CURRNFSS
+
+\fontspec{texgyrepagella-regular.otf}[Numbers={OldStyle,Tabular}]
+\CURRNFSS
+
+\fontspec{texgyrepagella-regular.otf}[Numbers={Lowercase,Tabular}]
+\CURRNFSS
+
+\end{document}

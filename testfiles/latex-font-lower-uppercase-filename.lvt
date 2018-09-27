@@ -1,0 +1,16 @@
+% !Mode:: "TeX:UTF-8:Main"
+% Date: 26.06.2018
+% Test luafont-duckchess
+% need to reconsider this
+\input regression-test.tex\relax
+\documentclass{article}
+\begin{document}
+\font\testa={file:FiraSans-Light.otf}
+
+\font\testb={file:firamono-regular.otf}
+
+\START\showoutput
+\testa BlbL
+\testb blbl
+
+\end{document}

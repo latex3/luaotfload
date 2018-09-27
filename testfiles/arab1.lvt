@@ -1,0 +1,70 @@
+% !Mode:: "TeX:UTF-8:Main"
+% Date: 01.09.2018
+% Description: demonstrates the use of arabluatex. arabtex input is
+% replaced with Arabic Unicode.
+% Requires: arabluatex package
+% Source/Links:
+% https://ctan.org/pkg/arabluatex
+% Remarks:
+% Subtending marks are rendered correctly with this version of
+% luaotfload.
+
+\input regression-test.tex\relax
+
+\documentclass{article}
+
+\pagestyle{empty}
+
+\usepackage{arabluatex}
+\newarbmark{sly}{\arbcolor[red]{^^^^06d6}}{}
+\newarbmark{jim}{\arbcolor[red]{^^^^06da}}{}
+\newarbmark{anum}{^^^^0600}{}
+\newarbmark{ayear}{^^^^0601}{}
+\newarbmark{afn}{^^^^0602}{}
+\newarbmark{apage}{^^^^0603}{}
+\newarbmark{asmv}{^^^^0604}{}
+\newarbmark{aeoa}{^^^^06dd}{}
+\newcommand{\ayah}[1]{#1\arbmark{aeoa}}
+
+\directlua{
+
+function test (head, g)
+  texio.write_nl('')
+  for item in node.traverse(head) do
+    if item.id == node.id'glyph' then
+      texio.write('<' .. item.char .. '>')
+    elseif item.id == node.id'dir' then
+      texio.write('<' .. item.dir .. '>')
+    else
+      texio.write('[' .. item.id .. ':' .. (item.subtype or '?') .. ']')
+    end
+  end
+  return head
+end
+
+luatexbase.add_to_callback("pre_linebreak_filter", test, "test")
+luatexbase.add_to_callback("hpack_filter", test, "test")
+}
+
+
+\begin{document}
+\START
+
+\begin{arab}
+  \uc{^g}u.hA wa-.himAru-hu
+\end{arab}
+\begin{arab}
+  'at_A .sadIquN 'il_A \uc{^g}u.hA ya.tlubu min-hu .himAra-hu
+  li-yarkaba-hu fI safraTiN qa.sIraTiN fa-qAla la-hu: sawfa 'u`Idu-hu
+  'ilay-ka fI 'l-masA'-i wa-'adfa`u la-ka 'u^graTaN. fa-qAla
+  \uc{^g}u.hA: 'anA 'AsifuN ^giddaN 'annI lA 'asta.tI`u 'an 'u.haqqiqa
+  la-ka ra.gbata-ka fa-'l-.himAr-u laysa hunA 'l-yawm-a.  wa-qabla 'an
+  yutimma \uc{^g}u.hA kalAma-hu bada'a 'l-.himAr-u yanhaqu fI
+  'i.s.tabli-hi. fa-qAla la-hu .sadIqu-hu: 'innI 'asma`u .himAra-ka yA
+  \uc{^g}u.hA yanhaqu. fa-qAla la-hu \uc{^g}u.hA: .garIbuN 'amru-ka yA
+  .sadIqI 'a-tu.saddiqu 'l-.himAr-a wa-tuka_d_diba-nI?
+\end{arab}
+\end{document}
+
+
+

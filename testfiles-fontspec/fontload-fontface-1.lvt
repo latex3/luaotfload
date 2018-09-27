@@ -1,0 +1,24 @@
+
+\input{fontspec-testsetup.tex}
+
+\usepackage{fontspec}
+
+\begin{document}
+
+\setmainfont{texgyre}[
+  Extension = .otf ,
+  UprightFont = *pagella-regular,
+  FontFace = {c}{n}{Font = *bonum-regular , Color = FF0000 },
+  FontFace = {nc}{n}{*heros-regular}
+]
+
+pagella
+\CURRNFSS
+
+\fontseries{c}\selectfont bonum (red)
+\CURRNFSS
+
+\fontseries{nc}\selectfont heros
+\CURRNFSS
+
+\end{document}

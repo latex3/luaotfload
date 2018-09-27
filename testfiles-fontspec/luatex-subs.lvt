@@ -1,0 +1,25 @@
+\input{fontspec-testsetup.tex}
+\usepackage{fontspec}
+\begin{document}
+
+\LUATEXONLY
+
+\directlua{
+    fonts.handlers.otf.addfeature {
+        name = "oneb",
+        type = "substitution",
+        data = {
+                ["1"] = "A",
+        }
+    }
+}
+
+\setmainfont{texgyrepagella-regualr.otf}
+\setbox1=\hbox{012}
+\TIMO\showbox1\OMIT
+
+\setmainfont{texgyrepagella-regular.otf}[RawFeature=+oneb]
+\setbox1=\hbox{012}
+\TIMO\showbox1\OMIT
+
+\end{document}

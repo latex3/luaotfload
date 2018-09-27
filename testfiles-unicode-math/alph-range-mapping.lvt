@@ -1,0 +1,27 @@
+
+\input{umtest-preamble}
+
+\usepackage{unicode-math}
+
+\setmathfont{xits-math.otf}
+\setmathfont[
+    range={
+      up/{latin}->sfup ,
+      it/{Latin}->sfit ,
+      up/{Greek}->bfup ,
+      it/{greek}->bfit ,
+    }
+  ]{xits-math.otf}
+
+\begin{document}
+
+\TESTBOX{$\LATINtext$}
+\TESTBOX{$\latintext$}
+\TESTBOX{$\symup\LATINtext$}
+\TESTBOX{$\symup\latintext$}
+\TESTBOX{$\GREEKtext$}
+\TESTBOX{$\greektext$}
+\TESTBOX{$\symit\GREEKtext$}
+\TESTBOX{$\symup\greektext$}
+
+\end{document}

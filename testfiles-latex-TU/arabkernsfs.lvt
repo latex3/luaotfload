@@ -1,0 +1,46 @@
+\input{test2e}
+\documentclass{article}
+\START
+\CLASS{article}
+\PACKAGE{fontspec}
+\OMIT
+
+\usepackage{fontspec}
+
+\setmainfont[Script=Arabic]{FreeSerif}
+
+\directlua{
+
+function test (head, g)
+  texio.write_nl('')
+  for item in node.traverse(head) do
+    if item.id == node.id'glyph' then
+      texio.write('<' .. item.char .. '>')
+    elseif item.id == node.id'dir' then
+      texio.write('<' .. item.dir .. '>')
+    else
+      texio.write('[' .. item.id .. ':' .. (item.subtype or '?') .. ']')
+    end
+  end
+  return head
+end
+
+luatexbase.add_to_callback("pre_linebreak_filter", test, "test")
+luatexbase.add_to_callback("hpack_filter", test, "test")
+}
+
+
+\begin{document}
+\textdir TRT \pardir TRT \bodydir TRT \pagedir TRT
+
+\TIMO
+
+الإشارات برهن
+
+\hbox{الإشارات برهن}
+
+\halign{#\cr{\textdir TRT الإشارات برهن}\cr}
+
+\halign{#\cr الإشارات برهن\cr}
+\OMIT
+\end{document}

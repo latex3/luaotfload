@@ -1,0 +1,38 @@
+
+\input{umtest-preamble}
+
+
+\usepackage{unicode-math}
+
+\setmainfont{texgyretermes-regular.otf}[ItalicFont=texgyretermes-italic.otf]
+\setmathfont{texgyrepagella-math.otf}
+
+\begin{document}
+
+\START
+
+\MSG{SQRT x}
+\setbox12=\hbox{$\displaystyle\sqrt{x}$}
+\SHOWBOX {12}
+
+\MSG{SQRT x squared}
+\setbox12=\hbox{$\displaystyle\sqrt{x^2}$}
+\SHOWBOX {12}
+
+\MSG{SQRT FRAC x y}
+\setbox12=\hbox{$\displaystyle\sqrt{\frac{x}{y}}$}
+\SHOWBOX {12}
+
+\MSG{SQRT n x}
+\setbox12=\hbox{$\displaystyle\sqrt[n]{x}$}
+\SHOWBOX {12}
+
+\MSG{SQRT n x squared}
+\setbox12=\hbox{$\displaystyle\sqrt[n]{x^2}$}
+\SHOWBOX {12}
+
+\MSG{SQRT n FRAC x y}
+\setbox12=\hbox{$\displaystyle\sqrt[n]{\frac{x}{y}}$}
+\SHOWBOX {12}
+
+\end{document}

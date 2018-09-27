@@ -1,0 +1,136 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 478.54889fil, direction TLT
+...\write-{}
+...\glue(\topskip) 0.0
+...\hbox(17.84+0.4)x345.0, glue set 225.45201fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\testa a
+....\glue(\spaceskip) 3.996 plus 1.998 minus 1.332
+....\testc a
+....\glue(\spaceskip) 7.824 plus 3.912 minus 2.608
+....\testc a
+....\glue(\spaceskip) 7.824 plus 3.912 minus 2.608
+....\testd a
+....\glue(\spaceskip) 4.596 plus 2.298 minus 1.532
+....\teste a
+....\glue(\spaceskip) 9.78 plus 4.89 minus 3.26
+....\testf a
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\lineskip) 1.0
+...\hbox(28.16+0.4)x345.0, glue set 146.58401fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\testa a
+....\testa f
+....\testa i
+....\glue(\spaceskip) 3.996 plus 1.998 minus 1.332
+....\testc a
+....\testc ﬁ (ligature fi)
+....\glue(\spaceskip) 7.824 plus 3.912 minus 2.608
+....\testc a
+....\testc ﬁ (ligature fi)
+....\glue(\spaceskip) 7.824 plus 3.912 minus 2.608
+....\testd a
+....\testd ﬁ (ligature fi)
+....\glue(\spaceskip) 4.596 plus 2.298 minus 1.532
+....\teste a
+....\teste ﬁ (ligature fi)
+....\glue(\spaceskip) 9.78 plus 4.89 minus 3.26
+....\testf a
+....\testf ﬁ (ligature fi)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 3.15201
+...\hbox(8.448+0.12)x345.0, glue set 276.79199fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\testg a
+....\testg ﬁ (ligature fi)
+....\glue(\spaceskip) 5.868 plus 2.934 minus 1.956
+....\testh a
+....\testh ﬁ (ligature fi)
+....\glue(\spaceskip) 3.912 plus 1.956 minus 1.304
+....\testf a
+....\testf ﬁ (ligature fi)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.5
+...\hbox(7.38+0.12)x345.0, glue set 145.20593fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\testg s
+....\testg o
+....\testg m
+....\testg e
+....\glue(\spaceskip) 5.868 plus 2.934 minus 1.956
+....\testg t
+....\testg e
+....\testg x
+....\testg t
+....\glue(\spaceskip) 5.868 plus 2.934 minus 1.956
+....\testh s
+....\testh o
+....\testh m
+....\testh e
+....\glue(\spaceskip) 3.912 plus 1.956 minus 1.304
+....\testh t
+....\testh e
+....\testh x
+....\testh t
+....\glue(\spaceskip) 3.912 plus 1.956 minus 1.304
+....\testf s
+....\testf o
+....\testf m
+....\testf e
+....\glue(\spaceskip) 3.912 plus 1.956 minus 1.304
+....\testf t
+....\testf e
+....\testf x
+....\testf t
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -0.12
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.34
+..\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\TU/lmr/m/n/10 1
+...\glue 0.0 plus 1.0fil
+(latex-font-input-syntax.aux)

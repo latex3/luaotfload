@@ -1,0 +1,27 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+% see https://chat.stackexchange.com/transcript/message/46845082#46845082
+% solution: dont use font.each() 
+% see https://tex.stackexchange.com/questions/126903/print-font-name-using-luatex
+
+\directlua{
+    local cbl=luatexbase.callback_descriptions('define_font')
+    if(cbl[1]\string~=nil) then
+      original_fontloader=luatexbase.remove_from_callback('define_font',cbl[1])
+    end
+function latexDefineFont(n,s,i)
+  for ii,vv in font.each() do end %comment this
+  return original_fontloader(n,s,i)
+end
+
+luatexbase.add_to_callback('define_font',latexDefineFont,"latexDefineFont")
+}
+
+\documentclass{article}
+\begin{document}
+
+abc
+\font\testa=cmr10 \testa abc
+
+
+\end{document}
+

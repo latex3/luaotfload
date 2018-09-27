@@ -16,8 +16,8 @@
 -----------------------------------------------------------------------
 --                              config
 -----------------------------------------------------------------------
-local glyphfile     = "./build/glyphlist.txt"
-local font_age      = "./build/luaotfload-glyphlist.lua"
+local glyphfile     = "./src/auto/glyphlist.txt" -- changed UF
+local font_age      = "./src/auto/luaotfload-glyphlist.lua" --changed UF
 local glyph_source  = "https://raw.githubusercontent.com/adobe-type-tools/agl-aglfn/master/glyphlist.txt"
 
 -----------------------------------------------------------------------

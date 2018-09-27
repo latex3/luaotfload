@@ -6,6 +6,7 @@
 -- REQUIREMENTS:  luatex, the lualibs package
 --       AUTHOR:  Philipp Gesang (Phg), <phg42.2a@gmail.com>
 --      CREATED:  2013-07-07 14:01:12+0200
+--      MODIFIED: 2018-09-18 (Ulrike Fischer)
 -----------------------------------------------------------------------
 --
 -- This script generates a list of hashes that serves as the input
@@ -38,16 +39,66 @@ local stringmatch  = string.match
 -----------------------------------------------------------------------
 
 local verbose  = false
-local filelist = "./build/luaotfload-status.lua" --- result
+local filelist = "./src/auto/luaotfload-status.lua" --- result
 
 local srcdir    = "src"
-local builddir  = "build"
+local builddir  = "src/auto"
 local scriptdir = "scripts"
 local loaderdir = "src/fontloader"
 local rtdir     = "src/fontloader/runtime"
 local miscdir   = "src/fontloader/misc"
 
-local names = {
+require ("luaotfload-filelist.lua")
+
+-- new 24.09.2018 we are building the name list from the file list. 
+local names = {}
+
+--- Luaotfload runtime files
+local t = luaotfload.filelist.selectlolsrcluaentries (luaotfload.filelist.data)
+for i,v in ipairs(t) do 
+  table.insert (names, {srcdir, v.gitpref..v.name..v.ext} )
+end 
+
+--- generated files
+local t = luaotfload.filelist.selectlolgeneentries (luaotfload.filelist.data)
+for i,v in ipairs(t) do 
+  if v.mkstatus then -- do nothing
+  else
+   table.insert (names, {builddir, v.gitpref..v.name..v.ext} )
+  end 
+end 
+--- scripts
+local t = luaotfload.filelist.selectlolscrentries (luaotfload.filelist.data)
+for i,v in ipairs(t) do 
+   table.insert (names, {scriptdir , v.gitpref..v.name..v.ext} )
+end 
+
+--- fontloader runtimes
+local t = luaotfload.filelist.selectlolessentries (luaotfload.filelist.data)
+for i,v in ipairs(t) do 
+  table.insert (names, {rtdir, (v.gitpref or "fontloader-")..(v.ours or v.name)..v.ext} )
+end 
+
+--- fontloader constituents -- ignored are not added so fonts-syn is not in the list! 
+local t = luaotfload.filelist.selectctxfontentries (luaotfload.filelist.data)  
+for i,v in ipairs(t) do 
+  table.insert (names, {miscdir, (v.gitpref or "fontloader-")..(v.ours or v.name)..v.ext} )
+end 
+local t = luaotfload.filelist.selectctxgeneusedentries (luaotfload.filelist.data)  
+for i,v in ipairs(t) do 
+  table.insert (names, {miscdir, (v.gitpref or "fontloader-")..(v.ours or v.name)..v.ext} )
+end 
+--- lua libraries
+local t = luaotfload.filelist.selectctxlibsentries (luaotfload.filelist.data)  
+for i,v in ipairs(t) do 
+  table.insert (names, {miscdir, (v.gitpref or "fontloader-")..(v.ours or v.name)..v.ext} )
+end 
+
+
+-- print (table.serialize(names))
+-- this is the old list
+-- keep it for the moment 
+local oldnames = {
 
   --- Luaotfload runtime files
   { srcdir,       "luaotfload-auxiliary.lua",       },
@@ -92,12 +143,15 @@ local names = {
   { miscdir,      "fontloader-font-ini.lua",        },
   { miscdir,      "fontloader-font-map.lua",        },
   { miscdir,      "fontloader-font-oti.lua",        },
-  { miscdir,      "fontloader-font-gbn.lua",        },
+--  { miscdir,      "fontloader-font-gbn.lua",        }, -- renamed
   { miscdir,      "fontloader-font-def.lua",        },
-  { miscdir,      "fontloader-fonts-demo-vf-1.lua", },
   { miscdir,      "fontloader-fonts-enc.lua",       },
   { miscdir,      "fontloader-fonts-ext.lua",       },
-  { miscdir,      "fontloader-fonts.lua",           },
+  { miscdir,      "fontloader-fonts-def.lua",       }, -- NEW
+  { miscdir,      "fontloader-fonts-mis.lua",       }, -- NEW  
+  { miscdir,      "fontloader-fonts-gbn.lua",       }, -- NEW/Renamed
+  { miscdir,      "fontloader-fonts-lig.lua",       }, -- NEW
+--  { miscdir,      "fontloader-fonts.lua",           },
   { miscdir,      "fontloader-font-lua.lua",        },
   { miscdir,      "fontloader-fonts-syn.lua",       },
   { miscdir,      "fontloader-font-tfm.lua",        },
@@ -110,13 +164,19 @@ local names = {
   { miscdir,      "fontloader-font-oto.lua",        },
   { miscdir,      "fontloader-font-otj.lua",        },
   { miscdir,      "fontloader-font-ota.lua",        },
+  { miscdir,      "fontloader-font-vfc.lua",        }, -- NEW
+  { miscdir,      "fontloader-font-ott.lua",        }, -- NEW
   { miscdir,      "fontloader-font-ots.lua",        },
   { miscdir,      "fontloader-font-osd.lua",        },
   { miscdir,      "fontloader-font-ocl.lua",        },
   { miscdir,      "fontloader-font-otc.lua",        },
+  { miscdir,      "fontloader-font-imp-tex.lua",    }, -- NEW
+  { miscdir,      "fontloader-font-imp-ligatures.lua",}, -- NEW
+  { miscdir,      "fontloader-font-imp-italics.lua",}, -- NEW
+  { miscdir,      "fontloader-font-imp-effects.lua",}, -- NEW
 
   --- lua libraries
-  { miscdir,      "fontloader-languages.lua",       },
+--  { miscdir,      "fontloader-languages.lua",       },
   { miscdir,      "fontloader-l-boolean.lua",       },
   { miscdir,      "fontloader-l-file.lua",          },
   { miscdir,      "fontloader-l-function.lua",      },
@@ -126,16 +186,18 @@ local names = {
   { miscdir,      "fontloader-l-math.lua",          },
   { miscdir,      "fontloader-l-string.lua",        },
   { miscdir,      "fontloader-l-table.lua",         },
-  { miscdir,      "fontloader-math.lua",            },
-  { miscdir,      "fontloader-mplib.lua",           },
-  { miscdir,      "fontloader-preprocessor.lua",    },
-  { miscdir,      "fontloader-swiglib.lua",         },
-  { miscdir,      "fontloader-swiglib-test.lua",    },
+  { miscdir,      "fontloader-l-unicode.lua",       },
+--  { miscdir,      "fontloader-math.lua",            },
+--  { miscdir,      "fontloader-mplib.lua",           },
+--  { miscdir,      "fontloader-preprocessor.lua",    },
+--  { miscdir,      "fontloader-swiglib.lua",         },
+--  { miscdir,      "fontloader-swiglib-test.lua",    },
   { miscdir,      "fontloader-util-str.lua",        },
   { miscdir,      "fontloader-util-fil.lua",        },
 
 } --[[local names]]
 
+-- print (table.serialize(oldnames))
 -----------------------------------------------------------------------
 -- helpers
 -----------------------------------------------------------------------

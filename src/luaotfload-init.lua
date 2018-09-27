@@ -3,9 +3,11 @@
 --         FILE:  luaotfload-init.lua
 --  DESCRIPTION:  Luaotfload font loader initialization
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs
---       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>
+--      VERSION:  2.9 2018-09-24
+--       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Marcel Krüger
 -----------------------------------------------------------------------
 --
+
 
 local setmetatable = setmetatable
 local kpselookup   = kpse.lookup
@@ -238,6 +240,7 @@ local context_modules = {
   { false, "l-file"     },
   { false, "l-boolean"  },
   { false, "l-math"     },
+  { false, "l-unicode"  }, -- NEW UF 19.09.2018
   { false, "util-str"   },
   { false, "util-fil"   },
 
@@ -246,13 +249,16 @@ local context_modules = {
   { ctx,   "data-con"          },
   { ltx,   "luatex-basics-nod" },
   { ctx,   "font-ini"          },
+  { ltx,   "luatex-fonts-mis"  }, -- NEW UF 19.09.2018
   { ctx,   "font-con"          },
   { ltx,   "luatex-fonts-enc"  },
   { ctx,   "font-cid"          },
   { ctx,   "font-map"          },
-  { ltx,   "luatex-fonts-syn"  },
+--  { ltx,   "luatex-fonts-syn"  }, -- ignore??
+  { ctx,   "font-vfc"          }, -- NEW UF 19.09.2018
   { ctx,   "font-oti"          },
   { ctx,   "font-otr"          },
+  { ctx,   "font-ott"          }, 
   { ctx,   "font-cff"          },
   { ctx,   "font-ttf"          },
   { ctx,   "font-dsp"          },
@@ -271,8 +277,15 @@ local context_modules = {
   { ctx,   "font-tfm"          },
   { ctx,   "font-lua"          },
   { ctx,   "font-def"          },
+  { ltx,   "luatex-fonts-def"  },  
   { ltx,   "luatex-fonts-ext"  },
-  { ctx,   "font-gbn"          },
+  { ctx,   "font-imp-tex"      },
+  { ctx,   "font-imp-ligatures"},
+  { ctx,   "font-imp-italics"  },
+  { ctx,   "font-imp-effects"  },
+  { ltx,   "luatex-fonts-lig"  },
+  { ltx,   "luatex-fonts-gbn"  },
+  
 
 } --[[context_modules]]
 
@@ -527,13 +540,16 @@ local init_main = function ()
     load_fontloader_module "data-con"
     load_fontloader_module "basics-nod"
     load_fontloader_module "font-ini"
+    load_fontloader_module "fonts-mis"
     load_fontloader_module "font-con"
     load_fontloader_module "fonts-enc"
     load_fontloader_module "font-cid"
     load_fontloader_module "font-map"
-    load_fontloader_module "fonts-syn"
-    load_fontloader_module "font-oti"
+--    load_fontloader_module "fonts-syn" -- ignore?
+    load_fontloader_module "font-vfc"
     load_fontloader_module "font-otr"
+    load_fontloader_module "font-oti"    
+    load_fontloader_module "font-ott"
     load_fontloader_module "font-cff"
     load_fontloader_module "font-ttf"
     load_fontloader_module "font-dsp"
@@ -545,14 +561,21 @@ local init_main = function ()
     load_fontloader_module "font-ots"
     load_fontloader_module "font-osd"
     load_fontloader_module "font-ocl"
+    load_fontloader_module "font-otc"
     load_fontloader_module "font-onr"
     load_fontloader_module "font-one"
     load_fontloader_module "font-afk"
     load_fontloader_module "font-tfm"
     load_fontloader_module "font-lua"
     load_fontloader_module "font-def"
+    load_fontloader_module "fonts-def"
     load_fontloader_module "fonts-ext"
-    load_fontloader_module "font-gbn"
+    load_fontloader_module "font-imp-tex"
+    load_fontloader_module "font-imp-ligatures"
+    load_fontloader_module "font-imp-italics"
+    load_fontloader_module "font-imp-effects"
+    load_fontloader_module "fonts-lig"
+    load_fontloader_module "fonts-gbn"
 
   elseif fontloader == "context" then
     logreport ("log", 0, "init",
@@ -648,14 +671,20 @@ local init_post_install_callbacks = function ()
 
   --doc]]--
 
+  -- MK Pass current text direction to simple_font_handler
+  local handler = nodes.simple_font_handler
+  local callback = function(head, groupcode, _, _, direction)
+    return handler(head, groupcode, nil, nil, direction or tex.get'textdir')
+  end
   luatexbase.add_to_callback("pre_linebreak_filter",
-                             nodes.simple_font_handler,
+                             callback,
                              "luaotfload.node_processor",
                              1)
   luatexbase.add_to_callback("hpack_filter",
-                             nodes.simple_font_handler,
+                             callback,
                              "luaotfload.node_processor",
                              1)
+  -- /MK
 end
 
 local init_post_load_agl = function ()

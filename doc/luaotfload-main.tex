@@ -1,4 +1,4 @@
-%% Copyright (C) 2009-2017
+%% Copyright (C) 2009-2018
 %%
 %%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
 %%      and Khaled Hosny   <khaledhosny@eglug.org>
@@ -32,9 +32,10 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2017/01/29 v2.8}
-  \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang\\
+  \setdocumentdate   {2018/09/24 v2.9}
+  \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
+                      New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
                       Support: \email     {lualatex-dev@tug.org}}
 
   \typesetdocumenttitle
@@ -53,6 +54,31 @@
 \endfrontmatter
 
 \typesetcontent
+
+\beginsection {New in version 2.9 (by Ulrike Fischer)}
+
+On the one side there is not very much new in this version: The native components of \identifier{Luaotfload} are nearly unchanged. A few bugs have been corrected, the various files lists which loads the components of the font loader have been cleaned up.
+
+On the other side there is a lot new:
+
+\begindescriptions
+
+  \beginaltitem {Fontloader} The fontloader files imported from \CONTEXT\ have been updated to the current version.
+   This was necessary to make \identifier{Luaotfload} compatible with the comimg \LUATEX 1.08. Compared to the previous version from february 2017 quite a number of things have changed. Most importantly the handling of arabic fonts has greatly improved. But this also means that changes in the output are possible.
+  \endaltitem
+
+  \beginaltitem {Lualibs} The update of the fontloader files also required an update of the \identifier{Lualibs} package. This \identifier{Luaotfload} versions needs version 2.6 of \identifier{Lualibs}.
+  \endaltitem
+
+  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LUATEX 1.08 maintenance has been transfered to Ulrike Fischer and Marcel Krüger. The package is currently maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload.git}. Issues should be reported there.
+  \endaltitem
+
+  \beginaltitem {Documentation}
+  The core of documentation is nearly unchanged. I added this introduction. I recreated with the help of @marmot the graphic. I updated the file lists. I imported as appendix pdf versions of the two man files which are part of the \identifier{Luaotfload} documentation.
+  \endaltitem
+
+\enddescriptions
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Introduction}
@@ -337,7 +363,7 @@ The file names corresponding to the example font names above are
 \endsubsection
 
 \beginsubsection {Bracketed Lookups}
-\label{sec:conf}
+\label{sec:bracket}
 Bracketed lookups allow for arbitrary character content to be used in a
 definition.
 %
@@ -373,7 +399,7 @@ In addition to the regular prefixed requests, \identifier{luaotfload}
 accepts loading fonts the \XETEX way.
 %
 There are again two modes: bracketed and unbracketed.
-For the bracketed variety, see above, \ref{sec:conf}.
+For the bracketed variety, see above, \ref{sec:bracket}.
 
 Unbracketed (or, for lack of a better word: \emphasis{anonymous})
 font requests resemble the conventional \TEX syntax.
@@ -1227,7 +1253,7 @@ complicated and error-prone fashion.
 Below is a commented list of the files distributed with
 \identifier{luaotfload} in one way or the other.
 %
-See figure \ref{file-graph} on page \pageref{file-graph} for a
+See see the figure on page \pageref{file-graph} for a
 graphical representation of the dependencies.
 %
 \label{package}%
@@ -1247,8 +1273,8 @@ This file constitutes the “default fontloader” and is part of the
 \identifier{luaotfload} package as \fileent{fontloader-YY-MM-DD.lua},
 where the uppercase letters are placeholders for the build date.
 %
-A companion to it, \fileent{luatex-basics-gen.lua} must be loaded
-beforehand to set up parts of the environment required by the \CONTEXT
+A companion to it, \fileent{luatex-basics-gen.lua} (renamed to \fileent{fontloader-basics-gen.lua} in \identifier{luaotfload})
+must be loaded beforehand to set up parts of the environment required by the \CONTEXT
 libraries.
 %
 During a \TEX\ run, the fontloader initialization and injection happens
@@ -1275,17 +1301,7 @@ and have thus been omitted from the merge.\footnote{%
 
 \begindoublecolumns
   \begindefinitions
-      \beginaltitem {l-lua.lua}       \endaltitem
-      \beginaltitem {l-lpeg.lua}      \endaltitem
-      \beginaltitem {l-function.lua}  \endaltitem
-      \beginaltitem {l-string.lua}    \endaltitem
-      \beginaltitem {l-table.lua}     \endaltitem
-      \beginaltitem {l-io.lua}        \endaltitem
-      \beginaltitem {l-file.lua}      \endaltitem
-      \beginaltitem {l-boolean.lua}   \endaltitem
-      \beginaltitem {l-math.lua}      \endaltitem
-      \beginaltitem {util-str.lua}    \endaltitem
-      \beginaltitem {util-fil.lua}    \endaltitem
+ \directlua{ printctxlibslist ()}
   \enddefinitions
 \enddoublecolumns
 
@@ -1305,11 +1321,7 @@ grouped twofold as below:
     fontloader.
     \begindoublecolumns
       \begindefinitions
-        \beginaltitem{luatex-basics-nod.lua} \endaltitem
-        \beginaltitem{luatex-basics-chr.lua} \endaltitem
-        \beginaltitem{luatex-fonts-enc.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-syn.lua}  \endaltitem
-        \beginaltitem{luatex-fonts-ext.lua}  \endaltitem
+        \directlua{printctxallgenericlist ()}
       \enddefinitions
     \enddoublecolumns
   \endnormalitem
@@ -1319,31 +1331,7 @@ grouped twofold as below:
     directly from \CONTEXT.
     \begindoublecolumns
       \begindefinitions
-        \beginaltitem{data-con.lua} \endaltitem
-        \beginaltitem{font-ini.lua} \endaltitem
-        \beginaltitem{font-con.lua} \endaltitem
-        \beginaltitem{font-cid.lua} \endaltitem
-        \beginaltitem{font-map.lua} \endaltitem
-        \beginaltitem{font-tfm.lua} \endaltitem
-        \beginaltitem{font-one.lua} \endaltitem
-        \beginaltitem{font-afk.lua} \endaltitem
-        \beginaltitem{font-oti.lua} \endaltitem
-        \beginaltitem{font-otr.lua} \endaltitem
-        \beginaltitem{font-cff.lua} \endaltitem
-        \beginaltitem{font-ttf.lua} \endaltitem
-        \beginaltitem{font-dsp.lua} \endaltitem
-        \beginaltitem{font-oup.lua} \endaltitem
-        \beginaltitem{font-otl.lua} \endaltitem
-        \beginaltitem{font-oto.lua} \endaltitem
-        \beginaltitem{font-otj.lua} \endaltitem
-        \beginaltitem{font-ota.lua} \endaltitem
-        \beginaltitem{font-ots.lua} \endaltitem
-        \beginaltitem{font-osd.lua} \endaltitem
-        \beginaltitem{font-ocl.lua} \endaltitem
-        \beginaltitem{font-lua.lua} \endaltitem
-        \beginaltitem{font-def.lua} \endaltitem
-        \beginaltitem{font-xtx.lua} \endaltitem
-        \beginaltitem{font-gbn.lua} \endaltitem
+      \directlua{printctxfontlist ()}
       \enddefinitions
     \enddoublecolumns
   \endnormalitem
@@ -1408,12 +1396,15 @@ files not contained in the merge. Some of these have no equivalent in
     \beginaltitem {luaotfload-letterspace.lua}
       font-based letterspacing.
     \endaltitem
+        \beginaltitem {luaotfload-filelist.lua}
+      data about the files in the package.
+    \endaltitem
 \endfilelist
 
-\figurefloat
-  {file-graph}
-  {Schematic of the files in \identifier{Luaotfload}}
-  {filegraph.pdf}
+%\figurefloat
+%  {file-graph}
+%  {Schematic of the files in \identifier{Luaotfload}}
+%  {filegraph.pdf}
 
 \endsubsection
 

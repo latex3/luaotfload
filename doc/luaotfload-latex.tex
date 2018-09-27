@@ -1,5 +1,6 @@
+% !Mode:: "TeX:EN:UTF-8:Main"
 \suppresslongerror1%% sigh ...
-%% Copyright (C) 2009-2015
+%% Copyright (C) 2009-2018
 %%
 %%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
 %%      and Khaled Hosny   <khaledhosny@eglug.org>
@@ -48,7 +49,7 @@
     citecolor=\primarycolor,
      pdftitle={The Luaotfload package},
    pdfsubject={OpenType layout system for Plain TeX and LaTeX},
-    pdfauthor={Elie Roux & Khaled Hosny & Philipp Gesang},
+    pdfauthor={Elie Roux & Khaled Hosny & Philipp Gesang & Ulrike Fischer},
   pdfkeywords={luatex, lualatex, unicode, opentype}
 ]{hyperref}
 
@@ -62,7 +63,7 @@
   ItalicFont  = {Linux Libertine O Italic},
   SlantedFont = {Linux Libertine O Italic},
 ]{Linux Libertine O}
-\setmonofont[Ligatures=TeX,Scale=MatchLowercase]{Liberation Mono}
+\setmonofont[Ligatures=TeX,Scale=MatchLowercase]{InconsolataN-Regular.otf}
 %setsansfont[Ligatures=TeX]{Linux Biolinum O}
 \setsansfont[Ligatures=TeX,Scale=MatchLowercase]{Iwona Medium}
 %setmathfont{XITS Math}
@@ -204,7 +205,7 @@
 
 %% Context offers both \type{…} and \type<<…>>, but not an unbalanced
 %% one that we could map directly onto Latex’s \verb|…|.
-
+\usepackage{pdfpages}
 \usepackage {listings}
 \usepackage {luatexbase}
 \lstset {
@@ -386,7 +387,7 @@
   \begin {figure} [b]
     \edef \syntaxlabel  {#1}%
     \def \syntaxcaption {#2}%
-    \setlength\grammarparsep{12pt plus 2pt minus 2pt}%
+    \setlength\grammarparsep{0pt plus 2pt minus 2pt}%
     \setlength\grammarindent{5cm}%
     \begingroup
       \small
@@ -479,8 +480,41 @@
 
 \newif \ifcontextmkiv \contextmkivfalse
 
+\usepackage{luacode}
+
+% a few lua functions to grab the file lists.
+\begin{luacode}
+require("luaotfload-filelist.lua")
+
+function printctxlibslist ()
+  t= luaotfload.filelist.selectctxlibsentries (luaotfload.filelist.data)
+ for i,v in ipairs (t) do
+  tex.sprint("\\beginaltitem {"..v.name.. v.ext.."}\\endaltitem")
+ end
+end
+
+function printctxallgenericlist ()
+  t= luaotfload.filelist.selectctxgeneentries (luaotfload.filelist.data)
+ for i,v in ipairs (t) do
+  tex.sprint("\\beginaltitem {"..v.ctxpref..v.name..v.ext.."}\\endaltitem")
+ end
+end
+
+function printctxfontlist ()
+  t= luaotfload.filelist.selectctxfontentries (luaotfload.filelist.data)
+ for i,v in ipairs (t) do
+  tex.sprint("\\beginaltitem {"..v.name..v.ext.."}\\endaltitem")
+ end
+end
+\end{luacode}
+
+
 \begin {document}
   \input {luaotfload-main.tex}
+\clearpage
+\includepdf[fitpaper,pagecommand={\label{file-graph}}]{filegraph}
+\includepdf[pages=-]{luaotfload-conf.pdf}
+\includepdf[pages=-]{luaotfload-tool.pdf}
 \end {document}
 
 

@@ -1,7 +1,7 @@
 if not modules then modules = { } end modules ['letterspace'] = {
-    version   = "2.8",
+    version   = "2.9",
     comment   = "companion to luaotfload-main.lua",
-    author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang",
+    author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang, Ulrike Fischer",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
 }
@@ -70,7 +70,7 @@ local copy_node          = nodedirect.copy
 local new_node           = nodedirect.new
 
 local nodepool           = nodedirect.pool
-local new_kern           = nodepool.kern
+-- local new_kern           = nodepool.kern -- UF removed 2017-07-14
 
 local nodecodes          = nodes.nodecodes
 
@@ -236,16 +236,21 @@ end
 ---                 character kerning functionality
 ---=================================================================---
 
+-- UF changed 2017-07-14
+local nodedirectnew = node.direct.new
+
 local kern_injector = function (fillup, kern)
-  if fillup then
-    local g = new_glue(kern)
-    local s = getfield(g, "spec")
-    setfield(s, "stretch", kern)
-    setfield(s, "stretch_order", 1)
-    return g
-  end
-  return new_kern(kern)
+ if fillup then
+   local g = nodedirectnew("glue")
+   setfield(g, "stretch", kern)
+   setfield(g, "stretch_order", 1)
+   return g
+ end
+   local g = nodedirectnew("kern")
+   setfield(g,"kern",kern)
+   return g
 end
+-- /UF
 
 local kernable_skip = function (n)
   local st = getsubtype (n)

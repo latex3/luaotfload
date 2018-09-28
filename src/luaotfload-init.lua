@@ -601,7 +601,7 @@ local init_main = function ()
                fontloader, path)
     local _void = require (path)
 
-  elseif fontloader then
+  elseif kpselookup (("fontloader-%s.lua"):format(fontloader)) then
     logreport ("log", 0, "init",
                "Using predefined fontloader “%s”.",
                fontloader)

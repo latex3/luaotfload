@@ -601,18 +601,18 @@ local init_main = function ()
                fontloader, path)
     local _void = require (path)
 
-  elseif fontloader then
+  elseif kpselookup (("fontloader-%s.lua"):format(fontloader)) then
     logreport ("log", 0, "init",
                "Using predefined fontloader “%s”.",
                fontloader)
     load_fontloader_module (fontloader)
 
   else
-    logreport ("log", 0, "init",
+    logreport ("both", 0, "init",
                "No match for requested fontloader “%s”.",
                fontloader)
     fontloader = luaotfload.fontloader_package
-    logreport ("log", 0, "init",
+    logreport ("both", 0, "init",
                "Defaulting to predefined fontloader “%s”.",
                fontloader)
     load_fontloader_module (fontloader)

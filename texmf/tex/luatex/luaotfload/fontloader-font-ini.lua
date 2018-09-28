@@ -10,22 +10,33 @@ if not modules then modules = { } end modules ['font-ini'] = {
 <p>Not much is happening here.</p>
 --ldx]]--
 
-local allocate   = utilities.storage.allocate
+local allocate    = utilities.storage.allocate
+local sortedhash  = table.sortedhash
 
-fonts            = fonts or { }
-local fonts      = fonts
+fonts             = fonts or { }
+local fonts       = fonts
 
-fonts.hashes     = fonts.hashes     or { identifiers = allocate() }
-fonts.tables     = fonts.tables     or { }
-fonts.helpers    = fonts.helpers    or { }
-fonts.tracers    = fonts.tracers    or { } -- for the moment till we have move to moduledata
-fonts.specifiers = fonts.specifiers or { } -- in format !
+local identifiers = allocate()
 
-fonts.analyzers  = { } -- not needed here
-fonts.readers    = { }
-fonts.definers   = { methods = { } }
-fonts.loggers    = { register = function() end }
+fonts.hashes      = fonts.hashes     or { identifiers = identifiers }
+fonts.tables      = fonts.tables     or { }
+fonts.helpers     = fonts.helpers    or { }
+fonts.tracers     = fonts.tracers    or { } -- for the moment till we have move to moduledata
+fonts.specifiers  = fonts.specifiers or { } -- in format !
+
+fonts.analyzers   = { } -- not needed here
+fonts.readers     = { }
+fonts.definers    = { methods = { } }
+fonts.loggers     = { register = function() end }
 
 if context then
+
+    font.originaleach = font.each
+
+    function font.each()
+        return sortedhash(identifiers)
+    end
+
     fontloader = nil
+
 end

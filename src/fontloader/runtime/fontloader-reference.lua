@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 09/24/18 14:11:29
+-- merge date  : 09/26/18 14:26:41
 
 do -- begin closure to overcome local limits and interference
 
@@ -9049,9 +9049,11 @@ if not modules then modules={} end modules ['font-ini']={
   license="see context related readme files"
 }
 local allocate=utilities.storage.allocate
+local sortedhash=table.sortedhash
 fonts=fonts or {}
 local fonts=fonts
-fonts.hashes=fonts.hashes   or { identifiers=allocate() }
+local identifiers=allocate()
+fonts.hashes=fonts.hashes   or { identifiers=identifiers }
 fonts.tables=fonts.tables   or {}
 fonts.helpers=fonts.helpers  or {}
 fonts.tracers=fonts.tracers  or {} 
@@ -9061,6 +9063,7 @@ fonts.readers={}
 fonts.definers={ methods={} }
 fonts.loggers={ register=function() end }
 if context then
+
 --removed
 
 end
@@ -9096,6 +9099,9 @@ table.setmetatableindex(marks,function(t,k)
     return marks
   end
 end)
+function font.each()
+  return table.sortedhash(fonts.hashes.identifiers)
+end
 
 end -- closure
 

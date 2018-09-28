@@ -608,11 +608,11 @@ local init_main = function ()
     load_fontloader_module (fontloader)
 
   else
-    logreport ("log", 0, "init",
+    logreport ("both", 0, "init",
                "No match for requested fontloader “%s”.",
                fontloader)
     fontloader = luaotfload.fontloader_package
-    logreport ("log", 0, "init",
+    logreport ("both", 0, "init",
                "Defaulting to predefined fontloader “%s”.",
                fontloader)
     load_fontloader_module (fontloader)

@@ -36,7 +36,7 @@ tlmgr install graphics xcolor graphics-def pgf
 
 # fonts support - perhaps take here luaotfload out of the list ...
 # or is it installed as dependency anyway?
-tlmgr fontspec microtype unicode-math luaotfload
+tlmgr install fontspec microtype unicode-math luaotfload
 
 # fonts
 tlmgr install  sourcecodepro Asana-Math  ebgaramond  tex-gyre  amsfonts gnu-freefont  

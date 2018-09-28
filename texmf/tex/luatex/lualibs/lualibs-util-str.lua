@@ -1022,6 +1022,22 @@ end
 
 --
 
+-- local strip
+--
+-- local format_Z = function(f)
+--     n = n + 1
+--     if not f or f == "" then
+--         f = ".9"
+--     end
+--     return format("(((a%s %% 1 == 0) and format('%%i',a%s)) or (strip and lpegmatch(stripzero,format('%%%sf',a%s))) or format('%%%sf',a%s))",n,n,f,n,f,n)
+-- end
+--
+-- function strings.stripformatterzeros()
+--     strip = true
+-- end
+
+--
+
 local format_rest = function(s)
     return format("%q",s) -- catches " and \n and such
 end
@@ -1155,6 +1171,7 @@ local builder = Cs { "start",
     ["M"] = (prefix_any * P("M")) / format_M, -- %M => xxx,xxx,xxx.xx (optional prefix instead of ,)
     --
     ["z"] = (prefix_any * P("z")) / format_z, -- %z => skip n arguments
+ -- ["Z"] = (prefix_any * P("Z")) / format_Z, -- %Z => optionally strip zeros
     --
     ["a"] = (prefix_any * P("a")) / format_a, -- %a => '...' (forces tostring)
     ["A"] = (prefix_any * P("A")) / format_A, -- %A => "..." (forces tostring)

@@ -1,9 +1,5 @@
 language: generic
 
-branches:
-  only:
-  - dev
-
 
 sudo: required
 services: docker

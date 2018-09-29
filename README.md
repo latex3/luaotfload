@@ -1,63 +1,66 @@
 # The Luaotfload Package
 
+![Version: 2.9](https://img.shields.io/badge/current_version-2.9-blue.svg?style=flat-square)
+[![License: GNU GPLv2](https://img.shields.io/badge/license-GNU_GPLv2-blue.svg?style=flat-square)](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+
+
 Luaotfload is an adaptation of the ConTeXt font loading system for the Plain
 and LaTeX formats. It allows OpenType fonts to be loaded with font features
 accessible using an extended font request syntax while providing compatibility
 with XeTeX. By indexing metadata in a database it facilitates loading fonts by
 their proper names instead of file names.
 
-Luaotfload may be loaded in Plain LuaTeX with "\input luaotfload.sty" and in
-LuaLaTeX with "\usepackage{luaotfload}". LuaLaTeX users may be interested in
+Luaotfload may be loaded in Plain LuaTeX with `\input luaotfload.sty`. 
+In LuaLaTeX it is loaded by default. LuaLaTeX users may be interested in
 the fontspec package which provides a high-level interface to the functionality
 provided by this package.
 
 Please see the documentation luaotfload.pdf for more information.
 
-## New September 2018
+## Versions
 
-Luaotfload 2.9 has been pushed to CTAN. The ongoing development is the dev branch. 
+[![Version: 2.9](https://img.shields.io/badge/version-2.9-blue.svg?style=flat-square)](https://travis-ci.com/u-fischer/luaotfload/)
+![Travis CI for 2.9](https://img.shields.io/travis/com/u-fischer/luaotfload/master.svg?style=flat-square)
+[![Version: development](https://img.shields.io/badge/version-dev-blue.svg?style=flat-square)](https://travis-ci.com/u-fischer/luaotfload/branches)
+![Travis CI for dev](https://img.shields.io/travis/com/u-fischer/luaotfload/dev.svg?style=flat-square)
+
+
+Luaotfload 2.9 has been pushed to CTAN in september 2018. The ongoing development is in the dev branch. 
  
+## Support
+[![GitHub issues](https://img.shields.io/badge/github-issues-blue.svg?style=flat-square)](https://github.com/u-fischer/luaotfload/issues) 
+[![mailing list](https://img.shields.io/badge/mailing_list-lualatex--dev-blue.svg?style=flat-square)](https://www.tug.org/mailman/listinfo/lualatex-dev) 
+
+
 Issues can be reported at the issue tracker or at the old issue tracker on 
-<http://github.com/lualatex/luaotfload>. 
+<https://github.com/lualatex/luaotfload>. 
 
 
 The development for LuaLaTeX is discussed on the lualatex-dev mailing list. See
-<http://www.tug.org/mailman/listinfo/lualatex-dev> for details.
+<https://www.tug.org/mailman/listinfo/lualatex-dev> for details.
 
 
 ## Responsible Persons
 
 The following people have contributed to this package.
 
-Khaled Hosny             <khaledhosny@eglug.org>
-
-Elie Roux                <elie.roux@telecom-bretagne.eu>
-
-Will Robertson           <will.robertson@latex-project.org>
-
-Philipp Gesang           <phg@phi-gamma.net>
-
-Dohyun Kim               <nomosnomos@gmail.com>
-
-Reuben Thomas            <https://github.com/rrthomas>
-
-Joseph Wright            <joseph.wright@morningstar2.co.uk>
-
-Manuel Pégourié-Gonnard  <mpg@elzevir.fr>
-
-Olof-Joachim Frahm       <olof@macrolet.net>
-
-Patrick Gundlach         <gundlach@speedata.de>
-
-Philipp Stephani         <st_philipp@yahoo.de>
-
-David Carlisle           <d.p.carlisle@gmail.com>
-
-Yan Zhou                 @zhouyan
-
-Ulrike Fischer           <fischer@troubleshooting-tex.de>
-
-Marcel Krüger            <https://github.com/zauguin> 
+|name |contact |
+|---|---|
+|Khaled Hosny      |       <khaledhosny@eglug.org>            |
+|Elie Roux         |       <elie.roux@telecom-bretagne.eu>    |
+|Will Robertson    |       <will.robertson@latex-project.org> | 
+|Philipp Gesang    |       <phg@phi-gamma.net>                |
+|Dohyun Kim        |       <nomosnomos@gmail.com>             |
+|Reuben Thomas     |       <https://github.com/rrthomas>      |
+|Joseph Wright     |       <joseph.wright@morningstar2.co.uk> |
+|Manuel Pégourié-Gonnard|  <mpg@elzevir.fr>                   |
+|Olof-Joachim Frahm|       <olof@macrolet.net>                |  
+|Patrick Gundlach  |       <gundlach@speedata.de>             |
+|Philipp Stephani  |       <st_philipp@yahoo.de>              |
+|David Carlisle    |       <d.p.carlisle@gmail.com>           |
+|Yan Zhou          |       @zhouyan                           |
+|Ulrike Fischer    |       <fischer@troubleshooting-tex.de>   |
+|Marcel Krüger     |       <https://github.com/zauguin>       |
 
 ## Installation
 

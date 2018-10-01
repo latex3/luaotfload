@@ -550,12 +550,17 @@ function mappings.addtounicode(data,filename,checklookups,forceligatures)
                         missing[du] = true
                         nofmissing  = nofmissing + 1
                     end
+                else
+                     -- maybe a message or so
                 end
             end
         else
             local overload = overloads[du]
             if overload then
                 glyph.unicode = overload.unicode
+            elseif not glyph.unicode then
+                missing[du] = true
+                nofmissing  = nofmissing + 1
             end
         end
     end

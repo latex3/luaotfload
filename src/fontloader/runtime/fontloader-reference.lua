@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 09/26/18 14:26:41
+-- merge date  : 09/30/18 19:32:19
 
 do -- begin closure to overcome local limits and interference
 
@@ -10968,12 +10968,16 @@ function mappings.addtounicode(data,filename,checklookups,forceligatures)
             missing[du]=true
             nofmissing=nofmissing+1
           end
+        else
         end
       end
     else
       local overload=overloads[du]
       if overload then
         glyph.unicode=overload.unicode
+      elseif not glyph.unicode then
+        missing[du]=true
+        nofmissing=nofmissing+1
       end
     end
   end
@@ -13522,6 +13526,7 @@ local languages=allocate {
   ["kiu" ]="kirmanjki",
   ["kjd" ]="southern kiwai",
   ["kjp" ]="eastern pwo karen",
+  ["kjz" ]="bumthangkha",
   ["kkn" ]="kokni",
   ["klm" ]="kalmyk",
   ["kmb" ]="kamba",
@@ -13610,6 +13615,7 @@ local languages=allocate {
   ["mdr" ]="mandar",
   ["men" ]="me'en",
   ["mer" ]="meru",
+  ["mfa" ]="pattani malay",
   ["mfe" ]="morisyen",
   ["min" ]="minangkabau",
   ["miz" ]="mizo",
@@ -13807,6 +13813,7 @@ local languages=allocate {
   ["tpi" ]="tok pisin",
   ["trk" ]="turkish",
   ["tsg" ]="tsonga",
+  ["tsj" ]="tshangla",
   ["tua" ]="turoyo aramaic",
   ["tul" ]="tulu",
   ["tuv" ]="tuvin",
@@ -13837,6 +13844,7 @@ local languages=allocate {
   ["xbd" ]="lü",
   ["xhs" ]="xhosa",
   ["xjb" ]="minjangbal",
+  ["xkf" ]="khengkha",
   ["xog" ]="soga",
   ["xpe" ]="kpelle (liberia)",
   ["yak" ]="sakha",
@@ -18131,7 +18139,7 @@ function gsubhandlers.single(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofg
     local delta=readshort(f) 
     local coverage=readcoverage(f,tableoffset+coverage) 
     for index in next,coverage do
-      local newindex=index+delta
+      local newindex=(index+delta)%65536 
       if index>nofglyphs or newindex>nofglyphs then
         report("invalid index in %s format %i: %i -> %i (max %i)","single",subtype,index,newindex,nofglyphs)
         coverage[index]=nil
@@ -22592,7 +22600,7 @@ local trace_defining=false registertracker("fonts.defining",function(v) trace_de
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.104 
+otf.version=3.105 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.sbixcache=containers.define("fonts","sbix",otf.version,true)

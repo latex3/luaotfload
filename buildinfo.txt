@@ -49,13 +49,14 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-28.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-01.lua
 
 8. Check lualibs status -- perhaps it needs update too
 
 9. Install the files in the texmf (for travis and for the tests)
 
 --> l3build install
+--> mktexlsr
 
 10. Install new dev luatex version
 

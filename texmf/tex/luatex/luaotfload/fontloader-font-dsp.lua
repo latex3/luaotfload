@@ -1215,7 +1215,7 @@ function gsubhandlers.single(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofg
         local delta    = readshort(f) -- can be negative
         local coverage = readcoverage(f,tableoffset+coverage) -- not simple as we need to set key/value anyway
         for index in next, coverage do
-            local newindex = index + delta
+            local newindex = (index + delta) % 65536 -- modulo is new in 1.8.3
             if index > nofglyphs or newindex > nofglyphs then
                 report("invalid index in %s format %i: %i -> %i (max %i)","single",subtype,index,newindex,nofglyphs)
                 coverage[index] = nil

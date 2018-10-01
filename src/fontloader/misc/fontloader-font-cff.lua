@@ -1567,6 +1567,7 @@ do
         end
 
         local function blend()
+            -- leaves n values on stack
             local n = stack[top]
             top = top - 1
             if not axis then

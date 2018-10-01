@@ -457,7 +457,6 @@ local function checklookups(fontdata,missing,nofmissing)
             end
         end
     end
-
     local function collectthem(sequences)
         if not sequences then
             return

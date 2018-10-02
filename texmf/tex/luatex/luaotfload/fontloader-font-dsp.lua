@@ -54,7 +54,7 @@ if not modules then modules = { } end modules ['font-dsp'] = {
 -- Although we use a few table readers there i sno real gain in there (apart from having
 -- less code. After all there are often not that many demanding features.
 
-local next, type = next, type
+local next, type, tonumber = next, type, tonumber
 local band = bit32.band
 local extract = bit32.extract
 local bor = bit32.bor
@@ -1007,8 +1007,9 @@ local function unchainedcontext(f,fontdata,lookupid,lookupoffset,offset,glyphs,n
             rules  = rules,
         }
     elseif subtype == 3 then
-        local current    = readarray(f)
+        local nofglyphs  = readushort(f)
         local noflookups = readushort(f)
+        local current    = readcardinaltable(f,nofglyphs,ushort)
         local lookups    = readlookuparray(f,noflookups,#current)
         current = readcoveragearray(f,tableoffset,current,true)
         return {
@@ -2213,7 +2214,7 @@ do
                             report_issue(i,what,sequence,"no")
                         elseif not next(rlookups) then
                             -- can be ok as it aborts a chain sequence
-                            report_issue(i,what,sequence,"empty")
+                         -- report_issue(i,what,sequence,"empty")
                             rule.lookups = nil
                         else
                             -- we can have holes in rlookups flagged false and we can have multiple lookups
@@ -2421,7 +2422,7 @@ do
         elseif specification.globalkerns then
             name = "globalkern"
         else
-            report("ignoring global kern table using gpos kern feature")
+            report("ignoring global kern table, using gpos kern feature")
             return
         end
         setposition(f,datatable.offset)

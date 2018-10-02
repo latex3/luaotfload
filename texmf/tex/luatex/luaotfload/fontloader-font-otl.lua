@@ -52,7 +52,7 @@ local report_otf          = logs.reporter("fonts","otf loading")
 local fonts               = fonts
 local otf                 = fonts.handlers.otf
 
-otf.version               = 3.105 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version               = 3.106 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                 = containers.define("fonts", "otl",  otf.version, true)
 otf.svgcache              = containers.define("fonts", "svg",  otf.version, true)
 otf.sbixcache             = containers.define("fonts", "sbix", otf.version, true)
@@ -155,7 +155,7 @@ function otf.load(filename,sub,instance)
      if reload then
         report_otf("loading %a, hash %a",filename,hash)
         --
-        starttiming(otfreaders)
+        starttiming(otfreaders,true)
         data = otfreaders.loadfont(filename,sub or 1,instance) -- we can pass the number instead (if it comes from a name search)
         if data then
             -- todo: make this a plugin
@@ -242,6 +242,7 @@ function otf.load(filename,sub,instance)
                 checkmemory(used,threshold,tracememory)
             end
         else
+            stoptiming(otfreaders)
             data = nil
             report_otf("loading failed due to read error")
         end

@@ -1,0 +1,17 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{fontspec}
+\setmainfont{Coelacanth}
+\begin{document}
+\START \showoutput
+
+
+
+^^^^f58c
+
+\symbol{"F58C}
+
+\symbol{62860}% a converter called gbase tells me that f58c = 62860
+
+\char62860
+\end{document}

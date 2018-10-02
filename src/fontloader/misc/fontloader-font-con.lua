@@ -46,8 +46,7 @@ constructors.namemode        = "fullpath" -- will be a function
 constructors.version         = 1.01
 constructors.cache           = containers.define("fonts", "constructors", constructors.version, false)
 
-constructors.privateoffset   = 0xF0000 -- 0x10FFFF | context also uses privates: 0xE000-0xEFFF
-
+constructors.privateoffset   = fonts.privateoffsets.textbase or 0xF0000
 constructors.cacheintex      = true -- so we see the original table in fonts.font
 
 -- This might become an interface:

@@ -40,3 +40,15 @@ if context then
     fontloader = nil
 
 end
+
+-- Outside context one can bump textbase to some higher value but only the
+-- textbase given here is officially supported (read: bug testing etc will
+-- use the values below).
+
+fonts.privateoffsets = {
+    textbase      = 0xF0000, -- used for hidden (opentype features)
+    textextrabase = 0xFD000, -- used for visible by name
+    mathextrabase = 0xFE000, -- used for visible by code
+    mathbase      = 0xFF000, -- used for hidden (virtual math)
+    keepnames     = false,   -- when set to true names are always kept (not for context)
+}

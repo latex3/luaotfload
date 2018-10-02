@@ -1,5 +1,9 @@
 Change History
 --------------
+2018-10-03 luaotfload v2.91
+    * solved copy & paste of variant glyphs, https://tex.stackexchange.com/questions/451442/localized-glyphs-locl-have-unicode-value-ufffd
+    * solved problem with PUA no longer accessible with \char, see https://github.com/u-fischer/luaotfload/issues/7
+
 2018-09-21 luaotfload v2.9 
     * added various testfiles for the l3build system/travis tests to the github repository
     * solved a bug regarding directions https://github.com/u-fischer/lua-font-pond/issues/12

@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2018/09/24 v2.9}
+  \setdocumentdate   {2018/10/03 v2.91}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
@@ -53,8 +53,15 @@
 
 \endfrontmatter
 
-\pdfbookmark[1]{\contentsname}{table} 
+\pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
+
+\beginsection {New in version 2.91 (by Ulrike Fischer)}
+
+This version mostly correct two bugs found in the previous fontloader: Glyphvariants weren't copied and pasted correctly. Glyphs encoded in the PUA couldn't be accessed anymore. 
+
+\endsection
+
 
 \beginsection {New in version 2.9 (by Ulrike Fischer)}
 
@@ -75,12 +82,12 @@ On the other side there is a lot new:
   \endaltitem
 
   \beginaltitem {Documentation}
-  The core of documentation is nearly unchanged. I added this introduction. I recreated with the help of @marmot the graphic on \pageref{file-graph}. I updated the file lists. I imported as appendix pdf versions of the two man files which are part of the \identifier{Luaotfload} documentation. 
+  The core of documentation is nearly unchanged. I added this introduction. I recreated with the help of @marmot the graphic on \pageref{file-graph}. I updated the file lists. I imported as appendix pdf versions of the two man files which are part of the \identifier{Luaotfload} documentation.
   \endaltitem
 
 \enddescriptions
 
-
+\endsection
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -106,7 +106,7 @@ local version                  = "2.9"
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-28.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-02.lua
 
 
 ==============

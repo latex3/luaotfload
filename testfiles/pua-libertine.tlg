@@ -1,0 +1,65 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+LaTeX Font Info:    Font shape `TU/LinLibertine(0)/m/sl' in size <10> not available
+(Font)              Font shape `TU/LinLibertine(0)/m/it' tried instead on input line ....
+LaTeX Font Info:    Font shape `TU/LinLibertine(0)/m/it' will be
+(Font)              scaled to size 10.0pt on input line ....
+Completed box being shipped out [1]
+\vbox(627.36243+0.0)x380.0, direction TLT
+.\glue 22.0
+.\vbox(605.36243+0.0)x345.0, shifted 35.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 5.92fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(6.08+0.02)x345.0, glue set 340.35fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/LinLibertine(0)/m/n/10 1
+..\glue 18.06749
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 516.0fil, direction TLT
+...\write-{}
+...\glue(\topskip) 2.46
+...\hbox(7.54+2.12)x345.0, glue set 298.79999fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinBiolinum_K(0)/m/n/10 
+....\TU/LinLibertine(0)/m/n/10 +
+....\TU/LinBiolinum_K(0)/m/n/10 H
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.34001
+...\hbox(7.54+2.12)x345.0, glue set 291.6fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinBiolinum_K(0)/m/n/10 
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.34001
+...\hbox(7.54+2.12)x345.0, glue set 315.29999fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinBiolinum_K(0)/m/n/10 
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -2.12
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+..\glue(\baselineskip) 25.29494
+..\hbox(0.0+0.0)x345.0, direction TLT
+(pua-libertine.aux)

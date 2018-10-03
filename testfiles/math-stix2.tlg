@@ -1,0 +1,54 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 500.48654fil, direction TLT
+...\write-{}
+...\glue(\topskip) 10.0
+...\hbox(0.0+0.0)x345.0, glue set 122.9979fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\hbox(0.0+0.0)x207.0021, glue set 103.50105fil, direction TLT
+.....\glue 0.0 plus 1.0fil minus 1.0fil
+.....\glue 0.0 plus 1.0fil minus 1.0fil
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\penalty 10000
+...\glue(\abovedisplayskip) 10.0 plus 2.0 minus 5.0
+...\glue(\lineskip) 1.0
+...\hbox(14.30995+9.15004)x45.05989, shifted 149.97006, direction TLT
+....\hbox(14.28+9.18)x6.32, shifted -0.02995, direction TLT
+.....\TU/STIXTwoMath(1)/m/n/10 󰄸
+....\glue(\thinmuskip) 1.66663
+....\hbox(14.28+9.18)x9.99, shifted -0.02995, direction TLT
+.....\TU/STIXTwoMath(1)/m/n/10 󰄽
+....\glue(\thinmuskip) 1.66663
+....\hbox(14.28+9.18)x13.66, shifted -0.02995, direction TLT
+.....\TU/STIXTwoMath(1)/m/n/10 󰅂
+....\glue(\thinmuskip) 1.66663
+....\hbox(14.28+9.18)x10.09, shifted -0.02995, direction TLT
+.....\TU/STIXTwoMath(1)/m/n/10 󰅇
+...\penalty 0
+...\glue(\belowdisplayskip) 10.0 plus 2.0 minus 5.0
+...\glue -5.0
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.61
+..\hbox(6.39+0.0)x345.0, glue set 170.025fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\TU/STIXTwoText(0)/m/n/10 1
+...\glue 0.0 plus 1.0fil
+(math-stix2.aux)

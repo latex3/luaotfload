@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-auxiliary.lua
 --  DESCRIPTION:  part of luaotfload
--- REQUIREMENTS:  luaotfload 2.9
+-- REQUIREMENTS:  luaotfload 2.91
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 -----------------------------------------------------------------------
 --

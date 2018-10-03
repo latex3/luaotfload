@@ -22,7 +22,13 @@ checkconfigs = {
 checkruns = 3
 -- checksuppfiles = {"texmf.cnf"} -- later
 
-excludetests = {"luatex-ja","luatex-ja-travis"}
+if os.env["CONTEXTPATH"] then 
+  -- local system
+  excludetests = {}
+else
+  -- travis or somewhere else ...
+  excludetests = {"luatex-ja"}
+end
 
 -- l3build settings local folder descriptions 
 sourcefiledir = "./src"

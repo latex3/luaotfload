@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2018/09/24 v2.9}
+  \setdocumentdate   {2018/10/03 v2.91}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
@@ -53,7 +53,15 @@
 
 \endfrontmatter
 
+\pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
+
+\beginsection {New in version 2.91 (by Ulrike Fischer)}
+
+This version mostly correct two bugs found in the previous fontloader: Glyphvariants weren't copied and pasted correctly. Glyphs encoded in the PUA couldn't be accessed anymore. 
+
+\endsection
+
 
 \beginsection {New in version 2.9 (by Ulrike Fischer)}
 
@@ -64,22 +72,22 @@ On the other side there is a lot new:
 \begindescriptions
 
   \beginaltitem {Fontloader} The fontloader files imported from \CONTEXT\ have been updated to the current version.
-   This was necessary to make \identifier{Luaotfload} compatible with the comimg \LUATEX 1.08. Compared to the previous version from february 2017 quite a number of things have changed. Most importantly the handling of arabic fonts has greatly improved. But this also means that changes in the output are possible.
+   This was necessary to make \identifier{Luaotfload} compatible with the coming \LUATEX 1.08/1.09. Compared to the previous version from february 2017 quite a number of things have changed. Most importantly the handling of arabic fonts has greatly improved. But this also means that changes in the output are possible.
   \endaltitem
 
-  \beginaltitem {Lualibs} The update of the fontloader files also required an update of the \identifier{Lualibs} package. This \identifier{Luaotfload} versions needs version 2.6 of \identifier{Lualibs}.
+  \beginaltitem {Lualibs} The update of the fontloader files also required an update of the \identifier{Lualibs} package. This \identifier{Luaotfload} version needs version 2.6 of \identifier{Lualibs}.
   \endaltitem
 
-  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LUATEX 1.08 maintenance has been transfered to Ulrike Fischer and Marcel Krüger. The package is currently maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload.git}. Issues should be reported there.
+  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LUATEX 1.08/1.09 maintenance has been transfered to Ulrike Fischer and Marcel Krüger. The package is currently maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload}. Issues should be reported there.
   \endaltitem
 
   \beginaltitem {Documentation}
-  The core of documentation is nearly unchanged. I added this introduction. I recreated with the help of @marmot the graphic. I updated the file lists. I imported as appendix pdf versions of the two man files which are part of the \identifier{Luaotfload} documentation.
+  The core of documentation is nearly unchanged. I added this introduction. I recreated with the help of @marmot the graphic on \pageref{file-graph}. I updated the file lists. I imported as appendix pdf versions of the two man files which are part of the \identifier{Luaotfload} documentation.
   \endaltitem
 
 \enddescriptions
 
-
+\endsection
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -267,7 +275,7 @@ for a more formal description see figure \ref{font-syntax}.
 \endsyntaxfloat
 
 %% Below guarded space gets borked in index; why‽
-\beginsubsection{Prefix -- the \identifier{luaotfload}{ }Way}
+\beginsubsection{Prefix -- the \texorpdfstring{\identifier{luaotfload}}{luaotfload}{ }Way}
 
 In \identifier{luaotfload}, the canonical syntax for font requests
 requires a \emphasis{prefix}:
@@ -1888,7 +1896,7 @@ code imported from \CONTEXT.
 
 The complete text of the license is given as a separate file \fileent
 {COPYING} in the toplevel directory of the
-\hyperlink [\fileent {Luaotfload} Git repository]{https://github.com/lualatex/luaotfload/blob/master/COPYING}.
+\hyperlink [\fileent {Luaotfload} Git repository]{https://github.com/lualatex/luaotfload/blob/master/COPYING}.\\
 Distributions probably package it as \fileent
 {doc/luatex/luaotfload/COPYING} in the relevant \fileent {texmf} tree.
 

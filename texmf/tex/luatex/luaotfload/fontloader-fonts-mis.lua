@@ -29,3 +29,7 @@ table.setmetatableindex(marks,function(t,k)
         return marks
     end
 end)
+
+function font.each()
+    return table.sortedhash(fonts.hashes.identifiers)
+end

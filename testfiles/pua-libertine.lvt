@@ -1,0 +1,14 @@
+\input{regression-test}
+\documentclass{book}
+
+\usepackage{libertine}
+
+\begin{document}
+\START \showoutput
+\LKeyShiftX{H}
+
+
+\LKeySpace
+
+\LKeyEnter
+\end{document}

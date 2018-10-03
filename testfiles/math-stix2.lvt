@@ -1,0 +1,15 @@
+\input{regression-test}
+
+\documentclass{article}
+\usepackage{unicode-math}
+
+\setmainfont{STIX Two Text}
+\setmathfont{STIX Two Math}[StylisticSet=08]
+
+\begin{document}
+\START \showoutput
+\[
+\int \iint \iiint \oint
+\]
+
+\end{document}

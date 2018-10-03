@@ -49,13 +49,14 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-24.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-02.lua
 
 8. Check lualibs status -- perhaps it needs update too
 
 9. Install the files in the texmf (for travis and for the tests)
 
 --> l3build install
+--> mktexlsr
 
 10. Install new dev luatex version
 
@@ -101,11 +102,13 @@ The name contains the current date.
  -- REQUIREMENTS:  luaotfload 2.9
 local version                  = "2.9"
 
-13. Update luatotfload-status again so that the hashes are correct.
+13. commit and tag the commit so that status can pick it up.
+
+14. Update luatotfload-status again so that the hashes are correct.
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-09-24.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-02.lua
 
 
 ==============

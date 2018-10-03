@@ -102,7 +102,9 @@ The name contains the current date.
  -- REQUIREMENTS:  luaotfload 2.9
 local version                  = "2.9"
 
-13. Update luatotfload-status again so that the hashes are correct.
+13. commit and tag the commit so that status can pick it up.
+
+14. Update luatotfload-status again so that the hashes are correct.
 
 !!! date must be naturally correct
 

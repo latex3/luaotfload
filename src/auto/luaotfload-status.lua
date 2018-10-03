@@ -78,9 +78,9 @@ return {
  },
  ["notes"]={
   ["committer"]="Ulrike Fischer <fischer@troubleshooting-tex.de>",
-  ["description"]="dev",
+  ["description"]="v2.91",
   ["loader"]="fontloader-2018-10-02.lua",
-  ["revision"]="ce05f786496f69623253548c17948367508cdbb5",
-  ["timestamp"]="2018-10-03 00:23:24 +0200",
+  ["revision"]="0f1daff67762435aeabbb00a7874e5b1adba432e",
+  ["timestamp"]="2018-10-03 00:47:03 +0200",
  },
 }

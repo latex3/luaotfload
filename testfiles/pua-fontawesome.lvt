@@ -1,0 +1,11 @@
+\input{regression-test}
+
+\documentclass{article}
+\usepackage{fontspec}
+\usepackage{fontawesome}
+
+\begin{document}
+\START\showoutput
+\faEnvelopeO{}
+
+\end{document}

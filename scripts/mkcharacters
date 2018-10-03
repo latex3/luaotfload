@@ -47,6 +47,7 @@ local import = {
   "direction", "mirror", --> πολυγλωσσία/uax9
   "category",            --> https://gist.github.com/phi-gamma/5812290
   "textclass",           --> https://gist.github.com/phi-gamma/6488187 
+  "indic", "indicmark", "indicorder", "specials", -- Support indic scripts
 }
 
 -----------------------------------------------------------------------

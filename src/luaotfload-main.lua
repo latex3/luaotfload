@@ -39,6 +39,14 @@ else
     end
 end
 
+local info = status.list()
+
+if info["safer_option"] ~= 0 then
+ texio.write_nl("term and log","luaotfload can't run with option --safer. Aborting")
+ luaotfload.main = function () end
+ error("safer_option used")
+end 
+
 local authors = "\z
     Hans Hagen,\z
     Khaled Hosny,\z

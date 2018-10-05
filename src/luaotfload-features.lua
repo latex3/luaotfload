@@ -1031,7 +1031,8 @@ local verbosebaselines = swapped(baselines)
 --doc]]--
 
 local support_incomplete = tabletohash({
-    "deva", "beng", "guru", "gujr",
+   -- "deva", 
+    "beng", "guru", "gujr",
     "orya", "taml", "telu", "knda",
     "mlym", "sinh",
 }, true)

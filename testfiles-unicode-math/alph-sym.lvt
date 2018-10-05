@@ -1,9 +1,9 @@
 
 \input{umtest-preamble}
 
-\usepackage[math-style=ISO]{unicode-math}  
-\setmathfont{xits-math.otf}
-\setmathfont[range=it/{latin, greek, Greek}]{Asana-Math.otf}  
+\usepackage[math-style=ISO]{unicode-math}
+\setmathfont{xitsmath-regular.otf}
+\setmathfont[range=it/{latin, greek, Greek}]{Asana-Math.otf}
 \begin{document}
 \START
 

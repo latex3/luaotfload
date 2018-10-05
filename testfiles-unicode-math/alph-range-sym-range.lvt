@@ -3,7 +3,7 @@
 
 \usepackage{unicode-math}
 
-\setmathfont{xits-math.otf}
+\setmathfont{xitsmath-regular.otf}
 \setmathfont[
     range={
       it/{Latin} ,

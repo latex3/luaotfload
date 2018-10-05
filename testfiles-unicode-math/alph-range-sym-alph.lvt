@@ -3,11 +3,11 @@
 
 \usepackage{unicode-math}
 
-\setmathfont[Colour=330000]{xits-math.otf}
-\setmathfont[range=\symit/{latin}, Colour=660000]{xits-math.otf}
-\setmathfont[range=\symit/{Greek}, Colour=990000]{xits-math.otf}
-\setmathfont[range=\symit/{greek}, Colour=BB0000]{xits-math.otf}
-\setmathfont[range=\symup/{num},   Colour=EE0000]{xits-math.otf}
+\setmathfont[Colour=330000]{xitsmath-regular.otf}
+\setmathfont[range=\symit/{latin}, Colour=660000]{xitsmath-regular.otf}
+\setmathfont[range=\symit/{Greek}, Colour=990000]{xitsmath-regular.otf}
+\setmathfont[range=\symit/{greek}, Colour=BB0000]{xitsmath-regular.otf}
+\setmathfont[range=\symup/{num},   Colour=EE0000]{xitsmath-regular.otf}
 
 \begin{document}
 

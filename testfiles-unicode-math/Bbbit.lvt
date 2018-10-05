@@ -1,6 +1,6 @@
 \input{umtest-preamble}
 \usepackage{unicode-math}
-\setmathfont{xits-math.otf}
+\setmathfont{xitsmath-regular.otf}
 \begin{document}
 
 \MSG{MATHBBIT}
@@ -19,4 +19,4 @@
 \setbox12=\hbox{$\symbbit{𝐷𝑑𝑒𝑖𝑗}$}
 \SHOWBOX{12}
 
-\end{document}
+\end{document} 

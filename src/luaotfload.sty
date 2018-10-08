@@ -45,6 +45,11 @@
     [2018/10/03 v2.91  OpenType layout system]
 \fi
 \directlua{
-  require('luaotfload-main')
-  local _void = luaotfload.main ()
+  if xpcall(function ()%
+             require('luaotfload-main')%
+            end,texio.write_nl) then %
+  local _void = luaotfload.main ()%
+  else %
+  texio.write_nl('Error in luaotfload - loading aborted')%
+  end %
 }

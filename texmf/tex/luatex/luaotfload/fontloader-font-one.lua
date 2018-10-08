@@ -106,6 +106,7 @@ function afm.load(filename)
                 afmenhancers.apply(data,filename)
              -- otfreaders.addunicodetable(data) -- only when not done yet
                 fonts.mappings.addtounicode(data,filename)
+                otfreaders.stripredundant(data)
              -- otfreaders.extend(data)
                 otfreaders.pack(data)
                 data.size = size

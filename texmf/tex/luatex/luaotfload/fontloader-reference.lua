@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 10/02/18 23:17:57
+-- merge date  : 10/07/18 20:05:37
 
 do -- begin closure to overcome local limits and interference
 
@@ -306,10 +306,18 @@ function lpeg.instringchecker(p)
   end
 end
 function lpeg.splitter(pattern,action)
-  return (((1-P(pattern))^1)/action+1)^0
+  if action then
+    return (((1-P(pattern))^1)/action+1)^0
+  else
+    return (Cs((1-P(pattern))^1)+1)^0
+  end
 end
 function lpeg.tsplitter(pattern,action)
-  return Ct((((1-P(pattern))^1)/action+1)^0)
+  if action then
+    return Ct((((1-P(pattern))^1)/action+1)^0)
+  else
+    return Ct((Cs((1-P(pattern))^1)+1)^0)
+  end
 end
 local splitters_s,splitters_m,splitters_t={},{},{}
 local function splitat(separator,single)
@@ -14210,7 +14218,7 @@ if not modules then modules={} end modules ['font-cff']={
 }
 local next,type,tonumber=next,type,tonumber
 local byte,char,gmatch=string.byte,string.char,string.gmatch
-local concat,remove=table.concat,table.remove
+local concat,remove,unpack=table.concat,table.remove,table.unpack
 local floor,abs,round,ceil,min,max=math.floor,math.abs,math.round,math.ceil,math.min,math.max
 local P,C,R,S,C,Cs,Ct=lpeg.P,lpeg.C,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Ct
 local lpegmatch=lpeg.match
@@ -20843,7 +20851,7 @@ local function checklookups(fontdata,missing,nofmissing)
       end
     end
     if next(done) then
-      report_unicode("not unicoded: % t",sortedkeys(done))
+      report_unicodes("not unicoded: % t",sortedkeys(done))
     end
   end
 end
@@ -21032,9 +21040,25 @@ local function unifyglyphs(fontdata,usenames)
   fontdata.hashmethod=hashmethod
   return indices,names
 end
-local p_bogusname=(
-  (P("uni")+P("UNI")+P("Uni")+P("U")+P("u"))*S("Xx")^0*R("09","AF")^1+(P("identity")+P("Identity")+P("IDENTITY"))*R("09","AF")^1+(P("index")+P("Index")+P("INDEX"))*R("09")^1
-)*(P(-1)+P("."))
+local p_crappyname do
+  local p_hex=R("af","AF","09")
+  local p_digit=R("09")
+  local p_done=S("._-")^0+P(-1)
+  local p_alpha=R("az","AZ")
+  local p_ALPHA=R("AZ")
+  p_crappyname=(
+    lpeg.utfchartabletopattern({ "uni","u" },true)*S("Xx_")^0*p_hex^1
++lpeg.utfchartabletopattern({ "identity","glyph","jamo" },true)*p_hex^1
++lpeg.utfchartabletopattern({ "index","afii" },true)*p_digit^1
++p_digit*p_hex^3+p_alpha*p_digit^1
++P("aj")*p_digit^1+P("eh_")*(p_digit^1+p_ALPHA*p_digit^1)+(1-P("_"))^1*P("_uni")*p_hex^1
+  )*p_done
+end
+local forcekeep=false 
+directives.register("otf.keepnames",function(v)
+  report_cleanup("keeping weird glyph names, expect larger files and more memory usage")
+  forcekeep=v
+end)
 local function stripredundant(fontdata)
   local descriptions=fontdata.descriptions
   if descriptions then
@@ -21050,7 +21074,7 @@ local function stripredundant(fontdata)
     else
       for unicode,d in next,descriptions do
         local name=d.name
-        if name and lpegmatch(p_bogusname,name) then
+        if name and lpegmatch(p_crappyname,name) then
           d.name=nil
           n=n+1
         end
@@ -21070,6 +21094,7 @@ local function stripredundant(fontdata)
     end
   end
 end
+readers.stripredundant=stripredundant
 function readers.getcomponents(fontdata) 
   local resources=fontdata.resources
   if resources then
@@ -32874,6 +32899,7 @@ function afm.load(filename)
       if data then
         afmenhancers.apply(data,filename)
         fonts.mappings.addtounicode(data,filename)
+        otfreaders.stripredundant(data)
         otfreaders.pack(data)
         data.size=size
         data.time=time

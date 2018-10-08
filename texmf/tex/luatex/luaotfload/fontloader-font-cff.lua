@@ -28,7 +28,7 @@ if not modules then modules = { } end modules ['font-cff'] = {
 
 local next, type, tonumber = next, type, tonumber
 local byte, char, gmatch = string.byte, string.char, string.gmatch
-local concat, remove = table.concat, table.remove
+local concat, remove, unpack = table.concat, table.remove, table.unpack
 local floor, abs, round, ceil, min, max = math.floor, math.abs, math.round, math.ceil, math.min, math.max
 local P, C, R, S, C, Cs, Ct = lpeg.P, lpeg.C, lpeg.R, lpeg.S, lpeg.C, lpeg.Cs, lpeg.Ct
 local lpegmatch = lpeg.match

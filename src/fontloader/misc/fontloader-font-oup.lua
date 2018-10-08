@@ -715,7 +715,7 @@ local function checklookups(fontdata,missing,nofmissing)
             end
         end
         if next(done) then
-            report_unicode("not unicoded: % t",sortedkeys(done))
+            report_unicodes("not unicoded: % t",sortedkeys(done))
         end
     end
 end
@@ -916,12 +916,51 @@ local function unifyglyphs(fontdata,usenames)
     return indices, names
 end
 
-local p_bogusname = (
-    (P("uni") + P("UNI") + P("Uni") + P("U") + P("u")) * S("Xx")^0 * R("09","AF")^1
-  + (P("identity") + P("Identity") + P("IDENTITY")) * R("09","AF")^1
-  + (P("index") + P("Index") + P("INDEX")) * R("09")^1
-) * (P(-1) + P("."))
+local p_crappyname  do
 
+    local p_hex   = R("af","AF","09")
+    local p_digit = R("09")
+    local p_done  = S("._-")^0 + P(-1)
+    local p_alpha = R("az","AZ")
+    local p_ALPHA = R("AZ")
+
+    p_crappyname = (
+--         (P("uni") + P("UNI") + P("Uni") + P("U") + P("u"))
+        lpeg.utfchartabletopattern({ "uni", "u" },true)
+      * S("Xx_")^0
+      * p_hex^1
+--       + (P("identity") + P("Identity") + P("IDENTITY") + P("glyph") + P("jamo"))
+      + lpeg.utfchartabletopattern({ "identity", "glyph", "jamo" },true)
+      * p_hex^1
+--       + (P("index") + P("Index") + P("INDEX")+ P("afii"))
+      + lpeg.utfchartabletopattern({ "index", "afii" }, true)
+      * p_digit^1
+      -- also happens l
+      + p_digit
+      * p_hex^3
+      + p_alpha
+      * p_digit^1
+      -- sort of special
+      + P("aj")
+      * p_digit^1
+      + P("eh_")
+      * (p_digit^1 + p_ALPHA * p_digit^1)
+      + (1-P("_"))^1
+      * P("_uni")
+      * p_hex^1
+    ) * p_done
+
+end
+
+-- In context we only keep glyph names because of tracing and access by name
+-- so weird names make no sense.
+
+local forcekeep = false -- only for testing something
+
+directives.register("otf.keepnames",function(v)
+    report_cleanup("keeping weird glyph names, expect larger files and more memory usage")
+    forcekeep = v
+end)
 
 local function stripredundant(fontdata)
     local descriptions = fontdata.descriptions
@@ -939,7 +978,7 @@ local function stripredundant(fontdata)
         else
             for unicode, d in next, descriptions do
                 local name = d.name
-                if name and lpegmatch(p_bogusname,name) then
+                if name and lpegmatch(p_crappyname,name) then
                     d.name = nil
                     n = n + 1
                 end
@@ -959,6 +998,8 @@ local function stripredundant(fontdata)
         end
     end
 end
+
+readers.stripredundant = stripredundant
 
 function readers.getcomponents(fontdata) -- handy for resolving ligatures when names are missing
     local resources = fontdata.resources

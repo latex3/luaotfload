@@ -49,7 +49,7 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-02.lua
+--> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-08.lua
 
 8. Check lualibs status -- perhaps it needs update too
 
@@ -108,7 +108,7 @@ local version                  = "2.9"
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-02.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-08.lua
 
 
 ==============

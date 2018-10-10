@@ -122,7 +122,7 @@ do
   local patch = function (specification, size, id)
     local fontdata = read (specification, size, id)
 ----if not fontdata then not_found_msg (specification, size, id) end
-    if type (fontdata) == "table" and fontdata.shared then
+    if type (fontdata) == "table" and fontdata.shared and fontdata.format ~= "unknown" then
       --- We need to test for the “shared” field here
       --- or else the fontspec capheight callback will
       --- operate on tfm fonts.

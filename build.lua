@@ -20,7 +20,7 @@ checkconfigs = {
                }
 
 checkruns = 3
-checksuppfiles = {"texmf.cnf","arabluatex.lua"} -- later
+checksuppfiles = {"texmf.cnf"} -- later
 
 if os.env["CONTEXTPATH"] then 
   -- local system

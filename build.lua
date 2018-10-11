@@ -20,7 +20,7 @@ checkconfigs = {
                }
 
 checkruns = 3
--- checksuppfiles = {"texmf.cnf"} -- later
+checksuppfiles = {"texmf.cnf","arabluatex.lua"} -- later
 
 if os.env["CONTEXTPATH"] then 
   -- local system
@@ -29,6 +29,8 @@ else
   -- travis or somewhere else ...
   excludetests = {"luatex-ja"}
 end
+
+table.insert(excludetests,"arab2") -- until bug is corrected.
 
 -- l3build settings local folder descriptions 
 sourcefiledir = "./src"

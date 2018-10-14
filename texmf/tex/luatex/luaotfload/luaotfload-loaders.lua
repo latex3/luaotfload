@@ -122,10 +122,10 @@ do
   local patch = function (specification, size, id)
     local fontdata = read (specification, size, id)
 ----if not fontdata then not_found_msg (specification, size, id) end
-    if type (fontdata) == "table" and fontdata.shared and fontdata.format ~= "unknown" then
-      --- We need to test for the “shared” field here
-      --- or else the fontspec capheight callback will
-      --- operate on tfm fonts.
+    if type (fontdata) == "table" and fontdata.encodingbytes == 2 then
+      --- We need to test for `encodingbytes` to avoid passing
+      --- tfm fonts to `patch_font`. These fonts are fragile
+      --- because they use traditional TeX font handling.
       luatexbase.call_callback ("luaotfload.patch_font", fontdata, specification)
     else
       luatexbase.call_callback ("luaotfload.patch_font_unsafe", fontdata, specification)

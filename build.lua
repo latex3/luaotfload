@@ -30,7 +30,7 @@ else
   excludetests = {"luatex-ja"}
 end
 
-table.insert(excludetests,"arab2") -- until bug is corrected.
+-- table.insert(excludetests,"arab2") -- until bug is corrected.
 
 -- l3build settings local folder descriptions 
 sourcefiledir = "./src"

@@ -415,36 +415,42 @@ local function checkmathreplacements(tfmdata,fullname,fixitalics)
             for unicode, replacement in next, changed do
                 local u = characters[unicode]
                 local r = characters[replacement]
-                local n = u.next
-                local v = u.vert_variants
-                local h = u.horiz_variants
-                if fixitalics then
-                    -- quite some warnings on stix ...
-                    local ui = u.italic
-                    if ui and not r.italic then
-                        if trace_preparing then
-                            report_prepare("using %i units of italic correction from %C for %U",ui,unicode,replacement)
+                if u and r then
+                    local n = u.next
+                    local v = u.vert_variants
+                    local h = u.horiz_variants
+                    if fixitalics then
+                        -- quite some warnings on stix ...
+                        local ui = u.italic
+                        if ui and not r.italic then
+                            if trace_preparing then
+                                report_prepare("using %i units of italic correction from %C for %U",ui,unicode,replacement)
+                            end
+                            r.italic = ui -- print(ui,ri)
                         end
-                        r.italic = ui -- print(ui,ri)
                     end
-                end
-                if n and not r.next then
+                    if n and not r.next then
+                        if trace_preparing then
+                            report_prepare("forcing %s for %C substituted by %U","incremental step",unicode,replacement)
+                        end
+                        r.next = n
+                    end
+                    if v and not r.vert_variants then
+                        if trace_preparing then
+                            report_prepare("forcing %s for %C substituted by %U","vertical variants",unicode,replacement)
+                        end
+                        r.vert_variants = v
+                    end
+                    if h and not r.horiz_variants then
+                        if trace_preparing then
+                            report_prepare("forcing %s for %C substituted by %U","horizontal variants",unicode,replacement)
+                        end
+                        r.horiz_variants = h
+                    end
+                else
                     if trace_preparing then
-                        report_prepare("forcing %s for %C substituted by %U","incremental step",unicode,replacement)
+                        report_prepare("error replacing %C by %U",unicode,replacement)
                     end
-                    r.next = n
-                end
-                if v and not r.vert_variants then
-                    if trace_preparing then
-                        report_prepare("forcing %s for %C substituted by %U","vertical variants",unicode,replacement)
-                    end
-                    r.vert_variants = v
-                end
-                if h and not r.horiz_variants then
-                    if trace_preparing then
-                        report_prepare("forcing %s for %C substituted by %U","horizontal variants",unicode,replacement)
-                    end
-                    r.horiz_variants = h
                 end
             end
         end

@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 10/07/18 20:05:37
+-- merge date  : 10/18/18 00:07:52
 
 do -- begin closure to overcome local limits and interference
 
@@ -9414,6 +9414,7 @@ function constructors.scale(tfmdata,specification)
   targetparameters.forcedsize=forcedsize 
   targetparameters.extrafactor=extrafactor
   local tounicode=fonts.mappings.tounicode
+  local unknowncode=tounicode(0xFFFD)
   local defaultwidth=resources.defaultwidth or 0
   local defaultheight=resources.defaultheight or 0
   local defaultdepth=resources.defaultdepth or 0
@@ -9668,6 +9669,8 @@ function constructors.scale(tfmdata,specification)
     if isunicode then
       chr.unicode=isunicode
       chr.tounicode=tounicode(isunicode)
+    else
+      chr.tounicode=unknowncode
     end
     if hasquality then
       local ve=character.expansion_factor
@@ -10758,31 +10761,31 @@ local unknown=f_single(0xFFFD)
 local hash={}
 local conc={}
 table.setmetatableindex(hash,function(t,k)
+  if k<0xD7FF or (k>0xDFFF and k<=0xFFFF) then
+    v=f_single(k)
+  else
+    local k=k-0x10000
+    v=f_double(rshift(k,10)+0xD800,k%1024+0xDC00)
+  end
+  t[k]=v
+  return v
+end)
+local function tounicode(k)
   if type(k)=="table" then
     local n=#k
     for l=1,n do
       conc[l]=hash[k[l]]
     end
     return concat(conc,"",1,n)
-  end
-  local v
-  if k>=0x00E000 and k<=0x00F8FF then
-    v=unknown
+  elseif k>=0x00E000 and k<=0x00F8FF then
+    return unknown
   elseif k>=0x0F0000 and k<=0x0FFFFF then
-    v=unknown
+    return unknown
   elseif k>=0x100000 and k<=0x10FFFF then
-    v=unknown
-  elseif k<0xD7FF or (k>0xDFFF and k<=0xFFFF) then
-    v=f_single(k)
+    return unknown
   else
-    k=k-0x10000
-    v=f_double(rshift(k,10)+0xD800,k%1024+0xDC00)
+    return hash[k]
   end
-  t[k]=v
-  return v
-end)
-local function tounicode(unicode)
-  return hash[unicode]
 end
 local function fromunicode16(str)
   if #str==4 then
@@ -21051,7 +21054,7 @@ local p_crappyname do
 +lpeg.utfchartabletopattern({ "identity","glyph","jamo" },true)*p_hex^1
 +lpeg.utfchartabletopattern({ "index","afii" },true)*p_digit^1
 +p_digit*p_hex^3+p_alpha*p_digit^1
-+P("aj")*p_digit^1+P("eh_")*(p_digit^1+p_ALPHA*p_digit^1)+(1-P("_"))^1*P("_uni")*p_hex^1
++P("aj")*p_digit^1+P("eh_")*(p_digit^1+p_ALPHA*p_digit^1)+(1-P("_"))^1*P("_uni")*p_hex^1+P("_")*P(1)^1
   )*p_done
 end
 local forcekeep=false 
@@ -21064,7 +21067,7 @@ local function stripredundant(fontdata)
   if descriptions then
     local n=0
     local c=0
-    if not context and fonts.privateoffsets.keepnames then
+    if (not context and fonts.privateoffsets.keepnames) or forcekeep then
       for unicode,d in next,descriptions do
         if d.class=="base" then
           d.class=nil
@@ -23846,35 +23849,41 @@ local function checkmathreplacements(tfmdata,fullname,fixitalics)
       for unicode,replacement in next,changed do
         local u=characters[unicode]
         local r=characters[replacement]
-        local n=u.next
-        local v=u.vert_variants
-        local h=u.horiz_variants
-        if fixitalics then
-          local ui=u.italic
-          if ui and not r.italic then
-            if trace_preparing then
-              report_prepare("using %i units of italic correction from %C for %U",ui,unicode,replacement)
+        if u and r then
+          local n=u.next
+          local v=u.vert_variants
+          local h=u.horiz_variants
+          if fixitalics then
+            local ui=u.italic
+            if ui and not r.italic then
+              if trace_preparing then
+                report_prepare("using %i units of italic correction from %C for %U",ui,unicode,replacement)
+              end
+              r.italic=ui 
             end
-            r.italic=ui 
           end
-        end
-        if n and not r.next then
+          if n and not r.next then
+            if trace_preparing then
+              report_prepare("forcing %s for %C substituted by %U","incremental step",unicode,replacement)
+            end
+            r.next=n
+          end
+          if v and not r.vert_variants then
+            if trace_preparing then
+              report_prepare("forcing %s for %C substituted by %U","vertical variants",unicode,replacement)
+            end
+            r.vert_variants=v
+          end
+          if h and not r.horiz_variants then
+            if trace_preparing then
+              report_prepare("forcing %s for %C substituted by %U","horizontal variants",unicode,replacement)
+            end
+            r.horiz_variants=h
+          end
+        else
           if trace_preparing then
-            report_prepare("forcing %s for %C substituted by %U","incremental step",unicode,replacement)
+            report_prepare("error replacing %C by %U",unicode,replacement)
           end
-          r.next=n
-        end
-        if v and not r.vert_variants then
-          if trace_preparing then
-            report_prepare("forcing %s for %C substituted by %U","vertical variants",unicode,replacement)
-          end
-          r.vert_variants=v
-        end
-        if h and not r.horiz_variants then
-          if trace_preparing then
-            report_prepare("forcing %s for %C substituted by %U","horizontal variants",unicode,replacement)
-          end
-          r.horiz_variants=h
         end
       end
     end
@@ -31743,7 +31752,7 @@ if not modules then modules={} end modules ['font-otc']={
   license="see context related readme files"
 }
 local insert,sortedkeys,sortedhash,tohash=table.insert,table.sortedkeys,table.sortedhash,table.tohash
-local type,next=type,next
+local type,next,tonumber=type,next,tonumber
 local lpegmatch=lpeg.match
 local utfbyte,utflen=utf.byte,utf.len
 local sortedhash=table.sortedhash
@@ -31881,6 +31890,7 @@ local function addfeature(data,feature,specifications)
   if not specifications then
     return
   end
+  local p=lpeg.P("P")*(lpeg.patterns.hexdigit^1/function(s) return tonumber(s,16) end)*lpeg.P(-1)
   local function tounicode(code)
     if not code then
       return
@@ -31898,10 +31908,17 @@ local function addfeature(data,feature,specifications)
         return u
       end
     end
+    local u=lpegmatch(p,code)
+    if u then
+      return u
+    end
     if not aglunicodes then
       aglunicodes=fonts.encodings.agl.unicodes 
     end
-    return aglunicodes[code]
+    local u=aglunicodes[code]
+    if u then
+      return u
+    end
   end
   local coverup=otf.coverup
   local coveractions=coverup.actions

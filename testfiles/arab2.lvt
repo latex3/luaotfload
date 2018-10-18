@@ -23,8 +23,6 @@
 \newarbmark{afn}{^^^^0602}{}
 \newarbmark{apage}{^^^^0603}{}
 \newarbmark{asmv}{^^^^0604}{}
-\newarbmark{aeoa}{^^^^06dd}{}
-\newcommand{\ayah}[1]{#1\arbmark{aeoa}}
 
 \directlua{
 

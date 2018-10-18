@@ -122,16 +122,21 @@ do
   local patch = function (specification, size, id)
     local fontdata = read (specification, size, id)
 ----if not fontdata then not_found_msg (specification, size, id) end
-    if type (fontdata) == "table" and fontdata.encodingbytes == 2 then
+    if type (fontdata) == "table" then
+     --- if there is no table we don't patch
+     --- see https://github.com/u-fischer/luaotfload/issues/11#issuecomment-429754042
+     if fontdata.encodingbytes == 2 then
       --- We need to test for `encodingbytes` to avoid passing
       --- tfm fonts to `patch_font`. These fonts are fragile
       --- because they use traditional TeX font handling.
       luatexbase.call_callback ("luaotfload.patch_font", fontdata, specification)
-    else
+     else
       luatexbase.call_callback ("luaotfload.patch_font_unsafe", fontdata, specification)
-    end
+     end
+    end 
     return fontdata
   end
+
 
   local mk_info = function (name)
     local definer = name == "patch" and patch or read

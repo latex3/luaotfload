@@ -225,7 +225,7 @@ local unknown = f_single(0xFFFD)
 --     elseif k < 0xD7FF or (k > 0xDFFF and k <= 0xFFFF) then
 --         v = f_single(k)
 --     else
---         k = k - 0x10000
+--         local k = k - 0x10000
 --         v = f_double(rshift(k,10)+0xD800,k%1024+0xDC00)
 --     end
 --     t[k] = v
@@ -251,33 +251,62 @@ local conc = { }
 
 -- table.makeweak(hash)
 
+-- table.setmetatableindex(hash,function(t,k)
+--     if type(k) == "table" then
+--         local n = #k
+--         for l=1,n do
+--             conc[l] = hash[k[l]]
+--         end
+--         return concat(conc,"",1,n)
+--     end
+--     local v
+--     if k >= 0x00E000 and k <= 0x00F8FF then
+--         v = unknown
+--     elseif k >= 0x0F0000 and k <= 0x0FFFFF then
+--         v = unknown
+--     elseif k >= 0x100000 and k <= 0x10FFFF then
+--         v = unknown
+--     elseif k < 0xD7FF or (k > 0xDFFF and k <= 0xFFFF) then
+--         v = f_single(k)
+--     else
+--         local k = k - 0x10000
+--         v = f_double(rshift(k,10)+0xD800,k%1024+0xDC00)
+--     end
+--     t[k] = v
+--     return v
+-- end)
+--
+-- local function tounicode(unicode)
+--     return hash[unicode]
+-- end
+
 table.setmetatableindex(hash,function(t,k)
-    if type(k) == "table" then
-        local n = #k
-        for l=1,n do
-            conc[l] = hash[k[l]]
-        end
-        return concat(conc,"",1,n)
-    end
-    local v
-    if k >= 0x00E000 and k <= 0x00F8FF then
-        v = unknown
-    elseif k >= 0x0F0000 and k <= 0x0FFFFF then
-        v = unknown
-    elseif k >= 0x100000 and k <= 0x10FFFF then
-        v = unknown
-    elseif k < 0xD7FF or (k > 0xDFFF and k <= 0xFFFF) then
+    if k < 0xD7FF or (k > 0xDFFF and k <= 0xFFFF) then
         v = f_single(k)
     else
-        k = k - 0x10000
+        local k = k - 0x10000
         v = f_double(rshift(k,10)+0xD800,k%1024+0xDC00)
     end
     t[k] = v
     return v
 end)
 
-local function tounicode(unicode)
-    return hash[unicode]
+local function tounicode(k)
+    if type(k) == "table" then
+        local n = #k
+        for l=1,n do
+            conc[l] = hash[k[l]]
+        end
+        return concat(conc,"",1,n)
+    elseif k >= 0x00E000 and k <= 0x00F8FF then
+        return unknown
+    elseif k >= 0x0F0000 and k <= 0x0FFFFF then
+        return unknown
+    elseif k >= 0x100000 and k <= 0x10FFFF then
+        return unknown
+    else
+        return hash[k]
+    end
 end
 
 local function fromunicode16(str)

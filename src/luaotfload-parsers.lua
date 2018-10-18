@@ -2,7 +2,7 @@
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-parsers.lua
 --  DESCRIPTION:  various lpeg-based parsers used in Luaotfload
--- REQUIREMENTS:  Luaotfload >= 2.8
+-- REQUIREMENTS:  Luaotfload >= 2.9
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Marcel Krüger
 -------------------------------------------------------------------------------
 --

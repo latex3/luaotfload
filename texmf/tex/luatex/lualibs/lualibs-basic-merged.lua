@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Fri Sep 28 10:23:36 2018
+-- merge date  : Thu Oct 18 23:57:42 2018
 
 do -- begin closure to overcome local limits and interference
 
@@ -623,10 +623,18 @@ function lpeg.instringchecker(p)
   end
 end
 function lpeg.splitter(pattern,action)
-  return (((1-P(pattern))^1)/action+1)^0
+  if action then
+    return (((1-P(pattern))^1)/action+1)^0
+  else
+    return (Cs((1-P(pattern))^1)+1)^0
+  end
 end
 function lpeg.tsplitter(pattern,action)
-  return Ct((((1-P(pattern))^1)/action+1)^0)
+  if action then
+    return Ct((((1-P(pattern))^1)/action+1)^0)
+  else
+    return Ct((Cs((1-P(pattern))^1)+1)^0)
+  end
 end
 local splitters_s,splitters_m,splitters_t={},{},{}
 local function splitat(separator,single)
@@ -2668,6 +2676,9 @@ function number.decimaltobyte(d)
   else
     return b
   end
+end
+function number.idiv(i,d)
+  return floor(i/d) 
 end
 
 end -- closure

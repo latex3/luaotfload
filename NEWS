@@ -3,7 +3,8 @@ Change History
 XXXX-XX-XX luaotfload v2.92
     * better deva support
     * test for --safer and abort
-    * newest context files       
+    * newest context files   
+    * correct file: syntax for tfm files.    
 
 2018-10-03 luaotfload v2.91
     * solved copy & paste of variant glyphs, https://tex.stackexchange.com/questions/451442/localized-glyphs-locl-have-unicode-value-ufffd

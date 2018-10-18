@@ -1,0 +1,16 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\input regression-test.tex\relax
+\documentclass{article}
+
+
+\begin{document}
+
+
+\START
+
+\font\test={file:cmr10}\test
+
+blblb
+
+
+\end{document} 

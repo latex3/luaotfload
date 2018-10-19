@@ -40,6 +40,10 @@ tests/*.ovf
 tests/*.sty
 tests/luaotfload*
 
+testfiles/*.log
+testfiles/*.aux
+testfiles/*.pdf
+
 # temporary directories
 build/*
 testing/*

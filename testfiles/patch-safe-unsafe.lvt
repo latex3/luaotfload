@@ -6,11 +6,16 @@
 \begin{luacode}
 
 local testpatch = function (fontdata)
-  texio.write_nl("patch_font",fontdata.name,fontdata.encodingbytes)
+  texio.write_nl("patch_font" .. fontdata.name .. fontdata.encodingbytes)
 end
 
 local testpatchunsafe = function (fontdata)
-  texio.write_nl("patch_font_unsafe",fontdata.name,fontdata.encodingbytes)
+ local t =  type (fontdata)
+  if t == "table" then
+    texio.write_nl("patch_font_unsafe" .. fontdata.name .. fontdata.encodingbytes)
+  else
+    texio.write_nl("patch_font_unsafe, no table!")  
+  end   
  end
 
 
@@ -32,8 +37,9 @@ luatexbase.add_to_callback
 \begin{document}
 \font\test={name:texgyretermes}\test
 
-
 \START
+\font\test={name:texgyreheros}\test
+
 
 \font\test=cmr10 \test
 
@@ -43,4 +49,4 @@ blblb
 
 blbl
 
-\end{document}
+\end{document} 

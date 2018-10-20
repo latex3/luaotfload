@@ -119,9 +119,11 @@ Dokumentation
 
 2. Update README.md (twice, ctan and git)
 
-3. Check text of the other four files
+3. Change version in luaotfload-main
 
-4. Create man file: (requires docutils)
+4. Check text of the other four files
+
+5. Create man file: (requires docutils)
    the man pages should also go in the manual so we need also a pdf
 
 --> luaotfload/doc> rst2man.py luaotfload.conf.rst luaotfload.conf.5
@@ -129,7 +131,7 @@ Dokumentation
 --> luaotfload/doc> rst2man.py luaotfload-tool.rst luaotfload-tool.1
 --> luaotfload/doc> rst2xetex.py luaotfload-tool.rst luaotfload-tool.tex
 
-5. Compile the doc (hopefully done by l3build so only info)
+6. Compile the doc (hopefully done by l3build so only info)
 --> luaotfload/doc> lualatex luaotfload-tool.tex
 --> luaotfload/doc> lualatex luaotfload.conf.tex
 --> luaotfload/doc> lualatex filegraph

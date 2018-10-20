@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2018/10/03 v2.91}
+  \setdocumentdate   {2018/10/18 v2.92}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
@@ -56,9 +56,19 @@
 \pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
 
+\beginsection {New in version 2.92 (by Ulrike Fischer)}
+
+\begin{itemize}
+
+  \item Better devanagari support. 
+  \item \identifier{Luaotfload} doesn't work when luatex is used with the option \inlinecode{--safer}, it now aborts cleanly when the option is detected -- you still can errors from fontspec later.
+  \item  {file}The (broken) syntax \inlinecode{file:} for legacy font works again. 
+  \item The fontloader has been synched with the newest context version.
+\end{itemize}  
+\endsection
 \beginsection {New in version 2.91 (by Ulrike Fischer)}
 
-This version mostly correct two bugs found in the previous fontloader: Glyphvariants weren't copied and pasted correctly. Glyphs encoded in the PUA couldn't be accessed anymore. 
+This version mostly correct two bugs found in the previous fontloader: Glyphvariants weren't copied and pasted correctly. Glyphs encoded in the PUA couldn't be accessed anymore.
 
 \endsection
 

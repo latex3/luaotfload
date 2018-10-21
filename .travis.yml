@@ -7,8 +7,6 @@ services: docker
 install:
  - source texlive.sh
 
-env:
-- TEXMFHOME=${TRAVIS_BUILD_DIR}/texmf
 
 cache:
   directories:

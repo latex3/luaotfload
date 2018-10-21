@@ -7,7 +7,7 @@ if not modules then modules = { } end modules ['font-otc'] = {
 }
 
 local insert, sortedkeys, sortedhash, tohash = table.insert, table.sortedkeys, table.sortedhash, table.tohash
-local type, next = type, next
+local type, next, tonumber = type, next, tonumber
 local lpegmatch = lpeg.match
 local utfbyte, utflen = utf.byte, utf.len
 local sortedhash = table.sortedhash
@@ -174,6 +174,10 @@ local function addfeature(data,feature,specifications)
         return
     end
 
+    local p = lpeg.P("P")
+            * (lpeg.patterns.hexdigit^1/function(s) return tonumber(s,16) end)
+            * lpeg.P(-1)
+
     local function tounicode(code)
         if not code then
             return
@@ -183,6 +187,7 @@ local function addfeature(data,feature,specifications)
         end
         local u = unicodes[code]
         if u then
+         -- unicodes[code] = u
             return u
         end
         if utflen(code) == 1 then
@@ -191,10 +196,19 @@ local function addfeature(data,feature,specifications)
                 return u
             end
         end
+        local u = lpegmatch(p,code)
+        if u then
+         -- unicodes[code] = u
+            return u
+        end
         if not aglunicodes then
             aglunicodes = fonts.encodings.agl.unicodes -- delayed
         end
-        return aglunicodes[code]
+        local u = aglunicodes[code]
+        if u then
+         -- unicodes[code] = u
+            return u
+        end
     end
 
     local coverup      = otf.coverup

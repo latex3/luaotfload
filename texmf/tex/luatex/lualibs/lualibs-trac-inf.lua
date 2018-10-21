@@ -82,9 +82,13 @@ local seconds = function(n) return n or 0 end
 --
 -- end
 
-local function starttiming(instance)
+local function starttiming(instance,reset)
     local timer = timers[instance or "notimer"]
     local it = timer.timing
+    if reset then
+        it = 0
+        timer.loadtime = 0
+    end
     if it == 0 then
         timer.starttime = ticks()
         if not timer.loadtime then

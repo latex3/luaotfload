@@ -1,6 +1,6 @@
 # The Luaotfload Package
 
-![Version: 2.91](https://img.shields.io/badge/current_version-2.91-blue.svg?style=flat-square)
+![Version: 2.92](https://img.shields.io/badge/current_version-2.91-blue.svg?style=flat-square)
 [![License: GNU GPLv2](https://img.shields.io/badge/license-GNU_GPLv2-blue.svg?style=flat-square)](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 
 
@@ -19,13 +19,13 @@ Please see the documentation luaotfload.pdf for more information.
 
 ## Versions
 
-[![Version: 2.91](https://img.shields.io/badge/version-2.91-blue.svg?style=flat-square)](https://travis-ci.com/u-fischer/luaotfload/)
-![Travis CI for 2.91](https://img.shields.io/travis/com/u-fischer/luaotfload/master.svg?style=flat-square)
+[![Version: 2.92](https://img.shields.io/badge/version-2.91-blue.svg?style=flat-square)](https://travis-ci.com/u-fischer/luaotfload/)
+![Travis CI for 2.92](https://img.shields.io/travis/com/u-fischer/luaotfload/master.svg?style=flat-square)
 [![Version: development](https://img.shields.io/badge/version-dev-blue.svg?style=flat-square)](https://travis-ci.com/u-fischer/luaotfload/branches)
 ![Travis CI for dev](https://img.shields.io/travis/com/u-fischer/luaotfload/dev.svg?style=flat-square)
 
 
-Luaotfload 2.91 has been pushed to CTAN on october,3, 2018. The ongoing development is in the dev branch. 
+Luaotfload 2.92 has been pushed to CTAN on october,21, 2018. The ongoing development is in the dev branch. 
  
 ## Support
 [![GitHub issues](https://img.shields.io/badge/github-issues-blue.svg?style=flat-square)](https://github.com/u-fischer/luaotfload/issues) 

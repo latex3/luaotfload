@@ -1,0 +1,52 @@
+\input regression-test.tex\relax
+\documentclass{article}
+
+\usepackage{luacode}
+
+\begin{luacode}
+
+local testpatch = function (fontdata)
+  texio.write_nl("patch_font" .. fontdata.name .. fontdata.encodingbytes)
+end
+
+local testpatchunsafe = function (fontdata)
+ local t =  type (fontdata)
+  if t == "table" then
+    texio.write_nl("patch_font_unsafe" .. fontdata.name .. fontdata.encodingbytes)
+  else
+    texio.write_nl("patch_font_unsafe, no table!")  
+  end   
+ end
+
+
+luatexbase.add_to_callback
+ (
+  "luaotfload.patch_font",
+   testpatch,
+  "test"
+ )
+
+luatexbase.add_to_callback
+ (
+  "luaotfload.patch_font_unsafe",
+   testpatchunsafe,
+  "test"
+ )
+
+ \end{luacode}
+\begin{document}
+\font\test={name:texgyretermes}\test
+
+\START
+\font\test={name:texgyreheros}\test
+
+
+\font\test=cmr10 \test
+
+blblb
+
+\font\test={name:texgyretermes}\test
+
+blbl
+
+\end{document} 

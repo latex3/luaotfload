@@ -1,9 +1,9 @@
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-filelist.lua
 --  DESCRIPTION:  a table with the files of luaotfload
---      VERSION:  2.91 
+--      VERSION:  2.92 
 --       AUTHOR:  Ulrike Fischer, <fischer@troubleshooting-tex.de>
---         DATE:  2018-10-03
+--         DATE:  2018-10-18
 -------------------------------------------------------------------------------
 
 

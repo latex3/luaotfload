@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 10/02/18 23:17:57
+-- merge date  : 10/18/18 00:07:52
 
 do -- begin closure to overcome local limits and interference
 
@@ -306,10 +306,18 @@ function lpeg.instringchecker(p)
   end
 end
 function lpeg.splitter(pattern,action)
-  return (((1-P(pattern))^1)/action+1)^0
+  if action then
+    return (((1-P(pattern))^1)/action+1)^0
+  else
+    return (Cs((1-P(pattern))^1)+1)^0
+  end
 end
 function lpeg.tsplitter(pattern,action)
-  return Ct((((1-P(pattern))^1)/action+1)^0)
+  if action then
+    return Ct((((1-P(pattern))^1)/action+1)^0)
+  else
+    return Ct((Cs((1-P(pattern))^1)+1)^0)
+  end
 end
 local splitters_s,splitters_m,splitters_t={},{},{}
 local function splitat(separator,single)
@@ -9406,6 +9414,7 @@ function constructors.scale(tfmdata,specification)
   targetparameters.forcedsize=forcedsize 
   targetparameters.extrafactor=extrafactor
   local tounicode=fonts.mappings.tounicode
+  local unknowncode=tounicode(0xFFFD)
   local defaultwidth=resources.defaultwidth or 0
   local defaultheight=resources.defaultheight or 0
   local defaultdepth=resources.defaultdepth or 0
@@ -9660,6 +9669,8 @@ function constructors.scale(tfmdata,specification)
     if isunicode then
       chr.unicode=isunicode
       chr.tounicode=tounicode(isunicode)
+    else
+      chr.tounicode=unknowncode
     end
     if hasquality then
       local ve=character.expansion_factor
@@ -10750,31 +10761,31 @@ local unknown=f_single(0xFFFD)
 local hash={}
 local conc={}
 table.setmetatableindex(hash,function(t,k)
+  if k<0xD7FF or (k>0xDFFF and k<=0xFFFF) then
+    v=f_single(k)
+  else
+    local k=k-0x10000
+    v=f_double(rshift(k,10)+0xD800,k%1024+0xDC00)
+  end
+  t[k]=v
+  return v
+end)
+local function tounicode(k)
   if type(k)=="table" then
     local n=#k
     for l=1,n do
       conc[l]=hash[k[l]]
     end
     return concat(conc,"",1,n)
-  end
-  local v
-  if k>=0x00E000 and k<=0x00F8FF then
-    v=unknown
+  elseif k>=0x00E000 and k<=0x00F8FF then
+    return unknown
   elseif k>=0x0F0000 and k<=0x0FFFFF then
-    v=unknown
+    return unknown
   elseif k>=0x100000 and k<=0x10FFFF then
-    v=unknown
-  elseif k<0xD7FF or (k>0xDFFF and k<=0xFFFF) then
-    v=f_single(k)
+    return unknown
   else
-    k=k-0x10000
-    v=f_double(rshift(k,10)+0xD800,k%1024+0xDC00)
+    return hash[k]
   end
-  t[k]=v
-  return v
-end)
-local function tounicode(unicode)
-  return hash[unicode]
 end
 local function fromunicode16(str)
   if #str==4 then
@@ -14210,7 +14221,7 @@ if not modules then modules={} end modules ['font-cff']={
 }
 local next,type,tonumber=next,type,tonumber
 local byte,char,gmatch=string.byte,string.char,string.gmatch
-local concat,remove=table.concat,table.remove
+local concat,remove,unpack=table.concat,table.remove,table.unpack
 local floor,abs,round,ceil,min,max=math.floor,math.abs,math.round,math.ceil,math.min,math.max
 local P,C,R,S,C,Cs,Ct=lpeg.P,lpeg.C,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Ct
 local lpegmatch=lpeg.match
@@ -20843,7 +20854,7 @@ local function checklookups(fontdata,missing,nofmissing)
       end
     end
     if next(done) then
-      report_unicode("not unicoded: % t",sortedkeys(done))
+      report_unicodes("not unicoded: % t",sortedkeys(done))
     end
   end
 end
@@ -21032,15 +21043,31 @@ local function unifyglyphs(fontdata,usenames)
   fontdata.hashmethod=hashmethod
   return indices,names
 end
-local p_bogusname=(
-  (P("uni")+P("UNI")+P("Uni")+P("U")+P("u"))*S("Xx")^0*R("09","AF")^1+(P("identity")+P("Identity")+P("IDENTITY"))*R("09","AF")^1+(P("index")+P("Index")+P("INDEX"))*R("09")^1
-)*(P(-1)+P("."))
+local p_crappyname do
+  local p_hex=R("af","AF","09")
+  local p_digit=R("09")
+  local p_done=S("._-")^0+P(-1)
+  local p_alpha=R("az","AZ")
+  local p_ALPHA=R("AZ")
+  p_crappyname=(
+    lpeg.utfchartabletopattern({ "uni","u" },true)*S("Xx_")^0*p_hex^1
++lpeg.utfchartabletopattern({ "identity","glyph","jamo" },true)*p_hex^1
++lpeg.utfchartabletopattern({ "index","afii" },true)*p_digit^1
++p_digit*p_hex^3+p_alpha*p_digit^1
++P("aj")*p_digit^1+P("eh_")*(p_digit^1+p_ALPHA*p_digit^1)+(1-P("_"))^1*P("_uni")*p_hex^1+P("_")*P(1)^1
+  )*p_done
+end
+local forcekeep=false 
+directives.register("otf.keepnames",function(v)
+  report_cleanup("keeping weird glyph names, expect larger files and more memory usage")
+  forcekeep=v
+end)
 local function stripredundant(fontdata)
   local descriptions=fontdata.descriptions
   if descriptions then
     local n=0
     local c=0
-    if not context and fonts.privateoffsets.keepnames then
+    if (not context and fonts.privateoffsets.keepnames) or forcekeep then
       for unicode,d in next,descriptions do
         if d.class=="base" then
           d.class=nil
@@ -21050,7 +21077,7 @@ local function stripredundant(fontdata)
     else
       for unicode,d in next,descriptions do
         local name=d.name
-        if name and lpegmatch(p_bogusname,name) then
+        if name and lpegmatch(p_crappyname,name) then
           d.name=nil
           n=n+1
         end
@@ -21070,6 +21097,7 @@ local function stripredundant(fontdata)
     end
   end
 end
+readers.stripredundant=stripredundant
 function readers.getcomponents(fontdata) 
   local resources=fontdata.resources
   if resources then
@@ -23821,35 +23849,41 @@ local function checkmathreplacements(tfmdata,fullname,fixitalics)
       for unicode,replacement in next,changed do
         local u=characters[unicode]
         local r=characters[replacement]
-        local n=u.next
-        local v=u.vert_variants
-        local h=u.horiz_variants
-        if fixitalics then
-          local ui=u.italic
-          if ui and not r.italic then
-            if trace_preparing then
-              report_prepare("using %i units of italic correction from %C for %U",ui,unicode,replacement)
+        if u and r then
+          local n=u.next
+          local v=u.vert_variants
+          local h=u.horiz_variants
+          if fixitalics then
+            local ui=u.italic
+            if ui and not r.italic then
+              if trace_preparing then
+                report_prepare("using %i units of italic correction from %C for %U",ui,unicode,replacement)
+              end
+              r.italic=ui 
             end
-            r.italic=ui 
           end
-        end
-        if n and not r.next then
+          if n and not r.next then
+            if trace_preparing then
+              report_prepare("forcing %s for %C substituted by %U","incremental step",unicode,replacement)
+            end
+            r.next=n
+          end
+          if v and not r.vert_variants then
+            if trace_preparing then
+              report_prepare("forcing %s for %C substituted by %U","vertical variants",unicode,replacement)
+            end
+            r.vert_variants=v
+          end
+          if h and not r.horiz_variants then
+            if trace_preparing then
+              report_prepare("forcing %s for %C substituted by %U","horizontal variants",unicode,replacement)
+            end
+            r.horiz_variants=h
+          end
+        else
           if trace_preparing then
-            report_prepare("forcing %s for %C substituted by %U","incremental step",unicode,replacement)
+            report_prepare("error replacing %C by %U",unicode,replacement)
           end
-          r.next=n
-        end
-        if v and not r.vert_variants then
-          if trace_preparing then
-            report_prepare("forcing %s for %C substituted by %U","vertical variants",unicode,replacement)
-          end
-          r.vert_variants=v
-        end
-        if h and not r.horiz_variants then
-          if trace_preparing then
-            report_prepare("forcing %s for %C substituted by %U","horizontal variants",unicode,replacement)
-          end
-          r.horiz_variants=h
         end
       end
     end
@@ -31718,7 +31752,7 @@ if not modules then modules={} end modules ['font-otc']={
   license="see context related readme files"
 }
 local insert,sortedkeys,sortedhash,tohash=table.insert,table.sortedkeys,table.sortedhash,table.tohash
-local type,next=type,next
+local type,next,tonumber=type,next,tonumber
 local lpegmatch=lpeg.match
 local utfbyte,utflen=utf.byte,utf.len
 local sortedhash=table.sortedhash
@@ -31856,6 +31890,7 @@ local function addfeature(data,feature,specifications)
   if not specifications then
     return
   end
+  local p=lpeg.P("P")*(lpeg.patterns.hexdigit^1/function(s) return tonumber(s,16) end)*lpeg.P(-1)
   local function tounicode(code)
     if not code then
       return
@@ -31873,10 +31908,17 @@ local function addfeature(data,feature,specifications)
         return u
       end
     end
+    local u=lpegmatch(p,code)
+    if u then
+      return u
+    end
     if not aglunicodes then
       aglunicodes=fonts.encodings.agl.unicodes 
     end
-    return aglunicodes[code]
+    local u=aglunicodes[code]
+    if u then
+      return u
+    end
   end
   local coverup=otf.coverup
   local coveractions=coverup.actions
@@ -32874,6 +32916,7 @@ function afm.load(filename)
       if data then
         afmenhancers.apply(data,filename)
         fonts.mappings.addtounicode(data,filename)
+        otfreaders.stripredundant(data)
         otfreaders.pack(data)
         data.size=size
         data.time=time

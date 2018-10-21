@@ -1,0 +1,28 @@
+% !Mode:: "TeX:UTF-8:Main"
+% Date: 01.09.2018
+% Description: demonstrates the use of arabluatex. arabtex input is
+% replaced with Arabic Unicode.
+% Requires: arabluatex package
+% Source/Links:
+% https://ctan.org/pkg/arabluatex
+% Remarks:
+% Subtending marks are rendered correctly with this version of
+% luaotfload.
+
+\input regression-test.tex\relax
+
+\documentclass{article}
+
+\pagestyle{empty}
+
+
+\begin{document}
+\START\showoutput
+\font\test={file:cmr10} at 20pt 
+\test 
+abcdef
+
+\end{document}
+
+
+

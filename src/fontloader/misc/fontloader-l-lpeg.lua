@@ -308,12 +308,28 @@ function lpeg.instringchecker(p)
     end
 end
 
+-- function lpeg.splitter(pattern, action)
+--     return (((1-P(pattern))^1)/action+1)^0
+-- end
+
+-- function lpeg.tsplitter(pattern, action)
+--     return Ct((((1-P(pattern))^1)/action+1)^0)
+-- end
+
 function lpeg.splitter(pattern, action)
-    return (((1-P(pattern))^1)/action+1)^0
+    if action then
+        return (((1-P(pattern))^1)/action+1)^0
+    else
+        return (Cs((1-P(pattern))^1)+1)^0
+    end
 end
 
 function lpeg.tsplitter(pattern, action)
-    return Ct((((1-P(pattern))^1)/action+1)^0)
+    if action then
+        return Ct((((1-P(pattern))^1)/action+1)^0)
+    else
+        return Ct((Cs((1-P(pattern))^1)+1)^0)
+    end
 end
 
 -- probleem: separator can be lpeg and that does not hash too well, but

@@ -232,3 +232,7 @@ function number.decimaltobyte(d)
         return b
     end
 end
+
+function number.idiv(i,d)
+    return floor(i/d) -- i//d in 5.3
+end

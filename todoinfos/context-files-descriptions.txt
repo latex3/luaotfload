@@ -1,0 +1,4 @@
+font-con = constructors, handlers
+font-map = mappings      map-files? ligatures?
+font-otc = open-type-??, otf.addfeature
+font-oto = open-type-??, otf.basemodeinitializer

@@ -11,7 +11,7 @@ config                            = config     or { }
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
-luaotfload.version                = "2.91"
+luaotfload.version                = "2.92"
 luaotfload.loaders                = { }
 luaotfload.min_luatex_version     = { 0, 95, 0 }
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
@@ -39,6 +39,14 @@ else
     end
 end
 
+local info = status.list()
+
+if info["safer_option"] ~= 0 then
+ texio.write_nl("term and log","luaotfload can't run with option --safer. Aborting")
+ luaotfload.main = function () end
+ error("safer_option used")
+end 
+
 local authors = "\z
     Hans Hagen,\z
     Khaled Hosny,\z
@@ -52,8 +60,8 @@ local authors = "\z
 
 luaotfload.module = {
     name          = "luaotfload-main",
-    version       = 2.91001,
-    date          = "2018/10/03",
+    version       = 2.92001,
+    date          = "2018/10/18",
     description   = "OpenType layout system.",
     author        = authors,
     copyright     = authors,

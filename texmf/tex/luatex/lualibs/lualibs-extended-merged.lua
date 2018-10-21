@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Fri Sep 28 10:23:18 2018
+-- merge date  : Thu Oct 18 23:57:30 2018
 
 do -- begin closure to overcome local limits and interference
 
@@ -2859,9 +2859,13 @@ local function resettiming(instance)
 end
 local ticks=clock
 local seconds=function(n) return n or 0 end
-local function starttiming(instance)
+local function starttiming(instance,reset)
   local timer=timers[instance or "notimer"]
   local it=timer.timing
+  if reset then
+    it=0
+    timer.loadtime=0
+  end
   if it==0 then
     timer.starttime=ticks()
     if not timer.loadtime then

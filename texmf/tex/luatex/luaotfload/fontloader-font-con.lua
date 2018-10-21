@@ -425,6 +425,7 @@ function constructors.scale(tfmdata,specification)
     targetparameters.extrafactor = extrafactor -- context specific
     --
     local tounicode     = fonts.mappings.tounicode
+    local unknowncode   = tounicode(0xFFFD)
     --
     local defaultwidth  = resources.defaultwidth  or 0
     local defaultheight = resources.defaultheight or 0
@@ -739,6 +740,8 @@ function constructors.scale(tfmdata,specification)
             chr.tounicode = tounicode(isunicode)
             -- in luatex > 0.85 we can do this:
             -- chr.tounicode = isunicode
+        else
+            chr.tounicode = unknowncode
         end
         if hasquality then
             -- we could move these calculations elsewhere (saves calculations)

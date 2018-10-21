@@ -42,9 +42,14 @@
   \ProvidesPackage{luaotfload}%
     %% FIXME  The date is meaningless, we need to find a way to
     %%        use the git revision instead.
-    [2018/10/03 v2.91  OpenType layout system]
+    [2018/10/18 v2.92  OpenType layout system]
 \fi
 \directlua{
-  require('luaotfload-main')
-  local _void = luaotfload.main ()
+  if xpcall(function ()%
+             require('luaotfload-main')%
+            end,texio.write_nl) then %
+  local _void = luaotfload.main ()%
+  else %
+  texio.write_nl('Error in luaotfload - loading aborted')%
+  end %
 }

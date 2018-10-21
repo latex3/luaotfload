@@ -1,0 +1,632 @@
+.\" Man page generated from reStructuredText.
+.
+.TH LUAOTFLOAD.CONF 5 "2018-09-21" "2.9" "text processing"
+.SH NAME
+luaotfload.conf \- Luaotfload configuration file
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.SH SYNOPSIS
+.INDENT 0.0
+.IP \(bu 2
+\fB\&./luaotfload{.conf,rc}\fP
+.IP \(bu 2
+\fBXDG_CONFIG_HOME/luaotfload/luaotfload{.conf,rc}\fP
+.IP \(bu 2
+\fB~/.luaotfloadrc\fP
+.UNINDENT
+.SH DESCRIPTION
+.sp
+The file \fBluaotfload.conf\fP contains configuration options for
+\fILuaotfload\fP, a font loading and font management component for LuaTeX.
+.SH EXAMPLE
+.sp
+A small Luaotfload configuration file with few customizations could
+look as follows:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[db]
+    formats = afm,ttf
+    compress = false
+
+[misc]
+    termwidth = 60
+
+[run]
+    log\-level = 6
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+This will make Luaotfload ignore all font files except for PostScript
+binary fonts with a matching AFM file, and Truetype fonts. Also, an
+uncompressed index file will be dumped which is going to be much larger
+than the default gzip’ed index. The terminal width
+is truncated to 60 characters which influences the verbose output
+during indexing. Finally, the verbosity is increased greatly: each font
+file being processed will be printed to the stdout on a separate line,
+along with lots of other information.
+.sp
+To observe the difference in behavior, save above snippet to
+\fB\&./luaotfload.conf\fP and update the font index:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+luaotfload\-tool \-\-update \-\-force
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+The current configuration can be written to disk using
+\fBluaotfload\-tool\fP:
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+luaotfload\-tool \-\-dumpconf > luaotfload.conf
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+The result can itself be used as a configuration file.
+.SH SYNTAX
+.sp
+The configuration file syntax follows the common INI format. For a more
+detailed description please refer to the section “CONFIGURATION FILE”
+of \fBgit\-config\fP(1). A brief list of rules is given below:
+.INDENT 0.0
+.INDENT 3.5
+.INDENT 0.0
+.IP \(bu 2
+Blank lines and lines starting with a semicolon (\fB;\fP) are ignored.
+.IP \(bu 2
+A configuration file is partitioned into sections that are declared
+by specifying the section title in brackets on a separate line:
+.INDENT 2.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[some\-section]
+\&... section content ...
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+Sections consist of one or more variable assignments of the form
+\fBvariable\-name = value\fP  E. g.:
+.INDENT 2.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[foo]
+    bar = baz
+    quux = xyzzy
+    ...
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.IP \(bu 2
+Section and variable names may contain only uppercase and lowercase
+letters as well as dashes (\fB\-\fP).
+.UNINDENT
+.UNINDENT
+.UNINDENT
+.SH VARIABLES
+.sp
+Variables in belong into a configuration section and their values must
+be of a certain type. Some of them have further constraints. For
+example, the “color callback” must be a string of one of the values
+\fBpost_linebreak_filter\fP, \fBpre_linebreak_filter\fP, or
+\fBpre_output_filter\fP, defined in the section \fIrun\fP of the
+configuration file.
+.sp
+Currently, the configuration is organized into four sections:
+.INDENT 0.0
+.TP
+.B db
+Options relating to the font index.
+.TP
+.B misc
+Options without a clearly defined category.
+.TP
+.B paths
+Path and file name settings.
+.TP
+.B run
+Options controlling runtime behavior of Luaotfload.
+.UNINDENT
+.sp
+The list of valid variables, the sections they are part of and their
+type is given below. Types represent Lua types that the values must be
+convertible to; they are abbreviated as follows: \fBs\fP for the \fIstring\fP
+type, \fBn\fP for \fInumber\fP, \fBb\fP for \fIboolean\fP\&. A value of \fBnil\fP means
+the variable is unset.
+.SS Section \fBdb\fP
+.TS
+center;
+|l|l|l|.
+_
+T{
+variable
+T}	T{
+type
+T}	T{
+default
+T}
+_
+T{
+compress
+T}	T{
+b
+T}	T{
+\fBtrue\fP
+T}
+_
+T{
+designsize\-dimen
+T}	T{
+b
+T}	T{
+\fBbp\fP
+T}
+_
+T{
+formats
+T}	T{
+s
+T}	T{
+\fB"otf,ttf,ttc"\fP
+T}
+_
+T{
+max\-fonts
+T}	T{
+n
+T}	T{
+\fB2^51\fP
+T}
+_
+T{
+scan\-local
+T}	T{
+b
+T}	T{
+\fBfalse\fP
+T}
+_
+T{
+skip\-read
+T}	T{
+b
+T}	T{
+\fBfalse\fP
+T}
+_
+T{
+strip
+T}	T{
+b
+T}	T{
+\fBtrue\fP
+T}
+_
+T{
+update\-live
+T}	T{
+b
+T}	T{
+\fBtrue\fP
+T}
+_
+.TE
+.sp
+The flag \fBcompress\fP determines whether the font index (usually
+\fBluaotfload\-names.lua[.gz]\fP will be stored in compressed forms.
+If unset it is equivalent of passing \fB\-\-no\-compress\fP to
+\fBluaotfload\-tool\fP\&. Since the file is only created for convenience
+and has no effect on the runtime behavior of Luaotfload, the flag
+should remain set. Most editors come with zlib support anyways.
+.sp
+The setting \fBdesignsize\-dimen\fP applies when looking up fonts from
+families with design sizes. In Opentype, these are specified as
+“decipoints” where one decipoint equals ten DTP style “big points”.
+When indexing fonts these values are converted to \fBsp\fP\&. In order to
+treat the values as though they were specified in TeX points or Didot
+points, set \fBdesignsize\-dimen\fP to \fBpt\fP or \fBdd\fP\&.
+.sp
+The list of \fBformats\fP must be a comma separated sequence of strings
+containing one or more of these elements:
+.INDENT 0.0
+.IP \(bu 2
+\fBotf\fP               (OpenType format),
+.IP \(bu 2
+\fBttf\fP and \fBttc\fP       (TrueType format),
+.IP \(bu 2
+\fBafm\fP               (Adobe Font Metrics),
+.UNINDENT
+.sp
+It corresponds loosely to the \fB\-\-formats\fP option to
+\fBluaotfload\-tool\fP\&. Invalid or duplicate members are ignored; if the
+list does not contain any useful identifiers, the default list
+\fB"otf,ttf,ttc"\fP will be used.
+.sp
+The variable \fBmax\-fonts\fP determines after processing how many font
+files the font scanner will terminate the search. This is useful for
+debugging issues with the font index and has the same effect as the
+option \fB\-\-max\-fonts\fP to \fBluaotfload\-tools\fP\&.
+.sp
+The \fBscan\-local\fP flag, if set, will incorporate the current working
+directory as a font search location. NB: This will potentially slow
+down document processing because a font index with local fonts will not
+be saved to disk, so these fonts will have to be re\-indexed whenever
+the document is built.
+.sp
+The \fBskip\-read\fP flag is only useful for debugging: It makes
+Luaotfload skip reading fonts. The font information for rebuilding the
+index is taken from the presently existing one.
+.sp
+Unsetting the \fBstrip\fP flag prevents Luaotfload from removing data
+from the index that is only useful when processing font files. NB: this
+can increase the size of the index files significantly and has no
+effect on the runtime behavior.
+.sp
+If \fBupdate\-live\fP is set, Luaotfload will reload the database if it
+cannot find a requested font. Those who prefer to update manually using
+\fBluaotfload\-tool\fP should unset this flag. This option does not affect
+rebuilds due to version mismatch.
+.SS Section \fBdefault\-features\fP
+.sp
+By default Luaotfload enables \fBnode\fP mode and picks the default font
+features that are prescribed in the OpenType standard. This behavior
+may be overridden in the \fBdefault\-features\fP section. Global defaults
+that will be applied for all scripts can be set via the \fBglobal\fP
+option, others by the script they are to be applied to. For example,
+a setting of
+.INDENT 0.0
+.INDENT 3.5
+.sp
+.nf
+.ft C
+[default\-features]
+    global = mode=base,color=0000FF
+    dflt   = smcp,onum
+.ft P
+.fi
+.UNINDENT
+.UNINDENT
+.sp
+would force \fIbase\fP mode, tint all fonts blue and activate small
+capitals and text figures globally. Features are specified as a comma
+separated list of variables or variable\-value pairs. Variables without
+an explicit value are set to \fBtrue\fP\&.
+.SS Section \fBmisc\fP
+.TS
+center;
+|l|l|l|.
+_
+T{
+variable
+T}	T{
+type
+T}	T{
+default
+T}
+_
+T{
+statistics
+T}	T{
+b
+T}	T{
+\fBfalse\fP
+T}
+_
+T{
+termwidth
+T}	T{
+n
+T}	T{
+\fBnil\fP
+T}
+_
+T{
+version
+T}	T{
+s
+T}	T{
+<Luaotfload version>
+T}
+_
+.TE
+.sp
+With \fBstatistics\fP enabled, extra statistics will be collected during
+index creation and appended to the index file. It may then be queried
+at the Lua end or inspected by reading the file itself.
+.sp
+The value of \fBtermwidth\fP, if set, overrides the value retrieved by
+querying the properties of the terminal in which Luatex runs. This is
+useful if the engine runs with \fBshell_escape\fP disabled and the actual
+terminal dimensions cannot be retrieved.
+.sp
+The value of \fBversion\fP is derived from the version string hard\-coded
+in the Luaotfload source. Override at your own risk.
+.SS Section \fBpaths\fP
+.TS
+center;
+|l|l|l|.
+_
+T{
+variable
+T}	T{
+type
+T}	T{
+default
+T}
+_
+T{
+cache\-dir
+T}	T{
+s
+T}	T{
+\fB"fonts"\fP
+T}
+_
+T{
+names\-dir
+T}	T{
+s
+T}	T{
+\fB"names"\fP
+T}
+_
+T{
+index\-file
+T}	T{
+s
+T}	T{
+\fB"luaotfload\-names.lua"\fP
+T}
+_
+T{
+lookups\-file
+T}	T{
+s
+T}	T{
+\fB"luaotfload\-lookup\-cache.lua"\fP
+T}
+_
+.TE
+.sp
+The paths \fBcache\-dir\fP and \fBnames\-dir\fP determine the subdirectory
+inside the Luaotfload subtree of the \fBluatex\-cache\fP directory where
+the font cache and the font index will be stored, respectively.
+.sp
+Inside the index directory, the names of the index file and the font
+lookup cache will be derived from the respective values of
+\fBindex\-file\fP and \fBlookups\-file\fP\&. This is the filename base for the
+bytecode compiled version as well as \-\- for the index \-\- the gzipped
+version.
+.SS Section \fBrun\fP
+.TS
+center;
+|l|l|l|.
+_
+T{
+variable
+T}	T{
+type
+T}	T{
+default
+T}
+_
+T{
+anon\-sequence
+T}	T{
+s
+T}	T{
+\fB"tex,path,name"\fP
+T}
+_
+T{
+color\-callback
+T}	T{
+s
+T}	T{
+\fB"post_linebreak_filter"\fP
+T}
+_
+T{
+definer
+T}	T{
+s
+T}	T{
+\fB"patch"\fP
+T}
+_
+T{
+log\-level
+T}	T{
+n
+T}	T{
+\fB0\fP
+T}
+_
+T{
+resolver
+T}	T{
+s
+T}	T{
+\fB"cached"\fP
+T}
+_
+T{
+fontloader
+T}	T{
+s
+T}	T{
+\fB"default"\fP
+T}
+_
+.TE
+.sp
+Unqualified font lookups are treated with the flexible “anonymous”
+mechanism. This involves a chain of lookups applied successively until
+the first one yields a match. By default, the lookup will first search
+for TFM fonts using the Kpathsea library. If this wasn’t successful, an
+attempt is made at interpreting the request as an absolute path (like
+the \fB[/path/to/font/foo.ttf]\fP syntax) or a file name
+(\fBfile:foo.ttf\fP). Finally, the request is interpreted as a font name
+and retrieved from the index (\fBname:Foo Regular\fP). This behavior can
+be configured by specifying a list as the value to \fBanon\-sequence\fP\&.
+Available items are \fBtex\fP, \fBpath\fP, \fBname\fP \-\- representing the
+lookups described above, respectively \-\-, and \fBfile\fP for searching a
+filename but not an absolute path. Also, \fBmy\fP lookups are valid
+values but they should only be used from within TeX documents, because
+there is no means of customizing a \fBmy\fP lookups on the command line.
+.sp
+The \fBcolor\-callback\fP option determines the stage at which fonts that
+defined with a \fBcolor=xxyyzz\fP feature will be colorized. By default
+this happens in a \fBpost_linebreak_filter\fP but alternatively the
+\fBpre_linebreak_filter\fP or \fBpre_output_filter\fP may be chosen, which
+is faster but might produce inconsistent output. The
+\fBpre_output_filter\fP used to be the default in the 1.x series of
+Luaotfload, whilst later versions up to and including 2.5 hooked into
+the \fBpre_linebreak_filter\fP which naturally didn’t affect any glyphs
+inserting during hyphenation. Both are kept around as options to
+restore the previous behavior if necessary.
+.sp
+The \fBdefiner\fP allows for switching the \fBdefine_font\fP callback.
+Apart from the default \fBpatch\fP one may also choose the \fBgeneric\fP
+one that comes with the vanilla fontloader. Beware that this might
+break tools like Fontspec that rely on the \fBpatch_font\fP callback
+provided by Luaotfload to perform important corrections on font data.
+.sp
+The fontloader backend can be selected by setting the value of
+\fBfontloader\fP\&. The most important choices are \fBdefault\fP, which will
+load the dedicated Luaotfload fontloader, and \fBreference\fP, the
+upstream package as shipped with Luaotfload. Other than those, a file
+name accessible via kpathsea can be specified.
+.sp
+Alternatively, the individual files that constitute the fontloader can
+be loaded directly. While less efficient, this greatly aids debugging
+since error messages will reference the actual line numbers of the
+source files and explanatory comments are not stripped. Currently,
+three distinct loading strategies are available: \fBunpackaged\fP will
+load the batch that is part of Luaotfload. These contain the identical
+source code that the reference fontloader has been compiled from.
+Another option, \fBcontext\fP will attempt to load the same files by
+their names in the Context format from the search path. Consequently
+this option allows to use the version of Context that comes with the
+TeX distribution. Distros tend to prefer the stable version (“current”
+in Context jargon) of those files so certain bugs encountered in the
+more bleeding edge Luaotfload can be avoided this way. A third option
+is to use \fBcontext\fP with a colon to specify a directory prefix where
+the \fITEXMF\fP is located that the files should be loaded from, e. g.
+\fBcontext:~/context/tex/texmf\-context\fP\&. This can be used when
+referencing another distribution like the Context minimals that is
+installed under a different path not indexed by kpathsea.
+.sp
+The value of \fBlog\-level\fP sets the default verbosity of messages
+printed by Luaotfload. Only messages defined with a verbosity of less
+than or equal to the supplied value will be output on the terminal.
+At a log level of five Luaotfload can be very noisy. Also, printing too
+many messages will slow down the interpreter due to line buffering
+being disabled (see \fBsetbuf\fP(3)).
+.sp
+The \fBresolver\fP setting allows choosing the font name resolution
+function: With the default value \fBcached\fP Luaotfload saves the result
+of a successful font name request to a cache file to speed up
+subsequent lookups. The alternative, \fBnormal\fP circumvents the cache
+and resolves every request individually. (Since to the restructuring of
+the font name index in Luaotfload 2.4 the performance difference
+between the cached and uncached lookups should be marginal.)
+.SH FILES
+.sp
+Luaotfload only processes the first configuration file it encounters at
+one of the search locations. The file name may be either
+\fBluaotfload.conf\fP or \fBluaotfloadrc\fP, except for the dotfile in the
+user’s home directory which is expected at \fB~/.luaotfloadrc\fP\&.
+.sp
+Configuration files are located following a series of steps. The search
+terminates as soon as a suitable file is encountered. The sequence of
+locations that Luaotfload looks at is
+.INDENT 0.0
+.IP i. 5
+The current working directory of the LuaTeX process.
+.IP ii. 5
+The subdirectory \fBluaotfload/\fP inside the XDG configuration
+tree, e. g. \fB/home/oenothea/config/luaotfload/\fP\&.
+.IP iii. 5
+The dotfile.
+.IP iv. 5
+The \fITEXMF\fP (using kpathsea).
+.UNINDENT
+.SH SEE ALSO
+.sp
+\fBluaotfload\-tool\fP(1), \fBluatex\fP(1), \fBlua\fP(1)
+.INDENT 0.0
+.IP \(bu 2
+\fBtexdoc luaotfload\fP to display the PDF manual for the \fILuaotfload\fP
+package
+.IP \(bu 2
+Luaotfload development \fI\%https://github.com/u\-fischer/luaotfload\fP
+.IP \(bu 2
+LuaLaTeX mailing list  \fI\%http://tug.org/pipermail/lualatex\-dev/\fP
+.IP \(bu 2
+LuaTeX                 \fI\%http://luatex.org/\fP
+.IP \(bu 2
+Luaotfload on CTAN     \fI\%http://ctan.org/pkg/luaotfload\fP
+.UNINDENT
+.SH REFERENCES
+.INDENT 0.0
+.IP \(bu 2
+The XDG base specification
+\fI\%http://standards.freedesktop.org/basedir\-spec/basedir\-spec\-latest.html\fP\&.
+.UNINDENT
+.SH AUTHORS
+.sp
+\fILuaotfload\fP was developed by the LuaLaTeX dev team
+(\fI\%https://github.com/lualatex/\fP). It is currently maintained by Ulrike Fischer
+and Marcel Krüger at \fI\%https://github.com/u\-fischer/luaotfload\fP
+.sp
+This manual page was written by Philipp Gesang <\fI\%phg@phi\-gamma.net\fP>.
+.SH COPYRIGHT
+GPL v2.0
+.\" Generated by docutils manpage writer.
+.

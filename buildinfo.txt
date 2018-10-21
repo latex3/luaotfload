@@ -123,7 +123,7 @@ Dokumentation
 
 4. Check text of the other four files
 
-5. Create man file: (requires docutils)
+5. Create man file: (requires docutils) <----!!!!!
    the man pages should also go in the manual so we need also a pdf
 
 --> luaotfload/doc> rst2man.py luaotfload.conf.rst luaotfload.conf.5

@@ -17,8 +17,9 @@ local function shape(head, current, run, nodes, codes)
   if fontdata and fontdata.hb then
     local options = {}
     local buf = hb.Buffer.new()
+    local rtl = dir == "TRT"
 
-    if dir == "TRT" then
+    if rtl then
       options.direction = hb.Direction.HB_DIRECTION_RTL
     else
       options.direction = hb.Direction.HB_DIRECTION_LTR
@@ -26,7 +27,7 @@ local function shape(head, current, run, nodes, codes)
 
     buf:add_codepoints(codes, offset - 1, len)
     if hb.shape(fontdata.hb.font, buf, options) then
-      if dir == "TRT" then
+      if rtl then
         buf:reverse()
       end
       local glyphs = buf:get_glyph_infos_and_positions()
@@ -40,14 +41,18 @@ local function shape(head, current, run, nodes, codes)
 
         if id == glyphcode then
           n.char = hb.CH_GID_PREFIX + g.codepoint
-          n.xoffset = g.x_offset
+          n.xoffset = rtl and -g.x_offset or g.x_offset
           n.yoffset = g.y_offset
           if n.width ~= g.x_advance then
             -- LuaTeX always uses the glyph width from the font, so we need to
             -- insert a kern node if the x advance is different.
             local kern = node.new("kern")
             kern.kern = g.x_advance - n.width
-            head, current = node.insert_after(head, current, kern)
+            if rtl then
+              head = node.insert_before(head, current, kern)
+            else
+              head, current = node.insert_after(head, current, kern)
+            end
           end
           node.protect_glyph(n)
         elseif id == gluecode and n.subtype == spaceskip then

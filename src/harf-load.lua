@@ -69,23 +69,42 @@ local function define_font(name, size)
 
     -- Then load all characters supported by the font, we reused the glyph data
     -- we loaded earlier.
-    local unicodes = face:get_unicodes()
+    --
+    -- Looks this is not strictly needed, though, since the shaped output will
+    -- use glyph indices so these characters will be unused. Skipping loading
+    -- all the characters speeds loading fonts with large character sets.
+    --
+    -- We sill load a handful of characters that LuaTeX either use for font
+    -- metrics (ideally, LuaTeX should be updated to read these metrics from
+    -- the font) or we for calculating space and xheight.
+    --
+    -- Note this makes the loader completely unusable without the shaper, but
+    -- it wasn’t that much useful before.
+    --
+    --local unicodes = face:get_unicodes()
+    local unicodes = { 0x0020, 0x0078, 0x0048, 0x002E } -- space, x, H, .
     local space, xheight
     for _, uni in next, unicodes do
       local gid = font:get_nominal_glyph(uni)
-      characters[uni] = characters[hb.CH_GID_PREFIX + gid]
-      characters[uni].index = gid
+      characters[uni] = {}
 
       -- If this is space or no break space, save its advance width, we will
       -- need below.
-      if uni == 0x0020 then
-        space = characters[uni].width
-      elseif space == nil and uni == 0x00A0 then
-        space = characters[uni].width
-      elseif xheight == nil and uni == 0x0078 then -- XXX get this from OS/2 table
-        xheight = characters[uni].height
+      if uni == 0x0020 then -- SPACE
+        space = characters[hb.CH_GID_PREFIX + gid].width
+      elseif uni == 0x0078 then
+        xheight = characters[hb.CH_GID_PREFIX + gid].height
+      elseif uni == 0x0048 then
+        characters[uni] = characters[hb.CH_GID_PREFIX + gid]
+      elseif uni == 0x002E then
+        characters[uni] = characters[hb.CH_GID_PREFIX + gid]
       end
     end
+
+    -- LuaTeX checks for these characters to calculate the corresponding font
+    -- metrics.
+  --characters[0x0048] = { height = capheight } -- LATIN CAPITAL LETTER H, XXX get from OS/2
+  --characters[0x002E] = { width  = stemv     } -- FULL STOP, XXX What is stemv
 
     local upem =  face:get_upem()
     local mag = size / upem

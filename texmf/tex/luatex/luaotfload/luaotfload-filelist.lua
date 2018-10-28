@@ -1,10 +1,20 @@
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-filelist.lua
---  DESCRIPTION:  a table with the files of luaotfload
---      VERSION:  2.92 
+--  DESCRIPTION:  part of luaotfload / list of files
 --       AUTHOR:  Ulrike Fischer, <fischer@troubleshooting-tex.de>
---         DATE:  2018-10-18
--------------------------------------------------------------------------------
+-----------------------------------------------------------------------
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-filelist",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / filelist",
+    license       = "GPL v2.0"
+}
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
 
 
 

@@ -1,11 +1,23 @@
-#!/usr/bin/env texlua
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-diagnostics.lua
---  DESCRIPTION:  functionality accessible by the --diagnose option
+--  DESCRIPTION:  part of luaotfload-tool / functionality accessible by the --diagnose option
 -- REQUIREMENTS:  luaotfload-tool.lua
 --       AUTHOR:  Philipp Gesang <phg@phi-gamma.net>
 -----------------------------------------------------------------------
---
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-diagnostics",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload-tool submodule / diagnostics",
+    license       = "GPL v2.0"
+}
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
+
+
 local names                    = fonts.names
 
 local kpse                     = require "kpse"

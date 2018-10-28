@@ -121,11 +121,11 @@ local oldnames = {
   { builddir,     "luaotfload-glyphlist.lua",       },
 
   --- scripts
-  { scriptdir,    "mkcharacters",                   },
-  { scriptdir,    "mkglyphlist",                    },
-  { scriptdir,    "mkimport",                       },
-  { scriptdir,    "mkstatus",                       },
-  { scriptdir,    "mktests",                        },
+--  { scriptdir,    "mkcharacters",                   },
+--  { scriptdir,    "mkglyphlist",                    },
+--  { scriptdir,    "mkimport",                       },
+--  { scriptdir,    "mkstatus",                       },
+--  { scriptdir,    "mktests",                        },
 
   --- fontloader runtimes
   { rtdir,        "fontloader-basics-gen.lua",      },

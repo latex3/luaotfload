@@ -1,10 +1,23 @@
-if not modules then modules = { } end modules ["luaotfload-log"] = {
-    version   = "2.91",
-    comment   = "companion to Luaotfload",
-    author    = "Khaled Hosny, Elie Roux, Philipp Gesang",
-    copyright = "Luaotfload Development Team",
-    license   = "GNU GPL v2.0"
+-------------------------------------------------------------------------------
+--         FILE:  luaotfload-log.lua
+--  DESCRIPTION:  part of luaotfload / logging
+-------------------------------------------------------------------------------
+
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-log",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / logging",
+    license       = "GPL v2.0",
+    author        = "Khaled Hosny, Elie Roux, Philipp Gesang",
+    copyright     = "Luaotfload Development Team",  
 }
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
+
 
 --[[doc--
 The logging system is slow in general, as we always have the function

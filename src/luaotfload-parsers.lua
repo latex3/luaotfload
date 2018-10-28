@@ -1,11 +1,21 @@
-#!/usr/bin/env texlua
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-parsers.lua
 --  DESCRIPTION:  various lpeg-based parsers used in Luaotfload
--- REQUIREMENTS:  Luaotfload >= 2.9
+-- REQUIREMENTS:  Luaotfload
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Marcel Krüger
 -------------------------------------------------------------------------------
---
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-parsers",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / filelist",
+    license       = "GPL v2.0"
+}
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
 
 
 local traversal_maxdepth  = 42 --- prevent stack overflows

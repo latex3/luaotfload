@@ -1,17 +1,43 @@
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-main.lua
---  DESCRIPTION:  Luaotfload entry point
+--  DESCRIPTION:  OpenType layout system / luaotfload entry point
 -- REQUIREMENTS:  luatex v.0.95.0 or later; package lualibs
 --       AUTHOR:  Élie Roux, Khaled Hosny, Philipp Gesang, Ulrike Fischer, Marcel Krüger
 -----------------------------------------------------------------------
---
+
+local authors = "\z
+    Hans Hagen,\z
+    Khaled Hosny,\z
+    Elie Roux,\z
+    Will Robertson,\z
+    Philipp Gesang,\z
+    Dohyun Kim,\z
+    Reuben Thomas,\z
+    David Carlisle,\
+    Ulrike Fischer,\z
+    Marcel Krüger\z
+"
+-- version number is used below!
+local ProvidesLuaModule = { 
+    name          = "luaotfload-main",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload entry point",
+    author        = authors,
+    copyright     = authors,
+    license       = "GPL v2.0"
+}
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
 
 local osgettimeofday              = os.gettimeofday
 config                            = config     or { }
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
-luaotfload.version                = "2.92"
+luaotfload.version                = ProvidesLuaModule.version
 luaotfload.loaders                = { }
 luaotfload.min_luatex_version     = { 0, 95, 0 }
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
@@ -47,26 +73,8 @@ if info["safer_option"] ~= 0 then
  error("safer_option used")
 end 
 
-local authors = "\z
-    Hans Hagen,\z
-    Khaled Hosny,\z
-    Elie Roux,\z
-    Will Robertson,\z
-    Philipp Gesang,\z
-    Dohyun Kim,\z
-    Reuben Thomas\z
-"
 
 
-luaotfload.module = {
-    name          = "luaotfload-main",
-    version       = 2.92001,
-    date          = "2018/10/18",
-    description   = "OpenType layout system.",
-    author        = authors,
-    copyright     = authors,
-    license       = "GPL v2.0"
-}
 
 --[[doc--
 
@@ -93,7 +101,6 @@ local luatexbase       = luatexbase
 local require          = require
 local type             = type
 
-luatexbase.provides_module (luaotfload.module)
 
 --[[doc--
 
@@ -301,7 +308,7 @@ luaotfload.main = function ()
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 
     logreport ("both", 0, "main",
-               "initialization completed in %0.3f seconds",
+               "initialization completed in %0.3f seconds\n",
                osgettimeofday() - starttime)
 ----inspect (timing_info)
 end

@@ -896,7 +896,7 @@ end
 local luaotfload_header = [==[
 --[[info-----------------------------------------------------------------------
   Luaotfload fontloader package
-  build %s by %s@%s
+  build %s
 -------------------------------------------------------------------------------
 
   © %s PRAGMA ADE / ConTeXt Development Team
@@ -904,7 +904,7 @@ local luaotfload_header = [==[
   The code in this file is provided under the GPL v2.0 license. See the
   file COPYING in the Luaotfload repository for details.
 
-  Report bugs to github.com/lualatex/luaotfload
+  Report bugs to github.com/u-fischer/luaotfload
 
   This file has been assembled from components taken from Context. See
   the Luaotfload documentation for details:
@@ -930,8 +930,8 @@ local make_header = function (files)
   end
   return stringformat (luaotfload_header,
                        os.date "%Y-%m-%d %X", -- 18.09.2018 changed from %F %T
-                       os.getenv "USER" or "anon",
-                       os.getenv "HOSTNAME" or "void",
+--                       os.getenv "USER" or "anon",
+--                       os.getenv "HOSTNAME" or "void",
                        os.date "%Y",
                        table.concat (filelist, "\n"))
 end

@@ -1,12 +1,22 @@
-#!/usr/bin/env texlua
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-init.lua
---  DESCRIPTION:  Luaotfload font loader initialization
+--  DESCRIPTION:  part of luaotfload / font loader initialization
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs
---      VERSION:  2.92 2018-10-18
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Marcel Krüger
 -----------------------------------------------------------------------
---
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-init",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / initialization",
+    license       = "GPL v2.0"
+}
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
+-----------------------------------------------------------------------
 
 
 local setmetatable = setmetatable

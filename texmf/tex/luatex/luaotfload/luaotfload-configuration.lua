@@ -1,20 +1,23 @@
-#!/usr/bin/env texlua
 -------------------------------------------------------------------------------
 --         FILE:  luaotfload-configuration.lua
---  DESCRIPTION:  config file reader
--- REQUIREMENTS:  Luaotfload 2.9 or above
+--  DESCRIPTION:  part of luaotfload / luaotfload-tool / config file reader
 --       AUTHOR:  Philipp Gesang, <phg@phi-gamma.net>
 --       AUTHOR:  Dohyun Kim <nomosnomos@gmail.com>
 -------------------------------------------------------------------------------
---
 
-if not modules then modules = { } end modules ["luaotfload-configuration"] = {
-  version   = "2.92",
-  comment   = "part of Luaotfload",
-  author    = "Philipp Gesang, Dohyun Kim",
-  copyright = "Luaotfload Development Team",
-  license   = "GNU GPL v2.0"
+local ProvidesLuaModule = { 
+    name          = "luaotfload-configuration",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / config file reader",
+    license       = "GPL v2.0"
 }
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
+
+------------------------------
 
 local status_file             = "luaotfload-status"
 local luaotfloadstatus        = require (status_file)

@@ -39,7 +39,6 @@ files are created in src/auto
 6. Merge the files to get the default fontloader.
 The name contains the current date.
 
-!!! Set USER and HOSTNAME to get a sensible header
 
 -->   texlua scripts/mkimport package
 
@@ -49,7 +48,7 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
---> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-18.lua
+--> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-28.lua
 
 8. Check lualibs status -- perhaps it needs update too
 
@@ -58,82 +57,72 @@ The name contains the current date.
 --> l3build install
 --> mktexlsr
 
+=== end phase 1 - preparation ===
+
+=== phase 2 - tests ==
+
 10. Install new dev luatex version
 
 11. Run tests in default TL and with dev-version
 
 --> l3build check
 
+=== end phase 2 - tests ===
 
-12. Update version information everywhere ... (tagging doesn't work for now,
-    too many different variants)
-- sty:
-  %% Copyright (C) 2009-2018
-  [2018/09/24 v2.9  OpenType layout system]
+=== phase 3 - documentation ===
 
-- auxiliary no date, only version:
-  -- REQUIREMENTS:  luaotfload 2.9
+12. Update documentation (see below)
 
-- colors, database, features, letterspace, log: "module"
-      version   = "2.9",
+=== end phase 3 ===
 
-- configuration module and requirements:
-   -- REQUIREMENTS:  Luaotfload 2.8 or above
-  version   = "2.9",
+=== phase 4  - ctan build ===
 
-- filelist
---         DATE:  2018-09-23
---      VERSION:  2.9
+13. Update version information:
+    Update date and tag in build.lua
+    then run
+-->    l3build tag 0
 
+(number is irrelevant)
 
-- init
---      VERSION:  2.9 2018-09-24
+14. commit and tag the commit so that status can pick it up. Grumpf.
 
-- loaders, resolvers: no info
-
-- main:
- luaotfload.version                = "2.9"
- und noch mehr weiter unten ...
-
-- parsers
- -- REQUIREMENTS:  Luaotfload >= 2.8
-
-- tool
- -- REQUIREMENTS:  luaotfload 2.9
-local version                  = "2.9"
-
-13. commit and tag the commit so that status can pick it up.
-
-14. Update luatotfload-status again so that the hashes are correct.
+15. Update luaotfload-status again so that the hashes are correct.
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-18.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-28.lua
 
 
 ==============
 Dokumentation
 ==============
 
-1. Update NEWS
+1. Update NEWS -- no tagging needed
 
-2. Update README.md (twice, ctan and git)
+2. Update README.md -- tagging is activated
 
-3. Change version in luaotfload-main
+3. Update CTANREADME -- tagging is activated
 
-4. Check text of the other four files
+4. Check text in luaotfload-main -- version is done by tagging.
 
-5. Create man file: (requires docutils) <----!!!!!
+5. Check text of the other four files
+   -luaotfload-latex.tex (no version)
+   -luaotfload.conf.rst (version by tagging)
+   -luaotfload-tool.rst (version by tagging)
+   -filegraph.tex (no version)
+
+6. Create man file: (requires docutils)
+   Done by l3build doc, so only info
    the man pages should also go in the manual so we need also a pdf
 
 --> luaotfload/doc> rst2man.py luaotfload.conf.rst luaotfload.conf.5
---> luaotfload/doc> rst2xetex.py luaotfload.conf.rst luaotfload.conf.tex
+--> luaotfload/doc> rst2xetex.py luaotfload.conf.rst luaotfload-conf.tex
 --> luaotfload/doc> rst2man.py luaotfload-tool.rst luaotfload-tool.1
 --> luaotfload/doc> rst2xetex.py luaotfload-tool.rst luaotfload-tool.tex
 
-6. Compile the doc (hopefully done by l3build so only info)
+7. Compile the doc (done by l3build so only info)
 --> luaotfload/doc> lualatex luaotfload-tool.tex
---> luaotfload/doc> lualatex luaotfload.conf.tex
+--> luaotfload/doc> lualatex luaotfload-conf.tex
 --> luaotfload/doc> lualatex filegraph
 --> luaotfload/doc  lualatex
 

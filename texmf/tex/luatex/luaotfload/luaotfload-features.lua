@@ -1,10 +1,21 @@
-if not modules then modules = { } end modules ["features"] = {
-    version   = "2.92",
-    comment   = "companion to luaotfload-main.lua",
-    author    = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
-    copyright = "PRAGMA ADE / ConTeXt Development Team",
-    license   = "see context related readme files"
+-----------------------------------------------------------------------
+--         FILE:  luaotfload-features.lua
+--  DESCRIPTION:  part of luaotfload / font features
+-----------------------------------------------------------------------
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-features",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / features",
+    license       = "GPL v2.0",
+    author        = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
+    copyright     = "PRAGMA ADE / ConTeXt Development Team",
 }
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
 
 
 local type              = type

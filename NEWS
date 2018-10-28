@@ -1,5 +1,11 @@
 Change History
 --------------
+2018-10-28 luaotfload v2.93
+    * reinserted forgotten man files
+    * unified and improved version/module info for automatic tagging
+    * 
+
+
 2018-10-21 luaotfload v2.92
     * better deva support, issue #9
     * test for --safer and abort, issue #12 

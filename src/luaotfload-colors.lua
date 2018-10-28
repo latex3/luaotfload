@@ -1,10 +1,22 @@
-if not modules then modules = { } end modules ['luaotfload-colors'] = {
-    version   = "2.92",
-    comment   = "companion to luaotfload-main.lua (font color)",
-    author    = "Khaled Hosny, Elie Roux, Philipp Gesang, Dohyun Kim, David Carlisle",
-    copyright = "Luaotfload Development Team",
-    license   = "GNU GPL v2.0"
-}
+-----------------------------------------------------------------------
+--         FILE:  luaotfload-colors.lua
+--  DESCRIPTION:  part of luaotfload / font colors
+-----------------------------------------------------------------------
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-colors",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / color",
+    license       = "GPL v2.0",
+    author        = "Khaled Hosny, Elie Roux, Philipp Gesang, Dohyun Kim, David Carlisle",
+    copyright     = "Luaotfload Development Team"
+    }
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
+
 
 --[[doc--
 

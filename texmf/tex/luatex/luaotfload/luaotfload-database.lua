@@ -1,12 +1,22 @@
-if not modules then modules = { } end modules ['luaotfload-database'] = {
-    version   = "2.92",
-    comment   = "companion to luaotfload-main.lua",
-    author    = "Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
-    copyright = "Luaotfload Development Team",
-    license   = "GNU GPL v2.0"
-}
+-----------------------------------------------------------------------
+--         FILE:  luaotfload-database.lua
+--  DESCRIPTION:  part of luaotfload / luaotfload-tool / font database
+-----------------------------------------------------------------------
+do -- block to avoid to many local variables error
+ local ProvidesLuaModule = { 
+     name          = "luaotfload-database",
+     version       = "2.93",       --TAGVERSION
+     date          = "2018-10-28", --TAGDATE
+     description   = "luaotfload submodule / database",
+     license       = "GPL v2.0",
+     author        = "Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
+     copyright     = "Luaotfload Development Team",     
+ }
 
-
+ if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+ end  
+end
 
 --[[doc--
 

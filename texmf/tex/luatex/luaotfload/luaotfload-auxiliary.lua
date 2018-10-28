@@ -1,11 +1,21 @@
-#!/usr/bin/env texlua
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-auxiliary.lua
 --  DESCRIPTION:  part of luaotfload
--- REQUIREMENTS:  luaotfload 2.92
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 -----------------------------------------------------------------------
---
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-auxiliary",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / auxiliary functions",
+    license       = "GPL v2.0"
+}
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
+
 
 luaotfload                  = luaotfload or { }
 local log                   = luaotfload.log

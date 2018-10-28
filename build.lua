@@ -1,7 +1,6 @@
 
-packageversion= "2.9"
-packagestatus = "upload"
-packagedate   = "2018-09-24"
+packageversion= "2.93"
+packagedate   = "2018-10-28"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -66,7 +65,7 @@ typesetdemofiles  = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"
 -- typesetsuppfiles  = {"texmf.cnf"} --later
 
 typesetfiles      = {"**/luaotfload-latex.tex"}
-typsetcycles = 2 -- for the tests
+typesetcycles = 2 -- for the tests
 
 -- installation
 tdsroot = "luatex"
@@ -78,8 +77,8 @@ sourcefiles  = {
  "**/fontloader-*.tex",
  "luaotfload-blacklist.cnf",
  "./doc/filegraph.tex",
- "./doc/luaotfload-conf.tex",
- "./doc/luaotfload-tool.tex",
+-- "./doc/luaotfload-conf.tex",
+-- "./doc/luaotfload-tool.tex",
  "./doc/luaotfload-main.tex", 
                 }
                 
@@ -104,45 +103,90 @@ scriptmanfiles = {"luaotfload.conf.5","luaotfload-tool.1"}
 -- l3build settings for tags:
 
 tagfiles = {
-            "src/*.md",
+            "doc/CTANREADME.md",
+            "README.md",
             "src/luaotfload.sty",
             "src/luaotfload-*.lua",
+            "src/auto/luaotfload-glyphlist.lua",
             "doc/luaotfload-main.tex",
-            "doc/luaotfload.conf.rst"
+            "doc/luaotfload.conf.rst",
+            "doc/luaotfload-tool.rst"
             }
+
+function typeset_demo_tasks()
+ local errorlevel = 0
+ errorlevel = run (docfiledir,"rst2man.py luaotfload.conf.rst luaotfload.conf.5")
+ if errorlevel ~= 0 then
+        return errorlevel
+ end
+ errorlevel = run (docfiledir,"rst2man.py luaotfload-tool.rst luaotfload-tool.1")
+ if errorlevel ~= 0 then
+        return errorlevel
+ end
+ errorlevel= run (typesetdir,"rst2xetex.py luaotfload.conf.rst luaotfload-conf.tex") 
+ if errorlevel ~= 0 then
+        return errorlevel
+ end
+ errorlevel=run (typesetdir,"rst2xetex.py luaotfload-tool.rst luaotfload-tool.tex")
+ if errorlevel ~= 0 then
+        return errorlevel
+ end
+ return 0
+end 
 
 function update_tag (file,content,tagname,tagdate)
  tagdate = string.gsub (packagedate,"-", "/")
  if string.match (file, "%.sty$" ) then
   content = string.gsub (content,  
                          "%d%d%d%d/%d%d/%d%d [a-z]+%d%.%d+",
-                         tagdate.." ".. packagestatus..packageversion)
+                         tagdate.." v"..packageversion)
   return content                         
  elseif string.match (file, "%.lua$") then
   content = string.gsub (content,  
-                         "-- REQUIREMENTS:  luaotfload %d.%d+",
-                         "-- REQUIREMENTS:  luaotfload "..packageversion)                         
+                         '(version%s*=%s*")%d%.%d+(",%s*--TAGVERSION)',
+                         "%1"..packageversion.."%2")
+  content = string.gsub (content,  
+                         '(date%s*=%s*")%d%d%d%d%-%d%d%-%d%d(",%s*--TAGDATE)',
+                         "%1"..packagedate.."%2")                                                  
   return content                         
- elseif string.match (file, "%.md$") then
+ elseif string.match (file, "^README.md$") then
    content = string.gsub (content,  
-                         "Packageversion: %d%.%d",
-                         "Packageversion: " .. packageversion )
+                         "Version: %d%.%d+",
+                         "Version: " .. packageversion )
    content = string.gsub (content,  
-                         "Packagedate: %d%d%d%d/%d%d/%d%d",
-                         "Packagedate: " .. tagdate )                      
+                         "version%-%d%.%d+",
+                         "version-" .. packageversion ) 
+   content = string.gsub (content,  
+                         "for %d%.%d+",
+                         "for " .. packageversion ) 
+   content = string.gsub (content,  
+                         "%d%d%d%d%-%d%d%-%d%d",
+                         packagedate )
+   local imgpackagedate = string.gsub (packagedate,"%-","--")                          
+   content = string.gsub (content,  
+                         "%d%d%d%d%-%-%d%d%-%-%d%d",
+                         imgpackagedate)                                                                                                     
    return content
+ elseif string.match (file, "CTANREADME.md$") then
+   content = string.gsub (content,  
+                         "VERSION: %d%.%d+",
+                         "VERSION: " .. packageversion )
+   content = string.gsub (content,  
+                         "DATE: %d%d%d%d%-%d%d%-%d%d",
+                         "DATE: " .. packagedate )                                                                          
+   return content   
  elseif string.match (file, "%.tex$" ) then
    content = string.gsub (content,  
-                         "%d%d%d%d/%d%d/%d%d [a-z]+%d%.%d+",
-                         tagdate.." ".. packagestatus..packageversion)
+                         "%d%d%d%d%-%d%d%-%d%d v%d%.%d+",
+                         packagedate.." v"..packageversion)
   return content    
  elseif string.match (file, "%.rst$" ) then
    content = string.gsub (content,  
-                         "%d%d%d%d-%d%d-%d%d",
-                         packagedate)
+                         "(:Date:%s+)%d%d%d%d%-%d%d%-%d%d",
+                         "%1"..packagedate)
   content = string.gsub (content,  
-                         ":Version:               2.8",
-                         ":Version:               "..packageversion)                       
+                         "(:Version:%s+)%d%.%d+",
+                         "%1"..packageversion)                       
   return content                          
  end
  return content

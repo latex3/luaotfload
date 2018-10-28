@@ -1,4 +1,3 @@
-#!/usr/bin/env texlua
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-loaders.lua
 --  DESCRIPTION:  Luaotfload callback handling
@@ -6,8 +5,21 @@
 --       AUTHOR:  Philipp Gesang <phg@phi-gamma.net>
 --       AUTHOR:  Hans Hagen, Khaled Hosny, Elie Roux, David Carlisle
 -----------------------------------------------------------------------
---
---- Contains parts of the earlier main script.
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-loaders",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / callback handling",
+    license       = "GPL v2.0"
+}
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
+-----------------------------------------------------------------------
+
+
 
 if not lualibs    then error "this module requires Luaotfload" end
 if not luaotfload then error "this module requires Luaotfload" end

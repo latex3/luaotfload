@@ -1,10 +1,21 @@
-if not modules then modules = { } end modules ['letterspace'] = {
-    version   = "2.92",
-    comment   = "companion to luaotfload-main.lua",
-    author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang, Ulrike Fischer",
-    copyright = "PRAGMA ADE / ConTeXt Development Team",
-    license   = "see context related readme files"
+-----------------------------------------------------------------------
+--         FILE:  luaotfload-letterspace.lua
+--  DESCRIPTION:  part of luaotfload / letterspacing
+-----------------------------------------------------------------------
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-letterspace",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / color",
+    license       = "GPL v2.0",
+    copyright     = "PRAGMA ADE / ConTeXt Development Team",
+    author        = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang, Ulrike Fischer"
 }
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
 
 --- This code diverged quite a bit from its origin in Context. Please
 --- do *not* report bugs on the Context list.

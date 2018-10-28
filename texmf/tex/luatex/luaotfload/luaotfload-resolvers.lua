@@ -1,4 +1,3 @@
-#!/usr/bin/env texlua
 -----------------------------------------------------------------------
 --         FILE:  luaotfload-resolvers.lua
 --        USAGE:  ./luaotfload-resolvers.lua 
@@ -9,6 +8,19 @@
 --
 --- The bare fontloader uses a set of simplistic file name resolvers
 --- that must be overloaded by the user (i. e. us).
+
+local ProvidesLuaModule = { 
+    name          = "luaotfload-resolvers",
+    version       = "2.93",       --TAGVERSION
+    date          = "2018-10-28", --TAGDATE
+    description   = "luaotfload submodule / resolvers",
+    license       = "GPL v2.0"
+}
+
+if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+end  
+
 
 if not lualibs    then error "this module requires Luaotfload" end
 if not luaotfload then error "this module requires Luaotfload" end

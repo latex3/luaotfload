@@ -86,18 +86,17 @@ local function define_font(name, size)
     local space, xheight
     for _, uni in next, unicodes do
       local gid = font:get_nominal_glyph(uni)
-      characters[uni] = {}
-
-      -- If this is space or no break space, save its advance width, we will
-      -- need below.
-      if uni == 0x0020 then -- SPACE
-        space = characters[hb.CH_GID_PREFIX + gid].width
-      elseif uni == 0x0078 then
-        xheight = characters[hb.CH_GID_PREFIX + gid].height
-      elseif uni == 0x0048 then
-        characters[uni] = characters[hb.CH_GID_PREFIX + gid]
-      elseif uni == 0x002E then
-        characters[uni] = characters[hb.CH_GID_PREFIX + gid]
+      if gid then
+        characters[uni] = {}
+        if uni == 0x0020 then -- SPACE
+          space = characters[hb.CH_GID_PREFIX + gid].width
+        elseif uni == 0x0078 then
+          xheight = characters[hb.CH_GID_PREFIX + gid].height
+        elseif uni == 0x0048 then
+          characters[uni] = characters[hb.CH_GID_PREFIX + gid]
+        elseif uni == 0x002E then
+          characters[uni] = characters[hb.CH_GID_PREFIX + gid]
+        end
       end
     end
 

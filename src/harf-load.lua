@@ -89,7 +89,7 @@ local function define_font(name, size)
           space = font:get_glyph_h_advance(gid)
         elseif uni == 0x0078 then
           local extents = font:get_glyph_extents(gid)
-          xheight = extents and extents.y_bearing or ascender
+          xheight = extents and extents.y_bearing or ascender / 2
         elseif uni == 0x0048 then
           local extents = font:get_glyph_extents(gid)
           characters[uni] = { height = extents and extents.y_bearing or ascender }

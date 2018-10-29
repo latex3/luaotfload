@@ -13,7 +13,7 @@ local function define_font(name, size)
 
     local font = hb.Font.new(face)
 
-    tfmdata = { }
+    tfmdata = {}
 
     tfmdata.hb = {
       face = face,
@@ -49,11 +49,11 @@ local function define_font(name, size)
     tfmdata.embedding = "subset"
     tfmdata.tounicode = 1
 
-    local fextents = font:get_h_extents()
-    local ascender = fextents and fextents.ascender
-    local descender = fextents and fextents.descender
+    local fontextents = font:get_h_extents()
+    local ascender = fontextents and fontextents.ascender
+    local descender = fontextents and fontextents.descender
 
-    local characters = { }
+    local characters = {}
     tfmdata.characters = characters
 
     -- Add dummy entries for all glyphs in the font. Shouldn’t be needed, but
@@ -108,10 +108,10 @@ local function define_font(name, size)
     local mag = size / upem
     tfmdata.parameters = {
       slant = 0,
-      space = space or mag * upem/2,
-      space_stretch = mag * upem/2,
-      space_shrink = mag * upem/3,
-      x_height = xheight or 2 * mag * upem/5,
+      space = space or mag * upem / 2,
+      space_stretch = mag * upem / 2,
+      space_shrink = mag * upem / 3,
+      x_height = xheight or 2 * mag * upem / 5,
       quad = mag * upem,
     }
   else

@@ -18,6 +18,7 @@ local function define_font(name, size)
     tfmdata.hb = {
       face = face,
       font = font,
+      loaded = {}, -- { gid=true } for glyphs we loaded their metrics.
     }
 
     font:set_scale(size, size)
@@ -55,17 +56,14 @@ local function define_font(name, size)
     local characters = { }
     tfmdata.characters = characters
 
-    -- Load all glyphs in the font and set basic info about them.
-    for gid = 0, face:get_glyph_count() - 1 do
-      local uni = hb.CH_GID_PREFIX + gid
-      local extents = font:get_glyph_extents(gid)
-      characters[uni] = {
-        index = gid,
-        width = font:get_glyph_h_advance(gid),
-        height = extents and extents.y_bearing or ascender,
-        depth = -(extents and extents.y_bearing + extents.height or descender),
-      }
+    -- Add dummy entries for all glyphs in the font. Shouldn’t be needed, but
+    -- some glyphs disappear from the PDF otherwise. The actual loading is done
+    -- after shaping.
+    local glyphcount = face:get_glyph_count() - 1
+    for gid = 0, glyphcount do
+      characters[hb.CH_GID_PREFIX + gid] = { index = gid }
     end
+
 
     -- Then load all characters supported by the font, we reused the glyph data
     -- we loaded earlier.
@@ -87,15 +85,16 @@ local function define_font(name, size)
     for _, uni in next, unicodes do
       local gid = font:get_nominal_glyph(uni)
       if gid then
-        characters[uni] = {}
         if uni == 0x0020 then -- SPACE
-          space = characters[hb.CH_GID_PREFIX + gid].width
+          space = font:get_glyph_h_advance(gid)
         elseif uni == 0x0078 then
-          xheight = characters[hb.CH_GID_PREFIX + gid].height
+          local extents = font:get_glyph_extents(gid)
+          xheight = extents and extents.y_bearing or ascender
         elseif uni == 0x0048 then
-          characters[uni] = characters[hb.CH_GID_PREFIX + gid]
+          local extents = font:get_glyph_extents(gid)
+          characters[uni] = { height = extents and extents.y_bearing or ascender }
         elseif uni == 0x002E then
-          characters[uni] = characters[hb.CH_GID_PREFIX + gid]
+          characters[uni] = { width = font:get_glyph_h_advance(gid) }
         end
       end
     end

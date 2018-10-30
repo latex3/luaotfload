@@ -1,4 +1,4 @@
-local hb = require("harfbuzz")
+local hb = require("luaharfbuzz")
 
 -- LuaTeX’s TFM structure indexes glyphs by character codes, so we fake it by
 -- adding the maximum possible Unicode code point to the glyph id. This way

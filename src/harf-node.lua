@@ -52,27 +52,26 @@ local function chars_in_glyph(i, glyphs)
 end
 
 local function shape(head, current, run, nodes, codes)
-  local offset = run.start
-  local len = run.len
-  local dir = run.dir
   local fontid = run.font
   local fontdata = fontid and font.fonts[fontid]
 
   if fontdata and fontdata.hb then
+    local offset = run.start
+    local len = run.len
+    local dir = run.dir or hb.Direction.new("ltr")
+    local script = run.script or hb.Script.new("Latn")
+    local lang = run.lang or hb.Language.new("x-hbotdflt")
     local hbfont = fontdata.hb.font
     local loaded = fontdata.hb.loaded
-    local options = {}
     local buf = hb.Buffer.new()
-    local rtl = dir == "TRT"
+    local rtl = hb.Direction.is_backward(dir)
 
-    if rtl then
-      options.direction = hb.Direction.HB_DIRECTION_RTL
-    else
-      options.direction = hb.Direction.HB_DIRECTION_LTR
-    end
-
+    buf:set_direction(dir)
+    --buf:set_script(script)
+    --buf:set_language(lang)
     buf:add_codepoints(codes, offset - 1, len)
-    if hb.shape(hbfont, buf, options) then
+    buf:guess_segment_properties()
+    if hb.shape_full(hbfont, buf, {}) then
       if rtl then
         buf:reverse()
       end
@@ -82,7 +81,7 @@ local function shape(head, current, run, nodes, codes)
       local descender = fontextents and fontextents.descender
 
       local characters = {} -- LuaTeX font characters table
-      local glyphs = buf:get_glyph_infos_and_positions()
+      local glyphs = buf:get_glyphs()
       for i, g in next, glyphs do
         -- Copy the node for the first character in the cluster, so that we
         -- inherit any of its properties.
@@ -188,6 +187,13 @@ local function shape(head, current, run, nodes, codes)
   return head, current
 end
 
+local to_hb_dir = {
+  TLT = hb.Direction.new("ltr"),
+  TRT = hb.Direction.new("rtl"),
+  RTT = hb.Direction.new("ltr"), -- XXX What to do with this?
+  LTL = hb.Direction.new("ltr"), -- XXX Ditto
+}
+
 local function process(head, groupcode, size, packtype, direction)
   local fontid
   local has_hb
@@ -205,7 +211,7 @@ local function process(head, groupcode, size, packtype, direction)
   local dirstack = {}
   local dir = direction or "TLT"
   local nodes, codes = {}, {}
-  local runs = { { font = fontid, dir = dir, start = 1, len = 0 } }
+  local runs = { { font = fontid, dir = to_hb_dir[dir], start = 1, len = 0 } }
   local i = 1
   for n in node.traverse(head) do
     local id = n.id
@@ -233,7 +239,12 @@ local function process(head, groupcode, size, packtype, direction)
     end
 
     if currfont ~= fontid or currdir ~= dir then
-      runs[#runs + 1] = { font = currfont, dir = currdir, start = i, len = 0 }
+      runs[#runs + 1] = {
+        start = i,
+        len = 0,
+        font = currfont,
+        dir = to_hb_dir[currdir],
+      }
     end
 
     fontid = currfont

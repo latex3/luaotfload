@@ -4,7 +4,7 @@ local disccode  = node.id("disc")
 local gluecode  = node.id("glue")
 local glyphcode = node.id("glyph")
 local dircode   = node.id("dir")
-local parcode   = node.id("local_par")
+local localparcode = node.id("local_par")
 local spaceskip = 13
 local directmode = 2
 
@@ -52,12 +52,12 @@ local function chars_in_glyph(i, glyphs)
 end
 
 local function shape(head, current, run, nodes, codes)
+  local offset = run.start
+  local len = run.len
   local fontid = run.font
   local fontdata = fontid and font.fonts[fontid]
 
   if fontdata and fontdata.hb then
-    local offset = run.start
-    local len = run.len
     local dir = run.dir or hb.Direction.new("ltr")
     local script = run.script or hb.Script.new("Latn")
     local lang = run.lang or hb.Language.new("x-hbotdflt")
@@ -88,7 +88,7 @@ local function shape(head, current, run, nodes, codes)
         local gid = g.codepoint
         local char = hb.CH_GID_PREFIX + gid
         local index = g.cluster + 1
-        local n = node.copy(nodes[index])
+        local n = node.copy(nodes[index].node)
         local id = n.id
 
         head, current = node.insert_after(head, current, n)
@@ -142,7 +142,7 @@ local function shape(head, current, run, nodes, codes)
           if nchars > 0 then
             local tounicode = ""
             for j = 0, nchars - 1 do
-              local id = nodes[index + j].id
+              local id = nodes[index + j].node.id
               if id == glyphcode or id == gluecode then
                 tounicode = tounicode..to_utf16_hex(codes[index + j])
               end
@@ -180,7 +180,7 @@ local function shape(head, current, run, nodes, codes)
   else
     -- Not shaping, insert the original node list of of this run.
     for i = offset, offset + len do
-      head, current = node.insert_after(head, current, nodes[i])
+      head, current = node.insert_after(head, current, nodes[i].node)
     end
   end
 
@@ -193,6 +193,51 @@ local to_hb_dir = {
   RTT = hb.Direction.new("ltr"), -- XXX What to do with this?
   LTL = hb.Direction.new("ltr"), -- XXX Ditto
 }
+
+local function collect(head, direction)
+  local nodes = {}
+  local codes = {}
+  local dirstack = {}
+  local currdir = direction or "TLT"
+  local currfont = nil
+
+  for n in node.traverse(head) do
+    local id = n.id
+    local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
+
+    if id == glyphcode then
+      code = n.char
+      currfont = n.font
+    elseif id == gluecode and n.subtype == spaceskip then
+      code = 0x0020 -- SPACE
+    elseif id == disccode then
+      -- XXX actually handle this
+      code = 0x00AD -- SOFT HYPHEN
+    elseif id == dircode then
+      if n.dir:sub(1, 1) == "+" then
+        table.insert(dirstack, currdir)
+        currdir = n.dir:sub(2)
+      else
+        assert(currdir == n.dir:sub(2))
+        currdir = table.remove(dirstack)
+      end
+    elseif id == localparcode then
+      currdir = n.dir
+    end
+
+    codes[#codes + 1] = code
+    nodes[#nodes + 1] = {
+      node = n,
+      font = currfont,
+      dir = to_hb_dir[currdir],
+    }
+
+    fontid = currfont
+    dir = currdir
+  end
+
+  return nodes, codes
+end
 
 local function process(head, groupcode, size, packtype, direction)
   local fontid
@@ -208,52 +253,26 @@ local function process(head, groupcode, size, packtype, direction)
     return head
   end
 
-  local dirstack = {}
-  local dir = direction or "TLT"
-  local nodes, codes = {}, {}
-  local runs = { { font = fontid, dir = to_hb_dir[dir], start = 1, len = 0 } }
-  local i = 1
-  for n in node.traverse(head) do
-    local id = n.id
-    local char = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
-    local currdir = dir
-    local currfont = fontid
+  local currfont, currdir = nil, nil
+  local nodes, codes = collect(head, direction)
+  local runs = {}
+  for i, n in next, nodes do
+    local font = n.font
+    local dir = n.dir
 
-    if id == glyphcode then
-      currfont = n.font
-      char = n.char
-    elseif id == gluecode and n.subtype == spaceskip then
-      char = 0x0020 -- SPACE
-    elseif id == disccode then
-      -- XXX actually handle this
-      char = 0x00AD -- SOFT HYPHEN
-    elseif id == dircode then
-      if n.dir:sub(1, 1) == "+" then
-        table.insert(dirstack, currdir)  -- push
-        currdir = n.dir:sub(2)
-      else
-        currdir = table.remove(dirstack) -- pop
-      end
-    elseif id == parcode then
-      currdir = n.dir
-    end
-
-    if currfont ~= fontid or currdir ~= dir then
+    if font ~= currfont or dir ~= currdir then
       runs[#runs + 1] = {
         start = i,
         len = 0,
-        font = currfont,
-        dir = to_hb_dir[currdir],
+        font = font,
+        dir = dir,
       }
     end
 
-    fontid = currfont
-    dir = currdir
     runs[#runs].len = runs[#runs].len + 1
 
-    nodes[#nodes + 1] = n
-    codes[#codes + 1] = char
-    i = i + 1
+    currfont = font
+    currdir = dir
   end
 
   local newhead, current

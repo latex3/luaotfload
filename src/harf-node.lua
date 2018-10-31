@@ -8,6 +8,12 @@ local localparcode = node.id("local_par")
 local spaceskip = 13
 local directmode = 2
 
+local getscript    = hb.unicode.script
+local sc_common    = hb.Script.new("Zyyy")
+local sc_inherited = hb.Script.new("Zinh")
+local sc_unknown   = hb.Script.new("Zzzz")
+local sc_latn      = hb.Script.new("Latn")
+
 -- Convert integer to UTF-16 hex string used in PDF.
 local function to_utf16_hex(uni)
   if uni < 0x10000 then
@@ -59,18 +65,17 @@ local function shape(head, current, run, nodes, codes)
 
   if fontdata and fontdata.hb then
     local dir = run.dir or hb.Direction.new("ltr")
-    local script = run.script or hb.Script.new("Latn")
-    local lang = run.lang or hb.Language.new("x-hbotdflt")
+    local script = run.script
+    local lang = run.lang or hb.Language.new()
     local hbfont = fontdata.hb.font
     local loaded = fontdata.hb.loaded
     local buf = hb.Buffer.new()
     local rtl = hb.Direction.is_backward(dir)
 
     buf:set_direction(dir)
-    --buf:set_script(script)
-    --buf:set_language(lang)
+    buf:set_script(script)
+    buf:set_language(lang)
     buf:add_codepoints(codes, offset - 1, len)
-    buf:guess_segment_properties()
     if hb.shape_full(hbfont, buf, {}) then
       if rtl then
         buf:reverse()
@@ -187,6 +192,46 @@ local function shape(head, current, run, nodes, codes)
   return head, current
 end
 
+local paired_open = {
+  [0x0028] = 0x0029,
+  [0x003c] = 0x003e,
+  [0x005b] = 0x005d,
+  [0x007b] = 0x007d,
+  [0x00ab] = 0x00bb,
+  [0x2018] = 0x2019,
+  [0x201c] = 0x201d,
+  [0x2039] = 0x203a,
+  [0x3008] = 0x3009,
+  [0x300a] = 0x300b,
+  [0x300c] = 0x300d,
+  [0x300e] = 0x300f,
+  [0x3010] = 0x3011,
+  [0x3014] = 0x3015,
+  [0x3016] = 0x3017,
+  [0x3018] = 0x3019,
+  [0x301a] = 0x301b,
+}
+
+local paired_close = {
+  [0x0029] = 0x0028,
+  [0x003e] = 0x003c,
+  [0x005d] = 0x005b,
+  [0x007d] = 0x007b,
+  [0x00bb] = 0x00ab,
+  [0x2019] = 0x2018,
+  [0x201d] = 0x201c,
+  [0x203a] = 0x2039,
+  [0x3009] = 0x3008,
+  [0x300b] = 0x300a,
+  [0x300d] = 0x300c,
+  [0x300f] = 0x300e,
+  [0x3011] = 0x3010,
+  [0x3015] = 0x3014,
+  [0x3017] = 0x3016,
+  [0x3019] = 0x3018,
+  [0x301b] = 0x301a,
+}
+
 local to_hb_dir = {
   TLT = hb.Direction.new("ltr"),
   TRT = hb.Direction.new("rtl"),
@@ -198,16 +243,19 @@ local function collect(head, direction)
   local nodes = {}
   local codes = {}
   local dirstack = {}
+  local pairstack = {}
   local currdir = direction or "TLT"
   local currfont = nil
 
   for n in node.traverse(head) do
     local id = n.id
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
+    local script = sc_common
 
     if id == glyphcode then
       code = n.char
       currfont = n.font
+      script = getscript(code)
     elseif id == gluecode and n.subtype == spaceskip then
       code = 0x0020 -- SPACE
     elseif id == disccode then
@@ -225,15 +273,39 @@ local function collect(head, direction)
       currdir = n.dir
     end
 
+    if #nodes > 0 and (script == sc_common or script == sc_inherited) then
+      script = nodes[#nodes].script
+      -- Paired punctuation characters
+      if paired_open[code] then
+        table.insert(pairstack, { code, script })
+      elseif paired_close[code] then
+        while #pairstack > 0 do
+          local c = table.remove(pairstack)
+          if c[1] == paired_close[code] then
+            script = c[2]
+            break
+          end
+        end
+      end
+    end
+
     codes[#codes + 1] = code
     nodes[#nodes + 1] = {
       node = n,
       font = currfont,
       dir = to_hb_dir[currdir],
+      script = script,
     }
 
     fontid = currfont
     dir = currdir
+  end
+
+  for i = #nodes - 1, 1, -1 do
+    -- If script is not resolved yet, use that of the next glyph.
+    if nodes[i].script == sc_common or nodes[i].script == sc_inherited then
+      nodes[i].script = nodes[i + 1].script
+    end
   end
 
   return nodes, codes
@@ -253,19 +325,21 @@ local function process(head, groupcode, size, packtype, direction)
     return head
   end
 
-  local currfont, currdir = nil, nil
+  local currfont, currdir, currscript = nil, nil, nil
   local nodes, codes = collect(head, direction)
   local runs = {}
   for i, n in next, nodes do
     local font = n.font
     local dir = n.dir
+    local script = n.script
 
-    if font ~= currfont or dir ~= currdir then
+    if font ~= currfont or dir ~= currdir or script ~= currscript then
       runs[#runs + 1] = {
         start = i,
         len = 0,
         font = font,
         dir = dir,
+        script = script,
       }
     end
 
@@ -273,6 +347,7 @@ local function process(head, groupcode, size, packtype, direction)
 
     currfont = font
     currdir = dir
+    currscript = script
   end
 
   local newhead, current

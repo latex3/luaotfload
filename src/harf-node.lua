@@ -14,7 +14,7 @@ local function to_utf16_hex(uni)
     return string.format("%04X", uni)
   else
     uni = uni - 0x10000
-    local hi = 0xD800 + bit32.rshift(uni, 10) -- 0xD800 + (uni // 0x400)
+    local hi = 0xD800 + (uni // 0x400)
     local lo = 0xDC00 + (uni % 0x400)
     return string.format("%04X%04X", hi, lo)
   end

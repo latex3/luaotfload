@@ -75,6 +75,7 @@ local function shape(head, current, run, nodes, codes)
     buf:set_direction(dir)
     buf:set_script(script)
     buf:set_language(lang)
+    buf:set_cluster_level(buf.CLUSTER_LEVEL_MONOTONE_CHARACTERS)
     buf:add_codepoints(codes, offset - 1, len)
     if hb.shape_full(hbfont, buf, {}) then
       if rtl then

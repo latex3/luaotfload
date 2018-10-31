@@ -24,10 +24,8 @@ local function define_font(name, size)
     font:set_scale(size, size)
 
     tfmdata.name = name
-  -- XXX HarfBuzz does not expose name table yet
-  -- https://github.com/harfbuzz/harfbuzz/pull/1254
-  --tfmdata.psname = ??
-  --tfmdata.fullname = ??
+    tfmdata.psname = face:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME)
+    tfmdata.fullname = face:get_name(hb.ot.NAME_ID_FULL_NAME)
     tfmdata.filename = filename
     tfmdata.designsize = size
     tfmdata.size = size

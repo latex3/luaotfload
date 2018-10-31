@@ -79,7 +79,6 @@ local function define_font(name, size)
     -- Note this makes the loader completely unusable without the shaper, but
     -- it wasn’t that much useful before.
     --
-    --local unicodes = face:get_unicodes()
     local unicodes = { 0x0020, 0x0078, 0x0048, 0x002E } -- space, x, H, .
     local space, xheight
     for _, uni in next, unicodes do

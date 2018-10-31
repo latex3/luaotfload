@@ -13,6 +13,9 @@ local sc_common    = hb.Script.new("Zyyy")
 local sc_inherited = hb.Script.new("Zinh")
 local sc_unknown   = hb.Script.new("Zzzz")
 local sc_latn      = hb.Script.new("Latn")
+local dir_ltr      = hb.Direction.new("ltr")
+local dir_rtl      = hb.Direction.new("rtl")
+local lang_invalid = hb.Language.new()
 
 -- Convert integer to UTF-16 hex string used in PDF.
 local function to_utf16_hex(uni)
@@ -64,9 +67,9 @@ local function shape(head, current, run, nodes, codes)
   local fontdata = fontid and font.fonts[fontid]
 
   if fontdata and fontdata.hb then
-    local dir = run.dir or hb.Direction.new("ltr")
+    local dir = run.dir
     local script = run.script
-    local lang = run.lang or hb.Language.new()
+    local lang = run.lang or lang_invalid
     local hbfont = fontdata.hb.font
     local loaded = fontdata.hb.loaded
     local buf = hb.Buffer.new()
@@ -234,10 +237,10 @@ local paired_close = {
 }
 
 local to_hb_dir = {
-  TLT = hb.Direction.new("ltr"),
-  TRT = hb.Direction.new("rtl"),
-  RTT = hb.Direction.new("ltr"), -- XXX What to do with this?
-  LTL = hb.Direction.new("ltr"), -- XXX Ditto
+  TLT = dir_ltr,
+  TRT = dir_rtl,
+  RTT = dir_ltr, -- XXX What to do with this?
+  LTL = dir_ltr, -- XXX Ditto
 }
 
 local function collect(head, direction)

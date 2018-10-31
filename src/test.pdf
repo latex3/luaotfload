@@ -47,7 +47,7 @@ endobj
   /Type /Font
   /Subtype /Type0
   /Encoding /Identity-H
-  /BaseFont /ZLJLVO+Amiri-Regular.ttf
+  /BaseFont /LGGEEX+amiri-regular.ttf
   /DescendantFonts [ 55 0 R ]
   /ToUnicode 54 0 R
 >>
@@ -1162,7 +1162,7 @@ endobj
 51 0 obj
 <<
   /Type /FontDescriptor
-  /FontName /ZLJLVO+Amiri-Regular.ttf
+  /FontName /LGGEEX+amiri-regular.ttf
   /Flags 4
   /FontBBox [ 0 0 1000 646 ]
   /Ascent 0
@@ -3110,8 +3110,8 @@ stream
 %!PS-Adobe-3.0 Resource-CMap
 %%DocumentNeededResources: ProcSet (CIDInit)
 %%IncludeResource: ProcSet (CIDInit)
-%%BeginResource: CMap (TeX-ZLJLVO-Amiri-Regular.ttf-0)
-%%Title: (TeX-ZLJLVO-Amiri-Regular.ttf-0 TeX ZLJLVO-Amiri-Regular.ttf 0)
+%%BeginResource: CMap (TeX-LGGEEX-amiri-regular.ttf-0)
+%%Title: (TeX-LGGEEX-amiri-regular.ttf-0 TeX LGGEEX-amiri-regular.ttf 0)
 %%Version: 1.000
 %%EndComments
 /CIDInit /ProcSet findresource begin
@@ -3119,10 +3119,10 @@ stream
 begincmap
 /CIDSystemInfo
 << /Registry (TeX)
-/Ordering (ZLJLVO-Amiri-Regular.ttf)
+/Ordering (LGGEEX-amiri-regular.ttf)
 /Supplement 0
 >> def
-/CMapName /TeX-Identity-ZLJLVO-Amiri-Regular.ttf def
+/CMapName /TeX-Identity-LGGEEX-amiri-regular.ttf def
 /CMapType 2 def
 1 begincodespacerange
 <0000> <FFFF>
@@ -3322,7 +3322,7 @@ endobj
   /Type /Font
   /Subtype /CIDFontType2
   /CIDToGIDMap /Identity
-  /BaseFont /ZLJLVO+Amiri-Regular.ttf
+  /BaseFont /LGGEEX+amiri-regular.ttf
   /FontDescriptor 51 0 R
   /W 50 0 R
   /CIDSystemInfo <<
@@ -4558,8 +4558,8 @@ endobj
 <<
   /Producer (LuaTeX-1.09.0)
   /Creator (TeX)
-  /CreationDate (D:20181031153831+02'00')
-  /ModDate (D:20181031153831+02'00')
+  /CreationDate (D:20181031185126+02'00')
+  /ModDate (D:20181031185126+02'00')
   /Trapped /False
   /PTEX.FullBanner (This is LuaTeX, Version 1.09.0 \(TeX Live 2019/dev\))
 >>
@@ -4638,7 +4638,7 @@ trailer
   /Size 65
   /Info 63 0 R
   /Root 62 0 R
-  /ID [ (Y\262\201!\363^\356"\204\355\215ZN:\006\022) (*\314&}L\276EZ\366@\344\247\007\250F\222) ]
+  /ID [ <5FBAB78D34AAA9F3C8E5928F2C304ED7> (\)_\275\310;\201LU\3253[R\326\313-\355) ]
 >>
 startxref
 248844

@@ -188,7 +188,7 @@ local function shape(head, current, run, nodes, codes)
     end
   else
     -- Not shaping, insert the original node list of of this run.
-    for i = offset, offset + len do
+    for i = offset, offset + len - 1 do
       head, current = node.insert_after(head, current, nodes[i].node)
     end
   end

@@ -1,5 +1,8 @@
 local hb = require("harf-base")
 
+local cfftag  = hb.Tag.new("CFF ")
+local cff2tag = hb.Tag.new("CFF2")
+
 local function define_font(name, size)
   local tfmdata
   local filename = kpse.find_file(name, "truetype fonts") or
@@ -35,10 +38,10 @@ local function define_font(name, size)
     local fonttype = "truetype"
     local tags = face:get_table_tags()
     for i = 1, #tags do
-      local tag = tostring(tags[i])
-      if tag == "CFF " or tag == "CFF2" then
-          fonttype = "opentype"
-          break
+      local tag = tags[i]
+      if tag == cfftag or tag == cff2tag then
+        fonttype = "opentype"
+        break
       end
     end
     tfmdata.format = fonttype

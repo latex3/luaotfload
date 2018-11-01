@@ -2,6 +2,7 @@ local hb = require("harf-base")
 
 local cfftag  = hb.Tag.new("CFF ")
 local cff2tag = hb.Tag.new("CFF2")
+local os2tag  = hb.Tag.new("OS/2")
 
 local function define_font(name, size)
   local tfmdata
@@ -36,12 +37,14 @@ local function define_font(name, size)
     -- All LuaTeX seem to care about in font type is whether it has CFF table
     -- or not, so we check for that here.
     local fonttype = "truetype"
+    local hasos2 = false
     local tags = face:get_table_tags()
     for i = 1, #tags do
       local tag = tags[i]
       if tag == cfftag or tag == cff2tag then
         fonttype = "opentype"
-        break
+      elseif tag == os2tag then
+        hasos2 = true
       end
     end
     tfmdata.format = fonttype
@@ -80,38 +83,52 @@ local function define_font(name, size)
     -- Note this makes the loader completely unusable without the shaper, but
     -- it wasn’t that much useful before.
     --
-    local unicodes = { 0x0020, 0x0078, 0x0048, 0x002E } -- space, x, H, .
-    local space, xheight
+    local unicodes = { 0x0020 } -- space
+    local space
     for _, uni in next, unicodes do
       local gid = font:get_nominal_glyph(uni)
       if gid then
         if uni == 0x0020 then -- SPACE
           space = font:get_glyph_h_advance(gid)
-        elseif uni == 0x0078 then
-          local extents = font:get_glyph_extents(gid)
-          xheight = extents and extents.y_bearing or ascender / 2
-        elseif uni == 0x0048 then
-          local extents = font:get_glyph_extents(gid)
-          characters[uni] = { height = extents and extents.y_bearing or ascender }
-        elseif uni == 0x002E then
-          characters[uni] = { width = font:get_glyph_h_advance(gid) }
         end
       end
     end
 
-    -- LuaTeX checks for these characters to calculate the corresponding font
-    -- metrics.
-  --characters[0x0048] = { height = capheight } -- LATIN CAPITAL LETTER H, XXX get from OS/2
-  --characters[0x002E] = { width  = stemv     } -- FULL STOP, XXX What is stemv
-
     local upem =  face:get_upem()
     local mag = size / upem
+    local xheight, capheight, stemv
+    if hasos2 then
+      local os2 = face:get_table(os2tag)
+      local length = os2:get_length()
+      local data = os2:get_data()
+      if length >= 96 and string.unpack(">H", data) > 1 then
+        local weightclass
+
+        -- We don’t need much of the table, so we read from hard-coded offsets.
+        weightclass = string.unpack(">H", data, 5)
+        xheight = string.unpack(">H", data, 87) * mag
+        capheight = string.unpack(">H", data, 89) * mag
+        -- Magic formula from dvipdfmx.
+        stemv = ((weightclass / 65) * (weightclass / 65) + 50) * mag
+      end
+    end
+
+    xheight = xheight or ascender / 2
+    capheight = capheight or ascender
+    stemv = stemv or 80 * mag
+
+    -- LuaTeX uses `char_height(f, 'H')` for CapHeight.
+    characters[0x0048] = { height = capheight }
+
+    -- LuaTeX uses `char_width(f, '.') / 3` for StemV.
+    characters[0x002E] = { width  = stemv * 3 }
+
     tfmdata.parameters = {
       slant = 0,
       space = space or mag * upem / 2,
       space_stretch = mag * upem / 2,
       space_shrink = mag * upem / 3,
-      x_height = xheight or 2 * mag * upem / 5,
+      x_height = xheight,
       quad = mag * upem,
     }
   else

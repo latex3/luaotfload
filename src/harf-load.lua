@@ -52,6 +52,7 @@ local function define_font(name, size)
     tfmdata.type = "real"
     tfmdata.embedding = "subset"
     tfmdata.tounicode = 1
+    tfmdata.nomath = true
 
     local fontextents = font:get_h_extents()
     local ascender = fontextents and fontextents.ascender

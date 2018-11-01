@@ -63,36 +63,19 @@ local function define_font(name, size)
     -- Add dummy entries for all glyphs in the font. Shouldn’t be needed, but
     -- some glyphs disappear from the PDF otherwise. The actual loading is done
     -- after shaping.
+    --
+    -- We don’t add entries for character supported by the font as the shaped
+    -- output will use glyph indices so these characters will be unused.
+    -- Skipping loading all the characters should speed loading fonts with
+    -- large character sets.
+    --
     local glyphcount = face:get_glyph_count() - 1
     for gid = 0, glyphcount do
       characters[hb.CH_GID_PREFIX + gid] = { index = gid }
     end
 
-
-    -- Then load all characters supported by the font, we reused the glyph data
-    -- we loaded earlier.
-    --
-    -- Looks this is not strictly needed, though, since the shaped output will
-    -- use glyph indices so these characters will be unused. Skipping loading
-    -- all the characters speeds loading fonts with large character sets.
-    --
-    -- We sill load a handful of characters that LuaTeX either use for font
-    -- metrics (ideally, LuaTeX should be updated to read these metrics from
-    -- the font) or we for calculating space and xheight.
-    --
-    -- Note this makes the loader completely unusable without the shaper, but
-    -- it wasn’t that much useful before.
-    --
-    local unicodes = { 0x0020 } -- space
-    local space
-    for _, uni in next, unicodes do
-      local gid = font:get_nominal_glyph(uni)
-      if gid then
-        if uni == 0x0020 then -- SPACE
-          space = font:get_glyph_h_advance(gid)
-        end
-      end
-    end
+    local spacegid = font:get_nominal_glyph(0x0020)
+    local space = spacegid and font:get_glyph_h_advance(spacegid)
 
     local upem =  face:get_upem()
     local mag = size / upem

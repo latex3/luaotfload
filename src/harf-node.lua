@@ -97,8 +97,15 @@ local function shape(head, current, run, nodes, codes)
         local gid = g.codepoint
         local char = hb.CH_GID_PREFIX + gid
         local index = g.cluster + 1
-        local n = node.copy(nodes[index].node)
+        local n = nodes[index].node
         local id = n.id
+
+        local nchars, nglyphs = chars_in_glyph(i, glyphs)
+        -- If this glyph is part of a complex cluster, then copy the node as
+        -- more than one glyph will use it.
+        if nglyphs < 1 or nglyphs > 1 then
+          n = node.copy(nodes[index].node)
+        end
 
         head, current = node.insert_after(head, current, n)
 
@@ -146,7 +153,6 @@ local function shape(head, current, run, nodes, codes)
           --     represented by /ActualText spans.
           -- * If there are zero characters, then this glyph is part of complex
           --   cluster that will be covered by an /ActualText span.
-          local nchars, nglyphs = chars_in_glyph(i, glyphs)
           nchars = nchars >= 0 and nchars or offset + len - index
           if nchars > 0 then
             local tounicode = ""

@@ -73,7 +73,7 @@ local function shape(head, current, run, nodes, codes)
     local hbfont = fontdata.hb.font
     local loaded = fontdata.hb.loaded
     local buf = hb.Buffer.new()
-    local rtl = hb.Direction.is_backward(dir)
+    local rtl = dir:is_backward()
 
     buf:set_direction(dir)
     buf:set_script(script)

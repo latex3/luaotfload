@@ -308,6 +308,8 @@ shape = function(head, current, run, nodes, codes)
           if n.width ~= g.x_advance then
             n.width = g.x_advance
           end
+        elseif id == disccode then
+          n.pre = process(n.pre)
         end
       end
 

@@ -31,14 +31,12 @@ end
 
 -- Find how many characters are part of this glyph.
 --
--- The first return value is the number of characters, with the these special
--- values:
---   0 means it is inside a multi-glyph cluster
---  -1 means as many characters tell the end of the run
+-- The first return value is the number of characters, with 0 meaning it is
+-- inside a multi-glyph cluster
 --
 -- The second return value is the number of glyph in this cluster.
 --
-local function chars_in_glyph(i, glyphs)
+local function chars_in_glyph(i, glyphs, stop)
   local nchars, nglyphs = 0, 0
   local cluster = glyphs[i].cluster
 
@@ -54,7 +52,7 @@ local function chars_in_glyph(i, glyphs)
   if glyphs[i + nglyphs] then
     nchars = glyphs[i + nglyphs].cluster - cluster
   else
-    nchars = -1
+    nchars = stop - cluster - 1
   end
 
   return nchars, nglyphs
@@ -100,7 +98,7 @@ local function shape(head, current, run, nodes, codes)
         local n = nodes[index].node
         local id = n.id
 
-        local nchars, nglyphs = chars_in_glyph(i, glyphs)
+        local nchars, nglyphs = chars_in_glyph(i, glyphs, offset + len)
         -- If this glyph is part of a complex cluster, then copy the node as
         -- more than one glyph will use it.
         if nglyphs < 1 or nglyphs > 1 then
@@ -153,7 +151,6 @@ local function shape(head, current, run, nodes, codes)
           --     represented by /ActualText spans.
           -- * If there are zero characters, then this glyph is part of complex
           --   cluster that will be covered by an /ActualText span.
-          nchars = nchars >= 0 and nchars or offset + len - index
           if nchars > 0 then
             local tounicode = ""
             for j = 0, nchars - 1 do

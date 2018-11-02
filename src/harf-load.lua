@@ -3,6 +3,7 @@ local hb = require("harf-base")
 local cfftag  = hb.Tag.new("CFF ")
 local cff2tag = hb.Tag.new("CFF2")
 local os2tag  = hb.Tag.new("OS/2")
+local posttag = hb.Tag.new("post")
 
 local function define_font(name, size)
   local tfmdata
@@ -38,6 +39,7 @@ local function define_font(name, size)
     -- or not, so we check for that here.
     local fonttype = "truetype"
     local hasos2 = false
+    local haspost = false
     local tags = face:get_table_tags()
     for i = 1, #tags do
       local tag = tags[i]
@@ -45,6 +47,8 @@ local function define_font(name, size)
         fonttype = "opentype"
       elseif tag == os2tag then
         hasos2 = true
+      elseif tag == posttag then
+        haspost = true
       end
     end
     tfmdata.format = fonttype
@@ -107,8 +111,21 @@ local function define_font(name, size)
     -- LuaTeX uses `char_width(f, '.') / 3` for StemV.
     characters[0x002E] = { width  = stemv * 3 }
 
+    local slant = 0
+    if haspost then
+      local post = face:get_table(posttag)
+      local length = post:get_length()
+      local data = post:get_data()
+      if length >= 32 and string.unpack(">i4", data) <= 0x00030000 then
+        local italicangle = string.unpack(">i4", data, 5) / 2^16
+        if italicangle ~= 0 then
+          slant = -math.tan(italicangle * math.pi / 180) * 65536.0
+        end
+      end
+    end
+
     tfmdata.parameters = {
-      slant = 0,
+      slant = slant,
       space = space or mag * upem / 2,
       space_stretch = mag * upem / 2,
       space_shrink = mag * upem / 3,

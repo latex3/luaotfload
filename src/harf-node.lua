@@ -52,7 +52,11 @@ local to_hb_dir = {
   LTL = dir_ltr, -- XXX Ditto
 }
 
-local function collect(head, direction)
+local collect
+local itemize
+local process
+
+collect = function(head, direction)
   local nodes = {}
   local codes = {}
   local dirstack = {}
@@ -124,7 +128,7 @@ local function collect(head, direction)
   return nodes, codes
 end
 
-local function itemize(nodes)
+itemize = function(nodes)
   local runs = {}
   local currfont, currdir, currscript = nil, nil, nil
   for i, n in next, nodes do
@@ -181,7 +185,7 @@ local function chars_in_glyph(i, glyphs, stop)
   return nchars, nglyphs
 end
 
-local function shape(head, current, run, nodes, codes)
+shape = function(head, current, run, nodes, codes)
   local offset = run.start
   local len = run.len
   local fontid = run.font
@@ -322,7 +326,19 @@ local function shape(head, current, run, nodes, codes)
   return head, current
 end
 
-local function process(head, groupcode, size, packtype, direction)
+process = function(head, direction)
+  local newhead, current = nil, nil
+  local nodes, codes = collect(head, direction)
+  local runs = itemize(nodes)
+
+  for _, run in next, runs do
+    newhead, current = shape(newhead, current, run, nodes, codes)
+  end
+
+  return newhead or head
+end
+
+local function callback_function(head, groupcode, size, packtype, direction)
   local fontid
   local has_hb
   for n in node.traverse_id(glyphcode, head) do
@@ -336,16 +352,8 @@ local function process(head, groupcode, size, packtype, direction)
     return head
   end
 
-  local nodes, codes = collect(head, direction)
-  local runs = itemize(nodes)
-
-  local newhead, current = nil, nil
-  for _, run in next, runs do
-    newhead, current = shape(newhead, current, run, nodes, codes)
-  end
-
-  return newhead or head
+  return process(head, direction)
 end
 
-callback.register('pre_linebreak_filter', process)
-callback.register('hpack_filter',         process)
+callback.register('pre_linebreak_filter', callback_function)
+callback.register('hpack_filter',         callback_function)

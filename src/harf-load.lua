@@ -101,16 +101,6 @@ local function define_font(name, size)
       end
     end
 
-    xheight = xheight or ascender / 2
-    capheight = capheight or ascender
-    stemv = stemv or 80 * mag
-
-    -- LuaTeX uses `char_height(f, 'H')` for CapHeight.
-    characters[0x0048] = { height = capheight }
-
-    -- LuaTeX uses `char_width(f, '.') / 3` for StemV.
-    characters[0x002E] = { width  = stemv * 3 }
-
     local slant = 0
     if haspost then
       local post = face:get_table(posttag)
@@ -124,13 +114,25 @@ local function define_font(name, size)
       end
     end
 
+    xheight = xheight or ascender / 2
+    capheight = capheight or ascender
+    stemv = stemv or 80 * mag
+    space = space or size / 2
+
+    -- LuaTeX uses `char_height(f, 'H')` for CapHeight.
+    characters[0x0048] = { height = capheight }
+
+    -- LuaTeX uses `char_width(f, '.') / 3` for StemV.
+    characters[0x002E] = { width  = stemv * 3 }
+
     tfmdata.parameters = {
       slant = slant,
-      space = space or mag * upem / 2,
-      space_stretch = mag * upem / 2,
-      space_shrink = mag * upem / 3,
+      space = space,
+      space_stretch = space / 2,
+      space_shrink = space / 3,
       x_height = xheight,
-      quad = mag * upem,
+      quad = size,
+      extra_space = space / 3,
     }
   else
     tfmdata = font.read_tfm(name, size)

@@ -1,14 +1,19 @@
 \iftrue
   \directlua{dofile("harf-load.lua")}
   \directlua{dofile("harf-node.lua")}
+  \font\testr={lmroman10-regular.otf} at 10pt
+  \font\testb={lmroman10-bold.otf} at 10pt
+  \font\testi={lmromanslant10-regular.otf} at 10pt
+  \font\testR={lmroman12-regular.otf} at 12pt
+  \font\testA={amiri-regular.ttf} at 10pt
 \else
   \input luaotfload.sty
+  \font\testr={file:lmroman10-regular.otf:script=latn} at 10pt
+  \font\testb={file:lmroman10-bold.otf:script=latn} at 10pt
+  \font\testi={file:lmromanslant10-regular.otf:script=latn} at 10pt
+  \font\testR={file:lmroman12-regular.otf:script=latn} at 12pt
+  \font\testA={file:amiri-regular.ttf:script=arab} at 10pt
 \fi
-\font\testr={lmroman10-regular.otf} at 10pt
-\font\testb={lmroman10-bold.otf} at 10pt
-\font\testi={lmromanslant10-regular.otf} at 10pt
-\font\testR={lmroman12-regular.otf} at 12pt
-\font\testA={amiri-regular.ttf} at 10pt
 
 \testA
 \pardir TRT

@@ -114,7 +114,6 @@ collect = function(head, direction)
       script = script,
     }
 
-    fontid = currfont
     dir = currdir
   end
 
@@ -339,20 +338,15 @@ process = function(head, direction)
 end
 
 local function callback_function(head, groupcode, size, packtype, direction)
-  local fontid
-  local has_hb
+  local fonts = font.fonts
   for n in node.traverse_id(glyphcode, head) do
-    local fontdata = font.fonts[n.font]
-    has_hb = has_hb or fontdata.hb ~= nil
-    fontid = fontid or n.font
+    if fonts[n.font].hb ~= nil then
+      return process(head, direction)
+    end
   end
 
   -- Nothing to do; no glyphs or no HarfBuzz fonts.
-  if not has_hb then
-    return head
-  end
-
-  return process(head, direction)
+  return head
 end
 
 callback.register('pre_linebreak_filter', callback_function)

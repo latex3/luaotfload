@@ -119,11 +119,17 @@ local function define_font(name, size)
     stemv = stemv or 80 * mag
     space = space or size / 2
 
-    -- LuaTeX uses `char_height(f, 'H')` for CapHeight.
-    characters[0x0048] = { height = capheight }
-
-    -- LuaTeX uses `char_width(f, '.') / 3` for StemV.
+    -- LuaTeX (ab)uses the metrics of these characters for some font metrics.
+    --
+    -- `char_width(f, '.') / 3` for StemV.
     characters[0x002E] = { width  = stemv * 3 }
+    -- `char_height(f, 'H')` for CapHeight.
+    characters[0x0048] = { height = capheight }
+    -- `char_height(f, 'h')` for Ascent.
+    characters[0x0068] = { height = ascender }
+    -- `-char_depth(f, 'y')` for Descent.
+    characters[0x0079] = { depth = -descender }
+
 
     tfmdata.parameters = {
       slant = slant,

@@ -124,6 +124,34 @@ local function collect(head, direction)
   return nodes, codes
 end
 
+local function itemize(nodes)
+  local runs = {}
+  local currfont, currdir, currscript = nil, nil, nil
+  for i, n in next, nodes do
+    local font = n.font
+    local dir = n.dir
+    local script = n.script
+
+    if font ~= currfont or dir ~= currdir or script ~= currscript then
+      runs[#runs + 1] = {
+        start = i,
+        len = 0,
+        font = font,
+        dir = dir,
+        script = script,
+      }
+    end
+
+    runs[#runs].len = runs[#runs].len + 1
+
+    currfont = font
+    currdir = dir
+    currscript = script
+  end
+
+  return runs
+end
+
 -- Find how many characters are part of this glyph.
 --
 -- The first return value is the number of characters, with 0 meaning it is
@@ -308,32 +336,10 @@ local function process(head, groupcode, size, packtype, direction)
     return head
   end
 
-  local currfont, currdir, currscript = nil, nil, nil
   local nodes, codes = collect(head, direction)
-  local runs = {}
-  for i, n in next, nodes do
-    local font = n.font
-    local dir = n.dir
-    local script = n.script
+  local runs = itemize(nodes)
 
-    if font ~= currfont or dir ~= currdir or script ~= currscript then
-      runs[#runs + 1] = {
-        start = i,
-        len = 0,
-        font = font,
-        dir = dir,
-        script = script,
-      }
-    end
-
-    runs[#runs].len = runs[#runs].len + 1
-
-    currfont = font
-    currdir = dir
-    currscript = script
-  end
-
-  local newhead, current
+  local newhead, current = nil, nil
   for _, run in next, runs do
     newhead, current = shape(newhead, current, run, nodes, codes)
   end

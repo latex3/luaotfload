@@ -29,6 +29,101 @@ local function to_utf16_hex(uni)
   end
 end
 
+local paired_open = {
+  [0x0028] = 0x0029, [0x003c] = 0x003e, [0x005b] = 0x005d, [0x007b] = 0x007d,
+  [0x00ab] = 0x00bb, [0x2018] = 0x2019, [0x201c] = 0x201d, [0x2039] = 0x203a,
+  [0x3008] = 0x3009, [0x300a] = 0x300b, [0x300c] = 0x300d, [0x300e] = 0x300f,
+  [0x3010] = 0x3011, [0x3014] = 0x3015, [0x3016] = 0x3017, [0x3018] = 0x3019,
+  [0x301a] = 0x301b,
+}
+
+local paired_close = {
+  [0x0029] = 0x0028, [0x003e] = 0x003c, [0x005d] = 0x005b, [0x007d] = 0x007b,
+  [0x00bb] = 0x00ab, [0x2019] = 0x2018, [0x201d] = 0x201c, [0x203a] = 0x2039,
+  [0x3009] = 0x3008, [0x300b] = 0x300a, [0x300d] = 0x300c, [0x300f] = 0x300e,
+  [0x3011] = 0x3010, [0x3015] = 0x3014, [0x3017] = 0x3016, [0x3019] = 0x3018,
+  [0x301b] = 0x301a,
+}
+
+local to_hb_dir = {
+  TLT = dir_ltr,
+  TRT = dir_rtl,
+  RTT = dir_ltr, -- XXX What to do with this?
+  LTL = dir_ltr, -- XXX Ditto
+}
+
+local function collect(head, direction)
+  local nodes = {}
+  local codes = {}
+  local dirstack = {}
+  local pairstack = {}
+  local currdir = direction or "TLT"
+  local currfont = nil
+
+  for n in node.traverse(head) do
+    local id = n.id
+    local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
+    local script = sc_common
+
+    if id == glyphcode then
+      code = n.char
+      currfont = n.font
+      script = getscript(code)
+    elseif id == gluecode and n.subtype == spaceskip then
+      code = 0x0020 -- SPACE
+    elseif id == disccode then
+      -- XXX actually handle this
+      code = 0x00AD -- SOFT HYPHEN
+    elseif id == dircode then
+      if n.dir:sub(1, 1) == "+" then
+        table.insert(dirstack, currdir)
+        currdir = n.dir:sub(2)
+      else
+        assert(currdir == n.dir:sub(2))
+        currdir = table.remove(dirstack)
+      end
+    elseif id == localparcode then
+      currdir = n.dir
+    end
+
+    if #nodes > 0 and (script == sc_common or script == sc_inherited) then
+      script = nodes[#nodes].script
+      -- Paired punctuation characters
+      if paired_open[code] then
+        table.insert(pairstack, { code, script })
+      elseif paired_close[code] then
+        while #pairstack > 0 do
+          local c = table.remove(pairstack)
+          if c[1] == paired_close[code] then
+            script = c[2]
+            break
+          end
+        end
+      end
+    end
+
+    codes[#codes + 1] = code
+    nodes[#nodes + 1] = {
+      node = n,
+      font = currfont,
+      dir = to_hb_dir[currdir],
+      script = script,
+    }
+
+    fontid = currfont
+    dir = currdir
+  end
+
+  for i = #nodes - 1, 1, -1 do
+    -- If script is not resolved yet, use that of the next glyph.
+    if nodes[i].script == sc_common or nodes[i].script == sc_inherited then
+      nodes[i].script = nodes[i + 1].script
+    end
+  end
+
+  return nodes, codes
+end
+
 -- Find how many characters are part of this glyph.
 --
 -- The first return value is the number of characters, with 0 meaning it is
@@ -197,125 +292,6 @@ local function shape(head, current, run, nodes, codes)
   end
 
   return head, current
-end
-
-local paired_open = {
-  [0x0028] = 0x0029,
-  [0x003c] = 0x003e,
-  [0x005b] = 0x005d,
-  [0x007b] = 0x007d,
-  [0x00ab] = 0x00bb,
-  [0x2018] = 0x2019,
-  [0x201c] = 0x201d,
-  [0x2039] = 0x203a,
-  [0x3008] = 0x3009,
-  [0x300a] = 0x300b,
-  [0x300c] = 0x300d,
-  [0x300e] = 0x300f,
-  [0x3010] = 0x3011,
-  [0x3014] = 0x3015,
-  [0x3016] = 0x3017,
-  [0x3018] = 0x3019,
-  [0x301a] = 0x301b,
-}
-
-local paired_close = {
-  [0x0029] = 0x0028,
-  [0x003e] = 0x003c,
-  [0x005d] = 0x005b,
-  [0x007d] = 0x007b,
-  [0x00bb] = 0x00ab,
-  [0x2019] = 0x2018,
-  [0x201d] = 0x201c,
-  [0x203a] = 0x2039,
-  [0x3009] = 0x3008,
-  [0x300b] = 0x300a,
-  [0x300d] = 0x300c,
-  [0x300f] = 0x300e,
-  [0x3011] = 0x3010,
-  [0x3015] = 0x3014,
-  [0x3017] = 0x3016,
-  [0x3019] = 0x3018,
-  [0x301b] = 0x301a,
-}
-
-local to_hb_dir = {
-  TLT = dir_ltr,
-  TRT = dir_rtl,
-  RTT = dir_ltr, -- XXX What to do with this?
-  LTL = dir_ltr, -- XXX Ditto
-}
-
-local function collect(head, direction)
-  local nodes = {}
-  local codes = {}
-  local dirstack = {}
-  local pairstack = {}
-  local currdir = direction or "TLT"
-  local currfont = nil
-
-  for n in node.traverse(head) do
-    local id = n.id
-    local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
-    local script = sc_common
-
-    if id == glyphcode then
-      code = n.char
-      currfont = n.font
-      script = getscript(code)
-    elseif id == gluecode and n.subtype == spaceskip then
-      code = 0x0020 -- SPACE
-    elseif id == disccode then
-      -- XXX actually handle this
-      code = 0x00AD -- SOFT HYPHEN
-    elseif id == dircode then
-      if n.dir:sub(1, 1) == "+" then
-        table.insert(dirstack, currdir)
-        currdir = n.dir:sub(2)
-      else
-        assert(currdir == n.dir:sub(2))
-        currdir = table.remove(dirstack)
-      end
-    elseif id == localparcode then
-      currdir = n.dir
-    end
-
-    if #nodes > 0 and (script == sc_common or script == sc_inherited) then
-      script = nodes[#nodes].script
-      -- Paired punctuation characters
-      if paired_open[code] then
-        table.insert(pairstack, { code, script })
-      elseif paired_close[code] then
-        while #pairstack > 0 do
-          local c = table.remove(pairstack)
-          if c[1] == paired_close[code] then
-            script = c[2]
-            break
-          end
-        end
-      end
-    end
-
-    codes[#codes + 1] = code
-    nodes[#nodes + 1] = {
-      node = n,
-      font = currfont,
-      dir = to_hb_dir[currdir],
-      script = script,
-    }
-
-    fontid = currfont
-    dir = currdir
-  end
-
-  for i = #nodes - 1, 1, -1 do
-    -- If script is not resolved yet, use that of the next glyph.
-    if nodes[i].script == sc_common or nodes[i].script == sc_inherited then
-      nodes[i].script = nodes[i + 1].script
-    end
-  end
-
-  return nodes, codes
 end
 
 local function process(head, groupcode, size, packtype, direction)

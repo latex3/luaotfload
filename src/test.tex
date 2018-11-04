@@ -10,6 +10,7 @@
 \font\testR="[lmroman12-regular.otf]:script=latn" at 12pt
 \font\testA="[amiri-regular.ttf]:script=arab" at 10pt
 \font\testB="[amiri-bold.ttf]:script=arab" at 10pt
+\font\testF="[NotoSerifCJK-Regular.ttc]:script=latn;" at 10pt
 
 \testA
 
@@ -33,16 +34,29 @@
 \vfill\eject
 
 \begingroup
+\parindent=0pt
+\testF
+\noindent
+\smallskip
+offbeat office baffle coffee HAVANA\par
+\smallskip
+\begingroup
+\rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
+offbeat office baffle coffee HAVANA\par
+\endgroup
+\endgroup
+\vfill\eject
+
+\begingroup
+\parindent=0pt
 \testr
 \noindent
 \smallskip
 offbeat office baffle coffee HAVANA\par
 \smallskip
-with forced hyphenation:\par
-\smallskip
 \begingroup
-	\rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
-	offbeat office baffle coffee HAVANA\par
+\rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
+offbeat office baffle coffee HAVANA\par
 \endgroup
 \endgroup
 \vfill\eject

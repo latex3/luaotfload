@@ -5,12 +5,69 @@ local cff2tag = hb.Tag.new("CFF2")
 local os2tag  = hb.Tag.new("OS/2")
 local posttag = hb.Tag.new("post")
 
-local function define_font(name, size)
-  local tfmdata
-  local filename = kpse.find_file(name, "truetype fonts") or
-                   kpse.find_file(name, "opentype fonts")
+local function trim(str)
+  return str:gsub("^%s*(.-)%s*$", "%1")
+end
 
-  local face = filename and hb.Face.new(filename)
+local function split(str, sep)
+  if str then
+    local result = string.explode(str, sep.."+")
+    for i, s in next, result do
+      result[i] = trim(result[i])
+    end
+    return result
+  end
+end
+
+local function parse(str)
+  local spec = { variants = {}, features = {}, options = {}}
+  local name, options = str:match("%s*(.*)%s*:%s*(.*)%s*")
+
+  name = trim(name or str)
+
+  local filename = name:match("%[(.*)%]")
+  if filename then
+    -- [file]
+    -- [file:index]
+    filename = string.explode(filename, ":+")
+    spec.file = filename[1]
+    spec.index = tonumber(filename[2]) or 0
+  else
+    -- name
+    -- name/variants
+    local fontname, variants = name:match("(.-)%s*/%s*(.*)")
+    spec.name = fontname or name
+    spec.variants = split(variants, "/")
+  end
+  if options then
+    options = split(options, ";+")
+    for _, opt in next, options do
+      if opt:find("[+-]") == 1 then
+        local feature = hb.Feature.new(opt)
+        spec.features[#spec.features + 1] = feature
+      else
+        local key, val = opt:match("(.*)%s*=%s*(.*)")
+        spec.options[key or opt] = val or true
+      end
+    end
+  end
+  return spec
+end
+
+local function define_font(name, size)
+  local spec = parse(name)
+  local tfmdata = nil
+  local filename, index = nil, 0
+
+  if spec.file then
+    filename = kpse.find_file(spec.file, "truetype fonts") or
+               kpse.find_file(spec.file, "opentype fonts")
+    index = spec.index
+  else
+    -- XXX support font names
+  end
+
+  local face = filename and hb.Face.new(filename, index)
   if face then
     if size < 0 then
       size = (-655.36) * size
@@ -21,6 +78,7 @@ local function define_font(name, size)
     tfmdata = {}
 
     tfmdata.hb = {
+      spec = spec,
       face = face,
       font = font,
       loaded = {}, -- { gid=true } for glyphs we loaded their metrics.

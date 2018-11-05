@@ -195,6 +195,7 @@ shape = function(head, current, run, nodes, codes)
     local script = run.script
     local lang = run.lang or lang_invalid
     local hbfont = fontdata.hb.font
+    local features = fontdata.hb.spec.features
     local loaded = fontdata.hb.loaded
     local buf = hb.Buffer.new()
     local rtl = dir:is_backward()
@@ -204,7 +205,7 @@ shape = function(head, current, run, nodes, codes)
     buf:set_language(lang)
     buf:set_cluster_level(buf.CLUSTER_LEVEL_MONOTONE_CHARACTERS)
     buf:add_codepoints(codes, offset - 1, len)
-    if hb.shape_full(hbfont, buf, {}) then
+    if hb.shape_full(hbfont, buf, features) then
       if rtl then
         buf:reverse()
       end

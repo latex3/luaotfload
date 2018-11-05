@@ -1,21 +1,15 @@
 \iftrue
   \directlua{dofile("harf-load.lua")}
   \directlua{dofile("harf-node.lua")}
-  \font\testr={lmroman10-regular.otf} at 10pt
-  \font\testb={lmroman10-bold.otf} at 10pt
-  \font\testi={lmromanslant10-regular.otf} at 10pt
-  \font\testR={lmroman12-regular.otf} at 12pt
-  \font\testA={amiri-regular.ttf} at 10pt
-  \font\testB={amiri-bold.ttf} at 10pt
 \else
   \input luaotfload.sty
-  \font\testr=[lmroman10-regular.otf]:script=latn at 10pt
-  \font\testb=[lmroman10-bold.otf]:script=latn at 10pt
-  \font\testi=[lmromanslant10-regular.otf]:script=latn at 10pt
-  \font\testR=[lmroman12-regular.otf]:script=latn at 12pt
-  \font\testA=[amiri-regular.ttf]:script=arab at 10pt
-  \font\testB=[amiri-bold.ttf]:script=arab at 10pt
 \fi
+\font\testr="[lmroman10-regular.otf]:script=latn;+dlig" at 10pt
+\font\testb="[lmroman10-bold.otf]:script=latn" at 10pt
+\font\testi="[lmromanslant10-regular.otf]:script=latn" at 10pt
+\font\testR="[lmroman12-regular.otf]:script=latn" at 12pt
+\font\testA="[amiri-regular.ttf]:script=arab" at 10pt
+\font\testB="[amiri-bold.ttf]:script=arab" at 10pt
 
 \testA
 
@@ -63,7 +57,7 @@ with forced hyphenation:\par
 Once upon a time, in a distant {\testR galaxy called} Ööç, there lived a computer named
 R.~J. Drofnats.
 
-Mr.~Drofnats—or “R. J.,” as he {\textdir TRT preferred} to be called—was happiest when he
+Mr.~Drofnats-----or ‘‘R. J.,’’ as he {\textdir TRT preferred} to be called-----was happiest when he
 was at work typesetting beautiful documents.
 \vskip 1in
 \hrule

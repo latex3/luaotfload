@@ -460,7 +460,7 @@ process = function(head, direction)
   return newhead or head
 end
 
-local function callback_function(head, groupcode, size, packtype, direction)
+local function process_nodes(head, groupcode, size, packtype, direction)
   local fonts = font.fonts
   for n in node.traverse_id(glyphcode, head) do
     if fonts[n.font].hb ~= nil then
@@ -472,5 +472,4 @@ local function callback_function(head, groupcode, size, packtype, direction)
   return head
 end
 
-callback.register('pre_linebreak_filter', callback_function)
-callback.register('hpack_filter',         callback_function)
+return process_nodes

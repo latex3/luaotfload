@@ -204,4 +204,4 @@ local function define_font(name, size)
   return tfmdata
 end
 
-callback.register("define_font", define_font)
+return define_font

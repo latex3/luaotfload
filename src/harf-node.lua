@@ -64,11 +64,9 @@ local to_luatex_dir = {
   dir_rtl = "TRT",
 }
 
-local collect
-local itemize
 local process
 
-collect = function(head, direction)
+local function collect(head, direction)
   local nodes = {}
   local codes = {}
   local dirstack = {}
@@ -138,7 +136,7 @@ collect = function(head, direction)
   return nodes, codes
 end
 
-itemize = function(nodes)
+local function itemize(nodes)
   local runs = {}
   local currfont, currdir, currscript = nil, nil, nil
   for i, n in next, nodes do

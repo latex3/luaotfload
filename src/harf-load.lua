@@ -199,6 +199,7 @@ local function define_font(name, size)
       x_height = xheight,
       quad = size,
       extra_space = space / 3,
+      [8] = capheight, -- for XeTeX compatibility.
     }
   else
     tfmdata = font.read_tfm(name, size)

@@ -217,12 +217,14 @@ local shape
 
 -- Make s a sub run, used by discretionary nodes.
 local function makesub(run, nodes, codes, start, stop, nodelist)
-  local start = start or 1
-  local stop = stop or #nodes
+  local start = start
+  local stop = stop
   local subnodes, subcodes = {}, {}
   for i = start, stop do
-    subnodes[#subnodes + 1] = node.copy(nodes[i])
-    subcodes[#subcodes + 1] = codes[i]
+    if nodes[i].id ~= disccode then
+      subnodes[#subnodes + 1] = node.copy(nodes[i])
+      subcodes[#subcodes + 1] = codes[i]
+    end
   end
   -- Prepend any existing nodes to the list.
   for n in node.traverse(nodelist) do

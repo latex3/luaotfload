@@ -20,17 +20,19 @@ local dir_rtl      = hb.Direction.new("rtl")
 local lang_invalid = hb.Language.new()
 local fl_unsafe    = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 
+local format = string.format
+
 -- Convert list of integers to UTF-16 hex string used in PDF.
 local function to_utf16_hex(unicodes)
   local hex = ""
   for _, uni in next, unicodes do
     if uni < 0x10000 then
-      hex = hex..string.format("%04X", uni)
+      hex = hex..format("%04X", uni)
     else
       uni = uni - 0x10000
       local hi = 0xD800 + (uni // 0x400)
       local lo = 0xDC00 + (uni % 0x400)
-      hex = hex..string.format("%04X%04X", hi, lo)
+      hex = hex..format("%04X%04X", hi, lo)
     end
   end
   return hex

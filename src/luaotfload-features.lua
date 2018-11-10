@@ -1223,7 +1223,15 @@ local handle_request = function (specification)
         specification.features = features
     end
 
-    features.raw = table.merged(request.features or {})
+    features.raw = request.features or {}
+    request.features = {}
+    for k, v in pairs(features.raw) do
+        if type(v) == 'string' then
+            v = string.lower(v)
+            v = ({['true'] = true, ['false'] = false})[v] or v
+        end
+        request.features[k] = v
+    end
     request.features = apply_default_features(request.features)
 
     if name then

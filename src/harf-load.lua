@@ -55,9 +55,11 @@ local function parse(str)
 end
 
 local function define_font(name, size)
-  local spec = parse(name)
+  local spec
   local tfmdata = nil
   local filename, index = nil, 0
+
+  spec = type(name) == "string" and parse(name) or name
 
   if spec.file then
     filename = kpse.find_file(spec.file, "truetype fonts") or

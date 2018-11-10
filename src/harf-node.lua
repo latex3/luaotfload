@@ -374,6 +374,8 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
   local loaded = hbdata.loaded
   local rtl = dir:is_backward()
 
+  local tracinglostchars = tex.tracinglostchars
+
   local fontextents = hbfont:get_h_extents()
   local ascender = fontextents and fontextents.ascender
   local descender = fontextents and fontextents.descender
@@ -410,6 +412,17 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
 
       if id == glyphcode then
         local width = hbfont:get_glyph_h_advance(gid)
+
+        -- Report missing characters, trying to emulate the engine behaviour as
+        -- much as possible.
+        if gid == 0 and tracinglostchars > 0 then
+          local code = n.char
+          local target = tracinglostchars > 1 and "term and log" or "log"
+          local msg = format("Missing character: There is no %s (U+%04X) in "..
+                             "font %s!", utf8.char(code), code, fontdata.name)
+          texio.write_nl(target, msg)
+          texio.write_nl(target, "")
+        end
 
         n.char = char
         n.xoffset = rtl and -glyph.x_offset or glyph.x_offset

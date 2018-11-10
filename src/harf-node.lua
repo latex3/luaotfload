@@ -66,6 +66,7 @@ local process
 -- Collect character properties (font, direction, script) and resolve common
 -- and inherited scripts. Pre-requisite for itemization into smaller runs.
 local function collect(head, direction)
+  local props = {}
   local nodes = {}
   local codes = {}
   local dirstack = {}
@@ -103,8 +104,8 @@ local function collect(head, direction)
     -- Resolve common and inherited scripts. Inherited takes the script of the
     -- previous character. Common almost the same, but we tray to make paired
     -- characters (e.g. parentheses) to take the same script.
-    if #nodes > 0 and (script == sc_common or script == sc_inherited) then
-      script = nodes[#nodes].script
+    if #props > 0 and (script == sc_common or script == sc_inherited) then
+      script = props[#props].script
       -- Paired punctuation characters
       if paired_open[code] then
         table.insert(pairstack, { code, script })
@@ -120,8 +121,8 @@ local function collect(head, direction)
     end
 
     codes[#codes + 1] = code
-    nodes[#nodes + 1] = {
-      node = n,
+    nodes[#nodes + 1] = n
+    props[#props + 1] = {
       font = currfont,
       dir = to_hb_dir[currdir],
       script = script,
@@ -130,25 +131,25 @@ local function collect(head, direction)
     dir = currdir
   end
 
-  for i = #nodes - 1, 1, -1 do
+  for i = #props - 1, 1, -1 do
     -- If script is not resolved yet, use that of the next character.
-    if nodes[i].script == sc_common or nodes[i].script == sc_inherited then
-      nodes[i].script = nodes[i + 1].script
+    if props[i].script == sc_common or props[i].script == sc_inherited then
+      props[i].script = props[i + 1].script
     end
   end
 
-  return nodes, codes
+  return props, nodes, codes
 end
 
 -- Split into a list of runs, each has the same font, direction and script.
 -- TODO: itemize by language as well.
-local function itemize(nodes)
+local function itemize(props)
   local runs = {}
   local currfont, currdir, currscript = nil, nil, nil
-  for i, n in next, nodes do
-    local font = n.font
-    local dir = n.dir
-    local script = n.script
+  for i, prop in next, props do
+    local font = prop.font
+    local dir = prop.dir
+    local script = prop.script
 
     -- Start a new run if there is a change in properties.
     if font ~= currfont or dir ~= currdir or script ~= currscript then
@@ -540,12 +541,8 @@ end
 
 process = function(head, direction)
   local newhead, current = nil, nil
-  local nodes, codes = collect(head, direction)
-  local runs = itemize(nodes)
-
-  for i, n in next, nodes do
-    nodes[i] = n.node
-  end
+  local props, nodes, codes = collect(head, direction)
+  local runs = itemize(props)
 
   for _, run in next, runs do
     newhead, current = shape_run(newhead, current, run, nodes, codes)

@@ -61,6 +61,8 @@ local to_hb_dir = {
 
 local process
 
+-- Collect character properties (font, direction, script) and resolve common
+-- and inherited scripts. Pre-requisite for itemization into smaller runs.
 local function collect(head, direction)
   local nodes = {}
   local codes = {}
@@ -84,16 +86,21 @@ local function collect(head, direction)
       code = 0x00AD -- SOFT HYPHEN
     elseif id == dircode then
       if n.dir:sub(1, 1) == "+" then
+        -- Push the current direction to the stack.
         table.insert(dirstack, currdir)
         currdir = n.dir:sub(2)
       else
         assert(currdir == n.dir:sub(2))
+        -- Pop the last direction from the stack.
         currdir = table.remove(dirstack)
       end
     elseif id == localparcode then
       currdir = n.dir
     end
 
+    -- Resolve common and inherited scripts. Inherited takes the script of the
+    -- previous character. Common almost the same, but we tray to make paired
+    -- characters (e.g. parentheses) to take the same script.
     if #nodes > 0 and (script == sc_common or script == sc_inherited) then
       script = nodes[#nodes].script
       -- Paired punctuation characters
@@ -122,7 +129,7 @@ local function collect(head, direction)
   end
 
   for i = #nodes - 1, 1, -1 do
-    -- If script is not resolved yet, use that of the next glyph.
+    -- If script is not resolved yet, use that of the next character.
     if nodes[i].script == sc_common or nodes[i].script == sc_inherited then
       nodes[i].script = nodes[i + 1].script
     end
@@ -131,6 +138,8 @@ local function collect(head, direction)
   return nodes, codes
 end
 
+-- Split into a list of runs, each has the same font, direction and script.
+-- TODO: itemize by language as well.
 local function itemize(nodes)
   local runs = {}
   local currfont, currdir, currscript = nil, nil, nil
@@ -139,6 +148,7 @@ local function itemize(nodes)
     local dir = n.dir
     local script = n.script
 
+    -- Start a new run if there is a change in properties.
     if font ~= currfont or dir ~= currdir or script ~= currscript then
       runs[#runs + 1] = {
         start = i,
@@ -175,28 +185,35 @@ local function chars_in_glyph(i, glyphs, stop)
     return 0, 0
   end
 
+  -- Find the last glyph in this cluster.
   while glyphs[i + nglyphs] and glyphs[i + nglyphs].cluster == cluster do
     nglyphs = nglyphs + 1
   end
 
+  -- The number of characters is the diff between the next cluster in this one.
   if glyphs[i + nglyphs] then
     nchars = glyphs[i + nglyphs].cluster - cluster
   else
+    -- This glyph cluster in the last in the run.
     nchars = stop - cluster - 1
   end
 
   return nchars, nglyphs
 end
 
+-- Check if it is safe to break before this glyph.
 local function unsafetobreak(glyph, nodes)
   return glyph
      and glyph.flags
      and glyph.flags & fl_unsafe
+     -- LuaTeX’s discretionary nodes can’t contain glue, so stop at first glue
+     -- as well. This is incorrect, but I don’t have a better idea.
      and nodes[glyph.cluster + 1].id ~= gluecode
 end
 
 local shape
 
+-- Make s a sub run, used by discretionary nodes.
 local function makesub(run, nodes, codes, start, stop, nodelist)
   local start = start or 1
   local stop = stop or #nodes
@@ -205,6 +222,7 @@ local function makesub(run, nodes, codes, start, stop, nodelist)
     subnodes[#subnodes + 1] = node.copy(nodes[i])
     subcodes[#subcodes + 1] = codes[i]
   end
+  -- Prepend any existing nodes to the list.
   for n in node.traverse(nodelist) do
     subnodes[#subnodes + 1] = n
     subcodes[#subcodes + 1] = n.char
@@ -225,6 +243,7 @@ local function makesub(run, nodes, codes, start, stop, nodelist)
   }
 end
 
+-- Simple table copying function. DOES NOT copy sub tables.
 local function copytable(old)
   local new = {}
   for k, v in next, old do
@@ -233,6 +252,8 @@ local function copytable(old)
   return new
 end
 
+-- Main shaping function that calls HarfBuzz, and does some post-processing of
+-- the output.
 shape = function(run, nodes, codes)
   local offset = run.start
   local len = run.len
@@ -265,6 +286,9 @@ shape = function(run, nodes, codes)
       local nchars, nglyphs = chars_in_glyph(i, glyphs, offset + len)
       glyph.nchars, glyph.nglyphs = nchars, nglyphs
 
+      -- Calculate the Unicode code points of this glyph. If nchars is zero
+      -- then this is a glyph inside a complex cluster and will be handled with
+      -- the start of its cluster.
       if nchars > 0 then
         local unicodes = {}
         for j = 0, nchars - 1 do
@@ -276,6 +300,9 @@ shape = function(run, nodes, codes)
         glyph.unicodes = unicodes
       end
 
+      -- Find if we have a discretionary inside a ligature, if nchars less than
+      -- two then either this is not a ligature or there is no discretionary
+      -- involved.
       if nchars > 2 and not fordisc then
         local discindex = nil
         for j = nodeindex, nodeindex + nchars - 1 do
@@ -285,18 +312,20 @@ shape = function(run, nodes, codes)
           end
         end
         if discindex then
+          -- Discretionary found.
           local disc = nodes[discindex]
           local startindex, stopindex = nil, nil
           local startglyph, stopglyph = nil, nil
 
-          -- Find the previous character that is safe to break at.
+          -- Find the previous glyph that is safe to break at.
           startglyph = i
           while unsafetobreak(glyphs[startglyph], nodes) do
             startglyph = startglyph - 1
           end
+          -- Get the corresponding character index.
           startindex = glyphs[startglyph].cluster + 1
 
-          -- Find the next character that is safe to break at.
+          -- Find the next glyph that is safe to break at.
           stopglyph = i + nglyphs
           while unsafetobreak(glyphs[stopglyph], nodes) do
             stopglyph = stopglyph + 1
@@ -306,6 +335,8 @@ shape = function(run, nodes, codes)
           -- We break up to stop glyph but not including it, so the -1 below.
           stopglyph = stopglyph - 1
 
+          -- Mark these glyph for skipping since they will be replaced by the
+          -- discretionary fields.
           for j = startglyph, stopglyph do
             glyphs[j].skip = true
           end
@@ -330,6 +361,7 @@ local function pdfdirect(data)
   return actual
 end
 
+-- Convert glyphs to nodes and collect font characters.
 local function tonodes(head, current, run, nodes, codes, glyphs, characters)
   local fordisc = run.fordisc
   local dir = run.dir
@@ -351,6 +383,7 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
     local n = nodes[index]
     local id = n.id
     local nchars, nglyphs = glyph.nchars, glyph.nglyphs
+
     -- If this glyph is part of a complex cluster, then copy the node as
     -- more than one glyph will use it.
     if nglyphs < 1 or nglyphs > 1 then
@@ -358,6 +391,8 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
     end
 
     if glyph.disc then
+      -- For discretionary the glyph itself is skipped and a discretionary node
+      -- is output in place of it.
       local disc = glyph.disc
       local replace = glyph.replace
       local pre = glyph.pre
@@ -452,11 +487,13 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
   return head, current, characters
 end
 
-local function layout(head, current, run, nodes, codes)
+local function shape_run(head, current, run, nodes, codes)
   local fontid = run.font
   local fontdata = fontid and font.fonts[fontid]
 
   if fontdata and fontdata.hb then
+    -- Font loaded with our loader and an HarfBuzz face is present, do our
+    -- shaping.
     local characters = {} -- LuaTeX font characters table
 
     local glyphs = shape(run, nodes, codes)
@@ -466,9 +503,9 @@ local function layout(head, current, run, nodes, codes)
       font.addcharacters(run.font, { characters = characters })
     end
   else
+    -- Not shaping, insert the original node list of of this run.
     local offset = run.start
     local len = run.len
-    -- Not shaping, insert the original node list of of this run.
     for i = offset, offset + len - 1 do
       head, current = node.insert_after(head, current, nodes[i])
     end
@@ -487,7 +524,7 @@ process = function(head, direction)
   end
 
   for _, run in next, runs do
-    newhead, current = layout(newhead, current, run, nodes, codes)
+    newhead, current = shape_run(newhead, current, run, nodes, codes)
   end
 
   return newhead or head

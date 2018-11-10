@@ -532,6 +532,10 @@ end
 
 local function process_nodes(head, groupcode, size, packtype, direction)
   local fonts = font.fonts
+
+  -- Check if any fonts are loaded by us and then process the whole node list,
+  -- we will take care of skipping fonts we did not load later, otherwise
+  -- return unmodified head.
   for n in node.traverse_id(glyphcode, head) do
     if fonts[n.font].hb ~= nil then
       return process(head, direction)

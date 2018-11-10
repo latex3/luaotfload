@@ -490,6 +490,11 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
         -- The simple case of a discretionary that is not part of a complex
         -- cluster. We only need to make sure kerning before the hyphenation
         -- point is dropped when a line break is inserted here.
+        --
+        -- TODO: nothing as simple as it sounds, we need to handle this like
+        -- the other discretionary handling, otherwise the discretionary
+        -- contents do not interact with the surrounding (e.g. no ligatures or
+        -- kerning) as it should.
         local prev = current.prev
         if prev and prev.id == kerncode and prev.subtype == fontkern then
           head = node.remove(head, prev)
@@ -497,6 +502,8 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
           n.replace = prev
         end
         n.pre = process(n.pre, direction)
+        n.post = process(n.post, direction)
+        n.replace = process(n.replace, direction)
       end
     end
   end

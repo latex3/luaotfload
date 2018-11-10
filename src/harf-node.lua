@@ -59,11 +59,6 @@ local to_hb_dir = {
   LTL = dir_ltr, -- XXX Ditto
 }
 
-local to_luatex_dir = {
-  dir_ltr = "TLT",
-  dir_rtl = "TRT",
-}
-
 local process
 
 local function collect(head, direction)
@@ -193,13 +188,59 @@ local function chars_in_glyph(i, glyphs, stop)
   return nchars, nglyphs
 end
 
-local function shape(run, nodes, codes)
+local function unsafetobreak(glyph, nodes)
+  return glyph
+     and glyph.flags
+     and glyph.flags & fl_unsafe
+     and nodes[glyph.cluster + 1].id ~= gluecode
+end
+
+local shape
+
+local function makesub(run, nodes, codes, start, stop, nodelist)
+  local start = start or 1
+  local stop = stop or #nodes
+  local subnodes, subcodes = {}, {}
+  for i = start, stop do
+    subnodes[#subnodes + 1] = node.copy(nodes[i])
+    subcodes[#subcodes + 1] = codes[i]
+  end
+  for n in node.traverse(nodelist) do
+    subnodes[#subnodes + 1] = n
+    subcodes[#subcodes + 1] = n.char
+  end
+  local subrun = {
+    start = 1,
+    len = #subnodes,
+    font = run.font,
+    script = run.script,
+    dir = run.dir,
+    fordisc = true,
+  }
+  return {
+    glyphs = shape(subrun, subnodes, subcodes),
+    run = subrun,
+    nodes = subnodes,
+    codes = subcodes,
+  }
+end
+
+local function copytable(old)
+  local new = {}
+  for k, v in next, old do
+    new[k] = v
+  end
+  return new
+end
+
+shape = function(run, nodes, codes)
   local offset = run.start
   local len = run.len
   local fontid = run.font
   local dir = run.dir
   local script = run.script
   local lang = run.lang or lang_invalid
+  local fordisc = run.fordisc
 
   local fontdata = font.fonts[fontid]
   local hbdata = fontdata.hb
@@ -227,12 +268,53 @@ local function shape(run, nodes, codes)
       if nchars > 0 then
         local unicodes = {}
         for j = 0, nchars - 1 do
-          local id = nodes[nodeindex + j].node.id
+          local id = nodes[nodeindex + j].id
           if id == glyphcode or id == gluecode then
             unicodes[#unicodes + 1] = codes[nodeindex + j]
           end
         end
         glyph.unicodes = unicodes
+      end
+
+      if nchars > 2 and not fordisc then
+        local discindex = nil
+        for j = nodeindex, nodeindex + nchars - 1 do
+          if codes[j] == 0x00AD then
+            discindex = j
+            break
+          end
+        end
+        if discindex then
+          local disc = nodes[discindex]
+          local startindex, stopindex = nil, nil
+          local startglyph, stopglyph = nil, nil
+
+          -- Find the previous character that is safe to break at.
+          startglyph = i
+          while unsafetobreak(glyphs[startglyph], nodes) do
+            startglyph = startglyph - 1
+          end
+          startindex = glyphs[startglyph].cluster + 1
+
+          -- Find the next character that is safe to break at.
+          stopglyph = i + nglyphs
+          while unsafetobreak(glyphs[stopglyph], nodes) do
+            stopglyph = stopglyph + 1
+          end
+          -- We also want the last char in the previous glyph, so no +1 below.
+          stopindex = glyphs[stopglyph].cluster
+          -- We break up to stop glyph but not including it, so the -1 below.
+          stopglyph = stopglyph - 1
+
+          for j = startglyph, stopglyph do
+            glyphs[j].skip = true
+          end
+
+          glyph.disc = disc
+          glyph.replace = makesub(run, nodes, codes, startindex, stopindex, disc.replace)
+          glyph.pre = makesub(run, nodes, codes, startindex, discindex - 1, disc.pre)
+          glyph.post = makesub(run, nodes, codes, discindex + 1, stopindex, disc.post)
+        end
       end
     end
     return glyphs
@@ -248,231 +330,147 @@ local function pdfdirect(data)
   return actual
 end
 
-local function layout(head, current, run, nodes, codes)
-  local offset = run.start
-  local len = run.len
+local function tonodes(head, current, run, nodes, codes, glyphs, characters)
+  local fordisc = run.fordisc
+  local dir = run.dir
   local fontid = run.font
   local fontdata = fontid and font.fonts[fontid]
   local hbdata = fontdata and fontdata.hb
+  local hbfont = hbdata.font
+  local loaded = hbdata.loaded
+  local rtl = dir:is_backward()
 
-  if hbdata then
-    local dir = run.dir
-    local rtl = dir:is_backward()
-    local hbfont = hbdata.font
-    local loaded = hbdata.loaded
+  local fontextents = hbfont:get_h_extents()
+  local ascender = fontextents and fontextents.ascender
+  local descender = fontextents and fontextents.descender
 
-    local fontextents = hbfont:get_h_extents()
-    local ascender = fontextents and fontextents.ascender
-    local descender = fontextents and fontextents.descender
+  for i, glyph in next, glyphs do
+    local index = glyph.cluster + 1
+    local gid = glyph.codepoint
+    local char = hb.CH_GID_PREFIX + gid
+    local n = nodes[index]
+    local id = n.id
+    local nchars, nglyphs = glyph.nchars, glyph.nglyphs
+    -- If this glyph is part of a complex cluster, then copy the node as
+    -- more than one glyph will use it.
+    if nglyphs < 1 or nglyphs > 1 then
+      n = node.copy(nodes[index])
+    end
 
-    local characters = {} -- LuaTeX font characters table
-    local glyphs = shape(run, nodes, codes)
-    for i, g in next, glyphs do
-      local index = g.cluster + 1
+    if glyph.disc then
+      local disc = glyph.disc
+      local replace = glyph.replace
+      local pre = glyph.pre
+      local post = glyph.post
 
-      if not nodes[index].skip then
-        local gid = g.codepoint
-        local char = hb.CH_GID_PREFIX + gid
-        local n = nodes[index].node
-        local id = n.id
-        local nchars, nglyphs = g.nchars, g.nglyphs
-        -- If this glyph is part of a complex cluster, then copy the node as
-        -- more than one glyph will use it.
-        if nglyphs < 1 or nglyphs > 1 then
-          n = node.copy(nodes[index].node)
+      disc.replace = tonodes(nil, nil, replace.run, replace.nodes, replace.codes, replace.glyphs, characters)
+      disc.pre = tonodes(nil, nil, pre.run, pre.nodes, pre.codes, pre.glyphs, characters)
+      disc.post = tonodes(nil, nil, post.run, post.nodes, post.codes, post.glyphs, characters)
+
+      head, current = node.insert_after(head, current, disc)
+    elseif not glyph.skip then
+      head, current = node.insert_after(head, current, n)
+
+      if id == glyphcode then
+        local width = hbfont:get_glyph_h_advance(gid)
+
+        n.char = char
+        n.xoffset = rtl and -glyph.x_offset or glyph.x_offset
+        n.yoffset = glyph.y_offset
+
+        if width ~= glyph.x_advance then
+          -- LuaTeX always uses the glyph width from the font, so we need to
+          -- insert a kern node if the x advance is different.
+          local kern = node.new("kern")
+          kern.kern = glyph.x_advance - width
+          if rtl then
+            head = node.insert_before(head, current, kern)
+          else
+            head, current = node.insert_after(head, current, kern)
+          end
         end
 
-        head, current = node.insert_after(head, current, n)
+        node.protect_glyph(n)
 
-        if id == glyphcode then
-          local width = hbfont:get_glyph_h_advance(gid)
-
-          n.char = char
-          n.xoffset = rtl and -g.x_offset or g.x_offset
-          n.yoffset = g.y_offset
-
-          if width ~= g.x_advance then
-            -- LuaTeX always uses the glyph width from the font, so we need to
-            -- insert a kern node if the x advance is different.
-            local kern = node.new("kern")
-            kern.kern = g.x_advance - width
-            if rtl then
-              head = node.insert_before(head, current, kern)
-            else
-              head, current = node.insert_after(head, current, kern)
-            end
-          end
-
-          node.protect_glyph(n)
-
-          -- Load the glyph metrics of not already loaded.
-          if not loaded[gid] then
-            local extents = hbfont:get_glyph_extents(gid)
-            local character = {
-              index = gid,
-              width = width,
-              height = extents and extents.y_bearing or ascender,
-              depth = -(extents and extents.y_bearing + extents.height or descender),
-              tounicode = tounicode
-            }
-            loaded[gid] = character
-            characters[char] = character
-          end
-
-          -- Handle PDF text extraction:
-          -- * Find how many characters in this cluster and how many glyphs,
-          -- * If there is more than 0 characters
-          --   * One glyph: one to one or one to many mapping, can be
-          --     represented by font’s /ToUnicode
-          --   * More than one: many to one or many to many mapping, can be
-          --     represented by /ActualText spans.
-          -- * If there are zero characters, then this glyph is part of complex
-          --   cluster that will be covered by an /ActualText span.
-          local unicodes = g.unicodes or {}
-          if #unicodes > 0 then
-            local tounicode = to_utf16_hex(unicodes)
-            if nglyphs == 1 and not loaded[gid].tounicode then
-              loaded[gid].tounicode = tounicode
-              characters[char] = loaded[gid]
-            elseif tounicode ~= loaded[gid].tounicode then
-              local actual = "/Span<</ActualText<FEFF"..tounicode..">>>BDC"
-              --head = node.insert_before(head, current, pdfdirect(actual))
-              glyphs[i + nglyphs - 1].endactual = true
-            end
-          end
-          if g.endactual then
-            head, current = node.insert_after(head, current, pdfdirect("EMC"))
-          end
-
-          if nchars > 2 then
-            -- XXX: ugly and complex code, refactor!
-            -- See if we have a discretionary inside a complex glyph cluster.
-            local discindex
-            for j = index, index + nchars - 1 do
-              if codes[j] == 0x00AD then
-                discindex = j
-                break
-              end
-            end
-            if discindex then
-              local direction = to_luatex_dir[dir]
-              local disc = nodes[discindex].node
-              local start, stop
-              local j
-
-              -- Find the previous safe to break at glyph.
-              j = i
-              while glyphs[j] do
-                j = j - 1
-                if not (glyphs[j].flags and glyphs[j].flags & fl_unsafe) then
-                  break
-                end
-              end
-              start = glyphs[j + 1].cluster
-
-              -- Remove the current node from the list, it will be part of the
-              -- discretionary’s replace list.
-              local k = i
-              while k > j - 1 do
-                if not (current.id == kerncode and
-                        current.subtype == fontkern)
-                then
-                  k = k - 1
-                end
-                head = node.remove(head, current)
-                current = node.tail(head)
-              end
-
-              -- Find the next safe to break at glyph.
-              j = i + nglyphs
-              while glyphs[j] do
-                j = j + 1
-                if not (glyphs[j].flags and glyphs[j].flags & fl_unsafe) then
-                  break
-                end
-              end
-              stop = glyphs[j - 1].cluster
-
-              -- Insert the discretionary.
-              head, current = node.insert_after(head, current, disc)
-
-              local replace, pre, post = nil, nil, nil
-              -- Create the “replace” list, to be used if no line breaking
-              -- happens here.
-              -- XXX: We can re-use the already shaped glyphs here.
-              for j = start, stop do
-                local nn = nodes[j].node
-                if nn.id == glyphcode then
-                  nn = node.copy(nn)
-                  if nn.char >= hb.CH_GID_PREFIX then
-                    nn.char = codes[j]
-                    node.unprotect_glyph(nn)
-                  end
-                  replace = node.insert_after(replace, nil, nn)
-                end
-                -- Mark these glyphs to be skipped to not insert them twice.
-                nodes[j].skip = true
-              end
-              disc.replace = process(replace, direction)
-
-              -- Create the “pre” list, to be inserted before the line break.
-              for j = start, discindex - 1 do
-                local nn = nodes[j].node
-                if nn.id == glyphcode then
-                  nn = node.copy(nn)
-                  if nn.char >= hb.CH_GID_PREFIX then
-                    nn.char = codes[j]
-                    node.unprotect_glyph(nn)
-                  end
-                  pre = node.insert_after(pre, nil, nn)
-                end
-              end
-              -- include the hyphen.
-              pre = node.insert_after(pre, nil, disc.pre)
-              disc.pre = process(pre, direction)
-
-              -- Create the “post” list, to inserted after the line break.
-              for j = discindex + 1, stop do
-                local nn = nodes[j].node
-                if nn.id == glyphcode then
-                  nn = node.copy(nn)
-                  if nn.char >= hb.CH_GID_PREFIX then
-                    nn.char = codes[j]
-                    node.unprotect_glyph(nn)
-                  end
-                  post = node.insert_after(post, nil, nn)
-                end
-              end
-              disc.post = process(post, direction)
-            end
-          end
-        elseif id == gluecode and n.subtype == spaceskip then
-          if n.width ~= g.x_advance then
-            n.width = g.x_advance
-          end
-        elseif id == disccode then
-          assert(nglyphs == 1)
-          -- The simple case of a discretionary that is not part of a complex
-          -- cluster. We only need to make sure kerning before the hyphenation
-          -- point is dropped when a line break is inserted here.
-          local prev = current.prev
-          if prev and prev.id == kerncode and prev.subtype == fontkern then
-            head = node.remove(head, prev)
-            prev.prev, prev.next = nil, nil
-            n.replace = prev
-          end
-          n.pre = process(n.pre, direction)
+        -- Load the glyph metrics of not already loaded.
+        if not loaded[gid] then
+          local extents = hbfont:get_glyph_extents(gid)
+          local character = {
+            index = gid,
+            width = width,
+            height = extents and extents.y_bearing or ascender,
+            depth = -(extents and extents.y_bearing + extents.height or descender),
+          }
+          loaded[gid] = character
+          characters[char] = character
         end
+
+        -- Handle PDF text extraction:
+        -- * Find how many characters in this cluster and how many glyphs,
+        -- * If there is more than 0 characters
+        --   * One glyph: one to one or one to many mapping, can be
+        --     represented by font’s /ToUnicode
+        --   * More than one: many to one or many to many mapping, can be
+        --     represented by /ActualText spans.
+        -- * If there are zero characters, then this glyph is part of complex
+        --   cluster that will be covered by an /ActualText span.
+        local unicodes = glyph.unicodes or {}
+        if #unicodes > 0 then
+          local tounicode = to_utf16_hex(unicodes)
+          if nglyphs == 1 and not loaded[gid].tounicode then
+            loaded[gid].tounicode = tounicode
+            characters[char] = loaded[gid]
+          elseif tounicode ~= loaded[gid].tounicode and not fordisc then
+            local actual = "/Span<</ActualText<FEFF"..tounicode..">>>BDC"
+            head = node.insert_before(head, current, pdfdirect(actual))
+            glyphs[i + nglyphs - 1].endactual = true
+          end
+        end
+        if glyph.endactual then
+          head, current = node.insert_after(head, current, pdfdirect("EMC"))
+        end
+      elseif id == gluecode and n.subtype == spaceskip then
+        if n.width ~= glyph.x_advance then
+          n.width = glyph.x_advance
+        end
+      elseif id == disccode then
+        assert(nglyphs == 1)
+        -- The simple case of a discretionary that is not part of a complex
+        -- cluster. We only need to make sure kerning before the hyphenation
+        -- point is dropped when a line break is inserted here.
+        local prev = current.prev
+        if prev and prev.id == kerncode and prev.subtype == fontkern then
+          head = node.remove(head, prev)
+          prev.prev, prev.next = nil, nil
+          n.replace = prev
+        end
+        n.pre = process(n.pre, direction)
       end
     end
+  end
+
+  return head, current, characters
+end
+
+local function layout(head, current, run, nodes, codes)
+  local fontid = run.font
+  local fontdata = fontid and font.fonts[fontid]
+
+  if fontdata and fontdata.hb then
+    local characters = {} -- LuaTeX font characters table
+
+    local glyphs = shape(run, nodes, codes)
+    head, current = tonodes(head, current, run, nodes, codes, glyphs, characters)
 
     if next(characters) ~= nil then
       font.addcharacters(run.font, { characters = characters })
     end
   else
+    local offset = run.start
+    local len = run.len
     -- Not shaping, insert the original node list of of this run.
     for i = offset, offset + len - 1 do
-      head, current = node.insert_after(head, current, nodes[i].node)
+      head, current = node.insert_after(head, current, nodes[i])
     end
   end
 
@@ -483,6 +481,10 @@ process = function(head, direction)
   local newhead, current = nil, nil
   local nodes, codes = collect(head, direction)
   local runs = itemize(nodes)
+
+  for i, n in next, nodes do
+    nodes[i] = n.node
+  end
 
   for _, run in next, runs do
     newhead, current = layout(newhead, current, run, nodes, codes)

@@ -2,16 +2,18 @@
 \tracinglostchars=2
 \iftrue
   \directlua{dofile("harf.lua")}
+  \def\script#1{}
 \else
   \input luaotfload.sty
+  \def\script#1{script=#1;}
 \fi
-\font\testr="[lmroman10-regular.otf]:script=latn;+dlig" at 10pt
-\font\testb="[lmroman10-bold.otf]:script=latn" at 10pt
-\font\testi="[lmromanslant10-regular.otf]:script=latn" at 10pt
-\font\testR="[lmroman12-regular.otf]:script=latn" at 12pt
-\font\testA="[amiri-regular.ttf]:script=arab" at 10pt
-\font\testB="[amiri-bold.ttf]:script=arab" at 10pt
-\font\testF="[NotoSerifCJK-Regular.ttc]:script=latn;" at 10pt
+\font\testr="[lmroman10-regular.otf]:\script{latn}+dlig" at 10pt
+\font\testb="[lmroman10-bold.otf]:\script{latn}" at 10pt
+\font\testi="[lmromanslant10-regular.otf]:\script{latn}" at 10pt
+\font\testR="[lmroman12-regular.otf]:\script{latn}" at 12pt
+\font\testA="[amiri-regular.ttf]:\script{arab}" at 10pt
+\font\testB="[amiri-bold.ttf]:\script{arab}" at 10pt
+\font\testF="[NotoSerifCJK-Regular.ttc]:\script{latn}" at 10pt
 
 \begingroup
 \testA
@@ -34,7 +36,7 @@
 تولّد، أو دخل.
 \endgroup
 
-Τεχ
+\TeX\ = τεχ in Greek
 
 \endgroup
 \vfill\eject

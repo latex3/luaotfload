@@ -143,7 +143,7 @@ end
 
 -- Split into a list of runs, each has the same font, direction and script.
 -- TODO: itemize by language as well.
-local function itemize(props)
+local function itemize(props, nodes, codes)
   local runs = {}
   local currfont, currdir, currscript = nil, nil, nil
   for i, prop in next, props do
@@ -159,6 +159,8 @@ local function itemize(props)
         font = font,
         dir = dir,
         script = script,
+        nodes = nodes,
+        codes = codes,
       }
     end
 
@@ -217,7 +219,9 @@ end
 local shape
 
 -- Make s a sub run, used by discretionary nodes.
-local function makesub(run, nodes, codes, start, stop, nodelist)
+local function makesub(run, start, stop, nodelist)
+  local nodes = run.nodes
+  local codes = run.codes
   local start = start
   local stop = stop
   local subnodes, subcodes = {}, {}
@@ -239,13 +243,10 @@ local function makesub(run, nodes, codes, start, stop, nodelist)
     script = run.script,
     dir = run.dir,
     fordisc = true,
-  }
-  return {
-    glyphs = shape(subrun, subnodes, subcodes),
-    run = subrun,
     nodes = subnodes,
     codes = subcodes,
   }
+  return { glyphs = shape(subrun), run = subrun }
 end
 
 -- Simple table copying function. DOES NOT copy sub tables.
@@ -259,7 +260,9 @@ end
 
 -- Main shaping function that calls HarfBuzz, and does some post-processing of
 -- the output.
-shape = function(run, nodes, codes)
+shape = function(run)
+  local nodes = run.nodes
+  local codes = run.codes
   local offset = run.start
   local len = run.len
   local fontid = run.font
@@ -347,9 +350,9 @@ shape = function(run, nodes, codes)
           end
 
           glyph.disc = disc
-          glyph.replace = makesub(run, nodes, codes, startindex, stopindex, disc.replace)
-          glyph.pre = makesub(run, nodes, codes, startindex, discindex - 1, disc.pre)
-          glyph.post = makesub(run, nodes, codes, discindex + 1, stopindex, disc.post)
+          glyph.replace = makesub(run, startindex, stopindex, disc.replace)
+          glyph.pre = makesub(run, startindex, discindex - 1, disc.pre)
+          glyph.post = makesub(run, discindex + 1, stopindex, disc.post)
         end
       end
     end
@@ -367,7 +370,8 @@ local function pdfdirect(data)
 end
 
 -- Convert glyphs to nodes and collect font characters.
-local function tonodes(head, current, run, nodes, codes, glyphs, characters)
+local function tonodes(head, current, run, glyphs, characters)
+  local nodes = run.nodes
   local fordisc = run.fordisc
   local dir = run.dir
   local fontid = run.font
@@ -404,9 +408,9 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
       local pre = glyph.pre
       local post = glyph.post
 
-      disc.replace = tonodes(nil, nil, replace.run, replace.nodes, replace.codes, replace.glyphs, characters)
-      disc.pre = tonodes(nil, nil, pre.run, pre.nodes, pre.codes, pre.glyphs, characters)
-      disc.post = tonodes(nil, nil, post.run, post.nodes, post.codes, post.glyphs, characters)
+      disc.replace = tonodes(nil, nil, replace.run, replace.glyphs, characters)
+      disc.pre = tonodes(nil, nil, pre.run, pre.glyphs, characters)
+      disc.post = tonodes(nil, nil, post.run, post.glyphs, characters)
 
       head, current = node.insert_after(head, current, disc)
     elseif not glyph.skip then
@@ -516,7 +520,7 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
   return head, current, characters
 end
 
-local function shape_run(head, current, run, nodes, codes)
+local function shape_run(head, current, run)
   local fontid = run.font
   local fontdata = fontid and font.fonts[fontid]
 
@@ -525,14 +529,15 @@ local function shape_run(head, current, run, nodes, codes)
     -- shaping.
     local characters = {} -- LuaTeX font characters table
 
-    local glyphs = shape(run, nodes, codes)
-    head, current = tonodes(head, current, run, nodes, codes, glyphs, characters)
+    local glyphs = shape(run)
+    head, current = tonodes(head, current, run, glyphs, characters)
 
     if next(characters) ~= nil then
       font.addcharacters(run.font, { characters = characters })
     end
   else
     -- Not shaping, insert the original node list of of this run.
+    local nodes = run.nodes
     local offset = run.start
     local len = run.len
     for i = offset, offset + len - 1 do
@@ -546,10 +551,10 @@ end
 process = function(head, direction)
   local newhead, current = nil, nil
   local props, nodes, codes = collect(head, direction)
-  local runs = itemize(props)
+  local runs = itemize(props, nodes, codes)
 
   for _, run in next, runs do
-    newhead, current = shape_run(newhead, current, run, nodes, codes)
+    newhead, current = shape_run(newhead, current, run)
   end
 
   return newhead or head

@@ -446,12 +446,17 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
 
         -- Load the glyph metrics of not already loaded.
         if not loaded[gid] then
+          local height, depth = nil
           local extents = hbfont:get_glyph_extents(gid)
+          if extents then
+            height = extents.y_bearing
+            depth = extents.y_bearing + extents.height
+          end
           local character = {
             index = gid,
             width = width,
-            height = extents and extents.y_bearing or ascender,
-            depth = -(extents and extents.y_bearing + extents.height or descender),
+            height = height or ascender,
+            depth = -(depth or descender),
           }
           loaded[gid] = character
           characters[char] = character

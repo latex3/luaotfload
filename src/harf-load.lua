@@ -79,13 +79,6 @@ local function define_font(name, size)
 
     tfmdata = {}
 
-    tfmdata.hb = {
-      spec = spec,
-      face = face,
-      font = font,
-      loaded = {}, -- { gid=true } for glyphs we loaded their metrics.
-    }
-
     font:set_scale(size, size)
 
     tfmdata.name = name
@@ -123,7 +116,6 @@ local function define_font(name, size)
     local descender = fontextents and fontextents.descender
 
     local characters = {}
-    tfmdata.characters = characters
 
     -- Add dummy entries for all glyphs in the font. Shouldn’t be needed, but
     -- some glyphs disappear from the PDF otherwise. The actual loading is done
@@ -190,6 +182,16 @@ local function define_font(name, size)
     -- `-char_depth(f, 'y')` for Descent.
     characters[0x0079] = { depth = -descender }
 
+    tfmdata.characters = characters
+
+    tfmdata.hb = {
+      spec = spec,
+      face = face,
+      font = font,
+      ascender = ascender,
+      descender = descender,
+      loaded = {}, -- Cached loaded glyph data.
+    }
 
     tfmdata.parameters = {
       slant = slant,

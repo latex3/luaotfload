@@ -379,9 +379,8 @@ local function tonodes(head, current, run, nodes, codes, glyphs, characters)
 
   local tracinglostchars = tex.tracinglostchars
 
-  local fontextents = hbfont:get_h_extents()
-  local ascender = fontextents and fontextents.ascender
-  local descender = fontextents and fontextents.descender
+  local ascender = hbdata.ascender
+  local descender = hbdata.descender
 
   for i, glyph in next, glyphs do
     local index = glyph.cluster + 1

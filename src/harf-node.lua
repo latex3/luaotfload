@@ -9,6 +9,7 @@ local localparid = node.id("local_par")
 local spaceskip = 13
 local directmode = 2
 local fontkern = 0
+local italiccorrection = 3
 
 local getscript    = hb.unicode.script
 local sc_common    = hb.Script.new("Zyyy")
@@ -450,17 +451,21 @@ local function tonodes(head, current, run, glyphs, characters)
 
         -- Load the glyph metrics of not already loaded.
         if not loaded[gid] then
-          local height, depth = nil
+          local height, depth, italic = nil, nil, nil
           local extents = hbfont:get_glyph_extents(gid)
           if extents then
             height = extents.y_bearing
             depth = extents.y_bearing + extents.height
+            if extents.x_bearing < 0 then
+              italic = -extents.x_bearing
+            end
           end
           local character = {
             index = gid,
             width = width,
             height = height or ascender,
             depth = -(depth or descender),
+            italic = italic,
           }
           loaded[gid] = character
           characters[char] = character
@@ -493,6 +498,24 @@ local function tonodes(head, current, run, glyphs, characters)
       elseif id == glueid and n.subtype == spaceskip then
         if n.width ~= glyph.x_advance then
           n.width = glyph.x_advance
+        end
+      elseif id == kernid and n.subtype == italiccorrection then
+        -- If this is an italic correction node and the previous node is a
+        -- glyph, update its kern value with the glyph’s italic correction.
+        -- I’d have expected the engine to do this, but apparently it doesn’t.
+        -- May be it is checking for the italic correction before we have had
+        -- loaded the glyph?
+        local prevchar, prevfontid = node.is_glyph(current.prev)
+        if prevchar > 0 then
+          local prevgid = prevchar - hb.CH_GID_PREFIX
+          local prevfont = font.fonts[prevfontid]
+          local prevhbdata = prevfont and prevfont.hb
+          local prevloaded = prevhbdata and prevhbdata.loaded
+          local prevcharacter = prevloaded and prevloaded[prevgid]
+          local italic = prevcharacter and prevcharacter.italic
+          if italic then
+            n.kern = italic
+          end
         end
       elseif id == discid then
         assert(nglyphs == 1)

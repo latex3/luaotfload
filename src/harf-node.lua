@@ -1,14 +1,15 @@
 local hb = require("harf-base")
 
-local discid  = node.id("disc")
-local glueid  = node.id("glue")
-local glyphid = node.id("glyph")
-local dirid   = node.id("dir")
-local kernid  = node.id("kern")
+local discid     = node.id("disc")
+local glueid     = node.id("glue")
+local glyphid    = node.id("glyph")
+local dirid      = node.id("dir")
+local kernid     = node.id("kern")
 local localparid = node.id("local_par")
-local spaceskip = 13
-local directmode = 2
-local fontkern = 0
+
+local spaceskip        = 13
+local directmode       = 2
+local fontkern         = 0
 local italiccorrection = 3
 
 local getscript    = hb.unicode.script

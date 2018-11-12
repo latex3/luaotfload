@@ -1,11 +1,11 @@
 local hb = require("harf-base")
 
-local disccode  = node.id("disc")
-local gluecode  = node.id("glue")
-local glyphcode = node.id("glyph")
-local dircode   = node.id("dir")
-local kerncode  = node.id("kern")
-local localparcode = node.id("local_par")
+local discid  = node.id("disc")
+local glueid  = node.id("glue")
+local glyphid = node.id("glyph")
+local dirid   = node.id("dir")
+local kernid  = node.id("kern")
+local localparid = node.id("local_par")
 local spaceskip = 13
 local directmode = 2
 local fontkern = 0
@@ -79,15 +79,15 @@ local function collect(head, direction)
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
     local script = sc_common
 
-    if id == glyphcode then
+    if id == glyphid then
       code = n.char
       currfont = n.font
       script = getscript(code)
-    elseif id == gluecode and n.subtype == spaceskip then
+    elseif id == glueid and n.subtype == spaceskip then
       code = 0x0020 -- SPACE
-    elseif id == disccode then
+    elseif id == discid then
       code = 0x00AD -- SOFT HYPHEN
-    elseif id == dircode then
+    elseif id == dirid then
       if n.dir:sub(1, 1) == "+" then
         -- Push the current direction to the stack.
         table.insert(dirstack, currdir)
@@ -97,7 +97,7 @@ local function collect(head, direction)
         -- Pop the last direction from the stack.
         currdir = table.remove(dirstack)
       end
-    elseif id == localparcode then
+    elseif id == localparid then
       currdir = n.dir
     end
 
@@ -213,7 +213,7 @@ local function unsafetobreak(glyph, nodes)
      and glyph.flags & fl_unsafe
      -- LuaTeX’s discretionary nodes can’t contain glue, so stop at first glue
      -- as well. This is incorrect, but I don’t have a better idea.
-     and nodes[glyph.cluster + 1].id ~= gluecode
+     and nodes[glyph.cluster + 1].id ~= glueid
 end
 
 local shape
@@ -226,7 +226,7 @@ local function makesub(run, start, stop, nodelist)
   local stop = stop
   local subnodes, subcodes = {}, {}
   for i = start, stop do
-    if nodes[i].id ~= disccode then
+    if nodes[i].id ~= discid then
       subnodes[#subnodes + 1] = node.copy(nodes[i])
       subcodes[#subcodes + 1] = codes[i]
     end
@@ -301,7 +301,7 @@ shape = function(run)
         local unicodes = {}
         for j = 0, nchars - 1 do
           local id = nodes[nodeindex + j].id
-          if id == glyphcode or id == gluecode then
+          if id == glyphid or id == glueid then
             unicodes[#unicodes + 1] = codes[nodeindex + j]
           end
         end
@@ -416,7 +416,7 @@ local function tonodes(head, current, run, glyphs, characters)
     elseif not glyph.skip then
       head, current = node.insert_after(head, current, n)
 
-      if id == glyphcode then
+      if id == glyphid then
         local width = hbfont:get_glyph_h_advance(gid)
 
         -- Report missing characters, trying to emulate the engine behaviour as
@@ -437,7 +437,7 @@ local function tonodes(head, current, run, glyphs, characters)
         if width ~= glyph.x_advance then
           -- LuaTeX always uses the glyph width from the font, so we need to
           -- insert a kern node if the x advance is different.
-          local kern = node.new("kern")
+          local kern = node.new(kernid)
           kern.kern = glyph.x_advance - width
           if rtl then
             head = node.insert_before(head, current, kern)
@@ -490,11 +490,11 @@ local function tonodes(head, current, run, glyphs, characters)
         if glyph.endactual then
           head, current = node.insert_after(head, current, pdfdirect("EMC"))
         end
-      elseif id == gluecode and n.subtype == spaceskip then
+      elseif id == glueid and n.subtype == spaceskip then
         if n.width ~= glyph.x_advance then
           n.width = glyph.x_advance
         end
-      elseif id == disccode then
+      elseif id == discid then
         assert(nglyphs == 1)
         -- The simple case of a discretionary that is not part of a complex
         -- cluster. We only need to make sure kerning before the hyphenation
@@ -505,7 +505,7 @@ local function tonodes(head, current, run, glyphs, characters)
         -- contents do not interact with the surrounding (e.g. no ligatures or
         -- kerning) as it should.
         local prev = current.prev
-        if prev and prev.id == kerncode and prev.subtype == fontkern then
+        if prev and prev.id == kernid and prev.subtype == fontkern then
           head = node.remove(head, prev)
           prev.prev, prev.next = nil, nil
           n.replace = prev
@@ -566,7 +566,7 @@ local function process_nodes(head, groupcode, size, packtype, direction)
   -- Check if any fonts are loaded by us and then process the whole node list,
   -- we will take care of skipping fonts we did not load later, otherwise
   -- return unmodified head.
-  for n in node.traverse_id(glyphcode, head) do
+  for n in node.traverse_id(glyphid, head) do
     if fonts[n.font] and fonts[n.font].hb ~= nil then
       return process(head, direction)
     end

@@ -77,16 +77,9 @@ local function define_font(name, size)
 
     local font = hb.Font.new(face)
 
-    tfmdata = {}
-
+    local upem = face:get_upem()
+    local scale = size / upem
     font:set_scale(size, size)
-
-    tfmdata.name = name
-    tfmdata.psname = face:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME)
-    tfmdata.fullname = face:get_name(hb.ot.NAME_ID_FULL_NAME)
-    tfmdata.filename = filename
-    tfmdata.designsize = size
-    tfmdata.size = size
 
     -- All LuaTeX seem to care about in font type is whether it has CFF table
     -- or not, so we check for that here.
@@ -104,18 +97,10 @@ local function define_font(name, size)
         haspost = true
       end
     end
-    tfmdata.format = fonttype
-
-    tfmdata.type = "real"
-    tfmdata.embedding = "subset"
-    tfmdata.tounicode = 1
-    tfmdata.nomath = true
 
     local fontextents = font:get_h_extents()
     local ascender = fontextents and fontextents.ascender
     local descender = fontextents and fontextents.descender
-
-    local characters = {}
 
     -- Add dummy entries for all glyphs in the font. Shouldn’t be needed, but
     -- some glyphs disappear from the PDF otherwise. The actual loading is done
@@ -126,6 +111,7 @@ local function define_font(name, size)
     -- Skipping loading all the characters should speed loading fonts with
     -- large character sets.
     --
+    local characters = {}
     local glyphcount = face:get_glyph_count() - 1
     for gid = 0, glyphcount do
       characters[hb.CH_GID_PREFIX + gid] = { index = gid }
@@ -134,9 +120,7 @@ local function define_font(name, size)
     local spacegid = font:get_nominal_glyph(0x0020)
     local space = spacegid and font:get_glyph_h_advance(spacegid)
 
-    local upem =  face:get_upem()
-    local mag = size / upem
-    local xheight, capheight, stemv
+    local xheight, capheight, stemv = nil, nil, nil
     if hasos2 then
       local os2 = face:get_table(os2tag)
       local length = os2:get_length()
@@ -146,10 +130,10 @@ local function define_font(name, size)
 
         -- We don’t need much of the table, so we read from hard-coded offsets.
         weightclass = string.unpack(">H", data, 5)
-        xheight = string.unpack(">H", data, 87) * mag
-        capheight = string.unpack(">H", data, 89) * mag
+        xheight = string.unpack(">H", data, 87) * scale
+        capheight = string.unpack(">H", data, 89) * scale
         -- Magic formula from dvipdfmx.
-        stemv = ((weightclass / 65) * (weightclass / 65) + 50) * mag
+        stemv = ((weightclass / 65) * (weightclass / 65) + 50) * scale
       end
     end
 
@@ -168,7 +152,7 @@ local function define_font(name, size)
 
     xheight = xheight or ascender / 2
     capheight = capheight or ascender
-    stemv = stemv or 80 * mag
+    stemv = stemv or 80 * scale
     space = space or size / 2
 
     -- LuaTeX (ab)uses the metrics of these characters for some font metrics.
@@ -182,26 +166,37 @@ local function define_font(name, size)
     -- `-char_depth(f, 'y')` for Descent.
     characters[0x0079] = { depth = -descender }
 
-    tfmdata.characters = characters
-
-    tfmdata.hb = {
-      spec = spec,
-      face = face,
-      font = font,
-      ascender = ascender,
-      descender = descender,
-      loaded = {}, -- Cached loaded glyph data.
-    }
-
-    tfmdata.parameters = {
-      slant = slant,
-      space = space,
-      space_stretch = space / 2,
-      space_shrink = space / 3,
-      x_height = xheight,
-      quad = size,
-      extra_space = space / 3,
-      [8] = capheight, -- for XeTeX compatibility.
+    tfmdata = {
+      name = name,
+      psname = face:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
+      fullname = face:get_name(hb.ot.NAME_ID_FULL_NAME),
+      filename = filename,
+      designsize = size,
+      size = size,
+      type = "real",
+      embedding = "subset",
+      tounicode = 1,
+      nomath = true,
+      format = fonttype,
+      characters = characters,
+      parameters = {
+        slant = slant,
+        space = space,
+        space_stretch = space / 2,
+        space_shrink = space / 3,
+        x_height = xheight,
+        quad = size,
+        extra_space = space / 3,
+        [8] = capheight, -- for XeTeX compatibility.
+      },
+      hb = {
+        spec = spec,
+        face = face,
+        font = font,
+        ascender = ascender,
+        descender = descender,
+        loaded = {}, -- Cached loaded glyph data.
+      },
     }
   else
     tfmdata = font.read_tfm(name, size)

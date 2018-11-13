@@ -260,6 +260,15 @@ local function copytable(old)
   return new
 end
 
+local function copycharacter(character, scale)
+  local new = copytable(character)
+  new.width = new.width * scale
+  new.height = new.height * scale
+  new.depth = new.depth * scale
+  new.italic = new.italic * scale
+  return new
+end
+
 -- Main shaping function that calls HarfBuzz, and does some post-processing of
 -- the output.
 shape = function(run)
@@ -459,22 +468,22 @@ local function tonodes(head, current, run, glyphs, characters)
           local height, depth, italic = nil, nil, nil
           local extents = hbfont:get_glyph_extents(gid)
           if extents then
-            height = extents.y_bearing * scale
-            depth = (extents.y_bearing + extents.height) * scale
+            height = extents.y_bearing
+            depth = extents.y_bearing + extents.height
             if extents.x_bearing < 0 then
-              italic = -extents.x_bearing * scale
+              italic = -extents.x_bearing
             end
           end
           local character = {
             index = gid,
-            width = width * scale,
+            width = width,
             height = height or ascender,
             depth = -(depth or descender),
-            italic = italic,
+            italic = italic or 0,
           }
           loaded[gid] = character
-          characters[char] = character
         end
+        characters[char] = copycharacter(loaded[gid], scale)
 
         -- Handle PDF text extraction:
         -- * Find how many characters in this cluster and how many glyphs,
@@ -490,7 +499,7 @@ local function tonodes(head, current, run, glyphs, characters)
           local tounicode = to_utf16_hex(unicodes)
           if nglyphs == 1 and not loaded[gid].tounicode then
             loaded[gid].tounicode = tounicode
-            characters[char] = loaded[gid]
+            characters[char].tounicode = tounicode
           elseif tounicode ~= loaded[gid].tounicode and not fordisc then
             local actual = "/Span<</ActualText<FEFF"..tounicode..">>>BDC"
             head = node.insert_before(head, current, pdfdirect(actual))
@@ -519,7 +528,7 @@ local function tonodes(head, current, run, glyphs, characters)
           local prevcharacter = prevloaded and prevloaded[prevgid]
           local italic = prevcharacter and prevcharacter.italic
           if italic then
-            n.kern = italic
+            n.kern = italic * scale
           end
         end
       elseif id == discid then

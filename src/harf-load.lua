@@ -1,5 +1,8 @@
 local hb = require("harf-base")
 
+local hbfonts = hb.fonts
+local hbfonts = hbfonts or {}
+
 local cfftag  = hb.Tag.new("CFF ")
 local cff2tag = hb.Tag.new("CFF2")
 local os2tag  = hb.Tag.new("OS/2")
@@ -69,40 +72,112 @@ local function define_font(name, size)
     -- XXX support font names
   end
 
-  local face = filename and hb.Face.new(filename, index)
-  if face then
+  local hbdata = nil
+  if filename then
+    local key = string.format("%s:%d", filename, index)
+    hbdata = hbfonts[key]
+    if not hbdata then
+      local face = hb.Face.new(filename, index)
+      if face then
+        local font = hb.Font.new(face)
+        local upem = face:get_upem()
+
+        -- All LuaTeX seem to care about in font type is whether it has CFF table
+        -- or not, so we check for that here.
+        local fonttype = "truetype"
+        local hasos2 = false
+        local haspost = false
+        local tags = face:get_table_tags()
+        for i = 1, #tags do
+          local tag = tags[i]
+          if tag == cfftag or tag == cff2tag then
+            fonttype = "opentype"
+          elseif tag == os2tag then
+            hasos2 = true
+          elseif tag == posttag then
+            haspost = true
+          end
+        end
+
+        local fontextents = font:get_h_extents()
+        local ascender = fontextents and fontextents.ascender or upem * .8
+        local descender = fontextents and fontextents.descender or upem * .2
+
+        local gid = font:get_nominal_glyph(0x0020)
+        local space = gid and font:get_glyph_h_advance(gid) or upem / 2
+
+        local xheight, capheight, stemv = nil, nil, nil
+        if hasos2 then
+          local os2 = face:get_table(os2tag)
+          local length = os2:get_length()
+          local data = os2:get_data()
+          if length >= 96 and string.unpack(">H", data) > 1 then
+            -- We don’t need much of the table, so we read from hard-coded offsets.
+            local weightclass = string.unpack(">H", data, 5)
+            -- Magic formula from dvipdfmx.
+            stemv = ((weightclass / 65) * (weightclass / 65) + 50)
+            xheight = string.unpack(">H", data, 87)
+            capheight = string.unpack(">H", data, 89)
+          end
+        end
+
+        xheight = xheight or ascender / 2
+        capheight = capheight or ascender
+        stemv = stemv or 80
+
+        local slant = 0
+        if haspost then
+          local post = face:get_table(posttag)
+          local length = post:get_length()
+          local data = post:get_data()
+          if length >= 32 and string.unpack(">i4", data) <= 0x00030000 then
+            local italicangle = string.unpack(">i4", data, 5) / 2^16
+            if italicangle ~= 0 then
+              slant = -math.tan(italicangle * math.pi / 180) * 65536.0
+            end
+          end
+        end
+
+        hbdata = {
+          spec = spec,
+          face = face,
+          font = font,
+          upem = upem,
+          fonttype = fonttype,
+          ascender = ascender,
+          descender = descender,
+          space = space,
+          xheight = xheight,
+          capheight = capheight,
+          stemv = stemv,
+          slant = slant,
+          glyphcount = face:get_glyph_count(),
+          psname = face:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
+          fullname = face:get_name(hb.ot.NAME_ID_FULL_NAME),
+          loaded = {}, -- Cached loaded glyph data.
+        }
+        hbfonts[key] = hbdata
+      end
+    end
+  end
+
+  if hbdata then
     if size < 0 then
       size = (-655.36) * size
     end
 
-    local font = hb.Font.new(face)
+    local font = hbdata.font
+    local upem = hbdata.upem
+    local ascender = hbdata.ascender
+    local descender = hbdata.descender
+    local space = hbdata.space
+    local stemv = hbdata.stemv
+    local capheight = hbdata.capheight
 
     -- We shape in font units (at UPEM) and then scale output with the desired
     -- sfont size.
-    local upem = face:get_upem()
     local scale = size / upem
     font:set_scale(upem, upem)
-
-    -- All LuaTeX seem to care about in font type is whether it has CFF table
-    -- or not, so we check for that here.
-    local fonttype = "truetype"
-    local hasos2 = false
-    local haspost = false
-    local tags = face:get_table_tags()
-    for i = 1, #tags do
-      local tag = tags[i]
-      if tag == cfftag or tag == cff2tag then
-        fonttype = "opentype"
-      elseif tag == os2tag then
-        hasos2 = true
-      elseif tag == posttag then
-        haspost = true
-      end
-    end
-
-    local fontextents = font:get_h_extents()
-    local ascender = fontextents and fontextents.ascender or upem * .8
-    local descender = fontextents and fontextents.descender or upem * .2
 
     -- Add dummy entries for all glyphs in the font. Shouldn’t be needed, but
     -- some glyphs disappear from the PDF otherwise. The actual loading is done
@@ -114,66 +189,26 @@ local function define_font(name, size)
     -- large character sets.
     --
     local characters = {}
-    local glyphcount = face:get_glyph_count() - 1
-    for gid = 0, glyphcount do
+    local glyphcount = hbdata.glyphcount
+    for gid = 0, glyphcount - 1 do
       characters[hb.CH_GID_PREFIX + gid] = { index = gid }
     end
-
-    local spacegid = font:get_nominal_glyph(0x0020)
-    local space = spacegid and font:get_glyph_h_advance(spacegid)
-
-    local xheight, capheight, stemv = nil, nil, nil
-    if hasos2 then
-      local os2 = face:get_table(os2tag)
-      local length = os2:get_length()
-      local data = os2:get_data()
-      if length >= 96 and string.unpack(">H", data) > 1 then
-        local weightclass
-
-        -- We don’t need much of the table, so we read from hard-coded offsets.
-        weightclass = string.unpack(">H", data, 5)
-        xheight = string.unpack(">H", data, 87)
-        capheight = string.unpack(">H", data, 89)
-        -- Magic formula from dvipdfmx.
-        stemv = ((weightclass / 65) * (weightclass / 65) + 50)
-      end
-    end
-
-    local slant = 0
-    if haspost then
-      local post = face:get_table(posttag)
-      local length = post:get_length()
-      local data = post:get_data()
-      if length >= 32 and string.unpack(">i4", data) <= 0x00030000 then
-        local italicangle = string.unpack(">i4", data, 5) / 2^16
-        if italicangle ~= 0 then
-          slant = -math.tan(italicangle * math.pi / 180) * 65536.0
-        end
-      end
-    end
-
-    xheight = (xheight or ascender / 2) * scale
-    capheight = (capheight or ascender) * scale
-    stemv = (stemv or 80) * scale
-    space = (space or upem / 2) * scale
-    ascender = ascender * scale
-    descender = descender * scale
 
     -- LuaTeX (ab)uses the metrics of these characters for some font metrics.
     --
     -- `char_width(f, '.') / 3` for StemV.
-    characters[0x002E] = { width  = stemv * 3 }
+    characters[0x002E] = { width  = stemv * scale * 3 }
     -- `char_height(f, 'H')` for CapHeight.
-    characters[0x0048] = { height = capheight }
+    characters[0x0048] = { height = capheight * scale }
     -- `char_height(f, 'h')` for Ascent.
-    characters[0x0068] = { height = ascender }
+    characters[0x0068] = { height = ascender * scale }
     -- `-char_depth(f, 'y')` for Descent.
-    characters[0x0079] = { depth = -descender }
+    characters[0x0079] = { depth = -descender * scale }
 
     tfmdata = {
       name = name,
-      psname = face:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
-      fullname = face:get_name(hb.ot.NAME_ID_FULL_NAME),
+      psname = hbdata.psname,
+      fullname = hbdata.fullname,
       filename = filename,
       designsize = size,
       size = size,
@@ -181,26 +216,26 @@ local function define_font(name, size)
       embedding = "subset",
       tounicode = 1,
       nomath = true,
-      format = fonttype,
+      format = hbdata.fonttype,
       characters = characters,
       parameters = {
-        slant = slant,
-        space = space,
-        space_stretch = space / 2,
-        space_shrink = space / 3,
-        x_height = xheight,
+        slant = hbdata.slant,
+        space = space * scale,
+        space_stretch = space * scale / 2,
+        space_shrink = space * scale / 3,
+        x_height = hbdata.xheight * scale,
         quad = size,
-        extra_space = space / 3,
-        [8] = capheight, -- for XeTeX compatibility.
+        extra_space = space * scale / 3,
+        [8] = capheight * scale, -- for XeTeX compatibility.
       },
       hb = {
         scale = scale,
         spec = spec,
-        face = face,
+        face = hbdata.face,
         font = font,
         ascender = ascender,
         descender = descender,
-        loaded = {}, -- Cached loaded glyph data.
+        loaded = hbdata.loaded,
       },
     }
   else

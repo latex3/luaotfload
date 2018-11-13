@@ -386,6 +386,7 @@ local function tonodes(head, current, run, glyphs, characters)
   local tracinglostchars = tex.tracinglostchars
   local tracingonline = tex.tracingonline
 
+  local scale = hbdata.scale
   local ascender = hbdata.ascender
   local descender = hbdata.descender
 
@@ -420,8 +421,6 @@ local function tonodes(head, current, run, glyphs, characters)
       head, current = node.insert_after(head, current, n)
 
       if id == glyphid then
-        local width = hbfont:get_glyph_h_advance(gid)
-
         -- Report missing characters, trying to emulate the engine behaviour as
         -- much as possible.
         if gid == 0 and tracinglostchars > 0 then
@@ -437,14 +436,15 @@ local function tonodes(head, current, run, glyphs, characters)
         end
 
         n.char = char
-        n.xoffset = rtl and -glyph.x_offset or glyph.x_offset
-        n.yoffset = glyph.y_offset
+        n.xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
+        n.yoffset = glyph.y_offset * scale
 
+        local width = hbfont:get_glyph_h_advance(gid)
         if width ~= glyph.x_advance then
           -- LuaTeX always uses the glyph width from the font, so we need to
           -- insert a kern node if the x advance is different.
           local kern = node.new(kernid)
-          kern.kern = glyph.x_advance - width
+          kern.kern = (glyph.x_advance - width) * scale
           if rtl then
             head = node.insert_before(head, current, kern)
           else
@@ -459,15 +459,15 @@ local function tonodes(head, current, run, glyphs, characters)
           local height, depth, italic = nil, nil, nil
           local extents = hbfont:get_glyph_extents(gid)
           if extents then
-            height = extents.y_bearing
-            depth = extents.y_bearing + extents.height
+            height = extents.y_bearing * scale
+            depth = (extents.y_bearing + extents.height) * scale
             if extents.x_bearing < 0 then
-              italic = -extents.x_bearing
+              italic = -extents.x_bearing * scale
             end
           end
           local character = {
             index = gid,
-            width = width,
+            width = width * scale,
             height = height or ascender,
             depth = -(depth or descender),
             italic = italic,
@@ -501,8 +501,8 @@ local function tonodes(head, current, run, glyphs, characters)
           head, current = node.insert_after(head, current, pdfdirect("EMC"))
         end
       elseif id == glueid and n.subtype == spaceskip then
-        if n.width ~= glyph.x_advance then
-          n.width = glyph.x_advance
+        if n.width ~= (glyph.x_advance * scale) then
+          n.width = glyph.x_advance * scale
         end
       elseif id == kernid and n.subtype == italiccorrection then
         -- If this is an italic correction node and the previous node is a

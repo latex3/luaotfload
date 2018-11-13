@@ -77,9 +77,11 @@ local function define_font(name, size)
 
     local font = hb.Font.new(face)
 
+    -- We shape in font units (at UPEM) and then scale output with the desired
+    -- sfont size.
     local upem = face:get_upem()
     local scale = size / upem
-    font:set_scale(size, size)
+    font:set_scale(upem, upem)
 
     -- All LuaTeX seem to care about in font type is whether it has CFF table
     -- or not, so we check for that here.
@@ -99,8 +101,8 @@ local function define_font(name, size)
     end
 
     local fontextents = font:get_h_extents()
-    local ascender = fontextents and fontextents.ascender
-    local descender = fontextents and fontextents.descender
+    local ascender = fontextents and fontextents.ascender or upem * .8
+    local descender = fontextents and fontextents.descender or upem * .2
 
     -- Add dummy entries for all glyphs in the font. Shouldn’t be needed, but
     -- some glyphs disappear from the PDF otherwise. The actual loading is done
@@ -130,10 +132,10 @@ local function define_font(name, size)
 
         -- We don’t need much of the table, so we read from hard-coded offsets.
         weightclass = string.unpack(">H", data, 5)
-        xheight = string.unpack(">H", data, 87) * scale
-        capheight = string.unpack(">H", data, 89) * scale
+        xheight = string.unpack(">H", data, 87)
+        capheight = string.unpack(">H", data, 89)
         -- Magic formula from dvipdfmx.
-        stemv = ((weightclass / 65) * (weightclass / 65) + 50) * scale
+        stemv = ((weightclass / 65) * (weightclass / 65) + 50)
       end
     end
 
@@ -150,10 +152,12 @@ local function define_font(name, size)
       end
     end
 
-    xheight = xheight or ascender / 2
-    capheight = capheight or ascender
-    stemv = stemv or 80 * scale
-    space = space or size / 2
+    xheight = (xheight or ascender / 2) * scale
+    capheight = (capheight or ascender) * scale
+    stemv = (stemv or 80) * scale
+    space = (space or upem / 2) * scale
+    ascender = ascender * scale
+    descender = descender * scale
 
     -- LuaTeX (ab)uses the metrics of these characters for some font metrics.
     --
@@ -190,6 +194,7 @@ local function define_font(name, size)
         [8] = capheight, -- for XeTeX compatibility.
       },
       hb = {
+        scale = scale,
         spec = spec,
         face = face,
         font = font,

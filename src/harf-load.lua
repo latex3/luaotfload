@@ -60,12 +60,12 @@ end
 local function define_font(name, size)
   local spec
   local tfmdata = nil
-  local filename, index = nil, 0
+  local path, index = nil, 0
 
   spec = type(name) == "string" and parse(name) or name
 
   if spec.file then
-    filename = kpse.find_file(spec.file, "truetype fonts") or
+    path = kpse.find_file(spec.file, "truetype fonts") or
                kpse.find_file(spec.file, "opentype fonts")
     index = spec.index
   else
@@ -73,11 +73,11 @@ local function define_font(name, size)
   end
 
   local hbdata = nil
-  if filename then
-    local key = string.format("%s:%d", filename, index)
+  if path then
+    local key = string.format("%s:%d", path, index)
     hbdata = hbfonts[key]
     if not hbdata then
-      local face = hb.Face.new(filename, index)
+      local face = hb.Face.new(path, index)
       if face then
         local font = hb.Font.new(face)
         local upem = face:get_upem()
@@ -209,7 +209,7 @@ local function define_font(name, size)
       name = name,
       psname = hbdata.psname,
       fullname = hbdata.fullname,
-      filename = filename,
+      filename = path,
       designsize = size,
       size = size,
       type = "real",

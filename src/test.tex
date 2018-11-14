@@ -57,6 +57,18 @@
 
 ({\testI f\/})
 
+\def\l#1#2{%
+  \begingroup%
+  \font\testl="[amiri-regular.ttf]:\script{arab}language=#1" at 10pt
+  \testl #2%
+  \endgroup%
+}
+\l{ARA}{٠١٢٣٤٥٦٧٨٩}\par
+\l{FAR}{۰۱۲۳۴۵۶۷۸۹}\par
+\l{URD}{۰۱۲۳۴۵۶۷۸۹}\par
+\l{SND}{۰۱۲۳۴۵۶۷۸۹}\par
+\l{KSH}{۰۱۲۳۴۵۶۷۸۹}\par
+
 \endgroup
 \vfill\eject
 

@@ -269,6 +269,7 @@ local function copycharacter(character, scale)
   return new
 end
 
+
 -- Main shaping function that calls HarfBuzz, and does some post-processing of
 -- the output.
 shape = function(run)
@@ -279,7 +280,7 @@ shape = function(run)
   local fontid = run.font
   local dir = run.dir
   local script = run.script
-  local lang = run.lang or lang_invalid
+  local lang = run.lang
   local fordisc = run.fordisc
 
   local fontdata = font.fonts[fontid]
@@ -287,6 +288,8 @@ shape = function(run)
   local hbfont = hbdata.font
   local features = hbdata.spec.features
   local loaded = hbdata.loaded
+
+  local lang = lang or hbdata.spec.options.language or lang_invalid
 
   local buf = hb.Buffer.new()
   buf:set_direction(dir)

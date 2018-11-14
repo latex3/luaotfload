@@ -48,8 +48,9 @@ local function parse(str)
       if opt:find("[+-]") == 1 then
         local feature = hb.Feature.new(opt)
         spec.features[#spec.features + 1] = feature
-      else
+      elseif opt ~= "" then
         local key, val = opt:match("(.*)%s*=%s*(.*)")
+        if key == "language" then val = hb.Language.new(val) end
         spec.options[key or opt] = val or true
       end
     end

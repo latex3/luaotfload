@@ -571,7 +571,7 @@ local function shape_run(head, current, run)
     head, current = tonodes(head, current, run, glyphs, characters)
 
     if next(characters) ~= nil then
-      font.addcharacters(run.font, { characters = characters })
+      font.addcharacters(fontid, { nomath = true, characters = characters })
     end
   else
     -- Not shaping, insert the original node list of of this run.

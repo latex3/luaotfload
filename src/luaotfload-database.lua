@@ -748,13 +748,14 @@ local get_font_file = function (index)
     end
     local basename = entry.basename
     if entry.location == "texmf" then
-        if kpselookup(basename) then
-            return true, basename, entry.subfont
+        local fullname = kpselookup(basename)
+        if fullname then
+            return true, fullname, entry.subfont
         end
     else --- system, local
         local fullname = name_index.files.full [index]
         if lfsisfile (fullname) then
-            return true, basename, entry.subfont
+            return true, fullname, entry.subfont
         end
     end
     return false
@@ -1055,7 +1056,7 @@ local lookup_fontname = function (specification, name, style)
             or face.fullname   == name
             or face.psname     == name
         then
-            return face.basename, face.subfont
+            return face.fullpath, face.subfont
         elseif face.familyname == name then
             if typographicsubfamily == style
                 or subfamily == style
@@ -1074,10 +1075,10 @@ local lookup_fontname = function (specification, name, style)
         end
     end
     if fallback then
-        return fallback.basename, fallback.subfont
+        return fallback.fullpath, fallback.subfont
     end
     if lastresort then
-        return lastresort.basename, lastresort.subfont
+        return lastresort.fullpath, lastresort.subfont
     end
     return nil, nil
 end

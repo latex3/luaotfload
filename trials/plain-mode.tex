@@ -1,0 +1,32 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+% needs plain-mode.lua
+% scale of values unclear, defaults too
+% needs luatex 1.09
+
+\pdfvariable compresslevel=0
+\documentclass{article}
+\directlua{require'plain-mode'}
+\font\cmrfonts"cmr10:mode=plain;slant=200;"
+\font\cmrfontb"cmr10:mode=plain;bold=1;"
+\font\cmrfonto"cmr10:mode=plain;outline=0.25;"
+
+\usepackage{pdfrender,xcolor}
+\begin{document}
+
+\textpdfrender{%
+FillColor=yellow,%
+StrokeColor=[cmyk]{1,.5,0,0},%
+TextRenderingMode=FillStroke,%
+LineWidth=.25pt,%
+LineCapStyle=Round,%
+LineJoinStyle=Bevel,%
+}{Outline}
+
+\font\test={name:texgyreheros:mode=node;effect={width=0.25,effect=outline};slant=0.4}
+\test abc
+
+abc
+\cmrfonts slant
+\cmrfontb bold
+\cmrfonto Outline
+\end{document}

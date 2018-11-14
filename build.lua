@@ -19,7 +19,7 @@ checkconfigs = {
                }
 
 checkruns = 3
-checksuppfiles = {"texmf.cnf"} -- later
+checksuppfiles = {"texmf.cnf"} 
 
 if os.env["CONTEXTPATH"] then 
   -- local system
@@ -31,15 +31,14 @@ end
 
 -- table.insert(excludetests,"arab2") -- until bug is corrected.
 
--- l3build settings local folder descriptions 
-sourcefiledir = "./src"
-docfiledir    = "./doc" 
 
 
 -- l3build settings for CTAN/install target
 packtdszip=true
+sourcefiledir = "./src"
 
 -- documentation
+docfiledir    = "./doc" 
 
 ctanreadme= "CTANREADME.md"
 
@@ -70,31 +69,37 @@ typesetcycles = 2 -- for the tests
 -- installation
 tdsroot = "luatex"
 
-sourcefiles  = {
- "luaotfload.sty", 
- "**/luaotfload-*.lua",
- "**/fontloader-*.lua",
- "**/fontloader-*.tex",
- "luaotfload-blacklist.cnf",
- "./doc/filegraph.tex",
+if options["target"] == "check" or options["target"] == "save" then 
+  print("check/save")
+--  sourcefiledir = "./dontexist"
+  installfiles={} 
+  sourcefiles={} 
+  unpackfiles={}
+else
+  sourcefiles  = {
+   "luaotfload.sty", 
+   "**/luaotfload-*.lua",
+   "**/fontloader-*.lua",
+   "**/fontloader-*.tex",
+   "luaotfload-blacklist.cnf",
+   "./doc/filegraph.tex",
 -- "./doc/luaotfload-conf.tex",
 -- "./doc/luaotfload-tool.tex",
- "./doc/luaotfload-main.tex", 
+   "./doc/luaotfload-main.tex", 
                 }
-                
-installfiles = {
-                "luaotfload.sty",
-                "luaotfload-blacklist.cnf",
-                "**/luaotfload-*.lua",
-                "**/fontloader-b*.lua",
-                "**/fontloader-d*.lua",
-                "**/fontloader-f*.lua",
-                "**/fontloader-l*.lua",
-                "**/fontloader-u*.lua",
-                "**/fontloader-reference.lua",
-                "**/fontloader-2*.lua",
+   installfiles = {
+     "luaotfload.sty",
+     "luaotfload-blacklist.cnf",
+     "**/luaotfload-*.lua",
+     "**/fontloader-b*.lua",
+     "**/fontloader-d*.lua",
+     "**/fontloader-f*.lua",
+     "**/fontloader-l*.lua",
+     "**/fontloader-u*.lua",
+     "**/fontloader-reference.lua",
+     "**/fontloader-2*.lua",
                 }
-
+end
 
 scriptfiles   =  {"luaotfload-tool.lua"} 
 

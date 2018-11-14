@@ -140,7 +140,7 @@ local function loadfont(path, index)
   end
 end
 
-local function scalefont(data, path, size, spec)
+local function scalefont(data, name, path, size, spec)
   if size < 0 then
     size = (-655.36) * size
   end
@@ -241,7 +241,7 @@ local function define_font(name, size)
 
   local tfmdata = nil
   if hbdata then
-    tfmdata = scalefont(hbdata, path, size, spec)
+    tfmdata = scalefont(hbdata, name, path, size, spec)
   else
     tfmdata = font.read_tfm(name, size)
   end

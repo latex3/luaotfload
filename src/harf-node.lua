@@ -129,8 +129,6 @@ local function collect(head, direction)
       dir = to_hb_dir[currdir],
       script = script,
     }
-
-    dir = currdir
   end
 
   for i = #props - 1, 1, -1 do

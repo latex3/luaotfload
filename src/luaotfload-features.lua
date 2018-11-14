@@ -1217,6 +1217,13 @@ local handle_request = function (specification)
         return handle_combination (request.combo, specification)
     end
 
+    local features = specification.features
+    if not features then
+        features = { }
+        specification.features = features
+    end
+
+    features.raw = table.merged(request.features or {})
     request.features = apply_default_features(request.features)
 
     if name then
@@ -1250,11 +1257,6 @@ local handle_request = function (specification)
     --- The next line sets the “rand” feature to “random”; I haven’t
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.
-    local features = specification.features
-    if not features then
-        features = { }
-        specification.features = features
-    end
     features.normal = normalize (request.features)
     local subfont = tonumber (request.sub)
     if subfont and subfont >= 0 then
@@ -1262,6 +1264,13 @@ local handle_request = function (specification)
     else
         specification.sub = false
     end
+
+    if request.features and request.features.mode
+          and fonts.readers[request.features.mode] then
+        specification.forced = request.features.mode
+        return specification
+    end
+
     return specification
 end
 

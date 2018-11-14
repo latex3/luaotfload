@@ -1217,6 +1217,7 @@ local handle_request = function (specification)
         return handle_combination (request.combo, specification)
     end
 
+    local raw_features = table.merged(request.features or {})
     request.features = apply_default_features(request.features)
 
     if name then
@@ -1255,6 +1256,7 @@ local handle_request = function (specification)
         features = { }
         specification.features = features
     end
+    features.raw = raw_features
     features.normal = normalize (request.features)
     local subfont = tonumber (request.sub)
     if subfont and subfont >= 0 then
@@ -1262,6 +1264,13 @@ local handle_request = function (specification)
     else
         specification.sub = false
     end
+
+    if request.features and request.features.mode
+          and fonts.readers[request.features.mode] then
+        specification.forced = request.features.mode
+        return specification
+    end
+
     return specification
 end
 

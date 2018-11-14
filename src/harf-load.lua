@@ -22,9 +22,17 @@ local function split(str, sep)
   end
 end
 
-local function parse(str)
-  local spec = { variants = {}, features = {}, options = {}}
+local function parse(str, size)
+  if size < 0 then
+    size = -655.36 * size
+  end
+
   local name, options = str:match("%s*(.*)%s*:%s*(.*)%s*")
+  local spec = {
+    specification = str,
+    size = size,
+    variants = {}, features = {}, options = {},
+  }
 
   name = trim(name or str)
 
@@ -58,7 +66,18 @@ local function parse(str)
   return spec
 end
 
-local function loadfont(path, index)
+local function loadfont(spec)
+  local path, index = spec.path, spec.index
+  if not path then
+    return nil
+  end
+
+  local key = string.format("%s:%d", path, index)
+  local data = hbfonts[key]
+  if data then
+    return data
+  end
+
   local face = hb.Face.new(path, index)
   if face then
     local font = hb.Font.new(face)
@@ -120,7 +139,7 @@ local function loadfont(path, index)
       end
     end
 
-    return {
+    data = {
       face = face,
       font = font,
       upem = upem,
@@ -137,14 +156,14 @@ local function loadfont(path, index)
       fullname = face:get_name(hb.ot.NAME_ID_FULL_NAME),
       loaded = {}, -- Cached loaded glyph data.
     }
+
+    hbfonts[key] = data
+    return data
   end
 end
 
-local function scalefont(data, name, path, size, spec)
-  if size < 0 then
-    size = (-655.36) * size
-  end
-
+local function scalefont(data, spec)
+  local size = spec.size
   local font = data.font
   local upem = data.upem
   local ascender = data.ascender
@@ -185,11 +204,11 @@ local function scalefont(data, name, path, size, spec)
   characters[0x0079] = { depth = -descender * scale }
 
   return {
-    name = name,
+    name = spec.specification,
+    filename = spec.path,
+    designsize = size,
     psname = data.psname,
     fullname = data.fullname,
-    filename = path,
-    designsize = size,
     size = size,
     type = "real",
     embedding = "subset",
@@ -220,28 +239,18 @@ local function scalefont(data, name, path, size, spec)
 end
 
 local function define_font(name, size)
-  local path, index = nil, 0
-
-  local spec = type(name) == "string" and parse(name) or name
-
+  local spec = type(name) == "string" and parse(name, size) or name
   if spec.file then
-    path = kpse.find_file(spec.file, "truetype fonts") or
-           kpse.find_file(spec.file, "opentype fonts")
-    index = spec.index
+    spec.path = kpse.find_file(spec.file, "truetype fonts") or
+                kpse.find_file(spec.file, "opentype fonts")
   else
     -- XXX support font names
   end
 
-  local hbdata = nil
-  if path then
-    local key = string.format("%s:%d", path, index)
-    hbdata = hbfonts[key] or loadfont(path, index)
-    hbfonts[key] = hbdata
-  end
-
   local tfmdata = nil
+  local hbdata = loadfont(spec)
   if hbdata then
-    tfmdata = scalefont(hbdata, name, path, size, spec)
+    tfmdata = scalefont(hbdata, spec)
   else
     tfmdata = font.read_tfm(name, size)
   end

@@ -1,21 +1,20 @@
 \tracingstats=1
 \tracingonline=1
+\input luaotfload.sty
+\def\mode{mode=node;}
 \iftrue
-  \directlua{dofile("harf.lua")}
-  \def\script#1{}
-\else
-  \input luaotfload.sty
-  \def\script#1{script=#1;}
+  \directlua{dofile("harf-luaotfload.lua")}
+  \def\mode{mode=harf;}
 \fi
-\font\testr="[lmroman10-regular.otf]:\script{latn}+dlig" at 10pt
-\font\testb="[lmroman10-bold.otf]:\script{latn}" at 10pt
-\font\testi="[lmromanslant10-regular.otf]:\script{latn}" at 10pt
-\font\testR="[lmroman12-regular.otf]:\script{latn}" at 12pt
-\font\testA="[amiri-regular.ttf]:\script{arab}" at 10pt
-\font\testB="[amiri-bold.ttf]:\script{arab}" at 10pt
-\font\testI="[amiri-slanted.ttf]:\script{arab}" at 10pt
-\font\testF="[NotoSerifCJK-Regular.ttc]:\script{latn}" at 10pt
-\font\testa="[amiri-regular.ttf]:\script{arab}" at 20pt
+\font\testr="[lmroman10-regular.otf]:\mode;script=latn;+dlig" at 10pt
+\font\testb="[lmroman10-bold.otf]:\mode;script=latn;" at 10pt
+\font\testi="[lmromanslant10-regular.otf]:\mode;script=latn;" at 10pt
+\font\testR="[lmroman12-regular.otf]:\mode;script=latn;" at 12pt
+\font\testA="[amiri-regular.ttf]:\mode;script=arab;" at 10pt
+\font\testB="[amiri-bold.ttf]:\mode;script=arab;" at 10pt
+\font\testI="[amiri-slanted.ttf]:\mode;script=arab;" at 10pt
+\font\testF="[NotoSerifCJK-Regular.ttc]:\mode;script=latn;" at 10pt
+\font\testa="[amiri-regular.ttf]:\mode;script=arab;" at 20pt
 
 \begingroup
 \testA
@@ -59,7 +58,7 @@
 
 \def\l#1#2{%
   \begingroup%
-  \font\testl="[amiri-regular.ttf]:\script{arab}language=#1" at 10pt
+  \font\testl="[amiri-regular.ttf]:\mode;script=arab;language=#1" at 10pt
   \testl #2%
   \endgroup%
 }

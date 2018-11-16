@@ -1276,7 +1276,6 @@ local handle_request = function (specification)
     if request.features and request.features.mode
           and fonts.readers[request.features.mode] then
         specification.forced = request.features.mode
-        return specification
     end
 
     return specification

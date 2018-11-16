@@ -200,12 +200,12 @@ local resolve_sequence = function (seq, specification)
                        "step %d: invalid lookup method %q", i, id)
         else
             logreport ("both", 3, "resolve", "step %d: apply method %q (%s)", i, id, mth)
-            local result = mth (specification)
+            local result, t = mth (specification)
             if result then
                 logreport ("both", 3, "resolve",
                            "%d: method %q resolved %q -> %s.",
                            i, id, specification.specification, result)
-                return result
+                return result, t
             end
         end
     end

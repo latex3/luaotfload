@@ -781,7 +781,7 @@ local resolve_config_path = function ()
     local t, p = unpack (config_paths[i])
     local fullname
     if t == kpse_t then
-      fullname = kpse.lookup (p)
+      fullname = kpse.find_file (p)
       logreport ("both", 6, "conf", "kpse lookup: %s -> %s.", p, fullname)
     elseif t == path_t then
       local expanded = tilde_expand (p)

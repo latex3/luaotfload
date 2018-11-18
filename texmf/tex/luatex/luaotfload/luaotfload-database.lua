@@ -151,6 +151,7 @@ local ioopen                   = io.open
 local iopopen                  = io.popen
 local kpseexpand_path          = kpse.expand_path
 local kpsefind_file            = kpse.find_file
+local kpselookup               = kpse.lookup
 local kpsereadable_file        = kpse.readable_file
 local lfsattributes            = lfs.attributes
 local lfschdir                 = lfs.chdir
@@ -2040,31 +2041,36 @@ end
 
 --- unit -> unit
 read_blacklist = function ()
-    local path = kpsefind_file ("luaotfload-blacklist.cnf", "tex")
+    local files = {
+        kpselookup ("luaotfload-blacklist.cnf",
+                    {all=true, format="tex"})
+    }
     local blacklist = { }
     local whitelist = { }
 
-    if path then
-        for line in iolines (path) do
-            line = stringstrip(line) -- to get rid of lines like " % foo"
-            local first_chr = stringsub(line, 1, 1)
-            if first_chr == "%" or stringis_empty(line) then
-                -- comment or empty line
-            elseif first_chr == "-" then
-                logreport ("both", 3, "db",
-                           "Whitelisted file %q via %q.",
-                           line, path)
-                whitelist[#whitelist+1] = stringsub(line, 2, -1)
-            else
-                local cmt = stringfind(line, "%%")
-                if cmt then
-                    line = stringsub(line, 1, cmt - 1)
+    if files and type(files) == "table" then
+        for _, path in next, files do
+            for line in iolines (path) do
+                line = stringstrip(line) -- to get rid of lines like " % foo"
+                local first_chr = stringsub(line, 1, 1)
+                if first_chr == "%" or stringis_empty(line) then
+                    -- comment or empty line
+                elseif first_chr == "-" then
+                    logreport ("both", 3, "db",
+                               "Whitelisted file %q via %q.",
+                               line, path)
+                    whitelist[#whitelist+1] = stringsub(line, 2, -1)
+                else
+                    local cmt = stringfind(line, "%%")
+                    if cmt then
+                        line = stringsub(line, 1, cmt - 1)
+                    end
+                    line = stringstrip(line)
+                    logreport ("both", 3, "db",
+                               "Blacklisted file %q via %q.",
+                               line, path)
+                    blacklist[#blacklist+1] = line
                 end
-                line = stringstrip(line)
-                logreport ("both", 3, "db",
-                           "Blacklisted file %q via %q.",
-                           line, path)
-                blacklist[#blacklist+1] = line
             end
         end
     end

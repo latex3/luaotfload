@@ -495,17 +495,6 @@ local splitcomma        = Ct((C(noncomma^1) + comma)^1)
 --doc]]------------------------------------------------------------------------
 
 
-local handle_normal_option = function (key, val)
-  val = stringlower(val)
-  --- the former “toboolean()” handler
-  if val == "true"  then
-    val = true
-  elseif val == "false" then
-    val = false
-  end
-  return key, val
-end
-
 --[[doc--
 
     Xetex style indexing begins at zero which we just increment before
@@ -513,35 +502,8 @@ end
 
 --doc]]--
 
-local handle_xetex_option = function (key, val)
-  val = stringlower(val)
-  local numeric = tonumber(val) --- decimal only; keeps colors intact
-  if numeric then --- ugh
-    if  mathceil(numeric) == numeric then -- integer, possible index
-      val = tostring(numeric + 1)
-    end
-  elseif val == "true"  then
-    val = true
-  elseif val == "false" then
-    val = false
-  end
-  return key, val
-end
-
---[[doc--
-
-    Instead of silently ignoring invalid options we emit a warning to
-    the log.
-
-    Note that we have to return a pair to please rawset(). This creates
-    an entry on the resulting features hash which will later be removed
-    during set_default_features().
-
---doc]]--
-
-local handle_invalid_option = function (opt)
-  logreport("log", 0, "load", "font option %q unknown.", opt)
-  return "", false
+local handle_xetex_option = function (val)
+  return tostring(1 + tonumber(val))
 end
 
 --[[doc--
@@ -674,22 +636,24 @@ local path_lookup       = lbrk * Cg(Cs(path_balanced), "path") * rbrk
                         * subfont^-1
 
 --- features ----------------------------------------------------------
-local field_char        = anum + S"+-.!?" --- sic!
-local field             = field_char^1
+local balanced_braces   = P{((1 - S'{}') + '{' * V(1) * '}')^0}
+local field_char        = '{' * C(balanced_braces) * '}' + (1 - S'={}' - featuresep)
+local field             = '{' * C(balanced_braces) * '}' + C(field_char^1)
 --- assignments are “lhs=rhs”
 ---              or “+lhs=rhs” (Xetex-style)
 --- switches    are “+key” | “-key”
-local normal_option     = C(field) * ws * equals * ws * C(field) * ws
-local xetex_option      = P"+" * ws * normal_option
+local normal_option     = field * ws * equals * ws * field
+local xetex_option      = P"+" * ws * (  field * ws * equals * ws
+                                               * (digit^1/handle_xetex_option)
+                                       + normal_option)
 local ignore_option     = (1 - equals - featuresep)^1
                         * equals
                         * (1 - featuresep)^1
-local assignment        = xetex_option  / handle_xetex_option
-                        + normal_option / handle_normal_option
-                        + ignore_option / handle_invalid_option
-local switch            = P"+" * ws * C(field) * Cc(true)
-                        + P"-" * ws * C(field) * Cc(false)
-                        +             C(field) * Cc(true)   --- default
+local assignment        = xetex_option
+                        + normal_option
+local switch            = P"+" * ws * field * Cc(true)
+                        + P"-" * ws * field * Cc(false)
+                        +             field * Cc(true)   --- default
 local feature_expr      = ws * Cg(assignment + switch) * ws
 local option            = feature_expr
 local feature_list      = Cf(Ct""

@@ -77,7 +77,7 @@ local resolve_file
 resolve_file = function (specification)
     local name, _format, success = fonts.names.lookup_font_file (specification.name)
     local suffix = filesuffix (name)
-    if fonts.formats[suffix] then
+    if not specification.forced and fonts.formats[suffix] then
         specification.forced      = stringlower (suffix)
         specification.forcedname  = fileremovesuffix (name)
     else
@@ -110,7 +110,7 @@ resolve_path = function (specification)
         return resolve_file (specification)
     end
     local suffix = filesuffix (name)
-    if fonts.formats [suffix] then
+    if not specification.forced and fonts.formats [suffix] then
         specification.forced      = stringlower (suffix)
         specification.name        = fileremovesuffix (name)
         specification.forcedname  = name
@@ -142,7 +142,8 @@ resolve_name = function (specification)
                    subfont and stringformat ("(%d)", subfont) or "")
         specification.resolved   = resolved
         specification.sub        = subfont
-        specification.forced     = stringlower (filesuffix (resolved) or "")
+        specification.forced     = specification.forced
+                                or stringlower (filesuffix (resolved) or "")
         specification.forcedname = resolved
         specification.name       = fileremovesuffix (resolved)
         return true
@@ -184,7 +185,7 @@ local resolve_tex_format = function (specification)
         if resolvers.findfile (name, format) then
             local usename = suffix == format and fileremovesuffix (name) or name
             specification.forcedname = file.addsuffix (usename, format)
-            specification.forced     = format
+            specification.forced     = specification.forced or format
 ----        specification.resolved   = name
             return true
         end
@@ -277,7 +278,7 @@ local resolve_kpse
 resolve_kpse = function (specification)
     local name       = specification.name
     local suffix     = filesuffix (name)
-    if suffix and fonts.formats[suffix] then
+    if not specification.forced and suffix and fonts.formats[suffix] then
         name = fileremovesuffix (name)
         if resolvers.findfile (name, suffix) then
             specification.forced       = stringlower (suffix)

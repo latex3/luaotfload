@@ -1,0 +1,185 @@
+This is LuaTeX, Version 1.09.0 (MiKTeX 2.9.6880 64-bit)  (format=lualatex 2018.11.14)  15 NOV 2018 00:20
+ restricted system commands enabled.
+ file:line:error style messages enabled.
+**plain-mode.tex
+(./plain-mode.tex
+LaTeX2e <2018-04-01> patch level 5
+Lua module: luaotfload-main 2018-10-28 2.93 luaotfload entry point
+Lua module: luaotfload-init 2018-10-28 2.93 luaotfload submodule / initializatio
+n
+Lua module: lualibs 2018-10-18 2.61 ConTeXt Lua standard libraries.
+Lua module: lualibs-extended 2018-10-18 2.61 ConTeXt Lua libraries -- extended c
+ollection.
+Lua module: luaotfload-log 2018-10-28 2.93 luaotfload submodule / logging
+Lua module: luaotfload-parsers 2018-10-28 2.93 luaotfload submodule / filelist
+Lua module: luaotfload-configuration 2018-10-28 2.93 luaotfload submodule / conf
+ig file reader
+luaotfload | conf : Root cache directory is C:/Users/Nililand-Surface/AppData/Lo
+cal/MiKTeX/2.9/luatex-cache/generic/names.
+luaotfload | init : Loading fontloader “fontloader-2018-10-28.lua” from kpse
+-resolved path “C:/Users/Nililand-Surface/Documents/Git/luaotfload/texmf/tex/l
+uatex/luaotfload/fontloader-2018-10-28.lua”.
+Lua-only attribute luaotfload@state = 1
+Lua-only attribute luaotfload@noligature = 2
+Lua-only attribute luaotfload@syllabe = 3
+luaotfload | init : Context OpenType loader version “3.106”
+Inserting `luaotfload.node_processor' at position 1 in `pre_linebreak_filter'.
+Inserting `luaotfload.node_processor' at position 1 in `hpack_filter'.
+Lua module: luaotfload-loaders 2018-10-28 2.93 luaotfload submodule / callback h
+andling
+Inserting `luaotfload.define_font' at position 1 in `define_font'.
+Lua module: luaotfload-database 2018-10-28 2.93 luaotfload submodule / database
+Lua module: luaotfload-colors 2018-10-28 2.93 luaotfload submodule / color
+Lua-only attribute luaotfload_color_attribute = 4
+Lua module: luaotfload-resolvers 2018-10-28 2.93 luaotfload submodule / resolver
+s
+luaotfload | conf : Root cache directory is C:/Users/Nililand-Surface/AppData/Lo
+cal/MiKTeX/2.9/luatex-cache/generic/names.
+Lua module: luaotfload-features 2018-10-28 2.93 luaotfload submodule / features
+Lua module: luaotfload-letterspace 2018-10-28 2.93 luaotfload submodule / color
+Lua module: luaotfload-auxiliary 2018-10-28 2.93 luaotfload submodule / auxiliar
+y functions
+Inserting `luaotfload.aux.set_sscale_dimens' at position 1 in `luaotfload.patch_
+font'.
+Inserting `luaotfload.aux.patch_cambria_domh' at position 2 in `luaotfload.patch
+_font'.
+Inserting `luaotfload.aux.fixup_fontdata' at position 1 in `luaotfload.patch_fon
+t_unsafe'.
+Inserting `luaotfload.aux.set_capheight' at position 3 in `luaotfload.patch_font
+'.
+Inserting `luaotfload.rewrite_fontname' at position 4 in `luaotfload.patch_font'
+.
+luaotfload | main : initialization completed in 1.646 seconds
+(C:/Users/Nililand-Surface/MiKTeX/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(C:/Users/Nililand-Surface/MiKTeX/tex/latex/base/size10.clo
+File: size10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+luaotfload | db : Font names database loaded from C:/Users/Nililand-Surface/AppD
+ata/Local/MiKTeX/2.9/luatex-cache/generic/names/luaotfload-names.luc)
+\c@part=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(C:/Users/Nililand-Surface/MiKTeX/tex/generic/oberdiek/pdfrender.sty
+Package: pdfrender 2016/05/17 v1.4 Access to some PDF graphics parameters (HO)
+
+(C:/Users/Nililand-Surface/MiKTeX/tex/generic/luatex85/luatex85.sty
+Package: luatex85 2016/06/15 v1.4 pdftex aliases for luatex
+)
+(C:/Users/Nililand-Surface/MiKTeX/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2018/09/07 v3.3 Provides the ifpdf switch
+)
+(C:/Users/Nililand-Surface/MiKTeX/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
+)
+(C:/Users/Nililand-Surface/MiKTeX/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
+)
+Package pdfrender Info: \pdfmatch not found. Therefore the values
+(pdfrender)             of some parameters are not validated.
+
+(C:/Users/Nililand-Surface/MiKTeX/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
+
+(C:/Users/Nililand-Surface/MiKTeX/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+
+(C:/Users/Nililand-Surface/MiKTeX/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX detected.
+)))
+LaTeX Info: Redefining \pdfrender on input line 328.
+LaTeX Info: Redefining \textpdfrender on input line 345.
+)
+(C:/Users/Nililand-Surface/MiKTeX/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
+
+(C:/Users/Nililand-Surface/MiKTeX/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: luatex.def on input line 225.
+
+(C:/Users/Nililand-Surface/MiKTeX/tex/latex/graphics-def/luatex.def
+File: luatex.def 2018/01/08 v1.0l Graphics/color driver for luatex
+)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1348.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1352.
+Package xcolor Info: Model `RGB' extended on input line 1364.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1366.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1367.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
+)
+(./plain-mode.aux)
+\openout1 = plain-mode.aux
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 14.
+LaTeX Font Info:    ... okay on input line 14.
+
+(C:/Users/Nililand-Surface/MiKTeX/tex/context/base/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count88
+\scratchdimen=\dimen103
+\scratchbox=\box26
+\nofMPsegments=\count89
+\nofMParguments=\count90
+\everyMPshowfont=\toks14
+\MPscratchCnt=\count91
+\MPscratchDim=\dimen104
+\MPnumerator=\count92
+\makeMPintoPDFobject=\count93
+\everyMPtoPDFconversion=\toks15
+)
+Package pdfrender Info: New color stack `TextRenderingMode' = 1 on input line 23
+.
+Package pdfrender Info: New color stack `LineWidth' = 2 on input line 23.
+Package pdfrender Info: New color stack `LineCapStyle' = 3 on input line 23.
+Package pdfrender Info: New color stack `LineJoinStyle' = 4 on input line 23.
+luaotfload | cache : Lookup cache loaded from C:/Users/Nililand-Surface/AppData/
+Local/MiKTeX/2.9/luatex-cache/generic/names/luaotfload-lookup-cache.luc. [1
+
+{C:/Users/Nililand-Surface/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] 
+(./plain-mode.aux))
+
+Here is how much of LuaTeX's memory you used:
+ 1784 strings out of 494324
+ 100000,106986 words of node,token memory allocated
+ 382 words of node memory still in use:
+   2 hlist, 1 vlist, 1 rule, 2 glue, 3 kern, 1 glyph, 4 attribute, 45 glue_spec,
+ 4 attribute_list, 1 write nodes
+   avail lists: 2:29,3:4,4:31,5:24,6:3,7:55,9:13,11:2
+ 5989 multiletter control sequences out of 65536+200000
+ 19 fonts using 1084583 bytes
+ 30i,5n,35p,232b,137s stack positions out of 5000i,500n,10000p,200000b,50000s
+<C:/Users/Nililand-Surface/MiKTeX/fonts/opentype/public/tex-gyre/texgyreheros-re
+gular.otf><c:/users/nililand-surface/miktex/fonts/opentype/public/lm/lmroman10-r
+egular.otf><C:/Users/Nililand-Surface/MiKTeX/fonts/type1/public/amsfonts/cm/cmr1
+0.pfb>
+Output written on plain-mode.pdf (1 page, 19341 bytes).
+
+PDF statistics: 24 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 131072)
+ 1 words of extra memory for PDF output out of 10000 (max. 100000000)
+

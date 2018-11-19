@@ -558,17 +558,52 @@ local function tonodes(head, current, run, glyphs, characters)
   return head, current, characters
 end
 
+local function hex_to_rgba(s)
+  local r = tonumber(s:sub(1, 2), 16)
+  local g = tonumber(s:sub(3, 4), 16)
+  local b = tonumber(s:sub(5, 6), 16)
+  if not (r and g and b) then return end
+  r = r / 255
+  g = g / 255
+  b = b / 255
+  if #s == 8 then
+    local a = tonumber(s:sub(7, 8), 16)
+    if not a then return end
+    a = a / 255
+    -- XXX: alpha
+    return string.format('%s %s %s rg', r, g, b)
+  else
+    return string.format('%s %s %s rg', r, g, b)
+  end
+end
+
 local function shape_run(head, current, run)
   local fontid = run.font
   local fontdata = fontid and font.fonts[fontid]
+  local hbdata = fontdata and fontdata.hb
 
-  if fontdata and fontdata.hb then
+  if hbdata then
+    local spec = hbdata.spec
+    local options = spec and spec.options
+    local color = options and options.color and hex_to_rgba(options.color)
+
     -- Font loaded with our loader and an HarfBuzz face is present, do our
     -- shaping.
     local characters = {} -- LuaTeX font characters table
 
+    -- Push color if font has color option
+    if color then
+      local push = pdfdirect(color)
+      head, current = node.insert_after(head, current, push)
+    end
+
     local glyphs = shape(run)
     head, current = tonodes(head, current, run, glyphs, characters)
+
+    if color then
+      local pop = pdfdirect("0 g")
+      head, current = node.insert_after(head, current, pop)
+    end
 
     if next(characters) ~= nil then
       font.addcharacters(fontid, { nomath = true, characters = characters })

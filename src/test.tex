@@ -3,8 +3,8 @@
 
 \input luaotfload.sty
 \directlua{dofile("harf-luaotfload.lua")}
-\def\mode{mode=node;}
-\def\mode{mode=harf;}
+\def\mode{mode=node}
+\def\mode{mode=harf}
 
 \font\testr="[lmroman10-regular.otf]:\mode;script=latn;+dlig" at 10pt
 \font\testb="[lmroman10-bold.otf]:\mode;script=latn;" at 10pt
@@ -17,6 +17,7 @@
 \font\testa="[amiri-regular.ttf]:\mode;script=arab;" at 20pt
 \font\ruqaa="Aref Ruqaa:\mode;script=arab;" at 18pt
 \font\nasta="Noto Nastaliq Urdu:\mode;script=arab;" at 14pt
+\font\testc="[amiri-regular.ttf]:\mode;script=arab;color=FF0000" at 20pt
 
 \begingroup\pardir TRT\textdir TRT
 \testA
@@ -67,6 +68,10 @@
 \nasta
 \baselineskip=3em
 \arabictext
+\par\endgroup\vfill\eject
+
+\begingroup\pardir TRT\textdir TRT
+\testa قلبي {\testc تلون كله} بلون الحب.
 \par\endgroup\vfill\eject
 
 \begingroup

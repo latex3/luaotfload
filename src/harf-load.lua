@@ -139,6 +139,16 @@ local function loadfont(spec)
       end
     end
 
+    -- Load CPAL palettes if avialable in the font.
+    local palettes = nil
+    if face:ot_color_has_palettes() and face:ot_color_has_layers() then
+      local count = face:ot_color_palette_get_count()
+      palettes = {}
+      for i = 1, count do
+        palettes[#palettes + 1] = face:ot_color_palette_get_colors(i)
+      end
+    end
+
     data = {
       face = face,
       font = font,
@@ -154,6 +164,7 @@ local function loadfont(spec)
       glyphcount = face:get_glyph_count(),
       psname = face:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
       fullname = face:get_name(hb.ot.NAME_ID_FULL_NAME),
+      palettes = palettes,
       loaded = {}, -- Cached loaded glyph data.
     }
 
@@ -164,6 +175,7 @@ end
 
 local function scalefont(data, spec)
   local size = spec.size
+  local options = spec.options
   local font = data.font
   local upem = data.upem
   local ascender = data.ascender
@@ -203,6 +215,11 @@ local function scalefont(data, spec)
   -- `-char_depth(f, 'y')` for Descent.
   characters[0x0079] = { depth = -descender * scale }
 
+  -- Select font palette, we support `palette=index` option, and load the first
+  -- one otherwise.
+  local palettes = data.palettes
+  local palette = palettes and palettes[tonumber(options.palette) or 1]
+
   return {
     name = spec.specification,
     filename = spec.path,
@@ -234,6 +251,7 @@ local function scalefont(data, spec)
       ascender = ascender,
       descender = descender,
       loaded = data.loaded,
+      palette = palette,
     },
   }
 end

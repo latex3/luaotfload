@@ -284,8 +284,11 @@ shape = function(run)
   local fontdata = font.fonts[fontid]
   local hbdata = fontdata.hb
   local hbfont = hbdata.font
+  local hbface = hbdata.face
   local features = hbdata.spec.features
   local loaded = hbdata.loaded
+
+  local palette = hbdata.palette
 
   local lang = lang or hbdata.spec.options.language or lang_invalid
 
@@ -301,6 +304,45 @@ shape = function(run)
     if dir:is_backward() then buf:reverse() end
 
     local glyphs = buf:get_glyphs()
+
+    -- If the font has COLR/CPAL tables, decompose each glyph to its color
+    -- layers and set the color from the palette.
+    if palette then
+      for i, glyph in next, glyphs do
+        local gid = glyph.codepoint
+        local layers = hbface:ot_color_glyph_get_layers(gid)
+        if layers then
+          -- Remove this glyph, we will use its layers.
+          table.remove(glyphs, i)
+          for j, layer in next, layers do
+            -- All glyphs but the last use 0 advance so that the layers
+            -- overlap.
+            local xadavance, yadvance = nil, nil
+            if dir:is_backward() then
+              x_advance = j == 1 and glyph.x_advance or 0
+              y_advance = j == 1 and glyph.y_advance or 0
+            else
+              x_advance = j == #layers and glyph.x_advance or 0
+              y_advance = j == #layers and glyph.y_advance or 0
+            end
+            table.insert(glyphs, i + j - 1, {
+              codepoint = layer.glyph,
+              cluster = glyph.cluster,
+              x_advance = x_advance,
+              y_advance = y_advance,
+              x_offset = glyph.x_offset,
+              y_offset = glyph.y_offset,
+              flags = glyph.flags,
+              -- color_index has a special value, 0x10000, that mean use text
+              -- color, we don’t check for it here explicitly since we will
+              -- get nil anyway.
+              color = palette[layer.color_index],
+            })
+          end
+        end
+      end
+    end
+
     for i, glyph in next, glyphs do
       local nodeindex = glyph.cluster + 1
       local nchars, nglyphs = chars_in_glyph(i, glyphs, offset + len)
@@ -381,6 +423,19 @@ local function pdfdirect(data)
   return actual
 end
 
+local function color_to_rgba(color)
+  local r = color.red   / 255
+  local g = color.green / 255
+  local b = color.blue  / 255
+  local a = color.alpha / 255
+  if a ~= 1 then
+    -- XXX: alpha
+    return string.format('%s %s %s rg', r, g, b)
+  else
+    return string.format('%s %s %s rg', r, g, b)
+  end
+end
+
 -- Convert glyphs to nodes and collect font characters.
 local function tonodes(head, current, run, glyphs, characters)
   local nodes = run.nodes
@@ -428,6 +483,11 @@ local function tonodes(head, current, run, glyphs, characters)
 
       head, current = node.insert_after(head, current, disc)
     elseif not glyph.skip then
+      local color = glyph.color
+      if color then
+        local push = pdfdirect(color_to_rgba(color))
+        head, current = node.insert_after(head, current, push)
+      end
       head, current = node.insert_after(head, current, n)
 
       if id == glyphid then
@@ -551,6 +611,10 @@ local function tonodes(head, current, run, glyphs, characters)
         n.pre = process(n.pre, direction)
         n.post = process(n.post, direction)
         n.replace = process(n.replace, direction)
+      end
+      if color then
+        local pop = pdfdirect("0 g")
+        head, current = node.insert_after(head, current, pop)
       end
     end
   end

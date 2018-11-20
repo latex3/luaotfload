@@ -19,14 +19,19 @@ fonts.readers.harf = function(spec)
     specification = spec.specification,
   }
   for key, val in next, spec.features.raw do
-    if val == true or val == false then
-      val = (val and '+' or '-')..key
-      features[#features + 1] = hb.Feature.new(val)
-    elseif key:len() == 4 and tonumber(val) then
-      val = '+'..key..'='..tonumber(val) - 1
-      features[#features + 1] = hb.Feature.new(val)
+    if key == "language" then val = hb.Language.new(val) end
+    if key == "colr" then key = "palette" end
+    if key:len() == 4 then
+      if val == true or val == false then
+        val = (val and '+' or '-')..key
+        features[#features + 1] = hb.Feature.new(val)
+      elseif tonumber(val) then
+        val = '+'..key..'='..tonumber(val) - 1
+        features[#features + 1] = hb.Feature.new(val)
+      else
+        options[key] = val
+      end
     else
-      if key == "language" then val = hb.Language.new(val) end
       options[key] = val
     end
   end

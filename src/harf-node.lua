@@ -417,10 +417,10 @@ shape = function(run)
 end
 
 local function pdfdirect(data)
-  local actual = node.new("whatsit", "pdf_literal")
-  actual.mode = directmode
-  actual.data = data
-  return actual
+  local n = node.new("whatsit", "pdf_literal")
+  n.mode = directmode
+  n.data = data
+  return n
 end
 
 local function color_to_rgba(color)

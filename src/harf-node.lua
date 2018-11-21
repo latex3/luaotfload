@@ -22,6 +22,9 @@ local dir_rtl      = hb.Direction.new("rtl")
 local lang_invalid = hb.Language.new()
 local fl_unsafe    = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 
+local p_startactual = "startactualtext"
+local p_endactual   = "endactualtext"
+
 local format = string.format
 
 -- Simple table copying function.
@@ -594,12 +597,12 @@ local function tonodes(head, current, run, glyphs, characters, color)
             loaded[gid].tounicode = tounicode
             characters[char].tounicode = tounicode
           elseif tounicode ~= loaded[gid].tounicode then
-            setprop(current, "startactualtext", tounicode)
+            setprop(current, p_startactual, tounicode)
             glyphs[i + nglyphs - 1].endactual = true
           end
         end
         if glyph.endactual then
-          setprop(current, "endactualtext", true)
+          setprop(current, p_endactual, true)
         end
       elseif id == glueid and n.subtype == spaceskip then
         if n.width ~= (glyph.x_advance * scale) then
@@ -738,8 +741,8 @@ end
 
 local function post_process_nodes(head, groupcode, size, packtype, maxdepth, direction, currentcolor)
   for n in node.traverse(head) do
-    local startactual = getprop(n, "startactualtext")
-    local endactual = getprop(n, "endactualtext")
+    local startactual = getprop(n, p_startactual)
+    local endactual = getprop(n, p_endactual)
     local color = getprop(n, "color")
 
     if currentcolor and currentcolor ~= color then

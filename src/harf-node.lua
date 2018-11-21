@@ -454,7 +454,7 @@ local function color_to_rgba(color)
 end
 
 -- Convert glyphs to nodes and collect font characters.
-local function tonodes(head, current, run, glyphs, characters)
+local function tonodes(head, current, run, glyphs, characters, color)
   local nodes = run.nodes
   local dir = run.dir
   local fontid = run.font
@@ -485,6 +485,10 @@ local function tonodes(head, current, run, glyphs, characters)
       n = node.copy(nodes[index])
     end
 
+    if color then
+      setprop(n, "color", color)
+    end
+
     if glyph.disc then
       -- For discretionary the glyph itself is skipped and a discretionary node
       -- is output in place of it.
@@ -493,16 +497,14 @@ local function tonodes(head, current, run, glyphs, characters)
       local pre = glyph.pre
       local post = glyph.post
 
-      disc.replace = tonodes(nil, nil, replace.run, replace.glyphs, characters)
-      disc.pre = tonodes(nil, nil, pre.run, pre.glyphs, characters)
-      disc.post = tonodes(nil, nil, post.run, post.glyphs, characters)
+      disc.replace = tonodes(nil, nil, replace.run, replace.glyphs, characters, color)
+      disc.pre = tonodes(nil, nil, pre.run, pre.glyphs, characters, color)
+      disc.post = tonodes(nil, nil, post.run, post.glyphs, characters, color)
 
       head, current = node.insert_after(head, current, disc)
     elseif not glyph.skip then
-      local color = glyph.color
-      if color then
-        local push = pdfdirect(color_to_rgba(color))
-        head, current = node.insert_after(head, current, push)
+      if glyph.color then
+        setprop(n, "color", color_to_rgba(glyph.color))
       end
       head, current = node.insert_after(head, current, n)
 
@@ -627,28 +629,31 @@ local function tonodes(head, current, run, glyphs, characters)
         n.post = process(n.post, direction)
         n.replace = process(n.replace, direction)
       end
-      if color then
-        local pop = pdfdirect("0 g")
-        head, current = node.insert_after(head, current, pop)
-      end
     end
   end
 
   return head, current, characters
 end
 
-local function hex_to_rgba(s)
+local function validate_color(s)
   local r = tonumber(s:sub(1, 2), 16)
   local g = tonumber(s:sub(3, 4), 16)
   local b = tonumber(s:sub(5, 6), 16)
   if not (r and g and b) then return end
-  r = r / 255
-  g = g / 255
-  b = b / 255
   if #s == 8 then
     local a = tonumber(s:sub(7, 8), 16)
     if not a then return end
-    a = a / 255
+  end
+  return s
+end
+
+local function hex_to_rgba(s)
+  if not validate_color(s) then return end
+  local r = tonumber(s:sub(1, 2), 16) / 255
+  local g = tonumber(s:sub(3, 4), 16) / 255
+  local b = tonumber(s:sub(5, 6), 16) / 255
+  if #s == 8 then
+    local a = tonumber(s:sub(7, 8), 16) / 255
     -- XXX: alpha
     return string.format('%s %s %s rg', r, g, b)
   else
@@ -670,19 +675,8 @@ local function shape_run(head, current, run)
     -- shaping.
     local characters = {} -- LuaTeX font characters table
 
-    -- Push color if font has color option
-    if color then
-      local push = pdfdirect(color)
-      head, current = node.insert_after(head, current, push)
-    end
-
     local glyphs = shape(run)
-    head, current = tonodes(head, current, run, glyphs, characters)
-
-    if color then
-      local pop = pdfdirect("0 g")
-      head, current = node.insert_after(head, current, pop)
-    end
+    head, current = tonodes(head, current, run, glyphs, characters, color)
 
     if next(characters) ~= nil then
       font.addcharacters(fontid, { nomath = true, characters = characters })
@@ -728,21 +722,34 @@ local function process_nodes(head, groupcode, size, packtype, direction)
   return head
 end
 
-local function post_process_nodes(head, groupcode, size, packtype, maxdepth, direction)
+local function post_process_nodes(head, groupcode, size, packtype, maxdepth, direction, currentcolor)
   for n in node.traverse(head) do
     local startactual = getprop(n, "startactualtext")
+    local endactual = getprop(n, "endactualtext")
+    local color = getprop(n, "color")
+
+    if currentcolor and currentcolor ~= color then
+      -- Pop current color.
+      head = node.insert_before(head, n, pdfdirect("0 g"))
+    end
+
     if startactual then
       local actualtext = "/Span<</ActualText<FEFF"..startactual..">>>BDC"
       head = node.insert_before(head, n, pdfdirect(actualtext))
     end
 
-    local endactual = getprop(n, "endactualtext")
     if endactual then
       head = node.insert_after(head, n, pdfdirect("EMC"))
     end
 
+    if currentcolor ~= color then
+      -- Push new color.
+      head = node.insert_before(head, n, pdfdirect(color))
+      currentcolor = color
+    end
+
     if n.head then
-      post_process_nodes(n.head)
+      post_process_nodes(n.head, currentcolor)
     end
   end
   return head

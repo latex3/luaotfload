@@ -24,6 +24,16 @@ local fl_unsafe    = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 
 local format = string.format
 
+-- Simple table copying function.
+local function copytable(old)
+  local new = {}
+  for k, v in next, old do
+    if type(v) == "table" then v = copytable(v) end
+    new[k] = v
+  end
+  return new
+end
+
 -- Set and get properties from our private `harf` subtable.
 local function setprop(n, prop, value)
   local props = node.getproperty(n)
@@ -39,6 +49,18 @@ local function getprop(n, prop, value)
   local p = node.getproperty(n)
   local h = p and p.harf
   return h and h[prop]
+end
+
+-- Copy node properties and attributes.
+local function copyprops(src, dst)
+  local props = node.getproperty(src)
+  local attrs = src.attr
+  if props then
+    node.setproperty(dst, copytable(props))
+  end
+  if attrs then
+    dst.attr = node.copy_list(attrs)
+  end
 end
 
 -- Convert list of integers to UTF-16 hex string used in PDF.
@@ -264,15 +286,6 @@ local function makesub(run, start, stop, nodelist)
     codes = subcodes,
   }
   return { glyphs = shape(subrun), run = subrun }
-end
-
--- Simple table copying function. DOES NOT copy sub tables.
-local function copytable(old)
-  local new = {}
-  for k, v in next, old do
-    new[k] = v
-  end
-  return new
 end
 
 local function copycharacter(character, scale)
@@ -533,6 +546,7 @@ local function tonodes(head, current, run, glyphs, characters, color)
           -- insert a kern node if the x advance is different.
           local kern = node.new(kernid)
           kern.kern = (glyph.x_advance - width) * scale
+          copyprops(n, kern)
           if rtl then
             head = node.insert_before(head, current, kern)
           else

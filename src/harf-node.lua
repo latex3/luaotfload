@@ -24,6 +24,23 @@ local fl_unsafe    = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 
 local format = string.format
 
+-- Set and get properties from our private `harf` subtable.
+local function setprop(n, prop, value)
+  local props = node.getproperty(n)
+  if not props then
+    props = {}
+    node.setproperty(n, props)
+  end
+  props.harf = props.harf or {}
+  props.harf[prop] = value
+end
+
+local function getprop(n, prop, value)
+  local p = node.getproperty(n)
+  local h = p and p.harf
+  return h and h[prop]
+end
+
 -- Convert list of integers to UTF-16 hex string used in PDF.
 local function to_utf16_hex(unicodes)
   local hex = ""
@@ -439,7 +456,6 @@ end
 -- Convert glyphs to nodes and collect font characters.
 local function tonodes(head, current, run, glyphs, characters)
   local nodes = run.nodes
-  local fordisc = run.fordisc
   local dir = run.dir
   local fontid = run.font
   local fontdata = fontid and font.fonts[fontid]
@@ -561,14 +577,13 @@ local function tonodes(head, current, run, glyphs, characters)
           if nglyphs == 1 and not loaded[gid].tounicode then
             loaded[gid].tounicode = tounicode
             characters[char].tounicode = tounicode
-          elseif tounicode ~= loaded[gid].tounicode and not fordisc then
-            local actual = "/Span<</ActualText<FEFF"..tounicode..">>>BDC"
-            head = node.insert_before(head, current, pdfdirect(actual))
+          elseif tounicode ~= loaded[gid].tounicode then
+            setprop(current, "startactualtext", tounicode)
             glyphs[i + nglyphs - 1].endactual = true
           end
         end
         if glyph.endactual then
-          head, current = node.insert_after(head, current, pdfdirect("EMC"))
+          setprop(current, "endactualtext", true)
         end
       elseif id == glueid and n.subtype == spaceskip then
         if n.width ~= (glyph.x_advance * scale) then
@@ -713,4 +728,27 @@ local function process_nodes(head, groupcode, size, packtype, direction)
   return head
 end
 
-return process_nodes
+local function post_process_nodes(head, groupcode, size, packtype, maxdepth, direction)
+  for n in node.traverse(head) do
+    local startactual = getprop(n, "startactualtext")
+    if startactual then
+      local actualtext = "/Span<</ActualText<FEFF"..startactual..">>>BDC"
+      head = node.insert_before(head, n, pdfdirect(actualtext))
+    end
+
+    local endactual = getprop(n, "endactualtext")
+    if endactual then
+      head = node.insert_after(head, n, pdfdirect("EMC"))
+    end
+
+    if n.head then
+      post_process_nodes(n.head)
+    end
+  end
+  return head
+end
+
+return {
+  process = process_nodes,
+  post_process = post_process_nodes,
+}

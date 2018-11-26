@@ -165,6 +165,7 @@ local function loadfont(spec)
       psname = face:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
       fullname = face:get_name(hb.ot.NAME_ID_FULL_NAME),
       palettes = palettes,
+      haspng = face:ot_color_has_png(),
       loaded = {}, -- Cached loaded glyph data.
     }
 
@@ -252,6 +253,7 @@ local function scalefont(data, spec)
       descender = descender,
       loaded = data.loaded,
       palette = palette,
+      haspng = data.haspng,
     },
   }
 end

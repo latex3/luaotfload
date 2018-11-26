@@ -8,6 +8,7 @@ harf.callbacks = {
   pre_linebreak_filter = harf_node.process,
   hpack_filter = harf_node.process,
   pre_output_filter = harf_node.post_process,
+  wrapup_run = harf_node.cleanup,
 }
 
 return harf

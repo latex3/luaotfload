@@ -47,6 +47,9 @@ fonts.readers.harf = function(spec)
   return define_font(specification)
 end
 
+-- luatexbase does not know how to handle `wrapup_run` callback, teach it.
+luatexbase.callbacktypes.wrapup_run = 1 -- simple
+
 -- Register all Harf callbacks, except `define_font` which is handled above.
 for name, func in next, harf.callbacks do
   if name ~= "define_font" then

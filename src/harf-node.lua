@@ -469,6 +469,22 @@ local function color_to_rgba(color)
   end
 end
 
+-- Cache of color glyph PNG data for bookkeeping, only because I couldn’t
+-- figure how to make LuaTeX load the image from the binary data directly.
+local pngcache = {}
+local function cachedpng(data)
+  local hash = md5.sumhexa(data)
+  local path = pngcache[hash]
+  if not path then
+    path = os.tmpname()
+    local file = io.open(path, "w")
+    file:write(data)
+    file:close()
+    pngcache[hash] = path
+  end
+  return path
+end
+
 -- Convert glyphs to nodes and collect font characters.
 local function tonodes(head, current, run, glyphs, characters, color)
   local nodes = run.nodes
@@ -522,7 +538,6 @@ local function tonodes(head, current, run, glyphs, characters, color)
       if glyph.color then
         setprop(n, "color", color_to_rgba(glyph.color))
       end
-      head, current = node.insert_after(head, current, n)
 
       if id == glyphid then
         -- Report missing characters, trying to emulate the engine behaviour as
@@ -539,28 +554,9 @@ local function tonodes(head, current, run, glyphs, characters, color)
           texio.write_nl(target, "")
         end
 
-        n.char = char
-        n.xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
-        n.yoffset = glyph.y_offset * scale
-
-        local width = hbfont:get_glyph_h_advance(gid)
-        if width ~= glyph.x_advance then
-          -- LuaTeX always uses the glyph width from the font, so we need to
-          -- insert a kern node if the x advance is different.
-          local kern = node.new(kernid)
-          kern.kern = (glyph.x_advance - width) * scale
-          copyprops(n, kern)
-          if rtl then
-            head = node.insert_before(head, current, kern)
-          else
-            head, current = node.insert_after(head, current, kern)
-          end
-        end
-
-        node.protect_glyph(n)
-
         -- Load the glyph metrics of not already loaded.
         if not loaded[gid] then
+          local width = hbfont:get_glyph_h_advance(gid)
           local height, depth, italic = nil, nil, nil
           local extents = hbfont:get_glyph_extents(gid)
           if extents then
@@ -576,45 +572,84 @@ local function tonodes(head, current, run, glyphs, characters, color)
             height = height or ascender,
             depth = -(depth or descender),
             italic = italic or 0,
+            png = hbdata.haspng and hbfont:ot_color_glyph_get_png(gid),
           }
           loaded[gid] = character
         end
-        characters[char] = copycharacter(loaded[gid], scale)
+        local character = copycharacter(loaded[gid], scale)
 
-        -- Handle PDF text extraction:
-        -- * Find how many characters in this cluster and how many glyphs,
-        -- * If there is more than 0 characters
-        --   * One glyph: one to one or one to many mapping, can be
-        --     represented by font’s /ToUnicode
-        --   * More than one: many to one or many to many mapping, can be
-        --     represented by /ActualText spans.
-        -- * If there are zero characters, then this glyph is part of complex
-        --   cluster that will be covered by an /ActualText span.
-        local unicodes = glyph.unicodes or {}
-        if #unicodes > 0 then
-          local tounicode = to_utf16_hex(unicodes)
-          if nglyphs == 1 and not loaded[gid].tounicode then
-            loaded[gid].tounicode = tounicode
-            characters[char].tounicode = tounicode
-          elseif tounicode ~= loaded[gid].tounicode then
-            setprop(current, p_startactual, tounicode)
-            glyphs[i + nglyphs - 1].endactual = true
+        local pngblob = loaded[gid].png
+        if pngblob then
+          -- Color bitmap font, extract the PNG data and insert it in the node
+          -- list.
+          local data = pngblob:get_data()
+          local path = cachedpng(data)
+
+          local image = img.node {
+            filename  = path,
+            width     = character.width,
+            height    = character.height,
+            depth     = character.depth,
+          }
+          head, current = node.insert_after(head, current, image)
+        else
+          n.char = char
+          n.xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
+          n.yoffset = glyph.y_offset * scale
+          node.protect_glyph(n)
+          head, current = node.insert_after(head, current, n)
+          characters[char] = character
+
+          local width = loaded[gid].width
+          if width ~= glyph.x_advance then
+            -- LuaTeX always uses the glyph width from the font, so we need to
+            -- insert a kern node if the x advance is different.
+            local kern = node.new(kernid)
+            kern.kern = (glyph.x_advance - width) * scale
+            copyprops(n, kern)
+            if rtl then
+              head = node.insert_before(head, current, kern)
+            else
+              head, current = node.insert_after(head, current, kern)
+            end
           end
-        end
-        if glyph.endactual then
-          setprop(current, p_endactual, true)
+
+          -- Handle PDF text extraction:
+          -- * Find how many characters in this cluster and how many glyphs,
+          -- * If there is more than 0 characters
+          --   * One glyph: one to one or one to many mapping, can be
+          --     represented by font’s /ToUnicode
+          --   * More than one: many to one or many to many mapping, can be
+          --     represented by /ActualText spans.
+          -- * If there are zero characters, then this glyph is part of complex
+          --   cluster that will be covered by an /ActualText span.
+          local unicodes = glyph.unicodes or {}
+          if #unicodes > 0 then
+            local tounicode = to_utf16_hex(unicodes)
+            if nglyphs == 1 and not loaded[gid].tounicode then
+              loaded[gid].tounicode = tounicode
+              character.tounicode = tounicode
+            elseif tounicode ~= loaded[gid].tounicode then
+              setprop(current, p_startactual, tounicode)
+              glyphs[i + nglyphs - 1].endactual = true
+            end
+          end
+          if glyph.endactual then
+            setprop(current, p_endactual, true)
+          end
         end
       elseif id == glueid and n.subtype == spaceskip then
         if n.width ~= (glyph.x_advance * scale) then
           n.width = glyph.x_advance * scale
         end
+        head, current = node.insert_after(head, current, n)
       elseif id == kernid and n.subtype == italiccorrection then
         -- If this is an italic correction node and the previous node is a
         -- glyph, update its kern value with the glyph’s italic correction.
         -- I’d have expected the engine to do this, but apparently it doesn’t.
         -- May be it is checking for the italic correction before we have had
         -- loaded the glyph?
-        local prevchar, prevfontid = node.is_glyph(current.prev)
+        local prevchar, prevfontid = node.is_glyph(current)
         if prevchar > 0 then
           local prevgid = prevchar - hb.CH_GID_PREFIX
           local prevfont = font.fonts[prevfontid]
@@ -626,6 +661,7 @@ local function tonodes(head, current, run, glyphs, characters, color)
             n.kern = italic * scale
           end
         end
+        head, current = node.insert_after(head, current, n)
       elseif id == discid then
         assert(nglyphs == 1)
         -- The simple case of a discretionary that is not part of a complex
@@ -636,15 +672,18 @@ local function tonodes(head, current, run, glyphs, characters, color)
         -- the other discretionary handling, otherwise the discretionary
         -- contents do not interact with the surrounding (e.g. no ligatures or
         -- kerning) as it should.
-        local prev = current.prev
-        if prev and prev.id == kernid and prev.subtype == fontkern then
-          head = node.remove(head, prev)
-          prev.prev, prev.next = nil, nil
-          n.replace = prev
+        if current and current.id == kernid and current.subtype == fontkern then
+          current.prev, current.next = nil, nil
+          n.replace = current
+          head, current = node.remove(head, current)
         end
         n.pre = process(n.pre, direction)
         n.post = process(n.post, direction)
         n.replace = process(n.replace, direction)
+
+        head, current = node.insert_after(head, current, n)
+      else
+        head, current = node.insert_after(head, current, n)
       end
     end
   end
@@ -772,7 +811,15 @@ local function post_process_nodes(head, groupcode, size, packtype, maxdepth, dir
   return head
 end
 
+local function run_cleanup()
+  -- Remove temporary PNG files that we created, if any.
+  for _, path in next, pngcache do
+    os.remove(path)
+  end
+end
+
 return {
   process = process_nodes,
   post_process = post_process_nodes,
+  cleanup = run_cleanup,
 }

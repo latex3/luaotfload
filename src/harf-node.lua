@@ -463,9 +463,9 @@ local function color_to_rgba(color)
   local a = color.alpha / 255
   if a ~= 1 then
     -- XXX: alpha
-    return string.format('%s %s %s rg', r, g, b)
+    return format('%s %s %s rg', r, g, b)
   else
-    return string.format('%s %s %s rg', r, g, b)
+    return format('%s %s %s rg', r, g, b)
   end
 end
 
@@ -711,9 +711,9 @@ local function hex_to_rgba(s)
   if #s == 8 then
     local a = tonumber(s:sub(7, 8), 16) / 255
     -- XXX: alpha
-    return string.format('%s %s %s rg', r, g, b)
+    return format('%s %s %s rg', r, g, b)
   else
-    return string.format('%s %s %s rg', r, g, b)
+    return format('%s %s %s rg', r, g, b)
   end
 end
 

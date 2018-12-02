@@ -1,7 +1,11 @@
 SHELL := /bin/bash
 
-.PHONY: test.pdf
+.PHONY: test.pdf test-latex.pdf
 
-test.pdf: test.tex harf-base.lua harf-load.lua harf-node.lua
+test.pdf: test.tex
 	time luahbtex $<
+	mutool clean -a -d $@ $@
+
+test-latex.pdf: test-latex.tex
+	time luahblatex $<
 	mutool clean -a -d $@ $@

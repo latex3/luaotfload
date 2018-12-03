@@ -147,6 +147,9 @@ local function collect(head, direction)
       currdir = n.dir
     end
 
+    local fontdata = currfont and font.fonts[currfont]
+    if not (fontdata and fontdata.hb) then skip = true end
+
     -- Resolve common and inherited scripts. Inherited takes the script of the
     -- previous character. Common almost the same, but we tray to make paired
     -- characters (e.g. parentheses) to take the same script.
@@ -727,11 +730,9 @@ local function hex_to_rgba(s)
 end
 
 local function shape_run(head, current, run)
-  local fontid = run.font
-  local fontdata = fontid and font.fonts[fontid]
-  local hbdata = fontdata and fontdata.hb
-
-  if hbdata and not run.skip then
+  if not run.skip then
+    local fontid = run.font
+    local hbdata = font.fonts[fontid].hb
     local spec = hbdata.spec
     local options = spec and spec.options
     local color = options and options.color and hex_to_rgba(options.color)

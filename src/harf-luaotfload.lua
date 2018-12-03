@@ -53,6 +53,6 @@ luatexbase.callbacktypes.wrapup_run = 1 -- simple
 -- Register all Harf callbacks, except `define_font` which is handled above.
 for name, func in next, harf.callbacks do
   if name ~= "define_font" then
-    add_to_callback(name, func, "Harf "..name.." callback")
+    add_to_callback(name, func, "Harf "..name.." callback", 1)
   end
 end

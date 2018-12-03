@@ -122,8 +122,10 @@ local function collect(head, direction)
     local id = n.id
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
     local script = sc_common
+    local skip = false
 
     if id == glyphid then
+      if n.subtype > 255 then skip = true end
       code = n.char
       currfont = n.font
       script = getscript(code)
@@ -170,6 +172,7 @@ local function collect(head, direction)
       font = currfont,
       dir = to_hb_dir[currdir],
       script = script,
+      skip = skip,
     }
   end
 
@@ -187,20 +190,25 @@ end
 -- TODO: itemize by language as well.
 local function itemize(props, nodes, codes)
   local runs = {}
-  local currfont, currdir, currscript = nil, nil, nil
+  local currfont, currdir, currscript, currskip = nil, nil, nil, nil
   for i, prop in next, props do
     local font = prop.font
     local dir = prop.dir
     local script = prop.script
+    local skip = prop.skip
 
     -- Start a new run if there is a change in properties.
-    if font ~= currfont or dir ~= currdir or script ~= currscript then
+    if font ~= currfont or
+       dir ~= currdir or
+       script ~= currscript or
+       skip ~= currskip then
       runs[#runs + 1] = {
         start = i,
         len = 0,
         font = font,
         dir = dir,
         script = script,
+        skip = skip,
         nodes = nodes,
         codes = codes,
       }
@@ -211,6 +219,7 @@ local function itemize(props, nodes, codes)
     currfont = font
     currdir = dir
     currscript = script
+    currskip = skip
   end
 
   return runs
@@ -722,7 +731,7 @@ local function shape_run(head, current, run)
   local fontdata = fontid and font.fonts[fontid]
   local hbdata = fontdata and fontdata.hb
 
-  if hbdata then
+  if hbdata and not run.skip then
     local spec = hbdata.spec
     local options = spec and spec.options
     local color = options and options.color and hex_to_rgba(options.color)

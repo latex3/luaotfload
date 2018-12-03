@@ -4,10 +4,9 @@
 \usepackage{setspace}
 \usepackage{fontspec}
 \directlua{dofile("harf-luaotfload.lua")}
-\def\mode{}
-\def\mode{RawFeature={mode=harf}}
+\defaultfontfeatures{RawFeature={mode=harf}}
 
-\setmainfont{Amiri}[\mode, Script=Arabic]
+\setmainfont{Amiri}[Script=Arabic]
 
 \begin{document}
 \begingroup\pardir TRT\textdir TRT
@@ -47,30 +46,30 @@
 }
 
 \begingroup\pardir TRT\textdir TRT
-\fontspec{Amiri}[\mode, Script=Arabic, Scale=1.6]
+\fontspec{Amiri}[Script=Arabic, Scale=1.6]
 \setstretch{2.4}
 \arabictext
 \par\endgroup\newpage
 
 \begingroup\pardir TRT\textdir TRT
-\fontspec{Aref Ruqaa}[\mode, Script=Arabic, Scale=1.2]
+\fontspec{Aref Ruqaa}[Script=Arabic, Scale=1.2]
 \setstretch{2.4}
 \arabictext
 \par\endgroup\newpage
 
 \begingroup\pardir TRT\textdir TRT
-\fontspec{Noto Nastaliq Urdu}[\mode, Script=Arabic]
+\fontspec{Noto Nastaliq Urdu}[Script=Arabic]
 \setstretch{2.5}
 \arabictext
 \par\endgroup\newpage
 
 \begingroup\pardir TRT\textdir TRT
-\fontspec{Amiri}[\mode, Script=Arabic, Scale=2]
+\fontspec{Amiri}[Script=Arabic, Scale=2]
 قلبي {\addfontfeature{Color=FF0000} تلون كله} بلون الحب.
 \par\endgroup\newpage
 
 \begingroup\pardir TRT\textdir TRT
-\fontspec{Amiri Quran Colored}[\mode, Script=Arabic, Scale=2]
+\fontspec{Amiri Quran Colored}[Script=Arabic, Scale=2]
 \setstretch{3.8}
 \parindent=0pt
 \leftskip=0pt plus 1fil
@@ -82,12 +81,12 @@
 \endgroup\newpage
 
 \begingroup
-\fontspec{BungeeColor1.ttf}[\mode, Script=Latin, RawFeature={colr=true}, Scale=5]
+\fontspec{BungeeColor1.ttf}[Script=Latin, RawFeature={colr=true}, Scale=5]
 ABCDEFG\par
-\fontspec{BungeeColor1.ttf}[\mode, Script=Latin, RawFeature={colr=2}, Scale=5]
+\fontspec{BungeeColor1.ttf}[Script=Latin, RawFeature={colr=2}, Scale=5]
 ABCDEFG\par
 
-\fontspec{Noto Color Emoji}[\mode, Scale=2]
+\fontspec{Noto Color Emoji}[Scale=2]
 💙💚💛💜💝🖤🧡😀😇🧔
 \endgroup\newpage
 
@@ -98,7 +97,7 @@ ABCDEFG\par
 
 \def\l#1#2{%
   \begingroup%
-  \fontspec{amiri-regular.ttf}[\mode, Script=Arabic, Language=#1]
+  \fontspec{amiri-regular.ttf}[Script=Arabic, Language=#1]
   #2%
   \endgroup%
 }
@@ -115,7 +114,7 @@ display math \[E=mc^2\hbox{ with text inside}\]
 
 \begingroup
 \parindent=0pt
-\fontspec{NotoSerifCJK-Regular.ttc}[\mode, Script=Latin]
+\fontspec{NotoSerifCJK-Regular.ttc}[Script=Latin]
 
 \noindent
 \smallskip
@@ -128,7 +127,7 @@ offbeat office baffle coffee HAVANA\par
 \endgroup
 \newpage
 
-\newfontfamily\testr{lmroman10-regular.otf}[\mode, Script=Latin, Ligatures=Discretionary]
+\newfontfamily\testr{lmroman10-regular.otf}[Script=Latin, Ligatures=Discretionary]
 \begingroup
 \parindent=0pt
 \testr
@@ -143,9 +142,9 @@ offbeat office baffle {\rm baffle} coffee HAVANA\par
 \endgroup
 \newpage
 
-\newfontfamily\testb{lmroman10-bold.otf}[\mode, Script=Latin]
-\newfontfamily\testi{lmromanslant10-regular.otf}[\mode, Script=Latin]
-\newfontfamily\testR{lmroman12-regular.otf}[\mode, Script=Latin, Scale=1.2]
+\newfontfamily\testb{lmroman10-bold.otf}[Script=Latin]
+\newfontfamily\testi{lmromanslant10-regular.otf}[Script=Latin]
+\newfontfamily\testR{lmroman12-regular.otf}[Script=Latin, Scale=1.2]
 \testr
 \hrule
 \vskip 1in

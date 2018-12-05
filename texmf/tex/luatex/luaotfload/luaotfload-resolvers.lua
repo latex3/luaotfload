@@ -265,6 +265,16 @@ local function wrap_resolver(resolver)
     end
 end
 
+local resolvers = table.merge(luaotfload.resolvers, {
+    path = resolve_path,
+    name = resolve_name,
+    anon = resolve_anon,
+    file = resolve_file,
+    kpse = resolve_kpse,
+    my   = resolve_my,
+})
+luaotfload.resolvers = resolvers
+
 return {
     init = function ( )
         if luatexbase and luatexbase.create_callback then
@@ -273,12 +283,17 @@ return {
         end
         logreport ("log", 5, "resolvers", "installing font resolvers", name)
         local request_resolvers = fonts.definers.resolvers
-        request_resolvers.file = wrap_resolver(resolve_file)
-        request_resolvers.name = wrap_resolver(resolve_name)
-        request_resolvers.anon = wrap_resolver(resolve_anon)
-        request_resolvers.path = wrap_resolver(resolve_path)
-        request_resolvers.kpse = wrap_resolver(resolve_kpse)
-        request_resolvers.my   = wrap_resolver(resolve_my)
+        table.print(request_resolvers)
+        for k, _ in pairs(resolvers) do
+            request_resolvers[k] = nil
+        end
+        setmetatable(request_resolvers, {__index = function(t, n)
+            if not resolvers[n] then return end
+            local wrapped = wrap_resolver(resolvers[n])
+            t[n] = wrapped
+            return wrapped
+        end})
+        table.print(request_resolvers)
         fonts.formats.ofm      = "type1"
         fonts.encodings        = fonts.encodings       or { }
         fonts.encodings.known  = fonts.encodings.known or { }

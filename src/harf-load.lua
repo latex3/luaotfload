@@ -177,7 +177,7 @@ end
 local function scalefont(data, spec)
   local size = spec.size
   local options = spec.options
-  local font = data.font
+  local hbfont = data.font
   local upem = data.upem
   local ascender = data.ascender
   local descender = data.descender
@@ -188,7 +188,7 @@ local function scalefont(data, spec)
   -- We shape in font units (at UPEM) and then scale output with the desired
   -- sfont size.
   local scale = size / upem
-  font:set_scale(upem, upem)
+  hbfont:set_scale(upem, upem)
 
   -- Add dummy entries for all glyphs in the font. Shouldn’t be needed, but
   -- some glyphs disappear from the PDF otherwise. The actual loading is done
@@ -247,13 +247,8 @@ local function scalefont(data, spec)
     hb = {
       scale = scale,
       spec = spec,
-      face = data.face,
-      font = font,
-      ascender = ascender,
-      descender = descender,
-      loaded = data.loaded,
       palette = palette,
-      haspng = data.haspng,
+      shared = data,
     },
   }
 end

@@ -328,10 +328,11 @@ shape = function(run)
 
   local fontdata = font.fonts[fontid]
   local hbdata = fontdata.hb
-  local hbfont = hbdata.font
-  local hbface = hbdata.face
+  local hbshared = hbdata.shared
+  local hbfont = hbshared.font
+  local hbface = hbshared.face
   local features = hbdata.spec.features
-  local loaded = hbdata.loaded
+  local loaded = hbshared.loaded
 
   local palette = hbdata.palette
 
@@ -502,18 +503,19 @@ local function tonodes(head, current, run, glyphs, characters, color)
   local nodes = run.nodes
   local dir = run.dir
   local fontid = run.font
-  local fontdata = fontid and font.fonts[fontid]
-  local hbdata = fontdata and fontdata.hb
-  local hbfont = hbdata.font
-  local loaded = hbdata.loaded
+  local fontdata = font.fonts[fontid]
+  local hbdata = fontdata.hb
+  local hbshared = hbdata.shared
+  local hbfont = hbshared.font
+  local loaded = hbshared.loaded
   local rtl = dir:is_backward()
 
   local tracinglostchars = tex.tracinglostchars
   local tracingonline = tex.tracingonline
 
   local scale = hbdata.scale
-  local ascender = hbdata.ascender
-  local descender = hbdata.descender
+  local ascender = hbshared.ascender
+  local descender = hbshared.descender
 
   for i, glyph in next, glyphs do
     local index = glyph.cluster + 1
@@ -584,13 +586,14 @@ local function tonodes(head, current, run, glyphs, characters, color)
             height = height or ascender,
             depth = -(depth or descender),
             italic = italic or 0,
-            png = hbdata.haspng and hbfont:ot_color_glyph_get_png(gid),
+            png = hbshared.haspng and hbfont:ot_color_glyph_get_png(gid),
           }
           loaded[gid] = character
         end
         local character = copycharacter(loaded[gid], scale)
 
-        local pngblob = loaded[gid].png
+        local gl = loaded[gid]
+        local pngblob = gl.png
         if pngblob then
           -- Color bitmap font, extract the PNG data and insert it in the node
           -- list.
@@ -599,9 +602,9 @@ local function tonodes(head, current, run, glyphs, characters, color)
 
           local image = img.node {
             filename  = path,
-            width     = character.width,
-            height    = character.height,
-            depth     = character.depth,
+            width     = gl.width * scale,
+            height    = gl.height * scale,
+            depth     = gl.depth * scale,
           }
           head, current = node.insert_after(head, current, image)
         else
@@ -612,7 +615,7 @@ local function tonodes(head, current, run, glyphs, characters, color)
           head, current = node.insert_after(head, current, n)
           characters[char] = character
 
-          local width = loaded[gid].width
+          local width = gl.width
           if width ~= glyph.x_advance then
             -- LuaTeX always uses the glyph width from the font, so we need to
             -- insert a kern node if the x advance is different.
@@ -638,10 +641,10 @@ local function tonodes(head, current, run, glyphs, characters, color)
           local unicodes = glyph.unicodes or {}
           if #unicodes > 0 then
             local tounicode = to_utf16_hex(unicodes)
-            if nglyphs == 1 and not loaded[gid].tounicode then
-              loaded[gid].tounicode = tounicode
+            if nglyphs == 1 and not gl.tounicode then
+              gl.tounicode = tounicode
               character.tounicode = tounicode
-            elseif tounicode ~= loaded[gid].tounicode then
+            elseif tounicode ~= gl.tounicode then
               setprop(current, p_startactual, tounicode)
               glyphs[i + nglyphs - 1].endactual = true
             end
@@ -666,7 +669,7 @@ local function tonodes(head, current, run, glyphs, characters, color)
           local prevgid = prevchar - hb.CH_GID_PREFIX
           local prevfont = font.fonts[prevfontid]
           local prevhbdata = prevfont and prevfont.hb
-          local prevloaded = prevhbdata and prevhbdata.loaded
+          local prevloaded = prevhbdata and prevhbdata.shared.loaded
           local prevcharacter = prevloaded and prevloaded[prevgid]
           local italic = prevcharacter and prevcharacter.italic
           if italic then

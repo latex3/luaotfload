@@ -303,16 +303,6 @@ local function makesub(run, start, stop, nodelist)
   return { glyphs = shape(subrun), run = subrun }
 end
 
-local function copycharacter(character, scale)
-  local new = copytable(character)
-  new.width = new.width * scale
-  new.height = new.height * scale
-  new.depth = new.depth * scale
-  new.italic = new.italic * scale
-  return new
-end
-
-
 -- Main shaping function that calls HarfBuzz, and does some post-processing of
 -- the output.
 shape = function(run)
@@ -332,8 +322,6 @@ shape = function(run)
   local hbfont = hbshared.font
   local hbface = hbshared.face
   local features = hbdata.spec.features
-  local loaded = hbshared.loaded
-
   local palette = hbdata.palette
 
   local lang = lang or hbdata.spec.options.language or lang_invalid
@@ -499,15 +487,16 @@ local function cachedpng(data)
 end
 
 -- Convert glyphs to nodes and collect font characters.
-local function tonodes(head, current, run, glyphs, characters, color)
+local function tonodes(head, current, run, glyphs, color)
   local nodes = run.nodes
   local dir = run.dir
   local fontid = run.font
   local fontdata = font.fonts[fontid]
+  local characters = fontdata.characters
   local hbdata = fontdata.hb
   local hbshared = hbdata.shared
   local hbfont = hbshared.font
-  local loaded = hbshared.loaded
+  local hbglyphs = hbshared.glyphs
   local rtl = dir:is_backward()
 
   local tracinglostchars = tex.tracinglostchars
@@ -543,9 +532,9 @@ local function tonodes(head, current, run, glyphs, characters, color)
       local pre = glyph.pre
       local post = glyph.post
 
-      disc.replace = tonodes(nil, nil, replace.run, replace.glyphs, characters, color)
-      disc.pre = tonodes(nil, nil, pre.run, pre.glyphs, characters, color)
-      disc.post = tonodes(nil, nil, post.run, post.glyphs, characters, color)
+      disc.replace = tonodes(nil, nil, replace.run, replace.glyphs, color)
+      disc.pre = tonodes(nil, nil, pre.run, pre.glyphs, color)
+      disc.post = tonodes(nil, nil, post.run, post.glyphs, color)
 
       head, current = node.insert_after(head, current, disc)
     elseif not glyph.skip then
@@ -554,6 +543,8 @@ local function tonodes(head, current, run, glyphs, characters, color)
       end
 
       if id == glyphid then
+        local hbglyph = hbglyphs[gid]
+
         -- Report missing characters, trying to emulate the engine behaviour as
         -- much as possible.
         if gid == 0 and tracinglostchars > 0 then
@@ -568,43 +559,23 @@ local function tonodes(head, current, run, glyphs, characters, color)
           texio.write_nl(target, "")
         end
 
-        -- Load the glyph metrics of not already loaded.
-        if not loaded[gid] then
-          local width = hbfont:get_glyph_h_advance(gid)
-          local height, depth, italic = nil, nil, nil
-          local extents = hbfont:get_glyph_extents(gid)
-          if extents then
-            height = extents.y_bearing
-            depth = extents.y_bearing + extents.height
-            if extents.x_bearing < 0 then
-              italic = -extents.x_bearing
-            end
-          end
-          local character = {
-            index = gid,
-            width = width,
-            height = height or ascender,
-            depth = -(depth or descender),
-            italic = italic or 0,
-            png = hbshared.haspng and hbfont:ot_color_glyph_get_png(gid),
-          }
-          loaded[gid] = character
+        local pngblob = hbshared.haspng and hbglyph.png
+        if not pngblob and hbshared.haspng then
+          pngblob = hbfont:ot_color_glyph_get_png(gid)
+          hbglyph.png = pngblob
         end
-        local character = copycharacter(loaded[gid], scale)
-
-        local gl = loaded[gid]
-        local pngblob = gl.png
         if pngblob then
           -- Color bitmap font, extract the PNG data and insert it in the node
           -- list.
           local data = pngblob:get_data()
           local path = cachedpng(data)
+          local character = characters[char]
 
           local image = img.node {
             filename  = path,
-            width     = gl.width * scale,
-            height    = gl.height * scale,
-            depth     = gl.depth * scale,
+            width     = character.width,
+            height    = character.height,
+            depth     = character.depth,
           }
           head, current = node.insert_after(head, current, image)
         else
@@ -613,9 +584,8 @@ local function tonodes(head, current, run, glyphs, characters, color)
           n.yoffset = glyph.y_offset * scale
           node.protect_glyph(n)
           head, current = node.insert_after(head, current, n)
-          characters[char] = character
 
-          local width = gl.width
+          local width = hbglyph.width
           if width ~= glyph.x_advance then
             -- LuaTeX always uses the glyph width from the font, so we need to
             -- insert a kern node if the x advance is different.
@@ -641,10 +611,9 @@ local function tonodes(head, current, run, glyphs, characters, color)
           local unicodes = glyph.unicodes or {}
           if #unicodes > 0 then
             local tounicode = to_utf16_hex(unicodes)
-            if nglyphs == 1 and not gl.tounicode then
-              gl.tounicode = tounicode
-              character.tounicode = tounicode
-            elseif tounicode ~= gl.tounicode then
+            if nglyphs == 1 and not hbglyph.tounicode then
+              hbglyph.tounicode = tounicode
+            elseif tounicode ~= hbglyph.tounicode then
               setprop(current, p_startactual, tounicode)
               glyphs[i + nglyphs - 1].endactual = true
             end
@@ -666,14 +635,9 @@ local function tonodes(head, current, run, glyphs, characters, color)
         -- loaded the glyph?
         local prevchar, prevfontid = node.is_glyph(current)
         if prevchar > 0 then
-          local prevgid = prevchar - hb.CH_GID_PREFIX
-          local prevfont = font.fonts[prevfontid]
-          local prevhbdata = prevfont and prevfont.hb
-          local prevloaded = prevhbdata and prevhbdata.shared.loaded
-          local prevcharacter = prevloaded and prevloaded[prevgid]
-          local italic = prevcharacter and prevcharacter.italic
+          local italic = font.fonts[prevfontid].characters[prevchar].italic
           if italic then
-            n.kern = italic * scale
+            n.kern = italic
           end
         end
         head, current = node.insert_after(head, current, n)
@@ -703,7 +667,7 @@ local function tonodes(head, current, run, glyphs, characters, color)
     end
   end
 
-  return head, current, characters
+  return head, current
 end
 
 local function validate_color(s)
@@ -732,24 +696,39 @@ local function hex_to_rgba(s)
   end
 end
 
+local function update_font_tounicode(fontid)
+  local fontdata = font.fonts[fontid]
+  local characters = fontdata.characters
+  local glyphs = fontdata.hb.shared.glyphs
+
+  local new = {}
+  local needsupdate = false
+  for gid, glyph in next, glyphs do
+    local char = gid + hb.CH_GID_PREFIX
+    local character = characters[char]
+    if not character.tounicode and glyph.tounicode then
+      character.tounicode = glyph.tounicode
+      new[char] = character
+      needsupdate = true
+    end
+  end
+  if needsupdate then
+    font.addcharacters(fontid, { nomath = true, characters = new })
+  end
+end
+
 local function shape_run(head, current, run)
   if not run.skip then
-    local fontid = run.font
-    local hbdata = font.fonts[fontid].hb
-    local spec = hbdata.spec
-    local options = spec and spec.options
-    local color = options and options.color and hex_to_rgba(options.color)
-
     -- Font loaded with our loader and an HarfBuzz face is present, do our
     -- shaping.
-    local characters = {} -- LuaTeX font characters table
+    local fontid = run.font
+    local options = font.fonts[fontid].hb.spec.options
+    local color = options and options.color and hex_to_rgba(options.color)
 
     local glyphs = shape(run)
-    head, current = tonodes(head, current, run, glyphs, characters, color)
+    head, current = tonodes(head, current, run, glyphs, color)
 
-    if next(characters) ~= nil then
-      font.addcharacters(fontid, { nomath = true, characters = characters })
-    end
+    update_font_tounicode(fontid)
   else
     -- Not shaping, insert the original node list of of this run.
     local nodes = run.nodes

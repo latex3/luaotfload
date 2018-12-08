@@ -149,6 +149,36 @@ local function loadfont(spec)
       end
     end
 
+    -- Load glyph metrics for all glyphs in the font. We used to do this on
+    -- demand to make loading fonts faster, but hit many limitations inside
+    -- LuaTeX (mainly with shared backend fonts, where LuaTeX would assume all
+    -- fonts it decides to share load the same set of glyphs).
+    --
+    -- Getting glyph advances is fast enough, but glyph extents are slower
+    -- especially in CFF fonts. We might want to have an option to ignore exact
+    -- glyph extents and use font ascender and descender if this proved to be
+    -- too slow.
+    local glyphcount = hbface:get_glyph_count()
+    local glyphs = {}
+    for gid = 0, glyphcount - 1 do
+      local width = hbfont:get_glyph_h_advance(gid)
+      local height, depth, italic = nil, nil, nil
+      local extents = hbfont:get_glyph_extents(gid)
+      if extents then
+        height = extents.y_bearing
+        depth = extents.y_bearing + extents.height
+        if extents.x_bearing < 0 then
+          italic = -extents.x_bearing
+        end
+      end
+      glyphs[gid] = {
+        width  = width,
+        height = height or ascender,
+        depth  = -(depth or descender),
+        italic = italic or 0,
+      }
+    end
+
     data = {
       face = hbface,
       font = hbfont,
@@ -161,7 +191,7 @@ local function loadfont(spec)
       capheight = capheight,
       stemv = stemv,
       slant = slant,
-      glyphcount = hbface:get_glyph_count(),
+      glyphs = glyphs,
       psname = hbface:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
       fullname = hbface:get_name(hb.ot.NAME_ID_FULL_NAME),
       palettes = palettes,
@@ -190,19 +220,17 @@ local function scalefont(data, spec)
   local scale = size / upem
   hbfont:set_scale(upem, upem)
 
-  -- Add dummy entries for all glyphs in the font. Shouldn’t be needed, but
-  -- some glyphs disappear from the PDF otherwise. The actual loading is done
-  -- after shaping.
-  --
-  -- We don’t add entries for character supported by the font as the shaped
-  -- output will use glyph indices so these characters will be unused.
-  -- Skipping loading all the characters should speed loading fonts with
-  -- large character sets.
-  --
+  -- Populate font’s characters table.
+  local glyphs = data.glyphs
   local characters = {}
-  local glyphcount = data.glyphcount
-  for gid = 0, glyphcount - 1 do
-    characters[hb.CH_GID_PREFIX + gid] = { index = gid }
+  for gid, glyph in next, glyphs do
+    characters[hb.CH_GID_PREFIX + gid] = {
+      index  = gid,
+      width  = glyph.width  * scale,
+      height = glyph.height * scale,
+      depth  = glyph.depth  * scale,
+      italic = glyph.italic * scale,
+    }
   end
 
   -- LuaTeX (ab)uses the metrics of these characters for some font metrics.

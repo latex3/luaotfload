@@ -78,17 +78,17 @@ local function loadfont(spec)
     return data
   end
 
-  local face = hb.Face.new(path, index)
-  if face then
-    local font = hb.Font.new(face)
-    local upem = face:get_upem()
+  local hbface = hb.Face.new(path, index)
+  if hbface then
+    local hbfont = hb.Font.new(hbface)
+    local upem = hbface:get_upem()
 
     -- All LuaTeX seem to care about in font type is whether it has CFF table
     -- or not, so we check for that here.
     local fonttype = "truetype"
     local hasos2 = false
     local haspost = false
-    local tags = face:get_table_tags()
+    local tags = hbface:get_table_tags()
     for i = 1, #tags do
       local tag = tags[i]
       if tag == cfftag or tag == cff2tag then
@@ -100,16 +100,16 @@ local function loadfont(spec)
       end
     end
 
-    local fontextents = font:get_h_extents()
+    local fontextents = hbfont:get_h_extents()
     local ascender = fontextents and fontextents.ascender or upem * .8
     local descender = fontextents and fontextents.descender or upem * .2
 
-    local gid = font:get_nominal_glyph(0x0020)
-    local space = gid and font:get_glyph_h_advance(gid) or upem / 2
+    local gid = hbfont:get_nominal_glyph(0x0020)
+    local space = gid and hbfont:get_glyph_h_advance(gid) or upem / 2
 
     local xheight, capheight, stemv = nil, nil, nil
     if hasos2 then
-      local os2 = face:get_table(os2tag)
+      local os2 = hbface:get_table(os2tag)
       local length = os2:get_length()
       local data = os2:get_data()
       if length >= 96 and string.unpack(">H", data) > 1 then
@@ -128,7 +128,7 @@ local function loadfont(spec)
 
     local slant = 0
     if haspost then
-      local post = face:get_table(posttag)
+      local post = hbface:get_table(posttag)
       local length = post:get_length()
       local data = post:get_data()
       if length >= 32 and string.unpack(">i4", data) <= 0x00030000 then
@@ -141,17 +141,17 @@ local function loadfont(spec)
 
     -- Load CPAL palettes if avialable in the font.
     local palettes = nil
-    if face:ot_color_has_palettes() and face:ot_color_has_layers() then
-      local count = face:ot_color_palette_get_count()
+    if hbface:ot_color_has_palettes() and hbface:ot_color_has_layers() then
+      local count = hbface:ot_color_palette_get_count()
       palettes = {}
       for i = 1, count do
-        palettes[#palettes + 1] = face:ot_color_palette_get_colors(i)
+        palettes[#palettes + 1] = hbface:ot_color_palette_get_colors(i)
       end
     end
 
     data = {
-      face = face,
-      font = font,
+      face = hbface,
+      font = hbfont,
       upem = upem,
       fonttype = fonttype,
       ascender = ascender,
@@ -161,11 +161,11 @@ local function loadfont(spec)
       capheight = capheight,
       stemv = stemv,
       slant = slant,
-      glyphcount = face:get_glyph_count(),
-      psname = face:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
-      fullname = face:get_name(hb.ot.NAME_ID_FULL_NAME),
+      glyphcount = hbface:get_glyph_count(),
+      psname = hbface:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
+      fullname = hbface:get_name(hb.ot.NAME_ID_FULL_NAME),
       palettes = palettes,
-      haspng = face:ot_color_has_png(),
+      haspng = hbface:ot_color_has_png(),
       loaded = {}, -- Cached loaded glyph data.
     }
 

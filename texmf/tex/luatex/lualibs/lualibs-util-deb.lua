@@ -10,9 +10,6 @@ if not modules then modules = { } end modules ['util-deb'] = {
 -- bound to a variable, like node.new, node.copy etc (contrary to for instance
 -- node.has_attribute which is bound to a has_attribute local variable in mkiv)
 
-local debug = require "debug"
-
-local getinfo, sethook = debug.getinfo, debug.sethook
 local type, next, tostring, tonumber = type, next, tostring, tonumber
 local format, find, sub, gsub = string.format, string.find, string.sub, string.gsub
 local insert, remove, sort = table.insert, table.remove, table.sort
@@ -240,6 +237,31 @@ function debugger.showstats(printer,threshold)
  -- table.save("luatex-profile.lua",names)
 end
 
+local getinfo = nil
+local sethook = nil
+
+local function getdebug()
+    if sethook and getinfo then
+        return
+    end
+    if not debug then
+        local okay
+        okay, debug = pcall(require,"debug")
+    end
+    if type(debug) ~= "table" then
+        return
+    end
+    getinfo = debug.getinfo
+    sethook = debug.sethook
+    if type(getinfo) ~= "function" then
+        getinfo = nil
+    end
+    if type(sethook) ~= "function" then
+        sethook = nil
+    end
+end
+
+
 function debugger.savestats(filename,threshold)
     local f = io.open(filename,'w')
     if f then
@@ -249,7 +271,8 @@ function debugger.savestats(filename,threshold)
 end
 
 function debugger.enable()
-    if nesting == 0 then
+    getdebug()
+    if sethook and getinfo and nesting == 0 then
         running = true
         if initialize then
             initialize()
@@ -271,7 +294,7 @@ function debugger.disable()
     if nesting > 0 then
         nesting = nesting - 1
     end
-    if nesting == 0 then
+    if sethook and getinfo and nesting == 0 then
         sethook()
     end
 end
@@ -294,20 +317,25 @@ end
 -- from the lua book:
 
 local function showtraceback(rep) -- from lua site / adapted
-    local level = 2 -- we don't want this function to be reported
-    local reporter = rep or report
-    while true do
-        local info = getinfo(level, "Sl")
-        if not info then
-            break
-        elseif info.what == "C" then
-            reporter("%2i : %s",level-1,"C function")
-        else
-            reporter("%2i : %s : %s",level-1,info.short_src,info.currentline)
+    getdebug()
+    if getinfo then
+        local level = 2 -- we don't want this function to be reported
+        local reporter = rep or report
+        while true do
+            local info = getinfo(level, "Sl")
+            if not info then
+                break
+            elseif info.what == "C" then
+                reporter("%2i : %s",level-1,"C function")
+            else
+                reporter("%2i : %s : %s",level-1,info.short_src,info.currentline)
+            end
+            level = level + 1
         end
-        level = level + 1
     end
 end
 
 debugger.showtraceback = showtraceback
 -- debug.showtraceback = showtraceback
+
+-- showtraceback()

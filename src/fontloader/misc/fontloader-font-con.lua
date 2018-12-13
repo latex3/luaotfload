@@ -592,6 +592,7 @@ function constructors.scale(tfmdata,specification)
         targetparameters.descender = delta * descender
     end
     --
+-- inspect(targetparameters)
     constructors.enhanceparameters(targetparameters) -- official copies for us, now virtual
     --
     local protrusionfactor = (targetquad ~= 0 and 1000/targetquad) or 0
@@ -1027,24 +1028,22 @@ function constructors.finalize(tfmdata)
         properties.virtualized = tfmdata.type == "virtual"
     end
     --
-    if not tfmdata.properties then
-        tfmdata.properties = {
-            fontname      = tfmdata.fontname,
-            filename      = tfmdata.filename,
-            fullname      = tfmdata.fullname,
-            name          = tfmdata.name,
-            psname        = tfmdata.psname,
-            --
-            encodingbytes = tfmdata.encodingbytes or 1,
-            embedding     = tfmdata.embedding     or "subset",
-            tounicode     = tfmdata.tounicode     or 1,
-            cidinfo       = tfmdata.cidinfo       or nil,
-            format        = tfmdata.format        or "type1",
-            direction     = tfmdata.direction     or 0,
-            writingmode   = tfmdata.writingmode   or "horizontal",
-            identity      = tfmdata.identity      or "horizontal",
-        }
-    end
+    properties.fontname      = tfmdata.fontname
+    properties.filename      = tfmdata.filename
+    properties.fullname      = tfmdata.fullname
+    properties.name          = tfmdata.name
+    properties.psname        = tfmdata.psname
+    --
+    properties.encodingbytes = tfmdata.encodingbytes or 1
+    properties.embedding     = tfmdata.embedding     or "subset"
+    properties.tounicode     = tfmdata.tounicode     or 1
+    properties.cidinfo       = tfmdata.cidinfo       or nil
+    properties.format        = tfmdata.format        or "type1"
+    properties.direction     = tfmdata.direction     or 0
+    properties.writingmode   = tfmdata.writingmode   or "horizontal"
+    properties.identity      = tfmdata.identity      or "horizontal"
+    properties.usedbitmap    = tfmdata.usedbitmap
+    --
     if not tfmdata.resources then
         tfmdata.resources = { }
     end

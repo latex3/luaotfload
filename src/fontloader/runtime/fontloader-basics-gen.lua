@@ -18,6 +18,7 @@ local match, gmatch, gsub, lower = string.match, string.gmatch, string.gsub, str
 local formatters, split, format, dump = string.formatters, string.split, string.format, string.dump
 local loadfile, type = loadfile, type
 local setmetatable, getmetatable, collectgarbage = setmetatable, getmetatable, collectgarbage
+local floor = math.floor
 
 local dummyfunction = function()
 end
@@ -403,5 +404,13 @@ if arg then
         if k and v then
             arguments[k] = v
         end
+    end
+end
+
+-- another one
+
+if not number.idiv then
+    function number.idiv(i,d)
+        return floor(i/d) -- i//d in 5.3
     end
 end

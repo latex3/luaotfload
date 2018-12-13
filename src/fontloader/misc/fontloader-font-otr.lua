@@ -25,7 +25,7 @@ if not modules then modules = { } end modules ['font-otr'] = {
 -- are just a unicode string but it doesn't save that much. It will be an option
 -- some day.
 
--- Optimizing the widths wil be done anyway as it save quite some on a cjk font
+-- Optimizing the widths will be done anyway as it save quite some on a cjk font
 -- and the existing (old) code if okay.
 
 -- todo: more messages (only if really needed)
@@ -67,6 +67,7 @@ if not modules then modules = { } end modules ['font-otr'] = {
 
 local next, type, tonumber = next, type, tonumber
 local byte, lower, char, gsub = string.byte, string.lower, string.char, string.gsub
+local fullstrip = string.fullstrip
 local floor, round = math.floor, math.round
 local P, R, S, C, Cs, Cc, Ct, Carg, Cmt = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.Cs, lpeg.Cc, lpeg.Ct, lpeg.Carg, lpeg.Cmt
 local lpegmatch = lpeg.match
@@ -740,20 +741,30 @@ readers.helpers = helpers
 
 local function gotodatatable(f,fontdata,tag,criterium)
     if criterium and f then
-        local datatable = fontdata.tables[tag]
-        if datatable then
-            local tableoffset = datatable.offset
-            setposition(f,tableoffset)
-            return tableoffset
+        local tables = fontdata.tables
+        if tables then
+            local datatable = tables[tag]
+            if datatable then
+                local tableoffset = datatable.offset
+                setposition(f,tableoffset)
+                return tableoffset
+            end
+        else
+            report("no tables")
         end
     end
 end
 
 local function reportskippedtable(f,fontdata,tag,criterium)
     if criterium and f then
-        local datatable = fontdata.tables[tag]
-        if datatable then
-            report("loading of table %a skipped",tag)
+        local tables = fontdata.tables
+        if tables then
+            local datatable = tables[tag]
+            if datatable then
+                report("loading of table %a skipped",tag)
+            end
+        else
+            report("no tables")
         end
     end
 end
@@ -783,6 +794,16 @@ local platformnames = {
     typographicfamily    = true,
     typographicsubfamily = true,
     compatiblefullname   = true,
+}
+
+local platformextras = {
+    uniqueid     = true,
+    version      = true,
+    copyright    = true,
+    license      = true,
+    licenseurl   = true,
+    manufacturer = true,
+    vendorurl    = true,
 }
 
 function readers.name(f,fontdata,specification)
@@ -855,6 +876,18 @@ function readers.name(f,fontdata,specification)
         -- and extend when we run into it (todo: proper reverse hash) .. we're only
         -- interested in english anyway
         --
+        local function decoded(platform,encoding,content)
+            local decoder = decoders[platform]
+            if decoder then
+                decoder = decoder[encoding]
+            end
+            if decoder then
+                return decoder(content)
+            else
+                return content
+            end
+        end
+        --
         local function filter(platform,e,l)
             local namelist = namelists[platform]
             for i=1,#namelist do
@@ -866,14 +899,7 @@ function readers.name(f,fontdata,specification)
                     local language = name.language
                     if (not e or encoding == e) and (not l or language == l) then
                         setposition(f,name.offset)
-                        local content = readstring(f,name.length)
-                        local decoder = decoders[platform]
-                        if decoder then
-                            decoder = decoder[encoding]
-                        end
-                        if decoder then
-                            content = decoder(content)
-                        end
+                        local content = decoded(platform,encoding,readstring(f,name.length))
                         if nametag then
                             names[nametag] = {
                                 content  = content,
@@ -900,23 +926,16 @@ function readers.name(f,fontdata,specification)
         fontdata.extras = extras
         --
         if specification.platformnames then
-            local collected = { }
+            local collected      = { }
+            local platformextras = specification.platformextras and platformextras
             for platform, namelist in next, namelists do
                 local filtered = false
                 for i=1,#namelist do
                     local entry = namelist[i]
                     local name  = entry.name
-                    if platformnames[name] then
+                    if platformnames[name] or (platformextras and platformextras[name]) then
                         setposition(f,entry.offset)
-                        local content  = readstring(f,entry.length)
-                        local encoding = entry.encoding
-                        local decoder  = decoders[platform]
-                        if decoder then
-                            decoder = decoder[encoding]
-                        end
-                        if decoder then
-                            content = decoder(content)
-                        end
+                        local content = decoded(platform,entry.encoding,readstring(f,entry.length))
                         if filtered then
                             filtered[name] = content
                         else
@@ -959,7 +978,7 @@ readers["os/2"] = function(f,fontdata)
         local version = readushort(f)
         local windowsmetrics = {
             version            = version,
-            averagewidth       = readshort(f),
+            averagewidth       = readshort(f), -- ushort?
             weightclass        = readushort(f),
             widthclass         = readushort(f),
             fstype             = readushort(f),
@@ -1016,24 +1035,28 @@ end
 readers.head = function(f,fontdata)
     local tableoffset = gotodatatable(f,fontdata,"head",true)
     if tableoffset then
+        local version     = readulong(f)
+        local fontversion = readulong(f)
         local fontheader = {
-            version          = readfixed(f),
-            revision         = readfixed(f),
-            checksum         = readulong(f),
-            magic            = readulong(f),
-            flags            = readushort(f),
-            units            = readushort(f),
-            created          = readlongdatetime(f),
-            modified         = readlongdatetime(f),
-            xmin             = readshort(f),
-            ymin             = readshort(f),
-            xmax             = readshort(f),
-            ymax             = readshort(f),
-            macstyle         = readushort(f),
-            smallpixels      = readushort(f),
-            directionhint    = readshort(f),
-            indextolocformat = readshort(f),
-            glyphformat      = readshort(f),
+            version           = version,
+            fontversion       = number.to16dot16(fontversion),
+            fontversionnumber = fontversion,
+         -- checksum          = readulong(f),
+            checksum          = readushort(f) * 0x10000 + readushort(f),
+            magic             = readulong(f),
+            flags             = readushort(f),
+            units             = readushort(f),
+            created           = readlongdatetime(f),
+            modified          = readlongdatetime(f),
+            xmin              = readshort(f),
+            ymin              = readshort(f),
+            xmax              = readshort(f),
+            ymax              = readshort(f),
+            macstyle          = readushort(f),
+            smallpixels       = readushort(f),
+            directionhint     = readshort(f),
+            indextolocformat  = readshort(f),
+            glyphformat       = readshort(f),
         }
         fontdata.fontheader = fontheader
     else
@@ -1049,7 +1072,7 @@ readers.hhea = function(f,fontdata,specification)
     local tableoffset = gotodatatable(f,fontdata,"hhea",specification.details)
     if tableoffset then
         fontdata.horizontalheader = {
-            version             = readfixed(f), -- two ushorts: major minor
+            version             = readulong(f),
             ascender            = readfword(f),
             descender           = readfword(f),
             linegap             = readfword(f),
@@ -1078,7 +1101,7 @@ readers.vhea = function(f,fontdata,specification)
     local tableoffset = gotodatatable(f,fontdata,"vhea",specification.details)
     if tableoffset then
         fontdata.verticalheader = {
-            version              = readfixed(f),
+            version              = readulong(f),
             ascender             = readfword(f),
             descender            = readfword(f),
             linegap              = readfword(f),
@@ -1111,15 +1134,15 @@ end
 readers.maxp = function(f,fontdata,specification)
     local tableoffset = gotodatatable(f,fontdata,"maxp",specification.details)
     if tableoffset then
-        local version      = readfixed(f)
+        local version      = readulong(f)
         local nofglyphs    = readushort(f)
         fontdata.nofglyphs = nofglyphs
-        if version == 0.5 then
+        if version == 0x00005000 then
             fontdata.maximumprofile = {
                 version   = version,
                 nofglyphs = nofglyphs,
             }
-        elseif version == 1.0 then
+        elseif version == 0x00010000 then
             fontdata.maximumprofile = {
                 version            = version,
                 nofglyphs          = nofglyphs,
@@ -1160,15 +1183,14 @@ readers.hmtx = function(f,fontdata,specification)
         local leftsidebearing  = 0
         for i=0,nofmetrics-1 do
             local glyph     = glyphs[i]
-            width           = readshort(f)
+            width           = readshort(f) -- readushort
             leftsidebearing = readshort(f)
             if width ~= 0 then
                 glyph.width = width
             end
--- for now
---             if leftsidebearing ~= 0 then
---                 glyph.lsb = leftsidebearing
---             end
+         -- if leftsidebearing ~= 0 then
+         --     glyph.lsb = leftsidebearing
+         -- end
         end
         -- The next can happen in for instance a monospace font or in a cjk font
         -- with fixed widths.
@@ -1181,7 +1203,6 @@ readers.hmtx = function(f,fontdata,specification)
          --     glyph.lsb = leftsidebearing
          -- end
         end
-        -- hm, there can be a lsb here
     end
 end
 
@@ -1231,7 +1252,7 @@ end
 readers.post = function(f,fontdata,specification)
     local tableoffset = gotodatatable(f,fontdata,"post",true)
     if tableoffset then
-        local version = readfixed(f)
+        local version = readulong(f)
         fontdata.postscript = {
             version            = version,
             italicangle        = round(1000*readfixed(f))/1000,
@@ -1245,12 +1266,12 @@ readers.post = function(f,fontdata,specification)
         }
         if not specification.glyphs then
             -- enough done
-        elseif version == 1.0 then
+        elseif version == 0x00010000 then
             -- mac encoding (258 glyphs)
             for index=0,#standardromanencoding do
                 glyphs[index].name = standardromanencoding[index]
             end
-        elseif version == 2.0 then
+        elseif version == 0x00020000 then
             local glyphs    = fontdata.glyphs
             local nofglyphs = readushort(f)
             local indices   = { }
@@ -1281,10 +1302,6 @@ readers.post = function(f,fontdata,specification)
                     end
                 end
             end
-        elseif version == 2.5 then
-            -- depricated, will be done when needed
-        elseif version == 3.0 then
-            -- no ps name information
         end
     else
         fontdata.postscript = { }
@@ -1947,14 +1964,16 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo,inst
             designsize     = fontdata.designsize,
             minsize        = fontdata.minsize,
             maxsize        = fontdata.maxsize,
+            boundingbox    = fontheader and { fontheader.xmin or 0, fontheader.ymin or 0, fontheader.xmax or 0, fontheader.ymax or 0 } or nil,
             monospaced     = (tonumber(postscript.monospaced or 0) > 0) or metrics.panosewidth == "monospaced",
             averagewidth   = metrics.averagewidth,
-            xheight        = metrics.xheight,
-            capheight      = metrics.capheight, -- not always present and probably crap
+            xheight        = metrics.xheight, -- can be missing
+            capheight      = metrics.capheight or fontdata.maxy, -- can be missing
             ascender       = metrics.typoascender,
             descender      = metrics.typodescender,
             platformnames  = platformnames or nil,
             instancenames  = instancenames or nil,
+            tableoffsets   = fontdata.tableoffsets,
         }
         if metricstoo then
             local keys = {
@@ -2016,7 +2035,8 @@ local function loadtables(f,specification,offset)
     }
     for i=1,fontdata.noftables do
         local tag      = lower(stripstring(readstring(f,4)))
-        local checksum = readulong(f) -- not used
+     -- local checksum = readulong(f) -- not used
+        local checksum = readushort(f) * 0x10000 + readushort(f)
         local offset   = readulong(f)
         local length   = readulong(f)
         if offset + length > filesize then
@@ -2028,13 +2048,14 @@ local function loadtables(f,specification,offset)
             length   = length,
         }
     end
+-- inspect(tables)
     fontdata.foundtables = sortedkeys(tables)
     if tables.cff or tables.cff2 then
         fontdata.format = "opentype"
     else
         fontdata.format = "truetype"
     end
-    return fontdata
+    return fontdata, tables
 end
 
 local function prepareglyps(fontdata)
@@ -2063,7 +2084,7 @@ local variablefonts_supported = (context and true) or (logs and logs.application
 
 local function readdata(f,offset,specification)
 
-    local fontdata = loadtables(f,specification,offset)
+    local fontdata, tables = loadtables(f,specification,offset)
 
     if specification.glyphs then
         prepareglyps(fontdata)
@@ -2202,10 +2223,20 @@ local function readdata(f,offset,specification)
     readtable("math",f,fontdata,specification)
 
     fontdata.locations    = nil
-    fontdata.tables       = nil
     fontdata.cidmaps      = nil
     fontdata.dictionaries = nil
  -- fontdata.cff          = nil
+
+    if specification.tableoffsets then
+        fontdata.tableoffsets = tables
+        setmetatableindex(tables, {
+            version       = fontdata.version,
+            noftables     = fontdata.noftables,
+            searchrange   = fontdata.searchrange,
+            entryselector = fontdata.entryselector,
+            rangeshift    = fontdata.rangeshift,
+        })
+    end
     return fontdata
 end
 
@@ -2313,12 +2344,13 @@ local function loadfont(specification,n,instance)
         specification.instance = specification.instance or instance
     end
     local function message(str)
-        report("fatal error in file %a: %s\n%s",specification.filename,str,debug.traceback())
+        report("fatal error in file %a: %s\n%s",specification.filename,str,debug and debug.traceback())
     end
     local ok, result = xpcall(loadfontdata,message,specification)
     if ok then
         return result
     end
+--     return loadfontdata(specification)
 end
 
 -- we need even less, but we can have a 'detail' variant
@@ -2340,13 +2372,26 @@ function readers.loadshapes(filename,n,instance,streams)
             v.math  = nil
          -- v.name  = nil
         end
+        local names = fontdata.names
+        if names then
+            for k, v in next, names do
+                names[k] = fullstrip(v.content)
+            end
+        end
     end
     return fontdata and {
-     -- version  = 0.123 -- todo
-        filename = filename,
-        format   = fontdata.format,
-        glyphs   = fontdata.glyphs,
-        units    = fontdata.fontheader.units,
+     -- version          = 0.123 -- todo
+        filename         = filename,
+        format           = fontdata.format,
+        glyphs           = fontdata.glyphs,
+        units            = fontdata.fontheader.units,
+        cffinfo          = fontdata.cffinfo,
+        fontheader       = fontdata.fontheader,
+        horizontalheader = fontdata.horizontalheader,
+        verticalheader   = fontdata.verticalheader,
+        maximumprofile   = fontdata.maximumprofile,
+        names            = fontdata.names,
+        postscript       = fontdata.postscript,
     } or {
         filename = filename,
         format   = "unknown",
@@ -2417,10 +2462,12 @@ function readers.getinfo(filename,specification) -- string, nil|number|table
     local platformnames  = false
     local rawfamilynames = false
     local instancenames  = true
+    local tableoffsets   = false
     if type(specification) == "table" then
         subfont        = tonumber(specification.subfont)
         platformnames  = specification.platformnames
         rawfamilynames = specification.rawfamilynames
+        tableoffsets   = specification.tableoffsets
     else
         subfont       = tonumber(specification)
     end
@@ -2429,6 +2476,7 @@ function readers.getinfo(filename,specification) -- string, nil|number|table
         details        = true,
         platformnames  = platformnames,
         instancenames  = true,
+        tableoffsets   = tableoffsets,
      -- rawfamilynames = rawfamilynames,
     }
     if fontdata then

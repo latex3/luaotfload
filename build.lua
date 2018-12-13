@@ -1,6 +1,6 @@
 
-packageversion= "2.93"
-packagedate   = "2018-10-28"
+packageversion= "2.94"
+packagedate   = "2018-11-18"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"

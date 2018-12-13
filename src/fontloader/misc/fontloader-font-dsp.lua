@@ -2297,7 +2297,7 @@ do
 
     local function loadvariations(f,fontdata,variationsoffset,lookuptypes,featurehash,featureorder)
         setposition(f,variationsoffset)
-        local version    = readulong(f)
+        local version    = readulong(f) -- two times readushort
         local nofrecords = readulong(f)
         local records    = { }
         for i=1,nofrecords do
@@ -3186,8 +3186,7 @@ end
 --             }
 --         end
 --
---         local majorversion  = readushort(f)
---         local minorversion  = readushort(f)
+--         local version       = readulong(f)
 --         local nofsizetables = readulong(f)
 --         local sizetable     = { }
 --         for i=1,nofsizetables do
@@ -3387,11 +3386,10 @@ function readers.avar(f,fontdata,specification)
             return false
         end
 
-        local majorversion = readushort(f) -- 1
-        local minorversion = readushort(f) -- 0
-        local reserved     = readushort(f)
-        local nofaxis      = readushort(f)
-        local segments     = { }
+        local version  = readulong(f) -- 0x00010000
+        local reserved = readushort(f)
+        local nofaxis  = readushort(f)
+        local segments = { }
         for i=1,nofaxis do
             segments[i] = collect()
         end
@@ -3402,7 +3400,7 @@ end
 function readers.fvar(f,fontdata,specification)
     local tableoffset = gotodatatable(f,fontdata,"fvar",true) -- specification.variable or specification.instancenames
     if tableoffset then
-        local version         = readulong(f) -- 1.0
+        local version         = readulong(f) -- 0x00010000
         local offsettoaxis    = tableoffset + readushort(f)
         local reserved        = skipshort(f)
         -- pair 1
@@ -3488,7 +3486,7 @@ function readers.hvar(f,fontdata,specification)
         return
     end
 
-    local version         = readulong(f) -- 1.0
+    local version         = readulong(f) -- 0x00010000
     local variationoffset = tableoffset + readulong(f) -- the store
     local advanceoffset   = tableoffset + readulong(f)
     local lsboffset       = tableoffset + readulong(f)
@@ -3585,7 +3583,7 @@ end
 function readers.mvar(f,fontdata,specification)
     local tableoffset = gotodatatable(f,fontdata,"mvar",specification.variable)
     if tableoffset then
-        local version       = readulong(f) -- 1.0
+        local version       = readulong(f) -- 0x00010000
         local reserved      = skipshort(f,1)
         local recordsize    = readushort(f)
         local nofrecords    = readushort(f)

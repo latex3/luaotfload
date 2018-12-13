@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Thu Oct 18 23:57:42 2018
+-- merge date  : Wed Dec 12 23:45:37 2018
 
 do -- begin closure to overcome local limits and interference
 
@@ -1424,7 +1424,6 @@ local table,string=table,string
 local concat,sort,insert,remove=table.concat,table.sort,table.insert,table.remove
 local format,lower,dump=string.format,string.lower,string.dump
 local getmetatable,setmetatable=getmetatable,setmetatable
-local getinfo=debug.getinfo
 local lpegmatch,patterns=lpeg.match,lpeg.patterns
 local floor=math.floor
 local stripper=patterns.stripper
@@ -1986,20 +1985,23 @@ local function do_serialize(root,name,depth,level,indexed)
         end
       elseif tv=="function" then
         if functions then
-          local f=getinfo(v).what=="C" and dump(dummy) or dump(v)
-          if tk=="number" then
-            if hexify then
-              handle(format("%s [0x%X]=load(%q),",depth,k,f))
+          local getinfo=debug and debug.getinfo
+          if getinfo then
+            local f=getinfo(v).what=="C" and dump(dummy) or dump(v)
+            if tk=="number" then
+              if hexify then
+                handle(format("%s [0x%X]=load(%q),",depth,k,f))
+              else
+                handle(format("%s [%s]=load(%q),",depth,k,f))
+              end
+            elseif tk=="boolean" then
+              handle(format("%s [%s]=load(%q),",depth,k and "true" or "false",f))
+            elseif tk~="string" then
+            elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+              handle(format("%s %s=load(%q),",depth,k,f))
             else
-              handle(format("%s [%s]=load(%q),",depth,k,f))
+              handle(format("%s [%q]=load(%q),",depth,k,f))
             end
-          elseif tk=="boolean" then
-            handle(format("%s [%s]=load(%q),",depth,k and "true" or "false",f))
-          elseif tk~="string" then
-          elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
-            handle(format("%s %s=load(%q),",depth,k,f))
-          else
-            handle(format("%s [%q]=load(%q),",depth,k,f))
           end
         end
       else
@@ -2590,11 +2592,14 @@ if bit32 then
     "0","0","0","0","0","0","0","0",
     "0","0","0","0","0","0","0","0",
   }
-  function number.tobitstring(b,m)
-    local n=32
-    for i=0,31 do
+  function number.tobitstring(b,m,w)
+    if not w then
+      w=32
+    end
+    local n=w
+    for i=0,w-1 do
       local v=bextract(b,i)
-      local k=32-i
+      local k=w-i
       if v==1 then
         n=k
         t[k]="1"
@@ -2602,12 +2607,14 @@ if bit32 then
         t[k]="0"
       end
     end
-    if m then
+    if w then
+      return concat(t,"",1,w)
+    elseif m then
       m=33-m*8
       if m<1 then
         m=1
       end
-      return concat(t,"",m)
+      return concat(t,"",1,m)
     elseif n<8 then
       return concat(t)
     elseif n<16 then

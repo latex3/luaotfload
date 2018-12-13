@@ -9,6 +9,7 @@ if not modules then modules = { } end modules ['font-tfm'] = {
 local next, type = next, type
 local match, format = string.match, string.format
 local concat, sortedhash = table.concat, table.sortedhash
+local idiv = number.idiv
 
 local trace_defining           = false  trackers.register("fonts.defining", function(v) trace_defining = v end)
 local trace_features           = false  trackers.register("tfm.features",   function(v) trace_features = v end)
@@ -117,7 +118,6 @@ local depth = { } -- table.setmetatableindex("number")
 --
 -- So "czechdqcheat=yes" is then a valid feature. And yes, it's a cheat.
 
-
 local function read_from_tfm(specification)
     local filename  = specification.filename
     local size      = specification.size
@@ -140,28 +140,29 @@ local function read_from_tfm(specification)
              tfmdata = newtfmdata
         end
 
-        local resources     = tfmdata.resources  or { }
-        local properties    = tfmdata.properties or { }
-        local parameters    = tfmdata.parameters or { }
-        local shared        = tfmdata.shared     or { }
+        local resources  = tfmdata.resources  or { }
+        local properties = tfmdata.properties or { }
+        local parameters = tfmdata.parameters or { }
+        local shared     = tfmdata.shared     or { }
         --
-        shared.features     = features
-        shared.resources    = resources
+        shared.features  = features
+        shared.resources = resources
         --
-        properties.name     = tfmdata.name           -- todo: fallback
-        properties.fontname = tfmdata.fontname       -- todo: fallback
-        properties.psname   = tfmdata.psname         -- todo: fallback
-        properties.fullname = tfmdata.fullname       -- todo: fallback
-        properties.filename = specification.filename -- todo: fallback
-        properties.format   = fonts.formats.tfm      -- better than nothing
+        properties.name       = tfmdata.name           -- todo: fallback
+        properties.fontname   = tfmdata.fontname       -- todo: fallback
+        properties.psname     = tfmdata.psname         -- todo: fallback
+        properties.fullname   = tfmdata.fullname       -- todo: fallback
+        properties.filename   = specification.filename -- todo: fallback
+        properties.format     = tfmdata.format or fonts.formats.tfm -- better than nothing
+        properties.usedbitmap = tfmdata.usedbitmap
         --
-        tfmdata.properties  = properties
-        tfmdata.resources   = resources
-        tfmdata.parameters  = parameters
-        tfmdata.shared      = shared
+        tfmdata.properties = properties
+        tfmdata.resources  = resources
+        tfmdata.parameters = parameters
+        tfmdata.shared     = shared
         --
-        shared.rawdata      = { resources = resources }
-        shared.features     = features
+        shared.rawdata  = { resources = resources }
+        shared.features = features
         --
         -- The next branch is only entered when we have a proper encoded file i.e.
         -- unicodes and such. It really nakes no sense to do feature juggling when
@@ -235,6 +236,9 @@ local function read_from_tfm(specification)
         --
         shared.processes    = next(features) and tfm.setfeatures(tfmdata,features) or nil
         --
+if size < 0 then
+    size = idiv(65536 * -size,100)
+end
         parameters.factor        = 1 -- already scaled
         parameters.size          = size
         parameters.slant         = parameters.slant          or parameters[1] or 0
@@ -441,7 +445,7 @@ do
         local originals  = tfmdata.characters
         local indices    = { }
         local parentfont = { "font", 1 }
-        local private    = tfmdata or fonts.constructors.privateoffset
+        local private    = tfmdata.privateoffset or fonts.constructors.privateoffset
         local reported   = encdone[tfmfile][encfile]
 
         -- create characters table
@@ -466,7 +470,7 @@ do
                 indices[index]      = unicode
                 original.name       = name -- so one can lookup weird names
                 if backmap then
-                    original.index     = backmap[name]
+                    original.index = backmap[name]
                 else -- probably bitmap
                     original.commands = { parentfont, charcommand[index] } -- or "slot"
                     original.oindex   = index
@@ -515,6 +519,7 @@ do
         tfmdata.psname        = file.nameonly(pfbfile or tfmdata.name)
         tfmdata.filename      = pfbfile
         tfmdata.encodingbytes = 2
+     -- tfmdata.format        = bitmap and "type3" or "type1"
         tfmdata.format        = "type1"
         tfmdata.tounicode     = 1
         tfmdata.embedding     = "subset"
@@ -551,24 +556,18 @@ end
 end
 ]]
 
-    local flushstreamobject = lpdf and lpdf.flushstreamobject
-    local setfontattributes = pdf.setfontattributes
+    local flushstreamobject = lpdf and lpdf.flushstreamobject -- context
+    local setfontattributes = lpdf and lpdf.setfontattributes -- context
 
-    if flushstreamobject then
-        -- we're in context
-    else
+    if not flushstreamobject then
         flushstreamobject = function(data)
-            return pdf.obj {
-                immediate = true,
-                type      = "stream",
-                string    = data,
-            }
+            return pdf.obj { immediate = true, type = "stream", string = data } -- generic
         end
     end
 
     if not setfontattributes then
         setfontattributes = function(id,data)
-            print(format("your luatex is too old so no tounicode bitmap font%i",id))
+            return pdf.setfontattributes(id,data) -- generic
         end
     end
 
@@ -596,7 +595,7 @@ end
 
 -- Now we implement the regular features handlers. We need to convert the
 -- tfm specific structures to opentype structures. In basemode they are
--- converted back so that is a bti of a waste but it's fast enough.
+-- converted back so that is a bit of a waste but it's fast enough.
 
 do
 

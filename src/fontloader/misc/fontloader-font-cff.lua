@@ -26,7 +26,7 @@ if not modules then modules = { } end modules ['font-cff'] = {
 -- with merging subroutines and flattening, not so much with calculations.) On
 -- the other hand, we can now feed back cff2 stuff.
 
-local next, type, tonumber = next, type, tonumber
+local next, type, tonumber, rawget = next, type, tonumber, rawget
 local byte, char, gmatch = string.byte, string.char, string.gmatch
 local concat, remove, unpack = table.concat, table.remove, table.unpack
 local floor, abs, round, ceil, min, max = math.floor, math.abs, math.round, math.ceil, math.min, math.max
@@ -34,6 +34,8 @@ local P, C, R, S, C, Cs, Ct = lpeg.P, lpeg.C, lpeg.R, lpeg.S, lpeg.C, lpeg.Cs, l
 local lpegmatch = lpeg.match
 local formatters = string.formatters
 local bytetable = string.bytetable
+local idiv = number.idiv
+local rshift, band, extract = bit32.rshift, bit32.band, bit32.extract
 
 local readers           = fonts.handlers.otf.readers
 local streamreader      = readers.streamreader
@@ -287,12 +289,30 @@ do
             result.fontbbox = { unpack(stack,1,4) }
             top = 0
         end
-   -- + P("\06") / function() end -- bluevalues
-   -- + P("\07") / function() end -- otherblues
-   -- + P("\08") / function() end -- familyblues
-   -- + P("\09") / function() end -- familyotherblues
-   -- + P("\10") / function() end -- strhw
-   -- + P("\11") / function() end -- stdvw
+      + P("\06") / function()
+            result.bluevalues = { unpack(stack,1,top) }
+            top = 0
+        end
+      + P("\07") / function()
+            result.otherblues = { unpack(stack,1,top) }
+            top = 0
+        end
+      + P("\08") / function()
+            result.familyblues = { unpack(stack,1,top) }
+            top = 0
+        end
+      + P("\09") / function()
+            result.familyotherblues = { unpack(stack,1,top) }
+            top = 0
+        end
+      + P("\10") / function()
+            result.strhw = stack[top]
+            top = 0
+        end
+      + P("\11") / function()
+            result.strvw = stack[top]
+            top = 0
+        end
       + P("\13") / function()
             result.uniqueid = stack[top]
             top = 0
@@ -386,6 +406,26 @@ do
             result.strokewidth = stack[top]
             top = 0
         end
+      + P("\09") / function()
+            result.bluescale = stack[top]
+            top = 0
+        end
+      + P("\10") / function()
+            result.bluesnap = stack[top]
+            top = 0
+        end
+      + P("\11") / function()
+            result.bluefuzz = stack[top]
+            top = 0
+        end
+      + P("\12") / function()
+            result.stemsnaph = { unpack(stack,1,top) }
+            top = 0
+        end
+      + P("\13") / function()
+            result.stemsnapv = { unpack(stack,1,top) }
+            top = 0
+        end
       + P("\20") / function()
             result.syntheticbase = stack[top]
             top = 0
@@ -446,52 +486,27 @@ do
     -- the second variant is much faster. Not that it matters much as we don't see
     -- such numbers often.
 
-    local p_last = P("\x0F") / "0" + P("\x1F") / "1" + P("\x2F") / "2"  + P("\x3F") / "3"
-        + P("\x4F") / "4" + P("\x5F") / "5" + P("\x6F") / "6"  + P("\x7F") / "7"
-        + P("\x8F") / "8" + P("\x9F") / "9" + P("\xAF") / ""   + P("\xBF") / ""
-        + P("\xCF") / ""  + P("\xDF") / ""  + P("\xEF") / ""   + R("\xF0\xFF") / ""
-
- -- local remap = { [0] =
- --     "00",  "01",  "02",  "03",  "04",  "05",  "06",  "07",  "08",  "09",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     "10",  "11",  "12",  "13",  "14",  "15",  "16",  "17",  "18",  "19",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     "20",  "21",  "22",  "23",  "24",  "25",  "26",  "27",  "28",  "29",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     "30",  "31",  "32",  "33",  "34",  "35",  "36",  "37",  "38",  "39",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     "40",  "41",  "42",  "43",  "44",  "45",  "46",  "47",  "48",  "49",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     "50",  "51",  "52",  "53",  "54",  "55",  "56",  "57",  "58",  "59",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     "60",  "61",  "62",  "63",  "64",  "65",  "66",  "67",  "68",  "69",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     "70",  "71",  "72",  "73",  "74",  "75",  "76",  "77",  "78",  "79",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     "80",  "81",  "82",  "83",  "84",  "85",  "86",  "87",  "88",  "89",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     "90",  "91",  "92",  "93",  "94",  "95",  "96",  "97",  "98",  "99",  "0.",  "0E",  "0E-",  "0",  "0-",  "0",
- --     ".0",  ".1",  ".2",  ".3",  ".4",  ".5",  ".6",  ".7",  ".8",  ".9",  "..",  ".E",  ".E-",  ".",  ".-",  ".",
- --     "E0",  "E1",  "E2",  "E3",  "E4",  "E5",  "E6",  "E7",  "E8",  "E9",  "E.",  "EE",  "EE-",  "E",  "E-",  "E",
- --     "E-0", "E-1", "E-2", "E-3", "E-4", "E-5", "E-6", "E-7", "E-8", "E-9", "E-.", "E-E", "E-E-", "E-", "E--", "E-",
- --     "-0",  "-1",  "-2",  "-3",  "-4",  "-5",  "-6",  "-7",  "-8",  "-9",  "-.",  "-E",  "-E-",  "-",  "--",  "-",
- -- }
-
- -- local p_nibbles = Cs(((1-p_last)/byte/remap)^0+p_last)
-
- -- local p = P("\30") * p_nibbles / function(t)
- --     print(tonumber(t))
- -- end
-
     local remap = {
         ["\x00"] = "00",  ["\x01"] = "01",  ["\x02"] = "02",  ["\x03"] = "03",  ["\x04"] = "04",  ["\x05"] = "05",  ["\x06"] = "06",  ["\x07"] = "07",  ["\x08"] = "08",  ["\x09"] = "09",  ["\x0A"] = "0.",  ["\x0B"] = "0E",  ["\x0C"] = "0E-",  ["\x0D"] = "0",  ["\x0E"] = "0-",  ["\x0F"] = "0",
-        ["\x10"] = "10",  ["\x11"] = "11",  ["\x12"] = "12",  ["\x13"] = "13",  ["\x14"] = "14",  ["\x15"] = "15",  ["\x16"] = "16",  ["\x17"] = "17",  ["\x18"] = "18",  ["\x19"] = "19",  ["\x1A"] = "0.",  ["\x1B"] = "0E",  ["\x1C"] = "0E-",  ["\x1D"] = "0",  ["\x1E"] = "0-",  ["\x1F"] = "0",
-        ["\x20"] = "20",  ["\x21"] = "21",  ["\x22"] = "22",  ["\x23"] = "23",  ["\x24"] = "24",  ["\x25"] = "25",  ["\x26"] = "26",  ["\x27"] = "27",  ["\x28"] = "28",  ["\x29"] = "29",  ["\x2A"] = "0.",  ["\x2B"] = "0E",  ["\x2C"] = "0E-",  ["\x2D"] = "0",  ["\x2E"] = "0-",  ["\x2F"] = "0",
-        ["\x30"] = "30",  ["\x31"] = "31",  ["\x32"] = "32",  ["\x33"] = "33",  ["\x34"] = "34",  ["\x35"] = "35",  ["\x36"] = "36",  ["\x37"] = "37",  ["\x38"] = "38",  ["\x39"] = "39",  ["\x3A"] = "0.",  ["\x3B"] = "0E",  ["\x3C"] = "0E-",  ["\x3D"] = "0",  ["\x3E"] = "0-",  ["\x3F"] = "0",
-        ["\x40"] = "40",  ["\x41"] = "41",  ["\x42"] = "42",  ["\x43"] = "43",  ["\x44"] = "44",  ["\x45"] = "45",  ["\x46"] = "46",  ["\x47"] = "47",  ["\x48"] = "48",  ["\x49"] = "49",  ["\x4A"] = "0.",  ["\x4B"] = "0E",  ["\x4C"] = "0E-",  ["\x4D"] = "0",  ["\x4E"] = "0-",  ["\x4F"] = "0",
-        ["\x50"] = "50",  ["\x51"] = "51",  ["\x52"] = "52",  ["\x53"] = "53",  ["\x54"] = "54",  ["\x55"] = "55",  ["\x56"] = "56",  ["\x57"] = "57",  ["\x58"] = "58",  ["\x59"] = "59",  ["\x5A"] = "0.",  ["\x5B"] = "0E",  ["\x5C"] = "0E-",  ["\x5D"] = "0",  ["\x5E"] = "0-",  ["\x5F"] = "0",
-        ["\x60"] = "60",  ["\x61"] = "61",  ["\x62"] = "62",  ["\x63"] = "63",  ["\x64"] = "64",  ["\x65"] = "65",  ["\x66"] = "66",  ["\x67"] = "67",  ["\x68"] = "68",  ["\x69"] = "69",  ["\x6A"] = "0.",  ["\x6B"] = "0E",  ["\x6C"] = "0E-",  ["\x6D"] = "0",  ["\x6E"] = "0-",  ["\x6F"] = "0",
-        ["\x70"] = "70",  ["\x71"] = "71",  ["\x72"] = "72",  ["\x73"] = "73",  ["\x74"] = "74",  ["\x75"] = "75",  ["\x76"] = "76",  ["\x77"] = "77",  ["\x78"] = "78",  ["\x79"] = "79",  ["\x7A"] = "0.",  ["\x7B"] = "0E",  ["\x7C"] = "0E-",  ["\x7D"] = "0",  ["\x7E"] = "0-",  ["\x7F"] = "0",
-        ["\x80"] = "80",  ["\x81"] = "81",  ["\x82"] = "82",  ["\x83"] = "83",  ["\x84"] = "84",  ["\x85"] = "85",  ["\x86"] = "86",  ["\x87"] = "87",  ["\x88"] = "88",  ["\x89"] = "89",  ["\x8A"] = "0.",  ["\x8B"] = "0E",  ["\x8C"] = "0E-",  ["\x8D"] = "0",  ["\x8E"] = "0-",  ["\x8F"] = "0",
-        ["\x90"] = "90",  ["\x91"] = "91",  ["\x92"] = "92",  ["\x93"] = "93",  ["\x94"] = "94",  ["\x95"] = "95",  ["\x96"] = "96",  ["\x97"] = "97",  ["\x98"] = "98",  ["\x99"] = "99",  ["\x9A"] = "0.",  ["\x9B"] = "0E",  ["\x9C"] = "0E-",  ["\x9D"] = "0",  ["\x9E"] = "0-",  ["\x9F"] = "0",
+        ["\x10"] = "10",  ["\x11"] = "11",  ["\x12"] = "12",  ["\x13"] = "13",  ["\x14"] = "14",  ["\x15"] = "15",  ["\x16"] = "16",  ["\x17"] = "17",  ["\x18"] = "18",  ["\x19"] = "19",  ["\x1A"] = "1.",  ["\x1B"] = "1E",  ["\x1C"] = "1E-",  ["\x1D"] = "1",  ["\x1E"] = "1-",  ["\x1F"] = "1",
+        ["\x20"] = "20",  ["\x21"] = "21",  ["\x22"] = "22",  ["\x23"] = "23",  ["\x24"] = "24",  ["\x25"] = "25",  ["\x26"] = "26",  ["\x27"] = "27",  ["\x28"] = "28",  ["\x29"] = "29",  ["\x2A"] = "2.",  ["\x2B"] = "2E",  ["\x2C"] = "2E-",  ["\x2D"] = "2",  ["\x2E"] = "2-",  ["\x2F"] = "2",
+        ["\x30"] = "30",  ["\x31"] = "31",  ["\x32"] = "32",  ["\x33"] = "33",  ["\x34"] = "34",  ["\x35"] = "35",  ["\x36"] = "36",  ["\x37"] = "37",  ["\x38"] = "38",  ["\x39"] = "39",  ["\x3A"] = "3.",  ["\x3B"] = "3E",  ["\x3C"] = "3E-",  ["\x3D"] = "3",  ["\x3E"] = "3-",  ["\x3F"] = "3",
+        ["\x40"] = "40",  ["\x41"] = "41",  ["\x42"] = "42",  ["\x43"] = "43",  ["\x44"] = "44",  ["\x45"] = "45",  ["\x46"] = "46",  ["\x47"] = "47",  ["\x48"] = "48",  ["\x49"] = "49",  ["\x4A"] = "4.",  ["\x4B"] = "4E",  ["\x4C"] = "4E-",  ["\x4D"] = "4",  ["\x4E"] = "4-",  ["\x4F"] = "4",
+        ["\x50"] = "50",  ["\x51"] = "51",  ["\x52"] = "52",  ["\x53"] = "53",  ["\x54"] = "54",  ["\x55"] = "55",  ["\x56"] = "56",  ["\x57"] = "57",  ["\x58"] = "58",  ["\x59"] = "59",  ["\x5A"] = "5.",  ["\x5B"] = "5E",  ["\x5C"] = "5E-",  ["\x5D"] = "5",  ["\x5E"] = "5-",  ["\x5F"] = "5",
+        ["\x60"] = "60",  ["\x61"] = "61",  ["\x62"] = "62",  ["\x63"] = "63",  ["\x64"] = "64",  ["\x65"] = "65",  ["\x66"] = "66",  ["\x67"] = "67",  ["\x68"] = "68",  ["\x69"] = "69",  ["\x6A"] = "6.",  ["\x6B"] = "6E",  ["\x6C"] = "6E-",  ["\x6D"] = "6",  ["\x6E"] = "6-",  ["\x6F"] = "6",
+        ["\x70"] = "70",  ["\x71"] = "71",  ["\x72"] = "72",  ["\x73"] = "73",  ["\x74"] = "74",  ["\x75"] = "75",  ["\x76"] = "76",  ["\x77"] = "77",  ["\x78"] = "78",  ["\x79"] = "79",  ["\x7A"] = "7.",  ["\x7B"] = "7E",  ["\x7C"] = "7E-",  ["\x7D"] = "7",  ["\x7E"] = "7-",  ["\x7F"] = "7",
+        ["\x80"] = "80",  ["\x81"] = "81",  ["\x82"] = "82",  ["\x83"] = "83",  ["\x84"] = "84",  ["\x85"] = "85",  ["\x86"] = "86",  ["\x87"] = "87",  ["\x88"] = "88",  ["\x89"] = "89",  ["\x8A"] = "8.",  ["\x8B"] = "8E",  ["\x8C"] = "8E-",  ["\x8D"] = "8",  ["\x8E"] = "8-",  ["\x8F"] = "8",
+        ["\x90"] = "90",  ["\x91"] = "91",  ["\x92"] = "92",  ["\x93"] = "93",  ["\x94"] = "94",  ["\x95"] = "95",  ["\x96"] = "96",  ["\x97"] = "97",  ["\x98"] = "98",  ["\x99"] = "99",  ["\x9A"] = "9.",  ["\x9B"] = "9E",  ["\x9C"] = "9E-",  ["\x9D"] = "9",  ["\x9E"] = "9-",  ["\x9F"] = "9",
         ["\xA0"] = ".0",  ["\xA1"] = ".1",  ["\xA2"] = ".2",  ["\xA3"] = ".3",  ["\xA4"] = ".4",  ["\xA5"] = ".5",  ["\xA6"] = ".6",  ["\xA7"] = ".7",  ["\xA8"] = ".8",  ["\xA9"] = ".9",  ["\xAA"] = "..",  ["\xAB"] = ".E",  ["\xAC"] = ".E-",  ["\xAD"] = ".",  ["\xAE"] = ".-",  ["\xAF"] = ".",
         ["\xB0"] = "E0",  ["\xB1"] = "E1",  ["\xB2"] = "E2",  ["\xB3"] = "E3",  ["\xB4"] = "E4",  ["\xB5"] = "E5",  ["\xB6"] = "E6",  ["\xB7"] = "E7",  ["\xB8"] = "E8",  ["\xB9"] = "E9",  ["\xBA"] = "E.",  ["\xBB"] = "EE",  ["\xBC"] = "EE-",  ["\xBD"] = "E",  ["\xBE"] = "E-",  ["\xBF"] = "E",
         ["\xC0"] = "E-0", ["\xC1"] = "E-1", ["\xC2"] = "E-2", ["\xC3"] = "E-3", ["\xC4"] = "E-4", ["\xC5"] = "E-5", ["\xC6"] = "E-6", ["\xC7"] = "E-7", ["\xC8"] = "E-8", ["\xC9"] = "E-9", ["\xCA"] = "E-.", ["\xCB"] = "E-E", ["\xCC"] = "E-E-", ["\xCD"] = "E-", ["\xCE"] = "E--", ["\xCF"] = "E-",
         ["\xD0"] = "-0",  ["\xD1"] = "-1",  ["\xD2"] = "-2",  ["\xD3"] = "-3",  ["\xD4"] = "-4",  ["\xD5"] = "-5",  ["\xD6"] = "-6",  ["\xD7"] = "-7",  ["\xD8"] = "-8",  ["\xD9"] = "-9",  ["\xDA"] = "-.",  ["\xDB"] = "-E",  ["\xDC"] = "-E-",  ["\xDD"] = "-",  ["\xDE"] = "--",  ["\xDF"] = "-",
     }
 
-    local p_nibbles = P("\30") * Cs(((1-p_last)/remap)^0+p_last) / function(n)
+    local p_last = S("\x0F\x1F\x2F\x3F\x4F\x5F\x6F\x7F\x8F\x9F\xAF\xBF")
+                 + R("\xF0\xFF")
+
+    local p_nibbles = P("\30") * Cs(((1-p_last)/remap)^0 * (P(1)/remap)) / function(n)
         -- 0-9=digit a=. b=E c=E- d=reserved e=- f=finish
         top = top + 1
         stack[top] = tonumber(n) or 0
@@ -1230,7 +1245,7 @@ do
         if trace_charstrings then
             showstate("stem")
         end
-        stems = stems + top/2
+        stems = stems + idiv(top,2)
         top   = 0
     end
 
@@ -1251,14 +1266,15 @@ do
         if trace_charstrings then
             showstate(operator == 19 and "hintmark" or "cntrmask")
         end
-        stems = stems + top/2
+        stems = stems + idiv(top,2)
         top   = 0
         if stems == 0 then
             -- forget about it
         elseif stems <= 8 then
             return 1
         else
-            return floor((stems+7)/8)
+         -- return floor((stems+7)/8)
+            return idiv(stems+7,8)
         end
     end
 
@@ -1305,8 +1321,9 @@ do
     local function hsbw()
         if version == 1 then
             if trace_charstrings then
-                showstate("dotsection")
+                showstate("hsbw")
             end
+         -- lsb   = stack[top-1]
             width = stack[top]
         end
         top = 0
@@ -1528,89 +1545,115 @@ do
         [037] = flex1,
     }
 
-    local c_endchar = char(14)
+    local chars = setmetatableindex(function (t,k)
+        local v = char(k)
+        t[k] = v
+        return v
+    end)
 
-    local passon  do
+    local c_endchar = chars[14]
 
-        -- todo: round in blend
-        -- todo: delay this hash
+    -- todo: round in blend
 
-        local rshift = bit32.rshift
-        local band = bit32.band
-        local round = math.round
+    local encode = { }
 
-        local encode = table.setmetatableindex(function(t,i)
-            for i=-2048,-1130 do
-                t[i] = char(28,band(rshift(i,8),0xFF),band(i,0xFF))
+    -- this eventually can become a helper
+
+    setmetatableindex(encode,function(t,i)
+        for i=-2048,-1130 do
+            t[i] = char(28,band(rshift(i,8),0xFF),band(i,0xFF))
+        end
+        for i=-1131,-108 do
+            local v = 0xFB00 - i - 108
+            t[i] = char(band(rshift(v,8),0xFF),band(v,0xFF))
+        end
+        for i=-107,107 do
+            t[i] = chars[i + 139]
+        end
+        for i=108,1131 do
+            local v = 0xF700 + i - 108
+--             t[i] = char(band(rshift(v,8),0xFF),band(v,0xFF))
+            t[i] = char(extract(v,8,8),extract(v,0,8))
+        end
+        for i=1132,2048 do
+            t[i] = char(28,band(rshift(i,8),0xFF),band(i,0xFF))
+        end
+        setmetatableindex(encode,function(t,k)
+            -- 16.16-bit signed fixed value
+            local r = round(k)
+            local v = rawget(t,r)
+            if v then
+                return v
             end
-            for i=-1131,-108 do
-                local v = 0xFB00 - i - 108
-                t[i] = char(band(rshift(v,8),0xFF),band(v,0xFF))
-            end
-            for i=-107,107 do
-                t[i] = char(i + 139)
-            end
-            for i=108,1131 do
-                local v = 0xF700 + i - 108
-                t[i] = char(band(rshift(v,8),0xFF),band(v,0xFF))
-            end
-            for i=1132,2048 do
-                t[i] = char(28,band(rshift(i,8),0xFF),band(i,0xFF))
-            end
-            return t[i]
+            local v1 = floor(k)
+            local v2 = floor((k - v1) * 0x10000)
+            return char(255,extract(v1,8,8),extract(v1,0,8),extract(v2,8,8),extract(v2,0,8))
         end)
+        return t[i]
+    end)
 
-        local function setvsindex()
-            local vsindex = stack[top]
-            updateregions(vsindex)
-            top = top - 1
-        end
+    readers.cffencoder = encode
 
-        local function blend()
-            -- leaves n values on stack
-            local n = stack[top]
-            top = top - 1
-            if not axis then
-                -- fatal error
-            elseif n == 1 then
-                top = top - nofregions
-                local v = stack[top]
+    local function p_setvsindex()
+        local vsindex = stack[top]
+        updateregions(vsindex)
+        top = top - 1
+    end
+
+    local function p_blend()
+        -- leaves n values on stack
+        local n = stack[top]
+        top = top - 1
+        if not axis then
+            -- fatal error
+        elseif n == 1 then
+            top = top - nofregions
+            local v = stack[top]
+            for r=1,nofregions do
+                v = v + stack[top+r] * factors[r]
+            end
+            stack[top] = round(v)
+        else
+            top = top - nofregions * n
+            local d = top
+            local k = top - n
+            for i=1,n do
+                k = k + 1
+                local v = stack[k]
                 for r=1,nofregions do
-                    v = v + stack[top+r] * factors[r]
+                    v = v + stack[d+r] * factors[r]
                 end
-                stack[top] = round(v)
-            else
-                top = top - nofregions * n
-                local d = top
-                local k = top - n
-                for i=1,n do
-                    k = k + 1
-                    local v = stack[k]
-                    for r=1,nofregions do
-                        v = v + stack[d+r] * factors[r]
-                    end
-                    stack[k] = round(v)
-                    d = d + nofregions
-                end
+                stack[k] = round(v)
+                d = d + nofregions
             end
         end
+    end
 
-        passon = function(operation)
-            if operation == 15 then
-                setvsindex()
-            elseif operation == 16 then
-                blend()
-            else
-                for i=1,top do
-                    r = r + 1
-                    result[r] = encode[stack[i]]
-                end
-                r = r + 1
-                result[r] = char(operation) -- maybe use a hash
-                top = 0
-            end
+    local function p_getstem()
+        local n = 0
+        if top % 2 ~= 0 then
+            n = 1
         end
+        if top > n then
+            stems = stems + idiv(top-n,2)
+        end
+    end
 
+    local function p_getmask()
+        local n = 0
+        if top % 2 ~= 0 then
+            n = 1
+        end
+        if top > n then
+            stems = stems + idiv(top-n,2)
+        end
+        if stems == 0 then
+            return 0
+        elseif stems <= 8 then
+            return 1
+        else
+            return idiv(stems+7,8)
+        end
     end
 
     -- end of experiment
@@ -1643,6 +1686,42 @@ do
 
     local justpass = false
 
+ -- local function decode(str)
+ --     local a, b, c, d, e = byte(str,1,5)
+ --     if a == 28 then
+ --         if c then
+ --             local n = 0x100 * b + c
+ --             if n >= 0x8000 then
+ --                 return n - 0x10000
+ --             else
+ --                 return n
+ --             end
+ --         end
+ --     elseif a < 32 then
+ --         return false
+ --     elseif a <= 246 then
+ --         return  a - 139
+ --     elseif a <= 250 then
+ --         if b then
+ --             return  a*256 - 63124 + b
+ --         end
+ --     elseif a <= 254 then
+ --         if b then
+ --             return -a*256 + 64148 - b
+ --         end
+ --     else
+ --         if e then
+ --             local n = 0x100 * b + c
+ --             if n >= 0x8000 then
+ --                 return n - 0x10000 + (0x100 * d + e)/0xFFFF
+ --             else
+ --                 return n           + (0x100 * d + e)/0xFFFF
+ --             end
+ --         end
+ --     end
+ --     return false
+ -- end
+
     process = function(tab)
         local i = 1
         local n = #tab
@@ -1667,9 +1746,9 @@ do
                     stack[top] = -t*256 + 64148 - tab[i+1]
                     i = i + 2
                 else
+                    -- a 16.16 float
                     local n = 0x100 * tab[i+1] + tab[i+2]
-                    if n  >= 0x8000 then
-                     -- stack[top] = n - 0xFFFF - 1 + (0x100 * tab[i+3] + tab[i+4])/0xFFFF
+                    if n >= 0x8000 then
                         stack[top] = n - 0x10000 + (0x100 * tab[i+3] + tab[i+4])/0xFFFF
                     else
                         stack[top] = n           + (0x100 * tab[i+3] + tab[i+4])/0xFFFF
@@ -1716,19 +1795,94 @@ do
             elseif t == 12 then
                 i = i + 1
                 local t = tab[i]
-                local a = subactions[t]
-                if a then
-                    a(t)
-                else
-                    if trace_charstrings then
-                        showvalue("<subaction>",t)
+                if justpass then
+                    if t >= 34 or t <= 37 then -- flexes
+                        for i=1,top do
+                            r = r + 1 ; result[r] = encode[stack[i]]
+                        end
+                        r = r + 1 ; result[r] = chars[12]
+                        r = r + 1 ; result[r] = chars[t]
+                        top = 0
+                    else
+                        local a = subactions[t]
+                        if a then
+                            a(t)
+                        else
+                            top = 0
+                        end
                     end
-                    top = 0
+                else
+                    local a = subactions[t]
+                    if a then
+                        a(t)
+                    else
+                        if trace_charstrings then
+                            showvalue("<subaction>",t)
+                        end
+                        top = 0
+                    end
                 end
                 i = i + 1
             elseif justpass then
-                passon(t)
-                i = i + 1
+                -- todo: local a = passactions
+                if t == 15 then
+                    p_setvsindex()
+                    i = i + 1
+                elseif t == 16 then
+                    local s = p_blend() or 0
+                    i = i + s + 1
+                -- cff 1: (when cff2 strip them)
+                elseif t == 1 or t == 3 or t == 18 or operation == 23 then
+                    p_getstem() -- at the start
+if true then
+                    if top > 0 then
+                        for i=1,top do
+                            r = r + 1 ; result[r] = encode[stack[i]]
+                        end
+                        top = 0
+                    end
+                    r = r + 1 ; result[r] = chars[t]
+else
+    top = 0
+end
+                    i = i + 1
+                -- cff 1: (when cff2 strip them)
+                elseif t == 19 or t == 20 then
+                    local s = p_getmask() or 0 -- after the stems
+if true then
+                    if top > 0 then
+                        for i=1,top do
+                            r = r + 1 ; result[r] = encode[stack[i]]
+                        end
+                        top = 0
+                    end
+                    r = r + 1 ; result[r] = chars[t]
+                    for j=1,s do
+                        i = i + 1
+                        r = r + 1 ; result[r] = chars[tab[i]]
+                    end
+else
+    i = i + s
+    top = 0
+end
+                    i = i + 1
+                -- cff 1: closepath
+                elseif t == 9 then
+                    top = 0
+                    i = i + 1
+                elseif t == 13 then
+                    local s = hsbw() or 0
+                    i = i + s + 1
+                else
+                    if top > 0 then
+                        for i=1,top do
+                            r = r + 1 ; result[r] = encode[stack[i]]
+                        end
+                        top = 0
+                    end
+                    r = r + 1 ; result[r] = chars[t]
+                    i = i + 1
+                end
             else
                 local a = actions[t]
                 if a then
@@ -1788,19 +1942,31 @@ do
  -- end
 
     local function setbias(globals,locals)
-        if version == 1 then
-            return
-                false,
-                false
-        else
+--         if version == 1 then  -- charstring version, not cff
+--             return
+--                 0,
+--                 0
+--             return
+--                 1,
+--                 1
+--         else
             local g, l = #globals, #locals
             return
-                ((g <  1240 and 107) or (g < 33900 and 1131) or 32768) + 1,
-                ((l <  1240 and 107) or (l < 33900 and 1131) or 32768) + 1
-        end
+                ((g < 1240 and 107) or (g < 33900 and 1131) or 32768) + 1,
+                ((l < 1240 and 107) or (l < 33900 and 1131) or 32768) + 1
+--         end
     end
 
     local function processshape(tab,index)
+
+        if not tab then
+            glyphs[index] = {
+                boundingbox = { 0, 0, 0, 0 },
+                width       = 0,
+                name        = charset and charset[index] or nil,
+            }
+            return
+        end
 
         tab     = bytetable(tab)
 
@@ -1817,7 +1983,6 @@ do
         ymin    = 0
         ymax    = 0
         checked = false
-
         if trace_charstrings then
             report("glyph: %i",index)
             report("data : % t",tab)
@@ -1937,19 +2102,20 @@ do
         globalbias,   localbias    = setbias(globals,locals)
         nominalwidth, defaultwidth = setwidths(dictionary.private)
 
-        startparsing(fontdata,data,streams)
-
-        for index=1,#charstrings do
-            processshape(charstrings[index],index-1)
-            charstrings[index] = nil -- free memory (what if used more often?)
+        if charstrings then
+            startparsing(fontdata,data,streams)
+            for index=1,#charstrings do
+                processshape(charstrings[index],index-1)
+--                 charstrings[index] = nil -- free memory (what if used more often?)
+            end
+            stopparsing(fontdata,data)
+        else
+            report("no charstrings")
         end
-
-        stopparsing(fontdata,data)
-
         return glyphs
     end
 
-    parsecharstring = function(fontdata,data,dictionary,tab,glphs,index,doshapes,tversion)
+    parsecharstring = function(fontdata,data,dictionary,tab,glphs,index,doshapes,tversion,streams)
 
         keepcurve = doshapes
         version   = tversion
@@ -1959,6 +2125,8 @@ do
         charset   = false
         vsindex   = dictionary.vsindex or 0
         glyphs    = glphs or { }
+
+ justpass = streams == true
 
         globalbias,   localbias    = setbias(globals,locals)
         nominalwidth, defaultwidth = setwidths(dictionary.private)
@@ -2134,7 +2302,7 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
     local format       = readbyte(f)
     if format == 1 then
         for i=0,nofglyphs do -- notdef included (needs checking)
-            local index = readbyte(i)
+            local index = readbyte(f)
             fdindex[i] = index
             if index > maxindex then
                 maxindex = index
@@ -2165,23 +2333,27 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
     -- hm, always
     if maxindex >= 0 then
         local cidarray = cid.fdarray
-        setposition(f,header.offset+cidarray)
-        local dictionaries = readlengths(f)
-        for i=1,#dictionaries do
-            dictionaries[i] = readstring(f,dictionaries[i])
+        if cidarray then
+            setposition(f,header.offset+cidarray)
+            local dictionaries = readlengths(f)
+            for i=1,#dictionaries do
+                dictionaries[i] = readstring(f,dictionaries[i])
+            end
+            parsedictionaries(data,dictionaries)
+            cid.dictionaries = dictionaries
+            readcidprivates(f,data)
+            for i=1,#dictionaries do
+                readlocals(f,data,dictionaries[i])
+            end
+            startparsing(fontdata,data,streams)
+            for i=1,#charstrings do
+                parsecharstring(fontdata,data,dictionaries[fdindex[i]+1],charstrings[i],glyphs,i,doshapes,version,streams)
+--                 charstrings[i] = nil
+            end
+            stopparsing(fontdata,data)
+        else
+            report("no cid array")
         end
-        parsedictionaries(data,dictionaries)
-        cid.dictionaries = dictionaries
-        readcidprivates(f,data)
-        for i=1,#dictionaries do
-            readlocals(f,data,dictionaries[i])
-        end
-        startparsing(fontdata,data,streams)
-        for i=1,#charstrings do
-            parsecharstring(fontdata,data,dictionaries[fdindex[i]+1],charstrings[i],glyphs,i,doshapes,version)
-            charstrings[i] = nil
-        end
-        stopparsing(fontdata,data)
     end
 end
 
@@ -2200,7 +2372,7 @@ local function cleanup(data,dictionaries)
 end
 
 function readers.cff(f,fontdata,specification)
-    local tableoffset = gotodatatable(f,fontdata,"cff",specification.details)
+    local tableoffset = gotodatatable(f,fontdata,"cff",specification.details or specification.glyphs)
     if tableoffset then
         local header = readheader(f)
         if header.major ~= 1 then
@@ -2223,14 +2395,17 @@ function readers.cff(f,fontdata,specification)
         --
         local dic = dictionaries[1]
         local cid = dic.cid
-        fontdata.cffinfo = {
-            familynamename     = dic.familyname,
+        --
+        local cffinfo = {
+            familyname         = dic.familyname,
             fullname           = dic.fullname,
             boundingbox        = dic.boundingbox,
             weight             = dic.weight,
             italicangle        = dic.italicangle,
             underlineposition  = dic.underlineposition,
             underlinethickness = dic.underlinethickness,
+            defaultwidth       = dic.defaultwidthx,
+            nominalwidth       = dic.nominalwidthx,
             monospaced         = dic.monospaced,
         }
         fontdata.cidinfo = cid and {
@@ -2238,13 +2413,31 @@ function readers.cff(f,fontdata,specification)
             ordering   = cid.ordering,
             supplement = cid.supplement,
         }
+        fontdata.cffinfo = cffinfo
         --
-        if specification.glyphs then
-            local all = specification.shapes or false
+        local all = specification.shapes or specification.streams or false
+        if specification.glyphs or all then
             if cid and cid.fdselect then
-                readfdselect(f,fontdata,data,glyphs,all,"cff")
+                readfdselect(f,fontdata,data,glyphs,all,"cff",specification.streams)
             else
-                readnoselect(f,fontdata,data,glyphs,all,"cff")
+                readnoselect(f,fontdata,data,glyphs,all,"cff",specification.streams)
+            end
+        end
+        local private = dic.private
+        if private then
+            local data = private.data
+            if type(data) == "table" then
+                cffinfo.defaultwidth     = data.defaultwidth or cffinfo.defaultwidth
+                cffinfo.nominalwidth     = data.nominalwidth or cffinfo.nominalwidth
+                cffinfo.bluevalues       = data.bluevalues
+                cffinfo.otherblues       = data.otherblues
+                cffinfo.familyblues      = data.familyblues
+                cffinfo.familyotherblues = data.familyotherblues
+                cffinfo.bluescale        = data.bluescale
+                cffinfo.blueshift        = data.blueshift
+                cffinfo.bluefuzz         = data.bluefuzz
+                cffinfo.stdhw            = data.stdhw
+                cffinfo.stdvw            = data.stdvw
             end
         end
         cleanup(data,dictionaries)
@@ -2283,7 +2476,7 @@ function readers.cff2(f,fontdata,specification)
         data.factors  = specification.factors
         --
         local cid = data.dictionaries[1].cid
-        local all = specification.shapes or false
+        local all = specification.shapes or specification.streams or false
         if cid and cid.fdselect then
             readfdselect(f,fontdata,data,glyphs,all,"cff2",specification.streams)
         else
@@ -2316,7 +2509,7 @@ function readers.cffcheck(filename)
             dictionaries = dictionaries,
             strings      = strings,
             glyphs       = glyphs,
-            nofglyphs    = 4,
+            nofglyphs    = 0,
         }
         --
         parsedictionaries(data,dictionaries,"cff")

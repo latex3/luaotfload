@@ -1415,3 +1415,11 @@ function strings.newcollector()
             end
         end
 end
+
+--
+
+local f_16_16 = formatters["%0.5N"]
+
+function number.to16dot16(n)
+    return f_16_16(n/65536.0)
+end

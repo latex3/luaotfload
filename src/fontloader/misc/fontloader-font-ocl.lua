@@ -306,17 +306,6 @@ fonts.handlers.otf.features.register {
 
 do
 
- -- local f_setstream = formatters[ [[io.savedata("svg-glyph-%05i",%q)]] ]
- -- local f_getstream = formatters[ [[svg-glyph-%05i]] ]
-
- -- function otfsvg.storepdfdata(pdf)
- --     nofstreams = nofstreams + 1
- --     storepdfdata = function(pdf)
- --         nofstreams = nofstreams + 1
- --         return f_setstream(nofstreams,pdf), f_getstream(nofstreams)
- --     end
- -- end
-
     local nofstreams = 0
     local f_name     = formatters[ [[pdf-glyph-%05i]] ]
     local f_used     = context and formatters[ [[original:///%s]] ] or formatters[ [[%s]] ]
@@ -336,7 +325,7 @@ do
                 done = f_used(n)
                 hashed[pdf] = done
             end
-            return nil, done, nil
+            return done
         end
 
     else
@@ -353,47 +342,15 @@ do
                 done = f_used(n)
                 hashed[pdf] = done
             end
-            return nil, done, nil
+            return done
         end
 
     end
 
- -- maybe more efficient but much slower (and we hash already)
- --
- -- if context then
- --
- --     local storepdfdata = otf.storepdfdata
- --     local initialized  = false
- --
- --     function otf.storepdfdata(pdf)
- --         if not initialized then
- --             if resolvers.setmemstream then
- --                 local f_setstream = formatters[ [[resolvers.setmemstream("pdf-glyph-%05i",%q,true)]] ]
- --                 local f_getstream = formatters[ [[memstream:///pdf-glyph-%05i]] ]
- --                 local f_nilstream = formatters[ [[resolvers.resetmemstream("pdf-glyph-%05i",true)]] ]
- --                 storepdfdata = function(pdf)
- --                     local done  = hashed[pdf]
- --                     local set   = nil
- --                     local reset = nil
- --                     if not done then
- --                         nofstreams = nofstreams + 1
- --                         set   = f_setstream(nofstreams,pdf)
- --                         done  = f_getstream(nofstreams)
- --                         reset = f_nilstream(nofstreams)
- --                         hashed[pdf] = done
- --                     end
- --                     return set, done, reset
- --                 end
- --                 otf.storepdfdata = storepdfdata
- --             end
- --             initialized = true
- --         end
- --         return storepdfdata(pdf)
- --     end
- --
- -- end
-
 end
+
+-- I'll probably make a variant for context as we can do it more efficient there than in
+-- generic.
 
 local function pdftovirtual(tfmdata,pdfshapes,kind) -- kind = sbix|svg
     if not tfmdata or not pdfshapes or not kind then
@@ -418,6 +375,12 @@ local function pdftovirtual(tfmdata,pdfshapes,kind) -- kind = sbix|svg
     local actualb       = { "pdf", "page", b } -- saves tables
     local actuale       = { "pdf", "page", e } -- saves tables
     --
+    local vfimage = lpdf and lpdf.vfimage or function(wd,ht,dp,data,name)
+        -- needed for generic (if used there at all)
+        local name = storepdfdata(data)
+        return { "image", { filename = name, width = wd, height = ht, depth = dp } }
+    end
+    --
     for unicode, character in sortedhash(characters) do  -- sort is nicer for svg
         local index = character.index
         if index then
@@ -438,23 +401,20 @@ local function pdftovirtual(tfmdata,pdfshapes,kind) -- kind = sbix|svg
             if data then
                 -- We can delay storage by a lua function in commands: but then we need to
                 -- be able to provide our own mem stream name (so that we can reserve it).
-                local setcode, name, nilcode = storepdfdata(data)
-                if name then
-                    local bt = unicode and getactualtext(unicode)
-                    local wd = character.width  or 0
-                    local ht = character.height or 0
-                    local dp = character.depth  or 0
-                    character.commands = {
-                        not unicode and actualb or { "pdf", "page", (getactualtext(unicode)) },
-                        downcommand[dp + dy * hfactor],
-                        rightcommand[dx * hfactor],
-                     -- setcode and { "lua", setcode } or nop,
-                        { "image", { filename = name, width = wd, height = ht, depth = dp } },
-                     -- nilcode and { "lua", nilcode } or nop,
-                        actuale,
-                    }
-                    character[kind] = true
-                end
+                -- Anyway, we will do this different in a future version of context.
+                local bt = unicode and getactualtext(unicode)
+                local wd = character.width  or 0
+                local ht = character.height or 0
+                local dp = character.depth  or 0
+                -- The down and right will change too (we can move that elsewhere).
+                character.commands = {
+                    not unicode and actualb or { "pdf", "page", (getactualtext(unicode)) },
+                    downcommand[dp + dy * hfactor],
+                    rightcommand[dx * hfactor],
+                    vfimage(wd,ht,dp,data,name),
+                    actuale,
+                }
+                character[kind] = true
             end
         end
     end
@@ -667,6 +627,8 @@ do
     end
 
 end
+
+-- This will change in a future version of context. More direct.
 
 local function initializesbix(tfmdata,kind,value) -- hm, always value
     if value and otf.sbixenabled then

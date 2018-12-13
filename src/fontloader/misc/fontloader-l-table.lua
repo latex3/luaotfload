@@ -11,7 +11,6 @@ local table, string = table, string
 local concat, sort, insert, remove = table.concat, table.sort, table.insert, table.remove
 local format, lower, dump = string.format, string.lower, string.dump
 local getmetatable, setmetatable = getmetatable, setmetatable
-local getinfo = debug.getinfo
 local lpegmatch, patterns = lpeg.match, lpeg.patterns
 local floor = math.floor
 
@@ -830,22 +829,25 @@ local function do_serialize(root,name,depth,level,indexed)
                 end
             elseif tv == "function" then
                 if functions then
-                    local f = getinfo(v).what == "C" and dump(dummy) or dump(v) -- maybe strip
-                 -- local f = getinfo(v).what == "C" and dump(function(...) return v(...) end) or dump(v) -- maybe strip
-                    if tk == "number" then
-                        if hexify then
-                            handle(format("%s [0x%X]=load(%q),",depth,k,f))
+                    local getinfo = debug and debug.getinfo
+                    if getinfo then
+                        local f = getinfo(v).what == "C" and dump(dummy) or dump(v) -- maybe strip
+                     -- local f = getinfo(v).what == "C" and dump(function(...) return v(...) end) or dump(v) -- maybe strip
+                        if tk == "number" then
+                            if hexify then
+                                handle(format("%s [0x%X]=load(%q),",depth,k,f))
+                            else
+                                handle(format("%s [%s]=load(%q),",depth,k,f))
+                            end
+                        elseif tk == "boolean" then
+                            handle(format("%s [%s]=load(%q),",depth,k and "true" or "false",f))
+                        elseif tk ~= "string" then
+                            -- ignore
+                        elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+                            handle(format("%s %s=load(%q),",depth,k,f))
                         else
-                            handle(format("%s [%s]=load(%q),",depth,k,f))
+                            handle(format("%s [%q]=load(%q),",depth,k,f))
                         end
-                    elseif tk == "boolean" then
-                        handle(format("%s [%s]=load(%q),",depth,k and "true" or "false",f))
-                    elseif tk ~= "string" then
-                        -- ignore
-                    elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
-                        handle(format("%s %s=load(%q),",depth,k,f))
-                    else
-                        handle(format("%s [%q]=load(%q),",depth,k,f))
                     end
                 end
             else

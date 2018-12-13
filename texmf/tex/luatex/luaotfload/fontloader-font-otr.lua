@@ -1008,7 +1008,7 @@ readers["os/2"] = function(f,fontdata)
         if version >= 1 then
             windowsmetrics.codepageranges = { readulong(f), readulong(f) }
         end
-        if version >= 3 then
+        if version >= 2 then
             windowsmetrics.xheight               = readshort(f)
             windowsmetrics.capheight             = readshort(f)
             windowsmetrics.defaultchar           = readushort(f)
@@ -2447,7 +2447,7 @@ function readers.loadfont(filename,n,instance)
                 mathconstants = fontdata.mathconstants,
                 colorpalettes = fontdata.colorpalettes,
                 svgshapes     = fontdata.svgshapes,
-                sbixshapes    = fontdata.sbixshapes,
+                pngshapes     = fontdata.pngshapes,
                 variabledata  = fontdata.variabledata,
                 foundtables   = fontdata.foundtables,
             },

@@ -118,6 +118,15 @@ local depth = { } -- table.setmetatableindex("number")
 --
 -- So "czechdqcheat=yes" is then a valid feature. And yes, it's a cheat.
 
+local loadtfmvf = tfm.readers and tfm.readers.loadtfmvf
+
+directives.register("fonts.tfm.builtin",function(v)
+    loadtfmvf = tfm.readers and tfm.readers.loadtfmvf
+    if v and font.read_tfm then
+        loadtfmvf = false
+    end
+end)
+
 local function read_from_tfm(specification)
     local filename  = specification.filename
     local size      = specification.size
@@ -125,7 +134,12 @@ local function read_from_tfm(specification)
     if trace_defining then
         report_defining("loading tfm file %a at size %s",filename,size)
     end
-    local tfmdata = font.read_tfm(filename,size) -- not cached, fast enough
+    local tfmdata
+    if loadtfmvf then
+        tfmdata = loadtfmvf(filename,size)
+    else
+        tfmdata = font.read_tfm(filename,size) -- not cached, fast enough
+    end
     if tfmdata then
 
         local features = specification.features and specification.features.normal or { }
@@ -133,7 +147,7 @@ local function read_from_tfm(specification)
         specification.features.normal = features
 
         -- If reencode returns a new table, we assume that we're doing something
-        -- special. An 'auto' reencode pickt up its vector from the pfb file.
+        -- special. An 'auto' reencode picks up its vector from the pfb file.
 
         local newtfmdata = (depth[filename] == 1) and tfm.reencode(tfmdata,specification)
         if newtfmdata then
@@ -234,11 +248,11 @@ local function read_from_tfm(specification)
             end
         end
         --
-        shared.processes    = next(features) and tfm.setfeatures(tfmdata,features) or nil
+        shared.processes = next(features) and tfm.setfeatures(tfmdata,features) or nil
         --
-if size < 0 then
-    size = idiv(65536 * -size,100)
-end
+        if size < 0 then
+            size = idiv(65536 * -size,100)
+        end
         parameters.factor        = 1 -- already scaled
         parameters.size          = size
         parameters.slant         = parameters.slant          or parameters[1] or 0
@@ -258,6 +272,27 @@ end
             -- We do nothing as we assume flat tfm files. It would become real messy
             -- otherwise and I don't have something for testing on my system anyway.
             --
+        elseif loadtfmvf then
+            -- already loaded
+            local fonts = tfmdata.fonts
+            if fonts then
+                for i=1,#fonts do
+                    local font = fonts[i]
+                    local id   = font.id
+                    if not id then
+                        local name = font.name
+                        local size = font.size
+                        if name and size then
+                            local data, id = constructors.readanddefine(name,size)
+                            if id then
+                                font.id   = id
+                                font.name = nil
+                                font.size = nil
+                            end
+                        end
+                    end
+                end
+            end
         elseif constructors.resolvevirtualtoo then
             fonts.loggers.register(tfmdata,file.suffix(filename),specification) -- strange, why here
             local vfname = findbinfile(specification.name, 'ovf')
@@ -285,7 +320,7 @@ end
                             report_defining("virtual font %a exceeds size %s",n,s)
                             fontlist[i] = { id = 0 }
                         else
-                            local t, id = fonts.constructors.readanddefine(n,s)
+                            local t, id = constructors.readanddefine(n,s)
                             fontlist[i] = { id = id }
                         end
                     end
@@ -308,6 +343,7 @@ end
         --
         properties.haskerns     = true
         properties.hasligatures = true
+        properties.hasitalics   = true
         resources.unicodes      = { }
         resources.lookuptags    = { }
         --
@@ -416,7 +452,7 @@ do
         local vector   = false
 
         if type(pfbfile) == "string" then
-            local pfb = fonts.constructors.handlers.pfb
+            local pfb = constructors.handlers.pfb
             if pfb and pfb.loadvector then
                 local v, e = pfb.loadvector(pfbfile)
                 if v then
@@ -445,7 +481,7 @@ do
         local originals  = tfmdata.characters
         local indices    = { }
         local parentfont = { "font", 1 }
-        local private    = tfmdata.privateoffset or fonts.constructors.privateoffset
+        local private    = tfmdata.privateoffset or constructors.privateoffset
         local reported   = encdone[tfmfile][encfile]
 
         -- create characters table

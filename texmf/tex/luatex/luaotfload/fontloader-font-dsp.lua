@@ -86,10 +86,11 @@ local streamreader      = readers.streamreader
 
 local setposition       = streamreader.setposition
 local getposition       = streamreader.getposition
-local readushort        = streamreader.readcardinal2  -- 16-bit unsigned integer
-local readulong         = streamreader.readcardinal4  -- 24-bit unsigned integer
+local readuinteger      = streamreader.readcardinal1
+local readushort        = streamreader.readcardinal2
+local readulong         = streamreader.readcardinal4
 local readinteger       = streamreader.readinteger1
-local readshort         = streamreader.readinteger2   -- 16-bit   signed integer
+local readshort         = streamreader.readinteger2
 local readstring        = streamreader.readstring
 local readtag           = streamreader.readtag
 local readbytes         = streamreader.readbytes
@@ -113,6 +114,7 @@ directives.register("fonts.streamreader",function()
 
     setposition       = streamreader.setposition
     getposition       = streamreader.getposition
+    readuinteger      = streamreader.readcardinal1
     readushort        = streamreader.readcardinal2
     readulong         = streamreader.readcardinal4
     readinteger       = streamreader.readinteger1
@@ -3070,182 +3072,324 @@ function readers.sbix(f,fontdata,specification)
         for i=1,nofstrikes do
             strikes[i] = readulong(f)
         end
-     -- if true then
-            local shapes = { }
-            local done   = 0
-            for i=1,nofstrikes do
-                local strikeoffset = strikes[i] + tableoffset
-                setposition(f,strikeoffset)
-                strikes[i] = {
-                    ppem   = readushort(f),
-                    ppi    = readushort(f),
-                    offset = strikeoffset
-                }
+        local shapes = { }
+        local done   = 0
+        for i=1,nofstrikes do
+            local strikeoffset = strikes[i] + tableoffset
+            setposition(f,strikeoffset)
+            strikes[i] = {
+                ppem   = readushort(f),
+                ppi    = readushort(f),
+                offset = strikeoffset
+            }
+        end
+        -- highest first
+        sort(strikes,function(a,b)
+            if b.ppem == a.ppem then
+                return b.ppi < a.ppi
+            else
+                return b.ppem < a.ppem
             end
-            -- highest first
-            sort(strikes,function(a,b)
-                if b.ppem == a.ppem then
-                    return b.ppi < a.ppi
-                else
-                    return b.ppem < a.ppem
-                end
-            end)
-            local glyphs = { }
-            for i=1,nofstrikes do
-                local strike = strikes[i]
-                local strikeppem   = strike.ppem
-                local strikeppi    = strike.ppi
-                local strikeoffset = strike.offset
-                setposition(f,strikeoffset)
-                for i=0,nofglyphs do
-                    glyphs[i] = readulong(f)
-                end
-                local glyphoffset = glyphs[0]
-                for i=0,nofglyphs-1 do
-                    local nextoffset = glyphs[i+1]
-                    if not shapes[i] then
-                        local datasize = nextoffset - glyphoffset
-                        if datasize > 0 then
-                            setposition(f,strikeoffset + glyphoffset)
-                            shapes[i] = {
-                                x    = readshort(f),
-                                y    = readshort(f),
-                                tag  = readtag(f), -- maybe for tracing
-                                data = readstring(f,datasize-8),
-                                ppem = strikeppem, -- not used, for tracing
-                                ppi  = strikeppi,  -- not used, for tracing
-                            }
-                            done = done + 1
-                            if done == nofglyphs then
-                                break
-                            end
+        end)
+        local glyphs = { }
+        for i=1,nofstrikes do
+            local strike       = strikes[i]
+            local strikeppem   = strike.ppem
+            local strikeppi    = strike.ppi
+            local strikeoffset = strike.offset
+            setposition(f,strikeoffset)
+            for i=0,nofglyphs do
+                glyphs[i] = readulong(f)
+            end
+            local glyphoffset = glyphs[0]
+            for i=0,nofglyphs-1 do
+                local nextoffset = glyphs[i+1]
+                if not shapes[i] then
+                    local datasize = nextoffset - glyphoffset
+                    if datasize > 0 then
+                        setposition(f,strikeoffset + glyphoffset)
+                        shapes[i] = {
+                            x    = readshort(f),
+                            y    = readshort(f),
+                            tag  = readtag(f), -- maybe for tracing
+                            data = readstring(f,datasize-8),
+                            ppem = strikeppem, -- not used, for tracing
+                            ppi  = strikeppi,  -- not used, for tracing
+                        }
+                        done = done + 1
+                        if done == nofglyphs then
+                            break
                         end
                     end
-                    glyphoffset = nextoffset
                 end
+                glyphoffset = nextoffset
             end
-            fontdata.sbixshapes = shapes
-     -- else
-     --     for i=1,nofstrikes do
-     --         local strikeoffset = strikes[i] + tableoffset
-     --         setposition(f,strikeoffset)
-     --         local glyphs = { }
-     --         strikes[i] = {
-     --             ppem   = readushort(f),
-     --             ppi    = readushort(f),
-     --             glyphs = glyphs,
-     --         }
-     --         for i=0,nofglyphs do
-     --             glyphs[i] = readulong(f)
-     --         end
-     --         local glyphoffset = glyphs[0]
-     --         for i=0,nofglyphs-1 do
-     --             local nextoffset = glyphs[i+1]
-     --             local datasize   = nextoffset - glyphoffset
-     --             if datasize > 0 then
-     --                 setposition(f,strikeoffset + glyphoffset)
-     --                 glyphs[i] = {
-     --                     x    = readshort(f),
-     --                     y    = readshort(f),
-     --                     tag  = readtag(f),
-     --                     data = readstring(f,datasize-8)
-     --                 }
-     --                 glyphoffset = nextoffset
-     --             end
-     --         end
-     --     end
-     --     fontdata.sbixshapes = strikes
-     -- end
+        end
+        fontdata.pngshapes = shapes
     end
 end
 
--- function readers.cblc(f,fontdata,specification)
---     local tableoffset = gotodatatable(f,fontdata,"cblc",specification.glyphs)
---     if tableoffset then
---     end
--- end
---
--- function readers.cbdt(f,fontdata,specification)
---     local tableoffset = gotodatatable(f,fontdata,"ctdt",specification.glyphs)
---     if tableoffset then
---
---         local function getmetrics(f)
---             return {
---                 ascender              = readinteger(f),
---                 descender             = readinteger(f),
---                 widthmax              = readcardinal(f),
---                 caretslopedumerator   = readinteger(f),
---                 caretslopedenominator = readinteger(f),
---                 caretoffset           = readinteger(f),
---                 minorigin             = readinteger(f),
---                 minadvance            = readinteger(f),
---                 maxbefore             = readinteger(f),
---                 minafter              = readinteger(f),
---                 pad1                  = readinteger(f),
---                 pad2                  = readinteger(f),
---             }
---         end
---
---         local version       = readulong(f)
---         local nofsizetables = readulong(f)
---         local sizetable     = { }
---         for i=1,nofsizetables do
---             sizetable[i] = {
---                 subtables    = readulong(f),
---                 indexsize    = readulong(f),
---                 nofsubtables = readulong(f),
---                 colorref     = readulong(f),
---                 hormetrics   = getmetrics(f),
---                 vermetrics   = getmetrics(f),
---                 firstindex   = readushort(f),
---                 lastindex    = readushort(f),
---                 ppemx        = readbyte(f),
---                 ppemy        = readbyte(f),
---                 bitdepth     = readbyte(f),
---                 flags        = readbyte(f),
---             }
---         end
---
---         sort(sizetable,function(a,b)
---             if b.ppemx == a.ppemx then
---                 return b.bitdepth < a.bitdepth
---             else
---                 return b.ppemx < a.ppemx
---             end
---         end)
---
---         local shapes = { }
---
---         for i=1,nofsizetables do
---             local s = sizetables[i]
---             for j=firstindex,lastindex do
---                 if not shapes[j] then
---                     shapes[j] = {
---                         i
---                     }
---                 end
---             end
---         end
---
---         inspect(shapes)
---
---     end
--- end
+-- Another bitmap (so not that useful) format. But Luigi found a font that
+-- has them , so ...
 
--- function readers.ebdt(f,fontdata,specification)
---     if specification.glyphs then
---     end
--- end
+do
 
--- function readers.ebsc(f,fontdata,specification)
---     if specification.glyphs then
---     end
--- end
+    local function getmetrics(f)
+        return {
+            ascender              = readinteger(f),
+            descender             = readinteger(f),
+            widthmax              = readuinteger(f),
+            caretslopedumerator   = readinteger(f),
+            caretslopedenominator = readinteger(f),
+            caretoffset           = readinteger(f),
+            minorigin             = readinteger(f),
+            minadvance            = readinteger(f),
+            maxbefore             = readinteger(f),
+            minafter              = readinteger(f),
+            pad1                  = readinteger(f),
+            pad2                  = readinteger(f),
+        }
+    end
 
--- function readers.eblc(f,fontdata,specification)
---     if specification.glyphs then
---     end
--- end
+    -- bad names
+
+    local function getbigmetrics(f)
+        -- bigmetrics, maybe just skip 9 bytes
+        return {
+            height       = readuinteger(f),
+            width        = readuinteger(f),
+            horiBearingX = readinteger(f),
+            horiBearingY = readinteger(f),
+            horiAdvance  = readuinteger(f),
+            vertBearingX = readinteger(f),
+            vertBearingY = readinteger(f),
+            vertAdvance  = readuinteger(f),
+        }
+    end
+
+    local function getsmallmetrics(f)
+        -- smallmetrics, maybe just skip 5 bytes
+        return {
+            height   = readuinteger(f),
+            width    = readuinteger(f),
+            bearingX = readinteger(f),
+            bearingY = readinteger(f),
+            advance  = readuinteger(f),
+        }
+    end
+
+    function readers.cblc(f,fontdata,specification)
+        -- should we delay this ?
+        local ctdttableoffset = gotodatatable(f,fontdata,"cbdt",specification.glyphs)
+        if not ctdttableoffset then
+            return
+        end
+        local cblctableoffset = gotodatatable(f,fontdata,"cblc",specification.glyphs)
+        if cblctableoffset then
+            local majorversion  = readushort(f)
+            local minorversion  = readushort(f)
+            local nofsizetables = readulong(f)
+            local sizetables    = { }
+            local shapes        = { }
+            local subtables     = { }
+            for i=1,nofsizetables do
+                sizetables[i] = {
+                    subtables    = readulong(f),
+                    indexsize    = readulong(f),
+                    nofsubtables = readulong(f),
+                    colorref     = readulong(f),
+                    hormetrics   = getmetrics(f),
+                    vermetrics   = getmetrics(f),
+                    firstindex   = readushort(f),
+                    lastindex    = readushort(f),
+                    ppemx        = readbyte(f),
+                    ppemy        = readbyte(f),
+                    bitdepth     = readbyte(f),
+                    flags        = readbyte(f),
+                }
+            end
+            sort(sizetables,function(a,b)
+                if b.ppemx == a.ppemx then
+                    return b.bitdepth < a.bitdepth
+                else
+                    return b.ppemx < a.ppemx
+                end
+            end)
+            for i=1,nofsizetables do
+                local s = sizetables[i]
+                local d = false
+                for j=s.firstindex,s.lastindex do
+                    if not shapes[j] then
+                        shapes[j] = i
+                        d = true
+                    end
+                end
+                if d then
+                    s.used = true
+                end
+            end
+            for i=1,nofsizetables do
+                local s = sizetables[i]
+                if s.used then
+                    local offset = s.subtables
+                    setposition(f,cblctableoffset+offset)
+                    for j=1,s.nofsubtables do
+                        local firstindex  = readushort(f)
+                        local lastindex   = readushort(f)
+                        local tableoffset = readulong(f) + offset
+                        for k=firstindex,lastindex do
+                            if shapes[k] == i then
+                                local s = subtables[tableoffset]
+                                if not s then
+                                    s = {
+                                        firstindex = firstindex,
+                                        lastindex  = lastindex,
+                                    }
+                                    subtables[tableoffset] = s
+                                end
+                                shapes[k] = s
+                            end
+                        end
+                    end
+                end
+            end
+
+            -- there is no need to sort in string stream but we have a nicer trace
+            -- if needed
+
+            for offset, subtable in sortedhash(subtables) do
+                local tabletype  = readushort(f)
+                subtable.format  = readushort(f)
+                local baseoffset = readulong(f) + ctdttableoffset
+                local offsets    = { }
+                local metrics    = nil
+                if tabletype == 1 then
+                    -- we have the usual one more to get the size
+                    for i=subtable.firstindex,subtable.lastindex do
+                        offsets[i] = readulong(f) + baseoffset
+                    end
+                    skipbytes(f,4)
+                elseif tabletype == 2 then
+                    local size = readulong(f)
+                    local done = baseoffset
+                    metrics = getbigmetrics(f)
+                    for i=subtable.firstindex,subtable.lastindex do
+                        offsets[i] = done
+                        done = done + size
+                    end
+                elseif tabletype == 3 then
+                    -- we have the usual one more to get the size
+                    local n = subtable.lastindex - subtable.firstindex + 2
+                    for i=subtable.firstindex,subtable.lastindex do
+                        offsets[i] = readushort(f) + baseoffset
+                    end
+                    if math.odd(n) then
+                        skipbytes(f,4)
+                    else
+                        skipbytes(f,2)
+                    end
+                elseif tabletype == 4 then
+                    for i=1,readulong(f) do
+                        offsets[readushort(f)] = readushort(f) + baseoffset
+                    end
+                elseif tabletype == 5 then
+                    local size = readulong(f)
+                    local done = baseoffset
+                    metrics = getbigmetrics(f)
+                    local n = readulong(f)
+                    for i=1,n do
+                        offsets[readushort(f)] = done
+                        done = done + size
+                    end
+                    if math.odd(n) then
+                        skipbytes(f,2)
+                    end
+                else
+                    return -- unsupported format
+                end
+                subtable.offsets = offsets
+                subtable.metrics = metrics
+            end
+
+            -- we only support a few sensible types ... there are hardly any fonts so
+            -- why are there so many variants ... not the best spec
+
+            local default = { width = 0, height = 0 }
+            local glyphs  = fontdata.glyphs
+
+            for index, subtable in sortedhash(shapes) do
+                if type(subtable) == "table" then
+                    local data    = nil
+                    local metrics = default
+                    local format  = subtable.format
+                    local offset  = subtable.offsets[index]
+                    setposition(f,offset)
+                    if format == 17 then
+                        metrics = getsmallmetrics(f)
+                        data    = readstring(f,readulong(f))
+                    elseif format == 18 then
+                        metrics = getbigmetrics(f)
+                        data    = readstring(f,readulong(f))
+                    elseif format == 19 then
+                        metrics = subtable.metrics
+                        data    = readstring(f,readulong(f))
+                    else
+                        -- forget about it
+                    end
+                    local x = metrics.width
+                    local y = metrics.height
+                    shapes[index] = {
+                        -- maybe some metrics
+                        x    = x,
+                        y    = y,
+                        data = data,
+                    }
+                    -- I'll look into this in more details when needed
+                    -- as we can use the bearings to get better boxes.
+                    local glyph = glyphs[index]
+                    if not glyph.boundingbox then
+                        local width  = glyph.width
+                        local height = width * y/x
+                        glyph.boundingbox = { 0, 0, width, height }
+                    end
+
+                else
+                    shapes[index] = {
+                        x    = 0,
+                        y    = 0,
+                        data = "",
+                    }
+                end
+            end
+
+            fontdata.pngshapes = shapes -- we cheat
+        end
+    end
+
+    function readers.cbdt(f,fontdata,specification)
+     -- local tableoffset = gotodatatable(f,fontdata,"ctdt",specification.glyphs)
+     -- if tableoffset then
+     --     local majorversion = readushort(f)
+     --     local minorversion = readushort(f)
+     -- end
+    end
+
+    -- function readers.ebdt(f,fontdata,specification)
+    --     if specification.glyphs then
+    --     end
+    -- end
+
+    -- function readers.ebsc(f,fontdata,specification)
+    --     if specification.glyphs then
+    --     end
+    -- end
+
+    -- function readers.eblc(f,fontdata,specification)
+    --     if specification.glyphs then
+    --     end
+    -- end
+
+end
 
 -- + AVAR : optional
 -- + CFF2 : otf outlines

@@ -8,8 +8,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-loaders",
-    version       = "2.94",       --TAGVERSION
-    date          = "2018-11-18", --TAGDATE
+    version       = "2.95",       --TAGVERSION
+    date          = "2018-11-29", --TAGDATE
     description   = "luaotfload submodule / callback handling",
     license       = "GPL v2.0"
 }

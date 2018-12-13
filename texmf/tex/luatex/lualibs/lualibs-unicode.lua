@@ -24,7 +24,14 @@ if not modules then modules = { } end modules ['l-unicode'] = {
 -- used     : byte char gmatch len lower sub upper
 -- not used : dump find format gfind gsub match rep reverse
 
-utf = utf or (unicode and unicode.utf8) or { }
+-- utf  = utf or (unicode and unicode.utf8) or { }
+
+-- not supported:
+--
+-- dump, find, format, gfind, gmatch, gsub, lower, match, rep, reverse, upper
+
+utf     = utf or { }
+unicode = nil
 
 utf.characters = utf.characters or string.utfcharacters
 utf.values     = utf.values     or string.utfvalues
@@ -65,11 +72,9 @@ local p_utfbom        = patterns.utfbom
 local p_newline       = patterns.newline
 local p_whitespace    = patterns.whitespace
 
-if not unicode then
-
-    unicode = { utf = utf } -- for a while
-
-end
+-- if not unicode then
+--     unicode = { utf = utf } -- for a while
+-- end
 
 if not utf.char then
 
@@ -1310,7 +1315,7 @@ if bit32 then
     local extract = bit32.extract
     local char    = string.char
 
-    function unicode.toutf32string(n)
+    function utf.toutf32string(n)
         if n <= 0xFF then
             return
                 char(n) ..

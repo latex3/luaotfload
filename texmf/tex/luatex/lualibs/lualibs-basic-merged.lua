@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Wed Dec 12 23:45:37 2018
+-- merge date  : Thu Dec 13 18:59:40 2018
 
 do -- begin closure to overcome local limits and interference
 
@@ -871,7 +871,7 @@ function lpeg.counter(pattern,action)
     return function(str) n=0;lpegmatch(pattern,str);return n end
   end
 end
-utf=utf or (unicode and unicode.utf8) or {}
+utf=utf or {}
 local utfcharacters=utf and utf.characters or string.utfcharacters
 local utfgmatch=utf and utf.gmatch
 local utfchar=utf and utf.char
@@ -4558,7 +4558,8 @@ if not modules then modules={} end modules ['l-unicode']={
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"
 }
-utf=utf or (unicode and unicode.utf8) or {}
+utf=utf or {}
+unicode=nil
 utf.characters=utf.characters or string.utfcharacters
 utf.values=utf.values   or string.utfvalues
 local type=type
@@ -4581,9 +4582,6 @@ local p_utf8byte=patterns.utf8byte
 local p_utfbom=patterns.utfbom
 local p_newline=patterns.newline
 local p_whitespace=patterns.whitespace
-if not unicode then
-  unicode={ utf=utf } 
-end
 if not utf.char then
   utf.char=string.utfcharacter or (utf8 and utf8.char)
   if not utf.char then
@@ -5204,7 +5202,7 @@ end
 if bit32 then
   local extract=bit32.extract
   local char=string.char
-  function unicode.toutf32string(n)
+  function utf.toutf32string(n)
     if n<=0xFF then
       return
         char(n).."\000\000\000"

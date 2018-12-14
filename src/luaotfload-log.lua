@@ -6,7 +6,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-log",
-    version       = "2.97",       --TAGVERSION
+    version       = "2.9404",       --TAGVERSION
     date          = "2018-12-07", --TAGDATE
     description   = "luaotfload submodule / logging",
     license       = "GPL v2.0",

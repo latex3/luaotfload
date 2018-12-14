@@ -106,6 +106,9 @@ setmetatableindex(names,function(t,name)
     return v
 end)
 
+local getinfo = nil
+local sethook = nil
+
 local function hook(where)
     local f = getinfo(2,"nSl")
     if f then
@@ -237,9 +240,6 @@ function debugger.showstats(printer,threshold)
  -- table.save("luatex-profile.lua",names)
 end
 
-local getinfo = nil
-local sethook = nil
-
 local function getdebug()
     if sethook and getinfo then
         return
@@ -260,7 +260,6 @@ local function getdebug()
         sethook = nil
     end
 end
-
 
 function debugger.savestats(filename,threshold)
     local f = io.open(filename,'w')

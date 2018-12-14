@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Fri Dec 14 10:26:50 2018
+-- merge date  : Fri Dec 14 12:52:31 2018
 
 do -- begin closure to overcome local limits and interference
 
@@ -3287,6 +3287,8 @@ setmetatableindex(names,function(t,name)
   t[name]=v
   return v
 end)
+local getinfo=nil
+local sethook=nil
 local function hook(where)
   local f=getinfo(2,"nSl")
   if f then
@@ -3411,8 +3413,6 @@ function debugger.showstats(printer,threshold)
   printer(format("calls     : %i",calls))
   printer(format("overhead  : %f",seconds(overhead/1000)))
 end
-local getinfo=nil
-local sethook=nil
 local function getdebug()
   if sethook and getinfo then
     return

@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Thu Oct 18 23:57:30 2018
+-- merge date  : Fri Dec 14 12:52:31 2018
 
 do -- begin closure to overcome local limits and interference
 
@@ -871,6 +871,10 @@ function strings.newcollector()
         return str
       end
     end
+end
+local f_16_16=formatters["%0.5N"]
+function number.to16dot16(n)
+  return f_16_16(n/65536.0)
 end
 
 end -- closure
@@ -3203,8 +3207,6 @@ if not modules then modules={} end modules ['util-deb']={
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"
 }
-local debug=require "debug"
-local getinfo,sethook=debug.getinfo,debug.sethook
 local type,next,tostring,tonumber=type,next,tostring,tonumber
 local format,find,sub,gsub=string.format,string.find,string.sub,string.gsub
 local insert,remove,sort=table.insert,table.remove,table.sort
@@ -3285,6 +3287,8 @@ setmetatableindex(names,function(t,name)
   t[name]=v
   return v
 end)
+local getinfo=nil
+local sethook=nil
 local function hook(where)
   local f=getinfo(2,"nSl")
   if f then
@@ -3409,6 +3413,26 @@ function debugger.showstats(printer,threshold)
   printer(format("calls     : %i",calls))
   printer(format("overhead  : %f",seconds(overhead/1000)))
 end
+local function getdebug()
+  if sethook and getinfo then
+    return
+  end
+  if not debug then
+    local okay
+    okay,debug=pcall(require,"debug")
+  end
+  if type(debug)~="table" then
+    return
+  end
+  getinfo=debug.getinfo
+  sethook=debug.sethook
+  if type(getinfo)~="function" then
+    getinfo=nil
+  end
+  if type(sethook)~="function" then
+    sethook=nil
+  end
+end
 function debugger.savestats(filename,threshold)
   local f=io.open(filename,'w')
   if f then
@@ -3417,7 +3441,8 @@ function debugger.savestats(filename,threshold)
   end
 end
 function debugger.enable()
-  if nesting==0 then
+  getdebug()
+  if sethook and getinfo and nesting==0 then
     running=true
     if initialize then
       initialize()
@@ -3438,23 +3463,26 @@ function debugger.disable()
   if nesting>0 then
     nesting=nesting-1
   end
-  if nesting==0 then
+  if sethook and getinfo and nesting==0 then
     sethook()
   end
 end
 local function showtraceback(rep) 
-  local level=2 
-  local reporter=rep or report
-  while true do
-    local info=getinfo(level,"Sl")
-    if not info then
-      break
-    elseif info.what=="C" then
-      reporter("%2i : %s",level-1,"C function")
-    else
-      reporter("%2i : %s : %s",level-1,info.short_src,info.currentline)
+  getdebug()
+  if getinfo then
+    local level=2 
+    local reporter=rep or report
+    while true do
+      local info=getinfo(level,"Sl")
+      if not info then
+        break
+      elseif info.what=="C" then
+        reporter("%2i : %s",level-1,"C function")
+      else
+        reporter("%2i : %s : %s",level-1,info.short_src,info.currentline)
+      end
+      level=level+1
     end
-    level=level+1
   end
 end
 debugger.showtraceback=showtraceback

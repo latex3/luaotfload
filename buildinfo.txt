@@ -9,11 +9,13 @@
 
 2. Check for changes
 
--->  texlua scripts/mkimport news "" %CONTEXTPATH%
+cmd -->  texlua scripts/mkimport news "" %CONTEXTPATH%
+bash-->  texlua scripts/mkimport news "" $CONTEXTPATH
 
 3. Import changes
 
--->   texlua scripts/mkimport import "" %CONTEXTPATH%
+cmd -->   texlua scripts/mkimport import "" %CONTEXTPATH%
+bash-->   texlua scripts/mkimport import "" $CONTEXTPATH
 
 This also imports the merged orginal file and saves it as
 fontloader-reference.lua in src/fontloader/runtime
@@ -26,7 +28,8 @@ this create a new luaotfload-character.lua.
 requirements char-def.lua and char-ini.lua
 the file is created in src/auto by default!
 
--->   texlua scripts/mkcharacters %CONTEXTPATH%/tex/context/base/mkiv/
+cmd -->   texlua scripts/mkcharacters %CONTEXTPATH%/tex/context/base/mkiv/
+bash-->   texlua scripts/mkcharacters $CONTEXTPATH/tex/context/base/mkiv/
 
 5. Update glyphlist
 

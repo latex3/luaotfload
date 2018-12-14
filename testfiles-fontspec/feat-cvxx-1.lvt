@@ -5,8 +5,8 @@
 
 \begin{document}
 
-\fontspec{EBGaramond12-Italic.otf}
- 
+\fontspec{EBGaramond-Italic.otf}
+
 very \CURRNFSS
 {\addfontfeature{CharacterVariant=5}.  very\CURRNFSS}
 {\addfontfeature{CharacterVariant=5:0} very\CURRNFSS}
@@ -14,4 +14,4 @@ very \CURRNFSS
 {\addfontfeature{CharacterVariant=5:2} very\CURRNFSS}
 {\addfontfeature{CharacterVariant=5:3} very\CURRNFSS}
 
-\end{document}
+\end{document} 

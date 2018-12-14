@@ -52,14 +52,14 @@ local report_otf          = logs.reporter("fonts","otf loading")
 local fonts               = fonts
 local otf                 = fonts.handlers.otf
 
-otf.version               = 3.106 -- beware: also sync font-mis.lua and in mtx-fonts
-otf.cache                 = containers.define("fonts", "otl",  otf.version, true)
-otf.svgcache              = containers.define("fonts", "svg",  otf.version, true)
-otf.sbixcache             = containers.define("fonts", "sbix", otf.version, true)
-otf.pdfcache              = containers.define("fonts", "pdf",  otf.version, true)
+otf.version               = 3.107 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.cache                 = containers.define("fonts", "otl", otf.version, true)
+otf.svgcache              = containers.define("fonts", "svg", otf.version, true)
+otf.pngcache              = containers.define("fonts", "png", otf.version, true)
+otf.pdfcache              = containers.define("fonts", "pdf", otf.version, true)
 
 otf.svgenabled            = false
-otf.sbixenabled           = false
+otf.pngenabled            = false
 
 local otfreaders          = otf.readers
 
@@ -152,17 +152,17 @@ function otf.load(filename,sub,instance)
         report_otf("forced reload of %a due to hard coded flag",filename)
         reload = true
     end
-     if reload then
+    if reload then
         report_otf("loading %a, hash %a",filename,hash)
         --
         starttiming(otfreaders,true)
         data = otfreaders.loadfont(filename,sub or 1,instance) -- we can pass the number instead (if it comes from a name search)
         if data then
             -- todo: make this a plugin
-            local used       = checkmemory()
-            local resources  = data.resources
-            local svgshapes  = resources.svgshapes
-            local sbixshapes = resources.sbixshapes
+            local used      = checkmemory()
+            local resources = data.resources
+            local svgshapes = resources.svgshapes
+            local pngshapes = resources.pngshapes
             if cleanup == 0 then
                 checkmemory(used,threshold,tracememory)
             end
@@ -186,16 +186,16 @@ function otf.load(filename,sub,instance)
                     checkmemory(used,threshold,tracememory)
                 end
             end
-            if sbixshapes then
-                resources.sbixshapes = nil
-                if otf.sbixenabled then
+            if pngshapes then
+                resources.pngshapes = nil
+                if otf.pngenabled then
                     local timestamp = os.date()
                     -- work in progress ... a bit boring to do
-                    containers.write(otf.sbixcache,hash, {
-                        sbixshapes = sbixshapes,
-                        timestamp  = timestamp,
+                    containers.write(otf.pngcache,hash, {
+                        pngshapes = pngshapes,
+                        timestamp = timestamp,
                     })
-                    data.properties.sbix = {
+                    data.properties.png = {
                         hash      = hash,
                         timestamp = timestamp,
                     }

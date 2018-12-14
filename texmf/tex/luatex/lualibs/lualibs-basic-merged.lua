@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Thu Oct 18 23:57:42 2018
+-- merge date  : Fri Dec 14 12:52:37 2018
 
 do -- begin closure to overcome local limits and interference
 
@@ -871,7 +871,7 @@ function lpeg.counter(pattern,action)
     return function(str) n=0;lpegmatch(pattern,str);return n end
   end
 end
-utf=utf or (unicode and unicode.utf8) or {}
+utf=utf or {}
 local utfcharacters=utf and utf.characters or string.utfcharacters
 local utfgmatch=utf and utf.gmatch
 local utfchar=utf and utf.char
@@ -1424,7 +1424,6 @@ local table,string=table,string
 local concat,sort,insert,remove=table.concat,table.sort,table.insert,table.remove
 local format,lower,dump=string.format,string.lower,string.dump
 local getmetatable,setmetatable=getmetatable,setmetatable
-local getinfo=debug.getinfo
 local lpegmatch,patterns=lpeg.match,lpeg.patterns
 local floor=math.floor
 local stripper=patterns.stripper
@@ -1986,20 +1985,23 @@ local function do_serialize(root,name,depth,level,indexed)
         end
       elseif tv=="function" then
         if functions then
-          local f=getinfo(v).what=="C" and dump(dummy) or dump(v)
-          if tk=="number" then
-            if hexify then
-              handle(format("%s [0x%X]=load(%q),",depth,k,f))
+          local getinfo=debug and debug.getinfo
+          if getinfo then
+            local f=getinfo(v).what=="C" and dump(dummy) or dump(v)
+            if tk=="number" then
+              if hexify then
+                handle(format("%s [0x%X]=load(%q),",depth,k,f))
+              else
+                handle(format("%s [%s]=load(%q),",depth,k,f))
+              end
+            elseif tk=="boolean" then
+              handle(format("%s [%s]=load(%q),",depth,k and "true" or "false",f))
+            elseif tk~="string" then
+            elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
+              handle(format("%s %s=load(%q),",depth,k,f))
             else
-              handle(format("%s [%s]=load(%q),",depth,k,f))
+              handle(format("%s [%q]=load(%q),",depth,k,f))
             end
-          elseif tk=="boolean" then
-            handle(format("%s [%s]=load(%q),",depth,k and "true" or "false",f))
-          elseif tk~="string" then
-          elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
-            handle(format("%s %s=load(%q),",depth,k,f))
-          else
-            handle(format("%s [%q]=load(%q),",depth,k,f))
           end
         end
       else
@@ -2590,11 +2592,14 @@ if bit32 then
     "0","0","0","0","0","0","0","0",
     "0","0","0","0","0","0","0","0",
   }
-  function number.tobitstring(b,m)
-    local n=32
-    for i=0,31 do
+  function number.tobitstring(b,m,w)
+    if not w then
+      w=32
+    end
+    local n=w
+    for i=0,w-1 do
       local v=bextract(b,i)
-      local k=32-i
+      local k=w-i
       if v==1 then
         n=k
         t[k]="1"
@@ -2602,12 +2607,14 @@ if bit32 then
         t[k]="0"
       end
     end
-    if m then
+    if w then
+      return concat(t,"",1,w)
+    elseif m then
       m=33-m*8
       if m<1 then
         m=1
       end
-      return concat(t,"",m)
+      return concat(t,"",1,m)
     elseif n<8 then
       return concat(t)
     elseif n<16 then
@@ -4551,7 +4558,7 @@ if not modules then modules={} end modules ['l-unicode']={
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"
 }
-utf=utf or (unicode and unicode.utf8) or {}
+utf=utf or {}
 utf.characters=utf.characters or string.utfcharacters
 utf.values=utf.values   or string.utfvalues
 local type=type
@@ -4574,9 +4581,6 @@ local p_utf8byte=patterns.utf8byte
 local p_utfbom=patterns.utfbom
 local p_newline=patterns.newline
 local p_whitespace=patterns.whitespace
-if not unicode then
-  unicode={ utf=utf } 
-end
 if not utf.char then
   utf.char=string.utfcharacter or (utf8 and utf8.char)
   if not utf.char then
@@ -5197,7 +5201,7 @@ end
 if bit32 then
   local extract=bit32.extract
   local char=string.char
-  function unicode.toutf32string(n)
+  function utf.toutf32string(n)
     if n<=0xFF then
       return
         char(n).."\000\000\000"

@@ -1,6 +1,6 @@
 --[[info-----------------------------------------------------------------------
   Luaotfload fontloader package
-  build 2018-10-28 00:14:04
+  build 2018-12-14 13:10:42
 -------------------------------------------------------------------------------
 
   © 2018 PRAGMA ADE / ConTeXt Development Team
@@ -61,7 +61,7 @@
 --info]]-----------------------------------------------------------------------
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “data-con” d8982c834ed9acc6193eee23067b9d5d] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “data-con” 7ce546725b1550f655c78ac9d69419ca] ---
 
 if not modules then modules={} end modules ['data-con']={
   version=1.100,
@@ -173,10 +173,10 @@ function containers.cleanname(name)
   return (gsub(lower(name),"[^%w\128-\255]+","-")) 
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “data-con”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “data-con”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “basics-nod” 78f56219685f3145b9393c2b688aad94] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “basics-nod” f899f78e915f8c428df33bd62d5520dc] ---
 
 if not modules then modules={} end modules ['luatex-fonts-nod']={
   version=1.001,
@@ -589,10 +589,10 @@ do
   }
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “basics-nod”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “basics-nod”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ini” dd3ff5febc73c79b23e16d713a1282fb] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ini” 4299a02110bbd7c0d27e131235c5319d] ---
 
 if not modules then modules={} end modules ['font-ini']={
   version=1.001,
@@ -630,10 +630,10 @@ fonts.privateoffsets={
   keepnames=false,
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ini”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ini”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-mis” 17e967c9ec4d001deefd43ddf25e98f7] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-mis” bc9eb43c27f63ce9d0fff67e104fe1c6] ---
 
 if not modules then modules={} end modules ['luatex-font-mis']={
   version=1.001,
@@ -665,10 +665,10 @@ function font.each()
   return table.sortedhash(fonts.hashes.identifiers)
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-mis”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-mis”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-con” f30ef604ea0eece92e00cad7c7b56580] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-con” 6308f40e1b4fecfbe05b01c571d46936] ---
 
 if not modules then modules={} end modules ['font-con']={
   version=1.001,
@@ -1387,9 +1387,9 @@ function constructors.scale(tfmdata,specification)
   constructors.aftercopyingcharacters(target,tfmdata)
   constructors.trytosharefont(target,tfmdata)
   local vfonts=target.fonts
-if isvirtual or target.type=="virtual" or properties.virtualized then
+  if isvirtual or target.type=="virtual" or properties.virtualized then
     properties.virtualized=true
-target.type="virtual"
+    target.type="virtual"
     if not vfonts or #vfonts==0 then
       target.fonts={ { id=0 } }
     end
@@ -1469,23 +1469,20 @@ function constructors.finalize(tfmdata)
   if not properties.virtualized then
     properties.virtualized=tfmdata.type=="virtual"
   end
-  if not tfmdata.properties then
-    tfmdata.properties={
-      fontname=tfmdata.fontname,
-      filename=tfmdata.filename,
-      fullname=tfmdata.fullname,
-      name=tfmdata.name,
-      psname=tfmdata.psname,
-      encodingbytes=tfmdata.encodingbytes or 1,
-      embedding=tfmdata.embedding   or "subset",
-      tounicode=tfmdata.tounicode   or 1,
-      cidinfo=tfmdata.cidinfo    or nil,
-      format=tfmdata.format    or "type1",
-      direction=tfmdata.direction   or 0,
-      writingmode=tfmdata.writingmode  or "horizontal",
-      identity=tfmdata.identity   or "horizontal",
-    }
-  end
+  properties.fontname=tfmdata.fontname
+  properties.filename=tfmdata.filename
+  properties.fullname=tfmdata.fullname
+  properties.name=tfmdata.name
+  properties.psname=tfmdata.psname
+  properties.encodingbytes=tfmdata.encodingbytes or 1
+  properties.embedding=tfmdata.embedding   or "subset"
+  properties.tounicode=tfmdata.tounicode   or 1
+  properties.cidinfo=tfmdata.cidinfo    or nil
+  properties.format=tfmdata.format    or "type1"
+  properties.direction=tfmdata.direction   or 0
+  properties.writingmode=tfmdata.writingmode  or "horizontal"
+  properties.identity=tfmdata.identity   or "horizontal"
+  properties.usedbitmap=tfmdata.usedbitmap
   if not tfmdata.resources then
     tfmdata.resources={}
   end
@@ -2010,10 +2007,10 @@ function constructors.addcoreunicodes(unicodes)
   return unicodes
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-con”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-con”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-enc” 5ff4ca50493d7c4ecea0e15c203099f0] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-enc” 3e71a54297e8f85a1ac438bb0f20dd79] ---
 
 if not modules then modules={} end modules ['luatex-font-enc']={
   version=1.001,
@@ -2082,10 +2079,10 @@ function encodings.load(filename)
   return containers.write(encodings.cache,name,data)
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-enc”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-enc”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-cid” 22b0367742fb253deef84ef7ccf5e8de] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-cid” 4d87988efa86020a14708ee03c23415f] ---
 
 if not modules then modules={} end modules ['font-cid']={
   version=1.001,
@@ -2236,10 +2233,10 @@ function cid.getmap(specification)
   return found
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-cid”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-cid”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-map” 210b9288eef0df624da638b65d27291b] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-map” 210b9288eef0df624da638b65d27291b] ---
 
 if not modules then modules={} end modules ['font-map']={
   version=1.001,
@@ -2626,10 +2623,10 @@ function mappings.addtounicode(data,filename,checklookups,forceligatures)
   end
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-map”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-map”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-vfc” 237aff1862009b7850653c2098473bd4] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-vfc” 3182c1c98f9de2e4813f23be365578b7] ---
 
 if not modules then modules={} end modules ['font-vfc']={
   version=1.001,
@@ -2705,10 +2702,10 @@ helpers.commands=utilities.storage.allocate {
   dummy=dummy,
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-vfc”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-vfc”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-otr” 4a1dae571a43d7cb8afce7e906df89c6] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-otr” 2c35abf43f9a64bdd99240593d432d8a] ---
 
 if not modules then modules={} end modules ['font-otr']={
   version=1.001,
@@ -2719,6 +2716,7 @@ if not modules then modules={} end modules ['font-otr']={
 }
 local next,type,tonumber=next,type,tonumber
 local byte,lower,char,gsub=string.byte,string.lower,string.char,string.gsub
+local fullstrip=string.fullstrip
 local floor,round=math.floor,math.round
 local P,R,S,C,Cs,Cc,Ct,Carg,Cmt=lpeg.P,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Cc,lpeg.Ct,lpeg.Carg,lpeg.Cmt
 local lpegmatch=lpeg.match
@@ -2995,19 +2993,29 @@ local helpers={}
 readers.helpers=helpers
 local function gotodatatable(f,fontdata,tag,criterium)
   if criterium and f then
-    local datatable=fontdata.tables[tag]
-    if datatable then
-      local tableoffset=datatable.offset
-      setposition(f,tableoffset)
-      return tableoffset
+    local tables=fontdata.tables
+    if tables then
+      local datatable=tables[tag]
+      if datatable then
+        local tableoffset=datatable.offset
+        setposition(f,tableoffset)
+        return tableoffset
+      end
+    else
+      report("no tables")
     end
   end
 end
 local function reportskippedtable(f,fontdata,tag,criterium)
   if criterium and f then
-    local datatable=fontdata.tables[tag]
-    if datatable then
-      report("loading of table %a skipped",tag)
+    local tables=fontdata.tables
+    if tables then
+      local datatable=tables[tag]
+      if datatable then
+        report("loading of table %a skipped",tag)
+      end
+    else
+      report("no tables")
     end
   end
 end
@@ -3030,6 +3038,15 @@ local platformnames={
   typographicfamily=true,
   typographicsubfamily=true,
   compatiblefullname=true,
+}
+local platformextras={
+  uniqueid=true,
+  version=true,
+  copyright=true,
+  license=true,
+  licenseurl=true,
+  manufacturer=true,
+  vendorurl=true,
 }
 function readers.name(f,fontdata,specification)
   local tableoffset=gotodatatable(f,fontdata,"name",true)
@@ -3083,6 +3100,17 @@ function readers.name(f,fontdata,specification)
     local names={}
     local done={}
     local extras={}
+    local function decoded(platform,encoding,content)
+      local decoder=decoders[platform]
+      if decoder then
+        decoder=decoder[encoding]
+      end
+      if decoder then
+        return decoder(content)
+      else
+        return content
+      end
+    end
     local function filter(platform,e,l)
       local namelist=namelists[platform]
       for i=1,#namelist do
@@ -3094,14 +3122,7 @@ function readers.name(f,fontdata,specification)
           local language=name.language
           if (not e or encoding==e) and (not l or language==l) then
             setposition(f,name.offset)
-            local content=readstring(f,name.length)
-            local decoder=decoders[platform]
-            if decoder then
-              decoder=decoder[encoding]
-            end
-            if decoder then
-              content=decoder(content)
-            end
+            local content=decoded(platform,encoding,readstring(f,name.length))
             if nametag then
               names[nametag]={
                 content=content,
@@ -3125,22 +3146,15 @@ function readers.name(f,fontdata,specification)
     fontdata.extras=extras
     if specification.platformnames then
       local collected={}
+      local platformextras=specification.platformextras and platformextras
       for platform,namelist in next,namelists do
         local filtered=false
         for i=1,#namelist do
           local entry=namelist[i]
           local name=entry.name
-          if platformnames[name] then
+          if platformnames[name] or (platformextras and platformextras[name]) then
             setposition(f,entry.offset)
-            local content=readstring(f,entry.length)
-            local encoding=entry.encoding
-            local decoder=decoders[platform]
-            if decoder then
-              decoder=decoder[encoding]
-            end
-            if decoder then
-              content=decoder(content)
-            end
+            local content=decoded(platform,entry.encoding,readstring(f,entry.length))
             if filtered then
               filtered[name]=content
             else
@@ -3205,7 +3219,7 @@ readers["os/2"]=function(f,fontdata)
     if version>=1 then
       windowsmetrics.codepageranges={ readulong(f),readulong(f) }
     end
-    if version>=3 then
+    if version>=2 then
       windowsmetrics.xheight=readshort(f)
       windowsmetrics.capheight=readshort(f)
       windowsmetrics.defaultchar=readushort(f)
@@ -3223,10 +3237,13 @@ end
 readers.head=function(f,fontdata)
   local tableoffset=gotodatatable(f,fontdata,"head",true)
   if tableoffset then
+    local version=readulong(f)
+    local fontversion=readulong(f)
     local fontheader={
-      version=readfixed(f),
-      revision=readfixed(f),
-      checksum=readulong(f),
+      version=version,
+      fontversion=number.to16dot16(fontversion),
+      fontversionnumber=fontversion,
+      checksum=readushort(f)*0x10000+readushort(f),
       magic=readulong(f),
       flags=readushort(f),
       units=readushort(f),
@@ -3252,7 +3269,7 @@ readers.hhea=function(f,fontdata,specification)
   local tableoffset=gotodatatable(f,fontdata,"hhea",specification.details)
   if tableoffset then
     fontdata.horizontalheader={
-      version=readfixed(f),
+      version=readulong(f),
       ascender=readfword(f),
       descender=readfword(f),
       linegap=readfword(f),
@@ -3280,7 +3297,7 @@ readers.vhea=function(f,fontdata,specification)
   local tableoffset=gotodatatable(f,fontdata,"vhea",specification.details)
   if tableoffset then
     fontdata.verticalheader={
-      version=readfixed(f),
+      version=readulong(f),
       ascender=readfword(f),
       descender=readfword(f),
       linegap=readfword(f),
@@ -3307,15 +3324,15 @@ end
 readers.maxp=function(f,fontdata,specification)
   local tableoffset=gotodatatable(f,fontdata,"maxp",specification.details)
   if tableoffset then
-    local version=readfixed(f)
+    local version=readulong(f)
     local nofglyphs=readushort(f)
     fontdata.nofglyphs=nofglyphs
-    if version==0.5 then
+    if version==0x00005000 then
       fontdata.maximumprofile={
         version=version,
         nofglyphs=nofglyphs,
       }
-    elseif version==1.0 then
+    elseif version==0x00010000 then
       fontdata.maximumprofile={
         version=version,
         nofglyphs=nofglyphs,
@@ -3352,7 +3369,7 @@ readers.hmtx=function(f,fontdata,specification)
     local leftsidebearing=0
     for i=0,nofmetrics-1 do
       local glyph=glyphs[i]
-      width=readshort(f)
+      width=readshort(f) 
       leftsidebearing=readshort(f)
       if width~=0 then
         glyph.width=width
@@ -3398,7 +3415,7 @@ end
 readers.post=function(f,fontdata,specification)
   local tableoffset=gotodatatable(f,fontdata,"post",true)
   if tableoffset then
-    local version=readfixed(f)
+    local version=readulong(f)
     fontdata.postscript={
       version=version,
       italicangle=round(1000*readfixed(f))/1000,
@@ -3411,11 +3428,11 @@ readers.post=function(f,fontdata,specification)
       maxmemtype1=readulong(f),
     }
     if not specification.glyphs then
-    elseif version==1.0 then
+    elseif version==0x00010000 then
       for index=0,#standardromanencoding do
         glyphs[index].name=standardromanencoding[index]
       end
-    elseif version==2.0 then
+    elseif version==0x00020000 then
       local glyphs=fontdata.glyphs
       local nofglyphs=readushort(f)
       local indices={}
@@ -3446,8 +3463,6 @@ readers.post=function(f,fontdata,specification)
           end
         end
       end
-    elseif version==2.5 then
-    elseif version==3.0 then
     end
   else
     fontdata.postscript={}
@@ -4004,14 +4019,16 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo,inst
       designsize=fontdata.designsize,
       minsize=fontdata.minsize,
       maxsize=fontdata.maxsize,
+      boundingbox=fontheader and { fontheader.xmin or 0,fontheader.ymin or 0,fontheader.xmax or 0,fontheader.ymax or 0 } or nil,
       monospaced=(tonumber(postscript.monospaced or 0)>0) or metrics.panosewidth=="monospaced",
       averagewidth=metrics.averagewidth,
       xheight=metrics.xheight,
-      capheight=metrics.capheight,
+      capheight=metrics.capheight or fontdata.maxy,
       ascender=metrics.typoascender,
       descender=metrics.typodescender,
       platformnames=platformnames or nil,
       instancenames=instancenames or nil,
+      tableoffsets=fontdata.tableoffsets,
     }
     if metricstoo then
       local keys={
@@ -4069,7 +4086,7 @@ local function loadtables(f,specification,offset)
   }
   for i=1,fontdata.noftables do
     local tag=lower(stripstring(readstring(f,4)))
-    local checksum=readulong(f) 
+    local checksum=readushort(f)*0x10000+readushort(f)
     local offset=readulong(f)
     local length=readulong(f)
     if offset+length>filesize then
@@ -4087,7 +4104,7 @@ local function loadtables(f,specification,offset)
   else
     fontdata.format="truetype"
   end
-  return fontdata
+  return fontdata,tables
 end
 local function prepareglyps(fontdata)
   local glyphs=setmetatableindex(function(t,k)
@@ -4108,7 +4125,7 @@ local function readtable(tag,f,fontdata,specification,...)
 end
 local variablefonts_supported=(context and true) or (logs and logs.application and true) or false
 local function readdata(f,offset,specification)
-  local fontdata=loadtables(f,specification,offset)
+  local fontdata,tables=loadtables(f,specification,offset)
   if specification.glyphs then
     prepareglyps(fontdata)
   end
@@ -4218,9 +4235,18 @@ local function readdata(f,offset,specification)
   readtable("gpos",f,fontdata,specification)
   readtable("math",f,fontdata,specification)
   fontdata.locations=nil
-  fontdata.tables=nil
   fontdata.cidmaps=nil
   fontdata.dictionaries=nil
+  if specification.tableoffsets then
+    fontdata.tableoffsets=tables
+    setmetatableindex(tables,{
+      version=fontdata.version,
+      noftables=fontdata.noftables,
+      searchrange=fontdata.searchrange,
+      entryselector=fontdata.entryselector,
+      rangeshift=fontdata.rangeshift,
+    })
+  end
   return fontdata
 end
 local function loadfontdata(specification)
@@ -4324,7 +4350,7 @@ local function loadfont(specification,n,instance)
     specification.instance=specification.instance or instance
   end
   local function message(str)
-    report("fatal error in file %a: %s\n%s",specification.filename,str,debug.traceback())
+    report("fatal error in file %a: %s\n%s",specification.filename,str,debug and debug.traceback())
   end
   local ok,result=xpcall(loadfontdata,message,specification)
   if ok then
@@ -4346,12 +4372,25 @@ function readers.loadshapes(filename,n,instance,streams)
       v.index=nil
       v.math=nil
     end
+    local names=fontdata.names
+    if names then
+      for k,v in next,names do
+        names[k]=fullstrip(v.content)
+      end
+    end
   end
   return fontdata and {
     filename=filename,
     format=fontdata.format,
     glyphs=fontdata.glyphs,
     units=fontdata.fontheader.units,
+    cffinfo=fontdata.cffinfo,
+    fontheader=fontdata.fontheader,
+    horizontalheader=fontdata.horizontalheader,
+    verticalheader=fontdata.verticalheader,
+    maximumprofile=fontdata.maximumprofile,
+    names=fontdata.names,
+    postscript=fontdata.postscript,
   } or {
     filename=filename,
     format="unknown",
@@ -4403,7 +4442,7 @@ function readers.loadfont(filename,n,instance)
         mathconstants=fontdata.mathconstants,
         colorpalettes=fontdata.colorpalettes,
         svgshapes=fontdata.svgshapes,
-        sbixshapes=fontdata.sbixshapes,
+        pngshapes=fontdata.pngshapes,
         variabledata=fontdata.variabledata,
         foundtables=fontdata.foundtables,
       },
@@ -4415,10 +4454,12 @@ function readers.getinfo(filename,specification)
   local platformnames=false
   local rawfamilynames=false
   local instancenames=true
+  local tableoffsets=false
   if type(specification)=="table" then
     subfont=tonumber(specification.subfont)
     platformnames=specification.platformnames
     rawfamilynames=specification.rawfamilynames
+    tableoffsets=specification.tableoffsets
   else
     subfont=tonumber(specification)
   end
@@ -4427,6 +4468,7 @@ function readers.getinfo(filename,specification)
     details=true,
     platformnames=platformnames,
     instancenames=true,
+    tableoffsets=tableoffsets,
   }
   if fontdata then
     local subfonts=fontdata.subfonts
@@ -4486,10 +4528,10 @@ function readers.extend(fontdata)
   end
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-otr”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-otr”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-oti” 309a75f9c14b77d87e94eba827dc4e71] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-oti” dbae7722baae24d917a17176553825cf] ---
 
 if not modules then modules={} end modules ['font-oti']={
   version=1.001,
@@ -4632,10 +4674,10 @@ function otffeatures.checkeddefaultlanguage(featuretype,autolanguage,languages)
   end
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-oti”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-oti”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ott” b20ddcf6360a2e35e79b7bdad0289a19] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ott” 3791be083c2eccf366792dc84baee67a] ---
 
 if not modules then modules={} end modules ["font-ott"]={
   version=1.001,
@@ -5685,10 +5727,10 @@ function otffeatures.normalize(features)
   end
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ott”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ott”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-cff” 98e33e8b6de9990678768744247634d0] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-cff” fda3887cbaad0b82d06d3cbffdfff560] ---
 
 if not modules then modules={} end modules ['font-cff']={
   version=1.001,
@@ -5697,7 +5739,7 @@ if not modules then modules={} end modules ['font-cff']={
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"
 }
-local next,type,tonumber=next,type,tonumber
+local next,type,tonumber,rawget=next,type,tonumber,rawget
 local byte,char,gmatch=string.byte,string.char,string.gmatch
 local concat,remove,unpack=table.concat,table.remove,table.unpack
 local floor,abs,round,ceil,min,max=math.floor,math.abs,math.round,math.ceil,math.min,math.max
@@ -5705,6 +5747,8 @@ local P,C,R,S,C,Cs,Ct=lpeg.P,lpeg.C,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Ct
 local lpegmatch=lpeg.match
 local formatters=string.formatters
 local bytetable=string.bytetable
+local idiv=number.idiv
+local rshift,band,extract=bit32.rshift,bit32.band,bit32.extract
 local readers=fonts.handlers.otf.readers
 local streamreader=readers.streamreader
 local readstring=streamreader.readstring
@@ -5899,8 +5943,25 @@ do
     end+P("\05")/function()
       result.fontbbox={ unpack(stack,1,4) }
       top=0
-    end
-+P("\13")/function()
+    end+P("\06")/function()
+      result.bluevalues={ unpack(stack,1,top) }
+      top=0
+    end+P("\07")/function()
+      result.otherblues={ unpack(stack,1,top) }
+      top=0
+    end+P("\08")/function()
+      result.familyblues={ unpack(stack,1,top) }
+      top=0
+    end+P("\09")/function()
+      result.familyotherblues={ unpack(stack,1,top) }
+      top=0
+    end+P("\10")/function()
+      result.strhw=stack[top]
+      top=0
+    end+P("\11")/function()
+      result.strvw=stack[top]
+      top=0
+    end+P("\13")/function()
       result.uniqueid=stack[top]
       top=0
     end+P("\14")/function()
@@ -5966,6 +6027,21 @@ do
     end+P("\08")/function()
       result.strokewidth=stack[top]
       top=0
+    end+P("\09")/function()
+      result.bluescale=stack[top]
+      top=0
+    end+P("\10")/function()
+      result.bluesnap=stack[top]
+      top=0
+    end+P("\11")/function()
+      result.bluefuzz=stack[top]
+      top=0
+    end+P("\12")/function()
+      result.stemsnaph={ unpack(stack,1,top) }
+      top=0
+    end+P("\13")/function()
+      result.stemsnapv={ unpack(stack,1,top) }
+      top=0
     end+P("\20")/function()
       result.syntheticbase=stack[top]
       top=0
@@ -6009,24 +6085,24 @@ do
       top=0
     end
   )
-  local p_last=P("\x0F")/"0"+P("\x1F")/"1"+P("\x2F")/"2"+P("\x3F")/"3"+P("\x4F")/"4"+P("\x5F")/"5"+P("\x6F")/"6"+P("\x7F")/"7"+P("\x8F")/"8"+P("\x9F")/"9"+P("\xAF")/""+P("\xBF")/""+P("\xCF")/""+P("\xDF")/""+P("\xEF")/""+R("\xF0\xFF")/""
   local remap={
     ["\x00"]="00",["\x01"]="01",["\x02"]="02",["\x03"]="03",["\x04"]="04",["\x05"]="05",["\x06"]="06",["\x07"]="07",["\x08"]="08",["\x09"]="09",["\x0A"]="0.",["\x0B"]="0E",["\x0C"]="0E-",["\x0D"]="0",["\x0E"]="0-",["\x0F"]="0",
-    ["\x10"]="10",["\x11"]="11",["\x12"]="12",["\x13"]="13",["\x14"]="14",["\x15"]="15",["\x16"]="16",["\x17"]="17",["\x18"]="18",["\x19"]="19",["\x1A"]="0.",["\x1B"]="0E",["\x1C"]="0E-",["\x1D"]="0",["\x1E"]="0-",["\x1F"]="0",
-    ["\x20"]="20",["\x21"]="21",["\x22"]="22",["\x23"]="23",["\x24"]="24",["\x25"]="25",["\x26"]="26",["\x27"]="27",["\x28"]="28",["\x29"]="29",["\x2A"]="0.",["\x2B"]="0E",["\x2C"]="0E-",["\x2D"]="0",["\x2E"]="0-",["\x2F"]="0",
-    ["\x30"]="30",["\x31"]="31",["\x32"]="32",["\x33"]="33",["\x34"]="34",["\x35"]="35",["\x36"]="36",["\x37"]="37",["\x38"]="38",["\x39"]="39",["\x3A"]="0.",["\x3B"]="0E",["\x3C"]="0E-",["\x3D"]="0",["\x3E"]="0-",["\x3F"]="0",
-    ["\x40"]="40",["\x41"]="41",["\x42"]="42",["\x43"]="43",["\x44"]="44",["\x45"]="45",["\x46"]="46",["\x47"]="47",["\x48"]="48",["\x49"]="49",["\x4A"]="0.",["\x4B"]="0E",["\x4C"]="0E-",["\x4D"]="0",["\x4E"]="0-",["\x4F"]="0",
-    ["\x50"]="50",["\x51"]="51",["\x52"]="52",["\x53"]="53",["\x54"]="54",["\x55"]="55",["\x56"]="56",["\x57"]="57",["\x58"]="58",["\x59"]="59",["\x5A"]="0.",["\x5B"]="0E",["\x5C"]="0E-",["\x5D"]="0",["\x5E"]="0-",["\x5F"]="0",
-    ["\x60"]="60",["\x61"]="61",["\x62"]="62",["\x63"]="63",["\x64"]="64",["\x65"]="65",["\x66"]="66",["\x67"]="67",["\x68"]="68",["\x69"]="69",["\x6A"]="0.",["\x6B"]="0E",["\x6C"]="0E-",["\x6D"]="0",["\x6E"]="0-",["\x6F"]="0",
-    ["\x70"]="70",["\x71"]="71",["\x72"]="72",["\x73"]="73",["\x74"]="74",["\x75"]="75",["\x76"]="76",["\x77"]="77",["\x78"]="78",["\x79"]="79",["\x7A"]="0.",["\x7B"]="0E",["\x7C"]="0E-",["\x7D"]="0",["\x7E"]="0-",["\x7F"]="0",
-    ["\x80"]="80",["\x81"]="81",["\x82"]="82",["\x83"]="83",["\x84"]="84",["\x85"]="85",["\x86"]="86",["\x87"]="87",["\x88"]="88",["\x89"]="89",["\x8A"]="0.",["\x8B"]="0E",["\x8C"]="0E-",["\x8D"]="0",["\x8E"]="0-",["\x8F"]="0",
-    ["\x90"]="90",["\x91"]="91",["\x92"]="92",["\x93"]="93",["\x94"]="94",["\x95"]="95",["\x96"]="96",["\x97"]="97",["\x98"]="98",["\x99"]="99",["\x9A"]="0.",["\x9B"]="0E",["\x9C"]="0E-",["\x9D"]="0",["\x9E"]="0-",["\x9F"]="0",
+    ["\x10"]="10",["\x11"]="11",["\x12"]="12",["\x13"]="13",["\x14"]="14",["\x15"]="15",["\x16"]="16",["\x17"]="17",["\x18"]="18",["\x19"]="19",["\x1A"]="1.",["\x1B"]="1E",["\x1C"]="1E-",["\x1D"]="1",["\x1E"]="1-",["\x1F"]="1",
+    ["\x20"]="20",["\x21"]="21",["\x22"]="22",["\x23"]="23",["\x24"]="24",["\x25"]="25",["\x26"]="26",["\x27"]="27",["\x28"]="28",["\x29"]="29",["\x2A"]="2.",["\x2B"]="2E",["\x2C"]="2E-",["\x2D"]="2",["\x2E"]="2-",["\x2F"]="2",
+    ["\x30"]="30",["\x31"]="31",["\x32"]="32",["\x33"]="33",["\x34"]="34",["\x35"]="35",["\x36"]="36",["\x37"]="37",["\x38"]="38",["\x39"]="39",["\x3A"]="3.",["\x3B"]="3E",["\x3C"]="3E-",["\x3D"]="3",["\x3E"]="3-",["\x3F"]="3",
+    ["\x40"]="40",["\x41"]="41",["\x42"]="42",["\x43"]="43",["\x44"]="44",["\x45"]="45",["\x46"]="46",["\x47"]="47",["\x48"]="48",["\x49"]="49",["\x4A"]="4.",["\x4B"]="4E",["\x4C"]="4E-",["\x4D"]="4",["\x4E"]="4-",["\x4F"]="4",
+    ["\x50"]="50",["\x51"]="51",["\x52"]="52",["\x53"]="53",["\x54"]="54",["\x55"]="55",["\x56"]="56",["\x57"]="57",["\x58"]="58",["\x59"]="59",["\x5A"]="5.",["\x5B"]="5E",["\x5C"]="5E-",["\x5D"]="5",["\x5E"]="5-",["\x5F"]="5",
+    ["\x60"]="60",["\x61"]="61",["\x62"]="62",["\x63"]="63",["\x64"]="64",["\x65"]="65",["\x66"]="66",["\x67"]="67",["\x68"]="68",["\x69"]="69",["\x6A"]="6.",["\x6B"]="6E",["\x6C"]="6E-",["\x6D"]="6",["\x6E"]="6-",["\x6F"]="6",
+    ["\x70"]="70",["\x71"]="71",["\x72"]="72",["\x73"]="73",["\x74"]="74",["\x75"]="75",["\x76"]="76",["\x77"]="77",["\x78"]="78",["\x79"]="79",["\x7A"]="7.",["\x7B"]="7E",["\x7C"]="7E-",["\x7D"]="7",["\x7E"]="7-",["\x7F"]="7",
+    ["\x80"]="80",["\x81"]="81",["\x82"]="82",["\x83"]="83",["\x84"]="84",["\x85"]="85",["\x86"]="86",["\x87"]="87",["\x88"]="88",["\x89"]="89",["\x8A"]="8.",["\x8B"]="8E",["\x8C"]="8E-",["\x8D"]="8",["\x8E"]="8-",["\x8F"]="8",
+    ["\x90"]="90",["\x91"]="91",["\x92"]="92",["\x93"]="93",["\x94"]="94",["\x95"]="95",["\x96"]="96",["\x97"]="97",["\x98"]="98",["\x99"]="99",["\x9A"]="9.",["\x9B"]="9E",["\x9C"]="9E-",["\x9D"]="9",["\x9E"]="9-",["\x9F"]="9",
     ["\xA0"]=".0",["\xA1"]=".1",["\xA2"]=".2",["\xA3"]=".3",["\xA4"]=".4",["\xA5"]=".5",["\xA6"]=".6",["\xA7"]=".7",["\xA8"]=".8",["\xA9"]=".9",["\xAA"]="..",["\xAB"]=".E",["\xAC"]=".E-",["\xAD"]=".",["\xAE"]=".-",["\xAF"]=".",
     ["\xB0"]="E0",["\xB1"]="E1",["\xB2"]="E2",["\xB3"]="E3",["\xB4"]="E4",["\xB5"]="E5",["\xB6"]="E6",["\xB7"]="E7",["\xB8"]="E8",["\xB9"]="E9",["\xBA"]="E.",["\xBB"]="EE",["\xBC"]="EE-",["\xBD"]="E",["\xBE"]="E-",["\xBF"]="E",
     ["\xC0"]="E-0",["\xC1"]="E-1",["\xC2"]="E-2",["\xC3"]="E-3",["\xC4"]="E-4",["\xC5"]="E-5",["\xC6"]="E-6",["\xC7"]="E-7",["\xC8"]="E-8",["\xC9"]="E-9",["\xCA"]="E-.",["\xCB"]="E-E",["\xCC"]="E-E-",["\xCD"]="E-",["\xCE"]="E--",["\xCF"]="E-",
     ["\xD0"]="-0",["\xD1"]="-1",["\xD2"]="-2",["\xD3"]="-3",["\xD4"]="-4",["\xD5"]="-5",["\xD6"]="-6",["\xD7"]="-7",["\xD8"]="-8",["\xD9"]="-9",["\xDA"]="-.",["\xDB"]="-E",["\xDC"]="-E-",["\xDD"]="-",["\xDE"]="--",["\xDF"]="-",
   }
-  local p_nibbles=P("\30")*Cs(((1-p_last)/remap)^0+p_last)/function(n)
+  local p_last=S("\x0F\x1F\x2F\x3F\x4F\x5F\x6F\x7F\x8F\x9F\xAF\xBF")+R("\xF0\xFF")
+  local p_nibbles=P("\30")*Cs(((1-p_last)/remap)^0*(P(1)/remap))/function(n)
     top=top+1
     stack[top]=tonumber(n) or 0
   end
@@ -6647,7 +6723,7 @@ do
     if trace_charstrings then
       showstate("stem")
     end
-    stems=stems+top/2
+    stems=stems+idiv(top,2)
     top=0
   end
   local function getmask()
@@ -6666,13 +6742,13 @@ do
     if trace_charstrings then
       showstate(operator==19 and "hintmark" or "cntrmask")
     end
-    stems=stems+top/2
+    stems=stems+idiv(top,2)
     top=0
     if stems==0 then
     elseif stems<=8 then
       return 1
     else
-      return floor((stems+7)/8)
+      return idiv(stems+7,8)
     end
   end
   local function unsupported(t)
@@ -6711,7 +6787,7 @@ do
   local function hsbw()
     if version==1 then
       if trace_charstrings then
-        showstate("dotsection")
+        showstate("hsbw")
       end
       width=stack[top]
     end
@@ -6897,76 +6973,98 @@ do
     [036]=hflex1,
     [037]=flex1,
   }
-  local c_endchar=char(14)
-  local passon do
-    local rshift=bit32.rshift
-    local band=bit32.band
-    local round=math.round
-    local encode=table.setmetatableindex(function(t,i)
-      for i=-2048,-1130 do
-        t[i]=char(28,band(rshift(i,8),0xFF),band(i,0xFF))
+  local chars=setmetatableindex(function (t,k)
+    local v=char(k)
+    t[k]=v
+    return v
+  end)
+  local c_endchar=chars[14]
+  local encode={}
+  setmetatableindex(encode,function(t,i)
+    for i=-2048,-1130 do
+      t[i]=char(28,band(rshift(i,8),0xFF),band(i,0xFF))
+    end
+    for i=-1131,-108 do
+      local v=0xFB00-i-108
+      t[i]=char(band(rshift(v,8),0xFF),band(v,0xFF))
+    end
+    for i=-107,107 do
+      t[i]=chars[i+139]
+    end
+    for i=108,1131 do
+      local v=0xF700+i-108
+      t[i]=char(extract(v,8,8),extract(v,0,8))
+    end
+    for i=1132,2048 do
+      t[i]=char(28,band(rshift(i,8),0xFF),band(i,0xFF))
+    end
+    setmetatableindex(encode,function(t,k)
+      local r=round(k)
+      local v=rawget(t,r)
+      if v then
+        return v
       end
-      for i=-1131,-108 do
-        local v=0xFB00-i-108
-        t[i]=char(band(rshift(v,8),0xFF),band(v,0xFF))
-      end
-      for i=-107,107 do
-        t[i]=char(i+139)
-      end
-      for i=108,1131 do
-        local v=0xF700+i-108
-        t[i]=char(band(rshift(v,8),0xFF),band(v,0xFF))
-      end
-      for i=1132,2048 do
-        t[i]=char(28,band(rshift(i,8),0xFF),band(i,0xFF))
-      end
-      return t[i]
+      local v1=floor(k)
+      local v2=floor((k-v1)*0x10000)
+      return char(255,extract(v1,8,8),extract(v1,0,8),extract(v2,8,8),extract(v2,0,8))
     end)
-    local function setvsindex()
-      local vsindex=stack[top]
-      updateregions(vsindex)
-      top=top-1
-    end
-    local function blend()
-      local n=stack[top]
-      top=top-1
-      if not axis then
-      elseif n==1 then
-        top=top-nofregions
-        local v=stack[top]
+    return t[i]
+  end)
+  readers.cffencoder=encode
+  local function p_setvsindex()
+    local vsindex=stack[top]
+    updateregions(vsindex)
+    top=top-1
+  end
+  local function p_blend()
+    local n=stack[top]
+    top=top-1
+    if not axis then
+    elseif n==1 then
+      top=top-nofregions
+      local v=stack[top]
+      for r=1,nofregions do
+        v=v+stack[top+r]*factors[r]
+      end
+      stack[top]=round(v)
+    else
+      top=top-nofregions*n
+      local d=top
+      local k=top-n
+      for i=1,n do
+        k=k+1
+        local v=stack[k]
         for r=1,nofregions do
-          v=v+stack[top+r]*factors[r]
+          v=v+stack[d+r]*factors[r]
         end
-        stack[top]=round(v)
-      else
-        top=top-nofregions*n
-        local d=top
-        local k=top-n
-        for i=1,n do
-          k=k+1
-          local v=stack[k]
-          for r=1,nofregions do
-            v=v+stack[d+r]*factors[r]
-          end
-          stack[k]=round(v)
-          d=d+nofregions
-        end
+        stack[k]=round(v)
+        d=d+nofregions
       end
     end
-    passon=function(operation)
-      if operation==15 then
-        setvsindex()
-      elseif operation==16 then
-        blend()
-      else
-        for i=1,top do
-          r=r+1
-          result[r]=encode[stack[i]]
-        end
-        r=r+1
-        result[r]=char(operation) 
-        top=0
-      end
+  end
+  local function p_getstem()
+    local n=0
+    if top%2~=0 then
+      n=1
+    end
+    if top>n then
+      stems=stems+idiv(top-n,2)
+    end
+  end
+  local function p_getmask()
+    local n=0
+    if top%2~=0 then
+      n=1
+    end
+    if top>n then
+      stems=stems+idiv(top-n,2)
+    end
+    if stems==0 then
+      return 0
+    elseif stems<=8 then
+      return 1
+    else
+      return idiv(stems+7,8)
     end
   end
   local process
@@ -7054,19 +7152,90 @@ do
       elseif t==12 then
         i=i+1
         local t=tab[i]
-        local a=subactions[t]
-        if a then
-          a(t)
-        else
-          if trace_charstrings then
-            showvalue("<subaction>",t)
+        if justpass then
+          if t>=34 or t<=37 then 
+            for i=1,top do
+              r=r+1;result[r]=encode[stack[i]]
+            end
+            r=r+1;result[r]=chars[12]
+            r=r+1;result[r]=chars[t]
+            top=0
+          else
+            local a=subactions[t]
+            if a then
+              a(t)
+            else
+              top=0
+            end
           end
-          top=0
+        else
+          local a=subactions[t]
+          if a then
+            a(t)
+          else
+            if trace_charstrings then
+              showvalue("<subaction>",t)
+            end
+            top=0
+          end
         end
         i=i+1
       elseif justpass then
-        passon(t)
-        i=i+1
+        if t==15 then
+          p_setvsindex()
+          i=i+1
+        elseif t==16 then
+          local s=p_blend() or 0
+          i=i+s+1
+        elseif t==1 or t==3 or t==18 or operation==23 then
+          p_getstem() 
+if true then
+          if top>0 then
+            for i=1,top do
+              r=r+1;result[r]=encode[stack[i]]
+            end
+            top=0
+          end
+          r=r+1;result[r]=chars[t]
+else
+  top=0
+end
+          i=i+1
+        elseif t==19 or t==20 then
+          local s=p_getmask() or 0 
+if true then
+          if top>0 then
+            for i=1,top do
+              r=r+1;result[r]=encode[stack[i]]
+            end
+            top=0
+          end
+          r=r+1;result[r]=chars[t]
+          for j=1,s do
+            i=i+1
+            r=r+1;result[r]=chars[tab[i]]
+          end
+else
+  i=i+s
+  top=0
+end
+          i=i+1
+        elseif t==9 then
+          top=0
+          i=i+1
+        elseif t==13 then
+          local s=hsbw() or 0
+          i=i+s+1
+        else
+          if top>0 then
+            for i=1,top do
+              r=r+1;result[r]=encode[stack[i]]
+            end
+            top=0
+          end
+          r=r+1;result[r]=chars[t]
+          i=i+1
+        end
       else
         local a=actions[t]
         if a then
@@ -7087,18 +7256,20 @@ do
     end
   end
   local function setbias(globals,locals)
-    if version==1 then
-      return
-        false,
-        false
-    else
       local g,l=#globals,#locals
       return
         ((g<1240 and 107) or (g<33900 and 1131) or 32768)+1,
         ((l<1240 and 107) or (l<33900 and 1131) or 32768)+1
-    end
   end
   local function processshape(tab,index)
+    if not tab then
+      glyphs[index]={
+        boundingbox={ 0,0,0,0 },
+        width=0,
+        name=charset and charset[index] or nil,
+      }
+      return
+    end
     tab=bytetable(tab)
     x=0
     y=0
@@ -7211,15 +7382,18 @@ do
     glyphs=glphs or {}
     globalbias,localbias=setbias(globals,locals)
     nominalwidth,defaultwidth=setwidths(dictionary.private)
-    startparsing(fontdata,data,streams)
-    for index=1,#charstrings do
-      processshape(charstrings[index],index-1)
-      charstrings[index]=nil 
+    if charstrings then
+      startparsing(fontdata,data,streams)
+      for index=1,#charstrings do
+        processshape(charstrings[index],index-1)
+      end
+      stopparsing(fontdata,data)
+    else
+      report("no charstrings")
     end
-    stopparsing(fontdata,data)
     return glyphs
   end
-  parsecharstring=function(fontdata,data,dictionary,tab,glphs,index,doshapes,tversion)
+  parsecharstring=function(fontdata,data,dictionary,tab,glphs,index,doshapes,tversion,streams)
     keepcurve=doshapes
     version=tversion
     strings=data.strings
@@ -7228,6 +7402,7 @@ do
     charset=false
     vsindex=dictionary.vsindex or 0
     glyphs=glphs or {}
+ justpass=streams==true
     globalbias,localbias=setbias(globals,locals)
     nominalwidth,defaultwidth=setwidths(dictionary.private)
     processshape(tab,index-1)
@@ -7381,7 +7556,7 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
   local format=readbyte(f)
   if format==1 then
     for i=0,nofglyphs do 
-      local index=readbyte(i)
+      local index=readbyte(f)
       fdindex[i]=index
       if index>maxindex then
         maxindex=index
@@ -7410,30 +7585,33 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
   end
   if maxindex>=0 then
     local cidarray=cid.fdarray
-    setposition(f,header.offset+cidarray)
-    local dictionaries=readlengths(f)
-    for i=1,#dictionaries do
-      dictionaries[i]=readstring(f,dictionaries[i])
+    if cidarray then
+      setposition(f,header.offset+cidarray)
+      local dictionaries=readlengths(f)
+      for i=1,#dictionaries do
+        dictionaries[i]=readstring(f,dictionaries[i])
+      end
+      parsedictionaries(data,dictionaries)
+      cid.dictionaries=dictionaries
+      readcidprivates(f,data)
+      for i=1,#dictionaries do
+        readlocals(f,data,dictionaries[i])
+      end
+      startparsing(fontdata,data,streams)
+      for i=1,#charstrings do
+        parsecharstring(fontdata,data,dictionaries[fdindex[i]+1],charstrings[i],glyphs,i,doshapes,version,streams)
+      end
+      stopparsing(fontdata,data)
+    else
+      report("no cid array")
     end
-    parsedictionaries(data,dictionaries)
-    cid.dictionaries=dictionaries
-    readcidprivates(f,data)
-    for i=1,#dictionaries do
-      readlocals(f,data,dictionaries[i])
-    end
-    startparsing(fontdata,data,streams)
-    for i=1,#charstrings do
-      parsecharstring(fontdata,data,dictionaries[fdindex[i]+1],charstrings[i],glyphs,i,doshapes,version)
-      charstrings[i]=nil
-    end
-    stopparsing(fontdata,data)
   end
 end
 local gotodatatable=readers.helpers.gotodatatable
 local function cleanup(data,dictionaries)
 end
 function readers.cff(f,fontdata,specification)
-  local tableoffset=gotodatatable(f,fontdata,"cff",specification.details)
+  local tableoffset=gotodatatable(f,fontdata,"cff",specification.details or specification.glyphs)
   if tableoffset then
     local header=readheader(f)
     if header.major~=1 then
@@ -7454,14 +7632,16 @@ function readers.cff(f,fontdata,specification)
     parsedictionaries(data,dictionaries,"cff")
     local dic=dictionaries[1]
     local cid=dic.cid
-    fontdata.cffinfo={
-      familynamename=dic.familyname,
+    local cffinfo={
+      familyname=dic.familyname,
       fullname=dic.fullname,
       boundingbox=dic.boundingbox,
       weight=dic.weight,
       italicangle=dic.italicangle,
       underlineposition=dic.underlineposition,
       underlinethickness=dic.underlinethickness,
+      defaultwidth=dic.defaultwidthx,
+      nominalwidth=dic.nominalwidthx,
       monospaced=dic.monospaced,
     }
     fontdata.cidinfo=cid and {
@@ -7469,12 +7649,30 @@ function readers.cff(f,fontdata,specification)
       ordering=cid.ordering,
       supplement=cid.supplement,
     }
-    if specification.glyphs then
-      local all=specification.shapes or false
+    fontdata.cffinfo=cffinfo
+    local all=specification.shapes or specification.streams or false
+    if specification.glyphs or all then
       if cid and cid.fdselect then
-        readfdselect(f,fontdata,data,glyphs,all,"cff")
+        readfdselect(f,fontdata,data,glyphs,all,"cff",specification.streams)
       else
-        readnoselect(f,fontdata,data,glyphs,all,"cff")
+        readnoselect(f,fontdata,data,glyphs,all,"cff",specification.streams)
+      end
+    end
+    local private=dic.private
+    if private then
+      local data=private.data
+      if type(data)=="table" then
+        cffinfo.defaultwidth=data.defaultwidth or cffinfo.defaultwidth
+        cffinfo.nominalwidth=data.nominalwidth or cffinfo.nominalwidth
+        cffinfo.bluevalues=data.bluevalues
+        cffinfo.otherblues=data.otherblues
+        cffinfo.familyblues=data.familyblues
+        cffinfo.familyotherblues=data.familyotherblues
+        cffinfo.bluescale=data.bluescale
+        cffinfo.blueshift=data.blueshift
+        cffinfo.bluefuzz=data.bluefuzz
+        cffinfo.stdhw=data.stdhw
+        cffinfo.stdvw=data.stdvw
       end
     end
     cleanup(data,dictionaries)
@@ -7508,7 +7706,7 @@ function readers.cff2(f,fontdata,specification)
     end
     data.factors=specification.factors
     local cid=data.dictionaries[1].cid
-    local all=specification.shapes or false
+    local all=specification.shapes or specification.streams or false
     if cid and cid.fdselect then
       readfdselect(f,fontdata,data,glyphs,all,"cff2",specification.streams)
     else
@@ -7538,7 +7736,7 @@ function readers.cffcheck(filename)
       dictionaries=dictionaries,
       strings=strings,
       glyphs=glyphs,
-      nofglyphs=4,
+      nofglyphs=0,
     }
     parsedictionaries(data,dictionaries,"cff")
     local cid=data.dictionaries[1].cid
@@ -7551,10 +7749,10 @@ function readers.cffcheck(filename)
   end
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-cff”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-cff”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ttf” ff587471f4297aa8ba0fa022609adc6e] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ttf” fe1b771df5d6442a10fcfa1388f3eed2] ---
 
 if not modules then modules={} end modules ['font-ttf']={
   version=1.001,
@@ -7566,8 +7764,10 @@ if not modules then modules={} end modules ['font-ttf']={
 local next,type,unpack=next,type,unpack
 local band,rshift=bit32.band,bit32.rshift
 local sqrt,round=math.sqrt,math.round
-local char=string.char
+local char,rep=string.char,string.rep
 local concat=table.concat
+local idiv=number.idiv
+local setmetatableindex=table.setmetatableindex
 local report=logs.reporter("otf reader","ttf")
 local trace_deltas=false
 local readers=fonts.handlers.otf.readers
@@ -7632,22 +7832,41 @@ local function mergecomposites(glyphs,shapes)
         local yscale=matrix[4]
         local xoffset=matrix[5]
         local yoffset=matrix[6]
-        for i=1,#subpoints do
-          local p=subpoints[i]
-          local x=p[1]
-          local y=p[2]
-          nofpoints=nofpoints+1
-          points[nofpoints]={
-            xscale*x+xrotate*y+xoffset,
-            yscale*y+yrotate*x+yoffset,
-            p[3]
-          }
+        local count=#subpoints
+        if xscale==1 and yscale==1 and xrotate==0 and yrotate==0 then
+          for i=1,count do
+            local p=subpoints[i]
+            nofpoints=nofpoints+1
+            points[nofpoints]={
+              p[1]+xoffset,
+              p[2]+yoffset,
+              p[3]
+            }
+          end
+        else
+          for i=1,count do
+            local p=subpoints[i]
+            local x=p[1]
+            local y=p[2]
+            nofpoints=nofpoints+1
+            points[nofpoints]={
+              xscale*x+xrotate*y+xoffset,
+              yscale*y+yrotate*x+yoffset,
+              p[3]
+            }
+          end
         end
-        for i=1,#subcontours do
+        local subcount=#subcontours
+        if subcount==1 then
           nofcontours=nofcontours+1
-          contours[nofcontours]=offset+subcontours[i]
+          contours[nofcontours]=offset+subcontours[1]
+        else
+          for i=1,#subcontours do
+            nofcontours=nofcontours+1
+            contours[nofcontours]=offset+subcontours[i]
+          end
         end
-        offset=offset+#subpoints
+        offset=offset+count
       else
         report("missing contours composite %s, component %s of %s, glyph %s",index,i,#components,subindex)
       end
@@ -7657,7 +7876,7 @@ local function mergecomposites(glyphs,shapes)
     shape.components=nil
     return contours,points
   end
-  for index=1,#glyphs do
+  for index=0,#glyphs-1 do
     local shape=shapes[index]
     if shape then
       local components=shape.components
@@ -7667,7 +7886,7 @@ local function mergecomposites(glyphs,shapes)
     end
   end
 end
-local function readnothing(f,nofcontours)
+local function readnothing(f)
   return {
     type="nothing",
   }
@@ -7761,8 +7980,8 @@ local function applyaxis(glyph,shape,deltas,dowidth)
   end
 end
 local quadratic=false
-local function contours2outlines_normal(glyphs,shapes) 
-  for index=1,#glyphs do
+local function contours2outlines_normal(glyphs,shapes)
+  for index=0,#glyphs-1 do
     local shape=shapes[index]
     if shape then
       local glyph=glyphs[index]
@@ -7877,7 +8096,7 @@ local function contours2outlines_normal(glyphs,shapes)
   end
 end
 local function contours2outlines_shaped(glyphs,shapes,keepcurve)
-  for index=1,#glyphs do
+  for index=0,#glyphs-1 do
     local shape=shapes[index]
     if shape then
       local glyph=glyphs[index]
@@ -8056,115 +8275,128 @@ local function toshort(n)
   end
   return char(band(rshift(n,8),0xFF),band(n,0xFF))
 end
+local chars=setmetatableindex(function(t,k)
+  for i=0,255 do local v=char(i) t[i]=v end return t[k]
+end)
 local function repackpoints(glyphs,shapes)
   local noboundingbox={ 0,0,0,0 }
   local result={} 
-  for index=1,#glyphs do
+  local xpoints={} 
+  local ypoints={} 
+  for index=0,#glyphs-1 do
     local shape=shapes[index]
     if shape then
       local r=0
       local glyph=glyphs[index]
-      if false then
-      else
-        local contours=shape.contours
-        local nofcontours=contours and #contours or 0
-        local boundingbox=glyph.boundingbox or noboundingbox
-        r=r+1 result[r]=toshort(nofcontours)
-        r=r+1 result[r]=toshort(boundingbox[1]) 
-        r=r+1 result[r]=toshort(boundingbox[2]) 
-        r=r+1 result[r]=toshort(boundingbox[3]) 
-        r=r+1 result[r]=toshort(boundingbox[4]) 
-        if nofcontours>0 then
-          for i=1,nofcontours do
-            r=r+1 result[r]=toshort(contours[i]-1)
-          end
-          r=r+1 result[r]=s_zero 
-          local points=shape.points
-          local currentx=0
-          local currenty=0
-          local xpoints={}
-          local ypoints={}
-          local x=0
-          local y=0
-          local lastflag=nil
-          local nofflags=0
-          for i=1,#points do
-            local pt=points[i]
-            local px=pt[1]
-            local py=pt[2]
-            local fl=pt[3] and 0x01 or 0x00
-            if px==currentx then
-              fl=fl+0x10
-            else
-              local dx=round(px-currentx)
-              if dx<-255 or dx>255 then
-                x=x+1 xpoints[x]=toshort(dx)
-              elseif dx<0 then
-                fl=fl+0x02
-                x=x+1 xpoints[x]=char(-dx)
-              elseif dx>0 then
-                fl=fl+0x12
-                x=x+1 xpoints[x]=char(dx)
-              else
-                fl=fl+0x02
-                x=x+1 xpoints[x]=c_zero
-              end
-            end
-            if py==currenty then
-              fl=fl+0x20
-            else
-              local dy=round(py-currenty)
-              if dy<-255 or dy>255 then
-                y=y+1 ypoints[y]=toshort(dy)
-              elseif dy<0 then
-                fl=fl+0x04
-                y=y+1 ypoints[y]=char(-dy)
-              elseif dy>0 then
-                fl=fl+0x24
-                y=y+1 ypoints[y]=char(dy)
-              else
-                fl=fl+0x04
-                y=y+1 ypoints[y]=c_zero
-              end
-            end
-            currentx=px
-            currenty=py
-            if lastflag==fl then
-              nofflags=nofflags+1
-            else 
-              if nofflags==1 then
-                r=r+1 result[r]=char(lastflag)
-              elseif nofflags==2 then
-                r=r+1 result[r]=char(lastflag,lastflag)
-              elseif nofflags>2 then
-                lastflag=lastflag+0x08
-                r=r+1 result[r]=char(lastflag,nofflags-1)
-              end
-              nofflags=1
-              lastflag=fl
-            end
-          end
-          if nofflags==1 then
-            r=r+1 result[r]=char(lastflag)
-          elseif nofflags==2 then
-            r=r+1 result[r]=char(lastflag,lastflag)
-          elseif nofflags>2 then
-            lastflag=lastflag+0x08
-            r=r+1 result[r]=char(lastflag,nofflags-1)
-          end
-          r=r+1 result[r]=concat(xpoints)
-          r=r+1 result[r]=concat(ypoints)
+      local contours=shape.contours
+      local nofcontours=contours and #contours or 0
+      local boundingbox=glyph.boundingbox or noboundingbox
+      r=r+1 result[r]=toshort(nofcontours)
+      r=r+1 result[r]=toshort(boundingbox[1]) 
+      r=r+1 result[r]=toshort(boundingbox[2]) 
+      r=r+1 result[r]=toshort(boundingbox[3]) 
+      r=r+1 result[r]=toshort(boundingbox[4]) 
+      if nofcontours>0 then
+        for i=1,nofcontours do
+          r=r+1 result[r]=toshort(contours[i]-1)
         end
+        r=r+1 result[r]=s_zero 
+        local points=shape.points
+        local currentx=0
+        local currenty=0
+        local x=0
+        local y=0
+        local lastflag=nil
+        local nofflags=0
+        for i=1,#points do
+          local pt=points[i]
+          local px=pt[1]
+          local py=pt[2]
+          local fl=pt[3] and 0x01 or 0x00
+          if px==currentx then
+            fl=fl+0x10
+          else
+            local dx=round(px-currentx)
+            x=x+1
+            if dx<-255 or dx>255 then
+              xpoints[x]=toshort(dx)
+            elseif dx<0 then
+              fl=fl+0x02
+              xpoints[x]=chars[-dx]
+            elseif dx>0 then
+              fl=fl+0x12
+              xpoints[x]=chars[dx]
+            else
+              fl=fl+0x02
+              xpoints[x]=c_zero
+            end
+          end
+          if py==currenty then
+            fl=fl+0x20
+          else
+            local dy=round(py-currenty)
+            y=y+1
+            if dy<-255 or dy>255 then
+              ypoints[y]=toshort(dy)
+            elseif dy<0 then
+              fl=fl+0x04
+              ypoints[y]=chars[-dy]
+            elseif dy>0 then
+              fl=fl+0x24
+              ypoints[y]=chars[dy]
+            else
+              fl=fl+0x04
+              ypoints[y]=c_zero
+            end
+          end
+          currentx=px
+          currenty=py
+          if lastflag==fl then
+            nofflags=nofflags+1
+          else 
+            if nofflags==1 then
+              r=r+1 result[r]=chars[lastflag]
+            elseif nofflags==2 then
+              r=r+1 result[r]=char(lastflag,lastflag)
+            elseif nofflags>2 then
+              lastflag=lastflag+0x08
+              r=r+1 result[r]=char(lastflag,nofflags-1)
+            end
+            nofflags=1
+            lastflag=fl
+          end
+        end
+        if nofflags==1 then
+          r=r+1 result[r]=chars[lastflag]
+        elseif nofflags==2 then
+          r=r+1 result[r]=char(lastflag,lastflag)
+        elseif nofflags>2 then
+          lastflag=lastflag+0x08
+          r=r+1 result[r]=char(lastflag,nofflags-1)
+        end
+        r=r+1 result[r]=concat(xpoints,"",1,x)
+        r=r+1 result[r]=concat(ypoints,"",1,y)
       end
-      glyph.stream=concat(result,"",1,r)
-    else
+      local stream=concat(result,"",1,r)
+      local length=#stream
+      local padding=idiv(length+3,4)*4-length
+      if padding>0 then
+        if padding==1 then
+          padding="\0"
+        elseif padding==2 then
+          padding="\0\0"
+        else
+          padding="\0\0\0"
+        end
+        padding=stream..padding
+      end
+      glyph.stream=stream
     end
   end
 end
+local flags={}
 local function readglyph(f,nofcontours) 
   local points={}
-  local instructions={}
-  local flags={}
   local contours={} 
   for i=1,nofcontours do
     contours[i]=readshort(f)+1
@@ -8177,9 +8409,15 @@ local function readglyph(f,nofcontours)
     local flag=readbyte(f)
     flags[i]=flag
     if band(flag,0x08)~=0 then
-      for j=1,readbyte(f) do
+      local n=readbyte(f)
+      if n==1 then
         i=i+1
         flags[i]=flag
+      else
+        for j=1,n do
+          i=i+1
+          flags[i]=flag
+        end
       end
     end
     i=i+1
@@ -8187,15 +8425,13 @@ local function readglyph(f,nofcontours)
   local x=0
   for i=1,nofpoints do
     local flag=flags[i]
-    local short=band(flag,0x02)~=0
-    local same=band(flag,0x10)~=0
-    if short then
-      if same then
+    if band(flag,0x02)~=0 then
+      if band(flag,0x10)~=0 then
         x=x+readbyte(f)
       else
         x=x-readbyte(f)
       end
-    elseif same then
+    elseif band(flag,0x10)~=0 then
     else
       x=x+readshort(f)
     end
@@ -8204,15 +8440,13 @@ local function readglyph(f,nofcontours)
   local y=0
   for i=1,nofpoints do
     local flag=flags[i]
-    local short=band(flag,0x04)~=0
-    local same=band(flag,0x20)~=0
-    if short then
-      if same then
+    if band(flag,0x04)~=0 then
+      if band(flag,0x20)~=0 then
         y=y+readbyte(f)
       else
         y=y-readbyte(f)
       end
-    elseif same then
+    elseif band(flag,0x20)~=0 then
     else
       y=y+readshort(f)
     end
@@ -8295,7 +8529,7 @@ local function readcomposite(f)
     if band(flags,0x0100)~=0 then
       instructions=true
     end
-    if not band(flags,0x0020)~=0 then 
+    if band(flags,0x0020)==0 then 
       break
     end
   end
@@ -8310,21 +8544,27 @@ function readers.loca(f,fontdata,specification)
     if datatable then
       local offset=fontdata.tables.glyf.offset
       local format=fontdata.fontheader.indextolocformat
+      local profile=fontdata.maximumprofile
+      local nofglyphs=profile and profile.nofglyphs
       local locations={}
       setposition(f,datatable.offset)
       if format==1 then
-        local nofglyphs=datatable.length/4-2
+        if not nofglyphs then
+          nofglyphs=idiv(datatable.length,4)-1
+        end
         for i=0,nofglyphs do
           locations[i]=offset+readulong(f)
         end
         fontdata.nofglyphs=nofglyphs
       else
-        local nofglyphs=datatable.length/2-2
+        if not nofglyphs then
+          nofglyphs=idiv(datatable.length,2)-1
+        end
         for i=0,nofglyphs do
           locations[i]=offset+readushort(f)*2
         end
-        fontdata.nofglyphs=nofglyphs
       end
+      fontdata.nofglyphs=nofglyphs
       fontdata.locations=locations
     end
   end
@@ -8339,15 +8579,16 @@ function readers.glyf(f,fontdata,specification)
       local filesize=fontdata.filesize
       local nothing={ 0,0,0,0 }
       local shapes={}
-      local loadshapes=specification.shapes or specification.instance
-      for index=0,nofglyphs do
+      local loadshapes=specification.shapes or specification.instance or specification.streams
+      for index=0,nofglyphs-1 do
         local location=locations[index]
+        local length=locations[index+1]-location
         if location>=filesize then
           report("discarding %s glyphs due to glyph location bug",nofglyphs-index+1)
           fontdata.nofglyphs=index-1
           fontdata.badfont=true
           break
-        elseif location>0 then
+        elseif length>0 then
           setposition(f,location)
           local nofcontours=readshort(f)
           glyphs[index].boundingbox={
@@ -8358,7 +8599,7 @@ function readers.glyf(f,fontdata,specification)
           }
           if not loadshapes then
           elseif nofcontours==0 then
-            shapes[index]=readnothing(f,nofcontours)
+            shapes[index]=readnothing(f)
           elseif nofcontours>0 then
             shapes[index]=readglyph(f,nofcontours)
           else
@@ -8366,7 +8607,7 @@ function readers.glyf(f,fontdata,specification)
           end
         else
           if loadshapes then
-            shapes[index]={}
+            shapes[index]=readnothing(f)
           end
           glyphs[index].boundingbox=nothing
         end
@@ -8383,7 +8624,13 @@ function readers.glyf(f,fontdata,specification)
             contours2outlines_shaped(glyphs,shapes,specification.shapes)
           end
         elseif specification.shapes then
-          contours2outlines_normal(glyphs,shapes)
+          if specification.streams then
+            repackpoints(glyphs,shapes)
+          else
+            contours2outlines_normal(glyphs,shapes)
+          end
+        elseif specification.streams then
+          repackpoints(glyphs,shapes)
         end
       end
     end
@@ -8645,10 +8892,10 @@ function readers.gvar(f,fontdata,specification,glyphdata,shapedata)
   end
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ttf”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ttf”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-dsp” cb8138a91cfbe562467821c5e0c2568e] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-dsp” 7959312318af6ed8fbd9edbeb2b1a335] ---
 
 if not modules then modules={} end modules ['font-dsp']={
   version=1.001,
@@ -8685,10 +8932,11 @@ local readers=fonts.handlers.otf.readers
 local streamreader=readers.streamreader
 local setposition=streamreader.setposition
 local getposition=streamreader.getposition
-local readushort=streamreader.readcardinal2 
-local readulong=streamreader.readcardinal4 
+local readuinteger=streamreader.readcardinal1
+local readushort=streamreader.readcardinal2
+local readulong=streamreader.readcardinal4
 local readinteger=streamreader.readinteger1
-local readshort=streamreader.readinteger2  
+local readshort=streamreader.readinteger2
 local readstring=streamreader.readstring
 local readtag=streamreader.readtag
 local readbytes=streamreader.readbytes
@@ -8708,6 +8956,7 @@ directives.register("fonts.streamreader",function()
   streamreader=utilities.streams
   setposition=streamreader.setposition
   getposition=streamreader.getposition
+  readuinteger=streamreader.readcardinal1
   readushort=streamreader.readcardinal2
   readulong=streamreader.readcardinal4
   readinteger=streamreader.readinteger1
@@ -10597,7 +10846,7 @@ do
   end
   local function loadvariations(f,fontdata,variationsoffset,lookuptypes,featurehash,featureorder)
     setposition(f,variationsoffset)
-    local version=readulong(f)
+    local version=readulong(f) 
     local nofrecords=readulong(f)
     local records={}
     for i=1,nofrecords do
@@ -11304,59 +11553,269 @@ function readers.sbix(f,fontdata,specification)
     for i=1,nofstrikes do
       strikes[i]=readulong(f)
     end
+    local shapes={}
+    local done=0
+    for i=1,nofstrikes do
+      local strikeoffset=strikes[i]+tableoffset
+      setposition(f,strikeoffset)
+      strikes[i]={
+        ppem=readushort(f),
+        ppi=readushort(f),
+        offset=strikeoffset
+      }
+    end
+    sort(strikes,function(a,b)
+      if b.ppem==a.ppem then
+        return b.ppi<a.ppi
+      else
+        return b.ppem<a.ppem
+      end
+    end)
+    local glyphs={}
+    for i=1,nofstrikes do
+      local strike=strikes[i]
+      local strikeppem=strike.ppem
+      local strikeppi=strike.ppi
+      local strikeoffset=strike.offset
+      setposition(f,strikeoffset)
+      for i=0,nofglyphs do
+        glyphs[i]=readulong(f)
+      end
+      local glyphoffset=glyphs[0]
+      for i=0,nofglyphs-1 do
+        local nextoffset=glyphs[i+1]
+        if not shapes[i] then
+          local datasize=nextoffset-glyphoffset
+          if datasize>0 then
+            setposition(f,strikeoffset+glyphoffset)
+            shapes[i]={
+              x=readshort(f),
+              y=readshort(f),
+              tag=readtag(f),
+              data=readstring(f,datasize-8),
+              ppem=strikeppem,
+              ppi=strikeppi,
+            }
+            done=done+1
+            if done==nofglyphs then
+              break
+            end
+          end
+        end
+        glyphoffset=nextoffset
+      end
+    end
+    fontdata.pngshapes=shapes
+  end
+end
+do
+  local function getmetrics(f)
+    return {
+      ascender=readinteger(f),
+      descender=readinteger(f),
+      widthmax=readuinteger(f),
+      caretslopedumerator=readinteger(f),
+      caretslopedenominator=readinteger(f),
+      caretoffset=readinteger(f),
+      minorigin=readinteger(f),
+      minadvance=readinteger(f),
+      maxbefore=readinteger(f),
+      minafter=readinteger(f),
+      pad1=readinteger(f),
+      pad2=readinteger(f),
+    }
+  end
+  local function getbigmetrics(f)
+    return {
+      height=readuinteger(f),
+      width=readuinteger(f),
+      horiBearingX=readinteger(f),
+      horiBearingY=readinteger(f),
+      horiAdvance=readuinteger(f),
+      vertBearingX=readinteger(f),
+      vertBearingY=readinteger(f),
+      vertAdvance=readuinteger(f),
+    }
+  end
+  local function getsmallmetrics(f)
+    return {
+      height=readuinteger(f),
+      width=readuinteger(f),
+      bearingX=readinteger(f),
+      bearingY=readinteger(f),
+      advance=readuinteger(f),
+    }
+  end
+  function readers.cblc(f,fontdata,specification)
+    local ctdttableoffset=gotodatatable(f,fontdata,"cbdt",specification.glyphs)
+    if not ctdttableoffset then
+      return
+    end
+    local cblctableoffset=gotodatatable(f,fontdata,"cblc",specification.glyphs)
+    if cblctableoffset then
+      local majorversion=readushort(f)
+      local minorversion=readushort(f)
+      local nofsizetables=readulong(f)
+      local sizetables={}
       local shapes={}
-      local done=0
-      for i=1,nofstrikes do
-        local strikeoffset=strikes[i]+tableoffset
-        setposition(f,strikeoffset)
-        strikes[i]={
-          ppem=readushort(f),
-          ppi=readushort(f),
-          offset=strikeoffset
+      local subtables={}
+      for i=1,nofsizetables do
+        sizetables[i]={
+          subtables=readulong(f),
+          indexsize=readulong(f),
+          nofsubtables=readulong(f),
+          colorref=readulong(f),
+          hormetrics=getmetrics(f),
+          vermetrics=getmetrics(f),
+          firstindex=readushort(f),
+          lastindex=readushort(f),
+          ppemx=readbyte(f),
+          ppemy=readbyte(f),
+          bitdepth=readbyte(f),
+          flags=readbyte(f),
         }
       end
-      sort(strikes,function(a,b)
-        if b.ppem==a.ppem then
-          return b.ppi<a.ppi
+      sort(sizetables,function(a,b)
+        if b.ppemx==a.ppemx then
+          return b.bitdepth<a.bitdepth
         else
-          return b.ppem<a.ppem
+          return b.ppemx<a.ppemx
         end
       end)
-      local glyphs={}
-      for i=1,nofstrikes do
-        local strike=strikes[i]
-        local strikeppem=strike.ppem
-        local strikeppi=strike.ppi
-        local strikeoffset=strike.offset
-        setposition(f,strikeoffset)
-        for i=0,nofglyphs do
-          glyphs[i]=readulong(f)
+      for i=1,nofsizetables do
+        local s=sizetables[i]
+        local d=false
+        for j=s.firstindex,s.lastindex do
+          if not shapes[j] then
+            shapes[j]=i
+            d=true
+          end
         end
-        local glyphoffset=glyphs[0]
-        for i=0,nofglyphs-1 do
-          local nextoffset=glyphs[i+1]
-          if not shapes[i] then
-            local datasize=nextoffset-glyphoffset
-            if datasize>0 then
-              setposition(f,strikeoffset+glyphoffset)
-              shapes[i]={
-                x=readshort(f),
-                y=readshort(f),
-                tag=readtag(f),
-                data=readstring(f,datasize-8),
-                ppem=strikeppem,
-                ppi=strikeppi,
-              }
-              done=done+1
-              if done==nofglyphs then
-                break
+        if d then
+          s.used=true
+        end
+      end
+      for i=1,nofsizetables do
+        local s=sizetables[i]
+        if s.used then
+          local offset=s.subtables
+          setposition(f,cblctableoffset+offset)
+          for j=1,s.nofsubtables do
+            local firstindex=readushort(f)
+            local lastindex=readushort(f)
+            local tableoffset=readulong(f)+offset
+            for k=firstindex,lastindex do
+              if shapes[k]==i then
+                local s=subtables[tableoffset]
+                if not s then
+                  s={
+                    firstindex=firstindex,
+                    lastindex=lastindex,
+                  }
+                  subtables[tableoffset]=s
+                end
+                shapes[k]=s
               end
             end
           end
-          glyphoffset=nextoffset
         end
       end
-      fontdata.sbixshapes=shapes
+      for offset,subtable in sortedhash(subtables) do
+        local tabletype=readushort(f)
+        subtable.format=readushort(f)
+        local baseoffset=readulong(f)+ctdttableoffset
+        local offsets={}
+        local metrics=nil
+        if tabletype==1 then
+          for i=subtable.firstindex,subtable.lastindex do
+            offsets[i]=readulong(f)+baseoffset
+          end
+          skipbytes(f,4)
+        elseif tabletype==2 then
+          local size=readulong(f)
+          local done=baseoffset
+          metrics=getbigmetrics(f)
+          for i=subtable.firstindex,subtable.lastindex do
+            offsets[i]=done
+            done=done+size
+          end
+        elseif tabletype==3 then
+          local n=subtable.lastindex-subtable.firstindex+2
+          for i=subtable.firstindex,subtable.lastindex do
+            offsets[i]=readushort(f)+baseoffset
+          end
+          if math.odd(n) then
+            skipbytes(f,4)
+          else
+            skipbytes(f,2)
+          end
+        elseif tabletype==4 then
+          for i=1,readulong(f) do
+            offsets[readushort(f)]=readushort(f)+baseoffset
+          end
+        elseif tabletype==5 then
+          local size=readulong(f)
+          local done=baseoffset
+          metrics=getbigmetrics(f)
+          local n=readulong(f)
+          for i=1,n do
+            offsets[readushort(f)]=done
+            done=done+size
+          end
+          if math.odd(n) then
+            skipbytes(f,2)
+          end
+        else
+          return 
+        end
+        subtable.offsets=offsets
+        subtable.metrics=metrics
+      end
+      local default={ width=0,height=0 }
+      local glyphs=fontdata.glyphs
+      for index,subtable in sortedhash(shapes) do
+        if type(subtable)=="table" then
+          local data=nil
+          local metrics=default
+          local format=subtable.format
+          local offset=subtable.offsets[index]
+          setposition(f,offset)
+          if format==17 then
+            metrics=getsmallmetrics(f)
+            data=readstring(f,readulong(f))
+          elseif format==18 then
+            metrics=getbigmetrics(f)
+            data=readstring(f,readulong(f))
+          elseif format==19 then
+            metrics=subtable.metrics
+            data=readstring(f,readulong(f))
+          else
+          end
+          local x=metrics.width
+          local y=metrics.height
+          shapes[index]={
+            x=x,
+            y=y,
+            data=data,
+          }
+          local glyph=glyphs[index]
+          if not glyph.boundingbox then
+            local width=glyph.width
+            local height=width*y/x
+            glyph.boundingbox={ 0,0,width,height }
+          end
+        else
+          shapes[index]={
+            x=0,
+            y=0,
+            data="",
+          }
+        end
+      end
+      fontdata.pngshapes=shapes 
+    end
+  end
+  function readers.cbdt(f,fontdata,specification)
   end
 end
 function readers.stat(f,fontdata,specification)
@@ -11466,8 +11925,7 @@ function readers.avar(f,fontdata,specification)
       end
       return false
     end
-    local majorversion=readushort(f) 
-    local minorversion=readushort(f) 
+    local version=readulong(f) 
     local reserved=readushort(f)
     local nofaxis=readushort(f)
     local segments={}
@@ -11659,10 +12117,10 @@ function readers.mvar(f,fontdata,specification)
   end
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-dsp”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-dsp”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-oup” 47feebddec74254caed369aa83f75dff] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-oup” 26b481cd9efebf7047810800930dff58] ---
 
 if not modules then modules={} end modules ['font-oup']={
   version=1.001,
@@ -12358,7 +12816,7 @@ local function unifymissing(fontdata)
   fonts.mappings.addtounicode(fontdata,fontdata.filename,checklookups)
   resources.unicodes=nil
 end
-local firstprivate=fonts.privateoffsets.textbase or 0xF0000
+local firstprivate=fonts.privateoffsets and fonts.privateoffsets.textbase or 0xF0000
 local puafirst=0xE000
 local pualast=0xF8FF
 local function unifyglyphs(fontdata,usenames)
@@ -14283,10 +14741,10 @@ function readers.expand(data)
   expandlookups(sublookups)
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-oup”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-oup”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-otl” 40cdceeb682bac55b4a69465b76bcc33] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-otl” 0836c8396cae2bcfd4020186e5e8d7e0] ---
 
 if not modules then modules={} end modules ['font-otl']={
   version=1.001,
@@ -14314,13 +14772,13 @@ local trace_defining=false registertracker("fonts.defining",function(v) trace_de
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.106 
+otf.version=3.107 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
-otf.sbixcache=containers.define("fonts","sbix",otf.version,true)
+otf.pngcache=containers.define("fonts","png",otf.version,true)
 otf.pdfcache=containers.define("fonts","pdf",otf.version,true)
 otf.svgenabled=false
-otf.sbixenabled=false
+otf.pngenabled=false
 local otfreaders=otf.readers
 local hashes=fonts.hashes
 local definers=fonts.definers
@@ -14388,7 +14846,7 @@ function otf.load(filename,sub,instance)
     report_otf("forced reload of %a due to hard coded flag",filename)
     reload=true
   end
-   if reload then
+  if reload then
     report_otf("loading %a, hash %a",filename,hash)
     starttiming(otfreaders,true)
     data=otfreaders.loadfont(filename,sub or 1,instance) 
@@ -14396,7 +14854,7 @@ function otf.load(filename,sub,instance)
       local used=checkmemory()
       local resources=data.resources
       local svgshapes=resources.svgshapes
-      local sbixshapes=resources.sbixshapes
+      local pngshapes=resources.pngshapes
       if cleanup==0 then
         checkmemory(used,threshold,tracememory)
       end
@@ -14419,15 +14877,15 @@ function otf.load(filename,sub,instance)
           checkmemory(used,threshold,tracememory)
         end
       end
-      if sbixshapes then
-        resources.sbixshapes=nil
-        if otf.sbixenabled then
+      if pngshapes then
+        resources.pngshapes=nil
+        if otf.pngenabled then
           local timestamp=os.date()
-          containers.write(otf.sbixcache,hash,{
-            sbixshapes=sbixshapes,
+          containers.write(otf.pngcache,hash,{
+            pngshapes=pngshapes,
             timestamp=timestamp,
           })
-          data.properties.sbix={
+          data.properties.png={
             hash=hash,
             timestamp=timestamp,
           }
@@ -14989,10 +15447,10 @@ otf.coverup={
   end
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-otl”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-otl”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-oto” 6ba2e73177b18007e74de324c324806c] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-oto” 6ba2e73177b18007e74de324c324806c] ---
 
 if not modules then modules={} end modules ['font-oto']={ 
   version=1.001,
@@ -15445,10 +15903,10 @@ registerotffeature {
 }
 otf.basemodeinitializer=featuresinitializer
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-oto”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-oto”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-otj” 578448ae37a167319dbccd5af04738da] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-otj” 91f45161817b7e8e33ad1d1b68e35fdb] ---
 
 if not modules then modules={} end modules ['font-otj']={
   version=1.001,
@@ -16905,10 +17363,10 @@ function injections.handler(head,where)
   end
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-otj”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-otj”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ota” d883cf661bb8c27bfa9b7cc66420c1ed] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ota” 1b2feab42ed8081933768c1e3ef7d103] ---
 
 if not modules then modules={} end modules ['font-ota']={
   version=1.001,
@@ -17286,10 +17744,10 @@ directives.register("otf.analyze.useunicodemarks",function(v)
   analyzers.useunicodemarks=v
 end)
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ota”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ota”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ots” 624f23e63b7430a51212c8824d09924f] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ots” ca923deced1ed4cdd86e66acdb9e6420] ---
 
 if not modules then modules={} end modules ['font-ots']={ 
   version=1.001,
@@ -17838,22 +18296,17 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
       else
       end
     end
-  else 
+  else
     local discfound=false
-    local lastdisc=nil
     local hasmarks=marks[startchar]
     while current do
       local char,id=ischar(current,currentfont)
       if char then
         if skiphash and skiphash[char] then
           current=getnext(current)
-        else 
-          local lg=ligature[char] 
+        else
+          local lg=ligature[char]
           if lg then
-            if not discfound and lastdisc then
-              discfound=lastdisc
-              lastdisc=nil
-            end
             if marks[char] then
               hasmarks=true
             end
@@ -17867,31 +18320,71 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
       elseif char==false then
         break
       elseif id==disc_code then
-        local replace=getfield(current,"replace") 
-        if replace then
-          while replace do
-            local char,id=ischar(replace,currentfont)
-            if char then
-              local lg=ligature[char] 
-              if lg then
-                if marks[char] then
-                  hasmarks=true 
-                end
-                ligature=lg
-                replace=getnext(replace)
-              else
-                return head,start,false,false
-              end
-            else
-              return head,start,false,false
-            end
-          end
-          stop=current
-        end
-        lastdisc=current
-        current=getnext(current)
+        discfound=current
+        break
       else
         break
+      end
+    end
+    if discfound then
+      local pre,post,replace=getdisc(discfound)
+      local match
+      if replace then
+        local char=ischar(replace,currentfont)
+        if char and ligature[char] then
+          match=true
+        end
+      end
+      if not match and pre then
+        local char=ischar(pre,currentfont)
+        if char and ligature[char] then
+          match=true
+        end
+      end
+      if not match and not pre or not replace then
+        local n=getnext(discfound)
+        local char=ischar(n,currentfont)
+        if char and ligature[char] then
+          match=true
+        end
+      end
+      if match then
+        local ishead=head==start
+        local prev=getprev(start)
+        if stop then
+          setnext(stop)
+          local tail=getprev(stop)
+          local copy=copy_node_list(start)
+          local liat=find_node_tail(copy)
+          if pre and replace then
+            setlink(liat,pre)
+          end
+          if replace then
+            setlink(tail,replace)
+          end
+          pre=copy
+          replace=start
+        else
+          setnext(start)
+          local copy=copy_node(start)
+          if pre then
+            setlink(copy,pre)
+          end
+          if replace then
+            setlink(start,replace)
+          end
+          pre=copy
+          replace=start
+        end
+        setdisc(discfound,pre,post,replace)
+        if prev then
+          setlink(prev,discfound)
+        else
+          setprev(discfound)
+          head=discfound
+        end
+        start=discfound
+        return head,start,true,true
       end
     end
     local lig=ligature.ligature
@@ -17899,10 +18392,10 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
       if stop then
         if trace_ligatures then
           local stopchar=getchar(stop)
-          head,start=toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+          head,start=toligature(head,start,stop,lig,dataset,sequence,skiphash,false,hasmarks)
           logprocess("%s: replacing %s upto %s by ligature %s case 2",pref(dataset,sequence),gref(startchar),gref(stopchar),gref(lig))
         else
-          head,start=toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+          head,start=toligature(head,start,stop,lig,dataset,sequence,skiphash,false,hasmarks)
         end
       else
         resetinjection(start)
@@ -17911,11 +18404,11 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
           logprocess("%s: replacing %s by (no real) ligature %s case 3",pref(dataset,sequence),gref(startchar),gref(lig))
         end
       end
-      return head,start,true,discfound
+      return head,start,true,false
     else
     end
   end
-  return head,start,false,discfound
+  return head,start,false,false
 end
 function handlers.gpos_single(head,start,dataset,sequence,kerns,rlmode,skiphash,step,injection)
   local startchar=getchar(start)
@@ -20394,9 +20887,10 @@ do
                     a=true
                   end
                   if a then
-                    local ok
-                    head,start,ok=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-                    if start then
+                    local ok,df
+                    head,start,ok,df=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+                    if df then
+                    elseif start then
                       start=getnext(start)
                     end
                   else
@@ -20450,21 +20944,24 @@ do
                     a=true
                   end
                   if a then
+                    local ok,df
                     for i=m[1],m[2] do
                       local step=steps[i]
                       local lookupcache=step.coverage
                       local lookupmatch=lookupcache[char]
                       if lookupmatch then
-                        local ok
-                        head,start,ok=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-                        if ok then
+                        head,start,ok,df=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+                        if df then
+                          break
+                        elseif ok then
                           break
                         elseif not start then
                           break
                         end
                       end
                     end
-                    if start then
+                    if df then
+                    elseif start then
                       start=getnext(start)
                     end
                   else
@@ -20857,10 +21354,10 @@ registerotffeature {
   },
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ots”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ots”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-osd” d2b542031aa693bb423b6d3272820c9a] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-osd” 883c29eaccf966c9ad9ab205a920de08] ---
 
 if not modules then modules={} end modules ['font-osd']={ 
   version=1.001,
@@ -22795,10 +23292,10 @@ for i=1,nofscripts do
   methods[scripts_two[i]]=method_two
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-osd”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-osd”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ocl” 49cf3230228aa7f2d19cd491f55f5395] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ocl” 6552143d102c2dc5404293d10af3a1eb] ---
 
 if not modules then modules={} end modules ['font-ocl']={
   version=1.001,
@@ -22850,26 +23347,33 @@ if context then
   local transparencies=attributes.list[attributes.private('transparency')] or {}
   function otf.registerpalette(name,values)
     sharedpalettes[name]=values
+    local color=lpdf.color
+    local transparency=lpdf.transparency
+    local register=colors.register
     for i=1,#values do
       local v=values[i]
-      local c=nil
-      local t=nil
-      if type(v)=="table" then
-        c=colors.register(name,"rgb",
-          max(round((v.r or 0)*255),255)/255,
-          max(round((v.g or 0)*255),255)/255,
-          max(round((v.b or 0)*255),255)/255
-        )
+      if v=="textcolor" then
+        values[i]=false
       else
-        c=colors[v]
-        t=transparencies[v]
-      end
-      if c and t then
-        values[i]=hash[lpdf.color(1,c).." "..lpdf.transparency(t)]
-      elseif c then
-        values[i]=hash[lpdf.color(1,c)]
-      elseif t then
-        values[i]=hash[lpdf.color(1,t)]
+        local c=nil
+        local t=nil
+        if type(v)=="table" then
+          c=register(name,"rgb",
+            max(round((v.r or 0)*255),255)/255,
+            max(round((v.g or 0)*255),255)/255,
+            max(round((v.b or 0)*255),255)/255
+          )
+        else
+          c=colors[v]
+          t=transparencies[v]
+        end
+        if c and t then
+          values[i]=hash[color(1,c).." "..transparency(t)]
+        elseif c then
+          values[i]=hash[color(1,c)]
+        elseif t then
+          values[i]=hash[color(1,t)]
+        end
       end
     end
   end
@@ -22878,11 +23382,13 @@ else
     sharedpalettes[name]=values
     for i=1,#values do
       local v=values[i]
-      values[i]=hash[f_color(
-        max(round((v.r or 0)*255),255)/255,
-        max(round((v.g or 0)*255),255)/255,
-        max(round((v.b or 0)*255),255)/255
-      )]
+      if v then
+        values[i]=hash[f_color(
+          max(round((v.r or 0)*255),255)/255,
+          max(round((v.g or 0)*255),255)/255,
+          max(round((v.b or 0)*255),255)/255
+        )]
+      end
     end
   end
 end
@@ -22906,7 +23412,7 @@ local pop={ "pdf","page","Q" }
 if not LUATEXFUNCTIONALITY or LUATEXFUNCTIONALITY<6472 then 
   start={ "nop" }
 end
-local function initialize(tfmdata,kind,value) 
+local function initialize(tfmdata,kind,value)
   if value then
     local resources=tfmdata.resources
     local palettes=resources.colorpalettes
@@ -22916,7 +23422,13 @@ local function initialize(tfmdata,kind,value)
         converted=setmetatableindex(convert)
         resources.converted=converted
       end
-      local colorvalues=sharedpalettes[value] or converted[palettes[tonumber(value) or 1] or palettes[1]] or {}
+      local colorvalues=sharedpalettes[value]
+      local default=false 
+      if colorvalues then
+        default=colorvalues[#colorvalues]
+      else
+        colorvalues=converted[palettes[tonumber(value) or 1] or palettes[1]] or {}
+      end
       local classes=#colorvalues
       if classes==0 then
         return
@@ -22929,7 +23441,6 @@ local function initialize(tfmdata,kind,value)
         { id=0 }
       }
       local getactualtext=otf.getactualtext
-      local default=colorvalues[#colorvalues]
       local b,e=getactualtext(tounicode(0xFFFD))
       local actualb={ "pdf","page",b } 
       local actuale={ "pdf","page",e }
@@ -22960,6 +23471,12 @@ local function initialize(tfmdata,kind,value)
                 f=true
                 n=n+1 t[n]=v
                 l=v
+              else
+                if f then
+                  n=n+1 t[n]=pop
+                end
+                f=false
+                l=nil
               end
               n=n+1 t[n]=charcommand[entry.slot]
               if s>1 and i<s and goback then
@@ -23002,7 +23519,7 @@ do
         done=f_used(n)
         hashed[pdf]=done
       end
-      return nil,done,nil
+      return done
     end
   else
     local openpdf=pdfe.new
@@ -23015,7 +23532,7 @@ do
         done=f_used(n)
         hashed[pdf]=done
       end
-      return nil,done,nil
+      return done
     end
   end
 end
@@ -23036,6 +23553,10 @@ local function pdftovirtual(tfmdata,pdfshapes,kind)
   local b,e=getactualtext(tounicode(0xFFFD))
   local actualb={ "pdf","page",b } 
   local actuale={ "pdf","page",e }
+  local vfimage=lpdf and lpdf.vfimage or function(wd,ht,dp,data,name)
+    local name=storepdfdata(data)
+    return { "image",{ filename=name,width=wd,height=ht,depth=dp } }
+  end
   for unicode,character in sortedhash(characters) do 
     local index=character.index
     if index then
@@ -23054,21 +23575,18 @@ local function pdftovirtual(tfmdata,pdfshapes,kind)
         dy=0
       end
       if data then
-        local setcode,name,nilcode=storepdfdata(data)
-        if name then
-          local bt=unicode and getactualtext(unicode)
-          local wd=character.width or 0
-          local ht=character.height or 0
-          local dp=character.depth or 0
-          character.commands={
-            not unicode and actualb or { "pdf","page",(getactualtext(unicode)) },
-            downcommand[dp+dy*hfactor],
-            rightcommand[dx*hfactor],
-            { "image",{ filename=name,width=wd,height=ht,depth=dp } },
-            actuale,
-          }
-          character[kind]=true
-        end
+        local bt=unicode and getactualtext(unicode)
+        local wd=character.width or 0
+        local ht=character.height or 0
+        local dp=character.depth or 0
+        character.commands={
+          not unicode and actualb or { "pdf","page",(getactualtext(unicode)) },
+          downcommand[dp+dy*hfactor],
+          rightcommand[dx*hfactor],
+          vfimage(wd,ht,dp,data,name),
+          actuale,
+        }
+        character[kind]=true
       end
     end
   end
@@ -23184,40 +23702,40 @@ fonts.handlers.otf.features.register {
     node=initializesvg,
   }
 }
-local otfsbix=otf.sbix or {}
-otf.sbix=otfsbix
-otf.sbixenabled=true
+local otfpng=otf.png or {}
+otf.png=otfpng
+otf.pngenabled=true
 do
-  local report_sbix=logs.reporter("fonts","sbix conversion")
+  local report_png=logs.reporter("fonts","png conversion")
   local loaddata=io.loaddata
   local savedata=io.savedata
   local remove=os.remove
   local runner=sandbox and sandbox.registerrunner {
-    name="otfsbix",
+    name="otfpng",
     program="gm",
-    template="convert -quality 100 temp-otf-sbix-shape.sbix temp-otf-sbix-shape.pdf > temp-otf-svg-shape.log",
+    template="convert -quality 100 temp-otf-png-shape.png temp-otf-png-shape.pdf > temp-otf-svg-shape.log",
   }
   if not runner then
     runner=function()
-      return os.execute("gm convert -quality 100 temp-otf-sbix-shape.sbix temp-otf-sbix-shape.pdf > temp-otf-svg-shape.log")
+      return os.execute("gm convert -quality 100 temp-otf-png-shape.png temp-otf-png-shape.pdf > temp-otf-svg-shape.log")
     end
   end
-  function otfsbix.topdf(sbixshapes)
+  function otfpng.topdf(pngshapes)
     local pdfshapes={}
-    local sbixfile="temp-otf-sbix-shape.sbix"
-    local pdffile="temp-otf-sbix-shape.pdf"
+    local pngfile="temp-otf-png-shape.png"
+    local pdffile="temp-otf-png-shape.pdf"
     local nofdone=0
-    local indices=sortedkeys(sbixshapes) 
+    local indices=sortedkeys(pngshapes) 
     local nofindices=#indices
-    report_sbix("processing %i sbix containers",nofindices)
+    report_png("processing %i png containers",nofindices)
     statistics.starttiming()
     for i=1,nofindices do
       local index=indices[i]
-      local entry=sbixshapes[index]
-      local data=entry.data
+      local entry=pngshapes[index]
+      local data=entry.data 
       local x=entry.x
       local y=entry.y
-      savedata(sbixfile,data)
+      savedata(pngfile,data)
       runner()
       pdfshapes[index]={
         x=x~=0 and x or nil,
@@ -23226,54 +23744,62 @@ do
       }
       nofdone=nofdone+1
       if nofdone%100==0 then
-        report_sbix("%i shapes processed",nofdone)
+        report_png("%i shapes processed",nofdone)
       end
     end
-    report_sbix("processing %i pdf results",nofindices)
-    remove(sbixfile)
+    report_png("processing %i pdf results",nofindices)
+    remove(pngfile)
     remove(pdffile)
     statistics.stoptiming()
     if statistics.elapsedseconds then
-      report_sbix("sbix conversion time %s",statistics.elapsedseconds() or "-")
+      report_png("png conversion time %s",statistics.elapsedseconds() or "-")
     end
     return pdfshapes
   end
 end
-local function initializesbix(tfmdata,kind,value) 
-  if value and otf.sbixenabled then
-    local sbix=tfmdata.properties.sbix
-    local hash=sbix and sbix.hash
-    local timestamp=sbix and sbix.timestamp
+local function initializepng(tfmdata,kind,value) 
+  if value and otf.pngenabled then
+    local png=tfmdata.properties.png
+    local hash=png and png.hash
+    local timestamp=png and png.timestamp
     if not hash then
       return
     end
     local pdffile=containers.read(otf.pdfcache,hash)
     local pdfshapes=pdffile and pdffile.pdfshapes
     if not pdfshapes or pdffile.timestamp~=timestamp then
-      local sbixfile=containers.read(otf.sbixcache,hash)
-      local sbixshapes=sbixfile and sbixfile.sbixshapes
-      pdfshapes=sbixshapes and otfsbix.topdf(sbixshapes) or {}
+      local pngfile=containers.read(otf.pngcache,hash)
+      local pngshapes=pngfile and pngfile.pngshapes
+      pdfshapes=pngshapes and otfpng.topdf(pngshapes) or {}
       containers.write(otf.pdfcache,hash,{
         pdfshapes=pdfshapes,
         timestamp=timestamp,
       })
     end
-    pdftovirtual(tfmdata,pdfshapes,"sbix")
+    pdftovirtual(tfmdata,pdfshapes,"png")
   end
 end
 fonts.handlers.otf.features.register {
   name="sbix",
   description="sbix glyphs",
   manipulators={
-    base=initializesbix,
-    node=initializesbix,
+    base=initializepng,
+    node=initializepng,
+  }
+}
+fonts.handlers.otf.features.register {
+  name="cblc",
+  description="cblc glyphs",
+  manipulators={
+    base=initializepng,
+    node=initializepng,
   }
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-ocl”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-ocl”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-otc” 088ba25667dfc5036867d007797e1602] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-otc” 088ba25667dfc5036867d007797e1602] ---
 
 if not modules then modules={} end modules ['font-otc']={
   version=1.001,
@@ -24022,10 +24548,10 @@ end
 otf.enhancers.enhance=enhance
 otf.enhancers.register("check extra features",enhance)
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-otc”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-otc”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-onr” cf93eb4ab34461d2b3797792dbdb035f] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-onr” 20b0d2753f58ff91180947ce4078571e] ---
 
 if not modules then modules={} end modules ['font-onr']={
   version=1.001,
@@ -24040,7 +24566,7 @@ local match,lower,gsub,strip,find=string.match,string.lower,string.gsub,string.s
 local char,byte,sub=string.char,string.byte,string.sub
 local abs=math.abs
 local bxor,rshift=bit32.bxor,bit32.rshift
-local P,S,R,Cmt,C,Ct,Cs,Carg,Cf,Cg=lpeg.P,lpeg.S,lpeg.R,lpeg.Cmt,lpeg.C,lpeg.Ct,lpeg.Cs,lpeg.Carg,lpeg.Cf,lpeg.Cg
+local P,S,R,V,Cmt,C,Ct,Cs,Carg,Cf,Cg,Cc=lpeg.P,lpeg.S,lpeg.R,lpeg.V,lpeg.Cmt,lpeg.C,lpeg.Ct,lpeg.Cs,lpeg.Carg,lpeg.Cf,lpeg.Cg,lpeg.Cc
 local lpegmatch,patterns=lpeg.match,lpeg.patterns
 local trace_indexing=false trackers.register("afm.indexing",function(v) trace_indexing=v end)
 local trace_loading=false trackers.register("afm.loading",function(v) trace_loading=v end)
@@ -24083,14 +24609,21 @@ do
   local routines,vector,chars,n,m
   local initialize=function(str,position,size)
     n=0
-    m=size 
+    m=size
     return position+1
   end
   local setroutine=function(str,position,index,size,filename)
-    local forward=position+tonumber(size)
+    if routines[index] then
+      return false
+    end
+    local forward=position+size
     local stream=decrypt(sub(str,position+1,forward),4330,4)
     routines[index]={ byte(stream,1,#stream) }
-    return forward
+    n=n+1
+    if n>=m then
+      return #str
+    end
+    return forward+1
   end
   local setvector=function(str,position,name,size,filename)
     local forward=position+tonumber(size)
@@ -24130,7 +24663,7 @@ do
   local p_np=spacing*(P("NP")+P("|"))
   local p_nd=spacing*(P("ND")+P("|"))
   local p_filterroutines=
-    (1-subroutines)^0*subroutines*spaces*Cmt(cardinal,initialize)*(Cmt(cardinal*spaces*cardinal*p_rd*Carg(1),setroutine)*p_np+P(1))^1
+    (1-subroutines)^0*subroutines*spaces*Cmt(cardinal,initialize)*(Cmt(cardinal*spaces*cardinal*p_rd*Carg(1),setroutine)*p_np+(1-p_nd))^1
   local p_filtershapes=
     (1-charstrings)^0*charstrings*spaces*Cmt(cardinal,initialize)*(Cmt(name*spaces*cardinal*p_rd*Carg(1),setshapes)*p_nd+P(1))^1
   local p_filternames=Ct (
@@ -24139,7 +24672,18 @@ do
   local p_filterencoding=(1-encoding)^0*encoding*spaces*digits*spaces*array*(1-dup)^0*Cf(
       Ct("")*Cg(spacing*dup*spaces*cardinal*spaces*name*spaces*put)^1
 ,rawset)
-  local function loadpfbvector(filename,shapestoo)
+  local key=spacing*P("/")*R("az","AZ")
+  local str=spacing*Cs { (P("(")/"")*((1-P("\\(")-P("\\)")-S("()"))+V(1))^0*(P(")")/"") }
+  local num=spacing*(R("09")+S("+-."))^1/tonumber
+  local arr=spacing*Ct (S("[{")*(num)^0*spacing*S("]}"))
+  local boo=spacing*(P("true")*Cc(true)+P("false")*Cc(false))
+  local nam=spacing*P("/")*Cs(R("az","AZ")^1)
+  local p_filtermetadata=(
+    P("/")*Carg(1)*((
+      C("version")*str+C("Copyright")*str+C("Notice")*str+C("FullName")*str+C("FamilyName")*str+C("Weight")*str+C("ItalicAngle")*num+C("isFixedPitch")*boo+C("UnderlinePosition")*num+C("UnderlineThickness")*num+C("FontName")*nam+C("FontMatrix")*arr+C("FontBBox")*arr
+    ) )/function(t,k,v) t[lower(k)]=v end+P(1)
+  )^0*Carg(1)
+  local function loadpfbvector(filename,shapestoo,streams)
     local data=io.loaddata(resolvers.findfile(filename))
     if not data then
       report_pfb("no data in %a",filename)
@@ -24157,9 +24701,10 @@ do
     binary=decrypt(binary,55665,4)
     local names={}
     local encoding=lpegmatch(p_filterencoding,ascii)
+    local metadata=lpegmatch(p_filtermetadata,ascii,1,{})
     local glyphs={}
     routines,vector,chars={},{},{}
-    if shapestoo then
+    if shapestoo or streams then
       lpegmatch(p_filterroutines,binary,1,filename)
       lpegmatch(p_filtershapes,binary,1,filename)
       local data={
@@ -24171,13 +24716,13 @@ do
           }
         },
       }
-      fonts.handlers.otf.readers.parsecharstrings(false,data,glyphs,true,true)
+      fonts.handlers.otf.readers.parsecharstrings(false,data,glyphs,true,"cff",streams)
     else
       lpegmatch(p_filternames,binary,1,filename)
     end
     names=vector
     routines,vector,chars=nil,nil,nil
-    return names,encoding,glyphs
+    return names,encoding,glyphs,metadata
   end
   local pfb=handlers.pfb or {}
   handlers.pfb=pfb
@@ -24378,10 +24923,10 @@ function readers.getinfo(filename)
   end
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-onr”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-onr”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-one” b0a175e8f123feb797c7a5a9b02b85a0] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-one” b0a175e8f123feb797c7a5a9b02b85a0] ---
 
 if not modules then modules={} end modules ['font-one']={
   version=1.001,
@@ -25081,10 +25626,10 @@ registerafmenhancer("normalize features",enhance_normalize_features)
 registerafmenhancer("check extra features",otfenhancers.enhance)
 registerafmenhancer("fix names",enhance_fix_names)
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-one”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-one”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-afk” 9da14e0fb22129c053acc599d1312544] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-afk” 54d554530e75c57c56ee76234724e26d] ---
 
 if not modules then modules={} end modules ['font-afk']={
   version=1.001,
@@ -25251,10 +25796,10 @@ fonts.handlers.afm.helpdata={
   }
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-afk”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-afk”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-tfm” c9797c1b4ccb8fdb7f041e19207109a2] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-tfm” f1a3796cce3838210248eb1daee6ea83] ---
 
 if not modules then modules={} end modules ['font-tfm']={
   version=1.001,
@@ -25266,6 +25811,7 @@ if not modules then modules={} end modules ['font-tfm']={
 local next,type=next,type
 local match,format=string.match,string.format
 local concat,sortedhash=table.concat,table.sortedhash
+local idiv=number.idiv
 local trace_defining=false trackers.register("fonts.defining",function(v) trace_defining=v end)
 local trace_features=false trackers.register("tfm.features",function(v) trace_features=v end)
 local report_defining=logs.reporter("fonts","defining")
@@ -25301,147 +25847,190 @@ function tfm.setfeatures(tfmdata,features)
   end
 end
 local depth={}
-local function read_from_tfm(specification)
-  local filename=specification.filename
-  local size=specification.size
-  depth[filename]=(depth[filename] or 0)+1
-  if trace_defining then
-    report_defining("loading tfm file %a at size %s",filename,size)
-  end
-  local tfmdata=font.read_tfm(filename,size) 
-  if tfmdata then
-    local features=specification.features and specification.features.normal or {}
-    local features=constructors.checkedfeatures("tfm",features)
-    specification.features.normal=features
-    local newtfmdata=(depth[filename]==1) and tfm.reencode(tfmdata,specification)
-    if newtfmdata then
-       tfmdata=newtfmdata
+local read_from_tfm,check_tfm do
+  local tfmreaders=context and tfm.readers
+  local loadtfmvf=tfmreaders and tfmreaders.loadtfmvf
+  local loadtfm=font.read_tfm
+  local loadvf=font.read_vf
+  directives.register("fonts.tfm.builtin",function(v)
+    loadtfmvf=tfmreaders and tfmreaders.loadtfmvf
+    if v and loadtfm then
+      loadtfmvf=false
     end
-    local resources=tfmdata.resources or {}
-    local properties=tfmdata.properties or {}
-    local parameters=tfmdata.parameters or {}
-    local shared=tfmdata.shared   or {}
-    shared.features=features
-    shared.resources=resources
-    properties.name=tfmdata.name      
-    properties.fontname=tfmdata.fontname    
-    properties.psname=tfmdata.psname     
-    properties.fullname=tfmdata.fullname    
-    properties.filename=specification.filename 
-    properties.format=fonts.formats.tfm
-    tfmdata.properties=properties
-    tfmdata.resources=resources
-    tfmdata.parameters=parameters
-    tfmdata.shared=shared
-    shared.rawdata={ resources=resources }
-    shared.features=features
-    if newtfmdata then
-      if not resources.marks then
-        resources.marks={}
+  end)
+  read_from_tfm=function(specification)
+    local filename=specification.filename
+    local size=specification.size
+    depth[filename]=(depth[filename] or 0)+1
+    if trace_defining then
+      report_defining("loading tfm file %a at size %s",filename,size)
+    end
+    local tfmdata 
+    if loadtfmvf then
+      tfmdata=loadtfmvf(filename,size)
+    else
+      tfmdata=loadtfm(filename,size)
+    end
+    if tfmdata then
+      local features=specification.features and specification.features.normal or {}
+      local features=constructors.checkedfeatures("tfm",features)
+      specification.features.normal=features
+      local newtfmdata=(depth[filename]==1) and tfm.reencode(tfmdata,specification)
+      if newtfmdata then
+         tfmdata=newtfmdata
       end
-      if not resources.sequences then
-        resources.sequences={}
-      end
-      if not resources.features then
-        resources.features={
-          gsub={},
-          gpos={},
-        }
-      end
-      if not tfmdata.changed then
-        tfmdata.changed={}
-      end
-      if not tfmdata.descriptions then
-        tfmdata.descriptions=tfmdata.characters
-      end
-      otf.readers.addunicodetable(tfmdata)
-      tfmenhancers.apply(tfmdata,filename)
-      constructors.applymanipulators("tfm",tfmdata,features,trace_features,report_tfm)
-      otf.readers.unifymissing(tfmdata)
-      fonts.mappings.addtounicode(tfmdata,filename)
-      tfmdata.tounicode=1
-      local tounicode=fonts.mappings.tounicode
-      for unicode,v in next,tfmdata.characters do
-        local u=v.unicode
-        if u then
-          v.tounicode=tounicode(u)
+      local resources=tfmdata.resources or {}
+      local properties=tfmdata.properties or {}
+      local parameters=tfmdata.parameters or {}
+      local shared=tfmdata.shared   or {}
+      shared.features=features
+      shared.resources=resources
+      properties.name=tfmdata.name      
+      properties.fontname=tfmdata.fontname    
+      properties.psname=tfmdata.psname     
+      properties.fullname=tfmdata.fullname    
+      properties.filename=specification.filename 
+      properties.format=tfmdata.format or fonts.formats.tfm 
+      properties.usedbitmap=tfmdata.usedbitmap
+      tfmdata.properties=properties
+      tfmdata.resources=resources
+      tfmdata.parameters=parameters
+      tfmdata.shared=shared
+      shared.rawdata={ resources=resources }
+      shared.features=features
+      if newtfmdata then
+        if not resources.marks then
+          resources.marks={}
+        end
+        if not resources.sequences then
+          resources.sequences={}
+        end
+        if not resources.features then
+          resources.features={
+            gsub={},
+            gpos={},
+          }
+        end
+        if not tfmdata.changed then
+          tfmdata.changed={}
+        end
+        if not tfmdata.descriptions then
+          tfmdata.descriptions=tfmdata.characters
+        end
+        otf.readers.addunicodetable(tfmdata)
+        tfmenhancers.apply(tfmdata,filename)
+        constructors.applymanipulators("tfm",tfmdata,features,trace_features,report_tfm)
+        otf.readers.unifymissing(tfmdata)
+        fonts.mappings.addtounicode(tfmdata,filename)
+        tfmdata.tounicode=1
+        local tounicode=fonts.mappings.tounicode
+        for unicode,v in next,tfmdata.characters do
+          local u=v.unicode
+          if u then
+            v.tounicode=tounicode(u)
+          end
+        end
+        if tfmdata.usedbitmap then
+          tfm.addtounicode(tfmdata)
         end
       end
-      if tfmdata.usedbitmap then
-        tfm.addtounicode(tfmdata)
+      shared.processes=next(features) and tfm.setfeatures(tfmdata,features) or nil
+      if size<0 then
+        size=idiv(65536*-size,100)
       end
-    end
-    shared.processes=next(features) and tfm.setfeatures(tfmdata,features) or nil
-    parameters.factor=1 
-    parameters.size=size
-    parameters.slant=parameters.slant     or parameters[1] or 0
-    parameters.space=parameters.space     or parameters[2] or 0
-    parameters.space_stretch=parameters.space_stretch or parameters[3] or 0
-    parameters.space_shrink=parameters.space_shrink  or parameters[4] or 0
-    parameters.x_height=parameters.x_height    or parameters[5] or 0
-    parameters.quad=parameters.quad      or parameters[6] or 0
-    parameters.extra_space=parameters.extra_space  or parameters[7] or 0
-    constructors.enhanceparameters(parameters)
-    properties.private=properties.private or tfmdata.private or privateoffset
-    if newtfmdata then
-    elseif constructors.resolvevirtualtoo then
-      fonts.loggers.register(tfmdata,file.suffix(filename),specification) 
-      local vfname=findbinfile(specification.name,'ovf')
-      if vfname and vfname~="" then
-        local vfdata=font.read_vf(vfname,size) 
-        if vfdata then
-          local chars=tfmdata.characters
-          for k,v in next,vfdata.characters do
-            chars[k].commands=v.commands
+      parameters.factor=1   
+      parameters.units=1000 
+      parameters.size=size
+      parameters.slant=parameters.slant     or parameters[1] or 0
+      parameters.space=parameters.space     or parameters[2] or 0
+      parameters.space_stretch=parameters.space_stretch or parameters[3] or 0
+      parameters.space_shrink=parameters.space_shrink  or parameters[4] or 0
+      parameters.x_height=parameters.x_height    or parameters[5] or 0
+      parameters.quad=parameters.quad      or parameters[6] or 0
+      parameters.extra_space=parameters.extra_space  or parameters[7] or 0
+      constructors.enhanceparameters(parameters)
+      properties.private=properties.private or tfmdata.private or privateoffset
+      if newtfmdata then
+      elseif loadtfmvf then
+        local fonts=tfmdata.fonts
+        if fonts then
+          for i=1,#fonts do
+            local font=fonts[i]
+            local id=font.id
+            if not id then
+              local name=font.name
+              local size=font.size
+              if name and size then
+                local data,id=constructors.readanddefine(name,size)
+                if id then
+                  font.id=id
+                  font.name=nil
+                  font.size=nil
+                end
+              end
+            end
           end
-          properties.virtualized=true
-          tfmdata.fonts=vfdata.fonts
-          tfmdata.type="virtual" 
-          local fontlist=vfdata.fonts
-          local name=file.nameonly(filename)
-          for i=1,#fontlist do
-            local n=fontlist[i].name
-            local s=fontlist[i].size
-            local d=depth[filename]
-            s=constructors.scaled(s,vfdata.designsize)
-            if d>tfm.maxnestingdepth then
-              report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
-              fontlist[i]={ id=0 }
-            elseif (d>1) and (s>tfm.maxnestingsize) then
-              report_defining("virtual font %a exceeds size %s",n,s)
-              fontlist[i]={ id=0 }
-            else
-              local t,id=fonts.constructors.readanddefine(n,s)
-              fontlist[i]={ id=id }
+        end
+      elseif constructors.resolvevirtualtoo then
+        fonts.loggers.register(tfmdata,file.suffix(filename),specification) 
+        local vfname=findbinfile(specification.name,'ovf')
+        if vfname and vfname~="" then
+          local vfdata=loadvf(vfname,size)
+          if vfdata then
+            local chars=tfmdata.characters
+            for k,v in next,vfdata.characters do
+              chars[k].commands=v.commands
+            end
+            properties.virtualized=true
+            tfmdata.fonts=vfdata.fonts
+            tfmdata.type="virtual" 
+            local fontlist=vfdata.fonts
+            local name=file.nameonly(filename)
+            for i=1,#fontlist do
+              local n=fontlist[i].name
+              local s=fontlist[i].size
+              local d=depth[filename]
+              s=constructors.scaled(s,vfdata.designsize)
+              if d>tfm.maxnestingdepth then
+                report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
+                fontlist[i]={ id=0 }
+              elseif (d>1) and (s>tfm.maxnestingsize) then
+                report_defining("virtual font %a exceeds size %s",n,s)
+                fontlist[i]={ id=0 }
+              else
+                local t,id=constructors.readanddefine(n,s)
+                fontlist[i]={ id=id }
+              end
             end
           end
         end
       end
+      properties.haskerns=true
+      properties.hasligatures=true
+      properties.hasitalics=true
+      resources.unicodes={}
+      resources.lookuptags={}
+      depth[filename]=depth[filename]-1
+      return tfmdata
+    else
+      depth[filename]=depth[filename]-1
     end
-    properties.haskerns=true
-    properties.hasligatures=true
-    resources.unicodes={}
-    resources.lookuptags={}
-    depth[filename]=depth[filename]-1
-    return tfmdata
-  else
-    depth[filename]=depth[filename]-1
   end
-end
-local function check_tfm(specification,fullname) 
-  local foundname=findbinfile(fullname,'tfm') or ""
-  if foundname=="" then
-    foundname=findbinfile(fullname,'ofm') or "" 
-  end
-  if foundname=="" then
-    foundname=fonts.names.getfilename(fullname,"tfm") or ""
-  end
-  if foundname~="" then
-    specification.filename=foundname
-    specification.format="ofm"
-    return read_from_tfm(specification)
-  elseif trace_defining then
-    report_defining("loading tfm with name %a fails",specification.name)
+  check_tfm=function(specification,fullname) 
+    local foundname=findbinfile(fullname,'tfm') or ""
+    if foundname=="" then
+      foundname=findbinfile(fullname,'ofm') or "" 
+    end
+    if foundname=="" then
+      foundname=fonts.names.getfilename(fullname,"tfm") or ""
+    end
+    if foundname~="" then
+      specification.filename=foundname
+      specification.format="ofm"
+      return read_from_tfm(specification)
+    elseif trace_defining then
+      report_defining("loading tfm with name %a fails",specification.name)
+    end
   end
 end
 readers.check_tfm=check_tfm
@@ -25501,7 +26090,7 @@ do
     local encoding=false
     local vector=false
     if type(pfbfile)=="string" then
-      local pfb=fonts.constructors.handlers.pfb
+      local pfb=constructors.handlers.pfb
       if pfb and pfb.loadvector then
         local v,e=pfb.loadvector(pfbfile)
         if v then
@@ -25529,7 +26118,7 @@ do
     local originals=tfmdata.characters
     local indices={}
     local parentfont={ "font",1 }
-    local private=tfmdata or fonts.constructors.privateoffset
+    local private=tfmdata.privateoffset or constructors.privateoffset
     local reported=encdone[tfmfile][encfile]
     local backmap=vector and table.swapped(vector)
     local done={} 
@@ -25619,21 +26208,16 @@ CMapName currentdict /CMap defineresource pop end
 end
 end
 ]]
-  local flushstreamobject=lpdf and lpdf.flushstreamobject
-  local setfontattributes=pdf.setfontattributes
-  if flushstreamobject then
-  else
+  local flushstreamobject=lpdf and lpdf.flushstreamobject 
+  local setfontattributes=lpdf and lpdf.setfontattributes 
+  if not flushstreamobject then
     flushstreamobject=function(data)
-      return pdf.obj {
-        immediate=true,
-        type="stream",
-        string=data,
-      }
+      return pdf.obj { immediate=true,type="stream",string=data } 
     end
   end
   if not setfontattributes then
     setfontattributes=function(id,data)
-      print(format("your luatex is too old so no tounicode bitmap font%i",id))
+      return pdf.setfontattributes(id,data) 
     end
   end
   function tfm.addtounicode(tfmdata)
@@ -25765,10 +26349,10 @@ registertfmfeature {
   }
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-tfm”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-tfm”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-lua” 1fbfdf7b689b2bdfd0e3bb9bf74ce136] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-lua” 55b281fb98f7bd848fc19928f376f647] ---
 
 if not modules then modules={} end modules ['font-lua']={
   version=1.001,
@@ -25808,10 +26392,10 @@ function readers.lua(specification)
   return check_lua(specification,fullname)
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-lua”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-lua”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-def” 8e2cb2552bf02246da2ac43334b91795] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-def” 6569d90e55c91890b3b0650063a83ee6] ---
 
 if not modules then modules={} end modules ['font-def']={
   version=1.001,
@@ -25948,9 +26532,6 @@ function resolvers.name(specification)
           features.normal=normal
         end
         normal.instance=instance
-        if not callbacks.supported.glyph_stream_provider then
-          normal.variableshapes=true 
-        end
       end
       local suffix=lower(suffixonly(resolved))
       if fonts.formats[suffix] then
@@ -26216,10 +26797,10 @@ function font.getfont(id)
 end
 callbacks.register('define_font',definers.read,"definition of fonts (tfmdata preparation)")
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-def”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-def”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-def” f435e0875f203f343157baeff876ec9c] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-def” 5ad79120ebc5e60f4d322fb3ee13bffe] ---
 
 if not modules then modules={} end modules ['luatex-fonts-def']={
   version=1.001,
@@ -26300,10 +26881,10 @@ function fonts.definers.applypostprocessors(tfmdata)
   return tfmdata
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-def”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-def”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-ext” 32013cbc5d5d336be8b1d1e5879d86c4] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-ext” 01015ab3758cdc2af29394e6d502a91a] ---
 
 if not modules then modules={} end modules ['luatex-fonts-ext']={
   version=1.001,
@@ -26489,10 +27070,10 @@ registerotffeature {
   }
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-ext”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-ext”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-imp-tex” ceb087ef6fa2f89aed7179f60ddf8f35] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-imp-tex” 77c374b0ef00c2fb12188ec42beb4257] ---
 
 if not modules then modules={} end modules ['font-imp-tex']={
   version=1.001,
@@ -26591,10 +27172,10 @@ registerotffeature {
   description="arabic digits",
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-imp-tex”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-imp-tex”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-imp-ligatures” 26ffcf089391445f7af59536c8814364] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-imp-ligatures” 043daa4fcccf2560868da359d71d3a4a] ---
 
 if not modules then modules={} end modules ['font-imp-ligatures']={
   version=1.001,
@@ -26708,10 +27289,10 @@ if context then
   }
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-imp-ligatures”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-imp-ligatures”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-imp-italics” c2e6d6c4096a2c30d68fbffd3d7d58a7] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-imp-italics” fe1ca80fb5ea4a2f8d2d5c484e7ba913] ---
 
 if not modules then modules={} end modules ['font-imp-italics']={
   version=1.001,
@@ -26817,14 +27398,14 @@ if context then
   registerafmfeature(dimensions_specification)
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-imp-italics”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-imp-italics”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “font-imp-effects” 3327181ef3db6f44dd234ad66ccc3f38] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “font-imp-effects” 73a660359a0ec71e44cc2b7225a715ac] ---
 
 if not modules then modules={} end modules ['font-imp-effects']={
   version=1.001,
-  comment="companion to font-ini.mkiv and hand-ini.mkiv",
+  comment="companion to font-ini.mkiv",
   author="Hans Hagen, PRAGMA-ADE, Hasselt NL",
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"
@@ -27177,10 +27758,10 @@ local specification={
 registerotffeature(specification)
 registerafmfeature(specification)
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “font-imp-effects”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “font-imp-effects”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-lig” fbd251eea3810a43a8d5542319361d68] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-lig” b9dbe77ce747d4c35bb2a20ffbe5aa51] ---
 
 
 fonts.handlers.otf.addfeature {
@@ -29249,10 +29830,10 @@ fonts.handlers.otf.addfeature {
  ["type"]="ligature",
 }
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-lig”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-lig”] ---
 
 
-do  --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-gbn” 10ecdf01e7c926e5128ad8a9dff4d677] ---
+do  --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-gbn” d25472d54c4841db43a745764a63533e] ---
 
 if not modules then modules={} end modules ['luatex-fonts-gbn']={
   version=1.001,
@@ -29517,7 +30098,7 @@ function nodes.simple_font_handler(head,groupcode,size,packtype,direction)
   return head
 end
 
-end --- [luaotfload, fontloader-2018-10-28.lua scope for “fonts-gbn”] ---
+end --- [luaotfload, fontloader-2018-12-14.lua scope for “fonts-gbn”] ---
 
 
 --- vim:ft=lua:sw=2:ts=8:et:tw=79

@@ -659,7 +659,8 @@ end
 
 -- utf extensies
 
-utf = utf or (unicode and unicode.utf8) or { }
+-- utf = utf or (unicode and unicode.utf8) or { }
+utf = utf or { }
 
 local utfcharacters = utf and utf.characters or string.utfcharacters
 local utfgmatch     = utf and utf.gmatch

@@ -740,7 +740,7 @@ local function unifymissing(fontdata)
     resources.unicodes = nil
 end
 
-local firstprivate = fonts.privateoffsets.textbase or 0xF0000
+local firstprivate = fonts.privateoffsets and fonts.privateoffsets.textbase or 0xF0000
 local puafirst     = 0xE000
 local pualast      = 0xF8FF
 

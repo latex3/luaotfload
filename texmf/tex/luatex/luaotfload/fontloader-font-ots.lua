@@ -784,23 +784,17 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                 -- ok, goto next lookup
             end
         end
-    else -- is the check for disc still valid here ? and why only replace then
+    else
         local discfound = false
-        local lastdisc  = nil
         local hasmarks  = marks[startchar]
         while current do
             local char, id = ischar(current,currentfont)
             if char then
                 if skiphash and skiphash[char] then
                     current = getnext(current)
-                 -- if stop then stop = current end -- ?
-                else -- ligature is a tree
-                    local lg = ligature[char] -- can there be multiple in a row? maybe in a bad font
+                else
+                    local lg = ligature[char]
                     if lg then
-                        if not discfound and lastdisc then
-                            discfound = lastdisc
-                            lastdisc  = nil
-                        end
                         if marks[char] then
                             hasmarks = true
                         end
@@ -815,47 +809,76 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                 -- kind of weird
                 break
             elseif id == disc_code then
-                --
-                -- Kai: see chainprocs, we probably could do the same here or was there a reason
-                -- why we kept the replace check here.
-                --
-                -- if not discfound then
-                --     discfound = current
-                -- end
-                -- if current == stop then
-                --     break -- okay? or before the disc
-                -- else
-                --     current = getnext(current)
-                -- end
-                --
-                local replace = getfield(current,"replace") -- hm: pre and post
-                if replace then
-                    -- of{f-}{}{f}e  o{f-}{}{f}fe  o{-}{}{ff}e (oe and ff ligature)
-                    -- we can end up here when we have a start run .. testruns start at a disc but
-                    -- so here we have the other case: char + disc
-                    while replace do
-                        local char, id = ischar(replace,currentfont)
-                        if char then
-                            local lg = ligature[char] -- can there be multiple in a row? maybe in a bad font
-                            if lg then
-                                if marks[char] then
-                                    hasmarks = true -- very unlikely
-                                end
-                                ligature = lg
-                                replace  = getnext(replace)
-                            else
-                                return head, start, false, false
-                            end
-                        else
-                            return head, start, false, false
-                        end
-                    end
-                    stop = current
-                end
-                lastdisc = current
-                current  = getnext(current)
+                discfound = current
+                break
             else
                 break
+            end
+        end
+        -- of{f-}{}{f}e  o{f-}{}{f}fe  o{-}{}{ff}e (oe and ff ligature)
+        -- we can end up here when we have a start run .. testruns start at a disc but
+        -- so here we have the other case: char + disc
+        if discfound then
+            -- don't assume marks in a disc and we don't run over a disc (for now)
+            local pre, post, replace = getdisc(discfound)
+            local match
+            if replace then
+                local char = ischar(replace,currentfont)
+                if char and ligature[char] then
+                    match = true
+                end
+            end
+            if not match and pre then
+                local char = ischar(pre,currentfont)
+                if char and ligature[char] then
+                    match = true
+                end
+            end
+            if not match and not pre or not replace then
+                local n = getnext(discfound)
+                local char = ischar(n,currentfont)
+                if char and ligature[char] then
+                    match = true
+                end
+            end
+            if match then
+                -- we force a restart
+                local ishead = head == start
+                local prev   = getprev(start)
+                if stop then
+                    setnext(stop)
+                    local tail = getprev(stop)
+                    local copy = copy_node_list(start)
+                    local liat = find_node_tail(copy)
+                    if pre and replace then
+                        setlink(liat,pre)
+                    end
+                    if replace then
+                        setlink(tail,replace)
+                    end
+                    pre     = copy
+                    replace = start
+                else
+                    setnext(start)
+                    local copy = copy_node(start)
+                    if pre then
+                        setlink(copy,pre)
+                    end
+                    if replace then
+                        setlink(start,replace)
+                    end
+                    pre     = copy
+                    replace = start
+                end
+                setdisc(discfound,pre,post,replace)
+                if prev then
+                    setlink(prev,discfound)
+                else
+                    setprev(discfound)
+                    head  = discfound
+                end
+                start = discfound
+                return head, start, true, true
             end
         end
         local lig = ligature.ligature
@@ -863,10 +886,12 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
             if stop then
                 if trace_ligatures then
                     local stopchar = getchar(stop)
-                    head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+                 -- head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+                    head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,false,hasmarks)
                     logprocess("%s: replacing %s upto %s by ligature %s case 2",pref(dataset,sequence),gref(startchar),gref(stopchar),gref(lig))
                 else
-                    head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+                 -- head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+                    head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,false,hasmarks)
                 end
             else
                 -- weird but happens (in some arabic font)
@@ -876,12 +901,12 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                     logprocess("%s: replacing %s by (no real) ligature %s case 3",pref(dataset,sequence),gref(startchar),gref(lig))
                 end
             end
-            return head, start, true, discfound
+            return head, start, true, false
         else
             -- weird but happens, pseudo ligatures ... just the components
         end
     end
-    return head, start, false, discfound
+    return head, start, false, false
 end
 
 function handlers.gpos_single(head,start,dataset,sequence,kerns,rlmode,skiphash,step,injection)
@@ -3960,12 +3985,14 @@ do
                                         a = true
                                     end
                                     if a then
-                                        local ok
-                                        head, start, ok = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+                                        local ok, df
+                                        head, start, ok, df = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
                                      -- if ok then
                                      --     done = true
                                      -- end
-                                        if start then
+                                        if df then
+-- print("restart 1",typ)
+                                        elseif start then
                                             start = getnext(start)
                                         end
                                     else
@@ -4023,6 +4050,7 @@ do
                                         a = true
                                     end
                                     if a then
+                                        local ok, df
                                         for i=m[1],m[2] do
                                             local step = steps[i]
                                      -- for i=1,#m do
@@ -4031,9 +4059,11 @@ do
                                             local lookupmatch = lookupcache[char]
                                             if lookupmatch then
                                                 -- we could move all code inline but that makes things even more unreadable
-                                                local ok
-                                                head, start, ok = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-                                                if ok then
+--                                                 local ok, df
+                                                head, start, ok, df = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+                                                if df then
+                                                    break
+                                                elseif ok then
                                                  -- done = true
                                                     break
                                                 elseif not start then
@@ -4042,7 +4072,9 @@ do
                                                 end
                                             end
                                         end
-                                        if start then
+                                        if df then
+-- print("restart 2",typ)
+                                        elseif start then
                                             start = getnext(start)
                                         end
                                     else

@@ -208,9 +208,9 @@ function resolvers.name(specification)
                     features.normal = normal
                 end
                 normal.instance = instance
-                if not callbacks.supported.glyph_stream_provider then
-                    normal.variableshapes = true -- for the moment
-                end
+             -- if not callbacks.supported.glyph_stream_provider then
+             --     normal.variableshapes = true -- for the moment
+             -- end
             end
             --
             local suffix = lower(suffixonly(resolved))

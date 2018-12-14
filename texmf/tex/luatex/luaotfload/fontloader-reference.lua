@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 11/29/18 19:46:33
+-- merge date  : 12/07/18 19:37:06
 
 do -- begin closure to overcome local limits and interference
 
@@ -9850,9 +9850,9 @@ function constructors.scale(tfmdata,specification)
   constructors.aftercopyingcharacters(target,tfmdata)
   constructors.trytosharefont(target,tfmdata)
   local vfonts=target.fonts
-if isvirtual or target.type=="virtual" or properties.virtualized then
+  if isvirtual or target.type=="virtual" or properties.virtualized then
     properties.virtualized=true
-target.type="virtual"
+    target.type="virtual"
     if not vfonts or #vfonts==0 then
       target.fonts={ { id=0 } }
     end
@@ -34316,184 +34316,190 @@ function tfm.setfeatures(tfmdata,features)
   end
 end
 local depth={}
-local loadtfmvf=tfm.readers and tfm.readers.loadtfmvf
-directives.register("fonts.tfm.builtin",function(v)
-  loadtfmvf=tfm.readers and tfm.readers.loadtfmvf
-  if v and font.read_tfm then
-    loadtfmvf=false
-  end
-end)
-local function read_from_tfm(specification)
-  local filename=specification.filename
-  local size=specification.size
-  depth[filename]=(depth[filename] or 0)+1
-  if trace_defining then
-    report_defining("loading tfm file %a at size %s",filename,size)
-  end
-  local tfmdata
-  if loadtfmvf then
-    tfmdata=loadtfmvf(filename,size)
-  else
-    tfmdata=font.read_tfm(filename,size) 
-  end
-  if tfmdata then
-    local features=specification.features and specification.features.normal or {}
-    local features=constructors.checkedfeatures("tfm",features)
-    specification.features.normal=features
-    local newtfmdata=(depth[filename]==1) and tfm.reencode(tfmdata,specification)
-    if newtfmdata then
-       tfmdata=newtfmdata
+local read_from_tfm,check_tfm do
+  local tfmreaders=context and tfm.readers
+  local loadtfmvf=tfmreaders and tfmreaders.loadtfmvf
+  local loadtfm=font.read_tfm
+  local loadvf=font.read_vf
+  directives.register("fonts.tfm.builtin",function(v)
+    loadtfmvf=tfmreaders and tfmreaders.loadtfmvf
+    if v and loadtfm then
+      loadtfmvf=false
     end
-    local resources=tfmdata.resources or {}
-    local properties=tfmdata.properties or {}
-    local parameters=tfmdata.parameters or {}
-    local shared=tfmdata.shared   or {}
-    shared.features=features
-    shared.resources=resources
-    properties.name=tfmdata.name      
-    properties.fontname=tfmdata.fontname    
-    properties.psname=tfmdata.psname     
-    properties.fullname=tfmdata.fullname    
-    properties.filename=specification.filename 
-    properties.format=tfmdata.format or fonts.formats.tfm 
-    properties.usedbitmap=tfmdata.usedbitmap
-    tfmdata.properties=properties
-    tfmdata.resources=resources
-    tfmdata.parameters=parameters
-    tfmdata.shared=shared
-    shared.rawdata={ resources=resources }
-    shared.features=features
-    if newtfmdata then
-      if not resources.marks then
-        resources.marks={}
+  end)
+  read_from_tfm=function(specification)
+    local filename=specification.filename
+    local size=specification.size
+    depth[filename]=(depth[filename] or 0)+1
+    if trace_defining then
+      report_defining("loading tfm file %a at size %s",filename,size)
+    end
+    local tfmdata 
+    if loadtfmvf then
+      tfmdata=loadtfmvf(filename,size)
+    else
+      tfmdata=loadtfm(filename,size)
+    end
+    if tfmdata then
+      local features=specification.features and specification.features.normal or {}
+      local features=constructors.checkedfeatures("tfm",features)
+      specification.features.normal=features
+      local newtfmdata=(depth[filename]==1) and tfm.reencode(tfmdata,specification)
+      if newtfmdata then
+         tfmdata=newtfmdata
       end
-      if not resources.sequences then
-        resources.sequences={}
-      end
-      if not resources.features then
-        resources.features={
-          gsub={},
-          gpos={},
-        }
-      end
-      if not tfmdata.changed then
-        tfmdata.changed={}
-      end
-      if not tfmdata.descriptions then
-        tfmdata.descriptions=tfmdata.characters
-      end
-      otf.readers.addunicodetable(tfmdata)
-      tfmenhancers.apply(tfmdata,filename)
-      constructors.applymanipulators("tfm",tfmdata,features,trace_features,report_tfm)
-      otf.readers.unifymissing(tfmdata)
-      fonts.mappings.addtounicode(tfmdata,filename)
-      tfmdata.tounicode=1
-      local tounicode=fonts.mappings.tounicode
-      for unicode,v in next,tfmdata.characters do
-        local u=v.unicode
-        if u then
-          v.tounicode=tounicode(u)
+      local resources=tfmdata.resources or {}
+      local properties=tfmdata.properties or {}
+      local parameters=tfmdata.parameters or {}
+      local shared=tfmdata.shared   or {}
+      shared.features=features
+      shared.resources=resources
+      properties.name=tfmdata.name      
+      properties.fontname=tfmdata.fontname    
+      properties.psname=tfmdata.psname     
+      properties.fullname=tfmdata.fullname    
+      properties.filename=specification.filename 
+      properties.format=tfmdata.format or fonts.formats.tfm 
+      properties.usedbitmap=tfmdata.usedbitmap
+      tfmdata.properties=properties
+      tfmdata.resources=resources
+      tfmdata.parameters=parameters
+      tfmdata.shared=shared
+      shared.rawdata={ resources=resources }
+      shared.features=features
+      if newtfmdata then
+        if not resources.marks then
+          resources.marks={}
+        end
+        if not resources.sequences then
+          resources.sequences={}
+        end
+        if not resources.features then
+          resources.features={
+            gsub={},
+            gpos={},
+          }
+        end
+        if not tfmdata.changed then
+          tfmdata.changed={}
+        end
+        if not tfmdata.descriptions then
+          tfmdata.descriptions=tfmdata.characters
+        end
+        otf.readers.addunicodetable(tfmdata)
+        tfmenhancers.apply(tfmdata,filename)
+        constructors.applymanipulators("tfm",tfmdata,features,trace_features,report_tfm)
+        otf.readers.unifymissing(tfmdata)
+        fonts.mappings.addtounicode(tfmdata,filename)
+        tfmdata.tounicode=1
+        local tounicode=fonts.mappings.tounicode
+        for unicode,v in next,tfmdata.characters do
+          local u=v.unicode
+          if u then
+            v.tounicode=tounicode(u)
+          end
+        end
+        if tfmdata.usedbitmap then
+          tfm.addtounicode(tfmdata)
         end
       end
-      if tfmdata.usedbitmap then
-        tfm.addtounicode(tfmdata)
+      shared.processes=next(features) and tfm.setfeatures(tfmdata,features) or nil
+      if size<0 then
+        size=idiv(65536*-size,100)
       end
-    end
-    shared.processes=next(features) and tfm.setfeatures(tfmdata,features) or nil
-    if size<0 then
-      size=idiv(65536*-size,100)
-    end
-    parameters.factor=1 
-    parameters.size=size
-    parameters.slant=parameters.slant     or parameters[1] or 0
-    parameters.space=parameters.space     or parameters[2] or 0
-    parameters.space_stretch=parameters.space_stretch or parameters[3] or 0
-    parameters.space_shrink=parameters.space_shrink  or parameters[4] or 0
-    parameters.x_height=parameters.x_height    or parameters[5] or 0
-    parameters.quad=parameters.quad      or parameters[6] or 0
-    parameters.extra_space=parameters.extra_space  or parameters[7] or 0
-    constructors.enhanceparameters(parameters)
-    properties.private=properties.private or tfmdata.private or privateoffset
-    if newtfmdata then
-    elseif loadtfmvf then
-      local fonts=tfmdata.fonts
-      if fonts then
-        for i=1,#fonts do
-          local font=fonts[i]
-          local id=font.id
-          if not id then
-            local name=font.name
-            local size=font.size
-            if name and size then
-              local data,id=constructors.readanddefine(name,size)
-              if id then
-                font.id=id
-                font.name=nil
-                font.size=nil
+      parameters.factor=1   
+      parameters.units=1000 
+      parameters.size=size
+      parameters.slant=parameters.slant     or parameters[1] or 0
+      parameters.space=parameters.space     or parameters[2] or 0
+      parameters.space_stretch=parameters.space_stretch or parameters[3] or 0
+      parameters.space_shrink=parameters.space_shrink  or parameters[4] or 0
+      parameters.x_height=parameters.x_height    or parameters[5] or 0
+      parameters.quad=parameters.quad      or parameters[6] or 0
+      parameters.extra_space=parameters.extra_space  or parameters[7] or 0
+      constructors.enhanceparameters(parameters)
+      properties.private=properties.private or tfmdata.private or privateoffset
+      if newtfmdata then
+      elseif loadtfmvf then
+        local fonts=tfmdata.fonts
+        if fonts then
+          for i=1,#fonts do
+            local font=fonts[i]
+            local id=font.id
+            if not id then
+              local name=font.name
+              local size=font.size
+              if name and size then
+                local data,id=constructors.readanddefine(name,size)
+                if id then
+                  font.id=id
+                  font.name=nil
+                  font.size=nil
+                end
+              end
+            end
+          end
+        end
+      elseif constructors.resolvevirtualtoo then
+        fonts.loggers.register(tfmdata,file.suffix(filename),specification) 
+        local vfname=findbinfile(specification.name,'ovf')
+        if vfname and vfname~="" then
+          local vfdata=loadvf(vfname,size)
+          if vfdata then
+            local chars=tfmdata.characters
+            for k,v in next,vfdata.characters do
+              chars[k].commands=v.commands
+            end
+            properties.virtualized=true
+            tfmdata.fonts=vfdata.fonts
+            tfmdata.type="virtual" 
+            local fontlist=vfdata.fonts
+            local name=file.nameonly(filename)
+            for i=1,#fontlist do
+              local n=fontlist[i].name
+              local s=fontlist[i].size
+              local d=depth[filename]
+              s=constructors.scaled(s,vfdata.designsize)
+              if d>tfm.maxnestingdepth then
+                report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
+                fontlist[i]={ id=0 }
+              elseif (d>1) and (s>tfm.maxnestingsize) then
+                report_defining("virtual font %a exceeds size %s",n,s)
+                fontlist[i]={ id=0 }
+              else
+                local t,id=constructors.readanddefine(n,s)
+                fontlist[i]={ id=id }
               end
             end
           end
         end
       end
-    elseif constructors.resolvevirtualtoo then
-      fonts.loggers.register(tfmdata,file.suffix(filename),specification) 
-      local vfname=findbinfile(specification.name,'ovf')
-      if vfname and vfname~="" then
-        local vfdata=font.read_vf(vfname,size) 
-        if vfdata then
-          local chars=tfmdata.characters
-          for k,v in next,vfdata.characters do
-            chars[k].commands=v.commands
-          end
-          properties.virtualized=true
-          tfmdata.fonts=vfdata.fonts
-          tfmdata.type="virtual" 
-          local fontlist=vfdata.fonts
-          local name=file.nameonly(filename)
-          for i=1,#fontlist do
-            local n=fontlist[i].name
-            local s=fontlist[i].size
-            local d=depth[filename]
-            s=constructors.scaled(s,vfdata.designsize)
-            if d>tfm.maxnestingdepth then
-              report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
-              fontlist[i]={ id=0 }
-            elseif (d>1) and (s>tfm.maxnestingsize) then
-              report_defining("virtual font %a exceeds size %s",n,s)
-              fontlist[i]={ id=0 }
-            else
-              local t,id=constructors.readanddefine(n,s)
-              fontlist[i]={ id=id }
-            end
-          end
-        end
-      end
+      properties.haskerns=true
+      properties.hasligatures=true
+      properties.hasitalics=true
+      resources.unicodes={}
+      resources.lookuptags={}
+      depth[filename]=depth[filename]-1
+      return tfmdata
+    else
+      depth[filename]=depth[filename]-1
     end
-    properties.haskerns=true
-    properties.hasligatures=true
-    properties.hasitalics=true
-    resources.unicodes={}
-    resources.lookuptags={}
-    depth[filename]=depth[filename]-1
-    return tfmdata
-  else
-    depth[filename]=depth[filename]-1
   end
-end
-local function check_tfm(specification,fullname) 
-  local foundname=findbinfile(fullname,'tfm') or ""
-  if foundname=="" then
-    foundname=findbinfile(fullname,'ofm') or "" 
-  end
-  if foundname=="" then
-    foundname=fonts.names.getfilename(fullname,"tfm") or ""
-  end
-  if foundname~="" then
-    specification.filename=foundname
-    specification.format="ofm"
-    return read_from_tfm(specification)
-  elseif trace_defining then
-    report_defining("loading tfm with name %a fails",specification.name)
+  check_tfm=function(specification,fullname) 
+    local foundname=findbinfile(fullname,'tfm') or ""
+    if foundname=="" then
+      foundname=findbinfile(fullname,'ofm') or "" 
+    end
+    if foundname=="" then
+      foundname=fonts.names.getfilename(fullname,"tfm") or ""
+    end
+    if foundname~="" then
+      specification.filename=foundname
+      specification.format="ofm"
+      return read_from_tfm(specification)
+    elseif trace_defining then
+      report_defining("loading tfm with name %a fails",specification.name)
+    end
   end
 end
 readers.check_tfm=check_tfm
@@ -34955,9 +34961,6 @@ function resolvers.name(specification)
           features.normal=normal
         end
         normal.instance=instance
-        if not callbacks.supported.glyph_stream_provider then
-          normal.variableshapes=true 
-        end
       end
       local suffix=lower(suffixonly(resolved))
       if fonts.formats[suffix] then
@@ -35815,7 +35818,7 @@ do -- begin closure to overcome local limits and interference
 
 if not modules then modules={} end modules ['font-imp-effects']={
   version=1.001,
-  comment="companion to font-ini.mkiv and hand-ini.mkiv",
+  comment="companion to font-ini.mkiv",
   author="Hans Hagen, PRAGMA-ADE, Hasselt NL",
   copyright="PRAGMA ADE / ConTeXt Development Team",
   license="see context related readme files"

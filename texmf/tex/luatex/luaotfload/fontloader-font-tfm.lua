@@ -118,258 +118,266 @@ local depth = { } -- table.setmetatableindex("number")
 --
 -- So "czechdqcheat=yes" is then a valid feature. And yes, it's a cheat.
 
-local loadtfmvf = tfm.readers and tfm.readers.loadtfmvf
+local read_from_tfm, check_tfm  do
 
-directives.register("fonts.tfm.builtin",function(v)
-    loadtfmvf = tfm.readers and tfm.readers.loadtfmvf
-    if v and font.read_tfm then
-        loadtfmvf = false
-    end
-end)
+    local tfmreaders = context and tfm.readers
+    local loadtfmvf  = tfmreaders and tfmreaders.loadtfmvf
+    local loadtfm    = font.read_tfm
+    local loadvf     = font.read_vf
 
-local function read_from_tfm(specification)
-    local filename  = specification.filename
-    local size      = specification.size
-    depth[filename] = (depth[filename] or 0) + 1
-    if trace_defining then
-        report_defining("loading tfm file %a at size %s",filename,size)
-    end
-    local tfmdata
-    if loadtfmvf then
-        tfmdata = loadtfmvf(filename,size)
-    else
-        tfmdata = font.read_tfm(filename,size) -- not cached, fast enough
-    end
-    if tfmdata then
-
-        local features = specification.features and specification.features.normal or { }
-        local features = constructors.checkedfeatures("tfm",features)
-        specification.features.normal = features
-
-        -- If reencode returns a new table, we assume that we're doing something
-        -- special. An 'auto' reencode picks up its vector from the pfb file.
-
-        local newtfmdata = (depth[filename] == 1) and tfm.reencode(tfmdata,specification)
-        if newtfmdata then
-             tfmdata = newtfmdata
+    directives.register("fonts.tfm.builtin",function(v)
+        loadtfmvf = tfmreaders and tfmreaders.loadtfmvf
+        if v and loadtfm then
+            loadtfmvf = false
         end
+    end)
 
-        local resources  = tfmdata.resources  or { }
-        local properties = tfmdata.properties or { }
-        local parameters = tfmdata.parameters or { }
-        local shared     = tfmdata.shared     or { }
-        --
-        shared.features  = features
-        shared.resources = resources
-        --
-        properties.name       = tfmdata.name           -- todo: fallback
-        properties.fontname   = tfmdata.fontname       -- todo: fallback
-        properties.psname     = tfmdata.psname         -- todo: fallback
-        properties.fullname   = tfmdata.fullname       -- todo: fallback
-        properties.filename   = specification.filename -- todo: fallback
-        properties.format     = tfmdata.format or fonts.formats.tfm -- better than nothing
-        properties.usedbitmap = tfmdata.usedbitmap
-        --
-        tfmdata.properties = properties
-        tfmdata.resources  = resources
-        tfmdata.parameters = parameters
-        tfmdata.shared     = shared
-        --
-        shared.rawdata  = { resources = resources }
-        shared.features = features
-        --
-        -- The next branch is only entered when we have a proper encoded file i.e.
-        -- unicodes and such. It really nakes no sense to do feature juggling when
-        -- we have no names and unicodes.
-        --
-        if newtfmdata then
-            --
-            -- Some opentype processing assumes these to be present:
-            --
-            if not resources.marks then
-                resources.marks = { }
+    read_from_tfm = function(specification)
+        local filename  = specification.filename
+        local size      = specification.size
+        depth[filename] = (depth[filename] or 0) + 1
+        if trace_defining then
+            report_defining("loading tfm file %a at size %s",filename,size)
+        end
+        local tfmdata -- not cached, fast enough
+        if loadtfmvf then
+            tfmdata = loadtfmvf(filename,size)
+        else
+            tfmdata = loadtfm(filename,size)
+        end
+        if tfmdata then
+
+            local features = specification.features and specification.features.normal or { }
+            local features = constructors.checkedfeatures("tfm",features)
+            specification.features.normal = features
+
+            -- If reencode returns a new table, we assume that we're doing something
+            -- special. An 'auto' reencode picks up its vector from the pfb file.
+
+            local newtfmdata = (depth[filename] == 1) and tfm.reencode(tfmdata,specification)
+            if newtfmdata then
+                 tfmdata = newtfmdata
             end
-            if not resources.sequences then
-                resources.sequences = { }
-            end
-            if not resources.features then
-                resources.features = {
-                    gsub = { },
-                    gpos = { },
-                }
-            end
-            if not tfmdata.changed then
-                tfmdata.changed = { }
-            end
-            if not tfmdata.descriptions then
-                tfmdata.descriptions = tfmdata.characters
-            end
+
+            local resources  = tfmdata.resources  or { }
+            local properties = tfmdata.properties or { }
+            local parameters = tfmdata.parameters or { }
+            local shared     = tfmdata.shared     or { }
             --
-            -- It might be handy to have this:
+            shared.features  = features
+            shared.resources = resources
             --
-            otf.readers.addunicodetable(tfmdata)
+            properties.name       = tfmdata.name           -- todo: fallback
+            properties.fontname   = tfmdata.fontname       -- todo: fallback
+            properties.psname     = tfmdata.psname         -- todo: fallback
+            properties.fullname   = tfmdata.fullname       -- todo: fallback
+            properties.filename   = specification.filename -- todo: fallback
+            properties.format     = tfmdata.format or fonts.formats.tfm -- better than nothing
+            properties.usedbitmap = tfmdata.usedbitmap
             --
-            -- We make a pseudo opentype font, e.g. kerns and ligatures etc:
+            tfmdata.properties = properties
+            tfmdata.resources  = resources
+            tfmdata.parameters = parameters
+            tfmdata.shared     = shared
             --
-            tfmenhancers.apply(tfmdata,filename)
+            shared.rawdata  = { resources = resources }
+            shared.features = features
             --
-            -- Now user stuff can kick in.
+            -- The next branch is only entered when we have a proper encoded file i.e.
+            -- unicodes and such. It really nakes no sense to do feature juggling when
+            -- we have no names and unicodes.
             --
-            constructors.applymanipulators("tfm",tfmdata,features,trace_features,report_tfm)
-            --
-            -- As that can also mess with names and such, we are now ready for finalizing
-            -- the unicode information. This is a different order that for instance type one
-            -- (afm) files. First we try to deduce unicodes from already present information.
-            --
-            otf.readers.unifymissing(tfmdata)
-            --
-            -- Next we fill in the gaps, based on names from teh agl. Probably not much will
-            -- happen here.
-            --
-            fonts.mappings.addtounicode(tfmdata,filename)
-            --
-            -- The tounicode data is passed to the backend that constructs the vectors for us.
-            --
-            tfmdata.tounicode = 1
-            local tounicode   = fonts.mappings.tounicode
-            for unicode, v in next, tfmdata.characters do
-                local u = v.unicode
-                if u then
-                    v.tounicode = tounicode(u)
+            if newtfmdata then
+                --
+                -- Some opentype processing assumes these to be present:
+                --
+                if not resources.marks then
+                    resources.marks = { }
+                end
+                if not resources.sequences then
+                    resources.sequences = { }
+                end
+                if not resources.features then
+                    resources.features = {
+                        gsub = { },
+                        gpos = { },
+                    }
+                end
+                if not tfmdata.changed then
+                    tfmdata.changed = { }
+                end
+                if not tfmdata.descriptions then
+                    tfmdata.descriptions = tfmdata.characters
+                end
+                --
+                -- It might be handy to have this:
+                --
+                otf.readers.addunicodetable(tfmdata)
+                --
+                -- We make a pseudo opentype font, e.g. kerns and ligatures etc:
+                --
+                tfmenhancers.apply(tfmdata,filename)
+                --
+                -- Now user stuff can kick in.
+                --
+                constructors.applymanipulators("tfm",tfmdata,features,trace_features,report_tfm)
+                --
+                -- As that can also mess with names and such, we are now ready for finalizing
+                -- the unicode information. This is a different order that for instance type one
+                -- (afm) files. First we try to deduce unicodes from already present information.
+                --
+                otf.readers.unifymissing(tfmdata)
+                --
+                -- Next we fill in the gaps, based on names from teh agl. Probably not much will
+                -- happen here.
+                --
+                fonts.mappings.addtounicode(tfmdata,filename)
+                --
+                -- The tounicode data is passed to the backend that constructs the vectors for us.
+                --
+                tfmdata.tounicode = 1
+                local tounicode   = fonts.mappings.tounicode
+                for unicode, v in next, tfmdata.characters do
+                    local u = v.unicode
+                    if u then
+                        v.tounicode = tounicode(u)
+                    end
+                end
+                --
+                -- However, when we use a bitmap font those vectors can't be constructed because
+                -- that information is not carried with those fonts (there is no name info, nor
+                -- proper index info, nor unicodes at that end). So, we provide it ourselves.
+                --
+                if tfmdata.usedbitmap then
+                    tfm.addtounicode(tfmdata)
                 end
             end
             --
-            -- However, when we use a bitmap font those vectors can't be constructed because
-            -- that information is not carried with those fonts (there is no name info, nor
-            -- proper index info, nor unicodes at that end). So, we provide it ourselves.
+            shared.processes = next(features) and tfm.setfeatures(tfmdata,features) or nil
             --
-            if tfmdata.usedbitmap then
-                tfm.addtounicode(tfmdata)
+            if size < 0 then
+                size = idiv(65536 * -size,100)
             end
-        end
-        --
-        shared.processes = next(features) and tfm.setfeatures(tfmdata,features) or nil
-        --
-        if size < 0 then
-            size = idiv(65536 * -size,100)
-        end
-        parameters.factor        = 1 -- already scaled
-        parameters.size          = size
-        parameters.slant         = parameters.slant          or parameters[1] or 0
-        parameters.space         = parameters.space          or parameters[2] or 0
-        parameters.space_stretch = parameters.space_stretch  or parameters[3] or 0
-        parameters.space_shrink  = parameters.space_shrink   or parameters[4] or 0
-        parameters.x_height      = parameters.x_height       or parameters[5] or 0
-        parameters.quad          = parameters.quad           or parameters[6] or 0
-        parameters.extra_space   = parameters.extra_space    or parameters[7] or 0
-        --
-        constructors.enhanceparameters(parameters) -- official copies for us
-        --
-        properties.private       =  properties.private or tfmdata.private or privateoffset
-        --
-        if newtfmdata then
+            parameters.factor        = 1     -- already scaled
+            parameters.units         = 1000  -- just in case
+            parameters.size          = size
+            parameters.slant         = parameters.slant          or parameters[1] or 0
+            parameters.space         = parameters.space          or parameters[2] or 0
+            parameters.space_stretch = parameters.space_stretch  or parameters[3] or 0
+            parameters.space_shrink  = parameters.space_shrink   or parameters[4] or 0
+            parameters.x_height      = parameters.x_height       or parameters[5] or 0
+            parameters.quad          = parameters.quad           or parameters[6] or 0
+            parameters.extra_space   = parameters.extra_space    or parameters[7] or 0
             --
-            -- We do nothing as we assume flat tfm files. It would become real messy
-            -- otherwise and I don't have something for testing on my system anyway.
+            constructors.enhanceparameters(parameters) -- official copies for us
             --
-        elseif loadtfmvf then
-            -- already loaded
-            local fonts = tfmdata.fonts
-            if fonts then
-                for i=1,#fonts do
-                    local font = fonts[i]
-                    local id   = font.id
-                    if not id then
-                        local name = font.name
-                        local size = font.size
-                        if name and size then
-                            local data, id = constructors.readanddefine(name,size)
-                            if id then
-                                font.id   = id
-                                font.name = nil
-                                font.size = nil
+            properties.private       =  properties.private or tfmdata.private or privateoffset
+            --
+            if newtfmdata then
+                --
+                -- We do nothing as we assume flat tfm files. It would become real messy
+                -- otherwise and I don't have something for testing on my system anyway.
+                --
+            elseif loadtfmvf then
+                -- already loaded
+                local fonts = tfmdata.fonts
+                if fonts then
+                    for i=1,#fonts do
+                        local font = fonts[i]
+                        local id   = font.id
+                        if not id then
+                            local name = font.name
+                            local size = font.size
+                            if name and size then
+                                local data, id = constructors.readanddefine(name,size)
+                                if id then
+                                    font.id   = id
+                                    font.name = nil
+                                    font.size = nil
+                                end
+                            end
+                        end
+                    end
+                end
+            elseif constructors.resolvevirtualtoo then
+                fonts.loggers.register(tfmdata,file.suffix(filename),specification) -- strange, why here
+                local vfname = findbinfile(specification.name, 'ovf')
+                if vfname and vfname ~= "" then
+                    local vfdata = loadvf(vfname,size)
+                    if vfdata then
+                        local chars = tfmdata.characters
+                        for k,v in next, vfdata.characters do
+                            chars[k].commands = v.commands
+                        end
+                        properties.virtualized = true
+                        tfmdata.fonts = vfdata.fonts
+                        tfmdata.type = "virtual" -- else nested calls with cummulative scaling
+                        local fontlist = vfdata.fonts
+                        local name = file.nameonly(filename)
+                        for i=1,#fontlist do
+                            local n = fontlist[i].name
+                            local s = fontlist[i].size
+                            local d = depth[filename]
+                            s = constructors.scaled(s,vfdata.designsize)
+                            if d > tfm.maxnestingdepth then
+                                report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
+                                fontlist[i] = { id = 0 }
+                            elseif (d > 1) and (s > tfm.maxnestingsize) then
+                                report_defining("virtual font %a exceeds size %s",n,s)
+                                fontlist[i] = { id = 0 }
+                            else
+                                local t, id = constructors.readanddefine(n,s)
+                                fontlist[i] = { id = id }
                             end
                         end
                     end
                 end
             end
-        elseif constructors.resolvevirtualtoo then
-            fonts.loggers.register(tfmdata,file.suffix(filename),specification) -- strange, why here
-            local vfname = findbinfile(specification.name, 'ovf')
-            if vfname and vfname ~= "" then
-                local vfdata = font.read_vf(vfname,size) -- not cached, fast enough
-                if vfdata then
-                    local chars = tfmdata.characters
-                    for k,v in next, vfdata.characters do
-                        chars[k].commands = v.commands
-                    end
-                    properties.virtualized = true
-                    tfmdata.fonts = vfdata.fonts
-                    tfmdata.type = "virtual" -- else nested calls with cummulative scaling
-                    local fontlist = vfdata.fonts
-                    local name = file.nameonly(filename)
-                    for i=1,#fontlist do
-                        local n = fontlist[i].name
-                        local s = fontlist[i].size
-                        local d = depth[filename]
-                        s = constructors.scaled(s,vfdata.designsize)
-                        if d > tfm.maxnestingdepth then
-                            report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
-                            fontlist[i] = { id = 0 }
-                        elseif (d > 1) and (s > tfm.maxnestingsize) then
-                            report_defining("virtual font %a exceeds size %s",n,s)
-                            fontlist[i] = { id = 0 }
-                        else
-                            local t, id = constructors.readanddefine(n,s)
-                            fontlist[i] = { id = id }
-                        end
-                    end
-                end
-            end
+            --
+            -- This is for old times sake (and context specific) so we comment it. It has
+            -- to do with encoding prefixes (a context naming that was later adopted by
+            -- the lm/gyre project)
+            --
+         -- if not features.encoding then
+         --     local encoding, filename = match(properties.filename,"^(.-)%-(.*)$")
+         --     if filename and encoding and encodings.known and encodings.known[encoding] then
+         --         features.encoding = encoding
+         --     end
+         -- end
+            --
+            -- Some afterthoughts:
+            --
+            properties.haskerns     = true
+            properties.hasligatures = true
+            properties.hasitalics   = true
+            resources.unicodes      = { }
+            resources.lookuptags    = { }
+            --
+            depth[filename] = depth[filename] - 1
+            --
+            return tfmdata
+        else
+            depth[filename] = depth[filename] - 1
         end
-        --
-        -- This is for old times sake (and context specific) so we comment it. It has
-        -- to do with encoding prefixes (a context naming that was later adopted by
-        -- the lm/gyre project)
-        --
-     -- if not features.encoding then
-     --     local encoding, filename = match(properties.filename,"^(.-)%-(.*)$")
-     --     if filename and encoding and encodings.known and encodings.known[encoding] then
-     --         features.encoding = encoding
-     --     end
-     -- end
-        --
-        -- Some afterthoughts:
-        --
-        properties.haskerns     = true
-        properties.hasligatures = true
-        properties.hasitalics   = true
-        resources.unicodes      = { }
-        resources.lookuptags    = { }
-        --
-        depth[filename] = depth[filename] - 1
-        --
-        return tfmdata
-    else
-        depth[filename] = depth[filename] - 1
     end
-end
 
-local function check_tfm(specification,fullname) -- we could split up like afm/otf
-    local foundname = findbinfile(fullname, 'tfm') or ""
-    if foundname == "" then
-        foundname = findbinfile(fullname, 'ofm') or "" -- not needed in context
+    check_tfm = function(specification,fullname) -- we could split up like afm/otf
+        local foundname = findbinfile(fullname, 'tfm') or ""
+        if foundname == "" then
+            foundname = findbinfile(fullname, 'ofm') or "" -- not needed in context
+        end
+        if foundname == "" then
+            foundname = fonts.names.getfilename(fullname,"tfm") or ""
+        end
+        if foundname ~= "" then
+            specification.filename = foundname
+            specification.format   = "ofm"
+            return read_from_tfm(specification)
+        elseif trace_defining then
+            report_defining("loading tfm with name %a fails",specification.name)
+        end
     end
-    if foundname == "" then
-        foundname = fonts.names.getfilename(fullname,"tfm") or ""
-    end
-    if foundname ~= "" then
-        specification.filename = foundname
-        specification.format   = "ofm"
-        return read_from_tfm(specification)
-    elseif trace_defining then
-        report_defining("loading tfm with name %a fails",specification.name)
-    end
+
 end
 
 readers.check_tfm = check_tfm

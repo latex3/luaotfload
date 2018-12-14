@@ -927,10 +927,9 @@ function constructors.scale(tfmdata,specification)
     -- catch inconsistencies
     --
     local vfonts = target.fonts
---     if isvirtual then
-if isvirtual or target.type == "virtual" or properties.virtualized then
+    if isvirtual or target.type == "virtual" or properties.virtualized then
         properties.virtualized = true
-target.type = "virtual"
+        target.type = "virtual"
         if not vfonts or #vfonts == 0 then
             target.fonts = { { id = 0 } }
         end

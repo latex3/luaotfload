@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Thu Dec 13 18:59:40 2018
+-- merge date  : Fri Dec 14 09:55:48 2018
 
 do -- begin closure to overcome local limits and interference
 
@@ -4559,7 +4559,6 @@ if not modules then modules={} end modules ['l-unicode']={
   license="see context related readme files"
 }
 utf=utf or {}
-unicode=nil
 utf.characters=utf.characters or string.utfcharacters
 utf.values=utf.values   or string.utfvalues
 local type=type

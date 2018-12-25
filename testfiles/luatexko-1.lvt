@@ -1,4 +1,4 @@
-\input{regression-test}\START
+\input{regression-test}
 \documentclass{article}
 \usepackage{luatexko}
 \setmainhangulfont{UnBatang}[Language=Korean, Script=Hangul]

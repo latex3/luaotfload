@@ -478,7 +478,7 @@ local function cachedpng(data)
   local path = pngcache[hash]
   if not path then
     path = os.tmpname()
-    local file = io.open(path, "w")
+    local file = io.open(path, "wb")
     file:write(data)
     file:close()
     pngcache[hash] = path

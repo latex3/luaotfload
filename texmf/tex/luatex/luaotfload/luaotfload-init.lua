@@ -552,6 +552,7 @@ local init_main = function ()
 
     load_fontloader_module "data-con"
     load_fontloader_module "basics-nod"
+    load_fontloader_module "basics-chr"
     load_fontloader_module "font-ini"
     load_fontloader_module "fonts-mis"
     load_fontloader_module "font-con"

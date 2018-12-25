@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Fri Dec 14 12:52:37 2018
+-- merge date  : Tue Dec 25 16:21:45 2018
 
 do -- begin closure to overcome local limits and interference
 
@@ -869,64 +869,6 @@ function lpeg.counter(pattern,action)
     return function(str) n=0;lpegmatch(pattern,str);action(n) end
   else
     return function(str) n=0;lpegmatch(pattern,str);return n end
-  end
-end
-utf=utf or {}
-local utfcharacters=utf and utf.characters or string.utfcharacters
-local utfgmatch=utf and utf.gmatch
-local utfchar=utf and utf.char
-lpeg.UP=lpeg.P
-if utfcharacters then
-  function lpeg.US(str)
-    local p=P(false)
-    for uc in utfcharacters(str) do
-      p=p+P(uc)
-    end
-    return p
-  end
-elseif utfgmatch then
-  function lpeg.US(str)
-    local p=P(false)
-    for uc in utfgmatch(str,".") do
-      p=p+P(uc)
-    end
-    return p
-  end
-else
-  function lpeg.US(str)
-    local p=P(false)
-    local f=function(uc)
-      p=p+P(uc)
-    end
-    lpegmatch((utf8char/f)^0,str)
-    return p
-  end
-end
-local range=utf8byte*utf8byte+Cc(false) 
-function lpeg.UR(str,more)
-  local first,last
-  if type(str)=="number" then
-    first=str
-    last=more or first
-  else
-    first,last=lpegmatch(range,str)
-    if not last then
-      return P(str)
-    end
-  end
-  if first==last then
-    return P(str)
-  elseif utfchar and (last-first<8) then 
-    local p=P(false)
-    for i=first,last do
-      p=p+P(utfchar(i))
-    end
-    return p 
-  else
-    local f=function(b)
-      return b>=first and b<=last
-    end
-    return utf8byte/f 
   end
 end
 function lpeg.is_lpeg(p)
@@ -3143,6 +3085,61 @@ local find,format,gsub,upper,gmatch=string.find,string.format,string.gsub,string
 local concat=table.concat
 local random,ceil,randomseed=math.random,math.ceil,math.randomseed
 local rawget,rawset,type,getmetatable,setmetatable,tonumber,tostring=rawget,rawset,type,getmetatable,setmetatable,tonumber,tostring
+do
+  local selfdir=os.selfdir
+  if selfdir=="" then
+    selfdir=nil
+  end
+  if not selfdir then
+    if arg then
+      for i=1,#arg do
+        local a=arg[i]
+        if find(a,"^%-%-[c:]*texmfbinpath=") then
+          selfdir=gsub(a,"^.-=","")
+          break
+        end
+      end
+    end
+    if not selfdir then
+      selfdir=os.selfbin or "luatex"
+      if find(selfdir,"[/\\]") then
+        selfdir=gsub(selfdir,"[/\\][^/\\]*$","")
+      elseif os.getenv then
+        local path=os.getenv("PATH")
+        local name=gsub(selfdir,"^.*[/\\][^/\\]","")
+        local patt="[^:]+"
+        if os.type=="windows" then
+          patt="[^;]+"
+          name=name..".exe"
+        end
+        local isfile
+        if lfs then
+          local attributes=lfs.attributes
+          isfile=function(name)
+            local a=attributes(name,"mode")
+            return a=="file" or a=="link" or nil
+          end
+        else
+          local open=io.open
+          isfile=function(name)
+            local f=open(name)
+            if f then
+              f:close()
+              return true
+            end
+          end
+        end
+        for p in gmatch(path,patt) do
+          if isfile(p.."/"..name) then
+            selfdir=p
+            break
+          end
+        end
+      end
+    end
+    os.selfdir=selfdir or "."
+  end
+end
 math.initialseed=tonumber(string.sub(string.reverse(tostring(ceil(socket and socket.gettime()*10000 or time()))),1,6))
 randomseed(math.initialseed)
 if not os.__getenv__ then
@@ -4559,8 +4556,13 @@ if not modules then modules={} end modules ['l-unicode']={
   license="see context related readme files"
 }
 utf=utf or {}
-utf.characters=utf.characters or string.utfcharacters
-utf.values=utf.values   or string.utfvalues
+if not string.utfcharacters then
+  local gmatch=string.gmatch
+  function string.characters(str)
+    return gmatch(str,".[\128-\191]*")
+  end
+end
+utf.characters=string.utfcharacters
 local type=type
 local char,byte,format,sub,gmatch=string.char,string.byte,string.format,string.sub,string.gmatch
 local concat=table.concat
@@ -4571,12 +4573,11 @@ local tabletopattern=lpeg.utfchartabletopattern
 local bytepairs=string.bytepairs
 local finder=lpeg.finder
 local replacer=lpeg.replacer
-local utfvalues=utf.values
-local utfgmatch=utf.gmatch 
 local p_utftype=patterns.utftype
 local p_utfstricttype=patterns.utfstricttype
 local p_utfoffset=patterns.utfoffset
-local p_utf8char=patterns.utf8character
+local p_utf8character=patterns.utf8character
+local p_utf8char=patterns.utf8char
 local p_utf8byte=patterns.utf8byte
 local p_utfbom=patterns.utfbom
 local p_newline=patterns.newline
@@ -4645,9 +4646,8 @@ end
 if not utf.byte then
   utf.byte=string.utfvalue or (utf8 and utf8.codepoint)
   if not utf.byte then
-    local utf8byte=patterns.utf8byte
     function utf.byte(c)
-      return lpegmatch(utf8byte,c)
+      return lpegmatch(p_utf8byte,c)
     end
   end
 end
@@ -4748,10 +4748,10 @@ if not utf.sub then
       return true
     end
   end
-  local pattern_zero=Cmt(p_utf8char,slide_zero)^0
-  local pattern_one=Cmt(p_utf8char,slide_one )^0
-  local pattern_two=Cmt(p_utf8char,slide_two )^0
-  local pattern_first=C(patterns.utf8character)
+  local pattern_zero=Cmt(p_utf8character,slide_zero)^0
+  local pattern_one=Cmt(p_utf8character,slide_one )^0
+  local pattern_two=Cmt(p_utf8character,slide_two )^0
+  local pattern_first=C(p_utf8character)
   function utf.sub(str,start,stop)
     if not start then
       return str
@@ -4826,15 +4826,15 @@ function utf.remapper(mapping,option,action)
           return ""
         else
           if not pattern then
-            pattern=Cs((tabletopattern(mapping)/action+p_utf8char)^0)
+            pattern=Cs((tabletopattern(mapping)/action+p_utf8character)^0)
           end
           return lpegmatch(pattern,str)
         end
       end
     elseif option=="pattern" then
-      return Cs((tabletopattern(mapping)/action+p_utf8char)^0)
+      return Cs((tabletopattern(mapping)/action+p_utf8character)^0)
     else
-      local pattern=Cs((tabletopattern(mapping)/action+p_utf8char)^0)
+      local pattern=Cs((tabletopattern(mapping)/action+p_utf8character)^0)
       return function(str)
         if not str or str=="" then
           return ""
@@ -4845,9 +4845,9 @@ function utf.remapper(mapping,option,action)
     end
   elseif variant=="function" then
     if option=="pattern" then
-      return Cs((p_utf8char/mapping+p_utf8char)^0)
+      return Cs((p_utf8character/mapping+p_utf8character)^0)
     else
-      local pattern=Cs((p_utf8char/mapping+p_utf8char)^0)
+      local pattern=Cs((p_utf8character/mapping+p_utf8character)^0)
       return function(str)
         if not str or str=="" then
           return ""
@@ -4883,9 +4883,9 @@ function utf.subtituter(t)
   end
 end
 local utflinesplitter=p_utfbom^-1*lpeg.tsplitat(p_newline)
-local utfcharsplitter_ows=p_utfbom^-1*Ct(C(p_utf8char)^0)
-local utfcharsplitter_iws=p_utfbom^-1*Ct((p_whitespace^1+C(p_utf8char))^0)
-local utfcharsplitter_raw=Ct(C(p_utf8char)^0)
+local utfcharsplitter_ows=p_utfbom^-1*Ct(C(p_utf8character)^0)
+local utfcharsplitter_iws=p_utfbom^-1*Ct((p_whitespace^1+C(p_utf8character))^0)
+local utfcharsplitter_raw=Ct(C(p_utf8character)^0)
 patterns.utflinesplitter=utflinesplitter
 function utf.splitlines(str)
   return lpegmatch(utflinesplitter,str or "")
@@ -4922,7 +4922,7 @@ local more=0
 local p_utf16_to_utf8_be=C(1)*C(1)/function(left,right)
   local now=256*byte(left)+byte(right)
   if more>0 then
-    now=(more-0xD800)*0x400+(now-0xDC00)+0x10000 
+    now=(more-0xD800)*0x400+(now-0xDC00)+0x10000
     more=0
     return utfchar(now)
   elseif now>=0xD800 and now<=0xDBFF then
@@ -4935,7 +4935,7 @@ end
 local p_utf16_to_utf8_le=C(1)*C(1)/function(right,left)
   local now=256*byte(left)+byte(right)
   if more>0 then
-    now=(more-0xD800)*0x400+(now-0xDC00)+0x10000 
+    now=(more-0xD800)*0x400+(now-0xDC00)+0x10000
     more=0
     return utfchar(now)
   elseif now>=0xD800 and now<=0xDBFF then
@@ -5132,20 +5132,8 @@ function utf.toeight(str)
     return str
   end
 end
-local p_nany=p_utf8char/""
-if utfgmatch then
-  function utf.count(str,what)
-    if type(what)=="string" then
-      local n=0
-      for _ in utfgmatch(str,what) do
-        n=n+1
-      end
-      return n
-    else 
-      return #lpegmatch(Cs((P(what)/" "+p_nany)^0),str)
-    end
-  end
-else
+do
+  local p_nany=p_utf8character/""
   local cache={}
   function utf.count(str,what)
     if type(what)=="string" then
@@ -5160,17 +5148,11 @@ else
     end
   end
 end
-if not utf.characters then
-  function utf.characters(str)
-    return gmatch(str,".[\128-\191]*")
-  end
-  string.utfcharacters=utf.characters
-end
-if not utf.values then
+if not string.utfvalues then
   local find=string.find
   local dummy=function()
   end
-  function utf.values(str)
+  function string.utfvalues(str)
     local n=#str
     if n==0 then
       return dummy
@@ -5187,8 +5169,8 @@ if not utf.values then
       end
     end
   end
-  string.utfvalues=utf.values
 end
+utf.values=string.utfvalues
 function utf.chrlen(u) 
   return
     (u<0x80 and 1) or
@@ -5235,6 +5217,60 @@ function string.utfpadd(s,n)
     end
   end
   return s
+end
+do
+  local utfcharacters=utf.characters or string.utfcharacters
+  local utfchar=utf.char    or string.utfcharacter
+  lpeg.UP=P
+  if utfcharacters then
+    function lpeg.US(str)
+      local p=P(false)
+      for uc in utfcharacters(str) do
+        p=p+P(uc)
+      end
+      return p
+    end
+  else
+    function lpeg.US(str)
+      local p=P(false)
+      local f=function(uc)
+        p=p+P(uc)
+      end
+      lpegmatch((p_utf8char/f)^0,str)
+      return p
+    end
+  end
+  local range=p_utf8byte*p_utf8byte+Cc(false) 
+  function lpeg.UR(str,more)
+    local first,last
+    if type(str)=="number" then
+      first=str
+      last=more or first
+    else
+      first,last=lpegmatch(range,str)
+      if not last then
+        return P(str)
+      end
+    end
+    if first==last then
+      return P(str)
+    end
+    if not utfchar then
+      utfchar=utf.char 
+    end
+    if utfchar and (last-first<8) then 
+      local p=P(false)
+      for i=first,last do
+        p=p+P(utfchar(i))
+      end
+      return p 
+    else
+      local f=function(b)
+        return b>=first and b<=last
+      end
+      return p_utf8byte/f 
+    end
+  end
 end
 
 end -- closure

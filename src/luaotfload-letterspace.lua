@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-letterspace",
-    version       = "2.9405",       --TAGVERSION
-    date          = "2018-12-07", --TAGDATE
+    version       = "2.9406",       --TAGVERSION
+    date          = "2018-12-19", --TAGDATE
     description   = "luaotfload submodule / color",
     license       = "GPL v2.0",
     copyright     = "PRAGMA ADE / ConTeXt Development Team",

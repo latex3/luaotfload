@@ -414,3 +414,66 @@ if not number.idiv then
         return floor(i/d) -- i//d in 5.3
     end
 end
+
+-- hook into unicode
+
+local u = unicode and unicode.utf8
+
+if u then
+
+    utf.lower = u.lower
+    utf.upper = u.upper
+    utf.char  = u.char
+    utf.byte  = u.byte
+    utf.len   = u.len
+
+    -- needed on font-*
+
+    if lpeg.setutfcasers then
+        lpeg.setutfcasers(u.lower,u.upper)
+    end
+
+    -- needed on font-otr
+
+    local bytepairs = string.bytepairs
+    local utfchar   = utf.char
+    local concat    = table.concat
+
+    function utf.utf16_to_utf8_be(s)
+        if not s then
+            return nil
+        elseif s == "" then
+            return ""
+        end
+        local result, r, more = { }, 0, 0
+        for left, right in bytepairs(s) do
+            if right then
+                local now = 256*left + right
+                if more > 0 then
+                    now = (more-0xD800)*0x400 + (now-0xDC00) + 0x10000
+                    more = 0
+                    r = r + 1
+                    result[r] = utfchar(now)
+                elseif now >= 0xD800 and now <= 0xDBFF then
+                    more = now
+                else
+                    r = r + 1
+                    result[r] = utfchar(now)
+                end
+            end
+        end
+        return concat(result)
+    end
+
+    local characters = string.utfcharacters
+
+    function utf.split(str)
+        local t, n = { }, 0
+        for s in characters(str) do
+            n = n + 1
+            t[n] = s
+        end
+        return t
+    end
+
+end

@@ -506,6 +506,8 @@ local function tonodes(head, current, run, glyphs, color)
   local ascender = hbshared.ascender
   local descender = hbshared.descender
 
+  local haspng = hbshared.haspng
+
   for i, glyph in next, glyphs do
     local index = glyph.cluster + 1
     local gid = glyph.codepoint
@@ -559,8 +561,8 @@ local function tonodes(head, current, run, glyphs, color)
           texio.write_nl(target, "")
         end
 
-        local pngblob = hbshared.haspng and hbglyph.png
-        if not pngblob and hbshared.haspng then
+        local pngblob = hbglyph.png
+        if haspng and not pngblob then
           pngblob = hbfont:ot_color_glyph_get_png(gid)
           hbglyph.png = pngblob
         end

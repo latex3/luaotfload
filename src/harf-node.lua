@@ -507,6 +507,7 @@ local function tonodes(head, current, run, glyphs, color)
   local descender = hbshared.descender
 
   local haspng = hbshared.haspng
+  local fonttype = hbshared.fonttype
 
   for i, glyph in next, glyphs do
     local index = glyph.cluster + 1
@@ -581,7 +582,17 @@ local function tonodes(head, current, run, glyphs, color)
           }
           head, current = node.insert_after(head, current, image)
         else
-          n.char = char
+          if haspng and not fonttype then
+            -- If this is a color bitmap font with no glyph outlines (like Noto
+            -- Color Emoji) and we end up here then the glyph is not supported
+            -- by the font.  LuaTeX does not now how to embed such fonts, so we
+            -- don’t want them to reach the backend as it will cause a fatal
+            -- error. We use `nullfont` instead.
+            -- That is a hack, but I think it is good enough for now.
+            n.font = 0
+          else
+            n.char = char
+          end
           n.xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
           n.yoffset = glyph.y_offset * scale
           node.protect_glyph(n)

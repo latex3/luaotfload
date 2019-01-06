@@ -318,13 +318,16 @@ shape = function(run)
 
   local fontdata = font.fonts[fontid]
   local hbdata = fontdata.hb
+  local palette = hbdata.palette
+  local spec = hbdata.spec
+  local features = spec.features
+  local options = spec.options
   local hbshared = hbdata.shared
   local hbfont = hbshared.font
   local hbface = hbshared.face
-  local features = hbdata.spec.features
-  local palette = hbdata.palette
 
-  local lang = lang or hbdata.spec.options.language or lang_invalid
+  local lang = lang or options.language or lang_invalid
+  local shapers = options.shaper and { options.shaper } or {}
 
   local buf = hb.Buffer.new()
   buf:set_direction(dir)
@@ -333,7 +336,7 @@ shape = function(run)
   buf:set_cluster_level(buf.CLUSTER_LEVEL_MONOTONE_CHARACTERS)
   buf:add_codepoints(codes, offset - 1, len)
 
-  if hb.shape_full(hbfont, buf, features) then
+  if hb.shape_full(hbfont, buf, features, shapers or {}) then
     -- LuaTeX wants the glyphs in logical order, so reverse RTL buffers.
     if dir:is_backward() then buf:reverse() end
 

@@ -748,7 +748,7 @@ local get_font_file = function (index)
     end
     local basename = entry.basename
     if entry.location == "texmf" then
-        local fullname = kpselookup(basename)
+        local fullname = resolvers.findfile(basename)
         if fullname then
             return true, fullname, entry.subfont
         end
@@ -772,7 +772,7 @@ local verify_font_file = function (basename)
     if path and lfsisfile(path) then
         return true
     end
-    if kpsefind_file(basename) then
+    if resolvers.findfile(basename) then
         return true
     end
     return false

@@ -20,7 +20,7 @@ end
 
 
 local setmetatable = setmetatable
-local kpselookup   = kpse.lookup
+local kpsefind_file   = kpse.find_file
 local lfsisdir     = lfs.isdir
 
 --[[doc--
@@ -608,14 +608,14 @@ local init_main = function ()
                fontloader)
     local _void = require (fontloader)
 
-  elseif kpselookup (fontloader) then
-    local path = kpselookup (fontloader)
+  elseif kpsefind_file (fontloader) then
+    local path = kpsefind_file (fontloader)
     logreport ("log", 0, "init",
                "Loading fontloader “%s” from kpse-resolved path “%s”.",
                fontloader, path)
     local _void = require (path)
 
-  elseif kpselookup (("fontloader-%s.lua"):format(fontloader)) then
+  elseif kpsefind_file (("fontloader-%s.lua"):format(fontloader)) then
     logreport ("log", 0, "init",
                "Using predefined fontloader “%s”.",
                fontloader)

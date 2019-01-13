@@ -2,11 +2,9 @@ This is a generated file for the l3build validation system.
 Don't change this file in any respect.
 LaTeX Font Info:    Font shape `JT3/gt/m/n' will be
 (Font)              scaled to size 9.6222pt on input line ....
-(load cache: ../extra_ipaexgothic.luc)
-luaotfload | aux : font no 19 (nil) does not define feature vrt2 for script dflt with language dflt
-luaotfload | aux : no font with id 19
 LaTeX Font Info:    Font shape `JY3/gt/m/n' will be
 (Font)              scaled to size 9.6222pt on input line ....
+(load cache: ../extra_ipaexgothic.luc)
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT
 .\whatsit4=[]

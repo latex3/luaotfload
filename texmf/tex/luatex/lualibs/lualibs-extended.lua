@@ -30,7 +30,7 @@ lualibs = lualibs or { }
 
 local lualibs_extended_module = {
   name          = "lualibs-extended",
-  version       = 2.6205,
+  version       = 2.62,
   date          = "2018-12-19",
   description   = "ConTeXt Lua libraries -- extended collection.",
   author        = "Hans Hagen, PRAGMA-ADE, Hasselt NL & Elie Roux & Philipp Gesang",

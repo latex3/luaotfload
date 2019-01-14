@@ -2,6 +2,10 @@
 packageversion= "2.9406"
 packagedate   = "2018-12-19"
 
+local luatexstatus = status.list()
+local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
+
+
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
 
@@ -23,7 +27,11 @@ checksuppfiles = {"texmf.cnf"}
 
 if os.env["CONTEXTPATH"] then 
   -- local system
-  excludetests = {}
+  if ismiktex then
+   excludetests = {"arabkernsfs","fontload-ttc-fontindex"}
+  else
+   excludetests = {}
+  end
 else
   -- travis or somewhere else ...
   excludetests = {"luatex-ja"}

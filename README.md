@@ -26,9 +26,9 @@ Please see the documentation luaotfload.pdf for more information.
 ![Travis CI for dev](https://img.shields.io/travis/com/u-fischer/luaotfload/dev.svg?style=flat-square)
 
 
-Date of last CTAN upload: 2018-12-19. 
+The version will be uploaded to CTAN shortly.  
 
-The ongoing development is in the dev branch. 
+The ongoing development is in the dev branch and in branches referring to the dates of the import of the context files. 
  
 ## Support
 [![GitHub issues](https://img.shields.io/badge/github-issues-blue.svg?style=flat-square)](https://github.com/u-fischer/luaotfload/issues) 

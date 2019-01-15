@@ -9,6 +9,25 @@ local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
 
+uploadconfig = {
+  pkg     = ctanpkg,
+  version = "v"..packageversion.." "..packagedate,
+  author  = "Ulrike Fischer; Philipp Gesang; Marcel Krüger; The LaTeX Team; Élie Roux; Manuel Pégourié-Gonnard (inaktiv); Khaled Hosny (inaktiv); Will Robertson (inaktiv)",
+  license = "GNU General Public License, version 2",
+  summary = "OpenType ‘loader’ for Plain TeX and LaTeX",
+  ctanPath = "/macros/luatex/generic/luaotfload",
+  repository = "https://github.com/u-fischer/luaotfload",
+  bugtracker = "https://github.com/u-fischer/luaotfload/issues",
+  support    = "https://github.com/u-fischer/luaotfload/issues",
+  uploader = "Ulrike Fischer",
+  -- email should get asked ... 
+  update   = true ,
+  topic=    {"font-use","luatex"},
+  note     = [[Uploaded automatically by l3build...]],
+  description=[[The package adopts the TrueType/OpenType Font loader code provided in ConTeXt, and adapts it to use in Plain TeX and LaTeX. It works under LuaLaTeX only.]],
+  announcement="This version syncs the files with the ConTeXt files from"..string.gsub (packagedate,"-", "/")..". It extends the mode key to allow the use of more fontloaders. It is the last version which can be used with luatex 1.07. Future versions will need 1.09 and will be available only at the github site until texlive 2018 is freezed."              
+}
+
 -- l3build check settings
 stdengine    = "luatex"
 checkengines = {"luatex"}

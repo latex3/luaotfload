@@ -5,6 +5,12 @@ packagedate   = "2018-12-19"
 local luatexstatus = status.list()
 local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 
+local ok, mydata = pcall(require, "ulrikefischerdata.lua")
+if not ok then
+  mydata= {email="XXX",github="XXX",name="XXX"}
+end
+
+print(mydata.email)
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -16,11 +22,11 @@ uploadconfig = {
   license = "GNU General Public License, version 2",
   summary = "OpenType ‘loader’ for Plain TeX and LaTeX",
   ctanPath = "/macros/luatex/generic/luaotfload",
-  repository = "https://github.com/u-fischer/luaotfload",
-  bugtracker = "https://github.com/u-fischer/luaotfload/issues",
-  support    = "https://github.com/u-fischer/luaotfload/issues",
-  uploader = "Ulrike Fischer",
-  -- email should get asked ... 
+  repository = mydata.github .. "luaotfload",
+  bugtracker = mydata.github .. "luaotfload/issues",
+  support    = mydata.github .. "luaotfload/issues",
+  uploader = mydata.name,
+  email    = mydate.email, 
   update   = true ,
   topic=    {"font-use","luatex"},
   note     = [[Uploaded automatically by l3build...]],

@@ -1,7 +1,7 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-luaotfload | aux : font no 28 (nil) does not define feature smcp for script latn with language dflt
-luaotfload | aux : no font with id 28
+luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
+luaotfload | aux : no font with id 29
 Package fontspec Info: Font family 'OpenSans-Regular.ttf(1)' created for font
 (fontspec)             'OpenSans-Regular.ttf' with options
 (fontspec)             [Ligatures=TeX,RawFeature=+vircase].

@@ -612,12 +612,6 @@ local italic_synonym = {
     italic  = true,
 }
 
-local bold_synonym = {
-    bold  = true,
-    black = true,
-    heavy = true,
-}
-
 local style_category = {
     regular     = "r",
     bold        = "b",
@@ -2790,6 +2784,7 @@ do
                     return "i"
                 end
             end
+            return tostring(pfmweight) .. (italicangle == 0 and "" or "i")
         end
         return false
     end
@@ -3023,7 +3018,7 @@ group_modifiers = function (mappings, families)
                                     local entry  = mappings [index]
                                     local weight = entry.pfmweight
                                     local diff   = weight < 700 and 700 - weight or weight - 700
-                                    if diff < minimum then
+                                    if weight > 500 and diff < minimum then
                                         minimum = diff
                                         closest = weight
                                     end

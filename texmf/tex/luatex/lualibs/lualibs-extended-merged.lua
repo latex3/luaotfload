@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Tue Dec 25 16:21:26 2018
+-- merge date  : Sun Jan 27 19:40:41 2019
 
 do -- begin closure to overcome local limits and interference
 
@@ -22,19 +22,11 @@ local unpack,concat=table.unpack,table.concat
 local P,V,C,S,R,Ct,Cs,Cp,Carg,Cc=lpeg.P,lpeg.V,lpeg.C,lpeg.S,lpeg.R,lpeg.Ct,lpeg.Cs,lpeg.Cp,lpeg.Carg,lpeg.Cc
 local patterns,lpegmatch=lpeg.patterns,lpeg.match
 local utfchar,utfbyte,utflen=utf.char,utf.byte,utf.len
-local loadstripped=nil
-local oldfashioned=LUAVERSION<5.2
-if oldfashioned then
-  loadstripped=function(str,shortcuts)
-    return load(str)
-  end
-else
-  loadstripped=function(str,shortcuts)
-    if shortcuts then
-      return load(dump(load(str),true),nil,nil,shortcuts)
-    else
-      return load(dump(load(str),true))
-    end
+local loadstripped=function(str,shortcuts)
+  if shortcuts then
+    return load(dump(load(str),true),nil,nil,shortcuts)
+  else
+    return load(dump(load(str),true))
   end
 end
 if not number then number={} end 
@@ -341,61 +333,33 @@ local template=[[
 %s
 return function(%s) return %s end
 ]]
-local preamble,environment="",{}
-if oldfashioned then
-  preamble=[[
-local lpeg=lpeg
-local type=type
-local tostring=tostring
-local tonumber=tonumber
-local format=string.format
-local concat=table.concat
-local signed=number.signed
-local points=number.points
-local basepoints= number.basepoints
-local utfchar=utf.char
-local utfbyte=utf.byte
-local lpegmatch=lpeg.match
-local nspaces=string.nspaces
-local utfpadding=string.utfpadding
-local tracedchar=string.tracedchar
-local autosingle=string.autosingle
-local autodouble=string.autodouble
-local sequenced=table.sequenced
-local formattednumber=number.formatted
-local sparseexponent=number.sparseexponent
-local formattedfloat=number.formattedfloat
-local stripzero=lpeg.patterns.stripzero
-local stripzeros=lpeg.patterns.stripzeros
-    ]]
-else
-  environment={
-    global=global or _G,
-    lpeg=lpeg,
-    type=type,
-    tostring=tostring,
-    tonumber=tonumber,
-    format=string.format,
-    concat=table.concat,
-    signed=number.signed,
-    points=number.points,
-    basepoints=number.basepoints,
-    utfchar=utf.char,
-    utfbyte=utf.byte,
-    lpegmatch=lpeg.match,
-    nspaces=string.nspaces,
-    utfpadding=string.utfpadding,
-    tracedchar=string.tracedchar,
-    autosingle=string.autosingle,
-    autodouble=string.autodouble,
-    sequenced=table.sequenced,
-    formattednumber=number.formatted,
-    sparseexponent=number.sparseexponent,
-    formattedfloat=number.formattedfloat,
-    stripzero=lpeg.patterns.stripzero,
-    stripzeros=lpeg.patterns.stripzeros,
-  }
-end
+local preamble=""
+local environment={
+  global=global or _G,
+  lpeg=lpeg,
+  type=type,
+  tostring=tostring,
+  tonumber=tonumber,
+  format=string.format,
+  concat=table.concat,
+  signed=number.signed,
+  points=number.points,
+  basepoints=number.basepoints,
+  utfchar=utf.char,
+  utfbyte=utf.byte,
+  lpegmatch=lpeg.match,
+  nspaces=string.nspaces,
+  utfpadding=string.utfpadding,
+  tracedchar=string.tracedchar,
+  autosingle=string.autosingle,
+  autodouble=string.autodouble,
+  sequenced=table.sequenced,
+  formattednumber=number.formatted,
+  sparseexponent=number.sparseexponent,
+  formattedfloat=number.formattedfloat,
+  stripzero=lpeg.patterns.stripzero,
+  stripzeros=lpeg.patterns.stripzeros,
+}
 local arguments={ "a1" } 
 setmetatable(arguments,{ __index=function(t,k)
     local v=t[k-1]..",a"..k
@@ -670,31 +634,33 @@ local format_extension=function(extensions,f,name)
   local extension=extensions[name] or "tostring(%s)"
   local f=tonumber(f) or 1
   local w=find(extension,"%.%.%.")
-  if f==0 then
-    if w then
+  if w then
+    if f==0 then
       extension=gsub(extension,"%.%.%.","")
-    end
-    return extension
-  elseif f==1 then
-    if w then
+      return extension
+    elseif f==1 then
       extension=gsub(extension,"%.%.%.","%%s")
-    end
-    n=n+1
-    local a="a"..n
-    return format(extension,a,a) 
-  elseif f<0 then
-    local a="a"..(n+f+1)
-    return format(extension,a,a)
-  else
-    if w then
-      extension=gsub(extension,"%.%.%.",rep("%%s,",f-1).."%%s")
-    end
-    local t={}
-    for i=1,f do
       n=n+1
-      t[i]="a"..n
+      local a="a"..n
+      return format(extension,a,a) 
+    elseif f<0 then
+      local a="a"..(n+f+1)
+      return format(extension,a,a)
+    else
+      extension=gsub(extension,"%.%.%.",rep("%%s,",f-1).."%%s")
+      local t={}
+      for i=1,f do
+        n=n+1
+        t[i]="a"..n
+      end
+      return format(extension,unpack(t))
     end
-    return format(extension,unpack(t))
+  else
+    extension=gsub(extension,"%%s",function()
+      n=n+1
+      return "a"..n
+    end)
+    return extension
   end
 end
 local builder=Cs { "start",
@@ -799,22 +765,20 @@ local function use(t,fmt,...)
   return t[fmt](...)
 end
 strings.formatters={}
-if oldfashioned then
-  function strings.formatters.new(noconcat)
-    local t={ _type_="formatter",_connector_=noconcat and "," or "..",_extensions_={},_preamble_=preamble,_environment_={} }
-    setmetatable(t,{ __index=make,__call=use })
-    return t
+function strings.formatters.new(noconcat)
+  local e={} 
+  for k,v in next,environment do
+    e[k]=v
   end
-else
-  function strings.formatters.new(noconcat)
-    local e={} 
-    for k,v in next,environment do
-      e[k]=v
-    end
-    local t={ _type_="formatter",_connector_=noconcat and "," or "..",_extensions_={},_preamble_="",_environment_=e }
-    setmetatable(t,{ __index=make,__call=use })
-    return t
-  end
+  local t={
+    _type_="formatter",
+    _connector_=noconcat and "," or "..",
+    _extensions_={},
+    _preamble_="",
+    _environment_=e,
+  }
+  setmetatable(t,{ __index=make,__call=use })
+  return t
 end
 local formatters=strings.formatters.new() 
 string.formatters=formatters 
@@ -836,15 +800,9 @@ patterns.xmlescape=Cs((P("<")/"&lt;"+P(">")/"&gt;"+P("&")/"&amp;"+P('"')/"&quot;
 patterns.texescape=Cs((C(S("#$%\\{}"))/"\\%1"+anything)^0)
 patterns.luaescape=Cs(((1-S('"\n'))^1+P('"')/'\\"'+P('\n')/'\\n"')^0) 
 patterns.luaquoted=Cs(Cc('"')*((1-S('"\n'))^1+P('"')/'\\"'+P('\n')/'\\n"')^0*Cc('"'))
-if oldfashioned then
-  add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],"local xmlescape = lpeg.patterns.xmlescape")
-  add(formatters,"tex",[[lpegmatch(texescape,%s)]],"local texescape = lpeg.patterns.texescape")
-  add(formatters,"lua",[[lpegmatch(luaescape,%s)]],"local luaescape = lpeg.patterns.luaescape")
-else
-  add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],{ xmlescape=lpeg.patterns.xmlescape })
-  add(formatters,"tex",[[lpegmatch(texescape,%s)]],{ texescape=lpeg.patterns.texescape })
-  add(formatters,"lua",[[lpegmatch(luaescape,%s)]],{ luaescape=lpeg.patterns.luaescape })
-end
+add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],{ xmlescape=lpeg.patterns.xmlescape })
+add(formatters,"tex",[[lpegmatch(texescape,%s)]],{ texescape=lpeg.patterns.texescape })
+add(formatters,"lua",[[lpegmatch(luaescape,%s)]],{ luaescape=lpeg.patterns.luaescape })
 local dquote=patterns.dquote 
 local equote=patterns.escaped+dquote/'\\"'+1
 local cquote=Cc('"')
@@ -1791,6 +1749,42 @@ if setinspector then
     end
   end)
 end
+local mt={
+  __newindex=function(t,k,v)
+    local n=t.last+1
+    t.last=n
+    t.list[n]=k
+    t.hash[k]=v
+  end,
+  __index=function(t,k)
+    return t.hash[k]
+  end,
+  __len=function(t)
+    return t.last
+  end,
+}
+function table.orderedhash()
+  return setmetatable({ list={},hash={},last=0 },mt)
+end
+function table.ordered(t)
+  local n=t.last
+  if n>0 then
+    local l=t.list
+    local i=1
+    local h=t.hash
+    local f=function()
+      if i<=n then
+        local k=i
+        local v=h[l[k]]
+        i=i+1
+        return k,v
+      end
+    end
+    return f,1,h[l[1]]
+  else
+    return function() end
+  end
+end
 
 end -- closure
 
@@ -2724,7 +2718,7 @@ if not modules then modules={} end modules ['util-jsn']={
 }
 local P,V,R,S,C,Cc,Cs,Ct,Cf,Cg=lpeg.P,lpeg.V,lpeg.R,lpeg.S,lpeg.C,lpeg.Cc,lpeg.Cs,lpeg.Ct,lpeg.Cf,lpeg.Cg
 local lpegmatch=lpeg.match
-local format=string.format
+local format,gsub=string.format,string.gsub
 local utfchar=utf.char
 local concat=table.concat
 local tonumber,tostring,rawset,type,next=tonumber,tostring,rawset,type,next
@@ -2746,7 +2740,9 @@ local escapes={
   ["r"]="\r",
   ["t"]="\t",
 }
-local escape_un=C(P("\\u")/"0x"*S("09","AF","af"))/function(s) return utfchar(tonumber(s)) end
+local escape_un=P("\\u")/""*(C(R("09","AF","af")^-4)/function(s)
+  return utfchar(tonumber(s,16))
+end)
 local escape_bs=P([[\]])/""*(P(1)/escapes) 
 local jstring=dquote*Cs((escape_un+escape_bs+(1-dquote))^0)*dquote
 local jtrue=P("true")*Cc(true)
@@ -2763,7 +2759,8 @@ local jsonconverter={ "value",
 function json.tolua(str)
   return lpegmatch(jsonconverter,str)
 end
-local function tojson(value,t) 
+local escaper
+local function tojson(value,t,n) 
   local kind=type(value)
   if kind=="table" then
     local done=false
@@ -2771,50 +2768,64 @@ local function tojson(value,t)
     if size==0 then
       for k,v in next,value do
         if done then
-          t[#t+1]=","
+          n=n+1;t[n]=","
         else
-          t[#t+1]="{"
+          n=n+1;t[n]="{"
           done=true
         end
-        t[#t+1]=format("%q:",k)
-        tojson(v,t)
+        n=n+1;t[n]=format("%q:",k)
+        t,n=tojson(v,t,n)
       end
       if done then
-        t[#t+1]="}"
+        n=n+1;t[n]="}"
       else
-        t[#t+1]="{}"
+        n=n+1;t[n]="{}"
       end
     elseif size==1 then
-      t[#t+1]="["
-      tojson(value[1],t)
-      t[#t+1]="]"
+      n=n+1;t[n]="["
+      t,n=tojson(value[1],t,n)
+      n=n+1;t[n]="]"
     else
       for i=1,size do
         if done then
-          t[#t+1]=","
+          n=n+1;t[n]=","
         else
-          t[#t+1]="["
+          n=n+1;t[n]="["
           done=true
         end
-        tojson(value[i],t)
+        t,n=tojson(value[i],t,n)
       end
-      t[#t+1]="]"
+      n=n+1;t[n]="]"
     end
   elseif kind=="string" then
-    t[#t+1]=format("%q",value)
+    n=n+1;t[n]='"'
+    n=n+1;t[n]=lpegmatch(escaper,value) or value
+    n=n+1;t[n]='"'
   elseif kind=="number" then
-    t[#t+1]=value
+    n=n+1;t[n]=value
   elseif kind=="boolean" then
-    t[#t+1]=tostring(value)
+    n=n+1;t[n]=tostring(value)
   end
-  return t
+  return t,n
 end
 function json.tostring(value)
   local kind=type(value)
   if kind=="table" then
-    return concat(tojson(value,{}),"")
+    if not escaper then
+      local escapes={
+        ["\\"]="\\u005C",
+        ["\""]="\\u0022",
+      }
+      for i=0,0x20 do
+        escapes[utfchar(i)]=format("\\u%04X",i)
+      end
+      escaper=Cs((
+        (R('\0\x20')+S('\"\\'))/escapes+P(1)
+      )^1 )
+    end
+    return concat((tojson(value,{},0)))
   elseif kind=="string" or kind=="number" then
-    return value
+    return lpegmatch(escaper,value) or value
   else
     return tostring(value)
   end
@@ -3009,14 +3020,23 @@ function statistics.formatruntime(runtime)
 end
 function statistics.runtime()
   stoptiming(statistics)
-  return statistics.formatruntime(elapsedtime(statistics))
+  local runtime=lua.getruntime and lua.getruntime() or elapsedtime(statistics)
+  return statistics.formatruntime(runtime)
 end
 local report=logs.reporter("system")
-function statistics.timed(action)
+function statistics.timed(action,all)
   starttiming("run")
   action()
   stoptiming("run")
-  report("total runtime: %s seconds",elapsedtime("run"))
+  local runtime=tonumber(elapsedtime("run"))
+  if all then
+    local alltime=tonumber(lua.getruntime and lua.getruntime() or elapsedtime(statistics))
+    if alltime and alltime>0 then
+      report("total runtime: %0.3f seconds of %0.3f seconds",runtime,alltime)
+      return
+    end
+  end
+  report("total runtime: %0.3f seconds",runtime)
 end
 function statistics.tracefunction(base,tag,...)
   for i=1,select("#",...) do
@@ -3108,6 +3128,7 @@ function luautilities.loadedluacode(fullname,forcestrip,name,macros)
     code()
   else
     report_lua("loading of file %a failed:\n\t%s",fullname,message or "no message")
+    code,message=loadfile(fullname)
   end
   if forcestrip and luautilities.stripcode then
     if type(forcestrip)=="function" then

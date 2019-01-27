@@ -35,8 +35,6 @@ if LUAVERSION < 5.2 and jit then
     LUAVERSION   = 5.2
 end
 
-_LUAVERSION = LUAVERSION -- for old times sake, will go away
-
 -- lpeg
 
 if not lpeg then

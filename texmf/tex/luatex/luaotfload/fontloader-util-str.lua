@@ -22,25 +22,12 @@ local utfchar, utfbyte, utflen = utf.char, utf.byte, utf.len
 ----- loadstripped = utilities.lua.loadstripped
 ----- setmetatableindex = table.setmetatableindex
 
-local loadstripped = nil
-local oldfashioned = LUAVERSION < 5.2
-
-if oldfashioned then
-
-    loadstripped = function(str,shortcuts)
-        return load(str)
+local loadstripped = function(str,shortcuts)
+    if shortcuts then
+        return load(dump(load(str),true),nil,nil,shortcuts)
+    else
+        return load(dump(load(str),true))
     end
-
-else
-
-    loadstripped = function(str,shortcuts)
-        if shortcuts then
-            return load(dump(load(str),true),nil,nil,shortcuts)
-        else
-            return load(dump(load(str),true))
-        end
-    end
-
 end
 
 -- todo: make a special namespace for the formatter
@@ -598,66 +585,34 @@ local template = [[
 return function(%s) return %s end
 ]]
 
-local preamble, environment = "", { }
+local preamble = ""
 
-if oldfashioned then
-
-    preamble = [[
-local lpeg=lpeg
-local type=type
-local tostring=tostring
-local tonumber=tonumber
-local format=string.format
-local concat=table.concat
-local signed=number.signed
-local points=number.points
-local basepoints= number.basepoints
-local utfchar=utf.char
-local utfbyte=utf.byte
-local lpegmatch=lpeg.match
-local nspaces=string.nspaces
-local utfpadding=string.utfpadding
-local tracedchar=string.tracedchar
-local autosingle=string.autosingle
-local autodouble=string.autodouble
-local sequenced=table.sequenced
-local formattednumber=number.formatted
-local sparseexponent=number.sparseexponent
-local formattedfloat=number.formattedfloat
-local stripzero=lpeg.patterns.stripzero
-local stripzeros=lpeg.patterns.stripzeros
-    ]]
-
-else
-
-    environment = {
-        global          = global or _G,
-        lpeg            = lpeg,
-        type            = type,
-        tostring        = tostring,
-        tonumber        = tonumber,
-        format          = string.format,
-        concat          = table.concat,
-        signed          = number.signed,
-        points          = number.points,
-        basepoints      = number.basepoints,
-        utfchar         = utf.char,
-        utfbyte         = utf.byte,
-        lpegmatch       = lpeg.match,
-        nspaces         = string.nspaces,
-        utfpadding      = string.utfpadding,
-        tracedchar      = string.tracedchar,
-        autosingle      = string.autosingle,
-        autodouble      = string.autodouble,
-        sequenced       = table.sequenced,
-        formattednumber = number.formatted,
-        sparseexponent  = number.sparseexponent,
-        formattedfloat  = number.formattedfloat,
-        stripzero       = lpeg.patterns.stripzero,
-        stripzeros      = lpeg.patterns.stripzeros,
-    }
-
-end
+local environment = {
+    global          = global or _G,
+    lpeg            = lpeg,
+    type            = type,
+    tostring        = tostring,
+    tonumber        = tonumber,
+    format          = string.format,
+    concat          = table.concat,
+    signed          = number.signed,
+    points          = number.points,
+    basepoints      = number.basepoints,
+    utfchar         = utf.char,
+    utfbyte         = utf.byte,
+    lpegmatch       = lpeg.match,
+    nspaces         = string.nspaces,
+    utfpadding      = string.utfpadding,
+    tracedchar      = string.tracedchar,
+    autosingle      = string.autosingle,
+    autodouble      = string.autodouble,
+    sequenced       = table.sequenced,
+    formattednumber = number.formatted,
+    sparseexponent  = number.sparseexponent,
+    formattedfloat  = number.formattedfloat,
+    stripzero       = lpeg.patterns.stripzero,
+    stripzeros      = lpeg.patterns.stripzeros,
+}
 
 -- -- --
 
@@ -1036,44 +991,86 @@ end
 --     strip = true
 -- end
 
+-- add(formatters,"texexp", [[texexp(...)]], "local texexp = metapost.texexp")
 --
+-- add(formatters,"foo:bar",[[foo(...)]], { foo = function(...) print(...) return "!" end })
+-- print(string.formatters["foo %3!foo:bar! bar"](1,2,3))
+
 
 local format_rest = function(s)
     return format("%q",s) -- catches " and \n and such
 end
 
+-- local format_extension = function(extensions,f,name)
+--     local extension = extensions[name] or "tostring(%s)"
+--     local f = tonumber(f) or 1
+--     local w = find(extension,"%.%.%.")
+--     if f == 0 then
+--         if w then
+--             extension = gsub(extension,"%.%.%.","")
+--         end
+--         return extension
+--     elseif f == 1 then
+--         if w then
+--             extension = gsub(extension,"%.%.%.","%%s")
+--         end
+--         n = n + 1
+--         local a = "a" .. n
+--         return format(extension,a,a) -- maybe more times?
+--     elseif f < 0 then
+--         local a = "a" .. (n + f + 1)
+--         return format(extension,a,a)
+--     else
+--         if w then
+--             extension = gsub(extension,"%.%.%.",rep("%%s,",f-1).."%%s")
+--         end
+--         -- we could fill an array and then n = n + 1 unpack(t,n,n+f) but as we
+--         -- cache we don't save much and there are hardly any extensions anyway
+--         local t = { }
+--         for i=1,f do
+--             n = n + 1
+--          -- t[#t+1] = "a" .. n
+--             t[i] = "a" .. n
+--         end
+--         return format(extension,unpack(t))
+--     end
+-- end
+
 local format_extension = function(extensions,f,name)
     local extension = extensions[name] or "tostring(%s)"
     local f = tonumber(f) or 1
     local w = find(extension,"%.%.%.")
-    if f == 0 then
-        if w then
+    if w then
+        -- we have a wildcard
+        if f == 0 then
             extension = gsub(extension,"%.%.%.","")
-        end
-        return extension
-    elseif f == 1 then
-        if w then
+            return extension
+        elseif f == 1 then
             extension = gsub(extension,"%.%.%.","%%s")
-        end
-        n = n + 1
-        local a = "a" .. n
-        return format(extension,a,a) -- maybe more times?
-    elseif f < 0 then
-        local a = "a" .. (n + f + 1)
-        return format(extension,a,a)
-    else
-        if w then
-            extension = gsub(extension,"%.%.%.",rep("%%s,",f-1).."%%s")
-        end
-        -- we could fill an array and then n = n + 1 unpack(t,n,n+f) but as we
-        -- cache we don't save much and there are hardly any extensions anyway
-        local t = { }
-        for i=1,f do
             n = n + 1
-         -- t[#t+1] = "a" .. n
-            t[i] = "a" .. n
+            local a = "a" .. n
+            return format(extension,a,a) -- maybe more times?
+        elseif f < 0 then
+            local a = "a" .. (n + f + 1)
+            return format(extension,a,a)
+        else
+            extension = gsub(extension,"%.%.%.",rep("%%s,",f-1).."%%s")
+            -- we could fill an array and then n = n + 1 unpack(t,n,n+f) but as we
+            -- cache we don't save much and there are hardly any extensions anyway
+            local t = { }
+            for i=1,f do
+                n = n + 1
+             -- t[#t+1] = "a" .. n
+                t[i] = "a" .. n
+            end
+            return format(extension,unpack(t))
         end
-        return format(extension,unpack(t))
+    else
+        extension = gsub(extension,"%%s",function()
+            n = n + 1
+            return "a" .. n
+        end)
+        return extension
     end
 end
 
@@ -1273,35 +1270,21 @@ strings.formatters = { }
 
 -- _connector_ is an experiment
 
-if oldfashioned then
-
-    function strings.formatters.new(noconcat)
-        local t = { _type_ = "formatter", _connector_ = noconcat and "," or "..", _extensions_ = { }, _preamble_ = preamble, _environment_ = { } }
-        setmetatable(t, { __index = make, __call = use })
-        return t
+function strings.formatters.new(noconcat)
+    local e = { } -- better make a copy as we can overload
+    for k, v in next, environment do
+        e[k] = v
     end
-
-else
-
-    function strings.formatters.new(noconcat)
-        local e = { } -- better make a copy as we can overload
-        for k, v in next, environment do
-            e[k] = v
-        end
-        local t = { _type_ = "formatter", _connector_ = noconcat and "," or "..", _extensions_ = { }, _preamble_ = "", _environment_ = e }
-        setmetatable(t, { __index = make, __call = use })
-        return t
-    end
-
+    local t = {
+        _type_        = "formatter",
+        _connector_   = noconcat and "," or "..",
+        _extensions_  = { },
+        _preamble_    = "",
+        _environment_ = e,
+    }
+    setmetatable(t, { __index = make, __call = use })
+    return t
 end
-
--- function strings.formatters.new()
---     local t = { _extensions_ = { }, _preamble_ = "", _type_ = "formatter", _n_ = 0 }
---     local m = { _t_ = t }
---     setmetatable(t, { __index = m, __call = use })
---     setmetatable(m, { __index = make })
---     return t
--- end
 
 local formatters   = strings.formatters.new() -- the default instance
 
@@ -1333,19 +1316,9 @@ patterns.luaquoted = Cs(Cc('"') * ((1-S('"\n'))^1 + P('"')/'\\"' + P('\n')/'\\n"
 -- escaping by lpeg is faster for strings without quotes, slower on a string with quotes, but
 -- faster again when other q-escapables are found (the ones we don't need to escape)
 
-if oldfashioned then
-
-    add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],"local xmlescape = lpeg.patterns.xmlescape")
-    add(formatters,"tex",[[lpegmatch(texescape,%s)]],"local texescape = lpeg.patterns.texescape")
-    add(formatters,"lua",[[lpegmatch(luaescape,%s)]],"local luaescape = lpeg.patterns.luaescape")
-
-else
-
-    add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],{ xmlescape = lpeg.patterns.xmlescape })
-    add(formatters,"tex",[[lpegmatch(texescape,%s)]],{ texescape = lpeg.patterns.texescape })
-    add(formatters,"lua",[[lpegmatch(luaescape,%s)]],{ luaescape = lpeg.patterns.luaescape })
-
-end
+add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],{ xmlescape = lpeg.patterns.xmlescape })
+add(formatters,"tex",[[lpegmatch(texescape,%s)]],{ texescape = lpeg.patterns.texescape })
+add(formatters,"lua",[[lpegmatch(luaescape,%s)]],{ luaescape = lpeg.patterns.luaescape })
 
 -- -- yes or no:
 --

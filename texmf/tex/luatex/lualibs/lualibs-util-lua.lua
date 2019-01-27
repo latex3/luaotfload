@@ -88,6 +88,7 @@ function luautilities.loadedluacode(fullname,forcestrip,name,macros)
         code()
     else
         report_lua("loading of file %a failed:\n\t%s",fullname,message or "no message")
+        code, message = loadfile(fullname)
     end
     if forcestrip and luautilities.stripcode then
         if type(forcestrip) == "function" then

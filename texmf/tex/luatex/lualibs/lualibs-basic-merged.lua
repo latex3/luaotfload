@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Tue Dec 25 16:21:45 2018
+-- merge date  : Sun Jan 27 19:40:53 2019
 
 do -- begin closure to overcome local limits and interference
 
@@ -20,7 +20,6 @@ if LUAVERSION<5.2 and jit then
   MINORVERSION=2
   LUAVERSION=5.2
 end
-_LUAVERSION=LUAVERSION
 if not lpeg then
   lpeg=require("lpeg")
 end

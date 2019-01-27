@@ -37,7 +37,6 @@ local getprev             = nuts.getprev
 local getprev             = nuts.getprev
 local getprop             = nuts.getprop
 local setprop             = nuts.setprop
-local getfont             = nuts.getfont
 local getsubtype          = nuts.getsubtype
 local getchar             = nuts.getchar
 local ischar              = nuts.is_char

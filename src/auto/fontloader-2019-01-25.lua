@@ -1,9 +1,9 @@
 --[[info-----------------------------------------------------------------------
   Luaotfload fontloader package
-  build 2018-12-25 16:48:51
+  build 2019-01-27 19:45:03
 -------------------------------------------------------------------------------
 
-  © 2018 PRAGMA ADE / ConTeXt Development Team
+  © 2019 PRAGMA ADE / ConTeXt Development Team
 
   The code in this file is provided under the GPL v2.0 license. See the
   file COPYING in the Luaotfload repository for details.
@@ -62,7 +62,7 @@
 --info]]-----------------------------------------------------------------------
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “data-con” 7ce546725b1550f655c78ac9d69419ca] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “data-con” 7ce546725b1550f655c78ac9d69419ca] ---
 
 if not modules then modules={} end modules ['data-con']={
   version=1.100,
@@ -174,10 +174,10 @@ function containers.cleanname(name)
   return (gsub(lower(name),"[^%w\128-\255]+","-")) 
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “data-con”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “data-con”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “basics-nod” f899f78e915f8c428df33bd62d5520dc] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “basics-nod” 31e53bc2d299eda36a0f6592a0d0693f] ---
 
 if not modules then modules={} end modules ['luatex-fonts-nod']={
   version=1.001,
@@ -224,7 +224,7 @@ end
 for k,v in next,glyphcodes do
   glyphcodes[v]=k
 end
-for k,v in next,glyphcodes do
+for k,v in next,disccodes do
   disccodes[v]=k
 end
 nodes.nodecodes=nodecodes
@@ -235,15 +235,6 @@ local remove_node=node.remove
 local traverse_id=node.traverse_id
 nodes.handlers.protectglyphs=node.protect_glyphs  
 nodes.handlers.unprotectglyphs=node.unprotect_glyphs 
-local math_code=nodecodes.math
-local end_of_math=node.end_of_math
-function node.end_of_math(n)
-  if n.id==math_code and n.subtype==1 then
-    return n
-  else
-    return end_of_math(n)
-  end
-end
 function nodes.remove(head,current,free_too)
   local t=current
   head,current=remove_node(head,current)
@@ -309,113 +300,78 @@ nodes.tonode=tonode
 nodes.tonut=tonut
 nuts.tonode=tonode
 nuts.tonut=tonut
-local getfield=direct.getfield
-local setfield=direct.setfield
-nuts.getfield=getfield
-nuts.setfield=setfield
-nuts.getnext=direct.getnext
-nuts.setnext=direct.setnext
-nuts.getprev=direct.getprev
-nuts.setprev=direct.setprev
+nuts.getattr=direct.get_attribute
 nuts.getboth=direct.getboth
-nuts.setboth=direct.setboth
-nuts.getid=direct.getid
-nuts.getattr=direct.get_attribute or direct.has_attribute or getfield
-nuts.setattr=setfield
-nuts.getfont=direct.getfont
-nuts.setfont=direct.setfont
-nuts.getsubtype=direct.getsubtype
-nuts.setsubtype=direct.setsubtype
 nuts.getchar=direct.getchar
-nuts.setchar=direct.setchar
+nuts.getcomponents=direct.getcomponents
+nuts.getdirection=direct.getdirection
 nuts.getdisc=direct.getdisc
-nuts.setdisc=direct.setdisc
-nuts.setlink=direct.setlink
-nuts.setsplit=direct.setsplit
+nuts.getfield=direct.getfield
+nuts.getfont=direct.getfont
+nuts.getid=direct.getid
+nuts.getkern=direct.getkern
 nuts.getlist=direct.getlist
+nuts.getnext=direct.getnext
+nuts.getoffsets=direct.getoffsets
+nuts.getprev=direct.getprev
+nuts.getsubtype=direct.getsubtype
+nuts.getwidth=direct.getwidth
+nuts.setattr=direct.setfield
+nuts.setboth=direct.setboth
+nuts.setchar=direct.setchar
+nuts.setcomponents=direct.setcomponents
+nuts.setdir=direct.setdir
+nuts.setdirection=direct.setdirection
+nuts.setdisc=direct.setdisc
+nuts.setfield=setfield
+nuts.setkern=direct.setkern
+nuts.setlink=direct.setlink
 nuts.setlist=direct.setlist
-nuts.getoffsets=direct.getoffsets or
-  function(n)
-    return getfield(n,"xoffset"),getfield(n,"yoffset")
-  end
-nuts.setoffsets=direct.setoffsets or
-  function(n,x,y)
-    if x then setfield(n,"xoffset",x) end
-    if y then setfield(n,"xoffset",y) end
-  end
-nuts.getleader=direct.getleader   or function(n)  return getfield(n,"leader")    end
-nuts.setleader=direct.setleader   or function(n,l)    setfield(n,"leader",l)   end
-nuts.getcomponents=direct.getcomponents or function(n)  return getfield(n,"components")  end
-nuts.setcomponents=direct.setcomponents or function(n,c)    setfield(n,"components",c) end
-nuts.getkern=direct.getkern    or function(n)  return getfield(n,"kern")     end
-nuts.setkern=direct.setkern    or function(n,k)    setfield(n,"kern",k)    end
-nuts.getdir=direct.getdir    or function(n)  return getfield(n,"dir")     end
-nuts.setdir=direct.setdir    or function(n,d)    setfield(n,"dir",d)    end
-nuts.getwidth=direct.getwidth   or function(n)  return getfield(n,"width")    end
-nuts.setwidth=direct.setwidth   or function(n,w) return setfield(n,"width",w)   end
-nuts.getheight=direct.getheight   or function(n)  return getfield(n,"height")    end
-nuts.setheight=direct.setheight   or function(n,h) return setfield(n,"height",h)   end
-nuts.getdepth=direct.getdepth   or function(n)  return getfield(n,"depth")    end
-nuts.setdepth=direct.setdepth   or function(n,d) return setfield(n,"depth",d)   end
-if not direct.is_glyph then
-  local getchar=direct.getchar
-  local getid=direct.getid
-  local getfont=direct.getfont
-  local glyph_code=nodes.nodecodes.glyph
-  function direct.is_glyph(n,f)
-    local id=getid(n)
-    if id==glyph_code then
-      if f and getfont(n)==f then
-        return getchar(n)
-      else
-        return false
-      end
-    else
-      return nil,id
-    end
-  end
-  function direct.is_char(n,f)
-    local id=getid(n)
-    if id==glyph_code then
-      if getsubtype(n)>=256 then
-        return false
-      elseif f and getfont(n)==f then
-        return getchar(n)
-      else
-        return false
-      end
-    else
-      return nil,id
+nuts.setnext=direct.setnext
+nuts.setoffsets=direct.setoffsets
+nuts.setprev=direct.setprev
+nuts.setsplit=direct.setsplit
+nuts.setsubtype=direct.setsubtype
+nuts.setwidth=direct.setwidth
+nuts.is_char=direct.is_char
+nuts.is_glyph=direct.is_glyph
+nuts.ischar=direct.is_char
+nuts.isglyph=direct.is_glyph
+nuts.copy=direct.copy
+nuts.copy_list=direct.copy_list
+nuts.copy_node=direct.copy
+nuts.delete=direct.delete
+nuts.end_of_math=direct.end_of_math
+nuts.flush=direct.flush
+nuts.flush_list=direct.flush_list
+nuts.flush_node=direct.flush_node
+nuts.free=direct.free
+nuts.insert_after=direct.insert_after
+nuts.insert_before=direct.insert_before
+nuts.is_node=direct.is_node
+nuts.kerning=direct.kerning
+nuts.ligaturing=direct.ligaturing
+nuts.new=direct.new
+nuts.remove=direct.remove
+nuts.tail=direct.tail
+nuts.traverse=direct.traverse
+nuts.traverse_char=direct.traverse_char
+nuts.traverse_glyph=direct.traverse_glyph
+nuts.traverse_id=direct.traverse_id
+if not nuts.getdirection then
+  local getdir=direct.getdir
+  function nuts.getdirection(n)
+    local d=getdir(n)
+    if   d=="TLT" then return 0
+    elseif d=="TRT" then return 1
+    elseif d=="+TLT" then return 0,false
+    elseif d=="+TRT" then return 1,false
+    elseif d=="-TLT" then return 0,true
+    elseif d=="-TRT" then return 1,true
+    else          return 0
     end
   end
 end
-nuts.ischar=direct.is_char
-nuts.is_char=direct.is_char
-nuts.isglyph=direct.is_glyph
-nuts.is_glyph=direct.is_glyph
-nuts.insert_before=direct.insert_before
-nuts.insert_after=direct.insert_after
-nuts.delete=direct.delete
-nuts.copy=direct.copy
-nuts.copy_node=direct.copy
-nuts.copy_list=direct.copy_list
-nuts.tail=direct.tail
-nuts.flush_list=direct.flush_list
-nuts.flush_node=direct.flush_node
-nuts.flush=direct.flush
-nuts.free=direct.free
-nuts.remove=direct.remove
-nuts.is_node=direct.is_node
-nuts.end_of_math=direct.end_of_math
-nuts.traverse=direct.traverse
-nuts.traverse_id=direct.traverse_id
-nuts.traverse_char=direct.traverse_char
-nuts.traverse_glyph=direct.traverse_glyph
-nuts.ligaturing=direct.ligaturing
-nuts.kerning=direct.kerning
-nuts.new=direct.new
-nuts.getprop=nuts.getattr
-nuts.setprop=nuts.setattr
 local propertydata=direct.get_properties_table()
 nodes.properties={ data=propertydata }
 direct.set_properties_mode(true,true)   
@@ -452,70 +408,6 @@ local flush_node=nuts.flush_node
 local traverse_id=nuts.traverse_id
 local copy_node=nuts.copy_node
 local glyph_code=nodes.nodecodes.glyph
-function nuts.set_components(target,start,stop)
-  local head=getcomponents(target)
-  if head then
-    flush_list(head)
-    head=nil
-  end
-  if start then
-    setprev(start)
-  else
-    return nil
-  end
-  if stop then
-    setnext(stop)
-  end
-  local tail=nil
-  while start do
-    local c=getcomponents(start)
-    local n=getnext(start)
-    if c then
-      if head then
-        setlink(tail,c)
-      else
-        head=c
-      end
-      tail=find_tail(c)
-      setcomponents(start)
-      flush_node(start)
-    else
-      if head then
-        setlink(tail,start)
-      else
-        head=start
-      end
-      tail=start
-    end
-    start=n
-  end
-  setcomponents(target,head)
-  return head
-end
-nuts.get_components=nuts.getcomponents
-function nuts.take_components(target)
-  local c=getcomponents(target)
-  setcomponents(target)
-  return c
-end
-function nuts.count_components(n,marks)
-  local components=getcomponents(n)
-  if components then
-    if marks then
-      local i=0
-      for g in traverse_id(glyph_code,components) do
-        if not marks[getchar(g)] then
-          i=i+1
-        end
-      end
-      return i
-    else
-      return count(glyph_code,components)
-    end
-  else
-    return 0
-  end
-end
 function nuts.copy_no_components(g,copyinjection)
   local components=getcomponents(g)
   if components then
@@ -549,35 +441,6 @@ function nuts.copy_only_glyphs(current)
   return head
 end
 nuts.uses_font=direct.uses_font
-if not nuts.uses_font then
-  local getdisc=nuts.getdisc
-  local getfont=nuts.getfont
-  function nuts.uses_font(n,font)
-    local pre,post,replace=getdisc(n)
-    if pre then
-      for n in traverse_id(glyph_code,pre) do
-        if getfont(n)==font then
-          return true
-        end
-      end
-    end
-    if post then
-      for n in traverse_id(glyph_code,post) do
-        if getfont(n)==font then
-          return true
-        end
-      end
-    end
-    if replace then
-      for n in traverse_id(glyph_code,replace) do
-        if getfont(n)==font then
-          return true
-        end
-      end
-    end
-    return false
-  end
-end
 do
   local dummy=tonut(node.new("glyph"))
   nuts.traversers={
@@ -590,10 +453,10 @@ do
   }
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “basics-nod”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “basics-nod”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “basics-chr” a8b8316248b40cc9bc1be19050f7074f] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “basics-chr” a8b8316248b40cc9bc1be19050f7074f] ---
 
 
 characters=characters or {}
@@ -3832,10 +3695,10 @@ characters.indicgroups={
  },
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “basics-chr”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “basics-chr”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ini” 4299a02110bbd7c0d27e131235c5319d] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ini” 4299a02110bbd7c0d27e131235c5319d] ---
 
 if not modules then modules={} end modules ['font-ini']={
   version=1.001,
@@ -3873,10 +3736,10 @@ fonts.privateoffsets={
   keepnames=false,
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ini”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ini”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-mis” bc9eb43c27f63ce9d0fff67e104fe1c6] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-mis” bc9eb43c27f63ce9d0fff67e104fe1c6] ---
 
 if not modules then modules={} end modules ['luatex-font-mis']={
   version=1.001,
@@ -3908,10 +3771,10 @@ function font.each()
   return table.sortedhash(fonts.hashes.identifiers)
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-mis”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-mis”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-con” 6308f40e1b4fecfbe05b01c571d46936] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-con” 6308f40e1b4fecfbe05b01c571d46936] ---
 
 if not modules then modules={} end modules ['font-con']={
   version=1.001,
@@ -5250,10 +5113,10 @@ function constructors.addcoreunicodes(unicodes)
   return unicodes
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-con”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-con”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-enc” 3e71a54297e8f85a1ac438bb0f20dd79] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-enc” 3e71a54297e8f85a1ac438bb0f20dd79] ---
 
 if not modules then modules={} end modules ['luatex-font-enc']={
   version=1.001,
@@ -5322,10 +5185,10 @@ function encodings.load(filename)
   return containers.write(encodings.cache,name,data)
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-enc”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-enc”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-cid” 4d87988efa86020a14708ee03c23415f] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-cid” 4d87988efa86020a14708ee03c23415f] ---
 
 if not modules then modules={} end modules ['font-cid']={
   version=1.001,
@@ -5476,10 +5339,10 @@ function cid.getmap(specification)
   return found
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-cid”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-cid”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-map” 210b9288eef0df624da638b65d27291b] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-map” 210b9288eef0df624da638b65d27291b] ---
 
 if not modules then modules={} end modules ['font-map']={
   version=1.001,
@@ -5866,10 +5729,10 @@ function mappings.addtounicode(data,filename,checklookups,forceligatures)
   end
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-map”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-map”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-vfc” 94937140f2c909e9c831ba021f1ab303] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-vfc” 94937140f2c909e9c831ba021f1ab303] ---
 
 if not modules then modules={} end modules ['font-vfc']={
   version=1.001,
@@ -5967,10 +5830,10 @@ helpers.commands=utilities.storage.allocate {
   dummy=dummy,
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-vfc”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-vfc”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-otr” 2c35abf43f9a64bdd99240593d432d8a] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-otr” 2c35abf43f9a64bdd99240593d432d8a] ---
 
 if not modules then modules={} end modules ['font-otr']={
   version=1.001,
@@ -7793,10 +7656,10 @@ function readers.extend(fontdata)
   end
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-otr”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-otr”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-oti” dbae7722baae24d917a17176553825cf] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-oti” dbae7722baae24d917a17176553825cf] ---
 
 if not modules then modules={} end modules ['font-oti']={
   version=1.001,
@@ -7939,10 +7802,10 @@ function otffeatures.checkeddefaultlanguage(featuretype,autolanguage,languages)
   end
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-oti”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-oti”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ott” 3791be083c2eccf366792dc84baee67a] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ott” a8b78a27cbb22d4f697a8dd801a73eea] ---
 
 if not modules then modules={} end modules ["font-ott"]={
   version=1.001,
@@ -8941,7 +8804,7 @@ statistics.usedfeatures=usedfeatures
 table.setmetatableindex(usedfeatures,function(t,k) if k then local v={} t[k]=v return v end end) 
 storage.register("fonts/otf/usedfeatures",usedfeatures,"fonts.handlers.otf.statistics.usedfeatures" )
 local normalizedaxis=otf.readers.helpers.normalizedaxis or function(s) return s end
-function otffeatures.normalize(features)
+function otffeatures.normalize(features,wrap) 
   if features then
     local h={}
     for key,value in next,features do
@@ -8967,7 +8830,11 @@ function otffeatures.normalize(features)
           elseif type(value)=="string" then
             local b=is_boolean(value)
             if type(b)=="nil" then
-              uv=lower(value)
+              if wrap and find(value,",") then
+                uv="{"..lower(value).."}"
+              else
+                uv=lower(value)
+              end
             else
               uv=b
             end
@@ -8992,10 +8859,10 @@ function otffeatures.normalize(features)
   end
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ott”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ott”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-cff” fda3887cbaad0b82d06d3cbffdfff560] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-cff” fda3887cbaad0b82d06d3cbffdfff560] ---
 
 if not modules then modules={} end modules ['font-cff']={
   version=1.001,
@@ -11014,10 +10881,10 @@ function readers.cffcheck(filename)
   end
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-cff”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-cff”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ttf” fe1b771df5d6442a10fcfa1388f3eed2] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ttf” fe1b771df5d6442a10fcfa1388f3eed2] ---
 
 if not modules then modules={} end modules ['font-ttf']={
   version=1.001,
@@ -12157,10 +12024,10 @@ function readers.gvar(f,fontdata,specification,glyphdata,shapedata)
   end
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ttf”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ttf”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-dsp” 7959312318af6ed8fbd9edbeb2b1a335] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-dsp” 7959312318af6ed8fbd9edbeb2b1a335] ---
 
 if not modules then modules={} end modules ['font-dsp']={
   version=1.001,
@@ -15382,10 +15249,10 @@ function readers.mvar(f,fontdata,specification)
   end
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-dsp”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-dsp”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-oup” 26b481cd9efebf7047810800930dff58] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-oup” 26b481cd9efebf7047810800930dff58] ---
 
 if not modules then modules={} end modules ['font-oup']={
   version=1.001,
@@ -18006,10 +17873,10 @@ function readers.expand(data)
   expandlookups(sublookups)
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-oup”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-oup”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-otl” 0836c8396cae2bcfd4020186e5e8d7e0] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-otl” 0836c8396cae2bcfd4020186e5e8d7e0] ---
 
 if not modules then modules={} end modules ['font-otl']={
   version=1.001,
@@ -18712,10 +18579,10 @@ otf.coverup={
   end
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-otl”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-otl”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-oto” 6ba2e73177b18007e74de324c324806c] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-oto” 6ba2e73177b18007e74de324c324806c] ---
 
 if not modules then modules={} end modules ['font-oto']={ 
   version=1.001,
@@ -19168,10 +19035,10 @@ registerotffeature {
 }
 otf.basemodeinitializer=featuresinitializer
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-oto”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-oto”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-otj” 91f45161817b7e8e33ad1d1b68e35fdb] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-otj” 91f45161817b7e8e33ad1d1b68e35fdb] ---
 
 if not modules then modules={} end modules ['font-otj']={
   version=1.001,
@@ -20628,10 +20495,10 @@ function injections.handler(head,where)
   end
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-otj”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-otj”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ota” 1b2feab42ed8081933768c1e3ef7d103] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ota” 5503fc4d2bd8c6a2cbb2db1b1651e402] ---
 
 if not modules then modules={} end modules ['font-ota']={
   version=1.001,
@@ -20658,7 +20525,6 @@ local getprev=nuts.getprev
 local getprev=nuts.getprev
 local getprop=nuts.getprop
 local setprop=nuts.setprop
-local getfont=nuts.getfont
 local getsubtype=nuts.getsubtype
 local getchar=nuts.getchar
 local ischar=nuts.is_char
@@ -21009,10 +20875,10 @@ directives.register("otf.analyze.useunicodemarks",function(v)
   analyzers.useunicodemarks=v
 end)
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ota”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ota”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ots” ca923deced1ed4cdd86e66acdb9e6420] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ots” 4187844d094bc9825878dd307d472eb3] ---
 
 if not modules then modules={} end modules ['font-ots']={ 
   version=1.001,
@@ -21083,7 +20949,6 @@ local getattr=nuts.getattr
 local setattr=nuts.setattr
 local getprop=nuts.getprop
 local setprop=nuts.setprop
-local getfont=nuts.getfont
 local getsubtype=nuts.getsubtype
 local setsubtype=nuts.setsubtype
 local getchar=nuts.getchar
@@ -21093,9 +20958,9 @@ local setdisc=nuts.setdisc
 local setlink=nuts.setlink
 local getcomponents=nuts.getcomponents 
 local setcomponents=nuts.setcomponents 
-local getdir=nuts.getdir
 local getwidth=nuts.getwidth
 local ischar=nuts.is_char
+local isglyph=nuts.isglyph
 local usesfont=nuts.uses_font
 local insert_node_after=nuts.insert_after
 local copy_node=nuts.copy
@@ -21105,11 +20970,6 @@ local find_node_tail=nuts.tail
 local flush_node_list=nuts.flush_list
 local flush_node=nuts.flush_node
 local end_of_math=nuts.end_of_math
-local set_components=nuts.set_components
-local take_components=nuts.take_components
-local count_components=nuts.count_components
-local copy_no_components=nuts.copy_no_components
-local copy_only_glyphs=nuts.copy_only_glyphs
 local setmetatable=setmetatable
 local setmetatableindex=table.setmetatableindex
 local nextnode=nuts.traversers.node
@@ -21122,8 +20982,8 @@ local disc_code=nodecodes.disc
 local math_code=nodecodes.math
 local dir_code=nodecodes.dir
 local localpar_code=nodecodes.localpar
-local discretionary_code=disccodes.discretionary
-local ligature_code=glyphcodes.ligature
+local discretionarydisc_code=disccodes.discretionary
+local ligatureglyph_code=glyphcodes.ligature
 local a_state=attributes.private('state')
 local a_noligature=attributes.private("noligature")
 local injections=nodes.injections
@@ -21285,24 +21145,26 @@ local function appenddisc(disc,list)
   end
   setdisc(disc,pre,post,replace)
 end
-local take_components=getcomponents 
+local copy_no_components=nuts.copy_no_components
+local copy_only_glyphs=nuts.copy_only_glyphs
 local set_components=setcomponents
+local take_components=getcomponents
 local function count_components(start,marks)
-  if getid(start)~=glyph_code then
-    return 0
-  elseif getsubtype(start)==ligature_code then
-    local i=0
-    local components=getcomponents(start)
-    while components do
-      i=i+count_components(components,marks)
-      components=getnext(components)
+  local char=isglyph(start)
+  if char then
+    if getsubtype(start)==ligatureglyph_code then
+      local i=0
+      local components=getcomponents(start)
+      while components do
+        i=i+count_components(components,marks)
+        components=getnext(components)
+      end
+      return i
+    elseif not marks[char] then
+      return 1
     end
-    return i
-  elseif not marks[getchar(start)] then
-    return 1
-  else
-    return 0
   end
+  return 0
 end
 local function markstoligature(head,start,stop,char)
   if start==stop and getchar(start)==char then
@@ -21318,7 +21180,7 @@ local function markstoligature(head,start,stop,char)
     end
     resetinjection(base)
     setchar(base,char)
-    setsubtype(base,ligature_code)
+    setsubtype(base,ligatureglyph_code)
     set_components(base,start)
     setlink(prev,base,next)
     return head,base
@@ -21344,7 +21206,7 @@ local function toligature(head,start,stop,char,dataset,sequence,skiphash,discfou
   end
   resetinjection(base)
   setchar(base,char)
-  setsubtype(base,ligature_code)
+  setsubtype(base,ligatureglyph_code)
   set_components(base,comp)
   setlink(prev,base,next)
   if not discfound then
@@ -21415,7 +21277,7 @@ local function toligature(head,start,stop,char,dataset,sequence,skiphash,discfou
         set_components(base,copied)
         replace=base
         if forcediscretionaries then
-          setdisc(discfound,pre,post,replace,discretionary_code)
+          setdisc(discfound,pre,post,replace,discretionarydisc_code)
         else
           setdisc(discfound,pre,post,replace)
         end
@@ -23986,41 +23848,48 @@ local function k_run_multiple(sub,injection,last,font,attr,steps,nofsteps,datase
     end
   end
 end
-local function txtdirstate(start,stack,top,rlparmode)
-  local nxt=getnext(start)
-  local dir=getdir(start)
-  if dir=="+TRT" then
-    top=top+1
-    stack[top]=dir
-    return nxt,top,-1
-  elseif dir=="+TLT" then
-    top=top+1
-    stack[top]=dir
-    return nxt,top,1
-  elseif dir=="-TRT" or dir=="-TLT" then
-    if top==1 then
-      return nxt,0,rlparmode
-    else
-      top=top-1
-      if stack[top]=="+TRT" then
-        return nxt,top,-1
+local txtdirstate,pardirstate do 
+  local getdirection=nuts.getdirection
+  local lefttoright=0
+  local righttoleft=1
+  txtdirstate=function(start,stack,top,rlparmode)
+    local dir,pop=getdirection(start)
+    if pop then
+      if top==1 then
+        return 0,rlparmode
       else
-        return nxt,top,1
+        top=top-1
+        if stack[top]==righttoleft then
+          return top,-1
+        else
+          return top,1
+        end
       end
+    elseif dir==lefttoright then
+      top=top+1
+      stack[top]=lefttoright
+      return top,1
+    elseif dir==righttoleft then
+      top=top+1
+      stack[top]=righttoleft
+      return top,-1
+    else
+      return top,rlparmode
     end
-  else
-    return nxt,top,rlparmode
   end
-end
-local function pardirstate(start)
-  local nxt=getnext(start)
-  local dir=getdir(start)
-  if dir=="TLT" then
-    return nxt,1,1
-  elseif dir=="TRT" then
-    return nxt,-1,-1
-  else
-    return nxt,0,0
+  pardirstate=function(start)
+    local dir=getdirection(start)
+    if dir==lefttoright then
+      return 1,1
+    elseif dir==righttoleft then
+      return -1,-1
+    elseif dir=="TLT" then
+      return 1,1
+    elseif dir=="TRT" then
+      return -1,-1
+    else
+      return 0,0
+    end
   end
 end
 otf.helpers=otf.helpers or {}
@@ -24068,7 +23937,12 @@ do
     if trace_steps then
       checkstep(head)
     end
-    local initialrl=direction=="TRT" and -1 or 0
+    local initialrl=0
+    if getid(head)==localpar_code and getsubtype(head)==0 then
+      initialrl=pardirstate(head)
+    elseif direction==1 or direction=="TRT" then
+      initialrl=-1
+    end
     local datasets=otfdataset(tfmdata,font,attr)
     local dirstack={ nil } 
     sweephead={}
@@ -24183,9 +24057,8 @@ do
             elseif id==math_code then
               start=getnext(end_of_math(start))
             elseif id==dir_code then
-              start,topstack,rlmode=txtdirstate(start,dirstack,topstack,rlparmode)
-            elseif id==localpar_code then
-              start,rlparmode,rlmode=pardirstate(start)
+              topstack,rlmode=txtdirstate(start,dirstack,topstack,rlparmode)
+              start=getnext(start)
             else
               start=getnext(start)
             end
@@ -24254,9 +24127,8 @@ do
             elseif id==math_code then
               start=getnext(end_of_math(start))
             elseif id==dir_code then
-              start,topstack,rlmode=txtdirstate(start,dirstack,topstack,rlparmode)
-            elseif id==localpar_code then
-              start,rlparmode,rlmode=pardirstate(start)
+              topstack,rlmode=txtdirstate(start,dirstack,topstack,rlparmode)
+              start=getnext(start)
             else
               start=getnext(start)
             end
@@ -24292,7 +24164,7 @@ do
     local done=false
     local dirstack={ nil } 
     local start=head
-    local initialrl=direction=="TRT" and -1 or 0
+    local initialrl=(direction==1 or direction=="TRT") and -1 or 0
     local rlmode=initialrl
     local rlparmode=initialrl
     local topstack=0
@@ -24333,9 +24205,8 @@ do
       elseif id==math_code then
         start=getnext(end_of_math(start))
       elseif id==dir_code then
-        start,topstack,rlmode=txtdirstate(start,dirstack,topstack,rlparmode)
-      elseif id==localpar_code then
-        start,rlparmode,rlmode=pardirstate(start)
+        topstack,rlmode=txtdirstate(start,dirstack,topstack,rlparmode)
+        start=getnext(start)
       else
         start=getnext(start)
       end
@@ -24619,10 +24490,10 @@ registerotffeature {
   },
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ots”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ots”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-osd” 883c29eaccf966c9ad9ab205a920de08] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-osd” 883c29eaccf966c9ad9ab205a920de08] ---
 
 if not modules then modules={} end modules ['font-osd']={ 
   version=1.001,
@@ -26557,10 +26428,10 @@ for i=1,nofscripts do
   methods[scripts_two[i]]=method_two
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-osd”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-osd”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ocl” 6552143d102c2dc5404293d10af3a1eb] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ocl” 6552143d102c2dc5404293d10af3a1eb] ---
 
 if not modules then modules={} end modules ['font-ocl']={
   version=1.001,
@@ -27061,10 +26932,10 @@ fonts.handlers.otf.features.register {
   }
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-ocl”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-ocl”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-otc” 088ba25667dfc5036867d007797e1602] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-otc” 088ba25667dfc5036867d007797e1602] ---
 
 if not modules then modules={} end modules ['font-otc']={
   version=1.001,
@@ -27813,10 +27684,10 @@ end
 otf.enhancers.enhance=enhance
 otf.enhancers.register("check extra features",enhance)
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-otc”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-otc”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-onr” 20b0d2753f58ff91180947ce4078571e] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-onr” 20b0d2753f58ff91180947ce4078571e] ---
 
 if not modules then modules={} end modules ['font-onr']={
   version=1.001,
@@ -28188,10 +28059,10 @@ function readers.getinfo(filename)
   end
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-onr”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-onr”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-one” b0a175e8f123feb797c7a5a9b02b85a0] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-one” b0a175e8f123feb797c7a5a9b02b85a0] ---
 
 if not modules then modules={} end modules ['font-one']={
   version=1.001,
@@ -28891,10 +28762,10 @@ registerafmenhancer("normalize features",enhance_normalize_features)
 registerafmenhancer("check extra features",otfenhancers.enhance)
 registerafmenhancer("fix names",enhance_fix_names)
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-one”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-one”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-afk” 54d554530e75c57c56ee76234724e26d] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-afk” 54d554530e75c57c56ee76234724e26d] ---
 
 if not modules then modules={} end modules ['font-afk']={
   version=1.001,
@@ -29061,10 +28932,10 @@ fonts.handlers.afm.helpdata={
   }
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-afk”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-afk”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-tfm” f1a3796cce3838210248eb1daee6ea83] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-tfm” f1a3796cce3838210248eb1daee6ea83] ---
 
 if not modules then modules={} end modules ['font-tfm']={
   version=1.001,
@@ -29614,10 +29485,10 @@ registertfmfeature {
   }
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-tfm”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-tfm”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-lua” 55b281fb98f7bd848fc19928f376f647] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-lua” 55b281fb98f7bd848fc19928f376f647] ---
 
 if not modules then modules={} end modules ['font-lua']={
   version=1.001,
@@ -29657,10 +29528,10 @@ function readers.lua(specification)
   return check_lua(specification,fullname)
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-lua”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-lua”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-def” 6569d90e55c91890b3b0650063a83ee6] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-def” 6569d90e55c91890b3b0650063a83ee6] ---
 
 if not modules then modules={} end modules ['font-def']={
   version=1.001,
@@ -30062,10 +29933,10 @@ function font.getfont(id)
 end
 callbacks.register('define_font',definers.read,"definition of fonts (tfmdata preparation)")
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-def”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-def”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-def” 5ad79120ebc5e60f4d322fb3ee13bffe] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-def” 5ad79120ebc5e60f4d322fb3ee13bffe] ---
 
 if not modules then modules={} end modules ['luatex-fonts-def']={
   version=1.001,
@@ -30146,10 +30017,10 @@ function fonts.definers.applypostprocessors(tfmdata)
   return tfmdata
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-def”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-def”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-ext” 01015ab3758cdc2af29394e6d502a91a] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-ext” 01015ab3758cdc2af29394e6d502a91a] ---
 
 if not modules then modules={} end modules ['luatex-fonts-ext']={
   version=1.001,
@@ -30335,10 +30206,10 @@ registerotffeature {
   }
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-ext”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-ext”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-imp-tex” 77c374b0ef00c2fb12188ec42beb4257] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-imp-tex” 77c374b0ef00c2fb12188ec42beb4257] ---
 
 if not modules then modules={} end modules ['font-imp-tex']={
   version=1.001,
@@ -30437,10 +30308,10 @@ registerotffeature {
   description="arabic digits",
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-imp-tex”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-imp-tex”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-imp-ligatures” 043daa4fcccf2560868da359d71d3a4a] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-imp-ligatures” 043daa4fcccf2560868da359d71d3a4a] ---
 
 if not modules then modules={} end modules ['font-imp-ligatures']={
   version=1.001,
@@ -30554,10 +30425,10 @@ if context then
   }
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-imp-ligatures”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-imp-ligatures”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-imp-italics” fe1ca80fb5ea4a2f8d2d5c484e7ba913] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-imp-italics” fe1ca80fb5ea4a2f8d2d5c484e7ba913] ---
 
 if not modules then modules={} end modules ['font-imp-italics']={
   version=1.001,
@@ -30663,10 +30534,10 @@ if context then
   registerafmfeature(dimensions_specification)
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-imp-italics”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-imp-italics”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “font-imp-effects” 73a660359a0ec71e44cc2b7225a715ac] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “font-imp-effects” 73a660359a0ec71e44cc2b7225a715ac] ---
 
 if not modules then modules={} end modules ['font-imp-effects']={
   version=1.001,
@@ -31023,10 +30894,10 @@ local specification={
 registerotffeature(specification)
 registerafmfeature(specification)
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “font-imp-effects”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “font-imp-effects”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-lig” b9dbe77ce747d4c35bb2a20ffbe5aa51] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-lig” b9dbe77ce747d4c35bb2a20ffbe5aa51] ---
 
 
 fonts.handlers.otf.addfeature {
@@ -33095,10 +32966,10 @@ fonts.handlers.otf.addfeature {
  ["type"]="ligature",
 }
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-lig”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-lig”] ---
 
 
-do  --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-gbn” d25472d54c4841db43a745764a63533e] ---
+do  --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-gbn” d25472d54c4841db43a745764a63533e] ---
 
 if not modules then modules={} end modules ['luatex-fonts-gbn']={
   version=1.001,
@@ -33363,7 +33234,7 @@ function nodes.simple_font_handler(head,groupcode,size,packtype,direction)
   return head
 end
 
-end --- [luaotfload, fontloader-2018-12-25.lua scope for “fonts-gbn”] ---
+end --- [luaotfload, fontloader-2019-01-27.lua scope for “fonts-gbn”] ---
 
 
 --- vim:ft=lua:sw=2:ts=8:et:tw=79

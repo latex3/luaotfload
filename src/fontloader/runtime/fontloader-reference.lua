@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 01/25/19 20:06:50
+-- merge date  : 01/28/19 16:58:09
 
 do -- begin closure to overcome local limits and interference
 
@@ -23952,15 +23952,9 @@ function injections.setmark(start,base,factor,rlmode,ba,ma,tfmbase,mkmk,checkmar
   if i then
    if i.markmark then
    else
-    if dx~=0 then
-     i.markx=dx
-    end
-    if y~=0 then
-     i.marky=dy
-    end
-    if rlmode then
-     i.markdir=rlmode
-    end
+    i.markx=dx
+    i.marky=dy
+    i.markdir=rlmode or 0
     i.markbase=nofregisteredmarks
     i.markbasenode=base
     i.markmark=mkmk
@@ -24154,7 +24148,8 @@ local function inject_kerns_only(head,where)
       if i then
        local leftkern=i.leftkern
        if leftkern and leftkern~=0 then
-        setfield(prev,"replace",fontkern(leftkern)) 
+        replace=fontkern(leftkern)
+        done=true
        end
       end
      end
@@ -24282,7 +24277,8 @@ local function inject_positions_only(head,where)
        if next and getid(next)==disc_code then
         if replace then
         else
-         setfield(next,"replace",fontkern(rightkern)) 
+         replace=fontkern(rightkern) 
+         done=true	
         end
        end
       end
@@ -24314,7 +24310,8 @@ local function inject_positions_only(head,where)
       if i then
        local leftkern=i.leftkern
        if leftkern and leftkern~=0 then
-        setfield(prev,"replace",fontkern(leftkern)) 
+        replace=fontkern(leftkern)
+        done=true
        end
       end
      end
@@ -24634,7 +24631,8 @@ local function inject_everything(head,where)
        if next and getid(next)==disc_code then
         if replace then
         else
-         setfield(next,"replace",fontkern(rightkern)) 
+         replace=fontkern(rightkern)
+         done=true
         end
        end
       end
@@ -24667,7 +24665,8 @@ local function inject_everything(head,where)
        if i then
         local leftkern=i.leftkern
         if leftkern and leftkern~=0 then
-         setfield(prev,"replace",fontkern(leftkern)) 
+         replace=fontkern(leftkern)
+         done=true
         end
        end
       end
@@ -26014,7 +26013,7 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
      local tail=getprev(stop)
      local copy=copy_node_list(start)
      local liat=find_node_tail(copy)
-     if pre and replace then
+     if pre then
       setlink(liat,pre)
      end
      if replace then
@@ -27563,7 +27562,6 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
            end
           end
          else
-          notmatchreplace[prev]=true 
          end
         end
         prev=getprev(prev)
@@ -27683,7 +27681,6 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
          end
         end
        else
-        notmatchreplace[current]=true 
        end
        current=getnext(current)
       elseif id==glue_code then
@@ -27999,7 +27996,7 @@ local function testrun(disc,t_run,c_run,...)
    local d=d_replace>d_post and d_replace or d_post
    local head=getnext(disc) 
    local tail=head
-   for i=1,d do
+   for i=2,d do 
     local nx=getnext(tail)
     local id=getid(nx)
     if id==disc_code then
@@ -31032,9 +31029,6 @@ end
 local start={ "pdf","mode","font" }
 local push={ "pdf","page","q" }
 local pop={ "pdf","page","Q" }
-if not LUATEXFUNCTIONALITY or LUATEXFUNCTIONALITY<6472 then 
- start={ "nop" }
-end
 local function initialize(tfmdata,kind,value)
  if value then
   local resources=tfmdata.resources
@@ -34206,7 +34200,7 @@ local function checkfeatures(tfmdata)
       else
        for script,languages in next,scripts do
         if languages["*"] then
-        elseif not languages[usedlanguage] then
+        elseif context and not languages[usedlanguage] then
          report_defining("font %!font:name!, feature %a, script %a, no language %a",
           tfmdata,feature,script,usedlanguage)
         end
@@ -34226,7 +34220,7 @@ local function checkfeatures(tfmdata)
         if not languages["*"] then
          for i=1,#foundlanguages do
           local language=foundlanguages[i]
-          if not languages[language] then
+          if context and not languages[language] then
            report_defining("font %!font:name!, feature %a, script %a, no language %a",
             tfmdata,feature,script,language)
           end

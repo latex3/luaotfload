@@ -844,7 +844,7 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                     local tail = getprev(stop)
                     local copy = copy_node_list(start)
                     local liat = find_node_tail(copy)
-                    if pre and replace then
+                    if pre then
                         setlink(liat,pre)
                     end
                     if replace then
@@ -2655,7 +2655,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
                                             end
                                         end
                                     else
-                                        notmatchreplace[prev] = true -- new, for Kai to check
+                                     -- notmatchreplace[prev] = true -- not according to Kai
                                     end
                                 end
                                 prev = getprev(prev)
@@ -2784,7 +2784,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
                                     end
                                 end
                             else
-                                notmatchreplace[current] = true -- new, for Kai to check
+                             -- notmatchreplace[current] = true -- not according to Kai
                             end
                             current = getnext(current)
                         elseif id == glue_code then
@@ -3192,7 +3192,7 @@ local function testrun(disc,t_run,c_run,...)
             local d = d_replace > d_post and d_replace or d_post
             local head = getnext(disc) -- is: next
             local tail = head
-            for i=1,d do
+            for i=2,d do -- must start at 2 according to Kai 
                 local nx = getnext(tail)
                 local id = getid(nx)
                 if id == disc_code then

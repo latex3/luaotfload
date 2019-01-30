@@ -1,8 +1,8 @@
 # The Luaotfload Package
 
-VERSION: 2.9502
+VERSION: 2.9503
 
-DATE: 2019-01-25
+DATE: 2019-01-28
 
 
 ## Description

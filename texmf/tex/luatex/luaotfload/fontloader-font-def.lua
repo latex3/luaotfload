@@ -340,7 +340,7 @@ local function checkfeatures(tfmdata)
                             for script, languages in next, scripts do
                                 if languages["*"] then
                                     -- ok
-                                elseif not languages[usedlanguage] then
+                                elseif context and not languages[usedlanguage] then
                                     report_defining("font %!font:name!, feature %a, script %a, no language %a",
                                         tfmdata,feature,script,usedlanguage)
                                 end
@@ -360,7 +360,7 @@ local function checkfeatures(tfmdata)
                                 if not languages["*"] then
                                     for i=1,#foundlanguages do
                                         local language = foundlanguages[i]
-                                        if not languages[language] then
+                                        if context and not languages[language] then
                                             report_defining("font %!font:name!, feature %a, script %a, no language %a",
                                                 tfmdata,feature,script,language)
                                         end

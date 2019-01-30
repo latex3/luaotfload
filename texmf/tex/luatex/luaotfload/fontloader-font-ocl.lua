@@ -146,11 +146,6 @@ local start = { "pdf", "mode", "font" } -- force text mode (so get q Q right)
 local push  = { "pdf", "page", "q" }
 local pop   = { "pdf", "page", "Q" }
 
-if not LUATEXFUNCTIONALITY or LUATEXFUNCTIONALITY < 6472 then -- for outside context (till tl 2019)
-    start = { "nop" }
-    ----- = stop
-end
-
 -- -- This one results in color directives inside BT ET but has less q Q pairs. It
 -- -- only shows the first glyph in acrobat and nothing more. No problem with other
 -- -- renderers.

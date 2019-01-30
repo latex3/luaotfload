@@ -469,15 +469,18 @@ function injections.setmark(start,base,factor,rlmode,ba,ma,tfmbase,mkmk,checkmar
             if i.markmark then
                 -- out of order mkmk: yes or no or option
             else
-                if dx ~= 0 then
-                    i.markx    = dx
-                end
-                if y ~= 0 then
-                    i.marky    = dy
-                end
-                if rlmode then
-                    i.markdir  = rlmode
-                end
+             -- if dx ~= 0 then
+             --     i.markx    = dx
+             -- end
+             -- if y ~= 0 then
+             --     i.marky    = dy
+             -- end
+             -- if rlmode then
+             --     i.markdir  = rlmode
+             -- end
+                i.markx        = dx
+                i.marky        = dy
+                i.markdir      = rlmode or 0
                 i.markbase     = nofregisteredmarks
                 i.markbasenode = base
                 i.markmark     = mkmk
@@ -690,7 +693,8 @@ local function inject_kerns_only(head,where)
                             -- glyph|disc|glyph (special case)
                             local leftkern = i.leftkern
                             if leftkern and leftkern ~= 0 then
-                                setfield(prev,"replace",fontkern(leftkern)) -- maybe also leftkern
+                                replace = fontkern(leftkern)
+                                done    = true
                             end
                         end
                     end
@@ -831,7 +835,9 @@ local function inject_positions_only(head,where)
                                 if replace then
                                     -- error, we expect an empty one
                                 else
-                                    setfield(next,"replace",fontkern(rightkern)) -- maybe also leftkern
+--KE                                    setfield(next,"replace",fontkern(rightkern)) -- maybe also leftkern
+                                    replace = fontkern(rightkern) -- maybe also leftkern	--KE
+                                    done = true	--KE
                                 end
                             end
                         end
@@ -864,7 +870,8 @@ local function inject_positions_only(head,where)
                             -- new .. okay?
                             local leftkern = i.leftkern
                             if leftkern and leftkern ~= 0 then
-                                setfield(prev,"replace",fontkern(leftkern)) -- maybe also leftkern
+                                replace = fontkern(leftkern)
+                                done = true
                             end
                         end
                     end
@@ -1280,7 +1287,8 @@ local function inject_everything(head,where)
                                 if replace then
                                     -- error, we expect an empty one
                                 else
-                                    setfield(next,"replace",fontkern(rightkern)) -- maybe also leftkern
+                                    replace = fontkern(rightkern)
+                                    done    = true
                                 end
                             end
                         end
@@ -1313,7 +1321,8 @@ local function inject_everything(head,where)
                             if i then
                                 local leftkern = i.leftkern
                                 if leftkern and leftkern ~= 0 then
-                                    setfield(prev,"replace",fontkern(leftkern)) -- maybe also leftkern
+                                    replace = fontkern(leftkern)
+                                    done    = true
                                 end
                             end
                         end

@@ -233,7 +233,7 @@ local function resolve_kpse (specification)
     local name       = specification.name
     local suffix     = stringlower (filesuffix (name))
     if suffix and fonts.formats[suffix] then
-        local resolved = resolvers.findfile(name)
+        local resolved = resolvers.findfile(name, suffix)
         if resolved then return resolved end
     end
     for t, format in next, fonts.formats do --- brute force

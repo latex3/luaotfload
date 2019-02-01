@@ -722,10 +722,9 @@ local init_post_load_agl = function ()
 
   --doc]]--
 
-  local findfile  = resolvers.findfile
   local encodings = fonts.encodings
 
-  if not findfile or not encodings then
+  if not encodings then
     --- Might happen during refactoring; we continue graciously but in
     --- a somewhat defect state.
     logreport ("log", 0, "init",
@@ -750,11 +749,11 @@ local init_post_load_agl = function ()
       return nil
     end
 
-    local glyphlist = findfile "luaotfload-glyphlist.lua"
+    local glyphlist = kpsefind_file "luaotfload-glyphlist.lua"
     if glyphlist then
       logreport ("log", 1, "init", "loading the Adobe glyph list")
     else
-      glyphlist = findfile "font-age.lua"
+      glyphlist = kpsefind_file "font-age.lua"
       logreport ("both", 0, "init",
                  "loading the extended glyph list from ConTeXt")
     end

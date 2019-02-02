@@ -283,7 +283,6 @@ return {
         end
         logreport ("log", 5, "resolvers", "installing font resolvers", name)
         local request_resolvers = fonts.definers.resolvers
-        table.print(request_resolvers)
         for k, _ in pairs(resolvers) do
             request_resolvers[k] = nil
         end
@@ -293,7 +292,6 @@ return {
             t[n] = wrapped
             return wrapped
         end})
-        table.print(request_resolvers)
         fonts.formats.ofm      = "type1"
         fonts.encodings        = fonts.encodings       or { }
         fonts.encodings.known  = fonts.encodings.known or { }

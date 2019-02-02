@@ -1,0 +1,24 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\input{regression-test}
+\documentclass{article}
+\usepackage{luacode}
+
+\begin{document}
+\START
+\showoutput
+
+\begin{luacode}
+  local my_fonts = {
+    rm = kpse.find_file("lmroman10-regular.otf", "opentype fonts"),
+    sf = kpse.find_file("lmsans10-regular.otf", "opentype fonts"),
+    dh = kpse.find_file("lmromandunh10-regular.otf", "opentype fonts"),
+  }
+  luatexbase.add_to_callback("luaotfload.resolve_font", function(spec)
+    return my_fonts[spec.name]
+  end, "luaotfload.test_resolver")
+\end{luacode}
+\font\myrm my:rm at 10pt
+\font\mysf my:sf at 10pt
+\font\mydh my:dh at 10pt
+\myrf Some \mysf nice \mydh fonts!
+\end{document}

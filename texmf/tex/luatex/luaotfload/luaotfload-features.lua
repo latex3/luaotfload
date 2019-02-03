@@ -1124,21 +1124,6 @@ local import_values = {
     { "sub",    false },
 }
 
-local lookup_types = { "anon"  , "file", "kpse"
-                     , "my"    , "name", "path"
-                     , "combo"
-                     }
-
-local select_lookup = function (request)
-    for i=1, #lookup_types do
-        local lookup = lookup_types[i]
-        local value  = request[lookup]
-        if value then
-            return lookup, value
-        end
-    end
-end
-
 local supported = {
     b    = "b",
     i    = "i",
@@ -1212,9 +1197,9 @@ local handle_request = function (specification)
         return specification
     end
 
-    local lookup, name = select_lookup (request)
+    local lookup, name = request.lookup, request.name
     if lookup == "combo" then
-        return handle_combination (request.combo, specification)
+        return handle_combination (name, specification)
     end
 
     local features = specification.features
@@ -1235,12 +1220,6 @@ local handle_request = function (specification)
     request.features = apply_default_features(request.features)
 
     if name then
-        if lookup == "file" then
-            local suffix = file.suffix (name)
-            specification.forcedname = name
-            specification.forced     = suffix
-            name                     = file.removesuffix (name)
-        end
         specification.name     = name
         specification.lookup   = lookup or specification.lookup
     end
@@ -1276,7 +1255,6 @@ local handle_request = function (specification)
     if request.features and request.features.mode
           and fonts.readers[request.features.mode] then
         specification.forced = request.features.mode
-        return specification
     end
 
     return specification

@@ -680,8 +680,6 @@ end
 
 --doc]]--
 
-local dummy_findfile = resolvers.findfile -- from basics-gen
-
 --- string -> string * string * bool
 local lookup_font_file
 
@@ -694,7 +692,10 @@ lookup_font_file = function (filename)
     local found = lookup_filename (filename)
 
     if not found then
-        found = dummy_findfile(filename)
+        local type = file.suffix(filename)
+        if type ~= "" then
+            found = resolvers.findfile(filename, type)
+        end
     end
 
     if found then
@@ -742,7 +743,7 @@ local get_font_file = function (index)
     end
     local basename = entry.basename
     if entry.location == "texmf" then
-        local fullname = resolvers.findfile(basename)
+        local fullname = resolvers.findfile(basename, entry.format)
         if fullname then
             return true, fullname, entry.subfont
         end

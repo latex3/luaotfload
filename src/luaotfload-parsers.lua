@@ -608,19 +608,19 @@ local subfont           = P"(" * Cg((1 - S"()")^1, "sub") * P")"
 --- lookups -----------------------------------------------------------
 local fontname          = C((1-S":(/")^1)  --- like luatex-fonts
 local unsupported       = Cmt((1-S":(")^1, check_garbage)
-local combo             = P"combo:" * ws * Cg(combolist, "combo")
-local prefixed          = P"name:" * ws * Cg(fontname, "name")
+local combo             = Cg(P"combo", "lookup") * colon * ws
+                          * Cg(combolist, "name")
 --- initially we intended file: to emulate the behavior of
 --- luatex-fonts, i.e. no paths allowed. after all, we do have XeTeX
 --- emulation with the path lookup and it interferes with db lookups.
 --- turns out fontspec and other widely used packages rely on file:
 --- with paths already, so we’ll add a less strict rule here.  anyways,
 --- we’ll emit a warning.
-                        + P"file:" * ws * Cg(unsupported, "path")
-                        + P"file:" * ws * Cg(fontname, "file")
-                        + P"kpse:" * ws * Cg(fontname, "kpse")
-                        + P"my:" * ws * Cg(fontname, "my")
-local unprefixed        = Cg(fontname, "anon")
+local prefixed          = P"file:" * ws * Cg(Cc"path", "lookup")
+                          * Cg(unsupported, "name")
+                        + Cg(P"name" + "file" + "kpse" + "my", "lookup")
+                          * colon * ws * Cg(fontname, "name")
+local unprefixed        = Cg(Cc"anon", "lookup") * Cg(fontname, "name")
 --- Bracketed “path” lookups: These may contain any character except
 --- for unbalanced brackets. A backslash escapes any following
 --- character. Everything inside the outermost brackets is treated as
@@ -632,12 +632,13 @@ local path_escape       = backslash / "" * patterns.utf8char
 local path_content      = path_escape + (1 - brackets)
 local path_balanced     = { (path_content + V(2))^1
                           , lbrk * V(1)^-1 * rbrk }
-local path_lookup       = lbrk * Cg(Cs(path_balanced), "path") * rbrk
-                        * subfont^-1
+local path_lookup       = Cg(Cc"path", "lookup")
+                          * lbrk * Cg(Cs(path_balanced), "name") * rbrk
+                          * subfont^-1
 
 --- features ----------------------------------------------------------
 local balanced_braces   = P{((1 - S'{}') + '{' * V(1) * '}')^0}
-local field_char        = '{' * C(balanced_braces) * '}' + (1 - S'={}' - featuresep)
+local field_char        = '{' *   balanced_braces  * '}' + (1 - S'={}' - featuresep)
 local field             = '{' * C(balanced_braces) * '}' + C(field_char^1)
 --- assignments are “lhs=rhs”
 ---              or “+lhs=rhs” (Xetex-style)
@@ -646,14 +647,10 @@ local normal_option     = field * ws * equals * ws * field
 local xetex_option      = P"+" * ws * (  field * ws * equals * ws
                                                * (digit^1/handle_xetex_option)
                                        + normal_option)
-local ignore_option     = (1 - equals - featuresep)^1
-                        * equals
-                        * (1 - featuresep)^1
 local assignment        = xetex_option
                         + normal_option
-local switch            = P"+" * ws * field * Cc(true)
-                        + P"-" * ws * field * Cc(false)
-                        +             field * Cc(true)   --- default
+local switch            = P"-"    * ws * field * Cc(false)
+                        + P"+"^-1 * ws * field * Cc(true)
 local feature_expr      = ws * Cg(assignment + switch) * ws
 local option            = feature_expr
 local feature_list      = Cf(Ct""
@@ -666,7 +663,7 @@ local feature_list      = Cf(Ct""
 local features          = Cg(feature_list, "features")
 local specification     = (prefixed + unprefixed)
                         * subfont^-1
-                        * modifier_list^-1
+                        * modifier_list
 local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
                            + combo --> TODO: feature list needed?
                            + specification * (colon    * features)^-1)

@@ -7,6 +7,7 @@ local cfftag  = hb.Tag.new("CFF ")
 local cff2tag = hb.Tag.new("CFF2")
 local os2tag  = hb.Tag.new("OS/2")
 local posttag = hb.Tag.new("post")
+local glyftag = hb.Tag.new("glyf")
 
 local function trim(str)
   return str:gsub("^%s*(.-)%s*$", "%1")
@@ -85,7 +86,7 @@ local function loadfont(spec)
 
     -- All LuaTeX seem to care about in font type is whether it has CFF table
     -- or not, so we check for that here.
-    local fonttype = "truetype"
+    local fonttype = nil
     local hasos2 = false
     local haspost = false
     local tags = hbface:get_table_tags()
@@ -93,6 +94,8 @@ local function loadfont(spec)
       local tag = tags[i]
       if tag == cfftag or tag == cff2tag then
         fonttype = "opentype"
+      elseif tag == glyftag then
+        fonttype = "truetype"
       elseif tag == os2tag then
         hasos2 = true
       elseif tag == posttag then

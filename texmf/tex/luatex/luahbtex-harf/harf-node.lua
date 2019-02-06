@@ -318,14 +318,17 @@ shape = function(run)
 
   local fontdata = font.fonts[fontid]
   local hbdata = fontdata.hb
+  local palette = hbdata.palette
+  local spec = hbdata.spec
+  local features = spec.features
+  local options = spec.options
   local hbshared = hbdata.shared
   local hbfont = hbshared.font
   local hbface = hbshared.face
-  local features = hbdata.spec.features
-  local palette = hbdata.palette
 
-  local lang = lang or hbdata.spec.options.language or lang_invalid
-
+  local lang = lang or options.language or lang_invalid
+  local shapers = options.shaper and { options.shaper } or {}
+  
   local buf = hb.Buffer.new()
   buf:set_direction(dir)
   buf:set_script(script)
@@ -333,7 +336,7 @@ shape = function(run)
   buf:set_cluster_level(buf.CLUSTER_LEVEL_MONOTONE_CHARACTERS)
   buf:add_codepoints(codes, offset - 1, len)
 
-  if hb.shape_full(hbfont, buf, features) then
+  if hb.shape_full(hbfont, buf, features, shapers) then
     -- LuaTeX wants the glyphs in logical order, so reverse RTL buffers.
     if dir:is_backward() then buf:reverse() end
 
@@ -506,6 +509,9 @@ local function tonodes(head, current, run, glyphs, color)
   local ascender = hbshared.ascender
   local descender = hbshared.descender
 
+  local haspng = hbshared.haspng
+  local fonttype = hbshared.fonttype
+
   for i, glyph in next, glyphs do
     local index = glyph.cluster + 1
     local gid = glyph.codepoint
@@ -559,8 +565,8 @@ local function tonodes(head, current, run, glyphs, color)
           texio.write_nl(target, "")
         end
 
-        local pngblob = hbshared.haspng and hbglyph.png
-        if not pngblob and hbshared.haspng then
+        local pngblob = hbglyph.png
+        if haspng and not pngblob then
           pngblob = hbfont:ot_color_glyph_get_png(gid)
           hbglyph.png = pngblob
         end
@@ -579,7 +585,17 @@ local function tonodes(head, current, run, glyphs, color)
           }
           head, current = node.insert_after(head, current, image)
         else
-          n.char = char
+          if haspng and not fonttype then
+            -- If this is a color bitmap font with no glyph outlines (like Noto
+            -- Color Emoji) and we end up here then the glyph is not supported
+            -- by the font.  LuaTeX does not now how to embed such fonts, so we
+            -- don’t want them to reach the backend as it will cause a fatal
+            -- error. We use `nullfont` instead.
+            -- That is a hack, but I think it is good enough for now.
+            n.font = 0
+          else
+            n.char = char
+          end
           n.xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
           n.yoffset = glyph.y_offset * scale
           node.protect_glyph(n)

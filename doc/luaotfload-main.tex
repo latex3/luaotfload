@@ -56,12 +56,25 @@
 \pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
 
+\beginsection {New in version 2.95 (by Ulrike Fischer)}
+\begin{itemize}
+\item
+This version imports from context the generic fontloader in the version of 2019-01-28. Contrary to the last announcement, it still works with luatex 1.07. So updates will continue.
+
+\item The handling of the lucida-fonts had been improved (issue 33).
+
+\item tex-files are no longer misused as font fallbacks (issue 35).
+
+\item The resolver code has be refactorated (pull request 36).
+
+\end{itemize}
+\endsection
 \beginsection {New in version 2.94 (by Ulrike Fischer)}
 \begin{itemize}
-\item 
+\item
 This version imports from context the generic fontloader in the version of 2018-12-19. It is the last version that works with luatex 1.07 and texlive 2018. As context has moved to luatex 1.09 newer versions of the fontloader needs now this luatex version too. This means that until the texlive 2018 freeze there will be probably no update of luaotfload.
 
-\item This version changes the handling of the \inlinecode{mode} key. It no longer accepts only the values \inlinecode{base} and \inlinecode{node}, but can be used to load a font with an alternative font loader/renderer. 
+\item This version changes the handling of the \inlinecode{mode} key. It no longer accepts only the values \inlinecode{base} and \inlinecode{node}, but can be used to load a font with an alternative font loader/renderer.
 
 
 \end{itemize}
@@ -670,7 +683,7 @@ obviously, \inlinecode{random}.
 \begindescriptions
 
   \beginaltitem {mode}
-         Until version 2.94 
+         Until version 2.94
          \identifier{luaotfload} had two \OpenType processing
          \emphasis{modes}:
          \identifier{base} and \identifier{node}.
@@ -692,11 +705,11 @@ obviously, \inlinecode{random}.
          By default \identifier{luaotfload} is in \identifier{node}
          mode, and \identifier{base} mode has to be requested where needed,
          e.~g. for math fonts.
-         
+
          Since version 2.94 it is possible to call other font renderers with the mode key. A simple example with a plain reader can be found at \hyperlink{https://github.com/u-fischer/luaotfload/pull/26\#issuecomment-437716326}.
          A more useful example needs the new experimental luahbtex engine (windows binaries can be found at w32tex.org), and the luahbtex-harf renderer (\hyperlink{https://github.com/khaledhosny/luahbtex-harf}). With both it is possible to render a font using the harfbuzz library (used also by xetex).
-         
-         
+
+
   \endaltitem
 
   \beginaltitem {script} \label{script-tag}

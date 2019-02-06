@@ -1,9 +1,10 @@
 Change History
 --------------
-2019-01-25 luaotfload v2.9501
-    * imported context files of 2019-01-25
+2019-01-28 luaotfload v2.95
+    * imported context files of 2019-01-28
     * changed bold indification (for lucida demi bold) (issue #33)
-
+    * changed handling of tex file (issue #35)
+    * changed resolver code (pr #36)
 
 2019-01-14 luaotfload v2.94
     * imported context files of 2018-12-19

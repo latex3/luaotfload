@@ -11,7 +11,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-resolvers",
-    version       = "2.9504",       --TAGVERSION
+    version       = "2.95",       --TAGVERSION
     date          = "2019-01-28", --TAGDATE
     description   = "luaotfload submodule / resolvers",
     license       = "GPL v2.0"

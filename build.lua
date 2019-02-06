@@ -32,7 +32,9 @@ uploadconfig = {
   update   = true ,
   topic=    {"font-use","luatex"},
   note     = [[Uploaded automatically by l3build... description is unchanged despite the missing linebreaks, authors are unchanged]],
-  description=[[The package adopts the TrueType/OpenType Font loader code provided in ConTeXt, and adapts it to use in Plain TeX and LaTeX. It works under LuaLaTeX only.]],
+  description=[[The package adopts the TrueType/OpenType Font loader code provided in ConTeXt, 
+              and adapts it to use in Plain TeX and LaTeX. It works under LuaLaTeX only.]],
+  announcement_file="ctan.ann"             
 }
 
 -- l3build check settings
@@ -41,8 +43,8 @@ uploadconfig = {
 
 stdengine    = "luatex"
 checkengines = {"luatex"}
-
-if not os.getenv('TRAVIS') then 
+local errorlevel   = os.execute("luahbtex --version") 
+if not os.getenv('TRAVIS') and errorlevel==0 then 
     checkengines = {"luatex","luahbtex"}
 end 
  

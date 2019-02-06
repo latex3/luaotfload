@@ -33,12 +33,19 @@ uploadconfig = {
   topic=    {"font-use","luatex"},
   note     = [[Uploaded automatically by l3build... description is unchanged despite the missing linebreaks, authors are unchanged]],
   description=[[The package adopts the TrueType/OpenType Font loader code provided in ConTeXt, and adapts it to use in Plain TeX and LaTeX. It works under LuaLaTeX only.]],
-  announcement="This version syncs the files with the ConTeXt files from"..string.gsub (packagedate,"-", "/")..". It extends the mode key to allow the use of more fontloaders. It is the last version which can be used with luatex 1.07. Future versions will need 1.09 and will be available only at the github site until texlive 2018 is freezed."              
 }
 
 -- l3build check settings
+
+
+
 stdengine    = "luatex"
 checkengines = {"luatex"}
+
+if not os.getenv('TRAVIS') then 
+    checkengines = {"luatex","luahbtex"}
+end 
+ 
 checkconfigs = {
                 "build",
                 "config-loader-unpackaged",

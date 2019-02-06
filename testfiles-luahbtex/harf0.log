@@ -1,0 +1,133 @@
+This is LuaHBTeX, Version 1.09.1 (TeX Live 2018/W32TeX)  (format=luahblatex 2019.1.30)  6 FEB 2019 19:25
+ restricted system commands enabled.
+**harf0
+(./harf0.tex
+LaTeX2e <2018-12-01>
+Lua module: luaotfload-main 2019-01-28 2.9504 luaotfload entry point
+Lua module: luaotfload-init 2019-01-28 2.9504 luaotfload submodule / initializat
+ion
+Lua module: lualibs 2019-01-28 2.6302 ConTeXt Lua standard libraries.
+Lua module: lualibs-extended 2019-01-28 2.6302 ConTeXt Lua libraries -- extended
+ collection.
+Lua module: luaotfload-log 2019-01-28 2.9504 luaotfload submodule / logging
+Lua module: luaotfload-parsers 2019-01-28 2.9504 luaotfload submodule / filelist
+Lua module: luaotfload-configuration 2019-01-28 2.9504 luaotfload submodule / co
+nfig file reader
+luaotfload | conf : Root cache directory is C:/texlive/2018/texmf-var-exp/luatex
+-cache/generic/names.
+luaotfload | init : Loading fontloader “fontloader-2019-01-28.lua” from kpse
+-resolved path “c:/Users/Nililand-Surface/Documents/Git/luaotfload/texmf/tex/l
+uatex/luaotfload/fontloader-2019-01-28.lua”.
+Lua-only attribute luaotfload@state = 1
+Lua-only attribute luaotfload@noligature = 2
+Lua-only attribute luaotfload@syllabe = 3
+luaotfload | init : Context OpenType loader version “3.107”
+Inserting `luaotfload.node_processor' at position 1 in `pre_linebreak_filter'.
+Inserting `luaotfload.node_processor' at position 1 in `hpack_filter'.
+Lua module: luaotfload-loaders 2019-01-28 2.9504 luaotfload submodule / callback
+ handling
+Inserting `luaotfload.define_font' at position 1 in `define_font'.
+Lua module: luaotfload-database 2019-01-28 2.9504 luaotfload submodule / databas
+e
+Lua module: luaotfload-colors 2019-01-28 2.9504 luaotfload submodule / color
+Lua-only attribute luaotfload_color_attribute = 4
+Lua module: luaotfload-resolvers 2019-01-28 2.9504 luaotfload submodule / resolv
+ers
+luaotfload | conf : Root cache directory is C:/texlive/2018/texmf-var-exp/luatex
+-cache/generic/names.
+Lua module: luaotfload-features 2019-01-28 2.9504 luaotfload submodule / feature
+s
+Lua module: luaotfload-letterspace 2019-01-28 2.9504 luaotfload submodule / colo
+r
+Lua module: luaotfload-auxiliary 2019-01-28 2.9504 luaotfload submodule / auxili
+ary functions
+Inserting `luaotfload.aux.set_sscale_dimens' at position 1 in `luaotfload.patch_
+font'.
+Inserting `luaotfload.aux.patch_cambria_domh' at position 2 in `luaotfload.patch
+_font'.
+Inserting `luaotfload.aux.fixup_fontdata' at position 1 in `luaotfload.patch_fon
+t_unsafe'.
+Inserting `luaotfload.aux.set_capheight' at position 3 in `luaotfload.patch_font
+'.
+Inserting `luaotfload.rewrite_fontname' at position 4 in `luaotfload.patch_font'
+.
+luaotfload | main : initialization completed in 0.520 seconds
+(c:/texlive/2018/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2018/09/03 v1.4i Standard LaTeX document class
+(c:/texlive/2018/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2018/09/03 v1.4i Standard LaTeX file (size option)
+luaotfload | db : Font names database loaded from C:/texlive/2018/texmf-var-exp/
+luatex-cache/generic/names/luaotfload-names.luc)
+\c@part=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(c:/texlive/2018/texmf-dist/tex/luatex/luatexbase/luatexbase.sty
+Package: luatexbase 2015/10/04 v1.3 luatexbase interface to LuaTeX 
+
+(c:/texlive/2018/texmf-dist/tex/luatex/ctablestack/ctablestack.sty
+Package: ctablestack 2015/10/01 v1.0 Catcode table stable support
+\@catcodetablestackcnt=\count88
+)
+\CatcodeTableOther=\catcodetable5
+\CatcodeTableExpl=\catcodetable6
+)
+Inserting `Harf pre_output_filter callback' at position 1 in `pre_output_filter'
+.
+Removing  `luaotfload.node_processor' from `pre_linebreak_filter'.
+Inserting `Harf pre_linebreak_filter callback' at position 1 in `pre_linebreak_f
+ilter'.
+Inserting `luaotfload.node_processor' at position 2 in `pre_linebreak_filter'.
+Inserting `Harf wrapup_run callback' at position 1 in `wrapup_run'.
+Removing  `luaotfload.node_processor' from `hpack_filter'.
+Inserting `Harf hpack_filter callback' at position 1 in `hpack_filter'.
+Inserting `luaotfload.node_processor' at position 2 in `hpack_filter'.
+(./harf0.aux)
+\openout1 = harf0.aux
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+ [1
+
+{c:/texlive/2018/texmf-var-exp/fonts/map/pdftex/updmap/pdftex.map}] (./harf0.au
+x))
+
+Here is how much of LuaTeX's memory you used:
+ 284 strings out of 494300
+ 100000,89155 words of node,token memory allocated
+ 382 words of node memory still in use:
+   2 hlist, 1 vlist, 1 rule, 2 glue, 3 kern, 1 glyph, 4 attribute, 45 glue_spec,
+ 4 attribute_list, 1 write nodes
+   avail lists: 1:1,2:15,3:2,4:1,5:21,6:1,7:15,9:7
+ 4590 multiletter control sequences out of 65536+600000
+ 16 fonts using 898935 bytes
+ 22i,4n,17p,128b,123s stack positions out of 5000i,500n,10000p,200000b,100000s
+<c:/texlive/2018/texmf-dist/fonts/opentype/public/lm/lmroman10-regular.otf><c:/t
+exlive/2018/texmf-dist/fonts/opentype/public/tex-gyre/texgyreheros-regular.otf>
+Output written on harf0.pdf (1 page, 4022 bytes).
+
+PDF statistics: 22 PDF objects out of 1000 (max. 8388607)
+ 12 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 131072)
+ 1 words of extra memory for PDF output out of 10000 (max. 100000000)
+

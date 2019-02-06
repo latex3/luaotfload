@@ -24,10 +24,6 @@ local function split(str, sep)
 end
 
 local function parse(str, size)
-  if size < 0 then
-    size = -655.36 * size
-  end
-
   local name, options = str:match("%s*(.*)%s*:%s*(.*)%s*")
   local spec = {
     specification = str,
@@ -217,6 +213,10 @@ local function scalefont(data, spec)
   local space = data.space
   local stemv = data.stemv
   local capheight = data.capheight
+
+  if size < 0 then
+    size = -655.36 * size
+  end
 
   -- We shape in font units (at UPEM) and then scale output with the desired
   -- sfont size.

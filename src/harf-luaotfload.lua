@@ -19,7 +19,7 @@ fonts.readers.harf = function(spec)
   local specification = {
     features = features,
     options = options,
-    path = spec.lookup == "path" and spec.name or spec.resolved,
+    path = spec.resolved or spec.name,
     index = spec.sub and spec.sub - 1 or 0,
     size = spec.size,
     specification = spec.specification,

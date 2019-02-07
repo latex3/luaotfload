@@ -298,7 +298,7 @@ local function define_font(name, size)
   if hbdata then
     tfmdata = scalefont(hbdata, spec)
   else
-    tfmdata = font.read_tfm(name, size)
+    tfmdata = font.read_tfm(spec.specification, spec.size)
   end
   return tfmdata
 end

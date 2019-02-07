@@ -20,8 +20,8 @@ local authors = "\z
 -- version number is used below!
 local ProvidesLuaModule = { 
     name          = "luaotfload-main",
-    version       = "2.93",       --TAGVERSION
-    date          = "2018-10-28", --TAGDATE
+    version       = "2.95",       --TAGVERSION
+    date          = "2019-01-28", --TAGDATE
     description   = "luaotfload entry point",
     author        = authors,
     copyright     = authors,
@@ -65,11 +65,8 @@ else
     end
 end
 
-local info = status.list()
-
-if info["safer_option"] ~= 0 then
+if status.safer_option ~= 0 then
  texio.write_nl("term and log","luaotfload can't run with option --safer. Aborting")
- luaotfload.main = function () end
  error("safer_option used")
 end 
 

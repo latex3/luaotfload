@@ -9,11 +9,13 @@
 
 2. Check for changes
 
--->  texlua scripts/mkimport news "" %CONTEXTPATH%
+cmd -->  texlua scripts/mkimport news "" %CONTEXTPATH%
+bash-->  texlua scripts/mkimport news "" $CONTEXTPATH
 
 3. Import changes
 
--->   texlua scripts/mkimport import "" %CONTEXTPATH%
+cmd -->   texlua scripts/mkimport import "" %CONTEXTPATH%
+bash-->   texlua scripts/mkimport import "" $CONTEXTPATH
 
 This also imports the merged orginal file and saves it as
 fontloader-reference.lua in src/fontloader/runtime
@@ -26,7 +28,11 @@ this create a new luaotfload-character.lua.
 requirements char-def.lua and char-ini.lua
 the file is created in src/auto by default!
 
--->   texlua scripts/mkcharacters %CONTEXTPATH%/tex/context/base/mkiv/
+25.12.2018: in the new code luaotfload-character.lua is no longer used.
+Perhaps it will be dropped completly.
+
+cmd -->   texlua scripts/mkcharacters %CONTEXTPATH%/tex/context/base/mkiv/
+bash-->   texlua scripts/mkcharacters $CONTEXTPATH/tex/context/base/mkiv/
 
 5. Update glyphlist
 
@@ -48,7 +54,7 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
---> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-28.lua
+--> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-01-28.lua
 
 8. Check lualibs status -- perhaps it needs update too
 

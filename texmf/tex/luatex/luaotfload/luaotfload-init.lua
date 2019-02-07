@@ -7,8 +7,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-init",
-    version       = "2.93",       --TAGVERSION
-    date          = "2018-10-28", --TAGDATE
+    version       = "2.95",       --TAGVERSION
+    date          = "2019-01-28", --TAGDATE
     description   = "luaotfload submodule / initialization",
     license       = "GPL v2.0"
 }
@@ -20,7 +20,7 @@ end
 
 
 local setmetatable = setmetatable
-local kpselookup   = kpse.lookup
+local kpsefind_file   = kpse.find_file
 local lfsisdir     = lfs.isdir
 
 --[[doc--
@@ -258,6 +258,7 @@ local context_modules = {
   { ltx,   "luatex-basics-gen" },
   { ctx,   "data-con"          },
   { ltx,   "luatex-basics-nod" },
+  { ltx,   "luatex-basics-chr" }, -- NEW UF 14.12.2018
   { ctx,   "font-ini"          },
   { ltx,   "luatex-fonts-mis"  }, -- NEW UF 19.09.2018
   { ctx,   "font-con"          },
@@ -395,107 +396,109 @@ end --- [init_adapt]
 
 --doc]]--
 
-characters         = characters or { } --- should be created in basics-gen
-characters.data    = nil
-local chardef      = "luaotfload-characters"
-
-do
-  local setmetatableindex = function (t, f)
-    local mt = getmetatable (t)
-    if mt then
-      mt.__index = f
-    else
-      setmetatable (t, { __index = f })
-    end
-  end
-
-  --- there are some special tables for each field that provide access
-  --- to fields of the character table by means of a metatable
-
-  local mkcharspecial = function (characters, tablename, field)
-
-    local chardata = characters.data
-
-    if chardata then
-      local newspecial        = { }
-      characters [tablename]  = newspecial --> e.g. “characters.data.mirrors”
-
-      local idx = function (t, char)
-        local c = chardata [char]
-        if c then
-          local m = c [field] --> e.g. “mirror”
-          if m then
-            t [char] = m
-            return m
-          end
-        end
-        newspecial [char] = false
-        return char
-      end
-
-      setmetatableindex (newspecial, idx)
-    end
-
-  end
-
-  local mkcategories = function (characters) -- different from the others
-
-    local chardata         = characters.data
-    local categories       = characters.categories or { }
-    characters.categories  = categories
-
-    setmetatable (categories, { __index = function (t, char)
-      if char then
-        local c = chardata [char]
-        c = c.category or char
-        t [char] = c
-        return c
-      end
-    end})
-
-  end
-
-  local load_failed = false
-  local chardata --> characters.data; loaded on demand
-
-  local load_chardef = function ()
-
-    logreport ("both", 1, "aux", "Loading character metadata from %s.", chardef)
-    chardata = dofile (kpse.find_file (chardef, "lua"))
-
-    if chardata == nil then
-      logreport ("both", 0, "aux",
-                 "Could not load %s; continuing with empty character table.",
-                 chardef)
-      chardata    = { }
-      load_failed = true
-    end
-
-    characters             = { } --- nuke metatable
-    characters.data        = chardata
-    characters.classifiers = chardata.classifiers
-    chardata.classifiers   = nil
-
-    --- institute some of the functionality from char-ini.lua
-
-    mkcharspecial (characters, "mirrors",     "mirror")
-    mkcharspecial (characters, "directions",  "direction")
-    mkcharspecial (characters, "textclasses", "textclass")
-    mkcategories  (characters)
-
-  end
-
-  local charindex = function (t, k)
-    if chardata == nil and load_failed ~= true then
-      load_chardef ()
-    end
-
-    return rawget (characters, k)
-  end
-
-  setmetatableindex (characters, charindex)
-
-end
+--[[--14.12.2018disable characters 
+--characters         = characters or { } --- should be created in basics-gen
+--characters.data    = nil
+--local chardef      = "luaotfload-characters"
+--
+--do
+--  local setmetatableindex = function (t, f)
+--    local mt = getmetatable (t)
+--    if mt then
+--      mt.__index = f
+--    else
+--      setmetatable (t, { __index = f })
+--    end
+--  end
+--
+--  --- there are some special tables for each field that provide access
+--  --- to fields of the character table by means of a metatable
+--
+--  local mkcharspecial = function (characters, tablename, field)
+--
+--    local chardata = characters.data
+--
+--    if chardata then
+--      local newspecial        = { }
+--      characters [tablename]  = newspecial --> e.g. “characters.data.mirrors”
+--
+--      local idx = function (t, char)
+--        local c = chardata [char]
+--        if c then
+--          local m = c [field] --> e.g. “mirror”
+--          if m then
+--            t [char] = m
+--            return m
+--          end
+--        end
+--        newspecial [char] = false
+--        return char
+--      end
+--
+--      setmetatableindex (newspecial, idx)
+--    end
+--
+--  end
+--
+--  local mkcategories = function (characters) -- different from the others
+--
+--    local chardata         = characters.data
+--    local categories       = characters.categories or { }
+--    characters.categories  = categories
+--
+--    setmetatable (categories, { __index = function (t, char)
+--      if char then
+--        local c = chardata [char]
+--        c = c.category or char
+--        t [char] = c
+--        return c
+--      end
+--    end})
+--
+--  end
+--
+--  local load_failed = false
+--  local chardata --> characters.data; loaded on demand
+--
+--  local load_chardef = function ()
+--
+--    logreport ("both", 1, "aux", "Loading character metadata from %s.", chardef)
+--    chardata = dofile (kpse.find_file (chardef, "lua"))
+--
+--    if chardata == nil then
+--      logreport ("both", 0, "aux",
+--                 "Could not load %s; continuing with empty character table.",
+--                 chardef)
+--      chardata    = { }
+--      load_failed = true
+--    end
+--
+--    characters             = { } --- nuke metatable
+--    characters.data        = chardata
+--    characters.classifiers = chardata.classifiers
+--    chardata.classifiers   = nil
+--
+--    --- institute some of the functionality from char-ini.lua
+--
+--    mkcharspecial (characters, "mirrors",     "mirror")
+--    mkcharspecial (characters, "directions",  "direction")
+--    mkcharspecial (characters, "textclasses", "textclass")
+--    mkcategories  (characters)
+--
+--  end
+--
+--  local charindex = function (t, k)
+--    if chardata == nil and load_failed ~= true then
+--      load_chardef ()
+--    end
+--
+--    return rawget (characters, k)
+--  end
+--
+--  setmetatableindex (characters, charindex)
+--
+--end
+--]] --14.12.2018disable characters 
 
 local init_main = function ()
 
@@ -549,6 +552,7 @@ local init_main = function ()
 
     load_fontloader_module "data-con"
     load_fontloader_module "basics-nod"
+    load_fontloader_module "basics-chr"
     load_fontloader_module "font-ini"
     load_fontloader_module "fonts-mis"
     load_fontloader_module "font-con"
@@ -604,14 +608,14 @@ local init_main = function ()
                fontloader)
     local _void = require (fontloader)
 
-  elseif kpselookup (fontloader) then
-    local path = kpselookup (fontloader)
+  elseif kpsefind_file (fontloader) then
+    local path = kpsefind_file (fontloader)
     logreport ("log", 0, "init",
                "Loading fontloader “%s” from kpse-resolved path “%s”.",
                fontloader, path)
     local _void = require (path)
 
-  elseif kpselookup (("fontloader-%s.lua"):format(fontloader)) then
+  elseif kpsefind_file (("fontloader-%s.lua"):format(fontloader)) then
     logreport ("log", 0, "init",
                "Using predefined fontloader “%s”.",
                fontloader)
@@ -718,10 +722,9 @@ local init_post_load_agl = function ()
 
   --doc]]--
 
-  local findfile  = resolvers.findfile
   local encodings = fonts.encodings
 
-  if not findfile or not encodings then
+  if not encodings then
     --- Might happen during refactoring; we continue graciously but in
     --- a somewhat defect state.
     logreport ("log", 0, "init",
@@ -746,11 +749,11 @@ local init_post_load_agl = function ()
       return nil
     end
 
-    local glyphlist = findfile "luaotfload-glyphlist.lua"
+    local glyphlist = kpsefind_file "luaotfload-glyphlist.lua"
     if glyphlist then
       logreport ("log", 1, "init", "loading the Adobe glyph list")
     else
-      glyphlist = findfile "font-age.lua"
+      glyphlist = kpsefind_file "font-age.lua"
       logreport ("both", 0, "init",
                  "loading the extended glyph list from ConTeXt")
     end

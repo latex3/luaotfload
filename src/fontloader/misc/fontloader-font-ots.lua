@@ -82,7 +82,7 @@ mechanisms. Both put some constraints on the code here.</p>
 -- Todo: check if we copy attributes to disc nodes if needed.
 --
 -- Todo: it would be nice if we could get rid of components. In other places we can use
--- the unicode properties.
+-- the unicode properties. We can just keep a lua table.
 --
 -- Remark: We do some disc juggling where we need to keep in mind that the pre, post and
 -- replace fields can have prev pointers to a nesting node ... I wonder if that is still
@@ -189,7 +189,6 @@ local getattr            = nuts.getattr
 local setattr            = nuts.setattr
 local getprop            = nuts.getprop
 local setprop            = nuts.setprop
-local getfont            = nuts.getfont
 local getsubtype         = nuts.getsubtype
 local setsubtype         = nuts.setsubtype
 local getchar            = nuts.getchar
@@ -199,10 +198,10 @@ local setdisc            = nuts.setdisc
 local setlink            = nuts.setlink
 local getcomponents      = nuts.getcomponents -- the original one, not yet node-aux
 local setcomponents      = nuts.setcomponents -- the original one, not yet node-aux
-local getdir             = nuts.getdir
 local getwidth           = nuts.getwidth
 
 local ischar             = nuts.is_char
+local isglyph            = nuts.isglyph
 local usesfont           = nuts.uses_font
 
 local insert_node_after  = nuts.insert_after
@@ -213,13 +212,6 @@ local find_node_tail     = nuts.tail
 local flush_node_list    = nuts.flush_list
 local flush_node         = nuts.flush_node
 local end_of_math        = nuts.end_of_math
------ traverse_nodes     = nuts.traverse
------ traverse_id        = nuts.traverse_id
-local set_components     = nuts.set_components
-local take_components    = nuts.take_components
-local count_components   = nuts.count_components
-local copy_no_components = nuts.copy_no_components
-local copy_only_glyphs   = nuts.copy_only_glyphs
 
 local setmetatable       = setmetatable
 local setmetatableindex  = table.setmetatableindex
@@ -240,8 +232,8 @@ local math_code          = nodecodes.math
 local dir_code           = nodecodes.dir
 local localpar_code      = nodecodes.localpar
 
-local discretionary_code = disccodes.discretionary
-local ligature_code      = glyphcodes.ligature
+local discretionarydisc_code = disccodes.discretionary
+local ligatureglyph_code     = glyphcodes.ligature
 
 local a_state            = attributes.private('state')
 local a_noligature       = attributes.private("noligature")
@@ -458,26 +450,28 @@ end
 
 -- start is a mark and we need to keep that one
 
-local take_components = getcomponents -- we overload here (for now)
-local set_components  = setcomponents -- we overload here (for now)
------ get_components  = getcomponents -- we overload here (for now)
+local copy_no_components = nuts.copy_no_components
+local copy_only_glyphs   = nuts.copy_only_glyphs
+
+local set_components     = setcomponents
+local take_components    = getcomponents
 
 local function count_components(start,marks)
-    if getid(start) ~= glyph_code then
-        return 0
-    elseif getsubtype(start) == ligature_code then
-        local i = 0
-        local components = getcomponents(start)
-        while components do
-            i = i + count_components(components,marks)
-            components = getnext(components)
+    local char = isglyph(start)
+    if char then
+        if getsubtype(start) == ligatureglyph_code then
+            local i = 0
+            local components = getcomponents(start)
+            while components do
+                i = i + count_components(components,marks)
+                components = getnext(components)
+            end
+            return i
+        elseif not marks[char] then
+            return 1
         end
-        return i
-    elseif not marks[getchar(start)] then
-        return 1
-    else
-        return 0
     end
+    return 0
 end
 
 local function markstoligature(head,start,stop,char)
@@ -494,7 +488,7 @@ local function markstoligature(head,start,stop,char)
         end
         resetinjection(base)
         setchar(base,char)
-        setsubtype(base,ligature_code)
+        setsubtype(base,ligatureglyph_code)
         set_components(base,start)
         setlink(prev,base,next)
         return head, base
@@ -530,7 +524,7 @@ local function toligature(head,start,stop,char,dataset,sequence,skiphash,discfou
     end
     resetinjection(base)
     setchar(base,char)
-    setsubtype(base,ligature_code)
+    setsubtype(base,ligatureglyph_code)
     set_components(base,comp)
     setlink(prev,base,next)
     if not discfound then
@@ -612,7 +606,7 @@ local function toligature(head,start,stop,char,dataset,sequence,skiphash,discfou
                 set_components(base,copied)
                 replace = base
                 if forcediscretionaries then
-                    setdisc(discfound,pre,post,replace,discretionary_code)
+                    setdisc(discfound,pre,post,replace,discretionarydisc_code)
                 else
                     setdisc(discfound,pre,post,replace)
                 end
@@ -784,23 +778,17 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                 -- ok, goto next lookup
             end
         end
-    else -- is the check for disc still valid here ? and why only replace then
+    else
         local discfound = false
-        local lastdisc  = nil
         local hasmarks  = marks[startchar]
         while current do
             local char, id = ischar(current,currentfont)
             if char then
                 if skiphash and skiphash[char] then
                     current = getnext(current)
-                 -- if stop then stop = current end -- ?
-                else -- ligature is a tree
-                    local lg = ligature[char] -- can there be multiple in a row? maybe in a bad font
+                else
+                    local lg = ligature[char]
                     if lg then
-                        if not discfound and lastdisc then
-                            discfound = lastdisc
-                            lastdisc  = nil
-                        end
                         if marks[char] then
                             hasmarks = true
                         end
@@ -815,47 +803,76 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                 -- kind of weird
                 break
             elseif id == disc_code then
-                --
-                -- Kai: see chainprocs, we probably could do the same here or was there a reason
-                -- why we kept the replace check here.
-                --
-                -- if not discfound then
-                --     discfound = current
-                -- end
-                -- if current == stop then
-                --     break -- okay? or before the disc
-                -- else
-                --     current = getnext(current)
-                -- end
-                --
-                local replace = getfield(current,"replace") -- hm: pre and post
-                if replace then
-                    -- of{f-}{}{f}e  o{f-}{}{f}fe  o{-}{}{ff}e (oe and ff ligature)
-                    -- we can end up here when we have a start run .. testruns start at a disc but
-                    -- so here we have the other case: char + disc
-                    while replace do
-                        local char, id = ischar(replace,currentfont)
-                        if char then
-                            local lg = ligature[char] -- can there be multiple in a row? maybe in a bad font
-                            if lg then
-                                if marks[char] then
-                                    hasmarks = true -- very unlikely
-                                end
-                                ligature = lg
-                                replace  = getnext(replace)
-                            else
-                                return head, start, false, false
-                            end
-                        else
-                            return head, start, false, false
-                        end
-                    end
-                    stop = current
-                end
-                lastdisc = current
-                current  = getnext(current)
+                discfound = current
+                break
             else
                 break
+            end
+        end
+        -- of{f-}{}{f}e  o{f-}{}{f}fe  o{-}{}{ff}e (oe and ff ligature)
+        -- we can end up here when we have a start run .. testruns start at a disc but
+        -- so here we have the other case: char + disc
+        if discfound then
+            -- don't assume marks in a disc and we don't run over a disc (for now)
+            local pre, post, replace = getdisc(discfound)
+            local match
+            if replace then
+                local char = ischar(replace,currentfont)
+                if char and ligature[char] then
+                    match = true
+                end
+            end
+            if not match and pre then
+                local char = ischar(pre,currentfont)
+                if char and ligature[char] then
+                    match = true
+                end
+            end
+            if not match and not pre or not replace then
+                local n = getnext(discfound)
+                local char = ischar(n,currentfont)
+                if char and ligature[char] then
+                    match = true
+                end
+            end
+            if match then
+                -- we force a restart
+                local ishead = head == start
+                local prev   = getprev(start)
+                if stop then
+                    setnext(stop)
+                    local tail = getprev(stop)
+                    local copy = copy_node_list(start)
+                    local liat = find_node_tail(copy)
+                    if pre then
+                        setlink(liat,pre)
+                    end
+                    if replace then
+                        setlink(tail,replace)
+                    end
+                    pre     = copy
+                    replace = start
+                else
+                    setnext(start)
+                    local copy = copy_node(start)
+                    if pre then
+                        setlink(copy,pre)
+                    end
+                    if replace then
+                        setlink(start,replace)
+                    end
+                    pre     = copy
+                    replace = start
+                end
+                setdisc(discfound,pre,post,replace)
+                if prev then
+                    setlink(prev,discfound)
+                else
+                    setprev(discfound)
+                    head  = discfound
+                end
+                start = discfound
+                return head, start, true, true
             end
         end
         local lig = ligature.ligature
@@ -863,10 +880,12 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
             if stop then
                 if trace_ligatures then
                     local stopchar = getchar(stop)
-                    head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+                 -- head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+                    head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,false,hasmarks)
                     logprocess("%s: replacing %s upto %s by ligature %s case 2",pref(dataset,sequence),gref(startchar),gref(stopchar),gref(lig))
                 else
-                    head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+                 -- head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,discfound,hasmarks)
+                    head, start = toligature(head,start,stop,lig,dataset,sequence,skiphash,false,hasmarks)
                 end
             else
                 -- weird but happens (in some arabic font)
@@ -876,12 +895,12 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                     logprocess("%s: replacing %s by (no real) ligature %s case 3",pref(dataset,sequence),gref(startchar),gref(lig))
                 end
             end
-            return head, start, true, discfound
+            return head, start, true, false
         else
             -- weird but happens, pseudo ligatures ... just the components
         end
     end
-    return head, start, false, discfound
+    return head, start, false, false
 end
 
 function handlers.gpos_single(head,start,dataset,sequence,kerns,rlmode,skiphash,step,injection)
@@ -2636,7 +2655,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
                                             end
                                         end
                                     else
-                                        notmatchreplace[prev] = true -- new, for Kai to check
+                                     -- notmatchreplace[prev] = true -- not according to Kai
                                     end
                                 end
                                 prev = getprev(prev)
@@ -2765,7 +2784,7 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
                                     end
                                 end
                             else
-                                notmatchreplace[current] = true -- new, for Kai to check
+                             -- notmatchreplace[current] = true -- not according to Kai
                             end
                             current = getnext(current)
                         elseif id == glue_code then
@@ -3173,7 +3192,7 @@ local function testrun(disc,t_run,c_run,...)
             local d = d_replace > d_post and d_replace or d_post
             local head = getnext(disc) -- is: next
             local tail = head
-            for i=1,d do
+            for i=2,d do -- must start at 2 according to Kai 
                 local nx = getnext(tail)
                 local id = getid(nx)
                 if id == disc_code then
@@ -3620,129 +3639,57 @@ local function k_run_multiple(sub,injection,last,font,attr,steps,nofsteps,datase
     end
 end
 
--- to be checked, nowadays we probably can assume properly matched directions
--- so maybe we no longer need a stack
+local txtdirstate, pardirstate  do -- this might change (no need for nxt in pardirstate)
 
--- local function txtdirstate(start,stack,top,rlparmode)
---     local dir = getdir(start)
---     local new = 1
---     if dir == "+TRT" then
---         top = top + 1
---         stack[top] = dir
---         new = -1
---     elseif dir == "+TLT" then
---         top = top + 1
---         stack[top] = dir
---     elseif dir == "-TRT" or dir == "-TLT" then
---         if top == 1 then
---             top = 0
---             new = rlparmode
---         else
---             top = top - 1
---             if stack[top] == "+TRT" then
---                 new = -1
---             end
---         end
---     else
---         new = rlparmode
---     end
---     return getnext(start), top, new
--- end
---
--- local function pardirstate(start)
---     local dir = getdir(start)
---     local new = 0
---     if dir == "TLT" then
---         new = 1
---     elseif dir == "TRT" then
---         new = -1
---     end
---     return getnext(start), new, new
--- end
+    local getdirection = nuts.getdirection
+    local lefttoright  = 0
+    local righttoleft  = 1
 
-local function txtdirstate(start,stack,top,rlparmode)
-    local nxt = getnext(start)
-    local dir = getdir(start)
-    if dir == "+TRT" then
-        top = top + 1
-        stack[top] = dir
-        return nxt, top, -1
-    elseif dir == "+TLT" then
-        top = top + 1
-        stack[top] = dir
-        return nxt, top, 1
-    elseif dir == "-TRT" or dir == "-TLT" then
-        if top == 1 then
-            return nxt, 0, rlparmode
-        else
-            top = top - 1
-            if stack[top] == "+TRT" then
-                return nxt, top, -1
+    txtdirstate = function(start,stack,top,rlparmode)
+        local dir, pop = getdirection(start)
+        if pop then
+            if top == 1 then
+                return 0, rlparmode
             else
-                return nxt, top, 1
+                top = top - 1
+                if stack[top] == righttoleft then
+                    return top, -1
+                else
+                    return top, 1
+                end
             end
+        elseif dir == lefttoright then
+            top = top + 1
+            stack[top] = lefttoright
+            return top, 1
+        elseif dir == righttoleft then
+            top = top + 1
+            stack[top] = righttoleft
+            return top, -1
+        else
+            return top, rlparmode
         end
-    else
-        return nxt, top, rlparmode
     end
+
+    pardirstate = function(start)
+        local dir = getdirection(start)
+        if dir == lefttoright then
+            return 1, 1
+        elseif dir == righttoleft then
+            return -1, -1
+        -- for old times sake we we handle strings too
+        elseif dir == "TLT" then
+            return 1, 1
+        elseif dir == "TRT" then
+            return -1, -1
+        else
+            return 0, 0
+        end
+    end
+
 end
 
-local function pardirstate(start)
-    local nxt = getnext(start)
-    local dir = getdir(start)
-    if dir == "TLT" then
-        return nxt, 1, 1
-    elseif dir == "TRT" then
-        return nxt, -1, -1
-    else
-        return nxt, 0, 0
-    end
-end
-
--- -- this will become:
---
--- local getdirection = nuts.getdirection
---
--- local function txtdirstate1(start,stack,top,rlparmode)
---     local nxt = getnext(start)
---     local dir, sub = getdirection(start)
---     if sub then
---         if top == 1 then
---             return nxt, 0, rlparmode
---         elseif dir < 2 then
---             top = top - 1
---             if stack[top] == 1 then
---                 return nxt, top, -1
---             else
---                 return nxt, top, 1
---             end
---         else
---             return nxt, top, rlparmode
---         end
---     elseif dir == 1 then
---         top = top + 1
---         stack[top] = 1
---         return nxt, top, -1
---     elseif dir == 0 then
---         top = top + 1
---         stack[top] = 0
---         return nxt, top, 1
---     else
---         return nxt, top, rlparmode
---     end
--- end
---
--- local function pardirstate1(start)
---     local nxt = getnext(start)
---     local dir = getdirection(start)
---     if dir == 0 then
---         return nxt, 1, 1
---     elseif dir == 1 then
---         return nxt, -1, -1
---     else
---         return nxt, 0, 0
---     end
--- end
+-- These are non public helpers that can change without notice!
 
 otf.helpers             = otf.helpers or { }
 otf.helpers.txtdirstate = txtdirstate
@@ -3850,8 +3797,13 @@ do
             checkstep(head)
         end
 
-        local initialrl = direction == "TRT" and -1 or 0
-     -- local initialrl = (direction == 1 or direction == "TRT") and -1 or 0
+        local initialrl = 0
+
+        if getid(head) == localpar_code and getsubtype(head) == 0 then
+            initialrl = pardirstate(head)
+        elseif direction == 1 or direction == "TRT" then
+            initialrl = -1
+        end
 
      -- local done      = false
         local datasets  = otfdataset(tfmdata,font,attr)
@@ -3960,12 +3912,14 @@ do
                                         a = true
                                     end
                                     if a then
-                                        local ok
-                                        head, start, ok = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+                                        local ok, df
+                                        head, start, ok, df = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
                                      -- if ok then
                                      --     done = true
                                      -- end
-                                        if start then
+                                        if df then
+-- print("restart 1",typ)
+                                        elseif start then
                                             start = getnext(start)
                                         end
                                     else
@@ -3997,9 +3951,11 @@ do
                         elseif id == math_code then
                             start = getnext(end_of_math(start))
                         elseif id == dir_code then
-                            start, topstack, rlmode = txtdirstate(start,dirstack,topstack,rlparmode)
-                        elseif id == localpar_code then
-                            start, rlparmode, rlmode = pardirstate(start)
+                            topstack, rlmode = txtdirstate(start,dirstack,topstack,rlparmode)
+                            start = getnext(start)
+                     -- elseif id == localpar_code then
+                     --     rlparmode, rlmode = pardirstate(start)
+                     --     start = getnext(start)
                         else
                             start = getnext(start)
                         end
@@ -4023,6 +3979,7 @@ do
                                         a = true
                                     end
                                     if a then
+                                        local ok, df
                                         for i=m[1],m[2] do
                                             local step = steps[i]
                                      -- for i=1,#m do
@@ -4031,9 +3988,11 @@ do
                                             local lookupmatch = lookupcache[char]
                                             if lookupmatch then
                                                 -- we could move all code inline but that makes things even more unreadable
-                                                local ok
-                                                head, start, ok = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-                                                if ok then
+--                                                 local ok, df
+                                                head, start, ok, df = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+                                                if df then
+                                                    break
+                                                elseif ok then
                                                  -- done = true
                                                     break
                                                 elseif not start then
@@ -4042,7 +4001,9 @@ do
                                                 end
                                             end
                                         end
-                                        if start then
+                                        if df then
+-- print("restart 2",typ)
+                                        elseif start then
                                             start = getnext(start)
                                         end
                                     else
@@ -4074,9 +4035,11 @@ do
                         elseif id == math_code then
                             start = getnext(end_of_math(start))
                         elseif id == dir_code then
-                            start, topstack, rlmode = txtdirstate(start,dirstack,topstack,rlparmode)
-                        elseif id == localpar_code then
-                            start, rlparmode, rlmode = pardirstate(start)
+                            topstack, rlmode = txtdirstate(start,dirstack,topstack,rlparmode)
+                            start = getnext(start)
+                     -- elseif id == localpar_code then
+                     --     rlparmode, rlmode = pardirstate(start)
+                     --     start = getnext(start)
                         else
                             start = getnext(start)
                         end
@@ -4133,8 +4096,7 @@ do
         local done      = false
         local dirstack  = { nil } -- could move outside function but we can have local runs (maybe a few more nils)
         local start     = head
-        local initialrl = direction == "TRT" and -1 or 0
-     -- local initialrl = (direction == 1 or direction == "TRT") and -1 or 0
+        local initialrl = (direction == 1 or direction == "TRT") and -1 or 0
         local rlmode    = initialrl
         local rlparmode = initialrl
         local topstack  = 0
@@ -4184,9 +4146,11 @@ do
             elseif id == math_code then
                 start = getnext(end_of_math(start))
             elseif id == dir_code then
-                start, topstack, rlmode = txtdirstate(start,dirstack,topstack,rlparmode)
-            elseif id == localpar_code then
-                start, rlparmode, rlmode = pardirstate(start)
+                topstack, rlmode = txtdirstate(start,dirstack,topstack,rlparmode)
+                start = getnext(start)
+         -- elseif id == localpar_code then
+         --     rlparmode, rlmode = pardirstate(start)
+         --     start = getnext(start)
             else
                 start = getnext(start)
             end

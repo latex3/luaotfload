@@ -5,8 +5,8 @@
 do -- block to avoid to many local variables error
  local ProvidesLuaModule = { 
      name          = "luaotfload-database",
-     version       = "2.93",       --TAGVERSION
-     date          = "2018-10-28", --TAGDATE
+     version       = "2.95",       --TAGVERSION
+     date          = "2019-01-28", --TAGDATE
      description   = "luaotfload submodule / database",
      license       = "GPL v2.0",
      author        = "Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
@@ -612,12 +612,6 @@ local italic_synonym = {
     italic  = true,
 }
 
-local bold_synonym = {
-    bold  = true,
-    black = true,
-    heavy = true,
-}
-
 local style_category = {
     regular     = "r",
     bold        = "b",
@@ -686,8 +680,6 @@ end
 
 --doc]]--
 
-local dummy_findfile = resolvers.findfile -- from basics-gen
-
 --- string -> string * string * bool
 local lookup_font_file
 
@@ -700,7 +692,10 @@ lookup_font_file = function (filename)
     local found = lookup_filename (filename)
 
     if not found then
-        found = dummy_findfile(filename)
+        local type = file.suffix(filename)
+        if type ~= "" then
+            found = resolvers.findfile(filename, type)
+        end
     end
 
     if found then
@@ -748,7 +743,7 @@ local get_font_file = function (index)
     end
     local basename = entry.basename
     if entry.location == "texmf" then
-        local fullname = kpselookup(basename)
+        local fullname = resolvers.findfile(basename, entry.format)
         if fullname then
             return true, fullname, entry.subfont
         end
@@ -772,7 +767,7 @@ local verify_font_file = function (basename)
     if path and lfsisfile(path) then
         return true
     end
-    if kpsefind_file(basename) then
+    if resolvers.findfile(basename) then
         return true
     end
     return false
@@ -2790,6 +2785,7 @@ do
                     return "i"
                 end
             end
+            return tostring(pfmweight) .. (italicangle == 0 and "" or "i")
         end
         return false
     end
@@ -3023,7 +3019,7 @@ group_modifiers = function (mappings, families)
                                     local entry  = mappings [index]
                                     local weight = entry.pfmweight
                                     local diff   = weight < 700 and 700 - weight or weight - 700
-                                    if diff < minimum then
+                                    if weight > 500 and diff < minimum then
                                         minimum = diff
                                         closest = weight
                                     end

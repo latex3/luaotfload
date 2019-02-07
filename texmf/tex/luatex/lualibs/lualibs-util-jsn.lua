@@ -14,10 +14,12 @@ if not modules then modules = { } end modules ['util-jsn'] = {
 --
 -- Reminder for me: check usage in framework and extend when needed. Also document
 -- it in the cld lib documentation.
+--
+-- Upgraded for handling the somewhat more fax server templates.
 
 local P, V, R, S, C, Cc, Cs, Ct, Cf, Cg = lpeg.P, lpeg.V, lpeg.R, lpeg.S, lpeg.C, lpeg.Cc, lpeg.Cs, lpeg.Ct, lpeg.Cf, lpeg.Cg
 local lpegmatch = lpeg.match
-local format = string.format
+local format, gsub = string.format, string.gsub
 local utfchar = utf.char
 local concat = table.concat
 
@@ -25,9 +27,6 @@ local tonumber, tostring, rawset, type, next = tonumber, tostring, rawset, type,
 
 local json      = utilities.json or { }
 utilities.json  = json
-
--- moduledata      = moduledata or { }
--- moduledata.json = json
 
 -- \\ \/ \b \f \n \r \t \uHHHH
 
@@ -43,16 +42,19 @@ local whitespace = lpeg.patterns.whitespace
 local optionalws = whitespace^0
 
 local escapes    = {
- -- ["\\"] = "\\",  -- lua will escape these
- -- ["/"]  = "/",   -- no need to escape this one
-    ["b"]  = "\010",
-    ["f"]  = "\014",
-    ["n"]  = "\n",
-    ["r"]  = "\r",
-    ["t"]  = "\t",
+    ["b"] = "\010",
+    ["f"] = "\014",
+    ["n"] = "\n",
+    ["r"] = "\r",
+    ["t"] = "\t",
 }
 
-local escape_un  = C(P("\\u") / "0x" * S("09","AF","af")) / function(s) return utfchar(tonumber(s)) end
+-- todo: also handle larger utf16
+
+local escape_un  = P("\\u")/"" * (C(R("09","AF","af")^-4) / function(s)
+    return utfchar(tonumber(s,16))
+end)
+
 local escape_bs  = P([[\]]) / "" * (P(1) / escapes) -- if not found then P(1) is returned i.e. the to be escaped char
 
 local jstring    = dquote * Cs((escape_un + escape_bs + (1-dquote))^0) * dquote
@@ -85,7 +87,9 @@ function json.tolua(str)
     return lpegmatch(jsonconverter,str)
 end
 
-local function tojson(value,t) -- we could optimize #t
+local escaper
+
+local function tojson(value,t,n) -- we could optimize #t
     local kind = type(value)
     if kind == "table" then
         local done = false
@@ -93,60 +97,75 @@ local function tojson(value,t) -- we could optimize #t
         if size == 0 then
             for k, v in next, value do
                 if done then
-                    t[#t+1] = ","
+                    n = n + 1 ; t[n] = ","
                 else
-                    t[#t+1] = "{"
+                    n = n + 1 ; t[n] = "{"
                     done = true
                 end
-                t[#t+1] = format("%q:",k)
-                tojson(v,t)
+                n = n + 1 ; t[n] = format("%q:",k)
+                t, n = tojson(v,t,n)
             end
             if done then
-                t[#t+1] = "}"
+                n = n + 1 ; t[n] = "}"
             else
-                t[#t+1] = "{}"
+                n = n + 1 ; t[n] = "{}"
             end
         elseif size == 1 then
             -- we can optimize for non tables
-            t[#t+1] = "["
-            tojson(value[1],t)
-            t[#t+1] = "]"
+            n = n + 1 ; t[n] = "["
+            t, n = tojson(value[1],t,n)
+            n = n + 1 ; t[n] = "]"
         else
             for i=1,size do
                 if done then
-                    t[#t+1] = ","
+                    n = n + 1 ; t[n] = ","
                 else
-                    t[#t+1] = "["
+                    n = n + 1 ; t[n] = "["
                     done = true
                 end
-                tojson(value[i],t)
+                t, n = tojson(value[i],t,n)
             end
-            t[#t+1] = "]"
+            n = n + 1 ; t[n] = "]"
         end
     elseif kind == "string"  then
-        t[#t+1] = format("%q",value)
+        n = n + 1 ; t[n] = '"'
+        n = n + 1 ; t[n] = lpegmatch(escaper,value) or value
+        n = n + 1 ; t[n] = '"'
     elseif kind == "number" then
-        t[#t+1] = value
+        n = n + 1 ; t[n] = value
     elseif kind == "boolean" then
-        t[#t+1] = tostring(value)
+        n = n + 1 ; t[n] = tostring(value)
     end
-    return t
+    return t, n
 end
 
 function json.tostring(value)
     -- todo optimize for non table
     local kind = type(value)
     if kind == "table" then
-        return concat(tojson(value,{}),"")
+        if not escaper then
+            local escapes = {
+                ["\\"] = "\\u005C",
+                ["\""] = "\\u0022",
+            }
+            for i=0,0x20 do
+                escapes[utfchar(i)] = format("\\u%04X",i)
+            end
+            escaper = Cs( (
+                (R('\0\x20') + S('\"\\')) / escapes
+              + P(1)
+            )^1 )
+
+        end
+        return concat((tojson(value,{},0)))
     elseif kind == "string" or kind == "number" then
-        return value
+        return lpegmatch(escaper,value) or value
     else
         return tostring(value)
     end
 end
 
--- local tmp = [[ { "a" : true, "b" : [ 123 , 456E-10, { "a" : true, "b" : [ 123 , 456 ] } ] } ]]
-
+-- local tmp = [[ { "t" : "foobar", "a" : true, "b" : [ 123 , 456E-10, { "a" : true, "b" : [ 123 , 456 ] } ] } ]]
 -- tmp = json.tolua(tmp)
 -- inspect(tmp)
 -- tmp = json.tostring(tmp)
@@ -155,7 +174,6 @@ end
 -- inspect(tmp)
 -- tmp = json.tostring(tmp)
 -- inspect(tmp)
-
 -- inspect(json.tostring(true))
 
 function json.load(filename)
@@ -164,5 +182,12 @@ function json.load(filename)
         return lpegmatch(jsonconverter,data)
     end
 end
+
+-- local s = [[\foo"bar"]]
+-- local j = json.tostring { s = s }
+-- local l = json.tolua(j)
+-- inspect(j)
+-- inspect(l)
+-- print(s==l.s)
 
 return json

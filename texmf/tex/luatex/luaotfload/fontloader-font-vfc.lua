@@ -6,7 +6,7 @@ if not modules then modules = { } end modules ['font-vfc'] = {
     license   = "see context related readme files"
 }
 
-local select = select
+local select, type = select, type
 local insert = table.insert
 
 local fonts             = fonts
@@ -25,7 +25,7 @@ local dummy = { "comment" }
 function helpers.prependcommands(commands,...)
     insert(commands,1,push)
     for i=select("#",...),1,-1 do
-        local s = select(i,...)
+        local s = (select(i,...))
         if s then
             insert(commands,1,s)
         end
@@ -38,7 +38,31 @@ function helpers.appendcommands(commands,...)
     insert(commands,1,push)
     insert(commands,pop)
     for i=1,select("#",...) do
-        local s = select(i,...)
+        local s = (select(i,...))
+        if s then
+            insert(commands,s)
+        end
+    end
+    return commands
+end
+
+function helpers.prependcommandtable(commands,t)
+    insert(commands,1,push)
+    for i=#t,1,-1 do
+        local s = t[i]
+        if s then
+            insert(commands,1,s)
+        end
+    end
+    insert(commands,pop)
+    return commands
+end
+
+function helpers.appendcommandtable(commands,t)
+    insert(commands,1,push)
+    insert(commands,pop)
+    for i=1,#t do
+        local s = t[i]
         if s then
             insert(commands,s)
         end

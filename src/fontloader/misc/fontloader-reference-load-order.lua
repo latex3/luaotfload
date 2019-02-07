@@ -44,7 +44,7 @@ if not modules then modules = { } end modules ['luatex-fonts'] = {
 -- and interferences between mechanisms between macro packages. We use the rendering in context
 -- and luatex-plain as reference for issues.
 
-utf = utf or unicode.utf8
+utf = utf or (unicode and unicode.utf8) or { }
 
 -- We have some (global) hooks (for latex):
 
@@ -206,7 +206,6 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         loadmodule("l-file.lua")
         loadmodule("l-boolean.lua")
         loadmodule("l-math.lua")
-        loadmodule("l-unicode.lua")
 
         -- A few slightly higher level support modules:
 

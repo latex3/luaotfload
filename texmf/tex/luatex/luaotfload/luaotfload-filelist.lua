@@ -6,8 +6,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-filelist",
-    version       = "2.93",       --TAGVERSION
-    date          = "2018-10-28", --TAGDATE
+    version       = "2.95",       --TAGVERSION
+    date          = "2019-01-28", --TAGDATE
     description   = "luaotfload submodule / filelist",
     license       = "GPL v2.0"
 }
@@ -175,10 +175,10 @@ luaotfload.filelist.data =
     { name = "util-fil"          , ours = "util-fil"          , ext = ".lua", kind = kind_lualibs   , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" },
 
     { name = "basics-gen"        , ours = nil                 , ext = ".lua", kind = kind_essential , gitdir=gitdiress, texdir = texdirtex , ctxdir= ctxdirgen, ctxtype = "ctxgene" , ctxpref = "luatex-" },
--- files merged in the fontloader. Two files are ignored
+-- files merged in the fontloader. One file is ignored
     { name = "data-con"          , ours = "data-con"          , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" },
     { name = "basics-nod"        , ours = nil                 , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirgen, ctxtype = "ctxgene" , ctxpref = "luatex-" },
-    { name = "basics-chr"        , ours = nil                 , ext = ".lua", kind = kind_ignored   , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirgen, ctxtype = "ctxgene" , ctxpref = "luatex-" }, 
+    { name = "basics-chr"        , ours = nil                 , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirgen, ctxtype = "ctxgene" , ctxpref = "luatex-" }, 
     { name = "font-ini"          , ours = "font-ini"          , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" },
     { name = "fonts-mis"         , ours = nil                 , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirgen, ctxtype = "ctxgene" , ctxpref = "luatex-" }, 
     { name = "font-con"          , ours = "font-con"          , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" },

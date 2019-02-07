@@ -32,6 +32,72 @@ local concat = table.concat
 local random, ceil, randomseed = math.random, math.ceil, math.randomseed
 local rawget, rawset, type, getmetatable, setmetatable, tonumber, tostring = rawget, rawset, type, getmetatable, setmetatable, tonumber, tostring
 
+-- This check needs to happen real early on. Todo: we can pick it up from the commandline
+-- if we pass --binpath= (which is useful anyway)
+
+do
+    local selfdir = os.selfdir
+    if selfdir == "" then
+        selfdir = nil
+    end
+    if not selfdir then
+        -- We need a fallback plan so let's see what we get.
+        if arg then
+            -- passed by mtx-context ... saves network access
+            for i=1,#arg do
+                local a = arg[i]
+                if find(a,"^%-%-[c:]*texmfbinpath=") then
+                    selfdir = gsub(a,"^.-=","")
+                    break
+                end
+            end
+        end
+        if not selfdir then
+            selfdir = os.selfbin or "luatex"
+            if find(selfdir,"[/\\]") then
+                selfdir = gsub(selfdir,"[/\\][^/\\]*$","")
+            elseif os.getenv then
+                local path = os.getenv("PATH")
+                local name = gsub(selfdir,"^.*[/\\][^/\\]","")
+                local patt = "[^:]+"
+                if os.type == "windows" then
+                    patt = "[^;]+"
+                    name = name .. ".exe"
+                end
+                local isfile
+                if lfs then
+                    -- we're okay as lfs is assumed present
+                    local attributes = lfs.attributes
+                    isfile = function(name)
+                        local a = attributes(name,"mode")
+                        return a == "file" or a == "link" or nil
+                    end
+                else
+                    -- we're not okay and much will not work as we miss lfs
+                    local open = io.open
+                    isfile = function(name)
+                        local f = open(name)
+                        if f then
+                            f:close()
+                            return true
+                        end
+                    end
+                end
+                for p in gmatch(path,patt) do
+                    -- possible speedup: there must be tex in 'p'
+                    if isfile(p .. "/" .. name) then
+                        selfdir = p
+                        break
+                    end
+                end
+            end
+        end
+        -- let's hope we're okay now
+        os.selfdir = selfdir or "."
+    end
+end
+-- print(os.selfdir) os.exit()
+
 -- The following code permits traversing the environment table, at least in luatex. Internally all
 -- environment names are uppercase.
 

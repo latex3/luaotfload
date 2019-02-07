@@ -81,13 +81,14 @@ if bit32 then
         "0", "0", "0", "0", "0", "0", "0", "0",
     }
 
-    function number.tobitstring(b,m)
-        -- if really needed we can speed this one up
-        -- because small numbers need less extraction
-        local n = 32
-        for i=0,31 do
+    function number.tobitstring(b,m,w)
+        if not w then
+            w = 32
+        end
+        local n = w
+        for i=0,w-1 do
             local v = bextract(b,i)
-            local k = 32 - i
+            local k = w - i
             if v == 1 then
                 n = k
                 t[k] = "1"
@@ -95,12 +96,14 @@ if bit32 then
                 t[k] = "0"
             end
         end
-        if m then
+        if w then
+            return concat(t,"",1,w)
+        elseif m then
             m = 33 - m * 8
             if m < 1 then
                 m = 1
             end
-            return concat(t,"",m)
+            return concat(t,"",1,m)
         elseif n < 8 then
             return concat(t)
         elseif n < 16 then

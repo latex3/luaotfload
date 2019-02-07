@@ -1,0 +1,13 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{luatexko}
+\setmainhangulfont{UnBatang}[Language=Korean, Script=Hangul]
+\setsanshangulfont{UnDotum}
+
+\begin{document}
+\START \showoutput
+모든 사람은 생명과 신체의 자유와 안전에 대한 권리를 가진다.
+
+{\sffamily 모든 사람은 생명과 신체의 자유와 안전에 대한 권리를 가진다.}
+
+\end{document}

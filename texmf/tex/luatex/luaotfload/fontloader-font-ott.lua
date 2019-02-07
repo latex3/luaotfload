@@ -1098,7 +1098,7 @@ storage.register("fonts/otf/usedfeatures", usedfeatures, "fonts.handlers.otf.sta
 
 local normalizedaxis = otf.readers.helpers.normalizedaxis or function(s) return s end
 
-function otffeatures.normalize(features)
+function otffeatures.normalize(features,wrap) -- wrap is for context
     if features then
         local h = { }
         for key, value in next, features do
@@ -1137,7 +1137,11 @@ function otffeatures.normalize(features)
                          --         value = sequenced(t,",")
                          --     end
                          -- end
-                            uv = lower(value)
+                            if wrap and find(value,",") then
+                                uv = "{"..lower(value).."}"
+                            else
+                                uv = lower(value)
+                            end
                         else
                             uv = b
                         end

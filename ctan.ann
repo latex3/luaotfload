@@ -1,0 +1,5 @@
+In contradiction to the last announcement this version of the fontloader is still
+compatible with luatex 1.07. So updates will continue. 
+This version syncs the files with the ConTeXt files from 2019-01-28. 
+It improves the handling of the lucida fonts - the demi font is now used as bold. 
+The resolver code has been cleaned up a bit. 

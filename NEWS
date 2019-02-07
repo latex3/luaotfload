@@ -1,9 +1,20 @@
 Change History
 --------------
+2019-01-28 luaotfload v2.95
+    * imported context files of 2019-01-28
+    * changed bold indification (for lucida demi bold) (issue #33)
+    * changed handling of tex file (issue #35)
+    * changed resolver code (pr #36)
+
+2019-01-14 luaotfload v2.94
+    * imported context files of 2018-12-19
+    * removed luaotfload-characters from init - use the basics-chr instead.
+    * allow custom fontloaders through the mode-key https://github.com/u-fischer/luaotfload/pull/25
+    * resolved issue #29
+
 2018-10-28 luaotfload v2.93
     * reinserted forgotten man files
     * unified and improved version/module info for automatic tagging
-    * 
 
 
 2018-10-21 luaotfload v2.92

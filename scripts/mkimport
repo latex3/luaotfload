@@ -201,6 +201,7 @@ local imports = {
   fontloader = {
     { name = "basics-gen"        , ours = nil          , kind = kind_essential },
     { name = "basics-nod"        , ours = nil          , kind = kind_merged    },
+    { name = "basics-chr"        , ours = nil          , kind = kind_merged    }, -- NEW 14.12.2018
 --  { name = "basics"            , ours = nil          , kind = kind_tex       }, -- dropped 22.9.18
 --  { name = "fonts-demo-vf-1"   , ours = nil          , kind = kind_ignored   }, -- dropped 22.9.18
     { name = "fonts-enc"         , ours = nil          , kind = kind_merged    },
@@ -381,7 +382,7 @@ local package = {
 
     "data-con",
     "basics-nod",
---  "basics-chr", -- is luaotfload-characters.lua the replacement??
+    "basics-chr", -- 14.12.2018 enabled. is luaotfload-characters.lua the replacement??
     "font-ini",
     "fonts-mis",
     "font-con",

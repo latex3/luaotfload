@@ -62,7 +62,7 @@ end
 for k, v in next, glyphcodes do
     glyphcodes[v] = k
 end
-for k, v in next, glyphcodes do
+for k, v in next, disccodes do
     disccodes[v] = k
 end
 
@@ -76,17 +76,6 @@ local traverse_id  = node.traverse_id
 
 nodes.handlers.protectglyphs   = node.protect_glyphs   -- beware: nodes!
 nodes.handlers.unprotectglyphs = node.unprotect_glyphs -- beware: nodes!
-
-local math_code   = nodecodes.math
-local end_of_math = node.end_of_math
-
-function node.end_of_math(n)
-    if n.id == math_code and n.subtype == 1 then
-        return n
-    else
-        return end_of_math(n)
-    end
-end
 
 function nodes.remove(head, current, free_too)
    local t = current
@@ -155,8 +144,6 @@ nodes.unset_attribute      = node.unset_attribute
 
 nodes.protect_glyphs       = node.protect_glyphs
 nodes.unprotect_glyphs     = node.unprotect_glyphs
------.kerning              = node.kerning
------.ligaturing           = node.ligaturing
 nodes.mlist_to_hlist       = node.mlist_to_hlist
 
 -- in generic code, at least for some time, we stay nodes, while in context
@@ -178,120 +165,94 @@ nodes.tonut              = tonut
 nuts.tonode              = tonode
 nuts.tonut               = tonut
 
-local getfield           = direct.getfield
-local setfield           = direct.setfield
-
-nuts.getfield            = getfield
-nuts.setfield            = setfield
-nuts.getnext             = direct.getnext
-nuts.setnext             = direct.setnext
-nuts.getprev             = direct.getprev
-nuts.setprev             = direct.setprev
+nuts.getattr             = direct.get_attribute
 nuts.getboth             = direct.getboth
-nuts.setboth             = direct.setboth
-nuts.getid               = direct.getid
-nuts.getattr             = direct.get_attribute or direct.has_attribute or getfield
-nuts.setattr             = setfield
-nuts.getfont             = direct.getfont
-nuts.setfont             = direct.setfont
-nuts.getsubtype          = direct.getsubtype
-nuts.setsubtype          = direct.setsubtype
 nuts.getchar             = direct.getchar
-nuts.setchar             = direct.setchar
+nuts.getcomponents       = direct.getcomponents
+----.getdepth            = direct.getdepth
+----.getdir              = direct.getdir
+nuts.getdirection        = direct.getdirection
 nuts.getdisc             = direct.getdisc
-nuts.setdisc             = direct.setdisc
-nuts.setlink             = direct.setlink
-nuts.setsplit            = direct.setsplit
+nuts.getfield            = direct.getfield
+nuts.getfont             = direct.getfont
+----.getheight           = direct.getheight
+nuts.getid               = direct.getid
+nuts.getkern             = direct.getkern
+----.getleader           = direct.getleader
 nuts.getlist             = direct.getlist
+nuts.getnext             = direct.getnext
+nuts.getoffsets          = direct.getoffsets
+nuts.getprev             = direct.getprev
+nuts.getsubtype          = direct.getsubtype
+nuts.getwidth            = direct.getwidth
+nuts.setattr             = direct.setfield
+nuts.setboth             = direct.setboth
+nuts.setchar             = direct.setchar
+nuts.setcomponents       = direct.setcomponents
+----.setdepth            = direct.setdepth
+nuts.setdir              = direct.setdir
+nuts.setdirection        = direct.setdirection
+nuts.setdisc             = direct.setdisc
+nuts.setfield            = setfield
+----.setfont             = direct.setfont
+----.setheight           = direct.setheight
+nuts.setkern             = direct.setkern
+----.setleader           = direct.setleader
+nuts.setlink             = direct.setlink
 nuts.setlist             = direct.setlist
+nuts.setnext             = direct.setnext
+nuts.setoffsets          = direct.setoffsets
+nuts.setprev             = direct.setprev
+nuts.setsplit            = direct.setsplit
+nuts.setsubtype          = direct.setsubtype
+nuts.setwidth            = direct.setwidth
 
-nuts.getoffsets          = direct.getoffsets or
-    function(n)
-        return getfield(n,"xoffset"), getfield(n,"yoffset")
-    end
-nuts.setoffsets          = direct.setoffsets or
-    function(n,x,y)
-        if x then setfield(n,"xoffset",x) end
-        if y then setfield(n,"xoffset",y) end
-    end
-
-nuts.getleader     = direct.getleader     or function(n)   return getfield(n,"leader")       end
-nuts.setleader     = direct.setleader     or function(n,l)        setfield(n,"leader",l)     end
-nuts.getcomponents = direct.getcomponents or function(n)   return getfield(n,"components")   end
-nuts.setcomponents = direct.setcomponents or function(n,c)        setfield(n,"components",c) end
-nuts.getkern       = direct.getkern       or function(n)   return getfield(n,"kern")         end
-nuts.setkern       = direct.setkern       or function(n,k)        setfield(n,"kern",k)       end
-nuts.getdir        = direct.getdir        or function(n)   return getfield(n,"dir")          end
-nuts.setdir        = direct.setdir        or function(n,d)        setfield(n,"dir",d)        end
-nuts.getwidth      = direct.getwidth      or function(n)   return getfield(n,"width")        end
-nuts.setwidth      = direct.setwidth      or function(n,w) return setfield(n,"width",w)      end
-nuts.getheight     = direct.getheight     or function(n)   return getfield(n,"height")       end
-nuts.setheight     = direct.setheight     or function(n,h) return setfield(n,"height",h)     end
-nuts.getdepth      = direct.getdepth      or function(n)   return getfield(n,"depth")        end
-nuts.setdepth      = direct.setdepth      or function(n,d) return setfield(n,"depth",d)      end
-
-if not direct.is_glyph then
-    local getchar    = direct.getchar
-    local getid      = direct.getid
-    local getfont    = direct.getfont
-    local glyph_code = nodes.nodecodes.glyph
-    function direct.is_glyph(n,f)
-        local id   = getid(n)
-        if id == glyph_code then
-            if f and getfont(n) == f then
-                return getchar(n)
-            else
-                return false
-            end
-        else
-            return nil, id
-        end
-    end
-    function direct.is_char(n,f)
-        local id = getid(n)
-        if id == glyph_code then
-            if getsubtype(n) >= 256 then
-                return false
-            elseif f and getfont(n) == f then
-                return getchar(n)
-            else
-                return false
-            end
-        else
-            return nil, id
-        end
-    end
-end
-
-nuts.ischar              = direct.is_char
 nuts.is_char             = direct.is_char
-nuts.isglyph             = direct.is_glyph
 nuts.is_glyph            = direct.is_glyph
+nuts.ischar              = direct.is_char
+nuts.isglyph             = direct.is_glyph
 
-nuts.insert_before       = direct.insert_before
-nuts.insert_after        = direct.insert_after
-nuts.delete              = direct.delete
 nuts.copy                = direct.copy
-nuts.copy_node           = direct.copy
 nuts.copy_list           = direct.copy_list
-nuts.tail                = direct.tail
+nuts.copy_node           = direct.copy
+nuts.delete              = direct.delete
+nuts.end_of_math         = direct.end_of_math
+nuts.flush               = direct.flush
 nuts.flush_list          = direct.flush_list
 nuts.flush_node          = direct.flush_node
-nuts.flush               = direct.flush
 nuts.free                = direct.free
-nuts.remove              = direct.remove
+nuts.insert_after        = direct.insert_after
+nuts.insert_before       = direct.insert_before
 nuts.is_node             = direct.is_node
-nuts.end_of_math         = direct.end_of_math
+nuts.kerning             = direct.kerning
+nuts.ligaturing          = direct.ligaturing
+nuts.new                 = direct.new
+nuts.remove              = direct.remove
+nuts.tail                = direct.tail
 nuts.traverse            = direct.traverse
-nuts.traverse_id         = direct.traverse_id
 nuts.traverse_char       = direct.traverse_char
 nuts.traverse_glyph      = direct.traverse_glyph
-nuts.ligaturing          = direct.ligaturing
-nuts.kerning             = direct.kerning
-nuts.new                 = direct.new
+nuts.traverse_id         = direct.traverse_id
 
-nuts.getprop             = nuts.getattr
-nuts.setprop             = nuts.setattr
+-- for now
+
+if not nuts.getdirection then
+
+    local getdir = direct.getdir
+
+    function nuts.getdirection(n)
+        local d = getdir(n)
+        if     d ==  "TLT" then return 0
+        elseif d ==  "TRT" then return 1
+        elseif d == "+TLT" then return 0, false
+        elseif d == "+TRT" then return 1, false
+        elseif d == "-TLT" then return 0, true
+        elseif d == "-TRT" then return 1, true
+        else                    return 0
+        end
+    end
+
+end
 
 -- properties as used in the (new) injector:
 
@@ -343,76 +304,6 @@ local copy_node     = nuts.copy_node
 
 local glyph_code    = nodes.nodecodes.glyph
 
-function nuts.set_components(target,start,stop)
-    local head = getcomponents(target)
-    if head then
-        flush_list(head)
-        head = nil
-    end
-    if start then
-        setprev(start)
-    else
-        return nil
-    end
-    if stop then
-        setnext(stop)
-    end
-    local tail = nil
-    while start do
-        local c = getcomponents(start)
-        local n = getnext(start)
-        if c then
-            if head then
-                setlink(tail,c)
-            else
-                head = c
-            end
-            tail = find_tail(c)
-            setcomponents(start)
-            flush_node(start)
-        else
-            if head then
-                setlink(tail,start)
-            else
-                head = start
-            end
-            tail = start
-        end
-        start = n
-    end
-    setcomponents(target,head)
-    -- maybe also upgrade the subtype but we don't use it anyway
-    return head
-end
-
-nuts.get_components = nuts.getcomponents
-
-function nuts.take_components(target)
-    local c = getcomponents(target)
-    setcomponents(target)
-    -- maybe also upgrade the subtype but we don't use it anyway
-    return c
-end
-
-function nuts.count_components(n,marks)
-    local components = getcomponents(n)
-    if components then
-        if marks then
-            local i = 0
-            for g in traverse_id(glyph_code,components) do
-                if not marks[getchar(g)] then
-                    i = i + 1
-                end
-            end
-            return i
-        else
-            return count(glyph_code,components)
-        end
-    else
-        return 0
-    end
-end
-
 function nuts.copy_no_components(g,copyinjection)
     local components = getcomponents(g)
     if components then
@@ -450,38 +341,6 @@ end
 
 nuts.uses_font = direct.uses_font
 
-if not nuts.uses_font then
-    local getdisc = nuts.getdisc
-    local getfont = nuts.getfont
-    function nuts.uses_font(n,font)
-        local pre, post, replace = getdisc(n)
-        if pre then
-            -- traverse_char
-            for n in traverse_id(glyph_code,pre) do
-                if getfont(n) == font then
-                    return true
-                end
-            end
-        end
-        if post then
-            for n in traverse_id(glyph_code,post) do
-                if getfont(n) == font then
-                    return true
-                end
-            end
-        end
-        if replace then
-            for n in traverse_id(glyph_code,replace) do
-                if getfont(n) == font then
-                    return true
-                end
-            end
-        end
-        return false
-    end
-end
-
---
 do
 
     -- another poor mans substitute ... i will move these to a more protected

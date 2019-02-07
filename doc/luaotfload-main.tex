@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2018-10-28 v2.93}
+  \setdocumentdate   {2019-01-28 v2.95}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
@@ -55,6 +55,30 @@
 
 \pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
+
+\beginsection {New in version 2.95 (by Ulrike Fischer)}
+\begin{itemize}
+\item
+This version imports from context the generic fontloader in the version of 2019-01-28. Contrary to the last announcement, it still works with luatex 1.07. So updates will continue.
+
+\item The handling of the lucida-fonts had been improved (issue 33).
+
+\item tex-files are no longer misused as font fallbacks (issue 35).
+
+\item The resolver code has be refactorated (pull request 36).
+
+\end{itemize}
+\endsection
+\beginsection {New in version 2.94 (by Ulrike Fischer)}
+\begin{itemize}
+\item
+This version imports from context the generic fontloader in the version of 2018-12-19. It is the last version that works with luatex 1.07 and texlive 2018. As context has moved to luatex 1.09 newer versions of the fontloader needs now this luatex version too. This means that until the texlive 2018 freeze there will be probably no update of luaotfload.
+
+\item This version changes the handling of the \inlinecode{mode} key. It no longer accepts only the values \inlinecode{base} and \inlinecode{node}, but can be used to load a font with an alternative font loader/renderer.
+
+
+\end{itemize}
+\endsection
 
 \beginsection {New in version 2.93 (by Ulrike Fischer)}
 Mainly internal clean up of the version info to allow automatic versioning.
@@ -319,7 +343,8 @@ where \meta{prefix} is either \inlinecode{file:} or \inlinecode {name:}.\footnot
   This ensures full control over how a file is located.
   %
   For a working example see the
-  \hyperlink [test repo]{https://bitbucket.org/phg/lua-la-tex-tests/src/5f6a535d/pln-lookup-callback-1.tex}.
+  \hyperlink [test in the luaotfload
+  repo]{https://github.com/u-fischer/luaotfload/blob/master/testfiles/my-resolver.lvt}.
 }
 %
 It determines whether the font loader should interpret the request as
@@ -653,12 +678,13 @@ obviously, \inlinecode{random}.
   \font \librmsaltfirst = LatinModernRoman:salt=1
 \endlisting
 
-\beginsubsection {Basic font features}
+\beginsubsection {Basic font features}\label{sec:mode}
 
 \begindescriptions
 
   \beginaltitem {mode}
-         \identifier{luaotfload} has two \OpenType processing
+         Until version 2.94
+         \identifier{luaotfload} had two \OpenType processing
          \emphasis{modes}:
          \identifier{base} and \identifier{node}.
 
@@ -679,6 +705,11 @@ obviously, \inlinecode{random}.
          By default \identifier{luaotfload} is in \identifier{node}
          mode, and \identifier{base} mode has to be requested where needed,
          e.~g. for math fonts.
+
+         Since version 2.94 it is possible to call other font renderers with the mode key. A simple example with a plain reader can be found at \hyperlink{https://github.com/u-fischer/luaotfload/pull/26\#issuecomment-437716326}.
+         A more useful example needs the new experimental luahbtex engine (windows binaries can be found at w32tex.org), and the luahbtex-harf renderer (\hyperlink{https://github.com/khaledhosny/luahbtex-harf}). With both it is possible to render a font using the harfbuzz library (used also by xetex).
+
+
   \endaltitem
 
   \beginaltitem {script} \label{script-tag}

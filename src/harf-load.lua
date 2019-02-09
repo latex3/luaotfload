@@ -76,7 +76,10 @@ local function loadfont(spec)
   end
 
   local hbface = hb.Face.new(path, index)
-  if hbface then
+  local tags = hbface and hbface:get_table_tags()
+  -- If the face has no table tags then it isn’t a valid SFNT font that
+  -- HarfBuzz can handle.
+  if tags then
     local hbfont = hb.Font.new(hbface)
     local upem = hbface:get_upem()
 
@@ -85,7 +88,6 @@ local function loadfont(spec)
     local fonttype = nil
     local hasos2 = false
     local haspost = false
-    local tags = hbface:get_table_tags()
     for i = 1, #tags do
       local tag = tags[i]
       if tag == cfftag or tag == cff2tag then

@@ -31,7 +31,7 @@ local tonumber           = tonumber
 local next               = next
 local nodes, node, fonts = nodes, node, fonts
 
-local nodedirect         = nodes.nuts
+local nodedirect         = node.direct
 
 local getfield           = nodedirect.getfield
 local setfield           = nodedirect.setfield
@@ -67,8 +67,10 @@ local setsubtype         = nodedirect.setsubtype or field_setter "subtype"
 local getchar            = nodedirect.getchar or field_getter "subtype"
 local setchar            = nodedirect.setchar or field_setter "subtype"
 
+local setglue            = nodedirect.setglue
+
 local find_node_tail     = nodedirect.tail
-local todirect           = nodedirect.tonut
+local todirect           = nodedirect.todirect
 local tonode             = nodedirect.tonode
 
 local insert_node_before = nodedirect.insert_before
@@ -79,9 +81,6 @@ local free_node          = function (n)
 end
 local copy_node          = nodedirect.copy
 local new_node           = nodedirect.new
-
-local nodepool           = nodedirect.pool
--- local new_kern           = nodepool.kern -- UF removed 2017-07-14
 
 local nodecodes          = nodes.nodecodes
 
@@ -135,43 +134,6 @@ local userkern_code     = kerncodes.userkern
 local userskip_code     = skipcodes.userskip
 local spaceskip_code    = skipcodes.spaceskip
 local xspaceskip_code   = skipcodes.xspaceskip
-
------------------------------------------------------------------------
---- node-res
------------------------------------------------------------------------
-
-local glue_spec   = new_node "glue_spec"
-
-local new_gluespec = function (width,
-                               stretch,       shrink,
-                               stretch_order, shrink_order)
-  local spec = copy_node(glue_spec)
-  if width         then setfield(spec, "width"        , width        )  end
-  if stretch       then setfield(spec, "stretch"      , stretch      )  end
-  if shrink        then setfield(spec, "shrink"       , shrink       )  end
-  if stretch_order then setfield(spec, "stretch_order", stretch_order)  end
-  if shrink_order  then setfield(spec, "shrink_order" , shrink_order )  end
-  return spec
-end
-
-local new_glue = function (width, stretch, shrink,
-                           stretch_order, shrink_order)
-  local n = new_node "glue"
-  if not width then return n end
-    -- no spec
-  if width == false then
-    local width = tonumber(width)
-    if width then
-      setfield(n, "spec",
-               new_gluespec(width, stretch, shrink,
-                            stretch_order, shrink_order))
-    end
-  else
-    -- shared
-    setfield(n, "spec", copy_node(width))
-  end
-  return n
-end
 
 -----------------------------------------------------------------------
 --- font-hsh
@@ -248,16 +210,13 @@ end
 ---=================================================================---
 
 -- UF changed 2017-07-14
-local nodedirectnew = node.direct.new
-
 local kern_injector = function (fillup, kern)
  if fillup then
-   local g = nodedirectnew("glue")
-   setfield(g, "stretch", kern)
-   setfield(g, "stretch_order", 1)
+   local g = new_node("glue")
+   setglue(g, 0, kern, 0, 1, 0)
    return g
  end
-   local g = nodedirectnew("kern")
+   local g = new_node("kern")
    setfield(g,"kern",kern)
    return g
 end
@@ -268,15 +227,6 @@ local kernable_skip = function (n)
   return st == userskip_code
       or st == spaceskip_code
       or st == xspaceskip_code
-end
-
-local function spec_injector (fillup, width, stretch, shrink)
-  if fillup then
-    local spec = new_gluespec(width, 2 * stretch, 2 * shrink)
-    setfield(spec, "stretch_order", 1)
-    return spec
-  end
-  return new_gluespec(width,stretch,shrink)
 end
 
 --[[doc--
@@ -383,17 +333,19 @@ kerncharacters = function (head)
           -- nothing
 
         elseif pid == glue_code and kernable_skip(prev) then
-          local spec = getfield(prev, "spec")
-          local wd   = getfield(spec, "width")
+          local wd   = getfield(prev, "width")
           if wd > 0 then
             --- formula taken from Context
             ---      existing_width extended by four times the
             ---      width times the font’s kernfactor
             local newwd     = wd + --[[two en to a quad]] 4 * wd * krn
-            local stretched = (getfield(spec,"stretch") * newwd) / wd
-            local shrunk    = (getfield(spec,"shrink")  * newwd) / wd
-            setfield(prev, "spec",
-                     spec_injector(fillup, newwd, stretched, shrunk))
+            local stretched = (getfield(prev,"stretch") * newwd) / wd
+            local shrunk    = (getfield(prev,"shrink")  * newwd) / wd
+            if fillup then
+              setglue(prev, newwd, 2 * stretched, 2 * shrunk, 1, 0)
+            else
+              setglue(prev, newwd, stretched, shrunk, 0, 0)
+            end
           end
 
         elseif pid == kern_code then

@@ -40018,12 +40018,8 @@ endobj
 
 160 0 obj
 <<
-  /Producer (LuaTeX-1.09.2)
   /Creator (TeX)
-  /CreationDate (D:20190212004543+02'00')
-  /ModDate (D:20190212004543+02'00')
   /Trapped /False
-  /PTEX.FullBanner (This is LuaTeX, Version 1.09.2 \(TeX Live 2019/dev\))
 >>
 endobj
 
@@ -40190,15 +40186,14 @@ xref
 0002310090 00000 n 
 0002310166 00000 n 
 0002310224 00000 n 
-0002310464 00001 f 
+0002310283 00001 f 
 
 trailer
 <<
   /Size 162
   /Info 160 0 R
   /Root 159 0 R
-  /ID [ (\267\031\224\242W\234m\255\2401\\\337M7\3164) <1A33CB87C50DB28D77F698821046C294> ]
 >>
 startxref
-2310464
+2310283
 %%EOF

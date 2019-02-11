@@ -335,10 +335,7 @@ kerncharacters = function (head)
         elseif pid == glue_code and kernable_skip(prev) then
           local wd   = getfield(prev, "width")
           if wd > 0 then
-            --- formula taken from Context
-            ---      existing_width extended by four times the
-            ---      width times the font’s kernfactor
-            local newwd     = wd + --[[two en to a quad]] 4 * wd * krn
+            local newwd     = wd + quaddata[lastfont] * krn
             local stretched = (getfield(prev,"stretch") * newwd) / wd
             local shrunk    = (getfield(prev,"shrink")  * newwd) / wd
             if fillup then

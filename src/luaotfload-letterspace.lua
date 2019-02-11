@@ -108,6 +108,7 @@ local letterspace        = luaotfload.letterspace
 
 letterspace.keepligature = false
 letterspace.keeptogether = false
+letterspace.keepwordspacing = false
 
 ---=================================================================---
 ---                     preliminary definitions
@@ -248,6 +249,11 @@ kerncharacters = function (head)
   local lastfont      = nil
   local keepligature  = letterspace.keepligature --- function
   local keeptogether  = letterspace.keeptogether --- function
+  local keepwordspacing = letterspace.keepwordspacing
+  if type(keepwordspacing) ~= "function" then
+    local savedwordspacing = keepwordspacing
+    keepwordspacing = function() return savedwordspacing end
+  end
   local fillup        = false
 
   local identifiers   = fonthashes.identifiers
@@ -332,7 +338,8 @@ kerncharacters = function (head)
         if not pid then
           -- nothing
 
-        elseif pid == glue_code and kernable_skip(prev) then
+        elseif pid == glue_code and kernable_skip(prev)
+                                and not keepwordspacing(prev, lastfont) then
           local wd   = getfield(prev, "width")
           if wd > 0 then
             local newwd     = wd + quaddata[lastfont] * krn

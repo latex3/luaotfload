@@ -5,9 +5,9 @@ SHELL := /bin/bash
 all: test.pdf test-latex.pdf
 
 test.pdf: test.tex
-	time luahbtex $<
+	time luatex $<
 	mutool clean -a -d $@ $@
 
 test-latex.pdf: test-latex.tex
-	time luahblatex $<
+	time lualatex $<
 	mutool clean -a -d $@ $@

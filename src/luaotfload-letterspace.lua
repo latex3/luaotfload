@@ -20,16 +20,14 @@ end
 --- This code diverged quite a bit from its origin in Context. Please
 --- do *not* report bugs on the Context list.
 
-local log                = luaotfload.log
-local logreport          = log.report
+local logreport          = luaotfload.log.report
 
 local getmetatable       = getmetatable
-local require            = require
 local setmetatable       = setmetatable
 local tonumber           = tonumber
 
 local next               = next
-local nodes, node, fonts = nodes, node, fonts
+local node, fonts        = node, fonts
 
 local nodedirect         = node.direct
 
@@ -74,11 +72,7 @@ local todirect           = nodedirect.todirect
 local tonode             = nodedirect.tonode
 
 local insert_node_before = nodedirect.insert_before
-local free_node          = nodedirect.free -- may cause double free
-local free_node          = function (n)
-  logreport ("term", 5, "letterspace", "not calling free_node(%d)", n)
-  -- free_node (n)
-end
+local free_node          = nodedirect.free
 local copy_node          = nodedirect.copy
 local new_node           = nodedirect.new
 
@@ -426,7 +420,7 @@ kerncharacters = function (head)
             setprev(after, tail)
             setnext(after, nil)
             post = kerncharacters (post)
-            setnext(tail, nil)
+            setnext(getprev(after), nil)
             setfield(disc, "post", post)
             free_node(after)
           end
@@ -445,7 +439,7 @@ kerncharacters = function (head)
             replace = getnext(replace)
             setprev(replace, nil)
             setnext(getprev(after), nil)
-            setfield(disc, "replace",   replace)
+            setfield(disc, "replace", replace)
             free_node(after)
             free_node(before)
 

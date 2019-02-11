@@ -1,3 +1,7 @@
+if not pcall(require, "luaharfbuzz") then
+  luatexbase.module_error("harf", "'luaharfbuzz' module is required.")
+end
+
 local harf = require("harf")
 
 local add_to_callback = luatexbase.add_to_callback

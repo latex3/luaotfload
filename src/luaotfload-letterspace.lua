@@ -100,7 +100,12 @@ local otffeatures        = fonts.constructors.newfeatures "otf"
 luaotfload.letterspace   = luaotfload.letterspace or { }
 local letterspace        = luaotfload.letterspace
 
-letterspace.keepligature = false
+letterspace.keepligature = function(start)
+  local f = font.getfont(getfont(start))
+  if not f then return end
+  if not f.specification then return end
+  return not f.specification.features.normal.liga
+end
 letterspace.keeptogether = false
 letterspace.keepwordspacing = false
 
@@ -241,8 +246,12 @@ local kerncharacters
 kerncharacters = function (head)
   local start         = head
   local lastfont      = nil
-  local keepligature  = letterspace.keepligature --- function
   local keeptogether  = letterspace.keeptogether --- function
+  local keepligature  = letterspace.keepligature
+  if type(keepligature) ~= "function" then
+    local savedligature = keepligature
+    keepligature = function() return savedligature end
+  end
   local keepwordspacing = letterspace.keepwordspacing
   if type(keepwordspacing) ~= "function" then
     local savedwordspacing = keepwordspacing
@@ -300,7 +309,7 @@ kerncharacters = function (head)
       local c = getfield(start, "components")
 
       if c then
-        if keepligature and keepligature(start) then
+        if keepligature(start) then
           -- keep 'm
           c = nil
         else

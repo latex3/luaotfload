@@ -93,12 +93,8 @@ local otffeatures        = fonts.constructors.newfeatures "otf"
 luaotfload.letterspace   = luaotfload.letterspace or { }
 local letterspace        = luaotfload.letterspace
 
-letterspace.keepligature = function(start)
-  local f = font.getfont(getfont(start))
-  if not f then return end
-  if not f.specification then return end
-  return not f.specification.features.normal.liga
-end
+local lectured = false
+letterspace.keepligature = true
 letterspace.keeptogether = false
 letterspace.keepwordspacing = false
 
@@ -196,6 +192,14 @@ kerncharacters = function (head)
   local lastfont      = nil
   local keeptogether  = letterspace.keeptogether --- function
   local keepligature  = letterspace.keepligature
+  if not lectured and keepligature ~= true then
+    logreport ("both", 0, "letterspace",
+               "Breaking ligatures through letterspacing is deprecated and "
+            .. "will be removed soon. Please disable unwanted ligatures through "
+            .. "font features instead and reset luaotfload.letterspace.keepligature "
+            .. "to true to maintain compatibility with future versions of luaotfload.")
+    lectured = true
+  end
   if type(keepligature) ~= "function" then
     local savedligature = keepligature
     keepligature = function() return savedligature end

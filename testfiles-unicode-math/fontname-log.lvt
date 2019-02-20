@@ -5,8 +5,6 @@
 
 \begin{document}
 
-\START
-
 % Here is a font loaded in csname \string\1:
 
 \font\1="[texgyrepagella-regular.otf]" at 10pt
@@ -42,7 +40,7 @@
 \MSG{\the\font}
 
 \MSG{Here is the problem I'm trying to solve:}
-\setbox0=\hbox{$a$}
-\SHOWBOX0
+\SHIPOUT{$a$}
+
 
 \end{document}

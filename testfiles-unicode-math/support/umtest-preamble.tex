@@ -2,10 +2,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \input{regression-test.tex}
-
 \documentclass{article}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[enable-debug]{expl3}
+  \ExplSyntaxOn
+  \debug_on:n {all}
+  \ExplSyntaxOff
+
 
 \usepackage{geometry}
 \geometry{
@@ -16,8 +21,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \tracingonline=1\relax
+\tracingoutput=1\relax
 
-\AtBeginDocument{\START\OMIT}
+\ExplSyntaxOn
+\tl_new:N \g__um_secret_hook_tl
+\tl_gset:Nn \g__um_secret_hook_tl {\OMIT$x$\TIMO\clearpage\START\OMIT}
+\ExplSyntaxOff
+
 \AtEndDocument{\OMIT}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -50,16 +60,12 @@
   \ht#1=0pt \dp#1=0pt \wd#1=0pt
 }
 
-\newcommand\SHOWBOX[1]{%
-  \TIMO
-  \scrollmode
-  \showbox#1\relax
+\newcommand\SHIPOUT[2][12]{%
   \OMIT
-}
-
-\newcommand\TESTBOX[2][12]{%
   \SETBOX{#1}{#2}%
-  \SHOWBOX{#1}%
+  \TIMO
+  \shipout\box#1\relax
+  \OMIT
 }
 
 \makeatletter

@@ -3,12 +3,11 @@
 
 \usepackage{unicode-math}
 \setmathfont{texgyrepagella-math.otf}
-\setmathfont[range=\mathbin]{xitsmath-regular.otf}
+\setmathfont[range=\mathbin]{XITSMath-Regular.otf}
 
 \begin{document}
-\START
 
-\TESTBOX{$=$}
-\TESTBOX{$+$}
+\SHIPOUT{$=$}
+\SHIPOUT{$+$}
 
 \end{document}

@@ -3,18 +3,18 @@
 
 \usepackage{unicode-math}
 
-\setmathfont[Colour=330000]{xitsmath-regular.otf}
-\setmathfont[range=\symit/{latin}, Colour=660000]{xitsmath-regular.otf}
-\setmathfont[range=\symit/{Greek}, Colour=990000]{xitsmath-regular.otf}
-\setmathfont[range=\symit/{greek}, Colour=BB0000]{xitsmath-regular.otf}
-\setmathfont[range=\symup/{num},   Colour=EE0000]{xitsmath-regular.otf}
+\setmathfont[Colour=330000]{XITSMath-Regular.otf}
+\setmathfont[range=\symit/{latin}, Colour=660000]{XITSMath-Regular.otf}
+\setmathfont[range=\symit/{Greek}, Colour=990000]{XITSMath-Regular.otf}
+\setmathfont[range=\symit/{greek}, Colour=BB0000]{XITSMath-Regular.otf}
+\setmathfont[range=\symup/{num},   Colour=EE0000]{XITSMath-Regular.otf}
 
 \begin{document}
 
-\TESTBOX{$\symit{\LATINtext}$}
-\TESTBOX{$\symit{\latintext}$}
-\TESTBOX{$\symit{\GREEKtext}$}
-\TESTBOX{$\symit{\greektext}$}
-\TESTBOX{$0123456789$}
+\SHIPOUT{$\symit{\LATINtext}$}
+\SHIPOUT{$\symit{\latintext}$}
+\SHIPOUT{$\symit{\GREEKtext}$}
+\SHIPOUT{$\symit{\greektext}$}
+\SHIPOUT{$0123456789$}
 
 \end{document}

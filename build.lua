@@ -43,6 +43,7 @@ uploadconfig = {
 
 stdengine    = "luatex"
 checkengines = {"luatex"}
+
 local errorlevel   = os.execute("luahbtex --version") 
 if not os.getenv('TRAVIS') and errorlevel==0 then 
     checkengines = {"luatex","luahbtex"}

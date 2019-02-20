@@ -1180,7 +1180,7 @@ lookup_font_name = function (specification)
                                                            name,
                                                            style,
                                                            askedsize)
-    if not resolved and fallback then
+    if not resolved or fallback then
         local new_resolved, new_subfont = lookup_fontname (specification,
                                                            name,
                                                            style)

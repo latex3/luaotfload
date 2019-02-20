@@ -370,7 +370,6 @@ This is a sketch of the luaotfload db:
         index                : int;      // index in the mappings table
         italicangle          : float;    // italic angle; non-zero with oblique faces
         location             : string;   // "texmf" | "system" | "local"
-        metafamily           : string;   // alternative family identifier if appropriate, sanitized
         plainname            : string;   // unsanitized font name
         typographicsubfamily : string;   // sanitized preferred subfamily (names table 14)
         psname               : string;   // PostScript name
@@ -606,21 +605,14 @@ local regular_synonym = {
     roman   = true,
 }
 
-local italic_synonym = {
-    oblique = true,
-    slanted = true,
-    italic  = true,
-}
-
-local style_category = {
-    regular     = "r",
-    bold        = "b",
-    bolditalic  = "bi",
-    italic      = "i",
-    r           = "regular",
-    b           = "bold",
-    bi          = "bolditalic",
-    i           = "italic",
+local style_synonym = {
+    oblique = 'i',
+    slanted = 'i',
+    italic  = 'i',
+    boldoblique = 'bi',
+    boldslanted = 'bi',
+    bolditalic  = 'bi',
+    bold = 'b',
 }
 
 -- MK Determine if casefold search is requested
@@ -939,9 +931,8 @@ end
 --doc]]--
 
 --- int * int * int * int list -> int -> int
-local choose_size = function (sizes, askedsize)
+local function choose_size (sizes, askedsize)
     local mappings = name_index.mappings
-    local match    = sizes.default
     local exact
     local inrange  = { } --- distance * index list
     local norange  = { } --- distance * index list
@@ -953,8 +944,7 @@ local choose_size = function (sizes, askedsize)
             local dsnsize, high, low, index = unpack (sizes [i])
             if dsnsize == askedsize then
                 --- exact match, this is what we were looking for
-                exact = index
-                goto skip
+                return index
             elseif askedsize <= low then
                 --- below range, add to the norange table
                 local d = low - askedsize
@@ -983,14 +973,15 @@ local choose_size = function (sizes, askedsize)
         end
     end
 ::skip::
-    if exact then
-        match = exact
-    elseif #inrange > 0 then
-        match = choose_closest (inrange)
+    if #inrange > 0 then
+        return choose_closest (inrange)
     elseif #norange > 0 then
-        match = choose_closest (norange)
+        return choose_closest (norange)
+    elseif sizes.default then
+        return sizes.default
+    elseif askedsize == 0 then
+        return choose_size(sizes, 655360) -- If there is no default size and no size specified, just guess
     end
-    return match
 end
 
 --[[doc--
@@ -1000,11 +991,12 @@ end
     The parameters “name” and “style” are pre-sanitized.
 
 --doc]]--
---- spec -> string -> string -> int -> string * int
+--- spec -> string -> string -> int -> string * int * bool
 local lookup_familyname = function (specification, name, style, askedsize)
     local families   = name_index.families
     local mappings   = name_index.mappings
     local candidates = nil
+    local fallback   = true
     --- arrow code alert
     for i = 1, #location_precedence do
         local location = location_precedence [i]
@@ -1018,13 +1010,16 @@ local lookup_familyname = function (specification, name, style, askedsize)
                     local stylegroup = familygroup [style]
                     if stylegroup then --- suitable match
                         candidates = stylegroup
+                        fallback = false
                         goto done
+                    elseif not candidates then
+                        candidates = familygroup.r
                     end
                 end
             end
         end
     end
-    if true then
+    if not candidates then
         return nil, nil
     end
 ::done::
@@ -1035,14 +1030,13 @@ local lookup_familyname = function (specification, name, style, askedsize)
     end
     logreport ("info", 2, "db", "Match found: %s(%d).",
                resolved, subfont or 0)
-    return resolved, subfont
+    return resolved, subfont, fallback
 end
 
-local lookup_fontname = function (specification, name, style)
+local lookup_fontname = function (specification, name)
     local mappings    = name_index.mappings
     local fallback    = nil
     local lastresort  = nil
-    style = style_category [style]
     for i = 1, #mappings do
         local face = mappings [i]
         local typographicsubfamily = face.typographicsubfamily
@@ -1052,28 +1046,7 @@ local lookup_fontname = function (specification, name, style)
             or face.psname     == name
         then
             return face.fullpath, face.subfont
-        elseif face.familyname == name then
-            if typographicsubfamily == style
-                or subfamily == style
-            then
-                fallback = face
-            elseif regular_synonym [typographicsubfamily]
-                or regular_synonym [subfamily]
-            then
-                lastresort = face
-            end
-        elseif face.metafamily == name
-            and (   regular_synonym [typographicsubfamily]
-                 or regular_synonym [subfamily])
-        then
-            lastresort = face
         end
-    end
-    if fallback then
-        return fallback.fullpath, fallback.subfont
-    end
-    if lastresort then
-        return lastresort.fullpath, lastresort.subfont
     end
     return nil, nil
 end
@@ -1185,7 +1158,6 @@ end
 
 --- table -> string * (int | bool)
 lookup_font_name = function (specification)
-    local resolved, subfont
     if not name_index then name_index = load_names () end
     local name      = sanitize_fontname (specification.name)
     local style     = sanitize_fontname (specification.style) or "r"
@@ -1204,14 +1176,17 @@ lookup_font_name = function (specification)
         askedsize = design_size_dimension * askedsize
     end
 
-    resolved, subfont = lookup_familyname (specification,
-                                           name,
-                                           style,
-                                           askedsize)
-    if not resolved then
-        resolved, subfont = lookup_fontname (specification,
-                                             name,
-                                             style)
+    local resolved, subfont, fallback = lookup_familyname (specification,
+                                                           name,
+                                                           style,
+                                                           askedsize)
+    if not resolved and fallback then
+        local new_resolved, new_subfont = lookup_fontname (specification,
+                                                           name,
+                                                           style)
+        if new_resolved then
+            resolved, subfont = new_resolved, new_subfont
+        end
     end
 
     if not resolved then
@@ -1402,7 +1377,6 @@ end --- find_closest()
 local read_font_file = function (filename, subfont)
     local fontdata = otfhandler.readers.getinfo (filename,
                                                  { subfont        = subfont
-                                                 , details        = false
                                                  , platformnames  = true
                                                  , rawfamilynames = true
                                                  })
@@ -1669,7 +1643,6 @@ ot_fullinfo = function (filename,
     local style         = organize_styledata (metadata,
                                               rawinfo,
                                               info)
-
     local res = {
         file            = { base        = basename,
                             full        = filename,
@@ -1708,7 +1681,6 @@ t1_fullinfo = function (filename, _subfont, location, basename, format)
     sanitized = sanitize_fontnames ({
         fontname              = fontname,
         psname                = fullname,
-        metafamily            = familyname,
         familyname            = familyname,
         weight                = metadata.weight, --- string identifier
         typographicsubfamily  = style,
@@ -2728,38 +2700,8 @@ local pick_fallback_style
 local check_regular
 
 do
-    local choose_exact = function (field)
-        --- only clean matches, without guessing
-        if italic_synonym [field] then
-            return "i"
-        end
-
-        if stringsub (field, 1, 10) == "bolditalic"
-        or stringsub (field, 1, 11) == "boldoblique" then
-            return "bi"
-        end
-
-        if stringsub (field, 1, 4) == "bold" then
-            return "b"
-        end
-
-        if stringsub (field, 1, 6) == "italic" then
-            return "i"
-        end
-
-        return false
-    end
-
     pick_style = function (typographicsubfamily, subfamily)
-        local style
-        if typographicsubfamily then
-            style = choose_exact (typographicsubfamily)
-            if style then return style end
-        elseif subfamily then
-            style = choose_exact (subfamily)
-            if style then return style end
-        end
-        return false
+        return style_synonym [typographicsubfamily or subfamily or ""]
     end
 
     pick_fallback_style = function (italicangle, pfmweight, width)

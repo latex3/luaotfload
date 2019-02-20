@@ -1,5 +1,5 @@
 
-packageversion= "2.95"
+packageversion= "2.9601"
 packagedate   = "2019-01-28"
 
 local luatexstatus = status.list()

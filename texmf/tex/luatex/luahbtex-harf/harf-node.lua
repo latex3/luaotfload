@@ -328,7 +328,7 @@ shape = function(run)
 
   local lang = lang or options.language or lang_invalid
   local shapers = options.shaper and { options.shaper } or {}
-  
+
   local buf = hb.Buffer.new()
   buf:set_direction(dir)
   buf:set_script(script)

@@ -39,6 +39,9 @@ tests/*.ovp
 tests/*.ovf
 tests/*.sty
 tests/luaotfload*
+trials/*.log
+trials/*.pdf
+trials/*.aux
 
 testfiles/*.log
 testfiles/*.aux

@@ -56,6 +56,18 @@
 \pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
 
+\beginsection {New in version 2.96 (by Ulrike Fischer)}
+\begin{itemize}
+\item \textbf{Incompatible change!} 
+In version 2.95 letterspacing was broken due to a change in the fontloader. This has been repaired. At the same time a number of oddities and bugs of the letterspacing has been corrected. This can change existing documents. 
+
+\item A problem with the detection of bold fonts has been corrected (issue 41, pull request 42).
+
+\end{itemize}
+\endsection
+
+
+
 \beginsection {New in version 2.95 (by Ulrike Fischer)}
 \begin{itemize}
 \item
@@ -771,7 +783,7 @@ obviously, \inlinecode{random}.
          results in $4.2$ pt of additional kerning applied to each
          pair of glyphs.
          %
-         Ligatures are split into their component glyphs unless
+         \marginpar{New v2.96} Ligatures are split into their component glyphs unless
          explicitly ignored (see below).
 
          For compatibility with \XETEX an alternative

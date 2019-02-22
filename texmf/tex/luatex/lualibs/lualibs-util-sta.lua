@@ -289,24 +289,24 @@ end
 --
 -- local concat = table.concat
 --
--- local pdfpageliteral = nodes.pool.pdfpageliteral
+-- local pageliteral = nodes.pool.pageliteral
 --
 -- function demostacker.start(s,t,first,last)
 --     local n = whatever[t[last]]
 --  -- s.report("start: %s",n)
---     return pdfpageliteral(n)
+--     return pageliteral(n)
 -- end
 --
 -- function demostacker.stop(s,t,first,last)
 --     local n = whatever[false]
 --  -- s.report("stop: %s",n)
---     return pdfpageliteral(n)
+--     return pageliteral(n)
 -- end
 --
 -- function demostacker.change(s,t1,first1,last1,t2,first2,last2)
 --     local n = whatever[t2[last2]]
 --  -- s.report("change: %s",n)
---     return pdfpageliteral(n)
+--     return pageliteral(n)
 -- end
 --
 -- demostacker.mode = "switch"
@@ -325,7 +325,7 @@ end
 --         r[#r+1] = whatever[t[i]]
 --     end
 --  -- s.report("start: %s",concat(r," "))
---     return pdfpageliteral(concat(r," "))
+--     return pageliteral(concat(r," "))
 -- end
 --
 -- function demostacker.stop(s,t,first,last)
@@ -334,7 +334,7 @@ end
 --         r[#r+1] = whatever[false]
 --     end
 --  -- s.report("stop: %s",concat(r," "))
---     return pdfpageliteral(concat(r," "))
+--     return pageliteral(concat(r," "))
 -- end
 --
 -- function demostacker.change(s,t1,first1,last1,t2,first2,last2)
@@ -346,7 +346,7 @@ end
 --         r[#r+1] = whatever[t2[i]]
 --     end
 --  -- s.report("change: %s",concat(r," "))
---     return pdfpageliteral(concat(r," "))
+--     return pageliteral(concat(r," "))
 -- end
 --
 -- demostacker.mode = "stack"

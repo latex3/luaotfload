@@ -259,9 +259,10 @@ end
 local propertydata = direct.get_properties_table()
 nodes.properties   = { data = propertydata }
 
-direct.set_properties_mode(true,true)     -- needed for injection
-
-function direct.set_properties_mode() end -- we really need the set modes
+if direct.set_properties_mode then
+    direct.set_properties_mode(true,true)
+    function direct.set_properties_mode() end
+end
 
 nuts.getprop = function(n,k)
     local p = propertydata[n]

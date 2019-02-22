@@ -1,8 +1,0 @@
-\input{regression-test}
-\documentclass{article}
-\usepackage{fontspec}
-\setmainfont{Iwona Medium}
-\begin{document}
-\START\showoutput
-abc
-\end{document}

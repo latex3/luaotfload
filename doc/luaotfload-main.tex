@@ -58,8 +58,8 @@
 
 \beginsection {New in version 2.96 (by Ulrike Fischer)}
 \begin{itemize}
-\item \textbf{Incompatible change!} 
-In version 2.95 letterspacing was broken due to a change in the fontloader. This has been repaired. At the same time a number of oddities and bugs of the letterspacing has been corrected. This can change existing documents. 
+\item In\marginpar{\mbox{}\hfill \textbf{Incompatible change!}}
+version 2.95 letterspacing was broken due to a change in the fontloader. This has been repaired. At the same time a number of oddities and bugs in the letterspacing has been corrected. This can change existing documents. See page~\pageref{p:letterspace} for more information.
 
 \item A problem with the detection of bold fonts has been corrected (issue 41, pull request 42).
 
@@ -760,7 +760,7 @@ obviously, \inlinecode{random}.
          \endlisting
   \endaltitem
 
-  \beginaltitem {kernfactor \& letterspace}
+  \beginaltitem {kernfactor \& letterspace}\label{p:letterspace}
          Define a font with letterspacing (tracking) enabled.
          %
          In \identifier{luaotfload}, letterspacing is implemented by
@@ -783,9 +783,42 @@ obviously, \inlinecode{random}.
          results in $4.2$ pt of additional kerning applied to each
          pair of glyphs.
          %
-         \marginpar{New v2.96} Ligatures are split into their component glyphs unless
-         explicitly ignored (see below).
+         
+         Spaces\marginpar{\mbox{}\hfill NEW in v2.96!} between words are now stretched too. This is consistent with the \XETEX behaviour (and the amount of stretching should be similar). This 
+         naturally changes the output of a document.  In case you want the old behaviour back use
+         \beginlisting
+           \directlua{luaotfload.letterspace.keepwordspacing = true}
+         \endlisting
+         
+         The difference between both options is obvious:
+         
+         \begingroup
+         \fontspec{IwonaMedium-Regular.otf}[LetterSpace=60]
+          New: hello world
 
+          \directlua{luaotfload.letterspace.keepwordspacing = true}
+
+          Old: hello world
+
+          \directlua{luaotfload.letterspace.keepwordspacing = false}
+          \endgroup
+         
+         
+         Ligatures\marginpar{\mbox{}\hfill NEW in v2.96!}  are no longer split into their component glyphs. 
+         This change too make the \identifier{luaotfload} more compatible with \XETEX. It also makes it much easier to activate or deactivate ligature sets in letterspaced fonts.   
+         If you want to split ligatures, you should deactivate as you would do it with a not-letterspaced font, e.g. with the fontspec \identifier{Ligatures} option, or the low-level \identifier{-liga} and similar. 
+         
+
+         {\font \test = "file:Iwona-Regular.otf:mode=base;+liga;+tlig;letterspace=12.5"
+          \test With standard ligatures: fi -- ff\par
+           
+          \font \test = "file:Iwona-Regular.otf:mode=base;-liga;+tlig;letterspace=12.5" 
+          \test Only with tlig: fi -- ff \par
+          
+          \font \test = "file:Iwona-Regular.otf:mode=base;-liga;letterspace=12.5"
+          \test No ligatures: fi -- ff \par
+         } 
+         
          For compatibility with \XETEX an alternative
          \identifier{letterspace} option is supplied that interprets the
          supplied value as a \emphasis{percentage} of the font size but
@@ -799,7 +832,10 @@ obviously, \inlinecode{random}.
     \font \iwonakernedB = "file:Iwona-Regular.otf:letterspace=12.5"
          \endlisting
 
-         Specific pairs of letters and ligatures may be exempt from
+         The \identifier{microtype} package uses a special implementation of letterspacing, and the commands \inlinecode{\lsstyle} and \inlinecode{\textls} are  not affected by these changes.
+
+         Setting the ligatures with the font options is the recommended way, to activate or deactivate them. In case of special requirements   
+         specific pairs of letters and ligatures may be exempt from
          letterspacing by defining the \LUA functions
          \luaident{keeptogether} and \luaident{keepligature},
          respectively, inside the namespace \inlinecode {luaotfload.letterspace}.

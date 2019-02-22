@@ -1,5 +1,7 @@
-In contradiction to the last announcement this version of the fontloader is still
-compatible with luatex 1.07. So updates will continue. 
-This version syncs the files with the ConTeXt files from 2019-01-28. 
-It improves the handling of the lucida fonts - the demi font is now used as bold. 
-The resolver code has been cleaned up a bit. 
+- In version 2.95 letterspacing was broken due to a change in the fontloader. 
+In version 2.96 this is now repaired. At the same time a number of long-standing 
+oddities and bugs in the letterspacing has been corrected. 
+This can change the output of existing documents!! 
+See the documentation for more information and ways to restore the old behaviour,
+
+- A problem with the detection of bold fonts has been corrected (issue 41, pull request 42).

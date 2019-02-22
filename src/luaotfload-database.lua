@@ -2835,6 +2835,18 @@ local add_family = function (name, subtable, modifier, entry)
     }
 end
 
+local add_lastresort_regular = function (name, subtable, entry)
+    if not name then --- probably borked font
+        return
+    end
+    local familytable = subtable [name]
+    if not familytable then
+        familytable = { }
+        subtable [name] = familytable
+    end
+    familytable.fallback = entry.index
+end
+
 local get_subtable = function (families, entry)
     local location  = entry.location
     local format    = entry.format
@@ -2890,6 +2902,9 @@ local collect_families = function (mappings)
         if modifier then
             add_family (familyname, subtable, modifier, entry)
         end
+        if modifier ~= 'r' and regular_synonym[typographicsubfamily or subfamily or ''] then
+            add_lastresort_regular (familyname, subtable, entry)
+        end
     end
 
     collectgarbage "collect"
@@ -2916,6 +2931,8 @@ group_modifiers = function (mappings, families)
         for format, format_data in next, location_data do
             for familyname, collected in next, format_data do
                 local styledata = { } --- will replace the “collected” table
+                local lastresort_regular = collected.fallback
+                collected.fallback = nil
                 --- First, fill in the ordinary style data that
                 --- fits neatly into the four relevant modifier
                 --- categories.
@@ -2943,6 +2960,9 @@ group_modifiers = function (mappings, families)
                         end
                         styledata [modifier] = entries
                     end
+                end
+                if not styledata.r and lastresort_regular then
+                    styledata.r = {default = lastresort_regular}
                 end
 
                 --- At this point the family set may still lack

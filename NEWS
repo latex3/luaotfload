@@ -1,7 +1,7 @@
 Change History
 --------------
 2019-01-28 luaotfload v2.96
-    * repaired broken letterspace
+    * repaired broken letterspace (issue #38)
     * changed handling of spaces in letterspacing
     * changed handling of ligatures in letterspacing
     * corrected detection of bold fonts (issue #41)

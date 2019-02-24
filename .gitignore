@@ -42,6 +42,8 @@ tests/luaotfload*
 trials/*.log
 trials/*.pdf
 trials/*.aux
+trials/*.tuc
+
 
 testfiles/*.log
 testfiles/*.aux

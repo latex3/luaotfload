@@ -5,12 +5,12 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-letterspace",
-    version       = "2.95",       --TAGVERSION
-    date          = "2019-01-28", --TAGDATE
+    version       = "2.96",       --TAGVERSION
+    date          = "2019-02-14", --TAGDATE
     description   = "luaotfload submodule / color",
     license       = "GPL v2.0",
     copyright     = "PRAGMA ADE / ConTeXt Development Team",
-    author        = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang, Ulrike Fischer"
+    author        = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang, Ulrike Fischer, Marcel Krüger"
 }
 
 if luatexbase and luatexbase.provides_module then
@@ -20,80 +20,66 @@ end
 --- This code diverged quite a bit from its origin in Context. Please
 --- do *not* report bugs on the Context list.
 
-local log                = luaotfload.log
-local logreport          = log.report
+local logreport          = luaotfload.log.report
 
 local getmetatable       = getmetatable
-local require            = require
 local setmetatable       = setmetatable
 local tonumber           = tonumber
+local unpack             = table.unpack
 
 local next               = next
-local nodes, node, fonts = nodes, node, fonts
+local node, fonts        = node, fonts
 
-local nodedirect         = nodes.nuts
+local nodedirect         = node.direct
 
 local getfield           = nodedirect.getfield
 local setfield           = nodedirect.setfield
 
-local field_setter = function (name) return function (n, ...) setfield (n, name, ...) end end
-local field_getter = function (name) return function (n, ...) getfield (n, name, ...) end end
-
 local getfont            = nodedirect.getfont
 local getid              = nodedirect.getid
 
-local getnext            = nodedirect.getnext or field_getter "next"
-local setnext            = nodedirect.setnext or field_setter "next"
+local getnext            = nodedirect.getnext
+local setnext            = nodedirect.setnext
 
-local getprev            = nodedirect.getprev or field_getter "prev"
-local setprev            = nodedirect.setprev or field_setter "prev"
+local getprev            = nodedirect.getprev
+local setprev            = nodedirect.setprev
 
---- since r5336
-local getboth            = nodedirect.getboth or function (n)
-  return getprev (n), getnext (n)
-end
+local getboth            = nodedirect.getboth
 
-local setlink            = nodedirect.setlink or function (a, b)
-  setnext (a, b)
-  setprev (b, a)
-end
+local setlink            = nodedirect.setlink
 
-local getdisc            = nodedirect.getdisc or field_getter "disc"
-local setdisc            = nodedirect.setdisc or field_setter "disc"
+local getdisc            = nodedirect.getdisc
+local setdisc            = nodedirect.setdisc
 
-local getsubtype         = nodedirect.getsubtype or field_getter "subtype"
-local setsubtype         = nodedirect.setsubtype or field_setter "subtype"
+local getsubtype         = nodedirect.getsubtype
+local setsubtype         = nodedirect.setsubtype
 
-local getchar            = nodedirect.getchar or field_getter "subtype"
-local setchar            = nodedirect.setchar or field_setter "subtype"
+local getchar            = nodedirect.getchar
+local setchar            = nodedirect.setchar
+
+local getkern            = nodedirect.getkern
+local setkern            = nodedirect.setkern
+
+local getglue            = nodedirect.getglue
+local setglue            = nodedirect.setglue
 
 local find_node_tail     = nodedirect.tail
-local todirect           = nodedirect.tonut
+local todirect           = nodedirect.todirect
 local tonode             = nodedirect.tonode
 
 local insert_node_before = nodedirect.insert_before
-local free_node          = nodedirect.free -- may cause double free
-local free_node          = function (n)
-  logreport ("term", 5, "letterspace", "not calling free_node(%d)", n)
-  -- free_node (n)
-end
+local free_node          = nodedirect.free
 local copy_node          = nodedirect.copy
 local new_node           = nodedirect.new
 
-local nodepool           = nodedirect.pool
--- local new_kern           = nodepool.kern -- UF removed 2017-07-14
-
-local nodecodes          = nodes.nodecodes
-
-local glyph_code         = nodecodes.glyph
-local kern_code          = nodecodes.kern
-local disc_code          = nodecodes.disc
-local math_code          = nodecodes.math
-local glue_code          = nodecodes.glue
+local glyph_code         = node.id"glyph"
+local kern_code          = node.id"kern"
+local disc_code          = node.id"disc"
+local glue_code          = node.id"glue"
 
 local fonthashes         = fonts.hashes
+local identifiers        = fonthashes.identifiers
 local chardata           = fonthashes.characters
-local quaddata           = fonthashes.quads
 local otffeatures        = fonts.constructors.newfeatures "otf"
 
 --[[doc--
@@ -107,8 +93,10 @@ local otffeatures        = fonts.constructors.newfeatures "otf"
 luaotfload.letterspace   = luaotfload.letterspace or { }
 local letterspace        = luaotfload.letterspace
 
-letterspace.keepligature = false
+local lectured = false
+letterspace.keepligature = true
 letterspace.keeptogether = false
+letterspace.keepwordspacing = false
 
 ---=================================================================---
 ---                     preliminary definitions
@@ -119,105 +107,19 @@ letterspace.keeptogether = false
 --- node-ini
 -----------------------------------------------------------------------
 
-local bothways  = function (t) return table.swapped (t, t) end
-local kerncodes = bothways { [0] = "fontkern"
-                           , [1] = "userkern"
-                           , [2] = "accentkern"
-                           }
-local skipcodes = bothways {  [0] = "userskip"
-                           , [13] = "spaceskip"
-                           , [14] = "xspaceskip"
-                           }
-
-kerncodes.kerning       = kerncodes.fontkern --- idiosyncrasy
-local kerning_code      = kerncodes.kerning
-local userkern_code     = kerncodes.userkern
-local userskip_code     = skipcodes.userskip
-local spaceskip_code    = skipcodes.spaceskip
-local xspaceskip_code   = skipcodes.xspaceskip
-
------------------------------------------------------------------------
---- node-res
------------------------------------------------------------------------
-
-local glue_spec   = new_node "glue_spec"
-
-local new_gluespec = function (width,
-                               stretch,       shrink,
-                               stretch_order, shrink_order)
-  local spec = copy_node(glue_spec)
-  if width         then setfield(spec, "width"        , width        )  end
-  if stretch       then setfield(spec, "stretch"      , stretch      )  end
-  if shrink        then setfield(spec, "shrink"       , shrink       )  end
-  if stretch_order then setfield(spec, "stretch_order", stretch_order)  end
-  if shrink_order  then setfield(spec, "shrink_order" , shrink_order )  end
-  return spec
-end
-
-local new_glue = function (width, stretch, shrink,
-                           stretch_order, shrink_order)
-  local n = new_node "glue"
-  if not width then return n end
-    -- no spec
-  if width == false then
-    local width = tonumber(width)
-    if width then
-      setfield(n, "spec",
-               new_gluespec(width, stretch, shrink,
-                            stretch_order, shrink_order))
-    end
-  else
-    -- shared
-    setfield(n, "spec", copy_node(width))
-  end
-  return n
-end
-
------------------------------------------------------------------------
---- font-hsh
------------------------------------------------------------------------
---- some initialization resembling font-hsh
-local fonthashes         = fonts.hashes
-local identifiers        = fonthashes.identifiers --- was: fontdata
-local chardata           = fonthashes.characters
-local quaddata           = fonthashes.quads
-local parameters         = fonthashes.parameters
-
---- ('a, 'a) hash -> (('a, 'a) hash -> 'a -> 'a) -> ('a, 'a) hash
-local setmetatableindex = function (t, f)
-  local mt = getmetatable(t)
-  if mt then
-    mt.__index = f
-  else
-    setmetatable(t, { __index = f })
-  end
-  return t
-end
-
-if not parameters then
-  parameters = { }
-  setmetatableindex(parameters, function(t, k)
-    if k == true then
-      return parameters[currentfont()]
-    else
-      local parameters = identifiers[k].parameters
-      t[k] = parameters
-      return parameters
-    end
-  end)
-  --fonthashes.parameters = parameters
-end
+local kerning_code      = 0
+local userkern_code     = 1
+local userskip_code     = 0
+local spaceskip_code    = 13
+local xspaceskip_code   = 14
 
 if not chardata then
   chardata = { }
-  setmetatableindex(chardata, function(t, k)
+  table.setmetatableindex(chardata, function(t, k)
     if k == true then
       return chardata[currentfont()]
     else
-      local tfmdata = identifiers[k]
-      if not tfmdata then --- unsafe
-        tfmdata = font.fonts[k]
-      end
+      local tfmdata = font.getfont(k) or font.fonts[k]
       if tfmdata then
         local characters = tfmdata.characters
         t[k] = characters
@@ -228,37 +130,19 @@ if not chardata then
   fonthashes.characters = chardata
 end
 
-if not quaddata then
-  quaddata = { }
-  setmetatableindex(quaddata, function(t, k)
-    if k == true then
-      return quads[currentfont()]
-    else
-      local parameters = parameters[k]
-      local quad = parameters and parameters.quad or 0
-      t[k] = quad
-      return quad
-    end
-  end)
-  --fonthashes.quads = quaddata
-end
-
 ---=================================================================---
 ---                 character kerning functionality
 ---=================================================================---
 
 -- UF changed 2017-07-14
-local nodedirectnew = node.direct.new
-
 local kern_injector = function (fillup, kern)
  if fillup then
-   local g = nodedirectnew("glue")
-   setfield(g, "stretch", kern)
-   setfield(g, "stretch_order", 1)
+   local g = new_node(glue_code)
+   setglue(g, 0, kern, 0, 1, 0)
    return g
  end
-   local g = nodedirectnew("kern")
-   setfield(g,"kern",kern)
+   local g = new_node(kern_code)
+   setkern(g,kern)
    return g
 end
 -- /UF
@@ -268,15 +152,6 @@ local kernable_skip = function (n)
   return st == userskip_code
       or st == spaceskip_code
       or st == xspaceskip_code
-end
-
-local function spec_injector (fillup, width, stretch, shrink)
-  if fillup then
-    local spec = new_gluespec(width, 2 * stretch, 2 * shrink)
-    setfield(spec, "stretch_order", 1)
-    return spec
-  end
-  return new_gluespec(width,stretch,shrink)
 end
 
 --[[doc--
@@ -290,58 +165,69 @@ end
 
 --doc]]--
 
-local kernfactors = { } --- fontid -> factor
+local kernamounts = table.setmetatableindex(function (t, f) --- fontid -> {kern, fill}
+  local tfmdata = font.getfont(f) or font.fonts[f]
+  if tfmdata then
+    local fontproperties = tfmdata.properties
+    local fontparameters = tfmdata.parameters
+    if fontproperties and fontparameters then
+      local r
+      if fontproperties.kerncharacters == "max" then
+        r = {fontparameters.quad/4, true}
+      elseif fontproperties.kerncharacters then
+        r = {fontproperties.kerncharacters * fontparameters.quad, false}
+      else
+        r = {}
+      end
+      t[f] = r
+      return r
+    end
+  end
+  return {}
+end)
 
 local kerncharacters
 kerncharacters = function (head)
   local start         = head
   local lastfont      = nil
-  local keepligature  = letterspace.keepligature --- function
   local keeptogether  = letterspace.keeptogether --- function
-  local fillup        = false
+  local keepligature  = letterspace.keepligature
+--  if not lectured and keepligature ~= true then
+--    logreport ("both", 0, "letterspace",
+--               "Breaking ligatures through letterspacing is deprecated and "
+--            .. "will be removed soon. Please disable unwanted ligatures through "
+--            .. "font features instead and reset luaotfload.letterspace.keepligature "
+--            .. "to true to maintain compatibility with future versions of luaotfload.")
+--    lectured = true
+--  end
+  if type(keepligature) ~= "function" then
+    local savedligature = keepligature
+    keepligature = function() return savedligature end
+  end
+  local keepwordspacing = letterspace.keepwordspacing
+  if type(keepwordspacing) ~= "function" then
+    local savedwordspacing = keepwordspacing
+    keepwordspacing = function() return savedwordspacing end
+  end
 
-  local identifiers   = fonthashes.identifiers
-  local kernfactors   = kernfactors
+  local kernamounts   = kernamounts
   local firstkern     = true
 
   while start do
     local id = getid(start)
     if id == glyph_code then
       --- 1) look up kern factor (slow, but cached rudimentarily)
-      local krn
       local fontid = getfont(start)
-      do
-        krn = kernfactors[fontid]
-        if not krn then
-          local tfmdata = identifiers[fontid]
-          if not tfmdata then -- unsafe
-            tfmdata = font.fonts[fontid]
-          end
-          if tfmdata then
-            fontproperties = tfmdata.properties
-            if fontproperties then
-              krn = fontproperties.kerncharacters
-            end
-          end
-          kernfactors[fontid] = krn
-        end
-        if not krn or krn == 0 then
-          firstkern = true
+      local krn, fillup = unpack(kernamounts[fontid])
+      if not krn or krn == 0 then
+        firstkern = true
+        goto nextnode
+      elseif firstkern then
+        firstkern = false
+        if (id ~= disc_code) and (not getfield(start, "components")) then
+          --- not a ligature, skip node
           goto nextnode
-        elseif firstkern then
-          firstkern = false
-          if (id ~= disc_code) and (not getfield(start, "components")) then
-            --- not a ligature, skip node
-            goto nextnode
-          end
         end
-      end
-
-      if krn == "max" then
-        krn = .25
-        fillup = true
-      else
-        fillup = false
       end
 
       lastfont = fontid
@@ -350,7 +236,7 @@ kerncharacters = function (head)
       local c = getfield(start, "components")
 
       if c then
-        if keepligature and keepligature(start) then
+        if keepligature(start) then
           -- keep 'm
           c = nil
         else
@@ -382,18 +268,18 @@ kerncharacters = function (head)
         if not pid then
           -- nothing
 
-        elseif pid == glue_code and kernable_skip(prev) then
-          local spec = getfield(prev, "spec")
-          local wd   = getfield(spec, "width")
+        elseif pid == glue_code and kernable_skip(prev)
+                                and not keepwordspacing(prev, lastfont) then
+          local wd, stretch, shrink = getglue(prev)
           if wd > 0 then
-            --- formula taken from Context
-            ---      existing_width extended by four times the
-            ---      width times the font’s kernfactor
-            local newwd     = wd + --[[two en to a quad]] 4 * wd * krn
-            local stretched = (getfield(spec,"stretch") * newwd) / wd
-            local shrunk    = (getfield(spec,"shrink")  * newwd) / wd
-            setfield(prev, "spec",
-                     spec_injector(fillup, newwd, stretched, shrunk))
+            local newwd     = wd + krn
+            local stretched = (stretch * newwd) / wd
+            local shrunk    = (shrink  * newwd) / wd
+            if fillup then
+              setglue(prev, newwd, 2 * stretched, 2 * shrunk, 1, 0)
+            else
+              setglue(prev, newwd, stretched, shrunk, 0, 0)
+            end
           end
 
         elseif pid == kern_code then
@@ -412,9 +298,9 @@ kerncharacters = function (head)
               -- keep
             else
               setsubtype (prev, userkern_code)
-              local prev_kern = getfield(prev, "kern")
-              prev_kern = prev_kern + quaddata[lastfont] * krn
-              setfield (prev, "kern", prev_kern)
+              local prev_kern = getkern(prev)
+              prev_kern = prev_kern + krn
+              setkern (prev, prev_kern)
             end
           end
 
@@ -434,13 +320,12 @@ kerncharacters = function (head)
                   local kern = 0
                   local kerns = prevchardata.kerns
                   if kerns then kern = kerns[lastchar] or kern end
-                  krn = kern + quaddata[lastfont]*krn -- here
+                  krn = kern + krn -- here
                   insert_node_before(head,start,kern_injector(fillup,krn))
                 end
               end
             end
           else
-            krn = quaddata[lastfont]*krn -- here
             insert_node_before(head,start,kern_injector(fillup,krn))
           end
 
@@ -470,7 +355,7 @@ kerncharacters = function (head)
             setprev(after, tail)
             setnext(after, nil)
             post = kerncharacters (post)
-            setnext(tail, nil)
+            setnext(getprev(after), nil)
             setfield(disc, "post", post)
             free_node(after)
           end
@@ -489,7 +374,7 @@ kerncharacters = function (head)
             replace = getnext(replace)
             setprev(replace, nil)
             setnext(getprev(after), nil)
-            setfield(disc, "replace",   replace)
+            setfield(disc, "replace", replace)
             free_node(after)
             free_node(before)
 
@@ -511,9 +396,7 @@ kerncharacters = function (head)
                   if kerns then kern = kerns[lastchar] or kern end
                 end
               end
-              krn = kern + quaddata[lastfont]*krn -- here
-            else
-              krn = quaddata[lastfont]*krn -- here
+              krn = kern + krn -- here
             end
             setfield(disc, "replace", kern_injector(false, krn))
           end --[[if replace and prv and nxt]]
@@ -535,7 +418,6 @@ end
 
 --- · callback:     kerncharacters
 --- · enabler:      enablefontkerning
---- · disabler:     disablefontkerning
 
 --- callback wrappers
 
@@ -591,11 +473,6 @@ local enablefontkerning = function ( )
                       , "pre_linebreak_filter"
                       , "hpack_filter")
 end
-
---- unit -> bool
----al disablefontkerning = function ( )
----eturn remove_processor "luaotfload.letterspace"
----
 
 --[[doc--
 

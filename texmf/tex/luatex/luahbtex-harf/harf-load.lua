@@ -24,10 +24,6 @@ local function split(str, sep)
 end
 
 local function parse(str, size)
-  if size < 0 then
-    size = -655.36 * size
-  end
-
   local name, options = str:match("%s*(.*)%s*:%s*(.*)%s*")
   local spec = {
     specification = str,
@@ -80,7 +76,10 @@ local function loadfont(spec)
   end
 
   local hbface = hb.Face.new(path, index)
-  if hbface then
+  local tags = hbface and hbface:get_table_tags()
+  -- If the face has no table tags then it isn’t a valid SFNT font that
+  -- HarfBuzz can handle.
+  if tags then
     local hbfont = hb.Font.new(hbface)
     local upem = hbface:get_upem()
 
@@ -89,7 +88,6 @@ local function loadfont(spec)
     local fonttype = nil
     local hasos2 = false
     local haspost = false
-    local tags = hbface:get_table_tags()
     for i = 1, #tags do
       local tag = tags[i]
       if tag == cfftag or tag == cff2tag then
@@ -218,6 +216,10 @@ local function scalefont(data, spec)
   local stemv = data.stemv
   local capheight = data.capheight
 
+  if size < 0 then
+    size = -655.36 * size
+  end
+
   -- We shape in font units (at UPEM) and then scale output with the desired
   -- sfont size.
   local scale = size / upem
@@ -298,7 +300,7 @@ local function define_font(name, size)
   if hbdata then
     tfmdata = scalefont(hbdata, spec)
   else
-    tfmdata = font.read_tfm(name, size)
+    tfmdata = font.read_tfm(spec.specification, spec.size)
   end
   return tfmdata
 end

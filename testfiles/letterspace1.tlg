@@ -1,0 +1,774 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line ....
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line ....
+(../mt-cmr.cfg
+File: mt-cmr.cfg ....-..-.. v... microtype config. file: Computer Modern Roman (RS)
+)
+Package fontspec Info: Font family 'LinLibertine_R.otf(1)' created for font
+(fontspec)             'LinLibertine_R.otf' with options
+(fontspec)             [Ligatures=TeX,LetterSpace=50,Ligatures=Historic].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;+hlig;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;+hlig;+smcp;"
+Package fontspec Info: Font family 'LinLibertine_R.otf(2)' created for font
+(fontspec)             'LinLibertine_R.otf' with options
+(fontspec)             [Ligatures=TeX,LetterSpace=50,Ligatures=Rare].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;+dlig;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;+dlig;+smcp;"
+Package fontspec Info: Font family 'LinLibertine_R.otf(3)' created for font
+(fontspec)             'LinLibertine_R.otf' with options
+(fontspec)             [Ligatures=TeX,LetterSpace=50,Ligatures=NoCommon].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;-liga;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;-liga;+smcp;"
+Completed box being shipped out [1]
+\vbox(633.0+0.02)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.02)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 335.96411fil, direction TLT
+...\write-{}
+...\glue(\topskip) 3.02
+...\hbox(6.98+0.12)x345.0, glue set 280.03998fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(0)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(0)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.12)x345.0, glue set 255.37997fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\kern5.1
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls – (ligature --)
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls i
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.12)x345.0, glue set 259.58997fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\kern5.1
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls – (ligature --)
+....\glue(\spaceskip) 2.75 plus 1.25 minus 0.83333
+....\kern5.5
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\kern0.5
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.12)x345.0, glue set 183.72998fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 s
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 c
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 ﬆ (ligature st)
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10  (ligature ct)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(1)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 ﬁ (ligature fi)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+2.32)x345.0, glue set 133.63995fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 w
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 u
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 z
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 e
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 w
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 u
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10  (ligature tz)
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 e
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(2)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 ﬁ (ligature fi)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.7
+...\hbox(6.98+2.32)x345.0, glue set 115.35997fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 r
+....\kern4.92
+....\TU/LinLibertine_R.otf(0)/m/n/10 e
+....\discretionary (penalty 50)
+.....< \kern5.0 (font)
+.....< \TU/LinLibertine_R.otf(0)/m/n/10 -
+.....= \kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬂ (ligature fl)
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 y
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬀ (ligature ff)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 r
+....\kern4.92
+....\TU/LinLibertine_R.otf(3)/m/n/10 e
+....\discretionary (penalty 50)
+.....< \kern5.0 (font)
+.....< \TU/LinLibertine_R.otf(3)/m/n/10 -
+.....= \kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.4
+....\TU/LinLibertine_R.otf(3)/m/n/10 l
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 y
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(3)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 i
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.7
+...\hbox(6.98+0.12)x345.0, glue set 268.54999fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(0)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(0)/m/n/10 -
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 -
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(0)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 i
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.12)x345.0, glue set 249.09996fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\kern5.1
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls -
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls -
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls i
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.12)x345.0, glue set 248.09996fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\kern5.1
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls -
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls -
+....\glue(\spaceskip) 2.75 plus 1.25 minus 0.83333
+....\kern5.5
+....\TU/LinLibertine_R.otf(0)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 i
+....\kern0.5
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.12)x345.0, glue set 161.68996fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 s
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 c
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 s
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 c
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 t
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(1)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 -
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 -
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 i
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.13)x345.0, glue set 115.06993fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 w
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 u
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 z
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 e
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 w
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 u
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 z
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 e
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(2)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 -
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 -
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 i
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.89
+...\hbox(6.98+2.32)x345.0, glue set 86.86992fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 r
+....\kern4.92
+....\TU/LinLibertine_R.otf(0)/m/n/10 e
+....\discretionary (penalty 50)
+.....< \kern5.0 (font)
+.....< \TU/LinLibertine_R.otf(0)/m/n/10 -
+.....= \kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 l
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 y
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(0)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 f
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 r
+....\kern4.92
+....\TU/LinLibertine_R.otf(3)/m/n/10 e
+....\discretionary (penalty 50)
+.....< \kern5.0 (font)
+.....< \TU/LinLibertine_R.otf(3)/m/n/10 -
+.....= \kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.4
+....\TU/LinLibertine_R.otf(3)/m/n/10 l
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 y
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(3)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 -
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 -
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 i
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 -
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 -
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.7
+...\hbox(6.98+0.12)x345.0, glue set 280.03998fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(0)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(0)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.12)x345.0, glue set 265.96997fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\kern5.1
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls – (ligature --)
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬁ (ligature fi)
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬀ (ligature ff)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.12)x345.0, glue set 264.96997fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\kern5.1
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls – (ligature --)
+....\glue(\spaceskip) 2.75 plus 1.25 minus 0.83333
+....\kern5.5
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\kern0.5
+....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬀ (ligature ff)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+0.12)x345.0, glue set 183.72998fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 s
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 c
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 ﬆ (ligature st)
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10  (ligature ct)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(1)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(1)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(1)/m/n/10 ﬁ (ligature fi)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.90001
+...\hbox(6.98+2.32)x345.0, glue set 133.63995fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 w
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 u
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 z
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 e
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 w
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 u
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 r
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10  (ligature tz)
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 t
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 e
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(2)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(2)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(2)/m/n/10 ﬁ (ligature fi)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.7
+...\hbox(6.98+2.32)x345.0, glue set 115.35997fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 r
+....\kern4.92
+....\TU/LinLibertine_R.otf(0)/m/n/10 e
+....\discretionary (penalty 50)
+.....< \kern5.0 (font)
+.....< \TU/LinLibertine_R.otf(0)/m/n/10 -
+.....= \kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬂ (ligature fl)
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(0)/m/n/10 y
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬀ (ligature ff)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 i
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 r
+....\kern4.92
+....\TU/LinLibertine_R.otf(3)/m/n/10 e
+....\discretionary (penalty 50)
+.....< \kern5.0 (font)
+.....< \TU/LinLibertine_R.otf(3)/m/n/10 -
+.....= \kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.4
+....\TU/LinLibertine_R.otf(3)/m/n/10 l
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 y
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 a
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 b
+....\kern5.1
+....\TU/LinLibertine_R.otf(3)/m/n/10 c
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 i
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 – (ligature --)
+....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\kern5.0 (font)
+....\TU/LinLibertine_R.otf(3)/m/n/10 f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -2.32
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.92
+..\hbox(6.08+0.02)x345.0, glue set 170.175fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\TU/LinLibertine_R.otf(0)/m/n/10 1
+...\glue 0.0 plus 1.0fil
+(letterspace1.aux)

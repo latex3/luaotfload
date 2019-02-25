@@ -1,0 +1,22 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+TEXTIT:
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\TU/texgyretermes-regular.otf(0)/m/it/10 x
+.\kern0.23 (italic)
+MATHIT:
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\mathon
+.\TU/texgyretermes-regular.otf(1)/m/it/10 x
+.\kern0.23 (italic)
+.\mathoff
+SYMIT:
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\mathon
+.\TU/texgyrepagella-math.otf(1)/m/n/10 𝑥
+.\mathoff
+***************
+Compilation 1 of test file completed with exit status 0

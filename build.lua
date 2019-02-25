@@ -1,6 +1,6 @@
 
-packageversion= "2.95"
-packagedate   = "2019-01-28"
+packageversion= "2.96"
+packagedate   = "2019-02-14"
 
 local luatexstatus = status.list()
 local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
@@ -43,6 +43,7 @@ uploadconfig = {
 
 stdengine    = "luatex"
 checkengines = {"luatex"}
+
 local errorlevel   = os.execute("luahbtex --version") 
 if not os.getenv('TRAVIS') and errorlevel==0 then 
     checkengines = {"luatex","luahbtex"}

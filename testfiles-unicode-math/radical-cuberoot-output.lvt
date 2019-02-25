@@ -1,0 +1,22 @@
+
+\input{umtest-preamble}
+
+
+\usepackage{unicode-math}
+
+\setmainfont{texgyrepagella-regular.otf}
+\setmathfont{XITSMath-Regular.otf}
+
+\begin{document}
+
+\MSG{SQRT x}
+\SHIPOUT{$\displaystyle\cuberoot{x}$}
+
+\MSG{SQRT x squared}
+\SHIPOUT{$\displaystyle\cuberoot{x^2}$}
+
+\MSG{SQRT FRAC x y}
+\SHIPOUT{$\displaystyle\cuberoot{\frac{x}{y}}$}
+
+
+\end{document}

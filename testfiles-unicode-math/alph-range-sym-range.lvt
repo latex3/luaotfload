@@ -3,7 +3,7 @@
 
 \usepackage{unicode-math}
 
-\setmathfont{xitsmath-regular.otf}
+\setmathfont{XITSMath-Regular.otf}
 \setmathfont[
     range={
       it/{Latin} ,
@@ -13,8 +13,8 @@
 
 \begin{document}
 
-\TESTBOX{$\latintext$}
-\TESTBOX{$\LATINtext$}
-\TESTBOX{$\symbfsf{\LATINtext}$}
+\SHIPOUT{$\latintext$}
+\SHIPOUT{$\LATINtext$}
+\SHIPOUT{$\symbfsf{\LATINtext}$}
 
 \end{document}

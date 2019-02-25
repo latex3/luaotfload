@@ -1,0 +1,15 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\input{regression-test}
+\documentclass{article}
+
+
+\begin{document}
+\START\showoutput
+
+ \font \testA = "file:Iwona-Regular.otf:+liga;+tlig;kernfactor=0.125;"
+ \testA abc -- fi ff
+ 
+ \font \testA = "file:Iwona-Regular.otf:+liga;+tlig;letterspace=12.5;"
+ \testA abc -- fi ff
+
+\end{document} 

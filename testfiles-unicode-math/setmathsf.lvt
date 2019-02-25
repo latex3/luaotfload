@@ -6,8 +6,7 @@
 \usepackage{unicode-math}
 
 \begin{document}
-\START
 
-\TESTBOX{$\mathsf{X}=X$}
+\SHIPOUT{$\mathsf{X}=X$}
 
 \end{document}

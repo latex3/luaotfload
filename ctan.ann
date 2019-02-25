@@ -5,3 +5,5 @@ This can change the output of existing documents!!
 See the documentation for more information and ways to restore the old behaviour,
 
 - A problem with the detection of bold fonts has been corrected (issue 41, pull request 42).
+
+- The fontloader has been synced with the context files from 2019-02-14.

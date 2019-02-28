@@ -841,7 +841,7 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                 local prev   = getprev(start)
                 if stop then
                     setnext(stop)
-                    local tail = getprev(stop)
+                    local tail = stop
                     local copy = copy_node_list(start)
                     local liat = find_node_tail(copy)
                     if pre then

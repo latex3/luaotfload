@@ -799,6 +799,12 @@ local function post_process_nodes(head, groupcode, size, packtype, maxdepth, dir
       head = node.insert_before(head, n, pdfdirect("0 g"))
     end
 
+    if currentcolor ~= color then
+      -- Push new color.
+      head = node.insert_before(head, n, pdfdirect(color))
+      currentcolor = color
+    end
+
     if startactual then
       local actualtext = "/Span<</ActualText<FEFF"..startactual..">>>BDC"
       head = node.insert_before(head, n, pdfdirect(actualtext))
@@ -806,12 +812,6 @@ local function post_process_nodes(head, groupcode, size, packtype, maxdepth, dir
 
     if endactual then
       head = node.insert_after(head, n, pdfdirect("EMC"))
-    end
-
-    if currentcolor ~= color then
-      -- Push new color.
-      head = node.insert_before(head, n, pdfdirect(color))
-      currentcolor = color
     end
 
     if n.head then

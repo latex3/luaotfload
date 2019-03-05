@@ -1,0 +1,99 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+OPERATORNAME
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\mathon
+.\hbox(7.05+2.06)x34.79, direction TLT
+..\kern0.0
+..\hbox(0.0+0.0)x0.0, direction TLT
+..\TU/lmr/m/n/10 f
+..\TU/lmr/m/n/10 l
+..\TU/lmr/m/n/10 a
+..\TU/lmr/m/n/10 g
+..\TU/lmr/m/n/10 s
+..\TU/lmr/m/n/10 t
+..\TU/lmr/m/n/10 a
+..\TU/lmr/m/n/10 f
+..\TU/lmr/m/n/10 f
+.\mathoff
+MATHRM
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\mathon
+.\hbox(7.05+2.06)x34.79, direction TLT
+..\TU/lmr/m/n/10 f
+..\TU/lmr/m/n/10 l
+..\TU/lmr/m/n/10 a
+..\TU/lmr/m/n/10 g
+..\TU/lmr/m/n/10 s
+..\TU/lmr/m/n/10 t
+..\TU/lmr/m/n/10 a
+..\TU/lmr/m/n/10 f
+..\TU/lmr/m/n/10 f
+.\mathoff
+TEXTNORMAL
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\TU/lmr/m/n/10 ﬂ (ligature fl)
+.\TU/lmr/m/n/10 a
+.\TU/lmr/m/n/10 g
+.\TU/lmr/m/n/10 s
+.\TU/lmr/m/n/10 t
+.\TU/lmr/m/n/10 a
+.\TU/lmr/m/n/10 ﬀ (ligature ff)
+MATHIT
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\mathon
+.\hbox(7.05+2.05)x35.65002, direction TLT
+..\TU/lmr/m/it/10 f
+..\TU/lmr/m/it/10 l
+..\TU/lmr/m/it/10 a
+..\TU/lmr/m/it/10 g
+..\TU/lmr/m/it/10 s
+..\TU/lmr/m/it/10 t
+..\TU/lmr/m/it/10 a
+..\TU/lmr/m/it/10 f
+..\TU/lmr/m/it/10 f
+..\kern1.65 (italic)
+.\mathoff
+TEXTIT
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\TU/lmr/m/it/10 ﬂ (ligature fl)
+.\TU/lmr/m/it/10 a
+.\TU/lmr/m/it/10 g
+.\TU/lmr/m/it/10 s
+.\TU/lmr/m/it/10 t
+.\TU/lmr/m/it/10 a
+.\TU/lmr/m/it/10 ﬀ (ligature ff)
+.\kern1.65 (italic)
+MATHBF
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\mathon
+.\hbox(7.0+2.01)x39.65997, direction TLT
+..\TU/lmr/bx/n/10 f
+..\TU/lmr/bx/n/10 l
+..\TU/lmr/bx/n/10 a
+..\TU/lmr/bx/n/10 g
+..\TU/lmr/bx/n/10 s
+..\TU/lmr/bx/n/10 t
+..\TU/lmr/bx/n/10 a
+..\TU/lmr/bx/n/10 f
+..\TU/lmr/bx/n/10 f
+.\mathoff
+TEXTBF
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\TU/lmr/bx/n/10 ﬂ (ligature fl)
+.\TU/lmr/bx/n/10 a
+.\TU/lmr/bx/n/10 g
+.\TU/lmr/bx/n/10 s
+.\TU/lmr/bx/n/10 t
+.\TU/lmr/bx/n/10 a
+.\TU/lmr/bx/n/10 ﬀ (ligature ff)
+.\kern0.0 (italic)
+***************
+Compilation 1 of test file completed with exit status 0

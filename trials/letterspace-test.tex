@@ -1,0 +1,43 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+
+
+\documentclass{article}
+\usepackage{luatexbase}
+\usepackage{fontspec}
+\setmainfont{LinLibertine_R.otf}[LetterSpace=50]
+\usepackage{microtype,luacode}
+
+\begin{document}
+
+abc -- fi
+
+\textls{abc -- fi ff}
+
+\font\test={name:arial:mode=node;}
+
+\test abc \textls{abs -- fi ff}
+
+\end{document}
+strict {\addfontfeatures{Ligatures=Historic}{strict} abc -- fi}
+
+wurtzite {\addfontfeatures{Ligatures=Rare}{wurtzite} abc -- fi}
+
+firefly ff {\addfontfeatures{Ligatures=NoCommon}{firefly} abc -- fi -- ff}
+
+\textls{\directlua{print(table.serialize(microtype.ligs))}abc -- fi ff}
+
+\textls{abc -- \lslig{fi} ff}
+
+%\directlua{luaotfload.letterspace.keepligature = function (start) return true end}
+
+abc -- fi
+
+strict {\addfontfeatures{Ligatures=Historic}{strict} abc -- fi}
+
+wurtzite {\addfontfeatures{Ligatures=Rare}{wurtzite} abc -- fi}
+
+firefly {\addfontfeatures{Ligatures=NoCommon}{firefly} abc -- fi}
+
+{\addfontfeatures{Ligatures=TeXReset,Ligatures=NoCommon} abc -- fi}
+
+\end{document} 

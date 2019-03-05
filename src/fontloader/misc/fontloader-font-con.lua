@@ -49,6 +49,8 @@ constructors.cache           = containers.define("fonts", "constructors", constr
 constructors.privateoffset   = fonts.privateoffsets.textbase or 0xF0000
 constructors.cacheintex      = true -- so we see the original table in fonts.font
 
+constructors.addtounicode    = true
+
 -- This might become an interface:
 
 local designsizes           = allocate()
@@ -424,6 +426,8 @@ function constructors.scale(tfmdata,specification)
     targetparameters.forcedsize  = forcedsize  -- context specific
     targetparameters.extrafactor = extrafactor -- context specific
     --
+    local addtounicode  = constructors.addtounicode
+    --
     local tounicode     = fonts.mappings.tounicode
     local unknowncode   = tounicode(0xFFFD)
     --
@@ -736,13 +740,19 @@ function constructors.scale(tfmdata,specification)
             end
         end
         local isunicode = description.unicode
-        if isunicode then
-            chr.unicode   = isunicode
-            chr.tounicode = tounicode(isunicode)
-            -- in luatex > 0.85 we can do this:
-            -- chr.tounicode = isunicode
+        if addtounicode then
+            if isunicode then
+                chr.unicode   = isunicode
+                chr.tounicode = tounicode(isunicode)
+                -- in luatex > 0.85 we can do this:
+                -- chr.tounicode = isunicode
+            else
+                chr.tounicode = unknowncode
+            end
         else
-            chr.tounicode = unknowncode
+            if isunicode then
+                chr.unicode   = isunicode
+            end
         end
         if hasquality then
             -- we could move these calculations elsewhere (saves calculations)

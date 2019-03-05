@@ -1,0 +1,24 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\mathon
+.\TU/lmr/m/n/10 s
+.\mathoff
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\mathon
+.\hbox(4.48+0.11)x3.94, direction TLT
+..\kern0.0
+..\TU/lmr/m/n/10 s
+.\mathoff
+Completed box being shipped out [2]
+\hbox(0.0+0.0)x0.0, direction TLT
+.\mathon
+.\hbox(4.4+0.06)x5.25, direction TLT
+..\kern0.0
+..\hbox(0.0+0.0)x0.0, direction TLT
+..\TU/lmtt/m/n/10 s
+.\mathoff
+***************
+Compilation 1 of test file completed with exit status 0

@@ -3,16 +3,15 @@
 
 \usepackage{unicode-math}
 \setmathfont{texgyrepagella-math.otf}
-\setmathfont[range="1D4B0,Color=990000]{xitsmath-regular.otf}
-\setmathfont[range=\therefore,Color=009900]{xitsmath-regular.otf}
+\setmathfont[range="1D4B0,Color=990000]{XITSMath-Regular.otf}
+\setmathfont[range=\therefore,Color=009900]{XITSMath-Regular.otf}
 
 \begin{document}
-\START
 
-\TESTBOX{$\symscr{A}$}
-\TESTBOX{$\symscr{U}$}
-\TESTBOX{$\mscrA$}
-\TESTBOX{$\mscrU$}
-\TESTBOX{$\therefore$}
+\SHIPOUT{$\symscr{A}$}
+\SHIPOUT{$\symscr{U}$}
+\SHIPOUT{$\mscrA$}
+\SHIPOUT{$\mscrU$}
+\SHIPOUT{$\therefore$}
 
 \end{document}

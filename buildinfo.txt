@@ -50,11 +50,13 @@ The name contains the current date.
 
 !!! delete old default fontloader
 
+6.b change version number in build.lua and call l3build tag
+
 7. Update luatotfload-status
 
 !!! date must be naturally correct
 
---> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-01-28.lua
+--> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-02-14.lua
 
 8. Check lualibs status -- perhaps it needs update too
 
@@ -96,7 +98,7 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2018-10-28.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-02-14.lua
 
 
 ==============

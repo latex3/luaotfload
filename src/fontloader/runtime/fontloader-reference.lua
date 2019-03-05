@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 01/28/19 16:58:09
+-- merge date  : 02/14/19 16:57:24
 
 do -- begin closure to overcome local limits and interference
 
@@ -3386,6 +3386,7 @@ local environment={
  formattedfloat=number.formattedfloat,
  stripzero=lpeg.patterns.stripzero,
  stripzeros=lpeg.patterns.stripzeros,
+ FORMAT=string.f9,
 }
 local arguments={ "a1" } 
 setmetatable(arguments,{ __index=function(t,k)
@@ -4855,8 +4856,10 @@ if not nuts.getdirection then
 end
 local propertydata=direct.get_properties_table()
 nodes.properties={ data=propertydata }
-direct.set_properties_mode(true,true)  
-function direct.set_properties_mode() end 
+if direct.set_properties_mode then
+ direct.set_properties_mode(true,true)
+ function direct.set_properties_mode() end
+end
 nuts.getprop=function(n,k)
  local p=propertydata[n]
  if p then
@@ -8283,7 +8286,8 @@ constructors.namemode="fullpath"
 constructors.version=1.01
 constructors.cache=containers.define("fonts","constructors",constructors.version,false)
 constructors.privateoffset=fonts.privateoffsets.textbase or 0xF0000
-constructors.cacheintex=true
+constructors.cacheintex=true 
+constructors.addtounicode=true
 local designsizes=allocate()
 constructors.designsizes=designsizes
 local loadedfonts=allocate()
@@ -8543,6 +8547,7 @@ function constructors.scale(tfmdata,specification)
  targetparameters.textsize=textsize 
  targetparameters.forcedsize=forcedsize  
  targetparameters.extrafactor=extrafactor
+ local addtounicode=constructors.addtounicode
  local tounicode=fonts.mappings.tounicode
  local unknowncode=tounicode(0xFFFD)
  local defaultwidth=resources.defaultwidth  or 0
@@ -8796,11 +8801,17 @@ function constructors.scale(tfmdata,specification)
    end
   end
   local isunicode=description.unicode
-  if isunicode then
-   chr.unicode=isunicode
-   chr.tounicode=tounicode(isunicode)
+  if addtounicode then
+   if isunicode then
+    chr.unicode=isunicode
+    chr.tounicode=tounicode(isunicode)
+   else
+    chr.tounicode=unknowncode
+   end
   else
-   chr.tounicode=unknowncode
+   if isunicode then
+    chr.unicode=isunicode
+   end
   end
   if hasquality then
    local ve=character.expansion_factor

@@ -39,10 +39,19 @@ tests/*.ovp
 tests/*.ovf
 tests/*.sty
 tests/luaotfload*
+trials/*.log
+trials/*.pdf
+trials/*.aux
+trials/*.tuc
+
 
 testfiles/*.log
 testfiles/*.aux
 testfiles/*.pdf
+testfiles-luahbtex/*.pdf
+testfiles-luahbtex/*.log
+testfiles-luahbtex/*.aux
+
 
 # temporary directories
 build/*

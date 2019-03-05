@@ -1,7 +1,8 @@
 \input{umtest-preamble}
+%\START\TIMO % this line is here so I can uncomment it to debug CI errors
 \usepackage{unicode-math}
 \setmathfont{latinmodern-math.otf}
 \begin{document}
 \MSG{No log output; test loading only.}
-$a=\alpha$
+\SHIPOUT{$a=\alpha$}
 \end{document}

@@ -31,7 +31,7 @@ if not modules then modules = { } end modules ['l-unicode'] = {
 -- dump, find, format, gfind, gmatch, gsub, lower, match, rep, reverse, upper
 
 utf     = utf or { }
--- unicode = nil
+--unicode = nil
 
 if not string.utfcharacters then
 

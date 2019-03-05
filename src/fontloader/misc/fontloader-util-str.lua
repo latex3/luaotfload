@@ -612,6 +612,8 @@ local environment = {
     formattedfloat  = number.formattedfloat,
     stripzero       = lpeg.patterns.stripzero,
     stripzeros      = lpeg.patterns.stripzeros,
+
+    FORMAT          = string.f9,
 }
 
 -- -- --
@@ -729,6 +731,17 @@ local format_F = function(f) -- beware, no cast to number
         return format("format((a%s %% 1 == 0) and '%%i' or '%%%sf',a%s)",n,f,n)
     end
 end
+
+-- if string.f9 then
+--     format_F = function(f) -- beware, no cast to number
+--         n = n + 1
+--         if not f or f == "" then
+--             return format("(((a%s > -0.0000000005 and a%s < 0.0000000005) and '0') or FORMAT(a%s))",n,n,n,n,n)
+--         else
+--             return format("((a%s %% 1 == 0) and format('%%i',a%s) or FORMAT(a%s,'%%%sf'))",n,n,n,f)
+--         end
+--     end
+-- end
 
 local format_k = function(b,a) -- slow
     n = n + 1

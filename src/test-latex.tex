@@ -5,19 +5,8 @@
 \usepackage{luatexbase}
 \usepackage{setspace}
 \usepackage{fontspec}
-\ExplSyntaxOn
-\keys_define:nn {fontspec-renderer}
- {
-  Renderer / harf .code:n =
-   {
-      \tl_set:Nx \l_fontspec_mode_tl {harf}
-      \tl_gset:Nx \g__fontspec_single_feat_tl { mode=harf }
-   }
- }
-
-\ExplSyntaxOff
 \directlua{dofile("harf-luaotfload.lua")}
-\defaultfontfeatures{Renderer=harf}
+\defaultfontfeatures{RawFeature={mode=harf}}
 
 \setmainfont{Amiri}[Script=Arabic]
 

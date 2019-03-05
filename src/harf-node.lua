@@ -788,7 +788,7 @@ local function process_nodes(head, groupcode, size, packtype, direction)
   return head
 end
 
-local function post_process_nodes(head, groupcode, size, packtype, maxdepth, direction, currentcolor)
+local function post_process_nodes(head, groupcode, currentcolor)
   for n in node.traverse(head) do
     local startactual = getprop(n, p_startactual)
     local endactual = getprop(n, p_endactual)
@@ -815,7 +815,7 @@ local function post_process_nodes(head, groupcode, size, packtype, maxdepth, dir
     end
 
     if n.head then
-      post_process_nodes(n.head, groupcode, size, packtype, maxdepth, direction, currentcolor)
+      post_process_nodes(n.head, groupcode, currentcolor)
     end
   end
   return head

@@ -7,7 +7,7 @@ harf.callbacks = {
   define_font = define_font,
   pre_linebreak_filter = harf_node.process,
   hpack_filter = harf_node.process,
-  pre_output_filter = harf_node.post_process,
+  post_linebreak_filter = harf_node.post_process,
   wrapup_run = harf_node.cleanup,
 }
 

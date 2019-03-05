@@ -813,7 +813,7 @@ local function post_process_nodes(head, groupcode, size, packtype, maxdepth, dir
     end
 
     if n.head then
-      post_process_nodes(n.head, currentcolor)
+      post_process_nodes(n.head, groupcode, size, packtype, maxdepth, direction, currentcolor)
     end
   end
   return head

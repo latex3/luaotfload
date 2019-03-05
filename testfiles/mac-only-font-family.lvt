@@ -5,14 +5,17 @@
 
 \begin{document}
 
+\font\testname={Dummy Font Name Bold}
+\font\testfamily={Dummy Font Family/B}
+\testname
 
 \START\showoutput
 
-\font\testname={Dummy Font Name Bold}\testname
+\testname
 
 AAAAAA
 
-\font\testfamily={Dummy Font Family/B}\testfamily
+\testfamily
 
 AAA
 

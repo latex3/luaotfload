@@ -712,20 +712,21 @@ local function hex_to_rgba(s)
   end
 end
 
-local function update_font_tounicode(fontid)
-  local fontdata = font.fonts[fontid]
+local function update_font_tounicode(fontid, fontdata)
   local characters = fontdata.characters
   local glyphs = fontdata.hb.shared.glyphs
 
   local new = {}
   local needsupdate = false
   for gid, glyph in next, glyphs do
-    local char = gid + hb.CH_GID_PREFIX
-    local character = characters[char]
-    if not character.tounicode and glyph.tounicode then
-      character.tounicode = glyph.tounicode
-      new[char] = character
-      needsupdate = true
+    if glyph.tounicode then
+      local char = gid + hb.CH_GID_PREFIX
+      local character = characters[char]
+      if character.tounicode ~= glyph.tounicode then
+        character.tounicode = glyph.tounicode
+        new[char] = character
+        needsupdate = true
+      end
     end
   end
   if needsupdate then
@@ -738,13 +739,14 @@ local function shape_run(head, current, run)
     -- Font loaded with our loader and an HarfBuzz face is present, do our
     -- shaping.
     local fontid = run.font
-    local options = font.fonts[fontid].hb.spec.options
+    local fontdata = font.fonts[fontid]
+    local options = fontdata.hb.spec.options
     local color = options and options.color and hex_to_rgba(options.color)
 
     local glyphs = shape(run)
     head, current = tonodes(head, current, run, glyphs, color)
 
-    update_font_tounicode(fontid)
+    update_font_tounicode(fontid, fontdata)
   else
     -- Not shaping, insert the original node list of of this run.
     local nodes = run.nodes

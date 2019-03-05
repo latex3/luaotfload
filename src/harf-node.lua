@@ -630,12 +630,12 @@ local function tonodes(head, current, run, glyphs, color)
             if nglyphs == 1 and not hbglyph.tounicode then
               hbglyph.tounicode = tounicode
             elseif tounicode ~= hbglyph.tounicode then
-              setprop(current, p_startactual, tounicode)
+              setprop(n, p_startactual, tounicode)
               glyphs[i + nglyphs - 1].endactual = true
             end
           end
           if glyph.endactual then
-            setprop(current, p_endactual, true)
+            setprop(n, p_endactual, true)
           end
         end
       elseif id == glueid and n.subtype == spaceskip then

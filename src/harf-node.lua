@@ -814,6 +814,10 @@ local function post_process_nodes(head, groupcode, currentcolor)
       head = node.insert_after(head, n, pdfdirect("EMC"))
     end
 
+    if n.replace then
+      n.replace = post_process_nodes(n.replace, groupcode, currentcolor)
+    end
+
     if n.head then
       n.head = post_process_nodes(n.head, groupcode, currentcolor)
     end

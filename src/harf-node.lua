@@ -815,7 +815,7 @@ local function post_process_nodes(head, groupcode, currentcolor)
     end
 
     if n.head then
-      post_process_nodes(n.head, groupcode, currentcolor)
+      n.head = post_process_nodes(n.head, groupcode, currentcolor)
     end
   end
   return head

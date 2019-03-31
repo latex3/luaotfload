@@ -209,8 +209,8 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
 
         -- A few slightly higher level support modules:
 
-        loadmodule("util-str.lua")
-        loadmodule("util-fil.lua")
+        loadmodule("util-str.lua") -- future versions can ship without this one
+        loadmodule("util-fil.lua") -- future versions can ship without this one
 
         -- The following modules contain code that is either not used at all
         -- outside context or will fail when enabled due to lack of other

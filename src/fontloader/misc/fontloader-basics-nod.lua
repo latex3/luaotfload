@@ -70,81 +70,77 @@ nodes.nodecodes    = nodecodes
 nodes.glyphcodes   = glyphcodes
 nodes.disccodes    = disccodes
 
-local flush_node   = node.flush_node
-local remove_node  = node.remove
-local traverse_id  = node.traverse_id
-
 nodes.handlers.protectglyphs   = node.protect_glyphs   -- beware: nodes!
 nodes.handlers.unprotectglyphs = node.unprotect_glyphs -- beware: nodes!
 
-function nodes.remove(head, current, free_too)
-   local t = current
-   head, current = remove_node(head,current)
-   if t then
-        if free_too then
-            flush_node(t)
-            t = nil
-        else
-            t.next, t.prev = nil, nil
-        end
-   end
-   return head, current, t
-end
+-- These are now gone in generic as they are context specific.
 
-function nodes.delete(head,current)
-    return nodes.remove(head,current,true)
-end
+-- local flush_node   = node.flush_node
+-- local remove_node  = node.remove
+-- local traverse_id  = node.traverse_id
+--
+-- function nodes.remove(head, current, free_too)
+--    local t = current
+--    head, current = remove_node(head,current)
+--    if t then
+--         if free_too then
+--             flush_node(t)
+--             t = nil
+--         else
+--             t.next, t.prev = nil, nil
+--         end
+--    end
+--    return head, current, t
+-- end
+--
+-- function nodes.delete(head,current)
+--     return nodes.remove(head,current,true)
+-- end
 
-local getfield = node.getfield
-local setfield = node.setfield
+----- getfield = node.getfield
+----- setfield = node.setfield
 
-nodes.getfield = getfield
-nodes.setfield = setfield
+-----.getfield = getfield
+-----.setfield = setfield
+-----.getattr  = getfield
+-----.setattr  = setfield
 
-nodes.getattr  = getfield
-nodes.setattr  = setfield
+-----.tostring             = node.tostring or tostring
+-----.copy                 = node.copy
+-----.copy_node            = node.copy
+-----.copy_list            = node.copy_list
+-----.delete               = node.delete
+-----.dimensions           = node.dimensions
+-----.end_of_math          = node.end_of_math
+-----.flush_list           = node.flush_list
+-----.flush_node           = node.flush_node
+-----.flush                = node.flush_node
+-----.free                 = node.free
+-----.insert_after         = node.insert_after
+-----.insert_before        = node.insert_before
+-----.hpack                = node.hpack
+-----.new                  = node.new
+-----.tail                 = node.tail
+-----.traverse             = node.traverse
+-----.traverse_id          = node.traverse_id
+-----.slide                = node.slide
+-----.vpack                = node.vpack
 
--- being lazy ... just copy a bunch ... not all needed in generic but we assume
--- nodes to be kind of private anyway
+-----.first_glyph          = node.first_glyph
+-----.has_glyph            = node.has_glyph or node.first_glyph
+-----.current_attr         = node.current_attr
+-----.has_field            = node.has_field
+-----.usedlist             = node.usedlist
+-----.protrusion_skippable = node.protrusion_skippable
+-----.write                = node.write
 
-nodes.tostring             = node.tostring or tostring
-nodes.copy                 = node.copy
-nodes.copy_node            = node.copy
-nodes.copy_list            = node.copy_list
-nodes.delete               = node.delete
-nodes.dimensions           = node.dimensions
-nodes.end_of_math          = node.end_of_math
-nodes.flush_list           = node.flush_list
-nodes.flush_node           = node.flush_node
-nodes.flush                = node.flush_node
-nodes.free                 = node.free
-nodes.insert_after         = node.insert_after
-nodes.insert_before        = node.insert_before
-nodes.hpack                = node.hpack
-nodes.new                  = node.new
-nodes.tail                 = node.tail
-nodes.traverse             = node.traverse
-nodes.traverse_id          = node.traverse_id
-nodes.slide                = node.slide
-nodes.vpack                = node.vpack
+-----.has_attribute        = node.has_attribute
+-----.set_attribute        = node.set_attribute
+-----.unset_attribute      = node.unset_attribute
 
-nodes.first_glyph          = node.first_glyph
-nodes.has_glyph            = node.has_glyph or node.first_glyph
-
-nodes.current_attr         = node.current_attr
-nodes.has_field            = node.has_field
-nodes.last_node            = node.last_node
-nodes.usedlist             = node.usedlist
-nodes.protrusion_skippable = node.protrusion_skippable
-nodes.write                = node.write
-
-nodes.has_attribute        = node.has_attribute
-nodes.set_attribute        = node.set_attribute
-nodes.unset_attribute      = node.unset_attribute
-
-nodes.protect_glyphs       = node.protect_glyphs
-nodes.unprotect_glyphs     = node.unprotect_glyphs
-nodes.mlist_to_hlist       = node.mlist_to_hlist
+-----.protect_glyphs       = node.protect_glyphs
+-----.unprotect_glyphs     = node.unprotect_glyphs
+-----.mlist_to_hlist       = node.mlist_to_hlist
 
 -- in generic code, at least for some time, we stay nodes, while in context
 -- we can go nuts (e.g. experimental); this split permits us us keep code

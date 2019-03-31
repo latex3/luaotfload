@@ -74,7 +74,6 @@ local lpegmatch = lpeg.match
 local rshift = bit32.rshift
 
 local setmetatableindex = table.setmetatableindex
-local formatters        = string.formatters
 local sortedkeys        = table.sortedkeys
 local sortedhash        = table.sortedhash
 local stripstring       = string.nospaces

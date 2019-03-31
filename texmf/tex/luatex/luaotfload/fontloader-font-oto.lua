@@ -49,7 +49,9 @@ local function gref(descriptions,n)
             return f_unicode(n)
         end
     elseif n then
-        local num, nam, j = { }, { }, 0
+        local num = { }
+        local nam = { }
+        local j   = 0
         for i=1,#n do
             local ni = n[i]
             if tonumber(ni) then -- first is likely a key
@@ -121,8 +123,8 @@ local basehash, basehashes, applied = { }, 1, { }
 
 local function registerbasehash(tfmdata)
     local properties = tfmdata.properties
-    local hash = concat(applied," ")
-    local base = basehash[hash]
+    local hash       = concat(applied," ")
+    local base       = basehash[hash]
     if not base then
         basehashes     = basehashes + 1
         base           = basehashes
@@ -310,13 +312,16 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
 
         for i=1,nofligatures do
             local ligature = ligatures[i]
-            local unicode, tree = ligature[1], ligature[2]
+            local unicode  = ligature[1]
+            local tree     = ligature[2]
             make_1(present,tree,"ctx_"..unicode)
         end
 
         for i=1,nofligatures do
-            local ligature = ligatures[i]
-            local unicode, tree, lookupname = ligature[1], ligature[2], ligature[3]
+            local ligature   = ligatures[i]
+            local unicode    = ligature[1]
+            local tree       = ligature[2]
+            local lookupname = ligature[3]
             make_2(present,tfmdata,characters,tree,"ctx_"..unicode,unicode,unicode,done,sequence)
         end
 

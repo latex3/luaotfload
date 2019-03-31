@@ -319,7 +319,8 @@ local function contours2outlines_normal(glyphs,shapes) -- maybe accept the bbox 
                 local nofsegments = 0
                 glyph.segments    = segments
                 if nofcontours > 0 then
-                    local px, py = 0, 0 -- we could use these in calculations which saves a copy
+                    local px    = 0
+                    local py    = 0
                     local first = 1
                     for i=1,nofcontours do
                         local last = contours[i]
@@ -347,15 +348,20 @@ local function contours2outlines_normal(glyphs,shapes) -- maybe accept the bbox 
                                     end
                                     control_pt = first_pt
                                 end
-                                local x, y = first_pt[1], first_pt[2]
+                                local x = first_pt[1]
+                                local y = first_pt[2]
                                 if not done then
-                                    xmin, ymin, xmax, ymax = x, y, x, y
+                                    xmin = x
+                                    ymin = y
+                                    xmax = x
+                                    ymax = y
                                     done = true
                                 end
                                 nofsegments = nofsegments + 1
                                 segments[nofsegments] = { x, y, "m" } -- "moveto"
                                 if not quadratic then
-                                    px, py = x, y
+                                    px = x
+                                    py = y
                                 end
                                 local previous_pt = first_pt
                                 for i=first,last do
@@ -375,8 +381,10 @@ local function contours2outlines_normal(glyphs,shapes) -- maybe accept the bbox 
                                             control_pt = current_pt
                                         end
                                     elseif current_on then
-                                        local x1, y1 = control_pt[1], control_pt[2]
-                                        local x2, y2 = current_pt[1], current_pt[2]
+                                        local x1 = control_pt[1]
+                                        local y1 = control_pt[2]
+                                        local x2 = current_pt[1]
+                                        local y2 = current_pt[2]
                                         nofsegments = nofsegments + 1
                                         if quadratic then
                                             segments[nofsegments] = { x1, y1, x2, y2, "q" } -- "quadraticto"
@@ -386,8 +394,10 @@ local function contours2outlines_normal(glyphs,shapes) -- maybe accept the bbox 
                                         end
                                         control_pt = false
                                     else
-                                        local x2, y2 = (previous_pt[1]+current_pt[1])/2, (previous_pt[2]+current_pt[2])/2
-                                        local x1, y1 = control_pt[1], control_pt[2]
+                                        local x2 = (previous_pt[1]+current_pt[1])/2
+                                        local y2 = (previous_pt[2]+current_pt[2])/2
+                                        local x1 = control_pt[1]
+                                        local y1 = control_pt[2]
                                         nofsegments = nofsegments + 1
                                         if quadratic then
                                             segments[nofsegments] = { x1, y1, x2, y2, "q" } -- "quadraticto"
@@ -403,14 +413,17 @@ local function contours2outlines_normal(glyphs,shapes) -- maybe accept the bbox 
                                     -- we're already done, probably a simple curve
                                 else
                                     nofsegments = nofsegments + 1
-                                    local x2, y2 = first_pt[1], first_pt[2]
+                                    local x2 = first_pt[1]
+                                    local y2 = first_pt[2]
                                     if not control_pt then
                                         segments[nofsegments] = { x2, y2, "l" } -- "lineto"
                                     elseif quadratic then
-                                        local x1, y1 = control_pt[1], control_pt[2]
+                                        local x1 = control_pt[1]
+                                        local y1 = control_pt[2]
                                         segments[nofsegments] = { x1, y1, x2, y2, "q" } -- "quadraticto"
                                     else
-                                        local x1, y1 = control_pt[1], control_pt[2]
+                                        local x1 = control_pt[1]
+                                        local y1 = control_pt[2]
                                         x1, y1, x2, y2, px, py = curveto(x1, y1, px, py, x2, y2)
                                         segments[nofsegments] = { x1, y1, x2, y2, px, py, "c" } -- "curveto"
                                      -- px, py = x2, y2
@@ -474,7 +487,8 @@ local function contours2outlines_shaped(glyphs,shapes,keepcurve)
                                     end
                                     control_pt = first_pt
                                 end
-                                local x, y = first_pt[1], first_pt[2]
+                                local x = first_pt[1]
+                                local y = first_pt[2]
                                 if not done then
                                     xmin, ymin, xmax, ymax = x, y, x, y
                                     done = true
@@ -487,7 +501,8 @@ local function contours2outlines_shaped(glyphs,shapes,keepcurve)
                                     segments[nofsegments] = { x, y, "m" } -- "moveto"
                                 end
                                 if not quadratic then
-                                    px, py = x, y
+                                    px = x
+                                    py = y
                                 end
                                 local previous_pt = first_pt
                                 for i=first,last do
@@ -497,7 +512,8 @@ local function contours2outlines_shaped(glyphs,shapes,keepcurve)
                                     if previous_on then
                                         if current_on then
                                             -- both normal points
-                                            local x, y = current_pt[1], current_pt[2]
+                                            local x = current_pt[1]
+                                            local y = current_pt[2]
                                             if x < xmin then xmin = x elseif x > xmax then xmax = x end
                                             if y < ymin then ymin = y elseif y > ymax then ymax = y end
                                             if keepcurve then
@@ -505,14 +521,17 @@ local function contours2outlines_shaped(glyphs,shapes,keepcurve)
                                                 segments[nofsegments] = { x, y, "l" } -- "lineto"
                                             end
                                             if not quadratic then
-                                                px, py = x, y
+                                                px = x
+                                                py = y
                                             end
                                         else
                                             control_pt = current_pt
                                         end
                                     elseif current_on then
-                                        local x1, y1 = control_pt[1], control_pt[2]
-                                        local x2, y2 = current_pt[1], current_pt[2]
+                                        local x1 = control_pt[1]
+                                        local y1 = control_pt[2]
+                                        local x2 = current_pt[1]
+                                        local y2 = current_pt[2]
                                         if quadratic then
                                             if x1 < xmin then xmin = x1 elseif x1 > xmax then xmax = x1 end
                                             if y1 < ymin then ymin = y1 elseif y1 > ymax then ymax = y1 end
@@ -535,8 +554,10 @@ local function contours2outlines_shaped(glyphs,shapes,keepcurve)
                                         end
                                         control_pt = false
                                     else
-                                        local x2, y2 = (previous_pt[1]+current_pt[1])/2, (previous_pt[2]+current_pt[2])/2
-                                        local x1, y1 = control_pt[1], control_pt[2]
+                                        local x2 = (previous_pt[1]+current_pt[1])/2
+                                        local y2 = (previous_pt[2]+current_pt[2])/2
+                                        local x1 = control_pt[1]
+                                        local y1 = control_pt[2]
                                         if quadratic then
                                             if x1 < xmin then xmin = x1 elseif x1 > xmax then xmax = x1 end
                                             if y1 < ymin then ymin = y1 elseif y1 > ymax then ymax = y1 end
@@ -569,8 +590,10 @@ local function contours2outlines_shaped(glyphs,shapes,keepcurve)
                                         segments[nofsegments] = { first_pt[1], first_pt[2], "l" } -- "lineto"
                                     end
                                 else
-                                    local x1, y1 = control_pt[1], control_pt[2]
-                                    local x2, y2 = first_pt[1], first_pt[2]
+                                    local x1 = control_pt[1]
+                                    local y1 = control_pt[2]
+                                    local x2 = first_pt[1]
+                                    local y2 = first_pt[2]
                                     if x1 < xmin then xmin = x1 elseif x1 > xmax then xmax = x1 end
                                     if y1 < ymin then ymin = y1 elseif y1 > ymax then ymax = y1 end
                                     if quadratic then

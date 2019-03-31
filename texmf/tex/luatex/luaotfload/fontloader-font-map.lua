@@ -523,7 +523,8 @@ function mappings.addtounicode(data,filename,checklookups,forceligatures)
                                 glyph.unicode = unicode
                             end
                         else
-                            local t, n = { }, 0
+                            local t = { }
+                            local n = 0
                             for l=1,nsplit do
                                 local base = split[l]
                                 local u = unicodes[base] or unicodevector[base] or contextvector[name]

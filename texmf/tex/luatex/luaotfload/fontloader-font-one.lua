@@ -86,14 +86,16 @@ function afm.load(filename)
         local name = file.removesuffix(file.basename(filename))
         local data = containers.read(afm.cache,name)
         local attr = lfs.attributes(filename)
-        local size, time = attr and attr.size or 0, attr and attr.modification or 0
+        local size = attr and attr.size or 0
+        local time = attr and attr.modification or 0
         --
         local pfbfile = file.replacesuffix(name,"pfb")
         local pfbname = resolvers.findfile(pfbfile,"pfb") or ""
         if pfbname == "" then
             pfbname = resolvers.findfile(file.basename(pfbfile),"pfb") or ""
         end
-        local pfbsize, pfbtime = 0, 0
+        local pfbsize = 0
+        local pfbtime = 0
         if pfbname ~= "" then
             local attr = lfs.attributes(pfbname)
             pfbsize = attr.size or 0
@@ -324,7 +326,8 @@ local addthem = function(rawdata,ligatures)
             local one = descriptions[unicodes[ligname]]
             if one then
                 for _, pair in next, ligdata do
-                    local two, three = unicodes[pair[1]], unicodes[pair[2]]
+                    local two   = unicodes[pair[1]]
+                    local three = unicodes[pair[2]]
                     if two and three then
                         local ol = one.ligatures
                         if ol then
@@ -392,7 +395,7 @@ local function enhance_add_extra_kerns(rawdata) -- using shcodes is not robust h
         if what then
             for complex, simple in next, what do
                 complex = unicodes[complex]
-                simple = unicodes[simple]
+                simple  = unicodes[simple]
                 if complex and simple then
                     local complexdescription = descriptions[complex]
                     if complexdescription then -- optional
@@ -445,7 +448,8 @@ local function adddimensions(data) -- we need to normalize afm to otf i.e. index
         for unicode, description in next, data.descriptions do
             local bb = description.boundingbox
             if bb then
-                local ht, dp = bb[4], -bb[2]
+                local ht =  bb[4]
+                local dp = -bb[2]
                 if ht == 0 or ht < 0 then
                     -- no need to set it and no negative heights, nil == 0
                 else
@@ -757,7 +761,7 @@ local function check_afm(specification,fullname)
     if foundname == "" then
         foundname = fonts.names.getfilename(fullname,"afm") or ""
     end
-    if foundname == "" and afm.autoprefixed then
+    if fullname and foundname == "" and afm.autoprefixed then
         local encoding, shortname = match(fullname,"^(.-)%-(.*)$") -- context: encoding-name.*
         if encoding and shortname and fonts.encodings.known[encoding] then
             shortname = findbinfile(shortname,'afm') or "" -- just to be sure

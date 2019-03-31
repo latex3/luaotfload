@@ -73,13 +73,9 @@ local P, R, S, C, Cs, Cp, Cc, Ct = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.Cs, lpeg
 
 -- better this way:
 
------ tricky     = S("/\\") * P(-1)
 local attributes = lfs.attributes
 
 function lfs.isdir(name)
- -- if not lpegmatch(tricky,name) then
- --     name = name .. "/."
- -- end
     return attributes(name,"mode") == "directory"
 end
 
@@ -336,43 +332,52 @@ end
 -- But after some testing Taco and I came up with the more robust
 -- variant:
 
-function file.is_writable(name)
-    if not name then
-        -- error
-    elseif lfs.isdir(name) then
-        name = name .. "/m_t_x_t_e_s_t.tmp"
-        local f = io.open(name,"wb")
-        if f then
-            f:close()
-            os.remove(name)
-            return true
-        end
-    elseif lfs.isfile(name) then
-        local f = io.open(name,"ab")
-        if f then
-            f:close()
-            return true
-        end
-    else
-        local f = io.open(name,"ab")
-        if f then
-            f:close()
-            os.remove(name)
-            return true
-        end
-    end
-    return false
-end
+if lfs.isreadablefile and lfs.iswritablefile then
 
-local readable = P("r") * Cc(true)
+    file.is_readable = lfs.isreadablefile
+    file.is_writable = lfs.iswritablefile
 
-function file.is_readable(name)
-    if name then
-        local a = attributes(name)
-        return a and lpegmatch(readable,a.permissions) or false
-    else
+else
+
+    function file.is_writable(name)
+        if not name then
+            -- error
+        elseif lfs.isdir(name) then
+            name = name .. "/m_t_x_t_e_s_t.tmp"
+            local f = io.open(name,"wb")
+            if f then
+                f:close()
+                os.remove(name)
+                return true
+            end
+        elseif lfs.isfile(name) then
+            local f = io.open(name,"ab")
+            if f then
+                f:close()
+                return true
+            end
+        else
+            local f = io.open(name,"ab")
+            if f then
+                f:close()
+                os.remove(name)
+                return true
+            end
+        end
         return false
     end
+
+    local readable = P("r") * Cc(true)
+
+    function file.is_readable(name)
+        if name then
+            local a = attributes(name)
+            return a and lpegmatch(readable,a.permissions) or false
+        else
+            return false
+        end
+    end
+
 end
 
 file.isreadable = file.is_readable -- depricated

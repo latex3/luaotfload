@@ -829,7 +829,7 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                 end
             end
             if not match and not pre or not replace then
-                local n = getnext(discfound)
+                local n    = getnext(discfound)
                 local char = ischar(n,currentfont)
                 if char and ligature[char] then
                     match = true
@@ -841,8 +841,8 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
                 local prev   = getprev(start)
                 if stop then
                     setnext(stop)
-                    local tail = getprev(stop)
                     local copy = copy_node_list(start)
+                    local tail = stop -- was: getprev(stop) -- Kai: needs checking on your samples
                     local liat = find_node_tail(copy)
                     if pre then
                         setlink(liat,pre)
@@ -939,7 +939,8 @@ function handlers.gpos_pair(head,start,dataset,sequence,kerns,rlmode,skiphash,st
                     end
                     local format = step.format
                     if format == "pair" then
-                        local a, b = krn[1], krn[2]
+                        local a = krn[1]
+                        local b = krn[2]
                         if a == true then
                             -- zero
                         elseif a then -- #a > 0
@@ -1559,7 +1560,8 @@ function chainprocs.gpos_pair(head,start,stop,dataset,sequence,currentlookup,rlm
                         end
                         local format = currentlookup.format
                         if format == "pair" then
-                            local a, b = krn[1], krn[2]
+                            local a = krn[1]
+                            local b = krn[2]
                             if a == true then
                                 -- zero
                             elseif a then
@@ -3192,7 +3194,7 @@ local function testrun(disc,t_run,c_run,...)
             local d = d_replace > d_post and d_replace or d_post
             local head = getnext(disc) -- is: next
             local tail = head
-            for i=2,d do -- must start at 2 according to Kai 
+            for i=2,d do -- must start at 2 according to Kai
                 local nx = getnext(tail)
                 local id = getid(nx)
                 if id == disc_code then

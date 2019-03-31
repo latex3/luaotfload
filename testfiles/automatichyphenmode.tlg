@@ -222,7 +222,7 @@ Overfull \hbox (64.78pt too wide) in paragraph at lines 22--23
 .\penalty 10000
 .\glue(\parfillskip) 0.0 plus 1.0fil
 .\glue(\rightskip) 0.0
-Overfull \hbox (88.95pt too wide) in paragraph at lines 24--25
+Overfull \hbox (93.95pt too wide) in paragraph at lines 24--25
 [][] 
 \hbox(7.16+0.22)x2.0, direction TLT
 .\localpar
@@ -231,7 +231,7 @@ Overfull \hbox (88.95pt too wide) in paragraph at lines 24--25
 ..\localleftbox=null
 ..\localrightbox=null
 .\hbox(0.0+0.0)x0.0, direction TLT
-.\hbox(7.16+0.22)x90.95, direction TLT
+.\hbox(7.16+0.22)x95.95, direction TLT
 ..\TU/lmr/m/n/10 m
 ..\TU/lmr/m/n/10 d
 ..\TU/lmr/m/n/10 a
@@ -239,7 +239,7 @@ Overfull \hbox (88.95pt too wide) in paragraph at lines 24--25
 ..\TU/lmr/m/n/10 h
 ..\discretionary (penalty 50)
 ...< \TU/lmr/m/n/10 — (ligature ---)
-...= \TU/lmr/m/n/10 – (ligature --)
+...= \TU/lmr/m/n/10 — (ligature ---)
 ..\TU/lmr/m/n/10 m
 ..\TU/lmr/m/n/10 d
 ..\TU/lmr/m/n/10 a
@@ -946,7 +946,7 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x0.0, direction TLT
-....\hbox(7.16+0.22)x90.95, direction TLT
+....\hbox(7.16+0.22)x95.95, direction TLT
 .....\TU/lmr/m/n/10 m
 .....\TU/lmr/m/n/10 d
 .....\TU/lmr/m/n/10 a
@@ -954,7 +954,7 @@ Completed box being shipped out [1]
 .....\TU/lmr/m/n/10 h
 .....\discretionary (penalty 50)
 ......< \TU/lmr/m/n/10 — (ligature ---)
-......= \TU/lmr/m/n/10 – (ligature --)
+......= \TU/lmr/m/n/10 — (ligature ---)
 .....\TU/lmr/m/n/10 m
 .....\TU/lmr/m/n/10 d
 .....\TU/lmr/m/n/10 a

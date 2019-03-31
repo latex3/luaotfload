@@ -14,9 +14,13 @@ local char = string.char
 -- flac files). In Lua 5.3 we can probably do this better. Some code will move
 -- here.
 
+-- We could comment those that are in fio and sio.
+
 utilities       = utilities or { }
 local files     = { }
 utilities.files = files
+
+-- we could have a gc method that closes but files auto close anyway
 
 local zerobased = { }
 
@@ -249,13 +253,42 @@ end
 
 if bit32 then
 
-    local rshift  = bit32.rshift
+    local rshift = bit32.rshift
 
     function files.writecardinal2(f,n)
         local a = char(n % 256)
         n = rshift(n,8)
         local b = char(n % 256)
         f:write(b,a)
+    end
+
+    function files.writecardinal4(f,n)
+        local a = char(n % 256)
+        n = rshift(n,8)
+        local b = char(n % 256)
+        n = rshift(n,8)
+        local c = char(n % 256)
+        n = rshift(n,8)
+        local d = char(n % 256)
+        f:write(d,c,b,a)
+    end
+
+    function files.writecardinal2le(f,n)
+        local a = char(n % 256)
+        n = rshift(n,8)
+        local b = char(n % 256)
+        f:write(a,b)
+    end
+
+    function files.writecardinal4le(f,n)
+        local a = char(n % 256)
+        n = rshift(n,8)
+        local b = char(n % 256)
+        n = rshift(n,8)
+        local c = char(n % 256)
+        n = rshift(n,8)
+        local d = char(n % 256)
+        f:write(a,b,c,d)
     end
 
 else
@@ -269,17 +302,35 @@ else
         f:write(b,a)
     end
 
-end
+    function files.writecardinal4(f,n)
+        local a = char(n % 256)
+        n = floor(n/256)
+        local b = char(n % 256)
+        n = floor(n/256)
+        local c = char(n % 256)
+        n = floor(n/256)
+        local d = char(n % 256)
+        f:write(d,c,b,a)
+    end
 
-function files.writecardinal4(f,n)
-    local a = char(n % 256)
-    n = rshift(n,8)
-    local b = char(n % 256)
-    n = rshift(n,8)
-    local c = char(n % 256)
-    n = rshift(n,8)
-    local d = char(n % 256)
-    f:write(d,c,b,a)
+    function files.writecardinal2le(f,n)
+        local a = char(n % 256)
+        n = floor(n/256)
+        local b = char(n % 256)
+        f:write(a,b)
+    end
+
+    function files.writecardinal4le(f,n)
+        local a = char(n % 256)
+        n = floor(n/256)
+        local b = char(n % 256)
+        n = floor(n/256)
+        local c = char(n % 256)
+        n = floor(n/256)
+        local d = char(n % 256)
+        f:write(a,b,c,d)
+    end
+
 end
 
 function files.writestring(f,s)
@@ -292,30 +343,42 @@ end
 
 if fio and fio.readcardinal1 then
 
-    files.readcardinal1  = fio.readcardinal1
-    files.readcardinal2  = fio.readcardinal2
-    files.readcardinal3  = fio.readcardinal3
-    files.readcardinal4  = fio.readcardinal4
-    files.readinteger1   = fio.readinteger1
-    files.readinteger2   = fio.readinteger2
-    files.readinteger3   = fio.readinteger3
-    files.readinteger4   = fio.readinteger4
-    files.readfixed2     = fio.readfixed2
-    files.readfixed4     = fio.readfixed4
-    files.read2dot14     = fio.read2dot14
-    files.setposition    = fio.setposition
-    files.getposition    = fio.getposition
+    files.readcardinal1   = fio.readcardinal1
+    files.readcardinal2   = fio.readcardinal2
+    files.readcardinal3   = fio.readcardinal3
+    files.readcardinal4   = fio.readcardinal4
 
-    files.readbyte       = files.readcardinal1
-    files.readsignedbyte = files.readinteger1
-    files.readcardinal   = files.readcardinal1
-    files.readinteger    = files.readinteger1
+    files.readcardinal1le = fio.readcardinal1le or files.readcardinal1le
+    files.readcardinal2le = fio.readcardinal2le or files.readcardinal2le
+    files.readcardinal3le = fio.readcardinal3le or files.readcardinal3le
+    files.readcardinal4le = fio.readcardinal4le or files.readcardinal4le
 
-    local skipposition   = fio.skipposition
-    files.skipposition   = skipposition
+    files.readinteger1    = fio.readinteger1
+    files.readinteger2    = fio.readinteger2
+    files.readinteger3    = fio.readinteger3
+    files.readinteger4    = fio.readinteger4
 
-    files.readbytes      = fio.readbytes
-    files.readbytetable  = fio.readbytetable
+    files.readinteger1le  = fio.readinteger1le or files.readinteger1le
+    files.readinteger2le  = fio.readinteger2le or files.readinteger2le
+    files.readinteger3le  = fio.readinteger3le or files.readinteger3le
+    files.readinteger4le  = fio.readinteger4le or files.readinteger4le
+
+    files.readfixed2      = fio.readfixed2
+    files.readfixed4      = fio.readfixed4
+    files.read2dot14      = fio.read2dot14
+    files.setposition     = fio.setposition
+    files.getposition     = fio.getposition
+
+    files.readbyte        = files.readcardinal1
+    files.readsignedbyte  = files.readinteger1
+    files.readcardinal    = files.readcardinal1
+    files.readinteger     = files.readinteger1
+
+    local skipposition    = fio.skipposition
+    files.skipposition    = skipposition
+
+    files.readbytes       = fio.readbytes
+    files.readbytetable   = fio.readbytetable
 
     function files.skipshort(f,n)
         skipposition(f,2*(n or 1))
@@ -324,6 +387,30 @@ if fio and fio.readcardinal1 then
     function files.skiplong(f,n)
         skipposition(f,4*(n or 1))
     end
+
+end
+
+if fio and fio.writecardinal1 then
+
+    files.writecardinal1   = fio.writecardinal1
+    files.writecardinal2   = fio.writecardinal2
+    files.writecardinal3   = fio.writecardinal3
+    files.writecardinal4   = fio.writecardinal4
+
+    files.writecardinal1le = fio.writecardinal1le
+    files.writecardinal2le = fio.writecardinal2le
+    files.writecardinal3le = fio.writecardinal3le
+    files.writecardinal4le = fio.writecardinal4le
+
+    files.writeinteger1    = fio.writeinteger1 or fio.writecardinal1
+    files.writeinteger2    = fio.writeinteger2 or fio.writecardinal2
+    files.writeinteger3    = fio.writeinteger3 or fio.writecardinal3
+    files.writeinteger4    = fio.writeinteger4 or fio.writecardinal4
+
+    files.writeinteger1le  = files.writeinteger1le or fio.writecardinal1le
+    files.writeinteger2le  = files.writeinteger2le or fio.writecardinal2le
+    files.writeinteger3le  = files.writeinteger3le or fio.writecardinal3le
+    files.writeinteger4le  = files.writeinteger4le or fio.writecardinal4le
 
 end
 

@@ -1466,7 +1466,9 @@ function readers.pack(data)
                 end
                 return false
             elseif nt >= threshold then
-                local one, two, rest = 0, 0, 0
+                local one  = 0
+                local two  = 0
+                local rest = 0
                 if pass == 1 then
                     for k,v in next, c do
                         if v == 1 then

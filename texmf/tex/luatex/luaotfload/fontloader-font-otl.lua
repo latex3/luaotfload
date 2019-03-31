@@ -495,7 +495,6 @@ local function copytotfm(data,cache_id)
         properties.space         = spacer
         properties.encodingbytes = 2
         properties.format        = data.format or formats.otf
-        properties.noglyphnames  = true
         properties.filename      = filename
         properties.fontname      = fontname
         properties.fullname      = fullname

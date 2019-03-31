@@ -456,7 +456,8 @@ function injections.setmove(current,factor,rlmode,x,injection)
 end
 
 function injections.setmark(start,base,factor,rlmode,ba,ma,tfmbase,mkmk,checkmark) -- ba=baseanchor, ma=markanchor
-    local dx, dy = factor*(ba[1]-ma[1]), factor*(ba[2]-ma[2])
+    local dx = factor*(ba[1]-ma[1])
+    local dy = factor*(ba[2]-ma[2])
     nofregisteredmarks = nofregisteredmarks + 1
     if rlmode >= 0 then
         dx = tfmbase.width - dx -- see later commented ox

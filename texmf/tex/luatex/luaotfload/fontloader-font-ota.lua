@@ -302,9 +302,9 @@ if not classifiers then
 end
 
 function methods.arab(head,font,attr)
-    local first, last = nil, nil
-    local c_first, c_last = nil, nil
-    local current, done = head, false
+    local first, last, c_first, c_last
+    local current = head
+    local done    = false
     current = tonut(current)
     while current do
         local char, id = ischar(current,font)

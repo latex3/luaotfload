@@ -278,7 +278,8 @@ local function addfeature(data,feature,specifications)
             if not nocheck and not description then
                 skip = skip + 1
             elseif type(replacement) == "table" then
-                local r, n = { }, 0
+                local r = { }
+                local n = 0
                 for i=1,#replacement do
                     local u = tounicode(replacement[i])
                     if nocheck or descriptions[u] then

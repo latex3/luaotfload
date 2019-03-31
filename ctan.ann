@@ -1,9 +1,1 @@
-- In version 2.95 letterspacing was broken due to a change in the fontloader. 
-In version 2.96 this is now repaired. At the same time a number of long-standing 
-oddities and bugs in the letterspacing has been corrected. 
-This can change the output of existing documents!! 
-See the documentation for more information and ways to restore the old behaviour,
-
-- A problem with the detection of bold fonts has been corrected (issue 41, pull request 42).
-
-- The fontloader has been synced with the context files from 2019-02-14.
+- The fontloader has been synced with the context files from 2019-03-21.

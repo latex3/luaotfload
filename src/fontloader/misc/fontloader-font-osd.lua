@@ -615,6 +615,8 @@ local function initializedevanagi(tfmdata)
                 end
             end
             --
+            -- needs checking: this might be needed per instance ?
+            --
             if script == "deva" then
                 sharedfeatures["dv04"] = true -- dv04_remove_joiners
             elseif script == "dev2" then
@@ -689,7 +691,7 @@ local function initialize_one(font,attr) -- we need a proper hook into the datas
 
     if not devanagaridata then
 
-        devanagaridata      = {
+        devanagaridata = {
             reph      = false,
             vattu     = false,
             blwfcache = { },
@@ -1329,7 +1331,7 @@ end
 
 function handlers.devanagari_remove_joiners(head,start,kind,lookupname,replacement)
     local stop = getnext(start)
-    local font = getfont(start)
+    local font = getfont(start) -- hm
     local last = start
     while stop do
         local char = ischar(stop,font)

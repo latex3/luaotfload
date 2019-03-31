@@ -1950,7 +1950,8 @@ end
 --                 1,
 --                 1
 --         else
-            local g, l = #globals, #locals
+            local g = #globals
+            local l = #locals
             return
                 ((g < 1240 and 107) or (g < 33900 and 1131) or 32768) + 1,
                 ((l < 1240 and 107) or (l < 33900 and 1131) or 32768) + 1

@@ -214,13 +214,11 @@ function statistics.show()
      -- collectgarbage("collect")
         register("lua properties",function()
             local hashchar = tonumber(status.luatex_hashchars)
-            local hashtype = status.luatex_hashtype
             local mask = lua.mask or "ascii"
-            return format("engine: %s %s, used memory: %s, hash type: %s, hash chars: min(%i,40), symbol mask: %s (%s)",
+            return format("engine: %s %s, used memory: %s, hash chars: min(%i,40), symbol mask: %s (%s)",
                 jit and "luajit" or "lua",
                 LUAVERSION,
                 statistics.memused(),
-                hashtype or "default",
                 hashchar and 2^hashchar or "unknown",
                 mask,
                 mask == "utf" and "τεχ" or "tex")

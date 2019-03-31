@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Fri Feb 22 23:27:00 2019
+-- merge date  : Sun Mar 31 23:48:12 2019
 
 do -- begin closure to overcome local limits and interference
 
@@ -119,8 +119,7 @@ if not FFISUPPORTED then
 elseif not ffi.number then
  ffi.number=tonumber
 end
-if not bit32 then
- bit32=require("l-bit32")
+if LUAVERSION>5.3 then
 end
 
 end -- closure
@@ -1362,7 +1361,7 @@ if not modules then modules={} end modules ['l-table']={
 }
 local type,next,tostring,tonumber,select=type,next,tostring,tonumber,select
 local table,string=table,string
-local concat,sort,insert,remove=table.concat,table.sort,table.insert,table.remove
+local concat,sort=table.concat,table.sort
 local format,lower,dump=string.format,string.lower,string.dump
 local getmetatable,setmetatable=getmetatable,setmetatable
 local lpegmatch,patterns=lpeg.match,lpeg.patterns
@@ -1372,7 +1371,8 @@ function table.getn(t)
  return t and #t 
 end
 function table.strip(tab)
- local lst,l={},0
+ local lst={}
+ local l=0
  for i=1,#tab do
   local s=lpegmatch(stripper,tab[i]) or ""
   if s=="" then
@@ -1385,7 +1385,8 @@ function table.strip(tab)
 end
 function table.keys(t)
  if t then
-  local keys,k={},0
+  local keys={}
+  local k=0
   for key in next,t do
    k=k+1
    keys[k]=key
@@ -1416,27 +1417,30 @@ local function compare(a,b)
 end
 local function sortedkeys(tab)
  if tab then
-  local srt,category,s={},0,0 
+  local srt={}
+  local category=0 
+  local s=0
   for key in next,tab do
    s=s+1
    srt[s]=key
-   if category==3 then
-   elseif category==1 then
-    if type(key)~="string" then
-     category=3
-    end
-   elseif category==2 then
-    if type(key)~="number" then
-     category=3
-    end
-   else
+   if category~=3 then
     local tkey=type(key)
-    if tkey=="string" then
-     category=1
-    elseif tkey=="number" then
-     category=2
+    if category==1 then
+     if tkey~="string" then
+      category=3
+     end
+    elseif category==2 then
+     if tkey~="number" then
+      category=3
+     end
     else
-     category=3
+     if tkey=="string" then
+      category=1
+     elseif tkey=="number" then
+      category=2
+     else
+      category=3
+     end
     end
    end
   end
@@ -1453,7 +1457,8 @@ local function sortedkeys(tab)
 end
 local function sortedhashonly(tab)
  if tab then
-  local srt,s={},0
+  local srt={}
+  local s=0
   for key in next,tab do
    if type(key)=="string" then
     s=s+1
@@ -1470,7 +1475,8 @@ local function sortedhashonly(tab)
 end
 local function sortedindexonly(tab)
  if tab then
-  local srt,s={},0
+  local srt={}
+  local s=0
   for key in next,tab do
    if type(key)=="number" then
     s=s+1
@@ -1487,7 +1493,8 @@ local function sortedindexonly(tab)
 end
 local function sortedhashkeys(tab,cmp) 
  if tab then
-  local srt,s={},0
+  local srt={}
+  local s=0
   for key in next,tab do
    if key then
     s=s+1
@@ -1563,7 +1570,9 @@ function table.prepend(t,list)
  return t
 end
 function table.merge(t,...) 
- t=t or {}
+ if not t then
+  t={}
+ end
  for i=1,select("#",...) do
   for k,v in next,(select(i,...)) do
    t[k]=v
@@ -1592,7 +1601,8 @@ function table.imerge(t,...)
  return t
 end
 function table.imerged(...)
- local tmp,ntmp={},0
+ local tmp={}
+ local ntmp=0
  for i=1,select("#",...) do
   local nst=select(i,...)
   for j=1,#nst do
@@ -1624,7 +1634,9 @@ local function fastcopy(old,metatabletoo)
  end
 end
 local function copy(t,tables) 
- tables=tables or {}
+ if not tables then
+  tables={}
+ end
  local tcopy={}
  if not tables[t] then
   tables[t]=tcopy
@@ -1671,7 +1683,8 @@ function table.tohash(t,value)
  return h
 end
 function table.fromhash(t)
- local hsh,h={},0
+ local hsh={}
+ local h=0
  for k,v in next,t do
   if v then
    h=h+1
@@ -1772,7 +1785,8 @@ local function do_serialize(root,name,depth,level,indexed)
   end
  end
  if root and next(root)~=nil then
-  local first,last=nil,0
+  local first=nil
+  local last=0
   if compact then
    last=#root
    for k=1,last do
@@ -2031,7 +2045,8 @@ local function serialize(_handle,root,name,specification)
  handle("}")
 end
 function table.serialize(root,name,specification)
- local t,n={},0
+ local t={}
+ local n=0
  local function flush(s)
   n=n+1
   t[n]=s
@@ -2045,13 +2060,15 @@ function table.tofile(filename,root,name,specification)
  local f=io.open(filename,'w')
  if f then
   if maxtab>1 then
-   local t,n={},0
+   local t={}
+   local n=0
    local function flush(s)
     n=n+1
     t[n]=s
     if n>maxtab then
      f:write(concat(t,"\n"),"\n") 
-     t,n={},0 
+     t={} 
+     n=0
     end
    end
    serialize(flush,root,name,specification)
@@ -2153,8 +2170,12 @@ local function are_equal(a,b,n,m)
  if a==b then
   return true
  elseif a and b and #a==#b then
-  n=n or 1
-  m=m or #a
+  if not n then
+   n=1
+  end
+  if not m then
+   m=#a
+  end
   for i=n,m do
    local ai,bi=a[i],b[i]
    if ai==bi then
@@ -2254,7 +2275,8 @@ function table.mirrored(t)
 end
 function table.reversed(t)
  if t then
-  local tt,tn={},#t
+  local tt={}
+  local tn=#t
   if tn>0 then
    local ttn=0
    for i=tn,1,-1 do
@@ -2367,7 +2389,9 @@ function table.sorted(t,...)
 end
 function table.values(t,s) 
  if t then
-  local values,keys,v={},{},0
+  local values={}
+  local keys={}
+  local v=0
   for key,value in next,t do
    if not keys[value] then
     v=v+1
@@ -3236,16 +3260,6 @@ local launchers={
 function os.launch(str)
  execute(format(launchers[os.name] or launchers.unix,str))
 end
-if not os.times then
- function os.times()
-  return {
-   utime=os.gettimeofday(),
-   stime=0,
-   cutime=0,
-   cstime=0,
-  }
- end
-end
 local gettimeofday=os.gettimeofday or os.clock
 os.gettimeofday=gettimeofday
 local startuptime=gettimeofday()
@@ -3696,39 +3710,44 @@ local reslasher=lpeg.replacer(P("\\"),"/")
 function file.reslash(str)
  return str and lpegmatch(reslasher,str)
 end
-function file.is_writable(name)
- if not name then
- elseif lfs.isdir(name) then
-  name=name.."/m_t_x_t_e_s_t.tmp"
-  local f=io.open(name,"wb")
-  if f then
-   f:close()
-   os.remove(name)
-   return true
+if lfs.isreadablefile and lfs.iswritablefile then
+ file.is_readable=lfs.isreadablefile
+ file.is_writable=lfs.iswritablefile
+else
+ function file.is_writable(name)
+  if not name then
+  elseif lfs.isdir(name) then
+   name=name.."/m_t_x_t_e_s_t.tmp"
+   local f=io.open(name,"wb")
+   if f then
+    f:close()
+    os.remove(name)
+    return true
+   end
+  elseif lfs.isfile(name) then
+   local f=io.open(name,"ab")
+   if f then
+    f:close()
+    return true
+   end
+  else
+   local f=io.open(name,"ab")
+   if f then
+    f:close()
+    os.remove(name)
+    return true
+   end
   end
- elseif lfs.isfile(name) then
-  local f=io.open(name,"ab")
-  if f then
-   f:close()
-   return true
-  end
- else
-  local f=io.open(name,"ab")
-  if f then
-   f:close()
-   os.remove(name)
-   return true
-  end
- end
- return false
-end
-local readable=P("r")*Cc(true)
-function file.is_readable(name)
- if name then
-  local a=attributes(name)
-  return a and lpegmatch(readable,a.permissions) or false
- else
   return false
+ end
+ local readable=P("r")*Cc(true)
+ function file.is_readable(name)
+  if name then
+   local a=attributes(name)
+   return a and lpegmatch(readable,a.permissions) or false
+  else
+   return false
+  end
  end
 end
 file.isreadable=file.is_readable 
@@ -4114,13 +4133,15 @@ local function glob_pattern_function(path,patt,recurse,action)
   end
   local dirs
   local nofdirs=0
-  for name in walkdir(usedpath) do
+  for name,mode,size,time in walkdir(usedpath) do
    if name~="." and name~=".." then
     local full=path..name
-    local mode=attributes(full,'mode')
+    if mode==nil then
+     mode=attributes(full,'mode')
+    end
     if mode=='file' then
      if not patt or find(full,patt) then
-      action(full)
+      action(full,size,time)
      end
     elseif recurse and mode=="directory" then
      if dirs then
@@ -4156,10 +4177,12 @@ local function glob_pattern_table(path,patt,recurse,result)
  local dirs
  local nofdirs=0
  local noffiles=#result
- for name,a in walkdir(usedpath) do
+ for name,mode in walkdir(usedpath) do
   if name~="." and name~=".." then
    local full=path..name
-   local mode=attributes(full,'mode')
+   if mode==nil then
+    mode=attributes(full,'mode')
+   end
    if mode=='file' then
     if not patt or find(full,patt) then
      noffiles=noffiles+1
@@ -4210,7 +4233,7 @@ local function collectpattern(path,patt,recurse,result)
   if not find(path,"/$") then
    path=path..'/'
   end
-  for name in scanner,first do
+  for name in scanner,first do 
    if name=="." then
    elseif name==".." then
    else
@@ -4301,10 +4324,12 @@ local function globfiles(path,recurse,func,files)
  end
  files=files or {}
  local noffiles=#files
- for name in walkdir(path) do
+ for name,mode in walkdir(path) do
   if find(name,"^%.") then
   else
-   local mode=attributes(name,'mode')
+   if mode==nil then
+    mode=attributes(name,'mode')
+   end
    if mode=="directory" then
     if recurse then
      globfiles(path.."/"..name,recurse,func,files)
@@ -4327,10 +4352,12 @@ local function globdirs(path,recurse,func,files)
  end
  files=files or {}
  local noffiles=#files
- for name in walkdir(path) do
+ for name,mode in walkdir(path) do
   if find(name,"^%.") then
   else
-   local mode=attributes(name,'mode')
+   if mode==nil then
+    mode=attributes(name,'mode')
+   end
    if mode=="directory" then
     if not func or func(name) then
      noffiles=noffiles+1
@@ -4511,8 +4538,7 @@ local stack={}
 function dir.push(newdir)
  local curdir=currentdir()
  insert(stack,curdir)
- if newdir and newdir~="" then
-  chdir(newdir)
+ if newdir and newdir~="" and chdir(newdir) then
   return newdir
  else
   return curdir

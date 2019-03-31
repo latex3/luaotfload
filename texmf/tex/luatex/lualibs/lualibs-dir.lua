@@ -91,13 +91,15 @@ local function glob_pattern_function(path,patt,recurse,action)
         end
         local dirs
         local nofdirs  = 0
-        for name in walkdir(usedpath) do
+        for name, mode, size, time in walkdir(usedpath) do
             if name ~= "." and name ~= ".." then
                 local full = path .. name
-                local mode = attributes(full,'mode')
+                if mode == nil then
+                    mode = attributes(full,'mode')
+                end
                 if mode == 'file' then
                     if not patt or find(full,patt) then
-                        action(full)
+                        action(full,size,time)
                     end
                 elseif recurse and mode == "directory" then
                     if dirs then
@@ -134,10 +136,12 @@ local function glob_pattern_table(path,patt,recurse,result)
     local dirs
     local nofdirs  = 0
     local noffiles = #result
-    for name, a in walkdir(usedpath) do
+    for name, mode in walkdir(usedpath) do
         if name ~= "." and name ~= ".." then
             local full = path .. name
-            local mode = attributes(full,'mode')
+            if mode == nil then
+                mode = attributes(full,'mode')
+            end
             if mode == 'file' then
                 if not patt or find(full,patt) then
                     noffiles = noffiles + 1
@@ -193,7 +197,7 @@ local function collectpattern(path,patt,recurse,result)
         if not find(path,"/$") then
             path = path .. '/'
         end
-        for name in scanner, first do
+        for name in scanner, first do -- cna be optimized
             if name == "." then
                 -- skip
             elseif name == ".." then
@@ -321,11 +325,13 @@ local function globfiles(path,recurse,func,files) -- func == pattern or function
     end
     files = files or { }
     local noffiles = #files
-    for name in walkdir(path) do
+    for name, mode in walkdir(path) do
         if find(name,"^%.") then
             --- skip
         else
-            local mode = attributes(name,'mode')
+            if mode == nil then
+                mode = attributes(name,'mode')
+            end
             if mode == "directory" then
                 if recurse then
                     globfiles(path .. "/" .. name,recurse,func,files)
@@ -350,11 +356,13 @@ local function globdirs(path,recurse,func,files) -- func == pattern or function
     end
     files = files or { }
     local noffiles = #files
-    for name in walkdir(path) do
+    for name, mode in walkdir(path) do
         if find(name,"^%.") then
             --- skip
         else
-            local mode = attributes(name,'mode')
+            if mode == nil then
+                mode = attributes(name,'mode')
+            end
             if mode == "directory" then
                 if not func or func(name) then
                     noffiles = noffiles + 1
@@ -597,8 +605,7 @@ local stack = { }
 function dir.push(newdir)
     local curdir = currentdir()
     insert(stack,curdir)
-    if newdir and newdir ~= "" then
-        chdir(newdir)
+    if newdir and newdir ~= "" and chdir(newdir) then
         return newdir
     else
         return curdir

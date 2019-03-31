@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Fri Feb 22 23:26:50 2019
+-- merge date  : Sun Mar 31 23:48:01 2019
 
 do -- begin closure to overcome local limits and interference
 
@@ -17,7 +17,6 @@ local strings=utilities.strings
 local format,gsub,rep,sub,find=string.format,string.gsub,string.rep,string.sub,string.find
 local load,dump=load,string.dump
 local tonumber,type,tostring,next,setmetatable=tonumber,type,tostring,next,setmetatable
-local unpack,concat=table.unpack,table.concat
 local unpack,concat=table.unpack,table.concat
 local P,V,C,S,R,Ct,Cs,Cp,Carg,Cc=lpeg.P,lpeg.V,lpeg.C,lpeg.S,lpeg.R,lpeg.Ct,lpeg.Cs,lpeg.Cp,lpeg.Carg,lpeg.Cc
 local patterns,lpegmatch=lpeg.patterns,lpeg.match
@@ -445,7 +444,7 @@ local format_F=function(f)
 end
 local format_k=function(b,a) 
  n=n+1
- return format("formattedfloat(a%s,%i,%i)",n,b or 0,a or 0)
+ return format("formattedfloat(a%s,%s,%s)",n,b or 0,a or 0)
 end
 local format_g=function(f)
  n=n+1
@@ -1154,7 +1153,8 @@ local formatters=string.formatters
 local utftoeight=utf.toeight
 local splitter=lpeg.tsplitat(".")
 function utilities.tables.definetable(target,nofirst,nolast) 
- local composed,t=nil,{}
+ local composed=nil
+ local t={}
  local snippets=lpegmatch(splitter,target)
  for i=1,#snippets-(nolast and 1 or 0) do
   local name=snippets[i]
@@ -1595,18 +1595,19 @@ local function serialize(root,name,specification)
   end
   if root and next(root)~=nil then
    local first=nil
-   local last=0
-   last=#root
-   for k=1,last do
-    if rawget(root,k)==nil then
-     last=k-1
-     break
+   local last=#root
+   if last>0 then
+    for k=1,last do
+     if rawget(root,k)==nil then
+      last=k-1
+      break
+     end
+    end
+    if last>0 then
+     first=1
     end
    end
-   if last>0 then
-    first=1
-   end
-   local sk=sortedkeys(root) 
+   local sk=sortedkeys(root)
    for i=1,#sk do
     local k=sk[i]
     local v=root[k]
@@ -1980,7 +1981,7 @@ local sortedhash=table.sortedhash
 local sortedkeys=table.sortedkeys
 local tohash=table.tohash
 local hashes={}
-utilities.parsers.hashes=hashes
+parsers.hashes=hashes
 local digit=R("09")
 local space=P(' ')
 local equal=P("=")
@@ -2200,7 +2201,9 @@ function parsers.add_settings_to_array(t,str)
 end
 function parsers.hash_to_string(h,separator,yes,no,strict,omit)
  if h then
-  local t,tn,s={},0,sortedkeys(h)
+  local t={}
+  local tn=0
+  local s=sortedkeys(h)
   omit=omit and tohash(omit)
   for i=1,#s do
    local key=s[i]
@@ -2238,7 +2241,7 @@ function parsers.array_to_string(a,separator)
  end
 end
 local pattern=Cf(Ct("")*Cg(C((1-S(", "))^1)*S(", ")^0*Cc(true))^1,rawset)
-function utilities.parsers.settings_to_set(str)
+function parsers.settings_to_set(str)
  return str and lpegmatch(pattern,str) or {}
 end
 hashes.settings_to_set=table.setmetatableindex(function(t,k) 
@@ -2248,7 +2251,8 @@ hashes.settings_to_set=table.setmetatableindex(function(t,k)
 end)
 getmetatable(hashes.settings_to_set).__mode="kv" 
 function parsers.simple_hash_to_string(h,separator)
- local t,tn={},0
+ local t={}
+ local tn=0
  for k,v in sortedhash(h) do
   if v then
    tn=tn+1
@@ -2260,11 +2264,11 @@ end
 local str=Cs(lpegpatterns.unquoted)+C((1-whitespace-equal)^1)
 local setting=Cf(Carg(1)*(whitespace^0*Cg(str*whitespace^0*(equal*whitespace^0*str+Cc(""))))^1,rawset)
 local splitter=setting^1
-function utilities.parsers.options_to_hash(str,target)
+function parsers.options_to_hash(str,target)
  return str and lpegmatch(splitter,str,1,target or {}) or {}
 end
 local splitter=lpeg.tsplitat(" ")
-function utilities.parsers.options_to_array(str)
+function parsers.options_to_array(str)
  return str and lpegmatch(splitter,str) or {}
 end
 local value=P(lbrace*C((nobrace+nestedbraces)^0)*rbrace)+C(digit^1*lparent*(noparent+nestedparents)^1*rparent)+C((nestedbraces+(1-comma))^1)
@@ -2277,7 +2281,8 @@ local function repeater(n,str)
   if n==1 then
    return unpack(s)
   else
-   local t,tn={},0
+   local t={}
+   local tn=0
    for i=1,n do
     for j=1,#s do
      tn=tn+1
@@ -2448,7 +2453,7 @@ setmetatableindex(cache,function(t,k)
  return pattern
 end)
 local commalistiterator=cache[","]
-function utilities.parsers.iterator(str,separator)
+function parsers.iterator(str,separator)
  local n=#str
  if n==0 then
   return dummy
@@ -2490,10 +2495,10 @@ end
 local name=C((1-S(", "))^1)
 local parser=(Carg(1)*name/initialize)*(S(", ")^1*(Carg(1)*name/fetch))^0
 local merge=Cf(parser,process)
-function utilities.parsers.mergehashes(hash,list)
+function parsers.mergehashes(hash,list)
  return lpegmatch(merge,list,1,hash)
 end
-function utilities.parsers.runtime(time)
+function parsers.runtime(time)
  if not time then
   time=os.runtime()
  end
@@ -2510,12 +2515,23 @@ local apply=P("->")
 local method=C((1-apply)^1)
 local token=lbrace*C((1-rbrace)^1)*rbrace+C(anything^1)
 local pattern=spacing*(method*spacing*apply+Carg(1))*spacing*token
-function utilities.parsers.splitmethod(str,default)
+function parsers.splitmethod(str,default)
  if str then
   return lpegmatch(pattern,str,1,default or false)
  else
   return default or false,""
  end
+end
+local p_year=lpegpatterns.digit^4/tonumber
+local pattern=Cf(Ct("")*(
+  (Cg(Cc("year")*p_year)*S("-/")*Cg(Cc("month")*cardinal)*S("-/")*Cg(Cc("day")*cardinal)
+  )+(Cg(Cc("day")*cardinal)*S("-/")*Cg(Cc("month")*cardinal)*S("-/")*Cg(Cc("year")*p_year)
+  )
+ )*P(" ")*Cg(Cc("hour")*cardinal)*P(":")*Cg(Cc("min")*cardinal)*(P(":")*Cg(Cc("sec")*cardinal))^-1
+,rawset)
+lpegpatterns.splittime=pattern
+function parsers.totime(str)
+ return lpegmatch(pattern,str)
 end
 
 end -- closure
@@ -2988,13 +3004,11 @@ function statistics.show()
   end
   register("lua properties",function()
    local hashchar=tonumber(status.luatex_hashchars)
-   local hashtype=status.luatex_hashtype
    local mask=lua.mask or "ascii"
-   return format("engine: %s %s, used memory: %s, hash type: %s, hash chars: min(%i,40), symbol mask: %s (%s)",
+   return format("engine: %s %s, used memory: %s, hash chars: min(%i,40), symbol mask: %s (%s)",
     jit and "luajit" or "lua",
     LUAVERSION,
     statistics.memused(),
-    hashtype or "default",
     hashchar and 2^hashchar or "unknown",
     mask,
     mask=="utf" and "τεχ" or "tex")

@@ -24,8 +24,8 @@ local sortedhash        = table.sortedhash
 local sortedkeys        = table.sortedkeys
 local tohash            = table.tohash
 
-local hashes             = { }
-utilities.parsers.hashes = hashes
+local hashes            = { }
+parsers.hashes          = hashes
 -- we share some patterns
 
 local digit       = R("09")
@@ -308,7 +308,9 @@ end
 
 function parsers.hash_to_string(h,separator,yes,no,strict,omit)
     if h then
-        local t, tn, s = { }, 0, sortedkeys(h)
+        local t  = { }
+        local tn = 0
+        local s  = sortedkeys(h)
         omit = omit and tohash(omit)
         for i=1,#s do
             local key = s[i]
@@ -361,7 +363,7 @@ end
 
 local pattern = Cf(Ct("") * Cg(C((1-S(", "))^1) * S(", ")^0 * Cc(true))^1,rawset)
 
-function utilities.parsers.settings_to_set(str)
+function parsers.settings_to_set(str)
     return str and lpegmatch(pattern,str) or { }
 end
 
@@ -374,7 +376,8 @@ end)
 getmetatable(hashes.settings_to_set).__mode = "kv" -- could be an option (maybe sharing makes sense)
 
 function parsers.simple_hash_to_string(h, separator)
-    local t, tn = { }, 0
+    local t  = { }
+    local tn = 0
     for k, v in sortedhash(h) do
         if v then
             tn = tn + 1
@@ -390,13 +393,13 @@ local str      = Cs(lpegpatterns.unquoted) + C((1-whitespace-equal)^1)
 local setting  = Cf( Carg(1) * (whitespace^0 * Cg(str * whitespace^0 * (equal * whitespace^0 * str + Cc(""))))^1,rawset)
 local splitter = setting^1
 
-function utilities.parsers.options_to_hash(str,target)
+function parsers.options_to_hash(str,target)
     return str and lpegmatch(splitter,str,1,target or { }) or { }
 end
 
 local splitter = lpeg.tsplitat(" ")
 
-function utilities.parsers.options_to_array(str)
+function parsers.options_to_array(str)
     return str and lpegmatch(splitter,str) or { }
 end
 
@@ -415,7 +418,8 @@ local function repeater(n,str)
         if n == 1 then
             return unpack(s)
         else
-            local t, tn = { }, 0
+            local t  = { }
+            local tn = 0
             for i=1,n do
                 for j=1,#s do
                     tn = tn + 1
@@ -557,7 +561,7 @@ end
 
 -- and this is a slightly patched version of a version posted by Philipp Gesang
 
--- local mycsvsplitter = utilities.parsers.rfc4180splitter()
+-- local mycsvsplitter = parsers.rfc4180splitter()
 
 -- local crap = [[
 -- first,second,third,fourth
@@ -597,11 +601,11 @@ function parsers.rfc4180splitter(specification)
     end
 end
 
--- utilities.parsers.stepper("1,7-",9,function(i) print(">>>",i) end)
--- utilities.parsers.stepper("1-3,7,8,9")
--- utilities.parsers.stepper("1-3,6,7",function(i) print(">>>",i) end)
--- utilities.parsers.stepper(" 1 : 3, ,7 ")
--- utilities.parsers.stepper("1:4,9:13,24:*",30)
+-- parsers.stepper("1,7-",9,function(i) print(">>>",i) end)
+-- parsers.stepper("1-3,7,8,9")
+-- parsers.stepper("1-3,6,7",function(i) print(">>>",i) end)
+-- parsers.stepper(" 1 : 3, ,7 ")
+-- parsers.stepper("1:4,9:13,24:*",30)
 
 local function ranger(first,last,n,action)
     if not first then
@@ -654,7 +658,7 @@ function parsers.unittoxml(str)
     return lpegmatch(pattern,str)
 end
 
--- print(utilities.parsers.unittotex("10^-32 %"),utilities.parsers.unittoxml("10^32 %"))
+-- print(parsers.unittotex("10^-32 %"),utilities.parsers.unittoxml("10^32 %"))
 
 local cache   = { }
 local spaces  = lpegpatterns.space^0
@@ -670,7 +674,7 @@ end)
 
 local commalistiterator = cache[","]
 
-function utilities.parsers.iterator(str,separator)
+function parsers.iterator(str,separator)
     local n = #str
     if n == 0 then
         return dummy
@@ -689,7 +693,7 @@ function utilities.parsers.iterator(str,separator)
     end
 end
 
--- for s in utilities.parsers.iterator("a b c,b,c") do
+-- for s in parsers.iterator("a b c,b,c") do
 --     print(s)
 -- end
 
@@ -721,7 +725,7 @@ local name   = C((1-S(", "))^1)
 local parser = (Carg(1) * name / initialize) * (S(", ")^1 * (Carg(1) * name / fetch))^0
 local merge  = Cf(parser,process)
 
-function utilities.parsers.mergehashes(hash,list)
+function parsers.mergehashes(hash,list)
     return lpegmatch(merge,list,1,hash)
 end
 
@@ -731,9 +735,9 @@ end
 --     cc = { epsilon = 3 },
 -- }
 --
--- inspect(utilities.parsers.mergehashes(t,"aa, bb, cc"))
+-- inspect(parsers.mergehashes(t,"aa, bb, cc"))
 
-function utilities.parsers.runtime(time)
+function parsers.runtime(time)
     if not time then
         time = os.runtime()
     end
@@ -755,7 +759,7 @@ local token   = lbrace * C((1-rbrace)^1) * rbrace + C(anything^1)
 
 local pattern = spacing * (method * spacing * apply + Carg(1)) * spacing * token
 
-function utilities.parsers.splitmethod(str,default)
+function parsers.splitmethod(str,default)
     if str then
         return lpegmatch(pattern,str,1,default or false)
     else
@@ -763,9 +767,38 @@ function utilities.parsers.splitmethod(str,default)
     end
 end
 
--- print(utilities.parsers.splitmethod(" foo -> {bar} "))
--- print(utilities.parsers.splitmethod("foo->{bar}"))
--- print(utilities.parsers.splitmethod("foo->bar"))
--- print(utilities.parsers.splitmethod("foo"))
--- print(utilities.parsers.splitmethod("{foo}"))
--- print(utilities.parsers.splitmethod())
+-- print(parsers.splitmethod(" foo -> {bar} "))
+-- print(parsers.splitmethod("foo->{bar}"))
+-- print(parsers.splitmethod("foo->bar"))
+-- print(parsers.splitmethod("foo"))
+-- print(parsers.splitmethod("{foo}"))
+-- print(parsers.splitmethod())
+
+local p_year = lpegpatterns.digit^4 / tonumber
+
+local pattern = Cf( Ct("") *
+    (
+        (              Cg(Cc("year")  * p_year)
+          *  S("-/") * Cg(Cc("month") * cardinal)
+          *  S("-/") * Cg(Cc("day")   * cardinal)
+        ) +
+        (              Cg(Cc("day")   * cardinal)
+          *  S("-/") * Cg(Cc("month") * cardinal)
+          *  S("-/") * Cg(Cc("year")  * p_year)
+        )
+    )
+      *  P(" ")  * Cg(Cc("hour")   * cardinal)
+      *  P(":")  * Cg(Cc("min")    * cardinal)
+      * (P(":")  * Cg(Cc("sec")    * cardinal))^-1
+, rawset)
+
+lpegpatterns.splittime = pattern
+
+function parsers.totime(str)
+    return lpegmatch(pattern,str)
+end
+
+-- print(os.time(parsers.totime("2019-03-05 12:12:12")))
+-- print(os.time(parsers.totime("2019/03/05 12:12:12")))
+-- print(os.time(parsers.totime("05-03-2019 12:12:12")))
+-- print(os.time(parsers.totime("05/03/2019 12:12:12")))

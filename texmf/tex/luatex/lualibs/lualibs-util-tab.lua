@@ -22,7 +22,8 @@ local utftoeight = utf.toeight
 local splitter = lpeg.tsplitat(".")
 
 function utilities.tables.definetable(target,nofirst,nolast) -- defines undefined tables
-    local composed, t = nil, {  }
+    local composed = nil
+    local t        = { }
     local snippets = lpegmatch(splitter,target)
     for i=1,#snippets - (nolast and 1 or 0) do
         local name = snippets[i]
@@ -310,7 +311,8 @@ function tables.encapsulate(core,capsule,protect)
     end
 end
 
--- best keep [%q] keys (as we have some in older applications i.e. saving user data
+-- best keep [%q] keys (as we have some in older applications i.e. saving user data (otherwise
+-- we also need to check for reserved words)
 
 local f_hashed_string   = formatters["[%q]=%q,"]
 local f_hashed_number   = formatters["[%q]=%s,"]
@@ -334,7 +336,6 @@ function table.fastserialize(t,prefix)
 
     local r = { type(prefix) == "string" and prefix or "return" }
     local m = 1
-
     local function fastserialize(t,outer) -- no mixes
         local n = #t
         m = m + 1
@@ -654,19 +655,20 @@ local function serialize(root,name,specification)
         -- we could check for k (index) being number (cardinal)
         if root and next(root) ~= nil then
             local first = nil
-            local last  = 0
-            last = #root
-            for k=1,last do
-                if rawget(root,k) == nil then
-             -- if root[k] == nil then
-                    last = k - 1
-                    break
+            local last  = #root
+            if last > 0 then
+                for k=1,last do
+                    if rawget(root,k) == nil then
+                 -- if root[k] == nil then
+                        last = k - 1
+                        break
+                    end
+                end
+                if last > 0 then
+                    first = 1
                 end
             end
-            if last > 0 then
-                first = 1
-            end
-            local sk = sortedkeys(root) -- inline fast version?\
+            local sk = sortedkeys(root)
             for i=1,#sk do
                 local k  = sk[i]
                 local v  = root[k]

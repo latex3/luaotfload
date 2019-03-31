@@ -230,22 +230,6 @@ function os.launch(str)
     execute(format(launchers[os.name] or launchers.unix,str))
 end
 
-if not os.times then -- ?
-    -- utime  = user time
-    -- stime  = system time
-    -- cutime = children user time
-    -- cstime = children system time
-    function os.times()
-        return {
-            utime  = os.gettimeofday(), -- user
-            stime  = 0,                 -- system
-            cutime = 0,                 -- children user
-            cstime = 0,                 -- children system
-        }
-    end
-end
-
-
 local gettimeofday = os.gettimeofday or os.clock
 os.gettimeofday    = gettimeofday
 

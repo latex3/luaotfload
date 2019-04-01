@@ -712,28 +712,6 @@ local function hex_to_rgba(s)
   end
 end
 
-local function update_font_tounicode(fontid, fontdata)
-  local characters = fontdata.characters
-  local glyphs = fontdata.hb.shared.glyphs
-
-  local new = {}
-  local needsupdate = false
-  for gid, glyph in next, glyphs do
-    if glyph.tounicode then
-      local char = gid + hb.CH_GID_PREFIX
-      local character = characters[char]
-      if character.tounicode ~= glyph.tounicode then
-        character.tounicode = glyph.tounicode
-        new[char] = character
-        needsupdate = true
-      end
-    end
-  end
-  if needsupdate then
-    font.addcharacters(fontid, { nomath = true, characters = new })
-  end
-end
-
 local function shape_run(head, current, run)
   if not run.skip then
     -- Font loaded with our loader and an HarfBuzz face is present, do our
@@ -745,8 +723,6 @@ local function shape_run(head, current, run)
 
     local glyphs = shape(run)
     head, current = tonodes(head, current, run, glyphs, color)
-
-    update_font_tounicode(fontid, fontdata)
   else
     -- Not shaping, insert the original node list of of this run.
     local nodes = run.nodes
@@ -832,8 +808,19 @@ local function run_cleanup()
   end
 end
 
+local function get_tounicode(fontid, c)
+  local fontdata = font.fonts[fontid]
+  local hbdata = fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbglyphs = hbshared.glyphs
+    return hbglyphs[c - hb.CH_GID_PREFIX].tounicode
+  end
+end
+
 return {
   process = process_nodes,
   post_process = post_process_nodes,
   cleanup = run_cleanup,
+  get_tounicode = get_tounicode,
 }

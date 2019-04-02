@@ -9,7 +9,6 @@ harf.callbacks = {
   hpack_filter = harf_node.process,
   post_linebreak_filter = harf_node.post_process,
   wrapup_run = harf_node.cleanup,
-  get_char_tounicode = harf_node.get_tounicode
 }
 
 return harf

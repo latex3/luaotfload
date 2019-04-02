@@ -1474,7 +1474,9 @@ local get_english_names = function (metadata)
         certain.
     --]]--
     if platformnames then
-        --namesource = platformnames.macintosh or platformnames.windows
+        if platformnames.windows and platformnames.macintosh then
+            return table.merge(platformnames.macintosh, platformnames.windows)
+        end
         namesource = platformnames.windows or platformnames.macintosh
     end
     return namesource or metadata

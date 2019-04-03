@@ -1,0 +1,22 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\input regression-test.tex\relax
+\documentclass{article}
+
+
+\begin{document}
+
+\font\testname={Dummy Font Name Bold}
+\font\testfamily={Dummy Font Family/B}
+\testname
+
+\START\showoutput
+
+\testname
+
+AAAAAA
+
+\testfamily
+
+AAA
+
+\end{document}

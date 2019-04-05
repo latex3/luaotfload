@@ -11,12 +11,12 @@
 
 \input regression-test.tex\relax
 \documentclass{article}
-
+\usepackage{amsmath}
 
 \pagestyle{empty}
 
 \usepackage{arabluatex}
-\newfontfamily\arabicfont[Script=Arabic]{amiri-regular.ttf}\fi}%
+\newfontfamily\arabicfont[Script=Arabic]{amiri-regular.ttf}%
 \newarbmark{sly}{\arbcolor[red]{^^^^06d6}}{}
 \newarbmark{jim}{\arbcolor[red]{^^^^06da}}{}
 \newarbmark{anum}{^^^^0600}{}
@@ -25,7 +25,6 @@
 \newarbmark{apage}{^^^^0603}{}
 \newarbmark{asmv}{^^^^0604}{}
 \newarbmark{aeoa}{^^^^06dd}{}
-\newcommand{\ayah}[1]{#1\arbmark{aeoa}}
 
 \directlua{
 

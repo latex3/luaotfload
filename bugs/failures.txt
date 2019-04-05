@@ -1,0 +1,43 @@
+05.04.2019 / tl2019
+
+ Check failed with difference files
+  - ./build/test/arab3.luatex.fc     -> Robert
+  - ./build/test/math-stix2.luatex.fc
+   -> \glue(\thinmuskip) 1.66663 changed to \glue(\thinmuskip) 1.66649
+   -> ignore
+
+Failed tests for configuration config-loader-unpackaged:
+
+  Check failed with difference files
+  - ./build/test-config-loader-unpackaged/arab3.luatex.fc -> ditto
+  - ./build/test-config-loader-unpackaged/math-stix2.luatex.fc
+  ->ditto
+
+Failed tests for configuration config-loader-reference:
+
+  Check failed with difference files
+  - ./build/test-config-loader-reference/arab3.luatex.fc ->ditto
+  - ./build/test-config-loader-reference/math-stix2.luatex.fc
+  ->ditto
+
+Failed tests for configuration config-unicode-math:
+
+  Check failed with difference files
+  - ./build/test-config-unicode-math/aaa-loading.luatex.fc
+   -> thickmuskip changed, ignore
+  - ./build/test-config-unicode-math/active-frac.luatex.fc
+   -> unicode-math small scaling changes, ignore
+  - ./build/test-config-unicode-math/active-sscripts.luatex.fc
+   -> unicode-math, ignore
+  - ./build/test-config-unicode-math/hyphen.luatex.fc
+   -> unicode-math, ignore
+  - ./build/test-config-unicode-math/not.luatex.fc
+   -> unicode-math, ignore
+  - ./build/test-config-unicode-math/radical-cuberoot-output.luatex.fc
+   -> unicode-math, ignore
+  - ./build/test-config-unicode-math/setmathsf.luatex.fc
+   -> unicode-math, ignore
+  - ./build/test-config-unicode-math/sqrt-amsmath-output.luatex.fc
+   -> unicode-math, ignore
+  - ./build/test-config-unicode-math/sqrt-output.luatex.fc
+   -> unicode-math, ignore

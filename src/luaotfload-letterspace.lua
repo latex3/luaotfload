@@ -76,11 +76,25 @@ local glyph_code         = node.id"glyph"
 local kern_code          = node.id"kern"
 local disc_code          = node.id"disc"
 local glue_code          = node.id"glue"
+local whatsit_code       = node.id"whatsit"
 
 local fonthashes         = fonts.hashes
 local identifiers        = fonthashes.identifiers
 local chardata           = fonthashes.characters
 local otffeatures        = fonts.constructors.newfeatures "otf"
+
+local function getprevreal(n)
+  repeat
+    n = getprev(n)
+  until not n or getid(n) ~= whatsit_code
+  return n
+end
+local function getnextreal(n)
+  repeat
+    n = getnext(n)
+  until not n or getid(n) ~= whatsit_code
+  return n
+end
 
 --[[doc--
 
@@ -261,7 +275,7 @@ kerncharacters = function (head)
       end -- kern ligature
 
       --- 3) apply the extra kerning
-      local prev = getprev(start)
+      local prev = getprevreal(start)
       if prev then
         local pid = getid(prev)
 
@@ -288,7 +302,7 @@ kerncharacters = function (head)
           or prev_subtype == userkern_code  --- attribute; we may need a test
           then
 
-            local pprev    = getprev(prev)
+            local pprev    = getprevreal(prev)
             local pprev_id = getid(pprev)
 
             if    keeptogether
@@ -332,8 +346,8 @@ kerncharacters = function (head)
         elseif pid == disc_code then
           local disc = prev -- disc
           local pre, post, replace = getdisc (disc)
-          local prv = getprev(disc)
-          local nxt = getnext(disc)
+          local prv = getprevreal(disc)
+          local nxt = getnextreal(disc)
 
           if pre and prv then -- must pair with start.prev
             -- this one happens in most cases
@@ -353,7 +367,6 @@ kerncharacters = function (head)
             local tail = find_node_tail(post)
             setnext(tail,  after)
             setprev(after, tail)
-            setnext(after, nil)
             post = kerncharacters (post)
             setnext(getprev(after), nil)
             setfield(disc, "post", post)

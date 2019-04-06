@@ -153,7 +153,8 @@ local function collect(head, direction)
     end
 
     local fontdata = currfont and font.fonts[currfont]
-    if not (fontdata and fontdata.hb) then skip = true end
+    local hbdata = fontdata and fontdata.hb
+    if not hbdata then skip = true end
 
     -- Resolve common and inherited scripts. Inherited takes the script of the
     -- previous character. Common almost the same, but we tray to make paired
@@ -172,6 +173,15 @@ local function collect(head, direction)
           end
         end
       end
+    end
+
+    -- If script is not resolved yet, and the font has a "script" option, use
+    -- it.
+    if (script == sc_common or script == sc_inherited) and hbdata then
+      local spec = hbdata.spec
+      local features = spec.features
+      local options = spec.options
+      script = options.script and hb.Script.new(options.script) or script
     end
 
     codes[#codes + 1] = code

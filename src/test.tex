@@ -131,6 +131,20 @@ display math $$E=mc^2\hbox{ with text inside}$$
 \font\padauk="[Padauk-Regular.ttf]:\mode;shaper=ot;+kdot"        at 30pt\padauk
 က ဂ င တ ပ မ ယ လ ဢ ၵ ၸ \par
 
+
+\font\arab="[amiri-regular.ttf]:\mode;script=arab;" at 10pt\arab
+\font\latn="[amiri-regular.ttf]:\mode;script=latn;" at 10pt\latn
+\font\dflt="[amiri-regular.ttf]:\mode;" at 10pt\dflt
+\baselineskip=1.6em
+\halign{#\qquad\hfill&(#)\hfill\cr
+{\arab .A.} & {\tt Arab} script\cr
+{\latn .ع.} & {\tt Latn} script\cr
+{\arab ..}  & {\tt Arab} script\cr
+{\dflt .A.} & No script in font options\cr
+{\dflt .ع.} & No script in font options\cr
+{\dflt ..}  & No script in font options\cr
+}
+
 \endgroup\vfill\eject
 
 \begingroup

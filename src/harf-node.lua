@@ -27,6 +27,8 @@ local p_endactual   = "endactualtext"
 
 local format = string.format
 
+local has_tounicode_callback = callback.list()["get_char_tounicode"] ~= nil
+
 -- Simple table copying function.
 local function copytable(old)
   local new = {}
@@ -749,7 +751,9 @@ local function shape_run(head, current, run)
     local glyphs = shape(run)
     head, current = tonodes(head, current, run, glyphs, color)
 
-    update_font_tounicode(fontid, fontdata)
+    if not has_tounicode_callback then
+      update_font_tounicode(fontid, fontdata)
+    end
   else
     -- Not shaping, insert the original node list of of this run.
     local nodes = run.nodes
@@ -835,8 +839,19 @@ local function run_cleanup()
   end
 end
 
+local function get_tounicode(fontid, c)
+  local fontdata = font.fonts[fontid]
+  local hbdata = fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbglyphs = hbshared.glyphs
+    return hbglyphs[c - hb.CH_GID_PREFIX].tounicode
+  end
+end
+
 return {
   process = process_nodes,
   post_process = post_process_nodes,
   cleanup = run_cleanup,
+  get_tounicode = get_tounicode,
 }

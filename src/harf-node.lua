@@ -125,10 +125,13 @@ local function collect(head, direction)
     local skip = false
 
     if id == glyphid then
-      if n.subtype > 255 then skip = true end
-      code = n.char
       currfont = n.font
-      script = getscript(code)
+      if n.subtype > 255 then
+        skip = true
+      else
+        code = n.char
+        script = getscript(code)
+      end
     elseif id == glueid and n.subtype == spaceskip then
       code = 0x0020 -- SPACE
     elseif id == discid then

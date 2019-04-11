@@ -112,6 +112,13 @@ ABCDEFG\par
 Some text then inline math \(E=mc^2\) then \(\hbox{text inside inline math}\), then
 display math \[E=mc^2\hbox{ with text inside}\]
 
+\begingroup
+% Amiri does not have “onum” feature, so this produces a warning, which is what
+% we are testing here.
+\fontspec{Amiri}[Script=Latin, Numbers=OldStyle]
+Hello 0123456789
+\endgroup
+
 \endgroup\newpage
 
 \begingroup

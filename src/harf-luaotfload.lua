@@ -12,12 +12,21 @@ fonts.names.set_location_precedence {
   "local", "texmf", "system"
 }
 
--- Register a reader for `harf` mode (`mode=harf` font option) so that we only
--- load fonts when explicitly requested. Fonts we load will be shaped by the
--- callbacks we register below.
-fonts.readers.harf = function(spec)
+local readers = {
+  opentype = fonts.readers.opentype,
+  otf = fonts.readers.otf,
+  ttf = fonts.readers.ttf,
+  ttc = fonts.readers.ttc,
+}
+
+local function harf_reader(spec)
   local features = {}
   local options = {}
+
+  local mode = spec.features.raw.mode
+  if mode and mode ~= "harf" then
+    return readers[spec.forced](spec)
+  end
 
   -- Rewrite luaotfload specification to look like what we expect.
   local specification = {
@@ -50,6 +59,16 @@ fonts.readers.harf = function(spec)
   end
   return define_font(specification)
 end
+
+-- Register font readers. We override the default ones to always use HarfBuzz
+-- if no mode is explicitly set or when `mode=harf` is used, otherwise we
+-- fallback to the old readers. Fonts we load will be shaped by the callbacks
+-- we register below.
+fonts.readers.harf = harf_reader
+fonts.readers.opentype = harf_reader
+fonts.readers.otf = harf_reader
+fonts.readers.ttf = harf_reader
+fonts.readers.ttc = harf_reader
 
 local GSUBtag = harf.Tag.new("GSUB")
 local GPOStag = harf.Tag.new("GPOS")

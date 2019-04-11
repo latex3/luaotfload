@@ -51,6 +51,90 @@ fonts.readers.harf = function(spec)
   return define_font(specification)
 end
 
+local GSUBtag = harf.Tag.new("GSUB")
+local GPOStag = harf.Tag.new("GPOS")
+local dflttag = harf.Tag.new("dflt")
+
+local aux = luaotfload.aux
+
+local aux_provides_script = aux.provides_script
+aux.provides_script = function(fontid, script)
+  local fontdata = font.fonts[fontid]
+  local hbdata = fontdata and fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbface = hbshared.face
+
+    local script = harf.Tag.new(script)
+    for _, tag in next, { GSUBtag, GPOStag } do
+      local scripts = hbface:get_script_tags(tag) or {}
+      for i = 1, #scripts do
+        if script == scripts[i] then return true end
+      end
+    end
+    return false
+  end
+  return aux_provides_script(fontid, script)
+end
+
+local aux_provides_language = aux.provides_language
+aux.provides_language = function(fontid, script, language)
+  local fontdata = font.fonts[fontid]
+  local hbdata = fontdata and fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbface = hbshared.face
+
+    local script = harf.Tag.new(script)
+    -- fontspec seems to incorrectly use “DFLT” for language instead of “dflt”.
+    local language = harf.Tag.new(language == "DFLT" and "dflt" or language)
+
+    for _, tag in next, { GSUBtag, GPOStag } do
+      local scripts = hbface:get_script_tags(tag) or {}
+      for i = 1, #scripts do
+        if script == scripts[i] then
+          if language == dflttag then
+            -- By definition “dflt” language is always present.
+            return true
+          else
+            local languages = hbface:get_language_tags(tag, i - 1) or {}
+            for j = 1, #languages do
+              if language == languages[j] then return true end
+            end
+          end
+        end
+      end
+    end
+    return false
+  end
+  return aux_provides_language(fontid, script, language)
+end
+
+local aux_provides_feature = aux.provides_feature
+aux.provides_feature = function(fontid, script, language, feature)
+  local fontdata = font.fonts[fontid]
+  local hbdata = fontdata and fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbface = hbshared.face
+
+    local script = harf.Tag.new(script)
+    -- fontspec seems to incorrectly use “DFLT” for language instead of “dflt”.
+    local language = harf.Tag.new(language == "DFLT" and "dflt" or language)
+    local feature = harf.Tag.new(feature)
+
+    for _, tag in next, { GSUBtag, GPOStag } do
+      local _, script_idx = hbface:find_script(tag, script)
+      local _, language_idx = hbface:find_language(tag, script_idx, language)
+      if hbface:find_feature(tag, script_idx, language_idx, feature) then
+        return true
+      end
+    end
+    return false
+  end
+  return aux_provides_feature(fontid, script, language, feature)
+end
+
 -- luatexbase does not know how to handle `wrapup_run` callback, teach it.
 luatexbase.callbacktypes.wrapup_run = 1 -- simple
 luatexbase.callbacktypes.get_char_tounicode = 1 -- simple

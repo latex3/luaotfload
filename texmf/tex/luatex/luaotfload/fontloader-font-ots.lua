@@ -185,8 +185,6 @@ local setprev            = nuts.setprev
 local getboth            = nuts.getboth
 local setboth            = nuts.setboth
 local getid              = nuts.getid
-local getattr            = nuts.getattr
-local setattr            = nuts.setattr
 local getprop            = nuts.getprop
 local setprop            = nuts.setprop
 local getsubtype         = nuts.getsubtype
@@ -199,6 +197,9 @@ local setlink            = nuts.setlink
 local getcomponents      = nuts.getcomponents -- the original one, not yet node-aux
 local setcomponents      = nuts.setcomponents -- the original one, not yet node-aux
 local getwidth           = nuts.getwidth
+local getattr            = nuts.getattr
+
+local getglyphdata       = nuts.getglyphdata
 
 local ischar             = nuts.is_char
 local isglyph            = nuts.isglyph
@@ -3291,7 +3292,7 @@ end
 -- discretionaries (maybe we need to tag those some day). So, at least for now, we don't
 -- have the following test in the sub runs:
 --
--- -- local a = getattr(start,0)
+-- -- local a = getglyhpdata(start)
 -- -- if a then
 -- --     a = (a == attr) and (not attribute or getprop(start,a_state) == attribute)
 -- -- else
@@ -3301,7 +3302,7 @@ end
 --
 -- but use this instead:
 --
--- -- local a = getattr(start,0)
+-- -- local a = getglyphdata(start)
 -- -- if not a or (a == attr) then
 --
 -- and even that one is probably not needed. However, we can handle interesting
@@ -3327,7 +3328,7 @@ local function c_run_single(head,font,attr,lookupcache,step,dataset,sequence,rlm
         if char then
             local a -- happens often so no assignment is faster
             if attr then
-                a = getattr(start,0)
+                a = getglyphdata(start)
             end
             if not a or (a == attr) then
                 local lookupmatch = lookupcache[char]
@@ -3367,7 +3368,7 @@ local function t_run_single(start,stop,font,attr,lookupcache)
         if char then
             local a -- happens often so no assignment is faster
             if attr then
-                a = getattr(start,0)
+                a = getglyphdata(start)
             end
             local startnext = getnext(start)
             if not a or (a == attr) then
@@ -3451,7 +3452,7 @@ end
 local function k_run_single(sub,injection,last,font,attr,lookupcache,step,dataset,sequence,rlmode,skiphash,handler)
     local a -- happens often so no assignment is faster
     if attr then
-        a = getattr(sub,0)
+        a = getglyphdata(sub)
     end
     if not a or (a == attr) then
         for n in nextnode, sub do -- only gpos
@@ -3487,7 +3488,7 @@ local function c_run_multiple(head,font,attr,steps,nofsteps,dataset,sequence,rlm
         if char then
             local a -- happens often so no assignment is faster
             if attr then
-                a = getattr(start,0)
+                a = getglyphdata(start)
             end
             if not a or (a == attr) then
                 for i=1,nofsteps do
@@ -3535,7 +3536,7 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
         if char then
             local a -- happens often so no assignment is faster
             if attr then
-                a = getattr(start,0)
+                a = getglyphdata(start)
             end
             local startnext = getnext(start)
             if not a or (a == attr) then
@@ -3616,7 +3617,7 @@ end
 local function k_run_multiple(sub,injection,last,font,attr,steps,nofsteps,dataset,sequence,rlmode,skiphash,handler)
     local a -- happens often so no assignment is faster
     if attr then
-        a = getattr(sub,0)
+        a = getglyphdata(sub)
     end
     if not a or (a == attr) then
         for n in nextnode, sub do -- only gpos
@@ -3709,7 +3710,7 @@ do
 
     -- reference:
     --
-    --  local a = attr and getattr(start,0)
+    --  local a = attr and getglyphdata(start)
     --  if a then
     --      a = (a == attr) and (not attribute or getprop(start,a_state) == attribute)
     --  else
@@ -3720,7 +3721,7 @@ do
     --
     --  local a -- happens often so no assignment is faster
     --  if attr then
-    --      if getattr(start,0) == attr and (not attribute or getprop(start,a_state) == attribute) then
+    --      if getglyphdata(start) == attr and (not attribute or getprop(start,a_state) == attribute) then
     --          a = true
     --      end
     --  elseif not attribute or getprop(start,a_state) == attribute then
@@ -3860,7 +3861,7 @@ do
                         if m then
                             local a -- happens often so no assignment is faster
                             if attr then
-                                a = getattr(start,0)
+                                a = getglyphdata(start)
                             end
                             if not a or (a == attr) then
                                 for i=m[1],m[2] do
@@ -3907,7 +3908,7 @@ do
                                 if lookupmatch then
                                     local a -- happens often so no assignment is faster
                                     if attr then
-                                        if getattr(start,0) == attr and (not attribute or getprop(start,a_state) == attribute) then
+                                        if getglyphdata(start) == attr and (not attribute or getprop(start,a_state) == attribute) then
                                             a = true
                                         end
                                     elseif not attribute or getprop(start,a_state) == attribute then
@@ -3974,7 +3975,7 @@ do
                                 if m then
                                     local a -- happens often so no assignment is faster
                                     if attr then
-                                        if getattr(start,0) == attr and (not attribute or getprop(start,a_state) == attribute) then
+                                        if getglyphdata(start) == attr and (not attribute or getprop(start,a_state) == attribute) then
                                             a = true
                                         end
                                     elseif not attribute or getprop(start,a_state) == attribute then

@@ -2073,9 +2073,7 @@ end
 local function readtable(tag,f,fontdata,specification,...)
     local reader = readers[tag]
     if reader then
-     -- local t = os.clock()
         reader(f,fontdata,specification,...)
-     -- report("reading table %a took %0.4f seconds",tag,os.clock()-t)
     end
 end
 

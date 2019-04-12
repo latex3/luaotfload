@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Sun Mar 31 23:48:12 2019
+-- merge date  : Fri Apr 12 19:12:33 2019
 
 do -- begin closure to overcome local limits and interference
 
@@ -3258,7 +3258,8 @@ local launchers={
  unix="xdg-open %s &> /dev/null &",
 }
 function os.launch(str)
- execute(format(launchers[os.name] or launchers.unix,str))
+ local command=format(launchers[os.name] or launchers.unix,str)
+ execute(command)
 end
 local gettimeofday=os.gettimeofday or os.clock
 os.gettimeofday=gettimeofday

@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Sun Mar 31 23:48:01 2019
+-- merge date  : Fri Apr 12 19:12:17 2019
 
 do -- begin closure to overcome local limits and interference
 
@@ -356,8 +356,8 @@ local environment={
  formattednumber=number.formatted,
  sparseexponent=number.sparseexponent,
  formattedfloat=number.formattedfloat,
- stripzero=lpeg.patterns.stripzero,
- stripzeros=lpeg.patterns.stripzeros,
+ stripzero=patterns.stripzero,
+ stripzeros=patterns.stripzeros,
  FORMAT=string.f9,
 }
 local arguments={ "a1" } 
@@ -800,9 +800,9 @@ patterns.xmlescape=Cs((P("<")/"&lt;"+P(">")/"&gt;"+P("&")/"&amp;"+P('"')/"&quot;
 patterns.texescape=Cs((C(S("#$%\\{}"))/"\\%1"+anything)^0)
 patterns.luaescape=Cs(((1-S('"\n'))^1+P('"')/'\\"'+P('\n')/'\\n"')^0) 
 patterns.luaquoted=Cs(Cc('"')*((1-S('"\n'))^1+P('"')/'\\"'+P('\n')/'\\n"')^0*Cc('"'))
-add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],{ xmlescape=lpeg.patterns.xmlescape })
-add(formatters,"tex",[[lpegmatch(texescape,%s)]],{ texescape=lpeg.patterns.texescape })
-add(formatters,"lua",[[lpegmatch(luaescape,%s)]],{ luaescape=lpeg.patterns.luaescape })
+add(formatters,"xml",[[lpegmatch(xmlescape,%s)]],{ xmlescape=patterns.xmlescape })
+add(formatters,"tex",[[lpegmatch(texescape,%s)]],{ texescape=patterns.texescape })
+add(formatters,"lua",[[lpegmatch(luaescape,%s)]],{ luaescape=patterns.luaescape })
 local dquote=patterns.dquote 
 local equote=patterns.escaped+dquote/'\\"'+1
 local cquote=Cc('"')
@@ -833,6 +833,27 @@ end
 local f_16_16=formatters["%0.5N"]
 function number.to16dot16(n)
  return f_16_16(n/65536.0)
+end
+if not string.explode then
+ local tsplitat=lpeg.tsplitat
+ local p_utf=patterns.utf8character
+ local p_check=C(p_utf)*(P("+")*Cc(true))^0
+ local p_split=Ct(C(p_utf)^0)
+ local p_space=Ct((C(1-P(" ")^1)+P(" ")^1)^0)
+ function string.explode(str,symbol)
+  if symbol=="" then
+   return lpegmatch(p_split,str)
+  elseif symbol then
+   local a,b=lpegmatch(p_check,symbol)
+   if b then
+    return lpegmatch(tsplitat(P(a)^1),str)
+   else
+    return lpegmatch(tsplitat(a),str)
+   end
+  else
+   return lpegmatch(p_space,str)
+  end
+ end
 end
 
 end -- closure
@@ -3093,9 +3114,9 @@ local strippedchunks={}
 luautilities.strippedchunks=strippedchunks
 luautilities.suffixes={
  tma="tma",
- tmc=jit and "tmb" or "tmc",
+ tmc=(CONTEXTLMTXMODE and CONTEXTLMTXMODE>0 and "tmd") or (jit and "tmb") or "tmc",
  lua="lua",
- luc=jit and "lub" or "luc",
+ luc=(CONTEXTLMTXMODE and CONTEXTLMTXMODE>0 and "lud") or (jit and "lub") or "luc",
  lui="lui",
  luv="luv",
  luj="luj",
@@ -3258,7 +3279,13 @@ local dummycalls=10*1000
 local nesting=0
 local names={}
 local initialize=false
-if not (FFISUPPORTED and ffi) then
+if lua.getpreciseticks then
+ initialize=function()
+  ticks=lua.getpreciseticks
+  seconds=lua.getpreciseseconds
+  initialize=false
+ end
+elseif not (FFISUPPORTED and ffi) then
 elseif os.type=="windows" then
  initialize=function()
   local kernel=ffilib("kernel32","system") 

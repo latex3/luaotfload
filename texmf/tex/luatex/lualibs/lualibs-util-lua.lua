@@ -30,9 +30,9 @@ luautilities.strippedchunks    = strippedchunks
 
 luautilities.suffixes = {
     tma = "tma",
-    tmc = jit and "tmb" or "tmc",
+    tmc = (CONTEXTLMTXMODE and CONTEXTLMTXMODE > 0 and "tmd") or (jit and "tmb") or "tmc",
     lua = "lua",
-    luc = jit and "lub" or "luc",
+    luc = (CONTEXTLMTXMODE and CONTEXTLMTXMODE > 0 and "lud") or (jit and "lub") or "luc",
     lui = "lui",
     luv = "luv",
     luj = "luj",

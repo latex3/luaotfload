@@ -1,6 +1,6 @@
 return {
  ["hashes"]={
-  { "fontloader-2019-04-12.lua", "2734f256315f1bd7442900080f939351" },
+  { "fontloader-2019-04-12.lua", "eae0a600960e4daf8d2ec915fbb22b62" },
   { "fontloader-util-fil.lua", "4bb3e4dc72e308d8ed67cd7a80027fa7" },
   { "fontloader-util-str.lua", "a09020dcaed195ea9acaace2b7b9a66f" },
   { "fontloader-l-unicode.lua", "d46cc6cf18fb3f368ef1e404dc9fcb5c" },
@@ -21,7 +21,7 @@ return {
   { "fontloader-fonts-enc.lua", "3e71a54297e8f85a1ac438bb0f20dd79" },
   { "fontloader-fonts-mis.lua", "bc9eb43c27f63ce9d0fff67e104fe1c6" },
   { "fontloader-basics-chr.lua", "a8b8316248b40cc9bc1be19050f7074f" },
-  { "fontloader-basics-nod.lua", "0372c2984c51e9387ebdcdb77391da8e" },
+  { "fontloader-basics-nod.lua", "ffca92f622544a9a6f6d735af82a00ec" },
   { "fontloader-font-imp-effects.lua", "73a660359a0ec71e44cc2b7225a715ac" },
   { "fontloader-font-imp-italics.lua", "fe1ca80fb5ea4a2f8d2d5c484e7ba913" },
   { "fontloader-font-imp-ligatures.lua", "043daa4fcccf2560868da359d71d3a4a" },
@@ -52,7 +52,7 @@ return {
   { "fontloader-font-con.lua", "5fc3a79cecebd8b2aa110d800b481794" },
   { "fontloader-font-ini.lua", "4299a02110bbd7c0d27e131235c5319d" },
   { "fontloader-data-con.lua", "7ce546725b1550f655c78ac9d69419ca" },
-  { "fontloader-reference.lua", "55c99e7ffbfb948d5f2e19265297c2b1" },
+  { "fontloader-reference.lua", "06b4d851dc230eead072c95876a6847e" },
   { "fontloader-basics-gen.lua", "b21e91bbd534f77e368f0ec13f865aed" },
   { "mktests", "c7cff7025962922944376acc1ffa9c47" },
   { "mkstatus", "54c20ea0757ef99b5f01b7c6bdeb69f4" },
@@ -81,7 +81,7 @@ return {
   ["committer"]="Ulrike Fischer <fischer@troubleshooting-tex.de>",
   ["description"]="v2.9705-2019-04-12",
   ["loader"]="fontloader-2019-04-12.lua",
-  ["revision"]="22d00b6ed05de056125de29dda5742ca000d93d6",
-  ["timestamp"]="2019-04-13 15:56:48 +0200",
+  ["revision"]="002cca69fd284fa4df46bff63d32d0dd17eb84b1",
+  ["timestamp"]="2019-04-13 16:04:41 +0200",
  },
 }

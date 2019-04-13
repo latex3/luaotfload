@@ -654,7 +654,12 @@ local function tonodes(head, current, run, glyphs, color)
           end
         end
       elseif id == glueid and n.subtype == spaceskip then
-        if n.width ~= math.round(glyph.x_advance * scale) then
+        -- If the glyph advance is different from the font space, then a
+        -- substitution or positioning was applied to the space glyph changing
+        -- it from the default, so reset the glue using the new advance.
+        -- We are intentionally not comparing with the existing glue width as
+        -- spacing after the period is larger by default in TeX.
+        if fontdata.parameters.space ~= glyph.x_advance * scale then
           n.width = glyph.x_advance * scale
         end
         head, current = node.insert_after(head, current, n)

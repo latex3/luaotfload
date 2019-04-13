@@ -211,6 +211,7 @@ local imports = {
     { name = "fonts-gbn"         , ours = nil          , kind = kind_merged    }, -- RENAMED/MOVED UF 18.09.2018
     { name = "fonts-lig"         , ours = nil          , kind = kind_merged    }, -- NEW UF 18.09.2018
     { name = "fonts-mis"         , ours = nil          , kind = kind_merged    }, -- NEW UF 22.09.2018
+    { name = "fonts-tfm"         , ours = nil          , kind = kind_merged    }, -- RENAMED/MOVED MK 12.04.2019
     { name = "fonts-merged"      , ours = "reference"  , kind = kind_essential },
     { name = "fonts"             , ours = "reference-load-order", kind = kind_ignored   }, -- corrected 22.09.2018, is not of type merged
     { name = "fonts"             , ours = "reference-load-order", kind = kind_tex       },
@@ -261,7 +262,7 @@ local imports = {
     { name = "font-ots"          , ours = "font-ots"          , kind = kind_merged    },
     { name = "font-ott"          , ours = "font-ott"          , kind = kind_merged    }, -- NEW UF 18.09.2018
     { name = "font-oup"          , ours = "font-oup"          , kind = kind_merged    },
-    { name = "font-tfm"          , ours = "font-tfm"          , kind = kind_merged    },
+--  { name = "font-tfm"          , ours = "font-tfm"          , kind = kind_merged  }, -- REMOVED/MOVED 13.04.2019
     { name = "font-ttf"          , ours = "font-ttf"          , kind = kind_merged    },
     { name = "font-imp-tex"      , ours = "font-imp-tex"      , kind = kind_merged    },
     { name = "font-imp-ligatures", ours = "font-imp-ligatures", kind = kind_merged    },
@@ -332,7 +333,7 @@ local package = {
 ---   [37] font-onr.lua
 ---   [38] font-one.lua
 ---   [39] font-afk.lua
----   [40] font-tfm.lua
+---   [40] luatex-fonts-tfm.lua -- was font-tfm.lua, changed 13.04.2019
 ---   [41] font-lua.lua
 ---   [42] font-def.lua
 ---REN[43] luatex-fonts-def.lua -- was font-xtx.lua
@@ -408,7 +409,7 @@ local package = {
     "font-onr",
     "font-one",
     "font-afk",
-    "font-tfm",
+    "fonts-tfm",          -- was font-tfm,changed 13.04.2019
     "font-lua",
     "font-def",
     "fonts-def",          -- NEW 18.09.2018

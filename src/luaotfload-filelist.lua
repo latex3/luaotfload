@@ -205,7 +205,7 @@ luaotfload.filelist.data =
     { name = "font-onr"          , ours = "font-onr"          , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" },
     { name = "font-one"          , ours = "font-one"          , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" },
     { name = "font-afk"          , ours = "font-afk"          , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" },
-    { name = "font-tfm"          , ours = "font-tfm"          , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" },
+    { name = "fonts-tfm"         , ours = nil                 , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxgene" , ctxpref = "luatex-" },    
     { name = "font-lua"          , ours = "font-lua"          , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" },
     { name = "font-def"          , ours = "font-def"          , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirbas, ctxtype = "ctxbase" }, 
     { name = "fonts-def"         , ours = nil                 , ext = ".lua", kind = kind_merged    , gitdir=gitdirimp, texdir = texdirtex , ctxdir= ctxdirgen, ctxtype = "ctxgene" , ctxpref = "luatex-" }, 

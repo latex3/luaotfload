@@ -284,7 +284,7 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
 
         -- And for traditional TeX fonts.
 
-        loadmodule('fontloader-font-tfm.lua')
+        loadmodule('fontloader-fonts-tfm.lua')
 
         -- Some common code.
 

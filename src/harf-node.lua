@@ -654,7 +654,7 @@ local function tonodes(head, current, run, glyphs, color)
           end
         end
       elseif id == glueid and n.subtype == spaceskip then
-        if n.width ~= (glyph.x_advance * scale) then
+        if n.width ~= math.round(glyph.x_advance * scale) then
           n.width = glyph.x_advance * scale
         end
         head, current = node.insert_after(head, current, n)

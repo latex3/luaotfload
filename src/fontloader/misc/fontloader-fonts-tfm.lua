@@ -1,4 +1,4 @@
-if not modules then modules = { } end modules ['font-tfm'] = {
+if not modules then modules = { } end modules ['luatex-fonts-tfm'] = {
     version   = 1.001,
     comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
@@ -6,7 +6,8 @@ if not modules then modules = { } end modules ['font-tfm'] = {
     license   = "see context related readme files"
 }
 
-if not context then return end -- use luatex-fonts-tfm.lua instead
+-- This is the generic tfm/vf loader. There are no fundamental differences with
+-- the one used in ConTeXt but we save some byte(codes) this way.
 
 local next, type = next, type
 local match, format = string.match, string.format
@@ -50,30 +51,6 @@ constructors.resolvevirtualtoo = false -- wil be set in font-ctx.lua
 fonts.formats.tfm              = "type1" -- we need to have at least a value here
 fonts.formats.ofm              = "type1" -- we need to have at least a value here
 
---[[ldx--
-<p>The next function encapsulates the standard <l n='tfm'/> loader as
-supplied by <l n='luatex'/>.</p>
---ldx]]--
-
--- this might change: not scaling and then apply features and do scaling in the
--- usual way with dummy descriptions but on the other hand .. we no longer use
--- tfm so why bother
-
--- ofm directive blocks local path search unless set; btw, in context we
--- don't support ofm files anyway as this format is obsolete
-
--- we need to deal with nested virtual fonts, but because we load in the
--- frontend we also need to make sure we don't nest too deep (esp when sizes
--- get large)
---
--- (VTITLE Example of a recursion)
--- (MAPFONT D 0 (FONTNAME recurse)(FONTAT D 2))
--- (CHARACTER C A (CHARWD D 1)(CHARHT D 1)(MAP (SETRULE D 1 D 1)))
--- (CHARACTER C B (CHARWD D 2)(CHARHT D 2)(MAP (SETCHAR C A)))
--- (CHARACTER C C (CHARWD D 4)(CHARHT D 4)(MAP (SETCHAR C B)))
---
--- we added the same checks as below to the luatex engine
-
 function tfm.setfeatures(tfmdata,features)
     local okay = constructors.initializefeatures("tfm",tfmdata,features,trace_features,report_tfm)
     if okay then
@@ -85,42 +62,8 @@ end
 
 local depth = { } -- table.setmetatableindex("number")
 
--- Normally we just load the tfm data and go on. However there was some demand for
--- loading good old tfm /pfb files where afm files were lacking and even enc files
--- of dubious quality so we now support loading such (often messy) setups too.
---
--- Because such fonts also use (ugly) tweaks achieve some purpose (like swapping
--- accents) we need to delay the unicoding actions till after the features have been
--- applied.
---
--- It must be noted that in ConTeXt we don't expect this to be used at all. Here is
--- example:
---
---   tfm metrics + pfb vector for index + pfb file for shapes
---
---   \font\foo=file:csr10.tfm:reencode=auto;mode=node;liga=yes;kern=yes
---
---   tfm metrics + pfb vector for index + enc file for tfm mapping + pfb file for shapes
---
---   \font\foo=file:csr10.tfm:reencode=csr.enc;mode=node;liga=yes;kern=yes
---
---   tfm metrics + enc file for mapping to tfm + bitmaps shapes
---
---   \font\foo=file:csr10.tfm:reencode=csr.enc;bitmap=yes;mode=node;liga=yes;kern=yes
---
--- One can add features:
---
---  fonts.handlers.otf.addfeature {
---      name = "czechdqcheat",
---      type = "substitution",
---      data = {
---          quotedblright = "csquotedblright",
---      },
---  }
---
--- So "czechdqcheat=yes" is then a valid feature. And yes, it's a cheat.
-
-local loadtfmvf = tfm.readers.loadtfmvf
+local loadtfm = font.read_tfm
+local loadvf  = font.read_vf
 
 local function read_from_tfm(specification)
     local filename  = specification.filename
@@ -129,7 +72,7 @@ local function read_from_tfm(specification)
     if trace_defining then
         report_defining("loading tfm file %a at size %s",filename,size)
     end
-    local tfmdata = loadtfmvf(filename,size)
+    local tfmdata = loadtfm(filename,size)
     if tfmdata then
 
         local features = specification.features and specification.features.normal or { }
@@ -263,23 +206,35 @@ local function read_from_tfm(specification)
             -- We do nothing as we assume flat tfm files. It would become real messy
             -- otherwise and I don't have something for testing on my system anyway.
             --
-        else
-            -- already loaded
-            local fonts = tfmdata.fonts
-            if fonts then
-                for i=1,#fonts do
-                    local font = fonts[i]
-                    local id   = font.id
-                    if not id then
-                        local name = font.name
-                        local size = font.size
-                        if name and size then
-                            local data, id = constructors.readanddefine(name,size)
-                            if id then
-                                font.id   = id
-                                font.name = nil
-                                font.size = nil
-                            end
+        elseif constructors.resolvevirtualtoo then
+            fonts.loggers.register(tfmdata,file.suffix(filename),specification) -- strange, why here
+            local vfname = findbinfile(specification.name, 'ovf')
+            if vfname and vfname ~= "" then
+                local vfdata = loadvf(vfname,size)
+                if vfdata then
+                    local chars = tfmdata.characters
+                    for k,v in next, vfdata.characters do
+                        chars[k].commands = v.commands
+                    end
+                    properties.virtualized = true
+                    tfmdata.fonts = vfdata.fonts
+                    tfmdata.type = "virtual" -- else nested calls with cummulative scaling
+                    local fontlist = vfdata.fonts
+                    local name = file.nameonly(filename)
+                    for i=1,#fontlist do
+                        local n = fontlist[i].name
+                        local s = fontlist[i].size
+                        local d = depth[filename]
+                        s = constructors.scaled(s,vfdata.designsize)
+                        if d > tfm.maxnestingdepth then
+                            report_defining("too deeply nested virtual font %a with size %a, max nesting depth %s",n,s,tfm.maxnestingdepth)
+                            fontlist[i] = { id = 0 }
+                        elseif (d > 1) and (s > tfm.maxnestingsize) then
+                            report_defining("virtual font %a exceeds size %s",n,s)
+                            fontlist[i] = { id = 0 }
+                        else
+                            local t, id = constructors.readanddefine(n,s)
+                            fontlist[i] = { id = id }
                         end
                     end
                 end
@@ -508,6 +463,68 @@ do
         tfmdata.private       = private
 
         return tfmdata
+    end
+
+end
+
+-- This code adds a ToUnicode vector for bitmap fonts. We don't bother about
+-- ranges because we have small fonts. it works ok with acrobat but fails with
+-- the other viewers (they get confused by the bitmaps I guess).
+
+do
+
+    local template = [[
+/CIDInit /ProcSet findresource begin
+  12 dict begin
+  begincmap
+    /CIDSystemInfo << /Registry (TeX) /Ordering (bitmap-%s) /Supplement 0 >> def
+    /CMapName /TeX-bitmap-%s def
+    /CMapType 2 def
+    1 begincodespacerange
+      <00> <FF>
+    endcodespacerange
+    %s beginbfchar
+%s
+    endbfchar
+  endcmap
+CMapName currentdict /CMap defineresource pop end
+end
+end
+]]
+
+    local flushstreamobject = lpdf and lpdf.flushstreamobject -- context
+    local setfontattributes = lpdf and lpdf.setfontattributes -- context
+
+    if not flushstreamobject then
+        flushstreamobject = function(data)
+            return pdf.obj { immediate = true, type = "stream", string = data } -- generic
+        end
+    end
+
+    if not setfontattributes then
+        setfontattributes = function(id,data)
+            return pdf.setfontattributes(id,data) -- generic
+        end
+    end
+
+    function tfm.addtounicode(tfmdata)
+        local id   = tfmdata.usedbitmap
+        local map  = { }
+        local char = { } -- no need for range, hardly used
+        for k, v in next, tfmdata.characters do
+            local index     = v.oindex
+            local tounicode = v.tounicode
+            if index and tounicode then
+                map[index] = tounicode
+            end
+        end
+        for k, v in sortedhash(map) do
+            char[#char+1] = format("<%02X> <%s>",k,v)
+        end
+        char  = concat(char,"\n")
+        local stream    = format(template,id,id,#char,char)
+        local reference = flushstreamobject(stream,nil,true)
+        setfontattributes(id,format("/ToUnicode %i 0 R",reference))
     end
 
 end

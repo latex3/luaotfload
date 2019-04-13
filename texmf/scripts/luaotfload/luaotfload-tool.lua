@@ -152,7 +152,7 @@ require "fontloader-basics-gen.lua"
 texio.write, texio.write_nl          = backup.write, backup.write_nl
 utilities                            = backup.utilities
 
-pdf = pdf or { } --- for font-tfm
+pdf = pdf or { } --- for fonts-tfm
 
 require "fontloader-data-con"
 require "fontloader-font-ini"

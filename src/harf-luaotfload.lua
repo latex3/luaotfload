@@ -86,7 +86,7 @@ aux.provides_script = function(fontid, script)
 
     local script = harf.Tag.new(script)
     for _, tag in next, { GSUBtag, GPOStag } do
-      local scripts = hbface:get_script_tags(tag) or {}
+      local scripts = hbface:ot_layout_get_script_tags(tag) or {}
       for i = 1, #scripts do
         if script == scripts[i] then return true end
       end
@@ -109,14 +109,14 @@ aux.provides_language = function(fontid, script, language)
     local language = harf.Tag.new(language == "DFLT" and "dflt" or language)
 
     for _, tag in next, { GSUBtag, GPOStag } do
-      local scripts = hbface:get_script_tags(tag) or {}
+      local scripts = hbface:ot_layout_get_script_tags(tag) or {}
       for i = 1, #scripts do
         if script == scripts[i] then
           if language == dflttag then
             -- By definition “dflt” language is always present.
             return true
           else
-            local languages = hbface:get_language_tags(tag, i - 1) or {}
+            local languages = hbface:ot_layout_get_language_tags(tag, i - 1) or {}
             for j = 1, #languages do
               if language == languages[j] then return true end
             end
@@ -143,9 +143,9 @@ aux.provides_feature = function(fontid, script, language, feature)
     local feature = harf.Tag.new(feature)
 
     for _, tag in next, { GSUBtag, GPOStag } do
-      local _, script_idx = hbface:find_script(tag, script)
-      local _, language_idx = hbface:find_language(tag, script_idx, language)
-      if hbface:find_feature(tag, script_idx, language_idx, feature) then
+      local _, script_idx = hbface:ot_layout_find_script(tag, script)
+      local _, language_idx = hbface:ot_layout_find_language(tag, script_idx, language)
+      if hbface:ot_layout_find_feature(tag, script_idx, language_idx, feature) then
         return true
       end
     end

@@ -661,6 +661,8 @@ local function tonodes(head, current, run, glyphs, color)
         -- spacing after the period is larger by default in TeX.
         if fontdata.parameters.space ~= glyph.x_advance * scale then
           n.width = glyph.x_advance * scale
+          n.stretch = n.width / 2
+          n.shrink = n.width / 3
         end
         head, current = node.insert_after(head, current, n)
       elseif id == kernid and n.subtype == italiccorrection then

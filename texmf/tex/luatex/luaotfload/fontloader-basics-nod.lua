@@ -203,8 +203,8 @@ nuts.setsplit            = direct.setsplit
 nuts.setsubtype          = direct.setsubtype
 nuts.setwidth            = direct.setwidth
 
-nuts.getglyphdata        = direct.get_attribute
-nuts.setglyphdata        = direct.set_attribute
+nuts.getglyphdata        = nuts.getattr
+nuts.setglyphdata        = nuts.setattr
 
 nuts.is_char             = direct.is_char
 nuts.is_glyph            = direct.is_glyph

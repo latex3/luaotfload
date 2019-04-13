@@ -1,3 +1,41 @@
+13.04.2019 / tl2019 Failed tests for configuration build:
+
+  Check failed with difference files
+  - ./build/test/latex-font-lower-uppercase-filename.luatex.fc
+  - ./build/test/math-stix2.luatex.fc
+
+Failed tests for configuration config-loader-unpackaged:
+
+  Check failed with difference files
+  - ./build/test-config-loader-unpackaged/add-uppercase-feature.luatex.fc
+  - ./build/test-config-loader-unpackaged/arab3.luatex.fc
+  - ./build/test-config-loader-unpackaged/issue11.luatex.fc
+  - ./build/test-config-loader-unpackaged/latex-font-lower-uppercase-filename.luatex.fc
+  - ./build/test-config-loader-unpackaged/letterspace1.luatex.fc
+  - ./build/test-config-loader-unpackaged/math-stix2.luatex.fc
+  - ./build/test-config-loader-unpackaged/patch-safe-unsafe.luatex.fc
+  - ./build/test-config-loader-unpackaged/tfm-file-syntax.luatex.fc
+
+Failed tests for configuration config-loader-reference:
+
+  Check failed with difference files
+  - ./build/test-config-loader-reference/latex-font-lower-uppercase-filename.luatex.fc
+  - ./build/test-config-loader-reference/math-stix2.luatex.fc
+
+Failed tests for configuration config-unicode-math:
+
+  Check failed with difference files
+  - ./build/test-config-unicode-math/aaa-loading.luatex.fc
+  - ./build/test-config-unicode-math/active-frac.luatex.fc
+  - ./build/test-config-unicode-math/active-sscripts.luatex.fc
+  - ./build/test-config-unicode-math/hyphen.luatex.fc
+  - ./build/test-config-unicode-math/not.luatex.fc
+  - ./build/test-config-unicode-math/radical-cuberoot-output.luatex.fc
+  - ./build/test-config-unicode-math/setmathsf.luatex.fc
+  - ./build/test-config-unicode-math/sqrt-amsmath-output.luatex.fc
+  - ./build/test-config-unicode-math/sqrt-output.luatex.fc
+
+
 05.04.2019 / tl2019
 
  Check failed with difference files

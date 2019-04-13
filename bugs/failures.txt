@@ -1,3 +1,10 @@
+Legend
+
+X -- ignore, change in luatex % 
+x -- ignore, package change
+! -- needs investigation
+
+
 13.04.2019 / tl2019 Failed tests for configuration build:
 
   Check failed with difference files
@@ -35,6 +42,33 @@ Failed tests for configuration config-unicode-math:
   - ./build/test-config-unicode-math/sqrt-amsmath-output.luatex.fc
   - ./build/test-config-unicode-math/sqrt-output.luatex.fc
 
+
+13.04.2019 tl18
+
+
+  Check failed with difference files
+X - ./build/test/issue47-mac-only-font-family.luatex.fc
+X - ./build/test/mac-only-font-family.luatex.fc
+
+Failed tests for configuration config-loader-unpackaged:
+
+  Check failed with difference files
+Xx - ./build/test-config-loader-unpackaged/add-uppercase-feature.luatex.fc
+  - ./build/test-config-loader-unpackaged/arab3.luatex.fc
+  - ./build/test-config-loader-unpackaged/issue11.luatex.fc
+X-./build/test-config-loader-unpackaged/issue47-mac-only-font-family.luatex.fc
+  - ./build/test-config-loader-unpackaged/letterspace1.luatex.fc
+X-./build/test-config-loader-unpackaged/mac-only-font-family.luatex.fc
+  - ./build/test-config-loader-unpackaged/patch-safe-unsafe.luatex.fc
+  - ./build/test-config-loader-unpackaged/tfm-file-syntax.luatex.fc
+
+Failed tests for configuration config-loader-reference:
+
+  Check failed with difference files
+ignore lt change -
+./build/test-config-loader-reference/issue47-mac-only-font-family.luatex.fc
+ignore lt change -
+./build/test-config-loader-reference/mac-only-font-family.luatex.fc
 
 05.04.2019 / tl2019
 

@@ -579,7 +579,7 @@ local init_main = function ()
     load_fontloader_module "font-onr"
     load_fontloader_module "font-one"
     load_fontloader_module "font-afk"
-    load_fontloader_module "font-tfm"
+    load_fontloader_module "fonts-tfm"
     load_fontloader_module "font-lua"
     load_fontloader_module "font-def"
     load_fontloader_module "fonts-def"

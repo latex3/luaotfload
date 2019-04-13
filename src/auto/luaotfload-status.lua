@@ -74,14 +74,14 @@ return {
   { "luaotfload-tool.lua", "be542601433606fd88c12bf543fa6421" },
   { "luaotfload-diagnostics.lua", "9f96e8f32631030dc119d82097e4767a" },
   { "luaotfload-log.lua", "5183dad83d191af15b490619bd56a9e4" },
-  { "luaotfload-init.lua", "93d127de57323c80eab009263fb07a04" },
+  { "luaotfload-init.lua", "48b07edf0c95469faf63812cb5f86546" },
   { "luaotfload-main.lua", "f138d0e0df6184419a0483885334acdf" },
  },
  ["notes"]={
   ["committer"]="Ulrike Fischer <fischer@troubleshooting-tex.de>",
   ["description"]="v2.9705-2019-04-12",
   ["loader"]="fontloader-2019-04-12.lua",
-  ["revision"]="acf2437b8219e3441a037c0adcd6d3a8b79d3f0b",
-  ["timestamp"]="2019-04-13 16:38:53 +0200",
+  ["revision"]="7b8cf23bb95f22762badb9a6e710186224e9b857",
+  ["timestamp"]="2019-04-13 17:11:00 +0200",
  },
 }

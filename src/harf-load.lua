@@ -260,6 +260,7 @@ local function scalefont(data, spec)
     designsize = size,
     psname = data.psname,
     fullname = data.fullname,
+    index = spec.index,
     size = size,
     type = "real",
     embedding = "subset",

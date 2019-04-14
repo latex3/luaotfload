@@ -6,11 +6,9 @@
 \input luatexbase.sty
 \input luaotfload.sty
 \directlua{dofile("harf-luaotfload.lua")}
-\def\mode{mode=node}
-\def\mode{mode=harf}
 
-\font\amiriten="[amiri-regular.ttf]:\mode;script=arab;" at 10pt
-\font\amiritenb="[amiri-bold.ttf]:\mode;script=arab;" at 10pt
+\font\amiriten="[amiri-regular.ttf]" at 10pt
+\font\amiritenb="[amiri-bold.ttf]" at 10pt
 
 \begingroup\pardir TRT\textdir TRT
 \amiriten
@@ -48,7 +46,7 @@
 تولّد، أو دخل.%
 }
 
-\font\amiritwelve="[amiri-regular.ttf]:\mode;script=arab;" at 20pt
+\font\amiritwelve="[amiri-regular.ttf]" at 20pt
 \begingroup\pardir TRT\textdir TRT
 \amiritwelve
 \baselineskip=2em
@@ -56,26 +54,26 @@
 \par\endgroup\vfill\eject
 
 \begingroup\pardir TRT\textdir TRT
-\font\ruqaa="Aref Ruqaa:\mode;script=arab;" at 18pt
+\font\ruqaa="Aref Ruqaa" at 18pt
 \ruqaa
 \baselineskip=2.2em
 \arabictext
 \par\endgroup\vfill\eject
 
 \begingroup\pardir TRT\textdir TRT
-\font\nasta="Noto Nastaliq Urdu:\mode;script=arab;" at 14pt
+\font\nasta="Noto Nastaliq Urdu" at 14pt
 \nasta
 \baselineskip=3em
 \arabictext
 \par\endgroup\vfill\eject
 
 \begingroup\pardir TRT\textdir TRT
-\font\testc="[amiri-regular.ttf]:\mode;script=arab;color=FF0000" at 20pt
+\font\testc="[amiri-regular.ttf]:color=FF0000" at 20pt
 \amiritwelve قلبي {\testc تلون كله} بلون الحب.
 \par\endgroup\vfill\eject
 
 \begingroup\pardir TRT\textdir TRT
-\font\quran="Amiri Quran Colored:\mode;script=arab;" at 20pt
+\font\quran="Amiri Quran Colored" at 20pt
 \quran
 \baselineskip=2.6em
 \parindent=0pt
@@ -88,12 +86,12 @@
 \endgroup\vfill\eject
 
 \begingroup
-\font\bungeea="[BungeeColor1.ttf]:\mode;script=latn;colr=true" at 50pt
-\font\bungeeb="[BungeeColor1.ttf]:\mode;script=latn;colr=2" at 50pt
+\font\bungeea="[BungeeColor1.ttf]:colr=true" at 50pt
+\font\bungeeb="[BungeeColor1.ttf]:colr=2" at 50pt
 \bungeea ABCDEFG\par
 \bungeeb ABCDEFG\par
 
-\font\emoji="Noto Color Emoji:\mode;script=latn" at 24pt
+\font\emoji="Noto Color Emoji" at 24pt
 \emoji
 💙💚💛💜💝🖤🧡😀😇🧔🏽🦆
 abc
@@ -104,12 +102,12 @@ abc
 \amiriten
 \TeX\ = τεχ in Greek
 
-\font\amiriteni="[amiri-slanted.ttf]:\mode;script=arab;" at 10pt
+\font\amiriteni="[amiri-slanted.ttf]" at 10pt
 ({\amiriteni f\/})
 
 \def\l#1#2{%
   \begingroup%
-  \font\testl="[amiri-regular.ttf]:\mode;script=arab;language=#1" at 10pt
+  \font\testl="[amiri-regular.ttf]:language=#1" at 10pt
   \testl #2%
   \endgroup%
 }
@@ -124,17 +122,17 @@ display math $$E=mc^2\hbox{ with text inside}$$
 
 % Test selecting shapers; when “ot” shaper is used, “kdot” feature will not
 % work as it is a Graphite-only feature in Padauk font.
-\font\padauk="[Padauk-Regular.ttf]:\mode;+kdot" at 30pt\padauk
+\font\padauk="[Padauk-Regular.ttf]:+kdot" at 30pt\padauk
 က ဂ င တ ပ မ ယ လ ဢ ၵ ၸ \par
-\font\padauk="[Padauk-Regular.ttf]:\mode;shaper=graphite2;+kdot" at 30pt\padauk
+\font\padauk="[Padauk-Regular.ttf]:shaper=graphite2;+kdot" at 30pt\padauk
 က ဂ င တ ပ မ ယ လ ဢ ၵ ၸ \par
-\font\padauk="[Padauk-Regular.ttf]:\mode;shaper=ot;+kdot"        at 30pt\padauk
+\font\padauk="[Padauk-Regular.ttf]:shaper=ot;+kdot"        at 30pt\padauk
 က ဂ င တ ပ မ ယ လ ဢ ၵ ၸ \par
 
 
-\font\arab="[amiri-regular.ttf]:\mode;script=arab;" at 10pt\arab
-\font\latn="[amiri-regular.ttf]:\mode;script=latn;" at 10pt\latn
-\font\dflt="[amiri-regular.ttf]:\mode;" at 10pt\dflt
+\font\arab="[amiri-regular.ttf]:script=arab" at 10pt\arab
+\font\latn="[amiri-regular.ttf]:script=latn" at 10pt\latn
+\font\dflt="[amiri-regular.ttf]" at 10pt\dflt
 \baselineskip=1.6em
 \halign{#\qquad\hfill&(#)\hfill\cr
 {\arab .A.} & {\tt Arab} script\cr
@@ -149,7 +147,7 @@ display math $$E=mc^2\hbox{ with text inside}$$
 
 \begingroup
 \parindent=0pt
-\font\notoserifcjk="[NotoSerifCJK-Regular.ttc]:\mode;script=latn;" at 10pt
+\font\notoserifcjk="[NotoSerifCJK-Regular.ttc]" at 10pt
 \notoserifcjk
 \noindent
 \smallskip
@@ -162,7 +160,7 @@ offbeat office baffle coffee HAVANA\par
 \endgroup
 \vfill\eject
 
-\font\lmten="[lmroman10-regular.otf]:\mode;script=latn;+dlig" at 10pt
+\font\lmten="[lmroman10-regular.otf]:+dlig" at 10pt
 \begingroup
 \parindent=0pt
 \lmten
@@ -177,9 +175,9 @@ offbeat office baffle {\rm baffle} coffee HAVANA\par
 \endgroup
 \vfill\eject
 
-\font\lmtwelve="[lmroman12-regular.otf]:\mode;script=latn;" at 12pt
-\font\lmtenb="[lmroman10-bold.otf]:\mode;script=latn;" at 10pt
-\font\lmteni="[lmromanslant10-regular.otf]:\mode;script=latn;" at 10pt
+\font\lmtwelve="[lmroman12-regular.otf]" at 12pt
+\font\lmtenb="[lmroman10-bold.otf]" at 10pt
+\font\lmteni="[lmromanslant10-regular.otf]" at 10pt
 \lmten
 \hrule
 \vskip 1in

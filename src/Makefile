@@ -1,15 +1,15 @@
 SHELL := /bin/bash
 
-LUATEX ?= luatex
+ENGINE ?= harftex
 
 .PHONY: test.pdf test-latex.pdf
 
 all: test.pdf test-latex.pdf
 
 test.pdf: test.tex
-	time $(LUATEX) $<
+	time $(ENGINE) -fmt luatex $<
 	mutool clean -a -d $@ $@
 
 test-latex.pdf: test-latex.tex
-	time $(LUATEX) -fmt lualatex $<
+	time $(ENGINE) -fmt lualatex $<
 	mutool clean -a -d $@ $@

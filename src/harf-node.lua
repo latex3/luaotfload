@@ -69,19 +69,15 @@ local function copyprops(src, dst)
 end
 
 -- Convert list of integers to UTF-16 hex string used in PDF.
-local function to_utf16_hex(unicodes)
-  local hex = ""
-  for _, uni in next, unicodes do
-    if uni < 0x10000 then
-      hex = hex..format("%04X", uni)
-    else
-      uni = uni - 0x10000
-      local hi = 0xD800 + (uni // 0x400)
-      local lo = 0xDC00 + (uni % 0x400)
-      hex = hex..format("%04X%04X", hi, lo)
-    end
+local function to_utf16_hex(uni)
+  if uni < 0x10000 then
+    return format("%04X", uni)
+  else
+    uni = uni - 0x10000
+    local hi = 0xD800 + (uni // 0x400)
+    local lo = 0xDC00 + (uni % 0x400)
+    return format("%04X%04X", hi, lo)
   end
-  return hex
 end
 
 local paired_open = {
@@ -404,14 +400,15 @@ shape = function(run)
       -- then this is a glyph inside a complex cluster and will be handled with
       -- the start of its cluster.
       if nchars > 0 then
-        local unicodes = {}
+        local hex = ""
         for j = 0, nchars - 1 do
           local id = nodes[nodeindex + j].id
           if id == glyphid or id == glueid then
-            unicodes[#unicodes + 1] = codes[nodeindex + j]
+            local code = codes[nodeindex + j]
+            hex = hex..to_utf16_hex(code)
           end
         end
-        glyph.unicodes = unicodes
+        glyph.tounicode = hex
       end
 
       -- Find if we have a discretionary inside a ligature, if nchars less than
@@ -639,9 +636,8 @@ local function tonodes(head, current, run, glyphs, color)
           --     represented by /ActualText spans.
           -- * If there are zero characters, then this glyph is part of complex
           --   cluster that will be covered by an /ActualText span.
-          local unicodes = glyph.unicodes or {}
-          if #unicodes > 0 then
-            local tounicode = to_utf16_hex(unicodes)
+          local tounicode = glyph.tounicode
+          if tounicode then
             if nglyphs == 1 and not hbglyph.tounicode then
               hbglyph.tounicode = tounicode
             elseif tounicode ~= hbglyph.tounicode then

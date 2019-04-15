@@ -27,8 +27,6 @@ local p_endactual   = "endactualtext"
 
 local format = string.format
 
-local has_tounicode_callback = callback.list()["get_char_tounicode"] ~= nil
-
 -- Simple table copying function.
 local function copytable(old)
   local new = {}
@@ -741,28 +739,6 @@ local function hex_to_rgba(s)
   end
 end
 
-local function update_font_tounicode(fontid, fontdata)
-  local characters = fontdata.characters
-  local glyphs = fontdata.hb.shared.glyphs
-
-  local new = {}
-  local needsupdate = false
-  for gid, glyph in next, glyphs do
-    if glyph.tounicode then
-      local char = gid + hb.CH_GID_PREFIX
-      local character = characters[char]
-      if character.tounicode ~= glyph.tounicode then
-        character.tounicode = glyph.tounicode
-        new[char] = character
-        needsupdate = true
-      end
-    end
-  end
-  if needsupdate then
-    font.addcharacters(fontid, { nomath = true, characters = new })
-  end
-end
-
 local function shape_run(head, current, run)
   if not run.skip then
     -- Font loaded with our loader and an HarfBuzz face is present, do our
@@ -774,10 +750,6 @@ local function shape_run(head, current, run)
 
     local glyphs = shape(run)
     head, current = tonodes(head, current, run, glyphs, color)
-
-    if not has_tounicode_callback then
-      update_font_tounicode(fontid, fontdata)
-    end
   else
     -- Not shaping, insert the original node list of of this run.
     local nodes = run.nodes

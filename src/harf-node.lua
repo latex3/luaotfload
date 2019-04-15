@@ -401,14 +401,17 @@ shape = function(run)
       -- the start of its cluster.
       if nchars > 0 then
         local hex = ""
+        local str = ""
         for j = 0, nchars - 1 do
           local id = nodes[nodeindex + j].id
           if id == glyphid or id == glueid then
             local code = codes[nodeindex + j]
             hex = hex..to_utf16_hex(code)
+            str = str..utf8.char(code)
           end
         end
         glyph.tounicode = hex
+        glyph.string = str
       end
 
       -- Find if we have a discretionary inside a ligature, if nchars less than
@@ -626,6 +629,14 @@ local function tonodes(head, current, run, glyphs, color)
               head, current = node.insert_after(head, current, kern)
             end
           end
+
+          -- HarfTeX will use this string when printing a glyph node e.g. in
+          -- overfull messages, otherwise it will be trying to print our
+          -- invalid pseudo Unicode code points.
+          -- If the string is empty it means this glyph is part of a larger
+          -- cluster and we don’t to print anything for it as the first glyph
+          -- in the cluster will have the string of the whole cluster.
+          n.string = glyph.string or ""
 
           -- Handle PDF text extraction:
           -- * Find how many characters in this cluster and how many glyphs,

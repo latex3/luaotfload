@@ -564,20 +564,6 @@ local function tonodes(head, current, run, glyphs, color)
       if id == glyphid then
         local hbglyph = hbglyphs[gid]
 
-        -- Report missing characters, trying to emulate the engine behaviour as
-        -- much as possible.
-        if gid == 0 and tracinglostchars > 0 then
-          local code = n.char
-          local target = "log"
-          local msg = format("Missing character: There is no %s (U+%04X) in "..
-                             "font %s!", utf8.char(code), code, fontdata.name)
-          if tracinglostchars > 1 or tracingonline > 0 then
-            target = "term and log"
-          end
-          texio.write_nl(target, msg)
-          texio.write_nl(target, "")
-        end
-
         local pngblob = hbglyph.png
         if haspng and not pngblob then
           pngblob = hbfont:ot_color_glyph_get_png(gid)

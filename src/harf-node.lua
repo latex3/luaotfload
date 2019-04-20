@@ -184,7 +184,7 @@ local function collect(head, direction)
       currdir = getdir(n)
     end
 
-    local fontdata = currfont and font.fonts[currfont]
+    local fontdata = currfont and font.getfont(currfont)
     local hbdata = fontdata and fontdata.hb
     if not hbdata then skip = true end
 
@@ -364,7 +364,7 @@ shape = function(run)
   local lang = run.lang
   local fordisc = run.fordisc
 
-  local fontdata = font.fonts[fontid]
+  local fontdata = font.getfont(fontid)
   local hbdata = fontdata.hb
   local palette = hbdata.palette
   local spec = hbdata.spec
@@ -540,7 +540,7 @@ local function tonodes(head, current, run, glyphs, color)
   local nodes = run.nodes
   local dir = run.dir
   local fontid = run.font
-  local fontdata = font.fonts[fontid]
+  local fontdata = font.getfont(fontid)
   local characters = fontdata.characters
   local hbdata = fontdata.hb
   local hbshared = hbdata.shared
@@ -697,7 +697,9 @@ local function tonodes(head, current, run, glyphs, color)
         -- loaded the glyph?
         local prevchar, prevfontid = isglyph(current)
         if prevchar > 0 then
-          local italic = font.fonts[prevfontid].characters[prevchar].italic
+          local prevfontdata = font.getfont(prevfontid)
+          local prevcharacters = prevfontdata and prevfontdata.characters
+          local italic = prevcharacters and prevcharacters[prevchar].italic
           if italic then
             setkern(n, italic)
           end
@@ -765,7 +767,7 @@ local function shape_run(head, current, run)
     -- Font loaded with our loader and an HarfBuzz face is present, do our
     -- shaping.
     local fontid = run.font
-    local fontdata = font.fonts[fontid]
+    local fontdata = font.getfont(fontid)
     local options = fontdata.hb.spec.options
     local color = options and options.color and hex_to_rgba(options.color)
 
@@ -797,8 +799,6 @@ process = function(head, direction)
 end
 
 local function process_nodes(head, groupcode, size, packtype, direction)
-  local fonts = font and font.fonts or {}
-
   local head = todirect(head)
 
   -- Check if any fonts are loaded by us and then process the whole node list,
@@ -806,7 +806,9 @@ local function process_nodes(head, groupcode, size, packtype, direction)
   -- return unmodified head.
   for n in traverseid(glyphid, head) do
     local fontid = getfont(n)
-    if fonts[fontid] and fonts[fontid].hb ~= nil then
+    local fontdata = font.getfont(fontid)
+    local hbdata = fontdata and fontdata.hb
+    if hbdata then
       head = process(head, direction)
       break
     end
@@ -880,7 +882,7 @@ local function run_cleanup()
 end
 
 local function get_tounicode(fontid, c)
-  local fontdata = font.fonts[fontid]
+  local fontdata = font.getfont(fontid)
   local hbdata = fontdata.hb
   if hbdata then
     local hbshared = hbdata.shared

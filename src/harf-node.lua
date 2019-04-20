@@ -1,5 +1,18 @@
 local hb = require("harf-base")
 
+local direct       = node.direct
+local tonode       = direct.tonode
+local todirect     = direct.todirect
+local traverse     = direct.traverse
+local insertbefore = direct.insert_before
+local insertafter  = direct.insert_after
+
+local getfield     = direct.getfield
+local setfield     = direct.setfield
+local getproperty  = direct.getproperty
+local setdata      = direct.setdata
+local newnode      = direct.new
+
 local discid     = node.id("disc")
 local glueid     = node.id("glue")
 local glyphid    = node.id("glyph")
@@ -24,6 +37,7 @@ local fl_unsafe    = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 
 local p_startactual = "startactualtext"
 local p_endactual   = "endactualtext"
+local p_color       = "color"
 
 local format = string.format
 
@@ -46,12 +60,6 @@ local function setprop(n, prop, value)
   end
   props.harf = props.harf or {}
   props.harf[prop] = value
-end
-
-local function getprop(n, prop, value)
-  local p = node.getproperty(n)
-  local h = p and p.harf
-  return h and h[prop]
 end
 
 -- Copy node properties and attributes.
@@ -466,13 +474,6 @@ shape = function(run)
   return {}
 end
 
-local function pdfdirect(data)
-  local n = node.new("whatsit", "pdf_literal")
-  n.mode = directmode
-  n.data = data
-  return n
-end
-
 local function color_to_rgba(color)
   local r = color.red   / 255
   local g = color.green / 255
@@ -540,7 +541,7 @@ local function tonodes(head, current, run, glyphs, color)
     end
 
     if color then
-      setprop(n, "color", color)
+      setprop(n, p_color, color)
     end
 
     if glyph.disc then
@@ -558,7 +559,7 @@ local function tonodes(head, current, run, glyphs, color)
       head, current = node.insert_after(head, current, disc)
     elseif not glyph.skip then
       if glyph.color then
-        setprop(n, "color", color_to_rgba(glyph.color))
+        setprop(n, p_color, color_to_rgba(glyph.color))
       end
 
       if id == glyphid then
@@ -777,41 +778,60 @@ local function process_nodes(head, groupcode, size, packtype, direction)
   return head
 end
 
-local function post_process_nodes(head, groupcode, currentcolor)
-  for n in node.traverse(head) do
-    local startactual = getprop(n, p_startactual)
-    local endactual = getprop(n, p_endactual)
-    local color = getprop(n, "color")
+local function pdfdirect(data)
+  local n = newnode("whatsit", "pdf_literal")
+  setfield(n, "mode", directmode)
+  setdata(n, data)
+  return n
+end
+
+local function post_process(head, currentcolor)
+  for n in traverse(head) do
+    local props = getproperty(n)
+    local harfprops = props and props.harf
+
+    local startactual, endactual, color
+    if harfprops then
+      startactual = harfprops[p_startactual]
+      endactual = harfprops[p_endactual]
+      color = harfprops[p_color]
+    end
 
     if currentcolor and currentcolor ~= color then
       -- Pop current color.
-      head = node.insert_before(head, n, pdfdirect("0 g"))
+      head = insertbefore(head, n, pdfdirect("0 g"))
     end
 
     if currentcolor ~= color then
       -- Push new color.
-      head = node.insert_before(head, n, pdfdirect(color))
+      head = insertbefore(head, n, pdfdirect(color))
       currentcolor = color
     end
 
     if startactual then
       local actualtext = "/Span<</ActualText<FEFF"..startactual..">>>BDC"
-      head = node.insert_before(head, n, pdfdirect(actualtext))
+      head = insertbefore(head, n, pdfdirect(actualtext))
     end
 
     if endactual then
-      head = node.insert_after(head, n, pdfdirect("EMC"))
+      head = insertafter(head, n, pdfdirect("EMC"))
     end
 
-    if n.replace then
-      n.replace = post_process_nodes(n.replace, groupcode, currentcolor)
+    local replace = getfield(n, "replace")
+    if replace then
+      setfield(n, "replace", post_process(replace, currentcolor))
     end
 
-    if n.head then
-      n.head = post_process_nodes(n.head, groupcode, currentcolor)
+    local subhead = getfield(n, "head")
+    if subhead then
+      setfield(n, "head", post_process(subhead, currentcolor))
     end
   end
   return head
+end
+
+local function post_process_nodes(head, groupcode)
+  return tonode(post_process(todirect(head)))
 end
 
 local function run_cleanup()

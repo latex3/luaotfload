@@ -74,6 +74,7 @@ local fl_unsafe    = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 local p_startactual = "startactualtext"
 local p_endactual   = "endactualtext"
 local p_color       = "color"
+local p_string      = "string"
 
 local format = string.format
 
@@ -652,7 +653,7 @@ local function tonodes(head, current, run, glyphs, color)
           -- If the string is empty it means this glyph is part of a larger
           -- cluster and we don’t to print anything for it as the first glyph
           -- in the cluster will have the string of the whole cluster.
-          setfield(n, "string", glyph.string or "")
+          setprop(n, p_string, glyph.string or "")
 
           -- Handle PDF text extraction:
           -- * Find how many characters in this cluster and how many glyphs,
@@ -891,9 +892,17 @@ local function get_tounicode(fontid, c)
   end
 end
 
+local function get_glyph_string(n)
+  local n = todirect(n)
+  local props = getproperty(n)
+  props = props and props.harf
+  return props and props[p_string] or nil
+end
+
 return {
   process = process_nodes,
   post_process = post_process_nodes,
   cleanup = run_cleanup,
   get_tounicode = get_tounicode,
+  get_glyph_string = get_glyph_string,
 }

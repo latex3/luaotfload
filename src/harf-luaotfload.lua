@@ -157,6 +157,7 @@ end
 -- luatexbase does not know how to handle `wrapup_run` callback, teach it.
 luatexbase.callbacktypes.wrapup_run = 1 -- simple
 luatexbase.callbacktypes.get_char_tounicode = 1 -- simple
+luatexbase.callbacktypes.get_glyph_string = 1 -- simple
 
 -- Register all Harf callbacks, except `define_font` which is handled above.
 for name, func in next, harf.callbacks do

@@ -78,7 +78,7 @@ local aux = luaotfload.aux
 
 local aux_provides_script = aux.provides_script
 aux.provides_script = function(fontid, script)
-  local fontdata = font.fonts[fontid]
+  local fontdata = font.getfont(fontid)
   local hbdata = fontdata and fontdata.hb
   if hbdata then
     local hbshared = hbdata.shared
@@ -98,7 +98,7 @@ end
 
 local aux_provides_language = aux.provides_language
 aux.provides_language = function(fontid, script, language)
-  local fontdata = font.fonts[fontid]
+  local fontdata = font.getfont(fontid)
   local hbdata = fontdata and fontdata.hb
   if hbdata then
     local hbshared = hbdata.shared
@@ -131,7 +131,7 @@ end
 
 local aux_provides_feature = aux.provides_feature
 aux.provides_feature = function(fontid, script, language, feature)
-  local fontdata = font.fonts[fontid]
+  local fontdata = font.getfont(fontid)
   local hbdata = fontdata and fontdata.hb
   if hbdata then
     local hbshared = hbdata.shared

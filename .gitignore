@@ -1,4 +1,2 @@
 *.aux
 *.log
-*.tuc
-/src/luaharfbuzz.so

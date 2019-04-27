@@ -1,5 +1,54 @@
 local hb = require("harf-base")
 
+local direct       = node.direct
+local tonode       = direct.tonode
+local todirect     = direct.todirect
+local traverse     = direct.traverse
+local traverseid   = direct.traverse_id
+local insertbefore = direct.insert_before
+local insertafter  = direct.insert_after
+local protectglyph = direct.protect_glyph
+local newnode      = direct.new
+local copynode     = direct.copy
+local removenode   = direct.remove
+local copynodelist = direct.copy_list
+local isglyph      = direct.is_glyph
+
+local getattrs     = direct.getattributelist
+local setattrs     = direct.setattributelist
+local getchar      = direct.getchar
+local setchar      = direct.setchar
+local getdir       = direct.getdir
+local setdir       = direct.setdir
+local getdata      = direct.getdata
+local setdata      = direct.setdata
+local getfont      = direct.getfont
+local setfont      = direct.setfont
+local getfield     = direct.getfield
+local setfield     = direct.setfield
+local getid        = direct.getid
+local getkern      = direct.getkern
+local setkern      = direct.setkern
+local getnext      = direct.getnext
+local setnext      = direct.setnext
+local getoffsets   = direct.getoffsets
+local setoffsets   = direct.setoffsets
+local getproperty  = direct.getproperty
+local setproperty  = direct.setproperty
+local getprev      = direct.getprev
+local setprev      = direct.setprev
+local getsubtype   = direct.getsubtype
+local setsubtype   = direct.setsubtype
+local getwidth     = direct.getwidth
+local setwidth     = direct.setwidth
+
+local getpre       = function (n) return getfield(n, "pre")        end
+local setpre       = function (n, v)     setfield(n, "pre", v)     end
+local getpost      = function (n) return getfield(n, "post")       end
+local setpost      = function (n, v)     setfield(n, "post", v)    end
+local getrep       = function (n) return getfield(n, "replace")    end
+local setrep       = function (n, v)     setfield(n, "replace", v) end
+
 local discid     = node.id("disc")
 local glueid     = node.id("glue")
 local glyphid    = node.id("glyph")
@@ -24,6 +73,8 @@ local fl_unsafe    = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 
 local p_startactual = "startactualtext"
 local p_endactual   = "endactualtext"
+local p_color       = "color"
+local p_string      = "string"
 
 local format = string.format
 
@@ -39,47 +90,37 @@ end
 
 -- Set and get properties from our private `harf` subtable.
 local function setprop(n, prop, value)
-  local props = node.getproperty(n)
+  local props = getproperty(n)
   if not props then
     props = {}
-    node.setproperty(n, props)
+    setproperty(n, props)
   end
   props.harf = props.harf or {}
   props.harf[prop] = value
 end
 
-local function getprop(n, prop, value)
-  local p = node.getproperty(n)
-  local h = p and p.harf
-  return h and h[prop]
-end
-
 -- Copy node properties and attributes.
 local function copyprops(src, dst)
-  local props = node.getproperty(src)
-  local attrs = src.attr
+  local props = getproperty(src)
+  local attrs = getattrs(src)
   if props then
-    node.setproperty(dst, copytable(props))
+    setproperty(dst, copytable(props))
   end
   if attrs then
-    dst.attr = node.copy_list(attrs)
+    setattrs(dst, copynodelist(attrs))
   end
 end
 
 -- Convert list of integers to UTF-16 hex string used in PDF.
-local function to_utf16_hex(unicodes)
-  local hex = ""
-  for _, uni in next, unicodes do
-    if uni < 0x10000 then
-      hex = hex..format("%04X", uni)
-    else
-      uni = uni - 0x10000
-      local hi = 0xD800 + (uni // 0x400)
-      local lo = 0xDC00 + (uni % 0x400)
-      hex = hex..format("%04X%04X", hi, lo)
-    end
+local function to_utf16_hex(uni)
+  if uni < 0x10000 then
+    return format("%04X", uni)
+  else
+    uni = uni - 0x10000
+    local hi = 0xD800 + (uni // 0x400)
+    local lo = 0xDC00 + (uni % 0x400)
+    return format("%04X%04X", hi, lo)
   end
-  return hex
 end
 
 local paired_open = {
@@ -98,13 +139,6 @@ local paired_close = {
   [0x301b] = 0x301a,
 }
 
-local to_hb_dir = {
-  TLT = dir_ltr,
-  TRT = dir_rtl,
-  RTT = dir_ltr, -- XXX What to do with this?
-  LTL = dir_ltr, -- XXX Ditto
-}
-
 local process
 
 -- Collect character properties (font, direction, script) and resolve common
@@ -118,37 +152,42 @@ local function collect(head, direction)
   local currdir = direction or "TLT"
   local currfont = nil
 
-  for n in node.traverse(head) do
-    local id = n.id
+  for n in direct.traverse(head) do
+    local id = getid(n)
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
     local script = sc_common
     local skip = false
 
     if id == glyphid then
-      if n.subtype > 255 then skip = true end
-      code = n.char
-      currfont = n.font
-      script = getscript(code)
-    elseif id == glueid and n.subtype == spaceskip then
+      currfont = getfont(n)
+      if getsubtype(n) > 255 then
+        skip = true
+      else
+        code = getchar(n)
+        script = getscript(code)
+      end
+    elseif id == glueid and getsubtype(n) == spaceskip then
       code = 0x0020 -- SPACE
     elseif id == discid then
       code = 0x00AD -- SOFT HYPHEN
     elseif id == dirid then
-      if n.dir:sub(1, 1) == "+" then
+      local dir = getdir(n)
+      if dir:sub(1, 1) == "+" then
         -- Push the current direction to the stack.
         table.insert(dirstack, currdir)
-        currdir = n.dir:sub(2)
+        currdir = dir:sub(2)
       else
-        assert(currdir == n.dir:sub(2))
+        assert(currdir == dir:sub(2))
         -- Pop the last direction from the stack.
         currdir = table.remove(dirstack)
       end
     elseif id == localparid then
-      currdir = n.dir
+      currdir = getdir(n)
     end
 
-    local fontdata = currfont and font.fonts[currfont]
-    if not (fontdata and fontdata.hb) then skip = true end
+    local fontdata = currfont and font.getfont(currfont)
+    local hbdata = fontdata and fontdata.hb
+    if not hbdata then skip = true end
 
     -- Resolve common and inherited scripts. Inherited takes the script of the
     -- previous character. Common almost the same, but we tray to make paired
@@ -169,11 +208,21 @@ local function collect(head, direction)
       end
     end
 
+    -- If script is not resolved yet, and the font has a "script" option, use
+    -- it.
+    if (script == sc_common or script == sc_inherited) and hbdata then
+      local spec = hbdata.spec
+      local features = spec.features
+      local options = spec.options
+      script = options.script and hb.Script.new(options.script) or script
+    end
+
     codes[#codes + 1] = code
     nodes[#nodes + 1] = n
     props[#props + 1] = {
       font = currfont,
-      dir = to_hb_dir[currdir],
+      -- XXX handle RTT and LTL.
+      dir = currdir == "TRT" and dir_rtl or dir_ltr,
       script = script,
       skip = skip,
     }
@@ -267,7 +316,7 @@ local function unsafetobreak(glyph, nodes)
      and glyph.flags & fl_unsafe
      -- LuaTeX’s discretionary nodes can’t contain glue, so stop at first glue
      -- as well. This is incorrect, but I don’t have a better idea.
-     and nodes[glyph.cluster + 1].id ~= glueid
+     and getid(nodes[glyph.cluster + 1]) ~= glueid
 end
 
 local shape
@@ -280,15 +329,15 @@ local function makesub(run, start, stop, nodelist)
   local stop = stop
   local subnodes, subcodes = {}, {}
   for i = start, stop do
-    if nodes[i].id ~= discid then
-      subnodes[#subnodes + 1] = node.copy(nodes[i])
+    if getid(nodes[i]) ~= discid then
+      subnodes[#subnodes + 1] = copynode(nodes[i])
       subcodes[#subcodes + 1] = codes[i]
     end
   end
   -- Prepend any existing nodes to the list.
-  for n in node.traverse(nodelist) do
+  for n in traverse(nodelist) do
     subnodes[#subnodes + 1] = n
-    subcodes[#subcodes + 1] = n.char
+    subcodes[#subcodes + 1] = getchar(n)
   end
   local subrun = {
     start = 1,
@@ -316,7 +365,7 @@ shape = function(run)
   local lang = run.lang
   local fordisc = run.fordisc
 
-  local fontdata = font.fonts[fontid]
+  local fontdata = font.getfont(fontid)
   local hbdata = fontdata.hb
   local palette = hbdata.palette
   local spec = hbdata.spec
@@ -389,14 +438,18 @@ shape = function(run)
       -- then this is a glyph inside a complex cluster and will be handled with
       -- the start of its cluster.
       if nchars > 0 then
-        local unicodes = {}
+        local hex = ""
+        local str = ""
         for j = 0, nchars - 1 do
-          local id = nodes[nodeindex + j].id
+          local id = getid(nodes[nodeindex + j])
           if id == glyphid or id == glueid then
-            unicodes[#unicodes + 1] = codes[nodeindex + j]
+            local code = codes[nodeindex + j]
+            hex = hex..to_utf16_hex(code)
+            str = str..utf8.char(code)
           end
         end
-        glyph.unicodes = unicodes
+        glyph.tounicode = hex
+        glyph.string = str
       end
 
       -- Find if we have a discretionary inside a ligature, if nchars less than
@@ -440,10 +493,11 @@ shape = function(run)
             glyphs[j].skip = true
           end
 
+          local pre, post, rep = getpre(disc), getpost(disc), getrep(disc)
           glyph.disc = disc
-          glyph.replace = makesub(run, startindex, stopindex, disc.replace)
-          glyph.pre = makesub(run, startindex, discindex - 1, disc.pre)
-          glyph.post = makesub(run, discindex + 1, stopindex, disc.post)
+          glyph.replace = makesub(run, startindex, stopindex, rep)
+          glyph.pre = makesub(run, startindex, discindex - 1, pre)
+          glyph.post = makesub(run, discindex + 1, stopindex, post)
         end
       end
     end
@@ -451,13 +505,6 @@ shape = function(run)
   end
 
   return {}
-end
-
-local function pdfdirect(data)
-  local n = node.new("whatsit", "pdf_literal")
-  n.mode = directmode
-  n.data = data
-  return n
 end
 
 local function color_to_rgba(color)
@@ -494,7 +541,7 @@ local function tonodes(head, current, run, glyphs, color)
   local nodes = run.nodes
   local dir = run.dir
   local fontid = run.font
-  local fontdata = font.fonts[fontid]
+  local fontdata = font.getfont(fontid)
   local characters = fontdata.characters
   local hbdata = fontdata.hb
   local hbshared = hbdata.shared
@@ -517,53 +564,37 @@ local function tonodes(head, current, run, glyphs, color)
     local gid = glyph.codepoint
     local char = hb.CH_GID_PREFIX + gid
     local n = nodes[index]
-    local id = n.id
+    local id = getid(n)
     local nchars, nglyphs = glyph.nchars, glyph.nglyphs
 
     -- If this glyph is part of a complex cluster, then copy the node as
     -- more than one glyph will use it.
     if nglyphs < 1 or nglyphs > 1 then
-      n = node.copy(nodes[index])
+      n = copynode(nodes[index])
     end
 
     if color then
-      setprop(n, "color", color)
+      setprop(n, p_color, color)
     end
 
     if glyph.disc then
       -- For discretionary the glyph itself is skipped and a discretionary node
       -- is output in place of it.
       local disc = glyph.disc
-      local replace = glyph.replace
-      local pre = glyph.pre
-      local post = glyph.post
+      local rep, pre, post = glyph.replace, glyph.pre, glyph.post
 
-      disc.replace = tonodes(nil, nil, replace.run, replace.glyphs, color)
-      disc.pre = tonodes(nil, nil, pre.run, pre.glyphs, color)
-      disc.post = tonodes(nil, nil, post.run, post.glyphs, color)
+      setrep(disc, tonodes(nil, nil, rep.run, rep.glyphs, color))
+      setpre(disc, tonodes(nil, nil, pre.run, pre.glyphs, color))
+      setpost(disc, tonodes(nil, nil, post.run, post.glyphs, color))
 
-      head, current = node.insert_after(head, current, disc)
+      head, current = insertafter(head, current, disc)
     elseif not glyph.skip then
       if glyph.color then
-        setprop(n, "color", color_to_rgba(glyph.color))
+        setprop(n, p_color, color_to_rgba(glyph.color))
       end
 
       if id == glyphid then
         local hbglyph = hbglyphs[gid]
-
-        -- Report missing characters, trying to emulate the engine behaviour as
-        -- much as possible.
-        if gid == 0 and tracinglostchars > 0 then
-          local code = n.char
-          local target = "log"
-          local msg = format("Missing character: There is no %s (U+%04X) in "..
-                             "font %s!", utf8.char(code), code, fontdata.name)
-          if tracinglostchars > 1 or tracingonline > 0 then
-            target = "term and log"
-          end
-          texio.write_nl(target, msg)
-          texio.write_nl(target, "")
-        end
 
         local pngblob = hbglyph.png
         if haspng and not pngblob then
@@ -583,7 +614,7 @@ local function tonodes(head, current, run, glyphs, color)
             height    = character.height,
             depth     = character.depth,
           }
-          head, current = node.insert_after(head, current, image)
+          head, current = insertafter(head, current, todirect(image))
         else
           if haspng and not fonttype then
             -- If this is a color bitmap font with no glyph outlines (like Noto
@@ -592,28 +623,37 @@ local function tonodes(head, current, run, glyphs, color)
             -- don’t want them to reach the backend as it will cause a fatal
             -- error. We use `nullfont` instead.
             -- That is a hack, but I think it is good enough for now.
-            n.font = 0
+            setfont(n, 0)
           else
-            n.char = char
+            setchar(n, char)
           end
-          n.xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
-          n.yoffset = glyph.y_offset * scale
-          node.protect_glyph(n)
-          head, current = node.insert_after(head, current, n)
+          local xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
+          local yoffset = glyph.y_offset * scale
+          setoffsets(n, xoffset, yoffset)
+          protectglyph(n)
+          head, current = insertafter(head, current, n)
 
           local width = hbglyph.width
           if width ~= glyph.x_advance then
             -- LuaTeX always uses the glyph width from the font, so we need to
             -- insert a kern node if the x advance is different.
-            local kern = node.new(kernid)
-            kern.kern = (glyph.x_advance - width) * scale
+            local kern = newnode(kernid)
+            setkern(kern, (glyph.x_advance - width) * scale)
             copyprops(n, kern)
             if rtl then
-              head = node.insert_before(head, current, kern)
+              head = insertbefore(head, current, kern)
             else
-              head, current = node.insert_after(head, current, kern)
+              head, current = insertafter(head, current, kern)
             end
           end
+
+          -- HarfTeX will use this string when printing a glyph node e.g. in
+          -- overfull messages, otherwise it will be trying to print our
+          -- invalid pseudo Unicode code points.
+          -- If the string is empty it means this glyph is part of a larger
+          -- cluster and we don’t to print anything for it as the first glyph
+          -- in the cluster will have the string of the whole cluster.
+          setprop(n, p_string, glyph.string or "")
 
           -- Handle PDF text extraction:
           -- * Find how many characters in this cluster and how many glyphs,
@@ -624,39 +664,48 @@ local function tonodes(head, current, run, glyphs, color)
           --     represented by /ActualText spans.
           -- * If there are zero characters, then this glyph is part of complex
           --   cluster that will be covered by an /ActualText span.
-          local unicodes = glyph.unicodes or {}
-          if #unicodes > 0 then
-            local tounicode = to_utf16_hex(unicodes)
+          local tounicode = glyph.tounicode
+          if tounicode then
             if nglyphs == 1 and not hbglyph.tounicode then
               hbglyph.tounicode = tounicode
             elseif tounicode ~= hbglyph.tounicode then
-              setprop(current, p_startactual, tounicode)
+              setprop(n, p_startactual, tounicode)
               glyphs[i + nglyphs - 1].endactual = true
             end
           end
           if glyph.endactual then
-            setprop(current, p_endactual, true)
+            setprop(n, p_endactual, true)
           end
         end
-      elseif id == glueid and n.subtype == spaceskip then
-        if n.width ~= (glyph.x_advance * scale) then
-          n.width = glyph.x_advance * scale
+      elseif id == glueid and getsubtype(n) == spaceskip then
+        -- If the glyph advance is different from the font space, then a
+        -- substitution or positioning was applied to the space glyph changing
+        -- it from the default, so reset the glue using the new advance.
+        -- We are intentionally not comparing with the existing glue width as
+        -- spacing after the period is larger by default in TeX.
+        if fontdata.parameters.space ~= glyph.x_advance * scale then
+          local width = glyph.x_advance * scale
+          setwidth(n, width)
+          setfield(n, "stretch", width / 2)
+          setfield(n, "shrink", width / 3)
         end
-        head, current = node.insert_after(head, current, n)
-      elseif id == kernid and n.subtype == italiccorrection then
+        head, current = insertafter(head, current, n)
+      elseif id == kernid and getsubtype(n) == italiccorrection then
         -- If this is an italic correction node and the previous node is a
         -- glyph, update its kern value with the glyph’s italic correction.
         -- I’d have expected the engine to do this, but apparently it doesn’t.
         -- May be it is checking for the italic correction before we have had
         -- loaded the glyph?
-        local prevchar, prevfontid = node.is_glyph(current)
+        local prevchar, prevfontid = isglyph(current)
         if prevchar > 0 then
-          local italic = font.fonts[prevfontid].characters[prevchar].italic
+          local prevfontdata = font.getfont(prevfontid)
+          local prevcharacters = prevfontdata and prevfontdata.characters
+          local italic = prevcharacters and prevcharacters[prevchar].italic
           if italic then
-            n.kern = italic
+            setkern(n, italic)
           end
         end
-        head, current = node.insert_after(head, current, n)
+        head, current = insertafter(head, current, n)
       elseif id == discid then
         assert(nglyphs == 1)
         -- The simple case of a discretionary that is not part of a complex
@@ -667,18 +716,20 @@ local function tonodes(head, current, run, glyphs, color)
         -- the other discretionary handling, otherwise the discretionary
         -- contents do not interact with the surrounding (e.g. no ligatures or
         -- kerning) as it should.
-        if current and current.id == kernid and current.subtype == fontkern then
-          current.prev, current.next = nil, nil
-          n.replace = current
-          head, current = node.remove(head, current)
+        if current and getid(current) == kernid and getsubtype(current) == fontkern then
+          setprev(current, nil)
+          setnext(current, nil)
+          setfield(n, "replace", current)
+          head, current = removenode(head, current)
         end
-        n.pre = process(n.pre, direction)
-        n.post = process(n.post, direction)
-        n.replace = process(n.replace, direction)
+        local pre, post, rep = getpre(n), getpost(n), getrep(n)
+        setfield(n, "pre", process(pre, direction))
+        setfield(n, "post", process(post, direction))
+        setfield(n, "replace", process(rep, direction))
 
-        head, current = node.insert_after(head, current, n)
+        head, current = insertafter(head, current, n)
       else
-        head, current = node.insert_after(head, current, n)
+        head, current = insertafter(head, current, n)
       end
     end
   end
@@ -712,46 +763,24 @@ local function hex_to_rgba(s)
   end
 end
 
-local function update_font_tounicode(fontid)
-  local fontdata = font.fonts[fontid]
-  local characters = fontdata.characters
-  local glyphs = fontdata.hb.shared.glyphs
-
-  local new = {}
-  local needsupdate = false
-  for gid, glyph in next, glyphs do
-    local char = gid + hb.CH_GID_PREFIX
-    local character = characters[char]
-    if not character.tounicode and glyph.tounicode then
-      character.tounicode = glyph.tounicode
-      new[char] = character
-      needsupdate = true
-    end
-  end
-  if needsupdate then
-    font.addcharacters(fontid, { nomath = true, characters = new })
-  end
-end
-
 local function shape_run(head, current, run)
   if not run.skip then
     -- Font loaded with our loader and an HarfBuzz face is present, do our
     -- shaping.
     local fontid = run.font
-    local options = font.fonts[fontid].hb.spec.options
+    local fontdata = font.getfont(fontid)
+    local options = fontdata.hb.spec.options
     local color = options and options.color and hex_to_rgba(options.color)
 
     local glyphs = shape(run)
     head, current = tonodes(head, current, run, glyphs, color)
-
-    update_font_tounicode(fontid)
   else
     -- Not shaping, insert the original node list of of this run.
     local nodes = run.nodes
     local offset = run.start
     local len = run.len
     for i = offset, offset + len - 1 do
-      head, current = node.insert_after(head, current, nodes[i])
+      head, current = insertafter(head, current, nodes[i])
     end
   end
 
@@ -771,52 +800,79 @@ process = function(head, direction)
 end
 
 local function process_nodes(head, groupcode, size, packtype, direction)
-  local fonts = font and font.fonts or {}
+  local head = todirect(head)
 
   -- Check if any fonts are loaded by us and then process the whole node list,
   -- we will take care of skipping fonts we did not load later, otherwise
   -- return unmodified head.
-  for n in node.traverse_id(glyphid, head) do
-    if fonts[n.font] and fonts[n.font].hb ~= nil then
-      return process(head, direction)
+  for n in traverseid(glyphid, head) do
+    local fontid = getfont(n)
+    local fontdata = font.getfont(fontid)
+    local hbdata = fontdata and fontdata.hb
+    if hbdata then
+      head = process(head, direction)
+      break
     end
   end
 
   -- Nothing to do; no glyphs or no HarfBuzz fonts.
-  return head
+  return tonode(head)
 end
 
-local function post_process_nodes(head, groupcode, size, packtype, maxdepth, direction, currentcolor)
-  for n in node.traverse(head) do
-    local startactual = getprop(n, p_startactual)
-    local endactual = getprop(n, p_endactual)
-    local color = getprop(n, "color")
+local function pdfdirect(data)
+  local n = newnode("whatsit", "pdf_literal")
+  setfield(n, "mode", directmode)
+  setdata(n, data)
+  return n
+end
+
+local function post_process(head, currentcolor)
+  for n in traverse(head) do
+    local props = getproperty(n)
+    local harfprops = props and props.harf
+
+    local startactual, endactual, color
+    if harfprops then
+      startactual = harfprops[p_startactual]
+      endactual = harfprops[p_endactual]
+      color = harfprops[p_color]
+    end
 
     if currentcolor and currentcolor ~= color then
       -- Pop current color.
-      head = node.insert_before(head, n, pdfdirect("0 g"))
-    end
-
-    if startactual then
-      local actualtext = "/Span<</ActualText<FEFF"..startactual..">>>BDC"
-      head = node.insert_before(head, n, pdfdirect(actualtext))
-    end
-
-    if endactual then
-      head = node.insert_after(head, n, pdfdirect("EMC"))
+      head = insertbefore(head, n, pdfdirect("0 g"))
     end
 
     if currentcolor ~= color then
       -- Push new color.
-      head = node.insert_before(head, n, pdfdirect(color))
+      head = insertbefore(head, n, pdfdirect(color))
       currentcolor = color
     end
 
-    if n.head then
-      post_process_nodes(n.head, currentcolor)
+    if startactual then
+      local actualtext = "/Span<</ActualText<FEFF"..startactual..">>>BDC"
+      head = insertbefore(head, n, pdfdirect(actualtext))
+    end
+
+    if endactual then
+      head = insertafter(head, n, pdfdirect("EMC"))
+    end
+
+    local replace = getfield(n, "replace")
+    if replace then
+      setfield(n, "replace", post_process(replace, currentcolor))
+    end
+
+    local subhead = getfield(n, "head")
+    if subhead then
+      setfield(n, "head", post_process(subhead, currentcolor))
     end
   end
   return head
+end
+
+local function post_process_nodes(head, groupcode)
+  return tonode(post_process(todirect(head)))
 end
 
 local function run_cleanup()
@@ -826,8 +882,27 @@ local function run_cleanup()
   end
 end
 
+local function get_tounicode(fontid, c)
+  local fontdata = font.getfont(fontid)
+  local hbdata = fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbglyphs = hbshared.glyphs
+    return hbglyphs[c - hb.CH_GID_PREFIX].tounicode
+  end
+end
+
+local function get_glyph_string(n)
+  local n = todirect(n)
+  local props = getproperty(n)
+  props = props and props.harf
+  return props and props[p_string] or nil
+end
+
 return {
   process = process_nodes,
   post_process = post_process_nodes,
   cleanup = run_cleanup,
+  get_tounicode = get_tounicode,
+  get_glyph_string = get_glyph_string,
 }

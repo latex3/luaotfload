@@ -553,8 +553,6 @@ local function tonodes(head, current, run, glyphs, color)
   local tracingonline = tex.tracingonline
 
   local scale = hbdata.scale
-  local ascender = hbshared.ascender
-  local descender = hbshared.descender
 
   local haspng = hbshared.haspng
   local fonttype = hbshared.fonttype

@@ -108,16 +108,13 @@ local function loadfont(spec)
     local gid = hbfont:get_nominal_glyph(0x0020)
     local space = gid and hbfont:get_glyph_h_advance(gid) or upem / 2
 
-    local xheight, capheight, stemv = nil, nil, nil
+    local xheight, capheight = nil, nil
     if hasos2 then
       local os2 = hbface:get_table(os2tag)
       local length = os2:get_length()
       local data = os2:get_data()
       if length >= 96 and string.unpack(">H", data) > 1 then
         -- We don’t need much of the table, so we read from hard-coded offsets.
-        local weightclass = string.unpack(">H", data, 5)
-        -- Magic formula from dvipdfmx.
-        stemv = ((weightclass / 65) * (weightclass / 65) + 50)
         xheight = string.unpack(">H", data, 87)
         capheight = string.unpack(">H", data, 89)
       end
@@ -125,7 +122,6 @@ local function loadfont(spec)
 
     xheight = xheight or ascender / 2
     capheight = capheight or ascender
-    stemv = stemv or 80
 
     local slant = 0
     if haspost then
@@ -185,12 +181,9 @@ local function loadfont(spec)
       font = hbfont,
       upem = upem,
       fonttype = fonttype,
-      ascender = ascender,
-      descender = descender,
       space = space,
       xheight = xheight,
       capheight = capheight,
-      stemv = stemv,
       slant = slant,
       glyphs = glyphs,
       psname = hbface:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
@@ -210,10 +203,7 @@ local function scalefont(data, spec)
   local options = spec.options
   local hbfont = data.font
   local upem = data.upem
-  local ascender = data.ascender
-  local descender = data.descender
   local space = data.space
-  local stemv = data.stemv
   local capheight = data.capheight
 
   if size < 0 then
@@ -237,17 +227,6 @@ local function scalefont(data, spec)
       italic = glyph.italic * scale,
     }
   end
-
-  -- LuaTeX (ab)uses the metrics of these characters for some font metrics.
-  --
-  -- `char_width(f, '.') / 3` for StemV.
-  characters[0x002E] = { width  = stemv * scale * 3 }
-  -- `char_height(f, 'H')` for CapHeight.
-  characters[0x0048] = { height = capheight * scale }
-  -- `char_height(f, 'h')` for Ascent.
-  characters[0x0068] = { height = ascender * scale }
-  -- `-char_depth(f, 'y')` for Descent.
-  characters[0x0079] = { depth = -descender * scale }
 
   -- Select font palette, we support `palette=index` option, and load the first
   -- one otherwise.

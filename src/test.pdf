@@ -30458,7 +30458,7 @@ endobj
   /CapHeight 683
   /Descent -280
   /ItalicAngle 0
-  /StemV 88
+  /StemV 87
   /XHeight 431
   /FontFile3 88 0 R
   /CIDSet 87 0 R
@@ -30614,7 +30614,7 @@ endobj
   /CapHeight 683
   /Descent -290
   /ItalicAngle -10
-  /StemV 88
+  /StemV 87
   /XHeight 431
   /FontFile3 94 0 R
   /CIDSet 93 0 R
@@ -30771,7 +30771,7 @@ endobj
   /CapHeight 686
   /Descent -295
   /ItalicAngle 0
-  /StemV 166
+  /StemV 165
   /XHeight 444
   /FontFile3 100 0 R
   /CIDSet 99 0 R
@@ -30923,7 +30923,7 @@ endobj
   /CapHeight 683
   /Descent -290
   /ItalicAngle 0
-  /StemV 88
+  /StemV 87
   /XHeight 431
   /FontFile3 106 0 R
   /CIDSet 105 0 R
@@ -31263,7 +31263,7 @@ endobj
   /CapHeight 729
   /Descent -286
   /ItalicAngle 0
-  /StemV 88
+  /StemV 87
   /XHeight 514
   /FontFile3 112 0 R
   /CIDSet 111 0 R
@@ -31745,9 +31745,9 @@ endobj
   /Type /FontDescriptor
   /FontName /GPRQKP+Padauk-Regular
   /Flags 4
-  /FontBBox [ 0 -488 1000 986 ]
+  /FontBBox [ -1086 -486 2044 932 ]
   /Ascent 986
-  /CapHeight 986
+  /CapHeight 0
   /Descent -488
   /ItalicAngle 0
   /StemV 86
@@ -32285,11 +32285,11 @@ endobj
   /Type /FontDescriptor
   /FontName /RHXWKM+Amiri-Slanted
   /Flags 4
-  /FontBBox [ 0 -635 1000 1123 ]
+  /FontBBox [ -545 -899 11541 1814 ]
   /Ascent 1123
   /CapHeight 650
-  /Descent -635
-  /ItalicAngle 0
+  /Descent -634
+  /ItalicAngle 10
   /StemV 86
   /XHeight 426
   /FontFile2 127 0 R
@@ -32580,7 +32580,7 @@ endobj
   /Type /FontDescriptor
   /FontName /DICVLS+BungeeColor-Regular
   /Flags 4
-  /FontBBox [ 0 -140 1000 860 ]
+  /FontBBox [ -49 -362 1393 1138 ]
   /Ascent 860
   /CapHeight 720
   /Descent -140
@@ -32935,10 +32935,10 @@ endobj
   /Type /FontDescriptor
   /FontName /DXQNOJ+AmiriQuranColored-Regular
   /Flags 4
-  /FontBBox [ 0 -635 1000 1814 ]
-  /Ascent 1814
+  /FontBBox [ -333 -834 11454 1814 ]
+  /Ascent 1813
   /CapHeight 0
-  /Descent -635
+  /Descent -634
   /ItalicAngle 0
   /StemV 86
   /XHeight 0
@@ -34082,7 +34082,7 @@ endobj
   /Type /FontDescriptor
   /FontName /XKKYMI+NotoNastaliqUrdu-Regular
   /Flags 4
-  /FontBBox [ 0 -596 1000 1904 ]
+  /FontBBox [ -379 -1382 4531 1805 ]
   /Ascent 1904
   /CapHeight 714
   /Descent -596
@@ -35682,10 +35682,10 @@ endobj
   /Type /FontDescriptor
   /FontName /VNSRVI+ArefRuqaa-Bold
   /Flags 4
-  /FontBBox [ 0 -232 1000 711 ]
-  /Ascent 696
-  /CapHeight 711
-  /Descent -232
+  /FontBBox [ -193 -383 1434 1046 ]
+  /Ascent 1220
+  /CapHeight 701
+  /Descent -244
   /ItalicAngle 0
   /StemV 150
   /XHeight 490
@@ -36163,10 +36163,10 @@ endobj
   /Type /FontDescriptor
   /FontName /HSWVUZ+ArefRuqaa-Bold
   /Flags 4
-  /FontBBox [ 0 -232 1000 711 ]
-  /Ascent 696
-  /CapHeight 711
-  /Descent -232
+  /FontBBox [ -193 -383 1434 1046 ]
+  /Ascent 1220
+  /CapHeight 701
+  /Descent -244
   /ItalicAngle 0
   /StemV 150
   /XHeight 490
@@ -36819,13 +36819,13 @@ endobj
   /Type /FontDescriptor
   /FontName /BAJSJP+ArefRuqaa-Regular
   /Flags 4
-  /FontBBox [ 0 -244 1000 1221 ]
-  /Ascent 1221
-  /CapHeight 690
+  /FontBBox [ -199 -377 1458 1027 ]
+  /Ascent 1220
+  /CapHeight 689
   /Descent -244
   /ItalicAngle 0
   /StemV 86
-  /XHeight 462
+  /XHeight 461
   /FontFile2 163 0 R
   /CIDSet 162 0 R
 >>
@@ -37694,10 +37694,10 @@ endobj
   /Type /FontDescriptor
   /FontName /EREHEI+Amiri-Bold
   /Flags 4
-  /FontBBox [ 0 -635 1000 1123 ]
+  /FontBBox [ -447 -909 11489 1823 ]
   /Ascent 1123
   /CapHeight 650
-  /Descent -635
+  /Descent -634
   /ItalicAngle 0
   /StemV 150
   /XHeight 434
@@ -38857,10 +38857,10 @@ endobj
   /Type /FontDescriptor
   /FontName /EQXPKQ+Amiri-Regular
   /Flags 4
-  /FontBBox [ 0 -635 1000 1123 ]
+  /FontBBox [ -581 -899 11467 1814 ]
   /Ascent 1123
   /CapHeight 651
-  /Descent -635
+  /Descent -634
   /ItalicAngle 0
   /StemV 86
   /XHeight 426
@@ -43695,84 +43695,84 @@ xref
 0001814912 00000 n 
 0001815054 00000 n 
 0001815321 00000 n 
-0001815577 00000 n 
-0001815777 00000 n 
-0001842692 00000 n 
-0001843720 00000 n 
-0001843972 00000 n 
-0001844000 00000 n 
-0001844116 00000 n 
-0001844151 00000 n 
-0001844408 00000 n 
-0001844510 00000 n 
-0001857462 00000 n 
-0001858190 00000 n 
-0001858441 00000 n 
-0001858561 00000 n 
-0001858822 00000 n 
-0001858995 00000 n 
-0001874324 00000 n 
-0001875068 00000 n 
-0001875325 00000 n 
-0001876951 00000 n 
-0001877216 00000 n 
-0001877871 00000 n 
-0001940532 00000 n 
-0001942134 00000 n 
-0001942397 00000 n 
-0001943885 00000 n 
-0001944153 00000 n 
-0001944483 00000 n 
-0002037905 00000 n 
-0002039544 00000 n 
-0002039806 00000 n 
-0002040103 00000 n 
-0002040360 00000 n 
-0002040515 00000 n 
-0002062850 00000 n 
-0002064061 00000 n 
-0002064313 00000 n 
-0002064796 00000 n 
-0002065053 00000 n 
-0002065247 00000 n 
-0002096657 00000 n 
-0002098204 00000 n 
-0002098456 00000 n 
-0002099723 00000 n 
-0002099984 00000 n 
-0002100245 00000 n 
-0002145338 00000 n 
-0002147110 00000 n 
-0002147365 00000 n 
-0002147792 00000 n 
-0002147934 00000 n 
-0002148189 00000 n 
-0002149347 00000 n 
-0002214007 00000 n 
-0002214818 00000 n 
-0002215066 00000 n 
-0002218321 00000 n 
-0002218578 00000 n 
-0002220183 00000 n 
-0002362365 00000 n 
-0002366605 00000 n 
-0002366856 00000 n 
-0002367123 00000 n 
-0002387104 00000 n 
-0002387360 00000 n 
-0002403713 00000 n 
-0002404196 00000 n 
-0002443235 00000 n 
-0002443483 00000 n 
-0002458508 00000 n 
-0002458786 00000 n 
-0002477692 00000 n 
-0002477956 00000 n 
+0001815579 00000 n 
+0001815779 00000 n 
+0001842694 00000 n 
+0001843722 00000 n 
+0001843974 00000 n 
+0001844002 00000 n 
+0001844118 00000 n 
+0001844153 00000 n 
+0001844415 00000 n 
+0001844517 00000 n 
+0001857469 00000 n 
+0001858197 00000 n 
+0001858448 00000 n 
+0001858568 00000 n 
+0001858832 00000 n 
+0001859005 00000 n 
+0001874334 00000 n 
+0001875078 00000 n 
+0001875335 00000 n 
+0001876961 00000 n 
+0001877230 00000 n 
+0001877885 00000 n 
+0001940546 00000 n 
+0001942148 00000 n 
+0001942411 00000 n 
+0001943899 00000 n 
+0001944171 00000 n 
+0001944501 00000 n 
+0002037923 00000 n 
+0002039562 00000 n 
+0002039824 00000 n 
+0002040121 00000 n 
+0002040383 00000 n 
+0002040538 00000 n 
+0002062873 00000 n 
+0002064084 00000 n 
+0002064336 00000 n 
+0002064819 00000 n 
+0002065081 00000 n 
+0002065275 00000 n 
+0002096685 00000 n 
+0002098232 00000 n 
+0002098484 00000 n 
+0002099751 00000 n 
+0002100015 00000 n 
+0002100276 00000 n 
+0002145369 00000 n 
+0002147141 00000 n 
+0002147396 00000 n 
+0002147823 00000 n 
+0002147965 00000 n 
+0002148224 00000 n 
+0002149382 00000 n 
+0002214042 00000 n 
+0002214853 00000 n 
+0002215101 00000 n 
+0002218356 00000 n 
+0002218617 00000 n 
+0002220222 00000 n 
+0002362404 00000 n 
+0002366644 00000 n 
+0002366895 00000 n 
+0002367162 00000 n 
+0002387143 00000 n 
+0002387399 00000 n 
+0002403752 00000 n 
+0002404235 00000 n 
+0002443274 00000 n 
+0002443522 00000 n 
+0002458547 00000 n 
+0002458825 00000 n 
+0002477731 00000 n 
+0002477995 00000 n 
 0000000195 00001 f 
-0002497561 00000 n 
-0002497637 00000 n 
-0002497695 00000 n 
-0002497754 00001 f 
+0002497600 00000 n 
+0002497676 00000 n 
+0002497734 00000 n 
+0002497793 00001 f 
 
 trailer
 <<
@@ -43781,5 +43781,5 @@ trailer
   /Root 193 0 R
 >>
 startxref
-2497754
+2497793
 %%EOF

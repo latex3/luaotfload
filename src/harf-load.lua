@@ -176,6 +176,12 @@ local function loadfont(spec)
       }
     end
 
+    local unicodes = hbface:collect_unicodes()
+    local characters = {}
+    for _, uni in next, unicodes do
+      characters[uni] = hbfont:get_nominal_glyph(uni)
+    end
+
     data = {
       face = hbface,
       font = hbfont,
@@ -186,6 +192,7 @@ local function loadfont(spec)
       capheight = capheight,
       slant = slant,
       glyphs = glyphs,
+      unicodes = characters,
       psname = hbface:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
       fullname = hbface:get_name(hb.ot.NAME_ID_FULL_NAME),
       palettes = palettes,
@@ -226,6 +233,11 @@ local function scalefont(data, spec)
       depth  = glyph.depth  * scale,
       italic = glyph.italic * scale,
     }
+  end
+
+  local unicodes = data.unicodes
+  for uni, gid in next, unicodes do
+    characters[uni] = characters[hb.CH_GID_PREFIX + gid]
   end
 
   -- Select font palette, we support `palette=index` option, and load the first

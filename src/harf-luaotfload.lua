@@ -4,7 +4,6 @@ end
 
 local harf = require("harf")
 
-local add_to_callback = luatexbase.add_to_callback
 local define_font     = harf.callbacks.define_font
 
 -- Change luaotfload’s default of preferring system fonts.
@@ -159,9 +158,26 @@ luatexbase.callbacktypes.wrapup_run = 1 -- simple
 luatexbase.callbacktypes.get_char_tounicode = 1 -- simple
 luatexbase.callbacktypes.get_glyph_string = 1 -- simple
 
+local base_callback_descriptions = luatexbase.callback_descriptions
+local base_add_to_callback = luatexbase.add_to_callback
+local base_remove_from_callback = luatexbase.remove_from_callback
+
+-- Remove all existing functions from given callback, insert ours, then
+-- reinsert the removed ones, so ours takes a priority.
+local function add_to_callback(name, func)
+  local saved_callbacks = {}, ff, dd
+  for k, v in next, base_callback_descriptions(name) do
+    saved_callbacks[k] = { base_remove_from_callback(name, v) }
+  end
+  base_add_to_callback(name, func, "Harf "..name.." callback")
+  for _, v in next, saved_callbacks do
+    base_add_to_callback(name, v[1], v[2])
+  end
+end
+
 -- Register all Harf callbacks, except `define_font` which is handled above.
 for name, func in next, harf.callbacks do
   if name ~= "define_font" then
-    add_to_callback(name, func, "Harf "..name.." callback", 1)
+    add_to_callback(name, func)
   end
 end

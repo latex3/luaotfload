@@ -599,12 +599,12 @@ local function tonodes(head, current, run, glyphs, color)
           pngblob = hbfont:ot_color_glyph_get_png(gid)
           hbglyph.png = pngblob
         end
+        local character = characters[char]
         if pngblob then
           -- Color bitmap font, extract the PNG data and insert it in the node
           -- list.
           local data = pngblob:get_data()
           local path = cachedpng(data)
-          local character = characters[char]
 
           local image = img.node {
             filename  = path,
@@ -623,7 +623,14 @@ local function tonodes(head, current, run, glyphs, color)
             -- That is a hack, but I think it is good enough for now.
             setfont(n, 0)
           else
-            setchar(n, char)
+            local oldcharacter = characters[getchar(n)]
+            -- If the glyph index of current font chars is the same as shaped
+            -- glyph, keep the node char unchanged. Helps with primitives that
+            -- take characters as input but actually work on glyphs, like
+            -- `\rpcode`.
+            if not oldcharacter or character.index ~= oldcharacter.index then
+              setchar(n, char)
+            end
           end
           local xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
           local yoffset = glyph.y_offset * scale

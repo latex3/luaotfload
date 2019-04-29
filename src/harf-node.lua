@@ -886,7 +886,14 @@ local function get_tounicode(fontid, c)
   if hbdata then
     local hbshared = hbdata.shared
     local hbglyphs = hbshared.glyphs
-    return hbglyphs[c - hb.CH_GID_PREFIX].tounicode
+    local hbfont = hbshared.font
+
+    local gid = c - hb.CH_GID_PREFIX
+    if c < hb.CH_GID_PREFIX then
+      gid = hbfont:get_nominal_glyph(c)
+    end
+
+    return hbglyphs[gid].tounicode
   end
 end
 

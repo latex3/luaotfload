@@ -529,9 +529,15 @@ load_names = function (dry_run, no_rebuild)
         end
         names_version = names.version
         if db_version ~= names_version then
-            logreport ("both", 0, "db",
-                       [[Version mismatch; expected %d, got %d.]],
-                       names_version, db_version)
+            if math.tointeger(db_version) then
+                logreport ("both", 0, "db",
+                           [[Version mismatch; expected %d, got %d.]],
+                           names_version, db_version)
+            else
+                logreport ("both", 0, "db",
+                           [[Version mismatch; expected %d, got invalid data.]],
+                           names_version, db_version)
+            end
             if not fonts_reloaded then
                 logreport ("both", 0, "db", [[Force rebuild.]])
                 data = update_names (initialize_namedata (get_font_filter ()),
@@ -1097,7 +1103,7 @@ do
         if conv ~= nil then
             logreport ("both", 4, "db",
                        "Interpreting design sizes as %q, factor %.6f.",
-                       dim, conv)
+                       dim, conv or 1)
             design_size_dimension = conv
             return
         end

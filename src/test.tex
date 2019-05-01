@@ -103,6 +103,19 @@ abc
 \amiriten
 \TeX\ = τεχ in Greek
 
+\directlua{
+if luaotfload then
+  local hb = require("harf")
+  assert(    luaotfload.aux.font_has_glyph(font.id("amiriten"), 0x0061)) % a
+  assert(not luaotfload.aux.font_has_glyph(font.id("amiriten"), 0x03C4)) % τ
+  assert(not luaotfload.aux.font_has_glyph(font.id("amiriten"), 0x0061 + hb.CH_GID_PREFIX)) % a pseudo char
+  assert("a" == luaotfload.aux.name_of_slot(font.id("amiriten"), 0x0061)) % a
+  assert(nil == luaotfload.aux.name_of_slot(font.id("amiriten"), 0x03C4)) % τ
+  assert(68 + hb.CH_GID_PREFIX == luaotfload.aux.slot_of_name(font.id("amiriten"), "a"))
+  assert(nil == luaotfload.aux.slot_of_name(font.id("amiriten"), "foo"))
+end
+}
+
 \font\amiriteni="[amiri-slanted.ttf]" at 10pt
 ({\amiriteni f\/})
 

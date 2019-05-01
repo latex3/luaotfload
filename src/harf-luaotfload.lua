@@ -154,6 +154,54 @@ aux.provides_feature = function(fontid, script, language, feature)
   return aux_provides_feature(fontid, script, language, feature)
 end
 
+local aux_font_has_glyph = aux.font_has_glyph
+aux.font_has_glyph = function(fontid, codepoint)
+  local fontdata = font.getfont(fontid)
+  local hbdata = fontdata and fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local unicodes = hbshared.unicodes
+    return unicodes[codepoint] ~= nil
+  end
+  return aux_font_has_glyph(fontid, codepoint)
+end
+
+local aux_slot_of_name = aux.slot_of_name
+aux.slot_of_name = function(fontid, glyphname, unsafe)
+  local fontdata = font.getfont(fontid)
+  local hbdata = fontdata and fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbfont = hbshared.font
+
+    local gid = hbfont:get_glyph_from_name(glyphname)
+    if gid ~= nil then
+      return gid + harf.CH_GID_PREFIX
+    end
+    return nil
+  end
+  return aux_slot_of_name(fontid, glyphname, unsafe)
+end
+
+local aux_name_of_slot = aux.name_of_slot
+aux.name_of_slot = function(fontid, codepoint)
+  local fontdata = font.getfont(fontid)
+  local hbdata = fontdata and fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbfont = hbshared.font
+    local characters = fontdata.characters
+    local character = characters[codepoint]
+
+    if character then
+      local gid = characters[codepoint].index
+      return hbfont:get_glyph_name(gid)
+    end
+    return nil
+  end
+  return aux_name_of_slot(fontid, codepoint)
+end
+
 -- luatexbase does not know how to handle `wrapup_run` callback, teach it.
 luatexbase.callbacktypes.wrapup_run = 1 -- simple
 luatexbase.callbacktypes.get_char_tounicode = 1 -- simple

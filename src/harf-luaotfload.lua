@@ -21,8 +21,9 @@ local readers = {
 local function harf_reader(spec)
   local features = {}
   local options = {}
+  local rawfeatures = spec.features and spec.features.raw or {}
 
-  local mode = spec.features.raw.mode
+  local mode = rawfeatures.mode
   if mode and mode ~= "harf" then
     return readers[spec.forced](spec)
   end
@@ -37,7 +38,7 @@ local function harf_reader(spec)
     specification = spec.specification,
   }
 
-  for key, val in next, spec.features.raw do
+  for key, val in next, rawfeatures do
     if key == "language" then val = harf.Language.new(val) end
     if key == "colr" then key = "palette" end
     if key:len() == 4 then

@@ -287,6 +287,8 @@ local function define_font(name, size)
     -- XXX support font names
   end
 
+  if spec.specification == "" then return nil end
+
   local tfmdata = nil
   local hbdata = loadfont(spec)
   if hbdata then

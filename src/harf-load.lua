@@ -245,7 +245,7 @@ local function scalefont(data, spec)
   local palettes = data.palettes
   local palette = palettes and palettes[tonumber(options.palette) or 1]
 
-  local letterspace = (options.letterspace or 0) / 100 * upem
+  local letterspace = tonumber(options.letterspace or 0) / 100 * upem
   space = space + letterspace
 
   return {

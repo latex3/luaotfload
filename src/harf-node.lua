@@ -546,7 +546,7 @@ local function tonodes(head, current, run, glyphs, color)
   local hbdata = fontdata.hb
   local hbshared = hbdata.shared
   local hbfont = hbshared.font
-  local hbglyphs = hbshared.glyphs
+  local fontglyphs = hbshared.glyphs
   local rtl = dir:is_backward()
 
   local tracinglostchars = tex.tracinglostchars
@@ -592,12 +592,12 @@ local function tonodes(head, current, run, glyphs, color)
       end
 
       if id == glyphid then
-        local hbglyph = hbglyphs[gid]
+        local fontglyph = fontglyphs[gid]
 
-        local pngblob = hbglyph.png
+        local pngblob = fontglyph.png
         if haspng and not pngblob then
           pngblob = hbfont:ot_color_glyph_get_png(gid)
-          hbglyph.png = pngblob
+          fontglyph.png = pngblob
         end
         local character = characters[char]
         if pngblob then
@@ -638,7 +638,7 @@ local function tonodes(head, current, run, glyphs, color)
           protectglyph(n)
           head, current = insertafter(head, current, n)
 
-          local width = hbglyph.width
+          local width = fontglyph.width
           if width ~= glyph.x_advance then
             -- LuaTeX always uses the glyph width from the font, so we need to
             -- insert a kern node if the x advance is different.
@@ -671,9 +671,9 @@ local function tonodes(head, current, run, glyphs, color)
           --   cluster that will be covered by an /ActualText span.
           local tounicode = glyph.tounicode
           if tounicode then
-            if nglyphs == 1 and not hbglyph.tounicode then
-              hbglyph.tounicode = tounicode
-            elseif tounicode ~= hbglyph.tounicode then
+            if nglyphs == 1 and not fontglyph.tounicode then
+              fontglyph.tounicode = tounicode
+            elseif tounicode ~= fontglyph.tounicode then
               setprop(n, p_startactual, tounicode)
               glyphs[i + nglyphs - 1].endactual = true
             end
@@ -892,7 +892,7 @@ local function get_tounicode(fontid, c)
   local hbdata = fontdata.hb
   if hbdata then
     local hbshared = hbdata.shared
-    local hbglyphs = hbshared.glyphs
+    local fontglyphs = hbshared.glyphs
     local hbfont = hbshared.font
 
     local gid = c - hb.CH_GID_PREFIX
@@ -900,7 +900,7 @@ local function get_tounicode(fontid, c)
       gid = hbfont:get_nominal_glyph(c)
     end
 
-    return hbglyphs[gid].tounicode
+    return fontglyphs[gid].tounicode
   end
 end
 

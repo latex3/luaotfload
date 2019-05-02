@@ -248,6 +248,8 @@ local function scalefont(data, spec)
   local letterspace = tonumber(options.letterspace or 0) / 100 * upem
   space = space + letterspace
 
+  local slantfactor = tonumber(options.slant or 0)
+
   return {
     name = spec.specification,
     filename = spec.path,
@@ -261,6 +263,7 @@ local function scalefont(data, spec)
     tounicode = 1,
     nomath = true,
     format = data.fonttype,
+    slant = slantfactor * 1000,
     characters = characters,
     parameters = {
       slant = data.slant,

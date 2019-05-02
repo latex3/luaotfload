@@ -553,6 +553,7 @@ local function tonodes(head, current, run, glyphs, color)
   local tracingonline = tex.tracingonline
 
   local scale = hbdata.scale
+  local letterspace = hbdata.letterspace
 
   local haspng = hbshared.haspng
   local fonttype = hbshared.fonttype
@@ -638,12 +639,13 @@ local function tonodes(head, current, run, glyphs, color)
           protectglyph(n)
           head, current = insertafter(head, current, n)
 
+          local x_advance = glyph.x_advance + letterspace
           local width = fontglyph.width
-          if width ~= glyph.x_advance then
+          if width ~= x_advance then
             -- LuaTeX always uses the glyph width from the font, so we need to
             -- insert a kern node if the x advance is different.
             local kern = newnode(kernid)
-            setkern(kern, (glyph.x_advance - width) * scale)
+            setkern(kern, (x_advance - width) * scale)
             copyprops(n, kern)
             if rtl then
               head = insertbefore(head, current, kern)
@@ -688,8 +690,8 @@ local function tonodes(head, current, run, glyphs, color)
         -- it from the default, so reset the glue using the new advance.
         -- We are intentionally not comparing with the existing glue width as
         -- spacing after the period is larger by default in TeX.
-        if fontdata.parameters.space ~= glyph.x_advance * scale then
-          local width = glyph.x_advance * scale
+        local width = (glyph.x_advance + letterspace) * scale
+        if fontdata.parameters.space ~= width then
           setwidth(n, width)
           setfield(n, "stretch", width / 2)
           setfield(n, "shrink", width / 3)

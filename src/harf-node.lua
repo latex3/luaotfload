@@ -147,7 +147,7 @@ local function itemize(head, direction)
   local props, nodes, codes = {}, {}, {}
   local dirstack, pairstack = {}, {}
   local currdir = direction or "TLT"
-  local currfont = nil
+  local currfontid = nil
 
   for n in direct.traverse(head) do
     local id = getid(n)
@@ -156,7 +156,7 @@ local function itemize(head, direction)
     local skip = false
 
     if id == glyphid then
-      currfont = getfont(n)
+      currfontid = getfont(n)
       if getsubtype(n) > 255 then
         skip = true
       else
@@ -182,7 +182,7 @@ local function itemize(head, direction)
       currdir = getdir(n)
     end
 
-    local fontdata = currfont and font.getfont(currfont)
+    local fontdata = currfontid and font.getfont(currfontid)
     local hbdata = fontdata and fontdata.hb
     if not hbdata then skip = true end
 
@@ -217,7 +217,7 @@ local function itemize(head, direction)
     codes[#codes + 1] = code
     nodes[#nodes + 1] = n
     props[#props + 1] = {
-      font = currfont,
+      font = currfontid,
       -- XXX handle RTT and LTL.
       dir = currdir == "TRT" and dir_rtl or dir_ltr,
       script = script,
@@ -235,22 +235,22 @@ local function itemize(head, direction)
   -- Split into a list of runs, each has the same font, direction and script.
   -- TODO: itemize by language as well.
   local runs = {}
-  local currfont, currdir, currscript, currskip = nil, nil, nil, nil
+  local currfontid, currdir, currscript, currskip = nil, nil, nil, nil
   for i, prop in next, props do
-    local font = prop.font
+    local fontid = prop.font
     local dir = prop.dir
     local script = prop.script
     local skip = prop.skip
 
     -- Start a new run if there is a change in properties.
-    if font ~= currfont or
+    if fontid ~= currfontid or
        dir ~= currdir or
        script ~= currscript or
        skip ~= currskip then
       runs[#runs + 1] = {
         start = i,
         len = 0,
-        font = font,
+        font = fontid,
         dir = dir,
         script = script,
         skip = skip,
@@ -261,7 +261,7 @@ local function itemize(head, direction)
 
     runs[#runs].len = runs[#runs].len + 1
 
-    currfont = font
+    currfontid = fontid
     currdir = dir
     currscript = script
     currskip = skip

@@ -141,14 +141,11 @@ local paired_close = {
 
 local process
 
--- Collect character properties (font, direction, script) and resolve common
--- and inherited scripts. Pre-requisite for itemization into smaller runs.
-local function collect(head, direction)
-  local props = {}
-  local nodes = {}
-  local codes = {}
-  local dirstack = {}
-  local pairstack = {}
+local function itemize(head, direction)
+  -- Collect character properties (font, direction, script) and resolve common
+  -- and inherited scripts. Pre-requisite for itemization into smaller runs.
+  local props, nodes, codes = {}, {}, {}
+  local dirstack, pairstack = {}, {}
   local currdir = direction or "TLT"
   local currfont = nil
 
@@ -235,12 +232,8 @@ local function collect(head, direction)
     end
   end
 
-  return props, nodes, codes
-end
-
--- Split into a list of runs, each has the same font, direction and script.
--- TODO: itemize by language as well.
-local function itemize(props, nodes, codes)
+  -- Split into a list of runs, each has the same font, direction and script.
+  -- TODO: itemize by language as well.
   local runs = {}
   local currfont, currdir, currscript, currskip = nil, nil, nil, nil
   for i, prop in next, props do
@@ -796,8 +789,7 @@ end
 
 process = function(head, direction)
   local newhead, current = nil, nil
-  local props, nodes, codes = collect(head, direction)
-  local runs = itemize(props, nodes, codes)
+  local runs = itemize(head, direction)
 
   for _, run in next, runs do
     newhead, current = shape_run(newhead, current, run)

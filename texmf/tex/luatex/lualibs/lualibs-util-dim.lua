@@ -397,18 +397,22 @@ function dimen(a)
 end
 
 function string.todimen(str) -- maybe use tex.sp when available
-    if type(str) == "number" then
+    local t = type(str)
+    if t == "number" then
         return str
     else
         local k = known[str]
         if not k then
-            local value, unit = lpegmatch(dimenpair,str)
-            if value and unit then
-                k = value/unit -- to be considered: round
+            if t == "string" then
+                local value, unit = lpegmatch(dimenpair,str)
+                if value and unit then
+                    k = value/unit -- to be considered: round
+                else
+                    k = 0
+                end
             else
                 k = 0
             end
-            -- print(str,value,unit)
             known[str] = k
         end
         return k

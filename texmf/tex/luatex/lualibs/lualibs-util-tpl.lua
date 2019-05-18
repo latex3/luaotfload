@@ -171,6 +171,8 @@ local function replace(str,mapping,how,recurse)
 end
 
 -- print(replace("test '%[x]%' test",{ x = [[a 'x'  a]] }))
+-- print(replace("test '%x%' test",{ x = [[a "x"  a]] }))
+-- print(replace([[test "%[x]%" test]],{ x = [[a "x"  a]] }))
 -- print(replace("test '%[x]%' test",{ x = true }))
 -- print(replace("test '%[x]%' test",{ x = [[a 'x'  a]], y = "oeps" },'sql'))
 -- print(replace("test '%[x]%' test",{ x = [[a '%y%'  a]], y = "oeps" },'sql',true))

@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Fri Apr 12 19:12:33 2019
+-- merge date  : Sat May 18 17:39:21 2019
 
 do -- begin closure to overcome local limits and interference
 

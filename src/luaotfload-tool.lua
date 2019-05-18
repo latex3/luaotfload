@@ -628,7 +628,7 @@ local display_feature_set = function (set)
 end
 
 local display_features_type = function (id, feat)
-    if next (feat) then
+    if feat and next (feat) then
         print_heading(id, 3)
         display_feature_set(feat)
         return true
@@ -640,10 +640,11 @@ local display_features = function (features)
     texiowrite_nl ""
     print_heading("Features", 2)
 
-    if not display_features_type ("GSUB Features", features.gsub)
-    or not display_features_type ("GPOS Features", features.gpos)
-    then
-        texiowrite_nl("font defines neither gsub nor gpos features")
+    if not display_features_type ("GSUB Features", features.gsub) then
+        texiowrite_nl("font defines no gsub feature")
+    end
+    if not display_features_type ("GPOS Features", features.gpos) then
+        texiowrite_nl("font defines no gpos feature")
     end
 end
 
@@ -1188,8 +1189,8 @@ actions.query = function (job)
         end
     elseif tmpspec.lookup == "file" then
         needle  = tmpspec.name
-        subfont = tmpspec.sub
     end
+    subfont = tmpspec.sub
 
     if needle then
         foundname, _, success = fonts.names.lookup_font_file (tmpspec.name)

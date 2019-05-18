@@ -1,5 +1,9 @@
 Change History
 --------------
+XXXX       luaotfload v2.97
+    * fix issue #47
+    * fix whatsits interfering with letterspacing (issue #53)
+    
 2019-01-28 luaotfload v2.96
     * repaired broken letterspace (issue #38)
     * changed handling of spaces in letterspacing

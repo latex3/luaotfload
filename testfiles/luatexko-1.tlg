@@ -12,7 +12,7 @@ Completed box being shipped out [1]
 ..\vbox(550.0+0.0)x345.0, glue set 527.9436fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 2.21
-...\hbox(7.79+1.51)x345.0, glue set 59.22fil, direction TLT
+...\hbox(7.79+1.51)x345.0, glue set 59.35fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -21,77 +21,76 @@ Completed box being shipped out [1]
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\TU/UnBatang(0)/m/n/10 모
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 든
 ....\glue(\spaceskip) 2.25 plus 1.125 minus 0.75
 ....\TU/UnBatang(0)/m/n/10 사
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 람
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 은
 ....\glue(\spaceskip) 2.25 plus 1.125 minus 0.75
 ....\TU/UnBatang(0)/m/n/10 생
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 명
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 과
 ....\glue(\spaceskip) 2.25 plus 1.125 minus 0.75
 ....\TU/UnBatang(0)/m/n/10 신
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 체
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 의
 ....\glue(\spaceskip) 2.25 plus 1.125 minus 0.75
 ....\TU/UnBatang(0)/m/n/10 자
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 유
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 와
 ....\glue(\spaceskip) 2.25 plus 1.125 minus 0.75
 ....\TU/UnBatang(0)/m/n/10 안
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 전
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 에
 ....\glue(\spaceskip) 2.25 plus 1.125 minus 0.75
 ....\TU/UnBatang(0)/m/n/10 대
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 한
 ....\glue(\spaceskip) 2.25 plus 1.125 minus 0.75
 ....\TU/UnBatang(0)/m/n/10 권
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 리
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 를
 ....\glue(\spaceskip) 2.25 plus 1.125 minus 0.75
 ....\TU/UnBatang(0)/m/n/10 가
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 진
-....\penalty 5000
-....\glue 0.0 plus 0.4 minus 0.2
+....\penalty 1000
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 다
-....\penalty 10000
-....\TU/lmr/m/n/10 .
+....\TU/UnBatang(0)/m/n/10 .
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 3.0
-...\hbox(7.49+1.51)x345.0, glue set 53.22fil, direction TLT
+...\hbox(7.49+1.51)x345.0, glue set 53.0fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -100,71 +99,70 @@ Completed box being shipped out [1]
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\TU/UnDotum(0)/m/n/10 모
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 든
 ....\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
 ....\TU/UnDotum(0)/m/n/10 사
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 람
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 은
 ....\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
 ....\TU/UnDotum(0)/m/n/10 생
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 명
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 과
 ....\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
 ....\TU/UnDotum(0)/m/n/10 신
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 체
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 의
 ....\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
 ....\TU/UnDotum(0)/m/n/10 자
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 유
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 와
 ....\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
 ....\TU/UnDotum(0)/m/n/10 안
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 전
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 에
 ....\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
 ....\TU/UnDotum(0)/m/n/10 대
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 한
 ....\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
 ....\TU/UnDotum(0)/m/n/10 권
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 리
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 를
 ....\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
 ....\TU/UnDotum(0)/m/n/10 가
 ....\penalty 50
-....\glue 0.0 plus 0.4 minus 0.2
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 진
-....\penalty 5000
-....\glue 0.0 plus 0.4 minus 0.2
+....\penalty 1000
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 다
-....\penalty 10000
-....\TU/lmss/m/n/10 .
+....\TU/UnDotum(0)/m/n/10 .
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0

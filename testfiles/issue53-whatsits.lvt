@@ -1,0 +1,10 @@
+\input{regression-test}
+\documentclass[]{article}
+
+\usepackage{fontspec,xcolor}
+\setmainfont{TeX Gyre Termes}[LetterSpace=30]
+
+\begin{document}
+\START\showoutput
+{Auf\color{red}gabe}
+\end{document}

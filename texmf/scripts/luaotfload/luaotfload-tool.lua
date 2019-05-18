@@ -70,7 +70,7 @@ do
     local minimum         = luaotfload.min_luatex_version
     local actual          = { 0, 0, 0 }
     if stats then
-        local major    = stats.luatex_version / 100
+        local major    = stats.luatex_version // 100
         local minor    = stats.luatex_version % 100
         local revision = stats.luatex_revision --[[ : string ]]
         local revno    = tonumber (revision)

@@ -52,7 +52,7 @@ tlmgr install  luatexja arabluatex babel babel-english
 tlmgr install  amsmath lualatex-math  
 
 # a few more packages
-tlmgr install   luacode environ adjustbox collectbox ms varwidth geometry url
+tlmgr install   luacode environ adjustbox collectbox ms varwidth geometry url ulem
 
  
 # Assuming a 'basic' font set up, metafont is required to avoid

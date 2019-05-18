@@ -483,8 +483,9 @@ local function copytotfm(data)
         local filename   = constructors.checkedfilename(resources)
         local fontname   = metadata.fontname or metadata.fullname
         local fullname   = metadata.fullname or metadata.fontname
-        local endash     = 0x0020 -- space
+        local endash     = 0x2013
         local emdash     = 0x2014
+        local space      = 0x0020 -- space
         local spacer     = "space"
         local spaceunits = 500
         --
@@ -496,28 +497,33 @@ local function copytotfm(data)
         parameters.italicangle = italicangle
         parameters.charwidth   = charwidth
         parameters.charxheight = charxheight
-        -- same as otf
+        -- nearly the same as otf, catches
+        local d_endash = descriptions[endash]
+        local d_emdash = descriptions[emdash]
+        local d_space  = descriptions[space]
+        if not d_space or d_space == 0 then
+            d_space = d_endash
+        end
+        if d_space then
+            spaceunits, spacer = d_space.width or 0, "space"
+        end
         if properties.monospaced then
-            if descriptions[endash] then
-                spaceunits, spacer = descriptions[endash].width, "space"
-            end
-            if not spaceunits and descriptions[emdash] then
-                spaceunits, spacer = descriptions[emdash].width, "emdash"
-            end
-            if not spaceunits and charwidth then
-                spaceunits, spacer = charwidth, "charwidth"
+            if spaceunits == 0 and d_emdash then
+                spaceunits, spacer = d_emdash.width or 0, "emdash"
             end
         else
-            if descriptions[endash] then
-                spaceunits, spacer = descriptions[endash].width, "space"
-            end
-            if not spaceunits and charwidth then
-                spaceunits, spacer = charwidth, "charwidth"
+            if spaceunits == 0 and d_endash then
+                spaceunits, spacer = d_emdash.width or 0, "endash"
             end
         end
-        spaceunits = tonumber(spaceunits)
-        if spaceunits < 200 then
-            -- todo: warning
+        if spaceunits == 0 and charwidth then
+            spaceunits, spacer = charwidth or 0, "charwidth"
+        end
+        if spaceunits == 0 then
+            spaceunits = tonumber(spaceunits) or 500
+        end
+        if spaceunits == 0 then
+            spaceunits = 500
         end
         --
         parameters.slant         = 0

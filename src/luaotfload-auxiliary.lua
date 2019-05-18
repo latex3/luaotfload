@@ -6,8 +6,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-auxiliary",
-    version       = "2.9706",       --TAGVERSION
-    date          = "2019-04-12", --TAGDATE
+    version       = "2.9707",       --TAGVERSION
+    date          = "2019-05-18", --TAGDATE
     description   = "luaotfload submodule / auxiliary functions",
     license       = "GPL v2.0"
 }

@@ -2428,8 +2428,8 @@ function readers.cff(f,fontdata,specification)
         if private then
             local data = private.data
             if type(data) == "table" then
-                cffinfo.defaultwidth     = data.defaultwidth or cffinfo.defaultwidth
-                cffinfo.nominalwidth     = data.nominalwidth or cffinfo.nominalwidth
+                cffinfo.defaultwidth     = data.defaultwidthx or cffinfo.defaultwidth
+                cffinfo.nominalwidth     = data.nominalwidthx or cffinfo.nominalwidth
                 cffinfo.bluevalues       = data.bluevalues
                 cffinfo.otherblues       = data.otherblues
                 cffinfo.familyblues      = data.familyblues

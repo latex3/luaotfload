@@ -595,7 +595,6 @@ function constructors.scale(tfmdata,specification)
         targetparameters.descender = delta * descender
     end
     --
--- inspect(targetparameters)
     constructors.enhanceparameters(targetparameters) -- official copies for us, now virtual
     --
     local protrusionfactor = (targetquad ~= 0 and 1000/targetquad) or 0
@@ -1027,11 +1026,11 @@ function constructors.finalize(tfmdata)
         properties.virtualized = tfmdata.type == "virtual"
     end
     --
-    properties.fontname      = tfmdata.fontname
-    properties.filename      = tfmdata.filename
-    properties.fullname      = tfmdata.fullname
-    properties.name          = tfmdata.name
-    properties.psname        = tfmdata.psname
+    properties.fontname      = properties.fontname or tfmdata.fontname
+    properties.filename      = properties.filename or tfmdata.filename
+    properties.fullname      = properties.fullname or tfmdata.fullname
+    properties.name          = properties.name     or tfmdata.name
+    properties.psname        = properties.psname   or tfmdata.psname
     --
     properties.encodingbytes = tfmdata.encodingbytes or 1
     properties.embedding     = tfmdata.embedding     or "subset"

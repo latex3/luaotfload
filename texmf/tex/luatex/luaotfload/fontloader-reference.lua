@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 04/12/19 17:43:58
+-- merge date  : 05/18/19 10:42:24
 
 do -- begin closure to overcome local limits and interference
 
@@ -4860,7 +4860,6 @@ nuts.setattr=direct.setfield
 nuts.setboth=direct.setboth
 nuts.setchar=direct.setchar
 nuts.setcomponents=direct.setcomponents
-nuts.setdir=direct.setdir
 nuts.setdirection=direct.setdirection
 nuts.setdisc=direct.setdisc
 nuts.setfield=setfield
@@ -4873,10 +4872,8 @@ nuts.setprev=direct.setprev
 nuts.setsplit=direct.setsplit
 nuts.setsubtype=direct.setsubtype
 nuts.setwidth=direct.setwidth
-nuts.getglyphdata        = nuts.getattr
-nuts.setglyphdata        = nuts.setattr
-nuts.is_char=direct.is_char
-nuts.is_glyph=direct.is_glyph
+nuts.getglyphdata=nuts.getattr
+nuts.setglyphdata=nuts.setattr
 nuts.ischar=direct.is_char
 nuts.isglyph=direct.is_glyph
 nuts.copy=direct.copy
@@ -4900,20 +4897,6 @@ nuts.traverse=direct.traverse
 nuts.traverse_char=direct.traverse_char
 nuts.traverse_glyph=direct.traverse_glyph
 nuts.traverse_id=direct.traverse_id
-if not nuts.getdirection then
- local getdir=direct.getdir
- function nuts.getdirection(n)
-  local d=getdir(n)
-  if  d=="TLT" then return 0
-  elseif d=="TRT" then return 1
-  elseif d=="+TLT" then return 0,false
-  elseif d=="+TRT" then return 1,false
-  elseif d=="-TLT" then return 0,true
-  elseif d=="-TRT" then return 1,true
-  else     return 0
-  end
- end
-end
 local propertydata=direct.get_properties_table()
 nodes.properties={ data=propertydata }
 if direct.set_properties_mode then
@@ -9115,11 +9098,11 @@ function constructors.finalize(tfmdata)
  if not properties.virtualized then
   properties.virtualized=tfmdata.type=="virtual"
  end
- properties.fontname=tfmdata.fontname
- properties.filename=tfmdata.filename
- properties.fullname=tfmdata.fullname
- properties.name=tfmdata.name
- properties.psname=tfmdata.psname
+ properties.fontname=properties.fontname or tfmdata.fontname
+ properties.filename=properties.filename or tfmdata.filename
+ properties.fullname=properties.fullname or tfmdata.fullname
+ properties.name=properties.name  or tfmdata.name
+ properties.psname=properties.psname   or tfmdata.psname
  properties.encodingbytes=tfmdata.encodingbytes or 1
  properties.embedding=tfmdata.embedding  or "subset"
  properties.tounicode=tfmdata.tounicode  or 1
@@ -15408,8 +15391,8 @@ function readers.cff(f,fontdata,specification)
   if private then
    local data=private.data
    if type(data)=="table" then
-    cffinfo.defaultwidth=data.defaultwidth or cffinfo.defaultwidth
-    cffinfo.nominalwidth=data.nominalwidth or cffinfo.nominalwidth
+    cffinfo.defaultwidth=data.defaultwidthx or cffinfo.defaultwidth
+    cffinfo.nominalwidth=data.nominalwidthx or cffinfo.nominalwidth
     cffinfo.bluevalues=data.bluevalues
     cffinfo.otherblues=data.otherblues
     cffinfo.familyblues=data.familyblues
@@ -17898,6 +17881,7 @@ function gposhandlers.pair(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofgly
   local sets=readarray(f)
      sets=readpairsets(f,tableoffset,sets,format1,format2,mainoffset,getdelta)
      coverage=readcoverage(f,tableoffset+coverage)
+  local shared={} 
   for index,newindex in next,coverage do
    local set=sets[newindex+1]
    local hash={}
@@ -17905,18 +17889,24 @@ function gposhandlers.pair(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofgly
     local value=set[i]
     if value then
      local other=value[1]
-     local first=value[2]
-     local second=value[3]
-     if first or second then
-      hash[other]={ first,second or nil } 
-     else
-      hash[other]=nil 
+     local share=shared[value]
+     if share==nil then
+      local first=value[2]
+      local second=value[3]
+      if first or second then
+       share={ first,second or nil } 
+      else
+       share=false
+      end
+      shared[value]=share
      end
+     hash[other]=share or nil 
     end
    end
    coverage[index]=hash
   end
   return {
+   shared=shared and true or nil,
    format="pair",
    coverage=coverage,
   }
@@ -17933,7 +17923,7 @@ function gposhandlers.pair(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofgly
      classdef1=readclassdef(f,tableoffset+classdef1,coverage)
      classdef2=readclassdef(f,tableoffset+classdef2,nofglyphs)
   local usedcoverage={}
-local shared={} 
+  local shared={} 
   for g1,c1 in next,classdef1 do
    if coverage[g1] then
     local l1=classlist[c1]
@@ -17945,18 +17935,17 @@ local shared={}
        local first=offsets[1]
        local second=offsets[2]
        if first or second then
-local s1=shared[first]
-if not s1 then
- s1={}
- shared[first]=s1
-end
-local s2=s1[second]
-if not s2 then
- s2={ first,second or nil }
- s1[second]=s2
-end
-hash[paired]=s2
-       else
+        local s1=shared[first]
+        if s1==nil then
+         s1={}
+         shared[first]=s1
+        end
+        local s2=s1[second]
+        if s2==nil then
+         s2={ first,second or nil }
+         s1[second]=s2
+        end
+        hash[paired]=s2
        end
       end
      end
@@ -17965,6 +17954,7 @@ hash[paired]=s2
    end
   end
   return {
+   shared=shared and true or nil,
    format="pair",
    coverage=usedcoverage,
   }
@@ -21256,16 +21246,30 @@ function readers.pack(data)
        if kind=="gpos_pair" then
         local c=step.coverage
         if c then
-         if step.format=="pair" then
+         if step.format~="pair" then
+          for g1,d1 in next,c do
+           c[g1]=pack_normal(d1)
+          end
+         elseif step.shared then
+          local shared={}
+          for g1,d1 in next,c do
+           for g2,d2 in next,d1 do
+            if not shared[d2] then
+             local f=d2[1] if f and f~=true then d2[1]=pack_indexed(f) end
+             local s=d2[2] if s and s~=true then d2[2]=pack_indexed(s) end
+             shared[d2]=true
+            end
+           end
+          end
+          if pass==2 then
+           step.shared=nil 
+          end
+         else
           for g1,d1 in next,c do
            for g2,d2 in next,d1 do
             local f=d2[1] if f and f~=true then d2[1]=pack_indexed(f) end
             local s=d2[2] if s and s~=true then d2[2]=pack_indexed(s) end
            end
-          end
-         else
-          for g1,d1 in next,c do
-           c[g1]=pack_normal(d1)
           end
          end
         end
@@ -22551,7 +22555,7 @@ local trace_defining=false  registertracker("fonts.defining",function(v) trace_d
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.107 
+otf.version=3.108 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pngcache=containers.define("fonts","png",otf.version,true)
@@ -23737,7 +23741,7 @@ local getboth=nuts.getboth
 local getdisc=nuts.getdisc
 local setdisc=nuts.setdisc
 local setoffsets=nuts.setoffsets
-local ischar=nuts.is_char
+local ischar=nuts.ischar
 local getkern=nuts.getkern
 local setkern=nuts.setkern
 local setlink=nuts.setlink
@@ -25168,7 +25172,7 @@ local getprop=nuts.getprop
 local setprop=nuts.setprop
 local getsubtype=nuts.getsubtype
 local getchar=nuts.getchar
-local ischar=nuts.is_char
+local ischar=nuts.ischar
 local end_of_math=nuts.end_of_math
 local nodecodes=nodes.nodecodes
 local disc_code=nodecodes.disc
@@ -25599,7 +25603,7 @@ local setcomponents=nuts.setcomponents
 local getwidth=nuts.getwidth
 local getattr=nuts.getattr
 local getglyphdata=nuts.getglyphdata
-local ischar=nuts.is_char
+local ischar=nuts.ischar
 local isglyph=nuts.isglyph
 local usesfont=nuts.uses_font
 local insert_node_after=nuts.insert_after
@@ -29166,7 +29170,7 @@ local setprev=nuts.setprev
 local setchar=nuts.setchar
 local getprop=nuts.getprop
 local setprop=nuts.setprop
-local ischar=nuts.is_char
+local ischar=nuts.ischar
 local insert_node_after=nuts.insert_after
 local copy_node=nuts.copy
 local remove_node=nuts.remove
@@ -33051,8 +33055,9 @@ local function copytotfm(data)
   local filename=constructors.checkedfilename(resources)
   local fontname=metadata.fontname or metadata.fullname
   local fullname=metadata.fullname or metadata.fontname
-  local endash=0x0020 
+  local endash=0x2013
   local emdash=0x2014
+  local space=0x0020 
   local spacer="space"
   local spaceunits=500
   local monospaced=metadata.monospaced
@@ -33063,26 +33068,32 @@ local function copytotfm(data)
   parameters.italicangle=italicangle
   parameters.charwidth=charwidth
   parameters.charxheight=charxheight
+  local d_endash=descriptions[endash]
+  local d_emdash=descriptions[emdash]
+  local d_space=descriptions[space]
+  if not d_space or d_space==0 then
+   d_space=d_endash
+  end
+  if d_space then
+   spaceunits,spacer=d_space.width or 0,"space"
+  end
   if properties.monospaced then
-   if descriptions[endash] then
-    spaceunits,spacer=descriptions[endash].width,"space"
-   end
-   if not spaceunits and descriptions[emdash] then
-    spaceunits,spacer=descriptions[emdash].width,"emdash"
-   end
-   if not spaceunits and charwidth then
-    spaceunits,spacer=charwidth,"charwidth"
+   if spaceunits==0 and d_emdash then
+    spaceunits,spacer=d_emdash.width or 0,"emdash"
    end
   else
-   if descriptions[endash] then
-    spaceunits,spacer=descriptions[endash].width,"space"
-   end
-   if not spaceunits and charwidth then
-    spaceunits,spacer=charwidth,"charwidth"
+   if spaceunits==0 and d_endash then
+    spaceunits,spacer=d_emdash.width or 0,"endash"
    end
   end
-  spaceunits=tonumber(spaceunits)
-  if spaceunits<200 then
+  if spaceunits==0 and charwidth then
+   spaceunits,spacer=charwidth or 0,"charwidth"
+  end
+  if spaceunits==0 then
+   spaceunits=tonumber(spaceunits) or 500
+  end
+  if spaceunits==0 then
+   spaceunits=500
   end
   parameters.slant=0
   parameters.space=spaceunits

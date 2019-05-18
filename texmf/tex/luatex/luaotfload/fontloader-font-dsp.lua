@@ -1478,6 +1478,118 @@ end
 --     [false] = { [true] = { false, true }, [false] = { false } },
 -- }
 
+-- function gposhandlers.pair(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyphs)
+--     local tableoffset = lookupoffset + offset
+--     setposition(f,tableoffset)
+--     local subtype  = readushort(f)
+--     local getdelta = fontdata.temporary.getdelta
+--     if subtype == 1 then
+--         local coverage = readushort(f)
+--         local format1  = readushort(f)
+--         local format2  = readushort(f)
+--         local sets     = readarray(f)
+--               sets     = readpairsets(f,tableoffset,sets,format1,format2,mainoffset,getdelta)
+--               coverage = readcoverage(f,tableoffset + coverage)
+--         local shared   = { } -- partial sparse, when set also needs to be handled in the packer
+--         for index, newindex in next, coverage do
+--             local set  = sets[newindex+1]
+--             local hash = { }
+--             for i=1,#set do
+--                 local value = set[i]
+--                 if value then
+--                     local other  = value[1]
+--                     if shared then
+--                         local s = shared[value]
+--                         if s == nil then
+--                             local first  = value[2]
+--                             local second = value[3]
+--                             if first or second then
+--                                 s = { first, second or nil } -- needs checking
+--                             else
+--                                 s = false
+--                             end
+--                             shared[value] = s
+--                         end
+--                         hash[other] = s or nil
+--                     else
+--                         local first  = value[2]
+--                         local second = value[3]
+--                         if first or second then
+--                             hash[other] = { first, second or nil } -- needs checking
+--                         else
+--                             hash[other] = nil -- what if set, maybe warning
+--                         end
+--                     end
+--                 end
+--             end
+--             coverage[index] = hash
+--         end
+--         return {
+--             shared   = shared and true or nil,
+--             format   = "pair",
+--             coverage = coverage,
+--         }
+--     elseif subtype == 2 then
+--         local coverage     = readushort(f)
+--         local format1      = readushort(f)
+--         local format2      = readushort(f)
+--         local classdef1    = readushort(f)
+--         local classdef2    = readushort(f)
+--         local nofclasses1  = readushort(f) -- incl class 0
+--         local nofclasses2  = readushort(f) -- incl class 0
+--         local classlist    = readpairclasssets(f,nofclasses1,nofclasses2,format1,format2,tableoffset,getdelta)
+--               coverage     = readcoverage(f,tableoffset+coverage)
+--               classdef1    = readclassdef(f,tableoffset+classdef1,coverage)
+--               classdef2    = readclassdef(f,tableoffset+classdef2,nofglyphs)
+--         local usedcoverage = { }
+--         local shared       = { } -- partial sparse, when set also needs to be handled in the packer
+--         for g1, c1 in next, classdef1 do
+--             if coverage[g1] then
+--                 local l1 = classlist[c1]
+--                 if l1 then
+--                     local hash = { }
+--                     for paired, class in next, classdef2 do
+--                         local offsets = l1[class]
+--                         if offsets then
+--                             local first  = offsets[1]
+--                             local second = offsets[2]
+--                             if first or second then
+--                                 if shared then
+--                                     local s1 = shared[first]
+--                                     if s1 == nil then
+--                                         s1 = { }
+--                                         shared[first] = s1
+--                                     end
+--                                     local s2 = s1[second]
+--                                     if s2 == nil then
+--                                         s2 = { first, second or nil }
+--                                         s1[second] = s2
+--                                     end
+--                                     hash[paired] = s2
+--                                 else
+--                                     hash[paired] = { first, second or nil }
+--                                 end
+--                             else
+--                                 -- upto the next lookup for this combination
+--                             end
+--                         end
+--                     end
+--                     usedcoverage[g1] = hash
+--                 end
+--             end
+--         end
+--         return {
+--             shared   = shared and true or nil,
+--             format   = "pair",
+--             coverage = usedcoverage,
+--         }
+--     elseif subtype == 3 then
+--         report("yet unsupported subtype %a in %a positioning",subtype,"pair")
+--     else
+--         report("unsupported subtype %a in %a positioning",subtype,"pair")
+--     end
+-- end
+
 function gposhandlers.pair(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofglyphs)
     local tableoffset = lookupoffset + offset
     setposition(f,tableoffset)
@@ -1490,25 +1602,32 @@ function gposhandlers.pair(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofgly
         local sets     = readarray(f)
               sets     = readpairsets(f,tableoffset,sets,format1,format2,mainoffset,getdelta)
               coverage = readcoverage(f,tableoffset + coverage)
+        local shared   = { } -- partial sparse, when set also needs to be handled in the packer
         for index, newindex in next, coverage do
             local set  = sets[newindex+1]
             local hash = { }
             for i=1,#set do
                 local value = set[i]
                 if value then
-                    local other  = value[1]
-                    local first  = value[2]
-                    local second = value[3]
-                    if first or second then
-                        hash[other] = { first, second or nil } -- needs checking
-                    else
-                        hash[other] = nil -- what if set, maybe warning
+                    local other = value[1]
+                    local share = shared[value]
+                    if share == nil then
+                        local first  = value[2]
+                        local second = value[3]
+                        if first or second then
+                            share = { first, second or nil } -- needs checking
+                        else
+                            share = false
+                        end
+                        shared[value] = share
                     end
+                    hash[other] = share or nil -- really overload ?
                 end
             end
             coverage[index] = hash
         end
         return {
+            shared   = shared and true or nil,
             format   = "pair",
             coverage = coverage,
         }
@@ -1525,7 +1644,7 @@ function gposhandlers.pair(f,fontdata,lookupid,lookupoffset,offset,glyphs,nofgly
               classdef1    = readclassdef(f,tableoffset+classdef1,coverage)
               classdef2    = readclassdef(f,tableoffset+classdef2,nofglyphs)
         local usedcoverage = { }
-local shared = { } -- partial sparse
+        local shared       = { } -- partial sparse, when set also needs to be handled in the packer
         for g1, c1 in next, classdef1 do
             if coverage[g1] then
                 local l1 = classlist[c1]
@@ -1537,20 +1656,17 @@ local shared = { } -- partial sparse
                             local first  = offsets[1]
                             local second = offsets[2]
                             if first or second then
-local s1 = shared[first]
-if not s1 then
-    s1 = { }
-    shared[first] = s1
-end
-local s2 = s1[second]
-if not s2 then
-    s2 = { first, second or nil }
-    s1[second] = s2
-end
-hash[paired] = s2
---                                 hash[paired] = { first, second or nil }
-                            else
-                                -- upto the next lookup for this combination
+                                local s1 = shared[first]
+                                if s1 == nil then
+                                    s1 = { }
+                                    shared[first] = s1
+                                end
+                                local s2 = s1[second]
+                                if s2 == nil then
+                                    s2 = { first, second or nil }
+                                    s1[second] = s2
+                                end
+                                hash[paired] = s2
                             end
                         end
                     end
@@ -1559,6 +1675,7 @@ hash[paired] = s2
             end
         end
         return {
+            shared   = shared and true or nil,
             format   = "pair",
             coverage = usedcoverage,
         }

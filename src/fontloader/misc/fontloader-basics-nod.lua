@@ -146,7 +146,8 @@ nodes.handlers.unprotectglyphs = node.unprotect_glyphs -- beware: nodes!
 -- we can go nuts (e.g. experimental); this split permits us us keep code
 -- used elsewhere stable but at the same time play around in context
 
--- much of this will go away
+-- much of this will go away .. it's part of the context interface and not
+-- officially in luatex-*.lua
 
 local direct             = node.direct
 local nuts               = { }
@@ -186,7 +187,7 @@ nuts.setboth             = direct.setboth
 nuts.setchar             = direct.setchar
 nuts.setcomponents       = direct.setcomponents
 ----.setdepth            = direct.setdepth
-nuts.setdir              = direct.setdir
+----.setdir              = direct.setdir
 nuts.setdirection        = direct.setdirection
 nuts.setdisc             = direct.setdisc
 nuts.setfield            = setfield
@@ -206,8 +207,6 @@ nuts.setwidth            = direct.setwidth
 nuts.getglyphdata        = nuts.getattr
 nuts.setglyphdata        = nuts.setattr
 
-nuts.is_char             = direct.is_char
-nuts.is_glyph            = direct.is_glyph
 nuts.ischar              = direct.is_char
 nuts.isglyph             = direct.is_glyph
 
@@ -232,26 +231,6 @@ nuts.traverse            = direct.traverse
 nuts.traverse_char       = direct.traverse_char
 nuts.traverse_glyph      = direct.traverse_glyph
 nuts.traverse_id         = direct.traverse_id
-
--- for now
-
-if not nuts.getdirection then
-
-    local getdir = direct.getdir
-
-    function nuts.getdirection(n)
-        local d = getdir(n)
-        if     d ==  "TLT" then return 0
-        elseif d ==  "TRT" then return 1
-        elseif d == "+TLT" then return 0, false
-        elseif d == "+TRT" then return 1, false
-        elseif d == "-TLT" then return 0, true
-        elseif d == "-TRT" then return 1, true
-        else                    return 0
-        end
-    end
-
-end
 
 -- properties as used in the (new) injector:
 

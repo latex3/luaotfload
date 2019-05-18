@@ -201,7 +201,7 @@ local getattr            = nuts.getattr
 
 local getglyphdata       = nuts.getglyphdata
 
-local ischar             = nuts.is_char
+local ischar             = nuts.ischar
 local isglyph            = nuts.isglyph
 local usesfont           = nuts.uses_font
 

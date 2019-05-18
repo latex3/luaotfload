@@ -114,7 +114,7 @@ local setchar            = nuts.setchar
 local getprop            = nuts.getprop
 local setprop            = nuts.setprop
 
-local ischar             = nuts.is_char
+local ischar             = nuts.ischar
 
 local insert_node_after  = nuts.insert_after
 local copy_node          = nuts.copy

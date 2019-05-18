@@ -1573,16 +1573,34 @@ function readers.pack(data)
                             if kind == "gpos_pair" then
                                 local c = step.coverage
                                 if c then
-                                    if step.format == "pair" then
+                                    if step.format ~= "pair" then
+                                        for g1, d1 in next, c do
+                                            c[g1] = pack_normal(d1)
+                                        end
+                                    elseif step.shared then
+                                        -- This branch results from classes. We already share at the reader end. Maybe
+                                        -- the sharing should be moved there altogether but it becomes kind of messy
+                                        -- then. Here we're still wasting time because in the second pass we serialize
+                                        -- and hash. So we compromise. We could merge the two passes ...
+                                        local shared = { }
+                                        for g1, d1 in next, c do
+                                            for g2, d2 in next, d1 do
+                                                if not shared[d2] then
+                                                    local f = d2[1] if f and f ~= true then d2[1] = pack_indexed(f) end
+                                                    local s = d2[2] if s and s ~= true then d2[2] = pack_indexed(s) end
+                                                    shared[d2] = true
+                                                end
+                                            end
+                                        end
+                                        if pass == 2 then
+                                            step.shared = nil -- weird, so dups
+                                        end
+                                    else
                                         for g1, d1 in next, c do
                                             for g2, d2 in next, d1 do
                                                 local f = d2[1] if f and f ~= true then d2[1] = pack_indexed(f) end
                                                 local s = d2[2] if s and s ~= true then d2[2] = pack_indexed(s) end
                                             end
-                                        end
-                                    else
-                                        for g1, d1 in next, c do
-                                            c[g1] = pack_normal(d1)
                                         end
                                     end
                                 end

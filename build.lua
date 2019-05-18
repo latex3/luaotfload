@@ -1,6 +1,6 @@
 
-packageversion= "2.9706"
-packagedate   = "2019-04-12"
+packageversion= "2.9707"
+packagedate   = "2019-05-18"
 
 local luatexstatus = status.list()
 local ismiktex = string.match (luatexstatus.banner,"MiKTeX")

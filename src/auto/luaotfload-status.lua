@@ -81,7 +81,7 @@ return {
   ["committer"]="Ulrike Fischer <fischer@troubleshooting-tex.de>",
   ["description"]="2.9707-2019-05-18",
   ["loader"]="fontloader-2019-05-18.lua",
-  ["revision"]="8dbba8239301c96e51409f2148e73851f021fdd6",
-  ["timestamp"]="2019-05-18 17:45:19 +0200",
+  ["revision"]="48e94fbe639f531e17df00a93f6129b3765d0f8d",
+  ["timestamp"]="2019-05-18 19:38:03 +0200",
  },
 }

@@ -640,11 +640,19 @@ local display_features = function (features)
     texiowrite_nl ""
     print_heading("Features", 2)
 
+    local status = 0
     if not display_features_type ("GSUB Features", features.gsub) then
-        texiowrite_nl("font defines no gsub feature")
+        status = status + 1
     end
     if not display_features_type ("GPOS Features", features.gpos) then
+        status = status + 2
+    end
+    if status == 3 then
+        texiowrite_nl("font defines neither gsub nor gpos features")
+    elseif status == 2 then
         texiowrite_nl("font defines no gpos feature")
+    elseif status == 1 then
+        texiowrite_nl("font defines no gsub feature")
     end
 end
 

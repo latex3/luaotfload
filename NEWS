@@ -1,8 +1,11 @@
 Change History
 --------------
-XXXX       luaotfload v2.97
+2019-05-18 luaotfload v2.97
     * fix issue #47
     * fix whatsits interfering with letterspacing (issue #53)
+    * fix luaotfload-tool switches version and find not working correctly (PR#59)
+    * fix luaotfload-tool support of ttc fonts (PR#58)
+    * sync with context files from 2019-05-18 (improves handling of large fonts, see e.g. issue #55 and PR#58)
     
 2019-01-28 luaotfload v2.96
     * repaired broken letterspace (issue #38)

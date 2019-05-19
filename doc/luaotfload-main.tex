@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2019-05-18 v2.9707}
+  \setdocumentdate   {2019-05-18 v2.97}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
@@ -55,6 +55,13 @@
 
 \pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
+\beginsection {New in version 2.97 (by Ulrike Fischer)}
+\begin{itemize}
+\item the new generic fontloader improves the handling of large fonts (but some fonts still need a 64bit luatex version to create the font files).
+\item A number of small bug (also in luaotfload-tool) have been corrected, see the NEWS file for details.
+
+\end{itemize}
+\endsection
 
 \beginsection {New in version 2.96 (by Ulrike Fischer)}
 \begin{itemize}

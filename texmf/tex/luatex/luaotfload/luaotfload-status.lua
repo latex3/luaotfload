@@ -71,7 +71,7 @@ return {
   { "luaotfload-colors.lua", "3bb21fbfa485f85c637ca699dc4e60cf" },
   { "luaotfload-auxiliary.lua", "8b2dd8f751d987da640e662372f8bae2" },
   { "luaotfload-filelist.lua", "aa58dd1e63a7f6d3061e7fcc57bef1c8" },
-  { "luaotfload-tool.lua", "692736bc7f33d73e4e50d2e529fe48ab" },
+  { "luaotfload-tool.lua", "aabbbbcb7b4e85594de130f26f2a461e" },
   { "luaotfload-diagnostics.lua", "9464f39ed119bf7b2ed669ea0aa66015" },
   { "luaotfload-log.lua", "3765398bcade0cdc9c6bab624addef71" },
   { "luaotfload-init.lua", "b0806bfa231abecb4f21cf3a796020b2" },
@@ -81,7 +81,7 @@ return {
   ["committer"]="Ulrike Fischer <fischer@troubleshooting-tex.de>",
   ["description"]="2.9707-2019-05-18",
   ["loader"]="fontloader-2019-05-18.lua",
-  ["revision"]="8dbba8239301c96e51409f2148e73851f021fdd6",
-  ["timestamp"]="2019-05-18 17:45:19 +0200",
+  ["revision"]="05fc0119b8e30705da975b3d709154d98e30c42b",
+  ["timestamp"]="2019-05-18 19:53:24 +0200",
  },
 }

@@ -1,11 +1,9 @@
 \csname ifharfloadloaded\endcsname
 \let\ifharfloadloaded\endinput
 \ifdefined\ProvidesPackage
-  \RequirePackage{luatexbase}
   \RequirePackage{luaotfload}
   \ProvidesPackage{harfload}[2019/04/26 v0.1.0  Unicode text layout system]
 \else
-  \input luatexbase.sty
   \input luaotfload.sty
 \fi
 \directlua{

@@ -4,7 +4,6 @@ end
 
 local harf = require("harf")
 
-local add_to_callback = luatexbase.add_to_callback
 local define_font     = harf.callbacks.define_font
 
 -- Change luaotfload’s default of preferring system fonts.
@@ -22,8 +21,9 @@ local readers = {
 local function harf_reader(spec)
   local features = {}
   local options = {}
+  local rawfeatures = spec.features and spec.features.raw or {}
 
-  local mode = spec.features.raw.mode
+  local mode = rawfeatures.mode
   if mode and mode ~= "harf" then
     return readers[spec.forced](spec)
   end
@@ -38,7 +38,7 @@ local function harf_reader(spec)
     specification = spec.specification,
   }
 
-  for key, val in next, spec.features.raw do
+  for key, val in next, rawfeatures do
     if key == "language" then val = harf.Language.new(val) end
     if key == "colr" then key = "palette" end
     if key:len() == 4 then
@@ -154,14 +154,79 @@ aux.provides_feature = function(fontid, script, language, feature)
   return aux_provides_feature(fontid, script, language, feature)
 end
 
+local aux_font_has_glyph = aux.font_has_glyph
+aux.font_has_glyph = function(fontid, codepoint)
+  local fontdata = font.getfont(fontid)
+  local hbdata = fontdata and fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local unicodes = hbshared.unicodes
+    return unicodes[codepoint] ~= nil
+  end
+  return aux_font_has_glyph(fontid, codepoint)
+end
+
+local aux_slot_of_name = aux.slot_of_name
+aux.slot_of_name = function(fontid, glyphname, unsafe)
+  local fontdata = font.getfont(fontid)
+  local hbdata = fontdata and fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbfont = hbshared.font
+
+    local gid = hbfont:get_glyph_from_name(glyphname)
+    if gid ~= nil then
+      return gid + harf.CH_GID_PREFIX
+    end
+    return nil
+  end
+  return aux_slot_of_name(fontid, glyphname, unsafe)
+end
+
+local aux_name_of_slot = aux.name_of_slot
+aux.name_of_slot = function(fontid, codepoint)
+  local fontdata = font.getfont(fontid)
+  local hbdata = fontdata and fontdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local hbfont = hbshared.font
+    local characters = fontdata.characters
+    local character = characters[codepoint]
+
+    if character then
+      local gid = characters[codepoint].index
+      return hbfont:get_glyph_name(gid)
+    end
+    return nil
+  end
+  return aux_name_of_slot(fontid, codepoint)
+end
+
 -- luatexbase does not know how to handle `wrapup_run` callback, teach it.
 luatexbase.callbacktypes.wrapup_run = 1 -- simple
 luatexbase.callbacktypes.get_char_tounicode = 1 -- simple
 luatexbase.callbacktypes.get_glyph_string = 1 -- simple
 
+local base_callback_descriptions = luatexbase.callback_descriptions
+local base_add_to_callback = luatexbase.add_to_callback
+local base_remove_from_callback = luatexbase.remove_from_callback
+
+-- Remove all existing functions from given callback, insert ours, then
+-- reinsert the removed ones, so ours takes a priority.
+local function add_to_callback(name, func)
+  local saved_callbacks = {}, ff, dd
+  for k, v in next, base_callback_descriptions(name) do
+    saved_callbacks[k] = { base_remove_from_callback(name, v) }
+  end
+  base_add_to_callback(name, func, "Harf "..name.." callback")
+  for _, v in next, saved_callbacks do
+    base_add_to_callback(name, v[1], v[2])
+  end
+end
+
 -- Register all Harf callbacks, except `define_font` which is handled above.
 for name, func in next, harf.callbacks do
   if name ~= "define_font" then
-    add_to_callback(name, func, "Harf "..name.." callback", 1)
+    add_to_callback(name, func)
   end
 end

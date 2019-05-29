@@ -141,16 +141,13 @@ local paired_close = {
 
 local process
 
--- Collect character properties (font, direction, script) and resolve common
--- and inherited scripts. Pre-requisite for itemization into smaller runs.
-local function collect(head, direction)
-  local props = {}
-  local nodes = {}
-  local codes = {}
-  local dirstack = {}
-  local pairstack = {}
+local function itemize(head, direction)
+  -- Collect character properties (font, direction, script) and resolve common
+  -- and inherited scripts. Pre-requisite for itemization into smaller runs.
+  local props, nodes, codes = {}, {}, {}
+  local dirstack, pairstack = {}, {}
   local currdir = direction or "TLT"
-  local currfont = nil
+  local currfontid = nil
 
   for n in direct.traverse(head) do
     local id = getid(n)
@@ -159,7 +156,7 @@ local function collect(head, direction)
     local skip = false
 
     if id == glyphid then
-      currfont = getfont(n)
+      currfontid = getfont(n)
       if getsubtype(n) > 255 then
         skip = true
       else
@@ -185,7 +182,7 @@ local function collect(head, direction)
       currdir = getdir(n)
     end
 
-    local fontdata = currfont and font.getfont(currfont)
+    local fontdata = currfontid and font.getfont(currfontid)
     local hbdata = fontdata and fontdata.hb
     if not hbdata then skip = true end
 
@@ -220,7 +217,7 @@ local function collect(head, direction)
     codes[#codes + 1] = code
     nodes[#nodes + 1] = n
     props[#props + 1] = {
-      font = currfont,
+      font = currfontid,
       -- XXX handle RTT and LTL.
       dir = currdir == "TRT" and dir_rtl or dir_ltr,
       script = script,
@@ -235,29 +232,25 @@ local function collect(head, direction)
     end
   end
 
-  return props, nodes, codes
-end
-
--- Split into a list of runs, each has the same font, direction and script.
--- TODO: itemize by language as well.
-local function itemize(props, nodes, codes)
+  -- Split into a list of runs, each has the same font, direction and script.
+  -- TODO: itemize by language as well.
   local runs = {}
-  local currfont, currdir, currscript, currskip = nil, nil, nil, nil
+  local currfontid, currdir, currscript, currskip = nil, nil, nil, nil
   for i, prop in next, props do
-    local font = prop.font
+    local fontid = prop.font
     local dir = prop.dir
     local script = prop.script
     local skip = prop.skip
 
     -- Start a new run if there is a change in properties.
-    if font ~= currfont or
+    if fontid ~= currfontid or
        dir ~= currdir or
        script ~= currscript or
        skip ~= currskip then
       runs[#runs + 1] = {
         start = i,
         len = 0,
-        font = font,
+        font = fontid,
         dir = dir,
         script = script,
         skip = skip,
@@ -268,7 +261,7 @@ local function itemize(props, nodes, codes)
 
     runs[#runs].len = runs[#runs].len + 1
 
-    currfont = font
+    currfontid = fontid
     currdir = dir
     currscript = script
     currskip = skip
@@ -546,15 +539,14 @@ local function tonodes(head, current, run, glyphs, color)
   local hbdata = fontdata.hb
   local hbshared = hbdata.shared
   local hbfont = hbshared.font
-  local hbglyphs = hbshared.glyphs
+  local fontglyphs = hbshared.glyphs
   local rtl = dir:is_backward()
 
   local tracinglostchars = tex.tracinglostchars
   local tracingonline = tex.tracingonline
 
   local scale = hbdata.scale
-  local ascender = hbshared.ascender
-  local descender = hbshared.descender
+  local letterspace = hbdata.letterspace
 
   local haspng = hbshared.haspng
   local fonttype = hbshared.fonttype
@@ -594,19 +586,19 @@ local function tonodes(head, current, run, glyphs, color)
       end
 
       if id == glyphid then
-        local hbglyph = hbglyphs[gid]
+        local fontglyph = fontglyphs[gid]
 
-        local pngblob = hbglyph.png
+        local pngblob = fontglyph.png
         if haspng and not pngblob then
           pngblob = hbfont:ot_color_glyph_get_png(gid)
-          hbglyph.png = pngblob
+          fontglyph.png = pngblob
         end
+        local character = characters[char]
         if pngblob then
           -- Color bitmap font, extract the PNG data and insert it in the node
           -- list.
           local data = pngblob:get_data()
           local path = cachedpng(data)
-          local character = characters[char]
 
           local image = img.node {
             filename  = path,
@@ -625,7 +617,14 @@ local function tonodes(head, current, run, glyphs, color)
             -- That is a hack, but I think it is good enough for now.
             setfont(n, 0)
           else
-            setchar(n, char)
+            local oldcharacter = characters[getchar(n)]
+            -- If the glyph index of current font chars is the same as shaped
+            -- glyph, keep the node char unchanged. Helps with primitives that
+            -- take characters as input but actually work on glyphs, like
+            -- `\rpcode`.
+            if not oldcharacter or character.index ~= oldcharacter.index then
+              setchar(n, char)
+            end
           end
           local xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
           local yoffset = glyph.y_offset * scale
@@ -633,12 +632,13 @@ local function tonodes(head, current, run, glyphs, color)
           protectglyph(n)
           head, current = insertafter(head, current, n)
 
-          local width = hbglyph.width
-          if width ~= glyph.x_advance then
+          local x_advance = glyph.x_advance + letterspace
+          local width = fontglyph.width
+          if width ~= x_advance then
             -- LuaTeX always uses the glyph width from the font, so we need to
             -- insert a kern node if the x advance is different.
             local kern = newnode(kernid)
-            setkern(kern, (glyph.x_advance - width) * scale)
+            setkern(kern, (x_advance - width) * scale)
             copyprops(n, kern)
             if rtl then
               head = insertbefore(head, current, kern)
@@ -666,9 +666,9 @@ local function tonodes(head, current, run, glyphs, color)
           --   cluster that will be covered by an /ActualText span.
           local tounicode = glyph.tounicode
           if tounicode then
-            if nglyphs == 1 and not hbglyph.tounicode then
-              hbglyph.tounicode = tounicode
-            elseif tounicode ~= hbglyph.tounicode then
+            if nglyphs == 1 and not fontglyph.tounicode then
+              fontglyph.tounicode = tounicode
+            elseif tounicode ~= fontglyph.tounicode then
               setprop(n, p_startactual, tounicode)
               glyphs[i + nglyphs - 1].endactual = true
             end
@@ -683,8 +683,8 @@ local function tonodes(head, current, run, glyphs, color)
         -- it from the default, so reset the glue using the new advance.
         -- We are intentionally not comparing with the existing glue width as
         -- spacing after the period is larger by default in TeX.
-        if fontdata.parameters.space ~= glyph.x_advance * scale then
-          local width = glyph.x_advance * scale
+        local width = (glyph.x_advance + letterspace) * scale
+        if fontdata.parameters.space ~= width then
           setwidth(n, width)
           setfield(n, "stretch", width / 2)
           setfield(n, "shrink", width / 3)
@@ -789,8 +789,7 @@ end
 
 process = function(head, direction)
   local newhead, current = nil, nil
-  local props, nodes, codes = collect(head, direction)
-  local runs = itemize(props, nodes, codes)
+  local runs = itemize(head, direction)
 
   for _, run in next, runs do
     newhead, current = shape_run(newhead, current, run)
@@ -887,8 +886,15 @@ local function get_tounicode(fontid, c)
   local hbdata = fontdata.hb
   if hbdata then
     local hbshared = hbdata.shared
-    local hbglyphs = hbshared.glyphs
-    return hbglyphs[c - hb.CH_GID_PREFIX].tounicode
+    local fontglyphs = hbshared.glyphs
+    local hbfont = hbshared.font
+
+    local gid = c - hb.CH_GID_PREFIX
+    if c < hb.CH_GID_PREFIX then
+      gid = hbfont:get_nominal_glyph(c)
+    end
+
+    return fontglyphs[gid].tounicode
   end
 end
 

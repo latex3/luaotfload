@@ -1,5 +1,5 @@
 
-packageversion= "2.9801"
+packageversion= "2.9802"
 packagedate   = "2019-05-18"
 
 local luatexstatus = status.list()
@@ -44,9 +44,9 @@ uploadconfig = {
 stdengine    = "luatex"
 checkengines = {"luatex"}
 
-local errorlevel   = os.execute("luahbtex --version") 
+local errorlevel   = os.execute("harftex --version") 
 if not os.getenv('TRAVIS') and errorlevel==0 then 
-    checkengines = {"luatex","luahbtex"}
+    checkengines = {"luatex","harftex"}
 end 
  
 checkconfigs = {

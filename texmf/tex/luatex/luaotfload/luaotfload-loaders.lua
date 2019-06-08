@@ -8,7 +8,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-loaders",
-    version       = "2.9801",       --TAGVERSION
+    version       = "2.9802",       --TAGVERSION
     date          = "2019-05-18", --TAGDATE
     description   = "luaotfload submodule / callback handling",
     license       = "GPL v2.0"
@@ -138,9 +138,9 @@ do
       --- We need to test for `encodingbytes` to avoid passing
       --- tfm fonts to `patch_font`. These fonts are fragile
       --- because they use traditional TeX font handling.
-      luatexbase.call_callback ("luaotfload.patch_font", fontdata, specification)
+      luatexbase.call_callback ("luaotfload.patch_font", fontdata, specification, id)
     else
-      luatexbase.call_callback ("luaotfload.patch_font_unsafe", fontdata, specification)
+      luatexbase.call_callback ("luaotfload.patch_font_unsafe", fontdata, specification, id)
     end
     return fontdata
   end

@@ -81,7 +81,7 @@ if not modules then modules = { } end modules ['font-osd'] = { -- script devanag
 -- malayalam, oriya, tamil and tolugu but not all are checked. Also, some of the
 -- code below might need to be adapted to the extra scripts.
 
-local insert, imerge, copy = table.insert, table.imerge, table.copy
+local insert, imerge, copy, tohash = table.insert, table.imerge, table.copy, table.tohash
 local next, type = next, type
 
 local report             = logs.reporter("otf","devanagari")
@@ -332,8 +332,8 @@ local two_defaults = {
 }
 
 local one_defaults = {
-    dev2 = dflt_true,
-    deva = dflt_true,
+    dev2 = dflt_true, -- set later
+    deva = dflt_true, -- set later
 }
 
 local false_flags = { false, false, false, false }
@@ -418,15 +418,6 @@ local basic_shaping_forms =  {
 }
 
 local valid = {
- -- akhn = true, -- malayalam
- -- rphf = true,
- -- pref = true,
- -- half = true,
- -- blwf = true,
- -- pstf = true,
- -- pres = true, -- malayalam
- -- blws = true, -- malayalam
- -- psts = true, -- malayalam
     abvs = true,
     akhn = true,
     blwf = true,
@@ -454,6 +445,8 @@ local scripts = { }
 
 local scripts_one = { "deva", "mlym", "beng", "gujr", "guru", "knda", "orya", "taml", "telu" }
 local scripts_two = { "dev2", "mlm2", "bng2", "gjr2", "gur2", "knd2", "ory2", "tml2", "tel2" }
+
+local scripts_old = { } for i=1,#scripts_one do local v = scripts_one[i] scripts_old[v] = v end -- self
 
 local nofscripts = #scripts_one
 
@@ -532,6 +525,8 @@ local function initializedevanagi(tfmdata)
             --
             resources.devanagari = devanagari
             --
+            local old = scripts_old[script] or false
+            --
             for s=1,#sequences do
                 local sequence = sequences[s]
                 local steps    = sequence.steps
@@ -539,9 +534,9 @@ local function initializedevanagi(tfmdata)
                 local features = sequence.features
                 local has_rphf = features.rphf
                 local has_blwf = features.blwf
-                if has_rphf and has_rphf.deva then
+                if has_rphf and has_rphf[old] then
                     devanagari.reph = true
-                elseif has_blwf and has_blwf.deva then
+                elseif has_blwf and has_blwf[old] then
                     devanagari.vattu = true
                     for i=1,nofsteps do
                         local step     = steps[i]
@@ -615,43 +610,88 @@ local function initializedevanagi(tfmdata)
                 end
             end
             --
-            -- needs checking: this might be needed per instance ?
+            -- The following presets need checking (by Kai). Most of these scripts share a common
+            -- handling (some need less but that doesn't hurt). The question is: what to enable.
             --
-            if script == "deva" then
-                sharedfeatures["dv04"] = true -- dv04_remove_joiners
+            -- dv01_reorder_matras
+            -- dv02_reorder_reph
+            -- dv03_reorder_pre_base_reordering_consonants
+            -- dv04_remove_joiners
+            --
+            if     script == "deva" then
+                sharedfeatures["dv04"] = true
             elseif script == "dev2" then
-                sharedfeatures["dv01"] = true -- dv01_reorder_matras
-                sharedfeatures["dv02"] = true -- dv02_reorder_reph
-                sharedfeatures["dv03"] = true -- dv03_reorder_pre_base_reordering_consonants
-                sharedfeatures["dv04"] = true -- dv04_remove_joiners
+                sharedfeatures["dv01"] = true
+                sharedfeatures["dv02"] = true
+                sharedfeatures["dv03"] = true
+                sharedfeatures["dv04"] = true
+
+            elseif script == "knda" then
+                -- needs checking
+                sharedfeatures["dv04"] = true
+            elseif script == "knd2" then
+                -- needs checking
+                sharedfeatures["dv01"] = true
+                sharedfeatures["dv02"] = true
+                sharedfeatures["dv03"] = true
+                sharedfeatures["dv04"] = true
+
+            elseif script == "beng" then
+                -- needs checking
+                sharedfeatures["dv04"] = true
+            elseif script == "bng2" then
+                -- needs checking
+                sharedfeatures["dv01"] = true
+                sharedfeatures["dv02"] = true
+                sharedfeatures["dv03"] = true
+                sharedfeatures["dv04"] = true
+
+            elseif script == "gurj" then
+                -- needs checking
+                sharedfeatures["dv04"] = true
+            elseif script == "grj2" then
+                -- needs checking
+                sharedfeatures["dv01"] = true
+                sharedfeatures["dv02"] = true
+                sharedfeatures["dv03"] = true
+                sharedfeatures["dv04"] = true
+
+            elseif script == "guru" then
+                -- needs checking
+                sharedfeatures["dv04"] = true
+            elseif script == "gur2" then
+                -- needs checking
+                sharedfeatures["dv01"] = true
+                sharedfeatures["dv02"] = true
+                sharedfeatures["dv03"] = true
+                sharedfeatures["dv04"] = true
+
+            elseif script == "telu" then
+                -- needs checking
+                sharedfeatures["dv04"] = true
+            elseif script == "tel2" then
+                -- needs checking
+                sharedfeatures["dv01"] = true
+                sharedfeatures["dv02"] = true
+                sharedfeatures["dv03"] = true
+                sharedfeatures["dv04"] = true
+
             elseif script == "mlym" then
                 sharedfeatures["pstf"] = true
             elseif script == "mlm2" then
                 sharedfeatures["pstf"] = true
                 sharedfeatures["pref"] = true
-                sharedfeatures["dv03"] = true -- dv03_reorder_pre_base_reordering_consonants
-                gsubfeatures  ["dv03"] = two_defaults -- reorder pre base reordering consonants
+                sharedfeatures["dv03"] = true
+                gsubfeatures  ["dv03"] = two_defaults
                 insert(sequences,insertindex,sequence_reorder_pre_base_reordering_consonants)
-         -- elseif script == "beng" then
-         -- elseif script == "bng2" then
-         -- elseif script == "gujr" then
-         -- elseif script == "gjr2" then
-         -- elseif script == "guru" then
-         -- elseif script == "gur2" then
-         -- elseif script == "knda" then
-         -- elseif script == "knd2" then
+
             elseif script == "taml" then
-                sharedfeatures["dv04"] = true -- dv04_remove_joiners
-sharedfeatures["pstf"] = true
+                -- needs checking
+                sharedfeatures["dv04"] = true
+                sharedfeatures["pstf"] = true
             elseif script == "tml2" then
--- sharedfeatures["pstf"] = true
--- sharedfeatures["pref"] = true
---                 sharedfeatures["dv01"] = true -- dv01_reorder_matras
---                 sharedfeatures["dv02"] = true -- dv02_reorder_reph
---                 sharedfeatures["dv03"] = true -- dv03_reorder_pre_base_reordering_consonants
---                 sharedfeatures["dv04"] = true -- dv04_remove_joiners
-         -- elseif script == "telu" then
-         -- elseif script == "tel2" then
+                -- needs checking
+
             else
                 report("todo: enable the right features for script %a",script)
             end
@@ -699,7 +739,6 @@ local function initialize_one(font,attr) -- we need a proper hook into the datas
         datasets.devanagari = devanagaridata
         local resources     = tfmdata.resources
         local devanagari    = resources.devanagari
-
         for s=1,#datasets do
             local dataset = datasets[s]
             if dataset and dataset[1] then -- value

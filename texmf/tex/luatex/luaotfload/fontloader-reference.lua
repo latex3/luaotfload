@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 05/18/19 10:42:24
+-- merge date  : 06/05/19 15:39:40
 
 do -- begin closure to overcome local limits and interference
 
@@ -12426,14 +12426,19 @@ otf.tables=tables
 local statistics=otf.statistics or {}
 otf.statistics=statistics
 local scripts=allocate {
+ ["adlm"]="adlam",
+ ["aghb"]="caucasian albanian",
+ ["ahom"]="ahom",
  ["arab"]="arabic",
  ["armi"]="imperial aramaic",
  ["armn"]="armenian",
  ["avst"]="avestan",
  ["bali"]="balinese",
  ["bamu"]="bamum",
+ ["bass"]="bassa vah",
  ["batk"]="batak",
  ["beng"]="bengali",
+ ["bhks"]="bhaiksuki",
  ["bng2"]="bengali variant 2",
  ["bopo"]="bopomofo",
  ["brah"]="brahmi",
@@ -12449,23 +12454,33 @@ local scripts=allocate {
  ["copt"]="coptic",
  ["cprt"]="cypriot syllabary",
  ["cyrl"]="cyrillic",
- ["deva"]="devanagari",
  ["dev2"]="devanagari variant 2",
+ ["deva"]="devanagari",
+ ["dogr"]="dogra",
  ["dsrt"]="deseret",
+ ["dupl"]="duployan",
  ["egyp"]="egyptian heiroglyphs",
+ ["elba"]="elbasan",
  ["ethi"]="ethiopic",
  ["geor"]="georgian",
+ ["gjr2"]="gujarati variant 2",
  ["glag"]="glagolitic",
+ ["gong"]="gunjala gondi",
+ ["gonm"]="masaram gondi",
  ["goth"]="gothic",
+ ["gran"]="grantha",
  ["grek"]="greek",
  ["gujr"]="gujarati",
- ["gjr2"]="gujarati variant 2",
- ["guru"]="gurmukhi",
  ["gur2"]="gurmukhi variant 2",
+ ["guru"]="gurmukhi",
  ["hang"]="hangul",
  ["hani"]="cjk ideographic",
  ["hano"]="hanunoo",
+ ["hatr"]="hatran",
  ["hebr"]="hebrew",
+ ["hluw"]="anatolian hieroglyphs",
+ ["hmng"]="pahawh hmong",
+ ["hung"]="old hungarian",
  ["ital"]="old italic",
  ["jamo"]="hangul jamo",
  ["java"]="javanese",
@@ -12473,49 +12488,77 @@ local scripts=allocate {
  ["kana"]="hiragana and katakana",
  ["khar"]="kharosthi",
  ["khmr"]="khmer",
- ["knda"]="kannada",
+ ["khoj"]="khojki",
  ["knd2"]="kannada variant 2",
+ ["knda"]="kannada",
  ["kthi"]="kaithi",
  ["lana"]="tai tham",
  ["lao" ]="lao",
  ["latn"]="latin",
  ["lepc"]="lepcha",
  ["limb"]="limbu",
+ ["lina"]="linear a",
  ["linb"]="linear b",
  ["lisu"]="lisu",
  ["lyci"]="lycian",
  ["lydi"]="lydian",
+ ["mahj"]="mahajani",
+ ["maka"]="makasar",
  ["mand"]="mandaic and mandaean",
+ ["mani"]="manichaean",
+ ["marc"]="marchen",
  ["math"]="mathematical alphanumeric symbols",
+ ["medf"]="medefaidrin",
+ ["mend"]="mende kikakui",
  ["merc"]="meroitic cursive",
  ["mero"]="meroitic hieroglyphs",
- ["mlym"]="malayalam",
  ["mlm2"]="malayalam variant 2",
+ ["mlym"]="malayalam",
+ ["modi"]="modi",
  ["mong"]="mongolian",
+ ["mroo"]="mro",
  ["mtei"]="meitei Mayek",
+ ["mult"]="multani",
  ["musc"]="musical symbols",
  ["mym2"]="myanmar variant 2",
  ["mymr"]="myanmar",
+ ["narb"]="old north arabian",
+ ["nbat"]="nabataean",
+ ["newa"]="newa",
  ["nko" ]='n"ko',
+ ["nshu"]="nüshu",
  ["ogam"]="ogham",
  ["olck"]="ol chiki",
  ["orkh"]="old turkic and orkhon runic",
- ["orya"]="oriya",
  ["ory2"]="odia variant 2",
+ ["orya"]="oriya",
+ ["osge"]="osage",
  ["osma"]="osmanya",
+ ["palm"]="palmyrene",
+ ["pauc"]="pau cin hau",
+ ["perm"]="old permic",
  ["phag"]="phags-pa",
  ["phli"]="inscriptional pahlavi",
+ ["phlp"]="psalter pahlavi",
  ["phnx"]="phoenician",
+ ["plrd"]="miao",
  ["prti"]="inscriptional parthian",
  ["rjng"]="rejang",
+ ["rohg"]="hanifi rohingya",
  ["runr"]="runic",
  ["samr"]="samaritan",
  ["sarb"]="old south arabian",
  ["saur"]="saurashtra",
+ ["sgnw"]="sign writing",
  ["shaw"]="shavian",
  ["shrd"]="sharada",
+ ["sidd"]="siddham",
+ ["sind"]="khudawadi",
  ["sinh"]="sinhala",
+ ["sogd"]="sogdian",
+ ["sogo"]="old sogdian",
  ["sora"]="sora sompeng",
+ ["soyo"]="soyombo",
  ["sund"]="sundanese",
  ["sylo"]="syloti nagri",
  ["syrc"]="syriac",
@@ -12524,20 +12567,24 @@ local scripts=allocate {
  ["tale"]="tai le",
  ["talu"]="tai lu",
  ["taml"]="tamil",
+ ["tang"]="tangut",
  ["tavt"]="tai viet",
- ["telu"]="telugu",
  ["tel2"]="telugu variant 2",
+ ["telu"]="telugu",
  ["tfng"]="tifinagh",
  ["tglg"]="tagalog",
  ["thaa"]="thaana",
  ["thai"]="thai",
  ["tibt"]="tibetan",
+ ["tirh"]="tirhuta",
  ["tml2"]="tamil variant 2",
  ["ugar"]="ugaritic cuneiform",
  ["vai" ]="vai",
+ ["wara"]="warang citi",
  ["xpeo"]="old persian cuneiform",
  ["xsux"]="sumero-akkadian cuneiform",
  ["yi"  ]="yi",
+ ["zanb"]="zanabazar square",
 }
 local languages=allocate {
  ["aba" ]="abaza",
@@ -12606,12 +12653,15 @@ local languages=allocate {
  ["brm" ]="burmese",
  ["brx" ]="bodo",
  ["bsh" ]="bashkir",
+ ["bsk" ]="burushaski",
  ["bti" ]="beti",
  ["bts" ]="batak simalungun",
  ["bug" ]="bugis",
+ ["byv" ]="medumba",
  ["cak" ]="kaqchikel",
  ["cat" ]="catalan",
  ["cbk" ]="zamboanga chavacano",
+ ["cchn"]="chinantec",
  ["ceb" ]="cebuano",
  ["cgg" ]="chiga",
  ["cha" ]="chamorro",
@@ -12626,6 +12676,8 @@ local languages=allocate {
  ["chr" ]="cherokee",
  ["chu" ]="chuvash",
  ["chy" ]="cheyenne",
+ ["cja" ]="western cham",
+ ["cjm" ]="eastern cham",
  ["cmr" ]="comorian",
  ["cop" ]="coptic",
  ["cor" ]="cornish",
@@ -12681,6 +12733,7 @@ local languages=allocate {
  ["fin" ]="finnish",
  ["fji" ]="fijian",
  ["fle" ]="dutch (flemish)",
+ ["fmp" ]="fe’fe’",
  ["fne" ]="forest nenets",
  ["fon" ]="fon",
  ["fos" ]="faroese",
@@ -12759,6 +12812,7 @@ local languages=allocate {
  ["jan" ]="japanese",
  ["jav" ]="javanese",
  ["jbo" ]="lojban",
+ ["jct" ]="krymchak",
  ["jii" ]="yiddish",
  ["jud" ]="ladino",
  ["jul" ]="jula",
@@ -12795,6 +12849,7 @@ local languages=allocate {
  ["kmn" ]="kumaoni",
  ["kmo" ]="komo",
  ["kms" ]="komso",
+ ["kmz" ]="khorasani turkic",
  ["knr" ]="kanuri",
  ["kod" ]="kodagu",
  ["koh" ]="korean old hangul",
@@ -12871,6 +12926,7 @@ local languages=allocate {
  ["mar" ]="marathi",
  ["maw" ]="marwari",
  ["mbn" ]="mbundu",
+ ["mbo" ]="mbo",
  ["mch" ]="manchu",
  ["mcr" ]="moose cree",
  ["mde" ]="mende",
@@ -12887,6 +12943,7 @@ local languages=allocate {
  ["mle" ]="male",
  ["mlg" ]="malagasy",
  ["mln" ]="malinke",
+ ["mlr" ]="malayalam reformed",
  ["mly" ]="malay",
  ["mnd" ]="mandinka",
  ["mng" ]="mongolian",
@@ -12940,6 +12997,7 @@ local languages=allocate {
  ["nto" ]="esperanto",
  ["nym" ]="nyamwezi",
  ["nyn" ]="norwegian nynorsk",
+ ["nza" ]="mbembe tigon",
  ["oci" ]="occitan",
  ["ocr" ]="oji-cree",
  ["ojb" ]="ojibway",
@@ -13003,6 +13061,7 @@ local languages=allocate {
  ["say" ]="sayisi",
  ["scn" ]="sicilian",
  ["sco" ]="scots",
+ ["scs" ]="north slavey",
  ["sek" ]="sekota",
  ["sel" ]="selkup",
  ["sga" ]="old irish",
@@ -13047,6 +13106,9 @@ local languages=allocate {
  ["sxu" ]="upper saxon",
  ["syl" ]="sylheti",
  ["syr" ]="syriac",
+ ["syre"]="estrangela syriac",
+ ["syrj"]="western syriac",
+ ["syrn"]="eastern syriac",
  ["szl" ]="silesian",
  ["tab" ]="tabasaran",
  ["taj" ]="tajiki",
@@ -13078,6 +13140,7 @@ local languages=allocate {
  ["tsj" ]="tshangla",
  ["tua" ]="turoyo aramaic",
  ["tul" ]="tulu",
+ ["tum" ]="tulu",
  ["tuv" ]="tuvin",
  ["tvl" ]="tuvalu",
  ["twi" ]="twi",
@@ -13103,6 +13166,7 @@ local languages=allocate {
  ["wel" ]="welsh",
  ["wlf" ]="wolof",
  ["wln" ]="walloon",
+ ["wtm" ]="mewati",
  ["xbd" ]="lü",
  ["xhs" ]="xhosa",
  ["xjb" ]="minjangbal",
@@ -13246,6 +13310,7 @@ local features=allocate {
  ["vkna"]="vertical kana alternates",
  ["vkrn"]="vertical kerning",
  ["vpal"]="proportional alternate vertical metrics",
+ ["vrtr"]="vertical alternates for rotation",
  ["vrt2"]="vertical rotation",
  ["zero"]="slashed zero",
  ["trep"]="traditional tex replacements",
@@ -28095,7 +28160,7 @@ local function testrun(disc,t_run,c_run,...)
  end
  local pre,post,replace,pretail,posttail,replacetail=getdisc(disc,true)
  local renewed=false
- if (post or replace) and prev then
+ if (post or replace) then 
   if post then
    setlink(posttail,next)
   else
@@ -28288,6 +28353,7 @@ local function t_run_single(start,stop,font,attr,lookupcache)
           ss=nil
          end
         end
+lookupmatch=lg
        else
         break
        end
@@ -28441,6 +28507,7 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
            ss=nil
           end
          end
+lookupmatch=lg
         else
          break
         end
@@ -29145,7 +29212,7 @@ if not modules then modules={} end modules ['font-osd']={
  copyright="TAT Zetwerk / PRAGMA ADE / ConTeXt Development Team",
  license="see context related readme files"
 }
-local insert,imerge,copy=table.insert,table.imerge,table.copy
+local insert,imerge,copy,tohash=table.insert,table.imerge,table.copy,table.tohash
 local next,type=next,type
 local report=logs.reporter("otf","devanagari")
 fonts=fonts       or {}
@@ -29436,6 +29503,7 @@ local valid={
 local scripts={}
 local scripts_one={ "deva","mlym","beng","gujr","guru","knda","orya","taml","telu" }
 local scripts_two={ "dev2","mlm2","bng2","gjr2","gur2","knd2","ory2","tml2","tel2" }
+local scripts_old={} for i=1,#scripts_one do local v=scripts_one[i] scripts_old[v]=v end 
 local nofscripts=#scripts_one
 for i=1,nofscripts do
  local one=scripts_one[i]
@@ -29498,6 +29566,7 @@ local function initializedevanagi(tfmdata)
    local pre_base_reordering_consonants={}
    reorder_pre_base_reordering_consonants.steps[1].coverage=pre_base_reordering_consonants
    resources.devanagari=devanagari
+   local old=scripts_old[script] or false
    for s=1,#sequences do
     local sequence=sequences[s]
     local steps=sequence.steps
@@ -29505,9 +29574,9 @@ local function initializedevanagi(tfmdata)
     local features=sequence.features
     local has_rphf=features.rphf
     local has_blwf=features.blwf
-    if has_rphf and has_rphf.deva then
+    if has_rphf and has_rphf[old] then
      devanagari.reph=true
-    elseif has_blwf and has_blwf.deva then
+    elseif has_blwf and has_blwf[old] then
      devanagari.vattu=true
      for i=1,nofsteps do
       local step=steps[i]
@@ -29578,24 +29647,59 @@ local function initializedevanagi(tfmdata)
      end
     end
    end
-   if script=="deva" then
-    sharedfeatures["dv04"]=true 
+   if  script=="deva" then
+    sharedfeatures["dv04"]=true
    elseif script=="dev2" then
-    sharedfeatures["dv01"]=true 
-    sharedfeatures["dv02"]=true 
-    sharedfeatures["dv03"]=true 
-    sharedfeatures["dv04"]=true 
+    sharedfeatures["dv01"]=true
+    sharedfeatures["dv02"]=true
+    sharedfeatures["dv03"]=true
+    sharedfeatures["dv04"]=true
+   elseif script=="knda" then
+    sharedfeatures["dv04"]=true
+   elseif script=="knd2" then
+    sharedfeatures["dv01"]=true
+    sharedfeatures["dv02"]=true
+    sharedfeatures["dv03"]=true
+    sharedfeatures["dv04"]=true
+   elseif script=="beng" then
+    sharedfeatures["dv04"]=true
+   elseif script=="bng2" then
+    sharedfeatures["dv01"]=true
+    sharedfeatures["dv02"]=true
+    sharedfeatures["dv03"]=true
+    sharedfeatures["dv04"]=true
+   elseif script=="gurj" then
+    sharedfeatures["dv04"]=true
+   elseif script=="grj2" then
+    sharedfeatures["dv01"]=true
+    sharedfeatures["dv02"]=true
+    sharedfeatures["dv03"]=true
+    sharedfeatures["dv04"]=true
+   elseif script=="guru" then
+    sharedfeatures["dv04"]=true
+   elseif script=="gur2" then
+    sharedfeatures["dv01"]=true
+    sharedfeatures["dv02"]=true
+    sharedfeatures["dv03"]=true
+    sharedfeatures["dv04"]=true
+   elseif script=="telu" then
+    sharedfeatures["dv04"]=true
+   elseif script=="tel2" then
+    sharedfeatures["dv01"]=true
+    sharedfeatures["dv02"]=true
+    sharedfeatures["dv03"]=true
+    sharedfeatures["dv04"]=true
    elseif script=="mlym" then
     sharedfeatures["pstf"]=true
    elseif script=="mlm2" then
     sharedfeatures["pstf"]=true
     sharedfeatures["pref"]=true
-    sharedfeatures["dv03"]=true 
-    gsubfeatures  ["dv03"]=two_defaults 
+    sharedfeatures["dv03"]=true
+    gsubfeatures  ["dv03"]=two_defaults
     insert(sequences,insertindex,sequence_reorder_pre_base_reordering_consonants)
    elseif script=="taml" then
-    sharedfeatures["dv04"]=true 
-sharedfeatures["pstf"]=true
+    sharedfeatures["dv04"]=true
+    sharedfeatures["pstf"]=true
    elseif script=="tml2" then
    else
     report("todo: enable the right features for script %a",script)
@@ -31241,32 +31345,17 @@ do
  local f_used=context and formatters[ [[original:///%s]] ] or formatters[ [[%s]] ]
  local hashed={}
  local cache={}
- if epdf then
-  local openpdf=epdf.openMemStream
-  function otf.storepdfdata(pdf)
-   local done=hashed[pdf]
-   if not done then
-    nofstreams=nofstreams+1
-    local o,n=openpdf(pdf,#pdf,f_name(nofstreams))
-    cache[n]=o 
-    done=f_used(n)
-    hashed[pdf]=done
-   end
-   return done
+ local openpdf=pdfe.new
+ function otf.storepdfdata(pdf)
+  local done=hashed[pdf]
+  if not done then
+   nofstreams=nofstreams+1
+   local f=f_name(nofstreams)
+   local n=openpdf(pdf,#pdf,f)
+   done=f_used(n)
+   hashed[pdf]=done
   end
- else
-  local openpdf=pdfe.new
-  function otf.storepdfdata(pdf)
-   local done=hashed[pdf]
-   if not done then
-    nofstreams=nofstreams+1
-    local f=f_name(nofstreams)
-    local n=openpdf(pdf,#pdf,f)
-    done=f_used(n)
-    hashed[pdf]=done
-   end
-   return done
-  end
+  return done
  end
 end
 local function pdftovirtual(tfmdata,pdfshapes,kind) 

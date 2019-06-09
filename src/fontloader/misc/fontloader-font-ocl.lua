@@ -330,39 +330,19 @@ do
     local hashed     = { }
     local cache      = { }
 
-    if epdf then
+    local openpdf = pdfe.new
+    ----- prefix  = "data:application/pdf,"
 
-        local openpdf = epdf.openMemStream
-
-        function otf.storepdfdata(pdf)
-            local done = hashed[pdf]
-            if not done then
-                nofstreams = nofstreams + 1
-                local o, n = openpdf(pdf,#pdf,f_name(nofstreams))
-                cache[n] = o -- we need to keep in mem
-                done = f_used(n)
-                hashed[pdf] = done
-            end
-            return done
+    function otf.storepdfdata(pdf)
+        local done = hashed[pdf]
+        if not done then
+            nofstreams = nofstreams + 1
+            local f = f_name(nofstreams)
+            local n = openpdf(pdf,#pdf,f)
+            done = f_used(n)
+            hashed[pdf] = done
         end
-
-    else
-
-        local openpdf = pdfe.new
-        ----- prefix  = "data:application/pdf,"
-
-        function otf.storepdfdata(pdf)
-            local done = hashed[pdf]
-            if not done then
-                nofstreams = nofstreams + 1
-                local f = f_name(nofstreams)
-                local n = openpdf(pdf,#pdf,f)
-                done = f_used(n)
-                hashed[pdf] = done
-            end
-            return done
-        end
-
+        return done
     end
 
 end

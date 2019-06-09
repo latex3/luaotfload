@@ -3178,7 +3178,7 @@ local function testrun(disc,t_run,c_run,...)
     end
     local pre, post, replace, pretail, posttail, replacetail = getdisc(disc,true)
     local renewed = false
-    if (post or replace) and prev then
+    if (post or replace) then -- and prev then -- hm, we can start with a disc
         if post then
             setlink(posttail,next)
         else
@@ -3419,6 +3419,7 @@ local function t_run_single(start,stop,font,attr,lookupcache)
                                         ss = nil
                                     end
                                 end
+lookupmatch = lg
                             else
                                 break
                             end
@@ -3588,6 +3589,7 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
                                             ss = nil
                                         end
                                     end
+lookupmatch = lg
                                 else
                                     break
                                 end

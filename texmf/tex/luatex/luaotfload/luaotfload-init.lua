@@ -7,8 +7,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-init",
-    version       = "2.9802",       --TAGVERSION
-    date          = "2019-05-18", --TAGDATE
+    version       = "2.9803",       --TAGVERSION
+    date          = "2019-06-05", --TAGDATE
     description   = "luaotfload submodule / initialization",
     license       = "GPL v2.0"
 }

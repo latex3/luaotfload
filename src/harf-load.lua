@@ -205,6 +205,30 @@ local function loadfont(spec)
   end
 end
 
+-- Drop illegal characters from PS Name, per the spec
+-- https://docs.microsoft.com/en-us/typography/opentype/spec/name#nid6
+local function sanitize(psname)
+  local new = psname:gsub(".", function(c)
+    local b = c:byte()
+    if (b < 33 or b > 126)
+    or c == "["
+    or c == "]"
+    or c == "("
+    or c == ")"
+    or c == "{"
+    or c == "}"
+    or c == "<"
+    or c == ">"
+    or c == "/"
+    or c == "%"
+    then
+      return "-"
+    end
+    return c
+  end)
+  return new
+end
+
 local function scalefont(data, spec)
   local size = spec.size
   local options = spec.options
@@ -254,7 +278,7 @@ local function scalefont(data, spec)
     name = spec.specification,
     filename = spec.path,
     designsize = size,
-    psname = data.psname,
+    psname = sanitize(data.psname),
     fullname = data.fullname,
     index = spec.index,
     size = size,

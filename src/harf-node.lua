@@ -378,6 +378,10 @@ shape = function(run)
   buf:set_cluster_level(buf.CLUSTER_LEVEL_MONOTONE_CHARACTERS)
   buf:add_codepoints(codes, offset - 1, len)
 
+  local hscale = hbdata.hscale
+  local vscale = hbdata.vscale
+  hbfont:set_scale(hscale, vscale)
+
   if hb.shape_full(hbfont, buf, features, shapers) then
     -- LuaTeX wants the glyphs in logical order, so reverse RTL buffers.
     if dir:is_backward() then buf:reverse() end

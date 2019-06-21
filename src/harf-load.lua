@@ -287,6 +287,20 @@ local function scalefont(data, spec)
     width = (size * tonumber(options.embolden) / 6553.6) * (7200.0/7227)
   end
 
+  local hscale = upem
+  local extendfactor = nil
+  if options.extend then
+    extendfactor = tonumber(options.extend) * 1000
+    hscale = hscale * tonumber(options.extend)
+  end
+
+  local vscale = upem
+  local squeezefactor = nil
+  if options.squeeze then
+    squeezefactor = tonumber(options.squeeze) * 1000
+    vscale = vscale * tonumber(options.squeeze)
+  end
+
   return {
     name = spec.specification,
     filename = spec.path,
@@ -304,6 +318,8 @@ local function scalefont(data, spec)
     slant = slantfactor,
     mode = mode,
     width = width,
+    extend = extendfactor,
+    squeeze = squeezefactor,
     characters = characters,
     parameters = {
       slant = data.slant,
@@ -321,6 +337,8 @@ local function scalefont(data, spec)
       palette = palette,
       shared = data,
       letterspace = letterspace,
+      hscale = hscale,
+      vscale = vscale,
     },
   }
 end

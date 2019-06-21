@@ -274,6 +274,16 @@ local function scalefont(data, spec)
 
   local slantfactor = tonumber(options.slant or 0)
 
+  local mode = nil
+  local width = nil
+  if options.embolden then
+    mode = 2
+    -- The multiplication by 7200.0/7227 is to undo the opposite conversion
+    -- LuaTeX is doing and make the final number written in the PDF file match
+    -- XeTeX's.
+    width = (size * tonumber(options.embolden) / 6553.6) * (7200.0/7227)
+  end
+
   return {
     name = spec.specification,
     filename = spec.path,
@@ -289,6 +299,8 @@ local function scalefont(data, spec)
     nomath = true,
     format = data.fonttype,
     slant = slantfactor * 1000,
+    mode = mode,
+    width = width,
     characters = characters,
     parameters = {
       slant = data.slant,

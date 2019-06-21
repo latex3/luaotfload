@@ -282,6 +282,7 @@ local function scalefont(data, spec)
     fullname = data.fullname,
     index = spec.index,
     size = size,
+    units_per_em = upem,
     type = "real",
     embedding = "subset",
     tounicode = 1,

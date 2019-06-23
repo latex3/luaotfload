@@ -60,6 +60,8 @@ local spaceskip        = 13
 local directmode       = 2
 local fontkern         = 0
 local italiccorrection = 3
+local explicitdisc     = 1
+local regulardisc      = 3
 
 local getscript    = hb.unicode.script
 local sc_common    = hb.Script.new("Zyyy")
@@ -165,7 +167,9 @@ local function itemize(head, direction)
       end
     elseif id == glueid and getsubtype(n) == spaceskip then
       code = 0x0020 -- SPACE
-    elseif id == discid then
+    elseif id == discid
+      and (getsubtype(n) == explicitdisc
+        or getsubtype(n) == regulardisc) then
       code = 0x00AD -- SOFT HYPHEN
     elseif id == dirid then
       local dir = getdir(n)

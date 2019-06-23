@@ -1,5 +1,5 @@
 
-packageversion= "2.9803"
+packageversion= "2.9804"
 packagedate   = "2019-06-05"
 
 local luatexstatus = status.list()
@@ -46,7 +46,7 @@ checkengines = {"luatex"}
 
 local errorlevel   = os.execute("harftex --version") 
 if not os.getenv('TRAVIS') and errorlevel==0 then 
-    checkengines = {"luatex","harftex"}
+  --  checkengines = {"luatex","harftex"}
 end 
  
 checkconfigs = {

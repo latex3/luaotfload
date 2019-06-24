@@ -205,6 +205,30 @@ local function loadfont(spec)
   end
 end
 
+-- Drop illegal characters from PS Name, per the spec
+-- https://docs.microsoft.com/en-us/typography/opentype/spec/name#nid6
+local function sanitize(psname)
+  local new = psname:gsub(".", function(c)
+    local b = c:byte()
+    if (b < 33 or b > 126)
+    or c == "["
+    or c == "]"
+    or c == "("
+    or c == ")"
+    or c == "{"
+    or c == "}"
+    or c == "<"
+    or c == ">"
+    or c == "/"
+    or c == "%"
+    then
+      return "-"
+    end
+    return c
+  end)
+  return new
+end
+
 local function scalefont(data, spec)
   local size = spec.size
   local options = spec.options
@@ -248,22 +272,54 @@ local function scalefont(data, spec)
   local letterspace = tonumber(options.letterspace or 0) / 100 * upem
   space = space + letterspace
 
-  local slantfactor = tonumber(options.slant or 0)
+  local slantfactor = nil
+  if options.slant then
+    slantfactor = tonumber(options.slant) * 1000
+  end
+
+  local mode = nil
+  local width = nil
+  if options.embolden then
+    mode = 2
+    -- The multiplication by 7200.0/7227 is to undo the opposite conversion
+    -- LuaTeX is doing and make the final number written in the PDF file match
+    -- XeTeX's.
+    width = (size * tonumber(options.embolden) / 6553.6) * (7200.0/7227)
+  end
+
+  local hscale = upem
+  local extendfactor = nil
+  if options.extend then
+    extendfactor = tonumber(options.extend) * 1000
+    hscale = hscale * tonumber(options.extend)
+  end
+
+  local vscale = upem
+  local squeezefactor = nil
+  if options.squeeze then
+    squeezefactor = tonumber(options.squeeze) * 1000
+    vscale = vscale * tonumber(options.squeeze)
+  end
 
   return {
     name = spec.specification,
     filename = spec.path,
     designsize = size,
-    psname = data.psname,
+    psname = sanitize(data.psname),
     fullname = data.fullname,
     index = spec.index,
     size = size,
+    units_per_em = upem,
     type = "real",
     embedding = "subset",
     tounicode = 1,
     nomath = true,
     format = data.fonttype,
-    slant = slantfactor * 1000,
+    slant = slantfactor,
+    mode = mode,
+    width = width,
+    extend = extendfactor,
+    squeeze = squeezefactor,
     characters = characters,
     parameters = {
       slant = data.slant,
@@ -281,6 +337,8 @@ local function scalefont(data, spec)
       palette = palette,
       shared = data,
       letterspace = letterspace,
+      hscale = hscale,
+      vscale = vscale,
     },
   }
 end

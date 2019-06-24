@@ -1,0 +1,9 @@
+\csname ifharfloadloaded\endcsname
+\let\ifharfloadloaded\endinput
+\ifdefined\ProvidesPackage
+  \RequirePackage{luaotfload}
+  \ProvidesPackage{harfload}[2019/06/21 v0.2.0  Unicode text layout system]
+\else
+  \input luaotfload.sty
+\fi
+\directlua{require('harf-luaotfload')}

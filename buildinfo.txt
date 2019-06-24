@@ -56,7 +56,7 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
---> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-06-05.lua
+--> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-06-20.lua
 
 8. Check lualibs status -- perhaps it needs update too
 

@@ -5918,16 +5918,49 @@ endobj
 95 0 obj
 << /Font << /F81 70 0 R /F1 6 0 R >> /ProcSet [ /PDF /Text ] >>
 endobj
+100 0 obj
+<< /Length 603 >>        
+stream
+/Span<</ActualText<FEFF201C>>>BDC
+BT
+/F81 19.92528 Tf
+1 0 0 1 91.925 755.842 Tm [<01F3>]TJ
+EMC
+1 0 0 1 101.33 755.842 Tm [<012C>]TJ
+/Span<</ActualText<FEFF201D>>>BDC
+1 0 0 1 106.869 755.842 Tm [<01F4>]TJ
+EMC
+1 0 0 1 122.909 755.842 Tm [<01F501EF01F6>-333<0037011C0037>-333<0037>]TJ
+/Span<</ActualText<FEFF2014>>>BDC
+1 0 0 1 184.917 755.842 Tm [<011B>]TJ
+EMC
+1 0 0 1 204.842 755.842 Tm [<0037>-333<003700400037>-333<01F20037>]TJ
+/Span<</ActualText<FEFF201D>>>BDC
+1 0 0 1 259.098 755.842 Tm [<01F4>]TJ
+EMC
+1 0 0 1 275.138 755.842 Tm [<013F00370140>]TJ
+/F1 9.96264 Tf
+1 0 0 1 301.019 105.18 Tm [(17)]TJ
+ET
+
+endstream
+endobj
+99 0 obj
+<< /Type /Page /Contents 100 0 R /Resources 98 0 R /MediaBox [ 0 0 595.276 841.89 ] /Parent 77 0 R >>
+endobj
 98 0 obj
+<< /Font << /F81 70 0 R /F1 6 0 R >> /ProcSet [ /PDF /Text ] >>
+endobj
+101 0 obj
 [ 1 [ 739.7 739.7 739.7 868.7 654.8 682.6 682.6 609.9 654.8 607.9 ] ]
 endobj
-100 0 obj
+103 0 obj
 << /Length 2 >>          
 stream
 à
 endstream
 endobj
-101 0 obj
+104 0 obj
 << /Subtype /CIDFontType0C /Length 1813 >>       
 stream
   FRCLSM+URWGothicL-Book \ø ø!‹ø øøøøá©f²ÿxK/?‹‹?‹‹û€ü€	5ß  G  d–"  ß$  \% ’£¯´¼FRCLSM+URWGothicL-Book1.06Copyright (URW)++,Copyright 1999 by (URW)++ Design & Development; Cyrillic glyphs added by Valek Filippov (C) 2001-2005URW Gothic L BookURW Gothic LAdobeIdentity            	 
@@ -5936,10 +5969,10 @@ stream
 ÷,÷÷,=
 endstream
 endobj
-99 0 obj
-<< /Type /FontDescriptor /FontName /FRCLSM+URWGothicL-Book /Flags 4 /FontBBox [ -115 -240 1150 983 ] /Ascent 983 /CapHeight 738 /Descent -240 /ItalicAngle 0 /StemV 87 /XHeight 546 /FontFile3 101 0 R /CIDSet 100 0 R >>
-endobj
 102 0 obj
+<< /Type /FontDescriptor /FontName /FRCLSM+URWGothicL-Book /Flags 4 /FontBBox [ -115 -240 1150 983 ] /Ascent 983 /CapHeight 738 /Descent -240 /ItalicAngle 0 /StemV 87 /XHeight 546 /FontFile3 104 0 R /CIDSet 103 0 R >>
+endobj
+105 0 obj
 << /Length 809 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -5986,21 +6019,21 @@ end
 endstream
 endobj
 94 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /FRCLSM+URWGothicL-Book /DescendantFonts [ 103 0 R ] /ToUnicode 102 0 R >>
-endobj
-103 0 obj
-<< /Type /Font /Subtype /CIDFontType0 /BaseFont /FRCLSM+URWGothicL-Book /FontDescriptor 99 0 R /W 98 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-104 0 obj
-[ 1 [ 1020 1020 1020 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /FRCLSM+URWGothicL-Book /DescendantFonts [ 106 0 R ] /ToUnicode 105 0 R >>
 endobj
 106 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /FRCLSM+URWGothicL-Book /FontDescriptor 102 0 R /W 101 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+107 0 obj
+[ 1 [ 1020 1020 1020 ] ]
+endobj
+109 0 obj
 << /Length 1 >>          
 stream
 p
 endstream
 endobj
-107 0 obj
+110 0 obj
 << /Length 3606 >>       
 stream
     	 €  OS/2Ä&¶   œ   `cmapz¬3   ü   Dglyfû¸J  @  \headñ0b  	œ   6hheaiŸ  	Ô   $hmtxù Ş  	ø   locaRî  
@@ -6052,10 +6085,10 @@ k
                 d 0ü ? ™ o    $î.      X È                          Z  	      	     	  .  	  8<  	     	  t  	    ©   2 0 1 6   F r e e   H o n g   K o n g   F o n t s .   T h e s e   f o n t s   a r e   l i c e n s e d   u n d e r   a   C r e a t i v e   C o m m o n s   " A t t r i b u t i o n   4 . 0   I n t e r n a t i o n a l "   L i c e n s e e s   m a y   c o p y ,   d i s t r i b u t e ,   d i s p l a y   a n d   p e r f o r m   t h e   w o r k   a n d   m a k e   d e r i v a t i v e   w o r k s   a n d   r e m i x e s   b a s e d   o n   i t   o n l y   i f   t h e y   g i v e   t h e   a u t h o r   o r   l i c e n s o r   t h e   c r e d i t s   ( a t t r i b u t i o n )   i n   t h e   m a n n e r   s p e c i f i e d   b y   t h e s e .   F o r   m o r e   d e t a i l s ,   p l e a s e   r e f e r   t o   h t t p s : / / f r e e h k f o n t s . o p e n s o u r c e . h k / F r e e   H K   K a i   4 7 0 0 R e g u l a r F r e e H K K a i 4 7 0 0 - v 1 _ 0 2 - 2 0 1 7 0 1 1 3 V e r s i o n   1 . 0 2
 endstream
 endobj
-105 0 obj
-<< /Type /FontDescriptor /FontName /JDDZKA+Free-HK-Kai-4700 /Flags 4 /FontBBox [ -33 -214 1287 807 ] /Ascent 801 /CapHeight 584 /Descent -234 /ItalicAngle 0 /StemV 99 /XHeight 391 /FontFile2 107 0 R /CIDSet 106 0 R >>
-endobj
 108 0 obj
+<< /Type /FontDescriptor /FontName /JDDZKA+Free-HK-Kai-4700 /Flags 4 /FontBBox [ -33 -214 1287 807 ] /Ascent 801 /CapHeight 584 /Descent -234 /ItalicAngle 0 /StemV 99 /XHeight 391 /FontFile2 110 0 R /CIDSet 109 0 R >>
+endobj
+111 0 obj
 << /Length 715 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6095,21 +6128,21 @@ end
 endstream
 endobj
 90 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /JDDZKA+Free-HK-Kai-4700 /DescendantFonts [ 109 0 R ] /ToUnicode 108 0 R >>
-endobj
-109 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /JDDZKA+Free-HK-Kai-4700 /FontDescriptor 105 0 R /W 104 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-110 0 obj
-[ 0 [ 280 ] 28 [ 469 ] 35 [ 502 ] 43 [ 435 ] 45 [ 272 ] 47 [ 502 ] 50 [ 435 ] 55 [ 299 ] 59 [ 490 ] 63 [ 502 ] 66 [ 230 ] 70 [ 475 ] 72 [ 230 ] 75 [ 774 ] 77 [ 502 ] 81 [ 490 ] 84 [ 502 ] 88 [ 272 ] 96 [ 333 ] 98 [ 375 ] 105 [ 354 ] 109 [ 502 ] 112 [ 448 919 666 ] 116 [ 448 ] 118 [ 448 ] 120 [ 425 ] 122 [ 571 ] 125 [ 523 523 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /JDDZKA+Free-HK-Kai-4700 /DescendantFonts [ 112 0 R ] /ToUnicode 111 0 R >>
 endobj
 112 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /JDDZKA+Free-HK-Kai-4700 /FontDescriptor 108 0 R /W 107 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+113 0 obj
+[ 0 [ 280 ] 28 [ 469 ] 35 [ 502 ] 43 [ 435 ] 45 [ 272 ] 47 [ 502 ] 50 [ 435 ] 55 [ 299 ] 59 [ 490 ] 63 [ 502 ] 66 [ 230 ] 70 [ 475 ] 72 [ 230 ] 75 [ 774 ] 77 [ 502 ] 81 [ 490 ] 84 [ 502 ] 88 [ 272 ] 96 [ 333 ] 98 [ 375 ] 105 [ 354 ] 109 [ 502 ] 112 [ 448 919 666 ] 116 [ 448 ] 118 [ 448 ] 120 [ 425 ] 122 [ 571 ] 125 [ 523 523 ] ]
+endobj
+115 0 obj
 << /Length 16 >>         
 stream
    !"”H€ Dê¦
 endstream
 endobj
-113 0 obj
+116 0 obj
 << /Subtype /CIDFontType0C /Length 2819 >>       
 stream
   QXOPQI+LMSans12-Regular Gø!ø"‹ø øøøø ûC·ü/ûÈ‚  ˜  İ÷"  
@@ -6127,10 +6160,10 @@ stream
 áÁŒŒŒ‘“Ç”ŒŒŒŒŒ
 endstream
 endobj
-111 0 obj
-<< /Type /FontDescriptor /FontName /QXOPQI+LMSans12-Regular /Flags 4 /FontBBox [ -411 -308 1407 1154 ] /Ascent 1154 /CapHeight 694 /Descent -308 /ItalicAngle 0 /StemV 87 /XHeight 444 /FontFile3 113 0 R /CIDSet 112 0 R >>
-endobj
 114 0 obj
+<< /Type /FontDescriptor /FontName /QXOPQI+LMSans12-Regular /Flags 4 /FontBBox [ -411 -308 1407 1154 ] /Ascent 1154 /CapHeight 694 /Descent -308 /ItalicAngle 0 /StemV 87 /XHeight 444 /FontFile3 116 0 R /CIDSet 115 0 R >>
+endobj
+117 0 obj
 << /Length 1120 >>       
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6198,28 +6231,28 @@ end
 endstream
 endobj
 86 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /QXOPQI+LMSans12-Regular /DescendantFonts [ 115 0 R ] /ToUnicode 114 0 R >>
-endobj
-115 0 obj
-<< /Type /Font /Subtype /CIDFontType0 /BaseFont /QXOPQI+LMSans12-Regular /FontDescriptor 111 0 R /W 110 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-116 0 obj
-[277.8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 750 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 722.2 750 0 0 0 0 0 0 0 0 0 0 0 0 555.6 0 0 0 0 0 555.6 0 0 0 0 0 0 500 0 0 391.7 0 0 0 0 0 0 527.8 ]
-endobj
-117 0 obj
-[869.4 0 0 0 0 0 0 900 0 0 0 0 0 0 863.9 0 0 862.5 638.9 800 0 0 0 0 869.4 ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /QXOPQI+LMSans12-Regular /DescendantFonts [ 118 0 R ] /ToUnicode 117 0 R >>
 endobj
 118 0 obj
-[ 28 [ 490 ] 43 [ 435 ] 47 [ 544 ] 50 [ 435 ] 59 [ 490 ] 72 [ 272 ] 116 [ 517 ] 118 [ 517 ] ]
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /QXOPQI+LMSans12-Regular /FontDescriptor 114 0 R /W 113 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+119 0 obj
+[277.8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 750 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 722.2 750 0 0 0 0 0 0 0 0 0 0 0 0 555.6 0 0 0 0 0 555.6 0 0 0 0 0 0 500 0 0 391.7 0 0 0 0 0 0 527.8 ]
 endobj
 120 0 obj
+[869.4 0 0 0 0 0 0 900 0 0 0 0 0 0 863.9 0 0 862.5 638.9 800 0 0 0 0 869.4 ]
+endobj
+121 0 obj
+[ 28 [ 490 ] 43 [ 435 ] 47 [ 544 ] 50 [ 435 ] 59 [ 490 ] 72 [ 272 ] 116 [ 517 ] 118 [ 517 ] ]
+endobj
+123 0 obj
 << /Length 15 >>         
 stream
       €    
 
 endstream
 endobj
-121 0 obj
+124 0 obj
 << /Subtype /CIDFontType0C /Length 1635 >>       
 stream
   KMMMBX+LMRoman12-Regular Fø!ø"‹ø øøøø ûC·ü:û¬rúû  ›  ´÷"  $  ¬%     í şKMMMBX+LMRoman12-Regular2.004Copyright 2003, 2009 B. Jackowski and J. M. Nowacki (on behalf of TeX users groups). This work is released under the GUST Font License --  see http://tug.org/fonts/licenses/GUST-FONT-LICENSE.txt for details.LMRoman12-RegularLMRoman12NormalAdobeIdentity     + / 2 ; H t v     	 	   Œ åaÈ·÷¯Jûÿ†¨~v÷¤İÛw­Ò÷bÌ×¡ŸønäÃuSRsƒ}e‹Àš÷CÁ‹³_²«h^™_9LUJn}¢£œœ£´g‹|µ¢»³¹Æe1cû]ˆ?7>@<çrÈÍ¸³»§\ªg¶ Å™Ûû7¿)Bj`Zb¯»÷÷>—¯ûd¡÷¨İÁ¡®×÷^Şø*÷”„‹ˆ‚ŠˆˆDuUmUN:À÷,÷:à´½±Â|d¢f‹bsœz£¢™¨ÎE»:û	.#ûûë)÷÷©÷”(Ÿw²øŸ÷i³÷À×‹Ê‹×~ø—¨Gƒ’¼øõû€nÏ“„Zûq¨v`®Nû')ûûê)÷×·½™F÷y‹ˆ}u®hsbnYqû •÷VÓ—³¡¬ªŸ³ª½É®^{•—z‹‰yûd¡÷]‹÷Ww©×÷ƒÉÈø+÷‘†…ƒ‰††‰7qHtaa&§÷A÷©¼¡‹ğUéûû3$ûûñ*÷÷¸÷  M÷û‚÷1“ã§ö‘û!iŒûa ÷UÂá ÷ ¦¼|Ğ÷CĞ‹¼¼g¼@øoø*}§hWdk|}¢mh˜e1HG>R®f•‚ê€|yndQ®r“†]~]gWFéR÷÷îÀÖ¤„ÆOª¥XY‹5N„‹y•‚ œ‘œ•™lº³‹–åÎÏØ¦ƒ±k«³²º‹‹‰5@‡†€}•›“¡û>ûy‹bzpnxmv3‹ğ¢‹´œ¦¨©• Ê€ã‹&t÷ ü
@@ -6227,10 +6260,10 @@ stream
 ÌŒŒŒ‘Œ³š¡¦™‘‘ø~ù
 endstream
 endobj
-119 0 obj
-<< /Type /FontDescriptor /FontName /KMMMBX+LMRoman12-Regular /Flags 4 /FontBBox [ -422 -280 1394 1127 ] /Ascent 1127 /CapHeight 683 /Descent -280 /ItalicAngle 0 /StemV 87 /XHeight 431 /FontFile3 121 0 R /CIDSet 120 0 R >>
-endobj
 122 0 obj
+<< /Type /FontDescriptor /FontName /KMMMBX+LMRoman12-Regular /Flags 4 /FontBBox [ -422 -280 1394 1127 ] /Ascent 1127 /CapHeight 683 /Descent -280 /ItalicAngle 0 /StemV 87 /XHeight 431 /FontFile3 124 0 R /CIDSet 123 0 R >>
+endobj
+125 0 obj
 << /Length 790 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6275,21 +6308,21 @@ end
 endstream
 endobj
 76 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /KMMMBX+LMRoman12-Regular /DescendantFonts [ 123 0 R ] /ToUnicode 122 0 R >>
-endobj
-123 0 obj
-<< /Type /Font /Subtype /CIDFontType0 /BaseFont /KMMMBX+LMRoman12-Regular /FontDescriptor 119 0 R /W 118 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-124 0 obj
-[ 27 [ 750 ] 35 [ 556 ] 63 [ 556 ] 81 [ 500 ] 88 [ 278 ] 96 [ 392 ] 104 [ 722 ] 108 [ 750 ] 118 [ 528 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /KMMMBX+LMRoman12-Regular /DescendantFonts [ 126 0 R ] /ToUnicode 125 0 R >>
 endobj
 126 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /KMMMBX+LMRoman12-Regular /FontDescriptor 122 0 R /W 121 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+127 0 obj
+[ 27 [ 750 ] 35 [ 556 ] 63 [ 556 ] 81 [ 500 ] 88 [ 278 ] 96 [ 392 ] 104 [ 722 ] 108 [ 750 ] 118 [ 528 ] ]
+endobj
+129 0 obj
 << /Length 15 >>         
 stream
        @€€ˆ
 endstream
 endobj
-127 0 obj
+130 0 obj
 << /Subtype /CIDFontType0C /Length 1648 >>       
 stream
   DWNYUO+LMRomanSlant10-Regular Mø!ø"‹ø øøøø é¤boû&³ü]û¶¦úû  ¶  Ñ÷"  '$  É%    # ò!)DWNYUO+LMRomanSlant10-Regular2.004Copyright 2003, 2009 B. Jackowski and J. M. Nowacki (on behalf of TeX users groups). This work is released under the GUST Font License --  see http://tug.org/fonts/licenses/GUST-FONT-LICENSE.txt for details.LMRomanSlant10-RegularLMRomanSlant10NormalAdobeIdentity     # ? Q X ` h l v     
@@ -6300,10 +6333,10 @@ stream
 ä ŒŒŒŒ”È¤š¥‘“‘
 endstream
 endobj
-125 0 obj
-<< /Type /FontDescriptor /FontName /DWNYUO+LMRomanSlant10-Regular /Flags 4 /FontBBox [ -457 -290 1446 1127 ] /Ascent 1127 /CapHeight 683 /Descent -290 /ItalicAngle -10 /StemV 87 /XHeight 431 /FontFile3 127 0 R /CIDSet 126 0 R >>
-endobj
 128 0 obj
+<< /Type /FontDescriptor /FontName /DWNYUO+LMRomanSlant10-Regular /Flags 4 /FontBBox [ -457 -290 1446 1127 ] /Ascent 1127 /CapHeight 683 /Descent -290 /ItalicAngle -10 /StemV 87 /XHeight 431 /FontFile3 130 0 R /CIDSet 129 0 R >>
+endobj
+131 0 obj
 << /Length 829 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6349,21 +6382,21 @@ end
 endstream
 endobj
 75 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /DWNYUO+LMRomanSlant10-Regular /DescendantFonts [ 129 0 R ] /ToUnicode 128 0 R >>
-endobj
-129 0 obj
-<< /Type /Font /Subtype /CIDFontType0 /BaseFont /DWNYUO+LMRomanSlant10-Regular /FontDescriptor 125 0 R /W 124 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-130 0 obj
-[ 27 [ 869 ] 62 [ 900 ] 80 [ 864 ] 95 [ 863 ] 97 [ 639 ] 104 [ 800 ] 117 [ 869 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /DWNYUO+LMRomanSlant10-Regular /DescendantFonts [ 132 0 R ] /ToUnicode 131 0 R >>
 endobj
 132 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /DWNYUO+LMRomanSlant10-Regular /FontDescriptor 128 0 R /W 127 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+133 0 obj
+[ 27 [ 869 ] 62 [ 900 ] 80 [ 864 ] 95 [ 863 ] 97 [ 639 ] 104 [ 800 ] 117 [ 869 ] ]
+endobj
+135 0 obj
 << /Length 15 >>         
 stream
         €@€
 endstream
 endobj
-133 0 obj
+136 0 obj
 << /Subtype /CIDFontType0C /Length 1398 >>       
 stream
   GAQESF+LMRoman10-Bold Gø ø!‹ø øøøøû&Çüzû»Gm  ‹  ¢÷
@@ -6372,10 +6405,10 @@ stream
 ÷¬ŒŒŒ’’­Çº‘µ˜‘–“–
 endstream
 endobj
-131 0 obj
-<< /Type /FontDescriptor /FontName /GAQESF+LMRoman10-Bold /Flags 4 /FontBBox [ -486 -295 1607 1133 ] /Ascent 1133 /CapHeight 686 /Descent -295 /ItalicAngle 0 /StemV 165 /XHeight 444 /FontFile3 133 0 R /CIDSet 132 0 R >>
-endobj
 134 0 obj
+<< /Type /FontDescriptor /FontName /GAQESF+LMRoman10-Bold /Flags 4 /FontBBox [ -486 -295 1607 1133 ] /Ascent 1133 /CapHeight 686 /Descent -295 /ItalicAngle 0 /StemV 165 /XHeight 444 /FontFile3 136 0 R /CIDSet 135 0 R >>
+endobj
+137 0 obj
 << /Length 761 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6419,51 +6452,55 @@ end
 endstream
 endobj
 74 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /GAQESF+LMRoman10-Bold /DescendantFonts [ 135 0 R ] /ToUnicode 134 0 R >>
-endobj
-135 0 obj
-<< /Type /Font /Subtype /CIDFontType0 /BaseFont /GAQESF+LMRoman10-Bold /FontDescriptor 131 0 R /W 130 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-136 0 obj
-[ 27 [ 750 500 ] 35 [ 556 ] 43 [ 444 ] 45 [ 278 764 556 ] 50 [ 444 ] 55 [ 306 ] 59 [ 500 ] 62 [ 750 556 333 ] 66 [ 278 514 ] 70 [ 528 ] 72 [ 278 ] 74 [ 917 833 750 556 ] 80 [ 778 500 ] 84 [ 556 ] 88 [ 278 ] 95 [ 736 392 ] 98 [ 394 ] 105 [ 389 ] 109 [ 556 ] 111 [ 750 528 ] 114 [ 722 ] 118 [ 528 ] 122 [ 583 833 833 556 556 ] 207 [ 444 ] 283 [ 1000 ] 441 [ 778 500 ] 499 [ 472 472 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /GAQESF+LMRoman10-Bold /DescendantFonts [ 138 0 R ] /ToUnicode 137 0 R >>
 endobj
 138 0 obj
-<< /Length 63 >>         
-stream
-   !²¼È E¢>                                     `      
-endstream
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /GAQESF+LMRoman10-Bold /FontDescriptor 134 0 R /W 133 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
 endobj
 139 0 obj
-<< /Subtype /CIDFontType0C /Length 6272 >>       
+[ 27 [ 750 500 ] 35 [ 556 ] 43 [ 444 ] 45 [ 278 764 556 ] 50 [ 444 ] 55 [ 306 ] 59 [ 500 ] 62 [ 750 556 333 ] 66 [ 278 514 ] 70 [ 528 ] 72 [ 278 ] 74 [ 917 833 750 556 ] 80 [ 778 500 ] 84 [ 556 ] 88 [ 278 ] 95 [ 736 392 ] 98 [ 394 ] 105 [ 389 ] 109 [ 556 ] 111 [ 750 528 ] 114 [ 722 ] 118 [ 528 ] 122 [ 583 833 833 556 556 ] 207 [ 444 ] 283 [ 1000 500 ] 300 [ 278 ] 319 [ 556 556 ] 441 [ 778 500 ] 495 [ 472 ] 498 [ 472 472 472 278 278 ] ]
+endobj
+141 0 obj
+<< /Length 63 >>         
 stream
-  ZTFEOA+LMRoman10-Regular Fø!ø"‹ø øøøø û&³üBû¶‰úû  ›  şø‰"  7$  ö%     í şZTFEOA+LMRoman10-Regular2.004Copyright 2003, 2009 B. Jackowski and J. M. Nowacki (on behalf of TeX users groups). This work is released under the GUST Font License --  see http://tug.org/fonts/licenses/GUST-FONT-LICENSE.txt for details.LMRoman10-RegularLMRoman10NormalAdobeIdentity      # + - . / 2 7 ; > ? @ B C F H J K L M P Q T X _ ` b i m o p r v z { | } ~ Ï¹ºóô     . .   w‰å ŒyßÍgàõN¾\”(Ó	P	Æ
+   !²¼È E¢>                    €              `     >
+endstream
+endobj
+142 0 obj
+<< /Subtype /CIDFontType0C /Length 7144 >>       
+stream
+  OXOHPJ+LMRoman10-Regular Fø!ø"‹ø øøøø û&³üBû¶‰úû  ›  ø‹"  Ÿ$  %     í şOXOHPJ+LMRoman10-Regular2.004Copyright 2003, 2009 B. Jackowski and J. M. Nowacki (on behalf of TeX users groups). This work is released under the GUST Font License --  see http://tug.org/fonts/licenses/GUST-FONT-LICENSE.txt for details.LMRoman10-RegularLMRoman10NormalAdobeIdentity      # + - . / 2 7 ; > ? @ B C F H J K L M P Q T X _ ` b i m o p r v z { | } ~ Ï,?@¹ºïòóôõö     6 6   w‰å ŒyßÍgàõN¾\”(Ó	P	Æ
 
 x
 üÔ>è9š
-x"±h?²<¶ËOã_Ù÷¬ù‚‹ª÷Yªø]wùaªyO}’¬€ûlù˜†‰’{{ˆ…}†ûcüêyXc|UŠlñ÷ˆªYr¤¥Œ•Œ¹÷÷‹Àû-Œ‡…‡mS‹pl¯Ñ‹±û÷”ûu÷÷Ùøˆ€¡zª÷›å»¡«Ø÷cĞÔ¤~øwäÃrSQr…€j‡¸÷\µ‹²g°²dY›[9F\ImŸz¥§Ÿ¥—†¬]Œ®¦¼–«¼Äd2fXˆEˆLm@irW_€:ìrÊÍ¹³ºBc¦aº È™Üû;¾Œ,Ci^Zb®½ÂµŞ÷9‘øÀ€¡Èµ÷Æ¡÷fµõÍIŞ÷Şºø÷l÷)îû=`\y{÷Ñû$€lÑ“„Züè¤¯ÉtšµYÕ÷óí÷8Œf‰On^lvejUf^g£°s} ‹÷b‹Œ–›Ã²Â“£¸¯qe£¥bRbøP€¤÷¬ç°¤­Ş÷Wçø3÷•‹ˆ‚‰‡…‰.nJfV3¶÷5÷7İµÀ”ÊŠg®bˆ…m~qw§¥Ÿœ©Ï?²>û/û ûûî(÷÷«÷•÷ªû@v÷Uõ÷I¡÷_ŒËs´chypqqœp¯š™‘•–<oN_\……ŠŠ‡„‡—ÚÚ÷ù‹ªùª÷á¼ï÷~ïùW÷ä÷Rû÷1û?ül£Ø€gü£g‰€>slø÷<÷÷(÷P'ûxOgZpwRQ&&\‰’¬ø±¬’ºïÉĞuD¾¶P”5=øÀ€¡€ªÃª÷Â¡÷fªlµ­Ş÷Íeø£ªEƒ’¼øó›û$€lÑ“„Zûl¯n`¥Uû
+x"±h?²<¶Ëà'ÍtøŒ*¢˜Ü!÷¬ù‚‹ª÷Yªø]wùaªyO}’¬€ûlù˜†‰’{{ˆ…}†ûcüêyXc|UŠlñ÷ˆªYr¤¥Œ•Œ¹÷÷‹Àû-Œ‡…‡mS‹pl¯Ñ‹±û÷”ûu÷÷Ùøˆ€¡zª÷›å»¡«Ø÷cĞÔ¤~øwäÃrSQr…€j‡¸÷\µ‹²g°²dY›[9F\ImŸz¥§Ÿ¥—†¬]Œ®¦¼–«¼Äd2fXˆEˆLm@irW_€:ìrÊÍ¹³ºBc¦aº È™Üû;¾Œ,Ci^Zb®½ÂµŞ÷9‘øÀ€¡Èµ÷Æ¡÷fµõÍIŞ÷Şºø÷l÷)îû=`\y{÷Ñû$€lÑ“„Züè¤¯ÉtšµYÕ÷óí÷8Œf‰On^lvejUf^g£°s} ‹÷b‹Œ–›Ã²Â“£¸¯qe£¥bRbøP€¤÷¬ç°¤­Ş÷Wçø3÷•‹ˆ‚‰‡…‰.nJfV3¶÷5÷7İµÀ”ÊŠg®bˆ…m~qw§¥Ÿœ©Ï?²>û/û ûûî(÷÷«÷•÷ªû@v÷Uõ÷I¡÷_ŒËs´chypqqœp¯š™‘•–<oN_\……ŠŠ‡„‡—ÚÚ÷ù‹ªùª÷á¼ï÷~ïùW÷ä÷Rû÷1û?ül£Ø€gü£g‰€>slø÷<÷÷(÷P'ûxOgZpwRQ&&\‰’¬ø±¬’ºïÉĞuD¾¶P”5=øÀ€¡€ªÃª÷Â¡÷fªlµ­Ş÷Íeø£ªEƒ’¼øó›û$€lÑ“„Zûl¯n`¥Uû
 ")ûûí(÷Ë¸­«¤I@÷y‹‰€z²[m^u`^g¥±sq´ˆÄ´°Ç¨¸ª ±¬Á®µ|^ª–z‹‰yøP€¤÷m ÷B¡§Ş÷‚Íø3÷•ƒ†‚‰…ƒ‰$h1‹Yc©°tm»‹Í¯÷«¡‹ îUìûû/$ûûô*÷÷¸÷I÷û÷)‘ß¤­ò•ûd÷Æ‹ªøª÷4ß“¡÷Íçâ÷ùù°f¬VE6V!û<lÚûØ^€‹Hl÷³º‹ˆ³ªvA‰–¯÷Ö÷ªû	÷ã»»·š‹„š‡y~rt›w¦¨šŸ£øˆûb¢÷RÅ¸¢›¢÷‹¢¢÷3Ö‹Ö‹Ö€€øyø(œ«dw_…baû€¬aau.FF>_¡e¤v~|yjhl˜eªwOzk`cCîT÷÷
 ó¾Ù®}¾X§§VQ‹Nr`‹Œ„kvª«‹¢œŸo²´ˆèĞĞØ°{°r¢­¯¯€‹’‹Š€‡†€z˜›•’¢ûDû pŠk|rƒtoc4‹ï¢¦Œ«š¤Ë€—“¢§³â‹'t÷üUDY)&F¾À¹±°·Æá÷‹5ù‚‹ª÷Éª÷­ª÷ä÷¿äù`ªs>‰–¯ø£¯–Ø£ªˆhA‹ee@‹hl£Ø€gû~û¿÷~¯–Ø£ªˆhA‹ee@‹hl£Ø€gü£g‰€>sl®Õ‹±±Ö‹ˆ®ªs>‰–¯÷š÷¿ûšg‰€>sl®Õ‹±±Ö‹ˆ®øÀ‹ªø¡÷fªlµ÷Ğ÷eĞÔø«ªWr‹©Š÷Sá‹ªl¯œ}jŸQ7_Og{Š÷ğìû$€lÑ“„Züœ^€‹Hl÷÷ˆªH€‹¸÷LóÒÃËÊ–URû}^€‹Hl÷÷á÷OÅ–÷÷¨÷OÅûQ÷ª‹ªøªlµ÷õàö:Í¤÷‹ªI‡²øÄû €lÌ”…Zû¡^€‹Hl÷®®‰Š­Tøğ¦t¥miworp¢q©­Ÿ§¤ø–u¡‹÷U÷u¡øvª´÷K÷ğáYøeù ªûˆa3‹el¯í‹~hü\/YSV"…G‹Åg$¿—©¥¯oŸoDui}_‹AÒOäñÔÑÖ–Œ“‹­øP´™‹Êø¤‹ªøª÷qªlµõÍÖÍ²ÍŞø“ªfu‹Àeû÷GŠ†‘ÒÇ•“Ê¾µ Œªˆn~‹ogMŒ}lŠ•€~w}ƒ„û!ûøt®û$€lÑ“„Züœ^€‹Hl÷÷ˆªH€‹¸òËÂØ!µSyxz‡xl÷ ¨¨Š‰¨÷ª‹ªùªlµ÷Í°÷“ªH€‹¸øşĞû$€lÑ“„Züœ^€‹Hl÷ú)‹ªùª÷ §÷š§÷Üúªs>‰–¯ø£¯–Ø£ªû=q‹Šy„ûoüÇûmøÄ¡‚ˆ‹tû=l£Ø€güˆp‹\$l÷	÷	ˆª$‹º¦ø¯Œ÷…ı~‚•–“–÷ŠùŒüÒg‰€>sl°Ï‹²²Î‹ˆ°ùÕ‹ªøª€¡÷Ğ÷eĞ÷eĞ¼ùÁªWr‹©Š÷Sá‹ªl¯œ}jŸQ7_Oezâ}A–^B\`MoôÜû!€lÑ“„Zû ^€‹Hl÷÷ˆªH€‹¸÷L¼óÒÃËÊ–URû}^€‹Hl÷÷ˆªH€‹¸÷LóÒÃËÊ–URû}^€‹Hl÷ù‚‹ªùª÷§ø9§ù`ù ªû	ˆû	lò‹\pü?ûõø›—‚ŠŒxû>l¨šŸŠŠš¢ˆŒŠxüp‹\$l÷	÷	ˆª$‹º¦øœ†ŒŠ…ø,üì”ŒŠ’™‹’ø¼¦‹ºòøÀ‹ªøª€¡÷Ğ÷eĞ¨ø«ªWr‹©Š÷Sá‹ªl¯œ}jŸQB\`MoôĞû!€lÑ“„Zû ^€‹Hl÷÷ˆªH€‹¸÷L¨óÒÃËÊ–URû}^€‹Hl÷ùu¥ù8¤Ãòø_òùe÷ç÷`û+÷6ûJûGû-û4ûbûa÷.û0÷F÷J÷+÷3÷^$™ûû7/+ûã÷™÷—÷&ÏŞâ÷#Dû”øˆ€¤ø0¡§Ş÷©Şøk÷j÷'õûû*ûûûó+÷	÷ğí÷8“g‹Uu_^u_nY`_ ¹pr·‹È¯²‹Á£·¹¦º ³·¶u`¥¥`‹QeøÀûVª÷,¡øª}¤õĞ÷›Şø÷l÷*îû=a_uwÍìû$€lÒ’…_üh^€‹Hl÷÷ˆªH€‹¸÷<”{µU×÷óí÷8ûE7AceŸ´p} ‹ŒŸ÷s¾¨¼¨¾ÔÈ3û÷ª‹õáõ÷TÀ¨s£nnssnn£s¨¨££¨ùtu¡‹ª÷À¡÷¿ª®ò‹á‹òùpã‘‹–~€‹‚„ŠD…hyrZƒ¾è}~ÛyËZ¬Tì£ÙÈÙëûßû'ûÎl£Ø€gü£ng‰€>sl¯Ò‹²²Ò‹ˆ¯ªs>‰–¯÷‘÷›µ‹i®±g‹lHJ‹c´e¾g´Â…©Ùœİ§ûuø3Fs:û(û÷—¢‹—¡•¨‹Ÿå÷‡û%ø‹ªøª€¡õÍõá ø ø«l¨`BgH`}÷Ğû€lÑ“„Zû ^€‹Hl÷³º‹ˆ³ªvA‰–¯÷.(îµä×’‹ŠˆŠwqo |¡¤—«ø€¡ø!¬»÷b»t»8÷ü÷Àm©—j«d“a“S–H˜Å®¥´á÷1lŒ‚–‹‹˜‹ğœ‹’€†‰‹~ˆ‡‚‡ˆ§eb‹|ûeHSh›o¦u«q§…Ó}Ô¡‡İ{CXhc=7gÄàx˜ˆŠ~‹„yûz‹„–ŒŒ‹a·¸Š ÷¹ÎÓø€¤÷;w÷ƒª÷LwóĞr¤÷¤ú÷à÷ÄrTAmefH‹æœ÷ª÷#ªû#÷L4rŠ9m )‡uªàû¨ûè¯Ò§ÒËøÀ€¡€ª»ª÷¶ªlµ÷Ğ÷eĞJø«ªEƒ’¼÷÷¶û'€lÑ“„ZûF4[GB7‡º¿÷à´û'€lÙ‹ˆ2û*=‹0÷,Ã·§É¨1@ù‚Švù6ªù[ùnù ª‰lcŠqûl¿Š qtƒˆ…‰…ûKüvûSø…™‹‹¨Ä‹¤ªˆgF‹eûlÌ‹e™÷|üúx’ˆ˜œ™÷søà™°¦¨ÏŒø¤•vø/ªø}øø$ª‰tnŠt4l°Š–tx‚‰‡‡€%û“û÷«…˜‹‹¥²‹ªûˆpcŒmlÊ…l˜÷$û÷}‘†˜˜”•÷÷Ù”¢œ¶ÍŒùf•vøªšªùAùSø$ª‰unŠu.l¯Š¡yn…‹‰†~0û”(÷«‡—Š¦²‹Ÿª#ˆmnŒml°›‰~•…–m’x5û†,÷Ÿ†—‹¦²‹Ÿªûˆ.l½—ˆk—÷ûö}ƒ˜˜‘™ğ÷¯ñû°€ƒ˜˜”•÷	÷Ü½ª˜®Œø¤ûa¡ß‹¡ø_ªß¸øø$ª‰tnŠt4lªŠ›zrŠ‰†&ûŠû÷¡‡•‰¥°‹ªûˆpcŒml»‹h™÷*ürPTuoFKØ†t‹xª“¡›¥x›twu~m^µg½Ê´ÄÄ£÷Dø?Ê¥¾Œ›øÛ‹ªøª÷¡÷Í‹Í‹Íùù¯h­SP_e‡†°nSp,ûWû û<lÚûØ^€‹Hl÷÷ˆªH€‹¸÷Ø÷fûØ^€‹Hl÷³º‹ˆ³ªvA‰–¯÷Ö÷ªû
 ÷ä»º¸š‹„š‡y~rt›w¦¨šŸ£û¨{ˆw~o…Œr¦‚ˆ~‹‚ûûi÷ìİµÌ¼§x‹ùÕ‹ªøª÷ç¬¡õÍ÷gÍ÷gÍù¸ªH€‹¸ødˆ"ƒŠ‰‰‹}û
 ÷îá³É©¯tŸb‰…o{j¥~¢¢›©ÆTµA3Rc|y®taŸY-û	Xûû<lÚûØ^€‹Hl÷÷ˆªH€‹¸÷Ø÷gûØ^€‹Hl÷÷ˆªH€‹¸÷Ø÷2¹’~bû¢^€‹Hl÷û¸ùd‰‚swu—{†ûûj÷ïâ²Æ£®†o¦ùÕ‹ªøª÷‡ªu¡õÍ÷gÍ÷gÍîù¸ªH€‹¸øşg…‡ŠŒ‡™kb‹€EUumf´vS–b)ûV û<lÚûØ^€‹Hl÷÷ˆªH€‹¸÷Ø÷gûØ^€‹Hl÷÷ˆªH€‹¸÷Ø÷gûØ^€‹Hl÷û¿ù)‰q‚j|‘z¡ƒˆ€‹~€ûûj÷^ìÜµÎœ­ˆ{¥÷û}ûj÷è×¹Õn”¦‹‚§‚‡{qy“|œ…øÀ‹ªøª÷ä¯¡õÍ÷%Í‹ÍÂø£ªH€‹¸øû‚{Š‰Š‹Š‰‰‹}û
-÷üîá³É©¯tŸb‰…o{j¥~¢¢›©ÆTµA.ûXûû<lÚûØ^€‹Hl÷÷ˆªH€‹¸÷Ø÷2¹’~bû¢^€‹Hl÷øÀ‹ªøª÷‡ªu¡õÍ÷gÍìø£ªH€‹¸øşg…‡ŠŒ‡™kb‹€"ûS#û<lÚûØ^€‹Hl÷÷ˆªH€‹¸÷Ø÷gûØ^€‹Hl÷jø@ûj÷è×¹Õd”¦‹‚§‚‡{qy“|œ…øP€¤÷¬ç°¤­Ş÷Wçø3÷•‹ˆ‚‰‡…‰.nJfV3¶÷5÷7İµÀ”ÊŠg®bˆ…m~qw§¥Ÿœ©Ï?²>û/û ûû	İ/ñ{8°²‚kb,‹@~q¥÷ ÷‹ÎºUŸUÃ÷—¨÷ ”ú|÷“¡‹ú{ú{÷“¡ş{uùu¥ù8¤ªêÃòØì÷ìÖòÒùe÷ç÷`û+÷6ûJûGû-û4ûbûa÷.û0÷F÷J÷+÷3÷^$™ûû7/+ûã÷™÷—÷&ÏŞâ÷#Dû”,û±øC£v¢plyrur t¦ª¤¢÷f£v¢plyrur t¦ª¤¢øˆ€¤ø0¡÷ê§ŞìÜì‹ŞÒøk÷j÷'õûû*ûûûó+÷	÷ğí÷8“g‹Uu_^u_nY`_ ¹pr·‹È¯²‹Á£·¹¦º ³·¶u`¥¥`‹Qe,ûFø£v¢plyrur t¦ª¤¢÷F£v¢plyrur t¦ª¤¢øløõ÷UwÓ¡÷@¡÷TøS¥z¦gw}……Š‰‰Š‹‹‰™«’ÓÊÉ——‹’††€8?û
+÷üîá³É©¯tŸb‰…o{j¥~¢¢›©ÆTµA.ûXûû<lÚûØ^€‹Hl÷÷ˆªH€‹¸÷Ø÷2¹’~bû¢^€‹Hl÷øÀ‹ªøª÷‡ªu¡õÍ÷gÍìø£ªH€‹¸øşg…‡ŠŒ‡™kb‹€"ûS#û<lÚûØ^€‹Hl÷÷ˆªH€‹¸÷Ø÷gûØ^€‹Hl÷jø@ûj÷è×¹Õd”¦‹‚§‚‡{qy“|œ…øP€¤÷¬ç°¤­Ş÷Wçø3÷•‹ˆ‚‰‡…‰.nJfV3¶÷5÷7İµÀ”ÊŠg®bˆ…m~qw§¥Ÿœ©Ï?²>û/û ûû	İ/ñ{8°²‚kb,‹@~q¥÷ ÷‹ÎºUŸUÃ÷—¨÷ ”ú|÷“¡‹ú{ú{÷“¡ş{uøˆ÷“¡‹ø‡ø‡÷“¡ü‡u÷ªûWvø¥wğõáõ÷TøS¨s£nnssnn£s¨¨££¨üøŠ–eøPšŠŠ“ˆ†zŠdü\j¦y¥¥¦¬øÀ vøww÷©•Œ‹Œ‹xÜkÙ`Ò¶Ò«ØÜŒ‹Œ‹‘‡…‰‡‡‰‡Šm5[=KK‰‰Šˆ‰ˆŒˆŠËJ»=©6‡Œˆ‘‘÷;Œ‹Œ‹xÜkÙ`Ò¶Ò«ØÜŒ‹Œ‹‘‡…‰‡‡‰‡Šm5[=KK‰‰Šˆ‰ˆŒˆŠËJ»=©6‡Œˆ‘‘øÀ vøwwøQ÷†‰ŠKË[ÙmáŠ‡‡‰…‡‡…‹‹ŠŠ:«>·D_Dk=y:‹‹ŠŠ…‡‘Œ©à»ÙËÌŒŒû;‰ŠKË[ÙmáŠ‡‡‰…‡‡…‹‹ŠŠ:«>·D_Dk=y:‹‹ŠŠ…‡‘Œ©à»ÙËÌŒŒùu¥ù8¤ªêÃòØì÷ìÖòÒùe÷ç÷`û+÷6ûJûGû-û4ûbûa÷.û0÷F÷J÷+÷3÷^$™ûû7/+ûã÷™÷—÷&ÏŞâ÷#Dû”,û±øC£v¢plyrur t¦ª¤¢÷f£v¢plyrur t¦ª¤¢øˆ€¤ø0¡÷ê§ŞìÜì‹ŞÒøk÷j÷'õûû*ûûûó+÷	÷ğí÷8“g‹Uu_^u_nY`_ ¹pr·‹È¯²‹Á£·¹¦º ³·¶u`¥¥`‹Qe,ûFø£v¢plyrur t¦ª¤¢÷F£v¢plyrur t¦ª¤¢ølûa¡‹õeæ]õ÷©wğõÃŞ‹ŞVõ»ç  ø3C­t™t@oywq  sr¯XmAzZY 5‹Ä¼È–šš Êä’ç×£—Š‚‹ˆ‹…y{b‹û $3 y{joM…@R«=÷õâÀÛû ø›¨s£n €nssn n£s¨ €¨££¨øl‰õ÷L¡÷@¡÷bŠÇs¸`hypqqœp¯Ÿ™•‘‘ŒŒ‹‹}‡k„CLM‹‰ˆ„‡–Ş×÷
+÷VÇs¸`hypqqœp¯Ÿ™•‘‘ŒŒ‹‹}‡k„CLM‹‰ˆ„‡–Ş×÷
+øløõ÷UwÓ¡÷@¡÷TøS¥z¦gw}……Š‰‰Š‹‹‰™«’ÓÊÉ——‹’††€8?û
 O£^¶®¦¥÷V¥z¦gw}……Š‰‰Š‹‹‰™«’ÓÊÉ——‹’††€8?û
 O£^¶®¦¥øløàõ÷L¡÷@¡÷bøáÇs¸`hypqqœp¯Ÿ™•‘‘ŒŒ‹‹}‡k„CLM‹‰ˆ„‡–Ş×÷
 ÷VÇs¸`hypqqœp¯Ÿ™•‘‘ŒŒ‹‹}‡k„CLM‹‰ˆ„‡–Ş×÷
- ø&   5  Ku¡øCœ÷n–‘¡JTl/	‹ª
+÷ªøõ÷UwÓ¡÷TøS¥z¦gw}……Š‰‰Š‹‹‰™«’ÓÊÉ——‹’††€8?û
+O£^¶®¦¥÷ªø4v÷Uõ÷L¡÷bøáÇs¸`hypqqœp¯Ÿ™•‘‘ŒŒ‹‹}‡k„CLM‹‰ˆ„‡–Ş×÷
+ ø&   5  ³u¡øCœ÷n–‘¡JTl/	‹ª
 Ğ¡ŒŒŒ’È¤´‘‘‘
 endstream
 endobj
-137 0 obj
-<< /Type /FontDescriptor /FontName /ZTFEOA+LMRoman10-Regular /Flags 4 /FontBBox [ -430 -290 1417 1127 ] /Ascent 1127 /CapHeight 683 /Descent -290 /ItalicAngle 0 /StemV 87 /XHeight 431 /FontFile3 139 0 R /CIDSet 138 0 R >>
-endobj
 140 0 obj
-<< /Length 1357 >>       
+<< /Type /FontDescriptor /FontName /OXOHPJ+LMRoman10-Regular /Flags 4 /FontBBox [ -430 -290 1417 1127 ] /Ascent 1127 /CapHeight 683 /Descent -290 /ItalicAngle 0 /StemV 87 /XHeight 431 /FontFile3 142 0 R /CIDSet 141 0 R >>
+endobj
+143 0 obj
+<< /Length 1469 >>       
 stream
 %!PS-Adobe-3.0 Resource-CMap
 %%DocumentNeededResources: ProcSet (CIDInit)
 %%IncludeResource: ProcSet (CIDInit)
-%%BeginResource: CMap (TeX-ZTFEOA-LMRoman10-Regular-0)
-%%Title: (TeX-ZTFEOA-LMRoman10-Regular-0 TeX ZTFEOA-LMRoman10-Regular 0)
+%%BeginResource: CMap (TeX-OXOHPJ-LMRoman10-Regular-0)
+%%Title: (TeX-OXOHPJ-LMRoman10-Regular-0 TeX OXOHPJ-LMRoman10-Regular 0)
 %%Version: 1.000
 %%EndComments
 /CIDInit /ProcSet findresource begin
@@ -6471,17 +6508,17 @@ stream
 begincmap
 /CIDSystemInfo
 << /Registry (TeX)
-/Ordering (ZTFEOA-LMRoman10-Regular)
+/Ordering (OXOHPJ-LMRoman10-Regular)
 /Supplement 0
 >> def
-/CMapName /TeX-Identity-ZTFEOA-LMRoman10-Regular def
+/CMapName /TeX-Identity-OXOHPJ-LMRoman10-Regular def
 /CMapType 2 def
 1 begincodespacerange
 <0000> <FFFF>
 endcodespacerange
 0 beginbfrange
 endbfrange
-45 beginbfchar
+53 beginbfchar
 <001B> <0041>
 <001C> <0061>
 <0023> <0062>
@@ -6523,10 +6560,18 @@ endbfrange
 <007E> <0066006C>
 <00CF> <00E7>
 <011B> <002D002D002D002D>
+<011C> <2013>
+<012C> <00A1>
+<013F> <00AB>
+<0140> <00BB>
 <01B9> <00D6>
 <01BA> <00F6>
+<01EF> <00BF>
+<01F2> <201E>
 <01F3> <20182018>
 <01F4> <20192019>
+<01F5> <2018>
+<01F6> <2019>
 endbfchar
 endcmap
 CMapName currentdict /CMap defineresource pop
@@ -6538,21 +6583,21 @@ end
 endstream
 endobj
 70 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /ZTFEOA+LMRoman10-Regular /DescendantFonts [ 141 0 R ] /ToUnicode 140 0 R >>
-endobj
-141 0 obj
-<< /Type /Font /Subtype /CIDFontType0 /BaseFont /ZTFEOA+LMRoman10-Regular /FontDescriptor 137 0 R /W 136 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-142 0 obj
-[ 14 [ 338 ] 34 [ 719 ] 41 [ 859 ] 47 [ 798 ] 55 [ 726 ] 66 [ 552 627 529 ] 70 [ 549 385 ] 80 [ 594 ] 85 [ 354 ] 59871 [ 714 671 661 999 989 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /OXOHPJ+LMRoman10-Regular /DescendantFonts [ 144 0 R ] /ToUnicode 143 0 R >>
 endobj
 144 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /OXOHPJ+LMRoman10-Regular /FontDescriptor 140 0 R /W 139 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+145 0 obj
+[ 14 [ 338 ] 34 [ 719 ] 41 [ 859 ] 47 [ 798 ] 55 [ 726 ] 66 [ 552 627 529 ] 70 [ 549 385 ] 80 [ 594 ] 85 [ 354 ] 59871 [ 714 671 661 999 989 ] ]
+endobj
+147 0 obj
 << /Length 7485 >>       
 stream
     A ; „                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ğ
 endstream
 endobj
-145 0 obj
+148 0 obj
 << /Subtype /CIDFontType0C /Length 4256 >>       
 stream
   VXPQXN+NotoSerifCJKjp-Regular Møø‹øøøøû*şyş­q  ÿ  ÿÿ"  ´  â  ×%  Z$     s Œ  ¾ å#Hf†¤Àİı =^yœÂëAdobeIdentityCopyright 2017 Adobe Systems Incorporated (http://www.adobe.com/). Noto is a trademark of Google Inc.Noto Serif CJK JP RegularNoto Serif CJK JPNotoSerifCJKjp-Regular-AlphabeticNotoSerifCJKjp-Regular-AlphabeticDigitsNotoSerifCJKjp-Regular-BopomofoNotoSerifCJKjp-Regular-DingbatsNotoSerifCJKjp-Regular-DingbatsDigitsNotoSerifCJKjp-Regular-GenericNotoSerifCJKjp-Regular-HDingbatsNotoSerifCJKjp-Regular-HHangulNotoSerifCJKjp-Regular-HKanaNotoSerifCJKjp-Regular-HWidthNotoSerifCJKjp-Regular-HWidthCJKNotoSerifCJKjp-Regular-HWidthDigitsNotoSerifCJKjp-Regular-HangulNotoSerifCJKjp-Regular-IdeographsNotoSerifCJKjp-Regular-KanaNotoSerifCJKjp-Regular-ProportionalNotoSerifCJKjp-Regular-ProportionalCJKNotoSerifCJKjp-Regular-ProportionalDigitsNotoSerifCJKjp-Regular-VKana     " ) / 7 B C D F G P Uéßéàéáéâéã        U j ÅWÏ!¶1€æ\¢òĞ‚*@	P û½ùïæY½ï½ùP½¸ïûù´ú|ı´ø$ü_ûÒø-ùû²üVØ÷Òø-ıÆı0b÷Òø-÷Òü-ı0ùï÷Òü-ûÒü-û·÷‡Å¶÷¶÷‡÷Åûå‹´bÿ )€ ÿ Ì€ ´øUw“ùRx÷r÷³÷÷î÷ûî¸÷=û…ûùFSxû{ıD1g÷„¯"˜Ì÷Y÷•Íû[û€g÷µ¸¯÷z‹´bÿ )€ ÿ9€ µÿ#€ ÿ (€ ÷3Şø
@@ -6580,10 +6625,10 @@ stream
 ¬¬ª¥¬™¥Œú|
 endstream
 endobj
-143 0 obj
-<< /Type /FontDescriptor /FontName /VXPQXN+NotoSerifCJKjp-Regular /Flags 4 /FontBBox [ -997 -1049 2929 1809 ] /Ascent 1151 /CapHeight 729 /Descent -286 /ItalicAngle 0 /StemV 87 /XHeight 514 /FontFile3 145 0 R /CIDSet 144 0 R >>
-endobj
 146 0 obj
+<< /Type /FontDescriptor /FontName /VXPQXN+NotoSerifCJKjp-Regular /Flags 4 /FontBBox [ -997 -1049 2929 1809 ] /Ascent 1151 /CapHeight 729 /Descent -286 /ItalicAngle 0 /StemV 87 /XHeight 514 /FontFile3 148 0 R /CIDSet 147 0 R >>
+endobj
+149 0 obj
 << /Length 970 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6637,25 +6682,25 @@ end
 endstream
 endobj
 66 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /VXPQXN+NotoSerifCJKjp-Regular /DescendantFonts [ 147 0 R ] /ToUnicode 146 0 R >>
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /VXPQXN+NotoSerifCJKjp-Regular /DescendantFonts [ 150 0 R ] /ToUnicode 149 0 R >>
 endobj
-147 0 obj
-<< /Type /Font /Subtype /CIDFontType0 /BaseFont /VXPQXN+NotoSerifCJKjp-Regular /FontDescriptor 143 0 R /W 142 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-148 0 obj
-[525 0 0 0 0 0 0 0 0 0 0 525 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 525 525 0 0 0 0 0 0 0 0 0 0 0 525 0 0 0 525 0 525 ]
-endobj
-149 0 obj
-[ 99 [ 978.5 ] 105 [ 571.3 ] 109 [ 554.7 ] 150 [ 973.6 ] 164 [ 570.3 ] 172 [ 571.3 ] 174 [ 970.7 ] 184 [ 937.5 ] 198 [ 975.6 ] 320 [ 563.5 ] 323 [ 973.6 ] 446 [ 978.5 571.3 554.7 973.6 571.3 571.3 970.7 937.5 970.7 ] 456 [ 564.5 975.6 ] ]
+150 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /VXPQXN+NotoSerifCJKjp-Regular /FontDescriptor 146 0 R /W 145 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
 endobj
 151 0 obj
+[525 0 0 0 0 0 0 0 0 0 0 525 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 525 525 0 0 0 0 0 0 0 0 0 0 0 525 0 0 0 525 0 525 ]
+endobj
+152 0 obj
+[ 99 [ 978.5 ] 105 [ 571.3 ] 109 [ 554.7 ] 150 [ 973.6 ] 164 [ 570.3 ] 172 [ 571.3 ] 174 [ 970.7 ] 184 [ 937.5 ] 198 [ 975.6 ] 320 [ 563.5 ] 323 [ 973.6 ] 446 [ 978.5 571.3 554.7 973.6 571.3 571.3 970.7 937.5 970.7 ] 456 [ 564.5 975.6 ] ]
+endobj
+154 0 obj
 << /Length 58 >>         
 stream
             D     
  €                             şÀ
 endstream
 endobj
-152 0 obj
+155 0 obj
 << /Length 13209 >>      
 stream
      €  @OS/2€øã>   Ì   VcmapİëÃ  $  cvt ˆş´  <   <fpgm†ŒtÈ  x  glyfª±V    Dhead&Ë]  Ô   6hheaÊz     $hmtxEñ  0  (loca‚€Z  #X  –maxpÙû  &ğ    name·  '   prep¦–T¼  3   ‰ °    Ö Ö  , Ö Ö  , 4       €     @    SIL  @ ş òş  òô                  $     ´          $    >      ~ ×!+>PQZc€†Ÿ      `"`%Ì©.©å©ï©ù©şª`ªlªş ÿÿ      × ",?QR[d‡      `"`%Ì©.©à©æ©ğ©úª`ªaªmş ÿÿÿõÿãÿ‹  ğ¤  ğÂğÃğÆ  ğË  ğÍêyábáaáZáTáßÛ¬XLW›WœW¡W’W;W=W>û        8   x       –   ¤                                       c g i k m w y { }   … Š Œ  ’ – ™ ›  Ÿ ¤ ¦ ¨ ª ¬ ® ° ¸ » ¼ ¿ À Ä Ñ Ò Õ × Ú İ Ş à á â ã ä å æ ç é í ù ı"$&'()*+-óMOPQR    Z    ş            uÈ xÉ €Ê ª`Ë ªaÌ ªbÍ ªcÎ ªdÏ ªeĞ ªfÑ ªkÒ ªlÓ ªoÔ 
@@ -6707,10 +6752,10 @@ mšmƒK‹J+EiYsX	R6:V.,9!(8pNC@SŒ    7ÿñ
 ·  	$ Å  	% ŞCopyright 2016 SIL International, all rights reserved C o p y r i g h t   2 0 1 6   S I L   I n t e r n a t i o n a l ,   a l l   r i g h t s   r e s e r v e dPadauk P a d a u kRegular R e g u l a rSILPadauk:2016-06-07 S I L P a d a u k : 2 0 1 6 - 0 6 - 0 7Version 3.002 V e r s i o n   3 . 0 0 2Padauk-Regular P a d a u k - R e g u l a rSIL S I LDebbi Hosken D e b b i   H o s k e nhttp://scripts.sil.org h t t p : / / s c r i p t s . s i l . o r gReleased under the Open Font License. R e l e a s e d   u n d e r   t h e   O p e n   F o n t   L i c e n s e .http://scripts.sil.org/OFL h t t p : / / s c r i p t s . s i l . o r g / O F LKhamti style dots K h a m t i   s t y l e   d o t sFalse F a l s eTrue T r u eAiton Phake special characters over Khamti A i t o n   P h a k e   s p e c i a l   c h a r a c t e r s   o v e r   K h a m t iFilled dots F i l l e d   d o t sLower dot shifts left L o w e r   d o t   s h i f t s   l e f tTear drop style washwe T e a r   d r o p   s t y l e   w a s h w eLong U with Yayit, long UU with Hato L o n g   U   w i t h   Y a y i t ,   l o n g   U U   w i t h   H a t oU and UU always full height U   a n d   U U   a l w a y s   f u l l   h e i g h tInsert dotted circles for errors I n s e r t   d o t t e d   c i r c l e s   f o r   e r r o r sSlanted hato S l a n t e d   h a t oUpright U p r i g h tSgaw style slanted leg with horizontal foot S g a w   s t y l e   s l a n t e d   l e g   w i t h   h o r i z o n t a l   f o o tSlanted leg with right angled foot S l a n t e d   l e g   w i t h   r i g h t   a n g l e d   f o o tDisable great nnya D i s a b l e   g r e a t   n n y aVariant tta V a r i a n t   t t aMove ldot right when possible M o v e   l d o t   r i g h t   w h e n   p o s s i b l eNoName N o N a m eK¸ ÈRX±Y¹  c °#D°#p±D± B² *± B³*± B³*± B²	*± 	B²	*³*±D±$ˆQX°@ˆX±D±&ˆQXº€ @ˆcTX±DYYYY¸ÿ…°± D
 endstream
 endobj
-150 0 obj
-<< /Type /FontDescriptor /FontName /GPRQKP+Padauk-Regular /Flags 4 /FontBBox [ -1086 -486 2044 932 ] /Ascent 986 /CapHeight 628 /Descent -488 /ItalicAngle 0 /StemV 86 /XHeight 493 /FontFile2 152 0 R /CIDSet 151 0 R >>
-endobj
 153 0 obj
+<< /Type /FontDescriptor /FontName /GPRQKP+Padauk-Regular /Flags 4 /FontBBox [ -1086 -486 2044 932 ] /Ascent 986 /CapHeight 628 /Descent -488 /ItalicAngle 0 /StemV 86 /XHeight 493 /FontFile2 155 0 R /CIDSet 154 0 R >>
+endobj
+156 0 obj
 << /Length 972 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6769,21 +6814,21 @@ end
 endstream
 endobj
 61 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /GPRQKP+Padauk-Regular /DescendantFonts [ 154 0 R ] /ToUnicode 153 0 R >>
-endobj
-154 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /GPRQKP+Padauk-Regular /FontDescriptor 150 0 R /W 149 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-155 0 obj
-[ 44 [ 525 ] 63 [ 525 ] 84 [ 525 ] 98 [ 525 ] 105 [ 525 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /GPRQKP+Padauk-Regular /DescendantFonts [ 157 0 R ] /ToUnicode 156 0 R >>
 endobj
 157 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /GPRQKP+Padauk-Regular /FontDescriptor 153 0 R /W 152 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+158 0 obj
+[ 44 [ 525 ] 63 [ 525 ] 84 [ 525 ] 98 [ 525 ] 105 [ 525 ] ]
+endobj
+160 0 obj
 << /Length 14 >>         
 stream
           @
 endstream
 endobj
-158 0 obj
+161 0 obj
 << /Subtype /CIDFontType0C /Length 1048 >>       
 stream
   LQIRRN+LMMono10-Regular Gø!ø"‹ø øøøø Œû;ĞüWûĞùoúŒ  ˜  «õ"  Ê$  £%     ì ü
@@ -6791,10 +6836,10 @@ stream
 Ğ±›‘ŒŒŒŒŒŸ‘® ’ŒŒ•Á¬•ø¡ö
 endstream
 endobj
-156 0 obj
-<< /Type /FontDescriptor /FontName /LQIRRN+LMMono10-Regular /Flags 4 /FontBBox [ -451 -316 731 1016 ] /Ascent 1016 /CapHeight 611 /Descent -316 /ItalicAngle 0 /StemV 87 /XHeight 431 /FontFile3 158 0 R /CIDSet 157 0 R >>
-endobj
 159 0 obj
+<< /Type /FontDescriptor /FontName /LQIRRN+LMMono10-Regular /Flags 4 /FontBBox [ -451 -316 731 1016 ] /Ascent 1016 /CapHeight 611 /Descent -316 /ItalicAngle 0 /StemV 87 /XHeight 431 /FontFile3 161 0 R /CIDSet 160 0 R >>
+endobj
+162 0 obj
 << /Length 743 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6836,27 +6881,27 @@ end
 endstream
 endobj
 60 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /LQIRRN+LMMono10-Regular /DescendantFonts [ 160 0 R ] /ToUnicode 159 0 R >>
-endobj
-160 0 obj
-<< /Type /Font /Subtype /CIDFontType0 /BaseFont /LQIRRN+LMMono10-Regular /FontDescriptor 156 0 R /W 155 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-161 0 obj
-[569.4 ]
-endobj
-162 0 obj
-[738.2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 432.8 0 0 0 0 0 0 0 0 0 878 ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /LQIRRN+LMMono10-Regular /DescendantFonts [ 163 0 R ] /ToUnicode 162 0 R >>
 endobj
 163 0 obj
-[ 73 [ 289.1 ] ]
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /LQIRRN+LMMono10-Regular /FontDescriptor 159 0 R /W 158 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+164 0 obj
+[569.4 ]
 endobj
 165 0 obj
+[738.2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 432.8 0 0 0 0 0 0 0 0 0 878 ]
+endobj
+166 0 obj
+[ 73 [ 289.1 ] ]
+endobj
+168 0 obj
 << /Length 10 >>         
 stream
          @
 endstream
 endobj
-166 0 obj
+169 0 obj
 << /Length 6335 >>       
 stream
      €  0OS/2º"‰L   ¼   `cmap¢ùœ    îcvt  D     glyf®Z      ÈheadUÅZ  Ø   6hhea`ãº     $hmtx<ÿL  4   ˜loca4ä  Ì   –maxp ìr  	d    name6‰¥J  	„  4prephŒ…  ¸    l   3™ÿÏ3™ ª× f              o€  B       ALIF   şüüúì  a   Ó   i4                   ä      È   ~ @  > ~ç7¼¿ÇÙÛİ#(.1ÿ ¬ş%+AWco…“—ó  " $ & 0 3 : > B D ¬""%ÌûûÁı?ııÇıışrştşüÿÿ      æ7»¾ÇØÛİ 
@@ -6875,10 +6920,10 @@ stream
  P o r t i o n s   c o p y r i g h t   ( c )   2 0 1 0 ,   S e b a s t i a n   K o s c h   < s e b a s t i a n @ a l d u s l e a f . o r g > .   A m i r i   S l a n t e d   S o r t s   M i l l   T o o l s   2 . 1 . 0 _ a l p h a 1   :   A m i r i   S l a n t e d   :   1 9 - 1 2 - 2 0 1 7   A m i r i   S l a n t e d   V e r s i o n   0 0 0 . 1 1 0     A m i r i - S l a n t e d   K h a l e d   H o s n y   A m i r i   i s   a   c l a s s i c a l   A r a b i c   t y p e f a c e   i n   N a s k h   s t y l e   f o r   t y p e s e t t i n g   b o o k s   a n d   o t h e r   r u n n i n g   t e x t .   I t s   d e s i g n   i s   a   r e v i v a l   o f   t h e   b e a u t i f u l   t y p e f a c e   p i o n e e r e d   i n   e a r l y   2 0 t h   c e n t u r y   b y   B u l a q   P r e s s   i n   C a i r o ,   a l s o   k n o w n   a s   A m i r i a   P r e s s ,   a f t e r   w h i c h   t h e   f o n t   i s   n a m e d .   h t t p : / / w w w . a m i r i f o n t . o r g   h t t p : / / w w w . k h a l e d h o s n y . o r g   T h i s   F o n t   S o f t w a r e   i s   l i c e n s e d   u n d e r   t h e   S I L   O p e n   F o n t   L i c e n s e ,   V e r s i o n   1 . 1 .   T h i s   F o n t   S o f t w a r e   i s   d i s t r i b u t e d   o n   a n   " A S   I S "   B A S I S ,   W I T H O U T   W A R R A N T I E S   O R   C O N D I T I O N S   O F   A N Y   K I N D ,   e i t h e r   e x p r e s s   o r   i m p l i e d .   S e e   t h e   S I L   O p e n   F o n t   L i c e n s e   f o r   t h e   s p e c i f i c   l a n g u a g e ,   p e r m i s s i o n s   a n d   l i m i t a t i o n s   g o v e r n i n g   y o u r   u s e   o f   t h i s   F o n t   S o f t w a r e .   h t t p : / / s c r i p t s . s i l . o r g / O F L  5PAR  .NDRBN  .NHR/M  CNEP+RDP  qD4QNER3P  %P0R  (N2N:N*R  JN-R8NIp  qD6QN,PJ9O  (PGN'  FN,RDN'!N  EP9R7N'1P .  -BHB  'DF41   2 0 1 0 - 2 0 1 7  .'D/  -3FJ   < k h a l e d h o s n y @ e g l u g . o r g > .  E'&D  %5/'1)   0 0 0k 1 1 0  .'D/  -3FJ  'D.7  'D#EJ1J  GH  %-J'!  D.7  'DF3.  'D0J  5OEE  H'3*./E  DDE1)  'D#HDJ  AJ  E(79)  (HD'B  ('DB'G1)   )*91A  #J6'  ('DE7(9)  'D#EJ1J) (  AJ  #H'&D  'DB1F  'D941JF .    *EJ2  'D.7  'D#EJ1J  F'(9  EF  EH2'F*G  'DE*EJ2)  (JF  ,E'D  .7  'DF3.  HE*7D('*  'D7('9)  'D1'BJ) .  'D.7  'D#EJ1J  EH,G  #C+1  D7('9)  'DF5H5  'D7HJD)  H'DC*( .  5PAR  .NDRBN  .NHR/M  CNEP+RDP  qD4QNER3P  %P0R  (N2N:N*R  JN-R8NIp  qD6QN,PJ9O  (PGN'  FN,RDN'!N  EP9R7N'1P .   K a s r a   i s   p l a c e d   b e l o w   S h a d d a   i n s t e a d   o f   b a s e   g l y p h   A l t e r n a t e ,   m o r e   n a s k h - l i k e ,   G a f   f o r m   L o c a l i s e d   @   a n d   &   s y m b o l s   A l t e r n a t e   m e d i a l   M e e m   a n d   f i n a l   A l e f   c o m b i n a t i o n   L o w   B a a   d o t   f o l l o w i n g   a   R a a   o r   W a w   N o   a u t o m a t i c   v o w e l   i n s e r t i o n   a b o v e   n a m e   o f   G o d   D i s a b l e   c u r v i l i n e a r   K a s h i d a  ¸ÿ…°
 endstream
 endobj
-164 0 obj
-<< /Type /FontDescriptor /FontName /RHXWKM+Amiri-Slanted /Flags 4 /FontBBox [ -545 -899 11541 1814 ] /Ascent 1123 /CapHeight 650 /Descent -634 /ItalicAngle 10 /StemV 86 /XHeight 426 /FontFile2 166 0 R /CIDSet 165 0 R >>
-endobj
 167 0 obj
+<< /Type /FontDescriptor /FontName /RHXWKM+Amiri-Slanted /Flags 4 /FontBBox [ -545 -899 11541 1814 ] /Ascent 1123 /CapHeight 650 /Descent -634 /ItalicAngle 10 /StemV 86 /XHeight 426 /FontFile2 169 0 R /CIDSet 168 0 R >>
+endobj
+170 0 obj
 << /Length 672 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6916,21 +6961,21 @@ end
 endstream
 endobj
 57 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /RHXWKM+Amiri-Slanted /DescendantFonts [ 168 0 R ] /ToUnicode 167 0 R >>
-endobj
-168 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /RHXWKM+Amiri-Slanted /FontDescriptor 164 0 R /W 163 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-169 0 obj
-[ 292 [ 730 730 ] 312 [ 725 725 628 628 ] 326 [ 746 746 ] 330 [ 654 654 ] 350 [ 618 618 708 708 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /RHXWKM+Amiri-Slanted /DescendantFonts [ 171 0 R ] /ToUnicode 170 0 R >>
 endobj
 171 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /RHXWKM+Amiri-Slanted /FontDescriptor 167 0 R /W 166 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+172 0 obj
+[ 292 [ 730 730 ] 312 [ 725 725 628 628 ] 326 [ 746 746 ] 330 [ 654 654 ] 350 [ 618 618 708 708 ] ]
+endobj
+174 0 obj
 << /Length 45 >>         
 stream
                                       ğ0 À
 endstream
 endobj
-172 0 obj
+175 0 obj
 << /Length 7505 >>       
 stream
     	 €  OS/2ƒòSv   œ   `cmapó-Ğœ   ü  Dglyf×L®<  @  ôheadêß¨  4   6hhea	g4  l   $hmtx:&ğ    †loca(Ç&Ì    Æmaxpsâ  à    nameÒÿ     Q ›  ŠX   KŠX  ^  ,                           djr  @  á;\ÿt Èrj       ôĞ                   L      0   P @   ` z ~ ¬ ± ´ ¸ » Ş07H~’Çİ&…ó    " & 0 3 : D ¬!!"""H"`"eá5á;ÿÿ     a { ¡ ® ´ ¶ º ¿ à29J’ÆØ&€ò      & 0 2 9 D ¬!!"""H"`"dá á8ÿÿÿêÿÊÿĞ    ÿ¬              şÜ      ıø  âB  àd      àLàWàèàHà;àpàß=İöŞ'ŞŞá          J `   d h j ¨HRp  ÖØÚ  â  ê  êîò                          Ü   l X Y € h  Z a ^ i p m ] ™ W e \ „  j q k s Š ˆ t O P c Q Œ R ‰ ‹      S “ ‘ ’ u T 	 d – ” • U   s Š ˆ t O P c Q Œ R ‰ ‹      S “ ‘ ’ u T } d – ” • U   ~ ¡ ¡ ¢ ¢ £ £ ¤ ¤ ¥ ¥ ¦ ¦ § § ¨ ¨ Ú Ú © © ª ª « « ¬ ¬ ­ ­ ® ® ¯ ¯ ° ° ± ± ² ² Û Û ³ ³ ´ ´ µ µ ¶ ¶ · Ü Ü ¸ ¸ ¹ ¹ º º » » ¼ ¼ İ İ   ½ ½ ¾ ¾ ¿ ¿ Ş Ş À À Á Á Â Â v v Ã Ã Ä Ä Å Å Æ Æ Ç Ç È È   Ê Ê Ë Ë ß ß Ì Ì Í Í Î Î Ï Ï Ğ Ğ Ñ Ñ Ò Ò Ö Ö ~ Ø Ø Ù Ù   É É —   š › œ Ÿ ˜  Ó Ó Ô Ô Õ Õ × × { | … y z † V ƒ [ ø   	 ÷ 
@@ -6956,10 +7001,10 @@ stream
        š       ´       À      Ë      Ò      Ş      ê      ı  	   r	  	  ({  	  £  	  <±  	  8í  	  n%  	  &“  	  R¹  	  &  	 	 &  	  $1  	  $1  	  U  	  4u  	  ©  	  Á  	 ×  	 å  	 ı  	 &  	 ;Copyright 2008 The Bungee Project Authors (david@djr.com)Bungee Color RegularRegular1.000;djr ;BungeeColor-RegularVersion 1.000;PS 1.0;hotconv 1.0.72;makeotf.lib2.5.5900BungeeColor-RegularBungee is a trademark of The Font Bureau.David Jonathan Rosshttp://www.djr.comThis Font Software is licensed under the SIL Open Font License, Version 1.1. This license is available with a FAQ at: http://scripts.sil.org/OFLhttp://scripts.sil.org/OFLBungee ColorRound formsRound ESans-serif ISans-serif LAlternate ampersandSmall quotes C o p y r i g h t   2 0 0 8   T h e   B u n g e e   P r o j e c t   A u t h o r s   ( d a v i d @ d j r . c o m ) B u n g e e   C o l o r   R e g u l a r R e g u l a r 1 . 0 0 0 ; d j r   ; B u n g e e C o l o r - R e g u l a r B u n g e e   C o l o r   R e g u l a r   R e g u l a r V e r s i o n   1 . 0 0 0 ; P S   1 . 0 ; h o t c o n v   1 . 0 . 7 2 ; m a k e o t f . l i b 2 . 5 . 5 9 0 0 B u n g e e C o l o r - R e g u l a r B u n g e e   i s   a   t r a d e m a r k   o f   T h e   F o n t   B u r e a u . D a v i d   J o n a t h a n   R o s s h t t p : / / w w w . d j r . c o m T h i s   F o n t   S o f t w a r e   i s   l i c e n s e d   u n d e r   t h e   S I L   O p e n   F o n t   L i c e n s e ,   V e r s i o n   1 . 1 .   T h i s   l i c e n s e   i s   a v a i l a b l e   w i t h   a   F A Q   a t :   h t t p : / / s c r i p t s . s i l . o r g / O F L h t t p : / / s c r i p t s . s i l . o r g / O F L B u n g e e   C o l o r R o u n d   f o r m s R o u n d   E S a n s - s e r i f   I S a n s - s e r i f   L A l t e r n a t e   a m p e r s a n d S m a l l   q u o t e s
 endstream
 endobj
-170 0 obj
-<< /Type /FontDescriptor /FontName /DICVLS+BungeeColor-Regular /Flags 4 /FontBBox [ -49 -362 1393 1138 ] /Ascent 860 /CapHeight 720 /Descent -140 /ItalicAngle 0 /StemV 86 /XHeight 500 /FontFile2 172 0 R /CIDSet 171 0 R >>
-endobj
 173 0 obj
+<< /Type /FontDescriptor /FontName /DICVLS+BungeeColor-Regular /Flags 4 /FontBBox [ -49 -362 1393 1138 ] /Ascent 860 /CapHeight 720 /Descent -140 /ItalicAngle 0 /StemV 86 /XHeight 500 /FontFile2 175 0 R /CIDSet 174 0 R >>
+endobj
+176 0 obj
 << /Length 688 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -6996,21 +7041,21 @@ end
 endstream
 endobj
 42 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /DICVLS+BungeeColor-Regular /DescendantFonts [ 174 0 R ] /ToUnicode 173 0 R >>
-endobj
-174 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /DICVLS+BungeeColor-Regular /FontDescriptor 170 0 R /W 169 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-175 0 obj
-[ 52 [ 399.9 ] 58 [ 792.5 ] 65 [ 657.7 ] 67 [ 452.1 ] 70 [ 400.9 ] 76 [ 0 0 0 0 ] 113 [ 1279.3 ] 117 [ 0 ] 120 [ 0 ] 308 [ 155.8 231 352.1 ] 377 [ 0 ] 381 [ 0 ] 465 [ 229.5 ] 474 [ 366.2 ] 503 [ 471.2 ] 518 [ 655.8 ] 525 [ 452.1 ] 531 [ 175.8 197.8 522.5 389.2 463.9 ] 552 [ 568.8 ] 561 [ 345.7 ] 584 [ 559.6 ] 609 [ 223.1 ] 698 [ 302.2 ] 700 [ 340.8 ] 730 [ 72.8 ] 767 [ 492.2 ] 781 [ 292 ] 826 [ 232.9 236.8 ] 935 [ 216.8 ] 937 [ 293 ] 972 [ 553.7 ] 1018 [ 390.6 ] 1030 [ 533.2 ] 1032 [ 510.7 ] 1117 [ 141.1 ] 1122 [ 488.3 ] 1132 [ 514.6 ] 1135 [ 216.8 ] 1225 [ 147.5 ] 1233 [ 199.7 ] 1236 [ 813.5 ] 1310 [ 208 ] 1316 [ 293 293 293 293 293 293 293 ] 1339 [ 0 ] 1363 [ 376 ] 1562 [ 234.4 234.4 ] 1566 [ 217.8 217.8 ] 1570 [ 926.3 926.3 ] 1598 [ 217.8 ] 1602 [ 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 ] 1646 [ 366.2 366.2 883.8 883.8 ] 1653 [ 190.4 ] 1655 [ 190.4 ] 1658 [ 190.4 ] 1661 [ 244.1 ] 1664 [ 244.1 ] 1667 [ 244.1 ] 1676 [ 378.4 378.4 ] 1690 [ 615.2 615.2 ] 1700 [ 722.7 722.7 ] 1744 [ 337.9 ] 1746 [ 337.9 ] 1847 [ 146 146 ] 1858 [ 562.5 562.5 219.2 ] 1865 [ 219.2 ] 1870 [ 258.8 ] 1872 [ 258.8 ] 1978 [ 218.3 ] 1980 [ 218.3 ] 1986 [ 543 543 ] 2057 [ 390.6 390.6 ] 2096 [ 285.6 ] 2098 [ 332 332 ] 2102 [ 285.6 ] 2135 [ 488.3 488.3 ] 2198 [ 311.5 ] 2200 [ 311.5 ] 2212 [ 217.8 ] 2254 [ 293 293 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /DICVLS+BungeeColor-Regular /DescendantFonts [ 177 0 R ] /ToUnicode 176 0 R >>
 endobj
 177 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /DICVLS+BungeeColor-Regular /FontDescriptor 173 0 R /W 172 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+178 0 obj
+[ 52 [ 399.9 ] 58 [ 792.5 ] 65 [ 657.7 ] 67 [ 452.1 ] 70 [ 400.9 ] 76 [ 0 0 0 0 ] 113 [ 1279.3 ] 117 [ 0 ] 120 [ 0 ] 308 [ 155.8 231 352.1 ] 377 [ 0 ] 381 [ 0 ] 465 [ 229.5 ] 474 [ 366.2 ] 503 [ 471.2 ] 518 [ 655.8 ] 525 [ 452.1 ] 531 [ 175.8 197.8 522.5 389.2 463.9 ] 552 [ 568.8 ] 561 [ 345.7 ] 584 [ 559.6 ] 609 [ 223.1 ] 698 [ 302.2 ] 700 [ 340.8 ] 730 [ 72.8 ] 767 [ 492.2 ] 781 [ 292 ] 826 [ 232.9 236.8 ] 935 [ 216.8 ] 937 [ 293 ] 972 [ 553.7 ] 1018 [ 390.6 ] 1030 [ 533.2 ] 1032 [ 510.7 ] 1117 [ 141.1 ] 1122 [ 488.3 ] 1132 [ 514.6 ] 1135 [ 216.8 ] 1225 [ 147.5 ] 1233 [ 199.7 ] 1236 [ 813.5 ] 1310 [ 208 ] 1316 [ 293 293 293 293 293 293 293 ] 1339 [ 0 ] 1363 [ 376 ] 1562 [ 234.4 234.4 ] 1566 [ 217.8 217.8 ] 1570 [ 926.3 926.3 ] 1598 [ 217.8 ] 1602 [ 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 11435.5 ] 1646 [ 366.2 366.2 883.8 883.8 ] 1653 [ 190.4 ] 1655 [ 190.4 ] 1658 [ 190.4 ] 1661 [ 244.1 ] 1664 [ 244.1 ] 1667 [ 244.1 ] 1676 [ 378.4 378.4 ] 1690 [ 615.2 615.2 ] 1700 [ 722.7 722.7 ] 1744 [ 337.9 ] 1746 [ 337.9 ] 1847 [ 146 146 ] 1858 [ 562.5 562.5 219.2 ] 1865 [ 219.2 ] 1870 [ 258.8 ] 1872 [ 258.8 ] 1978 [ 218.3 ] 1980 [ 218.3 ] 1986 [ 543 543 ] 2057 [ 390.6 390.6 ] 2096 [ 285.6 ] 2098 [ 332 332 ] 2102 [ 285.6 ] 2135 [ 488.3 488.3 ] 2198 [ 311.5 ] 2200 [ 311.5 ] 2212 [ 217.8 ] 2254 [ 293 293 ] ]
+endobj
+180 0 obj
 << /Length 282 >>        
 stream
        R    D€                              D          @      €@  €  @          (             0            @         €          	           @H        à                           30  ?ÿÿÿğÅ$ 0                 €8B€            (0        `    ²   €      €    
 endstream
 endobj
-178 0 obj
+181 0 obj
 << /Length 30807 >>      
 stream
      €  0OS/2¸æd‚   ¼   `cmap‹Te    ^cvt  D  |   glyfd®`  €  1lheadV}Åä  5ì   6hheag~  6$   $hmtxEÁÇ#  6H  "ìlocaÆ¤¹Â  Y4  ¢maxp	rs  jØ    nameÓR„Æ  jø  VprephŒ…  xP    L   3™  3™  × f           €  C€           ALIF À  ııƒúì  aŠ   @                           T      8   D @     ) 9 ] }   « »
@@ -7133,10 +7178,10 @@ T
  P o r t i o n s   c o p y r i g h t   ( c )   2 0 1 0 ,   S e b a s t i a n   K o s c h   < s e b a s t i a n @ a l d u s l e a f . o r g > . A m i r i   Q u r a n   C o l o r e d R e g u l a r S o r t s   M i l l   T o o l s   2 . 1 . 0 _ a l p h a 1   :   A m i r i   Q u r a n   :   1 9 - 1 2 - 2 0 1 7 V e r s i o n   0 0 0 . 1 1 0   A m i r i Q u r a n C o l o r e d - R e g u l a r K h a l e d   H o s n y A m i r i   i s   a   c l a s s i c a l   A r a b i c   t y p e f a c e   i n   N a s k h   s t y l e   f o r   t y p e s e t t i n g   b o o k s   a n d   o t h e r   r u n n i n g   t e x t .   I t s   d e s i g n   i s   a   r e v i v a l   o f   t h e   b e a u t i f u l   t y p e f a c e   p i o n e e r e d   i n   e a r l y   2 0 t h   c e n t u r y   b y   B u l a q   P r e s s   i n   C a i r o ,   a l s o   k n o w n   a s   A m i r i a   P r e s s ,   a f t e r   w h i c h   t h e   f o n t   i s   n a m e d . h t t p : / / w w w . a m i r i f o n t . o r g h t t p : / / w w w . k h a l e d h o s n y . o r g T h i s   F o n t   S o f t w a r e   i s   l i c e n s e d   u n d e r   t h e   S I L   O p e n   F o n t   L i c e n s e ,   V e r s i o n   1 . 1 .   T h i s   F o n t   S o f t w a r e   i s   d i s t r i b u t e d   o n   a n   " A S   I S "   B A S I S ,   W I T H O U T   W A R R A N T I E S   O R   C O N D I T I O N S   O F   A N Y   K I N D ,   e i t h e r   e x p r e s s   o r   i m p l i e d .   S e e   t h e   S I L   O p e n   F o n t   L i c e n s e   f o r   t h e   s p e c i f i c   l a n g u a g e ,   p e r m i s s i o n s   a n d   l i m i t a t i o n s   g o v e r n i n g   y o u r   u s e   o f   t h i s   F o n t   S o f t w a r e . h t t p : / / s c r i p t s . s i l . o r g / O F L5PAR  .NDRBN  .NHR/M  CNEP+RDP  qD4QNER3P  %P0R  (N2N:N*R  JN-R8NIp  qD6QN,PJ9O  (PGN'  FN,RDN'!N  EP9R7N'1P . L o w   B a a   d o t   f o l l o w i n g   a   R a a   o r   W a w A l t e r n a t e   m e d i a l   M e e m   a n d   f i n a l   A l e f   c o m b i n a t i o n K a s r a   i s   p l a c e d   b e l o w   S h a d d a   i n s t e a d   o f   b a s e   g l y p h D i s a b l e   c u r v i l i n e a r   K a s h i d a-BHB  'DF41   2 0 1 0 - 2 0 1 7  .'D/  -3FJ   < k h a l e d h o s n y @ e g l u g . o r g > .9'/J%5/'1)   0 0 0k 1 1 0.'D/  -3FJ'D.7  'D#EJ1J  GH  %-J'!  D.7  'DF3.  'D0J  5OEE  H'3*./E  DDE1)  'D#HDJ  AJ  E(79)  (HD'B  ('DB'G1)   )*91A  #J6'  ('DE7(9)  'D#EJ1J) (  AJ  #H'&D  'DB1F  'D941JF .    *EJ2  'D.7  'D#EJ1J  F'(9  EF  EH2'F*G  'DE*EJ2)  (JF  ,E'D  .7  'DF3.  HE*7D('*  'D7('9)  'D1'BJ) .  'D.7  'D#EJ1J  EH,G  #C+1  D7('9)  'DF5H5  'D7HJD)  H'DC*( .  ¸ÿ…°
 endstream
 endobj
-176 0 obj
-<< /Type /FontDescriptor /FontName /DXQNOJ+AmiriQuranColored-Regular /Flags 4 /FontBBox [ -333 -834 11454 1814 ] /Ascent 1813 /CapHeight 0 /Descent -634 /ItalicAngle 0 /StemV 86 /XHeight 0 /FontFile2 178 0 R /CIDSet 177 0 R >>
-endobj
 179 0 obj
+<< /Type /FontDescriptor /FontName /DXQNOJ+AmiriQuranColored-Regular /Flags 4 /FontBBox [ -333 -834 11454 1814 ] /Ascent 1813 /CapHeight 0 /Descent -634 /ItalicAngle 0 /StemV 86 /XHeight 0 /FontFile2 181 0 R /CIDSet 180 0 R >>
+endobj
+182 0 obj
 << /Length 1545 >>       
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -7232,21 +7277,21 @@ end
 endstream
 endobj
 27 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /DXQNOJ+AmiriQuranColored-Regular /DescendantFonts [ 180 0 R ] /ToUnicode 179 0 R >>
-endobj
-180 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /DXQNOJ+AmiriQuranColored-Regular /FontDescriptor 176 0 R /W 175 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-181 0 obj
-[ 11 [ 0 0 0 0 0 ] 18 [ 0 0 ] 32 [ 0 ] 51 [ 0 ] 86 [ 0 0 ] 115 [ 0 0 ] 202 [ 258 ] 206 [ 357 ] 224 [ 330 ] 231 [ 264 1175 1187 861 750 871 300 362 406 ] 243 [ 653 ] 245 [ 361 1217 1174 ] 249 [ 422 ] 251 [ 851 848 660 ] 259 [ 1184 ] 261 [ 239 ] 269 [ 205 ] 277 [ 521 ] 279 [ 230 314 297 438 236 236 ] 286 [ 252 ] 288 [ 382 238 ] 298 [ 355 276 ] 303 [ 156 156 ] 306 [ 312 ] 310 [ 216 249 ] 313 [ 304 304 381 ] 317 [ 422 ] 319 [ 235 347 ] 325 [ 224 ] 328 [ 595 ] 330 [ 158 ] 332 [ 404 368 ] 335 [ 512 ] 339 [ 271 ] 341 [ 456 ] 344 [ 376 ] 349 [ 469 ] 355 [ 419 279 ] 358 [ 345 ] 361 [ 273 371 250 267 ] 366 [ 298 ] 368 [ 494 ] 371 [ 185 218 292 227 ] 377 [ 178 90 331 294 ] 382 [ 258 692 ] 388 [ 302 ] 391 [ 713 626 ] 395 [ 565 ] 397 [ 225 413 ] 402 [ 337 ] 404 [ 208 ] 406 [ 235 310 367 411 254 ] 416 [ 4 ] 426 [ 402 ] 428 [ 503 739 ] 431 [ 200 358 ] 434 [ 278 330 332 ] 444 [ 295 195 ] 453 [ 486 ] 455 [ 638 ] 466 [ 533 ] 468 [ 547 ] 474 [ 759 ] 480 [ 531 796 ] 485 [ 459 ] 498 [ 644 ] 512 [ 614 ] 532 [ 653 875 ] 539 [ 773 ] 546 [ 280 279 ] 551 [ 310 354 ] 556 [ 669 ] 565 [ 422 554 ] 572 [ 354 ] 581 [ 79 ] 586 [ 569 141 576 ] 595 [ 539 ] 606 [ 342 378 ] 618 [ 43 192 ] 627 [ 46 9 ] 650 [ 368 ] 664 [ 527 587 ] 669 [ 502 ] 671 [ 334 500 ] 678 [ 350 ] 695 [ 147 ] 698 [ 957 ] 700 [ 367 ] 702 [ 302 ] 704 [ 390 ] 708 [ 278 330 ] 805 [ 261 246 ] 808 [ 68 99 304 384 ] 813 [ 539 ] 822 [ 310 ] 835 [ 544 ] 972 [ 0 0 0 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /DXQNOJ+AmiriQuranColored-Regular /DescendantFonts [ 183 0 R ] /ToUnicode 182 0 R >>
 endobj
 183 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /DXQNOJ+AmiriQuranColored-Regular /FontDescriptor 179 0 R /W 178 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+184 0 obj
+[ 11 [ 0 0 0 0 0 ] 18 [ 0 0 ] 32 [ 0 ] 51 [ 0 ] 86 [ 0 0 ] 115 [ 0 0 ] 202 [ 258 ] 206 [ 357 ] 224 [ 330 ] 231 [ 264 1175 1187 861 750 871 300 362 406 ] 243 [ 653 ] 245 [ 361 1217 1174 ] 249 [ 422 ] 251 [ 851 848 660 ] 259 [ 1184 ] 261 [ 239 ] 269 [ 205 ] 277 [ 521 ] 279 [ 230 314 297 438 236 236 ] 286 [ 252 ] 288 [ 382 238 ] 298 [ 355 276 ] 303 [ 156 156 ] 306 [ 312 ] 310 [ 216 249 ] 313 [ 304 304 381 ] 317 [ 422 ] 319 [ 235 347 ] 325 [ 224 ] 328 [ 595 ] 330 [ 158 ] 332 [ 404 368 ] 335 [ 512 ] 339 [ 271 ] 341 [ 456 ] 344 [ 376 ] 349 [ 469 ] 355 [ 419 279 ] 358 [ 345 ] 361 [ 273 371 250 267 ] 366 [ 298 ] 368 [ 494 ] 371 [ 185 218 292 227 ] 377 [ 178 90 331 294 ] 382 [ 258 692 ] 388 [ 302 ] 391 [ 713 626 ] 395 [ 565 ] 397 [ 225 413 ] 402 [ 337 ] 404 [ 208 ] 406 [ 235 310 367 411 254 ] 416 [ 4 ] 426 [ 402 ] 428 [ 503 739 ] 431 [ 200 358 ] 434 [ 278 330 332 ] 444 [ 295 195 ] 453 [ 486 ] 455 [ 638 ] 466 [ 533 ] 468 [ 547 ] 474 [ 759 ] 480 [ 531 796 ] 485 [ 459 ] 498 [ 644 ] 512 [ 614 ] 532 [ 653 875 ] 539 [ 773 ] 546 [ 280 279 ] 551 [ 310 354 ] 556 [ 669 ] 565 [ 422 554 ] 572 [ 354 ] 581 [ 79 ] 586 [ 569 141 576 ] 595 [ 539 ] 606 [ 342 378 ] 618 [ 43 192 ] 627 [ 46 9 ] 650 [ 368 ] 664 [ 527 587 ] 669 [ 502 ] 671 [ 334 500 ] 678 [ 350 ] 695 [ 147 ] 698 [ 957 ] 700 [ 367 ] 702 [ 302 ] 704 [ 390 ] 708 [ 278 330 ] 805 [ 261 246 ] 808 [ 68 99 304 384 ] 813 [ 539 ] 822 [ 310 ] 835 [ 544 ] 972 [ 0 0 0 ] ]
+endobj
+186 0 obj
 << /Length 122 >>        
 stream
  0 €                 "  ÿ\úÀ1£u„­„z{	–+à€-¸ ( Ä   € 1ˆ8 0    Å‚ *Œ           ô                 
 endstream
 endobj
-184 0 obj
+187 0 obj
 << /Length 27426 >>      
 stream
     	 €  OS/2­¿^G   œ   `cmapOb¾   ü  ¤glyfó¿á     JheadÜQ¹  N´   6hhea«  Nì   $hmtxúŸì  O  (locaÓ$ä  ]8   maxpğë  dØ    name’–½  dø  * )   ŠX   KŠX  ^ 2B  €  €  @        GOOG@  ııpı¬  pT   A    Ê                       – €      ! ) / 9 : = ] }   « · » × ÷ :@JY_isˆ‘“–š¡¤¦©«±³·¼¾ÄÇÊÍĞÕŞáéùÿY\cj}ÿ     :"%ÌûÁı?ıòıôııÿÿ        ( + 0 : = [ {   « · » × ÷ 	!;AK]`jyƒ‰‘“–˜¡¤¦©«¯³·º¾ÀÆÊÌĞÒİàéîÿY\cgkÿ     9"%Ìû²ı>ıòıôıúÿÿ ÿõ   ”  $ – ˆ \  ÿd -  ÿìÿÍ        ı"  ı    úA      ıüßıı  ıüÑüÏüúüËüö  üñüî  ü¹  ü¶ü´  üÚ      ıB  ü°üWüUüO  üL÷‰  à­àºà¸àŞ°ÚÎ  êíí        ’   ’         ’             Š ’ ¨ ª   ¬   ´ Ğ   Ò ä ô         ö             î     î   ğ     ô   ô ú ü   ü        
@@ -7561,10 +7606,10 @@ t
  Bê  	  >,  	  <j  	 –¦  	  4< C o p y r i g h t   2 0 1 7   G o o g l e   I n c .   A l l   R i g h t s   R e s e r v e d . N o t o   N a s t a l i q   U r d u R e g u l a r 2 . 0 0 0 ; G O O G ; N o t o N a s t a l i q U r d u - R e g u l a r N o t o   N a s t a l i q   U r d u   R e g u l a r V e r s i o n   2 . 0 0 0 N o t o N a s t a l i q U r d u - R e g u l a r N o t o   i s   a   t r a d e m a r k   o f   G o o g l e   I n c . M o n o t y p e   I m a g i n g   I n c . M o n o t y p e   D e s i g n   T e a m D e s i g n e d   b y   M o n o t y p e   d e s i g n   t e a m . h t t p : / / w w w . g o o g l e . c o m / g e t / n o t o / h t t p : / / w w w . m o n o t y p e . c o m / s t u d i o T h i s   F o n t   S o f t w a r e   i s   l i c e n s e d   u n d e r   t h e   S I L   O p e n   F o n t   L i c e n s e ,   V e r s i o n   1 . 1 .   T h i s   F o n t   S o f t w a r e   i s   d i s t r i b u t e d   o n   a n   " A S   I S "   B A S I S ,   W I T H O U T   W A R R A N T I E S   O R   C O N D I T I O N S   O F   A N Y   K I N D ,   e i t h e r   e x p r e s s   o r   i m p l i e d .   S e e   t h e   S I L   O p e n   F o n t   L i c e n s e   f o r   t h e   s p e c i f i c   l a n g u a g e ,   p e r m i s s i o n s   a n d   l i m i t a t i o n s   g o v e r n i n g   y o u r   u s e   o f   t h i s   F o n t   S o f t w a r e . h t t p : / / s c r i p t s . s i l . o r g / O F L
 endstream
 endobj
-182 0 obj
-<< /Type /FontDescriptor /FontName /XKKYMI+NotoNastaliqUrdu-Regular /Flags 4 /FontBBox [ -379 -1382 4531 1805 ] /Ascent 1904 /CapHeight 714 /Descent -596 /ItalicAngle 0 /StemV 86 /XHeight 536 /FontFile2 184 0 R /CIDSet 183 0 R >>
-endobj
 185 0 obj
+<< /Type /FontDescriptor /FontName /XKKYMI+NotoNastaliqUrdu-Regular /Flags 4 /FontBBox [ -379 -1382 4531 1805 ] /Ascent 1904 /CapHeight 714 /Descent -596 /ItalicAngle 0 /StemV 86 /XHeight 536 /FontFile2 187 0 R /CIDSet 186 0 R >>
+endobj
+188 0 obj
 << /Length 1582 >>       
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -7663,21 +7708,21 @@ end
 endstream
 endobj
 20 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /XKKYMI+NotoNastaliqUrdu-Regular /DescendantFonts [ 186 0 R ] /ToUnicode 185 0 R >>
-endobj
-186 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /XKKYMI+NotoNastaliqUrdu-Regular /FontDescriptor 182 0 R /W 181 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-187 0 obj
-[ 17 [ 279.8 ] 239 [ 278.3 ] 242 [ 431.2 ] 244 [ 248.5 ] 248 [ 248.5 801.3 247.1 801.3 801.3 683.6 683.6 683.6 367.2 367.2 469.2 469.2 933.6 933.6 881.8 881.8 681.2 681.2 683.6 683.6 ] 269 [ 679.7 634.8 568.4 445.8 505.9 463.9 247.1 491.7 615.7 615.7 ] 285 [ 0 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /XKKYMI+NotoNastaliqUrdu-Regular /DescendantFonts [ 189 0 R ] /ToUnicode 188 0 R >>
 endobj
 189 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /XKKYMI+NotoNastaliqUrdu-Regular /FontDescriptor 185 0 R /W 184 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+190 0 obj
+[ 17 [ 279.8 ] 239 [ 278.3 ] 242 [ 431.2 ] 244 [ 248.5 ] 248 [ 248.5 801.3 247.1 801.3 801.3 683.6 683.6 683.6 367.2 367.2 469.2 469.2 933.6 933.6 881.8 881.8 681.2 681.2 683.6 683.6 ] 269 [ 679.7 634.8 568.4 445.8 505.9 463.9 247.1 491.7 615.7 615.7 ] 285 [ 0 ] ]
+endobj
+192 0 obj
 << /Length 36 >>         
 stream
   @                          (ÿÿ÷ş
 endstream
 endobj
-190 0 obj
+193 0 obj
 << /Length 10954 >>      
 stream
     	 €  OS/2™Òl   œ   `cmapÃe­
@@ -7768,10 +7813,10 @@ t
  Şh  	  F  	  4f  	  Hš  	  â  	 ö  	   	 $(  	 4L  	 €  	 2˜  	 Ê C o p y r i g h t   ©   2 0 1 5 - 2 0 1 8   T h e   A r e f   R u q a a   P r o j e c t   A u t h o r s ,   w i t h   R e s e r v e d   F o n t   N a m e   " E U R M 1 0 " . A r e f   R u q a a B o l d 0 . 1 0 ; A L I F ; A r e f R u q a a - B o l d A r e f   R u q a a   B o l d V e r s i o n   0 . 1 0   A r e f R u q a a - B o l d A b d u l l a h   A r e f A r e f   R u q a a   i s   a n   A r a b i c   t y p e f a c e   t h a t   a s p i r e s   t o   c a p t u r e   t h e   e s s e n c e   o f   t h e   c l a s s i c a l   R u q a a   c a l l i g r a p h i c   s t y l e . T h i s   F o n t   S o f t w a r e   i s   l i c e n s e d   u n d e r   t h e   S I L   O p e n   F o n t   L i c e n s e ,   V e r s i o n   1 . 1 .   T h i s   l i c e n s e   i s   a v a i l a b l e   w i t h   a   F A Q   a t :   h t t p : / / s c r i p t s . s i l . o r g / O F L h t t p : / / s c r i p t s . s i l . o r g / O F L'D.7  GF/3)  1H-'FJ)  8G1*  ("D)  ,3E'FJ) L o o p e d   H a a O p e n   f i n a l   H a a T a i l e d   N o o n L o o p e d   i n i t i a l   K a f A l t e r n a t e   A r a b i c   d i g i t   t w o T a i l e d   S h e e n A l t e r n a t e   S a d - T a h / T a h - S a d A l t e r n a t e   S u k u n
 endstream
 endobj
-188 0 obj
-<< /Type /FontDescriptor /FontName /VNSRVI+ArefRuqaa-Bold /Flags 4 /FontBBox [ -193 -383 1434 1046 ] /Ascent 1220 /CapHeight 701 /Descent -244 /ItalicAngle 0 /StemV 150 /XHeight 490 /FontFile2 190 0 R /CIDSet 189 0 R >>
-endobj
 191 0 obj
+<< /Type /FontDescriptor /FontName /VNSRVI+ArefRuqaa-Bold /Flags 4 /FontBBox [ -193 -383 1434 1046 ] /Ascent 1220 /CapHeight 701 /Descent -244 /ItalicAngle 0 /StemV 150 /XHeight 490 /FontFile2 193 0 R /CIDSet 192 0 R >>
+endobj
+194 0 obj
 << /Length 1154 >>       
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -7843,21 +7888,21 @@ end
 endstream
 endobj
 16 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /VNSRVI+ArefRuqaa-Bold /DescendantFonts [ 192 0 R ] /ToUnicode 191 0 R >>
-endobj
-192 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /VNSRVI+ArefRuqaa-Bold /FontDescriptor 188 0 R /W 187 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-193 0 obj
-[ 17 [ 279.8 ] 239 [ 278.3 ] 242 [ 431.2 ] 285 [ 0 ] 288 [ 0 ] 369 [ 0 0 0 0 0 ] 378 [ 248.5 112.3 801.3 490.7 294.9 206.1 683.6 189 558.1 281.7 367.2 390.1 469.2 410.2 ] 394 [ 685.1 318.4 ] 398 [ 721.2 331.5 681.2 ] 402 [ 574.2 206.5 ] 405 [ 341.8 520.5 286.6 679.7 567.9 390.6 283.2 ] 413 [ 634.8 ] 415 [ 511.7 498.5 259.3 445.8 428.7 334 246.6 505.9 350.1 405.8 405.8 463.9 428.2 247.1 196.8 585.9 ] 432 [ 212.4 491.7 491.7 ] 436 [ 414.1 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /VNSRVI+ArefRuqaa-Bold /DescendantFonts [ 195 0 R ] /ToUnicode 194 0 R >>
 endobj
 195 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /VNSRVI+ArefRuqaa-Bold /FontDescriptor 191 0 R /W 190 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+196 0 obj
+[ 17 [ 279.8 ] 239 [ 278.3 ] 242 [ 431.2 ] 285 [ 0 ] 288 [ 0 ] 369 [ 0 0 0 0 0 ] 378 [ 248.5 112.3 801.3 490.7 294.9 206.1 683.6 189 558.1 281.7 367.2 390.1 469.2 410.2 ] 394 [ 685.1 318.4 ] 398 [ 721.2 331.5 681.2 ] 402 [ 574.2 206.5 ] 405 [ 341.8 520.5 286.6 679.7 567.9 390.6 283.2 ] 413 [ 634.8 ] 415 [ 511.7 498.5 259.3 445.8 428.7 334 246.6 505.9 350.1 405.8 405.8 463.9 428.2 247.1 196.8 585.9 ] 432 [ 212.4 491.7 491.7 ] 436 [ 414.1 ] ]
+endobj
+198 0 obj
 << /Length 55 >>         
 stream
   @                               €         |?ÿ3·õÿşè
 endstream
 endobj
-196 0 obj
+199 0 obj
 << /Length 15422 >>      
 stream
     	 €  OS/2™Òl   œ   `cmapÃe­
@@ -7958,10 +8003,10 @@ pAJ9r­ZMFA?J\U'¢ ? 	Ş3r?C'"?)%@#L! ÿŠ:h¹S¤?
  Şh  	  F  	  4f  	  Hš  	  â  	 ö  	   	 $(  	 4L  	 €  	 2˜  	 Ê C o p y r i g h t   ©   2 0 1 5 - 2 0 1 8   T h e   A r e f   R u q a a   P r o j e c t   A u t h o r s ,   w i t h   R e s e r v e d   F o n t   N a m e   " E U R M 1 0 " . A r e f   R u q a a B o l d 0 . 1 0 ; A L I F ; A r e f R u q a a - B o l d A r e f   R u q a a   B o l d V e r s i o n   0 . 1 0   A r e f R u q a a - B o l d A b d u l l a h   A r e f A r e f   R u q a a   i s   a n   A r a b i c   t y p e f a c e   t h a t   a s p i r e s   t o   c a p t u r e   t h e   e s s e n c e   o f   t h e   c l a s s i c a l   R u q a a   c a l l i g r a p h i c   s t y l e . T h i s   F o n t   S o f t w a r e   i s   l i c e n s e d   u n d e r   t h e   S I L   O p e n   F o n t   L i c e n s e ,   V e r s i o n   1 . 1 .   T h i s   l i c e n s e   i s   a v a i l a b l e   w i t h   a   F A Q   a t :   h t t p : / / s c r i p t s . s i l . o r g / O F L h t t p : / / s c r i p t s . s i l . o r g / O F L'D.7  GF/3)  1H-'FJ)  8G1*  ("D)  ,3E'FJ) L o o p e d   H a a O p e n   f i n a l   H a a T a i l e d   N o o n L o o p e d   i n i t i a l   K a f A l t e r n a t e   A r a b i c   d i g i t   t w o T a i l e d   S h e e n A l t e r n a t e   S a d - T a h / T a h - S a d A l t e r n a t e   S u k u n
 endstream
 endobj
-194 0 obj
-<< /Type /FontDescriptor /FontName /HSWVUZ+ArefRuqaa-Bold /Flags 4 /FontBBox [ -193 -383 1434 1046 ] /Ascent 1220 /CapHeight 701 /Descent -244 /ItalicAngle 0 /StemV 150 /XHeight 490 /FontFile2 196 0 R /CIDSet 195 0 R >>
-endobj
 197 0 obj
+<< /Type /FontDescriptor /FontName /HSWVUZ+ArefRuqaa-Bold /Flags 4 /FontBBox [ -193 -383 1434 1046 ] /Ascent 1220 /CapHeight 701 /Descent -244 /ItalicAngle 0 /StemV 150 /XHeight 490 /FontFile2 199 0 R /CIDSet 198 0 R >>
+endobj
+200 0 obj
 << /Length 1490 >>       
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -8057,21 +8102,21 @@ end
 endstream
 endobj
 15 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /HSWVUZ+ArefRuqaa-Bold /DescendantFonts [ 198 0 R ] /ToUnicode 197 0 R >>
-endobj
-198 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /HSWVUZ+ArefRuqaa-Bold /FontDescriptor 194 0 R /W 193 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-199 0 obj
-[ 17 [ 272 ] 239 [ 278.3 ] 242 [ 431.2 ] 285 [ 0 ] 288 [ 0 ] 369 [ 0 0 0 0 0 ] 378 [ 248.5 112.3 801.3 490.7 294.9 206.1 683.6 189 558.1 281.7 367.2 390.1 469.2 410.2 ] 394 [ 685.1 318.4 ] 398 [ 721.2 331.5 681.2 ] 402 [ 574.2 206.5 ] 405 [ 341.8 520.5 286.6 679.7 567.9 390.6 283.2 ] 413 [ 634.8 ] 415 [ 511.7 498.5 259.3 445.8 428.7 334 246.6 505.9 350.1 405.8 405.8 463.9 428.2 247.1 196.8 585.9 ] 432 [ 212.4 491.7 491.7 ] 436 [ 414.1 674.8 ] 449 [ 423.8 ] 457 [ 176.8 ] 461 [ 452.6 ] 467 [ 319.3 ] 473 [ 373 636.7 ] 478 [ 552.7 ] 481 [ 351.6 ] 483 [ 601.6 ] 486 [ 292 ] 490 [ 286.6 289.6 ] 497 [ 323.2 ] 501 [ 586.4 536.6 ] 505 [ 378.4 ] 509 [ 324.2 279.8 330.6 ] 513 [ 213.4 ] 521 [ 643.6 797.4 ] 527 [ 720.7 ] 529 [ 612.8 ] 533 [ 488.8 ] 539 [ 540.5 ] 545 [ 492.7 ] 548 [ 778.3 705.6 ] 551 [ 553.7 ] 554 [ 562 ] 557 [ 347.2 ] 561 [ 327.1 ] 565 [ 441.9 ] 576 [ 670.4 562 658.7 ] 581 [ 396 ] 583 [ 535.2 455.1 ] 590 [ 495.6 ] 593 [ 367.7 ] 595 [ 590.8 ] 601 [ 134.8 443.4 641.1 ] 605 [ 287.6 ] 610 [ 374.5 ] 616 [ 363.3 559.1 ] 621 [ 766.6 ] 626 [ 594.2 ] 629 [ 572.3 ] 647 [ 212.9 ] 651 [ 630.4 ] 653 [ 258.3 ] 661 [ 320.8 ] 665 [ 566.9 ] 668 [ 640.1 236.8 ] 671 [ 313.5 241.7 ] 700 [ 394 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /HSWVUZ+ArefRuqaa-Bold /DescendantFonts [ 201 0 R ] /ToUnicode 200 0 R >>
 endobj
 201 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /HSWVUZ+ArefRuqaa-Bold /FontDescriptor 197 0 R /W 196 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+202 0 obj
+[ 17 [ 272 ] 239 [ 278.3 ] 242 [ 431.2 ] 285 [ 0 ] 288 [ 0 ] 369 [ 0 0 0 0 0 ] 378 [ 248.5 112.3 801.3 490.7 294.9 206.1 683.6 189 558.1 281.7 367.2 390.1 469.2 410.2 ] 394 [ 685.1 318.4 ] 398 [ 721.2 331.5 681.2 ] 402 [ 574.2 206.5 ] 405 [ 341.8 520.5 286.6 679.7 567.9 390.6 283.2 ] 413 [ 634.8 ] 415 [ 511.7 498.5 259.3 445.8 428.7 334 246.6 505.9 350.1 405.8 405.8 463.9 428.2 247.1 196.8 585.9 ] 432 [ 212.4 491.7 491.7 ] 436 [ 414.1 674.8 ] 449 [ 423.8 ] 457 [ 176.8 ] 461 [ 452.6 ] 467 [ 319.3 ] 473 [ 373 636.7 ] 478 [ 552.7 ] 481 [ 351.6 ] 483 [ 601.6 ] 486 [ 292 ] 490 [ 286.6 289.6 ] 497 [ 323.2 ] 501 [ 586.4 536.6 ] 505 [ 378.4 ] 509 [ 324.2 279.8 330.6 ] 513 [ 213.4 ] 521 [ 643.6 797.4 ] 527 [ 720.7 ] 529 [ 612.8 ] 533 [ 488.8 ] 539 [ 540.5 ] 545 [ 492.7 ] 548 [ 778.3 705.6 ] 551 [ 553.7 ] 554 [ 562 ] 557 [ 347.2 ] 561 [ 327.1 ] 565 [ 441.9 ] 576 [ 670.4 562 658.7 ] 581 [ 396 ] 583 [ 535.2 455.1 ] 590 [ 495.6 ] 593 [ 367.7 ] 595 [ 590.8 ] 601 [ 134.8 443.4 641.1 ] 605 [ 287.6 ] 610 [ 374.5 ] 616 [ 363.3 559.1 ] 621 [ 766.6 ] 626 [ 594.2 ] 629 [ 572.3 ] 647 [ 212.9 ] 651 [ 630.4 ] 653 [ 258.3 ] 661 [ 320.8 ] 665 [ 566.9 ] 668 [ 640.1 236.8 ] 671 [ 313.5 241.7 ] 700 [ 394 ] ]
+endobj
+204 0 obj
 << /Length 88 >>         
 stream
   @                               €         |?ÿ3·õÿşì @DbR0FG@aDM$D å‚Pt Ä$ M€  
 endstream
 endobj
-202 0 obj
+205 0 obj
 << /Length 22158 >>      
 stream
     	 €  OS/2˜h¯   œ   `cmapÃe­
@@ -8190,10 +8235,10 @@ h
  Ş\  	  :  	  4Z  	  H  	  Ö  	 ê  	   	 $  	 4@  	 t  	 2Œ  	 ¾ C o p y r i g h t   ©   2 0 1 5 - 2 0 1 8   T h e   A r e f   R u q a a   P r o j e c t   A u t h o r s ,   w i t h   R e s e r v e d   F o n t   N a m e   " E U R M 1 0 " . A r e f   R u q a a R e g u l a r 0 . 1 0 ; A L I F ; A r e f R u q a a - R e g u l a r V e r s i o n   0 . 1 0   A r e f R u q a a - R e g u l a r A b d u l l a h   A r e f A r e f   R u q a a   i s   a n   A r a b i c   t y p e f a c e   t h a t   a s p i r e s   t o   c a p t u r e   t h e   e s s e n c e   o f   t h e   c l a s s i c a l   R u q a a   c a l l i g r a p h i c   s t y l e . T h i s   F o n t   S o f t w a r e   i s   l i c e n s e d   u n d e r   t h e   S I L   O p e n   F o n t   L i c e n s e ,   V e r s i o n   1 . 1 .   T h i s   l i c e n s e   i s   a v a i l a b l e   w i t h   a   F A Q   a t :   h t t p : / / s c r i p t s . s i l . o r g / O F L h t t p : / / s c r i p t s . s i l . o r g / O F L'D.7  GF/3)  1H-'FJ)  8G1*  ("D)  ,3E'FJ) L o o p e d   H a a O p e n   f i n a l   H a a T a i l e d   N o o n L o o p e d   i n i t i a l   K a f A l t e r n a t e   A r a b i c   d i g i t   t w o T a i l e d   S h e e n A l t e r n a t e   S a d - T a h / T a h - S a d A l t e r n a t e   S u k u n
 endstream
 endobj
-200 0 obj
-<< /Type /FontDescriptor /FontName /BAJSJP+ArefRuqaa-Regular /Flags 4 /FontBBox [ -199 -377 1458 1027 ] /Ascent 1220 /CapHeight 689 /Descent -244 /ItalicAngle 0 /StemV 86 /XHeight 461 /FontFile2 202 0 R /CIDSet 201 0 R >>
-endobj
 203 0 obj
+<< /Type /FontDescriptor /FontName /BAJSJP+ArefRuqaa-Regular /Flags 4 /FontBBox [ -199 -377 1458 1027 ] /Ascent 1220 /CapHeight 689 /Descent -244 /ItalicAngle 0 /StemV 86 /XHeight 461 /FontFile2 205 0 R /CIDSet 204 0 R >>
+endobj
+206 0 obj
 << /Length 1715 >>       
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -8304,24 +8349,24 @@ end
 endstream
 endobj
 14 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /BAJSJP+ArefRuqaa-Regular /DescendantFonts [ 204 0 R ] /ToUnicode 203 0 R >>
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /BAJSJP+ArefRuqaa-Regular /DescendantFonts [ 207 0 R ] /ToUnicode 206 0 R >>
 endobj
-204 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /BAJSJP+ArefRuqaa-Regular /FontDescriptor 200 0 R /W 199 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-205 0 obj
-[555.6 0 833.3 0 0 0 0 0 0 0 0 444.4 0 0 0 0 0 0 0 0 0 500 0 0 0 0 0 0 0 0 0 277.8 333.3 277.8 0 500 500 500 500 500 500 500 500 500 500 0 0 0 777.8 0 0 0 0 0 0 763.9 0 0 0 0 0 513.9 0 0 916.7 0 777.8 0 0 736.1 0 0 0 0 0 0 0 0 0 500 0 0 0 0 500 555.6 444.4 555.6 444.4 305.6 500 555.6 277.8 0 527.8 277.8 833.3 555.6 500 555.6 0 391.7 394.4 388.9 555.6 527.8 722.2 527.8 527.8 0 0 1000 0 0 500 ]
-endobj
-206 0 obj
-[ 386 [ 217.8 ] 2012 [ 471.2 ] 2022 [ 1005.9 ] 2045 [ 378.4 ] 2239 [ 722.7 ] 3878 [ 216.8 ] 3895 [ 293 ] 4230 [ 390.6 ] ]
+207 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /BAJSJP+ArefRuqaa-Regular /FontDescriptor 203 0 R /W 202 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
 endobj
 208 0 obj
+[555.6 0 833.3 0 0 0 0 0 0 0 0 444.4 0 0 0 0 0 0 0 0 0 500 0 0 0 0 0 0 0 0 0 277.8 333.3 277.8 0 500 500 500 500 500 500 500 500 500 500 0 0 0 777.8 0 0 0 0 0 0 763.9 0 0 0 0 0 513.9 0 0 916.7 0 777.8 0 0 736.1 0 0 0 0 0 0 0 0 0 500 0 0 0 0 500 555.6 444.4 555.6 444.4 305.6 500 555.6 277.8 0 527.8 277.8 833.3 555.6 500 555.6 0 391.7 394.4 388.9 555.6 527.8 722.2 527.8 527.8 0 0 1000 0 0 500 ]
+endobj
+209 0 obj
+[ 386 [ 217.8 ] 2012 [ 471.2 ] 2022 [ 1005.9 ] 2045 [ 378.4 ] 2239 [ 722.7 ] 3878 [ 216.8 ] 3895 [ 293 ] 4230 [ 390.6 ] ]
+endobj
+211 0 obj
 << /Length 529 >>        
 stream
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 endstream
 endobj
-209 0 obj
+212 0 obj
 << /Length 31791 >>      
 stream
      €  0OS/2»a‰6   ¼   `cmapÇN®¯    Öcvt  D  ô   glyfœõÒt  ø  headUŞÅ      6hheaaU®  8   $hmtx?Fı=  \  ?€locaP•Q¶  KÜ  !maxp)•  lì    name2¢†  m  prephŒ…  |(    ¼   3™  3™  × f              o€  B       ALIF    şüüúì  r#   Ó   y4                   Ì      °   x @  8 ~ç7¼¿ØÛ#(.1ÿ ¬ş%+AWco…“—ó  " $ & 0 3 : > B D ¬""%ÌûûÁı?ııÇıışrştşüÿÿ      æ7»¾ØÛ 
@@ -8345,10 +8390,10 @@ stream
  P o r t i o n s   c o p y r i g h t   ( c )   2 0 1 0 ,   S e b a s t i a n   K o s c h   < s e b a s t i a n @ a l d u s l e a f . o r g > .   A m i r i   B o l d   S o r t s   M i l l   T o o l s   2 . 1 . 0 _ a l p h a 1   :   A m i r i   B o l d   :   1 9 - 1 2 - 2 0 1 7   A m i r i   B o l d   V e r s i o n   0 0 0 . 1 1 0     A m i r i - B o l d   K h a l e d   H o s n y   A m i r i   i s   a   c l a s s i c a l   A r a b i c   t y p e f a c e   i n   N a s k h   s t y l e   f o r   t y p e s e t t i n g   b o o k s   a n d   o t h e r   r u n n i n g   t e x t .   I t s   d e s i g n   i s   a   r e v i v a l   o f   t h e   b e a u t i f u l   t y p e f a c e   p i o n e e r e d   i n   e a r l y   2 0 t h   c e n t u r y   b y   B u l a q   P r e s s   i n   C a i r o ,   a l s o   k n o w n   a s   A m i r i a   P r e s s ,   a f t e r   w h i c h   t h e   f o n t   i s   n a m e d .   h t t p : / / w w w . a m i r i f o n t . o r g   h t t p : / / w w w . k h a l e d h o s n y . o r g   T h i s   F o n t   S o f t w a r e   i s   l i c e n s e d   u n d e r   t h e   S I L   O p e n   F o n t   L i c e n s e ,   V e r s i o n   1 . 1 .   T h i s   F o n t   S o f t w a r e   i s   d i s t r i b u t e d   o n   a n   " A S   I S "   B A S I S ,   W I T H O U T   W A R R A N T I E S   O R   C O N D I T I O N S   O F   A N Y   K I N D ,   e i t h e r   e x p r e s s   o r   i m p l i e d .   S e e   t h e   S I L   O p e n   F o n t   L i c e n s e   f o r   t h e   s p e c i f i c   l a n g u a g e ,   p e r m i s s i o n s   a n d   l i m i t a t i o n s   g o v e r n i n g   y o u r   u s e   o f   t h i s   F o n t   S o f t w a r e .   h t t p : / / s c r i p t s . s i l . o r g / O F L  5PAR  .NDRBN  .NHR/M  CNEP+RDP  qD4QNER3P  %P0R  (N2N:N*R  JN-R8NIp  qD6QN,PJ9O  (PGN'  FN,RDN'!N  EP9R7N'1P .  -BHB  'DF41   2 0 1 0 - 2 0 1 7  .'D/  -3FJ   < k h a l e d h o s n y @ e g l u g . o r g > .  91J6  %5/'1)   0 0 0k 1 1 0  .'D/  -3FJ  'D.7  'D#EJ1J  GH  %-J'!  D.7  'DF3.  'D0J  5OEE  H'3*./E  DDE1)  'D#HDJ  AJ  E(79)  (HD'B  ('DB'G1)   )*91A  #J6'  ('DE7(9)  'D#EJ1J) (  AJ  #H'&D  'DB1F  'D941JF .    *EJ2  'D.7  'D#EJ1J  F'(9  EF  EH2'F*G  'DE*EJ2)  (JF  ,E'D  .7  'DF3.  HE*7D('*  'D7('9)  'D1'BJ) .  'D.7  'D#EJ1J  EH,G  #C+1  D7('9)  'DF5H5  'D7HJD)  H'DC*( .  5PAR  .NDRBN  .NHR/M  CNEP+RDP  qD4QNER3P  %P0R  (N2N:N*R  JN-R8NIp  qD6QN,PJ9O  (PGN'  FN,RDN'!N  EP9R7N'1P .   K a s r a   i s   p l a c e d   b e l o w   S h a d d a   i n s t e a d   o f   b a s e   g l y p h   A l t e r n a t e ,   m o r e   n a s k h - l i k e ,   G a f   f o r m   L o c a l i s e d   @   a n d   &   s y m b o l s   A l t e r n a t e   m e d i a l   M e e m   a n d   f i n a l   A l e f   c o m b i n a t i o n   L o w   B a a   d o t   f o l l o w i n g   a   R a a   o r   W a w   N o   a u t o m a t i c   v o w e l   i n s e r t i o n   a b o v e   n a m e   o f   G o d   D i s a b l e   c u r v i l i n e a r   K a s h i d a  ¸ÿ…°
 endstream
 endobj
-207 0 obj
-<< /Type /FontDescriptor /FontName /EREHEI+Amiri-Bold /Flags 4 /FontBBox [ -447 -909 11489 1823 ] /Ascent 1123 /CapHeight 650 /Descent -634 /ItalicAngle 0 /StemV 150 /XHeight 434 /FontFile2 209 0 R /CIDSet 208 0 R >>
-endobj
 210 0 obj
+<< /Type /FontDescriptor /FontName /EREHEI+Amiri-Bold /Flags 4 /FontBBox [ -447 -909 11489 1823 ] /Ascent 1123 /CapHeight 650 /Descent -634 /ItalicAngle 0 /StemV 150 /XHeight 434 /FontFile2 212 0 R /CIDSet 211 0 R >>
+endobj
+213 0 obj
 << /Length 755 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -8393,22 +8438,22 @@ end
 endstream
 endobj
 5 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /EREHEI+Amiri-Bold /DescendantFonts [ 211 0 R ] /ToUnicode 210 0 R >>
-endobj
-211 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /EREHEI+Amiri-Bold /FontDescriptor 207 0 R /W 206 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
-endobj
-212 0 obj
-[ 0 [ 365.2 ] 11 [ 459 459 ] 15 [ 196.3 ] 17 [ 202.1 ] 32 [ 551.8 ] 36 [ 612.3 ] 40 [ 573.2 ] 42 [ 703.1 709 ] 49 [ 757.8 ] 51 [ 535.2 ] 54 [ 490.2 611.3 ] 59 [ 652.3 ] 68 [ 420.9 486.3 413.1 502.9 419.9 300.8 ] 75 [ 503.9 263.7 ] 78 [ 505.9 249 771.5 519.5 497.1 498 485.4 374 360.4 303.7 502.9 ] 90 [ 704.1 464.8 458 436.5 ] 337 [ 0 ] 351 [ 0 ] 364 [ 369.1 ] 383 [ 381.8 ] 385 [ 234.4 ] 387 [ 217.8 ] 389 [ 217.8 926.3 369.1 926.3 ] 395 [ 661.6 ] 397 [ 450.7 ] 399 [ 399.9 ] 406 [ 792.5 540.5 ] 415 [ 983.9 ] 418 [ 603.5 452.1 572.8 369.1 400.9 764.6 764.6 ] 431 [ 0 ] 446 [ 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 ] 590 [ 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 ] 1915 [ 317.4 ] 1941 [ 585.9 585.9 585.9 ] 2021 [ 229.5 ] 2024 [ 289.6 ] 2036 [ 493.2 ] 2038 [ 477.5 ] 2043 [ 477.5 ] 2045 [ 366.2 ] 2050 [ 366.2 ] 2055 [ 883.8 ] 2057 [ 883.8 ] 2068 [ 883.8 ] 2083 [ 190.4 ] 2090 [ 190.4 ] 2093 [ 190.4 ] 2096 [ 190.4 ] 2099 [ 190.4 ] 2124 [ 244.1 ] 2131 [ 244.1 ] 2134 [ 244.1 ] 2137 [ 244.1 ] 2140 [ 244.1 ] 2157 [ 471.2 471.2 ] 2168 [ 1005.9 ] 2178 [ 295.4 295.4 ] 2191 [ 378.4 378.4 ] 2201 [ 639.6 ] 2218 [ 655.8 655.8 ] 2223 [ 655.8 ] 2236 [ 610.4 ] 2252 [ 379.4 ] 2256 [ 379.4 452.1 ] 2259 [ 390.6 ] 2283 [ 659.2 ] 2301 [ 588.9 ] 2317 [ 644.5 ] 2323 [ 175.8 ] 2329 [ 197.8 ] 2337 [ 389.2 ] 2340 [ 463.9 ] 2342 [ 615.2 ] 2353 [ 607.9 ] 2368 [ 343.3 ] 2375 [ 1181.6 ] 2378 [ 698.2 ] 2380 [ 698.2 ] 2383 [ 722.7 ] 2385 [ 722.7 ] 2399 [ 568.4 ] 2410 [ 568.8 ] 2413 [ 568.8 ] 2422 [ 567.9 567.9 ] 2425 [ 551.8 551.8 ] 2429 [ 345.7 ] 2442 [ 345.7 ] 2479 [ 176.8 ] 2486 [ 176.8 ] 2492 [ 310.5 ] 2495 [ 306.6 ] 2518 [ 299.3 ] 2520 [ 299.3 ] 2525 [ 253.9 ] 2543 [ 320.3 ] 2546 [ 559.6 ] 2716 [ 170.4 ] 2723 [ 170.4 ] 2750 [ 481.4 ] 2917 [ 195.8 ] 2929 [ 469.2 ] 2941 [ 349.1 ] 2981 [ 219.2 ] 2998 [ 209 ] 3002 [ 147.9 ] 3005 [ 302.2 ] 3010 [ 340.8 ] 3013 [ 340.8 340.8 ] 3056 [ 168.5 ] 3066 [ 168.5 ] 3107 [ 473.6 ] 3123 [ 72.8 72.8 ] 3128 [ 72.8 ] 3271 [ 219.2 ] 3291 [ 492.2 ] 3294 [ 492.2 ] 3313 [ 258.8 ] 3326 [ 258.8 ] 3354 [ 292 ] 3437 [ 265.1 ] 3440 [ 265.1 ] 3443 [ 265.1 ] 3458 [ 173.8 ] 3547 [ 279.3 ] 3551 [ 297.9 ] 3553 [ 57.6 ] 3620 [ 161.1 ] 3655 [ 451.2 ] 3677 [ 66.4 ] 3748 [ 295.9 ] 3755 [ 247.6 ] 3758 [ 274.4 ] 3761 [ 319.3 ] 3780 [ 772.9 ] 3950 [ 218.3 ] 3978 [ 543 ] 4024 [ 216.8 ] 4039 [ 293 ] 4041 [ 293 ] 4050 [ 55.2 ] 4086 [ 307.6 ] 4089 [ 307.6 ] 4092 [ 307.6 ] 4115 [ 421.9 ] 4121 [ 421.9 ] 4188 [ 553.7 ] 4220 [ 543.9 ] 4268 [ 587.9 ] 4271 [ 587.9 ] 4347 [ 104 ] 4376 [ 390.6 606.4 606.4 ] 4382 [ 606.4 ] 4394 [ 534.7 ] 4399 [ 534.7 ] 4424 [ 380.9 ] 4427 [ 380.9 ] 4466 [ 172.4 ] 4469 [ 249.5 ] 4504 [ 244.1 ] 4507 [ 244.1 ] 4510 [ 244.1 ] 4679 [ 587.9 ] 4727 [ 529.3 ] 4743 [ 150.9 ] 4766 [ 188 ] 4891 [ 141.1 ] 4897 [ 187.5 ] 4901 [ 404.3 ] 4905 [ 404.3 ] 4911 [ 488.3 488.3 ] 4993 [ 451.7 ] 4995 [ 216.8 ] 4998 [ 525.9 ] 5012 [ 280.8 173.8 ] 5097 [ 237.8 ] 5119 [ 552.7 ] 5135 [ 476.1 ] 5174 [ 391.1 ] 5202 [ 203.1 ] 5277 [ 384.3 ] 5280 [ 384.3 ] 5311 [ 311.5 ] 5318 [ 311.5 ] 5339 [ 147.5 ] 5351 [ 158.7 ] 5357 [ 221.7 ] 5393 [ 199.7 ] 5413 [ 813.5 ] 5947 [ 380.9 ] 5989 [ 185.5 ] ]
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /EREHEI+Amiri-Bold /DescendantFonts [ 214 0 R ] /ToUnicode 213 0 R >>
 endobj
 214 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /EREHEI+Amiri-Bold /FontDescriptor 210 0 R /W 209 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+215 0 obj
+[ 0 [ 365.2 ] 11 [ 459 459 ] 15 [ 196.3 ] 17 [ 202.1 ] 32 [ 551.8 ] 36 [ 612.3 ] 40 [ 573.2 ] 42 [ 703.1 709 ] 49 [ 757.8 ] 51 [ 535.2 ] 54 [ 490.2 611.3 ] 59 [ 652.3 ] 68 [ 420.9 486.3 413.1 502.9 419.9 300.8 ] 75 [ 503.9 263.7 ] 78 [ 505.9 249 771.5 519.5 497.1 498 485.4 374 360.4 303.7 502.9 ] 90 [ 704.1 464.8 458 436.5 ] 337 [ 0 ] 351 [ 0 ] 364 [ 369.1 ] 383 [ 381.8 ] 385 [ 234.4 ] 387 [ 217.8 ] 389 [ 217.8 926.3 369.1 926.3 ] 395 [ 661.6 ] 397 [ 450.7 ] 399 [ 399.9 ] 406 [ 792.5 540.5 ] 415 [ 983.9 ] 418 [ 603.5 452.1 572.8 369.1 400.9 764.6 764.6 ] 431 [ 0 ] 446 [ 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 ] 590 [ 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 585.9 ] 1915 [ 317.4 ] 1941 [ 585.9 585.9 585.9 ] 2021 [ 229.5 ] 2024 [ 289.6 ] 2036 [ 493.2 ] 2038 [ 477.5 ] 2043 [ 477.5 ] 2045 [ 366.2 ] 2050 [ 366.2 ] 2055 [ 883.8 ] 2057 [ 883.8 ] 2068 [ 883.8 ] 2083 [ 190.4 ] 2090 [ 190.4 ] 2093 [ 190.4 ] 2096 [ 190.4 ] 2099 [ 190.4 ] 2124 [ 244.1 ] 2131 [ 244.1 ] 2134 [ 244.1 ] 2137 [ 244.1 ] 2140 [ 244.1 ] 2157 [ 471.2 471.2 ] 2168 [ 1005.9 ] 2178 [ 295.4 295.4 ] 2191 [ 378.4 378.4 ] 2201 [ 639.6 ] 2218 [ 655.8 655.8 ] 2223 [ 655.8 ] 2236 [ 610.4 ] 2252 [ 379.4 ] 2256 [ 379.4 452.1 ] 2259 [ 390.6 ] 2283 [ 659.2 ] 2301 [ 588.9 ] 2317 [ 644.5 ] 2323 [ 175.8 ] 2329 [ 197.8 ] 2337 [ 389.2 ] 2340 [ 463.9 ] 2342 [ 615.2 ] 2353 [ 607.9 ] 2368 [ 343.3 ] 2375 [ 1181.6 ] 2378 [ 698.2 ] 2380 [ 698.2 ] 2383 [ 722.7 ] 2385 [ 722.7 ] 2399 [ 568.4 ] 2410 [ 568.8 ] 2413 [ 568.8 ] 2422 [ 567.9 567.9 ] 2425 [ 551.8 551.8 ] 2429 [ 345.7 ] 2442 [ 345.7 ] 2479 [ 176.8 ] 2486 [ 176.8 ] 2492 [ 310.5 ] 2495 [ 306.6 ] 2518 [ 299.3 ] 2520 [ 299.3 ] 2525 [ 253.9 ] 2543 [ 320.3 ] 2546 [ 559.6 ] 2716 [ 170.4 ] 2723 [ 170.4 ] 2750 [ 481.4 ] 2917 [ 195.8 ] 2929 [ 469.2 ] 2941 [ 349.1 ] 2981 [ 219.2 ] 2998 [ 209 ] 3002 [ 147.9 ] 3005 [ 302.2 ] 3010 [ 340.8 ] 3013 [ 340.8 340.8 ] 3056 [ 168.5 ] 3066 [ 168.5 ] 3107 [ 473.6 ] 3123 [ 72.8 72.8 ] 3128 [ 72.8 ] 3271 [ 219.2 ] 3291 [ 492.2 ] 3294 [ 492.2 ] 3313 [ 258.8 ] 3326 [ 258.8 ] 3354 [ 292 ] 3437 [ 265.1 ] 3440 [ 265.1 ] 3443 [ 265.1 ] 3458 [ 173.8 ] 3547 [ 279.3 ] 3551 [ 297.9 ] 3553 [ 57.6 ] 3620 [ 161.1 ] 3655 [ 451.2 ] 3677 [ 66.4 ] 3748 [ 295.9 ] 3755 [ 247.6 ] 3758 [ 274.4 ] 3761 [ 319.3 ] 3780 [ 772.9 ] 3950 [ 218.3 ] 3978 [ 543 ] 4024 [ 216.8 ] 4039 [ 293 ] 4041 [ 293 ] 4050 [ 55.2 ] 4086 [ 307.6 ] 4089 [ 307.6 ] 4092 [ 307.6 ] 4115 [ 421.9 ] 4121 [ 421.9 ] 4188 [ 553.7 ] 4220 [ 543.9 ] 4268 [ 587.9 ] 4271 [ 587.9 ] 4347 [ 104 ] 4376 [ 390.6 606.4 606.4 ] 4382 [ 606.4 ] 4394 [ 534.7 ] 4399 [ 534.7 ] 4424 [ 380.9 ] 4427 [ 380.9 ] 4466 [ 172.4 ] 4469 [ 249.5 ] 4504 [ 244.1 ] 4507 [ 244.1 ] 4510 [ 244.1 ] 4679 [ 587.9 ] 4727 [ 529.3 ] 4743 [ 150.9 ] 4766 [ 188 ] 4891 [ 141.1 ] 4897 [ 187.5 ] 4901 [ 404.3 ] 4905 [ 404.3 ] 4911 [ 488.3 488.3 ] 4993 [ 451.7 ] 4995 [ 216.8 ] 4998 [ 525.9 ] 5012 [ 280.8 173.8 ] 5097 [ 237.8 ] 5119 [ 552.7 ] 5135 [ 476.1 ] 5174 [ 391.1 ] 5202 [ 203.1 ] 5277 [ 384.3 ] 5280 [ 384.3 ] 5311 [ 311.5 ] 5318 [ 311.5 ] 5339 [ 147.5 ] 5351 [ 158.7 ] 5357 [ 221.7 ] 5393 [ 199.7 ] 5413 [ 813.5 ] 5947 [ 380.9 ] 5989 [ 185.5 ] ]
+endobj
+217 0 obj
 << /Length 749 >>        
 stream
  @ ˆ°SÛÿ¼                              @  W•? ÿ                ÿ                                                                                                                                                                               €
 !@ $  H  €0€@ 1  Ğ    @J @ )@ $d     	  „                                             @     $&     €      €                    @                         @                    @                              €@    H  @               	            â !       $    ’                                           DA€         R           @                  €        @                                                                       
 endstream
 endobj
-215 0 obj
+218 0 obj
 << /Length 70807 >>      
 stream
      €  0OS/2º#Œ3   ¼   `cmapÏ"Ó;    
@@ -8800,10 +8845,10 @@ l
  P o r t i o n s   c o p y r i g h t   ( c )   2 0 1 0 ,   S e b a s t i a n   K o s c h   < s e b a s t i a n @ a l d u s l e a f . o r g > .   A m i r i   R e g u l a r   S o r t s   M i l l   T o o l s   2 . 1 . 0 _ a l p h a 1   :   A m i r i   :   1 9 - 1 2 - 2 0 1 7   A m i r i   V e r s i o n   0 0 0 . 1 1 0     A m i r i - R e g u l a r   K h a l e d   H o s n y   A m i r i   i s   a   c l a s s i c a l   A r a b i c   t y p e f a c e   i n   N a s k h   s t y l e   f o r   t y p e s e t t i n g   b o o k s   a n d   o t h e r   r u n n i n g   t e x t .   I t s   d e s i g n   i s   a   r e v i v a l   o f   t h e   b e a u t i f u l   t y p e f a c e   p i o n e e r e d   i n   e a r l y   2 0 t h   c e n t u r y   b y   B u l a q   P r e s s   i n   C a i r o ,   a l s o   k n o w n   a s   A m i r i a   P r e s s ,   a f t e r   w h i c h   t h e   f o n t   i s   n a m e d .   h t t p : / / w w w . a m i r i f o n t . o r g   h t t p : / / w w w . k h a l e d h o s n y . o r g   T h i s   F o n t   S o f t w a r e   i s   l i c e n s e d   u n d e r   t h e   S I L   O p e n   F o n t   L i c e n s e ,   V e r s i o n   1 . 1 .   T h i s   F o n t   S o f t w a r e   i s   d i s t r i b u t e d   o n   a n   " A S   I S "   B A S I S ,   W I T H O U T   W A R R A N T I E S   O R   C O N D I T I O N S   O F   A N Y   K I N D ,   e i t h e r   e x p r e s s   o r   i m p l i e d .   S e e   t h e   S I L   O p e n   F o n t   L i c e n s e   f o r   t h e   s p e c i f i c   l a n g u a g e ,   p e r m i s s i o n s   a n d   l i m i t a t i o n s   g o v e r n i n g   y o u r   u s e   o f   t h i s   F o n t   S o f t w a r e .   h t t p : / / s c r i p t s . s i l . o r g / O F L  5PAR  .NDRBN  .NHR/M  CNEP+RDP  qD4QNER3P  %P0R  (N2N:N*R  JN-R8NIp  qD6QN,PJ9O  (PGN'  FN,RDN'!N  EP9R7N'1P .  -BHB  'DF41   2 0 1 0 - 2 0 1 7  .'D/  -3FJ   < k h a l e d h o s n y @ e g l u g . o r g > .  9'/J  %5/'1)   0 0 0k 1 1 0  .'D/  -3FJ  'D.7  'D#EJ1J  GH  %-J'!  D.7  'DF3.  'D0J  5OEE  H'3*./E  DDE1)  'D#HDJ  AJ  E(79)  (HD'B  ('DB'G1)   )*91A  #J6'  ('DE7(9)  'D#EJ1J) (  AJ  #H'&D  'DB1F  'D941JF .    *EJ2  'D.7  'D#EJ1J  F'(9  EF  EH2'F*G  'DE*EJ2)  (JF  ,E'D  .7  'DF3.  HE*7D('*  'D7('9)  'D1'BJ) .  'D.7  'D#EJ1J  EH,G  #C+1  D7('9)  'DF5H5  'D7HJD)  H'DC*( .  5PAR  .NDRBN  .NHR/M  CNEP+RDP  qD4QNER3P  %P0R  (N2N:N*R  JN-R8NIp  qD6QN,PJ9O  (PGN'  FN,RDN'!N  EP9R7N'1P .   K a s r a   i s   p l a c e d   b e l o w   S h a d d a   i n s t e a d   o f   b a s e   g l y p h   A l t e r n a t e ,   m o r e   n a s k h - l i k e ,   G a f   f o r m   L o c a l i s e d   @   a n d   &   s y m b o l s   A l t e r n a t e   m e d i a l   M e e m   a n d   f i n a l   A l e f   c o m b i n a t i o n   L o w   B a a   d o t   f o l l o w i n g   a   R a a   o r   W a w   N o   a u t o m a t i c   v o w e l   i n s e r t i o n   a b o v e   n a m e   o f   G o d   D i s a b l e   c u r v i l i n e a r   K a s h i d a  ¸ÿ…°
 endstream
 endobj
-213 0 obj
-<< /Type /FontDescriptor /FontName /RTIFWA+Amiri-Regular /Flags 4 /FontBBox [ -581 -899 11467 1814 ] /Ascent 1123 /CapHeight 651 /Descent -634 /ItalicAngle 0 /StemV 86 /XHeight 426 /FontFile2 215 0 R /CIDSet 214 0 R >>
-endobj
 216 0 obj
+<< /Type /FontDescriptor /FontName /RTIFWA+Amiri-Regular /Flags 4 /FontBBox [ -581 -899 11467 1814 ] /Ascent 1123 /CapHeight 651 /Descent -634 /ItalicAngle 0 /StemV 86 /XHeight 426 /FontFile2 218 0 R /CIDSet 217 0 R >>
+endobj
+219 0 obj
 << /Length 4267 >>       
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -9098,12 +9143,12 @@ end
 endstream
 endobj
 4 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /RTIFWA+Amiri-Regular /DescendantFonts [ 217 0 R ] /ToUnicode 216 0 R >>
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /RTIFWA+Amiri-Regular /DescendantFonts [ 220 0 R ] /ToUnicode 219 0 R >>
 endobj
-217 0 obj
-<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /RTIFWA+Amiri-Regular /FontDescriptor 213 0 R /W 212 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+220 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /RTIFWA+Amiri-Regular /FontDescriptor 216 0 R /W 215 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
 endobj
-219 0 obj
+222 0 obj
 << /Length1 1475 /Length2 8298 /Length3 0 /Length 9773 >>       
 stream
 %!PS-AdobeFont-1.0: CMBX10 003.002
@@ -9177,10 +9222,10 @@ FË)ÓY{€¾T~^qŠ ¨‹<(†Š¿Ü8»ó+âwY#ãUçÙÅ}›Ó:ô¡·>@­¤ËáOWØêYD@,t5Ãôp JÖ§ºã
  µ#XJÂ®F½KŠŒL÷_D­èt‹?òSË_k¬ØxÚ{Ì‚Ë„I!oï)£ôê„”™£pûö=„#Í"Pom8RÖ.gäU}~‡Ì±ÿµL"ˆÂNz#òàŒñß7Œã+L ˆşÀœZ»
 endstream
 endobj
-218 0 obj
-<< /Type /FontDescriptor /FontName /XIEQBS+CMBX10 /Flags 4 /FontBBox [ -56 -250 1164 750 ] /Ascent 694 /CapHeight 686 /Descent -194 /ItalicAngle 0 /StemV 114 /XHeight 444 /CharSet( /A /H /O /R /S /T /Y) /FontFile 219 0 R >>
-endobj
 221 0 obj
+<< /Type /FontDescriptor /FontName /XIEQBS+CMBX10 /Flags 4 /FontBBox [ -56 -250 1164 750 ] /Ascent 694 /CapHeight 686 /Descent -194 /ItalicAngle 0 /StemV 114 /XHeight 444 /CharSet( /A /H /O /R /S /T /Y) /FontFile 222 0 R >>
+endobj
+224 0 obj
 << /Length1 1444 /Length2 6543 /Length3 0 /Length 7987 >>       
 stream
 %!PS-AdobeFont-1.0: CMMI10 003.002
@@ -9256,10 +9301,10 @@ y¸q	´BÀ¶$Ã@'ˆÊ6é!Wëà
 Æ	ŞÑşî§NĞˆ~_!Uz„ëœ[ÙfR)ÕÄ»åH­ßŠœ!íFÑÓ¡ğÚ’â1›‡^ †,s"+‹^-Á±¡¬h.OŸ¿âIİ”ÊôœKÈgÏâlg– LÃ¦bsœnòÿ‡ø<³Àx‹ü¤=™/áİogø#1¡È'I#¦Š£ë7A0<yB­…Xº¯;á*8´ñZG’:ñêèŒ^y!]ÀÚöRòI¿ç/•Vø…=™!-»¥Û˜;«'ä.Â¸Ïú¹?Bl#w†±‹ø^4
 endstream
 endobj
-220 0 obj
-<< /Type /FontDescriptor /FontName /LLYCJX+CMMI10 /Flags 4 /FontBBox [ -32 -250 1048 750 ] /Ascent 694 /CapHeight 683 /Descent -194 /ItalicAngle -14 /StemV 72 /XHeight 431 /CharSet( /E /c /m) /FontFile 221 0 R >>
-endobj
 223 0 obj
+<< /Type /FontDescriptor /FontName /LLYCJX+CMMI10 /Flags 4 /FontBBox [ -32 -250 1048 750 ] /Ascent 694 /CapHeight 683 /Descent -194 /ItalicAngle -14 /StemV 72 /XHeight 431 /CharSet( /E /c /m) /FontFile 224 0 R >>
+endobj
+226 0 obj
 << /Length1 2171 /Length2 16984 /Length3 0 /Length 19155 >>      
 stream
 %!PS-AdobeFont-1.0: CMR10 003.002
@@ -9409,10 +9454,10 @@ X,©¬F"Ê,jà¤wjbå)úÏ½PÚ¹K®0=´Tu<W×“\]­7äêMÿ83td	€_mzoK)Ü¦Q“_*º÷m j
 ŒïnRÃ‰ƒF“‰,‡2¶Ú»9d;S ©Û¥L?øöjÅÑ‰!0e“Ë­¦ ô„[zD0Ûèƒ+7Ö,À¡¬:®hİÖ[.t«b¤PzM3»Ù˜ëZàÔ×X]ÑWsÏ€$+bÕ½t¬½±ˆb’3]G$zdi‡#o1¾M‹o¤ÂóTW†$¾=İvsÀ=>Œ›äöæçeBCÙ£[Ÿô™_EBö<vm<Ws aq:<õ“í·ÀÖ6Ÿ^"±G9ä‰}^Là¸wÁ÷o¾ÕU’R“-	ÿ÷wÌ¬ÀMß±ìgçEÙ–IÀš×Z'ÕÓÀ®ıç=¾Cß 6•ƒ¨u5X9şà£,ò8½…’#iä! w·ÕKÍ‡ÚjÂrvÉÃ\Í[ó­Vso¾'ç@–M®àı…Ï÷í$DÆ••` „½v³^<uBärlÒvIßtñ“ÙòÆ—¾ô‹¾úqÔ„îä7™ño@lAAÿı¶ÈcéŸ Ö”JÙZÛKõõ&Ş¶p‘Ó~9D6<0QÔÆâ/aäã¿~Âòâ"…q)RJï”!±ïÅ(‹(=†ìöA2÷S¡&‘†q¢£ªæÄ×$"I¯l¥CU‡@uV~˜²È­&š0÷ß}­`¼ò:Ä^¾Ø©¸îœqéj§àyÉ ¼ğ–×9"ác`×†}`=Pà<8ã‚ËIÏËO<¿¹òVo2ä©È—:šL×ñ@•†(²¾]]|ÚÒä«×È¼f«Në!ú¦	Û y)|ÏY.›PÆp{OáÃn;æ>ê¡JÇ“ÑÄ‘ì4	}£Ü–HŞ”§ìÓ2*JnA“É×˜Ÿ˜,`©4ît9ûWŞRh`Ö÷©™êóªßì¿éªea0üpx©şmï–‹J'.-'Ù‹òR¬õÂi» GôV¤úM+šSøçö¨û<nc‡Æğì¹àOÚ˜‚µ)ñ€	MÉm”¦‘Atd|“ÓrY*³Ê™ ÃYãPo€˜8õrõ: õi‡‰›æOŞ‰y®)n-Ö¦?õ$L\üDŒ“ÎIàÀ.Ş­Sò9­Æ\ák²#`W˜ôEÔ@ÒJÜÏùì¿kÆ€sµ©-?¥üˆÙ!æ'5òÌÃ¬uñ<OF8šöC©E#¢¯¤ÒÜ€{j¢ª++ÒC@p‰j§ÊÀdüµqæ%ˆ×7pAË/½Ô—Í‘ÿ]×f&¦¡mF_Úø?L^`â–ú^;"ŒN¿%Nœ×ş†ûİ—dÁ‹ˆ°õR“¾¢A¬t(õwÍ³ğ3GÌWĞøuü¹.x¸‚m43A‡==5êÈ¼+ñ}Æ<82RãIş0V7:È_ù6=Ä9>Ï5J§n«òƒ>pÇ`9OÏ±c2m£³Ò—ö(lCèò)@)ÀóvíÃ¹¦+¸5¦-1ÀWb{·Y³•³4‘ÛĞúõø5C	—´¨Nı’we¬n÷‡ISÂ¤ºàE`Œ`¯ı÷P¦£E.ÙY©ÍÎ`~VGyq¦]l¿ü$èo†‰HîP‚jäò˜hñv¿äõ]ª¤¦˜¿ï:±´gnœ/€9ÚG°›{À°ZÏjû fşÌªôü-û‡µÍç¼Qâ&¢ú»o÷éÜ’ÂÁÀ¨ÀŞúñúœÛÅgø-K£Ë*8Å…åJÃæ`awM×9´Û©ˆí<@‚…ıfƒ³Œá'¨ÃÌ šU‹v¸k$’NögMwÙ)ş(èş>
 endstream
 endobj
-222 0 obj
-<< /Type /FontDescriptor /FontName /GDKDYQ+CMR10 /Flags 4 /FontBBox [ -40 -250 1009 750 ] /Ascent 694 /CapHeight 683 /Descent -194 /ItalicAngle 0 /StemV 69 /XHeight 431 /CharSet( /D /J /M /O /R /a /b /c /cedilla /comma /d /dieresis /e /eight /emdash /equal /f /ffl /five /fl /four /g /h /hyphen /i /k /l /m /n /nine /o /one /p /period /quotedblleft /quotedblright /r /s /seven /six /t /three /two /u /v /w /x /y /zero) /FontFile 223 0 R >>
-endobj
 225 0 obj
+<< /Type /FontDescriptor /FontName /GDKDYQ+CMR10 /Flags 4 /FontBBox [ -40 -250 1009 750 ] /Ascent 694 /CapHeight 683 /Descent -194 /ItalicAngle 0 /StemV 69 /XHeight 431 /CharSet( /D /J /M /O /R /a /b /c /cedilla /comma /d /dieresis /e /eight /emdash /equal /f /ffl /five /fl /four /g /h /hyphen /i /k /l /m /n /nine /o /one /p /period /quotedblleft /quotedblright /r /s /seven /six /t /three /two /u /v /w /x /y /zero) /FontFile 226 0 R >>
+endobj
+228 0 obj
 << /Length1 1379 /Length2 5954 /Length3 0 /Length 7333 >>       
 stream
 %!PS-AdobeFont-1.0: CMR7 003.002
@@ -9491,10 +9536,10 @@ YQ@Àƒ]›õ´P2h¥/×Wë‚)XñvÛ¿“Y
 ‘v i¸>›zxÊØÇåuĞËp^Ä¾@™#uwĞ<4ãb,m*}ªp­Â…N‘{»fô E€ˆ@fN àg¡.`d"Åµƒ¨¬râåØsrº45ŒS-ÃUÉ_xšàÿ`ÌF#ßå¿{Î <UŞ¨U¥se*Ğo±KÃÑÛ¦(k`°€ú±·m~°:øãƒ0Ålß{”áÍ36-‡l«Ô?ğÙƒ]ÕÅ´ó&Šˆ1ó¹ÍI.SM™\O‘e±ïmo”³äíè#òÒÛR ”ú©p.[äîU±#j~#?/Y(:]ÖÕß5$úÜ‰#ËîÁa$6øcÀ£s-˜Ñìü’ÍZ¡èIÒº²Ô‘êûI	¡}êÆµòå'7=¯H=ŒË# NİÏ¨nÖ7Áøn¹£÷8ìŸÂ5ÍÍşrO)¢Ör.ÖâÉ¾‹òÔÜ04Nîé÷bÑZ]§øÀd–ğºşÚ	pI¤±~3—>ü‰FŠ6[q²o –úÊºÛ9?õU3®Èw¡aH–UcizDõÿUmÇÄ'Kšû§HÛ¿ïo£]%Ñ!“…ÜvN‘ÿÍ(Öÿî”¢£aÁ¸¬H¬ıDÇÁT¢Ér3Â 5ùmI#3:¡É5±U¥®ŠávK4ÊQx5iÍ'>®¡Ş¹0ÙF,ºíh1àT“.…Lf°İê#¸	»5?
 endstream
 endobj
-224 0 obj
-<< /Type /FontDescriptor /FontName /RKDUWA+CMR7 /Flags 4 /FontBBox [ -27 -250 1122 750 ] /Ascent 694 /CapHeight 683 /Descent -194 /ItalicAngle 0 /StemV 79 /XHeight 431 /CharSet( /two) /FontFile 225 0 R >>
-endobj
 227 0 obj
+<< /Type /FontDescriptor /FontName /RKDUWA+CMR7 /Flags 4 /FontBBox [ -27 -250 1122 750 ] /Ascent 694 /CapHeight 683 /Descent -194 /ItalicAngle 0 /StemV 79 /XHeight 431 /CharSet( /two) /FontFile 228 0 R >>
+endobj
+230 0 obj
 << /Length1 1518 /Length2 7726 /Length3 0 /Length 9244 >>       
 stream
 %!PS-AdobeFont-1.0: CMSL10 003.002
@@ -9572,10 +9617,10 @@ u7Õq*ÑA9ŸÊÆX*Eß®;:«±É~„í‰Öê
 CÎ;ì-¬ØwÖŠ/±ĞñĞMLY.ës<†ª–ı•8@T%¹gãÛ’ÍY ˜kjòz¼#6:mE‘×Á!`´@;)hCf˜é;cÙå]*¼Êb£læ ‰™›êd*t[ì=hÇä4$s…_kAÄj:™’dŸû”Øå5UUÔŒøäI<ŞvÜÀ½‰x˜:*GîŸ1©Èñ¼q|Z€„u‚¥µ‰–ù•„#~ôá÷jÕçmYvk·(—íV6/h6WÙ)ÓªQ¸uqœz—¡„§y’%™Õ@ã²ò‘KLh¥K(/²'Ï‰nªÉdh”Vøz0üƒİHÂ”9ß1’cÊ®!M52í•Û9*-Í>øÄ†cØ8D1É‰¾²9}á_EpeÄzƒªµÊ1¦C&Ï×øW[¿´§ırÁöÇ±à?~“#.’pgaàòZ0€±¯“‘ÌŒ´†[¯„Øß#äÙ6†(Û
 endstream
 endobj
-226 0 obj
-<< /Type /FontDescriptor /FontName /JHBPMI+CMSL10 /Flags 4 /FontBBox [ -62 -250 1123 750 ] /Ascent 694 /CapHeight 683 /Descent -194 /ItalicAngle -9 /StemV 79 /XHeight 431 /CharSet( /A /T /U /b /h /o /period /r /y) /FontFile 227 0 R >>
-endobj
 229 0 obj
+<< /Type /FontDescriptor /FontName /JHBPMI+CMSL10 /Flags 4 /FontBBox [ -62 -250 1123 750 ] /Ascent 694 /CapHeight 683 /Descent -194 /ItalicAngle -9 /StemV 79 /XHeight 431 /CharSet( /A /T /U /b /h /o /period /r /y) /FontFile 230 0 R >>
+endobj
+232 0 obj
 << /Length1 1477 /Length2 8111 /Length3 0 /Length 9588 >>       
 stream
 %!PS-AdobeFont-1.0: CMTT10 003.002
@@ -9658,72 +9703,72 @@ N’µ:3CC;OÊv"<È³A?9=¿Ô‡a’ÓÈ{úúMË»Š¶ö&}Lænu¦¥4ÛŸV[Ìà+.¢_…bê¨$tö«1ê.¶}ÉÖÇ
 ÏYôÔ‡ëòÍª|².šË½ês/¼üì%…ß…³Å¦™Øø½BºÉ=j6úp[wq„^3SXëA‰¸J3— Íò3.á‰D{^áˆ‡E™zHş2jƒ‚@êÛ0¸ÿv °F)¥µh=`”ÓÀ÷w@ã{ÉU€é3>*¡y[F ôd™*¯‹†ÆmêLë„+k­KWpFò-ôÈYãV‚z9"ªaëéõª NàŠÿ>V	·»!7…š×–ö,íÏ_^*F£(‹!ë°±œÓÑõŞ[0!ÄXhØVÏª¦òëÑàVBØ†}ŒW[›±ª[Œ”/D¬_8ÎYîB„8å& |Eeµ¤@<µô°0ÇiB½c"v5‰ïsÔ-İ“^O;¡Hé:MøâÃ¶øÉ8Üñ—Ôà»£1]*T+ì©ìŞˆîşÌú€;'¾º4dhîªq4ÓÊãöÿI'"ÁÔ'ğ¸DA×êåR GEip²ˆ1ñ£—Fk0}5Äà EI‚^¨~À6ÙŒ2=İ	¾ech…béŠ\Šwÿ Ç§HÏ?¦R¨hß˜®Gv¿gwàÙ^a8ÑOQM-ì~†£®®’ä‡)ıĞÙ°ı!F¨Ó•€f6‰›òO\O£Éß%üÙ-D‹aèÛrVlJó4’«õü»¿Fc‹À‘ŠKŸ‡ıZ
 endstream
 endobj
-228 0 obj
-<< /Type /FontDescriptor /FontName /AKUDIJ+CMTT10 /Flags 4 /FontBBox [ -4 -233 537 696 ] /Ascent 611 /CapHeight 611 /Descent -222 /ItalicAngle 0 /StemV 69 /XHeight 431 /CharSet( /A /L /a /b /n /r /t) /FontFile 229 0 R >>
+231 0 obj
+<< /Type /FontDescriptor /FontName /AKUDIJ+CMTT10 /Flags 4 /FontBBox [ -4 -233 537 696 ] /Ascent 611 /CapHeight 611 /Descent -222 /ItalicAngle 0 /StemV 69 /XHeight 431 /CharSet( /A /L /a /b /n /r /t) /FontFile 232 0 R >>
 endobj
 81 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /XIEQBS+CMBX10 /FontDescriptor 218 0 R /FirstChar 65 /LastChar 89 /Widths 117 0 R >>
+<< /Type /Font /Subtype /Type1 /BaseFont /XIEQBS+CMBX10 /FontDescriptor 221 0 R /FirstChar 65 /LastChar 89 /Widths 120 0 R >>
 endobj
 58 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /LLYCJX+CMMI10 /FontDescriptor 220 0 R /FirstChar 69 /LastChar 109 /Widths 162 0 R >>
+<< /Type /Font /Subtype /Type1 /BaseFont /LLYCJX+CMMI10 /FontDescriptor 223 0 R /FirstChar 69 /LastChar 109 /Widths 165 0 R >>
 endobj
 6 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /GDKDYQ+CMR10 /FontDescriptor 222 0 R /FirstChar 13 /LastChar 127 /Widths 205 0 R >>
+<< /Type /Font /Subtype /Type1 /BaseFont /GDKDYQ+CMR10 /FontDescriptor 225 0 R /FirstChar 13 /LastChar 127 /Widths 208 0 R >>
 endobj
 59 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /RKDUWA+CMR7 /FontDescriptor 224 0 R /FirstChar 50 /LastChar 50 /Widths 161 0 R >>
+<< /Type /Font /Subtype /Type1 /BaseFont /RKDUWA+CMR7 /FontDescriptor 227 0 R /FirstChar 50 /LastChar 50 /Widths 164 0 R >>
 endobj
 82 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /JHBPMI+CMSL10 /FontDescriptor 226 0 R /FirstChar 46 /LastChar 121 /Widths 116 0 R >>
+<< /Type /Font /Subtype /Type1 /BaseFont /JHBPMI+CMSL10 /FontDescriptor 229 0 R /FirstChar 46 /LastChar 121 /Widths 119 0 R >>
 endobj
 62 0 obj
-<< /Type /Font /Subtype /Type1 /BaseFont /AKUDIJ+CMTT10 /FontDescriptor 228 0 R /FirstChar 65 /LastChar 116 /Widths 148 0 R >>
+<< /Type /Font /Subtype /Type1 /BaseFont /AKUDIJ+CMTT10 /FontDescriptor 231 0 R /FirstChar 65 /LastChar 116 /Widths 151 0 R >>
 endobj
 7 0 obj
-<< /Type /Pages /Parent 230 0 R /Count 10 /Kids [ 2 0 R 9 0 R 12 0 R 18 0 R 22 0 R 25 0 R 40 0 R 55 0 R 64 0 R 68 0 R ] >>
+<< /Type /Pages /Parent 233 0 R /Count 10 /Kids [ 2 0 R 9 0 R 12 0 R 18 0 R 22 0 R 25 0 R 40 0 R 55 0 R 64 0 R 68 0 R ] >>
 endobj
 77 0 obj
-<< /Type /Pages /Parent 230 0 R /Count 6 /Kids [ 72 0 R 79 0 R 84 0 R 88 0 R 92 0 R 96 0 R ] >>
+<< /Type /Pages /Parent 233 0 R /Count 7 /Kids [ 72 0 R 79 0 R 84 0 R 88 0 R 92 0 R 96 0 R 99 0 R ] >>
 endobj
-230 0 obj
-<< /Type /Pages  /Count 16 /Kids [ 7 0 R 77 0 R ] >>
+233 0 obj
+<< /Type /Pages  /Count 17 /Kids [ 7 0 R 77 0 R ] >>
 endobj
-231 0 obj
-<< /Type /Catalog /Pages 230 0 R >>
+234 0 obj
+<< /Type /Catalog /Pages 233 0 R >>
 endobj
-232 0 obj
+235 0 obj
 << /Creator (TeX) /Trapped /False >>
 endobj
 xref
-0 233
+0 236
 0000000000 65535 f 
 0000008636 00000 n 
 0000008523 00000 n 
 0000000020 00000 n 
-0001289133 00000 n 
-0001209356 00000 n 
-0001355112 00000 n 
-0001355679 00000 n 
+0001291039 00000 n 
+0001211262 00000 n 
+0001357018 00000 n 
+0001357585 00000 n 
 0000016655 00000 n 
 0000016541 00000 n 
 0000008725 00000 n 
 0000103769 00000 n 
 0000103653 00000 n 
 0000016733 00000 n 
-0001174930 00000 n 
-0001148955 00000 n 
-0001130730 00000 n 
+0001176836 00000 n 
+0001150861 00000 n 
+0001132636 00000 n 
 0000162448 00000 n 
 0000162332 00000 n 
 0000103873 00000 n 
-0001117488 00000 n 
+0001119394 00000 n 
 0000163100 00000 n 
 0000162984 00000 n 
 0000162528 00000 n 
 0000179882 00000 n 
 0000179766 00000 n 
 0000163179 00000 n 
-0001086095 00000 n 
+0001088001 00000 n 
 0000184181 00000 n 
 0000254142 00000 n 
 0000324103 00000 n 
@@ -9738,7 +9783,7 @@ xref
 0000953752 00000 n 
 0000184065 00000 n 
 0000179962 00000 n 
-0001051091 00000 n 
+0001052997 00000 n 
 0000236576 00000 n 
 0000306537 00000 n 
 0000376498 00000 n 
@@ -9753,184 +9798,187 @@ xref
 0000959464 00000 n 
 0000959348 00000 n 
 0000953997 00000 n 
-0001041940 00000 n 
-0001354969 00000 n 
-0001355253 00000 n 
-0001033974 00000 n 
-0001031272 00000 n 
-0001355536 00000 n 
+0001043846 00000 n 
+0001356875 00000 n 
+0001357159 00000 n 
+0001035880 00000 n 
+0001033178 00000 n 
+0001357442 00000 n 
 0000960494 00000 n 
 0000960378 00000 n 
 0000959613 00000 n 
-0001015852 00000 n 
+0001017758 00000 n 
 0000961619 00000 n 
 0000961503 00000 n 
 0000960574 00000 n 
-0001002168 00000 n 
+0001004074 00000 n 
 0000963510 00000 n 
 0000963393 00000 n 
 0000961699 00000 n 
-0000993276 00000 n 
-0000990189 00000 n 
-0000986762 00000 n 
-0001355817 00000 n 
+0000994142 00000 n 
+0000991055 00000 n 
+0000987628 00000 n 
+0001357723 00000 n 
 0000964799 00000 n 
 0000964682 00000 n 
 0000963626 00000 n 
-0001354827 00000 n 
-0001355393 00000 n 
+0001356733 00000 n 
+0001357299 00000 n 
 0000968386 00000 n 
 0000968269 00000 n 
 0000964891 00000 n 
-0000983112 00000 n 
+0000983978 00000 n 
 0000968760 00000 n 
 0000968643 00000 n 
 0000968466 00000 n 
-0000977984 00000 n 
+0000978850 00000 n 
 0000969216 00000 n 
 0000969099 00000 n 
 0000968840 00000 n 
-0000972849 00000 n 
+0000973713 00000 n 
 0000969618 00000 n 
 0000969501 00000 n 
 0000969296 00000 n 
+0000970480 00000 n 
+0000970362 00000 n 
 0000969698 00000 n 
-0000971745 00000 n 
-0000969784 00000 n 
-0000969847 00000 n 
-0000971979 00000 n 
-0000973003 00000 n 
-0000973202 00000 n 
-0000976973 00000 n 
-0000973244 00000 n 
-0000973306 00000 n 
-0000977208 00000 n 
-0000978139 00000 n 
-0000978364 00000 n 
-0000981693 00000 n 
-0000978712 00000 n 
-0000978789 00000 n 
-0000981931 00000 n 
-0000983267 00000 n 
-0000983469 00000 n 
-0000983671 00000 n 
-0000983765 00000 n 
-0000985672 00000 n 
-0000983876 00000 n 
-0000983952 00000 n 
-0000985911 00000 n 
-0000986918 00000 n 
-0000987121 00000 n 
-0000989053 00000 n 
-0000987244 00000 n 
-0000987320 00000 n 
-0000989299 00000 n 
-0000990350 00000 n 
-0000990558 00000 n 
-0000992217 00000 n 
-0000990658 00000 n 
-0000990734 00000 n 
-0000992454 00000 n 
-0000993429 00000 n 
-0000993629 00000 n 
-0001000511 00000 n 
-0000994030 00000 n 
-0000994154 00000 n 
-0001000750 00000 n 
-0001002324 00000 n 
-0001002527 00000 n 
-0001014576 00000 n 
-0001002689 00000 n 
-0001010235 00000 n 
-0001014821 00000 n 
-0001016013 00000 n 
-0001016221 00000 n 
-0001016359 00000 n 
-0001030004 00000 n 
-0001016615 00000 n 
-0001016734 00000 n 
-0001030239 00000 n 
-0001031425 00000 n 
-0001031648 00000 n 
-0001032933 00000 n 
-0001031725 00000 n 
-0001031800 00000 n 
-0001033170 00000 n 
-0001034129 00000 n 
-0001034331 00000 n 
-0001034357 00000 n 
-0001034469 00000 n 
-0001040970 00000 n 
-0001034503 00000 n 
-0001034574 00000 n 
-0001041207 00000 n 
-0001042092 00000 n 
-0001042314 00000 n 
-0001050103 00000 n 
-0001042431 00000 n 
-0001042537 00000 n 
-0001050342 00000 n 
-0001051249 00000 n 
-0001051477 00000 n 
-0001084245 00000 n 
-0001053034 00000 n 
-0001053377 00000 n 
-0001084489 00000 n 
-0001086259 00000 n 
-0001086493 00000 n 
-0001115598 00000 n 
-0001087928 00000 n 
-0001088111 00000 n 
-0001115845 00000 n 
-0001117651 00000 n 
-0001117884 00000 n 
-0001129278 00000 n 
-0001118166 00000 n 
-0001118263 00000 n 
-0001129515 00000 n 
-0001130883 00000 n 
-0001131106 00000 n 
-0001147167 00000 n 
-0001131568 00000 n 
-0001131684 00000 n 
-0001147404 00000 n 
-0001149108 00000 n 
-0001149331 00000 n 
-0001172915 00000 n 
-0001150547 00000 n 
-0001150696 00000 n 
-0001173154 00000 n 
-0001175086 00000 n 
-0001175312 00000 n 
-0001175725 00000 n 
-0001208306 00000 n 
-0001175864 00000 n 
-0001176454 00000 n 
-0001208540 00000 n 
-0001209504 00000 n 
-0001209723 00000 n 
-0001284569 00000 n 
-0001212891 00000 n 
-0001213701 00000 n 
-0001284805 00000 n 
-0001289284 00000 n 
-0001299379 00000 n 
-0001289506 00000 n 
-0001307707 00000 n 
-0001299620 00000 n 
-0001327193 00000 n 
-0001307937 00000 n 
-0001335083 00000 n 
-0001327650 00000 n 
-0001344649 00000 n 
-0001335305 00000 n 
-0001354589 00000 n 
-0001344901 00000 n 
-0001355929 00000 n 
-0001355999 00000 n 
-0001356052 00000 n 
+0000970560 00000 n 
+0000972608 00000 n 
+0000970647 00000 n 
+0000970710 00000 n 
+0000972843 00000 n 
+0000973867 00000 n 
+0000974068 00000 n 
+0000977839 00000 n 
+0000974110 00000 n 
+0000974172 00000 n 
+0000978074 00000 n 
+0000979005 00000 n 
+0000979230 00000 n 
+0000982559 00000 n 
+0000979578 00000 n 
+0000979655 00000 n 
+0000982797 00000 n 
+0000984133 00000 n 
+0000984335 00000 n 
+0000984537 00000 n 
+0000984631 00000 n 
+0000986538 00000 n 
+0000984742 00000 n 
+0000984818 00000 n 
+0000986777 00000 n 
+0000987784 00000 n 
+0000987987 00000 n 
+0000989919 00000 n 
+0000988110 00000 n 
+0000988186 00000 n 
+0000990165 00000 n 
+0000991216 00000 n 
+0000991424 00000 n 
+0000993083 00000 n 
+0000991524 00000 n 
+0000991600 00000 n 
+0000993320 00000 n 
+0000994295 00000 n 
+0000994495 00000 n 
+0001002305 00000 n 
+0000994952 00000 n 
+0000995076 00000 n 
+0001002544 00000 n 
+0001004230 00000 n 
+0001004433 00000 n 
+0001016482 00000 n 
+0001004595 00000 n 
+0001012141 00000 n 
+0001016727 00000 n 
+0001017919 00000 n 
+0001018127 00000 n 
+0001018265 00000 n 
+0001031910 00000 n 
+0001018521 00000 n 
+0001018640 00000 n 
+0001032145 00000 n 
+0001033331 00000 n 
+0001033554 00000 n 
+0001034839 00000 n 
+0001033631 00000 n 
+0001033706 00000 n 
+0001035076 00000 n 
+0001036035 00000 n 
+0001036237 00000 n 
+0001036263 00000 n 
+0001036375 00000 n 
+0001042876 00000 n 
+0001036409 00000 n 
+0001036480 00000 n 
+0001043113 00000 n 
+0001043998 00000 n 
+0001044220 00000 n 
+0001052009 00000 n 
+0001044337 00000 n 
+0001044443 00000 n 
+0001052248 00000 n 
+0001053155 00000 n 
+0001053383 00000 n 
+0001086151 00000 n 
+0001054940 00000 n 
+0001055283 00000 n 
+0001086395 00000 n 
+0001088165 00000 n 
+0001088399 00000 n 
+0001117504 00000 n 
+0001089834 00000 n 
+0001090017 00000 n 
+0001117751 00000 n 
+0001119557 00000 n 
+0001119790 00000 n 
+0001131184 00000 n 
+0001120072 00000 n 
+0001120169 00000 n 
+0001131421 00000 n 
+0001132789 00000 n 
+0001133012 00000 n 
+0001149073 00000 n 
+0001133474 00000 n 
+0001133590 00000 n 
+0001149310 00000 n 
+0001151014 00000 n 
+0001151237 00000 n 
+0001174821 00000 n 
+0001152453 00000 n 
+0001152602 00000 n 
+0001175060 00000 n 
+0001176992 00000 n 
+0001177218 00000 n 
+0001177631 00000 n 
+0001210212 00000 n 
+0001177770 00000 n 
+0001178360 00000 n 
+0001210446 00000 n 
+0001211410 00000 n 
+0001211629 00000 n 
+0001286475 00000 n 
+0001214797 00000 n 
+0001215607 00000 n 
+0001286711 00000 n 
+0001291190 00000 n 
+0001301285 00000 n 
+0001291412 00000 n 
+0001309613 00000 n 
+0001301526 00000 n 
+0001329099 00000 n 
+0001309843 00000 n 
+0001336989 00000 n 
+0001329556 00000 n 
+0001346555 00000 n 
+0001337211 00000 n 
+0001356495 00000 n 
+0001346807 00000 n 
+0001357842 00000 n 
+0001357912 00000 n 
+0001357965 00000 n 
 trailer
-<< /Size 233 /Root 231 0 R /Info 232 0 R >>
+<< /Size 236 /Root 234 0 R /Info 235 0 R >>
 startxref
-1356106
+1358019
 %%EOF

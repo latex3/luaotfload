@@ -41,6 +41,7 @@ local function harf_reader(spec)
   for key, val in next, rawfeatures do
     if key == "language" then val = harf.Language.new(val) end
     if key == "colr" then key = "palette" end
+    if key == "tlig" then key = "texlig" end
     if key:len() == 4 then
       -- 4-letter options are likely font features, but not always, so we do
       -- some checks below. We put non feature options in the `options` dict.

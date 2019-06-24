@@ -143,6 +143,8 @@ local paired_close = {
 
 local process
 
+local trep = hb.texrep
+
 local function itemize(head, direction)
   -- Collect character properties (font, direction, script) and resolve common
   -- and inherited scripts. Pre-requisite for itemization into smaller runs.
@@ -187,7 +189,17 @@ local function itemize(head, direction)
     end
 
     local fontdata = currfontid and font.getfont(currfontid)
-    local hbdata = fontdata and fontdata.hb
+    local hbdata   = fontdata and fontdata.hb
+    local spec     = hbdata and hbdata.spec
+    local options  = spec and spec.options
+    local texlig   = options and options.texlig
+    if texlig then
+      local replacement = trep[code]
+      if replacement then
+        code = replacement
+      end
+    end
+
     if not hbdata then skip = true end
 
     -- Resolve common and inherited scripts. Inherited takes the script of the

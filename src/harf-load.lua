@@ -229,6 +229,8 @@ local function sanitize(psname)
   return new
 end
 
+local tlig = hb.texlig
+
 local function scalefont(data, spec)
   local size = spec.size
   local options = spec.options
@@ -299,6 +301,15 @@ local function scalefont(data, spec)
   if options.squeeze then
     squeezefactor = tonumber(options.squeeze) * 1000
     vscale = vscale * tonumber(options.squeeze)
+  end
+
+  if options.texlig then
+    for char in next, characters do
+      local ligatures = tlig[char]
+      if ligatures then
+        characters[char].ligatures = ligatures
+      end
+    end
   end
 
   return {

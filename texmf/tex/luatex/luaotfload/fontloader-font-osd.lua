@@ -143,6 +143,7 @@ local s_half             = states.half
 local s_pref             = states.pref
 local s_blwf             = states.blwf
 local s_pstf             = states.pstf
+local s_init             = states.init
 
 local replace_all_nbsp   = nil
 
@@ -209,10 +210,10 @@ if not indicgroups and characters then
     local indicorders = {
         bp = { }, -- before_postscript
         ap = { }, -- after_postscript
-        bs = { }, -- before_half
-        as = { }, -- after_half
-        bh = { }, -- before_subscript
-        ah = { }, -- after_subscript
+        bs = { }, -- before_subscript
+        as = { }, -- after_subscript
+        bh = { }, -- before_half
+        ah = { }, -- after_half
         bm = { }, -- before_main
         am = { }, -- after_main
     }
@@ -324,17 +325,11 @@ local zw_char = { -- both_joiners_true
 }
 
 local dflt_true = {
-    dflt = true
+    dflt = true,
 }
 
-local two_defaults = {
-    dev2 = dflt_true,
-}
-
-local one_defaults = {
-    dev2 = dflt_true, -- set later
-    deva = dflt_true, -- set later
-}
+local two_defaults = { }
+local one_defaults = { }
 
 local false_flags = { false, false, false, false }
 
@@ -367,7 +362,7 @@ local sequence_reorder_reph = {
 }
 
 local sequence_reorder_pre_base_reordering_consonants = {
-    features  = { dv03 = two_defaults },
+    features  = { dv03 = one_defaults },
     flags     = false_flags,
     name      = "dv03_reorder_pre_base_reordering_consonants",
     order     = { "dv03" },
@@ -399,22 +394,17 @@ local sequence_remove_joiners = {
 -- as it might depends on the font. Not that it's a bottleneck.
 
 local basic_shaping_forms =  {
- -- init = true, -- new
- -- abvs = true, -- new
     akhn = true,
     blwf = true,
- -- calt = true, -- new
     cjct = true,
     half = true,
- -- haln = true, -- new
     nukt = true,
     pref = true,
- -- pres = true, -- new
     pstf = true,
- -- psts = true, -- new
     rkrf = true,
     rphf = true,
     vatu = true,
+    locl = true,
 }
 
 local valid = {
@@ -439,14 +429,13 @@ local valid = {
     psts = true,
     haln = true,
     calt = true,
+    locl = true,
 }
 
 local scripts = { }
 
 local scripts_one = { "deva", "mlym", "beng", "gujr", "guru", "knda", "orya", "taml", "telu" }
 local scripts_two = { "dev2", "mlm2", "bng2", "gjr2", "gur2", "knd2", "ory2", "tml2", "tel2" }
-
-local scripts_old = { } for i=1,#scripts_one do local v = scripts_one[i] scripts_old[v] = v end -- self
 
 local nofscripts = #scripts_one
 
@@ -455,7 +444,7 @@ for i=1,nofscripts do
     local two = scripts_two[i]
     scripts[one] = true
     scripts[two] = true
-    two_defaults[one] = dflt_true
+    two_defaults[two] = dflt_true
     one_defaults[one] = dflt_true
     one_defaults[two] = dflt_true
 end
@@ -476,28 +465,75 @@ local function initializedevanagi(tfmdata)
             local sequences      = resources.sequences
             local sharedfeatures = tfmdata.shared.features
             --
-            local lastmatch      = 0
-            for s=1,#sequences do -- classify chars
-                local features = sequences[s].features
-                if features then
-                    for k, v in next, features do
-                        if basic_shaping_forms[k] then
-                            lastmatch = s
-                        end
-                    end
-                end
-            end
-            local insertindex = lastmatch + 1
-            --
             gsubfeatures["dv01"] = two_defaults -- reorder matras
             gsubfeatures["dv02"] = two_defaults -- reorder reph
-            gsubfeatures["dv03"] = two_defaults -- reorder pre base reordering consonants
+            gsubfeatures["dv03"] = one_defaults -- reorder pre base reordering consonants
             gsubfeatures["dv04"] = one_defaults -- remove joiners
             --
             local reorder_pre_base_reordering_consonants = copy(sequence_reorder_pre_base_reordering_consonants)
             local reorder_reph                           = copy(sequence_reorder_reph)
             local reorder_matras                         = copy(sequence_reorder_matras)
             local remove_joiners                         = copy(sequence_remove_joiners)
+
+            local lastmatch = 0
+            for s=1,#sequences do -- classify chars and make sure basic_shaping_forms come first
+                local features = sequences[s].features
+                if features then
+                    for k, v in next, features do
+                        if k == "locl" then
+                            local steps = sequences[s].steps
+                            local nofsteps = sequences[s].nofsteps
+                            for i=1,nofsteps do
+                                local step     = steps[i]
+                                local coverage = step.coverage
+                                if coverage then
+                                    for k, v in next, pre_mark do
+                                        local locl = coverage[k]
+                                        if locl then
+                                            if #locl > 0 then	--contextchain; KE: is this right?
+                                                for j=1,#locl do
+                                                    local ck      = locl[j]
+                                                    local f       = ck[4]
+                                                    local chainlookups = ck[6]
+                                                    if chainlookups then
+                                                        local chainlookup = chainlookups[f]
+                                                        for j=1,#chainlookup do
+                                                            local chainstep = chainlookup[j]
+                                                            local steps    = chainstep.steps
+                                                            local nofsteps = chainstep.nofsteps
+                                                            for i=1,nofsteps do
+                                                                local step     = steps[i]
+                                                                local coverage = step.coverage
+                                                                if coverage then
+                                                                    locl = coverage[k]
+                                                                end
+                                                            end
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                            if locl then
+                                                reorder_matras.steps[1].coverage[locl] = true
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        if basic_shaping_forms[k] then
+                            lastmatch = lastmatch + 1
+                            if s ~= lastmatch then
+                                table.insert(sequences, lastmatch, table.remove(sequences, s))
+                            end
+                        end
+                    end
+                end
+            end
+            local insertindex = lastmatch + 1
+            --
+            if tfmdata.properties.language then
+                dflt_true[tfmdata.properties.language] = true
+            end
             --
             insert(sequences,insertindex,reorder_pre_base_reordering_consonants)
             insert(sequences,insertindex,reorder_reph)
@@ -505,6 +541,8 @@ local function initializedevanagi(tfmdata)
             insert(sequences,insertindex,remove_joiners)
             --
             local blwfcache  = { }
+            local vatucache  = { }
+            local pstfcache  = { }
             local seqsubset  = { }
             local rephstep   = {
                 coverage = { } -- will be adapted each work
@@ -513,6 +551,8 @@ local function initializedevanagi(tfmdata)
                 reph        = false,
                 vattu       = false,
                 blwfcache   = blwfcache,
+                vatucache   = vatucache,
+                pstfcache   = pstfcache,
                 seqsubset   = seqsubset,
                 reorderreph = rephstep,
 
@@ -525,8 +565,6 @@ local function initializedevanagi(tfmdata)
             --
             resources.devanagari = devanagari
             --
-            local old = scripts_old[script] or false
-            --
             for s=1,#sequences do
                 local sequence = sequences[s]
                 local steps    = sequence.steps
@@ -534,41 +572,148 @@ local function initializedevanagi(tfmdata)
                 local features = sequence.features
                 local has_rphf = features.rphf
                 local has_blwf = features.blwf
-                if has_rphf and has_rphf[old] then
+                local has_vatu = features.vatu
+                local has_pstf = features.pstf
+                if has_rphf and has_rphf[script] then
                     devanagari.reph = true
-                elseif has_blwf and has_blwf[old] then
+                elseif (has_blwf and has_blwf[script] ) or (has_vatu and has_vatu[script] ) then
                     devanagari.vattu = true
                     for i=1,nofsteps do
                         local step     = steps[i]
                         local coverage = step.coverage
                         if coverage then
                             for k, v in next, coverage do
-                                if not blwfcache[k] then
-                                    blwfcache[k] = v
+                                for h, w in next, halant do
+                                    if v[h] then
+                                        if not blwfcache[k] then
+                                            blwfcache[k] = v
+                                        end
+                                    end
+                                    if has_vatu and has_vatu[script] and not vatucache[k] then
+                                        vatucache[k] = v
+                                    end
+                                end
+                            end
+                        end
+                    end
+                elseif has_pstf and has_pstf[script] then
+                    for i=1,nofsteps do
+                        local step     = steps[i]
+                        local coverage = step.coverage
+                        if coverage then
+                            for k, v in next, coverage do
+                                if not pstfcache[k] then
+                                    pstfcache[k] = v
+                                end
+                            end
+                            for k, v in next, ra do
+                                local r = coverage[k]
+                                if r then
+                                    local found = false
+                                    if #r > 0 then  -- contextchain; KE: is this right?
+                                        for j=1,#r do
+                                            local ck      = r[j]
+                                            local f       = ck[4]
+                                            local chainlookups = ck[6]
+                                            if chainlookups and chainlookups[f] then	--KE: why is check for chainlookups[f] necessacy???
+                                                local chainlookup = chainlookups[f]
+                                                for j=1,#chainlookup do
+                                                    local chainstep = chainlookup[j]
+                                                    local steps    = chainstep.steps
+                                                    local nofsteps = chainstep.nofsteps
+                                                    for i=1,nofsteps do
+                                                        local step     = steps[i]
+                                                        local coverage = step.coverage
+                                                        if coverage then
+                                                            local h = coverage[k]
+                                                            if h then
+                                                                for k, v in next, h do
+                                                                    found = v and v.ligature
+                                                                    if found then
+                                                                        pre_base_reordering_consonants[found] = true
+                                                                        break
+                                                                    end
+                                                                end
+                                                                if found then
+                                                                    break
+                                                                end
+                                                            end
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    else
+                                        for k, v in next, r do
+                                            found = v and v.ligature
+                                            if found then
+                                                pre_base_reordering_consonants[found] = true
+                                                break
+                                            end
+                                        end
+                                    end
+                                    if found then
+                                        break
+                                    end
                                 end
                             end
                         end
                     end
                 end
                 for kind, spec in next, features do
-                 -- if spec.dev2 and valid[kind] then
                     if valid[kind] and valid_two(spec)then
                         for i=1,nofsteps do
                             local step     = steps[i]
                             local coverage = step.coverage
                             if coverage then
-                                local reph = false
+                                local reph, rephbase = false, false
                                 if kind == "rphf" then
                                     -- rphf acts on consonant + halant
                                     for k, v in next, ra do
                                         local r = coverage[k]
                                         if r then
+                                            rephbase = k
                                             local h = false
-                                            for k, v in next, halant do
-                                                local h = r[k]
-                                                if h then
-                                                    reph = h.ligature or false
-                                                    break
+                                            if #r > 0 then	--contextchain; KE: is this right?
+                                                for j=1,#r do
+                                                    local ck      = r[j]
+                                                    local f       = ck[4]
+                                                    local chainlookups = ck[6]
+                                                    if chainlookups then
+                                                        local chainlookup = chainlookups[f]
+                                                        for j=1,#chainlookup do
+                                                            local chainstep = chainlookup[j]
+                                                            local steps    = chainstep.steps
+                                                            local nofsteps = chainstep.nofsteps
+                                                            for i=1,nofsteps do
+                                                                local step     = steps[i]
+                                                                local coverage = step.coverage
+                                                                if coverage then
+                                                                    local r = coverage[k]
+                                                                    if r then
+                                                                        for k, v in next, halant do
+                                                                            local h = r[k]
+                                                                            if h then
+                                                                                reph = h.ligature or false
+                                                                                break
+                                                                            end
+                                                                        end
+                                                                        if h then
+                                                                            break
+                                                                        end
+                                                                    end
+                                                                end
+                                                            end
+                                                        end
+                                                    end
+                                                end
+                                            else
+                                                for k, v in next, halant do
+                                                    local h = r[k]
+                                                    if h then
+                                                        reph = h.ligature or false
+                                                        break
+                                                    end
                                                 end
                                             end
                                             if reph then
@@ -577,7 +722,7 @@ local function initializedevanagi(tfmdata)
                                         end
                                     end
                                 end
-                                seqsubset[#seqsubset+1] = { kind, coverage, reph }
+                                seqsubset[#seqsubset+1] = { kind, coverage, reph, rephbase }
                             end
                         end
                     end
@@ -592,11 +737,46 @@ local function initializedevanagi(tfmdata)
                                     local h = coverage[k]
                                     if h then
                                         local found = false
-                                        for k, v in next, h do
-                                            found = v and v.ligature
-                                            if found then
-                                                pre_base_reordering_consonants[k] = found
-                                                break
+                                        if #h > 0 then -- contextchain; KE: is this right?
+                                            for j=1,#h do
+                                                local ck      = h[j]
+                                                local f       = ck[4]
+                                                local chainlookups = ck[6]
+                                                if chainlookups then
+                                                    local chainlookup = chainlookups[f]
+                                                    for j=1,#chainlookup do
+                                                        local chainstep = chainlookup[j]
+                                                        local steps    = chainstep.steps
+                                                        local nofsteps = chainstep.nofsteps
+                                                        for i=1,nofsteps do
+                                                            local step     = steps[i]
+                                                            local coverage = step.coverage
+                                                            if coverage then
+                                                                local h = coverage[k]
+                                                                if h then
+                                                                    for k, v in next, h do
+                                                                        found = v and v.ligature
+                                                                        if found then
+                                                                            pre_base_reordering_consonants[found] = true
+                                                                            break
+                                                                        end
+                                                                    end
+                                                                    if found then
+                                                                        break
+                                                                    end
+                                                                end
+                                                            end
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        else
+                                            for k, v in next, h do
+                                                found = v and v.ligature
+                                                if found then
+                                                    pre_base_reordering_consonants[found] = true
+                                                    break
+                                                end
                                             end
                                         end
                                         if found then
@@ -610,90 +790,17 @@ local function initializedevanagi(tfmdata)
                 end
             end
             --
-            -- The following presets need checking (by Kai). Most of these scripts share a common
-            -- handling (some need less but that doesn't hurt). The question is: what to enable.
-            --
-            -- dv01_reorder_matras
-            -- dv02_reorder_reph
-            -- dv03_reorder_pre_base_reordering_consonants
-            -- dv04_remove_joiners
-            --
-            if     script == "deva" then
-                sharedfeatures["dv04"] = true
-            elseif script == "dev2" then
-                sharedfeatures["dv01"] = true
-                sharedfeatures["dv02"] = true
-                sharedfeatures["dv03"] = true
-                sharedfeatures["dv04"] = true
-
-            elseif script == "knda" then
-                -- needs checking
-                sharedfeatures["dv04"] = true
-            elseif script == "knd2" then
-                -- needs checking
-                sharedfeatures["dv01"] = true
-                sharedfeatures["dv02"] = true
-                sharedfeatures["dv03"] = true
-                sharedfeatures["dv04"] = true
-
-            elseif script == "beng" then
-                -- needs checking
-                sharedfeatures["dv04"] = true
-            elseif script == "bng2" then
-                -- needs checking
-                sharedfeatures["dv01"] = true
-                sharedfeatures["dv02"] = true
-                sharedfeatures["dv03"] = true
-                sharedfeatures["dv04"] = true
-
-            elseif script == "gurj" then
-                -- needs checking
-                sharedfeatures["dv04"] = true
-            elseif script == "grj2" then
-                -- needs checking
-                sharedfeatures["dv01"] = true
-                sharedfeatures["dv02"] = true
-                sharedfeatures["dv03"] = true
-                sharedfeatures["dv04"] = true
-
-            elseif script == "guru" then
-                -- needs checking
-                sharedfeatures["dv04"] = true
-            elseif script == "gur2" then
-                -- needs checking
-                sharedfeatures["dv01"] = true
-                sharedfeatures["dv02"] = true
-                sharedfeatures["dv03"] = true
-                sharedfeatures["dv04"] = true
-
-            elseif script == "telu" then
-                -- needs checking
-                sharedfeatures["dv04"] = true
-            elseif script == "tel2" then
-                -- needs checking
-                sharedfeatures["dv01"] = true
-                sharedfeatures["dv02"] = true
-                sharedfeatures["dv03"] = true
-                sharedfeatures["dv04"] = true
-
-            elseif script == "mlym" then
-                sharedfeatures["pstf"] = true
-            elseif script == "mlm2" then
-                sharedfeatures["pstf"] = true
-                sharedfeatures["pref"] = true
-                sharedfeatures["dv03"] = true
-                gsubfeatures  ["dv03"] = two_defaults
-                insert(sequences,insertindex,sequence_reorder_pre_base_reordering_consonants)
-
-            elseif script == "taml" then
-                -- needs checking
-                sharedfeatures["dv04"] = true
-                sharedfeatures["pstf"] = true
-            elseif script == "tml2" then
-                -- needs checking
-
-            else
-                report("todo: enable the right features for script %a",script)
+            if two_defaults[script] then
+                sharedfeatures["dv01"] = true -- dv01_reorder_matras
+                sharedfeatures["dv02"] = true -- dv02_reorder_reph
+                sharedfeatures["dv03"] = true -- dv03_reorder_pre_base_reordering_consonants
+                sharedfeatures["dv04"] = true -- dv04_remove_joiners
+            elseif one_defaults[script] then
+                sharedfeatures["dv03"] = true -- dv03_reorder_pre_base_reordering_consonants
+                sharedfeatures["dv04"] = true -- dv04_remove_joiners
+            end
+            if script == "mlym" or script == "taml" then
+                devanagari.left_matra_before_base = true
             end
         end
     end
@@ -735,10 +842,13 @@ local function initialize_one(font,attr) -- we need a proper hook into the datas
             reph      = false,
             vattu     = false,
             blwfcache = { },
+            vatucache = { },
+            pstfcache = { },
         }
         datasets.devanagari = devanagaridata
         local resources     = tfmdata.resources
         local devanagari    = resources.devanagari
+
         for s=1,#datasets do
             local dataset = datasets[s]
             if dataset and dataset[1] then -- value
@@ -746,31 +856,97 @@ local function initialize_one(font,attr) -- we need a proper hook into the datas
                 if kind == "rphf" then
                     -- deva
                     devanagaridata.reph = true
-                elseif kind == "blwf" then
+                elseif kind == "blwf" or kind == "vatu" then
                     -- deva
                     devanagaridata.vattu = true
                     -- dev2
                     devanagaridata.blwfcache = devanagari.blwfcache
+                    devanagaridata.vatucache = devanagari.vatucache
+                    devanagaridata.pstfcache = devanagari.pstfcache
                 end
             end
         end
 
     end
 
-    return devanagaridata.reph, devanagaridata.vattu, devanagaridata.blwfcache
+    return devanagaridata.reph, devanagaridata.vattu, devanagaridata.blwfcache, devanagaridata.vatucache, devanagaridata.pstfcache
 
+end
+
+local function contextchain(contexts, n)
+    local char = getchar(n)
+    for k=1,#contexts do
+        local ck  = contexts[k]
+        local seq = ck[3]
+        local f   = ck[4]
+        local l   = ck[5]
+        if (l - f) == 1 and seq[f+1][char] then
+            local ok = true
+            local c = n
+            for i=l+1,#seq do
+                c = getnext(c)
+                if not c or not seq[i][ischar(c)] then
+                    ok = false
+                    break
+                end
+            end
+            if ok then
+                c = getprev(n)
+                for i=1,f-1 do
+                    c = getprev(c)
+                    if not c or not seq[f-i][ischar(c)] then
+                        ok = false
+                    end
+                end
+            end
+            if ok then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function order_matras(c)
+    local cn   = getnext(c)
+    local char = getchar(cn)
+    while dependent_vowel[char] do
+        local next  = getnext(cn)
+        local cc    = c
+        local cchar = getchar(cc)
+        while cc ~= cn do
+            if (above_mark[char] and (below_mark[cchar] or post_mark[cchar])) or (below_mark[char] and (post_mark[cchar])) then
+                local prev, next = getboth(cn)
+                if next then
+                    setprev(next,prev)
+                end
+                -- todo: setlink
+                setnext(prev,next)
+                setnext(getprev(cc),cn)
+                setprev(cn,getprev(cc))
+                setnext(cn,cc)
+                setprev(cc,cn)
+                break
+            end
+            cc    = getnext(cc)
+            cchar = getchar(cc)
+        end
+        cn   = next
+        char = getchar(cn)
+    end
 end
 
 local function reorder_one(head,start,stop,font,attr,nbspaces)
 
-    local reph, vattu, blwfcache = initialize_one(font,attr) -- todo: a hash[font]
+    local reph, vattu, blwfcache, vatucache, pstfcache = initialize_one(font,attr) -- todo: a hash[font]
 
-    local current   = start
-    local n         = getnext(start)
-    local base      = nil
-    local firstcons = nil
-    local lastcons  = nil
-    local basefound = false
+    local devanagari = fontdata[font].resources.devanagari
+    local current    = start
+    local n          = getnext(start)
+    local base       = nil
+    local firstcons  = nil
+    local lastcons   = nil
+    local basefound  = false
 
     if reph and ra[getchar(start)] and halant[getchar(n)] then
         -- if syllable starts with Ra + H and script has 'Reph' then exclude Reph
@@ -853,8 +1029,11 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
             if not base then
                 base = current
             elseif blwfcache[char] then
-                -- consonant has below-base (or post-base) form
+                -- consonant has below-base form
                 setprop(current,a_state,s_blwf)
+            elseif pstfcache[char] then
+                -- consonant has post-base form
+                setprop(current,a_state,s_pstf)
             else
                 base = current
             end
@@ -933,16 +1112,14 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
         current = next
     end
 
-    if base ~= stop and getprop(base,a_state) then
+    if base ~= stop and getprop(base,a_state) then -- a_state can also be init
         local next = getnext(base)
         if halant[getchar(next)] and not (next ~= stop and getchar(getnext(next)) == c_zwj) then
             setprop(base,a_state,unsetvalue)
         end
     end
 
-    -- ToDo: split two- or three-part matras into their parts. Then, move the left 'matra' part to the beginning of the syllable.
-    -- Not necessary for Devanagari. However it is necessay for other scripts, such as Tamil (e.g. TAMIL VOWEL SIGN O - 0BCA)
-
+    -- split two- or three-part matras into their parts. Then, move the left 'matra' part to the beginning of the syllable.
     -- classify consonants and 'matra' parts as pre-base, above-base (Reph), below-base or post-base, and group elements of the syllable (consonants and 'matras') according to this classification
 
     local current, allreordered, moved = start, false, { [base] = true }
@@ -968,6 +1145,17 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                     n  = getnext(n)
                     ch = getchar(n)
                 end
+
+                local tpm = twopart_mark[ch]
+                while tpm do
+                    local extra = copy_node(n)
+                    copyinjection(extra,n)
+                    ch = tpm[1]
+                    setchar(n,ch)
+                    setchar(extra,tpm[2])
+                    head = insert_node_after(head,current,extra)
+                    tpm = twopart_mark[ch]
+                end
                 while c ~= stop and dependent_vowel[ch] do
                     c  = n
                     n  = getnext(n)
@@ -986,15 +1174,51 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                 end
             end
         end
-        local bp = getprev(firstcons)
-        local cn = getnext(current)
+        local bp   = getprev(firstcons)
+        local cn   = getnext(current)
         local last = getnext(c)
         while cn ~= last do
             -- move pre-base matras...
             if pre_mark[getchar(cn)] then
-                if bp then
-                    setnext(bp,cn)
+                if devanagari.left_matra_before_base then
+                    local prev, next = getboth(cn)
+                    setlink(prev,next)
+                    if cn == stop then
+                        stop = getprev(cn)
+                    end
+                    if base == start then
+                       if head == start then
+                           head = cn
+                       end
+                       start = cn
+                    end
+                    setlink(getprev(base),cn)
+                    setlink(cn,base)
+                 -- setlink(getprev(base),cn,base) -- maybe
+                    cn = next
+                else
+                    if bp then
+                        setnext(bp,cn)
+                    end
+                    local prev, next = getboth(cn)
+                    if next then
+                        setprev(next,prev)
+                    end
+                    setnext(prev,next)
+                    if cn == stop then
+                        stop = prev
+                    end
+                    setprev(cn,bp)
+                    setlink(cn,firstcons)
+                    if firstcons == start then
+                        if head == start then
+                            head = cn
+                        end
+                        start = cn
+                    end
+                    cn = next
                 end
+            elseif current ~= base and dependent_vowel[getchar(cn)] then
                 local prev, next = getboth(cn)
                 if next then
                     setprev(next,prev)
@@ -1003,17 +1227,19 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                 if cn == stop then
                     stop = prev
                 end
-                setprev(cn,bp)
-                setlink(cn,firstcons)
-                if firstcons == start then
-                    if head == start then
-                        head = cn
-                    end
-                    start = cn
+                setlink(b,cn,getnext(b))
+                order_matras(cn)
+                cn = next
+            elseif current == base and dependent_vowel[getchar(cn)] then
+                local cnn = getnext(cn)
+                order_matras(cn)
+                cn = cnn
+                while cn ~= last and dependent_vowel[getchar(cn)] do
+                    cn = getnext(cn)
                 end
-                break
+            else
+                cn = getnext(cn)
             end
-            cn = getnext(cn)
         end
         allreordered = c == stop
         current = getnext(c)
@@ -1075,12 +1301,26 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                     if halant[getchar(next)] then
                         cns = next
                     end
+                    if not vatucache[char] then
+                        next = getnext(cns)
+                        while dependent_vowel[getchar(next)] do
+                            cns  = next
+                            next = getnext(cns)
+                        end
+                    end
                 elseif char == c_nbsp then
                     nbspaces   = nbspaces + 1
                     cns        = current
                     local next = getnext(cns)
                     if halant[getchar(next)] then
                         cns = next
+                    end
+                    if not vatucache[char] then
+                        next = getnext(cns)
+                        while dependent_vowel[getchar(next)] do
+                            cns  = next
+                            next = getnext(cns)
+                        end
                     end
                 end
             end
@@ -1090,6 +1330,9 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
 
     if getchar(base) == c_nbsp then
         nbspaces = nbspaces - 1
+        if base == stop then
+        	stop = getprev(stop)
+        end
         head = remove_node(head,base)
         flush_node(base)
     end
@@ -1114,7 +1357,7 @@ function handlers.devanagari_reorder_matras(head,start) -- no leak
         local char = ischar(current,startfont)
         local next = getnext(current)
         if char and getprop(current,a_syllabe) == startattr then
-            if halant[char] and not getprop(current,a_state) then
+            if halant[char] then -- a_state can also be init
                 if next then
                     local char = ischar(next,startfont)
                     if char and zw_char[char] and getprop(next,a_syllabe) == startattr then
@@ -1130,6 +1373,18 @@ function handlers.devanagari_reorder_matras(head,start) -- no leak
              -- setlink(current,start,next) -- maybe
                 start = startnext
                 break
+         -- elseif consonant[char] and ( not getprop(current,a_state) or getprop(current,a_state) == s_init) then
+         --     startnext = getnext(start)
+         --     head = remove_node(head,start)
+         --     if current == head then
+         --         setlink(start,current)
+         --         head = start
+         --     else
+         --         setlink(getprev(current),start)
+         --         setlink(start,current)
+         --     end
+         --     start = startnext
+         --     break
             end
         else
             break
@@ -1148,6 +1403,8 @@ end
 -- In Devanagari reph has reordering position 'before postscript' and dev2 only
 -- follows step 2, 4, and 6.
 
+local rephbase = { }
+
 function handlers.devanagari_reorder_reph(head,start)
     local current   = getnext(start)
     local startnext = nil
@@ -1159,6 +1416,12 @@ function handlers.devanagari_reorder_reph(head,start)
     --
     -- If reph should be positioned after post-base consonant forms, proceed to step 5.
     --
+    local char = ischar(start,startfont)
+    local rephbase = rephbase[startfont][char]
+    if char and after_subscript[rephbase] then
+        goto step_5
+    end
+    --
     ::step_2::
     --
     -- If the reph repositioning class is not after post-base: target position is after
@@ -1169,39 +1432,64 @@ function handlers.devanagari_reorder_reph(head,start)
     -- fixed in shaping engine, there was no case where reph position will be found on
     -- this step.
     --
-    while current do
-        local char = ischar(current,startfont)
-        if char and getprop(current,a_syllabe) == startattr then
-            if halant[char] and not getprop(current,a_state) then
-                local next = getnext(current)
-                if next then
-                    local nextchar = ischar(next,startfont)
-                    if nextchar and zw_char[nextchar] and getprop(next,a_syllabe) == startattr then
-                        current = next
-                        next    = getnext(current)
+    if char and not after_postscript[rephbase] then
+        while current do
+            local char = ischar(current,startfont)
+            if char and getprop(current,a_syllabe) == startattr then
+                if halant[char] then
+                    local next = getnext(current)
+                    if next then
+                        local nextchar = ischar(next,startfont)
+                        if nextchar and zw_char[nextchar] and getprop(next,a_syllabe) == startattr then
+                            current = next
+                            next    = getnext(current)
+                        end
                     end
+                    startnext = getnext(start)
+                    head = remove_node(head,start)
+                    setlink(start,next)
+                    setlink(current,start)
+                 -- setlink(current,start,next) -- maybe
+                    start = startnext
+                    startattr = getprop(start,a_syllabe)
+                    break
                 end
-                startnext = getnext(start)
-                head = remove_node(head,start)
-                setlink(start,next)
-                setlink(current,start)
-             -- setlink(current,start,next) -- maybe
-                start = startnext
-                startattr = getprop(start,a_syllabe)
+                current = getnext(current)
+            else
                 break
             end
-            current = getnext(current)
-        else
-            break
         end
     end
+    --
     ::step_3::
     --
-    -- If reph should be repositioned after the main consonant: from the first consonant
+    -- If reph should be repositioned after the main consonant: find the first consonant
     -- not ligated with main, or find the first consonant that is not a potential
     -- pre-base reordering Ra.
     --
-    -- Kai: todo
+    if not startnext then
+        if char and after_main[rephbase] then
+            current = getnext(start)
+            while current do
+                local char = ischar(current,startfont)
+                if char and getprop(current,a_syllabe) == startattr then
+                    if consonant[char] and not getprop(current,a_state) == s_pref then
+                        startnext = getnext(start)
+                        head = remove_node(head,start)
+                        setlink(current,start)
+                        setlink(start,getnext(current))
+                     -- setlink(current,start,getnext(current)) -- maybe
+                        start = startnext
+                        startattr = getprop(start,a_syllabe)
+                        break
+                    end
+                    current = getnext(current)
+                else
+                    break
+                end
+            end
+        end
+    end
     --
     ::step_4::
     --
@@ -1210,23 +1498,37 @@ function handlers.devanagari_reorder_reph(head,start)
     -- position should be before the first matra, syllable modifier sign or vedic sign.
     --
     if not startnext then
-        current = getnext(start)
-        while current do
-            local char = ischar(current,startfont)
-            if char and getprop(current,a_syllabe) == startattr then
-                if getprop(current,a_state) == s_pstf then -- post-base
-                    startnext = getnext(start)
-                    head = remove_node(head,start)
-                    setlink(getprev(current),start)
-                    setlink(start,current)
-                 -- setlink(getprev(current),start,current) -- maybe
-                    start = startnext
-                    startattr = getprop(start,a_syllabe)
+        if char and before_postscript[rephbase] then
+            current = getnext(start)
+            local c = nil
+            while current do
+                local char = ischar(current,startfont)
+                if char and getprop(current,a_syllabe) == startattr then
+                    if getprop(current,a_state) == s_pstf then -- post-base
+                        startnext = getnext(start)
+                        head = remove_node(head,start)
+                        setlink(getprev(current),start)
+                        setlink(start,current)
+                     -- setlink(getprev(current),start,current) -- maybe
+                        start = startnext
+                        startattr = getprop(start,a_syllabe)
+                        break
+                    elseif not c and ( vowel_modifier[char] or stress_tone_mark[char] ) then
+                        c = current
+                    end
+                    current = getnext(current)
+                else
+                    if c then
+                        startnext = getnext(start)
+                        head = remove_node(head,start)
+                        setlink(getprev(c),start)
+                        setlink(start,c)
+                     -- setlink(getprev(c),start,c) -- maybe
+                        start = startnext
+                        startattr = getprop(start,a_syllabe)
+                    end
                     break
                 end
-                current = getnext(current)
-            else
-                break
             end
         end
     end
@@ -1245,7 +1547,10 @@ function handlers.devanagari_reorder_reph(head,start)
         while current do
             local char = ischar(current,startfont)
             if char and getprop(current,a_syllabe) == startattr then
-                if not c and mark_above_below_post[char] and not after_subscript[char] then
+                local state = getprop(current,a_state)
+                if before_subscript[rephbase] and (state == s_blwf or state == s_pstf) then
+                    c = current
+                elseif after_subscript[rephbase] and (state == s_pstf) then
                     c = current
                 end
                 current = getnext(current)
@@ -1310,67 +1615,82 @@ end
 --       return head, start, done
 --   end
 
+local reordered_pre_base_reordering_consonants = { } -- shared ? not reset ?
+
 function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
-    local current   = start
-    local startnext = nil
-    local startprev = nil
+    if reordered_pre_base_reordering_consonants[start] then
+        return head, start, true
+    end
+    local current = start -- we could cache attributes here
     local startfont = getfont(start)
     local startattr = getprop(start,a_syllabe)
-    -- can be fast for loop + caching state
     while current do
         local char = ischar(current,startfont)
+        local next = getnext(current)
         if char and getprop(current,a_syllabe) == startattr then
-            local next = getnext(current)
-            if halant[char] and not getprop(current,a_state) then
+            if halant[char] then -- a_state can also be init
                 if next then
-                    local nextchar = ischar(next,startfont)
-                    if nextchar and getprop(next,a_syllabe) == startattr then
-                        if nextchar == c_zwnj or nextchar == c_zwj then
-                            current = next
-                            next    = getnext(current)
-                        end
+                    local char = ischar(next,startfont)
+                    if char and zw_char[char] and getprop(next,a_syllabe) == startattr then
+                        current = next
+                        next    = getnext(current)
                     end
                 end
-                startnext = getnext(start)
-                removenode(start,start)
+                -- can be optimzied
+                local startnext = getnext(start)
+                head = remove_node(head,start)
                 setlink(start,next)
                 setlink(current,start)
              -- setlink(current,start,next) -- maybe
+                reordered_pre_base_reordering_consonants[start] = true
                 start = startnext
-                break
+                return head, start, true
+         -- elseif consonant[char] and ( not getprop(current,a_state) or getprop(current,a_state) == s_init) then
+         --     startnext = getnext(start)
+         --     head = remove_node(head,start)
+         --     if current == head then
+         --         setlink(start,current)
+         --         head = start
+         --     else
+         --         setlink(getprev(current),start)
+         --         setlink(start,current)
+         --     end
+         --     start = startnext
+         --     break
             end
-            current = next
         else
             break
         end
+        current = next
     end
-    if not startnext then
-        current   = getnext(start)
-        startattr = getprop(start,a_syllabe)
-        while current do
-            local char = ischar(current,startfont)
-            if char and getprop(current,a_syllabe) == startattr then
-                if not consonant[char] and getprop(current,a_state) then -- main
-                    startnext = getnext(start)
-                    removenode(start,start)
-                    setlink(getprev(current),start)
-                    setlink(start,current)
-                 -- setlink(getprev(current),start,current) -- maybe
-                    start = startnext
-                    break
-                end
-                current = getnext(current)
+
+    local startattr = getprop(start,a_syllabe)
+    local current = getprev(start)
+    while current and getprop(current,a_syllabe) == startattr do
+        local char = ischar(current)
+        if ( not dependent_vowel[char] and not getprop(current,a_state) or getprop(current,a_state) == s_init) then
+            startnext = getnext(start)
+            head = remove_node(head,start)
+            if current == head then
+                setlink(start,current)
+                head = start
             else
-                break
+                setlink(getprev(current),start)
+                setlink(start,current)
             end
+            reordered_pre_base_reordering_consonants[start] = true
+            start = startnext
+            break
         end
+        current = getprev(current)
     end
+
     return head, start, true
 end
 
 function handlers.devanagari_remove_joiners(head,start,kind,lookupname,replacement)
     local stop = getnext(start)
-    local font = getfont(start) -- hm
+    local font = getfont(start)
     local last = start
     while stop do
         local char = ischar(stop,font)
@@ -1411,15 +1731,15 @@ end
 -- of the actions
 
 local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pass over (determine stop in sweep)
-
     local seqsubset, reorderreph = initialize_two(font,attr)
 
-    local reph     = false -- was nil ... probably went unnoticed because never assigned
     local halfpos  = nil
     local basepos  = nil
     local subpos   = nil
     local postpos  = nil
-    local locl     = { }
+
+    reorderreph.coverage = { }
+    rephbase[font]       = { }
 
     for i=1,#seqsubset do
 
@@ -1429,17 +1749,17 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
         local kind        = subset[1]
         local lookupcache = subset[2]
         if kind == "rphf" then
-            reph = subset[3]
+            reorderreph.coverage[subset[3]] = true -- neat
+            rephbase[font][subset[3]] = subset[4]
             local current = start
             local last = getnext(stop)
             while current ~= last do
                 if current ~= stop then
-                    local c = locl[current] or getchar(current)
+                    local c = getchar(current)
                     local found = lookupcache[c]
                     if found then
                         local next = getnext(current)
-                        local n = locl[next] or getchar(next)
-                        if found[n] then    --above-base: rphf    Consonant + Halant
+                        if found[getchar(next)] or contextchain(found, next) then    --above-base: rphf    Consonant + Halant
                             local afternext = next ~= stop and getnext(next)
                             if afternext and zw_char[getchar(afternext)] then -- ZWJ and ZWNJ prevent creation of reph
                                 current = afternext -- getnext(next)
@@ -1459,15 +1779,16 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
             local last = getnext(stop)
             while current ~= last do
                 if current ~= stop then
-                    local c = locl[current] or getchar(current)
+                    local c = getchar(current)
                     local found = lookupcache[c]
                     if found then -- pre-base: pref	Halant + Consonant
                         local next = getnext(current)
-                        local n = locl[next] or getchar(next)
-                        if found[n] then
-                            setprop(current,a_state,s_pref)
-                            setprop(next,a_state,s_pref)
-                            current = next
+                        if found[getchar(next)] or contextchain(found, next) then
+                            if (not getprop(current,a_state) and not getprop(next,a_state)) then	--KE: a_state can also be init...
+                                setprop(current,a_state,s_pref)
+                                setprop(next,a_state,s_pref)
+                                current = next
+                            end
                         end
                     end
                 end
@@ -1478,15 +1799,14 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
             local last = getnext(stop)
             while current ~= last do
                 if current ~= stop then
-                    local c = locl[current] or getchar(current)
+                    local c = getchar(current)
                     local found = lookupcache[c]
                     if found then
                         local next = getnext(current)
-                        local n = locl[next] or getchar(next)
-                        if found[n] then
+                        if found[getchar(next)] or contextchain(found, next) then
                             if next ~= stop and getchar(getnext(next)) == c_zwnj then    -- zwnj prevent creation of half
                                 current = next
-                            else
+                            elseif (not getprop(current,a_state)) then	--KE: a_state can also be init...
                                 setprop(current,a_state,s_half)
                                 if not halfpos then
                                     halfpos = current
@@ -1498,21 +1818,22 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                 end
                 current = getnext(current)
             end
-        elseif kind == "blwf" then -- below-base: blwf / Halant + Consonant
+        elseif kind == "blwf" or kind == "vatu" then -- below-base: blwf / Halant + Consonant
             local current = start
             local last = getnext(stop)
             while current ~= last do
                 if current ~= stop then
-                    local c = locl[current] or getchar(current)
+                    local c = getchar(current)
                     local found = lookupcache[c]
                     if found then
                         local next = getnext(current)
-                        local n = locl[next] or getchar(next)
-                        if found[n] then
-                            setprop(current,a_state,s_blwf)
-                            setprop(next,a_state,s_blwf)
-                            current = next
-                            subpos = current
+                        if found[getchar(next)] or contextchain(found, next) then
+                            if (not getprop(current,a_state) and not getprop(next,a_state)) then	--KE: a_state can also be init...
+                                setprop(current,a_state,s_blwf)
+                                setprop(next,a_state,s_blwf)
+                                current = next
+                                subpos  = current
+                            end
                         end
                     end
                 end
@@ -1523,16 +1844,17 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
             local last = getnext(stop)
             while current ~= last do
                 if current ~= stop then
-                    local c = locl[current] or getchar(current)
+                    local c = getchar(current)
                     local found = lookupcache[c]
                     if found then
                         local next = getnext(current)
-                        local n = locl[next] or getchar(next)
-                        if found[n] then
-                            setprop(current,a_state,s_pstf)
-                            setprop(next,a_state,s_pstf)
-                            current = next
-                            postpos = current
+                        if found[getchar(next)] or contextchain(found, next) then
+                            if (not getprop(current,a_state) and not getprop(next,a_state)) then	--KE: a_state can also be init...
+                                setprop(current,a_state,s_pstf)
+                                setprop(next,a_state,s_pstf)
+                                current = next
+                                postpos = current
+                            end
                         end
                     end
                 end
@@ -1540,12 +1862,6 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
             end
         end
     end
-
-    -- this one changes per word ...
-
-    reorderreph.coverage = { [reph] = true } -- neat
-
-    -- end of weird
 
     local current, base, firstcons = start, nil, nil
 
@@ -1612,7 +1928,7 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                     end
                     -- check whether consonant has below-base or post-base form or is pre-base reordering Ra
                     local a = getprop(current,a_state)
-                    if not (a == s_pref or a == s_blwf or a == s_pstf) then
+                    if not (a == s_blwf or a == s_pstf or (a ~= s_rphf and a ~= s_blwf and ra[getchar(current)])) then
                         base = current
                     end
                 end
@@ -1630,7 +1946,7 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
         end
         return head, stop, nbspaces
     else
-        if getprop(base,a_state) then
+        if getprop(base,a_state) then -- a_state can also be init
             setprop(base,a_state,unsetvalue)
         end
         basepos = base
@@ -1647,24 +1963,27 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
 
     -- Matra characters are classified and reordered by which consonant in a conjunct they have affinity for
 
-    local moved = { }
+    local moved   = { }
     local current = start
-    local last = getnext(stop)
+    local last    = getnext(stop)
     while current ~= last do
-        local char, target, cn = locl[current] or getchar(current), nil, getnext(current)
+        local char   = getchar(current)
+        local target = nil
+        local cn     = getnext(current)
         -- not so efficient (needed for malayalam)
         local tpm = twopart_mark[char]
-        if tpm then
+        while tpm do
             local extra = copy_node(current)
             copyinjection(extra,current)
             char = tpm[1]
             setchar(current,char)
             setchar(extra,tpm[2])
             head = insert_node_after(head,current,extra)
+            tpm = twopart_mark[char]
         end
         --
         if not moved[current] and dependent_vowel[char] then
-            if pre_mark[char] then            -- Before first half form in the syllable
+            if pre_mark[char] then -- or: if before_main or before_half
                 moved[current] = true
                 -- can be helper to remove one node
                 local prev, next = getboth(current)
@@ -1672,17 +1991,47 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                 if current == stop then
                     stop = getprev(current)
                 end
-                if halfpos == start then
+
+                local pos
+                if before_main[char] then
+                    pos     = basepos
+                 -- basepos = current -- is this correct?
+                else
+                    -- must be before_half
+                    pos      = halfpos
+                 -- halfpos = current -- is this correct?
+                end
+
+                local ppos = getprev(pos) -- necessary?
+                while ppos and getprop(ppos,a_syllabe) == getprop(pos,a_syllabe) do
+                    if getprop(ppos,a_state) == s_pref then
+                        pos = ppos
+                    end
+                    ppos = getprev(ppos)
+                end
+
+                local ppos = getprev(pos) -- necessary?
+                while ppos and getprop(ppos,a_syllabe) == getprop(pos,a_syllabe) and halant[ischar(ppos)] do
+                    ppos = getprev(ppos)
+                    if ppos and getprop(ppos,a_syllabe) == getprop(pos,a_syllabe) and consonant[ischar(ppos)] then
+                        pos  = ppos
+                        ppos = getprev(ppos)
+                    else
+                        break
+                    end
+                end
+
+                if pos == start then
                     if head == start then
                         head = current
                     end
                     start = current
                 end
-                setlink(getprev(halfpos),current)
-                setlink(current,halfpos)
-             -- setlink(getprev(halfpos),current,halfpos) -- maybe
-                halfpos = current
-            elseif above_mark[char] then    -- After main consonant
+                setlink(getprev(pos),current)
+                setlink(current,pos)
+             -- setlink(getprev(pos),current,pos) -- maybe
+            elseif above_mark[char] then
+                -- after main consonant
                 target = basepos
                 if subpos == basepos then
                     subpos = current
@@ -1691,13 +2040,25 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                     postpos = current
                 end
                 basepos = current
-            elseif below_mark[char] then    -- After subjoined consonants
+            elseif below_mark[char] then
+                -- after subjoined consonants
                 target = subpos
                 if postpos == subpos then
                     postpos = current
                 end
                 subpos = current
-            elseif post_mark[char] then    -- After post-form consonant
+            elseif post_mark[char] then
+                -- after post-form consonant
+                local n = getnext(postpos) -- nukta and vedic sign come first - is that right? and also halant+ra
+                while n do
+                    local v = ischar(n,font)
+                    if nukta[v] or stress_tone_mark[v] or vowel_modifier[v] then
+                        postpos = n
+                    else
+                        break
+                    end
+                    n = getnext(n)
+                end
                 target = postpos
                 postpos = current
             end
@@ -1718,9 +2079,44 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
         current = cn
     end
 
+    -- reorder halant+Ra
+
+    local current = getnext(start)
+    local last    = getnext(stop)
+    while current ~= last do
+        local char = getchar(current)
+        local cn   = getnext(current)
+        if halant[char] and ra[ischar(cn)] and getprop(cn,a_state) ~= s_rphf and getprop(cn,a_state) ~= s_blwf then
+            if after_main[ischar(cn)] then
+                local prev = getprev(current)
+                local next = getnext(cn)
+                local bpn  = getnext(basepos)
+                while bpn and dependent_vowel[ischar(bpn)] do
+                    basepos = bpn
+                    bpn     = getnext(bpn)
+                end
+                if basepos ~= prev then
+                    setlink(prev,next)
+                    setlink(cn, getnext(basepos))
+                    setlink(basepos, current)
+                    if cn == stop then
+                        stop = prev
+                    end
+                    cn = next
+                end
+            end
+            -- after_postscript
+            -- after_subscript
+            -- before_postscript
+            -- before_subscript
+        end
+        current = cn
+    end
+
     -- Reorder marks to canonical order: Adjacent nukta and halant or nukta and vedic sign are always repositioned if necessary, so that the nukta is first.
 
-    local current, c = start, nil
+    local current = start
+    local c       = nil
     while current ~= stop do
         local char = getchar(current)
         if halant[char] or stress_tone_mark[char] then
@@ -1849,7 +2245,25 @@ local function analyze_next_chars_one(c,font,variant) -- skip one dependent vowe
     if not v then
         return c
     end
-    if dependent_vowel[v] then
+    local already_pre_mark   -- = false
+    local already_above_mark -- = false
+    local already_below_mark -- = false
+    local already_post_mark  -- = false
+    while dependent_vowel[v] do
+	    local vowels = twopart_mark[v] or { v }
+	    for k, v in next, vowels do
+			if pre_mark[v] and not already_pre_mark then
+				already_pre_mark = true
+			elseif above_mark[v] and not already_above_mark then
+				already_above_mark = true
+			elseif below_mark[v] and not already_below_mark then
+				already_below_mark = true
+			elseif post_mark[v] and not already_post_mark then
+				already_post_mark = true
+			else
+				return c
+			end
+	    end
         c = getnext(c)
         n = getnext(c)
         if not n then
@@ -2021,7 +2435,25 @@ local function analyze_next_chars_two(c,font)
     else
         -- c = ms_matra(c)
         -- same as one
-        if dependent_vowel[v] then
+        local already_pre_mark   -- = false
+        local already_above_mark -- = false
+        local already_below_mark -- = false
+        local already_post_mark  -- = false
+		while dependent_vowel[v] do
+			local vowels = twopart_mark[v] or { v }
+			for k, v in next, vowels do
+				if pre_mark[v] and not already_pre_mark then
+					already_pre_mark = true
+				elseif above_mark[v] and not already_above_mark then
+					already_above_mark = true
+				elseif below_mark[v] and not already_below_mark then
+					already_below_mark = true
+				elseif post_mark[v] and not already_post_mark then
+					already_post_mark = true
+				else
+					return c
+				end
+			end
             c = n
             n = getnext(c)
             if not n then
@@ -2093,6 +2525,7 @@ local function method_one(head,font,attr)
     local start    = true
     local done     = false
     local nbspaces = 0
+    local syllabe  = 0
     while current do
         local char = ischar(current,font)
         if char then
@@ -2242,6 +2675,15 @@ local function method_one(head,font,attr)
                         end
                     end
                     if syllablestart ~= syllableend then
+                        if syllableend then
+                            syllabe = syllabe + 1
+                            local c = syllablestart
+                            local n = getnext(syllableend)
+                            while c ~= n do
+                                setprop(c,a_syllabe,syllabe)
+                                c = getnext(c)
+                            end
+                        end
                         head, current, nbspaces = reorder_one(head,syllablestart,syllableend,font,attr,nbspaces)
                         current = getnext(current)
                     end
@@ -2282,6 +2724,21 @@ local function method_one(head,font,attr)
     if nbspaces > 0 then
         head = replace_all_nbsp(head)
     end
+
+    current = head
+    local n = 0
+    while current do
+        local char = ischar(current,font)
+        if char then
+			if n == 0 and not getprop(current,a_state) then
+				setprop(current,a_state,s_init)
+			end
+			n = n + 1
+		else
+			n = 0
+		end
+		current = getnext(current)
+	end
 
     return head, done
 end
@@ -2363,7 +2820,7 @@ local function method_two(head,font,attr)
         end
         if not syllableend and show_syntax_errors then
             local char = ischar(current,font)
-            if char and not getprop(current,a_state) then
+            if char and not getprop(current,a_state) then -- a_state can also be init
                 local mark = mark_four[char]
                 if mark then
                     head, current = inject_syntax_error(head,current,char)
@@ -2377,6 +2834,21 @@ local function method_two(head,font,attr)
     if nbspaces > 0 then
         head = replace_all_nbsp(head)
     end
+
+    current = head
+    local n = 0
+    while current do
+        local char = ischar(current,font)
+        if char then
+			if n == 0 and not getprop(current,a_state) then	-- a_state can also be init
+				setprop(current,a_state,s_init)
+			end
+			n = n + 1
+		else
+			n = 0
+		end
+		current = getnext(current)
+	end
 
     return head, done
 end

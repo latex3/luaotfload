@@ -1,0 +1,16 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{unicode-math}
+\setmathfont{Latin Modern Math}
+\setmathfont{Latin Modern Math}[version=bold,RawFeature={embolden=2},]
+
+\begin{document}
+$x$
+
+\START \showoutput
+$x=\int_1 f(x) dx$
+
+\mathversion{bold}
+
+$x=\int_1 f(x) dx$
+\end{document}

@@ -1,0 +1,10 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{fontspec}
+\setmainfont{texgyretermes}
+
+\begin{document}
+
+\START \showoutput
+some text {\addfontfeature{RawFeature={embolden=2}} some text} some text
+\end{document}

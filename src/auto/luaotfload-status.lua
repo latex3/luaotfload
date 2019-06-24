@@ -1,5 +1,6 @@
 return {
  ["hashes"]={
+  { "fontloader-2019-06-20.lua", "f50b7be3bdec0ae346b70d57ef3a4ca8" },
   { "fontloader-util-fil.lua", "4bb3e4dc72e308d8ed67cd7a80027fa7" },
   { "fontloader-util-str.lua", "a09020dcaed195ea9acaace2b7b9a66f" },
   { "fontloader-l-unicode.lua", "d46cc6cf18fb3f368ef1e404dc9fcb5c" },
@@ -81,7 +82,7 @@ return {
   ["committer"]="Ulrike Fischer <fischer@troubleshooting-tex.de>",
   ["description"]="v2.9805-2019-06-20",
   ["loader"]="fontloader-2019-06-20.lua",
-  ["revision"]="e9facd8589f98e97235af8b14383f7cf4b286633",
-  ["timestamp"]="2019-06-24 23:00:03 +0200",
+  ["revision"]="50205059b865480685c2e92a39fcfc3571c750e3",
+  ["timestamp"]="2019-06-24 23:10:07 +0200",
  },
 }

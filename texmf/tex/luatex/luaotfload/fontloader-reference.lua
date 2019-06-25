@@ -8591,7 +8591,7 @@ characters.indicgroups={
   [43249]=true,
  },
 }
-return characters.indicgroups
+--return characters.indicgroups
 
 end -- closure
 

@@ -221,7 +221,7 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
         -- to let the font modules do their work. Don't depend on their functions
         -- as we might strip them in future versions of this generic variant.
 
-        loadmodule('fontloader--basics-gen.lua')
+        loadmodule('fontloader-basics-gen.lua')
         loadmodule('fontloader-data-con.lua')
 
         -- We do need some basic node support. The code in there is not for

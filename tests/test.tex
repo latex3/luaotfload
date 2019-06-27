@@ -164,19 +164,22 @@ display math $$E=mc^2\hbox{ with text inside}$$
 {\dflt ..}  & No script in font options\cr
 }
 
-\font\letterspace="[amiri-regular.ttf]:letterspace=50" at 30pt\letterspace
+\font\letterspace="[amiri-regular.ttf]:mode=harf;letterspace=50" at 30pt\letterspace
 letter spaced
 
-\font\slanted="[amiri-regular.ttf]:slant=.3" at 30pt\slanted
+\font\kernfactor="[amiri-regular.ttf]:mode=harf;kernfactor=.5" at 30pt\kernfactor
+letter spaced
+
+\font\slanted="[amiri-regular.ttf]:mode=harf;slant=.3" at 30pt\slanted
 Slanted text.
 
-\font\embolden="[amiri-regular.ttf]:embolden=1.5" at 30pt\embolden
+\font\embolden="[amiri-regular.ttf]:mode=harf;embolden=1.5" at 30pt\embolden
 Emboldened text.
 
-\font\extend="[amiri-regular.ttf]:extend=2" at 30pt\extend
+\font\extend="[amiri-regular.ttf]:mode=harf;extend=2" at 30pt\extend
 Extended text.
 
-\font\squeeze="[amiri-regular.ttf]:squeeze=.5" at 30pt\squeeze
+\font\squeeze="[amiri-regular.ttf]:mode=harf;squeeze=.5" at 30pt\squeeze
 Squeezed t^^^^0304e^^^^032ex^^^^0304t^^^^032e.
 
 \endgroup\vfill\eject

@@ -108,6 +108,14 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
   "patch_font", set_sscale_dimens, "set_sscale_dimens",
 }
 
+-- Starting with LuaTeX 1.11.2, this is a more reliable way of selecting the
+-- right font than relying on psnames
+luaotfload_callbacks [#luaotfload_callbacks + 1] = {
+  "patch_font", function(fontdata)
+    fontdata.subfont = fontdata.specification.sub or 1
+  end, "set_font_index",
+}
+
 local default_units = 1000
 
 --- fontobj -> int

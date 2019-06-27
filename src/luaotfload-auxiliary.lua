@@ -105,6 +105,14 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
   "patch_font", set_sscale_dimens, "set_sscale_dimens",
 }
 
+-- HarfteX doesn't like 1-based indexing, so we adjust it. This doesn't hurt in
+-- LuaTeX either because LuaTeX doesn't use a `index` field in the first place.
+luaotfload_callbacks [#luaotfload_callbacks + 1] = {
+  "patch_font", function(fontdata)
+    fontdata.index = (fontdata.specification.sub or 1) - 1
+  end, "set_harftex_font_index",
+}
+
 local default_units = 1000
 
 --- fontobj -> int

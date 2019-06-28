@@ -55,6 +55,13 @@
 
 \pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
+\beginsection {New in version 2.98 (by Ulrike Fischer)}
+\begin{itemize}
+\item The\marginpar{\mbox{}\hfill \textbf{breaking change!}} handling of missing chars has been changed. In This version a missing char will insert the \inlinecode{/.notdef} char of the fonts (this is sometimes a space, sometimes a rectangle with a cross) and no longer simply ignore the glyph. This behaviour can be reverted by using \inlinecode{notdef=false} as font feature.
+\item The font feature \inlinecode{embolden} can now be used to fake a bold font. 
+\item The fontloader has been synched with the context files from 2019-06-20.
+\end{itemize}
+\endsection
 \beginsection {New in version 2.97 (by Ulrike Fischer)}
 \begin{itemize}
 \item the new generic fontloader improves the handling of large fonts (but some fonts still need a 64bit luatex version to create the font files).
@@ -726,7 +733,7 @@ obviously, \inlinecode{random}.
          e.~g. for math fonts.
 
          Since version 2.94 it is possible to call other font renderers with the mode key. A simple example with a plain reader can be found at \hyperlink{https://github.com/u-fischer/luaotfload/pull/26\#issuecomment-437716326}.
-         A more useful example needs the new experimental luahbtex engine (windows binaries can be found at w32tex.org), and the luahbtex-harf renderer (\hyperlink{https://github.com/khaledhosny/luahbtex-harf}). With both it is possible to render a font using the harfbuzz library (used also by xetex).
+         A more useful example needs the new experimental harftex engine (windows binaries can be found at w32tex.org), and the harf renderer (\hyperlink{https://github.com/khaledhosny/harf}). With both it is possible to render a font using the harfbuzz library (used also by xetex).
 
 
   \endaltitem
@@ -767,6 +774,21 @@ obviously, \inlinecode{random}.
          \endlisting
   \endaltitem
 
+
+   \beginaltitem {embolden}
+         A factor, defined as a decimal number.
+
+         For example
+
+         \beginlisting
+      \font\test = "Latin Modern Roman:mode=node;embolden=2;"
+         \endlisting
+      
+      {\font\test= "Latin Modern Roman:mode=node;"\test Dies is not bold. 
+       \font\test= "Latin Modern Roman:mode=node;embolden=2;" \test Dies is a faked bold font.}
+         
+  \endaltitem
+  
   \beginaltitem {kernfactor \& letterspace}\label{p:letterspace}
          Define a font with letterspacing (tracking) enabled.
          %

@@ -1,5 +1,5 @@
 
-packageversion= "2.9806"
+packageversion= "2.9805"
 packagedate   = "2019-06-20"
 
 local luatexstatus = status.list()
@@ -46,7 +46,7 @@ checkengines = {"luatex"}
 
 local errorlevel   = os.execute("harftex --version") 
 if not os.getenv('TRAVIS') and errorlevel==0 then 
-  --  checkengines = {"luatex","harftex"}
+   checkengines = {"luatex","harftex"}
 end 
  
 checkconfigs = {
@@ -67,7 +67,7 @@ if os.env["CONTEXTPATH"] then
   if ismiktex then
    excludetests = {"arabkernsfs","fontload-ttc-fontindex"}
   else
-   excludetests = {}
+   excludetests = {"luatex-ja"}
   end
 else
   -- travis or somewhere else ...

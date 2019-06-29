@@ -25,7 +25,7 @@
 
 \usepackage{fontspec}
 
-\setmainfont{OpenSans-Regular.ttf}%
+\setmainfont{DejaVuSans.ttf}%
 
 \usepackage{microtype}
 \begin{document}

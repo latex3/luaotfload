@@ -41,7 +41,7 @@ tlmgr install fontspec microtype unicode-math luaotfload
 # fonts
 tlmgr install  sourcecodepro Asana-Math  ebgaramond  tex-gyre  amsfonts gnu-freefont  
 tlmgr install  opensans fira tex-gyre-math junicode lm  lm-math amiri ipaex xits
-tlmgr install  libertine coelacanth fontawesome stix2-otf
+tlmgr install  libertine coelacanth fontawesome stix2-otf dejavu
 tlmgr install  luatexko unfonts-core cjk-ko iwona
 
 # languages

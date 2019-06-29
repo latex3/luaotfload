@@ -1,0 +1,20 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+[\directlua]:9: attempt to concatenate a nil value.
+<to be read again> 
+\test 
+l. ...\font\test={name:texgyreheros}\test
+The lua interpreter ran into a problem, so the
+remainder of this lua chunk will be ignored.
+! Font \test=name:texgyreheros not loadable: metric data not found or bad.
+<to be read again> 
+\test 
+l. ...\font\test={name:texgyreheros}\test
+I wasn't able to read the size data for this font,
+so I will ignore the font specification.
+[Wizards can fix TFM files using TFtoPL/PLtoTF.]
+You might try inserting a different font spec;
+e.g., type `I\font<same font id>=<substitute font name>'.
+patch_font_unsafecmr100
+patch_font_unsafe, no table! [1
+] (patch-safe-unsafe.aux)

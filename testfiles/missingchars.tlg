@@ -1,0 +1,109 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 515.94489fil, direction TLT
+...\write-{}
+...\glue(\topskip) 3.06
+...\hbox(6.94+2.05)x345.0, glue set 248.68001fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\test L
+....\test a
+....\test t
+....\test i
+....\test n
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
+....\test M
+....\test o
+....\kern0.28 (font)
+....\test d
+....\discretionary (penalty 50)
+.....< \test -
+....\test e
+....\test r
+....\test n
+....\test :
+....\glue(\spaceskip) 4.44 plus 3.32999 minus 0.555
+....\test x
+....\test ẞ
+....\test 󰀀
+....\test y
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.87
+...\hbox(7.08+2.04)x345.0, glue set 267.14001fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\test L
+....\test i
+....\test b
+....\discretionary (penalty 50)
+.....< \test -
+.....= \kern0.28 (font)
+....\test e
+....\test r
+....\test t
+....\discretionary (penalty 50)
+.....< \test -
+....\test i
+....\discretionary (penalty 50)
+.....< \test -
+....\test n
+....\kern-0.28 (font)
+....\test u
+....\test s
+....\test :
+....\glue(\spaceskip) 4.44 plus 3.32999 minus 0.555
+....\TU/LibertinusSerif(0)/m/n/10 (
+....\TU/LibertinusSerif(0)/m/n/10 ➍
+....\TU/LibertinusSerif(0)/m/n/10 󰀀
+....\TU/LibertinusSerif(0)/m/n/10 )
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.88
+...\hbox(7.08+2.04)x345.0, glue set 324.04001fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/LibertinusSerif(1)/m/n/10 (
+....\TU/LibertinusSerif(1)/m/n/10 ➍
+....\TU/LibertinusSerif(1)/m/n/10 )
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -2.04
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.34
+..\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\TU/lmr/m/n/10 1
+...\glue 0.0 plus 1.0fil
+Missing character: There is no ẞ (U+1E9E) in font file:lmroman10-regular.otf:mode=node;!
+Missing character: There is no ➍ (U+278D) in font LibertinusSerif:mode=node;script=latn;language=DFLT;+tlig;!
+Missing character: There is no ➍ (U+278D) in font LibertinusSerif:mode=node;script=latn;language=DFLT;notdef=false;!
+(missingchars.aux)

@@ -1,0 +1,16 @@
+\input{regression-test}
+
+\documentclass{article}
+\usepackage{fontspec}
+\setsansfont{Libertinus Serif}
+\setmonofont{Libertinus Serif}[RawFeature={notdef=false}]
+\begin{document}
+
+\START\showoutput
+\font\test={file:lmroman10-regular.otf:mode=node;}\test
+Latin Modern: x\SS y
+
+Libertinus: \sffamily (^^^^278d)
+
+\ttfamily (^^^^278d)
+\end{document}

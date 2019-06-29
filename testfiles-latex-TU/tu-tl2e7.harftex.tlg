@@ -447,7 +447,7 @@ ne \ETC.}
 ....\TU/lmr/bx/n/14.4 m
 ....\discretionary (penalty 50)
 .....< \TU/lmr/bx/n/14.4 -
-....\TU/lmr/bx/n/14.4 ﬂ (ligature fl)
+....\TU/lmr/bx/n/14.4 fl
 ....\TU/lmr/bx/n/14.4 e
 ....\TU/lmr/bx/n/14.4 x
 ....\glue(\spaceskip) 5.4 plus 2.7 minus 1.8
@@ -929,7 +929,7 @@ ne \ETC.}
 ...\glue 9.913 plus 0.86198
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 4.8636
-...\hbox(7.05+2.0)x345.0, glue set 284.66998fil, direction TLT
+...\hbox(7.05+2.0)x345.0, glue set 287.46997fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -949,7 +949,7 @@ ne \ETC.}
 ....\glue(\spaceskip) 3.33 plus 1.66331 minus 1.1111
 ....\TU/lmr/m/n/10 x
 ....\TU/lmr/m/n/10 ̧
-....\TU/lmr/m/n/10 󰀀
+....\kern-2.8 (font)
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -1080,8 +1080,9 @@ ne \ETC.}
 ....\TU/lmr/m/n/10 Ł
 ....\TU/lmr/m/n/10 Œ
 ....\TU/lmr/m/n/10 ^^d8
+....\pdfliteral direct <lua data reference 810>
 ....\TU/lmr/m/n/10 ẞ
-....\TU/lmr/m/n/10 󰀀
+....\pdfliteral direct <lua data reference 812>
 ....\TU/lmr/m/n/10 ı
 ....\TU/lmr/m/n/10 ȷ
 ....\TU/lmr/m/n/10 ^^a3

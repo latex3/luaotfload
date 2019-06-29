@@ -1,0 +1,15 @@
+\input{regression-test}
+\documentclass{article}
+
+\usepackage{fontspec}
+\setmainfont{FandolSong-Regular.otf}
+
+\begin{document}
+
+\START\showoutput
+
+\section{现代建筑教育}
+
+中国的现代建筑教育体系不是来自本土建筑营造的延续
+
+\end{document}

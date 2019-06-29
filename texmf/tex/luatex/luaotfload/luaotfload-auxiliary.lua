@@ -289,13 +289,8 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
 
 -- Of course there are also fonts with no sensible x-height, so let's add a
 -- fallback there:
-<<<<<<< HEAD
-local function set_xheight(fontdata)
-  local parameters = fontdata.parameters
-=======
 local function set_xheight(tfmdata)
   local parameters = tfmdata.parameters
->>>>>>> 4c5b4aff7bbdecb8979545b00632fc4a3c658f36
   if not parameters then return end
   if not (parameters.x_height or parameters[5] or 0) == 0 then return end
   if tfmdata.characters and tfmdata.characters[120] then

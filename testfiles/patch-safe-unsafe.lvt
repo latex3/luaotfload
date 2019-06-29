@@ -6,16 +6,16 @@
 \begin{luacode}
 
 local testpatch = function (fontdata)
-  texio.write_nl("patch_font" .. fontdata.name .. fontdata.encodingbytes)
+  texio.write_nl("patch_font" .. fontdata.name .. (fontdata.encodingbytes or X))
 end
 
 local testpatchunsafe = function (fontdata)
  local t =  type (fontdata)
   if t == "table" then
-    texio.write_nl("patch_font_unsafe" .. fontdata.name .. fontdata.encodingbytes)
+    texio.write_nl("patch_font_unsafe" .. fontdata.name .. (fontdata.encodingbytes or X))
   else
-    texio.write_nl("patch_font_unsafe, no table!")  
-  end   
+    texio.write_nl("patch_font_unsafe, no table!")
+  end
  end
 
 

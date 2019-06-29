@@ -108,21 +108,6 @@ local function loadfont(spec)
     local gid = hbfont:get_nominal_glyph(0x0020)
     local space = gid and hbfont:get_glyph_h_advance(gid) or upem / 2
 
-    local xheight, capheight = nil, nil
-    if hasos2 then
-      local os2 = hbface:get_table(os2tag)
-      local length = os2:get_length()
-      local data = os2:get_data()
-      if length >= 96 and string.unpack(">H", data) > 1 then
-        -- We don’t need much of the table, so we read from hard-coded offsets.
-        xheight = string.unpack(">H", data, 87)
-        capheight = string.unpack(">H", data, 89)
-      end
-    end
-
-    xheight = xheight or ascender / 2
-    capheight = capheight or ascender
-
     local slant = 0
     if haspost then
       local post = hbface:get_table(posttag)
@@ -182,6 +167,36 @@ local function loadfont(spec)
       characters[uni] = hbfont:get_nominal_glyph(uni)
     end
 
+    local xheight, capheight = 0, 0
+    if hasos2 then
+      local os2 = hbface:get_table(os2tag)
+      local length = os2:get_length()
+      local data = os2:get_data()
+      if length >= 96 and string.unpack(">H", data) > 1 then
+        -- We don’t need much of the table, so we read from hard-coded offsets.
+        xheight = string.unpack(">H", data, 87)
+        capheight = string.unpack(">H", data, 89)
+      end
+    end
+
+    if xheight == 0 then
+      local gid = characters[120] -- x
+      if gid then
+        xheight = glyphs[gid].height
+      else
+        xheight = ascender / 2
+      end
+    end
+
+    if capheight == 0 then
+      local gid = characters[88] -- X
+      if gid then
+        capheight = glyphs[gid].height
+      else
+        capheight = ascender
+      end
+    end
+
     data = {
       face = hbface,
       font = hbfont,
@@ -237,7 +252,6 @@ local function scalefont(data, spec)
   local hbfont = data.font
   local upem = data.upem
   local space = data.space
-  local capheight = data.capheight
 
   if size < 0 then
     size = -655.36 * size
@@ -345,7 +359,7 @@ local function scalefont(data, spec)
       x_height = data.xheight * scale,
       quad = size,
       extra_space = space * scale / 3,
-      [8] = capheight * scale, -- for XeTeX compatibility.
+      [8] = data.capheight * scale, -- for XeTeX compatibility.
     },
     hb = {
       scale = scale,

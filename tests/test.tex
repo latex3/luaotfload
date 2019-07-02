@@ -92,9 +92,11 @@
 \btest
 \font\testa="[BungeeColor1.ttf]:colr=true" at 50pt\testa
 ABCDEFG\par
-\font\testb="[BungeeColor1.ttf]:colr=2" at 50pt\testb
+\font\testb="[BungeeColor1.ttf]:colr=2"    at 50pt\testb
 ABCDEFG\par
+\etest
 
+\btest
 \font\test="[NotoColorEmoji.ttf]" at 24pt\test
 💙💚💛💜💝🖤🧡😀😇🧔🏽🦆
 abc
@@ -116,10 +118,15 @@ if luaotfload then
   assert(nil == luaotfload.aux.slot_of_name(font.current(), "foo"))
 end
 }
+\etest
 
-\font\testi="[amiri-slanted.ttf]" at 10pt
-({\testi f\/})
+\btest
+\font\testr="[amiri-regular.ttf]" at 100pt
+\font\testi="[amiri-slanted.ttf]" at 100pt
+\testr ({\testi f\/})
+\etest
 
+\btest
 \def\l#1#2{%
   \begingroup
   \font\test="[amiri-regular.ttf]:language=#1" at 10pt\test #2%
@@ -130,15 +137,14 @@ end
 \l{URD}{۰۱۲۳۴۵۶۷۸۹}\par
 \l{SND}{۰۱۲۳۴۵۶۷۸۹}\par
 \l{KSH}{۰۱۲۳۴۵۶۷۸۹}\par
+\etest
 
-Some text then inline math $E=mc^2$ then $\hbox{text inside inline math}$, then
-display math $$E=mc^2\hbox{ with text inside}$$
-
-\begingroup
+\btest
 \font\test="[lmmono10-regular.otf]"\test
 $\fam0 \textfont0\font https:$
-\endgroup
+\etest
 
+\btest
 % Test selecting shapers; when “ot” shaper is used, “kdot” feature will not
 % work as it is a Graphite-only feature in Padauk font.
 \font\test="[Padauk-Regular.ttf]:+kdot"                  at 30pt\test
@@ -147,8 +153,9 @@ $\fam0 \textfont0\font https:$
 က ဂ င တ ပ မ ယ လ ဢ ၵ ၸ \par
 \font\test="[Padauk-Regular.ttf]:shaper=ot;+kdot"        at 30pt\test
 က ဂ င တ ပ မ ယ လ ဢ ၵ ၸ \par
+\etest
 
-
+\btest
 \font\arab="[amiri-regular.ttf]:script=arab" at 10pt\arab
 \font\latn="[amiri-regular.ttf]:script=latn" at 10pt\latn
 \font\dflt="[amiri-regular.ttf]" at 10pt\dflt
@@ -161,25 +168,36 @@ $\fam0 \textfont0\font https:$
 {\dflt .ع.} & No script in font options\cr
 {\dflt ..}  & No script in font options\cr
 }
+\etest
 
+\btest
 \font\test="[amiri-regular.ttf]:mode=harf;letterspace=50" at 30pt\test
 letter spaced
+\etest
 
+\btest
 \font\test="[amiri-regular.ttf]:mode=harf;kernfactor=.5" at 30pt\test
 letter spaced
+\etest
 
+\btest
 \font\test="[amiri-regular.ttf]:mode=harf;slant=.3" at 30pt\test
 Slanted text.
+\etest
 
+\btest
 \font\test="[amiri-regular.ttf]:mode=harf;embolden=1.5" at 30pt\test
 Emboldened text.
+\etest
 
+\btest
 \font\test="[amiri-regular.ttf]:mode=harf;extend=2" at 30pt\test
 Extended text.
+\etest
 
+\btest
 \font\test="[amiri-regular.ttf]:mode=harf;squeeze=.5" at 30pt\test
 Squeezed t^^^^0304e^^^^032ex^^^^0304t^^^^032e.
-
 \etest
 
 \btest
@@ -233,6 +251,11 @@ was at work typesetting beautiful documents.
 \font\test=cmr10 at 12pt
 \test
 \input story
+\etest
+
+\btest
+Some text then inline math $E=mc^2$ then $\hbox{text inside inline math}$, then
+display math $$E=mc^2\hbox{ with text inside}$$
 \etest
 
 \btest

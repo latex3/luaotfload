@@ -318,7 +318,7 @@ local function chars_in_glyph(i, glyphs, stop)
   return nchars, nglyphs
 end
 
--- Check if it is safe to break before this glyph.
+-- Check if it is not safe to break before this glyph.
 local function unsafetobreak(glyph, nodes)
   return glyph
      and glyph.flags

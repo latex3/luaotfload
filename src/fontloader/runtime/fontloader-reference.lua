@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 06/20/19 18:47:00
+-- merge date  : 07/04/19 12:29:22
 
 do -- begin closure to overcome local limits and interference
 
@@ -977,9 +977,11 @@ function string.is_empty(str)
  end
 end
 local anything=patterns.anything
-local allescapes=Cc("%")*S(".-+%?()[]*") 
-local someescapes=Cc("%")*S(".-+%()[]")   
-local matchescapes=Cc(".")*S("*?")   
+local moreescapes=Cc("%")*S(".-+%?()[]*$^{}")
+local allescapes=Cc("%")*S(".-+%?()[]*")   
+local someescapes=Cc("%")*S(".-+%()[]")  
+local matchescapes=Cc(".")*S("*?")     
+local pattern_m=Cs ((moreescapes+anything )^0 )
 local pattern_a=Cs ((allescapes+anything )^0 )
 local pattern_b=Cs ((someescapes+matchescapes+anything )^0 )
 local pattern_c=Cs (Cc("^")*(someescapes+matchescapes+anything )^0*Cc("$") )
@@ -989,6 +991,8 @@ end
 function string.topattern(str,lowercase,strict)
  if str=="" or type(str)~="string" then
   return ".*"
+ elseif strict=="all" then
+  str=lpegmatch(pattern_m,str)
  elseif strict then
   str=lpegmatch(pattern_c,str)
  else
@@ -8591,7 +8595,6 @@ characters.indicgroups={
   [43249]=true,
  },
 }
---return characters.indicgroups
 
 end -- closure
 

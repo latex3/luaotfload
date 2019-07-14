@@ -836,8 +836,8 @@ local function inject_positions_only(head,where)
                                 if replace then
                                     -- error, we expect an empty one
                                 else
---KE                                    setfield(next,"replace",fontkern(rightkern)) -- maybe also leftkern
-                                    replace = fontkern(rightkern) -- maybe also leftkern	--KE
+                              -- KE setfield(next,"replace",fontkern(rightkern)) -- maybe also leftkern
+                                    replace = fontkern(rightkern) -- maybe also leftkern
                                     done = true	--KE
                                 end
                             end

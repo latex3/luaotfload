@@ -3614,6 +3614,6 @@ characters.indicgroups={
  },
 }
 
--- done
+-- done, uncomment for testing:
 
-return characters.indicgroups
+-- return characters.indicgroups

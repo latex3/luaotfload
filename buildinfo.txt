@@ -98,7 +98,7 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-02-14.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-07-04.lua
 
 
 ==============

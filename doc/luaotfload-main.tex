@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2019-06-20 v2.9807}
+  \setdocumentdate   {2019-07-04 v2.9808}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
@@ -58,8 +58,8 @@
 \beginsection {New in version 2.98 (by Ulrike Fischer)}
 \begin{itemize}
 \item The\marginpar{\mbox{}\hfill \textbf{breaking change!}} handling of missing chars has been changed. In This version a missing char will insert the \inlinecode{/.notdef} char of the fonts (this is sometimes a space, sometimes a rectangle with a cross) and no longer simply ignore the glyph. This behaviour can be reverted by using \inlinecode{notdef=false} as font feature.
-\item The font feature \inlinecode{embolden} can now be used to fake a bold font. 
-\item The fontloader has been synched with the context files from 2019-06-20.
+\item The font feature \inlinecode{embolden} can now be used to fake a bold font.
+\item The fontloader has been synched with the context files from 2019-07-04.
 \end{itemize}
 \endsection
 \beginsection {New in version 2.97 (by Ulrike Fischer)}
@@ -783,12 +783,12 @@ obviously, \inlinecode{random}.
          \beginlisting
       \font\test = "Latin Modern Roman:mode=node;embolden=2;"
          \endlisting
-      
-      {\font\test= "Latin Modern Roman:mode=node;"\test Dies is not bold. 
+
+      {\font\test= "Latin Modern Roman:mode=node;"\test Dies is not bold.
        \font\test= "Latin Modern Roman:mode=node;embolden=2;" \test Dies is a faked bold font.}
-         
+
   \endaltitem
-  
+
   \beginaltitem {kernfactor \& letterspace}\label{p:letterspace}
          Define a font with letterspacing (tracking) enabled.
          %

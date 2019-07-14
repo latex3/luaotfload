@@ -31,7 +31,7 @@ local texsprint             = tex.sprint
 local dofile                = dofile
 local getmetatable          = getmetatable
 local setmetatable          = setmetatable
-local utf8                  = unicode.utf8
+local utfcodepoint          = utf8.codepoint
 local stringlower           = string.lower
 local stringformat          = string.format
 local stringgsub            = string.gsub
@@ -187,11 +187,10 @@ Comment from fontspec:
 
 local capheight_reference_chars      = { "X", "M", "Ж", "ξ", }
 local capheight_reference_codepoints do
-  local utfbyte = unicode.utf8.byte
   capheight_reference_codepoints = { }
   for i = 1, #capheight_reference_chars do
     local chr = capheight_reference_chars [i]
-    capheight_reference_codepoints [i] = utfbyte (chr)
+    capheight_reference_codepoints [i] = utfcodepoint (chr)
   end
 end
 

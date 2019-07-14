@@ -173,7 +173,8 @@ local tableconcat              = table.concat
 local tablesort                = table.sort
 local utf8gsub                 = unicode.utf8.gsub
 local utf8lower                = unicode.utf8.lower
-local utf8len                  = unicode.utf8.len
+local utf8len                  = utf8.len
+local utf8offset               = utf8.offset
 
 --- these come from Lualibs/Context
 local filebasename             = file.basename
@@ -2239,7 +2240,7 @@ local truncate_string = function (str, restrict)
     local len = utf8len (str)
     if wd - len < 0 then
         --- combined length exceeds terminal,
-        str = ".." .. stringsub(str, len - wd + 2)
+        str = ".." .. stringsub(str, utf8offset(str, - wd + 2))
     end
     return str
 end

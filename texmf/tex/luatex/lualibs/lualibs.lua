@@ -25,8 +25,8 @@ lualibs = lualibs or { }
 
 lualibs.module_info = {
   name          = "lualibs",
-  version       = 2.6601,
-  date          = "2019-06-20",
+  version       = 2.66,
+  date          = "2019-07-04",
   description   = "ConTeXt Lua standard libraries.",
   author        = "Hans Hagen, PRAGMA-ADE, Hasselt NL & Elie Roux & Philipp Gesang",
   copyright     = "PRAGMA ADE / ConTeXt Development Team",
@@ -79,12 +79,12 @@ do
   lualibs.error, lualibs.warn, lualibs.info = error, warn, info
 end
 
-if luatexbase and luatexbase.find_file then
-  find_file = luatexbase.find_file
-else
-  kpse.set_program_name"luatex"
-  find_file = kpsefind_file
+local info = status.list()
+if info.kpse_used == 0 then
+ kpse.set_program_name("luatex")
 end
+
+find_file = kpsefind_file
 
 
 local loadmodule = loadmodule or function (name, t)

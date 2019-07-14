@@ -1,0 +1,14 @@
+\input{regression-test}
+\documentclass{article}
+
+\pdfvariable omitcidset=1
+
+\begin{document}
+
+\START\showoutput
+\font \asanamain = {file:asana.ttc(0)} at 10pt
+\font \asanamath = {file:asana.ttc(1)} at 10pt
+
+\asanamain abc
+\asanamath cde
+\end{document}

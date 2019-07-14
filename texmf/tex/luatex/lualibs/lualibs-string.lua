@@ -155,11 +155,13 @@ end
 --- needs checking
 
 local anything     = patterns.anything
-local allescapes   = Cc("%") * S(".-+%?()[]*") -- also {} and ^$ ?
-local someescapes  = Cc("%") * S(".-+%()[]")   -- also {} and ^$ ?
-local matchescapes = Cc(".") * S("*?")         -- wildcard and single match
+local moreescapes  = Cc("%") * S(".-+%?()[]*$^{}")
+local allescapes   = Cc("%") * S(".-+%?()[]*")   -- also {} and ^$ ?
+local someescapes  = Cc("%") * S(".-+%()[]")     -- also {} and ^$ ?
+local matchescapes = Cc(".") * S("*?")           -- wildcard and single match
 
-local pattern_a = Cs ( ( allescapes + anything )^0 )
+local pattern_m = Cs ( ( moreescapes + anything )^0 )
+local pattern_a = Cs ( ( allescapes  + anything )^0 )
 local pattern_b = Cs ( ( someescapes + matchescapes + anything )^0 )
 local pattern_c = Cs ( Cc("^") * ( someescapes + matchescapes + anything )^0 * Cc("$") )
 
@@ -170,6 +172,8 @@ end
 function string.topattern(str,lowercase,strict)
     if str == "" or type(str) ~= "string" then
         return ".*"
+    elseif strict == "all" then
+        str = lpegmatch(pattern_m,str)
     elseif strict then
         str = lpegmatch(pattern_c,str)
     else

@@ -44,10 +44,10 @@ uploadconfig = {
 stdengine    = "luatex"
 checkengines = {"luatex"}
 
-local errorlevel   = os.execute("harftex --version") 
-if not os.getenv('TRAVIS') and errorlevel==0 then 
-   checkengines = {"luatex","harftex"}
-end 
+ -- local errorlevel   = os.execute("harftex --version") 
+ -- if not os.getenv('TRAVIS') and errorlevel==0 then 
+ --  checkengines = {"luatex","harftex"}
+ -- end 
  
 checkconfigs = {
                 "build",

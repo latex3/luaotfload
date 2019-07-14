@@ -1,0 +1,635 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Package fontspec Info: Font family 'DejaVuSans.ttf(1)' created for font
+(fontspec)             'DejaVuSans.ttf' with options
+(fontspec)             [Ligatures=TeX,RawFeature=+vircase].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"[DejaVuSans.ttf]:mode=node;script=latn;language=DFLT;+tlig;+vircase;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 407.95642fil, direction TLT
+...\write-{}
+...\glue(\topskip) 2.40234
+...\hbox(7.59766+0.1416)x345.0, glue set 218.96793fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/DejaVuSans.ttf(0)/m/n/10 G
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\TU/DejaVuSans.ttf(0)/m/n/10 ^^fc
+....\TU/DejaVuSans.ttf(0)/m/n/10 ^^df
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 d
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 W
+....\kern-0.58594 (font)
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 l
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 !
+....\glue(\spaceskip) 4.23828 plus 4.76807 minus 0.35318
+....\TU/DejaVuSans.ttf(0)/m/n/10 V
+....\kern-0.63965 (font)
+....\TU/DejaVuSans.ttf(0)/m/n/10 A
+....\penalty 10000
+....\kern-0.34 (right margin)
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.26074
+...\hbox(7.59766+0.1416)x345.0, glue set 218.96793fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/DejaVuSans.ttf(0)/m/n/10 G
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\TU/DejaVuSans.ttf(0)/m/n/10 ^^fc
+....\TU/DejaVuSans.ttf(0)/m/n/10 ^^df
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 d
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 W
+....\kern-0.58594 (font)
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 l
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 !
+....\glue(\spaceskip) 4.23828 plus 4.76807 minus 0.35318
+....\TU/DejaVuSans.ttf(0)/m/n/10 V
+....\kern-0.63965 (font)
+....\TU/DejaVuSans.ttf(0)/m/n/10 A
+....\penalty 10000
+....\kern-0.34 (right margin)
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.26074
+...\hbox(7.59766+2.08008)x345.0, glue set 0.91293, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/DejaVuSans.ttf(0)/m/n/10 T
+....\TU/DejaVuSans.ttf(0)/m/n/10 h
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 c
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\TU/DejaVuSans.ttf(0)/m/n/10 d
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 d
+....\TU/DejaVuSans.ttf(0)/m/n/10 d
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 f
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\discretionary (penalty 50)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 u
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\kern-0.21973 (font)
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 f
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 w
+....\TU/DejaVuSans.ttf(0)/m/n/10 h
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 c
+....\TU/DejaVuSans.ttf(0)/m/n/10 h
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 w
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 l
+....\TU/DejaVuSans.ttf(0)/m/n/10 l
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 v
+....\discretionary (penalty 50)
+.....< \kern-0.26855 (font)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\TU/DejaVuSans.ttf(0)/m/n/10 y
+....\discretionary (penalty 50)
+.....< \kern-0.17578 (font)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 h
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\TU/DejaVuSans.ttf(0)/m/n/10 g
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\glue(\rightskip) 0.0
+...\penalty 300
+...\glue(\baselineskip) 4.31934
+...\hbox(5.60059+2.08008)x345.0, glue set 291.98584fil, direction TLT
+....\TU/DejaVuSans.ttf(0)/m/n/10 u
+....\TU/DejaVuSans.ttf(0)/m/n/10 p
+....\discretionary (penalty 50)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+....\TU/DejaVuSans.ttf(0)/m/n/10 p
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\discretionary (penalty 50)
+.....< \kern-0.63965 (font)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+.....= \kern-0.21973 (font)
+....\TU/DejaVuSans.ttf(0)/m/n/10 c
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 .
+....\penalty 10000
+....\kern-2.23 (right margin)
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 1.92188
+...\hbox(7.99805+2.08008)x345.0, glue set 7.68555fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/DejaVuSans.ttf(0)/m/n/10 I
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 w
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\TU/DejaVuSans.ttf(0)/m/n/10 k
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 f
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 l
+....\TU/DejaVuSans.ttf(0)/m/n/10 l
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 c
+....\TU/DejaVuSans.ttf(0)/m/n/10 h
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\TU/DejaVuSans.ttf(0)/m/n/10 d
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\TU/DejaVuSans.ttf(0)/m/n/10 c
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 p
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 h
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 f
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 :
+....\glue(\spaceskip) 4.23828 plus 3.17871 minus 0.52979
+....\TU/DejaVuSans.ttf(0)/m/n/10 α
+....\TU/DejaVuSans.ttf(0)/m/n/10 υ
+....\TU/DejaVuSans.ttf(0)/m/n/10 τ
+....\TU/DejaVuSans.ttf(0)/m/n/10 ό
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 ε
+....\TU/DejaVuSans.ttf(0)/m/n/10 ί
+....\TU/DejaVuSans.ttf(0)/m/n/10 ν
+....\TU/DejaVuSans.ttf(0)/m/n/10 α
+....\TU/DejaVuSans.ttf(0)/m/n/10 ι
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 ε
+....\TU/DejaVuSans.ttf(0)/m/n/10 λ
+....\TU/DejaVuSans.ttf(0)/m/n/10 λ
+....\TU/DejaVuSans.ttf(0)/m/n/10 η
+....\TU/DejaVuSans.ttf(0)/m/n/10 ν
+....\TU/DejaVuSans.ttf(0)/m/n/10 ι
+....\TU/DejaVuSans.ttf(0)/m/n/10 κ
+....\TU/DejaVuSans.ttf(0)/m/n/10 ό
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.32227
+...\hbox(7.59766+2.08008)x345.0, glue set 0.0723, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/DejaVuSans.ttf(0)/m/n/10 I
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 p
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\discretionary (penalty 50)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\discretionary (penalty 50)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+....\TU/DejaVuSans.ttf(0)/m/n/10 b
+....\TU/DejaVuSans.ttf(0)/m/n/10 l
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 ﬁ (ligature fi)
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 u
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 h
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 u
+....\TU/DejaVuSans.ttf(0)/m/n/10 p
+....\discretionary (penalty 50)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+....\TU/DejaVuSans.ttf(0)/m/n/10 p
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\discretionary (penalty 50)
+.....< \kern-0.63965 (font)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+.....= \kern-0.21973 (font)
+....\TU/DejaVuSans.ttf(0)/m/n/10 c
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 (
+....\TU/DejaVuSans.ttf(0)/m/n/10 h
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\kern-0.21973 (font)
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 S
+....\TU/DejaVuSans.ttf(0)/m/n/10 S
+....\glue(\spaceskip) 3.17871 plus 1.58775 minus 1.06062
+....\TU/DejaVuSans.ttf(0)/m/n/10 f
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 ^^df
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 i
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\discretionary (penalty 50)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\TU/DejaVuSans.ttf(0)/m/n/10 t
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 d
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 o
+....\TU/DejaVuSans.ttf(0)/m/n/10 f
+....\glue(\rightskip) 0.0
+...\penalty 300
+...\glue(\baselineskip) 2.32227
+...\hbox(7.59766+2.08008)x345.0, glue set 262.9624fil, direction TLT
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 n
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 u
+....\TU/DejaVuSans.ttf(0)/m/n/10 p
+....\discretionary (penalty 50)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+....\TU/DejaVuSans.ttf(0)/m/n/10 p
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\TU/DejaVuSans.ttf(0)/m/n/10 r
+....\discretionary (penalty 50)
+.....< \kern-0.63965 (font)
+.....< \TU/DejaVuSans.ttf(0)/m/n/10 -
+.....= \kern-0.21973 (font)
+....\TU/DejaVuSans.ttf(0)/m/n/10 c
+....\TU/DejaVuSans.ttf(0)/m/n/10 a
+....\TU/DejaVuSans.ttf(0)/m/n/10 s
+....\TU/DejaVuSans.ttf(0)/m/n/10 e
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(0)/m/n/10 ^^df
+....\TU/DejaVuSans.ttf(0)/m/n/10 )
+....\TU/DejaVuSans.ttf(0)/m/n/10 .
+....\penalty 10000
+....\kern-2.23 (right margin)
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 0.78906
+...\hbox(9.13086+0.1416)x345.0, glue set 200.68668fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/DejaVuSans.ttf(1)/m/n/10 G
+....\TU/DejaVuSans.ttf(1)/m/n/10 R
+....\TU/DejaVuSans.ttf(1)/m/n/10 ^^dc
+....\TU/DejaVuSans.ttf(1)/m/n/10 S
+....\TU/DejaVuSans.ttf(1)/m/n/10 S
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\TU/DejaVuSans.ttf(1)/m/n/10 N
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 D
+....\TU/DejaVuSans.ttf(1)/m/n/10 I
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 W
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\TU/DejaVuSans.ttf(1)/m/n/10 L
+....\kern-1.37695 (font)
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\TU/DejaVuSans.ttf(1)/m/n/10 !
+....\glue(\spaceskip) 4.23828 plus 4.76807 minus 0.35318
+....\TU/DejaVuSans.ttf(1)/m/n/10 V
+....\kern-0.63965 (font)
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\penalty 10000
+....\kern-0.34 (right margin)
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.43652
+...\hbox(7.42188+0.1416)x345.0, glue set 0.11438, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\TU/DejaVuSans.ttf(1)/m/n/10 H
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 C
+....\TU/DejaVuSans.ttf(1)/m/n/10 O
+....\TU/DejaVuSans.ttf(1)/m/n/10 D
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\TU/DejaVuSans.ttf(1)/m/n/10 D
+....\TU/DejaVuSans.ttf(1)/m/n/10 D
+....\TU/DejaVuSans.ttf(1)/m/n/10 S
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 F
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\discretionary (penalty 50)
+.....< \kern-0.21973 (font)
+.....< \TU/DejaVuSans.ttf(1)/m/n/10 -
+.....= \kern-0.77637 (font)
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\TU/DejaVuSans.ttf(1)/m/n/10 U
+....\TU/DejaVuSans.ttf(1)/m/n/10 R
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\TU/DejaVuSans.ttf(1)/m/n/10 O
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 F
+....\TU/DejaVuSans.ttf(1)/m/n/10 O
+....\TU/DejaVuSans.ttf(1)/m/n/10 N
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 W
+....\TU/DejaVuSans.ttf(1)/m/n/10 H
+....\TU/DejaVuSans.ttf(1)/m/n/10 I
+....\TU/DejaVuSans.ttf(1)/m/n/10 C
+....\TU/DejaVuSans.ttf(1)/m/n/10 H
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 W
+....\TU/DejaVuSans.ttf(1)/m/n/10 I
+....\TU/DejaVuSans.ttf(1)/m/n/10 L
+....\TU/DejaVuSans.ttf(1)/m/n/10 L
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 S
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\TU/DejaVuSans.ttf(1)/m/n/10 V
+....\discretionary (penalty 50)
+.....< \kern-0.58594 (font)
+.....< \TU/DejaVuSans.ttf(1)/m/n/10 -
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\TU/DejaVuSans.ttf(1)/m/n/10 R
+....\kern-0.63965 (font)
+....\TU/DejaVuSans.ttf(1)/m/n/10 Y
+....\kern-1.18652 (font)
+....\TU/DejaVuSans.ttf(1)/m/n/10 -
+....\kern-1.8 (right margin)
+....\discretionary (penalty 50)
+....\glue(\rightskip) 0.0
+...\penalty 400
+...\glue(\baselineskip) 4.43652
+...\hbox(7.42188+0.1416)x345.0, glue set 237.12984fil, direction TLT
+....\kern-0.31 (left margin)
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\TU/DejaVuSans.ttf(1)/m/n/10 H
+....\TU/DejaVuSans.ttf(1)/m/n/10 I
+....\TU/DejaVuSans.ttf(1)/m/n/10 N
+....\TU/DejaVuSans.ttf(1)/m/n/10 G
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 I
+....\TU/DejaVuSans.ttf(1)/m/n/10 N
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 U
+....\TU/DejaVuSans.ttf(1)/m/n/10 P
+....\discretionary (penalty 50)
+.....< \kern-0.21973 (font)
+.....< \TU/DejaVuSans.ttf(1)/m/n/10 -
+....\TU/DejaVuSans.ttf(1)/m/n/10 P
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\TU/DejaVuSans.ttf(1)/m/n/10 R
+....\discretionary (penalty 50)
+.....< \kern-0.40527 (font)
+.....< \TU/DejaVuSans.ttf(1)/m/n/10 -
+.....= \kern-0.49805 (font)
+....\TU/DejaVuSans.ttf(1)/m/n/10 C
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\TU/DejaVuSans.ttf(1)/m/n/10 S
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\TU/DejaVuSans.ttf(1)/m/n/10 .
+....\penalty 10000
+....\kern-2.23 (right margin)
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 3.86035
+...\hbox(7.99805+0.1416)x345.0, glue set 0.0093, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/DejaVuSans.ttf(1)/m/n/10 I
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 W
+....\TU/DejaVuSans.ttf(1)/m/n/10 O
+....\TU/DejaVuSans.ttf(1)/m/n/10 R
+....\TU/DejaVuSans.ttf(1)/m/n/10 K
+....\TU/DejaVuSans.ttf(1)/m/n/10 S
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 F
+....\TU/DejaVuSans.ttf(1)/m/n/10 O
+....\TU/DejaVuSans.ttf(1)/m/n/10 R
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\TU/DejaVuSans.ttf(1)/m/n/10 L
+....\TU/DejaVuSans.ttf(1)/m/n/10 L
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 C
+....\TU/DejaVuSans.ttf(1)/m/n/10 H
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\TU/DejaVuSans.ttf(1)/m/n/10 R
+....\TU/DejaVuSans.ttf(1)/m/n/10 S
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 A
+....\TU/DejaVuSans.ttf(1)/m/n/10 N
+....\TU/DejaVuSans.ttf(1)/m/n/10 D
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 S
+....\TU/DejaVuSans.ttf(1)/m/n/10 C
+....\TU/DejaVuSans.ttf(1)/m/n/10 R
+....\TU/DejaVuSans.ttf(1)/m/n/10 I
+....\TU/DejaVuSans.ttf(1)/m/n/10 P
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\TU/DejaVuSans.ttf(1)/m/n/10 S
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 I
+....\TU/DejaVuSans.ttf(1)/m/n/10 N
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\TU/DejaVuSans.ttf(1)/m/n/10 H
+....\TU/DejaVuSans.ttf(1)/m/n/10 E
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 F
+....\TU/DejaVuSans.ttf(1)/m/n/10 O
+....\TU/DejaVuSans.ttf(1)/m/n/10 N
+....\TU/DejaVuSans.ttf(1)/m/n/10 T
+....\kern-1.09863 (font)
+....\TU/DejaVuSans.ttf(1)/m/n/10 :
+....\glue(\spaceskip) 4.23828 plus 3.17871 minus 0.52979
+....\TU/DejaVuSans.ttf(1)/m/n/10 Α
+....\TU/DejaVuSans.ttf(1)/m/n/10 Υ
+....\TU/DejaVuSans.ttf(1)/m/n/10 Τ
+....\TU/DejaVuSans.ttf(1)/m/n/10 Ό
+....\glue(\spaceskip) 3.17871 plus 1.58936 minus 1.05957
+....\TU/DejaVuSans.ttf(1)/m/n/10 Ε
+....\TU/DejaVuSans.ttf(1)/m/n/10 Ί
+....\TU/DejaVuSans.ttf(1)/m/n/10 Ν
+....\TU/DejaVuSans.ttf(1)/m/n/10 Α
+....\TU/DejaVuSans.ttf(1)/m/n/10 Ι
+....\glue(\rightskip) 0.0
+...\penalty 300
+...\glue(\baselineskip) 3.86035
+...\hbox(7.99805+0.1416)x345.0, glue set 292.36816fil, direction TLT
+....\TU/DejaVuSans.ttf(1)/m/n/10 Ε
+....\TU/DejaVuSans.ttf(1)/m/n/10 Λ
+....\TU/DejaVuSans.ttf(1)/m/n/10 Λ
+....\TU/DejaVuSans.ttf(1)/m/n/10 Η
+....\TU/DejaVuSans.ttf(1)/m/n/10 Ν
+....\TU/DejaVuSans.ttf(1)/m/n/10 Ι
+....\TU/DejaVuSans.ttf(1)/m/n/10 Κ
+....\TU/DejaVuSans.ttf(1)/m/n/10 Ό
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -0.1416
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 22.70996
+..\hbox(7.29004+0.0)x345.0, glue set 169.31885fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\TU/DejaVuSans.ttf(0)/m/n/10 1
+...\glue 0.0 plus 1.0fil
+(add-uppercase-feature.aux)

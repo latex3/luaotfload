@@ -5,7 +5,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-colors",
-    version       = "2.9808",       --TAGVERSION
+    version       = "2.98",       --TAGVERSION
     date          = "2019-07-04", --TAGDATE
     description   = "luaotfload submodule / color",
     license       = "GPL v2.0",

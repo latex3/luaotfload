@@ -137,6 +137,11 @@ Dokumentation
 ==============
 Finally
 =============
-
-1. create ctan package
+1. add a git tag git tag -a v2.98 -m 'my version 2.98'
+2. Call again to get the tag in the status file (grr)
+texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-07-04.lua
+3. Adapt/Check ctan.ann, ctanreadme
+4. create ctan package
 --> l3build ctan
+5. upload
+ -->l3build upload

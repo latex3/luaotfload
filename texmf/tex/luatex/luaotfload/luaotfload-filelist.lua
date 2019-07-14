@@ -250,6 +250,7 @@ luaotfload.filelist.data =
     { name = "loaders"           ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" }, 
     { name = "parsers"           ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" }, 
     { name = "resolvers"         ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" }, 
+    { name = "unicode"           ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" },
 
     { name = "characters"        ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkcharacter" },
     { name = "glyphlist"         ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkglyphlist" },

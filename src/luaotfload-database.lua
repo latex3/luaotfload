@@ -171,8 +171,6 @@ local stringsub                = string.sub
 local stringupper              = string.upper
 local tableconcat              = table.concat
 local tablesort                = table.sort
-local utf8gsub                 = unicode.utf8.gsub
-local utf8lower                = unicode.utf8.lower
 local utf8len                  = utf8.len
 local utf8offset               = utf8.offset
 
@@ -203,6 +201,11 @@ local tabletofile              = table.tofile
 local tabletohash              = table.tohash
 local tableserialize           = table.serialize
 local names                    = fonts and fonts.names or { }
+
+--- some of our own
+local unicode                  = require'luaotfload-unicode'
+local casefold                 = unicode.casefold
+local alphnum_only             = unicode.alphnum_only
 
 local name_index               = nil --> upvalue for names.data
 local lookup_cache             = nil --> for names.lookups
@@ -236,11 +239,9 @@ end
 
 --- string -> string
 
-local invalidchars = "[^%a%d]"
-
 local sanitize_fontname = function (str)
     if str ~= nil then
-        str = utf8gsub (utf8lower (str), invalidchars, "")
+        str = alphnum_only(casefold(str, true))
         return str
     end
     return nil
@@ -251,15 +252,11 @@ local sanitize_fontnames = function (rawnames)
     for category, namedata in next, rawnames do
 
         if type (namedata) == "string" then
-            result [category] = utf8gsub (utf8lower (namedata),
-                                          invalidchars,
-                                          "")
+            result [category] = alphnum_only(casefold(namedata, true))
         else
             local target = { }
             for field, name in next, namedata do
-                target [field] = utf8gsub (utf8lower (name),
-                                        invalidchars,
-                                        "")
+                target [field] = alphnum_only(casefold(name, true))
             end
             result [category] = target
         end

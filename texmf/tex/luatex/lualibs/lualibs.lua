@@ -79,8 +79,7 @@ do
   lualibs.error, lualibs.warn, lualibs.info = error, warn, info
 end
 
-local info = status.list()
-if info.kpse_used == 0 then
+if status.kpse_used == 0 then
  kpse.set_program_name("luatex")
 end
 

@@ -1261,10 +1261,12 @@ function table.reverse(t) -- check with 5.3 ?
     end
 end
 
+-- This one is for really simple cases where need a hash from a table.
+
 local function sequenced(t,sep,simple)
     if not t then
         return ""
-    elseif type(t) == "string" then
+    elseif type(t) ~= "table" then
         return t -- handy fallback
     end
     local n = #t
@@ -1305,7 +1307,11 @@ local function sequenced(t,sep,simple)
             end
         end
     end
-    return concat(s,sep or " | ")
+    if sep == true then
+        return "{ " .. concat(s,", ") .. " }"
+    else
+        return concat(s,sep or " | ")
+    end
 end
 
 table.sequenced = sequenced

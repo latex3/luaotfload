@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Sun Jul 14 15:31:33 2019
+-- merge date  : Wed Jul 24 14:19:06 2019
 
 do -- begin closure to overcome local limits and interference
 
@@ -2305,7 +2305,7 @@ end
 local function sequenced(t,sep,simple)
  if not t then
   return ""
- elseif type(t)=="string" then
+ elseif type(t)~="table" then
   return t 
  end
  local n=#t
@@ -2344,7 +2344,11 @@ local function sequenced(t,sep,simple)
    end
   end
  end
- return concat(s,sep or " | ")
+ if sep==true then
+  return "{ "..concat(s,", ").." }"
+ else
+  return concat(s,sep or " | ")
+ end
 end
 table.sequenced=sequenced
 function table.print(t,...)

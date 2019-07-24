@@ -262,7 +262,11 @@ end
 
 function statistics.memused() -- no math.round yet -)
     local round = math.round or math.floor
-    return format("%s MB (ctx: %s MB)",round(collectgarbage("count")/1000), round(status.luastate_bytes/1000000))
+    return format("%s MB, ctx: %s MB, max: %s MB)",
+        round(collectgarbage("count")/1000),
+        round(status.luastate_bytes/1000000),
+        status.luastate_bytes_max and round(status.luastate_bytes_max/1000000) or "unknown"
+    )
 end
 
 starttiming(statistics)

@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Sun Jul 14 15:31:26 2019
+-- merge date  : Wed Jul 24 14:18:57 2019
 
 do -- begin closure to overcome local limits and interference
 
@@ -2826,10 +2826,13 @@ do
  local f_key_val_num=f_key_val_seq
  local f_key_val_yes=formatters[ "\n"..'%w"%s" : true'  ]
  local f_key_val_nop=formatters[ "\n"..'%w"%s" : false' ]
+ local f_key_val_null=formatters[ "\n"..'%w"%s" : null'  ]
  local f_val_num=formatters[ "\n"..'%w%s' ]
  local f_val_str=formatters[ "\n"..'%w"%s"'  ]
  local f_val_yes=formatters[ "\n"..'%wtrue'  ]
  local f_val_nop=formatters[ "\n"..'%wfalse' ]
+ local f_val_null=formatters[ "\n"..'%wnull'  ]
+ local f_val_empty=formatters[ "\n"..'%w{ }'  ]
  local f_val_seq=f_val_num
  local t={}
  local n=0
@@ -2857,8 +2860,10 @@ do
      n=n+1 t[n]='"'
     elseif tv=="boolean" then
      n=n+1 t[n]=v and "true" or "false"
-    else
+    elseif v then
      n=n+1 t[n]=tostring(v)
+    else
+     n=n+1 t[n]="null"
     end
    end
    n=n+1 t[n]=" ]"
@@ -2915,8 +2920,11 @@ do
        if st then
         n=n+1 t[n]=f_val_seq(depth,st)
        else
-        tojsonpp(v,k,depth,level+1,0)
+        tojsonpp(v,nil,depth,level+1,#v)
        end
+      else
+       n=n+1
+       t[n]=f_val_empty(depth)
       end
      elseif tv=="boolean" then
       n=n+1
@@ -2925,6 +2933,9 @@ do
       else
        t[n]=f_val_nop(depth,v)
       end
+     else
+      n=n+1
+      t[n]=f_val_null(depth)
      end
     end
    elseif next(root) then
@@ -2942,12 +2953,12 @@ do
        n=n+1 t[n]=f_key_val_num(depth,k,v)
       elseif tk=="string" then
        k=lpegmatch(escaper,k) or k
-       n=n+1 t[n]=f_key_val_str(depth,k,v)
+       n=n+1 t[n]=f_key_val_num(depth,k,v)
       end
      elseif tv=="string" then
       if tk=="number" then
        v=lpegmatch(escaper,v) or v
-       n=n+1 t[n]=f_key_val_num(depth,k,v)
+       n=n+1 t[n]=f_key_val_str(depth,k,v)
       elseif tk=="string" then
        k=lpegmatch(escaper,k) or k
        v=lpegmatch(escaper,v) or v
@@ -2984,6 +2995,15 @@ do
        else
         t[n]=f_key_val_nop(depth,k)
        end
+      end
+     else
+      if tk=="number" then
+       n=n+1
+       t[n]=f_key_val_null(depth,k)
+      elseif tk=="string" then
+       k=lpegmatch(escaper,k) or k
+       n=n+1
+       t[n]=f_key_val_null(depth,k)
       end
      end
     end
@@ -3042,6 +3062,8 @@ do
    n=n+1;t[n]=value
   elseif kind=="boolean" then
    n=n+1;t[n]=tostring(value)
+  else
+   n=n+1;t[n]="null"
   end
   return t,n
  end
@@ -3066,7 +3088,7 @@ do
     tojsonpp(value,name,0,0,#value)
     value=concat(t,"",1,n)
    else
-    tojson(value,0)
+    t,n=tojson(value,0)
     value=concat(t,"",1,n)
    end
    t=nil
@@ -3279,7 +3301,11 @@ function statistics.show()
 end
 function statistics.memused() 
  local round=math.round or math.floor
- return format("%s MB (ctx: %s MB)",round(collectgarbage("count")/1000),round(status.luastate_bytes/1000000))
+ return format("%s MB, ctx: %s MB, max: %s MB)",
+  round(collectgarbage("count")/1000),
+  round(status.luastate_bytes/1000000),
+  status.luastate_bytes_max and round(status.luastate_bytes_max/1000000) or "unknown"
+ )
 end
 starttiming(statistics)
 function statistics.formatruntime(runtime) 

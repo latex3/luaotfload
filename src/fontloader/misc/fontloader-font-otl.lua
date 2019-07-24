@@ -52,7 +52,7 @@ local report_otf          = logs.reporter("fonts","otf loading")
 local fonts               = fonts
 local otf                 = fonts.handlers.otf
 
-otf.version               = 3.108 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version               = 3.109 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                 = containers.define("fonts", "otl", otf.version, true)
 otf.svgcache              = containers.define("fonts", "svg", otf.version, true)
 otf.pngcache              = containers.define("fonts", "png", otf.version, true)
@@ -491,6 +491,7 @@ local function copytotfm(data,cache_id)
         parameters.ascender      = abs(metadata.ascender  or 0)
         parameters.descender     = abs(metadata.descender or 0)
         parameters.units         = units
+        parameters.vheight       = metadata.defaultvheight
         --
         properties.space         = spacer
         properties.encodingbytes = 2

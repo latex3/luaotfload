@@ -1,6 +1,10 @@
 Change History
 --------------
-2019-XX-XX luaotfload v2.98
+2019-07-24 luaotfload v2.99-dev
+    * removed dependency on slnunicode (PR#72) 
+    * sync with context files from 2019-07-24
+
+2019-06-20 luaotfload v2.98
     * add embolden key
     * add missing char detection issue #65
     * sync with context files from 2019-07-04

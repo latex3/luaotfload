@@ -11,14 +11,13 @@ local insert, remove = table.insert, table.remove
 local format, gmatch, gsub, find, match, lower, strip = string.format, string.gmatch, string.gsub, string.find, string.match, string.lower, string.strip
 local type, next, tonumber, tostring, rawget = type, next, tonumber, tostring, rawget
 
-local trace_baseinit         = false  trackers.register("otf.baseinit",         function(v) trace_baseinit         = v end)
-local trace_singles          = false  trackers.register("otf.singles",          function(v) trace_singles          = v end)
-local trace_multiples        = false  trackers.register("otf.multiples",        function(v) trace_multiples        = v end)
-local trace_alternatives     = false  trackers.register("otf.alternatives",     function(v) trace_alternatives     = v end)
-local trace_ligatures        = false  trackers.register("otf.ligatures",        function(v) trace_ligatures        = v end)
------ trace_ligatures_detail = false  trackers.register("otf.ligatures.detail", function(v) trace_ligatures_detail = v end)
-local trace_kerns            = false  trackers.register("otf.kerns",            function(v) trace_kerns            = v end)
-local trace_preparing        = false  trackers.register("otf.preparing",        function(v) trace_preparing        = v end)
+local trace_baseinit         = false  trackers.register("otf.baseinit",     function(v) trace_baseinit     = v end)
+local trace_singles          = false  trackers.register("otf.singles",      function(v) trace_singles      = v end)
+local trace_multiples        = false  trackers.register("otf.multiples",    function(v) trace_multiples    = v end)
+local trace_alternatives     = false  trackers.register("otf.alternatives", function(v) trace_alternatives = v end)
+local trace_ligatures        = false  trackers.register("otf.ligatures",    function(v) trace_ligatures    = v end)
+local trace_kerns            = false  trackers.register("otf.kerns",        function(v) trace_kerns        = v end)
+local trace_preparing        = false  trackers.register("otf.preparing",    function(v) trace_preparing    = v end)
 
 local report_prepare         = logs.reporter("fonts","otf prepare")
 

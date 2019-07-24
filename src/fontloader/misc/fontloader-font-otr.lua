@@ -73,56 +73,54 @@ local P, R, S, C, Cs, Cc, Ct, Carg, Cmt = lpeg.P, lpeg.R, lpeg.S, lpeg.C, lpeg.C
 local lpegmatch = lpeg.match
 local rshift = bit32.rshift
 
-local setmetatableindex = table.setmetatableindex
-local sortedkeys        = table.sortedkeys
-local sortedhash        = table.sortedhash
-local stripstring       = string.nospaces
-local utf16_to_utf8_be  = utf.utf16_to_utf8_be
+local setmetatableindex  = table.setmetatableindex
+local sortedkeys         = table.sortedkeys
+local sortedhash         = table.sortedhash
+local stripstring        = string.nospaces
+local utf16_to_utf8_be   = utf.utf16_to_utf8_be
 
-local report            = logs.reporter("otf reader")
+local report             = logs.reporter("otf reader")
+local report_cmap        = logs.reporter("otf reader","cmap")
 
-local trace_cmap        = false -- only for checking issues
-local trace_cmap_detail = false -- only for checking issues
+local trace_cmap         = false  trackers.register("otf.cmap",         function(v) trace_cmap         = v end)
+local trace_cmap_details = false  trackers.register("otf.cmap.details", function(v) trace_cmap_details = v end)
 
--- local trace_cmap        = true
--- local trace_cmap_detail = true
+fonts                    = fonts or { }
+local handlers           = fonts.handlers or { }
+fonts.handlers           = handlers
+local otf                = handlers.otf or { }
+handlers.otf             = otf
+local readers            = otf.readers or { }
+otf.readers              = readers
 
-fonts                   = fonts or { }
-local handlers          = fonts.handlers or { }
-fonts.handlers          = handlers
-local otf               = handlers.otf or { }
-handlers.otf            = otf
-local readers           = otf.readers or { }
-otf.readers             = readers
+----- streamreader       = utilities.streams -- faster on big files (not true any longer)
+local streamreader       = utilities.files   -- faster on identify (also uses less memory)
+local streamwriter       = utilities.files
 
------ streamreader      = utilities.streams -- faster on big files (not true any longer)
-local streamreader      = utilities.files   -- faster on identify (also uses less memory)
-local streamwriter      = utilities.files
+readers.streamreader     = streamreader
+readers.streamwriter     = streamwriter
 
-readers.streamreader    = streamreader
-readers.streamwriter    = streamwriter
-
-local openfile          = streamreader.open
-local closefile         = streamreader.close
------ skipbytes         = streamreader.skip
-local setposition       = streamreader.setposition
-local skipshort         = streamreader.skipshort
-local readbytes         = streamreader.readbytes
-local readstring        = streamreader.readstring
-local readbyte          = streamreader.readcardinal1  --  8-bit unsigned integer
-local readushort        = streamreader.readcardinal2  -- 16-bit unsigned integer
-local readuint          = streamreader.readcardinal3  -- 24-bit unsigned integer
-local readulong         = streamreader.readcardinal4  -- 32-bit unsigned integer
------ readchar          = streamreader.readinteger1   --  8-bit   signed integer
-local readshort         = streamreader.readinteger2   -- 16-bit   signed integer
-local readlong          = streamreader.readinteger4   -- 32-bit unsigned integer
-local readfixed         = streamreader.readfixed4
-local read2dot14        = streamreader.read2dot14     -- 16-bit signed fixed number with the low 14 bits of fraction (2.14) (F2DOT14)
-local readfword         = readshort                   -- 16-bit   signed integer that describes a quantity in FUnits
-local readufword        = readushort                  -- 16-bit unsigned integer that describes a quantity in FUnits
-local readoffset        = readushort
-local readcardinaltable = streamreader.readcardinaltable
-local readintegertable  = streamreader.readintegertable
+local openfile           = streamreader.open
+local closefile          = streamreader.close
+----- skipbytes          = streamreader.skip
+local setposition        = streamreader.setposition
+local skipshort          = streamreader.skipshort
+local readbytes          = streamreader.readbytes
+local readstring         = streamreader.readstring
+local readbyte           = streamreader.readcardinal1  --  8-bit unsigned integer
+local readushort         = streamreader.readcardinal2  -- 16-bit unsigned integer
+local readuint           = streamreader.readcardinal3  -- 24-bit unsigned integer
+local readulong          = streamreader.readcardinal4  -- 32-bit unsigned integer
+----- readchar           = streamreader.readinteger1   --  8-bit   signed integer
+local readshort          = streamreader.readinteger2   -- 16-bit   signed integer
+local readlong           = streamreader.readinteger4   -- 32-bit unsigned integer
+local readfixed          = streamreader.readfixed4
+local read2dot14         = streamreader.read2dot14     -- 16-bit signed fixed number with the low 14 bits of fraction (2.14) (F2DOT14)
+local readfword          = readshort                   -- 16-bit   signed integer that describes a quantity in FUnits
+local readufword         = readushort                  -- 16-bit unsigned integer that describes a quantity in FUnits
+local readoffset         = readushort
+local readcardinaltable  = streamreader.readcardinaltable
+local readintegertable   = streamreader.readintegertable
 
 function streamreader.readtag(f)
     return lower(stripstring(readstring(f,4)))
@@ -1213,7 +1211,7 @@ readers.vmtx = function(f,fontdata,specification)
         local glyphs         = fontdata.glyphs
         local nofglyphs      = fontdata.nofglyphs
         local vheight        = 0
-        local vdefault       = verticalheader.ascender + verticalheader.descender
+        local vdefault       = verticalheader.ascender - verticalheader.descender
         local topsidebearing = 0
         for i=0,nofmetrics-1 do
             local glyph     = glyphs[i]
@@ -1222,9 +1220,9 @@ readers.vmtx = function(f,fontdata,specification)
             if vheight ~= 0 and vheight ~= vdefault then
                 glyph.vheight = vheight
             end
-         -- if topsidebearing ~= 0 then
-         --     glyph.tsb = topsidebearing
-         -- end
+            if topsidebearing ~= 0 then
+                glyph.tsb = topsidebearing
+            end
         end
         -- The next can happen in for instance a monospace font or in a cjk font
         -- with fixed heights.
@@ -1233,9 +1231,6 @@ readers.vmtx = function(f,fontdata,specification)
             if vheight ~= 0 and vheight ~= vdefault then
                 glyph.vheight = vheight
             end
-         -- if topsidebearing ~= 0 then
-         --     glyph.tsb = topsidebearing
-         -- end
         end
     end
 end
@@ -1324,27 +1319,16 @@ local sequence = {
     { 3, 10, 12 },
     { 0,  3,  4 },
     { 0,  1,  4 },
+ -- { 0,  1, 12 }, -- maybe for some old mac fonts
  -- { 0,  4, 12 },
     { 0,  0,  6 },
     { 3,  0,  6 },
     -- variants
     { 0,  5, 14 },
     -- last resort ranges
-{ 0,  4, 12 },
+    { 0,  4, 12 },
     { 3, 10, 13 },
 }
-
--- local sequence = {
---     { 0,  1,  4 },
---     { 0,  4, 12 },
---     { 0,  3,  4 },
---     { 3,  1,  4 },
---     { 3, 10, 12 },
---     { 0,  0,  6 },
---     { 3,  0,  6 },
---     -- variants
---     { 0,  5, 14 },
--- }
 
 local supported = {  }
 
@@ -1398,7 +1382,7 @@ formatreaders[4] = function(f,fontdata,offset)
         elseif offset == 0xFFFF then
             -- bad encoding
         elseif offset == 0 then
-            if trace_cmap_detail then
+            if trace_cmap_details then
                 report("format 4.%i segment %2i from %C upto %C at index %H",1,segment,startchar,endchar,(startchar + delta) % 65536)
             end
             for unicode=startchar,endchar do
@@ -1431,8 +1415,8 @@ formatreaders[4] = function(f,fontdata,offset)
             end
         else
             local shift = (segment-nofsegments+offset/2) - startchar
-            if trace_cmap_detail then
-                report("format 4.%i segment %2i from %C upto %C at index %H",0,segment,startchar,endchar,(startchar + delta) % 65536)
+            if trace_cmap_details then
+                report_cmap("format 4.%i segment %2i from %C upto %C at index %H",0,segment,startchar,endchar,(startchar + delta) % 65536)
             end
             for unicode=startchar,endchar do
                 local slot  = shift + unicode
@@ -1481,8 +1465,8 @@ formatreaders[6] = function(f,fontdata,offset)
     local count      = readushort(f)
     local stop       = start+count-1
     local nofdone    = 0
-    if trace_cmap_detail then
-        report("format 6 from %C to %C",2,start,stop)
+    if trace_cmap_details then
+        report_cmap("format 6 from %C to %C",2,start,stop)
     end
     for unicode=start,stop do
         local index = readushort(f)
@@ -1518,8 +1502,8 @@ formatreaders[12] = function(f,fontdata,offset)
         local first = readulong(f)
         local last  = readulong(f)
         local index = readulong(f)
-        if trace_cmap_detail then
-            report("format 12 from %C to %C starts at index %i",first,last,index)
+        if trace_cmap_details then
+            report_cmap("format 12 from %C to %C starts at index %i",first,last,index)
         end
         for unicode=first,last do
             local glyph = glyphs[index]
@@ -1562,8 +1546,8 @@ formatreaders[13] = function(f,fontdata,offset)
         local last  = readulong(f)
         local index = readulong(f)
         if first < privateoffset then
-            if trace_cmap_detail then
-                report("format 13 from %C to %C get index %i",first,last,index)
+            if trace_cmap_details then
+                report_cmap("format 13 from %C to %C get index %i",first,last,index)
             end
             local glyph   = glyphs[index]
             local unicode = glyph.unicode
@@ -1651,10 +1635,16 @@ end
 local function checkcmap(f,fontdata,records,platform,encoding,format)
     local data = records[platform]
     if not data then
+        if trace_cmap_details then
+            report_cmap("skipped, %s, p=%i e=%i f=%i","no platform",platform,encoding,format)
+        end
         return 0
     end
     data = data[encoding]
     if not data then
+        if trace_cmap_details then
+            report_cmap("skipped, %s, p=%i e=%i f=%i","no encoding",platform,encoding,format)
+        end
         return 0
     end
     data = data[format]
@@ -1663,13 +1653,17 @@ local function checkcmap(f,fontdata,records,platform,encoding,format)
     end
     local reader = formatreaders[format]
     if not reader then
+        if trace_cmap_details then
+            report_cmap("skipped, %s, p=%i e=%i f=%i","unsupported format",platform,encoding,format)
+        end
         return 0
     end
-    local p = platforms[platform]
-    local e = encodings[p]
     local n = reader(f,fontdata,data) or 0
     if trace_cmap then
-        report("cmap checked: platform %i (%s), encoding %i (%s), format %i, new unicodes %i",platform,p,encoding,e and e[encoding] or "?",format,n)
+        local p = platforms[platform]
+        local e = encodings[p]
+        report_cmap("checked, platform %i (%s), encoding %i (%s), format %i, new unicodes %i",
+            platform,p,encoding,e and e[encoding] or "?",format,n)
     end
     return n
 end
@@ -1904,6 +1898,7 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo,inst
         local postscript     = fontdata.postscript     or { }
         local fontheader     = fontdata.fontheader     or { }
         local cffinfo        = fontdata.cffinfo        or { }
+        local verticalheader = fontdata.verticalheader or { }
         local filename       = fontdata.filename
         local weight         = getname(fontdata,"weight") or (cffinfo and cffinfo.weight) or (metrics and metrics.weight)
         local width          = getname(fontdata,"width")  or (cffinfo and cffinfo.width ) or (metrics and metrics.width )
@@ -1973,6 +1968,7 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo,inst
             platformnames  = platformnames or nil,
             instancenames  = instancenames or nil,
             tableoffsets   = fontdata.tableoffsets,
+            defaultvheight = (verticalheader.ascender or 0) - (verticalheader.descender or 0)
         }
         if metricstoo then
             local keys = {

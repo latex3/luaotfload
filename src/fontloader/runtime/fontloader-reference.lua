@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 07/04/19 12:29:22
+-- merge date  : 07/24/19 11:17:48
 
 do -- begin closure to overcome local limits and interference
 
@@ -1988,7 +1988,7 @@ end
 local function sequenced(t,sep,simple)
  if not t then
   return ""
- elseif type(t)=="string" then
+ elseif type(t)~="table" then
   return t 
  end
  local n=#t
@@ -2027,7 +2027,11 @@ local function sequenced(t,sep,simple)
    end
   end
  end
- return concat(s,sep or " | ")
+ if sep==true then
+  return "{ "..concat(s,", ").." }"
+ else
+  return concat(s,sep or " | ")
+ end
 end
 table.sequenced=sequenced
 function table.print(t,...)
@@ -10830,8 +10834,9 @@ local sortedhash=table.sortedhash
 local stripstring=string.nospaces
 local utf16_to_utf8_be=utf.utf16_to_utf8_be
 local report=logs.reporter("otf reader")
-local trace_cmap=false 
-local trace_cmap_detail=false
+local report_cmap=logs.reporter("otf reader","cmap")
+local trace_cmap=false  trackers.register("otf.cmap",function(v) trace_cmap=v end)
+local trace_cmap_details=false  trackers.register("otf.cmap.details",function(v) trace_cmap_details=v end)
 fonts=fonts or {}
 local handlers=fonts.handlers or {}
 fonts.handlers=handlers
@@ -11493,7 +11498,7 @@ readers.vmtx=function(f,fontdata,specification)
   local glyphs=fontdata.glyphs
   local nofglyphs=fontdata.nofglyphs
   local vheight=0
-  local vdefault=verticalheader.ascender+verticalheader.descender
+  local vdefault=verticalheader.ascender-verticalheader.descender
   local topsidebearing=0
   for i=0,nofmetrics-1 do
    local glyph=glyphs[i]
@@ -11501,6 +11506,9 @@ readers.vmtx=function(f,fontdata,specification)
    topsidebearing=readshort(f)
    if vheight~=0 and vheight~=vdefault then
     glyph.vheight=vheight
+   end
+   if topsidebearing~=0 then
+    glyph.tsb=topsidebearing
    end
   end
   for i=nofmetrics,nofglyphs-1 do
@@ -11583,7 +11591,7 @@ local sequence={
  { 0,0,6 },
  { 3,0,6 },
  { 0,5,14 },
-{ 0,4,12 },
+ { 0,4,12 },
  { 3,10,13 },
 }
 local supported={}
@@ -11628,7 +11636,7 @@ formatreaders[4]=function(f,fontdata,offset)
   elseif startchar==0xFFFF and offset==0 then
   elseif offset==0xFFFF then
   elseif offset==0 then
-   if trace_cmap_detail then
+   if trace_cmap_details then
     report("format 4.%i segment %2i from %C upto %C at index %H",1,segment,startchar,endchar,(startchar+delta)%65536)
    end
    for unicode=startchar,endchar do
@@ -11660,8 +11668,8 @@ formatreaders[4]=function(f,fontdata,offset)
    end
   else
    local shift=(segment-nofsegments+offset/2)-startchar
-   if trace_cmap_detail then
-    report("format 4.%i segment %2i from %C upto %C at index %H",0,segment,startchar,endchar,(startchar+delta)%65536)
+   if trace_cmap_details then
+    report_cmap("format 4.%i segment %2i from %C upto %C at index %H",0,segment,startchar,endchar,(startchar+delta)%65536)
    end
    for unicode=startchar,endchar do
     local slot=shift+unicode
@@ -11708,8 +11716,8 @@ formatreaders[6]=function(f,fontdata,offset)
  local count=readushort(f)
  local stop=start+count-1
  local nofdone=0
- if trace_cmap_detail then
-  report("format 6 from %C to %C",2,start,stop)
+ if trace_cmap_details then
+  report_cmap("format 6 from %C to %C",2,start,stop)
  end
  for unicode=start,stop do
   local index=readushort(f)
@@ -11741,8 +11749,8 @@ formatreaders[12]=function(f,fontdata,offset)
   local first=readulong(f)
   local last=readulong(f)
   local index=readulong(f)
-  if trace_cmap_detail then
-   report("format 12 from %C to %C starts at index %i",first,last,index)
+  if trace_cmap_details then
+   report_cmap("format 12 from %C to %C starts at index %i",first,last,index)
   end
   for unicode=first,last do
    local glyph=glyphs[index]
@@ -11780,8 +11788,8 @@ formatreaders[13]=function(f,fontdata,offset)
   local last=readulong(f)
   local index=readulong(f)
   if first<privateoffset then
-   if trace_cmap_detail then
-    report("format 13 from %C to %C get index %i",first,last,index)
+   if trace_cmap_details then
+    report_cmap("format 13 from %C to %C get index %i",first,last,index)
    end
    local glyph=glyphs[index]
    local unicode=glyph.unicode
@@ -11853,10 +11861,16 @@ end
 local function checkcmap(f,fontdata,records,platform,encoding,format)
  local data=records[platform]
  if not data then
+  if trace_cmap_details then
+   report_cmap("skipped, %s, p=%i e=%i f=%i","no platform",platform,encoding,format)
+  end
   return 0
  end
  data=data[encoding]
  if not data then
+  if trace_cmap_details then
+   report_cmap("skipped, %s, p=%i e=%i f=%i","no encoding",platform,encoding,format)
+  end
   return 0
  end
  data=data[format]
@@ -11865,13 +11879,17 @@ local function checkcmap(f,fontdata,records,platform,encoding,format)
  end
  local reader=formatreaders[format]
  if not reader then
+  if trace_cmap_details then
+   report_cmap("skipped, %s, p=%i e=%i f=%i","unsupported format",platform,encoding,format)
+  end
   return 0
  end
- local p=platforms[platform]
- local e=encodings[p]
  local n=reader(f,fontdata,data) or 0
  if trace_cmap then
-  report("cmap checked: platform %i (%s), encoding %i (%s), format %i, new unicodes %i",platform,p,encoding,e and e[encoding] or "?",format,n)
+  local p=platforms[platform]
+  local e=encodings[p]
+  report_cmap("checked, platform %i (%s), encoding %i (%s), format %i, new unicodes %i",
+   platform,p,encoding,e and e[encoding] or "?",format,n)
  end
  return n
 end
@@ -12066,6 +12084,7 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo,inst
   local postscript=fontdata.postscript  or {}
   local fontheader=fontdata.fontheader  or {}
   local cffinfo=fontdata.cffinfo  or {}
+  local verticalheader=fontdata.verticalheader or {}
   local filename=fontdata.filename
   local weight=getname(fontdata,"weight") or (cffinfo and cffinfo.weight) or (metrics and metrics.weight)
   local width=getname(fontdata,"width")  or (cffinfo and cffinfo.width ) or (metrics and metrics.width )
@@ -12131,6 +12150,7 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo,inst
    platformnames=platformnames or nil,
    instancenames=instancenames or nil,
    tableoffsets=fontdata.tableoffsets,
+   defaultvheight=(verticalheader.ascender or 0)-(verticalheader.descender or 0)
   }
   if metricstoo then
    local keys={
@@ -22995,7 +23015,7 @@ local trace_defining=false  registertracker("fonts.defining",function(v) trace_d
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.108 
+otf.version=3.109 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pngcache=containers.define("fonts","png",otf.version,true)
@@ -23357,6 +23377,7 @@ local function copytotfm(data,cache_id)
   parameters.ascender=abs(metadata.ascender  or 0)
   parameters.descender=abs(metadata.descender or 0)
   parameters.units=units
+  parameters.vheight=metadata.defaultvheight
   properties.space=spacer
   properties.encodingbytes=2
   properties.format=data.format or formats.otf

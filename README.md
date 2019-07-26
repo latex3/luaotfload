@@ -18,25 +18,16 @@ provided by this package.
 
 Please see the documentation luaotfload.pdf for more information.
 
-## Versions
+## Development versions
 
-[![Version: 2.9902](https://img.shields.io/badge/version-2.9902-blue.svg?style=flat-square)](https://travis-ci.com/u-fischer/luaotfload/)
-![Travis CI for 2.9902](https://img.shields.io/travis/com/u-fischer/luaotfload/master.svg?style=flat-square)
-[![Version: development](https://img.shields.io/badge/version-dev-blue.svg?style=flat-square)](https://travis-ci.com/u-fischer/luaotfload/branches)
-![Travis CI for dev](https://img.shields.io/travis/com/u-fischer/luaotfload/dev.svg?style=flat-square)
-
-
-The version will be uploaded to CTAN shortly.  
-
-The ongoing development is in the dev branch and in branches referring to the dates of the import of the context files. 
+The ongoing development is in branches referring to the dates of the import of the context files. 
  
 ## Support
 [![GitHub issues](https://img.shields.io/badge/github-issues-blue.svg?style=flat-square)](https://github.com/u-fischer/luaotfload/issues) 
 [![mailing list](https://img.shields.io/badge/mailing_list-lualatex--dev-blue.svg?style=flat-square)](https://www.tug.org/mailman/listinfo/lualatex-dev) 
 
 
-Issues can be reported at the issue tracker or at the old issue tracker on 
-<https://github.com/lualatex/luaotfload>. 
+Issues can be reported at the issue tracker. 
 
 
 The development for LuaLaTeX is discussed on the lualatex-dev mailing list. See

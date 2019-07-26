@@ -2,44 +2,45 @@
 packageversion= "2.9902"
 packagedate   = "2019-07-24"
 
-local luatexstatus = status.list()
-local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
+module   = "luaotfload"
+ctanpkg  = "luaotfload"
 
+-- load my personal data for the ctan upload
 local ok, mydata = pcall(require, "ulrikefischerdata.lua")
 if not ok then
   mydata= {email="XXX",github="XXX",name="XXX"}
 end
 
+-- test the email
 print(mydata.email)
 
-module   = "luaotfload"
-ctanpkg  = "luaotfload"
-
 uploadconfig = {
-  pkg     = ctanpkg,
-  version = "v"..packageversion.." "..packagedate,
--- author  = "Ulrike Fischer;Philipp Gesang;Marcel Krüger;The LaTeX Team;Élie Roux;Manuel Pégourié-Gonnard (inactive);Khaled Hosny (inactive);Will Robertson (inactive)",
+     pkg     = ctanpkg,
+  version    = "v"..packageversion.." "..packagedate,
+-- author    = "Ulrike Fischer;Philipp Gesang;Marcel Krüger;The LaTeX Team;Élie Roux;Manuel Pégourié-Gonnard (inactive);Khaled Hosny (inactive);Will Robertson (inactive)",
 -- author list is too long
-  author  = "... as before ...",  
-  license = "gpl2",
-  summary = "OpenType ‘loader’ for Plain TeX and LaTeX",
-  ctanPath = "/macros/luatex/generic/luaotfload",
+  author     = "... as before ...",  
+  license    = "gpl2",
+  summary    = "OpenType ‘loader’ for Plain TeX and LaTeX",
+  ctanPath   = "/macros/luatex/generic/luaotfload",
   repository = mydata.github .. "luaotfload",
   bugtracker = mydata.github .. "luaotfload/issues",
   support    = mydata.github .. "luaotfload/issues",
-  uploader = mydata.name,
-  email    = mydata.email, 
-  update   = true ,
-  topic=    {"font-use","luatex"},
-  note     = [[Uploaded automatically by l3build... description is unchanged despite the missing linebreaks, authors are unchanged]],
+  uploader   = mydata.name,
+  email      = mydata.email, 
+  update     = true ,
+  topic      = {"font-use","luatex"},
+  note       = [[Uploaded automatically by l3build... description is unchanged despite the missing linebreaks, authors are unchanged]],
   description=[[The package adopts the TrueType/OpenType Font loader code provided in ConTeXt, 
               and adapts it to use in Plain TeX and LaTeX. It works under LuaLaTeX only.]],
   announcement_file="ctan.ann"             
 }
 
+-- we perhaps need different settings for miktex ...
+local luatexstatus = status.list()
+local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
+
 -- l3build check settings
-
-
 
 stdengine    = "luatex"
 checkengines = {"luatex"}
@@ -51,17 +52,18 @@ checkengines = {"luatex"}
  
 checkconfigs = {
                 "build",
-                "config-loader-unpackaged",
-                "config-loader-reference",
-                "config-latex-TU",
-                "config-unicode-math",
-                "config-plain",
-                "config-fontspec"
+               -- "config-loader-unpackaged",
+               -- "config-loader-reference",
+               -- "config-latex-TU",
+               -- "config-unicode-math",
+               -- "config-plain",
+               -- "config-fontspec"
                }
 
 checkruns = 3
 checksuppfiles = {"texmf.cnf"} 
 
+-- exclude some text temporarly or in certain systems ...
 if os.env["CONTEXTPATH"] then 
   -- local system
   if ismiktex then
@@ -74,20 +76,28 @@ else
   excludetests = {"luatex-ja"}
 end
 
--- table.insert(excludetests,"arab2") -- until bug is corrected.
-
-
-
+---------------------------------------------
 -- l3build settings for CTAN/install target
+---------------------------------------------
+
 packtdszip=true
 sourcefiledir = "./src"
-
--- documentation
 docfiledir    = "./doc" 
+-- install directory is the texmf-tree
+options = options or {}
+options["texmfhome"] = "./texmf"
 
-ctanreadme= "CTANREADME.md"
+-------------------
+-- documentation
+-------------------
 
 typesetexe = "lualatex"
+
+-- main docu
+typesetfiles      = {"luaotfload-latex.tex"}
+typesetcycles = 2 -- for the tests
+
+ctanreadme= "CTANREADME.md"
 
 docfiles = 
  {
@@ -101,57 +111,67 @@ textfiles =
  {
   "COPYING",
   "NEWS",
-  docfiledir .. "/CTANREADME.md",
+   docfiledir .. "/CTANREADME.md",
   }
     
-  
-typesetdemofiles  = {"filegraph.tex","luaotfload-conf.tex","luaotfload-tool.tex"}
+typesetdemofiles  = 
+  {
+   "filegraph.tex",
+   "luaotfload-conf.tex",
+   "luaotfload-tool.tex"
+  }
 -- typesetsuppfiles  = {"texmf.cnf"} --later
 
-typesetfiles      = {"**/luaotfload-latex.tex"}
-typesetcycles = 2 -- for the tests
-
+---------------------
 -- installation
+---------------------
 tdsroot = "luatex"
 
 if options["target"] == "check" or options["target"] == "save" then 
   print("check/save")
---  sourcefiledir = "./dontexist"
-  installfiles={} 
-  sourcefiles={} 
-  unpackfiles={}
+  installfiles ={} 
+  sourcefiles  ={} 
+  unpackfiles  ={}
 else
-  sourcefiles  = {
-   "luaotfload.sty", 
-   "**/luaotfload-*.lua",
-   "**/fontloader-*.lua",
-   "**/fontloader-*.tex",
-   "luaotfload-blacklist.cnf",
-   "./doc/filegraph.tex",
--- "./doc/luaotfload-conf.tex",
--- "./doc/luaotfload-tool.tex",
-   "./doc/luaotfload-main.tex", 
-                }
+  sourcefiles  = 
+  {
+    "luaotfload.sty", 
+    "**/luaotfload-*.lua",
+    "**/fontloader-*.lua",
+    "**/fontloader-*.tex",
+    "luaotfload-blacklist.cnf",
+    "./doc/filegraph.tex",
+    "./doc/luaotfload-main.tex", 
+   }
    installfiles = {
      "luaotfload.sty",
      "luaotfload-blacklist.cnf",
      "**/luaotfload-*.lua",
-     "**/fontloader-b*.lua",
-     "**/fontloader-d*.lua",
-     "**/fontloader-f*.lua",
-     "**/fontloader-l*.lua",
-     "**/fontloader-u*.lua",
-     "**/fontloader-reference.lua",
-     "**/fontloader-2*.lua",
+     "**/fontloader-*.lua",
+     "**/fontloader-*.tex",
+    -- "**/luaotfload-*.lua",
+--     "**/fontloader-b*.lua",
+--     "**/fontloader-d*.lua",
+--     "**/fontloader-f*.lua",
+--     "**/fontloader-l*.lua",
+--     "**/fontloader-u*.lua",
+--     "**/fontloader-reference.lua",
+--     "**/fontloader-2*.lua",
                 }
 end
+tdslocations=
+ {
+  "source/luatex/luaotfload/fontloader-reference-load-order.lua",
+  "source/luatex/luaotfload/fontloader-reference-load-order.tex",
+ } 
 
 scriptfiles   =  {"luaotfload-tool.lua"} 
 
 scriptmanfiles = {"luaotfload.conf.5","luaotfload-tool.1"}
 
+-----------------------------
 -- l3build settings for tags:
-
+-----------------------------
 tagfiles = {
             "doc/CTANREADME.md",
             "README.md",
@@ -242,10 +262,6 @@ function update_tag (file,content,tagname,tagdate)
  return content
  end
 
--- install directory is the texmf-tree
--- print(options["texmfhome"])
--- can this work??
-options["texmfhome"] = "./texmf"
 
 kpse.set_program_name ("kpsewhich")
 if not release_date then

@@ -65,6 +65,7 @@ function printlibrarylist ()
   if rowcnt % 2 == 0 then sep = "\\\\" else sep = "&" end
   tex.sprint("\\mbox{"..v.gitpref..v.name..v.ext.."}".. sep)
  end
+  if rowcnt % 2 == 1 then  tex.sprint("\\\\") end -- if odd number we must end the matrix
 end
 
 function printscriptlist ()

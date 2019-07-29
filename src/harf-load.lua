@@ -121,16 +121,6 @@ local function loadfont(spec)
       end
     end
 
-    -- Load CPAL palettes if avialable in the font.
-    local palettes = nil
-    if hbface:ot_color_has_palettes() and hbface:ot_color_has_layers() then
-      local count = hbface:ot_color_palette_get_count()
-      palettes = {}
-      for i = 1, count do
-        palettes[#palettes + 1] = hbface:ot_color_palette_get_colors(i)
-      end
-    end
-
     -- Load glyph metrics for all glyphs in the font. We used to do this on
     -- demand to make loading fonts faster, but hit many limitations inside
     -- LuaTeX (mainly with shared backend fonts, where LuaTeX would assume all
@@ -210,7 +200,6 @@ local function loadfont(spec)
       unicodes = characters,
       psname = hbface:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
       fullname = hbface:get_name(hb.ot.NAME_ID_FULL_NAME),
-      palettes = palettes,
       haspng = hbface:ot_color_has_png(),
       loaded = {}, -- Cached loaded glyph data.
     }
@@ -249,6 +238,7 @@ local tlig = hb.texlig
 local function scalefont(data, spec)
   local size = spec.size
   local options = spec.options
+  local hbface = data.face
   local hbfont = data.font
   local upem = data.upem
   local space = data.space
@@ -282,8 +272,16 @@ local function scalefont(data, spec)
 
   -- Select font palette, we support `palette=index` option, and load the first
   -- one otherwise.
-  local palettes = data.palettes
-  local palette = palettes and palettes[tonumber(options.palette) or 1]
+  local paletteidx = tonumber(options.palette) or 1
+
+  -- Load CPAL palette from the font.
+  local palette = nil
+  if hbface:ot_color_has_palettes() and hbface:ot_color_has_layers() then
+    local count = hbface:ot_color_palette_get_count()
+    if paletteidx <= count then
+      palette = hbface:ot_color_palette_get_colors(paletteidx)
+    end
+  end
 
   local letterspace = 0
   if options.letterspace then

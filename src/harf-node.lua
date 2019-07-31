@@ -101,16 +101,29 @@ local function setprop(n, prop, value)
   props.harf[prop] = value
 end
 
--- Copy node properties and attributes.
-local function copyprops(src, dst)
-  local props = getproperty(src)
-  local attrs = getattrs(src)
+-- New kern node of amount `v`, inheriting the properties/attributes of `n`.
+local function newkern(v, n)
+  local kern = newnode(kernid)
+  local props = getproperty(n)
+  local attrs = getattrs(n)
   if props then
-    setproperty(dst, copytable(props))
+    setproperty(kern, copytable(props))
   end
   if attrs then
-    setattrs(dst, copynodelist(attrs))
+    setattrs(kern, copynodelist(attrs))
   end
+
+  setkern(kern, v)
+  return kern
+end
+
+local function insertkern(head, current, kern, rtl)
+  if rtl then
+    head = insertbefore(head, current, kern)
+  else
+    head, current = insertafter(head, current, kern)
+  end
+  return head, current
 end
 
 -- Convert list of integers to UTF-16 hex string used in PDF.
@@ -658,14 +671,8 @@ local function tonodes(head, current, run, glyphs, color)
           if width ~= x_advance then
             -- LuaTeX always uses the glyph width from the font, so we need to
             -- insert a kern node if the x advance is different.
-            local kern = newnode(kernid)
-            setkern(kern, (x_advance - width) * scale)
-            copyprops(n, kern)
-            if rtl then
-              head = insertbefore(head, current, kern)
-            else
-              head, current = insertafter(head, current, kern)
-            end
+            local kern = newkern((x_advance - width) * scale, n)
+            head, current = insertkern(head, current, kern, rtl)
           end
 
           -- HarfTeX will use this string when printing a glyph node e.g. in

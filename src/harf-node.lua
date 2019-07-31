@@ -650,6 +650,7 @@ local function tonodes(head, current, run, glyphs, color)
             -- error. We use `nullfont` instead.
             -- That is a hack, but I think it is good enough for now.
             setfont(n, 0)
+            head, current = insertafter(head, current, n)
           else
             local oldcharacter = characters[getchar(n)]
             -- If the glyph index of current font chars is the same as shaped
@@ -659,7 +660,6 @@ local function tonodes(head, current, run, glyphs, color)
             if not oldcharacter or character.index ~= oldcharacter.index then
               setchar(n, char)
             end
-          end
           local xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
           local yoffset = glyph.y_offset * scale
           setoffsets(n, xoffset, yoffset)
@@ -703,6 +703,7 @@ local function tonodes(head, current, run, glyphs, color)
           end
           if glyph.endactual then
             setprop(n, p_endactual, true)
+          end
           end
         end
       elseif id == glueid and getsubtype(n) == spaceskip then

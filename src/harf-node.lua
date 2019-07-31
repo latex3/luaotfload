@@ -641,25 +641,37 @@ local function tonodes(head, current, run, glyphs, color)
             depth     = character.depth,
           }
           head, current = insertafter(head, current, todirect(image))
+          if fonttype then
+            -- Color bitmap font with glyph outlines. Insert negative kerning
+            -- as we will insert the glyph node below (to help with text
+            -- copying) and want the bitmap and the glyph to take the same
+            -- advance width.
+            local kern = newkern(-character.width, n)
+            head, current = insertkern(head, current, kern, rtl)
+          end
+        end
+        if pngblob and not fonttype then
+          -- Color bitmap font with no glyph outlines, and has a bitmap for
+          -- this glyph. No further work is needed.
+        elseif haspng and not fonttype then
+          -- Color bitmap font with no glyph outlines (like Noto
+          -- Color Emoji) but has no bitmap for current glyph (most likely
+          -- `.notdef` glyph). LuaTeX does not know how to embed such fonts, so
+          -- we don’t want them to reach the backend as it will cause a fatal
+          -- error. We use `nullfont` instead.  That is a hack, but I think it
+          -- is good enough for now.
+          -- We insert the glyph node and move on, no further work is needed.
+          setfont(n, 0)
+          head, current = insertafter(head, current, n)
         else
-          if haspng and not fonttype then
-            -- If this is a color bitmap font with no glyph outlines (like Noto
-            -- Color Emoji) and we end up here then the glyph is not supported
-            -- by the font.  LuaTeX does not now how to embed such fonts, so we
-            -- don’t want them to reach the backend as it will cause a fatal
-            -- error. We use `nullfont` instead.
-            -- That is a hack, but I think it is good enough for now.
-            setfont(n, 0)
-            head, current = insertafter(head, current, n)
-          else
-            local oldcharacter = characters[getchar(n)]
-            -- If the glyph index of current font chars is the same as shaped
-            -- glyph, keep the node char unchanged. Helps with primitives that
-            -- take characters as input but actually work on glyphs, like
-            -- `\rpcode`.
-            if not oldcharacter or character.index ~= oldcharacter.index then
-              setchar(n, char)
-            end
+          local oldcharacter = characters[getchar(n)]
+          -- If the glyph index of current font character is the same as shaped
+          -- glyph, keep the node char unchanged. Helps with primitives that
+          -- take characters as input but actually work on glyphs, like
+          -- `\rpcode`.
+          if not oldcharacter or character.index ~= oldcharacter.index then
+            setchar(n, char)
+          end
           local xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
           local yoffset = glyph.y_offset * scale
           setoffsets(n, xoffset, yoffset)
@@ -703,7 +715,6 @@ local function tonodes(head, current, run, glyphs, color)
           end
           if glyph.endactual then
             setprop(n, p_endactual, true)
-          end
           end
         end
       elseif id == glueid and getsubtype(n) == spaceskip then

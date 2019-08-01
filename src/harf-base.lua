@@ -1,14 +1,14 @@
 local hb = require("luaharfbuzz")
 
--- LuaTeX’s TFM structure indexes glyphs by character codes, so we fake it by
--- adding the maximum possible Unicode code point to the glyph id. This way
--- we have a simple mapping for all glyphs without interfering with any valid
--- Unicode code point.
+-- The engine’s TFM structure indexes glyphs by character codes, which means
+-- all our glyphs need character codes. We fake them by adding the maximum
+-- possible Unicode code point to the glyph id. This way we have a simple
+-- mapping for all glyphs without interfering with any valid Unicode code
+-- point.
 --
--- LuaTeX use the first 256 characters above maximum Unicode character for
--- escaping raw bytes, so skip that as well.
+-- The engine uses the first 256 code points outside valid Unicode code space
+-- for escaping raw bytes, so we skip them in our prefix.
 hb.CH_GID_PREFIX = 0x110000 + 256
-
 
 -- Legacy TeX Input Method Disguised as Font Ligatures hack.
 --

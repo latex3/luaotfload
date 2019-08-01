@@ -83,8 +83,8 @@ local function loadfont(spec)
     local hbfont = hb.Font.new(hbface)
     local upem = hbface:get_upem()
 
-    -- All LuaTeX seem to care about in font type is whether it has CFF table
-    -- or not, so we check for that here.
+    -- The engine seems to use the font type to tell whether there is a CFF
+    -- table or not, so we check for that here.
     local fonttype = nil
     local hasos2 = false
     local haspost = false
@@ -123,8 +123,8 @@ local function loadfont(spec)
 
     -- Load glyph metrics for all glyphs in the font. We used to do this on
     -- demand to make loading fonts faster, but hit many limitations inside
-    -- LuaTeX (mainly with shared backend fonts, where LuaTeX would assume all
-    -- fonts it decides to share load the same set of glyphs).
+    -- the engine (mainly with shared backend fonts, where the engine would
+    -- assume all fonts it decides to share load the same set of glyphs).
     --
     -- Getting glyph advances is fast enough, but glyph extents are slower
     -- especially in CFF fonts. We might want to have an option to ignore exact
@@ -301,8 +301,8 @@ local function scalefont(data, spec)
   if options.embolden then
     mode = 2
     -- The multiplication by 7200.0/7227 is to undo the opposite conversion
-    -- LuaTeX is doing and make the final number written in the PDF file match
-    -- XeTeX's.
+    -- the engine is doing and make the final number written in the PDF file
+    -- match XeTeX’s.
     width = (size * tonumber(options.embolden) / 6553.6) * (7200.0/7227)
   end
 

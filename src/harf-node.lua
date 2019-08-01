@@ -337,8 +337,8 @@ local function unsafetobreak(glyph, nodes)
   return glyph
      and glyph.flags
      and glyph.flags & fl_unsafe
-     -- LuaTeX’s discretionary nodes can’t contain glue, so stop at first glue
-     -- as well. This is incorrect, but I don’t have a better idea.
+     -- Discretionary nodes can’t contain glue, so stop at first glue as well.
+     -- This is incorrect, but I don’t have a better idea.
      and getid(nodes[glyph.cluster + 1]) ~= glueid
 end
 
@@ -413,7 +413,8 @@ shape = function(run)
   hbfont:set_scale(hscale, vscale)
 
   if hb.shape_full(hbfont, buf, features, shapers) then
-    -- LuaTeX wants the glyphs in logical order, so reverse RTL buffers.
+    -- The engine wants the glyphs in logical order, but HarfBuzz outputs them
+    -- in visual order, so we reverse RTL buffers.
     if dir:is_backward() then buf:reverse() end
 
     local glyphs = buf:get_glyphs()
@@ -548,7 +549,7 @@ local function color_to_rgba(color)
 end
 
 -- Cache of color glyph PNG data for bookkeeping, only because I couldn’t
--- figure how to make LuaTeX load the image from the binary data directly.
+-- figure how to make the engine load the image from the binary data directly.
 local pngcache = {}
 local function cachedpng(data)
   local hash = md5.sumhexa(data)
@@ -656,10 +657,10 @@ local function tonodes(head, current, run, glyphs, color)
         elseif haspng and not fonttype then
           -- Color bitmap font with no glyph outlines (like Noto
           -- Color Emoji) but has no bitmap for current glyph (most likely
-          -- `.notdef` glyph). LuaTeX does not know how to embed such fonts, so
-          -- we don’t want them to reach the backend as it will cause a fatal
-          -- error. We use `nullfont` instead.  That is a hack, but I think it
-          -- is good enough for now.
+	  -- `.notdef` glyph). The engine does not know how to embed such
+	  -- fonts, so we don’t want them to reach the backend as it will cause
+	  -- a fatal error. We use `nullfont` instead.  That is a hack, but I
+	  -- think it is good enough for now.
           -- We insert the glyph node and move on, no further work is needed.
           setfont(n, 0)
           head, current = insertafter(head, current, n)
@@ -681,15 +682,15 @@ local function tonodes(head, current, run, glyphs, color)
           local x_advance = glyph.x_advance + letterspace
           local width = fontglyph.width
           if width ~= x_advance then
-            -- LuaTeX always uses the glyph width from the font, so we need to
-            -- insert a kern node if the x advance is different.
+	    -- The engine always uses the glyph width from the font, so we need
+	    -- to insert a kern node if the x advance is different.
             local kern = newkern((x_advance - width) * scale, n)
             head, current = insertkern(head, current, kern, rtl)
           end
 
-          -- HarfTeX will use this string when printing a glyph node e.g. in
-          -- overfull messages, otherwise it will be trying to print our
-          -- invalid pseudo Unicode code points.
+	  -- The engine will use this string when printing a glyph node e.g. in
+	  -- overfull messages, otherwise it will be trying to print our
+	  -- invalid pseudo Unicode code points.
           -- If the string is empty it means this glyph is part of a larger
           -- cluster and we don’t to print anything for it as the first glyph
           -- in the cluster will have the string of the whole cluster.

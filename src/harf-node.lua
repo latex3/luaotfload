@@ -922,20 +922,25 @@ local function run_cleanup()
   end
 end
 
-local function get_tounicode(fontid, c)
-  local fontdata = font.getfont(fontid)
-  local hbdata = fontdata.hb
-  if hbdata then
-    local hbshared = hbdata.shared
-    local fontglyphs = hbshared.glyphs
-    local hbfont = hbshared.font
-
-    local gid = c - hb.CH_GID_PREFIX
-    if c < hb.CH_GID_PREFIX then
-      gid = hbfont:get_nominal_glyph(c)
+local function set_tounicode()
+  for fontid, fontdata in font.each() do
+    local hbdata = fontdata.hb
+    if hbdata and fontid == pdf.getfontname(fontid) then
+      local characters = fontdata.characters
+      local newcharacters = {}
+      local glyphs = hbdata.shared.glyphs
+      for gid = 0, #glyphs do
+        local glyph = glyphs[gid]
+        local tounicode = glyph.tounicode
+        if tounicode then
+          local character = characters[gid + hb.CH_GID_PREFIX]
+          newcharacters[gid + hb.CH_GID_PREFIX] = character
+          character.tounicode = tounicode
+          character.used = true
+        end
+      end
+      font.addcharacters(fontid, { characters = newcharacters })
     end
-
-    return fontglyphs[gid].tounicode
   end
 end
 
@@ -950,6 +955,6 @@ return {
   process = process_nodes,
   post_process = post_process_nodes,
   cleanup = run_cleanup,
-  get_tounicode = get_tounicode,
+  set_tounicode = set_tounicode,
   get_glyph_string = get_glyph_string,
 }

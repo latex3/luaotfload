@@ -1,7 +1,9 @@
 \input{regression-test}
 \documentclass{book}
 
-
+\directlua{
+  local found = luaotfload.aux.resolve_fontname("TeXGyreHeros")
+  }
 \begin{document}
 abc
 \START

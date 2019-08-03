@@ -117,8 +117,7 @@ local function resolve_name (specification)
         logreport ("log", 1, "resolve", "name lookup %q -> \"%s%s\"",
                    specification.name, resolved,
                    subfont and stringformat ("(%d)", subfont) or "")
-        specification.sub = subfont
-        return resolved
+        return resolved, tonumber(subfont)
     end
     return resolve_file (specification)
 end
@@ -244,11 +243,16 @@ end
 
 local function wrap_resolver(resolver)
     return function (specification)
-        local filename, forced = resolver(specification)
+        local filename, sub, forced = resolver(specification)
+        if type(sub) ~= "number" then
+            forced = sub
+            sub = nil
+        end
         if filename then
             specification.resolved = filename
             specification.filename = filename
             specification.name = filename
+            specification.sub = sub or specification.sub
             specification.forced = specification.forced or forced
             if not specification.forced then
                 local suffix = stringlower (filesuffix (filename))
@@ -275,28 +279,25 @@ local resolvers = table.merge(luaotfload.resolvers, {
 })
 luaotfload.resolvers = resolvers
 
-return {
-    init = function ( )
-        if luatexbase and luatexbase.create_callback then
-            luatexbase.create_callback ("luaotfload.resolve_font",
-                                        "exclusive", function () end)
-        end
-        logreport ("log", 5, "resolvers", "installing font resolvers", name)
-        local request_resolvers = fonts.definers.resolvers
-        for k, _ in pairs(resolvers) do
-            request_resolvers[k] = nil
-        end
-        setmetatable(request_resolvers, {__index = function(t, n)
-            if not resolvers[n] then return end
-            local wrapped = wrap_resolver(resolvers[n])
-            t[n] = wrapped
-            return wrapped
-        end})
-        fonts.formats.ofm      = "type1"
-        fonts.encodings        = fonts.encodings       or { }
-        fonts.encodings.known  = fonts.encodings.known or { }
-        return true
-    end, --- [.init]
-}
-
+return function()
+    if luatexbase and luatexbase.create_callback then
+        luatexbase.create_callback ("luaotfload.resolve_font",
+                                    "exclusive", function () end)
+    end
+    logreport ("log", 5, "resolvers", "installing font resolvers", name)
+    local request_resolvers = fonts.definers.resolvers
+    for k, _ in pairs(resolvers) do
+        request_resolvers[k] = nil
+    end
+    setmetatable(request_resolvers, {__index = function(t, n)
+        if not resolvers[n] then return end
+        local wrapped = wrap_resolver(resolvers[n])
+        t[n] = wrapped
+        return wrapped
+    end})
+    fonts.formats.ofm      = "type1"
+    fonts.encodings        = fonts.encodings       or { }
+    fonts.encodings.known  = fonts.encodings.known or { }
+    return true
+end
 --- vim:ft=lua:ts=8:sw=4:et:tw=79

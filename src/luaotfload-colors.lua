@@ -391,27 +391,24 @@ local setcolor = function (tfmdata, value)
     end
 end
 
-return {
-    init = function ()
-        logreport = luaotfload.log.report
-        if not fonts then
-            logreport ("log", 0, "color",
-                       "OTF mechanisms missing -- did you forget to \z
-                       load a font loader?")
-            return false
-        end
-        fonts.handlers.otf.features.register {
-            name        = "color",
-            description = "color",
-            initializers = {
-                base = setcolor,
-                node = setcolor,
-            }
-        }
-        return true
+return function ()
+    logreport = luaotfload.log.report
+    if not fonts then
+        logreport ("log", 0, "color",
+                   "OTF mechanisms missing -- did you forget to \z
+                   load a font loader?")
+        return false
     end
-}
-
+    fonts.handlers.otf.features.register {
+        name        = "color",
+        description = "color",
+        initializers = {
+            base = setcolor,
+            node = setcolor,
+        }
+    }
+    return true
+end
 
 -- vim:tw=71:sw=4:ts=4:expandtab
 

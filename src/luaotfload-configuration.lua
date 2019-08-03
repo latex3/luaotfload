@@ -1011,27 +1011,24 @@ end
 ---                                 EXPORTS
 -------------------------------------------------------------------------------
 
-return {
-  init = function ()
-    config.luaotfload = { }
-    logreport         = luaotfload.log.report
-    local parsers     = luaotfload.parsers
-    config_parser     = parsers.config
-    stripslashes      = parsers.stripslashes
+return function ()
+  config.luaotfload = { }
+  logreport         = luaotfload.log.report
+  local parsers     = luaotfload.parsers
+  config_parser     = parsers.config
+  stripslashes      = parsers.stripslashes
 
-    luaotfload.default_config = default_config
-    config.actions = {
-      read             = read,
-      apply            = apply,
-      apply_defaults   = apply_defaults,
-      reconfigure      = reconfigure,
-      dump             = dump,
-    }
-    if not apply_defaults () then
-      logreport ("log", 0, "load",
-                 "Configuration unsuccessful: error loading default settings.")
-    end
-    return true
+  luaotfload.default_config = default_config
+  config.actions = {
+    read             = read,
+    apply            = apply,
+    apply_defaults   = apply_defaults,
+    reconfigure      = reconfigure,
+    dump             = dump,
+  }
+  if not apply_defaults () then
+    logreport ("log", 0, "load",
+               "Configuration unsuccessful: error loading default settings.")
   end
-}
-
+  return true
+end

@@ -226,18 +226,15 @@ local install_callbacks = function ()
   return true
 end
 
-return {
-  init = function ()
-    local ret = true
-    if not install_formats () then
-      logreport ("log", 0, "loaders", "Error initializing OFM/PF{A,B} loaders.")
-      ret = false
-    end
-    if not install_callbacks () then
-      logreport ("log", 0, "loaders", "Error installing font loader callbacks.")
-      ret = false
-    end
-    return ret
+return function ()
+  if not install_formats () then
+    logreport ("log", 0, "loaders", "Error initializing OFM/PF{A,B} loaders.")
+    return false
   end
-}
+  if not install_callbacks () then
+    logreport ("log", 0, "loaders", "Error installing font loader callbacks.")
+    return false
+  end
+  return true
+end
 -- vim:tw=79:sw=2:ts=2:expandtab

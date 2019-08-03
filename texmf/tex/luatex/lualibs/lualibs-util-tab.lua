@@ -314,21 +314,21 @@ end
 -- best keep [%q] keys (as we have some in older applications i.e. saving user data (otherwise
 -- we also need to check for reserved words)
 
-local f_hashed_string   = formatters["[%q]=%q,"]
-local f_hashed_number   = formatters["[%q]=%s,"]
-local f_hashed_boolean  = formatters["[%q]=%l,"]
-local f_hashed_table    = formatters["[%q]="]
+local f_hashed_string   = formatters["[%Q]=%Q,"]
+local f_hashed_number   = formatters["[%Q]=%s,"]
+local f_hashed_boolean  = formatters["[%Q]=%l,"]
+local f_hashed_table    = formatters["[%Q]="]
 
-local f_indexed_string  = formatters["[%s]=%q,"]
+local f_indexed_string  = formatters["[%s]=%Q,"]
 local f_indexed_number  = formatters["[%s]=%s,"]
 local f_indexed_boolean = formatters["[%s]=%l,"]
 local f_indexed_table   = formatters["[%s]="]
 
-local f_ordered_string  = formatters["%q,"]
+local f_ordered_string  = formatters["%Q,"]
 local f_ordered_number  = formatters["%s,"]
 local f_ordered_boolean = formatters["%l,"]
 
-function table.fastserialize(t,prefix)
+function table.fastserialize(t,prefix) -- todo, move local function out
 
     -- prefix should contain the =
     -- not sorted
@@ -525,27 +525,27 @@ local f_start_key_nop     = formatters["%w{"]
 local f_stop              = formatters["%w},"]
 
 local f_key_num_value_num = formatters["%w[%s]=%s,"]
-local f_key_str_value_num = formatters["%w[%q]=%s,"]
+local f_key_str_value_num = formatters["%w[%Q]=%s,"]
 local f_key_boo_value_num = formatters["%w[%l]=%s,"]
 
-local f_key_num_value_str = formatters["%w[%s]=%q,"]
-local f_key_str_value_str = formatters["%w[%q]=%q,"]
-local f_key_boo_value_str = formatters["%w[%l]=%q,"]
+local f_key_num_value_str = formatters["%w[%s]=%Q,"]
+local f_key_str_value_str = formatters["%w[%Q]=%Q,"]
+local f_key_boo_value_str = formatters["%w[%l]=%Q,"]
 
 local f_key_num_value_boo = formatters["%w[%s]=%l,"]
-local f_key_str_value_boo = formatters["%w[%q]=%l,"]
+local f_key_str_value_boo = formatters["%w[%Q]=%l,"]
 local f_key_boo_value_boo = formatters["%w[%l]=%l,"]
 
 local f_key_num_value_not = formatters["%w[%s]={},"]
-local f_key_str_value_not = formatters["%w[%q]={},"]
+local f_key_str_value_not = formatters["%w[%Q]={},"]
 local f_key_boo_value_not = formatters["%w[%l]={},"]
 
 local f_key_num_value_seq = formatters["%w[%s]={ %, t },"]
-local f_key_str_value_seq = formatters["%w[%q]={ %, t },"]
+local f_key_str_value_seq = formatters["%w[%Q]={ %, t },"]
 local f_key_boo_value_seq = formatters["%w[%l]={ %, t },"]
 
 local f_val_num           = formatters["%w%s,"]
-local f_val_str           = formatters["%w%q,"]
+local f_val_str           = formatters["%w%Q,"]
 local f_val_boo           = formatters["%w%l,"]
 local f_val_not           = formatters["%w{},"]
 local f_val_seq           = formatters["%w{ %, t },"]
@@ -554,7 +554,7 @@ local f_fin_seq           = formatters[" %, t }"]
 local f_table_return      = formatters["return {"]
 local f_table_name        = formatters["%s={"]
 local f_table_direct      = formatters["{"]
-local f_table_entry       = formatters["[%q]={"]
+local f_table_entry       = formatters["[%Q]={"]
 local f_table_finish      = formatters["}"]
 
 ----- f_string            = formatters["%q"]

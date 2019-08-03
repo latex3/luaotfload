@@ -29,8 +29,8 @@ local loadmodule        = lualibs.loadmodule
 
 local lualibs_basic_module = {
   name          = "lualibs-basic",
-  version       = "2.6702",       --TAGVERSION
-  date          = "2019-07-24", --TAGDATE
+  version       = "2.6703",       --TAGVERSION
+  date          = "2019-08-02", --TAGDATE
   description   = "ConTeXt Lua libraries -- basic collection.",
   author        = "Hans Hagen, PRAGMA-ADE, Hasselt NL & Elie Roux & Philipp Gesang",
   copyright     = "PRAGMA ADE / ConTeXt Development Team",

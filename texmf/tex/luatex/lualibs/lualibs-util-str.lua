@@ -584,6 +584,26 @@ local template = [[
 return function(%s) return %s end
 ]]
 
+-- this might move
+
+local pattern = Cs(Cc('"') * (
+    (1-S('"\\\n\r'))^1
+  + P('"')  / '\\"'
+  + P('\\') / '\\\\'
+  + P('\n') / '\\n'
+  + P('\r') / '\\r'
+)^0 * Cc('"'))
+
+patterns.escapedquotes = pattern
+
+function string.escapedquotes(s)
+    return lpegmatch(pattern,s)
+end
+
+-- print(string.escapedquotes('1\\23\n"'))
+
+-- but for now here
+
 local preamble = ""
 
 local environment = {
@@ -611,6 +631,7 @@ local environment = {
     formattedfloat  = number.formattedfloat,
     stripzero       = patterns.stripzero,
     stripzeros      = patterns.stripzeros,
+    escapedquotes   = string.escapedquotes,
 
     FORMAT          = string.f9,
 }
@@ -685,11 +706,13 @@ local format_q = function()
     -- lua 5.3 has a different q than lua 5.2 (which does a tostring on numbers)
  -- return format("(a%s ~= nil and format('%%q',a%s) or '')",n,n)
     return format("(a%s ~= nil and format('%%q',tostring(a%s)) or '')",n,n)
+ -- return format("(a%s ~= nil and escapedquotes(tostring(a%s)) or '')",n,n)
 end
 
-local format_Q = function() -- can be optimized
+local format_Q = function() -- fast escaping
     n = n + 1
-    return format("format('%%q',tostring(a%s))",n)
+--  return format("format('%%q',tostring(a%s))",n)
+    return format("escapedquotes(tostring(a%s))",n)
 end
 
 local format_i = function(f)

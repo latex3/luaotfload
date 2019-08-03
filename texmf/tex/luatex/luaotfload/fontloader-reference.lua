@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 07/24/19 11:17:48
+-- merge date  : 08/02/19 19:40:08
 
 do -- begin closure to overcome local limits and interference
 
@@ -3396,6 +3396,13 @@ local template=[[
 %s
 return function(%s) return %s end
 ]]
+local pattern=Cs(Cc('"')*(
+ (1-S('"\\\n\r'))^1+P('"')/'\\"'+P('\\')/'\\\\'+P('\n')/'\\n'+P('\r')/'\\r'
+)^0*Cc('"'))
+patterns.escapedquotes=pattern
+function string.escapedquotes(s)
+ return lpegmatch(pattern,s)
+end
 local preamble=""
 local environment={
  global=global or _G,
@@ -3422,6 +3429,7 @@ local environment={
  formattedfloat=number.formattedfloat,
  stripzero=patterns.stripzero,
  stripzeros=patterns.stripzeros,
+ escapedquotes=string.escapedquotes,
  FORMAT=string.f9,
 }
 local arguments={ "a1" } 
@@ -3479,7 +3487,7 @@ local format_q=function()
 end
 local format_Q=function() 
  n=n+1
- return format("format('%%q',tostring(a%s))",n)
+ return format("escapedquotes(tostring(a%s))",n)
 end
 local format_i=function(f)
  n=n+1
@@ -11502,7 +11510,7 @@ readers.vmtx=function(f,fontdata,specification)
   local topsidebearing=0
   for i=0,nofmetrics-1 do
    local glyph=glyphs[i]
-   vheight=readshort(f)
+   vheight=readushort(f)
    topsidebearing=readshort(f)
    if vheight~=0 and vheight~=vdefault then
     glyph.vheight=vheight
@@ -11587,9 +11595,12 @@ local sequence={
  { 3,1,4 },
  { 3,10,12 },
  { 0,3,4 },
+ { 0,3,12 },
  { 0,1,4 },
+ { 0,1,12 },
  { 0,0,6 },
  { 3,0,6 },
+ { 3,0,4 },
  { 0,5,14 },
  { 0,4,12 },
  { 3,10,13 },
@@ -11859,24 +11870,33 @@ formatreaders[14]=function(f,fontdata,offset)
  end
 end
 local function checkcmap(f,fontdata,records,platform,encoding,format)
- local data=records[platform]
- if not data then
+ local pdata=records[platform]
+ if not pdata then
   if trace_cmap_details then
    report_cmap("skipped, %s, p=%i e=%i f=%i","no platform",platform,encoding,format)
   end
   return 0
  end
- data=data[encoding]
- if not data then
+ local edata=pdata[encoding]
+ if not edata then
   if trace_cmap_details then
    report_cmap("skipped, %s, p=%i e=%i f=%i","no encoding",platform,encoding,format)
   end
   return 0
  end
- data=data[format]
- if not data then
+ local fdata=edata[format]
+ if not fdata then
+  if trace_cmap_details then
+   report_cmap("skipped, %s, p=%i e=%i f=%i","no format",platform,encoding,format)
+  end
+  return 0
+ elseif type(fdata)~="number" then
+  if trace_cmap_details then
+   report_cmap("skipped, %s, p=%i e=%i f=%i","already done",platform,encoding,format)
+  end
   return 0
  end
+ edata[format]=true 
  local reader=formatreaders[format]
  if not reader then
   if trace_cmap_details then
@@ -11884,8 +11904,8 @@ local function checkcmap(f,fontdata,records,platform,encoding,format)
   end
   return 0
  end
- local n=reader(f,fontdata,data) or 0
- if trace_cmap then
+ local n=reader(f,fontdata,fdata) or 0
+ if trace_cmap_details or trace_cmap then
   local p=platforms[platform]
   local e=encodings[p]
   report_cmap("checked, platform %i (%s), encoding %i (%s), format %i, new unicodes %i",

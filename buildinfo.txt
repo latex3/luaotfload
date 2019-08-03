@@ -52,11 +52,11 @@ The name contains the current date.
 
 6.b change version number in build.lua and call l3build tag
 
-7. Update luatotfload-status
+7. Update luaotfload-status
 
 !!! date must be naturally correct
 
---> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-07-24.lua
+--> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-08-02.lua
 
 8. Check lualibs status -- perhaps it needs update too
 
@@ -68,7 +68,7 @@ The name contains the current date.
 === end phase 1 - preparation ===
 
 === phase 2 - tests ==
-
+10. Adapt aaaaa-luakern.tlg.
 10. Install new dev luatex version
 
 11. Run tests in default TL and with dev-version

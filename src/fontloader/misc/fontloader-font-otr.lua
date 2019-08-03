@@ -1215,7 +1215,7 @@ readers.vmtx = function(f,fontdata,specification)
         local topsidebearing = 0
         for i=0,nofmetrics-1 do
             local glyph     = glyphs[i]
-            vheight         = readshort(f)
+            vheight         = readushort(f)
             topsidebearing  = readshort(f)
             if vheight ~= 0 and vheight ~= vdefault then
                 glyph.vheight = vheight
@@ -1315,14 +1315,16 @@ local formatreaders = { }
 local duplicatestoo = true
 
 local sequence = {
+    -- these is some provision against redundant loading
     { 3,  1,  4 },
     { 3, 10, 12 },
     { 0,  3,  4 },
+    { 0,  3, 12 },
     { 0,  1,  4 },
- -- { 0,  1, 12 }, -- maybe for some old mac fonts
- -- { 0,  4, 12 },
+    { 0,  1, 12 }, -- for some old mac fonts
     { 0,  0,  6 },
     { 3,  0,  6 },
+    { 3,  0,  4 }, -- for (likely) old crap
     -- variants
     { 0,  5, 14 },
     -- last resort ranges
@@ -1633,24 +1635,33 @@ formatreaders[14] = function(f,fontdata,offset)
 end
 
 local function checkcmap(f,fontdata,records,platform,encoding,format)
-    local data = records[platform]
-    if not data then
+    local pdata = records[platform]
+    if not pdata then
         if trace_cmap_details then
             report_cmap("skipped, %s, p=%i e=%i f=%i","no platform",platform,encoding,format)
         end
         return 0
     end
-    data = data[encoding]
-    if not data then
+    local edata = pdata[encoding]
+    if not edata then
         if trace_cmap_details then
             report_cmap("skipped, %s, p=%i e=%i f=%i","no encoding",platform,encoding,format)
         end
         return 0
     end
-    data = data[format]
-    if not data then
+    local fdata = edata[format]
+    if not fdata then
+        if trace_cmap_details then
+            report_cmap("skipped, %s, p=%i e=%i f=%i","no format",platform,encoding,format)
+        end
+        return 0
+    elseif type(fdata) ~= "number" then
+        if trace_cmap_details then
+            report_cmap("skipped, %s, p=%i e=%i f=%i","already done",platform,encoding,format)
+        end
         return 0
     end
+    edata[format] = true -- done
     local reader = formatreaders[format]
     if not reader then
         if trace_cmap_details then
@@ -1658,8 +1669,8 @@ local function checkcmap(f,fontdata,records,platform,encoding,format)
         end
         return 0
     end
-    local n = reader(f,fontdata,data) or 0
-    if trace_cmap then
+    local n = reader(f,fontdata,fdata) or 0
+    if trace_cmap_details or trace_cmap then
         local p = platforms[platform]
         local e = encodings[p]
         report_cmap("checked, platform %i (%s), encoding %i (%s), format %i, new unicodes %i",

@@ -685,13 +685,11 @@ end
 --- https://github.com/lualatex/luaotfload/issues/74
 --- string -> (string * int)
 local resolve_fontname = function (name)
-  local foundname, subfont, success = namesresolve(nil, nil, {
-          name          = name,
-          lookup        = "name",
-          optsize       = 0,
-          specification = "name:" .. name,
-  })
-  if success then
+  local foundname, subfont = luaotfload.resolvers.name {
+    name          = name,
+    specification = "name:" .. name,
+  }
+  if foundname then
     return foundname, subfont
   end
   return false, false

@@ -52,12 +52,12 @@ checkengines = {"luatex"}
  
 checkconfigs = {
                 "build",
-               -- "config-loader-unpackaged",
-               -- "config-loader-reference",
-               -- "config-latex-TU",
-               -- "config-unicode-math",
-               -- "config-plain",
-               -- "config-fontspec"
+                "config-loader-unpackaged",
+                "config-loader-reference",
+                "config-latex-TU",
+                "config-unicode-math",
+                "config-plain",
+                "config-fontspec"
                }
 
 checkruns = 3
@@ -149,14 +149,6 @@ else
      "**/luaotfload-*.lua",
      "**/fontloader-*.lua",
      "**/fontloader-*.tex",
-    -- "**/luaotfload-*.lua",
---     "**/fontloader-b*.lua",
---     "**/fontloader-d*.lua",
---     "**/fontloader-f*.lua",
---     "**/fontloader-l*.lua",
---     "**/fontloader-u*.lua",
---     "**/fontloader-reference.lua",
---     "**/fontloader-2*.lua",
                 }
 end
 tdslocations=

@@ -117,8 +117,7 @@ local function resolve_name (specification)
         logreport ("log", 1, "resolve", "name lookup %q -> \"%s%s\"",
                    specification.name, resolved,
                    subfont and stringformat ("(%d)", subfont) or "")
-        specification.sub = subfont
-        return resolved
+        return resolved, tonumber(subfont)
     end
     return resolve_file (specification)
 end
@@ -244,11 +243,16 @@ end
 
 local function wrap_resolver(resolver)
     return function (specification)
-        local filename, forced = resolver(specification)
+        local filename, sub, forced = resolver(specification)
+        if type(sub) ~= "number" then
+            forced = sub
+            sub = nil
+        end
         if filename then
             specification.resolved = filename
             specification.filename = filename
             specification.name = filename
+            specification.sub = sub or specification.sub
             specification.forced = specification.forced or forced
             if not specification.forced then
                 local suffix = stringlower (filesuffix (filename))

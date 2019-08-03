@@ -9,7 +9,9 @@ abc
 \START
 \directlua{
   local foundA = luaotfload.aux.resolve_fontname("TeXGyreHeros")
+  texio.write_nl(foundB)
   local foundB = fonts.names.resolve("TeXGyreHeros")
+  texio.write_nl(foundA)
   if foundA==foundB then
    texio.write_nl("found")
   end

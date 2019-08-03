@@ -759,19 +759,10 @@ aux.font_index      = font_index
 --- just a proof of concept
 
 --- fontobj -> string list -> (string list) list
-local get_font_data get_font_data = function (tfmdata, keys, acc, n)
-  if not acc then
-    return get_font_data(tfmdata, keys, {}, 1)
-  end
-  local key = keys[n]
-  if key then
-    local val = tfmdata[key]
-    if val then
-      acc[#acc+1] = val
-    else
-      acc[#acc+1] = false
-    end
-    return get_font_data(tfmdata, keys, acc, n+1)
+local function get_font_data (tfmdata, keys)
+  local acc = {}
+  for n = 1, #keys do
+    acc[n] = tfmdata[keys[n]] or false
   end
   return acc
 end
@@ -790,27 +781,19 @@ end
 local default_keys = { "fullname" }
 
 --- string list -> (int * string list) list
-local get_loaded_fonts get_loaded_fonts = function (keys, acc, lastid)
-  if not acc then
-    if not keys then
-      keys = default_keys
-    end
-    return get_loaded_fonts(keys, {}, lastid)
-  end
-  local id, tfmdata = next(identifiers, lastid)
-  if id then
+function aux.get_loaded_fonts (keys)
+  keys = keys or default_keys
+  local acc = {}
+  for id, tfmdata in pairs(identifiers) do
     local data = get_font_data(tfmdata, keys)
     acc[#acc+1] = { id, data }
-    return get_loaded_fonts (keys, acc, id)
   end
   return acc
 end
 
-aux.get_loaded_fonts = get_loaded_fonts
-
 --- Raw access to the font.* namespace is unsafe so no documentation on
 --- this one.
-local get_raw_fonts = function ( )
+function aux.get_raw_fonts ()
   local res = { }
   for i, v in font.each() do
     if v.filename then
@@ -819,8 +802,6 @@ local get_raw_fonts = function ( )
   end
   return res
 end
-
-aux.get_raw_fonts = get_raw_fonts
 
 -----------------------------------------------------------------------
 ---                         font parameters
@@ -855,7 +836,7 @@ end})
 --doc]]--
 
 --- int -> (number | false)
-local get_quad = function (font_id)
+function aux.get_quad(font_id)
   local quad = quads[font_id]
   if quad then
     return quad
@@ -869,14 +850,11 @@ local get_quad = function (font_id)
   return false
 end
 
-aux.get_quad = get_quad
-
-
 -----------------------------------------------------------------------
 ---                         initialization
 -----------------------------------------------------------------------
 
-local inject_callbacks = function (lst)
+local function inject_callbacks (lst)
   if not lst and next (lst) then return false end
 
   local inject = function (def)

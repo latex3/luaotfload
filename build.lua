@@ -69,7 +69,7 @@ if os.env["CONTEXTPATH"] then
   if ismiktex then
    excludetests = {"arabkernsfs","fontload-ttc-fontindex"}
   else
-   excludetests = {"luatex-ja"}
+   -- excludetests = {"luatex-ja"}
   end
 else
   -- travis or somewhere else ...

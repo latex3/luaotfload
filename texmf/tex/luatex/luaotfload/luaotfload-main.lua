@@ -236,22 +236,20 @@ local install_loaders = function ()
     loaders.initialize = function (name)
         local tmp       = loadmodule (name)
         local logreport = luaotfload.log.report
-        if type (tmp) == "table" then
-            local init = tmp.init
-            if init and type (init) == "function" then
-                local t_0 = osgettimeofday ()
-                if not init () then
-                    logreport ("log", 0, "load",
-                               "Failed to load module “%s”.", name)
-                    return
-                end
-                local t_end = osgettimeofday ()
-                local d_t = t_end - t_0
-                logreport ("log", 4, "load",
-                           "Module “%s” loaded in %d ms.",
-                           name, d_t)
-                timing_info.t_init [name] = d_t
+        local init = type(tmp) == "table" and tmp.init or tmp
+        if init and type (init) == "function" then
+            local t_0 = osgettimeofday ()
+            if not init () then
+                logreport ("log", 0, "load",
+                           "Failed to load module “%s”.", name)
+                return
             end
+            local t_end = osgettimeofday ()
+            local d_t = t_end - t_0
+            logreport ("log", 4, "load",
+                       "Module “%s” loaded in %d ms.",
+                       name, d_t)
+            timing_info.t_init [name] = d_t
         end
     end
 
@@ -291,8 +289,8 @@ luaotfload.main = function ()
     initialize "database"        --- Font management.
     initialize "colors"          --- Per-font colors.
 
-    luaotfload.resolvers = loadmodule "resolvers" --- Font lookup
-    luaotfload.resolvers.init ()
+    local init_resolvers = loadmodule "resolvers" --- Font lookup
+    init_resolvers ()
 
     if not config.actions.reconfigure () then
         logreport ("log", 0, "load", "Post-configuration hooks failed.")

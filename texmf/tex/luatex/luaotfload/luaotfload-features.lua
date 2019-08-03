@@ -581,22 +581,16 @@ local add_auto_features = function ()
     end
 end
 
-return {
-    init = function ()
+return function ()
+    logreport = luaotfload.log.report
 
-        logreport = luaotfload.log.report
-
-        if not fonts and fonts.handlers then
-            logreport ("log", 0, "features",
-                       "OTF mechanisms missing -- did you forget to \z
-                       load a font loader?")
-            return false
-        end
-
-        add_auto_features ()
-
-        return true
+    if not fonts and fonts.handlers then
+        logreport ("log", 0, "features",
+                   "OTF mechanisms missing -- did you forget to \z
+                   load a font loader?")
+        return false
     end
-}
-
+    add_auto_features ()
+    return true
+end
 -- vim:tw=79:sw=4:ts=4:expandtab

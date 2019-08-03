@@ -900,14 +900,10 @@ local inject_callbacks = function (lst)
   return ret
 end
 
-return {
-  init = function ()
-    local ret = true
-    luaotfload.aux = aux
-    ret = inject_callbacks (luaotfload_callbacks)
-    return ret
-  end
-}
+return function ()
+  luaotfload.aux = aux
+  return inject_callbacks (luaotfload_callbacks)
+end
 
 -- vim:tw=79:sw=2:ts=8:et
 

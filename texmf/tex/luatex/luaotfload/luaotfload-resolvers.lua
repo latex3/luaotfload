@@ -275,28 +275,25 @@ local resolvers = table.merge(luaotfload.resolvers, {
 })
 luaotfload.resolvers = resolvers
 
-return {
-    init = function ( )
-        if luatexbase and luatexbase.create_callback then
-            luatexbase.create_callback ("luaotfload.resolve_font",
-                                        "exclusive", function () end)
-        end
-        logreport ("log", 5, "resolvers", "installing font resolvers", name)
-        local request_resolvers = fonts.definers.resolvers
-        for k, _ in pairs(resolvers) do
-            request_resolvers[k] = nil
-        end
-        setmetatable(request_resolvers, {__index = function(t, n)
-            if not resolvers[n] then return end
-            local wrapped = wrap_resolver(resolvers[n])
-            t[n] = wrapped
-            return wrapped
-        end})
-        fonts.formats.ofm      = "type1"
-        fonts.encodings        = fonts.encodings       or { }
-        fonts.encodings.known  = fonts.encodings.known or { }
-        return true
-    end, --- [.init]
-}
-
+return function()
+    if luatexbase and luatexbase.create_callback then
+        luatexbase.create_callback ("luaotfload.resolve_font",
+                                    "exclusive", function () end)
+    end
+    logreport ("log", 5, "resolvers", "installing font resolvers", name)
+    local request_resolvers = fonts.definers.resolvers
+    for k, _ in pairs(resolvers) do
+        request_resolvers[k] = nil
+    end
+    setmetatable(request_resolvers, {__index = function(t, n)
+        if not resolvers[n] then return end
+        local wrapped = wrap_resolver(resolvers[n])
+        t[n] = wrapped
+        return wrapped
+    end})
+    fonts.formats.ofm      = "type1"
+    fonts.encodings        = fonts.encodings       or { }
+    fonts.encodings.known  = fonts.encodings.known or { }
+    return true
+end
 --- vim:ft=lua:ts=8:sw=4:et:tw=79

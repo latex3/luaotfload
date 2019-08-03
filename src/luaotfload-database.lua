@@ -3723,30 +3723,28 @@ local export = {
     find_closest                = find_closest,
 }
 
-return {
-    init = function ()
-        --- the font loader namespace is “fonts”, same as in Context
-        --- we need to put some fallbacks into place for when running
-        --- as a script
-        if not fonts then return false end
-        logreport       = luaotfload.log.report
-        local fonts     = fonts
-        fonts.names     = fonts.names or names
-        fonts.formats   = fonts.formats or { }
-        fonts.definers  = fonts.definers or { resolvers = { } }
+return function ()
+    --- the font loader namespace is “fonts”, same as in Context
+    --- we need to put some fallbacks into place for when running
+    --- as a script
+    if not fonts then return false end
+    logreport       = luaotfload.log.report
+    local fonts     = fonts
+    fonts.names     = fonts.names or names
+    fonts.formats   = fonts.formats or { }
+    fonts.definers  = fonts.definers or { resolvers = { } }
 
-        names.blacklist = blacklist
-        -- MK Changed to rebuild with case insensitive fallback.
-        --    Negative version to indicate generation by modified code.
-        names.version   = -1       --- decrease monotonically
-        -- /MK
-        names.data      = nil      --- contains the loaded database
-        names.lookups   = nil      --- contains the lookup cache
+    names.blacklist = blacklist
+    -- MK Changed to rebuild with case insensitive fallback.
+    --    Negative version to indicate generation by modified code.
+    names.version   = -1       --- decrease monotonically
+    -- /MK
+    names.data      = nil      --- contains the loaded database
+    names.lookups   = nil      --- contains the lookup cache
 
-        for sym, ref in next, export do names[sym] = ref end
-        for sym, ref in next, api    do names[sym] = names[sym] or ref end
-        return true
-    end
-}
+    for sym, ref in next, export do names[sym] = ref end
+    for sym, ref in next, api    do names[sym] = names[sym] or ref end
+    return true
+end
 
 -- vim:tw=71:sw=4:ts=4:expandtab

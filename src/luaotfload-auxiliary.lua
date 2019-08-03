@@ -48,7 +48,7 @@ local luaotfload_callbacks  = { }
 
 --- https://github.com/khaledhosny/luaotfload/issues/54
 
-local rewrite_fontname = function (tfmdata, specification)
+local function rewrite_fontname(tfmdata, specification)
   local format = tfmdata.format or tfmdata.properties.format
   if stringfind (specification, " ") then
     tfmdata.name = stringformat ("%q", specification)
@@ -60,7 +60,7 @@ end
 
 local rewriting = false
 
-local start_rewrite_fontname = function ()
+function aux.start_rewrite_fontname()
   if rewriting == false then
     luatexbase.add_to_callback (
       "luaotfload.patch_font",
@@ -72,9 +72,7 @@ local start_rewrite_fontname = function ()
   end
 end
 
-aux.start_rewrite_fontname = start_rewrite_fontname
-
-local stop_rewrite_fontname = function ()
+function aux.stop_rewrite_fontname()
   if rewriting == true then
     luatexbase.remove_from_callback
       ("luaotfload.patch_font", "luaotfload.rewrite_fontname")
@@ -84,15 +82,13 @@ local stop_rewrite_fontname = function ()
   end
 end
 
-aux.stop_rewrite_fontname = stop_rewrite_fontname
-
 
 --[[doc--
 This sets two dimensions apparently relied upon by the unicode-math
 package.
 --doc]]--
 
-local set_sscale_dimens = function (fontdata)
+local function set_sscale_dimens(fontdata)
   local resources     = fontdata.resources      if not resources     then return end
   local mathconstants = resources.MathConstants if not mathconstants then return end
   local parameters    = fontdata.parameters     if not parameters    then return end
@@ -108,7 +104,7 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
 local default_units = 1000
 
 --- fontobj -> int
-local lookup_units = function (fontdata)
+local function lookup_units(fontdata)
   local units = fontdata.units
   if units and units > 0 then return units end
   local shared     = fontdata.shared    if not shared     then return default_units end
@@ -126,7 +122,7 @@ end
 This callback corrects some values of the Cambria font.
 --doc]]--
 --- fontobj -> unit
-local patch_cambria_domh = function (fontdata)
+local function patch_cambria_domh(fontdata)
   local mathconstants = fontdata.MathConstants
   if mathconstants and fontdata.psname == "CambriaMath" then
     --- my test Cambria has 2048
@@ -155,15 +151,13 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
 --doc]]--
 
 --- fontobj -> unit
-local fixup_fontdata = function (data)
-
+local function fixup_fontdata(data)
   local t = type (data)
   --- Some OT fonts like Libertine R lack the resources table, causing
   --- the fontloader to nil-index.
   if t == "table" then
     if data and not data.resources then data.resources = { } end
   end
-
 end
 
 luaotfload_callbacks [#luaotfload_callbacks + 1] = {
@@ -194,7 +188,7 @@ local capheight_reference_codepoints do
   end
 end
 
-local determine_capheight = function (fontdata)
+local function determine_capheight(fontdata)
   local parameters = fontdata.parameters if not parameters then return false end
   local characters = fontdata.characters if not characters then return false end
   --- Pretty simplistic but it does return *some* value for most fonts;
@@ -214,7 +208,7 @@ local determine_capheight = function (fontdata)
   return false
 end
 
-local query_ascender = function (fontdata)
+local function query_ascender(fontdata)
   local parameters = fontdata.parameters if not parameters then return false end
   local ascender   = parameters.ascender
   if ascender then
@@ -231,7 +225,7 @@ local query_ascender = function (fontdata)
   return ascender * size / units --- scaled
 end
 
-local query_capheight = function (fontdata)
+local function query_capheight(fontdata)
   local parameters = fontdata.parameters  if not parameters then return false end
   local shared     = fontdata.shared      if not shared     then return false end
   local rawdata    = shared.rawdata       if not rawdata    then return false end
@@ -243,20 +237,20 @@ local query_capheight = function (fontdata)
   return capheight * size / units
 end
 
-local query_fontdimen8 = function (fontdata)
+local function query_fontdimen8(fontdata)
   local parameters = fontdata.parameters if not parameters then return false end
   local fontdimen8 = parameters [8]
   if fontdimen8 then return fontdimen8 end
   return false
 end
 
-local caphtfmt = function (ref, ht)
+local function caphtfmt(ref, ht)
   if not ht  then return "<none>"      end
   if not ref then return tostring (ht) end
   return stringformat ("%s(δ=%s)", ht, ht - ref)
 end
 
-local set_capheight = function (fontdata)
+local function set_capheight(fontdata)
     if not fontdata then
       logreport ("both", 0, "aux",
                  "error: set_capheight() received garbage")
@@ -306,7 +300,7 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
 -----------------------------------------------------------------------
 
 --- int -> int -> bool
-local font_has_glyph = function (font_id, codepoint)
+function aux.font_has_glyph(font_id, codepoint)
   local fontdata = fonts.hashes.identifiers[font_id]
   if fontdata then
     if fontdata.characters[codepoint] ~= nil then return true end
@@ -314,11 +308,9 @@ local font_has_glyph = function (font_id, codepoint)
   return false
 end
 
-aux.font_has_glyph = font_has_glyph
-
 --- undocumented
 
-local raw_slot_of_name = function (font_id, glyphname)
+local function raw_slot_of_name(font_id, glyphname)
   local fontdata = font.fonts[font_id]
   if fontdata.type == "virtual" then --- get base font for glyph idx
     local codepoint  = encodings.agl.unicodes[glyphname]
@@ -345,7 +337,7 @@ end
 --doc]]--
 
 --- int -> string -> bool -> (int | false)
-local slot_of_name = function (font_id, glyphname, unsafe)
+function aux.slot_of_name(font_id, glyphname, unsafe)
   if not font_id   or type (font_id)   ~= "number"
   or not glyphname or type (glyphname) ~= "string"
   then
@@ -371,8 +363,6 @@ local slot_of_name = function (font_id, glyphname, unsafe)
   return false
 end
 
-aux.slot_of_name = slot_of_name
-
 --[[doc--
 
   Inverse of above; not authoritative as to my knowledge the official
@@ -387,7 +377,7 @@ aux.slot_of_name = slot_of_name
 local indices
 
 --- int -> (string | false)
-local name_of_slot = function (codepoint)
+function aux.name_of_slot(codepoint)
   if not codepoint or type (codepoint) ~= "number" then
     logreport ("both", 0, "aux",
                "invalid parameters to name_of_slot (%s)",
@@ -411,15 +401,12 @@ local name_of_slot = function (codepoint)
   return false
 end
 
-aux.name_of_slot      = name_of_slot
-
-
 -----------------------------------------------------------------------
 ---                 features / scripts / languages
 -----------------------------------------------------------------------
 --- lots of arrowcode ahead
 
-local get_features = function (tfmdata)
+local function get_features(tfmdata)
   local resources = tfmdata.resources  if not resources then return false end
   local features  = resources.features if not features  then return false end
   return features
@@ -432,7 +419,7 @@ least one feature.
 --doc]]--
 
 --- int -> string -> bool
-local provides_script = function (font_id, asked_script)
+function aux.provides_script(font_id, asked_script)
   if not font_id      or type (font_id)      ~= "number"
   or not asked_script or type (asked_script) ~= "string"
   then
@@ -469,8 +456,6 @@ local provides_script = function (font_id, asked_script)
   return false
 end
 
-aux.provides_script = provides_script
-
 --[[doc--
 This function, modeled after “check_language()” from fontspec, returns
 true if in the given font, the language with tage “asked_language” is
@@ -479,7 +464,7 @@ feature.
 --doc]]--
 
 --- int -> string -> string -> bool
-local provides_language = function (font_id, asked_script, asked_language)
+function aux.provides_language(font_id, asked_script, asked_language)
   if not font_id        or type (font_id)        ~= "number"
   or not asked_script   or type (asked_script)   ~= "string"
   or not asked_language or type (asked_language) ~= "string"
@@ -524,8 +509,6 @@ local provides_language = function (font_id, asked_script, asked_language)
   return false
 end
 
-aux.provides_language = provides_language
-
 --[[doc--
 We strip the syntax elements from feature definitions (shouldn’t
 actually be there in the first place, but who cares ...)
@@ -561,7 +544,7 @@ accounted for in the script with tag “asked_script” in feature
 --doc]]--
 
 --- int -> string -> string -> string -> bool
-local provides_feature = function (font_id,        asked_script,
+function aux.provides_feature(font_id,        asked_script,
                                    asked_language, asked_feature)
   if not font_id        or type (font_id)        ~= "number"
   or not asked_script   or type (asked_script)   ~= "string"
@@ -578,7 +561,7 @@ local provides_feature = function (font_id,        asked_script,
   asked_language  = stringlower(asked_language)
   asked_feature   = lpegmatch(strip_garbage, asked_feature)
 
-  if font_id and font_id > 0 then
+  if font_id > 0 then
     local tfmdata  = identifiers[font_id]
     if not tfmdata then return false end
     local features = get_features (tfmdata)
@@ -609,14 +592,12 @@ local provides_feature = function (font_id,        asked_script,
   return false
 end
 
-aux.provides_feature = provides_feature
-
 -----------------------------------------------------------------------
 ---                         font dimensions
 -----------------------------------------------------------------------
 
 --- int -> string -> int
-local get_math_dimension = function (font_id, dimenname)
+local function get_math_dimension(font_id, dimenname)
   if type(font_id) == "string" then
     font_id = fontid(font_id) --- safeguard
   end
@@ -631,7 +612,7 @@ end
 aux.get_math_dimension = get_math_dimension
 
 --- int -> string -> unit
-local sprint_math_dimension = function (font_id, dimenname)
+function aux.sprint_math_dimension(font_id, dimenname)
   if type(font_id) == "string" then
     font_id = fontid(font_id)
   end
@@ -639,14 +620,9 @@ local sprint_math_dimension = function (font_id, dimenname)
   texsprint(luatexbase.catcodetables["latex-package"], dim, "sp")
 end
 
-aux.sprint_math_dimension = sprint_math_dimension
-
 -----------------------------------------------------------------------
 ---                    extra database functions
 -----------------------------------------------------------------------
-
-local namesresolve      = fontnames.resolve
-local namesscan_dir     = fontnames.scan_dir
 
 --[====[-- TODO -> port this to new db model
 
@@ -676,7 +652,7 @@ aux.scan_external_dir = scan_external_dir
 
 --]====]--
 
-aux.scan_external_dir = function ()
+function aux.scan_external_dir()
   print "ERROR: scan_external_dir() is not implemented"
 end
 
@@ -684,7 +660,7 @@ end
 
 --- https://github.com/lualatex/luaotfload/issues/74
 --- string -> (string * int)
-local resolve_fontname = function (name)
+local function resolve_fontname(name)
   local foundname, subfont = luaotfload.resolvers.name {
     name          = name,
     specification = "name:" .. name,
@@ -698,23 +674,15 @@ end
 aux.resolve_fontname = resolve_fontname
 
 --- string list -> (string * int)
-local resolve_fontlist
-resolve_fontlist = function (names, n)
-  if not n then
-    return resolve_fontlist(names, 1)
-  end
-  local this = names[n]
-  if this then
+function aux.resolve_fontlist(names)
+  for n = 1, #names do
     local foundname, subfont = resolve_fontname(this)
     if foundname then
       return foundname, subfont
     end
-    return resolve_fontlist(names, n+1)
   end
   return false, false
 end
-
-aux.resolve_fontlist = resolve_fontlist
 
 --- index access ------------------------------------------------------
 
@@ -734,7 +702,7 @@ aux.resolve_fontlist = resolve_fontlist
 local load_names        = fontnames.load
 local access_font_index = fontnames.access_font_index
 
-local read_font_index = function ()
+function aux.read_font_index()
   return load_names (true) or { }
 end
 
@@ -747,10 +715,8 @@ end
 
 --doc]]--
 
-local font_index = function () return access_font_index () end
+function aux.font_index() return access_font_index () end
 
-aux.read_font_index = read_font_index
-aux.font_index      = font_index
 
 --- loaded fonts ------------------------------------------------------
 

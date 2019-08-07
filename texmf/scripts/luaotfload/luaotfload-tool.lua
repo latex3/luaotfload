@@ -9,7 +9,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-tool",
-    version       = "2.9904",       --TAGVERSION
+    version       = "2.9905",       --TAGVERSION
     date          = "2019-08-02", --TAGDATE
     description   = "luaotfload-tool / database functionality",
     license       = "GPL v2.0"

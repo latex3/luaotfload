@@ -7,7 +7,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-configuration",
-    version       = "2.9904",       --TAGVERSION
+    version       = "2.9905",       --TAGVERSION
     date          = "2019-08-02", --TAGDATE
     description   = "luaotfload submodule / config file reader",
     license       = "GPL v2.0"

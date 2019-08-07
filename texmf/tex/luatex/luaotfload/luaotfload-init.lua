@@ -7,7 +7,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-init",
-    version       = "2.9904",       --TAGVERSION
+    version       = "2.9905",       --TAGVERSION
     date          = "2019-08-02", --TAGDATE
     description   = "luaotfload submodule / initialization",
     license       = "GPL v2.0"
@@ -78,44 +78,6 @@ local logreport  --- filled in after loading the log module
 
 --doc]]--
 
-local glyph_codes =
-  { [0] = "character"
-  , [1] = "glyph"
-  , [2] = "ligature"
-  , [3] = "ghost"
-  , [4] = "left"
-  , [5] = "right"
-  }
-
-local disc_codes  =
-  { [0] = "discretionary"
-  , [1] = "explicit"
-  , [2] = "automatic"
-  , [3] = "regular"
-  , [4] = "first"
-  , [5] = "second"
-  }
-
-local node_types = { disc = disc_codes, glyph = glyph_codes }
-
-local luatex_stubs = function ()
-  if not node.subtypes then
-    node.subtypes = function (t) return node_types [t] or { } end
-    local direct = node.direct
-
-    local getfield = direct.getfield
-    local setfield = direct.setfield
-
-    direct.setchar = direct.setchar or function (n, ...) setfield (n, "char", ...) end
-    direct.setprev = direct.setprev or function (n, ...) setfield (n, "prev", ...) end
-    direct.setnext = direct.setnext or function (n, ...) setfield (n, "next", ...) end
-
-    direct.getchar = direct.getchar or function (n) getfield (n, "char") end
-    direct.getprev = direct.getprev or function (n) getfield (n, "prev") end
-    direct.getnext = direct.getnext or function (n) getfield (n, "next") end
-  end
-end
-
 local init_early = function ()
 
   local store                  = { }
@@ -131,8 +93,6 @@ local init_early = function ()
 
   if not lualibs    then error "this module requires Luaotfload" end
   if not luaotfload then error "this module requires Luaotfload" end
-
-  luatex_stubs ()
 
   --[[doc--
 

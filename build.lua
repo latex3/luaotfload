@@ -1,5 +1,5 @@
 
-packageversion= "2.9904"
+packageversion= "2.9905"
 packagedate   = "2019-08-02"
 
 module   = "luaotfload"

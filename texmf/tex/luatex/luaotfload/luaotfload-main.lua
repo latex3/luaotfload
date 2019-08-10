@@ -301,6 +301,7 @@ luaotfload.main = function ()
     loadmodule "embolden"     --- fake bold
     loadmodule "notdef"       --- missing glyph handling
     initialize "auxiliary"    --- additional high-level functionality
+    loadmodule "bidi"         --- ...
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 

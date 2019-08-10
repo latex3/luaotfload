@@ -143,18 +143,21 @@ local NI = {
   PDI = true,
 }
 
-local function adjust_nsm(pre, dir, node_type)
+local function adjust_nsm(pre, dir, node_origclass)
   local follow = getnext(pre)
-  local follow_type = node_type[follow]
-  while follow ~= stop and (not follow_type[2] or follow_type[3] == "NSM") do
-    if follow_type[2] then
-      follow_type[2] = dir
+  local follow_origclass = node_origclass[follow]
+  while follow ~= stop and (not follow_origclass or follow_origclass == "NSM") do
+    if follow_origclass then
+      follow_class = dir
     end
     follow = getnext(follow)
-    follow_type = node_type[follow]
+    follow_origclass = node_origclass[follow]
   end
 end
-function do_wni(head, level, stop, sos, eos, node_type)
+local gettime = socket.gettime
+local fulltime1, fulltime2, fulltime3 = 0, 0, 0
+function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origclass)
+  local starttime = gettime()
   local opposite, direction
   if level % 2 == 0 then
     direction, opposite = 'L', 'R'
@@ -167,17 +170,16 @@ function do_wni(head, level, stop, sos, eos, node_type)
   -- faster.
   local cur = head
   while cur ~= stop do
-    local curtype = node_type[cur]
-    local curclass = curtype[1]
+    local curclass = node_class[cur]
     if curclass == "NSM" then
       curclass = prevclass == "PDI" and "ON" or prevclass
-      curtype[1] = curclass
+      node_class[cur] = curclass
     elseif curclass == "EN" then
       if prevstrong == "AL" then
         curclass = "AN"
-        curtype[1] = curclass
+        node_class[cur] = curclass
       elseif prevstrong == "L" then
-        curtype[1] = "L"
+        node_class[cur] = curclass
         -- HACK: No curclass change. Therefore prevclass is still EN,
         -- such that this W7 change does not affect the ES/ET changes
         -- in W4-W5
@@ -185,17 +187,17 @@ function do_wni(head, level, stop, sos, eos, node_type)
     elseif curclass == "ES" then
       if prevclass == "EN" then
         local follow = getnext(cur)
-        local followclass = node_type[follow][1]
+        local followclass = node_class[cur]
         while follow ~= stop and not followclass do
           follow = getnext(follow)
-          followclass = follow and node_type[follow][1]
+          followclass = node_class[follow]
         end
         if follow ~= stop and followclass == "EN" then
           if prevstrong == "AL" then
             curclass = "AN"
-            curtype[1] = curclass
+            node_class[cur] = curclass
           elseif prevstrong == "L" then
-            curtype[1] = "L"
+            node_class[cur] = "L"
             curclass = "EN" -- (sic), see above
           end
         end
@@ -203,48 +205,48 @@ function do_wni(head, level, stop, sos, eos, node_type)
     elseif curclass == "CS" then
       if prevclass == "EN" or prevclass == "AN" then
         local follow = getnext(cur)
-        local followclass = node_type[follow][1]
+        local followclass = node_class[follow]
         while follow ~= stop and not followclass do
           follow = getnext(follow)
-          followclass = follow and node_type[follow][1]
+          followclass = node_class[follow]
         end
         if follow ~= stop and followclass == prevclass then
           if followclass == "EN" then
             if prevstrong == "AL" then
               curclass = "AN"
-              curtype[1] = curclass
+              node_class[cur] = curclass
             elseif prevstrong == "L" then
-              curtype[1] = "L"
+              node_class[cur] = "L"
               curclass = "EN" -- (sic), see above
             end
           else
             curclass = prevclass
-            curtype[1] = curclass
+            node_class[cur] = curclass
           end
         else
           curclass = "ON"
-          curtype[1] = curclass
+          node_class[cur] = curclass
         end
       else
         curclass = "ON"
-        curtype[1] = curclass
+        node_class[cur] = curclass
       end
     elseif curclass == "ET" then
       local follow = getnext(cur)
-      local followclass = node_type[follow][1]
+      local followclass = node_class[follow]
       while follow ~= stop and (followclass == "ET" or not followclass) do
         follow = getnext(follow)
-        followclass = follow and node_type[follow][1]
+        followclass = node_class[follow]
       end
       if followclass == "EN" then
         follow = cur
         followclass = curclass
         while follow ~= stop and (followclass == "ET" or not followclass) do
           if followclass then
-            node_type[follow][1] = "EN"
+            node_class[follow] = "EN"
           end
           follow = getnext(follow)
-          followclass = follow and node_type[follow][1]
+          followclass = node_class[follow]
         end
       else
         curclass = "ON"
@@ -282,16 +284,17 @@ function do_wni(head, level, stop, sos, eos, node_type)
                 stack[j] = nil
               end
               if last_e >= i then
-                local btype, etype = node_type[entry[1]], node_type[cur]
-                btype[1], etype[1] = direction, direction
-                adjust_nsm(entry[1], direction, node_type)
-                adjust_nsm(cur, direction, node_type)
+                local beg = entry[1]
+                node_class[beg], node_class[cur] = direction, direction
+                adjust_nsm(beg, direction, node_origclass)
+                adjust_nsm(cur, direction, node_origclass)
                 last_s, last_e = i-1, i-1
               elseif last_s >= i then
                 if entry[3] then
-                  local btype, etype = node_type[entry[1]], node_type[cur]
-                  adjust_nsm(entry[1], opposite, node_type)
-                  adjust_nsm(cur, opposite, node_type)
+                  local beg = entry[1]
+                  node_class[beg], node_class[cur] = opposite, opposite
+                  adjust_nsm(beg, opposite, node_origclass)
+                  adjust_nsm(cur, opposite, node_origclass)
                   btype[1], etype[1] = opposite, opposite
                 end
                 last_s = i-1
@@ -301,7 +304,7 @@ function do_wni(head, level, stop, sos, eos, node_type)
           end
         end
       else
-        local curclass = node_type[cur][1]
+        local curclass = node_class[cur]
         if Strong[curclass] == direction then
           last_e, last_s, prevstrong = #stack, #stack, direction
         elseif Strong[curclass] == opposite then
@@ -325,19 +328,18 @@ function do_wni(head, level, stop, sos, eos, node_type)
     EN = level+1,
   }
   while cur ~= stop do
-    local curtype = node_type[cur]
-    local curclass = curtype[1]
+    local curclass = node_class[cur]
     local strong = Strong[curclass]
     if strong then
       prevstrong = strong
-      curtype[2] = newlevels[curclass]
+      node_level[cur] = newlevels[curclass]
       cur = getnext(cur)
     else
       local follow = getnext(cur)
-      local followclass = follow and node_type[follow][1]
+      local followclass = node_class[follow]
       while follow ~= stop and not Strong[followclass] do
         follow = getnext(follow)
-        followclass = follow and Strong[node_type[follow][1]]
+        followclass = Strong[node_class[follow]]
       end
       if follow == stop then
         followclass = eos
@@ -346,21 +348,22 @@ function do_wni(head, level, stop, sos, eos, node_type)
       follow = cur
       followclass = curclass
       while follow ~= stop and not Strong[followclass] do
-        follow_type = node_type[follow]
-        follow_type[1], follow_type[2] = followclass and outerdir, followclass and newlevels[outerdir]
+        node_class[follow], node_level[follow] = followclass and outerdir, followclass and newlevels[outerdir]
         follow = getnext(follow)
-        followclass = follow and node_type[follow][1]
+        followclass = node_class[follow]
       end
       cur = follow
     end
   end
+  fulltime1 = fulltime1 + gettime() - starttime
 end
 function dobidi(head, a, b, c, par_direction)
+  local starttime = gettime()
   head = node.direct.todirect(head)
   -- for cur in traverse(head) do
   --   print(node.direct.tonode(cur))
   -- end
-  local node_type = {} -- We do not need to preserve the direction types, so this is faster than using properties
+  local node_class, node_origclass, node_level = {}, {}, {} -- We do not need to preserve the direction types, so this is faster than using properties
   local dir_matches = {}
   par_direction = par_direction == "TRT" and "R" or "L" -- We hope to only encounter TRT/TLT
   local level, overwrite, isolate = par_direction == "R" and 1 or 0
@@ -439,7 +442,7 @@ function dobidi(head, a, b, c, par_direction)
     else
       class = "ON"
     end
-    node_type[cur] = {class, curlevel or level, class}
+    node_class[cur], node_origclass[cur], node_level[cur] = class, class, curlevel or level
   end
   for i = 1,#stack do pop() end
   local parlevel = level
@@ -453,8 +456,7 @@ function dobidi(head, a, b, c, par_direction)
         setchar(cur, char)
       end
     end
-    local curtype = node_type[cur]
-    local curclass, curlevel = curtype[1], curtype[2]
+    local curclass, curlevel = node_class[cur], node_level[cur]
     if curlevel ~= level and curclass then
       local os = (level > curlevel and level or curlevel) % 2 == 1 and 'R' or 'L'
       level = curlevel
@@ -493,10 +495,12 @@ function dobidi(head, a, b, c, par_direction)
     -- Should always be level IINM, but let's us the offical check
     current_run = nil
   end
+  fulltime2 = fulltime2 + gettime() - starttime
   for i = 1, #isolating_level_runs do
     local run = isolating_level_runs[i]
-    do_wni(run[1], run[2], run[3], run[4], run[5], node_type)
+    do_wni(run[1], run[2], run[3], run[4], run[5], node_class, node_level, node_origclass)
   end
+  starttime = gettime()
   -- for cur in traverse(head) do
   --   local curtype = node_type[cur]
   --   local curclass, curlevel, origtype = curtype[1], curtype[2], curtype[3]
@@ -537,8 +541,7 @@ function dobidi(head, a, b, c, par_direction)
     return insert_before(head, n, dirnode), entry[2]
   end
   for cur, tcur, scur in traverse(head) do
-    local curtype = node_type[cur]
-    local curlevel = curtype[2]
+    local curlevel = node_level[cur]
     if tcur == dir_id and scur == 1 then
       local newlevel = curlevel + (curlevel + getdirection(cur) + 1)%2 + 1
       while level > newlevel do
@@ -568,9 +571,13 @@ function dobidi(head, a, b, c, par_direction)
   --   local dir = not curtype and getdirection(cur)
   --   print('_', node.direct.tonode(cur), curlevel, curtype and curtype[1], dir)
   -- end
+  fulltime3 = fulltime3 + gettime() - starttime
   return node.direct.tonode(head)
 end
 
+luatexbase.add_to_callback("stop_run", function()
+  print('fulltime', fulltime1, fulltime2, fulltime3)
+end, "mytimer")
 otffeatures.register {
   name        = "bidi",
   description = "Apply Unicode bidi algorithm",

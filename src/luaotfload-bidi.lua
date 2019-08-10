@@ -155,7 +155,7 @@ local function adjust_nsm(pre, dir, node_origclass)
   end
 end
 local gettime = socket.gettime
-local fulltime1, fulltime2, fulltime3, fulltime4 = 0, 0, 0, 0
+local fulltime1, fulltime2, fulltime3 = 0, 0, 0
 function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origclass)
   local starttime = gettime()
   local opposite, direction
@@ -250,12 +250,12 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
         end
       else
         curclass = "ON"
-        curtype[1] = curclass
+        node_class[cur] = curclass
       end
     elseif curclass == "AL" then
       prevstrong = "AL"
       curclass = "R"
-      curtype[1] = curclass
+      node_class[cur] = curclass
     elseif curclass == "L" or curclass == "R" then
       prevstrong = curclass
     elseif not curclass then
@@ -295,7 +295,6 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
                   node_class[beg], node_class[cur] = opposite, opposite
                   adjust_nsm(beg, opposite, node_origclass)
                   adjust_nsm(cur, opposite, node_origclass)
-                  btype[1], etype[1] = opposite, opposite
                 end
                 last_s = i-1
               end
@@ -357,16 +356,19 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
   end
   fulltime1 = fulltime1 + gettime() - starttime
 end
+local node_class, node_origclass, node_level = {}, {}, {} -- Making these local was significantly
+-- slower necause they are sparse arrays with medium sized integer
+-- keys, requiring relativly big allocations
 function dobidi(head, a, b, c, par_direction)
-  local starttime = gettime()
   head = node.direct.todirect(head)
   -- for cur in traverse(head) do
   --   print(node.direct.tonode(cur))
   -- end
-  local node_class, node_origclass, node_level = {}, {}, {} -- We do not need to preserve the direction types, so this is faster than using properties
+  local node_class, node_origclass, node_level = node_class, node_origclass, node_level
   local dir_matches = {}
   par_direction = par_direction == "TRT" and "R" or "L" -- We hope to only encounter TRT/TLT
-  local level, overwrite, isolate = par_direction == "R" and 1 or 0
+  local parlevel, level, oldlevel, overwrite, isolate = par_direction == "R" and 1 or 0
+  level, oldlevel = parlevel, -1
   local stack = {}
   local function push(dir, new_overwrite, new_isolate)
     stack[#stack+1] = {level, overwrite, isolate}
@@ -377,6 +379,9 @@ function dobidi(head, a, b, c, par_direction)
     stack[#stack] = nil
     level, overwrite, isolate = last[1], last[2], last[3]
   end
+  local starttime = gettime()
+  local isolating_level_runs = {}
+  local current_run
   for cur, tcur, scur in traverse(head) do
     local class, curlevel
     if tcur == glyph_id and bidi_fonts[getfont(cur)] then
@@ -442,26 +447,12 @@ function dobidi(head, a, b, c, par_direction)
     else
       class = "ON"
     end
-    node_class[cur], node_origclass[cur], node_level[cur] = class, class, curlevel or level
-  end
-  for i = 1,#stack do pop() end
-  fulltime4 = fulltime4 + gettime() - starttime
-  starttime = gettime()
-  local parlevel = level
-  local isolating_level_runs = {}
-  level = -parlevel - 2
-  local current_run
-  for cur, tcur, scur in traverse(head) do
-    if level % 2 == 1 and tcur == glyph_id and scur == 0 and bidi_fonts[getfont(cur)] then
-      local char = opentype_mirroring[getchar(cur)]
-      if char then
-        setchar(cur, char)
-      end
-    end
-    local curclass, curlevel = node_class[cur], node_level[cur]
-    if curlevel ~= level and curclass then
-      local os = (level > curlevel and level or curlevel) % 2 == 1 and 'R' or 'L'
-      level = curlevel
+    curlevel = curlevel or level
+    node_class[cur], node_origclass[cur] = class, class
+    --
+    if curlevel ~= oldlevel and class then
+      local os = (oldlevel > curlevel and oldlevel or curlevel) % 2 == 1 and 'R' or 'L'
+      oldlevel = curlevel
       if current_run then
         current_run[3] = getprev(cur)
         current_run[5] = os
@@ -482,7 +473,7 @@ function dobidi(head, a, b, c, par_direction)
           setprev(cur, beg)
         end
       else
-        current_run = {cur, level, nil, os}
+        current_run = {cur, curlevel, nil, os}
         isolating_level_runs[#isolating_level_runs+1] = current_run
       end
     end
@@ -491,9 +482,10 @@ function dobidi(head, a, b, c, par_direction)
       current_run = nil
     end
   end
+  for i = 1,#stack do pop() end
   if current_run then
     current_run[3] = tail(head)
-    current_run[5] = (level > parlevel and level or parlevel) % 2 == 1 and 'R' or 'L'
+    current_run[5] = (oldlevel > parlevel and oldlevel or parlevel) % 2 == 1 and 'R' or 'L'
     -- Should always be level IINM, but let's us the offical check
     current_run = nil
   end
@@ -562,6 +554,11 @@ function dobidi(head, a, b, c, par_direction)
         setprev(newnext, cur)
         setnext(cur, newnext)
       end
+    elseif level % 2 == 1 and tcur == glyph_id and scur == 0 and bidi_fonts[getfont(cur)] then
+      local char = opentype_mirroring[getchar(cur)]
+      if char then
+        setchar(cur, char)
+      end
     end
   end
   -- for cur in traverse(head) do
@@ -575,11 +572,12 @@ function dobidi(head, a, b, c, par_direction)
 end
 
 luatexbase.add_to_callback("stop_run", function()
-  print('fulltime', fulltime1, fulltime2, fulltime3, fulltime4)
+  print('fulltime', fulltime1, fulltime2, fulltime3)
 end, "mytimer")
 otffeatures.register {
   name        = "bidi",
   description = "Apply Unicode bidi algorithm",
+  default = 1,
   manipulators = {
     node = makebidifont,
   },

@@ -155,7 +155,7 @@ local function adjust_nsm(pre, dir, node_origclass)
   end
 end
 local gettime = socket.gettime
-local fulltime1, fulltime2, fulltime3 = 0, 0, 0
+local fulltime1, fulltime2, fulltime3, fulltime4 = 0, 0, 0, 0
 function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origclass)
   local starttime = gettime()
   local opposite, direction
@@ -445,6 +445,8 @@ function dobidi(head, a, b, c, par_direction)
     node_class[cur], node_origclass[cur], node_level[cur] = class, class, curlevel or level
   end
   for i = 1,#stack do pop() end
+  fulltime4 = fulltime4 + gettime() - starttime
+  starttime = gettime()
   local parlevel = level
   local isolating_level_runs = {}
   level = -parlevel - 2
@@ -506,22 +508,11 @@ function dobidi(head, a, b, c, par_direction)
   --   local curclass, curlevel, origtype = curtype[1], curtype[2], curtype[3]
   --   -- print('?', node.direct.tonode(cur), curclass, curlevel, origtype)
   -- end
-  for cur in traverse(head) do
-    local remembered = dir_matches[cur]
-    if remembered then
-      local newnext, newprev = remembered[1], remembered[2]
-      setnext(newprev, getnext(cur))
-      setprev(getnext(cur), newprev)
-      setprev(newnext, cur)
-      setnext(cur, newnext)
-    end
-  end
   -- for cur in traverse(head) do
   --   local curtype = node_type[cur]
   --   local curclass, curlevel, origtype = curtype[1], curtype[2], curtype[3]
   --   print('!', node.direct.tonode(cur), curclass, curlevel, origtype)
   -- end
-  -- TODO: Actually insert directional markers
   level = parlevel
   local curdir = level
   function push(n, newlevel)
@@ -563,6 +554,14 @@ function dobidi(head, a, b, c, par_direction)
       local newlevel = curlevel + (curlevel + getdirection(cur) + 1)%2 + 1
       stack[#stack + 1] = {level, cur}
       level = newlevel
+      local remembered = dir_matches[cur]
+      if remembered then
+        local newnext, newprev = remembered[1], remembered[2]
+        setnext(newprev, getnext(cur))
+        setprev(getnext(cur), newprev)
+        setprev(newnext, cur)
+        setnext(cur, newnext)
+      end
     end
   end
   -- for cur in traverse(head) do
@@ -576,7 +575,7 @@ function dobidi(head, a, b, c, par_direction)
 end
 
 luatexbase.add_to_callback("stop_run", function()
-  print('fulltime', fulltime1, fulltime2, fulltime3)
+  print('fulltime', fulltime1, fulltime2, fulltime3, fulltime4)
 end, "mytimer")
 otffeatures.register {
   name        = "bidi",

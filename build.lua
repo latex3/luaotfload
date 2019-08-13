@@ -1,9 +1,10 @@
 
-packageversion= "2.9905"
+packageversion= "3.0001"
 packagedate   = "2019-08-02"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
+tdsroot  = "luatex"
 
 -- load my personal data for the ctan upload
 local ok, mydata = pcall(require, "ulrikefischerdata.lua")
@@ -13,6 +14,27 @@ end
 
 -- test the email
 print(mydata.email)
+
+--------- setup things for a dev-version
+-- See stackoverflow.com/a/12142066/212001 / build-config from latex2e
+local errorlevel = os.execute("git rev-parse --abbrev-ref HEAD > branch.tmp")
+local master_branch = true
+if errorlevel ~= 0 then
+  exit(1)
+else
+ local f = assert(io.open("branch.tmp", "rb"))
+ local branch = f:read("*all")
+ f:close()
+ os.remove("branch.tmp")
+ if  string.match(branch, "%-dev") then
+    master_branch = false
+    tdsroot = "latex-dev"
+    print("creating/installing dev-version in " .. tdsroot)
+    ctanpkg = ctanpkg .. "-dev"
+    ctanzip = ctanpkg
+ end
+end
+---------------------------------
 
 uploadconfig = {
      pkg     = ctanpkg,
@@ -50,6 +72,8 @@ checkengines = {"luatex"}
  --  checkengines = {"luatex","harftex"}
  -- end 
  
+-- temporary for test dev branch
+if master_branch then 
 checkconfigs = {
                 "build",
                 "config-loader-unpackaged",
@@ -59,7 +83,9 @@ checkconfigs = {
                 "config-plain",
                 "config-fontspec"
                }
-
+else
+checkconfigs={}               
+end
 checkruns = 3
 checksuppfiles = {"texmf.cnf"} 
 
@@ -125,7 +151,7 @@ typesetdemofiles  =
 ---------------------
 -- installation
 ---------------------
-tdsroot = "luatex"
+
 
 if options["target"] == "check" or options["target"] == "save" then 
   print("check/save")
@@ -172,7 +198,8 @@ tagfiles = {
             "src/auto/luaotfload-glyphlist.lua",
             "doc/luaotfload-main.tex",
             "doc/luaotfload.conf.rst",
-            "doc/luaotfload-tool.rst"
+            "doc/luaotfload-tool.rst",
+            "src/fontloader/runtime/fontloader-basics-gen.lua"
             }
 
 function typeset_demo_tasks()
@@ -202,14 +229,25 @@ function update_tag (file,content,tagname,tagdate)
   content = string.gsub (content,  
                          "%d%d%d%d/%d%d/%d%d [a-z]+%d%.%d+",
                          tagdate.." v"..packageversion)
-  return content                         
+  return content  
+ elseif string.match (file,"fontloader%-basic") then
+  if master_branch then
+    content = string.gsub (content,
+                           "caches.namespace = 'generic%-dev'",
+                           "caches.namespace = 'generic'")
+  else 
+   content = string.gsub (content,
+                           "caches.namespace = 'generic'",
+                           "caches.namespace = 'generic-dev'")
+  end       
+  return content                              
  elseif string.match (file, "%.lua$") then
   content = string.gsub (content,  
                          '(version%s*=%s*")%d%.%d+(",%s*--TAGVERSION)',
                          "%1"..packageversion.."%2")
   content = string.gsub (content,  
                          '(date%s*=%s*")%d%d%d%d%-%d%d%-%d%d(",%s*--TAGDATE)',
-                         "%1"..packagedate.."%2")                                                  
+                         "%1"..packagedate.."%2")                                                                                           
   return content                         
  elseif string.match (file, "^README.md$") then
    content = string.gsub (content,  

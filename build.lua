@@ -140,12 +140,14 @@ else
     "**/fontloader-*.lua",
     "**/fontloader-*.tex",
     "luaotfload-blacklist.cnf",
+    "OpentypeMirroring.txt",
     "./doc/filegraph.tex",
     "./doc/luaotfload-main.tex", 
    }
    installfiles = {
      "luaotfload.sty",
      "luaotfload-blacklist.cnf",
+     "OpentypeMirroring.txt",
      "**/luaotfload-*.lua",
      "**/fontloader-*.lua",
      "**/fontloader-*.tex",

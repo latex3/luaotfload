@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 08/02/19 19:40:08
+-- merge date  : 08/11/19 20:03:46
 
 do -- begin closure to overcome local limits and interference
 
@@ -120,6 +120,9 @@ elseif not ffi.number then
  ffi.number=tonumber
 end
 if LUAVERSION>5.3 then
+end
+if status and os.setenv then
+ os.setenv("engine",string.lower(status.luatex_engine or "unknown"))
 end
 
 end -- closure
@@ -9449,13 +9452,13 @@ function constructors.finalize(tfmdata)
   parameters.width=0
  end
  if not parameters.slantfactor then
-  parameters.slantfactor=tfmdata.slant or 0
+  parameters.slantfactor=(tfmdata.slant or 0)/1000
  end
  if not parameters.extendfactor then
-  parameters.extendfactor=tfmdata.extend or 0
+  parameters.extendfactor=(tfmdata.extend or 1000)/1000
  end
  if not parameters.squeezefactor then
-  parameters.squeezefactor=tfmdata.squeeze or 0
+  parameters.squeezefactor=(tfmdata.squeeze or 1000)/1000
  end
  local designsize=parameters.designsize
  if designsize then
@@ -15279,7 +15282,7 @@ do
  local function call(scope,list,bias) 
   depth=depth+1
   if top==0 then
-   showstate(formatters["unknown %s call"](scope))
+   showstate(formatters["unknown %s call %s"](scope,"?"))
    top=0
   else
    local index=stack[top]+bias
@@ -15291,7 +15294,7 @@ do
    if tab then
     process(tab)
    else
-    showstate(formatters["unknown %s call %i"](scope,index))
+    showstate(formatters["unknown %s call %s"](scope,index))
     top=0
    end
   end
@@ -15361,7 +15364,7 @@ do
     i=i+1
     local t=tab[i]
     if justpass then
-     if t>=34 or t<=37 then 
+     if t>=34 and t<=37 then 
       for i=1,top do
        r=r+1;result[r]=encode[stack[i]]
       end
@@ -15463,12 +15466,16 @@ end
    end
   end
  end
- local function setbias(globals,locals)
+ local function setbias(globals,locals,nobias)
+  if nobias then
+   return 0,0
+  else
    local g=#globals
    local l=#locals
    return
     ((g<1240 and 107) or (g<33900 and 1131) or 32768)+1,
     ((l<1240 and 107) or (l<33900 and 1131) or 32768)+1
+  end
  end
  local function processshape(tab,index)
   if not tab then
@@ -15578,7 +15585,7 @@ end
   end
   return privatedata.nominalwidthx or 0,privatedata.defaultwidthx or 0
  end
- parsecharstrings=function(fontdata,data,glphs,doshapes,tversion,streams)
+ parsecharstrings=function(fontdata,data,glphs,doshapes,tversion,streams,nobias)
   local dictionary=data.dictionaries[1]
   local charstrings=dictionary.charstrings
   keepcurve=doshapes
@@ -15589,7 +15596,7 @@ end
   charset=dictionary.charset
   vsindex=dictionary.vsindex or 0
   glyphs=glphs or {}
-  globalbias,localbias=setbias(globals,locals)
+  globalbias,localbias=setbias(globals,locals,nobias)
   nominalwidth,defaultwidth=setwidths(dictionary.private)
   if charstrings then
    startparsing(fontdata,data,streams)
@@ -15611,8 +15618,8 @@ end
   charset=false
   vsindex=dictionary.vsindex or 0
   glyphs=glphs or {}
- justpass=streams==true
-  globalbias,localbias=setbias(globals,locals)
+  justpass=streams==true
+  globalbias,localbias=setbias(globals,locals,nobias)
   nominalwidth,defaultwidth=setwidths(dictionary.private)
   processshape(tab,index-1)
  end
@@ -16583,7 +16590,14 @@ local function repackpoints(glyphs,shapes)
      currentx=px
      currenty=py
      if lastflag==fl then
-      nofflags=nofflags+1
+      if nofflags==255 then
+       lastflag=lastflag+0x08
+       r=r+1 result[r]=char(lastflag,nofflags-1)
+       nofflags=1
+       lastflag=fl
+      else
+       nofflags=nofflags+1
+      end
      else 
       if nofflags==1 then
        r=r+1 result[r]=chars[lastflag]
@@ -33413,7 +33427,7 @@ do
      }
     },
    }
-   fonts.handlers.otf.readers.parsecharstrings(false,data,glyphs,true,"cff",streams)
+   fonts.handlers.otf.readers.parsecharstrings(false,data,glyphs,true,"cff",streams,true)
   else
    lpegmatch(p_filternames,binary,1,filename)
   end

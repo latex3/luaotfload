@@ -212,7 +212,7 @@ FFISUPPORTED = type(ffi) == "table" and ffi.os ~= "" and ffi.arch ~= "" and ffi.
 
 if not FFISUPPORTED then
 
-    -- Maybe we should check for LUATEXENGINE but that's also a bti tricky as we still
+    -- Maybe we should check for LUATEXENGINE but that's also a bit tricky as we still
     -- can have a weird ffi library laying around. Checking for presence of 'jit' is
     -- also not robust. So for now we hope for the best.
 
@@ -252,4 +252,8 @@ end
 if LUAVERSION > 5.3 then
  -- collectgarbage("collect")
  -- collectgarbage("generational") -- crashes on unix
+end
+
+if status and os.setenv then
+    os.setenv("engine",string.lower(status.luatex_engine or "unknown"))
 end

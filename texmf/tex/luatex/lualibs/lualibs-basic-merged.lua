@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Sat Aug  3 20:43:50 2019
+-- merge date  : Tue Aug 13 18:23:49 2019
 
 do -- begin closure to overcome local limits and interference
 
@@ -120,6 +120,9 @@ elseif not ffi.number then
  ffi.number=tonumber
 end
 if LUAVERSION>5.3 then
+end
+if status and os.setenv then
+ os.setenv("engine",string.lower(status.luatex_engine or "unknown"))
 end
 
 end -- closure

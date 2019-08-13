@@ -20,6 +20,7 @@ bash-->   texlua scripts/mkimport import "" $CONTEXTPATH
 This also imports the merged orginal file and saves it as
 fontloader-reference.lua in src/fontloader/runtime
 
+!! Check if luatex-fonts.lua has changed (indicates new files ...)
 
 4. Import character definitions
 
@@ -56,7 +57,7 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
---> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-08-02.lua
+--> texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-08-11.lua
 
 8. Check lualibs status -- perhaps it needs update too
 

@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-features",
-    version       = "2.9905",       --TAGVERSION
-    date          = "2019-08-02", --TAGDATE
+    version       = "2.9906",       --TAGVERSION
+    date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / features",
     license       = "GPL v2.0",
     author        = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",

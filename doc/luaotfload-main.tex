@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2019-08-02 v2.9905}
+  \setdocumentdate   {2019-08-11 v2.9906}
   \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
                       Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
                       New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
@@ -55,6 +55,12 @@
 
 \pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
+\beginsection {New in version 2.99 (by Ulrike Fischer)}
+\begin{itemize}
+\item Code cleanup.
+\item The fontloader has been synched with the context files from 2019-08-11.
+\end{itemize}
+\endsection
 \beginsection {New in version 2.98 (by Ulrike Fischer)}
 \begin{itemize}
 \item The\marginpar{\mbox{}\hfill \textbf{breaking change!}} handling of missing chars has been changed. In This version a missing char will insert the \inlinecode{/.notdef} char of the fonts (this is sometimes a space, sometimes a rectangle with a cross) and no longer simply ignore the glyph. This behaviour can be reverted by using \inlinecode{notdef=false} as font feature.

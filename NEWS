@@ -1,8 +1,10 @@
 Change History
 --------------
-2019-07-24 luaotfload v2.99-dev
+2019-08-11 luaotfload v2.99-dev
+    * some clean up
+    * fix a bug in luaotfload.aux.resolve_fontname()  (issue #76)
     * removed dependency on slnunicode (PR#72) 
-    * sync with context files from 2019-07-24
+    * sync with context files from 2019-08-11
 
 2019-06-20 luaotfload v2.98
     * add embolden key

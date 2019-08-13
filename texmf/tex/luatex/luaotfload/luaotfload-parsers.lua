@@ -7,8 +7,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-parsers",
-    version       = "2.9905",       --TAGVERSION
-    date          = "2019-08-02", --TAGDATE
+    version       = "2.9906",       --TAGVERSION
+    date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / filelist",
     license       = "GPL v2.0"
 }

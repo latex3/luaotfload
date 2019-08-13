@@ -982,15 +982,15 @@ function constructors.finalize(tfmdata)
     end
     --
     if not parameters.slantfactor then
-        parameters.slantfactor = tfmdata.slant or 0
+        parameters.slantfactor = (tfmdata.slant or 0)/1000
     end
     --
     if not parameters.extendfactor then
-        parameters.extendfactor = tfmdata.extend or 0
+        parameters.extendfactor = (tfmdata.extend or 1000)/1000
     end
     --
     if not parameters.squeezefactor then
-        parameters.squeezefactor = tfmdata.squeeze or 0
+        parameters.squeezefactor = (tfmdata.squeeze or 1000)/1000
     end
     --
     local designsize = parameters.designsize

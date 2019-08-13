@@ -1012,43 +1012,6 @@ do
         top = 0
     end
 
---     local function xxcurveto(swap)
---         local last = top % 4 ~= 0 and stack[top]
---         if last then
---             top = top - 1
---         end
---         for i=1,top,4 do
---             local ax, ay, bx, by
---             if swap then
---                 ax = x  + stack[i]
---                 ay = y
---                 bx = ax + stack[i+1]
---                 by = ay + stack[i+2]
---                 y  = by + stack[i+3]
---                 if last and i+3 == top then
---                     x = bx + last
---                 else
---                     x = bx
---                 end
---                 swap = false
---             else
---                 ax = x
---                 ay = y  + stack[i]
---                 bx = ax + stack[i+1]
---                 by = ay + stack[i+2]
---                 x  = bx + stack[i+3]
---                 if last and i+3 == top then
---                     y = by + last
---                 else
---                     y = by
---                 end
---                 swap = true
---             end
---             xycurveto(ax,ay,bx,by,x,y)
---         end
---         top = 0
---     end
-
     local function xxcurveto(swap)
         local last = top % 4 ~= 0 and stack[top]
         if last then
@@ -1085,7 +1048,6 @@ do
         end
         top = 0
     end
-
 
     local function hvcurveto()
         if trace_charstrings then
@@ -1663,7 +1625,7 @@ do
     local function call(scope,list,bias) -- ,process)
         depth = depth + 1
         if top == 0 then
-            showstate(formatters["unknown %s call"](scope))
+            showstate(formatters["unknown %s call %s"](scope,"?"))
             top = 0
         else
             local index = stack[top] + bias
@@ -1675,7 +1637,7 @@ do
             if tab then
                 process(tab)
             else
-                showstate(formatters["unknown %s call %i"](scope,index))
+                showstate(formatters["unknown %s call %s"](scope,index))
                 top = 0
             end
         end
@@ -1796,7 +1758,7 @@ do
                 i = i + 1
                 local t = tab[i]
                 if justpass then
-                    if t >= 34 or t <= 37 then -- flexes
+                    if t >= 34 and t <= 37 then -- flexes
                         for i=1,top do
                             r = r + 1 ; result[r] = encode[stack[i]]
                         end
@@ -1941,21 +1903,16 @@ end
  --     end
  -- end
 
-    local function setbias(globals,locals)
---         if version == 1 then  -- charstring version, not cff
---             return
---                 0,
---                 0
---             return
---                 1,
---                 1
---         else
+    local function setbias(globals,locals,nobias)
+        if nobias then
+            return 0, 0
+        else
             local g = #globals
             local l = #locals
             return
                 ((g < 1240 and 107) or (g < 33900 and 1131) or 32768) + 1,
                 ((l < 1240 and 107) or (l < 33900 and 1131) or 32768) + 1
---         end
+        end
     end
 
     local function processshape(tab,index)
@@ -2086,7 +2043,7 @@ end
         return privatedata.nominalwidthx or 0, privatedata.defaultwidthx or 0
     end
 
-    parsecharstrings = function(fontdata,data,glphs,doshapes,tversion,streams)
+    parsecharstrings = function(fontdata,data,glphs,doshapes,tversion,streams,nobias)
 
         local dictionary  = data.dictionaries[1]
         local charstrings = dictionary.charstrings
@@ -2100,7 +2057,7 @@ end
         vsindex   = dictionary.vsindex or 0
         glyphs    = glphs or { }
 
-        globalbias,   localbias    = setbias(globals,locals)
+        globalbias,   localbias    = setbias(globals,locals,nobias)
         nominalwidth, defaultwidth = setwidths(dictionary.private)
 
         if charstrings then
@@ -2127,9 +2084,9 @@ end
         vsindex   = dictionary.vsindex or 0
         glyphs    = glphs or { }
 
- justpass = streams == true
+        justpass = streams == true
 
-        globalbias,   localbias    = setbias(globals,locals)
+        globalbias,   localbias    = setbias(globals,locals,nobias)
         nominalwidth, defaultwidth = setwidths(dictionary.private)
 
         processshape(tab,index-1)

@@ -1,4 +1,2 @@
-- The fontloader has been synced with the context files from 2019-07-04.
-- A number of small bugs has been resolved, see NEWS
-- fonts can now be embolden
-- missing characters are now visible
+- The fontloader has been synced with the context files from 2019-08-11.
+- Some code clean up.

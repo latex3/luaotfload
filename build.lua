@@ -1,5 +1,5 @@
 
-packageversion= "2.9906"
+packageversion= "2.99"
 packagedate   = "2019-08-11"
 
 module   = "luaotfload"
@@ -121,7 +121,7 @@ typesetexe = "lualatex"
 
 -- main docu
 typesetfiles      = {"luaotfload-latex.tex"}
-typesetcycles = 2 -- for the tests
+typesetcycles = 3 -- for the tests
 
 ctanreadme= "CTANREADME.md"
 
@@ -199,7 +199,8 @@ tagfiles = {
             "doc/luaotfload-main.tex",
             "doc/luaotfload.conf.rst",
             "doc/luaotfload-tool.rst",
-            "src/fontloader/runtime/fontloader-basics-gen.lua"
+            "src/fontloader/runtime/fontloader-basics-gen.lua",
+            "scripts/mkstatus"
             }
 
 function typeset_demo_tasks()
@@ -287,7 +288,13 @@ function update_tag (file,content,tagname,tagdate)
   content = string.gsub (content,  
                          "(:Version:%s+)%d%.%d+",
                          "%1"..packageversion)                       
-  return content                          
+  return content 
+ elseif string.match (file,"mkstatus") then
+  content= string.gsub (content,  
+                         "v%d%.%d+/%d%d%d%d%-%d%d%-%d%d",
+                         "v"..packageversion.."/"..packagedate)
+ 
+ return content                          
  end
  return content
  end

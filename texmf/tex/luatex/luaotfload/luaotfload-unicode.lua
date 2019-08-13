@@ -5,7 +5,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-unicode",
-    version       = "2.9906",       --TAGVERSION
+    version       = "2.99",       --TAGVERSION
     date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / Unicode helpers",
     license       = "CC0 1.0 Universal",

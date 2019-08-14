@@ -21,6 +21,13 @@ Please see the documentation luaotfload.pdf for more information.
 ## Development versions
 
 The ongoing development is in branches referring to the dates of the import of the context files. 
+Very experimental stuff is in the next-dev branch. 
+
+## Pull requests
+
+The branches with numbers and dates are normally the newest but have a quite short life. If pull request is made
+against such a branch it gets automatically closed when the branch is closed. In general it is therefore better to make
+pull requests against the dev or next-dev branch.
  
 ## Support
 [![GitHub issues](https://img.shields.io/badge/github-issues-blue.svg?style=flat-square)](https://github.com/u-fischer/luaotfload/issues) 

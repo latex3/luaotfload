@@ -1,6 +1,7 @@
 
-packageversion= "2.99"
+packageversion= "3.001"
 packagedate   = "2019-08-11"
+packagedesc   = "pulled PR81, multiscript"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"

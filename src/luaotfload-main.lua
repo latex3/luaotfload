@@ -302,6 +302,7 @@ luaotfload.main = function ()
     loadmodule "notdef"       --- missing glyph handling
     initialize "auxiliary"    --- additional high-level functionality
     loadmodule "bidi"         --- ...
+    loadmodule "multiscript"  --- ...
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 

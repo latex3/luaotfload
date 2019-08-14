@@ -201,7 +201,8 @@ tagfiles = {
             "doc/luaotfload.conf.rst",
             "doc/luaotfload-tool.rst",
             "src/fontloader/runtime/fontloader-basics-gen.lua",
-            "scripts/mkstatus"
+            "scripts/mkstatus",
+            "testfiles/aaaaa-luakern.tlg"
             }
 
 function typeset_demo_tasks()
@@ -295,7 +296,13 @@ function update_tag (file,content,tagname,tagdate)
                          "v%d%.%d+/%d%d%d%d%-%d%d%-%d%d",
                          "v"..packageversion.."/"..packagedate)
  
- return content                          
+  return content
+ elseif string.match (file,"aaaaa%-luakern") then
+    content= string.gsub (content,  
+                         "%d%.%d+%swith%sfontloader%-%d%d%d%d%-%d%d%-%d%d",
+                         packageversion.." with fontloader-"..packagedate)
+
+   return content                           
  end
  return content
  end

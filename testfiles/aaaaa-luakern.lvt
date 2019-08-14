@@ -13,7 +13,7 @@ abc
 %texio.write_nl(table.serialize(info))}
 \begin{luacode}
 
-texio.write_nl(luaotfload.version .. " with " .. tostring(config.luaotfload.run.fontloader))
+texio.write_nl(luaotfload.version .. " with " .. string.gsub(tostring(config.luaotfload.run.fontloader),"[%-]","xxx"))
 
 -- t = {kpse.lookup("luaotfload-main.lua",{["all"]=true})}
 --

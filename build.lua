@@ -297,10 +297,10 @@ function update_tag (file,content,tagname,tagdate)
                          "v"..packageversion.."/"..packagedate)
  
   return content
- elseif string.match (file,"aaaaa%-luakern") then
+ elseif string.match (file,"aaaaa%-luakern") then   
     content= string.gsub (content,  
-                         "%d%.%d+%swith%sfontloader%-%d%d%d%d%-%d%d%-%d%d",
-                         packageversion.." with fontloader-"..packagedate)
+                         "%d%.%d+%swith%sfontloaderxxx%d%d%d%dxxx%d%dxxx%d%d",
+                         packageversion.." with fontloaderxxx"..string.gsub(packagedate,"[%-]","xxx"))
 
    return content                           
  end

@@ -94,7 +94,7 @@ local bidi_brackets_canonical = {
   [0x232A] = 0x3009,
 }
 for k, v in pairs(bidi_brackets) do
-  bidi_brackets_canonical[k] = k
+  bidi_brackets_canonical[k] = bidi_brackets_canonical[k] or k
 end
 
 local opentype_mirroring do
@@ -145,12 +145,12 @@ local NI = {
   PDI = true,
 }
 
-local function adjust_nsm(pre, dir, node_origclass)
+local function adjust_nsm(pre, stop, dir, node_class, node_origclass)
   local follow = getnext(pre)
   local follow_origclass = node_origclass[follow]
   while follow ~= stop and (not follow_origclass or follow_origclass == "NSM") do
     if follow_origclass then
-      follow_class = dir
+      node_class[follow] = dir
     end
     follow = getnext(follow)
     follow_origclass = node_origclass[follow]
@@ -181,7 +181,7 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
         curclass = "AN"
         node_class[cur] = curclass
       elseif prevstrong == "L" then
-        node_class[cur] = curclass
+        node_class[cur] = "L"
         -- HACK: No curclass change. Therefore prevclass is still EN,
         -- such that this W7 change does not affect the ES/ET changes
         -- in W4-W5
@@ -189,19 +189,14 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
     elseif curclass == "ES" then
       if prevclass == "EN" then
         local follow = getnext(cur)
-        local followclass = node_class[cur]
+        local followclass = node_class[follow]
         while follow ~= stop and not followclass do
           follow = getnext(follow)
           followclass = node_class[follow]
         end
         if follow ~= stop and followclass == "EN" then
-          if prevstrong == "AL" then
-            curclass = "AN"
-            node_class[cur] = curclass
-          elseif prevstrong == "L" then
-            node_class[cur] = "L"
-            curclass = "EN" -- (sic), see above
-          end
+          curclass = "EN"
+          node_class[cur] = prevstrong == "L" and "L" or curclass
         end
       end
     elseif curclass == "CS" then
@@ -212,17 +207,23 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
           follow = getnext(follow)
           followclass = node_class[follow]
         end
-        if follow ~= stop and followclass == prevclass then
+        if follow ~= stop then
           if followclass == "EN" then
             if prevstrong == "AL" then
               curclass = "AN"
               node_class[cur] = curclass
-            elseif prevstrong == "L" then
-              node_class[cur] = "L"
-              curclass = "EN" -- (sic), see above
+            elseif prevclass == "EN" then
+              curclass = "EN"
+              node_class[cur] = prevstrong == "L" and "L" or curclass
+            else
+              curclass = "ON"
+              node_class[cur] = curclass
             end
+          elseif followclass == "AN" and prevclass == "AN" then
+            curclass = "AN"
+            node_class[cur] = curclass
           else
-            curclass = prevclass
+            curclass = "ON"
             node_class[cur] = curclass
           end
         else
@@ -268,15 +269,16 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
   end
   cur = head
   local last_e, last_s = 0, 0
-  prevstrong = sos
   local stack = {}
+  local need_context = {}
   while cur ~= stop do
-    if getid(cur) == glyph_id and bidi_fonts[getfont(cur)] then
-      local cp = getchar(cur) -- FIXME: canonical equivalents
+    local curclass = node_class[cur]
+    if curclass == "ON" and getid(cur) == glyph_id and bidi_fonts[getfont(cur)] then
+      local cp = bidi_brackets_canonical[getchar(cur)]
       local bracket = bidi_brackets[cp]
       if bracket then
         if bracket.type == 'o' then
-          local info = {cur, bracket.other, prevstrong == opposite}
+          local info = {cur, bracket.other}
           stack[#stack + 1] = info
         else -- if cp.type == 'c'
           for i = #stack,1,-1 do
@@ -288,15 +290,16 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
               if last_e >= i then
                 local beg = entry[1]
                 node_class[beg], node_class[cur] = direction, direction
-                adjust_nsm(beg, direction, node_origclass)
-                adjust_nsm(cur, direction, node_origclass)
+                adjust_nsm(beg, stop, direction, node_class, node_origclass)
+                adjust_nsm(cur, stop, direction, node_class, node_origclass)
                 last_s, last_e = i-1, i-1
               elseif last_s >= i then
+                need_context[entry[1]] = cur
                 if entry[3] then
                   local beg = entry[1]
                   node_class[beg], node_class[cur] = opposite, opposite
-                  adjust_nsm(beg, opposite, node_origclass)
-                  adjust_nsm(cur, opposite, node_origclass)
+                  adjust_nsm(beg, stop, opposite, node_class, node_origclass)
+                  adjust_nsm(cur, stop, opposite, node_class, node_origclass)
                 end
                 last_s = i-1
               end
@@ -304,13 +307,13 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
             end
           end
         end
-      else
-        local curclass = node_class[cur]
-        if Strong[curclass] == direction then
-          last_e, last_s, prevstrong = #stack, #stack, direction
-        elseif Strong[curclass] == opposite then
-          last_s, prevstrong = #stack, opposite
-        end
+      end
+    else
+      local strong = Strong[curclass]
+      if strong == direction then
+        last_e, last_s = #stack, #stack
+      elseif strong == opposite then
+        last_s = #stack
       end
     end
     cur = getnext(cur)
@@ -335,12 +338,19 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
       prevstrong = strong
       node_level[cur] = newlevels[curclass]
       cur = getnext(cur)
+    elseif need_context[cur] then
+      local final = need_context[cur]
+      node_class[cur], node_class[final] = prevstrong, prevstrong
+      adjust_nsm(final, stop, prevstrong, node_class, node_origclass)
+      adjust_nsm(cur, stop, prevstrong, node_class, node_origclass)
+      node_level[cur] = newlevels[prevstrong]
+      cur = getnext(cur)
     else
       local follow = getnext(cur)
-      local followclass = node_class[follow]
-      while follow ~= stop and not Strong[followclass] do
+      local followclass = need_context[follow] and prevstrong or Strong[node_class[follow]]
+      while follow ~= stop and not followclass do
         follow = getnext(follow)
-        followclass = Strong[node_class[follow]]
+        followclass = need_context[follow] and prevstrong or Strong[node_class[follow]]
       end
       if follow == stop then
         followclass = eos
@@ -351,14 +361,14 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
       while follow ~= stop and not Strong[followclass] do
         node_class[follow], node_level[follow] = followclass and outerdir, followclass and newlevels[outerdir]
         follow = getnext(follow)
-        followclass = node_class[follow]
+        followclass = need_context[follow] and prevstrong or node_class[follow]
       end
       cur = follow
     end
   end
   fulltime1 = fulltime1 + gettime() - starttime
 end
-local node_class, node_origclass, node_level = {}, {}, {} -- Making these local was significantly
+node_class, node_origclass, node_level = {}, {}, {} -- Making these local was significantly
 -- slower necause they are sparse arrays with medium sized integer
 -- keys, requiring relativly big allocations
 function dobidi(head, a, b, c, par_direction)
@@ -387,10 +397,10 @@ function dobidi(head, a, b, c, par_direction)
       class = bidi_classes[getchar(cur)]
       if class == "RLE" then
         class, curlevel = nil, level
-        push(0)
+        push(1)
       elseif class == "LRE" then
         class, curlevel = nil, level
-        push(1)
+        push(0)
       elseif class == "RLO" then
         class, curlevel = nil, level
         push(1, "R")
@@ -430,6 +440,7 @@ function dobidi(head, a, b, c, par_direction)
           -- Unmatched reset. LuaTeX inserts them sometimes, just
           -- dropping them normally works fine. But deleting is
           -- difficult here because the loop needs the next pointer.
+          -- Technically they should stay
           if old_dir then nodeflush(old_dir) end
           head = remove(head, cur)
           old_dir = cur

@@ -2,6 +2,7 @@
 packageversion= "3.001"
 packagedate   = "2019-08-11"
 packagedesc   = "pulled PR81, multiscript"
+checkformat   = "latex-dev" -- for travis until something better comes up
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"

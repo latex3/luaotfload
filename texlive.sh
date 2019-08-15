@@ -20,7 +20,7 @@ if ! command -v texlua > /dev/null; then
 fi
 
 # Needed for any use of texlua even if not testing LuaTeX
-tlmgr install l3build latex latex-bin  luatex  
+tlmgr install l3build latex latex-bin  luatex  latex-dev
 
 # Required to build plain and LaTeX formats:
 # TeX90 plain for unpacking, pdfLaTeX, LuaLaTeX and XeTeX for tests

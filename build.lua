@@ -27,12 +27,13 @@ else
  local branch = f:read("*all")
  f:close()
  os.remove("branch.tmp")
- if  string.match(branch, "%-dev") then
+ if  string.match(branch, "dev") then
     master_branch = false
     tdsroot = "latex-dev"
     print("creating/installing dev-version in " .. tdsroot)
     ctanpkg = ctanpkg .. "-dev"
     ctanzip = ctanpkg
+    checkformat="latex-dev"
  end
 end
 ---------------------------------

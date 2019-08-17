@@ -5,7 +5,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-notdef",
-    version       = "3.001",       --TAGVERSION
+    version       = "3.002",       --TAGVERSION
     date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / color",
     license       = "GPL v2.0",
@@ -30,6 +30,18 @@ local remove             = node.direct.remove
 local setfont            = node.direct.setfont
 local traverse_char      = node.direct.traverse_char
 
+-- According to DerivedCoreProperties.txt, Default_Ignorable_Code_Point
+-- is generated from:
+--    Other_Default_Ignorable_Code_Point
+--  + Cf (Format characters)
+--  + Variation_Selector
+--  - White_Space
+--  - FFF9..FFFB (Interlinear annotation format characters)
+--  - 13430..13438 (Egyptian hieroglyph format characters)
+--  - Prepended_Concatenation_Mark (Exceptional format characters that should be visible)
+-- Based on HarfBuzz, we add the exclusion
+--  - Lo (Letter, Other)
+-- This affects Hangul fillers.
 local ignorable_codepoints do
   local sep = lpeg.P' '^0 * ';' * lpeg.P' '^0
   local codepoint = lpeg.S'0123456789ABCDEF'^4/function(c)return tonumber(c, 16)end
@@ -52,7 +64,7 @@ local ignorable_codepoints do
                                                + 'Variation_Selector' * lpeg.Cc(true)
                                                + 'White_Space' * lpeg.Cc(nil)
                                                + 'Prepended_Concatenation_Mark' * lpeg.Cc(nil)
-                                          ) * lpeg.P' '^0 * '#')^-1 * (1-lpeg.P'\n')^0 * '\n'
+                                          ) * ' # ' * (1-lpeg.P'Lo'))^-1 * (1-lpeg.P'\n')^0 * '\n'
   file = lpeg.Cf(
       lpeg.Carg(1)
     * entry^0

@@ -120,7 +120,7 @@ options["texmfhome"] = "./texmf"
 -- documentation
 -------------------
 
-typesetexe = "lualatex"
+typesetexe = "lua"..checkformat
 
 -- main docu
 typesetfiles      = {"luaotfload-latex.tex"}

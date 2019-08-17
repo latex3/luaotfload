@@ -55,6 +55,12 @@
 
 \pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
+\beginsection {New in version 3.00 (by Ulrike Fischer/Marcel Krüger)}
+\begin{itemize}
+\item Default Ignorable characters are now invisible by default (issue 63). This can be deactivated with the option \texttt{invisible}.
+\end{itemize}
+\endsection
+
 \beginsection {New in version 2.99 (by Ulrike Fischer)}
 \begin{itemize}
 \item Code cleanup.
@@ -942,6 +948,28 @@ obviously, \inlinecode{random}.
       \font \test = LatinModernRoman:protrusion=default
          \endlisting
   \endaltitem
+  
+ \beginaltitem {invisible}
+         Default Ignorable characters are control characters that should be invisible by default even if the font has glyphs for them. Since version 3.0 luaotfload makes them invisible, this can be switch on and off with the \texttt{invisible}. By default it is on.
+
+         For example
+
+         \beginlisting
+         \font\amiri={file:amiri-regular.ttf} at 20pt \amiri
+         \char"200Dي\char"200D
+         \endlisting
+
+       {\font\amiri={file:amiri-regular.ttf} at 20pt \amiri \char"200Dي\char"200D}
+  
+    \beginlisting
+         \font\amiri={file:amiri-regular.ttf:-invisible;} at 20pt \amiri
+         \char"200Dي\char"200D
+         \endlisting
+
+       {\font\amiri={file:amiri-regular.ttf:-invisible;} at 20pt \amiri \char"200Dي\char"200D}
+  
+
+  \endaltitem 
 \enddescriptions
 
 \endsubsection

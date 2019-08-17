@@ -300,6 +300,7 @@ luaotfload.main = function ()
     loadmodule "letterspace"  --- extra character kerning
     loadmodule "embolden"     --- fake bold
     loadmodule "notdef"       --- missing glyph handling
+    loadmodule "mirror"       --- mirroring for r2l text
     initialize "auxiliary"    --- additional high-level functionality
     loadmodule "multiscript"  --- ...
 

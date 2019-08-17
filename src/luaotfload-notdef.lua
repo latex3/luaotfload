@@ -187,7 +187,7 @@ end
 otfregister {
   name = 'invisible',
   description = 'Remove invisible control characters',
-  default = false,
+  default = true,
   initializers = {
     node = invisibleinitialiser,
   },

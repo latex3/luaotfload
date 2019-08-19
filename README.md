@@ -1,6 +1,6 @@
 # The Luaotfload Package
 
-![Version: 2.99](https://img.shields.io/badge/current_version-2.99-blue.svg?style=flat-square)
+![Version: 2.991](https://img.shields.io/badge/current_version-2.991-blue.svg?style=flat-square)
 ![Date: 2019-08-11](https://img.shields.io/badge/date-2019--08--11-blue.svg?style=flat-square)
 [![License: GNU GPLv2](https://img.shields.io/badge/license-GNU_GPLv2-blue.svg?style=flat-square)](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 

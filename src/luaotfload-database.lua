@@ -239,9 +239,15 @@ end
 
 --- string -> string
 
+local invalidchars = "[^%a%d]"
+
 local sanitize_fontname = function (str)
     if str ~= nil then
-        str = alphnum_only(casefold(str, true))
+        if utf8len(str) then
+            str = alphnum_only(casefold(str, true))
+        else
+            str = stringgsub(stringlower(str), invalidchars, "")
+        end
         return str
     end
     return nil
@@ -252,11 +258,19 @@ local sanitize_fontnames = function (rawnames)
     for category, namedata in next, rawnames do
 
         if type (namedata) == "string" then
-            result [category] = alphnum_only(casefold(namedata, true))
+            if utf8len(namedata) then
+                result [category] = alphnum_only(casefold(namedata, true))
+            else
+                result [category] = stringgsub(stringlower(namedata), invalidchars, "")
+            end
         else
             local target = { }
             for field, name in next, namedata do
-                target [field] = alphnum_only(casefold(name, true))
+                if utf8len(name) then
+                    target [category] = alphnum_only(casefold(name, true))
+                else
+                    target [category] = stringgsub(stringlower(name), invalidchars, "")
+                end
             end
             result [category] = target
         end

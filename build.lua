@@ -2,7 +2,7 @@
 packageversion= "2.991"
 packagedate   = "2019-08-11"
 packagedesc   = "ignorable"
--- checkformat   = "latex-dev" -- not on master
+checkformat   = "latex" -- master
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"

@@ -1,7 +1,7 @@
 
 packageversion= "2.991"
 packagedate   = "2019-08-11"
-packagedesc   = "ignorable"
+packagedesc   = "master"
 checkformat   = "latex" -- master
 
 module   = "luaotfload"

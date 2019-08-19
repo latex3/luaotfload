@@ -267,9 +267,9 @@ local sanitize_fontnames = function (rawnames)
             local target = { }
             for field, name in next, namedata do
                 if utf8len(name) then
-                    target [category] = alphnum_only(casefold(name, true))
+                    target [field] = alphnum_only(casefold(name, true))
                 else
-                    target [category] = stringgsub(stringlower(name), invalidchars, "")
+                    target [field] = stringgsub(stringlower(name), invalidchars, "")
                 end
             end
             result [category] = target

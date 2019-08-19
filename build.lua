@@ -1,6 +1,8 @@
 
-packageversion= "2.99"
+packageversion= "2.991"
 packagedate   = "2019-08-11"
+packagedesc   = "ignorable"
+-- checkformat   = "latex-dev" -- not on master
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -26,12 +28,13 @@ else
  local branch = f:read("*all")
  f:close()
  os.remove("branch.tmp")
- if  string.match(branch, "%-dev") then
+ if  string.match(branch, "dev") then
     master_branch = false
     tdsroot = "latex-dev"
     print("creating/installing dev-version in " .. tdsroot)
     ctanpkg = ctanpkg .. "-dev"
     ctanzip = ctanpkg
+    checkformat="latex-dev"
  end
 end
 ---------------------------------
@@ -44,10 +47,10 @@ uploadconfig = {
   author     = "... as before ...",  
   license    = "gpl2",
   summary    = "OpenType ‘loader’ for Plain TeX and LaTeX",
-  ctanPath   = "/macros/luatex/generic/luaotfload",
-  repository = mydata.github .. "luaotfload",
-  bugtracker = mydata.github .. "luaotfload/issues",
-  support    = mydata.github .. "luaotfload/issues",
+  ctanPath   = "/macros/luatex/generic/"..ctanpkg,
+  repository = "https://github.com/latex3/luaotfload",
+  bugtracker = "https://github.com/latex3/luaotfload/issues",
+  support    = "https://github.com/latex3/luaotfload/issues",
   uploader   = mydata.name,
   email      = mydata.email, 
   update     = true ,
@@ -117,7 +120,7 @@ options["texmfhome"] = "./texmf"
 -- documentation
 -------------------
 
-typesetexe = "lualatex"
+typesetexe = "lua"..checkformat
 
 -- main docu
 typesetfiles      = {"luaotfload-latex.tex"}
@@ -200,7 +203,8 @@ tagfiles = {
             "doc/luaotfload.conf.rst",
             "doc/luaotfload-tool.rst",
             "src/fontloader/runtime/fontloader-basics-gen.lua",
-            "scripts/mkstatus"
+            "scripts/mkstatus",
+            "testfiles/aaaaa-luakern.tlg"
             }
 
 function typeset_demo_tasks()
@@ -294,7 +298,13 @@ function update_tag (file,content,tagname,tagdate)
                          "v%d%.%d+/%d%d%d%d%-%d%d%-%d%d",
                          "v"..packageversion.."/"..packagedate)
  
- return content                          
+  return content
+ elseif string.match (file,"aaaaa%-luakern") then   
+    content= string.gsub (content,  
+                         "%d%.%d+%swith%sfontloaderxxx%d%d%d%dxxx%d%dxxx%d%d",
+                         packageversion.." with fontloaderxxx"..string.gsub(packagedate,"[%-]","xxx"))
+
+   return content                           
  end
  return content
  end

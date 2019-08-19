@@ -1,2 +1,1 @@
-- The fontloader has been synced with the context files from 2019-08-11.
-- Some code clean up.
+- Workaround for a problem with fontname encoding, issue #88

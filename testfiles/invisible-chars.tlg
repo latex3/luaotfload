@@ -1,6 +1,5 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-3.002 with fontloaderxxx2019xxx08xxx11.lua
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT
 .\glue 16.0
@@ -10,24 +9,36 @@ Completed box being shipped out [1]
 ...\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
-..\vbox(550.0+0.0)x345.0, glue set 539.94232fil, direction TLT
+..\vbox(550.0+0.0)x345.0, glue set 516.10309fil, direction TLT
 ...\write-{}
-...\glue(\topskip) 3.06
-...\hbox(6.94+0.11)x345.0, glue set 314.72fil, direction TLT
+...\glue(\topskip) 0.0
+...\hbox(12.19727+8.7793)x345.0, glue set 314.70703fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/lmr/m/n/10 a
-....\TU/lmr/m/n/10 b
-....\kern0.28 (font)
-....\TU/lmr/m/n/10 c
+....\amiri ‍
+....\amiri ي
+....\amiri ‍
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
-...\glue -0.11
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\lineskip) 1.0
+...\hbox(8.08594+8.7793)x345.0, glue set 314.70703fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\amiri ي
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -5.0
 ...\glue 0.0 plus 1.0fil
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
@@ -36,4 +47,4 @@ Completed box being shipped out [1]
 ...\glue 0.0 plus 1.0fil
 ...\TU/lmr/m/n/10 1
 ...\glue 0.0 plus 1.0fil
-(aaaaa-luakern.aux)
+(invisible-chars.aux)

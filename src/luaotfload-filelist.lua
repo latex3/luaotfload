@@ -6,7 +6,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-filelist",
-    version       = "3.001",       --TAGVERSION
+    version       = "3.002",       --TAGVERSION
     date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / filelist",
     license       = "GPL v2.0"
@@ -249,6 +249,7 @@ luaotfload.filelist.data =
     { name = "embolden"          ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" },
     { name = "notdef"            ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" },
     { name = "loaders"           ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" }, 
+    { name = "multiscript"       ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" }, 
     { name = "parsers"           ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" }, 
     { name = "resolvers"         ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" }, 
     { name = "unicode"           ,kind = kind_library, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" },

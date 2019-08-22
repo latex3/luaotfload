@@ -1,7 +1,7 @@
 
-packageversion= "3.001"
+packageversion= "3.002"
 packagedate   = "2019-08-11"
-packagedesc   = "pulled PR81, multiscript"
+packagedesc   = "ignorable"
 checkformat   = "latex-dev" -- for travis until something better comes up
 
 module   = "luaotfload"
@@ -120,7 +120,7 @@ options["texmfhome"] = "./texmf"
 -- documentation
 -------------------
 
-typesetexe = "lualatex"
+typesetexe = "lua"..checkformat
 
 -- main docu
 typesetfiles      = {"luaotfload-latex.tex"}

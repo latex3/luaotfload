@@ -186,6 +186,7 @@ tdslocations=
  {
   "source/luatex/luaotfload/fontloader-reference-load-order.lua",
   "source/luatex/luaotfload/fontloader-reference-load-order.tex",
+  "tex/generic/unicode-data/OpentypeMirroring.txt"
  } 
 
 scriptfiles   =  {"luaotfload-tool.lua"} 

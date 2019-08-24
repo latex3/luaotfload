@@ -87,7 +87,15 @@ checkconfigs = {
                 "config-fontspec"
                }
 else
-checkconfigs={}               
+checkconfigs = {
+                "build",
+               -- "config-loader-unpackaged",
+               -- "config-loader-reference",
+                "config-latex-TU",
+                "config-unicode-math",
+                "config-plain",
+                "config-fontspec"
+               }            
 end
 checkruns = 3
 checksuppfiles = {"texmf.cnf"} 

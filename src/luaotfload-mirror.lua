@@ -5,7 +5,7 @@
 
 local ProvidesLuaModule = {
     name          = "luaotfload-mirror",
-    version       = "3.001",       --TAGVERSION
+    version       = "3.0003",       --TAGVERSION
     date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / mirror",
     license       = "GPL v2.0",
@@ -40,7 +40,7 @@ local opentype_mirroring do
     * entry^0
   , rawset)
 
-  local f = io.open(kpse.find_file"OpentypeMirroring.txt")
+  local f = io.open(kpse.find_file"BidiMirroring-510.txt")
   opentype_mirroring = file:match(f:read'*a')
   f:close()
 end

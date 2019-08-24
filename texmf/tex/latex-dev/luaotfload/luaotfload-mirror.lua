@@ -40,7 +40,7 @@ local opentype_mirroring do
     * entry^0
   , rawset)
 
-  local f = io.open(kpse.find_file"OpentypeMirroring.txt")
+  local f = io.open(kpse.find_file"BidiMirroring-510.txt")
   opentype_mirroring = file:match(f:read'*a')
   f:close()
 end

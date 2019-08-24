@@ -649,8 +649,9 @@ local init_post_install_callbacks = function ()
   local handler = nodes.simple_font_handler
   local callback = function(head, groupcode, _, _, direction)
     if not direction then
-      direction = tex.get'textdir'
+      direction = head.dir or tex.textdir
     end
+    head = dobidi(head, nil, nil, nil, direction)
     domultiscript(head, nil, nil, nil, direction)
     return handler(head, groupcode, nil, nil, direction)
   end

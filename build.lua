@@ -177,14 +177,14 @@ else
     "**/fontloader-*.lua",
     "**/fontloader-*.tex",
     "luaotfload-blacklist.cnf",
-    "OpentypeMirroring.txt",
+    "BidiMirroring-510.txt",
     "./doc/filegraph.tex",
     "./doc/luaotfload-main.tex", 
    }
    installfiles = {
      "luaotfload.sty",
      "luaotfload-blacklist.cnf",
-     "OpentypeMirroring.txt",
+     "BidiMirroring-510.txt",
      "**/luaotfload-*.lua",
      "**/fontloader-*.lua",
      "**/fontloader-*.tex",
@@ -194,7 +194,7 @@ tdslocations=
  {
   "source/luatex/luaotfload/fontloader-reference-load-order.lua",
   "source/luatex/luaotfload/fontloader-reference-load-order.tex",
-  "tex/generic/unicode-data/OpentypeMirroring.txt"
+  "tex/generic/unicode-data/BidiMirroring-510.txt"
  } 
 
 scriptfiles   =  {"luaotfload-tool.lua"} 

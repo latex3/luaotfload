@@ -1,7 +1,7 @@
 
-packageversion= "3.002"
+packageversion= "3.0003"
 packagedate   = "2019-08-11"
-packagedesc   = "ignorable"
+packagedesc   = "bidi-dev"
 checkformat   = "latex-dev" -- for travis until something better comes up
 
 module   = "luaotfload"

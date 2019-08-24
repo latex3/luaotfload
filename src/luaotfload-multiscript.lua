@@ -5,7 +5,7 @@
 
 local ProvidesLuaModule = {
     name          = "luaotfload-multiscript",
-    version       = "3.002",     --TAGVERSION
+    version       = "3.0003",     --TAGVERSION
     date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / multiscript",
     license       = "GPL v2.0",

@@ -5,7 +5,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-bidi",
-    version       = "3.0003",       --TAGVERSION
+    version       = "3.0004",       --TAGVERSION
     date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / bidi",
     license       = "GPL v2.0",

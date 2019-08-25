@@ -97,18 +97,6 @@ for k, v in pairs(bidi_brackets) do
   bidi_brackets_canonical[k] = bidi_brackets_canonical[k] or k
 end
 
-local opentype_mirroring do
-  local entry = lpeg.Cg(codepoint * '; ' * codepoint * ' ')^-1 * (1-lpeg.P'\n')^0 * '\n'
-  local file = lpeg.Cf(
-      lpeg.Ct''
-    * entry^0
-  , rawset)
-
-  local f = io.open(kpse.find_file"BidiMirroring-510.txt")
-  opentype_mirroring = file:match(f:read'*a')
-  f:close()
-end
-
 local bidi_fonts = setmetatable({}, {
   __index = function(t, fid)
     local f = font.getfont(fid)
@@ -598,11 +586,6 @@ function dobidi(head, a, b, c, par_direction)
         setprev(getnext(cur), newprev)
         setprev(newnext, cur)
         setnext(cur, newnext)
-      end
-    elseif level % 2 == 1 and tcur == glyph_id and scur == 0 and bidi_fonts[getfont(cur)] then
-      local char = opentype_mirroring[getchar(cur)]
-      if char then
-        setchar(cur, char)
       end
     end
   end

@@ -49,7 +49,8 @@ local function dirchecking_handler(basehandler)
   local basehandler = handlers[basehandler]
   if not basehandler then return false end
   return function(head, start, dataset, sequence, param, rlmode, skiphash, step)
-    if param ~= true and rlmode ~= dataset[1] then
+    local value = dataset[1]
+    if value ~= true and rlmode ~= value then
       return head, start, false, false
     end
     return basehandler(head, start, dataset, sequence, param, rlmode, skiphash, step)
@@ -57,37 +58,41 @@ local function dirchecking_handler(basehandler)
 end
 
 local sequence = {
-  features = {rtlm = {["*"] = {["*"] = true}}},
+  features = {base_rtlm = {["*"] = {["*"] = true}}},
   flags = {false, false, false, false},
   name = "based mirroring",
-  order = {"rtlm"},
+  order = {"base_rtlm"},
   nofsteps = 1,
   steps = {{
     coverage = opentype_mirroring,
   }},
-  type = "gsub_single",
+  type = "dir_gsub_single",
 }
+handlers.dir_gsub_single = dirchecking_handler'gsub_single'
 local function mirroringinitialiser(tfmdata, value)
-  print'!!!'
   local resources = tfmdata.resources
   local sequences = resources and resources.sequences
   if sequences then
-    insert(sequences, 1, sequence)
     local features = tfmdata.shared.features
     features.ltrm, features.ltra = 1, 1
-    features.rtlm, features.rtla = -1, -1
+    features.rtlm, features.rtla, features.base_rtlm = -1, -1, -1
     for i = 1,#sequences do
-      local sequence = sequences[i]
-      local features = sequence.features
+      local cur_sequence = sequences[i]
+      -- In some cases, sequences are shared. Then we find `sequence`
+      -- already in the list.
+      -- In this case we are already done.
+      if sequence == cur_sequence then return end
+      local features = cur_sequence.features
       if features and (features.ltrm or features.ltra
                     or features.rtlm or features.rtla) then
-        local newtype = 'dir_' .. sequence.type
+        local newtype = 'dir_' .. cur_sequence.type
         if handlers[newtype] == nil then
-          handlers[newtype] = dirchecking_handler(sequence.type)
+          handlers[newtype] = dirchecking_handler(cur_sequence.type)
         end
-        sequence.type = newtype
+        cur_sequence.type = newtype
       end
     end
+    insert(sequences, 1, sequence)
   end
 end
 otfregister {

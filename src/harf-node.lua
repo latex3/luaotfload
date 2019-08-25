@@ -738,7 +738,7 @@ local function tonodes(head, current, run, glyphs, color)
         -- May be it is checking for the italic correction before we have had
         -- loaded the glyph?
         local prevchar, prevfontid = isglyph(current)
-        if prevchar > 0 then
+        if prevchar and prevchar > 0 then
           local prevfontdata = font.getfont(prevfontid)
           local prevcharacters = prevfontdata and prevfontdata.characters
           local italic = prevcharacters and prevcharacters[prevchar].italic

@@ -235,15 +235,9 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
         node_class[cur] = curclass
       end
     elseif curclass == "ET" then
-      local follow = getnext(cur)
-      local followclass = node_class[follow]
-      while follow ~= stop and (followclass == "ET" or not followclass) do
-        follow = getnext(follow)
-        followclass = node_class[follow]
-      end
-      if followclass == "EN" then
-        follow = cur
-        followclass = curclass
+      if prevclass == "EN" then
+        local follow = cur
+        local followclass = curclass
         while follow ~= stop and (followclass == "ET" or not followclass) do
           if followclass then
             node_class[follow] = "EN"
@@ -252,8 +246,26 @@ function do_wni(head, level, stop, sos, eos, node_class, node_level, node_origcl
           followclass = node_class[follow]
         end
       else
-        curclass = "ON"
-        node_class[cur] = curclass
+        local follow = getnext(cur)
+        local followclass = node_class[follow]
+        while follow ~= stop and (followclass == "ET" or not followclass) do
+          follow = getnext(follow)
+          followclass = node_class[follow]
+        end
+        if followclass == "EN" and prevstrong ~= "AL" then
+          follow = cur
+          followclass = curclass
+          while follow ~= stop and (followclass == "ET" or not followclass) do
+            if followclass then
+              node_class[follow] = "EN"
+            end
+            follow = getnext(follow)
+            followclass = node_class[follow]
+          end
+        else
+          curclass = "ON"
+          node_class[cur] = curclass
+        end
       end
     elseif curclass == "AL" then
       prevstrong = "AL"

@@ -19,16 +19,12 @@ print(mydata.email)
 
 --------- setup things for a dev-version
 -- See stackoverflow.com/a/12142066/212001 / build-config from latex2e
-local errorlevel = os.execute("git rev-parse --abbrev-ref HEAD > branch.tmp")
 local master_branch = true
-if errorlevel ~= 0 then
-  exit(1)
-else
- local f = assert(io.open("branch.tmp", "rb"))
- local branch = f:read("*all")
- f:close()
- os.remove("branch.tmp")
- if  string.match(branch, "dev") then
+do
+ local f = io.popen'git rev-parse --abbrev-ref HEAD'
+ local branch = f:read'*a':sub(1,-2)
+ assert(f:close())
+ if string.match(branch, "dev") then
     master_branch = false
     tdsroot = "latex-dev"
     print("creating/installing dev-version in " .. tdsroot)

@@ -20,9 +20,11 @@ Completed box being shipped out [1]
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\amiri ‍
+....\begindir TRT
 ....\amiri ي
 ....\amiri ‍
 ....\penalty 10000
+....\enddir TRT
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
@@ -34,8 +36,10 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
+....\begindir TRT
 ....\amiri ي
 ....\penalty 10000
+....\enddir TRT
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue -5.0

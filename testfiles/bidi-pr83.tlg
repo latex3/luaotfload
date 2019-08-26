@@ -1,0 +1,155 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Completed box being shipped out [1]
+\vbox(633.0+0.0293)x407.0, direction TRT
+.\glue 16.0
+.\vbox(617.0+0.0293)x345.0, shifted 62.0, direction TRT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TRT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TRT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 515.94489fil, direction TRT
+...\write-{}
+...\glue(\topskip) 5.1416
+...\hbox(4.8584+3.5791)x345.0, glue set 322.65625fil, direction TRT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TRT
+....\TU/Amiri(0)/m/n/10 󰴭
+....\TU/Amiri(0)/m/n/10 󰵺
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 0.1836
+...\hbox(8.2373+3.5791)x345.0, glue set 41.98242fil, direction TRT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TRT
+....\TU/Amiri(0)/m/n/10 󰴭
+....\TU/Amiri(0)/m/n/10 󰵺
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 ^^a3
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 󰴳
+....\TU/Amiri(0)/m/n/10 󰵺
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/Amiri(0)/m/n/10 a
+....\TU/Amiri(0)/m/n/10 z
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 ^^a3
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 󰴶
+....\TU/Amiri(0)/m/n/10 󰵺
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/Amiri(0)/m/n/10 b
+....\TU/Amiri(0)/m/n/10 z
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 ^^a3
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 c
+....\TU/Amiri(0)/m/n/10 z
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 󰪮
+....\TU/Amiri(0)/m/n/10 󰧘
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 ^^a3
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/Amiri(0)/m/n/10 d
+....\TU/Amiri(0)/m/n/10 z
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 󰪱
+....\TU/Amiri(0)/m/n/10 󰧘
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/Amiri(0)/m/n/10 1
+....\TU/Amiri(0)/m/n/10 9
+....\enddir TLT
+....\TU/Amiri(0)/m/n/10 ^^a3
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 󰫆
+....\TU/Amiri(0)/m/n/10 󰧘
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/Amiri(0)/m/n/10 $
+....\TU/Amiri(0)/m/n/10 2
+....\TU/Amiri(0)/m/n/10 9
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 󰫄
+....\TU/Amiri(0)/m/n/10 󰧘
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/Amiri(0)/m/n/10 e
+....\TU/Amiri(0)/m/n/10 z
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 3
+....\TU/Amiri(0)/m/n/10 9
+....\enddir TLT
+....\TU/Amiri(0)/m/n/10 ^^a3
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 󰋨
+....\TU/Amiri(0)/m/n/10 󰌄
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/Amiri(0)/m/n/10 4
+....\TU/Amiri(0)/m/n/10 9
+....\enddir TLT
+....\TU/Amiri(0)/m/n/10 ^^a3
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/Amiri(0)/m/n/10 f
+....\TU/Amiri(0)/m/n/10 z
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 󰋧
+....\TU/Amiri(0)/m/n/10 󰌄
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 1.22363
+...\hbox(7.19727+3.8623)x345.0, glue set 292.92969fil, direction TRT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TRT
+....\TU/Amiri(0)/m/n/10 󰴭
+....\TU/Amiri(0)/m/n/10 󰵺
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 )
+....\TU/Amiri(0)/m/n/10 󰴳
+....\TU/Amiri(0)/m/n/10 󰵺
+....\TU/Amiri(0)/m/n/10 (
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/Amiri(0)/m/n/10 󰴭
+....\TU/Amiri(0)/m/n/10 󰵺
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -3.8623
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.73047
+..\hbox(6.26953+0.0293)x345.0, glue set 169.83887fil, direction TRT
+...\glue 0.0 plus 1.0fil
+...\begindir TLT
+...\TU/Amiri(0)/m/n/10 1
+...\glue 0.0 plus 1.0fil
+(bidi-pr83.aux)

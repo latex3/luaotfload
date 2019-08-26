@@ -1,0 +1,18 @@
+\input{regression-test}
+\documentclass{article}
+
+\usepackage{fontspec}
+
+\setmainfont[Script=Arabic,RawFeature=+bidi]{Amiri}
+
+\begin{document}
+
+
+\pardir TRT \textdir TRT \bodydir TRT \pagedir TRT
+بى
+
+\START \showoutput
+بى £ تى az £ ثى bz £ cz سى £ dz شى 19£ صى \$29 ضى ez 39£ طى 49£ fz ظى
+
+بى (تى) بى
+\end{document}

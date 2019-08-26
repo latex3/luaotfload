@@ -462,6 +462,14 @@ end --- [init_adapt]
 
 local init_main = function ()
 
+  --[[doc--
+
+      First save a copy of font.each in order to also catch old-style fonts
+
+  --doc]]--
+
+  font.originaleach = font.each
+
   local load_fontloader_module = luaotfload.loaders.fontloader
   local ignore_module          = luaotfload.loaders.ignore
 

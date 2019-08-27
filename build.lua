@@ -2,7 +2,7 @@
 packageversion= "3.002"
 packagedate   = "2019-08-11"
 packagedesc   = "ignorable"
-checkformat   = "latex-dev" -- for travis until something better comes up
+checkformat   = "latex" -- for travis until something better comes up
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -19,16 +19,15 @@ print(mydata.email)
 
 --------- setup things for a dev-version
 -- See stackoverflow.com/a/12142066/212001 / build-config from latex2e
-local master_branch = true
-do
+local master_branch do
   local branch = os.getenv'TRAVIS_BRANCH'
   if not branch then
     local f = io.popen'git rev-parse --abbrev-ref HEAD'
     branch = f:read'*a':sub(1,-2)
     assert(f:close())
   end
-  if string.match(branch, "dev") then
-    master_branch = false
+  master_branch = string.match(branch, '^master')
+  if not master_branch then
     tdsroot = "latex-dev"
     print("creating/installing dev-version in " .. tdsroot)
     ctanpkg = ctanpkg .. "-dev"
@@ -43,7 +42,7 @@ uploadconfig = {
   version    = "v"..packageversion.." "..packagedate,
 -- author    = "Ulrike Fischer;Philipp Gesang;Marcel Krüger;The LaTeX Team;Élie Roux;Manuel Pégourié-Gonnard (inactive);Khaled Hosny (inactive);Will Robertson (inactive)",
 -- author list is too long
-  author     = "... as before ...",  
+  author     = "... as before ...",
   license    = "gpl2",
   summary    = "OpenType ‘loader’ for Plain TeX and LaTeX",
   ctanPath   = "/macros/luatex/generic/"..ctanpkg,
@@ -51,13 +50,13 @@ uploadconfig = {
   bugtracker = "https://github.com/latex3/luaotfload/issues",
   support    = "https://github.com/latex3/luaotfload/issues",
   uploader   = mydata.name,
-  email      = mydata.email, 
+  email      = mydata.email,
   update     = true ,
   topic      = {"font-use","luatex"},
   note       = [[Uploaded automatically by l3build... description is unchanged despite the missing linebreaks, authors are unchanged]],
-  description=[[The package adopts the TrueType/OpenType Font loader code provided in ConTeXt, 
+  description=[[The package adopts the TrueType/OpenType Font loader code provided in ConTeXt,
               and adapts it to use in Plain TeX and LaTeX. It works under LuaLaTeX only.]],
-  announcement_file="ctan.ann"             
+  announcement_file="ctan.ann"
 }
 
 -- we perhaps need different settings for miktex ...
@@ -69,13 +68,13 @@ local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 stdengine    = "luatex"
 checkengines = {"luatex"}
 
- -- local errorlevel   = os.execute("harftex --version") 
- -- if not os.getenv('TRAVIS') and errorlevel==0 then 
+ -- local errorlevel   = os.execute("harftex --version")
+ -- if not os.getenv('TRAVIS') and errorlevel==0 then
  --  checkengines = {"luatex","harftex"}
- -- end 
- 
+ -- end
+
 -- temporary for test dev branch
-if master_branch then 
+if master_branch then
 checkconfigs = {
                 "build",
                 "config-loader-unpackaged",
@@ -86,13 +85,13 @@ checkconfigs = {
                 "config-fontspec"
                }
 else
-checkconfigs={}               
+checkconfigs={}
 end
 checkruns = 3
-checksuppfiles = {"texmf.cnf"} 
+checksuppfiles = {"texmf.cnf"}
 
 -- exclude some text temporarly or in certain systems ...
-if os.env["CONTEXTPATH"] then 
+if os.env["CONTEXTPATH"] then
   -- local system
   if ismiktex then
    excludetests = {"arabkernsfs","fontload-ttc-fontindex"}
@@ -110,7 +109,7 @@ end
 
 packtdszip=true
 sourcefiledir = "./src"
-docfiledir    = "./doc" 
+docfiledir    = "./doc"
 -- install directory is the texmf-tree
 options = options or {}
 options["texmfhome"] = "./texmf"
@@ -127,7 +126,7 @@ typesetcycles = 3 -- for the tests
 
 ctanreadme= "CTANREADME.md"
 
-docfiles = 
+docfiles =
  {
   "luaotfload.conf.example",
   "luaotfload-main.tex",
@@ -135,14 +134,14 @@ docfiles =
   "luaotfload-tool.rst"
   }
 
-textfiles = 
+textfiles =
  {
   "COPYING",
   "NEWS",
    docfiledir .. "/CTANREADME.md",
   }
-    
-typesetdemofiles  = 
+
+typesetdemofiles  =
   {
    "filegraph.tex",
    "luaotfload-conf.tex",
@@ -155,21 +154,21 @@ typesetdemofiles  =
 ---------------------
 
 
-if options["target"] == "check" or options["target"] == "save" then 
+if options["target"] == "check" or options["target"] == "save" then
   print("check/save")
-  installfiles ={} 
-  sourcefiles  ={} 
+  installfiles ={}
+  sourcefiles  ={}
   unpackfiles  ={}
 else
-  sourcefiles  = 
+  sourcefiles  =
   {
-    "luaotfload.sty", 
+    "luaotfload.sty",
     "**/luaotfload-*.lua",
     "**/fontloader-*.lua",
     "**/fontloader-*.tex",
     "luaotfload-blacklist.cnf",
     "./doc/filegraph.tex",
-    "./doc/luaotfload-main.tex", 
+    "./doc/luaotfload-main.tex",
    }
    installfiles = {
      "luaotfload.sty",
@@ -183,9 +182,9 @@ tdslocations=
  {
   "source/luatex/luaotfload/fontloader-reference-load-order.lua",
   "source/luatex/luaotfload/fontloader-reference-load-order.tex",
- } 
+ }
 
-scriptfiles   =  {"luaotfload-tool.lua"} 
+scriptfiles   =  {"luaotfload-tool.lua"}
 
 scriptmanfiles = {"luaotfload.conf.5","luaotfload-tool.1"}
 
@@ -216,7 +215,7 @@ function typeset_demo_tasks()
  if errorlevel ~= 0 then
         return errorlevel
  end
- errorlevel= run (typesetdir,"rst2xetex.py luaotfload.conf.rst luaotfload-conf.tex") 
+ errorlevel= run (typesetdir,"rst2xetex.py luaotfload.conf.rst luaotfload-conf.tex")
  if errorlevel ~= 0 then
         return errorlevel
  end
@@ -225,88 +224,81 @@ function typeset_demo_tasks()
         return errorlevel
  end
  return 0
-end 
+end
 
-function update_tag (file,content,tagname,tagdate)
- tagdate = string.gsub (packagedate,"-", "/")
- if string.match (file, "%.sty$" ) then
-  content = string.gsub (content,  
-                         "%d%d%d%d/%d%d/%d%d [a-z]+%d%.%d+",
-                         tagdate.." v"..packageversion)
-  return content  
- elseif string.match (file,"fontloader%-basic") then
-  if master_branch then
-    content = string.gsub (content,
-                           "caches.namespace = 'generic%-dev'",
-                           "caches.namespace = 'generic'")
-  else 
-   content = string.gsub (content,
-                           "caches.namespace = 'generic'",
-                           "caches.namespace = 'generic-dev'")
-  end       
-  return content                              
- elseif string.match (file, "%.lua$") then
-  content = string.gsub (content,  
-                         '(version%s*=%s*")%d%.%d+(",%s*--TAGVERSION)',
-                         "%1"..packageversion.."%2")
-  content = string.gsub (content,  
-                         '(date%s*=%s*")%d%d%d%d%-%d%d%-%d%d(",%s*--TAGDATE)',
-                         "%1"..packagedate.."%2")                                                                                           
-  return content                         
- elseif string.match (file, "^README.md$") then
-   content = string.gsub (content,  
-                         "Version: %d%.%d+",
-                         "Version: " .. packageversion )
-   content = string.gsub (content,  
-                         "version%-%d%.%d+",
-                         "version-" .. packageversion ) 
-   content = string.gsub (content,  
-                         "for %d%.%d+",
-                         "for " .. packageversion ) 
-   content = string.gsub (content,  
-                         "%d%d%d%d%-%d%d%-%d%d",
-                         packagedate )
-   local imgpackagedate = string.gsub (packagedate,"%-","--")                          
-   content = string.gsub (content,  
-                         "%d%d%d%d%-%-%d%d%-%-%d%d",
-                         imgpackagedate)                                                                                                     
-   return content
- elseif string.match (file, "CTANREADME.md$") then
-   content = string.gsub (content,  
-                         "VERSION: %d%.%d+",
-                         "VERSION: " .. packageversion )
-   content = string.gsub (content,  
-                         "DATE: %d%d%d%d%-%d%d%-%d%d",
-                         "DATE: " .. packagedate )                                                                          
-   return content   
- elseif string.match (file, "%.tex$" ) then
-   content = string.gsub (content,  
-                         "%d%d%d%d%-%d%d%-%d%d v%d%.%d+",
-                         packagedate.." v"..packageversion)
-  return content    
- elseif string.match (file, "%.rst$" ) then
-   content = string.gsub (content,  
-                         "(:Date:%s+)%d%d%d%d%-%d%d%-%d%d",
-                         "%1"..packagedate)
-  content = string.gsub (content,  
-                         "(:Version:%s+)%d%.%d+",
-                         "%1"..packageversion)                       
-  return content 
- elseif string.match (file,"mkstatus") then
-  content= string.gsub (content,  
-                         "v%d%.%d+/%d%d%d%d%-%d%d%-%d%d",
-                         "v"..packageversion.."/"..packagedate)
- 
+local function lpeggsub(pattern)
+  return lpeg.Cs(lpeg.P{pattern + (1 * (lpeg.V(1) + -1))}^0)
+end
+local digit = lpeg.R'09'
+local spaces = lpeg.P' '^1
+local function lpegrep(pattern,times)
+  if times == 0 then return true end
+  return pattern * lpegrep(pattern, times - 1)
+end
+local tagdatepat = lpeg.Cg( -- Date: YYYY/MM/DD
+  lpegrep(digit, 4) * lpegrep('/' * digit * digit, 2)
+  * lpeg.Cc(string.gsub(packagedate, '-', '/')))
+local packagedatepat = lpeg.Cg( -- Date: YYYY-MM-DD
+  lpegrep(digit, 4) * lpegrep('-' * digit * digit, 2)
+  * lpeg.Cc(packagedate))
+local imgpackagedatepat = lpeg.Cg( -- Date: YYYY--MM--DD
+  lpegrep(digit, 4) * lpegrep('--' * digit * digit, 2)
+  * lpeg.Cc(string.gsub(packagedate, '-', '--')))
+local xxxpackagedatepat = lpeg.Cg( -- Date: YYYYxxxMMxxxDD
+  lpegrep(digit, 4) * lpegrep('xxx' * digit * digit, 2)
+  * lpeg.Cc(string.gsub(packagedate, '-', 'xxx')))
+local packageversionpat = lpeg.Cg( -- Version: M.mmmm-dev
+  digit * '.' * digit^1 * lpeg.P'-dev'^-1
+  * lpeg.Cc(packageversion))
+local sty_pattern = lpeggsub(tagdatepat * ' v' * packageversionpat)
+local tex_pattern = lpeggsub(packagedatepat * ' v' * packageversionpat)
+local lua_pattern = lpeggsub(
+      'version' * spaces * '=' * spaces
+           * '"' * packageversionpat * '",' * spaces * '--TAGVERSION'
+    + 'date' * spaces * '=' * spaces
+           * '"' * packagedatepat * '",' * spaces * '--TAGDATE')
+local readme_pattern = lpeggsub(
+      (lpeg.P'Version: ' + 'version-' + 'for ') * packageversionpat
+    + packagedatepat + imgpackagedatepat)
+local ctanreadme_pattern = lpeggsub(
+      'VERSION: ' * packageversionpat
+    + 'DATE: ' * packagedatepat)
+local rst_pattern = lpeggsub(
+      ':Date:' * spaces * packagedatepat
+    + ':Version:' * spaces * packageversionpat)
+local status_pattern = lpeggsub('v' * packageversionpat * '/' * packagedatepat)
+local fontloader_pattern = lpeggsub(
+      packageversionpat * ' with fontloaderxxx' * xxxpackagedatepat)
+function update_tag (file,content,_tagname,_tagdate)
+  if string.match (file, "%.sty$" ) then
+    return sty_pattern:match(content)
+  elseif string.match (file,"fontloader%-basic") then
+   if master_branch then
+     return string.gsub (content,
+                          "caches.namespace = 'generic%-dev'",
+                          "caches.namespace = 'generic'")
+   else
+     return string.gsub (content,
+                          "caches.namespace = 'generic'",
+                          "caches.namespace = 'generic-dev'")
+   end
+  elseif string.match (file, "%.lua$") then
+    return lua_pattern:match(content)
+  elseif file == 'README.md$' then
+    return readme_pattern:match(content)
+  elseif string.match (file, "CTANREADME.md$") then
+    return ctanreadme_pattern:match(content)
+  elseif string.match (file, "%.tex$" ) then
+    return tex_pattern:match(content)
+  elseif string.match (file, "%.rst$" ) then
+    return rst_pattern:match(content)
+  elseif string.match (file,"mkstatus$") then
+    return status_pattern:match(content)
+  elseif string.match (file,"aaaaa%-luakern") then
+    return fontloader_pattern:match(content)
+  end
   return content
- elseif string.match (file,"aaaaa%-luakern") then   
-    content= string.gsub (content,  
-                         "%d%.%d+%swith%sfontloaderxxx%d%d%d%dxxx%d%dxxx%d%d",
-                         packageversion.." with fontloaderxxx"..string.gsub(packagedate,"[%-]","xxx"))
-
-   return content                           
- end
- return content
- end
+end
 
 
 kpse.set_program_name ("kpsewhich")

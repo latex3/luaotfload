@@ -21,17 +21,20 @@ print(mydata.email)
 -- See stackoverflow.com/a/12142066/212001 / build-config from latex2e
 local master_branch = true
 do
- local f = io.popen'git rev-parse --abbrev-ref HEAD'
- local branch = f:read'*a':sub(1,-2)
- assert(f:close())
- if string.match(branch, "dev") then
+  local branch = os.getenv'TRAVIS_BRANCH'
+  if not branch then
+    local f = io.popen'git rev-parse --abbrev-ref HEAD'
+    branch = f:read'*a':sub(1,-2)
+    assert(f:close())
+  end
+  if string.match(branch, "dev") then
     master_branch = false
     tdsroot = "latex-dev"
     print("creating/installing dev-version in " .. tdsroot)
     ctanpkg = ctanpkg .. "-dev"
     ctanzip = ctanpkg
     checkformat="latex-dev"
- end
+  end
 end
 ---------------------------------
 

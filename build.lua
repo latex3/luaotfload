@@ -1,5 +1,5 @@
 
-packageversion= "3.002"
+packageversion= "3.002-dev"
 packagedate   = "2019-08-11"
 packagedesc   = "ignorable"
 checkformat   = "latex" -- for travis until something better comes up

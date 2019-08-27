@@ -207,19 +207,19 @@ tagfiles = {
 
 function typeset_demo_tasks()
  local errorlevel = 0
- errorlevel = run (docfiledir,"rst2man.py luaotfload.conf.rst luaotfload.conf.5")
+ errorlevel = run (docfiledir,"rst2man luaotfload.conf.rst luaotfload.conf.5")
  if errorlevel ~= 0 then
         return errorlevel
  end
- errorlevel = run (docfiledir,"rst2man.py luaotfload-tool.rst luaotfload-tool.1")
+ errorlevel = run (docfiledir,"rst2man luaotfload-tool.rst luaotfload-tool.1")
  if errorlevel ~= 0 then
         return errorlevel
  end
- errorlevel= run (typesetdir,"rst2xetex.py luaotfload.conf.rst luaotfload-conf.tex")
+ errorlevel= run (typesetdir,"rst2xetex luaotfload.conf.rst luaotfload-conf.tex")
  if errorlevel ~= 0 then
         return errorlevel
  end
- errorlevel=run (typesetdir,"rst2xetex.py luaotfload-tool.rst luaotfload-tool.tex")
+ errorlevel=run (typesetdir,"rst2xetex luaotfload-tool.rst luaotfload-tool.tex")
  if errorlevel ~= 0 then
         return errorlevel
  end

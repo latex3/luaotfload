@@ -93,7 +93,7 @@ else
 checkconfigs={}
 end
 checkruns = 3
-checksuppfiles = {"texmf.cnf"}
+checksuppfiles = {"LuaotfloadDummyFont.otf"}
 
 -- exclude some text temporarly or in certain systems ...
 if os.env["CONTEXTPATH"] then
@@ -115,9 +115,6 @@ end
 packtdszip=true
 sourcefiledir = "./src"
 docfiledir    = "./doc"
--- install directory is the texmf-tree
-options = options or {}
-options["texmfhome"] = "./texmf"
 
 -------------------
 -- documentation
@@ -152,7 +149,6 @@ typesetdemofiles  =
    "luaotfload-conf.tex",
    "luaotfload-tool.tex"
   }
--- typesetsuppfiles  = {"texmf.cnf"} --later
 
 ---------------------
 -- installation

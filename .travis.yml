@@ -17,7 +17,7 @@ cache:
 
 
 script: 
-  - l3build ctan -H --show-log-on-error
+  - l3build install && l3build ctan -H --show-log-on-error
 
 deploy:
   - provider: releases

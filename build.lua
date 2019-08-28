@@ -2,7 +2,7 @@
 packageversion= "3.002-dev"
 packagedate   = "2019-08-11"
 packagedesc   = "ignorable"
-checkformat   = "latex" -- for travis until something better comes up
+checkformat   = "latex"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -20,13 +20,18 @@ print(mydata.email)
 --------- setup things for a dev-version
 -- See stackoverflow.com/a/12142066/212001 / build-config from latex2e
 local master_branch do
-  local branch = os.getenv'TRAVIS_BRANCH'
-  if not branch then
-    local f = io.popen'git rev-parse --abbrev-ref HEAD'
-    branch = f:read'*a':sub(1,-2)
-    assert(f:close())
+  local tag = os.getenv'TRAVIS_TAG'
+  if tag then
+    master_branch = not string.match(tag, '-dev$')
+  else
+    local branch = os.getenv'TRAVIS_BRANCH'
+    if not branch then
+      local f = io.popen'git rev-parse --abbrev-ref HEAD'
+      branch = f:read'*a':sub(1,-2)
+      assert(f:close())
+    end
+    master_branch = string.match(branch, '^master')
   end
-  master_branch = string.match(branch, '^master')
   if not master_branch then
     tdsroot = "latex-dev"
     print("creating/installing dev-version in " .. tdsroot)

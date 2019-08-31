@@ -107,7 +107,9 @@ local bidi_fonts = setmetatable({}, {
   end,
 })
 
+local any_bidi = false
 local function makebidifont(tfmdata)
+  any_bidi = true
   tfmdata.bidi = true
 end
 
@@ -371,7 +373,8 @@ end
 node_class, node_origclass, node_level = {}, {}, {} -- Making these local was significantly
 -- slower necause they are sparse arrays with medium sized integer
 -- keys, requiring relativly big allocations
-function dobidi(head, a, b, c, par_direction)
+function luaotfload.apply_bidi(head, a, b, c, par_direction)
+  if not any_bidi then return head end -- Optimization: Skip if no font is bidi
   head = node.direct.todirect(head)
   local node_class, node_origclass, node_level = node_class, node_origclass, node_level
   local dir_matches = {}
@@ -544,7 +547,6 @@ function dobidi(head, a, b, c, par_direction)
     local dirnode = nodenew(dir_id)
     setdirection(dirnode, newlevel % 2, 0)
     stack[#stack + 1] = {level, dirnode}
-    -- tableinsert(stack, 
     level = newlevel
     return insert_before(head, n, dirnode)
   end
@@ -593,17 +595,10 @@ function dobidi(head, a, b, c, par_direction)
 end
 
 otffeatures.register {
-  name        = "bidi",
-  description = "Apply Unicode bidi algorithm",
-  default = 1,
+  name         = "bidi",
+  description  = "Apply Unicode bidi algorithm",
   manipulators = {
     node = makebidifont,
   },
-  --                -- We have to see how processors interact with
-  --                -- multiscript fonts
-  -- processors = {
-  --   node = donotdef,
-  -- }
 }
-
 --- vim:sw=2:ts=2:expandtab:tw=71

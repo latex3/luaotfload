@@ -647,12 +647,14 @@ local init_post_install_callbacks = function ()
 
   -- MK Pass current text direction to simple_font_handler
   local handler = nodes.simple_font_handler
+  local apply_bidi = luaotfload.apply_bidi
+  local apply_multiscript = luaotfload.apply_multiscript
   local callback = function(head, groupcode, _, _, direction)
     if not direction then
       direction = head.dir or tex.textdir
     end
-    head = dobidi(head, nil, nil, nil, direction)
-    domultiscript(head, nil, nil, nil, direction)
+    head = apply_bidi(head, nil, nil, nil, direction)
+    apply_multiscript(head, nil, nil, nil, direction)
     return handler(head, groupcode, nil, nil, direction)
   end
   luatexbase.add_to_callback("pre_linebreak_filter",
@@ -777,9 +779,11 @@ return {
     logreport ("both", 1, "init",
                "fontloader loaded in %0.3f seconds",
                os.gettimeofday() - starttime)
+    return true
+  end,
+  late = function()
     local n = init_post ()
     logreport ("both", 5, "init", "post hook terminated, %d actions performed", n)
-    return true
   end
 }
 

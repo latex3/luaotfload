@@ -285,6 +285,11 @@ luaotfload.main = function ()
         logreport ("log", 0, "load", "Main fontloader initialization failed.")
     end
 
+    loadmodule "bidi"         --- ...
+    loadmodule "multiscript"  --- ...
+
+    init.late()
+
     initialize "loaders"         --- Font loading; callbacks
     initialize "database"        --- Font management.
     initialize "colors"          --- Per-font colors.
@@ -302,8 +307,6 @@ luaotfload.main = function ()
     loadmodule "notdef"       --- missing glyph handling
     loadmodule "mirror"       --- mirroring for r2l text
     initialize "auxiliary"    --- additional high-level functionality
-    loadmodule "bidi"         --- ...
-    loadmodule "multiscript"  --- ...
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 

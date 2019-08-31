@@ -147,7 +147,7 @@ end
 
 local glyph_id = node.id'glyph'
 -- TODO: unset last_script, matching parentheses etc
-function domultiscript(head, _, _, _, direction)
+function luaotfload.apply_multiscript(head, _, _, _, direction)
   head = node.direct.todirect(head)
   local last_fid, last_fonts, last_script
   for cur, cid, fid in traverse_char(head) do

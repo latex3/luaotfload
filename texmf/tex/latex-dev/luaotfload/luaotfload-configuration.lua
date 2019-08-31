@@ -382,7 +382,7 @@ local set_default_features = function ()
                              global   = { },
                              defaults = { },
                            }
-  current_features       = luaotfload.features
+  local current_features = luaotfload.features
   for var, val in next, default_features do
     if var == "global" then
       current_features.global = val

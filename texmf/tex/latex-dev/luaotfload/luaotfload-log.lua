@@ -220,16 +220,16 @@ else
     end
 end
 
-stdout = function (writer, category, ...)
+local stdout = function (writer, category, ...)
     local res = { module_name, "|", category, ":" }
     local nargs = select("#", ...)
     if nargs == 0 then
         --writeln tableconcat(res, " ")
         --return
     elseif nargs == 1 then
-        res[#res+1] = select(1, ...) -- around 30% faster than unpack()
+        res[5] = ... -- around 30% faster than unpack()
     else
-        res[#res+1] = stringformat(...)
+        res[5] = stringformat(...)
     end
     writer (tableconcat(res, " "))
 end

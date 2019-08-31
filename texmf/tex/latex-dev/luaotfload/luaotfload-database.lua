@@ -2125,9 +2125,8 @@ do
             return
         end
 
-        if splitcomma == nil then
-            splitcomma = luaotfload.parsers and luaotfload.parsers.splitcomma
-        end
+        local splitcomma = luaotfload.parsers and luaotfload.parsers.splitcomma
+
         if stringsub (formats, 1, 1) == "+" then -- add
             formats = lpegmatch (splitcomma, stringsub (formats, 2))
             if formats then

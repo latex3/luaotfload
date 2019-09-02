@@ -25,6 +25,7 @@ local version                  = ProvidesLuaModule.version
 luaotfload.version             = ProvidesLuaModule.version
 luaotfload.min_luatex_version  = { 0, 95, 0 }
 luaotfload.self                = "luaotfload-tool"
+luaotfload.fontloader          = _G -- We don't isolate the fontloader here
 
 --[[doc--
 

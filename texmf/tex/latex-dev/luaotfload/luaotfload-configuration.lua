@@ -62,7 +62,7 @@ local filejoin                = file.join
 local filereplacesuffix       = file.replacesuffix
 
 local logreport               = print -- overloaded later
-local getwritablepath         = caches.getwritablepath
+local getwritablepath         = luaotfload.fontloader.caches.getwritablepath
 
 
 local config_parser -- set later during init

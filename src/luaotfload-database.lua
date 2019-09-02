@@ -148,7 +148,6 @@ local gzipload                 = gzip.load
 local gzipsave                 = gzip.save
 local iolines                  = io.lines
 local ioopen                   = io.open
-local iopopen                  = io.popen
 local kpseexpand_path          = kpse.expand_path
 local kpsefind_file            = kpse.find_file
 local kpselookup               = kpse.lookup
@@ -168,13 +167,14 @@ local stringgmatch             = string.gmatch
 local stringgsub               = string.gsub
 local stringlower              = string.lower
 local stringsub                = string.sub
-local stringupper              = string.upper
 local tableconcat              = table.concat
 local tablesort                = table.sort
 local utf8len                  = utf8.len
 local utf8offset               = utf8.offset
 
 --- these come from Lualibs/Context
+local context_environment      = luaotfload.fontloader
+local caches                   = context_environment.caches
 local filebasename             = file.basename
 local filecollapsepath         = file.collapsepath or file.collapse_path
 local filedirname              = file.dirname
@@ -198,9 +198,9 @@ local tablecontains            = table.contains
 local tablecopy                = table.copy
 local tablefastcopy            = table.fastcopy
 local tabletofile              = table.tofile
-local tabletohash              = table.tohash
 local tableserialize           = table.serialize
 local names                    = fonts and fonts.names or { }
+local resolversfindfile        = context_environment.resolvers.findfile
 
 --- some of our own
 local unicode                  = require'luaotfload-unicode'
@@ -736,7 +736,7 @@ lookup_font_file = function (filename)
     if not found then
         local type = file.suffix(filename)
         if type ~= "" then
-            found = resolvers.findfile(filename, type)
+            found = resolversfindfile(filename, type)
         end
     end
 
@@ -746,7 +746,7 @@ lookup_font_file = function (filename)
 
     for i=1, #type1_metrics do
         local format = type1_metrics[i]
-        if resolvers.findfile(filename, format) then
+        if resolversfindfile(filename, format) then
             return file.addsuffix(filename, format), format, true
         end
     end
@@ -785,7 +785,7 @@ local get_font_file = function (index)
     end
     local basename = entry.basename
     if entry.location == "texmf" then
-        local fullname = resolvers.findfile(basename, entry.format)
+        local fullname = resolversfindfile(basename, entry.format)
         if fullname then
             return true, fullname, entry.subfont
         end
@@ -809,7 +809,7 @@ local verify_font_file = function (basename)
     if path and lfsisfile(path) then
         return true
     end
-    if resolvers.findfile(basename) then
+    if resolversfindfile(basename) then
         return true
     end
     return false

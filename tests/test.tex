@@ -308,4 +308,12 @@ f-f f\-f f\discretionary{-}{-}{-}f
 😄👌☃⛄
 \etest
 
+\btest
+\font\testn="[lmroman10-regular.otf]" at 50pt
+\font\testc="[BungeeColor1.ttf]" at 50pt
+\pdfextension colorstack 0 push {0 1 0 rg}
+\testn
+ABC {\testc ABC} DEF
+\pdfextension colorstack 0 pop
+\etest
 \bye

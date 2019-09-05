@@ -866,6 +866,14 @@ local function pdfdirect(data)
   return n
 end
 
+local function pdfcolor(color)
+  local c = newnode("whatsit", "pdf_colorstack")
+  setfield(c, "stack", 0)
+  setfield(c, "command", color and 1 or 2) -- 1: push, 2: pop
+  setfield(c, "data", color)
+  return c
+end
+
 local function post_process(head, currentcolor)
   for n in traverse(head) do
     local props = getproperty(n)
@@ -880,13 +888,14 @@ local function post_process(head, currentcolor)
 
     if currentcolor and currentcolor ~= color then
       -- Pop current color.
-      head = insertbefore(head, n, pdfdirect("0 g"))
+      currentcolor = nil
+      head = insertbefore(head, n, pdfcolor(currentcolor))
     end
 
     if currentcolor ~= color then
       -- Push new color.
-      head = insertbefore(head, n, pdfdirect(color))
       currentcolor = color
+      head = insertbefore(head, n, pdfcolor(currentcolor))
     end
 
     if startactual then

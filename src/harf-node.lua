@@ -705,6 +705,8 @@ local function tonodes(head, current, run, glyphs, color)
             head, current = insertkern(head, current, kern, rtl)
           end
 
+          fontglyph.used = true
+
           -- The engine will use this string when printing a glyph node e.g. in
           -- overfull messages, otherwise it will be trying to print our
           -- invalid pseudo Unicode code points.
@@ -957,8 +959,8 @@ local function set_tounicode()
       local glyphs = hbdata.shared.glyphs
       for gid = 0, #glyphs do
         local glyph = glyphs[gid]
-        local tounicode = glyph.tounicode
-        if tounicode then
+        if glyph.used then
+          local tounicode = glyph.tounicode or "FFFD"
           local character = characters[gid + hb.CH_GID_PREFIX]
           newcharacters[gid + hb.CH_GID_PREFIX] = character
           character.tounicode = tounicode

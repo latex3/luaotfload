@@ -1,84 +1,101 @@
 local hb = require("harf-base")
 
-local direct       = node.direct
-local tonode       = direct.tonode
-local todirect     = direct.todirect
-local traverse     = direct.traverse
-local traverseid   = direct.traverse_id
-local insertbefore = direct.insert_before
-local insertafter  = direct.insert_after
-local protectglyph = direct.protect_glyph
-local newnode      = direct.new
-local copynode     = direct.copy
-local removenode   = direct.remove
-local copynodelist = direct.copy_list
-local isglyph      = direct.is_glyph
+local assert            = assert
+local next              = next
+local tonumber          = tonumber
+local type              = type
+local format            = string.format
+local open              = io.open
+local tableinsert       = table.insert
+local tableremove       = table.remove
+local ostmpname         = os.tmpname
+local osremove          = os.remove
 
-local getattrs     = direct.getattributelist
-local setattrs     = direct.setattributelist
-local getchar      = direct.getchar
-local setchar      = direct.setchar
-local getdir       = direct.getdir
-local setdir       = direct.setdir
-local getdata      = direct.getdata
-local setdata      = direct.setdata
-local getfont      = direct.getfont
-local setfont      = direct.setfont
-local getfield     = direct.getfield
-local setfield     = direct.setfield
-local getid        = direct.getid
-local getkern      = direct.getkern
-local setkern      = direct.setkern
-local getnext      = direct.getnext
-local setnext      = direct.setnext
-local getoffsets   = direct.getoffsets
-local setoffsets   = direct.setoffsets
-local getproperty  = direct.getproperty
-local setproperty  = direct.setproperty
-local getprev      = direct.getprev
-local setprev      = direct.setprev
-local getsubtype   = direct.getsubtype
-local setsubtype   = direct.setsubtype
-local getwidth     = direct.getwidth
-local setwidth     = direct.setwidth
+local direct            = node.direct
+local tonode            = direct.tonode
+local todirect          = direct.todirect
+local traverse          = direct.traverse
+local traverseid        = direct.traverse_id
+local insertbefore      = direct.insert_before
+local insertafter       = direct.insert_after
+local protectglyph      = direct.protect_glyph
+local newnode           = direct.new
+local copynode          = direct.copy
+local removenode        = direct.remove
+local copynodelist      = direct.copy_list
+local isglyph           = direct.is_glyph
 
-local getpre       = function (n) return getfield(n, "pre")        end
-local setpre       = function (n, v)     setfield(n, "pre", v)     end
-local getpost      = function (n) return getfield(n, "post")       end
-local setpost      = function (n, v)     setfield(n, "post", v)    end
-local getrep       = function (n) return getfield(n, "replace")    end
-local setrep       = function (n, v)     setfield(n, "replace", v) end
+local getattrs          = direct.getattributelist
+local setattrs          = direct.setattributelist
+local getchar           = direct.getchar
+local setchar           = direct.setchar
+local getdir            = direct.getdir
+local setdir            = direct.setdir
+local getdata           = direct.getdata
+local setdata           = direct.setdata
+local getfont           = direct.getfont
+local setfont           = direct.setfont
+local getfield          = direct.getfield
+local setfield          = direct.setfield
+local getid             = direct.getid
+local getkern           = direct.getkern
+local setkern           = direct.setkern
+local getnext           = direct.getnext
+local setnext           = direct.setnext
+local getoffsets        = direct.getoffsets
+local setoffsets        = direct.setoffsets
+local getproperty       = direct.getproperty
+local setproperty       = direct.setproperty
+local getprev           = direct.getprev
+local setprev           = direct.setprev
+local getsubtype        = direct.getsubtype
+local setsubtype        = direct.setsubtype
+local getwidth          = direct.getwidth
+local setwidth          = direct.setwidth
 
-local discid     = node.id("disc")
-local glueid     = node.id("glue")
-local glyphid    = node.id("glyph")
-local dirid      = node.id("dir")
-local kernid     = node.id("kern")
-local localparid = node.id("local_par")
+local getpre            = function (n) return getfield(n, "pre")        end
+local setpre            = function (n, v)     setfield(n, "pre", v)     end
+local getpost           = function (n) return getfield(n, "post")       end
+local setpost           = function (n, v)     setfield(n, "post", v)    end
+local getrep            = function (n) return getfield(n, "replace")    end
+local setrep            = function (n, v)     setfield(n, "replace", v) end
 
-local spaceskip        = 13
-local directmode       = 2
-local fontkern         = 0
-local italiccorrection = 3
-local explicitdisc     = 1
-local regulardisc      = 3
+local imgnode           = img.node
 
-local getscript    = hb.unicode.script
-local sc_common    = hb.Script.new("Zyyy")
-local sc_inherited = hb.Script.new("Zinh")
-local sc_unknown   = hb.Script.new("Zzzz")
-local sc_latn      = hb.Script.new("Latn")
-local dir_ltr      = hb.Direction.new("ltr")
-local dir_rtl      = hb.Direction.new("rtl")
-local lang_invalid = hb.Language.new()
-local fl_unsafe    = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
+local disc_t            = node.id("disc")
+local glue_t            = node.id("glue")
+local glyph_t           = node.id("glyph")
+local dir_t             = node.id("dir")
+local kern_t            = node.id("kern")
+local localpar_t        = node.id("local_par")
+local whatsit_t         = node.id("whatsit")
+local pdfliteral_t      = node.subtype("pdf_literal")
+local pdfcolorstack_t   = node.subtype("pdf_colorstack")
 
-local p_startactual = "startactualtext"
-local p_endactual   = "endactualtext"
-local p_color       = "color"
-local p_string      = "string"
+local spaceskip         = 13
+local directmode        = 2
+local fontkern          = 0
+local italiccorrection  = 3
+local explicitdisc      = 1
+local regulardisc       = 3
 
-local format = string.format
+local getscript         = hb.unicode.script
+
+local common_s          = hb.Script.new("Zyyy")
+local inherited_s       = hb.Script.new("Zinh")
+local unknown_s         = hb.Script.new("Zzzz")
+local latn_s            = hb.Script.new("Latn")
+
+local invalid_l         = hb.Language.new()
+
+local dir_ltr           = hb.Direction.new("ltr")
+local dir_rtl           = hb.Direction.new("rtl")
+local fl_unsafe         = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
+
+local startactual_p     = "startactualtext"
+local endactual_p       = "endactualtext"
+local color_p           = "color"
+local string_p          = "string"
 
 -- Simple table copying function.
 local function copytable(old)
@@ -103,7 +120,7 @@ end
 
 -- New kern node of amount `v`, inheriting the properties/attributes of `n`.
 local function newkern(v, n)
-  local kern = newnode(kernid)
+  local kern = newnode(kern_t)
   local props = getproperty(n)
   local attrs = getattrs(n)
   if props then
@@ -169,10 +186,10 @@ local function itemize(head, direction)
   for n in direct.traverse(head) do
     local id = getid(n)
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
-    local script = sc_common
+    local script = common_s
     local skip = false
 
-    if id == glyphid then
+    if id == glyph_t then
       currfontid = getfont(n)
       if getsubtype(n) > 255 then
         skip = true
@@ -180,25 +197,25 @@ local function itemize(head, direction)
         code = getchar(n)
         script = getscript(code)
       end
-    elseif id == glueid and getsubtype(n) == spaceskip then
+    elseif id == glue_t and getsubtype(n) == spaceskip then
       code = 0x0020 -- SPACE
-    elseif id == discid
+    elseif id == disc_t
       and (getsubtype(n) == explicitdisc  -- \-
         or getsubtype(n) == regulardisc)  -- \discretionary
     then
       code = 0x00AD -- SOFT HYPHEN
-    elseif id == dirid then
+    elseif id == dir_t then
       local dir = getdir(n)
       if dir:sub(1, 1) == "+" then
         -- Push the current direction to the stack.
-        table.insert(dirstack, currdir)
+        tableinsert(dirstack, currdir)
         currdir = dir:sub(2)
       else
         assert(currdir == dir:sub(2))
         -- Pop the last direction from the stack.
-        currdir = table.remove(dirstack)
+        currdir = tableremove(dirstack)
       end
-    elseif id == localparid then
+    elseif id == localpar_t then
       currdir = getdir(n)
     end
 
@@ -219,14 +236,14 @@ local function itemize(head, direction)
     -- Resolve common and inherited scripts. Inherited takes the script of the
     -- previous character. Common almost the same, but we tray to make paired
     -- characters (e.g. parentheses) to take the same script.
-    if #props > 0 and (script == sc_common or script == sc_inherited) then
+    if #props > 0 and (script == common_s or script == inherited_s) then
       script = props[#props].script
       -- Paired punctuation characters
       if paired_open[code] then
-        table.insert(pairstack, { code, script })
+        tableinsert(pairstack, { code, script })
       elseif paired_close[code] then
         while #pairstack > 0 do
-          local c = table.remove(pairstack)
+          local c = tableremove(pairstack)
           if c[1] == paired_close[code] then
             script = c[2]
             break
@@ -237,7 +254,7 @@ local function itemize(head, direction)
 
     -- If script is not resolved yet, and the font has a "script" option, use
     -- it.
-    if (script == sc_common or script == sc_inherited) and hbdata then
+    if (script == common_s or script == inherited_s) and hbdata then
       local spec = hbdata.spec
       local features = spec.features
       local options = spec.options
@@ -257,7 +274,7 @@ local function itemize(head, direction)
 
   for i = #props - 1, 1, -1 do
     -- If script is not resolved yet, use that of the next character.
-    if props[i].script == sc_common or props[i].script == sc_inherited then
+    if props[i].script == common_s or props[i].script == inherited_s then
       props[i].script = props[i + 1].script
     end
   end
@@ -339,7 +356,7 @@ local function unsafetobreak(glyph, nodes)
      and glyph.flags & fl_unsafe
      -- Discretionary nodes can’t contain glue, so stop at first glue as well.
      -- This is incorrect, but I don’t have a better idea.
-     and getid(nodes[glyph.cluster + 1]) ~= glueid
+     and getid(nodes[glyph.cluster + 1]) ~= glue_t
 end
 
 local shape
@@ -352,7 +369,7 @@ local function makesub(run, start, stop, nodelist)
   local stop = stop
   local subnodes, subcodes = {}, {}
   for i = start, stop do
-    if getid(nodes[i]) ~= discid then
+    if getid(nodes[i]) ~= disc_t then
       subnodes[#subnodes + 1] = copynode(nodes[i])
       subcodes[#subcodes + 1] = codes[i]
     end
@@ -398,7 +415,7 @@ shape = function(run)
   local hbfont = hbshared.font
   local hbface = hbshared.face
 
-  local lang = lang or options.language or lang_invalid
+  local lang = lang or options.language or invalid_l
   local shapers = options.shaper and { options.shaper } or {}
 
   local buf = hb.Buffer.new()
@@ -427,7 +444,7 @@ shape = function(run)
         local layers = hbface:ot_color_glyph_get_layers(gid)
         if layers then
           -- Remove this glyph, we will use its layers.
-          table.remove(glyphs, i)
+          tableremove(glyphs, i)
           for j, layer in next, layers do
             -- All glyphs but the last use 0 advance so that the layers
             -- overlap.
@@ -439,7 +456,7 @@ shape = function(run)
               x_advance = j == #layers and glyph.x_advance or 0
               y_advance = j == #layers and glyph.y_advance or 0
             end
-            table.insert(glyphs, i + j - 1, {
+            tableinsert(glyphs, i + j - 1, {
               codepoint = layer.glyph,
               cluster = glyph.cluster,
               x_advance = x_advance,
@@ -470,7 +487,7 @@ shape = function(run)
         local str = ""
         for j = 0, nchars - 1 do
           local id = getid(nodes[nodeindex + j])
-          if id == glyphid or id == glueid then
+          if id == glyph_t or id == glue_t then
             local code = codes[nodeindex + j]
             hex = hex..to_utf16_hex(code)
             str = str..utf8.char(code)
@@ -555,8 +572,8 @@ local function cachedpng(data)
   local hash = md5.sumhexa(data)
   local path = pngcache[hash]
   if not path then
-    path = os.tmpname()
-    local file = io.open(path, "wb")
+    path = ostmpname()
+    local file = open(path, "wb")
     file:write(data)
     file:close()
     pngcache[hash] = path
@@ -601,7 +618,7 @@ local function tonodes(head, current, run, glyphs, color)
     end
 
     if color then
-      setprop(n, p_color, color)
+      setprop(n, color_p, color)
     end
 
     if glyph.disc then
@@ -617,10 +634,10 @@ local function tonodes(head, current, run, glyphs, color)
       head, current = insertafter(head, current, disc)
     elseif not glyph.skip then
       if glyph.color then
-        setprop(n, p_color, color_to_rgba(glyph.color))
+        setprop(n, color_p, color_to_rgba(glyph.color))
       end
 
-      if id == glyphid then
+      if id == glyph_t then
         local fontglyph = fontglyphs[gid]
 
         local pngblob = fontglyph.png
@@ -635,7 +652,7 @@ local function tonodes(head, current, run, glyphs, color)
           local data = pngblob:get_data()
           local path = cachedpng(data)
 
-          local image = img.node {
+          local image = imgnode {
             filename  = path,
             width     = character.width,
             height    = character.height,
@@ -657,10 +674,10 @@ local function tonodes(head, current, run, glyphs, color)
         elseif haspng and not fonttype then
           -- Color bitmap font with no glyph outlines (like Noto
           -- Color Emoji) but has no bitmap for current glyph (most likely
-	  -- `.notdef` glyph). The engine does not know how to embed such
-	  -- fonts, so we don’t want them to reach the backend as it will cause
-	  -- a fatal error. We use `nullfont` instead.  That is a hack, but I
-	  -- think it is good enough for now.
+          -- `.notdef` glyph). The engine does not know how to embed such
+          -- fonts, so we don’t want them to reach the backend as it will cause
+          -- a fatal error. We use `nullfont` instead.  That is a hack, but I
+          -- think it is good enough for now.
           -- We insert the glyph node and move on, no further work is needed.
           setfont(n, 0)
           head, current = insertafter(head, current, n)
@@ -682,19 +699,19 @@ local function tonodes(head, current, run, glyphs, color)
           local x_advance = glyph.x_advance + letterspace
           local width = fontglyph.width
           if width ~= x_advance then
-	    -- The engine always uses the glyph width from the font, so we need
-	    -- to insert a kern node if the x advance is different.
+            -- The engine always uses the glyph width from the font, so we need
+            -- to insert a kern node if the x advance is different.
             local kern = newkern((x_advance - width) * scale, n)
             head, current = insertkern(head, current, kern, rtl)
           end
 
-	  -- The engine will use this string when printing a glyph node e.g. in
-	  -- overfull messages, otherwise it will be trying to print our
-	  -- invalid pseudo Unicode code points.
+          -- The engine will use this string when printing a glyph node e.g. in
+          -- overfull messages, otherwise it will be trying to print our
+          -- invalid pseudo Unicode code points.
           -- If the string is empty it means this glyph is part of a larger
           -- cluster and we don’t to print anything for it as the first glyph
           -- in the cluster will have the string of the whole cluster.
-          setprop(n, p_string, glyph.string or "")
+          setprop(n, string_p, glyph.string or "")
 
           -- Handle PDF text extraction:
           -- * Find how many characters in this cluster and how many glyphs,
@@ -710,15 +727,15 @@ local function tonodes(head, current, run, glyphs, color)
             if nglyphs == 1 and not fontglyph.tounicode then
               fontglyph.tounicode = tounicode
             elseif tounicode ~= fontglyph.tounicode then
-              setprop(n, p_startactual, tounicode)
+              setprop(n, startactual_p, tounicode)
               glyphs[i + nglyphs - 1].endactual = true
             end
           end
           if glyph.endactual then
-            setprop(n, p_endactual, true)
+            setprop(n, endactual_p, true)
           end
         end
-      elseif id == glueid and getsubtype(n) == spaceskip then
+      elseif id == glue_t and getsubtype(n) == spaceskip then
         -- If the glyph advance is different from the font space, then a
         -- substitution or positioning was applied to the space glyph changing
         -- it from the default, so reset the glue using the new advance.
@@ -731,7 +748,7 @@ local function tonodes(head, current, run, glyphs, color)
           setfield(n, "shrink", width / 3)
         end
         head, current = insertafter(head, current, n)
-      elseif id == kernid and getsubtype(n) == italiccorrection then
+      elseif id == kern_t and getsubtype(n) == italiccorrection then
         -- If this is an italic correction node and the previous node is a
         -- glyph, update its kern value with the glyph’s italic correction.
         -- I’d have expected the engine to do this, but apparently it doesn’t.
@@ -747,7 +764,7 @@ local function tonodes(head, current, run, glyphs, color)
           end
         end
         head, current = insertafter(head, current, n)
-      elseif id == discid then
+      elseif id == disc_t then
         assert(nglyphs == 1)
         -- The simple case of a discretionary that is not part of a complex
         -- cluster. We only need to make sure kerning before the hyphenation
@@ -757,7 +774,7 @@ local function tonodes(head, current, run, glyphs, color)
         -- the other discretionary handling, otherwise the discretionary
         -- contents do not interact with the surrounding (e.g. no ligatures or
         -- kerning) as it should.
-        if current and getid(current) == kernid and getsubtype(current) == fontkern then
+        if current and getid(current) == kern_t and getsubtype(current) == fontkern then
           setprev(current, nil)
           setnext(current, nil)
           setfield(n, "replace", current)
@@ -845,7 +862,7 @@ local function process_nodes(head, groupcode, size, packtype, direction)
   -- Check if any fonts are loaded by us and then process the whole node list,
   -- we will take care of skipping fonts we did not load later, otherwise
   -- return unmodified head.
-  for n in traverseid(glyphid, head) do
+  for n in traverseid(glyph_t, head) do
     local fontid = getfont(n)
     local fontdata = font.getfont(fontid)
     local hbdata = fontdata and fontdata.hb
@@ -860,14 +877,14 @@ local function process_nodes(head, groupcode, size, packtype, direction)
 end
 
 local function pdfdirect(data)
-  local n = newnode("whatsit", "pdf_literal")
+  local n = newnode(whatsit_t, pdfliteral_t)
   setfield(n, "mode", directmode)
   setdata(n, data)
   return n
 end
 
 local function pdfcolor(color)
-  local c = newnode("whatsit", "pdf_colorstack")
+  local c = newnode(whatsit_t, pdfcolorstack_t)
   setfield(c, "stack", 0)
   setfield(c, "command", color and 1 or 2) -- 1: push, 2: pop
   setfield(c, "data", color)
@@ -881,9 +898,9 @@ local function post_process(head, currentcolor)
 
     local startactual, endactual, color
     if harfprops then
-      startactual = harfprops[p_startactual]
-      endactual = harfprops[p_endactual]
-      color = harfprops[p_color]
+      startactual = harfprops[startactual_p]
+      endactual = harfprops[endactual_p]
+      color = harfprops[color_p]
     end
 
     if currentcolor and currentcolor ~= color then
@@ -927,7 +944,7 @@ end
 local function run_cleanup()
   -- Remove temporary PNG files that we created, if any.
   for _, path in next, pngcache do
-    os.remove(path)
+    osremove(path)
   end
 end
 
@@ -957,7 +974,7 @@ local function get_glyph_string(n)
   local n = todirect(n)
   local props = getproperty(n)
   props = props and props.harf
-  return props and props[p_string] or nil
+  return props and props[string_p] or nil
 end
 
 return {

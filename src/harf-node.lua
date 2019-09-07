@@ -72,12 +72,11 @@ local whatsit_t         = node.id("whatsit")
 local pdfliteral_t      = node.subtype("pdf_literal")
 local pdfcolorstack_t   = node.subtype("pdf_colorstack")
 
-local spaceskip         = 13
-local directmode        = 2
-local fontkern          = 0
-local italiccorrection  = 3
-local explicitdisc      = 1
-local regulardisc       = 3
+local explicitdisc_t    = 1
+local fontkern_t        = 0
+local italiccorr_t      = 3
+local regulardisc_t     = 3
+local spaceskip_t       = 13
 
 local getscript         = hb.unicode.script
 
@@ -197,11 +196,11 @@ local function itemize(head, direction)
         code = getchar(n)
         script = getscript(code)
       end
-    elseif id == glue_t and getsubtype(n) == spaceskip then
+    elseif id == glue_t and getsubtype(n) == spaceskip_t then
       code = 0x0020 -- SPACE
     elseif id == disc_t
-      and (getsubtype(n) == explicitdisc  -- \-
-        or getsubtype(n) == regulardisc)  -- \discretionary
+      and (getsubtype(n) == explicitdisc_t  -- \-
+        or getsubtype(n) == regulardisc_t)  -- \discretionary
     then
       code = 0x00AD -- SOFT HYPHEN
     elseif id == dir_t then
@@ -737,7 +736,7 @@ local function tonodes(head, current, run, glyphs, color)
             setprop(n, endactual_p, true)
           end
         end
-      elseif id == glue_t and getsubtype(n) == spaceskip then
+      elseif id == glue_t and getsubtype(n) == spaceskip_t then
         -- If the glyph advance is different from the font space, then a
         -- substitution or positioning was applied to the space glyph changing
         -- it from the default, so reset the glue using the new advance.
@@ -750,7 +749,7 @@ local function tonodes(head, current, run, glyphs, color)
           setfield(n, "shrink", width / 3)
         end
         head, current = insertafter(head, current, n)
-      elseif id == kern_t and getsubtype(n) == italiccorrection then
+      elseif id == kern_t and getsubtype(n) == italiccorr_t then
         -- If this is an italic correction node and the previous node is a
         -- glyph, update its kern value with the glyph’s italic correction.
         -- I’d have expected the engine to do this, but apparently it doesn’t.
@@ -776,7 +775,7 @@ local function tonodes(head, current, run, glyphs, color)
         -- the other discretionary handling, otherwise the discretionary
         -- contents do not interact with the surrounding (e.g. no ligatures or
         -- kerning) as it should.
-        if current and getid(current) == kern_t and getsubtype(current) == fontkern then
+        if current and getid(current) == kern_t and getsubtype(current) == fontkern_t then
           setprev(current, nil)
           setnext(current, nil)
           setfield(n, "replace", current)
@@ -880,7 +879,7 @@ end
 
 local function pdfdirect(data)
   local n = newnode(whatsit_t, pdfliteral_t)
-  setfield(n, "mode", directmode)
+  setfield(n, "mode", 2) -- direct
   setdata(n, data)
   return n
 end

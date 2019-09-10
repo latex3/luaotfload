@@ -1,7 +1,7 @@
 
-packageversion= "3.002"
+packageversion= "3.005"
 packagedate   = "2019-08-11"
-packagedesc   = "ignorable"
+packagedesc   = "lessglobals"
 checkformat   = "latex-dev" -- for travis until something better comes up
 
 module   = "luaotfload"

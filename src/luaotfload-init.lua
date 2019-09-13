@@ -7,7 +7,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-init",
-    version       = "3.0004",       --TAGVERSION
+    version       = "3.0004-dev",       --TAGVERSION
     date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / initialization",
     license       = "GPL v2.0"
@@ -461,6 +461,14 @@ end --- [init_adapt]
 --]] --14.12.2018disable characters 
 
 local init_main = function ()
+
+  --[[doc--
+
+      First save a copy of font.each in order to also catch old-style fonts
+
+  --doc]]--
+
+  font.originaleach = font.each
 
   local load_fontloader_module = luaotfload.loaders.fontloader
   local ignore_module          = luaotfload.loaders.ignore

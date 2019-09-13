@@ -5,7 +5,7 @@
 do -- block to avoid to many local variables error
  local ProvidesLuaModule = { 
      name          = "luaotfload-database",
-     version       = "3.0004",       --TAGVERSION
+     version       = "3.0004-dev",       --TAGVERSION
      date          = "2019-08-11", --TAGDATE
      description   = "luaotfload submodule / database",
      license       = "GPL v2.0",
@@ -2552,14 +2552,13 @@ local collect_font_filenames_local = function ()
     local files  = collect_font_filenames_dir (pwd, "local")
     local nfiles = #files
     if nfiles > 0 then
-        targetnames.meta["local"] = true --- prevent saving to disk
         logreport ("term", 1, "db", "Found %d files.", pwd)
     else
         logreport ("term", 1, "db",
                    "Couldn’t find a thing here. What a waste.", pwd)
     end
     logreport ("term", 3, "db", "Collected %d files.", #files)
-    return files
+    return files, nfiles > 0
 end
 
 --- fontentry list -> filemap
@@ -3115,8 +3114,14 @@ local collect_font_filenames = function ()
 
     tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
-    if config.luaotfload.db.scan_local == true then
-        tableappend (filenames, collect_font_filenames_local  ())
+    local scan_local = config.luaotfload.db.scan_local == true
+    if scan_local then
+        local localfonts, found = collect_font_filenames_local()
+        if found then
+            tableappend (filenames, localfonts)
+        else
+            scan_local = false
+        end
     end
     --- Now drop everything above max_fonts.
     if max_fonts < #filenames then
@@ -3126,7 +3131,7 @@ local collect_font_filenames = function ()
     if bisect then
         return { unpack (filenames, bisect[1], bisect[2]) }
     end
-    return filenames
+    return filenames, scan_local
 end
 
 --[[doc--
@@ -3397,7 +3402,10 @@ update_names = function (currentnames, force, dry_run)
         read_blacklist ()
 
         --- pass 1: Collect the names of all fonts we are going to process.
-        local font_filenames = collect_font_filenames ()
+        local font_filenames, local_fonts = collect_font_filenames ()
+        if local_fonts then
+            targetnames.meta['local'] = true
+        end
 
         --- pass 2: read font files (normal case) or reuse information
         --- present in index

@@ -6,7 +6,7 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-auxiliary",
-    version       = "3.005",       --TAGVERSION
+    version       = "3.005-dev",       --TAGVERSION
     date          = "2019-08-11", --TAGDATE
     description   = "luaotfload submodule / auxiliary functions",
     license       = "GPL v2.0"
@@ -285,7 +285,7 @@ luaotfload_callbacks [#luaotfload_callbacks + 1] = {
 local function set_xheight(tfmdata)
   local parameters = tfmdata.parameters
   if not parameters then return end
-  if not (parameters.x_height or parameters[5] or 0) == 0 then return end
+  if not ((parameters.x_height or parameters[5] or 0) == 0) then return end
   if tfmdata.characters and tfmdata.characters[120] then
     parameters.x_height = tfmdata.characters[120].height
   else

@@ -9,60 +9,6 @@ local os2tag  = hb.Tag.new("OS/2")
 local posttag = hb.Tag.new("post")
 local glyftag = hb.Tag.new("glyf")
 
-local function trim(str)
-  return str:gsub("^%s*(.-)%s*$", "%1")
-end
-
-local function split(str, sep)
-  if str then
-    local result = string.explode(str, sep.."+")
-    for i, s in next, result do
-      result[i] = trim(result[i])
-    end
-    return result
-  end
-end
-
-local function parse(str, size)
-  local name, options = str:match("%s*(.*)%s*:%s*(.*)%s*")
-  local spec = {
-    specification = str,
-    size = size,
-    variants = {}, features = {}, options = {},
-  }
-
-  name = trim(name or str)
-
-  local filename = name:match("%[(.*)%]")
-  if filename then
-    -- [file]
-    -- [file:index]
-    filename = string.explode(filename, ":+")
-    spec.file = filename[1]
-    spec.index = tonumber(filename[2]) or 0
-  else
-    -- name
-    -- name/variants
-    local fontname, variants = name:match("(.-)%s*/%s*(.*)")
-    spec.name = fontname or name
-    spec.variants = split(variants, "/")
-  end
-  if options then
-    options = split(options, ";+")
-    for _, opt in next, options do
-      if opt:find("[+-]") == 1 then
-        local feature = hb.Feature.new(opt)
-        spec.features[#spec.features + 1] = feature
-      elseif opt ~= "" then
-        local key, val = opt:match("(.*)%s*=%s*(.*)")
-        if key == "language" then val = hb.Language.new(val) end
-        spec.options[key or opt] = val or true
-      end
-    end
-  end
-  return spec
-end
-
 local function loadfont(spec)
   local path, index = spec.path, spec.index
   if not path then
@@ -212,25 +158,7 @@ end
 -- Drop illegal characters from PS Name, per the spec
 -- https://docs.microsoft.com/en-us/typography/opentype/spec/name#nid6
 local function sanitize(psname)
-  local new = psname:gsub(".", function(c)
-    local b = c:byte()
-    if (b < 33 or b > 126)
-    or c == "["
-    or c == "]"
-    or c == "("
-    or c == ")"
-    or c == "{"
-    or c == "}"
-    or c == "<"
-    or c == ">"
-    or c == "/"
-    or c == "%"
-    then
-      return "-"
-    end
-    return c
-  end)
-  return new
+  return psname:gsub('[][\0-\32\127-\255(){}<>/%%]', '-')
 end
 
 local tlig = hb.texlig
@@ -371,25 +299,6 @@ local function scalefont(data, spec)
   }
 end
 
-local function define_font(name, size)
-  local spec = type(name) == "string" and parse(name, size) or name
-  if spec.file then
-    spec.path = kpse.find_file(spec.file, "truetype fonts") or
-                kpse.find_file(spec.file, "opentype fonts")
-  else
-    -- XXX support font names
-  end
-
-  if spec.specification == "" then return nil end
-
-  local tfmdata = nil
-  local hbdata = loadfont(spec)
-  if hbdata then
-    tfmdata = scalefont(hbdata, spec)
-  else
-    tfmdata = font.read_tfm(spec.specification, spec.size)
-  end
-  return tfmdata
+return function(spec)
+  return scalefont(loadfont(spec), spec)
 end
-
-return define_font

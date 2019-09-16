@@ -167,6 +167,7 @@ else
     "**/luaotfload-*.lua",
     "**/fontloader-*.lua",
     "**/fontloader-*.tex",
+    "**/harf*.lua",
     "luaotfload-blacklist.cnf",
     "./doc/filegraph.tex",
     "./doc/luaotfload-main.tex",
@@ -177,6 +178,7 @@ else
      "**/luaotfload-*.lua",
      "**/fontloader-*.lua",
      "**/fontloader-*.tex",
+     "**/harf*.lua",
                 }
 end
 tdslocations=

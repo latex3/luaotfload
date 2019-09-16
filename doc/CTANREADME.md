@@ -1,6 +1,6 @@
 # The Luaotfload Package
 
-VERSION: 3.002-dev
+VERSION: 3.006-dev
 
 DATE: 2019-08-11
 

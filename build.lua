@@ -1,7 +1,7 @@
 
-packageversion= "3.002-dev"
+packageversion= "3.006-dev"
 packagedate   = "2019-08-11"
-packagedesc   = "ignorable"
+packagedesc   = "harf"
 checkformat   = "latex"
 
 module   = "luaotfload"

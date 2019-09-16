@@ -182,25 +182,24 @@ local function itemize(head, direction)
   local currdir = direction or "TLT"
   local currfontid = nil
 
-  for n in direct.traverse(head) do
-    local id = getid(n)
+  for n, id, subtype in direct.traverse(head) do
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
     local script = common_s
     local skip = false
 
     if id == glyph_t then
       currfontid = getfont(n)
-      if getsubtype(n) > 255 then
+      if subtype > 255 then
         skip = true
       else
         code = getchar(n)
         script = getscript(code)
       end
-    elseif id == glue_t and getsubtype(n) == spaceskip_t then
+    elseif id == glue_t and subtype == spaceskip_t then
       code = 0x0020 -- SPACE
     elseif id == disc_t
-      and (getsubtype(n) == explicitdisc_t  -- \-
-        or getsubtype(n) == regulardisc_t)  -- \discretionary
+      and (subtype == explicitdisc_t  -- \-
+        or subtype == regulardisc_t)  -- \discretionary
     then
       code = 0x00AD -- SOFT HYPHEN
     elseif id == dir_t then
@@ -808,17 +807,15 @@ local function validate_color(s)
   return s
 end
 
-local function hex_to_rgba(s)
-  if not validate_color(s) then return end
-  local r = tonumber(s:sub(1, 2), 16) / 255
-  local g = tonumber(s:sub(3, 4), 16) / 255
-  local b = tonumber(s:sub(5, 6), 16) / 255
-  if #s == 8 then
-    local a = tonumber(s:sub(7, 8), 16) / 255
-    -- XXX: alpha
-    return format('%s %s %s rg', r, g, b)
-  else
-    return format('%s %s %s rg', r, g, b)
+local hex_to_rgba do
+  local hex = lpeg.R'09' + lpeg.R'AF' + lpeg.R'af'
+  local twohex = hex * hex / function(s) return tonumber(s, 16) / 255 end
+  local color_expr = twohex * twohex * twohex * twohex^-1 * -1
+  function hex_to_rgba(s)
+    local r, g, b, a = color_expr:match(s)
+    if r then
+      return format('%s %s %s rg', r, g, b)
+    end
   end
 end
 

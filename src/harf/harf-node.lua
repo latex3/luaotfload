@@ -15,7 +15,6 @@ local direct            = node.direct
 local tonode            = direct.tonode
 local todirect          = direct.todirect
 local traverse          = direct.traverse
-local traverseid        = direct.traverse_id
 local insertbefore      = direct.insert_before
 local insertafter       = direct.insert_after
 local protectglyph      = direct.protect_glyph
@@ -52,7 +51,7 @@ local getsubtype        = direct.getsubtype
 local setsubtype        = direct.setsubtype
 local getwidth          = direct.getwidth
 local setwidth          = direct.setwidth
-local uses_font         = direct.uses_font
+local is_char           = direct.is_char
 
 local getpre            = function (n) return getfield(n, "pre")        end
 local setpre            = function (n, v)     setfield(n, "pre", v)     end
@@ -192,10 +191,10 @@ local function itemize(head, fontid, direction)
     local skip = false
 
     if id == glyph_t then
-      if subtype > 255 or not uses_font(n, fontid) then
-        skip = true
-      else
+      if is_char(n) and getfont(n) == fontid then
         code = getchar(n)
+      else
+        skip = true
       end
     elseif id == glue_t and subtype == spaceskip_t then
       code = 0x0020 -- SPACE
@@ -781,7 +780,7 @@ local function shape_run(head, current, run)
   return head, current
 end
 
-process = function(head, font, direction)
+function process(head, font, direction)
   local newhead, current = nil, nil
   local runs = itemize(head, font, direction)
 

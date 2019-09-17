@@ -11,9 +11,6 @@ local glyftag = hb.Tag.new("glyf")
 
 local function loadfont(spec)
   local path, sub = spec.resolved, spec.sub or 1
-  if not path then
-    return nil
-  end
 
   local key = string.format("%s:%d", path, sub)
   local data = hbfonts[key]
@@ -308,5 +305,6 @@ local function scalefont(data, spec)
 end
 
 return function(spec)
+  if not spec.resolved then return end
   return scalefont(loadfont(spec), spec)
 end

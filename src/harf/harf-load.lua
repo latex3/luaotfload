@@ -10,18 +10,32 @@ local posttag = hb.Tag.new("post")
 local glyftag = hb.Tag.new("glyf")
 
 local function loadfont(spec)
-  local path, index = spec.path, spec.index
+-- @@ -296,6 +297,13 @@ local function scalefont(data, spec)
+--        hscale = hscale,
+--        vscale = vscale,
+--      },
+-- +    shared = {
+-- +      processes = {
+-- +        function (head, font, _, direction)
+-- +          print('AAA', head, font, direction)
+-- +        end,
+-- +      },
+-- +    },
+--    }
+--  end
+
+  local path, sub = spec.resolved, spec.sub or 1
   if not path then
     return nil
   end
 
-  local key = string.format("%s:%d", path, index)
+  local key = string.format("%s:%d", path, sub)
   local data = hbfonts[key]
   if data then
     return data
   end
 
-  local hbface = hb.Face.new(path, index)
+  local hbface = hb.Face.new(path, sub - 1)
   local tags = hbface and hbface:get_table_tags()
   -- If the face has no table tags then it isn’t a valid SFNT font that
   -- HarfBuzz can handle.
@@ -165,7 +179,7 @@ local tlig = hb.texlig
 
 local function scalefont(data, spec)
   local size = spec.size
-  local options = spec.options
+  local options = spec.features.raw
   local hbface = data.face
   local hbfont = data.font
   local upem = data.upem
@@ -200,7 +214,7 @@ local function scalefont(data, spec)
 
   -- Select font palette, we support `palette=index` option, and load the first
   -- one otherwise.
-  local paletteidx = tonumber(options.palette) or 1
+  local paletteidx = tonumber(options.palette or options.colr) or 1
 
   -- Load CPAL palette from the font.
   local palette = nil
@@ -259,7 +273,7 @@ local function scalefont(data, spec)
 
   return {
     name = spec.specification,
-    filename = spec.path,
+    filename = spec.resolved,
     designsize = size,
     psname = sanitize(data.psname),
     fullname = data.fullname,
@@ -296,6 +310,7 @@ local function scalefont(data, spec)
       hscale = hscale,
       vscale = vscale,
     },
+    specification = spec,
   }
 end
 

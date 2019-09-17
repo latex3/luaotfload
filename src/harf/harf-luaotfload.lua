@@ -33,6 +33,9 @@ fonts.readers.harf = function(spec)
   if rawfeatures.language then
     spec.language = harf.Language.new(rawfeatures.language)
   end
+  if rawfeatures.script then
+    spec.script = harf.Script.new(rawfeatures.script)
+  end
   for key, val in next, rawfeatures do
     if key:len() == 4 then
       -- 4-letter options are likely font features, but not always, so we do

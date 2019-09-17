@@ -52,6 +52,7 @@ local getsubtype        = direct.getsubtype
 local setsubtype        = direct.setsubtype
 local getwidth          = direct.getwidth
 local setwidth          = direct.setwidth
+local uses_font         = direct.uses_font
 
 local getpre            = function (n) return getfield(n, "pre")        end
 local setpre            = function (n, v)     setfield(n, "pre", v)     end
@@ -86,6 +87,7 @@ local unknown_s         = hb.Script.new("Zzzz")
 local latn_s            = hb.Script.new("Latn")
 
 local invalid_l         = hb.Language.new()
+local invalid_s         = hb.Script.new()
 
 local dir_ltr           = hb.Direction.new("ltr")
 local dir_rtl           = hb.Direction.new("rtl")
@@ -174,30 +176,30 @@ local process
 
 local trep = hb.texrep
 
-local function itemize(head, direction)
-  -- Collect character properties (font, direction, script) and resolve common
-  -- and inherited scripts. Pre-requisite for itemization into smaller runs.
+local function itemize(head, fontid, direction)
+  local fontdata = font.getfont(fontid)
+  local hbdata   = fontdata and fontdata.hb
+  local spec     = fontdata and fontdata.specification
+  local options  = spec and spec.features.raw
+  local texlig   = options and options.tlig
+
   local props, nodes, codes = {}, {}, {}
-  local dirstack, pairstack = {}, {}
+  local dirstack = {}
   local currdir = direction or "TLT"
-  local currfontid = nil
 
   for n, id, subtype in direct.traverse(head) do
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
-    local script = common_s
     local skip = false
 
     if id == glyph_t then
-      currfontid = getfont(n)
-      if subtype > 255 then
+      if subtype > 255 or not uses_font(n, fontid) then
         skip = true
       else
         code = getchar(n)
-        script = getscript(code)
       end
     elseif id == glue_t and subtype == spaceskip_t then
       code = 0x0020 -- SPACE
-    elseif id == disc_t
+    elseif id == disc_t -- FIXME
       and (subtype == explicitdisc_t  -- \-
         or subtype == regulardisc_t)  -- \discretionary
     then
@@ -217,84 +219,37 @@ local function itemize(head, direction)
       currdir = getdir(n)
     end
 
-    local fontdata = currfontid and font.getfont(currfontid)
-    local hbdata   = fontdata and fontdata.hb
-    local spec     = fontdata and fontdata.specification
-    local options  = spec and spec.features.raw
-    local texlig   = options and options.tlig
-    if texlig then
+    if not skip and texlig then
       local replacement = trep[code]
       if replacement then
         code = replacement
       end
     end
 
-    if not hbdata then skip = true end
-
-    -- Resolve common and inherited scripts. Inherited takes the script of the
-    -- previous character. Common almost the same, but we tray to make paired
-    -- characters (e.g. parentheses) to take the same script.
-    if #props > 0 and (script == common_s or script == inherited_s) then
-      script = props[#props].script
-      -- Paired punctuation characters
-      if paired_open[code] then
-        tableinsert(pairstack, { code, script })
-      elseif paired_close[code] then
-        while #pairstack > 0 do
-          local c = tableremove(pairstack)
-          if c[1] == paired_close[code] then
-            script = c[2]
-            break
-          end
-        end
-      end
-    end
-
-    -- If script is not resolved yet, and the font has a "script" option, use
-    -- it.
-    if (script == common_s or script == inherited_s) and hbdata then
-      script = options.script and hb.Script.new(options.script) or script
-    end
-
     codes[#codes + 1] = code
     nodes[#nodes + 1] = n
     props[#props + 1] = {
-      font = currfontid,
       -- XXX handle RTT and LTL.
       dir = currdir == "TRT" and dir_rtl or dir_ltr,
-      script = script,
       skip = skip,
     }
   end
 
-  for i = #props - 1, 1, -1 do
-    -- If script is not resolved yet, use that of the next character.
-    if props[i].script == common_s or props[i].script == inherited_s then
-      props[i].script = props[i + 1].script
-    end
-  end
-
-  -- Split into a list of runs, each has the same font, direction and script.
-  -- TODO: itemize by language as well.
+  -- Split into a list of runs, each has the same font and direction
   local runs = {}
-  local currfontid, currdir, currscript, currskip = nil, nil, nil, nil
+  local currdir, currskip
   for i, prop in next, props do
-    local fontid = prop.font
     local dir = prop.dir
-    local script = prop.script
     local skip = prop.skip
 
     -- Start a new run if there is a change in properties.
-    if fontid ~= currfontid or
-       dir ~= currdir or
-       script ~= currscript or
+    if dir ~= currdir or
        skip ~= currskip then
       runs[#runs + 1] = {
         start = i,
         len = 0,
         font = fontid,
         dir = dir,
-        script = script,
         skip = skip,
         nodes = nodes,
         codes = codes,
@@ -303,7 +258,6 @@ local function itemize(head, direction)
 
     runs[#runs].len = runs[#runs].len + 1
 
-    currfontid = fontid
     currdir = dir
     currscript = script
     currskip = skip
@@ -396,8 +350,6 @@ shape = function(run)
   local len = run.len
   local fontid = run.font
   local dir = run.dir
-  local script = run.script
-  local lang = run.lang
   local fordisc = run.fordisc
 
   local fontdata = font.getfont(fontid)
@@ -410,7 +362,8 @@ shape = function(run)
   local hbfont = hbshared.font
   local hbface = hbshared.face
 
-  local lang = lang or options.language or invalid_l
+  local lang = options.language or invalid_l
+  local script = options.script or invalid_s
   local shapers = options.shaper and { options.shaper } or {}
 
   local buf = hb.Buffer.new()
@@ -778,9 +731,9 @@ local function tonodes(head, current, run, glyphs, color)
           head, current = removenode(head, current)
         end
         local pre, post, rep = getpre(n), getpost(n), getrep(n)
-        setfield(n, "pre", process(pre, direction))
-        setfield(n, "post", process(post, direction))
-        setfield(n, "replace", process(rep, direction))
+        setfield(n, "pre", process(pre, fontid, direction))
+        setfield(n, "post", process(post, fontid, direction))
+        setfield(n, "replace", process(rep, fontid, direction))
 
         head, current = insertafter(head, current, n)
       else
@@ -790,18 +743,6 @@ local function tonodes(head, current, run, glyphs, color)
   end
 
   return head, current
-end
-
-local function validate_color(s)
-  local r = tonumber(s:sub(1, 2), 16)
-  local g = tonumber(s:sub(3, 4), 16)
-  local b = tonumber(s:sub(5, 6), 16)
-  if not (r and g and b) then return end
-  if #s == 8 then
-    local a = tonumber(s:sub(7, 8), 16)
-    if not a then return end
-  end
-  return s
 end
 
 local hex_to_rgba do
@@ -840,35 +781,15 @@ local function shape_run(head, current, run)
   return head, current
 end
 
-process = function(head, direction)
+process = function(head, font, direction)
   local newhead, current = nil, nil
-  local runs = itemize(head, direction)
+  local runs = itemize(head, font, direction)
 
   for _, run in next, runs do
     newhead, current = shape_run(newhead, current, run)
   end
 
   return newhead or head
-end
-
-local function process_nodes(head, font, _, direction)
-  local head = todirect(head)
-
-  -- Check if any fonts are loaded by us and then process the whole node list,
-  -- we will take care of skipping fonts we did not load later, otherwise
-  -- return unmodified head.
-  for n in traverseid(glyph_t, head) do
-    local fontid = getfont(n)
-    local fontdata = font.getfont(fontid)
-    local hbdata = fontdata and fontdata.hb
-    if hbdata then
-      head = process(head, direction)
-      break
-    end
-  end
-
-  -- Nothing to do; no glyphs or no HarfBuzz fonts.
-  return tonode(head)
 end
 
 local function pdfdirect(data)
@@ -972,7 +893,7 @@ local function get_glyph_string(n)
   return props and props[string_p] or nil
 end
 
-fonts.handlers.otf.registerplugin('harf', process_nodes)
+fonts.handlers.otf.registerplugin('harf', process)
 
 return {
   -- process = process_nodes,

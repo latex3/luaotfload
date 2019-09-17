@@ -10,20 +10,6 @@ local posttag = hb.Tag.new("post")
 local glyftag = hb.Tag.new("glyf")
 
 local function loadfont(spec)
--- @@ -296,6 +297,13 @@ local function scalefont(data, spec)
---        hscale = hscale,
---        vscale = vscale,
---      },
--- +    shared = {
--- +      processes = {
--- +        function (head, font, _, direction)
--- +          print('AAA', head, font, direction)
--- +        end,
--- +      },
--- +    },
---    }
---  end
-
   local path, sub = spec.resolved, spec.sub or 1
   if not path then
     return nil
@@ -179,7 +165,10 @@ local tlig = hb.texlig
 
 local function scalefont(data, spec)
   local size = spec.size
-  local options = spec.features.raw
+  local features = spec.features.normal
+  features.mode = 'plug'
+  features.features = 'harf'
+  fonts.constructors.checkedfeatures("otf", features)
   local hbface = data.face
   local hbfont = data.font
   local upem = data.upem
@@ -214,7 +203,7 @@ local function scalefont(data, spec)
 
   -- Select font palette, we support `palette=index` option, and load the first
   -- one otherwise.
-  local paletteidx = tonumber(options.palette or options.colr) or 1
+  local paletteidx = tonumber(features.palette or features.colr) or 1
 
   -- Load CPAL palette from the font.
   local palette = nil
@@ -226,43 +215,43 @@ local function scalefont(data, spec)
   end
 
   local letterspace = 0
-  if options.letterspace then
-    letterspace = tonumber(options.letterspace) / 100 * upem
-  elseif options.kernfactor then
-    letterspace = tonumber(options.kernfactor) * upem
+  if features.letterspace then
+    letterspace = tonumber(features.letterspace) / 100 * upem
+  elseif features.kernfactor then
+    letterspace = tonumber(features.kernfactor) * upem
   end
   space = space + letterspace
 
   local slantfactor = nil
-  if options.slant then
-    slantfactor = tonumber(options.slant) * 1000
+  if features.slant then
+    slantfactor = tonumber(features.slant) * 1000
   end
 
   local mode = nil
   local width = nil
-  if options.embolden then
+  if features.embolden then
     mode = 2
     -- The multiplication by 7200.0/7227 is to undo the opposite conversion
     -- the engine is doing and make the final number written in the PDF file
     -- match XeTeX’s.
-    width = (size * tonumber(options.embolden) / 6553.6) * (7200.0/7227)
+    width = (size * tonumber(features.embolden) / 6553.6) * (7200.0/7227)
   end
 
   local hscale = upem
   local extendfactor = nil
-  if options.extend then
-    extendfactor = tonumber(options.extend) * 1000
-    hscale = hscale * tonumber(options.extend)
+  if features.extend then
+    extendfactor = tonumber(features.extend) * 1000
+    hscale = hscale * tonumber(features.extend)
   end
 
   local vscale = upem
   local squeezefactor = nil
-  if options.squeeze then
-    squeezefactor = tonumber(options.squeeze) * 1000
-    vscale = vscale * tonumber(options.squeeze)
+  if features.squeeze then
+    squeezefactor = tonumber(features.squeeze) * 1000
+    vscale = vscale * tonumber(features.squeeze)
   end
 
-  if options.texlig then
+  if features.tlig then
     for char in next, characters do
       local ligatures = tlig[char]
       if ligatures then
@@ -271,7 +260,7 @@ local function scalefont(data, spec)
     end
   end
 
-  return {
+  local tfmdata = {
     name = spec.specification,
     filename = spec.resolved,
     designsize = size,
@@ -311,7 +300,11 @@ local function scalefont(data, spec)
       vscale = vscale,
     },
     specification = spec,
+    shared = {},
+    properties = {},
   }
+  tfmdata.shared.processes = fonts.handlers.otf.setfeatures(tfmdata, features)
+  return tfmdata
 end
 
 return function(spec)

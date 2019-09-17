@@ -851,7 +851,7 @@ process = function(head, direction)
   return newhead or head
 end
 
-local function process_nodes(head, groupcode, size, packtype, direction)
+local function process_nodes(head, font, _, direction)
   local head = todirect(head)
 
   -- Check if any fonts are loaded by us and then process the whole node list,
@@ -972,8 +972,10 @@ local function get_glyph_string(n)
   return props and props[string_p] or nil
 end
 
+fonts.handlers.otf.registerplugin('harf', process_nodes)
+
 return {
-  process = process_nodes,
+  -- process = process_nodes,
   post_process = post_process_nodes,
   cleanup = run_cleanup,
   set_tounicode = set_tounicode,

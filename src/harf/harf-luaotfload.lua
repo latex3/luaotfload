@@ -2,14 +2,10 @@ if not pcall(require, "luaharfbuzz") then
   luatexbase.module_error("harf", "'luaharfbuzz' module is required.")
 end
 
-local harf = require("harf")
+local harf = require("harf-base")
 
-local define_font     = harf.callbacks.define_font
-
--- Change luaotfload’s default of preferring system fonts.
-fonts.names.set_location_precedence {
-  "local", "texmf", "system"
-}
+local define_font = require("harf-load")
+local harf_node   = require("harf-node")
 
 local callback_warning = true
 if callback_warning then
@@ -205,9 +201,7 @@ local function add_to_callback(name, func)
   end
 end
 
--- Register all Harf callbacks, except `define_font` which is handled above.
-for name, func in next, harf.callbacks do
-  if name ~= "define_font" then
-    add_to_callback(name, func)
-  end
-end
+add_to_callback('pre_output_filter', harf_node.post_process)
+add_to_callback('wrapup_run', harf_node.cleanup)
+add_to_callback('finish_pdffile', harf_node.set_tounicode)
+add_to_callback('get_glyph_string', harf_node.get_glyph_string)

@@ -30,6 +30,9 @@ local getchar           = direct.getchar
 local setchar           = direct.setchar
 local getdir            = direct.getdir
 local setdir            = direct.setdir
+local getdisc           = direct.getdisc
+local setdisc           = direct.setdisc
+local getfont           = direct.getfont
 local getdata           = direct.getdata
 local setdata           = direct.setdata
 local getfont           = direct.getfont
@@ -53,13 +56,6 @@ local getwidth          = direct.getwidth
 local setwidth          = direct.setwidth
 local is_char           = direct.is_char
 
-local getpre            = function (n) return getfield(n, "pre")        end
-local setpre            = function (n, v)     setfield(n, "pre", v)     end
-local getpost           = function (n) return getfield(n, "post")       end
-local setpost           = function (n, v)     setfield(n, "post", v)    end
-local getrep            = function (n) return getfield(n, "replace")    end
-local setrep            = function (n, v)     setfield(n, "replace", v) end
-
 local imgnode           = img.node
 
 local disc_t            = node.id("disc")
@@ -77,13 +73,6 @@ local fontkern_t        = 0
 local italiccorr_t      = 3
 local regulardisc_t     = 3
 local spaceskip_t       = 13
-
-local getscript         = hb.unicode.script
-
-local common_s          = hb.Script.new("Zyyy")
-local inherited_s       = hb.Script.new("Zinh")
-local unknown_s         = hb.Script.new("Zzzz")
-local latn_s            = hb.Script.new("Latn")
 
 local invalid_l         = hb.Language.new()
 local invalid_s         = hb.Script.new()
@@ -485,7 +474,7 @@ shape = function(run)
             glyphs[j].skip = true
           end
 
-          local pre, post, rep = getpre(disc), getpost(disc), getrep(disc)
+          local pre, post, rep = getdisc(disc)
           glyph.disc = disc
           glyph.replace = makesub(run, startindex, stopindex, rep)
           glyph.pre = makesub(run, startindex, discindex - 1, pre)
@@ -574,9 +563,9 @@ local function tonodes(head, current, run, glyphs, color)
       local disc = glyph.disc
       local rep, pre, post = glyph.replace, glyph.pre, glyph.post
 
-      setrep(disc, tonodes(nil, nil, rep.run, rep.glyphs, color))
-      setpre(disc, tonodes(nil, nil, pre.run, pre.glyphs, color))
-      setpost(disc, tonodes(nil, nil, post.run, post.glyphs, color))
+      setdisc(disc, tonodes(nil, nil, pre.run, pre.glyphs, color),
+                    tonodes(nil, nil, post.run, post.glyphs, color),
+                    tonodes(nil, nil, rep.run, rep.glyphs, color))
 
       head, current = insertafter(head, current, disc)
     elseif not glyph.skip then
@@ -729,10 +718,10 @@ local function tonodes(head, current, run, glyphs, color)
           setfield(n, "replace", current)
           head, current = removenode(head, current)
         end
-        local pre, post, rep = getpre(n), getpost(n), getrep(n)
-        setfield(n, "pre", process(pre, fontid, direction))
-        setfield(n, "post", process(post, fontid, direction))
-        setfield(n, "replace", process(rep, fontid, direction))
+        local pre, post, rep = getdisc(n)
+        setdisc(n, process(pre, fontid, direction),
+                   process(post, fontid, direction),
+                   process(rep, fontid, direction))
 
         head, current = insertafter(head, current, n)
       else

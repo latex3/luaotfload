@@ -1,1 +1,2 @@
-- Workaround for a problem with fontname encoding, issue #88
+- invisible option to avoid that some glyph are shown (issue #63)
+- correct a small bug in xheight calculation 

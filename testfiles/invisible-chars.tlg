@@ -9,62 +9,36 @@ Completed box being shipped out [1]
 ...\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
-..\vbox(550.0+0.0)x345.0, glue set 527.9436fil, direction TLT
+..\vbox(550.0+0.0)x345.0, glue set 516.10309fil, direction TLT
 ...\write-{}
-...\glue(\topskip) 2.9
-...\hbox(7.1+0.1)x345.0, glue set 278.98999fil, direction TLT
+...\glue(\topskip) 0.0
+...\hbox(12.19727+8.7793)x345.0, glue set 314.70703fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\testA a
-....\kern1.25 (font)
-....\testA b
-....\kern1.25 (font)
-....\testA c
-....\kern1.25 (font)
-....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA – (ligature --)
-....\kern1.25 (font)
-....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA fi
-....\kern1.25 (font)
-....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA ff
-....\kern1.25 (font)
+....\amiri ‍
+....\amiri ي
+....\amiri ‍
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
-...\glue(\baselineskip) 4.79999
-...\hbox(7.1+0.1)x345.0, glue set 278.98999fil, direction TLT
+...\glue(\lineskip) 1.0
+...\hbox(8.08594+8.7793)x345.0, glue set 314.70703fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\testA a
-....\kern1.25 (font)
-....\testA b
-....\kern1.25 (font)
-....\testA c
-....\kern1.25 (font)
-....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA – (ligature --)
-....\kern1.25 (font)
-....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA fi
-....\kern1.25 (font)
-....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA ff
-....\kern1.25 (font)
+....\amiri ي
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
-...\glue -0.1
+...\glue -5.0
 ...\glue 0.0 plus 1.0fil
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
@@ -73,4 +47,4 @@ Completed box being shipped out [1]
 ...\glue 0.0 plus 1.0fil
 ...\TU/lmr/m/n/10 1
 ...\glue 0.0 plus 1.0fil
-(letterspace2.aux)
+(invisible-chars.aux)

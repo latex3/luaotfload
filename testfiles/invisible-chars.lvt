@@ -1,0 +1,13 @@
+\input{regression-test}
+\documentclass{article}
+\begin{document}
+\START\showoutput
+\font\amiri={file:amiri-regular.ttf:-invisible;} at 20pt
+\amiri
+\char"200Dي\char"200D
+
+\font\amiri={file:amiri-regular.ttf:} at 20pt
+\amiri
+\char"200Dي\char"200D
+
+\end{document}

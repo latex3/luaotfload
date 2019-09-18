@@ -23,6 +23,9 @@ luaotfload.pdf
 luaotfload.tds.zip
 luaotfload.zip
 
+luaotfload-ctan.zip
+luaotfload-dev.zip
+
 # Temporary files in the tests directory
 tests/*.log
 tests/*.pdf

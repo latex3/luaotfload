@@ -526,6 +526,7 @@ local function tonodes(head, current, run, glyphs, color)
   local characters = fontdata.characters
   local hbdata = fontdata.hb
   local hbshared = hbdata.shared
+  local nominals = hbshared.nominals
   local hbfont = hbshared.font
   local fontglyphs = hbshared.glyphs
   local rtl = dir:is_backward()
@@ -542,7 +543,7 @@ local function tonodes(head, current, run, glyphs, color)
   for i, glyph in next, glyphs do
     local index = glyph.cluster + 1
     local gid = glyph.codepoint
-    local char = hb.CH_GID_PREFIX + gid
+    local char = nominals[gid] or hb.CH_GID_PREFIX + gid
     local n = nodes[index]
     local id = getid(n)
     local nchars, nglyphs = glyph.nchars, glyph.nglyphs
@@ -858,13 +859,19 @@ local function set_tounicode()
     if hbdata and fontid == pdf.getfontname(fontid) then
       local characters = fontdata.characters
       local newcharacters = {}
-      local glyphs = hbdata.shared.glyphs
+      local hbshared = hbdata.shared
+      local glyphs = hbshared.glyphs
+      local nominals = hbshared.nominals
       for gid = 0, #glyphs do
         local glyph = glyphs[gid]
         if glyph.used then
           local tounicode = glyph.tounicode or "FFFD"
           local character = characters[gid + hb.CH_GID_PREFIX]
           newcharacters[gid + hb.CH_GID_PREFIX] = character
+          local unicode = nominals[gid]
+          if unicode then
+            newcharacters[unicode] = character
+          end
           character.tounicode = tounicode
           character.used = true
         end

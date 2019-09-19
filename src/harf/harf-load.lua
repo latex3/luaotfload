@@ -96,8 +96,11 @@ local function loadfont(spec)
 
     local unicodes = hbface:collect_unicodes()
     local characters = {}
+    local nominals = {}
     for _, uni in next, unicodes do
-      characters[uni] = hbfont:get_nominal_glyph(uni)
+      local glyph = hbfont:get_nominal_glyph(uni)
+      characters[uni] = glyph
+      nominals[glyph] = uni
     end
 
     local xheight, capheight = 0, 0
@@ -140,6 +143,7 @@ local function loadfont(spec)
       capheight = capheight,
       slant = slant,
       glyphs = glyphs,
+      nominals = nominals,
       unicodes = characters,
       psname = hbface:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
       fullname = hbface:get_name(hb.ot.NAME_ID_FULL_NAME),

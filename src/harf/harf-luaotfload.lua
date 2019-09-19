@@ -150,11 +150,12 @@ aux.slot_of_name = function(fontid, glyphname, unsafe)
   local hbdata = fontdata and fontdata.hb
   if hbdata then
     local hbshared = hbdata.shared
+    local nominals = hbshared.nominals
     local hbfont = hbshared.font
 
     local gid = hbfont:get_glyph_from_name(glyphname)
     if gid ~= nil then
-      return gid + harf.CH_GID_PREFIX
+      return nominals[gid] or gid + harf.CH_GID_PREFIX
     end
     return nil
   end

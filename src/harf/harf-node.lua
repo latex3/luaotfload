@@ -205,7 +205,7 @@ local function itemize(head, fontid, direction)
     if lastdir ~= currdir or lastskip ~= skip then
       lastrun = {
         node = n,
-        start = codes[#codes],
+        start = #codes,
         len = 1,
         font = fontid,
         dir = currdir == "TRT" and dir_rtl or dir_ltr,
@@ -381,7 +381,7 @@ shape = function(run)
         local hex = ""
         local str = ""
         local nextcluster
-        while j = i+1,#glyphs do
+        for j = i+1, #glyphs do
           nextcluster = glyphs[j].cluster
           if cluster ~= nextcluster then
             goto NEXTCLUSTERFOUND -- break
@@ -507,7 +507,7 @@ shape = function(run)
               local lastrep = tail(rep)
               setnext(lastrep, getnext(disc))
               setprev(getnext(disc), lastrep)
-              setnext(getprev(endnode), 0)
+              setnext(getprev(endnode), nil)
               setnext(disc, endnode)
               setprev(endnode, disc)
             end

@@ -116,7 +116,7 @@ local function newkern(v, n)
     setproperty(kern, copytable(props))
   end
   if attrs then
-    setattrs(kern, copynodelist(attrs))
+    setattrs(kern, attrs)
   end
 
   setkern(kern, v)
@@ -144,22 +144,6 @@ local function to_utf16_hex(uni)
   end
 end
 
-local paired_open = {
-  [0x0028] = 0x0029, [0x003c] = 0x003e, [0x005b] = 0x005d, [0x007b] = 0x007d,
-  [0x00ab] = 0x00bb, [0x2018] = 0x2019, [0x201c] = 0x201d, [0x2039] = 0x203a,
-  [0x3008] = 0x3009, [0x300a] = 0x300b, [0x300c] = 0x300d, [0x300e] = 0x300f,
-  [0x3010] = 0x3011, [0x3014] = 0x3015, [0x3016] = 0x3017, [0x3018] = 0x3019,
-  [0x301a] = 0x301b,
-}
-
-local paired_close = {
-  [0x0029] = 0x0028, [0x003e] = 0x003c, [0x005d] = 0x005b, [0x007d] = 0x007b,
-  [0x00bb] = 0x00ab, [0x2019] = 0x2018, [0x201d] = 0x201c, [0x203a] = 0x2039,
-  [0x3009] = 0x3008, [0x300b] = 0x300a, [0x300d] = 0x300c, [0x300f] = 0x300e,
-  [0x3011] = 0x3010, [0x3015] = 0x3014, [0x3017] = 0x3016, [0x3019] = 0x3018,
-  [0x301b] = 0x301a,
-}
-
 local process
 
 local trep = hb.texrep
@@ -171,9 +155,10 @@ local function itemize(head, fontid, direction)
   local options  = spec and spec.features.raw
   local texlig   = options and options.tlig
 
-  local props, nodes, codes = {}, {}, {}
+  local runs, nodes, codes = {}, {}, {}
   local dirstack = {}
   local currdir = direction or "TLT"
+  local lastdir, lastskip, lastrun
 
   for n, id, subtype in direct.traverse(head) do
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
@@ -216,39 +201,23 @@ local function itemize(head, fontid, direction)
 
     codes[#codes + 1] = code
     nodes[#nodes + 1] = n
-    props[#props + 1] = {
-      -- XXX handle RTT and LTL.
-      dir = currdir == "TRT" and dir_rtl or dir_ltr,
-      skip = skip,
-    }
-  end
 
-  -- Split into a list of runs, each has the same font and direction
-  local runs = {}
-  local currdir, currskip
-  for i, prop in next, props do
-    local dir = prop.dir
-    local skip = prop.skip
-
-    -- Start a new run if there is a change in properties.
-    if dir ~= currdir or
-       skip ~= currskip then
-      runs[#runs + 1] = {
-        start = i,
-        len = 0,
+    if lastdir ~= currdir or lastskip ~= skip then
+      lastrun = {
+        node = n,
+        start = codes[#codes],
+        len = 1,
         font = fontid,
-        dir = dir,
+        dir = currdir == "TRT" and dir_rtl or dir_ltr,
         skip = skip,
         nodes = nodes,
         codes = codes,
       }
+      runs[#runs + 1] = lastrun
+      lastdir, lastskip = currdir, skip
+    else
+      lastrun.len = lastrun.len + 1
     end
-
-    runs[#runs].len = runs[#runs].len + 1
-
-    currdir = dir
-    currscript = script
-    currskip = skip
   end
 
   return runs
@@ -299,32 +268,19 @@ end
 local shape
 
 -- Make s a sub run, used by discretionary nodes.
-local function makesub(run, start, stop, nodelist)
+local function makesub(run, codes, nodelist)
   local nodes = run.nodes
   local codes = run.codes
   local start = start
   local stop = stop
-  local subnodes, subcodes = {}, {}
-  for i = start, stop do
-    if getid(nodes[i]) ~= disc_t then
-      subnodes[#subnodes + 1] = copynode(nodes[i])
-      subcodes[#subcodes + 1] = codes[i]
-    end
-  end
-  -- Prepend any existing nodes to the list.
-  for n in traverse(nodelist) do
-    subnodes[#subnodes + 1] = n
-    subcodes[#subcodes + 1] = getchar(n)
-  end
   local subrun = {
     start = 1,
-    len = #subnodes,
+    len = #codes,
     font = run.font,
-    script = run.script,
     dir = run.dir,
     fordisc = true,
-    nodes = subnodes,
-    codes = subcodes,
+    node = nodelist,
+    codes = codes,
   }
   return { glyphs = shape(subrun), run = subrun }
 end
@@ -332,13 +288,15 @@ end
 -- Main shaping function that calls HarfBuzz, and does some post-processing of
 -- the output.
 shape = function(run)
-  local nodes = run.nodes
+  -- local nodes = run.nodes
   local codes = run.codes
   local offset = run.start
   local len = run.len
   local fontid = run.font
   local dir = run.dir
   local fordisc = run.fordisc
+  local node = run.node
+  local cluster = offset - 2
 
   local fontdata = font.getfont(fontid)
   local hbdata = fontdata.hb
@@ -415,70 +373,149 @@ shape = function(run)
       local nchars, nglyphs = chars_in_glyph(i, glyphs, offset + len)
       glyph.nchars, glyph.nglyphs = nchars, nglyphs
 
-      -- Calculate the Unicode code points of this glyph. If nchars is zero
-      -- then this is a glyph inside a complex cluster and will be handled with
-      -- the start of its cluster.
-      if nchars > 0 then
+      -- Calculate the Unicode code points of this glyph. If cluster did not
+      -- change then this is a glyph inside a complex cluster and will be
+      -- handled with the start of its cluster.
+      if cluster ~= glyph.cluster then
+        cluster = glyph.cluster
         local hex = ""
         local str = ""
-        for j = 0, nchars - 1 do
-          local id = getid(nodes[nodeindex + j])
-          if id == glyph_t or id == glue_t then
-            local code = codes[nodeindex + j]
-            hex = hex..to_utf16_hex(code)
-            str = str..utf8.char(code)
+        local nextcluster
+        while j = i+1,#glyphs do
+          nextcluster = glyphs[j].cluster
+          if cluster ~= nextcluster then
+            goto NEXTCLUSTERFOUND -- break
           end
+        end -- else -- only executed if the loop reached the end without
+                    -- finding another cluster
+          nextcluster = offset + len - 1
+        ::NEXTCLUSTERFOUND:: -- end
+        do
+          local node = node
+          for j = cluster,nextcluster-1 do
+            local id = getid(node)
+            if id == glyph_t or id == glue_t then
+              local code = codes[j + 1]
+              hex = hex..to_utf16_hex(code)
+              str = str..utf8.char(code)
+            end
+          end
+          glyph.tounicode = hex
+          glyph.string = str
         end
-        glyph.tounicode = hex
-        glyph.string = str
-      end
-
-      -- Find if we have a discretionary inside a ligature, if nchars less than
-      -- two then either this is not a ligature or there is no discretionary
-      -- involved.
-      if nchars > 2 and not fordisc then
-        local discindex = nil
-        for j = nodeindex, nodeindex + nchars - 1 do
-          if codes[j] == 0x00AD then
-            discindex = j
-            break
+        -- Find if we have a discretionary inside a ligature, if the cluster
+        -- only spans one char than two then either this is not a ligature or
+        -- there is no discretionary involved.
+        if nextcluster > cluster + 1 and not fordisc then
+          local discindex = nil
+          local disc = node
+          for j = cluster, nextcluster - 1 do
+            if codes[j] == 0x00AD then
+              discindex = j
+              break
+            end
+            disc = getnext(disc)
           end
-        end
-        if discindex then
-          -- Discretionary found.
-          local disc = nodes[discindex]
-          local startindex, stopindex = nil, nil
-          local startglyph, stopglyph = nil, nil
+          if discindex then
+            -- Discretionary found.
+            local startindex, stopindex = nil, nil
+            local startglyph, stopglyph = nil, nil
 
-          -- Find the previous glyph that is safe to break at.
-          startglyph = i
-          while unsafetobreak(glyphs[startglyph], nodes) do
-            startglyph = startglyph - 1
+            -- Find the previous glyph that is safe to break at.
+            local startglyph = i, node
+            while unsafetobreak(glyphs[startglyph])
+                  and getid(startnode) ~= glue_t do
+              startglyph = startglyph - 1
+            end
+            -- Get the corresponding character index.
+            startindex = glyphs[startglyph].cluster + 1
+
+            -- Find the next glyph that is safe to break at.
+            stopglyph = i + 1
+            while unsafetobreak(glyphs[stopglyph], nodes) do
+              stopglyph = stopglyph + 1
+            end
+            -- We also want the last char in the previous glyph, so no +1 below.
+            stopindex = glyphs[stopglyph].cluster
+
+            local startnode, stopnode = node, node
+            for j=startindex-1, cluster do
+              startnode = getprev(startnode)
+            end
+            for j=cluster, stopindex do
+              stopnode = getnext(stopnode)
+            end
+
+            -- Mark these glyph for skipping since they will be replaced by the
+            -- discretionary fields.
+            -- We break up to stop glyph but not including it, so the -1 below.
+            for j = startglyph, stopglyph - 1 do
+              glyphs[j].skip = true
+            end
+
+            local subcodes, subindex = {}
+            do
+              local node = startnode
+              while node ~= stopnode do
+                if getid(node) == disc_t and node ~= disc then
+                  local oldnode = node
+                  startnode, node = remove(startnode, node)
+                  free(oldnode)
+                  tableremove(codes, startindex)
+                elseif node == disc then
+                  subindex = #subcodes
+                  tableremove(codes, startindex)
+                  node = getnext(node)
+                else
+                  subcodes[#subcodes + 1] = tableremove(codes, startindex)
+                  node = getnext(node)
+                end
+              end
+            end
+            
+            local pre, post, rep, lastpre, lastpost, lastrep = getdisc(disc, true)
+            local precodes, postcodes, repcodes = {}, {}, {}
+            table.move(subcodes, 1, subindex, 1, repcodes)
+            for n, id, subtype in traverse(rep) do
+              repcodes[#repcodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
+            end
+            table.move(subcodes, subindex + 1, #subcodes, #repcodes + 1, repcodes)
+            table.move(subcodes, 1, subindex, 1, precodes)
+            for n, id, subtype in traverse(pre) do
+              precodes[#precodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
+            end
+            for n, id, subtype in traverse(post) do
+              postcodes[#postcodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
+            end
+            table.move(subcodes, subindex + 1, #subcodes, #postcodes + 1, postcodes)
+            do local newpre = copy_list(startnode, disc)
+               setnext(tail(newpre), pre)
+               pre = newpre end
+            setnext(lastpost, copy_list(getnext(disc), stopnode))
+            if startnode ~= disc then
+              setnext(getprev(disc), rep)
+              setprev(rep, getprev(disc))
+              local before = getprev(startnode)
+              if before ~= startnode then
+                setnext(before, disc)
+                setprev(disc, before)
+              else
+                error'TODO'
+              end
+            end
+            if getnext(disc) ~= endnode then
+              local lastrep = tail(rep)
+              setnext(lastrep, getnext(disc))
+              setprev(getnext(disc), lastrep)
+              setnext(getprev(endnode), 0)
+              setnext(disc, endnode)
+              setprev(endnode, disc)
+            end
+            glyph.disc = disc
+            glyph.replace = makesub(run, repcodes, rep)
+            glyph.pre = makesub(run, precodes, pre)
+            glyph.post = makesub(run, postcodes, post)
           end
-          -- Get the corresponding character index.
-          startindex = glyphs[startglyph].cluster + 1
-
-          -- Find the next glyph that is safe to break at.
-          stopglyph = i + nglyphs
-          while unsafetobreak(glyphs[stopglyph], nodes) do
-            stopglyph = stopglyph + 1
-          end
-          -- We also want the last char in the previous glyph, so no +1 below.
-          stopindex = glyphs[stopglyph].cluster
-          -- We break up to stop glyph but not including it, so the -1 below.
-          stopglyph = stopglyph - 1
-
-          -- Mark these glyph for skipping since they will be replaced by the
-          -- discretionary fields.
-          for j = startglyph, stopglyph do
-            glyphs[j].skip = true
-          end
-
-          local pre, post, rep = getdisc(disc)
-          glyph.disc = disc
-          glyph.replace = makesub(run, startindex, stopindex, rep)
-          glyph.pre = makesub(run, startindex, discindex - 1, pre)
-          glyph.post = makesub(run, discindex + 1, stopindex, post)
         end
       end
     end

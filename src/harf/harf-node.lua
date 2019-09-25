@@ -55,6 +55,7 @@ local setsubtype        = direct.setsubtype
 local getwidth          = direct.getwidth
 local setwidth          = direct.setwidth
 local is_char           = direct.is_char
+local tail              = direct.tail
 
 local imgnode           = img.node
 
@@ -256,13 +257,10 @@ local function chars_in_glyph(i, glyphs, stop)
 end
 
 -- Check if it is not safe to break before this glyph.
-local function unsafetobreak(glyph, nodes)
+local function unsafetobreak(glyph)
   return glyph
      and glyph.flags
      and glyph.flags & fl_unsafe
-     -- Discretionary nodes can’t contain glue, so stop at first glue as well.
-     -- This is incorrect, but I don’t have a better idea.
-     and getid(nodes[glyph.cluster + 1]) ~= glue_t
 end
 
 local shape
@@ -282,6 +280,10 @@ local function makesub(run, codes, nodelist)
     node = nodelist,
     codes = codes,
   }
+  table.print(subrun)
+  for n in traverse(nodelist) do
+    print(tonode(n))
+  end
   return { glyphs = shape(subrun), run = subrun }
 end
 
@@ -317,6 +319,10 @@ shape = function(run)
   buf:set_script(script)
   buf:set_language(lang)
   buf:set_cluster_level(buf.CLUSTER_LEVEL_MONOTONE_CHARACTERS)
+  for n in traverse(node) do
+    print(tonode(n))
+  end
+  table.print{codes, offset-1, len}
   buf:add_codepoints(codes, offset - 1, len)
 
   local hscale = hbdata.hscale
@@ -368,6 +374,8 @@ shape = function(run)
       end
     end
 
+    table.print(codes)
+    table.print(glyphs)
     for i, glyph in next, glyphs do
       local nodeindex = glyph.cluster + 1
       local nchars, nglyphs = chars_in_glyph(i, glyphs, offset + len)
@@ -378,6 +386,7 @@ shape = function(run)
       -- handled with the start of its cluster.
       if cluster ~= glyph.cluster then
         cluster = glyph.cluster
+        print('CLUSTER', cluster)
         local hex = ""
         local str = ""
         local nextcluster
@@ -409,7 +418,7 @@ shape = function(run)
         if nextcluster > cluster + 1 and not fordisc then
           local discindex = nil
           local disc = node
-          for j = cluster, nextcluster - 1 do
+          for j = cluster + 1, nextcluster do
             if codes[j] == 0x00AD then
               discindex = j
               break
@@ -422,9 +431,9 @@ shape = function(run)
             local startglyph, stopglyph = nil, nil
 
             -- Find the previous glyph that is safe to break at.
-            local startglyph = i, node
+            local startglyph = i
             while unsafetobreak(glyphs[startglyph])
-                  and getid(startnode) ~= glue_t do
+                  or getid(startnode) == glue_t do
               startglyph = startglyph - 1
             end
             -- Get the corresponding character index.
@@ -432,17 +441,21 @@ shape = function(run)
 
             -- Find the next glyph that is safe to break at.
             stopglyph = i + 1
-            while unsafetobreak(glyphs[stopglyph], nodes) do
+            local lastcluster = glyphs[i].cluster
+            while unsafetobreak(glyphs[stopglyph], nodes)
+                  or getid(stopnode) == glue_t
+                  or lastcluster == glyphs[stopglyph].cluster do
+              lastcluster = glyphs[stopglyph].cluster
               stopglyph = stopglyph + 1
             end
             -- We also want the last char in the previous glyph, so no +1 below.
             stopindex = glyphs[stopglyph].cluster
 
             local startnode, stopnode = node, node
-            for j=startindex-1, cluster do
+            for j=cluster, startindex, -1 do
               startnode = getprev(startnode)
             end
-            for j=cluster, stopindex do
+            for j=cluster + 1, stopindex do
               stopnode = getnext(stopnode)
             end
 
@@ -454,44 +467,55 @@ shape = function(run)
             end
 
             local subcodes, subindex = {}
+            print'-1'
             do
               local node = startnode
               while node ~= stopnode do
+                print(node, stopnode)
                 if getid(node) == disc_t and node ~= disc then
+                  print'.1'
                   local oldnode = node
                   startnode, node = remove(startnode, node)
                   free(oldnode)
                   tableremove(codes, startindex)
                 elseif node == disc then
+                  print'.2'
                   subindex = #subcodes
                   tableremove(codes, startindex)
                   node = getnext(node)
                 else
+                  print'.3'
                   subcodes[#subcodes + 1] = tableremove(codes, startindex)
                   node = getnext(node)
                 end
+                print(node)
               end
             end
             
+            print'0'
             local pre, post, rep, lastpre, lastpost, lastrep = getdisc(disc, true)
             local precodes, postcodes, repcodes = {}, {}, {}
             table.move(subcodes, 1, subindex, 1, repcodes)
+            print'1'
             for n, id, subtype in traverse(rep) do
               repcodes[#repcodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
             end
             table.move(subcodes, subindex + 1, #subcodes, #repcodes + 1, repcodes)
             table.move(subcodes, 1, subindex, 1, precodes)
+            print'2'
             for n, id, subtype in traverse(pre) do
               precodes[#precodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
             end
+            print'3'
             for n, id, subtype in traverse(post) do
               postcodes[#postcodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
             end
+            print'4'
             table.move(subcodes, subindex + 1, #subcodes, #postcodes + 1, postcodes)
-            do local newpre = copy_list(startnode, disc)
+            do local newpre = copynodelist(startnode, disc)
                setnext(tail(newpre), pre)
                pre = newpre end
-            setnext(lastpost, copy_list(getnext(disc), stopnode))
+            setnext(lastpost, copynodelist(getnext(disc), stopnode))
             if startnode ~= disc then
               setnext(getprev(disc), rep)
               setprev(rep, getprev(disc))
@@ -511,6 +535,7 @@ shape = function(run)
               setnext(disc, endnode)
               setprev(endnode, disc)
             end
+            print'5'
             glyph.disc = disc
             glyph.replace = makesub(run, repcodes, rep)
             glyph.pre = makesub(run, precodes, pre)
@@ -518,6 +543,7 @@ shape = function(run)
           end
         end
       end
+      node = getnext(node)
     end
     return glyphs
   end

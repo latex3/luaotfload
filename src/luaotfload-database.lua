@@ -2281,7 +2281,14 @@ local truncate_string = function (str, restrict)
     local tw  = config.luaotfload.misc.termwidth
     local wd  = tw - restrict
     local len = utf8len (str)
-    if wd - len < 0 then
+    if not len then
+        -- str is not valid UTF-8... We will assume a 8-bit
+        -- encoding and forward it verbatim to the output.
+        len = #str
+        if wd - len < 0 then
+            str = ".." .. stringsub(str, len - wd + 2)
+        end
+    elseif wd - len < 0 then
         --- combined length exceeds terminal,
         str = ".." .. stringsub(str, utf8offset(str, - wd + 2))
     end

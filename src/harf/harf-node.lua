@@ -94,6 +94,7 @@ local function copytable(old)
     if type(v) == "table" then v = copytable(v) end
     new[k] = v
   end
+  setmetatable(new, getmetatable(old))
   return new
 end
 
@@ -108,18 +109,15 @@ local function setprop(n, prop, value)
   props.harf[prop] = value
 end
 
+local function inherit(t, base, properties)
+  local n = newnode(t)
+  setattrs(n, getattrs(base))
+  setproperty(n, properties and copytable(properties))
+  return n
+end
 -- New kern node of amount `v`, inheriting the properties/attributes of `n`.
 local function newkern(v, n)
-  local kern = newnode(kern_t)
-  local props = getproperty(n)
-  local attrs = getattrs(n)
-  if props then
-    setproperty(kern, copytable(props))
-  end
-  if attrs then
-    setattrs(kern, attrs)
-  end
-
+  local kern = inherit(kern_t, n, getproperty(n))
   setkern(kern, v)
   return kern
 end
@@ -156,7 +154,7 @@ local function itemize(head, fontid, direction)
   local options  = spec and spec.features.raw
   local texlig   = options and options.tlig
 
-  local runs, nodes, codes = {}, {}, {}
+  local runs, codes = {}, {}
   local dirstack = {}
   local currdir = direction or "TLT"
   local lastdir, lastskip, lastrun
@@ -201,17 +199,14 @@ local function itemize(head, fontid, direction)
     end
 
     codes[#codes + 1] = code
-    nodes[#nodes + 1] = n
 
     if lastdir ~= currdir or lastskip ~= skip then
       lastrun = {
-        node = n,
         start = #codes,
         len = 1,
         font = fontid,
         dir = currdir == "TRT" and dir_rtl or dir_ltr,
         skip = skip,
-        nodes = nodes,
         codes = codes,
       }
       runs[#runs + 1] = lastrun
@@ -267,10 +262,7 @@ local shape
 
 -- Make s a sub run, used by discretionary nodes.
 local function makesub(run, codes, nodelist)
-  local nodes = run.nodes
   local codes = run.codes
-  local start = start
-  local stop = stop
   local subrun = {
     start = 1,
     len = #codes,
@@ -284,20 +276,20 @@ local function makesub(run, codes, nodelist)
   for n in traverse(nodelist) do
     print(tonode(n))
   end
-  return { glyphs = shape(subrun), run = subrun }
+  local glyphs
+  nodelist, glyphs = shape(nodelist, subrun)
+  return { glyphs = shape(subrun), run = subrun, head = nodelist }
 end
 
 -- Main shaping function that calls HarfBuzz, and does some post-processing of
 -- the output.
-shape = function(run)
-  -- local nodes = run.nodes
+shape = function(head, node, run)
   local codes = run.codes
   local offset = run.start
   local len = run.len
   local fontid = run.font
   local dir = run.dir
   local fordisc = run.fordisc
-  local node = run.node
   local cluster = offset - 2
 
   local fontdata = font.getfont(fontid)
@@ -433,7 +425,7 @@ shape = function(run)
             -- Find the previous glyph that is safe to break at.
             local startglyph = i
             while unsafetobreak(glyphs[startglyph])
-                  or getid(startnode) == glue_t do
+                  and getid(startnode) ~= glue_t do
               startglyph = startglyph - 1
             end
             -- Get the corresponding character index.
@@ -442,9 +434,9 @@ shape = function(run)
             -- Find the next glyph that is safe to break at.
             stopglyph = i + 1
             local lastcluster = glyphs[i].cluster
-            while unsafetobreak(glyphs[stopglyph], nodes)
-                  or getid(stopnode) == glue_t
-                  or lastcluster == glyphs[stopglyph].cluster do
+            while unsafetobreak(glyphs[stopglyph])
+                  or lastcluster == glyphs[stopglyph].cluster
+                  and getid(stopnode) ~= glue_t do
               lastcluster = glyphs[stopglyph].cluster
               stopglyph = stopglyph + 1
             end
@@ -519,12 +511,12 @@ shape = function(run)
             if startnode ~= disc then
               setnext(getprev(disc), rep)
               setprev(rep, getprev(disc))
-              local before = getprev(startnode)
-              if before ~= startnode then
+              if startnode == head then
+                head = disc
+              else
+                local before = getprev(startnode)
                 setnext(before, disc)
                 setprev(disc, before)
-              else
-                error'TODO'
               end
             end
             if getnext(disc) ~= endnode then
@@ -536,7 +528,6 @@ shape = function(run)
               setprev(endnode, disc)
             end
             print'5'
-            glyph.disc = disc
             glyph.replace = makesub(run, repcodes, rep)
             glyph.pre = makesub(run, precodes, pre)
             glyph.post = makesub(run, postcodes, post)
@@ -545,10 +536,10 @@ shape = function(run)
       end
       node = getnext(node)
     end
-    return glyphs
+    return head, glyphs
   end
 
-  return {}
+  return head, {}
 end
 
 local function color_to_rgba(color)
@@ -581,8 +572,8 @@ local function cachedpng(data)
 end
 
 -- Convert glyphs to nodes and collect font characters.
-local function tonodes(head, current, run, glyphs, color)
-  local nodes = run.nodes
+local function tonodes(head, node, run, glyphs, color)
+  local nodeindex = run.offset
   local dir = run.dir
   local fontid = run.font
   local fontdata = font.getfont(fontid)
@@ -593,9 +584,7 @@ local function tonodes(head, current, run, glyphs, color)
   local hbfont = hbshared.font
   local fontglyphs = hbshared.glyphs
   local rtl = dir:is_backward()
-
-  local tracinglostchars = tex.tracinglostchars
-  local tracingonline = tex.tracingonline
+  local lastprops
 
   local scale = hbdata.scale
   local letterspace = hbdata.letterspace
@@ -603,44 +592,45 @@ local function tonodes(head, current, run, glyphs, color)
   local haspng = hbshared.haspng
   local fonttype = hbshared.fonttype
 
-  for i, glyph in next, glyphs do
-    local index = glyph.cluster + 1
+  for i, glyph in ipairs(glyphs) do
+    if glyph.cluster < nodeindex then -- Ups, we went too far
+      nodeindex = nodeindex - 1
+      local new = inherit(glyph_t, node, lastprops)
+      setfont(new, fontid)
+      head, node = insertbefore(head, new)
+    else
+      for j = nodeindex, glyph.cluster - 1 do
+        head, node = removenode(head, node)
+      end
+      lastprops = getproperty(node)
+      nodeindex = glyph.cluster
+    end
     local gid = glyph.codepoint
     local char = nominals[gid] or hb.CH_GID_PREFIX + gid
-    local n = nodes[index]
-    local id = getid(n)
+    local id = getid(node)
     local nchars, nglyphs = glyph.nchars, glyph.nglyphs
 
-    -- If this glyph is part of a complex cluster, then copy the node as
-    -- more than one glyph will use it.
-    if nglyphs < 1 or nglyphs > 1 then
-      n = copynode(nodes[index])
-    end
-
     if color then
-      setprop(n, color_p, color)
+      setprop(node, color_p, color)
     end
 
-    if glyph.disc then
+    if glyph.replace then
       -- For discretionary the glyph itself is skipped and a discretionary node
       -- is output in place of it.
-      local disc = glyph.disc
       local rep, pre, post = glyph.replace, glyph.pre, glyph.post
 
-      setdisc(disc, tonodes(nil, nil, pre.run, pre.glyphs, color),
-                    tonodes(nil, nil, post.run, post.glyphs, color),
-                    tonodes(nil, nil, rep.run, rep.glyphs, color))
-
-      head, current = insertafter(head, current, disc)
+      setdisc(node, tonodes(pre.head, pre.head, pre.run, pre.glyphs, color),
+                    tonodes(post.head, post.head, post.run, post.glyphs, color),
+                    tonodes(rep.head, rep.head, rep.run, rep.glyphs, color))
     elseif not glyph.skip then
       if glyph.color then
-        setprop(n, color_p, color_to_rgba(glyph.color))
+        setprop(node, color_p, color_to_rgba(glyph.color))
       end
 
       if id == glyph_t then
         local fontglyph = fontglyphs[gid]
 
-        local pngblob = fontglyph.png
+        local pngblob = fontglyph.png -- FIXME: Rewrite
         if haspng and not pngblob then
           pngblob = hbfont:ot_color_glyph_get_png(gid)
           fontglyph.png = pngblob
@@ -658,14 +648,13 @@ local function tonodes(head, current, run, glyphs, color)
             height    = character.height,
             depth     = character.depth,
           }
-          head, current = insertafter(head, current, todirect(image))
           if fonttype then
             -- Color bitmap font with glyph outlines. Insert negative kerning
             -- as we will insert the glyph node below (to help with text
             -- copying) and want the bitmap and the glyph to take the same
             -- advance width.
-            local kern = newkern(-character.width, n)
-            head, current = insertkern(head, current, kern, rtl)
+            local kern = newkern(-character.width, node)
+            head, node = insertkern(head, node, kern, rtl)
           end
         end
         if pngblob and not fonttype then
@@ -679,31 +668,20 @@ local function tonodes(head, current, run, glyphs, color)
           -- a fatal error. We use `nullfont` instead.  That is a hack, but I
           -- think it is good enough for now.
           -- We insert the glyph node and move on, no further work is needed.
-          setfont(n, 0)
-          head, current = insertafter(head, current, n)
+          setfont(node, 0)
+          head, current = insertafter(head, current, node)
         else
-          local oldcharacter = characters[getchar(n)]
+          local oldcharacter = characters[getchar(node)]
           -- If the glyph index of current font character is the same as shaped
           -- glyph, keep the node char unchanged. Helps with primitives that
           -- take characters as input but actually work on glyphs, like
           -- `\rpcode`.
           if not oldcharacter or character.index ~= oldcharacter.index then
-            setchar(n, char)
+            setchar(node, char)
           end
           local xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
           local yoffset = glyph.y_offset * scale
-          setoffsets(n, xoffset, yoffset)
-          protectglyph(n)
-          head, current = insertafter(head, current, n)
-
-          local x_advance = glyph.x_advance + letterspace
-          local width = fontglyph.width
-          if width ~= x_advance then
-            -- The engine always uses the glyph width from the font, so we need
-            -- to insert a kern node if the x advance is different.
-            local kern = newkern((x_advance - width) * scale, n)
-            head, current = insertkern(head, current, kern, rtl)
-          end
+          setoffsets(node, xoffset, yoffset)
 
           fontglyph.used = true
 
@@ -713,7 +691,7 @@ local function tonodes(head, current, run, glyphs, color)
           -- If the string is empty it means this glyph is part of a larger
           -- cluster and we don’t to print anything for it as the first glyph
           -- in the cluster will have the string of the whole cluster.
-          setprop(n, string_p, glyph.string or "")
+          setprop(node, string_p, glyph.string or "")
 
           -- Handle PDF text extraction:
           -- * Find how many characters in this cluster and how many glyphs,
@@ -729,15 +707,23 @@ local function tonodes(head, current, run, glyphs, color)
             if nglyphs == 1 and not fontglyph.tounicode then
               fontglyph.tounicode = tounicode
             elseif tounicode ~= fontglyph.tounicode then
-              setprop(n, startactual_p, tounicode)
+              setprop(node, startactual_p, tounicode)
               glyphs[i + nglyphs - 1].endactual = true
             end
           end
           if glyph.endactual then
-            setprop(n, endactual_p, true)
+            setprop(node, endactual_p, true)
+          end
+          local x_advance = glyph.x_advance + letterspace
+          local width = fontglyph.width
+          if width ~= x_advance then
+            -- The engine always uses the glyph width from the font, so we need
+            -- to insert a kern node if the x advance is different.
+            local kern = newkern((x_advance - width) * scale, node)
+            head, node = insertkern(head, node, kern, rtl)
           end
         end
-      elseif id == glue_t and getsubtype(n) == spaceskip_t then
+      elseif id == glue_t and getsubtype(node) == spaceskip_t then
         -- If the glyph advance is different from the font space, then a
         -- substitution or positioning was applied to the space glyph changing
         -- it from the default, so reset the glue using the new advance.
@@ -745,28 +731,23 @@ local function tonodes(head, current, run, glyphs, color)
         -- spacing after the period is larger by default in TeX.
         local width = (glyph.x_advance + letterspace) * scale
         if fontdata.parameters.space ~= width then
-          setwidth(n, width)
-          setfield(n, "stretch", width / 2)
-          setfield(n, "shrink", width / 3)
+          setwidth(node, width)
+          setfield(node, "stretch", width / 2)
+          setfield(node, "shrink", width / 3)
         end
-        head, current = insertafter(head, current, n)
-      elseif id == kern_t and getsubtype(n) == italiccorr_t then
+      elseif id == kern_t and getsubtype(node) == italiccorr_t then
         -- If this is an italic correction node and the previous node is a
         -- glyph, update its kern value with the glyph’s italic correction.
-        -- I’d have expected the engine to do this, but apparently it doesn’t.
-        -- May be it is checking for the italic correction before we have had
-        -- loaded the glyph?
-        local prevchar, prevfontid = isglyph(current)
-        if prevchar and prevchar > 0 then
-          local prevfontdata = font.getfont(prevfontid)
-          local prevcharacters = prevfontdata and prevfontdata.characters
-          local italic = prevcharacters and prevcharacters[prevchar].italic
+        -- FIXME: This fails if the previous glyph was e.g. a png glyph
+        local prevchar, prevfontid = ischar(getprev(node))
+        if prevfontid == fontid and prevchar and prevchar > 0 then
+          local italic = characters[prevchar].italic
           if italic then
-            setkern(n, italic)
+            setkern(node, italic)
           end
         end
-        head, current = insertafter(head, current, n)
       elseif id == disc_t then
+        assert(false, "Should be unreachable") -- This feels like it should be unreachable
         assert(nglyphs == 1)
         -- The simple case of a discretionary that is not part of a complex
         -- cluster. We only need to make sure kerning before the hyphenation
@@ -779,22 +760,22 @@ local function tonodes(head, current, run, glyphs, color)
         if current and getid(current) == kern_t and getsubtype(current) == fontkern_t then
           setprev(current, nil)
           setnext(current, nil)
-          setfield(n, "replace", current)
+          setfield(node, "replace", current)
           head, current = removenode(head, current)
         end
-        local pre, post, rep = getdisc(n)
-        setdisc(n, process(pre, fontid, direction),
-                   process(post, fontid, direction),
-                   process(rep, fontid, direction))
+        local pre, post, rep = getdisc(node)
+        setdisc(node, process(pre, fontid, direction),
+                      process(post, fontid, direction),
+                      process(rep, fontid, direction))
 
-        head, current = insertafter(head, current, n)
-      else
-        head, current = insertafter(head, current, n)
+        head, current = insertafter(head, current, node)
       end
     end
+    node = getnext(node)
+    nodeindex = nodeindex + 1
   end
 
-  return head, current
+  return head, node
 end
 
 local hex_to_rgba do
@@ -818,19 +799,15 @@ local function shape_run(head, current, run)
     local options = fontdata.specification.features.raw
     local color = options and options.color and hex_to_rgba(options.color)
 
-    local glyphs = shape(run)
-    head, current = tonodes(head, current, run, glyphs, color)
+    local glyphs
+    head, glyphs = shape(head, current, run)
+    return tonodes(head, current, run, glyphs, color)
   else
-    -- Not shaping, insert the original node list of of this run.
-    local nodes = run.nodes
-    local offset = run.start
-    local len = run.len
-    for i = offset, offset + len - 1 do
-      head, current = insertafter(head, current, nodes[i])
+    for i = 1, len do
+      current = getnext(current)
     end
+    return head, current
   end
-
-  return head, current
 end
 
 function process(head, font, direction)

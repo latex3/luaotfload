@@ -262,7 +262,6 @@ local shape
 
 -- Make s a sub run, used by discretionary nodes.
 local function makesub(run, codes, nodelist)
-  local codes = run.codes
   local subrun = {
     start = 1,
     len = #codes,
@@ -273,9 +272,6 @@ local function makesub(run, codes, nodelist)
     codes = codes,
   }
   table.print(subrun)
-  for n in traverse(nodelist) do
-    print(tonode(n))
-  end
   local glyphs
   nodelist, glyphs = shape(nodelist, nodelist, subrun)
   return { glyphs = glyphs, run = subrun, head = nodelist }
@@ -506,15 +502,15 @@ shape = function(head, node, run)
             do local newpre = copynodelist(startnode, disc)
                setnext(tail(newpre), pre)
                pre = newpre end
-            printnodes('PRE', pre)
+            -- printnodes('PRE', pre)
             if post then
               setnext(lastpost, copynodelist(getnext(disc), stopnode))
             else
               post = copynodelist(getnext(disc), stopnode)
             end
-            printnodes('POST', post)
-            printnodes('HEAD', head)
-            printnodes('REP', rep)
+            -- printnodes('POST', post)
+            -- printnodes('HEAD', head)
+            -- printnodes('REP', rep)
             if startnode ~= disc then
               local predisc = getprev(disc)
               setnext(predisc, rep)
@@ -530,8 +526,8 @@ shape = function(head, node, run)
               rep = startnode
               lastrep = lastrep or predisc
             end
-            printnodes('HEAD', head)
-            printnodes('REP', rep)
+            -- printnodes('HEAD', head)
+            -- printnodes('REP', rep)
             if getnext(disc) ~= stopnode then
               setnext(getprev(stopnode), nil)
               setprev(stopnode, disc)
@@ -539,10 +535,9 @@ shape = function(head, node, run)
               setnext(lastrep, getnext(disc))
               rep = rep or getnext(disc)
               setnext(disc, stopnode)
-              print(disc, stopnode)
             end
-            printnodes('HEAD', head)
-            printnodes('REP', rep)
+            -- printnodes('HEAD', head)
+            -- printnodes('REP', rep)
             glyph.replace = makesub(run, repcodes, rep)
             glyph.pre = makesub(run, precodes, pre)
             glyph.post = makesub(run, postcodes, post)

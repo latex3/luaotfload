@@ -365,12 +365,9 @@ shape = function(head, node, run)
 
     local i = 0
     while i < #glyphs do
-      print(i, #glyphs)
       i = i + 1
       local glyph = glyphs[i]
       local nodeindex = glyph.cluster + 1
-      printnodes(nodeindex, head)
-      print(glyph, node)
       local nchars, nglyphs = chars_in_glyph(i, glyphs, offset + len)
       glyph.nchars, glyph.nglyphs = nchars, nglyphs
 
@@ -456,6 +453,7 @@ shape = function(head, node, run)
               local glyph = glyphs[j]
               glyph.cluster = glyph.cluster - (stopindex - startindex)
             end
+            len = len - (stopindex - startindex)
             table.move(glyphs, stopglyph, #glyphs + stopglyph - i - 1, i + 1)
             -- -- Mark these glyph for skipping since they will be replaced by the
             -- -- discretionary fields.
@@ -486,7 +484,6 @@ shape = function(head, node, run)
             
             local pre, post, rep, lastpre, lastpost, lastrep = getdisc(disc, true)
             local precodes, postcodes, repcodes = {}, {}, {}
-            print(subcodes, 1, subindex, 1, repcodes)
             table.move(subcodes, 1, subindex, 1, repcodes)
             for n, id, subtype in traverse(rep) do
               repcodes[#repcodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
@@ -791,7 +788,7 @@ local function tonodes(head, node, run, glyphs, color)
   for j = nodeindex + 1, run.start + #run.codes do
     local oldnode = node
     head, node = removenode(head, node)
-    freenode(node)
+    freenode(oldnode)
   end
 
   return head, node

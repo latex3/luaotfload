@@ -19,6 +19,7 @@ local insertbefore      = direct.insert_before
 local insertafter       = direct.insert_after
 local protectglyph      = direct.protect_glyph
 local newnode           = direct.new
+local freenode          = direct.free
 local copynode          = direct.copy
 local removenode        = direct.remove
 local copynodelist      = direct.copy_list
@@ -172,8 +173,8 @@ local function itemize(head, fontid, direction)
     elseif id == glue_t and subtype == spaceskip_t then
       code = 0x0020 -- SPACE
     elseif id == disc_t -- FIXME
-      and (subtype == explicitdisc_t  -- \-
-        or subtype == regulardisc_t)  -- \discretionary
+      -- and (subtype == explicitdisc_t  -- \-
+      --   or subtype == regulardisc_t)  -- \discretionary
     then
       code = 0x00AD -- SOFT HYPHEN
     elseif id == dir_t then
@@ -271,7 +272,6 @@ local function makesub(run, codes, nodelist)
     node = nodelist,
     codes = codes,
   }
-  table.print(subrun)
   local glyphs
   nodelist, glyphs = shape(nodelist, nodelist, subrun)
   return { glyphs = glyphs, run = subrun, head = nodelist }
@@ -312,10 +312,6 @@ shape = function(head, node, run)
   buf:set_script(script)
   buf:set_language(lang)
   buf:set_cluster_level(buf.CLUSTER_LEVEL_MONOTONE_CHARACTERS)
-  for n in traverse(node) do
-    print(tonode(n))
-  end
-  -- table.print{codes, offset-1, len}
   buf:add_codepoints(codes, offset - 1, len)
 
   local hscale = hbdata.hscale
@@ -367,10 +363,14 @@ shape = function(head, node, run)
       end
     end
 
-    table.print(codes)
-    -- table.print(glyphs)
-    for i, glyph in next, glyphs do
+    local i = 0
+    while i < #glyphs do
+      print(i, #glyphs)
+      i = i + 1
+      local glyph = glyphs[i]
       local nodeindex = glyph.cluster + 1
+      printnodes(nodeindex, head)
+      print(glyph, node)
       local nchars, nglyphs = chars_in_glyph(i, glyphs, offset + len)
       glyph.nchars, glyph.nglyphs = nchars, nglyphs
 
@@ -407,7 +407,7 @@ shape = function(head, node, run)
         -- Find if we have a discretionary inside a ligature, if the cluster
         -- only spans one char than two then either this is not a ligature or
         -- there is no discretionary involved.
-        if nextcluster > cluster + 1 and not fordisc then
+        if true or nextcluster > cluster + 1 and not fordisc then
           local discindex = nil
           local disc = node
           for j = cluster + 1, nextcluster do
@@ -451,40 +451,42 @@ shape = function(head, node, run)
               stopnode = getnext(stopnode)
             end
 
-            -- Mark these glyph for skipping since they will be replaced by the
-            -- discretionary fields.
-            -- We break up to stop glyph but not including it, so the -1 below.
-            for j = startglyph, stopglyph - 1 do
-              glyphs[j].skip = true
+            glyphs[startglyph] = glyph
+            for j = stopglyph, #glyphs do
+              local glyph = glyphs[j]
+              glyph.cluster = glyph.cluster - (stopindex - startindex)
             end
+            table.move(glyphs, stopglyph, #glyphs + stopglyph - i - 1, i + 1)
+            -- -- Mark these glyph for skipping since they will be replaced by the
+            -- -- discretionary fields.
+            -- -- We break up to stop glyph but not including it, so the -1 below.
+            -- for j = startglyph, stopglyph - 1 do
+            --   glyphs[j].skip = true
+            -- end
 
             local subcodes, subindex = {}
             do
               local node = startnode
               while node ~= stopnode do
-                print(node, stopnode, tonode(node))
                 if getid(node) == disc_t and node ~= disc then
-                  print'.1'
                   local oldnode = node
-                  startnode, node = remove(startnode, node)
-                  free(oldnode)
+                  startnode, node = removenode(startnode, node)
+                  freenode(oldnode)
                   tableremove(codes, startindex)
                 elseif node == disc then
-                  print'.2'
                   subindex = #subcodes
-                  tableremove(codes, startindex)
+                  startindex = startindex + 1
                   node = getnext(node)
                 else
-                  print'.3'
                   subcodes[#subcodes + 1] = tableremove(codes, startindex)
                   node = getnext(node)
                 end
               end
-              table.print{subcodes = subcodes, subindex}
             end
             
             local pre, post, rep, lastpre, lastpost, lastrep = getdisc(disc, true)
             local precodes, postcodes, repcodes = {}, {}, {}
+            print(subcodes, 1, subindex, 1, repcodes)
             table.move(subcodes, 1, subindex, 1, repcodes)
             for n, id, subtype in traverse(rep) do
               repcodes[#repcodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
@@ -498,19 +500,14 @@ shape = function(head, node, run)
               postcodes[#postcodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
             end
             table.move(subcodes, subindex + 1, #subcodes, #postcodes + 1, postcodes)
-            table.print{repcodes, precodes, postcodes}
             do local newpre = copynodelist(startnode, disc)
                setnext(tail(newpre), pre)
                pre = newpre end
-            -- printnodes('PRE', pre)
             if post then
               setnext(lastpost, copynodelist(getnext(disc), stopnode))
             else
               post = copynodelist(getnext(disc), stopnode)
             end
-            -- printnodes('POST', post)
-            -- printnodes('HEAD', head)
-            -- printnodes('REP', rep)
             if startnode ~= disc then
               local predisc = getprev(disc)
               setnext(predisc, rep)
@@ -526,8 +523,6 @@ shape = function(head, node, run)
               rep = startnode
               lastrep = lastrep or predisc
             end
-            -- printnodes('HEAD', head)
-            -- printnodes('REP', rep)
             if getnext(disc) ~= stopnode then
               setnext(getprev(stopnode), nil)
               setprev(stopnode, disc)
@@ -536,11 +531,11 @@ shape = function(head, node, run)
               rep = rep or getnext(disc)
               setnext(disc, stopnode)
             end
-            -- printnodes('HEAD', head)
-            -- printnodes('REP', rep)
             glyph.replace = makesub(run, repcodes, rep)
             glyph.pre = makesub(run, precodes, pre)
             glyph.post = makesub(run, postcodes, post)
+            i = startglyph
+            node = disc
           end
         end
       end
@@ -583,7 +578,7 @@ end
 
 -- Convert glyphs to nodes and collect font characters.
 local function tonodes(head, node, run, glyphs, color)
-  local nodeindex = run.start - 1
+  local nodeindex = run.start
   local dir = run.dir
   local fontid = run.font
   local fontdata = font.getfont(fontid)
@@ -603,17 +598,19 @@ local function tonodes(head, node, run, glyphs, color)
   local fonttype = hbshared.fonttype
 
   for i, glyph in ipairs(glyphs) do
-    if glyph.cluster < nodeindex then -- Ups, we went too far
+    if glyph.cluster < nodeindex - 1 then -- Ups, we went too far
       nodeindex = nodeindex - 1
       local new = inherit(glyph_t, getprev(node), lastprops)
       setfont(new, fontid)
       head, node = insertbefore(head, node, new)
     else
-      for j = nodeindex, glyph.cluster - 1 do
+      for j = nodeindex, glyph.cluster do
+        local oldnode = node
         head, node = removenode(head, node)
+        freenode(oldnode)
       end
       lastprops = getproperty(node)
-      nodeindex = glyph.cluster
+      nodeindex = glyph.cluster + 1
     end
     local gid = glyph.codepoint
     local char = nominals[gid] or hb.CH_GID_PREFIX + gid
@@ -632,7 +629,14 @@ local function tonodes(head, node, run, glyphs, color)
       setdisc(node, tonodes(pre.head, pre.head, pre.run, pre.glyphs, color),
                     tonodes(post.head, post.head, post.run, post.glyphs, color),
                     tonodes(rep.head, rep.head, rep.run, rep.glyphs, color))
-    elseif not glyph.skip then
+      node = getnext(node)
+      nodeindex = nodeindex + 1
+    elseif glyph.skip then
+      local oldnode = node
+      head, node = removenode(head, node)
+      freenode(oldnode)
+      nodeindex = nodeindex + 1
+    else
       if glyph.color then
         setprop(node, color_p, color_to_rgba(glyph.color))
       end
@@ -780,9 +784,14 @@ local function tonodes(head, node, run, glyphs, color)
 
         head, current = insertafter(head, current, node)
       end
+      node = getnext(node)
+      nodeindex = nodeindex + 1
     end
-    node = getnext(node)
-    nodeindex = nodeindex + 1
+  end
+  for j = nodeindex + 1, run.start + #run.codes do
+    local oldnode = node
+    head, node = removenode(head, node)
+    freenode(node)
   end
 
   return head, node
@@ -811,10 +820,6 @@ local function shape_run(head, current, run)
 
     local glyphs
     head, glyphs = shape(head, current, run)
-    print'X0'
-    for n in node.traverse(tonode(head)) do
-      print('C0', n)
-    end
     return tonodes(head, current, run, glyphs, color)
   else
     for i = 1, len do
@@ -830,10 +835,6 @@ function process(head, font, direction)
 
   for _, run in next, runs do
     newhead, current = shape_run(newhead, current, run)
-  end
-  print'X'
-  for n in node.traverse(tonode(newhead)) do
-    print('C', n)
   end
 
   return newhead or head

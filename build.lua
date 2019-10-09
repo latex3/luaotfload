@@ -1,8 +1,8 @@
 
-packageversion= "3.00"
-packagedate   = "2019-09-13"
+packageversion= "3.0007-dev"
+packagedate   = "2019-10-10"
 fontloaderdate= "2019-08-11"
-packagedesc   = "ctan"
+packagedesc   = "dev"
 checkformat   = "latex"
 
 module   = "luaotfload"

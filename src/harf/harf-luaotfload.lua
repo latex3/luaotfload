@@ -1,8 +1,4 @@
-if not pcall(require, "luaharfbuzz") then
-  luatexbase.module_error("harf", "'luaharfbuzz' module is required.")
-end
-
-local harf = require("harf-base")
+local harf = luaharfbuzz or require'luaharfbuzz'
 
 local define_font = require("harf-load")
 local harf_node   = require("harf-node")
@@ -155,7 +151,7 @@ aux.slot_of_name = function(fontid, glyphname, unsafe)
 
     local gid = hbfont:get_glyph_from_name(glyphname)
     if gid ~= nil then
-      return nominals[gid] or gid + harf.CH_GID_PREFIX
+      return nominals[gid] or gid + hbshared.gid_offset
     end
     return nil
   end

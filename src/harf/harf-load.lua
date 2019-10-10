@@ -1,4 +1,4 @@
-local hb = require("harf-base")
+local hb = luaharfbuzz or require'luaharfbuzz'
 
 local hbfonts = hb.fonts
 local hbfonts = hbfonts or {}
@@ -134,6 +134,7 @@ local function loadfont(spec)
     end
 
     data = {
+      gid_offset = 0x120000,
       face = hbface,
       font = hbfont,
       upem = upem,
@@ -162,7 +163,19 @@ local function sanitize(psname)
   return psname:gsub('[][\0-\32\127-\255(){}<>/%%]', '-')
 end
 
-local tlig = hb.texlig
+-- Ligatures. The value is a character "ligature" table as described in the
+-- manual.
+local tlig ={
+  [0x2013] = { [0x002D] = { char = 0x2014 } }, -- [---]
+  [0x002D] = { [0x002D] = { char = 0x2013 } }, -- [--]
+  [0x0060] = { [0x0060] = { char = 0x201C } }, -- [``]
+  [0x0027] = { [0x0027] = { char = 0x201D } }, -- ['']
+  [0x0021] = { [0x0060] = { char = 0x00A1 } }, -- [!`]
+  [0x003F] = { [0x0060] = { char = 0x00BF } }, -- [?`]
+  [0x002C] = { [0x002C] = { char = 0x201E } }, -- [,,]
+  [0x003C] = { [0x003C] = { char = 0x00AB } }, -- [<<]
+  [0x003E] = { [0x003E] = { char = 0x00BB } }, -- [>>]
+}
 
 local function scalefont(data, spec)
   local size = spec.size
@@ -174,6 +187,7 @@ local function scalefont(data, spec)
   local hbfont = data.font
   local upem = data.upem
   local space = data.space
+  local gid_offset = data.gid_offset
 
   if size < 0 then
     size = -655.36 * size
@@ -188,7 +202,7 @@ local function scalefont(data, spec)
   local glyphs = data.glyphs
   local characters = {}
   for gid, glyph in next, glyphs do
-    characters[hb.CH_GID_PREFIX + gid] = {
+    characters[gid_offset + gid] = {
       index  = gid,
       width  = glyph.width  * scale,
       height = glyph.height * scale,
@@ -199,7 +213,7 @@ local function scalefont(data, spec)
 
   local unicodes = data.unicodes
   for uni, gid in next, unicodes do
-    characters[uni] = characters[hb.CH_GID_PREFIX + gid]
+    characters[uni] = characters[gid_offset + gid]
   end
 
   -- Select font palette, we support `palette=index` option, and load the first

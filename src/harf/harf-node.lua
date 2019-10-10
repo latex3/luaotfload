@@ -1,4 +1,4 @@
-local hb = require("harf-base")
+local hb = luaharfbuzz or require'luaharfbuzz'
 
 local assert            = assert
 local next              = next
@@ -146,7 +146,15 @@ end
 
 local process
 
-local trep = hb.texrep
+-- Legacy TeX Input Method Disguised as Font Ligatures hack.
+--
+-- Single replacements, keyed by character to replace. Handled separately
+-- because TeX ligaturing mechanism does not support one-to-one replacements.
+local trep = {
+  [0x0022] = 0x201D, -- ["]
+  [0x0027] = 0x2019, -- [']
+  [0x0060] = 0x2018, -- [`]
+}
 
 local function itemize(head, fontid, direction)
   local fontdata = font.getfont(fontid)
@@ -585,6 +593,7 @@ local function tonodes(head, node, run, glyphs, color)
   local nominals = hbshared.nominals
   local hbfont = hbshared.font
   local fontglyphs = hbshared.glyphs
+  local gid_offset = hbshared.gid_offset
   local rtl = dir:is_backward()
   local lastprops
 
@@ -610,7 +619,7 @@ local function tonodes(head, node, run, glyphs, color)
       nodeindex = glyph.cluster + 1
     end
     local gid = glyph.codepoint
-    local char = nominals[gid] or hb.CH_GID_PREFIX + gid
+    local char = nominals[gid] or gid_offset + gid
     local id = getid(node)
     local nchars, nglyphs = glyph.nchars, glyph.nglyphs
 
@@ -918,12 +927,13 @@ local function set_tounicode()
       local hbshared = hbdata.shared
       local glyphs = hbshared.glyphs
       local nominals = hbshared.nominals
+      local gid_offset = hbshared.gid_offset
       for gid = 0, #glyphs do
         local glyph = glyphs[gid]
         if glyph.used then
           local tounicode = glyph.tounicode or "FFFD"
-          local character = characters[gid + hb.CH_GID_PREFIX]
-          newcharacters[gid + hb.CH_GID_PREFIX] = character
+          local character = characters[gid + gid_offset]
+          newcharacters[gid + gid_offset] = character
           local unicode = nominals[gid]
           if unicode then
             newcharacters[unicode] = character

@@ -947,7 +947,7 @@ local function set_tounicode()
   end
 end
 
-local function get_glyph_string(n)
+local function get_glyph_info(n)
   local n = todirect(n)
   local props = getproperty(n)
   props = props and props.harf
@@ -957,8 +957,9 @@ end
 fonts.handlers.otf.registerplugin('harf', process)
 
 -- luatexbase does not know how to handle `wrapup_run` callback, teach it.
+-- TODO: Move these into ltluatex
 luatexbase.callbacktypes.wrapup_run = 1 -- simple
-luatexbase.callbacktypes.get_glyph_string = 1 -- simple
+luatexbase.callbacktypes.glyph_info = 1 -- simple
 
 local base_callback_descriptions = luatexbase.callback_descriptions
 local base_add_to_callback = luatexbase.add_to_callback
@@ -980,4 +981,4 @@ end
 add_to_callback('pre_output_filter', post_process_nodes) -- FIXME: Wrong callback, but I want to get rid of the whole function anyway
 add_to_callback('wrapup_run', run_cleanup)
 add_to_callback('finish_pdffile', set_tounicode)
-add_to_callback('get_glyph_string', get_glyph_string)
+add_to_callback('glyph_info', get_glyph_info)

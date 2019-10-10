@@ -913,6 +913,7 @@ end
 
 local function run_cleanup()
   -- Remove temporary PNG files that we created, if any.
+  -- FIXME: It would be nice if we wouldn't need this
   for _, path in next, pngcache do
     osremove(path)
   end
@@ -931,14 +932,13 @@ local function set_tounicode()
       for gid = 0, #glyphs do
         local glyph = glyphs[gid]
         if glyph.used then
-          local tounicode = glyph.tounicode or "FFFD"
           local character = characters[gid + gid_offset]
           newcharacters[gid + gid_offset] = character
           local unicode = nominals[gid]
           if unicode then
             newcharacters[unicode] = character
           end
-          character.tounicode = tounicode
+          character.tounicode = glyph.tounicode or "FFFD"
           character.used = true
         end
       end
@@ -956,10 +956,28 @@ end
 
 fonts.handlers.otf.registerplugin('harf', process)
 
-return {
-  -- process = process_nodes,
-  post_process = post_process_nodes,
-  cleanup = run_cleanup,
-  set_tounicode = set_tounicode,
-  get_glyph_string = get_glyph_string,
-}
+-- luatexbase does not know how to handle `wrapup_run` callback, teach it.
+luatexbase.callbacktypes.wrapup_run = 1 -- simple
+luatexbase.callbacktypes.get_glyph_string = 1 -- simple
+
+local base_callback_descriptions = luatexbase.callback_descriptions
+local base_add_to_callback = luatexbase.add_to_callback
+local base_remove_from_callback = luatexbase.remove_from_callback
+
+-- Remove all existing functions from given callback, insert ours, then
+-- reinsert the removed ones, so ours takes a priority.
+local function add_to_callback(name, func)
+  local saved_callbacks = {}, ff, dd
+  for k, v in next, base_callback_descriptions(name) do
+    saved_callbacks[k] = { base_remove_from_callback(name, v) }
+  end
+  base_add_to_callback(name, func, "Harf "..name.." callback")
+  for _, v in next, saved_callbacks do
+    base_add_to_callback(name, v[1], v[2])
+  end
+end
+
+add_to_callback('pre_output_filter', post_process_nodes) -- FIXME: Wrong callback, but I want to get rid of the whole function anyway
+add_to_callback('wrapup_run', run_cleanup)
+add_to_callback('finish_pdffile', set_tounicode)
+add_to_callback('get_glyph_string', get_glyph_string)

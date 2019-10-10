@@ -1,49 +1,5 @@
 local harf = luaharfbuzz or require'luaharfbuzz'
 
-local define_font = require("harf-load")
-local harf_node   = require("harf-node")
-
-local callback_warning = true
-if callback_warning then
-  local callbacks = callback.list()
-  if callbacks["get_glyph_string"] == nil then
-    luatexbase.module_warning("harf",
-      "'get_glyph_string' callback is missing, " ..
-      "log messages might show garbage.")
-  end
-  callback_warning = false
-end
-
--- Register a reader for `harf` mode (`mode=harf` font option) so that we only
--- load fonts when explicitly requested. Fonts we load will be shaped by the
--- callbacks we register below.
-fonts.readers.harf = function(spec)
-  local rawfeatures = spec.features.raw
-  local hb_features = {}
-  spec.hb_features = hb_features
-
-  if rawfeatures.language then
-    spec.language = harf.Language.new(rawfeatures.language)
-  end
-  if rawfeatures.script then
-    spec.script = harf.Script.new(rawfeatures.script)
-  end
-  for key, val in next, rawfeatures do
-    if key:len() == 4 then
-      -- 4-letter options are likely font features, but not always, so we do
-      -- some checks below. We put non feature options in the `options` dict.
-      if val == true or val == false then
-        val = (val and '+' or '-')..key
-        hb_features[#hb_features + 1] = harf.Feature.new(val)
-      elseif tonumber(val) then
-        val = '+'..key..'='..tonumber(val) - 1
-        hb_features[#hb_features + 1] = harf.Feature.new(val)
-      end
-    end
-  end
-  return define_font(spec)
-end
-
 local GSUBtag = harf.Tag.new("GSUB")
 local GPOStag = harf.Tag.new("GPOS")
 local dflttag = harf.Tag.new("dflt")
@@ -176,29 +132,3 @@ aux.name_of_slot = function(fontid, codepoint)
   end
   return aux_name_of_slot(fontid, codepoint)
 end
-
--- luatexbase does not know how to handle `wrapup_run` callback, teach it.
-luatexbase.callbacktypes.wrapup_run = 1 -- simple
-luatexbase.callbacktypes.get_glyph_string = 1 -- simple
-
-local base_callback_descriptions = luatexbase.callback_descriptions
-local base_add_to_callback = luatexbase.add_to_callback
-local base_remove_from_callback = luatexbase.remove_from_callback
-
--- Remove all existing functions from given callback, insert ours, then
--- reinsert the removed ones, so ours takes a priority.
-local function add_to_callback(name, func)
-  local saved_callbacks = {}, ff, dd
-  for k, v in next, base_callback_descriptions(name) do
-    saved_callbacks[k] = { base_remove_from_callback(name, v) }
-  end
-  base_add_to_callback(name, func, "Harf "..name.." callback")
-  for _, v in next, saved_callbacks do
-    base_add_to_callback(name, v[1], v[2])
-  end
-end
-
-add_to_callback('pre_output_filter', harf_node.post_process)
-add_to_callback('wrapup_run', harf_node.cleanup)
-add_to_callback('finish_pdffile', harf_node.set_tounicode)
-add_to_callback('get_glyph_string', harf_node.get_glyph_string)

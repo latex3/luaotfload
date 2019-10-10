@@ -1,7 +1,6 @@
 local hb = luaharfbuzz or require'luaharfbuzz'
 
-local hbfonts = hb.fonts
-local hbfonts = hbfonts or {}
+local hbfonts = {}
 
 local cfftag  = hb.Tag.new("CFF ")
 local cff2tag = hb.Tag.new("CFF2")
@@ -322,7 +321,33 @@ local function scalefont(data, spec)
   return tfmdata
 end
 
-return function(spec)
+-- Register a reader for `harf` mode (`mode=harf` font option) so that we only
+-- load fonts when explicitly requested. Fonts we load will be shaped by the
+-- harf plugin in luaotfload-harf-plug.
+fonts.readers.harf = function(spec)
   if not spec.resolved then return end
+  local rawfeatures = spec.features.raw
+  local hb_features = {}
+  spec.hb_features = hb_features
+
+  if rawfeatures.language then
+    spec.language = harf.Language.new(rawfeatures.language)
+  end
+  if rawfeatures.script then
+    spec.script = harf.Script.new(rawfeatures.script)
+  end
+  for key, val in next, rawfeatures do
+    if key:len() == 4 then
+      -- 4-letter options are likely font features, but not always, so we do
+      -- some checks below. We put non feature options in the `options` dict.
+      if val == true or val == false then
+        val = (val and '+' or '-')..key
+        hb_features[#hb_features + 1] = harf.Feature.new(val)
+      elseif tonumber(val) then
+        val = '+'..key..'='..tonumber(val) - 1
+        hb_features[#hb_features + 1] = harf.Feature.new(val)
+      end
+    end
+  end
   return scalefont(loadfont(spec), spec)
 end

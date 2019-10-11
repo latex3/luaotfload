@@ -24,6 +24,7 @@ local copynode          = direct.copy
 local removenode        = direct.remove
 local copynodelist      = direct.copy_list
 local isglyph           = direct.is_glyph
+local uses_font         = direct.uses_font
 
 local getattrs          = direct.getattributelist
 local setattrs          = direct.setattributelist
@@ -166,7 +167,8 @@ local function itemize(head, fontid, direction)
   local runs, codes = {}, {}
   local dirstack = {}
   local currdir = direction or "TLT"
-  local lastdir, lastskip, lastrun
+  local lastdir, lastskip
+  local lastrun = {}
 
   for n, id, subtype in direct.traverse(head) do
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
@@ -184,7 +186,11 @@ local function itemize(head, fontid, direction)
       -- and (subtype == explicitdisc_t  -- \-
       --   or subtype == regulardisc_t)  -- \discretionary
     then
-      code = 0x00AD -- SOFT HYPHEN
+      if uses_font(n, fontid) then
+        code = 0x00AD -- SOFT HYPHEN
+      else
+        skip = true
+      end
     elseif id == dir_t then
       local dir = getdir(n)
       if dir:sub(1, 1) == "+" then
@@ -210,6 +216,7 @@ local function itemize(head, fontid, direction)
     codes[#codes + 1] = code
 
     if lastdir ~= currdir or lastskip ~= skip then
+      lastrun.after = n
       lastrun = {
         start = #codes,
         len = 1,
@@ -294,7 +301,8 @@ end
 -- the output.
 shape = function(head, node, run)
   local codes = run.codes
-  local offset = run.start
+  local offset = run.start - (codes.offset or 0)
+  run.start = offset
   local len = run.len
   local fontid = run.font
   local dir = run.dir
@@ -439,14 +447,17 @@ shape = function(head, node, run)
             -- Find the next glyph that is safe to break at.
             stopglyph = i + 1
             local lastcluster = glyphs[i].cluster
-            while unsafetobreak(glyphs[stopglyph])
-                  or lastcluster == glyphs[stopglyph].cluster
-                  and getid(stopnode) ~= glue_t do
+            while stopglyph < #glyphs
+              and codes[glyphs[stopglyph].cluster + 1] ~= 0x20
+              and (unsafetobreak(glyphs[stopglyph])
+                or lastcluster == glyphs[stopglyph].cluster) do
               lastcluster = glyphs[stopglyph].cluster
               stopglyph = stopglyph + 1
             end
             -- We also want the last char in the previous glyph, so no +1 below.
-            stopindex = glyphs[stopglyph].cluster
+
+            stopindex = stopglyph < #glyphs and glyphs[stopglyph].cluster
+                                             or offset + len - 1
 
             local startnode, stopnode = node, node
             for j=cluster, startindex, -1 do
@@ -494,15 +505,15 @@ shape = function(head, node, run)
             local precodes, postcodes, repcodes = {}, {}, {}
             table.move(subcodes, 1, subindex, 1, repcodes)
             for n, id, subtype in traverse(rep) do
-              repcodes[#repcodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
+              repcodes[#repcodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
             end
             table.move(subcodes, subindex + 1, #subcodes, #repcodes + 1, repcodes)
             table.move(subcodes, 1, subindex, 1, precodes)
             for n, id, subtype in traverse(pre) do
-              precodes[#precodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
+              precodes[#precodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
             end
             for n, id, subtype in traverse(post) do
-              postcodes[#postcodes + 1] = id == glyph_t and getchar(n) or 0xFFFC
+              postcodes[#postcodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
             end
             table.move(subcodes, subindex + 1, #subcodes, #postcodes + 1, postcodes)
             do local newpre = copynodelist(startnode, disc)
@@ -546,6 +557,7 @@ shape = function(head, node, run)
       end
       node = getnext(node)
     end
+    codes.offset = run.len - len + (codes.offset or 0)
     return head, glyphs
   end
 
@@ -579,6 +591,10 @@ local function cachedpng(data)
     pngcache[hash] = path
   end
   return path
+end
+
+local function get_png_glyph(gid, fontid, characters, haspng)
+  return gid
 end
 
 -- Convert glyphs to nodes and collect font characters.
@@ -648,49 +664,60 @@ local function tonodes(head, node, run, glyphs, color)
       end
 
       if id == glyph_t then
+        local done
         local fontglyph = fontglyphs[gid]
-
-        local pngblob = fontglyph.png -- FIXME: Rewrite
-        if haspng and not pngblob then
-          pngblob = hbfont:ot_color_glyph_get_png(gid)
-          fontglyph.png = pngblob
-        end
         local character = characters[char]
-        if pngblob then
-          -- Color bitmap font, extract the PNG data and insert it in the node
-          -- list.
-          local data = pngblob:get_data()
-          local path = cachedpng(data)
 
-          local image = imgnode {
-            filename  = path,
-            width     = character.width,
-            height    = character.height,
-            depth     = character.depth,
-          }
-          if fonttype then
-            -- Color bitmap font with glyph outlines. Insert negative kerning
-            -- as we will insert the glyph node below (to help with text
-            -- copying) and want the bitmap and the glyph to take the same
-            -- advance width.
-            local kern = newkern(-character.width, node)
-            head, node = insertkern(head, node, kern, rtl)
+        if haspng then
+          local pngglyph = character.pngglyph
+          if pngglyph == nil then
+            pngglyph = fontglyph.png
+            if pngglyph == nil then
+              local pngblob = hbfont:ot_color_glyph_get_png(gid)
+              if pngblob then
+                pngglyph = img.scan{filename = cachedpng(pngblob:get_data())}
+              else
+                pngglyph = false
+              end
+              fontglyph.png = pngglyph
+            end
+            if pngglyph then
+              local pngchar = { }
+              for k,v in next, character do
+                pngchar[k] = v
+              end
+              local i = img.copy(pngglyph)
+              i.width = character.width
+              i.depth = 0
+              i.height = character.height + character.depth
+              pngchar.commands = fonttype and {
+                {"push"}, {"char", gid_offset + gid}, {"pop"},
+                {"down", character.depth}, {"image", i}
+              } or { {"down", character.depth}, {"image", i} }
+              if not nominals[gid] then
+                char = 0x130000 + gid
+              end
+              characters[char] = pngchar
+              pngglyph = char
+              font.addcharacters(fontid, {characters = {[char] = pngchar}})
+            end
+            character.pngglyph = pngglyph
+          end
+          if pngglyph then
+            char = pngglyph
+          elseif not fonttype then
+            -- Color bitmap font with no glyph outlines (like Noto
+            -- Color Emoji) but has no bitmap for current glyph (most likely
+            -- `.notdef` glyph). The engine does not know how to embed such
+            -- fonts, so we don’t want them to reach the backend as it will cause
+            -- a fatal error. We use `nullfont` instead.  That is a hack, but I
+            -- think it is good enough for now.
+            -- We insert the glyph node and move on, no further work is needed.
+            setfont(node, 0)
+            done = true
           end
         end
-        if pngblob and not fonttype then
-          -- Color bitmap font with no glyph outlines, and has a bitmap for
-          -- this glyph. No further work is needed.
-        elseif haspng and not fonttype then
-          -- Color bitmap font with no glyph outlines (like Noto
-          -- Color Emoji) but has no bitmap for current glyph (most likely
-          -- `.notdef` glyph). The engine does not know how to embed such
-          -- fonts, so we don’t want them to reach the backend as it will cause
-          -- a fatal error. We use `nullfont` instead.  That is a hack, but I
-          -- think it is good enough for now.
-          -- We insert the glyph node and move on, no further work is needed.
-          setfont(node, 0)
-          head, current = insertafter(head, current, node)
-        else
+        if not done then
           local oldcharacter = characters[getchar(node)]
           -- If the glyph index of current font character is the same as shaped
           -- glyph, keep the node char unchanged. Helps with primitives that
@@ -703,7 +730,7 @@ local function tonodes(head, node, run, glyphs, color)
           local yoffset = glyph.y_offset * scale
           setoffsets(node, xoffset, yoffset)
 
-          fontglyph.used = true
+          fontglyph.used = fonttype and true
 
           -- The engine will use this string when printing a glyph node e.g. in
           -- overfull messages, otherwise it will be trying to print our
@@ -794,7 +821,7 @@ local function tonodes(head, node, run, glyphs, color)
       nodeindex = nodeindex + 1
     end
   end
-  for j = nodeindex + 1, run.start + #run.codes do
+  while node ~= run.after do
     local oldnode = node
     head, node = removenode(head, node)
     freenode(oldnode)
@@ -828,10 +855,7 @@ local function shape_run(head, current, run)
     head, glyphs = shape(head, current, run)
     return tonodes(head, current, run, glyphs, color)
   else
-    for i = 1, len do
-      current = getnext(current)
-    end
-    return head, current
+    return head, run.after
   end
 end
 

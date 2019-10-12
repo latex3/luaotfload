@@ -59,6 +59,8 @@ local setwidth          = direct.setwidth
 local is_char           = direct.is_char
 local tail              = direct.tail
 
+local properties        = direct.get_properties_table()
+
 local imgnode           = img.node
 
 local disc_t            = node.id("disc")
@@ -86,8 +88,7 @@ local fl_unsafe         = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 
 local startactual_p     = "startactualtext"
 local endactual_p       = "endactualtext"
-local color_p           = "color"
-local string_p          = "string"
+local color_p           = "color" -- FIXME: Colors are better handled as attributes
 
 -- Simple table copying function.
 local function copytable(old)
@@ -299,7 +300,7 @@ local function printnodes(label, head)
 end
 -- Main shaping function that calls HarfBuzz, and does some post-processing of
 -- the output.
-shape = function(head, node, run)
+function shape(head, node, run)
   local codes = run.codes
   local offset = run.start - (codes.offset or 0)
   run.start = offset
@@ -311,13 +312,11 @@ shape = function(head, node, run)
 
   local fontdata = font.getfont(fontid)
   local hbdata = fontdata.hb
-  local palette = hbdata.palette
   local spec = hbdata.spec
   local features = spec.hb_features
   local options = spec.features.raw
   local hbshared = hbdata.shared
   local hbfont = hbshared.font
-  local hbface = hbshared.face
 
   local lang = options.language or invalid_l
   local script = options.script or invalid_s
@@ -340,44 +339,6 @@ shape = function(head, node, run)
     if dir:is_backward() then buf:reverse() end
 
     local glyphs = buf:get_glyphs()
-
-    -- If the font has COLR/CPAL tables, decompose each glyph to its color
-    -- layers and set the color from the palette.
-    if palette then
-      for i, glyph in next, glyphs do
-        local gid = glyph.codepoint
-        local layers = hbface:ot_color_glyph_get_layers(gid)
-        if layers then
-          -- Remove this glyph, we will use its layers.
-          tableremove(glyphs, i)
-          for j, layer in next, layers do
-            -- All glyphs but the last use 0 advance so that the layers
-            -- overlap.
-            local xadavance, yadvance = nil, nil
-            if dir:is_backward() then
-              x_advance = j == 1 and glyph.x_advance or 0
-              y_advance = j == 1 and glyph.y_advance or 0
-            else
-              x_advance = j == #layers and glyph.x_advance or 0
-              y_advance = j == #layers and glyph.y_advance or 0
-            end
-            tableinsert(glyphs, i + j - 1, {
-              codepoint = layer.glyph,
-              cluster = glyph.cluster,
-              x_advance = x_advance,
-              y_advance = y_advance,
-              x_offset = glyph.x_offset,
-              y_offset = glyph.y_offset,
-              flags = glyph.flags,
-              -- color_index has a special value, 0x10000, that mean use text
-              -- color, we don’t check for it here explicitly since we will
-              -- get nil anyway.
-              color = palette[layer.color_index],
-            })
-          end
-        end
-      end
-    end
 
     local i = 0
     while i < #glyphs do
@@ -580,113 +541,160 @@ end
 -- Cache of color glyph PNG data for bookkeeping, only because I couldn’t
 -- figure how to make the engine load the image from the binary data directly.
 local pngcache = {}
+local pngcachefiles = {}
 local function cachedpng(data)
   local hash = md5.sumhexa(data)
-  local path = pngcache[hash]
-  if not path then
-    path = ostmpname()
-    local file = open(path, "wb")
-    file:write(data)
-    file:close()
-    pngcache[hash] = path
-  end
-  return path
+  local i = pngcache[hash]
+  if not i then
+    local path = ostmpname()
+    pngcachefiles[#pngcachefiles + 1] = path
+    open(path, "wb"):write(data):close()
+    -- local file = open(path, "wb"):write():close()
+    -- file:write(data)
+    -- file:close()
+  i = img.scan{filename = path}
+  pngcache[hash] = i
+end
+return i
 end
 
 local function get_png_glyph(gid, fontid, characters, haspng)
-  return gid
+return gid
 end
+
+local push_cmd = { "push" }
+local pop_cmd = { "pop" }
+local nop_cmd = { "nop" }
+local save_cmd = { "pdf", "text", "q" }
+local restore_cmd = { "pdf", "text", "Q" }
 
 -- Convert glyphs to nodes and collect font characters.
 local function tonodes(head, node, run, glyphs, color)
-  local nodeindex = run.start
-  local dir = run.dir
-  local fontid = run.font
-  local fontdata = font.getfont(fontid)
-  local characters = fontdata.characters
-  local hbdata = fontdata.hb
-  local hbshared = hbdata.shared
-  local nominals = hbshared.nominals
-  local hbfont = hbshared.font
-  local fontglyphs = hbshared.glyphs
-  local gid_offset = hbshared.gid_offset
-  local rtl = dir:is_backward()
-  local lastprops
+local nodeindex = run.start
+-- local nodeindex = run.start - (run.codes.offset or 0)
+local dir = run.dir
+local fontid = run.font
+local fontdata = font.getfont(fontid)
+local characters = fontdata.characters
+local hbdata = fontdata.hb
+local palette = hbdata.palette
+local hbshared = hbdata.shared
+local hbface = hbshared.face
+local nominals = hbshared.nominals
+local hbfont = hbshared.font
+local fontglyphs = hbshared.glyphs
+local gid_offset = hbshared.gid_offset
+local rtl = dir:is_backward()
+local lastprops
 
-  local scale = hbdata.scale
-  local letterspace = hbdata.letterspace
+local scale = hbdata.scale
+local letterspace = hbdata.letterspace
 
-  local haspng = hbshared.haspng
-  local fonttype = hbshared.fonttype
+local haspng = hbshared.haspng
+local fonttype = hbshared.fonttype
 
-  for i, glyph in ipairs(glyphs) do
-    if glyph.cluster < nodeindex - 1 then -- Ups, we went too far
-      nodeindex = nodeindex - 1
-      local new = inherit(glyph_t, getprev(node), lastprops)
-      setfont(new, fontid)
-      head, node = insertbefore(head, node, new)
-    else
-      for j = nodeindex, glyph.cluster do
-        local oldnode = node
-        head, node = removenode(head, node)
-        freenode(oldnode)
-      end
-      lastprops = getproperty(node)
-      nodeindex = glyph.cluster + 1
-    end
-    local gid = glyph.codepoint
-    local char = nominals[gid] or gid_offset + gid
-    local id = getid(node)
-    local nchars, nglyphs = glyph.nchars, glyph.nglyphs
-
-    if color then
-      setprop(node, color_p, color)
-    end
-
-    if glyph.replace then
-      -- For discretionary the glyph itself is skipped and a discretionary node
-      -- is output in place of it.
-      local rep, pre, post = glyph.replace, glyph.pre, glyph.post
-
-      setdisc(node, tonodes(pre.head, pre.head, pre.run, pre.glyphs, color),
-                    tonodes(post.head, post.head, post.run, post.glyphs, color),
-                    tonodes(rep.head, rep.head, rep.run, rep.glyphs, color))
-      node = getnext(node)
-      nodeindex = nodeindex + 1
-    elseif glyph.skip then
+for i, glyph in ipairs(glyphs) do
+  if glyph.cluster < nodeindex - 1 then -- Ups, we went too far
+    nodeindex = nodeindex - 1
+    local new = inherit(glyph_t, getprev(node), lastprops)
+    setfont(new, fontid)
+    head, node = insertbefore(head, node, new)
+  else
+    for j = nodeindex, glyph.cluster do
       local oldnode = node
       head, node = removenode(head, node)
       freenode(oldnode)
-      nodeindex = nodeindex + 1
-    else
-      if glyph.color then
-        setprop(node, color_p, color_to_rgba(glyph.color))
-      end
+    end
+    lastprops = getproperty(node)
+    nodeindex = glyph.cluster + 1
+  end
+  local gid = glyph.codepoint
+  local char = nominals[gid] or gid_offset + gid
+  local id = getid(node)
+  local nchars, nglyphs = glyph.nchars, glyph.nglyphs
 
-      if id == glyph_t then
-        local done
-        local fontglyph = fontglyphs[gid]
-        local character = characters[char]
+  if color then
+    setprop(node, color_p, color)
+  end
+
+  if glyph.replace then
+    -- For discretionary the glyph itself is skipped and a discretionary node
+    -- is output in place of it.
+    local rep, pre, post = glyph.replace, glyph.pre, glyph.post
+
+    setdisc(node, tonodes(pre.head, pre.head, pre.run, pre.glyphs, color),
+                  tonodes(post.head, post.head, post.run, post.glyphs, color),
+                  tonodes(rep.head, rep.head, rep.run, rep.glyphs, color))
+    node = getnext(node)
+    nodeindex = nodeindex + 1
+  elseif glyph.skip then
+    local oldnode = node
+    head, node = removenode(head, node)
+    freenode(oldnode)
+    nodeindex = nodeindex + 1
+  else
+    if glyph.color then
+      setprop(node, color_p, color_to_rgba(glyph.color)) -- FIXME: Precompute this
+    end
+
+    if id == glyph_t then
+      local done
+      local fontglyph = fontglyphs[gid]
+      local character = characters[char]
+
+      if not character.commands then
+        if palette then
+          local layers = fontglyph.layers
+          if layers == nil then
+            layers = hbface:ot_color_glyph_get_layers(gid)
+            if layers then
+              local cmds = {} -- Every layer will add 3 cmds
+              local prev_color = nil
+              for j = 1, #layers do
+                local layer = layers[j]
+                local layerchar = characters[gid_offset + layer.glyph]
+                if layerchar.height > character.height then
+                  character.height = layerchar.height
+                end
+                if layerchar.depth > character.depth then
+                  character.depth = layerchar.depth
+                end
+                -- color_index has a special value, 0x10000, that mean use text
+                -- color, we don’t check for it here explicitly since we will
+                -- get nil anyway.
+                local color = palette[layer.color_index]
+                cmds[5*j - 4] = (color and not prev_color) and save_cmd or nop_cmd
+                cmds[5*j - 3] = prev_color == color and nop_cmd or (color and {"pdf", "text", color_to_rgba(color)} or restore_cmd)
+                cmds[5*j - 2] = push_cmd
+                cmds[5*j - 1] = {"char", layer.glyph + gid_offset}
+                cmds[5*j] = pop_cmd
+                fontglyphs[layer.glyph].used = true
+                prev_color = color
+              end
+              cmds[#cmds + 1] = prev_color and restore_cmd
+              layers = cmds
+            else
+              layers = false
+            end
+            fontglyph.layers = layers
+          end
+          if layers then
+            character.commands = layers
+            font.addcharacters(fontid, {characters = {[gid + gid_offset] = character, [char] = character}})
+          end
+        end
 
         if haspng then
           local pngglyph = character.pngglyph
           if pngglyph == nil then
-            pngglyph = fontglyph.png
-            if pngglyph == nil then
-              local pngblob = hbfont:ot_color_glyph_get_png(gid)
-              if pngblob then
-                pngglyph = img.scan{filename = cachedpng(pngblob:get_data())}
-              else
-                pngglyph = false
-              end
-              fontglyph.png = pngglyph
-            end
-            if pngglyph then
+            local pngblob = hbfont:ot_color_glyph_get_png(gid)
+            if pngblob then
+              local glyphimg = cachedpng(pngblob:get_data())
               local pngchar = { }
               for k,v in next, character do
                 pngchar[k] = v
               end
-              local i = img.copy(pngglyph)
+              local i = img.copy(glyphimg)
               i.width = character.width
               i.depth = 0
               i.height = character.height + character.depth
@@ -703,19 +711,23 @@ local function tonodes(head, node, run, glyphs, color)
             end
             character.pngglyph = pngglyph
           end
-          if pngglyph then
-            char = pngglyph
-          elseif not fonttype then
-            -- Color bitmap font with no glyph outlines (like Noto
-            -- Color Emoji) but has no bitmap for current glyph (most likely
-            -- `.notdef` glyph). The engine does not know how to embed such
-            -- fonts, so we don’t want them to reach the backend as it will cause
-            -- a fatal error. We use `nullfont` instead.  That is a hack, but I
-            -- think it is good enough for now.
-            -- We insert the glyph node and move on, no further work is needed.
-            setfont(node, 0)
-            done = true
+            if pngglyph then
+              char = pngglyph
+            elseif not fonttype then
+              -- Color bitmap font with no glyph outlines (like Noto
+              -- Color Emoji) but has no bitmap for current glyph (most likely
+              -- `.notdef` glyph). The engine does not know how to embed such
+              -- fonts, so we don’t want them to reach the backend as it will cause
+              -- a fatal error. We use `nullfont` instead.  That is a hack, but I
+              -- think it is good enough for now. We could make the glyph virtual
+              -- with empty commands suh that LuaTeX ignores it, but we still want
+              -- a missing glyph warning.
+              -- We insert the glyph node and move on, no further work is needed.
+              setfont(node, 0)
+              done = true
+            end
           end
+          ;
         end
         if not done then
           local oldcharacter = characters[getchar(node)]
@@ -738,7 +750,12 @@ local function tonodes(head, node, run, glyphs, color)
           -- If the string is empty it means this glyph is part of a larger
           -- cluster and we don’t to print anything for it as the first glyph
           -- in the cluster will have the string of the whole cluster.
-          setprop(node, string_p, glyph.string or "")
+          local props = properties[node]
+          if not props then
+            props = {}
+            properties[node] = props
+          end
+          props.glyph_info = glyph.string or ""
 
           -- Handle PDF text extraction:
           -- * Find how many characters in this cluster and how many glyphs,
@@ -849,7 +866,7 @@ local function shape_run(head, current, run)
     local fontid = run.font
     local fontdata = font.getfont(fontid)
     local options = fontdata.specification.features.raw
-    local color = options and options.color and hex_to_rgba(options.color)
+    local color = options and options.color and hex_to_rgba(options.color) -- FIXME: Precompute this
 
     local glyphs
     head, glyphs = shape(head, current, run)
@@ -938,7 +955,7 @@ end
 local function run_cleanup()
   -- Remove temporary PNG files that we created, if any.
   -- FIXME: It would be nice if we wouldn't need this
-  for _, path in next, pngcache do
+  for _, path in next, pngcachefiles do
     osremove(path)
   end
 end
@@ -971,11 +988,11 @@ local function set_tounicode()
   end
 end
 
+-- FIXME: Move this into generic parts of luaotfload
 local function get_glyph_info(n)
-  local n = todirect(n)
-  local props = getproperty(n)
-  props = props and props.harf
-  return props and props[string_p] or nil
+  local props = properties[todirect(n)]
+  if not props then return end
+  return props and props.glyph_info or nil
 end
 
 fonts.handlers.otf.registerplugin('harf', process)

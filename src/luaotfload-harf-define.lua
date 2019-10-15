@@ -330,10 +330,10 @@ fonts.readers.harf = function(spec)
   spec.hb_features = hb_features
 
   if rawfeatures.language then
-    spec.language = harf.Language.new(rawfeatures.language)
+    spec.language = hb.Language.new(rawfeatures.language)
   end
   if rawfeatures.script then
-    spec.script = harf.Script.new(rawfeatures.script)
+    spec.script = hb.Script.new(rawfeatures.script)
   end
   for key, val in next, rawfeatures do
     if key:len() == 4 then
@@ -341,10 +341,10 @@ fonts.readers.harf = function(spec)
       -- some checks below. We put non feature options in the `options` dict.
       if val == true or val == false then
         val = (val and '+' or '-')..key
-        hb_features[#hb_features + 1] = harf.Feature.new(val)
+        hb_features[#hb_features + 1] = hb.Feature.new(val)
       elseif tonumber(val) then
         val = '+'..key..'='..tonumber(val) - 1
-        hb_features[#hb_features + 1] = harf.Feature.new(val)
+        hb_features[#hb_features + 1] = hb.Feature.new(val)
       end
     end
   end

@@ -318,8 +318,8 @@ function shape(head, node, run)
   local hbshared = hbdata.shared
   local hbfont = hbshared.font
 
-  local lang = options.language or invalid_l
-  local script = options.script or invalid_s
+  local lang = spec.language or invalid_l
+  local script = spec.script or invalid_s
   local shapers = options.shaper and { options.shaper } or {}
 
   local buf = hb.Buffer.new()
@@ -571,7 +571,6 @@ local restore_cmd = { "pdf", "text", "Q" }
 -- Convert glyphs to nodes and collect font characters.
 local function tonodes(head, node, run, glyphs, color)
 local nodeindex = run.start
--- local nodeindex = run.start - (run.codes.offset or 0)
 local dir = run.dir
 local fontid = run.font
 local fontdata = font.getfont(fontid)

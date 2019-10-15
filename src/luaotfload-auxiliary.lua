@@ -39,7 +39,7 @@ local stringbyte            = string.byte
 local stringfind            = string.find
 local tablecopy             = table.copy
 
-local harf = luaharfbuzz or require'luaharfbuzz'
+local harf = luaotfload.harfbuzz
 local GSUBtag, GPOStag
 if harf then
   GSUBtag = harf.Tag.new("GSUB")

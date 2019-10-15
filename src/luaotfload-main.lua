@@ -301,11 +301,13 @@ luaotfload.main = function ()
     loadmodule "letterspace"  --- extra character kerning
     loadmodule "embolden"     --- fake bold
     loadmodule "notdef"       --- missing glyph handling
-    initialize "auxiliary"    --- additional high-level functionality
-    if pcall(require, 'luaharfbuzz') then
+    local harfstatus, harfbuzz = pcall(require, 'luaharfbuzz')
+    if harfstatus then
+        luaotfload.harfbuzz = harfbuzz
         loadmodule "harf-define"
         loadmodule "harf-plug"
     end
+    initialize "auxiliary"    --- additional high-level functionality
     loadmodule "multiscript"  --- ...
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec

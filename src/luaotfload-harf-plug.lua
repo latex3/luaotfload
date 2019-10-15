@@ -1,4 +1,4 @@
-local hb = luaharfbuzz or require'luaharfbuzz'
+local hb = luaotfload.harfbuzz
 
 local assert            = assert
 local next              = next

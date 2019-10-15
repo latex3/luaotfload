@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-features",
-    version       = "3.006-dev",       --TAGVERSION
-    date          = "2019-08-11", --TAGDATE
+    version       = "3.0006-dev",       --TAGVERSION
+    date          = "2019-10-15", --TAGDATE
     description   = "luaotfload submodule / features",
     license       = "GPL v2.0",
     author        = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
@@ -572,8 +572,8 @@ local autofeatures = {
 
 local add_auto_features = function ()
     local nfeats = #autofeatures
-    logreport ("both", 5, "features",
-               "auto-installing %d feature definitions", nfeats)
+    report ("both", 5, "features",
+            "auto-installing %d feature definitions", nfeats)
     for i = 1, nfeats do
         local name, spec, desc = unpack (autofeatures [i])
         spec.description = desc
@@ -582,12 +582,10 @@ local add_auto_features = function ()
 end
 
 return function ()
-    logreport = luaotfload.log.report
-
     if not fonts and fonts.handlers then
-        logreport ("log", 0, "features",
-                   "OTF mechanisms missing -- did you forget to \z
-                   load a font loader?")
+        report ("log", 0, "features",
+                "OTF mechanisms missing -- did you forget to \z
+                load a font loader?")
         return false
     end
     add_auto_features ()

@@ -1,2 +1,2 @@
-- The fontloader has been synced with the context files from 2019-08-11.
-- Some code clean up.
+- invisible option to avoid that some glyph are shown (issue #63)
+- correct a small bug in xheight calculation 

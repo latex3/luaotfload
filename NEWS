@@ -1,7 +1,8 @@
 Change History
 --------------
-2019-XX-XX luaotfload v3.0-dev
+2019-09-13 luaotfload v3.0
     * invisible option to avoid that some glyph are shown (issue #63)
+    * correct small bug in xheight calculation 
 
 2019-08-11 luaotfload v2.99
     * some clean up

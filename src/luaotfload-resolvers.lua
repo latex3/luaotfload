@@ -11,8 +11,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-resolvers",
-    version       = "3.006-dev",       --TAGVERSION
-    date          = "2019-08-11", --TAGDATE
+    version       = "3.0006-dev",       --TAGVERSION
+    date          = "2019-10-15", --TAGDATE
     description   = "luaotfload submodule / resolvers",
     license       = "GPL v2.0"
 }
@@ -148,11 +148,12 @@ end
 
 local tex_formats = { "tfm", "ofm" }
 
+local resolvers_findfile = luaotfload.fontloader.resolvers.findfile
 local resolve_tex_format = function (specification)
     local name = specification.name
     for i=1, #tex_formats do
         local format = tex_formats [i]
-        local resolved = resolvers.findfile(name, format)
+        local resolved = resolvers_findfile(name, format)
         if resolved then
             return resolved, format
         end

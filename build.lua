@@ -1,6 +1,7 @@
 
-packageversion= "3.006-dev"
-packagedate   = "2019-08-11"
+packageversion= "3.0006-dev"
+packagedate   = "2019-10-15"
+fontloaderdate= "2019-08-11"
 packagedesc   = "harf"
 checkformat   = "latex"
 
@@ -155,19 +156,12 @@ typesetdemofiles  =
 ---------------------
 
 
-if options["target"] == "check" or options["target"] == "save" then
-  print("check/save")
-  installfiles ={}
-  sourcefiles  ={}
-  unpackfiles  ={}
-else
   sourcefiles  =
   {
     "luaotfload.sty",
     "**/luaotfload-*.lua",
     "**/fontloader-*.lua",
     "**/fontloader-*.tex",
-    "**/harf*.lua",
     "luaotfload-blacklist.cnf",
     "./doc/filegraph.tex",
     "./doc/luaotfload-main.tex",
@@ -178,9 +172,8 @@ else
      "**/luaotfload-*.lua",
      "**/fontloader-*.lua",
      "**/fontloader-*.tex",
-     "**/harf*.lua",
                 }
-end
+
 tdslocations=
  {
   "source/luatex/luaotfload/fontloader-reference-load-order.lua",
@@ -207,27 +200,37 @@ tagfiles = {
             "scripts/mkstatus",
             "testfiles/aaaaa-luakern.tlg"
             }
+   
+ -- windows/UF
+  function typeset_demo_tasks()
+   local errorlevel = 0
+   local pyextension 
+   if os.type == "windows" then 
+    pyextension = ".py" 
+   else 
+    pyextension = "" 
+   end
+   local rst2man   = "rst2man"    .. pyextension
+   local rst2xetex = "rst2xetex" .. pyextension
+   errorlevel = run (docfiledir, rst2man .." luaotfload.conf.rst luaotfload.conf.5")
+   if errorlevel ~= 0 then
+          return errorlevel
+   end
+   errorlevel = run (docfiledir, rst2man .." luaotfload-tool.rst luaotfload-tool.1")
+   if errorlevel ~= 0 then
+          return errorlevel
+   end
+   errorlevel= run (typesetdir, rst2xetex .. " luaotfload.conf.rst luaotfload-conf.tex")
+   if errorlevel ~= 0 then
+          return errorlevel
+   end
+   errorlevel=run (typesetdir, rst2xetex .. " luaotfload-tool.rst luaotfload-tool.tex")
+   if errorlevel ~= 0 then
+          return errorlevel
+   end
+   return 0
+  end
 
-function typeset_demo_tasks()
- local errorlevel = 0
- errorlevel = run (docfiledir,"rst2man luaotfload.conf.rst luaotfload.conf.5")
- if errorlevel ~= 0 then
-        return errorlevel
- end
- errorlevel = run (docfiledir,"rst2man luaotfload-tool.rst luaotfload-tool.1")
- if errorlevel ~= 0 then
-        return errorlevel
- end
- errorlevel= run (typesetdir,"rst2xetex luaotfload.conf.rst luaotfload-conf.tex")
- if errorlevel ~= 0 then
-        return errorlevel
- end
- errorlevel=run (typesetdir,"rst2xetex luaotfload-tool.rst luaotfload-tool.tex")
- if errorlevel ~= 0 then
-        return errorlevel
- end
- return 0
-end
 
 local function lpeggsub(pattern)
   return lpeg.Cs(lpeg.P{pattern + (1 * (lpeg.V(1) + -1))}^0)
@@ -249,7 +252,7 @@ local imgpackagedatepat = lpeg.Cg( -- Date: YYYY--MM--DD
   * lpeg.Cc(string.gsub(packagedate, '-', '--')))
 local xxxpackagedatepat = lpeg.Cg( -- Date: YYYYxxxMMxxxDD
   lpegrep(digit, 4) * lpegrep('xxx' * digit * digit, 2)
-  * lpeg.Cc(string.gsub(packagedate, '-', 'xxx')))
+  * lpeg.Cc(string.gsub(fontloaderdate, '-', 'xxx')))
 local packageversionpat = lpeg.Cg( -- Version: M.mmmm-dev
   digit * '.' * digit^1 * lpeg.P'-dev'^-1
   * lpeg.Cc(packageversion))

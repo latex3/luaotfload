@@ -20,8 +20,8 @@ local authors = "\z
 -- version number is used below!
 local ProvidesLuaModule = { 
     name          = "luaotfload-main",
-    version       = "3.006-dev",       --TAGVERSION
-    date          = "2019-08-11", --TAGDATE
+    version       = "3.0006-dev",       --TAGVERSION
+    date          = "2019-10-15", --TAGDATE
     description   = "luaotfload entry point",
     author        = authors,
     copyright     = authors,
@@ -142,12 +142,12 @@ local timing_info = {
     t_init = { },
 }
 
-local make_loader = function (prefix)
+local make_loader = function (prefix, load_helper)
     return function (name)
         local t_0 = osgettimeofday ()
         local modname = make_loader_name (prefix, name)
         --- We don’t want the stack info from inside, so just pcall().
-        local ok, data = pcall (require, modname)
+        local ok, data = pcall (load_helper or require, modname)
         local t_end = osgettimeofday ()
         timing_info.t_load [name] = t_end - t_0
         if not ok then
@@ -190,6 +190,16 @@ local dummy_loader = function (name)
                            name)
 end
 
+local context_environment = setmetatable({}, {__index = _G})
+luaotfload.fontloader = context_environment
+local function context_isolated_load(name)
+    local fullname = kpse.find_file(name, 'lua')
+    if not fullname then
+        error(string.format('Fontloader module "%s" could not be found.', name))
+    end
+    return assert(loadfile(fullname, nil, context_environment))(name)
+end
+
 local context_loader = function (name, path)
     luaotfload.log.report ("log", 3, "load",
                            "Loading module “%s” from Context.",
@@ -209,7 +219,7 @@ local context_loader = function (name, path)
                                    path)
         end
     end
-    local ret = require (modpath)
+    local ret = context_isolated_load (modpath)
     local t_end = osgettimeofday ()
     timing_info.t_load [name] = t_end - t_0
 
@@ -228,7 +238,7 @@ local install_loaders = function ()
     local loaders      = { }
     local loadmodule   = make_loader "luaotfload"
     loaders.luaotfload = loadmodule
-    loaders.fontloader = make_loader "fontloader"
+    loaders.fontloader = make_loader ("fontloader", context_isolated_load)
     loaders.context    = context_loader
     loaders.ignore     = dummy_loader
 ----loaders.plaintex   = make_loader "luatex" --=> for Luatex-Plain
@@ -275,15 +285,13 @@ luaotfload.main = function ()
 
     local starttime = osgettimeofday ()
     local init      = loadmodule "init" --- fontloader initialization
-    local store     = init.early ()     --- injects the log module too
+    init (function ()
+
+        initialize "parsers"         --- fonts.conf and syntax
+        initialize "configuration"   --- configuration options
+    end)
+
     local logreport = luaotfload.log.report
-
-    initialize "parsers"         --- fonts.conf and syntax
-    initialize "configuration"   --- configuration options
-
-    if not init.main (store) then
-        logreport ("log", 0, "load", "Main fontloader initialization failed.")
-    end
 
     initialize "loaders"         --- Font loading; callbacks
     initialize "database"        --- Font management.

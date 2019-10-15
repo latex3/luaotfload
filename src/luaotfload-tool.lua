@@ -9,8 +9,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-tool",
-    version       = "3.006-dev",       --TAGVERSION
-    date          = "2019-08-11", --TAGDATE
+    version       = "3.0006-dev",       --TAGVERSION
+    date          = "2019-10-15", --TAGDATE
     description   = "luaotfload-tool / database functionality",
     license       = "GPL v2.0"
 }
@@ -25,6 +25,7 @@ local version                  = ProvidesLuaModule.version
 luaotfload.version             = ProvidesLuaModule.version
 luaotfload.min_luatex_version  = { 0, 95, 0 }
 luaotfload.self                = "luaotfload-tool"
+luaotfload.fontloader          = _G -- We don't isolate the fontloader here
 
 --[[doc--
 

@@ -1,3 +1,23 @@
+-----------------------------------------------------------------------
+--         FILE:  luaotfload-harf-plug.lua
+--  DESCRIPTION:  part of luaotfload / HarfBuzz / fontloader plugin
+-----------------------------------------------------------------------
+do -- block to avoid to many local variables error
+ local ProvidesLuaModule = { 
+     name          = "luaotfload-harf-plug",
+     version       = "3.0006-dev",       --TAGVERSION
+     date          = "2019-10-15", --TAGDATE
+     description   = "luaotfload submodule / database",
+     license       = "GPL v2.0",
+     author        = "Khaled Hosny, Marcel Krüger",
+     copyright     = "Luaotfload Development Team",     
+ }
+
+ if luatexbase and luatexbase.provides_module then
+  luatexbase.provides_module (ProvidesLuaModule)
+ end  
+end
+
 local hb = luaotfload.harfbuzz
 
 local assert            = assert

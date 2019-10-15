@@ -303,7 +303,6 @@ luaotfload.main = function ()
     loadmodule "notdef"       --- missing glyph handling
     initialize "auxiliary"    --- additional high-level functionality
     if pcall(require, 'luaharfbuzz') then
-        loadmodule "harf"
         loadmodule "harf-define"
         loadmodule "harf-plug"
     end

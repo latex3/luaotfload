@@ -71,7 +71,6 @@ local kern_t            = node.id("kern")
 local localpar_t        = node.id("local_par")
 local whatsit_t         = node.id("whatsit")
 local pdfliteral_t      = node.subtype("pdf_literal")
-local pdfcolorstack_t   = node.subtype("pdf_colorstack")
 
 local explicitdisc_t    = 1
 local fontkern_t        = 0
@@ -88,7 +87,6 @@ local fl_unsafe         = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 
 local startactual_p     = "startactualtext"
 local endactual_p       = "endactualtext"
-local color_p           = "color" -- FIXME: Colors are better handled as attributes
 
 -- Simple table copying function.
 local function copytable(old)
@@ -569,7 +567,7 @@ local save_cmd = { "pdf", "text", "q" }
 local restore_cmd = { "pdf", "text", "Q" }
 
 -- Convert glyphs to nodes and collect font characters.
-local function tonodes(head, node, run, glyphs, color)
+local function tonodes(head, node, run, glyphs)
 local nodeindex = run.start
 local dir = run.dir
 local fontid = run.font
@@ -612,18 +610,14 @@ for i, glyph in ipairs(glyphs) do
   local id = getid(node)
   local nchars, nglyphs = glyph.nchars, glyph.nglyphs
 
-  if color then
-    setprop(node, color_p, color)
-  end
-
   if glyph.replace then
     -- For discretionary the glyph itself is skipped and a discretionary node
     -- is output in place of it.
     local rep, pre, post = glyph.replace, glyph.pre, glyph.post
 
-    setdisc(node, tonodes(pre.head, pre.head, pre.run, pre.glyphs, color),
-                  tonodes(post.head, post.head, post.run, post.glyphs, color),
-                  tonodes(rep.head, rep.head, rep.run, rep.glyphs, color))
+    setdisc(node, tonodes(pre.head, pre.head, pre.run, pre.glyphs),
+                  tonodes(post.head, post.head, post.run, post.glyphs),
+                  tonodes(rep.head, rep.head, rep.run, rep.glyphs))
     node = getnext(node)
     nodeindex = nodeindex + 1
   elseif glyph.skip then
@@ -632,10 +626,6 @@ for i, glyph in ipairs(glyphs) do
     freenode(oldnode)
     nodeindex = nodeindex + 1
   else
-    if glyph.color then
-      setprop(node, color_p, color_to_rgba(glyph.color)) -- FIXME: Precompute this
-    end
-
     if id == glyph_t then
       local done
       local fontglyph = fontglyphs[gid]
@@ -846,18 +836,6 @@ for i, glyph in ipairs(glyphs) do
   return head, node
 end
 
-local hex_to_rgba do
-  local hex = lpeg.R'09' + lpeg.R'AF' + lpeg.R'af'
-  local twohex = hex * hex / function(s) return tonumber(s, 16) / 255 end
-  local color_expr = twohex * twohex * twohex * twohex^-1 * -1
-  function hex_to_rgba(s)
-    local r, g, b, a = color_expr:match(s)
-    if r then
-      return format('%s %s %s rg', r, g, b)
-    end
-  end
-end
-
 local function shape_run(head, current, run)
   if not run.skip then
     -- Font loaded with our loader and an HarfBuzz face is present, do our
@@ -865,11 +843,10 @@ local function shape_run(head, current, run)
     local fontid = run.font
     local fontdata = font.getfont(fontid)
     local options = fontdata.specification.features.raw
-    local color = options and options.color and hex_to_rgba(options.color) -- FIXME: Precompute this
 
     local glyphs
     head, glyphs = shape(head, current, run)
-    return tonodes(head, current, run, glyphs, color)
+    return tonodes(head, current, run, glyphs)
   else
     return head, run.after
   end
@@ -893,36 +870,15 @@ local function pdfdirect(data)
   return n
 end
 
-local function pdfcolor(color)
-  local c = newnode(whatsit_t, pdfcolorstack_t)
-  setfield(c, "stack", 0)
-  setfield(c, "command", color and 1 or 2) -- 1: push, 2: pop
-  setfield(c, "data", color)
-  return c
-end
-
-local function post_process(head, currentcolor)
+local function post_process(head)
   for n in traverse(head) do
     local props = getproperty(n)
     local harfprops = props and props.harf
 
-    local startactual, endactual, color
+    local startactual, endactual
     if harfprops then
       startactual = harfprops[startactual_p]
       endactual = harfprops[endactual_p]
-      color = harfprops[color_p]
-    end
-
-    if currentcolor and currentcolor ~= color then
-      -- Pop current color.
-      currentcolor = nil
-      head = insertbefore(head, n, pdfcolor(currentcolor))
-    end
-
-    if currentcolor ~= color then
-      -- Push new color.
-      currentcolor = color
-      head = insertbefore(head, n, pdfcolor(currentcolor))
     end
 
     if startactual then
@@ -936,12 +892,12 @@ local function post_process(head, currentcolor)
 
     local replace = getfield(n, "replace")
     if replace then
-      setfield(n, "replace", post_process(replace, currentcolor))
+      setfield(n, "replace", post_process(replace))
     end
 
     local subhead = getfield(n, "head")
     if subhead then
-      setfield(n, "head", post_process(subhead, currentcolor))
+      setfield(n, "head", post_process(subhead))
     end
   end
   return head

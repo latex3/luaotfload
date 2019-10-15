@@ -405,6 +405,7 @@ return function ()
         initializers = {
             base = setcolor,
             node = setcolor,
+            plug = setcolor,
         }
     }
     return true

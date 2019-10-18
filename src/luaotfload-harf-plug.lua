@@ -105,10 +105,10 @@ local dir_ltr           = hb.Direction.new("ltr")
 local dir_rtl           = hb.Direction.new("rtl")
 local fl_unsafe         = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 
-local startactual_p     = "startactualtext"
-local endactual_p       = "endactualtext"
+local startactual_p     = "luaotfload_startactualtext"
+local endactual_p       = "luaotfload_endactualtext"
 
--- Simple table copying function.
+-- "Copy" properties as done by LuaTeX: Make old properties metatable 
 local function copytable(old)
   local new = {}
   for k, v in next, old do
@@ -119,21 +119,22 @@ local function copytable(old)
   return new
 end
 
--- Set and get properties from our private `harf` subtable.
+-- Set and get properties.
 local function setprop(n, prop, value)
-  local props = getproperty(n)
+  local props = properties[n]
   if not props then
     props = {}
-    setproperty(n, props)
+    properties[n] = props
   end
-  props.harf = props.harf or {}
-  props.harf[prop] = value
+  props[prop] = value
 end
 
 local function inherit(t, base, properties)
   local n = newnode(t)
   setattrs(n, getattrs(base))
-  setproperty(n, properties and copytable(properties))
+  if properties then
+    setproperty(n, setmetatable({}, {__index = properties}))
+  end
   return n
 end
 -- New kern node of amount `v`, inheriting the properties/attributes of `n`.
@@ -668,7 +669,7 @@ for i, glyph in ipairs(glyphs) do
           if layers == nil then
             layers = hbface:ot_color_glyph_get_layers(gid)
             if layers then
-              local cmds = {} -- Every layer will add 3 cmds
+              local cmds = {} -- Every layer will add 5 cmds
               local prev_color = nil
               for j = 1, #layers do
                 local layer = layers[j]
@@ -699,8 +700,25 @@ for i, glyph in ipairs(glyphs) do
             fontglyph.layers = layers
           end
           if layers then
-            character.commands = layers
-            font.addcharacters(fontid, {characters = {[gid + gid_offset] = character, [char] = character}})
+            if not character.colored then
+              local coloredcharacter = {}
+              for k,v in next, character do
+                coloredcharacter[k] = v
+              end
+              coloredcharacter.commands = layers
+              local newcharacters = {[gid + 0x130000] = coloredcharacter}
+              characters[gid + 0x130000] = coloredcharacter
+              if char ~= gid + gid_offset then
+                newcharacters[char] = coloredcharacter
+                characters[char] = coloredcharacter
+                character.colored = char
+              else
+                character.colored = gid + 0x130000
+              end
+              font.addcharacters(fontid, {characters = newcharacters})
+            end
+            char = character.colored
+            character = characters[char]
           end
         end
 
@@ -755,7 +773,8 @@ for i, glyph in ipairs(glyphs) do
           -- glyph, keep the node char unchanged. Helps with primitives that
           -- take characters as input but actually work on glyphs, like
           -- `\rpcode`.
-          if not oldcharacter or character.index ~= oldcharacter.index then
+          if character.commands or not oldcharacter
+                                or character.index ~= oldcharacter.index then
             setchar(node, char)
           end
           local xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
@@ -903,13 +922,12 @@ end
 
 local function post_process(head)
   for n in traverse(head) do
-    local props = getproperty(n)
-    local harfprops = props and props.harf
+    local props = properties[n]
 
     local startactual, endactual
-    if harfprops then
-      startactual = harfprops[startactual_p]
-      endactual = harfprops[endactual_p]
+    if props then
+      startactual = rawget(props, startactual_p)
+      endactual = rawget(props, endactual_p)
     end
 
     if startactual then

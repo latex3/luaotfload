@@ -43,7 +43,7 @@ local freenode          = direct.free
 local copynode          = direct.copy
 local removenode        = direct.remove
 local copynodelist      = direct.copy_list
-local isglyph           = direct.is_glyph
+local ischar            = direct.is_char
 local uses_font         = direct.uses_font
 
 local getattrs          = direct.getattributelist
@@ -307,6 +307,9 @@ local function makesub(run, codes, nodelist)
     codes = codes,
   }
   local glyphs
+  if nodelist == 0 then -- FIXME: This shouldn't happen
+    nodelist = nil
+  end
   nodelist, glyphs = shape(nodelist, nodelist, subrun)
   return { glyphs = glyphs, run = subrun, head = nodelist }
 end
@@ -314,6 +317,16 @@ end
 local function printnodes(label, head)
   for n in node.traverse(tonode(head)) do
     print(label, n, n.char)
+    local pre, post, rep = getdisc(todirect(n))
+    if pre then
+      printnodes(label .. '<', pre)
+    end
+    if post then
+      printnodes(label .. '>', post)
+    end
+    if rep then
+      printnodes(label .. '=', rep)
+    end
   end
 end
 -- Main shaping function that calls HarfBuzz, and does some post-processing of
@@ -321,6 +334,7 @@ end
 function shape(head, node, run)
   local codes = run.codes
   local offset = run.start - (codes.offset or 0)
+  local nodeindex = offset
   run.start = offset
   local len = run.len
   local fontid = run.font
@@ -362,7 +376,6 @@ function shape(head, node, run)
     while i < #glyphs do
       i = i + 1
       local glyph = glyphs[i]
-      local nodeindex = glyph.cluster + 1
       local nchars, nglyphs = chars_in_glyph(i, glyphs, offset + len)
       glyph.nchars, glyph.nglyphs = nchars, nglyphs
 
@@ -371,6 +384,8 @@ function shape(head, node, run)
       -- handled with the start of its cluster.
       if cluster ~= glyph.cluster then
         cluster = glyph.cluster
+        for i = nodeindex, cluster do node = getnext(node) end
+        nodeindex = cluster + 1
         local hex = ""
         local str = ""
         local nextcluster
@@ -433,32 +448,26 @@ function shape(head, node, run)
               lastcluster = glyphs[stopglyph].cluster
               stopglyph = stopglyph + 1
             end
-            -- We also want the last char in the previous glyph, so no +1 below.
 
-            stopindex = stopglyph < #glyphs and glyphs[stopglyph].cluster
-                                             or offset + len - 1
+            stopindex = stopglyph < #glyphs and glyphs[stopglyph].cluster + 1
+                                             or offset + len
 
             local startnode, stopnode = node, node
-            for j=cluster, startindex, -1 do
+            for j=nodeindex - 1, startindex, -1 do
               startnode = getprev(startnode)
             end
-            for j=cluster + 1, stopindex do
+            for j=nodeindex + 1, stopindex do
               stopnode = getnext(stopnode)
             end
 
             glyphs[startglyph] = glyph
+            glyph.cluster = startindex - 1
             for j = stopglyph, #glyphs do
               local glyph = glyphs[j]
-              glyph.cluster = glyph.cluster - (stopindex - startindex)
+              glyph.cluster = glyph.cluster - (stopindex - startindex) + 1
             end
-            len = len - (stopindex - startindex)
-            table.move(glyphs, stopglyph, #glyphs + stopglyph - i - 1, i + 1)
-            -- -- Mark these glyph for skipping since they will be replaced by the
-            -- -- discretionary fields.
-            -- -- We break up to stop glyph but not including it, so the -1 below.
-            -- for j = startglyph, stopglyph - 1 do
-            --   glyphs[j].skip = true
-            -- end
+            len = len - (stopindex - startindex) + 1
+            table.move(glyphs, stopglyph, #glyphs + stopglyph - startglyph - 1, startglyph + 1)
 
             local subcodes, subindex = {}
             do
@@ -531,10 +540,12 @@ function shape(head, node, run)
             glyph.post = makesub(run, postcodes, post)
             i = startglyph
             node = disc
+            nodeindex = startindex
           end
         end
       end
       node = getnext(node)
+      nodeindex = nodeindex + 1
     end
     codes.offset = run.len - len + (codes.offset or 0)
     return head, glyphs

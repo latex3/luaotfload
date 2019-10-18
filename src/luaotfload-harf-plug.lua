@@ -670,45 +670,40 @@ for i, glyph in ipairs(glyphs) do
         if palette then
           local layers = fontglyph.layers
           if layers == nil then
-            layers = hbface:ot_color_glyph_get_layers(gid)
-            if layers then
-              local cmds = {} -- Every layer will add 5 cmds
-              local prev_color = nil
-              for j = 1, #layers do
-                local layer = layers[j]
-                local layerchar = characters[gid_offset + layer.glyph]
-                if layerchar.height > character.height then
-                  character.height = layerchar.height
-                end
-                if layerchar.depth > character.depth then
-                  character.depth = layerchar.depth
-                end
-                -- color_index has a special value, 0x10000, that mean use text
-                -- color, we don’t check for it here explicitly since we will
-                -- get nil anyway.
-                local color = palette[layer.color_index]
-                cmds[5*j - 4] = (color and not prev_color) and save_cmd or nop_cmd
-                cmds[5*j - 3] = prev_color == color and nop_cmd or (color and {"pdf", "text", color_to_rgba(color)} or restore_cmd)
-                cmds[5*j - 2] = push_cmd
-                cmds[5*j - 1] = {"char", layer.glyph + gid_offset}
-                cmds[5*j] = pop_cmd
-                fontglyphs[layer.glyph].used = true
-                prev_color = color
-              end
-              cmds[#cmds + 1] = prev_color and restore_cmd
-              layers = cmds
-            else
-              layers = false
-            end
+            layers = hbface:ot_color_glyph_get_layers(gid) or false
             fontglyph.layers = layers
           end
           if layers then
+            local cmds = {} -- Every layer will add 5 cmds
+            local prev_color = nil
+            for j = 1, #layers do
+              local layer = layers[j]
+              local layerchar = characters[gid_offset + layer.glyph]
+              if layerchar.height > character.height then
+                character.height = layerchar.height
+              end
+              if layerchar.depth > character.depth then
+                character.depth = layerchar.depth
+              end
+              -- color_index has a special value, 0x10000, that mean use text
+              -- color, we don’t check for it here explicitly since we will
+              -- get nil anyway.
+              local color = palette[layer.color_index]
+              cmds[5*j - 4] = (color and not prev_color) and save_cmd or nop_cmd
+              cmds[5*j - 3] = prev_color == color and nop_cmd or (color and {"pdf", "text", color_to_rgba(color)} or restore_cmd)
+              cmds[5*j - 2] = push_cmd
+              cmds[5*j - 1] = {"char", layer.glyph + gid_offset}
+              cmds[5*j] = pop_cmd
+              fontglyphs[layer.glyph].used = true
+              prev_color = color
+            end
+            cmds[#cmds + 1] = prev_color and restore_cmd
             if not character.colored then
               local coloredcharacter = {}
               for k,v in next, character do
                 coloredcharacter[k] = v
               end
-              coloredcharacter.commands = layers
+              coloredcharacter.commands = cmds
               local newcharacters = {[gid + 0x130000] = coloredcharacter}
               characters[gid + 0x130000] = coloredcharacter
               if char ~= gid + gid_offset then

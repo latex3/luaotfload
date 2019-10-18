@@ -315,8 +315,10 @@ local function makesub(run, codes, nodelist)
   return { glyphs = glyphs, run = subrun, head = nodelist }
 end
 
-local function printnodes(label, head)
+local function printnodes(label, head, after)
+  after = tonode(after)
   for n in node.traverse(tonode(head)) do
+    if n == after then return end
     print(label, n, n.char)
     local pre, post, rep = getdisc(todirect(n))
     if pre then
@@ -474,15 +476,15 @@ function shape(head, node, run)
             do
               local node = startnode
               while node ~= stopnode do
-                if getid(node) == disc_t and node ~= disc then
+                if node == disc then
+                  subindex = #subcodes
+                  startindex = startindex + 1
+                  node = getnext(node)
+                elseif getid(node) == disc_t then
                   local oldnode = node
                   startnode, node = removenode(startnode, node)
                   freenode(oldnode)
                   tableremove(codes, startindex)
-                elseif node == disc then
-                  subindex = #subcodes
-                  startindex = startindex + 1
-                  node = getnext(node)
                 else
                   subcodes[#subcodes + 1] = tableremove(codes, startindex)
                   node = getnext(node)
@@ -505,9 +507,11 @@ function shape(head, node, run)
               postcodes[#postcodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
             end
             table.move(subcodes, subindex + 1, #subcodes, #postcodes + 1, postcodes)
-            do local newpre = copynodelist(startnode, disc)
-               setnext(tail(newpre), pre)
-               pre = newpre end
+            if startnode ~= disc then
+              local newpre = copynodelist(startnode, disc)
+              setnext(tail(newpre), pre)
+              pre = newpre
+            end
             if post then
               setnext(lastpost, copynodelist(getnext(disc), stopnode))
             else
@@ -540,13 +544,12 @@ function shape(head, node, run)
             glyph.pre = makesub(run, precodes, pre)
             glyph.post = makesub(run, postcodes, post)
             i = startglyph
-            node = disc
+            -- assert(getnext(disc) == stopnode)
+            node = stopnode
             nodeindex = startindex
           end
         end
       end
-      node = getnext(node)
-      nodeindex = nodeindex + 1
     end
     codes.offset = run.len - len + (codes.offset or 0)
     return head, glyphs
@@ -993,10 +996,11 @@ local function set_tounicode()
 end
 
 -- FIXME: Move this into generic parts of luaotfload
+local utfchar = utf8.char
 local function get_glyph_info(n)
-  local props = properties[todirect(n)]
-  if not props then return end
-  return props and props.glyph_info or nil
+  n = todirect(n)
+  local props = properties[n]
+  return props and props.glyph_info or utfchar(getchar(n))
 end
 
 fonts.handlers.otf.registerplugin('harf', process)

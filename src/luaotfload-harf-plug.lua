@@ -585,14 +585,14 @@ local function cachedpng(data)
     -- local file = open(path, "wb"):write():close()
     -- file:write(data)
     -- file:close()
-  i = img.scan{filename = path}
-  pngcache[hash] = i
-end
-return i
+    i = img.scan{filename = path}
+    pngcache[hash] = i
+  end
+  return i
 end
 
 local function get_png_glyph(gid, fontid, characters, haspng)
-return gid
+  return gid
 end
 
 local push_cmd = { "push" }
@@ -603,150 +603,150 @@ local restore_cmd = { "pdf", "text", "Q" }
 
 -- Convert glyphs to nodes and collect font characters.
 local function tonodes(head, node, run, glyphs)
-local nodeindex = run.start
-local dir = run.dir
-local fontid = run.font
-local fontdata = font.getfont(fontid)
-local characters = fontdata.characters
-local hbdata = fontdata.hb
-local palette = hbdata.palette
-local hbshared = hbdata.shared
-local hbface = hbshared.face
-local nominals = hbshared.nominals
-local hbfont = hbshared.font
-local fontglyphs = hbshared.glyphs
-local gid_offset = hbshared.gid_offset
-local rtl = dir:is_backward()
-local lastprops
+  local nodeindex = run.start
+  local dir = run.dir
+  local fontid = run.font
+  local fontdata = font.getfont(fontid)
+  local characters = fontdata.characters
+  local hbdata = fontdata.hb
+  local palette = hbdata.palette
+  local hbshared = hbdata.shared
+  local hbface = hbshared.face
+  local nominals = hbshared.nominals
+  local hbfont = hbshared.font
+  local fontglyphs = hbshared.glyphs
+  local gid_offset = hbshared.gid_offset
+  local rtl = dir:is_backward()
+  local lastprops
 
-local scale = hbdata.scale
-local letterspace = hbdata.letterspace
+  local scale = hbdata.scale
+  local letterspace = hbdata.letterspace
 
-local haspng = hbshared.haspng
-local fonttype = hbshared.fonttype
+  local haspng = hbshared.haspng
+  local fonttype = hbshared.fonttype
 
-for i, glyph in ipairs(glyphs) do
-  if glyph.cluster < nodeindex - 1 then -- Ups, we went too far
-    nodeindex = nodeindex - 1
-    local new = inherit(glyph_t, getprev(node), lastprops)
-    setfont(new, fontid)
-    head, node = insertbefore(head, node, new)
-  else
-    for j = nodeindex, glyph.cluster do
+  for i, glyph in ipairs(glyphs) do
+    if glyph.cluster < nodeindex - 1 then -- Ups, we went too far
+      nodeindex = nodeindex - 1
+      local new = inherit(glyph_t, getprev(node), lastprops)
+      setfont(new, fontid)
+      head, node = insertbefore(head, node, new)
+    else
+      for j = nodeindex, glyph.cluster do
+        local oldnode = node
+        head, node = removenode(head, node)
+        freenode(oldnode)
+      end
+      lastprops = getproperty(node)
+      nodeindex = glyph.cluster + 1
+    end
+    local gid = glyph.codepoint
+    local char = nominals[gid] or gid_offset + gid
+    local id = getid(node)
+    local nchars, nglyphs = glyph.nchars, glyph.nglyphs
+
+    if glyph.replace then
+      -- For discretionary the glyph itself is skipped and a discretionary node
+      -- is output in place of it.
+      local rep, pre, post = glyph.replace, glyph.pre, glyph.post
+
+      setdisc(node, tonodes(pre.head, pre.head, pre.run, pre.glyphs),
+                    tonodes(post.head, post.head, post.run, post.glyphs),
+                    tonodes(rep.head, rep.head, rep.run, rep.glyphs))
+      node = getnext(node)
+      nodeindex = nodeindex + 1
+    elseif glyph.skip then
       local oldnode = node
       head, node = removenode(head, node)
       freenode(oldnode)
-    end
-    lastprops = getproperty(node)
-    nodeindex = glyph.cluster + 1
-  end
-  local gid = glyph.codepoint
-  local char = nominals[gid] or gid_offset + gid
-  local id = getid(node)
-  local nchars, nglyphs = glyph.nchars, glyph.nglyphs
+      nodeindex = nodeindex + 1
+    else
+      if id == glyph_t then
+        local done
+        local fontglyph = fontglyphs[gid]
+        local character = characters[char]
 
-  if glyph.replace then
-    -- For discretionary the glyph itself is skipped and a discretionary node
-    -- is output in place of it.
-    local rep, pre, post = glyph.replace, glyph.pre, glyph.post
-
-    setdisc(node, tonodes(pre.head, pre.head, pre.run, pre.glyphs),
-                  tonodes(post.head, post.head, post.run, post.glyphs),
-                  tonodes(rep.head, rep.head, rep.run, rep.glyphs))
-    node = getnext(node)
-    nodeindex = nodeindex + 1
-  elseif glyph.skip then
-    local oldnode = node
-    head, node = removenode(head, node)
-    freenode(oldnode)
-    nodeindex = nodeindex + 1
-  else
-    if id == glyph_t then
-      local done
-      local fontglyph = fontglyphs[gid]
-      local character = characters[char]
-
-      if not character.commands then
-        if palette then
-          local layers = fontglyph.layers
-          if layers == nil then
-            layers = hbface:ot_color_glyph_get_layers(gid) or false
-            fontglyph.layers = layers
-          end
-          if layers then
-            local cmds = {} -- Every layer will add 5 cmds
-            local prev_color = nil
-            for j = 1, #layers do
-              local layer = layers[j]
-              local layerchar = characters[gid_offset + layer.glyph]
-              if layerchar.height > character.height then
-                character.height = layerchar.height
-              end
-              if layerchar.depth > character.depth then
-                character.depth = layerchar.depth
-              end
-              -- color_index has a special value, 0x10000, that mean use text
-              -- color, we don’t check for it here explicitly since we will
-              -- get nil anyway.
-              local color = palette[layer.color_index]
-              cmds[5*j - 4] = (color and not prev_color) and save_cmd or nop_cmd
-              cmds[5*j - 3] = prev_color == color and nop_cmd or (color and {"pdf", "text", color_to_rgba(color)} or restore_cmd)
-              cmds[5*j - 2] = push_cmd
-              cmds[5*j - 1] = {"char", layer.glyph + gid_offset}
-              cmds[5*j] = pop_cmd
-              fontglyphs[layer.glyph].used = true
-              prev_color = color
+        if not character.commands then
+          if palette then
+            local layers = fontglyph.layers
+            if layers == nil then
+              layers = hbface:ot_color_glyph_get_layers(gid) or false
+              fontglyph.layers = layers
             end
-            cmds[#cmds + 1] = prev_color and restore_cmd
-            if not character.colored then
-              local coloredcharacter = {}
-              for k,v in next, character do
-                coloredcharacter[k] = v
+            if layers then
+              local cmds = {} -- Every layer will add 5 cmds
+              local prev_color = nil
+              for j = 1, #layers do
+                local layer = layers[j]
+                local layerchar = characters[gid_offset + layer.glyph]
+                if layerchar.height > character.height then
+                  character.height = layerchar.height
+                end
+                if layerchar.depth > character.depth then
+                  character.depth = layerchar.depth
+                end
+                -- color_index has a special value, 0x10000, that mean use text
+                -- color, we don’t check for it here explicitly since we will
+                -- get nil anyway.
+                local color = palette[layer.color_index]
+                cmds[5*j - 4] = (color and not prev_color) and save_cmd or nop_cmd
+                cmds[5*j - 3] = prev_color == color and nop_cmd or (color and {"pdf", "text", color_to_rgba(color)} or restore_cmd)
+                cmds[5*j - 2] = push_cmd
+                cmds[5*j - 1] = {"char", layer.glyph + gid_offset}
+                cmds[5*j] = pop_cmd
+                fontglyphs[layer.glyph].used = true
+                prev_color = color
               end
-              coloredcharacter.commands = cmds
-              local newcharacters = {[gid + 0x130000] = coloredcharacter}
-              characters[gid + 0x130000] = coloredcharacter
-              if char ~= gid + gid_offset then
-                newcharacters[char] = coloredcharacter
-                characters[char] = coloredcharacter
-                character.colored = char
-              else
-                character.colored = gid + 0x130000
+              cmds[#cmds + 1] = prev_color and restore_cmd
+              if not character.colored then
+                local coloredcharacter = {}
+                for k,v in next, character do
+                  coloredcharacter[k] = v
+                end
+                coloredcharacter.commands = cmds
+                local newcharacters = {[gid + 0x130000] = coloredcharacter}
+                characters[gid + 0x130000] = coloredcharacter
+                if char ~= gid + gid_offset then
+                  newcharacters[char] = coloredcharacter
+                  characters[char] = coloredcharacter
+                  character.colored = char
+                else
+                  character.colored = gid + 0x130000
+                end
+                font.addcharacters(fontid, {characters = newcharacters})
               end
-              font.addcharacters(fontid, {characters = newcharacters})
+              char = character.colored
+              character = characters[char]
             end
-            char = character.colored
-            character = characters[char]
           end
-        end
 
-        if haspng then
-          local pngglyph = character.pngglyph
-          if pngglyph == nil then
-            local pngblob = hbfont:ot_color_glyph_get_png(gid)
-            if pngblob then
-              local glyphimg = cachedpng(pngblob:get_data())
-              local pngchar = { }
-              for k,v in next, character do
-                pngchar[k] = v
+          if haspng then
+            local pngglyph = character.pngglyph
+            if pngglyph == nil then
+              local pngblob = hbfont:ot_color_glyph_get_png(gid)
+              if pngblob then
+                local glyphimg = cachedpng(pngblob:get_data())
+                local pngchar = { }
+                for k,v in next, character do
+                  pngchar[k] = v
+                end
+                local i = img.copy(glyphimg)
+                i.width = character.width
+                i.depth = 0
+                i.height = character.height + character.depth
+                pngchar.commands = fonttype and {
+                  {"push"}, {"char", gid_offset + gid}, {"pop"},
+                  {"down", character.depth}, {"image", i}
+                } or { {"down", character.depth}, {"image", i} }
+                if not nominals[gid] then
+                  char = 0x130000 + gid
+                end
+                characters[char] = pngchar
+                pngglyph = char
+                font.addcharacters(fontid, {characters = {[char] = pngchar}})
               end
-              local i = img.copy(glyphimg)
-              i.width = character.width
-              i.depth = 0
-              i.height = character.height + character.depth
-              pngchar.commands = fonttype and {
-                {"push"}, {"char", gid_offset + gid}, {"pop"},
-                {"down", character.depth}, {"image", i}
-              } or { {"down", character.depth}, {"image", i} }
-              if not nominals[gid] then
-                char = 0x130000 + gid
-              end
-              characters[char] = pngchar
-              pngglyph = char
-              font.addcharacters(fontid, {characters = {[char] = pngchar}})
+              character.pngglyph = pngglyph
             end
-            character.pngglyph = pngglyph
-          end
             if pngglyph then
               char = pngglyph
             elseif not fonttype then
@@ -763,7 +763,6 @@ for i, glyph in ipairs(glyphs) do
               done = true
             end
           end
-          ;
         end
         if not done then
           local oldcharacter = characters[getchar(node)]

@@ -255,37 +255,6 @@ local function itemize(head, fontid, direction)
   return runs
 end
 
--- Find how many characters are part of this glyph.
---
--- The first return value is the number of characters, with 0 meaning it is
--- inside a multi-glyph cluster
---
--- The second return value is the number of glyph in this cluster.
---
-local function chars_in_glyph(i, glyphs, stop)
-  local nchars, nglyphs = 0, 0
-  local cluster = glyphs[i].cluster
-
-  -- Glyph is not the first in cluster
-  if glyphs[i - 1] and glyphs[i - 1].cluster == cluster then
-    return 0, 0
-  end
-
-  -- Find the last glyph in this cluster.
-  while glyphs[i + nglyphs] and glyphs[i + nglyphs].cluster == cluster do
-    nglyphs = nglyphs + 1
-  end
-
-  -- The number of characters is the diff between the next cluster in this one.
-  if glyphs[i + nglyphs] then
-    nchars = glyphs[i + nglyphs].cluster - cluster
-  else
-    -- This glyph cluster in the last in the run.
-    nchars = stop - cluster - 1
-  end
-
-  return nchars, nglyphs
-end
 
 -- Check if it is not safe to break before this glyph.
 local function unsafetobreak(glyph)
@@ -379,8 +348,6 @@ function shape(head, node, run)
     while i < #glyphs do
       i = i + 1
       local glyph = glyphs[i]
-      local nchars, nglyphs = chars_in_glyph(i, glyphs, offset + len)
-      glyph.nchars, glyph.nglyphs = nchars, nglyphs
 
       -- Calculate the Unicode code points of this glyph. If cluster did not
       -- change then this is a glyph inside a complex cluster and will be
@@ -395,12 +362,15 @@ function shape(head, node, run)
         for j = i+1, #glyphs do
           nextcluster = glyphs[j].cluster
           if cluster ~= nextcluster then
+            glyph.nglyphs = j - i
             goto NEXTCLUSTERFOUND -- break
           end
         end -- else -- only executed if the loop reached the end without
                     -- finding another cluster
           nextcluster = offset + len - 1
+          glyph.nglyphs = #glyphs + 1 - i
         ::NEXTCLUSTERFOUND:: -- end
+        glyph.nextcluster = nextcluster
         do
           local node = node
           for j = cluster,nextcluster-1 do
@@ -414,10 +384,7 @@ function shape(head, node, run)
           glyph.tounicode = hex
           glyph.string = str
         end
-        -- Find if we have a discretionary inside a ligature, if the cluster
-        -- only spans one char than two then either this is not a ligature or
-        -- there is no discretionary involved.
-        if true or nextcluster > cluster + 1 and not fordisc then
+        if not fordisc then
           local discindex = nil
           local disc = node
           for j = cluster + 1, nextcluster do
@@ -465,6 +432,7 @@ function shape(head, node, run)
 
             glyphs[startglyph] = glyph
             glyph.cluster = startindex - 1
+            glyph.nextcluster = startindex
             for j = stopglyph, #glyphs do
               local glyph = glyphs[j]
               glyph.cluster = glyph.cluster - (stopindex - startindex) + 1
@@ -544,9 +512,9 @@ function shape(head, node, run)
             glyph.pre = makesub(run, precodes, pre)
             glyph.post = makesub(run, postcodes, post)
             i = startglyph
-            -- assert(getnext(disc) == stopnode)
-            node = stopnode
-            nodeindex = startindex
+            node = disc
+            cluster = glyph.cluster
+            nodeindex = cluster + 1
           end
         end
       end
@@ -625,13 +593,12 @@ local function tonodes(head, node, run, glyphs)
   local haspng = hbshared.haspng
   local fonttype = hbshared.fonttype
 
+  local nextcluster
+
   for i, glyph in ipairs(glyphs) do
-    if glyph.cluster < nodeindex - 1 then -- Ups, we went too far
-      nodeindex = nodeindex - 1
-      local new = inherit(glyph_t, getprev(node), lastprops)
-      setfont(new, fontid)
-      head, node = insertbefore(head, node, new)
-    else
+    if glyph.cluster + 1 >= nodeindex then -- Reached a new cluster
+      nextcluster = glyph.nextcluster
+      assert(nextcluster)
       for j = nodeindex, glyph.cluster do
         local oldnode = node
         head, node = removenode(head, node)
@@ -639,11 +606,15 @@ local function tonodes(head, node, run, glyphs)
       end
       lastprops = getproperty(node)
       nodeindex = glyph.cluster + 1
+    elseif nextcluster + 1 == nodeindex then -- Oops, we went too far
+      nodeindex = nodeindex - 1
+      local new = inherit(glyph_t, getprev(node), lastprops)
+      setfont(new, fontid)
+      head, node = insertbefore(head, node, new)
     end
     local gid = glyph.codepoint
     local char = nominals[gid] or gid_offset + gid
     local id = getid(node)
-    local nchars, nglyphs = glyph.nchars, glyph.nglyphs
 
     if glyph.replace then
       -- For discretionary the glyph itself is skipped and a discretionary node
@@ -804,11 +775,11 @@ local function tonodes(head, node, run, glyphs)
           --   cluster that will be covered by an /ActualText span.
           local tounicode = glyph.tounicode
           if tounicode then
-            if nglyphs == 1 and not fontglyph.tounicode then
+            if glyph.nglyphs == 1 and not fontglyph.tounicode then
               fontglyph.tounicode = tounicode
             elseif tounicode ~= fontglyph.tounicode then
               setprop(node, startactual_p, tounicode)
-              glyphs[i + nglyphs - 1].endactual = true
+              glyphs[i + glyph.nglyphs - 1].endactual = true
             end
           end
           if glyph.endactual then
@@ -838,7 +809,6 @@ local function tonodes(head, node, run, glyphs)
       elseif id == kern_t and getsubtype(node) == italiccorr_t then
         -- If this is an italic correction node and the previous node is a
         -- glyph, update its kern value with the glyph’s italic correction.
-        -- FIXME: This fails if the previous glyph was e.g. a png glyph
         local prevchar, prevfontid = ischar(getprev(node))
         if prevfontid == fontid and prevchar and prevchar > 0 then
           local italic = characters[prevchar].italic
@@ -846,29 +816,6 @@ local function tonodes(head, node, run, glyphs)
             setkern(node, italic)
           end
         end
-      elseif id == disc_t then
-        assert(false, "Should be unreachable") -- This feels like it should be unreachable
-        assert(nglyphs == 1)
-        -- The simple case of a discretionary that is not part of a complex
-        -- cluster. We only need to make sure kerning before the hyphenation
-        -- point is dropped when a line break is inserted here.
-        --
-        -- TODO: nothing as simple as it sounds, we need to handle this like
-        -- the other discretionary handling, otherwise the discretionary
-        -- contents do not interact with the surrounding (e.g. no ligatures or
-        -- kerning) as it should.
-        if current and getid(current) == kern_t and getsubtype(current) == fontkern_t then
-          setprev(current, nil)
-          setnext(current, nil)
-          setfield(node, "replace", current)
-          head, current = removenode(head, current)
-        end
-        local pre, post, rep = getdisc(node)
-        setdisc(node, process(pre, fontid, direction),
-                      process(post, fontid, direction),
-                      process(rep, fontid, direction))
-
-        head, current = insertafter(head, current, node)
       end
       node = getnext(node)
       nodeindex = nodeindex + 1

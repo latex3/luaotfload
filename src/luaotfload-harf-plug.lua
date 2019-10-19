@@ -187,7 +187,7 @@ local function itemize(head, fontid, direction)
   local runs, codes = {}, {}
   local dirstack = {}
   local currdir = direction or "TLT"
-  local lastdir, lastskip
+  local lastskip, lastdir = true
   local lastrun = {}
 
   for n, id, subtype in direct.traverse(head) do
@@ -202,10 +202,8 @@ local function itemize(head, fontid, direction)
       end
     elseif id == glue_t and subtype == spaceskip_t then
       code = 0x0020 -- SPACE
-    elseif id == disc_t -- FIXME
-      -- and (subtype == explicitdisc_t  -- \-
-      --   or subtype == regulardisc_t)  -- \discretionary
-    then
+      skip = lastskip
+    elseif id == disc_t then
       if uses_font(n, fontid) then
         code = 0x00AD -- SOFT HYPHEN
       else
@@ -222,8 +220,10 @@ local function itemize(head, fontid, direction)
         -- Pop the last direction from the stack.
         currdir = tableremove(dirstack)
       end
+      skip = lastskip
     elseif id == localpar_t then
       currdir = getdir(n)
+      skip = lastskip
     end
 
     if not skip and texlig then

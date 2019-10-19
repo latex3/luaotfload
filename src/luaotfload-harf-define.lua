@@ -18,6 +18,9 @@ do -- block to avoid to many local variables error
  end  
 end
 
+local stringlower = string.lower
+local stringupper = string.upper
+
 local hb = luaotfload.harfbuzz
 
 local hbfonts = {}
@@ -350,10 +353,14 @@ fonts.readers.harf = function(spec)
   spec.hb_features = hb_features
 
   if rawfeatures.language then
-    spec.language = hb.Language.new(rawfeatures.language)
+    local language = stringupper(rawfeatures.language)
+    spec.language = hb.Language.new(language == "DFLT" and "dflt"
+                                                  or script)
   end
   if rawfeatures.script then
-    spec.script = hb.Script.new(rawfeatures.script)
+    local script = stringlower(rawfeatures.script)
+    spec.script = hb.Script.new(script == "dflt" and "DFLT"
+                                                  or script)
   end
   for key, val in next, rawfeatures do
     if key:len() == 4 then

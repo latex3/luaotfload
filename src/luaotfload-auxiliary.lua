@@ -460,13 +460,14 @@ function aux.provides_script(font_id, asked_script)
   end
   local hbface = get_hbface(tfmdata)
   if hbface then
-    local script = harf.Tag.new(asked_script)
+    local script = harf.Tag.new(asked_script == "dflt" and "DFLT"
+                                                        or asked_script)
     for _, tag in next, { GSUBtag, GPOStag } do
-      local scripts = hbface:ot_layout_get_script_tags(tag) or {}
-      for i = 1, #scripts do
-        if script == scripts[i] then return true end
+      if hbface:ot_layout_find_script(tag, script) then
+        return true
       end
     end
+    return false
   else
     local features = get_features (tfmdata)
     if features == false then
@@ -523,20 +524,14 @@ function aux.provides_language(font_id, asked_script, asked_language)
     if asked_language == "DFLT" then
       return aux.provides_script(font_id, asked_script)
     end
-    local script = harf.Tag.new(asked_script)
-    -- HarfBuzz expects "DFLT" in lower-case
-    local language = harf.Tag.new(asked_language)
-    local feature = harf.Tag.new(feature)
-
+    local script = harf.Tag.new(asked_script == "dflt" and "DFLT"
+                                                        or asked_script)
+    local language = harf.Tag.new(asked_language == "DFLT" and "dflt"
+                                                            or asked_language)
     for _, tag in next, { GSUBtag, GPOStag } do
-      local scripts = hbface:ot_layout_get_script_tags(tag) or {}
-      for i = 1, #scripts do
-        if script == scripts[i] then
-          local languages = hbface:ot_layout_get_language_tags(tag, i - 1) or {}
-          for j = 1, #languages do
-            if language == languages[j] then return true end
-          end
-        end
+      local _, script_idx = hbface:ot_layout_find_script(tag, script)
+      if hbface:ot_layout_find_language(tag, script_idx, language) then
+        return true
       end
     end
     return false
@@ -630,9 +625,10 @@ function aux.provides_feature(font_id,        asked_script,
   local hbface = get_hbface(tfmdata)
   if hbface then
     asked_language  = stringupper(asked_language)
-    local script = harf.Tag.new(asked_script)
-    -- HarfBuzz expects "DFLT" in lower-case
-    local language = harf.Tag.new(asked_language == "DFLT" and "dflt" or asked_language)
+    local script = harf.Tag.new(asked_script == "dflt" and "DFLT"
+                                                        or asked_script)
+    local language = harf.Tag.new(asked_language == "DFLT" and "dflt"
+                                                            or asked_language)
     local feature = harf.Tag.new(feature)
 
     for _, tag in next, { GSUBtag, GPOStag } do

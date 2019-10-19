@@ -365,7 +365,8 @@ fonts.readers.harf = function(spec)
   for key, val in next, rawfeatures do
     if key:len() == 4 then
       -- 4-letter options are likely font features, but not always, so we do
-      -- some checks below. We put non feature options in the `options` dict.
+      -- some checks below. Other options will be queried
+      -- from spec.features.normal.
       if val == true or val == false then
         val = (val and '+' or '-')..key
         hb_features[#hb_features + 1] = hb.Feature.new(val)

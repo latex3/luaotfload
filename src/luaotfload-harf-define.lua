@@ -355,7 +355,7 @@ fonts.readers.harf = function(spec)
   if rawfeatures.language then
     local language = stringupper(rawfeatures.language)
     spec.language = hb.Language.new(language == "DFLT" and "dflt"
-                                                  or script)
+                                                        or language)
   end
   if rawfeatures.script then
     local script = stringlower(rawfeatures.script)

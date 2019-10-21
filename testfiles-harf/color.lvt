@@ -1,0 +1,16 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+\defaultfontfeatures{RawFeature={mode=harf}}
+
+\setmainfont{Amiri}[Script=Arabic]
+\begin{document}
+\showoutput
+\START
+
+قلبي {\addfontfeature{Color=FF000080} تلون كله} بلون الحب.
+
+\newpage
+\end{document}

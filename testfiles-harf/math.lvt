@@ -1,0 +1,14 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+\defaultfontfeatures{RawFeature={mode=harf}}
+
+\setmainfont{Amiri}[Script=Arabic]
+\begin{document}
+\showoutput
+\START
+Some text then inline math \(E=mc^2\) then \(\hbox{text inside inline math}\), then
+display math \[E=mc^2\hbox{ with text inside}\]
+\end{document}

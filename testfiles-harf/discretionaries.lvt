@@ -1,0 +1,28 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+\defaultfontfeatures{RawFeature={mode=harf}}
+
+\setmainfont{NotoSerifCJK-Regular.ttc}[Script=Latin]
+\begin{document}
+\showoutput
+\START
+offbeat office baffle coffee HAVANA\par
+
+\rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
+offbeat office baffle coffee HAVANA\par
+
+\fontspec{lmroman10-regular.otf}[Script=Latin, Ligatures=Discretionary]
+\parindent=0pt
+
+\noindent
+\smallskip
+offbeat office baffle {\rm baffle} coffee HAVANA\par
+\smallskip
+
+\rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
+offbeat office baffle {\rm baffle} coffee HAVANA
+
+\end{document}

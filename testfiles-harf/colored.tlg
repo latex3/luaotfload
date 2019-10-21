@@ -1,0 +1,427 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+luaotfload | aux : font no 32 (nil) does not define feature smcp for script latn with language dflt
+Package fontspec Info: Font family 'BungeeColor1.ttf(0)' created for font
+(fontspec)             'BungeeColor1.ttf' with options
+(fontspec)             [RawFeature={mode=harf},Script=Latin,RawFeature={colr=true},Scale=5].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->s*[5]"[BungeeColor1.ttf]:mode=node;script=latn;language=DFLT;mode=harf;colr=true;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+LaTeX Font Info:    Font shape `TU/BungeeColor1.ttf(0)/m/n' will be
+(Font)              scaled to size 50.0pt on input line ....
+luaotfload | aux : font no 32 (nil) does not define feature smcp for script latn with language dflt
+Package fontspec Info: Font family 'BungeeColor1.ttf(1)' created for font
+(fontspec)             'BungeeColor1.ttf' with options
+(fontspec)             [RawFeature={mode=harf},Script=Latin,RawFeature={colr=2},Scale=5].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->s*[5]"[BungeeColor1.ttf]:mode=node;script=latn;language=DFLT;mode=harf;colr=2;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+LaTeX Font Info:    Font shape `TU/BungeeColor1.ttf(1)/m/n' will be
+(Font)              scaled to size 50.0pt on input line ....
+Completed box being shipped out [1]
+\vbox(633.0+0.0293)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0293)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 357.56168fil, direction TLT
+...\write-{}
+...\glue(\topskip) 0.20996
+...\hbox(9.79004+6.08398)x345.0, glue set 107.46094fil, direction TRT
+....\glue(\leftskip) 0.0 plus 1.0fil
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x0.0, direction TRT
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ﷽
+....\penalty 10000
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۝
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ١
+....\kern-2.92969 (font)
+....\enddir TLT
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 2.0fil
+....\glue(\rightskip) 0.0 plus -1.0fil
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 28.31
+...\hbox(11.20605+6.33301)x345.0, glue set 0.54156, direction TRT
+....\glue(\leftskip) 0.0 plus 1.0fil
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x0.0, direction TRT
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ح
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 د
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ُ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ه
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ر
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ب
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ع
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٰ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\penalty 10000
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۝
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٢
+....\kern-2.92969 (font)
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ر
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ح
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٰ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ر
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ح
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\penalty 10000
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۝
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٣
+....\kern-2.92969 (font)
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٰ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ك
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 و
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 د
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\penalty 10000
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۝
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٤
+....\kern-2.92969 (font)
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\kern0.83008 (font)
+....\pdfliteral direct <lua data reference 792>
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 إِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 
+....\pdfliteral direct <lua data reference 803>
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ا
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ك
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ع
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ب
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ُ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 د
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ُ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 و
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\pdfliteral direct <lua data reference 804>
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 إِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 
+....\pdfliteral direct <lua data reference 805>
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ا
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ك
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 س
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ت
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ع
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ُ
+....\penalty 10000
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۝
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٥
+....\kern-2.92969 (font)
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ه
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 د
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ا
+....\glue(\rightskip) 0.0 plus -1.0fil
+...\penalty 300
+...\glue(\baselineskip) 27.69965
+...\hbox(11.56738+6.33301)x345.0, glue set 33.40576fil, direction TRT
+....\glue(\leftskip) 0.0 plus 1.0fil
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ص
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ر
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٰ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ط
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ُ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 س
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ت
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ق
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\penalty 10000
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۝
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٦
+....\kern-2.92969 (font)
+....\enddir TLT
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ص
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ر
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٰ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ط
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ذ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\pdfliteral direct <lua data reference 806>
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 أَ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 
+....\pdfliteral direct <lua data reference 807>
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ع
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ت
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ع
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ه
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 غ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ر
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 غ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ض
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ُ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 و
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ب
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ع
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ه
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 م
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۡ
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 و
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ا
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٱ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ض
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\kern1.2207 (font)
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ا
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۤ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ل
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ّ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ِ
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ی
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ن
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 َ
+....\penalty 10000
+....\glue(\spaceskip) 2.92969 plus 1.46484 minus 0.97656
+....\begindir TLT
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ۝
+....\TU/amiri-quran-colored.ttf(0)/m/n/10 ٧
+....\kern-2.92969 (font)
+....\enddir TLT
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 2.0fil
+....\glue(\rightskip) 0.0 plus -1.0fil
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 3.26703
+...\hbox(36.0+0.0)x345.0, glue set 52.27501fil, direction TRT
+....\glue(\leftskip) 0.0 plus 1.0fil
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x0.0, direction TRT
+....\TU/BungeeColor1.ttf(0)/m/n/10 A
+....\TU/BungeeColor1.ttf(0)/m/n/10 B
+....\TU/BungeeColor1.ttf(0)/m/n/10 C
+....\TU/BungeeColor1.ttf(0)/m/n/10 D
+....\TU/BungeeColor1.ttf(0)/m/n/10 E
+....\TU/BungeeColor1.ttf(0)/m/n/10 F
+....\TU/BungeeColor1.ttf(0)/m/n/10 G
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 2.0fil
+....\glue(\rightskip) 0.0 plus -1.0fil
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 9.60004
+...\hbox(36.0+0.0)x345.0, glue set 52.27501fil, direction TRT
+....\glue(\leftskip) 0.0 plus 1.0fil
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x0.0, direction TRT
+....\TU/BungeeColor1.ttf(1)/m/n/10 A
+....\TU/BungeeColor1.ttf(1)/m/n/10 B
+....\TU/BungeeColor1.ttf(1)/m/n/10 C
+....\TU/BungeeColor1.ttf(1)/m/n/10 D
+....\TU/BungeeColor1.ttf(1)/m/n/10 E
+....\TU/BungeeColor1.ttf(1)/m/n/10 F
+....\TU/BungeeColor1.ttf(1)/m/n/10 G
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 2.0fil
+....\glue(\rightskip) 0.0 plus -1.0fil
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.73047
+..\hbox(6.26953+0.0293)x345.0, glue set 169.83887fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\TU/amiri-quran-colored.ttf(0)/m/n/10 1
+...\glue 0.0 plus 1.0fil
+(colored.aux)

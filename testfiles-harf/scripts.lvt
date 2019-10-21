@@ -1,0 +1,27 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+\defaultfontfeatures{RawFeature={mode=harf}}
+
+\setmainfont{amiri-regular.ttf}[Script=Latin]
+\begin{document}
+\showoutput
+\START
+\TeX\ = {\addfontfeature{Script=Greek}τεχ} in Greek
+
+(\textit{f\/})
+
+\def\l#1#2{%
+  \begingroup%
+  \fontspec{amiri-regular.ttf}[Script=Arabic, Language=#1]
+  #2%
+  \endgroup%
+}
+\l{Arabic}  {٠١٢٣٤٥٦٧٨٩}\par
+\l{Arabic}  {۰۱۲۳۴۵۶۷۸۹}\par
+\l{Urdu}    {۰۱۲۳۴۵۶۷۸۹}\par
+\l{Sindhi}  {۰۱۲۳۴۵۶۷۸۹}\par
+\l{Kashmiri}{۰۱۲۳۴۵۶۷۸۹}\par
+\end{document}

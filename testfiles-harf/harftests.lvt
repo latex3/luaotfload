@@ -1,0 +1,200 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+\defaultfontfeatures{RawFeature={mode=harf}}
+
+\setmainfont{Amiri}[Script=Arabic]
+\begin{document}
+\showoutput
+\START
+\begingroup\pardir TRT\textdir TRT
+\setstretch{1.8}
+هذا كتاب صغير في بحث جديد، تنبّهنا له ونحن ننشر الطبعة الثانية من كتابنا الفلسفة
+اللغوية لأنّ موضوعه تابع لموضوعنا. أو هي خطوة ثانية في تاريخ اللغة باعتبار
+منشأها وتكونها ونموها. فالفلسفة اللغوية تبحث في كيف نطق الانسان الأول، وكيف
+نشأت اللغة وتولّدت الألفاظ من حكاية الأصوات الخارجية، ك\textbf{قصف الرعد}، وهبوب الرياح،
+والقطع والكسر، وحكاية التف والنفخ والصفير ونحوها. ومن المقاطع الطبيعية التي
+ينطق بها الانسان غريزيا كالتأوه، والزفير. وكيف تنوّعت تلك الأصوات لفظا ومعنى
+بالنحت، والابدال، والقلب، حتى صارت ألفاظا مستقلة وتكوّنت الأفعال، والأسماء،
+والحروف وصارت اللغة على نحو ما هي عليه.  وأما تاريخ اللغة فيتناول النظر في
+ألفاظها وتراكيبها، بعد تمام تكونها، فيبحث فيما طرأ عليهما من التغيير والتجدد أو
+الدثور، فيبين الألفاظ والتراكيب التي دثرت من اللغة بالاستعمال، وما قام مقامها
+من الألفاظ الجديدة، والتراكيب الجديدة، بما تولّد فيها، أو اقتبسته من سواها، مع
+بيان الأحوال التي قضت بدثور القديم وتولد الجديد، وأمثلة مما دثر، أو أهمل، أو
+تولّد، أو دخل.
+
+المحتوى الذي تصل إليه (في حالة عدم استخدام مواقع مؤمنة عن طريق بروتوكول نقل
+النص التشعبي الآمن {\textdir TLT HTTPS}).
+\par\endgroup\newpage
+
+\def\arabictext{%
+هذا كتاب صغير في بحث جديد، تنبّهنا له ونحن ننشر الطبعة الثانية من كتابنا الفلسفة
+اللغوية لأنّ موضوعه تابع لموضوعنا. أو هي خطوة ثانية في تاريخ اللغة باعتبار
+منشأها وتكونها ونموها. فالفلسفة اللغوية تبحث في كيف نطق الانسان الأول، وكيف
+نشأت اللغة وتولّدت الألفاظ من حكاية الأصوات الخارجية، كقصف الرعد، وهبوب الرياح،
+والقطع والكسر، وحكاية التف والنفخ والصفير ونحوها. ومن المقاطع الطبيعية التي
+ينطق بها الانسان غريزيا كالتأوه، والزفير. وكيف تنوّعت تلك الأصوات لفظا ومعنى
+بالنحت، والابدال، والقلب، حتى صارت ألفاظا مستقلة وتكوّنت الأفعال، والأسماء،
+والحروف وصارت اللغة على نحو ما هي عليه.  وأما تاريخ اللغة فيتناول النظر في
+ألفاظها وتراكيبها، بعد تمام تكونها، فيبحث فيما طرأ عليهما من التغيير والتجدد أو
+الدثور، فيبين الألفاظ والتراكيب التي دثرت من اللغة بالاستعمال، وما قام مقامها
+من الألفاظ الجديدة، والتراكيب الجديدة، بما تولّد فيها، أو اقتبسته من سواها، مع
+بيان الأحوال التي قضت بدثور القديم وتولد الجديد، وأمثلة مما دثر، أو أهمل، أو
+تولّد، أو دخل.%
+}
+
+\begingroup\pardir TRT\textdir TRT
+\fontspec{Amiri}[Script=Arabic, Scale=1.6]
+\setstretch{2.4}
+\arabictext
+\par\endgroup\newpage
+
+\begingroup\pardir TRT\textdir TRT
+\fontspec{ArefRuqaa-Regular.ttf}[Script=Arabic, Scale=1.2]
+\setstretch{2.4}
+\arabictext
+\par\endgroup\newpage
+
+\begingroup\pardir TRT\textdir TRT
+\fontspec{NotoNastaliqUrdu-Regular.ttf}[Script=Arabic]
+\setstretch{2.5}
+\arabictext
+\par\endgroup\newpage
+
+\begingroup\pardir TRT\textdir TRT
+\fontspec{AwamiNastaliq-Regular.ttf}
+\sloppy
+دفعہ ۱۔ تمام انسان آزاد اور حقوق و عزت کے اعتبار سے برابر پیدا ہوئے ہیں۔ انہیں
+ضمیر اور عقل ودیعت ہوئی ہے۔ اس لئے انہیں ایک دوسرے کے ساتھ بھائی چارے کا سلوک
+کرنا چاہیئے۔
+
+دفعہ ۲۔ ہر شخص ان تمام آزادیوں اور حقوق کا مستحق ہے جو اس اعلان میں بیان کئے گئے
+ہیں، اور اس حق پر نسل، رنگ، جنس، زبان، مذہب اور سیاسی تفریق کا یا کسی قسم کے
+عقیدے، قوم، معاشرے، دولت یا خاندانی حیثیت وغیرہ کا کوئی اثر نہ پڑے گا۔ اس کے
+علاوہ جس علاقے یا ملک سے جو شخص تعلق رکھتا ہے اس کی سیاسی کیفیت دائرہ اختیار یا
+بین الاقوامی حیثیت کی بنا پر اس سے کوئی امتیازی سلوک نہیں کیا جائے گا۔ چاہے وہ
+ملک یا علاقہ آزاد ہو یا تولیتی ہو یا غیر مختار ہو یا سیاسی اقتدار کے لحاظ سے کسی
+دوسری بندش کا پابند ہو۔
+\par
+\vskip 2em
+
+اُرْشَلیمئے\quad
+اوتبلیغی\quad
+گوَشتِش\quad
+انَون بُنگیجْ\quad
+مردم همینچُک\quad
+ظاهر بهینی\quad
+\par\endgroup\newpage
+
+\begingroup\pardir TRT\textdir TRT
+\fontspec{Amiri}[Script=Arabic, Scale=2]
+قلبي {\addfontfeature{Color=FF0000} تلون كله} بلون الحب.
+\par\endgroup\newpage
+
+\begingroup\pardir TRT\textdir TRT
+\fontspec{amiri-quran-colored.ttf}[Script=Arabic, Scale=2]
+\setstretch{3.8}
+\parindent=0pt
+\leftskip=0pt plus 1fil
+\rightskip=0pt plus -1fil
+\parfillskip=0pt plus 2fil
+\def\aya#1{{\textdir TLT ^^^^06dd#1}}
+^^^^fdfd~\aya{١}\par
+ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِینَ~\aya{٢} ٱلرَّحۡمَٰنِ ٱلرَّحِیمِ~\aya{٣} مَٰلِكِ یَوۡمِ ٱلدِّینِ~\aya{٤} إِیَّاكَ نَعۡبُدُ وَإِیَّاكَ نَسۡتَعِینُ~\aya{٥} ٱهۡدِنَا ٱلصِّرَٰطَ ٱلۡمُسۡتَقِیمَ~\aya{٦} صِرَٰطَ ٱلَّذِینَ أَنۡعَمۡتَ عَلَیۡهِمۡ غَیۡرِ ٱلۡمَغۡضُوبِ عَلَیۡهِمۡ وَلَا ٱلضَّاۤلِّینَ~\aya{٧}\par
+\endgroup\newpage
+
+\begingroup
+\fontspec{BungeeColor1.ttf}[Script=Latin, RawFeature={colr=true}, Scale=5]
+ABCDEFG\par
+\fontspec{BungeeColor1.ttf}[Script=Latin, RawFeature={colr=2}, Scale=5]
+ABCDEFG\par
+
+\fontspec{NotoColorEmoji.ttf}[Scale=2]
+💙💚💛💜💝🖤🧡😀😇🧔🏽🦆
+\endgroup\newpage
+
+\begingroup
+\addfontfeature{Script=Latin}
+\TeX\ = {\addfontfeature{Script=Greek}τεχ} in Greek
+
+(\textit{f\/})
+
+\def\l#1#2{%
+  \begingroup%
+  \fontspec{amiri-regular.ttf}[Script=Arabic, Language=#1]
+  #2%
+  \endgroup%
+}
+\l{Arabic}  {٠١٢٣٤٥٦٧٨٩}\par
+\l{Arabic}  {۰۱۲۳۴۵۶۷۸۹}\par
+\l{Urdu}    {۰۱۲۳۴۵۶۷۸۹}\par
+\l{Sindhi}  {۰۱۲۳۴۵۶۷۸۹}\par
+\l{Kashmiri}{۰۱۲۳۴۵۶۷۸۹}\par
+
+Some text then inline math \(E=mc^2\) then \(\hbox{text inside inline math}\), then
+display math \[E=mc^2\hbox{ with text inside}\]
+
+\begingroup
+% Amiri does not have “onum” feature, so this produces a warning, which is what
+% we are testing here.
+\fontspec{Amiri}[Script=Latin, Numbers=OldStyle]
+Hello 0123456789
+\endgroup
+
+\endgroup\newpage
+
+\begingroup
+\parindent=0pt
+\fontspec{NotoSerifCJK-Regular.ttc}[Script=Latin]
+
+\noindent
+\smallskip
+offbeat office baffle coffee HAVANA\par
+\smallskip
+\begingroup
+\rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
+offbeat office baffle coffee HAVANA\par
+\endgroup
+\endgroup
+\newpage
+
+\newfontfamily\testr{lmroman10-regular.otf}[Script=Latin, Ligatures=Discretionary]
+\begingroup
+\parindent=0pt
+\testr
+\noindent
+\smallskip
+offbeat office baffle {\rm baffle} coffee HAVANA\par
+\smallskip
+\begingroup
+\rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
+offbeat office baffle {\rm baffle} coffee HAVANA\par
+\endgroup
+\endgroup
+\newpage
+
+\newfontfamily\testb{lmroman10-bold.otf}[Script=Latin]
+\newfontfamily\testi{lmromanslant10-regular.otf}[Script=Latin]
+\newfontfamily\testR{lmroman12-regular.otf}[Script=Latin, Scale=1.2]
+\testr
+\hrule
+\vskip 1in
+\centerline{\testb A SHORT STORY}
+\vskip 6pt
+\centerline{\testi by A. U. Thor}
+\vskip .5cm
+Once upon a time, in a distant {\testR galaxy called} Ööç, there lived a computer named
+R.~J. Drofnats.
+
+Mr.~Drofnats-----or ‘‘R. J.,’’ as he {\textdir TRT preferred} to be called-----was happiest when he
+was at work typesetting beautiful documents.
+\vskip 1in
+\hrule
+\newpage
+
+\font\test=cmr10 at 12pt\test
+\addfontfeature{Script=Latin}
+\input story
+\end{document}

@@ -73,7 +73,7 @@ local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 
 local has_hbengine = os.execute(os.type == "unix"
                                   and "command -v luahbtex > /dev/null"
-                                  or "where /q luahbtex") or nil
+                                  or "where /q luahbtex") == 0 or nil
 stdengine    = "luatex"
 checkengines = {"luatex", has_hbengine and "luahbtex"}
 

@@ -96,7 +96,7 @@ checkconfigs = {
                }
 end
 checkruns = 3
-checksuppfiles = {"LuaotfloadDummyFont.otf"}
+checksuppfiles = {"texmf.cnf"}
 
 -- exclude some text temporarly or in certain systems ...
 if os.env["CONTEXTPATH"] then

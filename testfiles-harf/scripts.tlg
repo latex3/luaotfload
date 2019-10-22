@@ -79,32 +79,32 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(1)/m/n/10 T
+....\TU/amiri-regular.ttf(1)/m/n/10 "T" 0054 +0:+0
 ....\kern-1.66702
 ....\hbox(6.48+0.04)x5.73, shifted 2.165, direction TLT
-.....\TU/amiri-regular.ttf(1)/m/n/10 E
+.....\TU/amiri-regular.ttf(1)/m/n/10 "E" 0045 +0:+0
 ....\kern-1.25
-....\TU/amiri-regular.ttf(1)/m/n/10 X
+....\TU/amiri-regular.ttf(1)/m/n/10 "X" 0058 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/amiri-regular.ttf(1)/m/n/10 =
+....\TU/amiri-regular.ttf(1)/m/n/10 "=" 003D +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/amiri-regular.ttf(1)/m/n/10 τ
+....\TU/amiri-regular.ttf(1)/m/n/10 "τ" 120000 +0:+0
 ....\pdfliteral direct <lua data reference 792>
-....\TU/amiri-regular.ttf(1)/m/n/10 ε
+....\TU/amiri-regular.ttf(1)/m/n/10 "ε" 120000 +0:+0
 ....\pdfliteral direct <lua data reference 803>
 ....\pdfliteral direct <lua data reference 804>
-....\TU/amiri-regular.ttf(1)/m/n/10 χ
+....\TU/amiri-regular.ttf(1)/m/n/10 "χ" 120000 +0:+0
 ....\pdfliteral direct <lua data reference 805>
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/amiri-regular.ttf(1)/m/n/10 i
-....\TU/amiri-regular.ttf(1)/m/n/10 n
+....\TU/amiri-regular.ttf(1)/m/n/10 "i" 0069 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "n" 006E +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/amiri-regular.ttf(1)/m/n/10 G
-....\TU/amiri-regular.ttf(1)/m/n/10 r
+....\TU/amiri-regular.ttf(1)/m/n/10 "G" 0047 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "r" 0072 +0:+0
 ....\kern-0.04 (font)
-....\TU/amiri-regular.ttf(1)/m/n/10 e
-....\TU/amiri-regular.ttf(1)/m/n/10 e
-....\TU/amiri-regular.ttf(1)/m/n/10 k
+....\TU/amiri-regular.ttf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "k" 006B +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -117,11 +117,11 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(1)/m/n/10 (
+....\TU/amiri-regular.ttf(1)/m/n/10 "(" 0028 +0:+0
 ....\kern0.0 (italic)
-....\TU/amiri-regular.ttf(1)/m/n/10 f
+....\TU/amiri-regular.ttf(1)/m/n/10 "f" 0066 +0:+0
 ....\kern0.0 (italic)
-....\TU/amiri-regular.ttf(1)/m/n/10 )
+....\TU/amiri-regular.ttf(1)/m/n/10 ")" 0029 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -134,16 +134,16 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(2)/m/n/10 ٠
-....\TU/amiri-regular.ttf(2)/m/n/10 ١
-....\TU/amiri-regular.ttf(2)/m/n/10 ٢
-....\TU/amiri-regular.ttf(2)/m/n/10 ٣
-....\TU/amiri-regular.ttf(2)/m/n/10 ٤
-....\TU/amiri-regular.ttf(2)/m/n/10 ٥
-....\TU/amiri-regular.ttf(2)/m/n/10 ٦
-....\TU/amiri-regular.ttf(2)/m/n/10 ٧
-....\TU/amiri-regular.ttf(2)/m/n/10 ٨
-....\TU/amiri-regular.ttf(2)/m/n/10 ٩
+....\TU/amiri-regular.ttf(2)/m/n/10 "٠" 0660 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "١" 0661 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٢" 0662 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٣" 0663 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٤" 0664 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٥" 0665 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٦" 0666 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٧" 0667 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٨" 0668 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٩" 0669 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -156,16 +156,16 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(2)/m/n/10 ۰
-....\TU/amiri-regular.ttf(2)/m/n/10 ۱
-....\TU/amiri-regular.ttf(2)/m/n/10 ۲
-....\TU/amiri-regular.ttf(2)/m/n/10 ۳
-....\TU/amiri-regular.ttf(2)/m/n/10 ۴
-....\TU/amiri-regular.ttf(2)/m/n/10 ۵
-....\TU/amiri-regular.ttf(2)/m/n/10 ۶
-....\TU/amiri-regular.ttf(2)/m/n/10 ۷
-....\TU/amiri-regular.ttf(2)/m/n/10 ۸
-....\TU/amiri-regular.ttf(2)/m/n/10 ۹
+....\TU/amiri-regular.ttf(2)/m/n/10 "۰" 06F0 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۱" 06F1 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۲" 06F2 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۳" 06F3 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۴" 06F4 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۵" 06F5 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۶" 06F6 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۷" 06F7 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۸" 06F8 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۹" 06F9 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -178,16 +178,16 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(3)/m/n/10 ۰
-....\TU/amiri-regular.ttf(3)/m/n/10 ۱
-....\TU/amiri-regular.ttf(3)/m/n/10 ۲
-....\TU/amiri-regular.ttf(3)/m/n/10 ۳
-....\TU/amiri-regular.ttf(3)/m/n/10 ۴
-....\TU/amiri-regular.ttf(3)/m/n/10 ۵
-....\TU/amiri-regular.ttf(3)/m/n/10 ۶
-....\TU/amiri-regular.ttf(3)/m/n/10 ۷
-....\TU/amiri-regular.ttf(3)/m/n/10 ۸
-....\TU/amiri-regular.ttf(3)/m/n/10 ۹
+....\TU/amiri-regular.ttf(3)/m/n/10 "۰" 06F0 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۱" 06F1 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۲" 06F2 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۳" 06F3 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۴" 120796 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۵" 06F5 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۶" 120797 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۷" 120798 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۸" 06F8 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۹" 06F9 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -200,16 +200,16 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(4)/m/n/10 ۰
-....\TU/amiri-regular.ttf(4)/m/n/10 ۱
-....\TU/amiri-regular.ttf(4)/m/n/10 ۲
-....\TU/amiri-regular.ttf(4)/m/n/10 ۳
-....\TU/amiri-regular.ttf(4)/m/n/10 ۴
-....\TU/amiri-regular.ttf(4)/m/n/10 ۵
-....\TU/amiri-regular.ttf(4)/m/n/10 ۶
-....\TU/amiri-regular.ttf(4)/m/n/10 ۷
-....\TU/amiri-regular.ttf(4)/m/n/10 ۸
-....\TU/amiri-regular.ttf(4)/m/n/10 ۹
+....\TU/amiri-regular.ttf(4)/m/n/10 "۰" 06F0 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۱" 06F1 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۲" 06F2 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۳" 06F3 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۴" 06F4 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۵" 06F5 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۶" 120797 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۷" 120798 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۸" 06F8 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۹" 06F9 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -222,16 +222,16 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(5)/m/n/10 ۰
-....\TU/amiri-regular.ttf(5)/m/n/10 ۱
-....\TU/amiri-regular.ttf(5)/m/n/10 ۲
-....\TU/amiri-regular.ttf(5)/m/n/10 ۳
-....\TU/amiri-regular.ttf(5)/m/n/10 ۴
-....\TU/amiri-regular.ttf(5)/m/n/10 ۵
-....\TU/amiri-regular.ttf(5)/m/n/10 ۶
-....\TU/amiri-regular.ttf(5)/m/n/10 ۷
-....\TU/amiri-regular.ttf(5)/m/n/10 ۸
-....\TU/amiri-regular.ttf(5)/m/n/10 ۹
+....\TU/amiri-regular.ttf(5)/m/n/10 "۰" 06F0 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۱" 06F1 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۲" 06F2 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۳" 06F3 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۴" 06F4 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۵" 06F5 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۶" 06F6 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۷" 06F7 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۸" 06F8 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۹" 06F9 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -242,7 +242,7 @@ Completed box being shipped out [1]
 ..\glue(\baselineskip) 23.73
 ..\hbox(6.27+0.03)x345.0, glue set 169.84fil, direction TLT
 ...\glue 0.0 plus 1.0fil
-...\TU/amiri-regular.ttf(1)/m/n/10 1
+...\TU/amiri-regular.ttf(1)/m/n/10 "1" 0031 +0:+0
 ...\glue 0.0 plus 1.0fil
 (scripts.aux)
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.

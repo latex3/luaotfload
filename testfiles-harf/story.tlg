@@ -74,40 +74,40 @@ Completed box being shipped out [1]
 ...\glue 72.26999
 ...\hbox(6.98+0.11)x345.0, glue set 124.78fil, direction TLT
 ....\glue 0.0 plus 1.0fil minus 1.0fil
-....\TU/lmroman10-bold.otf(0)/m/n/10 A
+....\TU/lmroman10-bold.otf(0)/m/n/10 "A" 0041 +0:+0
 ....\glue(\spaceskip) 3.83 plus 1.91307 minus 1.27794
-....\TU/lmroman10-bold.otf(0)/m/n/10 S
-....\TU/lmroman10-bold.otf(0)/m/n/10 H
-....\TU/lmroman10-bold.otf(0)/m/n/10 O
-....\TU/lmroman10-bold.otf(0)/m/n/10 R
+....\TU/lmroman10-bold.otf(0)/m/n/10 "S" 0053 +0:+0
+....\TU/lmroman10-bold.otf(0)/m/n/10 "H" 0048 +0:+0
+....\TU/lmroman10-bold.otf(0)/m/n/10 "O" 004F +0:+0
+....\TU/lmroman10-bold.otf(0)/m/n/10 "R" 0052 +0:+0
 ....\kern-0.96 (font)
-....\TU/lmroman10-bold.otf(0)/m/n/10 T
+....\TU/lmroman10-bold.otf(0)/m/n/10 "T" 0054 +0:+0
 ....\glue(\spaceskip) 3.83 plus 1.91307 minus 1.27794
-....\TU/lmroman10-bold.otf(0)/m/n/10 S
-....\TU/lmroman10-bold.otf(0)/m/n/10 T
-....\TU/lmroman10-bold.otf(0)/m/n/10 O
-....\TU/lmroman10-bold.otf(0)/m/n/10 R
+....\TU/lmroman10-bold.otf(0)/m/n/10 "S" 0053 +0:+0
+....\TU/lmroman10-bold.otf(0)/m/n/10 "T" 0054 +0:+0
+....\TU/lmroman10-bold.otf(0)/m/n/10 "O" 004F +0:+0
+....\TU/lmroman10-bold.otf(0)/m/n/10 "R" 0052 +0:+0
 ....\kern-0.96 (font)
-....\TU/lmroman10-bold.otf(0)/m/n/10 Y
+....\TU/lmroman10-bold.otf(0)/m/n/10 "Y" 0059 +0:+0
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ...\glue 6.0
 ...\glue(\baselineskip) 4.73
 ...\hbox(7.16+2.05)x345.0, glue set 141.095fil, direction TLT
 ....\glue 0.0 plus 1.0fil minus 1.0fil
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 b
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 y
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "y" 0079 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 A
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 .
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 U
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 .
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "U" 0055 +0:+0
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 T
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 h
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 o
-....\TU/lmromanslant10-regular.otf(0)/m/n/10 r
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "T" 0054 +0:+0
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmromanslant10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ...\glue 14.22636
 ...\glue(\parskip) 0.0 plus 1.0
@@ -119,114 +119,114 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 O
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
-....\TU/lmroman10-regular.otf(0)/m/n/10 c
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "O" 004F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 u
-....\TU/lmroman10-regular.otf(0)/m/n/10 p
+....\TU/lmroman10-regular.otf(0)/m/n/10 "u" 0075 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 i
-....\TU/lmroman10-regular.otf(0)/m/n/10 m
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 ,
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "," 002C +0:+0
 ....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
-....\TU/lmroman10-regular.otf(0)/m/n/10 i
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
+....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 d
-....\TU/lmroman10-regular.otf(0)/m/n/10 i
-....\TU/lmroman10-regular.otf(0)/m/n/10 s
+....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman12-regular.otf(0)/m/n/10 g
-....\TU/lmroman12-regular.otf(0)/m/n/10 a
-....\TU/lmroman12-regular.otf(0)/m/n/10 l
-....\TU/lmroman12-regular.otf(0)/m/n/10 a
-....\TU/lmroman12-regular.otf(0)/m/n/10 x
-....\TU/lmroman12-regular.otf(0)/m/n/10 y
+....\TU/lmroman12-regular.otf(0)/m/n/10 "g" 0067 +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "x" 0078 +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "y" 0079 +0:+0
 ....\glue(\spaceskip) 3.91199 plus 1.956 minus 1.304
-....\TU/lmroman12-regular.otf(0)/m/n/10 c
-....\TU/lmroman12-regular.otf(0)/m/n/10 a
-....\TU/lmroman12-regular.otf(0)/m/n/10 l
-....\TU/lmroman12-regular.otf(0)/m/n/10 l
-....\TU/lmroman12-regular.otf(0)/m/n/10 e
-....\TU/lmroman12-regular.otf(0)/m/n/10 d
+....\TU/lmroman12-regular.otf(0)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman12-regular.otf(0)/m/n/10 "d" 0064 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 ^^d6
-....\TU/lmroman10-regular.otf(0)/m/n/10 ^^f6
+....\TU/lmroman10-regular.otf(0)/m/n/10 "^^d6" 00D6 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "^^f6" 00F6 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 ^^e7
-....\TU/lmroman10-regular.otf(0)/m/n/10 ,
+....\TU/lmroman10-regular.otf(0)/m/n/10 "^^e7" 00E7 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "," 002C +0:+0
 ....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 h
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 l
-....\TU/lmroman10-regular.otf(0)/m/n/10 i
-....\TU/lmroman10-regular.otf(0)/m/n/10 v
+....\TU/lmroman10-regular.otf(0)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "v" 0076 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 d
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 c
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 m
+....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 p
-....\TU/lmroman10-regular.otf(0)/m/n/10 u
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "u" 0075 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
 ....\glue(\rightskip) 0.0
 ...\penalty 300
 ...\glue(\baselineskip) 2.49
 ...\hbox(7.05+0.22)x345.0, glue set 247.27fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 m
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 d
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 R
-....\TU/lmroman10-regular.otf(0)/m/n/10 .
+....\TU/lmroman10-regular.otf(0)/m/n/10 "R" 0052 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 J
-....\TU/lmroman10-regular.otf(0)/m/n/10 .
+....\TU/lmroman10-regular.otf(0)/m/n/10 "J" 004A +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 D
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
+....\TU/lmroman10-regular.otf(0)/m/n/10 "D" 0044 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 s
-....\TU/lmroman10-regular.otf(0)/m/n/10 .
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -239,166 +239,166 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 M
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
-....\TU/lmroman10-regular.otf(0)/m/n/10 .
+....\TU/lmroman10-regular.otf(0)/m/n/10 "M" 004D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 D
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 s
-....\TU/lmroman10-regular.otf(0)/m/n/10 — (ligature ---)
+....\TU/lmroman10-regular.otf(0)/m/n/10 "D" 0044 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 – (ligature --)
-.....= \TU/lmroman10-regular.otf(0)/m/n/10 – (ligature --)
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "–" 2013 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0)
+.....= \TU/lmroman10-regular.otf(0)/m/n/10 "–" 2013 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0)
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 ‘
-....\TU/lmroman10-regular.otf(0)/m/n/10 ‘
-....\TU/lmroman10-regular.otf(0)/m/n/10 R
-....\TU/lmroman10-regular.otf(0)/m/n/10 .
+....\TU/lmroman10-regular.otf(0)/m/n/10 "‘" 2018 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "‘" 2018 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "R" 0052 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 J
-....\TU/lmroman10-regular.otf(0)/m/n/10 .
-....\TU/lmroman10-regular.otf(0)/m/n/10 ,
-....\TU/lmroman10-regular.otf(0)/m/n/10 ’
-....\TU/lmroman10-regular.otf(0)/m/n/10 ’
+....\TU/lmroman10-regular.otf(0)/m/n/10 "J" 004A +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "," 002C +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "’" 2019 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "’" 2019 +0:+0
 ....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 s
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 h
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\begindir TRT
-....\TU/lmroman10-regular.otf(0)/m/n/10 p
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 d
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
 ....\enddir TRT
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 b
+....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 c
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 l
-....\TU/lmroman10-regular.otf(0)/m/n/10 l
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 d
-....\TU/lmroman10-regular.otf(0)/m/n/10 — (ligature ---)
+....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 – (ligature --)
-.....= \TU/lmroman10-regular.otf(0)/m/n/10 – (ligature --)
-....\TU/lmroman10-regular.otf(0)/m/n/10 w
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "–" 2013 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0)
+.....= \TU/lmroman10-regular.otf(0)/m/n/10 "–" 2013 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0)
+....\TU/lmroman10-regular.otf(0)/m/n/10 "w" 0077 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 s
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 h
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 p
+....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 p
-....\TU/lmroman10-regular.otf(0)/m/n/10 i
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 s
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 w
-....\TU/lmroman10-regular.otf(0)/m/n/10 h
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
+....\TU/lmroman10-regular.otf(0)/m/n/10 "w" 0077 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
 ....\glue(\rightskip) 0.0
 ...\penalty 300
 ...\glue(\baselineskip) 3.01
 ...\hbox(7.05+2.06)x345.0, glue set 132.03fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 h
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 w
+....\TU/lmroman10-regular.otf(0)/m/n/10 "w" 0077 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 s
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 w
+....\TU/lmroman10-regular.otf(0)/m/n/10 "w" 0077 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 r
-....\TU/lmroman10-regular.otf(0)/m/n/10 k
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "k" 006B +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 y
-....\TU/lmroman10-regular.otf(0)/m/n/10 p
+....\TU/lmroman10-regular.otf(0)/m/n/10 "y" 0079 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 s
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 i
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
-....\TU/lmroman10-regular.otf(0)/m/n/10 g
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "g" 0067 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 b
+....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 u
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "u" 0075 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 i
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 u
-....\TU/lmroman10-regular.otf(0)/m/n/10 l
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "u" 0075 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "l" 006C +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(0)/m/n/10 d
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
+....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 c
+....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 u
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "u" 0075 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(0)/m/n/10 -
-....\TU/lmroman10-regular.otf(0)/m/n/10 m
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 n
+.....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
-....\TU/lmroman10-regular.otf(0)/m/n/10 s
-....\TU/lmroman10-regular.otf(0)/m/n/10 .
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -410,7 +410,7 @@ Completed box being shipped out [1]
 ..\glue(\baselineskip) 23.34
 ..\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
-...\TU/lmroman10-regular.otf(0)/m/n/10 1
+...\TU/lmroman10-regular.otf(0)/m/n/10 "1" 0031 +0:+0
 ...\glue 0.0 plus 1.0fil
 luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmroman10-regular.otf(1)' created for font
@@ -443,40 +443,40 @@ Completed box being shipped out [2]
 ...\glue 72.26999
 ...\hbox(7.16+0.22)x345.0, glue set 130.83fil, direction TLT
 ....\glue 0.0 plus 1.0fil minus 1.0fil
-....\TU/lmroman10-regular.otf(1)/m/n/10 A
+....\TU/lmroman10-regular.otf(1)/m/n/10 "A" 0041 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.66331 minus 1.1111
-....\TU/lmroman10-regular.otf(1)/m/n/10 S
-....\TU/lmroman10-regular.otf(1)/m/n/10 H
-....\TU/lmroman10-regular.otf(1)/m/n/10 O
-....\TU/lmroman10-regular.otf(1)/m/n/10 R
+....\TU/lmroman10-regular.otf(1)/m/n/10 "S" 0053 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "H" 0048 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "O" 004F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "R" 0052 +0:+0
 ....\kern-0.83 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 T
+....\TU/lmroman10-regular.otf(1)/m/n/10 "T" 0054 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.66331 minus 1.1111
-....\TU/lmroman10-regular.otf(1)/m/n/10 S
-....\TU/lmroman10-regular.otf(1)/m/n/10 T
-....\TU/lmroman10-regular.otf(1)/m/n/10 O
-....\TU/lmroman10-regular.otf(1)/m/n/10 R
+....\TU/lmroman10-regular.otf(1)/m/n/10 "S" 0053 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "T" 0054 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "O" 004F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "R" 0052 +0:+0
 ....\kern-0.83 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 Y
+....\TU/lmroman10-regular.otf(1)/m/n/10 "Y" 0059 +0:+0
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ...\glue 6.0
 ...\glue(\baselineskip) 4.62
 ...\hbox(7.16+2.05)x345.0, glue set 141.095fil, direction TLT
 ....\glue 0.0 plus 1.0fil minus 1.0fil
-....\TU/lmroman10-regular.otf(1)/m/n/10 b
+....\TU/lmroman10-regular.otf(1)/m/n/10 "b" 0062 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 y
+....\TU/lmroman10-regular.otf(1)/m/n/10 "y" 0079 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 A
-....\TU/lmroman10-regular.otf(1)/m/n/10 .
+....\TU/lmroman10-regular.otf(1)/m/n/10 "A" 0041 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 U
-....\TU/lmroman10-regular.otf(1)/m/n/10 .
+....\TU/lmroman10-regular.otf(1)/m/n/10 "U" 0055 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 T
-....\TU/lmroman10-regular.otf(1)/m/n/10 h
-....\TU/lmroman10-regular.otf(1)/m/n/10 o
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
+....\TU/lmroman10-regular.otf(1)/m/n/10 "T" 0054 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ...\glue 14.22636
 ...\glue(\parskip) 0.0 plus 1.0
@@ -488,114 +488,114 @@ Completed box being shipped out [2]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/lmroman10-regular.otf(1)/m/n/10 O
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
-....\TU/lmroman10-regular.otf(1)/m/n/10 c
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
+....\TU/lmroman10-regular.otf(1)/m/n/10 "O" 004F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 u
-....\TU/lmroman10-regular.otf(1)/m/n/10 p
+....\TU/lmroman10-regular.otf(1)/m/n/10 "u" 0075 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 o
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
+....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 i
-....\TU/lmroman10-regular.otf(1)/m/n/10 m
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 ,
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "," 002C +0:+0
 ....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
-....\TU/lmroman10-regular.otf(1)/m/n/10 i
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
+....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 d
-....\TU/lmroman10-regular.otf(1)/m/n/10 i
-....\TU/lmroman10-regular.otf(1)/m/n/10 s
+....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 g
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 l
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 x
-....\TU/lmroman10-regular.otf(1)/m/n/10 y
+....\TU/lmroman10-regular.otf(1)/m/n/10 "g" 0067 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "x" 0078 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "y" 0079 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 c
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 l
-....\TU/lmroman10-regular.otf(1)/m/n/10 l
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 d
+....\TU/lmroman10-regular.otf(1)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 ^^d6
-....\TU/lmroman10-regular.otf(1)/m/n/10 ^^f6
+....\TU/lmroman10-regular.otf(1)/m/n/10 "^^d6" 00D6 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "^^f6" 00F6 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 ^^e7
-....\TU/lmroman10-regular.otf(1)/m/n/10 ,
+....\TU/lmroman10-regular.otf(1)/m/n/10 "^^e7" 00E7 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "," 002C +0:+0
 ....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 h
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 l
-....\TU/lmroman10-regular.otf(1)/m/n/10 i
-....\TU/lmroman10-regular.otf(1)/m/n/10 v
+....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "v" 0076 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 d
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 c
-....\TU/lmroman10-regular.otf(1)/m/n/10 o
-....\TU/lmroman10-regular.otf(1)/m/n/10 m
+....\TU/lmroman10-regular.otf(1)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 p
-....\TU/lmroman10-regular.otf(1)/m/n/10 u
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "u" 0075 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\glue(\rightskip) 0.0
 ...\penalty 300
 ...\glue(\baselineskip) 2.89
 ...\hbox(7.05+0.22)x345.0, glue set 247.27fil, direction TLT
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 m
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 d
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 R
-....\TU/lmroman10-regular.otf(1)/m/n/10 .
+....\TU/lmroman10-regular.otf(1)/m/n/10 "R" 0052 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 J
-....\TU/lmroman10-regular.otf(1)/m/n/10 .
+....\TU/lmroman10-regular.otf(1)/m/n/10 "J" 004A +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 D
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
-....\TU/lmroman10-regular.otf(1)/m/n/10 o
-....\TU/lmroman10-regular.otf(1)/m/n/10 f
+....\TU/lmroman10-regular.otf(1)/m/n/10 "D" 0044 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "f" 0066 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 s
-....\TU/lmroman10-regular.otf(1)/m/n/10 .
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -608,160 +608,160 @@ Completed box being shipped out [2]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/lmroman10-regular.otf(1)/m/n/10 M
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
-....\TU/lmroman10-regular.otf(1)/m/n/10 .
+....\TU/lmroman10-regular.otf(1)/m/n/10 "M" 004D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 D
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
-....\TU/lmroman10-regular.otf(1)/m/n/10 o
-....\TU/lmroman10-regular.otf(1)/m/n/10 f
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 s
+....\TU/lmroman10-regular.otf(1)/m/n/10 "D" 0044 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 — (ligature ---)
-.....= \TU/lmroman10-regular.otf(1)/m/n/10 — (ligature ---)
-....\TU/lmroman10-regular.otf(1)/m/n/10 o
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
+.....= \TU/lmroman10-regular.otf(1)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
+....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 “ (ligature ``)
-....\TU/lmroman10-regular.otf(1)/m/n/10 R
-....\TU/lmroman10-regular.otf(1)/m/n/10 .
+....\TU/lmroman10-regular.otf(1)/m/n/10 "“" 201C +0:+0 (ligature "`" 0060 +0:+0"`" 0060 +0:+0)
+....\TU/lmroman10-regular.otf(1)/m/n/10 "R" 0052 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 J
-....\TU/lmroman10-regular.otf(1)/m/n/10 .
-....\TU/lmroman10-regular.otf(1)/m/n/10 ,
-....\TU/lmroman10-regular.otf(1)/m/n/10 ” (ligature '')
+....\TU/lmroman10-regular.otf(1)/m/n/10 "J" 004A +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "," 002C +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
 ....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 s
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 h
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
+....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 p
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
+....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 f
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 d
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 o
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 b
+....\TU/lmroman10-regular.otf(1)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 c
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 l
-....\TU/lmroman10-regular.otf(1)/m/n/10 l
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 d
+....\TU/lmroman10-regular.otf(1)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 — (ligature ---)
-.....= \TU/lmroman10-regular.otf(1)/m/n/10 — (ligature ---)
-....\TU/lmroman10-regular.otf(1)/m/n/10 w
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
+.....= \TU/lmroman10-regular.otf(1)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
+....\TU/lmroman10-regular.otf(1)/m/n/10 "w" 0077 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 s
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 h
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 p
+....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 p
-....\TU/lmroman10-regular.otf(1)/m/n/10 i
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 s
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 w
-....\TU/lmroman10-regular.otf(1)/m/n/10 h
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
+....\TU/lmroman10-regular.otf(1)/m/n/10 "w" 0077 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
 ....\glue(\rightskip) 0.0
 ...\penalty 300
 ...\glue(\baselineskip) 3.01
 ...\hbox(7.05+2.06)x345.0, glue set 132.03fil, direction TLT
-....\TU/lmroman10-regular.otf(1)/m/n/10 h
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
+....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 w
+....\TU/lmroman10-regular.otf(1)/m/n/10 "w" 0077 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 s
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 w
+....\TU/lmroman10-regular.otf(1)/m/n/10 "w" 0077 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 o
-....\TU/lmroman10-regular.otf(1)/m/n/10 r
-....\TU/lmroman10-regular.otf(1)/m/n/10 k
+....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "k" 006B +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 y
-....\TU/lmroman10-regular.otf(1)/m/n/10 p
+....\TU/lmroman10-regular.otf(1)/m/n/10 "y" 0079 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 s
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 i
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
-....\TU/lmroman10-regular.otf(1)/m/n/10 g
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "g" 0067 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 b
+....\TU/lmroman10-regular.otf(1)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 a
-....\TU/lmroman10-regular.otf(1)/m/n/10 u
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "u" 0075 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 i
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 f
-....\TU/lmroman10-regular.otf(1)/m/n/10 u
-....\TU/lmroman10-regular.otf(1)/m/n/10 l
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "u" 0075 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
-....\TU/lmroman10-regular.otf(1)/m/n/10 d
-....\TU/lmroman10-regular.otf(1)/m/n/10 o
+....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 c
+....\TU/lmroman10-regular.otf(1)/m/n/10 "c" 0063 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 u
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "u" 0075 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 -
-....\TU/lmroman10-regular.otf(1)/m/n/10 m
-....\TU/lmroman10-regular.otf(1)/m/n/10 e
-....\TU/lmroman10-regular.otf(1)/m/n/10 n
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
 ....\kern-0.28 (font)
-....\TU/lmroman10-regular.otf(1)/m/n/10 t
-....\TU/lmroman10-regular.otf(1)/m/n/10 s
-....\TU/lmroman10-regular.otf(1)/m/n/10 .
+....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
+....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -773,7 +773,7 @@ Completed box being shipped out [2]
 ..\glue(\baselineskip) 23.34
 ..\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
-...\TU/lmroman10-regular.otf(1)/m/n/10 2
+...\TU/lmroman10-regular.otf(1)/m/n/10 "2" 0032 +0:+0
 ...\glue 0.0 plus 1.0fil
 ) (story.aux)
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.

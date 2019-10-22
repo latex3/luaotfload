@@ -30,75 +30,75 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 o
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 ff
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ff" FB00 +0:+0
 .....< \kern-0.13 (font)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
-.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 b
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 ff
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ff" FB00 +0:+0
 .....= \kern-0.1 (font)
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 b
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\kern-0.07 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 a
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 t
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "t" 0074 +0:+0
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 o
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 .....< \kern-0.13 (font)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
-.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 fi
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 ffi
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 c
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fi" FB01 +0:+0
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ffi" FB03 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "c" 0063 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 b
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 a
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 .....< \kern-0.13 (font)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
-.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 fl
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 ffl
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fl" FB02 +0:+0
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ffl" FB04 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 c
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 o
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "c" 0063 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 .....< \kern-0.13 (font)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
-.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 .....> \kern-0.17 (font)
-.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 ff
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ff" FB00 +0:+0
 .....= \kern-0.17 (font)
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 H
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "H" 0048 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 A
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 .....< \kern-0.34 (font)
-.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
-.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 V
+.....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "V" 0056 +0:+0
 .....> \kern-1.22 (font)
-.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 A
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 .....> \kern-0.07 (font)
-.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 N
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "N" 004E +0:+0
 .....> \kern-0.39 (font)
-.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 A
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 A
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 .....= \kern-1.32 (font)
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 V
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "V" 0056 +0:+0
 .....= \kern-1.22 (font)
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 A
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 .....= \kern-0.07 (font)
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 N
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "N" 004E +0:+0
 .....= \kern-0.39 (font)
-.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 A
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -111,86 +111,86 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 o
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 ff
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ff" FB00 +0:+0
 ....\kern-0.13 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 250
 ...\glue(\baselineskip) 3.79
 ...\hbox(8.07+0.14)x345.0, glue set 324.25fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 b
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\kern-0.07 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 a
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 t
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "t" 0074 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 3.69
 ...\hbox(8.17+0.14)x345.0, glue set 331.95999fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 o
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 ....\kern-0.13 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 3.69
 ...\hbox(8.17+0.14)x345.0, glue set 327.51001fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 fi
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 c
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fi" FB01 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "c" 0063 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 3.69
 ...\hbox(8.17+0.14)x345.0, glue set 326.10999fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 b
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 a
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 ....\kern-0.13 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 3.69
 ...\hbox(8.17+0.14)x345.0, glue set 332.9fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 fl
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fl" FB02 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 3.69
 ...\hbox(8.17+0.14)x345.0, glue set 326.66998fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 c
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 o
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "c" 0063 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 ....\kern-0.13 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 3.69
 ...\hbox(8.17+0.14)x345.0, glue set 330.33997fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 ....\kern-0.17 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.5
 ...\hbox(7.36+0.0)x345.0, glue set 326.18fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 H
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 A
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "H" 0048 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 ....\kern-0.34 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 250
 ...\glue(\baselineskip) 4.64
 ...\hbox(7.36+0.08)x345.0, glue set 158.53fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 V
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "V" 0056 +0:+0
 ....\kern-1.22 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 A
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 ....\kern-0.07 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 N
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "N" 004E +0:+0
 ....\kern-0.39 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 A
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0 plus 1.0fil
@@ -202,9 +202,9 @@ Completed box being shipped out [1]
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 ff
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "ff" FB00 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue 3.0 plus 1.0 minus 1.0
@@ -212,85 +212,85 @@ Completed box being shipped out [1]
 ...\penalty 250
 ...\glue(\baselineskip) 4.95
 ...\hbox(6.94+0.11)x345.0, glue set 325.83002fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 b
+....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 333.60999fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 330.56fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 fi
-....\TU/lmroman10-regular.otf(0)/m/n/10 c
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "fi" FB01 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 328.04999fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 b
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 335.0fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 fl
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "fl" FB02 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 3.72
 ...\hbox(8.17+0.14)x345.0, glue set 326.10999fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 b
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 a
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 ....\kern-0.13 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 3.69
 ...\hbox(8.17+0.14)x345.0, glue set 332.9fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 fl
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fl" FB02 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.81
 ...\hbox(7.05+0.11)x345.0, glue set 329.16998fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 c
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 333.06fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.73
 ...\hbox(7.16+0.0)x345.0, glue set 326.66998fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 H
-....\TU/lmroman10-regular.otf(0)/m/n/10 A
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "H" 0048 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 250
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.16+0.22)x345.0, glue set 158.055fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 V
+....\TU/lmroman10-regular.otf(0)/m/n/10 "V" 0056 +0:+0
 ....\kern-1.11 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 A
-....\TU/lmroman10-regular.otf(0)/m/n/10 N
-....\TU/lmroman10-regular.otf(0)/m/n/10 A
+....\TU/lmroman10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "N" 004E +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0 plus 1.0fil
@@ -305,93 +305,93 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x0.0, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 ff
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "ff" FB00 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 250
 ...\glue(\baselineskip) 4.95
 ...\hbox(6.94+0.11)x345.0, glue set 325.83002fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 b
+....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 t
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 333.60999fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 330.56fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 fi
-....\TU/lmroman10-regular.otf(0)/m/n/10 c
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "fi" FB01 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 328.04999fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 b
-....\TU/lmroman10-regular.otf(0)/m/n/10 a
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 335.0fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 fl
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "fl" FB02 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 3.72
 ...\hbox(8.17+0.14)x345.0, glue set 326.10999fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 b
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 a
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 f
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 ....\kern-0.13 (font)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 -
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 3.69
 ...\hbox(8.17+0.14)x345.0, glue set 332.9fil, direction TLT
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 fl
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 e
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fl" FB02 +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.81
 ...\hbox(7.05+0.11)x345.0, glue set 329.16998fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 c
-....\TU/lmroman10-regular.otf(0)/m/n/10 o
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.05+0.11)x345.0, glue set 333.06fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 f
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
-....\TU/lmroman10-regular.otf(0)/m/n/10 e
+....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.73
 ...\hbox(7.16+0.0)x345.0, glue set 326.66998fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 H
-....\TU/lmroman10-regular.otf(0)/m/n/10 A
-....\TU/lmroman10-regular.otf(0)/m/n/10 -
+....\TU/lmroman10-regular.otf(0)/m/n/10 "H" 0048 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 250
 ...\glue(\baselineskip) 4.84
 ...\hbox(7.16+0.22)x345.0, glue set 158.055fil, direction TLT
-....\TU/lmroman10-regular.otf(0)/m/n/10 V
+....\TU/lmroman10-regular.otf(0)/m/n/10 "V" 0056 +0:+0
 ....\kern-1.11 (font)
-....\TU/lmroman10-regular.otf(0)/m/n/10 A
-....\TU/lmroman10-regular.otf(0)/m/n/10 N
-....\TU/lmroman10-regular.otf(0)/m/n/10 A
+....\TU/lmroman10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "N" 004E +0:+0
+....\TU/lmroman10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0 plus 1.0fil
@@ -402,6 +402,6 @@ Completed box being shipped out [1]
 ..\glue(\baselineskip) 22.86
 ..\hbox(7.14+0.0)x345.0, glue set 169.805fil, direction TLT
 ...\glue 0.0 plus 1.0fil
-...\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 1
+...\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "1" 12F357 +0:+0
 ...\glue 0.0 plus 1.0fil
 (discretionaries.aux)

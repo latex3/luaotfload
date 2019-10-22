@@ -5,6 +5,16 @@
 \usepackage{fontspec}
 \defaultfontfeatures{RawFeature={mode=harf}}
 
+\directlua{
+  local cbs = luatexbase.callback_descriptions'glyph_info'
+  local desc = cbs[1]
+  assert(desc == "Harf glyph_info callback" and nil == next(cbs, 1))
+  local cb = luatexbase.remove_from_callback('glyph_info', desc)
+  luatexbase.add_to_callback('glyph_info', function(n)
+    return string.format('"\csstring\%s" \csstring\%04X \csstring\%+i:\csstring\%+i', cb(n), n.char, n.xoffset, n.yoffset)
+  end, 'Harf glyph_info callback -- testing variant')
+}
+
 \setmainfont{Amiri}[Script=Arabic]
 \begin{document}
 \showoutput

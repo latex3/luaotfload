@@ -45,33 +45,33 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/Amiri(0)/m/n/10 ق
-....\TU/Amiri(0)/m/n/10 ل
-....\TU/Amiri(0)/m/n/10 ب
-....\TU/Amiri(0)/m/n/10 ي
+....\TU/Amiri(0)/m/n/10 "ق" 120C5E +0:+0
+....\TU/Amiri(0)/m/n/10 "ل" 120C58 +0:+0
+....\TU/Amiri(0)/m/n/10 "ب" 120BF8 +0:+0
+....\TU/Amiri(0)/m/n/10 "ي" 120EA5 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\pdfcolorstack 0 push {/TransGs0.502 gs 1 0 0 rg}
-....\TU/Amiri(1)/m/n/10 ت
-....\TU/Amiri(1)/m/n/10 ل
-....\TU/Amiri(1)/m/n/10 و
-....\TU/Amiri(1)/m/n/10 ن
+....\TU/Amiri(1)/m/n/10 "ت" 120808 +0:+0
+....\TU/Amiri(1)/m/n/10 "ل" 120914 +0:+0
+....\TU/Amiri(1)/m/n/10 "و" 12098B +0:+0
+....\TU/Amiri(1)/m/n/10 "ن" 12082E +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/Amiri(1)/m/n/10 ك
-....\TU/Amiri(1)/m/n/10 ل
-....\TU/Amiri(1)/m/n/10 ه
+....\TU/Amiri(1)/m/n/10 "ك" 121526 +0:+0
+....\TU/Amiri(1)/m/n/10 "ل" 121512 +0:+0
+....\TU/Amiri(1)/m/n/10 "ه" 1208D2 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\pdfcolorstack 0 pop
 ....\pdfliteral direct <lua data reference 792>
-....\TU/Amiri(0)/m/n/10 ب
-....\TU/Amiri(0)/m/n/10 ل
-....\TU/Amiri(0)/m/n/10 و
-....\TU/Amiri(0)/m/n/10 ن
+....\TU/Amiri(0)/m/n/10 "ب" 120815 +0:+0
+....\TU/Amiri(0)/m/n/10 "ل" 120914 +0:+0
+....\TU/Amiri(0)/m/n/10 "و" 12098B +0:+0
+....\TU/Amiri(0)/m/n/10 "ن" 12082E +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/Amiri(0)/m/n/10 ا
-....\TU/Amiri(0)/m/n/10 ل
-....\TU/Amiri(0)/m/n/10 ح
-....\TU/Amiri(0)/m/n/10 ب
-....\TU/Amiri(0)/m/n/10 .
+....\TU/Amiri(0)/m/n/10 "ا" 120DF9 +0:+0
+....\TU/Amiri(0)/m/n/10 "ل" 120DF4 +0:+0
+....\TU/Amiri(0)/m/n/10 "ح" 120FD3 +0:+0
+....\TU/Amiri(0)/m/n/10 "ب" 1210AD +0:+0
+....\TU/Amiri(0)/m/n/10 "." 12077A +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -82,6 +82,6 @@ Completed box being shipped out [1]
 ..\glue(\baselineskip) 23.73
 ..\hbox(6.27+0.03)x345.0, glue set 169.84fil, direction TLT
 ...\glue 0.0 plus 1.0fil
-...\TU/Amiri(0)/m/n/10 1
+...\TU/Amiri(0)/m/n/10 "1" 0031 +0:+0
 ...\glue 0.0 plus 1.0fil
 (color.aux)

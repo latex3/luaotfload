@@ -2,5 +2,5 @@ stdengine = "luahbtex"
 checkengines = {"luahbtex"}
 testfiledir = "testfiles-harf"
 supportdir = "support-harf"
-checksuppfiles = {"*.otf", "*.ttf", "init.lua"}
+checksuppfiles = {"texmf.cnf", "init.lua"}
 checkopts = "--lua=init.lua"

@@ -305,7 +305,7 @@ end
 -- the output.
 function shape(head, node, run)
   local codes = run.codes
-  local offset = run.start - (codes.offset or 0)
+  local offset = run.start
   local nodeindex = offset
   run.start = offset
   local len = run.len
@@ -401,8 +401,7 @@ function shape(head, node, run)
 
             -- Find the previous glyph that is safe to break at.
             local startglyph = i
-            while unsafetobreak(glyphs[startglyph])
-                  and getid(startnode) ~= glue_t do
+            while unsafetobreak(glyphs[startglyph]) do
               startglyph = startglyph - 1
             end
             -- Get the corresponding character index.
@@ -519,11 +518,10 @@ function shape(head, node, run)
         end
       end
     end
-    codes.offset = run.len - len + (codes.offset or 0)
-    return head, glyphs
+    return head, glyphs, run.len - len
   end
 
-  return head, {}
+  return head, {}, 0
 end
 
 local function color_to_rgba(color)
@@ -838,11 +836,11 @@ local function shape_run(head, current, run)
     local fontdata = font.getfont(fontid)
     local options = fontdata.specification.features.raw
 
-    local glyphs
-    head, glyphs = shape(head, current, run)
-    return tonodes(head, current, run, glyphs)
+    local glyphs, offset
+    head, glyphs, offset = shape(head, current, run)
+    return offset, tonodes(head, current, run, glyphs)
   else
-    return head, run.after
+    return 0, head, run.after
   end
 end
 
@@ -850,8 +848,13 @@ function process(head, font, direction)
   local newhead, current = head, head
   local runs = itemize(head, font, direction)
 
-  for _, run in next, runs do
-    newhead, current = shape_run(newhead, current, run)
+  local offset = 0
+  for i = 1,#runs do
+    local run = runs[i]
+    run.start = run.start - offset
+    local new_offset
+    new_offset, newhead, current = shape_run(newhead, current, run)
+    offset = offset + new_offset
   end
 
   return newhead or head

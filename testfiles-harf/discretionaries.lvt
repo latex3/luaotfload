@@ -21,15 +21,49 @@
 \START
 offbeat office baffle coffee HAVANA\par
 
+\smallskip
+``Some --- developments''
+\smallskip
+
+\smallskip
+{\addfontfeature{Ligatures=TeXOff} ``Some --- developments''}
+\smallskip
+
+\smallskip
+``Some---developments''
+\smallskip
+
+\smallskip
+{\addfontfeature{Ligatures=TeXOff} ``Some---developments''}
+\smallskip
+
+\begingroup
 \rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
 offbeat office baffle coffee HAVANA\par
+\endgroup
 
-\fontspec{lmroman10-regular.otf}[Script=Latin, Ligatures=Discretionary]
+\fontspec{lmroman10-regular.otf}[Script=Latin, Ligatures=Discretionary, Ligatures=TeX]
 \parindent=0pt
 
 \noindent
 \smallskip
 offbeat office baffle {\rm baffle} coffee HAVANA\par
+\smallskip
+
+\smallskip
+``Some --- developments''
+\smallskip
+
+\smallskip
+{\addfontfeature{Ligatures=TeXOff} ``Some --- developments''}
+\smallskip
+
+\smallskip
+``Some---developments''
+\smallskip
+
+\smallskip
+{\addfontfeature{Ligatures=TeXOff} ``Some---developments''}
 \smallskip
 
 \rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000

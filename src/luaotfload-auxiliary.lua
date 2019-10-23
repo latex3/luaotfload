@@ -356,7 +356,7 @@ function aux.slot_of_name(font_id, glyphname, unsafe)
 
   local tfmdata = identifiers [font_id]
   if not tfmdata then return raw_slot_of_name (font_id, glyphname) end
-  local hbdata = fontdata.hb
+  local hbdata = tfmdata.hb
   if hbdata then
     local hbshared = hbdata.shared
     local nominals = hbshared.nominals

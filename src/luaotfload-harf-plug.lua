@@ -564,8 +564,8 @@ end
 local push_cmd = { "push" }
 local pop_cmd = { "pop" }
 local nop_cmd = { "nop" }
-local save_cmd = { "pdf", "text", "q" }
-local restore_cmd = { "pdf", "text", "Q" }
+local save_cmd = { "pdf", "page", "q" }
+local restore_cmd = { "pdf", "page", "Q" }
 
 -- Convert glyphs to nodes and collect font characters.
 local function tonodes(head, node, run, glyphs)
@@ -659,7 +659,7 @@ local function tonodes(head, node, run, glyphs)
                 -- get nil anyway.
                 local color = palette[layer.color_index]
                 cmds[5*j - 4] = (color and not prev_color) and save_cmd or nop_cmd
-                cmds[5*j - 3] = prev_color == color and nop_cmd or (color and {"pdf", "text", color_to_rgba(color)} or restore_cmd)
+                cmds[5*j - 3] = prev_color == color and nop_cmd or (color and {"pdf", "page", color_to_rgba(color)} or restore_cmd)
                 cmds[5*j - 2] = push_cmd
                 cmds[5*j - 1] = {"char", layer.glyph + gid_offset}
                 cmds[5*j] = pop_cmd
@@ -773,9 +773,11 @@ local function tonodes(head, node, run, glyphs)
           --   cluster that will be covered by an /ActualText span.
           local tounicode = glyph.tounicode
           if tounicode then
-            if glyph.nglyphs == 1 and not fontglyph.tounicode then
+            if glyph.nglyphs == 1
+                and not character.commands
+                and not fontglyph.tounicode then
               fontglyph.tounicode = tounicode
-            elseif tounicode ~= fontglyph.tounicode then
+            elseif character.commands or tounicode ~= fontglyph.tounicode then
               setprop(node, startactual_p, tounicode)
               glyphs[i + glyph.nglyphs - 1].endactual = true
             end
@@ -860,9 +862,9 @@ function process(head, font, direction)
   return newhead or head
 end
 
-local function pdfdirect(data)
+local function pageliteral(data)
   local n = newnode(whatsit_t, pdfliteral_t)
-  setfield(n, "mode", 2) -- direct
+  setfield(n, "mode", 1) -- page
   setdata(n, data)
   return n
 end
@@ -879,11 +881,11 @@ local function post_process(head)
 
     if startactual then
       local actualtext = "/Span<</ActualText<FEFF"..startactual..">>>BDC"
-      head = insertbefore(head, n, pdfdirect(actualtext))
+      head = insertbefore(head, n, pageliteral(actualtext))
     end
 
     if endactual then
-      head = insertafter(head, n, pdfdirect("EMC"))
+      head = insertafter(head, n, pageliteral("EMC"))
     end
 
     local replace = getfield(n, "replace")

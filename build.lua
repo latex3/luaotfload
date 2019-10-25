@@ -22,7 +22,7 @@ print(mydata.email)
 -- See stackoverflow.com/a/12142066/212001 / build-config from latex2e
 local master_branch do
   local tag = os.getenv'TRAVIS_TAG'
-  if tag then
+  if tag and tag ~= "" then
     master_branch = not string.match(tag, '-dev$')
   else
     local branch = os.getenv'TRAVIS_BRANCH'

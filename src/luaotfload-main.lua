@@ -44,25 +44,25 @@ luaotfload.fontloader_package     = "reference"    --- default: from current Con
 
 if not tex or not tex.luatexversion then
     error "this program must be run in TeX mode" --- or call tex.initialize() =)
-else
-    --- version check
-    local major    = tex.luatexversion / 100
-    local minor    = tex.luatexversion % 100
-    local revision = tex.luatexrevision --[[ : string ]]
-    local revno    = tonumber (revision)
-    local minimum  = luaotfload.min_luatex_version
-    local actual   = { major, minor, revno or 0 }
-    if actual [1] < minimum [1]
+end
+
+--- version check
+local major    = tex.luatexversion / 100
+local minor    = tex.luatexversion % 100
+local revision = tex.luatexrevision --[[ : string ]]
+local revno    = tonumber (revision)
+local minimum  = luaotfload.min_luatex_version
+local actual   = { major, minor, revno or 0 }
+if actual [1] < minimum [1]
     or actual == minimum and actual [2] < minimum [2]
     or actual == minimum and actual [2] == minimum [2] and actual [3] < minimum [3]
-    then
-        texio.write_nl ("term and log",
-                        string.format ("\tFATAL ERROR\n\z
-                                        \tLuaotfload requires a Luatex version >= %d.%d.%d.\n\z
-                                        \tPlease update your TeX distribution!\n\n",
-                                       (unpack or table.unpack) (minimum)))
-        error "version check failed"
-    end
+then
+    texio.write_nl ("term and log",
+                    string.format ("\tFATAL ERROR\n\z
+                                    \tLuaotfload requires a Luatex version >= %d.%d.%d.\n\z
+                                    \tPlease update your TeX distribution!\n\n",
+                                   (unpack or table.unpack) (minimum)))
+    error "version check failed"
 end
 
 if status.safer_option ~= 0 then

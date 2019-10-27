@@ -65,6 +65,16 @@ then
     error "version check failed"
 end
 
+if not utf8 then
+    texio.write_nl("term and log", string.format("\z
+        \tluaotfload: module utf8 is unavailable\n\z
+        \tutf8 is available in Lua 5.3+; engine\'s _VERSION is '%s'\n\z
+        \tThis probably means that the engine is not supported\n\z
+        \n",
+        _VERSION))
+    error "module utf8 is unavailable"
+end
+
 if status.safer_option ~= 0 then
  texio.write_nl("term and log","luaotfload can't run with option --safer. Aborting")
  error("safer_option used")

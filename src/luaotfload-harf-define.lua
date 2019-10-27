@@ -120,7 +120,7 @@ local function loadfont(spec)
     local characters = {}
     local nominals = {}
     for _, uni in next, unicodes do
-      local glyph = hbfont:get_nominal_glyph(uni)
+      local glyph = hbfont:get_nominal_glyph(uni) or 0
       characters[uni] = glyph
       nominals[glyph] = uni
     end

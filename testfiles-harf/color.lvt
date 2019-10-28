@@ -23,4 +23,7 @@
 قلبي {\addfontfeature{Color=FF000080} تلون كله} بلون الحب.
 
 \newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
 \end{document}

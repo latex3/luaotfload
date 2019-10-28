@@ -34,4 +34,8 @@
 \l{Urdu}    {۰۱۲۳۴۵۶۷۸۹}\par
 \l{Sindhi}  {۰۱۲۳۴۵۶۷۸۹}\par
 \l{Kashmiri}{۰۱۲۳۴۵۶۷۸۹}\par
+\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
 \end{document}

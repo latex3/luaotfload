@@ -97,4 +97,7 @@
 مردم همینچُک\quad
 ظاهر بهینی\quad
 \par\endgroup\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
 \end{document}

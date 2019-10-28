@@ -244,5 +244,5 @@ Completed box being shipped out [1]
 ...\glue 0.0 plus 1.0fil
 ...\TU/amiri-regular.ttf(1)/m/n/10 "1" 0031 +0:+0
 ...\glue 0.0 plus 1.0fil
-(scripts.aux)
+2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 3 attribute, 48 glue_spec, 3 attribute_list (scripts.aux)
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.

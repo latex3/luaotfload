@@ -19,9 +19,9 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\testfamily A
-....\testfamily A
-....\testfamily A
+....\testname A
+....\testname A
+....\testname A
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0

@@ -20,8 +20,8 @@ local authors = "\z
 -- version number is used below!
 local ProvidesLuaModule = { 
     name          = "luaotfload-main",
-    version       = "3.0007-dev",       --TAGVERSION
-    date          = "2019-10-10", --TAGDATE
+    version       = "3.0006-dev",       --TAGVERSION
+    date          = "2019-10-15", --TAGDATE
     description   = "luaotfload entry point",
     author        = authors,
     copyright     = authors,
@@ -305,9 +305,16 @@ luaotfload.main = function ()
     end
 
     initialize "features"     --- font request and feature handling
+
     loadmodule "letterspace"  --- extra character kerning
     loadmodule "embolden"     --- fake bold
     loadmodule "notdef"       --- missing glyph handling
+    local harfstatus, harfbuzz = pcall(require, 'luaharfbuzz')
+    if harfstatus then
+        luaotfload.harfbuzz = harfbuzz
+        loadmodule "harf-define"
+        loadmodule "harf-plug"
+    end
     initialize "auxiliary"    --- additional high-level functionality
     loadmodule "multiscript"  --- ...
 

@@ -8,8 +8,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-loaders",
-    version       = "3.0007-dev",       --TAGVERSION
-    date          = "2019-10-10", --TAGDATE
+    version       = "3.0006-dev",       --TAGVERSION
+    date          = "2019-10-15", --TAGDATE
     description   = "luaotfload submodule / callback handling",
     license       = "GPL v2.0"
 }
@@ -27,17 +27,8 @@ if not luaotfload then error "this module requires Luaotfload" end
 local logreport = luaotfload.log and luaotfload.log.report or print
 
 local lua_reader = function (specification)
-  local fullname = specification.filename or ""
-  if fullname == "" then
-    local forced = specification.forced or ""
-    if forced ~= "" then
-      fullname = specification.name .. "." .. forced
-    else
-      fullname = specification.name
-    end
-  end
-  local fullname = resolvers.findfile (fullname) or ""
-  if fullname ~= "" then
+  local fullname = specification.resolved
+  if fullname then
     local loader = loadfile (fullname)
     loader = loader and loader ()
     return loader and loader (specification)

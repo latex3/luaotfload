@@ -1,0 +1,41 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+\defaultfontfeatures{RawFeature={mode=harf}}
+
+\directlua{
+  local cbs = luatexbase.callback_descriptions'glyph_info'
+  local desc = cbs[1]
+  assert(desc == "Harf glyph_info callback" and nil == next(cbs, 1))
+  local cb = luatexbase.remove_from_callback('glyph_info', desc)
+  luatexbase.add_to_callback('glyph_info', function(n)
+    return string.format('"\csstring\%s" \csstring\%04X \csstring\%+i:\csstring\%+i', cb(n), n.char, n.xoffset, n.yoffset)
+  end, 'Harf glyph_info callback -- testing variant')
+}
+
+\setmainfont{amiri-regular.ttf}[Script=Latin]
+\begin{document}
+\showoutput
+\START
+\TeX\ = {\addfontfeature{Script=Greek}τεχ} in Greek
+
+(\textit{f\/})
+
+\def\l#1#2{%
+  \begingroup%
+  \fontspec{amiri-regular.ttf}[Script=Arabic, Language=#1]
+  #2%
+  \endgroup%
+}
+\l{Arabic}  {٠١٢٣٤٥٦٧٨٩}\par
+\l{Arabic}  {۰۱۲۳۴۵۶۷۸۹}\par
+\l{Urdu}    {۰۱۲۳۴۵۶۷۸۹}\par
+\l{Sindhi}  {۰۱۲۳۴۵۶۷۸۹}\par
+\l{Kashmiri}{۰۱۲۳۴۵۶۷۸۹}\par
+\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
+\end{document}

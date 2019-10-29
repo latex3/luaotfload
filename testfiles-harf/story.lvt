@@ -1,0 +1,48 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+\defaultfontfeatures{RawFeature={mode=harf}}
+
+\directlua{
+  local cbs = luatexbase.callback_descriptions'glyph_info'
+  local desc = cbs[1]
+  assert(desc == "Harf glyph_info callback" and nil == next(cbs, 1))
+  local cb = luatexbase.remove_from_callback('glyph_info', desc)
+  luatexbase.add_to_callback('glyph_info', function(n)
+    return string.format('"\csstring\%s" \csstring\%04X \csstring\%+i:\csstring\%+i', cb(n), n.char, n.xoffset, n.yoffset)
+  end, 'Harf glyph_info callback -- testing variant')
+}
+
+\setmainfont{lmroman10-regular.otf}
+\begin{document}
+\showoutput
+\START
+\newfontfamily\testb{lmroman10-bold.otf}[Script=Latin, mode=node]
+\newfontfamily\testi{lmromanslant10-regular.otf}[Script=Latin]
+\newfontfamily\testR{lmroman12-regular.otf}[Script=Latin, Scale=1.2]
+\testr
+\hrule
+\vskip 1in
+\centerline{\testb A SHORT STORY}
+\vskip 6pt
+\centerline{\testi by A. U. Thor}
+\vskip .5cm
+Once upon a time, in a distant {\testR galaxy called} Ööç, there lived a computer named
+R.~J. Drofnats.
+
+Mr.~Drofnats-----or ‘‘R. J.,’’ as he {\textdir TRT preferred} to be called-----was happiest when he
+was at work typesetting beautiful documents.
+\vskip 1in
+\hrule
+\newpage
+
+\font\test=cmr10 at 12pt\test
+\addfontfeature{Script=Latin}
+\input story
+\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
+\end{document}

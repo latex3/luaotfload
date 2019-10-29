@@ -6,8 +6,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-auxiliary",
-    version       = "3.0007-dev",       --TAGVERSION
-    date          = "2019-10-10", --TAGDATE
+    version       = "3.0006-dev",       --TAGVERSION
+    date          = "2019-10-15", --TAGDATE
     description   = "luaotfload submodule / auxiliary functions",
     license       = "GPL v2.0"
 }
@@ -38,6 +38,13 @@ local stringgsub            = string.gsub
 local stringbyte            = string.byte
 local stringfind            = string.find
 local tablecopy             = table.copy
+
+local harf = luaotfload.harfbuzz
+local GSUBtag, GPOStag
+if harf then
+  GSUBtag = harf.Tag.new("GSUB")
+  GPOStag = harf.Tag.new("GPOS")
+end
 
 local aux                   = { }
 local luaotfload_callbacks  = { }
@@ -349,15 +356,27 @@ function aux.slot_of_name(font_id, glyphname, unsafe)
 
   local tfmdata = identifiers [font_id]
   if not tfmdata then return raw_slot_of_name (font_id, glyphname) end
-  local resources = tfmdata.resources  if not resources then return false end
-  local unicodes  = resources.unicodes if not unicodes  then return false end
+  local hbdata = tfmdata.hb
+  if hbdata then
+    local hbshared = hbdata.shared
+    local nominals = hbshared.nominals
+    local hbfont = hbshared.font
 
-  local unicode = unicodes [glyphname]
-  if unicode then
-    if type (unicode) == "number" then
-      return unicode
-    else
-      return unicode [1] --- for multiple components
+    local gid = hbfont:get_glyph_from_name(glyphname)
+    if gid ~= nil then
+      return nominals[gid] or gid + hbshared.gid_offset
+    end
+  else
+    local resources = tfmdata.resources  if not resources then return false end
+    local unicodes  = resources.unicodes if not unicodes  then return false end
+
+    local unicode = unicodes [glyphname]
+    if unicode then
+      if type (unicode) == "number" then
+        return unicode
+      else
+        return unicode [1] --- for multiple components
+      end
     end
   end
   return false
@@ -412,6 +431,11 @@ local function get_features(tfmdata)
   return features
 end
 
+local function get_hbface(tfmdata)
+  if not tfmdata.hb then return end
+  return tfmdata.hbshared.face
+end
+
 --[[doc--
 This function, modeled after “check_script()” from fontspec, returns
 true if in the given font, the script “asked_script” is accounted for in at
@@ -429,9 +453,22 @@ function aux.provides_script(font_id, asked_script)
     return false
   end
   asked_script = stringlower(asked_script)
-  if font_id and font_id > 0 then
-    local tfmdata = identifiers[font_id]
-    if not tfmdata then return false end
+  local tfmdata = identifiers[font_id]
+  if not tfmdata then
+    logreport ("log", 0, "aux", "no font with id %d", font_id)
+    return false
+  end
+  local hbface = get_hbface(tfmdata)
+  if hbface then
+    local script = harf.Tag.new(asked_script == "dflt" and "DFLT"
+                                                        or asked_script)
+    for _, tag in next, { GSUBtag, GPOStag } do
+      if hbface:ot_layout_find_script(tag, script) then
+        return true
+      end
+    end
+    return false
+  else
     local features = get_features (tfmdata)
     if features == false then
       logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
@@ -452,7 +489,6 @@ function aux.provides_script(font_id, asked_script)
                "font no %d (%s) defines no feature for script %s",
                font_id, fontname, asked_script)
   end
-  logreport ("log", 0, "aux", "no font with id %d", font_id)
   return false
 end
 
@@ -477,8 +513,30 @@ function aux.provides_language(font_id, asked_script, asked_language)
     return false
   end
   asked_script   = stringlower(asked_script)
-  asked_language = stringlower(asked_language)
-  if font_id and font_id > 0 then
+  local tfmdata = identifiers[font_id]
+  if not tfmdata then
+    logreport ("log", 0, "aux", "no font with id %d", font_id)
+    return false
+  end
+  local hbface = get_hbface(tfmdata)
+  if hbface then
+    asked_language  = stringupper(asked_language)
+    if asked_language == "DFLT" then
+      return aux.provides_script(font_id, asked_script)
+    end
+    local script = harf.Tag.new(asked_script == "dflt" and "DFLT"
+                                                        or asked_script)
+    local language = harf.Tag.new(asked_language == "DFLT" and "dflt"
+                                                            or asked_language)
+    for _, tag in next, { GSUBtag, GPOStag } do
+      local _, script_idx = hbface:ot_layout_find_script(tag, script)
+      if hbface:ot_layout_find_language(tag, script_idx, language) then
+        return true
+      end
+    end
+    return false
+  else
+    asked_language  = stringlower(asked_language)
     local tfmdata = identifiers[font_id]
     if not tfmdata then return false end
     local features = get_features (tfmdata)
@@ -504,9 +562,8 @@ function aux.provides_language(font_id, asked_script, asked_language)
                "font no %d (%s) defines no feature "
                .. "for script %s with language %s",
                font_id, fontname, asked_script, asked_language)
+    return false
   end
-  logreport ("log", 0, "aux", "no font with id %d", font_id)
-  return false
 end
 
 --[[doc--
@@ -558,12 +615,32 @@ function aux.provides_feature(font_id,        asked_script,
     return false
   end
   asked_script    = stringlower(asked_script)
-  asked_language  = stringlower(asked_language)
   asked_feature   = lpegmatch(strip_garbage, asked_feature)
 
-  if font_id > 0 then
-    local tfmdata  = identifiers[font_id]
-    if not tfmdata then return false end
+  local tfmdata = identifiers[font_id]
+  if not tfmdata then
+    logreport ("log", 0, "aux", "no font with id %d", font_id)
+    return false
+  end
+  local hbface = get_hbface(tfmdata)
+  if hbface then
+    asked_language  = stringupper(asked_language)
+    local script = harf.Tag.new(asked_script == "dflt" and "DFLT"
+                                                        or asked_script)
+    local language = harf.Tag.new(asked_language == "DFLT" and "dflt"
+                                                            or asked_language)
+    local feature = harf.Tag.new(feature)
+
+    for _, tag in next, { GSUBtag, GPOStag } do
+      local _, script_idx = hbface:ot_layout_find_script(tag, script)
+      local _, language_idx = hbface:ot_layout_find_language(tag, script_idx, language)
+      if hbface:ot_layout_find_feature(tag, script_idx, language_idx, feature) then
+        return true
+      end
+    end
+    return false
+  else
+    asked_language  = stringlower(asked_language)
     local features = get_features (tfmdata)
     if features == false then
       logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
@@ -588,8 +665,6 @@ function aux.provides_feature(font_id,        asked_script,
                "font no %d (%s) does not define feature %s for script %s with language %s",
                font_id, fontname, asked_feature, asked_script, asked_language)
   end
-  logreport ("log", 0, "aux", "no font with id %d", font_id)
-  return false
 end
 
 -----------------------------------------------------------------------

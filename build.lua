@@ -1,8 +1,8 @@
 
-packageversion= "3.0007-dev"
-packagedate   = "2019-10-10"
+packageversion= "3.0006-dev"
+packagedate   = "2019-10-15"
 fontloaderdate= "2019-08-11"
-packagedesc   = "dev"
+packagedesc   = "harf"
 checkformat   = "latex"
 
 module   = "luaotfload"
@@ -22,7 +22,7 @@ print(mydata.email)
 -- See stackoverflow.com/a/12142066/212001 / build-config from latex2e
 local master_branch do
   local tag = os.getenv'TRAVIS_TAG'
-  if tag then
+  if tag and tag ~= "" then
     master_branch = not string.match(tag, '-dev$')
   else
     local branch = os.getenv'TRAVIS_BRANCH'
@@ -71,13 +71,11 @@ local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 
 -- l3build check settings
 
+local has_hbengine = os.execute(os.type == "unix"
+                                  and "command -v luahbtex > /dev/null"
+                                  or "where /q luahbtex") == 0 or nil
 stdengine    = "luatex"
-checkengines = {"luatex"}
-
- -- local errorlevel   = os.execute("harftex --version")
- -- if not os.getenv('TRAVIS') and errorlevel==0 then
- --  checkengines = {"luatex","harftex"}
- -- end
+checkengines = {"luatex", has_hbengine and "luahbtex"}
 
 -- temporary for test dev branch
 if master_branch then
@@ -88,13 +86,17 @@ checkconfigs = {
                 "config-latex-TU",
                 "config-unicode-math",
                 "config-plain",
-                "config-fontspec"
+                "config-fontspec",
+                has_hbengine and "config-harf",
                }
 else
-checkconfigs={}
+checkconfigs = {
+                "build",
+                has_hbengine and "config-harf",
+               }
 end
 checkruns = 3
-checksuppfiles = {"LuaotfloadDummyFont.otf"}
+checksuppfiles = {"texmf.cnf"}
 
 -- exclude some text temporarly or in certain systems ...
 if os.env["CONTEXTPATH"] then

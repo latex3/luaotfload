@@ -1,0 +1,13 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+\defaultfontfeatures{RawFeature={mode=harf}}
+
+\begin{document}
+\showoutput
+\START
+\fontspec{NotoColorEmoji.ttf}
+💙💚💛💜💝🖤🧡😀😇🧔🏽🦆
+\end{document}

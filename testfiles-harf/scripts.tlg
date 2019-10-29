@@ -1,0 +1,248 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+luaotfload | aux : font no 29 (nil) defines no feature for script grek
+Package fontspec Warning: Font "amiri-regular" does not contain requested
+(fontspec)                Script "Greek".
+luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
+Package fontspec Info: Font family 'amiri-regular.ttf(1)' created for font
+(fontspec)             'amiri-regular.ttf' with options
+(fontspec)             [RawFeature={mode=harf},Ligatures=TeX,Script=Latin,Script=Greek].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=latn;language=DFLT;mode=harf;+tlig;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+LaTeX Font Warning: Font shape `TU/amiri-regular.ttf(0)/m/it' undefined
+(Font)              using `TU/amiri-regular.ttf(0)/m/n' instead on input line ....
+luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language ara
+Package fontspec Info: Font family 'amiri-regular.ttf(2)' created for font
+(fontspec)             'amiri-regular.ttf' with options
+(fontspec)             [RawFeature={mode=harf},Script=Arabic,Language=Arabic].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=arab;language=ARA;mode=harf;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language urd
+Package fontspec Info: Font family 'amiri-regular.ttf(3)' created for font
+(fontspec)             'amiri-regular.ttf' with options
+(fontspec)             [RawFeature={mode=harf},Script=Arabic,Language=Urdu].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=arab;language=URD;mode=harf;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language snd
+Package fontspec Info: Font family 'amiri-regular.ttf(4)' created for font
+(fontspec)             'amiri-regular.ttf' with options
+(fontspec)             [RawFeature={mode=harf},Script=Arabic,Language=Sindhi].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=arab;language=SND;mode=harf;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language ksh
+Package fontspec Info: Font family 'amiri-regular.ttf(5)' created for font
+(fontspec)             'amiri-regular.ttf' with options
+(fontspec)             [RawFeature={mode=harf},Script=Arabic,Language=Kashmiri].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=arab;language=KSH;mode=harf;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+Completed box being shipped out [1]
+\vbox(633.0+0.03)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.03)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 467.95001fil, direction TLT
+...\write-{}
+...\glue(\topskip) 3.22
+...\hbox(6.78+2.20499)x345.0, glue set 254.46701fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/amiri-regular.ttf(1)/m/n/10 "T" 0054 +0:+0
+....\kern-1.66702
+....\hbox(6.48+0.04)x5.73, shifted 2.165, direction TLT
+.....\TU/amiri-regular.ttf(1)/m/n/10 "E" 0045 +0:+0
+....\kern-1.25
+....\TU/amiri-regular.ttf(1)/m/n/10 "X" 0058 +0:+0
+....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
+....\TU/amiri-regular.ttf(1)/m/n/10 "=" 003D +0:+0
+....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
+....\TU/amiri-regular.ttf(1)/m/n/10 "τ" 120000 +0:+0
+....\pdfliteral page <lua data reference 792>
+....\TU/amiri-regular.ttf(1)/m/n/10 "ε" 120000 +0:+0
+....\pdfliteral page <lua data reference 803>
+....\pdfliteral page <lua data reference 804>
+....\TU/amiri-regular.ttf(1)/m/n/10 "χ" 120000 +0:+0
+....\pdfliteral page <lua data reference 805>
+....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
+....\TU/amiri-regular.ttf(1)/m/n/10 "i" 0069 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "n" 006E +0:+0
+....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
+....\TU/amiri-regular.ttf(1)/m/n/10 "G" 0047 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "r" 0072 +0:+0
+....\kern-0.04 (font)
+....\TU/amiri-regular.ttf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "e" 0065 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "k" 006B +0:+0
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.62502
+...\hbox(7.17+3.86)x345.0, glue set 317.84fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/amiri-regular.ttf(1)/m/n/10 "(" 0028 +0:+0
+....\kern0.0 (italic)
+....\TU/amiri-regular.ttf(1)/m/n/10 "f" 0066 +0:+0
+....\kern0.0 (italic)
+....\TU/amiri-regular.ttf(1)/m/n/10 ")" 0029 +0:+0
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.3
+...\hbox(5.84+1.15)x345.0, glue set 271.49994fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/amiri-regular.ttf(2)/m/n/10 "٠" 0660 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "١" 0661 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٢" 0662 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٣" 0663 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٤" 0664 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٥" 0665 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٦" 0666 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٧" 0667 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٨" 0668 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "٩" 0669 +0:+0
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 5.22
+...\hbox(5.63+1.03)x345.0, glue set 271.49994fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/amiri-regular.ttf(2)/m/n/10 "۰" 06F0 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۱" 06F1 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۲" 06F2 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۳" 06F3 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۴" 06F4 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۵" 06F5 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۶" 06F6 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۷" 06F7 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۸" 06F8 +0:+0
+....\TU/amiri-regular.ttf(2)/m/n/10 "۹" 06F9 +0:+0
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 4.97
+...\hbox(6.0+1.03)x345.0, glue set 271.49994fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/amiri-regular.ttf(3)/m/n/10 "۰" 06F0 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۱" 06F1 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۲" 06F2 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۳" 06F3 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۴" 120796 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۵" 06F5 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۶" 120797 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۷" 120798 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۸" 06F8 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۹" 06F9 +0:+0
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 5.35
+...\hbox(5.62+1.03)x345.0, glue set 271.49994fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/amiri-regular.ttf(4)/m/n/10 "۰" 06F0 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۱" 06F1 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۲" 06F2 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۳" 06F3 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۴" 06F4 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۵" 06F5 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۶" 120797 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۷" 120798 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۸" 06F8 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۹" 06F9 +0:+0
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 5.34
+...\hbox(5.63+1.03)x345.0, glue set 271.49994fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\TU/amiri-regular.ttf(5)/m/n/10 "۰" 06F0 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۱" 06F1 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۲" 06F2 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۳" 06F3 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۴" 06F4 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۵" 06F5 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۶" 06F6 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۷" 06F7 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۸" 06F8 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۹" 06F9 +0:+0
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -1.03
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.73
+..\hbox(6.27+0.03)x345.0, glue set 169.84fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\TU/amiri-regular.ttf(1)/m/n/10 "1" 0031 +0:+0
+...\glue 0.0 plus 1.0fil
+2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 3 attribute, 48 glue_spec, 3 attribute_list (scripts.aux)
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.

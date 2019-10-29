@@ -52,11 +52,12 @@ local report_otf          = logs.reporter("fonts","otf loading")
 local fonts               = fonts
 local otf                 = fonts.handlers.otf
 
-otf.version               = 3.109 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version               = 3.110 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                 = containers.define("fonts", "otl", otf.version, true)
 otf.svgcache              = containers.define("fonts", "svg", otf.version, true)
 otf.pngcache              = containers.define("fonts", "png", otf.version, true)
 otf.pdfcache              = containers.define("fonts", "pdf", otf.version, true)
+otf.mpscache              = containers.define("fonts", "mps", otf.version, true)
 
 otf.svgenabled            = false
 otf.pngenabled            = false

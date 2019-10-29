@@ -5,8 +5,8 @@
 do -- block to avoid to many local variables error
  local ProvidesLuaModule = { 
      name          = "luaotfload-harf-plug",
-     version       = "3.0006-dev",       --TAGVERSION
-     date          = "2019-10-15", --TAGDATE
+     version       = "3.0008-dev",       --TAGVERSION
+     date          = "2019-10-29", --TAGDATE
      description   = "luaotfload submodule / database",
      license       = "GPL v2.0",
      author        = "Khaled Hosny, Marcel Krüger",

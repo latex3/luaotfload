@@ -99,6 +99,7 @@ nuts.getchar             = direct.getchar
 nuts.getcomponents       = direct.getcomponents
 nuts.getdirection        = direct.getdirection
 nuts.getdisc             = direct.getdisc
+nuts.getreplace          = direct.getreplace
 nuts.getfield            = direct.getfield
 nuts.getfont             = direct.getfont
 nuts.getid               = direct.getid
@@ -115,6 +116,7 @@ nuts.setchar             = direct.setchar
 nuts.setcomponents       = direct.setcomponents
 nuts.setdirection        = direct.setdirection
 nuts.setdisc             = direct.setdisc
+nuts.setreplace          = direct.setreplace
 nuts.setfield            = setfield
 nuts.setkern             = direct.setkern
 nuts.setlink             = direct.setlink
@@ -259,5 +261,21 @@ do
 
         node     = nuts.traverse(dummy),
     }
+
+end
+
+if not nuts.setreplace then
+
+    local getdisc  = nuts.getdisc
+    local setfield = nuts.setfield
+
+    function nuts.getreplace(n)
+        local _, _, h, _, _, t = getdisc(n,true)
+        return h, t
+    end
+
+    function nuts.setreplace(n,h)
+        setfield(n,"replace",h)
+    end
 
 end

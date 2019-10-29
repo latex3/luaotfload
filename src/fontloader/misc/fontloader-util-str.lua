@@ -633,7 +633,7 @@ local environment = {
     stripzeros      = patterns.stripzeros,
     escapedquotes   = string.escapedquotes,
 
-    FORMAT          = string.f9,
+    FORMAT          = string.f6,
 }
 
 -- -- --
@@ -908,7 +908,7 @@ local format_L = function()
     return format("(a%s and 'TRUE' or 'FALSE')",n)
 end
 
-local format_n = function() -- strips leading and trailing zeros and removes .0
+local format_n = function() -- strips leading and trailing zeros and removes .0, beware: can produce e notation
     n = n + 1
     return format("((a%s %% 1 == 0) and format('%%i',a%s) or tostring(a%s))",n,n,n)
 end
@@ -938,13 +938,30 @@ end
 --     end
 -- end
 
-local format_N = function(f) -- strips leading and trailing zeros
-    n = n + 1
-    -- stripzero (singular) as we only have a number
-    if not f or f == "" then
-        f = ".9"
-    end -- always a leading number !
-    return format("(((a%s %% 1 == 0) and format('%%i',a%s)) or lpegmatch(stripzero,format('%%%sf',a%s)))",n,n,f,n)
+local format_N  if environment.FORMAT then
+
+    format_N = function(f)
+        n = n + 1
+        if not f or f == "" then
+            return format("FORMAT(a%s,'%%.9f')",n)
+        elseif f == ".6" then
+            return format("FORMAT(a%s)",n)
+        else
+            return format("FORMAT(a%s,'%%%sf')",n,f)
+        end
+    end
+
+else
+
+    format_N = function(f) -- strips leading and trailing zeros
+        n = n + 1
+        -- stripzero (singular) as we only have a number
+        if not f or f == "" then
+            f = ".9"
+        end -- always a leading number !
+        return format("(((a%s %% 1 == 0) and format('%%i',a%s)) or lpegmatch(stripzero,format('%%%sf',a%s)))",n,n,f,n)
+    end
+
 end
 
 local format_a = function(f)

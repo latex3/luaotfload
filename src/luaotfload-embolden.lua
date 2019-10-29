@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-embolden",
-    version       = "3.0006-dev",       --TAGVERSION
-    date          = "2019-10-15", --TAGDATE
+    version       = "3.0008-dev",       --TAGVERSION
+    date          = "2019-10-29", --TAGDATE
     description   = "luaotfload submodule / color",
     license       = "GPL v2.0",
     author        = "Marcel Krüger"

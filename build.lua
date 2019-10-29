@@ -1,7 +1,7 @@
 
-packageversion= "3.0006-dev"
-packagedate   = "2019-10-15"
-fontloaderdate= "2019-08-11"
+packageversion= "3.0008-dev"
+packagedate   = "2019-10-29"
+fontloaderdate= "2019-10-29"
 packagedesc   = "harf"
 checkformat   = "latex"
 

@@ -444,9 +444,10 @@ function constructors.scale(tfmdata,specification)
  -- boundarychar       = 65536, -- there is now a string 'right_boundary'
  -- false_boundarychar = 65536, -- produces invalid tfm in luatex
     --
-    targetproperties.language = properties.language or "dflt" -- inherited
-    targetproperties.script   = properties.script   or "dflt" -- inherited
-    targetproperties.mode     = properties.mode     or "base" -- inherited
+    targetproperties.language   = properties.language or "dflt" -- inherited
+    targetproperties.script     = properties.script   or "dflt" -- inherited
+    targetproperties.mode       = properties.mode     or "base" -- inherited
+    targetproperties.method     = properties.method
     --
     local askedscaledpoints   = scaledpoints
     local scaledpoints, delta = constructors.calculatescale(tfmdata,scaledpoints,nil,specification) -- no shortcut, dan be redefined

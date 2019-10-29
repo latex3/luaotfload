@@ -177,7 +177,6 @@ registertracker("otf.sample.silent", "otf.steps=silent","otf.substitutions","otf
 
 local nuts               = nodes.nuts
 
-local getfield           = nuts.getfield
 local getnext            = nuts.getnext
 local setnext            = nuts.setnext
 local getprev            = nuts.getprev
@@ -193,6 +192,7 @@ local getchar            = nuts.getchar
 local setchar            = nuts.setchar
 local getdisc            = nuts.getdisc
 local setdisc            = nuts.setdisc
+local getreplace         = nuts.getreplace
 local setlink            = nuts.setlink
 local getcomponents      = nuts.getcomponents -- the original one, not yet node-aux
 local setcomponents      = nuts.setcomponents -- the original one, not yet node-aux
@@ -2090,7 +2090,7 @@ local function chaindisk(head,start,dataset,sequence,rlmode,skiphash,ck)
             if keepdisc then
                 keepdisc      = false
                 lookaheaddisc = current
-                local replace = getfield(current,"replace")
+                local replace = getreplace(current)
                 if not replace then
                     sweepoverflow = true
                     sweepnode     = current
@@ -2167,7 +2167,7 @@ local function chaindisk(head,start,dataset,sequence,rlmode,skiphash,ck)
                         lookaheaddisc = current
                     end
                     -- we assume a simple text only replace (we could use nuts.count)
-                    local replace = getfield(current,"replace")
+                    local replace = getreplace(current)
                     while replace and i < s do
                         if getid(replace) == glyph_code then
                             i = i + 1
@@ -2213,7 +2213,7 @@ local function chaindisk(head,start,dataset,sequence,rlmode,skiphash,ck)
                         backtrackdisc = current
                     end
                     -- we assume a simple text only replace (we could use nuts.count)
-                    local replace = getfield(current,"replace")
+                    local replace = getreplace(current)
                     while replace and i > 1 do
                         if getid(replace) == glyph_code then
                             i = i - 1
@@ -3386,7 +3386,7 @@ local function t_run_single(start,stop,font,attr,lookupcache)
                     -- how about post ... we can probably merge this into the while
                     while getid(s) == disc_code do
                         ss = getnext(s)
-                        s  = getfield(s,"replace")
+                        s  = getreplace(s)
                         if not s then
                             s = ss
                             ss = nil
@@ -3413,7 +3413,7 @@ local function t_run_single(start,stop,font,attr,lookupcache)
                                 end
                                 while getid(s) == disc_code do
                                     ss = getnext(s)
-                                    s  = getfield(s,"replace")
+                                    s  = getreplace(s)
                                     if not s then
                                         s  = ss
                                         ss = nil
@@ -3556,7 +3556,7 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
                         end
                         while getid(s) == disc_code do
                             ss = getnext(s)
-                            s  = getfield(s,"replace")
+                            s  = getreplace(s)
                             if not s then
                                 s  = ss
                                 ss = nil
@@ -3583,7 +3583,7 @@ local function t_run_multiple(start,stop,font,attr,steps,nofsteps)
                                     end
                                     while getid(s) == disc_code do
                                         ss = getnext(s)
-                                        s  = getfield(s,"replace")
+                                        s  = getreplace(s)
                                         if not s then
                                             s  = ss
                                             ss = nil

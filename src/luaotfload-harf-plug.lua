@@ -288,7 +288,7 @@ local function printnodes(label, head, after)
   after = tonode(after)
   for n in node.traverse(tonode(head)) do
     if n == after then return end
-    print(label, n, n.char)
+    print(label, n, n.font or '', n.char or '')
     local pre, post, rep = getdisc(todirect(n))
     if pre then
       printnodes(label .. '<', pre)
@@ -401,7 +401,10 @@ function shape(head, node, run)
 
             -- Find the previous glyph that is safe to break at.
             local startglyph = i
-            while unsafetobreak(glyphs[startglyph]) do
+            while startglyph > 1
+              and codes[glyphs[startglyph - 1].cluster + 1] ~= 0x20
+              and codes[glyphs[startglyph - 1].cluster + 1] ~= 0xFFFC
+              and unsafetobreak(glyphs[startglyph]) do
               startglyph = startglyph - 1
             end
             -- Get the corresponding character index.
@@ -410,16 +413,17 @@ function shape(head, node, run)
             -- Find the next glyph that is safe to break at.
             stopglyph = i + 1
             local lastcluster = glyphs[i].cluster
-            while stopglyph < #glyphs
+            while stopglyph <= #glyphs
               and codes[glyphs[stopglyph].cluster + 1] ~= 0x20
+              and codes[glyphs[stopglyph].cluster + 1] ~= 0xFFFC
               and (unsafetobreak(glyphs[stopglyph])
                 or lastcluster == glyphs[stopglyph].cluster) do
               lastcluster = glyphs[stopglyph].cluster
               stopglyph = stopglyph + 1
             end
 
-            stopindex = stopglyph < #glyphs and glyphs[stopglyph].cluster + 1
-                                             or offset + len
+            stopindex = stopglyph <= #glyphs and glyphs[stopglyph].cluster + 1
+                                              or offset + len
 
             local startnode, stopnode = node, node
             for j=nodeindex - 1, startindex, -1 do

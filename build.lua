@@ -123,7 +123,7 @@ docfiledir    = "./doc"
 -- documentation
 -------------------
 
-typesetexe = "lualatex --fmt=lua"..checkformat
+typesetexe = "luahblatex --fmt=luahb"..checkformat
 
 -- main docu
 typesetfiles      = {"luaotfload-latex.tex"}
@@ -136,7 +136,7 @@ docfiles =
   "luaotfload.conf.example",
   "luaotfload-main.tex",
   "luaotfload.conf.rst",
-  "luaotfload-tool.rst"
+  "luaotfload-tool.rst",
   }
 
 textfiles =
@@ -150,7 +150,10 @@ typesetdemofiles  =
   {
    "filegraph.tex",
    "luaotfload-conf.tex",
-   "luaotfload-tool.tex"
+   "luaotfload-tool.tex",
+   "shaper-demo-graphite.tex",
+   "shaper-demo.tex",
+   "scripts-demo.tex"
   }
 
 ---------------------

@@ -1,5 +1,11 @@
 Change History
 --------------
+2019-09-13 luaotfload v3.1
+    * added code to use the harfbuzz library of luahbtex
+    * remove a number of lua tables from the global enviroment (_G) to reduce the polution. 
+      Kept there are only the tables luaotfload, fonts and nodes.
+    * sync with context files from 2019-10-29
+
 2019-09-13 luaotfload v3.0
     * invisible option to avoid that some glyph are shown (issue #63)
     * correct small bug in xheight calculation 

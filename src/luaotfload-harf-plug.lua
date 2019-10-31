@@ -327,6 +327,9 @@ function shape(head, node, run)
   local shapers = options.shaper and { options.shaper } or {}
 
   local buf = hb.Buffer.new()
+  if buf.set_flags then
+    buf:set_flags(hbdata.buf_flags)
+  end
   buf:set_direction(dir)
   buf:set_script(script)
   buf:set_language(lang)

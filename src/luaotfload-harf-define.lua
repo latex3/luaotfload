@@ -23,6 +23,9 @@ local stringupper = string.upper
 
 local hb = luaotfload.harfbuzz
 
+local harf_settings = luaotfload.harf or {}
+luaotfload.harf = harf_settings
+
 local hbfonts = {}
 
 local cfftag  = hb.Tag.new("CFF ")
@@ -30,6 +33,8 @@ local cff2tag = hb.Tag.new("CFF2")
 local os2tag  = hb.Tag.new("OS/2")
 local posttag = hb.Tag.new("post")
 local glyftag = hb.Tag.new("glyf")
+
+harf_settings.default_buf_flags = hb.Buffer.FLAGS_DEFAULT or 0
 
 local function loadfont(spec)
   local path, sub = spec.resolved, spec.sub or 1
@@ -206,7 +211,7 @@ local function scalefont(data, spec)
   local features = spec.features.normal
   features.mode = 'plug'
   features.features = 'harf'
-  fonts.constructors.checkedfeatures("otf", features)
+  features = fonts.constructors.checkedfeatures("otf", features)
   local hbface = data.face
   local hbfont = data.font
   local upem = data.upem
@@ -336,6 +341,7 @@ local function scalefont(data, spec)
       letterspace = letterspace,
       hscale = hscale,
       vscale = vscale,
+      buf_flags = harf_settings.default_buf_flags,
     },
     specification = spec,
     shared = {},

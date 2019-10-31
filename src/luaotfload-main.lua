@@ -306,15 +306,15 @@ luaotfload.main = function ()
 
     initialize "features"     --- font request and feature handling
 
-    loadmodule "letterspace"  --- extra character kerning
-    loadmodule "embolden"     --- fake bold
-    loadmodule "notdef"       --- missing glyph handling
     local harfstatus, harfbuzz = pcall(require, 'luaharfbuzz')
     if harfstatus then
         luaotfload.harfbuzz = harfbuzz
         loadmodule "harf-define"
         loadmodule "harf-plug"
     end
+    loadmodule "letterspace"  --- extra character kerning
+    loadmodule "embolden"     --- fake bold
+    loadmodule "notdef"       --- missing glyph handling
     initialize "auxiliary"    --- additional high-level functionality
     loadmodule "multiscript"  --- ...
     loadmodule "tounicode"

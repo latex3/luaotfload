@@ -16,6 +16,7 @@ if luatexbase and luatexbase.provides_module then
   luatexbase.provides_module (ProvidesLuaModule)
 end  
 
+local harfbuzz           = luaotfload.harfbuzz
 local flush_node         = node.direct.flush_node
 local getfont            = font.getfont
 local getnext            = node.direct.getnext
@@ -184,12 +185,41 @@ local function invisibleinitialiser(tfmdata, value)
     insert(sequences, sequence)
   end
 end
+local invisibleinitialiserharf if harfbuzz then
+  local harf_settings = luaotfload.harf
+  local preserve_flag = harfbuzz.Buffer.FLAG_PRESERVE_DEFAULT_IGNORABLES or 0
+  local remove_flag = harfbuzz.Buffer.FLAG_REMOVE_DEFAULT_IGNORABLES or 0
+  local dotted_circle_flag = harfbuzz.Buffer.FLAG_DO_NOT_INSERT_DOTTED_CIRCLE or 0
+  harf_settings.default_buf_flags = (harf_settings.default_buf_flags & ~remove_flag) | preserve_flag | dotted_circle_flag
+  function invisibleinitialiserharf(tfmdata, value)
+    if not tfmdata.hb then return end
+    local hb = tfmdata.hb
+    hb.buf_flags = hb.buf_flags & ~preserve_flag
+    if value == "remove" then
+      hb.buf_flags = hb.buf_flags | remove_flag
+    end
+  end
+  local function dottedcircleinitialize(tfmdata, value)
+    if not tfmdata.hb then return end
+    local hb = tfmdata.hb
+    hb.buf_flags = hb.buf_flags & ~dotted_circle_flag
+  end
+  otfregister {
+    name = 'dottedcircle',
+    description = 'Insert dotted circle to fix invalid clusters',
+    default = true,
+    initializers = {
+      plug = dottedcircleinitialize,
+    },
+  }
+end
 otfregister {
   name = 'invisible',
   description = 'Remove invisible control characters',
   default = true,
   initializers = {
     node = invisibleinitialiser,
+    plug = invisibleinitialiserharf,
   },
 }
 

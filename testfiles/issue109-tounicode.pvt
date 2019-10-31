@@ -1,0 +1,8 @@
+\input{regression-test}
+\documentclass{article}
+\START
+\begin{document}
+\font\test={name:CMU Serif:mode=node;script=latn;language=DFLT;+tlig;+onum;}
+\test
+abc123
+\end{document} 

@@ -1,0 +1,173 @@
+%PDF-1.5
+%Ã’¡‘≈ÿ–ƒ∆
+3 0 obj
+<< /Length 139 >>        
+stream
+BT
+/F16 9.96264 Tf
+1 0 0 1 148.712 707.125 Tm [<00420043>-28<0044087408750876>]TJ
+/F15 9.96264 Tf
+1 0 0 1 303.133 139.255 Tm [<0052>]TJ
+ET
+endstream
+endobj
+2 0 obj
+<< /Type /Page /Contents 3 0 R /Resources 1 0 R /MediaBox [ 0 0 595.276 841.89 ] /Parent 6 0 R >>
+endobj
+1 0 obj
+<< /Font << /F16 4 0 R /F15 5 0 R >> /ProcSet [ /PDF /Text ] >>
+endobj
+7 0 obj
+[ 82 [ 500 ] ]
+endobj
+9 0 obj
+<< /Length 11 >>         
+[BINARY STREAM]
+endobj
+10 0 obj
+<< /Subtype /CIDFontType0C /Length 574 >>        
+[BINARY STREAM]
+endobj
+8 0 obj
+<< /Type /FontDescriptor /FontName /JFRMQG+LMRoman10-Regular /Flags 4 /FontBBox [ -430 -290 1417 1127 ] /Ascent 1127 /CapHeight 683 /Descent -290 /ItalicAngle 0 /StemV 93 /XHeight 431 /FontFile3 10 0 R /CIDSet 9 0 R >>
+endobj
+11 0 obj
+<< /Length 692 >>        
+stream
+%!PS-Adobe-3.0 Resource-CMap
+%%DocumentNeededResources: ProcSet (CIDInit)
+%%IncludeResource: ProcSet (CIDInit)
+%%BeginResource: CMap (TeX-JFRMQG-LMRoman10-Regular-0)
+%%Title: (TeX-JFRMQG-LMRoman10-Regular-0 TeX JFRMQG-LMRoman10-Regular 0)
+%%Version: 1.000
+%%EndComments
+/CIDInit /ProcSet findresource begin
+12 dict begin
+begincmap
+/CIDSystemInfo
+<< /Registry (TeX)
+/Ordering (JFRMQG-LMRoman10-Regular)
+/Supplement 0
+>> def
+/CMapName /TeX-Identity-JFRMQG-LMRoman10-Regular def
+/CMapType 2 def
+1 begincodespacerange
+<0000> <FFFF>
+endcodespacerange
+0 beginbfrange
+endbfrange
+1 beginbfchar
+<0052> <0031>
+endbfchar
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end
+%%EndResource
+%%EOF
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /JFRMQG+LMRoman10-Regular /DescendantFonts [ 12 0 R ] /ToUnicode 11 0 R >>
+endobj
+12 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /JFRMQG+LMRoman10-Regular /FontDescriptor 8 0 R /W 7 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+13 0 obj
+[ 66 [ 500 555 444 ] 2164 [ 500 500 500 ] ]
+endobj
+15 0 obj
+<< /Length 271 >>        
+[BINARY STREAM]
+endobj
+16 0 obj
+<< /Subtype /CIDFontType0C /Length 1213 >>       
+[BINARY STREAM]
+endobj
+14 0 obj
+<< /Type /FontDescriptor /FontName /MNTVAL+CMUSerif-Roman /Flags 4 /FontBBox [ -1135 -387 1495 1094 ] /Ascent 935 /CapHeight 683 /Descent -250 /ItalicAngle 0 /StemV 93 /XHeight 430 /FontFile3 16 0 R /CIDSet 15 0 R >>
+endobj
+17 0 obj
+<< /Length 747 >>        
+stream
+%!PS-Adobe-3.0 Resource-CMap
+%%DocumentNeededResources: ProcSet (CIDInit)
+%%IncludeResource: ProcSet (CIDInit)
+%%BeginResource: CMap (TeX-MNTVAL-CMUSerif-Roman-0)
+%%Title: (TeX-MNTVAL-CMUSerif-Roman-0 TeX MNTVAL-CMUSerif-Roman 0)
+%%Version: 1.000
+%%EndComments
+/CIDInit /ProcSet findresource begin
+12 dict begin
+begincmap
+/CIDSystemInfo
+<< /Registry (TeX)
+/Ordering (MNTVAL-CMUSerif-Roman)
+/Supplement 0
+>> def
+/CMapName /TeX-Identity-MNTVAL-CMUSerif-Roman def
+/CMapType 2 def
+1 begincodespacerange
+<0000> <FFFF>
+endcodespacerange
+0 beginbfrange
+endbfrange
+6 beginbfchar
+<0042> <0061>
+<0043> <0062>
+<0044> <0063>
+<0874> <0031>
+<0875> <0032>
+<0876> <0033>
+endbfchar
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end
+%%EndResource
+%%EOF
+endstream
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /MNTVAL+CMUSerif-Roman /DescendantFonts [ 18 0 R ] /ToUnicode 17 0 R >>
+endobj
+18 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /MNTVAL+CMUSerif-Roman /FontDescriptor 14 0 R /W 13 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+6 0 obj
+<< /Type /Pages  /Count 1 /Kids [ 2 0 R ] >>
+endobj
+19 0 obj
+<< /Type /Catalog /Pages 6 0 R >>
+endobj
+20 0 obj
+<< /Producer (LuaTeX) /Creator (TeX) /Trapped /False >>
+endobj
+xref
+0 21
+0000000000 65535 f 
+0000000331 00000 n 
+0000000218 00000 n 
+0000000020 00000 n 
+0000005233 00000 n 
+0000002154 00000 n 
+0000005580 00000 n 
+0000000410 00000 n 
+0000001168 00000 n 
+0000000440 00000 n 
+0000000510 00000 n 
+0000001402 00000 n 
+0000002307 00000 n 
+0000002505 00000 n 
+0000004193 00000 n 
+0000002565 00000 n 
+0000002896 00000 n 
+0000004426 00000 n 
+0000005383 00000 n 
+0000005640 00000 n 
+0000005690 00000 n 
+trailer
+<< /Size 21 /Root 19 0 R /Info 20 0 R >>
+startxref
+5762
+%%EOF

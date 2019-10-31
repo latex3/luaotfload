@@ -317,6 +317,7 @@ luaotfload.main = function ()
     end
     initialize "auxiliary"    --- additional high-level functionality
     loadmodule "multiscript"  --- ...
+    loadmodule "tounicode"
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 

@@ -316,7 +316,7 @@ local function scalefont(data, spec)
 
   local tfmdata = {
     name = spec.specification,
-    filename = spec.resolved,
+    filename = 'harfloaded:' .. spec.resolved,
     subfont = spec.sub or 1,
     designsize = size,
     psname = sanitize(data.psname),
@@ -404,3 +404,11 @@ fonts.readers.harf = function(spec)
   end
   return scalefont(loadfont(spec), spec)
 end
+
+luatexbase.add_to_callback('find_opentype_file', function(name)
+  return name:gsub('^harfloaded:', '')
+end, 'luaotfload.harf.strip_prefix')
+
+luatexbase.add_to_callback('find_truetype_file', function(name)
+  return name:gsub('^harfloaded:', '')
+end, 'luaotfload.harf.strip_prefix')

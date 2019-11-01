@@ -302,6 +302,7 @@ local function scalefont(data, spec)
   local tfmdata = {
     name = spec.specification,
     filename = spec.resolved,
+    subfont = spec.sub or 1,
     designsize = size,
     psname = sanitize(data.psname),
     fullname = data.fullname,

@@ -563,8 +563,8 @@ non-standard directory:
 
 \identifier{TrueType} collection files (the extension is usually
 \inlinecode{.ttc}) contain more than a single font. In order to refer to these
-subfonts, the respective index may be added in parentheses after the file
-name.\footnote{%
+subfonts, the respective index or the respective PostScript font name may be
+added in parentheses after the file name.\footnote{%
   Incidentally, this syntactical detail also prevents one from loading files
   that end in balanced parentheses.
 }
@@ -572,6 +572,8 @@ name.\footnote{%
 \beginlisting
   \font \cambriamain = "file:cambria.ttc(0)" at 10pt
   \font \cambriamath = "file:cambria.ttc(1)" at 10pt
+  \font \Cambriamain = "file:cambria.ttc(Cambria)" at 10pt
+  \font \Cambriamath = "file:cambria.ttc(CambriaMath)" at 10pt
 \endlisting
 
 and likewise, requesting subfont inside a TTC container by path:

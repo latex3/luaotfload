@@ -20,6 +20,7 @@ end
 
 local stringlower = string.lower
 local stringupper = string.upper
+local gsub = string.gsub
 
 local hb = luaotfload.harfbuzz
 
@@ -31,21 +32,29 @@ local os2tag  = hb.Tag.new("OS/2")
 local posttag = hb.Tag.new("post")
 local glyftag = hb.Tag.new("glyf")
 
+local containers = luaotfload.fontloader.containers
+local hbcacheversion = 1.0
+local facecache = containers.define("fonts", "hb", hbcacheversion, true)
+
 local function loadfont(spec)
   local path, sub = spec.resolved, spec.sub or 1
 
-  local key = string.format("%s:%d", path, sub)
-  local data = hbfonts[key]
-  if data then
-    return data
-  end
+  local key = string.format("%s:%d", gsub(path, "[/\\]", ":"), sub)
 
-  local hbface = hb.Face.new(path, sub - 1)
+  local attributes = lfs.attributes(path)
+  local size, date = attributes.size or 0, attributes.modification or 0
+
+  local cached = containers.read(facecache, key)
+  local iscached = cached and cached.date == date and cached.size == size
+
+  local hbface = iscached and cached.face or hb.Face.new(path, sub - 1)
   local tags = hbface and hbface:get_table_tags()
   -- If the face has no table tags then it isn’t a valid SFNT font that
   -- HarfBuzz can handle.
-  if tags then
-    local hbfont = hb.Font.new(hbface)
+  if not tags then return end
+  local hbfont = iscached and cached.font or hb.Font.new(hbface)
+
+  if not iscached then
     local upem = hbface:get_upem()
 
     -- The engine seems to use the font type to tell whether there is a CFF
@@ -157,10 +166,10 @@ local function loadfont(spec)
       end
     end
 
-    data = {
+    cached = {
+      date = date,
+      size = size,
       gid_offset = 0x120000,
-      face = hbface,
-      font = hbfont,
       upem = upem,
       fonttype = fonttype,
       space = space,
@@ -176,9 +185,11 @@ local function loadfont(spec)
       loaded = {}, -- Cached loaded glyph data.
     }
 
-    hbfonts[key] = data
-    return data
+    containers.write(facecache, key, cached)
   end
+  cached.face = hbface
+  cached.font = hbfont
+  return cached
 end
 
 -- Drop illegal characters from PS Name, per the spec

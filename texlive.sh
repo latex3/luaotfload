@@ -35,8 +35,8 @@ tlmgr install luahbtex
 tlmgr install cm etex knuth-lib tex tex-ini-files unicode-data 
 
 # various tools / dependencies of other packages
-tlmgr install ctablestack filehook ifoddpage ifxetex luatexbase trimspaces
-tlmgr install oberdiek etoolbox xkeyval ucharcat xstring ifluatex  everyhook
+tlmgr install ctablestack filehook ifoddpage iftex luatexbase trimspaces
+tlmgr install oberdiek etoolbox xkeyval ucharcat xstring everyhook
 tlmgr install svn-prov setspace
 
 # graphics

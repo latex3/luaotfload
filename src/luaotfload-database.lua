@@ -3104,6 +3104,39 @@ end
 
 --[[doc--
 
+    Get the subfont index corresponding to a given psname in a
+    font collection
+
+--doc]]--
+
+local function lookup_subfont_index(filepath, psname)
+    assert(name_index)
+    -- if not name_index then name_index = load_names () end
+    local filestatus = name_index.status[filepath]
+    local mappings = name_index.mappings
+    if filestatus then
+        for subfont, idx in next, filestatus.index do
+            if mappings[idx].psname == psname then
+                return subfont or 1
+            end
+        end
+    end
+
+    -- If that didn't work, we do a manual search
+    psname = sanitize_fontname(psname)
+    local err, info = read_font_file (filepath)
+    if #info == 0 then return 1 end
+    for i = 1, #info do
+        for _, names in next, info[i].platformnames do
+            if psname == sanitize_fontname(names.postscriptname) then
+                return i
+            end
+        end
+    end
+end
+
+--[[doc--
+
     collect_font_filenames -- Scan the three search path categories for
     font files. This constitutes the first pass of the update mode.
 
@@ -3713,8 +3746,6 @@ end
 --- PHG: we need to investigate these, maybe they’re useful as early
 ---      hooks
 
-local ignoredfile = function () return false end
-
 local reportmissingbase = function ()
     logreport ("info", 0, "db", --> bug‽
                "Font name database not found but expected by fontloader.")
@@ -3743,7 +3774,7 @@ local resolve = function (name, subfont)
 end
 
 local api = {
-    ignoredfile       = ignoredfile,
+    ignoredfile       = function() return false end,
     reportmissingbase = reportmissingbase,
     reportmissingname = reportmissingname,
     getfilename       = getfilename,
@@ -3776,6 +3807,7 @@ local export = {
     count_font_files            = count_font_files,
     nth_font_filename           = nth_font_filename,
     font_slice                  = font_slice,
+    lookup_subfont_index        = lookup_subfont_index,
     --- font cache
     purge_cache                 = purge_cache,
     erase_cache                 = erase_cache,

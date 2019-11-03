@@ -242,6 +242,7 @@ local function resolve_kpse (specification)
     end
 end
 
+local lookup_subfont_index = fonts.names.lookup_subfont_index
 local function wrap_resolver(resolver)
     return function (specification)
         local filename, sub, forced = resolver(specification)
@@ -254,6 +255,10 @@ local function wrap_resolver(resolver)
             specification.filename = filename
             specification.name = filename
             specification.sub = sub or specification.sub
+            if type(specification.sub) == "string" then
+                specification.sub =
+                    lookup_subfont_index(filename, specification.sub)
+            end
             specification.forced = specification.forced or forced
             if not specification.forced then
                 local suffix = stringlower (filesuffix (filename))

@@ -6,22 +6,22 @@ luaotfload | aux : font no 31 (nil) does not define feature smcp for script arab
 luaotfload | aux : font no 32 (nil) does not define feature smcp for script arab with language dflt
 Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with
 (fontspec)             options
-(fontspec)             [RawFeature={mode=harf},Ligatures=TeX,Extension=.ttf,UprightFont=*-Regular,ItalicFont=*-Slanted,BoldFont=*-Bold,BoldItalicFont=*-BoldSlanted,Script=Arabic,Color=FF000080].
+(fontspec)             [Ligatures=TeX,Extension=.ttf,UprightFont=*-Regular,ItalicFont=*-Slanted,BoldFont=*-Bold,BoldItalicFont=*-BoldSlanted,Renderer=Harfbuzz,Script=Arabic,Color=FF000080].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[Amiri-Regular.ttf]:mode=node;script=arab;language=DFLT;mode=harf;+tlig;color=FF000080;"
+(fontspec)             <->"[Amiri-Regular.ttf]:mode=harf;script=arab;language=DFLT;+tlig;color=FF000080;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (fontspec)             - 'bold' (bx/n) with NFSS spec.:
-(fontspec)             <->"[Amiri-Bold.ttf]:mode=node;script=arab;language=DFLT;mode=harf;+tlig;color=FF000080;"
+(fontspec)             <->"[Amiri-Bold.ttf]:mode=harf;script=arab;language=DFLT;+tlig;color=FF000080;"
 (fontspec)             - 'bold small caps'  (bx/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
-(fontspec)             <->"[Amiri-Slanted.ttf]:mode=node;script=arab;language=DFLT;mode=harf;+tlig;color=FF000080;"
+(fontspec)             <->"[Amiri-Slanted.ttf]:mode=harf;script=arab;language=DFLT;+tlig;color=FF000080;"
 (fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.: 
 (fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
-(fontspec)             <->"[Amiri-BoldSlanted.ttf]:mode=node;script=arab;language=DFLT;mode=harf;+tlig;color=FF000080;"
+(fontspec)             <->"[Amiri-BoldSlanted.ttf]:mode=harf;script=arab;language=DFLT;+tlig;color=FF000080;"
 (fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.: 
 Inserting `luaotfload.color_handler' at position 1 in `post_linebreak_filter'.
 Inserting `luaotfload.color_handler' at position 2 in `hpack_filter'.
@@ -61,7 +61,7 @@ Completed box being shipped out [1]
 ....\TU/Amiri(1)/m/n/10 "ه" 1208D2 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\pdfcolorstack 0 pop
-....\pdfliteral direct <lua data reference 792>
+....\pdfliteral direct <lua data reference ...>
 ....\TU/Amiri(0)/m/n/10 "ب" 120815 +0:+0
 ....\TU/Amiri(0)/m/n/10 "ل" 120914 +0:+0
 ....\TU/Amiri(0)/m/n/10 "و" 12098B +0:+0

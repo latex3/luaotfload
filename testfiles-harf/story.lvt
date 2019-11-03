@@ -3,7 +3,6 @@
 \documentclass{article}
 \usepackage{setspace}
 \usepackage{fontspec}
-\defaultfontfeatures{RawFeature={mode=harf}}
 
 \directlua{
   local cbs = luatexbase.callback_descriptions'glyph_info'
@@ -15,13 +14,13 @@
   end, 'Harf glyph_info callback -- testing variant')
 }
 
-\setmainfont{lmroman10-regular.otf}
+\setmainfont[Renderer=Harfbuzz]{lmroman10-regular.otf}
 \begin{document}
 \showoutput
 \START
-\newfontfamily\testb{lmroman10-bold.otf}[Script=Latin, mode=node]
-\newfontfamily\testi{lmromanslant10-regular.otf}[Script=Latin]
-\newfontfamily\testR{lmroman12-regular.otf}[Script=Latin, Scale=1.2]
+\newfontfamily\testb{lmroman10-bold.otf}[Renderer=Harfbuzz, Script=Latin]
+\newfontfamily\testi{lmromanslant10-regular.otf}[Renderer=Harfbuzz, Script=Latin]
+\newfontfamily\testR{lmroman12-regular.otf}[Renderer=Harfbuzz, Script=Latin, Scale=1.2]
 \testr
 \hrule
 \vskip 1in

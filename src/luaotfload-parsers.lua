@@ -603,7 +603,9 @@ local combolist         = Ct(combodef1 * (comborowsep * combodef)^1)
 --- Note to self: subfonts apparently start at index 0. Tested with
 --- Cambria.ttc that includes “Cambria Math” at 0 and “Cambria” at 1.
 --- Other values cause luatex to segfault.
-local subfont           = P"(" * Cg((1 - S"()")^1, "sub") * P")"
+local subfont           = P"(" * Cg(R'09'^1 / function (s)
+                            return tonumber(s) + 1
+                          end + (1 - S"()")^1, "sub") * P")"
 
 --- lookups -----------------------------------------------------------
 local fontname          = C((1-S":(/")^1)  --- like luatex-fonts

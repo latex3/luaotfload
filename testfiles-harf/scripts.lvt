@@ -3,7 +3,6 @@
 \documentclass{article}
 \usepackage{setspace}
 \usepackage{fontspec}
-\defaultfontfeatures{RawFeature={mode=harf}}
 
 \directlua{
   local cbs = luatexbase.callback_descriptions'glyph_info'
@@ -15,7 +14,7 @@
   end, 'Harf glyph_info callback -- testing variant')
 }
 
-\setmainfont{amiri-regular.ttf}[Script=Latin]
+\setmainfont{amiri-regular.ttf}[Renderer=Harfbuzz, Script=Latin]
 \begin{document}
 \showoutput
 \START
@@ -25,7 +24,7 @@
 
 \def\l#1#2{%
   \begingroup%
-  \fontspec{amiri-regular.ttf}[Script=Arabic, Language=#1]
+  \fontspec{amiri-regular.ttf}[Renderer=Harfbuzz, Script=Arabic, Language=#1]
   #2%
   \endgroup%
 }

@@ -1,25 +1,9 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-! LaTeX3 Error: The key 'fontspec-opentype/mode' is unknown and is being
-(LaTeX3)        ignored.
-For immediate help type H <return>.
- ...                                              
-l. ......[Renderer=Harfbuzz, Script=Latin, mode=node]
-The module 'fontspec-opentype' does not have a key called
-'fontspec-opentype/mode'.
-Check that you have spelled the key name correctly.
-! LaTeX3 Error: The key 'fontspec-opentype/mode' is unknown and is being
-(LaTeX3)        ignored.
-For immediate help type H <return>.
- ...                                              
-l. ......[Renderer=Harfbuzz, Script=Latin, mode=node]
-The module 'fontspec-opentype' does not have a key called
-'fontspec-opentype/mode'.
-Check that you have spelled the key name correctly.
 luaotfload | aux : font no 32 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmroman10-bold.otf(0)' created for font
 (fontspec)             'lmroman10-bold.otf' with options
-(fontspec)             [Renderer=Harfbuzz,Script=Latin,mode=node].
+(fontspec)             [Renderer=Harfbuzz,Script=Latin].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:

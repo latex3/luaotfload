@@ -18,7 +18,7 @@
 \begin{document}
 \showoutput
 \START
-\newfontfamily\testb{lmroman10-bold.otf}[Renderer=Harfbuzz, Script=Latin, mode=node]
+\newfontfamily\testb{lmroman10-bold.otf}[Renderer=Harfbuzz, Script=Latin]
 \newfontfamily\testi{lmromanslant10-regular.otf}[Renderer=Harfbuzz, Script=Latin]
 \newfontfamily\testR{lmroman12-regular.otf}[Renderer=Harfbuzz, Script=Latin, Scale=1.2]
 \testr

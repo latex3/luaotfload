@@ -3,7 +3,6 @@
 \documentclass{article}
 \usepackage{setspace}
 \usepackage{fontspec}
-\defaultfontfeatures{RawFeature={mode=harf}}
 
 \directlua{
   local cbs = luatexbase.callback_descriptions'glyph_info'
@@ -15,7 +14,7 @@
   end, 'Harf glyph_info callback -- testing variant')
 }
 
-\setmainfont{Amiri}[Script=Arabic]
+\setmainfont{Amiri}[Renderer=Harfbuzz, Script=Arabic]
 \begin{document}
 \showoutput
 \START

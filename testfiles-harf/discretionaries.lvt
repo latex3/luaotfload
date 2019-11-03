@@ -3,7 +3,6 @@
 \documentclass{article}
 \usepackage{setspace}
 \usepackage{fontspec}
-\defaultfontfeatures{RawFeature={mode=harf}}
 
 \directlua{
   local cbs = luatexbase.callback_descriptions'glyph_info'
@@ -15,7 +14,7 @@
   end, 'Harf glyph_info callback -- testing variant')
 }
 
-\setmainfont{NotoSerifCJK-Regular.ttc}[Script=Latin]
+\setmainfont{NotoSerifCJK-Regular.ttc}[Renderer=Harfbuzz, Script=Latin]
 \begin{document}
 \showoutput
 \START
@@ -42,7 +41,7 @@ offbeat office baffle coffee HAVANA\par
 offbeat office baffle coffee HAVANA\par
 \endgroup
 
-\fontspec{lmroman10-regular.otf}[Script=Latin, Ligatures=Discretionary, Ligatures=TeX]
+\fontspec{lmroman10-regular.otf}[Renderer=Harfbuzz, Script=Latin, Ligatures=Discretionary, Ligatures=TeX]
 \parindent=0pt
 
 \noindent

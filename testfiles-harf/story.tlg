@@ -4,7 +4,7 @@ Don't change this file in any respect.
 (LaTeX3)        ignored.
 For immediate help type H <return>.
  ...                                              
-l. ......lmroman10-bold.otf}[Script=Latin, mode=node]
+l. ......[Renderer=Harfbuzz, Script=Latin, mode=node]
 The module 'fontspec-opentype' does not have a key called
 'fontspec-opentype/mode'.
 Check that you have spelled the key name correctly.
@@ -12,42 +12,42 @@ Check that you have spelled the key name correctly.
 (LaTeX3)        ignored.
 For immediate help type H <return>.
  ...                                              
-l. ......lmroman10-bold.otf}[Script=Latin, mode=node]
+l. ......[Renderer=Harfbuzz, Script=Latin, mode=node]
 The module 'fontspec-opentype' does not have a key called
 'fontspec-opentype/mode'.
 Check that you have spelled the key name correctly.
 luaotfload | aux : font no 32 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmroman10-bold.otf(0)' created for font
 (fontspec)             'lmroman10-bold.otf' with options
-(fontspec)             [RawFeature={mode=harf},Script=Latin,mode=node].
+(fontspec)             [Renderer=Harfbuzz,Script=Latin,mode=node].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[lmroman10-bold.otf]:mode=node;script=latn;language=DFLT;mode=harf;"
+(fontspec)             <->"[lmroman10-bold.otf]:mode=harf;script=latn;language=DFLT;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 luaotfload | aux : font no 34 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmromanslant10-regular.otf(0)' created for
 (fontspec)             font 'lmromanslant10-regular.otf' with options
-(fontspec)             [RawFeature={mode=harf},Script=Latin].
+(fontspec)             [Renderer=Harfbuzz,Script=Latin].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[lmromanslant10-regular.otf]:mode=node;script=latn;language=DFLT;mode=harf;"
+(fontspec)             <->"[lmromanslant10-regular.otf]:mode=harf;script=latn;language=DFLT;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 luaotfload | aux : font no 36 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmroman12-regular.otf(0)' created for font
 (fontspec)             'lmroman12-regular.otf' with options
-(fontspec)             [RawFeature={mode=harf},Script=Latin,Scale=1.2].
+(fontspec)             [Renderer=Harfbuzz,Script=Latin,Scale=1.2].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->s*[1.2]"[lmroman12-regular.otf]:mode=node;script=latn;language=DFLT;mode=harf;"
+(fontspec)             <->s*[1.2]"[lmroman12-regular.otf]:mode=harf;script=latn;language=DFLT;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 ! Undefined control sequence.
 l. ...\testr
@@ -415,13 +415,13 @@ Completed box being shipped out [1]
 luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmroman10-regular.otf(1)' created for font
 (fontspec)             'lmroman10-regular.otf' with options
-(fontspec)             [RawFeature={mode=harf},Ligatures=TeX,Script=Latin].
+(fontspec)             [Ligatures=TeX,Renderer=Harfbuzz,Script=Latin].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[lmroman10-regular.otf]:mode=node;script=latn;language=DFLT;mode=harf;+tlig;"
+(fontspec)             <->"[lmroman10-regular.otf]:mode=harf;script=latn;language=DFLT;+tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (../story.tex
 LaTeX Font Warning: Font shape `TU/lmroman10-regular.otf(0)/bx/n' undefined

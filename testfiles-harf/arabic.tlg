@@ -1179,22 +1179,22 @@ luaotfload | aux : font no 31 (nil) does not define feature smcp for script arab
 luaotfload | aux : font no 32 (nil) does not define feature smcp for script arab with language dflt
 Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with
 (fontspec)             options
-(fontspec)             [RawFeature={mode=harf},Extension=.ttf,UprightFont=*-Regular,ItalicFont=*-Slanted,BoldFont=*-Bold,BoldItalicFont=*-BoldSlanted,Script=Arabic,Scale=1.6].
+(fontspec)             [Extension=.ttf,UprightFont=*-Regular,ItalicFont=*-Slanted,BoldFont=*-Bold,BoldItalicFont=*-BoldSlanted,Renderer=Harfbuzz,Script=Arabic,Scale=1.6].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->s*[1.6]"[Amiri-Regular.ttf]:mode=node;script=arab;language=DFLT;mode=harf;"
+(fontspec)             <->s*[1.6]"[Amiri-Regular.ttf]:mode=harf;script=arab;language=DFLT;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (fontspec)             - 'bold' (bx/n) with NFSS spec.:
-(fontspec)             <->s*[1.6]"[Amiri-Bold.ttf]:mode=node;script=arab;language=DFLT;mode=harf;"
+(fontspec)             <->s*[1.6]"[Amiri-Bold.ttf]:mode=harf;script=arab;language=DFLT;"
 (fontspec)             - 'bold small caps'  (bx/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
-(fontspec)             <->s*[1.6]"[Amiri-Slanted.ttf]:mode=node;script=arab;language=DFLT;mode=harf;"
+(fontspec)             <->s*[1.6]"[Amiri-Slanted.ttf]:mode=harf;script=arab;language=DFLT;"
 (fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.: 
 (fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
-(fontspec)             <->s*[1.6]"[Amiri-BoldSlanted.ttf]:mode=node;script=arab;language=DFLT;mode=harf;"
+(fontspec)             <->s*[1.6]"[Amiri-BoldSlanted.ttf]:mode=harf;script=arab;language=DFLT;"
 (fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.: 
 LaTeX Font Info:    Font shape `TU/Amiri(1)/m/n' will be
 (Font)              scaled to size 16.00006pt on input line ....
@@ -2272,13 +2272,13 @@ Completed box being shipped out [2]
 luaotfload | aux : font no 37 (nil) does not define feature smcp for script arab with language dflt
 Package fontspec Info: Font family 'ArefRuqaa-Regular.ttf(0)' created for font
 (fontspec)             'ArefRuqaa-Regular.ttf' with options
-(fontspec)             [RawFeature={mode=harf},Script=Arabic,Scale=1.2].
+(fontspec)             [Renderer=Harfbuzz,Script=Arabic,Scale=1.2].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->s*[1.2]"[ArefRuqaa-Regular.ttf]:mode=node;script=arab;language=DFLT;mode=harf;"
+(fontspec)             <->s*[1.2]"[ArefRuqaa-Regular.ttf]:mode=harf;script=arab;language=DFLT;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 LaTeX Font Info:    Font shape `TU/ArefRuqaa-Regular.ttf(0)/m/n' will be
 (Font)              scaled to size 11.99997pt on input line ....
@@ -4527,13 +4527,13 @@ Completed box being shipped out [3]
 luaotfload | aux : font no 40 (nil) does not define feature smcp for script arab with language dflt
 Package fontspec Info: Font family 'NotoNastaliqUrdu-Regular.ttf(0)' created
 (fontspec)             for font 'NotoNastaliqUrdu-Regular.ttf' with options
-(fontspec)             [RawFeature={mode=harf},Script=Arabic].
+(fontspec)             [Renderer=Harfbuzz,Script=Arabic].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[NotoNastaliqUrdu-Regular.ttf]:mode=node;script=arab;language=DFLT;mode=harf;"
+(fontspec)             <->"[NotoNastaliqUrdu-Regular.ttf]:mode=harf;script=arab;language=DFLT;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Completed box being shipped out [4]
 \vbox(633.0+0.06)x407.0, direction TLT

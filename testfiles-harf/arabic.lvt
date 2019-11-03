@@ -3,7 +3,6 @@
 \documentclass{article}
 \usepackage{setspace}
 \usepackage{fontspec}
-\defaultfontfeatures{RawFeature={mode=harf}}
 
 \directlua{
   local cbs = luatexbase.callback_descriptions'glyph_info'
@@ -15,7 +14,7 @@
   end, 'Harf glyph_info callback -- testing variant')
 }
 
-\setmainfont{Amiri}[Script=Arabic]
+\setmainfont{Amiri}[Renderer=Harfbuzz, Script=Arabic]
 \begin{document}
 \showoutput
 \START
@@ -56,19 +55,19 @@
 }
 
 \begingroup\pardir TRT\textdir TRT
-\fontspec{Amiri}[Script=Arabic, Scale=1.6]
+\fontspec{Amiri}[Renderer=Harfbuzz, Script=Arabic, Scale=1.6]
 \setstretch{2.4}
 \arabictext
 \par\endgroup\newpage
 
 \begingroup\pardir TRT\textdir TRT
-\fontspec{ArefRuqaa-Regular.ttf}[Script=Arabic, Scale=1.2]
+\fontspec{ArefRuqaa-Regular.ttf}[Renderer=Harfbuzz, Script=Arabic, Scale=1.2]
 \setstretch{2.4}
 \arabictext
 \par\endgroup\newpage
 
 \begingroup\pardir TRT\textdir TRT
-\fontspec{NotoNastaliqUrdu-Regular.ttf}[Script=Arabic]
+\fontspec{NotoNastaliqUrdu-Regular.ttf}[Renderer=Harfbuzz, Script=Arabic]
 \setstretch{2.5}
 \arabictext
 \par\endgroup\newpage

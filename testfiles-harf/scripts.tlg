@@ -6,59 +6,59 @@ Package fontspec Warning: Font "amiri-regular" does not contain requested
 luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'amiri-regular.ttf(1)' created for font
 (fontspec)             'amiri-regular.ttf' with options
-(fontspec)             [RawFeature={mode=harf},Ligatures=TeX,Script=Latin,Script=Greek].
+(fontspec)             [Ligatures=TeX,Renderer=Harfbuzz,Script=Latin,Script=Greek].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=latn;language=DFLT;mode=harf;+tlig;"
+(fontspec)             <->"[amiri-regular.ttf]:mode=harf;script=latn;language=DFLT;+tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 LaTeX Font Warning: Font shape `TU/amiri-regular.ttf(0)/m/it' undefined
 (Font)              using `TU/amiri-regular.ttf(0)/m/n' instead on input line ....
 luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language ara
 Package fontspec Info: Font family 'amiri-regular.ttf(2)' created for font
 (fontspec)             'amiri-regular.ttf' with options
-(fontspec)             [RawFeature={mode=harf},Script=Arabic,Language=Arabic].
+(fontspec)             [Renderer=Harfbuzz,Script=Arabic,Language=Arabic].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=arab;language=ARA;mode=harf;"
+(fontspec)             <->"[amiri-regular.ttf]:mode=harf;script=arab;language=ARA;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language urd
 Package fontspec Info: Font family 'amiri-regular.ttf(3)' created for font
 (fontspec)             'amiri-regular.ttf' with options
-(fontspec)             [RawFeature={mode=harf},Script=Arabic,Language=Urdu].
+(fontspec)             [Renderer=Harfbuzz,Script=Arabic,Language=Urdu].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=arab;language=URD;mode=harf;"
+(fontspec)             <->"[amiri-regular.ttf]:mode=harf;script=arab;language=URD;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language snd
 Package fontspec Info: Font family 'amiri-regular.ttf(4)' created for font
 (fontspec)             'amiri-regular.ttf' with options
-(fontspec)             [RawFeature={mode=harf},Script=Arabic,Language=Sindhi].
+(fontspec)             [Renderer=Harfbuzz,Script=Arabic,Language=Sindhi].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=arab;language=SND;mode=harf;"
+(fontspec)             <->"[amiri-regular.ttf]:mode=harf;script=arab;language=SND;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language ksh
 Package fontspec Info: Font family 'amiri-regular.ttf(5)' created for font
 (fontspec)             'amiri-regular.ttf' with options
-(fontspec)             [RawFeature={mode=harf},Script=Arabic,Language=Kashmiri].
+(fontspec)             [Renderer=Harfbuzz,Script=Arabic,Language=Kashmiri].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[amiri-regular.ttf]:mode=node;script=arab;language=KSH;mode=harf;"
+(fontspec)             <->"[amiri-regular.ttf]:mode=harf;script=arab;language=KSH;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Completed box being shipped out [1]
 \vbox(633.0+0.03)x407.0, direction TLT

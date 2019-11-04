@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-tounicode",
-    version       = "3.0008-dev",       --TAGVERSION
-    date          = "2019-10-29", --TAGDATE
+    version       = "3.1",       --TAGVERSION
+    date          = "2019-11-04", --TAGDATE
     description   = "luaotfload submodule / tounicode",
     license       = "GPL v2.0",
     author        = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",

@@ -1,2 +1,4 @@
-- invisible option to avoid that some glyph are shown (issue #63)
-- correct a small bug in xheight calculation 
+- NEW: harf mode: added code to use the harfbuzz library of luahbtex
+- removed a number of lua tables from the global enviroment (_G) to reduce the polution. 
+  Kept there are only the tables luaotfload, fonts and nodes.
+- sync with context files from 2019-10-29

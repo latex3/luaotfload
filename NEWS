@@ -1,7 +1,8 @@
 Change History
 --------------
-2019-09-13 luaotfload v3.1
-    * added code to use the harfbuzz library of luahbtex
+2019-11-04 luaotfload v3.1
+    * added code to use the harfbuzz library of luahbtex ("mode=harf")
+    * fonts in ttc can now be indexed by name
     * remove a number of lua tables from the global enviroment (_G) to reduce the polution. 
       Kept there are only the tables luaotfload, fonts and nodes.
     * sync with context files from 2019-10-29

@@ -101,6 +101,7 @@ checksuppfiles = {"texmf.cnf"}
 -- exclude some text temporarly or in certain systems ...
 if os.env["CONTEXTPATH"] then
   -- local system
+     excludetests = {"math"} -- because of adjdemerits bug
   if ismiktex then
    excludetests = {"arabkernsfs","fontload-ttc-fontindex"}
   else

@@ -1,0 +1,27 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+
+\directlua{
+  local cbs = luatexbase.callback_descriptions'glyph_info'
+  local desc = cbs[1]
+  assert(desc == "Harf glyph_info callback" and nil == next(cbs, 1))
+  local cb = luatexbase.remove_from_callback('glyph_info', desc)
+  luatexbase.add_to_callback('glyph_info', function(n)
+    return string.format('"\csstring\%s" \csstring\%04X \csstring\%+i:\csstring\%+i', cb(n), n.char, n.xoffset, n.yoffset)
+  end, 'Harf glyph_info callback -- testing variant')
+}
+
+\setmainfont{Amiri}[Renderer=Harfbuzz, Script=Arabic]
+\begin{document}
+\showoutput
+\START
+Some text then inline math \(E=mc^2\) then \(\hbox{text inside inline math}\), then
+display math \[E=mc^2\hbox{ with text inside}\]
+\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
+\end{document}

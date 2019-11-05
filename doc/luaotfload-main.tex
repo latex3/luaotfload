@@ -32,11 +32,10 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2019-09-13 v3.00}
-  \setdocumentauthor {Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer\\
-                      Home:    \hyperlink {https://github.com/lualatex/luaotfload}\\
-                      New Home: \hyperlink {https://github.com/u-fischer/luaotfload}\\
-                      Support: \email     {lualatex-dev@tug.org}}
+  \setdocumentdate   {2019-11-04 v3.1}
+  \setdocumentauthor {LaTeX3 Project\\
+                      Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer · Marcel Krüger\\
+                      Home: \hyperlink {https://github.com/latex3/luaotfload}}
 
   \typesetdocumenttitle
 
@@ -55,34 +54,56 @@
 
 \pdfbookmark[1]{\contentsname}{table}
 \typesetcontent
-\beginsection {New in version 3.00 (by Ulrike Fischer/Marcel Krüger)}
+\beginsection {Engine and version support}
+\identifier{luaotfload} is a quite large and complex package. It imports code from context which is actively developed along with the luatex binary. It is not possible
+to support a large number of engines variants or versions.
+
+Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a current MiKTeX). Beginning with version 3.1 of this package also \identifier{luahbtex} is supported.
+\endsection
+
+\beginsection{Changes}
+\beginsubsection {New in version 3.1 (by Ulrike Fischer/Marcel Krüger)}
+\begin{itemize}
+\item   The package has been moved to the github of the LaTeX3 Project and is now maintained
+        officially by the LaTeX3 Project team.
+\item   Code to use the harfbuzz library of luahbtex has been added. See the description of the harf mode.
+\item   fonts in ttc-collections can now be indexed by name.    
+\item   To reduce the polution of the global lua enviroment a number of lua tables have been removed.
+        Only the tables \identifier{luaotfload}, \identifier{fonts} and \identifier{nodes} have been kept there.
+\item   The fontloader has been synched with the context files from 2019-10-29.
+
+\end{itemize}
+\endsubsection
+
+
+\beginsubsection {New in version 3.00 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
 \item Default Ignorable characters are now invisible by default (issue 63). This can be deactivated with the option \texttt{invisible}.
 \end{itemize}
-\endsection
+\endsubsection
 
-\beginsection {New in version 2.99 (by Ulrike Fischer)}
+\beginsubsection {New in version 2.99 (by Ulrike Fischer)}
 \begin{itemize}
 \item Code cleanup.
 \item The fontloader has been synched with the context files from 2019-08-11.
 \end{itemize}
-\endsection
-\beginsection {New in version 2.98 (by Ulrike Fischer)}
+\endsubsection
+\beginsubsection {New in version 2.98 (by Ulrike Fischer)}
 \begin{itemize}
 \item The\marginpar{\mbox{}\hfill \textbf{breaking change!}} handling of missing chars has been changed. In This version a missing char will insert the \inlinecode{/.notdef} char of the fonts (this is sometimes a space, sometimes a rectangle with a cross) and no longer simply ignore the glyph. This behaviour can be reverted by using \inlinecode{notdef=false} as font feature.
 \item The font feature \inlinecode{embolden} can now be used to fake a bold font.
 \item The fontloader has been synched with the context files from 2019-07-04.
 \end{itemize}
-\endsection
-\beginsection {New in version 2.97 (by Ulrike Fischer)}
+\endsubsection
+\beginsubsection {New in version 2.97 (by Ulrike Fischer)}
 \begin{itemize}
 \item the new generic fontloader improves the handling of large fonts (but some fonts still need a 64bit luatex version to create the font files).
 \item A number of small bug (also in luaotfload-tool) have been corrected, see the NEWS file for details.
 
 \end{itemize}
-\endsection
+\endsubsection
 
-\beginsection {New in version 2.96 (by Ulrike Fischer)}
+\beginsubsection {New in version 2.96 (by Ulrike Fischer)}
 \begin{itemize}
 \item In\marginpar{\mbox{}\hfill \textbf{Incompatible change!}}
 version 2.95 letterspacing was broken due to a change in the fontloader (issue 38). This has been repaired. At the same time a number of oddities and bugs in the letterspacing has been corrected. This can change existing documents. See page~\pageref{p:letterspace} for more information.
@@ -90,11 +111,11 @@ version 2.95 letterspacing was broken due to a change in the fontloader (issue 3
 \item A problem with the detection of bold fonts has been corrected (issue 41, pull request 42).
 
 \end{itemize}
-\endsection
+\endsubsection
 
 
 
-\beginsection {New in version 2.95 (by Ulrike Fischer)}
+\beginsubsection {New in version 2.95 (by Ulrike Fischer)}
 \begin{itemize}
 \item
 This version imports from context the generic fontloader in the version of 2019-01-28. Contrary to the last announcement, it still works with luatex 1.07. So updates will continue.
@@ -106,8 +127,8 @@ This version imports from context the generic fontloader in the version of 2019-
 \item The resolver code has be refactorated (pull request 36).
 
 \end{itemize}
-\endsection
-\beginsection {New in version 2.94 (by Ulrike Fischer)}
+\endsubsection
+\beginsubsection {New in version 2.94 (by Ulrike Fischer)}
 \begin{itemize}
 \item
 This version imports from context the generic fontloader in the version of 2018-12-19. It is the last version that works with luatex 1.07 and texlive 2018. As context has moved to luatex 1.09 newer versions of the fontloader needs now this luatex version too. This means that until the texlive 2018 freeze there will be probably no update of luaotfload.
@@ -116,13 +137,13 @@ This version imports from context the generic fontloader in the version of 2018-
 
 
 \end{itemize}
-\endsection
+\endsubsection
 
-\beginsection {New in version 2.93 (by Ulrike Fischer)}
+\beginsubsection {New in version 2.93 (by Ulrike Fischer)}
 Mainly internal clean up of the version info to allow automatic versioning.
-\endsection
+\endsubsection
 
-\beginsection {New in version 2.92 (by Ulrike Fischer)}
+\beginsubsection {New in version 2.92 (by Ulrike Fischer)}
 
 \begin{itemize}
 
@@ -131,15 +152,15 @@ Mainly internal clean up of the version info to allow automatic versioning.
   \item  The syntax \inlinecode{file:} for legacy font works again (issue \#11).
   \item The fontloader has been synched with the newest context version from october, 18.
 \end{itemize}
-\endsection
-\beginsection {New in version 2.91 (by Ulrike Fischer)}
+\endsubsection
+\beginsubsection {New in version 2.91 (by Ulrike Fischer)}
 
 This version mostly correct two bugs found in the previous fontloader: Glyphvariants weren't copied and pasted correctly. Glyphs encoded in the PUA couldn't be accessed anymore.
 
-\endsection
+\endsubsection
 
 
-\beginsection {New in version 2.9 (by Ulrike Fischer)}
+\beginsubsection {New in version 2.9 (by Ulrike Fischer)}
 
 On the one side there is not very much new in this version: The native components of \identifier{Luaotfload} are nearly unchanged. A few bugs have been corrected, the various files lists which loads the components of the font loader have been cleaned up.
 
@@ -154,7 +175,7 @@ On the other side there is a lot new:
   \beginaltitem {Lualibs} The update of the fontloader files also required an update of the \identifier{Lualibs} package. This \identifier{Luaotfload} version needs version 2.6 of \identifier{Lualibs}.
   \endaltitem
 
-  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LUATEX 1.08/1.09 maintenance has been transfered to Ulrike Fischer and Marcel Krüger. The package is currently maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload}. Issues should be reported there.
+  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LUATEX 1.08/1.09 maintenance has been transfered to Ulrike Fischer and Marcel Krüger. The package was maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload}. Issues should be reported there.
   \endaltitem
 
   \beginaltitem {Documentation}
@@ -163,6 +184,7 @@ On the other side there is a lot new:
 
 \enddescriptions
 
+\endsubsection
 \endsection
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Introduction}
@@ -181,11 +203,8 @@ These fonts can contain many more characters than \TEX fonts, as well
 as additional functionality like ligatures, old-style numbers, small
 capitals, etc., and support more complex writing systems like Arabic
 and Indic\footnote{%
-  Unfortunately, \identifier{luaotfload} doesn‘t support many Indic
-  scripts right now.
-  Assistance in implementing the prerequisites is greatly
-  appreciated.
-}
+  Unfortunately, the default fontloader of \identifier{luaotfload} doesn‘t support many Indic
+  scripts correctly. For these scripts it is recommended to use the harf mode along with the binary \identifier{luahbtex}.}
 scripts.
 
 \OpenType fonts are widely deployed and available for all modern
@@ -382,7 +401,7 @@ where \meta{prefix} is either \inlinecode{file:} or \inlinecode {name:}.\footnot
   %
   For a working example see the
   \hyperlink [test in the luaotfload
-  repo]{https://github.com/u-fischer/luaotfload/blob/master/testfiles/my-resolver.lvt}.
+  repo]{https://github.com/latex3/luaotfload/blob/master/testfiles/my-resolver.lvt}.
 }
 %
 It determines whether the font loader should interpret the request as
@@ -563,8 +582,8 @@ non-standard directory:
 
 \identifier{TrueType} collection files (the extension is usually
 \inlinecode{.ttc}) contain more than a single font. In order to refer to these
-subfonts, the respective index may be added in parentheses after the file
-name.\footnote{%
+subfonts, the respective index or the respective PostScript font name may be
+added in parentheses after the file name.\footnote{%
   Incidentally, this syntactical detail also prevents one from loading files
   that end in balanced parentheses.
 }
@@ -572,6 +591,8 @@ name.\footnote{%
 \beginlisting
   \font \cambriamain = "file:cambria.ttc(0)" at 10pt
   \font \cambriamath = "file:cambria.ttc(1)" at 10pt
+  \font \Cambriamain = "file:cambria.ttc(Cambria)" at 10pt
+  \font \Cambriamath = "file:cambria.ttc(CambriaMath)" at 10pt
 \endlisting
 
 and likewise, requesting subfont inside a TTC container by path:
@@ -721,10 +742,9 @@ obviously, \inlinecode{random}.
 \begindescriptions
 
   \beginaltitem {mode}
-         Until version 2.94
-         \identifier{luaotfload} had two \OpenType processing
+         \identifier{luaotfload} had three \OpenType processing
          \emphasis{modes}:
-         \identifier{base} and \identifier{node}.
+         \identifier{base}, \identifier{node} and \identifier{harf}.
 
          \identifier{base} mode works by mapping \OpenType
          features to traditional \TEX ligature and kerning mechanisms.
@@ -744,12 +764,42 @@ obviously, \inlinecode{random}.
          mode, and \identifier{base} mode has to be requested where needed,
          e.~g. for math fonts.
 
-         Since version 2.94 it is possible to call other font renderers with the mode key. A simple example with a plain reader can be found at \hyperlink{https://github.com/u-fischer/luaotfload/pull/26\#issuecomment-437716326}.
-         A more useful example needs the new experimental harftex engine (windows binaries can be found at w32tex.org), and the harf renderer (\hyperlink{https://github.com/khaledhosny/harf}). With both it is possible to render a font using the harfbuzz library (used also by xetex).
+         \identifier{harf} mode is new in version 3.1 and needs the new \identifier{luahbtex} engine (the mode is ignored if \identifier{luahbtex} is not used). With it is possible to render a font using the harfbuzz library in-built in the new engine. \identifier{harf} mode improves greatly the rendering of indic and arabic scripts and is highly recommended for such scripts.
 
+         When using \identifier{harf} mode it is required to set also the script correctly:
+
+
+         \beginlisting
+         \font\burmesefont={file:NotoSerifMyanmar-Regular.ttf:mode=harf;script=mymr;}
+         \font\devafont={file:NotoSansDevanagari-Regular.ttf:mode=harf;script=deva;}
+         \font\banglafont={name:Noto Sans Bengali:mode=harf;script=beng;}
+         \font\tibetanfont={name:Noto Serif Tibetan:mode=harf;script=tibt;}
+         \endlisting
+
+         \includegraphics{scripts-demo}
+
+
+         It is possible to call other font renderers with the mode key. A simple example with a plain reader can be found at \url{https://github.com/latex3/luaotfload/pull/26#issuecomment-437716326}.
 
   \endaltitem
+  \beginaltitem {shaper} \label{shaper-tag}
+  If \identifier{luahbtex} and \identifier{harf} mode are used it is possible to specify a shaper, like \identifier{graphite2} or \identifier{ot} (open type).
 
+  \beginlisting
+  \pardir TRT\textdir TRT
+  \font\test={file:AwamiNastaliq-Regular.ttf:mode=harf;shaper=ot}
+  \endlisting
+
+  \includegraphics{shaper-demo}
+
+  \beginlisting
+  \pardir TRT\textdir TRT
+  \font\test={file:AwamiNastaliq-Regular.ttf:mode=harf;shaper=graphite2}
+  \endlisting
+
+  \includegraphics{shaper-demo-graphite}
+
+  \endaltitem
   \beginaltitem {script} \label{script-tag}
          An \OpenType script tag;\footnote{%
            See \hyperlink {http://www.microsoft.com/typography/otspec/scripttags.htm}
@@ -948,7 +998,7 @@ obviously, \inlinecode{random}.
       \font \test = LatinModernRoman:protrusion=default
          \endlisting
   \endaltitem
-  
+
  \beginaltitem {invisible}
          Default Ignorable characters are control characters that should be invisible by default even if the font has glyphs for them. Since version 3.0 luaotfload makes them invisible, this can be switch on and off with the \texttt{invisible}. By default it is on.
 
@@ -960,16 +1010,16 @@ obviously, \inlinecode{random}.
          \endlisting
 
        {\font\amiri={file:amiri-regular.ttf} at 20pt \amiri \char"200Dي\char"200D}
-  
+
     \beginlisting
          \font\amiri={file:amiri-regular.ttf:-invisible;} at 20pt \amiri
          \char"200Dي\char"200D
          \endlisting
 
        {\font\amiri={file:amiri-regular.ttf:-invisible;} at 20pt \amiri \char"200Dي\char"200D}
-  
 
-  \endaltitem 
+
+  \endaltitem
 \enddescriptions
 
 \endsubsection

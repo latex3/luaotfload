@@ -1,0 +1,31 @@
+\input{regression-test}
+\documentclass{article}
+\START
+\begin{document}
+\font\test={name:CMU Serif:mode=node;script=latn;language=DFLT;+tlig;+onum;}
+\test
+abc123
+\end{document} 
+
+%% should give better to unicode values
+currently
+
+6 beginbfchar
+<0042> <0061>
+<0043> <0062>
+<0044> <0063>
+<0874> <FFFD>
+<0875> <FFFD>
+<0876> <FFFD>
+endbfchar
+
+Wanted
+
+6 beginbfchar
+<0042> <0061>
+<0043> <0062>
+<0044> <0063>
+<0874> <0031>
+<0875> <0032>
+<0876> <0033>
+endbfchar

@@ -7,8 +7,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-configuration",
-    version       = "3.00",       --TAGVERSION
-    date          = "2019-09-13", --TAGDATE
+    version       = "3.1",       --TAGVERSION
+    date          = "2019-11-04", --TAGDATE
     description   = "luaotfload submodule / config file reader",
     license       = "GPL v2.0"
 }
@@ -62,7 +62,7 @@ local filejoin                = file.join
 local filereplacesuffix       = file.replacesuffix
 
 local logreport               = print -- overloaded later
-local getwritablepath         = caches.getwritablepath
+local getwritablepath         = luaotfload.fontloader.caches.getwritablepath
 
 
 local config_parser -- set later during init
@@ -382,7 +382,7 @@ local set_default_features = function ()
                              global   = { },
                              defaults = { },
                            }
-  current_features       = luaotfload.features
+  local current_features = luaotfload.features
   for var, val in next, default_features do
     if var == "global" then
       current_features.global = val

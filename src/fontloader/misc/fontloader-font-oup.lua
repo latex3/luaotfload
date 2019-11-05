@@ -720,6 +720,10 @@ local function checklookups(fontdata,missing,nofmissing)
     end
 end
 
+local firstprivate = fonts.privateoffsets and fonts.privateoffsets.textbase or 0xF0000
+local puafirst     = 0xE000
+local pualast      = 0xF8FF
+
 local function unifymissing(fontdata)
     if not fonts.mappings then
         require("font-map")
@@ -730,19 +734,21 @@ local function unifymissing(fontdata)
     resources.unicodes = unicodes
     for unicode, d in next, fontdata.descriptions do
         if unicode < privateoffset then
-            local name = d.name
-            if name then
-                unicodes[name] = unicode
+            if unicode >= puafirst and unicode <= pualast then
+                -- report_unicodes("resolving private unicode %U",unicode)
+            else
+                local name = d.name
+                if name then
+                    unicodes[name] = unicode
+                end
             end
+        else
+            -- report_unicodes("resolving private unicode %U",unicode)
         end
     end
     fonts.mappings.addtounicode(fontdata,fontdata.filename,checklookups)
     resources.unicodes = nil
 end
-
-local firstprivate = fonts.privateoffsets and fonts.privateoffsets.textbase or 0xF0000
-local puafirst     = 0xE000
-local pualast      = 0xF8FF
 
 local function unifyglyphs(fontdata,usenames)
     local private      = fontdata.private or privateoffset

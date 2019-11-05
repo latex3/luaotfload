@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-features",
-    version       = "3.00",       --TAGVERSION
-    date          = "2019-09-13", --TAGDATE
+    version       = "3.1",       --TAGVERSION
+    date          = "2019-11-04", --TAGDATE
     description   = "luaotfload submodule / features",
     license       = "GPL v2.0",
     author        = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
@@ -26,6 +26,7 @@ local lpeg              = require "lpeg"
 local lpegmatch         = lpeg.match
 local P                 = lpeg.P
 local R                 = lpeg.R
+local S                 = lpeg.S
 local C                 = lpeg.C
 
 local table             = table
@@ -338,10 +339,9 @@ end
 local extract_subfont
 do
     local eof         = P(-1)
-    local digit       = R"09"
     --- Theoretically a valid subfont address can be up to ten
-    --- digits long.
-    local sub_expr    = P"(" * C(digit^1) * P")" * eof
+    --- digits long. Additionally we allow names
+    local sub_expr    = P"(" * C((1 - S"()")^1) * P")" * eof
     local full_path   = C(P(1 - sub_expr)^1)
     extract_subfont   = full_path * sub_expr
 end
@@ -371,7 +371,7 @@ local handle_request = function (specification)
         local fullpath, sub = lpegmatch(extract_subfont,
                                         specification.specification)
         if fullpath and sub then
-            specification.sub  = tonumber(sub)
+            specification.sub  = tonumber(sub) or sub
             specification.name = fullpath
         else
             specification.name = specification.specification
@@ -428,12 +428,7 @@ local handle_request = function (specification)
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.
     features.normal = normalize (request.features)
-    local subfont = tonumber (request.sub)
-    if subfont and subfont >= 0 then
-        specification.sub = subfont + 1
-    else
-        specification.sub = false
-    end
+    specification.sub = request.sub or specification.sub or false
 
     if request.features and request.features.mode
           and fonts.readers[request.features.mode] then
@@ -572,8 +567,8 @@ local autofeatures = {
 
 local add_auto_features = function ()
     local nfeats = #autofeatures
-    logreport ("both", 5, "features",
-               "auto-installing %d feature definitions", nfeats)
+    report ("both", 5, "features",
+            "auto-installing %d feature definitions", nfeats)
     for i = 1, nfeats do
         local name, spec, desc = unpack (autofeatures [i])
         spec.description = desc
@@ -582,12 +577,10 @@ local add_auto_features = function ()
 end
 
 return function ()
-    logreport = luaotfload.log.report
-
     if not fonts and fonts.handlers then
-        logreport ("log", 0, "features",
-                   "OTF mechanisms missing -- did you forget to \z
-                   load a font loader?")
+        report ("log", 0, "features",
+                "OTF mechanisms missing -- did you forget to \z
+                load a font loader?")
         return false
     end
     add_auto_features ()

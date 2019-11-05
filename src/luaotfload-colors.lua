@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-colors",
-    version       = "3.00",       --TAGVERSION
-    date          = "2019-09-13", --TAGDATE
+    version       = "3.1",       --TAGVERSION
+    date          = "2019-11-04", --TAGDATE
     description   = "luaotfload submodule / color",
     license       = "GPL v2.0",
     author        = "Khaled Hosny, Elie Roux, Philipp Gesang, Dohyun Kim, David Carlisle",
@@ -405,6 +405,7 @@ return function ()
         initializers = {
             base = setcolor,
             node = setcolor,
+            plug = setcolor,
         }
     }
     return true

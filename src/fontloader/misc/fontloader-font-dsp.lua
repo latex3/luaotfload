@@ -3159,6 +3159,14 @@ function readers.cpal(f,fontdata,specification)
     end
 end
 
+local compress   = gzip and gzip.compress
+local compressed = compress and gzip.compressed
+
+-- At some point I will delay loading and only store the offsets (in context lmtx
+-- only).
+
+-- compressed = false
+
 function readers.svg(f,fontdata,specification)
     local tableoffset = gotodatatable(f,fontdata,"svg",specification.glyphs)
     if tableoffset then
@@ -3184,10 +3192,14 @@ function readers.svg(f,fontdata,specification)
         for i=1,nofentries do
             local entry = entries[i]
             setposition(f,entry.offset)
+            local data = readstring(f,entry.length)
+            if compressed and not compressed(data) then
+                data = compress(data)
+            end
             entries[i] = {
                 first = entry.first,
                 last  = entry.last,
-                data  = readstring(f,entry.length)
+                data  = data
             }
         end
         fontdata.svgshapes = entries

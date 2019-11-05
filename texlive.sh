@@ -19,17 +19,25 @@ if ! command -v texlua > /dev/null; then
   cd ..
 fi
 
+if ! tlmgr repository list | grep -q tlcontrib; then
+  # Add TL contrib
+  tlmgr repository add http://contrib.texlive.info/current tlcontrib
+fi
+
 # Needed for any use of texlua even if not testing LuaTeX
 tlmgr install l3build latex latex-bin  luatex  latex-bin-dev
+
+tlmgr pinning add tlcontrib 'luahbtex*'
+tlmgr install luahbtex
 
 # Required to build plain and LaTeX formats:
 # TeX90 plain for unpacking, pdfLaTeX, LuaLaTeX and XeTeX for tests
 tlmgr install cm etex knuth-lib tex tex-ini-files unicode-data 
 
 # various tools / dependencies of other packages
-tlmgr install ctablestack filehook ifoddpage ifxetex luatexbase trimspaces
-tlmgr install oberdiek etoolbox xkeyval ucharcat xstring ifluatex  everyhook
-tlmgr install svn-prov
+tlmgr install ctablestack filehook ifoddpage iftex luatexbase trimspaces
+tlmgr install oberdiek etoolbox xkeyval ucharcat xstring everyhook
+tlmgr install svn-prov setspace
 
 # graphics
 tlmgr install graphics xcolor graphics-def pgf
@@ -43,6 +51,7 @@ tlmgr install  sourcecodepro Asana-Math  ebgaramond  tex-gyre  amsfonts gnu-free
 tlmgr install  opensans fira tex-gyre-math junicode lm  lm-math amiri ipaex xits
 tlmgr install  libertine coelacanth fontawesome stix2-otf dejavu
 tlmgr install  luatexko unfonts-core cjk-ko iwona libertinus-fonts fandol
+tlmgr install  cm-unicode
 
 # languages
 tlmgr install  luatexja arabluatex babel babel-english

@@ -1,0 +1,75 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+
+\directlua{
+  local cbs = luatexbase.callback_descriptions'glyph_info'
+  local desc = cbs[1]
+  assert(desc == "Harf glyph_info callback" and nil == next(cbs, 1))
+  local cb = luatexbase.remove_from_callback('glyph_info', desc)
+  luatexbase.add_to_callback('glyph_info', function(n)
+    return string.format('"\csstring\%s" \csstring\%04X \csstring\%+i:\csstring\%+i', cb(n), n.char, n.xoffset, n.yoffset)
+  end, 'Harf glyph_info callback -- testing variant')
+}
+
+\setmainfont{NotoSerifCJK-Regular.ttc}[Renderer=Harfbuzz, Script=Latin]
+\begin{document}
+\showoutput
+\START
+offbeat office baffle coffee HAVANA\par
+
+\smallskip
+``Some --- developments''
+\smallskip
+
+\smallskip
+{\addfontfeature{Ligatures=TeXOff} ``Some --- developments''}
+\smallskip
+
+\smallskip
+``Some---developments''
+\smallskip
+
+\smallskip
+{\addfontfeature{Ligatures=TeXOff} ``Some---developments''}
+\smallskip
+
+\begingroup
+\rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
+offbeat office baffle coffee HAVANA\par
+\endgroup
+
+\fontspec{lmroman10-regular.otf}[Renderer=Harfbuzz, Script=Latin, Ligatures=Discretionary, Ligatures=TeX]
+\parindent=0pt
+
+\noindent
+\smallskip
+offbeat office baffle {\rm baffle} coffee HAVANA\par
+\smallskip
+
+\smallskip
+``Some --- developments''
+\smallskip
+
+\smallskip
+{\addfontfeature{Ligatures=TeXOff} ``Some --- developments''}
+\smallskip
+
+\smallskip
+``Some---developments''
+\smallskip
+
+\smallskip
+{\addfontfeature{Ligatures=TeXOff} ``Some---developments''}
+\smallskip
+
+\rightskip=0pt plus1fil \pretolerance=-1 \hyphenpenalty=-10000
+offbeat office baffle {\rm baffle} coffee HAVANA
+
+\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
+\end{document}

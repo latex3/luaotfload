@@ -1,0 +1,77 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\usepackage{setspace}
+\usepackage{fontspec}
+
+\directlua{
+  local cbs = luatexbase.callback_descriptions'glyph_info'
+  local desc = cbs[1]
+  assert(desc == "Harf glyph_info callback" and nil == next(cbs, 1))
+  local cb = luatexbase.remove_from_callback('glyph_info', desc)
+  luatexbase.add_to_callback('glyph_info', function(n)
+    return string.format('"\csstring\%s" \csstring\%04X \csstring\%+i:\csstring\%+i', cb(n), n.char, n.xoffset, n.yoffset)
+  end, 'Harf glyph_info callback -- testing variant')
+}
+
+\setmainfont{Amiri}[Renderer=Harfbuzz, Script=Arabic]
+\begin{document}
+\showoutput
+\START
+\begingroup\pardir TRT\textdir TRT
+\setstretch{1.8}
+هذا كتاب صغير في بحث جديد، تنبّهنا له ونحن ننشر الطبعة الثانية من كتابنا الفلسفة
+اللغوية لأنّ موضوعه تابع لموضوعنا. أو هي خطوة ثانية في تاريخ اللغة باعتبار
+منشأها وتكونها ونموها. فالفلسفة اللغوية تبحث في كيف نطق الانسان الأول، وكيف
+نشأت اللغة وتولّدت الألفاظ من حكاية الأصوات الخارجية، ك\textbf{قصف الرعد}، وهبوب الرياح،
+والقطع والكسر، وحكاية التف والنفخ والصفير ونحوها. ومن المقاطع الطبيعية التي
+ينطق بها الانسان غريزيا كالتأوه، والزفير. وكيف تنوّعت تلك الأصوات لفظا ومعنى
+بالنحت، والابدال، والقلب، حتى صارت ألفاظا مستقلة وتكوّنت الأفعال، والأسماء،
+والحروف وصارت اللغة على نحو ما هي عليه.  وأما تاريخ اللغة فيتناول النظر في
+ألفاظها وتراكيبها، بعد تمام تكونها، فيبحث فيما طرأ عليهما من التغيير والتجدد أو
+الدثور، فيبين الألفاظ والتراكيب التي دثرت من اللغة بالاستعمال، وما قام مقامها
+من الألفاظ الجديدة، والتراكيب الجديدة، بما تولّد فيها، أو اقتبسته من سواها، مع
+بيان الأحوال التي قضت بدثور القديم وتولد الجديد، وأمثلة مما دثر، أو أهمل، أو
+تولّد، أو دخل.
+
+المحتوى الذي تصل إليه (في حالة عدم استخدام مواقع مؤمنة عن طريق بروتوكول نقل
+النص التشعبي الآمن {\textdir TLT HTTPS}).
+\par\endgroup\newpage
+
+\def\arabictext{%
+هذا كتاب صغير في بحث جديد، تنبّهنا له ونحن ننشر الطبعة الثانية من كتابنا الفلسفة
+اللغوية لأنّ موضوعه تابع لموضوعنا. أو هي خطوة ثانية في تاريخ اللغة باعتبار
+منشأها وتكونها ونموها. فالفلسفة اللغوية تبحث في كيف نطق الانسان الأول، وكيف
+نشأت اللغة وتولّدت الألفاظ من حكاية الأصوات الخارجية، كقصف الرعد، وهبوب الرياح،
+والقطع والكسر، وحكاية التف والنفخ والصفير ونحوها. ومن المقاطع الطبيعية التي
+ينطق بها الانسان غريزيا كالتأوه، والزفير. وكيف تنوّعت تلك الأصوات لفظا ومعنى
+بالنحت، والابدال، والقلب، حتى صارت ألفاظا مستقلة وتكوّنت الأفعال، والأسماء،
+والحروف وصارت اللغة على نحو ما هي عليه.  وأما تاريخ اللغة فيتناول النظر في
+ألفاظها وتراكيبها، بعد تمام تكونها، فيبحث فيما طرأ عليهما من التغيير والتجدد أو
+الدثور، فيبين الألفاظ والتراكيب التي دثرت من اللغة بالاستعمال، وما قام مقامها
+من الألفاظ الجديدة، والتراكيب الجديدة، بما تولّد فيها، أو اقتبسته من سواها، مع
+بيان الأحوال التي قضت بدثور القديم وتولد الجديد، وأمثلة مما دثر، أو أهمل، أو
+تولّد، أو دخل.%
+}
+
+\begingroup\pardir TRT\textdir TRT
+\fontspec{Amiri}[Renderer=Harfbuzz, Script=Arabic, Scale=1.6]
+\setstretch{2.4}
+\arabictext
+\par\endgroup\newpage
+
+\begingroup\pardir TRT\textdir TRT
+\fontspec{ArefRuqaa-Regular.ttf}[Renderer=Harfbuzz, Script=Arabic, Scale=1.2]
+\setstretch{2.4}
+\arabictext
+\par\endgroup\newpage
+
+\begingroup\pardir TRT\textdir TRT
+\fontspec{NotoNastaliqUrdu-Regular.ttf}[Renderer=Harfbuzz, Script=Arabic]
+\setstretch{2.5}
+\arabictext
+\par\endgroup\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
+\end{document}

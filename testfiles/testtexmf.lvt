@@ -1,0 +1,8 @@
+\input{regression-test}
+\documentclass{article}
+\begin{document}
+\START
+\input{testluaotfloadtexmfinput}
+\directlua{tex.print(-1,kpse.var_value("TEXMFAUXTREES"))}
+\font\test={file:LuaotfloadDummyFont.otf:mode=node} \test abc
+\end{document} 

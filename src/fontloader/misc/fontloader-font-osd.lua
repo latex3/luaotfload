@@ -1285,7 +1285,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                     local cp   = getprev(current)
                     local cnsn = getnext(cns)
                     setlink(cp,n)
-                    setlink(cns,current)
+                    setlink(cns,current) -- cns ?
                     setlink(c,cnsn)
                     if c == stop then
                         stop = cp

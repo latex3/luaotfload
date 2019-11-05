@@ -71,6 +71,8 @@ doc/*.tmp
 doc/*.toc
 doc/*.tuc
 doc/*.vimout
+doc/*.1
+doc/*.5
 
 *.synctex
 *.synctex.gz

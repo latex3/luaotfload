@@ -18,7 +18,7 @@ if ! command -v texlua > /dev/null; then
 
   cd ..
 fi
-
+tlmgr update --self 
 if ! tlmgr repository list | grep -q tlcontrib; then
   # Add TL contrib
   tlmgr repository add http://contrib.texlive.info/current tlcontrib

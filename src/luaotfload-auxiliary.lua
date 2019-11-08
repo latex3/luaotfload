@@ -33,6 +33,7 @@ local getmetatable          = getmetatable
 local setmetatable          = setmetatable
 local utfcodepoint          = utf8.codepoint
 local stringlower           = string.lower
+local stringupper           = string.upper
 local stringformat          = string.format
 local stringgsub            = string.gsub
 local stringbyte            = string.byte
@@ -441,7 +442,7 @@ end
 
 local function get_hbface(tfmdata)
   if not tfmdata.hb then return end
-  return tfmdata.hbshared.face
+  return tfmdata.hb.shared.face
 end
 
 --[[doc--

@@ -98,9 +98,6 @@ local italiccorr_t      = 3
 local regulardisc_t     = 3
 local spaceskip_t       = 13
 
-local invalid_l         = hb.Language.new()
-local invalid_s         = hb.Script.new()
-
 local dir_ltr           = hb.Direction.new("ltr")
 local dir_rtl           = hb.Direction.new("rtl")
 local fl_unsafe         = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
@@ -322,8 +319,8 @@ function shape(head, node, run)
   local hbshared = hbdata.shared
   local hbfont = hbshared.font
 
-  local lang = spec.language or invalid_l
-  local script = spec.script or invalid_s
+  local lang = spec.language
+  local script = spec.script
   local shapers = options.shaper and { options.shaper } or {}
 
   local buf = hb.Buffer.new()

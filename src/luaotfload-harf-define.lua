@@ -23,6 +23,7 @@ local stringupper = string.upper
 local gsub = string.gsub
 
 local hb = luaotfload.harfbuzz
+local scriptlang_to_harfbuzz = require'luaotfload-scripts'.to_harfbuzz
 
 local hbfonts = {}
 
@@ -31,6 +32,9 @@ local cff2tag = hb.Tag.new("CFF2")
 local os2tag  = hb.Tag.new("OS/2")
 local posttag = hb.Tag.new("post")
 local glyftag = hb.Tag.new("glyf")
+
+local invalid_l         = hb.Language.new()
+local invalid_s         = hb.Script.new()
 
 local containers = luaotfload.fontloader.containers
 local hbcacheversion = 1.0
@@ -366,15 +370,23 @@ fonts.readers.harf = function(spec)
   local hb_features = {}
   spec.hb_features = hb_features
 
-  if rawfeatures.language then
+  if rawfeatures.script then
+    local script = stringlower(rawfeatures.script)
+    if script == "dflt" then -- Probably a noop, HarfBuzz normalizes anyway
+      script = "DFLT"
+    end
+    local language = stringupper(rawfeatures.language or 'dflt')
+    language = language == "DFLT" and "dflt" or language
+    local hb_script, hb_lang = scriptlang_to_harfbuzz(script, language)
+    spec.script, spec.language = hb.Script.new(hb_script), hb.Language.new(hb_lang)
+  elseif rawfeatures.language then
     local language = stringupper(rawfeatures.language)
     spec.language = hb.Language.new(language == "DFLT" and "dflt"
                                                         or language)
-  end
-  if rawfeatures.script then
-    local script = stringlower(rawfeatures.script)
-    spec.script = hb.Script.new(script == "dflt" and "DFLT"
-                                                  or script)
+    spec.script = invalid_s
+  else
+    spec.script = invalid_s
+    spec.language = invalid_l
   end
   for key, val in next, rawfeatures do
     if key:len() == 4 then

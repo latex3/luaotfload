@@ -79,7 +79,7 @@ local function to_harfbuzz(script, language)
   if script_to_ot(otscript) == script then
     return otscript, language
   end
-  return otscript, "x-hbot" .. script .. "-hbsc" .. language
+  return otscript, "x-hbot" .. language .. "-hbsc" .. script
 end
 
 return {

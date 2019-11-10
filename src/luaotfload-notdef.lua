@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-notdef",
-    version       = "3.1",       --TAGVERSION
-    date          = "2019-11-04", --TAGDATE
+    version       = "3.11",       --TAGVERSION
+    date          = "2019-11-10", --TAGDATE
     description   = "luaotfload submodule / color",
     license       = "GPL v2.0",
     author        = "Marcel Krüger"

@@ -6,7 +6,7 @@
                      Luaotfload configuration file
 -----------------------------------------------------------------------
 
-:Date:                  2019-11-04
+:Date:                  2019-11-10
 :Copyright:             GPL v2.0
 :Version:               3.1
 :Manual section:        5

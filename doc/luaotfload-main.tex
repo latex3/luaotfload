@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2019-11-04 v3.1}
+  \setdocumentdate   {2019-11-10 v3.1}
   \setdocumentauthor {LaTeX3 Project\\
                       Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer · Marcel Krüger\\
                       Home: \hyperlink {https://github.com/latex3/luaotfload}}
@@ -62,12 +62,17 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \endsection
 
 \beginsection{Changes}
+\beginsubsection {New in version 3.11 (by Ulrike Fischer/Marcel Krüger)}
+\begin{itemize}
+\item Changed the handling of the \identifier{script} key in harf mode to be more compatible with behaviour of the node mode. It now expects the name of a script that is actually in the font instead of a ISO 15924 script tag. See issue 117.
+\item Corrected a number of small typos and bugs in harf mode.    
+\end{itemize}
 \beginsubsection {New in version 3.1 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
 \item   The package has been moved to the github of the LaTeX3 Project and is now maintained
         officially by the LaTeX3 Project team.
 \item   Code to use the harfbuzz library of luahbtex has been added. See the description of the harf mode.
-\item   fonts in ttc-collections can now be indexed by name.    
+\item   fonts in ttc-collections can now be indexed by name.
 \item   To reduce the polution of the global lua enviroment a number of lua tables have been removed.
         Only the tables \identifier{luaotfload}, \identifier{fonts} and \identifier{nodes} have been kept there.
 \item   The fontloader has been synched with the context files from 2019-10-29.
@@ -766,13 +771,13 @@ obviously, \inlinecode{random}.
 
          \identifier{harf} mode is new in version 3.1 and needs the new \identifier{luahbtex} engine (the mode is ignored if \identifier{luahbtex} is not used). With it is possible to render a font using the harfbuzz library in-built in the new engine. \identifier{harf} mode improves greatly the rendering of indic and arabic scripts and is highly recommended for such scripts.
 
-         When using \identifier{harf} mode it is required to set also the script correctly:
+         When using \identifier{harf} mode it is required to set also the script correctly. 
 
 
          \beginlisting
-         \font\burmesefont={file:NotoSerifMyanmar-Regular.ttf:mode=harf;script=mymr;}
-         \font\devafont={file:NotoSansDevanagari-Regular.ttf:mode=harf;script=deva;}
-         \font\banglafont={name:Noto Sans Bengali:mode=harf;script=beng;}
+         \font\burmesefont={file:NotoSerifMyanmar-Regular.ttf:mode=harf;script=mym2;}
+         \font\devafont={file:NotoSansDevanagari-Regular.ttf:mode=harf;script=dev2;}
+         \font\banglafont={name:Noto Sans Bengali:mode=harf;script=ben2;}
          \font\tibetanfont={name:Noto Serif Tibetan:mode=harf;script=tibt;}
          \endlisting
 

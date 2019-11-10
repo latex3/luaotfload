@@ -67,7 +67,7 @@ local function script_to_iso(tag)
   tag = tag:lower()
   tag = canonical_name[tag] or tag
   local stripped, did_strip = tag:gsub("%d$", "")
-  tag = did_strip and versioned_script[stripped] or tag
+  tag = did_strip == 1 and versioned_script[stripped] or tag
   local tag_length = #tag
   if tag_length == 4 then return tag end -- Optimization for common case
   -- I promise you, I am not making this one up
@@ -76,9 +76,9 @@ end
 
 local function to_harfbuzz(script, language)
   local otscript = script_to_iso(script)
-  if script_to_ot(otscript) == script then
-    return otscript, language
-  end
+  -- if script_to_ot(otscript) == script then
+  --   return otscript, language
+  -- end
   return otscript, "x-hbot" .. language .. "-hbsc" .. script
 end
 

@@ -1,5 +1,3 @@
-- NEW: harf mode: added code to use the harfbuzz library of luahbtex
-- fonts in ttc-collections can be indexed by name
-- removed a number of lua tables from the global enviroment (_G) to reduce the polution. 
-  Kept there are only the tables luaotfload, fonts and nodes.
-- sync with context files from 2019-10-29
+- Changed the handling of the script key in harf mode to be more compatible with behaviour of the node mode. 
+It now expects the name of a script that is actually in the font instead of a ISO 15924 script tag. See issue 117.
+- Corrected a number of small typos and bugs in harf mode.

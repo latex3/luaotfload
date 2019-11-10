@@ -1,5 +1,10 @@
 Change History
 --------------
+2019-11-10 luaotfload v3.11
+    * Changed the handling of the script key in harf mode to be more compatible with behaviour of the node mode. 
+      It now expects the name of a script that is actually in the font instead of a ISO 15924 script tag. See issue 117.
+    * Corrected a number of small typos and bugs in harf mode.
+
 2019-11-04 luaotfload v3.1
     * added code to use the harfbuzz library of luahbtex ("mode=harf")
     * fonts in ttc can now be indexed by name

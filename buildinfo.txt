@@ -99,7 +99,7 @@ The name contains the current date.
 
 !!! date must be naturally correct
 
--->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-08-11.lua
+-->  texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-10-29.lua
 
 
 ==============
@@ -146,3 +146,11 @@ texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-07-04.lua
 --> l3build ctan
 5. upload
  -->l3build upload
+
+
+=======
+I would do the merge to dev last because it is the least important step and the only
+step where we it is quite likely to get merge conflicts.
+So my order would be: Do a fast-forward merge to master, then set the tag.
+After the Tag tests ran through send the code to CTAN and delete the master-xx branch.
+Finally merge master back into dev.

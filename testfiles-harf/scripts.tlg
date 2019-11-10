@@ -214,8 +214,8 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
-...\glue(\baselineskip) 5.34
-...\hbox(5.63+1.03)x345.0, glue set 271.49994fil, direction TLT
+...\glue(\baselineskip) 4.97
+...\hbox(6.0+1.03)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -226,10 +226,10 @@ Completed box being shipped out [1]
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۱" 06F1 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۲" 06F2 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۳" 06F3 +0:+0
-....\TU/amiri-regular.ttf(5)/m/n/10 "۴" 06F4 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۴" 120796 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۵" 06F5 +0:+0
-....\TU/amiri-regular.ttf(5)/m/n/10 "۶" 06F6 +0:+0
-....\TU/amiri-regular.ttf(5)/m/n/10 "۷" 06F7 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۶" 120797 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۷" 120798 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۸" 06F8 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۹" 06F9 +0:+0
 ....\penalty 10000

@@ -209,9 +209,11 @@ local install_callbacks = function ()
   create_callback ("luaotfload.patch_font",        "simple", dummy_function)
   create_callback ("luaotfload.patch_font_unsafe", "simple", dummy_function)
   purge_define_font ()
-  local definer = config.luaotfload.run.definer
+  local definer = config.luaotfload.run.definer or "patch"
+  local selected_definer = definers[definer]
+  luaotfload.define_font = selected_definer
   luatexbase.add_to_callback ("define_font",
-                              definers[definer or "patch"],
+                              selected_definer,
                               "luaotfload.define_font",
                               1)
   return true

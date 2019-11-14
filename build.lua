@@ -71,14 +71,18 @@ local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 
 -- l3build check settings
 
+specialformats = specialformats or {}
+specialformats["latex-dev"] = specialformats["latex-dev"] or {
+    luahbtex = {format = "lualatex-dev"}
+  }
 local has_hbengine = os.execute(os.type == "unix"
                                   and "command -v luahbtex > /dev/null"
                                   or "where /q luahbtex") == 0 or nil
-stdengine    = "luatex"
-checkengines = {"luatex", has_hbengine and "luahbtex"}
-
 -- temporary for test dev branch
 if master_branch then
+stdengine    = "luatex"
+checkengines = {"luatex"}
+
 checkconfigs = {
                 "build",
                 "config-loader-unpackaged",
@@ -87,12 +91,15 @@ checkconfigs = {
                 "config-unicode-math",
                 "config-plain",
                 "config-fontspec",
-                has_hbengine and "config-harf",
                }
 else
+assert(has_hbengine, "luahbtex is required for latex-dev")
+stdengine    = "luahbtex"
+checkengines = {"luahbtex"}
+
 checkconfigs = {
                 "build",
-                has_hbengine and "config-harf",
+                "config-harf",
                }
 end
 checkruns = 3
@@ -124,7 +131,7 @@ docfiledir    = "./doc"
 -- documentation
 -------------------
 
-typesetexe = "luahblatex --fmt=luahb"..checkformat
+typesetexe = "luahbtex --fmt=lua"..checkformat
 
 -- main docu
 typesetfiles      = {"luaotfload-latex.tex"}

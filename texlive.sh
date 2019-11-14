@@ -19,18 +19,10 @@ if ! command -v texlua > /dev/null; then
   cd ..
 fi
 tlmgr update --self
-tlmgr pinning add tlcontrib 'luahbtex*'
-
-if ! tlmgr repository list | grep -q tlcontrib; then
-  # Add TL contrib
-  tlmgr repository add http://contrib.texlive.info/current tlcontrib
-fi
 
 (
 # Needed for any use of texlua even if not testing LuaTeX
-echo l3build latex latex-bin  luatex  latex-bin-dev
-
-echo luahbtex
+echo l3build latex latex-bin luatex latex-bin-dev
 
 # Required to build plain and LaTeX formats:
 # TeX90 plain for unpacking, pdfLaTeX, LuaLaTeX and XeTeX for tests

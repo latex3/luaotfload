@@ -7,7 +7,7 @@
 --  lualibs.dtx  (with options: `lualibs')
 --  This is a generated file.
 --  
---  Copyright (C) 2009--2018 by
+--  Copyright (C) 2009--2019 by
 --          PRAGMA ADE / ConTeXt Development Team
 --          The LuaLaTeX Dev Team
 --  
@@ -25,8 +25,8 @@ lualibs = lualibs or { }
 
 lualibs.module_info = {
   name          = "lualibs",
-  version       = "2.68",       --TAGVERSION
-    date        = "2019-11-05", --TAGDATE
+  version       = "2.69",       --TAGVERSION
+    date        = "2019-11-06", --TAGDATE
   description   = "ConTeXt Lua standard libraries.",
   author        = "Hans Hagen, PRAGMA-ADE, Hasselt NL & Elie Roux & Philipp Gesang",
   copyright     = "PRAGMA ADE / ConTeXt Development Team",

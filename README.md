@@ -1,7 +1,7 @@
 # The Luaotfload Package
 
-![Version: 3.11](https://img.shields.io/badge/current_version-3.11-blue.svg?style=flat-square)
-![Date: 2019-11-10](https://img.shields.io/badge/date-2019--11--10-blue.svg?style=flat-square)
+![Version: 3.1201](https://img.shields.io/badge/current_version-3.1201-blue.svg?style=flat-square)
+![Date: 2019-11-14](https://img.shields.io/badge/date-2019--11--14-blue.svg?style=flat-square)
 [![License: GNU GPLv2](https://img.shields.io/badge/license-GNU_GPLv2-blue.svg?style=flat-square)](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 
 
@@ -21,6 +21,7 @@ Please see the documentation luaotfload.pdf for more information.
 ## Requirements
 
 The current luaotfload needs luatex 1.10 (present in TeXLive 2019 and a current MiKTeX). 
+harfmode need luahbtex 1.11.2.
 The development targets the engines luatex and luahbtex and the version
 that will be in TeXLive 2020. 
 

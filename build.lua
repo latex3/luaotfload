@@ -207,6 +207,7 @@ tagfiles = {
             "src/luaotfload.sty",
             "src/luaotfload-*.lua",
             "src/auto/luaotfload-glyphlist.lua",
+            "src/auto/luaotfload-status.lua",
             "doc/luaotfload-main.tex",
             "doc/luaotfload.conf.rst",
             "doc/luaotfload-tool.rst",
@@ -270,6 +271,9 @@ local xxxpackagedatepat = lpeg.Cg( -- Date: YYYYxxxMMxxxDD
 local packageversionpat = lpeg.Cg( -- Version: M.mmmm-dev
   digit * '.' * digit^1 * lpeg.P'-dev'^-1
   * lpeg.Cc(packageversion))
+local imgpackageversionpat = lpeg.Cg( -- Version: M.mmmm--dev
+  digit * '.' * digit^1 * lpeg.P'--dev'^-1
+  * lpeg.Cc(string.gsub(packageversion, '-', '--')))
 local sty_pattern = lpeggsub(tagdatepat * ' v' * packageversionpat)
 local tex_pattern = lpeggsub(packagedatepat * ' v' * packageversionpat)
 local lua_pattern = lpeggsub(
@@ -278,7 +282,8 @@ local lua_pattern = lpeggsub(
     + 'date' * spaces * '=' * spaces
            * '"' * packagedatepat * '",' * spaces * '--TAGDATE')
 local readme_pattern = lpeggsub(
-      (lpeg.P'Version: ' + 'version-' + 'for ') * packageversionpat
+      (lpeg.P'Version: ' + 'for ') * packageversionpat
+    + 'version-' * imgpackageversionpat
     + packagedatepat + imgpackagedatepat)
 local ctanreadme_pattern = lpeggsub(
       'VERSION: ' * packageversionpat
@@ -302,9 +307,11 @@ function update_tag (file,content,_tagname,_tagdate)
                           "caches.namespace = 'generic'",
                           "caches.namespace = 'generic-dev'")
    end
+  elseif file == "luaotfload-status.lua" then
+   return status_pattern:match(content)
   elseif string.match (file, "%.lua$") then
     return lua_pattern:match(content)
-  elseif file == 'README.md$' then
+  elseif file == 'README.md' then
     return readme_pattern:match(content)
   elseif string.match (file, "CTANREADME.md$") then
     return ctanreadme_pattern:match(content)

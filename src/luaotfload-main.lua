@@ -331,7 +331,7 @@ luaotfload.main = function ()
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 
-    logreport ("both", 0, "main",
+    logreport ("log", 1, "main",
                "initialization completed in %0.3f seconds\n",
                osgettimeofday() - starttime)
 ----inspect (timing_info)

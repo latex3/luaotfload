@@ -8,7 +8,7 @@
 
 :Date:                  2019-11-14
 :Copyright:             GPL v2.0
-:Version:               3.1201
+:Version:               3.1201-dev
 :Manual section:        1
 :Manual group:          text processing
 

@@ -124,7 +124,7 @@ local additional_scripts_fonts = setmetatable({}, {
 
 local function makecombifont(tfmdata, _, additional_scripts)
   local basescript = tfmdata.properties.script
-  local scripts = {basescript = false}
+  local scripts = {[basescript] = false}
   additional_scripts = additional_scripts_tables[additional_scripts]
   for script, fontname in pairs(additional_scripts) do
     if script ~= basescript then
@@ -163,10 +163,11 @@ function domultiscript(head, _, _, _, direction)
         if additional_scripts then
           if additional_scripts[last_script] then
             mapped_scr = last_script
-          elseif not last_fonts[mapped_scr] then
+          elseif last_fonts[mapped_scr] == nil then
             for i = 1, #additional_scripts do
-              if last_fonts[additional_scripts[i]] then
-                mapped_scr = additional_scripts[i]
+              local script = additional_scripts[i]
+              if last_fonts[script] ~= nil then
+                mapped_scr = script
                 break
               end
             end

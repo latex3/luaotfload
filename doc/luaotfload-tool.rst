@@ -304,7 +304,7 @@ SEE ALSO
 
 * ``texdoc luaotfload`` to display the manual for the *Luaotfload*
   package
-* Luaotfload development `<https://github.com/lualatex/luaotfload>`_
+* Luaotfload development `<https://github.com/latex3/luaotfload>`_
 * LuaLaTeX mailing list  `<http://tug.org/pipermail/lualatex-dev/>`_
 * LuaTeX                 `<http://luatex.org/>`_
 * ConTeXt                `<http://wiki.contextgarden.net>`_
@@ -319,8 +319,8 @@ AUTHORS
 =======================================================================
 
 *Luaotfload* was developed by the LuaLaTeX dev team
-(`<https://github.com/lualatex/>`__). It is currently maintained by Ulrike Fischer
-and Marcel Krüger at `<https://github.com/u-fischer/luaotfload>`__
+(`<https://github.com/lualatex/>`__). It is currently maintained by the LaTeX
+Project Team at `<https://github.com/latex3/luaotfload>`__
 The fontloader code is provided by Hans Hagen of Pragma ADE, Hasselt
 NL (`<http://pragma-ade.com/>`__).
 

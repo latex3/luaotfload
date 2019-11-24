@@ -386,7 +386,7 @@ SEE ALSO
 
 * ``texdoc luaotfload`` to display the PDF manual for the *Luaotfload*
   package
-* Luaotfload development `<https://github.com/u-fischer/luaotfload>`_
+* Luaotfload development `<https://github.com/latex3/luaotfload>`_
 * LuaLaTeX mailing list  `<http://tug.org/pipermail/lualatex-dev/>`_
 * LuaTeX                 `<http://luatex.org/>`_
 * Luaotfload on CTAN     `<http://ctan.org/pkg/luaotfload>`_
@@ -402,8 +402,8 @@ AUTHORS
 =======================================================================
 
 *Luaotfload* was developed by the LuaLaTeX dev team
-(`<https://github.com/lualatex/>`_). It is currently maintained by Ulrike Fischer
-and Marcel Krüger at `<https://github.com/u-fischer/luaotfload>`_
+(`<https://github.com/lualatex/>`_). It is currently maintained by the 
+LaTeX Project Team at `<https://github.com/latex3/luaotfload>`_
 
 This manual page was written by Philipp Gesang <phg@phi-gamma.net>.
 

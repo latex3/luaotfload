@@ -33,6 +33,9 @@ echo ctablestack filehook ifoddpage iftex luatexbase trimspaces
 echo oberdiek etoolbox xkeyval ucharcat xstring everyhook
 echo svn-prov setspace
 
+# slices from oberdiek
+echo pdftexcmds
+
 # graphics
 echo graphics xcolor graphics-def pgf
 

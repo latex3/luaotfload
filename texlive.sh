@@ -34,7 +34,7 @@ echo oberdiek etoolbox xkeyval ucharcat xstring everyhook
 echo svn-prov setspace
 
 # slices from oberdiek
-echo pdftexcmds
+echo pdftexcmds epstopdf-pkg
 
 # graphics
 echo graphics xcolor graphics-def pgf

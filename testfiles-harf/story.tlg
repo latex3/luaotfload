@@ -760,5 +760,5 @@ Completed box being shipped out [2]
 ...\TU/lmroman10-regular.otf(1)/m/n/10 "2" 0032 +0:+0
 ...\glue 0.0 plus 1.0fil
 )
-2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 3 attribute, 48 glue_spec, 3 attribute_list (story.aux)
+2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (story.aux)
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.

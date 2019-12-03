@@ -226,8 +226,7 @@ local function node_colorize (head, current_color, nested)
         if n_id == hlist_t or n_id == vlist_t then
             local n_list = getlist(n)
             if  color_props(n_list).box_colored or
-                color_props(getnext(n_list)).box_colored or
-                color_props(getnext(getnext(n_list))).box_colored then
+                color_props(getnext(n_list)).box_colored then
                 if current_color then
                     head, n, current_color = color_whatsit(head, n, current_color, false)
                 end

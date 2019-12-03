@@ -52,8 +52,6 @@ local setattribute          = nodedirect.set_attribute
 local stringformat          = string.format
 local identifiers           = fonts.hashes.identifiers
 
-local add_color_callback --[[ this used to be a global‽ ]]
-
 --[[doc--
 This converts a single octet into a decimal with three digits of
 precision. The optional second argument limits precision to a single
@@ -328,15 +326,24 @@ end
 local color_callback_name      = "luaotfload.color_handler"
 local color_callback_activated = 0
 local add_to_callback          = luatexbase.add_to_callback
+local call_callback            = luatexbase.call_callback
+local create_callback          = luatexbase.create_callback
+local pass_fun                 = function(...) return ... end
 
---- unit -> bool
-local mlist_to_hlist_initial = function ()
-    local cdesc = luatexbase.callback_descriptions "mlist_to_hlist"
-    return cdesc and cdesc[1] == color_callback_name
-end
+create_callback("pre_mlist_to_hlist_filter",  "data", pass_fun)
+create_callback("post_mlist_to_hlist_filter", "data", pass_fun)
+add_to_callback("mlist_to_hlist",
+function(head, display_type, need_penalties)
+    head = call_callback ("pre_mlist_to_hlist_filter",
+                          head, display_type, need_penalties)
+    head = mlist_to_hlist(head, display_type, need_penalties)
+    head = call_callback ("post_mlist_to_hlist_filter",
+                          head, display_type, need_penalties)
+    return head
+end, "luaotfload.mlist_to_hlist")
 
 --- unit -> unit
-add_color_callback = function ( )
+local function add_color_callback ( )
     color_callback = config.luaotfload.run.color_callback
     if not color_callback then
         color_callback = "post_linebreak_filter"
@@ -356,11 +363,8 @@ add_color_callback = function ( )
                             return head
                         end,
                         color_callback_name)
-        add_to_callback("mlist_to_hlist",
-                        function (head, display_type, need_penalties)
-                            if mlist_to_hlist_initial () then
-                                head = mlist_to_hlist(head, display_type, need_penalties)
-                            end
+        add_to_callback("post_mlist_to_hlist_filter",
+                        function (head, display_type)
                             if display_type == "text" then
                                 return head
                             end

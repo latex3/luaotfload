@@ -168,6 +168,9 @@ local linebreak_t       = 1
 local mlist_to_hlist    = node.mlist_to_hlist
 
 local color_callback
+local rgb_stack   = pdf.newcolorstack("0 g", "page", true)
+local trans_stack = pdf.newcolorstack("0 g /TransGs1 gs", "page", true)
+
 
 -- get/set node property
 local function color_props (curr)
@@ -185,29 +188,18 @@ local function color_whatsit (head, curr, color, push, tail)
     local pushdata  = hex_to_rgba(color)
     local trans     = color:len() > 6
     local colornode = newnode(whatsit_t, colorstack_t)
-    setfield(colornode, "stack", 0)
+    setfield(colornode, "stack", trans and trans_stack or rgb_stack)
     setfield(colornode, "command", push and 1 or 2) -- 1: push, 2: pop
     setfield(colornode, "data", push and pushdata or nil)
     if push then
         color_props(colornode).start = color
-    elseif not trans then
+    else
         color_props(colornode).stop  = color
     end
     if tail then
         head, curr = insert_node_after (head, curr, colornode)
     else
         head = insert_node_before(head, curr, colornode)
-    end
-    if not push and trans then
-        local colornode = newnode(whatsit_t, pdfliteral_t)
-        setfield(colornode, "mode", 2)
-        setfield(colornode, "data", "/TransGs1 gs")
-        color_props(colornode).stop = color
-        if tail then
-            head, curr = insert_node_after (head, curr, colornode)
-        else
-            head = insert_node_before(head, curr, colornode)
-        end
     end
     return head, curr, push and color or nil
 end

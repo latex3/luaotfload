@@ -183,19 +183,26 @@ end
 -- (node * node * string * bool * (bool | nil)) -> (node * node * (string | nil))
 local function color_whatsit (head, curr, color, push, tail)
     local pushdata  = hex_to_rgba(color)
+    local trans     = color:len() > 6
     local colornode = newnode(whatsit_t, colorstack_t)
     setfield(colornode, "stack", 0)
     setfield(colornode, "command", push and 1 or 2) -- 1: push, 2: pop
     setfield(colornode, "data", push and pushdata or nil)
+    if push then
+        color_props(colornode).start = color
+    elseif not trans then
+        color_props(colornode).stop  = color
+    end
     if tail then
         head, curr = insert_node_after (head, curr, colornode)
     else
         head = insert_node_before(head, curr, colornode)
     end
-    if not push and color:len() > 6 then
+    if not push and trans then
         local colornode = newnode(whatsit_t, pdfliteral_t)
         setfield(colornode, "mode", 2)
         setfield(colornode, "data", "/TransGs1 gs")
+        color_props(colornode).stop = color
         if tail then
             head, curr = insert_node_after (head, curr, colornode)
         else
@@ -273,6 +280,18 @@ local function node_colorize (head, current_color, nested)
         elseif n_id == whatsit_t then
             if current_color then
                 head, n, current_color = color_whatsit(head, n, current_color, false)
+            end
+            local col_p = getsubtype(n) == colorstack_t and color_props(n).start
+            if col_p then
+                -- this color whatsit node was inserted by hpack_filter callback.
+                -- so, it is safe to skip until stopping whatsit node.
+                local nn = getnext(n)
+                while nn do
+                    if getid(nn) == whatsit_t and color_props(nn).stop == col_p then
+                        n = nn; break
+                    end
+                    nn = getnext(nn)
+                end
             end
 
         end

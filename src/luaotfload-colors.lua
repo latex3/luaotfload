@@ -43,14 +43,15 @@ local setfield              = nodedirect.setfield
 local getid                 = nodedirect.getid
 local getfont               = nodedirect.getfont
 local getlist               = nodedirect.getlist
+local setlist               = nodedirect.setlist
 local getsubtype            = nodedirect.getsubtype
 local getnext               = nodedirect.getnext
 local nodetail              = nodedirect.tail
-local getattribute          = nodedirect.has_attribute
-local setattribute          = nodedirect.set_attribute
+local getproperty           = nodedirect.getproperty
+local setproperty           = nodedirect.setproperty
 
 local stringformat          = string.format
-local identifiers           = fonts.hashes.identifiers
+local fontgetfont           = font.getfont
 
 --[[doc--
 This converts a single octet into a decimal with three digits of
@@ -166,16 +167,28 @@ local colorstack_t      = node.subtype("pdf_colorstack")
 local mlist_to_hlist    = node.mlist_to_hlist
 
 local color_callback
-local color_attr        = luatexbase.new_attribute("luaotfload_color_attribute")
+
+-- get/set node property
+local function color_props (curr)
+    local t = getproperty(curr)
+    if not t then
+        t = { }
+        setproperty(curr, t)
+    end
+    t.luaotfload_color = t.luaotfload_color or { }
+    return t.luaotfload_color
+end
 
 -- (node * node * string * bool * (bool | nil)) -> (node * node * (string | nil))
-local color_whatsit
-color_whatsit = function (head, curr, color, push, tail)
+local function color_whatsit (head, curr, color, push, tail)
     local pushdata  = hex_to_rgba(color)
     local colornode = newnode(whatsit_t, colorstack_t)
     setfield(colornode, "stack", 0)
     setfield(colornode, "command", push and 1 or 2) -- 1: push, 2: pop
     setfield(colornode, "data", push and pushdata or nil)
+    if push then
+        color_props(colornode).start = color
+    end
     if tail then
         head, curr = insert_node_after (head, curr, colornode)
     else
@@ -191,15 +204,16 @@ color_whatsit = function (head, curr, color, push, tail)
             head = insert_node_before(head, curr, colornode)
         end
     end
-    color = push and color or nil
-    return head, curr, color
+    if not push then
+        color_props(curr).stop = color
+    end
+    return head, curr, push and color or nil
 end
 
 -- number -> string | nil
-local get_font_color = function (font_id)
-    local tfmdata    = identifiers[font_id]
-    local font_color = tfmdata and tfmdata.properties and tfmdata.properties.color
-    return font_color
+local function get_font_color (font_id)
+    local tfmdata = fontgetfont(font_id)
+    return tfmdata and tfmdata.properties and tfmdata.properties.color
 end
 
 --[[doc--
@@ -209,24 +223,20 @@ values during the node list traversal.
 --doc]]--
 
 --- (node * (string | nil)) -> (node * (string | nil))
-local node_colorize
-node_colorize = function (head, toplevel, current_color)
+local function node_colorize (head, current_color)
     local n = head
     while n do
         local n_id = getid(n)
 
         if n_id == hlist_t or n_id == vlist_t then
             local n_list = getlist(n)
-            if getattribute(n_list, color_attr) then
+            if color_props(n_list).box_colored then
                 if current_color then
                     head, n, current_color = color_whatsit(head, n, current_color, false)
                 end
             else
-                n_list, current_color = node_colorize(n_list, false, current_color)
-                if current_color and getsubtype(n) == 1 then -- created by linebreak
-                    n_list, _, current_color = color_whatsit(n_list, nodetail(n_list), current_color, false, true)
-                end
-                setfield(n, "head", n_list)
+                n_list, current_color = node_colorize(n_list, current_color)
+                setlist(n, n_list)
             end
 
         elseif n_id == glyph_t then
@@ -265,17 +275,28 @@ node_colorize = function (head, toplevel, current_color)
             if current_color then
                 head, n, current_color = color_whatsit(head, n, current_color, false)
             end
-
+            if getsubtype(n) == colorstack_t then
+                local col_p = color_props(n).start
+                if col_p then -- skip redundant injection
+                    local nn = getnext(n)
+                    while nn do
+                        if getid(nn) == whatsit_t and color_props(nn).stop == col_p then
+                            n = nn; break
+                        end
+                        nn = getnext(nn)
+                    end
+                end
+            end
         end
 
         n = getnext(n)
     end
 
-    if toplevel and current_color then
+    if current_color then
         head, _, current_color = color_whatsit(head, nodetail(head), current_color, false, true)
     end
 
-    setattribute(head, color_attr, 1)
+    color_props(head).box_colored = true
     return head, current_color
 end
 
@@ -288,7 +309,7 @@ local pgf = { bye = "pgfutil@everybye", extgs = "\\pgf@sys@addpdfresource@extgs@
 --- node -> node
 local color_handler = function (head)
     head = todirect(head)
-    head = node_colorize(head, true)
+    head = node_colorize(head)
     head = tonode(head)
 
     -- now append our page resources

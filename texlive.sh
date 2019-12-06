@@ -35,6 +35,7 @@ echo svn-prov setspace
 
 # slices from oberdiek
 echo pdftexcmds epstopdf-pkg
+echo luacolor
 
 # graphics
 echo graphics xcolor graphics-def pgf

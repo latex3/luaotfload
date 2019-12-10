@@ -240,7 +240,15 @@ local support_incomplete = tabletohash({
 --doc]]--
 
 --- (string, string) dict -> (string, string) dict
-local apply_default_features = function (speclist)
+local apply_default_features = function (rawlist)
+    local speclist = {}
+    for k, v in pairs(rawlist) do
+        if type(v) == 'string' then
+            v = string.lower(v)
+            v = ({['true'] = true, ['false'] = false})[v] or v
+        end
+        speclist[k] = v
+    end
     local default_features = luaotfload.features
 
     speclist = speclist or { }
@@ -392,15 +400,7 @@ local handle_request = function (specification)
     end
 
     features.raw = request.features or {}
-    request.features = {}
-    for k, v in pairs(features.raw) do
-        if type(v) == 'string' then
-            v = string.lower(v)
-            v = ({['true'] = true, ['false'] = false})[v] or v
-        end
-        request.features[k] = v
-    end
-    request.features = apply_default_features(request.features)
+    request.features = apply_default_features(features.raw)
 
     if name then
         specification.name     = name
@@ -575,6 +575,8 @@ local add_auto_features = function ()
         otf.addfeature (name, spec)
     end
 end
+
+luaotfload.apply_default_features = apply_default_features
 
 return function ()
     if not fonts and fonts.handlers then

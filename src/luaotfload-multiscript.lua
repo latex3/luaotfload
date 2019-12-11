@@ -31,6 +31,13 @@ local scripts_lib        = require'luaotfload-scripts'.script
 local script_to_iso      = scripts_lib.to_iso
 local script_to_ot       = scripts_lib.to_ot
 
+local harf = luaotfload.harfbuzz
+local GSUBtag, GPOStag
+if harf then
+  GSUBtag = harf.Tag.new("GSUB")
+  GPOStag = harf.Tag.new("GPOS")
+end
+
 local sep = lpeg.P' '^0 * ';' * lpeg.P' '^0
 local codepoint = lpeg.S'0123456789ABCDEF'^4/function(c)return tonumber(c, 16)end
 local codepoint_range = codepoint * ('..' * codepoint + lpeg.Cc(false))
@@ -117,22 +124,27 @@ local script_mapping do
 end
 
 local function collect_scripts(tfmdata)
+  local script_dict = {}
   local hbdata = tfmdata.hb
   if hbdata then
-    print'HBmulti'
-  else
-    print'nonHBmulti'
-  end
-  local script_dict = {}
-  local features = tfmdata.resources.features
-  for _, feature_table in next, features do
-    for _, scripts in next, feature_table do
-      for script in next, scripts do
-        script_dict[script] = true
+    local face = hbdata.shared.face
+    for _, tag in next, { GSUBtag, GPOStag } do
+      local script_tags = face:ot_layout_get_script_tags(tag)
+      for i = 1, #script_tags do
+        script_dict[tostring(script_tags[i]):gsub(" +$", "")] = true
       end
     end
+  else
+    local features = tfmdata.resources.features
+    for _, feature_table in next, features do
+      for _, scripts in next, feature_table do
+        for script in next, scripts do
+          script_dict[script] = true
+        end
+      end
+    end
+    script_dict["*"] = nil
   end
-  script_dict["*"] = nil
   return script_dict
 end
 
@@ -267,6 +279,10 @@ otffeatures.register {
   description = "Combine fonts for multiple scripts",
   manipulators = {
     node = makecombifont,
+  },
+  -- HACK: harf should call manipulators too.
+  initializers = {
+    plug = function(a, b) return makecombifont(a, nil, b) end,
   },
   -- processors = { -- processors would be nice, but they are applied
   --                -- too late for our purposes

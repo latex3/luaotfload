@@ -35,7 +35,7 @@ local function multirawset(table, key1, key2, value)
   return table
 end
 local script_extensions do
-  local entry = lpeg.Cg(codepoint_range * sep * lpeg.Ct((lpeg.C(lpeg.R'AZ' * lpeg.R'az'^1))^1 * ' ') * '#')^-1 * (1-lpeg.P'\n')^0 * '\n'
+  local entry = lpeg.Cg(codepoint_range * sep * lpeg.Ct((lpeg.C(lpeg.R'AZ' * lpeg.R'az'^1)/string.lower)^1 * ' ') * '#')^-1 * (1-lpeg.P'\n')^0 * '\n'
   local file = lpeg.Cf(
       lpeg.Ct''
     * entry^0
@@ -98,7 +98,7 @@ local script_mapping do
     Cuneiform = "Xsux", Yi = "Yiii", Zanabazar_Square = "Zanb",
     Inherited = "Zinh", Common = "Zyyy", Unknown = "Zzzz",
   }
-  local entry = lpeg.Cg(codepoint_range * sep * ((lpeg.R'AZ' + lpeg.R'az' + '_')^1/script_aliases))^-1 * (1-lpeg.P'\n')^0 * '\n'
+  local entry = lpeg.Cg(codepoint_range * sep * ((lpeg.R'AZ' + lpeg.R'az' + '_')^1/script_aliases/string.lower))^-1 * (1-lpeg.P'\n')^0 * '\n'
   -- local entry = lpeg.Cg(codepoint_range * sep * lpeg.Cc(true))^-1 * (1-lpeg.P'\n')^0 * '\n'
   local file = lpeg.Cf(
       lpeg.Ct''
@@ -156,7 +156,7 @@ function domultiscript(head, _, _, _, direction)
     end
     if last_fonts then
       local mapped_scr = script_mapping[cid]
-      if mapped_scr == "Zinh" then
+      if mapped_scr == "zinh" then
         mapped_scr = last_script
       else
         local additional_scr = script_extensions[cid]
@@ -172,7 +172,7 @@ function domultiscript(head, _, _, _, direction)
               end
             end
           end
-        elseif mapped_scr == "Zyyy" then
+        elseif mapped_scr == "zyyy" then
           mapped_scr = last_script
         end
       end

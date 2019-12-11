@@ -24,6 +24,9 @@ local insert_after       = node.direct.insert_after
 local traverse_char      = node.direct.traverse_char
 local protect_glyph      = node.direct.protect_glyph
 local otffeatures        = fonts.constructors.newfeatures "otf"
+-- local normalize          = fonts.handlers.otf.features.normalize
+local definers           = fonts.definers
+local define_font        = luaotfload.define_font
 
 local sep = lpeg.P' '^0 * ';' * lpeg.P' '^0
 local codepoint = lpeg.S'0123456789ABCDEF'^4/function(c)return tonumber(c, 16)end
@@ -110,6 +113,26 @@ local script_mapping do
   f:close()
 end
 
+local function collect_scripts(tfmdata)
+  local hbdata = tfmdata.hb
+  if hbdata then
+    print'HBmulti'
+  else
+    print'nonHBmulti'
+  end
+  local script_dict = {}
+  local features = tfmdata.resources.features
+  for _, feature_table in next, features do
+    for _, scripts in next, feature_table do
+      for script in next, scripts do
+        script_dict[script] = true
+      end
+    end
+  end
+  script_dict["*"] = nil
+  return script_dict
+end
+
 local additional_scripts_tables = { }
 
 local additional_scripts_fonts = setmetatable({}, {
@@ -123,17 +146,49 @@ local additional_scripts_fonts = setmetatable({}, {
 })
 
 local function makecombifont(tfmdata, _, additional_scripts)
+  if additional_scripts == 'auto' then
+    local spec = tfmdata.specification
+    additional_scripts = {}
+    for script in next, collect_scripts(tfmdata) do
+      additional_scripts[script] = spec.specification .. ';-multiscript;script=' .. script
+      ---- FIXME: IMHO the following which just modiefies the spec
+      --   would be nicer, but it breaks font patching callbacks
+      --   (except if we ignore them, but that would be inconsistant to
+      --    other fonts)
+      -- local new_raw_features = {}
+      -- local new_features = { raw = new_raw_features, normal = new_raw_features }
+      -- for f, v in next, spec.features.raw do
+      --   new_raw_features[f] = v
+      -- end
+      -- new_raw_features.multiscript = false
+      -- new_raw_features.script = script
+      -- local new_normal_features = luaotfload.apply_default_features(new_raw_features)
+      -- new_normal_features.sub = nil
+      -- new_normal_features.lookup = nil
+      -- new_features.normal = normalize(new_normal_features)
+      -- local new_spec = {}
+      -- for k, v in next, spec do
+      --   new_spec[k] = v
+      -- end
+      -- new_spec.hash = nil
+      -- new_spec.features = new_features
+      -- additional_scripts[script] = new_spec
+    end
+  else
+    additional_scripts = additional_scripts_tables[additional_scripts]
+  end
   local basescript = tfmdata.properties.script
   local scripts = {[basescript] = false}
-  additional_scripts = additional_scripts_tables[additional_scripts]
   for script, fontname in pairs(additional_scripts) do
     if script ~= basescript then
-      local f = fonts.definers.read(fontname, tfmdata.size)
+      local f = define_font(fontname, tfmdata.size)
       local fid
       if type(f) == 'table' then
         fid = font.define(f)
-      else
-        error[[FIXME???]]
+        definers.register(f, fid)
+      elseif f then
+        fid = f
+        f = font.getfont(fid)
       end
       scripts[script] = {
         fid = fid,

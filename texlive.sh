@@ -34,8 +34,8 @@ echo oberdiek etoolbox xkeyval ucharcat xstring everyhook
 echo svn-prov setspace
 
 # slices from oberdiek
-echo pdftexcmds epstopdf-pkg
-echo luacolor letltxmacro bookmark
+echo atbegshi atveryend bitset bookmark epstopdf-pkg hologo letltxmacro
+echo luacolor pdfescape pdflscape pdftexcmds rerunfilecheck
 
 # graphics
 echo graphics xcolor graphics-def pgf

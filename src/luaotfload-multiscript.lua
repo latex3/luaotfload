@@ -27,6 +27,9 @@ local otffeatures        = fonts.constructors.newfeatures "otf"
 -- local normalize          = fonts.handlers.otf.features.normalize
 local definers           = fonts.definers
 local define_font        = luaotfload.define_font
+local scripts_lib        = require'luaotfload-scripts'.script
+local script_to_iso      = scripts_lib.to_iso
+local script_to_ot       = scripts_lib.to_ot
 
 local sep = lpeg.P' '^0 * ';' * lpeg.P' '^0
 local codepoint = lpeg.S'0123456789ABCDEF'^4/function(c)return tonumber(c, 16)end
@@ -145,34 +148,44 @@ local additional_scripts_fonts = setmetatable({}, {
   end,
 })
 
+local function is_dominant_script(scripts, script, first, ...)
+  if script == first then return true end
+  if scripts[first] or not first then return false end
+  return is_dominant_script(scripts, script, ...)
+end
+
 local function makecombifont(tfmdata, _, additional_scripts)
   if additional_scripts == 'auto' then
     local spec = tfmdata.specification
     additional_scripts = {}
-    for script in next, collect_scripts(tfmdata) do
-      additional_scripts[script] = spec.specification .. ';-multiscript;script=' .. script
-      ---- FIXME: IMHO the following which just modiefies the spec
-      --   would be nicer, but it breaks font patching callbacks
-      --   (except if we ignore them, but that would be inconsistant to
-      --    other fonts)
-      -- local new_raw_features = {}
-      -- local new_features = { raw = new_raw_features, normal = new_raw_features }
-      -- for f, v in next, spec.features.raw do
-      --   new_raw_features[f] = v
-      -- end
-      -- new_raw_features.multiscript = false
-      -- new_raw_features.script = script
-      -- local new_normal_features = luaotfload.apply_default_features(new_raw_features)
-      -- new_normal_features.sub = nil
-      -- new_normal_features.lookup = nil
-      -- new_features.normal = normalize(new_normal_features)
-      -- local new_spec = {}
-      -- for k, v in next, spec do
-      --   new_spec[k] = v
-      -- end
-      -- new_spec.hash = nil
-      -- new_spec.features = new_features
-      -- additional_scripts[script] = new_spec
+    local collected = collect_scripts(tfmdata)
+    for script in next, collected do
+      local iso_script = script_to_iso(script)
+      if is_dominant_script(collected, script, script_to_ot(iso_script)) then
+        additional_scripts[iso_script] = spec.specification .. ';-multiscript;script=' .. script
+        ---- FIXME: IMHO the following which just modiefies the spec
+        --   would be nicer, but it breaks font patching callbacks
+        --   (except if we ignore them, but that would be inconsistant to
+        --    other fonts)
+        -- local new_raw_features = {}
+        -- local new_features = { raw = new_raw_features, normal = new_raw_features }
+        -- for f, v in next, spec.features.raw do
+        --   new_raw_features[f] = v
+        -- end
+        -- new_raw_features.multiscript = false
+        -- new_raw_features.script = script
+        -- local new_normal_features = luaotfload.apply_default_features(new_raw_features)
+        -- new_normal_features.sub = nil
+        -- new_normal_features.lookup = nil
+        -- new_features.normal = normalize(new_normal_features)
+        -- local new_spec = {}
+        -- for k, v in next, spec do
+        --   new_spec[k] = v
+        -- end
+        -- new_spec.hash = nil
+        -- new_spec.features = new_features
+        -- additional_scripts[script] = new_spec
+      end
     end
   else
     additional_scripts = additional_scripts_tables[additional_scripts]

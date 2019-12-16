@@ -1,0 +1,290 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Package fontspec Info: Font family 'STIXTwoText(2)' created for font 'STIX Two
+(fontspec)             Text' with options
+(fontspec)             [Ligatures=TeX,Color=00FF00,Color=FF0000].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"STIXTwoText:mode=node;script=latn;language=DFLT;+tlig;color=FF0000FF
+(fontspec)             ;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
+(fontspec)             <->"STIXTwoText:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=FF0000FF
+(fontspec)             ;"
+(fontspec)             - 'bold' (bx/n) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/B:mode=node;script=latn;language=DFLT;+tlig;color=FF0000FF
+(fontspec)             ;"
+(fontspec)             - 'bold small caps'  (bx/sc) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/B:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=FF0000FF
+(fontspec)             ;"
+(fontspec)             - 'italic' (m/it) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=DFLT;+tlig;color=FF0000FF
+(fontspec)             ;"
+(fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=FF0000FF
+(fontspec)             ;"
+(fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=DFLT;+tlig;color=FF0000FF
+(fontspec)             ;"
+(fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=FF0000FF
+(fontspec)             ;"
+Package fontspec Info: Font family 'STIXTwoText(3)' created for font 'STIX Two
+(fontspec)             Text' with options
+(fontspec)             [Ligatures=TeX,Color=00FF00,Color=FF0000,Color=0000FF].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"STIXTwoText:mode=node;script=latn;language=DFLT;+tlig;color=0000FFFF
+(fontspec)             ;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
+(fontspec)             <->"STIXTwoText:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=0000FFFF
+(fontspec)             ;"
+(fontspec)             - 'bold' (bx/n) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/B:mode=node;script=latn;language=DFLT;+tlig;color=0000FFFF
+(fontspec)             ;"
+(fontspec)             - 'bold small caps'  (bx/sc) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/B:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=0000FFFF
+(fontspec)             ;"
+(fontspec)             - 'italic' (m/it) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=DFLT;+tlig;color=0000FFFF
+(fontspec)             ;"
+(fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=0000FFFF
+(fontspec)             ;"
+(fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=DFLT;+tlig;color=0000FFFF
+(fontspec)             ;"
+(fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.:
+(fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=0000FFFF
+(fontspec)             ;"
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 471.7796fil, direction TLT
+...\write-{}
+...\glue(\topskip) 2.94
+...\hbox(7.06+0.15)x345.0, glue set 251.26001fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\pdfcolorstack 0 push {0 1 0 rg}
+....\TU/STIXTwoText(0)/m/n/10 S
+....\TU/STIXTwoText(0)/m/n/10 o
+....\TU/STIXTwoText(0)/m/n/10 m
+....\TU/STIXTwoText(0)/m/n/10 e
+....\glue(\spaceskip) 2.35 plus 1.175 minus 0.78334
+....\TU/STIXTwoText(0)/m/n/10 i
+....\TU/STIXTwoText(0)/m/n/10 n
+....\discretionary (penalty 50)
+.....< \TU/STIXTwoText(0)/m/n/10 -
+....\TU/STIXTwoText(0)/m/n/10 t
+....\TU/STIXTwoText(0)/m/n/10 r
+....\kern-0.1 (font)
+....\TU/STIXTwoText(0)/m/n/10 o
+....\discretionary (penalty 50)
+.....< \kern0.1 (font)
+.....< \TU/STIXTwoText(0)/m/n/10 -
+....\TU/STIXTwoText(0)/m/n/10 d
+....\TU/STIXTwoText(0)/m/n/10 u
+....\TU/STIXTwoText(0)/m/n/10 c
+....\discretionary (penalty 50)
+.....< \TU/STIXTwoText(0)/m/n/10 -
+....\TU/STIXTwoText(0)/m/n/10 t
+....\TU/STIXTwoText(0)/m/n/10 i
+....\TU/STIXTwoText(0)/m/n/10 o
+....\TU/STIXTwoText(0)/m/n/10 n
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+....\pdfcolorstack 0 pop
+...\penalty 10000
+...\glue(\abovedisplayshortskip) 0.0 plus 3.0
+...\glue(\baselineskip) 5.07
+...\hbox(6.78+1.6)x39.05891, shifted 152.97055, direction TLT
+....\pdfcolorstack 0 push {1 0 1 rg}
+....\TU/STIXTwoMath(1)/m/n/10 1
+....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+....\TU/STIXTwoMath(1)/m/n/10 +
+....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+....\TU/STIXTwoMath(1)/m/n/10 2
+....\glue(\thickmuskip) 2.77748 plus 2.77748
+....\TU/STIXTwoMath(1)/m/n/10 ≠
+....\glue(\thickmuskip) 2.77748 plus 2.77748
+....\TU/STIXTwoMath(1)/m/n/10 3
+....\pdfcolorstack 0 pop
+...\penalty 0
+...\glue(\belowdisplayshortskip) 6.0 plus 3.0 minus 3.0
+...\glue(\baselineskip) 3.26999
+...\hbox(7.13+0.11)x345.0, glue set 267.70001fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\pdfcolorstack 0 push {0 1 0 rg}
+....\TU/STIXTwoText(0)/m/n/10 i
+....\TU/STIXTwoText(0)/m/n/10 n
+....\glue(\spaceskip) 2.35 plus 1.175 minus 0.78334
+....\pdfcolorstack 0 pop
+....\pdfcolorstack 0 push {1 0 0 rg}
+....\TU/STIXTwoText(2)/m/n/10 d
+....\TU/STIXTwoText(2)/m/n/10 i
+....\discretionary (penalty 50)
+.....< \TU/STIXTwoText(2)/m/n/10 f
+.....< \TU/STIXTwoText(2)/m/n/10 -
+.....> \TU/STIXTwoText(2)/m/n/10 f
+.....= \TU/STIXTwoText(2)/m/n/10 ﬀ (ligature ff)
+....\TU/STIXTwoText(2)/m/n/10 e
+....\TU/STIXTwoText(2)/m/n/10 r
+....\discretionary (penalty 50)
+.....< \kern-0.25 (font)
+.....< \TU/STIXTwoText(2)/m/n/10 -
+.....= \kern-0.1 (font)
+....\TU/STIXTwoText(2)/m/n/10 e
+....\TU/STIXTwoText(2)/m/n/10 n
+....\TU/STIXTwoText(2)/m/n/10 t
+....\glue(\spaceskip) 2.35 plus 1.175 minus 0.78334
+....\pdfcolorstack 0 pop
+....\pdfcolorstack 0 push {0 0 1 rg}
+....\TU/STIXTwoText(3)/m/n/10 c
+....\TU/STIXTwoText(3)/m/n/10 o
+....\TU/STIXTwoText(3)/m/n/10 l
+....\discretionary (penalty 50)
+.....< \TU/STIXTwoText(3)/m/n/10 -
+....\TU/STIXTwoText(3)/m/n/10 o
+....\TU/STIXTwoText(3)/m/n/10 r
+....\TU/STIXTwoText(3)/m/n/10 s
+....\pdfcolorstack 0 pop
+....\pdfcolorstack 0 push {0 1 0 rg}
+....\TU/STIXTwoText(0)/m/n/10 .
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+....\pdfcolorstack 0 pop
+...\glue(\lineskip) 1.0
+...\vbox(37.06+0.11)x345.0, direction TLT
+....\hbox(7.06+0.15)x345.0, glue set 251.26001fil, direction TLT
+.....\localpar
+......\localinterlinepenalty=0
+......\localbrokenpenalty=0
+......\localleftbox=null
+......\localrightbox=null
+.....\hbox(0.0+0.0)x15.0, direction TLT
+.....\pdfcolorstack 0 push {0 1 0 rg}
+.....\TU/STIXTwoText(0)/m/n/10 S
+.....\TU/STIXTwoText(0)/m/n/10 o
+.....\TU/STIXTwoText(0)/m/n/10 m
+.....\TU/STIXTwoText(0)/m/n/10 e
+.....\glue(\spaceskip) 2.35 plus 1.175 minus 0.78334
+.....\TU/STIXTwoText(0)/m/n/10 i
+.....\TU/STIXTwoText(0)/m/n/10 n
+.....\discretionary (penalty 50)
+......< \TU/STIXTwoText(0)/m/n/10 -
+.....\TU/STIXTwoText(0)/m/n/10 t
+.....\TU/STIXTwoText(0)/m/n/10 r
+.....\kern-0.1 (font)
+.....\TU/STIXTwoText(0)/m/n/10 o
+.....\discretionary (penalty 50)
+......< \kern0.1 (font)
+......< \TU/STIXTwoText(0)/m/n/10 -
+.....\TU/STIXTwoText(0)/m/n/10 d
+.....\TU/STIXTwoText(0)/m/n/10 u
+.....\TU/STIXTwoText(0)/m/n/10 c
+.....\discretionary (penalty 50)
+......< \TU/STIXTwoText(0)/m/n/10 -
+.....\TU/STIXTwoText(0)/m/n/10 t
+.....\TU/STIXTwoText(0)/m/n/10 i
+.....\TU/STIXTwoText(0)/m/n/10 o
+.....\TU/STIXTwoText(0)/m/n/10 n
+.....\penalty 10000
+.....\glue(\parfillskip) 0.0 plus 1.0fil
+.....\glue(\rightskip) 0.0
+.....\pdfcolorstack 0 pop
+....\penalty 10000
+....\glue(\abovedisplayshortskip) 0.0 plus 3.0
+....\glue(\baselineskip) 5.07
+....\hbox(6.78+1.6)x39.05891, shifted 152.97055, direction TLT
+.....\pdfcolorstack 0 push {1 0 1 rg}
+.....\TU/STIXTwoMath(1)/m/n/10 1
+.....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+.....\TU/STIXTwoMath(1)/m/n/10 +
+.....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+.....\TU/STIXTwoMath(1)/m/n/10 2
+.....\glue(\thickmuskip) 2.77748 plus 2.77748
+.....\TU/STIXTwoMath(1)/m/n/10 ≠
+.....\glue(\thickmuskip) 2.77748 plus 2.77748
+.....\TU/STIXTwoMath(1)/m/n/10 3
+.....\pdfcolorstack 0 pop
+....\penalty 0
+....\glue(\belowdisplayshortskip) 6.0 plus 3.0 minus 3.0
+....\glue(\baselineskip) 3.26999
+....\hbox(7.13+0.11)x345.0, glue set 267.70001fil, direction TLT
+.....\localpar
+......\localinterlinepenalty=0
+......\localbrokenpenalty=0
+......\localleftbox=null
+......\localrightbox=null
+.....\pdfcolorstack 0 push {0 1 0 rg}
+.....\TU/STIXTwoText(0)/m/n/10 i
+.....\TU/STIXTwoText(0)/m/n/10 n
+.....\glue(\spaceskip) 2.35 plus 1.175 minus 0.78334
+.....\pdfcolorstack 0 pop
+.....\pdfcolorstack 0 push {1 0 0 rg}
+.....\TU/STIXTwoText(2)/m/n/10 d
+.....\TU/STIXTwoText(2)/m/n/10 i
+.....\discretionary (penalty 50)
+......< \TU/STIXTwoText(2)/m/n/10 f
+......< \TU/STIXTwoText(2)/m/n/10 -
+......> \TU/STIXTwoText(2)/m/n/10 f
+......= \TU/STIXTwoText(2)/m/n/10 ﬀ (ligature ff)
+.....\TU/STIXTwoText(2)/m/n/10 e
+.....\TU/STIXTwoText(2)/m/n/10 r
+.....\discretionary (penalty 50)
+......< \kern-0.25 (font)
+......< \TU/STIXTwoText(2)/m/n/10 -
+......= \kern-0.1 (font)
+.....\TU/STIXTwoText(2)/m/n/10 e
+.....\TU/STIXTwoText(2)/m/n/10 n
+.....\TU/STIXTwoText(2)/m/n/10 t
+.....\glue(\spaceskip) 2.35 plus 1.175 minus 0.78334
+.....\pdfcolorstack 0 pop
+.....\pdfcolorstack 0 push {0 0 1 rg}
+.....\TU/STIXTwoText(3)/m/n/10 c
+.....\TU/STIXTwoText(3)/m/n/10 o
+.....\TU/STIXTwoText(3)/m/n/10 l
+.....\discretionary (penalty 50)
+......< \TU/STIXTwoText(3)/m/n/10 -
+.....\TU/STIXTwoText(3)/m/n/10 o
+.....\TU/STIXTwoText(3)/m/n/10 r
+.....\TU/STIXTwoText(3)/m/n/10 s
+.....\TU/STIXTwoText(3)/m/n/10 .
+.....\penalty 10000
+.....\glue(\parfillskip) 0.0 plus 1.0fil
+.....\glue(\rightskip) 0.0
+.....\pdfcolorstack 0 pop
+...\glue -0.11
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.61
+..\hbox(6.39+0.0)x345.0, glue set 170.025fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\pdfcolorstack 0 push {0 1 0 rg}
+...\TU/STIXTwoText(0)/m/n/10 1
+...\glue 0.0 plus 1.0fil
+...\pdfcolorstack 0 pop
+(color.aux)

@@ -1,0 +1,25 @@
+\input{regression-test}
+
+\documentclass{article}
+\usepackage{unicode-math}
+
+\setmainfont{STIX Two Text}[Color=00FF00]
+\setmathfont{STIX Two Math}[Color=FF00FF, StylisticSet=08]
+
+\begin{document}
+\START \showoutput
+Some introduction
+\[
+1 + 2 \neq 3
+\]
+in {\addfontfeature{Color=FF0000}different \addfontfeature{Color=0000FF}colors}.
+
+\vbox{
+Some introduction
+\[
+1 + 2 \neq 3
+\]
+in \addfontfeature{Color=FF0000}different \addfontfeature{Color=0000FF}colors.
+}
+
+\end{document}

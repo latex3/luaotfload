@@ -217,6 +217,7 @@ local tlig ={
 }
 
 local function scalefont(data, spec)
+  if not data then return data, spec end
   local size = spec.size
   local features = spec.features.normal
   features.mode = 'plug'

@@ -123,6 +123,29 @@ local script_mapping do
   f:close()
 end
 
+local function load_on_demand(specifications, size)
+  return setmetatable({}, { __index = function(t, k)
+    local specification = specifications[k]
+    if not specification then return end
+    local f = define_font(specification, size)
+    local fid
+    if type(f) == 'table' then
+      fid = font.define(f)
+      definers.register(f, fid)
+    elseif f then
+      fid = f
+      f = font.getfont(fid)
+    end
+    local v = {
+      fid = fid,
+      font = f,
+      characters = f.characters,
+    }
+    t[k] = v
+    return v
+  end})
+end
+
 local function collect_scripts(tfmdata)
   local script_dict = {}
   local hbdata = tfmdata.hb
@@ -167,9 +190,23 @@ local function is_dominant_script(scripts, script, first, ...)
 end
 
 local function makecombifont(tfmdata, _, additional_scripts)
-  if additional_scripts == 'auto' then
-    local spec = tfmdata.specification
+  local has_auto
+  additional_scripts = tostring(additional_scripts)
+  if additional_scripts:sub(1, 5) == "auto+" then
+    additional_scripts = additional_scripts:sub(6)
+    has_auto = true
+  elseif additional_scripts == "auto" then
+    has_auto, additional_scripts = true, false
+  end
+  if additional_scripts then
+    local t = additional_scripts_tables[tonumber(additional_scripts) or additional_scripts]
+    if not t then error(string.format("Unknown multiscript table %s", additional_scripts)) end
+    additional_scripts = table.merged(t)
+  else
     additional_scripts = {}
+  end
+  if has_auto then
+    local spec = tfmdata.specification
     local collected = collect_scripts(tfmdata)
     for script in next, collected do
       local iso_script = script_to_iso(script)
@@ -199,30 +236,10 @@ local function makecombifont(tfmdata, _, additional_scripts)
         -- additional_scripts[script] = new_spec
       end
     end
-  else
-    additional_scripts = additional_scripts_tables[additional_scripts]
   end
-  local basescript = tfmdata.properties.script
-  local scripts = {[basescript] = false}
-  for script, fontname in pairs(additional_scripts) do
-    if script ~= basescript then
-      local f = define_font(fontname, tfmdata.size)
-      local fid
-      if type(f) == 'table' then
-        fid = font.define(f)
-        definers.register(f, fid)
-      elseif f then
-        fid = f
-        f = font.getfont(fid)
-      end
-      scripts[script] = {
-        fid = fid,
-        font = f,
-        characters = f.characters,
-      }
-    end
-  end
-  tfmdata.additional_scripts = scripts
+  local basescript = tfmdata.properties.script or "dflt"
+  tfmdata.additional_scripts = load_on_demand(additional_scripts, tfmdata.size)
+  tfmdata.additional_scripts[basescript] = false
 end
 
 local glyph_id = node.id'glyph'
@@ -239,7 +256,7 @@ function domultiscript(head, _, _, _, direction)
       if mapped_scr == "zinh" then
         mapped_scr = last_script
       else
-        local additional_scr = script_extensions[cid]
+        local additional_scripts = script_extensions[cid]
         if additional_scripts then
           if additional_scripts[last_script] then
             mapped_scr = last_script

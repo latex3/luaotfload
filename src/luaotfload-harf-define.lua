@@ -219,10 +219,9 @@ local tlig ={
 local function scalefont(data, spec)
   if not data then return data, spec end
   local size = spec.size
-  local features = spec.features.normal
+  local features = fonts.constructors.checkedfeatures("otf", spec.features.normal)
   features.mode = 'plug'
   features.features = 'harf'
-  fonts.constructors.checkedfeatures("otf", features)
   local hbface = data.face
   local hbfont = data.font
   local upem = data.upem
@@ -359,6 +358,7 @@ local function scalefont(data, spec)
     properties = {},
   }
   tfmdata.shared.processes = fonts.handlers.otf.setfeatures(tfmdata, features)
+  fonts.constructors.applymanipulators("otf", tfmdata, features, false)
   return tfmdata
 end
 

@@ -35,7 +35,7 @@ echo svn-prov setspace
 
 # slices from oberdiek
 echo atbegshi atveryend bitset bookmark epstopdf-pkg hologo letltxmacro
-echo luacolor pdfescape pdflscape pdftexcmds rerunfilecheck
+echo luacolor pdfescape pdflscape pdftexcmds rerunfilecheck ltxcmds kvdefinekeys kvsetkeys hycolor intcalc etexcmds bigintcalc uniquecounter refcount gettitlestring
 
 # graphics
 echo graphics xcolor graphics-def pgf

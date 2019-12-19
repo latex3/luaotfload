@@ -439,6 +439,7 @@ local init_post_install_callbacks = function ()
       direction = tex.get'textdir'
     end
     domultiscript(head, nil, nil, nil, direction)
+    dofallback(head, nil, nil, nil, direction)
     return handler(head, groupcode, nil, nil, direction)
   end
   luatexbase.add_to_callback("pre_linebreak_filter",

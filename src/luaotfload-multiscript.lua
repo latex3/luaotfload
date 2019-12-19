@@ -134,15 +134,9 @@ local function load_on_demand(specifications, size)
       definers.register(f, fid)
     elseif f then
       fid = f
-      f = font.getfont(fid)
     end
-    local v = {
-      fid = fid,
-      font = f,
-      characters = f.characters,
-    }
-    t[k] = v
-    return v
+    t[k] = fid
+    return fid
   end})
 end
 
@@ -276,7 +270,7 @@ function domultiscript(head, _, _, _, direction)
       last_script = mapped_scr
       local mapped_font = last_fonts[mapped_scr]
       if mapped_font then
-        setfont(cur, mapped_font.fid)
+        setfont(cur, mapped_font)
       end
     end
   end
@@ -296,10 +290,7 @@ otffeatures.register {
   description = "Combine fonts for multiple scripts",
   manipulators = {
     node = makecombifont,
-  },
-  -- HACK: harf should call manipulators too.
-  initializers = {
-    plug = function(a, b) return makecombifont(a, nil, b) end,
+    plug = makecombifont,
   },
   -- processors = { -- processors would be nice, but they are applied
   --                -- too late for our purposes

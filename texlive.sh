@@ -34,8 +34,10 @@ echo oberdiek etoolbox xkeyval ucharcat xstring everyhook
 echo svn-prov setspace
 
 # slices from oberdiek
-echo atbegshi atveryend bitset bookmark epstopdf-pkg hologo letltxmacro
-echo luacolor pdfescape pdflscape pdftexcmds rerunfilecheck ltxcmds kvdefinekeys kvsetkeys hycolor intcalc etexcmds bigintcalc uniquecounter refcount gettitlestring
+echo atbegshi atveryend bigintcalc bitset bookmark epstopdf-pkg etexcmds
+echo gettitlestring hologo hycolor intcalc kvdefinekeys kvsetkeys
+echo letltxmacro ltxcmds luacolor pdfescape pdflscape pdftexcmds refcount
+echo rerunfilecheck uniquecounter
 
 # graphics
 echo graphics xcolor graphics-def pgf
@@ -62,7 +64,9 @@ echo amsmath lualatex-math
 echo luacode environ adjustbox collectbox ms varwidth geometry url ulem
 
 # some packages for the documentation
-echo standalone luatex85 tikzmarmots tikzducks pgf-blur inconsolata tools caption hyperref metalogo fancyvrb mdwtools titlesec tocloft pdfpages listings
+echo caption fancyvrb hyperref inconsolata listings luatex85 mdwtools
+echo metalogo pdfpages pgf-blur standalone tikzducks tikzmarmots titlesec
+echo tocloft tools
 
 
 # Assuming a 'basic' font set up, metafont is required to avoid

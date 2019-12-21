@@ -49,7 +49,7 @@ echo sourcecodepro Asana-Math  ebgaramond  tex-gyre  amsfonts gnu-freefont
 echo opensans fira tex-gyre-math junicode lm  lm-math amiri ipaex xits
 echo libertine coelacanth fontawesome stix2-otf dejavu
 echo luatexko unfonts-core cjk-ko iwona libertinus-fonts fandol
-echo cm-unicode
+echo cm-unicode noto
 
 # languages
 echo luatexja arabluatex babel babel-english

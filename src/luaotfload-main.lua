@@ -326,8 +326,8 @@ luaotfload.main = function ()
         loadmodule "harf-plug"
     end
     initialize "auxiliary"    --- additional high-level functionality
-    loadmodule "multiscript"  --- ...
     loadmodule "fallback"  --- ...
+    loadmodule "multiscript"  --- ...
     loadmodule "tounicode"
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec

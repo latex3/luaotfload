@@ -41,7 +41,7 @@ local fallback_table = setmetatable({}, {
       __index = function(tt, size)
         local lookup = {}
         for i=#names,1,-1 do
-          local f = define_font(names[i], size)
+          local f = define_font(names[i] .. ';-fallback', size)
           local fid
           if type(f) == 'table' then
             fid = font.define(f)
@@ -50,21 +50,7 @@ local fallback_table = setmetatable({}, {
             fid = f
             f = font.getfont(fid)
           end
-          for uni, _ in next, f.characters do
-            rawset(lookup, uni, fid)
-          end
-        end
-        local lookup = {}
-        for i=#names,1,-1 do
-          local f = define_font(names[i], size)
-          local fid
-          if type(f) == 'table' then
-            fid = font.define(f)
-            definers.register(f, fid)
-          elseif f then
-            fid = f
-            f = font.getfont(fid)
-          end
+          lookup[-i] = f -- Needed for multiscript interactions
           for uni, _ in next, f.characters do
             rawset(lookup, uni, fid)
           end
@@ -123,7 +109,7 @@ end
 function luaotfload.add_fallback(name, fonts)
   if fonts == nil then
     fonts = name
-    name = #additional_scripts_fonts + 1
+    name = #fallback_table_fontnames + 1
   end
   fallback_table_fontnames[name] = fonts
   fallback_table[name] = nil

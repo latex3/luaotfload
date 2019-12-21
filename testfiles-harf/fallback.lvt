@@ -1,0 +1,30 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+
+\directlua{
+  local cbs = luatexbase.callback_descriptions'glyph_info'
+  local desc = cbs[1]
+  assert(desc == "Harf glyph_info callback" and nil == next(cbs, 1))
+  local cb = luatexbase.remove_from_callback('glyph_info', desc)
+  luatexbase.add_to_callback('glyph_info', function(n)
+  return string.format('"\csstring\%s" \csstring\%04X \csstring\%+i:\csstring\%+i\string\t\csstring\%s', cb(n), n.char, n.xoffset, n.yoffset, font.getfont(n.font).specification.specification)
+  end, 'Harf glyph_info callback -- testing variant')
+}
+
+\directlua{luaotfload.add_fallback("myfallback", {
+    "Noto Color Emoji:mode=harf","[DejaVuSans.ttf]:mode=harf","Siddhanta:mode=harf","Noto Serif Tibetan:mode=node"
+  })}
+
+\begin{document}
+\showoutput
+\START
+\font\fonts"Noto Serif:mode=harf,multiscript=auto,fallback=myfallback"
+\fonts
+᚛ᚓᚅᚐᚁᚐᚏᚏ᚜ རྐྱກົ້ฐูà́̂̃कि Text 😺 emoji 
+
+\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
+\end{document}

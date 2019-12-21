@@ -213,7 +213,7 @@ local function makecombifont(tfmdata, _, additional_scripts)
             scr_fb = {}
             fallbacks[script] = scr_fb
           end
-          scr_fb[#scr_fb + 1] = current.specification.specification
+          scr_fb[#scr_fb + 1] = current.specification.specification .. ';script=' .. script .. ';-multiscript'
         end
         i = i - 1
         current = fallback[i]
@@ -224,7 +224,7 @@ local function makecombifont(tfmdata, _, additional_scripts)
         local collected = collect_scripts(current)
         for script, scr_fb in next, fallbacks do
           if not collected[script] then
-            scr_fb[#scr_fb + 1] = current.specification.specification
+            scr_fb[#scr_fb + 1] = current.specification.specification .. ';-multiscript'
           end
         end
         i = i - 1
@@ -236,7 +236,7 @@ local function makecombifont(tfmdata, _, additional_scripts)
           local main = scr_fb[1]
           table.remove(scr_fb, 1)
           local fbid = luaotfload.add_fallback(scr_fb)
-          additional_scripts[iso_script] = main .. ';-multiscript;script=' .. script .. ';fallback=' .. fbid
+          additional_scripts[iso_script] = main .. ';fallback=' .. fbid
         end
       end
     else

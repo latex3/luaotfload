@@ -1,0 +1,75 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+luaotfload | cache : Lookup cache loaded from /home/marcel/.texlive2019/texmf-var/luatex-cache/generic-dev/names/luaotfload-lookup-cache.luc.
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 535.70282fil, direction TLT
+...\write-{}
+...\glue(\topskip) 0.0
+...\hbox(14.23999+3.89)x345.0, glue set 142.14958fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\FONT35 "᚛" 169B +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=ogam;-multiscript;fallback=20
+....\FONT35 "ᚓ" 1693 +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=ogam;-multiscript;fallback=20
+....\FONT35 "ᚅ" 1685 +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=ogam;-multiscript;fallback=20
+....\FONT35 "ᚐ" 1690 +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=ogam;-multiscript;fallback=20
+....\FONT35 "ᚁ" 1681 +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=ogam;-multiscript;fallback=20
+....\FONT35 "ᚐ" 1690 +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=ogam;-multiscript;fallback=20
+....\FONT35 "ᚏ" 168F +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=ogam;-multiscript;fallback=20
+....\FONT35 "ᚏ" 168F +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=ogam;-multiscript;fallback=20
+....\FONT35 "᚜" 169C +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=ogam;-multiscript;fallback=20
+....\glue(\spaceskip) 2.6 plus 1.3 minus 0.86667
+....\FONT37 "󰌔" F0314 +0:+0^^INoto Serif Tibetan:mode=node;-fallback;script=tibt;-multiscript;fallback=11 (ligature "ར" 0F62 +0:+0^^INoto Serif Tibetan:mode=node;-fallback;script=tibt;-multiscript;fallback=11"ྐ" 0F90 +0:+0^^INoto Serif Tibetan:mode=node;-fallback;script=tibt;-multiscript;fallback=11"ྱ" 0FB1 +0:+0^^INoto Serif Tibetan:mode=node;-fallback;script=tibt;-multiscript;fallback=11)
+....\FONT38 "ກ" 0E81 +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=lao;-multiscript;fallback=18
+....\FONT38 "ົ" 0EBB +0:-2880^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=lao;-multiscript;fallback=18
+....\FONT38 "້" 0EC9 +0:-6080^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=lao;-multiscript;fallback=18
+....\FONT39 "ฐ" 120000 +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=thai;-multiscript;fallback=10
+....\pdfliteral page <lua data reference ...>
+....\FONT39 "ู" 120000 +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=thai;-multiscript;fallback=10
+....\pdfliteral page <lua data reference ...>
+....\FONT43 "à" 00E0 +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\FONT43 "́" 0301 -23593:+150733^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\FONT43 "̂" 0302 +5898:+301466^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\FONT43 "̃" 0303 +24248:+452198^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\pdfliteral page <lua data reference ...>
+....\FONT44 "कि" F311 +0:+0^^ISiddhanta:mode=harf;-fallback;script=deva;-multiscript;fallback=12
+....\FONT44 "" 0915 +0:+0^^ISiddhanta:mode=harf;-fallback;script=deva;-multiscript;fallback=12
+....\pdfliteral page <lua data reference ...>
+....\glue(\spaceskip) 2.6 plus 1.3 minus 0.86667
+....\FONT43 "T" 0054 +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\kern-0.5 (font)
+....\FONT43 "e" 0065 +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\FONT43 "x" 0078 +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\FONT43 "t" 0074 +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\glue(\spaceskip) 2.6 plus 1.3 minus 0.86667
+....\FONT42 "😺" 1F63A +0:+0^^I[DejaVuSans.ttf]:mode=harf;-fallback;script=latn;-multiscript;-fallback
+....\glue(\spaceskip) 2.6 plus 1.3 minus 0.86667
+....\FONT43 "e" 0065 +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\FONT43 "m" 006D +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\FONT43 "o" 006F +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\FONT43 "j" 006A +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\FONT43 "i" 0069 +0:+0^^INoto Serif:mode=harf,multiscript=auto,fallback=myfallback;script=latn;-multiscript;fallback=22
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -3.89
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.34
+..\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\TU/lmr/m/n/10 "1" 0031 +0:+0^^I[lmroman10-regular]:+tlig;
+...\glue 0.0 plus 1.0fil
+2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (fallback.aux)

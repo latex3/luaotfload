@@ -1,0 +1,34 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+
+\directlua{
+  local cbs = luatexbase.callback_descriptions'glyph_info'
+  local desc = cbs[1]
+  assert(desc == "Harf glyph_info callback" and nil == next(cbs, 1))
+  local cb = luatexbase.remove_from_callback('glyph_info', desc)
+  luatexbase.add_to_callback('glyph_info', function(n)
+    return string.format('"\csstring\%s" \csstring\%04X \csstring\%+i:\csstring\%+i', cb(n), n.char, n.xoffset, n.yoffset)
+  end, 'Harf glyph_info callback -- testing variant')
+}
+
+\begin{document}
+\showoutput
+\START
+\font\mydflt [Siddhanta]:mode=harf,script=dflt\mydflt
+à́̂̃कि
+
+\font\mylatn [Siddhanta]:mode=harf,script=latn\mylatn
+à́̂̃कि
+
+\font\mydeva [Siddhanta]:mode=harf,script=deva\mydeva
+à́̂̃कि
+
+\font\mymulti [Siddhanta]:mode=harf,multiscript=auto\mymulti
+à́̂̃कि
+
+\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
+\end{document}

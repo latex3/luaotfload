@@ -1,0 +1,100 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 497.07782fil, direction TLT
+...\write-{}
+...\glue(\topskip) 0.0
+...\hbox(12.86182+0.14182)x345.0, glue set 316.03998fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\mydflt "à" 00E0 +0:+0
+....\mydflt "́" 0301 +0:+0
+....\mydflt "̂" 0302 +0:+166819
+....\mydflt "̃" 0303 +0:+333638
+....\mydflt "क" 0915 +0:+0
+....\mydflt "ि" 093F +0:+0
+....\kern-2.90909 (font)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\lineskip) 1.0
+...\hbox(12.86182+0.14182)x345.0, glue set 316.03998fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\mylatn "à" 00E0 +0:+0
+....\mylatn "́" 0301 +0:+0
+....\mylatn "̂" 0302 +0:+166819
+....\mylatn "̃" 0303 +0:+333638
+....\mylatn "क" 0915 +0:+0
+....\mylatn "ि" 093F +0:+0
+....\kern-2.90909 (font)
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\baselineskip) 2.58546
+...\hbox(9.27272+0.14182)x345.0, glue set 313.13092fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\mydeva "à" 00E0 +0:+0
+....\mydeva "́" 0301 +0:+0
+....\mydeva "̂" 0302 +0:+0
+....\mydeva "̃" 0303 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\mydeva "कि" F311 +0:+0
+....\mydeva "" 0915 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\lineskip) 1.0
+...\hbox(12.86182+0.14182)x345.0, glue set 313.13092fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\FONT30 "à" 00E0 +0:+0
+....\FONT30 "́" 0301 +0:+0
+....\FONT30 "̂" 0302 +0:+166819
+....\FONT30 "̃" 0303 +0:+333638
+....\pdfliteral page <lua data reference ...>
+....\FONT31 "कि" F311 +0:+0
+....\FONT31 "" 0915 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -0.14182
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.34
+..\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\TU/lmr/m/n/10 "1" 0031 +0:+0
+...\glue 0.0 plus 1.0fil
+2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (multiscript-auto.aux)

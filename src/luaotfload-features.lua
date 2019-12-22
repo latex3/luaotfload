@@ -29,6 +29,8 @@ local R                 = lpeg.R
 local S                 = lpeg.S
 local C                 = lpeg.C
 
+local lower             = string.lower
+
 local table             = table
 local tabletohash       = table.tohash
 local tablesort         = table.sort
@@ -244,8 +246,7 @@ local apply_default_features = function (rawlist)
     local speclist = {}
     for k, v in pairs(rawlist) do
         if type(v) == 'string' then
-            v = string.lower(v)
-            v = ({['true'] = true, ['false'] = false})[v] or v
+            v = ({['true'] = true, ['false'] = false})[lower(v)] or v
         end
         speclist[k] = v
     end
@@ -256,8 +257,8 @@ local apply_default_features = function (rawlist)
 
     --- handle language tag
     local language = speclist.language
-    if language then --- already lowercase at this point
-        language = stringgsub(language, "[^a-z0-9]", "")
+    if language then
+        language = stringgsub(lower(language), "[^a-z0-9]", "")
         language = rawget(verboselanguages, language) -- srsly, rawget?
                 or (languages[language] and language)
                 or "dflt"
@@ -269,7 +270,7 @@ local apply_default_features = function (rawlist)
     --- handle script tag
     local script = speclist.script
     if script then
-        script = stringgsub(script, "[^a-z0-9]","")
+        script = stringgsub(lower(script), "[^a-z0-9]","")
         script = rawget(verbosescripts, script)
               or (scripts[script] and script)
               or "dflt"
@@ -430,9 +431,12 @@ local handle_request = function (specification)
     features.normal = normalize (request.features)
     specification.sub = request.sub or specification.sub or false
 
-    if request.features and request.features.mode
-          and fonts.readers[request.features.mode] then
-        specification.forced = request.features.mode
+    local forced_mode = request.features and request.features.mode
+    if forced_mode then
+        forced_mode = lower(forced_mode)
+        if fonts.readers[forced_mode] then
+            specification.forced = forced_mode
+        end
     end
 
     return specification

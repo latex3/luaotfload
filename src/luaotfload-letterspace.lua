@@ -82,6 +82,7 @@ local fonthashes         = fonts.hashes
 local identifiers        = fonthashes.identifiers
 local chardata           = fonthashes.characters
 local otffeatures        = fonts.constructors.newfeatures "otf"
+local markdata
 
 local function getprevreal(n)
   repeat
@@ -142,6 +143,21 @@ if not chardata then
     end
   end)
   fonthashes.characters = chardata
+end
+
+if not markdata then
+  markdata = setmetatable({}, {__index = function(t, k)
+    if k == true then
+      return t[currentfont()]
+    else
+      local tfmdata = font.getfont(k) or font.fonts[k]
+      if tfmdata then
+        local marks = tfmdata.resources.marks or {}
+        t[k] = marks
+        return marks
+      end
+    end
+  end})
 end
 
 ---=================================================================---
@@ -334,7 +350,7 @@ kerncharacters = function (head)
                   local kern = 0
                   local kerns = prevchardata.kerns
                   if kerns then kern = kerns[lastchar] or kern end
-                  krn = kern + krn -- here
+                  krn = kern + (markdata[lastfont][lastchar] and 0 or krn) -- here
                   insert_node_before(head,start,kern_injector(fillup,krn))
                 end
               end
@@ -409,7 +425,7 @@ kerncharacters = function (head)
                   if kerns then kern = kerns[lastchar] or kern end
                 end
               end
-              krn = kern + krn -- here
+              krn = kern + (markdata[lastfont][lastchar] and 0 or krn) -- here
             end
             setfield(disc, "replace", kern_injector(false, krn))
           end --[[if replace and prv and nxt]]

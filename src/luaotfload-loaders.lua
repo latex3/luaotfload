@@ -120,10 +120,23 @@ end
 
 local definers --- (string, spec -> size -> id -> tmfdata) hash_t
 do
-  local read = fonts.definers.read
+  local ctx_read = fonts.definers.read
+  local register = fonts.definers.register
+  local function read(specification, size, id)
+    local tfmdata = ctx_read(specification, size, id)
+    if tonumber(tfmdata) then
+      return tfmdata
+    end
+    if not id then
+      id = font.define(tfmdata)
+      register(tfmdata, id)
+      return id
+    end
+    return tfmdata
+  end
 
   local patch = function (specification, size, id)
-    local fontdata = read (specification, size, id)
+    local fontdata = ctx_read (specification, size, id)
 ----if not fontdata then not_found_msg (specification, size, id) end
     if type (fontdata) == "table" and fontdata.encodingbytes == 2 then
       --- We need to test for `encodingbytes` to avoid passing
@@ -132,6 +145,14 @@ do
       luatexbase.call_callback ("luaotfload.patch_font", fontdata, specification, id)
     else
       luatexbase.call_callback ("luaotfload.patch_font_unsafe", fontdata, specification, id)
+    end
+    if tonumber(fontdata) then
+      return fontdata
+    end
+    if not id then
+      id = font.define(fontdata)
+      register(fontdata, id)
+      return id
     end
     return fontdata
   end

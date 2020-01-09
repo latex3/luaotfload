@@ -193,6 +193,17 @@ local function loadfont(spec)
   end
   cached.face = hbface
   cached.font = hbfont
+  do
+    local nominals = cached.nominals
+    local gid_offset = cached.gid_offset
+    cached.name_to_char = setmetatable({}, {__index = function(t, name)
+      local gid = hbfont:get_glyph_from_name(name)
+      local char = gid and (nominals[gid] or gid_offset + gid)
+      t[name] = char -- ? Do we want this
+      return char
+    end})
+  end
+
   return cached
 end
 
@@ -356,6 +367,9 @@ local function scalefont(data, spec)
     specification = spec,
     shared = {},
     properties = {},
+    resources = {
+      unicodes = data.name_to_char,
+    },
   }
   tfmdata.shared.processes = fonts.handlers.otf.setfeatures(tfmdata, features)
   fonts.constructors.applymanipulators("otf", tfmdata, features, false)

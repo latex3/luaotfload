@@ -42,6 +42,7 @@ local tonode                = nodedirect.tonode
 local setfield              = nodedirect.setfield
 local getid                 = nodedirect.getid
 local getfont               = nodedirect.getfont
+local getchar               = nodedirect.getchar
 local getlist               = nodedirect.getlist
 local getsubtype            = nodedirect.getsubtype
 local getnext               = nodedirect.getnext
@@ -198,9 +199,14 @@ color_whatsit = function (head, curr, color, push, tail)
 end
 
 -- number -> string | nil
-local get_font_color = function (font_id)
+local get_glyph_color = function (font_id, char)
     local tfmdata    = identifiers[font_id]
     local font_color = tfmdata and tfmdata.properties and tfmdata.properties.color
+    if type(font_color) == "table" then
+        local char_tbl = tfmdata.characters[char]
+        char = char_tbl and (char_tbl.index or char)
+        return char and font_color[char] or font_color.default
+    end
     return font_color
 end
 
@@ -235,21 +241,21 @@ node_colorize = function (head, toplevel, current_color)
             --- colorization is restricted to those fonts
             --- that received the “color” property upon
             --- loading (see ``setcolor()`` above)
-            local font_color = get_font_color(getfont(n))
-            if font_color ~= current_color then
+            local glyph_color = get_glyph_color(getfont(n), getchar(n))
+            if glyph_color ~= current_color then
                 if current_color then
                     head, n, current_color = color_whatsit(head, n, current_color, false)
                 end
-                if font_color then
-                    head, n, current_color = color_whatsit(head, n, font_color, true)
+                if glyph_color then
+                    head, n, current_color = color_whatsit(head, n, glyph_color, true)
                 end
             end
 
             if current_color and color_callback == "pre_linebreak_filter" then
                 local nn = getnext(n)
                 while nn and getid(nn) == glyph_t do
-                    local font_color = get_font_color(getfont(nn))
-                    if font_color == current_color then
+                    local glyph_color = get_glyph_color(getfont(nn), getchar(nn))
+                    if glyph_color == current_color then
                         n = nn
                     else
                         break
@@ -381,14 +387,56 @@ end
 ---         hexadecimal, with an optional fourth transparency
 ---         value)
 ---
-local setcolor = function (tfmdata, value)
-    local sanitized  = sanitize_color_expression(value)
+local glyph_color_tables = { }
+-- Currently this either sets a common color for the whole font or
+-- builds a GID lookup table. This might change later to replace the
+-- lookup table with color information in the character hash. The
+-- problem with that approach right now are differences between harf
+-- and node and difficulties with getting the mapped unicode value for
+-- a GID.
+local function setcolor (tfmdata, value)
+    local sanitized
+    local color_table = glyph_color_tables[tonumber(value) or value]
+    if color_table then
+        sanitized = {}
+        local unicodes = tfmdata.resources.unicodes
+        local gid_mapping = {}
+        local descriptions = tfmdata.descriptions or tfmdata.characters
+        for color, glyphs in next, color_table do
+            for _, glyph in ipairs(glyphs) do
+                local gid = glyph == "default" and "default" or tonumber(glyph)
+                if not gid then
+                    local unicode = unicodes[glyph]
+                    local desc = unicode and descriptions[unicode]
+                    gid = desc and (desc.index or unicode)
+                end
+                if gid then
+                    sanitized[gid] = sanitize_color_expression(color)
+                else
+                    -- TODO: ??? Error out, warn or just ignore? Ignore
+                    -- makes sense because we have to ignore for GIDs
+                    -- anyway.
+                end
+            end
+        end
+    else
+        sanitized = sanitize_color_expression(value)
+    end
     local properties = tfmdata.properties
 
     if sanitized then
         properties.color = sanitized
         add_color_callback()
     end
+end
+
+function luaotfload.add_colorscheme(name, colortable)
+  if fonts == nil then
+    fonts = name
+    name = #glyph_color_tables + 1
+  end
+  glyph_color_tables[name] = colortable
+  return name
 end
 
 return function ()

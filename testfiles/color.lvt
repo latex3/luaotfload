@@ -3,8 +3,15 @@
 \documentclass{article}
 \usepackage{unicode-math}
 
+\directlua{
+  luaotfload.add_colorscheme("my_scheme", {
+    ["0000FF"] = {"default"},
+    ["FF00FF"] = {"one", 1140}, % 1140 is the GID of "three"
+    ["12345678"] = {"plus"},
+  })
+}
 \setmainfont{STIX Two Text}[Color=00FF00]
-\setmathfont{STIX Two Math}[Color=FF00FF, StylisticSet=08]
+\setmathfont{STIX Two Math}[RawFeature={color=my_scheme}, StylisticSet=08]
 
 \begin{document}
 \START \showoutput

@@ -118,12 +118,19 @@ Completed box being shipped out [1]
 ....\pdfcolorstack 0 push {1 0 1 rg}
 ....\TU/STIXTwoMath(1)/m/n/10 1
 ....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+....\pdfcolorstack 0 pop
+....\pdfcolorstack 0 push {/TransGs0.471 gs 0.0706 0.204 0.337 rg}
 ....\TU/STIXTwoMath(1)/m/n/10 +
 ....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+....\pdfcolorstack 0 pop
+....\pdfliteral direct <lua data reference ...>
+....\pdfcolorstack 0 push {0 0 1 rg}
 ....\TU/STIXTwoMath(1)/m/n/10 2
 ....\glue(\thickmuskip) 2.77748 plus 2.77748
 ....\TU/STIXTwoMath(1)/m/n/10 ≠
 ....\glue(\thickmuskip) 2.77748 plus 2.77748
+....\pdfcolorstack 0 pop
+....\pdfcolorstack 0 push {1 0 1 rg}
 ....\TU/STIXTwoMath(1)/m/n/10 3
 ....\pdfcolorstack 0 pop
 ...\penalty 0
@@ -221,12 +228,19 @@ Completed box being shipped out [1]
 .....\pdfcolorstack 0 push {1 0 1 rg}
 .....\TU/STIXTwoMath(1)/m/n/10 1
 .....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+.....\pdfcolorstack 0 pop
+.....\pdfcolorstack 0 push {/TransGs0.471 gs 0.0706 0.204 0.337 rg}
 .....\TU/STIXTwoMath(1)/m/n/10 +
 .....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+.....\pdfcolorstack 0 pop
+.....\pdfliteral direct <lua data reference ...>
+.....\pdfcolorstack 0 push {0 0 1 rg}
 .....\TU/STIXTwoMath(1)/m/n/10 2
 .....\glue(\thickmuskip) 2.77748 plus 2.77748
 .....\TU/STIXTwoMath(1)/m/n/10 ≠
 .....\glue(\thickmuskip) 2.77748 plus 2.77748
+.....\pdfcolorstack 0 pop
+.....\pdfcolorstack 0 push {1 0 1 rg}
 .....\TU/STIXTwoMath(1)/m/n/10 3
 .....\pdfcolorstack 0 pop
 ....\penalty 0

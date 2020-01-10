@@ -638,7 +638,7 @@ function aux.provides_feature(font_id,        asked_script,
                                                         or asked_script)
     local language = harf.Tag.new(asked_language == "DFLT" and "dflt"
                                                             or asked_language)
-    local feature = harf.Tag.new(feature)
+    local feature = harf.Tag.new(asked_feature)
 
     for _, tag in next, { GSUBtag, GPOStag } do
       local _, script_idx = hbface:ot_layout_find_script(tag, script)

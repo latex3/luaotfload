@@ -1173,10 +1173,6 @@ Completed box being shipped out [1]
 ...\glue 0.0 plus 1.0fil
 ...\TU/Amiri(0)/m/n/10 "1" 0031 +0:+0
 ...\glue 0.0 plus 1.0fil
-luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language dflt
-luaotfload | aux : font no 30 (nil) does not define feature smcp for script arab with language dflt
-luaotfload | aux : font no 31 (nil) does not define feature smcp for script arab with language dflt
-luaotfload | aux : font no 32 (nil) does not define feature smcp for script arab with language dflt
 Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with
 (fontspec)             options
 (fontspec)             [Extension=.ttf,UprightFont=*-Regular,ItalicFont=*-Slanted,BoldFont=*-Bold,BoldItalicFont=*-BoldSlanted,Renderer=Harfbuzz,Script=Arabic,Scale=1.6].
@@ -1192,10 +1188,10 @@ Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with
 (fontspec)             - 'bold small caps'  (bx/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->s*[1.6]"[Amiri-Slanted.ttf]:mode=harf;script=arab;language=DFLT;"
-(fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.: 
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
 (fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
 (fontspec)             <->s*[1.6]"[Amiri-BoldSlanted.ttf]:mode=harf;script=arab;language=DFLT;"
-(fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.: 
+(fontspec)             - 'bold italic small caps'  (bx/scit) with NFSS spec.: 
 LaTeX Font Info:    Font shape `TU/Amiri(1)/m/n' will be
 (Font)              scaled to size 16.00006pt on input line ....
 Completed box being shipped out [2]
@@ -2269,7 +2265,6 @@ Completed box being shipped out [2]
 ...\glue 0.0 plus 1.0fil
 ...\TU/Amiri(0)/m/n/10 "2" 0032 +0:+0
 ...\glue 0.0 plus 1.0fil
-luaotfload | aux : font no 37 (nil) does not define feature smcp for script arab with language dflt
 Package fontspec Info: Font family 'ArefRuqaa-Regular.ttf(0)' created for font
 (fontspec)             'ArefRuqaa-Regular.ttf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Arabic,Scale=1.2].
@@ -4524,7 +4519,6 @@ Completed box being shipped out [3]
 ...\glue 0.0 plus 1.0fil
 ...\TU/Amiri(0)/m/n/10 "3" 0033 +0:+0
 ...\glue 0.0 plus 1.0fil
-luaotfload | aux : font no 40 (nil) does not define feature smcp for script arab with language dflt
 Package fontspec Info: Font family 'NotoNastaliqUrdu-Regular.ttf(0)' created
 (fontspec)             for font 'NotoNastaliqUrdu-Regular.ttf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Arabic].

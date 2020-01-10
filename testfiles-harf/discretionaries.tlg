@@ -1,9 +1,5 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
-luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
-luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
-luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'NotoSerifCJK-Regular.ttc(1)' created for
 (fontspec)             font 'NotoSerifCJK-Regular.ttc' with options
 (fontspec)             [Ligatures=TeX,Renderer=Harfbuzz,Script=Latin,Ligatures=TeXOff].
@@ -19,11 +15,10 @@ Package fontspec Info: Font family 'NotoSerifCJK-Regular.ttc(1)' created for
 (fontspec)             - 'bold small caps'  (bx/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
-(fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.: 
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
 (fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
 (fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
-(fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.: 
-luaotfload | aux : font no 33 (nil) does not define feature smcp for script latn with language dflt
+(fontspec)             - 'bold italic small caps'  (bx/scit) with NFSS spec.: 
 Package fontspec Info: Font family 'lmroman10-regular.otf(0)' created for font
 (fontspec)             'lmroman10-regular.otf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Latin,Ligatures=Discretionary,Ligatures=TeX].
@@ -34,7 +29,6 @@ Package fontspec Info: Font family 'lmroman10-regular.otf(0)' created for font
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
 (fontspec)             <->"[lmroman10-regular.otf]:mode=harf;script=latn;language=DFLT;+dlig;+tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
-luaotfload | aux : font no 33 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmroman10-regular.otf(1)' created for font
 (fontspec)             'lmroman10-regular.otf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Latin,Ligatures=Discretionary,Ligatures=TeX,Ligatures=TeXOff].

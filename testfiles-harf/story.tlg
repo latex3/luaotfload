@@ -1,6 +1,5 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-luaotfload | aux : font no 32 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmroman10-bold.otf(0)' created for font
 (fontspec)             'lmroman10-bold.otf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Latin].
@@ -11,7 +10,6 @@ Package fontspec Info: Font family 'lmroman10-bold.otf(0)' created for font
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
 (fontspec)             <->"[lmroman10-bold.otf]:mode=harf;script=latn;language=DFLT;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
-luaotfload | aux : font no 34 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmromanslant10-regular.otf(0)' created for
 (fontspec)             font 'lmromanslant10-regular.otf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Latin].
@@ -22,7 +20,6 @@ Package fontspec Info: Font family 'lmromanslant10-regular.otf(0)' created for
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
 (fontspec)             <->"[lmromanslant10-regular.otf]:mode=harf;script=latn;language=DFLT;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
-luaotfload | aux : font no 36 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmroman12-regular.otf(0)' created for font
 (fontspec)             'lmroman12-regular.otf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Latin,Scale=1.2].
@@ -396,7 +393,6 @@ Completed box being shipped out [1]
 ...\glue 0.0 plus 1.0fil
 ...\TU/lmroman10-regular.otf(0)/m/n/10 "1" 0031 +0:+0
 ...\glue 0.0 plus 1.0fil
-luaotfload | aux : font no 29 (nil) does not define feature smcp for script latn with language dflt
 Package fontspec Info: Font family 'lmroman10-regular.otf(1)' created for font
 (fontspec)             'lmroman10-regular.otf' with options
 (fontspec)             [Ligatures=TeX,Renderer=Harfbuzz,Script=Latin].

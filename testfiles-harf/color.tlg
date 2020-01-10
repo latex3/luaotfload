@@ -1,9 +1,5 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-luaotfload | aux : font no 29 (nil) does not define feature smcp for script arab with language dflt
-luaotfload | aux : font no 30 (nil) does not define feature smcp for script arab with language dflt
-luaotfload | aux : font no 31 (nil) does not define feature smcp for script arab with language dflt
-luaotfload | aux : font no 32 (nil) does not define feature smcp for script arab with language dflt
 Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with
 (fontspec)             options
 (fontspec)             [Ligatures=TeX,Extension=.ttf,UprightFont=*-Regular,ItalicFont=*-Slanted,BoldFont=*-Bold,BoldItalicFont=*-BoldSlanted,Renderer=Harfbuzz,Script=Arabic,Color=FF000080].
@@ -19,10 +15,10 @@ Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with
 (fontspec)             - 'bold small caps'  (bx/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->"[Amiri-Slanted.ttf]:mode=harf;script=arab;language=DFLT;+tlig;color=FF000080;"
-(fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.: 
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
 (fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
 (fontspec)             <->"[Amiri-BoldSlanted.ttf]:mode=harf;script=arab;language=DFLT;+tlig;color=FF000080;"
-(fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.: 
+(fontspec)             - 'bold italic small caps'  (bx/scit) with NFSS spec.: 
 Inserting `luaotfload.color_handler' at position 1 in `post_linebreak_filter'.
 Inserting `luaotfload.color_handler' at position 2 in `hpack_filter'.
 Inserting `luaotfload.color_handler' at position 1 in `mlist_to_hlist'.

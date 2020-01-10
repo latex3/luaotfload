@@ -22,13 +22,13 @@ Package fontspec Info: Font family 'STIXTwoText(2)' created for font 'STIX Two
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=DFLT;+tlig;color=FF0000FF
 (fontspec)             ;"
-(fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.:
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.:
 (fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=FF0000FF
 (fontspec)             ;"
 (fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
 (fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=DFLT;+tlig;color=FF0000FF
 (fontspec)             ;"
-(fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.:
+(fontspec)             - 'bold italic small caps'  (bx/scit) with NFSS spec.:
 (fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=FF0000FF
 (fontspec)             ;"
 Package fontspec Info: Font family 'STIXTwoText(3)' created for font 'STIX Two
@@ -53,13 +53,13 @@ Package fontspec Info: Font family 'STIXTwoText(3)' created for font 'STIX Two
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=DFLT;+tlig;color=0000FFFF
 (fontspec)             ;"
-(fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.:
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.:
 (fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=0000FFFF
 (fontspec)             ;"
 (fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
 (fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=DFLT;+tlig;color=0000FFFF
 (fontspec)             ;"
-(fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.:
+(fontspec)             - 'bold italic small caps'  (bx/scit) with NFSS spec.:
 (fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=DFLT;+tlig;+smcp;color=0000FFFF
 (fontspec)             ;"
 Completed box being shipped out [1]

@@ -40,10 +40,13 @@ local insert_node_after     = nodedirect.insert_after
 local todirect              = nodedirect.todirect
 local tonode                = nodedirect.tonode
 local setfield              = nodedirect.setfield
+local setdisc               = nodedirect.setdisc
+local setreplace            = nodedirect.setreplace
 local getid                 = nodedirect.getid
 local getfont               = nodedirect.getfont
 local getchar               = nodedirect.getchar
 local getlist               = nodedirect.getlist
+local getdisc               = nodedirect.getdisc
 local getsubtype            = nodedirect.getsubtype
 local getnext               = nodedirect.getnext
 local nodetail              = nodedirect.tail
@@ -236,6 +239,11 @@ node_colorize = function (head, toplevel, current_color)
                 end
                 setfield(n, "head", n_list)
             end
+
+        elseif n_id == disc_t then
+            local n_pre, n_post, n_replace = getdisc(n)
+            n_replace, current_color = node_colorize(n_replace, false, current_color)
+            setdisc(n, n_pre, n_post, n_replace)
 
         elseif n_id == glyph_t then
             --- colorization is restricted to those fonts

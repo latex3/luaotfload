@@ -17,11 +17,11 @@ Package fontspec Info: Font family 'texgyretermes(1)' created for font
 (fontspec)             <->"texgyretermes/B:mode=node;script=latn;language=DFLT;+tlig;embolden=2;+smcp;"
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->"texgyretermes/I:mode=node;script=latn;language=DFLT;+tlig;embolden=2;"
-(fontspec)             - 'italic small caps'  (m/itsc) with NFSS spec.:
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.:
 (fontspec)             <->"texgyretermes/I:mode=node;script=latn;language=DFLT;+tlig;embolden=2;+smcp;"
 (fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
 (fontspec)             <->"texgyretermes/BI:mode=node;script=latn;language=DFLT;+tlig;embolden=2;"
-(fontspec)             - 'bold italic small caps'  (bx/itsc) with NFSS spec.:
+(fontspec)             - 'bold italic small caps'  (bx/scit) with NFSS spec.:
 (fontspec)             <->"texgyretermes/BI:mode=node;script=latn;language=DFLT;+tlig;embolden=2;+smcp;"
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT

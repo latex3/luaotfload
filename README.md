@@ -33,7 +33,7 @@ The main ongoing development is in the dev branch. If you clone the git and run 
 in the main folder the files will be installed in 
 the latex-dev part of your TEXMFHOME or the texmf you gave as option to the command 
 (see the l3build documentation for details). 
-They can then be tested with [lualatex-dev](https://www.latex-project.org/news/2019/09/01/LaTeX-dev-format/)
+They can then be tested with [lualatex-dev](https://www.latex-project.org/news/2019/09/01/LaTeX-dev-format/).
 Very experimental stuff is in the various other dev branches.  
 
 ## Pull requests

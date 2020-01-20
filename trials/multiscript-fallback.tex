@@ -1,0 +1,114 @@
+\documentclass{article}
+
+\usepackage{fontspec}
+\directlua
+{luaotfload.add_fallback
+ ("myfallback",
+  {
+   "DejaVuSans:mode=harf;script=greek;",
+   "Cambria:mode=node;script=cyrl;",
+   "NotoSansBengali:mode=harf;script=bng2"
+  }
+ )
+
+ luaotfload.add_fallback
+ ("mygreekfallback",
+  {
+    "DejaVuSans:mode=harf;script=grek;",
+  }
+ )
+
+ luaotfload.add_fallback
+ ("mycyrlfallback",
+  {
+    "Cambria:mode=node;script=cyrl;",
+  }
+ )
+
+ luaotfload.add_multiscript
+ ("cyrl_grek_beng",
+  {
+    cyrl = "Cambria:mode=node;script=cyrl",
+    grek = "DejaVuSans:mode=harf;script=grek",
+    beng = "NotoSansBengali:mode=harf;script=beng"
+  }
+ )
+
+
+ luaotfload.add_multiscript
+ ("cyrl_grek_bng2",
+  {
+    cyrl = "Cambria:mode=node;script=cyrl",
+    grek = "DejaVuSans:mode=harf;script=grek",
+    bng2 = "NotoSansBengali:mode=harf;script=bng2"
+  }
+ )
+}
+\begin{document}
+
+\begin{itemize}
+\item a!? π!? a БѨ!? a \char"0995\char"09BF
+
+\item \verb+{multiscript=cyrl_grek_beng}+:
+
+-- Why does only beng but not bng2 work?
+
+-- Why does multiscript trigger fallback fonts? 
+
+\fontspec{Latin Modern Roman}[RawFeature={multiscript=cyrl_grek_beng}]
+a!? π!? a БѨ!? a \char"0995\char"09BF
+
+\item \verb+{multiscript=cyrl_grek_bng2}+:
+
+\fontspec{Latin Modern Roman}[RawFeature={multiscript=cyrl_grek_bng2}]
+a!? π!? a БѨ!? a \char"0995\char"09BF
+
+\item \verb+{multiscript=cyrl_grek_beng,fallback=myfallback}+:
+
+\fontspec{Latin Modern Roman}[RawFeature={multiscript=cyrl_grek_beng,fallback=myfallback}]
+a!? π!? a БѨ!? \char"0995\char"09BF
+
+\item \verb+{multiscript=cyrl_grek_bng2,fallback=myfallback}+:
+
+\fontspec{Latin Modern Roman}[RawFeature={multiscript=cyrl_grek_bng2,fallback=myfallback}]
+a!? π!? a БѨ!? \char"0995\char"09BF
+
+\item \verb+{multiscript=auto,fallback=myfallback}+:
+
+-- Why is the last !? in latin modern?
+
+\fontspec{Latin Modern Roman}[RawFeature={multiscript=auto,fallback=myfallback}]
+a!? π!? a БѨ!? \char"0995\char"09BF
+
+\item \verb+{fallback=myfallback}+:
+
+-- What are the draw backs of the missing multiscript? 
+
+\fontspec{Latin Modern Roman}[RawFeature={fallback=myfallback}]
+a!? π!? a БѨ!? \char"0995\char"09BF
+
+\item \verb+fallback=mygreekfallback+
+
+-- is the script wrong for cyrillic?
+
+\fontspec{Latin Modern Roman}[RawFeature={fallback=mygreekfallback}]
+a!? π!? a БѨ!? \char"0995\char"09BF
+
+\item \verb+fallback=mycyrlfallback+
+
+\fontspec{Latin Modern Roman}[RawFeature={fallback=mycyrlfallback}]
+a!? π!? a БѨ!? \char"0995\char"09BF
+
+\item \verb!multiscript=auto+cyrl_grek_bng2,fallback=myfallback!
+
+-- Does \verb+cyrl_grek_bng2+ anything here?
+
+\fontspec{Latin Modern Roman}[RawFeature={multiscript=auto+cyrl_grek_beng,fallback=myfallback}]
+a!? π!? a БѨ!? \char"0995\char"09BF
+
+
+\item How to setup the π in dejavu (with script grek), the БѨ in cambria (script cyrl), and all !? in latin modern (script=latn?)?
+    
+\item How to handle that some fonts cover one script and some more?
+\end{itemize}
+\end{document}

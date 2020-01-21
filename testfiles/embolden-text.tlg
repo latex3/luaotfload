@@ -11,17 +11,17 @@ Package fontspec Info: Font family 'texgyretermes(1)' created for font
 (fontspec)             <->"texgyretermes:mode=node;script=latn;language=DFLT;+tlig;embolden=2;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
 (fontspec)             <->"texgyretermes:mode=node;script=latn;language=DFLT;+tlig;embolden=2;+smcp;"
-(fontspec)             - 'bold' (bx/n) with NFSS spec.:
+(fontspec)             - 'bold' (b/n) with NFSS spec.:
 (fontspec)             <->"texgyretermes/B:mode=node;script=latn;language=DFLT;+tlig;embolden=2;"
-(fontspec)             - 'bold small caps'  (bx/sc) with NFSS spec.:
+(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.:
 (fontspec)             <->"texgyretermes/B:mode=node;script=latn;language=DFLT;+tlig;embolden=2;+smcp;"
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->"texgyretermes/I:mode=node;script=latn;language=DFLT;+tlig;embolden=2;"
 (fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.:
 (fontspec)             <->"texgyretermes/I:mode=node;script=latn;language=DFLT;+tlig;embolden=2;+smcp;"
-(fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
+(fontspec)             - 'bold italic' (b/it) with NFSS spec.:
 (fontspec)             <->"texgyretermes/BI:mode=node;script=latn;language=DFLT;+tlig;embolden=2;"
-(fontspec)             - 'bold italic small caps'  (bx/scit) with NFSS spec.:
+(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.:
 (fontspec)             <->"texgyretermes/BI:mode=node;script=latn;language=DFLT;+tlig;embolden=2;+smcp;"
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT

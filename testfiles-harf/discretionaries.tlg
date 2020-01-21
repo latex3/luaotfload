@@ -10,15 +10,15 @@ Package fontspec Info: Font family 'NotoSerifCJK-Regular.ttc(1)' created for
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
 (fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
-(fontspec)             - 'bold' (bx/n) with NFSS spec.:
+(fontspec)             - 'bold' (b/n) with NFSS spec.:
 (fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
-(fontspec)             - 'bold small caps'  (bx/sc) with NFSS spec.: 
+(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
 (fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
-(fontspec)             - 'bold italic' (bx/it) with NFSS spec.:
+(fontspec)             - 'bold italic' (b/it) with NFSS spec.:
 (fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
-(fontspec)             - 'bold italic small caps'  (bx/scit) with NFSS spec.: 
+(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: 
 Package fontspec Info: Font family 'lmroman10-regular.otf(0)' created for font
 (fontspec)             'lmroman10-regular.otf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Latin,Ligatures=Discretionary,Ligatures=TeX].

@@ -404,9 +404,11 @@ Package fontspec Info: Font family 'lmroman10-regular.otf(1)' created for font
 (fontspec)             <->"[lmroman10-regular.otf]:mode=harf;script=latn;language=DFLT;+tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (../story.tex
-LaTeX Font Warning: Font shape `TU/lmroman10-regular.otf(0)/bx/n' undefined
+LaTeX Font Warning: Font shape `TU/lmroman10-regular.otf(0)/b/n' undefined
 (Font)              using `TU/lmroman10-regular.otf(0)/m/n' instead on input line ....
 LaTeX Font Warning: Font shape `TU/lmroman10-regular.otf(0)/m/sl' undefined
+(Font)              using `TU/lmroman10-regular.otf(0)/m/it' instead on input line ....
+LaTeX Font Warning: Font shape `TU/lmroman10-regular.otf(0)/m/it' undefined
 (Font)              using `TU/lmroman10-regular.otf(0)/m/n' instead on input line ....
 Completed box being shipped out [2]
 \vbox(633.0+0.0)x407.0, direction TLT

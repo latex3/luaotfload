@@ -62,10 +62,20 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \endsection
 
 \beginsection{Changes}
+\beginsubsection {New in version 3.12 (by Ulrike Fischer/Marcel Krüger)}
+\begin{itemize}
+\item Corrected a number of small bugs in harf mode.
+\item  Extension\marginpar{Experimental!} of the \identifier{color} key to allow 
+coloring of specific output glyphs
+\item  A\marginpar{Experimental!} new \identifier{fallback} key to allow to define fallback fonts.
+\item  A\marginpar{Experimental!} new \identifier{multiscript} key to allow to use a font
+for more than one script. 
+\end{itemize}
+
 \beginsubsection {New in version 3.11 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
 \item Changed the handling of the \identifier{script} key in harf mode to be more compatible with behaviour of the node mode. It now expects the name of a script that is actually in the font instead of a ISO 15924 script tag. See issue 117.
-\item Corrected a number of small typos and bugs in harf mode.    
+\item Corrected a number of small typos and bugs in harf mode.
 \end{itemize}
 \beginsubsection {New in version 3.1 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
@@ -771,7 +781,7 @@ obviously, \inlinecode{random}.
 
          \identifier{harf} mode is new in version 3.1 and needs the new \identifier{luahbtex} engine (the mode is ignored if \identifier{luahbtex} is not used). With it is possible to render a font using the harfbuzz library in-built in the new engine. \identifier{harf} mode improves greatly the rendering of indic and arabic scripts and is highly recommended for such scripts.
 
-         When using \identifier{harf} mode it is required to set also the script correctly. 
+         When using \identifier{harf} mode it is required to set also the script correctly.
 
 
          \beginlisting
@@ -839,6 +849,42 @@ obviously, \inlinecode{random}.
          \beginlisting
       \font \test = "Latin Modern Roman:color=FF0000BB"
          \endlisting
+         
+         Experimental!\marginpar{\mbox{}\hfill NEW in v3.12!} The \identifier{color} key has been
+         extended to accept a table with color declarations of (output) glyphs. For example
+         
+         \beginlisting   
+         \directlua{
+           luaotfload.add_colorscheme("myscheme",
+           {
+             ["00FFFF30"] = {"default"},
+             ["FF0000"] = {"kabeng","ebeng"},
+             ["00FF00"] = {"ivowelsignbeng"},
+             ["0000FF"] = {369} %% 369 is the GID of "nadarabeng"
+           })
+           }
+          \endlisting 
+          
+          The keys in such a table are like above RGB colors with an optional transparency setting.
+          The values are either lists of glyph names or GID numbers. 
+          Both types are font dependant! Not every font use the same
+          glyph names (or even glyph names at all). GID number are font specific anyway. The GID can be found 
+          by looking up the \verb+["index"]+ entry in the lua file of a font.
+          
+          Such a colorscheme can then be used like this:
+          \beginlisting   
+          \font\test={name:Noto Sans Bengali:mode=harf;script=bng2;color=myscheme}
+          \endlisting
+          
+          and then would give this output:
+          
+          
+          {\font\test={name:Noto Sans Bengali:mode=harf;script=bng2;color=myscheme}\test
+           কণ্যা এখন কি করিবে
+           \char"0995 \char"09BF
+           \char"09A8 \char"09CD \char"09A6
+           \char"09CD \char"09B0}
+           
   \endaltitem
 
 

@@ -280,7 +280,15 @@
     end
   end
 }
-
+\directlua{
+           luaotfload.add_colorscheme("myscheme",
+           {
+             ["00FFFF30"] = {"default"},
+             ["FF0000"] = {"kabeng"},
+             ["00FF00"] = {"ivowelsignbeng"},
+             ["0000FF"] = {369} %% 369 is the GID of "nadarabeng"
+           })
+           }
 \def \listingpar {\endgraf}
 
 \let \endlistingline \relax

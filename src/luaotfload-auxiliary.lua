@@ -429,6 +429,19 @@ function aux.name_of_slot(codepoint)
   return false
 end
 
+--[[doc--
+
+  Get the GID of the glyph associated with a given name.
+
+--doc]]--
+function aux.gid_of_name(font_id, glyphname)
+  local slot = aux.slot_of_name(font_id, glyphname)
+  if not slot then return end
+  local tfmdata = identifiers[font_id] or font.fonts[font_id]
+  -- assert(tfmdata) -- Otherwise slot_of_name would have failed already
+  return tfmdata.characters[slot].index or slot
+end
+
 -----------------------------------------------------------------------
 ---                 features / scripts / languages
 -----------------------------------------------------------------------

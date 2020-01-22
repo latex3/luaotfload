@@ -232,7 +232,7 @@ local function makecombifont(tfmdata, _, additional_scripts)
       end
       for script, scr_fb in next, fallbacks do
         local iso_script = script_to_iso(script)
-        if is_dominant_script(scr_fb, script, script_to_ot(iso_script)) then
+        if not additional_scripts[iso_script] and is_dominant_script(scr_fb, script, script_to_ot(iso_script)) then
           local main = scr_fb[1]
           table.remove(scr_fb, 1)
           local fbid = luaotfload.add_fallback(scr_fb)
@@ -244,7 +244,7 @@ local function makecombifont(tfmdata, _, additional_scripts)
       local collected = collect_scripts(tfmdata)
       for script in next, collected do
         local iso_script = script_to_iso(script)
-        if is_dominant_script(collected, script, script_to_ot(iso_script)) then
+        if not additional_scripts[iso_script] and is_dominant_script(collected, script, script_to_ot(iso_script)) then
           additional_scripts[iso_script] = spec.specification .. ';-multiscript;script=' .. script
           ---- FIXME: IMHO the following which just modiefies the spec
           --   would be nicer, but it breaks font patching callbacks

@@ -1898,16 +1898,23 @@ are defined for which scripts.
             has glyph \luaident{index}.
   \endaltitem
 
-  \beginaltitem  {aux.slot_of_name(name : string)}
-            Translates an Adobe Glyph name to the corresponding glyph
-            slot.
+  \beginaltitem  {aux.slot_of_name(id : int, name : string)}
+            Translates a name for a glyph in font \luaident{id} to the
+            corresponding glyph slot which can be used e.g.\ as an argument to
+            \inlinecode{\char}.
   \endaltitem
 
-  \beginaltitem  {aux.name_of_slot(slot : int)}
+  \beginaltitem  {aux.name_of_slot(id : int, slot : int)}
             The inverse of \luaident{slot_of_name}; note that this
             might be incomplete as multiple glyph names may map to the
             same codepoint, only one of which is returned by
             \luaident{name_of_slot}.
+  \endaltitem
+
+  \beginaltitem  {aux.gid_of_name(id : int, name : string)}
+            Translates a Glyph name to the corresponding GID in font
+            \luaident{id}. This corresponds to the value returned by
+            \luaident{\XeTeXglyphindex} in \XeTeX.
   \endaltitem
 
   \beginaltitem  {aux.provides_script(id : int, script : string)}

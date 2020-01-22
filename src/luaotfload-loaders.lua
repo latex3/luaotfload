@@ -124,15 +124,12 @@ do
   local register = fonts.definers.register
   local function read(specification, size, id)
     local tfmdata = ctx_read(specification, size, id)
-    if tonumber(tfmdata) then
+    if not tfmdata or id or tonumber(tfmdata) then
       return tfmdata
     end
-    if not id then
-      id = font.define(tfmdata)
-      register(tfmdata, id)
-      return id
-    end
-    return tfmdata
+    id = font.define(tfmdata)
+    register(tfmdata, id)
+    return id
   end
 
   local patch = function (specification, size, id)
@@ -146,15 +143,12 @@ do
     else
       luatexbase.call_callback ("luaotfload.patch_font_unsafe", fontdata, specification, id)
     end
-    if tonumber(fontdata) then
+    if not fontdata or id or tonumber(fontdata) then
       return fontdata
     end
-    if not id then
-      id = font.define(fontdata)
-      register(fontdata, id)
-      return id
-    end
-    return fontdata
+    id = font.define(fontdata)
+    register(fontdata, id)
+    return id
   end
 
   local mk_info = function (name)

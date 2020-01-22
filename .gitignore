@@ -46,7 +46,7 @@ trials/*.log
 trials/*.pdf
 trials/*.aux
 trials/*.tuc
-
+trials/*.out
 
 testfiles/*.log
 testfiles/*.aux

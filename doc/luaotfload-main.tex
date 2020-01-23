@@ -66,10 +66,10 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \begin{itemize}
 \item Corrected a number of small bugs in harf mode.
 \item  Extension\marginpar{Experimental!} of the \identifier{color} key to allow
-coloring of specific output glyphs
-\item  A\marginpar{Experimental!} new \identifier{fallback} key to allow to define fallback fonts.
+coloring of specific output glyphs, see page~\pageref{color-glyphs}
+\item  A\marginpar{Experimental!} new \identifier{fallback} key to allow to define fallback fonts, see page~\pageref{fallback}
 \item  A\marginpar{Experimental!} new \identifier{multiscript} key to allow to use a font
-for more than one script.
+for more than one script, see page~\pageref{multiscript}
 \end{itemize}
 
 \beginsubsection {New in version 3.11 (by Ulrike Fischer/Marcel Krüger)}
@@ -850,7 +850,7 @@ obviously, \inlinecode{random}.
       \font \test = "Latin Modern Roman:color=FF0000BB"
          \endlisting
 
-         Experimental!\marginpar{\mbox{}\hfill NEW in v3.12!} The \identifier{color} key has been
+         Experimental!\marginpar{\mbox{}\hfill NEW in v3.12!}\label{color-glyphs} The \identifier{color} key has been
          extended to accept a table with color declarations of (output) glyphs. For example
 
          \beginlisting
@@ -1072,7 +1072,7 @@ obviously, \inlinecode{random}.
 
   \endaltitem
 
-  \beginaltitem {multiscript}
+  \beginaltitem {multiscript}\label{multiscript}
    In\marginpar{New in 3.12 -- experimental} open type fonts many shaping rules are implemented only for specific scripts and so you get correct typesetting only if the \identifier{script} feature is correctly set. This means that to write a text which uses more than one script you have to declare a font for each script and switch fonts even if the font contains glyphs for all scripts.
    \identifier{multiscript} tries to help here. The feature is experimental and bound to change. Feedback is welcome but you use it at your risk.
    
@@ -1125,7 +1125,7 @@ obviously, \inlinecode{random}.
   
   \endaltitem
   
-   \beginaltitem {fallback}
+   \beginaltitem {fallback}\label{fallback}
    XX\marginpar{New in 3.12 -- experimental}
    \endaltitem
 \enddescriptions

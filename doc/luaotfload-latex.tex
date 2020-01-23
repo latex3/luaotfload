@@ -289,6 +289,17 @@
              ["0000FF"] = {369} %% 369 is the GID of "nadarabeng"
            })
            }
+           
+ \directlua{
+     luaotfload.add_multiscript
+       ("cyrlgrekbeng",
+        {
+          cyrl = "DejaVuSans:mode=node;script=cyrl;color=FF0000;",
+          grek = "texgyreheros:mode=harf;script=grek;color=0000FF;",
+          beng = "NotoSansBengali:mode=harf;script=bng2;color=00FF00"
+        }
+       )
+      }           
 \def \listingpar {\endgraf}
 
 \let \endlistingline \relax

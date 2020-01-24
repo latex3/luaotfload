@@ -104,6 +104,7 @@ checkconfigs = {
 end
 checkruns = 3
 checksuppfiles = {"texmf.cnf"}
+typesetsuppfiles = {"texmf.cnf"}
 
 -- exclude some text temporarly or in certain systems ...
 if os.env["CONTEXTPATH"] then

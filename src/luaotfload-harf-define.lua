@@ -46,6 +46,7 @@ local function loadfont(spec)
   local key = string.format("%s:%d", gsub(path, "[/\\]", ":"), sub)
 
   local attributes = lfs.attributes(path)
+  if not attributes then return end
   local size, date = attributes.size or 0, attributes.modification or 0
 
   local cached = containers.read(facecache, key)

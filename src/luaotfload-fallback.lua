@@ -110,6 +110,8 @@ function luaotfload.add_fallback(name, fonts)
   if fonts == nil then
     fonts = name
     name = #fallback_table_fontnames + 1
+  else
+    name = name:lower()
   end
   fallback_table_fontnames[name] = fonts
   fallback_table[name] = nil

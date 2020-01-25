@@ -321,6 +321,8 @@ function luaotfload.add_multiscript(name, fonts)
   if fonts == nil then
     fonts = name
     name = #additional_scripts_fonts + 1
+  else
+    name = name:lower()
   end
   additional_scripts_tables[name] = fonts
   return name

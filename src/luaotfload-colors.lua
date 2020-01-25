@@ -442,6 +442,8 @@ function luaotfload.add_colorscheme(name, colortable)
   if fonts == nil then
     fonts = name
     name = #glyph_color_tables + 1
+  else
+    name = name:lower()
   end
   glyph_color_tables[name] = colortable
   return name

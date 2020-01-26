@@ -192,6 +192,22 @@ local load_context_modules = function (pth)
 
 end
 
+local function verify_context_dir (pth)
+  if lfsisdir(file.join(pth, ltx)) then
+    return true
+  end
+  for _, d in ipairs(ctx) do
+    if lfsisdir(file.join(pth, d)) then
+      return true
+    end
+  end
+  logreport("both", 0, "init", "A directory name has been passed as \z
+    fontloader name but this directory does not acutally seem to contain \z
+    a font loader. I will try to interpret your fontloader name in another \z
+    way for now, but please fix your settings.")
+  return false
+end
+
 local function init_main(early_hook)
   config                       = config or { } --- global
   config.luaotfload            = config.luaotfload or { }
@@ -374,7 +390,7 @@ local function init_main(early_hook)
                "Loading Context modules in lookup path.")
     load_context_modules ()
 
-  elseif lfsisdir (fontloader) then
+  elseif lfsisdir (fontloader) and verify_context_dir (fontloader) then
     logreport ("log", 0, "init",
                "Loading Context files under prefix “%s”.",
                fontloader)

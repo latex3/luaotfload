@@ -195,7 +195,15 @@ local function makecombifont(tfmdata, _, additional_scripts)
   if additional_scripts then
     local t = additional_scripts_tables[tonumber(additional_scripts) or additional_scripts]
     if not t then error(string.format("Unknown multiscript table %s", additional_scripts)) end
-    additional_scripts = table.merged(t)
+    local lower_t = {}
+    for k, v in next, t do if type(k) == "string" then
+      local l = string.lower(k)
+      if lower_t[l] ~= nil and lower_t[l] ~= v then
+        error(string.format("Inconsistant multiscript table %q for script %s", additional_scripts, l))
+      end
+      lower_t[l] = v
+    end end
+    additional_scripts = lower_t
   else
     additional_scripts = {}
   end

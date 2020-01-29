@@ -1073,58 +1073,58 @@ obviously, \inlinecode{random}.
   \endaltitem
 
   \beginaltitem {multiscript}\phantomsection\label{multiscript}
-   In\marginpar{New in 3.12 -- experimental} open type fonts many shaping rules are implemented only for specific scripts and so you get correct typesetting only if the \identifier{script} feature is correctly set. This means that to write a text which uses more than one script you have to declare a font for each script and switch fonts even if the font contains glyphs for all scripts.
+   In\marginpar{New in 3.12 -- experimental} fonts many shaping rules are implemented only for specific scripts and so you get correct typesetting only if the \identifier{script} feature is correctly set. This means that to write a text which uses more than one script you have to declare a font for each script and switch fonts even if the font contains glyphs for all scripts.
    \identifier{multiscript} tries to help here. The feature is experimental and bound to change. Feedback is welcome but you use it at your risk.
-   
+
    \identifier{multiscript} allows you to declare fonts for various script. The value is either \identifier{auto} described below, or a name which has been previously declared or a combination of both. An example for such a named multiscript could look like this (the colors are only for demonstration):
-   
+
    \beginlisting
    \directlua{
      luaotfload.add_multiscript
        ("cyrlgrekbeng",
         {
-          cyrl = "DejaVuSans:mode=node;script=cyrl;color=FF0000;",
-          grek = "texgyreheros:mode=harf;script=grek;color=0000FF;",
-          beng = "NotoSansBengali:mode=harf;script=bng2;color=00FF00;"
+          Cyrl = "DejaVuSans:mode=node;script=cyrl;color=FF0000;",
+          Grek = "texgyreheros:mode=harf;script=grek;color=0000FF;",
+          Beng = "NotoSansBengali:mode=harf;script=bng2;color=00FF00;"
         }
        )
       }
    \endlisting
 
-  \identifier{cyrlgrekbeng} is the name of the multiscript (use lower case chars). The keys are ISO language tags (not open type tags!), the values are font declarations.
-  
+  \identifier{cyrlgrekbeng} is the name of the multiscript (the name is case insensitive). The keys are ISO language tags (not open type tags!).  They are case insensitive too: the example uses an uppercase letter for ISO tags to differentiate them from script tags.  The values are font declarations.
+
   The multiscript can then be used in a font like this:
-  
-  \beginlisting 
+
+  \beginlisting
    \font\test={name:DejaVuSans:mode=node;multiscript=cyrlgrekbeng;}
-  \endlisting 
-  
+  \endlisting
+
   This would lead to this output:
-  
+
   {\Large \font\test={name:DejaVuSans:mode=node;multiscript=cyrlgrekbeng;}\test
-   „a^^^^0301123!?“  „π^^^^0301123!?“ „a!?“  „Б123!?“ a „\char"0995\char"09BF 123“ 
+   „a^^^^0301123!?“  „π^^^^0301123!?“ „a!?“  „Б123!?“ a „\char"0995\char"09BF 123“
   }
-  
-  It shows that fonts are switched with the scripts. 
-  
+
+  It shows that fonts are switched with the scripts.
+
   Be aware of the following drawbacks:
-  
+
   \begin{itemize}
-  \item Quite a lot chars can and should be used with more than one script, they belong to the Common or Inherited class. Examples are punctuation chars, digits, accents but also emoji. Currently these chars follow the active script. That's why the digit are all typeset with a different font, the accent over the pi is different to the one over the a, and why the opening quote is sometimes different to the closing quote. It is clear that some tools to force a script (and so a font) locally and globally for such chars are needed.
-  
+  \item Quite a lot chars can and should be used with more than one script, they belong to the Common or Inherited class. Examples are punctuation chars, digits, accents but also emoji. Currently these chars follow the active script. That's why the digits are all typeset with a different font, the accent over the pi is different to the one over the a, and why the opening quote is sometimes different to the closing quote. It is clear that some tools to force a script (and so a font) locally and globally for such chars are needed.
+
   \item \identifier{multiscript} doesn't change hyphenation patterns or other language or script related features.
-  
-  \item Language packages like babel or polyglossia have code to change the script too which could interfere or clash. This hasn't been tested yet.
+
+  \item Language packages like \identifier{babel} or \identifier{polyglossia} have code to change the script too which could interfere or clash. This hasn't been tested yet.
   \end{itemize}
-  
-  It is possible to use the value \identifier{auto} with \identifier{multiscript}. luaotfload will then switch the script if it detects a char belonging to another script (and if the font support this script). This can be useful for fonts supporting more than one script or when using the \identifier{fallback} key described below. 
-  
+
+  It is possible to use the value \identifier{auto} with \identifier{multiscript}. luaotfload will then switch the script if it detects a char belonging to another script (and if the font support this script). This can be useful for fonts supporting more than one script or when using the \identifier{fallback} key described below.
+
   It is also possible to combine  \identifier{auto} with a named multiscript with the syntax \identifier{multiscript=auto+name}. The rules of the named multiscript will in such cases take precedence and \identifier{auto} used only for other scripts.
-  
-  
-  
+
+
+
   \endaltitem
-  
+
    \beginaltitem {fallback}\label{fallback}
    XX\marginpar{New in 3.12 -- experimental}
    \endaltitem

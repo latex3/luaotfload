@@ -1,7 +1,7 @@
 % !Mode:: "TeX:DE:UTF-8:Main"
 
 \documentclass{article}
-
+\primitive\tracingfonts=3
 \usepackage{fontspec}
 \setmainfont{Times New Roman}
 \directlua
@@ -31,18 +31,18 @@
  luaotfload.add_multiscript
  ("cyrl",
   {
-    cyrl = "Cambria:mode=node;script=cyrl;color=00FFFF",
+    Cyrl = "Cambria:mode=node;script=cyrl;color=00FFFF",
   }
  )
- 
-% Key is ISO tag not open type script tag!  
+
+% Key is ISO tag not open type script tag!
 
  luaotfload.add_multiscript
  ("cyrl_grek_beng",
   {
-    cyrl = "Cambria:mode=node;script=cyrl;color=0000FF",
-    grek = "DejaVuSans:mode=harf;script=grek;color=0000FF;",
-    beng = "NotoSansBengali:mode=harf;script=beng;color=0000FF"
+    Cyrl = "Cambria:mode=node;script=cyrl;color=0000FF",
+    Grek = "DejaVuSans:mode=harf;script=grek;color=0000FF;",
+    Beng = "NotoSansBengali:mode=harf;script=beng;color=0000FF"
   }
  )
 
@@ -50,11 +50,9 @@
  luaotfload.add_multiscript
  ("cyrl_grek_bng2",
   {
-    cyrl = "Cambria:mode=node;script=cyrl;color=00FF00;",
-    grek = "DejaVuSans:mode=harf;script=grek;color=00FF00;",
-    beng = "NotoSansBengali:mode=harf;script=bng2;color=00FF00;",
-    zyyy = "Arial:mode=node;color=101000;",
-    zinh = "Arial:mode=node;color=101000;"
+    Cyrl = "Cambria:mode=node;script=cyrl;color=00FF00;",
+    Grek = "DejaVuSans:mode=harf;script=grek;color=00FF00;",
+    Beng = "NotoSansBengali:mode=harf;script=bng2;color=00FF00;",
   }
  )
 }

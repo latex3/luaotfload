@@ -31,7 +31,7 @@ echo cm etex knuth-lib tex tex-ini-files unicode-data
 # various tools / dependencies of other packages
 echo ctablestack filehook ifoddpage iftex luatexbase trimspaces
 echo oberdiek etoolbox xkeyval ucharcat xstring everyhook
-echo svn-prov setspace
+echo svn-prov setspace csquotes
 
 # slices from oberdiek
 echo atbegshi atveryend bigintcalc bitset bookmark epstopdf-pkg etexcmds

@@ -71,7 +71,7 @@ echo tocloft tools
 
 # Assuming a 'basic' font set up, metafont is required to avoid
 # warnings with some packages and errors with others
-echo metafont mfware
+echo metafont mfware texlive-scripts
 ) | xargs tlmgr install
 
 # Keep no backups (not required, simply makes cache bigger)

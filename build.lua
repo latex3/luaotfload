@@ -100,6 +100,12 @@ checkengines = {"luahbtex"}
 checkconfigs = {
                 "build",
                 "config-harf",
+--                "config-loader-unpackaged",
+--                "config-loader-reference",
+--                "config-latex-TU",
+--                "config-unicode-math",
+--                "config-plain",
+--                "config-fontspec",                
                }
 end
 checkruns = 3

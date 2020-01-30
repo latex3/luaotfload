@@ -1,0 +1,77 @@
+with new unicode/fontspec (dev-version)
+
+  Check failed with difference files
+  - ./build/test/add-uppercase-feature.luahbtex.fc
+  - ./build/test/color.luahbtex.fc
+  - ./build/test/embolden-math.luahbtex.fc
+  - ./build/test/embolden-text.luahbtex.fc
+  - ./build/test/letterspace1.luahbtex.fc
+  - ./build/test/math-stix2.luahbtex.fc
+  - ./build/test/missingchars.luahbtex.fc
+
+Failed tests for configuration config-harf:
+
+  Check failed with difference files
+  - ./build/test-config-harf/arabic.luahbtex.fc
+  - ./build/test-config-harf/color.luahbtex.fc
+  - ./build/test-config-harf/discretionaries.luahbtex.fc
+  - ./build/test-config-harf/scripts.luahbtex.fc
+  - ./build/test-config-harf/story.luahbtex.fc
+
+Failed tests for configuration config-loader-unpackaged:
+
+  Check failed with difference files
+  - ./build/test-config-loader-unpackaged/add-uppercase-feature.luahbtex.fc
+  - ./build/test-config-loader-unpackaged/color.luahbtex.fc
+  - ./build/test-config-loader-unpackaged/embolden-math.luahbtex.fc
+  - ./build/test-config-loader-unpackaged/embolden-text.luahbtex.fc
+  - ./build/test-config-loader-unpackaged/letterspace1.luahbtex.fc
+  - ./build/test-config-loader-unpackaged/math-stix2.luahbtex.fc
+  - ./build/test-config-loader-unpackaged/missingchars.luahbtex.fc
+
+Failed tests for configuration config-loader-reference:
+
+  Check failed with difference files
+  - ./build/test-config-loader-reference/add-uppercase-feature.luahbtex.fc
+  - ./build/test-config-loader-reference/color.luahbtex.fc
+  - ./build/test-config-loader-reference/embolden-math.luahbtex.fc
+  - ./build/test-config-loader-reference/embolden-text.luahbtex.fc
+  - ./build/test-config-loader-reference/letterspace1.luahbtex.fc
+  - ./build/test-config-loader-reference/math-stix2.luahbtex.fc
+  - ./build/test-config-loader-reference/missingchars.luahbtex.fc
+
+Failed tests for configuration config-fontspec:
+
+  Check failed with difference files
+  - ./build/test-config-fontspec/aff-group.luahbtex.fc
+  - ./build/test-config-fontspec/aff-numbers.luahbtex.fc
+  - ./build/test-config-fontspec/api-assorted.luahbtex.fc
+  - ./build/test-config-fontspec/colour-basic.luahbtex.fc
+  - ./build/test-config-fontspec/colour-opacity.luahbtex.fc
+  - ./build/test-config-fontspec/em-declare.luahbtex.fc
+  - ./build/test-config-fontspec/em-innershape.luahbtex.fc
+  - ./build/test-config-fontspec/em.luahbtex.fc
+  - ./build/test-config-fontspec/feat-cvxx-1.luahbtex.fc
+  - ./build/test-config-fontspec/feat-cvxx-2.luahbtex.fc
+  - ./build/test-config-fontspec/feat-number-multichoice.luahbtex.fc
+  - ./build/test-config-fontspec/feat-reset.luahbtex.fc
+  - ./build/test-config-fontspec/feat-scale-match.luahbtex.fc
+  - ./build/test-config-fontspec/feat-ss06.luahbtex.fc
+  - ./build/test-config-fontspec/fontface-overwrite.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-defaults-adding.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-defaults.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-fontface-1.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-fontface-2-sc.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-fontface-3-sizing.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-fontspec-file.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-nfssfamily-1.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-nfssfamily-2.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-scfeat-nesting.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-sizefeatures-1.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-sizefeatures-2-nesting.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-sl.luahbtex.fc
+  - ./build/test-config-fontspec/fontload-ttc-fontindex.luahbtex.fc
+  - ./build/test-config-fontspec/strong-fontface.luahbtex.fc
+  - ./build/test-config-fontspec/user-alias-feature-option.luahbtex.fc
+  - ./build/test-config-fontspec/user-alias-feature.luahbtex.fc
+  - ./build/test-config-fontspec/user-new-ot-feature.luahbtex.fc

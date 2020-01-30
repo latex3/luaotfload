@@ -208,6 +208,7 @@
 %% one that we could map directly onto Latex’s \verb|…|.
 \usepackage{pdfpages}
 \usepackage {listings}
+\usepackage{csquotes}
 \usepackage {luatexbase}
 \lstset {
   basicstyle=\ttfamily,
@@ -289,7 +290,7 @@
              ["0000FF"] = {369} %% 369 is the GID of "nadarabeng"
            })
            }
-           
+
  \directlua{
      luaotfload.add_multiscript
        ("cyrlgrekbeng",
@@ -299,7 +300,18 @@
           beng = "NotoSansBengali:mode=harf;script=bng2;color=00FF00"
         }
        )
-      }           
+      }
+ \directlua
+    {luaotfload.add_fallback
+     ("myfallback",
+       {
+        "DejaVuSans:mode=harf;script=grek;color=FF0000;",
+        "cmuserif:mode=node;script=cyrl;color=00FF00;",
+        "NotoSansBengali:mode=harf;script=bng2;color=0000FF;",
+        "NotoColorEmoji:mode=harf;"
+       }
+     )
+    }       
 \def \listingpar {\endgraf}
 
 \let \endlistingline \relax

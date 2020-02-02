@@ -9,9 +9,9 @@ TU/TeXGyreTermes(0)/m/n:
 A more comprehensive family (note nested defn for BI shape):
 TU/MyHeros(0)/m/n:
   "[texgyreheros-regular.otf]:mode=node;script=latn;language=DFLT;+tlig;color=119944FF ;"
-TU/MyHeros(0)/bx/n:
+TU/MyHeros(0)/b/n:
   "[texgyreheros-bold.otf]:mode=node;script=latn;language=DFLT;+tlig;color=119944FF ;"
 TU/MyHeros(0)/m/it:
   "[texgyreheros-italic.otf]:mode=node;script=latn;language=DFLT;+tlig;color=119944FF ;"
-TU/MyHeros(0)/bx/it:
+TU/MyHeros(0)/b/it:
   "[texgyreheros-bolditalic.otf]:mode=node;script=latn;language=DFLT;+tlig;color=223355FF ;"

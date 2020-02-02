@@ -7,9 +7,9 @@ TU/texgyrepagella-regular.otf(0)/m/it:
   [texgyrepagella-italic.otf]:mode=node;script=latn;language=DFLT;+tlig;
 TU/texgyrepagella-regular.otf(0)/m/sc:
   [texgyrepagella-regular.otf]:mode=node;script=latn;language=DFLT;+tlig;+smcp;
-TU/texgyrepagella-regular.otf(0)/m/n:
-  [texgyrepagella-regular.otf]:mode=node;script=latn;language=DFLT;+tlig;
-TU/texgyrepagella-regular.otf(0)/m/it:
-  [texgyrepagella-italic.otf]:mode=node;script=latn;language=DFLT;+tlig;
+TU/texgyrepagella-regular.otf(0)/m/scit:
+  [texgyrepagella-italic.otf]:mode=node;script=latn;language=DFLT;+tlig;+smcp;
 TU/texgyrepagella-regular.otf(0)/m/sc:
   [texgyrepagella-regular.otf]:mode=node;script=latn;language=DFLT;+tlig;+smcp;
+TU/texgyrepagella-regular.otf(0)/m/scit:
+  [texgyrepagella-italic.otf]:mode=node;script=latn;language=DFLT;+tlig;+smcp;

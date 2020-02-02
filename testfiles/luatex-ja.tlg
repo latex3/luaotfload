@@ -1,11 +1,7 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-LaTeX Font Warning: Font shape `JT3/gt/m/up' undefined
-(Font)              using `JT3/gt/m/n' instead on input line ....
 LaTeX Font Info:    Font shape `JT3/gt/m/n' will be
 (Font)              scaled to size 9.6222pt on input line ....
-LaTeX Font Warning: Font shape `JY3/gt/m/up' undefined
-(Font)              using `JY3/gt/m/n' instead on input line ....
 LaTeX Font Info:    Font shape `JY3/gt/m/n' will be
 (Font)              scaled to size 9.6222pt on input line ....
 Completed box being shipped out [1]
@@ -34,14 +30,14 @@ Completed box being shipped out [1]
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\norule(8.46753+1.15466)x0.0
-....\JY3/mc/m/up/10 日
+....\JY3/mc/m/n/10 日
 ....\glue 0.0 plus 0.4 minus 0.5
 ....\norule(8.46753+1.15466)x0.0
-....\JY3/mc/m/up/10 本
+....\JY3/mc/m/n/10 本
 ....\penalty 500
 ....\glue 0.0 plus 0.4 minus 0.5
 ....\norule(8.46753+1.15466)x0.0
-....\JY3/mc/m/up/10 語
+....\JY3/mc/m/n/10 語
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -78,4 +74,3 @@ Completed box being shipped out [1]
 ...\TU/lmr/m/n/10 1
 ...\glue 0.0 plus 1.0fil
 (luatex-ja.aux)
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.

@@ -32,7 +32,7 @@ Completed box being shipped out [1]
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\mathon
-....\l_fontspec_font 𝑥
+....\TU/LatinModernMath(1)/m/n/10 𝑥
 ....\mathoff
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -47,25 +47,25 @@ Completed box being shipped out [1]
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\mathon
-....\l_fontspec_font 𝑥
+....\TU/LatinModernMath(1)/m/n/10 𝑥
 ....\glue(\thickmuskip) 2.77748 plus 2.77748
-....\l_fontspec_font =
+....\TU/LatinModernMath(1)/m/n/10 =
 ....\penalty 500
 ....\glue(\thickmuskip) 2.77748 plus 2.77748
 ....\hbox(8.05+3.06)x6.65, shifted -0.00473, direction TLT
-.....\l_fontspec_font ∫
+.....\TU/LatinModernMath(1)/m/n/10 ∫
 ....\kern-3.32 (font)
 ....\hbox(4.648+0.0)x4.54294, shifted 5.05505, direction TLT
 .....\TU/LatinModernMath(1)/m/n/7 1
 ....\glue(\thinmuskip) 1.66649
-....\l_fontspec_font 𝑓
+....\TU/LatinModernMath(1)/m/n/10 𝑓
 ....\kern0.9 (italic)
-....\l_fontspec_font (
-....\l_fontspec_font 𝑥
-....\l_fontspec_font )
-....\l_fontspec_font 𝑑
+....\TU/LatinModernMath(1)/m/n/10 (
+....\TU/LatinModernMath(1)/m/n/10 𝑥
+....\TU/LatinModernMath(1)/m/n/10 )
+....\TU/LatinModernMath(1)/m/n/10 𝑑
 ....\kern0.24 (italic)
-....\l_fontspec_font 𝑥
+....\TU/LatinModernMath(1)/m/n/10 𝑥
 ....\mathoff
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil

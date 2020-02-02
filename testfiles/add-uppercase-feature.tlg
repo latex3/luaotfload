@@ -9,7 +9,7 @@ Package fontspec Info: Font family 'DejaVuSans.ttf(1)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[DejaVuSans.ttf]:mode=node;script=latn;language=DFLT;+tlig;+vircase;"
+(fontspec)             <->"[DejaVuSans.ttf]:mode=node;script=latn;language=dflt;+tlig;+vircase;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT

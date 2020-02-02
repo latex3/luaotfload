@@ -15,9 +15,9 @@ Package fontspec Info: Font family 'LinLibertine_R.otf(1)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;+hlig;"
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;+hlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;+hlig;+smcp;"
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;+hlig;+smcp;"
 Package fontspec Info: Font family 'LinLibertine_R.otf(2)' created for font
 (fontspec)             'LinLibertine_R.otf' with options
 (fontspec)             [Ligatures=TeX,LetterSpace=50,Ligatures=Rare].
@@ -26,9 +26,9 @@ Package fontspec Info: Font family 'LinLibertine_R.otf(2)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;+dlig;"
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;+dlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;+dlig;+smcp;"
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;+dlig;+smcp;"
 Package fontspec Info: Font family 'LinLibertine_R.otf(3)' created for font
 (fontspec)             'LinLibertine_R.otf' with options
 (fontspec)             [Ligatures=TeX,LetterSpace=50,Ligatures=NoCommon].
@@ -37,9 +37,9 @@ Package fontspec Info: Font family 'LinLibertine_R.otf(3)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;-liga;"
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;-liga;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=DFLT;letterspace=50;+tlig;-liga;+smcp;"
+(fontspec)             <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;-liga;+smcp;"
 Completed box being shipped out [1]
 \vbox(633.0+0.02)x407.0, direction TLT
 .\glue 16.0

@@ -3,7 +3,6 @@ packageversion= "3.1202-dev"
 packagedate   = "2019-12-23"
 fontloaderdate= "2019-10-29"
 packagedesc   = "harf"
-checkformat   = "latex"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -38,7 +37,6 @@ local master_branch do
     print("creating/installing dev-version in " .. tdsroot)
     ctanpkg = ctanpkg .. "-dev"
     ctanzip = ctanpkg
-    checkformat="latex-dev"
   end
 end
 ---------------------------------
@@ -78,36 +76,23 @@ specialformats["latex-dev"] = specialformats["latex-dev"] or {
 local has_hbengine = os.execute(os.type == "unix"
                                   and "command -v luahbtex > /dev/null"
                                   or "where /q luahbtex") == 0 or nil
--- temporary for test dev branch
-if master_branch then
-stdengine    = "luatex"
-checkengines = {"luatex"}
+assert(has_hbengine, "luahbtex is required for latex-dev")                                  
 
-checkconfigs = {
-                "build",
-                "config-loader-unpackaged",
-                "config-loader-reference",
-                "config-latex-TU",
-                "config-unicode-math",
-                "config-plain",
-                "config-fontspec",
-               }
-else
-assert(has_hbengine, "luahbtex is required for latex-dev")
-stdengine    = "luahbtex"
+checkformat   = "latex-dev" -- in tl2020 this can be perhaps latex-dev and latex 
+stdengine     = "luahbtex"
 checkengines = {"luahbtex"}
 
 checkconfigs = {
                 "build",
                 "config-harf",
---                "config-loader-unpackaged",
---                "config-loader-reference",
---                "config-latex-TU",
---                "config-unicode-math",
---                "config-plain",
---                "config-fontspec",                
+                "config-loader-unpackaged",
+                "config-loader-reference",
+                "config-latex-TU",
+           --     "config-unicode-math", -- currently broken
+                "config-plain",
+                "config-fontspec",                
                }
-end
+
 checkruns = 3
 checksuppfiles = {"texmf.cnf"}
 typesetsuppfiles = {"texmf.cnf"}
@@ -115,7 +100,7 @@ typesetsuppfiles = {"texmf.cnf"}
 -- exclude some text temporarly or in certain systems ...
 if os.env["CONTEXTPATH"] then
   -- local system
-     excludetests = {"math"} -- because of adjdemerits bug
+  --   excludetests = {"math"} -- because of adjdemerits bug
   if ismiktex then
    excludetests = {"arabkernsfs","fontload-ttc-fontindex"}
   else

@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Tue Oct 29 16:47:31 2019
+-- merge date  : Sun Feb  2 22:31:00 2020
 
 do -- begin closure to overcome local limits and interference
 
@@ -19,9 +19,6 @@ LUAVERSION=LUAMAJORVERSION+LUAMINORVERSION/10
 if LUAVERSION<5.2 and jit then
  MINORVERSION=2
  LUAVERSION=5.2
-end
-if lua and lua.openfile then
- io.open=lua.openfile
 end
 if not lpeg then
  lpeg=require("lpeg")
@@ -1369,7 +1366,7 @@ if not modules then modules={} end modules ['l-table']={
  copyright="PRAGMA ADE / ConTeXt Development Team",
  license="see context related readme files"
 }
-local type,next,tostring,tonumber,select=type,next,tostring,tonumber,select
+local type,next,tostring,tonumber,select,rawget=type,next,tostring,tonumber,select,rawget
 local table,string=table,string
 local concat,sort=table.concat,table.sort
 local format,lower,dump=string.format,string.lower,string.dump
@@ -2774,7 +2771,7 @@ local open,flush,write,read=io.open,io.flush,io.write,io.read
 local byte,find,gsub,format=string.byte,string.find,string.gsub,string.format
 local concat=table.concat
 local type=type
-if string.find(os.getenv("PATH"),";",1,true) then
+if string.find(os.getenv("PATH") or "",";",1,true) then
  io.fileseparator,io.pathseparator="\\",";"
 else
  io.fileseparator,io.pathseparator="/",":"
@@ -3121,7 +3118,7 @@ local date,time=os.date,os.time
 local find,format,gsub,upper,gmatch=string.find,string.format,string.gsub,string.upper,string.gmatch
 local concat=table.concat
 local random,ceil,randomseed=math.random,math.ceil,math.randomseed
-local rawget,rawset,type,getmetatable,setmetatable,tonumber,tostring=rawget,rawset,type,getmetatable,setmetatable,tonumber,tostring
+local type,setmetatable,tonumber,tostring=type,setmetatable,tonumber,tostring
 do
  local selfdir=os.selfdir
  if selfdir=="" then
@@ -3567,15 +3564,24 @@ local checkedsplit=string.checkedsplit
 local P,R,S,C,Cs,Cp,Cc,Ct=lpeg.P,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Cp,lpeg.Cc,lpeg.Ct
 local attributes=lfs.attributes
 function lfs.isdir(name)
- return attributes(name,"mode")=="directory"
+ if name then
+  return attributes(name,"mode")=="directory"
+ end
 end
 function lfs.isfile(name)
- local a=attributes(name,"mode")
- return a=="file" or a=="link" or nil
+ if name then
+  local a=attributes(name,"mode")
+  return a=="file" or a=="link" or nil
+ end
 end
 function lfs.isfound(name)
- local a=attributes(name,"mode")
- return (a=="file" or a=="link") and name or nil
+ if name then
+  local a=attributes(name,"mode")
+  return (a=="file" or a=="link") and name or nil
+ end
+end
+function lfs.modification(name)
+ return name and attributes(name,"modification") or nil
 end
 if sandbox then
  sandbox.redefine(lfs.isfile,"lfs.isfile")
@@ -3957,35 +3963,46 @@ if not modules then modules={} end modules ['l-gzip']={
  copyright="PRAGMA ADE / ConTeXt Development Team",
  license="see context related readme files"
 }
-if gzip then
- local suffix,suffixes=file.suffix,file.suffixes
+gzip=gzip or {} 
+if not zlib then
+ zlib=xzip 
+elseif not xzip then
+ xzip=zlib
+end
+if zlib then
+ local suffix=file.suffix
+ local suffixes=file.suffixes
+ local find=string.find
+ local openfile=io.open
+ local gzipwindow=15+16 
+ local gziplevel=3
+ local identifier="^\x1F\x8B\x08"
+ local compress=zlib.compress
+ local decompress=zlib.decompress
  function gzip.load(filename)
-  local f=io.open(filename,"rb")
+  local f=openfile(filename,"rb")
   if not f then
-  elseif suffix(filename)=="gz" then
-   f:close()
-   local g=gzip.open(filename,"rb")
-   if g then
-    local str=g:read("*all")
-    g:close()
-    return str
-   end
   else
-   local str=f:read("*all")
+   local data=f:read("*all")
    f:close()
-   return str
+   if data and data~="" then
+    if suffix(filename)=="gz" then
+     data=decompress(data,gzipwindow)
+    end
+    return data
+   end
   end
  end
- function gzip.save(filename,data)
+ function gzip.save(filename,data,level)
   if suffix(filename)~="gz" then
    filename=filename..".gz"
   end
-  local f=io.open(filename,"wb")
+  local f=openfile(filename,"wb")
   if f then
-   local s=zlib.compress(data or "",9,nil,15+16)
-   f:write(s)
+   data=compress(data or "",level or gziplevel,nil,gzipwindow)
+   f:write(data)
    f:close()
-   return #s
+   return #data
   end
  end
  function gzip.suffix(filename)
@@ -3993,58 +4010,24 @@ if gzip then
   local gzipped=extra=="gz"
   return suffix,gzipped
  end
-else
-end
-if flate then
- local type=type
- local find=string.find
- local compress=flate.gz_compress
- local decompress=flate.gz_decompress
- local absmax=128*1024*1024
- local initial=64*1024
- local identifier="^\x1F\x8B\x08"
  function gzip.compressed(s)
   return s and find(s,identifier)
  end
  function gzip.compress(s,level)
   if s and not find(s,identifier) then 
    if not level then
-    level=3
+    level=gziplevel
    elseif level<=0 then
     return s
    elseif level>9 then
     level=9
    end
-   return compress(s,level) or s
+   return compress(s,level or gziplevel,nil,gzipwindow) or s
   end
  end
- function gzip.decompress(s,size,iterate)
+ function gzip.decompress(s)
   if s and find(s,identifier) then
-   if type(size)~="number" then
-    size=initial
-   end
-   if size>absmax then
-    size=absmax
-   end
-   if type(iterate)=="number" then
-    max=size*iterate
-   elseif iterate==nil or iterate==true then
-    iterate=true
-    max=absmax
-   end
-   if max>absmax then
-    max=absmax
-   end
-   while true do
-    local d=decompress(s,size)
-    if d then
-     return d
-    end
-    size=2*size
-    if not iterate or size>max then
-     return false
-    end
-   end
+   return decompress(s,gzipwindow)
   else
    return s
   end
@@ -4072,6 +4055,8 @@ if not md5 then
 end
 local md5,file=md5,file
 local gsub=string.gsub
+local modification,isfile,touch=lfs.modification,lfs.isfile,lfs.touch
+local loaddata,savedata=io.loaddata,io.savedata
 do
  local patterns=lpeg and lpeg.patterns
  if patterns then
@@ -4087,10 +4072,11 @@ do
   md5.sumHEXA=md5.HEX
  end
 end
+local md5HEX=md5.HEX
 function file.needsupdating(oldname,newname,threshold) 
- local oldtime=lfs.attributes(oldname,"modification")
+ local oldtime=modification(oldname)
  if oldtime then
-  local newtime=lfs.attributes(newname,"modification")
+  local newtime=modification(newname)
   if not newtime then
    return true 
   elseif newtime>=oldtime then
@@ -4106,31 +4092,32 @@ function file.needsupdating(oldname,newname,threshold)
 end
 file.needs_updating=file.needsupdating
 function file.syncmtimes(oldname,newname)
- local oldtime=lfs.attributes(oldname,"modification")
- if oldtime and lfs.isfile(newname) then
-  lfs.touch(newname,oldtime,oldtime)
+ local oldtime=modification(oldname)
+ if oldtime and isfile(newname) then
+  touch(newname,oldtime,oldtime)
  end
 end
-function file.checksum(name)
+local function checksum(name)
  if md5 then
-  local data=io.loaddata(name)
+  local data=loaddata(name)
   if data then
-   return md5.HEX(data)
+   return md5HEX(data)
   end
  end
  return nil
 end
+file.checksum=checksum
 function file.loadchecksum(name)
  if md5 then
-  local data=io.loaddata(name..".md5")
+  local data=loaddata(name..".md5")
   return data and (gsub(data,"%s",""))
  end
  return nil
 end
 function file.savechecksum(name,checksum)
- if not checksum then checksum=file.checksum(name) end
+ if not checksum then checksum=checksum(name) end
  if checksum then
-  io.savedata(name..".md5",checksum)
+  savedata(name..".md5",checksum)
   return checksum
  end
  return nil

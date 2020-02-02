@@ -944,7 +944,7 @@ local format_N  if environment.FORMAT then
         n = n + 1
         if not f or f == "" then
             return format("FORMAT(a%s,'%%.9f')",n)
-        elseif f == ".6" then
+        elseif f == ".6" or f == "0.6" then
             return format("FORMAT(a%s)",n)
         else
             return format("FORMAT(a%s,'%%%sf')",n,f)

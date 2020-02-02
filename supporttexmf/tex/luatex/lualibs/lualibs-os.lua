@@ -30,7 +30,7 @@ local date, time = os.date, os.time
 local find, format, gsub, upper, gmatch = string.find, string.format, string.gsub, string.upper, string.gmatch
 local concat = table.concat
 local random, ceil, randomseed = math.random, math.ceil, math.randomseed
-local rawget, rawset, type, getmetatable, setmetatable, tonumber, tostring = rawget, rawset, type, getmetatable, setmetatable, tonumber, tostring
+local type, setmetatable, tonumber, tostring = type, setmetatable, tonumber, tostring
 
 -- This check needs to happen real early on. Todo: we can pick it up from the commandline
 -- if we pass --binpath= (which is useful anyway)

@@ -37,9 +37,9 @@ end
 
 -- this is lmtx only:
 
-if lua and lua.openfile then
-    io.open = lua.openfile
-end
+-- if lua and lua.openfile then
+--     io.open = lua.openfile
+-- end
 
 -- lpeg
 

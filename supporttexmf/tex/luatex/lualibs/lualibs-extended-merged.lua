@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Tue Oct 29 16:47:22 2019
+-- merge date  : Sun Feb  2 22:30:49 2020
 
 do -- begin closure to overcome local limits and interference
 
@@ -579,7 +579,7 @@ local format_N  if environment.FORMAT then
   n=n+1
   if not f or f=="" then
    return format("FORMAT(a%s,'%%.9f')",n)
-  elseif f==".6" then
+  elseif f==".6" or f=="0.6" then
    return format("FORMAT(a%s)",n)
   else
    return format("FORMAT(a%s,'%%%sf')",n,f)
@@ -4134,8 +4134,11 @@ function stacker.new(name)
   insert(tops,top)
  end
  local function resolve_step(ti)
+  if not top then
+   return
+  end
   local result=nil
-  local noftop=top and #top or 0
+  local noftop=#top
   if ti>0 then
    local current=list[ti]
    if current then

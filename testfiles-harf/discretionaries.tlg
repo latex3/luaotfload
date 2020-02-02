@@ -8,16 +8,16 @@ Package fontspec Info: Font family 'NotoSerifCJK-Regular.ttc(1)' created for
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
+(fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=dflt;-tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (fontspec)             - 'bold' (b/n) with NFSS spec.:
-(fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
+(fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=dflt;-tlig;"
 (fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
-(fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
+(fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=dflt;-tlig;"
 (fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
 (fontspec)             - 'bold italic' (b/it) with NFSS spec.:
-(fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=DFLT;-tlig;"
+(fontspec)             <->"[NotoSerifCJK-Regular.ttc]:mode=harf;script=latn;language=dflt;-tlig;"
 (fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: 
 Package fontspec Info: Font family 'lmroman10-regular.otf(0)' created for font
 (fontspec)             'lmroman10-regular.otf' with options
@@ -27,7 +27,7 @@ Package fontspec Info: Font family 'lmroman10-regular.otf(0)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[lmroman10-regular.otf]:mode=harf;script=latn;language=DFLT;+dlig;+tlig;"
+(fontspec)             <->"[lmroman10-regular.otf]:mode=harf;script=latn;language=dflt;+dlig;+tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Package fontspec Info: Font family 'lmroman10-regular.otf(1)' created for font
 (fontspec)             'lmroman10-regular.otf' with options
@@ -37,7 +37,7 @@ Package fontspec Info: Font family 'lmroman10-regular.otf(1)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[lmroman10-regular.otf]:mode=harf;script=latn;language=DFLT;+dlig;-tlig;"
+(fontspec)             <->"[lmroman10-regular.otf]:mode=harf;script=latn;language=dflt;+dlig;-tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT

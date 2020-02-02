@@ -1181,16 +1181,16 @@ Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->s*[1.6]"[Amiri-Regular.ttf]:mode=harf;script=arab;language=DFLT;"
+(fontspec)             <->s*[1.6]"[Amiri-Regular.ttf]:mode=harf;script=arab;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (fontspec)             - 'bold' (b/n) with NFSS spec.:
-(fontspec)             <->s*[1.6]"[Amiri-Bold.ttf]:mode=harf;script=arab;language=DFLT;"
+(fontspec)             <->s*[1.6]"[Amiri-Bold.ttf]:mode=harf;script=arab;language=dflt;"
 (fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
-(fontspec)             <->s*[1.6]"[Amiri-Slanted.ttf]:mode=harf;script=arab;language=DFLT;"
+(fontspec)             <->s*[1.6]"[Amiri-Slanted.ttf]:mode=harf;script=arab;language=dflt;"
 (fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
 (fontspec)             - 'bold italic' (b/it) with NFSS spec.:
-(fontspec)             <->s*[1.6]"[Amiri-BoldSlanted.ttf]:mode=harf;script=arab;language=DFLT;"
+(fontspec)             <->s*[1.6]"[Amiri-BoldSlanted.ttf]:mode=harf;script=arab;language=dflt;"
 (fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: 
 LaTeX Font Info:    Font shape `TU/Amiri(1)/m/n' will be
 (Font)              scaled to size 16.00006pt on input line ....
@@ -2273,7 +2273,7 @@ Package fontspec Info: Font family 'ArefRuqaa-Regular.ttf(0)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->s*[1.2]"[ArefRuqaa-Regular.ttf]:mode=harf;script=arab;language=DFLT;"
+(fontspec)             <->s*[1.2]"[ArefRuqaa-Regular.ttf]:mode=harf;script=arab;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 LaTeX Font Info:    Font shape `TU/ArefRuqaa-Regular.ttf(0)/m/n' will be
 (Font)              scaled to size 11.99997pt on input line ....
@@ -4527,7 +4527,7 @@ Package fontspec Info: Font family 'NotoNastaliqUrdu-Regular.ttf(0)' created
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[NotoNastaliqUrdu-Regular.ttf]:mode=harf;script=arab;language=DFLT;"
+(fontspec)             <->"[NotoNastaliqUrdu-Regular.ttf]:mode=harf;script=arab;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Completed box being shipped out [4]
 \vbox(633.0+0.06)x407.0, direction TLT

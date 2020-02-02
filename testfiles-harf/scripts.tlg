@@ -10,7 +10,7 @@ Package fontspec Info: Font family 'amiri-regular.ttf(1)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[amiri-regular.ttf]:mode=harf;script=latn;language=DFLT;+tlig;"
+(fontspec)             <->"[amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 LaTeX Font Warning: Font shape `TU/amiri-regular.ttf(0)/m/it' undefined
 (Font)              using `TU/amiri-regular.ttf(0)/m/n' instead on input line ....

@@ -8,7 +8,7 @@ Package fontspec Info: Font family 'lmroman10-bold.otf(0)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[lmroman10-bold.otf]:mode=harf;script=latn;language=DFLT;"
+(fontspec)             <->"[lmroman10-bold.otf]:mode=harf;script=latn;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Package fontspec Info: Font family 'lmromanslant10-regular.otf(0)' created for
 (fontspec)             font 'lmromanslant10-regular.otf' with options
@@ -18,7 +18,7 @@ Package fontspec Info: Font family 'lmromanslant10-regular.otf(0)' created for
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[lmromanslant10-regular.otf]:mode=harf;script=latn;language=DFLT;"
+(fontspec)             <->"[lmromanslant10-regular.otf]:mode=harf;script=latn;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Package fontspec Info: Font family 'lmroman12-regular.otf(0)' created for font
 (fontspec)             'lmroman12-regular.otf' with options
@@ -28,7 +28,7 @@ Package fontspec Info: Font family 'lmroman12-regular.otf(0)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->s*[1.2]"[lmroman12-regular.otf]:mode=harf;script=latn;language=DFLT;"
+(fontspec)             <->s*[1.2]"[lmroman12-regular.otf]:mode=harf;script=latn;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 ! Undefined control sequence.
 l. ...\testr
@@ -401,7 +401,7 @@ Package fontspec Info: Font family 'lmroman10-regular.otf(1)' created for font
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[lmroman10-regular.otf]:mode=harf;script=latn;language=DFLT;+tlig;"
+(fontspec)             <->"[lmroman10-regular.otf]:mode=harf;script=latn;language=dflt;+tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (../story.tex
 LaTeX Font Warning: Font shape `TU/lmroman10-regular.otf(0)/b/n' undefined

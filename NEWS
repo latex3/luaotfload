@@ -1,5 +1,11 @@
 Change History
 --------------
+2020-02-02 luaotfload v3.12
+    * new experimental feature multiscript
+    * new experimental feature fallback
+    * extension of the color feature to color output glyphs 
+    * Small bug correction
+    
 2019-11-10 luaotfload v3.11
     * Changed the handling of the script key in harf mode to be more compatible with behaviour of the node mode. 
       It now expects the name of a script that is actually in the font instead of a ISO 15924 script tag. See issue 117.

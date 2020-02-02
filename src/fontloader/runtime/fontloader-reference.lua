@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 10/29/19 15:00:00
+-- merge date  : 01/26/20 18:34:44
 
 do -- begin closure to overcome local limits and interference
 
@@ -19,9 +19,6 @@ LUAVERSION=LUAMAJORVERSION+LUAMINORVERSION/10
 if LUAVERSION<5.2 and jit then
  MINORVERSION=2
  LUAVERSION=5.2
-end
-if lua and lua.openfile then
- io.open=lua.openfile
 end
 if not lpeg then
  lpeg=require("lpeg")
@@ -1052,7 +1049,7 @@ if not modules then modules={} end modules ['l-table']={
  copyright="PRAGMA ADE / ConTeXt Development Team",
  license="see context related readme files"
 }
-local type,next,tostring,tonumber,select=type,next,tostring,tonumber,select
+local type,next,tostring,tonumber,select,rawget=type,next,tostring,tonumber,select,rawget
 local table,string=table,string
 local concat,sort=table.concat,table.sort
 local format,lower,dump=string.format,string.lower,string.dump
@@ -2177,7 +2174,7 @@ local open,flush,write,read=io.open,io.flush,io.write,io.read
 local byte,find,gsub,format=string.byte,string.find,string.gsub,string.format
 local concat=table.concat
 local type=type
-if string.find(os.getenv("PATH"),";",1,true) then
+if string.find(os.getenv("PATH") or "",";",1,true) then
  io.fileseparator,io.pathseparator="\\",";"
 else
  io.fileseparator,io.pathseparator="/",":"
@@ -2532,15 +2529,24 @@ local checkedsplit=string.checkedsplit
 local P,R,S,C,Cs,Cp,Cc,Ct=lpeg.P,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Cp,lpeg.Cc,lpeg.Ct
 local attributes=lfs.attributes
 function lfs.isdir(name)
- return attributes(name,"mode")=="directory"
+ if name then
+  return attributes(name,"mode")=="directory"
+ end
 end
 function lfs.isfile(name)
- local a=attributes(name,"mode")
- return a=="file" or a=="link" or nil
+ if name then
+  local a=attributes(name,"mode")
+  return a=="file" or a=="link" or nil
+ end
 end
 function lfs.isfound(name)
- local a=attributes(name,"mode")
- return (a=="file" or a=="link") and name or nil
+ if name then
+  local a=attributes(name,"mode")
+  return (a=="file" or a=="link") and name or nil
+ end
+end
+function lfs.modification(name)
+ return name and attributes(name,"modification") or nil
 end
 if sandbox then
  sandbox.redefine(lfs.isfile,"lfs.isfile")
@@ -3649,7 +3655,7 @@ local format_N  if environment.FORMAT then
   n=n+1
   if not f or f=="" then
    return format("FORMAT(a%s,'%%.9f')",n)
-  elseif f==".6" then
+  elseif f==".6" or f=="0.6" then
    return format("FORMAT(a%s)",n)
   else
    return format("FORMAT(a%s,'%%%sf')",n,f)
@@ -4705,6 +4711,7 @@ if not modules then modules={} end modules ['data-con']={
  copyright="PRAGMA ADE / ConTeXt Development Team",
  license="see context related readme files"
 }
+local setmetatable=setmetatable
 local format,lower,gsub=string.format,string.lower,string.gsub
 local trace_cache=false  trackers.register("resolvers.cache",function(v) trace_cache=v end)
 local trace_containers=false  trackers.register("resolvers.containers",function(v) trace_containers=v end)
@@ -4712,16 +4719,21 @@ local trace_storage=false  trackers.register("resolvers.storage",function(v) tra
 containers=containers or {}
 local containers=containers
 containers.usecache=true
+local getwritablepath=caches.getwritablepath
+local getreadablepaths=caches.getreadablepaths
+local cacheiswritable=caches.is_writable
+local loaddatafromcache=caches.loaddata
+local savedataincache=caches.savedata
 local report_containers=logs.reporter("resolvers","containers")
 local allocated={}
 local mt={
  __index=function(t,k)
   if k=="writable" then
-   local writable=caches.getwritablepath(t.category,t.subcategory) or { "." }
+   local writable=getwritablepath(t.category,t.subcategory) or { "." }
    t.writable=writable
    return writable
   elseif k=="readables" then
-   local readables=caches.getreadablepaths(t.category,t.subcategory) or { "." }
+   local readables=getreadablepaths(t.category,t.subcategory) or { "." }
    t.readables=readables
    return readables
   end
@@ -4752,7 +4764,7 @@ function containers.define(category,subcategory,version,enabled)
  end
 end
 function containers.is_usable(container,name)
- return container.enabled and caches and caches.is_writable(container.writable,name)
+ return container.enabled and caches and cacheiswritable(container.writable,name)
 end
 function containers.is_valid(container,name)
  if name and name~="" then
@@ -4766,7 +4778,7 @@ function containers.read(container,name)
  local storage=container.storage
  local stored=storage[name]
  if not stored and container.enabled and caches and containers.usecache then
-  stored=caches.loaddata(container.readables,name,container.writable)
+  stored=loaddatafromcache(container.readables,name,container.writable)
   if stored and stored.cache_version==container.version then
    if trace_cache or trace_containers then
     report_containers("action %a, category %a, name %a","load",container.subcategory,name)
@@ -4782,17 +4794,20 @@ function containers.read(container,name)
  end
  return stored
 end
-function containers.write(container,name,data)
+function containers.write(container,name,data,fast)
  if data then
   data.cache_version=container.version
   if container.enabled and caches then
-   local unique,shared=data.unique,data.shared
-   data.unique,data.shared=nil,nil
-   caches.savedata(container.writable,name,data)
+   local unique=data.unique
+   local shared=data.shared
+   data.unique=nil
+   data.shared=nil
+   savedataincache(container.writable,name,data,fast)
    if trace_cache or trace_containers then
     report_containers("action %a, category %a, name %a","save",container.subcategory,name)
    end
-   data.unique,data.shared=unique,shared
+   data.unique=unique
+   data.shared=shared
   end
   if trace_cache or trace_containers then
    report_containers("action %a, category %a, name %a","store",container.subcategory,name)
@@ -5025,6 +5040,13 @@ if not nuts.setreplace then
  end
  function nuts.setreplace(n,h)
   setfield(n,"replace",h)
+ end
+end
+do
+ local getsubtype=nuts.getsubtype
+ function nuts.start_of_par(n)
+  local s=getsubtype(n)
+  return s==0 or s==2 
  end
 end
 
@@ -8677,6 +8699,9 @@ fonts.privateoffsets={
  mathbase=0xFF000,
  keepnames=false,
 }
+if node and not tex.getfontoffamily then
+ tex.getfontoffamily=node.family_font 
+end
 
 end -- closure
 
@@ -8743,13 +8768,13 @@ fonts.handlers=handlers
 local allocate=utilities.storage.allocate
 local setmetatableindex=table.setmetatableindex
 constructors.dontembed=allocate()
-constructors.autocleanup=true
 constructors.namemode="fullpath" 
 constructors.version=1.01
 constructors.cache=containers.define("fonts","constructors",constructors.version,false)
 constructors.privateoffset=fonts.privateoffsets.textbase or 0xF0000
 constructors.cacheintex=true 
 constructors.addtounicode=true
+constructors.fixprotrusion=true
 local designsizes=allocate()
 constructors.designsizes=designsizes
 local loadedfonts=allocate()
@@ -8801,11 +8826,6 @@ function constructors.getmathparameter(tfmdata,name)
  end
 end
 function constructors.cleanuptable(tfmdata)
- if constructors.autocleanup and tfmdata.properties.virtualized then
-  for k,v in next,tfmdata.characters do
-   if v.commands then v.commands=nil end
-  end
- end
 end
 function constructors.calculatescale(tfmdata,scaledpoints)
  local parameters=tfmdata.parameters
@@ -9032,6 +9052,7 @@ function constructors.scale(tfmdata,specification)
  properties.direction=direction
  target.size=scaledpoints
  target.encodingbytes=properties.encodingbytes or 1
+ target.subfont=properties.subfont
  target.embedding=properties.embedding or "subset"
  target.tounicode=1
  target.cidinfo=properties.cidinfo
@@ -9141,7 +9162,7 @@ function constructors.scale(tfmdata,specification)
   targetparameters.descender=delta*descender
  end
  constructors.enhanceparameters(targetparameters)
- local protrusionfactor=(targetquad~=0 and 1000/targetquad) or 0
+ local protrusionfactor=constructors.fixprotrusion and ((targetquad~=0 and 1000/targetquad) or 1) or 1
  local scaledwidth=defaultwidth*hdelta
  local scaledheight=defaultheight*vdelta
  local scaleddepth=defaultdepth*vdelta
@@ -9524,6 +9545,7 @@ function constructors.finalize(tfmdata)
  properties.name=properties.name  or tfmdata.name
  properties.psname=properties.psname   or tfmdata.psname
  properties.encodingbytes=tfmdata.encodingbytes or 1
+ properties.subfont=tfmdata.subfont    or nil
  properties.embedding=tfmdata.embedding  or "subset"
  properties.tounicode=tfmdata.tounicode  or 1
  properties.cidinfo=tfmdata.cidinfo    or nil
@@ -9549,6 +9571,7 @@ function constructors.finalize(tfmdata)
  tfmdata.name=nil 
  tfmdata.psname=nil
  tfmdata.encodingbytes=nil
+ tfmdata.subfont=nil
  tfmdata.embedding=nil
  tfmdata.tounicode=nil
  tfmdata.cidinfo=nil
@@ -10862,7 +10885,7 @@ if not modules then modules={} end modules ['font-otr']={
  copyright="PRAGMA ADE / ConTeXt Development Team",
  license="see context related readme files"
 }
-local next,type,tonumber=next,type,tonumber
+local next,type,tonumber,rawget=next,type,tonumber,rawget
 local byte,lower,char,gsub=string.byte,string.lower,string.char,string.gsub
 local fullstrip=string.fullstrip
 local floor,round=math.floor,math.round
@@ -13981,7 +14004,7 @@ if not modules then modules={} end modules ['font-cff']={
  license="see context related readme files"
 }
 local next,type,tonumber,rawget=next,type,tonumber,rawget
-local byte,char,gmatch=string.byte,string.char,string.gmatch
+local byte,char,gmatch,sub=string.byte,string.char,string.gmatch,string.sub
 local concat,remove,unpack=table.concat,table.remove,table.unpack
 local floor,abs,round,ceil,min,max=math.floor,math.abs,math.round,math.ceil,math.min,math.max
 local P,C,R,S,C,Cs,Ct=lpeg.P,lpeg.C,lpeg.R,lpeg.S,lpeg.C,lpeg.Cs,lpeg.Ct
@@ -14087,6 +14110,37 @@ local defaultstrings={ [0]=
  "Uacutesmall","Ucircumflexsmall","Udieresissmall","Yacutesmall",
  "Thornsmall","Ydieresissmall","001.000","001.001","001.002","001.003",
  "Black","Bold","Book","Light","Medium","Regular","Roman","Semibold",
+}
+local standardnames={ [0]=
+ false,false,false,false,false,false,false,false,false,false,false,
+ false,false,false,false,false,false,false,false,false,false,false,
+ false,false,false,false,false,false,false,false,false,false,
+ "space","exclam","quotedbl","numbersign","dollar","percent",
+ "ampersand","quoteright","parenleft","parenright","asterisk","plus",
+ "comma","hyphen","period","slash","zero","one","two","three","four",
+ "five","six","seven","eight","nine","colon","semicolon","less",
+ "equal","greater","question","at","A","B","C","D","E","F","G","H",
+ "I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W",
+ "X","Y","Z","bracketleft","backslash","bracketright","asciicircum",
+ "underscore","quoteleft","a","b","c","d","e","f","g","h","i","j",
+ "k","l","m","n","o","p","q","r","s","t","u","v","w","x","y",
+ "z","braceleft","bar","braceright","asciitilde",false,false,false,
+ false,false,false,false,false,false,false,false,false,false,false,
+ false,false,false,false,false,false,false,false,false,false,false,
+ false,false,false,false,false,false,false,false,false,"exclamdown",
+ "cent","sterling","fraction","yen","florin","section","currency",
+ "quotesingle","quotedblleft","guillemotleft","guilsinglleft",
+ "guilsinglright","fi","fl",false,"endash","dagger","daggerdbl",
+ "periodcentered",false,"paragraph","bullet","quotesinglbase",
+ "quotedblbase","quotedblright","guillemotright","ellipsis","perthousand",
+ false,"questiondown",false,"grave","acute","circumflex","tilde",
+ "macron","breve","dotaccent","dieresis",false,"ring","cedilla",false,
+ "hungarumlaut","ogonek","caron","emdash",false,false,false,false,
+ false,false,false,false,false,false,false,false,false,false,false,
+ false,"AE",false,"ordfeminine",false,false,false,false,"Lslash",
+ "Oslash","OE","ordmasculine",false,false,false,false,false,"ae",
+ false,false,false,"dotlessi",false,false,"lslash","oslash","oe",
+ "germandbls",false,false,false,false
 }
 local cffreaders={
  readbyte,
@@ -14449,6 +14503,7 @@ do
  local x=0
  local y=0
  local width=false
+ local lsb=0
  local r=0
  local stems=0
  local globalbias=0
@@ -14472,6 +14527,9 @@ do
  local factors=false
  local axis=false
  local vsindex=0
+ local justpass=false
+ local seacs={}
+ local procidx=nil
  local function showstate(where)
   report("%w%-10s : [%s] n=%i",depth*2,where,concat(stack," ",1,top),top)
  end
@@ -15011,14 +15069,14 @@ do
   top=0
  end
  local function divide()
-  if version==1 then
+  if version=="cff" then
    local d=stack[top]
    top=top-1
    stack[top]=stack[top]/d
   end
  end
  local function closepath()
-  if version==1 then
+  if version=="cff" then
    if trace_charstrings then
     showstate("closepath")
    end
@@ -15026,54 +15084,73 @@ do
   top=0
  end
  local function hsbw()
-  if version==1 then
+  if version=="cff" then
    if trace_charstrings then
     showstate("hsbw")
    end
+   lsb=stack[top-1] or 0
    width=stack[top]
   end
   top=0
  end
+ local function sbw()
+  if version=="cff" then
+   if trace_charstrings then
+    showstate("sbw")
+   end
+   lsb=stack[top-3]
+   width=stack[top-1]
+  end
+  top=0
+ end
  local function seac()
-  if version==1 then
+  if version=="cff" then
    if trace_charstrings then
     showstate("seac")
    end
   end
   top=0
  end
- local function sbw()
-  if version==1 then
-   if trace_charstrings then
-    showstate("sbw")
-   end
-   width=stack[top-1]
-  end
-  top=0
- end
+ local popped=3
+ local hints=3
  local function callothersubr()
-  if version==1 then
+  if version=="cff" then
    if trace_charstrings then
-    showstate("callothersubr (unsupported)")
+    showstate("callothersubr")
    end
+   if stack[top]==hints then
+    popped=stack[top-2]
+   else
+    popped=3
+   end
+   local t=stack[top-1]
+   if t then
+    top=top-(t+2)
+    if top<0 then
+     top=0
+    end
+   else
+    top=0
+   end
+  else
+   top=0
   end
-  top=0
  end
  local function pop()
-  if version==1 then
+  if version=="cff" then
    if trace_charstrings then
-    showstate("pop (unsupported)")
+    showstate("pop")
    end
    top=top+1
-   stack[top]=0 
+   stack[top]=popped
   else
    top=0
   end
  end
  local function setcurrentpoint()
-  if version==1 then
+  if version=="cff" then
    if trace_charstrings then
-    showstate("pop (unsupported)")
+    showstate("setcurrentpoint (unsupported)")
    end
    x=x+stack[top-1]
    y=y+stack[top]
@@ -15199,6 +15276,39 @@ do
   vhcurveto,
   hvcurveto,
  }
+ local reverse={ [0]="unsupported",
+  "getstem",
+  "unsupported",
+  "getstem",
+  "vmoveto",
+  "rlineto",
+  "hlineto",
+  "vlineto",
+  "rrcurveto",
+  "unsupported",
+  "unsupported",
+  "unsupported",
+  "unsupported",
+  "hsbw",
+  "unsupported",
+  "setvsindex",
+  "blend",
+  "unsupported",
+  "getstem",
+  "getmask",
+  "getmask",
+  "rmoveto",
+  "hmoveto",
+  "getstem",
+  "rcurveline",
+  "rlinecurve",
+  "vvcurveto",
+  "hhcurveto",
+  "unsupported",
+  "unsupported",
+  "vhcurveto",
+  "hvcurveto",
+ }
  local subactions={
   [000]=dotsection,
   [001]=getstem3,
@@ -15312,7 +15422,7 @@ do
  local function call(scope,list,bias) 
   depth=depth+1
   if top==0 then
-   showstate(formatters["unknown %s call %s"](scope,"?"))
+   showstate(formatters["unknown %s call %s, case %s"](scope,"?",1))
    top=0
   else
    local index=stack[top]+bias
@@ -15324,13 +15434,12 @@ do
    if tab then
     process(tab)
    else
-    showstate(formatters["unknown %s call %s"](scope,index))
+    showstate(formatters["unknown %s call %s, case %s"](scope,index,2))
     top=0
    end
   end
   depth=depth-1
  end
- local justpass=false
  process=function(tab)
   local i=1
   local n=#tab
@@ -15401,6 +15510,17 @@ do
       r=r+1;result[r]=chars[12]
       r=r+1;result[r]=chars[t]
       top=0
+     elseif t==6 then
+      seacs[procidx]={
+       asb=stack[1],
+       adx=stack[2],
+       ady=stack[3],
+       base=stack[4],
+       accent=stack[5],
+       width=width,
+       lsb=lsb,
+      }
+      top=0
      else
       local a=subactions[t]
       if a then
@@ -15430,44 +15550,52 @@ do
      i=i+s+1
     elseif t==1 or t==3 or t==18 or operation==23 then
      p_getstem() 
-if true then
-     if top>0 then
-      for i=1,top do
-       r=r+1;result[r]=encode[stack[i]]
+     if true then
+      if top>0 then
+       for i=1,top do
+        r=r+1;result[r]=encode[stack[i]]
+       end
+       top=0
       end
+      r=r+1;result[r]=chars[t]
+     else
       top=0
      end
-     r=r+1;result[r]=chars[t]
-else
- top=0
-end
      i=i+1
     elseif t==19 or t==20 then
      local s=p_getmask() or 0 
-if true then
-     if top>0 then
-      for i=1,top do
-       r=r+1;result[r]=encode[stack[i]]
+     if true then
+      if top>0 then
+       for i=1,top do
+        r=r+1;result[r]=encode[stack[i]]
+       end
+       top=0
       end
+      r=r+1;result[r]=chars[t]
+      for j=1,s do
+       i=i+1
+       r=r+1;result[r]=chars[tab[i]]
+      end
+     else
+      i=i+s
       top=0
      end
-     r=r+1;result[r]=chars[t]
-     for j=1,s do
-      i=i+1
-      r=r+1;result[r]=chars[tab[i]]
-     end
-else
- i=i+s
- top=0
-end
      i=i+1
     elseif t==9 then
      top=0
      i=i+1
     elseif t==13 then
-     local s=hsbw() or 0
-     i=i+s+1
+     hsbw()
+     if version=="cff" then
+      r=r+1;result[r]=encode[lsb]
+      r=r+1;result[r]=chars[22]
+     else
+     end
+     i=i+1
     else
+     if trace_charstrings then
+      showstate(reverse[t] or "<action>")
+     end
      if top>0 then
       for i=1,top do
        r=r+1;result[r]=encode[stack[i]]
@@ -15488,7 +15616,7 @@ end
      end
     else
      if trace_charstrings then
-      showvalue("<action>",t)
+      showstate(reverse[t] or "<action>")
      end
      top=0
      i=i+1
@@ -15507,7 +15635,7 @@ end
     ((l<1240 and 107) or (l<33900 and 1131) or 32768)+1
   end
  end
- local function processshape(tab,index)
+ local function processshape(tab,index,hack)
   if not tab then
    glyphs[index]={
     boundingbox={ 0,0,0,0 },
@@ -15520,10 +15648,13 @@ end
   x=0
   y=0
   width=false
+  lsb=0
   r=0
   top=0
   stems=0
   result={} 
+  popped=3
+  procidx=index
   xmin=0
   xmax=0
   ymin=0
@@ -15537,6 +15668,9 @@ end
    updateregions(vsindex)
   end
   process(tab)
+  if hack then
+   return x,y
+  end
   local boundingbox={
    round(xmin),
    round(ymin),
@@ -15591,6 +15725,8 @@ end
   axis=false
   regions=data.regions
   justpass=streams==true
+  popped=3
+  seacs={}
   if regions then
    regions={ regions } 
    axis=data.factors or false
@@ -15604,6 +15740,8 @@ end
   locals=false
   globals=false
   strings=false
+  popped=3
+  seacs={}
  end
  local function setwidths(private)
   if not private then
@@ -15633,6 +15771,29 @@ end
    for index=1,#charstrings do
     processshape(charstrings[index],index-1)
    end
+   if justpass and next(seacs) then
+    local charset=data.dictionaries[1].charset
+    if charset then
+     local lookup=table.swapped(charset)
+     for index,v in next,seacs do
+      local bindex=lookup[standardnames[v.base]]
+      local aindex=lookup[standardnames[v.accent]]
+      local bglyph=bindex and glyphs[bindex]
+      local aglyph=aindex and glyphs[aindex]
+      if bglyph and aglyph then
+       local jp=justpass
+       justpass=false
+       local x,y=processshape(charstrings[bindex+1],bindex,true)
+       justpass=jp
+       local base=bglyph.stream
+       local accent=aglyph.stream
+       local moveto=encode[-x-v.asb+v.adx]..chars[22]..encode[-y+v.ady]..chars[ 4]
+       base=sub(base,1,#base-1)
+       glyphs[index].stream=base..moveto..accent
+      end
+     end
+    end
+   end
    stopparsing(fontdata,data)
   else
    report("no charstrings")
@@ -15649,6 +15810,7 @@ end
   vsindex=dictionary.vsindex or 0
   glyphs=glphs or {}
   justpass=streams==true
+  seacs={}
   globalbias,localbias=setbias(globals,locals,nobias)
   nominalwidth,defaultwidth=setwidths(dictionary.private)
   processshape(tab,index-1)
@@ -23779,7 +23941,7 @@ if not modules then modules={} end modules ['font-oto']={
 local concat,unpack=table.concat,table.unpack
 local insert,remove=table.insert,table.remove
 local format,gmatch,gsub,find,match,lower,strip=string.format,string.gmatch,string.gsub,string.find,string.match,string.lower,string.strip
-local type,next,tonumber,tostring,rawget=type,next,tonumber,tostring,rawget
+local type,next,tonumber,tostring=type,next,tonumber,tostring
 local trace_baseinit=false  trackers.register("otf.baseinit",function(v) trace_baseinit=v end)
 local trace_singles=false  trackers.register("otf.singles",function(v) trace_singles=v end)
 local trace_multiples=false  trackers.register("otf.multiples",function(v) trace_multiples=v end)
@@ -26150,6 +26312,7 @@ local find_node_tail=nuts.tail
 local flush_node_list=nuts.flush_list
 local flush_node=nuts.flush_node
 local end_of_math=nuts.end_of_math
+local start_of_par=nuts.start_of_par
 local setmetatable=setmetatable
 local setmetatableindex=table.setmetatableindex
 local nextnode=nuts.traversers.node
@@ -29120,7 +29283,7 @@ do
    checkstep(head)
   end
   local initialrl=0
-  if getid(head)==localpar_code and getsubtype(head)==0 then
+  if getid(head)==localpar_code and start_of_par(head) then
    initialrl=pardirstate(head)
   elseif direction==1 or direction=="TRT" then
    initialrl=-1
@@ -29452,19 +29615,27 @@ registerotffeature {
   plug=otf.pluginprocessor,
  }
 }
+local function markinitializer(tfmdata,value)
+ local properties=tfmdata.properties
+ properties.checkmarks=value
+end
+registerotffeature {
+ name="checkmarks",
+ description="check mark widths",
+ default=true,
+ initializers={
+  node=markinitializer,
+ },
+}
 otf.handlers=handlers
+if context then
+
+--removed
+
+else
+end
 local setspacekerns=nodes.injections.setspacekerns if not setspacekerns then os.exit() end
-local tag="kern" 
-if fontfeatures then
- function handlers.trigger_space_kerns(head,dataset,sequence,initialrl,font,attr)
-  local features=fontfeatures[font]
-  local enabled=features and features.spacekern and features[tag]
-  if enabled then
-   setspacekerns(font,sequence)
-  end
-  return head,enabled
- end
-else 
+local tag="kern"
  function handlers.trigger_space_kerns(head,dataset,sequence,initialrl,font,attr)
   local shared=fontdata[font].shared
   local features=shared and shared.features
@@ -29474,7 +29645,6 @@ else
   end
   return head,enabled
  end
-end
 local function hasspacekerns(data)
  local resources=data.resources
  local sequences=resources.sequences
@@ -29657,18 +29827,6 @@ registerotffeature {
  default=true,
  initializers={
   node=spaceinitializer,
- },
-}
-local function markinitializer(tfmdata,value)
- local properties=tfmdata.properties
- properties.checkmarks=value
-end
-registerotffeature {
- name="checkmarks",
- description="check mark widths",
- default=true,
- initializers={
-  node=markinitializer,
  },
 }
 
@@ -32380,7 +32538,6 @@ do
   local pdfshapes={}
   local inkscape=runner()
   if inkscape then
-   local indices=fonts.getindices(tfmdata)
    local descriptions=tfmdata.descriptions
    local nofshapes=#svgshapes
    local f_svgfile=formatters["temp-otf-svg-shape-%i.svg"]
@@ -33355,7 +33512,7 @@ if not modules then modules={} end modules ['font-onr']={
  license="see context related readme files"
 }
 local fonts,logs,trackers,resolvers=fonts,logs,trackers,resolvers
-local next,type,tonumber,rawget,rawset=next,type,tonumber,rawget,rawset
+local next,type,tonumber,rawset=next,type,tonumber,rawset
 local match,lower,gsub,strip,find=string.match,string.lower,string.gsub,string.strip,string.find
 local char,byte,sub=string.char,string.byte,string.sub
 local abs=math.abs
@@ -35192,7 +35349,6 @@ local variants=allocate()
 specifiers.variants=variants
 definers.methods=definers.methods or {}
 local internalized=allocate() 
-local lastdefined=nil 
 local loadedfonts=constructors.loadedfonts
 local designsizes=constructors.designsizes
 local resolvefile=fontgoodies and fontgoodies.filenames and fontgoodies.filenames.resolve or function(s) return s end
@@ -35453,9 +35609,6 @@ function constructors.readanddefine(name,size)
  end
  return fontdata[id],id
 end
-function definers.current() 
- return lastdefined
-end
 function definers.registered(hash)
  local id=internalized[hash]
  return id,id and fontdata[id]
@@ -35506,7 +35659,6 @@ function definers.read(specification,size,id)
    end
   end
  end
- lastdefined=tfmdata or id 
  if not tfmdata then 
   report_defining("unknown font %a, loading aborted",specification.name)
  elseif trace_defining and type(tfmdata)=="table" then
@@ -35522,7 +35674,9 @@ end
 function font.getfont(id)
  return fontdata[id] 
 end
-callbacks.register('define_font',definers.read,"definition of fonts (tfmdata preparation)")
+if not context then
+ callbacks.register('define_font',definers.read,"definition of fonts (tfmdata preparation)")
+end
 
 end -- closure
 

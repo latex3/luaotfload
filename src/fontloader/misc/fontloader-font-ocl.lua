@@ -363,7 +363,6 @@ local function pdftovirtual(tfmdata,pdfshapes,kind) -- kind = png|svg
     local actuale       = { "pdf", "page", e } -- saves tables
     --
     local vfimage = lpdf and lpdf.vfimage or function(wd,ht,dp,data,name)
-        -- needed for generic (if used there at all)
         local name = storepdfdata(data)
         return { "image", { filename = name, width = wd, height = ht, depth = dp } }
     end
@@ -439,6 +438,8 @@ do
         local xmlfirst   = xml.first
 
         function otfsvg.filterglyph(entry,index)
+            -- we only support decompression in lmtx, so one needs to wipe the
+            -- cache when invalid xml is reported
             local svg  = xmlconvert(entry.data)
             local root = svg and xmlfirst(svg,"/svg[@id='glyph"..index.."']")
             local data = root and tostring(root)
@@ -483,7 +484,7 @@ do
         local pdfshapes = { }
         local inkscape  = runner()
         if inkscape then
-            local indices      = fonts.getindices(tfmdata)
+         -- local indices      = fonts.getindices(tfmdata)
             local descriptions = tfmdata.descriptions
             local nofshapes    = #svgshapes
             local f_svgfile    = formatters["temp-otf-svg-shape-%i.svg"]

@@ -6,7 +6,7 @@ if not modules then modules = { } end modules ['l-table'] = {
     license   = "see context related readme files"
 }
 
-local type, next, tostring, tonumber, select = type, next, tostring, tonumber, select
+local type, next, tostring, tonumber, select, rawget = type, next, tostring, tonumber, select, rawget
 local table, string = table, string
 local concat, sort = table.concat, table.sort
 local format, lower, dump = string.format, string.lower, string.dump

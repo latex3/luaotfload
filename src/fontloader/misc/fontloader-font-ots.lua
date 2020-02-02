@@ -213,6 +213,7 @@ local find_node_tail     = nuts.tail
 local flush_node_list    = nuts.flush_list
 local flush_node         = nuts.flush_node
 local end_of_math        = nuts.end_of_math
+local start_of_par       = nuts.start_of_par
 
 local setmetatable       = setmetatable
 local setmetatableindex  = table.setmetatableindex
@@ -3804,7 +3805,7 @@ do
 
         local initialrl = 0
 
-        if getid(head) == localpar_code and getsubtype(head) == 0 then
+        if getid(head) == localpar_code and start_of_par(head) then
             initialrl = pardirstate(head)
         elseif direction == 1 or direction == "TRT" then
             initialrl = -1
@@ -3958,7 +3959,7 @@ do
                         elseif id == dir_code then
                             topstack, rlmode = txtdirstate(start,dirstack,topstack,rlparmode)
                             start = getnext(start)
-                     -- elseif id == localpar_code then
+                     -- elseif id == localpar_code and start_of_par(start) then
                      --     rlparmode, rlmode = pardirstate(start)
                      --     start = getnext(start)
                         else
@@ -4042,7 +4043,7 @@ do
                         elseif id == dir_code then
                             topstack, rlmode = txtdirstate(start,dirstack,topstack,rlparmode)
                             start = getnext(start)
-                     -- elseif id == localpar_code then
+                     -- elseif id == localpar_code and start_of_par(start) then
                      --     rlparmode, rlmode = pardirstate(start)
                      --     start = getnext(start)
                         else
@@ -4153,7 +4154,7 @@ do
             elseif id == dir_code then
                 topstack, rlmode = txtdirstate(start,dirstack,topstack,rlparmode)
                 start = getnext(start)
-         -- elseif id == localpar_code then
+         -- elseif id == localpar_code and start_of_par(start) then
          --     rlparmode, rlmode = pardirstate(start)
          --     start = getnext(start)
             else
@@ -4234,9 +4235,26 @@ registerotffeature {
     }
 }
 
+-- Moved here (up) a bit. This doesn't really belong in generic so it will
+-- move to a context module some day.
+
+local function markinitializer(tfmdata,value)
+    local properties = tfmdata.properties
+    properties.checkmarks = value
+end
+
+registerotffeature {
+    name         = "checkmarks",
+    description  = "check mark widths",
+    default      = true,
+    initializers = {
+        node     = markinitializer,
+    },
+}
+
 -- This can be used for extra handlers, but should be used with care! We implement one
 -- here but some more can be found in the osd (script devanagary) file. Now watch out:
--- when a handlers has steps, it is called as the other ones, but when we have no steps,
+-- when a handler has steps, it is called as the other ones, but when we have no steps,
 -- we use a different call:
 --
 --   function(head,dataset,sequence,initialrl,font,attr)
@@ -4247,22 +4265,28 @@ registerotffeature {
 
 otf.handlers = handlers
 
+if context then
+    return
+else
+    -- todo: move the following code someplace else
+end
+
 local setspacekerns = nodes.injections.setspacekerns if not setspacekerns then os.exit() end
 
-local tag = "kern" -- maybe some day a merge
+local tag = "kern"
 
-if fontfeatures then
+-- if fontfeatures then
 
-    function handlers.trigger_space_kerns(head,dataset,sequence,initialrl,font,attr)
-        local features = fontfeatures[font]
-        local enabled  = features and features.spacekern and features[tag]
-        if enabled then
-            setspacekerns(font,sequence)
-        end
-        return head, enabled
-    end
+--     function handlers.trigger_space_kerns(head,dataset,sequence,initialrl,font,attr)
+--         local features = fontfeatures[font]
+--         local enabled  = features and features.spacekern and features[tag]
+--         if enabled then
+--             setspacekerns(font,sequence)
+--         end
+--         return head, enabled
+--     end
 
-else -- generic (no hashes)
+-- else -- generic (no hashes)
 
     function handlers.trigger_space_kerns(head,dataset,sequence,initialrl,font,attr)
         local shared   = fontdata[font].shared
@@ -4274,7 +4298,7 @@ else -- generic (no hashes)
         return head, enabled
     end
 
-end
+-- end
 
 -- There are fonts out there that change the space but we don't do that kind of
 -- things in TeX.
@@ -4392,7 +4416,7 @@ local function spaceinitializer(tfmdata,value) -- attr
                                     if rules then
                                         -- not now: analyze (simple) rules
                                     elseif not coverage then
-                                        -- nothng to do
+                                        -- nothing to do
                                     elseif kind == "gpos_single" then
                                         -- makes no sense in TeX
                                     elseif kind == "gpos_pair" then
@@ -4474,19 +4498,5 @@ registerotffeature {
     default      = true,
     initializers = {
         node     = spaceinitializer,
-    },
-}
-
-local function markinitializer(tfmdata,value)
-    local properties = tfmdata.properties
-    properties.checkmarks = value
-end
-
-registerotffeature {
-    name         = "checkmarks",
-    description  = "check mark widths",
-    default      = true,
-    initializers = {
-        node     = markinitializer,
     },
 }

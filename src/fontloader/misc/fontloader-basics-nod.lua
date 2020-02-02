@@ -279,3 +279,14 @@ if not nuts.setreplace then
     end
 
 end
+
+do
+
+    local getsubtype = nuts.getsubtype
+
+    function nuts.start_of_par(n)
+        local s = getsubtype(n)
+        return s == 0 or s == 2 -- sorry, hardcoded, won't change anyway
+    end
+
+end

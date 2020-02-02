@@ -1,7 +1,7 @@
 
-packageversion= "3.1202-dev"
-packagedate   = "2019-12-23"
-fontloaderdate= "2019-10-29"
+packageversion= "3.12"
+packagedate   = "2020-02-02"
+fontloaderdate= "2020-01-26"
 packagedesc   = "harf"
 
 module   = "luaotfload"

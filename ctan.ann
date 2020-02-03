@@ -1,3 +1,5 @@
-- Changed the handling of the script key in harf mode to be more compatible with behaviour of the node mode. 
-It now expects the name of a script that is actually in the font instead of a ISO 15924 script tag. See issue 117.
-- Corrected a number of small typos and bugs in harf mode.
+* new experimental feature multiscript to automatically switch fonts based on the script
+* new experimental feature fallback to fill in missing glyphs
+* experimental extension of the color feature to color output glyphs 
+* sync with context files of 2020-01-26
+* small bug corrections

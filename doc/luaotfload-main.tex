@@ -2058,7 +2058,14 @@ are defined for which scripts.
   \beginaltitem  {aux.slot_of_name(id : int, name : string)}
             Translates a name for a glyph in font \luaident{id} to the
             corresponding glyph slot which can be used e.g.\ as an argument to
-            \inlinecode{\char}.
+            \inlinecode{\char}. The number is assigned by the \identifier{luaotfload} code 
+            and not related to the glyph index (GID) of the font as stored in the \identifier{[index]} field
+            of the lua-file.
+  \endaltitem
+
+  \beginaltitem  {aux.gid_of_name(id : int, name : string)} 
+            Translates\marginpar{New version 3.12} a name for a glyph in font \luaident{id} to the
+            corresponding glyph index (GID) as stored in the \identifier{[index]} field. 
   \endaltitem
 
   \beginaltitem  {aux.name_of_slot(id : int, slot : int)}

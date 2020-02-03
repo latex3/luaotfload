@@ -44,7 +44,7 @@ echo graphics xcolor graphics-def pgf
 
 # fonts support - perhaps take here luaotfload out of the list ...
 # or is it installed as dependency anyway?
-echo  microtype unicode-math luaotfload
+echo fontspec microtype unicode-math luaotfload
 
 # fonts
 echo sourcecodepro Asana-Math  ebgaramond  tex-gyre  amsfonts gnu-freefont
@@ -76,7 +76,7 @@ echo metafont mfware texlive-scripts
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
-tlmgr uninstall --force fontspec
+
 # Update the TL install but add nothing new
 tlmgr update --self --all --no-auto-install
 

@@ -1,8 +1,8 @@
 # .gitignore file for luaotfload
 
-fontspec-luatex.sty
-fontspec.lua
-fontspec.sty
+#fontspec-luatex.sty
+#fontspec.lua
+#fontspec.sty
 
 luaotfload.aux
 luaotfload.fdb_latexmk

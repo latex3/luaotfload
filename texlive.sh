@@ -76,7 +76,7 @@ echo metafont mfware texlive-scripts
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
-tlmgr uninstall fontspec
+tlmgr uninstall --force fontspec
 # Update the TL install but add nothing new
 tlmgr update --self --all --no-auto-install
 

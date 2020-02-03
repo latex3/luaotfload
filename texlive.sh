@@ -44,7 +44,7 @@ echo graphics xcolor graphics-def pgf
 
 # fonts support - perhaps take here luaotfload out of the list ...
 # or is it installed as dependency anyway?
-echo fontspec microtype unicode-math luaotfload
+echo  microtype unicode-math luaotfload
 
 # fonts
 echo sourcecodepro Asana-Math  ebgaramond  tex-gyre  amsfonts gnu-freefont

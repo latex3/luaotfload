@@ -23,6 +23,8 @@ local getwhd             = node.direct.getwhd
 local insert_after       = node.direct.insert_after
 local traverse_char      = node.direct.traverse_char
 local protect_glyph      = node.direct.protect_glyph
+local flush_node         = node.direct.flush_node
+local remove             = node.direct.remove
 local otffeatures        = fonts.constructors.newfeatures "otf"
 -- local normalize          = fonts.handlers.otf.features.normalize
 local definers           = fonts.definers
@@ -31,6 +33,20 @@ local scripts_lib        = require'luaotfload-scripts'.script
 local script_to_iso      = scripts_lib.to_iso
 local script_to_ot       = scripts_lib.to_ot
 
+local delayedremove, finishremove do
+  local removed
+  function finishremove()
+    if removed then
+      flush_node(removed)
+    end
+    removed = nil
+  end
+  function delayedremove(head, current)
+    finishremove()
+    removed = current
+    return remove(head, current)
+  end
+end
 local harf = luaotfload.harfbuzz
 local GSUBtag, GPOStag
 if harf then
@@ -63,6 +79,7 @@ local script_extensions do
     end
   end
 end
+local script_list = {}
 local script_mapping do
   -- We could extract these from PropertyValueAliases.txt...
   local script_aliases = {
@@ -121,6 +138,23 @@ local script_mapping do
   local f = io.open(kpse.find_file"Scripts.txt")
   script_mapping = file:match(f:read'*a')
   f:close()
+
+  for _, scr in next, script_aliases do
+    script_list[#script_list + 1] = scr
+  end
+end
+
+table.sort(script_list)
+local script_mark_offset = 0x200000
+local script_marks = {}
+do
+  for i=1,#script_list do
+    local codepoint = script_mark_offset - 1 + i
+    local scr = script_list[i]
+    -- script_mapping[codepoint] = scr
+    script_marks[scr] = codepoint
+    script_marks[codepoint] = scr
+  end
 end
 
 local function load_on_demand(specifications, size)
@@ -292,7 +326,7 @@ function domultiscript(head, _, _, _, direction)
   local last_fid, last_fonts, last_script
   for cur, cid, fid in traverse_char(head) do
     if fid ~= last_fid then
-      last_fid, last_fonts, last_script = fid, additional_scripts_fonts[fid]
+      last_fid, last_fonts = fid, additional_scripts_fonts[fid]
     end
     if last_fonts then
       local mapped_scr = script_mapping[cid]
@@ -321,8 +355,18 @@ function domultiscript(head, _, _, _, direction)
       if mapped_font then
         setfont(cur, mapped_font)
       end
+    elseif fid == 0 then
+      local script_mark = script_marks[cid]
+      if script_mark then
+        head = delayedremove(head, current)
+        last_script = script_mark
+      end
+    else
+      last_script = nil
     end
   end
+  finishremove() -- Cleanup
+  return head
 end
 
 function luaotfload.add_multiscript(name, fonts)
@@ -334,6 +378,10 @@ function luaotfload.add_multiscript(name, fonts)
   end
   additional_scripts_tables[name] = fonts
   return name
+end
+
+function luaotfload.get_script_mark(scr)
+  return script_marks[scr]
 end
 
 otffeatures.register {

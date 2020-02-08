@@ -66,7 +66,17 @@ luaotfload.add_fallback
  )
 }
 
-\newcommand\testtext{1234 a^^^^0301 π^^^^0301 a!? π123!? a БѨ123!? a \char"1D6FC\ a \char"0995\char"09BF a „π“ a „Б“}
+\newcommand\testtext{1234 a^^^^0301 π^^^^0301 a!? π123!? a БѨ123!? a \char"1D6FC\ a \char"0995\char"09BF a\scriptmark grek „π“ a \scriptmark{cyrl}„Б“}
+\directlua{
+  local i = luatexbase.new_luafunction'scriptmark'
+  lua.get_functions_table()[i] = function()
+    local scr = token.scan_string()
+    local n = node.new'glyph'
+    n.char = luaotfload.get_script_mark(scr)
+    node.write(n)
+  end
+  token.set_lua('scriptmark', i, 'protected')
+}
 \begin{document}
 red= fallback, green = bng2 multiscript, blue= beng multiscript.
 %\showoutput

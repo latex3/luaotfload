@@ -319,7 +319,7 @@ local function init_main(early_hook)
     --- of our fontloader package. Perhaps something’s wrong with the status
     --- file which contains the datestamped filename? In any case, it can’t
     --- hurt reporting it as a bug.
-    logreport ("both", 0, "init", "Fontloader substitution failed, got “default”.")
+    logreport ("both", 0, "init", "Fontloader substitution failed, got \"default\".")
     logreport ("log",  4, "init", "Falling back to reference fontloader.")
     load_fontloader_module (luaotfload.fontloader_package)
 
@@ -392,36 +392,36 @@ local function init_main(early_hook)
 
   elseif lfsisdir (fontloader) and verify_context_dir (fontloader) then
     logreport ("log", 0, "init",
-               "Loading Context files under prefix “%s”.",
+               "Loading Context files under prefix \"%s\".",
                fontloader)
     load_context_modules (fontloader)
 
   elseif lfs.isfile (fontloader) then
     logreport ("log", 0, "init",
-               "Loading fontloader from absolute path “%s”.",
+               "Loading fontloader from absolute path \"%s\".",
                fontloader)
     local _void = assert (loadfile (fontloader, nil, context_environment)) ()
 
   elseif kpsefind_file (fontloader) then
     local path = kpsefind_file (fontloader)
     logreport ("log", 0, "init",
-               "Loading fontloader “%s” from kpse-resolved path “%s”.",
+               "Loading fontloader \"%s\" from kpse-resolved path \"%s\".",
                fontloader, path)
     local _void = assert (loadfile (path, nil, context_environment)) ()
 
   elseif kpsefind_file (("fontloader-%s.lua"):format(fontloader)) then
     logreport ("log", 0, "init",
-               "Using predefined fontloader “%s”.",
+               "Using predefined fontloader \"%s\".",
                fontloader)
     load_fontloader_module (fontloader)
 
   else
     logreport ("both", 0, "init",
-               "No match for requested fontloader “%s”.",
+               "No match for requested fontloader \"%s\".",
                fontloader)
     fontloader = luaotfload.fontloader_package
     logreport ("both", 0, "init",
-               "Defaulting to predefined fontloader “%s”.",
+               "Defaulting to predefined fontloader \"%s\".",
                fontloader)
     load_fontloader_module (fontloader)
   end
@@ -429,7 +429,7 @@ local function init_main(early_hook)
   ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 
   logreport ("log", 0, "init",
-             "Context OpenType loader version “%s”",
+             "Context OpenType loader version \"%s\"",
              fonts.handlers.otf.version)
   callback.register = trapped_register
   nodes = context_environment.nodes

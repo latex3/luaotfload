@@ -129,14 +129,14 @@ local make_loader_name = function (prefix, name)
              end
     if not name then
         msg ("both", 0, "load",
-             "Fatal error: make_loader_name (“%s”, “%s”).",
+             "Fatal error: make_loader_name (\"%s\", \"%s\").",
              tostring (prefix), tostring (name))
         return "dummy-name"
     end
     name = tostring (name)
     if prefix == false then
         msg ("log", 9, "load",
-             "No prefix requested, passing module name “%s” unmodified.",
+             "No prefix requested, passing module name \"%s\" unmodified.",
              name)
         return tostring (name) .. ".lua"
     end
@@ -196,7 +196,7 @@ end
 
 local dummy_loader = function (name)
     luaotfload.log.report ("log", 3, "load",
-                           "Skipping module “%s” on purpose.",
+                           "Skipping module \"%s\" on purpose.",
                            name)
 end
 
@@ -212,7 +212,7 @@ end
 
 local context_loader = function (name, path)
     luaotfload.log.report ("log", 3, "load",
-                           "Loading module “%s” from Context.",
+                           "Loading module \"%s\" from Context.",
                            name)
     local t_0 = osgettimeofday ()
     local modname = make_loader_name (false, name)
@@ -220,12 +220,12 @@ local context_loader = function (name, path)
     if path then
         if lfs.isdir (path) then
             luaotfload.log.report ("log", 3, "load",
-                                   "Prepending path “%s”.",
+                                   "Prepending path \"%s\".",
                                    path)
             modpath = file.join (path, modname)
         else
             luaotfload.log.report ("both", 0, "load",
-                                   "Non-existant path “%s” specified, ignoring.",
+                                   "Non-existant path \"%s\" specified, ignoring.",
                                    path)
         end
     end
@@ -239,7 +239,7 @@ local context_loader = function (name, path)
         --- something isn’t right, but against HH’s coding practices. We’ll
         --- silently ignore this ever happening on lower log levels.
         luaotfload.log.report ("log", 4, "load",
-                               "Module “%s” returned “%s”.", ret)
+                               "Module \"%s\" returned \"%s\".", ret)
     end
     return ret
 end
@@ -261,13 +261,13 @@ local install_loaders = function ()
             local t_0 = osgettimeofday ()
             if not init () then
                 logreport ("log", 0, "load",
-                           "Failed to load module “%s”.", name)
+                           "Failed to load module \"%s\".", name)
                 return
             end
             local t_end = osgettimeofday ()
             local d_t = t_end - t_0
             logreport ("log", 4, "load",
-                       "Module “%s” loaded in %d ms.",
+                       "Module \"%s\" loaded in %d ms.",
                        name, d_t)
             timing_info.t_init [name] = d_t
         end

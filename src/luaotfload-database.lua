@@ -2344,7 +2344,7 @@ local filter_out_pwd = function (dirs)
         local dir = path_normalize (lpegmatch (stripslashes, dirs[i]))
         if dir == "." or dir == pwd then
             logreport ("both", 3, "db",
-                       "Path “%s” matches $PWD (“%s”), skipping.",
+                       "Path \"%s\" matches $PWD (\"%s\"), skipping.",
                        dir, pwd)
         else
             result[#result+1] = dir
@@ -3356,12 +3356,12 @@ local collect_statistics = function (mappings)
         pprint_top (families, 4, true)
 
         logreport ("both", 0, "db",
-                   "   · %d different “subfamily” kinds.",
+                   "   · %d different \"subfamily\" kinds.",
                    setsize (subfamily))
         pprint_top (subfamily, 4)
 
         logreport ("both", 0, "db",
-                   "   · %d different “typographicsubfamily” kinds.",
+                   "   · %d different \"typographicsubfamily\" kinds.",
                    setsize (typographicsubfamily))
         pprint_top (typographicsubfamily, 4)
 

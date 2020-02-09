@@ -293,16 +293,6 @@ local function scalefont(data, spec)
     slantfactor = tonumber(features.slant) * 1000
   end
 
-  local mode = nil
-  local width = nil
-  if features.embolden then
-    mode = 2
-    -- The multiplication by 7200.0/7227 is to undo the opposite conversion
-    -- the engine is doing and make the final number written in the PDF file
-    -- match XeTeX’s.
-    width = (size * tonumber(features.embolden) / 6553.6) * (7200.0/7227)
-  end
-
   local hscale = upem
   local extendfactor = nil
   if features.extend then
@@ -341,8 +331,6 @@ local function scalefont(data, spec)
     nomath = true,
     format = data.fonttype,
     slant = slantfactor,
-    mode = mode,
-    width = width,
     extend = extendfactor,
     squeeze = squeezefactor,
     characters = characters,

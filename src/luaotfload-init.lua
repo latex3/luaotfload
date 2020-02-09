@@ -448,14 +448,19 @@ local init_post_install_callbacks = function ()
 
   --doc]]--
 
+  -- The order is important here: multiscript=auto needs to look at the
+  -- fallback fonts, so they already have to be processed at that stage
+  local fallback = luaotfload.loaders.luaotfload "fallback".process
+  local multiscript = luaotfload.loaders.luaotfload "multiscript".process
+
   -- MK Pass current text direction to simple_font_handler
   local handler = luaotfload.fontloader.nodes.simple_font_handler
   local callback = function(head, groupcode, _, _, direction)
     if not direction then
       direction = tex.get'textdir'
     end
-    domultiscript(head, nil, nil, nil, direction)
-    dofallback(head, nil, nil, nil, direction)
+    multiscript(head, nil, nil, nil, direction)
+    fallback(head, nil, nil, nil, direction)
     return handler(head, groupcode, nil, nil, direction)
   end
   luatexbase.add_to_callback("pre_linebreak_filter",

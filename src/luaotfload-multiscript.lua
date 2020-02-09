@@ -28,7 +28,7 @@ local remove             = node.direct.remove
 local otffeatures        = fonts.constructors.newfeatures "otf"
 -- local normalize          = fonts.handlers.otf.features.normalize
 local definers           = fonts.definers
-local define_font        = luaotfload.define_font
+local define_font --     = luaotfload.define_font % This is set when the first font is loaded.
 local scripts_lib        = require'luaotfload-scripts'.script
 local script_to_iso      = scripts_lib.to_iso
 local script_to_ot       = scripts_lib.to_ot
@@ -218,6 +218,7 @@ local function is_dominant_script(scripts, script, first, ...)
 end
 
 local function makecombifont(tfmdata, _, additional_scripts)
+  define_font = define_font or luaotfload.define_font -- Lazy loading because this file get's loaded before define_font is defined
   local has_auto
   additional_scripts = tostring(additional_scripts)
   if additional_scripts:sub(1, 5) == "auto+" then
@@ -321,7 +322,7 @@ end
 
 local glyph_id = node.id'glyph'
 -- TODO: unset last_script, matching parentheses etc
-function domultiscript(head, _, _, _, direction)
+local function domultiscript(head, _, _, _, direction)
   head = node.direct.todirect(head)
   local last_fid, last_fonts, last_script
   for cur, cid, fid in traverse_char(head) do
@@ -397,4 +398,8 @@ otffeatures.register {
   -- }
 }
 
+return {
+  -- I would omit the table if that wouldn't cause the function to be used as initializer
+  process = domultiscript,
+}
 --- vim:sw=2:ts=2:expandtab:tw=71

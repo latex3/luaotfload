@@ -26,7 +26,7 @@ local protect_glyph      = node.direct.protect_glyph
 local otffeatures        = fonts.constructors.newfeatures "otf"
 -- local normalize          = fonts.handlers.otf.features.normalize
 local definers           = fonts.definers
-local define_font        = luaotfload.define_font
+local define_font --     = luaotfload.define_font % This is set when the first font is loaded.
 
 local fallback_table_fontnames = {}
 
@@ -89,8 +89,8 @@ local function makefallbackfont(tfmdata, _, fallback)
 end
 
 local glyph_id = node.id'glyph'
--- TODO: unset last_script, matching parentheses etc
-function dofallback(head, _, _, _, direction)
+-- TODO: inherited fonts (combining accents etc.)
+local function dofallback(head, _, _, _, direction)
   head = node.direct.todirect(head)
   local last_fid, last_fallbacks
   for cur, cid, fid in traverse_char(head) do
@@ -107,6 +107,7 @@ function dofallback(head, _, _, _, direction)
 end
 
 function luaotfload.add_fallback(name, fonts)
+  define_font = define_font or luaotfload.define_font -- Lazy loading because this file get's loaded before define_font is defined
   if fonts == nil then
     fonts = name
     name = #fallback_table_fontnames + 1
@@ -131,4 +132,7 @@ otffeatures.register {
   -- }
 }
 
+return {
+  process = dofallback,
+}
 --- vim:sw=2:ts=2:expandtab:tw=71

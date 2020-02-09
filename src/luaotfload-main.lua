@@ -294,6 +294,14 @@ luaotfload.main = function ()
     local initialize = loaders.initialize
 
     local starttime = osgettimeofday ()
+
+    -- Feature detect HarfBuzz. This is done early to allow easy HarfBuzz
+    -- detection in other modules
+    local harfstatus, harfbuzz = pcall(require, 'luaharfbuzz')
+    if harfstatus then
+        luaotfload.harfbuzz = harfbuzz
+    end
+
     local init      = loadmodule "init" --- fontloader initialization
     init (function ()
 
@@ -319,15 +327,11 @@ luaotfload.main = function ()
     loadmodule "letterspace"  --- extra character kerning
     loadmodule "embolden"     --- fake bold
     loadmodule "notdef"       --- missing glyph handling
-    local harfstatus, harfbuzz = pcall(require, 'luaharfbuzz')
     if harfstatus then
-        luaotfload.harfbuzz = harfbuzz
         loadmodule "harf-define"
         loadmodule "harf-plug"
     end
     initialize "auxiliary"    --- additional high-level functionality
-    loadmodule "fallback"  --- ...
-    loadmodule "multiscript"  --- ...
     loadmodule "tounicode"
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec

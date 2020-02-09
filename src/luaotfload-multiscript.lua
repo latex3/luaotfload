@@ -359,7 +359,7 @@ local function domultiscript(head, _, _, _, direction)
     elseif fid == 0 then
       local script_mark = script_marks[cid]
       if script_mark then
-        head = delayedremove(head, current)
+        head = delayedremove(head, current) -- Instead of removing them we could also keep them and suppress the missing glyph warning, but this seems cleaner
         last_script = script_mark
       end
     else

@@ -164,8 +164,8 @@ local make_loader = function (prefix, load_helper)
             io.write "\n"
             local msg = luaotfload.log and luaotfload.log.report or print
             msg ("both", 0, "load", "FATAL ERROR")
-            msg ("both", 0, "load", "  × Failed to load module %q.",
-                 tostring (modname))
+            msg ("both", 0, "load", "  × Failed to load %q module %q.",
+                 tostring (prefix), tostring (name))
             local lines = string.split (data, "\n\t")
             if not lines then
                 msg ("both", 0, "load", "  × Error message: %q", data)

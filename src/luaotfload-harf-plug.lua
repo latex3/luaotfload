@@ -596,7 +596,6 @@ local function tonodes(head, node, run, glyphs)
   local lastprops
 
   local scale = hbdata.scale
-  local letterspace = hbdata.letterspace
 
   local haspng = hbshared.haspng
   local fonttype = hbshared.fonttype
@@ -795,7 +794,7 @@ local function tonodes(head, node, run, glyphs)
           if glyph.endactual then
             setprop(node, endactual_p, true)
           end
-          local x_advance = glyph.x_advance + letterspace
+          local x_advance = glyph.x_advance
           local width = fontglyph.width
           if width ~= x_advance then
             -- The engine always uses the glyph width from the font, so we need
@@ -810,7 +809,7 @@ local function tonodes(head, node, run, glyphs)
         -- it from the default, so reset the glue using the new advance.
         -- We are intentionally not comparing with the existing glue width as
         -- spacing after the period is larger by default in TeX.
-        local width = (glyph.x_advance + letterspace) * scale
+        local width = glyph.x_advance * scale
         if fontdata.parameters.space ~= width then
           setwidth(node, width)
           setfield(node, "stretch", width / 2)

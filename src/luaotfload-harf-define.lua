@@ -280,14 +280,6 @@ local function scalefont(data, spec)
     end
   end
 
-  local letterspace = 0
-  if features.letterspace then
-    letterspace = tonumber(features.letterspace) / 100 * upem
-  elseif features.kernfactor then
-    letterspace = tonumber(features.kernfactor) * upem
-  end
-  space = space + letterspace
-
   local slantfactor = nil
   if features.slant then
     slantfactor = tonumber(features.slant) * 1000
@@ -349,7 +341,6 @@ local function scalefont(data, spec)
       spec = spec,
       palette = palette,
       shared = data,
-      letterspace = letterspace,
       hscale = hscale,
       vscale = vscale,
     },

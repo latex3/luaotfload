@@ -461,18 +461,6 @@ local add_processor = function (processor, name, ...)
   return true
 end
 
---- string -> bool
-local remove_processor = function (name)
-  local callbacks = registered_as[name]
-  if callbacks then
-    for i=1, #callbacks do
-      luatexbase.remove_from_callback(callbacks[i], name)
-    end
-    return true
-  end
-  return false --> unregistered
-end
-
 --- When font kerning is requested, usually by defining a font with the
 --- ``letterspace`` parameter, we inject a wrapper for the
 --- ``kerncharacters()`` node processor in the relevant callbacks. This
@@ -548,6 +536,7 @@ otffeatures.register {
   initializers = {
     base = initializefontkerning,
     node = initializefontkerning,
+    plug = initializefontkerning,
   }
 }
 
@@ -580,6 +569,7 @@ otffeatures.register {
   initializers = {
     base = initializecompatfontkerning,
     node = initializecompatfontkerning,
+    plug = initializecompatfontkerning,
   }
 }
 

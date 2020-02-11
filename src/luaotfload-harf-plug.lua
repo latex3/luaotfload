@@ -581,6 +581,7 @@ local function tonodes(head, node, run, glyphs)
   local dir = run.dir
   local fontid = run.font
   local fontdata = font.getfont(fontid)
+  local space = fontdata.parameters.space
   local characters = fontdata.characters
   local hbdata = fontdata.hb
   local palette = hbdata.palette
@@ -802,14 +803,18 @@ local function tonodes(head, node, run, glyphs)
       elseif id == glue_t and getsubtype(node) == spaceskip_t then
         -- If the glyph advance is different from the font space, then a
         -- substitution or positioning was applied to the space glyph changing
-        -- it from the default, so reset the glue using the new advance.
+        -- it from the default. We try to maintain as much as possible from the
+        -- original value because we assume that we want to keep spacefactors and
+        -- assume that we got mostly positioning applied. TODO: Handle the case that
+        -- we became a glyph in the process.
         -- We are intentionally not comparing with the existing glue width as
         -- spacing after the period is larger by default in TeX.
         local width = glyph.x_advance
-        if fontdata.parameters.space ~= width then
-          setwidth(node, width)
-          setfield(node, "stretch", width / 2)
-          setfield(node, "shrink", width / 3)
+        -- if space > width + 2 or width > space + 2 then
+        if space ~= width then
+          setwidth(node, getwidth(node) - space + width)
+          -- setfield(node, "stretch", width / 2)
+          -- setfield(node, "shrink", width / 3)
         end
       elseif id == kern_t and getsubtype(node) == italiccorr_t then
         -- If this is an italic correction node and the previous node is a

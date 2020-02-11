@@ -392,36 +392,36 @@ local function init_main(early_hook)
 
   elseif lfsisdir (fontloader) and verify_context_dir (fontloader) then
     logreport ("log", 0, "init",
-               "Loading Context files under prefix \"%s\".",
+               "Loading Context files under prefix %q.",
                fontloader)
     load_context_modules (fontloader)
 
   elseif lfs.isfile (fontloader) then
     logreport ("log", 0, "init",
-               "Loading fontloader from absolute path \"%s\".",
+               "Loading fontloader from absolute path %q.",
                fontloader)
     local _void = assert (loadfile (fontloader, nil, context_environment)) ()
 
   elseif kpsefind_file (fontloader) then
     local path = kpsefind_file (fontloader)
     logreport ("log", 0, "init",
-               "Loading fontloader \"%s\" from kpse-resolved path \"%s\".",
+               "Loading fontloader %q from kpse-resolved path %q.",
                fontloader, path)
     local _void = assert (loadfile (path, nil, context_environment)) ()
 
   elseif kpsefind_file (("fontloader-%s.lua"):format(fontloader)) then
     logreport ("log", 0, "init",
-               "Using predefined fontloader \"%s\".",
+               "Using predefined fontloader %q.",
                fontloader)
     load_fontloader_module (fontloader)
 
   else
     logreport ("both", 0, "init",
-               "No match for requested fontloader \"%s\".",
+               "No match for requested fontloader %q.",
                fontloader)
     fontloader = luaotfload.fontloader_package
     logreport ("both", 0, "init",
-               "Defaulting to predefined fontloader \"%s\".",
+               "Defaulting to predefined fontloader %q.",
                fontloader)
     load_fontloader_module (fontloader)
   end
@@ -429,7 +429,7 @@ local function init_main(early_hook)
   ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 
   logreport ("log", 0, "init",
-             "Context OpenType loader version \"%s\"",
+             "Context OpenType loader version %q",
              fonts.handlers.otf.version)
   callback.register = trapped_register
   nodes = context_environment.nodes
@@ -532,7 +532,7 @@ local init_post_load_agl = function ()
       return nil
     end
     logreport ("both", 4, "init",
-               "found Adobe glyph list file at ``%s``, using that.",
+               "found Adobe glyph list file at %q, using that.",
                glyphlist)
 
     local unicodes = dofile(glyphlist)

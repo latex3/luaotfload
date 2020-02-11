@@ -114,9 +114,9 @@ local function resolve_name (specification)
     end
     local resolved, subfont = resolver (specification)
     if resolved then
-        logreport ("log", 1, "resolve", "name lookup %q -> \"%s%s\"",
-                   specification.name, resolved,
-                   subfont and stringformat ("(%d)", subfont) or "")
+        logreport ("log", 1, "resolve", "name lookup %q -> %q",
+                   specification.name, resolved ..
+                   (subfont and stringformat ("(%d)", subfont) or ""))
         return resolved, tonumber(subfont)
     end
     return resolve_file (specification)

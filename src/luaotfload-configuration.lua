@@ -151,7 +151,7 @@ local registered_loaders = {
 local pick_fontloader = function (s)
   local ldr = registered_loaders[s]
   if ldr ~= nil and type (ldr) == "string" then
-    logreport ("log", 2, "conf", "Using predefined fontloader \"%s\".", ldr)
+    logreport ("log", 2, "conf", "Using predefined fontloader %q.", ldr)
     return ldr
   end
   local idx = stringfind (s, ":")
@@ -159,17 +159,17 @@ local pick_fontloader = function (s)
     if stringsub (s, 1, idx - 1) == "context" then
       local pth = stringsub (s, idx + 1)
       pth = stringstrip (pth)
-      logreport ("log", 2, "conf", "Context base path specified at \"%s\".", pth)
+      logreport ("log", 2, "conf", "Context base path specified at %q.", pth)
       if lfsisdir (pth) then
-        logreport ("log", 5, "conf", "Context base path exists at \"%s\".", pth)
+        logreport ("log", 5, "conf", "Context base path exists at %q.", pth)
         return pth
       end
       pth = kpseexpand_path (pth)
       if lfsisdir (pth) then
-        logreport ("log", 5, "conf", "Context base path exists at \"%s\".", pth)
+        logreport ("log", 5, "conf", "Context base path exists at %q.", pth)
         return pth
       end
-      logreport ("both", 0, "conf", "Context base path not found at \"%s\".", pth)
+      logreport ("both", 0, "conf", "Context base path not found at %q.", pth)
     end
   end
   return nil
@@ -362,7 +362,7 @@ local build_cache_paths = function ()
   end
 
   prefix = lpegmatch (stripslashes, prefix)
-  logreport ("log", 0, "conf", "Root cache directory is %s.", prefix)
+  logreport ("log", 0, "conf", "Root cache directory is %q.", prefix)
 
   local index_file      = filejoin (prefix, paths.index_file)
   local lookups_file    = filejoin (prefix, paths.lookups_file)
@@ -571,7 +571,7 @@ local option_spec = {
           return ldr
         end
         logreport ("log", 0, "conf",
-                    "Requested fontloader \"%s\" not defined, "
+                    "Requested fontloader %q not defined, "
                     .. "use at your own risk.",
                     id)
         return id
@@ -590,12 +590,12 @@ local option_spec = {
         local cb = permissible_color_callbacks[cb_spec]
         if cb then
           logreport ("log", 3, "conf",
-                     "Using callback \"%s\" for font colorization.",
+                     "Using callback %q for font colorization.",
                      cb)
           return cb
         end
         logreport ("log", 0, "conf",
-                    "Requested callback identifier \"%s\" invalid, "
+                    "Requested callback identifier %q invalid, "
                     .. "falling back to default.",
                     cb_spec)
         return permissible_color_callbacks.default

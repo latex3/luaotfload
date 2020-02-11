@@ -916,7 +916,7 @@ apply = function (old, new)
   return result
 end
 
-local reconfigure = function ()
+local function reconfigure()
   for i = 1, #reconf_tasks do
     local name, task = unpack (reconf_tasks[i])
     logreport ("both", 3, "conf", "Launch post-configuration task %q.", name)

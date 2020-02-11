@@ -267,8 +267,8 @@ local install_loaders = function ()
             local t_end = osgettimeofday ()
             local d_t = t_end - t_0
             logreport ("log", 4, "load",
-                       "Module “%s” loaded in %d ms.",
-                       name, d_t)
+                       "Module “%s” loaded in %g ms.",
+                       name, d_t * 1000)
             timing_info.t_init [name] = d_t
         end
     end

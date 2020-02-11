@@ -372,7 +372,7 @@ function shape(head, node, run)
           local node = node
           for j = cluster,nextcluster-1 do
             local id = getid(node)
-            if id == glyph_t or id == glue_t then
+            if id == glyph_t or (id == glue_t and getsubtype(node) == spaceskip_t) then
               local code = codes[j + 1]
               hex = hex..to_utf16_hex(code)
               str = str..utf8.char(code)

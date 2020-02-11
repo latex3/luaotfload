@@ -215,7 +215,7 @@ local function determine_capheight(fontdata)
     local refchar = characters [refcp]
     if refchar then
       logreport ("both", 4, "aux",
-                 "picked height of character ‘%s’ (U+%d) as \\fontdimen8 \z
+                 "picked height of character '%s' (U+%04X) as \\fontdimen8 \z
                   candidate",
                  capheight_reference_chars [i], refcp)
       return refchar.height

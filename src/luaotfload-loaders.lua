@@ -39,7 +39,7 @@ local eval_reader = function (specification)
   local eval = specification.eval
   if not eval or type (eval) ~= "function" then return nil end
   logreport ("both", 0, "loaders",
-             "eval: found tfmdata for “%s”, injecting.",
+             "eval: found tfmdata for %q, injecting.",
              specification.name)
   return eval ()
 end
@@ -47,7 +47,7 @@ end
 local unsupported_reader = function (format)
   return function (specification)
     logreport ("both", 4, "loaders",
-               "font format “%s” unsupported; cannot load %s.",
+               "font format %q unsupported; cannot load %s.",
                format, tostring (specification.name))
   end
 end
@@ -68,14 +68,14 @@ local install_formats = function ()
   local aux = function (which, reader)
     if   not which  or type (which) ~= "string"
       or not reader or type (reader) ~= "function" then
-      logreport ("both", 2, "loaders", "Error installing reader for “%s”.", which)
+      logreport ("both", 2, "loaders", "Error installing reader for %q.", which)
       return false
     end
     formats  [which] = "type1"
     readers  [which] = reader
     if not seqset [which] then
       logreport ("both", 3, "loaders",
-                 "Extending reader sequence for “%s”.", which)
+                 "Extending reader sequence for %q.", which)
       sequence [#sequence + 1] = which
       seqset   [which]         = true
     end
@@ -210,10 +210,10 @@ local purge_define_font = function ()
     if d2 then --> issue warning
       logreport ("both", 0, "loaders",
                  "Callback table for define_font contains multiple entries: \z
-                  { [%d] = “%s” } -- seems fishy.", i, d2)
+                  { [%d] = %q } -- seems fishy.", i, d2)
     end
     logreport ("log", 0, "loaders",
-               "Entry ``%s`` present in define_font callback; overriding.", d)
+               "Entry %q present in define_font callback; overriding.", d)
     luatexbase.remove_from_callback ("define_font", d)
   end
 end

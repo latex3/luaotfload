@@ -1413,7 +1413,7 @@ find_closest = function (name, limit)
             local dist     = distances[i]
             local namelst  = delete_dupes (by_distance[dist])
             logreport (false, 0, "query",
-                       "Distance from \"%s\": %s\n    "
+                       "Distance from %q: %s\n    "
                        .. tableconcat (namelst, "\n    "),
                        name, dist)
         end
@@ -2344,7 +2344,7 @@ local filter_out_pwd = function (dirs)
         local dir = path_normalize (lpegmatch (stripslashes, dirs[i]))
         if dir == "." or dir == pwd then
             logreport ("both", 3, "db",
-                       "Path “%s” matches $PWD (“%s”), skipping.",
+                       "Path %q matches $PWD (%q), skipping.",
                        dir, pwd)
         else
             result[#result+1] = dir
@@ -2452,7 +2452,7 @@ local count_removed = function (files)
         local f = old[i]
         if not kpsereadable_file (f) then
             logreport ("log", 2, "db",
-                      "File %s does not exist in file system.")
+                      "File %q does not exist in file system.")
             nrem = nrem + 1
         end
     end
@@ -3356,12 +3356,12 @@ local collect_statistics = function (mappings)
         pprint_top (families, 4, true)
 
         logreport ("both", 0, "db",
-                   "   · %d different “subfamily” kinds.",
+                   "   · %d different \"subfamily\" kinds.",
                    setsize (subfamily))
         pprint_top (subfamily, 4)
 
         logreport ("both", 0, "db",
-                   "   · %d different “typographicsubfamily” kinds.",
+                   "   · %d different \"typographicsubfamily\" kinds.",
                    setsize (typographicsubfamily))
         pprint_top (typographicsubfamily, 4)
 

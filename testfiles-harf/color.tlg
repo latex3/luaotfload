@@ -34,7 +34,7 @@ Completed box being shipped out [1]
 ..\vbox(550.0+0.0)x345.0, glue set 539.94232fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 2.68
-...\hbox(7.32+2.88)x345.0, glue set 241.84001fil, direction TLT
+...\hbox(7.32+2.88)x345.0, glue set 241.84016fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -80,4 +80,4 @@ Completed box being shipped out [1]
 ...\glue 0.0 plus 1.0fil
 ...\TU/Amiri(0)/m/n/10 "1" 0031 +0:+0
 ...\glue 0.0 plus 1.0fil
-2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (color.aux)
+2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list, 1 if_stack (color.aux)

@@ -12,7 +12,7 @@ Completed box being shipped out [1]
 ..\vbox(550.0+0.0)x345.0, glue set 497.07782fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 0.0
-...\hbox(12.86182+0.14182)x345.0, glue set 316.03998fil, direction TLT
+...\hbox(12.86182+0.14182)x345.0, glue set 316.04004fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -31,7 +31,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\lineskip) 1.0
-...\hbox(12.86182+0.14182)x345.0, glue set 316.03998fil, direction TLT
+...\hbox(12.86182+0.14182)x345.0, glue set 316.04004fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0

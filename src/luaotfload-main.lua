@@ -118,7 +118,7 @@ local type             = type
 
 --doc]]--
 
-local make_loader_name = function (prefix, name)
+local function make_loader_name (prefix, name)
     local msg = luaotfload.log and luaotfload.log.report
              or function (stream, lvl, cat, ...)
                  if lvl > 1 then --[[not pressing]] return end
@@ -152,7 +152,7 @@ local timing_info = {
     t_init = { },
 }
 
-local make_loader = function (prefix, load_helper)
+local function make_loader (prefix, load_helper)
     return function (name)
         local t_0 = osgettimeofday ()
         local modname = make_loader_name (prefix, name)
@@ -194,7 +194,7 @@ end
     called in the expected places.
 --doc]]--
 
-local dummy_loader = function (name)
+local function dummy_loader (name)
     luaotfload.log.report ("log", 3, "load",
                            "Skipping module %q on purpose.",
                            name)
@@ -210,7 +210,7 @@ local function context_isolated_load(name)
     return assert(loadfile(fullname, nil, context_environment))(name)
 end
 
-local context_loader = function (name, path)
+local function context_loader (name, path)
     luaotfload.log.report ("log", 3, "load",
                            "Loading module %q from Context.",
                            name)
@@ -244,7 +244,7 @@ local context_loader = function (name, path)
     return ret
 end
 
-local install_loaders = function ()
+local function install_loaders ()
     local loaders      = { }
     local loadmodule   = make_loader "luaotfload"
     loaders.luaotfload = loadmodule
@@ -253,7 +253,7 @@ local install_loaders = function ()
     loaders.ignore     = dummy_loader
 ----loaders.plaintex   = make_loader "luatex" --=> for Luatex-Plain
 
-    loaders.initialize = function (name)
+    function loaders.initialize (name)
         local tmp       = loadmodule (name)
         local logreport = luaotfload.log.report
         local init = type(tmp) == "table" and tmp.init or tmp

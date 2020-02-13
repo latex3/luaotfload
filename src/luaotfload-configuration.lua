@@ -137,7 +137,7 @@ local feature_presets = {
 
 --doc]]--
 
-local default_fontloader = function ()
+local function default_fontloader ()
   return luaotfloadstatus and luaotfloadstatus.notes.loader or "reference"
 end
 
@@ -148,7 +148,7 @@ local registered_loaders = {
   context    = "context",
 }
 
-local pick_fontloader = function (s)
+local function pick_fontloader (s)
   local ldr = registered_loaders[s]
   if ldr ~= nil and type (ldr) == "string" then
     logreport ("log", 2, "conf", "Using predefined fontloader %q.", ldr)
@@ -281,7 +281,7 @@ local min_terminal_width = 40
 --- The “termwidth” value is only considered when printing
 --- short status messages, e.g. when building the database
 --- online.
-local check_termwidth = function ()
+local function check_termwidth ()
   if config.luaotfload.misc.termwidth == nil then
       local tw = 79
       if not (   os.type == "windows" --- Assume broken terminal.
@@ -306,7 +306,7 @@ local check_termwidth = function ()
   return true
 end
 
-local set_font_filter = function ()
+local function set_font_filter ()
   local names = fonts.names
   if names and names.set_font_filter then
     local formats = config.luaotfload.db.formats
@@ -318,7 +318,7 @@ local set_font_filter = function ()
   return true
 end
 
-local set_size_dimension = function ()
+local function set_size_dimension ()
   local names = fonts.names
   if names and names.set_size_dimension then
     local dim = config.luaotfload.db.designsize_dimen
@@ -330,7 +330,7 @@ local set_size_dimension = function ()
   return true
 end
 
-local set_name_resolver = function ()
+local function set_name_resolver ()
   local names = fonts.names
   if names and names.resolve_cached then
     --- replace the resolver from luatex-fonts
@@ -344,7 +344,7 @@ local set_name_resolver = function ()
   return true
 end
 
-local set_loglevel = function ()
+local function set_loglevel ()
   if luaotfload then
     luaotfload.log.set_loglevel (config.luaotfload.run.log_level)
     return true
@@ -352,7 +352,7 @@ local set_loglevel = function ()
   return false
 end
 
-local build_cache_paths = function ()
+local function build_cache_paths ()
   local paths  = config.luaotfload.paths
   local prefix = getwritablepath (paths.names_dir, "")
 
@@ -376,7 +376,7 @@ local build_cache_paths = function ()
 end
 
 
-local set_default_features = function ()
+local function set_default_features ()
   local default_features = config.luaotfload.default_features
   luaotfload.features    = luaotfload.features or {
                              global   = { },
@@ -413,14 +413,14 @@ local number_t    = "number"
 local boolean_t   = "boolean"
 local function_t  = "function"
 
-local tointeger = function (n)
+local function tointeger (n)
   n = tonumber (n)
   if n then
     return mathfloor (n + 0.5)
   end
 end
 
-local toarray = function (s)
+local function toarray (s)
   local fields = { lpegmatch (commasplitter, s) }
   local ret    = { }
   for i = 1, #fields do
@@ -432,7 +432,7 @@ local toarray = function (s)
   return ret
 end
 
-local tohash = function (s)
+local function tohash (s)
   local result = { }
   local fields = toarray (s)
   for _, field in next, fields do
@@ -637,32 +637,32 @@ local option_spec = {
 ---                               FORMATTERS
 -------------------------------------------------------------------------------
 
-local commented = function (str)
+local function commented (str)
   return ";" .. str
 end
 
 local underscore_replacer = lpeg.replacer ("_", "-", true)
 
-local dashed = function (var)
+local function dashed (var)
   --- INI spec dictates that dashes are valid in variable names, not
   --- underscores.
   return underscore_replacer (var) or var
 end
 
 local indent = "  "
-local format_string = function (var, val)
+local function format_string (var, val)
   return stringformat (indent .. "%s = %s", var, val)
 end
 
-local format_integer = function (var, val)
+local function format_integer (var, val)
   return stringformat (indent .. "%s = %d", var, val)
 end
 
-local format_boolean = function (var, val)
+local function format_boolean (var, val)
   return stringformat (indent .. "%s = %s", var, val == true and "true" or "false")
 end
 
-local format_keyval = function (var, val)
+local function format_keyval (var, val)
   local list = { }
   local keys = table.sortedkeys (val)
   for i = 1, #keys do
@@ -681,7 +681,7 @@ local format_keyval = function (var, val)
   end
 end
 
-local format_list = function (var, val)
+local function format_list (var, val)
   local elts = { }
   for i = 1, #val do elts [i] = val [i] end
   if next (elts) then
@@ -690,7 +690,7 @@ local format_list = function (var, val)
   end
 end
 
-local format_section = function (title)
+local function format_section (title)
   return stringformat ("[%s]", dashed (title))
 end
 
@@ -764,7 +764,7 @@ local formatters = {
 
 --doc]]--
 
-local tilde_expand = function (p)
+local function tilde_expand (p)
   if #p > 2 then
     if stringsub (p, 1, 2) == "~/" then
       local homedir = osgetenv "HOME"
@@ -776,7 +776,7 @@ local tilde_expand = function (p)
   return p
 end
 
-local resolve_config_path = function ()
+local function resolve_config_path ()
   for i = 1, #config_paths do
     local t, p = unpack (config_paths[i])
     local fullname
@@ -799,7 +799,7 @@ local resolve_config_path = function ()
   return false
 end
 
-local add_config_paths = function (t)
+local function add_config_paths (t)
   if not next (t) then
     return
   end
@@ -927,7 +927,7 @@ local function reconfigure()
   return true
 end
 
-local read = function (extra)
+local function read (extra)
   if extra then
     add_config_paths (extra)
   end
@@ -959,7 +959,7 @@ local read = function (extra)
   return ret
 end
 
-local apply_defaults = function ()
+local function apply_defaults ()
   local defaults      = default_config
   local vars          = read ()
   --- Side-effects galore ...
@@ -967,7 +967,7 @@ local apply_defaults = function ()
   return reconfigure ()
 end
 
-local dump = function ()
+local function dump ()
   local sections = table.sortedkeys (config.luaotfload)
   local confdata = { }
   for i = 1, #sections do

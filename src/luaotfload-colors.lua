@@ -65,7 +65,7 @@ digit.
 --doc]]--
 
 --- string -> bool? -> string
-local hex_to_dec = function (hex,one) --- one isn’t actually used anywhere ...
+local function hex_to_dec (hex,one)
     if one then
         return stringformat("%.1g", tonumber(hex, 16)/255)
     else
@@ -96,7 +96,7 @@ local p_Crgba        = p_Crgb * Cg(octet/hex_to_dec, "alpha")
 local extract_color  = Ct(p_Crgba + p_Crgb)
 
 --- string -> (string | nil)
-local sanitize_color_expression = function (digits)
+local function sanitize_color_expression (digits)
     digits = tostring(digits)
     local sanitized = lpegmatch(valid_digits, digits)
     if not sanitized then
@@ -124,7 +124,7 @@ end
 local color_cache = { } --- (string, (string * string)) hash_t
 
 --- string -> (string * string)
-local hex_to_rgba = function (digits)
+local function hex_to_rgba (digits)
     if not digits then
         return
     end
@@ -201,7 +201,7 @@ local function color_whatsit (head, curr, color, push, tail)
 end
 
 -- number -> string | nil
-local get_glyph_color = function (font_id, char)
+local function get_glyph_color (font_id, char)
     local tfmdata    = identifiers[font_id]
     local font_color = tfmdata and tfmdata.properties and tfmdata.properties.color
     if type(font_color) == "table" then
@@ -300,7 +300,7 @@ local gettoks, scantoks = tex.gettoks, tex.scantoks
 local pgf = { bye = "pgfutil@everybye", extgs = "\\pgf@sys@addpdfresource@extgs@plain" }
 
 --- node -> node
-local color_handler = function (head)
+local function color_handler (head)
     head = todirect(head)
     head = node_colorize(head, true)
     head = tonode(head)
@@ -342,7 +342,7 @@ local color_callback_activated = 0
 local add_to_callback          = luatexbase.add_to_callback
 
 --- unit -> bool
-local mlist_to_hlist_initial = function ()
+local function mlist_to_hlist_initial ()
     local cdesc = luatexbase.callback_descriptions "mlist_to_hlist"
     return cdesc and cdesc[1] == color_callback_name
 end

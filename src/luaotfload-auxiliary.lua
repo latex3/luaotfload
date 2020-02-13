@@ -729,7 +729,7 @@ end
 --- https://github.com/lualatex/luaotfload/pull/61#issuecomment-17776975
 
 --- string -> (int * int)
-local scan_external_dir = function (dir)
+local function scan_external_dir (dir)
   local old_names, new_names = names.data()
   if not old_names then
     old_names = load_names()
@@ -918,7 +918,7 @@ end
 local function inject_callbacks (lst)
   if not lst and next (lst) then return false end
 
-  local inject = function (def)
+  local function inject (def)
     local cb, fn, id = unpack (def)
     cb = tostring (cb)
     id = tostring (id)

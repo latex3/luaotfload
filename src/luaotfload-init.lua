@@ -144,7 +144,7 @@ local context_modules = {
 
 } --[[context_modules]]
 
-local load_context_modules = function (pth)
+local function load_context_modules (pth)
 
   local load_module   = luaotfload.loaders.context
   local ignore_module = luaotfload.loaders.ignore
@@ -238,7 +238,7 @@ local function init_main(early_hook)
   logreport ("log", 4, "init", "Concealing callback.register().")
   local trapped_register = callback.register
 
-  callback.register = function (id)
+  function callback.register (id)
     logreport ("log", 4, "init",
                "Dummy callback.register() invoked on %s.",
                id)
@@ -474,7 +474,7 @@ local init_post_install_callbacks = function ()
   -- /MK
 end
 
-local init_post_load_agl = function ()
+local function init_post_load_agl ()
 
   --[[doc--
 
@@ -554,7 +554,7 @@ local init_post_actions = {
 }
 
 --- unit -> size_t
-local init_post = function ()
+local function init_post ()
   --- hook for actions that need to take place after the fontloader is
   --- installed
 

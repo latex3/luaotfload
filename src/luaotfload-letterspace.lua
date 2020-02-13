@@ -165,7 +165,7 @@ end
 ---=================================================================---
 
 -- UF changed 2017-07-14
-local kern_injector = function (fillup, kern)
+local function kern_injector (fillup, kern)
  if fillup then
    local g = new_node(glue_code)
    setglue(g, 0, kern, 0, 1, 0)
@@ -177,7 +177,7 @@ local kern_injector = function (fillup, kern)
 end
 -- /UF
 
-local kernable_skip = function (n)
+local function kernable_skip (n)
   local st = getsubtype (n)
   return st == userskip_code
       or st == spaceskip_code
@@ -452,7 +452,7 @@ end
 
 --- (node_t -> node_t) -> string -> string list -> bool
 local registered_as = { } --- procname -> callbacks
-local add_processor = function (processor, name, ...)
+local function add_processor (processor, name, ...)
   local callbacks = { ... }
   for i=1, #callbacks do
     luatexbase.add_to_callback(callbacks[i], processor, name)
@@ -470,9 +470,9 @@ end
 --- performs all node operations on direct nodes.
 
 --- unit -> bool
-local enablefontkerning = function ( )
+local function enablefontkerning ( )
 
-  local handler = function (hd)
+  local function handler (hd)
     local direct_hd = todirect (hd)
     logreport ("term", 5, "letterspace",
                "kerncharacters() invoked with node.direct interface \z
@@ -511,7 +511,7 @@ end
 local fontkerning_enabled = false --- callback state
 
 --- fontobj -> float -> unit
-local initializefontkerning = function (tfmdata, factor)
+local function initializefontkerning (tfmdata, factor)
   if factor ~= "max" then
     factor = tonumber (factor) or 0
   end
@@ -551,7 +551,7 @@ otffeatures.register {
 
 --doc]]--
 
-local initializecompatfontkerning = function (tfmdata, percentage)
+local function initializecompatfontkerning (tfmdata, percentage)
   local factor = tonumber (percentage)
   if not factor then
     logreport ("both", 0, "letterspace",

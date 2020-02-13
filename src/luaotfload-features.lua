@@ -69,11 +69,11 @@ local stringgsub       = string.gsub
 local stringformat     = string.format
 local stringis_empty   = string.is_empty
 
-local cmp_by_idx = function (a, b) return a.idx < b.idx end
+local function cmp_by_idx (a, b) return a.idx < b.idx end
 
 local defined_combos = 0
 
-local handle_combination = function (combo, spec)
+local function handle_combination (combo, spec)
     defined_combos = defined_combos + 1
     if not combo [1] then
         report ("both", 0, "features",
@@ -151,7 +151,7 @@ local handle_combination = function (combo, spec)
         local src = fnt.characters
         local cnt = 0
 
-        local pickchr = function (uc, unavailable)
+        local function pickchr (uc, unavailable)
             local chr = src [uc]
             if unavailable == true and basechar [uc] then
                 --- fallback mode: already known
@@ -202,7 +202,7 @@ end
 
 ---[[ begin excerpt from font-ott.lua ]]
 
-local swapped = function (h)
+local function swapped (h)
     local r = { }
     for k, v in next, h do
         r[stringgsub(v,"[^a-z0-9]","")] = k -- is already lower
@@ -242,7 +242,7 @@ local support_incomplete = tabletohash({
 --doc]]--
 
 --- (string, string) dict -> (string, string) dict
-local apply_default_features = function (rawlist)
+local function apply_default_features (rawlist)
     local speclist = {}
     for k, v in pairs(rawlist) do
         if type(v) == 'string' then
@@ -327,7 +327,7 @@ local supported = {
 }
 
 --- (string | (string * string) | bool) list -> (string * number)
-local handle_slashed = function (modifiers)
+local function handle_slashed (modifiers)
     local style, optsize
     for i=1, #modifiers do
         local mod  = modifiers[i]
@@ -356,7 +356,7 @@ do
 end
 
 --- spec -> spec
-local handle_request = function (specification)
+local function handle_request (specification)
     local request = lpegmatch(luaotfload.parsers.font_request,
                               specification.specification)
 ----inspect(request)
@@ -569,7 +569,7 @@ local autofeatures = {
     { "!!??",  interrolig_specification, "interrobang substitutions"  },
 }
 
-local add_auto_features = function ()
+local function add_auto_features ()
     local nfeats = #autofeatures
     report ("both", 5, "features",
             "auto-installing %d feature definitions", nfeats)

@@ -149,7 +149,7 @@ end
 local tex_formats = { "tfm", "ofm" }
 
 local resolvers_findfile = luaotfload.fontloader.resolvers.findfile
-local resolve_tex_format = function (specification)
+local function resolve_tex_format (specification)
     local name = specification.name
     for i=1, #tex_formats do
         local format = tex_formats [i]
@@ -160,7 +160,7 @@ local resolve_tex_format = function (specification)
     end
 end
 
-local resolve_path_if_exists = function (specification)
+local function resolve_path_if_exists (specification)
     local spec = specification.specification
     local exists = lfsisfile (spec)
     if exists then
@@ -179,7 +179,7 @@ end
     Custom file resolvers via callback.
 --doc]]--
 
-local resolve_my = function (specification)
+local function resolve_my (specification)
     return luatexbase.call_callback ("luaotfload.resolve_font", specification)
 end
 
@@ -191,7 +191,7 @@ local resolve_methods = {
     my   = resolve_my,
 }
 
-local resolve_sequence = function (seq, specification)
+local function resolve_sequence (seq, specification)
     for i = 1, #seq do
         local id  = seq [i]
         local mth = resolve_methods [id]

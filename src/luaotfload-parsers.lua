@@ -147,7 +147,7 @@ local xml_attr_list     = Cf(Ct"" * xml_attr^1, rawset)
       scan_node creates a parser for a given xml tag.
 --doc]]--
 --- string -> bool -> lpeg_t
-local scan_node = function (tag)
+local function scan_node (tag)
   --- Node attributes go into a table with the index “attributes”
   --- (relevant for “prefix="xdg"” and the likes).
   local p_tag = P(tag)
@@ -192,7 +192,7 @@ local p_cheapxml          = header * root
       of the nodes it managed to extract from the file.
 --doc]]--
 --- string -> path list
-local fonts_conf_scanner = function (path)
+local function fonts_conf_scanner (path)
   logreport("both", 5, "db", "Read fontconfig file %s.", path)
   local fh = ioopen(path, "r")
   if not fh then
@@ -218,7 +218,7 @@ end
 local p_conf   = P".conf" * P(-1)
 local p_filter = (1 - p_conf)^1 * p_conf
 
-local conf_filter = function (path)
+local function conf_filter (path)
   if lpegmatch (p_filter, path) then
     return true
   end
@@ -383,7 +383,7 @@ end --- read_fonts_conf_indeed()
 
 --- list -> (string -> function option -> string list) -> list
 
-local read_fonts_conf = function (path_list, find_files)
+local function read_fonts_conf (path_list, find_files)
   local home      = kpseexpand_path"~" --- could be os.getenv"HOME"
   local xdg_config_home  = kpseexpand_path"$XDG_CONFIG_HOME"
   if xdg_config_home == "" then xdg_config_home = filejoin(home, ".config") end
@@ -499,7 +499,7 @@ local splitcomma        = Ct((C(noncomma^1) + comma)^1)
 
 --doc]]--
 
-local handle_xetex_option = function (val)
+local function handle_xetex_option (val)
   return tostring(1 + tonumber(val))
 end
 
@@ -511,7 +511,7 @@ end
 
 --doc]]--
 
-local check_garbage = function (_,i, garbage)
+local function check_garbage (_,i, garbage)
   if stringfind(garbage, "/") then
     logreport("log", 0, "load",  --- ffs use path!
               "warning: path in file: lookups is deprecated; ")
@@ -694,7 +694,7 @@ local truth_ids = {
   off       = false,
 }
 
-local maybe_cast = function (var)
+local function maybe_cast (var)
   local bool = truth_ids[var]
   if bool ~= nil then
     return bool
@@ -702,7 +702,7 @@ local maybe_cast = function (var)
   return tonumber (var) or var
 end
 
-local escape = function (chr, repl)
+local function escape (chr, repl)
   return (backslash * P(chr) / (repl or chr))
 end
 

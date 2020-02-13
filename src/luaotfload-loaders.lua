@@ -26,7 +26,7 @@ if not luaotfload then error "this module requires Luaotfload" end
 
 local logreport = luaotfload.log and luaotfload.log.report or print
 
-local lua_reader = function (specification)
+local function lua_reader (specification)
   local fullname = specification.resolved
   if fullname then
     local loader = loadfile (fullname)
@@ -35,7 +35,7 @@ local lua_reader = function (specification)
   end
 end
 
-local eval_reader = function (specification)
+local function eval_reader (specification)
   local eval = specification.eval
   if not eval or type (eval) ~= "function" then return nil end
   logreport ("both", 0, "loaders",
@@ -44,7 +44,7 @@ local eval_reader = function (specification)
   return eval ()
 end
 
-local unsupported_reader = function (format)
+local function unsupported_reader (format)
   return function (specification)
     logreport ("both", 4, "loaders",
                "font format %q unsupported; cannot load %s.",
@@ -55,7 +55,7 @@ end
 local type1_reader = fonts.readers.afm
 local tfm_reader   = fonts.readers.tfm
 
-local install_formats = function ()
+local function install_formats ()
   local fonts = fonts
   if not fonts then return false end
 
@@ -65,7 +65,7 @@ local install_formats = function ()
   local formats   = fonts.formats
   if not readers or not formats then return false end
 
-  local aux = function (which, reader)
+  local function aux (which, reader)
     if   not which  or type (which) ~= "string"
       or not reader or type (reader) ~= "function" then
       logreport ("both", 2, "loaders", "Error installing reader for %q.", which)
@@ -92,7 +92,7 @@ local install_formats = function ()
      and aux ("dfont", unsupported_reader "dfont")
 end
 
-local not_found_msg = function (specification, size, id)
+local function not_found_msg (specification, size, id)
   logreport ("both", 0, "loaders", "")
   logreport ("both", 0, "loaders",
              "--------------------------------------------------------")
@@ -132,7 +132,7 @@ do
     return id
   end
 
-  local patch = function (specification, size, id)
+  local function patch (specification, size, id)
     local fontdata = ctx_read (specification, size, id)
 ----if not fontdata then not_found_msg (specification, size, id) end
     if type (fontdata) == "table" and fontdata.encodingbytes == 2 then
@@ -151,7 +151,7 @@ do
     return id
   end
 
-  local mk_info = function (name)
+  local function mk_info (name)
     local definer = name == "patch" and patch or read
     return function (specification, size, id)
       logreport ("both", 0, "loaders", "defining font no. %d", id)
@@ -199,7 +199,7 @@ end
 
 --doc]]--
 
-local purge_define_font = function ()
+local function purge_define_font ()
   local cdesc = luatexbase.callback_descriptions "define_font"
   --- define_font is an “exclusive” callback, meaning that there can
   --- only ever be one entry. Everything beyond that would indicate

@@ -249,15 +249,15 @@ end
 ---     -> (string -> fun option -> string list)
 ---     -> tab * tab * tab
 local function read_fonts_conf_indeed (depth,
-                                   start,
-                                   home,
-                                   xdg_config_home,
-                                   xdg_data_home,
-                                   acc,
-                                   done,
-                                   dirs_done,
-                                   find_files,
-                                   basedir)
+                                       start,
+                                       home,
+                                       xdg_config_home,
+                                       xdg_data_home,
+                                       acc,
+                                       done,
+                                       dirs_done,
+                                       find_files,
+                                       basedir)
 
   logreport ("both", 4, "db",
              "Fontconfig scanner processing path %s.",

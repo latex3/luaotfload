@@ -3640,8 +3640,7 @@ end
 
 --- string -> string list -> int -> string list -> string list -> string list ->
 ---     (string list * string list * string list * string list)
-local function collect_cache (path, all, n, luanames,
-                                              lucnames, rest)
+local function collect_cache (path, all, n, luanames, lucnames, rest)
     if not all then
         local all = find_files (path)
 

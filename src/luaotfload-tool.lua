@@ -1324,6 +1324,7 @@ function actions.list (job)
     else
         criterion = stringexplode(criterion, ":") --> { field, value }
         local asked_value  = criterion[2]
+        local sane_asked_value  = fonts.names.sanitize_fontname(criterion[2])
         criterion          = criterion[1]
         asked_fields       = set_primary_field(asked_fields, criterion)
 
@@ -1335,8 +1336,9 @@ function actions.list (job)
             logreport (false, 2, "list", "Restricting to value %s", asked_value)
             for i=1, nmappings do
                 local entry = mappings[i]
-                if  entry[criterion]
-                and tostring(entry[criterion]) == asked_value
+                local entryvalue = tostring(entry[criterion])
+                if entryvalue
+                and (entryvalue == asked_value or entryvalue == sane_asked_value)
                 then
                     targets[#targets+1] = entry
                 end

@@ -249,7 +249,6 @@ end
 ---     -> (string -> fun option -> string list)
 ---     -> tab * tab * tab
 local read_fonts_conf_indeed
--- MK Made basedir an explicit parameter to fix relative paths
 read_fonts_conf_indeed = function (depth,
                                    start,
                                    home,
@@ -371,7 +370,6 @@ read_fonts_conf_indeed = function (depth,
   --inspect(done)
   return acc, done, dirs_done
 end --- read_fonts_conf_indeed()
--- /MK
 
 --[[doc--
       read_fonts_conf() sets up an accumulator and two sets

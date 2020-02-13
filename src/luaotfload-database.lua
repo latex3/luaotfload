@@ -310,8 +310,7 @@ local sanitize_fontnames = function (rawnames)
     return result
 end
 
-local find_files_indeed
-find_files_indeed = function (acc, dirs, filter)
+local function find_files_indeed (acc, dirs, filter)
     if not next (dirs) then --- done
         return acc
     end
@@ -632,8 +631,7 @@ getmetadata = function ()
 end
 
 --- unit -> unit
-local load_lookups
-load_lookups = function ( )
+local function load_lookups ( )
     local foundname, data = load_lua_file(config.luaotfload.paths.lookup_path_lua)
     if data then
         logreport ("log", 0, "cache", "Lookup cache loaded from %s.", foundname)
@@ -867,8 +865,7 @@ local hash_request = function (specification)
 end
 
 --- 'a -> 'a -> table -> (string * int|boolean * boolean)
-local lookup_font_name_cached
-lookup_font_name_cached = function (specification)
+local function lookup_font_name_cached (specification)
     if not lookup_cache then load_lookups () end
     local request = hash_request(specification)
     logreport ("both", 4, "cache", "Looking for %q in cache ...",
@@ -2175,8 +2172,7 @@ local locate_matching_pfb = function (afmfile, dir)
     return kpsefind_file (pfbname, "type1 fonts")
 end
 
-local process_dir_tree
-process_dir_tree = function (acc, dirs, done)
+local function process_dir_tree (acc, dirs, done)
     if not next (dirs) then --- done
         return acc
     end
@@ -3644,7 +3640,7 @@ end
 
 --- string -> string list -> int -> string list -> string list -> string list ->
 ---     (string list * string list * string list * string list)
-local collect_cache collect_cache = function (path, all, n, luanames,
+local function collect_cache (path, all, n, luanames,
                                               lucnames, rest)
     if not all then
         local all = find_files (path)

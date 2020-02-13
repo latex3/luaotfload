@@ -248,8 +248,7 @@ end
 ---     -> string list -> string list -> string list
 ---     -> (string -> fun option -> string list)
 ---     -> tab * tab * tab
-local read_fonts_conf_indeed
-read_fonts_conf_indeed = function (depth,
+local function read_fonts_conf_indeed (depth,
                                    start,
                                    home,
                                    xdg_config_home,

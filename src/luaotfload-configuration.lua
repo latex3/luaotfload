@@ -887,8 +887,7 @@ local process_options = function (opts)
   return new
 end
 
-local apply
-apply = function (old, new)
+local function apply (old, new)
   if not new then
     if not old then
       return false

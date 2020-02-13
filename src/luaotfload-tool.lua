@@ -447,7 +447,7 @@ local baseindent = "    "
 
 --doc]]--
 
-local show_info_table show_info_table = function (t, depth)
+local function show_info_table (t, depth)
     depth           = depth or 0
     local indent    = stringrep (baseindent, depth)
     local keys      = tablesortedkeys (t)
@@ -671,8 +671,7 @@ local show_full_info = function (path, subfont)
     display_features(rawinfo.resources.features)
 end
 
-local subfont_by_name
-subfont_by_name = function (lst, askedname, n)
+local function subfont_by_name (lst, askedname, n)
     for n = 1, #lst do
         local font = lst[n]
         if fonts.names.sanitize_fontname (font.fullname) == askedname then
@@ -1239,7 +1238,7 @@ end
 ---
 ---         --list=<criterion>          --fields=<f1>,<f2>,<f3>,...<fn>
 
-local get_fields get_fields = function (entry, fields, acc, n)
+local function get_fields (entry, fields, acc, n)
     if not acc then
         return get_fields (entry, fields, { }, 1)
     end
@@ -1268,7 +1267,7 @@ end
 
 local separator = "\t" --- could be “,” for csv
 
-local format_fields format_fields = function (fields, acc, n)
+local function format_fields (fields, acc, n)
     if not acc then
         return format_fields(fields, { }, 1)
     end
@@ -1285,8 +1284,7 @@ local format_fields format_fields = function (fields, acc, n)
     return tableconcat(acc, separator)
 end
 
-local set_primary_field
-set_primary_field = function (fields, addme, acc, n)
+local function set_primary_field (fields, addme, acc, n)
     if not acc then
         return set_primary_field(fields, addme, { addme }, 1)
     end

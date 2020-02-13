@@ -175,8 +175,7 @@ local color_callback
 local color_attr        = luatexbase.new_attribute("luaotfload_color_attribute")
 
 -- (node * node * string * bool * (bool | nil)) -> (node * node * (string | nil))
-local color_whatsit
-color_whatsit = function (head, curr, color, push, tail)
+local function color_whatsit (head, curr, color, push, tail)
     local pushdata  = hex_to_rgba(color)
     local colornode = newnode(whatsit_t, colorstack_t)
     setfield(colornode, "stack", 0)
@@ -220,8 +219,7 @@ values during the node list traversal.
 --doc]]--
 
 --- (node * (string | nil)) -> (node * (string | nil))
-local node_colorize
-node_colorize = function (head, toplevel, current_color)
+local function node_colorize (head, toplevel, current_color)
     local n = head
     while n do
         local n_id = getid(n)

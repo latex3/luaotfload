@@ -1238,29 +1238,19 @@ end
 ---
 ---         --list=<criterion>          --fields=<f1>,<f2>,<f3>,...<fn>
 
-local function get_fields (entry, fields, acc, n)
-    if not acc then
-        return get_fields (entry, fields, { }, 1)
-    end
-
-    local field = fields [n]
-    if field then
+local function get_fields (entry, fields)
+    local acc = {}
+    for n, field in ipairs(fields) do
         local chain = stringsplit (field, "->")
         local tmp   = entry
-        for i = 1, #chain - 1 do
+        for i = 1, #chain do
             tmp = tmp [chain [i]]
             if not tmp then
                 --- invalid field
                 break
             end
         end
-        if tmp then
-            local value = tmp [chain [#chain]]
-            acc[#acc+1] = value or false
-        else
-            acc[#acc+1] = false
-        end
-        return get_fields (entry, fields, acc, n+1)
+        acc[n] = tmp or false
     end
     return acc
 end

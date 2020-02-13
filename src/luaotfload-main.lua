@@ -327,6 +327,7 @@ luaotfload.main = function ()
     loadmodule "letterspace"  --- extra character kerning
     loadmodule "embolden"     --- fake bold
     loadmodule "notdef"       --- missing glyph handling
+    loadmodule "szss"       --- missing glyph handling
     if harfstatus then
         loadmodule "harf-define"
         loadmodule "harf-plug"

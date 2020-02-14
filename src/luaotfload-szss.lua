@@ -16,43 +16,67 @@ if luatexbase and luatexbase.provides_module then
   luatexbase.provides_module (ProvidesLuaModule)
 end  
 
-local insert             = table.insert
-local otfregister        = fonts.constructors.features.otf.register
+local direct       = node.direct
+local otfregister  = fonts.constructors.features.otf.register
 
-local sequence = {
-  features = {szss = {["*"] = {["*"] = true}}},
-  flags = {false, false, false, false},
-  name = "szss",
-  order = {"szss"},
-  nofsteps = 1,
-  steps = {{
-    coverage = {
-      [0x1E9E] = {0x53, 0x53},
-    },
-    index = 1,
-  }},
-  type = "gsub_multiple",
-}
+local copy         = direct.copy
+local getdisc      = direct.getdisc
+local getnext      = direct.getnext
+local insert_after = direct.insert_after
+local is_char      = direct.is_char
+local setchar      = direct.setchar
+local setdisc      = direct.setdisc
+
+local disc_t       = node.id'disc'
+
+local szsstable = setmetatable({}, { __index = function(t, i)
+  local v = font.getfont(i)
+  v = v and v.properties
+  v = v and v.transform_sz or false
+  t[i] = v
+  return v
+end})
+
 local function szssinitializer(tfmdata, value, features)
   if value == 'auto' then
     value = not tfmdata.characters[0x1E9E]
-    features.szss = value
-    if not value then return end -- Not strictly necessary
   end
-  local resources = tfmdata.resources
-  local sequences = resources and resources.sequences
-  if sequences then
-    -- Add the substitution at the very beginning to properly
-    -- integrate the 'SS' in shaping decisions
-    insert(sequences, 1, sequence)
-  end
+  local properties = tfmdata.properties
+  properties.transform_sz = value
 end
+
+local function szssprocessor(head,font) -- ,attr,direction)
+  if not szsstable[font] then return end
+  local n = head
+  while n do
+    local c, id = is_char(n, font)
+    if c == 0x1E9E then
+      setchar(n, 0x53)
+      head, n = insert_after(head, n, copy(n))
+    elseif id == disc_t then
+      local pre, post, replace = getdisc(n)
+      pre = szssprocessor(pre, font)
+      post = szssprocessor(post, font)
+      replace = szssprocessor(replace, font)
+      setdisc(n, pre, post, replace)
+    end
+    n = getnext(n)
+  end
+  return head
+end
+
 otfregister {
   name = 'szss',
   description = 'Replace capital ß with SS',
   default = 'auto',
   initializers = {
     node = szssinitializer,
+    plug = szssinitializer,
+  },
+  processors = {
+    position = 1,
+    node = szssprocessor,
+    plug = szssprocessor,
   },
 }
 

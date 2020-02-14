@@ -103,7 +103,7 @@ Completed box being shipped out [1]
 ...\glue 0.0 plus 1.0fil
 ...\TU/lmr/m/n/10 1
 ...\glue 0.0 plus 1.0fil
-Missing character: There is no ẞ (U+1E9E) in font file:lmroman10-regular.otf:mode=node;!
+Missing character: There is no ẞ (U+1E9E) in font file:lmroman10-regular.otf:mode=node;-szss;!
 Missing character: There is no ➍ (U+278D) in font LibertinusSerif:mode=node;script=latn;language=dflt;+tlig;!
 Missing character: There is no ➍ (U+278D) in font LibertinusSerif:mode=node;script=latn;language=dflt;notdef=false;!
 (missingchars.aux)

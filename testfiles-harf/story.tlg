@@ -53,17 +53,17 @@ Completed box being shipped out [1]
 ...\glue(\topskip) 9.6
 ...\rule(0.4+0.0)x*
 ...\glue 72.26999
-...\hbox(6.98+0.11)x345.0, glue set 124.78008fil, direction TLT
+...\hbox(6.98+0.11)x345.0, glue set 124.78fil, direction TLT
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ....\TU/lmroman10-bold.otf(0)/m/n/10 "A" 0041 +0:+0
-....\glue(\spaceskip) 3.82999 plus 1.91307 minus 1.27794
+....\glue(\spaceskip) 3.83 plus 1.91307 minus 1.27794
 ....\TU/lmroman10-bold.otf(0)/m/n/10 "S" 0053 +0:+0
 ....\TU/lmroman10-bold.otf(0)/m/n/10 "H" 0048 +0:+0
 ....\TU/lmroman10-bold.otf(0)/m/n/10 "O" 004F +0:+0
 ....\TU/lmroman10-bold.otf(0)/m/n/10 "R" 0052 +0:+0
 ....\kern-0.96 (font)
 ....\TU/lmroman10-bold.otf(0)/m/n/10 "T" 0054 +0:+0
-....\glue(\spaceskip) 3.82999 plus 1.91307 minus 1.27794
+....\glue(\spaceskip) 3.83 plus 1.91307 minus 1.27794
 ....\TU/lmroman10-bold.otf(0)/m/n/10 "S" 0053 +0:+0
 ....\TU/lmroman10-bold.otf(0)/m/n/10 "T" 0054 +0:+0
 ....\TU/lmroman10-bold.otf(0)/m/n/10 "O" 004F +0:+0
@@ -73,18 +73,18 @@ Completed box being shipped out [1]
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ...\glue 6.0
 ...\glue(\baselineskip) 4.73
-...\hbox(7.16+2.05)x345.0, glue set 141.09506fil, direction TLT
+...\hbox(7.16+2.05)x345.0, glue set 141.095fil, direction TLT
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ....\TU/lmromanslant10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmromanslant10-regular.otf(0)/m/n/10 "y" 0079 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmromanslant10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
 ....\TU/lmromanslant10-regular.otf(0)/m/n/10 "." 002E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmromanslant10-regular.otf(0)/m/n/10 "U" 0055 +0:+0
 ....\TU/lmromanslant10-regular.otf(0)/m/n/10 "." 002E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmromanslant10-regular.otf(0)/m/n/10 "T" 0054 +0:+0
 ....\TU/lmromanslant10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmromanslant10-regular.otf(0)/m/n/10 "o" 006F +0:+0
@@ -93,7 +93,7 @@ Completed box being shipped out [1]
 ...\glue 14.22636
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 1.62202
-...\hbox(8.32797+2.45999)x345.0, glue set - 0.0613, direction TLT
+...\hbox(8.32797+2.45999)x345.0, glue set - 0.06134, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -104,26 +104,26 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "u" 0075 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
 ....\kern0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "," 002C +0:+0
-....\glue(\spaceskip) 3.32999 plus 2.08124 minus 0.888
+....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
@@ -132,9 +132,9 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman12-regular.otf(0)/m/n/10 "g" 0067 +0:+0
 ....\TU/lmroman12-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman12-regular.otf(0)/m/n/10 "l" 006C +0:+0
@@ -154,22 +154,22 @@ Completed box being shipped out [1]
 ....\kern0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "^^e7" 00E7 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "," 002C +0:+0
-....\glue(\spaceskip) 3.32999 plus 2.08124 minus 0.888
+....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "l" 006C +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "v" 0076 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
@@ -183,20 +183,20 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\penalty 300
 ...\glue(\baselineskip) 2.49
-...\hbox(7.05+0.22)x345.0, glue set 247.27016fil, direction TLT
+...\hbox(7.05+0.22)x345.0, glue set 247.27fil, direction TLT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "R" 0052 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "J" 004A +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "D" 0044 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
@@ -213,7 +213,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 4.73
-...\hbox(7.05+1.94)x345.0, glue set - 0.76321, direction TLT
+...\hbox(7.05+1.94)x345.0, glue set - 0.76326, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -224,7 +224,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "D" 0044 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
@@ -239,24 +239,24 @@ Completed box being shipped out [1]
 .....= \TU/lmroman10-regular.otf(0)/m/n/10 "–" 2013 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "‘" 2018 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "‘" 2018 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "R" 0052 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "J" 004A +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "," 002C +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "’" 2019 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "’" 2019 +0:+0
-....\glue(\spaceskip) 3.32999 plus 2.08124 minus 0.888
+....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\begindir TRT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
@@ -270,14 +270,14 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
 ....\enddir TRT
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "l" 006C +0:+0
@@ -289,10 +289,10 @@ Completed box being shipped out [1]
 .....< \TU/lmroman10-regular.otf(0)/m/n/10 "–" 2013 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0)
 .....= \TU/lmroman10-regular.otf(0)/m/n/10 "–" 2013 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "w" 0077 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
@@ -305,7 +305,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "w" 0077 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
@@ -313,26 +313,26 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\penalty 300
 ...\glue(\baselineskip) 3.01
-...\hbox(7.05+2.06)x345.0, glue set 132.03043fil, direction TLT
+...\hbox(7.05+2.06)x345.0, glue set 132.03fil, direction TLT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "w" 0077 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "w" 0077 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "k" 006B +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "y" 0079 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "p" 0070 +0:+0
 ....\kern0.28 (font)
@@ -348,7 +348,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "g" 0067 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
@@ -363,7 +363,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "u" 0075 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "l" 006C +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\kern0.28 (font)
@@ -376,7 +376,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "." 002E +0:+0
@@ -423,17 +423,17 @@ Completed box being shipped out [2]
 ...\glue(\topskip) 9.6
 ...\rule(0.4+0.0)x*
 ...\glue 72.26999
-...\hbox(7.16+0.22)x345.0, glue set 130.83008fil, direction TLT
+...\hbox(7.16+0.22)x345.0, glue set 130.83fil, direction TLT
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "A" 0041 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.66331 minus 1.1111
+....\glue(\spaceskip) 3.33 plus 1.66331 minus 1.1111
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "S" 0053 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "H" 0048 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "O" 004F +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "R" 0052 +0:+0
 ....\kern-0.83 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "T" 0054 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.66331 minus 1.1111
+....\glue(\spaceskip) 3.33 plus 1.66331 minus 1.1111
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "S" 0053 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "T" 0054 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "O" 004F +0:+0
@@ -443,18 +443,18 @@ Completed box being shipped out [2]
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ...\glue 6.0
 ...\glue(\baselineskip) 4.62
-...\hbox(7.16+2.05)x345.0, glue set 141.09506fil, direction TLT
+...\hbox(7.16+2.05)x345.0, glue set 141.095fil, direction TLT
 ....\glue 0.0 plus 1.0fil minus 1.0fil
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "b" 0062 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "y" 0079 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "A" 0041 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "U" 0055 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "T" 0054 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
@@ -463,7 +463,7 @@ Completed box being shipped out [2]
 ...\glue 14.22636
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 1.64
-...\hbox(8.31+2.06)x345.0, glue set 0.40309, direction TLT
+...\hbox(8.31+2.06)x345.0, glue set 0.40308, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -474,26 +474,26 @@ Completed box being shipped out [2]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "u" 0075 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
 ....\kern0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "," 002C +0:+0
-....\glue(\spaceskip) 3.32999 plus 2.08124 minus 0.888
+....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
@@ -502,44 +502,44 @@ Completed box being shipped out [2]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "g" 0067 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "x" 0078 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "y" 0079 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "^^d6" 00D6 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "^^f6" 00F6 +0:+0
 ....\kern0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "^^e7" 00E7 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "," 002C +0:+0
-....\glue(\spaceskip) 3.32999 plus 2.08124 minus 0.888
+....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "v" 0076 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
@@ -553,20 +553,20 @@ Completed box being shipped out [2]
 ....\glue(\rightskip) 0.0
 ...\penalty 300
 ...\glue(\baselineskip) 2.89
-...\hbox(7.05+0.22)x345.0, glue set 247.27016fil, direction TLT
+...\hbox(7.05+0.22)x345.0, glue set 247.27fil, direction TLT
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "R" 0052 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "J" 004A +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "D" 0044 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
@@ -583,7 +583,7 @@ Completed box being shipped out [2]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 4.73
-...\hbox(7.05+1.94)x345.0, glue set 0.1351, direction TLT
+...\hbox(7.05+1.94)x345.0, glue set 0.13507, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -594,7 +594,7 @@ Completed box being shipped out [2]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\penalty 10000
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "D" 0044 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
@@ -608,22 +608,22 @@ Completed box being shipped out [2]
 .....= \TU/lmroman10-regular.otf(1)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "“" 201C +0:+0 (ligature "`" 0060 +0:+0"`" 0060 +0:+0)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "R" 0052 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "J" 004A +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "," 002C +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
-....\glue(\spaceskip) 3.32999 plus 2.08124 minus 0.888
+....\glue(\spaceskip) 3.33 plus 2.08124 minus 0.888
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
@@ -635,14 +635,14 @@ Completed box being shipped out [2]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
@@ -653,10 +653,10 @@ Completed box being shipped out [2]
 .....< \TU/lmroman10-regular.otf(1)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
 .....= \TU/lmroman10-regular.otf(1)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "w" 0077 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
@@ -669,7 +669,7 @@ Completed box being shipped out [2]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "w" 0077 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
@@ -677,26 +677,26 @@ Completed box being shipped out [2]
 ....\glue(\rightskip) 0.0
 ...\penalty 300
 ...\glue(\baselineskip) 3.01
-...\hbox(7.05+2.06)x345.0, glue set 132.03043fil, direction TLT
+...\hbox(7.05+2.06)x345.0, glue set 132.03fil, direction TLT
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "h" 0068 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "w" 0077 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "w" 0077 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "r" 0072 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "k" 006B +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "y" 0079 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "p" 0070 +0:+0
 ....\kern0.28 (font)
@@ -712,7 +712,7 @@ Completed box being shipped out [2]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "i" 0069 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "g" 0067 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "b" 0062 +0:+0
 ....\kern0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
@@ -727,7 +727,7 @@ Completed box being shipped out [2]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "f" 0066 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "u" 0075 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
 ....\kern0.28 (font)
@@ -740,7 +740,7 @@ Completed box being shipped out [2]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "." 002E +0:+0

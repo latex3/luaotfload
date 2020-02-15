@@ -34,7 +34,7 @@ Completed box being shipped out [1]
 ..\vbox(550.0+0.0)x345.0, glue set 539.94232fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 2.68
-...\hbox(7.32+2.88)x345.0, glue set 241.84016fil, direction TLT
+...\hbox(7.32+2.88)x345.0, glue set 241.84001fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0

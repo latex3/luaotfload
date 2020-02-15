@@ -51,7 +51,7 @@ Completed box being shipped out [1]
 ..\vbox(550.0+0.0)x345.0, glue set 113.98782fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 1.83
-...\hbox(8.17+0.14)x345.0, glue set 160.49033fil, direction TLT
+...\hbox(8.17+0.14)x345.0, glue set 160.48999fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -71,7 +71,7 @@ Completed box being shipped out [1]
 ....\kern-0.07 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "t" 0074 +0:+0
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
@@ -81,7 +81,7 @@ Completed box being shipped out [1]
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ffi" FB03 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
 ....\discretionary (penalty 50)
@@ -91,7 +91,7 @@ Completed box being shipped out [1]
 .....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fl" FB02 +0:+0
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ffl" FB04 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
 ....\discretionary (penalty 50)
@@ -99,24 +99,24 @@ Completed box being shipped out [1]
 .....< \kern-0.13 (font)
 .....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 .....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
-.....> \kern-0.17001 (font)
+.....> \kern-0.17 (font)
 .....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ff" FB00 +0:+0
-.....= \kern-0.17001 (font)
+.....= \kern-0.17 (font)
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "H" 0048 +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
-.....< \kern-0.34001 (font)
+.....< \kern-0.34 (font)
 .....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 .....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "V" 0056 +0:+0
 .....> \kern-1.22 (font)
 .....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 .....> \kern-0.07 (font)
 .....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "N" 004E +0:+0
-.....> \kern-0.39001 (font)
+.....> \kern-0.39 (font)
 .....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 .....= \kern-1.32 (font)
@@ -125,7 +125,7 @@ Completed box being shipped out [1]
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 .....= \kern-0.07 (font)
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "N" 004E +0:+0
-.....= \kern-0.39001 (font)
+.....= \kern-0.39 (font)
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -134,7 +134,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 3.69
-...\hbox(8.17+2.62)x345.0, glue set 210.33025fil, direction TLT
+...\hbox(8.17+2.62)x345.0, glue set 210.32997fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -146,9 +146,9 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "m" 006D +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "d" 0064 +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
@@ -175,12 +175,12 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "m" 006D +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "n" 006E +0:+0
-....\kern-0.04001 (font)
+....\kern-0.04 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "t" 0074 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "s" 0073 +0:+0
 ....\kern-0.05 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -191,7 +191,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 1.19
-...\hbox(8.19+2.62)x345.0, glue set 205.41026fil, direction TLT
+...\hbox(8.19+2.62)x345.0, glue set 205.40996fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -204,11 +204,11 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "o" 006F +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "m" 006D +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "d" 0064 +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "e" 0065 +0:+0
@@ -235,13 +235,13 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "m" 006D +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "n" 006E +0:+0
-....\kern-0.04001 (font)
+....\kern-0.04 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "t" 0074 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "s" 0073 +0:+0
 ....\kern-0.21 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "'" 0027 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "'" 0027 +0:+0
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -252,7 +252,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 1.21
-...\hbox(8.17+2.62)x345.0, glue set 215.49022fil, direction TLT
+...\hbox(8.17+2.62)x345.0, glue set 215.48997fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -281,12 +281,12 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "m" 006D +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "n" 006E +0:+0
-....\kern-0.04001 (font)
+....\kern-0.04 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "t" 0074 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "s" 0073 +0:+0
 ....\kern-0.05 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -297,7 +297,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 1.19
-...\hbox(8.19+2.62)x345.0, glue set 210.47025fil, direction TLT
+...\hbox(8.19+2.62)x345.0, glue set 210.46996fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -317,7 +317,7 @@ Completed box being shipped out [1]
 .....> \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "d" 0064 +0:+0
 .....= \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
 .....= \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
-.....= \kern0.09999 (font)
+.....= \kern0.1 (font)
 .....= \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "d" 0064 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "e" 0065 +0:+0
 ....\kern-0.07 (font)
@@ -332,13 +332,13 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "m" 006D +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "n" 006E +0:+0
-....\kern-0.04001 (font)
+....\kern-0.04 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "t" 0074 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "s" 0073 +0:+0
 ....\kern-0.21 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "'" 0027 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "'" 0027 +0:+0
-....\glue(\spaceskip) 2.57999 plus 1.29 minus 0.86
+....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -347,7 +347,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 1.21
-...\hbox(8.17+0.14)x345.0, glue set 313.67004fil, direction TLT
+...\hbox(8.17+0.14)x345.0, glue set 313.66998fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -362,7 +362,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 250
 ...\glue(\baselineskip) 3.79
-...\hbox(8.07+0.14)x345.0, glue set 324.25006fil, direction TLT
+...\hbox(8.07+0.14)x345.0, glue set 324.25fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\kern-0.07 (font)
@@ -370,7 +370,7 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "t" 0074 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 3.69
-...\hbox(8.17+0.14)x345.0, glue set 331.96002fil, direction TLT
+...\hbox(8.17+0.14)x345.0, glue set 331.95999fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
 ....\kern-0.13 (font)
@@ -385,7 +385,7 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 3.69
-...\hbox(8.17+0.14)x345.0, glue set 326.11005fil, direction TLT
+...\hbox(8.17+0.14)x345.0, glue set 326.10999fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
@@ -395,12 +395,12 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 3.69
-...\hbox(8.17+0.14)x345.0, glue set 332.90002fil, direction TLT
+...\hbox(8.17+0.14)x345.0, glue set 332.9fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fl" FB02 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 3.69
-...\hbox(8.17+0.14)x345.0, glue set 326.67004fil, direction TLT
+...\hbox(8.17+0.14)x345.0, glue set 326.66998fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "o" 006F +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
@@ -410,36 +410,36 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 3.69
-...\hbox(8.17+0.14)x345.0, glue set 330.34003fil, direction TLT
+...\hbox(8.17+0.14)x345.0, glue set 330.33997fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
-....\kern-0.17001 (font)
+....\kern-0.17 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.5
-...\hbox(7.36+0.0)x345.0, glue set 326.18005fil, direction TLT
+...\hbox(7.36+0.0)x345.0, glue set 326.18fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "H" 0048 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
-....\kern-0.34001 (font)
+....\kern-0.34 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty -10000)
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 250
 ...\glue(\baselineskip) 4.64
-...\hbox(7.36+0.08)x345.0, glue set 158.53003fil, direction TLT
+...\hbox(7.36+0.08)x345.0, glue set 158.53fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "V" 0056 +0:+0
 ....\kern-1.22 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 ....\kern-0.07 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "N" 004E +0:+0
-....\kern-0.39001 (font)
+....\kern-0.39 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "A" 0041 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 3.75
-...\hbox(8.17+0.22)x345.0, glue set 158.71042fil, direction TLT
+...\hbox(8.17+0.22)x345.0, glue set 158.70996fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -454,7 +454,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
@@ -463,7 +463,7 @@ Completed box being shipped out [1]
 .....= \TU/lmroman10-regular.otf(0)/m/n/10 "ffi" FB03 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\discretionary (penalty 50)
@@ -472,7 +472,7 @@ Completed box being shipped out [1]
 .....> \TU/lmroman10-regular.otf(0)/m/n/10 "fl" FB02 +0:+0
 .....= \TU/lmroman10-regular.otf(0)/m/n/10 "ffl" FB04 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
 ....\discretionary (penalty 50)
@@ -482,7 +482,7 @@ Completed box being shipped out [1]
 .....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fl" FB02 +0:+0
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "ffl" FB04 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\discretionary (penalty 50)
@@ -492,7 +492,7 @@ Completed box being shipped out [1]
 .....= \TU/lmroman10-regular.otf(0)/m/n/10 "ff" FB00 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "H" 0048 +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/lmroman10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
@@ -518,7 +518,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 4.73
-...\hbox(7.05+1.94)x345.0, glue set 233.58025fil, direction TLT
+...\hbox(7.05+1.94)x345.0, glue set 233.57999fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -530,15 +530,15 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "v" 0076 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "l" 006C +0:+0
 ....\discretionary (penalty 50)
@@ -550,11 +550,11 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -565,7 +565,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 3.01
-...\hbox(7.05+1.94)x345.0, glue set 229.96025fil, direction TLT
+...\hbox(7.05+1.94)x345.0, glue set 229.95999fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -578,15 +578,15 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "---" F6DE +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "v" 0076 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
 ....\discretionary (penalty 50)
@@ -598,12 +598,12 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "'" 0027 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "'" 0027 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -614,7 +614,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 3.01
-...\hbox(7.05+1.94)x345.0, glue set 240.24022fil, direction TLT
+...\hbox(7.05+1.94)x345.0, glue set 240.23999fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -632,7 +632,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "d" 0064 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "v" 0076 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "l" 006C +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
@@ -640,11 +640,11 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "n" 006E +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "s" 0073 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -655,7 +655,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 3.01
-...\hbox(7.05+1.94)x345.0, glue set 235.79024fil, direction TLT
+...\hbox(7.05+1.94)x345.0, glue set 235.79fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -675,7 +675,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "v" 0076 +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "l" 006C +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
@@ -683,12 +683,12 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "n" 006E +0:+0
-....\kern-0.28001 (font)
+....\kern-0.28 (font)
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "t" 0074 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "s" 0073 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "'" 0027 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "'" 0027 +0:+0
-....\glue(\spaceskip) 3.32999 plus 1.665 minus 1.11
+....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -697,7 +697,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 3.01
-...\hbox(7.05+0.11)x345.0, glue set 330.84003fil, direction TLT
+...\hbox(7.05+0.11)x345.0, glue set 330.84fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -719,7 +719,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "t" 0074 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.84
-...\hbox(7.05+0.11)x345.0, glue set 333.61005fil, direction TLT
+...\hbox(7.05+0.11)x345.0, glue set 333.60999fil, direction TLT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
@@ -727,13 +727,13 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 4.84
-...\hbox(7.05+0.11)x345.0, glue set 330.56003fil, direction TLT
+...\hbox(7.05+0.11)x345.0, glue set 330.56fil, direction TLT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "fi" FB01 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.84
-...\hbox(7.05+0.11)x345.0, glue set 328.05005fil, direction TLT
+...\hbox(7.05+0.11)x345.0, glue set 328.04999fil, direction TLT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "b" 0062 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
@@ -747,7 +747,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 3.72
-...\hbox(8.17+0.14)x345.0, glue set 326.11005fil, direction TLT
+...\hbox(8.17+0.14)x345.0, glue set 326.10999fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "b" 0062 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "f" 0066 +0:+0
@@ -757,12 +757,12 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 3.69
-...\hbox(8.17+0.14)x345.0, glue set 332.90002fil, direction TLT
+...\hbox(8.17+0.14)x345.0, glue set 332.9fil, direction TLT
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "fl" FB02 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.81
-...\hbox(7.05+0.11)x345.0, glue set 329.17004fil, direction TLT
+...\hbox(7.05+0.11)x345.0, glue set 329.16998fil, direction TLT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "c" 0063 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
@@ -771,13 +771,13 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 100
 ...\glue(\baselineskip) 4.84
-...\hbox(7.05+0.11)x345.0, glue set 333.06003fil, direction TLT
+...\hbox(7.05+0.11)x345.0, glue set 333.06fil, direction TLT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "f" 0066 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "e" 0065 +0:+0
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\baselineskip) 4.73
-...\hbox(7.16+0.0)x345.0, glue set 326.67004fil, direction TLT
+...\hbox(7.16+0.0)x345.0, glue set 326.66998fil, direction TLT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "H" 0048 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "A" 0041 +0:+0
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "-" 002D +0:+0
@@ -785,7 +785,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\penalty 250
 ...\glue(\baselineskip) 4.84
-...\hbox(7.16+0.22)x345.0, glue set 158.05502fil, direction TLT
+...\hbox(7.16+0.22)x345.0, glue set 158.055fil, direction TLT
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "V" 0056 +0:+0
 ....\kern-1.11 (font)
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "A" 0041 +0:+0

@@ -66,7 +66,7 @@ Completed box being shipped out [1]
 ..\vbox(550.0+0.0)x345.0, glue set 467.95001fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 3.22
-...\hbox(6.78+2.20499)x345.0, glue set 254.46715fil, direction TLT
+...\hbox(6.78+2.20499)x345.0, glue set 254.46701fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -95,7 +95,7 @@ Completed box being shipped out [1]
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\TU/amiri-regular.ttf(1)/m/n/10 "G" 0047 +0:+0
 ....\TU/amiri-regular.ttf(1)/m/n/10 "r" 0072 +0:+0
-....\kern-0.04001 (font)
+....\kern-0.04 (font)
 ....\TU/amiri-regular.ttf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/amiri-regular.ttf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/amiri-regular.ttf(1)/m/n/10 "k" 006B +0:+0
@@ -104,7 +104,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 2.62502
-...\hbox(7.17+3.86)x345.0, glue set 317.84003fil, direction TLT
+...\hbox(7.17+3.86)x345.0, glue set 317.84fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -121,7 +121,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 2.3
-...\hbox(5.84+1.15)x345.0, glue set 271.50009fil, direction TLT
+...\hbox(5.84+1.15)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -143,7 +143,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 5.22
-...\hbox(5.63+1.03)x345.0, glue set 271.50009fil, direction TLT
+...\hbox(5.63+1.03)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -165,7 +165,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 4.97
-...\hbox(6.0+1.03)x345.0, glue set 271.50009fil, direction TLT
+...\hbox(6.0+1.03)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -187,7 +187,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 5.35
-...\hbox(5.62+1.03)x345.0, glue set 271.50009fil, direction TLT
+...\hbox(5.62+1.03)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -209,7 +209,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 4.97
-...\hbox(6.0+1.03)x345.0, glue set 271.50009fil, direction TLT
+...\hbox(6.0+1.03)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -249,7 +249,7 @@ Completed box being shipped out [2]
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 499.42664fil, direction TLT
 ...\glue(\topskip) 0.0
-...\hbox(10.69+5.38)x345.0, glue set 244.78009fil, direction TLT
+...\hbox(10.69+5.38)x345.0, glue set 244.78003fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -304,7 +304,7 @@ Completed box being shipped out [2]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 2.71
-...\hbox(9.17+0.52)x345.0, glue set 245.48016fil, direction TLT
+...\hbox(9.17+0.52)x345.0, glue set 245.47992fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -315,17 +315,17 @@ Completed box being shipped out [2]
 ....\banglafont "ণ" 09A3 +0:+0
 ....\banglafont "্য" 1200C7 +0:+0
 ....\banglafont "া" 09BE +0:+0
-....\glue(\spaceskip) 2.59999 plus 1.3 minus 0.86667
+....\glue(\spaceskip) 2.6 plus 1.3 minus 0.86667
 ....\banglafont "এ" 098F +0:+0
-....\kern-0.18001 (font)
+....\kern-0.18 (font)
 ....\banglafont "খ" 0996 +0:+0
 ....\banglafont "ন" 09A8 +0:+0
-....\glue(\spaceskip) 2.59999 plus 1.3 minus 0.86667
+....\glue(\spaceskip) 2.6 plus 1.3 minus 0.86667
 ....\pdfliteral page <lua data reference ...>
 ....\banglafont "কি" 09BF +0:+0
 ....\banglafont "" 0995 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.59999 plus 1.3 minus 0.86667
+....\glue(\spaceskip) 2.6 plus 1.3 minus 0.86667
 ....\banglafont "ক" 0995 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\banglafont "রি" 09BF +0:+0
@@ -340,7 +340,7 @@ Completed box being shipped out [2]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 0.7
-...\hbox(10.78+5.49)x345.0, glue set 217.38023fil, direction TLT
+...\hbox(10.78+5.49)x345.0, glue set 217.37996fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -348,21 +348,21 @@ Completed box being shipped out [2]
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\tibetanfont "སྐྱ" 120444 +0:+0
-....\tibetanfont "ེ" 0F7A -392560:+0
+....\tibetanfont "ེ" 0F7A -392561:+0
 ....\tibetanfont "ས" 0F66 +0:+0
 ....\tibetanfont "་" 0F0B +0:+0
 ....\tibetanfont "ཙ" 0F59 +0:+0
 ....\tibetanfont "མ" 0F58 +0:+0
 ....\tibetanfont "་" 0F0B +0:+0
 ....\tibetanfont "ཉ" 0F49 +0:+0
-....\tibetanfont "ི" 0F72 -390594:+0
+....\tibetanfont "ི" 0F72 -390595:+0
 ....\tibetanfont "ད" 0F51 +0:+0
 ....\tibetanfont "་" 0F0B +0:+0
 ....\tibetanfont "ན" 0F53 +0:+0
 ....\tibetanfont "ས" 0F66 +0:+0
 ....\tibetanfont "་" 0F0B +0:+0
 ....\tibetanfont "ཆ" 0F46 +0:+0
-....\tibetanfont "ེ" 0F7A -406978:+0
+....\tibetanfont "ེ" 0F7A -406979:+0
 ....\tibetanfont "་" 0F0B +0:+0
 ....\tibetanfont "མ" 0F58 +0:+0
 ....\tibetanfont "ཐ" 0F50 +0:+0

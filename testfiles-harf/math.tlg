@@ -16,7 +16,7 @@ Completed box being shipped out [1]
 ..\vbox(550.0+0.0)x345.0, glue set 509.94553fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 1.85997
-...\hbox(8.14003+2.23)x345.0, glue set 0.782, direction TLT
+...\hbox(8.14003+2.23)x345.0, glue set 0.78197, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -71,7 +71,7 @@ Completed box being shipped out [1]
 ....\TU/Amiri(0)/m/n/10 "n" 006E +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\mathon
-....\hbox(6.78+0.11)x89.19983, direction TLT
+....\hbox(6.78+0.11)x89.20004, direction TLT
 .....\TU/Amiri(0)/m/n/10 "t" 0074 +0:+0
 .....\TU/Amiri(0)/m/n/10 "e" 0065 +0:+0
 .....\TU/Amiri(0)/m/n/10 "x" 0078 +0:+0
@@ -119,7 +119,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\penalty 200
 ...\glue(\baselineskip) 2.99
-...\hbox(6.78+0.08)x345.0, glue set 325.03003fil, direction TLT
+...\hbox(6.78+0.08)x345.0, glue set 325.03fil, direction TLT
 ....\TU/Amiri(0)/m/n/10 "m" 006D +0:+0
 ....\TU/Amiri(0)/m/n/10 "a" 0061 +0:+0
 ....\TU/Amiri(0)/m/n/10 "t" 0074 +0:+0
@@ -130,7 +130,7 @@ Completed box being shipped out [1]
 ...\penalty 10000
 ...\glue(\abovedisplayshortskip) 0.0 plus 3.0
 ...\glue(\baselineskip) 3.27997
-...\hbox(8.64003+0.11)x103.52525, shifted 120.73738, direction TLT
+...\hbox(8.64003+0.11)x103.52538, shifted 120.73732, direction TLT
 ....\OML/cmm/m/it/10 "E" 0045 +0:+0
 ....\kern0.57637 (italic)
 ....\glue(\thickmuskip) 2.77771 plus 2.77771
@@ -140,7 +140,7 @@ Completed box being shipped out [1]
 ....\OML/cmm/m/it/10 "c" 0063 +0:+0
 ....\hbox(4.51111+0.0)x4.48613, shifted -4.12892, direction TLT
 .....\OT1/cmr/m/n/7 "2" 0032 +0:+0
-....\hbox(6.78+0.11)x64.6399, direction TLT
+....\hbox(6.78+0.11)x64.64001, direction TLT
 .....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 .....\TU/Amiri(0)/m/n/10 "w" 0077 +0:+0
 .....\TU/Amiri(0)/m/n/10 "i" 0069 +0:+0

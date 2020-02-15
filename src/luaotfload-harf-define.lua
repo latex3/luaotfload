@@ -112,6 +112,7 @@ local function loadfont(spec)
     local glyphcount = hbface:get_glyph_count()
     local glyphs = {}
     for gid = 0, glyphcount - 1 do
+      local width = hbfont:get_glyph_h_advance(gid)
       local height, depth, italic = nil, nil, nil
       local extents = hbfont:get_glyph_extents(gid)
       if extents then
@@ -122,6 +123,7 @@ local function loadfont(spec)
         end
       end
       glyphs[gid] = {
+        width  = width,
         height = height or ascender,
         depth  = -(depth or descender),
         italic = italic or 0,
@@ -245,22 +247,7 @@ local function scalefont(data, spec)
   -- We shape in font units (at UPEM) and then scale output with the desired
   -- sfont size.
   local scale = size / upem
-
-  local hscale = scale
-  local extendfactor = nil
-  if features.extend then
-    extendfactor = tonumber(features.extend) * 1000
-    hscale = hscale * tonumber(features.extend)
-  end
-
-  local vscale = scale
-  local squeezefactor = nil
-  if features.squeeze then
-    squeezefactor = tonumber(features.squeeze) * 1000
-    vscale = vscale * tonumber(features.squeeze)
-  end
-
-  hbfont:set_scale(hscale * upem, vscale * upem)
+  hbfont:set_scale(upem, upem)
 
   -- Populate font’s characters table.
   local glyphs = data.glyphs
@@ -268,10 +255,10 @@ local function scalefont(data, spec)
   for gid, glyph in next, glyphs do
     characters[gid_offset + gid] = {
       index  = gid,
-      width  = hbfont:get_glyph_h_advance(gid),
-      height = glyph.height * vscale,
-      depth  = glyph.depth  * vscale,
-      italic = glyph.italic * hscale,
+      width  = glyph.width  * scale,
+      height = glyph.height * scale,
+      depth  = glyph.depth  * scale,
+      italic = glyph.italic * scale,
     }
   end
 
@@ -296,6 +283,20 @@ local function scalefont(data, spec)
   local slantfactor = nil
   if features.slant then
     slantfactor = tonumber(features.slant) * 1000
+  end
+
+  local hscale = upem
+  local extendfactor = nil
+  if features.extend then
+    extendfactor = tonumber(features.extend) * 1000
+    hscale = hscale * tonumber(features.extend)
+  end
+
+  local vscale = upem
+  local squeezefactor = nil
+  if features.squeeze then
+    squeezefactor = tonumber(features.squeeze) * 1000
+    vscale = vscale * tonumber(features.squeeze)
   end
 
   if features.tlig then
@@ -326,22 +327,22 @@ local function scalefont(data, spec)
     squeeze = squeezefactor,
     characters = characters,
     parameters = {
-      slant = (data.slant + (slantfactor or 0) * 65.536) * hscale / vscale,
-      space = space * hscale,
-      space_stretch = space * hscale / 2,
-      space_shrink = space * hscale / 3,
-      x_height = data.xheight * vscale,
-      quad = hscale * upem,
-      extra_space = space * hscale / 3,
-      [8] = data.capheight * vscale, -- for XeTeX compatibility.
+      slant = data.slant,
+      space = space * scale,
+      space_stretch = space * scale / 2,
+      space_shrink = space * scale / 3,
+      x_height = data.xheight * scale,
+      quad = size,
+      extra_space = space * scale / 3,
+      [8] = data.capheight * scale, -- for XeTeX compatibility.
     },
     hb = {
-      -- scale = scale,
+      scale = scale,
       spec = spec,
       palette = palette,
       shared = data,
-      hscale = hscale * upem,
-      vscale = vscale * upem,
+      hscale = hscale,
+      vscale = vscale,
     },
     specification = spec,
     shared = {},

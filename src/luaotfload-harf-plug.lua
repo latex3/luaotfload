@@ -330,7 +330,9 @@ function shape(head, node, run)
   buf:set_cluster_level(buf.CLUSTER_LEVEL_MONOTONE_CHARACTERS)
   buf:add_codepoints(codes, offset - 1, len)
 
-  hbfont:set_scale(hbdata.hscale, hbdata.vscale)
+  local hscale = hbdata.hscale
+  local vscale = hbdata.vscale
+  hbfont:set_scale(hscale, vscale)
 
   if hb.shape_full(hbfont, buf, features, shapers) then
     -- The engine wants the glyphs in logical order, but HarfBuzz outputs them
@@ -594,6 +596,8 @@ local function tonodes(head, node, run, glyphs)
   local rtl = dir:is_backward()
   local lastprops
 
+  local scale = hbdata.scale
+
   local haspng = hbshared.haspng
   local fonttype = hbshared.fonttype
 
@@ -749,8 +753,8 @@ local function tonodes(head, node, run, glyphs)
                                 or character.index ~= oldcharacter.index then
             setchar(node, char)
           end
-          local xoffset = rtl and -glyph.x_offset or glyph.x_offset
-          local yoffset = glyph.y_offset
+          local xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale
+          local yoffset = glyph.y_offset * scale
           setoffsets(node, xoffset, yoffset)
 
           fontglyph.used = fonttype and true
@@ -792,11 +796,11 @@ local function tonodes(head, node, run, glyphs)
             setprop(node, endactual_p, true)
           end
           local x_advance = glyph.x_advance
-          local width = character.width
+          local width = fontglyph.width
           if width ~= x_advance then
             -- The engine always uses the glyph width from the font, so we need
             -- to insert a kern node if the x advance is different.
-            local kern = newkern(x_advance - width, node)
+            local kern = newkern((x_advance - width) * scale, node)
             head, node = insertkern(head, node, kern, rtl)
           end
         end
@@ -809,7 +813,7 @@ local function tonodes(head, node, run, glyphs)
         -- we became a glyph in the process.
         -- We are intentionally not comparing with the existing glue width as
         -- spacing after the period is larger by default in TeX.
-        local width = glyph.x_advance
+        local width = glyph.x_advance * scale
         -- if space > width + 2 or width > space + 2 then
         if space ~= width then
           setwidth(node, getwidth(node) - space + width)

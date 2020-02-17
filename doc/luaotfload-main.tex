@@ -62,6 +62,12 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \endsection
 
 \beginsection{Changes}
+\beginsubsection {New in version 3.13 (by Ulrike Fischer/Marcel Krüger)}
+\begin{itemize}
+\item A missing \enquote{capital sharp s} (U+1E9E) in a font is replaced by SS instead of giving a missing character message:
+      ^^^^1e9e or {\sffamily ^^^^1e9e}
+\end{itemize}
+\endsubsection
 \beginsubsection {New in version 3.12 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
 \item Corrected a number of small bugs in harf mode.
@@ -71,13 +77,14 @@ coloring of specific output glyphs, see page~\pageref{color-glyphs}
 \item  A\marginpar{Experimental!} new \identifier{multiscript} key to allow to use a font
 for more than one script, see page~\pageref{multiscript}
 \end{itemize}
-
+\endsubsection
 \beginsubsection {New in version 3.11 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
 \item Changed the handling of the \identifier{script} key in harf mode to be more compatible with behaviour of the node mode. It now expects the name of a script that is actually in the font instead of a ISO 15924 script tag. See issue 117.
 \item Corrected a number of small typos and bugs in harf mode.
 \end{itemize}
-\beginsubsection {New in version 3.1 (by Ulrike Fischer/Marcel Krüger)}
+\endsubsection
+\beginsubsection {New in version 3.10 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
 \item   The package has been moved to the github of the LaTeX3 Project and is now maintained
         officially by the LaTeX3 Project team.
@@ -2058,14 +2065,14 @@ are defined for which scripts.
   \beginaltitem  {aux.slot_of_name(id : int, name : string)}
             Translates a name for a glyph in font \luaident{id} to the
             corresponding glyph slot which can be used e.g.\ as an argument to
-            \inlinecode{\char}. The number is assigned by the \identifier{luaotfload} code 
+            \inlinecode{\char}. The number is assigned by the \identifier{luaotfload} code
             and not related to the glyph index (GID) of the font as stored in the \identifier{[index]} field
             of the lua-file.
   \endaltitem
 
-  \beginaltitem  {aux.gid_of_name(id : int, name : string)} 
+  \beginaltitem  {aux.gid_of_name(id : int, name : string)}
             Translates\marginpar{New version 3.12} a name for a glyph in font \luaident{id} to the
-            corresponding glyph index (GID) as stored in the \identifier{[index]} field. 
+            corresponding glyph index (GID) as stored in the \identifier{[index]} field.
   \endaltitem
 
   \beginaltitem  {aux.name_of_slot(id : int, slot : int)}

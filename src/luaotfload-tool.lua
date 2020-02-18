@@ -1289,6 +1289,16 @@ local function set_primary_field (fields, addme, acc, n)
     return acc
 end
 
+local function sane_pattern (p)
+    local l = lpeg or require'lpeg'
+    local special = l.Cg(l.P'*' * l.Cc'.*')
+    local pattern = l.Cs(l.Cc'^' * (special + (1 - special)^1/fonts.names.sanitize_fontname)^0 * l.Cc'$')
+    function sane_pattern (p)
+        return pattern:match(p)
+    end
+    return sane_pattern(p)
+end
+
 function actions.list (job)
     local criterion     = job.criterion
     local asked_fields  = job.asked_fields
@@ -1324,7 +1334,7 @@ function actions.list (job)
     else
         criterion = stringexplode(criterion, ":") --> { field, value }
         local asked_value  = criterion[2]
-        local sane_asked_value  = fonts.names.sanitize_fontname(criterion[2])
+        local sane_asked_pattern = sane_pattern(criterion[2])
         criterion          = criterion[1]
         asked_fields       = set_primary_field(asked_fields, criterion)
 
@@ -1338,7 +1348,7 @@ function actions.list (job)
                 local entry = mappings[i]
                 local entryvalue = tostring(entry[criterion])
                 if entryvalue
-                and (entryvalue == asked_value or entryvalue == sane_asked_value)
+                and (entryvalue == asked_value or entryvalue:match(sane_asked_pattern))
                 then
                     targets[#targets+1] = entry
                 end

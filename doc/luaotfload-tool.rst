@@ -132,7 +132,8 @@ query mode
                            containing ``->`` be properly quoted!
                         3) an expression of the form ``field:value`` to
                            limit the output to entries whose ``field``
-                           matches ``value``.
+                           matches ``value``. The ``value`` can contain
+                           ``*`` to match an arbitrary number of characters.
 
                         For example, in order to output file names and
                         corresponding versions, sorted by the font

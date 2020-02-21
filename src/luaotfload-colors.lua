@@ -84,7 +84,7 @@ local res = nil
 
 --- float -> unit
 local function pageresources(alpha)
-    res = res or {}
+    res = res or {true} -- Initialize with /TransGs1
     local f = res[alpha]
         or stringformat("/TransGs%.3g gs", alpha, alpha)
     res[alpha] = f
@@ -112,7 +112,6 @@ local function transparent_stack()
     -- if token.is_defined'TRP@colorstack' then -- transparency
         -- transparent_stack = tonumber(token.get_macro'TRP@colorstack')
     -- else
-        res[1] = true
         transparent_stack = pdf.newcolorstack("/TransGs1 gs","direct",true)
     -- end
     return transparent_stack
@@ -217,10 +216,10 @@ local function node_colorize (head, toplevel, current_color, current_transparent
     if toplevel then
         local nn = nodetail(n_list)
         if current_color then
-            head, nn, current_color = color_whatsit(head, nn, color_stack, false, true)
+            head, nn, current_color = color_whatsit(head, nn, color_stack, current_color, nil, true)
         end
         if current_transparent then
-            head, nn, current_transparent = color_whatsit(head, nn, transparent_stack, false, true)
+            head, nn, current_transparent = color_whatsit(head, nn, transparent_stack, current_color, nil, true)
         end
     end
 

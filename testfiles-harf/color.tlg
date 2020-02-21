@@ -46,7 +46,8 @@ Completed box being shipped out [1]
 ....\TU/Amiri(0)/m/n/10 "ب" 120BF8 +0:+0
 ....\TU/Amiri(0)/m/n/10 "ي" 120EA5 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\pdfcolorstack 0 push {/TransGs0.502 gs 1 0 0 rg}
+....\pdfcolorstack 0 push {1 0 0 rg}
+....\pdfcolorstack 1 push {/TransGs0.502 gs}
 ....\TU/Amiri(1)/m/n/10 "ت" 120808 +0:+0
 ....\TU/Amiri(1)/m/n/10 "ل" 120914 +0:+0
 ....\TU/Amiri(1)/m/n/10 "و" 12098B +0:+0
@@ -57,7 +58,7 @@ Completed box being shipped out [1]
 ....\TU/Amiri(1)/m/n/10 "ه" 1208D2 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\pdfcolorstack 0 pop
-....\pdfliteral direct <lua data reference ...>
+....\pdfcolorstack 1 pop
 ....\TU/Amiri(0)/m/n/10 "ب" 120815 +0:+0
 ....\TU/Amiri(0)/m/n/10 "ل" 120914 +0:+0
 ....\TU/Amiri(0)/m/n/10 "و" 12098B +0:+0

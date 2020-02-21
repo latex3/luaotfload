@@ -66,15 +66,16 @@ local lpeg           = require"lpeg"
 local lpegmatch      = lpeg.match
 local C, Cg, Ct, P, R, S = lpeg.C, lpeg.Cg, lpeg.Ct, lpeg.P, lpeg.R, lpeg.S
 
+local spaces         = S"\t "^0
 local digit16        = R("09", "af", "AF")
 local opaque         = S("fF") * S("fF")
 local octet          = digit16 * digit16 / function(s)
     return tonumber(s, 16) / 255
 end
 
-local extract_color  = octet * octet * octet / function(r,g,b)
+local extract_color  = spaces * octet * octet * octet / function(r,g,b)
                          return stringformat("%.3g %.3g %.3g rg", r, g, b)
-                       end * (octet - opaque + opaque)^-1 * -1
+                       end * (opaque + octet)^-1 * spaces * -1
 
 --- something is carried around in ``res``
 --- for later use by color_handler() --- but what?

@@ -131,6 +131,8 @@ local mlist_to_hlist    = node.mlist_to_hlist
 local color_callback
 local color_attr        = luatexbase.new_attribute("luaotfload_color_attribute")
 
+local custom_setcolor
+
 -- Pass nil for new_color or old_color to indicate no color
 -- If color is nil, pass tail to decide where to add whatsit
 local function color_whatsit (head, curr, stack, old_color, new_color, tail)
@@ -201,8 +203,20 @@ local function node_colorize (head, toplevel, current_color, current_transparent
             --- that received the “color” property upon
             --- loading (see ``setcolor()`` above)
             local glyph_color, glyph_transparent = get_glyph_color(getfont(n), getchar(n))
-            head, n, current_color = color_whatsit(head, n, color_stack, current_color, glyph_color)
-            head, n, current_transparent = color_whatsit(head, n, transparent_stack, current_transparent, glyph_transparent)
+            if custom_setcolor then
+                if glyph_color then
+                    head, n = custom_setcolor(head, n, glyph_color) -- Don't change current_color to transform all other color_whatsit calls into noops
+                end
+            else
+                head, n, current_color = color_whatsit(head, n, color_stack, current_color, glyph_color)
+            end
+            if custom_settransparent then
+                if glyph_transparent then
+                    head, n = custom_settransparent(head, n, glyph_transparent) -- Don't change current_transparent to transform all other color_whatsit calls into noops
+                end
+            else
+                head, n, current_transparent = color_whatsit(head, n, transparent_stack, current_transparent, glyph_transparent)
+            end
 
         elseif n_id == whatsit_t then
             head, n, current_color = color_whatsit(head, n, color_stack, current_color, nil)
@@ -215,12 +229,8 @@ local function node_colorize (head, toplevel, current_color, current_transparent
 
     if toplevel then
         local nn = nodetail(n_list)
-        if current_color then
-            head, nn, current_color = color_whatsit(head, nn, color_stack, current_color, nil, true)
-        end
-        if current_transparent then
-            head, nn, current_transparent = color_whatsit(head, nn, transparent_stack, current_color, nil, true)
-        end
+        head, nn, current_color = color_whatsit(head, nn, color_stack, current_color, nil, true)
+        head, nn, current_transparent = color_whatsit(head, nn, transparent_stack, current_color, nil, true)
     end
 
     setattribute(head, color_attr, 1)
@@ -240,7 +250,7 @@ local function color_handler (head)
     head = tonode(head)
 
     -- now append our page resources
-    if res then
+    if res and tonumber(transparent_stack) then
         if scantoks and nil == pgf.loaded then
             pgf.loaded = token.create(pgf.bye).cmdname == "assign_toks"
         end
@@ -387,6 +397,14 @@ function luaotfload.add_colorscheme(name, colortable)
   end
   glyph_color_tables[name] = colortable
   return name
+end
+
+-- cb must have the signature
+-- head, n = cb(head, n, color)
+-- and apply the PDF color operators in color to the node n.
+-- Call with nil to disable.
+function luaotfload.set_colorhandler(cb)
+  custom_setcolor = cb
 end
 
 return function ()

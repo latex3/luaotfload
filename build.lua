@@ -108,7 +108,8 @@ if os.env["CONTEXTPATH"] then
   end
 else
   -- travis or somewhere else ...
-  excludetests = {"luatex-ja","aux-resolve-fontname"}
+  -- luacolor will fail until update ...
+  excludetests = {"luatex-ja","aux-resolve-fontname","luacolor"}
 end
 
 ---------------------------------------------

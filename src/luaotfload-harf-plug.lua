@@ -105,6 +105,8 @@ local fl_unsafe         = hb.Buffer.GLYPH_FLAG_UNSAFE_TO_BREAK
 local startactual_p     = "luaotfload_startactualtext"
 local endactual_p       = "luaotfload_endactualtext"
 
+local empty_table       = {}
+
 -- "Copy" properties as done by LuaTeX: Make old properties metatable 
 local function copytable(old)
   local new = {}
@@ -332,6 +334,41 @@ function shape(head, node, run)
   local hscale = hbdata.hscale
   local vscale = hbdata.vscale
   hbfont:set_scale(hscale, vscale)
+
+  do
+    features = table.merged(features) -- We don't want to modify the global features
+    local current_features = {}
+    local n = node
+    for i = offset-1, offset+len-2 do
+      local props = properties[n] or empty_table
+      if props then
+        local local_feat = props.glyph_features or empty_table
+        if local_feat then
+          for tag, value in next, current_features do
+            local loc = local_feat[tag]
+            loc = loc ~= nil and (tonumber(loc) or (loc and 1 or 0)) or nil
+            if value.value ~= loc then -- This includes loc == nil
+              value._end = i
+              features[#features + 1] = value
+              current_features[tag] = nil
+            end
+          end
+          for tag, value in next, local_feat do
+            if not current_features[tag] then
+              local feat = hb.Feature.new(tag)
+              feat.value = tonumber(value) or (value and 1 or 0)
+              feat.start = i
+              current_features[tag] = feat
+            end
+          end
+        end
+      end
+      n = getnext(n)
+    end
+    for _, feat in next, current_features do
+      features[#features + 1] = feat
+    end
+  end
 
   if hb.shape_full(hbfont, buf, features, shapers) then
     -- The engine wants the glyphs in logical order, but HarfBuzz outputs them
